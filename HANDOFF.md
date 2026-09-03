@@ -1,5 +1,33 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-03 terminal design-chat handoff — resume at EP-D02
+
+This chat ended intentionally after closing EP-D01 and EP-D07. Resume with the
+newest dated handoff and `$ss2-progression-design`, beginning at EP-D02. The
+authoritative decision record still leaves EP-D02 pending: the fixed-four row
+in the owner packet is a **prefilled recommendation**, not an acceptance. Do
+not propagate four as decided, and do not mass-rewrite its many dependent draft
+tables before the owner accepts complete replacement wording.
+
+The owner-directed replacement is a variable, boss-clear-driven personal Rule
+Capacity that reaches **finite saturation** at maximum ordinary vertical power:
+enough capacity for a gladiator to fill every otherwise-legal rule-bearing gear
+position with Legendary items and choose one equipped Legendary for Ascendancy.
+This is “no cap” from the player's point of view, not an infinite number and not
+a waiver of slot, family, stacking, or legality rules. An equip attempt that
+would exceed current capacity is refused atomically and leaves the current
+loadout unchanged. Exact qualifying bosses, credit ownership, source/slot
+inventory, Load costs, Team Tactic accounting, and Ascendancy accounting remain
+open and must be resolved before a normative replay.
+
+Two conflicts must be shown to the owner rather than silently harmonized. The
+owner earlier required Ascended items to be Legendary only, while accepted
+EP-D01 clause 6 currently also names Trophies, Signatures, and Keystones. The
+owner also explored changing Ascendancy branches per battle, while accepted
+EP-D01 clause 7 locks the configuration for a Circuit with at most one narrow
+Pivot. The accepted wording governs unless the owner explicitly revises it.
+EP-D02–EP-D06 and EP-A01–EP-A03 remain open; no implementation is authorized.
+
 ## 2026-09-03 Endless owner-decision update — EP-D07
 
 EP-D07 is closed through Zanzagar's explicit `Accepted` response to the
