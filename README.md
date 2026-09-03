@@ -111,6 +111,12 @@ reconnect instead of allied AI fill or takeover. Before code, each of the seven
 product decisions and EP-A01–EP-A03 must be accepted or superseded by a fully
 normative, explicitly accepted replacement; EP-D01 and EP-D07 are closed while
 EP-D02–EP-D06 remain pending. Rejection or an open revision remains blocking.
+EP-D07's accepted corrected dropout supplement makes its grace period visible at Circuit
+entry: expiry never abandons automatically, but can activate an absent member's
+narrow pre-consent while every connected teammate must approve the existing
+atomic Concede receipt. A reconnect restores only that member, so a
+multiple-dropout battle stays paused until every required ally returns; any
+resulting Recovery retains its original roster and human-seat requirements.
 The readiness audit also found three P0 model questions that approval alone
 does not close—career/challenge pacing, deterministic retry/seed shopping, and
 post-completion maintenance access—plus missing designed-combat budgets and an
@@ -119,7 +125,8 @@ persistence claim. Rule-contract v2, sidecar/snapshot, or `endless-v0` code
 remains blocked until their selected repairs/specifications are normative.
 Headless and playable proofs have different final gates; playable work also
 needs a real per-action animation acknowledgement signal plus a genuine
-multi-human admission, pause, reconnect, and abandonment protocol.
+multi-human admission, pause, reconnect, grace-timer, and race-safe abandonment
+protocol implementing that accepted authority rule.
 
 Read the work in this order:
 

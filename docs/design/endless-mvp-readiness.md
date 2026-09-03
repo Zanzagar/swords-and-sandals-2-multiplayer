@@ -33,7 +33,7 @@ honestly start?* It is not a second feature design.
 | Durable reward settlement | Strong in-memory latch; no crash-repair transaction | Specify `ack-prepared` recovery and one pure idempotent settlement reducer. |
 | Numeric content | Tuning hypotheses only | Author tier budgets, chassis/opponents, action costs, `C_t`, and all finite catalogs. |
 | Headless proof | Reusable resolver exists | Build only after every preceding headless gate passes. |
-| Playable proof | No per-action animation acknowledgement or genuine multi-human session lifecycle | Requires an evidenced completion signal, fail-closed action gate, distinct-human allied-seat admission, durable action-boundary pause, authenticated same-seat reconnect, and a liveness-safe established abandonment transition after headless acceptance. |
+| Playable proof | No per-action animation acknowledgement or genuine multi-human session lifecycle | Requires an evidenced completion signal, fail-closed action gate, distinct-human allied-seat admission, durable action-boundary pause, authenticated same-seat reconnect, visible accepted grace timing, and a race-safe implementation of the accepted connected-team abandonment transition after headless acceptance. |
 
 There is no useful “percentage complete” here. The current design is
 feature-complete at proposal level and not implementation-ready at contract
@@ -311,7 +311,7 @@ counter or an executable rejection test before its owning slice is ready.
 | P1 | Trophy/effect gates can pass by cherry-pick | Concord currently needs one favourable and one losing cell; that does not establish robust non-dominance. Relay/Chain prerequisites may be scripted-opponent-specific; Quiver dies near cap; Stabilizer's floor makes low shields lose 100/50/33%; Breakwater can be burned by a tiny crossing. | Publish semantic-cell distribution and robust aggregate thresholds; sweep exact integer boundaries and every trigger sequence. No single showcase cell is acceptance. |
 | P1 | Veteran catch-up is punitive | A tier-50 incomplete veteran accompanying a 49-tier-gap ally forgoes about `46.6*C50` gold, 108 offers, 544 all-salvage Marks, and 196 grant/XP opportunities. | At gaps 1/10/25/49 and with same-custodian mule cases, compare current Practice-only veteran, nonmechanical mentor records, deferred mentor credit redeemable only after a later veteran-frontier victory, and split-tier authored encounters. No option may grant high-tier outcomes for low-tier wins, mint a second frontier set, or improve veteran reward/action by cycling fresh allies. The owner must select an acceptable veteran opportunity-cost ceiling. |
 | P1 | Deferred allied-AI/multi-seat funnel | If a later variant lets one human custodize multiple persistent or AI-driven fighters, it can collect several personal streams and funnel tradeable natural Legendaries to a carry. Per actor-action normalization hides per-human-command advantage. EP-D07 excludes this from the first playable version. | First-playable admission rejects allied AI and duplicate human authority. Any future variant needs a new accepted reward/custody rule plus concentration gates per actor-action, human command, and wall-clock minute; generic resolver support is insufficient. |
-| P1 | Governance can deadlock or impose debt | Ranked sums can put an absent Standard-preferring member onto a debt route. EP-D07 deliberately selects suspension rather than AI/controller substitution, but the current unanimity rule records a disconnected member as “no”; a suspended active attempt may therefore never reach abandonment. One `memberId` is not proof of one human. | Nonzero debt requires explicit unanimous acceptability; persist suspension; seal member/session authority; and specify how the established unanimous abandonment receipt terminates a suspended attempt without forged consent, AI takeover, or state loss. Test absence, timeout, Sybil, crash, and indefinite disconnect. |
+| P1 | Governance can deadlock or impose debt | Ranked sums can put an absent Standard-preferring member onto a debt route. EP-D07 selects suspension rather than AI/controller substitution and now accepts a narrow dropout exception: each expired absent member contributes only their Circuit-entry conditional consent to abandonment, while every connected member must approve. False disconnect attribution or a reconnect/receipt race could still destroy unearned outcomes. One `memberId` is not proof of one human. | Nonzero debt requires explicit unanimous acceptability; persist suspension and the visible versioned grace policy; seal member/session authority; let expiry mutate no combat/reward state; require every connected member's yes; invalidate a pending proposal on reconnect; and serialize reconnect against the atomic abandonment receipt. Test absence, ordinary timeout, dropout expiry, Sybil, false presence, crash, indefinite wait, and reconnect races. |
 | P1 | Cross-format identity and farming | One mode-neutral gladiator can carry team-earned power into 1v1, or a team-dependent build can become nonfunctional when entering solo. A faulty transition can also copy/reset Bound Soul, item, Tactic, or Lineage state. | Use one persistent `combatantId`; freeze format/roster per Circuit; require a functional solo action loop; round-trip the same gladiator through 1v1→2v2→3v3→1v1; and compare risk-normalized cross-format progression so one format is not a dominant power farm. |
 | P1 | Focus warning may not create agency | “One enemy action ahead” can still land before the targeted seat's next action, and per-enemy limits can coordinate focus. | Guarantee at least one scheduled action for the target before the threatened payoff and apply focus frequency at team scope. |
 | P1 | Post-cap tier may not mean harder | After raw/module caps and finite doctrines/Charters, an unbounded tier becomes an ordinal record, not monotonically increasing difficulty. Cosmetic recipe IDs can also evade no-repeat rules. | Either promise bounded bands then rotation/records, or publish a finite monotone schedule. Compare semantic mechanics fingerprints, not display IDs. |
@@ -461,6 +461,9 @@ The durable envelope must include:
 - frozen event format, roster size, combatant-to-seat and human-authority
   bindings, connection/suspension state, and the last acknowledged action
   boundary;
+- accepted grace-policy identity/version/duration, per-member presence and
+  independent dropout-timer state, plus any abandonment proposal's frozen
+  presence revision and stale/committed status;
 - active attempt sequence and immutable attempt-start/pre-ack snapshots;
 - operation/mutation sequences and event/presentation high-water marks;
 - RNG model/state, frozen rule/generator/definition identities;
@@ -534,7 +537,9 @@ back, or resolve N twice. N completes and acknowledges exactly once, its
 checkpoint commits, and suspension begins before N+1. A disconnect recognized
 at an idle action boundary suspends immediately. While suspended, human and AI
 submission, clocks that affect combat, and automatic settlement are all
-blocked; presentation may show only persisted pause/reconnect state. If N
+blocked; presentation may show only persisted pause/reconnect, grace countdown,
+and eligible abandonment state. The grace clock can change session authority
+only and never combat, RNG, reward, or settlement state. If N
 creates the terminal result, no N+1 boundary exists: ordinary terminal
 presentation acknowledgement and exactly-once settlement finish instead of
 creating a suspended nonterminal attempt.
@@ -567,25 +572,54 @@ to the generic controller registry. It must:
 - authenticate reconnect as the same member, restore the same seat and exact
   state, and reject a different member or stale session token;
 - persist connection and suspension transitions without letting wall-clock,
-  retry, combat RNG, or presentation order affect combat; and
-- allow a suspended attempt to end only through the established atomic
-  team-abandonment receipt protocol—never by timeout, host fiat, controller
-  substitution, or AI finish.
+  retry, combat RNG, or presentation order affect combat;
+- record every member's acceptance of one visible versioned grace policy before
+  Circuit mutation; begin the countdown only after a recognized nonterminal
+  disconnect reaches its durable action-boundary pause, with one independent
+  timer for each absent member;
+- let expiry activate only that absent member's conditional entry-time consent
+  to abandonment—never an automatic result, death, combat/RNG/reward advance,
+  controller substitution, or AI finish;
+- require explicit approval from every connected roster member and expired
+  grace for every absent member before the established atomic
+  team-abandonment receipt may commit; no connected member means no automatic
+  receipt;
+- make authenticated reconnect before that commit restore the exact seat/state
+  for only that member and invalidate the pending dropout-abandonment proposal;
+  resume combat only when every required ally is connected;
+- invalidate an open proposal on any new disconnect as well as reconnect, and
+  serialize presence and abandonment so exactly one transition commits; and
+- preserve the original Recovery roster, custody, and distinct-human admission
+  after dropout Concede; no reduced-party entry, proxy choice, or AI fill is
+  created.
+
+These accepted semantics preserve the frozen electorate: each member supplies
+either an explicit connected approval or only their own preaccepted conditional
+approval after expiry. In 2v2, one remaining member may approve after the other
+expires. In 3v3, both remaining members approve after one expiry; after two
+expiries, the sole remaining member may approve. The team may always keep
+waiting. Ordinary proposal timeout/absence remains “no.” Only authenticated
+session liveness may recognize a dropout; no teammate may declare it.
 
 The accepted rule does not select local multi-input versus remote transport,
-presence/heartbeat mechanics, reconnect-token schema, or how a disconnected
-member participates in the existing unanimous abandonment vote whose timeout
-currently means “no.” Those are [U] and the last point is a liveness blocker,
-not permission to invent a fallback.
+presence/heartbeat mechanics, reconnect-token schema, exact grace duration,
+durable timer representation, or reconnect-versus-receipt serialization. Those
+are [U] implementation blockers, not permission to change the accepted
+authority or invent a fallback.
 
 **Pass gate:** start succeeds with the required distinct humans and fails
 without mutation for every forbidden allied mapping; spoofed/duplicate/stale
 authority fails closed; disconnect at every S-07 boundary persists one paused
 state; reload remains paused; correct reconnect restores byte-identical combat
 and progression state to the same seat; wrong reconnect cannot observe or
-control it; indefinite disconnect creates no action, reward, loss, RNG advance,
-or AI takeover; and the reviewed abandonment path is atomic, unanimous under
-its accepted authority rule, idempotent, and live.
+control it; a terminal committed action settles without pause/timer; a partial
+3v3 reconnect restores only that member and remains paused; expiry alone
+creates no action, reward, loss, RNG advance, AI takeover, or receipt; exact
+2v2 and 3v3 one/two/all-disconnected cases obey the accepted approval table;
+no-player-online remains suspended; new-disconnect/reconnect and abandonment
+races expose exactly one state; false/manual dropout fails; Recovery retains
+its original roster/admission/custody; and the reviewed abandonment path is
+atomic, unanimous under its accepted authority rule, idempotent, and live.
 
 ## 7. Missing normative authoring inputs
 
@@ -607,8 +641,9 @@ version and review these exact finite inputs:
 8. Cache/pity/target/Forge/gold/maintenance tables after R-03 is closed.
 9. Stable definition, generator, rule-design, and migration version IDs.
 10. Minimum genuine two-human session topology, sealed member/controller
-    authority, presence and reconnect state, suspended-attempt persistence, and
-    the established abandonment protocol's liveness rule.
+    authority, presence and reconnect state, suspended-attempt persistence,
+    exact visible grace duration/storage, and race-safe implementation of the
+    accepted dropout-abandonment rule.
 
 No simulator can validate “meaningful choices” against missing chassis,
 opponent, and action numbers.

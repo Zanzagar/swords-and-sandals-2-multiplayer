@@ -10,14 +10,33 @@ the first playable version requires a distinct connected human. Allied AI fill,
 one-human multi-seat control, and AI takeover are excluded. A recognized
 disconnect finishes an already-committed action exactly once and then pauses at
 the next action boundary for same-seat reconnect or the established
-team-abandonment path.
+team-abandonment path. A separately accepted corrected nine-clause dropout
+supplement makes the versioned grace period visible and accepted at Circuit entry. Expiry
+never resolves automatically: it activates only that absent member's narrow
+conditional consent, every connected roster member must approve abandonment,
+and any presence change makes the old proposal stale. A terminal committed
+action settles without a timer, while a reconnect restores only that member and
+cannot resume play until all required allies return. In 2v2 the one
+remaining member may approve after the other's expiry; in 3v3 both remaining
+members approve after one expiry, or the sole remaining member after two. No
+connected member means no automatic result. Recovery retains its original
+roster, custody, and human-seat admission.
 
 The authoritative wording and its `[V]/[U]` boundary are in
 [`docs/design/endless-progression-decisions.md`](docs/design/endless-progression-decisions.md#ep-d07--mode-neutral-gladiators-and-human-only-allied-mvp).
 The acceptance makes a minimum genuine two-human session, durable pause,
-authenticated reconnect, and abandonment-liveness protocol new playable
-blockers. It does not remove the generic resolver's AI/controller capabilities,
-promise later companion/hot-seat modes, or authorize implementation.
+authenticated reconnect, and implementation of the accepted grace/abandonment
+protocol new playable blockers. The product liveness rule is no longer open,
+but transport topology, authenticated presence, exact grace duration/storage,
+and reconnect-versus-receipt serialization remain `[U]`. This does not remove
+the generic resolver's AI/controller capabilities, promise later
+companion/hot-seat modes, or authorize implementation.
+
+The corrected supplement supersedes an eight-clause replay that I withdrew
+before commit: it incorrectly said any reconnect resumed play despite another
+possible 3v3 dropout and left “Recovery remains available” ambiguous about
+reduced-roster entry. The owner explicitly accepted the corrected replay; the
+withdrawn draft is not authoritative.
 
 EP-D06 remains pending: the accepted EP-D07 replay did not include D06's
 separate choice of deterministic 2v2 under designed rules, so that constraint
@@ -62,6 +81,11 @@ per-action animation-completion signal. The branch did not run capture tools,
 launch Ruffle, or touch parity evidence, candidates, classic rules, or the
 licensed installation. Its fresh-worktree verification profile is 584 tests:
 583 passed, one expected raw-trace archive check skipped, and zero failed.
+
+## THE ARCHIVE LINE
+
+Everything below this heading is frozen evidence and history. Read it to check
+a claim; keep current state and corrections above this line.
 
 ## State at the end of the 2026-08-30 session
 

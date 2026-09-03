@@ -40,7 +40,7 @@ or code. Implementation requires a later, separate authorization.
 | EP-D04 | `accepted` | Within one family/profile/tier, rarity never raises ordinary chassis budget. It may change authored behavior complexity and Load. | Always equip the highest color; assert same-chassis equality and reject higher-rarity strict dominance across the opponent grid. |
 | EP-D05 | `accepted` | Every mechanically incomplete `grantEligible` persistent combatant gets a personal immutable precommitted outcome; completed future slots are typed records; only one prepared reward set may be grandfathered. | Reload, crash duplication, last-hit incentives, or carry funneling; require keyed escrow, atomic/idempotent settlement, personal ownership, fault injection, and concentration gates. |
 | EP-D06 | `accepted` | The first **playable** proof is deterministic 2v2 under a separate designed rule set. The principal seeded headless fixture is 2v2, while headless properties still cover 1v1/2v2/3v3. If selected, accepted EP-D07 requires two distinct connected human allies and no allied AI fallback. | Focus deletion, quarterbacking, solved scripts, or disconnect deadlock; require per-seat agency, focus-response, human-seat admission, durable pause/reconnect, abandonment liveness, and adversarial deterministic-policy tests. |
-| EP-D07 | `closed — accepted` | A persistent gladiator may enter 1v1/2v2/3v3; format and roster lock per Circuit. Every first-playable allied seat has a distinct connected human, with no allied AI fill, multi-seat human control, or AI takeover. Disconnect finishes a committed action and then pauses at the next action boundary. | Cross-format farming, fake distinct players, support builds that fail solo, or permanent disconnect deadlock; require cross-format progression tests, human seat authority, durable pause/reconnect, and a liveness-safe established abandonment path. |
+| EP-D07 | `closed — accepted, including corrected dropout supplement` | A persistent gladiator may enter 1v1/2v2/3v3; format and roster lock per Circuit. Every first-playable allied seat has a distinct connected human, with no allied AI fill, multi-seat human control, or AI takeover. A nonterminal disconnect pauses at the accepted action boundary; independent visible grace timers then permit only the accepted connected-team abandonment flow. | Cross-format farming, fake distinct players, support builds that fail solo, false dropout, multi-dropout resume, reduced-roster Recovery, or reconnect/abandon races; require human seat authority, terminal settlement, per-member pause/reconnect, authenticated liveness, non-automatic expiry, unchanged Recovery admission, and atomic abandonment. |
 
 Every row is Endless-only. None changes a classic descriptor, measured rule,
 fixture, or evidence claim. Novel combat behavior remains under a separate
@@ -252,8 +252,17 @@ and requires a distinct connected human in every allied seat of the first
 playable version. Allied AI fill, multi-seat human control, and AI takeover are
 not MVP fallbacks. A recognized disconnect finishes an already-committed action
 and then pauses at the next action boundary for authenticated reconnect or the
-established team-abandonment path. The transport topology and abandonment
-liveness mechanism remain [U]; acceptance does not implement them.
+established team-abandonment path. Its accepted corrected dropout supplement makes the
+grace policy visible at Circuit entry. Expiry never resolves the battle: it
+only activates that absent member's narrow pre-consent to abandonment. Every
+connected roster member must approve, every absent member's timer must have
+expired, nobody online means no automatic result, and authenticated reconnect
+first makes the proposal stale. A reconnect restores only that member and play
+resumes only after all required allies return. A terminal committed action
+settles without a pause/timer, while Concede preserves Recovery's original
+roster and human-seat admission. The transport topology, presence/heartbeat
+mechanism, timer storage and exact duration, and race-safe transaction remain
+[U]; acceptance does not implement them.
 
 ### F1 — full public forecast (recommended and closable)
 
@@ -343,7 +352,7 @@ a safe Recovery exhaustion transition. [D/U]
 
 ```text
 EP-D06: accept recommended rule | reject | replace: ...
-EP-D07: CLOSED — accepted (Zanzagar, 2026-09-03; see authoritative record)
+EP-D07: CLOSED — accepted, including corrected dropout supplement (Zanzagar, 2026-09-03; see authoritative record)
 EP-A02 outcome: F1 full public forecast | F2 direction, remains open | replace: ...
 EP-A02 retry: R1 unlimited exact-state Rematch | replace with exact limit/exhaustion: ...
 EP-A02 Recovery/Assistance rules: accept | replace: ...
@@ -370,7 +379,7 @@ EP-D03: <accepted/rejected/revise + exact replacement>
 EP-D04: <accepted/rejected/revise + exact replacement>
 EP-D05: <accepted/rejected/revise + exact replacement>
 EP-D06: <accepted/rejected/revise + exact replacement>
-EP-D07: CLOSED — accepted (see authoritative record)
+EP-D07: CLOSED — accepted, including corrected dropout supplement (see authoritative record)
 
 EP-A01: <accepted or revise + complete pace/post-ceiling rule>
 EP-A02: <revise + complete information/retry/Recovery contract>

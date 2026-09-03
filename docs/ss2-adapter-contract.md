@@ -246,8 +246,13 @@ operations; it does not define disconnect policy. Accepted Endless EP-D07
 explicitly forbids allied takeover in the first playable version: disconnect
 finishes an already-committed action, pauses at the next action boundary, and
 authenticated reconnect restores the original human authority to the same
-frozen seat/state. The admission/session layer—not combat code—must enforce
-that narrower product rule.
+frozen seat/state. Its accepted corrected dropout supplement lets expiry arm only the
+absent member's Circuit-entry consent to abandonment; every connected roster
+member must approve, expiry never resolves combat automatically, and reconnect
+first makes the proposal stale. Reconnect restores only that member and cannot
+resume a multiple-dropout battle until all required allies return; Recovery
+keeps the original roster and human-seat admission. The admission/session
+layer—not combat code—must enforce that narrower product rule.
 
 Two projections follow from that split:
 
@@ -1016,9 +1021,14 @@ binding as a non-product integration harness. Before any Endless team build is
 called the first playable version, accepted EP-D07 requires per-action
 acknowledgement plus one distinct connected human for every allied seat,
 action-boundary pause, authenticated same-seat reconnect, and the established
-team-abandonment path. Allied AI fill, one-human multi-seat control, and AI
-takeover cannot substitute for that checkpoint. Later 3v3 and broader remote
-client work use the same resolver; 1v1 is a parity gate, not the final scope.
+team-abandonment path. That path includes the visible versioned grace policy,
+non-automatic expiry, every connected member's approval, and stale-on-reconnect
+ordering accepted in the corrected EP-D07 supplement. Terminal actions settle
+without a timer, partial reconnect stays paused, and Recovery keeps its original
+roster/admission. Allied AI fill, one-human
+multi-seat control, and AI takeover cannot substitute for that checkpoint.
+Later 3v3 and broader remote client work use the same resolver; 1v1 is a parity
+gate, not the final scope.
 
 The licensed build's read-only static map is now recorded in
 [the SS2 battle map](integration/ss2-battle-map.md). Its formulas are evidence
@@ -1043,7 +1053,8 @@ What is still missing before a playable mod:
   action N's timeline is still running;
 - **the accepted human session lifecycle** — no admission/transport layer
   proves one distinct human per allied seat, persists action-boundary pause, or
-  authenticates same-seat reconnect and abandonment without AI takeover;
+  authenticates same-seat reconnect, visible grace timing, and race-safe
+  connected-team abandonment without AI takeover;
 - **the runtime-verified rule set** — the seam and its gate exist and nothing
   measured has been dropped into them yet. `classicStyleRules` is the only rule
   set anywhere under `src/`, and it is a declared placeholder; the others in the

@@ -55,7 +55,7 @@ readiness plan.
 | EP-D04 | Let rarity change behaviour complexity, not chassis budget | Accept as a permanent identity rule | `pending` |
 | EP-D05 | Use personal precommitted frontier outcomes and typed post-completion records | Accept only with atomic settlement, ordered plan folding, and maintenance entitlement | `pending` |
 | EP-D06 | Make the first playable proof deterministic 2v2 under a separate designed rule set | Accept only after selecting the public deterministic RNG model and separating headless/playable gates | `pending` |
-| EP-D07 | Keep persistent gladiators mode-neutral and require human-controlled allied seats in the first playable version | Accepted; the MVP has no allied AI fill, multi-seat human control, or AI takeover, and disconnect pauses at an action boundary | `accepted` / Zanzagar / 2026-09-03 |
+| EP-D07 | Keep persistent gladiators mode-neutral and require human-controlled allied seats in the first playable version | Accepted; disconnect pauses at an action boundary, then an accepted visible grace period may arm the absent member's pre-consent for connected teammates to abandon | `accepted`; corrected dropout supplement `accepted` / Zanzagar / 2026-09-03 |
 
 The decisions are coupled. D01 prevents an infinite scalar gear ladder while
 requiring a finite behaviour-led veteran edge and three continuing Pursuits;
@@ -66,6 +66,10 @@ fair and reload-safe. D06 is the smallest team format that can test the
 resulting co-op choices rather than a solo scalar ladder. D07 preserves one
 gladiator's identity across event sizes while making the first playable proof a
 genuine human team instead of filling or finishing allied seats with AI.
+Its accepted corrected dropout supplement keeps per-member reconnect available
+while giving the connected team an RTS-style, non-automatic way to end a
+suspended Circuit after every absent member's visible grace period expires.
+Combat resumes only after every required ally returns.
 
 ### Required model/architecture dispositions
 
@@ -476,6 +480,44 @@ deployment, runtime capture, or changes to classic rules/evidence.
 4. Hot-seat parties, solo control of multiple gladiators, AI companions, and
    opt-in AI takeover remain possible future designs, not promised features.
 
+**Accepted dropout-abandonment supplement (corrected exact approval scope):**
+
+1. Circuit entry freezes the visible, versioned grace policy accepted by every
+   member. It grants no control or custody rights.
+2. A disconnect finishes any committed action exactly once. If that action
+   ends the battle, normal settlement completes—no pause or timer. Otherwise,
+   the battle checkpoints and pauses, and that member's individual timer
+   starts.
+3. Reconnecting restores only that player's original gladiator and seat. It
+   cancels their dropout state and invalidates pending abandonment votes.
+   Combat resumes only when every required ally has reconnected; otherwise it
+   remains paused.
+4. Timer expiry never automatically abandons, kills, advances combat, or
+   invokes AI. It only activates that absent member's pre-consent for
+   abandonment. The team may keep waiting.
+5. Every connected member must approve abandonment, and every disconnected
+   member's timer must have expired:
+
+   - 2v2 with one dropout: the remaining player decides.
+   - 3v3 with one dropout: both remaining players must approve.
+   - 3v3 with two dropouts: the sole remaining player decides after both timers
+     expire.
+   - Nobody connected: nothing happens automatically.
+
+6. A new disconnect or reconnect invalidates any vote based on the old
+   presence state. Reconnect and abandonment are atomic: whichever commits
+   first determines the outcome.
+7. Abandonment uses the existing atomic Concede receipt. Committed progression
+   remains; unearned Circuit outcomes and Contract completion are forfeited.
+   Nobody dies or loses custody.
+8. The precommitted Recovery route remains preserved, but it retains its
+   original roster and human-seat requirements. The reduced team cannot enter
+   it without the missing players, control their gladiators, or fill their
+   seats with AI.
+9. Only authenticated session-liveness detection may open a dropout timer.
+   Players cannot manually declare teammates dropped. The exact grace duration
+   remains visible, versioned tuning.
+
 **Repository boundary:** the headless resolver already accepts one-to-three
 seats per team, separates combatant identity from controller identity, and can
 drive AI on either side. It does not encode a permanent character format. [V]
@@ -507,9 +549,9 @@ features and do not become runtime-verified through this acceptance.
 **Degenerate strategies and failure modes invited:** a team-oriented build can
 become unusable when its gladiator enters 1v1; one format can become the easiest
 farm for power used in another; a duplicate or spoofed connection can pretend
-one human is several players; or one disconnect can suspend a locked Circuit
-forever because the existing unanimous Concede protocol records absence as
-“no.”
+one human is several players; false dropout attribution can activate an absent
+member's conditional consent; or reconnect and abandonment can race and either
+lose state or apply both transitions.
 
 **Required counter and rejection gate:** every offered build retains a
 functional solo action loop; reward and difficulty tests compare the same
@@ -518,21 +560,40 @@ first-playable readiness rejects an allied AI controller, an empty allied seat,
 or one controller/member authority occupying both allied seats; and durable
 continuation tests finish one committed action, pause before the next action,
 reject all commands while paused, then restore the same seat, combat projection,
-hash, and controller authority on reconnect. The exact human-presence/session
-transport and the liveness-safe application of the established abandonment
-protocol are new [U] readiness blockers; neither may be replaced by AI.
+hash, and controller authority on reconnect. Circuit admission must persist the
+accepted versioned grace policy; authenticated session liveness alone starts a
+visible independent timer for each absent member; expiry changes no combat or
+reward state; every connected member must approve abandonment; every
+disconnected member must have an expired timer; and any new disconnect or
+reconnect invalidates a proposal based on the old presence state. A terminal
+committed action settles without suspension. One reconnect during multiple
+dropouts restores only that member and leaves combat paused. The exact session
+topology, presence mechanism, timer duration, durable timer representation, and
+reconnect-versus-abandon serialization remain [U] readiness blockers. None may
+be replaced by AI or a player's manual dropout declaration.
 
 **Approval consequence:** team size is an event/Circuit property rather than a
 persistent gladiator mode. If pending EP-D06 later selects the proposed 2v2
 playable proof, that proof requires two distinct connected human participants
-and a real pause/reconnect protocol. “Network transport” can no longer be
-blanket-deferred without first specifying another genuine two-human topology.
-This decision does not select that topology, promise later companion/hot-seat
-modes, authorize implementation, or close EP-D06.
+and a real pause/reconnect protocol. A visible versioned grace period now gives
+connected teammates a liveness-safe quit path without automatic abandonment:
+the full connected remainder approves, while each absent member contributes
+only the narrow conditional consent accepted at Circuit entry after their own
+timer expires. A resulting Concede preserves the original Recovery roster and
+human-seat requirements; it grants no proxy custody or reduced-party entry.
+“Network transport” can no longer be blanket-deferred without
+first specifying another genuine two-human topology. This decision does not
+select that topology or exact duration, promise later companion/hot-seat modes,
+authorize implementation, or close EP-D06.
 
 **Record:** `accepted` — owner: Zanzagar; UTC date: 2026-09-03. The owner
 explicitly replied `Accepted` after reviewing the complete four-clause wording
-above.
+above. The owner then replied `Accepted` to an eight-clause dropout replay, but
+pre-commit review found my statement that any reconnect “resumes play” false
+when another 3v3 member remains disconnected and found “Recovery remains
+available” ambiguous about reduced-roster entry. I withdrew that replay rather
+than silently reinterpret it; it was never committed. The owner explicitly
+replied `Accepted` to the corrected nine-clause supplement above on 2026-09-03.
 
 ## Contract consequences that are not an eighth product decision
 
@@ -577,5 +638,10 @@ accepted:
 - A recognized disconnect finishes only an already-committed action, then
   durably pauses before another command until authenticated reconnect or the
   accepted team-abandonment path resolves it.
+- Grace expiry never resolves combat or abandons automatically: after all
+  absent members' accepted timers expire, every connected roster member must
+  approve the existing atomic Concede receipt; a presence change makes the old
+  proposal stale, and one reconnect cannot resume while another required ally
+  remains absent.
 - No accepted decision authorizes classic-rule changes, candidate shaping,
   runtime capture, launcher deployment, or installed-game access.

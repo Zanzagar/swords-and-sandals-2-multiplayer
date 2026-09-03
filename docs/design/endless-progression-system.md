@@ -34,12 +34,21 @@ version, every allied seat requires a distinct connected human player.
 Allied AI fill, one-human multi-seat control, and AI takeover are excluded. A
 recognized disconnect finishes an already-committed action and then pauses at
 the next action boundary for reconnect or the established team-abandonment
-path. The exact accepted rule in the
+path. The accepted corrected dropout supplement makes the reconnect grace period visible
+and accepted at Circuit entry. Expiry never abandons automatically; it activates
+only the absent member's narrow pre-consent so that all connected roster members
+may approve the existing atomic Concede receipt. A terminal committed action
+settles without a timer. Each absent member has an independent timer; reconnect
+restores only that member, makes the old proposal stale, and resumes combat only
+after every required ally returns. Recovery keeps its original roster and
+human-seat admission. The exact accepted rule in the
 [decision record](endless-progression-decisions.md#ep-d07--mode-neutral-gladiators-and-human-only-allied-mvp)
 overrides every AI-finish, rewardless allied-fill, hot-seat MVP, or blanket
 network-deferral assumption still present in older proposal text. Human session
-topology, durable pause/reconnect, and abandonment liveness remain `[U]`; this
-overlay does not authorize their implementation.
+topology, presence/authentication, durable pause/reconnect, exact grace duration
+and storage, and race-safe abandonment transaction remain `[U]`; the product
+liveness rule itself is accepted, and this overlay does not authorize its
+implementation.
 
 **Research date:** 2026-08-30; readiness audit 2026-08-31.
 
@@ -125,7 +134,9 @@ power.
 8. **Keep the gladiator larger than the event format.** One persistent
    gladiator may enter 1v1, 2v2, or 3v3. The first playable allied roster is a
    genuine human team: one distinct connected person per seat, no allied AI
-   fill or takeover, and action-boundary pause on disconnect.
+   fill or takeover, action-boundary pause on disconnect, and a visible
+   non-automatic dropout timer that can unlock only the accepted team-abandon
+   flow.
 
 This is intentionally a **designed-mode** proposal. Existing measured classic
 behaviour remains untouched. The current rule descriptor has only
@@ -146,7 +157,11 @@ These are acceptance requirements, not flavour:
 - Every allied seat in the first playable version has a distinct connected
   human controller; no AI or duplicate human controller may satisfy readiness.
 - A recognized disconnect can finish only an already-committed action before
-  the battle pauses at the next action boundary.
+  the battle pauses at the next action boundary; if that action is terminal,
+  ordinary settlement finishes without pause or timer.
+- Dropout-timer expiry never advances or resolves combat. It only activates the
+  absent member's Circuit-entry consent to abandonment; every connected roster
+  member must still approve the existing atomic Concede receipt.
 - Opponents never read the current player equipment snapshot to set their raw
   power.
 - No procedural generator creates a new rule; it selects versioned authored
@@ -432,14 +447,22 @@ persisted. Active equipment, Rule Load, and roster lock for all four encounters.
 A recognized disconnect never changes that combatant's controller. An already
 committed action finishes exactly once; after its acknowledgement and durable
 checkpoint, or immediately if no action is committed, the battle pauses at the
-next action boundary and accepts no further command. Authenticated reconnect
-restores the same member to the same seat and exact battle state. Otherwise
-only the established team-abandonment protocol may terminate the suspended
-attempt. If the committed action produces the terminal battle result, there is
-no next action boundary: its ordinary presentation acknowledgement and
-settlement finish rather than creating a suspended nonterminal attempt. Allied
-AI takeover, allied fill, and bench substitution are illegal in the first
-playable version. [A; accepted EP-D07]
+next action boundary and accepts no further command. The shared versioned grace
+policy was visible and accepted by every member before Circuit entry; that
+absent member's independent countdown begins only with this nonterminal
+suspended state. Authenticated
+reconnect before abandonment commits restores the same member to the same seat
+and exact battle state, makes any pending dropout-abandonment proposal stale,
+and cancels only that member's dropout state. Play resumes only when every
+required ally has reconnected; otherwise the battle remains paused. Expiry
+changes no combat, RNG, reward, death, or controller state. It activates only
+that absent member's pre-authorized consent to the
+established team-abandonment protocol; all connected members must still approve,
+and the team may keep waiting. If the committed action produces the terminal
+battle result, there is no next action boundary or grace countdown: its ordinary
+presentation acknowledgement and settlement finish. Allied AI takeover, allied
+fill, and bench substitution are illegal in the first playable version. [A;
+accepted EP-D07 and corrected dropout supplement]
 
 A defeat does not regenerate anything. Doctrine, signature, liability, target
 policy, and every other decision-relevant fixed mechanic are disclosed before
@@ -468,11 +491,22 @@ Concede normally can be proposed only between attempts, with no
 reserved/active/decided/`ack-prepared` battle or pending settlement. A battle
 suspended by EP-D07 after its last committed action is acknowledged is the one
 exception: it may enter the same team-abandonment proposal without resolving,
-replacing, or handing off another action. The exact durable transition into
-that proposal, including how the disconnected member's authority participates,
-remains `[U]` and blocks playable readiness. Unanimous consent from the frozen
-custodian electorate atomically writes the receipt, tombstones every
-participant's remaining key/full-rank outcome, forfeits Contract completion,
+replacing, or handing off another action. Circuit entry preauthorizes each
+member's conditional yes only for this exception. A disconnected member
+satisfies that condition only after their own visible versioned grace period
+expires; every connected member must explicitly approve. Thus one remaining
+2v2 member may approve after the other's timer expires; in 3v3 both remaining
+members approve after one expiry, or the sole remaining member may approve
+after both other timers expire. With nobody connected, nothing resolves
+automatically. Authenticated reconnect before the receipt commits invalidates
+the pending dropout proposal, restores only that member, and resumes combat
+only if no required ally remains absent. Any new disconnect likewise
+invalidates a proposal based on the old presence state. Reconnect and
+abandonment commits serialize so exactly one transition wins. Unanimous
+consent from the frozen custodian electorate—explicit connected approvals plus
+only the accepted expired conditional consents—atomically writes the receipt,
+tombstones every participant's remaining key/full-rank outcome, forfeits
+Contract completion,
 marks every still-inactive personal Overtime pot sourced by a forfeited final as
 terminal `source-forfeited`, clears any matching
 `grandfatherOvertimePotId`, and binds the prepared Recovery branch. Recovery or
@@ -501,6 +535,10 @@ shopping.
 Recovery restart has the same between-attempt/unanimous rule and one idempotent
 restart receipt; it consumes no noncombat RNG, changes combat-attempt state only
 as EP-A02 specifies, and cannot repeat the one loadout choice.
+Dropout abandonment preserves that entitlement and recipe but does not waive
+the frozen roster, distinct-human allied-seat admission, or each custodian's
+own loadout authority. A reduced party cannot enter Recovery, control an absent
+gladiator, or fill that seat with AI.
 
 This block structure asks a different question from a one-fight counter-pick:
 **what kit can cover a short, disclosed range of problems, and where will the
@@ -567,23 +605,41 @@ to custodize.
   selection, spending the one shared Pivot, choosing Training Assistance, and
   Conceding a paid/Recovery Circuit, risking an Overtime pot, and restarting
   Recovery require unanimous consent from that frozen set.
-  Timeout, absence, or disconnect records a deterministic “no”; it never
-  shrinks the electorate or spends the shared choice. The suspended-attempt
-  abandonment exception introduced by EP-D07 still needs an exact liveness
-  rule for the disconnected authority; AI or another member cannot silently
-  supply its consent.
+  Outside the accepted suspended-attempt dropout exception, timeout, absence,
+  or disconnect records a deterministic “no”; it never shrinks the electorate
+  or spends the shared choice. For that exception only, Circuit entry records
+  each member's acceptance of one visible versioned grace policy. After an
+  authenticated disconnect reaches its accepted nonterminal pause and that
+  member's grace expires, the member's own entry record supplies a conditional
+  yes only to abandonment. Every connected roster member must explicitly vote
+  yes; an absent member with time remaining blocks; and no connected member
+  means no automatic receipt. AI, another member, and the host cannot supply or
+  broaden that conditional authority.
 - First-playable allied controller reassignment is illegal. Authenticated
   reconnect restores the same member/controller authority to the same seat and
-  does not create a ballot or change a saved ballot.
-- Every ballot, timeout default, and resolution is persisted before the next
-  battle or shared mutation.
+  cancels only that member's dropout state. It makes a pending
+  dropout-abandonment proposal stale without creating a ballot or changing any
+  other saved ballot, and play resumes only if no required ally remains absent.
+- Every reconnect or new disconnect invalidates a proposal based on the former
+  presence state. Reconnect and abandonment share one atomic ordering point:
+  reconnect first preserves the suspension or resumes the full roster;
+  abandonment first leaves the Circuit ended and exposes only the bound
+  Recovery state to a later reconnect.
+- Every ballot, timeout default, grace-policy acceptance, recognized suspension,
+  timer state, proposal, reconnect invalidation, and resolution is persisted
+  before the next battle or shared mutation. Only authenticated session
+  liveness may recognize a dropout; another player cannot mark a member absent.
 
 Test headless 1v1/2v2/3v3 authority projection, two-member ties, three-member
-majorities, disconnect, pause, authenticated same-seat reconnect, and
-abandonment liveness. The playable 2v2 proposal must additionally prove two
-distinct connected humans and reject allied AI, empty seats, duplicate allied
-authority, and controller takeover. Reject the protocol if the host can
-override another member or one silent client can spend a shared resource.
+majorities, one/two/all-member disconnect, pre-expiry refusal, post-expiry
+conditional consent, pause, authenticated same-seat reconnect, partial 3v3
+reconnect, terminal-action settlement, stale-proposal rejection, unchanged
+Recovery admission, and abandonment liveness. The playable 2v2 proposal must
+additionally prove two distinct connected humans and reject allied AI, empty
+seats, duplicate allied authority, and controller takeover. Reject the protocol if the host can
+override another member, one player can declare another dropped, timer expiry
+alone mutates combat/progression, or one silent client can spend a shared
+resource outside the accepted narrow abandonment exception.
 
 ### 2.4 Optional bounded variants
 
@@ -2257,7 +2313,7 @@ existing semantics; it does not mean the campaign itself is vanilla.
 | Frontier paid/clear eligibility | Campaign challenge/reward state; no classic combat change. | Hold a tier, farm fresh keys/Marks/pity, or clear-only/carry far ahead then claim high-tier rewards. | Initialize one four-key set; separate grant from clear; closed slots never reopen; only paid grants mutate reward channels/Trophy source; cap each personal reward budget to career tier; either frozen final creates at most one next set. Reject hold/farm/skip/carry policies. |
 | Four-fight Circuit and build lock | Campaign state/UI; classic-compatible only for existing actions. | Find one universal kit or Concede until a better fallback appears. | Scout/foil/mixed/final grammar, fixed eligibility keys, and the same precommitted Recovery recipes/source credit after every Concede; reject if removing the lock leaves the same policy or repeated Concede changes route/source odds. |
 | Loss log/Training Assistance | Campaign reward/recipe state/UI; selected boss modules may use designed semantics. | Scout a fixed RNG branch, exploit a private forecast, preserve two sibling keys, or deliberately fail into an easier farm. | Exact active-attempt restore plus the selected EP-A02 Rematch transition, information-parity and white-box policy tests, no voluntary restart, and atomic same-key Assistance delta after three boss losses; reject if seed inspection, intentional loss, or padding creates a material private advantage. |
-| Shared-decision protocol | Campaign member/ballot state/UI; no combat-rule change. | Host chooses everything, duplicate authorities multiply votes, or one controller destroys allied keys with Concede. | One vote per distinct connected first-playable custodian, ranked route ballot, unanimous frozen electorate for spend/risk/Concede/Recovery restart, timeout=no, and atomic forfeiture; test ties/disconnect/pause/reconnect/crash and the suspended-attempt abandonment exception. |
+| Shared-decision protocol | Campaign member/ballot state/UI; no combat-rule change. | Host chooses everything, duplicate authorities multiply votes, false dropout arms conditional consent, or reconnect races a Concede receipt. | One vote per distinct connected first-playable custodian, ranked route ballot, ordinary timeout=no, and a Circuit-entry grace policy whose expiry only conditionally authorizes suspended-attempt abandonment; require every connected member's yes, no automatic all-offline result, stale-on-reconnect ordering, and atomic forfeiture. |
 | Champion Gauntlet/Overtime variants | Campaign schedule/reward; modifiers/Laws use their selected rule set. | Cool a high-tier run with allies/Assistance, strand a completed roster behind a grant-only cooldown, redirect completed-player gold, or reload to protect a lost pot. | Freeze entry tier/roster and decrement only on three same-roster, same-or-higher-tier full-rank non-Assistance paid final receipts that consume every reward/record key; no Gauntlet Overtime; typed reward-key gold/record versus record-key record-only pots and atomic risk receipts; reject dominant rotation/risk/cash-out. |
 | Route offers | Campaign generator/save/UI. | Reload until the best route appears. | Persist all offers before display; 100 reloads must be byte-identical. |
 | Rule Load | Loadout validator plus designed effects. | Spend all Load on one multiplicative package. | Family caps, one 3-point identity, shared team constraints, exhaustive combination graph; reject strict action/build dominance. |
@@ -2367,10 +2423,12 @@ not claim current balance.
   personal reward outcome per `grantEligible` win. Automatic Marks require no choice;
   its custodian alone resolves a successful-cache item offer.
 - Propose Concede after 0/1/2/3 wins and Recovery restart with unanimous yes,
-  one no, timeout, disconnect/pause/reconnect, and a crash at every write.
-  Only unanimous frozen-custodian consent applies the all-or-nothing
-  forfeiture/bind/restart receipt; no controller or partial write destroys an
-  ally's key.
+  one no, ordinary timeout, disconnect/pause/pre-expiry/post-expiry/reconnect,
+  2v2 one-dropout, 3v3 one/two/all-dropout, and a crash at every write. Only
+  unanimous frozen-custodian consent—explicit yes or the same member's accepted
+  expired conditional authorization in the one suspended-attempt exception—
+  applies the all-or-nothing forfeiture/bind/restart receipt; no controller,
+  false dropout, timer alone, or partial write destroys an ally's key.
 
 ### 12.4 Determinism, conservation, and saves
 
@@ -2440,8 +2498,10 @@ not claim current balance.
 - Leave one custodian disconnected indefinitely with four pending offers. The
   offers and ownership remain unchanged, first-playable readiness rejects a new
   roster needing that member, and an already locked Circuit remains durably
-  paused. No allied AI fill, controller takeover, or reward redirection occurs.
-  Whether the remaining members may begin an unrelated Circuit is still `[U]`.
+  paused while the connected team chooses to keep waiting and no eligible
+  abandonment receipt commits. No allied AI fill, controller takeover, or
+  reward redirection occurs. Whether the remaining members may begin an
+  unrelated Circuit is still `[U]`.
 - Readiness with even one pending offer or bound award is rejected without
   mutation; readiness from zero reserves four offer records plus one bound-award
   record. Four cache outcomes and one automatic Trophy fill exactly those five
@@ -2647,7 +2707,7 @@ that candidate classic observations are promoted:
 | Personal inventory/custody/locker | Reads frozen equipped effects. | None. | Ownership/custody state machine. | Atomic transfers/migration. | Per-member Armory/consent. | Large. |
 | Rivals | Only if memory changes AI policy. | None. | Bounded rival recipe/memory. | Versioned summaries. | Disclosed memory/liability. | Medium-to-large. |
 | Battle/settlement durability | None. | Keep gate; add per-action checkpoint, exact-state load, and pre-ack rehydration. | Attempt-start/pre-ack snapshots, command/events, result/receipts/keys/pots. | Atomic active-battle store plus campaign journal and pinned-version recovery. | Resume/pending/error states. | Very large and prerequisite. |
-| Human session/pause/reconnect | Opponent AI keeps ordinary rule semantics; no allied AI fallback. | Freeze allied seat authority; stop after an acknowledged committed action. | Format, roster, member/controller binding, suspension boundary, reconnect identity. | Durable pause and abandonment transition. | Presence, paused/reconnect/error states. | Large, newly required by EP-D07 before a playable team proof. |
+| Human session/pause/reconnect | Opponent AI keeps ordinary rule semantics; no allied AI fallback. | Freeze allied seat authority; stop after an acknowledged committed action. | Format, roster, member/controller binding, accepted grace policy/timer, suspension boundary, reconnect identity, conditional abandon authority. | Durable pause, stale-on-reconnect proposal, and atomic abandonment transition. | Presence, visible grace, wait/quit vote, paused/reconnect/error states. | Large, newly required by EP-D07 before a playable team proof. |
 | Rule/generator provenance | Contract-v2 descriptor with validated `designVersion`. | Project/hash ID+contract+design triple. | Separate generator/definition IDs. | Every persistent product and migration. | Always visible. | Small code, blocking and cross-cutting. |
 | Launcher entry | None. | None. | None. | None. | Fixed launcher registry. | Separate integration. |
 
@@ -2677,7 +2737,8 @@ implementation authorization:
 6. implement headless Circuit/opponent/reward generation and adversarial tests;
 7. add per-action animation acknowledgement plus the minimum genuine
    two-human admission, command-authority, durable pause, authenticated
-   same-seat reconnect, and abandonment protocol required by EP-D07;
+   same-seat reconnect, visible grace timer, and accepted connected-team
+   abandonment protocol required by EP-D07;
 8. add the two-member route/Armory/reward UI for a safely sequenced playable
    proof;
 9. expand content, then add rivals, locker/trade, and full 3v3 presentation;
@@ -2866,7 +2927,9 @@ Build:
 10. sidecar v1, separate route/Mastery/opponent/reward/combat RNG, one prepared
     Circuit envelope, idempotent attempt receipts, `grantEligible` grants, and
     claims. The active envelope also persists format, frozen roster/seat
-    authority, action-boundary suspension, and exact same-seat reconnect state;
+    authority, accepted grace-policy identity, per-member presence/dropout
+    timers, action-boundary suspension, pending abandonment proposal/presence
+    snapshot, and exact same-seat reconnect/stale-proposal state;
 11. minimal doctrine/Contract preview, two personal Armory screens, reward
     choice, affix explanation, and provenance display;
 12. headless 1v1/2v2/3v3 property tests, including one persistent gladiator's
@@ -3035,7 +3098,8 @@ power remains bounded.
 - `[U]` acceptable local UI density for simultaneous 2v2/3v3 Armories;
 - `[U]` whether the minimum distinct-human session is local multi-input or
   remote, plus its presence/authentication, disconnect detection, durable
-  pause, same-seat reconnect, and abandonment-liveness protocol;
+  pause, same-seat reconnect, exact grace duration/storage, and race-safe
+  implementation of the accepted abandonment protocol;
 - `[U]` actual serialized save sizes and atomic-storage mechanism;
 - `[U]` balance of every proposed module and numeric threshold.
 
@@ -3063,7 +3127,12 @@ replacement; rejection or an open revision remains blocking:
    a distinct connected human; allied AI fill, multi-seat human control, and AI
    takeover are excluded; a committed action finishes before disconnect pauses
    at the next action boundary for same-seat reconnect or the established
-   team-abandonment path.
+   team-abandonment path; every member accepts a visible versioned grace policy
+   at Circuit entry; expiry never resolves automatically but activates only an
+   absent member's conditional abandonment consent; and every connected roster
+   member must approve the existing atomic Concede receipt. A partial 3v3
+   reconnect cannot resume combat, presence changes stale the old proposal, and
+   Recovery retains its original roster and human-seat admission.
 
 Then accept EP-A01–EP-A03 (or fully normative, explicitly accepted
 replacements) and close readiness R-04–R-06 plus every cross-layer exit gate in
