@@ -44,10 +44,20 @@ everything else (the 16:59 brief's ranked list) waits behind it.
 
 **Before writing a word, three things the record cannot supply:**
 
-1. **The owner's research.** Nothing in this repository, the harness or the
-   memory describes it (grepped 2026-09-02: no hit for Penn State, PhD or
-   dissertation that is about him). **Ask him for two or three sentences on it.
-   Never invent a field, an advisor or a topic.**
+1. **The owner's research — POINTER SUPPLIED by him after this brief was
+   first written, and verified with `gh api` the same night.** Read
+   `docs/RESEARCH_OVERVIEW.md` in `https://github.com/Zanzagar/persistent-homology-research`
+   (April 2026; the sibling `Zanzagar/persistent-homology` is the TDA and
+   statistics side). In one breath: the Qualia Convergence Framework —
+   retrieving geological analogs from sparse subsurface data by encoding
+   multiscale structural "essence" through three independent pathways
+   (classical variography, a learned vision encoder, and persistent homology),
+   fused where they converge; the headline hypothesis is that first-dimensional
+   persistent homology tells braided from meandering channel systems apart even
+   when variograms cannot. "Qualia" is operational, never phenomenological —
+   do not let the email imply otherwise. **Summarise from the overview and let
+   him cut; never invent an advisor, a department or a claim it does not
+   make.**
 2. **The recipient and the route.** The record does not name the developer or
    a contact address. Verify from the studio's own site / Steam page / socials
    who to write to and how they prefer to be reached, and put the source of
