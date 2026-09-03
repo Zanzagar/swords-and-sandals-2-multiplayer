@@ -8,8 +8,14 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-02 16:59 — three waves, cut at the usage limit](docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md).**
-Start there. Three capped fan-out waves on the 13:40 brief's ranked items 1–3
+[2026-09-02 23:13 — reach for the stars: the email to the developer](docs/handoffs/2026-09-02-2313--reach-for-the-stars-the-email-to-the-developer.md).**
+Start there: the owner's FIRST task is drafting (never sending) a careful
+email to the game's developer, SOLO — no wave. It also records the decided
+verification precedence (Pocock first, Codex second, one capped wave last;
+harness ADR 0001) and that ultracode stays ON at the owner's instruction.
+
+*(The brief it supersedes, whose findings and ranked list are unchanged:)*
+[2026-09-02 16:59 — three waves, cut at the usage limit](docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md). Three capped fan-out waves on the 13:40 brief's ranked items 1–3
 were stopped at 92% of the session limit; ranked item 4 is CLOSED by
 measurement (the branch was already pushed), item 3's premise is BROKEN (the
 hero's walk count is set by the villain's approach), and the one VERIFIED
@@ -18,7 +24,7 @@ damage pair — so the armoured candidate's omission is correct and the fix is a
 role-based requirement on the rule-set side. **Read its cost section before
 launching any wave.**
 
-*(The brief it supersedes:)*
+*(And before that:)*
 [2026-09-02 13:40 — the first armoured golden](docs/handoffs/2026-09-02-1340--the-first-armoured-golden.md).
 
 *(And the one before that:)*
