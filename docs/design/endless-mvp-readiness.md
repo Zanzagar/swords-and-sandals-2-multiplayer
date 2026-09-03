@@ -5,9 +5,9 @@
 > or shape what parity capture tries to prove.
 
 **Status:** specification and review plan only. **Not implementation-ready.**
-EP-D01 has an accepted replacement; five product decisions, EP-A01–EP-A03,
-three P0 model contradictions, three P0 specification blockers, and several
-cross-layer contracts remain open. Nothing here
+EP-D01 and EP-D07 have accepted dispositions; five product decisions,
+EP-A01–EP-A03, three P0 model contradictions, three P0 specification blockers,
+and several cross-layer contracts remain open. Nothing here
 authorizes `endless-v0`, launcher work, runtime capture, installed-game access,
 or changes to classic rules/evidence.
 
@@ -20,7 +20,7 @@ honestly start?* It is not a second feature design.
 
 | Gate | Current state | Required disposition |
 | --- | --- | --- |
-| Product constraints EP-D01–EP-D06 | `1 of 6 closed` | EP-D01 has an accepted replacement. EP-D02–EP-D06 still require fully normative, explicitly accepted dispositions in the [decision record](endless-progression-decisions.md); rejection/open revision remains blocking. |
+| Product constraints EP-D01–EP-D07 | `2 of 7 closed` | EP-D01 and EP-D07 have accepted dispositions. EP-D02–EP-D06 still require fully normative, explicitly accepted dispositions in the [decision record](endless-progression-decisions.md); rejection/open revision remains blocking. |
 | Pacing scale | **P0 contradiction** | Choose one coherent mapping among career level, frontier tier, Circuit count, vertical tier, and milestone cadence. |
 | Retry/combat RNG | **P0 exploit** | Remove semantic-label/seed shopping without losing reload determinism or classic ordered-tape parity. |
 | Post-completion economy | **P0 deadlock/hoard incentive** | Preserve bounded access to already known sidegrades after catalog completion. |
@@ -33,7 +33,7 @@ honestly start?* It is not a second feature design.
 | Durable reward settlement | Strong in-memory latch; no crash-repair transaction | Specify `ack-prepared` recovery and one pure idempotent settlement reducer. |
 | Numeric content | Tuning hypotheses only | Author tier budgets, chassis/opponents, action costs, `C_t`, and all finite catalogs. |
 | Headless proof | Reusable resolver exists | Build only after every preceding headless gate passes. |
-| Playable proof | No per-action animation acknowledgement | Requires an evidenced completion signal and fail-closed action gate after headless acceptance. |
+| Playable proof | No per-action animation acknowledgement or genuine multi-human session lifecycle | Requires an evidenced completion signal, fail-closed action gate, distinct-human allied-seat admission, durable action-boundary pause, authenticated same-seat reconnect, and a liveness-safe established abandonment transition after headless acceptance. |
 
 There is no useful “percentage complete” here. The current design is
 feature-complete at proposal level and not implementation-ready at contract
@@ -284,6 +284,7 @@ claim u64, not unrelated documentation.
 | Numeric resources | `src/team/resources.js` validates/projects generic finite-number resource bags and absolute writes; the adapter emits a fixed twenty-entry SS2 set whose numeric bounds are null. | Reuse it for missing charges where appropriate; do not create resolver fields named after SS2 globals. |
 | Status/items | Combatants have a simple loadout and deduplicated string statuses. | Frozen item-instance IDs/hashes, carried items, structured markers/conditions, expiry coordinates, charges. |
 | Turn/team lifecycle | Resolver owns seats, controllers, stable initiative, effects, elimination, result, and settlement arm. | Explicit cycle wrap/Pressure and timed expiry, without alternate result paths or extra boss turns. |
+| Controller/admission | The generic registry can assign or reassign local, hot-seat, remote, or AI controllers per seat, and the resolver accepts one-to-three seats per side. | EP-D07's first-playable admission layer must require one distinct connected human authority per allied seat, reject allied AI/duplicate authority/takeover, and persist action-boundary pause plus authenticated same-seat reconnect. Generic capability is not product permission. |
 | Terminal acknowledgement | `CampaignSettlement` and adapter result bridge gate the callback exactly once in memory. | Durable `ack-prepared` state, restore, and atomic progression apply/repair. |
 | Campaign persistence | Schema-v2 immutable settled records, namespaced storage, corruption quarantine, and a versioned 1→2 migration whose timestamp is injectable but defaults to the wall clock. | Separate active progression envelope/transaction; current backend has no multi-entity atomic commit and defaults to 64 KiB. Future migrations need explicit timestamp/receipt inputs before they may be called pure. |
 | Adapter | Canonical resource/status mapping, presentation commands, terminal result acknowledgement. | Per-action completion gate; no verified vanilla timeline-complete signal exists. |
@@ -309,8 +310,9 @@ counter or an executable rejection test before its owning slice is ready.
 | P1 | Rule Load is not a utility bound | Capacity four admits `3+1`, `2+2`, `2+1+1`, and four-minor packages; multi-tag actions may overcharge Signatures and cheap tag actions may become filler. Team Tactic removes one point from every member and creates a veto. | Test every partition under uniform-mechanics and actual-generator weights; define consequential-tag cost/timing; prevent a Signature action charging itself; compare Team Tactic against the lost package for every seat. |
 | P1 | Trophy/effect gates can pass by cherry-pick | Concord currently needs one favourable and one losing cell; that does not establish robust non-dominance. Relay/Chain prerequisites may be scripted-opponent-specific; Quiver dies near cap; Stabilizer's floor makes low shields lose 100/50/33%; Breakwater can be burned by a tiny crossing. | Publish semantic-cell distribution and robust aggregate thresholds; sweep exact integer boundaries and every trigger sequence. No single showcase cell is acceptance. |
 | P1 | Veteran catch-up is punitive | A tier-50 incomplete veteran accompanying a 49-tier-gap ally forgoes about `46.6*C50` gold, 108 offers, 544 all-salvage Marks, and 196 grant/XP opportunities. | At gaps 1/10/25/49 and with same-custodian mule cases, compare current Practice-only veteran, nonmechanical mentor records, deferred mentor credit redeemable only after a later veteran-frontier victory, and split-tier authored encounters. No option may grant high-tier outcomes for low-tier wins, mint a second frontier set, or improve veteran reward/action by cycling fresh allies. The owner must select an acceptable veteran opportunity-cost ceiling. |
-| P1 | Stable-AI mule and natural-item funnel | One human can custodize multiple persistent AI fighters, collect several personal streams, and funnel tradeable natural Legendaries to a carry. Per actor-action normalization hides per-human-command advantage. | Concentration gates apply per actor-action, human command, and wall-clock minute across one-human/one-fighter, one-human/three-fighter, and three-custodian cases. Review when natural items bind; permit rewardless preview so experimentation is not punished. |
-| P1 | Governance can deadlock or impose debt | Ranked sums can put an absent Standard-preferring member onto a debt route. Unanimity lets an absent/malicious member freeze Concede, Recovery, Pivot, Tactic, and Overtime forever. One `memberId` is not one person without sealed authority. | Nonzero debt requires explicit unanimous acceptability; choose suspension or a receipt-backed withdrawal/branch rule; seal membership authority; test absence, timeout, handoff, Sybil, and frozen unwinnable Circuits. |
+| P1 | Deferred allied-AI/multi-seat funnel | If a later variant lets one human custodize multiple persistent or AI-driven fighters, it can collect several personal streams and funnel tradeable natural Legendaries to a carry. Per actor-action normalization hides per-human-command advantage. EP-D07 excludes this from the first playable version. | First-playable admission rejects allied AI and duplicate human authority. Any future variant needs a new accepted reward/custody rule plus concentration gates per actor-action, human command, and wall-clock minute; generic resolver support is insufficient. |
+| P1 | Governance can deadlock or impose debt | Ranked sums can put an absent Standard-preferring member onto a debt route. EP-D07 deliberately selects suspension rather than AI/controller substitution, but the current unanimity rule records a disconnected member as “no”; a suspended active attempt may therefore never reach abandonment. One `memberId` is not proof of one human. | Nonzero debt requires explicit unanimous acceptability; persist suspension; seal member/session authority; and specify how the established unanimous abandonment receipt terminates a suspended attempt without forged consent, AI takeover, or state loss. Test absence, timeout, Sybil, crash, and indefinite disconnect. |
+| P1 | Cross-format identity and farming | One mode-neutral gladiator can carry team-earned power into 1v1, or a team-dependent build can become nonfunctional when entering solo. A faulty transition can also copy/reset Bound Soul, item, Tactic, or Lineage state. | Use one persistent `combatantId`; freeze format/roster per Circuit; require a functional solo action loop; round-trip the same gladiator through 1v1→2v2→3v3→1v1; and compare risk-normalized cross-format progression so one format is not a dominant power farm. |
 | P1 | Focus warning may not create agency | “One enemy action ahead” can still land before the targeted seat's next action, and per-enemy limits can coordinate focus. | Guarantee at least one scheduled action for the target before the threatened payoff and apply focus frequency at team scope. |
 | P1 | Post-cap tier may not mean harder | After raw/module caps and finite doctrines/Charters, an unbounded tier becomes an ordinal record, not monotonically increasing difficulty. Cosmetic recipe IDs can also evade no-repeat rules. | Either promise bounded bands then rotation/records, or publish a finite monotone schedule. Compare semantic mechanics fingerprints, not display IDs. |
 | P1 | Rival spoofing/free AI value | Two wins with a disposable tag can bait a rival counter, then a non-tag build exploits its liability. Doctrine policy adds value outside its modifier budget. | Adversarial two-of-three tag spoof test over the complete horizon; budget policy value; define “within 15%” as a vector norm that never raises raw chassis over the cap. |
@@ -339,9 +341,10 @@ The MVP is not an “eight-effect rule set.” Its complete authored surface is:
 | Trophy package | Concord Trophy combines Relay and Pursuit plus the Trophy-only Concord Chain interaction and Bash/Charge stamina burden | Designed effect/sequence + blueprint/escrow state |
 | Loadout grammar | Four Rule Load, six carried slots, family/slot mapping, strongest-only groups, exact active item linkage, no proc chains | Rule validator + canonical frozen loadout |
 | Opponents | Four previewed doctrines; deterministic Scout/Foil/Mixed/Final recipes; capped stat budgets | Pure campaign generator + rule AI/actions |
+| Allied roster/session | Under the pending 2v2 proof proposal, two persistent allied gladiators controlled by two distinct connected humans; no allied AI, empty allied seat, duplicate human authority, multi-seat control, or takeover | Admission/session authority + active Circuit envelope; accepted EP-D07 |
 | Routes | Standard plus alternating Elite Foil/Tight Clock; four fights; no combined debts | Campaign plan and disclosed UI |
 | Rewards | Personal precommitted four-key outcomes, cache offers, Forge/Salvage, fixed Concord source, custody/claim | Progression reducer/transaction + UI |
-| Continuation | Concede, Rematch, one Recovery branch, receipts, exact resume | Active battle/progression transaction |
+| Continuation | Concede, Rematch, one Recovery branch, receipts, exact resume; committed action completes once before disconnect pause, then same-seat authenticated reconnect or established abandonment only | Active battle/progression transaction + session/transport protocol |
 
 Before implementation, one normative appendix must list every MVP action,
 effect, state field, trigger, timing point, RNG need, resource read/write,
@@ -423,6 +426,12 @@ and normalization rules. Initiative and every other identifier tie-break use a
 specified ordinal byte/code-unit comparator, never locale-sensitive
 `localeCompare()`.
 
+One persistent combatant record has no permanent 1v1/2v2/3v3 mode field.
+Format, roster size, participating combatant IDs, and seat bindings belong to
+the immutable Circuit/attempt projection. Moving the same combatant among
+formats preserves its Bound Soul, levels, stats, inventory, equipped item IDs,
+Legendary Lineages, and personal Tactic library exactly.
+
 Every rule-readable field must be present in the authoritative projection and
 hash. Campaign inventory writes cannot change an active fight. Cycle wrap and
 expiry must behave identically across dead-seat skipping in 1v1/2v2/3v3.
@@ -434,7 +443,9 @@ dumping live adapter resource keys into final history records.
 **Pass gate:** snapshot→restore→snapshot is byte-identical; any rule-readable
 difference changes the hash; malformed/unknown fields fail closed; classic
 resource/status behavior remains unchanged; ID grammar rejects aliases and
-cross-locale fixtures produce the same initiative order.
+cross-locale fixtures produce the same initiative order. One persistent
+combatant round-trips through 1v1→2v2→3v3→1v1 without a copied, reset, or
+format-bound progression field.
 
 ### S-04 — one atomic progression/active-battle boundary
 
@@ -447,6 +458,9 @@ transaction.
 The durable envelope must include:
 
 - campaign, member, item, plan, escrow, key, and version identities;
+- frozen event format, roster size, combatant-to-seat and human-authority
+  bindings, connection/suspension state, and the last acknowledged action
+  boundary;
 - active attempt sequence and immutable attempt-start/pre-ack snapshots;
 - operation/mutation sequences and event/presentation high-water marks;
 - RNG model/state, frozen rule/generator/definition identities;
@@ -466,7 +480,9 @@ grant; migrations are clean-boundary, pure, idempotent, and backed up; a
 including both snapshots and explicit serialization/backend overhead, remain
 below the configured atomic backend limit. If the current 64 KiB limit cannot
 hold that envelope with margin, raising and versioning the limit is part of
-S-04; a separate 100 KiB design target cannot waive the backend gate.
+S-04; a separate 100 KiB design target cannot waive the backend gate. A crash
+while suspended reloads the same seat authorities, state hash, and next action
+boundary without advancing AI, command, RNG, or settlement.
 
 ### S-05 — durable reward settlement coordinator
 
@@ -498,8 +514,11 @@ explicit and must never become the playable adapter default.
 
 **Pass gate:** byte-identical 12-fight seeded fixture; at least 100 completed
 Circuits with no finite endpoint, deadlock, ID collision, or unbounded state;
-1v1/2v2/3v3 properties; reload/fault tests use the real continuation path; all
-acceptance metrics are machine assertions.
+1v1/2v2/3v3 properties; one persistent gladiator retains byte-identical
+progression through 1v1→2v2→3v3→1v1; first-playable admission rejects allied
+AI, an empty allied seat, duplicate human authority, multi-seat control, and
+takeover; reload/fault tests use the real continuation path; all acceptance
+metrics are machine assertions.
 
 ### S-07 — playable per-action acknowledgement
 
@@ -509,6 +528,16 @@ commands, and an action acknowledgement bridge. `VanillaBattleHost.submit`
 must refuse action N+1 while N is awaiting completion; AI advancement pauses
 after one submitted action. Restore re-presents the same operation without
 re-resolving or redrawing.
+
+A disconnect recognized while action N is committed does not cancel, roll
+back, or resolve N twice. N completes and acknowledges exactly once, its
+checkpoint commits, and suspension begins before N+1. A disconnect recognized
+at an idle action boundary suspends immediately. While suspended, human and AI
+submission, clocks that affect combat, and automatic settlement are all
+blocked; presentation may show only persisted pause/reconnect state. If N
+creates the terminal result, no N+1 boundary exists: ordinary terminal
+presentation acknowledgement and exactly-once settlement finish instead of
+creating a suspended nonterminal attempt.
 
 Per-action and terminal tokens remain distinct. Self-target, zero-event,
 unmapped/no-animation, knockout, AI continuation, and terminal actions need
@@ -521,7 +550,42 @@ gate remains [U] and fails closed.
 
 **Pass gate:** correct token opens once; duplicate is harmless; mismatch
 refuses; N+1 cannot rebind before N; restore is exact; a separately evidenced
-surface signal exists before playable integration is called verified.
+surface signal exists before playable integration is called verified. Inject
+disconnect before submission, after submit/before animation acknowledgement,
+after acknowledgement/before checkpoint, and after checkpoint; every repair
+path finishes at the same exactly-once action boundary and none advances N+1.
+
+### S-08 — distinct-human admission, suspension, and reconnect
+
+The first playable session needs a product-layer authority protocol in addition
+to the generic controller registry. It must:
+
+- admit exactly one distinct connected human member/controller for every allied
+  seat and bind that authority to the frozen `combatantId` and `seatId`;
+- reject allied AI, empty allied seats, duplicate human/member authority,
+  one-human multi-seat control, and controller reassignment/takeover;
+- authenticate reconnect as the same member, restore the same seat and exact
+  state, and reject a different member or stale session token;
+- persist connection and suspension transitions without letting wall-clock,
+  retry, combat RNG, or presentation order affect combat; and
+- allow a suspended attempt to end only through the established atomic
+  team-abandonment receipt protocol—never by timeout, host fiat, controller
+  substitution, or AI finish.
+
+The accepted rule does not select local multi-input versus remote transport,
+presence/heartbeat mechanics, reconnect-token schema, or how a disconnected
+member participates in the existing unanimous abandonment vote whose timeout
+currently means “no.” Those are [U] and the last point is a liveness blocker,
+not permission to invent a fallback.
+
+**Pass gate:** start succeeds with the required distinct humans and fails
+without mutation for every forbidden allied mapping; spoofed/duplicate/stale
+authority fails closed; disconnect at every S-07 boundary persists one paused
+state; reload remains paused; correct reconnect restores byte-identical combat
+and progression state to the same seat; wrong reconnect cannot observe or
+control it; indefinite disconnect creates no action, reward, loss, RNG advance,
+or AI takeover; and the reviewed abandonment path is atomic, unanimous under
+its accepted authority rule, idempotent, and live.
 
 ## 7. Missing normative authoring inputs
 
@@ -533,7 +597,8 @@ version and review these exact finite inputs:
 3. Standard chassis catalog, slot/family budgets, prices `C_t`, and integer
    interpolation/rounding for every tier.
 4. Baseline Endless action vocabulary, legality, probability convention,
-   damage, stamina/ammunition/magicka costs, range, target, and AI value.
+   damage, stamina/ammunition/magicka costs, range, target, and opponent-AI
+   value. First-playable allied AI is not an authoring target.
 5. Four doctrine base templates, liability/module deltas, budget caps, and
    Scout/Foil/Mixed/Final assembly order.
 6. Exact eight-effect/Trophy definitions, exclusions, item pools, rarity cells,
@@ -541,6 +606,9 @@ version and review these exact finite inputs:
 7. Pressure/expiry coordinates and whether Control Fatigue is in or out of MVP.
 8. Cache/pity/target/Forge/gold/maintenance tables after R-03 is closed.
 9. Stable definition, generator, rule-design, and migration version IDs.
+10. Minimum genuine two-human session topology, sealed member/controller
+    authority, presence and reconnect state, suspended-attempt persistence, and
+    the established abandonment protocol's liveness rule.
 
 No simulator can validate “meaningful choices” against missing chassis,
 opponent, and action numbers.
@@ -552,11 +620,12 @@ may start until every §10 gate is reviewed and the owner then gives the separat
 implementation authorization. Each authorized slice lands separately and must
 leave classic tests green.
 
-1. **Owner record:** retain the accepted EP-D01 replacement, decide
-   EP-D02–EP-D06, and select repairs for R-01–R-03. R-04–R-06 specifications
-   remain mandatory before their owning code.
+1. **Owner record:** retain accepted EP-D01 and EP-D07, decide EP-D02–EP-D06,
+   and select repairs for R-01–R-03. R-04–R-06 specifications remain mandatory
+   before their owning code.
 2. **Normative specifications:** MVP surface appendix, pace/economy tables, RNG
-   contract, canonical mechanics schema, transaction/repair protocol.
+   contract, canonical mechanics schema, transaction/repair protocol, and
+   human admission/pause/reconnect/abandonment protocol.
 3. **Rule contract v2:** explicit classic migration and provenance/hash tests;
    no Endless battle yet.
 4. **Battle snapshot/RNG state:** versioned export/import and selected Endless
@@ -568,11 +637,15 @@ leave classic tests green.
 8. **`endless-v0` plus generators:** exact MVP surface only.
 9. **Headless simulator:** 12-fight fixture, 100-Circuit soak, adversarial search,
    1v1/2v2/3v3 properties.
-10. **Playable protocol:** only after headless acceptance; mock action gate first,
-    evidenced vanilla signal before binding.
-11. **2v2 UI:** routes, preview, Armories, reward/custody, provenance, repair.
-12. **Expansion:** content, rivals, locker/trade, then 3v3 presentation.
-13. **Launcher/deployment:** separate approval after playable acceptance; never a
+10. **Playable action protocol:** only after headless acceptance; mock action
+    gate first, evidenced vanilla signal before binding.
+11. **Human session protocol:** distinct-human allied admission, authority,
+    durable suspension, authenticated same-seat reconnect, and live established
+    abandonment path; no allied AI fallback.
+12. **2v2 UI:** routes, preview, Armories, presence/pause/reconnect,
+    reward/custody, provenance, repair.
+13. **Expansion:** content, rivals, locker/trade, then 3v3 presentation.
+14. **Launcher/deployment:** separate approval after playable acceptance; never a
     hidden step in design implementation.
 
 ## 9. Review and test ownership
@@ -596,16 +669,19 @@ separate rule-set seam, and invited degeneration plus counter/rejection test.
 
 All of these must be true in a reviewed commit:
 
-- EP-D01–EP-D06 are accepted or superseded by fully normative, explicitly
+- EP-D01–EP-D07 are accepted or superseded by fully normative, explicitly
   accepted replacements; rejection or an open revision remains blocking.
 - EP-A01–EP-A03 are accepted or superseded by separate fully normative,
   explicitly accepted owner/date-stamped replacements, and
   R-01–R-03 have one selected normative repair each, not merely options;
   R-04–R-06 have complete executable specifications.
-- S-01–S-07 have closed schemas/protocols and objective test plans; S-07 may
-  remain a later playable blocker while headless work proceeds.
+- S-01–S-08 have closed schemas/protocols and objective test plans; S-07 and
+  S-08 may remain later playable blockers while headless work proceeds.
 - Every numeric input in §7 is authored, versioned, and total over the MVP.
 - Headless scope and playable scope are explicitly separate.
+- First-playable admission proves one distinct connected human per allied seat;
+  disconnect pauses durably at the accepted action boundary and only same-seat
+  reconnect or the reviewed established abandonment path can continue/end it.
 - Classic ordered RNG, rules, fixtures, and evidence remain untouched.
 - No document calls a designed rule runtime-verified or a custom campaign
   vanilla campaign parity.

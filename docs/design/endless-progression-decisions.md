@@ -4,15 +4,15 @@
 > candidates, fixtures, or capture hypotheses. Designed mechanics may not select
 > or shape what parity capture tries to prove.
 
-**Status:** owner review in progress. EP-D01 has an explicitly accepted
-replacement; EP-D02–EP-D06 and EP-A01–EP-A03 remain pending.
+**Status:** owner review in progress. EP-D01 and EP-D07 have explicitly
+accepted dispositions; EP-D02–EP-D06 and EP-A01–EP-A03 remain pending.
 **Implementation remains blocked.**
 
-This record turns the six gates in the
+This record turns the six original gates in the
 [Endless progression system](endless-progression-system.md#gate-before-code)
-into durable, independently reviewable decisions. It does not add a seventh
-product decision, change measured vanilla behaviour, or authorize an
-`endless-v0` implementation.
+and later owner-raised product questions into durable, independently reviewable
+decisions. EP-D07 records the first such added constraint. None changes
+measured vanilla behaviour or authorizes an `endless-v0` implementation.
 
 For the shorter pre-read and guided review sequence, use the
 [owner decision packet](endless-progression-owner-packet.md). This file remains
@@ -36,6 +36,7 @@ EP-D03: accepted
 EP-D04: accepted
 EP-D05: accepted
 EP-D06: accepted
+EP-D07: accepted
 Owner: <name>
 UTC date: YYYY-MM-DD
 ```
@@ -54,6 +55,7 @@ readiness plan.
 | EP-D04 | Let rarity change behaviour complexity, not chassis budget | Accept as a permanent identity rule | `pending` |
 | EP-D05 | Use personal precommitted frontier outcomes and typed post-completion records | Accept only with atomic settlement, ordered plan folding, and maintenance entitlement | `pending` |
 | EP-D06 | Make the first playable proof deterministic 2v2 under a separate designed rule set | Accept only after selecting the public deterministic RNG model and separating headless/playable gates | `pending` |
+| EP-D07 | Keep persistent gladiators mode-neutral and require human-controlled allied seats in the first playable version | Accepted; the MVP has no allied AI fill, multi-seat human control, or AI takeover, and disconnect pauses at an action boundary | `accepted` / Zanzagar / 2026-09-03 |
 
 The decisions are coupled. D01 prevents an infinite scalar gear ladder while
 requiring a finite behaviour-led veteran edge and three continuing Pursuits;
@@ -61,11 +63,13 @@ D04 must prevent rarity from reopening the scalar ladder. D02 prices the
 simultaneously active behavioural breadth, including Ascendancy. D03 determines
 the Circuit commitment window and Pivot timing. D05 makes Pursuit settlement
 fair and reload-safe. D06 is the smallest team format that can test the
-resulting co-op choices rather than a solo scalar ladder.
+resulting co-op choices rather than a solo scalar ladder. D07 preserves one
+gladiator's identity across event sizes while making the first playable proof a
+genuine human team instead of filling or finishing allied seats with AI.
 
 ### Required model/architecture dispositions
 
-These do not expand the six product decisions. They record how open blockers
+These do not expand the seven product decisions. They record how open blockers
 are resolved. Accepting an EP-D decision does **not** accept its corresponding
 EP-A repair. Each EP-A record needs its own owner/date-stamped disposition.
 
@@ -388,8 +392,10 @@ and uses a separate designed rule set.
 **Dependent working assumptions, not separately approved by D06:** the current
 proof proposal uses the non-runtime-verified `endless-v0` descriptor,
 four-fight Circuits, independent human custody/reward choices, deterministic
-generation, and reproducible combat. It never presents itself as vanilla
-parity.
+generation, and reproducible combat. Accepted EP-D07 now requires two distinct
+connected human allied controllers if this 2v2 proof is selected; allied AI,
+multi-seat human control, and takeover cannot complete it. It never presents
+itself as vanilla parity.
 
 **Recommendation:** accept after the owner separately selects EP-A02's public
 deterministic RNG/information contract. A 1v1 proof cannot test seat agency, focus fire,
@@ -417,9 +423,11 @@ one carry makes every important decision, a support seat becomes an appliance,
 or deterministic seeds turn into solved scripts.
 
 **Required counter and rejection gate:** per-seat meaningful-action and value
-metrics; focus-fire response fixtures; mixed-controller and reconnect tests;
-loadout locks and bounded Pivot; pre-registered held-out evaluation seeds that
-are not a runtime security boundary; and no secret-seed security claim.
+metrics; focus-fire response fixtures; distinct-human allied-seat admission,
+action-boundary suspension, same-seat reconnect, and abandonment-liveness
+tests; loadout locks and bounded Pivot; pre-registered held-out evaluation
+seeds that are not a runtime security boundary; and no secret-seed security
+claim.
 Separate two milestones: a headless deterministic
 2v2 proof may run after the state/contracts are ready, but a **playable** proof
 also requires per-action animation acknowledgement so action N+1 cannot rebind
@@ -445,9 +453,90 @@ deployment, runtime capture, or changes to classic rules/evidence.
 
 **Record:** `pending` — owner/date: —
 
-## Contract consequences that are not a seventh product decision
+## EP-D07 — mode-neutral gladiators and human-only allied MVP
 
-If the six decisions are accepted, the current proposal still requires an
+**Disposition:** `accepted`.
+
+**Canonical decision (exact approval scope):**
+
+1. A persistent gladiator is mode-neutral and may enter 1v1, 2v2, or 3v3
+   events. Team size and participating roster are chosen per Circuit and remain
+   locked until that Circuit ends. Changing formats never resets the
+   gladiator's Bound Soul, levels, stats, equipment, Legendary Lineages, or
+   personal Tactic library.
+2. For the first playable version, every allied seat must be controlled by a
+   distinct connected human player. Opponents may be AI-controlled, but allied
+   AI fill, one-human multi-seat control, and automatic AI takeover are
+   excluded.
+3. If a player disconnects, any already-committed action finishes and the
+   battle then pauses at the next action boundary. Reconnecting restores that
+   player to the same gladiator and state. Otherwise, only the established
+   team-abandonment protocol may end the suspended attempt. The AI never
+   assumes control.
+4. Hot-seat parties, solo control of multiple gladiators, AI companions, and
+   opt-in AI takeover remain possible future designs, not promised features.
+
+**Repository boundary:** the headless resolver already accepts one-to-three
+seats per team, separates combatant identity from controller identity, and can
+drive AI on either side. It does not encode a permanent character format. [V]
+Persistent cross-format campaign progression, a playable multi-human session,
+disconnect detection, durable mid-battle pause/reconnect, and live multi-slot
+presentation are not implemented. The only concrete non-test AI policy is
+explicitly placeholder. [U]
+
+**Alternatives considered:**
+
+- binding a character to 1v1, 2v2, or 3v3 at creation fragments one long-lived
+  Bound Soul, gear history, and Legendary Lineage across duplicate careers;
+- allowing one human to command several allied gladiators makes team modes
+  accessible alone, but changes the multiplayer fantasy and reintroduces
+  per-human reward and command-concentration problems;
+- allied AI fill keeps a short roster moving, but must understand arbitrary
+  player builds, personal Tactics, and custody without sabotaging a mortal
+  gladiator; and
+- automatic AI takeover avoids a pause, but can make an irreversible combat or
+  tournament decision for a disconnected owner and invites intentional
+  disconnect as an action-selection policy.
+
+**Parity/seam:** vanilla supplies no evidence for 2v2 or 3v3 and no persistent
+cross-format campaign path. This is an Endless product rule behind the separate
+designed rule set. Existing headless controller and AI-fill capabilities may
+remain tested architecture seams, but they are not first-playable product
+features and do not become runtime-verified through this acceptance.
+
+**Degenerate strategies and failure modes invited:** a team-oriented build can
+become unusable when its gladiator enters 1v1; one format can become the easiest
+farm for power used in another; a duplicate or spoofed connection can pretend
+one human is several players; or one disconnect can suspend a locked Circuit
+forever because the existing unanimous Concede protocol records absence as
+“no.”
+
+**Required counter and rejection gate:** every offered build retains a
+functional solo action loop; reward and difficulty tests compare the same
+gladiator across 1v1/2v2/3v3 without resetting or duplicating persistent state;
+first-playable readiness rejects an allied AI controller, an empty allied seat,
+or one controller/member authority occupying both allied seats; and durable
+continuation tests finish one committed action, pause before the next action,
+reject all commands while paused, then restore the same seat, combat projection,
+hash, and controller authority on reconnect. The exact human-presence/session
+transport and the liveness-safe application of the established abandonment
+protocol are new [U] readiness blockers; neither may be replaced by AI.
+
+**Approval consequence:** team size is an event/Circuit property rather than a
+persistent gladiator mode. If pending EP-D06 later selects the proposed 2v2
+playable proof, that proof requires two distinct connected human participants
+and a real pause/reconnect protocol. “Network transport” can no longer be
+blanket-deferred without first specifying another genuine two-human topology.
+This decision does not select that topology, promise later companion/hot-seat
+modes, authorize implementation, or close EP-D06.
+
+**Record:** `accepted` — owner: Zanzagar; UTC date: 2026-09-03. The owner
+explicitly replied `Accepted` after reviewing the complete four-clause wording
+above.
+
+## Contract consequences that are not an eighth product decision
+
+If the seven decisions are accepted, the current proposal still requires an
 explicit rule-contract v2 specification before code:
 
 - require a nonnegative safe-integer `designVersion` in every descriptor;
@@ -470,7 +559,7 @@ be revised.
 
 ## Approval checklist
 
-The owner should be able to answer yes to all of these before marking all six
+The owner should be able to answer yes to all of these before marking all seven
 accepted:
 
 - The vertical endpoint is intentionally designed, not claimed as a measured
@@ -482,5 +571,11 @@ accepted:
 - Personal rewards are blocked on durable atomic prepare/apply/repair semantics.
 - Headless 2v2 and playable 2v2 are understood to have different integration
   gates.
+- Persistent gladiators keep one identity across 1v1/2v2/3v3, while the first
+  playable allied roster contains one distinct connected human per seat and no
+  AI takeover or fill.
+- A recognized disconnect finishes only an already-committed action, then
+  durably pauses before another command until authenticated reconnect or the
+  accepted team-abandonment path resolves it.
 - No accepted decision authorizes classic-rule changes, candidate shaping,
   runtime capture, launcher deployment, or installed-game access.

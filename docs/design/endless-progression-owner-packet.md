@@ -4,9 +4,9 @@
 > candidates, fixtures, or promoted evidence. It concerns designed mechanics
 > behind a separate seam.
 
-**Status:** owner pre-read and guided-session worksheet. EP-D01 closed through
-an explicitly accepted replacement on 2026-09-03; EP-D02–EP-D06 and
-EP-A01–EP-A03 remain pending. This packet is not the authoritative
+**Status:** owner pre-read and guided-session worksheet. EP-D01 and EP-D07
+closed through explicitly accepted dispositions on 2026-09-03; EP-D02–EP-D06
+and EP-A01–EP-A03 remain pending. This packet is not the authoritative
 [decision record](endless-progression-decisions.md), a balance specification,
 or implementation authorization.
 
@@ -39,7 +39,8 @@ or code. Implementation requires a later, separate authorization.
 | EP-D03 | `accepted` | Four fights is the first 2v2 measurement boundary, explicitly revisable after interactive timing. It is not permanent for 3v3 or every mode. | Scout/Concede or shortest-route farming; precommit route/rewards, prohibit noncombat rerolls, count scouting, and compare reward per risk/action. |
 | EP-D04 | `accepted` | Within one family/profile/tier, rarity never raises ordinary chassis budget. It may change authored behavior complexity and Load. | Always equip the highest color; assert same-chassis equality and reject higher-rarity strict dominance across the opponent grid. |
 | EP-D05 | `accepted` | Every mechanically incomplete `grantEligible` persistent combatant gets a personal immutable precommitted outcome; completed future slots are typed records; only one prepared reward set may be grandfathered. | Reload, crash duplication, last-hit incentives, or carry funneling; require keyed escrow, atomic/idempotent settlement, personal ownership, fault injection, and concentration gates. |
-| EP-D06 | `accepted` | The first **playable** proof is deterministic 2v2 under a separate designed rule set. The principal seeded headless fixture is 2v2, while headless properties still cover 1v1/2v2/3v3. | Focus deletion, quarterbacking, or solved scripts; require per-seat agency, focus-response, reconnect, and adversarial deterministic-policy tests. |
+| EP-D06 | `accepted` | The first **playable** proof is deterministic 2v2 under a separate designed rule set. The principal seeded headless fixture is 2v2, while headless properties still cover 1v1/2v2/3v3. If selected, accepted EP-D07 requires two distinct connected human allies and no allied AI fallback. | Focus deletion, quarterbacking, solved scripts, or disconnect deadlock; require per-seat agency, focus-response, human-seat admission, durable pause/reconnect, abandonment liveness, and adversarial deterministic-policy tests. |
+| EP-D07 | `closed — accepted` | A persistent gladiator may enter 1v1/2v2/3v3; format and roster lock per Circuit. Every first-playable allied seat has a distinct connected human, with no allied AI fill, multi-seat human control, or AI takeover. Disconnect finishes a committed action and then pauses at the next action boundary. | Cross-format farming, fake distinct players, support builds that fail solo, or permanent disconnect deadlock; require cross-format progression tests, human seat authority, durable pause/reconnect, and a liveness-safe established abandonment path. |
 
 Every row is Endless-only. None changes a classic descriptor, measured rule,
 fixture, or evidence claim. Novel combat behavior remains under a separate
@@ -244,6 +245,16 @@ EP-D06 uses the prefilled recommendation. EP-A02 independently chooses public
 outcome information and post-loss retry semantics. Classic ordered RNG/tapes
 remain unchanged. Hidden entropy is never an offline safety premise. [V/D]
 
+EP-D07 is closed. Its exact accepted wording is in the
+[decision record](endless-progression-decisions.md#ep-d07--mode-neutral-gladiators-and-human-only-allied-mvp).
+It makes team size an event property, preserves one gladiator across formats,
+and requires a distinct connected human in every allied seat of the first
+playable version. Allied AI fill, multi-seat human control, and AI takeover are
+not MVP fallbacks. A recognized disconnect finishes an already-committed action
+and then pauses at the next action boundary for authenticated reconnect or the
+established team-abandonment path. The transport topology and abandonment
+liveness mechanism remain [U]; acceptance does not implement them.
+
 ### F1 — full public forecast (recommended and closable)
 
 Use a versioned `endless-public-forecast-v1` model. Before submission, a pure
@@ -332,6 +343,7 @@ a safe Recovery exhaustion transition. [D/U]
 
 ```text
 EP-D06: accept recommended rule | reject | replace: ...
+EP-D07: CLOSED — accepted (Zanzagar, 2026-09-03; see authoritative record)
 EP-A02 outcome: F1 full public forecast | F2 direction, remains open | replace: ...
 EP-A02 retry: R1 unlimited exact-state Rematch | replace with exact limit/exhaustion: ...
 EP-A02 Recovery/Assistance rules: accept | replace: ...
@@ -358,6 +370,7 @@ EP-D03: <accepted/rejected/revise + exact replacement>
 EP-D04: <accepted/rejected/revise + exact replacement>
 EP-D05: <accepted/rejected/revise + exact replacement>
 EP-D06: <accepted/rejected/revise + exact replacement>
+EP-D07: CLOSED — accepted (see authoritative record)
 
 EP-A01: <accepted or revise + complete pace/post-ceiling rule>
 EP-A02: <revise + complete information/retry/Recovery contract>
@@ -370,5 +383,6 @@ work. Implementation requires a later, separate explicit authorization.
 
 Even full acceptance leaves the designed combat budget, Pressure proof,
 integer encoding, rule contract, mechanics state, atomic transaction protocol,
-numeric content, and playable animation signal open. The next deliverable is a
-specification-only readiness PR, not implementation.
+numeric content, playable animation signal, and human session/pause/reconnect
+protocol open. The next deliverable is a specification-only readiness PR, not
+implementation.

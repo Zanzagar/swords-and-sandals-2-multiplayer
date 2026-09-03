@@ -27,6 +27,20 @@ this older proposal. Those details remain `[U]` until EP-A01 and the affected
 later decisions/specifications reconcile them; they are not implementation
 inputs.
 
+**Accepted EP-D07 overlay (2026-09-03):** a persistent gladiator is not bound
+to 1v1, 2v2, or 3v3; format and participating roster are selected and locked per
+Circuit without resetting persistent progression. In the first playable
+version, every allied seat requires a distinct connected human player.
+Allied AI fill, one-human multi-seat control, and AI takeover are excluded. A
+recognized disconnect finishes an already-committed action and then pauses at
+the next action boundary for reconnect or the established team-abandonment
+path. The exact accepted rule in the
+[decision record](endless-progression-decisions.md#ep-d07--mode-neutral-gladiators-and-human-only-allied-mvp)
+overrides every AI-finish, rewardless allied-fill, hot-seat MVP, or blanket
+network-deferral assumption still present in older proposal text. Human session
+topology, durable pause/reconnect, and abandonment liveness remain `[U]`; this
+overlay does not authorize their implementation.
+
 **Research date:** 2026-08-30; readiness audit 2026-08-31.
 
 ## Evidence discipline
@@ -108,6 +122,10 @@ power.
    may complete Ascendancy, Frontier, and Legacy together. At least one
    strategic, encounter, cosmetic, or system-access objective remains visible;
    a bare level or Chronicle record is not a sufficient successor.
+8. **Keep the gladiator larger than the event format.** One persistent
+   gladiator may enter 1v1, 2v2, or 3v3. The first playable allied roster is a
+   genuine human team: one distinct connected person per seat, no allied AI
+   fill or takeover, and action-boundary pause on disconnect.
 
 This is intentionally a **designed-mode** proposal. Existing measured classic
 behaviour remains untouched. The current rule descriptor has only
@@ -123,6 +141,12 @@ These are acceptance requirements, not flavour:
 - Active Rule Load never exceeds four per combatant.
 - Base stat and item-chassis budgets never rise after the versioned campaign
   vertical ceiling.
+- A gladiator's persistent identity and progression do not reset or fork when
+  moving among 1v1, 2v2, and 3v3 Circuits.
+- Every allied seat in the first playable version has a distinct connected
+  human controller; no AI or duplicate human controller may satisfy readiness.
+- A recognized disconnect can finish only an already-committed action before
+  the battle pauses at the next action boundary.
 - Opponents never read the current player equipment snapshot to set their raw
   power.
 - No procedural generator creates a new rule; it selects versioned authored
@@ -354,6 +378,29 @@ These rules do not claim a vanilla respec or allocation schedule. They prevent
 the designed career from spending levels on axes the mapped formulas have
 already capped. [V/A]
 
+### 1.7 Mode-neutral persistent gladiators
+
+Team size is an event property, not a character-creation property. One
+persistent `combatantId` may participate in 1v1, 2v2, or 3v3 Circuits. Selecting
+a format never copies, resets, or replaces its Bound Soul, levels, stats,
+equipment, Legendary Lineages, personal Tactic library, inventory, or
+progression history. The selected format, roster size, and participating
+combatants freeze in the Circuit envelope until that Circuit ends; a later
+Circuit may select another format and roster. [A; accepted EP-D07] Active
+equipment and Rule Load follow the separate Circuit-lock/Pivot proposal and are
+not accepted by EP-D07.
+
+This does not claim that cross-format campaign persistence already exists.
+The current resolver can place the same combatant-shaped source into any legal
+one-to-three-seat battle, but the repository has no persistent roster read-back
+or playable cross-format career path. [V/U]
+
+Every offered build must retain a functional solo action loop so mode-neutral
+eligibility does not disguise a 1v1-dead support character. Balance need not be
+identical across formats: situational strengths are intended. Cross-format
+tests must instead reject progression duplication, state reset, or one format
+becoming a materially superior farm for power carried into another. [A]
+
 ---
 
 ## 2. The four-fight Arena Circuit
@@ -382,8 +429,17 @@ The team selects one route and each combatant selects one personal hunt family:
 reward plan, noncombat generation cursors, any EP-A02-required public combat
 commitment/forecast state, and participating `combatantId` roster are then
 persisted. Active equipment, Rule Load, and roster lock for all four encounters.
-A disconnect may change that combatant's controller to AI, but no bench
-substitution may multiply rewards or bypass the series test.
+A recognized disconnect never changes that combatant's controller. An already
+committed action finishes exactly once; after its acknowledgement and durable
+checkpoint, or immediately if no action is committed, the battle pauses at the
+next action boundary and accepts no further command. Authenticated reconnect
+restores the same member to the same seat and exact battle state. Otherwise
+only the established team-abandonment protocol may terminate the suspended
+attempt. If the committed action produces the terminal battle result, there is
+no next action boundary: its ordinary presentation acknowledgement and
+settlement finish rather than creating a suspended nonterminal attempt. Allied
+AI takeover, allied fill, and bench substitution are illegal in the first
+playable version. [A; accepted EP-D07]
 
 A defeat does not regenerate anything. Doctrine, signature, liability, target
 policy, and every other decision-relevant fixed mechanic are disclosed before
@@ -408,8 +464,13 @@ commits its forfeiture instead of restoring an attempt.
 Players may concede the Circuit, but doing so writes an abandonment receipt
 and forfeits only its **unearned** encounter keys and Contract completion.
 Earlier committed XP, rewards, items, currencies, and pity are never rolled back.
-Concede can be proposed only between attempts, with no reserved/active/decided/
-`ack-prepared` battle or pending settlement. Unanimous consent from the frozen
+Concede normally can be proposed only between attempts, with no
+reserved/active/decided/`ack-prepared` battle or pending settlement. A battle
+suspended by EP-D07 after its last committed action is acknowledged is the one
+exception: it may enter the same team-abandonment proposal without resolving,
+replacing, or handing off another action. The exact durable transition into
+that proposal, including how the disconnected member's authority participates,
+remains `[U]` and blocks playable readiness. Unanimous consent from the frozen
 custodian electorate atomically writes the receipt, tombstones every
 participant's remaining key/full-rank outcome, forfeits Contract completion,
 marks every still-inactive personal Overtime pot sourced by a forfeited final as
@@ -447,9 +508,11 @@ team accept a weakness?**
 
 ### 2.1 Build locks and the late Pivot
 
-Until level 70, roster and active Rule Load are locked for all four fights.
-Battle-local Technique charges may reset only at a new battle attempt;
-equipment, Forms, and behaviour affixes cannot be swapped between fights.
+Format, roster size, and participating `combatantId` records are locked for the
+entire Circuit at every level. Until level 70, active Rule Load is also locked
+without a Pivot for all four fights. Battle-local Technique charges may reset
+only at a new battle attempt; equipment, Forms, and behaviour affixes cannot be
+swapped between fights.
 
 At level 70, each combatant may declare two reserve Rule Load effects. Once per
 Circuit, after fight two, the team may spend one **Pivot** to swap exactly one
@@ -457,7 +520,8 @@ active effect with one reserve effect. Later exact recipes remain hidden;
 players know only the route doctrine family.
 
 The Pivot is a controlled adaptation decision, not a free respec. Full
-respecification occurs only between Circuits.
+respecification and any format/roster change occur only between Circuits. A
+Pivot never changes roster size, seat occupant, or controller authority.
 
 ### 2.2 Failure and assistance
 
@@ -490,8 +554,10 @@ Campaign authority belongs to persistent campaign members, not the host
 process, current seat controller, or number of combatants one person happens
 to custodize.
 
-- Each active `custodianMemberId` receives one ballot, even when that member
-  custodizes several hot-seat combatants.
+- In the first playable version, each allied seat has one distinct connected
+  `custodianMemberId` and human controller, and each such member receives one
+  ballot. Hot-seat or one-human/multiple-seat custody is a future unapproved
+  variant. If later approved, it cannot manufacture extra ballots.
 - Route/Contract selection uses a persisted ranked ballot over all available
   offers (three in full design, two in the MVP). Lowest total rank wins; ties
   choose the lower-debt offer, then the
@@ -502,15 +568,22 @@ to custodize.
   Conceding a paid/Recovery Circuit, risking an Overtime pot, and restarting
   Recovery require unanimous consent from that frozen set.
   Timeout, absence, or disconnect records a deterministic “no”; it never
-  shrinks the electorate or spends the shared choice.
-- Controller reassignment during battle does not create a ballot or change a
-  saved ballot.
+  shrinks the electorate or spends the shared choice. The suspended-attempt
+  abandonment exception introduced by EP-D07 still needs an exact liveness
+  rule for the disconnected authority; AI or another member cannot silently
+  supply its consent.
+- First-playable allied controller reassignment is illegal. Authenticated
+  reconnect restores the same member/controller authority to the same seat and
+  does not create a ballot or change a saved ballot.
 - Every ballot, timeout default, and resolution is persisted before the next
   battle or shared mutation.
 
-Test 1v1/2v2/3v3, two-member ties, three-member majorities, hot-seat custody,
-disconnect, reconnect, and controller handoff. Reject the protocol if the host
-can override another member or one silent client can spend a shared resource.
+Test headless 1v1/2v2/3v3 authority projection, two-member ties, three-member
+majorities, disconnect, pause, authenticated same-seat reconnect, and
+abandonment liveness. The playable 2v2 proposal must additionally prove two
+distinct connected humans and reject allied AI, empty seats, duplicate allied
+authority, and controller takeover. Reject the protocol if the host can
+override another member or one silent client can spend a shared resource.
 
 ### 2.4 Optional bounded variants
 
@@ -1525,14 +1598,18 @@ is in campaign custody and has no combatant owner until an atomic claim.
 personally owned automatic Trophy/source award waiting outside vault capacity for
 its custodian to claim.
 
-Controller reassignment never changes ownership or custody. A hot-seat member
-may legitimately custodize multiple combatants. A temporary AI or host cannot
-claim a disconnected member's offer; it remains pending.
+The generic resolver can reassign a controller without changing ownership or
+custody, but the first playable admission layer forbids allied reassignment.
+Each participating allied combatant instead has one distinct connected human
+member/controller. A disconnected member's offer remains pending; neither a
+host, another member, nor AI may claim it. Hot-seat/multi-seat custody is a
+future unapproved variant. [V/A; accepted EP-D07]
 
 The full design globally caps a campaign at three persistent allied
 `combatantId` records and three persistent `memberId` authorities, matching the
-3v3 scope. Custodian reassignment may move authority among those records, and an
-ephemeral AI fill adds neither; adding a fourth persistent record is rejected.
+3v3 scope. In accepted first-playable scope, those identities map one-to-one for
+the participating roster; no ephemeral allied fill or custody reassignment may
+satisfy a missing human seat. Adding a fourth persistent record is rejected.
 Permanent roster replacement/deletion is outside this design until it has an
 explicit inventory/cooldown/Epoch migration, so the size bound never assumes an
 unbounded bench hidden behind per-combatant caps.
@@ -1559,11 +1636,12 @@ The reward plan permits at most one automatic bound award per combatant in a
 Circuit. One locked four-fight Circuit can then create at most four offers plus
 that award without blocking settlement. If its
 custodian is absent at the next boundary, the combatant is benched without
-changing custody, its bounded escrows remain unchanged, and an ephemeral AI
-fill may occupy the seat without rewards. This lets the team continue without
-confiscating an absent member's items and closes overflow without blocking a
-grant. Bulk salvage requires one explicit or pre-authorized
-confirmation.
+changing custody and its bounded escrows remain unchanged. First-playable
+readiness rejects a roster that lacks its required distinct connected human;
+an ephemeral AI cannot occupy that allied seat. If absence begins during a
+locked Circuit, EP-D07's action-boundary suspension applies. Whether other
+members may undertake a separate Circuit while one is suspended is not
+selected. Bulk salvage requires one explicit or pre-authorized confirmation.
 
 Salvaging a two-candidate offer grants exactly one item's listed salvage value,
 not both candidates' value.
@@ -1576,10 +1654,10 @@ not both candidates' value.
   prepared `xpDelta` and zero or one non-`none` payload.
 - A knocked-out winner still gets that outcome. A no-cache result commits
   automatic Marks; only a successful cache creates a pending item offer.
-- A stable campaign AI combatant owns progression normally under its assigned
-  custodian.
-- A truly ephemeral `aiFillSource` receives no persistent reward outcome; its missing
-  share disappears rather than being redirected to a carry.
+- Every first-playable allied recipient is a persistent combatant controlled by
+  its distinct connected human custodian. Opponent AI receives no campaign
+  progression. Stable allied AI and ephemeral allied fill are future
+  unapproved variants, so the MVP has no reward rule for either.
 - No other controller can choose a player's candidate.
 - A disconnect leaves the offer pending.
 
@@ -1672,8 +1750,9 @@ Progression gates are personal even though route selection is shared:
   combatant simply brings its lower personal career/stat budget; post-cap all
   challenge tiers keep tier-50 vertical stats and use the applicable shared
   Charter assignment;
-- only participating stable roster combatants receive reward outcomes; bench “mules”
-  and ephemeral fills receive nothing;
+- only participating, persistent, distinctly human-controlled allied
+  combatants receive reward outcomes; bench combatants receive nothing, and an
+  allied AI/ephemeral fill is illegal in the first playable roster;
 - milestone/blueprint credit records each eligible combatant separately.
 
 This permits a veteran to help a newer ally while suppressing raw stats,
@@ -2042,9 +2121,11 @@ or bare combatant: `member:<custodianMemberId>` signs personal choices and
 mutations. A member operation must use exactly `lastApplied + 1`; retry reuses
 the same sequence, operation ID, and payload hash. A gap, old sequence, or same
 ID/sequence with different payload is rejected. The campaign allocator reserves
-its next system sequence in the same transaction as the mutation. One custodian
-controlling several combatants still has one member namespace; expected entity
-versions prevent cross-combatant confusion.
+its next system sequence in the same transaction as the mutation. A future
+approved multi-seat variant would still give one custodian one member namespace;
+expected entity versions would prevent cross-combatant confusion. EP-D07's
+first-playable scope instead requires one distinct connected human member per
+participating allied combatant.
 
 A two-party trade is three idempotent records: the proposer consumes its member
 sequence for a versioned offer hash, the recipient consumes its own member
@@ -2052,7 +2133,10 @@ sequence for that exact acceptance hash, and one `system:campaign` transaction
 verifies both live consents/entity versions before moving the item and closing
 both intents. Cancellation is another sequenced consent and cannot race a
 successful finalization. Controller/AI handoff can submit battle commands but
-can never allocate either custodian's campaign-mutation sequence.
+can never allocate either custodian's campaign-mutation sequence in the generic
+engine model. First-playable allied handoff/takeover is nevertheless rejected;
+only opponent AI and the original allied human authority may submit battle
+commands there.
 
 The completion token alone is not a durable battle identity because two
 different encounters can have the same teams and result. Old, duplicate,
@@ -2173,7 +2257,7 @@ existing semantics; it does not mean the campaign itself is vanilla.
 | Frontier paid/clear eligibility | Campaign challenge/reward state; no classic combat change. | Hold a tier, farm fresh keys/Marks/pity, or clear-only/carry far ahead then claim high-tier rewards. | Initialize one four-key set; separate grant from clear; closed slots never reopen; only paid grants mutate reward channels/Trophy source; cap each personal reward budget to career tier; either frozen final creates at most one next set. Reject hold/farm/skip/carry policies. |
 | Four-fight Circuit and build lock | Campaign state/UI; classic-compatible only for existing actions. | Find one universal kit or Concede until a better fallback appears. | Scout/foil/mixed/final grammar, fixed eligibility keys, and the same precommitted Recovery recipes/source credit after every Concede; reject if removing the lock leaves the same policy or repeated Concede changes route/source odds. |
 | Loss log/Training Assistance | Campaign reward/recipe state/UI; selected boss modules may use designed semantics. | Scout a fixed RNG branch, exploit a private forecast, preserve two sibling keys, or deliberately fail into an easier farm. | Exact active-attempt restore plus the selected EP-A02 Rematch transition, information-parity and white-box policy tests, no voluntary restart, and atomic same-key Assistance delta after three boss losses; reject if seed inspection, intentional loss, or padding creates a material private advantage. |
-| Shared-decision protocol | Campaign member/ballot state/UI; no combat-rule change. | Host chooses everything, hot-seat fighters multiply votes, or one controller destroys allied keys with Concede. | One vote per custodian, ranked route ballot, unanimous frozen electorate for spend/risk/Concede/Recovery restart, timeout=no, and atomic forfeiture; test ties/disconnect/handoff/crash. |
+| Shared-decision protocol | Campaign member/ballot state/UI; no combat-rule change. | Host chooses everything, duplicate authorities multiply votes, or one controller destroys allied keys with Concede. | One vote per distinct connected first-playable custodian, ranked route ballot, unanimous frozen electorate for spend/risk/Concede/Recovery restart, timeout=no, and atomic forfeiture; test ties/disconnect/pause/reconnect/crash and the suspended-attempt abandonment exception. |
 | Champion Gauntlet/Overtime variants | Campaign schedule/reward; modifiers/Laws use their selected rule set. | Cool a high-tier run with allies/Assistance, strand a completed roster behind a grant-only cooldown, redirect completed-player gold, or reload to protect a lost pot. | Freeze entry tier/roster and decrement only on three same-roster, same-or-higher-tier full-rank non-Assistance paid final receipts that consume every reward/record key; no Gauntlet Overtime; typed reward-key gold/record versus record-key record-only pots and atomic risk receipts; reject dominant rotation/risk/cash-out. |
 | Route offers | Campaign generator/save/UI. | Reload until the best route appears. | Persist all offers before display; 100 reloads must be byte-identical. |
 | Rule Load | Loadout validator plus designed effects. | Spend all Load on one multiplicative package. | Family caps, one 3-point identity, shared team constraints, exhaustive combination graph; reject strict action/build dominance. |
@@ -2196,14 +2280,14 @@ existing semantics; it does not mean the campaign itself is vanilla.
 | Procedural champions | Campaign generator plus designed modifier catalog. | Affix soup, hidden immunity, or stat-check. | One signature/one liability, fixed module budget, exclusions, two viable families, preview; reject unreadable or no-counter recipes. |
 | Persistent rivals | Campaign state; designed AI only if memory changes policy. | Sandbag, win once in a fake kit, or create runaway exact mirroring. | A remembered tag must appear in two of the last three victories, with one replaceable broad counter and fixed ±15% budget; adversarial loss and tag-spoof victory policies must not improve later win rate or progression. |
 | Milestone bosses | Authored content; phases/signatures/AI are designed. | Mandatory resistance, hundreds-turn attrition, or hidden extra turns. | Early preview, equal seats, no extra turns/spawns, at least two build families, bounded assistance and action-count gates. |
-| Personal reward/record outcomes | Campaign generator/state/UI and durable settlement. | Last-hit funnel, host theft, completion disguises filler power, disconnect loss, reload reroll, or completion rewriting a displayed set. | One precommitted item-or-Marks outcome per grant-eligible combatant; one typed record fact per record key; at most one pinned reward-set grandfather; custodian escrow and knockout/handoff/disconnect/crash/reload tests. |
+| Personal reward/record outcomes | Campaign generator/state/UI and durable settlement. | Last-hit funnel, host theft, completion disguises filler power, disconnect loss, reload reroll, or completion rewriting a displayed set. | One precommitted item-or-Marks outcome per grant-eligible combatant; one typed record fact per record key; at most one pinned reward-set grandfather; custodian escrow and knockout/disconnect/pause/reconnect/crash/reload tests. |
 | Rarity as behaviour complexity | Designed rules for affixes; campaign loot/state/UI. | Legendary always best; item power becomes scalar again. | Same chassis budget, Rule Load cost, burden, one 3-point identity; reject if rarity alone orders all choices. |
 | Hunt/off-axis candidates | Campaign offer state/UI. | Target the published best-in-slot kit every run. | Four-fight lock, one targeted and one off-axis candidate, active-target limit, build-frontier simulation. |
 | Duplicate suppression and pity | Campaign state/generator. | Loss/reload advances pity, or ledger churn mints value. | Eligible-win cache grants only, persisted plan, bounded ledgers, no abandonment compensation; deterministic bad-luck-tail tests. |
 | Forge/Enchant | Campaign state/UI; novel effects use designed rules. | Deterministic crafting makes drops irrelevant or creates perfect counter swaps. | Discovery/source gates, 6–48 Mark costs, between-Circuit lock, Rule Load; direct same-rarity general throughput must exceed 16/28/48-Mark exact-copy throughput under stationary pity. |
 | Legendary evolution/retirement | Campaign item state/migration. | Permanent trophy becomes BIS and deletes future loot. | Immutable authored chassis ceiling, owner clear/career/global projection caps, one identity limit, burden, lateral Forms, retirement to blueprint/Marks; reject permanent additive legacy stats. |
 | Charisma-independent Armory economy | Designed campaign economy, not classic parity. | Pure Charisma becomes the universal combat-acquisition build. | Fixed tier prices and Forge costs; test acquisition rate across stats. |
-| Per-combatant inventory/custody | Canonical campaign state/save/UI. | Controller steals gear, a fourth persistent bench makes state unbounded, Trophy overflows, or absence deadlocks everyone. | Global three-member/combatant cap; separate identities; zero-pending readiness reserves four offers plus one bound award; one automatic award/Circuit and rewardless AI fill; handoff/disconnect conservation tests. |
+| Per-combatant inventory/custody | Canonical campaign state/save/UI. | Controller steals gear, a fourth persistent bench makes state unbounded, Trophy overflows, or absence deadlocks everyone. | Global three-member/combatant cap; separate identities; zero-pending readiness reserves four offers plus one bound award; one automatic award/Circuit; first-playable absence rejects readiness or pauses the locked Circuit, with no allied fill or takeover; reconnect/disconnect conservation tests. |
 | Item binding and locker/trade | Campaign state/UI and atomic persistence. | Funnel guarantees to one carry, clear-only launders career caps, or a consent retry duplicates on disconnect. | Explicit item states; recipient clear+career+rarity/source gates and `min(chassisCeiling, clear, career, 50)` projection while origin remains provenance; two member-sequenced consents plus system finalize; `A→B→A` conservation/concentration caps. |
 | Mixed-progression party | Campaign gating/normalization state; no new combat formula if authored as loadout inputs. | Veteran power-levels a mule or farms a low ally's easy challenge tier. | Team challenge tier uses the minimum next unlock, veteran stats/Load clamp down, rewards stay personal/frontier-only, and bench gets none; enumerate every roster-level mix. |
 | Shared Trophy blueprint/Concord prototype | Campaign final-receipt ledger/state/UI; embedded effects use designed rules. | Personal grant facts overcount the source, Chain preserves Relay through arbitrary fillers, an automatic copy overflows, or the 3-Load Trophy is worse than its components. | Increment once per unique paid final-attempt receipt; team discovery plus personal bound-award escrow; exact Relay/Pursuit bases with Chain permitted only across an immediately next Pursuit Charge into immediately next Bash; no extra action/proc/re-arm; frees the carried slot for the 1-Load Approach Kit while the pair fills the four-Load cap. Compare against separate components and reject stored-marker or dominated packages. |
@@ -2283,7 +2367,7 @@ not claim current balance.
   personal reward outcome per `grantEligible` win. Automatic Marks require no choice;
   its custodian alone resolves a successful-cache item offer.
 - Propose Concede after 0/1/2/3 wins and Recovery restart with unanimous yes,
-  one no, timeout, disconnect, controller handoff, and a crash at every write.
+  one no, timeout, disconnect/pause/reconnect, and a crash at every write.
   Only unanimous frozen-custodian consent applies the all-or-nothing
   forfeiture/bind/restart receipt; no controller or partial write destroys an
   ally's key.
@@ -2305,7 +2389,8 @@ not claim current balance.
   than silently reinterpreted.
 - Starting from one byte-identical attempt-start snapshot, combat RNG state, and command
   sequence, perturb route, Mastery, opponent, reward, presentation order,
-  controller handoff, and wall-clock inputs independently. Combat events,
+  connection loss/reconnect at action boundaries, and wall-clock inputs
+  independently. Combat events,
   outcome, and next-draw-relevant combat RNG state must remain byte-identical; each noncombat
   perturbation may advance only its declared stream. Concede/Recovery cannot
   alter a level-keyed Mastery offer. Rematch/retry behavior follows the selected
@@ -2318,9 +2403,10 @@ not claim current balance.
   the approved tolerance; if forecasts are intended gameplay, the UI must expose
   byte-identical information. Attempt count/prior result may enter RNG only if
   EP-A02 selects and specifies persisted post-loss seed evolution.
-- Attempting to substitute a bench `combatantId`, active item hash, or Rule Load
-  after Circuit lock is rejected without mutation. AI controller handoff for a
-  locked combatant remains legal and changes none of those hashes.
+- Attempting to substitute a bench `combatantId`, active item hash, Rule Load,
+  allied AI controller, or duplicate human authority after Circuit lock is
+  rejected without mutation. Reconnect restores the original controller/member
+  to its original locked seat and changes none of those hashes.
 - Across reward, equip, unequip, locker, trade, forge, salvage, disconnect,
   and reload: `before + created - explicitSinks == after`.
 - For an eligible unbound item, `A -> B -> A` preserves item ID, origin,
@@ -2344,15 +2430,18 @@ not claim current balance.
   bytes enter repair/error and never grant. Backup/migration preserves the blob;
   the receipt transaction clears it exactly once.
 - Replay claims, transfers, and sinks both inside and beyond the 32-receipt
-  detail window. Exercise `member:<id>` and `system:campaign` namespaces, one
-  custodian over multiple combatants, payload-changing retry, gaps, and a
-  propose/accept/cancel/finalize trade race. Actor high-water marks, consent
-  hashes, and entity versions must reject the old/conflicting mutation without
-  growing an unbounded deduplication set.
+  detail window. Exercise `member:<id>` and `system:campaign` namespaces,
+  payload-changing retry, gaps, and a propose/accept/cancel/finalize trade race.
+  Actor high-water marks, consent hashes, and entity versions must reject the
+  old/conflicting mutation without growing an unbounded deduplication set. A
+  separately labelled future-variant compatibility fixture may give one
+  custodian multiple nonparticipating combatants, but that mapping must fail
+  first-playable roster admission and is not an approved multi-seat feature.
 - Leave one custodian disconnected indefinitely with four pending offers. The
-  offers and ownership remain unchanged while the combatant is benched and the
-  other members can start and settle further Circuits using a rewardless AI
-  fill.
+  offers and ownership remain unchanged, first-playable readiness rejects a new
+  roster needing that member, and an already locked Circuit remains durably
+  paused. No allied AI fill, controller takeover, or reward redirection occurs.
+  Whether the remaining members may begin an unrelated Circuit is still `[U]`.
 - Readiness with even one pending offer or bound award is rejected without
   mutation; readiness from zero reserves four offer records plus one bound-award
   record. Four cache outcomes and one automatic Trophy fill exactly those five
@@ -2558,6 +2647,7 @@ that candidate classic observations are promoted:
 | Personal inventory/custody/locker | Reads frozen equipped effects. | None. | Ownership/custody state machine. | Atomic transfers/migration. | Per-member Armory/consent. | Large. |
 | Rivals | Only if memory changes AI policy. | None. | Bounded rival recipe/memory. | Versioned summaries. | Disclosed memory/liability. | Medium-to-large. |
 | Battle/settlement durability | None. | Keep gate; add per-action checkpoint, exact-state load, and pre-ack rehydration. | Attempt-start/pre-ack snapshots, command/events, result/receipts/keys/pots. | Atomic active-battle store plus campaign journal and pinned-version recovery. | Resume/pending/error states. | Very large and prerequisite. |
+| Human session/pause/reconnect | Opponent AI keeps ordinary rule semantics; no allied AI fallback. | Freeze allied seat authority; stop after an acknowledged committed action. | Format, roster, member/controller binding, suspension boundary, reconnect identity. | Durable pause and abandonment transition. | Presence, paused/reconnect/error states. | Large, newly required by EP-D07 before a playable team proof. |
 | Rule/generator provenance | Contract-v2 descriptor with validated `designVersion`. | Project/hash ID+contract+design triple. | Separate generator/definition IDs. | Every persistent product and migration. | Always visible. | Small code, blocking and cross-cutting. |
 | Launcher entry | None. | None. | None. | None. | Fixed launcher registry. | Separate integration. |
 
@@ -2567,7 +2657,7 @@ equipment/status state, or presentation. Headless and playable proofs have
 different final gates. The following is a **future dependency order**, not
 implementation authorization:
 
-1. accept each of the six product decisions in §15 and EP-A01–EP-A03, or
+1. accept each of the seven product decisions in §15 and EP-A01–EP-A03, or
    supersede it with a fully normative, explicitly accepted replacement;
    rejection/open revision remains blocking. Complete R-04–R-06 before their
    owning slices;
@@ -2585,10 +2675,13 @@ implementation authorization:
 5. implement the complete `endless-v0` MVP rule surface—not only its eight loot
    effects—and its loadout validator;
 6. implement headless Circuit/opponent/reward generation and adversarial tests;
-7. add per-action animation acknowledgement, then the two-member
-   route/Armory/reward UI for a safely sequenced playable proof;
-8. expand content, then add rivals, locker/trade, and full 3v3 presentation;
-9. consider launcher exposure only after the headless/UI slice is accepted.
+7. add per-action animation acknowledgement plus the minimum genuine
+   two-human admission, command-authority, durable pause, authenticated
+   same-seat reconnect, and abandonment protocol required by EP-D07;
+8. add the two-member route/Armory/reward UI for a safely sequenced playable
+   proof;
+9. expand content, then add rivals, locker/trade, and full 3v3 presentation;
+10. consider launcher exposure only after the headless/UI slice is accepted.
 
 ### 13.1 Cheapest: campaign/content over existing semantics
 
@@ -2696,8 +2789,10 @@ prototyping the headless system. [A]
 ## 14. Minimum viable slice
 
 A 1v1 scalar ladder does not demonstrate meaningful endless progression. The
-smallest credible slice is a deterministic **2v2, four-fight Contract loop**
-that can generate another Circuit indefinitely from a small authored catalog.
+pending EP-D06 proposal says the smallest credible slice is a deterministic
+**2v2, four-fight Contract loop** that can generate another Circuit indefinitely
+from a small authored catalog. EP-D07 is already accepted and governs its
+participants if D06 is later accepted; it does not itself close D06.
 
 Build:
 
@@ -2713,8 +2808,11 @@ Build:
    applies `115/100` gold the same way, and grants one extra final Mark. No
    fractional Mark or floating-point multiplier is stored, and the MVP never
    combines debts;
-4. two human combatants with stable personal inventories, eight reserve slots
-   each, and independent custody/reward decisions;
+4. two persistent allied combatants, each bound to a different connected human
+   member/controller, with stable personal inventories, eight reserve slots
+   each, and independent custody/reward decisions. The admission layer rejects
+   an empty allied seat, allied AI, one human authority in both seats, or
+   controller takeover;
 5. three item families: melee weapon, shield, and spell/Technique item. The
    mapped six carried positions are a hard active-slot cap: every active
    spell/Technique item occupies one even at 0 Load. The comparator is the
@@ -2767,11 +2865,14 @@ Build:
    on a Tempered or two-minor Inscribed item without changing rarity or Load;
 10. sidecar v1, separate route/Mastery/opponent/reward/combat RNG, one prepared
     Circuit envelope, idempotent attempt receipts, `grantEligible` grants, and
-    claims;
+    claims. The active envelope also persists format, frozen roster/seat
+    authority, action-boundary suspension, and exact same-seat reconnect state;
 11. minimal doctrine/Contract preview, two personal Armory screens, reward
     choice, affix explanation, and provenance display;
-12. headless 1v1/2v2/3v3 property tests, with 2v2 as the playable MVP and
-    controller handoff/AI-finish coverage.
+12. headless 1v1/2v2/3v3 property tests, including one persistent gladiator's
+    cross-format identity, with 2v2 as the pending playable-MVP proposal; its
+    admission tests require two distinct connected humans and reject allied AI,
+    duplicate authority, takeover, and action advancement while disconnected.
 
 The MVP's eight-effect catalog is concrete enough to specify the headless
 contract; all numbers remain tuning hypotheses `[A]`:
@@ -2860,7 +2961,9 @@ MVP acceptance:
   cell produces candidate A from the frozen catalog without retry, rarity
   downgrade, or off-family substitution;
 - both players receive and independently resolve personal rewards;
-- controller reassignment changes neither ownership nor progression;
+- allied controller reassignment is rejected; action-boundary disconnect and
+  authenticated same-seat reconnect change neither ownership, progression,
+  combat state, nor the already-committed action's exactly-once result;
 - crash-injected acknowledged losses and Practice battles write one attempt
   receipt and zero grant/clear; a paid win writes one attempt receipt and one
   grant; a clear-only final writes one receipt, zero grant, and one next-frontier
@@ -2881,7 +2984,11 @@ Defer from the MVP:
 - generalized crafting or multiple currencies;
 - persistent rivals;
 - procedural skills or rules;
-- network transport;
+- wide-area matchmaking, dedicated servers, and public lobbies; the minimum
+  genuine two-human session/presence, command-authority, pause, and reconnect
+  transport required by EP-D07 is not deferred;
+- hot-seat or one-human multi-seat parties, allied AI companions/fill, and
+  opt-in or automatic AI takeover;
 - seasons, dailies, leaderboards, or auction house;
 - full 3v3 presentation;
 - launcher installation and original-game assets.
@@ -2926,15 +3033,18 @@ power remains bounded.
 - `[U]` whether the mapped shield/ranged interaction is confirmed in a future
   promoted golden;
 - `[U]` acceptable local UI density for simultaneous 2v2/3v3 Armories;
+- `[U]` whether the minimum distinct-human session is local multi-input or
+  remote, plus its presence/authentication, disconnect detection, durable
+  pause, same-seat reconnect, and abandonment-liveness protocol;
 - `[U]` actual serialized save sizes and atomic-storage mechanism;
 - `[U]` balance of every proposed module and numeric threshold.
 
 ### Gate before code
 
 Do not implement the full system directly from this document. Retain EP-D01's
-accepted replacement, then accept each remaining product decision or supersede
-it with a fully normative, explicitly accepted replacement; rejection or an
-open revision remains blocking:
+accepted replacement and EP-D07's accepted rule, then accept each remaining
+product decision or supersede it with a fully normative, explicitly accepted
+replacement; rejection or an open revision remains blocking:
 
 1. **accepted replacement:** ordinary vertical power ends at a versioned
    campaign ceiling aligned with the Emperor; only a finite behaviour-led
@@ -2948,6 +3058,12 @@ open revision remains blocking:
    are typed records and only one already prepared reward set may be
    grandfathered;
 6. the first playable proof is 2v2 and uses a separate designed rule set.
+7. **accepted:** a persistent gladiator is mode-neutral across 1v1/2v2/3v3;
+   format and roster lock per Circuit; each first-playable allied seat requires
+   a distinct connected human; allied AI fill, multi-seat human control, and AI
+   takeover are excluded; a committed action finishes before disconnect pauses
+   at the next action boundary for same-seat reconnect or the established
+   team-abandonment path.
 
 Then accept EP-A01–EP-A03 (or fully normative, explicitly accepted
 replacements) and close readiness R-04–R-06 plus every cross-layer exit gate in

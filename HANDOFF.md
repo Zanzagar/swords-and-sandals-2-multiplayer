@@ -1,5 +1,31 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-03 Endless owner-decision update — EP-D07
+
+EP-D07 is closed through Zanzagar's explicit `Accepted` response to the
+complete replay. A persistent gladiator is mode-neutral across 1v1, 2v2, and
+3v3; format and roster lock per Circuit without resetting Bound Soul, levels,
+stats, equipment, Legendary Lineages, or personal Tactics. Every allied seat in
+the first playable version requires a distinct connected human. Allied AI fill,
+one-human multi-seat control, and AI takeover are excluded. A recognized
+disconnect finishes an already-committed action exactly once and then pauses at
+the next action boundary for same-seat reconnect or the established
+team-abandonment path.
+
+The authoritative wording and its `[V]/[U]` boundary are in
+[`docs/design/endless-progression-decisions.md`](docs/design/endless-progression-decisions.md#ep-d07--mode-neutral-gladiators-and-human-only-allied-mvp).
+The acceptance makes a minimum genuine two-human session, durable pause,
+authenticated reconnect, and abandonment-liveness protocol new playable
+blockers. It does not remove the generic resolver's AI/controller capabilities,
+promise later companion/hot-seat modes, or authorize implementation.
+
+EP-D06 remains pending: the accepted EP-D07 replay did not include D06's
+separate choice of deterministic 2v2 under designed rules, so that constraint
+was not silently smuggled into this acceptance. EP-D02–EP-D06 and EP-A01–EP-A03
+remain open. Resume through the newest dated handoff and the repo-local
+`$ss2-progression-design` skill; do not reopen EP-D07 without an explicit
+replacement decision.
+
 ## 2026-09-03 Endless owner-decision update
 
 EP-D01 is closed through Zanzagar's explicitly accepted replacement. Ordinary
@@ -11,9 +37,10 @@ and a bare counter or Chronicle entry cannot satisfy the continuing-objective
 requirement. The authoritative nine-clause wording is in
 [`docs/design/endless-progression-decisions.md`](docs/design/endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits).
 
-EP-D02–EP-D06 and EP-A01–EP-A03 remain pending, and implementation remains
-blocked. Resume through the newest dated progression handoff and discuss EP-D02
-one owner-guided decision at a time.
+EP-D07 has since closed as recorded in the newer section above. EP-D02–EP-D06
+and EP-A01–EP-A03 remain pending, and implementation remains blocked. Resume
+through the newest dated progression handoff and discuss one owner-guided
+frontier at a time.
 
 ## 2026-08-31 Endless readiness update
 
@@ -238,8 +265,8 @@ on `fightMode` (the fixtures carry it now).
 PR #1 merged the quarantined Endless design into `main` at `e3f14aa`. Follow-up
 design-readiness work continues on `design/endless-progression-readiness`; the
 merged proposal carries the Arena Circuit progression, loot, inventory,
-opponent, and settlement design. EP-D01 now has an accepted replacement;
-EP-D02–EP-D06 remain unapproved in the
+opponent, and settlement design. EP-D01 and EP-D07 now have accepted
+dispositions; EP-D02–EP-D06 remain unapproved in the
 [owner decision record](docs/design/endless-progression-decisions.md), and the
 [MVP readiness record](docs/design/endless-mvp-readiness.md) keeps
 implementation blocked on its model and contract gates.
