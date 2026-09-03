@@ -5,9 +5,9 @@
 > or shape what parity capture tries to prove.
 
 **Status:** specification and review plan only. **Not implementation-ready.**
-The six owner decisions are pending, three P0 model contradictions and three P0
-specification blockers remain open, and several cross-layer contracts do not
-exist in source. Nothing here
+EP-D01 has an accepted replacement; five product decisions, EP-A01–EP-A03,
+three P0 model contradictions, three P0 specification blockers, and several
+cross-layer contracts remain open. Nothing here
 authorizes `endless-v0`, launcher work, runtime capture, installed-game access,
 or changes to classic rules/evidence.
 
@@ -20,7 +20,7 @@ honestly start?* It is not a second feature design.
 
 | Gate | Current state | Required disposition |
 | --- | --- | --- |
-| Product constraints EP-D01–EP-D06 | `pending` | Owner accepts each or supplies a fully normative, explicitly accepted replacement in the [decision record](endless-progression-decisions.md); rejection/open revision remains blocking. |
+| Product constraints EP-D01–EP-D06 | `1 of 6 closed` | EP-D01 has an accepted replacement. EP-D02–EP-D06 still require fully normative, explicitly accepted dispositions in the [decision record](endless-progression-decisions.md); rejection/open revision remains blocking. |
 | Pacing scale | **P0 contradiction** | Choose one coherent mapping among career level, frontier tier, Circuit count, vertical tier, and milestone cadence. |
 | Retry/combat RNG | **P0 exploit** | Remove semantic-label/seed shopping without losing reload determinism or classic ordered-tape parity. |
 | Post-completion economy | **P0 deadlock/hoard incentive** | Preserve bounded access to already known sidegrades after catalog completion. |
@@ -58,7 +58,7 @@ contract/provenance specification.
 
 ### R-01 — career pace, challenge pace, and milestone cadence disagree
 
-The proposal advances frontier challenge tier exactly once per cleared Circuit
+The pre-EP-D01 proposal advances frontier challenge tier exactly once per cleared Circuit
 but also queues milestones every 20 career levels and targets those milestones
 at roughly every fifth Circuit. Let `g` be average career levels gained per
 complete progression Circuit. The pacing target implies:
@@ -79,7 +79,12 @@ Conversely, reaching challenge tier 50 no later than career level 50 requires
 roughly `g <= 1`. Then 20-level milestones are about 20 Circuits apart, not
 five. No single fixed `g` satisfies both claims. [D]
 
-**Small coherent repairs to decide between:**
+The accepted EP-D01 replacement removes tier 50 as a permanent product promise,
+but does not select the versioned campaign-ceiling integer or map career,
+frontier, campaign, and Circuit pace. The contradiction therefore remains an
+EP-A01/readiness blocker rather than an open EP-D01 decision.
+
+**Small coherent repairs retained as inputs to EP-A01:**
 
 1. **One career level per cleared Circuit:** preserve one frontier tier per
    Circuit and align vertical career/challenge tiers; revise the “every fifth
@@ -102,16 +107,19 @@ one four-key frontier set awards at most one total career level
 Fights 1–3 may accrue XP, but a level cannot activate early enough to violate
 the invariant; the final may commit the set's one crossing with its clear.
 Record-kind sets use the same aggregate limit. Treat the five-Circuit phrase as
-a failed target, not as a reason to distort challenge or reward tiers. This
-affects EP-D01 and the pacing consequence of EP-D03; it must be owner-reviewed
-rather than silently patched.
+a failed target, not as a reason to distort challenge or reward tiers. EP-D01
+is already closed; this pace and the consequence for EP-D03 must still be
+owner-reviewed under EP-A01 rather than silently patched.
 
 **Gate:** a normative table maps each Circuit outcome to XP, career level,
-career tier, frontier tier, reward-budget tier, milestone queue, and Epoch
-boundary for levels/tiers 1, 20, 40, 50, 60, 80, 100, 101, 125, and 200. No
-transition may increase a reward budget by more tiers than its declared clear.
-At the first level-50 receipt, the next selectable frontier is at least 50;
-from then on, later clear catch-up alone cannot increase a combat projection.
+career tier, frontier tier, reward-budget tier, milestone queue, Emperor
+completion, the versioned campaign vertical ceiling, and postcampaign Pursuit
+activation. It must include every authored system boundary plus levels/tiers 1,
+20, 40, 60, 80, 100, 101, 125, and 200. No transition may increase a reward
+budget by more tiers than its declared clear. At the first ceiling receipt, the
+next selectable frontier must be consistent with that ceiling; from then on,
+later clear catch-up alone cannot increase a raw stat or item-chassis
+projection.
 
 ### R-02 — deterministic semantic labels turn Rematch into an oracle
 
@@ -223,10 +231,11 @@ Concord, Forms, opponent-budget, and Contract-normalization gates cannot run.
 This is P0 even though it is not a contradiction: implementing effects first
 would fit balance to missing foundations.
 
-**Gate:** one versioned integer headless-balance specification covers tier
-1–50 stats/chassis/health/armour/resources, every baseline action, all opponent
-budget dimensions, and explicit rounding. EP-D01 and EP-D02 remain provisional
-until it exists.
+**Gate:** one versioned integer headless-balance specification selects the
+campaign vertical ceiling and covers every tier through it for
+stats/chassis/health/armour/resources, every baseline action, all opponent
+budget dimensions, and explicit rounding. EP-D01 is accepted, but its numeric
+tuning remains unimplemented; EP-D02 remains pending until separately decided.
 
 ### R-05 — Pressure's termination proof omits skipped turns and rounding
 
@@ -543,8 +552,9 @@ may start until every §10 gate is reviewed and the owner then gives the separat
 implementation authorization. Each authorized slice lands separately and must
 leave classic tests green.
 
-1. **Owner record:** decide EP-D01–EP-D06 and select repairs for R-01–R-03.
-   R-04–R-06 specifications remain mandatory before their owning code.
+1. **Owner record:** retain the accepted EP-D01 replacement, decide
+   EP-D02–EP-D06, and select repairs for R-01–R-03. R-04–R-06 specifications
+   remain mandatory before their owning code.
 2. **Normative specifications:** MVP surface appendix, pace/economy tables, RNG
    contract, canonical mechanics schema, transaction/repair protocol.
 3. **Rule contract v2:** explicit classic migration and provenance/hash tests;

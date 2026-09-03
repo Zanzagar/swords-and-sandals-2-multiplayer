@@ -4,8 +4,9 @@
 > candidates, fixtures, or capture hypotheses. Designed mechanics may not select
 > or shape what parity capture tries to prove.
 
-**Status:** owner review required; no decision below is approved by the existence
-of this document. **Implementation remains blocked.**
+**Status:** owner review in progress. EP-D01 has an explicitly accepted
+replacement; EP-D02–EP-D06 and EP-A01–EP-A03 remain pending.
+**Implementation remains blocked.**
 
 This record turns the six gates in the
 [Endless progression system](endless-progression-system.md#gate-before-code)
@@ -47,18 +48,20 @@ readiness plan.
 
 | ID | Decision | Recommendation | Status |
 | --- | --- | --- | --- |
-| EP-D01 | End vertical chassis/stat power at career tier 50 | Accept only with a career/frontier synchronization addendum and authored budget | `pending` |
+| EP-D01 | End ordinary vertical power at a versioned campaign ceiling, then permit only a finite behaviour-led veteran edge alongside continuing Arena Pursuits | Accepted replacement; exact ceiling, active budget, cadence, catalogs, and balance remain later gates | `revise — accepted replacement` / Zanzagar / 2026-09-03 |
 | EP-D02 | Cap active Rule Load at four per combatant | Accept provisionally, subject to build-frontier tests | `pending` |
 | EP-D03 | Make one Arena Circuit four fights | Accept only as the 2v2 MVP measurement boundary; human timing may revise it | `pending` |
 | EP-D04 | Let rarity change behaviour complexity, not chassis budget | Accept as a permanent identity rule | `pending` |
 | EP-D05 | Use personal precommitted frontier outcomes and typed post-completion records | Accept only with atomic settlement, ordered plan folding, and maintenance entitlement | `pending` |
 | EP-D06 | Make the first playable proof deterministic 2v2 under a separate designed rule set | Accept only after selecting the public deterministic RNG model and separating headless/playable gates | `pending` |
 
-The recommendations are coupled. D01 prevents an infinite scalar gear ladder;
-D04 prevents rarity from reopening it. D02 prices the behavioural breadth that
-replaces scalar growth. D03 determines lock duration and reward cadence. D05
-makes that cadence fair and reload-safe. D06 is the smallest team format that
-can test the resulting co-op choices rather than a solo scalar ladder.
+The decisions are coupled. D01 prevents an infinite scalar gear ladder while
+requiring a finite behaviour-led veteran edge and three continuing Pursuits;
+D04 must prevent rarity from reopening the scalar ladder. D02 prices the
+simultaneously active behavioural breadth, including Ascendancy. D03 determines
+the Circuit commitment window and Pivot timing. D05 makes Pursuit settlement
+fair and reload-safe. D06 is the smallest team format that can test the
+resulting co-op choices rather than a solo scalar ladder.
 
 ### Required model/architecture dispositions
 
@@ -82,61 +85,91 @@ Owner: <name>
 UTC date: YYYY-MM-DD
 ```
 
-## EP-D01 — vertical power ends at career tier 50
+## EP-D01 — finite campaign vertical power and continuing Pursuits
 
-**Canonical decision (exact approval scope):** vertical power ends at career
-tier 50.
+**Disposition:** `revise — accepted replacement`.
 
-**Dependent working interpretation, not separately approved by D01:** career level may continue indefinitely, but ordinary stat
-budget and item-chassis budget use `min(careerLevel, 50)`. After tier 50,
-progression changes options, combinations, opponents, and records rather than
-raising the raw chassis ceiling.
+**Exact accepted replacement:**
 
-**Recommendation:** accept only if EP-A01 separately selects this clean-boundary addendum:
+1. `[A]` Ordinary stats and item-chassis power grow during the main campaign,
+   then stop at a finite, versioned **campaign vertical ceiling**. Tier 50 is
+   not a permanent promise; the exact tier is a tuning parameter aligned with
+   the expected Emperor encounter.
+2. `[A]` Defeating the Emperor unlocks Arena Circuits and postcampaign Arena
+   Pursuits. Wherever practical, their underlying combat vocabulary appears
+   during the campaign so postgame expands familiar systems rather than
+   introducing an unrelated game.
+3. `[A]` Career level may continue indefinitely, but post-ceiling levels cannot
+   create unbounded stats, chassis budgets, active-rule capacity, multipliers,
+   or equivalent disguised scalar growth.
+4. `[A]` A small veteran combat edge may continue through **Ascendancy**, but
+   its simultaneously active power is finite and behavior-led. Its exact
+   shared active budget belongs to EP-D02.
+5. `[A]` **Arena Pursuits** contain three parallel lanes:
 
-```text
-careerLevel <= highestClear + 1
-one four-key frontier set awards at most one total career level
-```
+   - **Ascendancy Pursuit:** permanently learn Lineage Evolutions.
+   - **Frontier Pursuit:** unlock unusual encounters, compositions, challenge
+     routes, and greater risk/reward opportunities.
+   - **Legacy Pursuit:** unlock cosmetics, presentation, titles,
+     history-dependent rewards, and noncombat system access.
 
-The mapped vanilla systems contain
-hard caps and ratio/damage structures that already turn later scalar investment
-into dead, constant, or volatile value. A declared vertical endpoint makes that
-limit legible and leaves room for a finite, testable balance envelope. Fifty is
-an assumption, not a measured vanilla breakpoint.
+   Each combatant selects one primary Pursuit per Circuit. That choice directs
+   progression rewards; it does not disable abilities already earned through
+   another Pursuit.
+6. `[A]` For a Circuit, a combatant may **Ascend** one eligible Legendary,
+   Trophy, Signature, or Keystone. It uses one Core Evolution and one learned
+   Branch Evolution. Additional branches may be permanently learned without
+   increasing simultaneous active capacity.
+7. `[A]` Learned Evolutions permanently build the character, but no early
+   choice permanently destroys access to another branch. The active
+   configuration locks for the Circuit, with at most one narrow in-Circuit
+   Pivot; full reattunement occurs only between Circuits. This prevents
+   opponent-by-opponent counter-respeccing without creating reroll regret.
+8. `[A]` Standard late opponents obey the same bounded raw-power grammar as
+   players and never scale from the currently equipped player snapshot. Rare,
+   clearly disclosed encounters may carry bounded exceptional levels or wild
+   powers, accompanied by exploitable liabilities and proportionally better
+   rewards.
+9. `[A]` Mechanical Ascendancy may eventually reach its active ceiling, but the
+   game may not place all progression lanes into a completed state at one
+   milestone. At least one meaningful strategic, encounter, cosmetic, or
+   system-access objective must remain visible. A bare level counter or
+   Chronicle entry does not satisfy this requirement by itself.
 
-**Alternatives considered:**
+`[U]` Exact ceiling tier, Ascendancy magnitude, Rule Load interaction, Circuit
+length, reward cadence, catalogs, and balance remain later gates. This decision
+does not authorize implementation.
 
-- a rising soft cap reopens exponential or logarithmic treadmill tuning and
-  makes old content either trivial or stat-gated;
-- no vertical career growth removes the ordinary early-game arc;
-- separate higher caps per axis are possible, but are harder to communicate and
-  make item comparison opaque.
+**Parity/seam:** this is Endless campaign, progression, encounter, and loadout
+policy. It may use measured classic formulas only when their entire required
+path is promoted. Every new action, payoff, cap correction, Ascendancy effect,
+or postcampaign state remains behind the separate designed rule set and never
+changes a classic descriptor.
 
-**Parity/seam:** this is Endless campaign and item-generation policy. It may use
-measured classic formulas only when their entire required path is promoted; any
-new action, payoff, cap correction, or status remains behind the separate
-designed rule set. It never changes a classic descriptor.
+**Degenerate strategies invited:** leak a nominally lateral reward into an
+uncapped scalar; accumulate Evolutions that secretly stack outside the active
+budget; freely reattune after seeing each opponent; turn rare encounters into
+undisclosed stat checks; or satisfy continuing progression with an empty number
+or record.
 
-**Degenerate strategy invited:** rush the most efficient vertical axis before
-tier 50, then ignore lateral rewards; or find a post-cap chassis source that
-silently exceeds the ceiling.
+**Required counters and rejection gates:** the future authored specification
+must version and exhaustively enforce the campaign ceiling across every stat,
+generator, drop, Forge path, Evolution, and migration; enumerate Ascendancy
+against the EP-D02 active budget; freeze one Circuit configuration with no more
+than the accepted narrow Pivot; prove standard opponents do not read equipped
+player power; attach a disclosed liability to every exceptional opponent
+package; and demonstrate a meaningful successor objective whenever another
+Pursuit target completes. A Chronicle-only successor fails this gate.
 
-**Required counter and rejection gate:** author one normative tier-50 stat and
-item budget, reject dead offered ranks, include item origin and ceiling tier in
-provenance, and exhaustively validate every generator/Forge path against that
-ceiling. Across the seeded build/opponent grid, at least three build families
-must remain viable and no post-cap offer may be a disguised scalar upgrade.
-Simulate through career level 200 and assert the synchronization invariant plus
-`effectiveTier <= min(careerLevel, selectedChallengeTier, 50)` after every
-transaction. Remove the current “roughly every fifth Circuit” milestone target
-unless challenge advancement is explicitly redesigned.
+**Approval consequence:** EP-D01 is closed as a product decision. The exact
+campaign-ceiling integer and budget, EP-A01 pace mapping, EP-D02 active budget,
+EP-D03 Circuit/Pivot timing, reward catalogs, migrations, and balance tests
+remain blockers. Changing a released ceiling later requires a new design
+version and explicit migration; it does not alter classic data.
 
-**Approval consequence:** authoring the tier-50 budgets becomes a blocker for
-the headless MVP. Changing the cap later changes progression/generator versions
-and requires migration; it does not alter classic data.
-
-**Record:** `pending` — owner/date: —
+**Record:** `revise — accepted replacement` — owner: Zanzagar; UTC date:
+2026-09-03. The owner explicitly replied `EP-D01: accepted as replayed` after
+reviewing the complete nine-clause wording above.
 
 ## EP-D02 — active Rule Load caps at four
 
@@ -146,7 +179,7 @@ and requires migration; it does not alter classic data.
 combatant may equip at most four points of behaviour-bearing effects. Minor
 effects cost one, identities normally cost two, and a three-point Trophy
 package is permitted only where its authored burden and interaction justify
-it. Rule Load never rises after tier 50.
+it. Rule Load never rises after the campaign vertical ceiling.
 
 **Recommendation:** accept provisionally. Four is large enough to express a
 sequence plus coverage but small enough that the proposed two- and three-point

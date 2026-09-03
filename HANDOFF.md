@@ -1,5 +1,20 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-03 Endless owner-decision update
+
+EP-D01 is closed through Zanzagar's explicitly accepted replacement. Ordinary
+stat/item-chassis growth now ends at a finite versioned campaign ceiling aligned
+with the expected Emperor encounter, not a promised tier 50. Postcampaign Arena
+Circuits expose Ascendancy, Frontier, and Legacy Pursuits; Ascendancy may add
+only a finite behaviour-led veteran edge under the later EP-D02 active budget,
+and a bare counter or Chronicle entry cannot satisfy the continuing-objective
+requirement. The authoritative nine-clause wording is in
+[`docs/design/endless-progression-decisions.md`](docs/design/endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits).
+
+EP-D02–EP-D06 and EP-A01–EP-A03 remain pending, and implementation remains
+blocked. Resume through the newest dated progression handoff and discuss EP-D02
+one owner-guided decision at a time.
+
 ## 2026-08-31 Endless readiness update
 
 The docs-only branch `design/endless-progression-readiness` adds the
@@ -8,8 +23,9 @@ The docs-only branch `design/endless-progression-readiness` adds the
 reference-game and SS2 mod-scene research, and red-teams the stable proposal.
 It implements no Endless mechanics and does not authorize implementation.
 
-Before any Endless code, the owner must accept EP-D01–EP-D06 and EP-A01–EP-A03,
-or supersede any of them with a fully normative, explicitly accepted replacement.
+Before any Endless code, retain EP-D01's accepted replacement and accept
+EP-D02–EP-D06 and EP-A01–EP-A03, or supersede any of them with a fully
+normative, explicitly accepted replacement.
 A rejection or open revision remains blocking. The audit also requires complete
 designed combat and Pressure specifications, a JSON/u64 encoding decision, rule-contract
 v2/provenance, canonical active-battle state, collision-resistant durable
@@ -222,9 +238,10 @@ on `fightMode` (the fixtures carry it now).
 PR #1 merged the quarantined Endless design into `main` at `e3f14aa`. Follow-up
 design-readiness work continues on `design/endless-progression-readiness`; the
 merged proposal carries the Arena Circuit progression, loot, inventory,
-opponent, and settlement design, but its six product decisions remain
-unapproved in the [owner decision record](docs/design/endless-progression-decisions.md),
-and the [MVP readiness record](docs/design/endless-mvp-readiness.md) keeps
+opponent, and settlement design. EP-D01 now has an accepted replacement;
+EP-D02–EP-D06 remain unapproved in the
+[owner decision record](docs/design/endless-progression-decisions.md), and the
+[MVP readiness record](docs/design/endless-mvp-readiness.md) keeps
 implementation blocked on its model and contract gates.
 
 **Design must never flow into candidate authoring.** A candidate fitted to a

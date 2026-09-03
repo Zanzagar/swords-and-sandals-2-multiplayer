@@ -4,11 +4,11 @@
 > candidates, fixtures, or promoted evidence. It concerns designed mechanics
 > behind a separate seam.
 
-**Status:** owner pre-read and guided-session worksheet. It is not the
-authoritative decision record, a balance specification, or implementation
-authorization. Answers become durable only after their complete normative
-wording is replayed to the owner, transcribed into the
-[decision record](endless-progression-decisions.md), reviewed, and merged.
+**Status:** owner pre-read and guided-session worksheet. EP-D01 closed through
+an explicitly accepted replacement on 2026-09-03; EP-D02–EP-D06 and
+EP-A01–EP-A03 remain pending. This packet is not the authoritative
+[decision record](endless-progression-decisions.md), a balance specification,
+or implementation authorization.
 
 ## Session protocol and evidence
 
@@ -34,7 +34,7 @@ or code. Implementation requires a later, separate authorization.
 
 | ID | Recommended owner answer | Exact scope | Degeneration and required counter |
 | --- | --- | --- | --- |
-| EP-D01 | `accepted` | Raw stat and item-chassis power ends at designed tier 50. This is not a measured vanilla breakpoint. | Rush one axis or leak a post-cap scalar upgrade; reject dead ranks and validate every tier/generator/Forge path through level 200. |
+| EP-D01 | `closed — accepted replacement` | Campaign scalar/chassis power ends at a finite versioned ceiling aligned with the Emperor; a finite behaviour-led Ascendancy edge and Ascendancy/Frontier/Legacy Pursuits continue afterward. The exact ceiling is not fixed at 50. | Leak an uncapped scalar through Evolutions, perfect-counter reattunement, exceptional-enemy stat checks, or a fake successor counter; enforce the ceiling and active budget, Circuit commitment, disclosed liabilities, and meaningful successor objectives. |
 | EP-D02 | `accepted` | The **sum of active Rule Load** per combatant may not exceed four. This does not approve draft effect costs or unlock levels. | Universal package, free stat sticks, or proc chains; enumerate every legal Load partition, require active linkage/strongest-only stacking, and reject broad dominance. |
 | EP-D03 | `accepted` | Four fights is the first 2v2 measurement boundary, explicitly revisable after interactive timing. It is not permanent for 3v3 or every mode. | Scout/Concede or shortest-route farming; precommit route/rewards, prohibit noncombat rerolls, count scouting, and compare reward per risk/action. |
 | EP-D04 | `accepted` | Within one family/profile/tier, rarity never raises ordinary chassis budget. It may change authored behavior complexity and Load. | Always equip the highest color; assert same-chassis equality and reject higher-rarity strict dominance across the opponent grid. |
@@ -50,14 +50,17 @@ fixture, or evidence claim. Novel combat behavior remains under a separate
 ## Cluster 1 — progression ceiling
 
 The non-authoritative
-[EP-D01 vertical-power option matrix](ep-d01-vertical-power-matrix.md) expands
-the first product choice for owner discussion. It records possibilities and
-tradeoffs, not a disposition.
+[EP-D01 vertical-power option matrix](ep-d01-vertical-power-matrix.md) preserves
+the alternatives and tradeoffs that informed the accepted replacement. The
+complete nine-clause disposition lives only in the
+[decision record](endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits).
 
-### EP-A01 proposed replacement
+### EP-A01 prior proposal — requires revision
 
-Accept EP-D01, EP-D02, and EP-D04 as above, then select this synchronized pace:
-[A/D]
+The following synchronized pace predates the accepted EP-D01 replacement and
+retains a literal tier-50 assumption. It is historical input, not a selectable
+answer, until EP-A01 replaces `50` with the versioned campaign ceiling and
+defines the Emperor/campaign/Circuit transition. [A/D]
 
 ```text
 effective raw stat/item-chassis budget tier
@@ -85,8 +88,8 @@ may raise reward budget by more tiers than the clear it records.
 ### Cluster 1 card
 
 ```text
-EP-D01: accept recommended rule | reject | replace: ...
-EP-A01: accept synchronized pace and post-50 display career | replace: ...
+EP-D01: CLOSED — revise, accepted replacement (Zanzagar, 2026-09-03)
+EP-A01: replace with a complete synchronized campaign-ceiling pace: ...
 EP-D02: accept recommended rule | reject | replace: ...
 EP-D04: accept recommended rule | reject | replace: ...
 ```
@@ -349,14 +352,14 @@ The owner then confirms or corrects that transcription.
 Owner: <name or handle>
 UTC date: YYYY-MM-DD
 
-EP-D01: <accepted/rejected/revise + exact replacement>
+EP-D01: CLOSED — revise, accepted replacement (see authoritative record)
 EP-D02: <accepted/rejected/revise + exact replacement>
 EP-D03: <accepted/rejected/revise + exact replacement>
 EP-D04: <accepted/rejected/revise + exact replacement>
 EP-D05: <accepted/rejected/revise + exact replacement>
 EP-D06: <accepted/rejected/revise + exact replacement>
 
-EP-A01: <accepted or revise + complete pace/post-50 rule>
+EP-A01: <accepted or revise + complete pace/post-ceiling rule>
 EP-A02: <revise + complete information/retry/Recovery contract>
 EP-A03: <revise + complete licence/reconstruction/conservation contract>
 

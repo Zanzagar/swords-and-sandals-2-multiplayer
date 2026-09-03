@@ -13,6 +13,20 @@ and [MVP readiness record](endless-mvp-readiness.md) control whether any slice
 is eligible for separate implementation authorization. Where they flag an open
 gate, this proposal is not implementation-ready.
 
+**Accepted EP-D01 overlay (2026-09-03):** ordinary scalar/chassis progression
+now ends at a finite versioned campaign ceiling aligned with the Emperor, not a
+promised tier 50. Defeating the Emperor unlocks postcampaign Arena Circuits and
+the Ascendancy, Frontier, and Legacy Pursuits. Ascendancy may supply only a
+finite behaviour-led veteran edge under the later EP-D02 active budget, and a
+bare record cannot satisfy the requirement for a continuing meaningful
+objective. The exact nine-clause replacement in the
+[decision record](endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits)
+overrides every literal tier-50 cap, pre-Emperor Circuit chronology, purely
+lateral post-cap claim, or record-only completion fallback still present in
+this older proposal. Those details remain `[U]` until EP-A01 and the affected
+later decisions/specifications reconcile them; they are not implementation
+inputs.
+
 **Research date:** 2026-08-30; readiness audit 2026-08-31.
 
 ## Evidence discipline
@@ -63,16 +77,15 @@ Build a separate, clearly labelled progression mode called **Arena Circuits**.
 It should not pretend that unbounded levels can support unbounded vertical
 power.
 
-1. **End ordinary vertical growth near the known content boundary.** The
-   designed career has fifty finite combat/chassis tiers. Campaign level can
-   continue to 100 and beyond, but raw stat and base-item budgets stop rising
-   at level 50. `[A]` Community sources place the ordinary armour/champion
-   boundary near levels 48–50; the repository does not verify the exact
-   vanilla curve. [Diagnosis](progression-diagnosis.md#18-opponent-difficulty-the-listed-boss-schedule-ends-the-stat-curve-is-unknown)
+1. **End ordinary vertical growth at an authored campaign boundary.** Raw stat
+   and base-item budgets stop at one finite, versioned campaign vertical
+   ceiling aligned with the expected Emperor encounter. Career level may
+   continue afterward. The exact ceiling is not fixed at 50 and remains `[U]`
+   until authored and tested. [Diagnosis](progression-diagnosis.md#18-opponent-difficulty-the-listed-boss-schedule-ends-the-stat-curve-is-unknown)
 2. **Make later power change rules under a hard active budget.** Behavioural
    affixes, Techniques, spell Forms, Signatures, and Keystones all consume the
-   same four-point **Rule Load**. The library can grow; the equipped rules do
-   not grow without bound.
+   same proposed **Rule Load**. The library can grow; simultaneously active
+   power does not grow without bound. The exact budget remains EP-D02.
 3. **Generate opponents from authored, readable modules.** A procedural enemy
    is a tested body plus a doctrine, at most a small number of compatible
    modifiers, and a disclosed liability. Generation composes rules; it never
@@ -90,10 +103,11 @@ power.
    persisted before reveal, combat and campaign RNG are separate, settlement
    is crash-safe and idempotent, and all progression lives in a versioned
    sidecar rather than vanilla save fields.
-7. **Be honest about infinity.** A finite authored grammar can produce long
-   replayability, not literally infinite novelty. When the lateral library is
-   exhausted, further levels award records or cosmetics; they must not present
-   a fake scalar choice as meaningful progression.
+7. **Keep a meaningful successor without faking infinity.** A finite authored
+   grammar cannot promise literally infinite novelty, but no single milestone
+   may complete Ascendancy, Frontier, and Legacy together. At least one
+   strategic, encounter, cosmetic, or system-access objective remains visible;
+   a bare level or Chronicle record is not a sufficient successor.
 
 This is intentionally a **designed-mode** proposal. Existing measured classic
 behaviour remains untouched. The current rule descriptor has only
@@ -107,7 +121,8 @@ an `endless-v0` rule set must remain `runtimeVerified: false`. [V/A]
 These are acceptance requirements, not flavour:
 
 - Active Rule Load never exceeds four per combatant.
-- Base stat and item-chassis budgets never rise after designed career tier 50.
+- Base stat and item-chassis budgets never rise after the versioned campaign
+  vertical ceiling.
 - Opponents never read the current player equipment snapshot to set their raw
   power.
 - No procedural generator creates a new rule; it selects versioned authored
@@ -156,9 +171,10 @@ These are acceptance requirements, not flavour:
 pass 100. It unlocks systems, library options, rivals, and Epoch records.
 
 **Career tier** is the finite vertical budget used by base stats and item
-chassis. It is `min(careerLevel, 50)` in this proposal. The exact stat budget at
-each tier cannot be authored honestly until the player and champion curves are
-measured or deliberately replaced. `[U/A]`
+chassis. Its maximum is the versioned `campaignVerticalCeiling`; the exact
+mapping from display career level and frontier progress belongs to EP-A01. The
+ceiling and each tier's stat budget cannot be authored honestly until the
+player and champion curves are measured or deliberately replaced. `[U/A]`
 
 **Challenge tier** is the canonical term for the disclosed opponent/reward
 tier selected for the next
@@ -166,9 +182,9 @@ Circuit. It is unlocked by clears, not calculated from equipped gear. A player
 may hold or revisit a lower tier, but repeated lower-tier clears cannot be the
 fastest route to higher-tier power.
 
-Challenge tiers after career tier 50 do not create higher raw stat or chassis
-budgets. They select harder authored composition, Contracts, and Charter rules
-within the same vertical cap.
+Challenge tiers after `campaignVerticalCeiling` do not create higher raw stat
+or chassis budgets. They select harder authored composition, Contracts, and
+Charter rules within the same vertical cap.
 
 This separation makes a level 137 gladiator more *experienced and flexible*,
 not automatically several orders of magnitude stronger than a level 100
@@ -502,10 +518,11 @@ Two mod-scene patterns remain optional variants rather than changing the
 four-fight core:
 
 - **Champion Gauntlet:** four disclosed champion recipes replace
-  Scout/Foil/Mixed/Final after level 50. Fixed rewards are calibrated offline
-  against reward per resolved action but never depend on the live action
-  count. Entering—before fight one—atomically starts a three-ordinary-Circuit
-  cooldown, whether the route is cleared, lost, or conceded. The cooldown
+  Scout/Foil/Mixed/Final after the campaign vertical ceiling. Fixed rewards are
+  calibrated offline against reward per resolved action but never depend on
+  the live action count. Entering—before fight one—atomically starts a
+  three-ordinary-Circuit cooldown, whether the route is cleared, lost, or
+  conceded. The cooldown
   record freezes `gauntletRunId`, entry receipt, sorted participating
   `combatantId` and frontier-set IDs, entry challenge tier, and
   `remainingOrdinaryFinalCredits = 3`. It has no unique vertical reward. A
@@ -577,6 +594,15 @@ state fixtures and normalization simulations pass.
 The exact number of fights per level is `[U]`. The table specifies *unlock
 order and player questions*, not a claim about vanilla pacing.
 
+> **Superseded chronology warning:** this table predates the accepted EP-D01
+> replacement. Its literal level-50 cap, early Arena Circuits, level-100
+> completion, and record-only post-completion rows are not normative. EP-A01
+> must rewrite the timeline so the versioned ceiling aligns with the Emperor,
+> postcampaign Arena Circuits/Pursuits unlock on Emperor defeat, campaign play
+> introduces their underlying combat vocabulary, and at least one meaningful
+> Pursuit successor remains. The table is retained only as input to that later
+> decision.
+
 | Career level | New system or cadence | Question introduced |
 | --- | --- | --- |
 | 1–4 | Curated first Circuit; baseline actions, targeting, per-seat control, Standard chassis, and personal post-fight reward outcomes. | “Which action and target answer the visible threat?” |
@@ -602,7 +628,7 @@ not normative until EP-A01 resolves the career/frontier contradiction:
 - A combatant's **frontier challenge tier** is exactly `highestClear + 1`.
   Challenge entry is unlocked by the previous clear, not by career level or
   gear score. Career level gates systems, item rarities, milestone queues, and
-  the finite `min(careerLevel, 50)` vertical budget, but it never blocks entry
+  the finite campaign vertical budget, but it never blocks entry
   to the next cleared-unlocked challenge tier. Thus a zero-XP Recovery clear
   cannot strand a combatant with no eligible source of future XP. The highest
   cleared tier and every lower tier are Practice for that combatant.
@@ -692,7 +718,8 @@ Completion ends this Mastery-offer cadence; it does not itself create a
 records whose optional payload may be cosmetic/title.
 
 The offer can unlock a Technique, Form, blueprint family, or later a pruning
-choice. It never increases Rule Load after level 50. Every tenth level includes
+choice. It never increases Rule Load after the campaign vertical ceiling.
+Every tenth level includes
 an exact-category anchor beginning at level 20, so weak randomness cannot
 indefinitely deny a build family. There is no free refresh.
 
@@ -2869,8 +2896,9 @@ power remains bounded.
 
 ### Assumptions introduced here
 
-- `[A]` Fifty vertical career tiers are enough to cover the intended ordinary
-  arc; the exact mapping must be retuned after XP/stat/equipment curves exist.
+- `[U/A]` The integer campaign vertical ceiling and its complete budget remain
+  to be authored against the intended ordinary arc and Emperor encounter after
+  XP/stat/equipment curves exist.
 - `[A]` Four fights are the right local co-op Circuit length.
 - `[A]` Four Rule Load, the listed item costs, and the one-identity limit are
   sufficient to produce at least three viable build families.
@@ -2903,11 +2931,15 @@ power remains bounded.
 
 ### Gate before code
 
-Do not implement the full system directly from this document. First accept each
-of these six product decisions or supersede it with a fully normative,
-explicitly accepted replacement; rejection or an open revision remains blocking:
+Do not implement the full system directly from this document. Retain EP-D01's
+accepted replacement, then accept each remaining product decision or supersede
+it with a fully normative, explicitly accepted replacement; rejection or an
+open revision remains blocking:
 
-1. vertical power ends at career tier 50;
+1. **accepted replacement:** ordinary vertical power ends at a versioned
+   campaign ceiling aligned with the Emperor; only a finite behaviour-led
+   Ascendancy edge may continue under EP-D02, alongside the Ascendancy,
+   Frontier, and Legacy Pursuits and a meaningful-successor requirement;
 2. active Rule Load caps at four;
 3. one Circuit contains four fights;
 4. rarity changes behaviour complexity, not chassis budget;

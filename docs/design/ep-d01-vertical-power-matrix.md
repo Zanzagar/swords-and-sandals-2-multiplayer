@@ -3,11 +3,18 @@
 > **Design-track quarantine:** this discussion aid may not shape vanilla
 > capture, candidates, fixtures, or promoted evidence.
 
-**Status:** non-authoritative owner-discussion matrix. It does not approve
-EP-D01, select a cap, change the
-[owner packet](endless-progression-owner-packet.md), or authorize
-implementation. A decision becomes durable only through exact replay and the
-[decision record](endless-progression-decisions.md).
+**Status:** historical, non-authoritative owner-discussion matrix. EP-D01
+closed through an explicitly accepted replacement on 2026-09-03; this matrix
+continues to preserve the alternatives and tradeoffs, but the complete
+normative outcome lives in the
+[decision record](endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits).
+It does not authorize implementation.
+
+**Recorded outcome:** ordinary scalar/chassis progression ends at a finite
+versioned campaign ceiling aligned with the Emperor rather than a promised tier
+50. A finite behaviour-led Ascendancy edge may continue under the later EP-D02
+active budget, while Ascendancy, Frontier, and Legacy Pursuits provide
+continuing strategic, encounter, cosmetic, and system-access objectives.
 
 ## The actual decision
 
@@ -110,7 +117,7 @@ be exactly 50 or define whether bosses may exceed it.
 
 | Choice | Advantage | Disadvantage |
 | --- | --- | --- |
-| **Designed tier 50 as a product promise** — current proposal | Legible; matches the proposed system timeline and community-reconstructed ordinary equipment/boss endpoint near 48–50. | The exact vertical budget is still unauthored, and the fingerprinted build's complete opponent curve is unverified. The familiar number can masquerade as measured truth. |
+| **Designed tier 50 as a product promise** — pre-decision proposal | Legible; matches the proposed system timeline and community-reconstructed ordinary equipment/boss endpoint near 48–50. | The exact vertical budget is still unauthored, and the fingerprinted build's complete opponent curve is unverified. The familiar number can masquerade as measured truth. |
 | **Accept the hard-ceiling philosophy now; tune the exact tier later** | Separates the durable design principle from a balance parameter and permits playtesting 40/50/60. | Leaves milestone pacing, UI promises, content cadence, and migrations provisional longer. |
 | **Define the cap by authored content rather than career number** | Power stops when every intended vertical budget band has been mastered; avoids worshipping an arbitrary number. | Harder to communicate, and content additions can silently move what looked like a permanent endpoint. |
 
@@ -122,7 +129,7 @@ be exactly 50 or define whether bosses may exceed it.
 | **Bounded authored boss exceptions** | A rare oversized opponent can create spectacle and make survival/resource plans matter. | An exception can become a disguised stat check. It needs a disclosed liability and a strict bound or it erodes the ceiling immediately. |
 | **Unbounded enemy growth against capped players** | Supplies endless threat without giving players infinite numbers. | Mathematically terminates in unwinnable attrition or forces hidden normalization. It is not a stable endless contract. |
 
-## Current recommendation: A with explicit portfolio rules
+## Pre-decision recommendation: A with explicit portfolio rules
 
 The best fit for the stated goal is an early, satisfying vertical climb followed
 by a fixed **active** ceiling and continuing **portfolio** progression:
@@ -141,8 +148,9 @@ by a fixed **active** ceiling and continuing **portfolio** progression:
 5. Keep standard opponent raw power inside the same envelope. Produce late
    difficulty through authored doctrines, combinations, liabilities, resource
    pressure, and coordination.
-6. Treat tier 50 as a deliberate product target, not a vanilla measurement.
-   The exact budget and whether 50 survives playtesting remain explicit gates.
+6. The pre-decision draft treated tier 50 as a deliberate product target, not a
+   vanilla measurement. The accepted replacement instead aligns a versioned,
+   still-untuned ceiling with the expected Emperor encounter.
 
 This hybrid keeps the two strongest pleasures instead of choosing only one:
 the first half delivers accumulation and equipment escalation; the long game
@@ -151,9 +159,10 @@ Its central risk is severe but visible: the lateral library must contain real,
 non-dominated alternatives, and the commitment rules must stop a large
 collection from becoming a universal counter kit.
 
-## Owner discussion frontier
+## Questions used in owner discussion
 
-These questions select a direction; none closes EP-D01 yet.
+These questions produced the accepted replacement. They are retained as the
+decision rationale and are no longer an active owner frontier.
 
 1. **Late-career fantasy:** after the vertical climb, which satisfactions should
    dominate—becoming numerically stronger, becoming more strategically
