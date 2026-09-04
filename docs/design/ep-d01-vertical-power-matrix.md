@@ -12,8 +12,8 @@ It does not authorize implementation.
 
 **Recorded outcome:** ordinary scalar/chassis progression ends at a finite
 versioned campaign ceiling aligned with the Emperor rather than a promised tier
-50. A finite behaviour-led Ascendancy edge may continue under the later EP-D02
-active budget, while Ascendancy, Frontier, and Legacy Pursuits provide
+50. A finite behaviour-led Ascendancy edge may continue under EP-D02's accepted
+personal milestone Capacity model, while Ascendancy, Frontier, and Legacy Pursuits provide
 continuing strategic, encounter, cosmetic, and system-access objectives.
 
 ## The actual decision
@@ -25,15 +25,16 @@ advantage continued play may add to one legal combat build:
 | Kind of progression | What grows | Is it vertical power? | Why the distinction matters |
 | --- | --- | --- | --- |
 | Active scalar power | Damage, health, armour, accuracy/defence budget, or ordinary item-chassis budget in the build entering combat | Yes | If unbounded, enough time eventually overcomes encounter design and makes earlier gear/content obsolete. |
-| Active rule capacity | How many behavior-changing effects can operate together | Yes | Even with capped stats, more simultaneous rules can create universal packages, loops, permanent control, or invulnerability. EP-D02 owns the proposed four-Load limit. |
+| Active rule capacity | How many behavior-changing effects can operate together | Yes | Even with capped stats, more simultaneous rules can create universal packages, loops, permanent control, or invulnerability. EP-D02 accepts personal Capacity from 0 to a finite 48 through eighteen championship milestones, with lower-route clamping and independent legality rules. |
 | Portfolio breadth | How many different legal builds the player owns but cannot activate together | Not automatically | This is enjoyable growth only while loadout limits and commitment windows force the player to leave desirable answers behind. |
 | Encounter access | Which rivals, doctrines, routes, Contracts, and difficulty tiers may be attempted | No | Harder or stranger problems can continue indefinitely without making the player's old numbers false. |
 | Knowledge and execution | What the player understands and how well a team coordinates | No | This is mastery progression: the player improves even when the save's combat budget does not. |
 | Prestige and convenience | Records, titles, cosmetics, history, presets, or reduced menu friction | No combat power | These can mark an endless career honestly, but cannot carry the whole loop for a player motivated mainly by strength. |
 
 The key philosophical distinction is between **active power** and **portfolio
-power**. A capped gladiator who owns twenty compelling effects is more flexible
-than one who owns four, even if both may activate only four Load. That breadth
+power**. A capped gladiator who owns many compelling item configurations is more
+flexible than one with a smaller portfolio, even when both obey their effective
+Capacity, sixteen positions, and compatibility rules. That breadth
 is meaningful progression. It becomes game-breaking if exact opponent
 knowledge plus free swapping lets the larger library answer every fight without
 sacrificing anything.

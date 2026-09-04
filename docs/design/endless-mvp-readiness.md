@@ -5,7 +5,7 @@
 > or shape what parity capture tries to prove.
 
 **Status:** specification and review plan only. **Not implementation-ready.**
-EP-D01 and EP-D07 have accepted dispositions; five product decisions,
+EP-D01, EP-D02, and EP-D07 have accepted dispositions; four product decisions,
 EP-A01–EP-A03, three P0 model contradictions, three P0 specification blockers,
 and several cross-layer contracts remain open. Nothing here
 authorizes `endless-v0`, launcher work, runtime capture, installed-game access,
@@ -20,7 +20,7 @@ honestly start?* It is not a second feature design.
 
 | Gate | Current state | Required disposition |
 | --- | --- | --- |
-| Product constraints EP-D01–EP-D07 | `2 of 7 closed` | EP-D01 and EP-D07 have accepted dispositions. EP-D02–EP-D06 still require fully normative, explicitly accepted dispositions in the [decision record](endless-progression-decisions.md); rejection/open revision remains blocking. |
+| Product constraints EP-D01–EP-D07 | `3 of 7 closed` | EP-D01, EP-D02, and EP-D07 have accepted dispositions. EP-D03–EP-D06 still require fully normative, explicitly accepted dispositions in the [decision record](endless-progression-decisions.md); rejection/open revision remains blocking. |
 | Pacing scale | **P0 contradiction** | Choose one coherent mapping among career level, frontier tier, Circuit count, vertical tier, and milestone cadence. |
 | Retry/combat RNG | **P0 exploit** | Remove semantic-label/seed shopping without losing reload determinism or classic ordered-tape parity. |
 | Post-completion economy | **P0 deadlock/hoard incentive** | Preserve bounded access to already known sidegrades after catalog completion. |
@@ -90,8 +90,9 @@ EP-A01/readiness blocker rather than an open EP-D01 decision.
    Circuit and align vertical career/challenge tiers; revise the “every fifth
    Circuit” target and the 1–100 timeline's real-world length.
 2. **Separate display career from vertical tier:** let career/records rise
-   faster while vertical budget follows `min(highestClear, 50)`; rewrite every
-   level-gated unlock and admit that “level 100” may precede vertical tier 50.
+   faster while vertical budget follows
+   `min(highestClear, campaignVerticalCeiling)`; rewrite every level-gated
+   unlock and admit that display level may precede the selected vertical ceiling.
 3. **Advance several challenge tiers per Circuit:** preserves fast career pace
    but rewrites frontier keys, opponent selection, clear credit, mixed-party
    gates, and the meaning of a four-fight Circuit. This is the largest repair.
@@ -227,15 +228,17 @@ of a modifier/liability. A doctrine's AI-policy value also sits outside the
 stated positive-module budget. [U]
 
 Without that kernel, win-rate, build-frontier, same-chassis, action-duration,
-Concord, Forms, opponent-budget, and Contract-normalization gates cannot run.
+Concord, item-contained Form concepts, opponent-budget, and
+Contract-normalization gates cannot run.
 This is P0 even though it is not a contradiction: implementing effects first
 would fit balance to missing foundations.
 
 **Gate:** one versioned integer headless-balance specification selects the
 campaign vertical ceiling and covers every tier through it for
 stats/chassis/health/armour/resources, every baseline action, all opponent
-budget dimensions, and explicit rounding. EP-D01 is accepted, but its numeric
-tuning remains unimplemented; EP-D02 remains pending until separately decided.
+budget dimensions, and explicit rounding. EP-D01 and EP-D02 are accepted, but
+the vertical combat budget, complete sixteen-host compatibility catalog, and
+mixed-rarity dominance evidence remain unimplemented.
 
 ### R-05 — Pressure's termination proof omits skipped turns and rounding
 
@@ -304,12 +307,12 @@ counter or an executable rejection test before its owning slice is ready.
 | --- | --- | --- | --- |
 | P1 | Circuit duration | Multiplying the per-fight target ranges gives planning envelopes of 48–96 actor-actions for four 2v2 fights and 72–144 for four 3v3 fights; these are not statistical Circuit medians. After R-05 is repaired, the proposed headless safety bounds are at most 79 resolved actor-actions **and** 79 scheduled opportunities per 2v2 fight, hence 316 of each per Circuit. | Keep headless safety separate from the owner-approved interactive product gate. Time complete 2v2 sessions including routes, Armory, rewards, animation, control skips, and social choice; provisionally test median <=25 minutes and P90 <=40 minutes. Do not turn an action cap into a time cap without bounding decision and presentation time, and do not extrapolate D03 to 3v3. |
 | P1 | Exact Legendary target tail | Because target pity does not raise rarity, six host-eligible Legendary caches plus the next can take 63 Circuits/252 wins in the deterministic rarity tail; the stationary model implies roughly 24 Circuits to the seventh eligible Legendary cache, before earlier natural identity hits. | Declare an acceptable identity-specific tail; add a category-complete fallback or shorten the bound without making Forge the general fastest rarity source. |
-| P1 | Gold can become dead | Exact ordinary non-milestone baseline income is `3*roundHalfUp(20*C_t/100) + roundHalfUp(35*C_t/100)` gold/Circuit before Contract bonuses; `0.95*C_t` is only its large-`C_t` approximation. A milestone final uses the separately authored 50% row. After tier-50 chassis/services, no renewable sink is specified. On an ordinary non-milestone Circuit, Elite Foil adds approximately `0.19*C_t` and Tight Clock `0.1425*C_t` plus one Mark before integer effects. | Define bounded useful gold sinks and calculate every per-fight integer bonus; reject any Contract whose expected marginal reward is effectively the same one Mark or whose early fights dominate Concede. |
+| P1 | Gold can become dead | Exact ordinary non-milestone baseline income is `3*roundHalfUp(20*C_t/100) + roundHalfUp(35*C_t/100)` gold/Circuit before Contract bonuses; `0.95*C_t` is only its large-`C_t` approximation. A milestone final uses the separately authored 50% row. After campaign-ceiling chassis/services, no renewable sink is specified. On an ordinary non-milestone Circuit, Elite Foil adds approximately `0.19*C_t` and Tight Clock `0.1425*C_t` plus one Mark before integer effects. | Define bounded useful gold sinks and calculate every per-fight integer bonus; reject any Contract whose expected marginal reward is effectively the same one Mark or whose early fights dominate Concede. |
 | P1 | Precommit fold is underspecified | Pity 7→8, a later natural reset, target forcing, and duplicate history must deterministically change later outcomes in the same four-fight plan. Player claims cannot retroactively affect already immutable candidates. | Every prepared outcome carries its predecessor-state hash; specify the pure fold order and whether duplicate history observes generated, offered, claimed, or salvaged fingerprints. |
 | P1 | Assistance can become a second item roll | Three intentional losses may expose an independently preferable base-rank sibling outcome. | Assistance is a value-reducing transform of the same reward identity, or is honestly treated and priced as another choice; white-box loss policy must not dominate. |
-| P1 | Rule Load is not a utility bound | Capacity four admits `3+1`, `2+2`, `2+1+1`, and four-minor packages; multi-tag actions may overcharge Signatures and cheap tag actions may become filler. Team Tactic removes one point from every member and creates a veto. | Test every partition under uniform-mechanics and actual-generator weights; define consequential-tag cost/timing; prevent a Signature action charging itself; compare Team Tactic against the lost package for every seat. |
+| P1 | Rule Capacity is not a utility bound | Capacity grows from 0 to 48 across sixteen hosts; inactive sources and both weapons reserve Load, one Legendary's owner may retain or select its Branch at the accepted encounter boundary, and Team Tactic sits outside personal Capacity. This greatly enlarges the interaction surface even though the cap is finite. | Test every milestone/route band, all sixteen positions, both-weapon states, Ascendancy Branch boundary, separate Tactic allowance, and compatible payload set under uniform-mechanics and generator weights. Whole-state invalid equip must preserve prior bytes; one legal all-Legendary set must coexist with useful mixed-rarity configurations. |
 | P1 | Trophy/effect gates can pass by cherry-pick | Concord currently needs one favourable and one losing cell; that does not establish robust non-dominance. Relay/Chain prerequisites may be scripted-opponent-specific; Quiver dies near cap; Stabilizer's floor makes low shields lose 100/50/33%; Breakwater can be burned by a tiny crossing. | Publish semantic-cell distribution and robust aggregate thresholds; sweep exact integer boundaries and every trigger sequence. No single showcase cell is acceptance. |
-| P1 | Veteran catch-up is punitive | A tier-50 incomplete veteran accompanying a 49-tier-gap ally forgoes about `46.6*C50` gold, 108 offers, 544 all-salvage Marks, and 196 grant/XP opportunities. | At gaps 1/10/25/49 and with same-custodian mule cases, compare current Practice-only veteran, nonmechanical mentor records, deferred mentor credit redeemable only after a later veteran-frontier victory, and split-tier authored encounters. No option may grant high-tier outcomes for low-tier wins, mint a second frontier set, or improve veteran reward/action by cycling fresh allies. The owner must select an acceptable veteran opportunity-cost ceiling. |
+| P1 | Veteran catch-up is punitive | In the obsolete tier-50 example, a ceiling-tier incomplete veteran accompanying a 49-tier-gap ally forgoes about `46.6*C50` gold, 108 offers, 544 all-salvage Marks, and 196 grant/XP opportunities. The magnitude must be recomputed for the selected versioned ceiling. | At gaps 1/10/25/full-span and with same-custodian mule cases, compare current Practice-only veteran, nonmechanical mentor records, deferred mentor credit redeemable only after a later veteran-frontier victory, and split-tier authored encounters. No option may grant high-tier outcomes for low-tier wins, mint a second frontier set, or improve veteran reward/action by cycling fresh allies. The owner must select an acceptable veteran opportunity-cost ceiling. |
 | P1 | Deferred allied-AI/multi-seat funnel | If a later variant lets one human custodize multiple persistent or AI-driven fighters, it can collect several personal streams and funnel tradeable natural Legendaries to a carry. Per actor-action normalization hides per-human-command advantage. EP-D07 excludes this from the first playable version. | First-playable admission rejects allied AI and duplicate human authority. Any future variant needs a new accepted reward/custody rule plus concentration gates per actor-action, human command, and wall-clock minute; generic resolver support is insufficient. |
 | P1 | Governance can deadlock or impose debt | Ranked sums can put an absent Standard-preferring member onto a debt route. EP-D07 selects suspension rather than AI/controller substitution and now accepts a narrow dropout exception: each expired absent member contributes only their Circuit-entry conditional consent to abandonment, while every connected member must approve. False disconnect attribution or a reconnect/receipt race could still destroy unearned outcomes. One `memberId` is not proof of one human. | Nonzero debt requires explicit unanimous acceptability; persist suspension and the visible versioned grace policy; seal member/session authority; let expiry mutate no combat/reward state; require every connected member's yes; invalidate a pending proposal on reconnect; and serialize reconnect against the atomic abandonment receipt. Test absence, ordinary timeout, dropout expiry, Sybil, false presence, crash, indefinite wait, and reconnect races. |
 | P1 | Cross-format identity and farming | One mode-neutral gladiator can carry team-earned power into 1v1, or a team-dependent build can become nonfunctional when entering solo. A faulty transition can also copy/reset Bound Soul, item, Tactic, or Lineage state. | Use one persistent `combatantId`; freeze format/roster per Circuit; require a functional solo action loop; round-trip the same gladiator through 1v1→2v2→3v3→1v1; and compare risk-normalized cross-format progression so one format is not a dominant power farm. |
@@ -317,7 +320,7 @@ counter or an executable rejection test before its owning slice is ready.
 | P1 | Post-cap tier may not mean harder | After raw/module caps and finite doctrines/Charters, an unbounded tier becomes an ordinal record, not monotonically increasing difficulty. Cosmetic recipe IDs can also evade no-repeat rules. | Either promise bounded bands then rotation/records, or publish a finite monotone schedule. Compare semantic mechanics fingerprints, not display IDs. |
 | P1 | Rival spoofing/free AI value | Two wins with a disposable tag can bait a rival counter, then a non-tag build exploits its liability. Doctrine policy adds value outside its modifier budget. | Adversarial two-of-three tag spoof test over the complete horizon; budget policy value; define “within 15%” as a vector norm that never raises raw chassis over the cap. |
 | P1 | Mastery offer steering | One offer follows the semantic tags on the currently equipped build, so a player can equip an offer-fishing loadout immediately before a level threshold. | Compare honest locked builds with threshold-targeted tag spoofing. Either accept the sacrificed combat value as intentional steering, or key compatibility to a persisted preference/history rather than one equipped snapshot. |
-| P1 | Recovery can counterfeit paid rank | A clear-only Recovery may raise bare `highestClear`, allowing accessibility progress to leak into prestige, Trophy, leaderboard, or Contract-rank meanings that imply paid difficulty. | Use typed paid-clear facts for every paid-rank consumer. Test ordinary claim/evolution gates separately if Recovery clearance is intentionally accepted there. |
+| P1 | Recovery can counterfeit paid rank | A clear-only Recovery may raise bare `highestClear`, allowing accessibility progress to leak into prestige, Trophy, leaderboard, or Contract-rank meanings that imply paid difficulty. Its championship capacity receipt is now one intentional exception, not evidence that other paid-rank gates should leak. | Use typed paid-clear facts for every paid-rank consumer. Independently test the accepted one-per-lineage personal capacity receipt on qualifying Recovery victory and prove it grants no other reward/rank channel. |
 | P1 | Four-Charter rotation is forced | Four cards plus “no repeat within four” leaves only the oldest legal card after the first rotation. `standard-catchup` can reward race-one-character then advance another under easier bands. | Label initial behavior deterministic rotation, shorten the window, or ship more cards. Compare simultaneous versus race/catch-up; Standard catch-up cannot grant the same boundary mechanical-choice rate without paying equivalent challenge. |
 | P0 spec | JSON u64 conflict | See R-06: canonical unsigned 64-bit integers, rejection of numeric strings, and ordinary JavaScript JSON numbers cannot all coexist above `2^53-1`. | Cap authoritative counters at `Number.MAX_SAFE_INTEGER`, validate canonical fixed-width strings, or select a binary u64 format. Pick one before schema authoring. |
 | P1 | Metrics are not operational | “Within 5%,” “15% of cells,” “two consequential actions,” “same budget,” and “optimal policy” lack metric, cell distribution, solver, confidence, and tie rules. | Define cells as version × team size × mechanics-distinct budget band × Charter × semantic recipe fingerprint × persisted seed; report both uniform-mechanics and actual-generator weighting. |
@@ -328,9 +331,13 @@ Circuit, natural Legendary around one per 29.4 wins, and an independent
 with pity, 59.29% forced. The problem is not a calculation error; it is the
 unselected tail, sink, fold, and policy contract around those rates.
 
-## 5. Exact MVP mechanic inventory
+## 5. EP-D02-respecified MVP mechanic inventory
 
-The MVP is not an “eight-effect rule set.” Its complete authored surface is:
+The prior fixed-four MVP is no longer selectable. The replacement is still not
+an “eight-effect rule set”: it must include EP-D02's accepted Capacity, host,
+receipt, Ascendancy, Team Tactic, and migration contracts. The eight behaviors
+below remain candidate item-contained content, not an approved slice by
+themselves.
 
 | Surface | MVP content | Owner/seam |
 | --- | --- | --- |
@@ -338,13 +345,16 @@ The MVP is not an “eight-effect rule set.” Its complete authored surface is:
 | Global battle law | Arena Pressure, cycle counting, monotone stack-8 termination actions; decide whether Control Fatigue is omitted or fully specified | Rule legality/outcomes plus resolver lifecycle state |
 | Comparator action | Known 1-Load Approach Kit with one battle-local charge | Designed rule action + carried-item/loadout state |
 | Random loot effects | Measured Quiver, Critical Relay Grip, Blooded Reserve Pommel, Guarded Overdraw, Second Wind Guard, Breakwater Ward, Stabilizer Shield, Pursuit Step | Designed effects; eight total |
-| Trophy package | Concord Trophy combines Relay and Pursuit plus the Trophy-only Concord Chain interaction and Bash/Charge stamina burden | Designed effect/sequence + blueprint/escrow state |
-| Loadout grammar | Four Rule Load, six carried slots, family/slot mapping, strongest-only groups, exact active item linkage, no proc chains | Rule validator + canonical frozen loadout |
+| Prior Trophy package | Concord's item-contained sequence concept requires respecification against the item's actual rarity; Trophy naming alone determines neither Load nor Ascendancy eligibility | Historical designed-effect input; not a live gate |
+| Capacity cadence | Personal 0→48 Capacity through eighteen stable championship milestone lineages, including qualifying Assistance/Recovery victories and every negative case | Personal bounded ledger + atomic settlement |
+| Loadout grammar | All sixteen mapped positions, categorical 0/1/2/3 Load, both weapons reserved, exact active-source linkage, nullable applicable lower-route Capacity ceiling (personal Capacity otherwise), whole-state atomic validation, family/team caps, no proc chains | Rule validator + canonical frozen loadout/configuration |
+| Ascendancy | At most one equipped Legendary may Ascend; its item/Core lock for the Circuit and one learned exact-lineage Branch follows the accepted encounter/Assistance/Recovery boundary | Item/configuration state + encounter envelope |
+| Team Tactic | One visible nonfungible team allowance outside personal Capacity; no conversion into item Load | Separate team-rule state; lifecycle/vote/1v1 details remain open |
 | Opponents | Four previewed doctrines; deterministic Scout/Foil/Mixed/Final recipes; capped stat budgets | Pure campaign generator + rule AI/actions |
 | Allied roster/session | Under the pending 2v2 proof proposal, two persistent allied gladiators controlled by two distinct connected humans; no allied AI, empty allied seat, duplicate human authority, multi-seat control, or takeover | Admission/session authority + active Circuit envelope; accepted EP-D07 |
 | Routes | Standard plus alternating Elite Foil/Tight Clock; four fights; no combined debts | Campaign plan and disclosed UI |
 | Rewards | Personal precommitted four-key outcomes, cache offers, Forge/Salvage, fixed Concord source, custody/claim | Progression reducer/transaction + UI |
-| Continuation | Concede, Rematch, one Recovery branch, receipts, exact resume; committed action completes once before disconnect pause, then same-seat authenticated reconnect or established abandonment only | Active battle/progression transaction + session/transport protocol |
+| Continuation | Concede, Rematch, one Recovery branch, receipts, exact resume; qualifying Recovery championship victory writes only the accepted capacity exception; committed action completes once before disconnect pause, then same-seat authenticated reconnect or established abandonment only | Active battle/progression transaction + session/transport protocol |
 
 Before implementation, one normative appendix must list every MVP action,
 effect, state field, trigger, timing point, RNG need, resource read/write,
@@ -413,7 +423,19 @@ classic roll order remains unchanged.
 Add a versioned closed schema, separate from the existing compatibility
 `status: string[]`, for:
 
-- frozen equipped/carried item-instance IDs and definition/loadout hash;
+- all sixteen frozen equipment-position entries with nullable occupancy,
+  item-instance IDs where occupied, definition/loadout hash, each payload's
+  Load, and both equipped weapons' reserved Load even while one is inactive;
+- personal earned Capacity derived from one bounded receipt per stable
+  milestone lineage, plus the nullable applicable lower-route Capacity ceiling
+  and validated effective Capacity projection; no-next-milestone/post-Emperor
+  routes use personal Capacity directly;
+- each participating combatant's nullable at-most-one Ascended Legendary
+  item/Core selection and at most one bounded current
+  `{ combatantId, encounterInstanceId, branchId }` selection,
+  with exact Circuit/encounter/Assistance/Recovery lock coordinates;
+- the separate nonfungible Team Tactic allowance, never folded into personal
+  Load;
 - battle-local charges and once-per-battle markers;
 - counted/timed conditions with owner, source, arming event, and deterministic
   expiry coordinate;
@@ -445,7 +467,11 @@ difference changes the hash; malformed/unknown fields fail closed; classic
 resource/status behavior remains unchanged; ID grammar rejects aliases and
 cross-locale fixtures produce the same initiative order. One persistent
 combatant round-trips through 1v1→2v2→3v3→1v1 without a copied, reset, or
-format-bound progression field.
+format-bound progression field. Every illegal proposed equip/configuration is
+rejected as a whole and preserves the prior equipment/configuration bytes.
+A mixed-Capacity roster projects each `combatantId` independently: no campaign,
+teammate, guest, or Team Tactic access pools, loans, averages, copies, or
+projects Capacity.
 
 ### S-04 — one atomic progression/active-battle boundary
 
@@ -458,6 +484,9 @@ transaction.
 The durable envelope must include:
 
 - campaign, member, item, plan, escrow, key, and version identities;
+- the bounded personal Capacity milestone ledger; Capacity schedule/host/cost
+  versions; full sixteen-position saved configuration; and explicit migration
+  mapping identity;
 - frozen event format, roster size, combatant-to-seat and human-authority
   bindings, connection/suspension state, and the last acknowledged action
   boundary;
@@ -466,7 +495,10 @@ The durable envelope must include:
   presence revision and stale/committed status;
 - active attempt sequence and immutable attempt-start/pre-ack snapshots;
 - operation/mutation sequences and event/presentation high-water marks;
-- RNG model/state, frozen rule/generator/definition identities;
+- RNG model/state, frozen rule/generator/definition identities, personal/route
+  Capacity projection, both weapons' reserved Load, each participating
+  combatant's Ascended item/Core/current Branch, and the separate Team Tactic
+  allowance;
 - pending settlement intent and bounded recent receipts; and
 - collision-resistant canonical digests, schema/entity versions, migration
   state, and explicit repair/error. Use the existing SHA-256 campaign-record
@@ -474,7 +506,10 @@ The durable envelope must include:
   eight-hex FNV-1a combat hash for non-authoritative fast desync diagnostics.
 
 Active plans/snapshots never migrate mid-attempt. Old implementations remain
-pinned until a clean boundary. Future schemas remain untouched.
+pinned until a clean boundary. A now-illegal saved configuration and every item
+remain preserved; new play is refused until the owner explicitly selects a
+legal replacement. No migration auto-unequips, disables, salvages, or retires
+an item. Future schemas remain untouched.
 
 **Pass gate:** crash after every durable boundary resumes the same attempt and
 never allocates another sequence; invalid identity/hash enters repair without a
@@ -495,7 +530,8 @@ Keep the in-memory terminal gate, but wrap it in this durable sequence:
 2. submit the exact terminal acknowledgement through the existing resolver;
 3. run one pure reducer against the frozen plan/keys;
 4. atomically commit attempt receipt, every personal classification/grant,
-   key/set/clear/pot transition, sequence high-water, and pre-ack removal;
+   any qualifying championship capacity receipt/delta, key/set/clear/pot
+   transition, sequence high-water, and pre-ack removal;
 5. on load, rehydrate an orphaned `ack-prepared` state and replay the same gate.
 
 The optional immutable `CampaignRecorder` is history, not reward authority. Its
@@ -503,9 +539,17 @@ current failure-collection behavior cannot be the transaction.
 
 **Pass gate:** fault injection before/after reservation, action checkpoint,
 elimination, pre-ack, latch, callback, commit, and cleanup yields exactly one
-attempt receipt and zero/one correct grant per participant. Decided without
-pre-ack grants nothing; committed reload cannot apply twice; mixed personal
-mutations are all-or-nothing; conservation holds.
+attempt receipt and zero/one correct reward/record grant per participant.
+Independently, a qualifying full-rank, Training Assistance, or precommitted
+Recovery championship victory yields exactly one capacity receipt for every
+participating persistent gladiator in the frozen victorious roster, including
+one knocked out before team victory; every negative/replay path yields none.
+Decided without pre-ack grants nothing;
+committed reload cannot apply twice; mixed personal mutations are
+all-or-nothing; conservation holds. A newly committed Capacity receipt updates
+the durable personal ledger but leaves the in-progress battle/Circuit's frozen
+projection byte-identical; it becomes usable only at the next legal loadout
+boundary.
 
 ### S-06 — headless simulator
 
@@ -623,11 +667,13 @@ atomic, unanimous under its accepted authority rule, idempotent, and live.
 
 ## 7. Missing normative authoring inputs
 
-The design's rates and fractions are hypotheses. Before the headless build,
+The design's remaining unaccepted rates and fractions are hypotheses. EP-D02's
+accepted grant cadence and 48 ceiling are not. Before the headless build,
 version and review these exact finite inputs:
 
 1. XP per paid fight/final and the complete pace table that closes R-01.
-2. Tier-1–50 stat budgets and allocation rules, including all dead-cap axes.
+2. Stat budgets and allocation rules for every tier through the selected
+   versioned campaign ceiling, including all dead-cap axes.
 3. Standard chassis catalog, slot/family budgets, prices `C_t`, and integer
    interpolation/rounding for every tier.
 4. Baseline Endless action vocabulary, legality, probability convention,
@@ -635,12 +681,26 @@ version and review these exact finite inputs:
    value. First-playable allied AI is not an authoring target.
 5. Four doctrine base templates, liability/module deltas, budget caps, and
    Scout/Foil/Mixed/Final assembly order.
-6. Exact eight-effect/Trophy definitions, exclusions, item pools, rarity cells,
-   Rule Load costs, stacking groups, and total generation matrix.
-7. Pressure/expiry coordinates and whether Control Fatigue is in or out of MVP.
-8. Cache/pity/target/Forge/gold/maintenance tables after R-03 is closed.
-9. Stable definition, generator, rule-design, and migration version IDs.
-10. Minimum genuine two-human session topology, sealed member/controller
+6. Stable milestone-ID definitions mapped to the accepted eighteen names/order,
+   Capacity schedule version, receipt-lineage migration, and route-ceiling
+   mapping. The accepted `+2,+3,+3` cadence and 48 cap are not open tuning.
+7. The complete sixteen-host item/compatibility matrix, including both-weapon
+   reservation, exact active-source behavior, categorical 0/1/2/3 payloads, and
+   at least one otherwise-legal all-Legendary loadout with useful mixed-rarity
+   configurations.
+8. Legendary Ascendancy lineage/Core/Branch definitions and the exact durable
+   fields implementing its Circuit, encounter, Assistance, and Recovery timing.
+9. Team Tactic acquisition, vote, 1v1 availability, and source-member lifecycle.
+10. Exact candidate item-behavior definitions, exclusions, rarity cells,
+    stacking groups, and total generation matrix; the old fixed-four Concord
+    fixture is not a normative shortcut.
+11. Pressure/expiry coordinates and whether Control Fatigue is in or out of MVP.
+12. Cache/pity/target/Forge/gold tables and an EP-A03 maintenance replacement
+    after R-03 is closed.
+13. Stable definition, generator, rule-design, item/Capacity schedule, and
+    migration version IDs, including preserve-and-reconfigure handling for an
+    old saved configuration made illegal by new costs/slots.
+14. Minimum genuine two-human session topology, sealed member/controller
     authority, presence and reconnect state, suspended-attempt persistence,
     exact visible grace duration/storage, and race-safe implementation of the
     accepted dropout-abandonment rule.
@@ -655,7 +715,8 @@ may start until every §10 gate is reviewed and the owner then gives the separat
 implementation authorization. Each authorized slice lands separately and must
 leave classic tests green.
 
-1. **Owner record:** retain accepted EP-D01 and EP-D07, decide EP-D02–EP-D06,
+1. **Owner record:** retain accepted EP-D01, EP-D02, and EP-D07; decide
+   EP-D03–EP-D06,
    and select repairs for R-01–R-03. R-04–R-06 specifications remain mandatory
    before their owning code.
 2. **Normative specifications:** MVP surface appendix, pace/economy tables, RNG

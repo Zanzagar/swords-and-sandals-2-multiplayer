@@ -85,8 +85,9 @@ The current design proposes:
 - a finite, versioned vertical stat and item-chassis ceiling aligned with the
   expected Emperor encounter, followed by bounded behaviour-led progression
   rather than unbounded scalar inflation; the exact ceiling remains open;
-- a four-point **Rule Load** budget shared by behaviour-bearing equipment and
-  abilities;
+- personal **Rule Capacity** earned through eighteen authored championship
+  milestones, rising from zero to a finite 48-Load ceiling across all sixteen
+  mapped item positions; Team Tactic uses a separate nonfungible allowance;
 - rarity based on authored rule complexity rather than strictly larger damage
   or armour numbers;
 - personal inventories tied to stable combatants, with explicit co-op custody,
@@ -101,16 +102,19 @@ The current design proposes:
 
 Every proposed mechanic states whether it preserves classic combat semantics or
 requires the separate designed rule set, the degenerate strategy it invites,
-and the required counter/rejection test. Names, rates, caps, unlock levels, and
-balance thresholds remain design assumptions until approved and tested.
+and the required counter/rejection test. Unless the decision record explicitly
+accepts one—as it now does for EP-D02's named milestone order, grant cadence,
+costs, hosts, and 48 ceiling—names, rates, caps, unlocks, and balance thresholds
+remain design assumptions until approved and tested.
 
 The pending first-proof proposal is a deterministic 2v2, four-fight Contract
 loop. EP-D07 already requires every allied seat in any first playable version
 to have a distinct connected human, with action-boundary pause and same-seat
 reconnect instead of allied AI fill or takeover. Before code, each of the seven
 product decisions and EP-A01–EP-A03 must be accepted or superseded by a fully
-normative, explicitly accepted replacement; EP-D01 and EP-D07 are closed while
-EP-D02–EP-D06 remain pending. Rejection or an open revision remains blocking.
+normative, explicitly accepted replacement; EP-D01, EP-D02, and EP-D07 are
+closed while EP-D03–EP-D06 remain pending. Rejection or an open revision
+remains blocking.
 EP-D07's accepted corrected dropout supplement makes its grace period visible at Circuit
 entry: expiry never abandons automatically, but can activate an absent member's
 narrow pre-consent while every connected teammate must approve the existing

@@ -4,8 +4,8 @@
 > candidates, fixtures, or capture hypotheses. Designed mechanics may not select
 > or shape what parity capture tries to prove.
 
-**Status:** owner review in progress. EP-D01 and EP-D07 have explicitly
-accepted dispositions; EP-D02–EP-D06 and EP-A01–EP-A03 remain pending.
+**Status:** owner review in progress. EP-D01, EP-D02, and EP-D07 have explicitly
+accepted dispositions; EP-D03–EP-D06 and EP-A01–EP-A03 remain pending.
 **Implementation remains blocked.**
 
 This record turns the six original gates in the
@@ -49,18 +49,20 @@ readiness plan.
 
 | ID | Decision | Recommendation | Status |
 | --- | --- | --- | --- |
-| EP-D01 | End ordinary vertical power at a versioned campaign ceiling, then permit only a finite behaviour-led veteran edge alongside continuing Arena Pursuits | Accepted replacement; exact ceiling, active budget, cadence, catalogs, and balance remain later gates | `revise — accepted replacement` / Zanzagar / 2026-09-03 |
-| EP-D02 | Cap active Rule Load at four per combatant | Accept provisionally, subject to build-frontier tests | `pending` |
+| EP-D01 | End ordinary vertical power at a versioned campaign ceiling, then permit only a finite behaviour-led veteran edge alongside continuing Arena Pursuits | Accepted replacement; clauses 6–7 amended for Legendary-only Ascendancy and per-encounter Branch selection; exact ceiling, catalogs, and balance remain later gates | `revise — accepted replacement`; clauses 6–7 `revise — accepted amendments` / Zanzagar / 2026-09-03 and 2026-09-04 |
+| EP-D02 | Grow personal Rule Capacity through authored championship milestones to a finite 48-Load ceiling | Accepted replacement; exact personal credit, costs, hosts, route clamp, Team Tactic exception, validation, and migration are normative below | `revise — accepted replacement` / Zanzagar / 2026-09-04 |
 | EP-D03 | Make one Arena Circuit four fights | Accept only as the 2v2 MVP measurement boundary; human timing may revise it | `pending` |
-| EP-D04 | Let rarity change behaviour complexity, not chassis budget | Accept as a permanent identity rule | `pending` |
+| EP-D04 | Let rarity change behaviour complexity, not chassis budget | Revise before decision: preserve chassis equality while reconciling the accepted all-Legendary legal loadout and mixed-rarity viability contract | `pending` |
 | EP-D05 | Use personal precommitted frontier outcomes and typed post-completion records | Accept only with atomic settlement, ordered plan folding, and maintenance entitlement | `pending` |
 | EP-D06 | Make the first playable proof deterministic 2v2 under a separate designed rule set | Accept only after selecting the public deterministic RNG model and separating headless/playable gates | `pending` |
 | EP-D07 | Keep persistent gladiators mode-neutral and require human-controlled allied seats in the first playable version | Accepted; disconnect pauses at an action boundary, then an accepted visible grace period may arm the absent member's pre-consent for connected teammates to abandon | `accepted`; corrected dropout supplement `accepted` / Zanzagar / 2026-09-03 |
 
 The decisions are coupled. D01 prevents an infinite scalar gear ladder while
 requiring a finite behaviour-led veteran edge and three continuing Pursuits;
-D04 must prevent rarity from reopening the scalar ladder. D02 prices the
-simultaneously active behavioural breadth, including Ascendancy. D03 determines
+D04 must preserve chassis equality without contradicting D02's legal
+all-Legendary endpoint or mixed-rarity viability rule. D02 prices and unlocks
+personal simultaneously equipped behavioural breadth, including Ascendancy,
+while keeping Team Tactic outside that fungible budget. D03 determines
 the Circuit commitment window and Pivot timing. D05 makes Pursuit settlement
 fair and reload-safe. D06 is the smallest team format that can test the
 resulting co-op choices rather than a solo scalar ladder. D07 preserves one
@@ -124,15 +126,20 @@ UTC date: YYYY-MM-DD
    Each combatant selects one primary Pursuit per Circuit. That choice directs
    progression rewards; it does not disable abilities already earned through
    another Pursuit.
-6. `[A]` For a Circuit, a combatant may **Ascend** one eligible Legendary,
-   Trophy, Signature, or Keystone. It uses one Core Evolution and one learned
-   Branch Evolution. Additional branches may be permanently learned without
-   increasing simultaneous active capacity.
-7. `[A]` Learned Evolutions permanently build the character, but no early
-   choice permanently destroys access to another branch. The active
-   configuration locks for the Circuit, with at most one narrow in-Circuit
-   Pivot; full reattunement occurs only between Circuits. This prevents
-   opponent-by-opponent counter-respeccing without creating reroll regret.
+6. `[A]` For a Circuit, a combatant may Ascend at most one equipped
+   Legendary-rarity item. “Trophy,” “Signature,” or “Keystone” naming does not
+   independently qualify an item. The base identity, one Core Evolution, one
+   active learned Branch, and any active completion benefit form one
+   indivisible three-Load item payload. Additional Branches may be permanently
+   learned without increasing simultaneous active capacity.
+7. `[A]` The Ascended Legendary and Core lock for the Circuit. After each
+   encounter preview and before its first attempt, the gladiator may retain or
+   select one learned Branch from that exact lineage. That Branch locks through
+   all attempts, Rematches, and reloads of the encounter; Training Assistance
+   reopens selection once for its altered recipe, and Recovery uses the same
+   per-encounter rule. This bounded one-item adaptation is intentional and does
+   not spend the ordinary loadout Pivot; full item/Core reattunement occurs only
+   between Circuits.
 8. `[A]` Standard late opponents obey the same bounded raw-power grammar as
    players and never scale from the currently equipped player snapshot. Rare,
    clearly disclosed encounters may carry bounded exceptional levels or wild
@@ -144,9 +151,9 @@ UTC date: YYYY-MM-DD
    system-access objective must remain visible. A bare level counter or
    Chronicle entry does not satisfy this requirement by itself.
 
-`[U]` Exact ceiling tier, Ascendancy magnitude, Rule Load interaction, Circuit
-length, reward cadence, catalogs, and balance remain later gates. This decision
-does not authorize implementation.
+`[U]` Exact ceiling tier, Ascendancy magnitude, Circuit length, non-Capacity
+reward cadence, catalogs, and balance remain later gates. EP-D02 now owns the accepted Rule
+Capacity interaction. This decision does not authorize implementation.
 
 **Parity/seam:** this is Endless campaign, progression, encounter, and loadout
 policy. It may use measured classic formulas only when their entire required
@@ -156,72 +163,211 @@ changes a classic descriptor.
 
 **Degenerate strategies invited:** leak a nominally lateral reward into an
 uncapped scalar; accumulate Evolutions that secretly stack outside the active
-budget; freely reattune after seeing each opponent; turn rare encounters into
+budget; freely reattune the full loadout or Ascended item/Core after seeing an
+opponent beyond the accepted one-Branch window; turn rare encounters into
 undisclosed stat checks; or satisfy continuing progression with an empty number
 or record.
 
 **Required counters and rejection gates:** the future authored specification
 must version and exhaustively enforce the campaign ceiling across every stat,
 generator, drop, Forge path, Evolution, and migration; enumerate Ascendancy
-against the EP-D02 active budget; freeze one Circuit configuration with no more
-than the accepted narrow Pivot; prove standard opponents do not read equipped
-player power; attach a disclosed liability to every exceptional opponent
+against the EP-D02 active budget; freeze the Ascended item and Core for the
+Circuit, freeze its selected Branch for each encounter under clause 7, and keep
+the ordinary Pivot from changing either; prove standard opponents do not read
+equipped player power; attach a disclosed liability to every exceptional opponent
 package; and demonstrate a meaningful successor objective whenever another
 Pursuit target completes. A Chronicle-only successor fails this gate.
 
 **Approval consequence:** EP-D01 is closed as a product decision. The exact
-campaign-ceiling integer and budget, EP-A01 pace mapping, EP-D02 active budget,
-EP-D03 Circuit/Pivot timing, reward catalogs, migrations, and balance tests
+campaign-ceiling integer, EP-A01 pace mapping, EP-D03 Circuit/Pivot timing,
+reward catalogs, migrations, and balance tests
 remain blockers. Changing a released ceiling later requires a new design
 version and explicit migration; it does not alter classic data.
 
 **Record:** `revise — accepted replacement` — owner: Zanzagar; UTC date:
 2026-09-03. The owner explicitly replied `EP-D01: accepted as replayed` after
-reviewing the complete nine-clause wording above.
+reviewing the complete nine-clause wording above. Clauses 6–7 were subsequently
+`revise — accepted amendments as replayed` — owner: Zanzagar; UTC date:
+2026-09-04. The other seven accepted clauses are unchanged.
 
-## EP-D02 — active Rule Load caps at four
+## EP-D02 — personal Rule Capacity grows to a finite 48-Load ceiling
 
-**Canonical decision (exact approval scope):** active Rule Load caps at four.
+**Disposition:** `revise — accepted replacement`.
 
-**Dependent working assumptions, not separately approved by D02:** each
-combatant may equip at most four points of behaviour-bearing effects. Minor
-effects cost one, identities normally cost two, and a three-point Trophy
-package is permitted only where its authored burden and interaction justify
-it. Rule Load never rises after the campaign vertical ceiling.
+**Exact accepted replacement:**
 
-**Recommendation:** accept provisionally. Four is large enough to express a
-sequence plus coverage but small enough that the proposed two- and three-point
-identities force opportunity cost. It also keeps the 2v2 state surface
-auditable. The number is assumed until the full combination matrix passes.
+1. `[A/D]` Each persistent gladiator has an integer **Rule Capacity**. Its active
+   **Rule Load** is the sum of every equipped behavior payload. Capacity starts
+   at `0` and reaches a finite version-one maximum of `48`, derived from sixteen
+   simultaneous item positions at a maximum of three Load each.
 
-**Alternatives considered:**
+2. `[A]` Item payload costs are categorical:
 
-- three makes a three-point identity consume the whole meaningful kit and may
-  make hybrid play non-viable;
-- five or more makes broad best-stuff packages and combinatorial proc chains
-  more likely;
-- per-rarity capacity would turn rarity into vertical power, contradicting D04.
+   - Standard or unchanged ordinary item/spell: `0`
+   - Tempered minor behavior: `1`
+   - Inscribed major behavior or two compatible minors: `2`
+   - Legendary identity behavior: `3`
 
-**Parity/seam:** Rule Load is Endless loadout state. Effects that change combat
-legality or outcome require `endless-v0`; inventory capacity and validation live
-in canonical/progression state. Classic rule sets do not read Rule Load.
+   No behavior-changing payload may masquerade as zero Load. The old
+   maximum-one 3-Load identity rule is removed.
 
-**Degenerate strategy invited:** a universally optimal four-point package,
-zero-cost fillers, inactive-slot stat sticks, or trigger chains whose combined
-value exceeds the sum of priced effects.
+3. `[A]` The sixteen possible Legendary hosts are primary weapon, secondary
+   weapon, breastplate, helmet, shinguard, greaves, shoulderguard, gauntlet,
+   boot, shield, and six carried spell/Technique positions. The catalog must
+   permit at least one otherwise-legal all-sixteen-Legendary loadout, although
+   arbitrary Legendary combinations may still fail compatibility rules.
 
-**Required counter and rejection gate:** total generation and loadout
-validation over every compatible effect combination; strongest-only stacking
-groups; exact active-item linkage; no effect-triggered effect; and the system
-design's dominance gates. Reject any package that is best or within five
-percentage points of best in more than 70% of the declared test cells. Any
-exception requires an explicit owner revision of that rejection gate.
+4. `[A]` Every equipped behavior-bearing item reserves its full Load for the
+   frozen loadout, even while unused or temporarily inactive. Both weapons
+   reserve Load for the entire Circuit; only the exact active weapon's payload
+   operates. Weapon swapping cannot alter capacity or expose an unpaid effect.
+   Slot occupancy, item-source activation, family exclusions, strongest-only
+   stacking, control/survival limits, and other authored legality remain
+   independently enforceable.
 
-**Approval consequence:** four becomes an input to UI, item schemas, generator
-validation, AI loadouts, hashes, and migrations. Retuning effect costs requires
-a new design version; changing the cap requires progression-schema review.
+5. `[A]` Forms, Signature designations, and Keystones cease to be standalone
+   Load sources. Their useful concepts may exist as item-contained behaviors
+   but create no additional ability slots. Bound Soul remains one separately
+   bounded character-creation identity outside equipment capacity. Charms and
+   Soul Relics remain deferred and cannot add active rules until a later
+   decision gives them explicit slots and accounting.
 
-**Record:** `pending` — owner/date: —
+6. `[A]` Capacity belongs solely to `combatantId`. It is never campaign-wide,
+   transferable, tradeable, copied, averaged, loaned, or projected from another
+   gladiator. A guest may contribute access to a Team Tactic choice but never
+   capacity.
+
+7. `[A/D]` Version one uses eighteen stable authored championship milestone
+   IDs, excluding the Fearful Prisoner tutorial. Each three-boss chapter grants
+   `+2, +3, +3`:
+
+   | Authored milestones | Personal grants | Capacity after chapter |
+   | --- | --- | ---: |
+   | John the Butcher; Evil Ninja; Son of Stylonius | `+2, +3, +3` | 8 |
+   | Marksman Dantus; Great Beast; Wizard Sagan | `+2, +3, +3` | 16 |
+   | Slave Driver; Spheracles; Maharaja Saeed | `+2, +3, +3` | 24 |
+   | Gaiax; Daimyo Katsumodo; HeChaos | `+2, +3, +3` | 32 |
+   | Archfiend Zeerzabahl; Sir Belgrave; Bhaargle Yarg | `+2, +3, +3` | 40 |
+   | Archangel Sandalphon; Nameless Shadow; Emperor Antares | `+2, +3, +3` | 48 |
+
+   These names and ordering are intentional Endless authoring, not a claim that
+   the fingerprinted build's complete ladder has been runtime-verified. Emperor
+   is entered at capacity 45; victory grants the final three points for
+   postgame saturation.
+
+8. `[A]` A milestone credits every persistent gladiator in its frozen victorious
+   roster, including one knocked out before team victory. Benched and
+   nonparticipating gladiators receive nothing. An authorized full-rank
+   victory, Training Assistance victory, or precommitted Recovery victory
+   qualifies. Capacity is a core campaign transition rather than a first-clear
+   bonus; it is the sole mechanical exception to Recovery's otherwise
+   zero-grant rule. Loss, Concede without victory, Practice, historical or
+   low-tier replay, and nonqualifying encounters grant none.
+
+9. `[A]` Each grant is represented by one bounded receipt keyed by the gladiator
+   and stable milestone lineage. The winning settlement atomically writes the
+   boss result, receipt, and capacity change or writes none of them. Reload,
+   duplicate delivery, repeat clear, another team format, or a later
+   schedule-version number cannot recreate that entitlement.
+
+10. `[A]` Newly earned capacity becomes usable only at the next legal loadout
+    boundary. It never changes a battle or Circuit already in progress.
+
+11. `[A]` Lower-progression Circuits use:
+
+    `effectiveCapacity = min(personalEarnedCapacity, routeCapacityCeiling)`
+
+    The route ceiling is the capacity available immediately before that
+    route's next championship milestone. A veteran retains all earned capacity
+    persistently but must explicitly choose a legal lower-band Circuit loadout.
+    The game never mutates or disables the veteran's ordinary saved equipment
+    to enforce the projection.
+
+12. `[A]` Equip and configuration operations validate the complete proposed
+    result before mutation. If the resulting Load exceeds personal or
+    applicable route capacity—or violates another loadout rule—the entire
+    operation is refused and the prior equipment/configuration remains
+    byte-for-byte intact. The game never partially equips, automatically
+    disables another item, or asks which existing item should become inert
+    after the attempted mutation.
+
+13. `[A]` At most one equipped Legendary-rarity item may be Ascended for a
+    Circuit. Its base identity, one Core Evolution, one active learned Branch
+    Evolution, and any eventual active completion benefit form one bounded,
+    indivisible three-Load payload. Ascendancy never adds another Load source.
+    Additional learned Branches expand the portfolio only.
+
+14. `[A]` The Ascended Legendary and Core lock for the Circuit. After each
+    encounter's authorized preview and before its first attempt, that gladiator
+    may retain or select one learned Branch belonging to the exact Legendary
+    lineage. The selection persists through defeat, reload, and Rematches.
+    Entering Training Assistance permits one new selection before the first
+    assisted attempt because it changes the recipe; Recovery follows the same
+    per-encounter rule. Branch selection does not consume the ordinary loadout
+    Pivot, and that Pivot cannot change the Ascended item or Core.
+
+15. `[A]` Team Tactic uses one visible, nonfungible team-rule allowance outside
+    personal Rule Capacity. It cannot be converted into item Load, and its
+    selection cannot invalidate a personal loadout. At most one applies to the
+    team and it locks for the Circuit. Exact acquisition, voting, 1v1
+    availability, and source-member lifecycle remain separate Team Tactic
+    specification work.
+
+16. `[A]` Active Circuits finish under their pinned rule, schedule, and
+    item-definition versions. A migration occurs only at a clean boundary. If
+    new costs or slot grammar make a saved loadout illegal, every item and the
+    prior configuration record remain preserved, but that configuration cannot
+    enter new play until its owner explicitly selects a legal replacement.
+    Migration never auto-unequips, disables, salvages, or retires an item.
+
+17. `[A]` The sixteen-host grammar, three-point maximum, milestone ledger, and
+    48-point ceiling are versioned. Adding a simultaneous rule-bearing slot or
+    changing costs requires an explicit replacement decision and receipt
+    migration; content additions cannot silently raise or lower capacity. No
+    post-Emperor boss or career level grants further capacity in this version.
+
+18. `[A/U]` A fully Legendary loadout may be the theoretical optimum, but it
+    must not become generically best in every matchup. Legendary burdens,
+    compatibility, and authored opponent differences must preserve useful
+    mixed-rarity configurations. EP-D04 still owns the exact dominance rule and
+    remains pending.
+
+**Parity/seam:** Rule Capacity, milestone receipts, item payloads, route clamps,
+and Team Tactic allowance are Endless state. Any payload that changes combat
+legality or outcome requires `endless-v0`; classic descriptors do not read this
+state. The milestone names and order above are intentional Endless authoring,
+not a claim that the fingerprinted build's complete ladder is runtime-verified
+and not promoted vanilla observations.
+
+**Degenerate strategies invited:** funnel capacity to a team or campaign;
+duplicate boss receipts; hide payloads in inactive slots; bypass a route clamp;
+turn Team Tactic into fungible personal Load; perfect-counter Branch swapping;
+or make sixteen Legendary items the universal answer.
+
+**Required counters and rejection gates:** stable per-combatant milestone
+lineages, atomic/idempotent settlement and crash replay, total proposed-state
+validation, exact equipped-source linkage, strongest-only stacking groups, no
+effect-triggered effect, route-ceiling fixtures, pinned-version migration
+fixtures, and exhaustive or coverage-justified build-frontier tests over every
+slot, cost, Branch, Tactic, matchup, and compatibility family. At least one
+all-sixteen Legendary loadout must validate, while mixed-rarity builds must
+remain viable under the future EP-D04 gate.
+
+**Approval consequence:** EP-D02 and the related EP-D01 clauses 6–7 are closed
+as product decisions. Schema, UI, generator, AI loadouts, hashes, settlement,
+migration, and tests must use the accepted personal milestone-capacity model.
+Exact content balance, Team Tactic lifecycle, EP-D04's dominance metric, and a
+replacement EP-A03 maintenance model remain blockers. This decision does not
+authorize implementation.
+
+The accepted 48-point replacement also supersedes EP-A03's hard-coded
+four-unit Reconstruction Tray as a selectable proposal. This is a dependency
+consequence, not a nineteenth EP-D02 clause: do not replace four with
+forty-eight mechanically. EP-A03 remains pending and requires redesign.
+
+**Record:** `revise — accepted replacement as replayed` — owner: Zanzagar; UTC
+date: 2026-09-04. In the same reply, the owner explicitly recorded
+`EP-D01 clauses 6–7: revise — accepted amendments as replayed.`
 
 ## EP-D03 — one Arena Circuit contains four fights
 
@@ -287,10 +433,13 @@ complexity, not chassis budget.
 the number, structure, or authored identity of compatible behaviour effects. It
 does not increase the item's ordinary damage, armour, health, or stat budget.
 
-**Recommendation:** accept as a permanent identity rule. This is the strongest
-guard against turning an endless sidegrade system back into a colour-coded
-scalar ladder. Higher rarity can be exciting because it enables a different
-decision, not because its number invalidates every lower-rarity item.
+**Recommendation:** revise before decision. Preserve same-family/profile/tier
+chassis equality, but replace the old absolute dominance wording with an exact
+matchup-grid, weighting, tie, and threshold contract compatible with accepted
+EP-D02 clause 18. A fully Legendary loadout may be a theoretical optimum and at
+least one all-sixteen-Legendary loadout must be legal, while burden,
+compatibility, and opponent differences must still leave useful mixed-rarity
+configurations. That combination is not yet operationally specified.
 
 **Alternatives considered:**
 
@@ -309,16 +458,19 @@ one compound affix set, or use rare identities whose nominal burden does not
 pay for their interaction value.
 
 **Required counter and rejection gate:** chassis equality assertions across
-rarities; compatible pools and mutual exclusions; Rule Load and slot budgets;
-duplicate conversion/pity; full affix-combination tests; and observed loadout
-turnover driven by matchup, not colour. Reject any higher rarity that strictly
-dominates its lower-rarity chassis across the declared opponent grid. Also
-apply a frequency/concentration gate by rarity identity so one Legendary cannot
-lead nearly every cell and survive only by losing one showcase liability cell.
+rarities; compatible pools and mutual exclusions; accepted Load/host budgets;
+duplicate conversion/pity; full combination tests; and observed loadout
+turnover driven by matchup, not colour. The replacement must define the
+mechanics-distinct opponent grid, uniform and actual-generator weights, tie
+handling, “useful mixed-rarity” metric, and permitted Legendary concentration.
+It must allow the accepted theoretical optimum without letting one Legendary
+package pass merely by losing a showcase liability cell or lead generically
+across the real matchup distribution.
 
-**Approval consequence:** item generation, UI comparison, AI equipment, Forge,
-and migration must preserve chassis equality. Breaking this rule would require
-an explicit replacement decision, not a tuning commit.
+**Approval consequence if later accepted:** item generation, UI comparison, AI
+equipment, Forge, and migration must preserve chassis equality and the selected
+mixed-rarity/dominance metric. Until then EP-D04 remains a blocker, not an
+implicit extension of EP-D02.
 
 **Record:** `pending` — owner/date: —
 

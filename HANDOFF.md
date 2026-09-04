@@ -1,32 +1,45 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-03 terminal design-chat handoff — resume at EP-D02
+## 2026-09-04 Endless owner-decision update — EP-D02 and EP-D01 amendments
 
-This chat ended intentionally after closing EP-D01 and EP-D07. Resume with the
-newest dated handoff and `$ss2-progression-design`, beginning at EP-D02. The
-authoritative decision record still leaves EP-D02 pending: the fixed-four row
-in the owner packet is a **prefilled recommendation**, not an acceptance. Do
-not propagate four as decided, and do not mass-rewrite its many dependent draft
-tables before the owner accepts complete replacement wording.
+EP-D02 is closed through Zanzagar's explicit `revise — accepted replacement as
+replayed`, and EP-D01 clauses 6–7 are closed through `revise — accepted
+amendments as replayed`. The authoritative record transcribes the exact
+eighteen-clause EP-D02 replacement and the two exact amended clauses.
 
-The owner-directed replacement is a variable, boss-clear-driven personal Rule
-Capacity that reaches **finite saturation** at maximum ordinary vertical power:
-enough capacity for a gladiator to fill every otherwise-legal rule-bearing gear
-position with Legendary items and choose one equipped Legendary for Ascendancy.
-This is “no cap” from the player's point of view, not an infinite number and not
-a waiver of slot, family, stacking, or legality rules. An equip attempt that
-would exceed current capacity is refused atomically and leaves the current
-loadout unchanged. Exact qualifying bosses, credit ownership, source/slot
-inventory, Load costs, Team Tactic accounting, and Ascendancy accounting remain
-open and must be resolved before a normative replay.
+Each persistent gladiator now owns personal Rule Capacity, starting at 0 and
+rising through eighteen stable authored championship milestone lineages in six
+`+2,+3,+3` chapters to a finite v1 ceiling of 48. All sixteen mapped item
+positions may carry otherwise-legal Legendary payloads; categorical Load is
+0/1/2/3, both equipped weapons reserve Load, and there is no maximum-one
+3-Load-identity rule. Capacity cannot be pooled or loaned. Full-rank, Training
+Assistance, and precommitted Recovery victories qualify every participating
+persistent frozen-roster winner, with Recovery capacity as the sole exception
+to that branch's otherwise zero mechanical grants. Receipts are personal,
+bounded, atomic, and idempotent; lower routes clamp effective Capacity and
+require explicit legal selection without mutating saved equipment.
 
-Two conflicts must be shown to the owner rather than silently harmonized. The
-owner earlier required Ascended items to be Legendary only, while accepted
-EP-D01 clause 6 currently also names Trophies, Signatures, and Keystones. The
-owner also explored changing Ascendancy branches per battle, while accepted
-EP-D01 clause 7 locks the configuration for a Circuit with at most one narrow
-Pivot. The accepted wording governs unless the owner explicitly revises it.
-EP-D02–EP-D06 and EP-A01–EP-A03 remain open; no implementation is authorized.
+At most one equipped Legendary may Ascend. Its item/Core lock for the Circuit;
+after each encounter preview and before its first attempt, its owner may retain
+or select one learned exact-lineage Branch, which then persists through defeat,
+reload, and Rematches. Training Assistance and Recovery use the exact accepted
+reselection boundaries. Team Tactic has one separate nonfungible team allowance.
+Standalone Forms, Signature designations, and Keystones are removed as sources;
+their concepts may be item-contained. Clean-boundary migration preserves every
+item and an illegal old configuration until the owner explicitly replaces it.
+
+The old four-unit EP-A03 Reconstruction Tray is superseded, not rescaled to 48;
+EP-A03 requires redesign. EP-D04 also requires revised dominance wording that
+permits a theoretical all-Legendary optimum while preserving useful mixed-rarity
+matchups. EP-D03–EP-D06 and EP-A01–EP-A03 remain open. Implementation remains
+blocked and is not authorized. Resume with the newest dated handoff and
+`$ss2-progression-design`; the next coupled product frontier is EP-D04.
+
+## 2026-09-03 terminal design-chat handoff — superseded instruction
+
+The former instruction to resume at EP-D02 is superseded by the accepted
+2026-09-04 decision above. Do not reopen EP-D02 or restore the fixed-four model
+without an explicit replacement decision.
 
 ## 2026-09-03 Endless owner-decision update — EP-D07
 
@@ -68,8 +81,9 @@ withdrawn draft is not authoritative.
 
 EP-D06 remains pending: the accepted EP-D07 replay did not include D06's
 separate choice of deterministic 2v2 under designed rules, so that constraint
-was not silently smuggled into this acceptance. EP-D02–EP-D06 and EP-A01–EP-A03
-remain open. Resume through the newest dated handoff and the repo-local
+was not silently smuggled into this acceptance. EP-D03–EP-D06 and EP-A01–EP-A03
+remain open; EP-D02 has since closed in the newer section above. Resume through
+the newest dated handoff and the repo-local
 `$ss2-progression-design` skill; do not reopen EP-D07 without an explicit
 replacement decision.
 
@@ -84,8 +98,8 @@ and a bare counter or Chronicle entry cannot satisfy the continuing-objective
 requirement. The authoritative nine-clause wording is in
 [`docs/design/endless-progression-decisions.md`](docs/design/endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits).
 
-EP-D07 has since closed as recorded in the newer section above. EP-D02–EP-D06
-and EP-A01–EP-A03 remain pending, and implementation remains blocked. Resume
+EP-D07 and EP-D02 have since closed as recorded in the newer sections above.
+EP-D03–EP-D06 and EP-A01–EP-A03 remain pending, and implementation remains blocked. Resume
 through the newest dated progression handoff and discuss one owner-guided
 frontier at a time.
 
@@ -97,8 +111,9 @@ The docs-only branch `design/endless-progression-readiness` adds the
 reference-game and SS2 mod-scene research, and red-teams the stable proposal.
 It implements no Endless mechanics and does not authorize implementation.
 
-Before any Endless code, retain EP-D01's accepted replacement and accept
-EP-D02–EP-D06 and EP-A01–EP-A03, or supersede any of them with a fully
+Before any Endless code, retain EP-D01's accepted replacement/amendments,
+EP-D02's accepted replacement, and EP-D07's accepted rule; accept EP-D03–EP-D06
+and EP-A01–EP-A03, or supersede any of them with a fully
 normative, explicitly accepted replacement.
 A rejection or open revision remains blocking. The audit also requires complete
 designed combat and Pressure specifications, a JSON/u64 encoding decision, rule-contract
