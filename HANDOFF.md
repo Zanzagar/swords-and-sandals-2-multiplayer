@@ -1,5 +1,108 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-04 Endless owner-decision update — EP-D02 and EP-D01 amendments
+
+EP-D02 is closed through Zanzagar's explicit `revise — accepted replacement as
+replayed`, and EP-D01 clauses 6–7 are closed through `revise — accepted
+amendments as replayed`. The authoritative record transcribes the exact
+eighteen-clause EP-D02 replacement and the two exact amended clauses.
+
+Each persistent gladiator now owns personal Rule Capacity, starting at 0 and
+rising through eighteen stable authored championship milestone lineages in six
+`+2,+3,+3` chapters to a finite v1 ceiling of 48. All sixteen mapped item
+positions may carry otherwise-legal Legendary payloads; categorical Load is
+0/1/2/3, both equipped weapons reserve Load, and there is no maximum-one
+3-Load-identity rule. Capacity cannot be pooled or loaned. Full-rank, Training
+Assistance, and precommitted Recovery victories qualify every participating
+persistent frozen-roster winner, with Recovery capacity as the sole exception
+to that branch's otherwise zero mechanical grants. Receipts are personal,
+bounded, atomic, and idempotent; lower routes clamp effective Capacity and
+require explicit legal selection without mutating saved equipment.
+
+At most one equipped Legendary may Ascend. Its item/Core lock for the Circuit;
+after each encounter preview and before its first attempt, its owner may retain
+or select one learned exact-lineage Branch, which then persists through defeat,
+reload, and Rematches. Training Assistance and Recovery use the exact accepted
+reselection boundaries. Team Tactic has one separate nonfungible team allowance.
+Standalone Forms, Signature designations, and Keystones are removed as sources;
+their concepts may be item-contained. Clean-boundary migration preserves every
+item and an illegal old configuration until the owner explicitly replaces it.
+
+The old four-unit EP-A03 Reconstruction Tray is superseded, not rescaled to 48;
+EP-A03 requires redesign. EP-D04 also requires revised dominance wording that
+permits a theoretical all-Legendary optimum while preserving useful mixed-rarity
+matchups. EP-D03–EP-D06 and EP-A01–EP-A03 remain open. Implementation remains
+blocked and is not authorized. Resume with the newest dated handoff and
+`$ss2-progression-design`; the next coupled product frontier is EP-D04.
+
+## 2026-09-03 terminal design-chat handoff — superseded instruction
+
+The former instruction to resume at EP-D02 is superseded by the accepted
+2026-09-04 decision above. Do not reopen EP-D02 or restore the fixed-four model
+without an explicit replacement decision.
+
+## 2026-09-03 Endless owner-decision update — EP-D07
+
+EP-D07 is closed through Zanzagar's explicit `Accepted` response to the
+complete replay. A persistent gladiator is mode-neutral across 1v1, 2v2, and
+3v3; format and roster lock per Circuit without resetting Bound Soul, levels,
+stats, equipment, Legendary Lineages, or personal Tactics. Every allied seat in
+the first playable version requires a distinct connected human. Allied AI fill,
+one-human multi-seat control, and AI takeover are excluded. A recognized
+disconnect finishes an already-committed action exactly once and then pauses at
+the next action boundary for same-seat reconnect or the established
+team-abandonment path. A separately accepted corrected nine-clause dropout
+supplement makes the versioned grace period visible and accepted at Circuit entry. Expiry
+never resolves automatically: it activates only that absent member's narrow
+conditional consent, every connected roster member must approve abandonment,
+and any presence change makes the old proposal stale. A terminal committed
+action settles without a timer, while a reconnect restores only that member and
+cannot resume play until all required allies return. In 2v2 the one
+remaining member may approve after the other's expiry; in 3v3 both remaining
+members approve after one expiry, or the sole remaining member after two. No
+connected member means no automatic result. Recovery retains its original
+roster, custody, and human-seat admission.
+
+The authoritative wording and its `[V]/[U]` boundary are in
+[`docs/design/endless-progression-decisions.md`](docs/design/endless-progression-decisions.md#ep-d07--mode-neutral-gladiators-and-human-only-allied-mvp).
+The acceptance makes a minimum genuine two-human session, durable pause,
+authenticated reconnect, and implementation of the accepted grace/abandonment
+protocol new playable blockers. The product liveness rule is no longer open,
+but transport topology, authenticated presence, exact grace duration/storage,
+and reconnect-versus-receipt serialization remain `[U]`. This does not remove
+the generic resolver's AI/controller capabilities, promise later
+companion/hot-seat modes, or authorize implementation.
+
+The corrected supplement supersedes an eight-clause replay that I withdrew
+before commit: it incorrectly said any reconnect resumed play despite another
+possible 3v3 dropout and left “Recovery remains available” ambiguous about
+reduced-roster entry. The owner explicitly accepted the corrected replay; the
+withdrawn draft is not authoritative.
+
+EP-D06 remains pending: the accepted EP-D07 replay did not include D06's
+separate choice of deterministic 2v2 under designed rules, so that constraint
+was not silently smuggled into this acceptance. EP-D03–EP-D06 and EP-A01–EP-A03
+remain open; EP-D02 has since closed in the newer section above. Resume through
+the newest dated handoff and the repo-local
+`$ss2-progression-design` skill; do not reopen EP-D07 without an explicit
+replacement decision.
+
+## 2026-09-03 Endless owner-decision update
+
+EP-D01 is closed through Zanzagar's explicitly accepted replacement. Ordinary
+stat/item-chassis growth now ends at a finite versioned campaign ceiling aligned
+with the expected Emperor encounter, not a promised tier 50. Postcampaign Arena
+Circuits expose Ascendancy, Frontier, and Legacy Pursuits; Ascendancy may add
+only a finite behaviour-led veteran edge under the later EP-D02 active budget,
+and a bare counter or Chronicle entry cannot satisfy the continuing-objective
+requirement. The authoritative nine-clause wording is in
+[`docs/design/endless-progression-decisions.md`](docs/design/endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits).
+
+EP-D07 and EP-D02 have since closed as recorded in the newer sections above.
+EP-D03–EP-D06 and EP-A01–EP-A03 remain pending, and implementation remains blocked. Resume
+through the newest dated progression handoff and discuss one owner-guided
+frontier at a time.
+
 ## 2026-08-31 Endless readiness update
 
 The docs-only branch `design/endless-progression-readiness` adds the
@@ -8,8 +111,10 @@ The docs-only branch `design/endless-progression-readiness` adds the
 reference-game and SS2 mod-scene research, and red-teams the stable proposal.
 It implements no Endless mechanics and does not authorize implementation.
 
-Before any Endless code, the owner must accept EP-D01–EP-D06 and EP-A01–EP-A03,
-or supersede any of them with a fully normative, explicitly accepted replacement.
+Before any Endless code, retain EP-D01's accepted replacement/amendments,
+EP-D02's accepted replacement, and EP-D07's accepted rule; accept EP-D03–EP-D06
+and EP-A01–EP-A03, or supersede any of them with a fully
+normative, explicitly accepted replacement.
 A rejection or open revision remains blocking. The audit also requires complete
 designed combat and Pressure specifications, a JSON/u64 encoding decision, rule-contract
 v2/provenance, canonical active-battle state, collision-resistant durable
@@ -19,6 +124,11 @@ per-action animation-completion signal. The branch did not run capture tools,
 launch Ruffle, or touch parity evidence, candidates, classic rules, or the
 licensed installation. Its fresh-worktree verification profile is 584 tests:
 583 passed, one expected raw-trace archive check skipped, and zero failed.
+
+## THE ARCHIVE LINE
+
+Everything below this heading is frozen evidence and history. Read it to check
+a claim; keep current state and corrections above this line.
 
 ## State at the end of the 2026-08-30 session
 
@@ -222,9 +332,10 @@ on `fightMode` (the fixtures carry it now).
 PR #1 merged the quarantined Endless design into `main` at `e3f14aa`. Follow-up
 design-readiness work continues on `design/endless-progression-readiness`; the
 merged proposal carries the Arena Circuit progression, loot, inventory,
-opponent, and settlement design, but its six product decisions remain
-unapproved in the [owner decision record](docs/design/endless-progression-decisions.md),
-and the [MVP readiness record](docs/design/endless-mvp-readiness.md) keeps
+opponent, and settlement design. EP-D01 and EP-D07 now have accepted
+dispositions; EP-D02–EP-D06 remain unapproved in the
+[owner decision record](docs/design/endless-progression-decisions.md), and the
+[MVP readiness record](docs/design/endless-mvp-readiness.md) keeps
 implementation blocked on its model and contract gates.
 
 **Design must never flow into candidate authoring.** A candidate fitted to a
@@ -248,14 +359,17 @@ identity from merged PR #1.
 
 ## Working agreement for parallel agents
 
-Exclusive file ownership stated in every prompt; no agent runs a state-mutating
-git command; no agent launches Ruffle or touches the installation, the save or
-the snapshots; adversarial verifiers write nothing at all.
+**Corrected 2026-09-02:** Pocock's decision discipline is the default, Codex
+adversarial review checks a material diff, and a fan-out wave is the last resort
+for an otherwise unpinned binary/archive claim. Run one wave at a time through
+the committed capped workflow: at most six question agents and six
+write-nothing verifiers, one named claim per verifier, with the planned spawn
+count stated first. The older uncapped rule here spent roughly 30% of a week's
+usage in twenty minutes and is superseded.
 
-**The limit is the file graph, not the budget.** Writers are capped at ten to
-twelve coherent slices. Auditors have no cap, because they write nothing and
-cannot conflict — and several independent auditors on the same target is a
-quality technique, not duplication. Give each one ONE named claim to break.
+For every permitted subagent, state exclusive file ownership; no subagent runs
+a state-mutating git command, launches Ruffle, or touches the installation,
+save, or snapshots. A dead verifier leaves the claim unverified.
 
 ## Keep the project lawful and reversible
 

@@ -241,8 +241,18 @@ Three separate things:
 `ControllerRegistry` maps seat → controller and nothing else. One team can mix
 all four kinds. `reassignController(battle, seatId, controller)` hands a seat
 over mid-battle without touching combat state, and `advanceAiTurns` follows the
-*seat*, so handing a seat to the AI (a disconnect) or to a remote peer (a
-reconnect) needs no combat code at all.
+*seat*. That makes AI takeover and remote handoff representable generic engine
+operations; it does not define disconnect policy. Accepted Endless EP-D07
+explicitly forbids allied takeover in the first playable version: disconnect
+finishes an already-committed action, pauses at the next action boundary, and
+authenticated reconnect restores the original human authority to the same
+frozen seat/state. Its accepted corrected dropout supplement lets expiry arm only the
+absent member's Circuit-entry consent to abandonment; every connected roster
+member must approve, expiry never resolves combat automatically, and reconnect
+first makes the proposal stale. Reconnect restores only that member and cannot
+resume a multiple-dropout battle until all required allies return; Recovery
+keeps the original roster and human-seat admission. The admission/session
+layer—not combat code—must enforce that narrower product rule.
 
 Two projections follow from that split:
 
@@ -636,24 +646,27 @@ inventing vanilla state rather than mirroring it.
    rewriting a vanilla field. Note that this is a deliberate *departure* from
    the resolver's own default, which is `min: 0`.
 
-#### One resolver limitation the host reports rather than papers over
+#### One host integration lag it reports rather than papers over
 
-`src/team/roster.js` builds an AI-filled slot from `team.aiFill` — **one
-template per team, not one per slot**. A supplied gladiator gets its bag from
-its own combat object; a filled slot has to get one from the caller's template,
-and there is only one place to put it. So when two slots on one team are filled
-from templates that disagree about their canonical resources, there is nowhere
-to put the second bag.
+`src/team/roster.js` now accepts a shared `team.aiFill`, an array indexed by
+slot, or a fill source carried by each empty-slot marker. The core therefore has
+a place for distinct per-slot resource bags. `battle-host.js` still carries the
+older `aiFillWithResources` projection, however: when it derives fill state from
+supplied vanilla templates, it tries to produce one shared team-level resource
+bag instead of projecting each template into the roster's per-slot form.
 
 `battle-host.js` reports that as `diagnostics.aiFillResourceGaps` — one entry
 per affected team, naming the team and the reason — and declares **no**
-resources on those filled slots rather than guessing which template wins. A
+resources on those auto-projected filled slots rather than guessing which
+template wins. A
 guess would put an invented number inside `combatStateHash`, which is the one
 thing the hash exists to prevent. The consequence is concrete and worth
 knowing: a rule set's write to a resource on such a slot will be refused by the
 resolver. The remedies are to supply real gladiators, matching templates, or an
-explicit `aiFill.resources`. Closing it properly needs a per-slot fill source
-from the roster, which is `src/team/` work, not adapter work.
+explicit per-slot `aiFill` declaration. Closing it properly now means retiring
+the host workaround and projecting each caller-supplied template through the
+roster's existing per-slot surface; it is adapter/host work, not a missing core
+roster capability.
 
 ### The loadout bridge is a placeholder, twice over
 
@@ -928,13 +941,14 @@ that was closed two commits ago.
 
 ### Still open
 
-1. **AI-filled slots get one resource bag per team, not per slot.**
-   `src/team/roster.js` carries a single `aiFill` template per team, so two
-   filled slots on one team whose templates disagree cannot both get a bag.
-   `battle-host.js` reports `diagnostics.aiFillResourceGaps` and declares none
-   rather than guessing a number into the state hash. This is the one gap the
-   resource work left, and closing it is `src/team/` work: a per-slot fill
-   source from the roster.
+1. **The host does not yet auto-project distinct fill templates into the
+   roster's per-slot resource surface.** Core `src/team/roster.js` supports
+   shared, indexed, and empty-slot-local fill sources. The older
+   `battle-host.js` workaround still collapses caller-supplied vanilla
+   templates toward one team bag; on disagreement it reports
+   `diagnostics.aiFillResourceGaps` and declares none rather than guessing a
+   number into the state hash. Retire that workaround and pass each template
+   through the existing per-slot form.
 2. **Resources are numbers, so not everything vanilla carries has a home.**
    `normaliseResourceBag` accepts finite scalars only. Numeric pools fit;
    equipment identity does not — the **armour piece ids**, the six numbered
@@ -1002,10 +1016,19 @@ handover, and reconnects do not read as desyncs.
 ## First integration checkpoint
 
 With a supplied licensed SS2 build, complete a 1v1 adapter first and compare it
-with vanilla combat. Then render two static allies, progress to 2v2 with the
-second ally controlled by AI, then enable 2v2 campaign co-op, 3v3 campaign
-co-op, and remote clients. These stages share one verified resolver; 1v1 is a
-parity gate, not the final scope.
+with vanilla combat. Then render the additional static slots and exercise 2v2
+binding as a non-product integration harness. Before any Endless team build is
+called the first playable version, accepted EP-D07 requires per-action
+acknowledgement plus one distinct connected human for every allied seat,
+action-boundary pause, authenticated same-seat reconnect, and the established
+team-abandonment path. That path includes the visible versioned grace policy,
+non-automatic expiry, every connected member's approval, and stale-on-reconnect
+ordering accepted in the corrected EP-D07 supplement. Terminal actions settle
+without a timer, partial reconnect stays paused, and Recovery keeps its original
+roster/admission. Allied AI fill, one-human
+multi-seat control, and AI takeover cannot substitute for that checkpoint.
+Later 3v3 and broader remote client work use the same resolver; 1v1 is a parity
+gate, not the final scope.
 
 The licensed build's read-only static map is now recorded in
 [the SS2 battle map](integration/ss2-battle-map.md). Its formulas are evidence
@@ -1025,6 +1048,13 @@ above. The separate campaign save record is implemented asset-free in
 
 What is still missing before a playable mod:
 
+- **per-action presentation acknowledgement** — the terminal result bridge
+  cannot prevent action N+1 from rebinding the four vanilla globals while
+  action N's timeline is still running;
+- **the accepted human session lifecycle** — no admission/transport layer
+  proves one distinct human per allied seat, persists action-boundary pause, or
+  authenticates same-seat reconnect, visible grace timing, and race-safe
+  connected-team abandonment without AI takeover;
 - **the runtime-verified rule set** — the seam and its gate exist and nothing
   measured has been dropped into them yet. `classicStyleRules` is the only rule
   set anywhere under `src/`, and it is a declared placeholder; the others in the
