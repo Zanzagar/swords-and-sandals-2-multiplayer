@@ -8,6 +8,15 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-07 07:24 — the ranked list ran out](docs/handoffs/2026-09-07-0724--the-ranked-list-ran-out.md).**
+Start there. Every ranked item is closed; the game gained status phases, team
+fights and a campaign record that can be read back; and **the most useful move
+of the session was to stop reading the brief and start reading
+`docs/roadmap.md`'s "not started" column**, which is where the last two features
+came from. It also carries what to be careful of, in the order it will bite.
+
+*(The brief it supersedes, written MID-session and stale in places it names
+itself — read it for the email record:)*
 [2026-09-07 03:30 — the armoured golden reaches the resolver](docs/handoffs/2026-09-07-0330--the-armoured-golden-reaches-the-resolver.md).**
 Start there. `REPLAY_UNDRIVABLE` is EMPTY and all 23 goldens drive a real
 battle; the email to the developer was already SENT and the record now says so;
