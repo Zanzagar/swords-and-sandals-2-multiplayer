@@ -8,6 +8,19 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-07 08:25 — the accepted decisions do not authorize anything](docs/handoffs/2026-09-07-0825--the-accepted-decisions-do-not-authorize-anything.md).**
+Start there. Ranked item 2 is ANSWERED and the answer is a fork for the owner:
+three EP decisions are accepted, forty normative clauses, and **every one ends
+"This decision does not authorize implementation."** The accepted text is NOT on
+this branch — it is on the unmerged `design/endless-progression-owner-packet`,
+and this tree's copy is the older design where all six read `pending`. Read it
+with `git show`, never by checking that branch out (its `AGENTS.md` is 156
+commits stale). Meanwhile the campaign read-back got its first consumer —
+`node tools/hotseat.mjs --circuit 3` — and `playable` turned out to be a flag
+that CANNOT be true.
+
+*(The brief it supersedes, whose ranked items 1, 3 and 4 are all still open and
+all still the owner's supervised lanes:)*
 [2026-09-07 07:24 — the ranked list ran out](docs/handoffs/2026-09-07-0724--the-ranked-list-ran-out.md).**
 Start there. Every ranked item is closed; the game gained status phases, team
 fights and a campaign record that can be read back; and **the most useful move
