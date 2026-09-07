@@ -38,6 +38,7 @@ import {
   toTeamWireState
 } from "../src/team/index.js";
 
+import { ss2TeamRules } from "../src/team/ss2-rules.js";
 import {
   AcknowledgementError,
   ActionAnimationError,
@@ -1968,4 +1969,54 @@ test("a token no presentation command carried opens nothing", () => {
     (error) => error instanceof ActionAnimationError && /no presentation command carried it/.test(error.message)
   );
   assert.equal(host.readyForNextAction().ready, false);
+});
+
+/* ------------------------------------------------------------------ */
+/* The host and the map-derived rule set: where the seam actually ends  */
+/* ------------------------------------------------------------------ */
+
+test("the host CONSTRUCTS with ss2TeamRules and supplied gladiators, and says why it cannot derive", () => {
+  // WHY THIS EXISTS, and it is the third time this seam has sent someone to the
+  // wrong throw. `ss2-rules.js`'s own header says a supplied gladiator "now
+  // BUILDS, and fails on its own first swing instead". Measured 2026-09-07: it
+  // did NOT build — `compareMaximumHealth`, a DIAGNOSTIC the host runs once per
+  // combatant in its constructor, let the rule set's refusal-to-derive escape
+  // and killed the host before any swing. The header was describing the
+  // intended state; a different throw was firing first and hiding it.
+  const host = makeHost(1, { rules: ss2TeamRules });
+  assert.ok(host, "a diagnostic must not be able to refuse a battle");
+
+  // The refusal is now a FINDING, and it names the missing resource — which is
+  // the real statement about this seam: the canonical bag is too narrow for
+  // this rule set.
+  const reports = host.diagnostics.maximumHealthReports;
+  assert.equal(reports.length, 2);
+  for (const report of reports) {
+    assert.equal(report.ruleSetDerived, null);
+    assert.equal(report.agrees, false);
+    assert.match(report.underivable, /herolevel/);
+  }
+});
+
+test("and the wall it hits is the ATTACKER's damage pair, at the swing, not at construction", () => {
+  const host = makeHost(1, { rules: ss2TeamRules });
+  host.constructArena();
+
+  // Construction is past; the arithmetic is where the canonical bag runs out.
+  // `CANONICAL_RESOURCE_SOURCES` carries neither `min_damage` nor `max_damage`,
+  // and ss2TeamRules demands them of whoever ATTACKS at the moment the swing
+  // resolves — role-based, never of a pure defender.
+  assert.throws(
+    () => host.submit({ actorId: host.currentCombatantId(), ...host.legalActions()[0] }),
+    (error) => /max_damage, min_damage/.test(error.message) && /ATTACKS/.test(error.message)
+  );
+
+  // Pinned so the next person does not go to the wrong throw again: the
+  // AI-FILLED path has no such wall, because `team.aiFill.resources` bypasses
+  // `CANONICAL_RESOURCE_SOURCES` entirely and can carry the full SS2 bag.
+  assert.equal(
+    CANONICAL_RESOURCE_SOURCES.includes("min_damage") || CANONICAL_RESOURCE_SOURCES.includes("herolevel"),
+    false,
+    "if this ever becomes true, the two walls above have moved and both tests must be re-derived"
+  );
 });

@@ -117,6 +117,20 @@
  *   function is `assertDeclaredResources`; `assertRequiredResources` no longer
  *   exists.
  *
+ *   ► **THAT WAS AN INTENTION, NOT A MEASUREMENT, AND IT WAS FALSE FOR THE
+ *     REST OF THE DAY. Measured and fixed later on 2026-09-07.** A supplied
+ *     gladiator did NOT build: a THIRD throw fired ahead of the swing and hid
+ *     this one. `battle-host.js` runs `compareMaximumHealth` once per combatant
+ *     in its constructor; that diagnostic blanks `maxHealth` on purpose so the
+ *     rule set has to DERIVE it, `maximumHealth` here reaches for a `herolevel`
+ *     resource `CANONICAL_RESOURCE_SOURCES` does not carry, and the refusal
+ *     escaped and killed the host. **So this file's own note sent a reader to
+ *     the wrong throw for the third time.** The diagnostic now REPORTS an
+ *     underivable formula (`diagnostics.maximumHealthReports[].underivable`)
+ *     instead of propagating it, and the paragraph above is true as written.
+ *     Both walls are pinned by tests in `test/ss2-adapter-integration.test.js`
+ *     so the next reader measures rather than reads.
+ *
  * Widening the canonical list is still real work with its own evidence
  * requirements; it is not done here.
  *

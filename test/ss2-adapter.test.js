@@ -11,6 +11,7 @@ import {
   currentCombatant,
   defineTeamRuleSet,
   EffectKind,
+  placeholderTeamRules,
   RuleSetVerification,
   toTeamWireState
 } from "../src/team/index.js";
@@ -564,6 +565,49 @@ test("a mirror that is wrong about armour is drift now, where it used to be sile
   assert.deepEqual(mirrorDifferences(record, invented), []);
 });
 
+test("the adapter's resource vocabulary is PINNED: changing it re-hashes every adapter-built battle", () => {
+  // WHY THIS EXISTS, and it is a gap that was invisible until 2026-09-07.
+  // `CANONICAL_RESOURCE_SOURCES` IS the supplied-gladiator path's projected
+  // resource bag, and `combatStateHash` covers that projection — so adding one
+  // name to this list moves the hash of every battle the adapter builds, and an
+  // old peer reads the difference as state divergence rather than as
+  // "different code". The rule set's own vocabulary has been pinned this way
+  // since the wire format moved under it (`test/ss2-team-rules.test.js`); the
+  // ADAPTER's had not, so every assertion about this list was RELATIVE
+  // (`[...CANONICAL_RESOURCE_SOURCES].sort()`, `.includes(...)`) and
+  // self-updated silently when the list grew.
+  //
+  // There is a live reason to grow it: `ss2TeamRules` declares 32 resources and
+  // 14 of them never reach a supplied gladiator, so the map-derived rule set
+  // cannot be driven by the host with a gladiator a person controls. That is a
+  // decision with a peer-visible cost, and this pin is what makes it one.
+  assert.deepEqual([...CANONICAL_RESOURCE_SOURCES], [
+    // ammunition and the armour pool
+    "ammo_left", "armourclass", "armourclass_max", "maximum_ammo",
+    // stamina
+    "staminaleft", "staminamax",
+    // the one stat that is a resource
+    "charisma",
+    // per-piece armour VALUES — the piece IDS are deliberately absent; see
+    // `docs/ss2-adapter-contract.md`, "Still open" item 2
+    "boot_defence", "breastplate_defence", "gauntlet_defence", "greaves_defence",
+    "helmet_defence", "shield_defence", "shinguard_defence", "shoulderguard_defence",
+    // enchantments, both weapons
+    "secondary_weapon_enchantment_potency", "secondary_weapon_enchantment_type",
+    "weapon_enchantment_damage", "weapon_enchantment_potency", "weapon_enchantment_type"
+  ]);
+  assert.equal(CANONICAL_RESOURCE_SOURCES.length, 20);
+
+  // And the pin is only worth having if it really is the projected bag: a pin
+  // over a list nothing projects would be decoration.
+  const source = toCanonicalCombatantSource(freshVanillaGladiator(), { id: "red-1" });
+  assert.deepEqual(
+    Object.keys(source.combatant.resources).sort(),
+    [...CANONICAL_RESOURCE_SOURCES].sort(),
+    "the supplied path projects exactly this list, which is why changing it moves a hash"
+  );
+});
+
 test("every canonical resource name is a field the battle map already cites", () => {
   for (const name of CANONICAL_RESOURCE_SOURCES) {
     assert.ok(citationFor(name), `${name} must cite a battle-map section`);
@@ -584,6 +628,57 @@ test("maximum health is compared against the rule set, never corrected by the ad
     { derived: report.ruleSetDerived, vanilla: report.vanillaHitpointsMax, agrees: report.agrees },
     { derived: 80, vanilla: 30, agrees: false }
   );
+});
+
+test("a rule set that CANNOT derive maximum health is reported, not allowed to abort the host", () => {
+  // WHY THIS EXISTS. `compareMaximumHealth` blanks `maxHealth` on purpose, so
+  // the rule set has to derive rather than hand back the number the adapter
+  // just read. A rule set that derives from a resource the canonical bag does
+  // not carry therefore cannot answer, and says so by throwing — and this
+  // function used to let that throw escape into `battle-host.js`'s
+  // constructor, where it killed the host over a DIAGNOSTIC.
+  const source = toCanonicalCombatantSource(freshVanillaGladiator(), { id: "red-1" });
+  const cannotDerive = {
+    ...placeholderTeamRules,
+    id: "cannot-derive-maximum-health",
+    maximumHealth(combatant) {
+      if (!Number.isFinite(combatant.maxHealth)) {
+        throw new Error("needs a herolevel resource this bag does not carry");
+      }
+      return combatant.maxHealth;
+    }
+  };
+
+  const report = compareMaximumHealth(cannotDerive, source.combatant, source.vanilla);
+  assert.equal(report.ruleSetDerived, null, "no number is invented when the rule set cannot give one");
+  assert.equal(report.agrees, false, "an underivable formula agrees with nothing");
+  assert.match(report.underivable, /herolevel resource/);
+  assert.equal(report.vanillaHitpointsMax, 30, "the vanilla side is still reported");
+  assert.ok(Object.isFrozen(report));
+
+  // THE MUTANT THIS KILLS: falling back to the vanilla figure. Reporting
+  // vanilla's own number as the rule set's answer would make `agrees` true and
+  // turn the diagnostic into the self-confirming comparison the blanking exists
+  // to prevent.
+  assert.notEqual(report.ruleSetDerived, report.vanillaHitpointsMax);
+});
+
+test("compareMaximumHealth blanks maxHealth, so a rule set cannot agree with itself", () => {
+  const source = toCanonicalCombatantSource(freshVanillaGladiator(), { id: "red-1" });
+  let sawMaxHealth = "unset";
+  const echo = {
+    ...placeholderTeamRules,
+    id: "echoes-max-health",
+    maximumHealth(combatant) {
+      sawMaxHealth = combatant.maxHealth;
+      return Number.isFinite(combatant.maxHealth) ? combatant.maxHealth : -1;
+    }
+  };
+  const report = compareMaximumHealth(echo, source.combatant, source.vanilla);
+  assert.equal(sawMaxHealth, undefined, "the rule set must be handed no maxHealth to echo back");
+  assert.equal(report.ruleSetDerived, -1);
+  assert.equal(report.agrees, false, "echoing the adapter's own number must not read as agreement");
+  assert.equal(report.underivable, null, "returning a number is not the same as refusing to");
 });
 
 /* ------------------------------------------------------------------ */

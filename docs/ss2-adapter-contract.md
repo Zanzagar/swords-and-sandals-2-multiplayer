@@ -979,6 +979,30 @@ that was closed two commits ago.
    vanilla record directly, and a future `remove_armour` rule set, which has to
    know *which* piece was destroyed and not merely that armour fell, will need
    `CANONICAL_RESOURCE_SOURCES` to grow.
+
+   ► **THE FUTURE IS HERE, MEASURED 2026-09-07, and the shortfall is wider than
+   the piece ids.** `CANONICAL_RESOURCE_SOURCES` names **20** resources;
+   `SS2_RESOURCE_NAMES` (`src/team/ss2-rules.js`) names **32**, and **14** of
+   those never arrive through the supplied-gladiator path: the eight armour
+   piece ids plus `character_level`, `equipped_weapon`, `herolevel`,
+   `max_damage`, `min_damage` and `secondary_weapon_enchantment_damage`.
+
+   **What that does and does not block, because the obvious reading is too
+   strong and this repository has already made it once.** It blocks the
+   **supplied-gladiator** path only. An **AI-filled slot** takes its bag from
+   `team.aiFill.resources`, which bypasses `CANONICAL_RESOURCE_SOURCES`
+   entirely — measured 2026-09-07:
+   `createVanillaBattleHost({ rules: ss2TeamRules, teams: [...aiFill.resources
+   from ss2Combatant()] })` constructs and fights a full 27-action battle to
+   elimination with `unmapped: []`. **So the host CAN drive the map-derived
+   rule set today; what it cannot do is drive it with a gladiator a person
+   controls**, which is what a playable adapter-driven battle needs.
+
+   The supplied path now reaches its real wall — the role-based
+   `max_damage`/`min_damage` requirement, at the swing — rather than a
+   diagnostic's throw at construction; see `compareMaximumHealth`. Both walls
+   are pinned by tests. Widening the canonical list is real work with its own
+   evidence requirements and is NOT done.
 3. **Facing is read but not carried.** `gladiator_dir` affects the knockback
    sign and the debris direction in the 1v1 candidate. It is a string
    (`"right"` / `"left"`), so the numeric resource bag is not its home either.

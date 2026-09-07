@@ -833,8 +833,17 @@ test("facing changes the armour-debris draw's shape, so it is tape-load-bearing"
  * has a long record of metadata rotting quietly. The fix is to pin the SHAPE, so
  * the next change to it cannot be silent and has to be a decision.
  *
- * The legacy engine projection and the adapter's resource bags already had pins
- * like these. This rule set did not, which is why it was the one that moved.
+ * ~~The legacy engine projection and the adapter's resource bags already had
+ * pins like these.~~ ► **HALF WRONG, and corrected 2026-09-07. The half that
+ * was wrong is load-bearing**, because it is the reason a reader would believe
+ * the suite guards the adapter's bag. The wire projection's KEY SHAPE is
+ * pinned (`test/team-resolver.test.js:1312-1316`) — that half holds — but that
+ * pins which keys a combatant has, not what is inside `resources`. **The
+ * ADAPTER's resource NAMES were not pinned at all**: every assertion about
+ * `CANONICAL_RESOURCE_SOURCES` was relative (`[...].sort()`, `.includes(...)`)
+ * and self-updated when the list changed, so growing it would have re-hashed
+ * every adapter-built battle with the suite staying green. It is pinned now,
+ * in `test/ss2-adapter.test.js`.
  */
 
 test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash", () => {

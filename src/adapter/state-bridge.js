@@ -601,15 +601,58 @@ export function initialStatusEffects(sources) {
  * health agrees with the vanilla `hitpointsmax` the adapter read. It never
  * corrects either value: `hitpointsmax` comes from `battlevalues` (map,
  * "Combatant state objects"), which is a formula and therefore rule-set work.
+ *
+ * **`maxHealth` is blanked deliberately**, so the rule set has to DERIVE the
+ * number rather than hand back the one the adapter just read. Comparing a
+ * value with itself would report agreement always, which is the one answer
+ * this diagnostic must never be able to give.
+ *
+ * ► **AND A DIAGNOSTIC MUST NOT BE ABLE TO REFUSE A BATTLE (fixed 2026-09-07).**
+ * Blanking `maxHealth` means a rule set that derives from a resource the
+ * canonical bag does not carry cannot answer at all — and it says so by
+ * throwing. This function used to let that throw escape, and
+ * `battle-host.js` calls it once per combatant in its constructor, so the
+ * throw aborted construction. Measured that day: `createVanillaBattleHost`
+ * with `ss2TeamRules` and a SUPPLIED gladiator died here, at
+ * `ss2-rules.js`'s `maximumHealth` reaching for a `herolevel` resource that
+ * `CANONICAL_RESOURCE_SOURCES` does not carry — while the battle underneath
+ * was fine, because the roster had already normalised `maxHealth` from
+ * `hitpointsmax` and never needed the derivation.
+ *
+ * So a rule set that cannot derive is now REPORTED, in `underivable`, and
+ * `agrees` is false because an underivable formula agrees with nothing. That
+ * is a real finding about the seam — it says the canonical bag is too narrow
+ * for this rule set — and a finding belongs in `diagnostics`, not in a throw
+ * that stops a host being built at all.
  */
 export function compareMaximumHealth(rules, canonicalSource, vanillaRecord) {
-  const derived = rules.maximumHealth({ ...canonicalSource, maxHealth: undefined });
   const vanilla = Number(vanillaRecord.fields.hitpointsmax ?? 0);
+  let derived = null;
+  let underivable = null;
+  try {
+    derived = rules.maximumHealth({ ...canonicalSource, maxHealth: undefined });
+  } catch (error) {
+    // Only the rule set's refusal to derive is caught. Nothing here decides a
+    // number: `ruleSetDerived` stays null rather than falling back to the
+    // vanilla value, because reporting vanilla's own figure as the rule set's
+    // answer is exactly the self-confirming comparison the blanking prevents.
+    underivable = error?.message ?? String(error);
+  }
   return Object.freeze({
     combatantId: canonicalSource.id,
     ruleSetDerived: derived,
     vanillaHitpointsMax: vanilla,
-    agrees: derived === vanilla
+    // `underivable === null &&` is a GUARD, and it SURVIVES MUTATION — said
+    // here rather than left as an untested branch. It is unreachable today
+    // because `derived` stays null on the catch path and `vanilla` is always a
+    // number, so `derived === vanilla` is already false. It is kept because it
+    // is what stops the one dangerous composite edit: anyone who later makes
+    // the catch path fall back to `vanilla` (to "fill in" the null) would
+    // otherwise turn every underivable rule set into `agrees: true` — the
+    // self-confirming answer the blanking above exists to prevent. Delete this
+    // clause only together with that fallback, never on its own.
+    agrees: underivable === null && derived === vanilla,
+    underivable
   });
 }
 
