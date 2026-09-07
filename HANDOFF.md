@@ -14,6 +14,23 @@ email to the game's developer, SOLO — no wave. It also records the decided
 verification precedence (Pocock first, Codex second, one capped wave last;
 harness ADR 0001) and that ultracode stays ON at the owner's instruction.
 
+► **THAT FIRST TASK IS DONE AND CLOSED: THE EMAIL WAS SENT. Do not draft it
+  again** — the 23:13 brief above still reads as though it is pending, and a
+  session that follows it will re-do finished work. The owner sent it himself
+  and reported so on **2026-09-07**; the sent text, the verified recipient
+  (`info@whiskeybarrelstudios.com`, confirmed from the studio's own press kit
+  that day) and a provenance table for every factual claim it makes are in
+  **`docs/outreach/2026-09-02-email-to-oliver-joyce.md`**. **No reply is
+  recorded — append one THERE, not to a handoff**, which freezes.
+  One claim in the sent text overstates the record and is flagged in that
+  file: *"every number... observed in the real game and confirmed twice"* is
+  true of the 23 goldens, NOT of the engine, whose rule set declares
+  `kind: "map-derived"`, `runtimeVerified: false` (`src/team/ss2-rules.js:914`).
+  The owner's signature block is redacted there because **this repository is
+  public**; nothing evidentiary depends on it.
+  **The next task is therefore the 16:59 brief's ranked item 1**, the
+  role-based damage-pair requirement.
+
 *(The brief it supersedes, whose findings and ranked list are unchanged:)*
 [2026-09-02 16:59 — three waves, cut at the usage limit](docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md). Three capped fan-out waves on the 13:40 brief's ranked items 1–3
 were stopped at 92% of the session limit; ranked item 4 is CLOSED by
