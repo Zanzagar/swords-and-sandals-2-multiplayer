@@ -35,6 +35,7 @@ import {
   combatStateHash,
   createOrderedRngChannel,
   createTeamBattle,
+  toTeamWireState,
   currentCombatant,
   legalActions,
   reassignController,
@@ -56,6 +57,7 @@ import {
   SS2_FACING_LEFT,
   SS2_MAP_SOURCE_REFS,
   SS2_REQUIRED_RESOURCES,
+  SS2_RESOURCE_DEFAULTS,
   SS2_RESOURCE_NAMES,
   ss2StatusFlagOf,
   ss2StatusSourceOf,
@@ -804,6 +806,156 @@ test("facing changes the armour-debris draw's shape, so it is tape-load-bearing"
     );
   }
   assert.ok(checked, "the sweep must reach an armour destruction");
+});
+
+/* ------------------------------------------------------------------ */
+/* The wire projection: what every peer must agree on, byte for byte     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * WHY THIS SECTION EXISTS, and it is a defect report rather than a precaution.
+ *
+ * On 2026-09-07 two resource names were added to this rule set's vocabulary so
+ * the status phase could read an inflictor's enchantment damage. `ss2Combatant`
+ * declares every name in the vocabulary, `combatantProjection`
+ * (`src/team/resolver.js:480-496`) carries every DECLARED resource, and
+ * `combatStateHash` is an fnv1a over that projection. So **all 23 golden replay
+ * hashes moved** — measured, the armoured golden went `70e605e1` -> `4032d673`
+ * — and the entire suite stayed green, because nothing pinned the shape. The
+ * commit that did it reported "no pinned hash moved", which was true of the
+ * assertions and false of the hashes.
+ *
+ * Two peers on either side of that change do NOT corrupt a battle: their hashes
+ * differ, which is exactly the signal the hash exists to produce. What they lose
+ * is the diagnosis — it reads as state divergence when the cause is "different
+ * code". The fix chosen was NOT a version number in the rule-set id, because a
+ * version is only as good as the discipline that bumps it and this repository
+ * has a long record of metadata rotting quietly. The fix is to pin the SHAPE, so
+ * the next change to it cannot be silent and has to be a decision.
+ *
+ * The legacy engine projection and the adapter's resource bags already had pins
+ * like these. This rule set did not, which is why it was the one that moved.
+ */
+
+test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash", () => {
+  assert.deepEqual([...SS2_RESOURCE_NAMES], [
+    "armourclass", "armourclass_max",
+    "boot", "boot_defence",
+    "breastplate", "breastplate_defence",
+    "character_level", "charisma", "equipped_weapon",
+    "gauntlet", "gauntlet_defence",
+    "greaves", "greaves_defence",
+    "helmet", "helmet_defence",
+    "herolevel", "max_damage", "min_damage",
+    "secondary_weapon_enchantment_damage",
+    "secondary_weapon_enchantment_potency",
+    "secondary_weapon_enchantment_type",
+    "shield", "shield_defence",
+    "shinguard", "shinguard_defence",
+    "shoulderguard", "shoulderguard_defence",
+    "staminaleft", "staminamax",
+    "weapon_enchantment_damage",
+    "weapon_enchantment_potency",
+    "weapon_enchantment_type"
+  ], [
+    "The SS2 resource vocabulary changed. `ss2Combatant` declares every one of",
+    "these names, declared resources enter `combatantProjection`, and the",
+    "projection IS `combatStateHash` — so this list is part of the wire format.",
+    "Adding or removing a name re-hashes every battle in existence, including",
+    "all 23 golden replays, and a peer on the other side of the change will",
+    "disagree with this one about a battle they are playing identically.",
+    "If that is intended, update this list deliberately and say so in the",
+    "commit message. Do not update it to make the suite green."
+  ].join(" "));
+});
+
+test("an SS2 combatant declares exactly the vocabulary, and the projection carries it", () => {
+  // The vocabulary is the intent; this is what a real combatant actually puts
+  // on the wire. They can drift apart — a name could be declared and dropped
+  // from the projection, or a default could stop being written — so both are
+  // pinned and the second is derived from the first rather than restated.
+  const battle = battleOf({}, {});
+  const declared = Object.keys(combatantById(battle, "hero").resources).sort();
+  assert.deepEqual(declared, [...SS2_RESOURCE_NAMES].sort(), "declaration must match the vocabulary");
+
+  const projected = toTeamWireState(battle).teams[0].combatants[0];
+  assert.deepEqual(
+    Object.keys(projected.resources).sort(),
+    declared,
+    "every declared resource must reach the projection, or the hash is blind to an input"
+  );
+  assert.deepEqual(Object.keys(projected), [
+    "id", "name", "teamId", "seatId", "slotIndex", "aiFilled",
+    "stats", "loadout", "resources", "maxHealth", "health", "alive", "status"
+  ], "the per-combatant projection shape is wire format too");
+});
+
+test("the SS2 resource DEFAULTS are pinned: they are wire format too", () => {
+  // A default is as load-bearing as a name. Every gladiator that does not state
+  // a value declares this one, so changing a default re-hashes every battle
+  // exactly as adding a name does — and it does it without touching any list a
+  // reader would think to check.
+  assert.deepEqual(SS2_RESOURCE_DEFAULTS, {
+    armourclass: 0, armourclass_max: 0,
+    character_level: 1, charisma: 0, equipped_weapon: 1, herolevel: 1,
+    secondary_weapon_enchantment_damage: 0,
+    secondary_weapon_enchantment_potency: 0,
+    secondary_weapon_enchantment_type: 0,
+    weapon_enchantment_damage: 0,
+    weapon_enchantment_potency: 0,
+    weapon_enchantment_type: 0,
+    helmet: 0, shoulderguard: 0, breastplate: 0, gauntlet: 0,
+    greaves: 0, shinguard: 0, boot: 0, shield: 0,
+    helmet_defence: 0, shoulderguard_defence: 0, breastplate_defence: 0,
+    gauntlet_defence: 0, greaves_defence: 0, shinguard_defence: 0,
+    boot_defence: 0, shield_defence: 0
+  }, "a changed default re-hashes every battle that relies on it — change it deliberately");
+
+  // The four required names are absent on purpose: they have no defensible
+  // default, so a gladiator omitting one is refused instead of defaulted.
+  for (const required of SS2_REQUIRED_RESOURCES) {
+    assert.ok(
+      !Object.hasOwn(SS2_RESOURCE_DEFAULTS, required),
+      `${required} must never gain a default; refusing is the whole point of requiring it`
+    );
+  }
+});
+
+test("a canonical SS2 battle hashes to a pinned value — one tripwire for the whole projection", () => {
+  // The key-set pins above catch a NAME changing. This catches everything else
+  // that feeds the hash: a default value, a stat, a status token's spelling, the
+  // rule-set id, the contract version. One literal, and it moves whenever the
+  // wire format does.
+  //
+  // Deliberately a battle with no action applied: the point is the projection,
+  // not the arithmetic, and a fixed seed keeps it independent of RNG changes.
+  //
+  // And deliberately built from a MINIMAL gladiator that states as little as it
+  // can, so every value in `SS2_RESOURCE_DEFAULTS` actually feeds the hash. The
+  // first version of this test used the ordinary `gladiator()` helper, which
+  // states `character_level` — and a mutation changing that default passed the
+  // whole suite. A tripwire that only fires on names is half a tripwire.
+  const minimal = {
+    strength: 1, speed: 1, attack: 1, defence: 1, vitality: 1,
+    stamina: 1, magicka: 0, charisma: 0, herolevel: 1,
+    weapon_min_damage: 1, weapon_max_damage: 1
+  };
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(minimal, { id: "hero", name: "Hero" })] },
+      { id: "blue", combatants: [ss2Combatant(minimal, { id: "villain", name: "Villain" })] }
+    ]
+  });
+  assert.equal(combatStateHash(battle), "58240ee3", [
+    "The SS2 wire projection changed. That is not necessarily wrong — but it",
+    "means every peer running the previous build now disagrees with this one",
+    "about identical battles, and every stored completion token minted before",
+    "the change names a battle this build would hash differently.",
+    "Re-derive the new value, put it here, and say in the commit message WHAT",
+    "moved and why it was worth moving."
+  ].join(" "));
 });
 
 /* ------------------------------------------------------------------ */
