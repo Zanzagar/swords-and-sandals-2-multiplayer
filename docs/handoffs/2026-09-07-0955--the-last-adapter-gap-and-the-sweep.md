@@ -2,13 +2,18 @@
 handoff:      2026-09-07-0955--the-last-adapter-gap-and-the-sweep
 written:      2026-09-07 09:55 -0400
 sessionId:    cb4573bf-667b-4a07-b201-bd507c84f3ff (https://claude.ai/code/session_01RUt3YdrZ6qwhazUARrSoQi)
-branch:       arena/champion-capture. TWO commits, `20a8fa0` and `c5d45f9`.
+branch:       arena/champion-capture. FOUR commits, `20a8fa0` `c5d45f9`
+              `cc4ff6e` `659dfab`. The first three were pushed at 10:05 with
+              the owner's explicit approval (`470c56a..cc4ff6e`); the fourth
+              came after.
               Push state is decided at the very end of this session — check
               `git log --oneline github/arena/champion-capture..HEAD` rather
               than believing any sentence here.
-suite:        808 / 807 / 0 / 1 (fresh-clone profile: `captures/` holds only
-              ARCHIVE-MANIFEST.sha256 and README.md), measured 09:52. From 787
-              at session start. Re-measure; never copy this line.
+suite:        813 / 812 / 0 / 1 (fresh-clone profile: `captures/` holds only
+              ARCHIVE-MANIFEST.sha256 and README.md), measured at the end.
+              From 787 at session start. **It read 808 mid-session and a
+              verifier caught me quoting the stale figure in a wave brief.**
+              Re-measure; never copy this line.
 supersedes:   2026-09-07-0825--the-accepted-decisions-do-not-authorize-anything,
               whose ranked item 2 is BUILT and whose document-integrity sweep is
               RUN. Its ranked items 1, 3 and 4 are untouched and all three are
@@ -169,6 +174,69 @@ Also still the owner's, all unchanged: the status-phase capture hook
 (Windows/Ruffle), the villain stamina 105-vs-110 schema question, and
 `.claude/settings.local.json`'s `Bash(rm -rf *)` allow.
 
+## AFTER THE SWEEP: two defects found by USING a seam rather than reading it
+
+The owner chose "keep building game code", so I went looking for what the
+adapter host could not do. It could not drive `ss2TeamRules`, the only
+map-derived rule set — and the diagnosis moved twice before it was right.
+
+**1. A DIAGNOSTIC COULD ABORT CONSTRUCTION.** `compareMaximumHealth`'s own
+docstring says *"Diagnostic only … It never corrects either value"*, but it
+could throw and `battle-host.js` calls it once per combatant in its
+constructor. It blanks `maxHealth` deliberately — so the rule set must DERIVE
+rather than echo the number the adapter just read — and SS2's `maximumHealth`
+reaches for a `herolevel` resource `CANONICAL_RESOURCE_SOURCES` does not carry.
+Stack trace: `ss2-rules.js:1460` ← `state-bridge.js:606` ← `battle-host.js:299`.
+**The battle underneath was fine**: the resolver builds the same combatants,
+because the roster had already normalised `maxHealth` from `hitpointsmax`.
+An underivable formula is now REPORTED in
+`diagnostics.maximumHealthReports[].underivable`.
+
+**AND IT HAD BEEN HIDING THE REAL WALL.** `ss2-rules.js`'s header says a
+supplied gladiator *"now BUILDS, and fails on its own first swing instead"*.
+That was an INTENTION, not a measurement — it did not build. It does now, and
+fails on the role-based `max_damage`/`min_damage` requirement at the swing.
+**That file has sent a reader to the wrong throw three times**; both walls are
+pinned by tests so the next one measures.
+
+**2. MY OWN HEADLINE WAS WRONG, in the exact direction that file warns about.**
+I wrote *"the adapter host cannot drive ss2TeamRules at all"*. **It can.** An
+AI-FILLED slot takes its bag from `team.aiFill.resources`, bypassing
+`CANONICAL_RESOURCE_SOURCES` entirely — measured, a full 27-action battle to
+elimination with `unmapped: []`. What the host **cannot** do is drive it with a
+gladiator **a person controls**, which is what a playable adapter-driven battle
+needs. *(The trap: AI-filling alone is NOT enough. Without a declared
+`resources` bag the fill falls back to the same 20-name list and throws the
+identical error.)*
+
+**3. NOTHING WAS WATCHING THE ADAPTER'S BAG — the wave's best find.**
+`CANONICAL_RESOURCE_SOURCES` IS the supplied path's projected resource bag and
+`combatStateHash` covers that projection, so adding one name re-hashes every
+adapter-built battle. **Every test assertion about it was RELATIVE and
+self-updated silently.** Pinned literally now: adding `herolevel` fails 3 tests.
+A comment in `ss2-team-rules.test.js` claiming *"the adapter's resource bags
+already had pins like these"* was half wrong, and the wrong half is why a
+reader would have believed the suite guarded it.
+
+**THE DECISION I DID NOT TAKE, and it is the next real fork.** The wave
+recommends an **opt-in `resources` override on a supplied member** — about four
+lines across two files, moving **no existing hash**, versus growing
+`CANONICAL_RESOURCE_SOURCES`, which re-hashes every adapter-built battle for
+every peer. Two companion fixes go with it: guard the opt-in with
+`citationFor(name) !== null` so only map-cited vanilla fields can enter a hashed
+projection, and make `absentResourceSources`/`defaultedResources` respect the
+supplied bag. **One decisive unknown nobody has tested: whether the campaign
+layer needs a DESTROYED ARMOUR PIECE to reach the vanilla combat object.** If it
+does, the opt-in's unmapped `helmet`/`greaves` is a real bug rather than an
+honest report, and the wider change becomes mandatory. Check that first.
+
+**A METHODOLOGICAL LESSON THAT COST THIS WAVE ACCURACY: I launched it against a
+tree I then kept editing.** Two agents correctly reported that my brief's
+headline no longer reproduced and that its suite count was stale. A wave's brief
+is a SNAPSHOT — do not edit the tree underneath one. Integrity was still clean:
+6/6 investigators and 6/6 refuters returned, and the refuters broke 3 of 6
+claims, one of them mine.
+
 ## Highest-value work, ranked
 
 1. **Work `docs/doc-integrity-sweep-2026-09-07.md` down**, highest severity
@@ -176,13 +244,16 @@ Also still the owner's, all unchanged: the status-phase capture hook
    finding being wrong is **21%** — measured, on the ones that were checked.
    `ss2-arena-route.md`, `ss2-capture-staging.md`, `ss2-staging-runbook.md` and
    `ss2-item-tables.md` got no corrections applied at all this session.
-2. **The `ss2-champion-dna.md` §7 ranged-primary question**, which is now a live
+2. **Decide the supplied-gladiator route above**, after checking the campaign
+   /destroyed-piece unknown. It is what stands between the adapter host and a
+   playable SS2 battle with a human in a seat.
+3. **The `ss2-champion-dna.md` §7 ranged-primary question**, which is now a live
    capture-plan hypothesis rather than a settled invariant: stage `weapon:61` on
    the hero and see whether `initialise` really can start him in range. Cheap,
    and it either restores the invariant or changes the champion capture plan.
-3. **A capture hook that can arm on a status phase** — still the only way the
+4. **A capture hook that can arm on a status phase** — still the only way the
    status phase gets runtime backing. Owner's supervised lane; needs Windows.
-4. The schema question (villain stamina 105 vs 110), still the owner's.
+5. The schema question (villain stamina 105 vs 110), still the owner's.
 
 ## Hard rules (unchanged)
 

@@ -25,6 +25,18 @@ deliberately NOT projected, because `combatStateHash` hashes everything that is.
   one of the breaks would have BROKEN THE CORPUS.** Read that file's header
   before applying anything from it.
 
+► **AND THE ADAPTER HOST CANNOT DRIVE `ss2TeamRules` WITH A GLADIATOR A PERSON
+  CONTROLS (2026-09-07).** It CAN drive it through an AI-filled slot carrying
+  `team.aiFill.resources` — a full 27-action battle, measured — but the
+  SUPPLIED path stops at the role-based `max_damage`/`min_damage` requirement,
+  because `CANONICAL_RESOURCE_SOURCES` (20 names) does not carry 14 of the 32
+  `SS2_RESOURCE_NAMES`. **Do not write "the host cannot drive ss2TeamRules":
+  that over-general claim is the one `src/team/ss2-rules.js`'s own header warns
+  about, and I made it anyway.** A diagnostic that could abort construction has
+  been fixed, and `CANONICAL_RESOURCE_SOURCES` is now pinned literally —
+  nothing was watching it, so growing it would have re-hashed every
+  adapter-built battle with the suite green.
+
 *(The brief it supersedes, whose ranked items 1, 3 and 4 are all still open and
 all still the owner's:)*
 [2026-09-07 08:25 — the accepted decisions do not authorize anything](docs/handoffs/2026-09-07-0825--the-accepted-decisions-do-not-authorize-anything.md).**
