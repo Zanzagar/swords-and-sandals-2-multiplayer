@@ -100,7 +100,9 @@ const CAPTURE_KEYS = Object.freeze([
  * - `staged`: every combatant field the WRAPPER wrote before the observed
  *   action, and the value that stuck once the game's own construction had
  *   finished. Its absence means the scenario is one the game produced unaided,
- *   which is what all 22 promoted goldens rest on. Its presence does not make
+ *   which is what 22 of the 23 promoted goldens rest on — the exception is
+ *   `golden-armoured-deflection-threshold-cleared`, whose scenario the wrapper
+ *   staged and which therefore carries this key. Its presence does not make
  *   an observation weaker evidence — the game still resolved the action, and
  *   the formulas under measurement operate on whatever inputs they are given —
  *   but it does mean nobody has shown the game's own progression can *reach*
@@ -955,7 +957,7 @@ function hookForFixtureMutation(fixture, entry, index) {
  * matched, promoted, and yielded a golden the committed suite accepted — while
  * the hook is the record's only statement about WHERE in the game the write
  * came from, which is exactly the claim a golden rests on. Translating instead
- * of stripping costs no re-capture: all 22 promoted goldens' cited observations
+ * of stripping costs no re-capture: all 23 promoted goldens' cited observations
  * already carry the hooks their fixtures' reasons map to.
  */
 export function matchSs2ObservationToFixture(fixture, observation) {

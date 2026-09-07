@@ -264,7 +264,10 @@ function projectFields(fields, requiredKeys, context, lineNumber) {
  * pre-action dump — the scenario as it stood, however it came to stand that
  * way. `end.staged` is narrower and is about authorship: the fields the WRAPPER
  * itself wrote. A trace can have a full staged dump and no `end.staged` at all,
- * and every trace behind the 22 promoted goldens does.
+ * and every trace behind 22 of the 23 promoted goldens does. The 23rd,
+ * `golden-armoured-deflection-threshold-cleared`, is the exception in both
+ * halves: its wrapper staged the scenario, so its trace carries `end.staged`
+ * and its provenance carries the resulting `staged` string.
  *
  * Options:
  * - `installHashVerifiedAfter` — supply the live post-session hash result when

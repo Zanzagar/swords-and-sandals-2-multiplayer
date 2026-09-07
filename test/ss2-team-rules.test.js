@@ -12,7 +12,10 @@
  *   These pin the code to the MAP. They are not evidence about the build.
  * - **Differential checks**: the armour-first split, piece destruction, the
  *   breastplate stamina join and enchantment status have ZERO golden coverage
- *   (all 22 stage `armourclass 0` and eight zero piece ids). They are checked
+ *   (22 of the 23 stage `armourclass 0` and eight zero piece ids; the 23rd,
+ *   the armoured golden, backs armour ABSORPTION and the deflection threshold
+ *   but never exhausts the armour, so the overflow split is still unbacked —
+ *   see `test/ss2-golden-resolver-replay.test.js`). They are checked
  *   here by running the SAME arithmetic down two paths — standalone, and
  *   through the resolver — and requiring the defender to end up in the same
  *   state. **That tests the translation, not the arithmetic**, and agreement
@@ -47,6 +50,8 @@ import {
   Ss2ActionType,
   SS2_ARMOUR_DVAL,
   SS2_ARMOUR_PIECES,
+  SS2_ATTACKER_REQUIRED_RESOURCES,
+  SS2_CONSTRUCTION_REQUIRED_RESOURCES,
   SS2_FACING_LEFT,
   SS2_MAP_SOURCE_REFS,
   SS2_REQUIRED_RESOURCES,
@@ -252,23 +257,105 @@ test("the in-battle call skips the block the build skips", () => {
 /* Construction refuses an under-specified gladiator                    */
 /* ------------------------------------------------------------------ */
 
-test("a combatant missing an SS2 resource is refused when the battle is BUILT, not on the first blow", () => {
-  for (const missing of SS2_REQUIRED_RESOURCES) {
-    const source = ss2Combatant(gladiator(), { id: "hero", name: "Hero" });
-    delete source.resources[missing];
+function battleWith(hero, villain) {
+  return createTeamBattle({
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [hero] },
+      { id: "blue", combatants: [villain] }
+    ]
+  });
+}
+
+function without(resource, options) {
+  const source = ss2Combatant(gladiator(), options);
+  delete source.resources[resource];
+  return source;
+}
+
+test("a combatant missing a CONSTRUCTION resource is refused when the battle is BUILT, not on the first blow", () => {
+  assert.deepEqual(
+    [...SS2_CONSTRUCTION_REQUIRED_RESOURCES].sort(),
+    ["staminaleft", "staminamax"],
+    "the construction requirement changed; this test names what it checks"
+  );
+  for (const missing of SS2_CONSTRUCTION_REQUIRED_RESOURCES) {
     assert.throws(
-      () => createTeamBattle({
-        rules: ss2TeamRules,
-        teams: [
-          { id: "red", combatants: [source] },
-          { id: "blue", combatants: [ss2Combatant(gladiator(), { id: "villain", name: "Villain" })] }
-        ]
-      }),
+      () => battleWith(
+        without(missing, { id: "hero", name: "Hero" }),
+        ss2Combatant(gladiator(), { id: "villain", name: "Villain" })
+      ),
       (error) => error instanceof TeamRuleSetError && error.message.includes(missing),
-      `omitting ${missing} must be refused by name`
+      `omitting ${missing} must be refused by name, at construction`
     );
   }
 });
+
+/* ------------------------------------------------------------------ */
+/* The damage pair is required of the ATTACKER, and only of it          */
+/* ------------------------------------------------------------------ */
+
+test("a pure DEFENDER may omit the damage pair: the battle builds and the blow lands", () => {
+  // The hole this closes. `golden-armoured-deflection-threshold-cleared`'s
+  // villain omits min_damage/max_damage because the map says the candidate must
+  // not pin them — the villain never swings — and the old construction-time,
+  // role-blind check refused the whole battle for it.
+  for (const missing of SS2_ATTACKER_REQUIRED_RESOURCES) {
+    const battle = battleWith(
+      ss2Combatant(gladiator({ strength: 6 }), { id: "hero", name: "Hero" }),
+      without(missing, { id: "villain", name: "Villain" })
+    );
+    applyAction(battle, { actorId: "hero", type: Ss2ActionType.NORMAL_ATTACK, targetId: "villain" });
+    assert.ok(
+      battle.lastResolution.effects.length > 0,
+      `a villain missing ${missing} must still be a legal target of a resolved swing`
+    );
+  }
+});
+
+test("an ATTACKER missing the damage pair is refused BY NAME when its swing resolves", () => {
+  // And it must be the swing that fails, not the build: the omission changes a
+  // number only when this gladiator attacks, and refusing earlier is what
+  // rejected a fixture the map calls complete.
+  for (const missing of SS2_ATTACKER_REQUIRED_RESOURCES) {
+    const attacker = without(missing, { id: "hero", name: "Hero" });
+    const battle = battleWith(
+      attacker,
+      ss2Combatant(gladiator(), { id: "villain", name: "Villain" })
+    );
+    assert.throws(
+      () => applyAction(battle, { actorId: "hero", type: Ss2ActionType.NORMAL_ATTACK, targetId: "villain" }),
+      (error) => error instanceof TeamRuleSetError && error.message.includes(missing),
+      `an attacker omitting ${missing} must be refused by name when it swings`
+    );
+  }
+});
+
+test("the AI refuses to choose for an attacker that cannot state its damage", () => {
+  // chooseAiAction reads attacker.min_damage/max_damage directly to rank the
+  // three verbs, so the same requirement binds there. Without this the AI would
+  // rank on a defaulted 1/1 and pick a verb the gladiator cannot back.
+  const battle = battleWith(
+    without("max_damage", { id: "hero", name: "Hero", controller: "ai" }),
+    ss2Combatant(gladiator(), { id: "villain", name: "Villain" })
+  );
+  assert.throws(
+    () => ss2TeamRules.chooseAiAction(
+      { actor: currentCombatant(battle), foes: [combatantById(battle, "villain")] },
+      "hero",
+      legalActions(battle)
+    ),
+    (error) => error instanceof TeamRuleSetError && error.message.includes("max_damage")
+  );
+});
+
+// `vanillaRecordOf`'s mandatory `role` is deliberately NOT pinned by a test.
+// It is module-private with two call sites, both in this file's subject, and
+// the only way to reach its throw is to add a third that passes no role — so a
+// test would have to import a private or fake the failure, and would assert
+// nothing about behaviour. The guard is a compile-time-shaped check on future
+// editors, not a runtime rule; saying so is better than an assertion whose name
+// promises more than it does.
 
 test("deriving over a record that already states a measured number is refused", () => {
   // `battlevalues` overwrites min_damage/max_damage/hitpointsmax/staminamax

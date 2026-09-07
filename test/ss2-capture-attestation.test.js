@@ -12,9 +12,15 @@
  * assurance at all rather than failing loudly.
  *
  * `staged` answers a different question: not "was the capture sound" but "whose
- * scenario is this". All 22 promoted goldens rest on scenarios the game itself
- * produced; the armoured and tournament families cannot be reached that way, so
- * the wrapper will write combatant state directly. That is a legitimate
+ * scenario is this". 22 of the 23 promoted goldens rest on scenarios the game
+ * itself produced; the armoured and tournament families cannot be reached that
+ * way, so the wrapper writes combatant state directly.
+ *
+ * ► **That last sentence was a prediction when it was written, and it CAME
+ *   TRUE on 2026-09-02.** `golden-armoured-deflection-threshold-cleared` is
+ *   the first promoted golden with a `provenance.staged` string, and as of
+ *   2026-09-07 it is still the only one. Measured, not counted from a brief.
+ *   That is a legitimate
  * experimental input — the game still resolves the action — but it is a
  * materially different kind of evidence, and nothing in the repository
  * distinguished the two.
@@ -1178,9 +1184,10 @@ test("unstaged evidence promotes exactly as before, adding no key to the golden"
 
   assert.equal(promotion.golden.classification, GoldenClassification.GOLDEN);
   assert.equal(promotion.staged, null);
-  // Not `staged: null`, not `staged: ""` — no key. That is what keeps all 22
-  // committed goldens byte-identical, and it is also the honest claim: no
-  // wrapper wrote this scenario.
+  // Not `staged: null`, not `staged: ""` — no key. That is what keeps the 22
+  // unstaged committed goldens byte-identical, and it is also the honest
+  // claim: no wrapper wrote this scenario. (The 23rd, the armoured golden, DOES
+  // carry the key, because a wrapper did.)
   assert.equal(Object.hasOwn(promotion.golden.provenance, "staged"), false);
 });
 

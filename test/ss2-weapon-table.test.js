@@ -155,8 +155,10 @@ test("the table is frozen, so build data cannot be edited in place", () => {
  * `ss2BattleValues` derives the damage pair from `weapon`, and an explicit pair
  * still wins.
  *
- * The precedence is the load-bearing half. All 22 promoted goldens supply
- * `min_damage`/`max_damage` and none supplies `weapon`, so if derivation won,
+ * The precedence is the load-bearing half. All 23 promoted goldens supply
+ * `min_damage`/`max_damage` ON THE HERO — the armoured golden's villain does
+ * not, which is why the rule set's requirement is role-based — and none of the
+ * 46 scenario sides supplies `weapon`, so if derivation won,
  * a map-derived table would silently re-datum runtime evidence — the move the
  * standing rule forbids outright. Derivation fills a hole; it never overwrites
  * a measurement.

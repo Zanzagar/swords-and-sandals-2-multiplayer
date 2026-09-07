@@ -5,7 +5,7 @@
  *
  * `localeCompare` is ICU-locale-dependent. Five places in this repository had
  * independently reached for it, and one of them — the capture-manifest session
- * tiebreak — sits inside the digest that all 22 promoted goldens cite as
+ * tiebreak — sits inside the digest that all 23 promoted goldens cite as
  * `provenance.captureManifestSha256`. So two machines could mint two different,
  * equally "correct" digests for byte-identical evidence, in the one number that
  * is supposed to make a promotion reproducible.
@@ -155,7 +155,7 @@ test("initiative and target order are identical under az-AZ collation", () => {
  * THE SITE THAT MATTERS MOST, AND THE ONE NOTHING GUARDED.
  *
  * `build-manifest.mjs` breaks session-ordering ties on `sessionId`, and the
- * session array's order is inside the digest that all 22 promoted goldens cite
+ * session array's order is inside the digest that all 23 promoted goldens cite
  * as `provenance.captureManifestSha256`. A locale-dependent tiebreak there
  * means two machines mint two different digests for byte-identical evidence.
  *

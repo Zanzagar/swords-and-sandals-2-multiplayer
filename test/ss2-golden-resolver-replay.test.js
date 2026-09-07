@@ -1,11 +1,11 @@
 /**
- * The 22 promoted goldens, replayed through the THING THAT WOULD BE THE GAME.
+ * The 23 promoted goldens, replayed through the THING THAT WOULD BE THE GAME.
  *
  * WHY THIS FILE EXISTS. Every golden already replays exactly — through
  * `src/golden/run-1v1-fixture.js`, a standalone harness that imports nothing
  * from `src/team/`. So the corpus proved the arithmetic and proved nothing
  * about the resolver, the roster, the RNG channel, effect application or
- * clamping. Twenty-two runtime-verified fixtures had no consumer. This file is
+ * clamping. Twenty-three runtime-verified fixtures had no consumer. This file is
  * that consumer: it builds a real `createTeamBattle`, applies a real action,
  * and requires the measured outcome to come back out the other side.
  *
@@ -20,14 +20,34 @@
  * full return, and the translation of that return into the one declarative
  * effect these fixtures produce on the defender.
  *
- * CANNOT PROVE, and the limit is the corpus, not the harness: every one of the
- * 22 stages `armourclass 0` with all eight piece ids 0 and no enchantment; the
- * hero wins 19 and misses 3. On the DEFENDER they exercise one effect kind,
- * `damage`. The armour-first split, piece destruction, the breastplate stamina
- * join and enchantment status have ZERO runtime backing here — see
+ * CANNOT PROVE, and the limit is the corpus, not the harness: 22 of the 23
+ * stage `armourclass 0` with all eight piece ids 0 and no enchantment; the hero
+ * wins 19, misses 3, and lands one non-lethal hit. On the DEFENDER they
+ * exercise one effect kind, `damage`. Piece destruction, the breastplate
+ * stamina join and enchantment status have ZERO runtime backing here — see
  * `test/ss2-team-rules.test.js`, which cross-checks those against the
  * arithmetic itself and says plainly that a cross-check between two paths over
  * one module is not evidence about the build.
+ *
+ * ► **CORRECTED 2026-09-07, and in the direction that makes the corpus BETTER
+ *   than this header claimed.** The sentence above said "every one of the 22"
+ *   and listed the armour-first split among the untested. Since
+ *   `golden-armoured-deflection-threshold-cleared` became drivable, that is
+ *   false in two places, and both are worth stating precisely rather than
+ *   deleting:
+ *
+ *   - **Armour absorption and the deflection threshold now HAVE runtime
+ *     backing**, from exactly one golden. It measures `armourclass` 79 -> 57
+ *     against `selectedDamage` 22 with `hitpointDamage` 0, and a
+ *     `deflectionRoll` of 93 against a `deflectionThreshold` of 93 that clears
+ *     the critical. One fixture is one fixture: it pins the absorb path, not
+ *     the family.
+ *   - **The overflow to health is still unbacked**, because that golden's
+ *     armour was never exhausted (`hitpointDamage` 0). So the SPLIT — armour
+ *     first, remainder to health — remains a two-path cross-check only.
+ *   - Piece destruction (`armourRemovals: []`, roll 12), the breastplate join
+ *     (`breastplate 0`, `staminaBonus 0`) and enchantment (`statusApplied
+ *     null`) are untouched by it.
  *
  * It also proves NO CLAMPING. This header claimed it did, and a verifier
  * removed all three clamp sites (`ss2-rules.js`'s stamina clamp and both of
@@ -76,7 +96,7 @@
  *    dictated". The rule set draws it, so a replay has to supply it. The value
  *    comes from `golden.scenario.attackDirection`, i.e. from the golden. The
  *    fixture file is not touched.
- * 2. **`fightMode` is the golden's own (`misc` for all 22).** Play uses
+ * 2. **`fightMode` is the golden's own (`misc` for all 23).** Play uses
  *    `tournament`. No golden produces a first-blood outcome, so the mode's one
  *    unrepresentable case never arises here; the rule set throws if it ever
  *    does.
@@ -92,7 +112,7 @@
  * the attacker. `death()` deletes `nextphase` and both `onEnterFrame` handlers
  * (`+0x2035`, `+0x2042`, `+0x2049`) before the branch's `struck`-gated
  * `nextphase()` call can fire, so on a killing blow there is no phase
- * transition at all. Nineteen of the 22 goldens are kills. Their attacker
+ * transition at all. Nineteen of the 23 goldens are kills. Their attacker
  * state must EQUAL the measurement, and now does.
  *
  * The three misses do transition, and their delta is asserted against the
@@ -149,20 +169,29 @@ const goldens = await Promise.all(goldenFiles.map((name) => loadJson(path.join(G
  * candidate does not pin them — the villain never swings in this scenario, so
  * nothing in it is determined by the villain's damage pair.
  *
- * `assertRequiredResources` refuses the combatant anyway, and it is right to:
- * it cannot know in advance that this defender never attacks, and in a real
- * fight it would. So the gap is genuine and belongs to whoever decides what a
- * candidate must pin — and that decision has to come FROM THE MAP, never from
- * the observation, even though the raw trace does carry the numbers
- * (`min_damage` and `max_damage` are both in the wrapper's
- * DEFAULT_WATCH_FIELDS). Fitting the candidate to the capture is the one move
- * this repository refuses most consistently.
+ * The rule set refused the combatant anyway, and the paragraph that used to
+ * stand here said it was RIGHT to — that it "cannot know in advance that this
+ * defender never attacks". **That was the wrong half to fix, and the fix went
+ * to the rule set on 2026-09-07: the set is now EMPTY.**
+ *
+ * It can know. The requirement is role-based — `min_damage`/`max_damage` are
+ * demanded of whoever ATTACKS, at the moment the swing resolves
+ * (`SS2_ATTACKER_REQUIRED_RESOURCES` in `src/team/ss2-rules.js`) — because
+ * every read of that pair in `ss2-attack-candidate.js` is on `attacker.*` and
+ * the file contains no `defender.min_damage` read at all. The candidate's
+ * omission was correct from the map all along; the guard was over-broad. The
+ * corpus was never edited to fit the code, which is the move this repository
+ * refuses most consistently and which the old wording correctly warned about
+ * (the raw trace DOES carry both numbers — they are in the wrapper's
+ * DEFAULT_WATCH_FIELDS — so writing them into the candidate was always one
+ * keystroke away).
+ *
+ * **Keep this object and its two assertions even while it is empty.** They are
+ * what makes a future gap a finding instead of a silent skip, and the
+ * emptiness itself is now pinned: `replayableGoldens` must equal the whole
+ * corpus.
  */
-const REPLAY_UNDRIVABLE = Object.freeze({
-  "golden-armoured-deflection-threshold-cleared":
-    "its villain scenario omits min_damage/max_damage, which the candidate does not pin because the " +
-    "villain never swings; the rule set requires a damage pair from every combatant"
-});
+const REPLAY_UNDRIVABLE = Object.freeze({});
 
 /** Whether this file can build a battle from the golden at all. */
 function isReplayable(golden) {
@@ -257,10 +286,16 @@ function replayGolden(golden) {
   const observed = [];
   const rules = createSs2TeamRules({
     fightMode: golden.scenario.fightMode ?? "tournament",
-    // All 22 are `misc`, which the factory otherwise refuses: it can produce a
-    // first-blood result this seam cannot represent. Safe here and asserted
-    // below — 19 of the 22 expect `elimination` and 3 expect no result at all,
-    // so none can take that path.
+    // 22 of the 23 are `misc`, which the factory otherwise refuses: it can
+    // produce a first-blood result this seam cannot represent. Safe here and
+    // asserted below — 19 of the 23 expect `elimination` and 4 expect no
+    // result at all, so none can take that path. The 23rd, the armoured
+    // golden, declares `tournament` and needs no opt-in; passing the flag for
+    // every golden is simpler than branching and costs that one nothing.
+    //
+    // (Measured 2026-09-07, after a first draft of this comment asserted "all
+    // 23 are misc" from the old count. Re-deriving the property is what caught
+    // it.)
     fixtureReplay: true,
     observer: (record) => observed.push(record)
   });
@@ -306,6 +341,10 @@ test("every promoted golden replays through createTeamBattle/applyAction", () =>
   // the project's signature defect in the assertion that claimed to prevent
   // it. Build each one and require the refusal by name; the mutation that
   // kills this loop is relaxing the rule set's guard while leaving the list.
+  //
+  // The list is EMPTY as of 2026-09-07, so this loop currently runs zero times
+  // — which is exactly the hole it was written to close. The assertion on the
+  // line after it carries the weight instead: every golden must drive.
   for (const golden of goldens.filter((entry) => !isReplayable(entry))) {
     assert.throws(
       () => replayGolden(golden),
@@ -315,7 +354,12 @@ test("every promoted golden replays through createTeamBattle/applyAction", () =>
   }
 
   const replayable = goldens.filter(isReplayable);
-  assert.equal(replayable.length, 22, "the replayable corpus changed size");
+  assert.equal(
+    replayable.length,
+    goldens.length,
+    "a golden stopped driving; REPLAY_UNDRIVABLE is empty and must stay so unless the gap is real"
+  );
+  assert.equal(replayable.length, 23, "the replayable corpus changed size");
   for (const golden of replayable) {
     const { observed } = replayGolden(golden);
     assert.equal(observed.length, 1, `${golden.fixtureId}: exactly one action must resolve`);
@@ -382,7 +426,11 @@ test("a lethal golden ends the battle through the resolver's own elimination pat
   const lethal = replayableGoldens.filter((golden) => golden.expected.resultEvent !== null);
   const survived = replayableGoldens.filter((golden) => golden.expected.resultEvent === null);
   assert.equal(lethal.length, 19);
-  assert.equal(survived.length, 3, "the three misses");
+  assert.equal(
+    survived.length,
+    4,
+    "three misses and one non-lethal HIT — the armoured golden, added 2026-09-07"
+  );
 
   for (const golden of lethal) {
     const { battle } = replayGolden(golden);
@@ -447,13 +495,23 @@ test("a killing blow leaves the attacker's state exactly as the golden measured 
 });
 
 test("a non-lethal action DOES transition, by the map's own formula", () => {
-  // The three misses. This is the one place in this file where an expected
-  // value is recomputed from the map rather than read out of a fixture, so it
-  // is pinned to a literal as well as to the formula: the hero of every golden
-  // is strength 10 / staminamax 110 / staminaleft 105, i.e. stamina 1, and a
-  // normal attack costs round(10 * 2) = 20 against a regen of 1 + round(1/3).
+  // This is the one place in this file where an expected value is recomputed
+  // from the map rather than read out of a fixture, so it is pinned to a
+  // literal as well as to the formula: the hero of every golden is strength 10
+  // / staminamax 110 / staminaleft 105, i.e. stamina 1, and a normal attack
+  // costs round(10 * 2) = 20 against a regen of 1 + round(1/3).
+  //
+  // ► These were "the three misses" until 2026-09-07. The armoured golden is a
+  //   fourth non-lethal action and the first that HITS — the villain has 80
+  //   hitpoints and armour, and survives 21-23 damage. So this test stopped
+  //   being about missing and became about surviving, which is what it always
+  //   measured: a transition fires whenever `death()` does not.
   const survived = replayableGoldens.filter((golden) => golden.expected.resultEvent === null);
-  assert.equal(survived.length, 3, "the three misses");
+  assert.equal(survived.length, 4, "three misses and one non-lethal hit");
+  assert.ok(
+    survived.some((golden) => golden.expected.calculation.hit === true),
+    "a non-lethal HIT must be among them, or this test is still only about misses"
+  );
   const literalFor = { 1: 96, 2: 86, 3: 76 };  // quick / normal / power, from 105
   for (const golden of survived) {
     const { battle, band } = replayGolden(golden);
@@ -524,6 +582,159 @@ test("replay is deterministic: the same tape and the same action reach the same 
       JSON.stringify(first.battle.events),
       JSON.stringify(second.battle.events),
       golden.fixtureId
+    );
+  }
+});
+
+/* ------------------------------------------------------------------ */
+/* The role-based damage-pair requirement, pinned over the whole corpus  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Replay a golden with the villain's damage pair FORCED to a given value.
+ *
+ * The pair is written onto the scenario side before `combatantFromScenarioSide`
+ * builds the blueprint, so it travels the ordinary declared-resource route and
+ * reaches the arithmetic exactly as a real pair would.
+ */
+/**
+ * The same observer records with the villain's damage pair removed.
+ *
+ * The observer echoes the vanilla record it fed the arithmetic, so the pair
+ * appears there as an INPUT whatever the arithmetic did with it. Stripping it
+ * is what makes the comparison a statement about the OUTPUT — and it is
+ * stripped from the villain only: the hero's pair is the attacker's, and must
+ * come back identical.
+ */
+function withoutVillainPair(records) {
+  return records.map((record) => {
+    const villain = { ...record.scenario.villain };
+    delete villain.min_damage;
+    delete villain.max_damage;
+    return { ...record, scenario: { ...record.scenario, villain } };
+  });
+}
+
+function replayWithVillainPair(golden, min, max) {
+  const forced = {
+    ...golden,
+    scenario: {
+      ...golden.scenario,
+      villain: { ...golden.scenario.villain, min_damage: min, max_damage: max }
+    }
+  };
+  return replayGolden(forced);
+}
+
+/**
+ * Events with the settlement's completion token blanked.
+ *
+ * The token's second half is `combatStateHash`, an fnv1a over the whole wire
+ * projection — and `combatantProjection` (`src/team/resolver.js:490`) carries
+ * every DECLARED resource. So a defender's damage pair moves the token by
+ * being declared at all, without touching a single number the arithmetic
+ * computed. Separating the two is the entire point of the test below.
+ */
+function withoutCompletionToken(events) {
+  return events.map((event) => (
+    Object.hasOwn(event, "completionToken") ? { ...event, completionToken: null } : event
+  ));
+}
+
+const completionTokenOf = (events) => events.find((event) => event.completionToken)?.completionToken ?? null;
+
+test("the DEFENDER's damage pair cannot reach the arithmetic — every golden, three pairs", () => {
+  // This is the claim the role-based requirement rests on, and it is pinned
+  // here rather than left as a comment: `SS2_ATTACKER_REQUIRED_RESOURCES` lets
+  // a defender omit min_damage/max_damage precisely because no read of that
+  // pair in `ss2-attack-candidate.js` is on `defender.*`. If that ever stops
+  // being true, a defender's absent pair starts silently defaulting to 1 and
+  // changing outcomes — so the invariance is asserted, over the WHOLE corpus,
+  // against values three orders of magnitude apart.
+  //
+  // It also reproduces from the runtime: the two capture sessions
+  // `golden-armoured-deflection-threshold-cleared` cites recorded villains with
+  // different damage pairs (18/30 against 7/22) and measured identical
+  // outcomes.
+  assert.equal(replayableGoldens.length, 23, "every golden must be exercised here");
+  for (const golden of replayableGoldens) {
+    const baseline = replayGolden(golden);
+    for (const [min, max] of [[1, 1], [999, 999], [7, 22]]) {
+      const forced = replayWithVillainPair(golden, min, max);
+      assert.deepEqual(
+        withoutCompletionToken(forced.battle.events),
+        withoutCompletionToken(baseline.battle.events),
+        `${golden.fixtureId}: villain pair ${min}/${max} changed the events`
+      );
+
+      // The pair must actually have ARRIVED, or this test passes by doing
+      // nothing. The observer echoes the vanilla record it fed the arithmetic,
+      // so the forced value is visible there — and that echo is the ONLY place
+      // it may appear.
+      for (const record of forced.observed) {
+        assert.equal(record.scenario.villain.min_damage, min, `${golden.fixtureId}: pair did not reach the record`);
+        assert.equal(record.scenario.villain.max_damage, max, `${golden.fixtureId}: pair did not reach the record`);
+      }
+      assert.deepEqual(
+        withoutVillainPair(forced.observed),
+        withoutVillainPair(baseline.observed),
+        `${golden.fixtureId}: villain pair ${min}/${max} changed the calculation/mutation trace`
+      );
+    }
+  }
+});
+
+test("an attacker that omits the pair is still refused, so emptying the list narrowed nothing", () => {
+  // The other half of the split, on the corpus rather than on a synthetic
+  // gladiator: strip the HERO's pair from a golden and the replay must fail by
+  // name. Without this, "the guard fills a hole and overwrites nothing" is an
+  // assertion about code that no test distinguishes from having removed the
+  // guard entirely.
+  const golden = replayableGoldens.find((entry) => entry.scenario.hero.min_damage !== undefined);
+  assert.ok(golden, "no golden states a hero damage pair; this test would prove nothing");
+  for (const missing of ["min_damage", "max_damage"]) {
+    const hero = { ...golden.scenario.hero };
+    delete hero[missing];
+    assert.throws(
+      () => replayGolden({ ...golden, scenario: { ...golden.scenario, hero } }),
+      (error) => new RegExp(missing).test(error.message),
+      `a hero missing ${missing} must be refused by name when the swing resolves`
+    );
+  }
+});
+
+test("declaring a defender's damage pair MOVES the battle hash, which is why no fixture may add one", () => {
+  // The other side of the invariance above, and the one with a consequence for
+  // the corpus. `combatStateHash` is an fnv1a over `toTeamWireState`, whose
+  // `combatantProjection` carries every DECLARED resource
+  // (`src/team/resolver.js:480-496`, `:560`); the hash is the completion
+  // token's second half (`:316`, `settlement.js:93`). So writing
+  // min_damage/max_damage into a villain scenario changes the token even
+  // though it changes no number the arithmetic computed.
+  //
+  // That makes "complete the fixture so the guard stops complaining" a
+  // PROJECTION change, not a tidy-up — two peers, one with the pair and one
+  // without, desync on a battle they agree about in every arithmetic respect.
+  // The candidate must keep omitting it, which is what the map already said.
+  const withToken = replayableGoldens.filter(
+    (golden) => completionTokenOf(replayGolden(golden).battle.events) !== null
+  );
+  assert.ok(withToken.length > 0, "no golden settles; this test would asserting nothing");
+
+  for (const golden of withToken) {
+    const baseline = completionTokenOf(replayGolden(golden).battle.events);
+    const forced = completionTokenOf(replayWithVillainPair(golden, 999, 999).battle.events);
+    assert.notEqual(
+      forced,
+      baseline,
+      `${golden.fixtureId}: a declared villain damage pair left the battle hash unchanged, so the ` +
+      "projection no longer covers declared resources — read src/team/resolver.js:480"
+    );
+    // And the outcome half is untouched: same winner, same reason.
+    assert.equal(
+      forced.slice(0, forced.lastIndexOf(":")),
+      baseline.slice(0, baseline.lastIndexOf(":")),
+      `${golden.fixtureId}: the OUTCOME half of the token moved, which would mean the fight changed`
     );
   }
 });

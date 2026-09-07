@@ -103,10 +103,19 @@
  * writes with `unmapped: []`.
  *
  * Also corrected: the refusal is NOT `maximumHealth`'s. On the supplied path
- * the throw that actually fires is `assertRequiredResources`, and it names
- * `max_damage, min_damage` — `staminaleft` and `staminamax` ARE in
- * `CANONICAL_RESOURCE_SOURCES`, so only two of the four required names are
- * missing. Anyone debugging this from the old wording went to the wrong throw.
+ * the throw that actually fires names `max_damage, min_damage` — `staminaleft`
+ * and `staminamax` ARE in `CANONICAL_RESOURCE_SOURCES`, so only two of the four
+ * required names are missing. Anyone debugging this from the old wording went
+ * to the wrong throw.
+ *
+ * ► **AND THE THROW MOVED AGAIN (2026-09-07), so the paragraph above is now
+ *   right about the names and wrong about the moment.** The requirement is
+ *   ROLE-BASED: `max_damage`/`min_damage` are demanded of whoever ATTACKS,
+ *   from `vanillaRecordOf(view, "attacker")` when the swing resolves — NOT at
+ *   construction, and never of a pure defender. So a supplied gladiator on
+ *   that path now BUILDS, and fails on its own first swing instead. The
+ *   function is `assertDeclaredResources`; `assertRequiredResources` no longer
+ *   exists.
  *
  * Widening the canonical list is still real work with its own evidence
  * requirements; it is not done here.
@@ -126,9 +135,13 @@
  *    replay does; the in-action throw is a backstop behind that gate, not a
  *    routine path.
  *
- *    Worth knowing while reading that: `tournament` — the mode play uses — is
- *    the one mode of the build's three that no capture in this repository has
- *    ever observed. All 22 goldens are `misc`.
+ *    Worth knowing while reading that: `tournament` — the mode play uses —
+ *    was, until 2026-09-02, the one mode of the build's three that no capture
+ *    in this repository had ever observed. **That is no longer true**:
+ *    `golden-armoured-deflection-threshold-cleared` declares
+ *    `fightMode: "tournament"`, so 22 of the 23 goldens are `misc` and one is
+ *    not. The mode play uses now has exactly one runtime-verified fixture
+ *    behind it, which is one, not coverage.
  * 2. **The AI policy is invented, apart from one gate.** Only
  *    `villainChooseAction`'s unconditional `staminaleft > 10` is byte-decoded.
  *    Target choice and the choice among the three verbs are this module's own.
@@ -327,19 +340,65 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
 ].sort());
 
 /**
- * The resources whose absence changes the fight rather than merely defaulting
- * to the build's own zero. Checked at roster construction, not at first blow.
+ * The resources every combatant must declare, whatever it goes on to do.
+ * Checked at roster CONSTRUCTION, because both gate `legalActions` for a
+ * gladiator that has not swung yet: the forced-rest gate reads `staminaleft`
+ * before any player choice, and `staminamax` at or below zero makes the battle
+ * a fixpoint. Neither has a defensible default.
+ */
+export const SS2_CONSTRUCTION_REQUIRED_RESOURCES = Object.freeze([
+  "staminaleft",
+  "staminamax"
+]);
+
+/**
+ * The resources required of whoever ATTACKS, checked when the swing resolves
+ * rather than when the battle is built.
+ *
+ * WHY THE ROLE MATTERS, and it is measured rather than assumed. Every read of
+ * this pair in `ss2-attack-candidate.js` is on `attacker.*` — `:109`, `:116`,
+ * `:124`, `:136`, `:139`, `:148`, `:154` — and the file contains NO
+ * `defender.min_damage` or `defender.max_damage` read at all. A defender's
+ * damage pair cannot reach the arithmetic of a blow aimed AT it.
+ *
+ * That was independently established from the runtime first (2026-09-02):
+ * `golden-armoured-deflection-threshold-cleared` replays with `calculation`,
+ * `mutation`, `mutationTrace` and `state` all deepEqual whether the villain is
+ * given 1/1 or 999/999, and the two capture sessions the golden cites recorded
+ * DIFFERENT villains — strength 7 with 18/30 against strength 1 with 7/22 —
+ * and produced identical measured outcomes.
+ *
+ * So requiring the pair of a pure defender refused a fixture the map says is
+ * complete. **This is the hole this split fills, and it overwrites nothing: a
+ * gladiator that omits the pair and then swings is still refused, by name, at
+ * the moment the omission would change a number.**
+ *
+ * The alternative — a poisoned sentinel pair that throws when READ — was
+ * costed and rejected as unachievable: `initialiseCombatant`
+ * (`ss2-attack-candidate.js:55-56`) is eager over every field, so a throwing
+ * accessor fires for the defender too, before any arithmetic decides whether
+ * it wanted the value. `test/ss2-golden-resolver-replay.test.js` pins the
+ * invariance directly instead, over the whole corpus.
+ */
+export const SS2_ATTACKER_REQUIRED_RESOURCES = Object.freeze([
+  "max_damage",
+  "min_damage"
+]);
+
+/**
+ * The union: every resource whose absence changes the fight rather than
+ * defaulting to the build's own zero.
  *
  * Everything else on `SS2_RESOURCE_NAMES` has a defensible zero: no armour, no
  * enchantment, weapon slot 1. These four do not — `min_damage` absent means a
  * gladiator hitting for 1, which is a fight, just not this one's.
+ *
+ * DERIVED from the two role sets rather than restated, so a name added to one
+ * of them cannot go missing here.
  */
-export const SS2_REQUIRED_RESOURCES = Object.freeze([
-  "max_damage",
-  "min_damage",
-  "staminaleft",
-  "staminamax"
-]);
+export const SS2_REQUIRED_RESOURCES = Object.freeze(
+  [...SS2_ATTACKER_REQUIRED_RESOURCES, ...SS2_CONSTRUCTION_REQUIRED_RESOURCES].sort()
+);
 
 /**
  * The value a resource takes when a gladiator does not state one — "no armour,
@@ -446,10 +505,15 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
   // in code now (`ss2-weapon-table.js`), so a `weapon` id derives the pair.
   //
   // An EXPLICIT pair still wins, and that ordering is deliberate rather than
-  // defensive. Every one of the 22 promoted goldens supplies the pair and none
-  // supplies `weapon`, so deriving first would silently re-datum runtime
-  // evidence from a map-derived table — the exact move the standing rule
-  // forbids. Derivation fills a hole; it never overwrites a measurement.
+  // defensive. Every one of the 23 promoted goldens supplies the pair ON THE
+  // HERO and none supplies `weapon`, so deriving first would silently re-datum
+  // runtime evidence from a map-derived table — the exact move the standing
+  // rule forbids. Derivation fills a hole; it never overwrites a measurement.
+  //
+  // Re-derived 2026-09-07 rather than re-counted: 23 of 23 heroes state the
+  // pair, 22 of 23 villains do, and the exception is the armoured golden's
+  // villain — which is exactly why the rule set's requirement is now
+  // role-based (`SS2_ATTACKER_REQUIRED_RESOURCES`).
   const weaponPair = ss2WeaponDamageRange(source.weapon);
   if (weaponPair !== null) {
     if (source.weapon_min_damage === undefined) source.weapon_min_damage = weaponPair[0];
@@ -599,11 +663,32 @@ function declaredResourceValue(carrier, name) {
   return Number.isFinite(entry) ? entry : entry?.value;
 }
 
-function assertRequiredResources(carrier, where) {
-  const missing = SS2_REQUIRED_RESOURCES.filter(
-    (name) => !Number.isFinite(declaredResourceValue(carrier, name))
+/**
+ * One role's resource requirement, named in the refusal.
+ *
+ * `role` is not decoration: it is the difference between "this gladiator was
+ * built wrong" and "this gladiator cannot swing", and a reader of the throw
+ * needs to know which.
+ */
+function assertDeclaredResources(carrier, where, names, role) {
+  const missing = names.filter((name) => !Number.isFinite(declaredResourceValue(carrier, name)));
+  if (missing.length === 0) return;
+  throw new TeamRuleSetError(
+    `${where} does not declare the SS2 resources ${missing.join(", ")}, which this rule set requires ` +
+    `${role}. The attack arithmetic would silently default them and fight a different gladiator, so ` +
+    "this rule set refuses instead. Build the combatant with ss2Combatant(), or declare " +
+    `resources: { ${names.join(", ")} } on the blueprint.`
   );
-  if (missing.length === 0 && declaredResourceValue(carrier, "staminamax") <= 0) {
+}
+
+function assertConstructionResources(carrier, where) {
+  assertDeclaredResources(
+    carrier,
+    where,
+    SS2_CONSTRUCTION_REQUIRED_RESOURCES,
+    "of every combatant, at construction"
+  );
+  if (declaredResourceValue(carrier, "staminamax") <= 0) {
     // A verifier found the fixpoint: at staminamax <= 0 the forced-rest gate
     // makes `rest` the only legal action, and `rest` then writes nothing —
     // zero effects, zero rolls, no result, forever. Refused at construction,
@@ -612,14 +697,6 @@ function assertRequiredResources(carrier, where) {
       `${where} declares staminamax ${declaredResourceValue(carrier, "staminamax")}. At or below zero the ` +
       "forced-rest gate leaves rest as the only legal action and rest can change nothing, so the battle " +
       "is a fixpoint with no result. staminamax = 100 + stamina * 10 in the build, so it is never <= 0 there."
-    );
-  }
-  if (missing.length > 0) {
-    throw new TeamRuleSetError(
-      `${where} does not declare the SS2 resources ${missing.join(", ")}. ` +
-      "The attack arithmetic would silently default them and fight a different gladiator, so this " +
-      "rule set refuses instead. Build the combatant with ss2Combatant(), or declare " +
-      `resources: { ${SS2_REQUIRED_RESOURCES.join(", ")} } on the blueprint.`
     );
   }
 }
@@ -634,10 +711,29 @@ function assertRequiredResources(carrier, where) {
  * field to 0, and a view shares no field name with the vanilla shape, so a
  * cloned view resolves to attack 0 / defence 0 / hitpointsmax 1 and returns a
  * plausible-looking fabricated kill. This translator is therefore total and
- * explicit: every field is named, and the four that matter are required.
+ * explicit: every field is named, and the ones that matter are required.
+ *
+ * `role` is MANDATORY and has no default, deliberately. It decides whether the
+ * damage pair is required of this side (see
+ * `SS2_ATTACKER_REQUIRED_RESOURCES`), and a default would let a future call
+ * site pick one silently — which is the exact shape of the defect this
+ * parameter exists to close.
  */
-function vanillaRecordOf(view) {
-  assertRequiredResources(view, `Combatant ${view.id}`);
+function vanillaRecordOf(view, role) {
+  if (role !== "attacker" && role !== "defender") {
+    throw new TeamRuleSetError(
+      `vanillaRecordOf needs an explicit role ("attacker" or "defender") for combatant ${view?.id}; ` +
+      `it decides whether ${SS2_ATTACKER_REQUIRED_RESOURCES.join("/")} are required of this side.`
+    );
+  }
+  if (role === "attacker") {
+    assertDeclaredResources(
+      view,
+      `Combatant ${view.id}`,
+      SS2_ATTACKER_REQUIRED_RESOURCES,
+      "of whoever ATTACKS, at the moment the swing resolves"
+    );
+  }
   const status = new Set(view.status ?? []);
   const read = (name, fallback = 0) => resourceValue(view, name, fallback);
   const record = {
@@ -811,8 +907,24 @@ function phaseTransitionEffects(actor, { staminaCost, branchGain = 0, branchHeal
 /* The rule set                                                        */
 /* ------------------------------------------------------------------ */
 
-/** The 22 promoted goldens this rule set's attack ingress is checked against. */
+/**
+ * The 23 promoted goldens this rule set's attack ingress is checked against.
+ *
+ * `golden-armoured-deflection-threshold-cleared` joined on 2026-09-07, and it
+ * is the first entry here that puts ARMOUR on the defender. It was promoted on
+ * 2026-09-02 and could not be replayed until the damage-pair requirement
+ * became role-based: its villain declares no `min_damage`/`max_damage`, because
+ * the map says the candidate must not pin what the villain never uses.
+ *
+ * That matters beyond one line in a list. Every other golden stages
+ * `armourclass 0` with all eight piece ids 0, so the armour-first split and the
+ * deflection threshold had NO runtime backing at all — the header of
+ * `test/ss2-golden-resolver-replay.test.js` says so, and still should be read
+ * before this list is treated as broad coverage. One armoured golden is one,
+ * not a corpus.
+ */
 export const SS2_GOLDEN_FIXTURE_IDS = Object.freeze([
+  "golden-armoured-deflection-threshold-cleared",
   "golden-prisoner-normal-kill",
   "golden-prisoner-normal-kill-dir5",
   "golden-prisoner-normal-kill-dir6",
@@ -918,7 +1030,7 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
       goldenFixtureIds: SS2_GOLDEN_FIXTURE_IDS,
       note:
         "SS2's own attack arithmetic, read out of the licensed build's bytecode and replayed against " +
-        "22 promoted goldens for attack directions 1-12. NOT runtime-verified: no capture has observed " +
+        "23 promoted goldens for attack directions 1-12. NOT runtime-verified: no capture has observed " +
         "this module driving a fight, and the stamina economy, action legality and AI policy it adds " +
         "around the ingress have no runtime backing at all. The AI's choice among the three melee " +
         "verbs is invented; only its stamina gates are byte-decoded."
@@ -936,11 +1048,17 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
      * verbatim and the formula never overrules it.
      *
      * This is also the one hook the resolver calls at CONSTRUCTION, so it is
-     * where the required-resource check lives: a blueprint missing `min_damage`
-     * fails when the battle is built rather than on the first blow.
+     * where the ROLE-BLIND half of the requirement lives: `staminaleft` and
+     * `staminamax` gate `legalActions` for a gladiator that has not swung yet,
+     * so a blueprint missing either fails when the battle is built.
+     *
+     * The damage pair is NOT checked here. It is required of whoever attacks,
+     * at the moment the swing resolves — see
+     * `SS2_ATTACKER_REQUIRED_RESOURCES` for the measurement that says a
+     * defender's pair cannot reach the arithmetic.
      */
     maximumHealth(combatant) {
-      assertRequiredResources(combatant, `Combatant ${combatant.id}`);
+      assertConstructionResources(combatant, `Combatant ${combatant.id}`);
       if (Number.isFinite(combatant.maxHealth)) return combatant.maxHealth;
       const herolevel = declaredResourceValue(combatant, "herolevel");
       if (!Number.isFinite(herolevel)) {
@@ -1046,8 +1164,8 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
       // `+0x6146`, `+0x61f1` before `+0x62ad`, `+0x635c` before `+0x6418`).
       const attackDirection = rolls.randomBetween(ATTACK_DIRECTION_ROLL_LABEL, band.low, band.high);
 
-      const hero = vanillaRecordOf(actor);
-      const villain = vanillaRecordOf(target);
+      const hero = vanillaRecordOf(actor, "attacker");
+      const villain = vanillaRecordOf(target, "defender");
       const attackerBefore = { ...hero };
       const defenderBefore = { ...villain };
       const scenario = {
@@ -1181,8 +1299,8 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
       const target = foes[0];
       if (!target) return restOption ?? options[0];
 
-      const attacker = vanillaRecordOf(actor);
-      const defender = vanillaRecordOf(target);
+      const attacker = vanillaRecordOf(actor, "attacker");
+      const defender = vanillaRecordOf(target, "defender");
       const chances = calculateSs2AttackChances(attacker, defender);
       const expected = {
         [Ss2ActionType.QUICK_ATTACK]: (chances.quick / 100) * attacker.min_damage,
