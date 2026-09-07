@@ -8,6 +8,15 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-07 03:30 — the armoured golden reaches the resolver](docs/handoffs/2026-09-07-0330--the-armoured-golden-reaches-the-resolver.md).**
+Start there. `REPLAY_UNDRIVABLE` is EMPTY and all 23 goldens drive a real
+battle; the email to the developer was already SENT and the record now says so;
+and **the owner has DECIDED the enchantment fork — option (a), status phase as a
+forced legal action — so it is a build instruction, not an open question.** It
+also carries what blocks that build: byte verification is not possible from this
+WSL tree, and nothing had written that down.
+
+*(The brief it supersedes, whose ONE task is now done:)*
 [2026-09-02 23:13 — reach for the stars: the email to the developer](docs/handoffs/2026-09-02-2313--reach-for-the-stars-the-email-to-the-developer.md).**
 Start there: the owner's FIRST task is drafting (never sending) a careful
 email to the game's developer, SOLO — no wave. It also records the decided
@@ -30,6 +39,34 @@ harness ADR 0001) and that ultracode stays ON at the owner's instruction.
   public**; nothing evidentiary depends on it.
   **The next task is therefore the 16:59 brief's ranked item 1**, the
   role-based damage-pair requirement.
+
+  ► **AND RANKED ITEM 1 IS NOW DONE (2026-09-07, `89bc6c0` + `df14b24`).**
+    `REPLAY_UNDRIVABLE` is EMPTY, all 23 goldens replay through
+    `createTeamBattle`/`applyAction`, and the armoured golden is in
+    `SS2_GOLDEN_FIXTURE_IDS`. Suite 728 / 727 / 0 / 1 from 721 / 720 / 0 / 1.
+    **It was NOT done with a wave** — both of the brief's unverified claims were
+    CODE claims, so ADR 0001 puts them behind a test, not behind agents. Three
+    things it found that the brief did not predict, each measured:
+    1. **A defender's declared damage pair MOVES the battle hash** while
+       reaching no arithmetic (`combatantProjection`, `resolver.js:480-496`,
+       into `combatStateHash` `:560`). Declaring it as `1/1` — the value the
+       arithmetic defaults to anyway — still moves it, because the projection
+       covers the DECLARATION. So "complete the fixture so the guard stops
+       complaining" is a PROTOCOL change and would desync peers. Pinned.
+    2. **The armoured golden is `fightMode: "tournament"`, not `misc`.** The
+       mode play uses now has exactly one runtime-verified fixture behind it,
+       where `ss2-rules.js`'s header said it had none. It is also the only
+       golden with a `provenance.staged` string — the attestation header
+       PREDICTED that would happen one day, and it has.
+    3. **A refused attack was not free**, and that was a regression this work
+       introduced: the guard sat after the direction draw, so three rejections
+       took the journal from 3 draws to 6 and moved the hash each time. Found
+       by an INDEPENDENT CODEX REVIEW, confirmed by measurement, fixed by
+       building both vanilla records before the first draw. Same review caught
+       that the new hash test filtered to settled goldens and therefore skipped
+       the only fixture that omits the pair. **Codex earned its place in the
+       precedence again: two real defects, neither reachable by the tests I
+       had just written.**
 
 *(The brief it supersedes, whose findings and ranked list are unchanged:)*
 [2026-09-02 16:59 — three waves, cut at the usage limit](docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md). Three capped fan-out waves on the 13:40 brief's ranked items 1–3
