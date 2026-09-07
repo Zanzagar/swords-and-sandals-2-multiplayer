@@ -272,6 +272,25 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
  * wins; a symmetric multiplayer engine cannot have both, and the hero's rule is
  * the player's rule.)
  */
+/**
+ * The `damage_method` each status arm passes to `magic_damage_character` —
+ * which is NOT always the decision label.
+ *
+ * "Three spellings for one effect, and they are not interchangeable": the FIELD
+ * is `poison`, the DECISION label is `poisoned`, and `life_stolen` keeps its
+ * spelling as a decision but reaches the ingress as **`lifesteal`**. Passing
+ * the decision label straight through got that last one wrong — caught by an
+ * independent review. The argument is the defender clip's animation label and
+ * is read exactly once, so it changes no number; it is the ingress's recorded
+ * identity, and a wrong one misdescribes what happened.
+ */
+export const SS2_STATUS_DAMAGE_METHOD = Object.freeze({
+  frozen: "frozen",
+  burning: "burning",
+  poison: "poisoned",
+  life_stolen: "lifesteal"
+});
+
 export const SS2_STATUS_PHASE_FOR_FLAG = Object.freeze({
   frozen: Ss2ActionType.FROZEN_PHASE,
   burning: Ss2ActionType.BURNING_PHASE,
@@ -356,11 +375,17 @@ function forcedStatusFlag(actor) {
  * plainly: "a forced rest at zero stamina clears and discards a pending
  * `burning` phase in the same pass".
  */
-function statusConsumptionEffects(actor) {
+function statusConsumptionEffects(actor, flags = SS2_DEATH_CLEAR_FLAGS) {
+  const wanted = new Set(flags);
   const effects = [];
-  for (const flag of SS2_DEATH_CLEAR_FLAGS) {
-    const token = statusTokenFor(actor.status ?? [], flag);
-    if (token === null) continue;
+  // EVERY token, not one per flag. Two tokens can name the same condition with
+  // different inflictors (`burning:from=hero` and `burning:from=villain`) —
+  // `normaliseStatus` dedupes identical STRINGS, not conditions, so both
+  // survive construction. Clearing only the first left the survivor to force
+  // another turn: "every set flag is cleared" would have been false for the one
+  // case where it matters. Found by an independent review.
+  for (const token of actor.status ?? []) {
+    if (!wanted.has(ss2StatusFlagOf(token))) continue;
     effects.push({ kind: EffectKind.STATUS, targetId: actor.id, status: token, active: false });
   }
   return effects;
@@ -1120,9 +1145,23 @@ function resolveStatusPhase(request, flag, fightMode, observer) {
   // its source and this looks that combatant up among the living. At 1v1 the
   // source IS the only foe, so this is vanilla exactly.
   const sourceId = ss2StatusSourceOf(statusTokenFor(actor.status ?? [], flag) ?? flag);
-  const inflictor = sourceId === null
-    ? null
-    : [...request.foes, ...request.allies].find((combatant) => combatant.id === sourceId) ?? null;
+  // Matched on the STRINGIFIED id, because that is what the token stores — and
+  // refused outright when two living combatants stringify the same. The roster
+  // enforces id uniqueness with a Set over the raw values, so a numeric 7 and a
+  // string "7" can both exist; an independent review measured that billing the
+  // WRONG fighter's enchantment. Refusing is the only honest answer: the token
+  // genuinely does not say which one.
+  const candidates = sourceId === null
+    ? []
+    : [...request.foes, ...request.allies].filter((combatant) => String(combatant.id) === sourceId);
+  if (candidates.length > 1) {
+    throw new TeamRuleSetError(
+      `Combatant ${actor.id} carries ${flag} inflicted by "${sourceId}", but ${candidates.length} living ` +
+      "combatants share that id once stringified, so the tick cannot say whose enchantment damage to " +
+      "read. Give every combatant a distinct string id."
+    );
+  }
+  const inflictor = candidates[0] ?? null;
 
   // No source recorded (a battle that STARTED with the condition, which vanilla
   // cannot produce), or the inflictor is gone: there is no enchantment damage
@@ -1147,7 +1186,24 @@ function resolveStatusPhase(request, flag, fightMode, observer) {
     fightMode,
     result: null
   };
-  const outcome = applySs2MagicDamageCandidate(scenario, damage, { damageMethod: label });
+  const outcome = applySs2MagicDamageCandidate(scenario, damage, {
+    damageMethod: SS2_STATUS_DAMAGE_METHOD[flag]
+  });
+
+  // The same refusal the attack path carries, and for the same reason: a
+  // first-blood result ends the bout in the arithmetic and not in the battle,
+  // because `battleStanding` decides on `alive` alone. This branch previously
+  // tested only `hitpoints <= 0` and dropped the candidate's first-blood
+  // verdict on the floor — it healed the victim and left `battle.result` null
+  // where the map requires a defeat. Found by an independent review; only
+  // `duel`/`misc` can reach it, and both are gated at construction.
+  if (outcome.resultEvent && outcome.resultEvent.reason === "first-blood") {
+    throw new TeamRuleSetError(
+      `Rule set ss2-map-derived-${fightMode} produced a first-blood result from a ${flag} status phase, ` +
+      "which the team resolver cannot represent: it decides elimination on health > 0 and knows nothing " +
+      "of hitpoints < hitpointsmax. Use fightMode \"tournament\" for play."
+    );
+  }
 
   const victimAfter = scenario.hero;
   const eliminated = victimAfter.hitpoints <= 0;
@@ -1184,7 +1240,12 @@ function resolveStatusPhase(request, flag, fightMode, observer) {
 
   const effects = [
     ...defenderEffects(victimBefore, victimAfter, actor),
-    ...statusConsumptionEffects(actor),
+    // A lethal tick runs `death()`, which clears all SIX flags on the victim,
+    // not just the four conditions the forced chain consumes. Clearing only the
+    // conditions left a corpse still carrying `taunted1`/`taunted2` — the
+    // candidate cleared them in its own state and this seam never emitted the
+    // effect. Found by an independent review.
+    ...statusConsumptionEffects(actor, eliminated ? SS2_STATUS_FLAGS : SS2_DEATH_CLEAR_FLAGS),
     ...inflictorEffects,
     ...transition.effects
   ];
@@ -1206,11 +1267,23 @@ function resolveStatusPhase(request, flag, fightMode, observer) {
   }];
 
   if (observer) {
+    // `scenario.hero` is the VICTIM and `scenario.villain` the INFLICTOR,
+    // whatever those combatants are actually called — the keys are the
+    // candidate's two role slots, and the crossing is what makes the callee
+    // damage the phase's actor. The candidate stamps its `result` labels from
+    // those slot names, so an observer reading `loserSide` alone would learn
+    // the slot rather than the gladiator. The real ids are carried here so a
+    // diagnostic reader never has to guess; the resolver's own winner is
+    // decided from `alive` and is unaffected.
     observer(clone({
       actorId: actor.id,
       targetId: actor.id,
       type: SS2_STATUS_PHASE_FOR_FLAG[flag],
       condition: flag,
+      damageMethod: SS2_STATUS_DAMAGE_METHOD[flag],
+      victimId: actor.id,
+      inflictorId: sourceId,
+      roleSlots: { victim: "hero", inflictor: "villain" },
       fightMode,
       scenario,
       outcome

@@ -60,6 +60,7 @@ import {
   ss2StatusFlagOf,
   ss2StatusSourceOf,
   ss2StatusToken,
+  SS2_STATUS_DAMAGE_METHOD,
   SS2_STATUS_FLAGS,
   ss2BattleValues,
   ss2Combatant,
@@ -1230,6 +1231,196 @@ test("a lethal tick runs no phase transition and clears the flags on BOTH gladia
     "death() clears the inflictor's conditions and taunts as well as the victim's"
   );
   assert.ok(battle.result, "the battle settles through the resolver's own elimination path");
+});
+
+/* --- Defects an independent review found, each now pinned ------------ */
+
+test("the life-steal tick reaches the ingress as `lifesteal`, not as its decision label", () => {
+  // "Three spellings for one effect, and they are not interchangeable": the
+  // FIELD is poison and the DECISION is poisoned; life_stolen keeps its
+  // spelling as a decision but reaches magic_damage_character as `lifesteal`.
+  // Passing the decision label straight through got this one wrong.
+  const observed = [];
+  const rules = createSs2TeamRules({ observer: (record) => observed.push(record) });
+  const battle = createTeamBattle({
+    seed: 5,
+    rules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9, vitality: 8 }), { id: "hero", name: "Hero" })] },
+      { id: "blue", combatants: [ss2Combatant(enchanter({ vitality: 8 }), { id: "villain", name: "Villain" })] }
+    ]
+  });
+  combatantById(battle, "hero").status = [ss2StatusToken("life_stolen", "villain")];
+  applyAction(battle, { actorId: "hero", ...legalActions(battle)[0] });
+
+  assert.equal(battle.lastResolution.events[0].vanillaLabel, "life_stolen", "the getphase decision");
+  assert.equal(observed.at(-1).damageMethod, "lifesteal", "the ingress argument is spelled differently");
+  assert.deepEqual(
+    Object.entries(SS2_STATUS_DAMAGE_METHOD).sort(),
+    [["burning", "burning"], ["frozen", "frozen"], ["life_stolen", "lifesteal"], ["poison", "poisoned"]]
+  );
+});
+
+test("TWO tokens for one condition are BOTH consumed, so neither forces a second turn", () => {
+  // normaliseStatus dedupes identical STRINGS, not conditions, so two different
+  // inflictors leave two burning tokens. Clearing only the first left the
+  // survivor to take another turn — "every set flag is cleared" would have been
+  // false in the one case where it matters.
+  const battle = statusBattle({
+    status: [ss2StatusToken("burning", "villain"), ss2StatusToken("burning", "hero")]
+  });
+  assert.equal(combatantById(battle, "hero").status.length, 2, "both tokens must survive construction");
+
+  applyAction(battle, onlyAction(battle));
+  assert.deepEqual(
+    [...combatantById(battle, "hero").status],
+    [],
+    "both tokens go, or the condition outlives the turn that was supposed to spend it"
+  );
+});
+
+test("a LETHAL tick clears the victim's taunts too, not only its conditions", () => {
+  // death() clears all six flags on both gladiators. Clearing only the four
+  // conditions left a corpse still carrying taunted1/taunted2.
+  const battle = statusBattle({
+    heroFields: { vitality: 0, herolevel: 1 },
+    villainFields: { weapon_max_damage: 300, weapon_enchantment_potency: 3 },
+    status: [ss2StatusToken("burning", "villain"), "taunted1", "taunted2"]
+  });
+  applyAction(battle, onlyAction(battle));
+  assert.equal(combatantById(battle, "hero").alive, false);
+  assert.deepEqual(
+    [...combatantById(battle, "hero").status],
+    [],
+    "a lethal tick must leave the victim carrying nothing at all"
+  );
+});
+
+test("a status phase REFUSES a first-blood result rather than dropping it", () => {
+  // The attack path already refuses this; the status path tested only
+  // hitpoints <= 0 and silently healed a victim the build would have defeated.
+  const rules = createSs2TeamRules({ fightMode: "duel", fixtureReplay: true });
+  const battle = createTeamBattle({
+    seed: 5,
+    rules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9, vitality: 8 }), { id: "hero", name: "Hero" })] },
+      { id: "blue", combatants: [ss2Combatant(enchanter({ vitality: 8 }), { id: "villain", name: "Villain" })] }
+    ]
+  });
+  combatantById(battle, "hero").status = [ss2StatusToken("burning", "villain")];
+  assert.throws(
+    () => applyAction(battle, { actorId: "hero", ...legalActions(battle)[0] }),
+    (error) => error instanceof TeamRuleSetError && /first-blood/.test(error.message)
+  );
+});
+
+test("an ambiguous inflictor id is REFUSED, not billed to whichever matched first", () => {
+  // The roster enforces id uniqueness with a Set over raw values, so numeric 7
+  // and string "7" can both exist while the token can only record one of them.
+  const battle = createTeamBattle({
+    seed: 5,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9, vitality: 8 }), { id: "hero", name: "Hero" })] },
+      {
+        id: "blue",
+        combatants: [
+          ss2Combatant(enchanter({ vitality: 8, weapon_max_damage: 30 }), { id: 7, name: "Numeric" }),
+          ss2Combatant(enchanter({ vitality: 8, weapon_max_damage: 3 }), { id: "7", name: "Stringy" })
+        ]
+      }
+    ]
+  });
+  combatantById(battle, "hero").status = [ss2StatusToken("burning", "7")];
+  assert.throws(
+    () => applyAction(battle, { actorId: "hero", ...legalActions(battle)[0] }),
+    (error) => error instanceof TeamRuleSetError && /stringified/.test(error.message),
+    "billing one of them at random would be inventing evidence about which weapon burned the victim"
+  );
+});
+
+test("the tick costs no stamina and STILL regenerates — pinned as numbers, not as a flag", () => {
+  // `staminacost` is forced to 0 at +0x52c0 but nextphase() still runs, so the
+  // regeneration applies. Asserting only `staminaSpent: 0` left both the zero
+  // cost and the post-tick transition state removable without any test failing.
+  const battle = statusBattle({ status: [ss2StatusToken("burning", "villain")] });
+  const hero = combatantById(battle, "hero");
+  hero.resources.staminaleft.value = 40;
+  const stamina = hero.stats.stamina;
+
+  applyAction(battle, onlyAction(battle));
+
+  const event = battle.lastResolution.events[0];
+  // nextphase: staminaleft - 0 + 1 + round(stamina / 3); the tick itself adds
+  // only the breastplate bonus, which is 0 with no breastplate.
+  const expected = 40 + event.staminaBonus + 1 + Math.round(stamina / 3);
+  assert.equal(combatantById(battle, "hero").resources.staminaleft.value, expected);
+  assert.equal(event.staminaSpent, 0, "the phase spends nothing");
+  assert.equal(event.staminaGained, expected - 40);
+});
+
+test("the tick applies its damage RAW: no ceil, because the ingress has none", () => {
+  // The map is explicit that the ceil in magic_damage_character is display-only.
+  // A derived enchantment damage is always integral, so this is reachable only
+  // through a DECLARED fractional value — which the resource vocabulary now
+  // permits, and which is exactly why the seam must not round.
+  const battle = statusBattle({ status: [ss2StatusToken("burning", "villain")] });
+  combatantById(battle, "villain").resources.weapon_enchantment_damage.value = 2.5;
+  const before = combatantById(battle, "hero").health;
+
+  applyAction(battle, onlyAction(battle));
+  const event = battle.lastResolution.events[0];
+  assert.equal(event.damage, 2.5, "a ceil here would report 3");
+  assert.equal(before - event.hitpointDamage + event.healed, combatantById(battle, "hero").health);
+});
+
+test("the breastplate stamina join fires on a status tick, as it does on a blow", () => {
+  // Step 5 of the ingress is "the same unconditional breastplate stamina join
+  // as the physical path": ceil(breastplate * damageRegister / 100).
+  const battle = statusBattle({
+    heroFields: { breastplate: 8 },
+    villainFields: { weapon_max_damage: 60, weapon_enchantment_potency: 3 },
+    status: [ss2StatusToken("burning", "villain")]
+  });
+  combatantById(battle, "hero").resources.staminaleft.value = 10;
+
+  applyAction(battle, onlyAction(battle));
+  const event = battle.lastResolution.events[0];
+  assert.ok(event.staminaBonus > 0, "a breastplate must convert incoming damage into stamina");
+  // The join reads the DAMAGE REGISTER, not the hitpoint damage — with armour
+  // standing, most of that damage never reaches health, and the stamina gain
+  // still fires on the full figure. Asserting it against hitpointDamage looked
+  // right and measured 0 against an actual 5.
+  assert.equal(event.staminaBonus, Math.ceil(8 * event.damage / 100));
+
+  // AND the transition must build on that bonus rather than on the pre-tick
+  // view. This is the only reachable case where the two differ — with no
+  // breastplate the tick moves no stamina, so dropping the post-tick handoff
+  // is invisible. That is exactly how it survived the first mutation sweep.
+  const stamina = combatantById(battle, "hero").stats.stamina;
+  assert.equal(
+    combatantById(battle, "hero").resources.staminaleft.value,
+    10 + event.staminaBonus + 1 + Math.round(stamina / 3),
+    "the regeneration must start from the post-tick stamina, bonus included"
+  );
+});
+
+test("an unknown inflictor still gets the FULL transition, pinned exactly", () => {
+  // This asserted only `health >= before`, which passes with the healing
+  // removed. Every gladiator here starts at full health, so the heal is clamped
+  // to zero and the assertion proved nothing; start it wounded instead.
+  const battle = statusBattle({ status: ["burning"] });
+  const hero = combatantById(battle, "hero");
+  hero.health = hero.maxHealth - 20;
+  const stamina = hero.stats.stamina;
+  const before = hero.health;
+
+  applyAction(battle, onlyAction(battle));
+  const event = battle.lastResolution.events[0];
+  assert.equal(event.damage, 0, "no inflictor, no number to read");
+  assert.equal(event.healed, 1 + Math.ceil(stamina / 2), "and the transition still runs in full");
+  assert.equal(combatantById(battle, "hero").health, before + event.healed);
 });
 
 test("the AI takes the status phase it is handed, WITHOUT building an attacker record", () => {
