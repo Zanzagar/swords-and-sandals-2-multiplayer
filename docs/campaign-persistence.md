@@ -190,12 +190,23 @@ handed from a remote peer to the AI mid-battle records only where it ended up.
 - `runtimeVerified` must agree with `verification`; a record cannot claim more
   than its rule set could.
 - `placeholder` must not pin a build hash and must not cite goldens.
+- **`map-derived` must declare `runtimeVerified: false`, must pin a 64-hex
+  build SHA-256, and must cite at least one promoted golden.** ► *Added to the
+  list 2026-09-07: `RecordedRuleSetVerification` has had FOUR values since the
+  `map-derived` tier landed, and this bullet list named three. Re-derived —
+  `{placeholder, map-derived, runtime-verified, unknown}`.*
 - `runtime-verified` must pin a 64-hex build SHA-256 **and** cite at least one
   promoted golden fixture id.
 - `unknown` is legal only on a migrated record (see below).
 
-Today every record this layer can produce says `placeholder`, because
-`classicStyleRules` is an explicit placeholder and no verified rule set exists.
+~~Today every record this layer can produce says `placeholder`.~~ ►
+**CORRECTED 2026-09-07.** A record built on the default rule set still says
+`placeholder`; a record built on `ss2TeamRules` (`src/team/ss2-rules.js`) says
+**`map-derived`**, pins the build SHA-256 and cites 23 goldens.
+`test/campaign-circuit.test.js` and `test/campaign-read-back.test.js` build such
+records today, and `node tools/hotseat.mjs --circuit <n>` produces them at
+runtime. No RUNTIME-VERIFIED record is producible, which is the claim that
+still holds and the one this paragraph should always have been making.
 `describeCampaignRecord()` surfaces `verification` and `runtimeVerified` first
 for exactly that reason: a campaign built on placeholder maths has to stay
 identifiable later, and must never be presented as measured behaviour.
@@ -431,14 +442,25 @@ correct response to one is to fix the caller. It propagates.
 ## What this layer does not do
 
 - **No rewards.** The roadmap's Stage 5 line covers "campaign roster/save/reward
-  integration"; only the save half is built here. Computing a reward is a
+  integration"; **two of its three halves are built here** — the save
+  (`store.js` / `record.js` / `recorder.js`) and the roster read-back
+  (`to-battle.js`, consumed by `circuit.js`). Only the reward half is unbuilt.
+  *(This bullet said "only the save half" until 2026-09-07, three weeks after
+  read-back landed on the same day this file was last read.)* Computing a reward is a
   formula, and formulas belong in a rule set. The record carries what a reward
   calculation would need to read — the result, the survivors, the AI-filled
   slots, and the provenance of the maths — and stops there.
-- **No roster write-back.** Nothing here advances a gladiator, and nothing here
-  reads one. A campaign that wants to apply consequences does so through
-  vanilla's own surface, or through a future adapter path, with full knowledge
-  that the town square will flush over it.
+- **No roster WRITE-back.** ► **Corrected in place 2026-09-07: this bullet used
+  to end "and nothing here reads one", and reading is exactly what landed.**
+  `rosterFromCampaignRecord()` (`src/campaign/to-battle.js`) takes a settled
+  record plus the bout's blueprints and rebuilds the next bout's teams, writing
+  `health`, `status` and `maxHealth` onto a `structuredClone` of each survivor;
+  `advanceCircuit()` (`src/campaign/circuit.js`) chains bouts with the survivors
+  carried and reports `restoredResources` rather than deciding it. Nothing here
+  still ADVANCES a gladiator: no stat rises, no reward is paid, and a campaign
+  that wants to apply consequences does so through vanilla's own surface, or
+  through a future adapter path, with full knowledge that the town square will
+  flush over it.
 - **No action journal.** The record stores the outcome, the seed, the RNG
   cursor and the combat state hash, not the ordered action stream a replay would
   need. That is a bigger artefact with a different lifetime, and adding it later

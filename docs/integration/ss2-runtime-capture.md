@@ -2,7 +2,15 @@
 
 Status: capture, verification, and promotion landed 2026-08-30 and are fully
 covered by tests. The loop runs unattended end to end, and since `e4d02a3` it
-runs **concurrently** as well. **22 fixtures are promoted** to runtime-observed
+runs **concurrently** as well.
+
+► **EVERY COUNT IN THIS DOCUMENT WAS RE-DERIVED 2026-09-07 and several moved.
+  The corpus is 23 goldens / 69 observation records / 62 cited ids / 11
+  nonce-bearing across 5 goldens / 2 records carrying `staged`. Where a
+  paragraph below still says 22 or 67, it has been corrected AT the sentence;
+  where it has not, re-derive rather than quoting it.**
+
+**23 fixtures are promoted** to runtime-observed
 goldens in `test/fixtures/ss2-1v1-golden/`: twelve prisoner kills covering all
 twelve melee attack directions (the normal, power and quick bands) and ten
 probe arms that measure `rollneeded` per band, the critical-deflection
@@ -268,14 +276,27 @@ rediscovered as surprises:
   player and the promotion gate refuses two observations that share one. That
   narrows the gap rather than closing it — the nonce distinguishes player
   launches, and nothing still binds an observation to a distinct process.
-  Legacy records carry no nonce, and **not one of the 22 promoted goldens
-  cites an observation that carries one** (only 9 of the 67 committed records
-  do, and none of those 9 is cited), so for every golden in the repository
-  today independence remains exactly the two operator strings.
+  Legacy records carry no nonce. ► ~~**Not one of the 22 promoted goldens
+  cites an observation that carries one.**~~ **RETRACTED 2026-09-07, and the
+  conclusion inverts.** Re-derived that day: **11 of the 69 committed records
+  carry `capture.launchNonce`** — `obs-cachecold`, `obs-cachewarm`, `obs-iso2`,
+  `obs-onx1405-a1`, `obs-onx1521-a1`, `obs-par1`–`obs-par3`, `obs-pq1`–`obs-pq3`
+  — and **all 11 are cited**, across 5 goldens
+  (`golden-armoured-deflection-threshold-cleared`,
+  `golden-prisoner-normal-kill`, `-dir5`, `-dir6`, `-dir8`). For those five,
+  independence is no longer just the two operator strings. For the other 18 it
+  still is, and that is the claim to carry forward.
 
-**What a STAGED capture proves, and what it does not.** Until now the wrapper
-has never written combatant state: it injects the RNG tape and observes, and all
-22 promoted goldens rest on scenarios the game itself produced. The
+**What a STAGED capture proves, and what it does not.** ► **The future tense
+below is spent — corrected 2026-09-07.** The wrapper HAS written combatant
+state, in `session-onx1405` and `session-onx1521` (2026-09-02), and the golden
+they produced —`golden-armoured-deflection-threshold-cleared`, villain
+`armourclass 79`, `helmet 6`, `greaves 2`, `fightMode: "tournament"` — carries
+`provenance.staged`. So **22 of the 23** promoted goldens rest on scenarios the
+game itself produced, not all of them. Everything this section then says about
+what a staged capture proves still stands; only the "has never" / "will" framing
+was stale. As originally written: until then the wrapper had never written
+combatant state — it injects the RNG tape and observes. The
 `candidate-armoured-*` fixtures need exact per-piece values (helmet 6, greaves
 2) the game will never produce by chance, and while the tournament rank-1
 opponent is reproducible (`unleash_hell` builds it from hard-coded DNA
@@ -479,7 +500,17 @@ rather than failed — an undefined read taking the permissive branch, the same
 class as the `isNum` trap. `capture-refused-wrong-side` appears **zero** times
 across all 268 archived `.rufflelog` files and zero times in any `.jsonl`; its
 sibling `capture-refused-unstaged`, later in the same function body, appears
-1091 times, so emission works and the count is a real zero. Two independent
+1091 times, so emission works and the count is a real zero.
+
+► **RE-MEASURED 2026-09-07 against `/mnt/c/ss2-capture/captures`, and both
+  numbers have moved in the direction that retires this whole paragraph.** The
+  archive now holds **1650** `.rufflelog` files, and `capture-refused-wrong-side`
+  appears in **631 of them** (still zero in any `.jsonl`, which is correct — it
+  is a `dbg` line `delog` strips). The guard was fixed four minutes after this
+  paragraph was committed (`ad8c9ae` → `2b483a8`, 2026-08-31) and it demonstrably
+  fires. **So do not read the paragraph below as live**: the zero it reasons
+  about is a 2026-08-31 measurement of a defect that is fixed, and the
+  `if (attacker != undefined)` mechanism it describes is no longer the code. Two independent
 read-only audits on 2026-08-31 byte-mapped `game_attacker` to *overlay-clip*
 scope (bare `SetVariable` inside `changeCombatants`), which would make
 `gameRoot().game_attacker` undefined on **every** route rather than only this
@@ -742,16 +773,20 @@ match each other and both match the fixture, and promotion still refuses them.
 **A golden promoted from staged evidence records it in `provenance.staged`**,
 so the fixture says so on its own face rather than making a reader chase
 observation ids into `test/observations/`. Unstaged promotions add no key at
-all, which is what keeps the 22 committed goldens byte-identical and is also the
+all, which is what keeps the 22 unstaged goldens byte-identical and is also the
 honest claim.
 
-> **Outstanding.** `GOLDEN_PROVENANCE_KEYS` in `src/golden/run-1v1-fixture.js`
-> is a closed set that does not yet admit `staged`, so promotion of staged
-> evidence currently **fails loudly** with the exact change required rather than
-> dropping the field — emitting a golden that silently read as game-produced is
-> the outcome this whole field exists to prevent. Until that one-line schema
-> change lands, a staged capture can be ingested, matched and inspected, but not
-> promoted. Nothing about unstaged promotion is affected.
+> ~~**Outstanding.** `GOLDEN_PROVENANCE_KEYS` does not yet admit `staged`, so
+> promotion of staged evidence currently fails loudly … a staged capture can be
+> ingested, matched and inspected, but not promoted.~~
+>
+> ► **CLOSED 2026-09-02, and this blockquote advertised it as open until
+> 2026-09-07.** `GOLDEN_PROVENANCE_KEYS` admits `staged`
+> (`src/golden/run-1v1-fixture.js:71`, with the comment recording the date and
+> the reason), it is validated through `parseStagedDeclaration`, and a staged
+> capture HAS since been promoted. Struck rather than deleted, because "it fails
+> loudly rather than dropping the field" is still the design and is still the
+> reason the key is optional.
 
 ## Observation records
 
@@ -770,13 +805,24 @@ and `mutationGranularity`. It also admits exactly three optional members,
 described under
 [the capture attestations](#the-three-capture-attestations-on-the-end-line);
 `overdraw` may only be `0`, `launchNonce` must be a token, `staged` must satisfy
-the declaration grammar, and no other key is accepted. **9 of the 67 committed
-records carry the first two** — `obs-cachecold`, `obs-cachewarm`, `obs-iso2`,
-`obs-par1`–`obs-par3` and `obs-pq1`–`obs-pq3`, all of them isolated-store or
-concurrent sessions. The other 58 predate the fields, which is why the fields
-are optional and why no committed record was rewritten to add them. **No
-committed record carries `staged`**: nothing has been wrapper-staged yet, so
-every record in the repository is evidence the game produced unaided.
+the declaration grammar, and no other key is accepted.
+
+► **Both counts in this paragraph were re-derived 2026-09-07 and both moved.**
+**11 of the 69 committed records carry `launchNonce`** — the nine originally
+listed here (`obs-cachecold`, `obs-cachewarm`, `obs-iso2`, `obs-par1`–`obs-par3`,
+`obs-pq1`–`obs-pq3`, all isolated-store or concurrent sessions) plus
+`obs-onx1405-a1` and `obs-onx1521-a1`, which are arena-route staged captures and
+so break the "all of them isolated-store or concurrent" description. The other
+**58** predate the fields, which is why the fields are optional and why no
+committed record was rewritten to add them — and 58 is also, coincidentally, the
+size of the `SS2_PRE_NONCE_OBSERVATION_DIGESTS` waiver set.
+
+~~**No committed record carries `staged`**: nothing has been wrapper-staged yet,
+so every record in the repository is evidence the game produced unaided.~~ ►
+**FALSE since 2026-09-02.** `obs-onx1405-a1` and `obs-onx1521-a1` each declare a
+sixteen-field villain staging, and the golden promoted from them carries the
+same string in `provenance.staged`. **It is no longer true that every record in
+the repository is evidence the game produced unaided** — 67 of 69 are.
 
 That "holding only the repository" claim was checked, and it holds. The 22
 goldens cite 47 distinct observation ids, and **all 47 have committed records**

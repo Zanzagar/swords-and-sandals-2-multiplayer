@@ -18,8 +18,8 @@ read-only. This is not yet a finished playable mod.
 | Track | Current state |
 | --- | --- |
 | Shared team resolver | Implemented and tested for one to three combatants per team. 1v1, 2v2, and 3v3 use the same resolver. |
-| Vanilla parity | Partial and expanding. 22 promoted runtime goldens exist and now **replay through the shared resolver** under `src/team/ss2-rules.js`, a `map-derived` rule set carrying SS2's own attack arithmetic. No RUNTIME-VERIFIED rule set exists: map-derived declares `runtimeVerified: false`, and the goldens cover attack directions 1-12 with zero armour and zero enchantment. |
-| SS2 adapter and campaign layer | Asset-free state bridge, slot layout, presentation commands, acknowledgement bridge, and additive campaign-record schema have landed. Rendering, roster read-back, rewards, and licensed-build integration remain incomplete. |
+| Vanilla parity | Partial and expanding. **23** promoted runtime goldens exist and **replay through the shared resolver** under `src/team/ss2-rules.js`, a `map-derived` rule set carrying SS2's own attack arithmetic. No RUNTIME-VERIFIED rule set exists: map-derived declares `runtimeVerified: false`. The goldens cover attack directions 1–12; **22 of the 23 carry zero armour and `fightMode: "misc"`, and the 23rd does not** — `golden-armoured-deflection-threshold-cleared` stages a villain at `armourclass 79` in `fightMode: "tournament"` and measures absorption 79 → 57. Enchantment coverage is still zero. *(Re-derived 2026-09-07; this cell said 22 and "zero armour" until then.)* |
+| SS2 adapter and campaign layer | Asset-free state bridge, slot layout, presentation commands, acknowledgement bridge, per-action animation gate, and additive campaign-record schema have landed. **Roster read-back landed 2026-09-07** (`rosterFromCampaignRecord` / `advanceCircuit`, with `node tools/hotseat.mjs --circuit <n>` as its consumer) and is struck from this list. Rendering, rewards, and licensed-build integration remain incomplete. |
 | Endless progression | Quantitatively diagnosed and specified in a research-backed design; owner decisions and readiness blockers remain open. No Endless rule set or progression implementation exists yet. |
 | Online multiplayer | Deterministic foundations exist; lobby, transport, authentication, reconnect, and desync recovery are planned. |
 
@@ -45,13 +45,15 @@ The detailed and frequently changing delivery state lives in the
   state and emits inert presentation commands. Those commands have not proved a
   rendered multi-slot battle in the licensed build.
 - [`src/campaign/`](src/campaign) stores a separate, versioned, additive campaign
-  record. It has no path that overwrites vanilla save fields; it does not yet
-  read a persistent roster back into a playable campaign or award progression.
+  record. It has no path that overwrites vanilla save fields. It **reads a
+  record back into a playable roster** — `rosterFromCampaignRecord` plus the
+  bout's blueprints, chained by `advanceCircuit` — and still awards no
+  progression: paying a reward is a design decision EP-D04 owns.
 
 - [`src/team/ss2-rules.js`](src/team/ss2-rules.js) runs SS2's own attack
   arithmetic inside that resolver, and `node tools/hotseat.mjs` plays it: two
   humans, one keyboard, to a winner. Its tier is `map-derived` — read out of the
-  licensed build's bytecode, partly checked against the 22 goldens, and never
+  licensed build's bytecode, partly checked against the 23 goldens, and never
   observed running. The banner says so on every run.
 
 These are repository capabilities, not proof of complete vanilla parity. The

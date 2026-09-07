@@ -270,8 +270,14 @@ block, not by assumption:
   (burning, frozen, poison, life-stolen). The champion's
   `weapon_enchantment_type` 4 is therefore the poison entry.
 
-The largest `range factor` anywhere in the table is 3. That is load-bearing for
-the capture plan in §6.
+~~The largest `range factor` anywhere in the table is 3.~~ ► **WRONG, and
+corrected 2026-09-07 against the committed transcription.** The largest range
+factor in the weapon table is **100**. Re-derived from
+`src/team/ss2-weapon-table.js` (90 rows): **18 ids carry 100** — the ranged band
+61–64, 66–74 and 76–80 — and **three carry 4** (65, 75, 220). **3 is only the
+maximum among the non-ranged rows.** This sentence is load-bearing for the
+capture plan in §6, and §7 draws an invariant from it that does not survive; see
+the correction there.
 
 ## 4. `battlevalues` applied to the champion
 
@@ -704,10 +710,26 @@ hero always starts on a warrior controller because root frame 221 forces
 `equipped_weapon = 1` and `using_bow = false`. `getfightdistance`
 (sprite 2249 frame 1 `DoAction@0x6e421b` `+0x02ff`, `+0x0427`) makes
 `fightdistance` the rounded x-separation of the two clips, which is 500 at
-construction, while the largest `weapon_range` any row in §3 can produce is
-`physical_size + 3 * 44` — under 250 even at the stat cap. **No staging can
-start the hero in close range**, so the approach turns are unavoidable and only
-§6.1's argument 2 makes the captured state predictable.
+construction.
+
+► **THE INVARIANT THAT STOOD HERE IS BROKEN, corrected 2026-09-07.** It read:
+  *"the largest `weapon_range` any row in §3 can produce is
+  `physical_size + 3 * 44` — under 250 even at the stat cap. **No staging can
+  start the hero in close range**."* That rests on §3's "largest range factor is
+  3", which is wrong — 18 rows carry a range factor of **100** (see the
+  correction in §3). `-StageHero` writes numbers only, so a ranged primary such
+  as `weapon:61` is stageable, and `battlevalues` computes
+  `weapon_range = physical_size + factor * 44` from the PRIMARY weapon
+  regardless of `using_bow`. At this document's own staged strength that gives a
+  `weapon_range` in the thousands against a `fightdistance` of 500, so the hero
+  CAN start in range and the approach turns are not unavoidable.
+
+  **This is a live capture-plan consequence, not a wording fix**, and it is
+  UNVERIFIED against the runtime: nobody has staged a ranged primary and watched
+  what `initialise` does. Treat it as a hypothesis to test, not as a new
+  invariant — replacing one unmeasured universal with another is the mistake
+  this correction exists to stop. The rest of the paragraph, and §6.1's
+  argument 2, still stand for a MELEE primary.
 
 That leaves exactly three bands a capture can drive:
 
@@ -789,9 +811,14 @@ prevent.
 Two supporting facts, so the next operator can weigh a mismatch correctly rather
 than assuming the worst:
 
-- **The planner's note is about observation records, and it is accurate.** No
-  committed record under `test/observations/` carries `fight_mode` "tournament";
-  the 67 that exist carry "duel" and "misc".
+- ~~**The planner's note is about observation records, and it is accurate.** No
+  committed record carries `fight_mode` "tournament"; the 67 that exist carry
+  "duel" and "misc".~~ ► **STALE since 2026-09-02, corrected 2026-09-07.**
+  Re-derived: there are **69** committed records, and the distribution is **66
+  `misc`, 1 `duel`, 2 `tournament`** — `obs-onx1405-a1` and `obs-onx1521-a1`,
+  the two behind `golden-armoured-deflection-threshold-cleared`. So the mode IS
+  now recorded in an ingested observation and the gap this bullet describes is
+  discharged.
 - **The operator logs nevertheless already read "tournament" on this exact
   bout.** The wrapper's `versus` diagnostic prints `_global.fight_mode` directly,
   and it reads `"fightMode":"tournament"` on all twelve champion draws (and on 40

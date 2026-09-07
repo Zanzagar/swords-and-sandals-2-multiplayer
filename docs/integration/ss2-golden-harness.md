@@ -1,9 +1,15 @@
 # SS2 1v1 golden-harness checkpoint
 
 Status: asset-free candidate harness for the licensed SS2 build in
-[`ss2-build-fingerprint.json`](ss2-build-fingerprint.json), with its **first
-four runtime-verified goldens promoted 2026-08-30**. Everything else it holds
-is still a static candidate and does not claim runtime parity.
+[`ss2-build-fingerprint.json`](ss2-build-fingerprint.json), with **23
+runtime-verified goldens promoted** (the first four on 2026-08-30). Everything
+else it holds is still a static candidate and does not claim runtime parity.
+
+► **THIS DOCUMENT WAS THE STALEST IN THE REPOSITORY, measured 2026-09-07.** It
+  said "first four" and "Four fixtures carry it, and only four" while 23 were
+  promoted, and the count was ALREADY wrong at its own last content edit
+  (`4bda5fc`, 2026-08-31), when 22 existed. Every count below was re-derived on
+  2026-09-07 against the tree, not copied. **Re-derive before quoting.**
 
 ## Purpose and boundary
 
@@ -50,10 +56,15 @@ resolver replays them, and which action identity their scenario carries.
 
 `test/ss2-fixture-files.js` asserts the two lists are disjoint and that their
 union is exactly the directory: a new fixture must be registered in one list
-and only one. The separation is deliberate — the golden, observation, and
-simulator suites are hard-wired to the physical resolver and would reject a
-spell fixture, and the two reconstructions must be able to diverge without
-either silently rewriting the other. The spell module duplicates its helpers
+and only one. The separation is deliberate — the **golden** suite is hard-wired
+to the physical resolver and would reject a spell fixture, and the two
+reconstructions must be able to diverge without either silently rewriting the
+other. ► **CORRECTED 2026-09-07, and it was WRONG when written rather than
+stale:** this sentence named the observation and simulator suites as well.
+Both load `loadSs2SpellFixtures()` and drive all eight spell fixtures through
+the same ingest/match pipeline (`test/ss2-observation.test.js:59`,
+`test/ss2-simulate.test.js:22`, whose assertion is `spellFixtures.length === 8`).
+Only `test/ss2-golden.test.js` is physical-only. The spell module duplicates its helpers
 rather than importing them for that reason.
 
 A scenario carries exactly one action identity. The spell ingress has no
@@ -85,7 +96,12 @@ recorded as integer range 0 through `n - 1`.
 
 ## What "runtime-verified" means here
 
-Four fixtures carry it, and only four. It is not a judgement — it is what
+**23** fixtures carry it. *(This line read "Four fixtures carry it, and only
+four" until 2026-09-07.)* Re-derived that day: all 23 are
+`classification: golden` with `provenance.kind: "licensed-observation"`,
+`runtimeVerified: true`, at least two observation ids, and a
+`captureManifestSha256` — so the requirement table below still describes the
+gate exactly; only the count was wrong. It is not a judgement — it is what
 `src/golden/promote-1v1-golden.js` enforces before it will write into
 `test/fixtures/ss2-1v1-golden/`:
 
@@ -97,7 +113,11 @@ Four fixtures carry it, and only four. It is not a judgement — it is what
 | Attested | a capture manifest listing every session and observation, cited by its own SHA-256 |
 | Replayable | the candidate resolver is re-run against the fixture at promotion time and on every test run |
 
-The promoted set:
+The promoted set — **the four original prisoner goldens only.** The other 19
+(the eight remaining prisoner directions, the ten probe arms, and
+`golden-armoured-deflection-threshold-cleared`) are not tabled here; the tree is
+the oracle. Every row below was re-checked against its file on 2026-09-07 and
+each is correct as written:
 
 | Golden | Direction | Observations |
 | --- | --- | --- |
@@ -121,8 +141,22 @@ the game drew. What they verify is that whole path: the `attack_chances`
 normal formula, the physical roll order, armour-free damage application, the
 defeat gate's direction dispatch, and the pending result event with its
 completion token. They do not verify armour, status flags, non-lethal
-outcomes, tournament mode, or any other direction band. `candidateFlags` do
-not carry over on promotion, so nothing flagged has been confirmed yet.
+outcomes, tournament mode, or any other direction band — **which is a statement
+about these FOUR, not about the corpus.** Armour, tournament mode and non-lethal
+outcomes have since been verified by other goldens; see the roadmap's Stage 3
+cell.
+
+`candidateFlags` do not carry over on promotion — re-derived 2026-09-07: 0 of
+the 23 goldens carries one. ► **But "nothing flagged has been confirmed yet" is
+STALE.** Three flagged candidates have since been promoted:
+`candidate-probe-deflection-threshold-cleared`,
+`candidate-probe-deflection-threshold-critical` (both
+`critical-deflection-threshold-operand-mix`) and
+`candidate-armoured-deflection-threshold-cleared`, which additionally carried
+`fight-mode-tournament-unobserved` and
+`tournament-opponent-profile-parameterised`. The flags are still absent from the
+goldens, which is the mechanism this paragraph describes and which still holds —
+so a reader must look at the CANDIDATE to learn what a golden confirmed.
 
 Staging requirements for everything still unverified are catalogued in
 [the capture staging guide](ss2-capture-staging.md).
@@ -264,16 +298,33 @@ and cites at least one promoted golden fixture id in
 `provenance.goldenFixtureIds`. A placeholder must declare
 `runtimeVerified: false` and may not cite goldens at all.
 
-**Nothing measured has been dropped into that seam.** `classicStyleRules`
-remains the only rule set and is still the documented placeholder, with its
-formulas untouched. Four promoted goldens cover one direction band of one
-staged scenario — enough to satisfy the gate's *form*, nowhere near enough to
-be a rule set. A `describeTeamRuleSet` summary is what UI, logs, and save
-records should carry so placeholder behaviour is never mistaken for measured
-behaviour.
+~~**Nothing measured has been dropped into that seam.**~~ ► **RETRACTED
+2026-09-07: it has been, and this whole section described the state of
+2026-08-31.** `src/team/ss2-rules.js` exports `ss2TeamRules` — a SECOND rule set
+outside `test/`, declaring the tier `map-derived`, which was added to
+`rule-set.js` after this document's last edit and which the paragraph above
+therefore still omits. It pins the licensed build's SHA-256, cites all 23
+promoted goldens in `SS2_GOLDEN_FIXTURE_IDS`, and declares
+`runtimeVerified: false`. `tools/hotseat.mjs` selects it. **The claim that
+survives, and the one this paragraph should have been making, is narrower:
+nothing RUNTIME-VERIFIED has been dropped into the seam, because no capture has
+observed the rule set running.** A `describeTeamRuleSet` summary is what UI,
+logs, and save records should carry so placeholder behaviour is never mistaken
+for measured behaviour — and now so that MAP-DERIVED behaviour is never mistaken
+for observed behaviour either.
 
-The next implementation stage is breadth of evidence rather than feasibility:
-run the power and quick bands through the campaign, then the scenarios that
-need real staging (armour, statuses, non-lethal outcomes, tournament mode),
-and only then assemble a measured rule set for the seam and the team-aware SS2
-adapter described in the [roadmap](../roadmap.md).
+~~Four promoted goldens cover one direction band of one staged scenario.~~ 23
+goldens cover all twelve melee attack directions across three bands, ten probe
+arms, and one armoured tournament scenario.
+
+~~The next implementation stage is breadth of evidence: run the power and quick
+bands through the campaign, then the scenarios that need real staging (armour,
+statuses, non-lethal outcomes, tournament mode), and only then assemble a
+measured rule set.~~ ► **Every step named there is done**, and the list is
+struck rather than deleted because it is the record of what was planned. Power
+band, quick band, non-lethal outcomes (the four `*-rollneeded-miss` probe
+goldens), armour and tournament mode (`golden-armoured-deflection-threshold-cleared`),
+and the rule set itself (`src/team/ss2-rules.js`). **Statuses remain the one
+unstaged item on that list**, and the enchantment/status phase in the rule set
+is map-derived with no runtime backing. The live next step is in the
+[roadmap](../roadmap.md), not here.

@@ -397,10 +397,25 @@ universal.
     and does not prove: it is an integrity check, NOT a provenance claim, and a
     copy hashes exactly like its original.
 
-    **What is genuinely gone is the OneDrive tree**, which now holds only
+    ~~**What is genuinely gone is the OneDrive tree**, which now holds only
     `ss2-team-arena-foundation.bundle` — a git bundle, which by construction
     cannot carry gitignored traces. So it is two copies, not three, and the
-    second one is normally unplugged.
+    second one is normally unplugged.~~
+
+    ► **WRONG, AND CORRECTED 2026-09-07 BY MEASUREMENT. THE ONEDRIVE TREE IS
+      NOT GONE, AND IT IS A THIRD COPY OF THE EVIDENCE ARCHIVE.**
+      `/mnt/c/Users/corey/OneDrive/Documents/ChatGPT/SS2 Multiplayer Mod/ss2-team-arena-foundation/captures`
+      holds **1,589 files / 19,904,374 bytes, including 292 raw `.rufflelog`
+      traces** — byte-for-byte the figure this same section records ~20 lines
+      above for the 2026-08-31 `D:` mirror, so it is a frozen replica of that
+      snapshot rather than a bundle. The directory alongside it carries
+      `_RETIRED-DO-NOT-WORK-HERE.txt`, which is presumably why a previous
+      session inferred it had been emptied and never looked. **So it is THREE
+      copies, not two**, and two of the three are reachable from a WSL session
+      on this box right now. *(How this got written: the retired tree was
+      checked for a git bundle, found to have one, and the presence of the
+      bundle was read as the absence of everything else. State what you
+      measured, not what you inferred from one file.)*
 
   ► **`/mnt/d` FAILING DOES NOT MEAN `D:` IS UNPLUGGED, AND THIS FILE HAS NOW
     DRAWN THAT WRONG INFERENCE TWICE. Measured 2026-09-02.** `ls /mnt/d` returns
@@ -510,7 +525,10 @@ cleanly with no free parameter; 60 do not.** The corpus is about 98% sound, and
 four claims below this line are now WRONG. They are corrected here rather than
 edited away, because each was load-bearing.
 
-**Baseline is 622 tests, 0 failed, 0 skipped** (614 at the end of the audit pass,
+~~**Baseline is 622 tests, 0 failed, 0 skipped**~~ ► **808 / 807 / 0 / 1
+(fresh-clone), measured 2026-09-07. Every number in the parenthesis below is a
+historical trail, not a baseline — read it as history and measure the current
+one.** (614 at the end of the audit pass,
 617 by the end of that session — a number this file was never updated with, so
 every "614" below it was stale on the day it was written; 620 after `2b123b9`.
 Was 603 before the audit pass; the "602" written below was already stale when
@@ -665,22 +683,29 @@ of it (checked with `git merge-base --is-ancestor`, not assumed) — and the
 
 ### Expected test profiles
 
-► **THE COUNTS IN THIS SECTION ARE STALE BY 8. Corrected 2026-09-01 (evening),
-  measured on this tree: `630 tests, 629 passed, 0 failed, 1 skipped`** — the
-  fresh-clone profile, since the WSL tree's `captures/` holds only `README.md`.
-  The 15:50 handoff already states 630/629/0/1 correctly; **the defect is that
-  the LIVING HEAD was not updated with it**, which is exactly the failure mode
-  `AGENTS.md` names when it says the head is the only place a wrong instruction
-  may be corrected. Read every "622" below as 630 and every "621" as 629 until
-  someone re-measures both profiles the way this section demands. The
-  capture-bearing profile has NOT been re-measured since; do not assume 630/0.
+► **DO NOT READ ANY NUMBER IN THIS SECTION. MEASURE. Re-measured 2026-09-07 on
+  this tree: `808 tests, 807 passed, 0 failed, 1 skipped`** — the fresh-clone
+  profile, since this tree's `captures/` holds only `ARCHIVE-MANIFEST.sha256`
+  and `README.md`. **The SHAPE of the section is what is durable and it still
+  holds**: two profiles, differing by exactly the raw-trace archive existence
+  check, and a partial archive fails rather than skipping.
+
+  *(This block previously said "STALE BY 8 … read every 622 below as 630 and
+  every 621 as 629". That correction was itself stale by 178 when it was found
+  on 2026-09-07, and its substitution instruction was wrong at both values — so
+  a reader following it would have replaced one wrong number with another. A
+  correction that carries a number goes stale exactly as fast as the number
+  did; the durable fix is to state the COMMAND, which is
+  `node --test --test-concurrency=1` from the repo root.)*
 
 - A capture-bearing operator worktree with the complete ignored raw-trace
-  archive runs all **622 tests: 622 passed, 0 skipped, 0 failed**.
-- A fresh clone or worktree with none of those ignored traces runs **622 tests:
-  621 passed, 1 skipped, 0 failed**. The skipped test is the raw-trace archive
-  existence check; the committed observation and divergence integrity checks
-  still run.
+  archive runs **every test, 0 skipped, 0 failed**. *(Last measured at a total
+  of 622 on 2026-08-31; the total is now 808 and this profile has NOT been
+  re-measured since — do not assume 808/0.)*
+- A fresh clone or worktree with none of those ignored traces runs **one test
+  fewer passing and 1 skipped**: measured 2026-09-07, `808 tests, 807 passed,
+  1 skipped, 0 failed`. The skipped test is the raw-trace archive existence
+  check; the committed observation and divergence integrity checks still run.
 - A partial raw-trace archive does **not** skip: it fails and names every
   missing expected trace.
 
@@ -1279,8 +1304,10 @@ output and names the wrapper source hash it compiled.
 
 ## Next steps, in order
 
-► **STATE AS OF 2026-09-02 00:30. Suite is 708 / 707 / 0 / 1 (fresh-clone
-  profile), from 693. MEASURE IT, DO NOT COPY THIS LINE** — two commit messages
+► **STATE AS OF 2026-09-07. Suite is 808 / 807 / 0 / 1 (fresh-clone profile),
+  re-measured that day; it read 708 / 707 / 0 / 1 from 2026-09-02 until then,
+  and the line's own instruction had been ignored for five days. MEASURE IT, DO
+  NOT COPY THIS LINE** — two commit messages
   this session said "703 / 702" and were stale by one when written, which is the
   same error the previous session's last commit existed to fix. Ranked items 2, 3 and 5 of the `…-0130` brief are DONE
   or REFUTED and item 4 is answered; see

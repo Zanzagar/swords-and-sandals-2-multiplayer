@@ -52,7 +52,9 @@ is a thin compatibility façade over it.
 | Module | Owns |
 | --- | --- |
 | `src/team/rule-set.js` | the injection contract, and the gate on claiming runtime verification |
-| `src/team/placeholder-rules.js` | the only formulas in the tree — all placeholder |
+| `src/team/placeholder-rules.js` | the placeholder formulas — invented, and declared so |
+| `src/team/ss2-rules.js` | SS2's own map-derived arithmetic (`ss2TeamRules`), the largest file in `src/team/` |
+| `src/team/ss2-weapon-table.js` | 90 weapon rows transcribed from the licensed build: id, type, weight, damage pair, range multiplier |
 | `src/team/rng.js` | the ordered authoritative RNG channel (seeded or tape-backed) |
 | `src/team/resources.js` | the open, clamped, projected per-combatant numeric bag |
 | `src/team/roster.js` | teams, slots, combatant identity, AI fill |
@@ -61,8 +63,16 @@ is a thin compatibility façade over it.
 | `src/team/settlement.js` | once-only campaign settlement behind two gates |
 | `src/team/resolver.js` | turn order, legality, effect application, event sequencing |
 
-The boundary is asset-free and dependency-free: ESM, Node builtins only, no
-game data of any kind.
+The boundary is asset-free and dependency-free: ESM and Node builtins only.
+
+► **CORRECTED 2026-09-07: "no game data of any kind" was TRUE of `src/team/`
+  until `ss2-weapon-table.js` landed on 2026-09-02, and is false now.** That
+  file holds **90** weapon rows read out of the licensed build — its own header
+  calls itself build DATA — so the honest statement is: no ASSETS (no art, no
+  audio, no SWF, nothing that would let someone play without their own licensed
+  copy), and no third-party dependency. It stays true unqualified of
+  `src/adapter/`, which this document asserts separately below. Re-derived
+  2026-09-07: `SS2_WEAPON_IDS.length === 90`.
 
 ## What a rule set must provide
 
@@ -73,7 +83,7 @@ built with `defineTeamRuleSet`.
 | --- | --- | --- |
 | `id` | lowercase token | stable identifier, recorded in the wire state |
 | `contractVersion` | `1` | must equal `TEAM_RULE_SET_CONTRACT_VERSION` |
-| `verification` | `"placeholder"` \| `"runtime-verified"` | see the provenance gate below |
+| `verification` | `"placeholder"` \| `"map-derived"` \| `"runtime-verified"` | see the provenance gate below; **three tiers, not two** — `map-derived` was added 2026-09-01 and this row listed only two until 2026-09-07 |
 | `provenance` | object | `note` always; goldens and a build hash when verified |
 | `actionTypes` | lowercase tokens | the rule set's action vocabulary |
 | `maximumHealth(combatant)` | `number` | derived maximum health at normalisation |
@@ -195,11 +205,23 @@ not cite goldens. `describeTeamRuleSet(rules)` returns the one-line summary
 projection, save record, and diagnostic. A reader can therefore always tell
 measured behaviour from invented behaviour.
 
-**Everything shipped today is placeholder.** `classicStyleRules` and the
-`melee/ranged/spell/rest` vocabulary are invented approximations authored for
-this repository, are not measured against the licensed build, and must never be
-presented as SS2 parity. Promotion replaces them by *adding* a rule set, not by
-editing one.
+~~**Everything shipped today is placeholder.**~~ ► **CORRECTED 2026-09-07,
+and the sentence had been false since 2026-09-01.** `classicStyleRules` and the
+`melee/ranged/spell/rest` vocabulary are still invented approximations authored
+for this repository, are still not measured against the licensed build, and
+must still never be presented as SS2 parity. But they are no longer everything
+shipped: **`src/team/ss2-rules.js` ships `ss2TeamRules`, id
+`ss2-map-derived-tournament`, declaring the MIDDLE tier `map-derived`** — SS2's
+own arithmetic read out of the licensed build's bytecode, pinning the build
+SHA-256 and citing 23 promoted goldens, and still declaring
+`runtimeVerified: false`, which is the honest sentence.
+
+**The tier distinction is the whole point and is easy to flatten:**
+`map-derived` means *read from the bytes and not yet observed running*.
+Re-derived 2026-09-07: `describeTeamRuleSet(ss2TeamRules)` returns
+`{ id: "ss2-map-derived-tournament", verification: "map-derived",
+runtimeVerified: false }`. Promotion still replaces a rule set by *adding* one,
+not by editing one.
 
 ## Ordered authoritative RNG channel
 
@@ -477,8 +499,9 @@ reason it emits only the `loadout` keys a named vanilla field answers; see
 | `src/adapter/clip-registry.js` | `clipByCombatantId`, structurally outside deterministic state |
 | `src/adapter/presentation.js` | resolved events -> ordered presentation commands, and the animation binding tables |
 | `src/adapter/acknowledgement.js` | the animation surface -> once-only campaign settlement |
+| `src/adapter/action-gate.js` | per-action animation tokens: is the SURFACE ready for the next action? |
 | `src/adapter/battle-host.js` | the reference host loop that drives both seams together |
-| `src/adapter/index.js` | barrel; re-exports the seven modules above |
+| `src/adapter/index.js` | barrel; re-exports the eight modules above |
 
 `battle-host.js` is not a fifth responsibility — it is the two seams driven
 as one thing, which is what a real mod would be: read vanilla combat objects,
@@ -786,7 +809,10 @@ ordered, JSON-safe presentation commands stamped with the resolver event
 `sequence` they came from: `attach-clip`, `place-clip`, `bind-globals`,
 `clip-goto`, `panel-refresh`, `overlay-goto`, `arena-goto`, and `unmapped`.
 `createPresentationBinder` wraps it in a cursor so a host drains only new
-commands after each action. The cursor holds a sequence number and nothing else.
+commands after each action. The cursor holds a sequence number and the action
+boundaries it has been told about (`drain(wire, { actionBoundary })`) — no
+combat state. Every command also carries an `actionToken`; see "Still open"
+item 5, which is now a description of what was built rather than a gap.
 
 Two rules matter more than the command vocabulary:
 
@@ -1077,11 +1103,22 @@ above. The separate campaign save record is implemented asset-free in
 What is still missing before a playable mod:
 
 - **the runtime-verified rule set** — the seam and its gate exist and nothing
-  measured has been dropped into them yet. `classicStyleRules` is the only rule
-  set anywhere under `src/`, and it is a declared placeholder; the others in the
-  repository exist only inside `test/`, to exercise the seam;
-- **campaign roster and reward integration** — the record layer stores an
-  outcome, but nothing reads a record back into a roster or pays a reward;
+  RUNTIME-VERIFIED has been dropped into them yet. ► **Two errors corrected
+  2026-09-07, both mine.** (a) `classicStyleRules` is a formulas object; the
+  rule set built from it is `placeholderTeamRules`, which is also
+  `battle-host.js`'s default. (b) It is not the only rule set under `src/`:
+  `src/team/ss2-rules.js` exports `ss2TeamRules` / `createSs2TeamRules`, the
+  `map-derived` tier, which is a real second rule set outside `test/`. What is
+  still absent is the TOP tier, and only that;
+- ~~**campaign roster and reward integration**~~ **campaign REWARD integration**
+  — ► **corrected 2026-09-07: the roster half landed on 2026-09-07 and this
+  bullet advertised it as missing anyway.** `rosterFromCampaignRecord`
+  (`src/campaign/to-battle.js`) reads a settled record plus the bout's
+  blueprints back into the next bout's teams, `advanceCircuit`
+  (`src/campaign/circuit.js`) chains bouts with the survivors carried, and
+  `node tools/hotseat.mjs --circuit <n>` is a playable consumer of both. Nothing
+  pays a reward; that half stands, and EP-D04 owns it. Struck rather than
+  deleted, because this bulleted list is cited by number elsewhere;
 - **the launcher route** into the Collection's mods folder.
 
 None of these may be substituted for by the adapter.
