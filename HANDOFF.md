@@ -68,6 +68,33 @@ harness ADR 0001) and that ultracode stays ON at the owner's instruction.
        precedence again: two real defects, neither reachable by the tests I
        had just written.**
 
+  ► **AND RANKED ITEM 2 IS BUILT (2026-09-07, `86ccb68` → `dda33d4`): the
+    STATUS PHASE.** The owner chose option (a), so a condition —
+    burning/frozen/poison/life_stolen — is now the ONLY legal action its bearer
+    has, ticks damage through the existing `magic_damage_character` model,
+    draws NO rng, costs no stamina while `nextphase` still regenerates, and is
+    consumed. `node tools/hotseat.mjs --enchant burning:3` plays it. Suite
+    748 / 747 / 0 / 1. **Read these three before building on it:**
+    1. **THE WIRE FORMAT CHANGED AND NOTHING SIGNALS IT.** Declaring
+       `weapon_enchantment_damage`/`secondary_weapon_enchantment_damage` puts
+       them in every combatant's projection, so **all 23 golden replay hashes
+       moved** (armoured `70e605e1` → `4032d673`, measured against `842f45f`
+       in a worktree). No ASSERTED pin moved, which is why the suite stayed
+       green and why `86ccb68`'s message wrongly said no hash moved. An old
+       peer and a new peer now hash the same battle differently and
+       `ss2-map-derived-<mode>` carries no version to tell them apart.
+       **Whether that id should become versioned is the OWNER'S call and is
+       still open.**
+    2. **A condition carries its inflictor** (`"burning:from=villain"`), the
+       owner's decision, because vanilla reads the tick damage off "the other
+       gladiator" and that names nobody at 2v2. At 1v1 they coincide exactly.
+       A bare flag stays legal and means "inflictor unknown": it costs the turn
+       and applies nothing.
+    3. **THE HERO'S RULE WAS ADOPTED FOR EVERYONE.** First match wins, and
+       every condition is consumed whether or not it played. The villain's
+       last-match rule and the taunted-run row are NOT modelled; a symmetric
+       engine cannot have both, and the player's rule was chosen.
+
 *(The brief it supersedes, whose findings and ranked list are unchanged:)*
 [2026-09-02 16:59 — three waves, cut at the usage limit](docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md). Three capped fan-out waves on the 13:40 brief's ranked items 1–3
 were stopped at 92% of the session limit; ranked item 4 is CLOSED by
