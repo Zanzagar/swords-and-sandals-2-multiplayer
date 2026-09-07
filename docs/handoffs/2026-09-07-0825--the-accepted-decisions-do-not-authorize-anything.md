@@ -2,8 +2,10 @@
 handoff:      2026-09-07-0825--the-accepted-decisions-do-not-authorize-anything
 written:      2026-09-07 08:25 -0400
 sessionId:    8c4c0cbf-9f42-4e2a-bedd-92955513ac37 (https://claude.ai/code/session_01STjHkv778aFGiWPfBzJWNx)
-branch:       arena/champion-capture. NOT PUSHED — four commits sit local, and
-              this project asks before every push. Check
+branch:       arena/champion-capture. PUSHED with the owner's explicit approval
+              at 08:33 — `219cf99..6cb872b`, SIX commits, not the four an
+              earlier draft of this line said. Push state is the LAST thing
+              this session did; check
               `git log --oneline github/arena/champion-capture..HEAD` rather
               than believing this line.
 suite:        787 / 786 / 0 / 1 (fresh-clone profile: `captures/` holds only
@@ -197,16 +199,90 @@ SURVIVED mutation testing** and now have tests that kill them.
    2026-09-07, while the constraint table in the same file already said so).
    The contract's "Still open" item 1 is STRUCK rather than deleted, because the
    roadmap cited it by number.
-4. **Nothing here was pushed.** Four commits are local.
+4. **Everything here IS pushed** (`219cf99..6cb872b`, six commits, owner
+   approved). An earlier draft of this file said four commits were local; both
+   halves of that were wrong by the time the session ended.
+
+## PARALLELIZE — the owner's instruction, 2026-09-07, and where it applies
+
+**Owner, this session: use the remaining budget, and parallelize whatever can be
+parallelized with subagents WITHOUT sacrificing the integrity of the workflow.**
+About 60% of a five-hour window was left when he said it. That is an instruction
+to spend, not to hurry — and the second half of the sentence is the load-bearing
+half.
+
+**FIRST, A DISTINCTION THIS REPOSITORY'S RULES DEPEND ON and which is easy to
+miss.** `AGENTS.md` and `docs/adr/0001` put a *fan-out wave* LAST in the
+precedence, capped at 6 questions and 6 verifiers, one at a time, never
+concurrent — because three concurrent 12-verifier waves once spent ~30% of a
+week's usage in twenty minutes. **That rule is about the `question-fanout-audit`
+wave aimed at the game's BYTES or the CAPTURE ARCHIVE**, which is expensive,
+adversarial, and the last resort for a claim no test pins.
+
+It is NOT a ban on ordinary parallel investigation of CODE AND DOCS. This
+session ran a six-surveyor / six-verifier `Workflow` over the design record and
+`src/`, and it was the right tool: it cost one wave's worth of agents, returned
+`started == returned` on both phases, and its verifiers broke 5 of 6 claims as
+OVERSTATED and refuted 1. **Keep the caps and the discipline; do not read the
+precedence as "work alone".**
+
+### What genuinely parallelizes here, in descending confidence
+
+1. **A DOCUMENT-INTEGRITY SWEEP — one agent per document, and this is the
+   highest-value parallel work available.** This session re-derived two files
+   and found **six stale numbers and two gaps that were closed while still being
+   advertised as open**. Nothing else has been swept. Untouched and load-bearing:
+   `docs/ss2-adapter-contract.md` (~1,030 lines), `docs/campaign-persistence.md`,
+   `docs/integration/*`, `README.md`, and **`HANDOFF.md`'s own living head
+   (~810 lines)**, which is the document every session is told to trust.
+   Give each agent ONE file and one instruction: *re-derive every factual claim
+   in it against `src/` and `test/`, and report each as HOLDS / STALE / WRONG
+   with the command that settles it.* Perfectly parallel, write-nothing, and the
+   measured hit rate on the two files done so far was high.
+2. **Investigation ahead of a single code change.** For ranked item 2 below
+   (the per-action animation acknowledgement), fan out on QUESTIONS — what does
+   the contract specify at `ss2-adapter-contract.md:961-988`; what do the
+   presentation commands actually carry; what does the battle map say the real
+   timeline does; what would a test pin — then **implement serially**. Four
+   agents editing one seam is not parallelism, it is a merge conflict.
+3. **Adversarial verification, one named claim per write-nothing verifier.**
+   Cheap, and the base rate of load-bearing claims being wrong here is high
+   enough that it keeps paying.
+
+### What must stay SERIAL, and none of it is negotiable
+
+- **Anything touching Ruffle, the installed SWF, the save, the snapshots or
+  `captures/`.** Main session only, supervised, and most of it is the owner's
+  Windows lane regardless.
+- **Every state-mutating git command.** No subagent commits, pushes, checks out
+  or stashes.
+- **Edits to one file, and the promotion pipeline end to end.**
+- **The final number.** A parallel agent FINDS; the main session RE-DERIVES
+  before anything lands. Every count in this handoff was re-measured by hand
+  after an agent reported it, and that is why they can be quoted.
+
+### The failure mode to design against
+
+**Fan out on QUESTIONS, not replicas.** Two agents given one brief agree with
+each other and are wrong together, because the brief is the correlated failure
+mode. Ask "what were they all told?" And **assert `started == briefs`**: a wave
+that silently spawns nothing returns fast, which reads exactly like success.
 
 ## Highest-value work, ranked
 
-1. **The owner's fork above.** Everything Endless waits on one sentence.
+1. **The owner's fork above.** Everything Endless waits on one sentence. Do not
+   burn the budget waiting for it — items 2 and the document sweep are unblocked
+   and need no answer.
+
+   ► **AND RUN THE DOCUMENT-INTEGRITY SWEEP EARLY**, because it is the one piece
+     of work that is both fully parallel and fully unblocked, and because every
+     session after this one reads those documents as though they were true.
 2. **The per-action animation acknowledgement** — now the ONLY remaining gap in
    the adapter contract, unblocked, headless-testable, moves no hash
    (`combatStateHash` covers no presentation data). EP-D06 names it as a
    requirement for any *playable* proof. Be honest that nothing renders yet, so
-   it is a seam ahead of its consumer.
+   it is a seam ahead of its consumer. **Parallelize the investigation, then
+   implement serially** — see the section above.
 3. **A capture hook that can arm on a status phase** — still the only way the
    status phase gets runtime backing. Owner's supervised lane; needs Windows.
 4. The schema question (villain stamina 105 vs 110), still the only capture

@@ -19,6 +19,17 @@ commits stale). Meanwhile the campaign read-back got its first consumer —
 `node tools/hotseat.mjs --circuit 3` — and `playable` turned out to be a flag
 that CANNOT be true.
 
+► **THE OWNER ASKED THE NEXT SESSION TO PARALLELIZE (2026-09-07), and that
+  brief's § "PARALLELIZE" says where it applies.** The short version, because
+  the precedence rule is easy to misread: ADR 0001 putting a fan-out wave LAST
+  is about the `question-fanout-audit` wave aimed at the game's BYTES or the
+  CAPTURE ARCHIVE. **It is not a ban on ordinary parallel investigation of code
+  and docs.** A capped `Workflow` over code/doc questions is the right tool and
+  was used successfully this session. Keep the caps; do not read the precedence
+  as "work alone". Serial and non-negotiable: Ruffle, the install, the save, the
+  snapshots, `captures/`, every state-mutating git command, edits to one file,
+  and THE FINAL NUMBER — an agent finds, the main session re-derives.
+
 *(The brief it supersedes, whose ranked items 1, 3 and 4 are all still open and
 all still the owner's supervised lanes:)*
 [2026-09-07 07:24 — the ranked list ran out](docs/handoffs/2026-09-07-0724--the-ranked-list-ran-out.md).**
