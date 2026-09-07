@@ -83,8 +83,16 @@ harness ADR 0001) and that ultracode stays ON at the owner's instruction.
        green and why `86ccb68`'s message wrongly said no hash moved. An old
        peer and a new peer now hash the same battle differently and
        `ss2-map-derived-<mode>` carries no version to tell them apart.
-       **Whether that id should become versioned is the OWNER'S call and is
-       still open.**
+       **The owner's call, 2026-09-07: NOT a versioned id — pin the SHAPE
+       instead** (`7464ca0`). A version integer is only as good as the
+       discipline that bumps it, and this repository's record on metadata
+       discipline is poor; the projection's vocabulary, its DEFAULTS, the
+       declared-vs-projected key sets and one canonical battle hash are pinned
+       instead, so the next change to the wire format has to be a decision.
+       Replaying the original defect now fails two of those pins. **The
+       versioned id is deferred, not rejected: it earns its place at the first
+       release or the first second implementation, when it can be tested at
+       the value that matters.**
     2. **A condition carries its inflictor** (`"burning:from=villain"`), the
        owner's decision, because vanilla reads the tick damage off "the other
        gladiator" and that names nobody at 2v2. At 1v1 they coincide exactly.
