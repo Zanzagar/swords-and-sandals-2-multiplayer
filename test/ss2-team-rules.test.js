@@ -56,6 +56,8 @@ import {
   SS2_FACING_LEFT,
   SS2_MAP_SOURCE_REFS,
   SS2_REQUIRED_RESOURCES,
+  SS2_RESOURCE_NAMES,
+  ss2StatusToken,
   SS2_STATUS_FLAGS,
   ss2BattleValues,
   ss2Combatant,
@@ -170,9 +172,16 @@ test("a battle that cannot change state is refused at construction", () => {
   );
 });
 
-test("the vocabulary is three melee verbs and a rest, hyphenated to satisfy the token grammar", () => {
+test("the vocabulary is three melee verbs, a rest and four status phases, hyphenated for the token grammar", () => {
+  // FOUR status types rather than one, because the build's decision IS the
+  // label: getphase("frozen") and getphase("poisoned") reach different arms.
+  // The player never picks among them — legalActions offers exactly one.
   assert.deepEqual([...ss2TeamRules.actionTypes].sort(), [
+    "burning-phase",
+    "frozen-phase",
+    "life-stolen-phase",
     "normal-attack",
+    "poisoned-phase",
     "power-attack",
     "quick-attack",
     "rest"
@@ -926,13 +935,21 @@ test("status effects come out in death()'s own order: attacker's four, defender'
   // the build's — caught by a verifier reading the interleave.
   assert.deepEqual([...SS2_STATUS_FLAGS], ["frozen", "burning", "poison", "life_stolen", "taunted1", "taunted2"]);
 
+  // ► **NARROWED 2026-09-07, and the narrowing is a real consequence, not a
+  //   concession.** This test used to give BOTH sides all four conditions and
+  //   have the hero attack. Since the status phase became a forced legal action,
+  //   an attacker carrying a condition CANNOT attack — `legalActions` offers it
+  //   exactly one option, its own status phase — so the old setup now throws
+  //   "Illegal action" and the attacker's four are unreachable through the
+  //   resolver. The taunt flags do NOT force a phase (the build's taunted row
+  //   is modelled nowhere yet), so they still reach both sides and the
+  //   field-then-SIDE interleave is still pinned here.
   let cleared = null;
   for (let seed = 1; seed <= 60 && cleared === null; seed += 1) {
     const battle = battleOf({ strength: 30 }, { vitality: 0, herolevel: 1 }, { seed });
-    for (const id of ["hero", "villain"]) {
-      combatantById(battle, id).status =
-        ["frozen", "burning", "poison", "life_stolen", "taunted1", "taunted2"];
-    }
+    combatantById(battle, "hero").status = ["taunted1", "taunted2"];
+    combatantById(battle, "villain").status =
+      ["frozen", "burning", "poison", "life_stolen", "taunted1", "taunted2"];
     applyAction(battle, { actorId: "hero", type: Ss2ActionType.POWER_ATTACK, targetId: "villain" });
     if (!battle.result) continue;   // a miss: death() never runs
     cleared = battle.lastResolution.effects
@@ -941,11 +958,260 @@ test("status effects come out in death()'s own order: attacker's four, defender'
   }
   assert.ok(cleared, "the sweep must land a killing blow, so death() runs and clears the flags");
   assert.deepEqual(cleared, [
-    "hero:frozen", "hero:burning", "hero:poison", "hero:life_stolen",
     "villain:frozen", "villain:burning", "villain:poison", "villain:life_stolen",
     "hero:taunted1", "villain:taunted1",
     "hero:taunted2", "villain:taunted2"
   ]);
+});
+
+test("an attacker carrying a condition cannot attack: the phase takes the turn", () => {
+  // The other half of the narrowing above, asserted rather than left implied.
+  const battle = battleOf({ strength: 30 }, { vitality: 0, herolevel: 1 }, { seed: 3 });
+  combatantById(battle, "hero").status = ["burning"];
+  assert.deepEqual(
+    legalActions(battle).map((option) => option.type),
+    [Ss2ActionType.BURNING_PHASE],
+    "a burning gladiator gets exactly one option, and it is not an attack"
+  );
+  assert.throws(
+    () => applyAction(battle, { actorId: "hero", type: Ss2ActionType.POWER_ATTACK, targetId: "villain" }),
+    /Illegal action/
+  );
+});
+
+/* ------------------------------------------------------------------ */
+/* The status phase: the turn a condition costs its bearer               */
+/* ------------------------------------------------------------------ */
+
+/** A gladiator whose weapon enchantment does `ceil(weapon_max_damage / 3 * potency)`. */
+function enchanter(overrides = {}) {
+  return gladiator({ weapon_enchantment_type: 2, weapon_enchantment_potency: 3, weapon_max_damage: 9, ...overrides });
+}
+
+function statusBattle({ heroFields = {}, villainFields = {}, status = [], seed = 5 } = {}) {
+  const battle = createTeamBattle({
+    seed,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9, vitality: 8, ...heroFields }), { id: "hero", name: "Hero" })] },
+      { id: "blue", combatants: [ss2Combatant(enchanter({ vitality: 8, ...villainFields }), { id: "villain", name: "Villain" })] }
+    ]
+  });
+  combatantById(battle, "hero").status = status;
+  return battle;
+}
+
+const onlyAction = (battle) => {
+  const options = legalActions(battle);
+  assert.equal(options.length, 1, `expected exactly one legal option, got ${options.map((o) => o.type)}`);
+  return { actorId: "hero", ...options[0] };
+};
+
+test("the enchantment damage derives from the build's own formula and is a DECLARED resource", () => {
+  // ceil(weapon_max_damage / 3 * potency) = ceil(9 / 3 * 3) = 9, `battlevalues`
+  // +0x320c. Declared rather than recomputed at tick time, because the build
+  // derives it once in battlevalues and the status phase reads the stored field.
+  // A BLUEPRINT's resources are plain numbers; the `{ value }` shape appears
+  // only once `normaliseResourceBag` runs inside a battle. Both are checked, so
+  // this test fails if either representation stops carrying the derivation.
+  const source = ss2Combatant(enchanter(), { id: "villain", name: "Villain" });
+  assert.equal(source.resources.weapon_enchantment_damage, 9);
+  const battle = statusBattle({});
+  assert.equal(combatantById(battle, "villain").resources.weapon_enchantment_damage.value, 9);
+  assert.ok(
+    SS2_RESOURCE_NAMES.includes("weapon_enchantment_damage") &&
+    SS2_RESOURCE_NAMES.includes("secondary_weapon_enchantment_damage"),
+    "both must be declarable, or the tick cannot read them off a combatant view"
+  );
+});
+
+test("a condition takes the turn, applies the INFLICTOR's enchantment damage, and draws NO rng", () => {
+  // `magic_damage_character` contains no RNG call, no RandomNumber opcode and
+  // no armour-removal call, so a status phase must consume nothing from the
+  // channel. That is what keeps a status turn replayable off a fixture tape.
+  const battle = statusBattle({ status: [ss2StatusToken("burning", "villain")] });
+  const drawsBefore = rngJournal(battle).length;
+  const before = combatantById(battle, "hero").health;
+
+  applyAction(battle, onlyAction(battle));
+
+  const event = battle.lastResolution.events[0];
+  assert.equal(event.type, Ss2ActionType.BURNING_PHASE);
+  assert.equal(event.vanillaLabel, "burning", "the getphase label the build knows it by");
+  assert.equal(event.inflictorId, "villain");
+  assert.equal(event.damage, 9, "the inflictor's weapon_enchantment_damage, not the victim's");
+  assert.equal(event.staminaSpent, 0, "staminacost is forced to 0 at +0x52c0");
+  assert.equal(rngJournal(battle).length, drawsBefore, "the status phase must draw nothing");
+
+  // Net positive except the tick: nextphase still runs, so the heal applies.
+  const after = combatantById(battle, "hero");
+  assert.equal(after.health, before - event.hitpointDamage + event.healed);
+  assert.ok(event.healed > 0, "nextphase's heal must still fire; only staminacost is zeroed");
+  assert.deepEqual([...after.status], [], "the condition is consumed");
+});
+
+test("the FIRST condition plays and EVERY condition is consumed — the map's order, corrected 2026-09-07", () => {
+  // frozen, burning, poison, life_stolen as four SEQUENTIAL ifs. Each clears
+  // its own flag before calling getphase, and getphase only runs at
+  // turnphase == 1 — so the first match takes the turn and the rest are silent
+  // no-ops that have already eaten their flags.
+  const battle = statusBattle({
+    status: [ss2StatusToken("burning", "villain"), ss2StatusToken("frozen", "villain")]
+  });
+  const action = onlyAction(battle);
+  assert.equal(action.type, Ss2ActionType.FROZEN_PHASE, "frozen outranks burning whatever order they were added in");
+
+  applyAction(battle, action);
+  assert.equal(battle.lastResolution.events[0].condition, "frozen");
+  assert.deepEqual(
+    [...combatantById(battle, "hero").status],
+    [],
+    "the burning was consumed too, without ever playing — this is the build's behaviour, not a bug"
+  );
+});
+
+test("a forced REST at zero stamina eats the condition without playing it", () => {
+  // The status arms are rows 4-7 of frame 1's forced chain; rest is row 2. The
+  // map states this exact consequence: "a forced rest at zero stamina clears
+  // and discards a pending burning phase in the same pass".
+  const battle = statusBattle({ status: [ss2StatusToken("burning", "villain")] });
+  const hero = combatantById(battle, "hero");
+  hero.resources.staminaleft.value = 0;
+
+  const action = onlyAction(battle);
+  assert.equal(action.type, Ss2ActionType.REST, "the rest gate outranks every condition");
+
+  applyAction(battle, action);
+  assert.deepEqual([...combatantById(battle, "hero").status], [], "the condition is consumed anyway");
+  assert.ok(
+    !battle.lastResolution.events.some((event) => event.condition),
+    "and no status phase was played"
+  );
+});
+
+test("the primary/secondary selector reads the VICTIM's weapon slot — reproduced, not corrected", () => {
+  // `+0x530e` reads game_attacker.equipped_weapon (the VICTIM's slot) to choose
+  // between game_defender's (the INFLICTOR's) two enchantment damages. Which of
+  // someone else's weapons burned you cannot depend on which weapon you are
+  // holding, and it does. The map says reproduce it.
+  const villainFields = {
+    weapon_max_damage: 9, weapon_enchantment_potency: 3,              // primary   -> 9
+    secondary_weapon_max_damage: 30, secondary_weapon_enchantment_potency: 2  // secondary -> 20
+  };
+  for (const [slot, expected] of [[1, 9], [2, 20]]) {
+    const battle = statusBattle({
+      heroFields: { equipped_weapon: slot },
+      villainFields,
+      status: [ss2StatusToken("burning", "villain")]
+    });
+    applyAction(battle, onlyAction(battle));
+    assert.equal(
+      battle.lastResolution.events[0].damage,
+      expected,
+      `victim holding slot ${slot} must take the inflictor's slot-${slot} enchantment damage`
+    );
+  }
+});
+
+test("a condition with NO recorded inflictor costs the turn and applies nothing", () => {
+  // A battle that STARTS with a condition, which vanilla cannot produce: there
+  // is no enchantment damage to read, so none is invented.
+  const battle = statusBattle({ status: ["burning"] });
+  const before = combatantById(battle, "hero").health;
+  applyAction(battle, onlyAction(battle));
+
+  const event = battle.lastResolution.events[0];
+  assert.equal(event.inflictorId, null);
+  assert.equal(event.damage, 0, "no inflictor means no number to read, and inventing one would be inventing evidence");
+  assert.equal(event.hitpointDamage, 0);
+  assert.ok(combatantById(battle, "hero").health >= before, "the turn still passes and nextphase still heals");
+  assert.deepEqual([...combatantById(battle, "hero").status], [], "the condition is still consumed");
+});
+
+test("above 1v1 the tick reads the RECORDED inflictor, not whoever happens to be opposite", () => {
+  // Vanilla reads "the other gladiator", which names nobody at 2v2. The owner's
+  // decision (2026-09-07) is that the condition remembers its source; this
+  // pins that the WEAKER enchanter opposite is not the one billed.
+  const battle = createTeamBattle({
+    seed: 5,
+    rules: ss2TeamRules,
+    teams: [
+      {
+        id: "red",
+        combatants: [
+          ss2Combatant(gladiator({ speed: 9, vitality: 8 }), { id: "hero", name: "Hero" }),
+          ss2Combatant(gladiator({ speed: 1, vitality: 8 }), { id: "ally", name: "Ally" })
+        ]
+      },
+      {
+        id: "blue",
+        combatants: [
+          ss2Combatant(enchanter({ vitality: 8, weapon_max_damage: 3, weapon_enchantment_potency: 1 }), { id: "weak", name: "Weak" }),
+          ss2Combatant(enchanter({ vitality: 8, weapon_max_damage: 30, weapon_enchantment_potency: 3 }), { id: "strong", name: "Strong" })
+        ]
+      }
+    ]
+  });
+  combatantById(battle, "hero").status = [ss2StatusToken("burning", "strong")];
+  applyAction(battle, onlyAction(battle));
+
+  const event = battle.lastResolution.events[0];
+  assert.equal(event.inflictorId, "strong");
+  assert.equal(event.damage, 30, "ceil(30 / 3 * 3) from the recorded source");
+  assert.notEqual(event.damage, 1, "and NOT ceil(3 / 3 * 1) from the other foe");
+});
+
+test("a lethal tick runs no phase transition and clears the flags on BOTH gladiators", () => {
+  // death() deletes nextphase before the transition can fire — the same rule
+  // nineteen goldens measure on the attack path — and clearDeathState walks
+  // both sides, so the inflictor's own conditions go too.
+  const battle = statusBattle({
+    heroFields: { vitality: 0, herolevel: 1 },
+    villainFields: { weapon_max_damage: 300, weapon_enchantment_potency: 3 },
+    status: [ss2StatusToken("burning", "villain")]
+  });
+  combatantById(battle, "villain").status = ["poison", "taunted1"];
+
+  applyAction(battle, onlyAction(battle));
+
+  const event = battle.lastResolution.events[0];
+  assert.equal(event.healed, 0, "a lethal tick regenerates nothing");
+  assert.equal(event.staminaGained, 0);
+  assert.equal(combatantById(battle, "hero").alive, false);
+  assert.deepEqual(
+    [...combatantById(battle, "villain").status],
+    [],
+    "death() clears the inflictor's conditions and taunts as well as the victim's"
+  );
+  assert.ok(battle.result, "the battle settles through the resolver's own elimination path");
+});
+
+test("the AI takes the status phase it is handed, WITHOUT building an attacker record", () => {
+  const battle = statusBattle({ status: [ss2StatusToken("poison", "villain")] });
+  reassignController(battle, "red:slot-1", "ai");
+  const chosen = ss2TeamRules.chooseAiAction(
+    { actor: combatantById(battle, "hero"), foes: [combatantById(battle, "villain")] },
+    "hero",
+    legalActions(battle)
+  );
+  assert.equal(chosen.type, Ss2ActionType.POISONED_PHASE, "the field is `poison`; the decision label is `poisoned`");
+
+  // And it must not have needed the damage pair to get there. Ranking the melee
+  // verbs builds the ATTACKER record, which requires min_damage/max_damage — so
+  // a conditioned AI gladiator that declares neither must still take its forced
+  // phase rather than throwing. The mutation that kills this is moving the
+  // forced-option check below the record build.
+  const stripped = combatantById(battle, "hero");
+  delete stripped.resources.min_damage;
+  delete stripped.resources.max_damage;
+  assert.equal(
+    ss2TeamRules.chooseAiAction(
+      { actor: stripped, foes: [combatantById(battle, "villain")] },
+      "hero",
+      legalActions(battle)
+    ).type,
+    Ss2ActionType.POISONED_PHASE
+  );
 });
 
 test("the AI always returns one of the options it was handed, and a full AI fight settles", () => {

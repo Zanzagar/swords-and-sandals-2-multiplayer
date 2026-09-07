@@ -205,6 +205,7 @@
  */
 
 import { calculateSs2AttackChances, resolveSs2PhysicalAttackCandidate } from "../golden/ss2-attack-candidate.js";
+import { applySs2MagicDamageCandidate } from "../golden/ss2-spell-candidate.js";
 import { SS2_BUILD_SHA256 } from "../golden/run-1v1-fixture.js";
 import { resourceValue } from "./resources.js";
 import { ss2WeaponDamageRange } from "./ss2-weapon-table.js";
@@ -226,7 +227,19 @@ export const Ss2ActionType = Object.freeze({
   QUICK_ATTACK: "quick-attack",
   NORMAL_ATTACK: "normal-attack",
   POWER_ATTACK: "power-attack",
-  REST: "rest"
+  REST: "rest",
+  // The four status phases. FOUR types rather than one `status-phase`, because
+  // the build's decision IS the specific label — `getphase("frozen")` and
+  // `getphase("poisoned")` are different decisions reaching different arms of
+  // the phase (map §"The enchantment effect is a SKIPPED TURN"). One type with
+  // the condition hidden in a payload would need `VANILLA_PHASE_LABEL` to map
+  // one token to four labels, which is the round trip that table exists to
+  // keep. The player never chooses among them: `legalActions` offers exactly
+  // one, decided by the build's own priority order.
+  FROZEN_PHASE: "frozen-phase",
+  BURNING_PHASE: "burning-phase",
+  POISONED_PHASE: "poisoned-phase",
+  LIFE_STOLEN_PHASE: "life-stolen-phase"
 });
 
 /** Action token -> the `getphase` label the build knows it by. */
@@ -234,8 +247,124 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   [Ss2ActionType.QUICK_ATTACK]: "quick_attack",
   [Ss2ActionType.NORMAL_ATTACK]: "normal_attack",
   [Ss2ActionType.POWER_ATTACK]: "power_attack",
-  [Ss2ActionType.REST]: "rest"
+  [Ss2ActionType.REST]: "rest",
+  // Three spellings for one effect, and the map is explicit that they are not
+  // interchangeable: the FIELD is `poison`, the DECISION label is `poisoned`,
+  // and `life_stolen` keeps its spelling as a decision but reaches
+  // `magic_damage_character` as `"lifesteal"`.
+  [Ss2ActionType.FROZEN_PHASE]: "frozen",
+  [Ss2ActionType.BURNING_PHASE]: "burning",
+  [Ss2ActionType.POISONED_PHASE]: "poisoned",
+  [Ss2ActionType.LIFE_STOLEN_PHASE]: "life_stolen"
 });
+
+/**
+ * The status phase each condition flag forces, in the build's own priority
+ * order — frozen, burning, poison, life_stolen — which is the order the four
+ * sequential `if`s appear in.
+ *
+ * **The FIRST match wins, and that is a correction the map itself carried
+ * backwards until 2026-09-07.** The hero writes its decision by CALLING
+ * `getphase`, which runs only at `turnphase == 1` and sets `turnphase = 2` on
+ * success, so the first matching status takes the turn and every later one is a
+ * silent no-op — while still having cleared its flag. (The VILLAIN assigns
+ * `villaindecisionA` directly with no such gate, so on that side the last match
+ * wins; a symmetric multiplayer engine cannot have both, and the hero's rule is
+ * the player's rule.)
+ */
+export const SS2_STATUS_PHASE_FOR_FLAG = Object.freeze({
+  frozen: Ss2ActionType.FROZEN_PHASE,
+  burning: Ss2ActionType.BURNING_PHASE,
+  poison: Ss2ActionType.POISONED_PHASE,
+  life_stolen: Ss2ActionType.LIFE_STOLEN_PHASE
+});
+
+const SS2_FLAG_FOR_STATUS_PHASE = Object.freeze(
+  Object.fromEntries(Object.entries(SS2_STATUS_PHASE_FOR_FLAG).map(([flag, type]) => [type, flag]))
+);
+
+/**
+ * How a status remembers WHO inflicted it: `"burning:from=villain"`.
+ *
+ * The build never needs this. Its status tick reads the damage off
+ * `game_defender` — literally "the other gladiator" — which is unambiguous
+ * only because vanilla is 1v1. This engine runs 2v2 and 3v3, where "the other
+ * gladiator" names nobody, so the status carries its source and the tick reads
+ * THAT combatant's enchantment damage. **At 1v1 the two coincide exactly, so
+ * every measured fixture is unaffected** (owner's decision, 2026-09-07).
+ *
+ * A bare flag with no source is still legal and means "afflicted, inflictor
+ * unknown" — a battle that STARTS with a condition, which vanilla cannot
+ * produce. Such a tick costs the turn and clears the flag but applies no
+ * damage, because no enchantment damage exists to read.
+ */
+export const SS2_STATUS_SOURCE_SEPARATOR = ":from=";
+
+/** `("burning", "villain")` -> `"burning:from=villain"`; a null source -> `"burning"`. */
+export function ss2StatusToken(flag, sourceId = null) {
+  return sourceId === null || sourceId === undefined
+    ? flag
+    : `${flag}${SS2_STATUS_SOURCE_SEPARATOR}${sourceId}`;
+}
+
+/** The condition a status token names, ignoring any source. */
+export function ss2StatusFlagOf(token) {
+  const at = token.indexOf(SS2_STATUS_SOURCE_SEPARATOR);
+  return at === -1 ? token : token.slice(0, at);
+}
+
+/** The combatant id a status token blames, or null if it names none. */
+export function ss2StatusSourceOf(token) {
+  const at = token.indexOf(SS2_STATUS_SOURCE_SEPARATOR);
+  return at === -1 ? null : token.slice(at + SS2_STATUS_SOURCE_SEPARATOR.length);
+}
+
+/** The exact token carrying `flag` on this status list, or null. */
+function statusTokenFor(status, flag) {
+  for (const token of status ?? []) if (ss2StatusFlagOf(token) === flag) return token;
+  return null;
+}
+
+/** Whether this status list carries `flag`, whoever inflicted it. */
+function hasStatusFlag(status, flag) {
+  return statusTokenFor(status, flag) !== null;
+}
+
+/**
+ * The condition that takes this combatant's turn, or null.
+ *
+ * FIRST match in the build's own order. The four `if`s are sequential rather
+ * than an `else if` chain, so every set flag is CONSUMED — but only the first
+ * reaches `getphase` while `turnphase == 1`, and the rest are silent no-ops.
+ */
+function forcedStatusFlag(actor) {
+  for (const flag of SS2_DEATH_CLEAR_FLAGS) {
+    if (hasStatusFlag(actor.status ?? [], flag)) return flag;
+  }
+  return null;
+}
+
+/**
+ * Clearing EVERY condition the forced chain walked past, not just the one that
+ * played.
+ *
+ * This is the surprising half of the build's behaviour and the reason the
+ * chain is worth reproducing statement by statement: each `if` clears its own
+ * flag BEFORE calling `getphase`, so a gladiator carrying frozen + burning
+ * plays frozen and loses the burning outright — and a gladiator forced to rest
+ * at zero stamina loses BOTH without playing either. The map states it
+ * plainly: "a forced rest at zero stamina clears and discards a pending
+ * `burning` phase in the same pass".
+ */
+function statusConsumptionEffects(actor) {
+  const effects = [];
+  for (const flag of SS2_DEATH_CLEAR_FLAGS) {
+    const token = statusTokenFor(actor.status ?? [], flag);
+    if (token === null) continue;
+    effects.push({ kind: EffectKind.STATUS, targetId: actor.id, status: token, active: false });
+  }
+  return effects;
+}
 
 /**
  * The three melee bands, with the direction draw and the `staminacost` each
@@ -329,10 +458,12 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   "herolevel",
   "max_damage",
   "min_damage",
+  "secondary_weapon_enchantment_damage",
   "secondary_weapon_enchantment_potency",
   "secondary_weapon_enchantment_type",
   "staminaleft",
   "staminamax",
+  "weapon_enchantment_damage",
   "weapon_enchantment_potency",
   "weapon_enchantment_type",
   ...SS2_ARMOUR_PIECES,
@@ -425,6 +556,13 @@ export const SS2_RESOURCE_DEFAULTS = Object.freeze({
   charisma: 0,
   equipped_weapon: 1,
   herolevel: 1,
+  // Declared with a defensible zero: no enchantment means no tick damage. The
+  // status phase reads these at TICK time off whoever inflicted the condition,
+  // matching the build, which reads `game_defender.weapon_enchantment_damage`
+  // at the phase rather than caching it when the status landed — so changing
+  // weapons between the hit and the tick changes the tick.
+  secondary_weapon_enchantment_damage: 0,
+  weapon_enchantment_damage: 0,
   secondary_weapon_enchantment_potency: 0,
   secondary_weapon_enchantment_type: 0,
   weapon_enchantment_potency: 0,
@@ -756,13 +894,18 @@ function vanillaRecordOf(view, role) {
     weapon_enchantment_potency: read("weapon_enchantment_potency"),
     secondary_weapon_enchantment_type: read("secondary_weapon_enchantment_type"),
     secondary_weapon_enchantment_potency: read("secondary_weapon_enchantment_potency"),
+    weapon_enchantment_damage: read("weapon_enchantment_damage"),
+    secondary_weapon_enchantment_damage: read("secondary_weapon_enchantment_damage"),
     gladiator_dir: status.has(SS2_FACING_LEFT) ? "left" : "right"
   };
   for (const piece of SS2_ARMOUR_PIECES) {
     record[piece] = read(piece);
     record[`${piece}_defence`] = read(`${piece}_defence`);
   }
-  for (const flag of SS2_STATUS_FLAGS) record[flag] = status.has(flag);
+  // Through the token grammar, not `status.has(flag)`: a condition may carry
+  // its inflictor (`"burning:from=villain"`), and the vanilla record wants the
+  // boolean the build has.
+  for (const flag of SS2_STATUS_FLAGS) record[flag] = hasStatusFlag(view.status ?? [], flag);
   return record;
 }
 
@@ -872,14 +1015,25 @@ function statusEffects(attackerBefore, attackerAfter, defenderBefore, defenderAf
  *   build's own clamps (`check_stats` at `+0x5266` and `+0x334d`) are both
  *   ceilings and every term here is non-negative.
  */
-function phaseTransitionEffects(actor, { staminaCost, branchGain = 0, branchHeal = 0 }) {
+function phaseTransitionEffects(
+  actor,
+  { staminaCost, branchGain = 0, branchHeal = 0, fromStaminaleft = null, fromHealth = null }
+) {
   const declared = declaredResourceNames(actor);
   const stamina = actor.stats.stamina;
   const effects = [];
   let staminaGained = 0;
 
+  // `fromStaminaleft`/`fromHealth` exist for the STATUS PHASE, where the actor
+  // is also the thing that just took damage. Everywhere else the actor is the
+  // attacker, whose own state the action did not touch, so the frozen view IS
+  // the pre-transition state and both stay null. Transitioning off the view in
+  // a status phase would heal from the pre-tick hitpoints and hand back
+  // headroom the tick had just consumed.
+  const health = fromHealth === null ? actor.health : fromHealth;
+
   if (declared.has("staminaleft")) {
-    const before = resourceValue(actor, "staminaleft", 0);
+    const before = fromStaminaleft === null ? resourceValue(actor, "staminaleft", 0) : fromStaminaleft;
     const maximum = resourceValue(actor, "staminamax", before);
     const after = clamp(before - staminaCost + branchGain + 1 + Math.round(stamina / 3), 0, maximum);
     staminaGained = after - before;
@@ -895,12 +1049,158 @@ function phaseTransitionEffects(actor, { staminaCost, branchGain = 0, branchHeal
 
   const healed = Math.min(
     branchHeal + 1 + Math.ceil(stamina / 2),
-    Math.max(0, actor.maxHealth - actor.health)
+    Math.max(0, actor.maxHealth - health)
   );
   if (healed > 0) {
     effects.push({ kind: EffectKind.HEAL, targetId: actor.id, amount: healed });
   }
   return { effects, staminaGained, healed };
+}
+
+/**
+ * One status phase: the turn a condition costs its bearer.
+ *
+ * The build's shape, statement by statement (map §"The enchantment effect is a
+ * SKIPPED TURN, not an on-hit bonus"):
+ *
+ * - `crowd_action = 0`, then `staminacost = 0` — **the phase costs no stamina**;
+ * - the damage goes through `magic_damage_character`, which this repository
+ *   already models exactly in `applySs2MagicDamageCandidate`: armour first,
+ *   hitpoints only once the post-decrement `armourclass <= 0`, NO `Math.ceil`
+ *   on the applied damage (the ceil is display-only), the unconditional
+ *   `psyche_up = 1`, the breastplate stamina join, `check_stats`, and the
+ *   shared defeat gate. **The function contains no RNG call at all**, which is
+ *   why this branch takes no `rolls` and draws nothing;
+ * - `nextphase()` still runs, so the transition's stamina regeneration and heal
+ *   both apply: **a status turn is net positive on stamina and hitpoints except
+ *   for the tick itself.**
+ *
+ * THE ROLES ARE CROSSED IN THE BUILD AND THAT IS CORRECT, not a bug: the eight
+ * enchantment call sites invert the operands so the callee damages the phase's
+ * ACTOR, because in a status phase the actor is the victim. Half the inversion
+ * is inert — `magic_damage_character` binds `attacker`/`game_attacker` to
+ * register 0 and reads neither — so **no attacker stat can influence any number
+ * this produces**. Here the crossing is expressed by putting the victim on the
+ * scenario's DEFENDER side rather than by swapping four arguments.
+ *
+ * THE ODD SELECTOR IS REPRODUCED, NOT CORRECTED. `+0x530e` reads the VICTIM's
+ * `equipped_weapon` to choose between the INFLICTOR's primary and secondary
+ * enchantment damage. Which of someone else's two weapons burned you cannot
+ * depend on which weapon you are holding — and it does. The map says reproduce
+ * it; this does.
+ */
+function resolveStatusPhase(request, flag, fightMode, observer) {
+  const actor = request.actor;
+  const label = VANILLA_PHASE_LABEL[SS2_STATUS_PHASE_FOR_FLAG[flag]];
+
+  // The victim is the callee's DEFENDER — see the crossing note above. It is
+  // never the attacker of anything here, so it owes no damage pair: a gladiator
+  // may burn to death without ever declaring `min_damage`.
+  const victim = vanillaRecordOf(actor, "defender");
+  const victimBefore = { ...victim };
+
+  // WHO the tick reads its damage off. Vanilla reads `game_defender` — "the
+  // other gladiator" — which names nobody above 1v1, so the condition carries
+  // its source and this looks that combatant up among the living. At 1v1 the
+  // source IS the only foe, so this is vanilla exactly.
+  const sourceId = ss2StatusSourceOf(statusTokenFor(actor.status ?? [], flag) ?? flag);
+  const inflictor = sourceId === null
+    ? null
+    : [...request.foes, ...request.allies].find((combatant) => combatant.id === sourceId) ?? null;
+
+  // No source recorded (a battle that STARTED with the condition, which vanilla
+  // cannot produce), or the inflictor is gone: there is no enchantment damage
+  // to read, so the phase costs the turn and clears the flag and applies
+  // nothing. Inventing a number here would be inventing evidence.
+  const damage = inflictor === null
+    ? 0
+    : resourceValue(
+      inflictor,
+      victim.equipped_weapon === 1 ? "weapon_enchantment_damage" : "secondary_weapon_enchantment_damage",
+      0
+    );
+
+  const scenario = {
+    // The victim sits on the `hero` key and the side is named `villain`, so
+    // `defenderSide` resolves to the victim. The other side is a record the
+    // callee provably never reads; it is present because the ingress clears
+    // death state across both sides.
+    attackerSide: "villain",
+    hero: victim,
+    villain: inflictor === null ? { ...victim } : vanillaRecordOf(inflictor, "defender"),
+    fightMode,
+    result: null
+  };
+  const outcome = applySs2MagicDamageCandidate(scenario, damage, { damageMethod: label });
+
+  const victimAfter = scenario.hero;
+  const eliminated = victimAfter.hitpoints <= 0;
+
+  // `death()` deletes `nextphase` before the transition can fire, so a lethal
+  // tick costs and regenerates nothing — the same rule the attack path already
+  // carries, and the one nineteen goldens measure there.
+  const transition = eliminated
+    ? { effects: [], staminaGained: 0, healed: 0 }
+    : phaseTransitionEffects(actor, {
+      staminaCost: 0,
+      fromStaminaleft: victimAfter.staminaleft,
+      fromHealth: victimAfter.hitpoints
+    });
+
+  // A LETHAL TICK RUNS `death()`, which clears the condition and taunt flags on
+  // BOTH gladiators — so the inflictor's own conditions go too. Emitted from
+  // the ingress's own before/after rather than assumed: `clearDeathState`
+  // mutates both sides of the scenario, and skipping this would leave the
+  // inflictor burning in our state and clean in the build's.
+  const inflictorEffects = [];
+  if (eliminated && inflictor !== null) {
+    for (const statusFlag of SS2_STATUS_FLAGS) {
+      const token = statusTokenFor(inflictor.status ?? [], statusFlag);
+      if (token === null) continue;
+      inflictorEffects.push({
+        kind: EffectKind.STATUS,
+        targetId: inflictor.id,
+        status: token,
+        active: false
+      });
+    }
+  }
+
+  const effects = [
+    ...defenderEffects(victimBefore, victimAfter, actor),
+    ...statusConsumptionEffects(actor),
+    ...inflictorEffects,
+    ...transition.effects
+  ];
+
+  const events = [{
+    type: SS2_STATUS_PHASE_FOR_FLAG[flag],
+    actorId: actor.id,
+    targetId: actor.id,
+    condition: flag,
+    vanillaLabel: label,
+    inflictorId: sourceId,
+    damage: outcome.mutation.appliedDamage,
+    armourDamage: outcome.mutation.armourDamage,
+    hitpointDamage: outcome.mutation.hitpointDamage,
+    staminaBonus: outcome.mutation.staminaBonus,
+    staminaSpent: 0,
+    staminaGained: transition.staminaGained,
+    healed: transition.healed
+  }];
+
+  if (observer) {
+    observer(clone({
+      actorId: actor.id,
+      targetId: actor.id,
+      type: SS2_STATUS_PHASE_FOR_FLAG[flag],
+      condition: flag,
+      fightMode,
+      scenario,
+      outcome
+    }));
+  }
+  return { effects, events };
 }
 
 /* ------------------------------------------------------------------ */
@@ -1091,6 +1391,22 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
     legalActions(view, actorId) {
       const rest = { type: Ss2ActionType.REST, targetId: actorId };
       if (resourceValue(view.actor, "staminaleft", 0) <= 0) return [rest];
+
+      // THE FORCED STATUS PHASE, ranked exactly where the build ranks it.
+      //
+      // Frame 1's forced chain runs at the top of every turn, before the player
+      // can act: rows 1-3 are `swap_weapons`, `rest` and the taunted run; the
+      // four conditions are rows 4-7. The chain pre-empts the button, because
+      // `getphase` sets `turnphase = 2` and every later call that turn is a
+      // silent no-op — which is precisely "the status phase is the only legal
+      // action", and is why the forced-rest gate above still outranks it. A
+      // BURNING GLADIATOR AT ZERO STAMINA RESTS, and the burning is consumed
+      // without playing (see `statusConsumptionEffects`).
+      //
+      // FIRST match, not last. See `SS2_STATUS_PHASE_FOR_FLAG`.
+      const forced = forcedStatusFlag(view.actor);
+      if (forced) return [{ type: SS2_STATUS_PHASE_FOR_FLAG[forced], targetId: actorId }];
+
       const actions = [];
       for (const foe of view.foes) {
         actions.push({ type: Ss2ActionType.QUICK_ATTACK, targetId: foe.id });
@@ -1112,6 +1428,10 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
      */
     resolveAction(request, rolls) {
       const actor = request.actor;
+
+      const statusFlag = SS2_FLAG_FOR_STATUS_PHASE[request.type];
+      if (statusFlag) return resolveStatusPhase(request, statusFlag, fightMode, observer);
+
       if (request.type === Ss2ActionType.REST) {
         // `staminacost = 0 - round(stamina * 15)` at `+0x5163` — negative, so
         // `nextphase`'s subtraction is a gain — plus the branch's own
@@ -1138,8 +1458,12 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
           branchGain: stamina,
           branchHeal: 3 + Math.ceil(stamina)
         });
+        // A forced rest still walked the whole chain, so it CONSUMED any
+        // pending condition without playing it. Emitted here rather than only
+        // on the zero-stamina path because the chain does not know why rest
+        // was chosen — and a voluntary rest reaches frame 1 the same way.
         return {
-          effects: transition.effects,
+          effects: [...transition.effects, ...statusConsumptionEffects(actor)],
           events: [{
             type: Ss2ActionType.REST,
             actorId: actor.id,
@@ -1314,6 +1638,15 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
      * number wearing a citation.
      */
     chooseAiAction(view, actorId, options) {
+      // A forced phase is not a choice, and pretending to weigh it is a bug
+      // rather than a waste: ranking the melee verbs builds the actor's
+      // ATTACKER record, which demands the damage pair — so an AI gladiator
+      // that carries a condition and declares no `min_damage` would throw here
+      // instead of taking the one option it was handed. Returned before any
+      // record is built.
+      const forced = options.find((option) => SS2_FLAG_FOR_STATUS_PHASE[option.type]);
+      if (forced) return forced;
+
       const restOption = options.find((option) => option.type === Ss2ActionType.REST);
       const actor = view.actor;
       if (restOption && resourceValue(actor, "staminaleft", 0) <= 10) return restOption;
