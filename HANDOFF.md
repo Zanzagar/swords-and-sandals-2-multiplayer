@@ -8,6 +8,20 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-07 12:42 — the 78 are done, and the suite does not bite](docs/handoffs/2026-09-07-1242--the-78-are-done-and-the-suite-does-not-bite.md).**
+Start there. **The 78 stale living-head rows are re-derived and corrected AT
+their sentences** — every one carries a ► block naming what was measured and the
+command that measures it. **Then the finding that outranks them: 37 of 48
+deliberate one-line breakages SURVIVE the whole suite** (`docs/mutation-audit-2026-09-07.md`),
+with the corpus-integrity gates in `src/golden/` the honourable exception — six
+of the eleven kills are theirs, and only two of the thirty-seven survivors.
+**And Stage 7 is not the right next thing**
+(`docs/stage7-transport-findings-2026-09-07.md`): an owner decision accepted
+2026-09-03 lives on an unmerged branch, is invisible to a grep of this tree, and
+forbids the one behaviour all five designs were built around.
+
+*(The brief it supersedes, whose ranked item 1 is DONE and whose items 2-5 are
+all still the owner's:)*
 [2026-09-07 11:40 — the sweep reached the untouched six](docs/handoffs/2026-09-07-1140--the-sweep-reached-the-untouched-six.md).**
 Start there. The six documents the previous sweep never touched are done — **79
 rows, 73 applied and 6 rejected**, every one re-derived by hand, and four of the
