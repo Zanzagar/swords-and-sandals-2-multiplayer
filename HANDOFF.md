@@ -128,6 +128,19 @@ harness ADR 0001) and that ultracode stays ON at the owner's instruction.
       carrying one, and if the bearer dies `death()` clears it. It crosses a
       TEAM boundary only when a teammate ends the bout. Both are pinned.
 
+  ► **RANKED ITEM 4 IS CLOSED, and the instruction that opened it is STALE.**
+    The 16:59 brief warns that `~/projects/claude-harness/workflows/question-fanout-audit.js`
+    is "the UNCAPPED pre-2026-09-02 version: no `verifierBudget`, no
+    `environment` field, no `maxItems: 6`", and that any project adopting it
+    re-learns the five-hour usage limit. **Measured 2026-09-07: that is no
+    longer true.** Both copies carry `verifierBudget` (3 occurrences each) and
+    `maxItems: 6` at the same line, and the ONLY difference between the two
+    files is one `whenToUse` string — in which the HARNESS copy is the better
+    of the two, because it cites `docs/adr/0001` where this repository's still
+    points at `docs/overnight-agent-plan.md`. The harness is committed and
+    pushed. Nothing to sync; if anything, this repository's copy should take
+    the harness's wording.
+
 *(The brief it supersedes, whose findings and ranked list are unchanged:)*
 [2026-09-02 16:59 — three waves, cut at the usage limit](docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md). Three capped fan-out waves on the 13:40 brief's ranked items 1–3
 were stopped at 92% of the session limit; ranked item 4 is CLOSED by
