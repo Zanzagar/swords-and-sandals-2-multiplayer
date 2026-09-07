@@ -12,13 +12,40 @@ THIS file is right and the handoff was frozen at the end of its session.
 Start there. The six documents the previous sweep never touched are done — **79
 rows, 73 applied and 6 rejected**, every one re-derived by hand, and four of the
 six rejections are numbers that do not reproduce at all. **The remaining
-worklist is 78 rows in THIS FILE, lines 801–3132, which are LIVING HEAD and not
-archive:** the sweep chunked `HANDOFF.md` as though `## THE ARCHIVE LINE` were
-at 800, and `grep -n 'THE ARCHIVE LINE' HANDOFF.md` puts it at **3133**, so
-three of its four surveyed chunks were labelled archive and never applied. The
-unapplied range holds "What is running, and how to run it" (:852),
-"Non-negotiable rules" (:1245), "Next steps, in order" (:1346) and "Open items"
-(:1631) — precisely the sections that misdirect a session when stale.
+worklist was 78 rows in THIS FILE's LIVING HEAD, not in the archive:** the sweep
+chunked `HANDOFF.md` as though `## THE ARCHIVE LINE` were near line 800, and it
+is not, so three of its four surveyed chunks were labelled archive and never
+applied. The unapplied range holds § "What is running, and how to run it",
+§ "Non-negotiable rules", § "Next steps, in order" and § "Open items" —
+precisely the sections that misdirect a session when stale.
+**THOSE 78 ROWS WERE RE-DERIVED AND APPLIED 2026-09-07 (next session); every one
+now carries a ► correction AT its sentence.** Find any section by NAME, never by
+a line number some earlier session wrote down: `grep -n '^## ' HANDOFF.md`.
+
+► **THE PARAGRAPH ABOVE ORIGINALLY CARRIED SIX LINE NUMBERS AND THE COMMIT THAT
+  WROTE THEM INVALIDATED ALL SIX IN THE SAME BREATH. MY OWN ERROR, 2026-09-07.**
+  `4fe5dd8` inserted 24 lines ABOVE this paragraph while writing it, so its
+  "archive line at 3133" was 3157 the instant it was committed, its worklist
+  range "801–3132" was 825–3156, and its four section anchors were all 24 low.
+  **The commit that repaired one stale pointer minted six new ones inside the
+  paragraph explaining why stale pointers are dangerous** — and it was caught
+  not by me but by two independent agents of the very wave the paragraph was
+  written to launch. `test/handoff-navigation.test.js` checks § NAMES, never
+  line numbers, so the suite was green with all six wrong. **That is the whole
+  lesson: a line number into a growing file is a claim with a half-life of one
+  commit. The numbers are gone from this paragraph rather than corrected,
+  because correcting them would only restart the clock.**
+
+► **AND THE SWEEP'S OWN ROW NUMBERS WERE NEVER RIGHT EITHER — they are ~92 off
+  at HEAD, not the ~65 the file grew.** The next session's first move was to map
+  the 78 rows by adding the file's growth (+65, measured and correct) to the
+  sweep's numbers. That was WRONG, and it went out in six agent briefs before
+  text-matching the quotes caught it: the surveyors' own numbers were **already
+  ~27 lines low against the very blob they read** (`git show 470c56a:HANDOFF.md`
+  — archive line 3065, exactly the "3,064 lines" the sweep claims for the living
+  head). The wave was killed and relaunched with every anchor located by
+  MATCHING THE QUOTED TEXT. **If you ever need to find a sweep row again, match
+  its quoted sentence. Do not do arithmetic on the number in the table.**
 
 ► **AND THAT HANDOFF'S OWN COMMIT LEFT THREE TESTS RED (found by the next
   session, 2026-09-07).** `42527e0` added the handoff file without repointing
@@ -918,6 +945,25 @@ now refuses to restore it without `-Force`.
   every `ss2_data.sol` under `/mnt/c/ss2la/ss2-capture-snapshots`; the head's
   "74" at line ~608 is stale.** Distribution of the 75:
   **58** share `2514b1cb…`, 12 share `6a06e9e8…`, and five are unique.
+  ► **THIS POINTER RESOLVES NOWHERE, AND THE SURVEYOR CHASED IT TO THE WRONG PLACE
+    TOO.** There is no "74" at the line named — that line is about `github/main`'s
+    tip. The referent BY CONTENT is the "74 snapshots" sentence in § "Driving the
+    capture pipeline FROM WSL", which IS in the living head, and **which still
+    says 74 today** — so the correction announced here was never applied at the
+    sentence it corrects, and 74 is now wrong twice over (the store holds 1,429
+    directories). Fixed by quoting the text instead of a line: search
+    `grep -n '74 snapshots' HANDOFF.md`.
+
+  ► **DENOMINATOR STALE BY TWENTY-FOLD; THE SHAPE IS EXACTLY INTACT.** Re-measured
+    2026-09-07: **1,429 snapshot directories, not 75** — and still exactly 7
+    distinct saves, still 12 sharing `6a06e9e8…`, still five unique; the big
+    cohort is 1,412 sharing `2514b1cb…`, not 58. Every snapshot dir holds exactly
+    three files. **This is a live growing store, so the durable form is the
+    command, not the number:**
+    `find <snapshot-root> -name ss2_data.sol -exec sha256sum {} + | awk '{print $1}' | sort | uniq -c | sort -rn`.
+    The "the live save is already one of them" half was NOT re-derived — reading
+    the live save is outside the read-only boundary.
+
 
   **The operationally useful part: the LIVE save is `2514b1cb…` too** — byte
   identical to those 58, which include `level4-vitality-tournament-gate`. So for
@@ -942,6 +988,13 @@ it to them; they sent it straight back.
 | `~/.codex/config.toml` (this box, WSL) | `gpt-5.6-sol` / **`xhigh`** | ours — briefly raised to `ultra` 2026-09-01 and REVERTED the same day, see below; backup of the ultra state at `~/.codex/config.toml.bak-20260901` |
 | `/mnt/c/Users/corey/.codex/config.toml` (this box, Windows) | `gpt-5.6-sol` / **`ultra`**, plus `service_tier = "priority"` | ours — ALREADY aligned, no change made |
 | the peer machine's | `gpt-5.6-sol` / `xhigh` | theirs; divergence is deliberate and in front of Corey |
+► **RE-MEASURED 2026-09-07: the WSL row is now `gpt-6-astra` / `medium` /
+  `service_tier = "fast"`; the Windows row still HOLDS exactly.** ► **And the
+  backup file this sentence names does NOT hold "the ultra state" — it holds the
+  PRE-ultra state.** This is a live-mutable store, so the durable form is the
+  command: `cat ~/.codex/config.toml` and
+  `cat /mnt/c/Users/corey/.codex/config.toml`.
+
 
 `codex` is NOT on the Windows PATH here, which fits the migration guide's
 position that agents run in WSL and the Windows side is capture-only. The
@@ -958,6 +1011,22 @@ here in which `ultra` outperforms anything.** Swapping a proven setting for an
 unproven one because more effort ought to be better is the reasoning this
 project exists to refuse, and it was refused here against my own earlier
 position.
+► **FALSIFIED 117 TIMES OVER.** Of 124 rollouts under `~/.codex/sessions`, **118
+  ran at `ultra`**, 5 at `medium` and 1 at `xhigh`; exactly ONE ultra rollout is
+  the 17,044-token probe, and 101 of the 118 exceed 1 M total tokens (median
+  ~3.0 M, max ~112.8 M). The sentence was true when written and is now the
+  opposite of true. ► **The comparative claim it supports — that no measurement
+  here shows `ultra` outperforming anything — is NOT falsified by this**, because
+  no A/B exists in the rollout store; but its stated evidence is gone, so the
+  sentence must be REBUILT, not renumbered. ► **Two further facts.** `ultra` is
+  still in active use today even though the WSL config now reads `medium` — so
+  the config value is not what the runs actually used, which is exactly what this
+  section warns about elsewhere. And **the "220,010 tokens" figure for the xhigh
+  run is not reproducible**: the single xhigh rollout records 5,566,666 total
+  tokens (uncached input 230,075), and this same living head gives "5.57 M total
+  tokens" for what must be the same run ~100 lines later — **two irreconcilable
+  figures for one run.** The "~13 minutes" HOLDS (13 m 28 s).
+
 
 **If anyone wants `ultra` back, measure it: run the same review over the same
 diff at both efforts and compare findings.** Until that exists, this is settled.
@@ -978,6 +1047,13 @@ diff at both efforts and compare findings.** Until that exists, this is settled.
 - **It does not use `codex exec`** — it drives Codex's app-server protocol
   through a broker and returns STRUCTURED findings against a committed
   `schemas/review-output.schema.json`.
+  ► **OFF BY THREE, AND THE FILENAME IS WRONG TOO.** The `read-only` literal is
+    three lines below the line named — that line is the opening of the same call.
+    The `workspace-write` citation is exact, and the substance (a real sandbox, not
+    a prompt instruction) holds in both the installed copy and the marketplace
+    checkout, which are byte-identical. **The file is `codex-companion.mjs`, not
+    `companion.mjs`** — a filesystem search for the latter returns nothing.
+
 
 **ANSWERED 2026-09-01, AND IT SETTLES WHICH PATH TO USE WHEN: THE PLUGIN
 PRESERVES NO PER-COMMAND TRANSCRIPT AND WRITES NO ROLLOUT RECORD AT ALL.**
@@ -1070,6 +1146,18 @@ The peer reports that on ITS box the `codex@openai-codex` plugin
 from here — this session cannot see that machine's plugin state. So the
 migration handoff's "never exercised" claim holds for THIS box and should not be
 generalised.
+► **TWO OF THREE CLAUSES ARE FALSE, AND THIS FILE CONTRADICTS ITSELF ~50 LINES
+  ABOVE.** `mcpServers` empty HOLDS. But **the codex plugin IS installed**
+  (`codex@openai-codex` v1.0.6, user scope, 2026-09-01) and
+  **`/codex:adversarial-review` IS registered** — the command file ships in the
+  install alongside `review`/`rescue`/`setup`/`status`/`result`/`cancel`/
+  `transfer`, and agent sessions in this repo load the `codex:*` skills. ► This
+  same living head says "THE PLUGIN IS NOW INSTALLED ON THIS BOX (2026-09-01)"
+  fifty lines earlier, and this block then denies it in the present tense.
+  **A search of the surrounding hundred lines for a retraction finds none — this
+  is a live self-contradiction, not a retained historical bullet.** The one
+  surviving true clause is the npm CLI escape hatch.
+
 
 ### Driving the capture pipeline FROM WSL (measured 2026-09-01, first run since the relocation)
 
@@ -1218,6 +1306,21 @@ real test"; this was it, and it needed five things nothing had written down.
   has to reach it before it can run. Its 38 "modified" files are pure CRLF churn
   (verified by diffing content, not `git status`), so the tree is clean in
   substance; it simply has not been fetched since `98482b6`.
+  ► **THE "38" IS RIGHT AND THE SWEEP'S "1366" WAS THE WRONG QUANTITY.** Measured
+    2026-09-07: the tree shows **40 modified tracked files and 1,326 untracked**,
+    totalling the 1,366 the sweep reported as modified. **So "clean in substance"
+    needs re-deriving against 40, not abandoning against 1,366** — and it now
+    fails narrowly: exactly **2 of the 40** differ in real content rather than only
+    line endings (`src/golden/observation.js` and `src/golden/run-1v1-fixture.js`).
+    There is no `core.autocrlf`, no `.gitattributes` and no skip-worktree bit.
+    Command: `git -C /mnt/c/ss2-capture --no-optional-locks status --porcelain | cut -c1-2 | sort | uniq -c`.
+
+  ► **"SINCE `98482b6`" HOLDS EXACTLY; "28 commits behind" is now 113**, with
+    nothing unique on that side (`git rev-list --count HEAD..98482b6` is 0). Live
+    moving target — write
+    `git -C /mnt/c/ss2-capture --no-optional-locks rev-list --count 98482b6..HEAD`
+    rather than a number.
+
 
 ### The live save has moved past the prisoner, and 22 goldens depend on that bout
 
@@ -1228,6 +1331,13 @@ navigator never reached a bout. **Every prisoner and probe family — all 22
 promoted goldens — is therefore uncapturable from the LIVE save**, and
 reproducing or extending any of them means restoring an early snapshot first
 (`verified-good-1701` or `pre-arena-path`).
+► **SUBSTANCE HOLDS; THE APPOSITION IS THE BIT THAT IS STALE, AND "23" WOULD MAKE
+  THIS SENTENCE FALSE.** The prisoner+probe subset is exactly 22 of the 23
+  goldens, so "uncapturable from the LIVE save" is true of it. What is stale is
+  the apposition equating that subset with the whole corpus. **Correct form:
+  "22 of the 23 promoted goldens".** A blanket 22→23 here breaks a true
+  sentence — the armoured golden is in neither family.
+
 
 That makes the snapshot store load-bearing evidence infrastructure rather than a
 safety net, and it is the one copy: it sits inside the MSIX container, and the
@@ -1314,6 +1424,13 @@ rewrote the gladiator's gold. The only safe shape is un-negated `<`, twice:
   (line 574); if the true-branch REFUSES or defaults, it must be negated so NaN
   triggers the refusal (lines 588, 2137). Rewriting the second kind into the
   first is what turns a gate fail-OPEN.
+► **THIS CITATION WAS NEVER RIGHT — not drift.** The wrapper line named is a
+  plain assignment with no comparison in it, and the wrapper blob is BYTE-
+  IDENTICAL at HEAD to what it was at the commit that wrote this sentence, so
+  the number cannot have moved. Re-derive the site before relying on the
+  argument; `git rev-parse HEAD:tools/runtime-capture/ss2-capture-wrapper.as`
+  matches the blob at that commit.
+
 
   **And `isNum()` rejects only NaN.** `Number("")`, `Number(null)`,
   `Number(false)` and `Number([])` are all 0, so `isNum(f) && Number(f) == want`
@@ -1364,6 +1481,21 @@ output and names the wrapper source hash it compiled.
   inside a decompiled wrapper SOURCE copy, not a trace — the exact false-positive
   class the wrapper's own comment warns about, and it has now caught a reader
   twice.)*
+► **BOTH LOAD-BEARING HALVES HOLD; THE "209" IS NOT A COUNT OF TIMES AND NEVER
+  WAS.** `dbg()` in `tools/runtime-capture/ss2-capture-wrapper.as` returns early
+  on a label it has already emitted, so `called:*`, `wrapped:*` and
+  `action-armed` appear AT MOST ONCE PER TRACE — measured across the archive,
+  every rufflelog carrying the label carries it exactly once, never twice. So
+  209 was a count of TRACES, and substituting a bigger number would fix the
+  denominator and leave the category error in place. Its provenance is nailed:
+  209 is exactly the file count in the frozen 2026-08-31 replica under
+  OneDrive, not a live measurement. Say it as a proportion of traces and give
+  the command:
+  `grep -rlc --include='*.rufflelog' -e 'called:attack_chances' <archive> | wc -l`
+  (1531 of 1650 rufflelogs on 2026-09-07). The vehicle-check half HOLDS exactly:
+  0 of its 49 rufflelogs carry it, and the single hit is a decompiled wrapper
+  SOURCE copy — precisely the false-positive class this sentence names.
+
 
 ---
 
@@ -1378,6 +1510,14 @@ output and names the wrapper source hash it compiled.
   or REFUTED and item 4 is answered; see
   `docs/handoffs/2026-09-02-0007--the-wave-refuted-more-than-it-confirmed.md`.
   **What is left, in order:**
+  ► **RE-MEASURED 2026-09-07 (next session): 816 / 815 / 0 / 1, and the 808 above
+    went stale THE SAME DAY it was written** — `d7ff634` added 128 lines of tests
+    hours later. Three values have now been in play for one quantity: the sweep
+    proposed 787/786, this line was written as 808/807, the truth is 816/815.
+    **The line's own instruction now applies to itself, which is the whole point:
+    any digit written here is stale within a commit.** Keep the instruction; treat
+    every number beside it as expired on sight.
+
 
   1. **CAPTURE AN ARMOURED FIXTURE — still first, and the vehicle blocker was
      never real.** `run-arena.ps1` carries `-WatchFields` (`:137` → `:295`),
@@ -1390,6 +1530,19 @@ output and names the wrapper source hash it compiled.
      diverge. Raise the odds first by pinning the approach-step count and
      extending `-StageVillain` to `speed` and `strength` (`applyStageSide` has
      no whitelist, so it can already write them).
+     ► **CLOSED 2026-09-02 by `2341789`, and re-verified 2026-09-07. DO NOT
+       RE-CAPTURE.** `golden-armoured-deflection-threshold-cleared` is promoted:
+       `provenance.observationIds` = `["obs-onx1405-a1","obs-onx1521-a1"]`,
+       `repetitions: 2`, and it is the only golden carrying `provenance.staged`.
+       **Goldens are 23, not 22.** This item spans ~90 lines and carried ZERO
+       retraction markers while this same file records the promotion in five other
+       places. Following it would burn the project's single serial, supervised,
+       irreplaceable resource — a Ruffle capture window — on work already done; the
+       2026-09-02 13:40 handoff records that it cost 1,201 unattended rounds. The
+       item's own closing question ("whether they assert a villain state the build
+       can reach at all") is ALSO answered: 2 matches in 1,201 staged rounds, right
+       on its own predicted ~1-in-450.
+
 
      ► **IT IS NOT A "WINDOW" ANY MORE. A ROUND COSTS 14 SECONDS, AND 150 OF
        THEM RAN UNATTENDED ON 2026-09-02.** Driven from WSL with the store
@@ -1487,6 +1640,17 @@ output and names the wrapper source hash it compiled.
        and id 24 at `+0x41c6` — and both match the document exactly.
        Neither `ss2-rules.js`'s gap 3 nor this list mentioned that the file
        exists; both said "the table is not transcribed".
+     ► **BOTH OFFSETS ARE NOW MODELLED, so "both dropped" is closed** — `ss2BattleValues`
+       computes `weapon_enchantment_damage` and `secondary_weapon_enchantment_damage`,
+       proved at runtime rather than by reading: a call with `weapon: 5`,
+       `weapon_enchantment_potency: 3`, `secondary_weapon: 7`,
+       `secondary_weapon_enchantment_potency: 2` returns 49 and 54. **Ranked item 2
+       here still reads "both dropped" and is unstruck while item 3 beside it carries
+       a correction.** ► The sweep's own replacement line numbers for this are
+       themselves stale — find the derivation with
+       `grep -n 'weapon_enchantment_damage' src/team/ss2-rules.js`, not with a
+       number.
+
 
      ► **AND ALL 90 ROWS ARE NOW MECHANICALLY VERIFIED, so that half is done
        too.** `node tools/item-table-transcription.mjs` diffs **540 of 540
@@ -1512,12 +1676,27 @@ output and names the wrapper source hash it compiled.
        supplies `weapon`, so deriving first would re-datum runtime evidence
        from a map-derived table. Derivation fills a hole; it never overwrites a
        measurement.
+► **22 → 23, AND THE UNIVERSAL IS NOW ROLE-SCOPED.** Hero pair present 23/23;
+  villain pair 22/23 — the armoured golden's villain supplies NEITHER
+  `min_damage`/`max_damage` NOR a `weapon` id. **"None supplies `weapon`" HOLDS
+  EXACTLY: 0 of 23 files contain the string.** Third thing neither the document
+  nor the sweep says: on that one fixture the precedence rule is UNEXERCISED, not
+  violated — there is nothing to arbitrate. Adjacent stale in the same block:
+  "ONE test of 718" → 816, and "22 measured damage pairs" → 23 hero, 22 villain.
+
 
        **And the corpus cannot defend that rule.** Mutating the derivation to
        overwrite instead of fill fails ONE test of 718 — the new precedence
        assertion — and the golden replay does not notice, because no golden
        carries a `weapon` id for the derivation to fire on. One assertion is
        all that stands between the table and 22 measured damage pairs.
+► **THE MUTATION REPRODUCES EXACTLY; ONLY THE SUITE TOTAL MOVED.** Re-run
+  2026-09-07 in a disposable copy: overwriting instead of filling still fails
+  precisely one test — "an explicit damage pair OUTRANKS a weapon id, so evidence
+  is never re-datumed" — and the golden replay still does not notice, because
+  `grep -l '"weapon"' test/fixtures/ss2-1v1-golden/golden-*.json` is 0 of 23, so
+  no golden fires the derivation. "718" → 816.
+
 
        Still genuinely open, and NOT needed for the above: `weapon` as a
        declarable RESOURCE (`SS2_RESOURCE_NAMES`, `SS2_RESOURCE_DEFAULTS`,
@@ -1577,6 +1756,16 @@ output and names the wrapper source hash it compiled.
   sweep showed the suite cannot see most of what the rule set could get wrong
   in those dimensions. That is an evidence problem — a capture problem — not a
   test-writing problem, and it is now the top of this list.**
+  ► **ONE THIRD OF THIS IS NOW BACKWARDS AND ALWAYS WAS.** "No armour" is FALSE
+    since 2026-09-02 (villain `armourclass` 79/79, helmet 6, shoulderguard 1,
+    gauntlet 1, greaves 2, expected `armourDamage` 22). "No enchantment" HOLDS —
+    `statusApplied === null` in 23 of 23. **"No non-tournament coverage" IS THE
+    WRONG WAY ROUND.** The build's modes are tournament / duel / misc; 22 of the
+    23 goldens are `misc`, which IS non-tournament, so the corpus has had
+    non-tournament coverage from the first golden. What it LACKED was TOURNAMENT
+    coverage, and that gap closed 2026-09-02. `src/team/ss2-rules.js:156` already
+    carries the correct form. Neither this document nor the sweep spotted it.
+
 
 
 1. ~~**The champion family cannot be captured, and the fixtures must be
@@ -1704,6 +1893,26 @@ the one fact that would settle it.
   AT the function so the next reader has to delete a derivation rather than redo
   one. **This is last session's `+0x51d5` lesson from the opposite direction: a
   plausible bug report against faithful code.**
+  ► **WRONG AS COMMITTED, AND THE SWEEP'S REPLACEMENT IS WRONG TOO — the honest
+    answer is a third thing.** The prose bullet cited was the enchantment bullet
+    BEFORE the very commit this sentence describes inserted an offsets block above
+    it; by the time the sentence was written one commit later, that line was the
+    armour-removal bullet. **So the citation was already ~18 lines stale the moment
+    it was committed.** ► Second flag: "already said so in prose" is itself
+    misleading — the census sentence it now points at was written by that same
+    commit; only a weaker statement pre-existed. Find both with
+    `grep -n 'exactly one enchantment roll' docs/integration/ss2-battle-map.md`.
+
+  ► **STALE, AND ONE CLAUSE IS FALSE AND KNOWN-FALSE ELSEWHERE IN THIS SAME FILE.**
+    Over the 23: villain `armourclass 0` in 22; all 23 carry eight piece keys per
+    side, hero all-zero 23/23 and villain all-zero 22/23; "no enchantment" 23/23
+    HOLDS; `fightMode "misc"` in 22; "hero attack 1 == defence 1" 23/23 HOLDS;
+    "hero at full health" 23/23 HOLDS. **But "damage exactly equal to the
+    defender's hitpoints" is FALSE for every golden** — hero 21–23 against villain
+    hitpoints 10 (×22) or 80 (×1) — and a paragraph further down in this living
+    head says so explicitly ("The premise is false"), while this one was never
+    struck.
+
 
   **The REAL defect was three lines below, and nobody had named it. FIXED.**
   Each status arm is `(equipped_weapon == 1 && weapon_enchantment_type == N) ||
@@ -1726,6 +1935,23 @@ the one fact that would settle it.
   computed and never APPLIED, because the build applies it as a status phase
   that replaces the afflicted combatant's next turn. See the 16:59 handoff for
   the costed fork.
+► **DRIFT — AND THE CITATION WAS NEVER EXACT, AND THE SWEEP'S FIX IS ALSO
+  STALE.** At the commit that wrote this sentence those four lines were the
+  COMMENT BLOCK immediately above the assignments, not the derivation. The
+  substance holds: both are derived, and `src/adapter/vanilla-fields.js:150`
+  and `:155` carry both — those two anchors are still exact. Locate the
+  derivation with `grep -n 'derived.weapon_enchantment_damage' src/team/ss2-rules.js`.
+
+► **CLOSED 2026-09-07 by `86ccb68`** ("Build the status phase: a condition now
+  takes its bearer's turn"), with four commits stacked on top (`1f90d3e`,
+  `dda33d4`, `07773db`, `659dfab`). `resolveStatusPhase`
+  (`src/team/ss2-rules.js:1146`) reads the INFLICTOR's enchantment damage at
+  `:1186-1189`, selects primary vs secondary by the VICTIM's `equipped_weapon`
+  at `:1188` — reproduced, not corrected, and the code says so — and applies it
+  through `applySs2MagicDamageCandidate` at `:1203`. Both weapons are covered,
+  so "unmodelled on both weapons" is closed. Pinned by
+  `test/ss2-team-rules.test.js:1218`.
+
 
 - ~~**`localeCompare` is a desync hazard and survives in two files.**~~
   **DONE 2026-09-02, and it was FIVE files, not two. The one nobody had found is
@@ -1735,6 +1961,15 @@ the one fact that would settle it.
   `provenance.captureManifestSha256`** — so two machines could mint two
   different, equally "correct" digests for byte-identical evidence. Its own
   comment four lines up exists to prevent exactly that class one layer higher.
+  ► **COUNT STALE, CLAIM STRONGER: 23 of 23 goldens carry
+    `provenance.captureManifestSha256`.** ► **AND THIS ROW HAS TWO MORE TARGET
+    SITES IN THE SAME PARAGRAPH that a careless application would miss** — "all 22
+    committed manifests" and "0 of 22 reorder" — because the sweep's own table cell
+    contains an escaped pipe and any naive parse of it drops them. Measured: 23
+    committed manifests, **23 of 23 rebuild to the digest their golden cites**, one
+    manifest per golden, none unmatched. The locale census in the same paragraph
+    reproduces exactly (86 sessionIds, 3,655 pairs, az-AZ 682, haw-US 1).
+
 
   Measured over the 86 committed sessionIds (3,655 pairs): en-US and eleven
   other locales order every pair as the code-unit comparator does; **haw-US
@@ -1742,6 +1977,13 @@ the one fact that would settle it.
   directly, not inferred: all 22 committed manifests still rebuild to the digest
   their golden cites, and 0 of 22 reorder under six locales. Re-derive with
   `node tools/stable-order-locale-census.mjs`.
+► **OFF BY ONE, AND WRONG WHEN WRITTEN: it is en-US and TWELVE other locales.**
+  `node tools/stable-order-locale-census.mjs` reports 86 sessionIds / 3,655
+  pairs, az-AZ 682, haw-US 1, and thirteen of the fifteen locales scoring 0. The
+  census already covered the same fifteen locales at the commit that wrote this
+  sentence, so this was an arithmetic slip, not drift. The 86 / 3,655 / 1 / 682
+  figures all HOLD.
+
 
   **`initiativeOrder` was worse than "the hash diverges".** It drives
   `currentCombatant` and `advanceTurn`, so a locale difference changes WHO ACTS
@@ -1769,6 +2011,13 @@ the one fact that would settle it.
   differ only in an UNCONSUMED sample both hash to `2b429191`, with
   `rngState 0 / rngCursor 0` on both sides (`rng.js:126` sets `#state = 0` for
   tape mode, and `toTeamWireState` carries only `rngState`/`rngCursor`).
+  ► **ANCHOR DRIFTED BY TWO, AND THE SECOND CLAUSE IS NOW FALSE.** `toTeamWireState`
+    no longer carries only `rngState`/`rngCursor`: in tape mode it ALSO projects
+    `rngMode` and `rngDrawn` — the consumed-prefix fix this same bullet announces.
+    **The code says so itself**: `src/team/rng.js` reads "`toTeamWireState`
+    **projected** only `rngState` and `rngCursor`", past tense. Locate the
+    tape-mode reset with `grep -n '#state = 0' src/team/rng.js`.
+
 
   **This file said "projecting the channel mode and a digest of the samples
   would close it". Projecting a digest of the REMAINING tape closes it and
@@ -1790,6 +2039,16 @@ the one fact that would settle it.
   A tape-only projection was measured to break 0 tests: the 12 pinned hashes in
   `test/team-resolver.test.js` are the only literal hashes in the repo and none
   is a tape battle.
+► **WRONG ON ITS FACE, AND WIDER THAN THE SWEEP SAID — SCOPE IT.** (a) The twelve
+  pins named are real, all seeded, none a tape battle, so that clause holds.
+  (b) There is now a THIRTEENTH `combatStateHash` pin, in
+  `test/ss2-team-rules.test.js`, also seeded, so the tape-only projection still
+  does not move it. (c) **"The only literal hashes in the repo" is false**:
+  `src/golden/pre-nonce-observations.js` alone carries 58 literal 64-hex
+  sha256s, and there are more elsewhere. **Correct scope: "the only literal
+  pinned COMBAT-STATE hashes", and there are 13.** The load-bearing conclusion —
+  the projection landed and the suite is green — survives.
+
 
 - **`ss2BattleValues` reproduces a SUBSET of `battlevalues`, and two omissions
   change a fight.** `weapon_min_damage`/`weapon_max_damage` are themselves
@@ -1810,6 +2069,19 @@ the one fact that would settle it.
   `captures/` archive" and says in its own parenthesis that a tree with
   `captures/` and 1 skipped is CORRECT. Nothing to do; the item outlived its
   fix.**
+  ► **PURE DRIFT; the quoted wording is word-for-word unchanged.** Find it with
+    `grep -n 'holding at least one probe session directory' AGENTS.md`. (The
+    sweep's replacement span over-reaches — it includes the bold header and the
+    following bullet.)
+
+  ► **BOTH NAMED HALVES ARE NOW FALSE.** `ss2BattleValues` derives the damage pair
+    from a `weapon` id (an explicit pair still wins) and derives
+    `weapon_enchantment_damage`; a call with `weapon: 5` alone returns
+    `min_damage 27 / max_damage 69`. ► **But do NOT sweep away the REST of this
+    bullet's "also dropped" list, which still HOLDS**: no `maximum_ammo` herolevel
+    tier chain (only the `ammo_left` fallback), no `character_xp`, no bow
+    `weapon_range` override. The offsets themselves are unchallenged.
+
 
 ### Found 2026-09-02 (overnight): what a CAPPED verification wave established
 
@@ -1841,6 +2113,31 @@ session before anything was written.
   the primary pair with the secondary one at `round(strength * 1)`.
   **The table stays `map-derived`, and `tools/item-table-transcription.mjs`
   against the build remains the only thing that backs it.**
+     ► **RE-MEASURED 2026-09-07 AND THE COVERAGE IS HIGHER, NOT LOWER: 68 distinct
+       triples, 63 inverting, collapsing to 10 distinct `(min,max)` pairs of the
+       table's 69, compatible with 14 ids of 90 → 76 rows corroborated by nothing,
+       coverage ~15.6%, not 10%.** The table constants are unchanged (90 ids, 69
+       distinct pairs, re-derived from `src/team/ss2-weapon-table.js`), and adding the
+       archive's 57 `.json` files contributes zero new triples, so the result is
+       robust to the scope question. Live growing store — carry the command.
+       ► **SCOPE HAZARD: do NOT push this correction up into the sentence above that
+       says an investigator "claimed … for 26 of 28 triples".** That is a quotation
+       of a past claim, not a live count; rewriting it would falsify the record of
+       what was claimed.
+
+     ► **ONE DENOMINATOR MOVED, THE OTHER MUST NOT BE TOUCHED.** The zero-weapon-field
+       finding HOLDS exactly — `weapon`, `whichweapon`, `using_bow`,
+       `weapon_min_damage`, `secondary_min_damage` and `attack_type` are still ZERO
+       across both file types. **`.jsonl` moved 447 → 1,544; `.json` is still exactly
+       57, so a blanket substitution would falsify the half that is correct.**
+       ► And the claim is true only because it is SCOPED to `.jsonl`/`.json`: the
+       RUFFLELOGS do carry weapon data. `equipped_weapon`/`secondary_weapon` appear
+       in 140 rufflelogs, but only inside `navdiag` property-NAME enumerations, and
+       two arena-shop traces record a real weapon-table id as a VALUE. Neither of
+       those two sessions has a `.jsonl` or any `min_damage` line — **so the
+       conclusion survives for a sharper reason than the one given: the id-bearing
+       and triple-bearing traces are DISJOINT sets.**
+
 
 - **THE THIRD FORGERY IS OPEN, AND WIDER THAN THE HEAD DESCRIBES. The vehicle
   is `capture.method`, not `callSite`.**
@@ -1869,6 +2166,19 @@ session before anything was written.
     promotion), and `injected` alone is refused at ingest in both directions.
     So of the head's three named channels, one is closed and one is only open
     with `method` co-forged.
+    ► **THE SWEEP CALLED THIS UNCHECKABLE. IT IS CHECKABLE, AND THE ANSWER IS A
+      DIFFERENT NUMBER, NOT A STALE DENOMINATOR: 8 failures of 816, not 15 of 715.**
+      Measured 2026-09-07 by actually doing it in a disposable copy: simulate two
+      traces for `candidate-lethal-result` with distinct launch nonces, ingest them,
+      and promote through the UNMODIFIED CLI — the suite then reads 816 / 807 / 8 / 1
+      and the total does not grow. The eight are named in the session record.
+      ► **A TRAP FOR WHOEVER REPEATS THIS: a scratch copy built without `.git` is
+      NOT a valid baseline** — it reads 813/811/1/1, because a transcription test
+      reads the git history and fails at file level, swallowing its own four tests.
+      Copy with `.git` included. ► Also worth stating: **no committed observation
+      targets `candidate-lethal-result`**, so this is a hypothetical about a
+      promotion the corpus cannot currently reach.
+
 
 - **THE CLAMP ITEM IS WRONG IN ITS COUNT, ITS CAUSE AND ITS PREMISE.**
   The head says "three clamp sites can each be deleted with the replay file
@@ -1891,6 +2201,30 @@ session before anything was written.
     stays green even though `test/ss2-team-rules.test.js:456` drives −38
     through it, because `src/team/resources.js:252` re-clamps every resource
     write to the entry's minimum. A guard behind a guard reads as coverage.
+    ► **ANCHORS DRIFTED, SUBSTANCE AND MUTATION BOTH HOLD.** Both were EXACT at the
+      commit that wrote them. **Re-run 2026-09-07: deleting only the floor stays
+      green at 816 / 815 / 0 / 1 — the dead-code claim reproduces.** The −38
+      arithmetic is right (`strengthFactor: 2`, so 1 − round(20×2) + 0 + 1 + 0 = −38).
+      ► **Bonus defect: that test's own inline comment says "1 - 20 + 1 is 0, not 1",
+      using factor 1 — the comment understates its own spend by half.**
+
+    ► **FIVE ANCHORS HOLD, TWO DRIFTED, AND THE MUTATION RESULT REPRODUCES IN FULL.**
+      All seven were EXACT at the commit that wrote them, so this is honest drift,
+      not a bad citation. **Re-run 2026-09-07 in a disposable copy: all seven
+      whole-site deletions applied one at a time, reverting between — seven of seven
+      stay green at 816 / 815 / 0 / 1.** The claim survives at HEAD intact. Locate
+      the two that moved with `grep -nE 'Math\.max|Math\.min|clamp\(' src/team/ss2-rules.js`;
+      the sweep's replacements for them are themselves stale by 14 lines.
+
+    ► **STALE, AND "23" WOULD BREAK IT.** 22 of the 23 goldens stage villain
+      `hitpoints`/`hitpointsmax` at 10; the armoured golden stages 80/80 (hero
+      300/300). The hero `min_damage 21`/`max_damage 23` pair HOLDS across all 23.
+      **So the digit 22 is still a correct COUNT, but "All 22 goldens" misdescribes
+      the corpus — name the subset instead.** The bullet's conclusion survives on
+      BOTH archetypes (21–23 against hitpoints 10; `armourDamage` 22 against
+      `armourclass` 79). The "141 arrivals / 120 on the floor" instrumentation
+      figure beside it was NOT reproduced — carry it as unchecked.
+
 
 - **A METHODOLOGY HAZARD, found by two agents independently and worth keeping:
   the session scratchpad is SHARED between a wave's agents.** One agent's
@@ -1938,6 +2272,14 @@ written into the corpus. Re-derive with the archive at
   the change that would make the villain's stamina explainable from the record.**
   Not attempted; costed nowhere; and note it is an OBSERVABILITY change, not a
   determinism one — `villainChooseAction` makes its own random draws.
+  ► **SUBSTANCE HOLDS AND IS STRONGER THAN STATED; ONLY THE DENOMINATOR MOVED.**
+    `villaindecision` (case-insensitive) appears in **ZERO** files anywhere in the
+    live archive — including the 154 decompiled wrapper-source copies — and zero
+    in the frozen replica. The denominator is now ~1,592 entries, not 240; the 240
+    described the pre-relocation archive, and the frozen 2026-08-31 replica still
+    holds 238, which is within two. Live growing store: write
+    `grep -ril 'villaindecision' <archive> | wc -l` rather than a denominator.
+
 
 ► **`attackDirection` IS THE SECOND BLOCKER AND IS IRREDUCIBLE AT P = 1/4.**
   32 of 38 rounds diverge on `/scenario/attackDirection` (observed 4, 8, 10, 11
@@ -1949,6 +2291,22 @@ written into the corpus. Re-derive with the archive at
   1-in-4 lottery on direction before stamina is even considered. The map says
   the same thing in its own words ("nothing in a run can select the direction");
   this is that claim confirmed from the traces.
+  ► **THE COUNT HOLDS; THE VALUE LIST IS THE 11 COMMITTED DIVERGENCE REPORTS'
+    VALUES, SILENTLY PRESENTED AS THE 38'S.** Across all 38 the non-5 values are
+    2, 3, 4, 6, 7, 8, 10, 11 and 20. ► **BUT REFUSE THE INFERENCE THE SWEEP DREW
+    FROM THAT.** Attributed by which combatant took the first `damagecharacter`
+    hitpoints write — the battle map's own method — **28 of the 38 are HERO swings
+    and all 28 landed inside `randomBetween(5, 8)`; the 9 out-of-band rounds are
+    VILLAIN swings, which the battle map already states.** Writing "9 of the 38
+    landed outside range, so the P = 1/4 framing is in doubt" would put into the
+    record an implication that the hero's `+0x61f1` draw produced 2, 3 and 20 —
+    contradicting a byte-verified map row, i.e. deriving from a capture instead of
+    from the map. **The framing does not merely survive; the archive now confirms
+    it at n = 1,171**: every one of the 1,171 delogged `session-onx*` rounds is a
+    hero swing and every direction is in {5,6,7,8} — 273 / 287 / 304 / 307, so
+    P(5) = 0.2331 against 0.25 (z = −1.33). The rest of the bullet is exact: 254
+    roll lines, 0 not injected, 0 that are a `(5,8)` draw.
+
 
 ► **TWO OF THE EIGHT FIXTURES CANNOT INGEST AT ALL, AND IT IS NOT A DIVERGENCE.**
   `candidate-armoured-removal-destroys-helmet` and
@@ -1959,6 +2317,31 @@ written into the corpus. Re-derive with the archive at
   already right and is `-WatchFields`, which EXTENDS the default per session** —
   do NOT widen `DEFAULT_WATCH_FIELDS`, for the reason the wrapper's own comment
   gives. This is the cheapest unblocking on the list and nothing records it.
+  ► **HALF TRUE, HALF WRONG — AND THE WRONG HALF WAS WRONG WHEN WRITTEN
+    (`d39fb8b`, 2026-09-01 16:41).** "Nothing records it" is false: it was already
+    recorded in three places, two of them PREDATING this sentence —
+    `docs/integration/ss2-staging-runbook.md` §1.1 (rows added `d8642b2`,
+    2026-08-30 22:47) and `tools/runtime-capture/campaign.mjs watch-fields`
+    (`863ac0f`, 2026-08-30 23:19), which DERIVES the string rather than quoting
+    it: `node tools/runtime-capture/campaign.mjs watch-fields --family
+    armoured-removal-destroys-helmet` prints `helmet_defence,shoulderguard_defence`
+    for both fixtures. The CAPTURE is genuinely still open (no
+    `armoured-removal-destroys` fixture or observation is committed). So this is
+    one sentence with a true half and a false half, and only the false half is
+    struck.
+
+  ► **THE PARENTHETICAL IS FALSE.** BOTH removal fixtures pin BOTH
+    `helmet_defence` and `shoulderguard_defence`, in the same key order, and
+    `projectFields` iterates `Object.keys(fixture.scenario.villain)` in file order
+    and fails on the FIRST missing key. **Measured by running the real ingest: 22
+    of 22 runs (2 fixtures × 11 delogged traces) fail on `helmet_defence`;
+    `shoulderguard_defence` never appears.** Everything else HOLDS exactly — the
+    villain dump is 29 keys, neither `*_defence` is in it, 0 of the 38 armed traces
+    carry one, and the `-WatchFields` advice is right. **Two caveats on "every one
+    of the 38": only 11 are delogged, so the refusal is EXECUTED for 11 and
+    INFERRED for 27 from an identical dump shape; and under default options the
+    first refusal today is the null-attestation gate, not the field.**
+
 
 ► **ALL 38 ROUNDS TARGETED ONE FIXTURE. Seven of the eight have never had a
   capture attempt that could match them.** Identified by the injected tape,
@@ -1966,6 +2349,15 @@ written into the corpus. Re-derive with the archive at
   uniquely. `equality-quirk` and the three `tournament-*` stage a different
   villain (`armourclass 22, helmet 2`) that no `adc` round ever staged. **So
   "the armoured family has spent 38 rounds" is really "one fixture has".**
+  ► **WRONG ON ITS FOURTH MEMBER; THE CONCLUSION SURVIVES BY TWO ROUTES INSTEAD OF
+    ONE.** Three of the four stage villain `armourclass 22 / helmet 2`, but
+    `candidate-tournament-nonlethal-normal-hit` stages `armourclass 0` and has NO
+    `helmet` key at all. The conclusion is untouched: all 38 armed rounds staged
+    one distinct villain tuple (`armourclass 79, helmet 6, shoulderguard 1`), so
+    neither the ac-22 nor the ac-0 villain was ever staged; and the injected tape
+    is the seven values `(100, 22, 20, 93, 12, 1, 100)`, which among the eight
+    fixtures only `candidate-armoured-deflection-threshold-cleared` matches.
+
 
 ► **DELOGGING THE 27 ADDS NO MATCHABLE EVIDENCE, WHICH RETIRES A RANKED ITEM.**
   The 15:50 handoff ranks "27 archived armed traces were never delogged" third,
@@ -1983,6 +2375,16 @@ written into the corpus. Re-derive with the archive at
   because **zero `adc` observation records are committed** (68 observations, none
   from this family). Measure them in scratch, as this session did; do not ingest
   them without deciding that question first.
+  ► **68 → 69, and one half of this is now FALSE.** "Zero `adc` observation records
+    are committed" HOLDS — none in `test/observations/ss2-1v1`, and the 11 adc
+    records exist only as divergence reports. **But "none from this family" turns
+    on what "family" means, and on the reading this paragraph is actually about —
+    the ARMOURED family — it is false:** `obs-onx1405-a1` and `obs-onx1521-a1` are
+    committed, target `candidate-armoured-deflection-threshold-cleared`, and both
+    carry `installHashVerifiedAfter: true`. **So the paragraph's load-bearing
+    claim — "there is no committed record to carry the value forward from" — is
+    now false for the armoured family**, though still true for the 38 adc traces.
+
 
 ► **THE LOAD-BEARING NEGATIVE UNDER THE WHOLE PLAN HAS NO BYTE CITATION.**
   "The villain is never re-skinned, so `-StageVillain` is durable" is the
@@ -2025,6 +2427,14 @@ been.
   **630 / 612 / 17 / 1**. `TOURNAMENT_OPPONENT_PARAMETERS`
   (`test/ss2-post-tutorial-fixtures.test.js:170`) independently pins the same
   15-key villain surface, so two places must move together.
+  ► **PURE DRIFT; EVERYTHING SUBSTANTIVE HOLDS AND WAS RE-COUNTED, not relayed.**
+    Both anchors were EXACT at the commit that wrote them. The allow-list holds
+    exactly 42 keys; `staminaleft` and `staminamax` are IN; `stamina`, `speed`,
+    `vitality`, `herolevel` are ABSENT; the throw message is unchanged;
+    `TOURNAMENT_OPPONENT_PARAMETERS` holds exactly 15 keys. **The suite figure in
+    this same bullet describes a DELIBERATELY BROKEN tree — re-measure it, do not
+    substitute today's total into it.**
+
 
   So a scenario may pin a quantity the game DERIVES while being forbidden from
   declaring what derives it. Every "unpinned input to a pinned output" finding in
@@ -2053,6 +2463,17 @@ been.
       movement_speed = clamp(round(speed*1.5), 4, 60)
   regen = 1 + round(stamina/3)       so   stamina_min = 3M - 4
   ```
+► **OFF BY ONE: the map records 17 `cast_*` SITES covering 20 distinct labels,
+  not 18.** Two rows are shared branches — lightning/frightning bolt at one site,
+  fireball/hell/dire at another — so 15 + 2 + 3 = 20 labels across 17 sites. The
+  table has 42 rows total, exactly matching the "42 assignment sites" the map
+  claims two paragraphs above, so **the table is internally consistent and "18"
+  is not any of these numbers under any counting.** Write 17: this citation is a
+  SITE count in a formula whose other four citations are single sites. The
+  `M = max(...)` derivation is unaffected — every phase in the table reduces to
+  `2*movement_speed`, `round(strength*3)`, `round(charisma*2)`, `round(magicka)`
+  or the constant 7.
+
 
   `M = 8` — and hence `stamina 20`, `staminamax 300` — holds **only** for a
   villain with `strength <= 2, charisma <= 4, magicka <= 8, speed <= 2`. **The
@@ -2106,6 +2527,23 @@ measured to be blind to the difference.
   rounds, not a code change" — is WRONG for this family.** Re-derived from the
   SWF and the archive 2026-09-01, and independently reproduced by the main
   session after a question-diverse wave raised it.
+  ► **TWO HALVES, OPPOSITE VERDICTS — AND THE SWEEP'S REPLACEMENT NUMBER IS
+    REFUSED.** The STRUCTURAL half HOLDS, including of the promoted golden, which
+    pins villain `staminaleft 105 / staminamax 110` while its villain block carries
+    no `speed` and no `strength`. **The ABSOLUTE half — "no amount of sampling,
+    throughput or memory fixes this" — is FALSIFIED for exactly one of the eight**:
+    more rounds WAS the remedy for `candidate-armoured-deflection-threshold-cleared`.
+    ► **But the "5 hits" the sweep proposed is wrong: the measured figure is 2.**
+    Running the repo's own matcher over the archive, of 1,171 delogged
+    `session-onx*` traces exactly **2** produce zero differences — precisely the
+    manifest's two. Five traces hit a looser three-condition filter; three of those
+    fail a fourth condition the filter omits (hero `hitpoints`), and a sixth hits
+    the stamina pair but drew direction 7. **So the joint precondition is FOUR-way
+    and it landed 2 in 1,171 (0.17%)**, with the binding constraint being the
+    staged villain `staminaleft` surviving to arming (0.51%), not the direction
+    draw (23.3%). Live growing store — carry the command, not the ratio. Also
+    stale in the same sentence: seven of the eight remain candidates, not eight.
+
 
   The five `candidate-armoured-*` and three `candidate-tournament-*` all pin
   hero AND villain at `staminaleft 105 / staminamax 110`. `staminaleft` is
@@ -2140,6 +2578,18 @@ measured to be blind to the difference.
   | --- | --- |
   | `prisoner-*` (12 goldens) | `attack, strength, charisma, magicka, min_damage, max_damage` + armour |
   | `armoured-*`/`tournament-*` (0 goldens) | armour pieces + `defence` ONLY |
+► **`armoured-*` now has 1 golden; `tournament-*` still 0.** The stat description
+  reproduces for the armoured villain block (`defence` only, plus armourclass,
+  hitpoints, stamina, four pieces and `gladiator_dir` — no attack/strength/
+  charisma/magicka/min_damage/max_damage). **Two things neither the document nor
+  the sweep states.** (1) The `prisoner-*` row of this same table is also
+  imprecise: the prisoner villain DOES pin `defence`, at 0, which that row omits.
+  (2) **Before escalating the prose under this table from "(0 goldens)" to "the
+  defect is now in a golden", check it**: the promoted armoured golden's expected
+  block carries no villain stamina arithmetic (`staminaleft` 105 unchanged;
+  mutation `armourDamage 22 / hitpointDamage 0`), so "pins an output that its
+  unpinned stats determine" is not obviously true OF THAT GOLDEN.
+
 
   The armoured fixtures describe a RANDOMISED opponent by its armour alone, then
   pin an output that its unpinned stats determine. That is the whole defect.
@@ -2190,6 +2640,23 @@ measured to be blind to the difference.
   scenario needing every dependent value re-derived, not a correction; or (c)
   stop pinning it, which the head forbids elsewhere and which should stay
   forbidden until (a) and (b) are ruled out.
+► **WRONG AS AN ABSOLUTE; THE MECHANISM SENTENCE UNDER IT HOLDS AND MUST BE
+  KEPT.** The repository's own corpus falsifies it: the armoured golden pins
+  villain `staminaleft 105 / staminamax 110` and hero 105/110 at direction 5,
+  `runtimeVerified: true`, `repetitions: 2`, from two independent sessions on
+  this exact route. **But the scenario still cannot DERIVE the value** — the
+  wrapper STAGES it and the villain's own action sequence then usually destroys
+  it, which is what the next sentence says and why it stays. What resolved this
+  was option (a) from this same paragraph: sample, and keep only the runs where
+  the staged value survived. ► **REFUSE the "5 in 1,171" the sweep proposed.**
+  The sweep's own refuter had already broken this row for putting an unmeasured
+  ratio into the record; it has now been MEASURED and it is **2 in 1,171**, so
+  adopting that sentence would have written a wrong unmeasured number in — the
+  exact failure this project exists to prevent. ► **And do not describe option
+  (a) as implemented**: the villain-side gate in `captureAllowedNow` checks the
+  HERO's stamina and only in champion mode; this route ran `"always"`, so the
+  selection was post-hoc through the matcher, not at arming time.
+
 
   ► **CORRECTED 2026-09-01 (evening), AND THE FRAMING ABOVE IS THE RANKING
     ERROR: (a) AND (b) ARE NOT ALTERNATIVES — THEY ARE THE SAME PREDICATE.**
@@ -2275,6 +2742,13 @@ measured to be blind to the difference.
   promoted. **The constant was carried from a route where it was derivable to a
   route where it is not.** That is the whole mistake, and it is a much more
   instructive one than a typo.
+► **53 of 82 → 54 of 83, and "across BOTH staminamax values" is WRONG.** The
+  corpus carries SIX distinct villain `staminamax` values — 100 (59 fixtures),
+  110 (11), 130 (1), 140 (1), 150 (10), 160 (1) — and the −5 pattern occurs at
+  exactly TWO of them: 44 of 59 at 100, 10 of 11 at 110, zero at the other four.
+  **Correct form: "at two of the six staminamax values".** The substantive point
+  (105 = 110 − 5) is untouched.
+
 
   **The runbook's own rationale is false for exactly one field.**
   `ss2-staging-runbook.md` argues that staging overwrites the generator's draw
@@ -2346,6 +2820,18 @@ ones that change what the next session should DO are marked ►.
      plumbed through three files (`ss2-capture-wrapper.as`,
      `launch-capture.ps1`, and `run-arena.ps1`'s `-ArenaCapture` ValidateSet),
      not "a one-line bypass" above an existing branch.
+     ► **WRONG, AND THIS FILE ALREADY CONTAINS THE RIGHT NUMBER TWELVE LINES BELOW.**
+       There are SEVEN champion rufflelogs across three session directories, not four
+       across however many; six declare `"captureMode":"champion"` and the seventh
+       dies before any `battle-ready` line. Per-file `capture-refused-unstaged`:
+       382, 0, 460, 89, 0, 160, 0 → **1,091 total**. The 931 is 382+460+89+0 — the
+       arena-champ-1/2 files only, silently dropping the third session directory —
+       **and 1,091 is exactly the figure this same document uses twelve lines down.
+       The file states two numbers for one quantity.** The load-bearing half HOLDS:
+       `action-armed` is emitted 0 times in all seven. These come from `arenaLog`,
+       which does NOT dedupe, so unlike the `attack_chances` figures above they ARE
+       genuine event counts — the two families must not be corrected the same way.
+
 
   **And the yield it was ranked for does not exist.** A gate keyed on the
   fixtures as written would have armed **0 times in 38** — for every one of the
@@ -2368,6 +2854,17 @@ ones that change what the next session should DO are marked ►.
     NOT a record of what the wrapper did. **A log line that describes an
     intention is not evidence of a behaviour** — the same lesson as the
     `-WatchFields` docs, from the other direction.
+    ► **THE RANGE IS 3 TO 14, NOT 5 TO 14, AND THE QUOTED SHAPE IS NOT UNIVERSAL.**
+      Distribution over the 38 armed rounds: 3×1, 4×1, 5×8, 6×2, 7×12, 8×2, 9×7,
+      10×3, 11×1, 14×1. One session has four `walkright` entries and **no
+      `normal_attack` step at all**; another's is at n:2, another's at n:12 and
+      n:13; and `n` restarts, so two `"n":1` entries open every trace. **The literal
+      "n:1..5 then normal_attack n:6" shape fits at most 2 of the 38.** The
+      load-bearing half HOLDS and is stronger: every one of the 38 records autopilot
+      activity, minimum 3 entries, so the launcher's "NO autopilot" banner is
+      refuted. This set is CLOSED (nothing added since 2026-09-02), so a number is
+      defensible here — unlike the archive-wide rows above.
+
 
     So 0/38 measures an AUTOPILOT protocol, and the conclusion drawn from it —
     that the real measurement has never been taken — collapses. It has been
@@ -2406,6 +2903,12 @@ ones that change what the next session should DO are marked ►.
   `capture-refused-unstaged` appears ZERO times in any of them.** So the armoured
   family spent 38 rounds in the one mode that refuses nothing, and banked 11
   divergence reports against a precondition it never checked.
+► **NEVER RIGHT UNDER EITHER READING OF "IT".** The wrapper is byte-identical at
+  HEAD to its state at the commit that wrote this sentence, so nothing drifted:
+  the `arenaCaptureMode == "always"` early return is ONE line above the champion
+  branch and ~29 lines above the quoted comment block. The blockquote itself
+  checks out. Locate with `grep -n 'arenaCaptureMode' tools/runtime-capture/ss2-capture-wrapper.as`.
+
 
   *(Corrected 2026-09-01 evening: the 15:50 handoff restated this as "with ZERO
   refusals logged", which is false. **Seven refusals ARE logged** — all
@@ -2465,6 +2968,17 @@ ones that change what the next session should DO are marked ►.
   - **0 of 82** pin `speed`, for either combatant.
   - **All 22 promoted goldens share ONE villain profile**: `attack`, `defence`,
     `strength`, `charisma`, `magicka` all **zero**.
+    ► **STALE, AND "ALL 23" WOULD BE FALSE.** 22 of the 23 goldens have villain
+      attack/defence/strength/charisma/magicka all present and all zero.
+      `golden-armoured-deflection-threshold-cleared` breaks it with `defence: 3` and
+      the other four **ABSENT — not zero, absent.** Name the subset; do not raise the
+      count.
+
+    ► **DENOMINATOR ONLY: 83 of 83 fixtures pin the villain's `staminaleft`; the
+      invariant HOLDS.** The paired "0 of 82 pin `speed`" is 0 of 83 and is stronger
+      than stated — `grep -rn '"speed"' test/fixtures/` returns NOTHING at all, for
+      either combatant, in any fixture.
+
 
   `staminacost` for a walk is `round(movement_speed / 2)`, and
   `movement_speed = clamp(round(speed * 1.5), 4, 60)`. For a zero-speed villain
@@ -2473,6 +2987,19 @@ ones that change what the next session should DO are marked ►.
   bite. **That is why the prisoner and probe families promoted and nothing else
   ever has** — not because those fixtures are better specified, but because their
   opponent's stat vector makes the missing pin harmless.
+► **FALSIFIED AS A UNIVERSAL, AND CORRECTING ONLY THE COUNT WOULD LEAVE THE
+  EXPLANATION WRONG.** The armoured family promoted 2026-09-02, so "nothing else
+  ever has" is false. But it did NOT promote by the mechanism this sentence
+  describes: `golden-armoured-deflection-threshold-cleared` has no all-zero stat
+  vector (villain `defence 3`, with `attack`/`strength`/`charisma`/`magicka`
+  ABSENT rather than zero) and still pins no `speed`. It promoted because the
+  wrapper's `staged` declaration fixed the villain directly and 1,201 unattended
+  rounds beat a ~1-in-586 joint precondition. **Scope note: the block this sits
+  in is headed "Measured 2026-09-01", so its `82 of 82` / `0 of 82` /
+  `All 22 promoted goldens` are dated measurements that were correct then.**
+  Today: 83 fixtures, 83 of 83 pin villain `staminaleft`, 0 of 83 pin `speed`,
+  and 22 of 23 goldens carry the all-zero villain profile.
+
 
   Every other family fights an opponent the build DRAWS: `randomise_gladiator`
   (six call sites, incl. `sprite:1788/frame:69` x3 and `root/frame:214`) redraws
@@ -2485,6 +3012,12 @@ ones that change what the next session should DO are marked ►.
   NONE of `speed`/`strength`/`charisma`/`magicka`** — the four stats
   `staminacost` reads. The other 16 (champion 5, spell 8, duel 2, taunt 1) pin
   some of them but still never `speed`.
+► **FIRST CLAUSE STALE, SECOND CLAUSE EXACT — DO NOT TOUCH THE SECOND.** 21 of
+  the **37** unpromoted candidates, not 22 of 38 (60 candidates less the 23 whose
+  stem has a promoted golden). **"The other 16 (champion 5, spell 8, duel 2,
+  taunt 1)" reproduces EXACTLY**, and 21 + 16 = 37 closes arithmetically. Only
+  the first fraction moves.
+
 
   **This reframes the roadmap's "the remaining work is breadth".** It is not
   breadth: 22 goldens covering one opponent archetype is one archetype verified
@@ -2495,11 +3028,23 @@ ones that change what the next session should DO are marked ►.
   right: the watch fires per assignment, so a newly watched field the game writes
   during an armed action adds mutation lines and diverges every existing golden.
   `-WatchFields` already EXTENDS the default per session, which is the mechanism.
+► **23 goldens covering TWO opponent archetypes.** "One archetype verified many
+  ways" no longer describes the corpus: the armoured golden is defence 3 /
+  armourclass 79 / four pieces / four stats absent / `fightMode` tournament.
+  ► **Sibling that a digit-grep will miss:** the same defect is spelled in WORDS
+  further down this living head as "one archetype twenty-two ways".
+
 
 ► **40 DROPPED LAUNCH NONCES ARE RECOVERABLE FROM THE ARCHIVE, AND DOING IT
   COSTS RE-PROMOTING 20 OF THE 22 GOLDENS.** Measured 2026-09-01 by
   `node tools/recover-launch-nonces.mjs --archive <dir>` — REPORT ONLY, no write
   path, and re-run it rather than trusting these numbers:
+  ► **NUMERATOR HOLDS, DENOMINATOR MOVED: 20 of 23.** The tool prints exactly that
+    line today. The same stale "20 of 22" repeats in the table just below. This row
+    already carries the right correction shape — "re-run it rather than trusting
+    these numbers" — so keep the command; note that `--archive` is required by
+    design, so the path is not derivable.
+
 
   | | count |
   | --- | --- |
@@ -2508,6 +3053,13 @@ ones that change what the next session should DO are marked ►.
   | genuinely pre-nonce — ingest REFUSES the trace | 18 |
   | pre-nonce waiver, today -> if every recovery landed | **58 -> 18** |
   | **goldens that would need re-promotion** | **20 of 22** |
+► **9 → 11 nonce-bearing.** The whole table as measured 2026-09-07: records
+  examined **69** (the implicit total 40+11+18, not 67); would-recover 40
+  (holds); already nonce-bearing / identical **11** (was 9); genuinely pre-nonce
+  / ingest-refused 18 (holds); waiver 58 → 18 (holds); goldens needing
+  re-promotion 20 of 23. Cross-checked without the tool: 11 records carry
+  `capture.launchNonce`.
+
 
   Only `obs-pw10` and `obs-qk8` are cited by nothing and are therefore free.
 
@@ -2539,6 +3091,31 @@ ones that change what the next session should DO are marked ►.
     archive dirs hold more than one `.jsonl` (`vehicle-check`, `simulated`), and
     they are exactly the dirs `NON_SESSION_CAPTURE_DIRS` already exempts; no
     committed record points at either.
+    ► **FIRST AND LAST CLAUSES HOLD; THE SET-EQUALITY CLAUSE IS FALSE.** Exactly two
+      archive directories hold more than one `.jsonl` — that half is right. But
+      `NON_SESSION_CAPTURE_DIRS` (`test/ss2-divergence-corpus.test.js:121-125`)
+      exempts **THREE**: `simulated`, `vehicle-check` AND `wrapper`, and `wrapper/`
+      exists in the archive holding exactly one `.jsonl`. **The relation is a proper
+      SUBSET, so the word "exactly" is wrong.** "No committed record points at
+      either" HOLDS, and is stronger than stated: the same test file ASSERTS at
+      `:539-548` that no probe report's `sessionId` collides with the exempt set, so
+      it is enforced rather than merely true today.
+
+    ► **ALL FOUR NUMBERS STALE: 421 samples, 184 mutation entries, 191 events, 2,980
+      `finalState` fields across the 69 records.** The deltas are exactly the two
+      records added 2026-09-02. **State the leaf convention when rewriting** — a
+      scalar position, array entries counted individually — because the pairwise
+      tool's own leaf counts differ by whether empty containers count, and that
+      convention difference is what makes the ranges quoted elsewhere look wrong when
+      they are not.
+
+    ► **HEADLINE HOLDS; DENOMINATOR AND POPULATION BOTH NEED SAYING.** Zero of 69
+      records differ in substance, and the union of every changed JSON pointer is
+      exactly three — `/capture/launchNonce`, `/capture/overdraw`, `/digest`.
+      **Precision this sentence loses: 18 of the 69 are ingest-refused and produce no
+      diff at all**, so the union is measured over 51 comparable records, of which 40
+      changed and 11 were byte-identical. "Across all 69" overstates the population.
+
 
   **The reason this is not obviously worth doing.** A verifier this session
   resealed `obs-par1`'s digest with (a) its true nonce, (b) a FABRICATED nonce,
@@ -2666,6 +3243,34 @@ ones that change what the next session should DO are marked ►.
   closed that session was narrower — the matcher now TRANSLATES `reason` rather
   than stripping it. Two records agreeing on the same false attribution still
   promote.
+  ► **81 → 86 divergence reports, and the "unverified" half HOLDS PROVABLY.** Each
+    carries the digest under key `observationDigest`, never `digest`.
+    `test/ss2-divergence-corpus.test.js:355-359` DOES assert
+    `record.digest === report.observationDigest`, but only inside a
+    `fixtureId` match, and the same test asserts that match count is 0 with the
+    comment "which is why the digest equality above has never once executed
+    against the committed corpus". ► **Duplicate stale 81 further down this living
+    head, under "Still open".**
+
+  ► **FIRST HALF HOLDS EXACTLY; SECOND HALF IS THE SAME CATEGORY ERROR AS ABOVE.**
+    "7 of 15 hook slots have never wrapped in any gate run" re-derives: `hookSlots`
+    is 14 `registerSlot` + 1 `registerNativeSlot("gotoAndPlay")` = 15, the
+    vehicle-check runs emit exactly 8 distinct `wrapped:` names, and no rufflelog
+    anywhere carries more than one `wrapped:randomBetween`, so 7 slots never wrap
+    — attack_chances, check_spells, destroy_armour, magic_damage_character,
+    nextphase, remove_armour, and the second randomBetween slot. "0 times there"
+    HOLDS. **"~209 times live" is a trace count, not an event count** (see the
+    `dbg()` correction above); the `wrapped:` and `called:` file sets are
+    identical. Give the command, not a number.
+
+  ► **POINTER BROKEN — quote the target, do not renumber it.** § "Next steps, in
+    order" contains TWO numbered lists, and "item 1" now selects the wrong one: a
+    reader lands on "CAPTURE AN ARMOURED FIXTURE", which is itself the stale
+    instruction corrected above, so the two failures compound. The champion
+    retraction is intact and unambiguous — find it with
+    `grep -n 'champion' HANDOFF.md` inside that section, or search for its own
+    opening words. It is the first item of the SECOND list.
+
 
 Three claims I recorded during the session were wrong and are corrected in
 place: that the wrong-side defect was arena-specific; that `if (attacker ==
@@ -2719,6 +3324,16 @@ records are free — valid, re-digested, still matching their candidate — and
 **407 of them, every one at `/samples/*/callSite`, this gate alone refuses.**
 The free count is exact, not a lower bound: a leaf the matcher compares cannot
 be free, since every record matches its fixture at baseline.
+► **ALL THREE NUMBERS STALE, VERDICT UNCHANGED: 777 of 11,403 single-leaf
+  perturbations across 69 records are free; 421 of them, every one at
+  `/samples/*/callSite`, the gate alone refuses.** Classification today:
+  refused-by-validation 2,963 + caught-by-matcher 7,663 + free-caught-by-gate 421
+  + free-caught-by-nothing 356. **The ranges quoted a few paragraphs above
+  (full-record 101–184, matcher projection 86–157) still reproduce EXACTLY and
+  need no change** — but only under the counting-empty-containers convention; the
+  other convention gives 100–184 and 85–157. Live/tool kind: the correction is
+  the command, `node tools/pairwise-gate-dormancy.mjs --json`.
+
 
 **And on committed evidence it refuses nothing, for a reason nobody had looked
 at.** ~~Zero of the observation ids the 22 goldens cite carries a `launchNonce`~~
@@ -2735,6 +3350,15 @@ which three promotable groups exist (`obs-cachecold`+`obs-cachewarm`,
 `obs-iso2`+`obs-par1`, `obs-par2`+`obs-par3`) and no golden cites any.~~ **Also
 false, and it names the three groups that ARE cited — they are exactly `dir5`,
 `dir8` and `dir6` above.**
+► **9 → 11 records, 4 → 5 goldens — AND "THE OTHER 18" NEEDS NO CHANGE. FLAG
+  THAT LOUDLY.** All 11 nonce-bearing records are cited, across 5 goldens; the
+  four named groups reproduce with the same record lists, and the fifth is
+  `golden-armoured-deflection-threshold-cleared`, **the first golden whose
+  evidence is entirely nonce-bearing**. Numerator and denominator both moved by
+  one, so 23 − 5 = 18 exactly as 22 − 4 = 18 did: **a blanket edit of that 18
+  would break a correct sentence.** The sweep did not flag this. Siblings still
+  carrying the stale 9 are elsewhere in this living head.
+
 
 **This paragraph contradicted line ~715 of this same file**, which has carried
 the corrected "9 nonce-bearing records are now cited" since the re-promotion
@@ -2744,6 +3368,15 @@ gate's own comment, in `pairwise-gate-dormancy.mjs`, `docs/roadmap.md` and
 retract-at-the-instruction rule failing on the exact file that states it, for
 the third time.** Found by an adversarial verifier aimed at a different claim
 entirely, then re-derived directly: 4 goldens, 9 citations, 0 disagreement.
+► **POINTER BROKEN, AND ITS TARGET IS NOW STALE TOO — do not repoint it, rewrite
+  it.** "~line 715" was accurate when written (`4610132`, 2026-09-01: the text
+  really was at line 716 of that revision); the file has since grown ~1,870
+  lines under it. Worse, the sentence it points AT is wrong today: measured
+  2026-09-07 over the corpus, **69 observation records, 11 nonce-bearing, cited
+  by 5 goldens** — not "9 across 4". Repointing would hand the reader a number
+  wrong by two. This is why an intra-file line pointer is never the right
+  citation here.
+
 
 **So the old "DORMANT TODAY" comment was wrong about the function and
 accidentally right about the corpus.** Both halves are now pinned by tests in
@@ -2758,6 +3391,16 @@ carrying the SAME fabricated `callSite` agree, match, and promote.** It does not
 close the hook-attribution hole and must not be described as closing it — the
 same structural reason a pairwise comparison could never have caught the copied
 record, which had to go through the nonce instead.
+► **407 → 421 committed samples; the load-bearing half is untouched** — every one
+  carries `callSite`, and there is exactly ONE distinct literal, so the teeth
+  still cannot bite two honest captures. ► **AND THE SAME STALE COUNTS ARE IN
+  COMMITTED SOURCE, NOT ONLY IN THIS FILE.** `tools/pairwise-gate-dormancy.mjs`'s
+  `doesNotProve` strings say "All 407 committed samples", "NINE of them
+  nonce-bearing across four goldens", "the goldens now cite 60 distinct records",
+  "all 67 records", "all 47 cited slots". Measured today: 421 · 11 · 5 goldens ·
+  62 distinct cited records · 69 records. **A doc-only fix leaves the tool
+  contradicting its own JSON output.**
+
 
 It becomes load-bearing the moment any field stops being compared. With the
 prescribed `staminaleft` exclusion patched in, an auditor promoted two records
@@ -2771,6 +3414,15 @@ nonce-free evidence the gate is unreachable, so an exclusion landed today is
 backstopped here by nothing. Free to keep, re-measured: all 29 cited observation
 pairs across the 22 goldens agree under it, so it refuses no promotion that
 already stands.
+► **29 → 81 cited observation pairs, across 23 goldens, all agreeing, none
+  unresolved; the substance HOLDS.** Re-derived independently of the tool as
+  Σ C(n,2) over each golden's `provenance.observationIds` (23 goldens, 62
+  distinct cited records, no record cited twice), and the tool's own `citedPairs`
+  block returns the identical numbers. "It refuses no promotion that already
+  stands" HOLDS. Worth a sentence rather than a number: the tool also reports
+  `citedIdsNotResolvableByFileName: 1` — three records are filed under names
+  other than the id they carry.
+
 
 **ANSWERED FROM THE MAP, BLIND TO THE CAPTURES.** `staminaleft` is read by
 **nothing** in the attack-resolution chain, and the pinned 105 is not derivable
@@ -2947,6 +3599,13 @@ and the committed file has never been invoked. The technique is validated; the
 FILE's own correctness is not. Provisioned is not exercised, which is the same
 distinction that once left three of four workflow components installed and
 never fired.
+► **FALSE SINCE 2026-09-01 — the committed file HAS been invoked, repeatedly.**
+  `a9e690e` (2026-09-01) says in its own commit message that it was run for the
+  first time that session and names the defect that run exposed, and a later
+  2026-09-02 commit records another. **It was invoked again on 2026-09-07 for the
+  wave that produced these very corrections**, with `started == returned` on both
+  phases (6/6 questions, 6/6 verifiers).
+
 
 Three defects were found by the verifiers and fixed in the same commit, each of
 which would have made this change a net loss:
@@ -2974,6 +3633,16 @@ the driver passes nothing, so two settle runs over identical records produce
 different goldens. This is how all 22 committed manifests were made and was NOT
 changed here; reproducibility runs through the committed manifest file, which
 carries its own `createdAt`. Worth fixing, deliberately, as its own change.
+► **22 → 23 committed manifests; the MECHANISM reproduces verbatim** —
+  `tools/runtime-capture/build-manifest.mjs:157` is
+  `createdAt: createdAt ?? new Date().toISOString()` and
+  `tools/runtime-capture/campaign.mjs:1279` passes no `createdAt`. The escape
+  hatch holds too: all 23 goldens' cited `captureManifestSha256` reproduce when
+  the committed manifest's own `createdAt` is fed back in. ► **DO NOT SUBSTITUTE
+  in the nearby sentence "26 manifests against 22 goldens passed the whole
+  suite": that is a HISTORICAL description of a defect predating the fix — 22 was
+  right then, and 23 would falsify it.**
+
 
 ### DECIDED 2026-09-01 (evening): two questions this file kept re-asking
 
@@ -3004,6 +3673,23 @@ session and never acted on.
      fights are played, which parity actually MATTERS becomes an observation
      rather than a guess. Deciding the schema first spends the decision before
      the evidence.
+     ► **THE DEFERRAL'S PREMISE EXPIRED SIX DAYS AGO.** Reason 3 was "Once
+       `ss2-rules.js` exists and fights are played". `src/team/ss2-rules.js` was
+       added by `831bcdc` (2026-09-01 22:58), is **1,794 lines**, and was edited five
+       times on 2026-09-07; `tools/hotseat.mjs:58` imports it and `d7ff634` is titled
+       "Let a person's gladiator fight under SS2's own rules". **Reason 1 is
+       falsified too** — the corpus no longer "covers one archetype twenty-two ways
+       and feeds nothing"; it covers two archetypes 23 ways and feeds `ss2-rules.js`,
+       the hotseat and the campaign circuit. Only reason 2 survives untouched.
+       Whether the reopen trigger has FIRED is not determinable from the tree.
+       ► **And the recommendation below has silently flipped without anyone
+       noticing**: it reads "(b) until `ss2-rules.js` lands, then (a)", and it has
+       landed — so this file now recommends (a), merge wholesale. **That is an
+       owner's decision and it should be made deliberately, not inherited from an
+       expired conditional.** The branch figures beside it are stale by the usual
+       mechanism; measure with `git rev-list --count main..HEAD` and
+       `git diff --shortstat main...HEAD`, never with a fourth written number.
+
 
   **The trigger to reopen it:** a played fight shows behaviour that needs the
   second archetype, OR someone states a concrete reason to need it at golden
@@ -3014,6 +3700,12 @@ session and never acted on.
   +17,190 −2,398 ahead. **A PR that size is not reviewable, and opening one
   creates the APPEARANCE of a review gate while providing none** — which is
   worse than no PR, because the rubber stamp is then on the record.
+  ► **STALE, AND IT CONTRADICTS ANOTHER FIGURE IN THIS SAME DOCUMENT.** Measured
+    2026-09-07: **172 commits / 140 files / +33,337 −1,227**, with `main` a clean
+    ancestor of HEAD, so the clean-superset claim HOLDS. ► **This is exactly the
+    live-moving kind that should never be a written number.** Use
+    `git rev-list --count main..HEAD` and `git diff --shortstat main...HEAD`.
+
 
   What was actually blocking a clean merge was fixed instead: `main` had
   diverged, and merging it in surfaced content this branch was silently missing
@@ -3038,6 +3730,19 @@ written rule about `main` is a PROHIBITION — `AGENTS.md`: "Do not push to
 document in this repository says when a branch becomes ELIGIBLE to merge: not
 `AGENTS.md`, not this file, not `docs/handoffs/README.md`, not the roadmap, and
 there is no CONTRIBUTING.
+► **NARROWLY TRUE, MISLEADING AS WRITTEN.** `AGENTS.md` now names a thirteen-rule
+  document that explicitly covers "merge eligibility" and says those rules are
+  ENFORCED. The rules live in `claude-harness`, a different repository — which is
+  the only sense in which "no document in THIS repository" survives, and that is
+  a distinction worth stating rather than a gap worth recording.
+
+► **THAT SENTENCE IS NO LONGER IN `AGENTS.md`.** What it says today is that git
+  and GitHub follow `claude-harness/docs/git-hygiene.md` — thirteen rules
+  covering branches, commits, pushing, PRs and merge eligibility — that those
+  rules are ENFORCED through `.claude/settings.json`, that this project TIGHTENS
+  the push rule to ask before every push, and that `main` is denied outright.
+  Quote `AGENTS.md` as it reads now, not as it read on 2026-09-01.
+
 
 The de facto practice, read off the history rather than from any document: a
 branch becomes a GitHub PR and a HUMAN merges it in the web UI. Both merges to
@@ -3045,6 +3750,12 @@ branch becomes a GitHub PR and a HUMAN merges it in the web UI. Both merges to
 repository not authored by `Codex Local <codex-local@invalid>` was one of those
 web merges. The gate is the owner, exercised through GitHub, not anything an
 agent runs.
+► **WRONG ON BOTH HALVES, INCLUDING THE SHAPE.** There are **two** web-merge
+  commits authored by the owner, not one, so even "the only … one" is wrong. And
+  by the date this was written, **24 further commits were already authored
+  otherwise** — so the sweeping claim about authorship was false when it was
+  made, not merely stale.
+
 
 That is a real gap on a project this careful about writing rules down, and it
 has a cost right now: `arena/champion-capture` is 61 commits ahead of `main`
@@ -3052,6 +3763,11 @@ with no PR, so every promoted golden, the capture pipeline and the whole
 2026-08-31 corpus repair are unmerged. `gh` is installed and authenticated in
 WSL as of 2026-08-31, so opening one is newly cheap — **but that is a decision
 for the owner, not a cleanup an agent should perform.**
+► **STALE, AND IT CONTRADICTS THE "98 COMMITS" FIGURE a few dozen lines above in
+  this same document.** Measured 2026-09-07: 172 commits ahead. "With no PR"
+  still HOLDS — the open PR is for a different branch. Use
+  `git rev-list --count main..HEAD`, not a number.
+
 
 ### Still open, with the evidence below the archive line
 
@@ -3151,6 +3867,44 @@ the analysis that established it is below the line. **Correct these HERE.**
   `parseStageList` mechanism and its "weapon table unmapped" premise;
   `ss2-arena-route.md` §12 on `armourclass`; `ss2-champion-dna.md` §7 on
   `fightMode`.
+  ► **ALL THREE WERE RECONCILED 2026-08-31 by `dc334f2`** ("Reconcile three
+    integration documents with what the bytes say", +1340/−207, touching exactly
+    those three files). Verify: the runbook's `parseStageList` mechanism at
+    `:1218`; its weapon-table premise retracted at §5.1 `:1068`;
+    `ss2-arena-route.md` §12 `armourclass` at `:1985-1987`; `ss2-champion-dna.md`
+    §7 `fightMode` at `:764`. **This entry was correct for 2 h 16 min** (written
+    `2d70738` 2026-08-30 23:34, reconciled 01:50 the next morning) and has stood
+    wrong for seven days. `docs/integration/ss2-arena-route.md:1821` has been
+    telling this file so the whole time — "is correct and is now acted on; the
+    entry can be struck" — and nobody read it. **Struck.** (The duplicate below
+    the archive line is frozen; leave it.)
+
+    ► **TWO ANCHORS WERE WRONG THE DAY THEY WERE WRITTEN, TWO HOLD.** The script is
+      byte-identical to the commit that wrote this sentence, so neither is drift.
+      The comment block runs one line longer than stated, and the blanket-kill
+      fallback is one line further down than the range given — that range names the
+      comment tail and the WARNING line, not the kill. **Holding exactly:**
+      `Get-SessionRuffle`'s span, the start-refusal, and the close block.
+
+    ► **SELF-REFERENCE INTO A GROWING FILE — replaced by a search.** Find the
+      duplicate with `grep -n 'isNum. site survives' HANDOFF.md` and take the hit
+      below the archive line. The substance is verified: the wrapper line reads
+      `if (currentTournament >= 19 && ranking <= 2) {` with no `isNum` call.
+      ► **DO NOT "FIX" THE COUNT.** `grep -n isNum` on the wrapper returns 15 lines,
+      but three of them merely MENTION `isNum` in comments. The twelve this document
+      lists are exactly the twelve lines carrying an `isNum` CALL. **The sentence is
+      correct as written; a blanket 12→15 would falsify it.**
+
+    ► **SELF-REFERENCE INTO A GROWING FILE — AND IT WILL BE WRONG AGAIN NEXT COMMIT,
+      SO IT IS REPLACED BY A SEARCH RATHER THAN A NUMBER.** Find the frozen copy with
+      `grep -n 'resources: first' HANDOFF.md` and take the hit BELOW the archive
+      line. ► **AND THE SWEEP'S OWN ROW IS BROKEN HERE, not merely stale**: it claims
+      `declaredFillResources(declared, index)` spans `battle-host.js:150-156`, and
+      that was ALREADY wrong when the sweep measured it. Locate it with
+      `grep -n 'declaredFillResources' src/adapter/battle-host.js`. The two named
+      integration tests have also moved by two lines each; `aiFillWithResources`
+      appearing nowhere in `src/` still HOLDS.
+
 
 ---
 
