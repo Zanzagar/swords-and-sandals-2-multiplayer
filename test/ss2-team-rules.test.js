@@ -1431,6 +1431,33 @@ test("TWO tokens for one condition are BOTH consumed, so neither forces a second
   );
 });
 
+test("a lethal tick clears EVERY token on the inflictor, not the first per condition", () => {
+  // An independent review turned this into a counterexample against a claim
+  // made elsewhere in this repository — that a condition cannot survive a 1v1
+  // bout. It could, because `statusTokenFor` returns ONE token per flag and the
+  // inflictor's clear used it: a gladiator carrying `burning:from=x` and
+  // `burning:from=y` kept the second, and walked out of a finished bout still
+  // alight. The victim's own consumption already took every token; the
+  // inflictor's did not.
+  const battle = statusBattle({
+    heroFields: { vitality: 0, herolevel: 1 },
+    villainFields: { weapon_max_damage: 300, weapon_enchantment_potency: 3 },
+    status: [ss2StatusToken("burning", "villain")]
+  });
+  combatantById(battle, "villain").status = [
+    ss2StatusToken("frozen", "hero"),
+    ss2StatusToken("frozen", "someone-else")
+  ];
+
+  applyAction(battle, onlyAction(battle));
+  assert.equal(combatantById(battle, "hero").alive, false, "the tick must be lethal for death() to run");
+  assert.deepEqual(
+    [...combatantById(battle, "villain").status],
+    [],
+    "both frozen tokens go: death() clears the flag, and two tokens are still one flag"
+  );
+});
+
 test("a LETHAL tick clears the victim's taunts too, not only its conditions", () => {
   // death() clears all six flags on both gladiators. Clearing only the four
   // conditions left a corpse still carrying taunted1/taunted2.

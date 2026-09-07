@@ -1226,9 +1226,15 @@ function resolveStatusPhase(request, flag, fightMode, observer) {
   // inflictor burning in our state and clean in the build's.
   const inflictorEffects = [];
   if (eliminated && inflictor !== null) {
-    for (const statusFlag of SS2_STATUS_FLAGS) {
-      const token = statusTokenFor(inflictor.status ?? [], statusFlag);
-      if (token === null) continue;
+    // EVERY token, for the same reason `statusConsumptionEffects` takes every
+    // token: two can name one condition with different inflictors, and
+    // `statusTokenFor` returns only the first. Clearing one left the other
+    // standing on a gladiator `death()` had cleared — which an independent
+    // review then reproduced as a SURVIVOR still afflicted after a 1v1, a
+    // state this file's own boundary claim called impossible.
+    const wanted = new Set(SS2_STATUS_FLAGS);
+    for (const token of inflictor.status ?? []) {
+      if (!wanted.has(ss2StatusFlagOf(token))) continue;
       inflictorEffects.push({
         kind: EffectKind.STATUS,
         targetId: inflictor.id,

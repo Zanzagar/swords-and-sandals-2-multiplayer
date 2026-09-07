@@ -145,18 +145,86 @@ test("the fallen are NAMED, neither silently dropped nor silently revived", () =
   assert.equal(teams.find((team) => team.id === "red").combatants.length, 1);
 });
 
-test("includeFallen carries the dead at the health the record measured, which is zero", () => {
+test("a roster of the fallen is reported UNPLAYABLE rather than handed over as if it would fight", () => {
+  // The first version of this seam said such a battle would "settle instantly".
+  // It does not — it STALLS, and an independent review measured it: the roster
+  // constructs, initiative includes the dead, and when a dead fighter holds the
+  // turn there are ZERO legal actions and NO result, permanently.
+  //
+  // At 1v1 the loser's team is exactly that case, so `includeFallen` there is
+  // always a stall. Refusing is the same judgement the rule set already makes
+  // about a `staminamax <= 0` fixpoint: a battle that cannot change state is
+  // not a battle.
   const { record, blueprints } = settledBout();
-  const { teams, fallen } = rosterFromCampaignRecord(record, { blueprints, includeFallen: true });
-  assert.deepEqual(fallen, [], "nobody is reported missing when everybody is carried");
-  const villain = teams.find((team) => team.id === "blue").combatants[0];
-  assert.equal(villain.id, "villain");
-  assert.equal(villain.health, 0, "carried as measured — this is not a revival");
+  const withFallen = rosterFromCampaignRecord(record, { blueprints, includeFallen: true });
+  assert.equal(withFallen.playable, false, "a team of corpses cannot take a turn");
+  assert.deepEqual(withFallen.unplayableTeamIds, ["blue"], "and the seam names which team");
+
+  // Refusing outright was the FIRST fix and it was wrong: a settled bout always
+  // has a wholly eliminated team, so refusing would have banned includeFallen's
+  // only honest use — looking at who was there. The survivors-only roster, the
+  // one a caller actually builds from, is playable.
+  const survivors = rosterFromCampaignRecord(record, { blueprints });
+  assert.equal(survivors.playable, true);
+  assert.deepEqual(survivors.unplayableTeamIds, []);
 });
 
-/** A settled 2v2 whose blue side wields enchanted weapons. */
-function settledTeamBout(seed) {
-  const blueprints = [
+test("includeFallen DOES carry a casualty whose team still has somebody standing", () => {
+  // The legitimate use, and the one that proves the refusal above is a guard
+  // rather than a ban: a 2v2 where one side loses a fighter but not the fight.
+  let bout = null;
+  for (let seed = 1; seed <= 80 && bout === null; seed += 1) {
+    const candidate = settledTeamBout(seed, "costly");
+    if (candidate === null) continue;
+    const byTeam = new Map();
+    for (const outcome of candidate.record.outcomes) {
+      const entry = byTeam.get(outcome.teamId) ?? { alive: 0, dead: 0 };
+      entry[outcome.survived ? "alive" : "dead"] += 1;
+      byTeam.set(outcome.teamId, entry);
+    }
+    if ([...byTeam.values()].some((entry) => entry.alive > 0 && entry.dead > 0)) bout = candidate;
+  }
+  assert.ok(bout, "no seed produced a team that lost a fighter but not the fight");
+
+  const { teams, fallen } = rosterFromCampaignRecord(bout.record, {
+    blueprints: bout.blueprints,
+    includeFallen: true
+  });
+  assert.deepEqual(fallen, [], "nobody is reported missing when everybody is carried");
+  const casualty = teams
+    .flatMap((team) => team.combatants)
+    .find((combatant) => combatant.health === 0);
+  assert.ok(casualty, "the casualty must be carried, at the health the record measured");
+  assert.equal(casualty.health, 0, "carried as measured — this is not a revival");
+});
+
+/**
+ * A settled 2v2. Two shapes, because two different things need to happen.
+ *
+ * `"afflicted"` is tuned so a CONDITION survives the bout: the bearer must act
+ * before the enemy that procs it and a teammate must land the kill after, so
+ * initiative runs bearer-fastest and finisher-slowest. Measured: 23 of 80 seeds
+ * proc, 8 leave a survivor afflicted — and its reds are strong enough that
+ * neither of them dies.
+ *
+ * `"costly"` is tuned so a TEAM LOSES A FIGHTER BUT NOT THE FIGHT, which the
+ * seat and casualty tests need and which the afflicted shape never produces.
+ * Measured: 65 of 80 seeds leave a team mixed, every one of them with the
+ * slot-0 fighter dead and a survivor behind. It procs nothing.
+ */
+function settledTeamBout(seed, shape = "afflicted") {
+  const blueprints = shape === "costly" ? [
+    ss2Combatant(gladiator({ speed: 12, vitality: 0, herolevel: 1 }), { id: "red-1", name: "Red 1", controller: "local" }),
+    ss2Combatant(gladiator({ speed: 1, strength: 9, vitality: 6 }), { id: "red-2", name: "Red 2", controller: "local" }),
+    ss2Combatant(
+      gladiator({ vitality: 1, weapon_enchantment_type: 2, weapon_enchantment_potency: 3 }),
+      { id: "blue-1", name: "Blue 1", controller: "local" }
+    ),
+    ss2Combatant(
+      gladiator({ vitality: 1, weapon_enchantment_type: 2, weapon_enchantment_potency: 3 }),
+      { id: "blue-2", name: "Blue 2", controller: "local" }
+    )
+  ] : [
     // THE SPEEDS ARE THE EXPERIMENT, and getting them backwards produced zero
     // survivors carrying a condition across 80 seeds — twice.
     //
@@ -186,7 +254,7 @@ function settledTeamBout(seed) {
     ]
   });
   let guard = 0;
-  while (!battle.result && guard < 200) {
+  while (!battle.result && guard < 300) {
     guard += 1;
     const actor = currentCombatant(battle);
     const options = legalActions(battle);
@@ -208,13 +276,19 @@ function settledTeamBout(seed) {
   };
 }
 
-test("a condition CANNOT cross a 1v1 boundary, and the reason is structural", () => {
-  // Worth pinning as a fact about the game rather than discovering it twice.
-  // A condition takes its bearer's very NEXT turn, so a gladiator can never
-  // land a killing blow while carrying one — and if the bearer is the one who
-  // dies, `death()` clears it. So at 1v1 the surviving side is always clean.
+test("no 1v1 in this sweep leaves a survivor afflicted, and the reason it holds is narrow", () => {
+  // The mechanism: a condition takes its bearer's very NEXT turn, so a
+  // gladiator never lands a killing blow while carrying one — and if the bearer
+  // is the one who dies, `death()` clears the other side too.
   //
-  // This was found by a sweep that expected the opposite and returned nothing.
+  // ► **STATED AS A SWEEP, NOT AS A LAW, and that is a correction.** This test
+  //   was called "a condition CANNOT cross a 1v1 boundary" and an independent
+  //   review broke the universal within the hour: with two tokens naming one
+  //   condition, the inflictor's death-clear took only the first and a survivor
+  //   walked out of a 1v1 still alight. That hole is now closed and pinned in
+  //   `test/ss2-team-rules.test.js`, and this sweep passes again — but the
+  //   lesson is that "cannot" was a claim about every reachable state and this
+  //   test only ever visited forty of them. It asserts what it visits.
   for (let seed = 1; seed <= 40; seed += 1) {
     const bout = settledBout({
       seed,
@@ -297,16 +371,51 @@ test("a blueprint that disagrees with the record about maxHealth is refused, not
   );
 });
 
-test("slot order comes from the record, so everyone stands where they stood", () => {
-  const { record, blueprints } = settledBout();
-  const { teams } = rosterFromCampaignRecord(record, { blueprints, includeFallen: true });
-  for (const team of teams) {
-    const recorded = record.teams.find((entry) => entry.teamId === team.id);
-    const expected = [...recorded.slots]
-      .sort((left, right) => left.slotIndex - right.slotIndex)
-      .map((slot) => slot.combatantId);
-    assert.deepEqual(team.combatants.map((combatant) => combatant.id), expected, team.id);
+test("a survivor behind a casualty CHANGES SEAT, and the change is reported not hidden", () => {
+  // This test used to be called "everyone stands where they stood", which was
+  // false and was my claim. `createTeamBattle` assigns `seatId` from the ARRAY
+  // INDEX and there is no vacant-seat marker to hold a dead fighter's place —
+  // `"empty"` means AI-FILL, and an SS2 team containing one is refused outright
+  // because the fill template declares none of the required resources
+  // (measured). So a survivor behind a casualty moves up, and the honest thing
+  // is to say so.
+  let bout = null;
+  for (let seed = 1; seed <= 80 && bout === null; seed += 1) {
+    const candidate = settledTeamBout(seed, "costly");
+    if (candidate === null) continue;
+    // Want a team whose slot-0 fighter died and whose slot-1 fighter lived.
+    const dead = candidate.record.outcomes.find((outcome) => !outcome.survived && outcome.slotIndex === 0);
+    if (!dead) continue;
+    const behind = candidate.record.outcomes.find(
+      (outcome) => outcome.survived && outcome.teamId === dead.teamId && outcome.slotIndex > 0
+    );
+    if (behind) bout = { ...candidate, dead, behind };
   }
+  assert.ok(bout, "no seed produced a surviving fighter standing behind a casualty");
+
+  const { teams, seatChanges } = rosterFromCampaignRecord(bout.record, { blueprints: bout.blueprints });
+  const moved = seatChanges.find((change) => change.combatantId === bout.behind.combatantId);
+  assert.ok(moved, `${bout.behind.combatantId} moved up a slot and that must be reported`);
+  assert.equal(moved.fromSlotIndex, bout.behind.slotIndex);
+  assert.equal(moved.toSlotIndex, bout.behind.slotIndex - 1);
+  assert.equal(moved.fromSeatId, `${bout.behind.teamId}:slot-${bout.behind.slotIndex + 1}`);
+
+  // And the relative order within the team is still the record's.
+  const team = teams.find((entry) => entry.id === bout.behind.teamId);
+  const expected = [...bout.record.teams
+    .find((entry) => entry.teamId === bout.behind.teamId).slots]
+    .sort((left, right) => left.slotIndex - right.slotIndex)
+    .map((slot) => slot.combatantId)
+    .filter((id) => bout.record.outcomes.find((outcome) => outcome.combatantId === id).survived);
+  assert.deepEqual(team.combatants.map((combatant) => combatant.id), expected);
+});
+
+test("nobody moves seat when nobody falls, so seatChanges stays empty", () => {
+  const { record, blueprints } = settledBout();
+  const { seatChanges } = rosterFromCampaignRecord(record, { blueprints });
+  // At 1v1 the survivor was already in slot 0; the casualty is on the other
+  // team and its own slot 0 simply empties.
+  assert.deepEqual(seatChanges, [], "a report that fires when nothing moved is noise");
 });
 
 /* ------------------------------------------------------------------ */

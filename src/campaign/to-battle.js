@@ -55,9 +55,10 @@ import { validateCampaignRecord } from "./record.js";
  *                 from, in any order; matched to outcomes by `id`
  * @param {boolean} [options.includeFallen=false]  carry the dead into the
  *                 roster too, at the health the record measured (which is 0).
- *                 Off by default because a battle of corpses is not a battle —
- *                 the resolver would settle it instantly.
- * @returns {{teams: Array, fallen: Array, carried: Array}}
+ *                 Off by default. A settled bout always has a wholly eliminated
+ *                 team, so a roster including the fallen is for INSPECTION and
+ *                 is never directly playable — `playable` says so.
+ * @returns {{teams, fallen, carried, seatChanges, playable, unplayableTeamIds}}
  */
 export function rosterFromCampaignRecord(record, { blueprints, includeFallen = false } = {}) {
   validateCampaignRecord(record);
@@ -125,15 +126,29 @@ export function rosterFromCampaignRecord(record, { blueprints, includeFallen = f
         `${outcome.maxHealth} in the record. One of them is not this gladiator.`
       );
     }
-    const next = {
-      ...blueprint,
-      health: outcome.health,
-      // Conditions persist across a bout because nothing in the record or the
-      // rule set clears them at a boundary — `death()` clears them on a KILL,
-      // which is inside a bout. Carrying them is the faithful default; a
-      // campaign that wants a clean slate should say so out loud.
-      status: [...outcome.statuses]
-    };
+    // DEEP-copied, not spread. A shallow `{...blueprint}` hands back the
+    // caller's own `stats`, `resources` and `loadout` objects, so a campaign
+    // that edited a carried fighter would silently edit the blueprint it
+    // intends to reuse next bout. Ordinary construction happens to rebuild
+    // those, so a battle does not corrupt its source — but the returned object
+    // is meant to be handled, and handing back live references to someone
+    // else's state is a trap rather than an optimisation.
+    const next = structuredClone(blueprint);
+    next.health = outcome.health;
+    // Conditions persist across a bout because nothing in the record or the
+    // rule set clears them at a boundary — `death()` clears them on a KILL,
+    // which is inside a bout. Carrying them is the faithful default; a
+    // campaign that wants a clean slate should say so out loud.
+    next.status = [...outcome.statuses];
+    // The MEASURED maximum, stated rather than left to be re-derived.
+    //
+    // `maximumHealth` returns a declared `maxHealth` verbatim and otherwise
+    // derives one from herolevel and vitality. A blueprint that states no
+    // maximum therefore gets a DERIVED one — and if it derives lower than the
+    // carried health, construction clamps the survivor down without a word.
+    // Measured: a 25/60 outcome against a blueprint deriving 10 arrived as 10.
+    // The record measured this gladiator's maximum; state it.
+    if (Number.isFinite(outcome.maxHealth)) next.maxHealth = outcome.maxHealth;
     nextById.set(outcome.combatantId, next);
     carried.push({
       combatantId: outcome.combatantId,
@@ -142,18 +157,66 @@ export function rosterFromCampaignRecord(record, { blueprints, includeFallen = f
     });
   }
 
-  // Seats and slot order come from the record's own team/slot layout, so the
-  // next bout puts everyone back where they stood. A slot whose combatant did
-  // not survive is left out rather than backfilled — deciding who replaces a
-  // fallen gladiator is a campaign rule, not a file format.
-  const teams = record.teams.map((team) => ({
-    id: team.teamId,
-    name: team.name,
-    combatants: [...team.slots]
-      .sort((left, right) => left.slotIndex - right.slotIndex)
-      .map((slot) => nextById.get(slot.combatantId))
-      .filter((combatant) => combatant !== undefined)
-  }));
+  // Slot ORDER comes from the record's own layout, so the relative order of a
+  // team's fighters is preserved.
+  //
+  // ► **SEATS ARE NOT PRESERVED WHEN SOMEBODY FALLS, and an earlier version of
+  //   this comment claimed they were.** `createTeamBattle` assigns `seatId`
+  //   from the ARRAY INDEX, and there is no vacant-seat marker to hold a dead
+  //   fighter's place: `"empty"` means AI-FILL, not "leave this gap" (measured
+  //   — an SS2 team with an `"empty"` slot is refused, because the fill
+  //   template declares none of the required resources). So a survivor behind a
+  //   casualty MOVES UP: red slot-2 becomes red slot-1.
+  //
+  //   That is reported rather than hidden. Seat identity is what a campaign
+  //   uses to say "this is the same fighter's chair", and silently renumbering
+  //   it is the kind of change that is discovered three features later.
+  const teams = [];
+  const seatChanges = [];
+  for (const team of record.teams) {
+    const ordered = [...team.slots].sort((left, right) => left.slotIndex - right.slotIndex);
+    const combatants = [];
+    for (const slot of ordered) {
+      const combatant = nextById.get(slot.combatantId);
+      if (combatant === undefined) continue;
+      const toIndex = combatants.length;
+      if (toIndex !== slot.slotIndex) {
+        seatChanges.push({
+          combatantId: slot.combatantId,
+          fromSeatId: slot.seatId,
+          fromSlotIndex: slot.slotIndex,
+          toSlotIndex: toIndex
+        });
+      }
+      combatants.push(combatant);
+    }
+    teams.push({ id: team.teamId, name: team.name, combatants });
+  }
 
-  return { teams, fallen, carried };
+  // WHETHER THIS ROSTER CAN ACTUALLY FIGHT, reported rather than assumed.
+  //
+  // An earlier version of this file said a roster of corpses "would settle
+  // instantly". It does not — it STALLS, measured: `createTeamBattle` accepts
+  // it, initiative includes the dead, and when a dead fighter holds the turn
+  // there are ZERO legal actions and NO result, permanently.
+  //
+  // The first fix was to REFUSE such a roster, and that was wrong in a way
+  // worth recording: a settled bout always has a wholly eliminated team, so
+  // `includeFallen` can NEVER produce a playable roster and refusing turned the
+  // option into a ban on its own only honest use — looking at who was there.
+  // So the hazard is named instead. A caller building a battle checks
+  // `playable`; a caller inspecting a bout ignores it.
+  const unplayable = teams
+    .filter((team) => team.combatants.length > 0)
+    .filter((team) => !team.combatants.some((combatant) => (combatant.health ?? 0) > 0))
+    .map((team) => team.id);
+
+  return {
+    teams,
+    fallen,
+    carried,
+    seatChanges,
+    playable: unplayable.length === 0,
+    unplayableTeamIds: unplayable
+  };
 }
