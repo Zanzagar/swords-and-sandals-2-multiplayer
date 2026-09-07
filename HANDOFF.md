@@ -123,10 +123,22 @@ harness ADR 0001) and that ultracode stays ON at the owner's instruction.
       record alone cannot rebuild a gladiator. **Rewards are still not built,
       deliberately** — paying one is a progression decision and EP-D04 is
       pending.
-    - **A condition CANNOT cross a 1v1 bout boundary**, structurally: it takes
-      its bearer's very next turn, so nobody lands a killing blow while
-      carrying one, and if the bearer dies `death()` clears it. It crosses a
-      TEAM boundary only when a teammate ends the bout. Both are pinned.
+    - **Conditions and bout boundaries: state this as a SWEEP, not a law.** A
+      condition takes its bearer's very next turn, so a gladiator does not land
+      a killing blow while carrying one, and if the bearer dies `death()`
+      clears the other side too — so a 40-seed 1v1 sweep leaves no survivor
+      afflicted, and a team sweep does only when a teammate ends the bout.
+      **An earlier version of this line said a condition CANNOT cross a 1v1
+      boundary, and a reviewer broke that universal within the hour**: the
+      inflictor's death-clear took only the FIRST token per condition, so two
+      tokens naming one condition left a survivor still alight. Fixed and
+      pinned. The tests assert what they visit.
+    - **`rosterFromCampaignRecord` reports two things it cannot prevent**:
+      `seatChanges`, because a survivor behind a casualty MOVES UP (seats come
+      from the array index and `"empty"` means AI-fill, not a vacant chair), and
+      `playable`/`unplayableTeamIds`, because a roster including the fallen can
+      never fight — a settled bout always has a wholly eliminated team. Both
+      were claims this session got WRONG first and measured second.
 
   ► **RANKED ITEM 4 IS CLOSED, and the instruction that opened it is STALE.**
     The 16:59 brief warns that `~/projects/claude-harness/workflows/question-fanout-audit.js`
