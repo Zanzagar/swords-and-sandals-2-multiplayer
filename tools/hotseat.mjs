@@ -46,6 +46,7 @@ import {
   seatOf
 } from "../src/team/index.js";
 import {
+  SS2_FACING_LEFT,
   ss2Combatant,
   ss2StatusFlagOf,
   ss2StatusSourceOf,
@@ -97,7 +98,7 @@ const RULE_SETS = Object.freeze({
 
 function parseArgs(argv) {
   const options = {
-    seed: 1, hp: 60, armour: 0, rules: "ss2", enchant: null, names: ["Player 1", "Player 2"]
+    seed: 1, hp: 60, armour: 0, rules: "ss2", enchant: null, teams: null, names: null
   };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
@@ -111,6 +112,7 @@ function parseArgs(argv) {
     else if (flag === "--hp") options.hp = Number(next());
     else if (flag === "--armour") options.armour = Number(next());
     else if (flag === "--enchant") options.enchant = next();
+    else if (flag === "--teams") options.teams = next();
     else if (flag === "--rules") options.rules = next();
     else if (flag === "--names") options.names = next().split(",").map((part) => part.trim());
     else if (flag === "--help" || flag === "-h") options.help = true;
@@ -140,8 +142,26 @@ function parseArgs(argv) {
   if (!Object.hasOwn(RULE_SETS, options.rules)) {
     throw new Error(`--rules must be one of: ${Object.keys(RULE_SETS).join(", ")}.`);
   }
-  if (options.names.length !== 2 || options.names.some((name) => name === "")) {
-    throw new Error("--names needs exactly two non-empty names, comma separated.");
+  // `--teams 2v2`. Capped at 3 a side because that is what the arena was
+  // measured to support without touching a licensed asset (see the six-slot
+  // commit); a larger fight is not blocked by this tool, it is unproven.
+  const sizes = options.teams === null ? [1, 1] : options.teams.split("v").map(Number);
+  if (sizes.length !== 2 || sizes.some((n) => !Number.isInteger(n) || n < 1 || n > 3)) {
+    throw new Error("--teams must look like 2v2, with 1-3 fighters a side.");
+  }
+  options.sizes = sizes;
+
+  const total = sizes[0] + sizes[1];
+  if (options.names === null) {
+    options.names = total === 2
+      ? ["Player 1", "Player 2"]
+      : [
+        ...Array.from({ length: sizes[0] }, (_, i) => `Red ${i + 1}`),
+        ...Array.from({ length: sizes[1] }, (_, i) => `Blue ${i + 1}`)
+      ];
+  }
+  if (options.names.length !== total || options.names.some((name) => name === "")) {
+    throw new Error(`--names needs exactly ${total} non-empty names for ${sizes[0]}v${sizes[1]}, comma separated.`);
   }
   return options;
 }
@@ -166,7 +186,12 @@ Hot-seat: two humans, one keyboard, one fight.
   --armour <n>   give both fighters a breastplate and helmet of this grade
                  (default 0, no armour). SS2 subtracts damage from armour
                  first and carries only the overflow into health.
-  --names A,B    fighter names (default "Player 1,Player 2")
+  --teams NvM    fighters a side, 1-3 each (default 1v1). Every seat is a
+                 HUMAN at this keyboard; the resolver's turn order decides who
+                 acts, and an attack names its target, so a 2v2 asks you which
+                 foe to hit.
+  --names A,B    fighter names, one per seat, red first (default
+                 "Player 1,Player 2" at 1v1, otherwise "Red 1,...,Blue 1,...")
   --help         this text
 `;
 
@@ -201,9 +226,19 @@ function renderScoreboard(battle) {
     const health = `${String(combatant.health).padStart(4)}/${String(combatant.maxHealth).padEnd(4)}`;
     const armour = poolColumn(combatant, "armourclass", "armourclass_max");
     const stamina = poolColumn(combatant, "staminaleft", "staminamax");
-    const status = combatant.status.length > 0 ? `  [${combatant.status.join(" ")}]` : "";
+    // Conditions are shown by NAME. The stored token may carry its inflictor
+    // (`burning:from=blue-2`), which is wire format and not something to put in
+    // front of a player mid-fight.
+    // `facing-left` is a status TOKEN but not a condition — it is how a string
+    // (`gladiator_dir`) rides in a channel that only carries strings. Showing it
+    // beside burning and frozen reads as an affliction, which it is not.
+    const conditions = combatant.status
+      .map((token) => ss2StatusFlagOf(token))
+      .filter((flag) => flag !== SS2_FACING_LEFT);
+    const status = conditions.length > 0 ? `  [${conditions.join(" ")}]` : "";
+    const side = `${combatant.teamId === "red" ? "R" : "B"} `;
     lines.push(
-      `  ${combatant.name.padEnd(12)} ${healthBar(combatant)} ${health}${armour}${stamina}${status}${down}`
+      `  ${side}${combatant.name.padEnd(12)} ${healthBar(combatant)} ${health}${armour}${stamina}${status}${down}`
     );
   }
   return lines.join("\n");
@@ -346,7 +381,11 @@ function buildSs2Fighter(id, name, hp, armour, enchant) {
       ...(enchant === null
         ? {}
         : { weapon_enchantment_type: enchant.type, weapon_enchantment_potency: enchant.potency }),
-      gladiator_dir: id === "p1" ? "right" : "left"
+      // Facing is per SIDE, not per fighter: red faces right, blue faces left,
+      // which is what the build's two constant start positions produce. It is
+      // load-bearing rather than cosmetic — `gladiator_dir` shapes the armour
+      // debris draw and the knockback direction.
+      gladiator_dir: id === "p1" || id.startsWith("red-") ? "right" : "left"
     },
     { id, name, controller: "local" }
   );
@@ -404,8 +443,19 @@ async function main() {
     seed: options.seed,
     rules,
     teams: [
-      { id: "red", combatants: [buildFighter("p1", options.names[0])] },
-      { id: "blue", combatants: [buildFighter("p2", options.names[1])] }
+      {
+        id: "red",
+        combatants: Array.from({ length: options.sizes[0] }, (_, i) =>
+          buildFighter(options.sizes[0] === 1 && options.sizes[1] === 1 ? "p1" : `red-${i + 1}`, options.names[i]))
+      },
+      {
+        id: "blue",
+        combatants: Array.from({ length: options.sizes[1] }, (_, i) =>
+          buildFighter(
+            options.sizes[0] === 1 && options.sizes[1] === 1 ? "p2" : `blue-${i + 1}`,
+            options.names[options.sizes[0] + i]
+          ))
+      }
     ]
   });
 

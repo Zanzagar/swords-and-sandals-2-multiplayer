@@ -169,9 +169,15 @@ test("bad input is rejected without starting a fight", async () => {
   assert.equal(badSeed.code, 2);
   assert.match(badSeed.stderr, /--seed must be an integer/);
 
+  // The message now names the SEAT COUNT and the team shape, because with
+  // `--teams` the required number is no longer always two.
   const badNames = await runHotseat(["--names", "OnlyOne"], "");
   assert.equal(badNames.code, 2);
-  assert.match(badNames.stderr, /exactly two/);
+  assert.match(badNames.stderr, /exactly 2 non-empty names for 1v1/);
+
+  const badTeams = await runHotseat(["--teams", "2x2"], "");
+  assert.equal(badTeams.code, 2);
+  assert.match(badTeams.stderr, /--teams must look like 2v2/);
 });
 
 test("an unparsable choice re-prompts rather than crashing or acting", async () => {
@@ -179,4 +185,85 @@ test("an unparsable choice re-prompts rather than crashing or acting", async () 
   assert.equal(code, 0);
   assert.match(stdout, /is not one of 1-/, "a bad choice must say so");
   assert.match(stdout, /WINNER/, "and the fight must still be playable afterwards");
+});
+
+/* ------------------------------------------------------------------ */
+/* Team fights: the first time a person can play one                    */
+/* ------------------------------------------------------------------ */
+
+test("a 2v2 runs to a winner, and every seat is a separate human turn", async () => {
+  // The resolver's team paths have been tested since long before anything was
+  // playable, and no person had ever taken a turn in one. `--teams` is the
+  // whole change; the loop, the scoreboard and target selection already worked
+  // for N combatants and are asserted here rather than assumed.
+  const { code, stdout, stderr } = await runHotseat(
+    ["--teams", "2v2", "--hp", "40", "--seed", "3"],
+    "1\n".repeat(120)
+  );
+  assert.equal(code, 0, `runner exited ${code}\n${stderr}`);
+  assert.match(stdout, /WINNER: /, "a team fight must still settle");
+  for (const name of ["Red 1", "Red 2", "Blue 1", "Blue 2"]) {
+    assert.ok(stdout.includes(name), `${name} must appear on the scoreboard`);
+  }
+  assert.match(stdout, /seat red:slot-2/, "the second red seat must take its own turn");
+  assert.match(stdout, /seat blue:slot-2/, "and so must the second blue seat");
+});
+
+test("with two foes standing, an attack must NAME which one it hits", async () => {
+  // At 1v1 the target is implicit and a menu of three verbs is enough. At 2v2
+  // the same three verbs appear per foe, because targeting is a real choice the
+  // resolver has always supported and no interface had ever offered.
+  const { stdout } = await runHotseat(["--teams", "2v2", "--hp", "40", "--seed", "3"], "1\n");
+  assert.match(stdout, /quick-attack -> Red 1/);
+  assert.match(stdout, /quick-attack -> Red 2/);
+  assert.match(stdout, /power-attack -> Red 2/);
+});
+
+test("a 3v3 is playable, and 4 a side is refused rather than quietly allowed", async () => {
+  // Three a side is what the six-slot measurement covered: 2v2 and 3v3 reach
+  // the rendered arena with no new or altered licensed asset. A fourth is not
+  // blocked by the engine — it is UNPROVEN — so the tool refuses it by name.
+  const ok = await runHotseat(["--teams", "3v3", "--hp", "30", "--seed", "5"], "1\n".repeat(200));
+  assert.equal(ok.code, 0, ok.stderr);
+  assert.match(ok.stdout, /WINNER: /);
+  assert.ok(ok.stdout.includes("Blue 3"), "the third seat a side must exist");
+
+  const refused = await runHotseat(["--teams", "4v4"], "");
+  assert.notEqual(refused.code, 0, "4 a side must be refused");
+  assert.match(refused.stderr + refused.stdout, /1-3 fighters a side/);
+});
+
+test("--names must cover every seat, and the count is the team size", async () => {
+  const short = await runHotseat(["--teams", "2v2", "--names", "A,B"], "");
+  assert.notEqual(short.code, 0, "two names cannot fill four seats");
+  assert.match(short.stderr + short.stdout, /exactly 4 non-empty names for 2v2/);
+
+  const named = await runHotseat(["--teams", "2v2", "--names", "A,B,C,D", "--hp", "20", "--seed", "3"], "1\n");
+  assert.equal(named.code, 0, named.stderr);
+  for (const name of ["A", "B", "C", "D"]) assert.ok(named.stdout.includes(name), name);
+});
+
+test("a condition inflicted in a TEAM fight names which foe did it", async () => {
+  // The reason this ordering matters: the status tick reads its damage off the
+  // gladiator the condition RECORDS, and at 2v2 "the other gladiator" names
+  // nobody. Until team fights were playable that rule could not be exercised by
+  // a person at all — it existed only in tests.
+  const { code, stdout, stderr } = await runHotseat(
+    ["--teams", "2v2", "--hp", "90", "--enchant", "burning:3", "--seed", "3"],
+    "1\n".repeat(200)
+  );
+  assert.equal(code, 0, `runner exited ${code}\n${stderr}`);
+  assert.match(stdout, /gains burning \((from Red [12]|from Blue [12])\)/,
+    "the condition must name a specific foe, not just the condition");
+  assert.match(stdout, /is burning — this turn is spent/, "and it must take that fighter's turn");
+});
+
+test("the scoreboard shows conditions by name and never the wire token", async () => {
+  const { stdout } = await runHotseat(
+    ["--teams", "2v2", "--hp", "90", "--enchant", "burning:3", "--seed", "3"],
+    "1\n".repeat(200)
+  );
+  assert.ok(stdout.includes("[burning]"), "a condition is shown by its name");
+  assert.ok(!stdout.includes("[burning:from="), "the inflictor token is wire format, not player-facing");
+  assert.ok(!stdout.includes("facing-left"), "facing is not a condition and must not read as one");
 });
