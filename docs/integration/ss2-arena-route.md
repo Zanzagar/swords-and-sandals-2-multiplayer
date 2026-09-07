@@ -36,12 +36,23 @@ changes nothing never staged the bout in question.
 
 ## Why this document exists
 
-Every capture that produced one of the 22 promoted goldens reaches its fight the
-same way: the wrapper loads a saved gladiator, jumps to `daybreak`, and the game
-routes a **level-1** hero into the dungeon prologue and the tutorial prisoner.
-The [staging analysis](ss2-capture-staging.md) found 13 of 17 remaining
-candidate fixtures unreachable from that pair — they need armour on a combatant,
-a `tournament` fight mode, or a non-lethal outcome.
+Every capture that produced one of the ~~22~~ **23** promoted goldens reaches
+its fight the same way: the wrapper loads a saved gladiator, jumps to
+`daybreak`, and the game routes a **level-1** hero into the dungeon prologue and
+the tutorial prisoner. ~~The [staging analysis](ss2-capture-staging.md) found 13
+of 17 remaining candidate fixtures unreachable from that pair — they need armour
+on a combatant, a `tournament` fight mode, or a non-lethal outcome.~~
+
+► **CORRECTED 2026-09-07. Two corrections, and the second is the one that
+matters.** (a) The golden count is `ls test/fixtures/ss2-1v1-golden/*.json | wc
+-l` — **23** on this tree since `golden-armoured-deflection-threshold-cleared`
+was promoted on 2026-09-02. Run the command; do not read a number here or at
+lines 1440 and 1961, which carried the same 22. (b) **The cited document no
+longer says what this sentence cites it for, and now says the opposite.**
+`ss2-capture-staging.md` retracts the unreachability premise in its own words —
+*"premise was that most of the set was unreachable; that is now largely false"* —
+and counts 60 committed candidates with 37 uncaptured, not 17 with 13
+unreachable. A citation is only as live as the sentence it points at.
 
 This document maps the other route: a **leveled gladiator in the ordinary
 arena**, which skips the dungeon branch entirely. That route now exists as
@@ -391,8 +402,9 @@ The `game_mode` disjunction in the gate does no work in this build: it reads
 `"full"` at runtime (§3), so the second arm is always satisfied and the whole
 condition reduces to `herolevel >= tournament_level_required`.
 
-**Observed**: four `ABORT:duel-button-hidden` lines across `captures/arena-*`,
-every one reading `"level":4,"required":4` — a level-4 gladiator asked for a
+**Observed**: ~~four~~ **five** `ABORT:duel-button-hidden` lines across
+`captures/arena-*` (`grep -rc 'ABORT:duel-button-hidden' arena-*/`, re-derived
+2026-09-07), every one reading `"level":4,"required":4` — a level-4 gladiator asked for a
 duel, and the navigator refused because the game had already hidden the button,
 exactly as the gate predicts.
 
@@ -483,8 +495,10 @@ Three byte-level facts matter:
   anywhere on this path, and none is needed.**
 
   **Observed**: `root.game.villain.hitpointsmax` and `.armourclass` read 110 and
-  86 at root frame 220 in every one of the twelve champion bouts — which is only
-  possible if `skincharacter` derived them from the literal.
+  86 at root frame 220 in every one of the ~~twelve~~ **fourteen** champion
+  bouts — which is only possible if `skincharacter` derived them from the
+  literal. (Re-derived 2026-09-07; see the correction at §"The rank-1 champion
+  IS reproducible".)
 
 So **the duel opponent is generated, not drawn from a roster.**
 `randomise_gladiator(whichcharacter, whichavatar, herolevel)`
@@ -514,10 +528,18 @@ reproduce a duel opponent. It can only observe one — which is exactly the
 "author the fixture from the observation" route the staging guide already
 documents for the two duel candidates.
 
-**Observed, and it is as stark as the bytes say.** 54 `versus` lines across
-`captures/arena-*` name 43 distinct opponents. Twelve of the 54 are the
-champion, and **every one of the other 42 is unique — not a single generated
-opponent repeated**, in name, `hitpointsmax` or `armourclass`. The only
+**Observed, and it is as stark as the bytes say.** ~~54~~ **60** `versus` lines
+across `captures/arena-*` name ~~43~~ **47** distinct opponents. ~~Twelve~~
+**Fourteen** of the 60 are the champion, and **every one of the other 46 is
+unique — not a single generated opponent repeated**, in name, `hitpointsmax` or
+`armourclass`.
+
+► **CORRECTED 2026-09-07.** Three counts moved; the invariant did not, and is
+now stronger than when it was written. Re-derive rather than read:
+`grep -rh '"step":"versus"' arena-*/ | grep -oP '"villainName":"[^"]*"' | sort |
+uniq -c` over `/mnt/c/ss2-capture/captures` returns 60 lines, 47 distinct names,
+one of them ("John the Butcher") fourteen times and the other 46 exactly once
+each. The only
 reproducible opponent in the whole capture set is the one with no RNG behind it
 (§12).
 
@@ -574,9 +596,10 @@ The first revision reasoned about this build as the demo, on the strength of
 - **`_root.fizMode` is set to `"fizzle"` by the build itself**, at
   `root/frame:1/DoAction@0x5b66c` `+0x0026` — long before frame 10 reads it. So
   the `"full"` arm is the one that runs.
-- **Observed**: 32 log lines across `captures/arena-*` report
+- **Observed**: ~~32~~ **36** log lines across `captures/arena-*` report
   `"gameMode":"full"`, read out of the game at the reward screen. Not one
-  reports `"demo"`.
+  reports `"demo"` — that half is a zero and stays a zero. (Count re-derived
+  2026-09-07; the conclusion is unaffected by it.)
 
 What that makes dead, in this build:
 
@@ -701,9 +724,10 @@ Two capture-relevant consequences:
   three call sites in the whole build (root frame 150 `+0x0585`, button 1565
   `+0x02d6`, button 2042 `+0x020f`), and **none of them is reachable from a
   bout, from the ladder, from the win chain or from the loss path.** The slot
-  still holds whatever the last town-square entry flushed. **Observed**: 22
-  `ABORT:battle-lost` lines across `captures/arena-*`, including eight losses
-  to the rank-1 champion, and the gladiator survived every one — it lost gold
+  still holds whatever the last town-square entry flushed. **Observed**:
+  ~~22~~ **23** `ABORT:battle-lost` lines across `captures/arena-*`, including
+  ~~eight~~ **thirteen** losses to the rank-1 champion, and the gladiator
+  survived every one — it lost gold
   and counters that were never flushed, and nothing else.
 - **The tournament loop never returns to town square, so the whole ladder
   shares ONE `time_of_day` budget with no reset anchor.** Every exit from a
@@ -997,9 +1021,9 @@ refusal arm, and gets nowhere. The observed pair, from
 ```
 
 `statpointsHero` 0 while `statpointsRoot` still reads 1 — exactly one point of
-lag — and the mirror clears on the very next tick. **All 13 level-ups recorded
-across `captures/arena-*` show the identical pair**, with zero variation in
-either value or in the one-tick wait. This is GATE C in §9.
+lag — and the mirror clears on the very next tick. **All ~~13~~ 15 level-ups
+recorded across `captures/arena-*` show the identical pair**, with zero
+variation in either value or in the one-tick wait. This is GATE C in §9.
 
 **One overstatement to retract with it.** An earlier audit concluded that
 pressing 2283 early "parks the run forever". It does not: the refusal arm sets
@@ -1026,7 +1050,18 @@ different stat per session, makes two sessions of the same "family" no longer
 comparable.
 
 **Observed, and it corroborates the battle map's formula while exposing a
-trap.** The four `levelup-confirm` lines in `captures/arena-*` are:
+trap.** ~~The four `levelup-confirm` lines in `captures/arena-*` are:~~
+
+► **CORRECTED 2026-09-07, and the wrong number was already contradicted twelve
+hundred lines above.** There are **fifteen** `levelup-confirm` lines in
+`captures/arena-*`, not four — and §"level-up mirror" above says *thirteen* for
+the same set, so this document disagreed with itself before the archive ever
+moved. The table below is still correct as a table of the **four DISTINCT
+`(herolevel, vitality, hitpointsmax)` triples** the fifteen lines carry; read it
+as an enumeration of distinct values, not of lines. Re-derive with `grep -rh
+levelup-confirm arena-*/ | sort -u`.
+
+The four distinct triples across those fifteen lines are:
 
 | `herolevel` | `vitality` after the spend | `hitpointsmax` reported |
 | ---: | ---: | ---: |
@@ -1436,8 +1471,9 @@ close the distance, then attack — and it issues nothing the controller in scop
 does not offer, so it can only ever press buttons the player could press. It is
 forced off for every route other than `navigate=arena`, rather than merely left
 unset, because a stray policy on a prisoner run would replace that route's
-explicit step list and all 22 promoted goldens depend on the step list being
-exactly what was asked for.
+explicit step list and all ~~22~~ **23** promoted goldens depend on the step
+list being exactly what was asked for. (See the correction at §"Why this
+document exists": run the count, do not read it.)
 
 `rest` and `taunt` share one controller slot, chosen by whether stamina is at
 least half, and the wrapper cannot see which is wired — so neither is ever
@@ -1481,8 +1517,11 @@ during battle construction. It stops before the action arms, so **no staged
 write can ever appear in the mutation trace**. Every field is reported on the
 trace's `end` line, read back from the game **at arming time** rather than
 echoed — which is the only read-back worth anything, and one **no arena run has
-produced yet**: the eighteen `captures/arena-*` directories contain zero `end`
-lines between them. The `staged` diagnostic line is not a substitute for it;
+produced yet**: the ~~eighteen~~ **nineteen** `captures/arena-*` directories
+(eighteen of them non-empty — `arena-dry-1` holds nothing) contain zero `end`
+lines between them. **The substantive claim is the zero, and the zero still
+holds across all nineteen**; only the denominator moved. Same correction at
+§12's `grep -c '"t":"end"'` sentence. The `staged` diagnostic line is not a substitute for it;
 see §12.
 
 Two placements are deliberate:
@@ -1508,12 +1547,22 @@ staged value survives the fight.
 `run-arena.ps1` now takes `-WatchFields`, a comma-separated list of extra
 `Object.watch` field names **added to** the wrapper's default list rather than
 replacing it, forwarded verbatim to `launch-capture.ps1` the same way
-`run-capture.ps1` forwards it — except that `run-arena.ps1` wraps the value in
-quotes, which `run-capture.ps1` does not. The difference is inert for a
+`run-capture.ps1` forwards it. ~~— except that `run-arena.ps1` wraps the value
+in quotes, which `run-capture.ps1` does not. The difference is inert for a
 well-formed field list (`Start-Process -ArgumentList` joins with plain spaces
 and `powershell -File` passes each argument through as a literal string) and
 matters only if a value ever contains a space; neither script validates the
-grammar. It is appended to the launcher argument
+grammar.~~
+
+► **CORRECTED 2026-09-07: there is no difference, and one of the two scripts
+says so in a comment this paragraph was written against.** Both forward through
+the byte-identical line — `run-arena.ps1:295` and `run-capture.ps1:177` are both
+``if ($WatchFields) { $launcherArgs += @('-WatchFields', "`"$WatchFields`"") }``
+— so both wrap. `run-capture.ps1:175` records the reconciliation in as many
+words: *"the scripts now agree, and `-WatchFields` was the one string forward
+that did not."* The grammar half is wrong too: `run-capture.ps1:105` **throws**
+on any whitespace or quote in the value, so a value containing a space cannot
+reach the launcher at all. It is appended to the launcher argument
 array **only when non-empty**, so an empty `-WatchFields` leaves the launcher
 invocation byte-identical to what it was before the flag existed — a run that
 matched a golden before cannot be perturbed by the flag's addition.
@@ -1587,8 +1636,14 @@ Two cautions that come with the flag:
 - **A watched field can add a line to the mutation trace.** The watch callbacks
   emit on every assignment while armed, and ingest keeps any entry whose
   `before` differs from its `after`, so a fixture's `mutationTrace` gains an
-  entry if the game writes a newly watched field inside the armed window. This
-  is why `campaign.mjs` refuses to run the armoured family as one family. For
+  entry if the game writes a newly watched field inside the armed window.
+  ~~This is why `campaign.mjs` refuses to run the armoured family as one
+  family.~~ ► **CORRECTED 2026-09-07: watch fields are not why, and cannot be.**
+  The `ONE AT A TIME` verdict is computed at `campaign.mjs:1088-1096` from
+  attack-direction/action-identity collisions and the count of distinct
+  injectable tapes, and is **printed before watch fields are read at all** — the
+  `needsWatch` block at :1101 runs afterwards and drives nothing but an advisory
+  line. Widening a watch list would not change the verdict by one character. For
   the champion's eleven names the byte reading in §12 predicts **no** extra
   entries: the only writers of a `<piece>_defence` in the build sit inside
   `battlevalues`, `damagecharacter` carries no `battlevalues` reference at all,
@@ -1616,9 +1671,15 @@ Two cautions that come with the flag:
   that would settle whether replication is adequate is still a side-by-side:
   one manual session and one navigated session against the same save, compared
   on `_global` state at root frame 220.
-- **Spending stat points remains the least faithful step on the route** — the
+- ~~**Spending stat points remains the least faithful step on the route** — the
   button body is two statements with no call, so there is no game function to
-  invoke. One point per tick is the closest available approximation.
+  invoke. One point per tick is the closest available approximation.~~
+  ► **CORRECTED 2026-09-07: retracted by the implementation.** The wrapper
+  (`ss2-capture-wrapper.as:1463-1468`) records button 2128's body as *"a guard,
+  a CALL to `clicksound.start()`, and two assignments - all of"* which it
+  replicates verbatim. There IS a call, it is made, and the step is a verbatim
+  replication rather than the route's least faithful one. One point per tick is
+  what the game itself does, not an approximation of it.
 
 ### What this route does and does not unlock
 
@@ -1668,9 +1729,13 @@ struck here rather than deleted so the ask and the answer stay together.
 
 1. ~~**[`ss2-battle-map.md`](ss2-battle-map.md), §Controller frames** — close the
    "a ninth label in that gap cannot be excluded" caveat for sprite 862.~~
-   **Done.** The battle map now records "**Settled**: … the sprite carries
-   exactly eight labels, at frames 1, 5, 13, 20, 28, 52, 62 and 74 … There is no
-   ninth."
+   **Done.** ► **CORRECTED 2026-09-07: the verdict holds, the quotation was
+   never the battle map's words.** It does not say "Settled" and does not say
+   "There is no ninth". `ss2-battle-map.md:145` says **"Closed 2026-08-30, and
+   reproduced with the project's own tool."** and :156 reports **"`8 across 1 of
+   24 timelines`"** for `sprite:862[overlay]`. Same eight labels, same
+   conclusion, different sentence — and a paraphrase inside quotation marks is
+   the one thing a corpus like this cannot afford.
 2. ~~**[`ss2-battle-map.md`](ss2-battle-map.md), §Battle result and reward
    callbacks** — say that `ceil(herolevel^2 * 50)` is the **loss** deduction,
    and record the win reward.~~ **Done.** The battle map now carries an explicit
@@ -1702,15 +1767,28 @@ struck here rather than deleted so the ask and the answer stay together.
 
 ### New, from running the route
 
-7. **[`ss2-battle-map.md`](ss2-battle-map.md), §Controller frames.** Its
+7. ~~**[`ss2-battle-map.md`](ss2-battle-map.md), §Controller frames.** Its
    sprite-862 paragraph still ends "the project's own tooling still cannot
    reproduce it; a `--labels` mode on `tools/inspect-swf.mjs` would." That mode
-   now exists (item 6), so the sentence is stale.
-8. **[`ss2-capture-wrapper.as`](../../tools/runtime-capture/ss2-capture-wrapper.as),
+   now exists (item 6), so the sentence is stale.~~
+   ► **CLOSED, and it was closed 27 minutes after this item was written.**
+   `ss2-battle-map.md:145` now reads "Closed 2026-08-30, and reproduced with the
+   project's own tool." Commit `0a3076c` (2026-08-30 23:19) rewrote it;
+   `cea54a7` (2026-08-30 22:52) added this item. It has survived two later
+   revisions of this page as an open ask. *(Struck 2026-09-07 rather than moved
+   to "### Done", because the sweep that found it cites it by position.)*
+8. ~~**[`ss2-capture-wrapper.as`](../../tools/runtime-capture/ss2-capture-wrapper.as),
    the shopping comment.** It states the derivation as
    `min_damage = strength + weapons[hero.weapon].weapon_min_damage`. The bytes at
    `+0x3356` are `round(strength * 2) + weapon_min_damage` — the factor of 2 is
-   missing. The comment's *conclusion* is right and is the reason the shop path
+   missing.~~
+   ► **CLOSED, and this item was born stale.** The wrapper comment at
+   `ss2-capture-wrapper.as:780` already reads
+   `min_damage = round(strength * 2) + weapon_min_damage      (+0x3356)`. It was
+   corrected in `cea54a7` — the SAME commit that added this worklist item — so
+   the ask was never live for a single commit. Two sessions have since read past
+   it. *(Struck 2026-09-07; the remainder of the item is left standing because
+   its conclusion was always right.)* The comment's *conclusion* is right and is the reason the shop path
    exists at all; only the formula is misquoted.
    [`ss2-capture-staging.md`](ss2-capture-staging.md) already records the
    correct `round(strength * 2) + weapon_min/max`.
@@ -1764,10 +1842,19 @@ build, not from reading it. Evidence is the gitignored raw logs under
 | level 1 → 2 | the game's own dungeon prologue and tutorial prisoner | works, ~7 s |
 | level 2 → 4 | duels from foyer `browse` | works |
 | tournament ladder, rank 4 → rank 2 | tournament 1, field of four, arena 2 | **five of six attempts** in `captures/arena-tourn-2` (a1–a5 reached the rank-1 bout; a6 lost the rank-2 bout) |
-| rank 2 → rank 1 (the champion) | — | **0 for 12** — every champion bout in the retained captures was lost |
+| rank 2 → rank 1 (the champion) | — | **0 for 14** — no champion bout in the retained captures was ever won |
 
-Across the retained captures, **12 runs reached the champion bout out of 15
-tournament launches**, and every one of the 12 ended in `ABORT:battle-lost`.
+Across the retained captures, **14 runs reached the champion bout out of 17
+tournament launches**, and ~~every one of the 12 ended in
+`ABORT:battle-lost`~~ **thirteen of the 14 ended in `ABORT:battle-lost`**.
+
+► **CORRECTED 2026-09-07, and the blanket claim needed narrowing as well as
+recounting.** The fourteenth bout —
+`arena-champ-2/obs-champ-2-a2.rufflelog` — carries **no terminal line at all**:
+its trace stops mid-bout on a `walkright`, so it was not observed lost, it was
+not observed at all. "0 for 14" is still the right headline (nothing was won),
+but "every champion bout was lost" is not what the archive says about that one.
+Re-derive with `grep -c 'ABORT:' <file>` per trace, not with a sum.
 Six of those were unstaged vitality-only gladiators; the other six had been
 staged (below), including one at `strength 100 / min_damage 300 / max_damage
 400 / hitpoints 999`, and lost anyway.
@@ -1780,8 +1867,12 @@ treats a closed trace as success.
 ### The rank-1 champion IS reproducible
 
 **"John the Butcher", `hitpointsmax` 110, `armourclass` 86 — identical across
-twelve independent launches**, read off `_root.game.villain` at root frame 220.
-Twelve `versus` lines, twelve identical triples, zero variation.
+~~twelve~~ **fourteen** independent launches**, read off `_root.game.villain` at
+root frame 220. ~~Twelve~~ **Fourteen** `versus` lines, fourteen identical
+triples, zero variation. *(Re-derived 2026-09-07; the reproducibility claim is
+strengthened, not weakened. Archive-wide the count is fifteen — the fifteenth is
+`session-champ-n1`, outside `captures/arena-*` — and the triple is identical
+there too.)*
 
 That is what `unleash_hell` promises in bytes and now delivers in fact: the
 function builds `_root.game.champion` from a **hard-coded `charDNA` string
@@ -1801,8 +1892,10 @@ rank-1 DNA string means field by field — belongs to
 This was observed rather than inferred, and it is the reason the capture gate
 has to refuse rather than assume.
 
-- **The hero's level at the champion bout is decided by RNG.** In **10 of the
-  12** runs that reached it, the hero had levelled 4 → 5 first; in 2 it had not.
+- **The hero's level at the champion bout is decided by RNG.** In **~~10 of the
+  12~~ 12 of the 14** runs that reached it, the hero had levelled 4 → 5 first;
+  in 2 it had not. *(Re-derived 2026-09-07: the two-that-did-not is unchanged,
+  so the RNG conclusion is untouched — only the denominator moved.)*
   The cause is that experience per bout is a *generated* opponent's
   `character_xp` (arena frame 231 `+0x024e`), and that opponent came from
   `randomise_gladiator`. **The level-up lands after the rank-2 bout**, not the
@@ -1827,8 +1920,8 @@ the stamina check in §9's capture gate.
 
 Byte-verified and observed; see §3 for the argument. `save_character` has three
 call sites and none is reachable from a bout, the ladder, the win chain or the
-loss path. **22 `ABORT:battle-lost` lines across the captures, twelve of them to
-the champion, and the gladiator survived every one** — it lost gold and battle
+loss path. **~~22~~ 23 `ABORT:battle-lost` lines across the captures, ~~twelve~~
+thirteen of them to the champion, and the gladiator survived every one** — it lost gold and battle
 counters that were never flushed. This is what makes `-Attempts N` sound:
 `run-arena.ps1` relaunches after a loss deliberately *without* restoring the
 snapshot, because the save already holds every completed bout.
@@ -1857,8 +1950,8 @@ clock as an unstaged run.
 
 **1. "All eleven read back correctly at battle construction — the wrapper
 reports every staged field on the trace's `end` line."** There is no `end`
-line. `grep -c '"t":"end"'` over all eighteen `captures/arena-*` directories
-returns **0 for every one of them**: no arena run has ever closed a trace, so
+line. `grep -c '"t":"end"'` over all ~~eighteen~~ **nineteen**
+`captures/arena-*` directories returns **0 for every one of them**: no arena run has ever closed a trace, so
 the arming-time read-back the wrapper performs has never once run on this
 route. The only read-back that exists is the `staged` diagnostic line above,
 and the wrapper's own doc comment says what that line is worth:
@@ -1958,7 +2051,8 @@ four on `_global`. If `battlevalues` were reading the flag off anything else it
 would always be `undefined`, the gate would never be taken, and
 `hitpoints = round(hitpointsmax)` at `+0x3aa5` would fire at every phase
 transition. No combatant could ever lose a hitpoint. Every bout ever recorded
-refutes that, and so does every hitpoint entry in all 22 promoted goldens.
+refutes that, and so does every hitpoint entry in all ~~22~~ **23** promoted
+goldens.
 
 The register numbering agrees. `battlevalues` uses exactly three registers:
 `register:3` is the `whichcharacter` parameter (every character field hangs off

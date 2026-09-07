@@ -1,7 +1,10 @@
 # SS2 first integration checkpoint
 
 Status: read-only static map, first recorded 2026-08-29, last revised
-2026-08-31. This is interoperability research for the locally licensed Steam
+**2026-09-07** *(corrected 2026-09-07: the header said 2026-08-31 while the body
+already carried blocks dated `ADDED 2026-09-02`, `CORRECTED 2026-09-02`,
+`byte-read 2026-09-02` and `CORRECTED 2026-09-07`, so it contradicted itself as
+well as git. Prefer `git log -1 --format=%ad -- <this file>` to this line.)* This is interoperability research for the locally licensed Steam
 build identified in
 [`ss2-build-fingerprint.json`](ss2-build-fingerprint.json). It contains no game
 code, artwork, audio, exported scripts, or game binaries.
@@ -23,10 +26,10 @@ code, artwork, audio, exported scripts, or game binaries.
 | Item | Verified value |
 | --- | --- |
 | Steam app | `1055430`, Swords and Sandals Classic Collection |
-| Steam build | `24807725` |
-| Depot manifest | `1055432 / 8233185473219625516` |
+| Steam build | **corpus pin `24807725`; current install `25046632`** — see the note below the table |
+| Depot manifest | ~~`1055432 / 8233185473219625516`~~ **`1055432 / 433190280864947326`** *(corrected 2026-09-07; the old manifest is the superseded build's and now lives in the fingerprint's `priorBuilds[0]`)* |
 | AIR application | `com.game.whiskeybarrelstudios.swordsandsandalsclassic`, version `1.7.2` |
-| Collection shell | `swords_and_sandals_classic.swf`, SHA-256 `6A58E0843967AF5B781133E878A8E8DEB66F0D9EA265D0AAC8A0A4E53712D397` |
+| Collection shell | `swords_and_sandals_classic.swf`, SHA-256 ~~`6A58E0843967AF5B781133E878A8E8DEB66F0D9EA265D0AAC8A0A4E53712D397`~~ **`7E15456500E41E930D5046D1853AC1CCFBB1E69A9EBF08FAD11DF0C0B91B8A4C`** (99,256,433 bytes) *(corrected 2026-09-07 — see below: the old hash is one the repo's own install verifier REJECTS)* |
 | Vanilla SS2 | `swf/swords_sandals2_download.swf`, 7,586,504 bytes |
 | Vanilla SS2 SHA-256 | `77CB545C2061AB41246251467A4EDF5926AB6FD1DDD95DC9527D7BA9C45BB8CA` |
 | SWF format | uncompressed `FWS`, version 11, AVM1/ActionScript 2 |
@@ -35,6 +38,43 @@ code, artwork, audio, exported scripts, or game binaries.
 
 These identifiers are the compatibility key. Formula fixtures must name this
 build and hash instead of claiming to describe every SS2 release.
+
+► **CORRECTED 2026-09-07, and the correction is a DISTINCTION, not a
+substitution. Read this before changing any number above.**
+
+The Steam install moved on 2026-09-01 (`98482b6`) from build `24807725` to
+`25046632`, and **only the AVM2 launcher changed**: the AVM1 SS2 SWF was
+byte-identical across the transition (`ss2-build-fingerprint.json`,
+`priorBuilds[0].ss2Unchanged: true`), which is why every golden, divergence
+fixture and observation measured under the old build remains valid. That
+transition updated the fingerprint and nothing else — this table was left behind
+by omission, not by decision.
+
+So the three rows are **three different kinds of fact**, and they were being
+treated as one:
+
+- **Steam build is BOTH, and both are stated above.** `24807725` is
+  `SS2_STEAM_BUILD_ID` (`src/golden/run-1v1-fixture.js:7`), the corpus
+  COMPATIBILITY key — **four throwing equality gates** enforce it
+  (`run-1v1-fixture.js:559`, `observation.js:333`,
+  `promote-1v1-golden.js:120` and `:238`), one test asserts it
+  (`test/ss2-golden.test.js:179`), and **262 tracked files under `src/` and
+  `test/` carry the literal**. **DO NOT change it anywhere in code, tests,
+  fixtures, observations or manifests: that is not a documentation edit, it is
+  an invalidation of the corpus.** `25046632` is what is installed today.
+- **Depot manifest and collection-shell hash are install facts with no
+  compatibility-key cover.** Nothing in the codebase reads a depot manifest, and
+  the only machine-checked launcher hash is the fingerprint's current one:
+  `verifyInstallAgainstFingerprint` (`tools/capture-session.mjs:69-96`) hashes
+  the installed launcher against `fingerprint.collection.launcher.sha256`.
+  **The old `6A58E08…` in this table is therefore a value this repository's own
+  verifier REJECTS** — a reader checking their install against it would be told
+  their licensed copy was wrong. Those two rows are simply corrected.
+
+*(Also settled while re-deriving this, so it is not re-opened later:
+`ss2-golden-harness.md`'s "Steam build `24807725`" is **correct where it
+stands** — that section describes fixture classification, i.e. the corpus pin,
+not the install.)*
 
 ## Battle entry and timeline ownership
 
@@ -344,13 +384,52 @@ exception. And frames 1–4 carry no `Stop`, so the playhead never rests on
 table describes is real for *what the player can press*, and has no
 representation inside the dispatch path.
 
-The consequence for the capture wrapper is that its availability gate
+~~The consequence for the capture wrapper is that its availability gate
 (`ss2-capture-wrapper.as`, `CONTROLLERS` / `stepAutopilot`, which refuses a step
 the resting controller does not offer) is **stricter than the build requires**.
 That is the safe direction and the gate should stay — an unattended run that
 issues an unreachable label burns its one effective `getphase` for the turn and
 stalls with no trace — but the restriction is the wrapper's, not the game's, and
-neither this map nor the bytes should be cited as evidence for it.
+neither this map nor the bytes should be cited as evidence for it.~~
+
+► **CORRECTED 2026-09-07, verified independently, and the defect is worse than a
+mis-description: this paragraph used the gate to underwrite a safety argument
+the gate does not provide.**
+
+The gate does **not** refuse "a step the resting controller does not offer". At
+`ss2-capture-wrapper.as:1664-1665` it reads:
+
+```
+if (knownAutopilotAction[step] == true &&
+    (controller == undefined || controller.actions[step] != true)) {
+```
+
+`knownAutopilotAction` is built once (`:345-347`) from the union of every
+`CONTROLLERS` row. So the refusal fires only for a label that **appears in some
+row but not the resting one**. A label in **no** row short-circuits the `&&`,
+is merely logged as `autopilot-unknown:<step>` (`:1684-1687`), and reaches
+`ov.getphase(step)` at `:1697` regardless of which controller is resting. The
+wrapper says so itself at `:342-344`: *"An unknown label is passed through
+rather than blocked: this table is a map of what the build offers, not a
+whitelist the wrapper enforces."* There is no second gate — `launch-capture.ps1`
+declares `$Autopilot` with no `ValidateSet`, and the `getphase` instrumentation
+wrapper has no rejection path.
+
+**And that inverts the hazard argument.** The labels this section itself names
+unreachable — `swap_weapons`, `runleft`, `runright`, `frozen`, `burning`,
+`poisoned`, `life_stolen` — are exactly the labels that appear in **no**
+`CONTROLLERS` row (`swap_weapons` has one mention in the whole wrapper, the
+comment at `:271-272` saying it is deliberately absent). They are therefore
+exactly the set the gate lets straight through. **The gate protects against
+labels that ARE offered somewhere; this paragraph's own hazard list is its blind
+spot.** The gate is still worth keeping and the restriction is still the
+wrapper's rather than the game's — but it is narrower than described, and it is
+not evidence that an unreachable label cannot be issued.
+
+*(Not a stale description: `git log -S knownAutopilotAction` gives one commit,
+`7855015`, 2026-08-30 18:09, whose FIRST version already carries the
+pass-through; this paragraph landed in `0a3076c` five hours later. It was never
+true of any committed revision.)*
 
 What is *not* settled is whether such a cross-controller call completes
 end-to-end at runtime. Nothing above has been observed live, because every
@@ -897,7 +976,11 @@ routed through one ordered roll stream, with cosmetic rolls either represented
 in that stream or removed from authoritative simulation.
 
 The overlay's complete `RandomNumber` inventory is small enough to enumerate
-(byte-verified 2026-08-30; nine opcode sites on sprite 862):
+(byte-verified 2026-08-30; ~~nine~~ **ten** opcode sites on sprite 862 —
+*corrected 2026-09-07: the table below enumerates ten offsets (2 + 2 + 1 + 3 +
+2), and excluding the frame-74 `combatlost` pair as "outside the turn loop"
+gives eight. No reading of the table produces nine. The per-site conclusions are
+unaffected*):
 
 | Site | Use | Draws per invocation |
 | --- | --- | --- |
@@ -1100,10 +1183,14 @@ bound first — `== 5` → `Attack5` at `+0x6209`, `== 9` → `Attack9` at `+0x6
 would leave the first animation branch of every band unreachable.
 
 Eleven consecutive hero swings without a 5 is a `0.75^11 = 4.2%` event, which
-is unremarkable; and the archive settles it directly. **Eighteen committed
-observation records carry `scenario.attackDirection` 5**
-(`test/observations/ss2-1v1/`), and sixteen of them put their first mutation on
-`/villain/…` — the defender took the damage, so the hero swung. The other two
+is unremarkable; and the archive settles it directly. **~~Eighteen~~ Twenty
+committed observation records carry `scenario.attackDirection` 5**
+(`test/observations/ss2-1v1/`), and ~~sixteen~~ **eighteen** of them put their
+first mutation on `/villain/…` — the defender took the damage, so the hero
+swung. *(Re-derived 2026-09-07: 16 on `/villain/hitpoints` plus 2 on
+`/villain/armourclass`; the two additions are `obs-onx1405-a1` and
+`obs-onx1521-a1`. The remaining two are still the empty-trace misses. The
+conclusion is unchanged and better supported.)* The other two
 are misses with an empty mutation trace and carry no evidence either way;
 `scenario.attackerSide` is an operator-declared string and settles nothing
 here. Those eighteen are genuine live draws even though the runs were
@@ -1612,8 +1699,13 @@ it was decoded a second time from scratch. The condition reproduces exactly.
   assumption): first-blood defeats carry `reason: "first-blood"`, duels die
   by `howDied: "yield"`, and other modes dispatch the death string by
   direction. A third live capture (a first-blood duel kill) matched the
-  modeled gate formally. The live `fight_mode` of tournament/campaign
-  battles is still to be observed (every capture records it for free).
+  modeled gate formally. ~~The live `fight_mode` of tournament/campaign
+  battles is still to be observed (every capture records it for free).~~
+  ► **CORRECTED 2026-09-07: tournament `fight_mode` IS observed.** Two committed
+  observation records carry it — `obs-onx1405-a1` and `obs-onx1521-a1`
+  (2026-09-02) — and they are the two sources of
+  `golden-armoured-deflection-threshold-cleared`. What remains unobserved is the
+  **campaign** mode, not the tournament one.
 
 ### Spell ingress `magic_damage_character` (byte-verified 2026-08-30)
 
@@ -1842,7 +1934,14 @@ entries — poisoned 33, frozen 19, burning 14, life_stolen 1 — across 14
 rufflelogs in five session families (`arena-staged-1/2`, `arena-tourn-2`,
 `session-champ-n1`, `arena-champ-2`). **None of those traces armed a capture
 window and none records any other variable**, so the phases are observed and no
-value from them is measured. The wrapper's `DEFAULT_WATCH_FIELDS` already
+value from them is measured.
+
+*(Re-derived 2026-09-07. Scoped to the five named families the figures reproduce
+EXACTLY — 67 entries, 33/19/14/1, across 14 rufflelogs. Archive-wide it is now
+**91 entries across 32 rufflelogs**; a 2026-09-07 survey proposed 79 across 23
+and that does not reproduce, so do not carry it. **The load-bearing half is
+unchanged in either scope: zero of them armed a capture window**, so the status
+phase still has no runtime backing beyond its own occurrence.)* The wrapper's `DEFAULT_WATCH_FIELDS` already
 carries `burning`, `frozen`, `poison`, `life_stolen` and `hitpoints`, so
 capturing one needs no new flag — only a window armed while a status phase is
 the decision.
@@ -2180,7 +2279,7 @@ of them are reachable and fifteen are not.**
 | `atk 3 def 3 str 30`, hp 250, stam 150 | 5 | **herolevel 11**, vitality 7, speed 7, stamina 5, weapon **24** (hacking, gate `strength >= 12`). Also 13, 15, … 23. |
 | `atk 3 def 2 str 7`, hp 40, stam 130 | 2 | **herolevel 2**, vitality 1, speed 3, stamina 3, weapon **41** (bashing, gate `strength >= 3`), `greaves 4` + `boot 4` = 20. |
 | `atk 11 def 11 str 5 cha 5`, hp 60, stam 100 | 15 | **Unreachable.** Three grounds, below. |
-| spell family (magicka only) | 7 | No `attack`/`defence` pinned; every `staminamax` derives. |
+| spell family (magicka only) | ~~7~~ **8** | No `attack`/`defence` pinned; every `staminamax` derives. |
 
 **Why the `attack 11 / defence 11` family cannot be built, in decreasing order
 of how much it would take to overturn:**
@@ -2205,9 +2304,15 @@ of how much it would take to overturn:**
    value the promoted goldens measured. A DNA-built character clears this ground
    and still fails the first two.
 
-**What this changes about the capture plan.** The champion family needs a
+**What this changes about the capture plan.** ~~The champion family needs a
 gladiator at herolevel 11 holding weapon 24, which costs 4542 against a
-`goldpieces` start of 2500 — so it needs won purses, not just won bouts. The
+`goldpieces` start of 2500 — so it needs won purses, not just won bouts.~~
+► **CORRECTED 2026-09-07: the plan moved and the purchase is not needed.** The
+committed `run-arena.ps1` reaches the champion vector by STAGING — `herolevel 5`,
+`vitality 10`, and `weapon:24` as a **table id, not a purchase** — and it has
+been run: `session-champ-n1` (2026-08-31) carries `hero.weapon=24` in the
+`applied` string of every `{"at":"staged"}` line. The arithmetic above is still
+correct for the *purchase* route; that route is simply no longer the plan. The
 duel pair needs herolevel 2 and weapon 41 at 1714, which the starting purse
 covers outright. The 15 unreachable fixtures are not a capture problem at all;
 they are 15 fixtures asserting a weapon that is not in the game, and belong with
@@ -2330,8 +2435,12 @@ fingerprint-keyed candidate schema, strict ordered `randomBetween` and
 result bridge. It does not change `classicStyleRules`, and its static candidates
 do not yet count as vanilla parity.
 
-**Twenty-two goldens are promoted** as of 2026-08-30, all from the one staged
-tutorial fight: twelve kills covering all twelve melee directions
+**~~Twenty-two~~ Twenty-three goldens are promoted** as of 2026-09-02 — and the
+23rd, `golden-armoured-deflection-threshold-cleared`, is the **first that is not
+from the staged tutorial fight** (it is a tournament-mode armoured capture, from
+`obs-onx1405-a1` / `obs-onx1521-a1`, commit `2341789`). Run
+`ls test/fixtures/ss2-1v1-golden/*.json | wc -l` rather than reading this
+number. The other twenty-two are all from the one staged tutorial fight: twelve kills covering all twelve melee directions
 (`golden-prisoner-quick-kill-dir1..4`, `golden-prisoner-normal-kill*` at 5–8,
 `golden-prisoner-power-kill-dir9..12` — all three bands now complete; an earlier
 revision of this section said eighteen and "the quick band has no kill golden

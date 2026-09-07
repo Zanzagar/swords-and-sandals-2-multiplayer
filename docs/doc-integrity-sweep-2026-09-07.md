@@ -48,7 +48,7 @@ correction in this file:**
 
 | broken finding | why it was wrong |
 | --- | --- |
-| `ss2-battle-map.md:26` "Steam build `24807725` is stale, write `25046632`" | **Applying it would have broken the corpus.** `24807725` is `SS2_STEAM_BUILD_ID` in `src/golden/run-1v1-fixture.js`, enforced at eleven sites under `src/`. Re-derived here rather than relayed: **262** tracked files under `src/` and `test/` carry `24807725` and **2** files in the whole repository carry `25046632` — the verifier reported 261 and 0 under a narrower glob, and the shape of its argument survives the difference. The row is a compatibility key, not an install-identity field. |
+| `ss2-battle-map.md:26` "Steam build `24807725` is stale, write `25046632`" | **Applying it would have broken the corpus.** `24807725` is `SS2_STEAM_BUILD_ID` in `src/golden/run-1v1-fixture.js`. **262** tracked files under `src/` and `test/` carry it. The row is a compatibility key, not an install-identity field. ► **BUT THIS ROW'S OWN NUMBERS WERE WRONG, and a 2026-09-07 verifier broke two of them — see "Where this file was itself wrong" below.** |
 | `ss2-probe-replication.md:104` "the gate is closed for 1–4" is wrong for direction 4 | The surveyor's script filtered the divergence corpus to a subset and then reported a universal negative about the whole of it. A committed counter-example exists. |
 | `ss2-item-tables.md:1070` "§9's heading should say two of five remain" | The heading is a provenance statement ("not made *by this track*"), not a repo-status claim, and the living head already carries a sharper derivation of the same fact. |
 | `HANDOFF.md:426` "the archive has one reachable copy" | The head already retracts that bullet twice, 26 lines above it, naming it as "the bullet below". The finding read a deliberately-retained historical bullet as live. |
@@ -59,6 +59,35 @@ correction in this file:**
 **That is the argument for the adversarial layer in one table.** Five of the
 seven survived the surveyor's own evidence check and would have been applied by
 anyone reading the findings as results.
+
+## Where this file was itself wrong (added 2026-09-07, after working the list down)
+
+**This file's own "re-derived" table carried two wrong numbers, in the row that
+this file holds up as its best result.** Both were caught by a write-nothing
+verifier aimed at that row:
+
+| this file said | measured | how |
+| --- | --- | --- |
+| "**2** files in the whole repository carry `25046632`" | **3** | `git grep -l 25046632` — and **this file is one of the three**, so the count was already 3 when it was written |
+| "enforced at **eleven sites** under `src/`" | **4 throwing equality gates** | eleven is the `git grep -n SS2_STEAM_BUILD_ID` LINE count: 4 gates (`run-1v1-fixture.js:559`, `observation.js:333`, `promote-1v1-golden.js:120`, `:238`), 4 imports/definition, 2 message interpolations, 1 stamp |
+
+Neither error changes that row's verdict — 3 against 262 makes the same point as
+2 against 262 — but this file presented the first figure as *"re-derived here
+rather than relayed"*, and it was not. **The lesson is the one the file already
+teaches, turned on itself: a number is only as good as the command beside it,
+and "re-derived" is a claim like any other.**
+
+**And the refuter's own framing was too strong.** It said the battle map's row
+was "a compatibility key, not an install-identity field", which is right for the
+**Steam build** row and wrong for the two rows beside it. Nothing in the codebase
+reads a depot manifest; and the collection-shell hash the map carried
+(`6A58E08…`) is a value the repository's own install verifier
+(`verifyInstallAgainstFingerprint`, `tools/capture-session.mjs:69-96`) **actively
+rejects**, because it hashes against the fingerprint's current `7E1545…`. So the
+applied repair states BOTH builds for the Steam-build row and simply corrects
+the other two. **The surveyor was wrong, the refuter was wrong, and the answer
+was a third thing** — which is the same shape as the `probe-replication` digest
+row further down.
 
 ## Applied 2026-09-07, each re-derived by hand first
 
@@ -104,6 +133,38 @@ The numbers behind them, all re-derived on 2026-09-07 against this tree:
    archive.** The living head said it "now holds only the git bundle". It holds
    1,589 files including 292 raw traces — the 2026-08-31 mirror, frozen.
    Corrected in the head.
+
+## Worked down 2026-09-07 (second pass)
+
+**Six documents got no corrections applied in the first pass and all six are now
+done**, every row re-derived by hand before it was applied or rejected:
+
+| document | rows | applied | rejected, and why |
+| --- | ---: | ---: | --- |
+| `ss2-arena-route.md` | 18 | 18 | — |
+| `ss2-capture-staging.md` | 17 | 16 | Group H's `staminaleft` mechanism — the count 5→4 applied, the mechanism half left standing as the earlier refuter required |
+| `ss2-staging-runbook.md` | 18 | 18 | — |
+| `ss2-battle-map.md` | 13 | 13 | rows 26/27/29 applied as a THREE-WAY distinction, not the proposed substitution |
+| `ss2-item-tables.md` | 6 | 5 | the §9 heading — it is a provenance statement, and the earlier refuter was right; the three DONE items under it are struck individually instead |
+| `ss2-probe-replication.md` | 7 | 6 | the direction-4 narrowing — **challenged and upheld**: `golden-prisoner-quick-kill-dir4` is a committed golden at direction 4 |
+
+**Findings that did not reproduce, and were NOT applied:**
+
+- `probe-replication:241` — the file said "two of the six", the survey said "all
+  six" or "five of six". **Measured: three.** Only three of the six pre-existing
+  reports name a committed record at all; all three differ. A third value.
+- `probe-replication:200` — the file said 64, the survey said 68. Neither
+  reproduces, and this page's own rule twenty lines above forbids pinning a
+  total against a live directory. **Replaced with the command, not a number.**
+- `battle-map:1843` — the survey's archive-wide "79 entries across 23
+  rufflelogs" does not reproduce; it is **91 across 32**. The document's own
+  SCOPED figures (67/14) reproduce exactly and were left alone.
+- `capture-staging:811` row A — a blanket 22→23 would have broken it. **Group
+  A's "22" is CORRECT**: it is 12 `golden-prisoner-*` + 10 `golden-probe-*`, and
+  the 23rd golden belongs to Group H. Annotated rather than changed.
+
+**Two documents on this list have now had a proposed correction refuted AND a
+different proposed correction confirmed.** Read every row below as a claim.
 
 ## The worklist
 

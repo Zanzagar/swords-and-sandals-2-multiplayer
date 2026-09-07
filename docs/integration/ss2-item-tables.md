@@ -1043,9 +1043,17 @@ of them.
    `physical_size + 4400` — bows with melee reach. Almost certainly an authoring
    slip; recorded, not corrected.
 4. **Melee `[4]` is `[3]` squared** across the whole slashing band (3→9, 4→16,
-   … 26→676) and the whole ranged band. Hacking and bashing use `[4] = 4*[3]`
-   up to ids 34 and 56 and then diverge. Useful as an independent cross-check
-   that the six-element array decode is the right way round.
+   … 26→676) and the whole ranged band. ~~Hacking and bashing use `[4] = 4*[3]`
+   up to ids 34 and 56 and then diverge.~~ ► **CORRECTED 2026-09-07: the
+   hacking half is right, the bashing half is wrong in kind, not in degree.**
+   **Hacking** uses `[4] = 4*[3]` for ids 21–34 and diverges from id 35 onward
+   (35 is 70/240 = 3.43, falling to 2.59 by id 40) — as stated. **Bashing never
+   uses 4× at all.** It uses `[4] = 3*[3]` for every id in 41–60 with exactly
+   two exceptions: id **55** (80/250, ratio 3.125) and id **57** (100/30, the
+   §7.1 anomaly). Re-derive by importing `src/team/ss2-weapon-table.js` and
+   dividing `maxDamage` by `minDamage` across each band. Still useful as an
+   independent cross-check that the six-element array decode is the right way
+   round — with 3×, not 4×, as bashing's expected ratio.
 5. **`weapon0`'s type index is 2 (bashing)**, which does not match what the
    starting weapon is called. Inert — nothing gates on the starter's type.
 
@@ -1055,7 +1063,7 @@ of them.
 
 | Claim | Status | What would settle it |
 | --- | --- | --- |
-| `item.onRollOver()` immediately before `item.onRelease()` behaves like a real hover-then-click | **unverified** — neither handler reads mouse state, but it has not been run | one shop run that calls the pair and logs `clip.itemnumber` and `clip.itemcost` between them |
+| `item.onRollOver()` immediately before `item.onRelease()` behaves like a real hover-then-click | ~~**unverified** — neither handler reads mouse state, but it has not been run~~ ► **VERIFIED 2026-09-07 — it HAS been run, and it worked.** Capture `arena-shop-6` logs `{"step":"shop-bought","kind":"weapon","item":39,"cost":56870,"weapon":39,"goldLeft":843130}`: item 39 was requested, `hero.weapon` became **39** rather than the stuck 20, and `cost` read back as a number rather than `NaN`. The run predates this document's own first commit | *(settled — the settling run is in the archive)* |
 | `armourbuttons` leaves its `itemnumber` as `NaN` after the loop (no clip exists for `i = 60`) | **inferred** from the loop shape. `buyarmour` gets the item as an argument, but still reads `itemnumber` at `+0x123b` to attach the display clip | the same run, logging `armoursmith.itemnumber` after a page load |
 | `whichweapon` — the character property `battlevalues` reads `attack_type` and `attack_speed` from at `+0x3450` / `+0x346a` | **not mapped** — it is assigned outside `battlevalues` | a whole-build reference sweep on `whichweapon` |
 | The per-piece armour flavour bonuses are read by any battle site | **unverified** — nothing in `battlevalues` reads them | a reference sweep on each bonus's field name |
@@ -1069,8 +1077,15 @@ of them.
 
 ## 9. Changes this track would make elsewhere (not made — other tracks own these files)
 
-1. **`tools/runtime-capture/ss2-capture-wrapper.as`, `shop-open`.** It must call
-   `shop["item" + shopItem].onRollOver()` before `.onRelease()`. Without it
+1. ~~**`tools/runtime-capture/ss2-capture-wrapper.as`, `shop-open`.** It must
+   call `shop["item" + shopItem].onRollOver()` before `.onRelease()`.~~
+   ► **MADE, and made before this list was written — struck 2026-09-07.** The
+   call is in the file today: `chosen.onRollOver();` at
+   `ss2-capture-wrapper.as:1200`, immediately followed by `chosen.onRelease();`
+   at :1201, behind a both-handlers-bound guard at :1193 that logs
+   `shop-item-unbound` and backs off rather than pressing blind. It landed on
+   2026-08-30 in `b8d0d94`. The diagnosis below is kept because it is still the
+   reason the call is there: Without it
    `itemnumber`, `itemtype` and `itemcost` are never written, and the observed
    consequences are exactly the ones in the capture logs: `itemcost` `NaN`,
    `itemnumber` stuck at 20, `hero.weapon` set to 20 whichever id was pressed,
@@ -1085,17 +1100,33 @@ of them.
    on `browse` either; it needs the twenty per-piece page frames, or at minimum
    the pages for the piece the operator wants. As written, `-ShopArmour` can
    only ever reach `shop-unreachable`.
-4. **[`ss2-arena-route.md`](ss2-arena-route.md) §6.** Three corrections: the
+4. ~~**[`ss2-arena-route.md`](ss2-arena-route.md) §6.** Three corrections:~~
+   ► **ALL THREE MADE — struck 2026-09-07.** `ss2-arena-route.md` now carries
+   (a) the attribute gate at :1191 (*"`attribute_required` is the hero's
+   governing attribute for the band"*), (b) the `fizMode == "fizzle"` derivation
+   of `game_mode = "full"` at :595–618, which is what makes both refusals inert,
+   and (c) the `item<n>`-only-on-category-pages point. The asks were: the
    weapon gate compares the item's level to the **hero's attribute**, not to
    anything on the item (§3.1); the `itemlevel > 16` / `itemlevel > 12`
    refusals are **inert** in this build, because root frame 1 sets
    `_root.fizMode = "fizzle"` and frame 10 derives `game_mode = "full"` from it
    (§3.3); and `_root.weaponsmith["item"+i]` exists only on the category pages,
    never at `browse` (§1).
-5. **[`ss2-battle-map.md`](ss2-battle-map.md).** It should record
+5. ~~**[`ss2-battle-map.md`](ss2-battle-map.md).** It should record
    `min_damage = round(strength*2) + weapon_min_damage`, the matching
    `max_damage`, and the `[3]` / `[4]` table indices — that pair is the operand
-   of every damage roll and is currently only described as derived.
+   of every damage roll and is currently only described as derived.~~
+   ► **MADE — struck 2026-09-07.** The battle map records all three: the `[3]` /
+   `[4]` lookups at `weapon_min_damage`/`weapon_max_damage` (`+0x31be`,
+   `+0x31da`) and both formulas, `min_damage = round(strength * 2) +
+   weapon_min_damage` (`+0x3356`) and its `max` counterpart (`+0x3386`). Landed
+   `0a3076c`, 2026-08-30 — two days before this page's own last edit.
+
+**Items 1, 4 and 5 above are struck; 2 and 3 are still open.** *(The section
+heading is deliberately unchanged: it is a statement of PROVENANCE — these are
+changes this track does not make itself — not a running count of what remains.
+A proposed rewrite of the heading into a repo-status claim was refuted on
+2026-09-07.)*
 
 ---
 

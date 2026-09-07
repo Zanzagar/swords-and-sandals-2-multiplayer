@@ -45,8 +45,8 @@ the confusion started.
 
 ## How to read the evidence column
 
-Every table below carries an evidence marker, because the twenty-two promoted
-goldens make it possible to separate what has actually been staged from what
+Every table below carries an evidence marker, because the ~~twenty-two~~
+**twenty-three** promoted goldens make it possible to separate what has actually been staged from what
 the map says should be stageable.
 
 | Marker | Meaning |
@@ -286,11 +286,20 @@ version of this document did not record:
   `duel` and 136 `misc`. Treat any row below that says "needs a tournament" as
   a routing requirement, not an unknown.
 
-  The narrower claim that *is* still true: **no ingested observation records
+  ~~The narrower claim that *is* still true: **no ingested observation records
   the mode yet.** All 67 observations under `test/observations/ss2-1v1/` read
   `misc` (66) or `duel` (1), because ingest projects `fight_mode` only when the
   fixture stages it and no tournament-mode fixture has been captured. The first
-  successful tournament capture retires that gap for free.
+  successful tournament capture retires that gap for free.~~
+
+  ► **CORRECTED 2026-09-07: the gap is CLOSED, and closing it is what the
+  paragraph predicted.** There are now **69** observations under
+  `test/observations/ss2-1v1/` — 66 `misc`, 1 `duel` and **2 `tournament`**
+  (`obs-onx1405-a1` and `obs-onx1521-a1`, both 2026-09-02, both cited by
+  `golden-armoured-deflection-threshold-cleared`). Re-derive with
+  `grep -ho '"fightMode"[^,}]*' test/observations/ss2-1v1/*.json | sort | uniq -c`.
+  The mode IS recorded in an ingested observation; the "first successful
+  tournament capture" happened and did retire the gap for free.
 
 Armour damage does not enter the gate, so mid-battle armour wear
 (`armourclass < armourclass_max`) is stageable in any mode.
@@ -442,11 +451,21 @@ non-`normal_attack` direction on the arena route therefore needs
 the arena flags — and which has no snapshot guard, so take the snapshot by hand
 with `save-state.ps1 snapshot <new-name>` first.
 
-### The twenty-two goldens, and what the probe pairs measured
+### The twenty-three goldens, and what the probe pairs measured
 
-`test/fixtures/ss2-1v1-golden/` now holds **twenty-two** promoted goldens, of
-two different kinds. The earlier revision of this document was written when
-there were four, and the revision after that when there were eighteen.
+`test/fixtures/ss2-1v1-golden/` now holds ~~**twenty-two**~~ **twenty-three**
+promoted goldens, of two different kinds. The earlier revision of this document
+was written when there were four, the revision after that when there were
+eighteen, and the one after that when there were twenty-two.
+
+► **CORRECTED 2026-09-07. Do not read the number, run the count:**
+`ls test/fixtures/ss2-1v1-golden/*.json | wc -l`. This heading has been restated
+at four different values and will be restated again. The 23rd is
+`golden-armoured-deflection-threshold-cleared`, promoted 2026-09-02 (commit
+`2341789`) from `obs-onx1405-a1` / `obs-onx1521-a1`, and it is the **first
+golden outside the prisoner-and-probe band** — which is why "22" is still the
+right number in some sentences on this page and the wrong one in others. Check
+which set a sentence is counting before changing its number.
 
 - **Twelve kills.** `golden-prisoner-normal-kill*` (directions 5–8),
   `golden-prisoner-power-kill*` (9–12) and `golden-prisoner-quick-kill*` (1–4)
@@ -646,8 +665,9 @@ on is most of this page:
   losing the *slot*: `save_character` has exactly three call sites (root frame
   150 `+0x0585`, button 1565 `+0x02d6`, button 2042 `+0x020f`) and **none is
   reachable from a bout, the ladder, the win chain or the loss path** (arena
-  route §3). Observed: 22 `ABORT:battle-lost` lines across `captures/arena-*`,
-  twelve of them to the rank-1 champion, and the gladiator survived every one —
+  route §3). Observed: ~~22~~ **23** `ABORT:battle-lost` lines across
+  `captures/arena-*`, ~~twelve~~ **thirteen** of them to the rank-1 champion,
+  and the gladiator survived every one —
   it lost gold and battle counters that had never been flushed.
 
   The backup still matters, for the reason in the two bullets above rather than
@@ -759,7 +779,10 @@ Four qualifications the block did not have:
 - **The one opponent that needs no staging at all** is tournament rank 1.
   `unleash_hell` builds it from a hard-coded `charDNA` literal and contains
   zero RNG of any kind; "John the Butcher", `hitpointsmax` 110,
-  `armourclass` 86, identical across twelve independent launches. Its every
+  `armourclass` 86, identical across ~~twelve~~ **fifteen** independent launches
+  archive-wide (fourteen of them in `captures/arena-*`, the fifteenth in
+  `session-champ-n1`). *(Re-derived 2026-09-07; every one of the fifteen carries
+  the identical 110/86 triple, so the claim is strengthened.)* Its every
   combat field is decoded in [the champion DNA map](ss2-champion-dna.md).
 
 Three routes now exist, and the distinction above decides which applies:
@@ -796,8 +819,11 @@ grows steadily, so treat those two lists as the count and the table below as a
 partition of them, not of a number. At the time of writing that is **52
 physical and 8 spell** candidates — up from 39 physical at the last revision,
 the thirteen new ones being the five `candidate-armoured-*`, the three
-`candidate-tournament-*` and the five `candidate-champion-*`. Twenty-two are
-promoted, so **38 are uncaptured**.
+`candidate-tournament-*` and the five `candidate-champion-*`. ~~Twenty-two~~
+**Twenty-three** are promoted, so **~~38~~ 37 are uncaptured**. *(Re-derived
+2026-09-07 by name-matching `test/fixtures/ss2-1v1/` against
+`test/fixtures/ss2-1v1-golden/`; the group table below sums to 37 with Group H
+at 4.)*
 
 **This table's verdicts were the most out-of-date thing on the page.** Its
 premise was that most of the set was unreachable; that is now largely false.
@@ -807,8 +833,8 @@ and one runnable command line each — read it for *how*, and this table for
 
 | Group | Fixtures | Uncaptured | Binding constraint, as it stands |
 | --- | --- | ---: | --- |
-| A | prisoner kills + probes | 0 | **none** — all 22 promoted, all three bands complete |
-| **H** | `candidate-armoured-*` | 5 | **no staging blocker** — reachable with `-StageVillain`, runbook §3 — but 42 live rounds have produced 0 matches. The wrong-side gate is now repaired and direction 5 lands; `staminaleft` is the one field still standing. See below |
+| A | prisoner kills + probes | 0 | **none** — all 22 promoted, all three bands complete. *(This 22 is CORRECT and is not the repo total: group A is 12 `golden-prisoner-*` plus 10 `golden-probe-*`. The 23rd golden is Group H's.)* |
+| **H** | `candidate-armoured-*` | ~~5~~ **4** | **no staging blocker** — reachable with `-StageVillain`, runbook §3. ~~42 live rounds have produced 0 matches.~~ **One of the five matched twice and was promoted 2026-09-02 as `golden-armoured-deflection-threshold-cleared`** (commit `2341789`), so the family is no longer at zero. The wrong-side gate is repaired and direction 5 lands; `staminaleft` is the one field still standing. See below *(the count 5→4 is corrected; a proposed correction saying `staminaleft` had been closed by staging it was REFUTED on 2026-09-07 as a measurement error and is deliberately not applied)* |
 | **I** | `candidate-tournament-*` | 3 | **none. Reachable now**; runbook §4. `tournament-nonlethal-normal-hit` is the cheapest capture in the set |
 | **J** | `candidate-champion-*` | 5 | conditional, and **possibly the same 2/10-hero problem in another costume** — the opponent is reproducible, but four of the five hero values the fixtures assert have no writer in the tooling. Open; see below |
 | B | duel | 2 | **no longer the opponent.** A second, *lower*-level gladiator (`herolevel < tournament_level_required`), plus two weapon ids that this revision names |
@@ -821,7 +847,8 @@ and one runnable command line each — read it for *how*, and this table for
 (The runbook letters its families differently; when cross-reading, match on the
 fixture prefix rather than the letter.)
 
-**Scoreboard.** 8 uncaptured candidates have no *staging* blocker (H and I).
+**Scoreboard.** ~~8~~ **7** uncaptured candidates have no *staging* blocker
+(H's 4 and I's 3; H dropped by one on the 2026-09-02 promotion).
 5 more are conditional on the champion gate (J). 2 are reachable in principle
 but need a second gladiator (B). 8 are blocked in the wrapper (G). **15 cannot
 be captured as written at all** (C, D, E, F), and the blocker is not staging —
@@ -844,8 +871,12 @@ unspecified-state costs, not staging costs, and the distinction is the one this
 table exists to make — but a reader planning a supervised window needs all the
 numbers. The per-fixture arithmetic is under Group H.
 
-The runbook's own scoreboard says "9 more behind one read-only weapon-table
-sweep". **That sweep has been done** — [the item tables](ss2-item-tables.md)
+~~The runbook's own scoreboard says "9 more behind one read-only weapon-table
+sweep".~~ ► **CORRECTED 2026-09-07: the runbook says no such thing any more.**
+`grep -c 'weapon-table sweep' docs/integration/ss2-staging-runbook.md` returns
+**0**; its §11 row for family C now reads *"Not on a weapon sweep; there is
+nothing to sweep for"* — i.e. it has already absorbed this page's answer. **That
+sweep has been done** — [the item tables](ss2-item-tables.md)
 decodes all 90 weapon rows — and its answer for those fixtures is negative,
 now as a proof rather than as a search. See *The weapon spread is a table
 lookup* above.
@@ -1027,8 +1058,13 @@ drift.
   - Seven capture sessions log `capture-refused-wrong-side` once each —
     `session-adc{32,34,35,36,45,47,48}` — where the whole prior census of 268
     logs had zero.
-  - Nineteen `.rufflelog` files carry `attacker-resolved-hero` and **zero**
-    carry `attacker-resolved-villain`, which is the line the repaired guard
+  - ~~Nineteen~~ **1343** `.rufflelog` files carry `attacker-resolved-hero`
+    archive-wide (17 if scoped to `session-adc30`–`adc49`, which is the window
+    this bullet was written against — neither reading is nineteen) and **zero**
+    carry `attacker-resolved-villain`. **The zero is the durable half and it
+    still holds exactly, archive-wide.** Re-derive both with
+    `grep -rl 'attacker-resolved-hero' /mnt/c/ss2-capture/captures | wc -l`.
+    It is the line the repaired guard
     emits only after it has actually resolved the identity. A run whose log
     carries neither line has a dead guard again; that is what the line is for.
   - A refusal costs nothing: the wrapper re-arms on the hero's next attack in
@@ -1056,9 +1092,16 @@ drift.
   - so `attacker` is `undefined`, and the guard's `if (attacker != undefined)`
     skips the comparison wholesale rather than refusing.
 
-  Measured, not inferred — **as of the 268-log census; the tree now holds 292
-  logs and seven of them do carry the refusal, see the head of this bullet.** Of
-  those 268 archived `.rufflelog` files, **zero** contained
+  Measured, not inferred — ~~**as of the 268-log census; the tree now holds 292
+  logs and seven of them do carry the refusal, see the head of this bullet.**~~
+  ► **CORRECTED 2026-09-07, and this is the third value this sentence has
+  carried.** The archive at `/mnt/c/ss2-capture/captures` (which DOES resolve
+  from a WSL session on this box) holds **1650** `.rufflelog` files, of which
+  **631** carry `capture-refused-wrong-side`. Four further paths carry the
+  string and are NOT traces — three cached wrapper sources and a
+  `vehicle-check` decompile — so an unscoped `grep -rl` returns 635 and must be
+  restricted with `find . -name '*.rufflelog'`. **Stop writing a number here.**
+  Of those original 268 archived `.rufflelog` files, **zero** contained
   `capture-refused-wrong-side`, and so did zero `.jsonl` traces. A whole-tree
   grep of `captures/` then returned exactly six paths, and they were three archived
   wrapper *sources* plus the three `.swf` binaries compiled from them — not six
@@ -1109,8 +1152,9 @@ drift.
   **both** combatants and in both `scenario` and `expected.state` — the five
   `candidate-armoured-*` of this group and the three `candidate-tournament-*`
   of Group I, which share the hero block (runbook §2). Measured:
-  `grep -rlc '"staminaleft": 105' test/fixtures/` returns **53** files — those 8
-  plus 23 more candidates and 22 goldens — and the villain's 105 in these eight
+  `grep -rl '"staminaleft": 105' test/fixtures/` returns ~~**53**~~ **54**
+  files — those 8 plus 23 more candidates (31 in `ss2-1v1/`) and ~~22~~ **23**
+  goldens; the new armoured golden is the 54th — and the villain's 105 in these eight
   is the hero's number copied across, not a villain-side derivation: the
   runbook's villain table warrants `staminamax 110` and has no `staminaleft` row
   at all. **Eleven** committed divergence reports for this family, not six —
@@ -1195,8 +1239,13 @@ tolerating it.
 `tournament-nonlethal-normal-hit` stages no armour at all, so the only staging
 is stripping whatever the generator drew. It is the single cheapest uncaptured
 capture in the set. Treat a *mode* mismatch on any of the three as a finding,
-not a failed run: they would be the first ingested observation of
-`fight_mode == "tournament"` in the archive.
+not a failed run: ~~they would be the first ingested observation of
+`fight_mode == "tournament"` in the archive.~~ ► **CORRECTED 2026-09-07: they
+would not be the first.** Group H got there on 2026-09-02 — `obs-onx1405-a1`
+and `obs-onx1521-a1` both record `fight_mode == "tournament"` and are both
+committed and cited. Group I's three fixtures are still uncaptured, but the
+*mode* is no longer unobserved, so a mode mismatch is now checkable against two
+ingested records rather than against nothing.
 
 ### Group J — `candidate-champion-*` (5). Conditional on the hero, not the opponent.
 
@@ -1241,7 +1290,7 @@ on:
 > | `attack 3` | **1** | nothing — the town-square staging path filters to `strength`, `speed`, `charisma` only, and the level-up spends every point into `vitality` |
 > | `defence 3` | **1** | nothing, same |
 > | `staminamax 150` (⇒ `stamina 5`) | **110** (⇒ `stamina 1`) | nothing durable — `stamina` is restored from `charDNA` at each turn boundary |
-> | `hitpointsmax 250` | **300** | `10·herolevel + 20·vitality`, and the level-up's forced +1/+4 walks this gladiator 300 → 390 → 480; 250 falls between reachable values |
+> | `hitpointsmax 250` | **300** | `10·herolevel + 20·vitality`. ~~the level-up's forced +1/+4 walks this gladiator 300 → 390 → 480; 250 falls between reachable values~~ ► **WRONG, corrected 2026-09-07: 250 is exactly reachable, by this page's own formula.** `herolevel 5` + `vitality 10` = 50 + 200 = **250** — and that is precisely the pair §2A prescribes staging. The "falls between reachable values" reasoning fixed `herolevel` at the walked value instead of at the staged one |
 > | `min_damage 68` / `max_damage 92` | 21 / 23 | **this one is producible** — `strength 30` made durable in town plus `-ShopWeapon 24`, which is `8/32` at `strength >= 12` |
 >
 > `attack` and `defence` are not cosmetic here: the fixtures' `chance 50 /
@@ -1298,7 +1347,9 @@ What actually stands in the way now, in order of cost:
 1. **A second, lower-level gladiator.** The duel button is hidden exactly when
    `herolevel >= tournament_level_required`, which is **4** for
    `current_tournament == 1`. So a level-4 gladiator cannot duel — observed
-   four times as `ABORT:duel-button-hidden` reading `"level":4,"required":4`.
+   ~~four~~ **five** times as `ABORT:duel-button-hidden` (one each in
+   `arena-shop-2` through `arena-shop-6`), every one reading
+   `"level":4,"required":4`.
    `herolevel` 2–3 duels; 4+ tournaments only, until tournament 1 is won. This
    is the real cost of the family, not the opponent.
 2. **Two weapon ids, which this revision names.** `min_damage`/`max_damage` are
@@ -1641,17 +1692,44 @@ caller's mapped `randomBetween` range.
 Four blockers apply to the whole group. The first has been closed since this
 list was written; the second and third are new here and are the real ones.
 
-1. ~~**The trace carries no `spell_id`.**~~ **Closed.** The wrapper now emits
+1. ~~**The trace carries no `spell_id`.**~~ ~~**Closed.** The wrapper now emits
    it in `beginAction`, reading `overlay.spell_id` and falling back to
    `_global.spell_id`, and ingest reads it from the same `var` line. This was
-   the item the list called "small"; it was, and it is done.
-2. **The wrapper emits no `magic-damage` event, so ingest cannot key the
-   dispatch.** `deriveExpectedEventsFromSs2Fixture` pushes
+   the item the list called "small"; it was, and it is done.~~
+
+   ► **THE RETRACTION IS ITSELF WRONG — corrected 2026-09-07, and the wrapper
+   said so one day before this "Closed" was written.** The two reads exist
+   (`ss2-capture-wrapper.as:2256-2260`) but **can never fire**. The comment
+   directly above them, byte-verified in `7601888` on 2026-08-30, is headed
+   *"WITHDRAWN CLAIM"* and reads: *"`spell_id` DOES NOT EXIST anywhere in the
+   build. A whole-file reference scan for `/spell_id|spell_number/` returns
+   exactly one hit — the `spell_number` PARAMETER of
+   `cast_spell_icon(which_avatar, spell_number)` … So both branches below are
+   permanently undefined and no spell trace can carry an action identity."*
+   **Blocker 1 is OPEN.** The id is readable, but only as `cast_spell_icon`'s
+   second argument, which means wrapping the ARMING path — deliberately not
+   done. *An emit that cannot fire is not a closed blocker; it is a closed
+   blocker's costume.*
+
+2. ~~**The wrapper emits no `magic-damage` event, so ingest cannot key the
+   dispatch.**~~ ► **CLOSED 2026-08-30 in `7601888`; corrected here
+   2026-09-07.** `deriveExpectedEventsFromSs2Fixture` pushes
    `{ type: "magic-damage", … }` for every fixture carrying `scenario.spellId`,
    and ingest keys the death dispatch on
-   `events.some(e => e.type === "magic-damage")` — but the hook is registered
-   as `registerSlot(…, "magic_damage_character", makeHookMaker("damagecharacter"))`,
-   so a spell trace emits the *physical* label and never the event it needs.
+   `events.some(e => e.type === "magic-damage")` — and the wrapper now meets it.
+   `ss2-capture-wrapper.as:2447-2450` registers
+   `registerSlot(…, "magic_damage_character", makeHookMaker("magic-damage-character", …))`
+   and emits
+   `{ t: "event", type: "magic-damage", method: spellDamageMethod(args[4]) }`
+   when armed. **The label is `"magic-damage-character"`, not `"damagecharacter"`,
+   and the two-line snippet quoted below no longer exists in the file.** What
+   remains for the spell family is blocker 1 (a readable action identity) and an
+   arming site on the spell ingress.
+
+   *The superseded text, kept because two other pages cite it:* ~~the hook is
+   registered as `registerSlot(…, "magic_damage_character",
+   makeHookMaker("damagecharacter"))`, so a spell trace emits the *physical*
+   label and never the event it needs.~~
 3. **The recording window never opens on a cast.** `beginAction()` is called
    from exactly two sites — the `attack_chances` hook and the `checkattackroll`
    hook. `magic_damage_character` runs through neither, and `check_spells` is
@@ -1731,7 +1809,7 @@ revision and all of them agree (up to ordering, which the tool sorts):
 | Fixtures | Needs |
 | --- | --- |
 | the 15 in Groups C, D, E and F | a hero whose `strength` / `min_damage` / `max_damage` triple matches a real weapon row. A fixture edit |
-| all 8 `candidate-spell-*` | a `magic-damage` event on the `magic_damage_character` hook, and an arming site on the spell ingress. A wrapper edit |
+| all 8 `candidate-spell-*` | ~~a `magic-damage` event on the `magic_damage_character` hook, and~~ **the `magic-damage` event half is BUILT** (`ss2-capture-wrapper.as:2447-2450`, commit `7601888`, 2026-08-30). What is still needed is (a) an arming site on the spell ingress and (b) a readable action identity — `spell_id` does not exist in this build, so it has to come from `cast_spell_icon`'s second argument, which is an ARMING-path change. A wrapper edit *(corrected 2026-09-07)* |
 | `candidate-lethal-result`, `candidate-spell-first-blood-duel`, `candidate-spell-lethal-slain` | `-Stage*` to pass `true`/`false` through unconverted. A wrapper edit |
 | `candidate-taunt-charisma-floor` | proof that direction 20 arms at all — `taunt_effect` is drawn pre-arm |
 | `candidate-grievous-knockback` | proof that `getphase("psyche_up")` reaches the phase below `herolevel 7` |

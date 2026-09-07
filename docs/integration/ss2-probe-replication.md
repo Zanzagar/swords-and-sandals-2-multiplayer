@@ -38,6 +38,16 @@ captures (`session-pw*`, `session-qk*` and the lettered sessions), the
 navigation, frame-rate and watch-field diagnostics, the two simulator dry runs,
 and the stub-game vehicle checks.
 
+► **AMENDED 2026-09-07: that enumeration was complete when written and is not
+any more.** It described ~66 skipped traces on 2026-08-30. The archive has since
+grown and the skipped set is now dominated by two groups this sentence does not
+name: **`session-onx*` (1200 session directories) and `session-ondc*` (151)**,
+both post-dating it. **The 89 selected probe rounds are unchanged** — that is
+the load-bearing half and the campaign that produced them is finished — so the
+selection rule and the corpus are untouched. Only the description of what is
+left over went stale. Re-derive the groups with
+`ls -d /mnt/c/ss2-capture/captures/*/ | sed 's/[0-9].*$//' | sort | uniq -c`.
+
 `captures/` is a live working directory — `validate-vehicle.ps1` writes a fresh
 `vehicle-check/stubcheck-*.jsonl` on every wrapper validation — so its total
 file count moves and no total is pinned here. The 89 probe rounds do not move:
@@ -103,6 +113,14 @@ direction the knockback gate opens on, so "the quick band skips the knockback
 draw" and "directions 1–4 skip the knockback draw" are the same statement given
 this evidence. The corpus confirms the gate is closed for 1–4 and open for 5–12.
 It does not say which of the two is the cause.
+
+*(CHALLENGED AND UPHELD 2026-09-07. A survey proposed narrowing this to
+"directions 1, 2 and 3 … the corpus says nothing about direction 4", on the
+grounds that direction 4 appears only on quick-band MISS rounds that stop before
+the gate. It does not hold: direction 4 is committed evidence —
+`test/fixtures/ss2-1v1-golden/golden-prisoner-quick-kill-dir4.json` is a
+promoted golden at direction 4, backed by `obs-qk1` and `obs-qk9`. The sentence
+stands as written; recorded here so the next sweep does not re-raise it.)*
 
 ## What a divergence report proves
 
@@ -197,15 +215,35 @@ definition.
 
 **Stated plainly: none of the 69 regenerated reports came from a trace without
 over-draw assurance.** All 89 probe traces carry `"overdraw": 0` on their end
-line, and all 89 carry a `launchNonce`. The 64 archived traces that lack
+line, and all 89 carry a `launchNonce`. ~~The 64 archived traces that lack
 `overdraw` are all outside the probe corpus — they are the earlier band,
-navigation and frame-rate captures. The escape hatch is therefore load-bearing
+navigation and frame-rate captures.~~
+
+► **CORRECTED 2026-09-07, and the fix is to STOP PINNING A NUMBER HERE.** This
+sentence contradicted this page's own rule twenty lines above — *"`captures/` is
+a live working directory … so its total file count moves and **no total is
+pinned here**"* — and then pinned one against exactly that moving directory. The
+count was 64 when written and is not 64 now; do not substitute today's value,
+**run the command**:
+`find /mnt/c/ss2-capture/captures -name '*.rufflelog' -exec grep -L overdraw {} + | wc -l`.
+**The claim that matters is the invariant and it holds unconditionally: every
+one of the 89 probe traces carries `"overdraw": 0`, so no trace lacking
+over-draw assurance is inside the probe corpus.** The composition half was also
+wrong: **the frame-rate captures are NOT among the traces lacking `overdraw`** —
+every `session-fps*` and `session-fr*` trace carries `"overdraw":0`. The escape
+hatch is load-bearing for the tool's contract and not for a single committed
+report. The escape hatch is therefore load-bearing
 for the tool's contract and not for a single committed report.
 
 ## What weakens the claim
 
 Recorded here because the audit that called for this regeneration overstated the
-result, and the overstatement is now in `HANDOFF.md`.
+result, and the overstatement was ~~is now~~ **at the time of writing** in
+`HANDOFF.md`. ► **AMENDED 2026-09-07: it is not there any more.** `2d70738`
+removed it on 2026-08-30, the same day this page was committed;
+`grep -c 'every measurement replicates across all twelve directions' HANDOFF.md`
+returns **0**. The retraction below is kept because it is the substance, but it
+no longer describes a live overstatement anywhere in the repository.
 
 1. **"Every measurement replicates across all twelve directions with zero
    exceptions" is not true, and no campaign could make it true.** Each melee
@@ -220,8 +258,12 @@ result, and the overstatement is now in `HANDOFF.md`.
    rests on 2 sessions at 1 direction on its above-the-gate side, against 12
    sessions at 4 directions below. It was already the weakest of the three
    planned measurements (`HANDOFF.md`: it confirms something the map asserts
-   flatly, and the extra draw's label and position are echoed). Regeneration
-   does not improve it. Two more above-the-gate rounds, ideally landing on
+   flatly, and the extra draw's label and position are echoed — ► **CITATION
+   BROKEN, noted 2026-09-07: that passage is no longer in `HANDOFF.md`**, having
+   been removed in the same 2026-08-30 rewrite that removed the overstatement in
+   item 1. Read it at `git show 46cbd21:HANDOFF.md` lines 49-53, or treat the
+   parenthetical as this page's own restatement). Regeneration does not improve
+   it. Two more above-the-gate rounds, ideally landing on
    directions 6–8, is the cheapest real strengthening available.
    `test/ss2-divergence-corpus.test.js` pins this arm by name so it cannot be
    forgotten.
@@ -237,10 +279,20 @@ result, and the overstatement is now in `HANDOFF.md`.
    ingest changes what a record carries, every digest in the corpus changes and
    the reports must be regenerated. That is what `--check` is for; treat a
    `--check` failure after an ingest change as expected work, not as corruption.
-   Note the related trap this surfaced: two of the six pre-existing reports name
-   a committed observation record whose digest differs from the report's, which
-   is correct — those records were ingested against a *different* fixture, and an
-   observation record is fixture-relative.
+   Note the related trap this surfaced: ~~two~~ **three** of the six
+   pre-existing reports name a committed observation record whose digest differs
+   from the report's, which is correct — those records were ingested against a
+   *different* fixture, and an observation record is fixture-relative.
+
+   ► **CORRECTED 2026-09-07, and the corrected number is a THIRD value: neither
+   the "two" above nor the "all six" a 2026-09-07 survey proposed.** Measured:
+   of the six pre-existing reports, exactly **three** name a record that is
+   committed at all — `obs-20260830-e1`, `obs-20260830-u1` and
+   `obs-20260830-t1` — and **all three** show a digest difference. The other
+   three (`obs-diag`, `obs-gold3`, `obs-nav6`) name records that were never
+   committed, so they cannot be in the set the sentence describes. Re-derive by
+   comparing each report's `observationDigest` against the top-level `digest` of
+   the record it names under `test/observations/ss2-1v1/`.
 6. **One pre-existing report cannot be resolved from the repo at all.**
    `provisional-prisoner-kill--obs-20260830-t1-6bf4f120.json` names the fixture
    `provisional-prisoner-kill`, which is generated into the ignored `captures/`
