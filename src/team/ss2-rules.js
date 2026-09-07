@@ -971,17 +971,33 @@ function defenderEffects(before, after, target) {
  */
 function statusEffects(attackerBefore, attackerAfter, defenderBefore, defenderAfter, actor, target) {
   const effects = [];
-  const emit = (before, after, view, flag) => {
+  const emit = (before, after, view, flag, inflictorId = null) => {
     if (before[flag] === after[flag]) return;
+    const active = after[flag] === true;
     effects.push({
       kind: EffectKind.STATUS,
       targetId: view.id,
-      status: flag,
-      active: after[flag] === true
+      // SETTING a condition stamps WHO did it, so the status phase can bill the
+      // right gladiator above 1v1. CLEARING one must name the exact token
+      // already on the combatant — the resolver matches status effects by
+      // string equality — so a clear reads the live token back rather than
+      // rebuilding it, which would silently fail to remove a sourced condition.
+      //
+      // Without the set half, every condition inflicted IN PLAY carries no
+      // source, so its tick reads no enchantment damage and does nothing.
+      // Found by playing a fight, not by a test: the narration said "gains
+      // burning" where it should have said "gains burning (from Player 2)".
+      status: active
+        ? ss2StatusToken(flag, inflictorId)
+        : statusTokenFor(view.status ?? [], flag) ?? flag,
+      active
     });
   };
   for (const flag of SS2_DEATH_CLEAR_FLAGS) emit(attackerBefore, attackerAfter, actor, flag);
-  for (const flag of SS2_DEATH_CLEAR_FLAGS) emit(defenderBefore, defenderAfter, target, flag);
+  // The defender is the only side that can GAIN a condition here, and the
+  // attacker is who inflicted it — `damagecharacter`'s proc writes the boolean
+  // on `game_defender` using `game_attacker`'s enchantment.
+  for (const flag of SS2_DEATH_CLEAR_FLAGS) emit(defenderBefore, defenderAfter, target, flag, actor.id);
   for (const flag of SS2_TAUNT_FLAGS) {
     emit(attackerBefore, attackerAfter, actor, flag);
     emit(defenderBefore, defenderAfter, target, flag);

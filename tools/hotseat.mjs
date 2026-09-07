@@ -26,7 +26,8 @@
  *
  * Usage:
  *   node tools/hotseat.mjs [--rules ss2|placeholder] [--seed <n>]
- *                          [--hp <n>] [--armour <n>] [--names A,B]
+ *                          [--hp <n>] [--armour <n>] [--enchant <cond>[:<pot>]]
+ *                          [--names A,B]
  */
 
 import { createInterface } from "node:readline/promises";
@@ -44,7 +45,12 @@ import {
   rngJournal,
   seatOf
 } from "../src/team/index.js";
-import { ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
+import {
+  ss2Combatant,
+  ss2StatusFlagOf,
+  ss2StatusSourceOf,
+  ss2TeamRules
+} from "../src/team/ss2-rules.js";
 
 /**
  * Input that works both ways round.
@@ -90,7 +96,9 @@ const RULE_SETS = Object.freeze({
 });
 
 function parseArgs(argv) {
-  const options = { seed: 1, hp: 60, armour: 0, rules: "ss2", names: ["Player 1", "Player 2"] };
+  const options = {
+    seed: 1, hp: 60, armour: 0, rules: "ss2", enchant: null, names: ["Player 1", "Player 2"]
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
     const next = () => {
@@ -102,6 +110,7 @@ function parseArgs(argv) {
     if (flag === "--seed") options.seed = Number(next());
     else if (flag === "--hp") options.hp = Number(next());
     else if (flag === "--armour") options.armour = Number(next());
+    else if (flag === "--enchant") options.enchant = next();
     else if (flag === "--rules") options.rules = next();
     else if (flag === "--names") options.names = next().split(",").map((part) => part.trim());
     else if (flag === "--help" || flag === "-h") options.help = true;
@@ -111,6 +120,22 @@ function parseArgs(argv) {
   if (!Number.isInteger(options.hp) || options.hp < 1) throw new Error("--hp must be a positive integer.");
   if (!Number.isInteger(options.armour) || options.armour < 0) {
     throw new Error("--armour must be a non-negative integer.");
+  }
+  if (options.enchant !== null) {
+    const [condition, rawPotency] = options.enchant.split(":");
+    if (!Object.hasOwn(ENCHANTMENT_TYPE, condition)) {
+      throw new Error(
+        `--enchant must name one of: ${Object.keys(ENCHANTMENT_TYPE).join(", ")} (e.g. --enchant burning:3).`
+      );
+    }
+    // In-play potency maxes at 3: the magic shop's buttons 2010/2011/2012 push
+    // 3, 2 and 1. Higher is reachable in this tool but is not a state the game
+    // can produce, so it is refused rather than quietly allowed.
+    const potency = rawPotency === undefined ? 3 : Number(rawPotency);
+    if (!Number.isInteger(potency) || potency < 1 || potency > 3) {
+      throw new Error("--enchant potency must be 1, 2 or 3 — the only grades the magic shop sells.");
+    }
+    options.enchant = { condition, type: ENCHANTMENT_TYPE[condition], potency };
   }
   if (!Object.hasOwn(RULE_SETS, options.rules)) {
     throw new Error(`--rules must be one of: ${Object.keys(RULE_SETS).join(", ")}.`);
@@ -132,6 +157,12 @@ Hot-seat: two humans, one keyboard, one fight.
   --hp <n>       starting health for both fighters (default 60). In the build
                  this is DERIVED (herolevel * 10 + vitality * 20) and would be
                  recomputed by battlevalues; here it is staged directly.
+  --enchant <condition>[:<potency>]
+                 arm BOTH fighters with an enchanted weapon, so hits can
+                 inflict a condition: burning, frozen, poison or life_stolen,
+                 potency 1-3 (default 3 — the strongest grade the magic shop
+                 sells). A condition then TAKES ITS BEARER'S NEXT TURN: that is
+                 the build's behaviour, not a penalty this tool invented.
   --armour <n>   give both fighters a breastplate and helmet of this grade
                  (default 0, no armour). SS2 subtracts damage from armour
                  first and carries only the overflow into health.
@@ -206,7 +237,12 @@ function renderResolution(battle, before) {
     } else if (effect.kind === "heal") {
       lines.push(`  ${name} recovers ${effect.amount}`);
     } else if (effect.kind === "status") {
-      lines.push(`  ${name} ${effect.active === false ? "loses" : "gains"} status "${effect.status}"`);
+      // The token may carry its inflictor (`burning:from=p2`). A player wants
+      // the condition and who did it, not the wire format.
+      const condition = ss2StatusFlagOf(effect.status);
+      const source = ss2StatusSourceOf(effect.status);
+      const by = source === null ? "" : ` (from ${combatantById(battle, source)?.name ?? source})`;
+      lines.push(`  ${name} ${effect.active === false ? "loses" : "gains"} ${condition}${by}`);
     } else if (effect.kind === "resource") {
       lines.push(`  ${name} ${effect.resource} -> ${effect.to}`);
     }
@@ -237,7 +273,16 @@ function renderDerivation(battle) {
     `rolled ${event.diceroll} vs ${event.rollNeeded}   ${outcome}`;
 }
 
+const STATUS_PHASE_BLURB = Object.freeze({
+  "frozen-phase": "frozen solid — this turn is spent",
+  "burning-phase": "burning — this turn is spent",
+  "poisoned-phase": "poisoned — this turn is spent",
+  "life-stolen-phase": "life stolen — this turn is spent"
+});
+
 function describeOption(battle, option) {
+  const blurb = STATUS_PHASE_BLURB[option.type];
+  if (blurb) return `${option.type}  (${blurb})`;
   const target = combatantById(battle, option.targetId);
   const targetName = target?.name ?? option.targetId;
   const spell = option.spellKind ? ` (${option.spellKind})` : "";
@@ -271,7 +316,14 @@ function buildPlaceholderFighter(id, name, hp) {
  * the corpus says what a hot-seat duellist should be. `--hp` and `--armour`
  * move them.
  */
-function buildSs2Fighter(id, name, hp, armour) {
+/**
+ * `weapon_enchantment_type` -> the condition it inflicts, from the build's own
+ * mapping (`damagecharacter` `+0x1bf1..+0x1dd2`, types 2/3/4/5). Inverted here
+ * so a player names the condition rather than a magic number.
+ */
+const ENCHANTMENT_TYPE = Object.freeze({ burning: 2, frozen: 3, poison: 4, life_stolen: 5 });
+
+function buildSs2Fighter(id, name, hp, armour, enchant) {
   const source = ss2Combatant(
     {
       strength: 5,
@@ -288,6 +340,12 @@ function buildSs2Fighter(id, name, hp, armour) {
       weapon_max_damage: 6,
       breastplate: armour,
       helmet: armour,
+      // `weapon_enchantment_damage = ceil(weapon_max_damage / 3 * potency)` is
+      // DERIVED from these two by `ss2BattleValues`, exactly as `battlevalues`
+      // does at `+0x320c`. Nothing here states the damage directly.
+      ...(enchant === null
+        ? {}
+        : { weapon_enchantment_type: enchant.type, weapon_enchantment_potency: enchant.potency }),
       gladiator_dir: id === "p1" ? "right" : "left"
     },
     { id, name, controller: "local" }
@@ -340,7 +398,7 @@ async function main() {
 
   const rules = RULE_SETS[options.rules];
   const buildFighter = options.rules === "ss2"
-    ? (id, name) => buildSs2Fighter(id, name, options.hp, options.armour)
+    ? (id, name) => buildSs2Fighter(id, name, options.hp, options.armour, options.enchant)
     : (id, name) => buildPlaceholderFighter(id, name, options.hp);
   const battle = createTeamBattle({
     seed: options.seed,
@@ -367,12 +425,22 @@ async function main() {
 
       console.log(`\n--- turn ${battle.turnNumber} — ${actor.name} (seat ${seatOf(battle, actor.id)}) ---`);
       console.log(renderScoreboard(battle));
-      console.log("\n  actions:");
-      options_.forEach((option, index) => {
-        console.log(`    ${index + 1}) ${describeOption(battle, option)}`);
-      });
+      // A forced phase is not a choice, and presenting a menu of one invites
+      // the player to think they chose it. The build takes the turn before the
+      // buttons are live; this says so.
+      const forcedPhase = options_.length === 1 && STATUS_PHASE_BLURB[options_[0].type];
+      if (forcedPhase) {
+        console.log(`\n  ${actor.name} is ${forcedPhase}. The condition takes the turn.`);
+      } else {
+        console.log("\n  actions:");
+        options_.forEach((option, index) => {
+          console.log(`    ${index + 1}) ${describeOption(battle, option)}`);
+        });
+      }
 
-      const raw = await prompter.ask(`\n  ${actor.name}, choose 1-${options_.length} (or q to quit): `);
+      const raw = await prompter.ask(forcedPhase
+        ? "\n  press enter to take it (or q to quit): "
+        : `\n  ${actor.name}, choose 1-${options_.length} (or q to quit): `);
       if (raw === null) {
         console.log("\n  input ended before the fight did.");
         break;
@@ -382,7 +450,7 @@ async function main() {
         console.log("\nQuit. No result recorded.");
         return;
       }
-      const choice = Number(answer);
+      const choice = forcedPhase && answer === "" ? 1 : Number(answer);
       if (!Number.isInteger(choice) || choice < 1 || choice > options_.length) {
         console.log(`  "${answer}" is not one of 1-${options_.length}. Try again.`);
         continue;

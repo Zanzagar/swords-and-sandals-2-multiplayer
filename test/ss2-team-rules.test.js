@@ -57,6 +57,8 @@ import {
   SS2_MAP_SOURCE_REFS,
   SS2_REQUIRED_RESOURCES,
   SS2_RESOURCE_NAMES,
+  ss2StatusFlagOf,
+  ss2StatusSourceOf,
   ss2StatusToken,
   SS2_STATUS_FLAGS,
   ss2BattleValues,
@@ -746,10 +748,22 @@ test("an enchantment status reaches the resolver as a status effect", () => {
     sawStatus = true;
     const villain = combatantById(battle, "villain");
     assert.ok(SS2_STATUS_FLAGS.includes(outcome.mutation.statusApplied));
-    assert.ok(villain.status.includes(outcome.mutation.statusApplied), `seed ${seed}: status applied`);
+    // Through the token grammar since 2026-09-07: a condition carries its
+    // inflictor (`"burning:from=hero"`), so an exact-string `includes` would
+    // fail on a condition that IS present. The source is asserted too — that is
+    // the half that was silently missing and made every in-play condition tick
+    // for nothing.
+    assert.ok(
+      villain.status.some((token) => ss2StatusFlagOf(token) === outcome.mutation.statusApplied),
+      `seed ${seed}: status applied`
+    );
+    assert.ok(
+      villain.status.some((token) => ss2StatusSourceOf(token) === "hero"),
+      `seed ${seed}: the condition must name the gladiator that inflicted it`
+    );
     assert.ok(
       battle.lastResolution.effects.some(
-        (effect) => effect.kind === "status" && effect.status === outcome.mutation.statusApplied
+        (effect) => effect.kind === "status" && ss2StatusFlagOf(effect.status) === outcome.mutation.statusApplied
       )
     );
   }
@@ -1048,6 +1062,38 @@ test("a condition takes the turn, applies the INFLICTOR's enchantment damage, an
   assert.equal(after.health, before - event.hitpointDamage + event.healed);
   assert.ok(event.healed > 0, "nextphase's heal must still fire; only staminacost is zeroed");
   assert.deepEqual([...after.status], [], "the condition is consumed");
+});
+
+test("a condition inflicted IN PLAY carries its inflictor, so its tick can bill somebody", () => {
+  // THE GAP THIS CLOSES WAS FOUND BY PLAYING A FIGHT, NOT BY A TEST. The status
+  // phase read an inflictor off the token, and the attack path wrote a BARE
+  // flag — so every condition anyone could actually inflict ticked for zero and
+  // the whole mechanism was dead on the only path a player can reach. The
+  // narration said "gains burning" where it should have said "gains burning
+  // (from Player 2)".
+  //
+  // The mutation that kills this is dropping the inflictor argument where the
+  // defender's conditions are emitted.
+  let applied = null;
+  for (let seed = 1; seed <= 80 && applied === null; seed += 1) {
+    const battle = statusBattle({ villainFields: { vitality: 40 }, seed });
+    // The villain wields the enchanted weapon; give the HERO one too so the
+    // hero's swing is what procs, and the hero is the inflictor.
+    const hero = combatantById(battle, "hero");
+    hero.resources.weapon_enchantment_type.value = 2;
+    hero.resources.weapon_enchantment_potency.value = 3;
+    applyAction(battle, { actorId: "hero", type: Ss2ActionType.NORMAL_ATTACK, targetId: "villain" });
+    applied = battle.lastResolution.effects.find(
+      (effect) => effect.kind === "status" && effect.active !== false
+    ) ?? null;
+  }
+  assert.ok(applied, "the sweep must land an enchantment proc, or this test proves nothing");
+  assert.equal(ss2StatusFlagOf(applied.status), "burning");
+  assert.equal(
+    ss2StatusSourceOf(applied.status),
+    "hero",
+    "the condition must name whoever inflicted it, or its tick has no damage to read"
+  );
 });
 
 test("the FIRST condition plays and EVERY condition is consumed — the map's order, corrected 2026-09-07", () => {
