@@ -167,7 +167,16 @@ test("bad input is rejected without starting a fight", async () => {
 
   const badSeed = await runHotseat(["--seed", "not-a-number"], "");
   assert.equal(badSeed.code, 2);
-  assert.match(badSeed.stderr, /--seed must be an integer/);
+  assert.match(badSeed.stderr, /--seed must be a safe integer/);
+
+  // ► **AND AN UNSAFE ONE, which `Number.isInteger` ACCEPTED.** Found by an
+  //   independent Codex review 2026-09-07 and reproduced at the CLI: above
+  //   2^53 the per-bout offset `seed + bout - 1` is lost to floating point, so
+  //   `--seed 1e20 --circuit 3` ran three bouts on the identical tape while
+  //   printing "the same seed and the same choices replay exactly".
+  const unsafeSeed = await runHotseat(["--seed", "100000000000000000000", "--circuit", "3"], "");
+  assert.equal(unsafeSeed.code, 2, "an unsafe integer seed must be refused, not silently collapsed");
+  assert.match(unsafeSeed.stderr, /safe integer/);
 
   // The message now names the SEAT COUNT and the team shape, because with
   // `--teams` the required number is no longer always two.

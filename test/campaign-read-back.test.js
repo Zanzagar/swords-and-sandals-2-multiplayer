@@ -501,14 +501,27 @@ test("`playable` is PROVED against createTeamBattle, not asserted — and it was
     { label: "including the fallen, settled 1v1", ...settledBout(), includeFallen: true }
   ];
 
+  // ► **THE FIRST VERSION OF THIS SWEEP HAD A DEAD BRANCH, found by an
+  //   independent Codex review within the hour.** Both cases report
+  //   `playable: false`, so the arm checking the actual promise — that a
+  //   playable roster CONSTRUCTS — never ran. I guarded against the vacuous
+  //   shape in one direction and walked straight into its mirror image.
+  //
+  //   Chasing it produced a better finding than the fix: `playable` cannot be
+  //   true here AT ALL. See the invariant test below. So this sweep no longer
+  //   pretends the positive arm is reachable; it asserts the direction that
+  //   exists, in BOTH directions, and the separate test pins why.
   let sawPlayableFalse = false;
+  let sawRefusal = false;
+  let sawWalkover = false;
   for (const { label, record, blueprints, includeFallen } of cases) {
     const roster = rosterFromCampaignRecord(record, { blueprints, includeFallen });
 
     let constructs = true;
     let refusal = null;
+    let built = null;
     try {
-      createTeamBattle({
+      built = createTeamBattle({
         seed: 3,
         rules: ss2TeamRules,
         teams: roster.teams.map((team) => ({ id: team.id, name: team.name, combatants: team.combatants }))
@@ -525,6 +538,49 @@ test("`playable` is PROVED against createTeamBattle, not asserted — and it was
       );
     } else {
       sawPlayableFalse = true;
+      // ► **"UNPLAYABLE" HAS TWO DIFFERENT FAILURE MODES and an earlier
+      //   version of this assertion flattened them into one, which failed.**
+      //   An EMPTY side is refused by `createTeamBattle` outright. A side
+      //   holding only CORPSES is ACCEPTED and then stalls — initiative
+      //   includes the dead, and when a dead fighter holds the turn there are
+      //   zero legal actions and no result, permanently. Both mean "cannot be
+      //   fielded"; only one of them throws.
+      //
+      //   So the assertion is per mode, and each is PROVED rather than named.
+      const hasEmptySide = roster.teams.some((team) => team.combatants.length === 0);
+      if (hasEmptySide) {
+        assert.ok(!constructs, `${label}: an empty side must be refused by createTeamBattle`);
+        assert.match(refusal ?? "", /one to three combatants/, `${label}: and refused for that reason`);
+        sawRefusal = true;
+      } else {
+        // ► **MEASURED, AND IT IS NOT WHAT THIS FILE USED TO SAY.** The
+        //   comment in `to-battle.js` describes an unplayable roster as
+        //   STALLING — "initiative includes the dead, zero legal actions, no
+        //   result, permanently". That is not this case and I could not
+        //   reproduce it here. `includeFallen` at 1v1 does not produce a
+        //   roster of corpses: it produces the LIVE WINNER (measured at 88 of
+        //   88 for seed 11) alongside the loser's body. So it constructs, the
+        //   survivor has an action, and the battle settles at once because the
+        //   other side is already eliminated.
+        //
+        //   `playable: false` is still right, and for a better reason than
+        //   "it stalls": red cannot field anybody, so this is not a contest —
+        //   it is a walkover that settles before the dead side ever acts.
+        //   A genuinely all-corpses roster needs a DRAW to produce it, which
+        //   this helper does not build, so the stall claim stays UNVERIFIED
+        //   here rather than being repeated as though it were checked.
+        assert.ok(constructs, `${label}: a roster with a live survivor constructs`);
+        const actor = currentCombatant(built);
+        assert.ok(actor?.alive, `${label}: the fighter holding the turn is the survivor, not a corpse`);
+        assert.ok(legalActions(built).length > 0, `${label}: and he has something he may do`);
+
+        applyAction(built, { ...legalActions(built)[0], actorId: actor.id });
+        assert.ok(
+          built.result,
+          `${label}: with one side already eliminated the bout settles at once rather than being fought`
+        );
+        sawWalkover = true;
+      }
       // Named, so an unplayable roster tells a caller WHICH team it cannot field.
       assert.ok(
         roster.unplayableTeamIds.length > 0,
@@ -537,6 +593,8 @@ test("`playable` is PROVED against createTeamBattle, not asserted — and it was
   // visiting only playable rosters, which is the vacuous-test shape this
   // repository has shipped twice.
   assert.ok(sawPlayableFalse, "no case exercised the unplayable branch — the sweep proved nothing");
+  assert.ok(sawRefusal, "no case exercised the EMPTY-SIDE mode, which is the one this test was written for");
+  assert.ok(sawWalkover, "no case exercised the WALKOVER mode, so the two failure shapes were never distinguished");
 });
 
 test("an eliminated team's EMPTY slot list makes a roster unplayable, and the seam names it", () => {
@@ -550,4 +608,58 @@ test("an eliminated team's EMPTY slot list makes a roster unplayable, and the se
   assert.deepEqual(emptyTeams, ["blue"], "the settled bout's loser is the empty team");
   assert.equal(roster.playable, false, "a roster missing a whole side cannot be fielded");
   assert.deepEqual(roster.unplayableTeamIds, ["blue"], "and the caller is told which side to refill");
+});
+
+
+test("INVARIANT: a roster derived from a settled record is NEVER playable, and that is structural", () => {
+  // WHY THIS IS NOT A STATISTICAL CLAIM. A campaign record can only be built
+  // from a SETTLED battle; settlement requires that at most one team still has
+  // a standing combatant; so read-back always yields at least one side with
+  // nobody alive. There is no input that makes `playable` true.
+  //
+  // Swept anyway, because this project's signature failure is a universal
+  // asserted from a handful of cases and the argument above is exactly the
+  // shape that has been wrong here before. Both bout shapes this file can
+  // build — 1v1 and 2v2 — across twenty seeds, both `includeFallen` settings.
+  //
+  // WHAT A CALLER SHOULD READ INSTEAD is `unplayableTeamIds`, which names the
+  // sides needing a fresh opponent. `src/campaign/circuit.js` uses exactly
+  // that, and refills them.
+  let rosters = 0;
+  let everPlayable = 0;
+  const shapesSeen = new Set();
+
+  for (let seed = 1; seed <= 20; seed += 1) {
+    const bouts = [
+      { shape: "1v1", ...settledBout({ seed }) },
+      (() => {
+        const team = settledTeamBout(seed, "costly");
+        return team === null ? null : { shape: "2v2", ...team };
+      })()
+    ].filter(Boolean);
+
+    for (const bout of bouts) {
+      shapesSeen.add(bout.shape);
+      for (const includeFallen of [false, true]) {
+        const roster = rosterFromCampaignRecord(bout.record, { blueprints: bout.blueprints, includeFallen });
+        rosters += 1;
+        if (roster.playable) everPlayable += 1;
+        assert.ok(
+          roster.unplayableTeamIds.length > 0,
+          `${bout.shape} seed ${seed}: an unplayable roster must NAME the side to refill`
+        );
+      }
+    }
+  }
+
+  // SWEEP, THEN ASSERT YOU FOUND THE CASE — twice over, because a sweep that
+  // reached only one bout shape would prove far less than it appears to.
+  assert.ok(rosters >= 40, `the sweep must actually visit rosters; saw ${rosters}`);
+  assert.deepEqual([...shapesSeen].sort(), ["1v1", "2v2"], "both bout shapes must have been reached");
+  assert.equal(
+    everPlayable,
+    0,
+    "a record-derived roster became playable — if that is now genuinely reachable, the comment in " +
+    "src/campaign/to-battle.js calling this structural is wrong and must be corrected, not this assertion"
+  );
 });

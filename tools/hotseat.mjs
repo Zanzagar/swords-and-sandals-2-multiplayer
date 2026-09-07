@@ -123,7 +123,17 @@ function parseArgs(argv) {
     else if (flag === "--help" || flag === "-h") options.help = true;
     else throw new Error(`Unknown flag ${flag}. Try --help.`);
   }
-  if (!Number.isInteger(options.seed)) throw new Error("--seed must be an integer.");
+  // ► **`Number.isInteger` ACCEPTS 1e20, and every bout then drew the same
+  //   tape. Found by an independent Codex review 2026-09-07 and reproduced:
+  //   `--seed 100000000000000000000 --circuit 3` printed seed 1661992960 for
+  //   all three bouts.** Above 2^53 addition loses the increment entirely, so
+  //   `seed + bout - 1` stopped distinguishing bouts and a circuit silently
+  //   replayed one fight. `isSafeInteger` is the check that was meant.
+  if (!Number.isSafeInteger(options.seed)) {
+    throw new Error(
+      "--seed must be a safe integer: above 2^53 a circuit's per-bout offset is lost and every bout draws the same tape."
+    );
+  }
   if (!Number.isInteger(options.hp) || options.hp < 1) throw new Error("--hp must be a positive integer.");
   if (!Number.isInteger(options.armour) || options.armour < 0) {
     throw new Error("--armour must be a non-negative integer.");
@@ -692,6 +702,30 @@ async function runCircuit({ options, rules, buildFighter, openingTeams, prompter
     if (carried.length > 0) {
       console.log("\n  --- carried into the next bout ---");
       for (const line of carried) console.log(line);
+    }
+
+    // A DRAW leaves nobody standing on either side, so there is nobody to
+    // carry and no next bout. Without this the loop handed `createTeamBattle`
+    // a roster it refuses ("A battle needs exactly two teams"), turning mutual
+    // destruction into a crash. Found by an independent Codex review
+    // 2026-09-07.
+    //
+    // **THIS BRANCH IS UNREACHABLE FROM THIS TOOL TODAY, and saying so is
+    // better than letting it look covered.** Measured: 450 settled bouts —
+    // 1v1, 2v2 and 3v3, 150 seeds each, enchantments armed — produced ZERO
+    // draws under `ss2TeamRules`, and the mechanism says why rather than the
+    // count: one action damages at most one target, so no single action can
+    // empty both sides. No test drives the CLI through a draw because no
+    // input reaches one.
+    //
+    // It is kept because `advanceCircuit` is a library entry point any rule
+    // set may drive, and the drawn case IS covered there
+    // (`test/campaign-circuit.test.js`, with an injected mutual-destruction
+    // rule set). A rule set with area damage or a shared status tick would
+    // make this reachable here too, and then the guard is already right.
+    if (advance.concluded) {
+      console.log(`\n  CIRCUIT ENDS AT BOUT ${bout}: nobody survived to fight the next one.`);
+      return;
     }
 
     teams = advance.teams;

@@ -48,6 +48,8 @@
  * caller that wants free repair has it in writing rather than by omission.
  */
 
+import { normaliseResourceBag } from "../team/resources.js";
+
 import { CampaignRecordError } from "./errors.js";
 import { buildCampaignRecord } from "./from-battle.js";
 import { rosterFromCampaignRecord } from "./to-battle.js";
@@ -186,10 +188,31 @@ export function advanceCircuit(battle, { blueprints, challengers, battleId, reco
   for (const team of roster.teams) {
     for (const combatant of team.combatants) {
       const ended = measured.get(combatant.id) ?? {};
+      // ► **NORMALISE BEFORE COMPARING, or the report lies. Found by an
+      //   independent Codex review 2026-09-07 and reproduced here.** A
+      //   blueprint may DECLARE a value the resolver will never accept:
+      //   `normaliseResourceBag` CLAMPS on the way in, exactly as `health`
+      //   is clamped, so `{ value: 999, min: 0, max: 100 }` enters a battle
+      //   at 100. Comparing the raw declaration reported "100 -> 999" —
+      //   restoration where nothing had changed at all.
+      //
+      //   So compare against what the fighter WILL ACTUALLY ENTER WITH,
+      //   which means running the same normalisation construction runs.
+      //   Plain numbers and already-normalised bags were always right; the
+      //   bounded declaration was the case not visited.
+      const entering = normaliseResourceBag(combatant.resources ?? {});
       const changes = [];
       for (const [name, endValue] of Object.entries(ended)) {
-        const enters = scalarOf(combatant.resources?.[name]);
-        if (enters === null || enters === endValue) continue;
+        const enters = scalarOf(entering[name]);
+        if (enters === null) {
+          // Present at the end of the bout and NOT declared by the blueprint
+          // the fighter is rebuilt from. Reported rather than skipped: it
+          // means the resource silently vanishes between bouts, which is a
+          // louder fact than any restoration.
+          changes.push({ resource: name, measured: endValue, entersAt: null, undeclared: true });
+          continue;
+        }
+        if (enters === endValue) continue;
         changes.push({ resource: name, measured: endValue, entersAt: enters });
       }
       if (changes.length > 0) {
@@ -203,6 +226,32 @@ export function advanceCircuit(battle, { blueprints, challengers, battleId, reco
   // the `playable` fix of 2026-09-07 that includes a team holding NOBODY,
   // which is exactly what a settled bout produces and what used to be missed.
   const emptyTeamIds = new Set(roster.teams.filter((team) => team.combatants.length === 0).map((team) => team.id));
+
+  // ► **A DRAW EMPTIES BOTH SIDES, and this used to hand back ONE team.
+  //   Found by an independent Codex review 2026-09-07.** `battleStanding`
+  //   returns `DRAW` when NO team has a standing combatant
+  //   (`src/team/elimination.js`), so read-back produces two empty teams; the
+  //   loop below replaced the first and skipped the second, returning a
+  //   single-team roster that `createTeamBattle` then refused with "A battle
+  //   needs exactly two teams." A circuit ending in mutual destruction is an
+  //   ordinary outcome, not a malformed one — there is simply nobody to carry.
+  //
+  //   Reported through `concluded` with NO teams, rather than invented around
+  //   by promoting a challenger into a fight with nobody.
+  const everyTeamEmpty = roster.teams.every((team) => team.combatants.length === 0);
+  if (everyTeamEmpty) {
+    return {
+      record,
+      teams: [],
+      survivors: [],
+      fallen: roster.fallen,
+      seatChanges: roster.seatChanges,
+      restoredResources,
+      facingCorrections: [],
+      concluded: true,
+      winnerTeamId: battle.result.winnerTeamId ?? null
+    };
+  }
 
   const facingCorrections = [];
   const teams = [];
@@ -235,7 +284,9 @@ export function advanceCircuit(battle, { blueprints, challengers, battleId, reco
   const survivors = teams.flatMap((team) =>
     team.combatants.filter((combatant) => (combatant.health ?? 0) > 0).map((combatant) => combatant.id)
   );
-  const concluded = roster.teams.every((team) => team.combatants.length === 0);
+  // Every-team-empty already returned above, so a roster reaching here has
+  // somebody to carry. Stated rather than recomputed, so the two cannot drift.
+  const concluded = false;
 
   return {
     record,

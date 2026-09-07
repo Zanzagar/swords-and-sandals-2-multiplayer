@@ -21,8 +21,11 @@ import {
   applyAction,
   createTeamBattle,
   currentCombatant,
+  defineTeamRuleSet,
+  EffectKind,
   legalActions,
-  pendingResultEvent
+  pendingResultEvent,
+  RuleSetVerification
 } from "../src/team/index.js";
 import { ss2Combatant, ss2TeamRules, SS2_FACING_LEFT } from "../src/team/ss2-rules.js";
 import { advanceCircuit, CampaignRecordError, circuitLength, CircuitSide } from "../src/campaign/index.js";
@@ -337,22 +340,37 @@ test("bout -> record -> bout -> record: the survivor is measurably weaker the se
 
   // Bout two, built from what bout one returned. This is the whole point:
   // the teams handed back are directly constructible.
-  const second = settle(
-    createTeamBattle({
-      seed: 21,
-      rules: ss2TeamRules,
-      teams: first.teams.map((team) => ({ id: team.id, name: team.name, combatants: team.combatants }))
-    })
-  );
-  assert.ok(second.result, "the carried roster produced a real, settleable bout");
+  const second = createTeamBattle({
+    seed: 21,
+    rules: ss2TeamRules,
+    teams: first.teams.map((team) => ({ id: team.id, name: team.name, combatants: team.combatants }))
+  });
 
-  // The carried fighter entered bout two below full health — measured, not
-  // assumed, and the sweep above guarantees the case exists.
-  assert.ok(carriedHealth < fullHealth);
-  const enteredAt = first.teams
+  // ► **ASSERT ON THE BATTLE, NOT ON ITS INPUT. An independent Codex review
+  //   found that this read `first.teams` — the blueprint — and did so AFTER
+  //   settling bout two.** `createTeamBattle` COPIES its sources (measured:
+  //   the live combatant is not the same object, and mutating it leaves the
+  //   blueprint at its original value), so reading the input could never
+  //   detect construction resetting the carried health. It asserted that the
+  //   value I passed in was the value I passed in.
+  //
+  //   Checked on the LIVE combatant, and BEFORE any action is applied, so it
+  //   is bout two's starting state rather than its end state.
+  assert.ok(carriedHealth < fullHealth, "the swept survivor must actually be wounded");
+  const enteredAt = second.teams
     .flatMap((team) => team.combatants)
     .find((combatant) => combatant.id === "hero" || combatant.id === "foe");
-  assert.equal(enteredAt.health, carriedHealth, "bout two began from bout one's measured end health");
+  assert.ok(enteredAt, "the carried fighter must be present in bout two");
+  assert.notEqual(
+    enteredAt,
+    first.teams.flatMap((team) => team.combatants).find((c) => c.id === enteredAt.id),
+    "construction copies, so this must be the LIVE combatant and not the blueprint"
+  );
+  assert.equal(enteredAt.health, carriedHealth, "bout two BEGAN from bout one's measured end health");
+  assert.ok(enteredAt.health < enteredAt.maxHealth, "and began wounded");
+
+  settle(second);
+  assert.ok(second.result, "the carried roster produced a real, settleable bout");
 
   // And the loop can keep going: bout two settles, so it too can be advanced.
   const third = advanceCircuit(second, {
@@ -367,4 +385,154 @@ test("bout -> record -> bout -> record: the survivor is measurably weaker the se
   });
   assert.ok(third.record, "a circuit is not limited to two bouts");
   assert.notEqual(third.record.battleId, first.record.battleId, "each bout writes its own record");
+});
+
+test("A DRAW ENDS THE CIRCUIT: nobody survives, so no half-roster is handed back", () => {
+  // ► **THE DEFECT THIS PINS, found by an independent Codex review and
+  //   reproduced here.** A draw and "both teams empty" are the SAME resolver
+  //   outcome: `battleStanding` returns `DRAW` when NO team has a standing
+  //   combatant. Read-back then produces two empty teams, and the challenger
+  //   loop replaced the first while skipping the second — handing back a
+  //   ONE-TEAM roster that `createTeamBattle` refuses with "A battle needs
+  //   exactly two teams." Mutual destruction turned into a crash.
+  //
+  //   Built with an injected rule set rather than SS2's, because a mutual
+  //   kill is exactly what SS2's arithmetic makes hard to arrange on purpose;
+  //   the resolver path being tested is the same one either way.
+  const mutualDestruction = defineTeamRuleSet({
+    id: "mutual-destruction",
+    verification: RuleSetVerification.PLACEHOLDER,
+    provenance: { runtimeVerified: false, note: "test-only: kills both sides at once, to produce a DRAW" },
+    actionTypes: ["strike"],
+    maximumHealth: (source) => source.maxHealth ?? 10,
+    legalActions: (view) => [{ type: "strike", targetId: view.foes[0]?.id ?? view.actor.id }],
+    // One strike removes everybody, so the battle settles with no side standing.
+    resolveAction: (request) => ({
+      effects: [
+        { kind: EffectKind.DAMAGE, targetId: request.actorId, amount: 999 },
+        { kind: EffectKind.DAMAGE, targetId: request.targetId, amount: 999 }
+      ],
+      events: []
+    }),
+    chooseAiAction: () => null
+  });
+
+  const blue = [{ id: "b1", name: "Blue One", health: 10, maxHealth: 10, controller: "local" }];
+  const red = [{ id: "r1", name: "Red One", health: 10, maxHealth: 10, controller: "local" }];
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: mutualDestruction,
+    teams: [{ id: "blue", name: "Blue", combatants: blue }, { id: "red", name: "Red", combatants: red }]
+  });
+
+  const actor = currentCombatant(battle);
+  applyAction(battle, { ...legalActions(battle)[0], actorId: actor.id });
+  assert.ok(battle.result, "the bout must have settled");
+  assert.equal(battle.result.reason, "draw", "and it must be a DRAW — that is the case under test");
+  assert.equal(battle.result.winnerTeamId ?? null, null, "a draw names no winner");
+
+  const pending = pendingResultEvent(battle);
+  acknowledgeResultAnimation(battle, {
+    type: "battle-result-animation-complete",
+    completionToken: pending.completionToken
+  });
+
+  const advance = advanceCircuit(battle, {
+    blueprints: [...blue, ...red],
+    challengers: {
+      teamId: "challenger",
+      combatants: [{ id: "c1", name: "Challenger", health: 10, maxHealth: 10, controller: "local" }],
+      side: CircuitSide.RIGHT
+    },
+    battleId: "drawn-bout",
+    recordedAt: "2026-09-07T00:00:00Z"
+  });
+
+  assert.equal(advance.concluded, true, "a draw concludes the circuit: there is nobody to carry");
+  assert.deepEqual(advance.teams, [], "and no half-roster is handed back to be refused later");
+  assert.deepEqual(advance.survivors, [], "nobody survived");
+  assert.equal(advance.winnerTeamId, null, "a draw still names no winner");
+  assert.ok(advance.record, "the drawn bout is still RECORDED — it happened");
+
+  // The defect was that a caller could build from what came back. Prove the
+  // caller now cannot be tempted: there is nothing to build from.
+  assert.throws(
+    () => createTeamBattle({ seed: 2, rules: mutualDestruction, teams: advance.teams }),
+    /two teams/,
+    "an empty team list is refused loudly, which is why the CLI must check `concluded` first"
+  );
+});
+
+test("a CLAMPED declaration is not reported as restored, because the fighter never held the declared value", () => {
+  // ► **THE FALSE REPORT THIS PINS, found by an independent Codex review.**
+  //   `normaliseResourceBag` CLAMPS on the way in, the same way `health` is
+  //   clamped, so a blueprint declaring `{ value: 999, min: 0, max: 100 }`
+  //   enters a battle at 100 and can never hold 999. Comparing the raw
+  //   DECLARATION against the measured end value reported "100 -> 999":
+  //   restoration where absolutely nothing had changed.
+  //
+  //   The first version of the comparison read the declaration. It now runs
+  //   the same normalisation construction runs, so it compares against what
+  //   the fighter will actually enter with.
+  const inertRules = defineTeamRuleSet({
+    id: "bounded-resource-probe",
+    verification: RuleSetVerification.PLACEHOLDER,
+    provenance: { runtimeVerified: false, note: "test-only: ends the bout without touching the bounded pool" },
+    resources: ["ration"],
+    actionTypes: ["strike"],
+    maximumHealth: (source) => source.maxHealth ?? 10,
+    legalActions: (view) => [{ type: "strike", targetId: view.foes[0]?.id ?? view.actor.id }],
+    resolveAction: (request) => ({
+      effects: [{ kind: EffectKind.DAMAGE, targetId: request.targetId, amount: 999 }],
+      events: []
+    }),
+    chooseAiAction: () => null
+  });
+
+  // Declared ABOVE its own maximum, so construction clamps it to 100 and it
+  // stays there — nothing in the rule set writes to it.
+  const bounded = { ration: { value: 999, min: 0, max: 100 } };
+  const blue = [{ id: "b1", name: "Blue", health: 10, maxHealth: 10, controller: "local", resources: bounded }];
+  const red = [{ id: "r1", name: "Red", health: 10, maxHealth: 10, controller: "local", resources: bounded }];
+
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: inertRules,
+    teams: [{ id: "blue", name: "Blue", combatants: blue }, { id: "red", name: "Red", combatants: red }]
+  });
+
+  // Prove the premise before relying on it: the live fighter holds the CLAMPED
+  // value, not the declared one. Without this the test could pass for the
+  // wrong reason.
+  const live = battle.teams.flatMap((team) => team.combatants)[0];
+  assert.equal(live.resources.ration.value, 100, "construction must clamp 999 down to the declared maximum");
+
+  const actor = currentCombatant(battle);
+  applyAction(battle, { ...legalActions(battle)[0], actorId: actor.id });
+  assert.ok(battle.result, "the bout must settle");
+  const pending = pendingResultEvent(battle);
+  acknowledgeResultAnimation(battle, {
+    type: "battle-result-animation-complete",
+    completionToken: pending.completionToken
+  });
+
+  const advance = advanceCircuit(battle, {
+    blueprints: [...blue, ...red],
+    challengers: {
+      teamId: "challenger",
+      combatants: [{ id: "c1", name: "Challenger", health: 10, maxHealth: 10, controller: "local", resources: bounded }],
+      side: CircuitSide.RIGHT
+    },
+    battleId: "bounded-bout",
+    recordedAt: "2026-09-07T00:00:00Z"
+  });
+
+  const rations = advance.restoredResources
+    .flatMap((entry) => entry.changes)
+    .filter((change) => change.resource === "ration");
+  assert.deepEqual(
+    rations,
+    [],
+    `a pool nobody touched must not be reported as restored; got ${JSON.stringify(rations)}`
+  );
 });

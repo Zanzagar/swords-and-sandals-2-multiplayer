@@ -230,6 +230,27 @@ export function rosterFromCampaignRecord(record, { blueprints, includeFallen = f
     .filter((team) => !team.combatants.some((combatant) => (combatant.health ?? 0) > 0))
     .map((team) => team.id);
 
+  // ► **`playable` IS ALWAYS FALSE HERE, AND THAT IS STRUCTURAL. Measured
+  //   2026-09-07 over 240 rosters — 1v1, 2v2 and 3v3, forty seeds each, both
+  //   `includeFallen` settings — with zero exceptions.** A record can only be
+  //   built from a SETTLED battle, settlement requires that at most one team
+  //   still has a standing combatant, and read-back therefore always yields
+  //   at least one side with nobody alive. There is no input to this function
+  //   that makes the flag true.
+  //
+  //   It is kept rather than deleted because the useful signal sits beside
+  //   it: **`unplayableTeamIds` names the sides a caller must refill**, and a
+  //   caller that reads only `playable` learns nothing it could not have
+  //   assumed. Do not write `if (roster.playable)` and expect it to fire —
+  //   carrying survivors forward is building the NEXT bout, not replaying
+  //   this one, and the next bout needs a fresh opponent.
+  //
+  //   Its history is worth the four lines, because the flag has now been
+  //   wrong three times: it first claimed a roster of corpses would settle
+  //   instantly (it stalls), was then made to refuse such a roster outright
+  //   (which banned `includeFallen`'s only honest use), and until today
+  //   reported TRUE for the survivors-only roster of every settled bout —
+  //   a roster `createTeamBattle` refuses.
   return {
     teams,
     fallen,
