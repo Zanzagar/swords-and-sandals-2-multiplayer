@@ -41,6 +41,7 @@
 
 import { EffectKind } from "../team/rule-set.js";
 import {
+  citationFor,
   DEATH_STATUS_CLEAR_ORDER,
   DEFAULT_FACING,
   FACING_VALUES,
@@ -75,10 +76,28 @@ function mirrorsToVanillaField(name) {
  * Why a resource cannot reach vanilla, as a fixed reason string. Split from
  * "no vanilla field at all" because a resource colliding with a field another
  * source already owns is a different mistake from inventing one.
+ *
+ * ► **A THIRD REASON, added 2026-09-07, because the second one was being
+ * given for a case it does not describe.** Once a caller could declare a
+ * resource bag wider than `CANONICAL_RESOURCE_SOURCES`, a rule set could write
+ * a resource whose vanilla field **exists and is cited by the battle map** —
+ * `ss2TeamRules` destroying a `gauntlet` is the case that found this — and the
+ * adapter answered "no vanilla field carries this resource". That is false and
+ * it points the reader at the wrong fix: the field is real, it is simply
+ * outside the adapter's write allowlist, and widening that allowlist is a
+ * deliberate decision (see `docs/ss2-adapter-contract.md`, "Still open" item 2
+ * on equipment identity) rather than an oversight.
  */
 function unmappedResourceReason(name) {
   if (RESOURCE_RESERVED_FIELDS.has(name)) {
     return "this vanilla field is owned by canonical health, canonical status or the clip record, not by a resource";
+  }
+  if (citationFor(name)) {
+    return (
+      "the battle map cites this vanilla field, but it is not in the adapter's declared-resource write " +
+      "allowlist, so the resolved value is reported rather than written. Widening the allowlist is a decision: " +
+      "see docs/ss2-adapter-contract.md, 'Still open' item 2"
+    );
   }
   return "no vanilla field carries this resource";
 }
@@ -509,13 +528,50 @@ export function absentResourceSources(fields) {
  * (equipment ids, the chance cache, the inventory, the timed spell fields).
  * See `docs/ss2-adapter-contract.md` for the canonical-shape gaps left.
  */
+/**
+ * Validates a caller-supplied resource bag for `toCanonicalCombatantSource`.
+ *
+ * Two rules, and both exist to stop the opt-in becoming a hole:
+ *
+ * 1. **Every name must be a field the battle map already cites.** The bag is
+ *    hashed and replayed, so a name nobody can point at a vanilla field for
+ *    would put an invented quantity into combat state that no peer, capture or
+ *    document could ever check. `citationFor` is the same gate
+ *    `CANONICAL_RESOURCE_SOURCES` itself passes in `ss2-adapter.test.js`.
+ * 2. **Every value must be a finite number.** The bag is numeric; anything
+ *    needing structure is the rule set's own static configuration.
+ */
+function assertSuppliedResources(resources, id) {
+  if (!isPlainVanillaObject(resources)) {
+    throw new AdapterStateError(
+      `Combatant ${id}: \`resources\` must be a plain object of vanilla field names to finite numbers.`
+    );
+  }
+  for (const [name, value] of Object.entries(resources)) {
+    if (!citationFor(name)) {
+      throw new AdapterStateError(
+        `Combatant ${id} declares resource ${name}, which no battle-map section cites. The resource bag is ` +
+        "hashed and replayed, so a name with no vanilla field behind it would put an unverifiable quantity " +
+        "into combat state. Name a field the map records, or keep it in the rule set's own configuration."
+      );
+    }
+    if (!Number.isFinite(value)) {
+      throw new AdapterStateError(
+        `Combatant ${id} declares resource ${name} as ${String(value)}; the bag carries finite numbers only.`
+      );
+    }
+  }
+  return resources;
+}
+
 export function toCanonicalCombatantSource(source, {
   id,
   name,
   teamId = null,
   controller,
   clip = null,
-  loadout = null
+  loadout = null,
+  resources = null
 } = {}) {
   const record = normaliseVanillaCombatant(source, { clip });
   const { fields } = record;
@@ -551,7 +607,30 @@ export function toCanonicalCombatantSource(source, {
     loadout: loadout === null ? backed.loadout : { ...loadout },
     // The one open, hashed, resolver-clamped numeric bag. Declared on every
     // combatant so either side of the per-action binding can be written.
-    resources: canonicalResourcesFrom(fields),
+    //
+    // **`resources` is an OPT-IN override, added 2026-09-07, and the default
+    // is deliberately unchanged.** `canonicalResourcesFrom` reads the closed
+    // `CANONICAL_RESOURCE_SOURCES` list, which is 20 names — and
+    // `ss2TeamRules` declares 32, so a SUPPLIED gladiator could not be driven
+    // by the map-derived rule set at all: it reached its first swing and was
+    // refused for a `min_damage`/`max_damage` it had no way to carry. (An
+    // AI-filled slot never had the problem; its bag comes from
+    // `team.aiFill.resources` and bypasses this list entirely.)
+    //
+    // Widening `CANONICAL_RESOURCE_SOURCES` was the obvious fix and is the
+    // wrong one: that constant IS this path's projected bag, `combatStateHash`
+    // covers the projection, so growing it re-hashes EVERY adapter-built
+    // battle for every peer — and the owner's 2026-09-07 decision was to pin
+    // the shape rather than carry a version id, so an old peer cannot tell
+    // "different code" from state divergence. An override makes the hash move
+    // OPT-IN, paid only by a caller that asks for a wider bag. It follows the
+    // `loadout` override two lines above, which has worked this way all along.
+    //
+    // Nothing here decides combat: the bag is copied verbatim, with no
+    // formula, no roll and no arithmetic.
+    resources: resources === null
+      ? canonicalResourcesFrom(fields)
+      : { ...assertSuppliedResources(resources, id) },
     maxHealth: Number(fields.hitpointsmax ?? 0),
     health: Number(fields.hitpoints ?? 0),
     // The gladiator's true starting conditions. `roster.normaliseCombatant`

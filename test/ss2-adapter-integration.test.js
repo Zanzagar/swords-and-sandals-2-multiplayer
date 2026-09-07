@@ -38,7 +38,7 @@ import {
   toTeamWireState
 } from "../src/team/index.js";
 
-import { ss2TeamRules } from "../src/team/ss2-rules.js";
+import { ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
 import {
   AcknowledgementError,
   ActionAnimationError,
@@ -2019,4 +2019,130 @@ test("and the wall it hits is the ATTACKER's damage pair, at the swing, not at c
     false,
     "if this ever becomes true, the two walls above have moved and both tests must be re-derived"
   );
+});
+
+/* ------------------------------------------------------------------ */
+/* The opt-in resource bag: a SUPPLIED gladiator under ss2TeamRules     */
+/* ------------------------------------------------------------------ */
+
+/** The SS2 bag as flat numbers, which is the shape a caller declares. */
+function ss2Bag(overrides = {}) {
+  const combatant = ss2Combatant(
+    { ...vanillaGladiator(overrides), gladiator_dir: "right" },
+    { id: "template", name: "Template", controller: "local", derive: false }
+  );
+  return Object.fromEntries(
+    Object.entries(combatant.resources).map(([name, entry]) => [name, typeof entry === "object" ? entry.value : entry])
+  );
+}
+
+function ss2SuppliedHost({ resources = true } = {}) {
+  const member = (id, speed) => ({
+    id,
+    controller: "local",
+    vanilla: vanillaGladiator({ character_name: id, speed }),
+    clip: { gladiator_dir: "right" },
+    ...(resources ? { resources: ss2Bag({ speed }) } : {})
+  });
+  return createVanillaBattleHost({
+    rules: ss2TeamRules,
+    seed: 7,
+    teams: [
+      { id: "red", name: "Red", members: [member("hero", 30)] },
+      { id: "blue", name: "Blue", members: [member("villain", 6)] }
+    ]
+  });
+}
+
+test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declares the bag", () => {
+  // THE POINT OF THIS TEST. Before 2026-09-07 the adapter host could drive the
+  // map-derived rule set only through an AI-FILLED slot, whose bag comes from
+  // `team.aiFill.resources` and bypasses `CANONICAL_RESOURCE_SOURCES`. A
+  // gladiator a PERSON controls had no equivalent and was refused at its first
+  // swing — so the one seam meant to drive both layers together could not host
+  // SS2's own arithmetic with a human in the seat.
+  const host = ss2SuppliedHost();
+  host.constructArena();
+
+  let actions = 0;
+  while (!host.battle.result && actions < 300) {
+    actions += 1;
+    const actorId = host.currentCombatantId();
+    const options = host.legalActions(actorId);
+    assert.ok(options.length > 0, "a living actor always has an action");
+    host.submit({ actorId, ...options[0] });
+  }
+
+  assert.ok(host.battle.result, `the bout must settle; ran ${actions} actions`);
+  assert.equal(host.battle.result.reason, "elimination");
+  assert.ok(actions > 3, `and it must be a real fight, not one swing: ${actions} actions`);
+  // WHAT THIS DOES NOT BUY, stated because a silent gap would be a lie. The
+  // rule set destroys armour PIECES, and a piece id is outside the adapter's
+  // declared-resource write allowlist — so the resolved value reaches combat
+  // state and the hash, and does NOT reach the vanilla mirror. It is REPORTED,
+  // which is the contract's "Still open" item 2 arriving in practice.
+  const unmapped = host.steps.flatMap((step) => step.unmapped ?? []);
+  assert.ok(unmapped.length > 0, "this fixture wears armour, so a piece removal must actually occur");
+  const pieces = new Set(unmapped.map((entry) => entry.resource));
+  for (const resource of pieces) {
+    assert.ok(
+      ["boot", "breastplate", "gauntlet", "greaves", "helmet", "shield", "shinguard", "shoulderguard"].includes(resource),
+      `only armour piece ids should be unmapped here, not ${resource}`
+    );
+  }
+  // And the reason must name the real problem: the field EXISTS and is cited.
+  for (const entry of unmapped) {
+    assert.match(entry.reason, /not in the adapter's declared-resource write allowlist/);
+  }
+
+  // WHY THAT IS A REPORTED GAP AND NOT A BLOCKER, measured 2026-09-07 rather
+  // than assumed: the campaign layer cannot want a destroyed piece, because it
+  // carries no resource of any kind. `grep -c resources src/campaign/from-battle.js`
+  // is 0, and an outcome projects combatantId, name, teamId, seatId, slotIndex,
+  // aiFilled, survived, health, maxHealth and statuses — nothing else. If a
+  // record ever gains a resources block, re-derive this: the unmapped piece
+  // above becomes a real defect at that moment.
+
+  // The whole 32-name SS2 vocabulary reaches the projection, which is what the
+  // arithmetic needs and what the closed 20-name list could not supply.
+  const projected = Object.keys(host.wire().teams[0].combatants[0].resources);
+  assert.equal(projected.length, 32);
+  for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon"]) {
+    assert.ok(projected.includes(name), `${name} must reach the projection`);
+  }
+});
+
+test("the opt-in is OPT-IN: without it the bag and the refusal are exactly as before", () => {
+  const plain = ss2SuppliedHost({ resources: false });
+  assert.deepEqual(
+    Object.keys(plain.wire().teams[0].combatants[0].resources).sort(),
+    [...CANONICAL_RESOURCE_SOURCES].sort(),
+    "a caller that asks for nothing gets the closed list, so its hash cannot have moved"
+  );
+  assert.throws(
+    () => plain.submit({ actorId: plain.currentCombatantId(), ...plain.legalActions()[0] }),
+    (error) => /max_damage, min_damage/.test(error.message)
+  );
+
+  // And declaring the bag MOVES THE HASH. That is the cost, it is paid only by
+  // a caller who asks, and it is pinned here so it can never be paid silently.
+  assert.notEqual(ss2SuppliedHost().hash(), plain.hash());
+});
+
+test("the opt-in bag admits only map-cited vanilla fields, and only numbers", () => {
+  const build = (resources) => () => createVanillaBattleHost({
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", name: "Red", members: [{ id: "hero", controller: "local", vanilla: vanillaGladiator({ speed: 30 }), clip: { gladiator_dir: "right" }, resources }] },
+      { id: "blue", name: "Blue", members: [{ id: "villain", controller: "local", vanilla: vanillaGladiator(), clip: { gladiator_dir: "right" }, resources: ss2Bag() }] }
+    ]
+  });
+
+  // An invented name would put an unverifiable quantity into a hashed, replayed
+  // projection that no peer, capture or document could ever check.
+  assert.throws(build({ ...ss2Bag({ speed: 30 }), momentum: 9 }), (error) => /no battle-map section cites/.test(error.message));
+  assert.throws(build({ ...ss2Bag({ speed: 30 }), herolevel: "5" }), (error) => /finite numbers only/.test(error.message));
+  assert.throws(build("not-an-object"), (error) => /plain object/.test(error.message));
+  // The guard is the same one `CANONICAL_RESOURCE_SOURCES` itself passes.
+  assert.doesNotThrow(build(ss2Bag({ speed: 30 })));
 });

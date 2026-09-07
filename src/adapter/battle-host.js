@@ -251,7 +251,17 @@ class VanillaBattleHost {
           name: member.name,
           teamId,
           controller: member.controller,
-          clip: member.clip ?? null
+          clip: member.clip ?? null,
+          // OPT-IN, and absent by default. A supplied gladiator's bag is the
+          // closed `CANONICAL_RESOURCE_SOURCES` list unless the caller names a
+          // wider one — which is what a rule set declaring more than those 20
+          // needs, and what `ss2TeamRules` (32 names) needs to be driven with a
+          // gladiator a PERSON controls. An AI-filled slot has always had this
+          // through `team.aiFill.resources`; the supplied path had nothing.
+          // Declaring it moves this battle's hash, which is why it is opt-in:
+          // `combatStateHash` covers the projected bag, and a caller that does
+          // not ask for a wider one hashes exactly as it did before.
+          resources: member.resources ?? null
         });
         sources.push(source);
         templates.set(`${teamId}#${index}`, source.vanilla);

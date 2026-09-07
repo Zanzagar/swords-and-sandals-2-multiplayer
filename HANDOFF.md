@@ -37,6 +37,16 @@ deliberately NOT projected, because `combatStateHash` hashes everything that is.
   nothing was watching it, so growing it would have re-hashed every
   adapter-built battle with the suite green.
 
+  ► **AND IT CAN NOW (later the same day).** `toCanonicalCombatantSource` takes
+    an OPT-IN `resources` override and `battle-host.js` passes
+    `member.resources`, so a supplied gladiator declaring the SS2 bag fights a
+    full battle under `ss2TeamRules`. A caller that declares nothing is
+    byte-identical to before — the hash moves only for a caller who asks, and a
+    test pins that it moves. **What it does not buy: a destroyed armour piece
+    still does not reach the vanilla mirror**, because piece ids are outside the
+    write allowlist. Reported, pinned, and harmless today because a campaign
+    record carries no resources at all (measured, not assumed).
+
 *(The brief it supersedes, whose ranked items 1, 3 and 4 are all still open and
 all still the owner's:)*
 [2026-09-07 08:25 — the accepted decisions do not authorize anything](docs/handoffs/2026-09-07-0825--the-accepted-decisions-do-not-authorize-anything.md).**

@@ -998,11 +998,41 @@ that was closed two commits ago.
    rule set today; what it cannot do is drive it with a gladiator a person
    controls**, which is what a playable adapter-driven battle needs.
 
-   The supplied path now reaches its real wall — the role-based
-   `max_damage`/`min_damage` requirement, at the swing — rather than a
-   diagnostic's throw at construction; see `compareMaximumHealth`. Both walls
-   are pinned by tests. Widening the canonical list is real work with its own
-   evidence requirements and is NOT done.
+   **CLOSED THE SAME DAY, and NOT by widening the canonical list.**
+   `toCanonicalCombatantSource(record, { resources })` is an **opt-in override**
+   on the supplied path, mirroring the `loadout` override beside it, and
+   `battle-host.js` passes `member.resources`. A supplied gladiator declaring
+   the SS2 bag now fights a full battle under `ss2TeamRules` — measured:
+   settles by elimination, 32 resources projected. **A caller that declares
+   nothing is byte-identical to before**, which is the whole point: widening
+   `CANONICAL_RESOURCE_SOURCES` would re-hash every adapter-built battle for
+   every peer, and with the shape pinned rather than versioned an old peer
+   cannot tell "different code" from state divergence. The override makes that
+   cost **opt-in**, paid only by a caller who asks, and a test pins that the
+   hash moves so it can never be paid silently.
+
+   The override admits only names the battle map cites (`citationFor`) and only
+   finite numbers — so it cannot put an unverifiable quantity into a hashed,
+   replayed projection.
+
+   **WHAT IT DOES NOT BUY, and this is where item 2's original prediction
+   finally arrives in practice.** `ss2TeamRules` destroys armour PIECES, and a
+   piece id is outside the adapter's declared-resource **write** allowlist. So
+   the resolved value reaches combat state and the hash, and does **not** reach
+   the vanilla mirror: it is REPORTED as unmapped. The reason string was
+   misleading until 2026-09-07 — it said "no vanilla field carries this
+   resource" for a field the map cites by name — and now distinguishes "not in
+   the write allowlist" from "no such field", because the two need different
+   fixes.
+
+   **That gap is reported, not a blocker, and the reason is measured rather
+   than assumed:** the campaign layer cannot want a destroyed piece, because it
+   carries no resource of any kind. `grep -c resources src/campaign/from-battle.js`
+   is **0**; an outcome projects `combatantId`, `name`, `teamId`, `seatId`,
+   `slotIndex`, `aiFilled`, `survived`, `health`, `maxHealth` and `statuses`.
+   **If a record ever gains a resources block, this becomes a real defect at
+   that moment.** Widening the WRITE allowlist to the piece ids remains a
+   decision this item still owns.
 3. **Facing is read but not carried.** `gladiator_dir` affects the knockback
    sign and the debris direction in the 1v1 candidate. It is a string
    (`"right"` / `"left"`), so the numeric resource bag is not its home either.

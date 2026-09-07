@@ -2,14 +2,14 @@
 handoff:      2026-09-07-0955--the-last-adapter-gap-and-the-sweep
 written:      2026-09-07 09:55 -0400
 sessionId:    cb4573bf-667b-4a07-b201-bd507c84f3ff (https://claude.ai/code/session_01RUt3YdrZ6qwhazUARrSoQi)
-branch:       arena/champion-capture. FOUR commits, `20a8fa0` `c5d45f9`
-              `cc4ff6e` `659dfab`. The first three were pushed at 10:05 with
+branch:       arena/champion-capture. SIX commits, `20a8fa0` `c5d45f9`
+              `cc4ff6e` `659dfab` `e86643f` + the opt-in bag. The first three were pushed at 10:05 with
               the owner's explicit approval (`470c56a..cc4ff6e`); the fourth
               came after.
               Push state is decided at the very end of this session — check
               `git log --oneline github/arena/champion-capture..HEAD` rather
               than believing any sentence here.
-suite:        813 / 812 / 0 / 1 (fresh-clone profile: `captures/` holds only
+suite:        816 / 815 / 0 / 1 (fresh-clone profile: `captures/` holds only
               ARCHIVE-MANIFEST.sha256 and README.md), measured at the end.
               From 787 at session start. **It read 808 mid-session and a
               verifier caught me quoting the stale figure in a wave brief.**
@@ -218,17 +218,41 @@ A comment in `ss2-team-rules.test.js` claiming *"the adapter's resource bags
 already had pins like these"* was half wrong, and the wrong half is why a
 reader would have believed the suite guarded it.
 
-**THE DECISION I DID NOT TAKE, and it is the next real fork.** The wave
-recommends an **opt-in `resources` override on a supplied member** — about four
-lines across two files, moving **no existing hash**, versus growing
-`CANONICAL_RESOURCE_SOURCES`, which re-hashes every adapter-built battle for
-every peer. Two companion fixes go with it: guard the opt-in with
-`citationFor(name) !== null` so only map-cited vanilla fields can enter a hashed
-projection, and make `absentResourceSources`/`defaultedResources` respect the
-supplied bag. **One decisive unknown nobody has tested: whether the campaign
-layer needs a DESTROYED ARMOUR PIECE to reach the vanilla combat object.** If it
-does, the opt-in's unmapped `helmet`/`greaves` is a real bug rather than an
-honest report, and the wider change becomes mandatory. Check that first.
+**4. THE FORK IS TAKEN, AND THE "DECISIVE UNKNOWN" TURNED OUT NOT TO BE
+DECIDING ANYTHING.** The wave named one blocker: whether the campaign layer
+needs a DESTROYED ARMOUR PIECE to reach the vanilla combat object. Measured
+rather than reasoned: **it cannot want one, because a campaign record carries no
+resource of any kind.** `grep -c resources src/campaign/from-battle.js` is **0**,
+and an outcome projects `combatantId, name, teamId, seatId, slotIndex, aiFilled,
+survived, health, maxHealth, statuses`. Second fact, also measured: a
+non-canonical resource **cannot read as mirror drift** — `mirrorDifferences`
+gates on `CANONICAL_RESOURCE_SOURCES` via `mirrorsToVanillaField`, so it returns
+`[]` even with `helmet 6` against a field of 2.
+
+So the opt-in was safe and is **built**:
+`toCanonicalCombatantSource(record, { resources })`, with `battle-host.js`
+passing `member.resources`. **A gladiator A PERSON CONTROLS now fights a full
+battle under `ss2TeamRules` through the adapter host** — settles by elimination,
+32 resources projected. A caller that declares nothing is byte-identical to
+before; the hash moves only for a caller who asks, and a test pins that it moves
+so the cost can never be paid silently. The bag admits only map-cited names
+(`citationFor`) and only finite numbers.
+
+**AND THE FIGHT FOUND WHAT THE PROBE HAD NOT.** My first probe showed
+`unmapped: []` — because its gladiators wore no armour. The integration fixture
+does, so `ss2TeamRules` **destroys an armour piece**, and a piece id is outside
+the adapter's declared-resource WRITE allowlist. The value reaches combat state
+and the hash and does **not** reach the vanilla mirror. It is reported — and the
+reason string was WRONG until now, saying *"no vanilla field carries this
+resource"* about a field the map cites by name. It now distinguishes "not in the
+write allowlist" from "no such field", because those need different fixes.
+**That gap is reported, not a blocker** — see the campaign measurement above —
+and it is the contract's "Still open" item 2 arriving in practice at last.
+**Widening the WRITE allowlist to the piece ids is the decision that remains.**
+
+Four of five mutants die on the opt-in. The fifth is provably equivalent
+(`?? undefined` hits the `= null` default parameter), which is why it is
+recorded here rather than chased.
 
 **A METHODOLOGICAL LESSON THAT COST THIS WAVE ACCURACY: I launched it against a
 tree I then kept editing.** Two agents correctly reported that my brief's
@@ -244,9 +268,12 @@ claims, one of them mine.
    finding being wrong is **21%** — measured, on the ones that were checked.
    `ss2-arena-route.md`, `ss2-capture-staging.md`, `ss2-staging-runbook.md` and
    `ss2-item-tables.md` got no corrections applied at all this session.
-2. **Decide the supplied-gladiator route above**, after checking the campaign
-   /destroyed-piece unknown. It is what stands between the adapter host and a
-   playable SS2 battle with a human in a seat.
+2. **Decide whether the WRITE allowlist grows to the armour piece ids.** It is
+   the last thing between an adapter-driven SS2 battle and a vanilla mirror
+   that knows a piece was destroyed. Nothing needs it today — the campaign
+   record carries no resources — so it is a decision, not a defect, and the
+   contract's "Still open" item 2 owns it. **The reported-unmapped behaviour is
+   pinned by a test, so it cannot start being silently dropped instead.**
 3. **The `ss2-champion-dna.md` §7 ranged-primary question**, which is now a live
    capture-plan hypothesis rather than a settled invariant: stage `weapon:61` on
    the hero and see whether `initialise` really can start him in range. Cheap,
