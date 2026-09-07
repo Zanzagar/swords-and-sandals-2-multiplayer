@@ -129,6 +129,7 @@ import { fileURLToPath } from "node:url";
 import {
   applyAction,
   combatantById,
+  combatStateHash,
   createTeamBattle,
   currentCombatant,
   legalActions,
@@ -716,21 +717,58 @@ test("declaring a defender's damage pair MOVES the battle hash, which is why no 
   // PROJECTION change, not a tidy-up — two peers, one with the pair and one
   // without, desync on a battle they agree about in every arithmetic respect.
   // The candidate must keep omitting it, which is what the map already said.
-  const withToken = replayableGoldens.filter(
-    (golden) => completionTokenOf(replayGolden(golden).battle.events) !== null
-  );
-  assert.ok(withToken.length > 0, "no golden settles; this test would asserting nothing");
-
-  for (const golden of withToken) {
-    const baseline = completionTokenOf(replayGolden(golden).battle.events);
-    const forced = completionTokenOf(replayWithVillainPair(golden, 999, 999).battle.events);
+  // ► **CORRECTED after an independent Codex review, and the correction is the
+  //   point.** This test first filtered to goldens that SETTLE, and compared
+  //   their completion tokens. `golden-armoured-deflection-threshold-cleared`
+  //   has `resultEvent: null` — it is a non-lethal hit — so it settles, never
+  //   entered the loop, and the one fixture whose villain actually OMITS the
+  //   pair was the one fixture this test skipped. It was named for a hole and
+  //   stepped around it: the project's signature defect, caught here by a
+  //   reviewer rather than by the suite.
+  //
+  //   `combatStateHash` is compared directly instead. It exists for every
+  //   battle, settled or not, and it is the token's second half anyway.
+  for (const golden of replayableGoldens) {
+    const baseline = combatStateHash(replayGolden(golden).battle);
+    const forced = combatStateHash(replayWithVillainPair(golden, 999, 999).battle);
     assert.notEqual(
       forced,
       baseline,
       `${golden.fixtureId}: a declared villain damage pair left the battle hash unchanged, so the ` +
       "projection no longer covers declared resources — read src/team/resolver.js:480"
     );
-    // And the outcome half is untouched: same winner, same reason.
+  }
+
+  // The ABSENT-versus-DECLARED case, which is the one the corpus actually
+  // faces, and which the token comparison could not reach. Only the armoured
+  // golden's villain omits the pair, so it is named rather than filtered for:
+  // if another golden ever omits it, the assertion below says so.
+  const omitting = replayableGoldens.filter((golden) => golden.scenario.villain.min_damage === undefined);
+  assert.deepEqual(
+    omitting.map((golden) => golden.fixtureId),
+    ["golden-armoured-deflection-threshold-cleared"],
+    "the set of goldens whose villain omits the damage pair changed"
+  );
+  const absent = combatStateHash(replayGolden(omitting[0]).battle);
+  const declared = combatStateHash(replayWithVillainPair(omitting[0], 1, 1).battle);
+  assert.notEqual(
+    absent,
+    declared,
+    "declaring the villain's pair as 1/1 — the value the arithmetic defaults to anyway — must still " +
+    "move the hash, because the projection covers the DECLARATION and not just the value. If these " +
+    "are equal, completing the fixture is free and this whole test is unnecessary; check " +
+    "src/team/resolver.js:480 before believing that."
+  );
+
+  // And the outcome is genuinely unchanged for the settled ones: same winner,
+  // same reason, only the battle half of the token moves.
+  const settling = replayableGoldens.filter(
+    (golden) => completionTokenOf(replayGolden(golden).battle.events) !== null
+  );
+  assert.equal(settling.length, 19, "the 19 lethal goldens are what carry the outcome-half assertion");
+  for (const golden of settling) {
+    const baseline = completionTokenOf(replayGolden(golden).battle.events);
+    const forced = completionTokenOf(replayWithVillainPair(golden, 999, 999).battle.events);
     assert.equal(
       forced.slice(0, forced.lastIndexOf(":")),
       baseline.slice(0, baseline.lastIndexOf(":")),

@@ -1159,13 +1159,36 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
         throw new TeamRuleSetError(`${request.type} needs a target; ${String(request.targetId)} is not a combatant.`);
       }
 
-      // Drawn before anything else, matching the build: every band assigns the
-      // direction before its own `checkattackroll()` call (`+0x608a` before
-      // `+0x6146`, `+0x61f1` before `+0x62ad`, `+0x635c` before `+0x6418`).
-      const attackDirection = rolls.randomBetween(ATTACK_DIRECTION_ROLL_LABEL, band.low, band.high);
-
+      // BOTH RECORDS ARE BUILT BEFORE THE FIRST DRAW, and the order is
+      // load-bearing rather than tidy.
+      //
+      // `vanillaRecordOf(actor, "attacker")` is where the role-based damage-pair
+      // requirement throws. Drawing first would make that refusal EXPENSIVE:
+      // `randomBetween` advances the channel's generator state and cursor,
+      // `applyAction` has no rollback around resolution, and the cursor is
+      // inside `toTeamWireState` — so a refused action would leave the battle
+      // hashed differently from a peer that never attempted it, and each retry
+      // would burn another draw. Measured on 2026-09-07 before the fix: three
+      // rejections took the journal from 3 draws to 6 and moved the hash every
+      // time.
+      //
+      // This is the same hazard the `fixtureReplay` gate exists for one level
+      // up — the first-blood refusal below IS still post-draw, and is gated at
+      // construction for exactly that reason. A guard that can fire on an
+      // ordinary play path had to be cheaper than that, so it runs first.
+      //
+      // Found by an independent Codex adversarial review of `89bc6c0` and
+      // confirmed by direct measurement before it was believed.
+      //
+      // Neither call draws, so the RNG SEQUENCE is unchanged by moving them:
+      // the direction is still the first sample of the action, matching the
+      // build, where every band assigns the direction before its own
+      // `checkattackroll()` call (`+0x608a` before `+0x6146`, `+0x61f1` before
+      // `+0x62ad`, `+0x635c` before `+0x6418`).
       const hero = vanillaRecordOf(actor, "attacker");
       const villain = vanillaRecordOf(target, "defender");
+
+      const attackDirection = rolls.randomBetween(ATTACK_DIRECTION_ROLL_LABEL, band.low, band.high);
       const attackerBefore = { ...hero };
       const defenderBefore = { ...villain };
       const scenario = {

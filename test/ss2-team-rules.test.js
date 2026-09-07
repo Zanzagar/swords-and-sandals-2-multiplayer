@@ -32,6 +32,7 @@ import {
   advanceAiTurns,
   applyAction,
   combatantById,
+  combatStateHash,
   createOrderedRngChannel,
   createTeamBattle,
   currentCombatant,
@@ -327,6 +328,57 @@ test("an ATTACKER missing the damage pair is refused BY NAME when its swing reso
       () => applyAction(battle, { actorId: "hero", type: Ss2ActionType.NORMAL_ATTACK, targetId: "villain" }),
       (error) => error instanceof TeamRuleSetError && error.message.includes(missing),
       `an attacker omitting ${missing} must be refused by name when it swings`
+    );
+  }
+});
+
+test("a REFUSED attack costs nothing: no RNG draw, no hash movement, however often it is retried", () => {
+  // The defect this test exists for, found by an independent Codex review of
+  // 89bc6c0 and confirmed by measurement before it was believed. The
+  // construction check no longer refuses an incomplete gladiator, so the
+  // refusal moved into `resolveAction` — and it originally sat AFTER the
+  // direction draw. `randomBetween` advances the channel's generator state and
+  // cursor, `applyAction` has no rollback around resolution, and the cursor is
+  // inside `toTeamWireState`. So every rejected swing moved the battle hash and
+  // each retry burned another draw: measured 3 -> 4 -> 5 -> 6 over three
+  // attempts, against a peer that never attempted it and stayed at 3.
+  //
+  // A guard that can fire on an ordinary play path must be free. The mutation
+  // that kills this test is moving `vanillaRecordOf(actor, "attacker")` back
+  // below the draw.
+  // Vitality 20 so it SURVIVES the hero's blow and gets a turn of its own —
+  // the only way to reach the refusal is to be a legal actor first.
+  const source = ss2Combatant(gladiator({ vitality: 20 }), { id: "villain", name: "Villain" });
+  delete source.resources.min_damage;
+  const battle = createTeamBattle({
+    seed: 7,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9 }), { id: "hero", name: "Hero" })] },
+      { id: "blue", combatants: [source] }
+    ]
+  });
+  applyAction(battle, { actorId: "hero", type: Ss2ActionType.QUICK_ATTACK, targetId: "villain" });
+  assert.equal(currentCombatant(battle).id, "villain", "the incomplete gladiator must get a turn");
+
+  const drawsBefore = rngJournal(battle).length;
+  const hashBefore = combatStateHash(battle);
+  assert.ok(drawsBefore > 0, "the hero's swing must have drawn, or this test proves nothing");
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    assert.throws(
+      () => applyAction(battle, { actorId: "villain", type: Ss2ActionType.NORMAL_ATTACK, targetId: "hero" }),
+      (error) => error instanceof TeamRuleSetError && error.message.includes("min_damage")
+    );
+    assert.equal(
+      rngJournal(battle).length,
+      drawsBefore,
+      `attempt ${attempt}: a refused attack consumed an RNG draw it cannot roll back`
+    );
+    assert.equal(
+      combatStateHash(battle),
+      hashBefore,
+      `attempt ${attempt}: a refused attack moved the battle hash, so peers desync on a no-op`
     );
   }
 });
