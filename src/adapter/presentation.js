@@ -27,42 +27,37 @@
  *
  * ---
  *
- * **DESIGN GAP, stated and deliberately not filled: per-action animation
- * acknowledgement.**
+ * **PER-ACTION ANIMATION ACKNOWLEDGEMENT — the part of it that lives here.**
  *
- * Every command carries the resolver `sequence` it came from, which orders
- * them relative to each other. Nothing orders them relative to *time*. There
- * is no acknowledgement anywhere between an action's commands and the next
- * action's: `BIND_GLOBALS` and `CLIP_GOTO` carry a sequence and no completion
- * token, the binder's cursor advances on drain rather than on anything the
- * surface reports, and the only acknowledgement in the whole adapter is the
- * terminal one in `acknowledgement.js`, which fires once per battle.
+ * This was a stated, deliberately unfilled gap until 2026-09-07. The hazard it
+ * names is real: a host that submits action N+1 while action N's timeline is
+ * still running rebinds `_global.attacker` / `_global.defender` /
+ * `game_attacker` / `game_defender` underneath it, and vanilla's mapped
+ * functions read those globals rather than parameters captured at dispatch.
  *
- * So a host that submits action N+1 while action N's timeline is still running
- * will rebind `_global.attacker` / `_global.defender` / `game_attacker` /
- * `game_defender` underneath it, and vanilla's mapped functions read those
- * globals rather than parameters captured at dispatch. That is a real hazard
- * and it is not mitigated here.
+ * The seam has four parts. Part 1 is here — **every command bound from an
+ * event carries an `actionToken` naming the resolved action it belongs to** —
+ * and parts 2 and 3 are the gate in `src/adapter/action-gate.js`. Part 4, what
+ * happens when a surface never reports, is a host policy decision and is
+ * deliberately implemented nowhere: see that module's header.
  *
- * What a seam that closed it would have to offer, so nobody has to guess:
+ * **A TOKEN IS NOT `event.sequence`, and the old sketch here said it was.**
+ * "The resolver sequence is already unique per action and would do" was wrong.
+ * `addEvent` stamps `sequence: battle.events.length + 1`, so it is unique per
+ * EVENT; one action emits one, two or four of them (measured over 5,708
+ * actions — see `action-gate.js`), so a token read off `event.sequence` would
+ * split a killing blow into four actions.
  *
- * 1. a per-action token on the commands of one resolved action — the resolver
- *    sequence is already unique per action and would do, but it has to be
- *    carried on `BIND_GLOBALS` and `CLIP_GOTO` and echoed back, not merely
- *    stamped;
- * 2. a reporting call the surface makes when that action's timeline reaches
- *    its terminal frame, naming the token, shaped like
- *    `reportDeathAnimation` — accepted once, duplicates answered rather than
- *    thrown, an unknown token refused;
- * 3. a gate the host consults before submitting the next action, so "the
- *    resolver is ready" and "the surface is ready" are two separate questions
- *    with two separate answers;
- * 4. an answer for what happens when the surface never reports — a timeout is
- *    a policy decision and belongs to the host, not to this module.
- *
- * None of that is implemented. Inventing a mechanism here without a capture of
- * the vanilla timeline's own completion signal would put a guess at the centre
- * of the action loop, which is worse than a documented gap.
+ * The boundary that does work is `lastResolvedAction(battle).firstEventSequence`,
+ * which the resolver already computes. It is NOT in `toTeamWireState`, and
+ * that is load-bearing: `combatStateHash` hashes the whole projection, so
+ * projecting an action boundary would move every pinned battle hash. **So the
+ * boundary is carried IN by the caller** — `actionBoundaries` here,
+ * `drain(wire, { actionBoundary })` on the binder — and is never derived from
+ * the wire. A caller that supplies none gets `actionToken: null` on every
+ * command, which says "nobody told us where this action began" rather than
+ * inventing an answer. It is null, not absent, so a host cannot read a missing
+ * field as "no gating needed".
  */
 
 import { EliminationEvent } from "../team/elimination.js";
@@ -332,23 +327,77 @@ function clipGoto(sequence, placement, chosen, role) {
 }
 
 /**
+ * Normalises the caller-supplied action boundaries.
+ *
+ * Each entry is one resolved action's `lastResolvedAction(battle).firstEventSequence`.
+ * They must be positive integers in strictly ascending order, because an
+ * action that began at a lower sequence than the one before it is not a thing
+ * the resolver can produce, and silently sorting the caller's list would hide
+ * a host that had lost track of its own action order.
+ */
+function assertActionBoundaries(actionBoundaries) {
+  if (!Array.isArray(actionBoundaries)) {
+    throw new PresentationError(
+      "actionBoundaries must be an array of resolver sequence numbers, one per resolved action."
+    );
+  }
+  let previous = 0;
+  for (const boundary of actionBoundaries) {
+    if (!Number.isInteger(boundary) || boundary <= 0) {
+      throw new PresentationError(
+        `An action boundary is a positive integer resolver sequence, not ${String(boundary)}.`
+      );
+    }
+    if (boundary <= previous) {
+      throw new PresentationError(
+        `Action boundaries must ascend strictly; ${boundary} follows ${previous}. ` +
+        "Each one is an action's firstEventSequence, and the resolver stamps those in order."
+      );
+    }
+    previous = boundary;
+  }
+  return actionBoundaries;
+}
+
+/**
  * Converts resolver events into ordered presentation commands.
+ *
+ * `actionBoundaries` is how the per-action animation token gets here. It is
+ * NOT derivable from `wire`: the resolver's own action boundary lives on
+ * `battle.lastResolution`, which `toTeamWireState` deliberately does not
+ * project because `combatStateHash` covers everything it does project. Supply
+ * none and every command carries `actionToken: null`.
  *
  * @param {object} wire `toTeamWireState(battle)`
  * @param {object} options.layout from `buildArenaLayout`
  * @param {object} [options.bindings] the animation binding table
  * @param {number} [options.fromSequence] resume point; only events after it are bound
- * @returns {{ commands: object[], nextSequence: number }}
+ * @param {number[]} [options.actionBoundaries] each action's `firstEventSequence`, ascending
+ * @returns {{ commands: object[], nextSequence: number, actionTokens: number[] }}
  */
 export function presentResolvedEvents(wire, {
   layout,
   bindings = PLACEHOLDER_ANIMATION_BINDINGS,
-  fromSequence = 0
+  fromSequence = 0,
+  actionBoundaries = []
 } = {}) {
   assertCombatProjection(wire);
   if (!layout || typeof layout.placementFor !== "function") {
     throw new PresentationError("Presentation needs an arena layout from buildArenaLayout().");
   }
+  assertActionBoundaries(actionBoundaries);
+  // The action an event belongs to is the last one that began at or before it.
+  // Linear rather than clever: the boundaries ascend and so do the events, but
+  // this is called with a whole event log often enough that a scan per event
+  // is the honest cost of not assuming the caller's list is aligned.
+  const tokenFor = (sequence) => {
+    let token = null;
+    for (const boundary of actionBoundaries) {
+      if (boundary > sequence) break;
+      token = boundary;
+    }
+    return token;
+  };
   const combatants = combatantIndex(wire);
   const commands = [];
   let nextSequence = fromSequence;
@@ -476,27 +525,65 @@ export function presentResolvedEvents(wire, {
     for (const placement of layout.placements) refresh(placement);
   }
 
-  return Object.freeze({ commands: Object.freeze(commands), nextSequence });
+  // Stamped here rather than at each push site, because the action a command
+  // belongs to is a pure function of the `sequence` it already carries — the
+  // last boundary at or before it. So a knockout, its `team-eliminated` and the
+  // terminal `battle-result-pending` all inherit the token of the killing blow,
+  // which is the action whose timeline is actually playing.
+  const tokensSeen = [];
+  const stamped = commands.map((command) => {
+    const actionToken = tokenFor(command.sequence);
+    if (actionToken !== null && !tokensSeen.includes(actionToken)) tokensSeen.push(actionToken);
+    return Object.freeze({ ...command, actionToken });
+  });
+  return Object.freeze({
+    commands: Object.freeze(stamped),
+    nextSequence,
+    // The distinct tokens this batch carried, in order, so a gate can register
+    // them without rescanning the commands.
+    actionTokens: Object.freeze(tokensSeen)
+  });
 }
 
 /**
  * A stateful cursor over `presentResolvedEvents`, so a host can drain new
  * commands after each action without rebinding the whole event log. The cursor
- * holds a sequence number and nothing else — no combat state.
+ * holds a sequence number and the action boundaries it has been told about —
+ * no combat state.
+ *
+ * `drain(wire, { actionBoundary })` is how the per-action animation token gets
+ * in. Pass `lastResolvedAction(battle).firstEventSequence` after each
+ * `applyAction` and every command this binder emits for that action carries it.
+ * Pass nothing and every command carries `actionToken: null`, because the
+ * boundary is not in the wire projection and this module will not guess one —
+ * see the header for why `event.sequence` is NOT that boundary.
  */
 export function createPresentationBinder({ layout, bindings = PLACEHOLDER_ANIMATION_BINDINGS } = {}) {
   let cursor = 0;
+  const actionBoundaries = [];
   return Object.freeze({
     get sequence() {
       return cursor;
     },
-    drain(wire) {
-      const result = presentResolvedEvents(wire, { layout, bindings, fromSequence: cursor });
+    /** The action boundaries this binder has been told about, in order. */
+    get actionBoundaries() {
+      return Object.freeze([...actionBoundaries]);
+    },
+    drain(wire, { actionBoundary } = {}) {
+      if (actionBoundary !== undefined && actionBoundary !== null) {
+        // Validated against the whole list, so a host that hands the same
+        // boundary twice — or an older one — fails here rather than producing
+        // commands stamped with a token for an action that already finished.
+        assertActionBoundaries([...actionBoundaries, actionBoundary]);
+        actionBoundaries.push(actionBoundary);
+      }
+      const result = presentResolvedEvents(wire, { layout, bindings, fromSequence: cursor, actionBoundaries });
       cursor = result.nextSequence;
       return result.commands;
     },
     reset() {
       cursor = 0;
+      actionBoundaries.length = 0;
     }
   });
 }

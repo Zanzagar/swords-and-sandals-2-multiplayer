@@ -965,37 +965,81 @@ that was closed two commits ago.
    `staminaleft` cannot appear as keys in a persisted outcome. Today this is
    moot (`from-battle.js` projects no `resources` block at all), but it is the
    constraint any future attempt will hit.
-5. **There is no per-action animation acknowledgement.** This is the one gap in
-   the acknowledgement story, and it is a hazard rather than a shape problem.
+5. **Per-action animation acknowledgement — BUILT 2026-09-07, and the sketch
+   that stood here was wrong about its own mechanism.**
 
-   Every presentation command carries the resolver `sequence` it came from,
-   which orders the commands *relative to each other*. Nothing orders them
-   relative to **time**. `bind-globals` and `clip-goto` carry a sequence and no
-   completion token; `createPresentationBinder`'s cursor advances on drain
-   rather than on anything the surface reports; and the only acknowledgement
-   anywhere in the adapter is the terminal one in `acknowledgement.js`, which
-   fires once per battle.
+   The hazard was real and is stated unchanged: a host that submits action N+1
+   while action N's timeline is still running rebinds `_global.attacker` /
+   `_global.defender` / `game_attacker` / `game_defender` underneath it, and
+   vanilla's mapped functions read those globals rather than parameters
+   captured at dispatch. Nothing sequenced the rebind against the running
+   timeline.
 
-   So a host that submits action N+1 while action N's timeline is still running
-   rebinds `_global.attacker` / `_global.defender` / `game_attacker` /
-   `game_defender` underneath it — and vanilla's mapped functions read those
-   globals rather than parameters captured at dispatch. Nothing sequences the
-   rebind against the running timeline, and nothing here mitigates it.
+   **THE PREMISE CORRECTION, and it would have built the wrong thing.** This
+   entry used to say "the resolver sequence is already unique per action and
+   would serve". It is not: `addEvent` stamps
+   `sequence: battle.events.length + 1`, so `sequence` is unique per EVENT.
+   Measured over 5,708 actions (40 seeds, 1v1 and 3v3, `ss2TeamRules`): 5,488
+   actions emitted one event, 140 emitted two, and 80 emitted four — the
+   killing blow emits the action, the knockout, `team-eliminated` and
+   `battle-result-pending`. A token read off `event.sequence` splits one action
+   into four, and the host then gates on the wrong number. That is a sweep of
+   one rule set, not a law: `assertActionOutcome` requires only that `events`
+   be an array, so a rule set may legally emit none or a dozen, and "a new
+   action begins at every non-elimination event" is therefore not derivable
+   from the event stream either.
 
-   **This is documented, not designed.** What a seam that closed it would have
-   to offer, stated so nobody has to guess: (1) a per-action token on one
-   resolved action's commands — the resolver sequence is already unique per
-   action and would serve, but it has to be *carried* on `bind-globals` and
-   `clip-goto` and *echoed back*, not merely stamped; (2) a reporting call the
-   surface makes when that action's timeline reaches its terminal frame, naming
-   the token and shaped like `reportDeathAnimation` — accepted once, duplicates
-   answered rather than thrown, an unknown token refused; (3) a gate the host
-   consults before submitting the next action, so "the resolver is ready" and
-   "the surface is ready" stay two questions with two answers; and (4) a policy
-   for a surface that never reports, since a timeout is a host decision rather
-   than a presentation one. None of it is implemented, and inventing a mechanism
-   without a capture of the vanilla timeline's own completion signal would put a
-   guess at the centre of the action loop.
+   The identifier that works already existed: `lastResolvedAction(battle).firstEventSequence`.
+   **It is deliberately NOT in `toTeamWireState`, and that is load-bearing** —
+   `combatStateHash` hashes the whole projection, so projecting an action
+   boundary would move every pinned battle hash and desync an old peer from a
+   new one. The boundary is therefore CARRIED IN by the caller and never
+   derived from the wire.
+
+   What is built, against the four parts this entry asked for:
+
+   1. **The token.** Every command bound from an event carries `actionToken`.
+      `presentResolvedEvents(wire, { actionBoundaries })` takes an ascending
+      array of boundaries; `createPresentationBinder(...).drain(wire, { actionBoundary })`
+      takes one per action and is what `battle-host.js` uses. A caller that
+      supplies none gets `actionToken: **null**` on every command — present and
+      null, so a host cannot read a missing field as "no gating needed" — and
+      the module invents nothing. Boundaries must ascend strictly; a repeated
+      or backwards one is refused rather than sorted, because a host that has
+      lost track of its own action order should find out here.
+   2. **The reporting call.** `src/adapter/action-gate.js`:
+      `gate.report(token)` / `host.reportActionAnimation(token)`. Accepted
+      once; a duplicate is answered rather than thrown; an unknown token is
+      refused. An out-of-order report is accepted and FLAGGED rather than
+      refused — a surface finishing a later action first is unmeasured here,
+      not contradicted by resolved state, and this project refuses only what
+      resolved state can contradict.
+   3. **The gate.** `host.readyForNextAction()` answers "is the surface ready?"
+      as a separate question from "has the resolver finished?". It is
+      **advisory by default**, because every headless caller — the goldens, the
+      replay harness, the suite — has no surface to report from and a blocking
+      gate would deadlock them. `createVanillaBattleHost({ awaitAnimations: true })`
+      makes `submit` refuse while a token is unreported, and it refuses
+      **before** `applyAction`, because an applied action cannot be taken back.
+   4. **The never-reports policy is still not implemented, deliberately.** No
+      timer, no deadline, no default timeout lives anywhere in `src/adapter/`.
+      A host that stops waiting says so itself through
+      `abandon(token, reason)` / `host.abandonActionAnimation(token, reason)`,
+      and the reason is MANDATORY so that a gate opened by giving up is
+      distinguishable in the record from one opened by a surface reporting.
+      Nothing has ever captured the vanilla timeline's own completion signal,
+      so any duration chosen here would be the guess this entry warned about.
+
+   **Nothing in the host ever calls `report`.** That is the same rule
+   `acknowledgeResultAnimations` was rewritten to obey: a convenience that
+   supplies the evidence it is checking is not a convenience, and a gate that
+   opens itself is not a gate.
+
+   **What it does NOT prove.** No renderer exists, so this is a seam ahead of
+   its consumer: the tests drive it with a simulated surface, and no capture
+   has observed a vanilla action timeline reaching a terminal frame. The token
+   is a resolver quantity — it names which action a command belongs to, and
+   says nothing about how long that action's animation takes.
 
 ## Networking boundary
 

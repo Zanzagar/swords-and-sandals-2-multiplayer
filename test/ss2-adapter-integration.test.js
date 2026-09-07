@@ -40,6 +40,7 @@ import {
 
 import {
   AcknowledgementError,
+  ActionAnimationError,
   BattleHostError,
   bindingPlanFor,
   CANONICAL_RESOURCE_SOURCES,
@@ -1832,4 +1833,139 @@ test("GAP: the adapter presents the resolver's initiative and never translates a
     }
   }
   assert.equal(JSON.stringify(commands).includes("nextphase"), false);
+});
+
+/* ------------------------------------------------------------------ */
+/* The per-action animation gate, driven by the host                   */
+/* ------------------------------------------------------------------ */
+
+/** The first blue fighter still standing — blue's second slot is AI-filled. */
+const livingBlue = (host) =>
+  host.battle.teams.find((team) => team.id === "blue").combatants.find((combatant) => combatant.alive).id;
+
+test("the host stamps every action's commands with the RESOLVER's action boundary", () => {
+  const host = makeHost(2);
+  host.constructArena();
+
+  const steps = fightToSettlement(host);
+  assert.ok(steps.length >= 2, `the fight must take several actions: ${steps.length}`);
+
+  let multiSequenceSteps = 0;
+  for (const step of steps) {
+    if (step.commands.length === 0) continue;
+    assert.equal(typeof step.actionBoundary, "number");
+    assert.deepEqual([...step.actionTokens], [step.actionBoundary], "one action, one token");
+    if (new Set(step.commands.map((command) => command.sequence)).size > 1) multiSequenceSteps += 1;
+    for (const command of step.commands) {
+      assert.equal(
+        command.actionToken,
+        step.actionBoundary,
+        `${command.kind}@seq${command.sequence} must carry ${step.actionBoundary}`
+      );
+    }
+  }
+  // The whole point: at least one action bound commands from more than one
+  // event, so the token is demonstrably not `event.sequence`.
+  assert.ok(multiSequenceSteps > 0, "a knockout must put two events under one token");
+});
+
+test("the host never reports an action animation on the surface's behalf", () => {
+  const host = makeHost(2, { awaitAnimations: true });
+  host.constructArena();
+
+  const first = host.submit({ actorId: "red-1", type: "melee", targetId: "blue-1" });
+  assert.deepEqual(host.pipeline, HOST_PIPELINE, "the gate is a step in the pipeline, not a side effect");
+
+  // `submit` observed the token. It did NOT open the gate — a gate that
+  // supplies its own evidence is not a gate, which is the lesson
+  // `acknowledgeResultAnimations` was rewritten to learn.
+  const gate = host.readyForNextAction();
+  assert.equal(gate.enforced, true);
+  assert.equal(gate.ready, false);
+  assert.deepEqual([...gate.pending], [first.actionBoundary]);
+
+  assert.throws(
+    () => host.submit({ actorId: "red-2", type: "melee", targetId: "blue-2" }),
+    (error) =>
+      error instanceof BattleHostError &&
+      /has not reported action/.test(error.message) &&
+      /rebind _global.attacker/.test(error.message)
+  );
+  // Refused BEFORE the resolver was touched: the hazard is a rebind over a
+  // running timeline, and an applied action cannot be taken back.
+  assert.equal(host.steps.length, 1);
+  assert.equal(host.currentCombatantId(), "red-2");
+
+  const reported = host.reportActionAnimation(first.actionBoundary);
+  assert.equal(reported.counted, true);
+  assert.equal(host.readyForNextAction().ready, true);
+  assert.doesNotThrow(() =>
+    host.submit({ actorId: host.currentCombatantId(), type: "melee", targetId: livingBlue(host) })
+  );
+});
+
+test("a host that gives up on a surface says so in its own words, and the reason is kept", () => {
+  const host = makeHost(2, { awaitAnimations: true });
+  host.constructArena();
+  const first = host.submit({ actorId: "red-1", type: "melee", targetId: "blue-1" });
+
+  assert.throws(
+    () => host.abandonActionAnimation(first.actionBoundary),
+    (error) => error instanceof ActionAnimationError && /without a reason/.test(error.message)
+  );
+  assert.equal(host.readyForNextAction().ready, false, "a refused abandonment leaves the gate shut");
+
+  host.abandonActionAnimation(first.actionBoundary, "no animation surface attached (test policy)");
+  assert.equal(host.readyForNextAction().ready, true);
+  assert.deepEqual(
+    host.actionAnimationState().abandoned,
+    [{ token: first.actionBoundary, reason: "no animation surface attached (test policy)" }]
+  );
+  assert.doesNotThrow(() =>
+    host.submit({ actorId: host.currentCombatantId(), type: "melee", targetId: livingBlue(host) })
+  );
+
+  // The adapter owns no timer: nothing here ever abandons anything by itself.
+  const second = host.steps.at(-1);
+  assert.deepEqual([...host.readyForNextAction().pending], [second.actionBoundary]);
+});
+
+test("the gate is ADVISORY by default, so every headless caller is unaffected", () => {
+  const host = makeHost(3);
+  host.constructArena();
+  fightToSettlement(host);
+  reportAnimationSurface(host);
+
+  // A whole battle ran to settlement with nothing ever reporting an action
+  // animation — which is exactly what the goldens, the replay harness and this
+  // suite do, none of which has a surface to report from.
+  const state = host.actionAnimationState();
+  assert.equal(state.ready, false, "the gate observed the actions...");
+  assert.equal(state.reported.length, 0, "...and nothing answered...");
+  assert.deepEqual(state.abandoned, []);
+  assert.equal(host.readyForNextAction().enforced, false, "...because it was never enforcing");
+  assert.equal(state.observed.length, state.pending.length);
+  assert.ok(state.observed.length >= 3, `the battle must have opened it repeatedly: ${state.observed.length}`);
+});
+
+test("an AI turn goes through the same gate a human turn does", () => {
+  const host = makeHost(2, { awaitAnimations: true });
+  host.constructArena();
+  host.submit({ actorId: "red-1", type: "melee", targetId: "blue-1" });
+  // Seat 2 on red is AI-controlled at 2v2, and `runAiTurns` routes it through
+  // `submit` — so it meets the same refusal, rather than slipping past it.
+  assert.throws(() => host.runAiTurns(), BattleHostError);
+  assert.equal(host.steps.length, 1);
+});
+
+test("a token no presentation command carried opens nothing", () => {
+  const host = makeHost(2, { awaitAnimations: true });
+  host.constructArena();
+  const first = host.submit({ actorId: "red-1", type: "melee", targetId: "blue-1" });
+
+  assert.throws(
+    () => host.reportActionAnimation(first.actionBoundary + 999),
+    (error) => error instanceof ActionAnimationError && /no presentation command carried it/.test(error.message)
+  );
+  assert.equal(host.readyForNextAction().ready, false);
 });

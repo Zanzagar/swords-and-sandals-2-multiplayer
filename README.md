@@ -114,7 +114,13 @@ incomplete Pressure termination proof, and one incompatible JSON/u64
 persistence claim. Rule-contract v2, sidecar/snapshot, or `endless-v0` code
 remains blocked until their selected repairs/specifications are normative.
 Headless and playable proofs have different final gates; playable work also
-needs a real per-action animation acknowledgement signal.
+needs a real per-action animation acknowledgement signal. **The SEAM for that
+landed 2026-09-07** — presentation commands carry an `actionToken`, and
+`src/adapter/action-gate.js` is the gate a host consults before submitting the
+next action — but the sentence above still stands as written, because the
+*signal* is what is missing: no capture has ever observed a vanilla action
+timeline reaching its terminal frame, so nothing in the adapter owns a timeout
+and a host that stops waiting must say so itself.
 
 Read the work in this order:
 

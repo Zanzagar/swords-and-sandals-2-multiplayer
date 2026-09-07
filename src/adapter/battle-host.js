@@ -29,6 +29,24 @@
  *    comes from `lastResolvedAction(battle)` — the authoritative trace of what
  *    actually happened, rather than a recording wrapper's guess at it.
  *
+ * **The per-action animation gate (2026-09-07).** `submit` now stamps each
+ * action's presentation commands with the resolver's own action boundary
+ * (`lastResolvedAction(battle).firstEventSequence` — NOT `event.sequence`,
+ * which is per event and would split a killing blow into four) and registers
+ * that token with `src/adapter/action-gate.js`. Two things about it are
+ * deliberate and easy to undo by accident:
+ *
+ * - **Nothing here ever calls `gate.report`.** Only the animation surface
+ *   does, through `reportActionAnimation`. This is the same rule
+ *   `acknowledgeResultAnimations` was rewritten to obey after it was found
+ *   fabricating the death reports and the arena label it was itself waiting
+ *   for: a gate that supplies its own evidence is not a gate.
+ * - **It is advisory unless `awaitAnimations: true`.** Every headless caller —
+ *   the goldens, the replay harness, the suite — has no surface to report
+ *   from, and a gate that blocked them would wait forever. Enforcing hosts
+ *   refuse in `submit` BEFORE `applyAction`, because an applied action cannot
+ *   be taken back.
+ *
  * Node builtins only; no assets, no game data.
  */
 
@@ -49,6 +67,7 @@ import {
   toTeamWireState
 } from "../team/index.js";
 
+import { createActionAnimationGate } from "./action-gate.js";
 import { createResultAcknowledgementBridge } from "./acknowledgement.js";
 import { ClipRegistry } from "./clip-registry.js";
 import { createPresentationBinder, PLACEHOLDER_ANIMATION_BINDINGS, presentArenaConstruction } from "./presentation.js";
@@ -92,6 +111,7 @@ export const HOST_PIPELINE = Object.freeze([
   "applyVanillaWrites",
   "assertMirrorAgrees",
   "presentResolvedEvents",
+  "actionGate.observe",
   "bridge.sync"
 ]);
 
@@ -164,6 +184,8 @@ class VanillaBattleHost {
   #layout;
   #binder;
   #bridge;
+  #gate = createActionAnimationGate();
+  #awaitAnimations;
   #clips = new ClipRegistry();
   #mirrors = new Map();
   #steps = [];
@@ -177,8 +199,13 @@ class VanillaBattleHost {
     rngTape = null,
     heroTeamId = null,
     bindings = PLACEHOLDER_ANIMATION_BINDINGS,
-    onCampaignSettled = null
+    onCampaignSettled = null,
+    awaitAnimations = false
   } = {}) {
+    if (typeof awaitAnimations !== "boolean") {
+      throw new BattleHostError("awaitAnimations is a boolean: whether `submit` refuses while an action animation is unreported.");
+    }
+    this.#awaitAnimations = awaitAnimations;
     if (!Array.isArray(teams) || teams.length !== 2) {
       throw new BattleHostError("A hosted battle needs exactly two teams.");
     }
@@ -460,6 +487,18 @@ class VanillaBattleHost {
    * battle became decided. Nothing here computes a combat value.
    */
   submit(action) {
+    // The animation gate, consulted BEFORE the resolver is touched. Refusing
+    // here rather than after `applyAction` is the whole point: the hazard is a
+    // second action's globals rebinding over a running timeline, and an action
+    // the resolver has already applied cannot be taken back.
+    if (this.#awaitAnimations && !this.#gate.isReady) {
+      throw new BattleHostError(
+        `Cannot submit: the animation surface has not reported action ${this.#gate.pending.join(", ")}. ` +
+        "Submitting now would rebind _global.attacker/_global.defender under a running timeline. " +
+        "Report it with reportActionAnimation(token), or state a policy with " +
+        "abandonActionAnimation(token, reason) — this host will not decide to stop waiting on your behalf."
+      );
+    }
     const pipeline = [];
     const before = projectionsOf(this.wire());
     pipeline.push("toTeamWireState:before");
@@ -503,8 +542,20 @@ class VanillaBattleHost {
     }
     pipeline.push("assertMirrorAgrees");
 
-    const commands = this.#binder.drain(wire);
+    // The action boundary the presentation token is built from. It comes off
+    // the resolver's own trace — NOT off `event.sequence`, which is stamped per
+    // event and would split this one action into as many as four. See
+    // `src/adapter/action-gate.js` for the measurement.
+    const actionBoundary = lastResolvedAction(this.#battle)?.firstEventSequence ?? null;
+    const commands = this.#binder.drain(wire, { actionBoundary });
     pipeline.push("presentResolvedEvents");
+
+    // Registering what to wait for. It does NOT report anything: nothing in
+    // this host ever calls `gate.report`, because a gate that supplies its own
+    // evidence is not a gate — the lesson `acknowledgeResultAnimations` below
+    // was rewritten to learn.
+    const { observed } = this.#gate.observe(commands);
+    pipeline.push("actionGate.observe");
 
     const bridgeStatus = this.#bridge.sync();
     pipeline.push("bridge.sync");
@@ -516,12 +567,64 @@ class VanillaBattleHost {
       writes,
       unmapped,
       commands,
+      actionBoundary,
+      actionTokens: observed,
       bridgeStatus,
       result: this.#battle.result ? Object.freeze({ ...this.#battle.result }) : null,
       hash: this.hash()
     });
     this.#steps.push(step);
     return step;
+  }
+
+  /**
+   * "Is the animation surface ready for the next action?" — the second of the
+   * two questions, kept separate from "has the resolver finished?".
+   *
+   * Advisory unless the host was built with `awaitAnimations: true`, in which
+   * case `submit` refuses while `ready` is false. Advisory is the default so
+   * that every headless caller — the goldens, the replay harness, the test
+   * suite — is unaffected: none of them has an animation surface, and a gate
+   * that blocked them would be waiting for a report nobody can make.
+   */
+  readyForNextAction() {
+    return Object.freeze({
+      ready: this.#gate.isReady,
+      enforced: this.#awaitAnimations,
+      pending: this.#gate.pending,
+      abandoned: this.#gate.abandoned
+    });
+  }
+
+  /**
+   * The animation surface reports that one action's timeline reached its
+   * terminal frame, naming the `actionToken` its commands carried.
+   *
+   * This is the ONLY way a gate opens by evidence. The host never calls it for
+   * you, and there is no "acknowledge everything pending" convenience: that is
+   * exactly the shape `acknowledgeResultAnimations` had to have removed.
+   */
+  reportActionAnimation(actionToken) {
+    return this.#gate.report(actionToken);
+  }
+
+  /**
+   * The host states that it is no longer waiting for one action's timeline,
+   * and why.
+   *
+   * A timeout lands here. The adapter owns no timer and no deadline — nothing
+   * has ever captured the vanilla timeline's own completion signal, so any
+   * duration this module chose would be a guess at the centre of the action
+   * loop. The reason is mandatory so that a gate opened by giving up is
+   * distinguishable, in the record, from one opened by a surface reporting.
+   */
+  abandonActionAnimation(actionToken, reason) {
+    return this.#gate.abandon(actionToken, reason);
+  }
+
+  /** JSON-safe animation-gate state, for diagnostics and host/client compare. */
+  actionAnimationState() {
+    return this.#gate.toJSON();
   }
 
   /**
