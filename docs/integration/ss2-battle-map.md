@@ -1715,8 +1715,45 @@ life_stolen, as four SEQUENTIAL `if`s rather than an `else if` chain:
 `heroactions` label.
 
 **Because the tests are sequential, a combatant carrying two statuses loses
-one.** Every set flag is cleared, but only the LAST match sets the decision — so
-frozen + burning consumes the frozen flag and never plays a frozen phase.
+one.** Every set flag is cleared, but which match SURVIVES is not the same on
+the two sides, and the table above is why.
+
+► **CORRECTED 2026-09-07, after an independent verifier confirmed it. This
+  paragraph read "only the LAST match sets the decision — so frozen + burning
+  consumes the frozen flag and never plays a frozen phase", for BOTH sides.
+  That is the villain's rule generalised to the hero, and for the hero it is
+  backwards.**
+
+- **HERO: the FIRST match wins.** The hero writes its decision by CALLING
+  `getphase(...)` (`+0x0e81`, `+0x0ecd`, `+0x0f19`, `+0x0f65`), and `getphase`
+  runs its body only at `turnphase == 1` and sets `turnphase = 2` on success —
+  see §"Turn gating, forced phases, and per-turn re-entry", which states the
+  consequence in general terms already: *"at most one `getphase` call takes
+  effect per pass through frame 1"*. So the first matching status takes the
+  turn and every later one is a silent no-op **that still cleared its flag**.
+  frozen + burning plays FROZEN and silently loses the burning.
+- **VILLAIN: the last match wins — within the status chain only.** The villain
+  ASSIGNS `villaindecisionA` directly (`+0x1370`, `+0x13ae`, `+0x13ec`,
+  `+0x142a`) with no equivalent gate, so each match overwrites the previous.
+  But that is not the villain's final word either: `villainChooseAction` ends
+  by calling `villain_cast_spells()`, which **can replace the decision with a
+  spell label** (see §"Spell and vanilla AI surface"). "Last status wins" is
+  therefore the rule for that chain, not for the turn.
+- **And the status arms are rows 4-7 of a chain whose rows 1-3 are
+  `swap_weapons`, `rest` and the taunted run.** Under first-match-wins those
+  outrank every status for the hero: a BURNING HERO AT ZERO STAMINA rests, and
+  the burning flag is cleared with its phase never played. §"Turn gating"
+  already gives exactly this example — *"a forced rest at zero stamina clears
+  and discards a pending `burning` phase in the same pass"* — which is the
+  clearest sign the two sections were describing different rules while sitting
+  in the same document.
+
+*(How it survived: §"Turn gating" and this section were byte-read on different
+days and never reconciled, and each is correct about the offsets it cites. The
+contradiction is between two accurate readings, which is the kind a
+single-section review cannot catch. Found while implementing the status phase,
+confirmed by an independent verifier before this edit was made, per the standing
+rule that the map is corrected only after one.)*
 
 **Three spellings for one effect, and they are not interchangeable.** The FIELD
 is `poison`; the DECISION label is `"poisoned"`. `life_stolen` keeps its

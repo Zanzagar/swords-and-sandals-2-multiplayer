@@ -128,7 +128,48 @@ no turn-start hook, so option (a) needs no change to `resolver.js` or
 `rule-set.js`. It lands at **map-derived tier**: the wrapper cannot arm on a
 status phase, so no capture can confirm it until a new hook exists.
 
-### What it needs next, and the ONE thing that blocks it
+### What it needs next — CORRECTED, the blocker below was NOT the blocker
+
+► **The paragraph below says option (a) is blocked on byte verification this
+  WSL tree cannot do. That is WRONG, and it was wrong when written: the map
+  ALREADY carries the whole arithmetic, byte-verified.** §"Spell ingress
+  `magic_damage_character` (byte-verified 2026-08-30)" and §"The enchantment
+  effect is a SKIPPED TURN, not an on-hit bonus (byte-read 2026-09-02)" give
+  the tick end to end — armour-first then hitpoints gated on post-decrement
+  `armourclass <= 0`, **no `Math.ceil` on the applied damage** (the ceil is
+  display-only), `psyche_up = 1`, the breastplate stamina join, `check_stats`,
+  the shared defeat gate, **no RNG call anywhere in the function**,
+  `staminacost` forced to 0 while `nextphase()` still runs (so a status turn is
+  net positive on stamina and hitpoints except for the tick), and
+  `weapon_enchantment_damage = ceil(weapon_max_damage / 3 *
+  weapon_enchantment_potency)`. Byte reading is still needed to go BEYOND the
+  map; it is not needed to build option (a). The FFDec facts below stay true
+  and are worth keeping — they were simply not load-bearing.
+
+**THE REAL BLOCKERS are two design decisions the build cannot guess, both
+found by trying to write it, and both are the OWNER'S:**
+
+1. **The tick's damage number is not reachable from a combatant view today.**
+   `ss2BattleValues` derives `weapon_enchantment_damage` at construction
+   (`ss2-rules.js:540-541`) but it is NOT in `SS2_RESOURCE_NAMES`, so it is not
+   declared, not in `vanillaRecordOf`'s record, and not in the projection.
+   Either declare the two enchantment-damage resources, or declare
+   `weapon_max_damage`/`secondary_weapon_max_damage` and derive at tick time
+   (closer to the build's own order, twice the vocabulary). Either way the
+   resource vocabulary grows, and a combatant that declares a new name hashes
+   differently from one that does not — the same projection property this
+   session pinned for the damage pair.
+2. **Vanilla reads the damage off "the opponent", which only 1v1 defines.**
+   The crossed call takes `game_defender.weapon_enchantment_damage` — the OTHER
+   gladiator — not "whoever applied the status", and our engine stores a status
+   as a bare boolean with NO inflictor. At 1v1 they coincide; at 2v2/3v3 they
+   do not. Options: record the inflictor when the status lands (a superset that
+   reduces exactly to vanilla at 1v1, and costs a status-token grammar change
+   that moves the hash); or refuse the status phase above 1v1 until a rule is
+   decided (this project's habitual move — refuse rather than invent); or read
+   the sole living foe and refuse when there is more than one.
+
+### The FFDec facts, still true and no longer blocking
 
 The arithmetic comes from `magic_damage_character`. The 16:59 brief's
 byte-level notes on it are UNVERIFIED (that wave returned 0 verifiers) and must
@@ -149,7 +190,27 @@ map-derived tier on the map's existing prose. The Steam install itself IS
 reachable from WSL at `/mnt/c/Program Files (x86)/Steam/steamapps/common/Swords
 and Sandals Classic Collection`.
 
-### And a HYPOTHESIS that contradicts the 16:59 brief — do not act on it unread
+### ~~And a HYPOTHESIS that contradicts the 16:59 brief~~ — I WAS WRONG, and it is settled
+
+► **RESOLVED THE SAME SESSION, AGAINST ME. The hypothesis below is REFUTED and
+  the 16:59 brief was RIGHT. Read it only to see how the error was made.**
+  The map contained BOTH rules, in two sections byte-read on different days:
+  §"Turn gating" says at most one `getphase` takes effect per pass (first
+  wins), and §"The enchantment effect is a SKIPPED TURN" said flatly that "only
+  the LAST match sets the decision". I read the first, matched it to the
+  brief's claim, and concluded the brief was pointing at nothing — **without
+  reading the second section, which is the one the brief actually named.**
+  An independent verifier CONFIRMED the contradiction and the map is now
+  corrected: **hero = FIRST match wins** (it calls `getphase`, which is gated
+  and sets `turnphase = 2`); **villain = last match wins within the status
+  chain only**, because it assigns `villaindecisionA` directly — and
+  `villain_cast_spells()` can then replace even that. Ranked item 3 was real.
+  The lesson is the ordinary one and I paid for it anyway: **a brief's claim is
+  a hypothesis, and so is a refutation of it.**
+
+*(The original hypothesis, left in place because deleting a wrong call hides
+how it was reached:)*
+
 
 That brief says the map's status-arm section has two errors, the first being
 that "for the HERO the FIRST matching status wins, not the last". **Reading
