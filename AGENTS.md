@@ -48,7 +48,7 @@ there never reaches the next reader.
   things back later we note that and do it when we have to."*
 - **Two narrow operational facts remain, and NEITHER is an ethics boundary:**
   1. **The installed SWF stays byte-identical, because it is the MEASUREMENT
-     ORACLE.** All 23 promoted goldens, 70 observation records and every capture
+     ORACLE.** All 23 promoted goldens, 69 observation records and every capture
      manifest cite its sha256. Change the install by one byte and the corpus
      stops describing anything — not a licence problem, an evidence problem.
      **When modding the build becomes the work, put the modded copy in a SECOND
