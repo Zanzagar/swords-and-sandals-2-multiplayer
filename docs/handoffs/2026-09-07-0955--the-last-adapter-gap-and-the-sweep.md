@@ -2,13 +2,13 @@
 handoff:      2026-09-07-0955--the-last-adapter-gap-and-the-sweep
 written:      2026-09-07 09:55 -0400
 sessionId:    cb4573bf-667b-4a07-b201-bd507c84f3ff (https://claude.ai/code/session_01RUt3YdrZ6qwhazUARrSoQi)
-branch:       arena/champion-capture. SIX commits, `20a8fa0` `c5d45f9`
-              `cc4ff6e` `659dfab` `e86643f` + the opt-in bag. The first three were pushed at 10:05 with
-              the owner's explicit approval (`470c56a..cc4ff6e`); the fourth
-              came after.
-              Push state is decided at the very end of this session — check
-              `git log --oneline github/arena/champion-capture..HEAD` rather
-              than believing any sentence here.
+branch:       arena/champion-capture. SIX commits — `20a8fa0` `c5d45f9`
+              `cc4ff6e` `659dfab` `e86643f` `d7ff634` — ALL PUSHED with the
+              owner's explicit approval, in three batches
+              (`470c56a..cc4ff6e`, `..e86643f`, `..d7ff634`).
+              **Verify rather than believe this line:**
+              `git log --oneline github/arena/champion-capture..HEAD`
+              should print nothing.
 suite:        816 / 815 / 0 / 1 (fresh-clone profile: `captures/` holds only
               ARCHIVE-MANIFEST.sha256 and README.md), measured at the end.
               From 787 at session start. **It read 808 mid-session and a
