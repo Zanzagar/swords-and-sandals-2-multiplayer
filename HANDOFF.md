@@ -8,6 +8,25 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-07 09:55 — the last adapter gap, and the sweep](docs/handoffs/2026-09-07-0955--the-last-adapter-gap-and-the-sweep.md).**
+Start there. **The adapter's last documented gap is closed** — per-action
+animation acknowledgement — and the mechanism this repository's own contract
+proposed for it was WRONG: `event.sequence` is stamped per EVENT and one action
+emits up to four, so a token read off it splits a killing blow into four
+actions. The boundary that works, `lastResolvedAction().firstEventSequence`, is
+deliberately NOT projected, because `combatStateHash` hashes everything that is.
+
+► **AND EVERY DOCUMENT WAS SWEPT (2026-09-07):** 17 write-nothing surveyors and
+  34 adversarial refuters, `started == returned` on both phases, **3,146 claims
+  examined and 264 STALE or WRONG.** The corrections that were re-derived by
+  hand have landed at their sentences; the remaining ~250 are in
+  **`docs/doc-integrity-sweep-2026-09-07.md`, labelled as CLAIMS TO VERIFY
+  rather than results.** **The refuters broke 7 of 34 — a 21% base rate — and
+  one of the breaks would have BROKEN THE CORPUS.** Read that file's header
+  before applying anything from it.
+
+*(The brief it supersedes, whose ranked items 1, 3 and 4 are all still open and
+all still the owner's:)*
 [2026-09-07 08:25 — the accepted decisions do not authorize anything](docs/handoffs/2026-09-07-0825--the-accepted-decisions-do-not-authorize-anything.md).**
 Start there. Ranked item 2 is ANSWERED and the answer is a fork for the owner:
 three EP decisions are accepted, forty normative clauses, and **every one ends
