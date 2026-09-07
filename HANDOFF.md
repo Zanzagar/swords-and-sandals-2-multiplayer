@@ -8,6 +8,30 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-07 11:40 — the sweep reached the untouched six](docs/handoffs/2026-09-07-1140--the-sweep-reached-the-untouched-six.md).**
+Start there. The six documents the previous sweep never touched are done — **79
+rows, 73 applied and 6 rejected**, every one re-derived by hand, and four of the
+six rejections are numbers that do not reproduce at all. **The remaining
+worklist is 78 rows in THIS FILE, lines 801–3132, which are LIVING HEAD and not
+archive:** the sweep chunked `HANDOFF.md` as though `## THE ARCHIVE LINE` were
+at 800, and `grep -n 'THE ARCHIVE LINE' HANDOFF.md` puts it at **3133**, so
+three of its four surveyed chunks were labelled archive and never applied. The
+unapplied range holds "What is running, and how to run it" (:852),
+"Non-negotiable rules" (:1245), "Next steps, in order" (:1346) and "Open items"
+(:1631) — precisely the sections that misdirect a session when stale.
+
+► **AND THAT HANDOFF'S OWN COMMIT LEFT THREE TESTS RED (found by the next
+  session, 2026-09-07).** `42527e0` added the handoff file without repointing
+  this `**LATEST:` marker or adding a row to `docs/handoffs/README.md`, so the
+  measured suite was **816 / 812 / 3 / 1** where that handoff's frontmatter
+  claims `816 / 815 / 0 / 1`. Repaired here. The lesson is not "be careful": the
+  three guards that caught it exist BECAUSE the pointer went stale twice before,
+  and they only help a session that RUNS them. **A handoff commit is not
+  finished until `node --test --test-concurrency=1` is green — and the handoff's
+  own suite line must be measured after that commit, not before it.**
+
+*(The brief it supersedes, whose ranked items 2-5 are all still open and all
+still the owner's:)*
 [2026-09-07 09:55 — the last adapter gap, and the sweep](docs/handoffs/2026-09-07-0955--the-last-adapter-gap-and-the-sweep.md).**
 Start there. **The adapter's last documented gap is closed** — per-action
 animation acknowledgement — and the mechanism this repository's own contract
