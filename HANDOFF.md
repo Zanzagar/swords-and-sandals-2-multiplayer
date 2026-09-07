@@ -103,6 +103,31 @@ harness ADR 0001) and that ultracode stays ON at the owner's instruction.
        last-match rule and the taunted-run row are NOT modelled; a symmetric
        engine cannot have both, and the player's rule was chosen.
 
+  ► **AND TWO THINGS THE GAME COULD NOT DO BEFORE (2026-09-07, `a380fa0`,
+    `de18178`), both found by asking what the roadmap says is missing rather
+    than what the brief says is next:**
+    - **TEAM FIGHTS ARE PLAYABLE.** `node tools/hotseat.mjs --teams 2v2` (1-3 a
+      side; four is refused BY NAME because three is what the six-slot
+      measurement covered). The resolver has supported N-a-side since long
+      before anything was playable and no person had ever taken a turn in one.
+      Almost nothing needed changing, which is the point — the loop, the
+      scoreboard and target selection already worked for N. It also makes the
+      status phase's NvN inflictor rule reachable by a human for the first
+      time.
+    - **THE CAMPAIGN LOOP IS CLOSED.** `src/campaign/to-battle.js` —
+      `rosterFromCampaignRecord(record, { blueprints })`. The roadmap said "a
+      record is written and never read back into a battle"; now one can be.
+      **It needs the BLUEPRINTS as well as the record and that is the format's
+      real shape, not a shortcut:** `outcomes` carry survival, health,
+      maxHealth and statuses and carry NO stats, loadout or resources, so a
+      record alone cannot rebuild a gladiator. **Rewards are still not built,
+      deliberately** — paying one is a progression decision and EP-D04 is
+      pending.
+    - **A condition CANNOT cross a 1v1 bout boundary**, structurally: it takes
+      its bearer's very next turn, so nobody lands a killing blow while
+      carrying one, and if the bearer dies `death()` clears it. It crosses a
+      TEAM boundary only when a teammate ends the bout. Both are pinned.
+
 *(The brief it supersedes, whose findings and ranked list are unchanged:)*
 [2026-09-02 16:59 — three waves, cut at the usage limit](docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md). Three capped fan-out waves on the 13:40 brief's ranked items 1–3
 were stopped at 92% of the session limit; ranked item 4 is CLOSED by
