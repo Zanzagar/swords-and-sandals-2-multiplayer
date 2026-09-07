@@ -638,22 +638,28 @@ inventing vanilla state rather than mirroring it.
 
 #### One resolver limitation the host reports rather than papers over
 
-`src/team/roster.js` builds an AI-filled slot from `team.aiFill` — **one
-template per team, not one per slot**. A supplied gladiator gets its bag from
-its own combat object; a filled slot has to get one from the caller's template,
-and there is only one place to put it. So when two slots on one team are filled
-from templates that disagree about their canonical resources, there is nowhere
-to put the second bag.
+► **CLOSED. This section described a defect that no longer exists, and said
+so for eight days after it was fixed. Re-derived 2026-09-07 against
+`src/team/roster.js` and `src/adapter/battle-host.js`.**
 
-`battle-host.js` reports that as `diagnostics.aiFillResourceGaps` — one entry
-per affected team, naming the team and the reason — and declares **no**
-resources on those filled slots rather than guessing which template wins. A
-guess would put an invented number inside `combatStateHash`, which is the one
-thing the hash exists to prevent. The consequence is concrete and worth
-knowing: a rule set's write to a resource on such a slot will be refused by the
-resolver. The remedies are to supply real gladiators, matching templates, or an
-explicit `aiFill.resources`. Closing it properly needs a per-slot fill source
-from the roster, which is `src/team/` work, not adapter work.
+`src/team/roster.js` builds an AI-filled slot from up to two declarations,
+merged with the one nearest the slot winning: `team.aiFill` as an object
+(every filled slot on the team), `team.aiFill` as an **array** indexed by slot,
+or the empty-slot marker's own fields (`{ fill: "ai", ...combatantFields }`).
+So two filled slots on one team CAN each carry their own canonical resource
+bag, and `battle-host.js` puts each one on its own slot.
+
+`diagnostics.aiFillResourceGaps` **no longer exists**. The host's frozen
+diagnostics object names `aiFilledSlots`, `aiFillMirrorRewrites`,
+`aiFillLoadoutGaps`, `canonicalSyncs`, `maximumHealthReports` and
+`startingStatusEffects`; the old key survives only inside comments that
+describe what it used to do, which is how it went on reading as live.
+
+*What the old text got right and is worth keeping:* the reason a guess was
+never acceptable. Choosing which template "wins" would have put an invented
+number inside `combatStateHash`, which is the one thing that hash exists to
+prevent. The fix gave each slot a real source rather than teaching the host to
+guess.
 
 ### The loadout bridge is a placeholder, twice over
 
@@ -897,7 +903,7 @@ to settle would leave a decided battle that can never pay its campaign.
 | Claim | Status |
 | --- | --- |
 | the undefined-until-set status flags and clip-resident facing | **runtime-observed** 2026-08-30 (battle map, "Combatant state objects") |
-| the 22 promoted goldens in `test/fixtures/ss2-1v1-golden/` | **runtime-verified** — and they verify the ordered rolls, the mutation order, and the result transition, not any adapter mapping. No golden observes anything the adapter does. |
+| the 23 promoted goldens in `test/fixtures/ss2-1v1-golden/` | **runtime-verified** — and they verify the ordered rolls, the mutation order, and the result transition, not any adapter mapping. No golden observes anything the adapter does. |
 | field names, groups, clip names, depths, positions, panel instances, overlay/arena result labels, the four binding globals | **static map only** for the fingerprinted build |
 | every clip *label* the adapter dispatches | **static map at best**; the ranged `hurtN` adjustment and the death-variant label names are `assumed` |
 | the loadout bridge, the spell/heal inventory id sets | **assumption**, placeholder vocabulary only — and no longer on the conversion path. `toCanonicalCombatantSource` emits only the vanilla-backed keys; the inventory id sets survive in `placeholderLoadoutFrom`, which nothing calls unless a caller passes it as `options.loadout`. |
@@ -928,13 +934,14 @@ that was closed two commits ago.
 
 ### Still open
 
-1. **AI-filled slots get one resource bag per team, not per slot.**
-   `src/team/roster.js` carries a single `aiFill` template per team, so two
-   filled slots on one team whose templates disagree cannot both get a bag.
-   `battle-host.js` reports `diagnostics.aiFillResourceGaps` and declares none
-   rather than guessing a number into the state hash. This is the one gap the
-   resource work left, and closing it is `src/team/` work: a per-slot fill
-   source from the roster.
+1. ~~**AI-filled slots get one resource bag per team, not per slot.**~~
+   **CLOSED, and this entry was stale.** `team.aiFill` accepts a per-slot
+   array and the empty-slot marker carries its own fields, so each filled slot
+   has its own fill source; `diagnostics.aiFillResourceGaps` is gone from the
+   host. Struck rather than deleted, because `docs/roadmap.md` cited this
+   numbered entry by name — an item removed silently from a list that other
+   documents count is how a stale claim gets re-derived from its own citation.
+   Re-derived 2026-09-07.
 2. **Resources are numbers, so not everything vanilla carries has a home.**
    `normaliseResourceBag` accepts finite scalars only. Numeric pools fit;
    equipment identity does not — the **armour piece ids**, the six numbered

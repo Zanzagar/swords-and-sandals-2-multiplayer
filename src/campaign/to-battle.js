@@ -206,8 +206,27 @@ export function rosterFromCampaignRecord(record, { blueprints, includeFallen = f
   // option into a ban on its own only honest use — looking at who was there.
   // So the hazard is named instead. A caller building a battle checks
   // `playable`; a caller inspecting a bout ignores it.
+  // ► **THIS FILTERED OUT THE COMMONEST ROSTER THERE IS, and reported it
+  //   PLAYABLE. Found and measured 2026-09-07.** The first clause used to be
+  //   `.filter((team) => team.combatants.length > 0)`, which skipped a team
+  //   holding NOBODY before asking whether anybody could fight — and a
+  //   survivors-only roster of a settled bout always has one, because
+  //   settlement requires a wholly eliminated team. So `playable` said true
+  //   for the exact roster this seam exists to produce, while
+  //   `createTeamBattle` refused it outright: *"Each team must contain one to
+  //   three combatants."*
+  //
+  //   A team cannot fight for two different reasons and BOTH are unplayable:
+  //   it has nobody left (the eliminated side), or it has fighters and none of
+  //   them is alive (`includeFallen`'s roster of corpses, which stalls). The
+  //   old code handled only the second.
+  //
+  //   This is the THIRD wrong claim this seam has made about `playable` — the
+  //   first said a roster of corpses settles instantly, the second refused
+  //   such a roster outright — and the test that covered it asserted the flag
+  //   without ever building a battle from it. It is now proved against
+  //   `createTeamBattle` instead of asserted.
   const unplayable = teams
-    .filter((team) => team.combatants.length > 0)
     .filter((team) => !team.combatants.some((combatant) => (combatant.health ?? 0) > 0))
     .map((team) => team.id);
 

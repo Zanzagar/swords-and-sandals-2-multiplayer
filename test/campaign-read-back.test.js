@@ -162,11 +162,25 @@ test("a roster of the fallen is reported UNPLAYABLE rather than handed over as i
 
   // Refusing outright was the FIRST fix and it was wrong: a settled bout always
   // has a wholly eliminated team, so refusing would have banned includeFallen's
-  // only honest use — looking at who was there. The survivors-only roster, the
-  // one a caller actually builds from, is playable.
+  // only honest use — looking at who was there. Reporting is right; the
+  // reported VALUE was not.
+  //
+  // ► **CORRECTED 2026-09-07. These two lines used to assert
+  //   `survivors.playable === true` and `unplayableTeamIds === []`, and both
+  //   were wrong.** The survivors-only roster of a settled 1v1 has an
+  //   eliminated team holding zero combatants, and `createTeamBattle` refuses
+  //   it — *"Each team must contain one to three combatants."* The assertion
+  //   passed only because it checked the flag and never built the battle the
+  //   flag is a promise about. See the contract test at the bottom of this
+  //   file, which proves `playable` against `createTeamBattle` instead.
+  //
+  //   What a caller learns from `playable: false` here is the useful thing:
+  //   carrying survivors forward is not replaying this bout, it is building
+  //   the NEXT one, and the empty side has to be refilled with a fresh
+  //   opponent before anybody can fight.
   const survivors = rosterFromCampaignRecord(record, { blueprints });
-  assert.equal(survivors.playable, true);
-  assert.deepEqual(survivors.unplayableTeamIds, []);
+  assert.equal(survivors.playable, false, "the eliminated side is empty, so this roster cannot be fielded as-is");
+  assert.deepEqual(survivors.unplayableTeamIds, ["blue"], "and the seam names the side needing a fresh opponent");
 });
 
 test("includeFallen DOES carry a casualty whose team still has somebody standing", () => {
@@ -462,4 +476,78 @@ test("bout -> record -> roster -> BOUT: the record finally feeds something", () 
     applyAction(next, { actorId: actor.id, ...(options.find((o) => o.type === Ss2ActionType.POWER_ATTACK) ?? options[0]) });
   }
   assert.ok(next.result, "the carried-forward bout settles like any other");
+});
+
+test("`playable` is PROVED against createTeamBattle, not asserted — and it was wrong for the commonest roster there is", () => {
+  // WHAT THIS CAUGHT. `playable` had exactly one consumer contract, stated in
+  // to-battle.js's own comment: "A caller building a battle checks `playable`".
+  // It reported TRUE for the survivors-only roster of an ordinary settled 1v1
+  // — and `createTeamBattle` REFUSES that roster, because the eliminated team
+  // carries zero combatants and a team must hold one to three.
+  //
+  // The test above asserted `survivors.playable === true` and never built a
+  // battle, so it confirmed the flag rather than the promise. That is this
+  // project's signature failure — a universal asserted from a shape rather
+  // than measured — and it is the THIRD wrong claim this seam has made about
+  // `playable`. The first said a roster of corpses settles instantly (it
+  // stalls); the second refused such a roster outright (which banned
+  // `includeFallen`'s only honest use).
+  //
+  // So this test does not assert a value. It asserts the CONTRACT: whatever
+  // `playable` says, `createTeamBattle` agrees with it. A future change to
+  // either side has to keep them agreeing.
+  const cases = [
+    { label: "survivors-only, settled 1v1", ...settledBout(), includeFallen: false },
+    { label: "including the fallen, settled 1v1", ...settledBout(), includeFallen: true }
+  ];
+
+  let sawPlayableFalse = false;
+  for (const { label, record, blueprints, includeFallen } of cases) {
+    const roster = rosterFromCampaignRecord(record, { blueprints, includeFallen });
+
+    let constructs = true;
+    let refusal = null;
+    try {
+      createTeamBattle({
+        seed: 3,
+        rules: ss2TeamRules,
+        teams: roster.teams.map((team) => ({ id: team.id, name: team.name, combatants: team.combatants }))
+      });
+    } catch (error) {
+      constructs = false;
+      refusal = error.message;
+    }
+
+    if (roster.playable) {
+      assert.ok(
+        constructs,
+        `${label}: playable said true, but createTeamBattle refused it — ${refusal}`
+      );
+    } else {
+      sawPlayableFalse = true;
+      // Named, so an unplayable roster tells a caller WHICH team it cannot field.
+      assert.ok(
+        roster.unplayableTeamIds.length > 0,
+        `${label}: reported unplayable without naming a team`
+      );
+    }
+  }
+
+  // SWEEP, THEN ASSERT YOU FOUND THE CASE. Without this the loop passes by
+  // visiting only playable rosters, which is the vacuous-test shape this
+  // repository has shipped twice.
+  assert.ok(sawPlayableFalse, "no case exercised the unplayable branch — the sweep proved nothing");
+});
+
+test("an eliminated team's EMPTY slot list makes a roster unplayable, and the seam names it", () => {
+  // The specific hole: `unplayable` filtered to teams with combatants BEFORE
+  // asking whether any could fight, so a team with zero fighters — which every
+  // settled bout produces — was skipped rather than flagged.
+  const { record, blueprints } = settledBout();
+  const roster = rosterFromCampaignRecord(record, { blueprints });
+
+  const emptyTeams = roster.teams.filter((team) => team.combatants.length === 0).map((team) => team.id);
+  assert.deepEqual(emptyTeams, ["blue"], "the settled bout's loser is the empty team");
+  assert.equal(roster.playable, false, "a roster missing a whole side cannot be fielded");
+  assert.deepEqual(roster.unplayableTeamIds, ["blue"], "and the caller is told which side to refill");
 });
