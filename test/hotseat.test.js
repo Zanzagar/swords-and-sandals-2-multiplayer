@@ -267,3 +267,90 @@ test("the scoreboard shows conditions by name and never the wire token", async (
   assert.ok(!stdout.includes("[burning:from="), "the inflictor token is wire format, not player-facing");
   assert.ok(!stdout.includes("facing-left"), "facing is not a condition and must not read as one");
 });
+
+test("--circuit has NO default, and the refusal names the decision that would give it one", async () => {
+  // Four fights is EP-D03 and EP-D03 is `pending` on the design track. A tool
+  // that defaulted to four would adopt an undecided rule by accident, which is
+  // the quiet failure the whole design quarantine exists to prevent.
+  const missing = await runHotseat(["--circuit"], "");
+  assert.equal(missing.code, 2, "a flag with no value is refused");
+  assert.match(missing.stderr, /--circuit needs a value/);
+
+  for (const bad of ["0", "-1", "2.5", "four"]) {
+    const result = await runHotseat(["--circuit", bad], "");
+    assert.equal(result.code, 2, `--circuit ${bad} must be refused`);
+    assert.match(result.stderr, /positive integer/, `--circuit ${bad} must say why`);
+  }
+
+  // And the default really is absent: no flag means exactly one bout, with no
+  // circuit banner and no carry report.
+  const single = await runHotseat(["--seed", "3"], ALWAYS_ATTACK);
+  assert.equal(single.code, 0);
+  assert.doesNotMatch(single.stdout, /CIRCUIT/, "one bout is still one bout");
+  assert.doesNotMatch(single.stdout, /carried into the next bout/);
+  assert.match(single.stdout, /WINNER:/, "and it still reaches a winner");
+});
+
+test("a circuit fights consecutive bouts and carries the survivor between them", async () => {
+  const result = await runHotseat(["--seed", "3", "--circuit", "3"], "1\n".repeat(200));
+  assert.equal(result.code, 0);
+
+  assert.match(result.stdout, /CIRCUIT: 3 bouts/, "the run announces its length");
+  assert.match(result.stdout, /BOUT 2 of 3/, "a second bout actually starts");
+  assert.match(result.stdout, /BOUT 3 of 3/, "and a third");
+  assert.match(result.stdout, /CIRCUIT COMPLETE: 3 bouts fought/);
+
+  // Three bouts means three winners announced, not one.
+  const winners = result.stdout.match(/WINNER:/g) ?? [];
+  assert.equal(winners.length, 3, `expected one winner per bout, got ${winners.length}`);
+
+  // Each bout draws its own seed, so no two share a tape.
+  const seeds = [...result.stdout.matchAll(/seed (\d+)/g)].map((match) => match[1]);
+  assert.equal(new Set(seeds).size, seeds.length, `bouts must not share a seed: ${JSON.stringify(seeds)}`);
+});
+
+test("THE CIRCUIT PRINTS WHAT IT RESTORED, because a record carries no resources", async () => {
+  // The finding this output exists for, measured rather than described: a
+  // fighter whose armour is smashed to zero re-enters the next bout with all
+  // of it back, because `outcomes` carry survival, health, maxHealth and
+  // statuses and carry NO resources, so read-back rebuilds him from his
+  // blueprint. Whether that SHOULD happen is EP-A03, which is not drafted.
+  // Whether it happens silently is this tool's business, and it must not.
+  const result = await runHotseat(
+    ["--seed", "11", "--circuit", "3", "--armour", "30"],
+    "1\n".repeat(300)
+  );
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /carried into the next bout/, "the carry is reported at all");
+
+  const restored = result.stdout.match(/RESTORED for \S+: .+/g) ?? [];
+  assert.ok(restored.length > 0, "an armoured circuit must report SOMETHING restored");
+
+  // The report must name both numbers. "armourclass changed" cannot be acted
+  // on; "armourclass 168 -> 495" can.
+  const joined = restored.join("\n");
+  assert.match(joined, /\w+ \d+ -> \d+/, "every restoration names what it was and what it becomes");
+  assert.match(joined, /staminaleft \d+ -> \d+/, "stamina is spent by every action, so it must appear");
+
+  // SWEEP, THEN ASSERT YOU FOUND THE CASE. Armour restoration is the whole
+  // point; a pass that saw only stamina would miss it.
+  assert.match(joined, /armourclass \d+ -> \d+/, "armour attrition must be reported as undone");
+});
+
+test("a circuit heals nobody: the carried fighter's wound is visible on the next scoreboard", async () => {
+  const result = await runHotseat(["--seed", "3", "--circuit", "2"], "1\n".repeat(200));
+  assert.equal(result.code, 0);
+
+  const boutTwo = result.stdout.slice(result.stdout.indexOf("BOUT 2 of 2"));
+  assert.ok(boutTwo.length > 0, "bout 2 must have started for this test to mean anything");
+
+  // The first scoreboard of bout 2 must show somebody below full health. If
+  // the circuit healed between bouts, every fighter would open at 60/60.
+  const firstBoard = boutTwo.slice(0, boutTwo.indexOf("actions:"));
+  const healths = [...firstBoard.matchAll(/(\d+)\/(\d+)/g)].map(([, at, max]) => [Number(at), Number(max)]);
+  assert.ok(healths.length > 0, "the scoreboard must show health for this assertion to run");
+  assert.ok(
+    healths.some(([at, max]) => at < max),
+    `somebody must carry a wound into bout 2; saw ${JSON.stringify(healths)}`
+  );
+});

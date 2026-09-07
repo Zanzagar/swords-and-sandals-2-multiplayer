@@ -33,5 +33,6 @@ export * from "./record.js";
 export * from "./migrations.js";
 export * from "./from-battle.js";
 export * from "./to-battle.js";
+export * from "./circuit.js";
 export * from "./store.js";
 export * from "./recorder.js";

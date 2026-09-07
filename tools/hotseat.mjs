@@ -43,8 +43,12 @@ import {
   placeholderTeamRules,
   resourceValue,
   rngJournal,
-  seatOf
+  seatOf,
+  pendingResultEvent,
+  acknowledgeResultAnimation,
+  BATTLE_RESULT_ACK_TYPE
 } from "../src/team/index.js";
+import { advanceCircuit, circuitLength, CircuitSide } from "../src/campaign/index.js";
 import {
   SS2_FACING_LEFT,
   ss2Combatant,
@@ -113,6 +117,7 @@ function parseArgs(argv) {
     else if (flag === "--armour") options.armour = Number(next());
     else if (flag === "--enchant") options.enchant = next();
     else if (flag === "--teams") options.teams = next();
+    else if (flag === "--circuit") options.circuit = next();
     else if (flag === "--rules") options.rules = next();
     else if (flag === "--names") options.names = next().split(",").map((part) => part.trim());
     else if (flag === "--help" || flag === "-h") options.help = true;
@@ -150,6 +155,23 @@ function parseArgs(argv) {
     throw new Error("--teams must look like 2v2, with 1-3 fighters a side.");
   }
   options.sizes = sizes;
+
+  // `--circuit N`: N consecutive bouts, survivors carried between them.
+  //
+  // THERE IS NO DEFAULT, and that is a decision rather than an omission. One
+  // Arena Circuit being four fights is EP-D03, and EP-D03 is `pending` on the
+  // design track — so shipping `--circuit` with a default of 4 would adopt an
+  // undecided rule by accident. Absent, the tool plays exactly one bout, byte
+  // for byte as it did before this flag existed.
+  if (options.circuit !== undefined) {
+    const bouts = Number(options.circuit);
+    if (!Number.isInteger(bouts) || bouts < 1) {
+      throw new Error("--circuit must be a positive integer: the number of consecutive bouts to fight.");
+    }
+    options.circuit = circuitLength(bouts);
+  } else {
+    options.circuit = null;
+  }
 
   const total = sizes[0] + sizes[1];
   if (options.names === null) {
@@ -192,6 +214,14 @@ Hot-seat: two humans, one keyboard, one fight.
                  foe to hit.
   --names A,B    fighter names, one per seat, red first (default
                  "Player 1,Player 2" at 1v1, otherwise "Red 1,...,Blue 1,...")
+  --circuit <n>  fight n consecutive bouts, carrying the survivors between
+                 them at the health and conditions the campaign record
+                 measured. A fresh challenger fills the beaten side each time.
+                 NOTHING heals, revives, pays or levels between bouts — but
+                 armour and stamina DO come back, because the record carries
+                 no resources, and the tool prints exactly what was restored
+                 rather than letting it happen quietly. There is no default:
+                 four fights is EP-D03 and EP-D03 is still pending.
   --help         this text
 `;
 
@@ -439,31 +469,37 @@ async function main() {
   const buildFighter = options.rules === "ss2"
     ? (id, name) => buildSs2Fighter(id, name, options.hp, options.armour, options.enchant)
     : (id, name) => buildPlaceholderFighter(id, name, options.hp);
-  const battle = createTeamBattle({
-    seed: options.seed,
-    rules,
-    teams: [
-      {
-        id: "red",
-        combatants: Array.from({ length: options.sizes[0] }, (_, i) =>
-          buildFighter(options.sizes[0] === 1 && options.sizes[1] === 1 ? "p1" : `red-${i + 1}`, options.names[i]))
-      },
-      {
-        id: "blue",
-        combatants: Array.from({ length: options.sizes[1] }, (_, i) =>
-          buildFighter(
-            options.sizes[0] === 1 && options.sizes[1] === 1 ? "p2" : `blue-${i + 1}`,
-            options.names[options.sizes[0] + i]
-          ))
-      }
-    ]
-  });
-
-  console.log(banner(battle));
-  console.log(`\n  seed ${battle.seed} — the same seed and the same choices replay exactly.\n`);
+  const solo = options.sizes[0] === 1 && options.sizes[1] === 1;
+  const openingTeams = [
+    {
+      id: "red",
+      combatants: Array.from({ length: options.sizes[0] }, (_, i) =>
+        buildFighter(solo ? "p1" : `red-${i + 1}`, options.names[i]))
+    },
+    {
+      id: "blue",
+      combatants: Array.from({ length: options.sizes[1] }, (_, i) =>
+        buildFighter(solo ? "p2" : `blue-${i + 1}`, options.names[options.sizes[0] + i]))
+    }
+  ];
 
   const prompter = await createPrompter();
   try {
+    await runCircuit({ options, rules, buildFighter, openingTeams, prompter });
+  } finally {
+    prompter.close();
+  }
+}
+
+/**
+ * One bout, played to a result or to the player quitting.
+ *
+ * Extracted from `main` unchanged when `--circuit` landed, so a circuit is a
+ * loop over the same fight the tool has always played rather than a second
+ * implementation of it. Returns "quit" when the player left, "stalled" when no
+ * legal action remained, and "settled" when the bout produced a result.
+ */
+async function playBout(battle, prompter) {
     while (battle.result === null) {
       const actor = currentCombatant(battle);
       if (!actor) break;
@@ -498,7 +534,7 @@ async function main() {
       const answer = raw.trim();
       if (answer.toLowerCase() === "q") {
         console.log("\nQuit. No result recorded.");
-        return;
+        return "quit";
       }
       const choice = forcedPhase && answer === "" ? 1 : Number(answer);
       if (!Number.isInteger(choice) || choice < 1 || choice > options_.length) {
@@ -532,8 +568,134 @@ async function main() {
       `rng cursor: ${battle.rngCursor}`
     );
     console.log("=".repeat(66));
-  } finally {
-    prompter.close();
+    return battle.result ? "settled" : "stalled";
+}
+
+/**
+ * WHAT THE CIRCUIT PRINTS BETWEEN BOUTS, and why it is not optional.
+ *
+ * A campaign record carries survival, health, maxHealth and statuses, and no
+ * resources. So a survivor is rebuilt from his blueprint and his ARMOUR AND
+ * STAMINA COME BACK — measured, not supposed: a fighter who ended a bout at
+ * armourclass 0 and staminaleft 48 re-entered the next one at 420 and 140.
+ *
+ * Whether armour should repair free between fights is a balance question, and
+ * balance questions belong to the owner and the design track (EP-A03, which
+ * has not been drafted). What this tool must not do is let the answer happen
+ * by accident, so it prints the restoration every time.
+ */
+function renderCarry(advance) {
+  const lines = [];
+  if (advance.fallen.length > 0) {
+    lines.push(`  fallen: ${advance.fallen.map((entry) => entry.name ?? entry.combatantId).join(", ")}`);
+  }
+  for (const entry of advance.restoredResources) {
+    const changes = entry.changes
+      .map((change) => `${change.resource} ${change.measured} -> ${change.entersAt}`)
+      .join(", ");
+    lines.push(`  RESTORED for ${entry.combatantId}: ${changes}`);
+  }
+  for (const entry of advance.facingCorrections) {
+    lines.push(`  re-faced ${entry.combatantId}: now fights facing ${entry.to}`);
+  }
+  if (advance.seatChanges.length > 0) {
+    for (const change of advance.seatChanges) {
+      lines.push(`  ${change.combatantId} moves up: ${change.fromSeatId} -> slot ${change.toSlotIndex}`);
+    }
+  }
+  return lines;
+}
+
+/**
+ * The bout loop. One bout when `--circuit` is absent — byte for byte what this
+ * tool did before the flag existed — and N bouts when it is present, with the
+ * survivors carried between them through the campaign record.
+ *
+ * The carry goes through `buildCampaignRecord` and `rosterFromCampaignRecord`
+ * rather than by copying the live combatants across, and that is the point of
+ * the exercise: it is the campaign layer's first consumer outside its own
+ * tests, so a defect in the record round-trip shows up in a fight instead of
+ * staying theoretical.
+ */
+async function runCircuit({ options, rules, buildFighter, openingTeams, prompter }) {
+  const bouts = options.circuit ?? 1;
+  let teams = openingTeams;
+  let blueprints = teams.flatMap((team) => team.combatants);
+
+  for (let bout = 1; bout <= bouts; bout += 1) {
+    const battle = createTeamBattle({
+      // Each bout gets its own seed, derived from the run's seed and the bout
+      // number, so a circuit replays exactly while no two bouts share a tape.
+      seed: options.seed + bout - 1,
+      rules,
+      teams: teams.map((team) => ({ id: team.id, name: team.name, combatants: team.combatants }))
+    });
+
+    if (bout === 1) {
+      console.log(banner(battle));
+      console.log(`\n  seed ${battle.seed} — the same seed and the same choices replay exactly.`);
+      if (options.circuit !== null) {
+        console.log(`  CIRCUIT: ${bouts} bouts. Survivors carry their wounds; nothing heals them.`);
+      }
+      console.log("");
+    } else {
+      console.log(`\n${"#".repeat(66)}`);
+      console.log(`  BOUT ${bout} of ${bouts}   seed ${battle.seed}`);
+      console.log(`${"#".repeat(66)}`);
+    }
+
+    const outcome = await playBout(battle, prompter);
+    if (outcome !== "settled") return;
+    if (options.circuit === null) return;
+    if (bout === bouts) {
+      console.log(`\n  CIRCUIT COMPLETE: ${bouts} bouts fought.`);
+      return;
+    }
+
+    // Settle the result so a record can be written. In a rendered build this
+    // is the final animation finishing; here there is nothing to wait for, so
+    // the tool acknowledges its own pending result — which it may do only
+    // because it is the presentation surface, not the resolver.
+    const pending = pendingResultEvent(battle);
+    acknowledgeResultAnimation(battle, {
+      type: BATTLE_RESULT_ACK_TYPE,
+      completionToken: pending.completionToken
+    });
+
+    const challengerIndex = bout + 1;
+    const beatenSide = battle.result.winnerTeamId === "red" ? "blue" : "red";
+    const challengers = {
+      teamId: beatenSide,
+      name: beatenSide === "red" ? "Red" : "Blue",
+      side: beatenSide === "red" ? CircuitSide.RIGHT : CircuitSide.LEFT,
+      combatants: [buildFighter(`${beatenSide}-challenger-${challengerIndex}`, `Challenger ${challengerIndex}`)]
+    };
+
+    let advance;
+    try {
+      advance = advanceCircuit(battle, {
+        blueprints,
+        challengers,
+        battleId: `hotseat-bout-${bout}`,
+        recordedAt: new Date().toISOString(),
+        sides: {
+          red: CircuitSide.RIGHT,
+          blue: CircuitSide.LEFT
+        }
+      });
+    } catch (error) {
+      console.log(`\n  The circuit cannot continue: ${error.message}`);
+      return;
+    }
+
+    const carried = renderCarry(advance);
+    if (carried.length > 0) {
+      console.log("\n  --- carried into the next bout ---");
+      for (const line of carried) console.log(line);
+    }
+
+    teams = advance.teams;
+    blueprints = teams.flatMap((team) => team.combatants);
   }
 }
 
