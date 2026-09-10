@@ -246,11 +246,11 @@ not a confirmed one, and re-run before acting:
 | `src/team/resolver.js:540` | `turnCursor: 0,` | rng-and-hash |
 | `src/team/settlement.js:229` | `false ||` | settlement-and-elimination |
 | `src/team/settlement.js:182` | `if (this.#pending.completionToken === record.completionToken) {` | settlement-and-elimination |
-| `src/team/controllers.js:92` | `if (false) {` | settlement-and-elimination |
+| ~~`src/team/controllers.js:92`~~ | `if (false) {` | settlement-and-elimination | **CLOSED 2026-09-10** — killed by "reassign refuses an unknown seat instead of quietly inventing one" (`test/team-controllers.test.js`) |
 | `src/team/settlement.js:250` | `if (this.#onSettle) this.#onSettle(this.#settled);` | settlement-and-elimination |
 | `src/team/settlement.js:124` | `return true;` | settlement-and-elimination |
-| `src/team/controllers.js:60` | `if (false) {` | settlement-and-elimination |
-| `src/team/controllers.js:63` | `const resolvedId = id || kind;` | settlement-and-elimination |
+| ~~`src/team/controllers.js:60`~~ | `if (false) {` | settlement-and-elimination | **CLOSED 2026-09-10** — killed by "an unsupported controller kind is refused, and every supported one is accepted" |
+| ~~`src/team/controllers.js:63`~~ | `const resolvedId = id || kind;` | settlement-and-elimination | **CLOSED 2026-09-10** — killed by "an empty or non-string id is refused, and is NOT quietly replaced by the kind" |
 | `src/team/elimination.js:44` | `down: alive - total,` | settlement-and-elimination |
 | `src/golden/run-1v1-fixture.js:256` | `// assertAllowedKeys(combatant, COMBATANT_KEYS, path);` | golden-gates |
 | `src/golden/promote-1v1-golden.js:451` | `if (!session) {` | golden-gates |
@@ -276,6 +276,23 @@ not a confirmed one, and re-run before acting:
    appears nowhere under `test/`, and neither does its message text — so every
    throw in that file is a candidate survivor, and three of them are confirmed
    survivors above.
+
+   ► **CLOSED 2026-09-10 by `test/team-controllers.test.js`, and the finding was
+     exactly right.** All three survivors were re-derived first — with each
+     mutation applied one at a time on a clean tree at `c22c91c`, the whole suite
+     still reported **849 pass / 0 fail** — and all three now fail. **All NINE
+     throws in the module are covered**, each asserting the error TYPE *and*
+     matching its MESSAGE, because "the message text appears nowhere either" was
+     half of what this finding said and a refusal whose wording nothing pins can
+     be rewritten into uselessness with a green suite.
+     Four further mutants invented while checking the work also die: an `ai:`
+     prefix anchored on `ai`, a label guard that loses its "when present"
+     clause, a default label taken from the kind instead of the id, and
+     `identityFor` answering `undefined` for an unknown seat.
+     **What this does NOT close** is the audit's finding 2 — the pinned literal
+     hashes are still all taken before any action is applied — which is a
+     different and larger problem, and most of the remaining survivors exploit
+     it rather than anything in this module.
 2. **The pinned literal combat-state hashes are all taken on battles with NO
    action applied** — cursor 0, turnCursor 0, result null, events []. They pin
    field PRESENCE and any value that varies at construction, and pin NOTHING

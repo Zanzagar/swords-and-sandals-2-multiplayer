@@ -7,8 +7,10 @@ branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               which is the whole point of the arithmetic fix recorded in the
               living head:
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-suite:        850 / 849 / 0 / 1 (fresh-clone profile), measured after `473ef59`
-              and before this handoff commit. **Re-measure; never copy this.**
+suite:        866 / 865 / 0 / 1 (fresh-clone profile) at the end of the session.
+              It read 850 / 849 / 0 / 1 when this brief was first written; the
+              controllers tests below landed afterwards, in the same session.
+              **Re-measure; never copy this line.**
 supersedes:   2026-09-10-1212--everything-is-pushed-and-the-workflow-gate-is-gone.
               Its ranked list is UNCHANGED and untouched — nothing on it was
               started here. What WAS done is the thing its completeness critic
@@ -141,8 +143,15 @@ has run.
    theoretical.
 3. **CAPTURE BREADTH** — still 37 of 60 candidates with no golden and the spell
    family never captured. Owner's lane; needs Windows.
-4. **Give `src/team/controllers.js` its first negative tests.** Still zero;
-   three confirmed mutation survivors. Cheapest survivor to close.
+4. ~~**Give `src/team/controllers.js` its first negative tests.**~~ **DONE, later
+   in this same session** — `test/team-controllers.test.js`, 16 tests. The
+   audit's finding was exactly right and was re-derived before it was believed:
+   with each of the three mutations applied one at a time the whole suite still
+   reported 849 pass / 0 fail. All three now fail, **all nine throws in the
+   module are covered**, and each refusal asserts the error TYPE *and* matches
+   its MESSAGE — the audit's point was that the message text appeared nowhere
+   either. Four further mutants invented while checking the work also die.
+   `src/team/controllers.js` itself is UNCHANGED: this is a tests-only commit.
 5. **Animation polish and sound.** The figures read well and the timings are
    authored; nothing about them is measured and nothing needs to be.
 
