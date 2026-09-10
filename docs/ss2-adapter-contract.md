@@ -931,14 +931,21 @@ to settle would leave a decided battle that can never pay its campaign.
 | the undefined-until-set status flags and clip-resident facing | **runtime-observed** 2026-08-30 (battle map, "Combatant state objects") |
 | the 23 promoted goldens in `test/fixtures/ss2-1v1-golden/` | **runtime-verified** — and they verify the ordered rolls, the mutation order, and the result transition, not any adapter mapping. No golden observes anything the adapter does. |
 | field names, groups, clip names, depths, positions, panel instances, overlay/arena result labels, the four binding globals | **static map only** for the fingerprinted build |
-| every clip *label* the adapter dispatches | **static map at best**; the ranged `hurtN` adjustment and the death-variant label names are `assumed` |
+| every clip *label* the adapter dispatches | **static map at best**; the death-variant label names are `assumed`. *(This row also named "the ranged `hurtN` adjustment" as assumed until 2026-09-10. It is not: the map gives the rewrite with byte offsets at `docs/integration/ss2-battle-map.md:1471-1472`, and the adapter emitted the wrong label for three years' worth of directions because a `MAP_SILENCE` entry declared the map silent. See that constant's header.)* |
 | the loadout bridge, the spell/heal inventory id sets | **assumption**, placeholder vocabulary only — and no longer on the conversion path. `toCanonicalCombatantSource` emits only the vanilla-backed keys; the inventory id sets survive in `placeholderLoadoutFrom`, which nothing calls unless a caller passes it as `options.loadout`. |
 | multi-slot geometry, ally clip names, ally depths, ally panel widgets | **authored mod surface**; vanilla has no second ally, so no capture can settle it |
 
 `MAP_SILENCE` in `src/adapter/vanilla-fields.js` is the machine-readable
-version of this: seven entries, each naming the subject, the silence, what the
+version of this: **six** entries, each naming the subject, the silence, what the
 adapter does instead, and the capture that would settle it. A test asserts
 every entry is complete and uniquely identified.
+
+*(It said seven until 2026-09-10, and the seventh was false —
+`ranged-hurt-label-adjustment` claimed the map gave the phrase "adjusted for
+ranged directions" without giving the adjustment, when the map gives it one
+sentence later with byte offsets. An entry here is a CLAIM ABOUT THE MAP and is
+checkable like any other; the test pins the count, so removing it had to be
+deliberate.)*
 
 ## Canonical-shape gaps this exposes
 

@@ -467,3 +467,121 @@ test("a gate driven by a whole battle opens once per action, and only when told"
   assert.deepEqual([...gate.pending], []);
   assert.deepEqual(gate.abandoned, []);
 });
+
+/* ------------------------------------------------------------------ */
+/* Two claims this seam MADE about itself, one of them false           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `presentation.js` and `action-gate.js` both said the action boundary is
+ * "never derived from the wire". Not projected and not derivable are different
+ * claims, and only the first was ever true — so a host was being told it needed
+ * a resolver trace it does not need. These two tests pin the difference in both
+ * directions, because the useful version is not "it is derivable" but "it is
+ * derivable PROSPECTIVELY and not retrospectively".
+ */
+test("the action boundary IS derivable from the wire, prospectively", () => {
+  for (const [perSide, seed] of [[1, 3], [1, 7], [2, 3], [3, 11]]) {
+    const battle = ss2Battle(perSide, seed);
+    let checked = 0;
+    let guard = 0;
+    while (!battle.result && guard < 5000) {
+      guard += 1;
+      const actor = currentCombatant(battle);
+      if (!actor) break;
+      const options = legalActions(battle);
+      if (options.length === 0) break;
+
+      // Taken BEFORE the action, from the projection alone. `addEvent` is the
+      // sole appender to `battle.events` (`src/team/resolver.js`) and stamps
+      // `sequence = events.length + 1`, so the sequences are dense and the next
+      // one is arithmetic rather than a sample.
+      const predicted = toTeamWireState(battle).events.length + 1;
+      applyAction(battle, { ...options[0], actorId: actor.id });
+      assert.equal(
+        lastResolvedAction(battle).firstEventSequence,
+        predicted,
+        `${perSide}v${perSide} seed ${seed}: the wire already knew the boundary`
+      );
+      checked += 1;
+    }
+    assert.ok(checked > 3, `${perSide}v${perSide} seed ${seed} must have resolved several actions: ${checked}`);
+  }
+});
+
+test("the action boundary is NOT recoverable from a finished event log", () => {
+  // The whole reason the boundary must be carried in by a caller in the loop.
+  // A four-event killing action and four one-event actions project to the same
+  // dense sequence run, so nothing downstream can tell them apart afterwards.
+  const battle = ss2Battle(1, 3);
+  const actions = driveWithBinder(battle);
+  const boundaries = actions.map((entry) => entry.boundary);
+  const sequences = (toTeamWireState(battle).events ?? []).map((event) => event.sequence);
+
+  assert.deepEqual(sequences, sequences.map((unused, index) => index + 1), "sequences are dense 1..N");
+  assert.ok(
+    sequences.length > boundaries.length,
+    `some action must have emitted more than one event, or this test proves nothing: ` +
+    `${sequences.length} events across ${boundaries.length} actions`
+  );
+  // The evidence that would be needed to split them is exactly what the
+  // projection does not carry.
+  assert.equal(
+    boundaries.every((boundary) => sequences.includes(boundary)),
+    true,
+    "every boundary is itself a sequence, which is why the log cannot distinguish them"
+  );
+});
+
+/**
+ * The token is unique per EVENT BATCH, not per action, and `action-gate.js`
+ * concedes in its own header that "a rule set may legally emit none or a
+ * dozen". A rule set that emits NONE gives two consecutive actions the same
+ * boundary — and the second drain throws inside the host's action loop.
+ *
+ * `ss2TeamRules` never emits a zero-event action, so nothing in this repository
+ * hits this today. It is pinned so the next rule set meets it by name.
+ */
+test("a rule set that legally emits no events collides two actions on one boundary", () => {
+  const silentRules = defineTeamRuleSet({
+    id: "zero-event-rule-set",
+    verification: RuleSetVerification.PLACEHOLDER,
+    provenance: {
+      note: "A rule set that resolves actions without emitting events, to pin the boundary collision.",
+      runtimeVerified: false
+    },
+    actionTypes: ["noop"],
+    maximumHealth: () => 10,
+    legalActions: () => [{ type: "noop", targetId: null }],
+    resolveAction: () => ({ effects: [], events: [] }),
+    chooseAiAction: () => ({ type: "noop", targetId: null })
+  });
+
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: silentRules,
+    teams: [
+      { id: "red", name: "red", combatants: [{ id: "r1", name: "R" }] },
+      { id: "blue", name: "blue", combatants: [{ id: "b1", name: "B" }] }
+    ]
+  });
+  const layout = buildArenaLayout(toTeamWireState(battle));
+  const binder = createPresentationBinder({ layout });
+
+  const boundaries = [];
+  const submit = () => {
+    const actor = currentCombatant(battle);
+    applyAction(battle, { type: "noop", targetId: null, actorId: actor.id });
+    const boundary = lastResolvedAction(battle).firstEventSequence;
+    boundaries.push(boundary);
+    return binder.drain(toTeamWireState(battle), { actionBoundary: boundary });
+  };
+
+  assert.deepEqual([...submit()], [], "a zero-event action binds no command");
+  assert.throws(
+    submit,
+    (error) => error instanceof PresentationError && /ascend strictly/.test(error.message),
+    "the second action reuses the first action's boundary and the binder refuses it"
+  );
+  assert.deepEqual(boundaries, [1, 1], "two distinct actions, one boundary — that is the defect, not the throw");
+});

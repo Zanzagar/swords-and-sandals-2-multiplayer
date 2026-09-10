@@ -240,6 +240,21 @@ const CLIP_RESIDENT_SET = Object.freeze(new Set(CLIP_RESIDENT_FIELDS));
  * Every place this adapter had to act without the map settling the question.
  * Each entry names what would settle it. Nothing here is verified; nothing
  * here may be presented as SS2 behaviour.
+ *
+ * ► **AN ENTRY HERE IS A CLAIM ABOUT THE MAP, AND ONE OF THEM WAS FALSE
+ *   (removed 2026-09-10).** `ranged-hurt-label-adjustment` said the map gave
+ *   the phrase "adjusted for ranged directions" *"without giving the
+ *   adjustment"*. It gives it one sentence later, with byte offsets:
+ *   `docs/integration/ss2-battle-map.md:1471-1472` — `"hurt" + attack_direction`
+ *   (`+0x2086`), rewritten to `"hurt" + (attack_direction - 20)` for
+ *   directions 21–23 (`+0x2093`–`+0x20d6`). The entry had quoted the summary
+ *   sentence and stopped reading, `hurtLabel` emitted `hurt21`/`hurt22`/`hurt23`
+ *   on the strength of it, and `test/ss2-adapter.test.js` asserted that wrong
+ *   value — so three artefacts agreed with each other and none agreed with the
+ *   map. **Declaring the map silent is the cheapest way in this repository to
+ *   turn a measurement into a guess: check the surrounding paragraph, not the
+ *   sentence you are quoting.** Found by a write-nothing reader, re-derived
+ *   here before it was believed.
  */
 export const MAP_SILENCE = Object.freeze([
   Object.freeze({
@@ -277,17 +292,6 @@ export const MAP_SILENCE = Object.freeze([
       "Panel updates address a widget *role* per slot; the front slots use the six mapped instance names and " +
       "every other role is addressed by role name, not by a guessed instance name.",
     settledBy: "A capture that enumerates `arena.combat_panel`'s child instance names."
-  }),
-  Object.freeze({
-    id: "ranged-hurt-label-adjustment",
-    subject: "the `hurtN` label adjustment for ranged directions",
-    silence:
-      "The map records that `defender_hurt` \"selects an animation label (`hurtN`, adjusted for ranged " +
-      "directions, or `knockback`)\" without giving the adjustment.",
-    adapterBehaviour:
-      "The shipped SS2 label table marks every ranged-direction hurt label `assumed` and carries the flag " +
-      "onto the emitted presentation command.",
-    settledBy: "A capture that records the defender clip's current frame label after each bombard/snipe/bash hit."
   }),
   Object.freeze({
     id: "multi-slot-arena-geometry",

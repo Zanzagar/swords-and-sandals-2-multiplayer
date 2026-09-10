@@ -34,7 +34,23 @@
  * `combatStateHash` hashes the whole projection, so projecting an action
  * boundary would move every pinned battle hash and desync an old peer from a
  * new one. So the boundary is CARRIED BY THE CALLER into
- * `presentResolvedEvents`, never derived from the wire.
+ * `presentResolvedEvents`.
+ *
+ * ► **"never derived from the wire" WAS THE END OF THAT SENTENCE, AND IT WAS
+ *   WRONG (corrected 2026-09-10).** Prospectively the boundary IS derivable:
+ *   it equals `toTeamWireState(battle).events.length + 1` taken before
+ *   `applyAction`. Measured, 0 mismatches over 193 actions. NOT PROJECTED and
+ *   NOT DERIVABLE are different claims and only the first one is true.
+ *
+ * ► **AND THE TOKEN IS UNIQUE PER EVENT-BATCH, NOT PER ACTION.** The
+ *   measurement above concedes a rule set "may legally emit none"; if one
+ *   does, two consecutive actions are stamped with the SAME boundary and the
+ *   second `binder.drain` throws `Action boundaries must ascend strictly`.
+ *   `ss2TeamRules` never emits a zero-event action, so nothing in this
+ *   repository hits it today — but that is a property of one rule set, not of
+ *   the seam, and `test/action-animation-gate.test.js` now pins the crash so
+ *   the next rule set finds it named rather than as a stack trace inside a
+ *   host's action loop.
  *
  * WHAT THIS MODULE REFUSES TO DECIDE, because deciding it would put a guess at
  * the centre of the action loop:

@@ -1464,11 +1464,18 @@ test("animation labels carry their provenance, and none of them claims verificat
     .filter((command) => command.kind === CommandKind.CLIP_GOTO)
     .map((command) => [command.label, command.labelProvenance]);
 
+  // ► `["hurt21", ASSUMED]` STOOD ON THIS LINE UNTIL 2026-09-10 AND WAS WRONG.
+  //   The map rewrites the ranged band: `"hurt" + (attack_direction - 20)` for
+  //   directions 21-23 (`docs/integration/ss2-battle-map.md:1471-1472`,
+  //   `+0x2093`-`+0x20d6`), so direction 21 plays `hurt1` and the map NAMES it.
+  //   The assertion agreed with the code and neither agreed with the map, which
+  //   is why the suite was green while the adapter emitted a label the build
+  //   has no frame for.
   assert.deepEqual(labels, [
     ["attack7", LabelProvenance.ASSUMED],
     ["hurt7", LabelProvenance.MAP_NAMED],
     ["bombard", LabelProvenance.MAP_NAMED],
-    ["hurt21", LabelProvenance.ASSUMED],
+    ["hurt1", LabelProvenance.MAP_NAMED],
     ["attack7", LabelProvenance.ASSUMED],
     ["Block", LabelProvenance.MAP_NAMED]
   ]);
@@ -1479,6 +1486,47 @@ test("animation labels carry their provenance, and none of them claims verificat
   );
   assert.equal(SS2_STATIC_MAP_BINDINGS.verification, "static-map");
   assert.equal(PLACEHOLDER_ANIMATION_BINDINGS.verification, "placeholder");
+});
+
+test("the ranged hurt band is rewritten exactly as the map's byte offsets say", () => {
+  // `docs/integration/ss2-battle-map.md:1471-1472`: the animation label is
+  // `"hurt" + attack_direction` (`+0x2086`), rewritten to
+  // `"hurt" + (attack_direction - 20)` for directions 21-23
+  // (`+0x2093`-`+0x20d6`). The band therefore REUSES the melee hurt clips, and
+  // that collision is the build's arithmetic, not a simplification made here —
+  // so the test asserts the collision rather than avoiding it.
+  const hurtFor = (attackDirection) => {
+    const wire = {
+      version: 1,
+      teams: [
+        { id: "red", name: "red", combatants: [{ id: "red-1", teamId: "red", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] },
+        { id: "blue", name: "blue", combatants: [{ id: "blue-1", teamId: "blue", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] }
+      ],
+      events: [
+        { sequence: 1, turn: 1, type: "attack", actorId: "red-1", targetId: "blue-1", hit: true, attackDirection, dispatchedMethod: "normal" }
+      ]
+    };
+    const layout = buildArenaLayout(wire);
+    const { commands } = presentResolvedEvents(wire, { layout, bindings: SS2_STATIC_MAP_BINDINGS });
+    const target = commands.find((command) => command.kind === CommandKind.CLIP_GOTO && command.role === "target");
+    return [target.label, target.labelProvenance];
+  };
+
+  for (const [direction, expected] of [[21, "hurt1"], [22, "hurt2"], [23, "hurt3"]]) {
+    assert.deepEqual(
+      hurtFor(direction),
+      [expected, LabelProvenance.MAP_NAMED],
+      `direction ${direction} plays ${expected}, and the map NAMES it — it is not an assumption`
+    );
+  }
+
+  // The melee band is untouched by the rewrite, which is what makes the
+  // collision real: 1 and 21 land on the same clip.
+  assert.deepEqual(hurtFor(1), ["hurt1", LabelProvenance.MAP_NAMED]);
+  assert.deepEqual(hurtFor(12), ["hurt12", LabelProvenance.MAP_NAMED]);
+
+  // A direction outside every band is the one case that stays an assumption.
+  assert.deepEqual(hurtFor(Number.NaN), ["hurt5", LabelProvenance.ASSUMED]);
 });
 
 test("an event with no binding is reported as unmapped instead of guessed", () => {
@@ -1777,13 +1825,15 @@ test("every field the adapter maps cites the battle map, and every silence names
   assert.equal(citationFor("some_future_field"), null);
   assert.ok(record.unknownFields.length === 0);
 
-  // Pinned so the contract's "seven entries" claim cannot drift silently.
+  // Pinned so the contract's entry-count claim cannot drift silently — and so
+  // that REMOVING one is deliberate. `ranged-hurt-label-adjustment` was removed
+  // 2026-09-10 because the map is not silent on it; this list going from seven
+  // to six is that removal, not drift.
   assert.deepEqual([...MAP_SILENCE.map((entry) => entry.id)].sort(), [
     "initiative-order",
     "multi-slot-arena-geometry",
     "panel-bar-instance-names",
     "psyche-up-initialisation",
-    "ranged-hurt-label-adjustment",
     "secondary-weapon-field-names",
     "timed-spell-field-names"
   ]);

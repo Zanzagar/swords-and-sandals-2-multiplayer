@@ -53,11 +53,25 @@
  * that is load-bearing: `combatStateHash` hashes the whole projection, so
  * projecting an action boundary would move every pinned battle hash. **So the
  * boundary is carried IN by the caller** — `actionBoundaries` here,
- * `drain(wire, { actionBoundary })` on the binder — and is never derived from
- * the wire. A caller that supplies none gets `actionToken: null` on every
- * command, which says "nobody told us where this action began" rather than
- * inventing an answer. It is null, not absent, so a host cannot read a missing
- * field as "no gating needed".
+ * `drain(wire, { actionBoundary })` on the binder. A caller that supplies none
+ * gets `actionToken: null` on every command, which says "nobody told us where
+ * this action began" rather than inventing an answer. It is null, not absent,
+ * so a host cannot read a missing field as "no gating needed".
+ *
+ * ► **THIS PARAGRAPH USED TO END "and is never derived from the wire", AND
+ *   THAT WAS WRONG — corrected 2026-09-10.** The boundary is *exactly*
+ *   `toTeamWireState(battle).events.length + 1` taken immediately BEFORE
+ *   `applyAction`, because `addEvent` (`src/team/resolver.js:236`) is the sole
+ *   appender to `battle.events` and stamps `sequence = events.length + 1`, so
+ *   the sequences are dense. Measured here, not argued: 0 mismatches over 193
+ *   actions across 1v1, 2v2 and 3v3 under `ss2TeamRules`, pinned by
+ *   `the action boundary IS derivable from the wire, prospectively` in
+ *   `test/action-animation-gate.test.js`. **The reason it is not projected is
+ *   HASH STABILITY, never underivability**, and the distinction matters to a
+ *   host: a caller inside the action loop can always compute the boundary for
+ *   itself and needs no resolver trace. What is genuinely impossible is
+ *   recovering boundaries RETROSPECTIVELY from a finished event log — four
+ *   events at 7,8,9,10 are indistinguishable from four one-event actions.
  */
 
 import { EliminationEvent } from "../team/elimination.js";
@@ -141,6 +155,8 @@ export const PLACEHOLDER_ANIMATION_BINDINGS = Object.freeze({
 
 /** Map, "Attack roll dispatcher": which directions are the ranged band. */
 const RANGED_DIRECTIONS = Object.freeze(new Set([21, 22, 23]));
+/** Map `+0x2093`–`+0x20d6`: the ranged band's hurt label is `direction - 20`. */
+const RANGED_DIRECTION_OFFSET = 20;
 
 /**
  * SS2 vocabulary bindings, derived from the static map only.
@@ -198,11 +214,30 @@ function attackLabel(direction) {
 }
 
 function hurtLabel(direction) {
-  // Map: `defender_hurt` "selects an animation label (`hurtN`, adjusted for
-  // ranged directions, or `knockback`)" — the adjustment is not given, so
-  // every ranged-band hurt label is assumed. See MAP_SILENCE.
+  // Map, "Attack roll dispatcher" (`docs/integration/ss2-battle-map.md:1471-1473`):
+  // the animation label is `"hurt" + attack_direction` (`+0x2086`), REWRITTEN to
+  // `"hurt" + (attack_direction - 20)` for directions 21–23
+  // (`+0x2093`–`+0x20d6`), and replaced by `knockback` at direction 30
+  // (`+0x20dd`–`+0x20ec`, reached here through `dispatchedMethod: "grievous"`).
+  //
+  // ► THIS FUNCTION USED TO EMIT `hurt21`/`hurt22`/`hurt23` AND MARK THEM
+  //   `ASSUMED`, ON THE STRENGTH OF A `MAP_SILENCE` ENTRY THAT SAID THE MAP
+  //   GAVE THE PHRASE "adjusted for ranged directions" "without giving the
+  //   adjustment". The map gives it, with byte offsets, one sentence later —
+  //   the silence entry quoted the summary and stopped reading. So the label
+  //   was wrong AND its provenance understated the evidence, and
+  //   `test/ss2-adapter.test.js` pinned the wrong value, which is why the
+  //   suite was green. Corrected 2026-09-10; the silence entry is gone and
+  //   `the ranged hurt band is rewritten exactly as the map's byte offsets
+  //   say` pins the rule instead.
+  //
+  // The rewrite makes the ranged band REUSE the melee hurt animations: a
+  // bombard (21) plays `hurt1`, the same clip a direction-1 melee hit plays.
+  // That is the build's own arithmetic, not a simplification made here.
   if (!Number.isFinite(direction)) return label("hurt5", LabelProvenance.ASSUMED);
-  if (RANGED_DIRECTIONS.has(direction)) return label(`hurt${direction}`, LabelProvenance.ASSUMED);
+  if (RANGED_DIRECTIONS.has(direction)) {
+    return label(`hurt${direction - RANGED_DIRECTION_OFFSET}`, LabelProvenance.MAP_NAMED);
+  }
   return label(`hurt${direction}`, LabelProvenance.MAP_NAMED);
 }
 
@@ -362,11 +397,15 @@ function assertActionBoundaries(actionBoundaries) {
 /**
  * Converts resolver events into ordered presentation commands.
  *
- * `actionBoundaries` is how the per-action animation token gets here. It is
- * NOT derivable from `wire`: the resolver's own action boundary lives on
- * `battle.lastResolution`, which `toTeamWireState` deliberately does not
- * project because `combatStateHash` covers everything it does project. Supply
- * none and every command carries `actionToken: null`.
+ * `actionBoundaries` is how the per-action animation token gets here. The
+ * resolver's own action boundary lives on `battle.lastResolution`, which
+ * `toTeamWireState` deliberately does not project because `combatStateHash`
+ * covers everything it does project. Supply none and every command carries
+ * `actionToken: null`.
+ *
+ * This used to say the boundary is "NOT derivable from `wire`". It is — see
+ * the correction in this module's header. Not projected, for hash stability;
+ * not the same thing as not derivable.
  *
  * @param {object} wire `toTeamWireState(battle)`
  * @param {object} options.layout from `buildArenaLayout`
