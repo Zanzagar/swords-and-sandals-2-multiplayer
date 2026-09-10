@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Arena — a rendered surface for the team resolver</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #e8e4dc;
+    --ink-dim: #9a9287;
+    --ground: #17151a;
+    --panel: #211e26;
+    --edge: #3a3542;
+    --hero: #8c2f39;
+    --villain: #2f4858;
+    --warn: #d8a13a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--edge);
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; letter-spacing: .02em; }
+  .tier {
+    color: var(--warn);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .04em;
+  }
+  main { flex: 1; display: flex; gap: 0; flex-wrap: wrap; align-items: stretch; }
+  #stage { flex: 1 1 620px; min-width: 320px; position: relative; }
+  canvas { display: block; width: 100%; height: 100%; }
+  aside {
+    flex: 0 1 330px;
+    min-width: 280px;
+    border-left: 1px solid var(--edge);
+    background: var(--panel);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-dim); margin: 0 0 6px; }
+  .roster { display: flex; flex-direction: column; gap: 6px; }
+  .fighter { border: 1px solid var(--edge); border-radius: 5px; padding: 6px 8px; }
+  .fighter.acting { border-color: var(--warn); }
+  .fighter.down { opacity: .45; }
+  .fighter .row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .fighter .name { font-weight: 600; }
+  .fighter .slot { color: var(--ink-dim); font-size: 11px; }
+  .bar { height: 6px; border-radius: 3px; background: #000; overflow: hidden; margin-top: 4px; }
+  .bar > i { display: block; height: 100%; background: #6ea84f; }
+  .bar.hurt > i { background: #b8562f; }
+  .actions { display: flex; flex-direction: column; gap: 5px; }
+  button {
+    font: inherit; text-align: left; cursor: pointer;
+    background: #2c2833; color: var(--ink);
+    border: 1px solid var(--edge); border-radius: 5px; padding: 6px 9px;
+  }
+  button:hover:not(:disabled) { background: #383243; }
+  button:disabled { opacity: .4; cursor: default; }
+  .log { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; color: var(--ink-dim); }
+  .log div { padding: 1px 0; }
+  .log .warn { color: var(--warn); }
+  .provenance { font-size: 11.5px; color: var(--ink-dim); }
+  .provenance b { color: var(--ink); font-weight: 600; }
+  footer {
+    padding: 8px 16px; border-top: 1px solid var(--edge);
+    font-size: 11.5px; color: var(--ink-dim);
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>The Arena</h1>
+    <span class="tier" id="tier">loading…</span>
+    <span class="provenance" id="seed"></span>
+  </header>
+  <main>
+    <div id="stage"><canvas id="arena"></canvas></div>
+    <aside>
+      <section>
+        <h2>Roster</h2>
+        <div class="roster" id="roster"></div>
+      </section>
+      <section>
+        <h2 id="turn-heading">Your turn</h2>
+        <div class="actions" id="actions"></div>
+      </section>
+      <section>
+        <h2>What you are looking at</h2>
+        <div class="provenance" id="provenance"></div>
+      </section>
+      <section>
+        <h2>Surface log</h2>
+        <div class="log" id="log"></div>
+      </section>
+    </aside>
+  </main>
+  <footer id="footer"></footer>
+  <script type="module" src="/tools/arena/main.js"></script>
+</body>
+</html>

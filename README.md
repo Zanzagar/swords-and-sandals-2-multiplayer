@@ -19,7 +19,7 @@ read-only. This is not yet a finished playable mod.
 | --- | --- |
 | Shared team resolver | Implemented and tested for one to three combatants per team. 1v1, 2v2, and 3v3 use the same resolver. |
 | Vanilla parity | Partial and expanding. **23** promoted runtime goldens exist and **replay through the shared resolver** under `src/team/ss2-rules.js`, a `map-derived` rule set carrying SS2's own attack arithmetic. No RUNTIME-VERIFIED rule set exists: map-derived declares `runtimeVerified: false`. The goldens cover attack directions 1–12; **22 of the 23 carry zero armour and `fightMode: "misc"`, and the 23rd does not** — `golden-armoured-deflection-threshold-cleared` stages a villain at `armourclass 79` in `fightMode: "tournament"` and measures absorption 79 → 57. Enchantment coverage is still zero. *(Re-derived 2026-09-07; this cell said 22 and "zero armour" until then.)* |
-| SS2 adapter and campaign layer | Asset-free state bridge, slot layout, presentation commands, acknowledgement bridge, per-action animation gate, and additive campaign-record schema have landed. **Roster read-back landed 2026-09-07** (`rosterFromCampaignRecord` / `advanceCircuit`, with `node tools/hotseat.mjs --circuit <n>` as its consumer) and is struck from this list. Rendering, rewards, and licensed-build integration remain incomplete. |
+| SS2 adapter and campaign layer | Asset-free state bridge, slot layout, presentation commands, acknowledgement bridge, per-action animation gate, and additive campaign-record schema have landed. **Roster read-back landed 2026-09-07** (`rosterFromCampaignRecord` / `advanceCircuit`, with `node tools/hotseat.mjs --circuit <n>` as its consumer) and is struck from this list. **A rendered arena landed 2026-09-10** (`src/render/` + `tools/arena/`) and is the presentation stream's first consumer outside its own tests; it draws original vector art and ships no SS2 asset. Rewards and licensed-build integration remain incomplete. |
 | Endless progression | Quantitatively diagnosed and specified in a research-backed design; owner decisions and readiness blockers remain open. No Endless rule set or progression implementation exists yet. |
 | Online multiplayer | Deterministic foundations exist; lobby, transport, authentication, reconnect, and desync recovery are planned. |
 
@@ -55,6 +55,17 @@ The detailed and frequently changing delivery state lives in the
   humans, one keyboard, to a winner. Its tier is `map-derived` — read out of the
   licensed build's bytecode, partly checked against the 23 goldens, and never
   observed running. The banner says so on every run.
+
+- [`src/render/`](src/render/) draws it. `node tools/arena-server.mjs`, then
+  <http://127.0.0.1:8123/> — a browser arena that fights through the same
+  resolver and the same adapter the tests run, imported directly as ES modules
+  with no bundler and no build step. Add `?teams=3&spectate=1` to watch a 3v3
+  play itself. **Every figure is original vector art drawn from code**; this
+  repository ships no SS2 artwork, audio or bytes, and
+  `test/no-shipped-assets.test.js` enforces that rather than leaving it to
+  care. It is also the first host anywhere here to make the per-action
+  animation gate ENFORCE, so it is the first thing that has ever had to decide
+  when to stop waiting for an animation.
 
 These are repository capabilities, not proof of complete vanilla parity. The
 resolver's default rule set is `placeholder`; the hot-seat runner's is
