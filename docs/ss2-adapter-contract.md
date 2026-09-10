@@ -936,9 +936,17 @@ to settle would leave a decided battle that can never pay its campaign.
 | multi-slot geometry, ally clip names, ally depths, ally panel widgets | **authored mod surface**; vanilla has no second ally, so no capture can settle it |
 
 `MAP_SILENCE` in `src/adapter/vanilla-fields.js` is the machine-readable
-version of this: **six** entries, each naming the subject, the silence, what the
-adapter does instead, and the capture that would settle it. A test asserts
-every entry is complete and uniquely identified.
+version of this: **seven** entries, each naming the subject, the silence, what
+the adapter does instead, and the capture that would settle it. A test asserts
+every entry is complete and uniquely identified, and pins the id LIST rather
+than the count.
+
+*(It went six -> seven on 2026-09-10 with `movement-displacement`: the battle
+map gives all eight movement phases' stamina cost with byte offsets and no
+phase's DISTANCE, and the only `_x` writes it records are the four clamps in
+`nextphase`. That entry is deliberately careful about a figure the repository
+DOES hold — "one walk is 44 px", uncited, in a frozen handoff — because
+overstating a silence is the same error as declaring one falsely.)*
 
 *(It said seven until 2026-09-10, and the seventh was false —
 `ranged-hurt-label-adjustment` claimed the map gave the phrase "adjusted for

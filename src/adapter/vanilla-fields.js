@@ -306,6 +306,53 @@ export const MAP_SILENCE = Object.freeze([
     settledBy: "Nothing in vanilla; this is authored mod surface and is labelled as such."
   }),
   Object.freeze({
+    id: "movement-displacement",
+    subject: "how far a movement phase moves a gladiator's `_x`",
+    silence:
+      "The battle map gives every movement phase's stamina COST with a byte offset and no phase's " +
+      "DISTANCE: `walkleft` `+0x3b37`, `walkright` `+0x3d16`, `runleft` `+0x3ef5`, `runright` `+0x407e` all " +
+      "cost `round(movement_speed / 2)`; `chargeright` `+0x4214` and `chargeleft` `+0x4480` cost " +
+      "`round(movement_speed * 2)`; `jumpright` `+0x46ec` and `jumpleft` `+0x49c4` cost " +
+      "`round(movement_speed)`. The only `_x` writes it records anywhere are the four clamps opening " +
+      "`nextphase` (`If` at `+0x31cc`, `+0x31f8`, `+0x3224`, `+0x3250`, closed by `+0x3266`), and a clamp is " +
+      "a bound, not a step. **The repository is not wholly silent, and saying so loosely would repeat the " +
+      "error this list exists to prevent**: `docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md:194` " +
+      "states \"one walk is 44 px\" — one occurrence repo-wide, uncited, in a FROZEN handoff, and suspect " +
+      "because 44 is also the range multiplier in `weapon_range = physical_size + weapon[5] * 44` " +
+      "(`+0x3190`). It survives one check from the other direction: the same line reports that only 26.6% of " +
+      "real rounds reached range in fewer than five walks, and at 44px with both gladiators closing, four " +
+      "walks each leaves the champion staging at `fightdistance` 148 against its `weapon_range` 144 (out) " +
+      "and five leaves 60 (in). That is a CONSISTENCY CHECK against a different scenario, not a " +
+      "measurement, and it may never be cited as evidence about the game. Nothing states a displacement " +
+      "for the other six phases at all. What is NOT silent, and was wrongly recorded as such until " +
+      "2026-09-10: the controller selector (frame 4 `DoAction@0x238bbf` `+0x00f6`, `+0x015f`) and " +
+      "`getfightdistance` (`docs/integration/ss2-champion-dna.md:710-712`).",
+    adapterBehaviour:
+      "Nothing moves. No combatant projection carries a position, `combatStateHash` therefore commits to " +
+      "none, and `place-clip` is constructed at exactly one site — arena construction in " +
+      "`presentation.js` — and never again. The renderer's `advance` pose (`src/render/timeline.js`) is an " +
+      "authored within-slot lunge that returns the figure to where it started, so it invents no position " +
+      "the resolver would own. Measured 2026-09-10 while proving this entry out: a resolver-level position " +
+      "model works and reproduces the build's own five-walk approach, but movement with no presentation " +
+      "binding makes a walking gladiator emit `clip-goto Standing` — THE IDLE CLIP — plus a spurious " +
+      "`unmapped`, which is the identical defect the owner found by watching the arena on 2026-09-10. " +
+      "Movement needs a command kind of its own; reusing `place-clip` is not a style question but a " +
+      "defect, because `scene.js` overwrites all seven geometry fields and a partial command makes " +
+      "`toY(undefined)` NaN and the figure vanish.",
+    settledBy:
+      "NO NEW CAPTURE. The arena route's autopilot presses `walkright`/`walkleft` until the close-range " +
+      "controller offers `normal_attack` (`docs/integration/ss2-arena-route.md`, \"The fight policy\"), and " +
+      "traces record `phase_action` values by name — the same evidence shape already surveyed " +
+      "archive-wide for the status phases. Counting the walk phases before the first attack in a staged " +
+      "session bounds the per-phase displacement, because both ends of the interval are computable: the " +
+      "champion staging's `strength:30`/`weapon:24` give `physical_size` 100 and `weapon_range` 144 " +
+      "against a construction `fightdistance` of 500, so the approach closes at least 356 units over N " +
+      "walks (the SUM over both sides — the villain AI closes too). Repeating it across stagings with " +
+      "different `speed` settles the second question, whether the displacement scales with " +
+      "`movement_speed` at all, because that staging pins `movement_speed` at its clamp floor of 4. The " +
+      "archive is not on a fresh-clone tree; this needs the capture machine, not the capture rig.",
+  }),
+  Object.freeze({
     id: "initiative-order",
     subject: "the resolver's strict initiative order",
     silence:

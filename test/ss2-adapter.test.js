@@ -25,6 +25,7 @@ import {
   assertMirrorAgrees,
   assertWriteProvenance,
   ARENA_Y,
+  assertDistinctPlacements,
   buildArenaLayout,
   bindingPlanFor,
   CANONICAL_RESOURCE_SOURCES,
@@ -1887,11 +1888,16 @@ test("every field the adapter maps cites the battle map, and every silence names
   assert.ok(record.unknownFields.length === 0);
 
   // Pinned so the contract's entry-count claim cannot drift silently — and so
-  // that REMOVING one is deliberate. `ranged-hurt-label-adjustment` was removed
-  // 2026-09-10 because the map is not silent on it; this list going from seven
-  // to six is that removal, not drift.
+  // that ADDING or REMOVING one is deliberate. `ranged-hurt-label-adjustment`
+  // was removed 2026-09-10 because the map is not silent on it; seven to six
+  // was that removal. `movement-displacement` was added later the same day,
+  // taking it back to seven — for the opposite reason, and that symmetry is
+  // the point of pinning the list rather than the count: one entry left
+  // because the map turned out to SPEAK, and one arrived because a gap nobody
+  // had written down turned out to be real.
   assert.deepEqual([...MAP_SILENCE.map((entry) => entry.id)].sort(), [
     "initiative-order",
+    "movement-displacement",
     "multi-slot-arena-geometry",
     "panel-bar-instance-names",
     "psyche-up-initialisation",
@@ -1905,4 +1911,63 @@ test("every field the adapter maps cites the battle map, and every silence names
     }
   }
   assert.equal(new Set(MAP_SILENCE.map((entry) => entry.id)).size, MAP_SILENCE.length);
+});
+
+/**
+ * The guarantee `assertDistinctPlacements` DOCSTRINGS and, until 2026-09-10,
+ * did not check: "every combatant id gets a distinct slot, clip instance,
+ * depth, state path, and screen position". Its `seen` map held four keys and
+ * neither `x` nor `y` was one of them.
+ *
+ * This is not a hypothetical. It is unreachable through `buildArenaLayout`
+ * today only because the authored ally stride is non-zero — and the ranked
+ * work this guard sits in front of is putting POSITION in the resolver, after
+ * which two combatants sharing an `x` is an ordinary runtime state rather than
+ * an impossible one. The test drives the exported guard directly, because that
+ * is the surface a future position-aware layout would call.
+ */
+test("assertDistinctPlacements refuses two fighters on the same spot, which its docstring always promised", () => {
+  const base = {
+    combatantId: "a",
+    instanceName: "hero",
+    depth: 301,
+    shadowDepth: 298,
+    stateObjectPath: "adapter.hero",
+    vanillaNative: true,
+    x: -250,
+    y: 200
+  };
+  const other = {
+    ...base,
+    combatantId: "b",
+    instanceName: "ally1",
+    depth: 310,
+    shadowDepth: 311,
+    stateObjectPath: "adapter.ally1",
+    vanillaNative: false
+  };
+
+  // Distinct in every OTHER respect, and standing on exactly the same spot.
+  assert.throws(
+    () => assertDistinctPlacements([base, other]),
+    (error) => error instanceof SlotLayoutError && /same|Duplicate screen position/i.test(error.message),
+    "two fighters at one (x, y) must be refused"
+  );
+
+  // A shared x at a different y is the authored band working, not a collision:
+  // slot 1 sits further back, and that must stay legal.
+  assert.equal(assertDistinctPlacements([base, { ...other, y: 182 }]), true);
+
+  // And the real layout still passes, at every size the six-slot arena serves.
+  for (const perSide of [1, 2, 3]) {
+    const teams = [0, 1].map((side) => ({
+      id: side === 0 ? "blue" : "red",
+      combatants: Array.from({ length: perSide }, (_, index) => ({
+        id: `${side}-${index}`,
+        slotIndex: index
+      }))
+    }));
+    const layout = buildArenaLayout({ teams });
+    assert.equal(assertDistinctPlacements(layout.placements), true, `${perSide}v${perSide} must still pass`);
+  }
 });
