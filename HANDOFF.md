@@ -74,6 +74,14 @@ exploit.
   problem. REGRESSION pins, never goldens: every literal was computed from this
   repository's own code and is evidence about nothing but itself.
 
+► **THE 2026-09-10 17:30 SESSION COMMITTED SIX AND MEASURED EIGHT UNPUSHED at
+  `7653f97`, its handoff commit — and this correction commit makes it nine.**
+  Written with the self-reference in it on purpose: the arithmetic fix says to
+  measure AFTER the handoff commit, and the very next commit then falsifies a
+  bare number. An event that names its own hash stays true; a count does not.
+  **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
 ► **THE 13:23 HANDOFF'S RANKED ITEM 2 CONTAINS A FALSE SENTENCE, and a wave
   briefed from it inherited the error — corrected here 2026-09-10, because
   the handoff is frozen and this is the only place it can be corrected.**
