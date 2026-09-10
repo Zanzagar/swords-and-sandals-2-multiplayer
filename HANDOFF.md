@@ -26,10 +26,19 @@ only from static screenshots** — headless Chrome gives a `requestAnimationFram
 loop 2 frames whatever `--virtual-time-budget` says, so nobody has yet watched a
 bout animate end to end.
 
-► **THREE COMMITS WERE PUSHED AT 2026-09-10 13:28** — `74b376a`, `473ef59` and
-  `590d28a` — on the owner's explicit yes, and `github/arena/champion-capture`
-  verified at `590d28a` with **0 unpushed** immediately afterwards. Only the
-  correction commit that rewrote this very block came after it.
+**That brief's ranked item 4 was then done in the same session**
+(`f922d31`): `src/team/controllers.js` has its first negative tests, closing the
+2026-09-07 mutation audit's three confirmed survivors there. All three were
+re-derived first — applied one at a time, the suite still read 849 pass / 0 fail
+— and all nine throws in the module are now covered, each asserting the error
+TYPE *and* matching its MESSAGE. The module itself is unchanged; no bug was
+found, because a survivor is a COVERAGE fact. **It does not touch the audit's
+finding 2** — every pinned literal hash is still taken before any action is
+applied — which is the larger problem most of the remaining 29 survivors
+exploit, and it is still open.
+
+► **THE 2026-09-10 SESSION PUSHED EVERYTHING IT COMMITTED**, each push on the
+  owner's explicit yes, and verified `0 unpushed` after each one.
 
   **This block is written as an EVENT, not as a live count, and that is the
   point.** Its first version said "three commits are unpushed", which was true
@@ -39,6 +48,15 @@ bout animate end to end.
   never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
   `Bash(git push *)` stays in `ask`, so ask before every push regardless.
+
+  ► **AND THE REWRITE STILL LEFT A DECAYING CLAUSE IN, WHICH IS THE WHOLE
+    LESSON REPEATING ITSELF INSIDE THE PARAGRAPH ABOUT IT.** The version that
+    replaced the count named three specific commit hashes and then said "only
+    the correction commit that rewrote this very block came after it" — an
+    enumeration of the future, which the very next commit falsified. Naming an
+    event is not enough if the sentence also claims what has NOT happened
+    since. **Do not write "and nothing else since" into a file that is still
+    being written.**
 
 *(The brief it supersedes, whose RANKED LIST IS STILL THE WORK — nothing on it
 has been started:)*
