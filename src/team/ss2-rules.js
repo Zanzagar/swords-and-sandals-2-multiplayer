@@ -1494,8 +1494,56 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
      * Two documented widenings, because v1 models neither position nor the
      * controller frames: the build wires the three melee verbs only on
      * `closerange_warrior`, and wires `rest` only on the two long-range frames
-     * and only below 50% stamina. Adding the controller-frame gate needs
-     * `_root.arena.fightdistance`, for which the map records no writer at all.
+     * and only below 50% stamina. (Both halves re-derived 2026-09-10 against
+     * the map's own table at `docs/integration/ss2-battle-map.md:223-246`, and
+     * both hold.)
+     *
+     * ► **THE SENTENCE THAT USED TO END THIS PARAGRAPH WAS THE THING STANDING
+     *   IN FRONT OF THE WORK, and it does not survive being checked —
+     *   corrected 2026-09-10.** It read: *"Adding the controller-frame gate
+     *   needs `_root.arena.fightdistance`, for which the map records no writer
+     *   at all."*
+     *
+     *   It is TRUE of `ss2-battle-map.md` alone — that file mentions
+     *   `fightdistance` three times (`:146`, `:150`, `:156`) and all three are
+     *   READS inside the frame-4 selector — and FALSE of the corpus, which
+     *   names the writer twice with offsets:
+     *     `docs/integration/ss2-champion-dna.md:710-712` — `getfightdistance`
+     *       (`sprite 2249 frame 1 DoAction@0x6e421b` `+0x02ff`, `+0x0427`)
+     *       makes it the rounded x-separation of the two clips, 500 at
+     *       construction;
+     *     `docs/ss2-adapter-contract.md:1232` — the same function, reading
+     *       `gladiators.hero._x` / `.villain._x` by literal name.
+     *   The two disagree on base address (`0x6e421b` vs `0x6e4221`, six bytes
+     *   apart) and neither identifies the store, so the CITATION is soft even
+     *   though the DERIVATION is not.
+     *
+     *   **The chronology removes the "we did not know yet" reading.**
+     *   `git blame` puts this comment at `831bcdc`, 2026-09-01; champion-dna
+     *   recorded the writer at `5d3d777` on 2026-08-30. The counter-evidence
+     *   was already in a sibling integration doc when the sentence was
+     *   written. It is not a stale note — it is a sentence written without
+     *   opening the neighbouring document.
+     *
+     *   **And the justification is a non-sequitur even where the sentence is
+     *   true**: a reimplementation never calls the build's writer. It needs
+     *   positions, from which `fightdistance = round(|x_a - x_b|)`. Every
+     *   other input is derivable too —
+     *     `physical_size = 80 + round(strength / 1.5)`  (`battlevalues` `+0x30f1`)
+     *     `weapon_range  = physical_size + weapon[5] * 44` (`+0x3190`;
+     *        `ss2-weapon-table.js` already ships `rangeMultiplier`)
+     *     the selector, frame 4 `DoAction@0x238bbf` `+0x00f6` / `+0x015f`.
+     *
+     *   **What is actually missing is one number, and it is not this one: how
+     *   far a movement phase moves `_x`.** See
+     *   `MAP_SILENCE.movement-displacement` in `src/adapter/vanilla-fields.js`,
+     *   which records the gap, the single uncited figure the repository does
+     *   hold, and the measurement that would settle it without a new capture.
+     *
+     *   **Declaring the map silent is the cheapest way in this repository to
+     *   turn a measurement into a guess** — the second instance found in two
+     *   days; that constant's own header carries the first. Check the
+     *   surrounding paragraph, and the neighbouring document.
      */
     legalActions(view, actorId) {
       const rest = { type: Ss2ActionType.REST, targetId: actorId };
