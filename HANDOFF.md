@@ -58,6 +58,57 @@ exploit.
   problem. REGRESSION pins, never goldens: every literal was computed from this
   repository's own code and is evidence about nothing but itself.
 
+► **THE 13:23 HANDOFF'S RANKED ITEM 2 CONTAINS A FALSE SENTENCE, and a wave
+  briefed from it inherited the error — corrected here 2026-09-10, because
+  the handoff is frozen and this is the only place it can be corrected.**
+  That item says `slot-layout.js` "ships that clamp as `ARENA_X_CLAMP` while
+  **nothing produces a value to clamp**". It does: `src/adapter/slot-layout.js`
+  clamps `VANILLA_FRONT_X[side] + ±ALLY_X_STRIDE * slotIndex` on every
+  placement it builds. The clamp never BINDS — max |x| is `250 + 130*2 = 510`
+  against a bound of 2100 — but "never binds" and "nothing produces a value"
+  are different claims, and only the first is true. Re-derived by hand after an
+  agent broke it; the same false sentence went out in six agent briefs.
+  **While checking it, two things about `ARENA_X_CLAMP` worth knowing before
+  citing it:** the literals `-2100`/`2100` have NO byte citation anywhere in
+  the repository — every occurrence traces to one line of uncited prose in the
+  battle map's `nextphase` summary — while the only line that carries offsets
+  for the clamp (`:927`, the four `_x` `If`s at `+0x31cc`, `+0x31f8`, `+0x3224`,
+  `+0x3250`) states no literals at all; and the map never says WHOSE `_x` is
+  clamped.
+
+► **RANKED ITEM 2 — POSITION IN THE RESOLVER — IS UNBLOCKED, PROVEN OUT, AND
+  NOT LANDED. Read this before starting it; it is specified now, not
+  discovered.** The blocker in `src/team/ss2-rules.js` was a false claim that
+  the map records no writer for `_root.arena.fightdistance`; it is corrected at
+  its own sentence, along with the derivation of every other input the gate
+  needs. What the map genuinely does not give is the movement DISPLACEMENT,
+  now recorded as `MAP_SILENCE.movement-displacement` with the measurement that
+  settles it and no new capture required.
+  **A whole implementation was built and driven in a scratch copy** (never in
+  this tree) and it works: `x` on the projection, vanilla start geometry,
+  `walk-left`/`walk-right` with the map's own stamina costs, the controller
+  gate, an AI that closes. It reproduces the build's own approach — **five
+  walks a side**, matching the archive statistic in the 2026-09-02 handoff from
+  a completely independent direction. **All 23 goldens stay green**, because a
+  `fixtureReplay` rule set models no position and keeps the position-blind
+  vocabulary.
+  **Why it is not committed, measured rather than guessed:** with the melee
+  gate live the suite goes from 875/874/0/1 to **72 failures and two files that
+  hang**, and the hang is the important part — a walk emits `clip-goto`
+  **`Standing`, the idle clip**, plus a spurious `unmapped`, because
+  `SS2_STATIC_MAP_BINDINGS` has no movement case and falls through to the
+  attack branch. **That is the identical defect the owner found by watching the
+  arena on 2026-09-10, reappearing the instant a new self-targeted action was
+  added** — and the sweep guard written that day is what caught it.
+  So the order is: **presentation first, resolver second.** Movement needs a
+  command kind of its own (reusing `place-clip` is a defect, not a style
+  choice: `scene.js` overwrites all seven geometry fields, so a partial command
+  makes `toY(undefined)` NaN and the figure vanishes), a movement case in the
+  bindings with `LabelProvenance.ASSUMED` (export 1241 records movement only as
+  the unnamed frame range "movement and charge (33-104)"), and a timeline
+  entry — `timelineFor()` returns `unknown` for all eight movement labels
+  today. It is a PROTOCOL change and it is the `/codex:adversarial-review` case.
+
 ► **THE 2026-09-10 SESSION PUSHED EVERYTHING IT COMMITTED**, each push on the
   owner's explicit yes, and verified `0 unpushed` after each one.
 
