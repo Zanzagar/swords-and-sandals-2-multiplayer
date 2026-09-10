@@ -8,6 +8,22 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-10 17:30 — the map was not silent, twice](docs/handoffs/2026-09-10-1730--the-map-was-not-silent-twice.md).**
+Start there. **Ranked item 2 was blocked by a FALSE "the map is silent" claim**
+— the second in two days — and `git blame` shows it was written two days AFTER
+the corpus recorded the writer, so it was never a stale note. Corrected at its
+sentence, with every other input to the controller gate cited. The gap that IS
+real is now `MAP_SILENCE.movement-displacement`, careful about the one uncited
+figure the repo holds, and settleable with NO new capture. **A whole position
+implementation was built in a scratch copy and works** — five walks a side,
+matching the archive — **and proved it must not land resolver-first**: a walk
+emits `clip-goto Standing`, the idle clip, because the bindings have no
+movement case. That is the same defect the owner found by watching the arena
+that morning, caught in the afternoon by the sweep guard written for it.
+**Presentation first, resolver second.**
+
+*(The brief it supersedes, whose ranked item 2 is the work above and one of
+whose sentences is false — corrected in this living head, not there:)*
 [2026-09-10 13:23 — the arena is drawn](docs/handoffs/2026-09-10-1323--the-arena-is-drawn.md).**
 Start there. **The RENDERED ARENA landed** — `src/render/` plus `tools/arena/`,
 the presentation stream's first consumer outside its own tests, drawing original
