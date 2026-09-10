@@ -26,14 +26,19 @@ only from static screenshots** — headless Chrome gives a `requestAnimationFram
 loop 2 frames whatever `--virtual-time-budget` says, so nobody has yet watched a
 bout animate end to end.
 
-► **THREE COMMITS ARE UNPUSHED as of 2026-09-10 13:26** — `74b376a`, `473ef59`
-  and `791fe4b`, the handoff commit included. Counted the way the previous
-  session's correction says to count, AFTER the handoff commit rather than
-  before it, and amended into that same commit so the number describes the tree
-  it ships with:
+► **THREE COMMITS WERE PUSHED AT 2026-09-10 13:28** — `74b376a`, `473ef59` and
+  `590d28a` — on the owner's explicit yes, and `github/arena/champion-capture`
+  verified at `590d28a` with **0 unpushed** immediately afterwards. Only the
+  correction commit that rewrote this very block came after it.
+
+  **This block is written as an EVENT, not as a live count, and that is the
+  point.** Its first version said "three commits are unpushed", which was true
+  for two minutes and then became a bold instruction to act on a state that no
+  longer existed — the same half-life problem as the six line numbers below.
+  A timestamped event stays true; a count does not. **Measure the live number,
+  never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-  **Verify rather than believe it** — the owner had not been asked about a push
-  when this line was written, and `Bash(git push *)` stays in `ask`.
+  `Bash(git push *)` stays in `ask`, so ask before every push regardless.
 
 *(The brief it supersedes, whose RANKED LIST IS STILL THE WORK — nothing on it
 has been started:)*
