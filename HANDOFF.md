@@ -8,6 +8,16 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-10 12:12 — everything is pushed, and the Workflow gate is gone](docs/handoffs/2026-09-10-1212--everything-is-pushed-and-the-workflow-gate-is-gone.md).**
+Start there — it is SHORT, and it carries only what changed. **Nothing is
+unpushed for the first time in three sessions.** No code changed; the one thing
+that binds you is that `Workflow` is no longer in `permissions.ask`, so a
+fan-out wave starts with no dialog and **you must say what it will spawn before
+launching it.** Its ranked list is unchanged and points at the brief below,
+which is still the work.
+
+*(The brief it supersedes, whose RANKED LIST IS STILL THE WORK — nothing on it
+has been started:)*
 [2026-09-07 12:42 — the 78 are done, and the suite does not bite](docs/handoffs/2026-09-07-1242--the-78-are-done-and-the-suite-does-not-bite.md).**
 Start there. **The 78 stale living-head rows are re-derived and corrected AT
 their sentences** — every one carries a ► block naming what was measured and the
