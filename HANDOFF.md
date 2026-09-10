@@ -35,7 +35,10 @@ TYPE *and* matching its MESSAGE. The module itself is unchanged; no bug was
 found, because a survivor is a COVERAGE fact. **It does not touch the audit's
 finding 2** — every pinned literal hash is still taken before any action is
 applied — which is the larger problem most of the remaining 29 survivors
-exploit, and it is still open.
+exploit. **That is now ranked FIRST in the newest brief**, because it was the
+biggest item outside the owner's lane and it had no home on any list: it
+surfaced while closing the controllers work and was mentioned only here. An
+unranked item is an item the next session does not do.
 
 ► **THE 2026-09-10 SESSION PUSHED EVERYTHING IT COMMITTED**, each push on the
   owner's explicit yes, and verified `0 unpushed` after each one.

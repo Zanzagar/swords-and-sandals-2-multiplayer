@@ -134,16 +134,37 @@ has run.
 
 ## Highest-value work, ranked
 
-1. **The 12:12 brief's ranked list is untouched and still the work** — read it.
-   `settlement.arm()` on a battle with no result is still item 1, still a
+**Re-ranked at the end of the session, and item 1 is NEW.** The original list
+here ranked only the 12:12 brief's items plus the controllers work, which left
+the largest non-owner item on the board mentioned nowhere — it surfaced while
+closing item 5 below and had no home. That is how a next session picks the wrong
+thing, so it is ranked rather than left as an aside.
+
+1. **CLOSE THE MUTATION AUDIT'S FINDING 2 — the pinned literal hashes are all
+   taken on battles with NO action applied.** `docs/mutation-audit-2026-09-07.md`
+   states it: cursor 0, turnCursor 0, result null, events []. So they pin field
+   PRESENCE and any value that varies at construction, and pin **nothing** whose
+   value is `0`/`null`/`[]` before the first action. **Most of the 29 remaining
+   survivors exploit that asymmetry**, and every other hash assertion in the
+   suite is RELATIVE (rebuilt vs live, forced vs baseline), so it moves with the
+   mutation on both sides and cannot catch a change to a derivation both sides
+   share. The audit names the cheap guard: one pinned seeded draw sequence, or a
+   hash after N seeded actions, checked against a literal.
+   **This is the biggest thing here that is not the owner's lane, and it is
+   code-and-test work that needs no capture, no Windows and no Ruffle.**
+   *(Re-derive the survivor list before acting on it: the audit's own header
+   says 29 of the 37 were never individually verified, because the verifier
+   budget was 8 and a capped wave is complete-as-run, never complete-as-asked.)*
+2. **The 12:12 brief's ranked list is untouched and still the work** — read it.
+   `settlement.arm()` on a battle with no result is still its item 1, still a
    `combatStateHash` protocol change, and still the `/codex:adversarial-review`
    case.
-2. **Decide the ally depth-vs-y inversion** (finding 1 above). It is a small,
+3. **Decide the ally depth-vs-y inversion** (finding 1 above). It is a small,
    self-contained authored-geometry decision, and it is now visible rather than
-   theoretical.
-3. **CAPTURE BREADTH** — still 37 of 60 candidates with no golden and the spell
+   theoretical. **Owner's call 2026-09-10: leave it pinned, decide later.**
+4. **CAPTURE BREADTH** — still 37 of 60 candidates with no golden and the spell
    family never captured. Owner's lane; needs Windows.
-4. ~~**Give `src/team/controllers.js` its first negative tests.**~~ **DONE, later
+5. ~~**Give `src/team/controllers.js` its first negative tests.**~~ **DONE, later
    in this same session** — `test/team-controllers.test.js`, 16 tests. The
    audit's finding was exactly right and was re-derived before it was believed:
    with each of the three mutations applied one at a time the whole suite still
@@ -152,7 +173,7 @@ has run.
    its MESSAGE — the audit's point was that the message text appeared nowhere
    either. Four further mutants invented while checking the work also die.
    `src/team/controllers.js` itself is UNCHANGED: this is a tests-only commit.
-5. **Animation polish and sound.** The figures read well and the timings are
+6. **Animation polish and sound.** The figures read well and the timings are
    authored; nothing about them is measured and nothing needs to be.
 
 ## Hard rules (unchanged)
