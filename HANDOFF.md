@@ -33,6 +33,21 @@ forbids the one behaviour all five designs were built around.
   number in the living head, where it can be corrected.** As of 2026-09-09,
   eight commits are unpushed and the tree is clean at `79cc325`.
 
+► **THE `Workflow` PERMISSION GATE IS GONE — owner's decision, 2026-09-09.**
+  `.claude/settings.json` no longer lists `Workflow` in `permissions.ask`, so a
+  fan-out wave now starts with no confirmation dialog. **The reasoning, because
+  it changes what you must do rather than only what you may do: the dialog
+  bought VISIBILITY, not safety.** What still binds is the 6-questions /
+  6-verifiers hard cap inside `.claude/workflows/question-fanout-audit.js` and
+  the one-wave-at-a-time rule in `AGENTS.md`. **So SAY WHAT A WAVE WILL SPAWN IN
+  THE TRANSCRIPT BEFORE LAUNCHING IT** — that is now the only place the owner
+  sees the number, and it is on the session, not the harness. Authoring an
+  inline workflow to get past the committed cap was already a rule violation and
+  now has no dialog behind it. **`Bash(git push *)` STAYS in ASK**: that gate is
+  about what leaves this machine, not about cost. The settings file carries the
+  full rationale, including a claim it used to make about bypass mode that the
+  owner's own experience contradicted — do not cite that claim, measure it.
+
 *(The brief it supersedes, whose ranked item 1 is DONE and whose items 2-5 are
 all still the owner's:)*
 [2026-09-07 11:40 — the sweep reached the untouched six](docs/handoffs/2026-09-07-1140--the-sweep-reached-the-untouched-six.md).**
