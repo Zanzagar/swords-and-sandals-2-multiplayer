@@ -118,19 +118,55 @@ Run it: `node tools/arena-server.mjs`, then <http://127.0.0.1:8123/>.
    an allowance list that is EMPTY and a test that fails if an allowance goes
    stale.
 
-## What I did NOT verify, and you should not assume
+## The owner watched it, and it found a bug in under a minute
 
-**The canvas is verified only from static screenshots** — 1v1, 2v2 and 3v3, plus
-the enforcing gate visibly disabling input mid-animation. I could not watch a
-bout animate end to end in a browser: **headless Chrome gives a
-`requestAnimationFrame` loop exactly 2 frames whatever `--virtual-time-budget`
-says** (measured: 2 frames at both 2s and 20s), and no browser is installed in
-WSL. I briefly read that as a stall in the page; **it was not**, and the
-correction matters because the page logic is fine. The loop is proven instead on
-a fake clock, through the real cursor, for whole bouts at all three team sizes.
+► **THIS SECTION'S HEADING USED TO BE A WARNING AND IS NOW A RESULT.** It said
+  the canvas was verified only from static screenshots and that "nobody has yet
+  watched a bout animate end to end". The owner did, the same afternoon, and
+  **the one check nobody had run found the biggest defect of the session** —
+  which is the argument for running it, not a footnote to it.
 
-If you have a browser, open it and watch one. That is the one check nobody here
-has run.
+He reported three things. All three were real:
+
+1. **"There are amber lines."** Every self-targeted action fell through to the
+   attack branch, so `attackLabel(NaN)` handed the actor **`Standing` — THE
+   IDLE CLIP** — and `hurtLabel(NaN)` handed it a target label with nowhere to
+   play. A resting gladiator stood still; so did a burning one. Swept
+   headlessly afterwards: **4,326 unmapped commands over 360 bouts, in exactly
+   three causes (`rest` 2,929, `burning-phase` 824, `poisoned-phase` 573) — and
+   4,326 `actor:Standing` clip-gotos, the same number.** The amber line named
+   the label that could NOT play and hid the one that wrongly DID. Fixed from
+   the map in `c6fe43b`; the sweep now reports zero.
+2. **"The figures move, but they don't walk."** They cannot, and the reason is
+   deeper than the renderer — see ranked item 2 below.
+3. **"It says waiting for the arena on the side."** True for almost a whole
+   spectated bout, because the spectator takes its turn the instant the gate
+   opens, so the only state a person ever saw was the waiting one and it read
+   as a stall. It was not. The heading now says what it is doing.
+
+**THE METHOD MATTERS MORE THAN THE BUG.** The fix was not found by watching more
+bouts, and would not have been: **the sidebar's content is COMPUTABLE.** Those
+amber lines are derived from presentation commands, and presentation commands
+run under `node --test` perfectly well. One headless sweep — three team sizes,
+forty seeds, three enchantment loadouts — enumerated every cause in about a
+minute, deterministically, which no amount of watching could match. That sweep
+is now a test, so a log a person had to read is a guard that runs on every
+commit. **When a surface tells you something, ask whether what it is telling you
+can be computed. Here it always could.**
+
+## What is still NOT verified, and you should not assume
+
+**No agent here can watch the arena animate**, and that has not changed:
+**headless Chrome gives a `requestAnimationFrame` loop exactly 2 frames whatever
+`--virtual-time-budget` says** (measured: 2 frames at both 2s and 20s), and no
+browser is installed in WSL. A session can render static frames and can compute
+everything the surface would log, but it cannot watch motion. **The owner can,
+and doing so paid immediately** — so ask him to look rather than concluding the
+arena is fine because the sweep is green.
+
+Still unproven by anyone: that the ANIMATION READS WELL. Zero unmapped commands
+says every action can be drawn; it says nothing about whether a swing looks like
+a swing. The timings are authored and nothing measures them.
 
 ## Highest-value work, ranked
 
@@ -155,16 +191,29 @@ thing, so it is ranked rather than left as an aside.
    *(Re-derive the survivor list before acting on it: the audit's own header
    says 29 of the 37 were never individually verified, because the verifier
    budget was 8 and a capped wave is complete-as-run, never complete-as-asked.)*
-2. **The 12:12 brief's ranked list is untouched and still the work** — read it.
+2. **THE RESOLVER MODELS NO POSITION, so nothing can walk.** A combatant
+   projection carries stats, loadout, health, status and resources and **no
+   `x`** — so `place-clip` is emitted only during arena construction and
+   nothing ever moves a clip again. Vanilla does move gladiators: the map's
+   `nextphase` clamps the active x to `[-2100, 2100]`, and `slot-layout.js`
+   ships that clamp as `ARENA_X_CLAMP` while nothing produces a value to clamp.
+   The renderer now lunges — a step in and out within a slot, which is
+   presentation — but approach, retreat and knockback distance are all
+   unmodelled. **Closing it means putting position in the resolver, which puts
+   it inside `combatStateHash`, which makes it a PROTOCOL change**: the same
+   class as ranked item 3 below, and worth the same `/codex:adversarial-review`
+   treatment. It is the largest gap between this engine and the game it is
+   derived from that is not a capture question.
+3. **The 12:12 brief's ranked list is untouched and still the work** — read it.
    `settlement.arm()` on a battle with no result is still its item 1, still a
    `combatStateHash` protocol change, and still the `/codex:adversarial-review`
    case.
-3. **Decide the ally depth-vs-y inversion** (finding 1 above). It is a small,
+4. **Decide the ally depth-vs-y inversion** (finding 1 above). It is a small,
    self-contained authored-geometry decision, and it is now visible rather than
    theoretical. **Owner's call 2026-09-10: leave it pinned, decide later.**
-4. **CAPTURE BREADTH** — still 37 of 60 candidates with no golden and the spell
+5. **CAPTURE BREADTH** — still 37 of 60 candidates with no golden and the spell
    family never captured. Owner's lane; needs Windows.
-5. ~~**Give `src/team/controllers.js` its first negative tests.**~~ **DONE, later
+6. ~~**Give `src/team/controllers.js` its first negative tests.**~~ **DONE, later
    in this same session** — `test/team-controllers.test.js`, 16 tests. The
    audit's finding was exactly right and was re-derived before it was believed:
    with each of the three mutations applied one at a time the whole suite still
@@ -173,8 +222,12 @@ thing, so it is ranked rather than left as an aside.
    its MESSAGE — the audit's point was that the message text appeared nowhere
    either. Four further mutants invented while checking the work also die.
    `src/team/controllers.js` itself is UNCHANGED: this is a tests-only commit.
-6. **Animation polish and sound.** The figures read well and the timings are
-   authored; nothing about them is measured and nothing needs to be.
+7. **Animation polish and sound.** The timings are authored; nothing about them
+   is measured and nothing needs to be. *(This item used to assert "the figures
+   read well", which nobody had checked and which contradicts this brief's own
+   unverified section two headings up. Whether a swing looks like a swing is
+   still unproven — zero unmapped commands means every action CAN be drawn, not
+   that it looks right.)*
 
 ## Hard rules (unchanged)
 

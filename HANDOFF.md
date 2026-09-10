@@ -21,10 +21,18 @@ over 193 actions — the reason it is not PROJECTED is hash stability); and that
 **nothing whatsoever enforced "ship no SS2 asset"** until
 `test/no-shipped-assets.test.js`. It is also the first host here to set
 `awaitAnimations: true`, so the per-action gate ENFORCES for the first time and
-the animation-timeout policy exists for the first time. **The canvas is verified
-only from static screenshots** — headless Chrome gives a `requestAnimationFrame`
-loop 2 frames whatever `--virtual-time-budget` says, so nobody has yet watched a
-bout animate end to end.
+the animation-timeout policy exists for the first time. **The owner then opened it, and the one
+check no agent could run found the session's biggest defect in under a minute**:
+every SELF-TARGETED action was playing `Standing`, the IDLE clip, and emitting a
+spurious `unmapped` alongside it — 4,326 of each over a 360-bout sweep. Fixed
+from the map in `c6fe43b`. **No agent here can watch the arena animate**
+(headless Chrome gives a `requestAnimationFrame` loop 2 frames whatever
+`--virtual-time-budget` says), so ask the owner to look rather than concluding
+the arena is fine because the suite is green. **But the fix came from a SWEEP,
+not from watching**: the surface's log is derived from presentation commands and
+those run under `node --test`, so what a person had to read is now a guard that
+runs on every commit. Ask whether a surface's output can be computed — here it
+always could.
 
 **That brief's ranked item 4 was then done in the same session**
 (`f922d31`): `src/team/controllers.js` has its first negative tests, closing the
