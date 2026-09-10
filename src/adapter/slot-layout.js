@@ -253,7 +253,28 @@ export function buildArenaLayout(wire, { heroTeamId = null } = {}) {
  */
 export function assertDistinctPlacements(placements) {
   const seen = { combatantId: new Set(), instanceName: new Set(), depth: new Set(), stateObjectPath: new Set() };
+  // ► **SCREEN POSITION WAS IN THE DOCSTRING AND NOT IN THE CHECK until
+  //   2026-09-10.** The `seen` map above holds four keys and neither `x` nor
+  //   `y` is one of them, so "every combatant id gets a distinct ... screen
+  //   position" was a promise this function did not keep.
+  //
+  //   It was unreachable when it was written and it is not any more, which is
+  //   why it is being closed now rather than noted: with the authored band,
+  //   slot `i` of a side sits at `frontX + stride * i`, so two placements
+  //   could only collide if the stride were zeroed. **The moment anything
+  //   MOVES a gladiator — which is the ranked work this guard sits in front of
+  //   — two combatants sharing an `x` becomes an ordinary runtime state, and
+  //   the function that promises to catch it has to actually look.**
+  //   Kept separate from the `seen` loop because it is a COMPOSITE key: a
+  //   shared `x` at different `y` is two fighters in different ranks, which is
+  //   the authored band working, not a collision.
+  const seenPositions = new Set();
   for (const placement of placements) {
+    const position = `${placement.x},${placement.y}`;
+    if (seenPositions.has(position)) {
+      throw new SlotLayoutError(`Duplicate screen position in the arena layout: (${position}).`);
+    }
+    seenPositions.add(position);
     for (const key of Object.keys(seen)) {
       const value = placement[key];
       if (seen[key].has(value)) {
