@@ -204,6 +204,15 @@ const canvas = el("arena");
 const context = canvas.getContext("2d");
 
 /**
+ * How far a full `advance` steps, in arena units. Authored, and deliberately
+ * smaller than the gap between two slots: a lunge is a step inside your own
+ * ground, not a walk across the arena. Walking properly needs position in the
+ * resolver, which would put it in `combatStateHash` — see the note on
+ * `advance` in `src/render/timeline.js`.
+ */
+const ADVANCE_UNITS = 74;
+
+/**
  * Arena units -> canvas pixels, FITTED TO THE ROSTER ACTUALLY ON STAGE.
  *
  * The arena's own x runs -2100..2100 (`ARENA_X_CLAMP`), but a bout occupies a
@@ -401,7 +410,16 @@ function render(now = performance.now()) {
       pose = poseAt(idle, ((now / idle.durationMs) % 1));
     }
 
-    const origin = { x: actor.x, y: actor.y, facing: actor.facing };
+    // The lunge. `pose.advance` is a fraction of a step toward the opponent,
+    // authored in `src/render/timeline.js`; the surface turns it into a
+    // translation because the presentation stream carries no position and the
+    // resolver models none. The figure always ends where it started.
+    const towards = actor.facing === "left" ? -1 : 1;
+    const origin = {
+      x: actor.x + (pose.advance ?? 0) * ADVANCE_UNITS * towards,
+      y: actor.y,
+      facing: actor.facing
+    };
     drawOps(paintShadow(figure, pose), view, origin);
     drawOps(paintFigure(figure, pose), view, origin);
 
@@ -472,9 +490,15 @@ function renderControls() {
 
   const actorId = host.currentCombatantId();
   const byId = combatantsById();
-  el("turn-heading").textContent = ready.ready
-    ? `${byId.get(actorId)?.name ?? actorId} — choose`
-    : "waiting for the arena";
+  // In spectate mode the heading said "waiting for the arena" almost the whole
+  // bout, because the spectator takes its turn the instant the gate opens — so
+  // the only state a person ever SAW was the waiting one, which read as a
+  // stall. It is not: it is the gate doing its job between two automatic turns.
+  el("turn-heading").textContent = spectate
+    ? `Spectating — ${byId.get(actorId)?.name ?? actorId}`
+    : ready.ready
+      ? `${byId.get(actorId)?.name ?? actorId} — choose`
+      : "waiting for the arena";
 
   container.replaceChildren(
     ...host.legalActions().map((action) => {

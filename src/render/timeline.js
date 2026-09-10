@@ -58,6 +58,13 @@ const BEAT_MS = 120;
 const DEATH_VARIANTS = Object.freeze(["slain", "yield", "taunt", "arrow", "grievous"]);
 
 /**
+ * The vanilla condition FLAG names, which are what a condition phase emits as
+ * its actor label. `poison` the condition has the flag `poisoned`; the flag is
+ * the label, so this list is the flags.
+ */
+const CONDITION_LABELS = Object.freeze(new Set(["burning", "frozen", "poisoned", "life_stolen"]));
+
+/**
  * A pose is a set of normalised offsets a painter applies to the figure. All
  * zero is a neutral standing gladiator; the ranges are authored.
  */
@@ -68,7 +75,27 @@ const NEUTRAL = Object.freeze({
   weaponAngle: 0, // turns, -0.25 .. +0.25
   bob: 0,         // -1 crouched .. +1 on toes
   recoil: 0,      // 0 none .. 1 fully knocked back
-  fade: 0         // 0 opaque .. 1 gone
+  fade: 0,        // 0 opaque .. 1 gone
+  /**
+   * How far the figure has stepped TOWARD its opponent, 0..1, applied by the
+   * surface as a translation rather than a bend.
+   *
+   * ► **THIS EXISTS BECAUSE THE FIGURES DID NOT WALK, and they could not.**
+   *   The presentation stream emits `place-clip` only during arena
+   *   construction, so nothing ever moves a clip again — and it cannot, because
+   *   **the resolver models no position at all**: a combatant projection
+   *   carries stats, loadout, health, status and resources, and no x. Vanilla
+   *   does move gladiators (`nextphase` clamps the active x to [-2100, 2100]),
+   *   so this is a real gap, and closing it properly means putting position in
+   *   the resolver — which puts it in `combatStateHash`, which makes it a
+   *   protocol change. That is ranked, not done here.
+   *
+   *   What IS legitimate here is a lunge: the attacker steps in on the swing
+   *   and back out after it, within its own slot. That is interpolation of a
+   *   pose this module authored, which is presentation; it invents no position
+   *   the resolver owns, and the figure ends where it started.
+   */
+  advance: 0
 });
 
 function pose(overrides) {
@@ -107,6 +134,11 @@ function familyOf(label, role) {
   if (role === "defeated") return DEATH_VARIANTS.includes(label) ? `death:${label}` : "death:unknown";
   if (label === "Standing") return "standing";
   if (label === "rest") return "rest";
+  // The build's own condition FLAG names, which `SS2_STATIC_MAP_BINDINGS`
+  // emits as the actor label for a condition phase. Matched by name rather
+  // than by pattern: `poison` is dispatched as `poisoned-phase` and its flag is
+  // `poisoned`, so the three spellings differ and only the exact flag is safe.
+  if (CONDITION_LABELS.has(label)) return `condition:${label}`;
   if (label === "Block") return "block";
   if (label === "knockback") return "knockback";
   if (label === "taunted") return "taunted";
@@ -132,9 +164,9 @@ const FAMILIES = Object.freeze({
 
   attack: () => schedule("attack", 7, [
     { at: 0, pose: {} },
-    { at: 0.28, pose: { armSwing: -0.7, lean: -0.25, weaponAngle: -0.18, bob: 0.15 } },
-    { at: 0.52, pose: { armSwing: 1, lean: 0.55, weaponAngle: 0.2, legSpread: 0.6 } },
-    { at: 0.75, pose: { armSwing: 0.45, lean: 0.3, legSpread: 0.35 } },
+    { at: 0.28, pose: { armSwing: -0.7, lean: -0.25, weaponAngle: -0.18, bob: 0.15, advance: -0.12 } },
+    { at: 0.52, pose: { armSwing: 1, lean: 0.55, weaponAngle: 0.2, legSpread: 0.6, advance: 1 } },
+    { at: 0.75, pose: { armSwing: 0.45, lean: 0.3, legSpread: 0.35, advance: 0.55 } },
     { at: 1, pose: {} }
   ]),
 
@@ -143,6 +175,39 @@ const FAMILIES = Object.freeze({
     { at: 0.35, pose: { armSwing: -0.55, lean: -0.2, weaponAngle: -0.08 } },
     { at: 0.6, pose: { armSwing: -0.85, lean: -0.05, bob: 0.1 } },
     { at: 0.72, pose: { armSwing: 0.65, lean: 0.2 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * A condition taking its bearer's turn: burning, frozen, poisoned,
+   * life_stolen. Four schedules rather than one, because they should not read
+   * alike — but every millisecond of all four is AUTHORED, and the map records
+   * "condition effects (1911-2004)" as a frame range naming no label inside it.
+   */
+  "condition:burning": () => schedule("condition:burning", 7, [
+    { at: 0, pose: {} },
+    { at: 0.2, pose: { recoil: 0.35, lean: -0.3, bob: 0.12, armSwing: 0.3 } },
+    { at: 0.45, pose: { recoil: 0.2, lean: 0.2, bob: -0.1, armSwing: -0.2 } },
+    { at: 0.7, pose: { recoil: 0.3, lean: -0.2, bob: 0.08, armSwing: 0.25 } },
+    { at: 1, pose: {} }
+  ]),
+  "condition:frozen": () => schedule("condition:frozen", 8, [
+    { at: 0, pose: {} },
+    // Rigid on purpose: almost nothing moves, which is the whole read.
+    { at: 0.3, pose: { bob: -0.08, legSpread: 0.05, lean: -0.04 } },
+    { at: 0.72, pose: { bob: -0.05, legSpread: 0.02, lean: 0.03 } },
+    { at: 1, pose: {} }
+  ]),
+  "condition:poisoned": () => schedule("condition:poisoned", 9, [
+    { at: 0, pose: {} },
+    { at: 0.35, pose: { lean: -0.55, bob: -0.45, armSwing: -0.35, legSpread: 0.25 } },
+    { at: 0.7, pose: { lean: -0.35, bob: -0.3, armSwing: -0.2 } },
+    { at: 1, pose: {} }
+  ]),
+  "condition:life_stolen": () => schedule("condition:life_stolen", 8, [
+    { at: 0, pose: {} },
+    { at: 0.4, pose: { bob: -0.5, lean: -0.15, armSwing: -0.45, fade: 0.18 } },
+    { at: 0.75, pose: { bob: -0.25, armSwing: -0.2, fade: 0.08 } },
     { at: 1, pose: {} }
   ]),
 

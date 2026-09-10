@@ -175,6 +175,44 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
     "No capture has observed a clip label; every entry is map-named at best.",
   action(event) {
     const direction = Number(event.attackDirection);
+
+    // ► SELF-TARGETED ACTIONS USED TO FALL THROUGH TO THE ATTACK BRANCH, and
+    //   that was wrong twice over (found 2026-09-10 by watching the browser
+    //   arena, then measured over 360 bouts / 158,317 commands):
+    //
+    //   1. the ACTOR played `Standing` — the idle clip — because
+    //      `attackLabel(NaN)` returns it. A resting gladiator stood still; so
+    //      did a burning one. 4,326 times in the sweep.
+    //   2. the TARGET label `hurt5` had nowhere to play, because actor and
+    //      target are one clip, so every one of those actions ALSO emitted an
+    //      `unmapped`. Same 4,326: `rest` 2,929, `burning-phase` 824,
+    //      `poisoned-phase` 573.
+    //
+    //   `presentResolvedEvents` was right to refuse to guess which of the two
+    //   labels wins — the bug was upstream, here, in handing it two labels for
+    //   one clip in the first place.
+
+    // Map, "Key fighter animation labels on export 1241": `rest` (1380). The
+    // map NAMES this one, so it is map-named, not assumed.
+    if (event.type === "rest") {
+      return Object.freeze({ actor: label("rest", LabelProvenance.MAP_NAMED), target: null });
+    }
+
+    // A condition phase: burning, frozen, poisoned, life_stolen. Detected by
+    // the event carrying a `condition`, never by parsing the type string —
+    // `poison` is dispatched as `poisoned-phase` and its vanilla flag is
+    // `poisoned`, so the three names differ and only the fields are reliable.
+    //
+    // The label is the build's own flag name, and it is ASSUMED: the map
+    // records "condition effects (1911–2004)" as a frame RANGE and names no
+    // label inside it — exactly the position the death variants are in.
+    if (typeof event.condition === "string" && event.condition.length > 0) {
+      const conditionLabel = typeof event.vanillaLabel === "string" && event.vanillaLabel.length > 0
+        ? event.vanillaLabel
+        : event.condition;
+      return Object.freeze({ actor: label(conditionLabel, LabelProvenance.ASSUMED), target: null });
+    }
+
     if (event.hit === false) {
       // Map, "Attack roll dispatcher": "A miss calls `defender_blocked()`."
       return Object.freeze({ actor: attackLabel(direction), target: label("Block", LabelProvenance.MAP_NAMED) });

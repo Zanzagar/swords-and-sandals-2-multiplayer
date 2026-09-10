@@ -1529,6 +1529,67 @@ test("the ranged hurt band is rewritten exactly as the map's byte offsets say", 
   assert.deepEqual(hurtFor(Number.NaN), ["hurt5", LabelProvenance.ASSUMED]);
 });
 
+test("a self-targeted action plays its OWN clip, not the idle one, and binds no target label", () => {
+  // ► FOUND BY WATCHING THE BROWSER ARENA, 2026-09-10, then measured over 360
+  //   bouts / 158,317 presentation commands. Every self-targeted action fell
+  //   through to the attack branch, so `attackLabel(NaN)` gave the actor
+  //   `Standing` — THE IDLE CLIP — and `hurtLabel(NaN)` gave a target label
+  //   `hurt5` that had nowhere to play, because actor and target are one clip.
+  //   A resting gladiator stood still; so did a burning one; and each of them
+  //   emitted a spurious `unmapped`. 4,326 of them in the sweep: `rest` 2,929,
+  //   `burning-phase` 824, `poisoned-phase` 573. Now zero.
+  const selfEvent = (extra) => {
+    const wire = {
+      version: 1,
+      teams: [
+        { id: "red", name: "red", combatants: [{ id: "red-1", teamId: "red", slotIndex: 0, health: 8, maxHealth: 10, alive: true, status: [] }] },
+        { id: "blue", name: "blue", combatants: [{ id: "blue-1", teamId: "blue", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] }
+      ],
+      events: [{ sequence: 1, turn: 1, actorId: "red-1", targetId: "red-1", ...extra }]
+    };
+    const layout = buildArenaLayout(wire);
+    return presentResolvedEvents(wire, { layout, bindings: SS2_STATIC_MAP_BINDINGS }).commands;
+  };
+
+  // `rest` is NAMED by the map — "Key fighter animation labels on export 1241
+  // ... `rest` (1380)" — so it is map-named, not assumed.
+  const rest = selfEvent({ type: "rest", staminaGained: 41, healed: 0 });
+  const restClips = rest.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+  assert.deepEqual(
+    restClips.map((command) => [command.role, command.label, command.labelProvenance]),
+    [["actor", "rest", LabelProvenance.MAP_NAMED]],
+    "one clip, playing rest, and the map names it"
+  );
+  assert.deepEqual(rest.filter((command) => command.kind === CommandKind.UNMAPPED), [], "and nothing is unmapped");
+
+  // A condition phase is detected by the event carrying a `condition`, NEVER by
+  // parsing the type string: `poison` is dispatched as `poisoned-phase` and its
+  // vanilla flag is `poisoned`, so all three spellings differ.
+  for (const [type, condition, vanillaLabel] of [
+    ["burning-phase", "burning", "burning"],
+    ["frozen-phase", "frozen", "frozen"],
+    ["poisoned-phase", "poison", "poisoned"],
+    ["life-stolen-phase", "life_stolen", "life_stolen"]
+  ]) {
+    const commands = selfEvent({ type, condition, vanillaLabel, damage: 9, inflictorId: "blue-1" });
+    const clips = commands.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+    assert.deepEqual(
+      clips.map((command) => [command.role, command.label, command.labelProvenance]),
+      [["actor", vanillaLabel, LabelProvenance.ASSUMED]],
+      `${type} plays the build's own flag name, and it is ASSUMED — the map gives ` +
+      "\"condition effects (1911-2004)\" as a range and names no label inside it"
+    );
+    assert.deepEqual(commands.filter((command) => command.kind === CommandKind.UNMAPPED), []);
+  }
+
+  // The regression that would bring it back: any of these playing `Standing`.
+  const everyLabel = [rest, selfEvent({ type: "burning-phase", condition: "burning", vanillaLabel: "burning" })]
+    .flat()
+    .filter((command) => command.kind === CommandKind.CLIP_GOTO)
+    .map((command) => command.label);
+  assert.equal(everyLabel.includes("Standing"), false, "a self-targeted action must never play the idle clip");
+});
+
 test("an event with no binding is reported as unmapped instead of guessed", () => {
   const wire = {
     teams: [

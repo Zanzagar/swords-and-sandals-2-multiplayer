@@ -31,6 +31,7 @@ import {
   animationCursor,
   applyCommands,
   emptyScene,
+  poseAt,
   timelineFor
 } from "../src/render/index.js";
 import { demoSide } from "../tools/arena/roster.js";
@@ -384,4 +385,117 @@ test("the cursor reports a running token as running, and only the worst overrun 
   assert.ok(late.abandon, "past the grace period the surface gives up");
   assert.equal(late.abandon.token, 1);
   assert.match(late.abandon.reason, /hurt1/, "the worst overrun is the SHORTER timeline, which ran over by more");
+});
+
+/* ------------------------------------------------------------------ */
+/* The sweep the browser should never have been the first to run       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * THE GUARD THIS PROJECT DID NOT HAVE. Every `unmapped` command the adapter
+ * emits is a thing the arena cannot draw, and until 2026-09-10 the only way to
+ * discover one was to open the page and read the amber lines in its log. The
+ * owner did exactly that and found three — and the sidebar showed the SYMPTOM
+ * (a target label with nowhere to play) while hiding the worse half, which was
+ * that every one of those actions was also playing the IDLE clip.
+ *
+ * A log a person reads is not a guard. This is: the sidebar's content is
+ * computable, because it is derived from presentation commands, and those run
+ * under `node --test` perfectly well. Bouts across three team sizes, forty
+ * seeds and three enchantment loadouts, asserting that nothing is unmapped and
+ * that every clip label the run emits can actually be animated.
+ *
+ * Kept deliberately smaller than the 360-bout sweep that found the bug, because
+ * this runs on every commit. The full sweep lives in the commit message.
+ */
+test("a broad sweep of real bouts emits no unmapped command and no unplayable label", () => {
+  const unmapped = new Map();
+  const unplayable = new Map();
+  let bouts = 0;
+  let actions = 0;
+  let commands = 0;
+  let selfTargetedSeen = 0;
+
+  for (const perSide of [1, 2, 3]) {
+    for (const seed of [3, 7, 11, 19]) {
+      for (const enchant of [null, "burning", "poison"]) {
+        const host = arenaHost(perSide, seed, enchant ? { rngTape: null } : {});
+        host.constructArena();
+        bouts += 1;
+        let guard = 0;
+        while (!host.battle.result && guard < 900) {
+          guard += 1;
+          const options = host.legalActions();
+          if (options.length === 0) break;
+          const step = host.submit({
+            ...options[host.battle.turnNumber % options.length],
+            actorId: host.currentCombatantId()
+          });
+          actions += 1;
+          for (const command of step.commands) {
+            commands += 1;
+            if (command.kind === "unmapped") {
+              const key = command.reason.replace(/\b(red|blue)-\d+\b/g, "<id>");
+              unmapped.set(key, (unmapped.get(key) ?? 0) + 1);
+            }
+            if (command.kind === "clip-goto") {
+              if (command.role === "actor" && command.label === "rest") selfTargetedSeen += 1;
+              if (!timelineFor(command.label, { role: command.role }).recognised) {
+                const key = `${command.role}:${command.label} [${command.labelProvenance}]`;
+                unplayable.set(key, (unplayable.get(key) ?? 0) + 1);
+              }
+            }
+          }
+          for (const token of step.actionTokens) host.reportActionAnimation(token);
+        }
+      }
+    }
+  }
+
+  // The sweep must have done enough to mean something.
+  assert.ok(bouts >= 30, `too few bouts to prove anything: ${bouts}`);
+  assert.ok(actions > 500, `too few actions to prove anything: ${actions}`);
+  assert.ok(commands > 3000, `too few commands to prove anything: ${commands}`);
+  // And it must have MET the case that was broken, or it is green for the wrong
+  // reason: a sweep that never rests would pass with the bug still in place.
+  assert.ok(selfTargetedSeen > 0, "the sweep must have met a self-targeted action");
+
+  assert.deepEqual([...unmapped.entries()], [], "every action the adapter binds must be drawable");
+  assert.deepEqual([...unplayable.entries()], [], "every clip label emitted must have a timeline");
+});
+
+test("the lunge is a step, not a walk: a figure ends an attack where it started", () => {
+  // `advance` exists because the figures could not walk and CANNOT: the stream
+  // carries no position after construction, and the resolver models none. A
+  // lunge is presentation; a walk would be a protocol change. So the one thing
+  // that must hold is that the lunge always comes home.
+  for (const label of ["attack7", "bombard", "rest", "Block", "burning"]) {
+    const timeline = timelineFor(label, { role: label === "Block" ? "target" : "actor" });
+    assert.equal(poseAt(timeline, 0).advance, 0, `${label} starts at rest`);
+    assert.equal(poseAt(timeline, 1).advance, 0, `${label} returns to its own ground`);
+  }
+
+  // And an attack must actually leave it, or the lunge does nothing.
+  const attack = timelineFor("attack7", { role: "actor" });
+  const peak = Math.max(...[0.28, 0.4, 0.52, 0.62, 0.75].map((at) => poseAt(attack, at).advance));
+  assert.ok(peak > 0.8, `an attack must visibly step in: peak advance ${peak}`);
+});
+
+test("the four conditions do not read alike, and none is the idle pose", () => {
+  const idle = timelineFor("Standing", { role: "actor" });
+  const seen = new Map();
+  for (const label of ["burning", "frozen", "poisoned", "life_stolen"]) {
+    const timeline = timelineFor(label, { role: "actor" });
+    assert.equal(timeline.recognised, true, `${label} must animate`);
+    assert.equal(timeline.family, `condition:${label}`);
+    assert.notEqual(timeline.family, idle.family, `${label} must not be the idle clip`);
+    seen.set(label, JSON.stringify(timeline.keyframes));
+  }
+  assert.equal(new Set(seen.values()).size, 4, "four conditions, four distinct schedules");
+
+  // Frozen is the rigid one on purpose; poisoned doubles over. If those ever
+  // collapse into each other the read is gone even though both "animate".
+  const frozenPeak = Math.max(...[0.3, 0.5, 0.72].map((at) => Math.abs(poseAt(timelineFor("frozen", { role: "actor" }), at).lean)));
+  const poisonPeak = Math.max(...[0.35, 0.5, 0.7].map((at) => Math.abs(poseAt(timelineFor("poisoned", { role: "actor" }), at).lean)));
+  assert.ok(poisonPeak > frozenPeak * 3, `poisoned must double over far more than frozen: ${poisonPeak} vs ${frozenPeak}`);
 });
