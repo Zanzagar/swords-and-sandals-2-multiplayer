@@ -20,6 +20,19 @@ of the eleven kills are theirs, and only two of the thirty-seven survivors.
 2026-09-03 lives on an unmerged branch, is invisible to a grep of this tree, and
 forbids the one behaviour all five designs were built around.
 
+► **THAT HANDOFF'S OWN PUSH COUNT IS WRONG, AND IT IS THE SAME ERROR IT WAS
+  WRITTEN TO WARN ABOUT.** Its frontmatter names FOUR new commits and SEVEN
+  unpushed; measured 2026-09-09 the answer is **FIVE new and EIGHT unpushed**,
+  because the handoff was written before the commit that carries it and did not
+  count itself. **This is the third instance of one defect in three consecutive
+  sessions** — a handoff describing a state that its own commit then changes.
+  The frozen file is deliberately NOT edited (`docs/handoffs/README.md`: never
+  edit a handoff after its session ends; corrections go here). **The durable fix
+  is not care, it is arithmetic a session cannot get wrong: after committing a
+  handoff, run `git log --oneline github/<branch>..HEAD | wc -l` and put THAT
+  number in the living head, where it can be corrected.** As of 2026-09-09,
+  eight commits are unpushed and the tree is clean at `79cc325`.
+
 *(The brief it supersedes, whose ranked item 1 is DONE and whose items 2-5 are
 all still the owner's:)*
 [2026-09-07 11:40 — the sweep reached the untouched six](docs/handoffs/2026-09-07-1140--the-sweep-reached-the-untouched-six.md).**
