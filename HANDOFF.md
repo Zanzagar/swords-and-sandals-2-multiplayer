@@ -8,6 +8,35 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-10 13:23 — the arena is drawn](docs/handoffs/2026-09-10-1323--the-arena-is-drawn.md).**
+Start there. **The RENDERED ARENA landed** — `src/render/` plus `tools/arena/`,
+the presentation stream's first consumer outside its own tests, drawing original
+vector art in a browser that imports `src/` directly as ES modules. Building it
+found three things: a shipped clip label that CONTRADICTS the battle map while a
+`MAP_SILENCE` entry declared the map silent on it (the map gives the rule with
+byte offsets); two module comments telling a host the action boundary is
+"never derived from the wire" when it is exactly
+`toTeamWireState(battle).events.length + 1` before `applyAction` (0 mismatches
+over 193 actions — the reason it is not PROJECTED is hash stability); and that
+**nothing whatsoever enforced "ship no SS2 asset"** until
+`test/no-shipped-assets.test.js`. It is also the first host here to set
+`awaitAnimations: true`, so the per-action gate ENFORCES for the first time and
+the animation-timeout policy exists for the first time. **The canvas is verified
+only from static screenshots** — headless Chrome gives a `requestAnimationFrame`
+loop 2 frames whatever `--virtual-time-budget` says, so nobody has yet watched a
+bout animate end to end.
+
+► **THREE COMMITS ARE UNPUSHED as of 2026-09-10 13:26** — `74b376a`, `473ef59`
+  and `791fe4b`, the handoff commit included. Counted the way the previous
+  session's correction says to count, AFTER the handoff commit rather than
+  before it, and amended into that same commit so the number describes the tree
+  it ships with:
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+  **Verify rather than believe it** — the owner had not been asked about a push
+  when this line was written, and `Bash(git push *)` stays in `ask`.
+
+*(The brief it supersedes, whose RANKED LIST IS STILL THE WORK — nothing on it
+has been started:)*
 [2026-09-10 12:12 — everything is pushed, and the Workflow gate is gone](docs/handoffs/2026-09-10-1212--everything-is-pushed-and-the-workflow-gate-is-gone.md).**
 Start there — it is SHORT, and it carries only what changed. **Nothing is
 unpushed for the first time in three sessions.** No code changed; the one thing
