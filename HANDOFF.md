@@ -43,10 +43,20 @@ TYPE *and* matching its MESSAGE. The module itself is unchanged; no bug was
 found, because a survivor is a COVERAGE fact. **It does not touch the audit's
 finding 2** — every pinned literal hash is still taken before any action is
 applied — which is the larger problem most of the remaining 29 survivors
-exploit. **That is now ranked FIRST in the newest brief**, because it was the
-biggest item outside the owner's lane and it had no home on any list: it
-surfaced while closing the controllers work and was mentioned only here. An
-unranked item is an item the next session does not do.
+exploit.
+
+► **AND IT IS NOW CLOSED TOO** (`983fa7d`). It was ranked first the moment it
+  had a home — it had surfaced while closing the controllers work and was
+  mentioned only in this parenthesis, and **an unranked item is one the next
+  session does not do.** `test/seeded-play-pins.test.js` adds four literal pins
+  the construction-time one structurally cannot reach (six actions in, a settled
+  1v1, a settled 3v3, and the first eight seeded draws) plus the determinism
+  claim `src/team/rng.js` makes and nothing asserted. `rngCursor: 0` and
+  `turnCursor: 0` survive the old pin and fail the new ones; `elimination.js:44`
+  survives both and always will, because nothing consumes `teamStanding.down` —
+  **a pin cannot cover dead code**, and that is a deletion, not a hashing
+  problem. REGRESSION pins, never goldens: every literal was computed from this
+  repository's own code and is evidence about nothing but itself.
 
 ► **THE 2026-09-10 SESSION PUSHED EVERYTHING IT COMMITTED**, each push on the
   owner's explicit yes, and verified `0 unpushed` after each one.

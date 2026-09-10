@@ -176,8 +176,22 @@ the largest non-owner item on the board mentioned nowhere — it surfaced while
 closing item 5 below and had no home. That is how a next session picks the wrong
 thing, so it is ranked rather than left as an aside.
 
-1. **CLOSE THE MUTATION AUDIT'S FINDING 2 — the pinned literal hashes are all
-   taken on battles with NO action applied.** `docs/mutation-audit-2026-09-07.md`
+1. ~~**CLOSE THE MUTATION AUDIT'S FINDING 2.**~~ **DONE, later in this same
+   session** (`983fa7d`, `test/seeded-play-pins.test.js`). Re-derived first: the
+   suite held **exactly one** literal `combatStateHash` pin and its own comment
+   said "Deliberately a battle with no action applied"; the other 57 uses are
+   relative. Four literal pins now cover what it structurally cannot reach — a
+   battle six actions in, a settled 1v1, a settled 3v3, and the first eight
+   seeded draws with labels, bounds and values — plus the determinism claim
+   `src/team/rng.js` makes in its docstring and nothing asserted. **Measured
+   against the audit's own survivors:** `rngCursor: 0` and `turnCursor: 0` both
+   SURVIVE the old pin and now fail; `elimination.js:44` still survives and
+   always will, because `teamStanding.down` has no consumer — a pin cannot cover
+   dead code, and that one closes by deletion or by giving it a consumer.
+   `src/` unchanged; these are REGRESSION pins, never goldens, in their own file
+   away from `test/fixtures/`.
+   *(The original text of this item, for the next reader:)* **the pinned literal
+   hashes were all taken on battles with NO action applied.** `docs/mutation-audit-2026-09-07.md`
    states it: cursor 0, turnCursor 0, result null, events []. So they pin field
    PRESENCE and any value that varies at construction, and pin **nothing** whose
    value is `0`/`null`/`[]` before the first action. **Most of the 29 remaining
