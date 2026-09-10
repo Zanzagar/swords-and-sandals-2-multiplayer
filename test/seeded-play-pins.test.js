@@ -14,10 +14,35 @@
  *   the mutation on both sides and cannot catch a change to a derivation both
  *   sides share."
  *
- * Re-derived before it was believed, 2026-09-10: the suite contains **exactly
- * one** literal `combatStateHash` pin, in `test/ss2-team-rules.test.js`, and
- * its own comment says "Deliberately a battle with no action applied". 57 other
- * `combatStateHash` uses are all relative. The finding was exactly right.
+ * Re-derived before it was believed, 2026-09-10: the audit's finding was
+ * exactly right — every literal `combatStateHash` pin that existed before this
+ * file was taken on a battle with NO action applied.
+ *
+ * ► **BUT THE COUNT THIS PARAGRAPH USED TO GIVE WAS WRONG, and the error is
+ *   worth more than the correction — corrected later the same day.** It said
+ *   *"the suite contains **exactly one** literal `combatStateHash` pin, in
+ *   `test/ss2-team-rules.test.js` ... 57 other `combatStateHash` uses are all
+ *   relative."* There are TEN, and six of them predate this file by eleven
+ *   days:
+ *
+ *     test/ss2-team-rules.test.js:960                      1  (the one it named)
+ *     test/team-resolver.test.js UNCHANGED_FILL_BLUEPRINTS 6  (`combat:` literals,
+ *                                                             asserted in the loop at :700,
+ *                                                             added in 193e54d, 2026-08-30)
+ *     this file                                            3
+ *
+ *   Re-derive it rather than trusting either number:
+ *     `grep -rn 'combatStateHash' test/*.js | grep -E '"[0-9a-f]{8}"'`
+ *
+ *   **The conclusion survived the miscount and the reasoning did not.** All
+ *   seven pre-existing pins are construction-time — the six fill-blueprint
+ *   ones hash `createTeamBattle(blueprint)` with no action applied, exactly
+ *   the class the audit described — so this file's REASON to exist is intact
+ *   and its pins are the right pins. What was wrong is the sentence "57 other
+ *   uses are all relative", in a paragraph whose whole point is that it
+ *   re-derived before believing. **A re-derivation that miscounts is not a
+ *   re-derivation, and it reads exactly like one.** Found by an independent
+ *   write-nothing agent and re-derived here by hand before it was believed.
  *
  * It also names the cheap guard: "one pinned seeded draw sequence (or a hash
  * after N seeded actions) checked against a literal". This file is both.
