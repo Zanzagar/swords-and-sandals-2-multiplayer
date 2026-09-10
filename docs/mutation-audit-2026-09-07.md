@@ -300,6 +300,34 @@ not a confirmed one, and re-run before acting:
    of the confirmed survivors exploit. Every other hash assertion in the suite is
    RELATIVE (rebuilt vs live, forced vs baseline), so it moves with the mutation
    on both sides and cannot catch a change to a derivation both sides share.
+
+   ► **ADDRESSED 2026-09-10 by `test/seeded-play-pins.test.js`, and the finding
+     was exactly right.** Re-derived first: the suite held **exactly one**
+     literal `combatStateHash` pin, in `test/ss2-team-rules.test.js`, whose own
+     comment reads "Deliberately a battle with no action applied"; the other 57
+     `combatStateHash` uses are all relative. Four literal pins now exist that
+     the construction-time one structurally cannot reach — a battle six actions
+     in, a settled 1v1, a settled 3v3, and the first eight seeded draws with
+     their labels, bounds and values — plus the determinism claim
+     `src/team/rng.js` makes in its own docstring and nothing asserted.
+
+     **Measured against this audit's own survivors, old pin vs new:**
+
+     | mutation | construction-time pin | new pins |
+     | --- | --- | --- |
+     | `rngCursor: 0` in the projection | survives | **3 tests fail** |
+     | `turnCursor: 0` in the projection | survives | **1 test fails** |
+     | `rngState: 0` in the projection | 1 test fails | 3 tests fail |
+     | `elimination.js:44` `down: alive - total` | survives | **still survives** |
+
+     **The last row is the honest limit and is not a pinning gap.** No hash can
+     reach `teamStanding.down` because nothing consumes it — see finding 3
+     below, "dead API surface". A pin cannot cover code that nothing calls; that
+     one is closed by deleting it or by giving it a consumer, not by hashing.
+
+     **These are REGRESSION PINS, NOT GOLDENS.** Every literal was computed from
+     this repository's own code and asserts only that it has not silently
+     changed. None is evidence about the game, and the file says so at the top.
 3. **Dead API surface**: `OrderedRngChannel.snapshot()` and `remainingCount`
    have zero callers in `src/` or `test/`; `teamStanding`'s `total` and `down`
    have no consumer anywhere; and `CampaignSettlement.arm`'s `#pending` branch
