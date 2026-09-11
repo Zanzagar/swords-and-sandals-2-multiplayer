@@ -8,6 +8,16 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-11 18:30 — a walking gladiator has a clip to play](docs/handoffs/2026-09-11-1830--a-walking-gladiator-has-a-clip-to-play.md).**
+Start there. **Ranked item 3 is closed**: the presentation stream has a movement
+command, the SS2 bindings have a movement case, and the renderer has four gait
+schedules — so the resolver half can now land without a walking gladiator
+playing the idle clip. Nothing emits a `move-clip` yet, and that is the point.
+The one thing the resolver half must ADD is `vanillaLabel` on the movement
+event; the preserved patch does not carry it. Details in the ► block below.
+
+*(The brief it supersedes, whose ranked item 3 is the work above and whose item
+1 is still the owner's and still the cheapest question on the board:)*
 [2026-09-10 22:44 — the economy was the cheese](docs/handoffs/2026-09-10-2244--the-economy-was-the-cheese.md).**
 Start there. **Asked to design 3v3 so it could not be cheesed, a 13-agent panel
 produced four designs and ALL FOUR WERE BROKEN** — by two properties of the
@@ -32,6 +42,44 @@ priced on the weapon with strength in the denominator — and **both gated behin
   `docs/reference/position-in-the-resolver.patch.md` — written against
   `2c047b9`, UNBUILT, and it deadlocks the animation gate until presentation
   lands. Read it; do not apply it blind.
+
+► **PRESENTATION IS DONE (2026-09-11). RANKED ITEM 3 IS CLOSED, AND THE
+  RESOLVER HALF IS NOW UNBLOCKED.** A walking gladiator has a clip to play and
+  a command that moves it: `CommandKind.MOVE_CLIP` carrying `from` and `to` and
+  nothing else, a movement case in `SS2_STATIC_MAP_BINDINGS` at `ASSUMED`
+  provenance, four gait schedules and `travelAt` in `src/render/timeline.js`.
+  **Nothing emits a `move-clip` yet, and that is the point** — the producer is
+  the preserved patch at `docs/reference/position-in-the-resolver.patch.md`,
+  which is now the top buildable item.
+  **Three decisions in it that a rebuild must not undo:**
+  - **`move-clip` is NOT a partial `place-clip`.** `scene.js` folds that one by
+    overwriting all seven geometry fields, so a partial command sets `y` to
+    `undefined` and `toY(undefined)` is NaN — the figure vanishes rather than
+    moving. It carries no `distance` (two endpoints already say how far) and
+    never touches `facing` (vanilla walks backwards without turning round).
+  - **The GAIT is not derivable from the geometry and is not guessed.**
+    `to < from` gives the direction; nothing separates a walk from a charge. So
+    a movement event must NAME the build's phase in `vanillaLabel` — the eight
+    are `walkleft`, `walkright`, `runleft`, `runright`, `chargeleft`,
+    `chargeright`, `jumpleft`, `jumpright` — and one that does not is REPORTED.
+    **The resolver half must add that field**; the reference patch's event does
+    not carry it.
+  - **Geometry is not a label decision.** An event the bindings cannot name
+    still emits its `move-clip`, so the scene never draws a figure standing
+    where the resolver says it is not.
+  **Two decisions left the browser shell**, the one part of the renderer the
+  suite cannot reach, for the reason `animationCursor` left it: `figureXAt`
+  (lunge or travel) and `timelinesForStep` (which timelines a batch starts, and
+  the pairing of a travelling gait with its OWN `move-clip`).
+  `test/render-arena-host.test.js` had RE-IMPLEMENTED the second one, so the
+  test and the shell were two implementations that could agree while both being
+  wrong; both now call the same function.
+  ► **THIS DIFF HAS NOT HAD `/codex:adversarial-review`, AND IT IS THE CASE FOR
+    IT** — this living head said so while the work was ranked. The command is
+    `disable-model-invocation: true`, so a session cannot run it; **it is the
+    owner's to type.** 12 mutations were applied one at a time instead, and two
+    of them SURVIVED the first version of the tests (see the commit message of
+    `3a8638b`) — which is the argument for the review, not against it.
 
 ► **THE CHEAPEST OPEN QUESTION ON THE BOARD IS THE OWNER'S, AND IT IS SMALL:
   read the six `weaponweights` values at `+0x3dd4` off the installed build.**
@@ -178,6 +226,16 @@ exploit.
   the unnamed frame range "movement and charge (33-104)"), and a timeline
   entry — `timelineFor()` returns `unknown` for all eight movement labels
   today. It is a PROTOCOL change and it is the `/codex:adversarial-review` case.
+  ► **ALL THREE OF THOSE ARE DONE (2026-09-11, `3a8638b`), so this paragraph is
+    a description of the RESOLVER half only from here on.** `move-clip`, the
+    bindings case and four gait schedules all landed; `timelineFor()` no longer
+    returns `unknown` for any of the eight. **What the resolver half must add
+    that this patch does not have: `vanillaLabel` on the movement event.** The
+    gait is not derivable from `from`/`to`, so an event without it is reported
+    rather than given a guessed walk. See the block at the head of this file.
+    The `/codex:adversarial-review` sentence still stands and is still unspent:
+    the command is `disable-model-invocation: true`, so it is the owner's to
+    type, not a session's.
 
 ► **THE 2026-09-10 SESSION PUSHED EVERYTHING IT COMMITTED**, each push on the
   owner's explicit yes, and verified `0 unpushed` after each one.
