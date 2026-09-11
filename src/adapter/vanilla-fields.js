@@ -350,7 +350,15 @@ export const MAP_SILENCE = Object.freeze([
       "walks (the SUM over both sides — the villain AI closes too). Repeating it across stagings with " +
       "different `speed` settles the second question, whether the displacement scales with " +
       "`movement_speed` at all, because that staging pins `movement_speed` at its clamp floor of 4. The " +
-      "archive is not on a fresh-clone tree; this needs the capture machine, not the capture rig.",
+      "archive is not on a fresh-clone tree; this needs the capture machine, not the capture rig. " +
+      "**NO GOLDEN CAN SETTLE IT, and that is structural rather than an accident of which 23 we have.** " +
+      "Measured 2026-09-10: a golden's scenario carries exactly attack, defence, strength, charisma, " +
+      "magicka, min_damage, max_damage, hitpoints, hitpointsmax, staminaleft, staminamax, armourclass, " +
+      "armourclass_max and gladiator_dir — and `speed` is not among them, in any of the 23. Since the " +
+      "resolver renames `speed` to `agility` and `ss2Combatant` reads `agility: derived.speed ?? 0`, every " +
+      "golden has agility 0 and therefore `movement_speed` pinned at the clamp FLOOR of 4. They all sit at " +
+      "one point of the curve, so no comparison between them can show a slope. A fixture that could settle " +
+      "this would have to declare `speed`, which no promoted golden does.",
   }),
   Object.freeze({
     id: "initiative-order",

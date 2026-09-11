@@ -1667,6 +1667,28 @@ test("the resource bag is typed, not a grab-bag", () => {
   );
   // Declared out of range is clamped on the way in, exactly as `health` is.
   assert.equal(normaliseResourceBag({ armour: { value: 90, max: 44 } }).armour.value, 44);
+
+  // ► **AND THE SHORTHAND IS CLAMPED TOO, which it was not until 2026-09-10.**
+  //   `normaliseEntry` returned early for a plain number, so the shorthand was
+  //   the one path into the bag that skipped the clamp directly above: `-250`
+  //   constructed as `{ value: -250, min: 0 }` — a value below its own declared
+  //   minimum — and the first `writeResource` snapped it to 0, a silent
+  //   250-unit jump on a write that was moving it the other way. The two
+  //   assertions below are the two halves of "shorthand and long form agree"
+  //   that nobody had written down, and both fail if the early return comes
+  //   back.
+  assert.deepEqual(
+    normaliseResourceBag({ armour: -250 }),
+    normaliseResourceBag({ armour: { value: -250 } }),
+    "the shorthand must mean exactly what the long form means"
+  );
+  assert.equal(normaliseResourceBag({ armour: -250 }).armour.value, 0);
+  // A negative value is legal when the DECLARATION makes room for it — which
+  // is the only honest way to carry something signed, such as an arena x.
+  assert.deepEqual(
+    normaliseResourceBag({ arenaX: { value: -250, min: -2100, max: 2100 } }).arenaX,
+    { value: -250, min: -2100, max: 2100 }
+  );
   // Nothing declared is an empty bag, never a missing one.
   assert.deepEqual(normaliseResourceBag(undefined), {});
 

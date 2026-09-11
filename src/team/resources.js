@@ -122,8 +122,29 @@ function assertBound(bound, field, name) {
 }
 
 function normaliseEntry(name, declaration) {
+  // ► **THIS BRANCH USED TO `return` HERE, SKIPPING THE CLAMP TEN LINES BELOW
+  //   — and the comment on that clamp asserted the thing this skip made
+  //   false. Corrected 2026-09-10.** It read
+  //   `return { value: declaration, min: 0, max: null }`, so a plain-number
+  //   declaration was the ONE path into the bag that never clamped: `-250`
+  //   constructed as `{ value: -250, min: 0 }`, a value below its own declared
+  //   minimum, and the first `writeResource` then snapped it to 0 — a silent
+  //   250-unit jump on a write that was moving the value the other way.
+  //   The object form `{ value: -250 }` clamped to 0 correctly all along, so
+  //   two spellings of one declaration disagreed.
+  //
+  //   Falling through instead of returning gives the shorthand exactly the
+  //   object form's treatment, which is what "shorthand" has to mean. Measured
+  //   before landing: nothing in the repository declares a negative
+  //   plain-number resource, and the whole suite is unchanged by the fix.
+  //   (The negative numbers under `test/observations/` are measured hitpoints
+  //   inside observation records, not declared resources.)
+  //
+  //   Found while checking whether arena position could live in the resource
+  //   bag rather than the projection; it is not a position bug, it is reachable
+  //   today by any caller declaring a negative resource.
   if (Number.isFinite(declaration)) {
-    return { value: declaration, min: 0, max: null };
+    declaration = { value: declaration };
   }
   if (!isPlainObject(declaration)) {
     throw new BattleError(
