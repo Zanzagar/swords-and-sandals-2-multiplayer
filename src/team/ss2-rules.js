@@ -344,6 +344,36 @@ export const SS2_CROWD = Object.freeze({
    * `docs/combat-economy-findings-2026-09-10.md`, because a strength/stamina
    * rebalance changes bout length directly. The distribution is the number
    * that matters; 200 is downstream of it.
+   *
+   * ► **RE-RUN 2026-09-11, AND 200 NO LONGER CLEARS THE TAIL. IT IS LEFT AT
+   *   200 ON PURPOSE, because every way of fixing it is a design decision and
+   *   none of them is a measurement.** Full write-up and the costed options in
+   *   `docs/crowd-patience-findings-2026-09-11.md`; reproduce with
+   *   `node tools/crowd-patience-sweep.mjs --seeds 30 --cap 3000`, which exits
+   *   1 on the finding.
+   *
+   *   **The longest bout that ends on its own is 684 turns** (`tank` 1v1,
+   *   toll out of reach, 30/30 settled), so at 200 the crowd is the routine
+   *   cause of death for defensive builds rather than the invisible backstop
+   *   this comment promises.
+   *
+   *   **And four of fifteen cells never end without it at all** — a D1-class
+   *   fixpoint reached by FIGHTING rather than by resting, which D1 did not
+   *   anticipate. Every completed phase heals its ACTOR `1 + ceil(stamina / 2)`
+   *   and an attack is a completed phase, so attacking heals the attacker;
+   *   behind defence 16 that heal exceeds the damage getting through. Probed:
+   *   28,932 attacks over 15,001 turns ending at 349/350 and 350/350.
+   *
+   *   **No single value does both jobs.** Clearing 684 needs ~800; at 800 a
+   *   non-terminating bout runs past 1,600 actions before anybody dies. A
+   *   turn-count ramp cannot tell a long fight from a fight going nowhere,
+   *   because it cannot see whether anything is happening.
+   *
+   *   **THE INSTRUCTION ABOVE WAS UNRUNNABLE WHEN IT WAS WRITTEN**, which is
+   *   the part worth keeping: the 2026-09-10 sweep recorded its results here
+   *   and its parameters nowhere, so "re-run it" meant "invent a new sweep".
+   *   The numbers in the block above are therefore NOT comparable with the
+   *   ones in the findings document, and neither is a movement of the other.
    */
   patience: 200,
   /**
@@ -353,10 +383,17 @@ export const SS2_CROWD = Object.freeze({
   ramp: 1
 });
 
-/** Crowd damage owed by an actor acting on `turnNumber`. Pure; 0 during grace. */
-export function ss2CrowdDamage(turnNumber) {
+/**
+ * Crowd damage owed by an actor acting on `turnNumber`. Pure; 0 during grace.
+ *
+ * `patience` is a parameter so a sweep can measure honest bout length with the
+ * toll out of reach — see `createSs2TeamRules`. It defaults to the shipped
+ * constant, so every existing caller is unchanged.
+ */
+export function ss2CrowdDamage(turnNumber, patience = SS2_CROWD.patience) {
   if (!Number.isFinite(turnNumber)) return 0;
-  return Math.max(0, (turnNumber - SS2_CROWD.patience) * SS2_CROWD.ramp);
+  if (!Number.isFinite(patience)) return 0;
+  return Math.max(0, (turnNumber - patience) * SS2_CROWD.ramp);
 }
 
 /**
@@ -1994,9 +2031,37 @@ const byHealthThenId = (a, b) => healthRatio(a) - healthRatio(b) || byId(a, b);
  *   full return. NOT battle state: it is not projected and not hashed, exactly
  *   as `battle.lastResolution` is not. It must not mutate what it is handed.
  */
-export function createSs2TeamRules({ fightMode = "tournament", observer = null, fixtureReplay = false } = {}) {
+export function createSs2TeamRules({
+  fightMode = "tournament",
+  observer = null,
+  fixtureReplay = false,
+  /**
+   * Turns of grace before the crowd turns on the fighters. Defaults to
+   * `SS2_CROWD.patience`; `Infinity` disables the toll outright.
+   *
+   * ► **IT IS A PARAMETER BECAUSE THE CONSTANT'S OWN INSTRUCTION WAS
+   *   UNRUNNABLE WITHOUT ONE.** `SS2_CROWD.patience` says "re-run it whenever
+   *   the combat economy moves", and re-running it means measuring honest bout
+   *   length WITH THE TOLL OFF — the methodology error that cost the first two
+   *   values was tuning against a distribution the toll itself had shaped. The
+   *   only other way to turn the toll off is `fixtureReplay: true`, which also
+   *   disables position and the swing cost, so it measures a different engine
+   *   and reports it as this one.
+   *
+   * **It is in the rule-set ID when it differs from the default**, for exactly
+   * the reason `fightMode` is: `toTeamWireState` carries only the id into the
+   * hash, so two peers running different tolls would otherwise agree on every
+   * hash and then diverge the first turn past the shorter grace.
+   */
+  crowdPatience = SS2_CROWD.patience
+} = {}) {
   if (!FIGHT_MODES.includes(fightMode)) {
     throw new TeamRuleSetError(`fightMode must be one of: ${FIGHT_MODES.join(", ")}.`);
+  }
+  if (!(crowdPatience > 0)) {
+    throw new TeamRuleSetError(
+      `crowdPatience must be a positive number of turns, or Infinity to disable the toll; got ${String(crowdPatience)}.`
+    );
   }
   if (fightMode !== "tournament" && fixtureReplay !== true) {
     throw new TeamRuleSetError(
@@ -2013,7 +2078,12 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
   // Captured rather than read off `this`: a rule set's methods are only ever
   // called as methods by the resolver today, but an unbound `resolveAction`
   // would then throw a TypeError on the error path instead of the error.
-  const ruleSetId = `ss2-map-derived-${fightMode}`;
+  // The patience joins the id ONLY when it differs from the shipped default, so
+  // an ordinary battle keeps the id every pinned hash was taken against and a
+  // sweep's rule set can never be mistaken for it.
+  const ruleSetId = crowdPatience === SS2_CROWD.patience
+    ? `ss2-map-derived-${fightMode}`
+    : `ss2-map-derived-${fightMode}-patience-${crowdPatience === Infinity ? "none" : crowdPatience}`;
 
   return defineTeamRuleSet({
     // The mode is in the id because `toTeamWireState` carries only id,
@@ -2277,7 +2347,7 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
       // combatant died and revived invisibly and the 4,000-action standoff
       // survived unchanged. `collectKnockouts` compares liveness across the
       // whole list, so it could not see it either. Measured, not reasoned.
-      const toll = fixtureReplay ? 0 : ss2CrowdDamage(request.turnNumber);
+      const toll = fixtureReplay ? 0 : ss2CrowdDamage(request.turnNumber, crowdPatience);
       const crowd = toll > 0
         ? [{ kind: EffectKind.DAMAGE, targetId: actor.id, amount: toll }]
         : [];
