@@ -100,6 +100,12 @@ exploit.
   problem. REGRESSION pins, never goldens: every literal was computed from this
   repository's own code and is evidence about nothing but itself.
 
+► **THE SAME SESSION RAN ON PAST THAT AND PUSHED FOUR MORE TIMES, each on the
+  owner's explicit yes, verifying `0 unpushed` after each.** At its handoff
+  commit `e773c9e` the measured count was ONE, and the correction commit
+  carrying this sentence makes it two. Written with the self-reference for the
+  same reason as the block below it. **Measure the live number, never read it.**
+
 ► **THE 2026-09-10 17:30 SESSION COMMITTED SIX AND MEASURED EIGHT UNPUSHED at
   `7653f97`, its handoff commit — and this correction commit makes it nine.**
   Written with the self-reference in it on purpose: the arithmetic fix says to
