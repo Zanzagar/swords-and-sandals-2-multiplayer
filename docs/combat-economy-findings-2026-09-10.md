@@ -112,6 +112,65 @@ balance decision about what a *constructed* gladiator may declare.
 
 ---
 
+## D3 — THE AGILITY ALPHA-STRIKE (still open)
+
+**Measured 2026-09-10, unchanged at `677468c`.** A team whose fighters all
+out-run the enemy's acts three times before the enemy acts at all:
+
+```
+initiative: f1 -> f2 -> f3 -> s1 -> s2 -> s3
+team order : FAST -> FAST -> FAST -> SLOW -> SLOW -> SLOW
+```
+
+`initiativeOrder` (`src/team/roster.js`) is a FLAT agility-descending sort
+across both teams, and `advanceTurn` walks it. So stacking agility buys a free
+round in which a focused team can remove one enemy before the bout is joined —
+and at 3v3 removing one fighter is a third of the opposing side.
+
+**This is AUTHORED, not the build's**, which is what makes it cheap to change.
+`roster.js`'s own comment concedes it: *"SS2 does not sort initiative at all —
+`changeCombatants` alternates. Turn order in a team battle is the resolver's,
+not the build's."* So alternating sides — agility ordering only WITHIN a side —
+is both the fix and a move toward the build rather than away from it.
+
+**It is a protocol change**: `battle.initiative` is projected, reaches
+`combatStateHash`, and is persisted into a sealed campaign record
+(`src/campaign/from-battle.js`). The rule-set seam for it is already clean —
+`REQUIRED_FUNCTIONS` is four names and `defineTeamRuleSet` spreads `...spec`
+verbatim, so an optional `initiativeOrder` hook carries through with no
+contract-version bump. *(That seam claim came from a design agent and is NOT
+re-derived here — check it before relying on it.)*
+
+**Why it is recorded here rather than fixed**: it was found while briefing the
+3v3 design panel, the panel's designs all died for other reasons, and closing
+it is a turn-order decision the owner has not made. **It was very nearly lost
+entirely** — measured early on 2026-09-10 and written down nowhere until the
+session's last hour. An unranked item is one nobody does.
+
+---
+
+## D1 RESIDUAL — a stall is lost by whoever acts FIRST
+
+**Introduced by D1's own fix and measured 2026-09-10 after it landed.** The
+crowd toll is paid by each actor on its own turn, so when the toll turns lethal
+the fighter who acts first dies first. Confirmed in both directions: give blue
+the higher agility and red wins the standoff; reverse it and blue wins.
+
+Since initiative is agility-descending, **higher agility means acting first,
+which means losing a pure stall** — a small anti-synergy with the stat that is
+supposed to be an advantage. It bites only in the degenerate case the toll
+exists to punish, and turn order is fixed at construction rather than chosen,
+so it is not exploitable within a bout.
+
+Two ways out if it ever matters, neither taken: toll every living combatant on
+each actor's turn (deaths become simultaneous, so a mutual stall ends in
+`ResultReason.DRAW`, which `battleStanding` already returns and nothing
+currently reaches) — at the cost of a toll rate that scales with team size; or
+leave it, on the argument that a stall SHOULD have a loser rather than reward
+both sides with a draw. **Noted rather than decided.**
+
+---
+
 ## What this means for 3v3
 
 **3v3 multiplies both.** D1 gets worse with six combatants (more ways to

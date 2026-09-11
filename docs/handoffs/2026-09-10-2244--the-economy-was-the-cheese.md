@@ -88,22 +88,34 @@ the engine is backwards.** `MAP_SILENCE.swing-cost` carries it.
    *If index 1 is heavy*, `ss2WeaponMass` is right and becomes derived rather
    than authored. *If index 1 is light*, flip it, re-run the scale search in
    `SS2_SWING`, and re-derive the three seeded-play pins.
-2. **PRESENTATION BEFORE POSITION, unchanged and still the order.** A walk
+2. **CLOSE THE AGILITY ALPHA-STRIKE (D3) — it is the largest LIVE cheese
+   vector and it is not the owner's lane.** Measured and unchanged:
+   `FAST -> FAST -> FAST -> SLOW -> SLOW -> SLOW`, so a team that out-runs the
+   enemy acts three times before the enemy acts at all. `initiativeOrder` is a
+   flat agility sort across BOTH teams, it is AUTHORED, and `roster.js`'s own
+   comment concedes SS2 alternates instead — so alternating sides is both the
+   fix and a move toward the build. Protocol change: `initiative` is projected,
+   hashed, and persisted into sealed campaign records.
+   **It was found on 2026-09-10 and written down nowhere until that session's
+   last hour**, which is how it survived a whole session that was explicitly
+   hunting cheese vectors.
+
+3. **PRESENTATION BEFORE POSITION, unchanged and still the order.** A walk
    emits `clip-goto Standing` — the idle clip — because
    `SS2_STATIC_MAP_BINDINGS` has no movement case. Movement needs its own
    command kind (reusing `place-clip` is a defect: `scene.js` overwrites all
    seven geometry fields, so a partial command makes `toY(undefined)` NaN and
    the figure vanish), a bindings case at `ASSUMED` provenance, and a timeline
    entry. See the living head.
-3. **THEN the 3v3 positional layer** — and re-run the panel, because the four
+4. **THEN the 3v3 positional layer** — and re-run the panel, because the four
    designs it produced were all argued against the broken economy. The merged
    design is in the run journal of `wf_69080348-f15`; treat it as claims.
    **Do not carry its recommendation forward**: its judge asserted the shop
    gate "restores the trade", and re-derivation here showed it does not.
-4. **Re-run the `SS2_CROWD` and `SS2_SWING` searches whenever the economy
+5. **Re-run the `SS2_CROWD` and `SS2_SWING` searches whenever the economy
    moves.** Both numbers are downstream of distributions that D2 just changed.
    The `patience` comment carries the method and the trap.
-5. **CAPTURE BREADTH** — 37 of 60 candidates with no golden. Owner's lane.
+6. **CAPTURE BREADTH** — 37 of 60 candidates with no golden. Owner's lane.
 
 ## What is NOT verified
 
@@ -114,6 +126,10 @@ the engine is backwards.** `MAP_SILENCE.swing-cost` carries it.
   against measured distributions. Neither may be cited as SS2 behaviour.
 - **The 3v3 positional design is specified and unbuilt.** Nothing about it is
   tested, because nothing about it shipped.
+- **D3 (the alpha-strike) and the D1 residual are OPEN**, both measured, both
+  in `docs/combat-economy-findings-2026-09-10.md`. The D3 rule-set seam claim
+  — that an optional `initiativeOrder` hook needs no contract bump — came from
+  a design agent and was NOT re-derived; check it before relying on it.
 
 ## Two mistakes this session made, both recorded where they happened
 
