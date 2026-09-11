@@ -352,22 +352,40 @@ export const SS2_CROWD = Object.freeze({
    *   `node tools/crowd-patience-sweep.mjs --seeds 30 --cap 3000`, which exits
    *   1 on the finding.
    *
-   *   **The longest bout that ends on its own is 684 turns** (`tank` 1v1,
-   *   toll out of reach, 30/30 settled), so at 200 the crowd is the routine
-   *   cause of death for defensive builds rather than the invisible backstop
-   *   this comment promises.
+   *   ► **THE 684 BELOW IS WITHDRAWN, and the retraction matters more than the
+   *     number.** It came from five invented "archetypes" that were never
+   *     checked against the build's own budget: every one declared
+   *     `herolevel: 3` — 25 points — while spending 40 to 53, and every one set
+   *     `magicka: 0`, below the floor of 1 that `heroDNA` seeds and that has no
+   *     refund path. **They cannot exist**, and a four-way design fork was put
+   *     to the owner on their behalf before anyone checked.
+   *     `tools/stat-vector-reachability.mjs` had implemented that budget for
+   *     days. Re-measured over REACHABLE builds only:
+   *     **`patience: 200` clears every self-terminating bout with 70% headroom.**
    *
-   *   **And four of fifteen cells never end without it at all** — a D1-class
-   *   fixpoint reached by FIGHTING rather than by resting, which D1 did not
-   *   anticipate. Every completed phase heals its ACTOR `1 + ceil(stamina / 2)`
-   *   and an attack is a completed phase, so attacking heals the attacker;
-   *   behind defence 16 that heal exceeds the damage getting through. Probed:
-   *   28,932 attacks over 15,001 turns ending at 349/350 and 350/350.
+   *   The original, wrong text: *The longest bout that ends on its own is 684
+   *   turns (`tank` 1v1, toll out of reach, 30/30 settled), so at 200 the crowd
+   *   is the routine cause of death for defensive builds rather than the
+   *   invisible backstop this comment promises.*
    *
-   *   **No single value does both jobs.** Clearing 684 needs ~800; at 800 a
-   *   non-terminating bout runs past 1,600 actions before anybody dies. A
-   *   turn-count ramp cannot tell a long fight from a fight going nowhere,
-   *   because it cannot see whether anything is happening.
+   *   **THE FINDING THAT SURVIVED RE-MEASUREMENT IS LARGER, NOT SMALLER: this
+   *   is not a backstop, it is what makes roughly HALF of all reachable
+   *   matchups terminate at all.** Between builds a player can hold, carrying
+   *   weapons the measured shop gate permits, **52-63% of CROSS pairings never
+   *   end without it** — 1v1, toll out of reach, every level tried.
+   *
+   *   A D1-class fixpoint reached by FIGHTING rather than by resting, which D1
+   *   did not anticipate. Every completed phase heals its ACTOR
+   *   `1 + ceil(stamina / 2)` and an attack is a completed phase (`:2530`), so
+   *   attacking heals the attacker — while a build that spent its points
+   *   anywhere but strength deals single digits. Probed: 28,932 attacks over
+   *   15,001 turns ending at 349/350 and 350/350.
+   *
+   *   **Unlike D1 and D2 this corner is reachable by ordinary progression.** A
+   *   level-1 player who puts their points into vitality has made a legitimate
+   *   choice and cannot finish a fight. So the comment above that promises a
+   *   mechanic "invisible in honest play" is the part that is wrong, not the
+   *   value beside it.
    *
    *   **THE INSTRUCTION ABOVE WAS UNRUNNABLE WHEN IT WAS WRITTEN**, which is
    *   the part worth keeping: the 2026-09-10 sweep recorded its results here

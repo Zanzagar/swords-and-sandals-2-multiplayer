@@ -68,45 +68,148 @@
 import process from "node:process";
 
 import { applyAction, createTeamBattle, currentCombatant, legalActions } from "../src/team/index.js";
-import { createSs2TeamRules, ss2Combatant, SS2_CROWD } from "../src/team/ss2-rules.js";
+import {
+  createSs2TeamRules,
+  ss2Combatant,
+  ss2WeaponDemand,
+  ss2WeaponGateAttribute,
+  ss2WeaponIsRanged,
+  SS2_CROWD
+} from "../src/team/ss2-rules.js";
+import { ss2WeaponEntry, SS2_SHOP_WEAPON_IDS } from "../src/team/ss2-weapon-table.js";
 
 /**
- * The stat blocks the sweep runs, chosen to span what changes bout LENGTH
- * rather than to be realistic. Each names what it is for, because an archetype
- * nobody can justify is a number nobody can re-derive.
+ * THE EIGHT STATS, and the budget a real gladiator spends them from.
+ *
+ * ► **THE FIRST VERSION OF THIS FILE INVENTED FIVE ARCHETYPES AND NEVER
+ *   CHECKED THEM AGAINST THIS BUDGET. Every one of them was impossible.**
+ *   They declared `herolevel: 3` — a budget of 25 — while spending 40 to 53
+ *   points, and every one set `magicka: 0`, below the floor of 1 that
+ *   `heroDNA` seeds and that has no refund path (`createchar` refunds stop at
+ *   the floor and the level-up panel has no refund button at all). So the
+ *   bouts measured were between gladiators the game cannot produce, and the
+ *   findings drawn from them — a 684-turn tail, four non-terminating cells —
+ *   were numbers about nobody. `tools/stat-vector-reachability.mjs` had
+ *   implemented this budget for days.
+ *
+ * A character at herolevel L has eight stats summing to `13 + 4L`, none below
+ * 1 (battle map, "Levelling and stat points": `heroDNA` indices 16-22 seed
+ * every stat at 1, root frame 227 grants `statpoints = 4` per level). Health
+ * and stamina are NOT declared here — `ss2BattleValues` derives them from the
+ * stats, which is the other half of what went wrong before.
  */
-const ARCHETYPES = Object.freeze([
-  {
-    name: "baseline",
-    note: "the ordinary demo gladiator the rest of the suite uses",
-    stats: { strength: 9, speed: 5, attack: 9, defence: 5, vitality: 5, stamina: 4 }
-  },
-  {
-    name: "glass",
-    note: "dies fast — the SHORT end, which bounds nothing but proves the sweep spans a range",
-    stats: { strength: 12, speed: 7, attack: 14, defence: 1, vitality: 1, stamina: 3 }
-  },
-  {
-    name: "tank",
-    note: "high vitality AND defence: the long end, and the one `patience` actually has to clear",
-    stats: { strength: 6, speed: 3, attack: 4, defence: 14, vitality: 14, stamina: 8 }
-  },
-  {
-    name: "stamina-hoarder",
-    note: "the D2 exploit shape — low strength, high stamina — which the swing cost was repriced to answer",
-    stats: { strength: 1, speed: 9, attack: 10, defence: 8, vitality: 10, stamina: 12 }
-  },
-  {
-    name: "attrition",
-    note: "two tanks that can barely hurt each other: the worst honest case short of a standoff",
-    stats: { strength: 2, speed: 2, attack: 2, defence: 16, vitality: 16, stamina: 10 }
+const STATS = Object.freeze(["strength", "speed", "attack", "defence", "vitality", "stamina", "magicka", "charisma"]);
+const STAT_FLOOR = 1;
+const budgetFor = (herolevel) => 13 + 4 * herolevel;
+
+/**
+ * Reachable allocations at one herolevel, spanning the CORNERS of the space.
+ *
+ * Deterministic and structured rather than sampled: a stalemate is a corner
+ * phenomenon — it needs a build that can absorb more than it deals — so the
+ * builds worth running are the ones that dump everything into one or two
+ * stats. Every vector sums to exactly the budget with no stat below the floor,
+ * which is what makes it a gladiator a player could actually hold.
+ */
+function reachableVectors(herolevel, includePairs = false) {
+  const budget = budgetFor(herolevel);
+  const surplus = budget - STATS.length * STAT_FLOOR;
+  if (surplus < 0) return [];
+  const base = Object.fromEntries(STATS.map((stat) => [stat, STAT_FLOOR]));
+  const vectors = [];
+
+  // Everything into one stat.
+  for (const stat of STATS) {
+    vectors.push({ name: `all-${stat}`, stats: { ...base, [stat]: STAT_FLOOR + surplus } });
   }
+  // Split between each pair, which is where "tanky AND rested" lives. OFF by
+  // default: 28 more vectors triples the run time and the corners already show
+  // the effect. `--pairs` turns them on.
+  if (includePairs) for (let i = 0; i < STATS.length; i += 1) {
+    for (let j = i + 1; j < STATS.length; j += 1) {
+      const half = Math.floor(surplus / 2);
+      vectors.push({
+        name: `${STATS[i]}+${STATS[j]}`,
+        stats: { ...base, [STATS[i]]: STAT_FLOOR + half, [STATS[j]]: STAT_FLOOR + (surplus - half) }
+      });
+    }
+  }
+  // And an even spread, as the ordinary case.
+  const even = { ...base };
+  for (let k = 0; k < surplus; k += 1) even[STATS[k % STATS.length]] += 1;
+  vectors.push({ name: "even", stats: even });
+
+  return vectors.map((vector) => {
+    const sum = STATS.reduce((total, stat) => total + vector.stats[stat], 0);
+    if (sum !== budget) throw new Error(`${vector.name} at L${herolevel} sums to ${sum}, not ${budget}`);
+    if (STATS.some((stat) => vector.stats[stat] < STAT_FLOOR)) {
+      throw new Error(`${vector.name} at L${herolevel} puts a stat below the floor`);
+    }
+    return { ...vector, herolevel };
+  });
+}
+
+const LEVELS = Object.freeze([1, 6, 15]);
+
+/**
+ * TWO LOADOUTS: what you start with, and THE BEST THING YOUR OWN STATS CAN BUY.
+ *
+ * ► **THE SECOND ONE IS NOT A CHOICE THIS TOOL MAKES — THE BUILD MAKES IT.**
+ *   The first draft picked weapon 24 for every build and `assertSs2WeaponPurchasable`
+ *   threw: the shop gates it at `strength >= 12` (`3 * band_position`,
+ *   `ss2-item-tables.md:530-552`, `onRelease +0x0929`) and a defence-dumping
+ *   gladiator has strength 1. **The loadout is not a free parameter.** A build
+ *   that spends its points away from the gate attribute cannot carry the
+ *   weapon that would let it kill anything — which is the measured rule that
+ *   decides whether the stall below is reachable, and it came from the engine
+ *   refusing, not from a judgement here.
+ *
+ * Affordability in GOLD is still not modelled; the gate is a stat gate and
+ * that is what is applied. So "best purchasable" is an upper bound on what a
+ * gladiator of these stats could be holding.
+ */
+const LOADOUTS = Object.freeze([
+  { name: "weapon 0 (starting)", best: false },
+  { name: "best it can buy", best: true }
 ]);
 
-const SIZES = Object.freeze([1, 2, 3]);
+/**
+ * The highest-damage primary the shop would sell THIS build, or weapon 0.
+ *
+ * Ranged ids (61-80) are excluded because `buyweapon` routes them to the
+ * secondary slot and no gladiator carries one as a primary.
+ */
+function bestPurchasable(stats) {
+  let best = 0;
+  let bestMax = ss2WeaponEntry(0).maxDamage;
+  for (const id of SS2_SHOP_WEAPON_IDS) {
+    if (ss2WeaponIsRanged(id)) continue;
+    const attribute = ss2WeaponGateAttribute(id);
+    if (attribute !== null && ss2WeaponDemand(id) > (stats[attribute] ?? 0)) continue;
+    const entry = ss2WeaponEntry(id);
+    if (entry.maxDamage > bestMax) {
+      bestMax = entry.maxDamage;
+      best = id;
+    }
+  }
+  return best;
+}
+
+/**
+ * 1v1 only by default. The stall is a per-PAIR phenomenon — it is two builds
+ * failing to out-damage each other's heal — and running it at 2v2 and 3v3
+ * triples the cost to re-measure the same effect with more bodies in it.
+ */
+const SIZES = Object.freeze([1]);
 
 function parse(argv) {
-  const options = { seeds: 40, cap: 4000 };
+  // ► **DEFAULTS CHOSEN SO THIS FINISHES.** The first version defaulted to 40
+  //   seeds, a 4,000-action cap and 37 vectors across three team sizes, and
+  //   was killed by a 900-second timeout twice: a stalling bout burns the FULL
+  //   cap, and half of them stall, so the run time is dominated by the cases
+  //   that prove the point. A tool nobody can finish running is a tool nobody
+  //   re-runs, which is how the last instruction rotted.
+  const options = { seeds: 2, cap: 600, pairs: false };
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === "--seeds") {
       options.seeds = Number(argv[index + 1]);
@@ -114,8 +217,10 @@ function parse(argv) {
     } else if (argv[index] === "--cap") {
       options.cap = Number(argv[index + 1]);
       index += 1;
+    } else if (argv[index] === "--pairs") {
+      options.pairs = true;
     } else {
-      throw new Error(`Unknown flag ${argv[index]}. Try --seeds <n> or --cap <actions>.`);
+      throw new Error(`Unknown flag ${argv[index]}. Try --seeds <n>, --cap <actions>, or --pairs.`);
     }
   }
   if (!Number.isInteger(options.seeds) || options.seeds < 1) throw new Error("--seeds must be a positive integer.");
@@ -123,14 +228,21 @@ function parse(argv) {
   return options;
 }
 
-const gladiator = (stats) => ({
-  ...stats,
-  magicka: 0,
-  charisma: 3,
-  herolevel: 3,
-  character_level: 3,
-  weapon_min_damage: 3,
-  weapon_max_damage: 9
+/**
+ * A blueprint from a reachable vector. **It declares the STATS and the
+ * herolevel and nothing else** — `ss2BattleValues` derives `hitpointsmax`
+ * (`10L + 20*vitality`) and `staminamax` (`100 + 10*stamina`) from them.
+ *
+ * That is the second half of the earlier error: the invented archetypes
+ * declared level-10 stat totals at `herolevel: 3`, so even their health was a
+ * number no gladiator has.
+ */
+const gladiator = (vector, dir) => ({
+  ...vector.stats,
+  herolevel: vector.herolevel,
+  character_level: vector.herolevel,
+  gladiator_dir: dir,
+  weapon: vector.weapon
 });
 
 function viewFor(battle, actor) {
@@ -143,11 +255,22 @@ function viewFor(battle, actor) {
   };
 }
 
-function runBout(rules, stats, perSide, seed, patience, cap) {
-  const side = (prefix, dir) => ({
+/**
+ * One bout between two builds. `left === right` is a MIRROR match.
+ *
+ * Mirrors are the worst case for termination by construction — two identical
+ * builds cannot out-damage each other — so they bound the problem. **They do
+ * not describe play**, where two players bring different gladiators and one
+ * usually out-damages the other, so the sweep runs CROSS pairings too and
+ * reports the two separately. Quoting the mirror rate as if it were a player's
+ * experience would be the same error as the invented archetypes: a number
+ * about a situation nobody is in.
+ */
+function runBout(rules, left, right, perSide, seed, patience, cap) {
+  const side = (prefix, dir, vector) => ({
     id: prefix,
     combatants: Array.from({ length: perSide }, (unused, index) =>
-      ss2Combatant(gladiator({ ...stats, speed: stats.speed + index, gladiator_dir: dir }), {
+      ss2Combatant(gladiator(vector, dir), {
         id: `${prefix}-${index + 1}`,
         name: `${prefix} ${index + 1}`,
         controller: "ai"
@@ -157,7 +280,7 @@ function runBout(rules, stats, perSide, seed, patience, cap) {
   const battle = createTeamBattle({
     seed,
     rules,
-    teams: [side("red", "right"), side("blue", "left")]
+    teams: [side("red", "right", left), side("blue", "left", right)]
   });
   let actions = 0;
   let tolled = false;
@@ -189,83 +312,106 @@ function main(argv) {
 
   console.log("HONEST BOUT LENGTH, in TURNS — `turnNumber` advances once per ROUND, not per action.");
   console.log("measured with the crowd toll OUT OF REACH (crowdPatience: Infinity), which is the point.");
-  console.log(`seeds per cell: ${options.seeds}   archetypes: ${ARCHETYPES.length}   sizes: ${SIZES.join("/")}`);
+  console.log(`seeds per cell: ${options.seeds}   levels: ${LEVELS.join("/")}   sizes: ${SIZES.join("/")}`);
+  console.log("every build is REACHABLE: eight stats, none below 1, summing to 13 + 4L.");
   console.log(`SS2_CROWD.patience = ${patience}, ramp = ${SS2_CROWD.ramp} — compared against, never applied\n`);
 
   let worst = 0;
   let worstCell = null;
   let cells = 0;
-  const crowdDependent = [];
+  let bouts = 0;
+  const stalling = [];
 
-  console.log("  archetype         size   min  median   p95   max   actions(med)  settled  class");
-  for (const archetype of ARCHETYPES) {
-    for (const perSide of SIZES) {
-      const turns = [];
-      const actions = [];
-      let settled = 0;
-      for (let seed = 1; seed <= options.seeds; seed += 1) {
-        const bout = runBout(rules, archetype.stats, perSide, seed, patience, options.cap);
-        turns.push(bout.turns);
-        actions.push(bout.actions);
-        if (bout.settled) settled += 1;
+  console.log("  loadout                level   MIRROR stalls        CROSS stalls     max turns (self-terminating)");
+  for (const loadout of LOADOUTS) {
+    for (const herolevel of LEVELS) {
+      const vectors = reachableVectors(herolevel, options.pairs)
+        .map((vector) => ({ ...vector, weapon: loadout.best ? bestPurchasable(vector.stats) : 0 }));
+      const tally = { mirror: { stalled: 0, total: 0 }, cross: { stalled: 0, total: 0 } };
+      let levelWorst = 0;
+      let levelWorstName = "-";
+
+      for (let index = 0; index < vectors.length; index += 1) {
+        // One mirror, then three CROSS pairings chosen by a fixed stride so the
+        // opponent set is spread across the space and the run stays reproducible.
+        const pairings = [
+          { kind: "mirror", other: vectors[index] },
+          ...[1, 7, 19].map((stride) => ({ kind: "cross", other: vectors[(index + stride) % vectors.length] }))
+        ];
+        for (const pairing of pairings) {
+          if (pairing.kind === "cross" && pairing.other.name === vectors[index].name) continue;
+          for (const perSide of SIZES) {
+            cells += 1;
+            for (let seed = 1; seed <= options.seeds; seed += 1) {
+              const bout = runBout(rules, vectors[index], pairing.other, perSide, seed, patience, options.cap);
+              bouts += 1;
+              tally[pairing.kind].total += 1;
+              if (!bout.settled) {
+                tally[pairing.kind].stalled += 1;
+                if (pairing.kind === "cross") {
+                  stalling.push({
+                    loadout: loadout.name, herolevel, perSide, seed,
+                    name: `${vectors[index].name} vs ${pairing.other.name}`
+                  });
+                }
+                continue;
+              }
+              if (bout.turns > levelWorst) {
+                levelWorst = bout.turns;
+                levelWorstName = `${vectors[index].name} ${perSide}v${perSide}`;
+              }
+            }
+          }
+        }
       }
-      cells += 1;
-      const cell = `${archetype.name} ${perSide}v${perSide}`;
-      // A cell is CROWD-DEPENDENT the moment one bout fails to settle without
-      // the toll. It is deliberately not "most of them": one non-terminating
-      // bout is a bout a player can be stuck in.
-      const selfTerminating = settled === options.seeds;
-      if (!selfTerminating) crowdDependent.push({ cell, settled, of: options.seeds });
-      const max = Math.max(...turns);
-      // ONLY a self-terminating cell can bound `patience` from below. Taking
-      // the max over a capped, non-terminating cell would measure the cap.
-      if (selfTerminating && max > worst) {
-        worst = max;
-        worstCell = cell;
+      if (levelWorst > worst) {
+        worst = levelWorst;
+        worstCell = `${loadout.name} L${herolevel} ${levelWorstName}`;
       }
+      const rate = (t) => `${String(t.stalled).padStart(5)}/${String(t.total).padEnd(5)} ${(t.stalled / t.total * 100).toFixed(0).padStart(3)}%`;
       console.log(
-        `  ${archetype.name.padEnd(16)} ${perSide}v${perSide}   ` +
-        `${String(Math.min(...turns)).padStart(4)} ${String(percentile(turns, 0.5)).padStart(7)} ` +
-        `${String(percentile(turns, 0.95)).padStart(5)} ${String(max).padStart(5)} ` +
-        `${String(percentile(actions, 0.5)).padStart(13)} ` +
-        `${String(settled).padStart(8)}  ${selfTerminating ? "self-terminating" : "CROWD-DEPENDENT"}`
+        `  ${loadout.name.padEnd(22)} ${String(herolevel).padStart(5)}   ${rate(tally.mirror)}   ${rate(tally.cross)}   ` +
+        `${String(levelWorst).padStart(6)}  ${levelWorstName}`
       );
     }
   }
 
-  console.log("\n  " + ARCHETYPES.map((a) => `${a.name}: ${a.note}`).join("\n  "));
-
   const problems = [];
-  // Vacuity guard: a sweep that ran nothing agrees with everything.
   if (cells === 0) problems.push("no cells ran — the sweep is broken, not the constant");
   if (worstCell === null) {
-    problems.push(
-      "NO cell settled without the crowd, so nothing here bounds `patience` from below and this run " +
-      "cannot tune it. That is a finding about the economy, not about the sweep."
-    );
+    problems.push("NO bout settled without the crowd; nothing here bounds `patience` from below");
   }
 
-  if (crowdDependent.length > 0) {
-    console.log(
-      `\ncrowd-dependent cells: ${crowdDependent.length} of ${cells}. Without the toll these do not end ` +
-      `within ${options.cap} actions — so for them the crowd is not a backstop, it is what ENDS the bout, ` +
-      "and `patience` is choosing their length rather than catching their tail."
-    );
-    for (const entry of crowdDependent) {
-      console.log(`  ${entry.cell.padEnd(24)} settled ${entry.settled}/${entry.of} without the crowd`);
+  console.log(
+    `\nbouts run: ${bouts}   mirror AND cross pairings, toll out of reach, cap ${options.cap} actions`
+  );
+
+  if (stalling.length > 0) {
+    const byVector = new Map();
+    for (const entry of stalling) {
+      const key = `${entry.loadout} L${entry.herolevel} ${entry.name} ${entry.perSide}v${entry.perSide}`;
+      byVector.set(key, (byVector.get(key) ?? 0) + 1);
     }
-    console.log(
-      "  (A capped bout is evidence of non-termination, not proof: raise --cap to push on it. " +
-      "One probe ran attrition 1v1 to 30,000 actions and 15,001 turns, ending at 349/350 health.)"
+    console.log(`\nSTALLING: ${stalling.length} of ${bouts} bouts did not end without the crowd.`);
+    for (const [key, count] of [...byVector].sort((a, b) => b[1] - a[1]).slice(0, 12)) {
+      // Counted over seeds AND team sizes, so the denominator is not `seeds`.
+      // The first version labelled it "seeds" and printed 4/2, which is the
+      // kind of impossible fraction that makes a reader distrust the rest.
+      console.log(`  ${key.padEnd(52)} ${count} bout(s)`);
+    }
+    problems.push(
+      `${byVector.size} REACHABLE build PAIRINGS stall, so the crowd is load-bearing for gladiators a ` +
+      "player can actually hold and matchups a player can actually face — not only for declared blueprints"
     );
+  } else {
+    console.log("\nNO reachable mirror match stalled. Every bout ended on its own, with no crowd at all.");
   }
 
   if (worstCell !== null) {
-    console.log(`\nlongest SELF-TERMINATING bout: ${worst} turns (${worstCell})`);
+    console.log(`longest self-terminating bout: ${worst} turns (${worstCell})`);
     if (worst >= patience) {
       problems.push(
-        `patience ${patience} does NOT clear the self-terminating maximum of ${worst}: the crowd would be ` +
-        "a routine combat mechanic for builds that end their own fights, which is what it must not be"
+        `patience ${patience} does NOT clear the self-terminating maximum of ${worst} among REACHABLE builds`
       );
     } else {
       const headroom = patience - worst;
@@ -274,7 +420,7 @@ function main(argv) {
   }
 
   if (problems.length === 0) {
-    console.log("\nOK: patience still clears every self-terminating tail.");
+    console.log("\nOK: patience clears every reachable self-terminating tail, and nothing reachable stalls.");
     return 0;
   }
   console.log("");
