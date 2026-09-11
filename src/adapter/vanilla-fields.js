@@ -352,7 +352,16 @@ export const MAP_SILENCE = Object.freeze([
       "the presentation half needs no displacement at all, because a `move-clip` reports two " +
       "coordinates the resolver computed rather than a distance the renderer applies. " +
       "The rule-set half is ranked and preserved at " +
-      "`docs/reference/position-in-the-resolver.patch.md`.",
+      "`docs/reference/position-in-the-resolver.patch.md`. " +
+      "► **AND THAT HALF LANDED THE SAME DAY, so \"nothing moves\" is now FALSE and is corrected here " +
+      "rather than rewritten.** `ss2TeamRules` carries `SS2_ARENA`, a `startingPosition` hook, two walk " +
+      "verbs and the build's own controller gate; `x` is on the combatant projection and inside " +
+      "`combatStateHash`. **What has NOT changed is this entry's own subject: the DISPLACEMENT is still " +
+      "unsettled.** `SS2_ARENA.walkDistance` is 44 because of the one uncited handoff line below, and it " +
+      "is now load-bearing for how a bout paces — measured at landing, 10 walks in an average 1v1 and 48 " +
+      "in a 3v3, which is 53% of the actions. So the settling measurement below is worth MORE than it was, " +
+      "not less. The presentation half still needs no displacement at all: a `move-clip` reports two " +
+      "coordinates the resolver computed.",
     settledBy:
       "NO NEW CAPTURE. The arena route's autopilot presses `walkright`/`walkleft` until the close-range " +
       "controller offers `normal_attack` (`docs/integration/ss2-arena-route.md`, \"The fight policy\"), and " +

@@ -8,6 +8,15 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-11 21:15 — both halves of position are built](docs/handoffs/2026-09-11-2115--both-halves-of-position-are-built.md).**
+Start there. **Gladiators now stand somewhere and must walk to reach each
+other.** Both halves landed today — presentation in `3a8638b`, the resolver in
+`567eb41` — and the thing that needs a decision is not a defect: **53% of a 3v3
+is now walking.** The preserved patch is SUPERSEDED; read it as history.
+
+*(The brief it supersedes, written MID-session by the same session, whose
+ranked item 3 and whose "the resolver half must add `vanillaLabel`" are both
+done:)*
 [2026-09-11 18:30 — a walking gladiator has a clip to play](docs/handoffs/2026-09-11-1830--a-walking-gladiator-has-a-clip-to-play.md).**
 Start there. **Ranked item 3 is closed**: the presentation stream has a movement
 command, the SS2 bindings have a movement case, and the renderer has four gait
@@ -49,6 +58,54 @@ priced on the weapon with strength in the denominator — and **both gated behin
   reason every block below it is: a count is false one commit later.
   **Measure the live number, never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **POSITION IS IN THE RESOLVER (2026-09-11, `567eb41`). BOTH HALVES ARE NOW
+  BUILT, and the ranked list below is overtaken as far as movement goes.**
+  `x` is on the combatant and inside `combatStateHash`; `EffectKind.POSITION`
+  is absolute; `ss2TeamRules` carries `SS2_ARENA`, a `startingPosition` hook,
+  `walk-left`/`walk-right`, the build's own controller gate
+  (`fightdistance < weapon_range`, STRICT `<`) and an AI that closes.
+  **Everything was re-derived from the map, not carried over from the preserved
+  patch** — which was written against `2c047b9` and is now superseded; read it
+  only as history.
+
+  **THREE PLACES THE BUILT VERSION DIFFERS FROM THAT PATCH, each deliberate:**
+  - **`movement_speed` is NOT a resource.** The map's persistence table lists it
+    among the fields "recomputed unconditionally", so it is a `battlevalues`
+    OUTPUT, and `agility` is already projected — it is computed at resolve time
+    and adds nothing to the wire vocabulary. ONE vocabulary change in that
+    commit (`x`), not two.
+  - **The two walks are ordered LEFT then RIGHT**, not away-then-toward. All
+    eight rows of the map's controller table put `walkleft` at `optionB` and
+    `walkright` at `optionE`, in BOTH facings; the patch's ordering was an
+    invented rule.
+  - **The walk event carries `vanillaLabel`**, which is what the presentation
+    half cannot derive.
+
+  ► **THE PACING NUMBER, AND IT IS THE OWNER'S DECISION, NOT A DEFECT.**
+    Measured over 40 AI-driven seeds a side at landing:
+    **1v1 — 11 actions before the first attack, 10 walks, 27 total;
+    2v2 — 23 / 26 / 56; 3v3 — 35 / 48 / 91.** All 120 settle. Five walks a side
+    at 1v1 independently reproduces the archive's own figure, so the FIDELITY
+    is good — but **53% of a 3v3 is now walking.** The levers are
+    `SS2_ARENA.frontX` and `walkDistance`. **`weapon_range` is NOT a lever**: a
+    real weapon saves about one walk, because the 500-vs-44 ratio dominates. Do
+    not reach for the reach.
+
+  **THE GOLDENS DID NOT MOVE** — `fixtureReplay` returns `null` from
+  `startingPosition`, so a fixture models no geometry and is never offered a
+  walk. A mutation giving fixtures a position fails 15 tests including the whole
+  golden replay suite. **Every other hash DID move**, and the asymmetry is the
+  check that position stayed in its seam: all six team-projection `aiFill` pins
+  moved, all six `engine.js` legacy pins are byte-identical.
+
+  **Two consequences found by tests rather than by reading, both now fixed and
+  pinned:** `rosterFromCampaignRecord` DROPS position (the build re-places
+  everyone at battle entry, and a carried survivor kept its blueprint's `x`
+  while a fresh challenger got `startingPosition`, so bout 2 of a circuit never
+  reached a swing); and `tools/hotseat.mjs` opens ENGAGED with a new
+  `--approach` flag, because its own header says its fighters exist "so a demo
+  fight lasts a few turns".
 
 ► **PRESENTATION IS DONE (2026-09-11). RANKED ITEM 3 IS CLOSED, AND THE
   RESOLVER HALF IS NOW UNBLOCKED.** A walking gladiator has a clip to play and
