@@ -1896,6 +1896,7 @@ test("every field the adapter maps cites the battle map, and every silence names
   // because the map turned out to SPEAK, and one arrived because a gap nobody
   // had written down turned out to be real.
   assert.deepEqual([...MAP_SILENCE.map((entry) => entry.id)].sort(), [
+    "crowd-impatience",
     "initiative-order",
     "movement-displacement",
     "multi-slot-arena-geometry",

@@ -361,6 +361,40 @@ export const MAP_SILENCE = Object.freeze([
       "this would have to declare `speed`, which no promoted golden does.",
   }),
   Object.freeze({
+    id: "crowd-impatience",
+    subject: "what ends a bout neither side is trying to win",
+    silence:
+      "The build has a crowd and NO bout-level pressure mechanic, and the difference matters because the " +
+      "vocabulary is so suggestive that it reads like evidence. What the map actually records: " +
+      "`crowd_interest` is a GOLD MULTIPLIER read once on the victory frame (`2249/frame:88` `+0x078c`), " +
+      "derived from `herolevel` with a `RandomNumber(899)` draw, and it never touches a fight; " +
+      "`crowd_action` is a per-damage presentation cue (`+0x52af`); `wincrowd` is a player action costing 3 " +
+      "stamina (`+0x5014`), wired on every controller and hidden below `herolevel` 3, whose mechanical " +
+      "effect the map does not record at all; and the `taunttimer` watchdog (`+0x67e4`, 60 ticks) abandons " +
+      "a stuck ANIMATION, not a stalled bout. `nextphase` step 6 says \"update and clamp crowd state\" and " +
+      "names the variable only in that summary, so a decode MAY yet find a real pressure term — but none is " +
+      "recorded today. **This entry exists because the main session put a fork to the owner describing the " +
+      "crowd and the taunttimer as vanilla's answer to a stalled fight. They are not, and the owner chose " +
+      "on that false premise before it was caught and corrected.**",
+    adapterBehaviour:
+      "An AUTHORED crowd-impatience toll, `SS2_CROWD` in `src/team/ss2-rules.js`, answering a measured " +
+      "defect: 4,000 consecutive mutual `rest` actions leave `battle.result === null`, because rest is " +
+      "stamina-positive AND heals and no rule caps a bout. Past `patience` turns every actor takes " +
+      "escalating damage on its own turn, computed at the top of `resolveAction` so no path escapes it and " +
+      "applied LAST in the effect list so a heal in the same action cannot revive the actor it just killed. " +
+      "It is a pure function of `turnNumber`, which `combatStateHash` already covers, so it adds no " +
+      "projected field and cannot desync separately from the battle. `fixtureReplay` never pays it.",
+    settledBy:
+      "A capture that records crowd state across a LONG bout, and specifically across a stalled one: two " +
+      "gladiators declining to engage until the build does something about it. That would settle both " +
+      "halves — whether `nextphase`'s \"crowd state\" is a pressure term at all, and what the build does " +
+      "when nobody attacks. Until then every number here is authored and none may be cited as SS2 " +
+      "behaviour. The TUNING route, which is separate from the evidence route and has already been run: " +
+      "measure the bout-length distribution with the toll DISABLED (120 seeded bouts across 1v1/2v2/3v3 " +
+      "gave min 21, median 50, p95 102, max 135) and put `patience` past the tail — never with the toll " +
+      "enabled, which shapes the very distribution being measured."
+  }),
+  Object.freeze({
     id: "initiative-order",
     subject: "the resolver's strict initiative order",
     silence:

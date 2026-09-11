@@ -256,6 +256,93 @@ export const Ss2ActionType = Object.freeze({
   LIFE_STOLEN_PHASE: "life-stolen-phase"
 });
 
+/**
+ * THE CROWD'S PATIENCE — **AUTHORED IN FULL. Not one number here is the
+ * build's, and the crowd framing is vocabulary, not evidence.**
+ *
+ * See `MAP_SILENCE.crowd-impatience` in `src/adapter/vanilla-fields.js` for
+ * what the map does and does not record. The short version, because it is the
+ * kind of claim this repository has been wrong about twice this week:
+ * `crowd_interest` is a GOLD MULTIPLIER read once on the victory frame
+ * (`2249/frame:88` `+0x078c`), `crowd_action` is a per-damage presentation
+ * cue, and the `taunttimer` watchdog (`+0x67e4`, 60 ticks) abandons a stuck
+ * ANIMATION, not a stalled bout. **Vanilla records no bout-level pressure
+ * mechanic.** This is a designed answer to a measured defect, wearing the
+ * build's vocabulary because the build has a crowd and it is the natural face
+ * for it.
+ *
+ * THE DEFECT IT ANSWERS, measured 2026-09-10 and written up in
+ * `docs/combat-economy-findings-2026-09-10.md`: 4,000 consecutive mutual
+ * `rest` actions leave `battle.result === null`. `rest` is stamina-positive
+ * AND heals, so two combatants who decline to fight are a fixpoint that both
+ * sides strictly improve in, for ever.
+ *
+ * WHY IT IS A PURE FUNCTION OF `turnNumber` and holds no state of its own:
+ * `turnNumber` is already inside `combatStateHash`, so the pressure adds no
+ * field to the projection, cannot desync separately from the battle, and
+ * cannot be gamed by any action — a rising tide has nothing to exploit. The
+ * rule set cannot see the event log anyway (`actorView` hands it
+ * `turnNumber`, `actor`, `allies`, `foes` and nothing else), so "reset the
+ * crowd when somebody bleeds" would have cost new hashed state. That is a
+ * deliberate trade and it is the reason this is 12 lines rather than a
+ * subsystem.
+ *
+ * TERMINATION IS GUARANTEED, not hoped for. Damage grows by 1 each turn past
+ * the grace period, so a combatant on `maxHealth` H dies within
+ * `ceil((sqrt(8H + 1) - 1) / 2)` turns of the crowd starting, whatever either
+ * player does. When it takes the last combatants together, `battleStanding`
+ * already returns `ResultReason.DRAW` (`src/team/elimination.js`), so the
+ * existing result gate fires and the resolver needed no change at all.
+ */
+export const SS2_CROWD = Object.freeze({
+  /**
+   * Turns of grace before the crowd turns on the fighters. AUTHORED, and
+   * TUNED AGAINST A MEASUREMENT rather than chosen.
+   *
+   * ► **THE FIRST VALUE WAS 40 AND THE SECOND WAS 120, AND BOTH WERE TUNED
+   *   AGAINST A CONTAMINATED MEASUREMENT. The methodology error is worth more
+   *   than the number.** At 40, 85 of 120 seeded bouts paid a toll — 71%,
+   *   which makes a backstop into a routine combat mechanic. Raising it to 120
+   *   dropped that to 4 of 120, and the longest bout then measured 129 turns
+   *   when the same sweep had just reported a maximum of 60.
+   *
+   *   **The distribution had been shaped by the mechanic being tuned against
+   *   it.** At patience 40 the crowd was killing people and ENDING BOUTS
+   *   EARLY, so the "max 60" was a measurement of the crowd, not of combat.
+   *   Any threshold tuned on it was guaranteed to sit too low, and raising it
+   *   revealed a longer tail each time — which reads exactly like converging
+   *   on the right answer and is not.
+   *
+   *   The honest baseline is measured with the toll OFF (`fixtureReplay: true`
+   *   disables it): over the same 120 bouts, **min 21, median 50, p95 102,
+   *   max 135, and all 120 settle without any crowd at all.** 200 sits past
+   *   that tail with headroom, so the crowd is invisible in honest play, while
+   *   a standoff at `maxHealth` 250 still closes about 22 turns after it
+   *   starts.
+   *
+   *   **Measure the thing you are about to change WITHOUT the change in
+   *   place.** Obvious written down; it was not obvious while doing it, and
+   *   the first two numbers here are what that cost.
+   *
+   * **Re-run it whenever the combat economy moves** — and it is about to, see
+   * `docs/combat-economy-findings-2026-09-10.md`, because a strength/stamina
+   * rebalance changes bout length directly. The distribution is the number
+   * that matters; 200 is downstream of it.
+   */
+  patience: 200,
+  /**
+   * Damage per turn past `patience`, per turn. AUTHORED. Linear so the ramp is
+   * legible to a player — the first hit is a warning, not a surprise.
+   */
+  ramp: 1
+});
+
+/** Crowd damage owed by an actor acting on `turnNumber`. Pure; 0 during grace. */
+export function ss2CrowdDamage(turnNumber) {
+  if (!Number.isFinite(turnNumber)) return 0;
+  return Math.max(0, (turnNumber - SS2_CROWD.patience) * SS2_CROWD.ramp);
+}
+
 /** Action token -> the `getphase` label the build knows it by. */
 export const VANILLA_PHASE_LABEL = Object.freeze({
   [Ss2ActionType.QUICK_ATTACK]: "quick_attack",
@@ -1586,8 +1673,36 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
     resolveAction(request, rolls) {
       const actor = request.actor;
 
+      // THE CROWD'S TOLL, AND IT IS PREPENDED HERE ON PURPOSE.
+      //
+      // Above the status-phase return and above the REST return below, because
+      // the defect it closes is a REST standoff: a toll placed by the attack
+      // bands would let the exact fixpoint it exists to break walk straight
+      // past it. Every action pays, including the ones that are not choices.
+      //
+      // `fixtureReplay` never pays. A promoted golden is one measured action
+      // and reaches no turn number that could owe anything, but the gate is
+      // explicit rather than incidental so a fixture can never be re-datumed
+      // by an authored mechanic.
+      // **COMPUTED AT THE TOP, APPLIED AT THE END — and those are different
+      // things, which cost a wrong first version.** The CODE placement is here
+      // so no return path can skip the toll. The EFFECT ORDER is last on every
+      // path, because `applyEffects` clamps health to `[0, maxHealth]` after
+      // each effect: a toll placed FIRST killed the actor and then `rest`'s own
+      // heal brought it straight back inside the same effect list, so the
+      // combatant died and revived invisibly and the 4,000-action standoff
+      // survived unchanged. `collectKnockouts` compares liveness across the
+      // whole list, so it could not see it either. Measured, not reasoned.
+      const toll = fixtureReplay ? 0 : ss2CrowdDamage(request.turnNumber);
+      const crowd = toll > 0
+        ? [{ kind: EffectKind.DAMAGE, targetId: actor.id, amount: toll }]
+        : [];
+
       const statusFlag = SS2_FLAG_FOR_STATUS_PHASE[request.type];
-      if (statusFlag) return resolveStatusPhase(request, statusFlag, fightMode, observer);
+      if (statusFlag) {
+        const phase = resolveStatusPhase(request, statusFlag, fightMode, observer);
+        return crowd.length ? { ...phase, effects: [...phase.effects, ...crowd] } : phase;
+      }
 
       if (request.type === Ss2ActionType.REST) {
         // `staminacost = 0 - round(stamina * 15)` at `+0x5163` — negative, so
@@ -1620,7 +1735,7 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
         // on the zero-stamina path because the chain does not know why rest
         // was chosen — and a voluntary rest reaches frame 1 the same way.
         return {
-          effects: [...transition.effects, ...statusConsumptionEffects(actor)],
+          effects: [...transition.effects, ...statusConsumptionEffects(actor), ...crowd],
           events: [{
             type: Ss2ActionType.REST,
             actorId: actor.id,
@@ -1768,7 +1883,7 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
           outcome
         }));
       }
-      return { effects, events };
+      return { effects: [...effects, ...crowd], events };
     },
 
     /**

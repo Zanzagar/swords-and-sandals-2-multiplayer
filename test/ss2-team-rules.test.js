@@ -31,6 +31,7 @@ import test from "node:test";
 import {
   advanceAiTurns,
   applyAction,
+  chooseAiAction,
   combatantById,
   combatStateHash,
   createOrderedRngChannel,
@@ -49,6 +50,8 @@ import { SS2_BUILD_SHA256 } from "../src/golden/run-1v1-fixture.js";
 import {
   ATTACK_DIRECTION_ROLL_LABEL,
   createSs2TeamRules,
+  SS2_CROWD,
+  ss2CrowdDamage,
   Ss2ActionType,
   SS2_ARMOUR_DVAL,
   SS2_ARMOUR_PIECES,
@@ -1759,4 +1762,109 @@ test("the phase-transition heal rounds UP, measured with odd stamina and headroo
     assert.equal(hero.health, 5 + literal, `stamina ${stamina}: applied heal`);
     assert.equal(battle.lastResolution.events[0].healed, literal);
   }
+});
+
+
+/* ------------------------------------------------------------------ */
+/* The crowd's patience                                                */
+/* ------------------------------------------------------------------ */
+
+/** The blueprint the standoff and the honest-bout sweep share. */
+function crowdFighter(id, salt = 0) {
+  return {
+    id,
+    maxHealth: 250,
+    stats: { strength: 10 + (salt % 7), agility: 3 + (salt % 5), vitality: 10, stamina: 5 },
+    resources: {
+      staminaleft: 150,
+      staminamax: 150,
+      min_damage: 10 + (salt % 9),
+      max_damage: 25 + (salt % 11),
+      herolevel: 5
+    }
+  };
+}
+
+/**
+ * THE DEFECT THIS CLOSES, and it was measured before anything was built:
+ * 4,000 consecutive mutual `rest` actions left `battle.result === null`.
+ * `rest` is stamina-positive AND heals, so two combatants who decline to fight
+ * are a fixpoint both sides strictly improve in, for ever
+ * (`docs/combat-economy-findings-2026-09-10.md`, D1).
+ *
+ * The toll is AUTHORED — see `MAP_SILENCE.crowd-impatience`; vanilla records
+ * no bout-level pressure mechanic and this test may never be cited as evidence
+ * about the game.
+ */
+test("a mutual-rest standoff ENDS, because the crowd runs out of patience", () => {
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "blue", combatants: [crowdFighter("b1")] },
+      { id: "red", combatants: [crowdFighter("r1")] }
+    ]
+  });
+
+  let applied = 0;
+  while (!battle.result && applied < 9000) {
+    const actor = currentCombatant(battle);
+    const rest = legalActions(battle).find((option) => option.type === Ss2ActionType.REST);
+    assert.ok(rest, `rest must stay legal for ${actor.id}; the standoff is the point`);
+    applyAction(battle, { actorId: actor.id, ...rest });
+    applied += 1;
+  }
+
+  assert.ok(battle.result, `the standoff must end; it ran ${applied} actions to turn ${battle.turnNumber}`);
+  assert.ok(
+    battle.turnNumber > SS2_CROWD.patience,
+    `it must end BECAUSE of the crowd, past turn ${SS2_CROWD.patience}, not by accident at ${battle.turnNumber}`
+  );
+});
+
+/**
+ * The other half, and the one that makes the number defensible: a backstop
+ * that fires in ordinary fights is a balance change wearing a safety feature's
+ * clothes. At `patience` 40 this assertion failed for 85 of 120 bouts.
+ */
+test("the crowd is INVISIBLE in an honest bout: no seeded fight ever reaches its patience", () => {
+  let longest = 0;
+  let settled = 0;
+  for (const perSide of [1, 2, 3]) {
+    for (let seed = 1; seed <= 12; seed += 1) {
+      const side = (id) => ({
+        id,
+        combatants: Array.from({ length: perSide }, (_, i) => crowdFighter(`${id}${i}`, seed + i + perSide))
+      });
+      const battle = createTeamBattle({ seed, rules: ss2TeamRules, teams: [side("b"), side("r")] });
+      let applied = 0;
+      while (!battle.result && applied < 20000) {
+        const actor = currentCombatant(battle);
+        applyAction(battle, { actorId: actor.id, ...chooseAiAction(battle) });
+        applied += 1;
+      }
+      assert.ok(battle.result, `${perSide}v${perSide} seed ${seed} must settle on its own`);
+      settled += 1;
+      longest = Math.max(longest, battle.turnNumber);
+    }
+  }
+  assert.equal(settled, 36);
+  assert.ok(
+    longest <= SS2_CROWD.patience,
+    `an honest bout reached turn ${longest}, at or past the crowd's patience of ${SS2_CROWD.patience}. ` +
+    "RE-MEASURE THE DISTRIBUTION WITH THE TOLL DISABLED (fixtureReplay: true) and raise patience past the " +
+    "tail — never tune it against a sweep the toll itself shaped, which is how 40 and 120 were both wrong."
+  );
+});
+
+/** The toll itself: zero during grace, linear after, and never negative. */
+test("the crowd's toll is zero during grace and grows linearly after it", () => {
+  assert.equal(ss2CrowdDamage(1), 0);
+  assert.equal(ss2CrowdDamage(SS2_CROWD.patience), 0);
+  assert.equal(ss2CrowdDamage(SS2_CROWD.patience + 1), SS2_CROWD.ramp);
+  assert.equal(ss2CrowdDamage(SS2_CROWD.patience + 10), 10 * SS2_CROWD.ramp);
+  assert.equal(ss2CrowdDamage(Number.NaN), 0);
+  // A fixture never pays it, so no golden can be re-datumed by an authored rule.
+  const fixture = createSs2TeamRules({ fightMode: "misc", fixtureReplay: true });
+  assert.ok(fixture, "a fixtureReplay rule set still constructs");
 });
