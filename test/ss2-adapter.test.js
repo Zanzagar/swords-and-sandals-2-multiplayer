@@ -1903,6 +1903,7 @@ test("every field the adapter maps cites the battle map, and every silence names
     "panel-bar-instance-names",
     "psyche-up-initialisation",
     "secondary-weapon-field-names",
+    "swing-cost",
     "timed-spell-field-names"
   ]);
   for (const entry of MAP_SILENCE) {

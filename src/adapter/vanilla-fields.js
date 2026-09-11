@@ -361,6 +361,39 @@ export const MAP_SILENCE = Object.freeze([
       "this would have to declare `speed`, which no promoted golden does.",
   }),
   Object.freeze({
+    id: "swing-cost",
+    subject: "what a swing costs its wielder, and which way the `weaponweights` index runs",
+    silence:
+      "The build states the cost outright and this engine deliberately leaves it, so the SILENCE here is " +
+      "narrower and more specific than the divergence. What the build gives with offsets: " +
+      "`staminacost = round(strength * 3)` for `power_attack` (`+0x603c`), `* 2` for `normal_attack` " +
+      "(`+0x61a3`), `* 1` for `quick_attack` (`+0x6317`). What it does NOT give is any reader for " +
+      "`attack_speed` — the weapon table's `[2]` column, read through by `battlevalues` (`+0x3174`, " +
+      "`+0x346a`) and catalogued by the map as derived combat with no consumer recorded anywhere. **And the " +
+      "genuinely weak link: `[2]` is an INDEX into `weaponweights`, a six-entry array whose location is " +
+      "known (`+0x3dd4`, `docs/integration/ss2-item-tables.md:345`) and whose VALUES this repository does " +
+      "not hold.** So nothing here says whether index 1 is the heavy end or the light one. It is read as " +
+      "HEAVY from the damage correlation across the whole table — index 1 spans 80-676 max damage, index 5 " +
+      "spans 3-36 — and if that is backwards, every swing cost is backwards.",
+    adapterBehaviour:
+      "`SS2_SWING` / `ss2SwingCost` in `src/team/ss2-rules.js` price a swing on the weapon's mass with " +
+      "strength in the denominator, so strength BUYS cheaper swings instead of paying for them. The band " +
+      "factors 3/2/1 are still the build's, so the three bands keep their relative prices. **It is gated " +
+      "behind `fixtureReplay`**: a fixture keeps `round(strength * band_factor)` exactly, so all 23 goldens " +
+      "still reproduce their measured `staminaleft` and the corpus stays evidence. It answers a measured " +
+      "defect (`docs/combat-economy-findings-2026-09-10.md` D2): strength 7 beat strength 30 over 39 " +
+      "actions without losing a point of stamina or health, because the build prices a swing on the wielder " +
+      "and pays it out of the weapon.",
+    settledBy:
+      "THE DIRECTION IS SETTLED BY A TOOL THAT ALREADY EXISTS, and it is the cheapest open question in this " +
+      "list: the same `tools/item-table-transcription.mjs` route that re-reads the ninety weapon literals " +
+      "out of the installed SWF can read the six `weaponweights` values at `+0x3dd4`. That turns `mass()` " +
+      "from an authored reading into a derived one, or reverses it. It needs the licensed build, so it is " +
+      "the owner's lane, but it needs no capture, no staging and no Ruffle. **Nothing settles the " +
+      "divergence itself** — pricing a swing on the weapon is a decision (owner's, 2026-09-10), not a " +
+      "measurement, and no capture can endorse it."
+  }),
+  Object.freeze({
     id: "crowd-impatience",
     subject: "what ends a bout neither side is trying to win",
     silence:

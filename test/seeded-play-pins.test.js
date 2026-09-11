@@ -135,6 +135,26 @@ function driveFirst(battle, limit) {
   return taken;
 }
 
+/**
+ * ► **ALL THREE LITERALS MOVED ON 2026-09-10, and this is the explanation the
+ *   `WHY_IT_MOVED` message demands.** The cause is one deliberate change:
+ *   a swing is now priced on the WEAPON (`SS2_SWING`, `ss2SwingCost`) instead
+ *   of on `round(strength * band_factor)`, closing the measured defect in
+ *   `docs/combat-economy-findings-2026-09-10.md` D2 — strength 7 beat strength
+ *   30 over 39 actions without losing a point of stamina or health.
+ *
+ *   fb82a03e -> f12b5d6c   (six actions in)
+ *   976c78a3 -> edb93099   (settled 1v1)
+ *   6474bf07 -> 3f21de75   (settled 3v3)
+ *
+ *   **Two peers on either side of that change disagree about identical
+ *   battles, and that is the point of these pins firing.** The goldens did NOT
+ *   move: `fixtureReplay` keeps the build's own formula, so all 23 still
+ *   reproduce their measured `staminaleft`. A fourth literal in
+ *   `ss2-team-rules.test.js` and the six in `team-resolver.test.js` are
+ *   construction-time and did not move either, which is exactly the asymmetry
+ *   this file exists to cover.
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -155,7 +175,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "fb82a03e", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "f12b5d6c", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -167,7 +187,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "976c78a3", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "edb93099", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
@@ -178,7 +198,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "6474bf07", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "3f21de75", WHY_IT_MOVED);
 });
 
 /**

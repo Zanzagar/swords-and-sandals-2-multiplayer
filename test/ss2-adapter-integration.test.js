@@ -94,8 +94,19 @@ const vanillaGladiator = (overrides = {}) => ({
   armourclass_max: 44,
   ammo_left: 0,
   maximum_ammo: 0,
-  weapon: 4,
-  weapon_type: 1,
+  // ► **WAS `weapon: 4` (slashing) UNTIL 2026-09-10, and the shop's own gate
+  //   refused it once that gate was imported.** Slashing and ranged are gated
+  //   on SPEED at `3 * band_position` (`ss2-item-tables.md:530-552`), so
+  //   weapon 4 demanded speed 12 while this template declares 6 and callers
+  //   below override it as low as 2 to control initiative order. **No slashing
+  //   weapon exists that a speed-2 gladiator could buy**, so the template had
+  //   to move bands rather than the dozen callers move their speeds.
+  //   Weapon 21 is the first HACKING row, gated on strength at 3, which every
+  //   caller clears (the lowest strength override in this file is 5). The
+  //   declared damage pair below still wins over the table, so no damage, no
+  //   hash and no assertion in this file depends on which id this is.
+  weapon: 21,
+  weapon_type: 3,
   weapon_weight: 9,
   weapon_range: 1,
   weapon_min_damage: 1,

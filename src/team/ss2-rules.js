@@ -222,7 +222,7 @@ import { calculateSs2AttackChances, resolveSs2PhysicalAttackCandidate } from "..
 import { applySs2MagicDamageCandidate } from "../golden/ss2-spell-candidate.js";
 import { SS2_BUILD_SHA256 } from "../golden/run-1v1-fixture.js";
 import { resourceValue } from "./resources.js";
-import { ss2WeaponDamageRange } from "./ss2-weapon-table.js";
+import { ss2WeaponDamageRange, ss2WeaponEntry } from "./ss2-weapon-table.js";
 import { defineTeamRuleSet, EffectKind, RuleSetVerification, TeamRuleSetError } from "./rule-set.js";
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -341,6 +341,208 @@ export const SS2_CROWD = Object.freeze({
 export function ss2CrowdDamage(turnNumber) {
   if (!Number.isFinite(turnNumber)) return 0;
   return Math.max(0, (turnNumber - SS2_CROWD.patience) * SS2_CROWD.ramp);
+}
+
+/**
+ * WHAT A SWING COSTS — **the one place this engine knowingly departs from the
+ * build's combat arithmetic, and the reason is a measured defect rather than
+ * taste.**
+ *
+ * THE DEFECT (`docs/combat-economy-findings-2026-09-10.md`, D2). The build
+ * prices a swing on the WIELDER — `power_attack` `staminacost = round(strength
+ * * 3)` (`+0x603c`) — and pays it out of the WEAPON — `max_damage =
+ * round(strength * 2) + weapon_max_damage` (`+0x3386`). Price and payload are
+ * decoupled, so the dominant build minimises the wielder and maximises the
+ * weapon. Measured: strength 7 beat strength 30 over 39 actions without losing
+ * a point of stamina or health, and once a weapon is equipped strength buys
+ * 2-15% of the damage and 100% of the cost.
+ *
+ * It is cheap, too. `round(strength * 3) <= 1 + round(stamina / 3)` — an
+ * attack that is free for ever — is satisfied by **strength 1 and stamina 5**,
+ * six stat points. Vanilla's own budget (`13 + 4 * herolevel`) only delays the
+ * finished build: at herolevel 15 `str 1 / stam 5 / speed 62` buys weapon 20
+ * and swings 678 damage for free, and the shop's purchase gate makes it worse
+ * rather than better, because slashing weapons gate on SPEED — the very stat
+ * the build dumps into.
+ *
+ * WHY VANILLA DOES NOT SHOW THIS, and why reproducing it faithfully is still
+ * wrong here: vanilla never hands anyone a free stat allocation. Stats are
+ * earned slowly against that budget and weapons bought with gold as it grows,
+ * so the corner is approached from far away if at all. **This engine lets a
+ * blueprint declare anything, which is correct for a multiplayer foundation
+ * and is exactly what exposes the corner.** Owner's decision, 2026-09-10:
+ * price the swing on the weapon and let strength offset it.
+ *
+ * THE FIELD IS THE BUILD'S; THE USE IS OURS. `attack_speed` is the weapon
+ * table's `[2]` column read straight through by `battlevalues` (`+0x3174`,
+ * `+0x346a`), catalogued by the map as derived combat and given NO READER
+ * anywhere in it. So there is a real per-weapon number to price with, and
+ * nothing that says it prices stamina. That step is authored.
+ *
+ * ► **AND SO IS THE DIRECTION, WHICH IS THE WEAKEST LINK HERE — read this
+ *   before trusting the sign.** `[2]` is an INDEX into `weaponweights`, a
+ *   six-entry array whose location is known (`+0x3dd4`,
+ *   `ss2-item-tables.md:345`) and **whose VALUES this repository does not
+ *   hold**, so nothing here says whether index 1 is the heavy end or the
+ *   light one. The inference is from the damage correlation across the whole
+ *   table: index 1 spans 80-676 max damage and index 5 spans 3-36, so index 1
+ *   is read as HEAVY. If that is backwards, every number below is backwards.
+ *   **It is settled by a tool that already exists** — the same
+ *   `tools/item-table-transcription.mjs` route that re-reads the ninety weapon
+ *   literals out of the installed SWF can read the six `weaponweights` values
+ *   at `+0x3dd4`. Until it has, `mass()` is an authored reading of a real
+ *   field. See `MAP_SILENCE.swing-cost`.
+ */
+export const SS2_SWING = Object.freeze({
+  /** Entries in `weaponweights`; `[2]` indexes it 1..6. Map, item-tables:345. */
+  weightIndexMax: 6,
+  /**
+   * How much strength offsets the swing. AUTHORED. Larger softens the curve.
+   * Tuned so a strength-1 gladiator cannot swing the heaviest weapon for free
+   * and a strength-60 one nearly can — which is the trade the build's own
+   * numbers destroyed.
+   */
+  strengthOffset: 10,
+  /**
+   * Scales the whole curve against `nextphase`'s regen. AUTHORED, and CHOSEN
+   * BY SEARCH rather than by feel — the search is the defensible part.
+   *
+   * A swing is "free for ever" when its cost is at or below the phase regen
+   * `1 + round(stamina / 3)`, so the question is not whether a sustainable
+   * build exists — one always will, and one SHOULD — but what it has to pay
+   * for. Sweeping scale 10..30 against vanilla's own stat budget
+   * (`13 + 4 * herolevel`) and its shop gate, the free-attack build does not
+   * disappear at any value; **it RELOCATES**, and that is the whole point:
+   *
+   *   before (build's formula) : herolevel 15, str  1 / stam  5 / speed 62 -> 678 dmg
+   *   scale 20                 : herolevel 15, str 15 / stam 11 / speed 42 -> 430 dmg
+   *                              herolevel 25, str 28 / stam 20 / speed 60 -> 732 dmg
+   *
+   * A strength-1 gladiator can still swing something indefinitely — a LIGHT
+   * weapon, for about 36 damage. Hitting hard and often now costs strength,
+   * which is exactly the trade the build's own arithmetic destroyed. 20 is the
+   * smallest value that puts the heavy-hitting sustainable build firmly into
+   * strength while leaving a light-weapon build viable.
+   *
+   * **Re-run the search whenever the regen or the budget moves.** The number
+   * is downstream of both.
+   */
+  scale: 20
+});
+
+/**
+ * A weapon's mass, from its `attack_speed` index. AUTHORED DIRECTION — see
+ * `SS2_SWING`. Index 1 is read as the heavy end, so `mass` runs 5 (heaviest)
+ * down to 1 (lightest).
+ */
+export function ss2WeaponMass(attackSpeedIndex) {
+  const index = Number.isFinite(attackSpeedIndex) ? attackSpeedIndex : SS2_RESOURCE_DEFAULTS.attack_speed;
+  return clamp(SS2_SWING.weightIndexMax - index, 1, SS2_SWING.weightIndexMax - 1);
+}
+
+/**
+ * What one swing costs its wielder.
+ *
+ * `bandFactor` is the build's own per-band multiplier — 3 for `power_attack`
+ * (`+0x603c`), 2 for `normal_attack` (`+0x61a3`), 1 for `quick_attack`
+ * (`+0x6317`) — so the RELATIVE price of the three bands is still the build's.
+ * What changed is what the factor multiplies: the weapon's mass rather than
+ * the wielder's strength, with strength in the denominator so it now BUYS
+ * cheaper swings instead of paying for them.
+ */
+export function ss2SwingCost({ bandFactor, attackSpeed, strength }) {
+  const mass = ss2WeaponMass(attackSpeed);
+  const str = Number.isFinite(strength) ? Math.max(0, strength) : 0;
+  return Math.ceil((bandFactor * mass * SS2_SWING.scale) / (str + SS2_SWING.strengthOffset));
+}
+
+/**
+ * WHAT THE CAMPAIGN WOULD NEVER HAVE SOLD YOU.
+ *
+ * **Both constraints here are MEASURED — no invented numbers — and they are
+ * the half of the 2026-09-10 economy decision that needs no defending.**
+ *
+ * 1. THE SHOP'S PURCHASE GATE, byte-verified at
+ *    `docs/integration/ss2-item-tables.md:530-552` from the `onRelease`
+ *    opcodes at `+0x0929`-`+0x0941`:
+ *
+ *      `3 * band_position <= hero.speed`     for slashing (1-20) and ranged (61-80)
+ *      `3 * band_position <= hero.strength`  for hacking (21-40) and bashing (41-60)
+ *
+ *    where `band_position` is `((id - 1) % 20) + 1`. Weapon slots are
+ *    attribute-gated and **not level-gated at all**.
+ *
+ * 2. RANGED IS NEVER A PRIMARY. `buyweapon` routes a ranged purchase to
+ *    `secondary_weapon` (`ss2-item-tables.md:826-828`), so the 18 rows with a
+ *    range multiplier of 100 can never reach the primary slot. Without this a
+ *    `weapon_range` in the thousands makes any distance check a tautology.
+ *
+ * WHY ENFORCE IT HERE. Vanilla never hands anyone a free allocation — stats
+ * are earned against `13 + 4 * herolevel` and weapons bought with gold as that
+ * budget grows — so the degenerate corner is approached from far away if at
+ * all. This engine lets a blueprint declare anything, which is correct for a
+ * multiplayer foundation and is exactly what exposes the corner.
+ *
+ * **AND MEASURED HONESTLY: THIS DOES NOT CLOSE D2 ON ITS OWN, which is why the
+ * swing was repriced as well.** Searched across the budget at every herolevel:
+ * importing the gate kills the pure dump build (strength 1 / speed 0 can buy 4
+ * of 80 weapons, best 34 damage) but at herolevel 15 `str 1 / stam 5 /
+ * speed 62` still buys weapon 20 and swings 678 damage for free — because
+ * slashing gates on SPEED, the very stat that build dumps into. **The gate
+ * channels the exploit rather than restraining it.** An independent design
+ * panel judged that it "restores the trade"; re-derived here, it does not.
+ */
+export const SS2_SHOP_GATE = Object.freeze({ stepPerBand: 3, bandSize: 20 });
+
+/** Which stat gates a weapon id, by band. Item-tables:530-533. */
+export function ss2WeaponGateAttribute(weaponId) {
+  if (!Number.isFinite(weaponId)) return null;
+  if (weaponId >= 1 && weaponId <= 20) return "speed";
+  if (weaponId >= 21 && weaponId <= 40) return "strength";
+  if (weaponId >= 41 && weaponId <= 60) return "strength";
+  if (weaponId >= 61 && weaponId <= 80) return "speed";
+  return null;
+}
+
+/** `3 * band_position`, the `itemlevel` the gate compares against. */
+export function ss2WeaponDemand(weaponId) {
+  if (!Number.isFinite(weaponId)) return null;
+  return SS2_SHOP_GATE.stepPerBand * (((weaponId - 1) % SS2_SHOP_GATE.bandSize) + 1);
+}
+
+/** True for the ranged band, which `buyweapon` never puts in the primary slot. */
+export function ss2WeaponIsRanged(weaponId) {
+  return Number.isFinite(weaponId) && weaponId >= 61 && weaponId <= 80;
+}
+
+/**
+ * Refuses a primary weapon the shop would not have sold this gladiator.
+ *
+ * Checked only when a `weapon` id is STATED. A combatant that declares its
+ * damage pair directly — every promoted golden — states no weapon id and is
+ * untouched, which is what keeps the corpus out of this entirely.
+ */
+export function assertSs2WeaponPurchasable(source, label = "Combatant") {
+  const weaponId = source?.weapon;
+  if (!Number.isFinite(weaponId)) return;
+  if (ss2WeaponIsRanged(weaponId)) {
+    throw new TeamRuleSetError(
+      `${label} declares weapon ${weaponId} as its PRIMARY, and ids 61-80 are the ranged band. ` +
+      "`buyweapon` routes a ranged purchase to `secondary_weapon` (ss2-item-tables.md:826-828), so no " +
+      "gladiator in the build can carry one in the primary slot. Declare it as `secondary_weapon`."
+    );
+  }
+  const attribute = ss2WeaponGateAttribute(weaponId);
+  if (attribute === null) return;
+  const demand = ss2WeaponDemand(weaponId);
+  const have = Number.isFinite(source[attribute]) ? source[attribute] : 0;
+  if (demand > have) {
+    throw new TeamRuleSetError(
+      `${label} declares weapon ${weaponId}, which the shop gates at ${attribute} >= ${demand} ` +
+      `(3 * band_position; ss2-item-tables.md:530-552, onRelease +0x0929) and it declares ${attribute} ` +
+      `${have}. The campaign would never have sold it this weapon.`
+    );
+  }
 }
 
 /** Action token -> the `getphase` label the build knows it by. */
@@ -682,6 +884,13 @@ export const SS2_RESOURCE_DEFAULTS = Object.freeze({
   charisma: 0,
   equipped_weapon: 1,
   herolevel: 1,
+  /**
+   * The MIDDLE of the six-entry `weaponweights` index, so a combatant that
+   * states no weapon swings something unremarkable rather than free or
+   * crippling. AUTHORED default over a real field; see `SS2_SWING` for the
+   * direction problem and what settles it.
+   */
+  attack_speed: 3,
   // Declared with a defensible zero: no enchantment means no tick damage. The
   // status phase reads these at TICK time off whoever inflicted the condition,
   // matching the build, which reads `game_defender.weapon_enchantment_damage`
@@ -821,6 +1030,17 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
   derived.staminamax = 100 + number("stamina") * 10;
   derived.movement_speed = clamp(Math.round(number("speed") * 1.5), 4, 60);
 
+  // `attack_speed` is the weapon table's `[2]` column, read straight through
+  // by `battlevalues` (`+0x3174`, `+0x346a`, `docs/integration/ss2-item-tables.md:328`).
+  // The map catalogues it as a derived-combat field and records NO READER for
+  // it anywhere; this engine ignored it entirely until 2026-09-10. Derived
+  // here only when the caller states a `weapon` id, so a combatant that
+  // declares the damage pair directly — every promoted golden — is untouched.
+  if (derived.attack_speed === undefined && Number.isFinite(source.weapon)) {
+    const entry = ss2WeaponEntry(source.weapon);
+    if (entry) derived.attack_speed = entry.weight;
+  }
+
   if (battleStarted) return derived;
 
   derived.hitpoints = Math.round(derived.hitpointsmax);
@@ -871,6 +1091,14 @@ export function ss2Combatant(
       "Pass derive: false to keep the stated values, or remove them to derive from stats and kit."
     );
   }
+  // The shop gate runs on the STATED record, before anything is derived, so a
+  // refusal names the id the caller wrote rather than a number computed from
+  // it. `ss2Combatant` is the right home: it is the only place the weapon id
+  // still exists — equipment identity is deliberately outside
+  // `SS2_RESOURCE_NAMES` and `CANONICAL_RESOURCE_SOURCES`, so by the time a
+  // combatant reaches the resolver there is nothing left to gate on.
+  assertSs2WeaponPurchasable(vanilla, id ? `Combatant ${id}` : "Combatant");
+
   const derived = derive ? ss2BattleValues(vanilla, { battleStarted }) : { ...vanilla };
   const resources = {};
   for (const key of SS2_RESOURCE_NAMES) {
@@ -1826,7 +2054,33 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
       // attacker's stamina must DIFFER from the only measured number the
       // fixture carries for it. It now asserts they are equal.
       const eliminated = scenario.villain.hitpoints <= 0;
-      const staminaCost = Math.round(actor.stats.strength * band.strengthFactor);
+      // ► **THIS USED TO BE `round(strength * band.strengthFactor)`, THE
+      //   BUILD'S OWN FORMULA, AND IT IS THE ONE PLACE THIS ENGINE KNOWINGLY
+      //   LEAVES IT — owner's decision 2026-09-10.** The band factor is still
+      //   the build's (3 / 2 / 1 at `+0x603c`, `+0x61a3`, `+0x6317`), so the
+      //   three bands keep their relative prices; what changed is what it
+      //   multiplies. See `SS2_SWING` for the measured defect this answers,
+      //   for which half is the build's and which is ours, and for the one
+      //   inference in it that is genuinely weak — the DIRECTION of the
+      //   `weaponweights` index, which a tool that already exists can settle.
+      //
+      //   **AND `fixtureReplay` KEEPS THE BUILD'S FORMULA, which is not a
+      //   convenience — it is the whole reason the corpus stays evidence.** A
+      //   promoted golden carries a `staminaleft` MEASURED in the running
+      //   game, and `a non-lethal action DOES transition` in
+      //   `ss2-golden-resolver-replay.test.js` checks the replay against it.
+      //   Repricing that path would make this engine disagree with an observed
+      //   number, which is not a balance change but a corpus break. So the
+      //   divergence is gated exactly where `startingPosition` and the crowd
+      //   toll are: a fixture reproduces the build, play gets the repriced
+      //   economy, and the seam is one flag rather than three conventions.
+      const staminaCost = fixtureReplay
+        ? Math.round(actor.stats.strength * band.strengthFactor)
+        : ss2SwingCost({
+          bandFactor: band.strengthFactor,
+          attackSpeed: resourceValue(actor, "attack_speed", SS2_RESOURCE_DEFAULTS.attack_speed),
+          strength: actor.stats.strength
+        });
       const transition = eliminated
         ? { effects: [], staminaGained: 0, healed: 0 }
         : phaseTransitionEffects(actor, { staminaCost });

@@ -936,7 +936,7 @@ to settle would leave a decided battle that can never pay its campaign.
 | multi-slot geometry, ally clip names, ally depths, ally panel widgets | **authored mod surface**; vanilla has no second ally, so no capture can settle it |
 
 `MAP_SILENCE` in `src/adapter/vanilla-fields.js` is the machine-readable
-version of this: **eight** entries, each naming the subject, the silence, what
+version of this: **nine** entries, each naming the subject, the silence, what
 the adapter does instead, and the capture that would settle it. A test asserts
 every entry is complete and uniquely identified, and pins the id LIST rather
 than the count.

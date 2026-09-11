@@ -49,8 +49,11 @@ import { resolveSs2PhysicalAttackCandidate } from "../src/golden/ss2-attack-cand
 import { SS2_BUILD_SHA256 } from "../src/golden/run-1v1-fixture.js";
 import {
   ATTACK_DIRECTION_ROLL_LABEL,
+  assertSs2WeaponPurchasable,
   createSs2TeamRules,
   SS2_CROWD,
+  SS2_SWING,
+  ss2SwingCost,
   ss2CrowdDamage,
   Ss2ActionType,
   SS2_ARMOUR_DVAL,
@@ -569,9 +572,22 @@ test("rest clamps at staminamax and at maxHealth rather than overshooting", () =
   assert.equal(battle.lastResolution.events[0].healed, 0, "a fighter at full health reports no heal");
 });
 
-test("an attack spends round(strength * factor) and regenerates, attacker-only", () => {
-  // `quick_attack` `+0x6317` = round(strength), `normal_attack` `+0x61a3` =
-  // round(strength * 2), `power_attack` `+0x603c` = round(strength * 3).
+test("an attack spends the SWING COST and regenerates, attacker-only", () => {
+  // ► **THIS TEST PINNED `round(strength * factor)` AND NOW PINS THE SWING
+  //   COST — the one deliberate departure from the build's combat arithmetic
+  //   in this engine (owner's decision, 2026-09-10).** The band FACTORS below
+  //   are still the build's and still pinned: `quick_attack` `+0x6317` = 1,
+  //   `normal_attack` `+0x61a3` = 2, `power_attack` `+0x603c` = 3, so the
+  //   three bands keep their relative prices. What changed is what the factor
+  //   multiplies — the weapon's mass rather than the wielder's strength, with
+  //   strength in the denominator. See `SS2_SWING` for the measured defect
+  //   that forced it (strength 7 beat strength 30 losing nothing) and for the
+  //   one weak inference in it.
+  //
+  //   Everything else this test asserted is UNCHANGED and still asserted: the
+  //   spend and regen are combined before one clamp, and `nextphase`
+  //   `+0x32a1`-`+0x3304` has no `game_defender` counterpart, so a defender
+  //   neither pays nor recovers.
   const factors = {
     [Ss2ActionType.QUICK_ATTACK]: 1,
     [Ss2ActionType.NORMAL_ATTACK]: 2,
@@ -587,12 +603,25 @@ test("an attack spends round(strength * factor) and regenerates, attacker-only",
     const villainStaminaBefore = villain.resources.staminaleft.value;
     applyAction(battle, { actorId: "hero", type, targetId: "villain" });
 
+    const cost = ss2SwingCost({
+      bandFactor: factor,
+      attackSpeed: hero.resources.attack_speed?.value,
+      strength
+    });
     const expected = Math.max(0, Math.min(
       hero.resources.staminamax.value,
-      staminaBefore - Math.round(strength * factor) + 1 + Math.round(stamina / 3)
+      staminaBefore - cost + 1 + Math.round(stamina / 3)
     ));
     assert.equal(hero.resources.staminaleft.value, expected, type);
-    assert.equal(battle.lastResolution.events[0].staminaSpent, Math.round(strength * factor), type);
+    assert.equal(battle.lastResolution.events[0].staminaSpent, cost, type);
+    // The inversion itself, asserted rather than assumed: a STRONGER wielder
+    // pays LESS for the same swing. Under the build's own formula this was
+    // strictly the other way round, which is what made strength a trap.
+    assert.ok(
+      ss2SwingCost({ bandFactor: factor, attackSpeed: 1, strength: 60 }) <
+      ss2SwingCost({ bandFactor: factor, attackSpeed: 1, strength: 1 }),
+      `${type}: strength must BUY cheaper swings, not pay for them`
+    );
     // `nextphase` `+0x32a1`-`+0x3304` has no `game_defender` counterpart.
     assert.equal(villain.resources.staminaleft.value, villainStaminaBefore, `${type}: defender untouched`);
   }
@@ -606,7 +635,12 @@ test("the regeneration ROUNDS stamina/3, and a stat where round differs from flo
   const hero = combatantById(battle, "hero");
   hero.resources.staminaleft.value = 50;
   applyAction(battle, { actorId: "hero", type: Ss2ActionType.QUICK_ATTACK, targetId: "villain" });
-  assert.equal(hero.resources.staminaleft.value, 50 - 6 + 1 + 1, "50 - round(6) + 1 + round(2/3)");
+  // The REGEN half is untouched by the swing-cost change and is what this test
+  // is for: `+0x32c9` is `Math.round`, and stamina 2 separates round from
+  // floor. Only the spend moved; it is read from the model rather than
+  // restated so this test cannot drift from `SS2_SWING`.
+  const spend = ss2SwingCost({ bandFactor: 1, attackSpeed: hero.resources.attack_speed?.value, strength: 6 });
+  assert.equal(hero.resources.staminaleft.value, 50 - spend + 1 + 1, "50 - swing + 1 + round(2/3)");
 });
 
 test("the spend and the regeneration are combined before ONE clamp, as the build has them", () => {
@@ -909,6 +943,12 @@ test("the SS2 resource DEFAULTS are pinned: they are wire format too", () => {
   // reader would think to check.
   assert.deepEqual(SS2_RESOURCE_DEFAULTS, {
     armourclass: 0, armourclass_max: 0,
+    // AUTHORED default over a real `battlevalues` field, added 2026-09-10 and
+    // load-bearing twice over: it prices every swing (`SS2_SWING`), and 3 is
+    // the middle of the six-entry `weaponweights` index, so a gladiator that
+    // states no `weapon` swings something unremarkable rather than free or
+    // crippling. Changing it re-hashes every battle that does not state one.
+    attack_speed: 3,
     character_level: 1, charisma: 0, equipped_weapon: 1, herolevel: 1,
     secondary_weapon_enchantment_damage: 0,
     secondary_weapon_enchantment_potency: 0,
@@ -1867,4 +1907,68 @@ test("the crowd's toll is zero during grace and grows linearly after it", () => 
   // A fixture never pays it, so no golden can be re-datumed by an authored rule.
   const fixture = createSs2TeamRules({ fightMode: "misc", fixtureReplay: true });
   assert.ok(fixture, "a fixtureReplay rule set still constructs");
+});
+
+
+/* ------------------------------------------------------------------ */
+/* What the campaign would never have sold you                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The shop's own purchase gate, byte-verified at
+ * `docs/integration/ss2-item-tables.md:530-552` from the `onRelease` opcodes
+ * at `+0x0929`-`+0x0941`. MEASURED, not authored — which is what makes it
+ * cheap to defend and why it is enforced rather than tuned.
+ */
+test("the shop's gate refuses a weapon the campaign would never have sold", () => {
+  // Slashing and ranged gate on SPEED at 3 * band_position.
+  assert.throws(
+    () => assertSs2WeaponPurchasable({ weapon: 4, speed: 6, strength: 99 }, "Test"),
+    (error) => error instanceof TeamRuleSetError && /speed >= 12/.test(error.message),
+    "weapon 4 sits at band position 4, so it demands speed 12"
+  );
+  // ...and strength does NOT substitute for it, which is the half that makes
+  // the gate bite on the dump build: pouring everything into strength buys no
+  // slashing weapon at all.
+  assert.throws(
+    () => assertSs2WeaponPurchasable({ weapon: 20, speed: 1, strength: 200 }, "Test"),
+    (error) => error instanceof TeamRuleSetError && /speed >= 60/.test(error.message)
+  );
+
+  // Hacking and bashing gate on STRENGTH instead.
+  assert.throws(
+    () => assertSs2WeaponPurchasable({ weapon: 40, speed: 200, strength: 5 }, "Test"),
+    (error) => error instanceof TeamRuleSetError && /strength >= 60/.test(error.message)
+  );
+
+  // The band boundary itself, both sides of it: band position 1 demands 3.
+  assert.equal(assertSs2WeaponPurchasable({ weapon: 21, speed: 0, strength: 3 }, "Test"), undefined);
+  assert.throws(
+    () => assertSs2WeaponPurchasable({ weapon: 21, speed: 0, strength: 2 }, "Test"),
+    (error) => error instanceof TeamRuleSetError && /strength >= 3/.test(error.message),
+    "one point below the band's demand must still be refused, and say so by name"
+  );
+});
+
+test("ranged is refused in the PRIMARY slot, because `buyweapon` never puts it there", () => {
+  // ss2-item-tables.md:826-828. Without this the 18 rangeMultiplier-100 rows
+  // give a weapon_range in the thousands, which makes any distance check a
+  // tautology — and refusing on range alone LEAKS, because ids 65 and 75 are
+  // type-4 bows with a range multiplier of 4. Refuse by BAND.
+  for (const id of [61, 65, 75, 80]) {
+    assert.throws(
+      () => assertSs2WeaponPurchasable({ weapon: id, speed: 999, strength: 999 }, "Test"),
+      (error) => error instanceof TeamRuleSetError && /ranged band|secondary_weapon/.test(error.message),
+      `weapon ${id} must be refused as a primary however good the stats are`
+    );
+  }
+});
+
+test("a combatant that states NO weapon id is untouched, which is what keeps the corpus out of this", () => {
+  // Every promoted golden declares its damage pair directly and states no
+  // `weapon`. If the gate ever fired on them it would be refusing runtime
+  // evidence on the strength of a shop rule, which is backwards.
+  assert.equal(assertSs2WeaponPurchasable({ speed: 0, strength: 0 }, "Test"), undefined);
+  assert.equal(assertSs2WeaponPurchasable({ weapon: null, speed: 0 }, "Test"), undefined);
+  assert.equal(assertSs2WeaponPurchasable({}, "Test"), undefined);
 });

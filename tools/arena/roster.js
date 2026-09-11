@@ -47,7 +47,16 @@ export function demoGladiator(overrides = {}) {
     ammo_left: 0,
     maximum_ammo: 0,
 
-    weapon: 3,
+    // ► **WAS `weapon: 3` UNTIL 2026-09-10, WHEN THE SHOP'S OWN GATE STARTED
+    //   BEING ENFORCED and refused it.** Slashing is gated on speed at
+    //   `3 * band_position` (`ss2-item-tables.md:530-552`), so weapon 3
+    //   demanded speed 9, while this roster runs speed `6 + side - index` —
+    //   4 through 7 across the six slots. Weapon 1 is the only slashing blade
+    //   the whole roster can actually carry, and a demo roster carrying gear
+    //   the campaign would never have sold it is the exact thing the gate
+    //   exists to stop. The declared damage pair below is unchanged, so the
+    //   arena plays the same; only the id is now one a shop would sell.
+    weapon: 1,
     weapon_type: 1,
     weapon_weight: 7,
     weapon_range: 1,
