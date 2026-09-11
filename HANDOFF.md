@@ -59,6 +59,13 @@ priced on the weapon with strength in the denominator — and **both gated behin
   **Measure the live number, never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
 
+► **THIS SESSION'S SECOND STRETCH COMMITTED TWO AND MEASURED TWO UNPUSHED AFTER
+  ITS HANDOFF COMMIT `4723e4c`; the correction commit carrying this sentence
+  makes three.** Written as an EVENT with the self-reference in it, for the
+  reason every block below it gives: a bare count is false one commit later.
+  **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
 ► **POSITION IS IN THE RESOLVER (2026-09-11, `567eb41`). BOTH HALVES ARE NOW
   BUILT, and the ranked list below is overtaken as far as movement goes.**
   `x` is on the combatant and inside `combatStateHash`; `EffectKind.POSITION`
