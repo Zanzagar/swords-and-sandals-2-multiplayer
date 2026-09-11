@@ -334,14 +334,50 @@ test("conditions cross the bout boundary, because nothing in the build clears th
   //
   // Swept and asserted to have found one. An early return here would be a test
   // that passes by not running.
-  let found = null;
-  for (let seed = 1; seed <= 80 && found === null; seed += 1) {
-    const bout = settledTeamBout(seed);
-    if (bout === null) continue;
-    const outcome = bout.record.outcomes.find((entry) => entry.survived && entry.statuses.length > 0);
-    if (outcome) found = { ...bout, outcome };
-  }
-  assert.ok(found, "no seed left a survivor carrying a condition; this test would prove nothing");
+  // ► **THE SWEEP THAT USED TO STAND HERE IS GONE, and the reason is a
+  //   MEASURED consequence of `ss2InitiativeOrder` (2026-09-10, D3).**
+  //
+  //   It swept 80 seeds for a bout that naturally left a survivor carrying a
+  //   condition, and its blueprint said so explicitly: *"the bearer has to act
+  //   BEFORE the enemy that procs it and a TEAMMATE has to land the killing
+  //   blow AFTER ... bearer fastest (12), enemies in the middle (5), the
+  //   teammate who finishes it slowest (1)."* **That ordering only exists
+  //   under a FLAT cross-team agility sort.** Sides alternate now, so every
+  //   fighter acts once per round evenly spaced, and an afflicted fighter
+  //   almost always gets a turn in which to burn the condition off.
+  //
+  //   Measured before this test was touched: **0 of 300 seeds left a living
+  //   afflicted survivor**, at 2v2 and at 3v3, and across three different
+  //   blueprint designs (fragile fast bearer, tanky fast bearer, slowest-in-
+  //   side bearer starting afflicted). The old vacuity guard did its job — it
+  //   refused to pass rather than quietly prove nothing.
+  //
+  //   **The CLAIM under test never depended on that sweep**: it is that
+  //   read-back carries a survivor's statuses into the next bout. So the input
+  //   is now constructed directly and the test is deterministic. What the
+  //   sweep used to prove — that the situation arises in play — is no longer
+  //   true often enough to sweep for, and is recorded as a finding in
+  //   `docs/combat-economy-findings-2026-09-10.md` rather than asserted here.
+  //   **If you make conditions survive bouts again, restore a sweep.**
+  const bout = settledTeamBout(1);
+  assert.ok(bout, "the 2v2 must settle");
+  const survivor = bout.battle.teams
+    .flatMap((team) => team.combatants)
+    .find((combatant) => combatant.alive);
+  assert.ok(survivor, "a settled bout has a survivor");
+
+  // Constructed, not swept — and this file already mutates battle state
+  // directly elsewhere for exactly this kind of setup.
+  survivor.status = ["burning:from=blue-1"];
+  const record = buildCampaignRecord(bout.battle, {
+    battleId: "team-bout-constructed-condition",
+    writer: { id: "campaign-read-back-test", version: "1" }
+  });
+  const outcome = record.outcomes.find((entry) => entry.combatantId === survivor.id);
+  assert.ok(outcome?.survived, "the constructed bearer must be recorded as a survivor");
+  assert.deepEqual(outcome.statuses, ["burning:from=blue-1"], "the record must carry it");
+
+  const found = { record, blueprints: bout.blueprints, outcome };
 
   const { teams } = rosterFromCampaignRecord(found.record, { blueprints: found.blueprints });
   const carriedFighter = teams

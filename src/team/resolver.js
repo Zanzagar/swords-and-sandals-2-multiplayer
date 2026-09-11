@@ -95,7 +95,13 @@ export function createTeamBattle({
     rulesDescriptor: describeTeamRuleSet(rules),
     teams: roster.teams,
     controllers: roster.controllers,
-    initiative: initiativeOrder(roster.teams),
+    // A rule set MAY own turn order. `ss2TeamRules` does, because SS2 does not
+    // sort initiative at all — `changeCombatants` alternates — and the flat
+    // agility sort this resolver ships is authored. The fallback keeps every
+    // other rule set, and every caller that declares no hook, exactly as it
+    // was. See `initiativeOrder` in `roster.js` and D3 in
+    // `docs/combat-economy-findings-2026-09-10.md`.
+    initiative: rules.initiativeOrder?.(roster.teams) ?? initiativeOrder(roster.teams),
     turnCursor: 0,
     turnNumber: 1,
     result: null,

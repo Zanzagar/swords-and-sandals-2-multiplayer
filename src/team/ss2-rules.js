@@ -221,6 +221,7 @@
 import { calculateSs2AttackChances, resolveSs2PhysicalAttackCandidate } from "../golden/ss2-attack-candidate.js";
 import { applySs2MagicDamageCandidate } from "../golden/ss2-spell-candidate.js";
 import { SS2_BUILD_SHA256 } from "../golden/run-1v1-fixture.js";
+import { byCodeUnit } from "../common/stable-order.js";
 import { resourceValue } from "./resources.js";
 import { ss2WeaponDamageRange, ss2WeaponEntry } from "./ss2-weapon-table.js";
 import { defineTeamRuleSet, EffectKind, RuleSetVerification, TeamRuleSetError } from "./rule-set.js";
@@ -543,6 +544,65 @@ export function assertSs2WeaponPurchasable(source, label = "Combatant") {
       `${have}. The campaign would never have sold it this weapon.`
     );
   }
+}
+
+/**
+ * TURN ORDER — sides ALTERNATE, and this is a fidelity gain rather than a
+ * divergence.
+ *
+ * THE DEFECT (`docs/combat-economy-findings-2026-09-10.md`, D3). The
+ * resolver's default `initiativeOrder` is a FLAT agility-descending sort
+ * across BOTH teams, so a side whose fighters all out-run the enemy's acts
+ * three times before the enemy acts at all — measured:
+ * `FAST -> FAST -> FAST -> SLOW -> SLOW -> SLOW`. At 3v3 that is a third of
+ * the opposing side removed before the bout is joined.
+ *
+ * **The flat sort is AUTHORED, not the build's**, and `roster.js`'s own
+ * comment has said so all along: *"SS2 does not sort initiative at all —
+ * `changeCombatants` alternates. Turn order in a team battle is the
+ * resolver's, not the build's."* So alternating is the fix AND a step toward
+ * the build.
+ *
+ * WHAT IS STILL AUTHORED, because vanilla has no second ally and so cannot
+ * settle it (`MAP_SILENCE.initiative-order`):
+ *
+ * - **Who opens.** The side holding the single fastest gladiator, ties broken
+ *   by team id so two peers cannot disagree. Agility therefore still buys
+ *   something real — the first action of the bout — but it buys a LEAD, never
+ *   a free round, which is the whole distinction D3 turns on.
+ * - **Order within a side**: agility descending, then id ascending, which is
+ *   the resolver's own rule kept verbatim.
+ * - **Uneven sides** (1v3): interleave until the short side runs out, then the
+ *   remainder in order. A 1v3 therefore does NOT give the lone fighter every
+ *   other turn for the whole bout, which would be a much larger invention than
+ *   the one being fixed.
+ */
+function ss2InitiativeOrder(teams) {
+  const ordered = teams.map((team) =>
+    [...team.combatants]
+      .slice()
+      .sort((a, b) => b.stats.agility - a.stats.agility || byCodeUnit(a.id, b.id))
+  );
+
+  // Who opens: the side holding the single fastest gladiator. `sort` above
+  // already put it first in each side, so this is a comparison of two heads.
+  const headAgility = (side) => (side.length > 0 ? side[0].stats.agility : -Infinity);
+  const headId = (side) => (side.length > 0 ? side[0].id : "");
+  let lead = 0;
+  if (ordered.length === 2) {
+    const byAgility = headAgility(ordered[1]) - headAgility(ordered[0]);
+    // Ties break by the head's id rather than by team index, so the answer
+    // does not depend on which order the caller listed the teams in.
+    if (byAgility > 0 || (byAgility === 0 && byCodeUnit(headId(ordered[1]), headId(ordered[0])) < 0)) lead = 1;
+  }
+
+  const sides = lead === 1 ? [ordered[1], ordered[0]] : ordered;
+  const interleaved = [];
+  const longest = Math.max(0, ...sides.map((side) => side.length));
+  for (let rank = 0; rank < longest; rank += 1) {
+    for (const side of sides) if (side[rank]) interleaved.push(side[rank].id);
+  }
+  return interleaved;
 }
 
 /** Action token -> the `getphase` label the build knows it by. */
@@ -1761,6 +1821,9 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
     },
     actionTypes: Object.values(Ss2ActionType),
     fightMode,
+
+    /** Sides alternate; see `ss2InitiativeOrder`. Optional hook, no contract bump. */
+    initiativeOrder: ss2InitiativeOrder,
 
     /**
      * `hitpointsmax = herolevel * 10 + vitality * 20`, `battlevalues`

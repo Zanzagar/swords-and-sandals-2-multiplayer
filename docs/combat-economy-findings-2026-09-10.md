@@ -141,7 +141,30 @@ verbatim, so an optional `initiativeOrder` hook carries through with no
 contract-version bump. *(That seam claim came from a design agent and is NOT
 re-derived here — check it before relying on it.)*
 
-**Why it is recorded here rather than fixed**: it was found while briefing the
+### CLOSED 2026-09-10, and it had one consequence worth knowing
+
+`ss2InitiativeOrder` makes sides ALTERNATE — agility orders only WITHIN a side,
+and the side holding the single fastest gladiator opens. Measured:
+`A -> B -> A -> B -> A -> B`. Agility still buys the first action of the bout;
+it no longer buys a free round. Uneven sides interleave until the short side
+runs out.
+
+**THE CONSEQUENCE, measured before it was accepted: conditions effectively stop
+crossing bout boundaries.** Under the flat sort a slow fighter could have
+several enemy turns between its own, which is the window in which a condition
+outlives a bout. Under alternation every fighter acts once per round, evenly
+spaced, so an afflicted fighter almost always gets a turn to burn it off.
+**0 of 300 seeds left a living afflicted survivor** — at 2v2 and 3v3, across
+three blueprint designs (fragile fast bearer, tanky fast bearer, and a
+slowest-in-side bearer starting afflicted).
+
+That is not a correctness regression — the read-back seam still carries
+statuses when they do occur, and `test/campaign-read-back.test.js` now proves
+it deterministically instead of sweeping for a case that no longer arises. But
+it IS a design change nobody asked for, arriving as a side effect of a turn-order
+fix, and if conditions surviving bouts matters it is now the thing to restore.
+
+**Why it was recorded here before it was fixed**: it was found while briefing the
 3v3 design panel, the panel's designs all died for other reasons, and closing
 it is a turn-order decision the owner has not made. **It was very nearly lost
 entirely** — measured early on 2026-09-10 and written down nowhere until the

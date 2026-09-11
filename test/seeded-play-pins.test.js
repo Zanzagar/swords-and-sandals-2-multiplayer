@@ -143,6 +143,14 @@ function driveFirst(battle, limit) {
  *   `docs/combat-economy-findings-2026-09-10.md` D2 — strength 7 beat strength
  *   30 over 39 actions without losing a point of stamina or health.
  *
+ *   Then the 3v3 literal moved AGAIN, later the same day, on a SECOND
+ *   deliberate change: `ss2InitiativeOrder` (D3) makes sides ALTERNATE
+ *   instead of sorting flat by agility across both teams, so a 3v3's turn
+ *   order — and therefore its whole event log — is different.
+ *   3f21de75 -> 347dc64f. **Only the 3v3 pin moved**, and that is the pin
+ *   earning its place: 1v1 alternates identically under both rules, so the
+ *   two settled-1v1 pins could not have caught this and did not.
+ *
  *   fb82a03e -> f12b5d6c   (six actions in)
  *   976c78a3 -> edb93099   (settled 1v1)
  *   6474bf07 -> 3f21de75   (settled 3v3)
@@ -198,7 +206,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "3f21de75", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "347dc64f", WHY_IT_MOVED);
 });
 
 /**
