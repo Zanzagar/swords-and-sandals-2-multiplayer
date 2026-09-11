@@ -410,7 +410,17 @@ export function ss2CrowdDamage(turnNumber) {
  *   field. See `MAP_SILENCE.swing-cost`.
  */
 export const SS2_SWING = Object.freeze({
-  /** Entries in `weaponweights`; `[2]` indexes it 1..6. Map, item-tables:345. */
+  /**
+   * Entries in `weaponweights` — SIX, of which index 0 is an empty pad and
+   * 1..5 are the five weight classes. Map, item-tables §2.1 and the array at
+   * `+0x3dd4`.
+   *
+   * ► **THIS COMMENT SAID "`[2]` indexes it 1..6", AND IT IS 1..5.** Measured
+   *   2026-09-11 across all ninety rows of `ss2-weapon-table.js`: the index is
+   *   1 for 13 weapons, 2 for 13, 3 for 41, 4 for 14 and 5 for 9. Never 0,
+   *   never 6. The arithmetic below was right anyway — `6 - index` maps 1 to 5
+   *   and 5 to 1 — but the stated range was not.
+   */
   weightIndexMax: 6,
   /**
    * How much strength offsets the swing. AUTHORED. Larger softens the curve.
@@ -447,9 +457,30 @@ export const SS2_SWING = Object.freeze({
 });
 
 /**
- * A weapon's mass, from its `attack_speed` index. AUTHORED DIRECTION — see
- * `SS2_SWING`. Index 1 is read as the heavy end, so `mass` runs 5 (heaviest)
- * down to 1 (lightest).
+ * A weapon's mass, from its `attack_speed` index. Index 1 is the heavy end, so
+ * `mass` runs 5 (heaviest) down to 1 (lightest).
+ *
+ * ► **THE DIRECTION IS DERIVED, NOT AUTHORED — read off the build 2026-09-11,
+ *   and this docstring used to say "AUTHORED DIRECTION".** `weaponweights` at
+ *   `+0x3dd4` is six STRINGS, so `attack_speed` is a weight-CLASS index and
+ *   never a numeric speed; reversed out of its push order the array runs
+ *   `["", <very heavy>, <heavy>, <normal>, <light>, <very light>]`. Index 1 is
+ *   the heavy end, so the inference this function was built on was correct.
+ *   `tools/item-table-transcription.mjs` now checks it against the installed
+ *   build on every run — shape, direction, and the push-order convention
+ *   itself, the last confirmed against `weapontypes`, which the item-tables
+ *   document pins and §2.2 cross-checks from the ninety rows' own `[0]`.
+ *
+ *   **It was ranked as the cheapest open question on the board for a day, and
+ *   the answer was already in the document that `MAP_SILENCE.swing-cost` cites
+ *   for the array's LOCATION** — two lines under the offset, since
+ *   `df3a122` on 2026-08-30. The silence entry said the values were not held.
+ *   Third instance in this repository of one failure: declaring the map silent
+ *   without reading the surrounding paragraph.
+ *
+ * **NOTHING ELSE ABOUT `ss2SwingCost` BECAME MEASURED.** `SS2_SWING.scale` and
+ * `strengthOffset` are still authored, and pricing a swing on the weapon at all
+ * is still an owner's decision rather than the build's behaviour.
  */
 export function ss2WeaponMass(attackSpeedIndex) {
   const index = Number.isFinite(attackSpeedIndex) ? attackSpeedIndex : SS2_RESOURCE_DEFAULTS.attack_speed;

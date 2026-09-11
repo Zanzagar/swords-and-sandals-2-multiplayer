@@ -348,6 +348,26 @@ weaponweights (6)                                    // +0x3dd4
 Weight index 1 is the heaviest and 5 the lightest (the string literals run
 "Very heavy" → "Very light", pushed in that order at `+0x3dd4`).
 
+► **THIS SENTENCE IS NOW MACHINE-CHECKED, AND IT SPENT TWELVE DAYS BEING
+  IGNORED BY THE FILE THAT NEEDED IT.** `MAP_SILENCE.swing-cost` in
+  `src/adapter/vanilla-fields.js` declared that the array's *"VALUES this
+  repository does not hold"*, cited `:345` — two lines above this one — for the
+  LOCATION, and the engine's `ss2WeaponMass` therefore carried its direction as
+  AUTHORED, inferred from a damage correlation. It was ranked as the cheapest
+  open question on the board and put to the owner as work. Read off the
+  installed build on 2026-09-11 the sentence is exactly right, and the
+  inference was right with it.
+  **Two things worth keeping from it.** `weaponweights` holds STRINGS, so
+  `attack_speed` is a weight-CLASS index and never a numeric speed — the field
+  name misleads. And `tools/item-table-transcription.mjs` now verifies the
+  shape, the direction and the push-order convention on every run, the last
+  against `weapontypes`, whose reversed form §2.2 cross-checks from the ninety
+  rows' own `[0]` values. **It reproduces no entry**: the direction is tested by
+  substring, per the licensing boundary in §2.1.
+  What is still genuinely unrecorded is narrower: the map names no READER for
+  `attack_speed` anywhere, so what the build DOES with the weight class remains
+  unknown.
+
 `physical_size = 80 + Math.round(strength / 1.5)` (`battlevalues` `+0x30f1`),
 which is why `weapon_range` moves with strength as well as with `[5]`.
 

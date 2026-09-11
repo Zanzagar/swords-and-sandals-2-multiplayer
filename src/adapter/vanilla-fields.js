@@ -397,7 +397,22 @@ export const MAP_SILENCE = Object.freeze([
       "known (`+0x3dd4`, `docs/integration/ss2-item-tables.md:345`) and whose VALUES this repository does " +
       "not hold.** So nothing here says whether index 1 is the heavy end or the light one. It is read as " +
       "HEAVY from the damage correlation across the whole table — index 1 spans 80-676 max damage, index 5 " +
-      "spans 3-36 — and if that is backwards, every swing cost is backwards.",
+      "spans 3-36 — and if that is backwards, every swing cost is backwards. " +
+      "► **EVERY WORD OF THE BOLD SENTENCE ABOVE WAS FALSE WHEN IT WAS WRITTEN, and it is corrected here " +
+      "rather than deleted because the mechanism matters more than the fact. THIS REPOSITORY DID HOLD THE " +
+      "VALUES**: `ss2-item-tables.md` states them TWO LINES under the offset this entry cites for the " +
+      "location — \"Weight index 1 is the heaviest and 5 the lightest\" — and has since `df3a122` on " +
+      "2026-08-30, which is before this entry existed. It was then ranked as the cheapest open question on " +
+      "the board and sent to the owner as work. **Third instance in this repository of one failure: " +
+      "declaring the map silent without reading the surrounding paragraph** — the other two are named in " +
+      "this list's own header and in `hurtLabel`. " +
+      "**THE DIRECTION IS SETTLED, and the inference was RIGHT**: read off the installed build 2026-09-11, " +
+      "`weaponweights` is six STRINGS — so `attack_speed` is a weight-CLASS index and never a numeric " +
+      "speed — and reversed out of its push order index 1 is the heavy end and index 5 the light one. " +
+      "`tools/item-table-transcription.mjs` checks it on every run, including the push-order convention " +
+      "itself against `weapontypes`. **WHAT REMAINS SILENT IS NARROWER AND STILL REAL**: the map records " +
+      "no READER for `attack_speed` anywhere, so the build does something with the weight class that this " +
+      "repository still cannot name.",
     adapterBehaviour:
       "`SS2_SWING` / `ss2SwingCost` in `src/team/ss2-rules.js` price a swing on the weapon's mass with " +
       "strength in the denominator, so strength BUYS cheaper swings instead of paying for them. The band " +
@@ -408,6 +423,8 @@ export const MAP_SILENCE = Object.freeze([
       "actions without losing a point of stamina or health, because the build prices a swing on the wielder " +
       "and pays it out of the weapon.",
     settledBy:
+      "► **DONE 2026-09-11: the tool was extended and run, and the direction came back as read. What is " +
+      "written below is what was done, kept because it describes the route.** " +
       "THE DIRECTION IS SETTLED BY A TOOL THAT ALREADY EXISTS, and it is the cheapest open question in this " +
       "list: the same `tools/item-table-transcription.mjs` route that re-reads the ninety weapon literals " +
       "out of the installed SWF can read the six `weaponweights` values at `+0x3dd4`. That turns `mass()` " +

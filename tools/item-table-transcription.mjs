@@ -148,6 +148,58 @@ function weaponLiteralsIn(analysis) {
 }
 
 /**
+ * WHICH END OF `weaponweights` IS HEAVY — the question the swing cost rests on.
+ *
+ * ► **THIS WAS CARRIED AS AN OPEN QUESTION FOR A DAY, RANKED FIRST, AND THE
+ *   ANSWER WAS ALREADY IN THE DOCUMENT THIS TOOL CHECKS.**
+ *   `MAP_SILENCE.swing-cost` said the array's "VALUES this repository does not
+ *   hold", so `ss2WeaponMass`'s direction was marked AUTHORED and inferred from
+ *   a damage correlation. `docs/integration/ss2-item-tables.md` states it
+ *   outright two lines under the offset the silence entry cites for the
+ *   LOCATION — and has since `df3a122`, 2026-08-30. **Third instance of one
+ *   failure: declaring the map silent without reading the surrounding
+ *   paragraph.** The inference happened to be right, which is the least
+ *   reassuring way for it to end.
+ *
+ * WHAT IS CHECKED, and why it is a direction rather than a transcription.
+ * `weaponweights` holds six STRINGS — human-readable weight classes, so
+ * `attack_speed` is a weight-CLASS index and never a numeric speed. This tool
+ * asserts the SHAPE (six entries, index 0 the empty pad) and the DIRECTION
+ * (index 1 is the heavy end, index 5 the light one) by substring, and
+ * reproduces no entry. That answers the only question the engine asks of it
+ * while keeping the licensing boundary §2.1 sets for the weapon names.
+ *
+ * The array is built by `NewObject`, which pops the class name, then the count,
+ * then the arguments — so the compiler pushes them in REVERSE and the array is
+ * the reverse of the push order. That convention is not assumed here: it is
+ * confirmed against `weapontypes`, whose reversed form the document pins AND
+ * which §2.2 cross-checks from the 90 rows' own `[0]` values.
+ */
+function weightClassDirectionIn(analysis) {
+  const ARRAYS = Object.freeze({ weaponweights: 6, weapontypes: 5 });
+  const found = new Map();
+  for (const block of analysis.actionBlocks) {
+    for (const instruction of walk(block.instructions)) {
+      if (instruction.name !== "Push" || !Array.isArray(instruction.operand)) continue;
+      const operands = instruction.operand;
+      const name = operands[0];
+      if (typeof name?.value !== "string" || !Object.hasOwn(ARRAYS, name.value)) continue;
+      if (found.has(name.value)) continue;
+      const constructor = operands.at(-1);
+      const count = numeric(operands.at(-2));
+      if (constructor?.value !== "Array" || count !== ARRAYS[name.value]) continue;
+      // Reverse of the push order, minus the name, the count and the class.
+      const entries = operands.slice(1, -2).reverse().map((operand) => operand.value);
+      found.set(name.value, {
+        offset: `+0x${(instruction.offset - block.offset).toString(16)}`,
+        entries
+      });
+    }
+  }
+  return found;
+}
+
+/**
  * The index each `weapon_*` output is actually read from, per the bytes.
  *
  * `battlevalues` writes each one as `c.<field> = _root["weapon" + c.weapon][k]`,
@@ -310,6 +362,49 @@ function main(argv) {
     const ok = site.index === expected;
     if (!ok) problems.push(`${field}: the build reads index ${site.index}, the document says ${expected}`);
     console.log(`  ${field.padEnd(18)} index ${site.index} at ${site.at} ${ok ? "" : `!= documented ${expected}`}`);
+  }
+
+  console.log("\nweight-class direction, read off `weaponweights` rather than inferred:");
+  const arrays = weightClassDirectionIn(analysis);
+  const weights = arrays.get("weaponweights");
+  const types = arrays.get("weapontypes");
+
+  // The reversal convention FIRST, against an array the document pins and §2.2
+  // cross-checks from the 90 rows. Without this the direction below would rest
+  // on an argument about how `NewObject` pops its arguments.
+  const DOCUMENTED_TYPES = ["", "slashing", "bashing", "hacking", "ranged"];
+  if (!types) {
+    problems.push("weapontypes not found; the push-order convention is UNVERIFIED, so the direction below means nothing");
+    console.log("  weapontypes        NOT FOUND");
+  } else {
+    const ok = types.entries.length === DOCUMENTED_TYPES.length &&
+      types.entries.every((entry, index) => entry === DOCUMENTED_TYPES[index]);
+    if (!ok) problems.push(`weapontypes reversed is ${JSON.stringify(types.entries)}, not what the document pins`);
+    console.log(`  push order reverses: ${ok ? "CONFIRMED" : "WRONG"} against weapontypes at ${types.offset}`);
+  }
+
+  if (!weights) {
+    problems.push("weaponweights not found; the swing cost's direction is UNVERIFIED, not confirmed");
+    console.log("  weaponweights      NOT FOUND");
+  } else {
+    // Shape, then direction. Nothing is reproduced: the entries are tested by
+    // substring and never printed, per the licensing boundary in §2.1.
+    if (weights.entries.length !== 6) {
+      problems.push(`weaponweights has ${weights.entries.length} entries, not 6`);
+    }
+    if (weights.entries[0] !== "") {
+      problems.push("weaponweights[0] is not the empty pad; the 1-based reading is wrong");
+    }
+    const heavy = /heav/i.test(String(weights.entries[1]));
+    const light = /light/i.test(String(weights.entries[5]));
+    if (!heavy) problems.push("weaponweights[1] is NOT the heavy end — every swing cost in ss2SwingCost is backwards");
+    if (!light) problems.push("weaponweights[5] is NOT the light end — every swing cost in ss2SwingCost is backwards");
+    console.log(
+      `  weaponweights at ${weights.offset}: 6 entries, [0] empty, ` +
+      `[1] ${heavy ? "heavy" : "NOT HEAVY"}, [5] ${light ? "light" : "NOT LIGHT"}`
+    );
+    console.log("    so ss2WeaponMass's `weightIndexMax - index` runs 1 -> heaviest, 5 -> lightest: " +
+      `${heavy && light ? "DERIVED, not authored" : "REFUTED"}`);
   }
 
   if (problems.length === 0) {
