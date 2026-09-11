@@ -8,6 +8,32 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-10 22:44 — the economy was the cheese](docs/handoffs/2026-09-10-2244--the-economy-was-the-cheese.md).**
+Start there. **Asked to design 3v3 so it could not be cheesed, a 13-agent panel
+produced four designs and ALL FOUR WERE BROKEN** — by two properties of the
+shipped 1v1 engine that 3v3 only multiplies. **D1: a bout need not terminate**
+(4,000 mutual `rest` actions, `result` still null). **D2: strength was a trap
+and stamina the only stat** (strength 7 beat strength 30 losing nothing). Both
+closed by owner decision — an authored crowd-impatience toll, and a swing
+priced on the weapon with strength in the denominator — and **both gated behind
+`fixtureReplay`, so all 23 goldens still reproduce their MEASURED
+`staminaleft`.** The 3v3 positional layer is deliberately NOT built on top yet.
+
+► **THE CHEAPEST OPEN QUESTION ON THE BOARD IS THE OWNER'S, AND IT IS SMALL:
+  read the six `weaponweights` values at `+0x3dd4` off the installed build.**
+  `attack_speed` is an INDEX into that array and this repository does not hold
+  its values, so nothing says whether index 1 is the heavy end. It is read as
+  HEAVY from the damage correlation. **If that is backwards, every swing cost
+  in the engine is backwards.** No capture, no staging, no Ruffle — only the
+  licensed SWF. `tools/item-table-transcription.mjs` already reads the ninety
+  weapon literals out of the same action block BY SHAPE, so extending it is the
+  route; it was deliberately not extended blind, because a parser nobody has
+  run returning a confident wrong answer is the failure mode this session spent
+  the day catching in others.
+
+*(The brief it supersedes, written MID-session by the same session and
+overtaken by it — its ranked list aimed at the 3v3 positional layer, and the
+answer turned out to be that 3v3 was not where the cheese lived:)*
 [2026-09-10 17:30 — the map was not silent, twice](docs/handoffs/2026-09-10-1730--the-map-was-not-silent-twice.md).**
 Start there. **Ranked item 2 was blocked by a FALSE "the map is silent" claim**
 — the second in two days — and `git blame` shows it was written two days AFTER
