@@ -43,6 +43,13 @@ priced on the weapon with strength in the denominator — and **both gated behin
   `2c047b9`, UNBUILT, and it deadlocks the animation gate until presentation
   lands. Read it; do not apply it blind.
 
+► **THIS SESSION COMMITTED TWO AND MEASURED TWO UNPUSHED AFTER ITS HANDOFF
+  COMMIT `92e651e`, and the correction commit carrying this sentence makes
+  three.** Written as an EVENT with the self-reference in it, for the same
+  reason every block below it is: a count is false one commit later.
+  **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
 ► **PRESENTATION IS DONE (2026-09-11). RANKED ITEM 3 IS CLOSED, AND THE
   RESOLVER HALF IS NOW UNBLOCKED.** A walking gladiator has a clip to play and
   a command that moves it: `CommandKind.MOVE_CLIP` carrying `from` and `to` and
