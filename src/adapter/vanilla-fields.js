@@ -338,7 +338,21 @@ export const MAP_SILENCE = Object.freeze([
       "`unmapped`, which is the identical defect the owner found by watching the arena on 2026-09-10. " +
       "Movement needs a command kind of its own; reusing `place-clip` is not a style question but a " +
       "defect, because `scene.js` overwrites all seven geometry fields and a partial command makes " +
-      "`toY(undefined)` NaN and the figure vanish.",
+      "`toY(undefined)` NaN and the figure vanish. " +
+      "► **THE PRESENTATION HALF OF THAT IS NOW BUILT (2026-09-11), AND THE PARAGRAPH ABOVE IS " +
+      "CORRECTED HERE RATHER THAN REWRITTEN, because half of it still holds.** What changed: " +
+      "`CommandKind.MOVE_CLIP` exists and carries two endpoints and nothing else; " +
+      "`SS2_STATIC_MAP_BINDINGS` has a movement case keyed on the event's own geometry, emitting the " +
+      "build's phase name at ASSUMED provenance — the map gives movement as the unnamed frame range " +
+      "\"movement and charge (33-104)\" while naming `Standing`, `Block`, `rest` and `knockback` " +
+      "individually; `src/render/timeline.js` has four gait schedules and `travelAt`. **What has NOT " +
+      "changed, and is the part this entry is about: nothing moves, because nothing emits a " +
+      "`move-clip`.** No combatant projection carries a position and `combatStateHash` still commits " +
+      "to none. The displacement is STILL unsettled and the 44 below is still a consistency check — " +
+      "the presentation half needs no displacement at all, because a `move-clip` reports two " +
+      "coordinates the resolver computed rather than a distance the renderer applies. " +
+      "The rule-set half is ranked and preserved at " +
+      "`docs/reference/position-in-the-resolver.patch.md`.",
     settledBy:
       "NO NEW CAPTURE. The arena route's autopilot presses `walkright`/`walkleft` until the close-range " +
       "controller offers `normal_attack` (`docs/integration/ss2-arena-route.md`, \"The fight policy\"), and " +

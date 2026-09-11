@@ -32,8 +32,9 @@
  *    until this surface existed to have a policy.
  *
  * IT DECIDES NO COMBAT. Every number on screen is copied from a `panel-refresh`
- * command or a wire projection. The only arithmetic here is interpolation,
- * layout and canvas scaling.
+ * command or a wire projection. The only arithmetic here is layout and canvas
+ * scaling: where a figure stands this frame is `figureXAt`, how it is bent is
+ * `poseAt`, and both live in `src/render/` under the suite.
  */
 
 import {
@@ -46,10 +47,12 @@ import {
   applyCommands,
   emptyScene,
   figureSpecFor,
+  figureXAt,
   paintFigure,
   paintShadow,
   poseAt,
-  timelineFor
+  timelineFor,
+  timelinesForStep
 } from "/src/render/index.js";
 import { demoSide } from "/tools/arena/roster.js";
 
@@ -115,23 +118,23 @@ function log(message, { warn = false } = {}) {
 function beginStep(step) {
   scene = applyCommands(scene, step.commands);
 
-  const started = new Map();
-  for (const command of step.commands) {
-    if (command.kind !== "clip-goto") continue;
-    const timeline = timelineFor(command.label, { role: command.role });
-    started.set(command.combatantId, { timeline, startedAt: performance.now(), token: command.actionToken ?? null });
-    if (!timeline.recognised) {
-      log(`no timeline for "${command.label}" (${command.labelProvenance}) — playing a fallback`, { warn: true });
-    }
-  }
+  // THE DECISION IS `timelinesForStep` in `src/render/cursor.js`, under the
+  // suite — pairing a travelling gait with the `move-clip` from its own batch
+  // is exactly the kind of thing that is invisible on a screenshot. This shell
+  // stamps the clock and says the notices out loud.
+  const { started, notices } = timelinesForStep(step.commands);
+  for (const notice of notices) log(notice.reason, { warn: true });
+
+  // The clock is stamped BEFORE the entries reach `playing`, not after: an
+  // entry with no `startedAt` reads as infinitely overdue to `animationCursor`.
+  // Stamped here rather than inside `timelinesForStep` so a frame that arrives
+  // late does not make a timeline look overdue before it has drawn once.
+  for (const entry of started.values()) entry.startedAt = performance.now();
   for (const [combatantId, entry] of started) playing.set(combatantId, entry);
 
   for (const token of step.actionTokens) {
     if (!pendingTokens.includes(token)) pendingTokens.push(token);
   }
-  // Started HERE rather than in the loop, so a frame that arrives late does not
-  // make a timeline look overdue before it has drawn once.
-  for (const entry of started.values()) entry.startedAt = performance.now();
   if (step.actionTokens.length === 0 && step.commands.length > 0) {
     log("this action bound commands but carried no token — nothing to wait for", { warn: true });
   }
@@ -203,14 +206,12 @@ function settleIfReady() {
 const canvas = el("arena");
 const context = canvas.getContext("2d");
 
-/**
- * How far a full `advance` steps, in arena units. Authored, and deliberately
- * smaller than the gap between two slots: a lunge is a step inside your own
- * ground, not a walk across the arena. Walking properly needs position in the
- * resolver, which would put it in `combatStateHash` — see the note on
- * `advance` in `src/render/timeline.js`.
+/*
+ * `ADVANCE_UNITS` used to live here. It moved to `src/render/timeline.js` on
+ * 2026-09-11, with `figureXAt`: a constant only the shell could see is a number
+ * no test can be wrong about, and this file is the one part of the renderer the
+ * suite cannot reach.
  */
-const ADVANCE_UNITS = 74;
 
 /**
  * Arena units -> canvas pixels, FITTED TO THE ROSTER ACTUALLY ON STAGE.
@@ -399,9 +400,12 @@ function render(now = performance.now()) {
     const figure = figureSpecFor(combatant, { side: placement.side });
 
     const entry = playing.get(combatantId);
+    // How far through its own schedule the running timeline is. Computed once:
+    // the pose and the travelled x are two readings of the same clock, and
+    // computing it twice is how they drift apart.
+    const at = entry ? Math.min(1, (now - entry.startedAt) / entry.timeline.durationMs) : 0;
     let pose;
     if (entry) {
-      const at = Math.min(1, (now - entry.startedAt) / entry.timeline.durationMs);
       pose = poseAt(entry.timeline, at);
     } else if (!combatant.alive) {
       pose = poseAt(timelineFor("slain", { role: "defeated" }), 1);
@@ -410,13 +414,18 @@ function render(now = performance.now()) {
       pose = poseAt(idle, ((now / idle.durationMs) % 1));
     }
 
-    // The lunge. `pose.advance` is a fraction of a step toward the opponent,
-    // authored in `src/render/timeline.js`; the surface turns it into a
-    // translation because the presentation stream carries no position and the
-    // resolver models none. The figure always ends where it started.
-    const towards = actor.facing === "left" ? -1 : 1;
+    // The lunge and the step, resolved into one coordinate by
+    // `src/render/timeline.js` — where the suite can reach the decision, the
+    // way `animationCursor` is. This shell computes no arithmetic of its own.
     const origin = {
-      x: actor.x + (pose.advance ?? 0) * ADVANCE_UNITS * towards,
+      x: figureXAt({
+        restingX: actor.x,
+        facing: actor.facing,
+        pose,
+        timeline: entry?.timeline ?? null,
+        motion: entry?.motion ?? null,
+        at
+      }),
       y: actor.y,
       facing: actor.facing
     };

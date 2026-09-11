@@ -1,6 +1,14 @@
 /**
- * "Which action animations have finished, and which has this surface given up
- * on?" — the decision, separated from the clock that asks it.
+ * "Which action animations BEGIN, which have finished, and which has this
+ * surface given up on?" — the decisions, separated from the clock that asks
+ * them.
+ *
+ * ► The first clause was added 2026-09-11, with movement. Starting a timeline
+ *   used to be four obvious lines in the shell, and then it stopped being
+ *   obvious: a travelling gait has to be paired with the `move-clip` from its
+ *   OWN step, and getting that pairing wrong is invisible on a screenshot.
+ *   Same lesson as the paragraph below, applied before it cost anything this
+ *   time rather than after.
  *
  * WHY IT IS NOT IN THE SHELL. It was, for exactly one screenshot. The browser
  * arena's first spectated bout submitted ONE action and then froze on "waiting
@@ -24,13 +32,73 @@
  * Pure: it holds no clock, no battle and no host. It is told the time.
  */
 
-import { abandonReasonFor } from "./timeline.js";
+import { abandonReasonFor, timelineFor } from "./timeline.js";
 
 export class CursorError extends Error {
   constructor(message, options = {}) {
     super(message, options);
     this.name = new.target.name;
   }
+}
+
+/**
+ * Which timelines one drained batch of presentation commands starts.
+ *
+ * Pure, and it holds no clock: the caller stamps `startedAt` when it actually
+ * begins playing them, because a frame that arrives late must not make a
+ * timeline look overdue before it has drawn once.
+ *
+ * TWO PAIRINGS IT MAKES, both of which are wrong-able in silence:
+ *
+ * - **a travelling gait is paired with the `move-clip` from its OWN batch**,
+ *   never with the scene's latest `motion`. The scene keeps the last step an
+ *   actor took; reading it here would let a later step retarget a gait that is
+ *   still in flight, and the figure would slide to a destination its own
+ *   animation was never about;
+ * - **only a travelling schedule gets a motion at all.** A figure that both
+ *   moved and was hurt in one batch plays `hurt3` — which does not travel — so
+ *   pairing by combatant alone would drag it across the arena on a flinch.
+ *
+ * `notices` names what a surface should say out loud rather than swallow: an
+ * unrecognised label, and a travelling gait with no step to travel along.
+ *
+ * @param {Iterable<object>} commands one drained batch
+ * @returns {{started: Map<string, {timeline: object, token: number|null, motion: object|null}>,
+ *   notices: Array<{combatantId: string, label: string, reason: string}>}}
+ */
+export function timelinesForStep(commands) {
+  if (!commands || typeof commands[Symbol.iterator] !== "function") {
+    throw new CursorError("timelinesForStep needs an iterable of presentation commands.");
+  }
+  const batch = [...commands];
+  const stepped = new Map();
+  for (const command of batch) {
+    if (command.kind === "move-clip") stepped.set(command.combatantId, { from: command.from, to: command.to });
+  }
+
+  const started = new Map();
+  const notices = [];
+  for (const command of batch) {
+    if (command.kind !== "clip-goto") continue;
+    const timeline = timelineFor(command.label, { role: command.role });
+    const motion = timeline.travel ? (stepped.get(command.combatantId) ?? null) : null;
+    started.set(command.combatantId, { timeline, token: command.actionToken ?? null, motion });
+    if (!timeline.recognised) {
+      notices.push({
+        combatantId: command.combatantId,
+        label: command.label,
+        reason: `no timeline for "${command.label}" (${command.labelProvenance}) — playing a fallback`
+      });
+    }
+    if (timeline.travel && motion === null) {
+      notices.push({
+        combatantId: command.combatantId,
+        label: command.label,
+        reason: `"${command.label}" is a travelling gait with no move-clip — the figure will step in place`
+      });
+    }
+  }
+  return Object.freeze({ started, notices: Object.freeze(notices) });
 }
 
 /**

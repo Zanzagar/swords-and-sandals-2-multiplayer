@@ -28,19 +28,26 @@ import {
   buildArenaLayout,
   createPresentationBinder,
   presentArenaConstruction,
+  presentResolvedEvents,
   SS2_STATIC_MAP_BINDINGS
 } from "../src/adapter/index.js";
 import {
+  ADVANCE_UNITS,
   ANIMATION_TIMEOUT_MS,
   ARMOUR_SLOTS,
   abandonReasonFor,
   applyCommands,
+  CursorError,
   emptyScene,
   figureSpecFor,
+  figureXAt,
   labelProvenanceSummary,
   poseAt,
   SceneError,
-  timelineFor
+  timelineFor,
+  timelinesForStep,
+  TimelineError,
+  travelAt
 } from "../src/render/index.js";
 
 /* ------------------------------------------------------------------ */
@@ -336,6 +343,21 @@ test("every label the SS2 bindings can emit gets a timeline, recognised or not",
     // `taunt` is BOTH an attack label and a death variant. Only the role tells
     // them apart, which is why the role is passed rather than inferred.
     ["taunt", "defeated", "death:taunt", true],
+    // The build's eight movement phases collapse to four gaits. Direction is
+    // not a schedule: the figure travels between the endpoints the `move-clip`
+    // named, whichever way that points.
+    ["walkleft", "actor", "movement:walk", true],
+    ["walkright", "actor", "movement:walk", true],
+    ["runleft", "actor", "movement:run", true],
+    ["runright", "actor", "movement:run", true],
+    ["chargeleft", "actor", "movement:charge", true],
+    ["chargeright", "actor", "movement:charge", true],
+    ["jumpleft", "actor", "movement:jump", true],
+    ["jumpright", "actor", "movement:jump", true],
+    // Matched against the build's own eight names, never by pattern: a pattern
+    // would also accept this, and a recognised gait for an invented phase is
+    // how a guess stops looking like one.
+    ["sprintleft", "actor", "unknown", false],
     ["a-label-nobody-has-seen", "actor", "unknown", false]
   ];
   for (const [label, role, family, recognised] of cases) {
@@ -372,6 +394,235 @@ test("poses interpolate between the frames, and clamp outside them", () => {
     assert.ok(value >= previous - 1e-9, `armSwing must not go backwards through the wind-up: ${value}`);
     previous = value;
   }
+});
+
+/* ------------------------------------------------------------------ */
+/* Movement: the scene and the tween                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THE RESOLVER MODELS NO POSITION, so no bout in this file can produce a
+ *   `move-clip`.** These commands come from the real `presentResolvedEvents`
+ *   and the real `SS2_STATIC_MAP_BINDINGS`; only the EVENT that drives them is
+ *   hand-written, because the rule-set half is ranked and preserved at
+ *   `docs/reference/position-in-the-resolver.patch.md`. See the block above
+ *   the movement tests in `test/ss2-adapter.test.js` for why that half is
+ *   second rather than first.
+ */
+function movementBatch(actorId, { from, to, vanillaLabel = "walkleft" }) {
+  const battle = battleOf(1, 5);
+  const wire = toTeamWireState(battle);
+  const moved = {
+    ...wire,
+    events: [{ sequence: 1, turn: 1, type: "walk-left", actorId, targetId: actorId, vanillaLabel, from, to }]
+  };
+  const layout = buildArenaLayout(wire);
+  return {
+    layout,
+    construction: presentArenaConstruction(layout),
+    commands: presentResolvedEvents(moved, { layout, bindings: SS2_STATIC_MAP_BINDINGS }).commands
+  };
+}
+
+test("a move-clip moves the clip and touches none of the other geometry", () => {
+  const { construction, commands } = movementBatch("red-1", { from: -250, to: -294 });
+  const built = applyCommands(emptyScene(), construction);
+  const walked = applyCommands(built, commands);
+
+  const before = built.actors["red-1"];
+  const after = walked.actors["red-1"];
+  assert.equal(before.x, -250, "the vanilla hero is constructed at -250");
+  assert.equal(after.x, -294, "and the scene's x is the DESTINATION, because the fold is not a tween");
+
+  // ► THE REASON `move-clip` IS NOT A PARTIAL `place-clip`: this fold
+  //   overwrites all seven geometry fields, so a partial one would set `y` to
+  //   undefined and the shell's `toY(undefined)` is NaN — the figure vanishes
+  //   rather than moving.
+  for (const field of ["y", "facing", "xscale", "yscale", "geometryAuthored", "placed", "depth", "instancePath"]) {
+    assert.deepEqual(after[field], before[field], `${field} must survive a step sideways untouched`);
+  }
+
+  assert.deepEqual(
+    { ...after.motion },
+    { from: -250, to: -294, sequence: 1, actionToken: null },
+    "the origin is kept, because the fold is the destination and the surface needs both ends"
+  );
+});
+
+test("a move-clip on a combatant nothing placed is recorded and still refuses to be drawn", () => {
+  const { construction, commands } = movementBatch("red-1", { from: -250, to: -294 });
+  // Attach without placing: the actor has no y, no facing and no scale.
+  const attached = applyCommands(emptyScene(), construction.filter((command) => command.kind === "attach-clip"));
+  const walked = applyCommands(attached, commands);
+  const actor = walked.actors["red-1"];
+
+  assert.equal(actor.x, -294, "the scene and the resolver never disagree about where the figure is");
+  assert.equal(actor.placed, false, "but drawing it would mean inventing five fields to use one");
+  assert.equal(actor.y, null);
+});
+
+test("a movement gait travels; nothing else does", () => {
+  const walk = timelineFor("walkleft", { role: "actor" });
+  assert.equal(walk.travel, true, "a surface must not have to know which families are movement");
+  for (const label of ["attack7", "hurt3", "rest", "Standing", "Block", "burning"]) {
+    assert.equal(timelineFor(label, { role: "actor" }).travel, false, `${label} poses in place`);
+  }
+  assert.equal(timelineFor("slain", { role: "defeated" }).travel, false);
+
+  // The gaits keep `advance` at 0 throughout, and that is load-bearing:
+  // `advance` is the within-slot LUNGE the surface applies with its own
+  // ADVANCE_UNITS, so a gait that used both would displace the figure twice
+  // and the second displacement would be the renderer's invention.
+  let sampled = 0;
+  for (const label of ["walkleft", "runright", "chargeleft", "jumpright"]) {
+    const timeline = timelineFor(label, { role: "actor" });
+    for (let at = 0; at <= 1.0001; at += 0.05) {
+      assert.equal(poseAt(timeline, at).advance, 0, `${label} must not also lunge, at ${at.toFixed(2)}`);
+      sampled += 1;
+    }
+  }
+  assert.equal(sampled, 84, "the sweep has to have actually sampled all four gaits");
+});
+
+test("travelAt runs between the endpoints the resolver named, and invents nothing between them", () => {
+  const motion = { from: -250, to: -294 };
+  assert.equal(travelAt(motion, 0), -250);
+  assert.equal(travelAt(motion, 1), -294);
+  // ► **ASSERTED OFF-CENTRE ON PURPOSE, and 0.5 alone does not do it.** The
+  //   first version of this test pinned only the midpoint, and a mutation that
+  //   replaced the linear run with a smoothstep SURVIVED the whole suite —
+  //   0.5 is a fixed point of every symmetric ease, so the one sample that
+  //   reads like the obvious one is the one sample that proves nothing.
+  assert.equal(travelAt(motion, 0.5), -272, "linear: the only curve that is wrong nowhere except in taste");
+  assert.equal(travelAt(motion, 0.25), -261, "a quarter of the way is a quarter of the distance");
+  assert.equal(travelAt(motion, 0.75), -283);
+  assert.equal(travelAt(motion, -5), -250, "clamped, not extrapolated");
+  assert.equal(travelAt(motion, 5), -294);
+
+  // A step the arena clamp swallowed is a standstill, which is the right
+  // picture of walking into a wall.
+  const blocked = { from: -2100, to: -2100 };
+  for (const at of [0, 0.37, 1]) assert.equal(travelAt(blocked, at), -2100);
+
+  // It never guesses a missing endpoint into existence.
+  assert.throws(() => travelAt({ from: -250 }, 0.5), TimelineError);
+  assert.throws(() => travelAt(null, 0.5), TimelineError);
+  assert.throws(() => travelAt({ from: 0, to: 1 }, Number.NaN), TimelineError);
+});
+
+test("a figure lunges from where it stands, and travels between the resolver's endpoints", () => {
+  // ► THIS DECISION USED TO LIVE IN `tools/arena/main.js`, WHERE THE SUITE
+  //   CANNOT REACH IT — the same place the first spectated bout's freeze hid
+  //   in, and the reason `animationCursor` was extracted. Movement added a
+  //   second such decision, so it went the same way.
+  const attack = timelineFor("attack7", { role: "actor" });
+  const lunging = poseAt(attack, 0.52);
+  assert.ok(lunging.advance > 0.9, `the attack schedule is the one that lunges: ${lunging.advance}`);
+
+  // Facing decides which way a lunge carries; the vanilla villain faces left.
+  assert.equal(
+    figureXAt({ restingX: 250, facing: "left", pose: lunging, timeline: attack }),
+    250 - lunging.advance * ADVANCE_UNITS
+  );
+  assert.equal(
+    figureXAt({ restingX: -250, facing: "right", pose: lunging, timeline: attack }),
+    -250 + lunging.advance * ADVANCE_UNITS
+  );
+  // And it ends where it started, which is the whole licence for a lunge.
+  assert.equal(figureXAt({ restingX: -250, facing: "right", pose: poseAt(attack, 1), timeline: attack }), -250);
+
+  // A travelling gait ignores `restingX` ENTIRELY. Not belt-and-braces over
+  // the gaits' `advance: 0`: the scene's x is already the DESTINATION, so
+  // adding a lunge to it would overshoot the end of the step being drawn.
+  const walk = timelineFor("walkleft", { role: "actor" });
+  const motion = { from: -250, to: -294 };
+  assert.equal(figureXAt({ restingX: -294, facing: "right", pose: poseAt(walk, 0), timeline: walk, motion, at: 0 }), -250);
+  assert.equal(figureXAt({ restingX: -294, facing: "right", pose: poseAt(walk, 1), timeline: walk, motion, at: 1 }), -294);
+
+  // ► **PINNED WITH A LUNGING POSE ON A TRAVELLING SCHEDULE, and the obvious
+  //   version of this test did not do it.** Sampling the gaits alone proves
+  //   nothing here: they keep `advance` at 0, so a mutation that ADDED the
+  //   lunge to the travelled x survived the whole suite. Two tests were
+  //   jointly forbidding the bug — one saying gaits never lunge, the other
+  //   saying travel ignores `restingX` — and neither pinned the contract a
+  //   future gait author would rely on. So the contract is asserted against a
+  //   pose that lunges hard, whatever schedule it came from.
+  assert.ok(lunging.advance > 0.9);
+  assert.equal(
+    figureXAt({ restingX: -294, facing: "right", pose: lunging, timeline: walk, motion, at: 0.25 }),
+    -261,
+    "travel WINS: the step is the resolver's, and a lunge is never added on top of it"
+  );
+
+  // A travelling schedule with no motion record falls back to standing still
+  // rather than to a guessed step. The shell warns when it happens.
+  assert.equal(
+    figureXAt({ restingX: -294, facing: "right", pose: poseAt(walk, 0.5), timeline: walk, motion: null, at: 0.5 }),
+    -294
+  );
+
+  // An unplaced actor has no x to draw at, and is refused rather than drawn at zero.
+  assert.throws(() => figureXAt({ restingX: null, facing: "right", pose: lunging }), TimelineError);
+  assert.throws(() => figureXAt({ restingX: 0, facing: "right", pose: null }), TimelineError);
+});
+
+test("a step pairs a travelling gait with its OWN move-clip, and nothing else with any", () => {
+  // ► THE PAIRING IS THE PART THAT IS WRONG-ABLE IN SILENCE, which is why it
+  //   left the shell. Two ways it can go wrong and neither shows on a
+  //   screenshot: reading the SCENE's latest `motion` instead of this batch's,
+  //   so a later step retargets a gait still in flight; and pairing by
+  //   combatant alone, so a figure that both moved and was hurt gets dragged
+  //   across the arena on a flinch.
+  const { commands } = movementBatch("red-1", { from: -250, to: -294, vanillaLabel: "chargeright" });
+  const { started, notices } = timelinesForStep(commands);
+
+  const walker = started.get("red-1");
+  assert.equal(walker.timeline.family, "movement:charge");
+  assert.deepEqual({ ...walker.motion }, { from: -250, to: -294 });
+  assert.deepEqual(notices, [], "a gait with its own step has nothing to say out loud");
+
+  // The same batch with the gait swapped for a flinch: the move-clip is still
+  // there, and the hurt animation must NOT pick it up.
+  const flinch = commands.map((command) =>
+    command.kind === "clip-goto" ? { ...command, label: "hurt3", role: "target" } : command);
+  const hurt = timelinesForStep(flinch).started.get("red-1");
+  assert.equal(hurt.timeline.family, "hurt");
+  assert.equal(hurt.motion, null, "only a travelling schedule gets a step to travel along");
+
+  // A travelling gait with no step is reported rather than given an invented one.
+  const stranded = timelinesForStep(commands.filter((command) => command.kind !== "move-clip"));
+  assert.equal(stranded.started.get("red-1").motion, null);
+  assert.equal(stranded.notices.length, 1);
+  assert.match(stranded.notices[0].reason, /travelling gait with no move-clip/);
+
+  // And an unrecognised label still says so, which is the notice that already existed.
+  const invented = commands.map((command) =>
+    command.kind === "clip-goto" ? { ...command, label: "moonwalkleft" } : command);
+  const said = timelinesForStep(invented).notices.map((notice) => notice.reason);
+  // ONE notice, not two: an invented label is unrecognised, and because it is
+  // no gait it does not travel either — so it has no missing step to complain
+  // about. The `move-clip` in this batch is simply left unpaired, which is
+  // right: the figure is where the scene put it and plays a fallback there.
+  assert.deepEqual(said.length, 1);
+  assert.match(said[0], /no timeline for "moonwalkleft"/);
+
+  assert.throws(() => timelinesForStep(null), CursorError);
+});
+
+test("a gait's travel and its pose read the same clock", () => {
+  // The surface computes `at` once and hands it to both `poseAt` and
+  // `travelAt`. Pinned here because the two drifting apart is invisible on a
+  // screenshot and obvious in a bout: the legs would pace out of step with the
+  // ground the figure covers.
+  const { construction, commands } = movementBatch("red-1", { from: -250, to: -294, vanillaLabel: "runleft" });
+  const scene = applyCommands(applyCommands(emptyScene(), construction), commands);
+  const clip = commands.find((command) => command.kind === "clip-goto");
+  const timeline = timelineFor(clip.label, { role: clip.role });
+
+  assert.equal(timeline.family, "movement:run");
+  assert.equal(timeline.travel, true);
+  const midway = travelAt(scene.actors["red-1"].motion, 0.5);
+  assert.ok(midway > -294 && midway < -250, `halfway is between the ends: ${midway}`);
 });
 
 test("the timeout policy names itself, and waits before it gives up", () => {

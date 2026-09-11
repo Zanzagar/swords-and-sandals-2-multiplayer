@@ -1591,6 +1591,152 @@ test("a self-targeted action plays its OWN clip, not the idle one, and binds no 
   assert.equal(everyLabel.includes("Standing"), false, "a self-targeted action must never play the idle clip");
 });
 
+/* ------------------------------------------------------------------ */
+/* Movement: the presentation half                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **NOTHING IN THIS REPOSITORY EMITS A MOVEMENT EVENT YET, AND THAT IS WHY
+ *   THESE EVENTS ARE HAND-WRITTEN.** The resolver models no position: a
+ *   combatant projection carries stats, loadout, health, status and resources
+ *   and no `x`. The rule-set half is ranked and preserved as a reference patch
+ *   at `docs/reference/position-in-the-resolver.patch.md`.
+ *
+ *   The order is deliberate and was measured, not argued: landing the resolver
+ *   half FIRST made a walking gladiator emit `clip-goto Standing` — the idle
+ *   clip — plus a spurious `unmapped`, because the bindings had no movement
+ *   case and fell through to the attack branch. The suite went to 72 failures
+ *   and two hanging files. So presentation comes first, and these tests are
+ *   what "first" means.
+ *
+ *   **The COMMANDS are not hand-written.** Only the events are; every command
+ *   asserted below is produced by the real `presentResolvedEvents` from the
+ *   real `SS2_STATIC_MAP_BINDINGS`. When the resolver half lands, the events
+ *   here should be replaced by a real bout's, and the assertions should not
+ *   have to change.
+ */
+function movementCommands(extra) {
+  const wire = {
+    version: 1,
+    teams: [
+      { id: "red", name: "red", combatants: [{ id: "red-1", teamId: "red", slotIndex: 0, health: 9, maxHealth: 10, alive: true, status: [] }] },
+      { id: "blue", name: "blue", combatants: [{ id: "blue-1", teamId: "blue", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] }
+    ],
+    events: [{ sequence: 1, turn: 1, actorId: "red-1", targetId: "red-1", ...extra }]
+  };
+  return presentResolvedEvents(wire, { layout: buildArenaLayout(wire), bindings: SS2_STATIC_MAP_BINDINGS }).commands;
+}
+
+test("each of the build's eight movement phases plays its own gait and moves its own clip", () => {
+  // The eight names and their offsets are the build's, from the battle map's
+  // movement-cost table: `walkleft` `+0x3b37`, `walkright` `+0x3d16`,
+  // `runleft` `+0x3ef5`, `runright` `+0x407e`, `chargeright` `+0x4214`,
+  // `chargeleft` `+0x4480`, `jumpright` `+0x46ec`, `jumpleft` `+0x49c4`.
+  // That they are also CLIP labels is the assumption, which is why every one
+  // is ASSUMED: the map gives movement as the unnamed frame range "movement
+  // and charge (33-104)" while naming `Standing`, `Block`, `rest` and
+  // `knockback` individually.
+  const phases = [
+    "walkleft", "walkright", "runleft", "runright",
+    "chargeleft", "chargeright", "jumpleft", "jumpright"
+  ];
+  let asserted = 0;
+  for (const phase of phases) {
+    const left = phase.endsWith("left");
+    const from = -250;
+    const to = left ? from - 44 : from + 44;
+    const commands = movementCommands({ type: left ? "walk-left" : "walk-right", vanillaLabel: phase, from, to });
+
+    const clips = commands.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+    assert.deepEqual(
+      clips.map((command) => [command.role, command.label, command.labelProvenance]),
+      [["actor", phase, LabelProvenance.ASSUMED]],
+      `${phase} plays its own gait, and the map names no label inside "movement and charge (33-104)"`
+    );
+    assert.deepEqual(
+      commands.filter((command) => command.kind === CommandKind.UNMAPPED),
+      [],
+      `${phase} binds cleanly; a movement event is self-targeted and must not produce a target label`
+    );
+
+    const moves = commands.filter((command) => command.kind === CommandKind.MOVE_CLIP);
+    assert.equal(moves.length, 1, `${phase} moves exactly one clip`);
+    assert.equal(moves[0].combatantId, "red-1");
+    assert.equal(moves[0].from, from);
+    assert.equal(moves[0].to, to);
+    asserted += 1;
+  }
+  assert.equal(asserted, 8, "the sweep has to have found all eight, not zero of them");
+});
+
+test("a move-clip carries the two endpoints and NONE of place-clip's other geometry", () => {
+  // ► WHY THIS IS ITS OWN KIND, and it is a defect rather than a style
+  //   question. `src/render/scene.js` folds `place-clip` by overwriting all
+  //   seven geometry fields, so a partial `place-clip` carrying only a new `x`
+  //   sets `y` to `undefined` — and the browser shell's `toY(undefined)` is
+  //   NaN, so the figure does not move, it VANISHES.
+  const [move] = movementCommands({ type: "walk-left", vanillaLabel: "walkleft", from: -250, to: -294 })
+    .filter((command) => command.kind === CommandKind.MOVE_CLIP);
+  assert.deepEqual(
+    Object.keys(move).sort(),
+    ["actionToken", "combatantId", "from", "instancePath", "kind", "sequence", "to"],
+    "y, facing, xscale, yscale, geometryAuthored and placed are absent ON PURPOSE"
+  );
+  // No `distance`: two endpoints already say how far the step went, and a
+  // third field that could disagree with them is a second source of truth.
+  assert.equal(Object.hasOwn(move, "distance"), false);
+  // Vanilla walks backwards without turning round — `gladiator_dir` is its own
+  // field and the controller frames select ON it rather than being set by it.
+  assert.equal(Object.hasOwn(move, "facing"), false);
+});
+
+test("a movement event that names no phase is reported precisely, and the figure still moves", () => {
+  // The gait is the one thing the geometry cannot supply: `to < from` gives
+  // the direction, but nothing separates a walk from a run, a charge or a
+  // jump. Deriving `walkleft` from the sign would put a guessed gait on screen
+  // every time the action was a charge, so it is reported instead.
+  const commands = movementCommands({ type: "walk-left", from: -250, to: -294 });
+  const unmapped = commands.filter((command) => command.kind === CommandKind.UNMAPPED);
+  assert.equal(unmapped.length, 1);
+  assert.match(unmapped[0].reason, /needs the build's own phase named in `vanillaLabel`/);
+  assert.match(unmapped[0].reason, /jumpright/, "the reason names the eight, so the fix is a field and not a hunt");
+  // Two ways to go unbound, two fixes, and the reason claims to know neither:
+  // `bindings.action` returns null whether the event lacks a label or the
+  // table lacks a movement case.
+  assert.match(unmapped[0].reason, /another binding table needs a movement case of its own/);
+  assert.deepEqual(commands.filter((command) => command.kind === CommandKind.CLIP_GOTO), [], "no clip is guessed");
+
+  // And the geometry still applies. A scene that dropped it would draw the
+  // figure standing where the resolver says it is not, which is the same
+  // failure as swallowing an `unmapped`.
+  const moves = commands.filter((command) => command.kind === CommandKind.MOVE_CLIP);
+  assert.equal(moves.length, 1, "the label is a binding decision; where the figure ends up is not");
+  assert.deepEqual([moves[0].from, moves[0].to], [-250, -294]);
+});
+
+test("a step the arena clamp swallowed is still emitted, so walking into a wall is not silence", () => {
+  const commands = movementCommands({ type: "walk-left", vanillaLabel: "walkleft", from: -2100, to: -2100 });
+  const moves = commands.filter((command) => command.kind === CommandKind.MOVE_CLIP);
+  assert.equal(moves.length, 1, "suppressing it would make 'walked into the wall' and 'never walked' one stream");
+  assert.equal(moves[0].from, moves[0].to);
+  assert.deepEqual(
+    commands.filter((command) => command.kind === CommandKind.CLIP_GOTO).map((command) => command.label),
+    ["walkleft"],
+    "and the gladiator still visibly tries"
+  );
+});
+
+test("a movement step binds its globals, then moves, then animates", () => {
+  // The clip is started LAST so a surface folding the batch knows where the
+  // figure is going before it starts the timeline that carries it there.
+  const kinds = movementCommands({ type: "walk-right", vanillaLabel: "walkright", from: 250, to: 294 })
+    .map((command) => command.kind);
+  assert.deepEqual(
+    kinds.slice(0, 3),
+    [CommandKind.BIND_GLOBALS, CommandKind.MOVE_CLIP, CommandKind.CLIP_GOTO]
+  );
+});
+
 test("an event with no binding is reported as unmapped instead of guessed", () => {
   const wire = {
     teams: [
@@ -1603,6 +1749,21 @@ test("an event with no binding is reported as unmapped instead of guessed", () =
   assert.equal(commands.length, 1);
   assert.equal(commands[0].kind, CommandKind.UNMAPPED);
   assert.match(commands[0].reason, /no animation binding/);
+
+  // ► **AND IT IS STILL A RECORD, NOT A THROW, WHEN THE ACTOR HAS NO SLOT.**
+  //   Pinned 2026-09-11 after the movement work nearly broke it: resolving the
+  //   actor's placement moved ABOVE the binding check, and
+  //   `layout.placementFor` throws on a combatant with no slot — so an unbound
+  //   event naming an unknown actor would have become a `SlotLayoutError`
+  //   instead of the report this test is about. The lookup is now inside
+  //   `movementFor`, which returns before it for an event carrying no geometry.
+  const stranger = {
+    ...wire,
+    events: [{ sequence: 1, turn: 1, type: "cartwheel", actorId: "nobody-1", targetId: "blue-1" }]
+  };
+  const reported = presentResolvedEvents(stranger, { layout: buildArenaLayout(wire) }).commands;
+  assert.equal(reported.length, 1);
+  assert.equal(reported[0].kind, CommandKind.UNMAPPED);
 });
 
 /* ------------------------------------------------------------------ */

@@ -16,10 +16,13 @@
  * - `painter.js` turns a figure plus a pose into DRAW OPERATIONS — still pure
  *   data, so the drawing logic itself is under the suite and the shell is a
  *   `switch` over operation kinds.
- * - `cursor.js` decides which action animations have finished and which the
- *   surface has given up on — extracted from the shell after the first
- *   spectated bout froze after one action inside a `requestAnimationFrame`
- *   callback the suite could not reach.
+ * - `cursor.js` decides which action animations BEGIN, which have finished and
+ *   which the surface has given up on — extracted from the shell after the
+ *   first spectated bout froze after one action inside a
+ *   `requestAnimationFrame` callback the suite could not reach. "Which begin"
+ *   joined it with movement, because pairing a travelling gait with the
+ *   `move-clip` from its own batch is the same kind of decision: invisible on
+ *   a screenshot, and wrong-able in silence.
  * - `timeline.js` owns TIME, because the presentation stream carries none, and
  *   states this surface's animation-timeout policy — part 4 of the
  *   acknowledgement seam, which `src/adapter/action-gate.js` deliberately left

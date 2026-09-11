@@ -17,6 +17,19 @@
  *   `presentArenaConstruction` — so *nothing in the stream ever moves a clip
  *   again after the arena is built*. All motion, tweening and timing therefore
  *   belong to the renderer, and this module is where that boundary is drawn.
+ *
+ *   ► **THE SECOND HALF OF THAT IS NOW FALSE, AND IT IS CORRECTED HERE RATHER
+ *     THAN ABOVE IT (2026-09-11).** `move-clip` exists, and it moves a clip
+ *     after the arena is built. What survives, and is the part that mattered:
+ *     the stream still carries no TIME. A `move-clip` says where a figure ends
+ *     up and never how long it takes to get there, so the tween is still the
+ *     renderer's — see `travelAt` in `timeline.js`. What changed is that the
+ *     DESTINATION is no longer the renderer's to invent; it is the resolver's,
+ *     and it arrives as data like every other bound field.
+ *
+ *     `place-clip` is still constructed at exactly one site. `move-clip` is a
+ *     separate kind precisely because folding a partial `place-clip` here
+ *     would set `y` to `undefined` and make the figure vanish.
  * - so a scene holds two kinds of field: **bound** ones, which came from a
  *   command and may never be invented here, and **presentational** ones, which
  *   are this module's own and are marked as such.
@@ -55,6 +68,7 @@ export class SceneError extends Error {
 const HANDLED = Object.freeze([
   "attach-clip",
   "place-clip",
+  "move-clip",
   "bind-globals",
   "clip-goto",
   "panel-refresh",
@@ -78,7 +92,16 @@ const EMPTY_ACTOR = Object.freeze({
   yscale: null,
   geometryAuthored: null,
   clip: null,
-  panel: null
+  panel: null,
+  /**
+   * The step this actor is in the middle of, from the last `move-clip`, or
+   * null. `x` above is already the DESTINATION — the fold is not a tween — and
+   * this is the origin the surface interpolates from while the gait animation
+   * runs. It is left in place once the step is over: a stale `motion` whose
+   * `to` equals the current `x` interpolates to a standstill, which is exactly
+   * what a figure that has finished walking should do.
+   */
+  motion: null
 });
 
 function frozenActor(actor) {
@@ -196,6 +219,32 @@ export function applyCommands(scene, commands) {
           xscale: command.xscale,
           yscale: command.yscale,
           geometryAuthored: command.geometryAuthored
+        });
+        break;
+      }
+
+      case "move-clip": {
+        const actor = actorFor(actors, command.combatantId);
+        // ONLY `x` and `motion`. Not `y`, `facing`, `xscale`, `yscale`,
+        // `geometryAuthored` or `placed` — that is the whole reason this is
+        // not a `place-clip`, and the reason it is spelled out rather than
+        // spread: a future field added to `place-clip`'s fold must not
+        // silently start being overwritten by a step sideways.
+        //
+        // `placed` is deliberately NOT set true. A combatant that never got a
+        // `place-clip` has no `y`, no facing and no scale, and a painter that
+        // drew it would be inventing five fields to use one. The move is still
+        // recorded, so the scene and the resolver never disagree about where
+        // the figure is — it simply cannot be drawn yet.
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          x: command.to,
+          motion: Object.freeze({
+            from: command.from,
+            to: command.to,
+            sequence: command.sequence,
+            actionToken: command.actionToken ?? null
+          })
         });
         break;
       }

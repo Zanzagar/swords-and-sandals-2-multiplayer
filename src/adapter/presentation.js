@@ -89,6 +89,30 @@ export class PresentationError extends Error {
 export const CommandKind = Object.freeze({
   ATTACH_CLIP: "attach-clip",
   PLACE_CLIP: "place-clip",
+  /**
+   * Move an already-placed clip along the arena's x, and change NOTHING else.
+   *
+   * **It is a separate kind from `PLACE_CLIP` because reusing that one is a
+   * defect, not a style choice.** `src/render/scene.js` folds `place-clip` by
+   * overwriting all seven geometry fields — `x`, `y`, `facing`, `xscale`,
+   * `yscale`, `geometryAuthored` and `placed` — so a partial `place-clip`
+   * carrying only a new `x` sets `y` to `undefined`, and the browser shell's
+   * `toY(undefined)` is `NaN`: the figure does not move, it VANISHES. Measured
+   * 2026-09-10 while proving out the resolver-side position model.
+   *
+   * It carries `from` and `to` and no distance. The two endpoints already say
+   * how far the step went, and a third field that could disagree with them is
+   * a second source of truth for one fact. `from` is carried rather than left
+   * to the consumer's own memory because every other command here is
+   * self-describing, and a surface resuming from `fromSequence` has no memory
+   * to consult.
+   *
+   * It never touches `facing`. Vanilla walks backwards without turning round —
+   * `gladiator_dir` is its own field, and the controller frames select on it
+   * (battle map, "Buttons wired per controller frame") rather than being set
+   * by the walk.
+   */
+  MOVE_CLIP: "move-clip",
   BIND_GLOBALS: "bind-globals",
   CLIP_GOTO: "clip-goto",
   PANEL_REFRESH: "panel-refresh",
@@ -196,6 +220,40 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
     // map NAMES this one, so it is map-named, not assumed.
     if (event.type === "rest") {
       return Object.freeze({ actor: label("rest", LabelProvenance.MAP_NAMED), target: null });
+    }
+
+    // MOVEMENT. Detected by the event carrying arena geometry — a finite
+    // `from` and `to` — never by parsing the type string, for the same reason
+    // the condition case below does not: the engine's token (`walk-left`) and
+    // the build's phase label (`walkleft`) are different spellings, and only
+    // the fields are reliable.
+    //
+    // The label is ASSUMED, and the map is the reason: export 1241's labels
+    // are catalogued one by one — `Standing` (2), `Block` (118/179), `rest`
+    // (1380), `knockback` (1428) — and movement is the unnamed frame RANGE
+    // "movement and charge (33-104)" (battle map, "Key fighter animation
+    // labels on export 1241"). The build names the eight PHASES with byte
+    // offsets (`walkleft` `+0x3b37` through `jumpleft` `+0x49c4`); that those
+    // phase names are also the clip labels is the assumption, and it is the
+    // same one the death variants and the condition flags already carry.
+    //
+    // **The GAIT is not derivable and is not guessed.** `to < from` gives the
+    // direction, but nothing in the geometry separates a walk from a run, a
+    // charge or a jump — they differ only in stamina cost, which is the
+    // resolver's business. So the event must NAME the build's phase in
+    // `vanillaLabel`, exactly as a condition phase does; an event that carries
+    // geometry and no label is reported by `presentResolvedEvents`, which says
+    // which field was missing. Deriving `walkleft`/`walkright` from the sign
+    // would put a guessed gait on screen every time the action was a charge.
+    if (Number.isFinite(event.from) && Number.isFinite(event.to)) {
+      const phase = typeof event.vanillaLabel === "string" && event.vanillaLabel.length > 0
+        ? event.vanillaLabel
+        : null;
+      // Passed through rather than checked against the eight: the closed set
+      // of movement labels belongs to `src/render/timeline.js`, which reports
+      // `recognised: false` for anything outside it. Duplicating it here would
+      // be two lists to keep in step.
+      return phase === null ? null : Object.freeze({ actor: label(phase, LabelProvenance.ASSUMED), target: null });
     }
 
     // A condition phase: burning, frozen, poisoned, life_stolen. Detected by
@@ -387,6 +445,39 @@ function panelRefresh(sequence, placement, combatant) {
   });
 }
 
+/**
+ * The `move-clip` for an event that carries arena geometry, or null.
+ *
+ * **Geometry is not a label decision, so it is not a binding decision.** The
+ * binding table chooses which clip plays; where the figure ends up is the
+ * resolver's own reported fact, read off the event and copied. That split is
+ * why a movement event whose gait the bindings cannot name still MOVES: the
+ * scene would otherwise draw a figure standing where the resolver says it is
+ * not, which is the same failure as swallowing an `unmapped`.
+ *
+ * A step the arena clamp swallowed — `to === from` — is still emitted. It is
+ * inert to fold, and suppressing it would make "walked into the wall" and
+ * "never walked" the same stream.
+ */
+function movementFor(layout, event) {
+  if (!Number.isFinite(event.from) || !Number.isFinite(event.to)) return null;
+  // Resolved HERE rather than by the caller, and that is not tidiness. This is
+  // called before the binding is known, and `layout.placementFor` THROWS on a
+  // combatant with no slot — so hoisting the lookup to the call site turned an
+  // unbound event naming an unknown actor from an `unmapped` record into a
+  // `SlotLayoutError`. Caught by reading the diff; pinned by
+  // `an event with no binding is reported as unmapped instead of guessed`.
+  const placement = layout.placementFor(event.actorId);
+  return Object.freeze({
+    kind: CommandKind.MOVE_CLIP,
+    sequence: event.sequence,
+    combatantId: placement.combatantId,
+    instancePath: placement.instancePath,
+    from: event.from,
+    to: event.to
+  });
+}
+
 function clipGoto(sequence, placement, chosen, role) {
   return Object.freeze({
     kind: CommandKind.CLIP_GOTO,
@@ -539,13 +630,26 @@ export function presentResolvedEvents(wire, {
     }
 
     const chosen = bindings.action(event);
+    const movement = movementFor(layout, event);
     if (!chosen) {
       commands.push(Object.freeze({
         kind: CommandKind.UNMAPPED,
         sequence: event.sequence,
-        reason: `no animation binding for event type ${event.type} in ${bindings.id}`,
+        reason: movement
+          // Named precisely, because a movement event has TWO ways to go
+          // unbound and they have different fixes. It does not claim to know
+          // which: `bindings.action` returns null either way, and guessing
+          // would send half the readers to the wrong file.
+          ? `${event.type} carried arena geometry and ${bindings.id} bound no label for it. ` +
+            "SS2_STATIC_MAP_BINDINGS needs the build's own phase named in `vanillaLabel` " +
+            "(walkleft, walkright, runleft, runright, chargeleft, chargeright, jumpleft, jumpright), " +
+            "because the geometry gives the direction and never the gait; another binding table needs " +
+            "a movement case of its own."
+          : `no animation binding for event type ${event.type} in ${bindings.id}`,
         detail: Object.freeze({ eventType: event.type })
       }));
+      // The figure still moves. See `movementFor`.
+      if (movement) commands.push(movement);
       continue;
     }
     const actorPlacement = layout.placementFor(event.actorId);
@@ -556,6 +660,9 @@ export function presentResolvedEvents(wire, {
       sequence: event.sequence,
       globals: bindingPlanFor(layout, { actorId: event.actorId, targetId: event.targetId ?? null })
     }));
+    // Before the clip, so a surface folding the batch knows where the figure
+    // is going before it starts the timeline that carries it there.
+    if (movement) commands.push(movement);
     if (chosen.actor) commands.push(clipGoto(event.sequence, actorPlacement, chosen.actor, "actor"));
     if (chosen.target && targetPlacement) {
       commands.push(clipGoto(event.sequence, targetPlacement, chosen.target, "target"));

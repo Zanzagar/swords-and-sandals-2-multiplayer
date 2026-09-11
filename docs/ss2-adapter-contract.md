@@ -806,8 +806,37 @@ that agree on combat state compute the same layout.
 
 `presentResolvedEvents(toTeamWireState(battle), { layout, bindings })` returns
 ordered, JSON-safe presentation commands stamped with the resolver event
-`sequence` they came from: `attach-clip`, `place-clip`, `bind-globals`,
-`clip-goto`, `panel-refresh`, `overlay-goto`, `arena-goto`, and `unmapped`.
+`sequence` they came from: `attach-clip`, `place-clip`, `move-clip`,
+`bind-globals`, `clip-goto`, `panel-refresh`, `overlay-goto`, `arena-goto`, and
+`unmapped`.
+
+**`move-clip` is the movement half of the position work (added 2026-09-11), and
+nothing in this repository emits one yet.** The resolver models no position, so
+the producer is the ranked rule-set change preserved at
+`docs/reference/position-in-the-resolver.patch.md`; the presentation half is
+first because landing the resolver half first made a walking gladiator play
+`Standing`, the idle clip. Three things about it are decisions rather than
+details:
+
+- **it is a separate kind from `place-clip`, and reusing that one is a defect.**
+  `src/render/scene.js` folds `place-clip` by overwriting all seven geometry
+  fields, so a partial `place-clip` carrying only a new `x` sets `y` to
+  `undefined` and the browser shell's `toY(undefined)` is `NaN` — the figure
+  does not move, it vanishes;
+- **it carries `from` and `to` and no distance**, because two endpoints already
+  say how far the step went and a third field that could disagree with them is
+  a second source of truth. It never touches `facing`: vanilla walks backwards
+  without turning round;
+- **geometry is not a label decision, so it is not a binding decision.** An
+  event whose gait the bindings cannot name still emits its `move-clip`,
+  alongside an `unmapped` naming the missing field. The bindings choose which
+  clip plays; where the figure ends up is the resolver's reported fact.
+
+A movement event must NAME the build's own phase in `vanillaLabel` — one of
+`walkleft`, `walkright`, `runleft`, `runright`, `chargeleft`, `chargeright`,
+`jumpleft`, `jumpright`. The direction is derivable from the two endpoints; the
+GAIT is not, and deriving `walkleft` from the sign would put a guessed gait on
+screen every time the action was a charge.
 `createPresentationBinder` wraps it in a cursor so a host drains only new
 commands after each action. The cursor holds a sequence number and the action
 boundaries it has been told about (`drain(wire, { actionBoundary })`) — no

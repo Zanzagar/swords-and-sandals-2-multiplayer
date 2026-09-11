@@ -32,7 +32,8 @@ import {
   applyCommands,
   emptyScene,
   poseAt,
-  timelineFor
+  timelineFor,
+  timelinesForStep
 } from "../src/render/index.js";
 import { demoSide } from "../tools/arena/roster.js";
 
@@ -47,17 +48,20 @@ function arenaHost(perSide = 2, seed = 7, options = {}) {
   });
 }
 
-/** The shell's own dispatch: fold commands, start timelines, collect tokens. */
+/**
+ * The shell's own dispatch: fold commands, start timelines, collect tokens.
+ *
+ * ► **THIS USED TO RE-IMPLEMENT THE LOOP IT WAS TESTING, and that is a
+ *   correlated failure, not a convenience.** It walked the commands itself and
+ *   built its own `started` map, so the shell and the test were two
+ *   implementations of one decision and could agree with each other while both
+ *   disagreeing with what a person would see. The decision now lives in
+ *   `timelinesForStep` (`src/render/cursor.js`) and both call it, which is how
+ *   `animationCursor` is already arranged.
+ */
 function beginStep(scene, step) {
-  const started = new Map();
-  for (const command of step.commands) {
-    if (command.kind !== "clip-goto") continue;
-    started.set(command.combatantId, {
-      timeline: timelineFor(command.label, { role: command.role }),
-      token: command.actionToken ?? null
-    });
-  }
-  return { scene: applyCommands(scene, step.commands), started };
+  const { started, notices } = timelinesForStep(step.commands);
+  return { scene: applyCommands(scene, step.commands), started, notices };
 }
 
 test("the demo roster builds a host that ss2TeamRules will actually fight", () => {
