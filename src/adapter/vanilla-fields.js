@@ -374,6 +374,21 @@ export const MAP_SILENCE = Object.freeze([
       "different `speed` settles the second question, whether the displacement scales with " +
       "`movement_speed` at all, because that staging pins `movement_speed` at its clamp floor of 4. The " +
       "archive is not on a fresh-clone tree; this needs the capture machine, not the capture rig. " +
+      "► **THE COUNTING HALF IS DONE (2026-09-11), AND THE ARCHIVE WAS REACHABLE ALL ALONG.** It is a " +
+      "second checkout on the capture box — `/mnt/c/ss2-capture/captures`, 1,650 rufflelogs — so this " +
+      "sentence was right that a fresh clone cannot do it and wrong to imply nobody could. " +
+      "`tools/approach-length-census.mjs` reads it and reports the distribution, using a SHARPER boundary " +
+      "than the one prescribed above: the autopilot records the CONTROLLER, and the build picks " +
+      "`closerange_warrior` exactly when `fightdistance < hero.weapon_range`, so the flip from " +
+      "`longrange_warrior` IS the predicate first holding — an observation of the gate rather than an " +
+      "inference from when the autopilot chose to swing. **Result over 1,512 sessions: median 5, mode 5 " +
+      "(36.3%), min 2, max 17, 82% between 4 and 7.** " +
+      "**THAT IS NOT A DISPLACEMENT AND MUST NOT BE READ AS ONE.** Both gladiators close and these are " +
+      "the HERO's steps, so the closure per step is unknown and the interval has one end, not two. What " +
+      "it does is corroborate the FIVE-WALK figure the authored 44 was consistency-checked against — now " +
+      "from the build's own gate, across the whole archive, instead of from one uncited line in a frozen " +
+      "handoff. **What remains is narrower and still open: the VILLAIN's own phase sequence**, which " +
+      "closes the second end of the interval and which these traces do not record. " +
       "**NO GOLDEN CAN SETTLE IT, and that is structural rather than an accident of which 23 we have.** " +
       "Measured 2026-09-10: a golden's scenario carries exactly attack, defence, strength, charisma, " +
       "magicka, min_damage, max_damage, hitpoints, hitpointsmax, staminaleft, staminamax, armourclass, " +
