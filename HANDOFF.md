@@ -19,6 +19,20 @@ priced on the weapon with strength in the denominator — and **both gated behin
 `fixtureReplay`, so all 23 goldens still reproduce their MEASURED
 `staminaleft`.** The 3v3 positional layer is deliberately NOT built on top yet.
 
+► **D3 IS CLOSED (2026-09-11): SIDES ALTERNATE.** The agility alpha-strike —
+  a side that out-ran the enemy acting three times before the enemy acted at
+  all — is gone; agility now buys the first action of the bout and never a free
+  round. A fidelity GAIN, because SS2's `changeCombatants` alternates and the
+  flat sort was ours. **One consequence, measured before it was accepted:
+  conditions effectively stop crossing bout boundaries** (0 of 300 seeds leave
+  a living afflicted survivor). Not a correctness regression, but a design
+  change that arrived as a side effect — if it matters, that is what to
+  restore. `docs/combat-economy-findings-2026-09-10.md` carries both.
+  **A working position implementation is preserved as a reference patch** at
+  `docs/reference/position-in-the-resolver.patch.md` — written against
+  `2c047b9`, UNBUILT, and it deadlocks the animation gate until presentation
+  lands. Read it; do not apply it blind.
+
 ► **THE CHEAPEST OPEN QUESTION ON THE BOARD IS THE OWNER'S, AND IT IS SMALL:
   read the six `weaponweights` values at `+0x3dd4` off the installed build.**
   `attack_speed` is an INDEX into that array and this repository does not hold

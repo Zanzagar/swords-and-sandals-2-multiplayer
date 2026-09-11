@@ -88,8 +88,17 @@ the engine is backwards.** `MAP_SILENCE.swing-cost` carries it.
    *If index 1 is heavy*, `ss2WeaponMass` is right and becomes derived rather
    than authored. *If index 1 is light*, flip it, re-run the scale search in
    `SS2_SWING`, and re-derive the three seeded-play pins.
-2. **CLOSE THE AGILITY ALPHA-STRIKE (D3) — it is the largest LIVE cheese
-   vector and it is not the owner's lane.** Measured and unchanged:
+2. ~~**CLOSE THE AGILITY ALPHA-STRIKE (D3).**~~ **DONE, 2026-09-11** — sides
+   alternate, agility orders only within a side, the side holding the fastest
+   gladiator opens. **It had one consequence, measured before it was accepted
+   and worth a decision: conditions effectively stop crossing bout
+   boundaries** (0 of 300 seeds leave a living afflicted survivor, 2v2 and
+   3v3, three blueprint designs), because under alternation everyone acts once
+   per round and burns the condition off. Not a correctness regression — the
+   read-back seam still carries statuses and is now tested deterministically —
+   but it is a design change that arrived as a side effect. **If conditions
+   surviving bouts matters, that is the thing to restore, and a sweep with
+   it.** The original text of this item: Measured and unchanged:
    `FAST -> FAST -> FAST -> SLOW -> SLOW -> SLOW`, so a team that out-runs the
    enemy acts three times before the enemy acts at all. `initiativeOrder` is a
    flat agility sort across BOTH teams, it is AUTHORED, and `roster.js`'s own
