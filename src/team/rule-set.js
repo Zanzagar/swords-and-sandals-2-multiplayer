@@ -68,7 +68,17 @@ export const EffectKind = Object.freeze({
   DAMAGE: "damage",
   HEAL: "heal",
   STATUS: "status",
-  RESOURCE: "resource"
+  RESOURCE: "resource",
+  /**
+   * Move a combatant to an absolute arena x.
+   *
+   * **Absolute, never a delta, for the same reason `RESOURCE` writes `to` and
+   * not `by`**: an effect log has to be replayable out of order without
+   * accumulating drift, and a rule set that has already clamped is entitled to
+   * have its clamped value survive the resolver. Signed, unlike an `amount` —
+   * walking left is a negative COORDINATE, not a negative distance.
+   */
+  POSITION: "position"
 });
 
 const REQUIRED_FUNCTIONS = Object.freeze([
@@ -275,6 +285,14 @@ export function assertActionOutcome(outcome, ruleSetId) {
       if (!Number.isFinite(effect.to)) {
         throw new TeamRuleSetError(
           `Rule set ${ruleSetId} produced a resource effect without a finite absolute \`to\` value.`
+        );
+      }
+    } else if (effect.kind === EffectKind.POSITION) {
+      // Absolute for the same reason RESOURCE is, and SIGNED unlike an amount,
+      // which is why this arm cannot fall through to the `>= 0` check below.
+      if (!Number.isFinite(effect.to)) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a position effect without a finite absolute \`to\` value.`
         );
       }
     } else if (!Number.isFinite(effect.amount) || effect.amount < 0) {

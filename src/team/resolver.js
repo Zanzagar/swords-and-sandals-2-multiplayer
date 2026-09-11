@@ -201,7 +201,12 @@ function combatantView(combatant) {
     maxHealth: combatant.maxHealth,
     health: combatant.health,
     alive: combatant.alive,
-    status: Object.freeze([...combatant.status])
+    status: Object.freeze([...combatant.status]),
+    // Where this gladiator stands, or `null` for a rule set that models no
+    // geometry. Present either way — see `normaliseCombatant` for why the key
+    // is never absent — so the soundness invariant above holds: it is in
+    // `combatantProjection` too, and therefore inside `combatStateHash`.
+    x: combatant.x
   });
 }
 
@@ -267,6 +272,17 @@ function applyEffects(battle, effects) {
       target.health = clamp(target.health + effect.amount, 0, target.maxHealth);
     } else if (effect.kind === EffectKind.RESOURCE) {
       writeResource(target, effect.resource, effect.to, { ruleSetId: battle.rules.id });
+    } else if (effect.kind === EffectKind.POSITION) {
+      // The rule set owns the arena bound and has already applied it; this is
+      // the same division as a RESOURCE write, where the rule set clamps to
+      // its own pool and the resolver stores what it is handed.
+      if (target.x === null) {
+        throw new BattleError(
+          `Rule set ${battle.rules.id} moved ${effect.targetId}, which models no position. ` +
+          "A rule set that emits POSITION effects must also declare startingPosition()."
+        );
+      }
+      target.x = effect.to;
     } else if (effect.kind === EffectKind.STATUS) {
       const present = target.status.includes(effect.status);
       if (effect.active === false && present) {
@@ -497,7 +513,8 @@ function combatantProjection(combatant) {
     maxHealth: combatant.maxHealth,
     health: combatant.health,
     alive: combatant.alive,
-    status: [...combatant.status]
+    status: [...combatant.status],
+    x: combatant.x
   };
 }
 

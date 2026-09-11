@@ -243,6 +243,21 @@ export const Ss2ActionType = Object.freeze({
   NORMAL_ATTACK: "normal-attack",
   POWER_ATTACK: "power-attack",
   REST: "rest",
+  // MOVEMENT. **Direction-ABSOLUTE, because the build's buttons are.** Every
+  // controller frame wires `walkleft` and/or `walkright` BY NAME and the player
+  // picks a direction, not a relationship to an opponent (battle map, "Buttons
+  // wired per controller frame"). A `walk-toward` token would be this engine
+  // inventing a decision the build does not offer, and it would lose the case
+  // the map is explicit about: `closerange_warrior` wires only the AWAY
+  // direction, in both facings.
+  //
+  // Two of the build's eight movement phases, not all eight. `run*` is
+  // reachable only through the taunted chain, which nothing here sets;
+  // `charge*` and `jump*` are wired but their displacement is unknown
+  // separately from the walk's, and one unmeasured distance is enough. See
+  // `SS2_ARENA.walkDistance`.
+  WALK_LEFT: "walk-left",
+  WALK_RIGHT: "walk-right",
   // The four status phases. FOUR types rather than one `status-phase`, because
   // the build's decision IS the specific label — `getphase("frozen")` and
   // `getphase("poisoned")` are different decisions reaching different arms of
@@ -611,6 +626,14 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   [Ss2ActionType.NORMAL_ATTACK]: "normal_attack",
   [Ss2ActionType.POWER_ATTACK]: "power_attack",
   [Ss2ActionType.REST]: "rest",
+  // The build's own spellings — `walkleft` `+0x3b37`, `walkright` `+0x3d16`,
+  // one word, no underscore, unlike the attack phases beside them. **The
+  // movement event carries this onto the wire**, because the presentation
+  // bindings cannot derive a gait from the geometry: `to < from` gives the
+  // direction and nothing separates a walk from a charge. See
+  // `src/adapter/presentation.js`, the movement case.
+  [Ss2ActionType.WALK_LEFT]: "walkleft",
+  [Ss2ActionType.WALK_RIGHT]: "walkright",
   // Three spellings for one effect, and the map is explicit that they are not
   // interchangeable: the FIELD is `poison`, the DECISION label is `poisoned`,
   // and `life_stolen` keeps its spelling as a decision but reaches
@@ -764,6 +787,154 @@ function statusConsumptionEffects(actor, flags = SS2_DEATH_CLEAR_FLAGS) {
  * | `normal-attack` | `randomBetween(5, 8)`  `+0x61f1` | `round(strength * 2)` `+0x61a3` |
  * | `power-attack`  | `randomBetween(9, 12)` `+0x608a` | `round(strength * 3)` `+0x603c` |
  */
+/* ------------------------------------------------------------------ */
+/* Arena geometry                                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * WHERE GLADIATORS STAND, AND HOW FAR A STEP CARRIES THEM.
+ *
+ * Three of these four are the build's, cited. The fourth is AUTHORED and is
+ * the only unmeasured number this rule set's movement adds; see
+ * `MAP_SILENCE.movement-displacement` in `src/adapter/vanilla-fields.js` for
+ * the measurement that would settle it without a new capture.
+ */
+export const SS2_ARENA = Object.freeze({
+  /**
+   * Map, "Battle entry" step 5: the runtime clips are placed at `(-250, 200)`
+   * and `(250, 200)`, hero facing right and villain facing left. So the
+   * separation at construction is 500 — which
+   * `docs/integration/ss2-champion-dna.md:710-712` states independently, from
+   * `getfightdistance`, and which `src/adapter/slot-layout.js`'s
+   * `VANILLA_FRONT_X` already ships for the presentation side.
+   */
+  frontX: 250,
+  /**
+   * AUTHORED, and it matches the adapter's `ALLY_X_STRIDE` on purpose: vanilla
+   * has no second ally, so nothing can settle it (`MAP_SILENCE`,
+   * `multi-slot-arena-geometry`). Allies stand FURTHER OUT than slot 0, so
+   * slot 0 keeps the vanilla pair exactly and 1v1 stays the parity case.
+   */
+  allyStride: 130,
+  /**
+   * Map, `nextphase` step 1. **Read the caveat before citing this.** The map
+   * states the bound in PROSE with no byte offset anywhere in the repository,
+   * while the only line carrying offsets for the clamp — the four `_x` `If`s
+   * at `+0x31cc`, `+0x31f8`, `+0x3224`, `+0x3250` — states no literals at all.
+   * It is the build's number as far as this repository knows and no further.
+   */
+  clamp: Object.freeze({ min: -2100, max: 2100 }),
+  /**
+   * **AUTHORED. THE ONE NUMBER HERE THAT NO BYTE SUPPORTS.**
+   *
+   * How far a completed `walkleft`/`walkright` phase carries a gladiator. The
+   * map gives every movement phase's stamina COST with an offset (`walkleft`
+   * `+0x3b37` and its seven siblings) and no phase's DISTANCE; the only `_x`
+   * writes it records anywhere are the four clamps above.
+   *
+   * 44 is not invented from nothing, and it is not measured either. It is the
+   * single figure in the whole repository —
+   * `docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md:194`,
+   * *"one walk is 44 px"*, uncited, in a FROZEN handoff — and an adversarial
+   * reader proposed it is a conflation with the range multiplier in
+   * `weapon_range = physical_size + weapon[5] * 44`. It survives one check
+   * from a different direction: the same handoff line reports, from real
+   * rounds, that only 26.6% reached range in FEWER than five walks, and at
+   * 44px with both gladiators closing, four walks each leaves the champion
+   * staging at `fightdistance` 148 against its `weapon_range` 144 (out) and
+   * five leaves 60 (in).
+   *
+   * **That is a CONSISTENCY CHECK, not a promotion. It may never be cited as
+   * evidence about the game.**
+   */
+  walkDistance: 44
+});
+
+/**
+ * `fightdistance` — the rounded x-separation of two gladiators.
+ *
+ * `getfightdistance`, `sprite 2249 frame 1 DoAction@0x6e421b` `+0x02ff` /
+ * `+0x0427` (`docs/integration/ss2-champion-dna.md:710-712`), which makes it
+ * the rounded separation of the two clips and 500 at construction. Null when
+ * either side models no position, so a caller can tell "not modelled" from
+ * "standing on top of each other".
+ */
+export function ss2FightDistance(a, b) {
+  if (!Number.isFinite(a?.x) || !Number.isFinite(b?.x)) return null;
+  return Math.round(Math.abs(a.x - b.x));
+}
+
+/**
+ * How far this gladiator's swing reaches, in arena units.
+ *
+ * `weapon_range = physical_size + weapon[5] * 44` (`battlevalues` `+0x3190`,
+ * `docs/integration/ss2-item-tables.md:331`), and an UNARMED gladiator's
+ * `weapon_range` is exactly `physical_size` (`ss2-item-tables.md:58`,
+ * `c.weapon_range = c.physical_size`), with
+ * `physical_size = 80 + round(strength / 1.5)` (`+0x30f1`).
+ *
+ * **THIS RETURNS THE UNARMED REACH FOR EVERYONE, AND THAT IS A NARROWING OF
+ * THE BUILD RATHER THAN A DERIVATION.** The weapon id is equipment IDENTITY
+ * and is deliberately outside `SS2_RESOURCE_NAMES` and
+ * `CANONICAL_RESOURCE_SOURCES` ("the piece *ids* are equipment identity, not a
+ * numeric pool"), so by the time a combatant reaches the resolver the range
+ * multiplier is gone. `ss2-weapon-table.js` HOLDS it — `rangeMultiplier` is
+ * shipped — so the gap is the projection, not the data.
+ *
+ * The narrowing is conservative in the direction that matters: every real
+ * weapon reaches AT LEAST this far, so a gladiator here closes further than
+ * one in the build would need to and **never swings from outside the build's
+ * own range**. What it costs is extra walking, which is a gameplay cost and is
+ * measured in `test/ss2-position.test.js` rather than argued.
+ *
+ * Declaring `weapon_range` as a resource is the opt-in that would close it,
+ * and is the same shape as the `resources` override `toCanonicalCombatantSource`
+ * already takes. It is deliberately NOT added here: `x` is already one
+ * projection change in this commit, and it is the one that needs the review.
+ */
+export function ss2Reach(actor) {
+  return 80 + Math.round(actor.stats.strength / 1.5);
+}
+
+/**
+ * `movement_speed = clamp(round(speed * 1.5), 4, 60)` (`battlevalues` `+0x37d2`).
+ *
+ * **Computed here from the projected stat rather than carried as a resource**,
+ * and that is the more faithful of the two: the map's own persistence table
+ * (`:698`) lists `movement_speed` among the fields "recomputed
+ * unconditionally", so it is a `battlevalues` OUTPUT and never a stored pool.
+ * The resolver renames `speed` to `agility`, and `ss2Combatant` sets
+ * `agility: derived.speed ?? 0`, so the input is already inside
+ * `combatStateHash` and nothing needs adding to the wire vocabulary.
+ *
+ * The clamp FLOOR of 4 is the build's, not a convenience: however slow a
+ * gladiator is, `movement_speed` cannot go below it.
+ */
+export function ss2MovementSpeed(actor) {
+  return clamp(Math.round((actor.stats.agility ?? 0) * 1.5), 4, 60);
+}
+
+/** The living foe standing closest, or null. Ties break by id, deterministically. */
+function nearestFoe(view) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (const foe of view.foes) {
+    const distance = ss2FightDistance(view.actor, foe);
+    if (distance === null) continue;
+    if (distance < bestDistance || (distance === bestDistance && best && foe.id < best.id)) {
+      best = foe;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+/** Which way a walk carries its actor. Left is negative x, as in the build. */
+const SS2_WALK_DIRECTION = Object.freeze({
+  [Ss2ActionType.WALK_LEFT]: -1,
+  [Ss2ActionType.WALK_RIGHT]: 1
+});
+
 const ATTACK_BANDS = Object.freeze({
   [Ss2ActionType.QUICK_ATTACK]: Object.freeze({ low: 1, high: 4, strengthFactor: 1 }),
   [Ss2ActionType.NORMAL_ATTACK]: Object.freeze({ low: 5, high: 8, strengthFactor: 2 }),
@@ -1134,7 +1305,7 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
  */
 export function ss2Combatant(
   vanilla,
-  { id, name, controller, battleStarted = false, derive = true } = {}
+  { id, name, controller, battleStarted = false, derive = true, x } = {}
 ) {
   // `derive` is a GUARD, not a convention. `ss2BattleValues` overwrites
   // `min_damage`, `max_damage`, `hitpointsmax` and `staminamax`
@@ -1194,6 +1365,19 @@ export function ss2Combatant(
   if (id !== undefined) source.id = id;
   if (name !== undefined) source.name = name;
   if (controller !== undefined) source.controller = controller;
+  /**
+   * WHERE THIS GLADIATOR STANDS, stated outright instead of derived from its
+   * slot. It is an OPTION rather than a `vanilla` field because it is not a
+   * `battlevalues` output: the build keeps it on the CLIP (`gladiators.hero._x`,
+   * which `getfightdistance` reads), not on the character record.
+   *
+   * A stated position wins over `startingPosition`, exactly as a stated
+   * `maxHealth` overrules the derived one — see `normaliseCombatant`. Two
+   * callers want it: a host restoring a bout mid-approach, and a test that is
+   * about something other than geometry and just needs the two gladiators
+   * within reach of each other.
+   */
+  if (x !== undefined) source.x = x;
   return source;
 }
 
@@ -1844,6 +2028,30 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
      * `SS2_ATTACKER_REQUIRED_RESOURCES` for the measurement that says a
      * defender's pair cannot reach the arithmetic.
      */
+    /**
+     * Where slot `slotIndex` of team `teamIndex` starts.
+     *
+     * Team 0 is the hero side and stands at negative x, team 1 the villain
+     * side at positive x — map, "Battle entry" step 5, `(-250, 200)` and
+     * `(250, 200)`. Allies stand FURTHER OUT, which keeps slot 0 of each side
+     * byte-identical to the vanilla pair and 1v1 the parity case.
+     *
+     * **`fixtureReplay` returns `null` instead, and that is not a shortcut.**
+     * A promoted golden is a measurement of ONE resolved action, staged in the
+     * running game at whatever separation that capture happened to have.
+     * Giving it a construction position this engine invented, and then gating
+     * its swing on that invention, would make 23 runtime-verified fixtures
+     * replay through a geometry no capture observed. A fixture models no
+     * position, so it has none, and `legalActions` falls back to the
+     * position-blind vocabulary for exactly the callers that ask for it.
+     */
+    startingPosition({ teamIndex, slotIndex }) {
+      if (fixtureReplay) return null;
+      const side = teamIndex === 0 ? -1 : 1;
+      const magnitude = SS2_ARENA.frontX + SS2_ARENA.allyStride * slotIndex;
+      return clamp(side * magnitude, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+    },
+
     maximumHealth(combatant) {
       assertConstructionResources(combatant, `Combatant ${combatant.id}`);
       if (Number.isFinite(combatant.maxHealth)) return combatant.maxHealth;
@@ -1943,11 +2151,65 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
       if (forced) return [{ type: SS2_STATUS_PHASE_FOR_FLAG[forced], targetId: actorId }];
 
       const actions = [];
+      const reach = ss2Reach(view.actor);
+      const positioned = Number.isFinite(view.actor.x);
+
+      // THE CONTROLLER FRAME, reproduced. The build picks one of four frames
+      // per turn and each wires a different eight buttons; for a melee hero
+      // that is `closerange_warrior` vs `longrange_warrior`, selected by
+      // `fightdistance < hero.weapon_range` — frame 4 `DoAction@0x238bbf`
+      // `+0x00f6`, re-derived 2026-09-11 from the map's own transcription of
+      // the selector. STRICT `<`, as the build has it.
+      //
+      // A gladiator with NO position keeps the old position-blind vocabulary
+      // exactly — three melee verbs against every foe — which is what
+      // `fixtureReplay` asks for and what every rule set declaring no
+      // `startingPosition` gets.
+      let anyInReach = !positioned;
       for (const foe of view.foes) {
+        const distance = ss2FightDistance(view.actor, foe);
+        const inReach = distance === null || distance < reach;
+        if (!inReach) continue;
+        anyInReach = true;
         actions.push({ type: Ss2ActionType.QUICK_ATTACK, targetId: foe.id });
         actions.push({ type: Ss2ActionType.NORMAL_ATTACK, targetId: foe.id });
         actions.push({ type: Ss2ActionType.POWER_ATTACK, targetId: foe.id });
       }
+
+      if (positioned) {
+        // Which walk buttons the frame wires, from the map's own table
+        // (battle map, "Buttons wired per controller frame", `:223-230`).
+        //
+        // ► **THAT TABLE CONTRADICTS ITS OWN SUMMARY SENTENCE at `:219`**,
+        //   which says the label set is "facing-invariant apart from the
+        //   charge/ranged handedness". Compared as SETS, three of the four
+        //   controllers differ between facings in MOVEMENT labels too; only
+        //   `longrange_warrior` matches the summary. Re-derived by hand
+        //   2026-09-10 and again 2026-09-11 — the table wins, because it
+        //   carries the offsets and the summary carries none.
+        //
+        // The consequence is a real rule and not a nit: `closerange_warrior`
+        // wires NO toward-movement in either facing — facing right it wires
+        // `jumpleft`/`walkleft`, facing left `jumpright`/`walkright`, both of
+        // which are RETREAT. **Once you are in range the build lets you back
+        // out and never further in.** `longrange_warrior` wires both.
+        const nearest = nearestFoe(view);
+        const towardIsRight = nearest ? nearest.x > view.actor.x : true;
+        const away = towardIsRight ? Ss2ActionType.WALK_LEFT : Ss2ActionType.WALK_RIGHT;
+        const offered = anyInReach
+          ? [away]
+          : [Ss2ActionType.WALK_LEFT, Ss2ActionType.WALK_RIGHT];
+        // ► **ORDERED BY DIRECTION, LEFT BEFORE RIGHT — the build's own slot
+        //   order, and the first version of this ordered by AWAY-then-TOWARD,
+        //   which was an invented rule.** Checked across all eight rows of the
+        //   map's table: every controller that wires both puts `walkleft` at
+        //   `optionB` and `walkright` at `optionE`, in BOTH facings. So the
+        //   build orders the two buttons by direction and never by their
+        //   relationship to the opponent — which it cannot do, because the
+        //   slots are wired once per frame and the opponent moves.
+        for (const type of offered) actions.push({ type, targetId: actorId });
+      }
+
       actions.push(rest);
       return actions;
     },
@@ -2031,6 +2293,54 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
             type: Ss2ActionType.REST,
             actorId: actor.id,
             targetId: actor.id,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
+          }]
+        };
+      }
+
+      const walkDirection = SS2_WALK_DIRECTION[request.type];
+      if (walkDirection) {
+        if (!Number.isFinite(actor.x)) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a position, and ${actor.id} has none. A rule set built with ` +
+            "fixtureReplay: true models no geometry and never offers a walk."
+          );
+        }
+        // `walkleft` `+0x3b37` / `walkright` `+0x3d16`:
+        // `staminacost = round(movement_speed / 2)`. Spent by `nextphase`'s
+        // subtraction like every other phase, so the same helper applies it
+        // and the transition's heal and regeneration still run — **a walk is a
+        // completed phase, not a free step**, which is the whole reason it can
+        // be a real choice against resting.
+        const transition = phaseTransitionEffects(actor, {
+          staminaCost: Math.round(ss2MovementSpeed(actor) / 2)
+        });
+        // `nextphase` step 1 clamps the active x before anything else it does.
+        const to = clamp(
+          actor.x + walkDirection * SS2_ARENA.walkDistance,
+          SS2_ARENA.clamp.min,
+          SS2_ARENA.clamp.max
+        );
+        return {
+          effects: [
+            { kind: EffectKind.POSITION, targetId: actor.id, to },
+            ...transition.effects,
+            ...crowd
+          ],
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: actor.id,
+            from: actor.x,
+            to,
+            // **THE FIELD THE PRESENTATION HALF CANNOT DO WITHOUT.** `from`
+            // and `to` give the direction and never the GAIT — nothing in the
+            // geometry separates a walk from a run, a charge or a jump — so
+            // `SS2_STATIC_MAP_BINDINGS` reports a movement event that does not
+            // name its phase rather than guessing one. This is that name, and
+            // it is the build's own spelling.
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
             staminaGained: transition.staminaGained,
             healed: transition.healed
           }]
@@ -2243,6 +2553,37 @@ export function createSs2TeamRules({ fightMode = "tournament", observer = null, 
       const foes = [...view.foes].sort(byHealthThenId);
       const target = foes[0];
       if (!target) return restOption ?? options[0];
+
+      // OUT OF POSITION: close the distance. The build's own villain has
+      // "out-of-position movement chains — the arm taken while the opponent is
+      // still closing the distance" (battle map, § "Direction 20 is the taunt
+      // path"), so an AI that moves is the right SHAPE; the arm's `choices`
+      // bands are not decoded, so WHICH movement verb it picks is invented,
+      // like the rest of this policy.
+      //
+      // **Recognised by the VOCABULARY rather than by re-deriving the
+      // geometry.** `legalActions` offered a toward-walk if and only if
+      // nothing was in reach, so taking one whenever no melee verb is on offer
+      // needs no second opinion about who is standing where — and, more to the
+      // point, it cannot DISAGREE with the gate that built the list. A second
+      // distance computation here would be a second chance to be wrong.
+      //
+      // Returned before the attacker record is built, for the same reason the
+      // forced phase above is: ranking the melee verbs demands the damage
+      // pair, and a gladiator still walking toward the fight should not have
+      // to declare one to take a step.
+      const meleeOnOffer = options.some((option) => ATTACK_BANDS[option.type]);
+      if (!meleeOnOffer) {
+        const nearest = nearestFoe(view);
+        if (nearest) {
+          const towardType = nearest.x > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
+          const stride = options.find((option) => option.type === towardType);
+          // Stamina still outranks it: the forced-rest gate above already
+          // returned at <= 10, so reaching here means the walk is affordable
+          // in the only sense the build has — it does not refuse to spend.
+          if (stride) return stride;
+        }
+      }
 
       const attacker = vanillaRecordOf(actor, "attacker");
       const defender = vanillaRecordOf(target, "defender");

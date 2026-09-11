@@ -130,7 +130,7 @@ function normaliseStatus(source) {
  * Normalises one combatant source. This is the only combatant constructor in
  * the codebase; AI fill goes through it too.
  */
-export function normaliseCombatant(source, teamId, index, rules) {
+export function normaliseCombatant(source, teamId, index, rules, teamIndex = 0) {
   const stats = {
     strength: source.stats?.strength ?? DEFAULT_STATS.strength,
     agility: source.stats?.agility ?? DEFAULT_STATS.agility,
@@ -162,8 +162,34 @@ export function normaliseCombatant(source, teamId, index, rules) {
     maxHealth: source.maxHealth,
     health: source.health,
     alive: true,
-    status: normaliseStatus(source.status)
+    status: normaliseStatus(source.status),
+    /**
+     * Where this gladiator stands, in the build's own arena coordinates.
+     *
+     * `null` for a rule set that models no position — which is every rule set
+     * declaring no `startingPosition`, the placeholder included — and a finite
+     * number for one that does. **It is not optional-and-absent: the key is
+     * ALWAYS present**, so `combatStateHash` commits to the same projection
+     * shape for every rule set, and a `null` says "this battle has no
+     * geometry" rather than leaving two peers to disagree about whether the
+     * field exists at all.
+     *
+     * A blueprint may state it outright and that wins, exactly as a declared
+     * `maxHealth` overrules the derived one.
+     */
+    x: null
   };
+  combatant.x = Number.isFinite(source.x)
+    ? source.x
+    : (typeof rules.startingPosition === "function"
+      ? rules.startingPosition({ teamIndex, slotIndex: index, combatant })
+      : null);
+  if (combatant.x !== null && !Number.isFinite(combatant.x)) {
+    throw new BattleError(
+      `Rule set ${rules.id} returned a non-finite starting position for ${combatant.id}. ` +
+      "startingPosition must return a finite number or null."
+    );
+  }
   combatant.maxHealth = rules.maximumHealth(combatant);
   combatant.health = clamp(combatant.health ?? combatant.maxHealth, 0, combatant.maxHealth);
   combatant.alive = combatant.health > 0;
@@ -323,7 +349,7 @@ export function buildRoster({ teams, rules }) {
       // The marker itself is this slot's nearest fill source, so it is passed
       // through rather than discarded once `isEmptySlot` has read it.
       const source = filled ? aiFillSource({ ...team, id, name }, index, entry) : entry;
-      const combatant = normaliseCombatant(source, id, index, rules);
+      const combatant = normaliseCombatant(source, id, index, rules, teamIndex);
       combatant.aiFilled = filled;
       combatants.push(combatant);
       // A filled slot's seat is the AI's by construction; `assertFillTemplate`

@@ -90,7 +90,37 @@ const FIGHTER = Object.freeze({
   weapon_min_damage: 6, weapon_max_damage: 12
 });
 
+/**
+ * ► **STAGED IN CONTACT (`x: ∓30`) SINCE 2026-09-11, and it is what keeps
+ *   these pins pinning what they were built to pin.** The rule set models
+ *   position now, so a battle left to `startingPosition` opens 500 apart
+ *   against an unarmed reach of ~83 — and the first six actions of such a
+ *   battle are six WALKS, which draw nothing. The "six actions in" pin exists
+ *   to cover `rngCursor`, the event log and everything that is 0/null/[]
+ *   before the first action; against an approach it would have hashed a
+ *   battle whose cursor was still zero and gone on passing. Its own guard
+ *   caught that — `rngCursor must have moved off 0: 0` — which is the guard
+ *   doing exactly its job.
+ *
+ *   The approach is not left uncovered: `positionBuild` below pins it
+ *   separately, so both states have a literal.
+ */
 function build(seed, stats, perSide = 1) {
+  const side = (prefix) => ({
+    id: prefix === "hero" ? "red" : "blue",
+    combatants: Array.from({ length: perSide }, (unused, index) =>
+      ss2Combatant(stats, {
+        id: perSide === 1 ? prefix : `${prefix}-${index + 1}`,
+        name: prefix === "hero" ? "Hero" : "Villain",
+        x: prefix === "hero" ? -30 : 30
+      })
+    )
+  });
+  return createTeamBattle({ seed, rules: ss2TeamRules, teams: [side("hero"), side("villain")] });
+}
+
+/** The same pair, left where the RULE SET puts them: the vanilla +/-250. */
+function positionBuild(seed, stats, perSide = 1) {
   const side = (prefix) => ({
     id: prefix === "hero" ? "red" : "blue",
     combatants: Array.from({ length: perSide }, (unused, index) =>
@@ -121,7 +151,12 @@ function driveByTurn(battle, limit) {
   return taken;
 }
 
-/** Always the first legal option, which under `ss2TeamRules` is an attack. */
+/**
+ * Always the first legal option — an attack for a pair staged in CONTACT, and
+ * `walk-left` for a pair that is not. (It used to say "which under
+ * `ss2TeamRules` is an attack"; that became false when the rule set learned
+ * about position, and the callers below all use `build`, which stages.)
+ */
 function driveFirst(battle, limit) {
   let taken = 0;
   while (!battle.result && taken < limit) {
@@ -163,6 +198,24 @@ function driveFirst(battle, limit) {
  *   construction-time and did not move either, which is exactly the asymmetry
  *   this file exists to cover.
  */
+/**
+ * ► **ALL THREE MOVED AGAIN ON 2026-09-11, and this time for a PROJECTION
+ *   change rather than an arithmetic one.** `x` joined `combatantProjection`,
+ *   so every SS2 battle hashes differently — `null` for a rule set that models
+ *   no position, a number for one that does, and the key present either way so
+ *   two peers commit to one shape. The three pins ALSO changed what they
+ *   describe: the pair is now staged in contact (see `build`), because left at
+ *   the vanilla separation the first six actions are six walks and the
+ *   six-actions-in pin would have hashed a battle with `rngCursor` still 0.
+ *
+ *     f12b5d6c -> 49866259   (six actions in)
+ *     edb93099 -> 83b564ac   (settled 1v1)
+ *     347dc64f -> 797ff2be   (settled 3v3)
+ *
+ *   **The goldens did NOT move**: `fixtureReplay` returns `null` from
+ *   `startingPosition`, so a fixture models no geometry, is never offered a
+ *   walk, and replays through exactly the vocabulary it always did.
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -183,7 +236,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "f12b5d6c", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "49866259", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -195,7 +248,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "edb93099", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "83b564ac", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
@@ -206,7 +259,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "347dc64f", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "797ff2be", WHY_IT_MOVED);
 });
 
 /**

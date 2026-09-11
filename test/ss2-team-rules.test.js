@@ -95,8 +95,24 @@ function gladiator(overrides = {}) {
   };
 }
 
+/**
+ * THE TWO GLADIATORS ARE STAGED IN CONTACT, and it is deliberate.
+ *
+ * ► **BEFORE 2026-09-11 THERE WAS NOWHERE ELSE TO STAND.** The rule set now
+ *   models position, and `startingPosition` puts the vanilla pair 500 apart
+ *   (map, "Battle entry" step 5) against an unarmed reach of ~86 — so a battle
+ *   built with no stated `x` offers `walk-left`, `walk-right` and `rest` and
+ *   NO melee verb, which is the build's own `closerange_warrior` gate doing
+ *   its job. Almost every test in this file is about the attack arithmetic,
+ *   the stamina economy or the resource vocabulary, and would otherwise have
+ *   to walk ten times to reach the thing it is testing.
+ *
+ *   `x: ∓30` puts them 60 apart, inside the reach of any strength. **A test
+ *   that IS about geometry does not use this helper** — those live in
+ *   `test/ss2-position.test.js`, which states its positions explicitly.
+ */
 function battleOf(heroFields, villainFields, options = {}) {
-  const { rules = ss2TeamRules, seed = 1, rngTape = null } = options;
+  const { rules = ss2TeamRules, seed = 1, rngTape = null, heroX = -30, villainX = 30 } = options;
   return createTeamBattle({
     seed,
     rngTape,
@@ -104,14 +120,16 @@ function battleOf(heroFields, villainFields, options = {}) {
     teams: [
       {
         id: "red",
-        combatants: [ss2Combatant(gladiator(heroFields), { id: "hero", name: "Hero", controller: "local" })]
+        combatants: [
+          ss2Combatant(gladiator(heroFields), { id: "hero", name: "Hero", controller: "local", x: heroX })
+        ]
       },
       {
         id: "blue",
         combatants: [
           ss2Combatant(
             gladiator({ speed: 0, gladiator_dir: "left", ...villainFields }),
-            { id: "villain", name: "Villain", controller: "local" }
+            { id: "villain", name: "Villain", controller: "local", x: villainX }
           )
         ]
       }
@@ -183,10 +201,23 @@ test("a battle that cannot change state is refused at construction", () => {
   );
 });
 
-test("the vocabulary is three melee verbs, a rest and four status phases, hyphenated for the token grammar", () => {
+test("the vocabulary is three melee verbs, two walks, a rest and four status phases, hyphenated for the token grammar", () => {
   // FOUR status types rather than one, because the build's decision IS the
   // label: getphase("frozen") and getphase("poisoned") reach different arms.
   // The player never picks among them — legalActions offers exactly one.
+  //
+  // ► **TWO WALKS JOINED IT 2026-09-11, and they are DIRECTION-absolute.**
+  //   Every controller frame wires `walkleft` and/or `walkright` BY NAME and
+  //   the player picks a direction, not a relationship to an opponent (battle
+  //   map, "Buttons wired per controller frame"). A `walk-toward` token would
+  //   be this engine inventing a decision the build does not offer, and would
+  //   lose the case the map is explicit about: `closerange_warrior` wires only
+  //   the AWAY direction, in both facings.
+  //
+  //   TWO of the build's eight movement phases, not eight: `run*` is reachable
+  //   only through the taunted chain, which nothing here sets, and `charge*`
+  //   and `jump*` have no displacement this repository can separate from the
+  //   walk's. One unmeasured distance is enough — see `SS2_ARENA.walkDistance`.
   assert.deepEqual([...ss2TeamRules.actionTypes].sort(), [
     "burning-phase",
     "frozen-phase",
@@ -195,7 +226,9 @@ test("the vocabulary is three melee verbs, a rest and four status phases, hyphen
     "poisoned-phase",
     "power-attack",
     "quick-attack",
-    "rest"
+    "rest",
+    "walk-left",
+    "walk-right"
   ]);
   for (const type of ss2TeamRules.actionTypes) {
     assert.match(type, /^[a-z0-9][a-z0-9-]{0,63}$/, "actionTypes tokens reject vanilla's underscores");
@@ -278,12 +311,18 @@ test("the in-battle call skips the block the build skips", () => {
 /* Construction refuses an under-specified gladiator                    */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Two prebuilt sources, staged in contact for the same reason `battleOf` is:
+ * these tests are about the resource vocabulary and the damage-pair roles, and
+ * a battle with no stated `x` starts 500 apart and offers no melee verb at all.
+ * Stated HERE rather than at each call site so the intent reads once.
+ */
 function battleWith(hero, villain) {
   return createTeamBattle({
     rules: ss2TeamRules,
     teams: [
-      { id: "red", combatants: [hero] },
-      { id: "blue", combatants: [villain] }
+      { id: "red", combatants: [{ ...hero, x: -30 }] },
+      { id: "blue", combatants: [{ ...villain, x: 30 }] }
     ]
   });
 }
@@ -374,8 +413,10 @@ test("a REFUSED attack costs nothing: no RNG draw, no hash movement, however oft
     seed: 7,
     rules: ss2TeamRules,
     teams: [
-      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9 }), { id: "hero", name: "Hero" })] },
-      { id: "blue", combatants: [source] }
+      // Staged in contact: this test is about the refusal being free, not about
+      // geometry, and a battle with no stated `x` starts out of melee range.
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9 }), { id: "hero", name: "Hero", x: -30 })] },
+      { id: "blue", combatants: [{ ...source, x: 30 }] }
     ]
   });
   applyAction(battle, { actorId: "hero", type: Ss2ActionType.QUICK_ATTACK, targetId: "villain" });
@@ -480,7 +521,15 @@ test("there is NO affordability gate: the build never refuses an attack for lack
   const battle = battleOf({ strength: 20 }, {});
   combatantById(battle, "hero").resources.staminaleft.value = 1;
   const options = legalActions(battle).map((option) => option.type);
-  assert.deepEqual(options, ["quick-attack", "normal-attack", "power-attack", "rest"]);
+  // ► **`walk-left` JOINED THIS LIST 2026-09-11, and it is the RETREAT.** The
+  //   two are staged in contact, so the build's selector puts this gladiator on
+  //   `closerange_warrior` — which wires `jumpleft`/`walkleft` facing right and
+  //   `jumpright`/`walkright` facing left, both of them AWAY. Once you are in
+  //   range the build lets you back out and never further in, so a
+  //   toward-walk is correctly absent here while the three melee verbs are not.
+  //   The point of the test is unchanged: at 1 stamina against a swing costing
+  //   far more, nothing is withheld.
+  assert.deepEqual(options, ["quick-attack", "normal-attack", "power-attack", "walk-left", "rest"]);
 });
 
 test("every living foe gets all three melee verbs, and rest targets the actor", () => {
@@ -930,9 +979,14 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
     declared,
     "every declared resource must reach the projection, or the hash is blind to an input"
   );
+  // ► **`x` JOINED THE PROJECTION 2026-09-11 and it moved every pinned hash.**
+  //   It is present on EVERY combatant, `null` for a rule set that models no
+  //   position, so two peers commit to the same projection shape whatever rule
+  //   set they run — an absent key would let them disagree about whether the
+  //   field exists at all, which is the one thing this pin is for.
   assert.deepEqual(Object.keys(projected), [
     "id", "name", "teamId", "seatId", "slotIndex", "aiFilled",
-    "stats", "loadout", "resources", "maxHealth", "health", "alive", "status"
+    "stats", "loadout", "resources", "maxHealth", "health", "alive", "status", "x"
   ], "the per-combatant projection shape is wire format too");
 });
 
@@ -1000,7 +1054,7 @@ test("a canonical SS2 battle hashes to a pinned value — one tripwire for the w
       { id: "blue", combatants: [ss2Combatant(minimal, { id: "villain", name: "Villain" })] }
     ]
   });
-  assert.equal(combatStateHash(battle), "58240ee3", [
+  assert.equal(combatStateHash(battle), "8cf9b04e", [
     "The SS2 wire projection changed. That is not necessarily wrong — but it",
     "means every peer running the previous build now disagrees with this one",
     "about identical battles, and every stored completion token minted before",
@@ -1032,8 +1086,8 @@ test("no resource is ever written that the blueprint did not declare", () => {
       seed,
       rules: ss2TeamRules,
       teams: [
-        { id: "red", combatants: [ss2Combatant(gladiator({ strength: 6 }), { id: "hero", name: "Hero" })] },
-        { id: "blue", combatants: [JSON.parse(JSON.stringify(minimal))] }
+        { id: "red", combatants: [ss2Combatant(gladiator({ strength: 6 }), { id: "hero", name: "Hero", x: -30 })] },
+        { id: "blue", combatants: [{ ...JSON.parse(JSON.stringify(minimal)), x: 30 }] }
       ]
     });
     applyAction(battle, { actorId: "hero", type: Ss2ActionType.NORMAL_ATTACK, targetId: "villain" });
@@ -1212,8 +1266,10 @@ function statusBattle({ heroFields = {}, villainFields = {}, status = [], seed =
     seed,
     rules: ss2TeamRules,
     teams: [
-      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9, vitality: 8, ...heroFields }), { id: "hero", name: "Hero" })] },
-      { id: "blue", combatants: [ss2Combatant(enchanter({ vitality: 8, ...villainFields }), { id: "villain", name: "Villain" })] }
+      // In contact, as `battleOf` is: the status phases are what these tests
+      // are about, and reaching one means landing a blow first.
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 9, vitality: 8, ...heroFields }), { id: "hero", name: "Hero", x: -30 })] },
+      { id: "blue", combatants: [ss2Combatant(enchanter({ vitality: 8, ...villainFields }), { id: "villain", name: "Villain", x: 30 })] }
     ]
   });
   combatantById(battle, "hero").status = status;

@@ -1527,7 +1527,13 @@ test("a placeholder rule set that declares no armour effect still writes only hi
   // EffectKind gained a generic resource kind rather than a bespoke armour
   // one: a bespoke kind would put an SS2 noun inside a game-agnostic resolver
   // and need a sibling for stamina, ammo and everything after.
-  assert.deepEqual(Object.values(EffectKind).sort(), ["damage", "heal", "resource", "status"]);
+  //
+  // ► **`position` JOINED THEM 2026-09-11**, on the same reasoning: a generic
+  //   absolute coordinate rather than a bespoke `walk` kind, so the resolver
+  //   stores what it is handed and never learns what an arena is. Like
+  //   `resource` it writes `to` and not `by`, because an effect log must be
+  //   replayable without accumulating drift.
+  assert.deepEqual(Object.values(EffectKind).sort(), ["damage", "heal", "position", "resource", "status"]);
 
   // The defeated fighter is at 0 hitpoints with all 44 points of armour still
   // standing, and that is right: `classicStyleRules` has no armour rule, and
@@ -1652,9 +1658,15 @@ test("CLOSED: a rule set reads armour off the canonical view, and the hash cover
   // The rule set still cannot see the vanilla record, and it no longer needs
   // to: `resources` is on the view, and the invariant that makes that sound is
   // that the projection carries everything the view does.
+  // ► **`x` JOINED THE VIEW 2026-09-11**, and it joined the PROJECTION in the
+  //   same commit — which is the invariant the paragraph above is about. This
+  //   rule set models no position, so its combatants carry `x: null`: the key
+  //   is present for every rule set so two peers commit to one projection
+  //   shape, and the null says "no geometry here" rather than leaving them to
+  //   disagree about whether the field exists.
   assert.deepEqual(seen[0], [
     "aiFilled", "alive", "health", "id", "loadout", "maxHealth",
-    "name", "resources", "seatId", "slotIndex", "stats", "status", "teamId"
+    "name", "resources", "seatId", "slotIndex", "stats", "status", "teamId", "x"
   ].sort());
   assert.equal(seen[0].includes("vanilla"), false);
   assert.equal(seen[0].includes("armourclass"), false, "armour arrives inside `resources`, not as a top-level field");
@@ -2012,13 +2024,35 @@ test("the host CONSTRUCTS with ss2TeamRules and supplied gladiators, and says wh
 test("and the wall it hits is the ATTACKER's damage pair, at the swing, not at construction", () => {
   const host = makeHost(1, { rules: ss2TeamRules });
   host.constructArena();
+  // Walked into contact first, because the wall is at the SWING and a bout now
+  // opens out of melee range. Driven through the real host — `submit` — rather
+  // than by writing positions behind it, so the approach this test steps over
+  // is the same one a player takes.
+  let guard = 0;
+  while (guard < 40 && !host.legalActions().some((option) => /attack$/.test(option.type))) {
+    guard += 1;
+    const actor = host.currentCombatantId();
+    const foe = host.wire().teams.flatMap((team) => team.combatants).find((c) => c.id !== actor);
+    const mine = host.wire().teams.flatMap((team) => team.combatants).find((c) => c.id === actor);
+    const toward = foe.x > mine.x ? "walk-right" : "walk-left";
+    const option = host.legalActions().find((o) => o.type === toward) ?? host.legalActions()[0];
+    host.submit({ actorId: actor, ...option });
+  }
+  assert.ok(guard > 0, "the bout must actually have opened out of range, or this steps over nothing");
 
   // Construction is past; the arithmetic is where the canonical bag runs out.
   // `CANONICAL_RESOURCE_SOURCES` carries neither `min_damage` nor `max_damage`,
   // and ss2TeamRules demands them of whoever ATTACKS at the moment the swing
   // resolves — role-based, never of a pure defender.
+  // ► **`legalActions()[0]` IS NO LONGER AN ATTACK, so the swing is selected by
+  //   name.** With position modelled the opening options are the two walks, and
+  //   a walk needs no damage pair — correctly: a gladiator still crossing the
+  //   arena should not have to declare what it hits for. So the wall this test
+  //   is about is reached only by actually swinging.
+  const swing = (surface) =>
+    surface.legalActions().find((option) => /attack$/.test(option.type)) ?? surface.legalActions()[0];
   assert.throws(
-    () => host.submit({ actorId: host.currentCombatantId(), ...host.legalActions()[0] }),
+    () => host.submit({ actorId: host.currentCombatantId(), ...swing(host) }),
     (error) => /max_damage, min_damage/.test(error.message) && /ATTACKS/.test(error.message)
   );
 
@@ -2130,8 +2164,26 @@ test("the opt-in is OPT-IN: without it the bag and the refusal are exactly as be
     [...CANONICAL_RESOURCE_SOURCES].sort(),
     "a caller that asks for nothing gets the closed list, so its hash cannot have moved"
   );
+  // Walked into contact for the same reason as the test above: the wall is at
+  // the SWING, and a bout now opens out of melee range. A walk costs this
+  // gladiator nothing it has not declared — correctly, since crossing the
+  // arena needs no damage pair — so the approach runs clean and the refusal
+  // still lands the moment it tries to hit somebody.
+  let plainGuard = 0;
+  while (plainGuard < 40 && !plain.legalActions().some((option) => /attack$/.test(option.type))) {
+    plainGuard += 1;
+    const actor = plain.currentCombatantId();
+    const everyone = plain.wire().teams.flatMap((team) => team.combatants);
+    const mine = everyone.find((c) => c.id === actor);
+    const foe = everyone.find((c) => c.id !== actor);
+    const toward = foe.x > mine.x ? "walk-right" : "walk-left";
+    plain.submit({ actorId: actor, ...(plain.legalActions().find((o) => o.type === toward) ?? plain.legalActions()[0]) });
+  }
+  assert.ok(plainGuard > 0, "the bout must actually have opened out of range");
+  const plainSwing = plain.legalActions().find((option) => /attack$/.test(option.type));
+  assert.ok(plainSwing, "and the approach must have reached melee range");
   assert.throws(
-    () => plain.submit({ actorId: plain.currentCombatantId(), ...plain.legalActions()[0] }),
+    () => plain.submit({ actorId: plain.currentCombatantId(), ...plainSwing }),
     (error) => /max_damage, min_damage/.test(error.message)
   );
 

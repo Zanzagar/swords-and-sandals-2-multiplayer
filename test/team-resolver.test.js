@@ -602,6 +602,20 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
  * The blueprints that must not move, and the hashes they produced **before**
  * per-slot fill existed.
  *
+ * ► **EVERY `combat` LITERAL MOVED ON 2026-09-11, AND EVERY `legacy` ONE DID
+ *   NOT — which is the more informative half.** `x` joined
+ *   `combatantProjection`, so the team projection rehashed for every rule set,
+ *   `null` included; `src/engine.js`'s façade projection does not carry it and
+ *   its six hashes are byte-identical. That asymmetry is the check that
+ *   position stayed inside the seam it was added to:
+ *
+ *     79952a5d -> 32e85f6d, b629f6a2 -> ae3bb07a, fefc60d4 -> ef1cbb43,
+ *     8d2f19d4 -> 6ef57cf4, 2007fba4 -> fcb5bdd6, and the last -> 132fea31.
+ *
+ *   These fills run under the PLACEHOLDER rule set, which declares no
+ *   `startingPosition`, so every combatant here carries `x: null`. The hash
+ *   moved on the key existing, not on any position being taken.
+ *
  * These literals were not hand-written. They were read off a run of the roster
  * at the commit before this change, over the five shapes a single-template team
  * can take: implicit empty slots, `null` and `{ fill: "ai" }` markers, the two
@@ -613,7 +627,7 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
 const UNCHANGED_FILL_BLUEPRINTS = [
   {
     name: "implicit empty slots",
-    combat: "79952a5d",
+    combat: "32e85f6d",
     legacy: "ecffd39f",
     blueprint: {
       seed: 3,
@@ -625,7 +639,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "null and object markers",
-    combat: "b629f6a2",
+    combat: "ae3bb07a",
     legacy: "5a573636",
     blueprint: {
       seed: 3,
@@ -637,7 +651,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "string markers",
-    combat: "fefc60d4",
+    combat: "ef1cbb43",
     legacy: "b2dfc69d",
     blueprint: {
       seed: 5,
@@ -649,7 +663,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a populated team template",
-    combat: "8d2f19d4",
+    combat: "6ef57cf4",
     legacy: "1529c5aa",
     blueprint: {
       seed: 7,
@@ -673,7 +687,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a template carrying an explicit id",
-    combat: "2007fba4",
+    combat: "fcb5bdd6",
     legacy: "be79738c",
     blueprint: {
       seed: 11,
@@ -685,7 +699,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a team that supplies no fighters at all",
-    combat: "5b5bafa7",
+    combat: "132fea31",
     legacy: "8e29b02b",
     blueprint: {
       seed: 13,

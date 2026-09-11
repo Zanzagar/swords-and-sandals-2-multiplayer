@@ -134,6 +134,22 @@ export function rosterFromCampaignRecord(record, { blueprints, includeFallen = f
     // is meant to be handled, and handing back live references to someone
     // else's state is a trap rather than an optimisation.
     const next = structuredClone(blueprint);
+    /**
+     * **POSITION IS DROPPED, and that is the faithful answer rather than a
+     * convenience.** A new bout RE-PLACES everyone: the build's battle entry
+     * puts the two clips at `(-250, 200)` and `(250, 200)` every time (map,
+     * "Battle entry" step 5), and nothing anywhere restores a previous bout's
+     * geometry. So a survivor carried forward starts where the rule set says a
+     * slot-0 gladiator starts, exactly like the challenger it is about to face.
+     *
+     * Found by carrying a survivor into a second bout: the survivor kept its
+     * blueprint's stated `x` while a freshly built challenger got
+     * `startingPosition`, so the two opened at different distances from the
+     * middle and the fight never reached a swing. A record that carried
+     * position would make every bout after the first depend on where the last
+     * one happened to stop.
+     */
+    delete next.x;
     next.health = outcome.health;
     // Conditions persist across a bout because nothing in the record or the
     // rule set clears them at a boundary — `death()` clears them on a KILL,

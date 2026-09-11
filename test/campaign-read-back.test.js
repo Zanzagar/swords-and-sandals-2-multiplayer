@@ -46,11 +46,18 @@ function gladiator(overrides = {}) {
 
 /** A finished bout: its record, and the blueprints it was built from. */
 function settledBout({ heroFields = {}, villainFields = {}, seed = 11, heroStatus = null } = {}) {
+  // Staged IN CONTACT. These tests are about the campaign record and the
+  // rosters derived from it, not about geometry: left to `startingPosition`
+  // the pair opens 500 apart against an unarmed reach of ~83, and the
+  // `options[0]` fallback below would take the first walk on offer — which is
+  // `walk-left` for both of them, so the hero retreats to the arena wall and
+  // the bout never settles. Position itself is covered in
+  // `test/ss2-position.test.js`.
   const blueprints = [
-    ss2Combatant(gladiator({ speed: 9, ...heroFields }), { id: "hero", name: "Hero", controller: "local" }),
+    ss2Combatant(gladiator({ speed: 9, ...heroFields }), { id: "hero", name: "Hero", controller: "local", x: -30 }),
     ss2Combatant(
       gladiator({ vitality: 0, herolevel: 1, ...villainFields }),
-      { id: "villain", name: "Villain", controller: "local" }
+      { id: "villain", name: "Villain", controller: "local", x: 30 }
     )
   ];
   const battle = createTeamBattle({
@@ -504,14 +511,75 @@ test("bout -> record -> roster -> BOUT: the record finally feeds something", () 
   );
   assert.ok(legalActions(next).length > 0, "and it is a real battle: somebody can act");
 
+  // ► **THE CARRIED-FORWARD BOUT OPENS WITH AN APPROACH, and the drive below
+  //   has to handle it.** `rosterFromCampaignRecord` deliberately DROPS the
+  //   survivor's position — the build re-places both clips at `(-250, 200)` and
+  //   `(250, 200)` on every battle entry — so this bout starts at the vanilla
+  //   separation like any other, and the previous version of this loop, which
+  //   fell back to `options[0]`, took `walk-left` for both fighters and marched
+  //   the survivor into the arena wall. The bout settling is what this test is
+  //   about; reaching the enemy is now part of that.
+  const towardWalk = (battle, actor) => {
+    const foe = battle.teams.flatMap((team) => team.combatants)
+      .find((combatant) => combatant.teamId !== actor.teamId && combatant.alive);
+    if (!foe || !Number.isFinite(actor.x) || !Number.isFinite(foe.x)) return null;
+    return foe.x > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
+  };
   let guard = 0;
-  while (!next.result && guard < 80) {
+  while (!next.result && guard < 200) {
     guard += 1;
     const actor = currentCombatant(next);
     const options = legalActions(next);
-    applyAction(next, { actorId: actor.id, ...(options.find((o) => o.type === Ss2ActionType.POWER_ATTACK) ?? options[0]) });
+    const toward = towardWalk(next, actor);
+    const chosen =
+      options.find((o) => o.type === Ss2ActionType.POWER_ATTACK) ??
+      options.find((o) => o.type === toward) ??
+      options[0];
+    applyAction(next, { actorId: actor.id, ...chosen });
   }
   assert.ok(next.result, "the carried-forward bout settles like any other");
+});
+
+test("read-back DROPS position, because a new bout re-places everyone", () => {
+  // ► **THE BUILD RE-PLACES ON EVERY BATTLE ENTRY.** Battle entry step 5 puts
+  //   the two clips at `(-250, 200)` and `(250, 200)` each time, and nothing in
+  //   the build restores a previous bout's geometry — so a survivor carried
+  //   forward starts where a slot-0 gladiator starts, exactly like the
+  //   challenger it is about to face.
+  //
+  //   Found by carrying a survivor into a second bout: it kept the position its
+  //   blueprint stated while a freshly built challenger got `startingPosition`,
+  //   so the two opened at different distances from the middle and the fight
+  //   never reached a swing.
+  //
+  //   **Pinned HERE because nothing else pins it any more.** A mutation
+  //   removing the drop survived the whole suite: `tools/hotseat.mjs` re-places
+  //   every bout of a circuit itself, so the CLI stopped depending on this and
+  //   took the only coverage with it.
+  const first = settledBout({ villainFields: { attack: 9, strength: 8, vitality: 3 } });
+  const stated = first.blueprints.find((blueprint) => blueprint.id === "hero");
+  assert.equal(stated.x, -30, "the blueprint must actually state one, or this proves nothing");
+
+  const { teams } = rosterFromCampaignRecord(first.record, { blueprints: first.blueprints });
+  const survivor = teams.flatMap((team) => team.combatants).find((combatant) => combatant.id === "hero");
+  assert.ok(survivor, "the hero must have survived, or there is nothing to carry");
+  assert.equal(Object.hasOwn(survivor, "x"), false, "the carried gladiator brings no geometry forward");
+
+  // And the rule set then places it where it places any slot-0 gladiator.
+  const rebuilt = createTeamBattle({
+    seed: 12,
+    rules: ss2TeamRules,
+    teams: [
+      teams.find((team) => team.id === "red"),
+      {
+        id: "blue",
+        name: "Blue",
+        combatants: [ss2Combatant(gladiator({ vitality: 0, herolevel: 1 }), { id: "challenger", name: "Challenger" })]
+      }
+    ]
+  });
+  assert.equal(combatantById(rebuilt, "hero").x, -250, "back on the vanilla mark, like every other bout");
+  assert.equal(combatantById(rebuilt, "challenger").x, 250, "and symmetric with the fresh challenger");
 });
 
 test("`playable` is PROVED against createTeamBattle, not asserted — and it was wrong for the commonest roster there is", () => {

@@ -102,7 +102,7 @@ const RULE_SETS = Object.freeze({
 
 function parseArgs(argv) {
   const options = {
-    seed: 1, hp: 60, armour: 0, rules: "ss2", enchant: null, teams: null, names: null
+    seed: 1, hp: 60, armour: 0, rules: "ss2", enchant: null, teams: null, names: null, approach: false
   };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
@@ -120,6 +120,7 @@ function parseArgs(argv) {
     else if (flag === "--circuit") options.circuit = next();
     else if (flag === "--rules") options.rules = next();
     else if (flag === "--names") options.names = next().split(",").map((part) => part.trim());
+    else if (flag === "--approach") options.approach = true;
     else if (flag === "--help" || flag === "-h") options.help = true;
     else throw new Error(`Unknown flag ${flag}. Try --help.`);
   }
@@ -215,6 +216,9 @@ Hot-seat: two humans, one keyboard, one fight.
                  potency 1-3 (default 3 — the strongest grade the magic shop
                  sells). A condition then TAKES ITS BEARER'S NEXT TURN: that is
                  the build's behaviour, not a penalty this tool invented.
+  --approach     start at the build's own separation (the vanilla pair's +/-250)
+                 instead of already engaged, so the fight opens with the walk
+                 in. Only the ss2 rule set models position at all.
   --armour <n>   give both fighters a breastplate and helmet of this grade
                  (default 0, no armour). SS2 subtracts damage from armour
                  first and carries only the overflow into health.
@@ -398,7 +402,38 @@ function buildPlaceholderFighter(id, name, hp) {
  */
 const ENCHANTMENT_TYPE = Object.freeze({ burning: 2, frozen: 3, poison: 4, life_stolen: 5 });
 
-function buildSs2Fighter(id, name, hp, armour, enchant) {
+/**
+ * WHERE THE TWO DEMO FIGHTERS STAND.
+ *
+ * ► **Added 2026-09-11, when the rule set learned about position.** Left to
+ *   `startingPosition` they would open at the vanilla pair's own ±250 — 500
+ *   apart against an unarmed reach of ~83 — and a hot-seat fight would begin
+ *   with ten walks and no attack on offer. That is FAITHFUL, and it is also
+ *   flatly against what this file says it is for three paragraphs up: an
+ *   arbitrary symmetric pair "chosen so a demo fight lasts a few turns".
+ *
+ *   So the demo opens ENGAGED, and `--approach` opens at the real separation
+ *   for anyone who wants to walk in. The flag is the honest one to add: it
+ *   makes the vanilla geometry reachable from the only thing here a person can
+ *   play, rather than leaving the positional layer exercised by tests alone.
+ */
+const CONTACT_X = 30;
+
+/**
+ * Puts one combatant where this run wants it: engaged by default, or left to
+ * the rule set's own `startingPosition` under `--approach`.
+ *
+ * Applied at EVERY bout of a circuit, not only the first, because a new bout
+ * re-places everyone — see the call site in `runCircuit`.
+ */
+function stagePosition(combatant, teamId, approach) {
+  const next = { ...combatant };
+  if (approach) delete next.x;
+  else next.x = teamId === "red" ? -CONTACT_X : CONTACT_X;
+  return next;
+}
+
+function buildSs2Fighter(id, name, hp, armour, enchant, approach = false) {
   const source = ss2Combatant(
     {
       strength: 5,
@@ -427,7 +462,14 @@ function buildSs2Fighter(id, name, hp, armour, enchant) {
       // debris draw and the knockback direction.
       gladiator_dir: id === "p1" || id.startsWith("red-") ? "right" : "left"
     },
-    { id, name, controller: "local" }
+    {
+      id,
+      name,
+      controller: "local",
+      // Undefined under `--approach`, so `startingPosition` decides and the
+      // pair opens where the build opens them.
+      x: approach ? undefined : (id === "p1" || id.startsWith("red-") ? -CONTACT_X : CONTACT_X)
+    }
   );
   // `--hp` stages `hitpointsmax` directly. `maximumHealth` returns a declared
   // maxHealth verbatim precisely so a staged one is never quietly overruled.
@@ -477,7 +519,7 @@ async function main() {
 
   const rules = RULE_SETS[options.rules];
   const buildFighter = options.rules === "ss2"
-    ? (id, name) => buildSs2Fighter(id, name, options.hp, options.armour, options.enchant)
+    ? (id, name) => buildSs2Fighter(id, name, options.hp, options.armour, options.enchant, options.approach)
     : (id, name) => buildPlaceholderFighter(id, name, options.hp);
   const solo = options.sizes[0] === 1 && options.sizes[1] === 1;
   const openingTeams = [
@@ -728,7 +770,18 @@ async function runCircuit({ options, rules, buildFighter, openingTeams, prompter
       return;
     }
 
-    teams = advance.teams;
+    // ► **EVERY BOUT IS RE-PLACED, exactly as bout 1 was.** `initbattle` puts
+    //   the clips at `(-250, 200)` and `(250, 200)` on every battle entry and
+    //   nothing restores a previous bout's geometry, which is why
+    //   `rosterFromCampaignRecord` DROPS position — so a carried survivor
+    //   arrives with none. Without this line the next bout opened with the
+    //   fresh challenger staged in contact and the survivor back at the
+    //   vanilla mark: 280 apart, nobody in reach, and a circuit that never
+    //   reached its second winner. Found by the circuit test, 2026-09-11.
+    teams = advance.teams.map((team) => ({
+      ...team,
+      combatants: team.combatants.map((combatant) => stagePosition(combatant, team.id, options.approach))
+    }));
     blueprints = teams.flatMap((team) => team.combatants);
   }
 }
