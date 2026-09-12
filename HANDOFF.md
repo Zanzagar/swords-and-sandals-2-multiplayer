@@ -67,6 +67,12 @@ priced on the weapon with strength in the denominator — and **both gated behin
   **Measure the live number, never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
 
+► **THIS SESSION'S THIRD STRETCH COMMITTED FIVE AND MEASURED FIVE UNPUSHED
+  AFTER ITS HANDOFF COMMIT; the correction commit carrying this sentence makes
+  six.** An event, with the self-reference, for the reason every block below it
+  gives. **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
 ► **THE `weaponweights` DIRECTION IS READ, AND THE REPOSITORY ALREADY HELD IT
   (2026-09-11, `ac8c7f4`). RANKED ITEM 1 IS CLOSED.** Index 1 IS the heavy end,
   so `ss2WeaponMass` is right and the swing cost is NOT backwards. Read
