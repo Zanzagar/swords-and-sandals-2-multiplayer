@@ -240,8 +240,8 @@ export const DEPTH_SCALE_PER_RANK = 0.03;
  *
  * ## The depth half is what a one-dimensional arena needs from a renderer
  *
- * The resolver models ONE axis. That is faithful — vanilla has one gladiator a
- * side, so there is no second axis to be faithful to — but it means a team
+ * The resolver models ONE axis. ~~That is faithful — vanilla has one gladiator a
+ * side, so there is no second axis to be faithful to~~ — but it means a team
  * walking at the enemy all stops at the same clamp line: measured, three allies
  * at x = 40, 40, 30 while each claims 85 units of personal space. **That is not
  * the model being wrong, it is the model being 1-D**, and a queue is a perfectly
@@ -249,12 +249,40 @@ export const DEPTH_SCALE_PER_RANK = 0.03;
  * job, and doing it by RANK rather than by current position means figures never
  * pop or swap as they move: `slotIndex` does not change during a bout.
  *
- * Lanes in the resolver were tried first and are arithmetically impossible.
- * Reach is `physical_size + 44` at minimum and the front rank already parks at
- * `physical_size`, so the whole budget for standing further back is 44 units,
- * shared across every rank, against a drawn figure ~57 wide. Measured over 8
- * seeds at strides 60, 85 and 130: **0 of 8 bouts settled and the third rank
- * never once had an attack on offer.** See the handoff of 2026-09-12.
+ * ~~Lanes in the resolver were tried first and are arithmetically impossible.~~
+ * **X-LANES are. Read the arithmetic below for what it actually rules out,
+ * corrected 2026-09-12.** Reach is `physical_size + 44` at minimum and the front
+ * rank already parks at `physical_size`, so the whole budget for standing
+ * further back IS 44 units, shared across every rank, against a drawn figure
+ * ~57 wide. Measured over 8 seeds at strides 60, 85 and 130: **0 of 8 bouts
+ * settled and the third rank never once had an attack on offer.** See the
+ * handoff of 2026-09-12.
+ *
+ * ► **THAT MEASUREMENT IS SOUND AND IT IS ABOUT ONE AXIS.** Every quantity in
+ *   it — the clamp line, the reach, the 44 — is an `x` quantity, because the
+ *   ranks were staggered along the SAME axis the walk and the reach gate both
+ *   spend. A PERPENDICULAR axis does not spend that budget at all, and the
+ *   struck-through sentence above is why nobody checked: it asserted there was
+ *   no second axis to be faithful to, and **the build's own `getfightdistance`
+ *   is two-dimensional** (`ydist` at `+0x0338`, combined at `+0x0427`; see
+ *   `ss2FightDistance`).
+ *
+ *   Under the build's own metric, `round(sqrt(xdist^2 + ydist^2))`, a second
+ *   rank parked at the front rank's clamp line (`dx = 86` at strength 9,
+ *   `reach = 130`) stays in reach until `dy` reaches 97:
+ *
+ *   ```text
+ *     dy      0    20    40    60    80    97   100   120
+ *     dist   86    88    95   105   117   130   132   148
+ *            <-------- in reach -------->|<-- out of reach -->
+ *   ```
+ *
+ *   **97 units against x's 44 — 2.2x the budget, and it does not compete with
+ *   the walk clamp.** Two of the three strides that failed as x-lanes (60, 85)
+ *   are comfortable as y-strides. This does NOT make a second rank faithful —
+ *   vanilla stands both clips at `_y = 200` and `MAP_SILENCE.multi-slot-arena-
+ *   geometry` still owns where an ally stands — it makes the DISTANCE between
+ *   two unlevel gladiators derived rather than invented.
  *
  * @param {object} actor `{ yscale, slotIndex }` — composed by the caller from
  *   the scene actor (which carries `yscale`) and the wire combatant (which

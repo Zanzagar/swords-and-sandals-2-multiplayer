@@ -33,6 +33,13 @@
  *    stamina. This should be ZERO. It was 4.6% of 3v3 actions until 2026-09-12,
  *    when `chooseAiAction` was picking the globally weakest foe and then
  *    resting if that one happened to be out of reach.
+ * 5. **CROSSINGS** — turns on which anybody stands on the far side of an enemy.
+ *    Zero means the two teams meet at ONE interface and every blow in the bout
+ *    is struck there. See `anyCrossing`.
+ * 6. **SIMULTANEOUS FIGHTS** — how many separate engagements exist at once.
+ *    One means a breakoff fight is not unlikely but IMPOSSIBLE. See
+ *    `simultaneousFights`. **This is the number the owner's brief is about**,
+ *    and the one any second-axis work has to move.
  *
  * ## THE RESULT THAT DECIDED THE DESIGN, and it took two wrong guesses first
  *
@@ -46,7 +53,9 @@
  * STOPS is the clamp against the nearest binding foe, so all three allies park
  * on one line whatever they are aiming at.
  *
- * What is actually true is stronger than either, and this is the number to keep:
+ * What is actually true is stronger than either, and this is the number to keep
+ * — **now counted by this tool rather than quoted at it** (metrics 5 and 6
+ * below; until 2026-09-12 this block was prose and nothing computed it):
  *
  * ```text
  *   3v3, 24 bouts, 1,682 turns inspected
@@ -81,11 +90,86 @@
  * Node builtins only.
  */
 import process from "node:process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 import { combatantById } from "../src/team/index.js";
-import { ss2BattleValues, ss2Combatant, ss2TeamRules, SS2_ARENA } from "../src/team/ss2-rules.js";
+import {
+  ss2BattleValues, ss2Combatant, ss2TeamRules, SS2_ARENA,
+  ss2FightDistance, ss2Reach
+} from "../src/team/ss2-rules.js";
 import { demoSide } from "./arena/roster.js";
+
+/**
+ * How many SEPARATE fights are happening right now.
+ *
+ * ► **THIS AND `anyCrossing` BELOW ARE THE TWO NUMBERS THIS FILE'S OWN HEADER
+ *   CALLS "the number to keep", AND UNTIL 2026-09-12 IT DID NOT COMPUTE
+ *   EITHER.** They came from a scratch script that died with its session, and
+ *   were quoted into the tool committed to stop exactly that — under a
+ *   paragraph reading "a number nobody can reproduce is not evidence". Found
+ *   twice independently on 2026-09-12, by the main session and by an agent
+ *   asked a different question. The conclusion they support survives, because
+ *   it is re-derivable from the code; the NUMBERS had no instrument.
+ *
+ * An EDGE joins two living gladiators on OPPOSITE sides who are inside reach.
+ * `ss2Reach` is per-actor — this roster's three slots reach 130/129/129 — so
+ * engagement is `distance < max(reachA, reachB)`: the UNION, not the
+ * intersection, because a fighter who can be struck without striking back is
+ * still in a fight.
+ *
+ * A FIGHT is a connected component of that graph CONTAINING AT LEAST ONE EDGE.
+ * Counting components over every living body instead would report a gladiator
+ * standing alone as a fight, and in a converged 3v3 that is the difference
+ * between "one brawl" and "four fights".
+ */
+export function simultaneousFights(living) {
+  const parent = new Map(living.map((combatant) => [combatant.id, combatant.id]));
+  const find = (id) => {
+    let root = id;
+    while (parent.get(root) !== root) root = parent.get(root);
+    return root;
+  };
+  const engaged = new Set();
+  for (let i = 0; i < living.length; i += 1) {
+    for (let j = i + 1; j < living.length; j += 1) {
+      const a = living[i];
+      const b = living[j];
+      if (a.teamId === b.teamId) continue;
+      const distance = ss2FightDistance(a, b);
+      if (distance === null) continue;
+      if (distance >= Math.max(ss2Reach(a), ss2Reach(b))) continue;
+      const rootA = find(a.id);
+      const rootB = find(b.id);
+      if (rootA !== rootB) parent.set(rootA, rootB);
+      engaged.add(a.id);
+      engaged.add(b.id);
+    }
+  }
+  const roots = new Set();
+  for (const id of engaged) roots.add(find(id));
+  return roots.size;
+}
+
+/**
+ * Has anybody got PAST anybody?
+ *
+ * Team 0 starts at negative x and team 1 at positive (`startingPosition`), so a
+ * member of team 0 standing to the RIGHT of any member of team 1 can only have
+ * happened by crossing.
+ *
+ * **In one dimension this is 0 by construction** — `ss2WalkDestination` clamps
+ * a walk at `defender._x -/+ physical_size(defender)` and its reversal guard
+ * sends a crossing walk nowhere — and that is the whole argument for a second
+ * axis. It is MEASURED here rather than asserted so the argument can be
+ * checked, and so a change to the geometry is visible the moment it lands.
+ */
+export function anyCrossing(living, leftTeamId) {
+  const left = living.filter((combatant) => combatant.teamId === leftTeamId);
+  const right = living.filter((combatant) => combatant.teamId !== leftTeamId);
+  return left.some((a) => right.some((b) => a.x > b.x));
+}
 
 const IS_ATTACK = /attack$/;
 
@@ -111,7 +195,8 @@ function census(perSide, { seeds, guard }) {
     blows: 0, through: 0,
     mutualTurns: 0, reachTurns: 0,
     idleRests: 0,
-    spread: 0, widest: 0
+    spread: 0, widest: 0,
+    crossingTurns: 0, mostFights: 0, multiFightTurns: 0
   };
   for (let seed = 1; seed <= seeds; seed += 1) {
     const host = createVanillaBattleHost({
@@ -126,6 +211,10 @@ function census(perSide, { seeds, guard }) {
     });
     host.constructArena();
     const ids = host.combatantIds();
+    // Team 0 is the side `startingPosition` puts at negative x. Read off the
+    // battle rather than hard-coded to "red", so a caller that swaps the
+    // rosters gets a crossing count that still means what it says.
+    const leftTeamId = host.battle.teams[0].id;
     totals.bouts += 1;
     let taken = 0;
     let tightest = Infinity;
@@ -146,6 +235,13 @@ function census(perSide, { seeds, guard }) {
         const xs = living.map((combatant) => combatant.x);
         tightest = Math.min(tightest, Math.max(...xs) - Math.min(...xs));
       }
+
+      // (5) CROSSINGS and (6) SIMULTANEOUS FIGHTS. Per TURN rather than per
+      // bout, so the denominator is the same `actions` every other rate uses.
+      if (anyCrossing(living, leftTeamId)) totals.crossingTurns += 1;
+      const fights = simultaneousFights(living);
+      if (fights > totals.mostFights) totals.mostFights = fights;
+      if (fights >= 2) totals.multiFightTurns += 1;
 
       // (2) MUTUAL REACH: can this actor hit every living enemy right now?
       const foesAlive = living.filter((combatant) => combatant.teamId !== actor.teamId);
@@ -214,6 +310,11 @@ function main(argv) {
     console.log(`  can hit EVERY foe    ${pct(totals.mutualTurns, totals.reachTurns)} of turns  (${totals.mutualTurns}/${totals.reachTurns})`);
     console.log(`  blows through a body ${pct(totals.through, totals.blows)}  (${totals.through}/${totals.blows})`);
     console.log(`  idle rests           ${totals.idleRests}  ${totals.idleRests === 0 ? "" : "<-- SHOULD BE ZERO"}`);
+    // The two that decide whether a second engagement exists at all. In one
+    // dimension both are pinned by the geometry: nobody may cross, so the two
+    // teams meet at a single interface and there is never more than one fight.
+    console.log(`  crossings            ${pct(totals.crossingTurns, totals.actions)} of turns  (${totals.crossingTurns}/${totals.actions})`);
+    console.log(`  most fights at once  ${totals.mostFights}   (2 or more on ${totals.multiFightTurns} turns)`);
     console.log("");
   }
 
@@ -232,4 +333,11 @@ function main(argv) {
   return 0;
 }
 
-process.exitCode = main(process.argv.slice(2));
+// Guarded so the two metric functions above can be imported and tested without
+// running a 90-second sweep as a side effect. **This tool had no test at all
+// until 2026-09-12** — the one artefact whose numbers justify the second axis
+// was the one artefact nothing could catch being wrong. Same idiom as
+// `tools/inspect-swf.mjs:1059` and `tools/capture-session.mjs:407`.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  process.exitCode = main(process.argv.slice(2));
+}

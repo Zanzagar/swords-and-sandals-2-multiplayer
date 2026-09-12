@@ -100,6 +100,59 @@ function towardWalk(battle, actorId) {
 }
 
 /* ------------------------------------------------------------------ */
+/* The build's own distance metric                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `getfightdistance` is EUCLIDEAN, and this repository recorded it as the
+ * x-separation in four places until 2026-09-12. The offsets it cited were
+ * always right; `ydist` sits between them. See `ss2FightDistance`.
+ *
+ * These two tests pin the two halves that matter: the second term is really
+ * there, and turning it on moved nothing, because a level pair reduces to the
+ * previous body EXACTLY rather than approximately.
+ */
+test("fightdistance is the build's hypotenuse, not the x-separation", () => {
+  // `+0x0427`: fightdistance = round(sqrt(xdist*xdist + ydist*ydist)).
+  // 3-4-5, so no rounding can hide a wrong operator.
+  assert.equal(ss2FightDistance({ x: 0, y: 0 }, { x: 30, y: 40 }), 50);
+  assert.equal(ss2FightDistance({ x: 0, y: 0 }, { x: 0, y: 40 }), 40, "a pure y separation is a real distance");
+
+  // The worked case from `figureScaleFor`'s docstring: a second rank parked on
+  // the front rank's clamp line at strength 9 (physical_size 86, reach 130)
+  // stays in reach until dy reaches 97. This is the arithmetic that makes a
+  // perpendicular axis viable where an x-stagger is not.
+  assert.equal(ss2FightDistance({ x: 0, y: 0 }, { x: 86, y: 60 }), 105);
+  assert.equal(ss2FightDistance({ x: 0, y: 0 }, { x: 86, y: 97 }), 130);
+});
+
+test("a level pair reduces EXACTLY to the rounded x-separation, so no pinned distance moved", () => {
+  // The reduction is exact, not approximate: with ydist 0, round(sqrt(xdist^2))
+  // is xdist, and xdist is already round(|dx|).
+  //
+  // The negative-half-integer case is the one that breaks the naive rewrite —
+  // `Math.round(-2.5)` is -2, so rounding the SIGNED difference before squaring
+  // loses a unit. The build branches on which clip is left, always subtracting
+  // the smaller from the larger, so the absolute value comes FIRST.
+  for (let dx = -400; dx <= 400; dx += 1) {
+    for (const frac of [0, 0.25, 0.5, 0.75, -0.5]) {
+      const a = { x: dx + frac };
+      const b = { x: 0 };
+      assert.equal(
+        ss2FightDistance(a, b),
+        Math.round(Math.abs(a.x - b.x)),
+        `a level pair at dx ${dx + frac} must reduce to the rounded x-separation`
+      );
+    }
+  }
+
+  // An absent `y` reads as 0 rather than throwing or returning null: every
+  // combatant in the tree today has no second coordinate, and the 1-D answer
+  // is the correct one for them.
+  assert.equal(ss2FightDistance({ x: -250 }, { x: 250 }), 500);
+});
+
+/* ------------------------------------------------------------------ */
 /* Construction geometry                                               */
 /* ------------------------------------------------------------------ */
 

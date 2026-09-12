@@ -709,8 +709,18 @@ What each group is for:
 hero always starts on a warrior controller because root frame 221 forces
 `equipped_weapon = 1` and `using_bow = false`. `getfightdistance`
 (sprite 2249 frame 1 `DoAction@0x6e421b` `+0x02ff`, `+0x0427`) makes
-`fightdistance` the rounded x-separation of the two clips, which is 500 at
-construction.
+`fightdistance` the rounded ~~x-separation~~ **EUCLIDEAN separation** of the two
+clips, which is 500 at construction.
+
+► **"x-separation" WAS WRONG, corrected 2026-09-12 against the oracle.** Both
+offsets above are real; `ydist = Math.round(<far>._y - <near>._y)` sits BETWEEN
+them at `+0x0338` / `+0x03de`, and `+0x0427` combines the two:
+`fightdistance = Math.round(Math.sqrt(xdist*xdist + ydist*ydist))`. Reproduce
+with `node tools/inspect-swf.mjs <oracle> --function getfightdistance`.
+The 500 at construction is unaffected — both clips are placed at `_y = 200`, so
+`ydist` is 0 for standing play and the separation reduces exactly to the
+x-distance. See `ss2FightDistance` in `src/team/ss2-rules.js` for the full
+derivation and for what it does and does not license.
 
 ► **THE INVARIANT THAT STOOD HERE IS BROKEN, corrected 2026-09-07.** It read:
   *"the largest `weapon_range` any row in §3 can produce is

@@ -952,17 +952,72 @@ export const SS2_ARENA = Object.freeze({
 });
 
 /**
- * `fightdistance` — the rounded x-separation of two gladiators.
+ * `fightdistance` — the rounded EUCLIDEAN separation of two gladiators.
  *
- * `getfightdistance`, `sprite 2249 frame 1 DoAction@0x6e421b` `+0x02ff` /
- * `+0x0427` (`docs/integration/ss2-champion-dna.md:710-712`), which makes it
- * the rounded separation of the two clips and 500 at construction. Null when
- * either side models no position, so a caller can tell "not modelled" from
- * "standing on top of each other".
+ * ► **THIS WAS RECORDED AS "THE ROUNDED X-SEPARATION" IN FOUR PLACES, AND THE
+ *   BUILD'S OWN FUNCTION IS TWO-DIMENSIONAL. Corrected 2026-09-12 by reading
+ *   the oracle.** The two offsets this docstring has always cited are both
+ *   REAL — and the `ydist` computation sits BETWEEN them, and was never read.
+ *   **Fifth instance of this project's signature failure: a correct offset
+ *   whose neighbouring instructions hold the answer.** (The other four:
+ *   `ss2Reach`'s half-a-wrapped-line docstring, `MAP_SILENCE.movement-displacement`,
+ *   the `fightdistance` "no writer at all" claim, and the `physical_size`
+ *   conflation. The pattern is not a stale note — it is a citation that was
+ *   never re-opened.)
+ *
+ * `getfightdistance`, `sprite:2249/frame:1/DoAction@0x6e421b`, re-derived in
+ * full with `node tools/inspect-swf.mjs <oracle> --function getfightdistance`:
+ *
+ * ```text
+ *   +0x02c4  branch on hero._x < villain._x        (Less2; Not; If)
+ *   +0x02ff  xdist = Math.round(<far>._x - <near>._x)     the two arms, so
+ *   +0x0395    "     "                                    xdist is round(|dx|)
+ *   +0x0338  ydist = Math.round(<far>._y - <near>._y)     constant[9] = "_y"
+ *   +0x03de    "     "
+ *   +0x0427  fightdistance = Math.round(Math.sqrt(xdist*xdist + ydist*ydist))
+ *   +0x0467  midwaypoint   = Math.round(fightdistance / 2)
+ * ```
+ *
+ * **AND `_y` GENUINELY VARIES, so the second term is not dead code.** The jump
+ * stores `attacker.grounded = attacker._y` and then walks `_y` away from it,
+ * landing when `_y` is no longer less than `grounded` (`sprite:862[overlay]/
+ * frame:52/DoAction@0x240c7f`, `+0x3807`..`+0x3823`). The build's own tooltip
+ * says so in words: *"The **height** and distance of your jump is determined by
+ * your agility"* (`sprite:862/frame:5/DoAction@0x238de2` `+0x0b9c`). So during a
+ * jump the build's `fightdistance` is a true hypotenuse.
+ *
+ * ## What this means, stated narrowly, because the temptation is to overclaim
+ *
+ * The METRIC is derived and is the build's. **Where a gladiator STANDS is
+ * still one-dimensional in vanilla** — both clips are constructed at `_y = 200`
+ * ("Battle entry" step 5) and a standing fighter never leaves it, so
+ * `MAP_SILENCE.multi-slot-arena-geometry` still governs where a second ALLY
+ * stands and that remains authored mod surface. What is no longer authored is
+ * how far apart two gladiators are once they are not level.
+ *
+ * **The reduction is exact, which is why this rewrite moves nothing.** With
+ * `ydist === 0`, `round(sqrt(xdist^2))` is `xdist`, and `xdist` is already
+ * `round(|dx|)` — the previous body exactly. Verified over 30,005 offsets
+ * including the negative-half-integer case (`Math.round(-2.5) === -2`) that
+ * breaks the naive rewrite which rounds the SIGNED difference: the build
+ * branches so that it always subtracts the smaller from the larger, so the
+ * absolute value comes FIRST and the rounding second.
+ *
+ * `y` is absent on every combatant today and reads as 0, so every caller gets
+ * the 1-D answer until a rule set gives gladiators a second coordinate.
+ *
+ * Null when either side models no position, so a caller can tell "not
+ * modelled" from "standing on top of each other".
  */
 export function ss2FightDistance(a, b) {
   if (!Number.isFinite(a?.x) || !Number.isFinite(b?.x)) return null;
-  return Math.round(Math.abs(a.x - b.x));
+  // Absolute FIRST, then round — the build's two arms subtract the smaller
+  // from the larger, so neither component is ever a rounded negative.
+  const xdist = Math.round(Math.abs(a.x - b.x));
+  const ay = Number.isFinite(a?.y) ? a.y : 0;
+  const by = Number.isFinite(b?.y) ? b.y : 0;
+  const ydist = Math.round(Math.abs(ay - by));
+  return Math.round(Math.sqrt(xdist * xdist + ydist * ydist));
 }
 
 /**

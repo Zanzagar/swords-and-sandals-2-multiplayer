@@ -1274,7 +1274,7 @@ an asset:
 | --- | --- | --- |
 | `death(whichcharacter, how_died)` | `0x240c85` `+0x1e99` | routes on CLIP IDENTITY (`=== gladiators.villain` → `combatwon`, `=== .hero` → `combatlost`). **An ally dying matches neither and transitions nothing.** |
 | `cast_spell_icon` | `+0x2251` | two identity branches with literal `_x` 60 / 580; an ally casting falls through both and writes to `undefined` |
-| `getfightdistance()` | `0x6e4221` `+0x2a9` | reads `gladiators.hero._x` / `.villain._x` by literal name to derive `midwaypoint` and `fightdistance` — which the controller selector then uses |
+| `getfightdistance()` | `0x6e4221` `+0x2a9` | reads `gladiators.hero._x` / `.villain._x` **and `._y`** by literal name to derive `midwaypoint` and `fightdistance` — which the controller selector then uses. **`._y` was omitted here until 2026-09-12**: `fightdistance` is `round(sqrt(xdist^2 + ydist^2))` (`+0x0427`), not the x-separation. See `ss2FightDistance`. |
 | the villain AI | `0x23f83b` `+0x2c9` | unparameterised; assumes one opponent |
 
 **So stages 5 and 6 need no new or altered game asset.** What they need is our
