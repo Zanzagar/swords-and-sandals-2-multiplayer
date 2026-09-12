@@ -8,6 +8,17 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-12 — weapon_range is projected, and twelve verifiers broke six things](docs/handoffs/2026-09-12-0930--weapon-range-is-projected-and-the-wave-broke-six.md).**
+Start there. **Ranked item 1 is CLOSED**: `weapon_range` is a projected
+resource, the build's own overlap clamp is restored, the `foe.x` narrowing is
+gone. The reach it replaced was `physical_size` — **the reach of no gladiator
+the build can make**, because its docstring cited half of a wrapped line.
+**Then a 12-agent wave broke six things in it, and the worst was mine: I wrote
+the sub-100 nudge backwards in five places. It SEPARATES.** The bytes do not
+settle that — only the `gladiator_dir` turnaround does — so the tool now
+DERIVES the direction instead of checking a constant.
+
+*(The brief it supersedes, whose ranked item 1 is the work above:)*
 [2026-09-12 01:40 — the last authored number is derived](docs/handoffs/2026-09-12-0140--the-last-authored-number-is-derived.md).**
 Start there. **The walk displacement was in the build all along** —
 `movement_speed * 16` eased to a stop — so `MAP_SILENCE.movement-displacement` is
@@ -90,6 +101,69 @@ priced on the weapon with strength in the denominator — and **both gated behin
   the self-reference in it, for the reason every block below it gives: a bare
   count is false one commit later. **Measure the live number, never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **`weapon_range` IS A PROJECTED RESOURCE AND THE BUILD'S OWN CLAMP IS BACK
+  (2026-09-12, `6926069` + `3666c62`). RANKED ITEM 1 IS CLOSED.** `ss2Reach`
+  returned `physical_size` and called it "the unarmed reach", citing
+  `ss2-item-tables.md:58` — **half of a wrapped line**; line 59 continues
+  `+ _root["weapon" + c.weapon][5] * 44`. There is no unarmed branch in
+  `battlevalues`, and the smallest `[5]` in ninety rows is 1, so the shipped
+  reach was 44 short of the shortest the build has. **Fourth instance here of a
+  quoted offset's neighbouring line holding the answer, and the first that was a
+  DOCSTRING rather than a `MAP_SILENCE` entry** — so the catalogue's new "say why
+  the bytes cannot answer it" rule would not have caught it. The clamp is the
+  DEFENDER's `physical_size`, the gate is the ATTACKER's `weapon_range`; one
+  function for both is what deadlocked the faithful clamp. Byte-identical walk
+  ratios to the narrowing it deletes, and 8/8 settling in all 24 sweep
+  configurations.
+
+  ► **THEN 12 AGENTS BROKE SIX THINGS IN IT — 6 questions + 6 write-nothing
+    verifiers, 0 dead, 5 HOLDS and 1 PARTIALLY-BROKEN, and the HOLDS verdicts
+    carried more damage than the broken one.** All six re-derived by the main
+    session before being written down.
+    - **THE SUB-100 NUDGE SEPARATES, and I wrote "drives the two together" into
+      two source docstrings, two test comments and a commit message.** The
+      nudge's own bytes DO NOT settle it — `hero._x += 1` is toward or away
+      depending on what `gladiator_dir` means, and the rival convention fits the
+      same opcodes. The TURNAROUND settles it: `if (hero._x < villain._x)
+      hero.gladiator_dir = "right"` (`+0x28f3` -> `+0x290e`), so the word is
+      FACING and both arms move the pair APART.
+      **And the claim it supported is broken a second time, independently**: the
+      guard is `fightdistance < 100` while the parked-with-gate-shut case needs a
+      separation of at least `80 + 44 = 124`. The nudge cannot fire there.
+      **The build has no escape from that case; it simply has the case.**
+    - **`physical_size` IS a live reach gate**, just not `weapon_range`: the
+      frame-4 selector's bow arm is `fightdistance < 100 + hero.physical_size`
+      and never reads `weapon_range` at all.
+    - **A THIRD reach gate exists and this repository did not hold it** —
+      `sprite:862/frame:52/DoAction@0x23f835` `+0x0356`: the VILLAIN's AI gate is
+      `(equipped_weapon == 1 && fightdistance < villain.weapon_range) ||
+      (equipped_weapon == 2 && fightdistance < 200)`. **The two sides do not
+      share a gate in vanilla.**
+    - **`[5]` runs 1, 2, 3, 4 and 100** — 18 ranged rows at 100. The build's
+      reach scale is 44 to 4,400, and the sweeps covered 1/2/3 only.
+    - **The archive claim is mostly WITHDRAWN.** 3,004 resolve not 3,091; 432 are
+      ambiguous and every one spans the range column; and "not one implies a
+      `weapon_range` below `physical_size + 44`" is **unfalsifiable by
+      construction**, because min `[5]` is 1 over every row. What survives: the
+      archive's hero resolves uniquely to weapon 0, so its reach is 131 not 87 —
+      a fact about the DAMAGE columns, with the range following through the
+      table.
+    - **I made the exact reporting error my own docstring convicts somebody of.**
+      `tools/arena/roster.js` said the `weapon_range: 1` paste meant "no bout in
+      the arena ever settled". Every bout settled either way — 24/24 — and the
+      real diagnostic is **0 attacks and seven times the actions**. The crowd
+      kills them. That is the failure `ss2WalkDestination` already names, quoted
+      in the same commit that repeated it.
+  **WHAT HELD:** the formula, the absence of an unarmed branch, the clamp's
+  structure, the strict `<`, the bow override, **no golden moved** (confirmed
+  independently by hashing all 23 rebuilt projections on both trees) and
+  **exactly one seeded pin moved**.
+  ► **UNFIXED AND RANKED: the browser arena's SPECTATE mode never reaches a
+    swing.** `tools/arena/main.js:572` drives `options[turnNumber %
+    options.length]`; out of range that list is `[walk-left, walk-right, rest]`,
+    so the cycle is net-zero displacement forever. 24/24 bouts, 20,712 actions,
+    **0 attacks**, identical before and after this work. Not caused here.
 
 ► **THE WALK DISPLACEMENT IS DERIVED AND `MAP_SILENCE.movement-displacement` IS
   GONE (2026-09-12, `bdc157b` + `6bb790e`).** `movement_speed * 16`, scaled by
