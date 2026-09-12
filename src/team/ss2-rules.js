@@ -1486,6 +1486,42 @@ export function ss2WalkDestination(actor, foes, direction) {
     const limit = foe.x - direction * ss2PhysicalSize(foe);
     if ((to - limit) * direction > 0) to = limit;
   }
+  // ► **THE REVERSAL GUARD — AUTHORED, AND IT EXISTS BECAUSE THE BUILD'S OWN
+  //   CLAMP BREAKS THIS MODULE'S ONE LOAD-BEARING INVARIANT AS SOON AS THERE IS
+  //   A SECOND FOE (found 2026-09-12 by `/codex:adversarial-review`,
+  //   reproduced here before it was believed).**
+  //
+  //   `+0x3de6` sets the destination to `defender._x - physical_size(defender)`
+  //   unconditionally, which can land BEHIND the walker. In vanilla that is
+  //   harmless: there is exactly one defender, so a destination behind you
+  //   cannot carry you past anybody. Here it can. Measured: an actor at x = 0
+  //   with strength-9 foes at -10 and +20 is offered `walk-right` as its
+  //   retreat, the foe at +20 clamps the destination to `20 - 86 = -66`, and
+  //   the actor travels LEFT THROUGH the foe at -10 — which the forward pass
+  //   above had skipped, because it filters on the REQUESTED direction while
+  //   the realised travel had reversed.
+  //
+  //   So the guard runs on the REALISED direction, and a reversal that would
+  //   cross a foe goes NOWHERE rather than part-way. Stopping short would need
+  //   a rule for which side of that foe to stop on, and vanilla cannot settle
+  //   one (`MAP_SILENCE.multi-slot-arena-geometry`); a walk that goes nowhere
+  //   is already this module's answer for walking into the arena wall, and is
+  //   still a completed phase that pays and regenerates.
+  //
+  //   **It cannot bite the forward case**: the loop above leaves `to` at or
+  //   before every foe ahead, so nothing there is ever crossed.
+  const realised = Math.sign(to - actor.x);
+  if (realised !== 0) {
+    for (const foe of foes ?? []) {
+      if (!foe || foe.alive === false || !Number.isFinite(foe.x)) continue;
+      const behindInTravel = (foe.x - actor.x) * realised > 0;
+      const overshot = (to - foe.x) * realised > 0;
+      if (behindInTravel && overshot) {
+        to = actor.x;
+        break;
+      }
+    }
+  }
   return clamp(to, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
 }
 

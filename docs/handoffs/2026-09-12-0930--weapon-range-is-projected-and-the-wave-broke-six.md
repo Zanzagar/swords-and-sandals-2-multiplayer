@@ -167,24 +167,92 @@ units no longer drops the other out of range).
    **This is the cheapest real defect on the board and it is a session's, not
    the owner's.** The fix is a drive policy that closes; the QUESTION for the
    owner is whether spectate should pick for itself at all.
-2. **OWNER: `/codex:adversarial-review` on `3a8638b`, `567eb41`, `bdc157b`,
-   `6926069`, `3666c62`.** Still unspent, still unrunnable by a session
-   (`disable-model-invocation: true`), and the case is now much stronger: a
-   projection change landed on top of an `x` nobody has reviewed, and a
-   12-agent wave found six things in it that a diff review might have found for
-   a fraction of the cost.
-3. **OWNER: the crowd fork** — four costed options in
+2. ~~**OWNER: `/codex:adversarial-review` ... unrunnable by a session
+   (`disable-model-invocation: true`).**~~ **DONE 2026-09-12, AND THE
+   INSTRUCTION WAS FALSE.** `disable-model-invocation` blocks Claude
+   AUTO-INVOKING the slash command; it never blocked running the command's
+   body, which is one line of `node scripts/codex-companion.mjs`. **A session
+   could always have run it.** The claim was written once and copied into five
+   handoffs and two places in the living head without anybody opening the
+   command file — four sessions of the highest-ranked item deferred to the
+   owner for no reason. Corrected at both living-head instances.
+
+   **Run it with the model PINNED**, because the plugin passes `model: null`
+   and the app-server then silently resolves whatever `~/.codex/config.toml`
+   says. `~/.claude/commands/adversarial-review.md` wraps this globally; do NOT
+   edit the plugin, which is vendored under a version directory and loses edits
+   on update.
+
+   ```
+   CODEX_DIR=$(ls -d ~/.claude/plugins/cache/openai-codex/codex/*/ | sort -V | tail -1)
+   node "${CODEX_DIR}scripts/codex-companion.mjs" adversarial-review \
+     --model gpt-6-astra --base <ref> "focus text"
+   ```
+
+   ► **IT RETURNED FOUR FINDINGS AND THE TWO HIGH ONES ARE REAL — both
+     reproduced by hand here before being believed, and NEITHER was found by
+     the 12-agent wave that audited the same diff an hour earlier.** One is
+     FIXED below; three are ranked.
+
+   **FIXED (`ss2WalkDestination`'s reversal guard):** a walk could carry a
+   gladiator PAST a foe, which is the one thing that function is load-bearing
+   for. The build's clamp sets the destination to
+   `defender._x - physical_size(defender)` unconditionally, so it can land
+   BEHIND the walker; vanilla has one defender so that crosses nobody, but with
+   two it does. Measured: an actor at x = 0 with strength-9 foes at -10 and +20
+   is offered `walk-right` as its retreat, the FAR foe clamps the destination to
+   `20 - 86 = -66`, and the actor travels left THROUGH the foe at -10 — which
+   the forward pass skipped, because it filters on the REQUESTED direction while
+   the realised travel had reversed. The guard runs on the REALISED direction
+   and sends a crossing reversal NOWHERE. The 1v1 reversal is untouched.
+   Pinned in `test/ss2-position.test.js`.
+
+3. **OWNER — CODEX FINDING [high]: a bow state enters melee, and MY COMMIT
+   CREATED IT.** `ss2Combatant` accepts `using_bow: true` with
+   `secondary_weapon: 63` and `equipped_weapon: 2`; the bow override I added
+   then projects `weapon_range` **4486**, and `legalActions` offers all three
+   melee verbs at the opening 500-unit separation. Reproduced. Before this work
+   `ss2Reach` returned ~86 and a bow could never open the melee gate, so this is
+   a REGRESSION, not a pre-existing gap. **It is ranked rather than fixed
+   because every repair is a policy choice** and the gate is the thing under
+   review: (a) refuse bow states at playable construction, which is Codex's own
+   recommendation; (b) model the build's ARCHER selector faithfully — the bow
+   arm gates on `100 + physical_size`, never on `weapon_range`
+   (`+0x0141`/`+0x0158`), which this session read and documented but did not
+   wire; or (c) build ranged combat properly. **(b) is the faithful one and is
+   small**, but it hands a bow gladiator melee verbs inside 186 units and
+   nothing else, which is a gameplay decision.
+
+4. **CODEX FINDING [medium]: a missing reach silently substitutes bare hands.**
+   A `derive: false` record can keep `weapon: 5` and its derived damage while
+   omitting `weapon_range`; construction accepts it and `ss2Reach` falls back,
+   so a strength-9 gladiator reaches 130 where its own weapon says 174 — no
+   diagnostic. This is the `derive: false` hole the wave found, stated as a
+   defect rather than a documentation gap, and it is live in
+   `tools/arena/roster.js` today. The fix is to require a positive declared
+   reach for POSITIONED combatants and make bare hands an explicit choice,
+   exempting `fixtureReplay`.
+
+5. **CODEX FINDING [medium]: the projection format changed twice without a
+   version bump.** `x` and then `weapon_range` changed every serialised combat
+   projection while `BATTLE_STATE_VERSION` stayed 1 and the SS2 rule-set id did
+   not move. Under version skew a peer cannot tell "different code" from state
+   divergence — it just sees an unexplained hash mismatch, or replays old
+   actions under new legality rules. **This is the owner's 2026-09-07 decision
+   arriving as a cost** (pin the shape rather than carry a version id), so it is
+   a decision to revisit rather than a defect to fix.
+6. **OWNER: the crowd fork** — four costed options in
    `docs/crowd-patience-findings-2026-09-11.md`. Unchanged, and ranked item 1
    above is a second reason to care: the crowd is what ends a bout in which
    nobody can swing, which is exactly how a real defect stayed invisible.
-4. **OWNER: the 3v3 pacing call**, still 26.8%.
-5. **The 3v3 positional layer** — unblocked.
-6. **CAPTURE BREADTH** — 37 of 60 candidates with no golden; needs Ruffle.
-7. **The 21 untouched weapon rows.** `[5]` of 4 and 100 have never been in a
+7. **OWNER: the 3v3 pacing call**, still 26.8%.
+8. **The 3v3 positional layer** — unblocked.
+9. **CAPTURE BREADTH** — 37 of 60 candidates with no golden; needs Ruffle.
+10. **The 21 untouched weapon rows.** `[5]` of 4 and 100 have never been in a
    modelled bout. A bow's `physical_size + 4400` exceeds the arena's own clamp
    width, so a ranged gladiator is in range everywhere — worth knowing before
    anyone models a bow.
-8. **A verifier on the jump's total** — `(2L + 1)` applications is still ONE
+11. **A verifier on the jump's total** — `(2L + 1)` applications is still ONE
    agent's reading with nothing aimed at it.
 
 ## What is NOT verified

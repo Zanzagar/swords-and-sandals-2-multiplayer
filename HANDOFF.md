@@ -396,12 +396,33 @@ priced on the weapon with strength in the denominator — and **both gated behin
   `test/render-arena-host.test.js` had RE-IMPLEMENTED the second one, so the
   test and the shell were two implementations that could agree while both being
   wrong; both now call the same function.
-  ► **THIS DIFF HAS NOT HAD `/codex:adversarial-review`, AND IT IS THE CASE FOR
-    IT** — this living head said so while the work was ranked. The command is
-    `disable-model-invocation: true`, so a session cannot run it; **it is the
-    owner's to type.** 12 mutations were applied one at a time instead, and two
-    of them SURVIVED the first version of the tests (see the commit message of
-    `3a8638b`) — which is the argument for the review, not against it.
+  ► ~~**THIS DIFF HAS NOT HAD `/codex:adversarial-review` ... the command is
+    `disable-model-invocation: true`, so a session cannot run it; it is the
+    owner's to type.**~~ **THE REVIEW IS DONE (2026-09-12), AND THE REASON IT
+    WAITED FOUR SESSIONS WAS A FALSE INSTRUCTION THIS FILE KEPT REPEATING.**
+    `disable-model-invocation: true` stops Claude AUTO-INVOKING the slash
+    command; it does not stop anything from running the command's body, which
+    is one line of `node scripts/codex-companion.mjs adversarial-review`. **A
+    session could always have run it.** The claim was written once and copied
+    forward into five handoffs and two places in this living head without
+    anybody opening the command file.
+    **Run it like this — the model is PINNED, because the plugin passes
+    `model: null` and the app-server then silently resolves whatever
+    `~/.codex/config.toml` happens to say:**
+    ```
+    CODEX_DIR=$(ls -d ~/.claude/plugins/cache/openai-codex/codex/*/ | sort -V | tail -1)
+    node "${CODEX_DIR}scripts/codex-companion.mjs" adversarial-review \
+      --model gpt-6-astra --base <ref> "focus text"
+    ```
+    `~/.claude/commands/adversarial-review.md` wraps that globally. **Do NOT
+    edit the plugin** — it is vendored under a pinned version directory and an
+    edit there is discarded, silently, on the next update.
+    ► **AND IT FOUND TWO HIGH DEFECTS THAT A 12-AGENT WAVE MISSED, one of them
+      introduced by the very commit the wave had just audited.** Both reproduced
+      by hand before being believed. See the ranked list in the newest handoff.
+      That is the ADR's precedence rule vindicated the expensive way round:
+      Codex review is the check on a diff that matters, and a fan-out wave is
+      not a substitute for it.
 
 ► **THE CHEAPEST OPEN QUESTION ON THE BOARD IS THE OWNER'S, AND IT IS SMALL:
   read the six `weaponweights` values at `+0x3dd4` off the installed build.**
@@ -573,9 +594,12 @@ exploit.
     that this patch does not have: `vanillaLabel` on the movement event.** The
     gait is not derivable from `from`/`to`, so an event without it is reported
     rather than given a guessed walk. See the block at the head of this file.
-    The `/codex:adversarial-review` sentence still stands and is still unspent:
-    the command is `disable-model-invocation: true`, so it is the owner's to
-    type, not a session's.
+    ~~The `/codex:adversarial-review` sentence still stands and is still
+    unspent: the command is `disable-model-invocation: true`, so it is the
+    owner's to type, not a session's.~~ **FALSE, and corrected 2026-09-12 at the
+    other instance of it above. `disable-model-invocation` blocks AUTO-INVOCATION
+    ONLY; the command body is a `node` call any session can run. The review is
+    now DONE.**
 
 ► **THE 2026-09-10 SESSION PUSHED EVERYTHING IT COMMITTED**, each push on the
   owner's explicit yes, and verified `0 unpushed` after each one.

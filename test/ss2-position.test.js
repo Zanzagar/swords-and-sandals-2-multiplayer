@@ -81,7 +81,7 @@ function bout(perSide = 1, seed = 1, overrides = {}) {
   return createTeamBattle({ seed, rules: ss2TeamRules, teams: [side("red", "right"), side("blue", "left")] });
 }
 
-const typesOf = (battle) => legalActions(battle).map((option) => option.type);
+const typesOf = (battle, actorId) => legalActions(battle, actorId).map((option) => option.type);
 
 /**
  * Whose turn it is. Used instead of a hard-coded `red-1` throughout, because
@@ -693,6 +693,71 @@ test("a walk INTO a foe you already overlap snaps back to the clamp line, which 
   const move = resolved.effects.find((effect) => effect.kind === EffectKind.POSITION);
   assert.equal(move.to, 20 - 86, "a forward walk from inside the clamp line moves BACKWARD to it");
   assert.ok(move.to < -20, "which is behind where the walker started, and that is the build as written");
+});
+
+test("a walk may never carry a gladiator past a foe — including when the CLAMP is what reverses it", () => {
+  // ► **THE REGRESSION TEST FOR A BUG THIS MODULE SHIPPED FOR ONE COMMIT,
+  //   found by `/codex:adversarial-review` on `gpt-6-astra` and NOT by the
+  //   12-agent wave that audited the same diff an hour earlier.** The build's
+  //   clamp (`+0x3de6`) sets the destination to
+  //   `defender._x - physical_size(defender)` unconditionally, so it can land
+  //   BEHIND the walker. Vanilla has one defender, so that can cross nobody;
+  //   with a second foe it can, and it did.
+  //
+  //   Exactly the reported reproduction: the actor is offered `walk-right` as
+  //   its retreat from the nearer foe, the FAR foe's clamp line is at
+  //   `20 - 86 = -66`, and the actor travelled left THROUGH the foe at -10 —
+  //   past a foe, which is the one thing `ss2WalkDestination` is load-bearing
+  //   for.
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator(), { id: "actor", x: 0 })] },
+      {
+        id: "blue",
+        combatants: [
+          ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "left-foe", x: -10 }),
+          ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "right-foe", x: 20 })
+        ]
+      }
+    ]
+  });
+  // The case only exists because the retreat is offered while a foe stands the
+  // other way — assert that, or the test proves nothing about the clamp.
+  const offered = typesOf(battle, "actor");
+  assert.equal(offered.includes(Ss2ActionType.WALK_RIGHT), true, "the retreat must be on offer");
+  assert.equal(ss2PhysicalSize(combatantById(battle, "right-foe")), 86);
+
+  applyAction(battle, { actorId: "actor", type: Ss2ActionType.WALK_RIGHT, targetId: "actor" });
+  const landed = combatantById(battle, "actor").x;
+  assert.ok(landed >= -10, `a walk must never end past the foe at -10; it ended at ${landed}`);
+  assert.equal(landed, 0, "and the reversal that would cross it goes NOWHERE, not part-way");
+
+  // The 1v1 reversal is UNTOUCHED, because it crosses nobody — that is the
+  // build's own behaviour and the guard must not eat it.
+  const solo = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator(), { id: "hero", x: -20 })] },
+      { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "villain", x: 20 })] }
+    ]
+  });
+  const resolved = ss2TeamRules.resolveAction({
+    type: Ss2ActionType.WALK_RIGHT,
+    actorId: "hero",
+    targetId: "hero",
+    actor: combatantById(solo, "hero"),
+    target: combatantById(solo, "hero"),
+    foes: [combatantById(solo, "villain")],
+    turnNumber: 1
+  }, { randomBetween: () => 0, randomNumber: () => 0 });
+  assert.equal(
+    resolved.effects.find((effect) => effect.kind === EffectKind.POSITION).to,
+    20 - 86,
+    "one foe means the reversal crosses nobody, so it still happens"
+  );
 });
 
 test("the arena clamp bounds a walk, and a step it swallows is still a resolved action", () => {
