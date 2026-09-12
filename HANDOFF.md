@@ -8,7 +8,19 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-12 — weapon_range is projected, and twelve verifiers broke six things](docs/handoffs/2026-09-12-0930--weapon-range-is-projected-and-the-wave-broke-six.md).**
+[2026-09-12 11:30 — Codex found in one pass what twelve agents missed](docs/handoffs/2026-09-12-1130--codex-found-what-twelve-agents-missed.md).**
+Start there. **`/codex:adversarial-review` was never unrunnable by a session** —
+that instruction was false and had been copied through five handoffs, parking the
+top-ranked item for four sessions. Run, it returned **two high defects a 12-agent
+wave had missed an hour earlier**, one of them a walk that carried a gladiator
+THROUGH a foe. All four actionable findings are fixed; the version bump is the
+owner's. **The lesson: a wave audits the RECORD, a review audits the CODE.**
+**RANKED FIRST AND IT IS THE OWNER'S: look at the arena** — three things changed
+under it today that no agent here can see.
+
+*(The brief it supersedes, written MID-session by the same session, whose ranked
+items 1, 3 and 4 are now done:)*
+[2026-09-12 09:30 — weapon_range is projected, and twelve verifiers broke six things](docs/handoffs/2026-09-12-0930--weapon-range-is-projected-and-the-wave-broke-six.md).**
 Start there. **Ranked item 1 is CLOSED**: `weapon_range` is a projected
 resource, the build's own overlap clamp is restored, the `foe.x` narrowing is
 gone. The reach it replaced was `physical_size` — **the reach of no gladiator
