@@ -3369,7 +3369,41 @@ export function createSs2TeamRules({
           ...view.foes,
           ...view.allies.filter((ally) => ally.id !== actorId)
         ];
+
+        // ► **A DUEL MAY CLOSE THE GAP AND MAY NOT FLEE. Owner's decision,
+        //   2026-09-12, after the exploit was measured rather than argued.**
+        //
+        //   `view.allies` includes the actor and both lists hold only the
+        //   living, so a total of two IS the endgame duel — however it was
+        //   reached, and including a 1v1 that was a duel from the first turn.
+        //
+        //   **What it fixes, measured.** A fighter that never attacks and
+        //   changes rank every turn cannot WIN — 0 of 144 bouts across three
+        //   strides and two sizes, because the crowd's toll kills it — but it
+        //   stretches a 1v1 from 59 actions to **425**, a sevenfold tax on
+        //   everyone's patience for a fight it cannot affect. Not a fairness
+        //   defect; a pacing one.
+        //
+        //   **Why the obvious rule is WRONG, and it fires backwards.** "No rank
+        //   change while you have one foe left" locks the wrong side of a 3v1:
+        //   each of the three has exactly one foe and would be frozen, while
+        //   the lone survivor has three and could still dance. The count has to
+        //   be of EVERYBODY alive, not of your own foes.
+        //
+        //   **It is CLOSE-ONLY rather than a ban**, because a duel that begins
+        //   in different ranks must still be able to meet. Vanilla's duel is
+        //   one-dimensional, so the end state this drives toward is the parity
+        //   case; the journey there is still the player's.
+        const duel = view.allies.length + view.foes.length === 2;
+        const lone = duel ? view.foes[0] : null;
+        const closing = lone && Number.isFinite(lone.y) && lone.y !== view.actor.y
+          ? (lone.y > view.actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK)
+          : null;
+
         for (const type of [Ss2ActionType.RANK_BACK, Ss2ActionType.RANK_FRONT]) {
+          // In a duel the only legal rank change is the one that closes the
+          // gap, and when the two already share a rank there is none.
+          if (duel && type !== closing) continue;
           const to = ss2RankDestination(view.actor.y, SS2_RANK_DIRECTION[type], rankStride);
           if (to === null) continue;
           const occupied = others.some((other) =>

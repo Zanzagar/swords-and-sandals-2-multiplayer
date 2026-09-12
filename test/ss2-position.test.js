@@ -538,6 +538,82 @@ test("a rank change into an occupied space is not offered", () => {
   assert.ok(!blocked.includes("rank-back"), "a rank you would land inside somebody is not offered");
 });
 
+/**
+ * ► **A DUEL MAY CLOSE AND MAY NOT FLEE — owner's decision 2026-09-12, after
+ *   the exploit was MEASURED rather than argued.**
+ *
+ * A fighter that never attacks and changes rank every turn cannot win — 0 of
+ * 144 bouts, because the crowd's toll kills it — but it stretched a 1v1 from
+ * 59 actions to 425. A pacing defect, not a fairness one. With the rule: 59,
+ * exactly the one-dimensional baseline.
+ */
+const duelView = (actorY, foeY, { extraAllies = [], extraFoes = [] } = {}) => ({
+  actor: {
+    id: "me", x: 0, y: actorY, alive: true, stats: { strength: 9, agility: 10 },
+    resources: { staminaleft: { value: 100 } }
+  },
+  // `allies` INCLUDES the actor, which is what makes "two alive" the duel test.
+  allies: [{ id: "me", x: 0, y: actorY, alive: true, stats: { strength: 9 } }, ...extraAllies],
+  foes: [{ id: "foe", x: 900, y: foeY, alive: true, stats: { strength: 9 } }, ...extraFoes]
+});
+
+test("in a duel only the rank change that CLOSES the gap is offered", () => {
+  const rules = createSs2TeamRules({ rankStride: 97 });
+
+  // The foe is one rank BACK (smaller y). Closing is rank-back; fleeing is not
+  // on the menu at all.
+  const chase = rules.legalActions(duelView(200, 103), "me").map((option) => option.type);
+  assert.ok(chase.includes("rank-back"), "a duel may still close a rank gap");
+  assert.ok(!chase.includes("rank-front"), "and may not flee the only fight left");
+
+  // Mirrored, so the test cannot pass by always banning one direction.
+  const chaseUp = rules.legalActions(duelView(103, 200), "me").map((option) => option.type);
+  assert.ok(chaseUp.includes("rank-front"));
+  assert.ok(!chaseUp.includes("rank-back"));
+});
+
+test("a duel already sharing a rank has no rank change at all", () => {
+  const rules = createSs2TeamRules({ rankStride: 97 });
+  const options = rules.legalActions(duelView(200, 200), "me").map((option) => option.type);
+  assert.ok(!options.includes("rank-back"), "there is nothing to close, so nothing is offered");
+  assert.ok(!options.includes("rank-front"));
+  // And the fight is still available: the rule removes flight, not the bout.
+  assert.ok(options.includes("rest"));
+});
+
+test("the duel rule does NOT fire while a third fighter is alive", () => {
+  const rules = createSs2TeamRules({ rankStride: 97 });
+  // The actor stands in the MIDDLE rank, so both directions genuinely exist —
+  // the front rank has no rank in front of it whatever the duel rule says, and
+  // a test placed there would pass for the wrong reason.
+  const withAlly = rules.legalActions(
+    duelView(103, 6, { extraAllies: [{ id: "friend", x: -900, y: 200, alive: true, stats: { strength: 9 } }] }),
+    "me"
+  ).map((option) => option.type);
+  assert.ok(withAlly.includes("rank-back"), "closing is legal");
+  assert.ok(withAlly.includes("rank-front"), "three alive is not a duel, so breaking off is still legal");
+});
+
+test("the count is of EVERYBODY alive, not of your own foes — the 3v1 fires backwards otherwise", () => {
+  // The obvious rule, "no rank change while you have one foe left", locks the
+  // WRONG side of a 3v1: each of the three has exactly one foe and would be
+  // frozen, while the lone survivor has three and could still dance.
+  const rules = createSs2TeamRules({ rankStride: 97 });
+  const oneOfThree = rules.legalActions(
+    duelView(103, 6, {
+      extraAllies: [
+        { id: "friend-a", x: -900, y: 200, alive: true, stats: { strength: 9 } },
+        { id: "friend-b", x: -800, y: 200, alive: true, stats: { strength: 9 } }
+      ]
+    }),
+    "me"
+  ).map((option) => option.type);
+  assert.ok(
+    oneOfThree.includes("rank-front"),
+    "one of three against a lone survivor must keep both directions"
+  );
+});
+
 /* ------------------------------------------------------------------ */
 /* Construction geometry                                               */
 /* ------------------------------------------------------------------ */
