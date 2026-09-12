@@ -146,7 +146,7 @@ function panelWidgetsFor(side, slotIndex) {
  * placement is derived entirely from the wire projection plus the hero-side
  * choice, so two peers that agree on combat state agree on the layout.
  */
-function placementFor({ combatantId, teamId, side, slotIndex }) {
+function placementFor({ combatantId, teamId, side, slotIndex, modelY = null }) {
   const instanceName = slotIndex === 0 ? side : allyName(side, slotIndex);
   const stateKey = `${side}_${slotIndex + 1}`;
   return Object.freeze({
@@ -181,9 +181,31 @@ function placementFor({ combatantId, teamId, side, slotIndex }) {
       ARENA_X_CLAMP.min,
       ARENA_X_CLAMP.max
     ),
-    y: ARENA_Y + ALLY_Y_STRIDE * slotIndex,
+    /**
+     * ► **THE MODEL'S OWN DEPTH WINS WHEN IT HAS ONE. Added 2026-09-12 with
+     *   the second axis, and without it the drawing would LIE.**
+     *
+     * `ALLY_Y_STRIDE` is -10: a legibility stagger, authored so converging
+     * ranks do not draw on top of each other, and deliberately far too small
+     * to be a position. Once a rule set models depth its ranks are ~97 apart,
+     * and drawing them 10 apart would show one pile while the resolver
+     * describes three ranks — the exact class of defect `withDrawOrder` and
+     * `figureScaleFor` were rewritten to remove one commit ago, arriving from
+     * the other direction.
+     *
+     * So this is the same division as `x`: the RESOLVER owns where a gladiator
+     * is, and the adapter owns how a gladiator that has no position is laid
+     * out. `modelY` is `combatant.y` off the wire, `null` for every rule set
+     * that models no depth — which is every rule set with the second axis off,
+     * the default — and those keep the authored stagger exactly.
+     */
+    y: Number.isFinite(modelY) ? modelY : ARENA_Y + ALLY_Y_STRIDE * slotIndex,
     panel: panelWidgetsFor(side, slotIndex),
-    /** Authored geometry for every slot past the first; vanilla cannot settle it. */
+    /**
+     * Authored geometry for every slot past the first; vanilla cannot settle
+     * it. Slot 0 is the vanilla pair exactly, on both axes: `VANILLA_FRONT_X`
+     * and `ARENA_Y` 200, and a model depth of 200 is the same number.
+     */
     geometryAuthored: slotIndex > 0
   });
 }
@@ -219,7 +241,9 @@ export function buildArenaLayout(wire, { heroTeamId = null } = {}) {
       if (slotIndex !== index) {
         throw new SlotLayoutError(`Team ${team.id} has a gap or duplicate at slot index ${String(slotIndex)}.`);
       }
-      placements.push(placementFor({ combatantId: combatant.id, teamId: team.id, side, slotIndex }));
+      placements.push(placementFor({
+        combatantId: combatant.id, teamId: team.id, side, slotIndex, modelY: combatant.y ?? null
+      }));
     });
   }
 

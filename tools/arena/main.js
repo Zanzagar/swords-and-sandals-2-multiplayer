@@ -41,7 +41,7 @@ import {
   createVanillaBattleHost,
   SS2_STATIC_MAP_BINDINGS
 } from "/src/adapter/index.js";
-import { ss2BattleValues, ss2Combatant, ss2TeamRules } from "/src/team/ss2-rules.js";
+import { ss2BattleValues, ss2Combatant, ss2TeamRules, createSs2TeamRules } from "/src/team/ss2-rules.js";
 import {
   animationCursor,
   applyCommands,
@@ -61,6 +61,9 @@ import { demoSide } from "/tools/arena/roster.js";
 /* Setup                                                               */
 /* ------------------------------------------------------------------ */
 
+/** Arena y of the front rank — the vanilla `_y`, and `toY`'s own datum. */
+const ARENA_FRONT_Y = 200;
+
 const params = new URLSearchParams(location.search);
 const perSide = Math.min(3, Math.max(1, Number(params.get("teams")) || 2));
 const seed = Number(params.get("seed")) || 7;
@@ -72,10 +75,27 @@ const seed = Number(params.get("seed")) || 7;
  * keep up with the resolver.
  */
 const spectate = params.get("spectate") === "1";
+/**
+ * THE SECOND AXIS, and it is here so the owner can answer the question only he
+ * can: **how much should standing in the right place matter?**
+ *
+ * `?rank=0` (the default) is the one-dimensional game exactly. `?rank=97` is
+ * the measured sweet spot — everything still settles, blows through a living
+ * body fall from 44.7% to 14.7%, and a breakoff fight exists. `?rank=150` is
+ * past the top of the dial: three simultaneous fights, but 15 of 24 bouts
+ * never settle. Measure any change with `node tools/engagement-census.mjs
+ * --rank-stride N`; this is the same number that tool takes.
+ *
+ * 97 is not tuned — it is `floor(sqrt(reach^2 - physical_size^2))`, the depth
+ * at which a second rank leaves the front rank's reach.
+ */
+const rankStride = Math.max(0, Number(params.get("rank")) || 0);
 
 const host = createVanillaBattleHost({
   teams: [demoSide("red", perSide, { ss2Combatant, ss2BattleValues }), demoSide("blue", perSide, { ss2Combatant, ss2BattleValues })],
-  rules: ss2TeamRules,
+  // The module singleton when the axis is off, so the shipped arena is the
+  // shipped rule set and not a lookalike built with the defaults.
+  rules: rankStride === 0 ? ss2TeamRules : createSs2TeamRules({ rankStride }),
   bindings: SS2_STATIC_MAP_BINDINGS,
   seed,
   awaitAnimations: true
@@ -229,18 +249,61 @@ function viewport() {
   const height = canvas.height;
 
   let extent = 250;
+  // ► **THE DEPTH BAND, added 2026-09-12 with the second axis. Without it the
+  //   BACK RANK IS DRAWN STANDING IN THE CROWD** — caught by screenshotting
+  //   the arena at `?rank=97`, which is the only thing that can catch it: the
+  //   suite cannot reach this file, and every test passed with the rear rank
+  //   167 pixels above the sand.
+  //
+  //   This scan used to read `Math.abs(actor.x)` and nothing else, which was
+  //   right while every gladiator stood on one line. `rearY` is the smallest
+  //   arena y on stage — arena y DECREASES going back — and 200 is the front
+  //   rank, so `200 - rearY` is how deep the roster reaches.
+  let rearY = ARENA_FRONT_Y;
   for (const combatantId of scene.drawOrder) {
     const actor = scene.actors[combatantId];
-    if (actor.placed) extent = Math.max(extent, Math.abs(actor.x));
+    if (!actor.placed) continue;
+    extent = Math.max(extent, Math.abs(actor.x));
+    if (Number.isFinite(actor.y)) rearY = Math.min(rearY, actor.y);
   }
   // A gladiator is about 150 arena units tall and swings about half that wide.
   const halfWidth = extent + 105;
-  const scale = Math.min(width / (halfWidth * 2), height / 250);
+  // How deep the roster reaches, in arena units. 0 when everybody is level.
+  const depthUnits = ARENA_FRONT_Y - rearY;
+  // ► **THE DEPTH ALSO CONSTRAINS THE SCALE, and leaving it out drove the
+  //   horizon OFF THE TOP OF THE CANVAS.** At `?rank=150` the solved horizon
+  //   came out at -191 on an 800px canvas: no crowd, no barrier, the whole
+  //   view sand. Fitting only the width is what the comment above describes,
+  //   and it was complete while every gladiator stood on one line.
+  //
+  //   Keeping at least `MIN_HORIZON_FRACTION` of the canvas as arena bowl and
+  //   solving the same inequality the other way gives the largest scale the
+  //   depth allows. With the second axis off, `depthUnits` is ~20 and this
+  //   term is hundreds of times looser than the width term, so it never binds
+  //   and the ordinary arena is untouched — verified: the axis-off horizon is
+  //   still exactly `height * 0.58`.
+  const MIN_HORIZON_FRACTION = 0.18;
+  const depthScaleCap = (height * (1 - MIN_HORIZON_FRACTION)) * 0.62 / (depthUnits * 1.7 + 30);
+  const scale = Math.min(width / (halfWidth * 2), height / 250, depthScaleCap);
   // The ground plane starts here. Everything above it is the arena bowl, which
   // is why the horizon sits near the middle rather than at the bottom: a bout
   // is much wider than it is tall, so fitting the width leaves vertical room,
   // and an empty sky is the wrong thing to spend it on.
-  const horizon = height * 0.58;
+  // How far up the canvas the rearmost rank reaches, in pixels, under `toY`'s
+  // own 1.7 depth multiplier. Zero when everybody stands on the front line.
+  const depthSpan = (ARENA_FRONT_Y - rearY) * scale * 1.7;
+  // The sand must reach BEHIND the rearmost rank, with room for its feet.
+  // `toY` puts a figure at `horizon + (height - horizon) * 0.62 - depthSpan`,
+  // so keeping that below the horizon by `FLOOR_MARGIN` solves for the highest
+  // horizon the roster allows. With the second axis off the span is ~20 units
+  // and this term never binds, so the ordinary arena is pixel-identical.
+  const FLOOR_MARGIN = scale * 30;
+  // `depthScaleCap` above guarantees the solved value clears the floor, so this
+  // is a belt-and-braces bound rather than the thing doing the work.
+  const horizon = Math.max(
+    height * MIN_HORIZON_FRACTION,
+    Math.min(height * 0.58, height - (FLOOR_MARGIN + depthSpan) / 0.62)
+  );
 
   return {
     scale,
@@ -248,7 +311,7 @@ function viewport() {
     toX: (x) => width / 2 + x * scale,
     // Arena y is 200 at the front rank and DECREASES further back, so a bigger
     // y is nearer the viewer and further down the canvas.
-    toY: (y, lift) => horizon + (height - horizon) * 0.62 - (200 - y) * scale * 1.7 - lift * scale
+    toY: (y, lift) => horizon + (height - horizon) * 0.62 - (ARENA_FRONT_Y - y) * scale * 1.7 - lift * scale
   };
 }
 
@@ -372,7 +435,7 @@ function drawArenaBowl(view) {
 
   // The fighting line the front rank stands on, so the depth offset between
   // slot 0 and an authored ally is legible rather than implied.
-  const front = view.toY(200, 0);
+  const front = view.toY(ARENA_FRONT_Y, 0);
   context.strokeStyle = "rgba(0,0,0,0.14)";
   context.lineWidth = Math.max(1, view.scale * 2);
   context.beginPath();

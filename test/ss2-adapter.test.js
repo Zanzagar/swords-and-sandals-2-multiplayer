@@ -26,6 +26,7 @@ import {
   assertWriteProvenance,
   ARENA_Y,
   assertDistinctPlacements,
+  ALLY_Y_STRIDE,
   buildArenaLayout,
   bindingPlanFor,
   CANONICAL_RESOURCE_SOURCES,
@@ -260,6 +261,49 @@ test("the facing write is the only write that targets the fighter clip", () => {
   assert.equal(write.target, WriteTarget.FIGHTER_CLIP);
   assert.equal(write.path, "_root.arena.gladiators.hero");
   assert.deepEqual([write.field, write.from, write.to], ["gladiator_dir", "right", "left"]);
+});
+
+/**
+ * ► **THE DRAWING MUST NOT CONTRADICT THE MODEL, and this is the invariant
+ *   that keeps it honest on the second axis.**
+ *
+ * `ALLY_Y_STRIDE` is -10: a legibility stagger so converging ranks do not draw
+ * on top of each other, far too small to be a position. A rule set that models
+ * depth puts its ranks ~97 apart. Drawing those 10 apart would show one pile
+ * while the resolver describes three ranks — the same class of defect as the
+ * back rank painting over the front one, which was found by looking at the
+ * arena and not by any test.
+ */
+/** A wire projection is all `buildArenaLayout` reads, so this is its contract. */
+const wireWithDepth = (depths) => ({
+  teams: ["red", "blue"].map((id) => ({
+    id,
+    combatants: depths.map((y, slotIndex) => ({ id: `${id}-${slotIndex + 1}`, slotIndex, x: 0, y }))
+  }))
+});
+
+test("the layout draws the RESOLVER's depth when the rule set models one", () => {
+  const stride = 97;
+  // What `startingY` produces at rankStride 97: 200, 103, 6.
+  const layout = buildArenaLayout(wireWithDepth([200, 200 - stride, 200 - 2 * stride]));
+
+  // Slot 0 is the vanilla depth on both sides, so 1v1 is the parity case here
+  // exactly as it is on x.
+  assert.equal(layout.placementFor("red-1").y, 200);
+  assert.equal(layout.placementFor("blue-1").y, 200);
+  // And the ranks are drawn where the model puts them, not where the stagger would.
+  assert.equal(layout.placementFor("red-2").y, 200 - stride);
+  assert.equal(layout.placementFor("red-3").y, 200 - 2 * stride);
+  assert.equal(layout.placementFor("blue-3").y, 200 - 2 * stride);
+});
+
+test("a rule set that models no depth keeps the authored legibility stagger", () => {
+  // Every rule set with the second axis off, which is the default. The stagger
+  // is the adapter's own business precisely because the model has no opinion.
+  const layout = buildArenaLayout(wireWithDepth([null, null, null]));
+  assert.equal(layout.placementFor("red-1").y, 200);
+  assert.equal(layout.placementFor("red-2").y, 200 + ALLY_Y_STRIDE);
+  assert.equal(layout.placementFor("red-3").y, 200 + 2 * ALLY_Y_STRIDE);
 });
 
 /* ------------------------------------------------------------------ */
