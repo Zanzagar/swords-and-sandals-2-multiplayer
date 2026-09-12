@@ -229,6 +229,20 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
   //     setting a destination, so its total is a property of the animation's
   //     length. These four are unwired because nothing offers them, not because
   //     the distance is unknown.
+  //
+  // ► **TWO RANK VERBS JOINED IT 2026-09-12 AND THEY CARRY NO VANILLA LABEL,
+  //   WHICH BROKE THIS TEST'S OWN INVARIANT — deliberately, and the invariant
+  //   is the thing that had to change.** It read "every token maps back to a
+  //   getphase label", which was true while every token WAS a build phase. The
+  //   build has no sidestep: its eight movement phases all change `_x`, and the
+  //   jump changes `_y` as well but is one named phase doing both.
+  //
+  //   So the vocabulary is now two sets, and they are pinned SEPARATELY rather
+  //   than as one list with a weaker rule. An authored token that quietly
+  //   acquired a fabricated label, or a map-derived token that quietly lost a
+  //   real one, both fail here — which a single relaxed check would let past.
+  const AUTHORED_TOKENS = ["rank-back", "rank-front"];
+
   assert.deepEqual([...ss2TeamRules.actionTypes].sort(), [
     "burning-phase",
     "frozen-phase",
@@ -237,13 +251,23 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "poisoned-phase",
     "power-attack",
     "quick-attack",
+    "rank-back",
+    "rank-front",
     "rest",
     "walk-left",
     "walk-right"
   ]);
   for (const type of ss2TeamRules.actionTypes) {
     assert.match(type, /^[a-z0-9][a-z0-9-]{0,63}$/, "actionTypes tokens reject vanilla's underscores");
-    assert.match(VANILLA_PHASE_LABEL[type], /^[a-z_]+$/, "every token maps back to a getphase label");
+    if (AUTHORED_TOKENS.includes(type)) {
+      assert.equal(
+        VANILLA_PHASE_LABEL[type],
+        undefined,
+        `${type} is authored mod surface: giving it a getphase label would put a guessed gait on screen`
+      );
+      continue;
+    }
+    assert.match(VANILLA_PHASE_LABEL[type], /^[a-z_]+$/, "every MAP-DERIVED token maps back to a getphase label");
   }
 });
 

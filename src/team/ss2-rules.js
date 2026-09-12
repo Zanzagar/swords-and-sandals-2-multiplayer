@@ -258,6 +258,20 @@ export const Ss2ActionType = Object.freeze({
   // `ss2WalkDisplacement`, which is `movement_speed * 16` eased to a stop.
   WALK_LEFT: "walk-left",
   WALK_RIGHT: "walk-right",
+  // ► **THE SECOND AXIS'S OWN VERBS, AND THEY ARE AUTHORED. The build has no
+  //   sidestep.** Its eight movement phases all change x; the jump changes
+  //   `_y` too, but it is one named phase that does both and is not this.
+  //   `MAP_SILENCE.multi-slot-arena-geometry` already covers a gladiator
+  //   standing anywhere but the front line, and these are how it gets there.
+  //
+  //   Named for the RANK rather than for a direction on screen, because the
+  //   screen mapping is the renderer's business and arena y runs backwards
+  //   (200 at the front, decreasing away). They carry NO `VANILLA_PHASE_LABEL`
+  //   — there is no build phase to name, and inventing one would put a guessed
+  //   gait on screen, which is the failure the movement label table exists to
+  //   prevent.
+  RANK_BACK: "rank-back",
+  RANK_FRONT: "rank-front",
   // The four status phases. FOUR types rather than one `status-phase`, because
   // the build's decision IS the specific label — `getphase("frozen")` and
   // `getphase("poisoned")` are different decisions reaching different arms of
@@ -916,6 +930,16 @@ export const SS2_ARENA = Object.freeze({
    * is Euclidean over `(_x, _y)`. See `ss2FightDistance`.
    */
   frontY: 200,
+  /**
+   * How many ranks the arena has. AUTHORED, and it matches the adapter's
+   * `MAX_SLOTS_PER_SIDE` on purpose — the presentation can lay out three slots
+   * a side and no more, so a fourth rank would be a position nothing can draw.
+   *
+   * It is a property of the ARENA rather than of the roster, so a 1v1 played
+   * with the second axis on can still use all three. With the axis OFF the
+   * rank verbs are never offered at all and 1v1 is untouched either way.
+   */
+  rankCount: 3,
   /**
    * AUTHORED, and it matches the adapter's `ALLY_X_STRIDE` on purpose: vanilla
    * has no second ally, so nothing can settle it (`MAP_SILENCE`,
@@ -1654,6 +1678,35 @@ function nearestFoe(view) {
 const SS2_WALK_DIRECTION = Object.freeze({
   [Ss2ActionType.WALK_LEFT]: -1,
   [Ss2ActionType.WALK_RIGHT]: 1
+});
+
+/**
+ * Where a rank change lands, or `null` when there is no rank that way.
+ *
+ * A rank is a DISCRETE position — `frontY - rankStride * k` for `k` in
+ * `[0, rankCount)` — so this is an occupancy step and not a distance. That is
+ * deliberate and it is the one place this design takes the 9-agent panel's
+ * advice over the build's: a continuous depth would need a second walk
+ * displacement nobody has measured, while a rank index needs none. The METRIC
+ * between two ranks is still the build's own hypotenuse; only the set of
+ * places you may stand is authored.
+ *
+ * **Unoccupied is not required.** Two gladiators may share a rank, exactly as
+ * they may share an x — the overlap clamp is what keeps bodies apart, and it
+ * already runs on the x axis within a rank.
+ */
+function ss2RankDestination(actorY, direction, rankStride) {
+  if (!Number.isFinite(actorY) || rankStride <= 0) return null;
+  const to = actorY + direction * rankStride;
+  const rearmost = SS2_ARENA.frontY - rankStride * (SS2_ARENA.rankCount - 1);
+  if (to > SS2_ARENA.frontY || to < rearmost) return null;
+  return to;
+}
+
+/** Which way a rank change carries its actor. Arena y DECREASES going back. */
+const SS2_RANK_DIRECTION = Object.freeze({
+  [Ss2ActionType.RANK_BACK]: -1,
+  [Ss2ActionType.RANK_FRONT]: 1
 });
 
 const ATTACK_BANDS = Object.freeze({
@@ -3235,6 +3288,33 @@ export function createSs2TeamRules({
         for (const type of offered) actions.push({ type, targetId: actorId });
       }
 
+      // ► **THE RANK VERBS, and they are what make the geometry a CHOICE.**
+      //
+      //   Offered whenever the rule set models depth and there is a rank that
+      //   way, INCLUDING when a foe is already in reach — unlike the walks
+      //   above, which the build narrows to the retreat direction once you are
+      //   engaged (`closerange_warrior` wires no toward-movement).
+      //
+      //   That is a deliberate departure and it is the whole point: the build
+      //   narrows the walks because a vanilla duel has one opponent and the
+      //   only question is how far apart you two stand. With ranks there is a
+      //   second question the build never had — WHICH fight you are in — and
+      //   answering "you may not leave this one" would rebuild the single
+      //   interface the second axis exists to break. **Breaking off is the
+      //   feature.**
+      //
+      //   Both directions are always offered when they exist, ordered BACK
+      //   before FRONT, for the same reason the walks are ordered left before
+      //   right: the build orders buttons by direction and never by their
+      //   relationship to the opponent, which it cannot do because the
+      //   opponent moves.
+      if (Number.isFinite(view.actor.y)) {
+        for (const type of [Ss2ActionType.RANK_BACK, Ss2ActionType.RANK_FRONT]) {
+          const to = ss2RankDestination(view.actor.y, SS2_RANK_DIRECTION[type], rankStride);
+          if (to !== null) actions.push({ type, targetId: actorId });
+        }
+      }
+
       actions.push(rest);
       return actions;
     },
@@ -3318,6 +3398,64 @@ export function createSs2TeamRules({
             type: Ss2ActionType.REST,
             actorId: actor.id,
             targetId: actor.id,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
+          }]
+        };
+      }
+
+      // ► **A RANK CHANGE, resolved beside the walk and costed like one.**
+      //
+      //   The stamina is the walk's — `round(movement_speed / 2)`, `walkleft`
+      //   `+0x3b37` — and that is a CHOICE this comment owns rather than a
+      //   derivation: the build has no sidestep to price. It is the most
+      //   defensible price available, because a rank change is a movement
+      //   phase and every movement phase the build has costs exactly this. It
+      //   goes through `phaseTransitionEffects` like a walk, so it is a
+      //   COMPLETED PHASE that pays and regenerates rather than a free step —
+      //   which is what lets it compete with attacking instead of dominating.
+      //
+      //   **It pays the crowd's toll too**, prepended above with every other
+      //   action, so breaking off cannot outrun the clock. That matters more
+      //   here than anywhere: with free disengage and a second axis, the toll
+      //   is the only thing standing between the arena and a kiting stalemate.
+      const rankDirection = SS2_RANK_DIRECTION[request.type];
+      if (rankDirection) {
+        const to = ss2RankDestination(actor.y, rankDirection, rankStride);
+        if (to === null) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a rank to move into, and ${actor.id} has none that way. ` +
+            "legalActions offers a rank verb only when ss2RankDestination finds one."
+          );
+        }
+        const transition = phaseTransitionEffects(actor, {
+          staminaCost: Math.round(ss2MovementSpeed(actor) / 2)
+        });
+        return {
+          effects: [
+            { kind: EffectKind.LATERAL, targetId: actor.id, to },
+            ...transition.effects,
+            ...crowd
+          ],
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: actor.id,
+            // **`fromY`/`toY`, NOT `from`/`to`.** The presentation detects
+            // movement by a finite `from` and `to`, which are X endpoints
+            // (`src/adapter/presentation.js`, the movement case); reusing them
+            // would make a step in depth play a `walkleft` clip and slide the
+            // figure sideways. A depth move needs its own fields and its own
+            // case, exactly as `src/render/scene.js` spells out about
+            // `move-clip` folding only `x`.
+            fromY: actor.y,
+            toY: to,
+            // **NO `vanillaLabel`, and that is the honest answer rather than a
+            // gap.** The walk beside this one carries the build's own phase
+            // name because there IS one; there is no sidestep phase to name,
+            // and putting `walkleft` here would play a guessed gait — exactly
+            // what that field exists to prevent. The presentation reports an
+            // event it cannot bind rather than inventing a clip for it.
             staminaGained: transition.staminaGained,
             healed: transition.healed
           }]
@@ -3601,6 +3739,52 @@ export function createSs2TeamRules({
       const meleeOnOffer = options.some((option) => ATTACK_BANDS[option.type]);
       if (!meleeOnOffer) {
         const nearest = nearestFoe(view);
+        // ► **CHANGE RANK BEFORE WALKING, when the fight is in another rank.**
+        //
+        //   Ranked BEFORE the walk for a measured reason: with the second axis
+        //   on, a gladiator whose opponents are all in other ranks can walk
+        //   the length of the arena without ever closing the distance, because
+        //   the distance it needs to close is perpendicular to the way it can
+        //   walk. Before this arm existed the rank verbs were legal and never
+        //   taken, and the bout ran to the guard.
+        //
+        //   **Recognised by the VOCABULARY, like the toward-walk below it.**
+        //   Reaching here means nothing is in reach; if the nearest foe is in
+        //   a different rank then closing the rank is what "approach" means,
+        //   and a second distance computation here would be a second chance to
+        //   be wrong. The comparison is the RANK and not the y-distance, so it
+        //   cannot disagree with `ss2RankDestination` about which way is which.
+        //
+        //   ► **IT CHANGES RANK ONLY WHEN ITS OWN RANK IS EMPTY OF FOES, AND
+        //     THE FIRST VERSION DID NOT. Measured, and the difference is the
+        //     whole feature.** The first version moved toward the NEAREST
+        //     foe's rank, which is the obvious rule and is a pile-up machine:
+        //     at the opening every foe is out of reach, so every gladiator
+        //     immediately walks its rank toward whichever enemy happened to be
+        //     nearest, all six converge on one rank, and the single interface
+        //     is rebuilt in two dimensions. The tell was unmistakable —
+        //     `rankStride` 97 and 150 produced IDENTICAL censuses (1,839
+        //     actions, 32.8% mutual reach, 0% crossings, 1 fight), because
+        //     once everybody shares a rank the stride cannot matter.
+        //
+        //     That is the failure the handoff of 2026-09-12 predicted in
+        //     words — *"the fighters will pile up in two dimensions exactly as
+        //     they do in one"* — and it arrived exactly as described.
+        //
+        //     So: **fight who is in front of you.** A foe in your own rank is
+        //     your fight, and the rank verbs exist for the case where there is
+        //     nobody left to fight rather than as a way to shop for a better
+        //     opponent. The comparison is RANK equality, not distance, so it
+        //     cannot disagree with `ss2RankDestination` about which way is
+        //     which.
+        const positionedInDepth = Number.isFinite(view.actor.y);
+        const ownRankHasFoe = positionedInDepth
+          && view.foes.some((foe) => foe.y === view.actor.y);
+        if (positionedInDepth && !ownRankHasFoe && nearest && Number.isFinite(nearest.y)) {
+          const towardRank = nearest.y > view.actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK;
+          const step = options.find((option) => option.type === towardRank);
+          if (step) return step;
+        }
         if (nearest) {
           const towardType = nearest.x > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
           const stride = options.find((option) => option.type === towardType);

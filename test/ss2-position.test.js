@@ -30,6 +30,7 @@ import {
   combatStateHash,
   createTeamBattle,
   currentCombatant,
+  suggestAction,
   legalActions,
   toTeamWireState
 } from "../src/team/index.js";
@@ -258,6 +259,122 @@ test("with every gladiator level the depth predicate is constantly true, so 1v1 
   const bare = { id: "a", x: 0, alive: true, stats: { strength: 9, agility: 10 } };
   const bareFoe = [{ id: "b", x: 300, alive: true, stats: { strength: 9 } }];
   assert.equal(ss2WalkDestination(bare, bareFoe, 1), withDepth, "a null depth and a level pair are the same walk");
+});
+
+/**
+ * The rank verbs, and the AI rule that stops them rebuilding the one interface.
+ */
+function rankedBout(perSide, rankStride, seed = 1) {
+  const side = (prefix, dir) => ({
+    id: prefix,
+    name: prefix,
+    combatants: Array.from({ length: perSide }, (unused, index) =>
+      ss2Combatant(gladiator({ speed: 5 + index, gladiator_dir: dir }), {
+        id: `${prefix}-${index + 1}`,
+        name: `${prefix} ${index + 1}`,
+        controller: "local"
+      })
+    )
+  });
+  return createTeamBattle({
+    seed,
+    rules: createSs2TeamRules({ rankStride }),
+    teams: [side("red", "right"), side("blue", "left")]
+  });
+}
+
+test("the rank verbs are offered only when the rule set models depth and a rank exists that way", () => {
+  // Axis OFF: the verbs never appear, whatever else is true.
+  const flatOptions = legalActions(bout(3)).map((option) => option.type);
+  assert.ok(!flatOptions.includes("rank-back"), "no depth, no rank verbs");
+  assert.ok(!flatOptions.includes("rank-front"));
+
+  // Axis ON: slot 0 stands at the FRONT rank, so there is no rank in front of
+  // it and only `rank-back` is legal. The band is bounded, not infinite.
+  const ranked = rankedBout(3, 97);
+  const front = legalActions(ranked, "red-1").map((option) => option.type);
+  assert.ok(front.includes("rank-back"), "the front rank can fall back");
+  assert.ok(!front.includes("rank-front"), "and has nowhere further forward to go");
+
+  const rear = legalActions(ranked, "red-3").map((option) => option.type);
+  assert.ok(rear.includes("rank-front"));
+  assert.ok(!rear.includes("rank-back"), "the rear rank has nowhere further back to go");
+});
+
+test("a rank change moves exactly one rank and costs a walk's stamina", () => {
+  const battle = rankedBout(3, 97);
+  // Whoever the initiative gives the first turn to; the rule is per-actor and
+  // not per-side, and hard-coding a mover made this test depend on the order.
+  const mover = actorId(battle);
+  const before = combatantById(battle, mover);
+  const startX = before.x;
+  const startY = before.y;
+  const startStamina = before.resources.staminaleft.value;
+
+  // Whichever rank verb this actor's rank allows — the rearmost slot has no
+  // `rank-back` and the frontmost no `rank-front`, so neither is universal.
+  const verb = legalActions(battle, mover)
+    .map((option) => option.type)
+    .find((type) => type === "rank-back" || type === "rank-front");
+  assert.ok(verb, "a 3-rank arena offers the mover at least one rank verb");
+
+  applyAction(battle, { actorId: mover, type: verb, targetId: mover });
+
+  const after = combatantById(battle, mover);
+  assert.equal(
+    Math.abs(after.y - startY), 97,
+    "exactly one rank, not a distance"
+  );
+  assert.equal(
+    after.y - startY,
+    verb === "rank-back" ? -97 : 97,
+    "and arena y DECREASES going back, which is the renderer's convention too"
+  );
+  assert.equal(after.x, startX, "and the other axis is untouched");
+  assert.ok(
+    after.resources.staminaleft.value < startStamina,
+    "a rank change is a completed phase that pays, not a free step"
+  );
+});
+
+/**
+ * ► **THE AI RULE THAT IS THE WHOLE FEATURE, and the first version of it was a
+ *   PILE-UP MACHINE.** Moving toward the NEAREST foe's rank is the obvious rule
+ *   and it collapses all six gladiators into one rank at the opening, which
+ *   rebuilds in two dimensions the single interface the axis exists to break.
+ *   The tell was unmistakable: `rankStride` 97 and 150 produced IDENTICAL
+ *   censuses — 1,839 actions, 32.8% mutual reach, 1 fight — because once
+ *   everybody shares a rank the stride cannot matter.
+ *
+ * This asserts the OUTCOME rather than the decision, because the outcome is
+ * what the owner sees and what the census measures.
+ */
+test("the AI keeps the ranks apart instead of collapsing them into one", () => {
+  const battle = rankedBout(3, 150);
+  const startingRanks = new Set([1, 2, 3].map((slot) => combatantById(battle, `red-${slot}`).y));
+  assert.equal(startingRanks.size, 3, "the three slots open in three distinct ranks");
+
+  // Drive the bout the way the AI would, and watch how many ranks stay
+  // occupied. A pile-up shows up as this collapsing to 1.
+  let leastRanksSeen = 3;
+  for (let step = 0; step < 200 && !battle.result; step += 1) {
+    const id = actorId(battle);
+    const options = legalActions(battle, id);
+    if (options.length === 0) break;
+    const chosen = suggestAction(battle, id);
+    applyAction(battle, { actorId: id, ...chosen });
+
+    const living = ["red", "blue"].flatMap((team) =>
+      [1, 2, 3].map((slot) => combatantById(battle, `${team}-${slot}`)).filter((c) => c.alive)
+    );
+    if (living.length >= 4) {
+      leastRanksSeen = Math.min(leastRanksSeen, new Set(living.map((c) => c.y)).size);
+    }
+  }
+  assert.ok(
+    leastRanksSeen >= 2,
+    `the ranks must not collapse to one while four or more are alive; saw ${leastRanksSeen}`
+  );
 });
 
 /* ------------------------------------------------------------------ */
