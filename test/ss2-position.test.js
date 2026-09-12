@@ -128,6 +128,66 @@ test("fightdistance is the build's hypotenuse, not the x-separation", () => {
   assert.equal(ss2FightDistance({ x: 0, y: 0 }, { x: 86, y: 97 }), 130);
 });
 
+/**
+ * ► **BOTH OF THESE CAME FROM `/adversarial-review` BREAKING THIS SESSION'S OWN
+ *   WORK, and both were re-derived here before being believed.** A Codex
+ *   finding is a CLAIM TO VERIFY; these two survived verification, and a third
+ *   (the projection version bump) is the owner's and is not a defect.
+ */
+test("ydist is SIGNED, because the branch that orders it is on x", () => {
+  // `+0x02f8` tests `hero._x < villain._x` and selects the operand order for
+  // BOTH subtractions. So `xdist` is non-negative by construction and `ydist`
+  // is not — and `Math.round` of a negative half-integer rounds toward +inf.
+  //
+  // The oracle's own answer for hero (0,200) villain (1,70.5) is 129:
+  // ydist rounds to -129, not to 130. The first version of this function took
+  // Math.abs of both components and returned 130.
+  assert.equal(ss2FightDistance({ x: 0, y: 200 }, { x: 1, y: 70.5 }), 129);
+
+  // The mirror case, so the test cannot pass by rounding everything down.
+  assert.equal(ss2FightDistance({ x: 0, y: 70.5 }, { x: 1, y: 200 }), 130);
+});
+
+test("no y a rule set can produce is affected, which is why nothing moved", () => {
+  // Every depth this engine assigns is `frontY - rankStride * k`, both
+  // integers, so `round` is the identity and the sign cannot survive squaring.
+  // Measured across the divergence: 479 disagreeing half-integer pairs, zero
+  // of them at integer y. That is why the correction moved no pinned hash —
+  // and it was still a wrong derivation, which is the point.
+  const rules = createSs2TeamRules({ rankStride: 97 });
+  for (const slotIndex of [0, 1, 2]) {
+    assert.ok(Number.isInteger(rules.startingY({ slotIndex })), "a rank is an integer depth");
+  }
+});
+
+/**
+ * ► **`y` WITHOUT `x` IS REFUSED, and before this guard it was reachable.**
+ * A blueprint-stated coordinate wins over the rule set's hook — deliberately,
+ * for `x`. The second axis inherited it, and a raw blueprint stating `y` under
+ * `fixtureReplay: true` produced a combatant with `x: null` and `y: 200`: its
+ * reach gate answered "no geometry" while its rank verbs answered "geometry",
+ * and it was offered `rank-back`.
+ */
+test("a combatant that states depth without a position is refused, not half-built", () => {
+  const rules = createSs2TeamRules({ fixtureReplay: true, rankStride: 97 });
+  const staged = (id, extra) => ({
+    ...ss2Combatant(gladiator({ gladiator_dir: "right" }), { id, name: id }),
+    ...extra
+  });
+  assert.throws(
+    () => createTeamBattle({
+      seed: 1,
+      rules,
+      teams: [
+        { id: "red", combatants: [staged("hero", { y: 200 })] },
+        { id: "blue", combatants: [staged("villain", { y: 103 })] }
+      ]
+    }),
+    (error) => /states a depth of 200 but no position/.test(error.message),
+    "depth with nowhere to be deep must be refused by name"
+  );
+});
+
 test("a level pair reduces EXACTLY to the rounded x-separation, so no pinned distance moved", () => {
   // The reduction is exact, not approximate: with ydist 0, round(sqrt(xdist^2))
   // is xdist, and xdist is already round(|dx|).

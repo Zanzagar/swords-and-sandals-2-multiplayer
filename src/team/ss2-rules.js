@@ -1035,10 +1035,34 @@ export const SS2_ARENA = Object.freeze({
  * **The reduction is exact, which is why this rewrite moves nothing.** With
  * `ydist === 0`, `round(sqrt(xdist^2))` is `xdist`, and `xdist` is already
  * `round(|dx|)` — the previous body exactly. Verified over 30,005 offsets
- * including the negative-half-integer case (`Math.round(-2.5) === -2`) that
- * breaks the naive rewrite which rounds the SIGNED difference: the build
- * branches so that it always subtracts the smaller from the larger, so the
- * absolute value comes FIRST and the rounding second.
+ * including the negative-half-integer case (`Math.round(-2.5) === -2`).
+ *
+ * ► **THE FIRST VERSION OF THIS FUNCTION TOOK `Math.abs` OF BOTH COMPONENTS,
+ *   AND THIS PARAGRAPH ASSERTED THAT WAS THE BUILD'S OWN SHAPE. IT IS NOT.
+ *   Broken by `/adversarial-review` within the hour, re-derived here against
+ *   the oracle before it was believed.** What it said:
+ *
+ *     ~~"the build branches so that it always subtracts the smaller from the
+ *     larger, so the absolute value comes FIRST and the rounding second."~~
+ *
+ *   **That is true of `xdist` and false of `ydist`.** The `Less2; Not; If` at
+ *   `+0x02f8` tests `hero._x < villain._x` and selects the operand order for
+ *   BOTH subtractions — so `xdist` is non-negative by construction, while
+ *   `ydist` is whatever that same order gives, sign included. `Math.round`
+ *   then rounds a possibly-negative value, and JS rounds a negative
+ *   half-integer toward +infinity: `round(-129.5)` is -129, while
+ *   `round(|-129.5|)` is 130. Squaring hides the sign but not the rounding.
+ *
+ *   Measured divergence: **479 disagreeing pairs over a half-integer sweep,
+ *   and ZERO of them at integer y.** So it moved no number this engine can
+ *   produce — every `y` a rule set assigns is `frontY - rankStride * k`, both
+ *   integers — and it was still wrong, because the claim was about the BUILD
+ *   and not about the reachable inputs.
+ *
+ *   **This is the same error the rest of this docstring convicts four files
+ *   of**: checking one half of a thing and generalising to the half that was
+ *   not checked. The branch really does make `xdist` positive. Nothing makes
+ *   `ydist` positive, and I wrote a sentence saying the branch did both.
  *
  * `y` is absent on every combatant today and reads as 0, so every caller gets
  * the 1-D answer until a rule set gives gladiators a second coordinate.
@@ -1048,12 +1072,17 @@ export const SS2_ARENA = Object.freeze({
  */
 export function ss2FightDistance(a, b) {
   if (!Number.isFinite(a?.x) || !Number.isFinite(b?.x)) return null;
-  // Absolute FIRST, then round — the build's two arms subtract the smaller
-  // from the larger, so neither component is ever a rounded negative.
-  const xdist = Math.round(Math.abs(a.x - b.x));
   const ay = Number.isFinite(a?.y) ? a.y : 0;
   const by = Number.isFinite(b?.y) ? b.y : 0;
-  const ydist = Math.round(Math.abs(ay - by));
+  // ► **THE BRANCH IS ON X AND IT SELECTS THE OPERAND ORDER FOR BOTH
+  //   COMPONENTS.** `xdist` is therefore never negative; `ydist` IS SIGNED,
+  //   because nothing about the branch orders the y pair. Corrected 2026-09-12
+  //   after `/adversarial-review` broke the first version of this function —
+  //   see the docstring's own correction block for what I wrote and why it was
+  //   wrong.
+  const forward = a.x < b.x;
+  const xdist = Math.round(forward ? b.x - a.x : a.x - b.x);
+  const ydist = Math.round(forward ? by - ay : ay - by);
   return Math.round(Math.sqrt(xdist * xdist + ydist * ydist));
 }
 
@@ -2149,7 +2178,7 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
  */
 export function ss2Combatant(
   vanilla,
-  { id, name, controller, battleStarted = false, derive = true, x } = {}
+  { id, name, controller, battleStarted = false, derive = true, x, y } = {}
 ) {
   // `derive` is a GUARD, not a convention. `ss2BattleValues` overwrites
   // `min_damage`, `max_damage`, `hitpointsmax` and `staminamax`
@@ -2268,6 +2297,18 @@ export function ss2Combatant(
    * within reach of each other.
    */
   if (x !== undefined) source.x = x;
+  /**
+   * And its RANK, on the same footing and for the same two callers.
+   *
+   * ► **THIS WAS MISSING UNTIL 2026-09-12 AND ITS ABSENCE WAS LOAD-BEARING BY
+   *   ACCIDENT.** `ss2Combatant` forwarded `x` and silently dropped `y`, so a
+   *   caller staging a ranked bout through this constructor got a gladiator
+   *   with a position and no depth and no error — the option simply vanished.
+   *   Adding it is what makes the two axes symmetric here, and the coherence
+   *   guard in `normaliseCombatant` is what stops the asymmetric state a raw
+   *   blueprint could still reach: `y` without `x` is refused outright.
+   */
+  if (y !== undefined) source.y = y;
   return source;
 }
 

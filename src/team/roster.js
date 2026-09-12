@@ -214,6 +214,35 @@ export function normaliseCombatant(source, teamId, index, rules, teamIndex = 0) 
       "startingY must return a finite number or null."
     );
   }
+  /**
+   * ► **DEPTH REQUIRES A POSITION. Found 2026-09-12 by `/adversarial-review`
+   *   and reproduced here before it was believed.**
+   *
+   * A blueprint-stated coordinate wins over the rule set's hook — deliberately,
+   * and `x` has always worked that way (the seeded pins stage a pair at +/-30
+   * with it). The second axis inherited that, and inheriting it opened a state
+   * nothing should be able to reach: a combatant with `x: null` and a finite
+   * `y`. Measured, under `fixtureReplay: true`, that gladiator was offered
+   * `rank-back` while `ss2FightDistance` returned `null` for every pair —
+   * half a geometry, with the reach gate answering "not modelled" and the rank
+   * verbs answering "modelled".
+   *
+   * **The asymmetry is the rule, not an oversight.** `x` without `y` is the
+   * one-dimensional arena and is the normal case for every rule set with the
+   * second axis off. `y` without `x` is depth with nowhere to be deep.
+   *
+   * It is checked HERE rather than in the rule set because it is a property of
+   * the combatant the resolver builds, and a rule set cannot see a blueprint
+   * that bypassed its hooks — which is exactly how this got in.
+   */
+  if (combatant.y !== null && combatant.x === null) {
+    throw new BattleError(
+      `Combatant ${combatant.id} states a depth of ${combatant.y} but no position. ` +
+      "A gladiator that models the second axis must model the first: `y` without `x` is depth " +
+      "with nowhere to be deep, and it reaches the rule set as a combatant whose reach gate says " +
+      "\"no geometry\" while its rank verbs say \"geometry\"."
+    );
+  }
   combatant.maxHealth = rules.maximumHealth(combatant);
   combatant.health = clamp(combatant.health ?? combatant.maxHealth, 0, combatant.maxHealth);
   combatant.alive = combatant.health > 0;
