@@ -377,6 +377,48 @@ test("the AI keeps the ranks apart instead of collapsing them into one", () => {
   );
 });
 
+/**
+ * ► **A RANK CHANGE MUST REACH THE SCREEN, AND IT MUST NOT REACH IT AS A
+ *   WALK.** The presentation detects movement by a finite `from`/`to`, which
+ *   are the X endpoints. A depth move that reused them would have been bound
+ *   as a walk: the figure would slide across the arena playing `walkleft`
+ *   while the resolver said it had changed rank and not moved in x at all.
+ *   That is the same class of defect as a walking gladiator playing the idle
+ *   clip, which cost a session in September.
+ */
+test("a rank change reaches the arena as a depth move, never as a walk", () => {
+  const battle = rankedBout(3, 97);
+  const mover = actorId(battle);
+  const startX = combatantById(battle, mover).x;
+  const verb = legalActions(battle, mover)
+    .map((option) => option.type)
+    .find((type) => type === "rank-back" || type === "rank-front");
+
+  applyAction(battle, { actorId: mover, type: verb, targetId: mover });
+  const wire = toTeamWireState(battle);
+  const layout = buildArenaLayout(wire);
+  const { commands } = presentResolvedEvents(wire, { layout, bindings: SS2_STATIC_MAP_BINDINGS });
+
+  const depthMoves = commands.filter((command) => command.kind === "move-clip-depth");
+  assert.equal(depthMoves.length, 1, "exactly one depth move reaches the surface");
+  assert.equal(depthMoves[0].combatantId, mover);
+  assert.equal(depthMoves[0].toY, combatantById(battle, mover).y, "and it agrees with the resolver");
+
+  assert.equal(
+    commands.filter((command) => command.kind === "move-clip").length,
+    0,
+    "a rank change must NOT be emitted as an x move"
+  );
+
+  // And the scene folds it onto the actor's depth without touching x.
+  const scene = applyCommands(emptyScene(), commands);
+  assert.equal(scene.actors[mover].y, combatantById(battle, mover).y);
+  assert.equal(
+    combatantById(battle, mover).x, startX,
+    "the resolver did not move it in x, so the surface must not either"
+  );
+});
+
 /* ------------------------------------------------------------------ */
 /* Construction geometry                                               */
 /* ------------------------------------------------------------------ */

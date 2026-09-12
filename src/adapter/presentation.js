@@ -113,6 +113,24 @@ export const CommandKind = Object.freeze({
    * by the walk.
    */
   MOVE_CLIP: "move-clip",
+  /**
+   * A move along the SECOND axis — a rank change.
+   *
+   * ► **ITS OWN KIND RATHER THAN A WIDER `move-clip`, and `src/render/scene.js`
+   *   states the reason in advance**: the `move-clip` fold writes only `x` and
+   *   `motion`, spelled out field by field precisely so "a future field added
+   *   to `place-clip`'s fold must not silently start being overwritten by a
+   *   step sideways". A depth move IS that step sideways. Widening `move-clip`
+   *   with an optional second pair would also break the movement DETECTOR,
+   *   which keys on a finite `from`/`to` — the X endpoints — so a rank change
+   *   would have been read as a walk and slid the figure across the arena
+   *   playing `walkleft`.
+   *
+   * It carries no clip label because the build has no sidestep phase to name.
+   * The figure moves; what it is playing while it moves is whatever it was
+   * already playing, which is the honest answer and not a gap.
+   */
+  MOVE_CLIP_DEPTH: "move-clip-depth",
   BIND_GLOBALS: "bind-globals",
   CLIP_GOTO: "clip-goto",
   PANEL_REFRESH: "panel-refresh",
@@ -478,6 +496,30 @@ function movementFor(layout, event) {
   });
 }
 
+/**
+ * The `move-clip-depth` for an event that carries a rank change, or null.
+ *
+ * Detected by `fromY`/`toY`, exactly as `movementFor` is detected by `from`
+ * and `to`, and for the same reason: the engine's token and the build's phase
+ * label are different spellings and only the fields are reliable. There is no
+ * build phase here at all, which makes the fields the only thing there is.
+ */
+function depthMovementFor(layout, event) {
+  if (!Number.isFinite(event.fromY) || !Number.isFinite(event.toY)) return null;
+  // Resolved here rather than by the caller, for the reason `movementFor`
+  // gives: this runs before the binding is known and `placementFor` throws on
+  // a combatant with no slot.
+  const placement = layout.placementFor(event.actorId);
+  return Object.freeze({
+    kind: CommandKind.MOVE_CLIP_DEPTH,
+    sequence: event.sequence,
+    combatantId: placement.combatantId,
+    instancePath: placement.instancePath,
+    fromY: event.fromY,
+    toY: event.toY
+  });
+}
+
 function clipGoto(sequence, placement, chosen, role) {
   return Object.freeze({
     kind: CommandKind.CLIP_GOTO,
@@ -631,11 +673,22 @@ export function presentResolvedEvents(wire, {
 
     const chosen = bindings.action(event);
     const movement = movementFor(layout, event);
+    // A rank change. Detected and emitted independently of the binding, for
+    // the reason `movementFor` gives: where the figure ends up is the
+    // resolver's own reported fact, and a scene that drew a figure where the
+    // resolver says it is NOT is the same failure as swallowing an `unmapped`.
+    const depthMovement = depthMovementFor(layout, event);
     if (!chosen) {
       commands.push(Object.freeze({
         kind: CommandKind.UNMAPPED,
         sequence: event.sequence,
-        reason: movement
+        reason: depthMovement && !movement
+          // A rank change is AUTHORED and has no build phase to name, so the
+          // "you forgot vanillaLabel" advice below would send the reader to
+          // fix something that is deliberately absent.
+          ? `${event.type} is an authored depth move with no vanilla phase to bind; ` +
+            "the figure still moves and no clip is played for it"
+          : movement
           // Named precisely, because a movement event has TWO ways to go
           // unbound and they have different fixes. It does not claim to know
           // which: `bindings.action` returns null either way, and guessing
@@ -650,6 +703,7 @@ export function presentResolvedEvents(wire, {
       }));
       // The figure still moves. See `movementFor`.
       if (movement) commands.push(movement);
+      if (depthMovement) commands.push(depthMovement);
       continue;
     }
     const actorPlacement = layout.placementFor(event.actorId);
@@ -663,6 +717,7 @@ export function presentResolvedEvents(wire, {
     // Before the clip, so a surface folding the batch knows where the figure
     // is going before it starts the timeline that carries it there.
     if (movement) commands.push(movement);
+    if (depthMovement) commands.push(depthMovement);
     if (chosen.actor) commands.push(clipGoto(event.sequence, actorPlacement, chosen.actor, "actor"));
     if (chosen.target && targetPlacement) {
       commands.push(clipGoto(event.sequence, targetPlacement, chosen.target, "target"));

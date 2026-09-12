@@ -69,6 +69,7 @@ const HANDLED = Object.freeze([
   "attach-clip",
   "place-clip",
   "move-clip",
+  "move-clip-depth",
   "bind-globals",
   "clip-goto",
   "panel-refresh",
@@ -101,7 +102,15 @@ const EMPTY_ACTOR = Object.freeze({
    * `to` equals the current `x` interpolates to a standstill, which is exactly
    * what a figure that has finished walking should do.
    */
-  motion: null
+  motion: null,
+  /**
+   * The rank change this actor is in the middle of, from the last
+   * `move-clip-depth`, or null. Separate from `motion` for the same reason the
+   * COMMAND is separate: a surface interpolating a step along one axis must
+   * not be handed the other axis's origin. `y` above is already the
+   * destination; this is where the step began.
+   */
+  depthMotion: null
 });
 
 function frozenActor(actor) {
@@ -274,6 +283,29 @@ export function applyCommands(scene, commands) {
             to: command.to,
             sequence: command.sequence,
             actionToken: command.actionToken ?? null
+          })
+        });
+        break;
+      }
+
+      case "move-clip-depth": {
+        const actor = actorFor(actors, command.combatantId);
+        // ONLY `y` and `depthMotion`. The same discipline as `move-clip`
+        // above, and for the same reason spelled out there: a step along one
+        // axis must never fold a field belonging to the other. `x` in
+        // particular is deliberately untouched — a rank change does not move a
+        // gladiator across the arena.
+        //
+        // `placed` is deliberately NOT set true, exactly as in `move-clip`: a
+        // combatant the stream never placed has no facing and no scale, and a
+        // painter drawing it would be inventing four fields to use one.
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          y: command.toY,
+          depthMotion: Object.freeze({
+            from: command.fromY,
+            to: command.toY,
+            sequence: command.sequence
           })
         });
         break;
