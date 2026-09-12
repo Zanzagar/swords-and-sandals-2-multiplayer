@@ -85,6 +85,36 @@ priced on the weapon with strength in the denominator — and **both gated behin
   gives. **Measure the live number, never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
 
+► **THIS SESSION COMMITTED THREE AND MEASURED THREE UNPUSHED AFTER ITS HANDOFF
+  COMMIT `208f4a2`; the commit carrying this sentence makes four.** An event with
+  the self-reference in it, for the reason every block below it gives: a bare
+  count is false one commit later. **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **THE WALK DISPLACEMENT IS DERIVED AND `MAP_SILENCE.movement-displacement` IS
+  GONE (2026-09-12, `bdc157b` + `6bb790e`).** `movement_speed * 16`, scaled by
+  `100 + 2 * boot` percent, set as a DESTINATION and eased by `ceil(gap / 8)` a
+  frame until the gap is 20 or less — so the clamp floor of 4 realises `64 - 20 =
+  44` and **the uncited "one walk is 44 px" was right all along, as the FLOOR
+  case.** `SS2_ARENA.walkDistance` is renamed `walkDistanceAtSpeedFloor`; a walk
+  is per-actor; `movement_speed` 12 walks 172.
+  **The lesson outranks the number and is in the catalogue's own header: a gap in
+  `MAP_SILENCE` is a gap in a TRANSCRIPTION and says nothing about the build.**
+  An entry whose `settledBy` reaches for a capture must now say why the bytes
+  cannot answer it first.
+  ► **A SIX-VERIFIER WAVE THEN BROKE FOUR THINGS IN THE FIRST VERSION, one of
+    them behaviour** — the build's `get_percentage` round trip is lossy in doubles
+    and `add_percentage` divides before multiplying, so the collapsed formula is
+    +1 out at six reachable `(movement_speed, boot)` pairs; and the tween is a
+    DO/WHILE, so a `while` returned 0 where the build moves 2. Both classes are
+    now caught mechanically by `tools/walk-displacement-derivation.mjs`.
+  **RANKED FIRST FOR THE NEXT SESSION, measured not argued:** declare
+  `weapon_range` a projected resource and restore the build's own overlap clamp.
+  The build clamps on the DEFENDER's `physical_size` and gates on the ATTACKER's
+  `weapon_range`; this module uses `ss2Reach` for both, which parks a walker
+  exactly ON its own gate threshold — that is why the faithful clamp deadlocks and
+  why the shipped narrowing is a placeholder.
+
 ► **THE `weaponweights` DIRECTION IS READ, AND THE REPOSITORY ALREADY HELD IT
   (2026-09-11, `ac8c7f4`). RANKED ITEM 1 IS CLOSED.** Index 1 IS the heavy end,
   so `ss2WeaponMass` is right and the swing cost is NOT backwards. Read
