@@ -249,7 +249,18 @@ function parseArguments(argv) {
 
 /** One team size, swept over seeds. Every counter is accumulated across bouts. */
 function census(perSide, { seeds, guard, rankStride }) {
-  const rules = rankStride === 0 ? ss2TeamRules : createSs2TeamRules({ rankStride });
+  // ► **THIS READ `rankStride === 0` AND THAT BROKE THE MOMENT 97 BECAME THE
+  //   DEFAULT (2026-09-12).** The singleton is the SHIPPED rule set, so asking
+  //   for `--rank-stride 0` selected it and the tool reported the default
+  //   engine while printing "second axis OFF" above the table. **The one
+  //   instrument whose numbers justify this work answered a question nobody
+  //   asked, confidently, for the length of one commit.**
+  //
+  //   Compare against the shipped value, not against zero: the singleton is
+  //   correct only when the request IS the default.
+  const rules = rankStride === SS2_ARENA.rankStride
+    ? ss2TeamRules
+    : createSs2TeamRules({ rankStride });
   const totals = {
     bouts: 0, settled: 0, actions: 0,
     blows: 0, through: 0,
@@ -359,7 +370,8 @@ function main(argv) {
   console.log(`arena is ${arenaWidth} units wide; a bare-handed reach is about 130`);
   console.log(options.rankStride === 0
     ? "second axis OFF (rankStride 0) — this is the one-dimensional engine\n"
-    : `second axis ON, rankStride ${options.rankStride} units between ranks\n`);
+    : `second axis ON, rankStride ${options.rankStride} units between ranks` +
+      `${options.rankStride === SS2_ARENA.rankStride ? " (the shipped default)" : ""}\n`);
 
   const rows = [];
   for (const perSide of [1, 2, 3]) {

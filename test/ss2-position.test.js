@@ -535,30 +535,84 @@ test("a walk through a whole team stops at the first body in the way", () => {
   assert.equal(ss2WalkDestination(actor, crowd, 1), 200 - 86);
 });
 
-test("a rank change into an occupied space is not offered", () => {
-  // A rank change keeps your x and changes your depth, so it can drop you on
-  // top of somebody standing at your x one rank away. The walk clamp cannot
-  // help — it clamps a walk, and this is not one. **This is the occupancy test
-  // discrete ranks were chosen to buy.**
+/**
+ * ► **A RANK CHANGE INTO AN OCCUPIED LANE ARRIVES BESIDE, IT DOES NOT REFUSE.
+ *   The owner broke the first version by asking the right question** — "two
+ *   gladiators can never be in the same lane, or potentially swap lanes? Seems
+ *   wrong to me" — and the measurement was worse than the suspicion.
+ *
+ * The refusal withheld **1,359 of 2,426 in-band rank changes (56%)**, because
+ * fighters converge in x and then everybody is within a body-width of
+ * everybody in the neighbouring lane. **Three bodies never once shared a lane
+ * in 1,871 turns**, so a 2-on-1 was unreachable, and the verb was taken 20
+ * times: a dead button.
+ *
+ * It was also the engine disagreeing with itself. A WALK into a body clamps —
+ * you move and stop beside them. The rank change forbade. Same situation, and
+ * only one of those is the build's own answer.
+ */
+test("a rank change into an occupied lane arrives BESIDE, and is never refused for it", () => {
   const rules = createSs2TeamRules({ rankStride: 97 });
-  const view = (actorY, others) => ({
-    actor: { id: "me", x: 0, y: actorY, alive: true, stats: { strength: 9, agility: 10 },
+  const view = (actorX, others) => ({
+    actor: { id: "me", x: actorX, y: 200, alive: true, stats: { strength: 9, agility: 10 },
       resources: { staminaleft: { value: 100 } } },
     allies: [],
     foes: others
   });
 
-  // Nobody behind: the verb is on offer.
-  const clear = rules.legalActions(view(200, [
-    { id: "far", x: 900, y: 103, alive: true, stats: { strength: 9 } }
+  // Somebody standing exactly where I would land. The verb is STILL offered.
+  const blocked = rules.legalActions(view(0, [
+    { id: "blocker", x: 10, y: 103, alive: true, stats: { strength: 9 } },
+    { id: "other", x: 900, y: 103, alive: true, stats: { strength: 9 } }
   ]), "me").map((option) => option.type);
-  assert.ok(clear.includes("rank-back"), "an empty rank behind is reachable");
+  assert.ok(blocked.includes("rank-back"), "an occupied lane is still reachable");
+});
 
-  // Somebody standing at my x, one rank back: refused.
-  const blocked = rules.legalActions(view(200, [
-    { id: "blocker", x: 10, y: 103, alive: true, stats: { strength: 9 } }
-  ]), "me").map((option) => option.type);
-  assert.ok(!blocked.includes("rank-back"), "a rank you would land inside somebody is not offered");
+test("the arrival lands on the clamp line a walk would have used", () => {
+  const battle = rankedBout(3, 97);
+  const mover = actorId(battle);
+  const before = combatantById(battle, mover);
+  const startY = before.y;
+
+  const verb = legalActions(battle, mover)
+    .map((option) => option.type)
+    .find((type) => type === "rank-back" || type === "rank-front");
+  applyAction(battle, { actorId: mover, type: verb, targetId: mover });
+
+  const after = combatantById(battle, mover);
+  assert.equal(Math.abs(after.y - startY), 97, "the lane change still happens");
+
+  // Whatever x it landed on, it is not inside anybody in its new lane.
+  const others = ["red-1", "red-2", "red-3", "blue-1", "blue-2", "blue-3"]
+    .filter((id) => id !== mover)
+    .map((id) => combatantById(battle, id))
+    .filter((c) => c.alive && c.y === after.y);
+  for (const other of others) {
+    assert.ok(
+      Math.abs(other.x - after.x) >= ss2PhysicalSize(other),
+      `${mover} landed inside ${other.id}: ${Math.abs(other.x - after.x)} < ${ss2PhysicalSize(other)}`
+    );
+  }
+});
+
+test("a rank change into EMPTY ground moves one axis only", () => {
+  // The common case must stay a pure lane change: no POSITION effect, and no
+  // `from`/`to` on the event, or the presentation would bind it as a walk.
+  const rules = createSs2TeamRules({ rankStride: 97 });
+  const request = {
+    actor: { id: "me", x: 0, y: 200, alive: true, stats: { strength: 9, agility: 10 },
+      resources: { staminaleft: { value: 100 }, staminamax: { value: 100 }, hitpoints: { value: 40 } } },
+    actorId: "me",
+    type: "rank-back",
+    targetId: "me",
+    foes: [{ id: "far", x: 2000, y: 103, alive: true, stats: { strength: 9 } }],
+    allies: []
+  };
+  const outcome = rules.resolveAction(request, { randomBetween: () => 0, randomNumber: () => 0 });
+  const position = outcome.effects.filter((effect) => effect.kind === "position");
+  assert.equal(position.length, 0, "empty ground means no sideways step");
+  assert.equal(outcome.events[0].from, undefined, "and nothing that looks like a walk");
+  assert.equal(outcome.events[0].toY, 103);
 });
 
 /**

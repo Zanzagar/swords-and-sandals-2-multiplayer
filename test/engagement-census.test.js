@@ -22,6 +22,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { simultaneousFights, anyCrossing } from "../tools/engagement-census.mjs";
+import { createSs2TeamRules, ss2TeamRules, SS2_ARENA } from "../src/team/ss2-rules.js";
 
 const fighter = (id, teamId, x, { strength = 9, y } = {}) => ({
   id,
@@ -151,4 +152,36 @@ test("the second axis is visible to both metrics, which is why they can report i
     fighter("red-2", "red", 0, { y: 600 }), fighter("blue-2", "blue", 100, { y: 600 })
   ];
   assert.equal(simultaneousFights(lanes), 2);
+});
+
+/**
+ * ► **THE INSTRUMENT ANSWERED A QUESTION NOBODY ASKED, for the length of one
+ *   commit (2026-09-12).** `census()` chose its rule set with
+ *   `rankStride === 0 ? ss2TeamRules : createSs2TeamRules({ rankStride })`.
+ *   That was right while the singleton WAS the one-dimensional engine. The
+ *   moment 97 became the shipped default, `--rank-stride 0` selected the
+ *   singleton — the default — and the tool printed "second axis OFF" above a
+ *   table describing the axis switched ON.
+ *
+ * The numbers were identical to the default's and looked perfectly plausible:
+ * 2,024 actions either way. **The one artefact whose numbers justify this
+ * work cannot be allowed to report the wrong engine**, so the selection rule
+ * is pinned here rather than left to be noticed.
+ */
+test("the census selects the rule set by the SHIPPED default, not by zero", () => {
+  // The singleton is correct only when the request IS the default.
+  assert.equal(
+    createSs2TeamRules({ rankStride: SS2_ARENA.rankStride }).id,
+    ss2TeamRules.id,
+    "asking for the default must be the shipped rule set"
+  );
+  // And every other stride must be a DIFFERENT rule set, which its id proves —
+  // including 0, the one the old comparison silently aliased to the default.
+  for (const stride of [0, 60, 150]) {
+    assert.notEqual(
+      createSs2TeamRules({ rankStride: stride }).id,
+      ss2TeamRules.id,
+      `rankStride ${stride} must not resolve to the shipped rule set`
+    );
+  }
 });

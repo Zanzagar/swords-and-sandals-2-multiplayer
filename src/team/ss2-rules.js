@@ -1744,6 +1744,61 @@ const SS2_WALK_DIRECTION = Object.freeze({
  * they may share an x — the overlap clamp is what keeps bodies apart, and it
  * already runs on the x axis within a rank.
  */
+/**
+ * Where you END UP in x when you step into a lane somebody is standing in.
+ *
+ * ► **THIS REPLACED A REFUSAL, and the refusal was the wrong shape. Found by
+ *   the owner, 2026-09-12: "two gladiators can never be in the same lane, or
+ *   potentially swap lanes? Seems wrong to me."**
+ *
+ *   He was right about the smell and the measurement was worse than the
+ *   guess. Withholding the verb when the landing spot was occupied refused
+ *   **1,359 of 2,426 in-band rank changes — 56%** — because fighters converge
+ *   in x, so once a fight forms everybody is within a body-width of everybody
+ *   in the neighbouring lane and nobody can move at all. **Never once did
+ *   three bodies share a lane in 1,871 turns**, so a 2-on-1 was unreachable,
+ *   and the rank verb was taken 20 times in 1,871 turns: a dead button.
+ *
+ *   It was also inconsistent with the engine's own answer to this exact
+ *   question. **A WALK that would carry you into a body CLAMPS** — you move,
+ *   and stop at `defender._x -/+ physical_size(defender)`. The rank change
+ *   FORBADE. Same situation, two different rules, and only one of them is the
+ *   build's.
+ *
+ * So a rank change always happens, and if the spot is taken you arrive BESIDE
+ * them, on the clamp line a walk would have used, nearest side first. The x
+ * shift is bounded by one `physical_size` — smaller than a single walk at any
+ * agility above the floor — so this is not a diagonal move by the back door:
+ * it cannot be steered and it cannot cover ground.
+ *
+ * `null` when there is no free spot at all, which is the only case that still
+ * refuses the verb.
+ */
+function ss2RankArrivalX(actorX, bodies, destinationY) {
+  const inLane = bodies.filter(
+    (body) => body && body.alive !== false && Number.isFinite(body.x) && body.y === destinationY
+  );
+  const free = (x) => inLane.every((body) => Math.abs(body.x - x) >= ss2PhysicalSize(body));
+  if (free(actorX)) return clamp(actorX, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+
+  // The same landing spots a walk uses: one body-width either side of whoever
+  // is in the way. Nearest to where you already stand wins, and ties break
+  // toward the arena centre so the choice is deterministic.
+  const candidates = [];
+  for (const body of inLane) {
+    const size = ss2PhysicalSize(body);
+    candidates.push(body.x - size, body.x + size);
+  }
+  const reachable = candidates
+    .map((x) => clamp(x, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max))
+    .filter(free)
+    .sort((left, right) => {
+      const byDistance = Math.abs(left - actorX) - Math.abs(right - actorX);
+      return byDistance !== 0 ? byDistance : Math.abs(left) - Math.abs(right);
+    });
+  return reachable.length > 0 ? reachable[0] : null;
+}
+
 function ss2RankDestination(actorY, direction, rankStride) {
   if (!Number.isFinite(actorY) || rankStride <= 0) return null;
   const to = actorY + direction * rankStride;
@@ -3430,10 +3485,12 @@ export function createSs2TeamRules({
           if (duel && type !== closing) continue;
           const to = ss2RankDestination(view.actor.y, SS2_RANK_DIRECTION[type], rankStride);
           if (to === null) continue;
-          const occupied = others.some((other) =>
-            Number.isFinite(other.x) && other.y === to
-            && Math.abs(other.x - view.actor.x) < ss2PhysicalSize(other));
-          if (!occupied) actions.push({ type, targetId: actorId });
+          // **Occupied is not refused, it is ARRIVED BESIDE** — see
+          // `ss2RankArrivalX`. Only a lane with no free spot at all is refused,
+          // which needs the whole band full and is why this is `null` rather
+          // than a boolean.
+          if (ss2RankArrivalX(view.actor.x, others, to) === null) continue;
+          actions.push({ type, targetId: actorId });
         }
       }
 
@@ -3550,12 +3607,30 @@ export function createSs2TeamRules({
             "legalActions offers a rank verb only when ss2RankDestination finds one."
           );
         }
+        const rankBodies = [
+          ...(request.foes ?? []),
+          ...(request.allies ?? []).filter((ally) => ally.id !== actor.id)
+        ];
+        const arrivalX = ss2RankArrivalX(actor.x, rankBodies, to);
+        if (arrivalX === null) {
+          throw new TeamRuleSetError(
+            `${request.type} found no free ground in the rank at ${to} for ${actor.id}. ` +
+            "legalActions offers a rank verb only when ss2RankArrivalX finds a spot."
+          );
+        }
         const transition = phaseTransitionEffects(actor, {
           staminaCost: Math.round(ss2MovementSpeed(actor) / 2)
         });
         return {
           effects: [
             { kind: EffectKind.LATERAL, targetId: actor.id, to },
+            // **The sidestep AROUND a body, and only when there was one.** A
+            // rank change into empty ground emits no POSITION effect at all,
+            // so the overwhelmingly common case stays a pure one-axis move and
+            // the effect log says which kind of step this was.
+            ...(arrivalX === actor.x
+              ? []
+              : [{ kind: EffectKind.POSITION, targetId: actor.id, to: arrivalX }]),
             ...transition.effects,
             ...crowd
           ],
@@ -3563,6 +3638,10 @@ export function createSs2TeamRules({
             type: request.type,
             actorId: actor.id,
             targetId: actor.id,
+            // Present only when the sidestep happened, for the same reason:
+            // the presentation binds a movement on finite `from`/`to`, and a
+            // rank change into empty ground must not look like a walk.
+            ...(arrivalX === actor.x ? {} : { from: actor.x, to: arrivalX }),
             // **`fromY`/`toY`, NOT `from`/`to`.** The presentation detects
             // movement by a finite `from` and `to`, which are X endpoints
             // (`src/adapter/presentation.js`, the movement case); reusing them
