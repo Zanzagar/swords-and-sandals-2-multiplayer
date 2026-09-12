@@ -3413,8 +3413,32 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **WHICH FOE IT ACTUALLY SWINGS AT, and this was a live defect until
+      //   2026-09-12.** `target` above is the globally weakest foe by health.
+      //   The ranking below then looks for an option whose `targetId` is THAT
+      //   foe — and if the weakest one is out of reach no option matches, `best`
+      //   stays null, and the fallback rests. **A gladiator stood still at full
+      //   stamina with three attacks on offer against a foe standing in front
+      //   of it.**
+      //
+      //   Measured on the demo roster through the arena's own host path, 24
+      //   seeds: 1v1 0 of 529 actions, 2v2 0 of 998, **3v3 78 of 1,688 (4.6%)**.
+      //   It needs three foes before it can bite, which is why two team sizes
+      //   of green sweeps never saw it. Found by a design agent that was asked
+      //   about geometry and reported it as a premise break instead, which is
+      //   the rule working.
+      //
+      //   The fix keeps "weakest first" and applies it to the foes it can
+      //   actually hit, rather than to all of them. `ATTACK_BANDS` is the same
+      //   predicate `meleeOnOffer` above uses, so the two cannot disagree about
+      //   what counts as a melee verb.
+      const reachable = new Set(
+        options.filter((option) => ATTACK_BANDS[option.type]).map((option) => option.targetId)
+      );
+      const engaged = foes.find((foe) => reachable.has(foe.id)) ?? target;
+
       const attacker = vanillaRecordOf(actor, "attacker");
-      const defender = vanillaRecordOf(target, "defender");
+      const defender = vanillaRecordOf(engaged, "defender");
       const chances = calculateSs2AttackChances(attacker, defender);
       const expected = {
         [Ss2ActionType.QUICK_ATTACK]: (chances.quick / 100) * attacker.min_damage,
@@ -3430,7 +3454,7 @@ export function createSs2TeamRules({
       ];
       let best = null;
       for (const type of preference) {
-        const option = options.find((entry) => entry.type === type && entry.targetId === target.id);
+        const option = options.find((entry) => entry.type === type && entry.targetId === engaged.id);
         if (!option) continue;
         if (best === null || expected[type] > expected[best.type]) best = option;
       }

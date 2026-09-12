@@ -1792,6 +1792,55 @@ test("the AI takes the status phase it is handed, WITHOUT building an attacker r
   );
 });
 
+test("the AI never rests with a swing on offer, whatever the WEAKEST foe is doing", () => {
+  // ► **THE REGRESSION TEST FOR A LIVE DEFECT (found 2026-09-12 by a design
+  //   agent asked about geometry, which reported it as a premise break instead
+  //   — the rule about premises outranking the task, working).**
+  //
+  //   `chooseAiAction` picked the globally weakest foe by health, then looked
+  //   for an attack option whose `targetId` was THAT foe. With the weakest one
+  //   out of reach nothing matched, `best` stayed null, and the fallback rested
+  //   — while attacks against a foe standing in front of it sat unread in the
+  //   very `options` array it had been handed.
+  //
+  //   **It needs three foes before it can bite**, which is why it survived: at
+  //   1v1 and 2v2 it measured 0 of 529 and 0 of 998 actions. At 3v3, 78 of
+  //   1,688 (4.6%).
+  //
+  //   Stated as an INVARIANT rather than as a seed count, because a seed sweep
+  //   is what missed it. A healthy gladiator holding a melee verb must never
+  //   answer `rest`.
+  const view = {
+    turnNumber: 4,
+    actor: {
+      ...combatantById(battleOf({}, {}), "hero"),
+      id: "hero",
+      x: 0
+    },
+    allies: [],
+    foes: [
+      // The WEAKEST foe, and deliberately the one out of reach: no option below
+      // names it, exactly as `legalActions` would have produced.
+      { id: "far-weak", alive: true, health: 1, maxHealth: 46, x: 4000, stats: { strength: 9 }, resources: {}, status: [] },
+      // The one actually in front of the actor.
+      { id: "near-whole", alive: true, health: 46, maxHealth: 46, x: 20, stats: { strength: 9 }, resources: {}, status: [] }
+    ]
+  };
+  const options = [
+    { type: Ss2ActionType.QUICK_ATTACK, targetId: "near-whole" },
+    { type: Ss2ActionType.NORMAL_ATTACK, targetId: "near-whole" },
+    { type: Ss2ActionType.POWER_ATTACK, targetId: "near-whole" },
+    { type: Ss2ActionType.REST, targetId: "hero" }
+  ];
+  const chosen = ss2TeamRules.chooseAiAction(view, "hero", options);
+  assert.notEqual(chosen.type, Ss2ActionType.REST, "it must not stand still with three swings on offer");
+  assert.equal(chosen.targetId, "near-whole", "and it must swing at the foe it can actually reach");
+  assert.ok(
+    options.some((option) => option.type === chosen.type && option.targetId === chosen.targetId),
+    "and the choice must be one of the options it was handed"
+  );
+});
+
 test("the AI always returns one of the options it was handed, and a full AI fight settles", () => {
   const battle = battleOf({ strength: 8 }, { strength: 8, vitality: 1, herolevel: 1 }, { seed: 21 });
   reassignController(battle, "red:slot-1", "ai");
