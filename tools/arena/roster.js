@@ -193,7 +193,17 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
       //   Per SLOT, not per template: each member has its own `strength`, so
       //   the reaches are 130 / 129 / 129 and no constant is right for all
       //   three.
-      const priced = { ...vanilla, weapon_range: ss2BattleValues(vanilla).weapon_range };
+      // ► **`physical_size` IS DERIVED PER SLOT TOO (2026-09-12), for the same
+      //   reason and after the same hazard.** The template states 87, which is
+      //   wrong at every strength this roster actually uses (9, 8, 7 give 86,
+      //   85, 85) and was left alone while the only consumer was a clip scale
+      //   nothing read. `tools/arena/main.js` now DOES read it — via
+      //   `figureScaleFor` — so a stale constant here makes three visibly
+      //   different gladiators draw at one size, defeating the thing it feeds.
+      //   **A stated derived field is harmless right up until something reads
+      //   it**, which is the third time this roster has taught that lesson.
+      const derived = ss2BattleValues(vanilla);
+      const priced = { ...vanilla, weapon_range: derived.weapon_range, physical_size: derived.physical_size };
       const canonical = ss2Combatant(priced, { id, name, controller: "local", derive: false });
       return { id, controller: "local", vanilla: priced, resources: canonical.resources, clip: { gladiator_dir: facing } };
     })

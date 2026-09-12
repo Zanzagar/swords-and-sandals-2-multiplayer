@@ -179,3 +179,72 @@ export function figureSpecFor(combatant, { side } = {}) {
     provenance: "authored-original-art"
   });
 }
+
+/* ------------------------------------------------------------------ */
+/* How big a figure draws                                              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * How much smaller each rank BEHIND the front one draws, per rank.
+ *
+ * AUTHORED. Vanilla has exactly one gladiator a side
+ * (`MAP_SILENCE.multi-slot-arena-geometry`), so there is no second rank in the
+ * build to observe and nothing here can be derived. Tuned by looking at the
+ * rendered arena, which is the only way to tune it.
+ */
+export const DEPTH_SCALE_PER_RANK = 0.11;
+
+/**
+ * The scale a figure draws at: the build's own `physical_size` percentage,
+ * then a falloff for how far back it stands.
+ *
+ * ## The `physical_size` half is NOT new, and the shell was ignoring it
+ *
+ * ► **`presentation.js` has emitted `xscale`/`yscale` on every `place-clip`
+ *   since the presentation stream existed, `scene.js` carries them onto the
+ *   actor — and `tools/arena/main.js` never read either one.** So every
+ *   gladiator drew at an identical size no matter its `physical_size`, and a
+ *   strength-30 fighter looked exactly like a strength-1 one. Found 2026-09-12
+ *   while chasing a different visual complaint. They are PERCENTAGES, as
+ *   `_xscale`/`_yscale` are in the build (map, "Battle entry" step 5, which is
+ *   also where the villain's negative x-scale comes from), so 86 means 0.86.
+ *
+ * ## The depth half is what a one-dimensional arena needs from a renderer
+ *
+ * The resolver models ONE axis. That is faithful — vanilla has one gladiator a
+ * side, so there is no second axis to be faithful to — but it means a team
+ * walking at the enemy all stops at the same clamp line: measured, three allies
+ * at x = 40, 40, 30 while each claims 85 units of personal space. **That is not
+ * the model being wrong, it is the model being 1-D**, and a queue is a perfectly
+ * good description of it. Drawing a queue as a legible rank is the renderer's
+ * job, and doing it by RANK rather than by current position means figures never
+ * pop or swap as they move: `slotIndex` does not change during a bout.
+ *
+ * Lanes in the resolver were tried first and are arithmetically impossible.
+ * Reach is `physical_size + 44` at minimum and the front rank already parks at
+ * `physical_size`, so the whole budget for standing further back is 44 units,
+ * shared across every rank, against a drawn figure ~57 wide. Measured over 8
+ * seeds at strides 60, 85 and 130: **0 of 8 bouts settled and the third rank
+ * never once had an attack on offer.** See the handoff of 2026-09-12.
+ *
+ * @param {object} actor `{ yscale, slotIndex }` — composed by the caller from
+ *   the scene actor (which carries `yscale`) and the wire combatant (which
+ *   carries `slotIndex`). Deliberately NOT a new field on `place-clip`: rank is
+ *   a property of the roster, the projection already states it, and widening a
+ *   command shape to re-deliver something the caller already holds is how a
+ *   presentation stream grows fields nobody consumes — which is exactly the
+ *   defect this function was written to fix. A null or absent `yscale` means the
+ *   vanilla record carried no `physical_size`, and the figure draws nominal
+ *   rather than vanishing.
+ * @returns {number} a positive multiplier for the painter's local coordinates.
+ */
+export function figureScaleFor(actor, { depthPerRank = DEPTH_SCALE_PER_RANK } = {}) {
+  const stated = Number(actor?.yscale);
+  // `_yscale` is a percentage in the build. Absent is not zero: a figure with no
+  // stated size draws nominal, and a NEGATIVE one is the villain's mirror on the
+  // x axis only, so the magnitude is what matters here.
+  const size = Number.isFinite(stated) && stated !== 0 ? Math.abs(stated) / 100 : 1;
+  const rank = Number.isFinite(actor?.slotIndex) ? Math.max(0, actor.slotIndex) : 0;
+  const depth = Math.max(0.25, 1 - depthPerRank * rank);
+  return size * depth;
+}

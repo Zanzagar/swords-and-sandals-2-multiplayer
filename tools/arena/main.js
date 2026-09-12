@@ -47,6 +47,7 @@ import {
   applyCommands,
   emptyScene,
   figureSpecFor,
+  figureScaleFor,
   figureXAt,
   paintFigure,
   paintShadow,
@@ -252,13 +253,18 @@ function viewport() {
 }
 
 function drawOps(ops, view, origin) {
+  // How big this figure draws. `src/render/figure.js` decides it, for the same
+  // reason `figureXAt` and `timelinesForStep` live there: a number only the
+  // shell can see is a number the suite cannot reach. `1` is a figure at its
+  // nominal size in the front rank.
+  const size = origin.size ?? 1;
   for (const operation of ops) {
     context.globalAlpha = operation.alpha ?? 1;
     if (operation.kind === "polygon") {
       context.beginPath();
       operation.points.forEach(([x, y], index) => {
-        const px = view.toX(origin.x + x * (origin.facing === "left" ? -1 : 1));
-        const py = view.toY(origin.y, y);
+        const px = view.toX(origin.x + x * size * (origin.facing === "left" ? -1 : 1));
+        const py = view.toY(origin.y, y * size);
         if (index === 0) context.moveTo(px, py);
         else context.lineTo(px, py);
       });
@@ -273,10 +279,10 @@ function drawOps(ops, view, origin) {
         context.stroke();
       }
     } else if (operation.kind === "circle" || operation.kind === "ellipse") {
-      const px = view.toX(origin.x + operation.x * (origin.facing === "left" ? -1 : 1));
-      const py = view.toY(origin.y, operation.y);
-      const rx = (operation.r ?? operation.rx) * view.scale;
-      const ry = (operation.r ?? operation.ry) * view.scale;
+      const px = view.toX(origin.x + operation.x * size * (origin.facing === "left" ? -1 : 1));
+      const py = view.toY(origin.y, operation.y * size);
+      const rx = (operation.r ?? operation.rx) * size * view.scale;
+      const ry = (operation.r ?? operation.ry) * size * view.scale;
       context.beginPath();
       context.ellipse(px, py, Math.abs(rx), Math.abs(ry), 0, 0, Math.PI * 2);
       if (operation.fill && operation.fill !== "transparent") {
@@ -427,7 +433,8 @@ function render(now = performance.now()) {
         at
       }),
       y: actor.y,
-      facing: actor.facing
+      facing: actor.facing,
+      size: figureScaleFor({ yscale: actor.yscale, slotIndex: combatant.slotIndex })
     };
     drawOps(paintShadow(figure, pose), view, origin);
     drawOps(paintFigure(figure, pose), view, origin);

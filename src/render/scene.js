@@ -125,15 +125,45 @@ export function emptyScene() {
   });
 }
 
+/**
+ * Draw order: FURTHEST BACK first, so nearer figures paint over further ones.
+ *
+ * ► **THIS SORTED BY CLIP `depth` UNTIL 2026-09-12, AND THAT IS BACKWARDS FOR
+ *   PAINTING.** A clip depth is a Flash display-list slot, chosen by
+ *   `slot-layout.js` to avoid colliding with the two depths the battle map
+ *   records (hero 301, villain 300) — so the ally band runs 322, 324, 332, 334
+ *   and has no relationship to how far back a gladiator stands. Measured: the
+ *   hero's FRONT rank is depth 301 and its BACK rank is 324, so the back rank
+ *   drew LAST and painted over the figure in front of it. Invisible while the
+ *   ranks were spread across the arena; obvious the moment a team converges,
+ *   which is what a team does as soon as it closes.
+ *
+ * Arena `y` is the depth that matters here: 200 at the front rank and DECREASING
+ * further back (`slot-layout.js`'s `ALLY_Y_STRIDE` is negative), so ascending
+ * `y` is back-to-front and that is exactly paint order.
+ *
+ * **`depth` remains the tie-break, which is what keeps 1v1 byte-identical.**
+ * Vanilla's two fighters are both at `y` 200, so they never reach the `y`
+ * comparison and fall through to 300 before 301 — the villain under the hero,
+ * as the map has it and as this function has always produced.
+ */
 function withDrawOrder(actors) {
-  const ids = Object.keys(actors).sort((left, right) => {
-    const leftDepth = actors[left].depth;
-    const rightDepth = actors[right].depth;
-    if (leftDepth === rightDepth) return left < right ? -1 : 1;
-    if (leftDepth === null) return -1;
-    if (rightDepth === null) return 1;
-    return leftDepth - rightDepth;
-  });
+  const rank = (id, key) => {
+    const value = actors[id][key];
+    return Number.isFinite(value) ? value : null;
+  };
+  const compare = (left, right, key) => {
+    const leftValue = rank(left, key);
+    const rightValue = rank(right, key);
+    if (leftValue === rightValue) return 0;
+    // A null sorts FIRST, as it always has: an actor the stream never placed
+    // has no position to argue from and must not paint over one that does.
+    if (leftValue === null) return -1;
+    if (rightValue === null) return 1;
+    return leftValue - rightValue;
+  };
+  const ids = Object.keys(actors).sort((left, right) =>
+    compare(left, right, "y") || compare(left, right, "depth") || (left < right ? -1 : 1));
   return Object.freeze(ids);
 }
 

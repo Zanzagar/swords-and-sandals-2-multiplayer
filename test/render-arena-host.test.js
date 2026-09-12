@@ -27,6 +27,7 @@ import {
 import { ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
 import {
   ANIMATION_TIMEOUT_MS,
+  figureScaleFor,
   abandonReasonFor,
   animationCursor,
   applyCommands,
@@ -390,6 +391,71 @@ test("a spectated bout runs to a decision on a fake clock, and never stalls", ()
     spectatedAttacks > 0,
     `and must have actually swung: ${spectatedAttacks} attacks over ${spectatedOffers} turns with one on offer`
   );
+});
+
+test("the nearer rank paints LAST, and 1v1 is byte-identical to the order it always had", () => {
+  // ► **THE REGRESSION TEST FOR A BUG NOBODY COULD SEE UNTIL A TEAM CONVERGED
+  //   (2026-09-12).** `withDrawOrder` sorted by clip `depth`, which is a Flash
+  //   display-list slot chosen to avoid colliding with the two depths the map
+  //   records — so the hero's FRONT rank is 301 and its BACK rank is 324, and
+  //   the back rank painted OVER the figure in front of it. Harmless while the
+  //   ranks were spread across the arena; obvious the moment a team closes,
+  //   which is the first thing a team does.
+  const host = arenaHost(3, 11);
+  const scene = applyCommands(emptyScene(), host.constructArena().commands);
+
+  // Back to front, and assert the ranks really ARE at different depths, or the
+  // ordering below proves nothing.
+  const ys = scene.drawOrder.map((id) => scene.actors[id].y);
+  assert.deepEqual(ys, [...ys].sort((left, right) => left - right), "draw order must run back to front");
+  assert.ok(new Set(ys).size > 1, "the ranks must stand at different y, or this test is vacuous");
+
+  // And the clip depths are NOT in draw order, which is the whole point: a test
+  // that happened to agree with the old sort would not have caught the bug.
+  const depths = scene.drawOrder.map((id) => scene.actors[id].depth);
+  assert.notDeepEqual(depths, [...depths].sort((left, right) => left - right),
+    "clip depth must NOT be the draw order here, or this fixture cannot distinguish the two rules");
+
+  // 1v1 PARITY: vanilla's two fighters share y 200, so they never reach the y
+  // comparison and fall through to depth — villain 300 under hero 301, exactly
+  // as the map has it and as this function produced before the change.
+  const solo = arenaHost(1, 7);
+  const soloScene = applyCommands(emptyScene(), solo.constructArena().commands);
+  assert.deepEqual(soloScene.drawOrder, ["blue-1", "red-1"], "the villain paints under the hero, unchanged");
+  assert.deepEqual(soloScene.drawOrder.map((id) => soloScene.actors[id].depth), [300, 301]);
+});
+
+test("a figure draws at its own physical_size, and smaller the further back it stands", () => {
+  // ► **`xscale`/`yscale` REACHED THE SCENE AND NOTHING READ THEM.**
+  //   `presentation.js` has emitted them on every `place-clip` since the stream
+  //   existed and `tools/arena/main.js` ignored both, so every gladiator drew
+  //   at one size whatever its `physical_size`. They are PERCENTAGES, as
+  //   `_xscale`/`_yscale` are in the build.
+  const host = arenaHost(3, 11);
+  const scene = applyCommands(emptyScene(), host.constructArena().commands);
+  const byId = new Map(host.wire().teams.flatMap((team) => team.combatants).map((c) => [c.id, c]));
+  const scaleOf = (id) =>
+    figureScaleFor({ yscale: scene.actors[id].yscale, slotIndex: byId.get(id).slotIndex });
+
+  // Strictly decreasing with rank: a back rank draws smaller, which is what
+  // makes a converged column read as depth rather than as figures on a hill.
+  assert.ok(scaleOf("red-1") > scaleOf("red-2"), "rank 1 draws smaller than the front rank");
+  assert.ok(scaleOf("red-2") > scaleOf("red-3"), "and rank 2 smaller still");
+
+  // The `physical_size` half is REAL and not swallowed by the depth half: a
+  // bigger gladiator in the SAME rank draws bigger.
+  const small = figureScaleFor({ yscale: 80, slotIndex: 0 });
+  const large = figureScaleFor({ yscale: 147, slotIndex: 0 });
+  assert.ok(large > small * 1.5, `physical_size must still drive size: ${small} vs ${large}`);
+  assert.equal(figureScaleFor({ yscale: 100, slotIndex: 0 }), 1, "100% is nominal, as in the build");
+
+  // The villain's mirrored scale is negative on the X axis; magnitude is what
+  // a size means, and a figure with no stated size draws nominal, never zero.
+  assert.equal(figureScaleFor({ yscale: -86, slotIndex: 0 }), figureScaleFor({ yscale: 86, slotIndex: 0 }));
+  assert.equal(figureScaleFor({ yscale: null, slotIndex: 0 }), 1);
+  assert.equal(figureScaleFor({}), 1);
+  // And it never collapses, however deep the roster gets.
+  assert.ok(figureScaleFor({ yscale: 86, slotIndex: 99 }) > 0, "a deep rank must still be visible");
 });
 
 test("a token whose action started NO timeline is finished, not waited on for ever", () => {
