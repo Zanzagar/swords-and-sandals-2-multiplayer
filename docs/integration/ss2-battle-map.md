@@ -942,16 +942,23 @@ if (!(attacker._x >/< attacker.destination +/- 20)) {                  // within
 }
 ```
 
-| Phase | clip | `<step>` | site | bonus |
-| --- | --- | --- | --- | --- |
-| `walkleft` | `StepBack` | `movement_speed * 16` | `+0x3b99` | `boot` `+0x3bb5` |
-| `walkright` | `StepForward` | `movement_speed * 16` | `+0x3d78` | `boot` `+0x3d94` |
-| `runleft` | `RunBack` | `movement_speed * 40` | `+0x3f69` | none |
-| `runright` | `RunForward` | `movement_speed * 40` | `+0x40f2` | none |
-| `chargeleft` | — | `movement_speed * 20` | `+0x44f4` | none |
-| `chargeright` | — | `movement_speed * 20` | `+0x4288` | none |
-| `jumpleft` | `Superjump` | `round(movement_speed * 0.6)` **per frame** | `+0x4a3d` | `shinguard` `+0x4a6f` |
-| `jumpright` | `Superjump` | `round(movement_speed * 0.6)` **per frame** | `+0x476e` | `shinguard` `+0x47a1` |
+| Phase | clip | `<step>` | `Push <factor>` | bonus | stop |
+| --- | --- | --- | --- | --- | --- |
+| `walkleft` | `StepBack` | `movement_speed * 16` | `+0x3b99` | `boot` `+0x3bb5` | 20 `+0x3cd0` |
+| `walkright` | `StepForward` | `movement_speed * 16` | `+0x3d78` | `boot` `+0x3d94` | 20 `+0x3eaf` |
+| `runleft` | `RunBack` | `movement_speed * 40` | `+0x3f69` | none | **10** `+0x4038` |
+| `runright` | `RunForward` | `movement_speed * 40` | `+0x40f2` | none | **10** `+0x41c1` |
+| `chargeleft` | — | `movement_speed * 20` | `+0x44f4` | none | none — see below |
+| `chargeright` | — | `movement_speed * 20` | `+0x4288` | none | none — see below |
+| `jumpleft` | `Superjump` | `round(movement_speed * 0.6)` **per frame** | `+0x4a3d` | `shinguard` `+0x4a6f` | n/a |
+| `jumpright` | `Superjump` | `round(movement_speed * 0.6)` **per frame** | `+0x476e` | `shinguard` `+0x47a1` | n/a |
+
+**The `stop` column is per phase and the first version of this table omitted it**,
+which invites reading a run's realised step as `40 * movement_speed - 20`. It is
+`- 10`. The offsets in the factor column are the `Push <factor>` literal itself;
+the `Push "destination", "attacker"` that opens each assignment is a second, also
+correct set (`+0x3f4f`, `+0x40d8`, `+0x44da`, `+0x426e`, `+0x4b69`, `+0x487c`) and
+naming both conventions here is deliberate, because three were in play at once.
 
 The bonus, where a phase takes one, is
 
@@ -973,16 +980,33 @@ Three consequences worth stating separately, because each was got wrong once:
    and the easing runs `64 -> 56 -> 49 -> 42 -> 36 -> 31 -> 27 -> 23 -> 20`,
    stopping with 20 to run: **44**. That is where the repository's uncited
    *"one walk is 44 px"* came from, and it is the floor case, not the rule.
-2. **Two phases clamp against the opponent and they clamp differently.** A walk
-   clips its destination to `defender._x -/+ game_defender.physical_size`
-   (`+0x3de6` / `+0x3c07`), guarded on the attacker's `gladiator_dir` so it binds
-   only forwards. A charge clips to
-   `defender._x -/+ game_attacker.weapon_range` (`+0x429f`) — the ATTACKER's
-   reach, which is what makes a charge an opener rather than a shove.
-3. **A jump is the one movement phase these bytes do not settle.** It adds to
-   `_x` every frame of the `Superjump` clip instead of setting a destination
-   (`+0x487c`, with `_y += attacker.leap` at `+0x4913`), so its total is a
-   property of the animation's length.
+   Two things that look like details and are not: the per-frame update is
+   UNCONDITIONAL and runs BEFORE the stop test (the init block falls through with
+   no `Jump`), so the loop is a do/while and a step inside the tolerance still
+   moves the gladiator once; and `add_percentage` DIVIDES BEFORE MULTIPLYING
+   (`+0x10c5`) while `get_percentage` round-trips `/100*100`, so the bonus path is
+   lossy in IEEE-754 doubles and collapsing it into `ceil(step * bonus / 100)`
+   changes the answer by +1 at six reachable `(movement_speed, boot)` pairs.
+2. **A walk CLIPS its destination against the opponent; a charge GATES its
+   advance, and those are different structures.** The walk clips to
+   `defender._x -/+ game_defender.physical_size` (`+0x3de6` / `+0x3c07`), guarded
+   on the attacker's `gladiator_dir` so it binds only forwards, and it is computed
+   ONCE inside the `destination == null` init block — never recomputed while the
+   gladiator eases, so a model that re-clips every step is stricter than the
+   build. The charge's destination (`+0x4288`) is **never clipped**: `+0x4293`..
+   `+0x42cc` is `if (!(attacker._x > round(defender._x - game_attacker.weapon_range)))
+   { _x += ceil((destination - _x) / 8) }`, a per-frame advance gate, with the
+   same threshold re-tested at `+0x431a` to fire `Chargeattack` (`+0x437e`).
+   *(This entry said a charge "clips to" that threshold; the quantity and the
+   offset were right and the structure word was wrong. The two readings diverge
+   the moment the defender moves mid-charge.)*
+3. **A jump may be determined after all, and this entry said it is not.** It adds
+   to `_x` every frame of the `Superjump` clip instead of setting a destination
+   (`+0x487c`, with `_y += attacker.leap` at `+0x4913`). An investigating agent
+   reports the add runs `(2L + 1)` times, with `L` the clamped `|leap|` in
+   `[8, 36]`, which would make the total
+   `(2L + 1) * ceil(round(movement_speed * 0.6) * (100 + 2 * shinguard) / 100)`.
+   **One agent's reading, no verifier aimed at it — a lead, not a derivation.**
 
 ### The per-turn mutation is attacker-only
 

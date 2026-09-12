@@ -110,24 +110,59 @@ priced on the weapon with strength in the denominator — and **both gated behin
   steps, so the interval has one end. `SS2_ARENA.walkDistance` stays AUTHORED.
   What it does is put the five-walk figure on something measured.
 
-► **THE DISPLACEMENT IS CLOSER THAN THE 23:40 HANDOFF SAYS, and its ranked
-  item 5 contains a FALSE clause — corrected here because that brief is
-  frozen.** It says the villain's phase sequence "these traces do not record".
-  **They record it.** `phase_action` is the game's own variable and fires for
-  BOTH sides: 206 records against 140 autopilot steps in
-  `arena-champ-1/obs-champ-1-a1`, and all 66 unpaired ones are `rest` — the
-  villain's, provably, because the autopilot's entire vocabulary is
-  `normal_attack`/`walkright`/`walkleft` and it never rests. **In that session
-  the villain never moves, so the hero closed the whole distance alone** —
-  exactly the clean case the derivation needs.
-  **THE REAL GAP IS THE HERO'S `weapon_range` IN THE SAME SESSION.** The flip
-  condition is `fightdistance < hero.weapon_range` and these traces carry no
-  `strength`, `weapon`, `physical_size`, `weapon_range` or `fightdistance`
-  anywhere. Supply it and a stationary-villain session bounds the displacement
-  from both ends — `500 - N*d < weapon_range <= 500 - (N-1)*d` — turning
-  `SS2_ARENA.walkDistance` from AUTHORED into derived. **That is the cheapest
-  remaining route to the last authored number that sets bout pace**, and it is
-  a session's work, not the owner's.
+► ~~**THE DISPLACEMENT IS CLOSER THAN THE 23:40 HANDOFF SAYS, and its ranked
+  item 5 contains a FALSE clause**~~ **— AND THE CORRECTION WAS ITSELF FALSE.
+  RETRACTED IN FULL 2026-09-11 by a write-nothing verifier. `phase_action`
+  RECORDS THE HERO ONLY.** The block below is kept because the retraction is
+  worth more than the claim was.
+
+  The claim was: *"`phase_action` fires for BOTH sides: 206 records against 140
+  autopilot steps in `arena-champ-1/obs-champ-1-a1`, and all 66 unpaired ones
+  are `rest` — the villain's, provably, because the autopilot's entire
+  vocabulary is `normal_attack`/`walkright`/`walkleft` and it never rests."*
+  Both counts reproduce exactly. **The inference does not: it is a false
+  dichotomy that leaves out the game's own forced phase.** Overlay frame 1 calls
+  `getphase("rest")` under `if (!(_root.game.hero.staminaleft > 0))` (`+0x0d2e`),
+  so the build issues rests the autopilot never asked for — **and the wrapper's
+  own comment at `ss2-capture-wrapper.as:1582-1586` already said so.**
+
+  **Measured, in that very file:** all 39 resolvable `rest` records sit at hero
+  `staminaleft == 0`; all 67 resolvable non-rest records sit at `>= 9`. Label
+  shuffles reproduce that separation in 0 of 20,000 trials. The session fought
+  three bouts and ended `ABORT:battle-lost`, so the villain certainly acted and
+  killed the hero — and `phase_action` holds exactly the autopilot's own 82
+  `normal_attack` and not one more. **Zero villain actions are recorded.**
+  Archive-wide (1,650 logs): `phase_action` 13,777 against 13,646 autopilot
+  steps, and the per-label excesses are precisely frame 1's forced-phase
+  vocabulary — rest +1387, poisoned +33, frozen +21, burning +19, life_stolen +6
+  — while the autopilot's own labels run NEGATIVE (`normal_attack` -1116,
+  `walkright` -220). `getphase` is hero-only by construction: the string occurs
+  seven times in the whole build and not once in the constant pool of any
+  villain block, and the villain is dispatched through
+  `villaindecisionA`/`villaindecisionB` instead.
+
+  **AND THIS FILE ALREADY SAID SO, 2,600 lines below, since `d39fb8b` on
+  2026-09-01** — "`getphase` carries only the HERO's actions … Confirmed live:
+  `adc36` … four `phase_action` lines, all the hero's." So `440dae9` did not
+  fill a gap in the living head; it CONTRADICTED the living head, and the
+  contradiction stood for a day with both halves above `## THE ARCHIVE LINE`.
+  **A living head long enough to disagree with itself needs the second reader,
+  not more care from the first.**
+
+  **The dependent clause goes too:** "in that session the villain never moves,
+  so the hero closed the whole distance alone" is UNSUPPORTED — the archive
+  carries no positional field anywhere, so no trace can say whether a villain
+  moved.
+
+  **AND THE GAP THE BLOCK WAS ABOUT IS CLOSED ANYWAY, BY A ROUTE NEITHER VERSION
+  CONSIDERED.** It said the missing piece was the hero's `weapon_range` and that
+  supplying it would bound the displacement from both ends. The hero's
+  `weapon_range` turned out to be derivable per session from the archive's own
+  `{"t":"state"}` record (strength 10, damage pair (1,3) → weapon 0 →
+  `physical_size` 87 → 131, in all 1,484), and the bound it gives is ONE-SIDED,
+  not two. **What settled the displacement was the build: `movement_speed * 16`,
+  eased to a stop.** Three successive framings of this gap all pointed at the
+  capture archive, and the answer was in the bytes the whole time.
 
 ► **THE CROWD RE-MEASUREMENT, AND A NUMBER THIS SESSION WITHDREW (`4acf2c9`).**
   ► **RETRACTED: "the longest self-terminating bout is 684 turns, so patience

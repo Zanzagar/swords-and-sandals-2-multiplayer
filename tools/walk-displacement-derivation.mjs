@@ -341,6 +341,22 @@ function main(argv) {
   const walkEnd = walkStart === undefined ? 0 : windowEnd(flat, walkStart);
   const ease = walkStart === undefined ? null : easing(flat, walkStart, walkEnd);
   const stop = walkStart === undefined ? null : stopGap(flat, walkStart, walkEnd);
+
+  // THE STOP TOLERANCE IS PER PHASE, and the first version of this tool printed
+  // one line as though it were universal — which invites computing a run's step
+  // as `40 * ms - 20` when it is `- 10`. Reported per branch, asserted only
+  // where the module depends on it.
+  const tolerances = new Map();
+  for (const entry of PHASES) {
+    const starts = branchStart(flat, entry.phase);
+    if (starts.length !== 1) continue;
+    const found = stopGap(flat, starts[0], windowEnd(flat, starts[0]));
+    tolerances.set(entry.phase, found?.gap ?? null);
+  }
+  note(`per-phase stop tolerance: ${[...tolerances].map(([phase, gap]) => `${phase} ${gap ?? "none"}`).join(", ")}`);
+  if (tolerances.get("walkleft") !== 20 || tolerances.get("walkright") !== 20) {
+    problems.push(`the two walk branches must both stop at 20; found ${tolerances.get("walkleft")} / ${tolerances.get("walkright")}`);
+  }
   if (ease === null) problems.push("walkright: no `ceil(gap / n)` easing found");
   else {
     note(`easing divisor ${ease.divisor}   +0x${(ease.offset - block.offset).toString(16).padStart(4, "0")}`);
@@ -352,7 +368,8 @@ function main(argv) {
     if (stop.gap !== 20) problems.push(`walkright: stop tolerance is ${stop.gap}, the module assumes 20`);
   }
 
-  console.log("\nTHE TWO PERCENTAGE HELPERS, headers included — the half a careless read inverts");
+  console.log("\nTHE TWO PERCENTAGE HELPERS, headers AND operation order — the halves a careless read gets wrong");
+  const helperOrder = new Map();
   for (const name of ["get_percentage", "add_percentage"]) {
     const defs = namedFunction(block, name);
     if (defs.length !== 1) {
@@ -360,12 +377,25 @@ function main(argv) {
       continue;
     }
     const registers = (defs[0].parameters ?? []).map((parameter) => `${parameter.name}=r${parameter.register}`);
-    note(`${name}(${registers.join(", ")})`);
+    // THE ARITHMETIC ORDER, READ RATHER THAN TRANSCRIBED. This is the check the
+    // first version of this tool did not have, and the one a verifier used to
+    // break the module: `add_percentage` DIVIDES BEFORE MULTIPLYING, which is a
+    // different function from `a * b / 100` in IEEE-754 doubles. The opcode
+    // sequence says so and a literal scan cannot.
+    const ops = (defs[0].body ?? []).map((instruction) => instruction.name).filter((op) => op === "Divide" || op === "Multiply");
+    helperOrder.set(name, ops.join(","));
+    note(`${name}(${registers.join(", ")})   arithmetic: ${ops.join(" then ") || "none"}`);
     const expected = ["a=r2", "b=r1"];
     if (registers.join(",") !== expected.join(",")) {
       problems.push(
         `${name}: parameter registers are ${registers.join(", ")}, and this module's arithmetic assumes ` +
         `${expected.join(", ")} — read the header, because the body alone inverts the helper`
+      );
+    }
+    if (ops.join(",") !== "Divide,Multiply") {
+      problems.push(
+        `${name}: arithmetic order is ${ops.join(" then ")}, and ss2WalkDisplacement is written for ` +
+        "Divide then Multiply. Collapsing the two into one expression changes the function in doubles."
       );
     }
   }
@@ -385,6 +415,44 @@ function main(argv) {
   if (!hasFloor) problems.push("battlevalues: no clamp floor of 4 beside movement_speed");
   if (!hasCeiling) problems.push("battlevalues: no clamp ceiling of 60 beside movement_speed");
 
+  console.log("\nTHE INIT BLOCK FALLS THROUGH INTO THE TWEEN, which is why a do/while and not a while");
+  // A verifier's mutation — replacing the init block's tail with a Jump over the
+  // tween — left the first version of this tool printing AGREES, because it
+  // checked literals and never control flow. The `destination == null` If's
+  // target is the tween's first instruction, and nothing between them jumps.
+  const destinationIf = (() => {
+    if (walkStart === undefined) return null;
+    for (let index = walkStart; index < walkEnd; index += 1) {
+      const instruction = flat[index].instruction;
+      if (instruction.name !== "If") continue;
+      const before = flat.slice(Math.max(walkStart, index - 6), index);
+      if (!before.some((entry) => pushedStrings(entry.instruction).includes("destination"))) continue;
+      if (!before.some((entry) => entry.instruction.name === "Equals2")) continue;
+      return { index, target: instruction.operand?.target ?? null };
+    }
+    return null;
+  })();
+  if (destinationIf === null || destinationIf.target === null) {
+    problems.push("walkright: could not locate the `destination == null` If, so the fall-through is unchecked");
+  } else {
+    const targetRel = destinationIf.target - block.offset;
+    const body = flat.filter((entry) => {
+      const rel = entry.instruction.offset - block.offset;
+      const fromRel = flat[destinationIf.index].instruction.offset - block.offset;
+      return rel > fromRel && rel < targetRel;
+    });
+    const jumps = body.filter((entry) => entry.instruction.name === "Jump" || entry.instruction.name === "Return");
+    note(`init block +0x${(flat[destinationIf.index].instruction.offset - block.offset).toString(16)}..+0x${targetRel.toString(16)}: ${body.length} instructions, ${jumps.length} Jump/Return`);
+    if (jumps.length > 0) {
+      problems.push(
+        `walkright: the destination init block contains ${jumps.length} Jump/Return, so it may not fall through ` +
+        "into the tween — ss2WalkDisplacement's do/while assumes it does"
+      );
+    }
+    // Vacuity guard: an empty init block would make "0 Jump/Return" vacuously true.
+    if (body.length === 0) problems.push("the fall-through scan found an EMPTY init block, so its 0 Jump/Return proves nothing");
+  }
+
   console.log("\nTHE MODULE'S OWN ARITHMETIC, against the build's numbers rather than against itself");
   const floorStep = Math.ceil(4 * SS2_MOVEMENT_STEP_FACTOR.walk);
   let gap = floorStep;
@@ -401,6 +469,34 @@ function main(argv) {
   }
   note(`ss2WalkDisplacement(4) = ${ss2WalkDisplacement(4)}   SS2_ARENA.walkDistanceAtSpeedFloor = ${SS2_ARENA.walkDistanceAtSpeedFloor}`);
 
+  // THE BOOT TERM, SWEPT. The first version of this tool checked one numeric
+  // point — `ss2WalkDisplacement(4)` at boot 0 — which is the single place the
+  // build's lossy percentage round trip is exact, so the module could disagree
+  // with the build everywhere else and still read AGREES. It did, by +1 at six
+  // pairs. This sweep reproduces the build's operation order from the literals
+  // read above and compares every reachable input.
+  const buildWalk = (speed, boot) => {
+    const base = speed * SS2_MOVEMENT_STEP_FACTOR.walk;
+    const bonus = ((100 + 2 * boot) / 100) * 100;
+    const step = Math.ceil(base * (bonus / 100));
+    let gap = step;
+    do {
+      gap -= Math.ceil(gap / (ease?.divisor ?? 8));
+    } while (gap > (stop?.gap ?? 20));
+    return step - gap;
+  };
+  const mismatches = [];
+  for (let speed = 4; speed <= 60; speed += 1) {
+    for (let boot = 0; boot <= 26; boot += 1) {
+      const mine = ss2WalkDisplacement(speed, { boot });
+      const theirs = buildWalk(speed, boot);
+      if (mine !== theirs) mismatches.push(`ms ${speed} boot ${boot}: module ${mine}, build ${theirs}`);
+    }
+  }
+  note(`boot sweep: movement_speed 4..60 x boot 0..26 = ${57 * 27} pairs, ${mismatches.length} disagree`);
+  for (const mismatch of mismatches.slice(0, 8)) problems.push(`boot sweep — ${mismatch}`);
+  if (mismatches.length > 8) problems.push(`boot sweep — and ${mismatches.length - 8} more`);
+
   // Vacuity guard. A census that matched nothing agrees with everything.
   if (flat.length < 1000) {
     problems.push(`only ${flat.length} instructions flattened out of a 0x${block.length.toString(16)}-byte block — the flatten is broken, not the build`);
@@ -408,7 +504,10 @@ function main(argv) {
 
   console.log("");
   if (problems.length === 0) {
-    console.log(`AGREES: ${PHASES.length} movement phases, both helpers, the easing, the stop and the clamp.`);
+    console.log(
+      `AGREES: ${PHASES.length} movement phases, both helpers (registers AND arithmetic order), the easing, ` +
+      "the per-phase stop tolerances, the init fall-through, the movement_speed clamp, and the boot sweep."
+    );
     console.log(`Repository checked: ${path.relative(REPO_ROOT, fileURLToPath(new URL("../src/team/ss2-rules.js", import.meta.url)))}`);
     return 0;
   }

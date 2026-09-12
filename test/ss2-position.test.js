@@ -320,11 +320,27 @@ test("the derivation reproduces the 44 the project held for nine days, and only 
   assert.equal(ss2WalkDisplacement(4, { boot: 5 }), 52);
   assert.ok(ss2WalkDisplacement(4, { boot: 9 }) > ss2WalkDisplacement(4, { boot: 0 }));
 
-  // A step inside the stop tolerance never moves the gladiator at all, because
-  // the phase ends on the frame it begins. Unreachable through the rule set —
-  // the `movement_speed` floor of 4 makes the smallest real step 64 — and
-  // asserted so the helper's edge is the build's and not a guard invented here.
-  assert.equal(ss2WalkDisplacement(1), 0);
+  // ► **THIS ASSERTION WAS `=== 0` AND IT WAS WRONG ABOUT THE BUILD (corrected
+  //   2026-09-11 by a write-nothing verifier).** The build's per-frame `_x`
+  //   update is unconditional and runs BEFORE the stop test — the init block
+  //   falls through into it with no `Jump` — so a step inside the tolerance
+  //   still moves the gladiator once: step 16 becomes `16 - ceil(16/8) = 2`. The
+  //   old comment called zero "the build's behaviour and not a guard invented
+  //   here", which is exactly the shape of claim this repository distrusts, made
+  //   about a case no caller can reach. Unreachable still (the `movement_speed`
+  //   floor of 4 makes the smallest real step 64); asserted because the helper is
+  //   exported and takes any non-negative number.
+  assert.equal(ss2WalkDisplacement(1), 2);
+
+  // THE BUILD'S OPERATION ORDER, which is not the same function as its algebra.
+  // `get_percentage` round-trips `(100 + 2*boot)/100*100` (lossy in doubles) and
+  // `add_percentage` divides before multiplying. The collapsed
+  // `ceil(ms*16*(100+2*boot)/100)` this module shipped for one commit differs by
+  // +1 at six reachable pairs; these three are the ones a `speed` stat can reach
+  // (`movement_speed` 45 and 50 from `speed` 30 and 33).
+  assert.equal(ss2WalkDisplacement(45, { boot: 5 }), 775, "not 774");
+  assert.equal(ss2WalkDisplacement(50, { boot: 5 }), 863, "not 862");
+  assert.equal(ss2WalkDisplacement(50, { boot: 6 }), 879, "not 878");
   assert.throws(() => ss2WalkDisplacement(-1), TeamRuleSetError);
   assert.throws(() => ss2WalkDisplacement(4, { boot: Number.NaN }), TeamRuleSetError);
 });

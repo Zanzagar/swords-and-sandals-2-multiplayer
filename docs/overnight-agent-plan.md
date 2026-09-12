@@ -287,6 +287,50 @@ distinct questions, and pointless if they are auditors with the same question.
   confirmation meaningless.
 - Any brief whose paths have not been checked against `git ls-files`.
 
+## Two failure modes a 12-agent wave found in itself, 2026-09-11
+
+Both came out of the displacement wave (6 questions + 6 verifiers, 0 dead), and
+neither is about agent quality — they are about the harness and the brief.
+
+### THE SCRATCHPAD IS SHARED, AND AGENTS COLLIDE BY FILENAME
+
+**Three independent agents reported the same thing: a scratch file they had
+written was silently replaced mid-run by another agent's file of the same name.**
+One agent's `dis.mjs` became a different 1.5 KB `dis.mjs` and its reader then
+emitted zero lines; another's `dump.mjs` was overwritten by a 618-byte file and
+the output read as its own tool misbehaving; a third's `block.txt` vanished
+between a `wc -l` that counted 9,063 lines and the next command, which failed
+`ENOENT`. Mutated copies of the licensed SWF from three different agents
+(`cost.swf`, `dest.swf`, `mut.swf`, distinct hashes) sat in the same directory.
+
+**This is worse than losing a file. An agent that re-runs "its" script after a
+clobber executes ANOTHER AGENT'S CODE believing it is its own** — a correlated
+failure inside a wave whose whole value is that its members fail independently.
+Two of the three only noticed because of a timestamp and a size mismatch.
+
+**So: every agent in a wave writes to a uniquely-named private subdirectory**, and
+the brief should say so. Generic names — `dis.mjs`, `dump.mjs`, `out.txt`,
+`block.txt`, `tmp.json` — are the ones that collide, and they are exactly the
+names an agent reaches for.
+
+### A PARSE RECIPE IN THE BRIEF IS A CORRELATED FAILURE, AND MINE LOST 69% OF THE DATA
+
+The brief told every agent that each archive record is *"one JSON record per line
+after an `INFO avm_trace:` prefix"*. **False for most logs:** 9,454 of the 13,777
+lines carrying `phase_action` have ANSI colour codes in that prefix
+(`\x1b[2m…\x1b[0m \x1b[32m INFO\x1b[0m …`), so a literal match drops about
+two thirds of them. One agent's first census read 13,777 records as 4,323 and
+still — by luck — pointed the same way.
+
+The repository's own `tools/approach-length-census.mjs` is immune because it
+slices from the first `{`, which is the robust form. **The brief taught agents a
+parse the repository had already outgrown, and it taught it to all of them at
+once.** This is the "fan out on questions, not replicas" rule reappearing one
+level down: the questions were diverse and the PARSER was shared.
+
+**So: a brief states where the data is and never how to read it** — or, if it
+must, it quotes the committed reader rather than paraphrasing the format.
+
 ---
 
 ## THE ARCHIVE LINE

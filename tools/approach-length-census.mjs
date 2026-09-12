@@ -45,9 +45,20 @@
  *    that are too small. It is reported as the one-sided thing it is.
  *
  * **IT STILL DOES NOT DERIVE THE DISPLACEMENT, and must not be read as doing
- * so.** The villain closes too and these traces record the HERO's phases only
- * (`phase_action` mirrors the autopilot step one-for-one in every session here),
- * so no session gives the closure per step. A closed loop was attempted —
+ * so.** The villain closes too and these traces record the HERO's phases only,
+ * so no session gives the closure per step.
+ *
+ * **`phase_action` IS HERO-ONLY, and the living head said otherwise for a day.**
+ * The wrapper hooks `getphase`, and `getphase` is hero-only by construction: the
+ * string occurs seven times in the build and not once in any villain block's
+ * constant pool, while the villain is dispatched through `villaindecisionA` /
+ * `villaindecisionB`. The records that have no autopilot press behind them are
+ * the build's OWN forced phases on the hero — frame 1 calls `getphase("rest")`
+ * under `if (!(hero.staminaleft > 0))` (`+0x0d2e`) — which is why, archive-wide,
+ * the unpaired labels are exactly rest (+1387), poisoned (+33), frozen (+21),
+ * burning (+19) and life_stolen (+6), while the autopilot's own labels run
+ * NEGATIVE. Commit `440dae9` read 66 unpaired rests as the villain's "provably";
+ * they sit at hero `staminaleft == 0` in every resolvable case. A closed loop was attempted —
  * inferring the villain's `movement_speed` from ITS stamina drop and predicting
  * the flip — and **it failed: 208 of 1,484 predicted, 202 wrong, 1,074 with no
  * integer solution at all.** The villain does not simply walk every turn, and
@@ -328,8 +339,23 @@ function main(argv) {
   }
   if (slopeTotal > 0) {
     console.log(`\n  drop == walks + 1 in ${slopeHits} of ${slopeTotal} (${(100 * slopeHits / slopeTotal).toFixed(1)}%).`);
-    console.log("  A net of 1 a walk means cost 2 against regeneration 1, so round(movement_speed / 2) = 2");
-    console.log(`  and movement_speed = 4 — the clamp FLOOR. The derived displacement there is ${ss2WalkDisplacement(4)}.`);
+    console.log("  A net of 1 a walk means cost 2 against regeneration 1, so round(movement_speed / 2) = 2.");
+    console.log(`  The derived displacement at the clamp floor is ${ss2WalkDisplacement(4)}.`);
+    console.log(
+      "\n  THREE CORRECTIONS A VERIFIER FORCED ON THIS SECTION, 2026-09-11 — read them before citing it:\n" +
+      "  1. THE `+ 1` IS AN ARTEFACT OF THE SEGMENTATION ABOVE, not part of the law. The armed run excludes\n" +
+      "     the autopilot presses made before `battle-ready`, and those walks were still charged. Count every\n" +
+      "     walk decision and the relation is drop == walks exactly. Simulating the whole phase stream instead\n" +
+      "     (every `phase_action` but the pending armed attack, from staminamax) matches 1484 of 1484.\n" +
+      "  2. THE LEDGER PINS round(movement_speed / 2) = 2, WHICH IS movement_speed 3 OR 4 — not 4 alone.\n" +
+      "     AVM1 round(1.5) = 2 = round(2), so ms 3 fits every session identically. What excludes 3 is the\n" +
+      "     CLAMP FLOOR at `battlevalues` +0x37fd, and the conclusion does not follow without citing it.\n" +
+      "  3. ALL 1,484 SHARE ONE STAT VECTOR (strength 10, stamina 1, staminamax 110, breastplate 0), so this\n" +
+      "     is not 1,484 independent probes of the ledger — it pins the pair (cost 2, regen 1) and a constant\n" +
+      "     regen of 1 fits as well as `1 + round(stamina/3)` does. The archive holds OTHER heroes:\n" +
+      "     session-20260830-b's has staminamax 130, i.e. stamina 3. movement_speed 4 is a property of the\n" +
+      "     onx/ondc/adc save, never of the game."
+    );
   }
 
   const ranges = [...rangeVotes.keys()].sort((a, b) => b[1] - a[1]);

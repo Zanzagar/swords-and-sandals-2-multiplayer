@@ -1016,9 +1016,19 @@ export function ss2MovementSpeed(actor) {
 }
 
 /**
- * The build's easing divisor and stop tolerance, named because both appear in
- * four movement branches and a bare `8` beside a bare `20` reads like a tidy-up
- * rather than a transcription. `ceil(gap / 8)` per frame, phase over at 20.
+ * The build's easing divisor and WALK stop tolerance, named because a bare `8`
+ * beside a bare `20` reads like a tidy-up rather than a transcription.
+ * `ceil(gap / 8)` per frame, walk phase over at 20.
+ *
+ * ► **"both appear in four movement branches" WAS WRONG ON BOTH COUNTS, and the
+ *   second one matters (corrected 2026-09-11 by a verifier).** The easing `Push
+ *   8` appears in SIX branches (`+0x3c9c`, `+0x3e7b`, `+0x3fa1`, `+0x412a`,
+ *   `+0x42fe`, `+0x456a`); the `20` appears in TWO — **the stop tolerance is
+ *   PER PHASE.** A run stops at 10 (`+0x4038` runleft, `+0x41c1` runright) and a
+ *   charge has no destination tolerance at all: it terminates on the
+ *   `defender._x ∓ game_attacker.weapon_range` test instead. So the name is
+ *   `SS2_WALK_STOP_GAP` and a reader must not compute a run's displacement as
+ *   `movement_speed * 40 - 20`. It is -10.
  */
 const SS2_WALK_EASING_DIVISOR = 8;
 const SS2_WALK_STOP_GAP = 20;
@@ -1081,9 +1091,55 @@ const SS2_WALK_STOP_GAP = 20;
  * treating 44 as universal was understating a fast gladiator's reach across
  * the arena by a factor of four.
  *
- * Corroborated at runtime from the capture archive, independently of these
- * bytes — see `tools/walk-displacement-derivation.mjs` and
- * `tools/approach-length-census.mjs`.
+ * The archive's own hero corroborates the FLOOR, independently of these bytes:
+ * its `movement_speed` is pinned at 4 by a stamina ledger that never mentions a
+ * displacement (`tools/approach-length-census.mjs`). **It does not corroborate
+ * the 44** — the archive carries no positional field at all, and the census's
+ * one-sided bound gives the same answer for 44 and for 45. An earlier version of
+ * this line said "corroborated at runtime", which overstated it.
+ *
+ * ## TWO CORRECTIONS A VERIFIER WAVE FORCED, both in this function's arithmetic
+ *
+ * Six write-nothing verifiers were run against the first version of this
+ * derivation (2026-09-11). Four said HOLDS; two broke something real, and both
+ * breaks are here rather than in the reading:
+ *
+ * 1. **THE OPERATION ORDER IS NOT OPTIONAL.** This function shipped
+ *    `ceil(ms * 16 * (100 + 2 * boot) / 100)`, which is the right algebra and
+ *    the wrong function. `get_percentage` round-trips `(100 + 2*boot) / 100 *
+ *    100`, which is LOSSY in IEEE-754 — `walk_bonus` is `110.00000000000001` at
+ *    boot 5 — and `add_percentage` DIVIDES BEFORE MULTIPLYING
+ *    (`StoreRegister r1 = b/100` at `+0x10c5`, then `a * r1`), not `a * b /
+ *    100`. Over `movement_speed` 4..60 and boot 0..26 the two disagree at six
+ *    pairs, always by one pixel: realised **421 vs 420** at (25, 5), **431/430**
+ *    at (25, 6), **775/774** at (45, 5), **863/862** at (50, 5), **879/878** at
+ *    (50, 6), **949/948** at (55, 5). `movement_speed` 45 and 50 come from
+ *    `speed` 30 and 33, so these are reachable, not pathological. Both round
+ *    trips are reproduced above on purpose; collapsing them is the bug.
+ *    **Derived from the bytecode plus IEEE-754 semantics, NOT measured in
+ *    Ruffle** — so it is the build's arithmetic as far as a reader of the
+ *    bytecode can tell, and one step short of a measurement.
+ * 2. **THE TWEEN IS A DO/WHILE.** The build's per-frame `_x` update at
+ *    `+0x3e4e` is UNCONDITIONAL and runs BEFORE the stop test at `+0x3e97` — the
+ *    `destination == null` init block falls through into it with no `Jump`. So a
+ *    step of 20 moves the gladiator by `ceil(20/8) = 3`, and this function's
+ *    `while (gap > 20)` returned 0 while its own comment asserted that zero was
+ *    *"the build's behaviour and not a guard invented here"*. It was the
+ *    opposite. Unreachable through `ss2MovementSpeed`, asserted as a universal
+ *    about the build, and wrong.
+ *
+ * ## ONE PRECONDITION THE 44 CARRIES, found by the same wave
+ *
+ * `attacker.onEnterFrame`'s FIRST act (`+0x36c1`..`+0x37c8`) is
+ * `if (arena.fightdistance < 100) { hero._x ±= 1; villain._x ∓= 1 }`, and
+ * `fightdistance` is recomputed every frame by `getfightdistance`. So inside 100
+ * units the attacker's `_x` gains ±1 per frame BEFORE the tween, and the phase
+ * realises 45 or 43 rather than 44 (7 frames / 10 frames, final gap 19 either
+ * way). **44 is the displacement while the gladiators are more than 100 apart**,
+ * which is every walk of an approach from 500 and is not every walk in a bout:
+ * the overlap clamp parks a walk at `defender._x ∓ physical_size`, and the
+ * captured hero's `physical_size` is 87. Not modelled here — the resolver has no
+ * frames — and recorded because it bounds what this number means.
  */
 export function ss2WalkDisplacement(movementSpeed, { boot = 0 } = {}) {
   if (!Number.isFinite(movementSpeed) || movementSpeed < 0) {
@@ -1092,13 +1148,25 @@ export function ss2WalkDisplacement(movementSpeed, { boot = 0 } = {}) {
   if (!Number.isFinite(boot) || boot < 0) {
     throw new TeamRuleSetError(`ss2WalkDisplacement: boot must be a finite non-negative number, got ${boot}.`);
   }
-  // `attacker_x_walk`, both halves: the base step and the boot bonus.
-  const step = Math.ceil(movementSpeed * 16 * (100 + 2 * boot) / 100);
-  // The easing tween, run to the build's own stop condition. A step of 20 or
-  // less never moves the gladiator at all, because the phase ends on the frame
-  // it starts — which is the build's behaviour and not a guard invented here.
+  // `attacker_x_walk`, IN THE BUILD'S OWN OPERATION ORDER. See the docstring's
+  // "two corrections a verifier wave forced" block: the collapsed
+  // `ceil(ms * 16 * (100 + 2 * boot) / 100)` this function shipped for one
+  // commit is a DIFFERENT FUNCTION in IEEE-754 doubles, and differs by +1 at
+  // reachable inputs. Both redundant round trips below are deliberate.
+  const base = movementSpeed * 16;
+  const bonus = ((100 + 2 * boot) / 100) * 100;         // get_percentage(100 + 2*boot, 100)
+  const step = Math.ceil(base * (bonus / 100));         // add_percentage: DIVIDES FIRST
+  // The easing tween, run to the build's own stop condition — and the build
+  // MOVES BEFORE IT CHECKS, so this is a do/while and not a while. A step of 20
+  // or less still moves the gladiator once: at `movement_speed` 1 the build
+  // realises 2, where a `while` would return 0. Unreachable through
+  // `ss2MovementSpeed` (the floor of 4 makes the smallest real step 64) but this
+  // function is exported and takes any non-negative number, and the comment here
+  // used to assert the opposite AS THE BUILD'S BEHAVIOUR.
   let gap = step;
-  while (gap > SS2_WALK_STOP_GAP) gap -= Math.ceil(gap / SS2_WALK_EASING_DIVISOR);
+  do {
+    gap -= Math.ceil(gap / SS2_WALK_EASING_DIVISOR);
+  } while (gap > SS2_WALK_STOP_GAP);
   return step - gap;
 }
 
@@ -1110,26 +1178,54 @@ export function ss2WalkDisplacement(movementSpeed, { boot = 0 } = {}) {
  * displacement for the other six phases at all", which was as wrong about the
  * build as the walk entry was.
  *
- * | phase | site | destination |
- * | --- | --- | --- |
- * | `runleft`     | `+0x3f4f` | `_x - movement_speed * 40` |
- * | `runright`    | `+0x40d8` | `_x + movement_speed * 40` |
- * | `chargeleft`  | `+0x44da` | `_x - movement_speed * 20` |
- * | `chargeright` | `+0x426e` | `_x + movement_speed * 20` |
- * | `jumpleft`    | `+0x4b69` | per FRAME: `_x -= ceil(round(movement_speed * 0.6) * (100 + 2 * shinguard) / 100)` |
- * | `jumpright`   | `+0x487c` | per FRAME: `_x += ceil(round(movement_speed * 0.6) * (100 + 2 * shinguard) / 100)` |
+ * **OFFSET CONVENTION, stated because three of them were in play at once and a
+ * cite nobody can locate is not a cite.** Every offset below is the `Push
+ * <factor>` literal itself, which is what `tools/walk-displacement-derivation.mjs`
+ * reports. The first version of this table cited the `Push "destination",
+ * "attacker"` that OPENS each assignment instead (`+0x3f4f`, `+0x40d8`,
+ * `+0x44da`, `+0x426e`, `+0x4b69`, `+0x487c`); a verifier checked all eight and
+ * both sets are correct and name the same statements. One convention from here on.
  *
- * Three things in that table are worth more than the numbers:
+ * | phase | `Push <factor>` | destination |
+ * | --- | --- | --- |
+ * | `runleft`     | `+0x3f69` | `_x - movement_speed * 40` |
+ * | `runright`    | `+0x40f2` | `_x + movement_speed * 40` |
+ * | `chargeleft`  | `+0x44f4` | `_x - movement_speed * 20` |
+ * | `chargeright` | `+0x4288` | `_x + movement_speed * 20` |
+ * | `jumpleft`    | `+0x4a3d` | per FRAME: `_x -= ceil(round(movement_speed * 0.6) * (100 + 2 * shinguard) / 100)` |
+ * | `jumpright`   | `+0x476e` | per FRAME: `_x += ceil(round(movement_speed * 0.6) * (100 + 2 * shinguard) / 100)` |
+ *
+ * Four things in that table are worth more than the numbers, and two of them are
+ * corrections a verifier wave forced on its first version:
  * - **Only the walk takes a boot bonus**, and only the jump takes a shinguard
- *   one (`+0x48a9`). Run and charge take neither and have no intermediate
- *   variable at all.
- * - **A jump is not a destination.** It adds to `_x` every frame of the
- *   `Superjump` clip and lifts `_y` by `attacker.leap` (`+0x4913`), so its
- *   total displacement is a property of the ANIMATION's length and is the one
- *   movement phase these bytes do not settle.
- * - **A charge has its own clamp**, against `defender._x - game_attacker.weapon_range`
- *   (`+0x429f`) rather than the defender's personal space: a charge closes to
- *   the attacker's own reach, which is what makes it an opener.
+ *   one (`+0x47a1` / `+0x4a6f`). Run and charge take neither and have no
+ *   intermediate variable at all.
+ * - **THE STOP TOLERANCE IS PER PHASE, and this table implied it was not.** A
+ *   walk stops within 20, a run within **10** (`+0x4038` runleft, `+0x41c1`
+ *   runright), and a charge has no destination tolerance at all. A run's
+ *   realised step is therefore `40 * movement_speed - 10`; reading
+ *   `SS2_WALK_STOP_GAP` as universal puts it 10 out.
+ * - **A charge's threshold is an ADVANCE GATE, not a destination clamp**, and
+ *   this table said "clamp". Bytes: `+0x4293`..`+0x42cc` is
+ *   `if (!(attacker._x > round(defender._x - game_attacker.weapon_range))) { _x
+ *   += ceil((destination - _x) / 8) }`, with the same threshold re-tested at
+ *   `+0x431a` to fire `Chargeattack` (`+0x437e`). The charge's destination
+ *   (`+0x4288`) is never clipped, so the two readings diverge the moment the
+ *   defender moves mid-charge. The quantity and the offset were right; the
+ *   structure word was wrong, here and in the battle map.
+ * - **A jump's total may BE determined, and this table said it is not.** An
+ *   investigating agent reports `(2L + 1)` applications of the per-frame add,
+ *   with `L` the clamped `|leap|` in `[8, 36]`, which would make the total
+ *   `(2L + 1) * ceil(round(movement_speed * 0.6) * (100 + 2 * shinguard) / 100)`.
+ *   **That is ONE agent's reading with no verifier aimed at it**, so it is a lead,
+ *   not a derivation. What is certain is the per-frame shape and that `_y` moves
+ *   by `attacker.leap` (`+0x4913`).
+ *
+ * **None of these six is wired into the rule set**, and there is a second reason
+ * beyond "nothing offers them": `SS2_MOVEMENT_STEP_FACTOR.run` and `.charge` are
+ * read nowhere in `src/` — only by the tool — so `node --test` does not guard
+ * them. The guard is a tool a human runs on the capture box, the same standing
+ * the weapon table has.
  */
 export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
   walk: 16,
@@ -1159,24 +1255,57 @@ export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
  * is `ss2Reach`, which is the same quantity under this module's own name.
  *
  * **WHY THE RESOLVER'S LIMIT IS THE FOE'S POSITION AND NOT THE FOE'S PERSONAL
- * SPACE. MEASURED, and the first version of this paragraph asserted the
- * measurement instead of taking it — which is the error this repository keeps
- * paying for, so the number is here and the guess is gone.** The faithful limit
- * DEADLOCKS the approach, and the reason is a narrowing this module already
- * documents: `ss2Reach` omits the weapon range multiplier (see its docstring),
- * so the melee gate opens at the actor's own `physical_size` while the build's
- * opens at `physical_size + 44 * rangeMultiplier`. Whenever a foe's
- * `physical_size` exceeds the actor's own gate, the build's clamp parks the
- * walker further out than its gate needs, so the gate keeps offering a walk the
- * clamp keeps refusing to advance, for ever.
+ * SPACE. MEASURED — AND THE FIRST TWO VERSIONS OF THIS PARAGRAPH WERE BOTH
+ * WRONG, the first by asserting instead of measuring and the second by
+ * measuring the wrong fixture. A write-nothing verifier broke it; the numbers
+ * below are re-taken.**
  *
- * Built with `foe.x - direction * ss2Reach(foe)` and swept 2026-09-11:
- * **the 1v1/2v2/3v3 settle sweep FAILS, and 19,764 of 20,000 actions in the
- * first 1v1 it tries are walks** — a gladiator stepping back and forth against
- * a limit it cannot cross. With the limit at the foe's `x` the same sweep
- * settles every bout and the clamp never binds at all in it, which is the other
- * half of the measurement: this clamp is insurance against a fast gladiator,
- * not a mechanic the AI leans on.
+ * ► **WHAT THE SECOND VERSION GOT WRONG, because the shape of the error is the
+ *   lesson.** It said "the 1v1/2v2/3v3 settle sweep FAILS, and 19,764 of 20,000
+ *   actions in the first 1v1 it tries are walks". That figure cannot come from
+ *   that sweep — its guard of 1200 over 8 seeds caps a 1v1 at 9,600 actions. It
+ *   came from a DIFFERENT sweep with a different fixture and a 20,000 cap, and
+ *   two measurements were written up as one. It also named the wrong mechanism:
+ *   "whenever a foe is STRONGER than the actor". Every gladiator in that fixture
+ *   is `strength` 9, so all six reaches are 86 and the deadlock follows from
+ *   EQUALITY, not from a gap.
+ *
+ * **RE-MEASURED 2026-09-11 on the sweep that is actually in the suite** (8 seeds
+ * a side, `test/ss2-position.test.js`'s own `bout()` fixture):
+ *
+ * ```text
+ *                      settled   walks/actions   turns an attack was on offer
+ *   faithful limit 1v1    8/8     3416/3496 97.7%            0
+ *                  2v2    8/8     6792/7000 97.0%            0
+ *                  3v3    0/8     9264/9600 96.5%            0
+ *   foe.x limit    1v1    8/8        32/168  19.0%          136
+ *                  2v2    8/8        80/325  24.6%          245
+ *                  3v3    8/8       128/477  26.8%          349
+ * ```
+ *
+ * **The 1v1 and 2v2 rows "settle" only because the crowd kills them: an attack
+ * is never once on offer in any of the 24 faithful bouts.** That is a worse
+ * failure than the 3v3's, and the old write-up missed it by reporting only what
+ * the assertion checked.
+ *
+ * ► **AND THE REAL CAUSE IS NOT THE CLAMP. It is that this module uses ONE
+ *   quantity where the build uses TWO, which makes the narrowing below a
+ *   PLACEHOLDER rather than a fix.** The build clamps on the DEFENDER's
+ *   `physical_size` and gates on the ATTACKER's `weapon_range` —
+ *   `physical_size + 44 * rangeMultiplier`, always at least 44 larger. Here both
+ *   are `ss2Reach`, so the clamp parks the walker exactly ON the gate threshold
+ *   and a STRICT `<` never opens. Measured: raising `ss2Reach` by 44 on BOTH
+ *   sides changes nothing (byte-identical counts — the equality survives), while
+ *   **clamping on the raw `physical_size` and gating on `physical_size + 44`
+ *   settles 8/8 at every size with 19.0 / 24.6 / 26.8% walks — identical to the
+ *   shipped narrowing, and faithful.**
+ *
+ *   So the route is the one `ss2Reach`'s docstring already names: declare
+ *   `weapon_range` as a projected resource, then restore the build's own limit
+ *   here and delete this narrowing. **Deliberately NOT done in the same commit**
+ *   — that is a second projection change stacked on an `x` that has still not
+ *   had `/codex:adversarial-review`, and stacking is what this repository keeps
+ *   paying for. It is ranked for the next session WITH these numbers.
  *
  * So the limit is the foe's `x`: strictly weaker than the build's, in the SAME
  * direction as the `ss2Reach` narrowing it compensates for (gladiators here may
