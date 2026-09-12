@@ -177,7 +177,20 @@ export function normaliseCombatant(source, teamId, index, rules, teamIndex = 0) 
      * A blueprint may state it outright and that wins, exactly as a declared
      * `maxHealth` overrules the derived one.
      */
-    x: null
+    x: null,
+    /**
+     * The SECOND axis, and the same contract as `x` in every respect: `null`
+     * for a rule set that models no depth, a finite number for one that does,
+     * and the key is ALWAYS present so two peers hash the same projection
+     * shape whatever their rule set.
+     *
+     * **A rule set may model `x` and not `y`.** That is the state of every
+     * rule set in the tree before the second axis is switched on, and it is
+     * why this is a separate hook rather than a widened `startingPosition`:
+     * `y === null` means "this battle has no depth", which is exactly what a
+     * one-dimensional arena is, and it reaches `ss2FightDistance` as 0.
+     */
+    y: null
   };
   combatant.x = Number.isFinite(source.x)
     ? source.x
@@ -188,6 +201,17 @@ export function normaliseCombatant(source, teamId, index, rules, teamIndex = 0) 
     throw new BattleError(
       `Rule set ${rules.id} returned a non-finite starting position for ${combatant.id}. ` +
       "startingPosition must return a finite number or null."
+    );
+  }
+  combatant.y = Number.isFinite(source.y)
+    ? source.y
+    : (typeof rules.startingY === "function"
+      ? rules.startingY({ teamIndex, slotIndex: index, combatant })
+      : null);
+  if (combatant.y !== null && !Number.isFinite(combatant.y)) {
+    throw new BattleError(
+      `Rule set ${rules.id} returned a non-finite starting depth for ${combatant.id}. ` +
+      "startingY must return a finite number or null."
     );
   }
   combatant.maxHealth = rules.maximumHealth(combatant);

@@ -96,8 +96,8 @@ import { fileURLToPath } from "node:url";
 import { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 import { combatantById } from "../src/team/index.js";
 import {
-  ss2BattleValues, ss2Combatant, ss2TeamRules, SS2_ARENA,
-  ss2FightDistance, ss2Reach
+  ss2BattleValues, ss2Combatant, ss2TeamRules, createSs2TeamRules, SS2_ARENA,
+  ss2FightDistance, ss2Reach, ss2PhysicalSize
 } from "../src/team/ss2-rules.js";
 import { demoSide } from "./arena/roster.js";
 
@@ -153,6 +153,43 @@ export function simultaneousFights(living) {
 }
 
 /**
+ * Is `body` standing in the line of a blow from `actor` to `target`?
+ *
+ * ► **THIS WAS A PURE X TEST UNTIL 2026-09-12, AND THE SECOND AXIS MADE IT
+ *   LIE.** It asked only whether `body.x` fell between the two, so a gladiator
+ *   standing in a DIFFERENT RANK counted as being in the way of a blow it was
+ *   nowhere near. Measured at `rankStride` 150 it reported 91.4% of blows
+ *   passing through a body — higher than the one-dimensional arena it exists
+ *   to indict, and an artefact rather than a finding. A metric that cannot see
+ *   the axis reports nonsense about it confidently.
+ *
+ * So: project the body onto the segment between attacker and target. It is in
+ * the way when it falls BETWEEN them along that segment (`0 < t < 1`) and its
+ * perpendicular distance from the line is less than its own `physical_size` —
+ * which is what "in the way" already meant, since `physical_size` is the
+ * body's own extent.
+ *
+ * **It reduces exactly to the old test when every gladiator is level**, which
+ * is every bout with the second axis off: with all y equal the perpendicular
+ * distance is 0 and `0 < t < 1` is precisely "strictly between in x". Verified
+ * by the sweep — every metric is byte-identical with the axis off.
+ */
+function isInTheWay(actor, target, body) {
+  const ay = Number.isFinite(actor.y) ? actor.y : 0;
+  const ty = Number.isFinite(target.y) ? target.y : 0;
+  const by = Number.isFinite(body.y) ? body.y : 0;
+  const dx = target.x - actor.x;
+  const dy = ty - ay;
+  const lengthSquared = dx * dx + dy * dy;
+  // Attacker and target on the same spot: nothing can be between them.
+  if (lengthSquared === 0) return false;
+  const t = ((body.x - actor.x) * dx + (by - ay) * dy) / lengthSquared;
+  if (!(t > 0 && t < 1)) return false;
+  const perpendicular = Math.abs((body.x - actor.x) * dy - (by - ay) * dx) / Math.sqrt(lengthSquared);
+  return perpendicular < ss2PhysicalSize(body);
+}
+
+/**
  * Has anybody got PAST anybody?
  *
  * Team 0 starts at negative x and team 1 at positive (`startingPosition`), so a
@@ -173,23 +210,46 @@ export function anyCrossing(living, leftTeamId) {
 
 const IS_ATTACK = /attack$/;
 
+const CENSUS_FLAGS = Object.freeze({
+  // `min` is the smallest ACCEPTED value, so a stride of 0 — the second axis
+  // switched off — is a legal measurement and not an error.
+  "--seeds": { key: "seeds", min: 1 },
+  "--guard": { key: "guard", min: 1 },
+  "--rank-stride": { key: "rankStride", min: 0 }
+});
+
+/**
+ * ► **AN UNKNOWN FLAG NOW THROWS. It was silently ignored until 2026-09-12**,
+ *   which is the worst failure mode an instrument can have: a mistyped
+ *   `--rank-stride` would have run the sweep at the DEFAULT and printed a tidy
+ *   table that reads as a measurement of something it never measured. This
+ *   tool exists because numbers that describe nothing got quoted as evidence;
+ *   a parser that answers a question nobody asked is the same defect wearing a
+ *   command line.
+ */
 function parseArguments(argv) {
-  const options = { seeds: 24, guard: 600 };
+  const options = { seeds: 24, guard: 600, rankStride: 0 };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
-    if (flag !== "--seeds" && flag !== "--guard") continue;
-    const value = Number(argv[index + 1]);
-    if (!Number.isFinite(value) || value <= 0) {
-      throw new Error(`${flag} needs a positive number, not ${JSON.stringify(argv[index + 1])}.`);
+    const spec = CENSUS_FLAGS[flag];
+    if (!spec) {
+      throw new Error(
+        `Unknown flag ${JSON.stringify(flag)}. Known flags: ${Object.keys(CENSUS_FLAGS).join(", ")}.`
+      );
     }
-    options[flag.slice(2)] = value;
+    const value = Number(argv[index + 1]);
+    if (!Number.isFinite(value) || value < spec.min) {
+      throw new Error(`${flag} needs a number >= ${spec.min}, not ${JSON.stringify(argv[index + 1])}.`);
+    }
+    options[spec.key] = value;
     index += 1;
   }
   return options;
 }
 
 /** One team size, swept over seeds. Every counter is accumulated across bouts. */
-function census(perSide, { seeds, guard }) {
+function census(perSide, { seeds, guard, rankStride }) {
+  const rules = rankStride === 0 ? ss2TeamRules : createSs2TeamRules({ rankStride });
   const totals = {
     bouts: 0, settled: 0, actions: 0,
     blows: 0, through: 0,
@@ -204,7 +264,9 @@ function census(perSide, { seeds, guard }) {
         demoSide("red", perSide, { ss2Combatant, ss2BattleValues }),
         demoSide("blue", perSide, { ss2Combatant, ss2BattleValues })
       ],
-      rules: ss2TeamRules,
+      // The stride is what the second axis IS: 0 builds the module singleton's
+      // own rule set, which is the one-dimensional engine exactly.
+      rules,
       bindings: SS2_STATIC_MAP_BINDINGS,
       seed,
       awaitAnimations: true
@@ -269,11 +331,9 @@ function census(perSide, { seeds, guard }) {
         totals.blows += 1;
         const target = combatantById(host.battle, chosen.targetId);
         if (target && Number.isFinite(target.x)) {
-          const low = Math.min(actor.x, target.x);
-          const high = Math.max(actor.x, target.x);
           const interposed = living.some((combatant) =>
             combatant.id !== actor.id && combatant.id !== target.id
-            && combatant.x > low && combatant.x < high);
+            && isInTheWay(actor, target, combatant));
           if (interposed) totals.through += 1;
         }
       }
@@ -296,7 +356,10 @@ function main(argv) {
   const options = parseArguments(argv);
   const arenaWidth = SS2_ARENA.clamp.max - SS2_ARENA.clamp.min;
   console.log(`engagement census — ${options.seeds} seeds a size, guard ${options.guard}`);
-  console.log(`arena is ${arenaWidth} units wide; a bare-handed reach is about 130\n`);
+  console.log(`arena is ${arenaWidth} units wide; a bare-handed reach is about 130`);
+  console.log(options.rankStride === 0
+    ? "second axis OFF (rankStride 0) — this is the one-dimensional engine\n"
+    : `second axis ON, rankStride ${options.rankStride} units between ranks\n`);
 
   const rows = [];
   for (const perSide of [1, 2, 3]) {

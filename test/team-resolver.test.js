@@ -616,6 +616,20 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
  *   `startingPosition`, so every combatant here carries `x: null`. The hash
  *   moved on the key existing, not on any position being taken.
  *
+ * ► **ALL SIX COMBAT HASHES MOVED 2026-09-12 AND ALL SIX LEGACY HASHES DID
+ *   NOT, which is the asymmetry this pair of columns exists to show.** `y`
+ *   joined `combatantProjection` as the second axis:
+ *
+ *     32e85f6d -> 587a06a9    ae3bb07a -> 8aa7093a    ef1cbb43 -> 2d3b42b3
+ *     6ef57cf4 -> 3f2c43a4    fcb5bdd6 -> c6d2995a    132fea31 -> 7d672ad1
+ *
+ *   The legacy column is byte-identical because `src/engine.js`'s façade
+ *   projects neither `x` nor `y` — so this re-pin is positive evidence that
+ *   the second axis is contained to the team seam and did not leak into the
+ *   compatibility projection. Every value here is `null`: `rankStride`
+ *   defaults to 0 and these blueprints use the placeholder rules, so nothing
+ *   about fill behaviour changed, only the serialised shape.
+ *
  * These literals were not hand-written. They were read off a run of the roster
  * at the commit before this change, over the five shapes a single-template team
  * can take: implicit empty slots, `null` and `{ fill: "ai" }` markers, the two
@@ -627,7 +641,7 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
 const UNCHANGED_FILL_BLUEPRINTS = [
   {
     name: "implicit empty slots",
-    combat: "32e85f6d",
+    combat: "587a06a9",
     legacy: "ecffd39f",
     blueprint: {
       seed: 3,
@@ -639,7 +653,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "null and object markers",
-    combat: "ae3bb07a",
+    combat: "8aa7093a",
     legacy: "5a573636",
     blueprint: {
       seed: 3,
@@ -651,7 +665,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "string markers",
-    combat: "ef1cbb43",
+    combat: "2d3b42b3",
     legacy: "b2dfc69d",
     blueprint: {
       seed: 5,
@@ -663,7 +677,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a populated team template",
-    combat: "6ef57cf4",
+    combat: "3f2c43a4",
     legacy: "1529c5aa",
     blueprint: {
       seed: 7,
@@ -687,7 +701,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a template carrying an explicit id",
-    combat: "fcb5bdd6",
+    combat: "c6d2995a",
     legacy: "be79738c",
     blueprint: {
       seed: 11,
@@ -699,7 +713,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a team that supplies no fighters at all",
-    combat: "132fea31",
+    combat: "7d672ad1",
     legacy: "8e29b02b",
     blueprint: {
       seed: 13,

@@ -1544,7 +1544,16 @@ test("a placeholder rule set that declares no armour effect still writes only hi
   //   stores what it is handed and never learns what an arena is. Like
   //   `resource` it writes `to` and not `by`, because an effect log must be
   //   replayable without accumulating drift.
-  assert.deepEqual(Object.values(EffectKind).sort(), ["damage", "heal", "position", "resource", "status"]);
+  //
+  // ► **`lateral` JOINED THEM 2026-09-12**, the second axis, and it is a
+  //   SEPARATE kind rather than a `toY` on `position` because the build has no
+  //   diagonal move: every movement phase it has — `walkleft`, `walkright`,
+  //   `runleft`/`runright`, `chargeleft`/`chargeright`, `jumpleft`/`jumpright`
+  //   — is one named phase changing one coordinate. Widening `position`
+  //   instead would have grown a shape whose consumers silently stop covering
+  //   it, which is the defect `src/render/scene.js` spells out about
+  //   `move-clip`.
+  assert.deepEqual(Object.values(EffectKind).sort(), ["damage", "heal", "lateral", "position", "resource", "status"]);
 
   // The defeated fighter is at 0 hitpoints with all 44 points of armour still
   // standing, and that is right: `classicStyleRules` has no armour rule, and
@@ -1675,9 +1684,14 @@ test("CLOSED: a rule set reads armour off the canonical view, and the hash cover
   //   is present for every rule set so two peers commit to one projection
   //   shape, and the null says "no geometry here" rather than leaving them to
   //   disagree about whether the field exists.
+  // ► **`y` JOINED BOTH 2026-09-12**, the second axis, on identical reasoning
+  //   and in a single commit for the same reason: the invariant is that the
+  //   projection carries everything the view does, so a key added to one and
+  //   not the other is a peer that can read a field nothing commits to. This
+  //   rule set models neither axis, so both are `null` here.
   assert.deepEqual(seen[0], [
     "aiFilled", "alive", "health", "id", "loadout", "maxHealth",
-    "name", "resources", "seatId", "slotIndex", "stats", "status", "teamId", "x"
+    "name", "resources", "seatId", "slotIndex", "stats", "status", "teamId", "x", "y"
   ].sort());
   assert.equal(seen[0].includes("vanilla"), false);
   assert.equal(seen[0].includes("armourclass"), false, "armour arrives inside `resources`, not as a top-level field");

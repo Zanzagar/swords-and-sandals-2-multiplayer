@@ -904,6 +904,19 @@ export const SS2_ARENA = Object.freeze({
    */
   frontX: 250,
   /**
+   * The `_y` both vanilla clips are constructed at — map, "Battle entry" step
+   * 5, `(-250, 200)` and `(250, 200)`. **DERIVED, not authored**: it is the
+   * same line `frontX` comes from, and `src/adapter/slot-layout.js`'s
+   * `ARENA_Y` already ships it for the presentation side.
+   *
+   * It is the front rank, and the only rank vanilla has. A gladiator standing
+   * anywhere else on this axis is authored mod surface
+   * (`MAP_SILENCE.multi-slot-arena-geometry`) — but how far apart two unlevel
+   * gladiators then ARE is the build's own answer, because `getfightdistance`
+   * is Euclidean over `(_x, _y)`. See `ss2FightDistance`.
+   */
+  frontY: 200,
+  /**
    * AUTHORED, and it matches the adapter's `ALLY_X_STRIDE` on purpose: vanilla
    * has no second ally, so nothing can settle it (`MAP_SILENCE`,
    * `multi-slot-arena-geometry`). Allies stand FURTHER OUT than slot 0, so
@@ -1529,10 +1542,48 @@ export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
  * unequal `physical_size` the two orders differ: a bigger foe standing slightly
  * further off is the one that stops you first.
  */
+/**
+ * ► **DOES A BODY AT THIS DEPTH BLOCK A WALK? Added 2026-09-12 with the second
+ *   axis, and it closes a deadlock that axis CREATED.**
+ *
+ * The overlap clamp exists so a walk cannot carry a gladiator INTO another
+ * gladiator — `defender._x -/+ game_defender.physical_size`, the build's own
+ * clamp. `physical_size` is how big the body is. Until there was a second axis
+ * that was the whole story, because every body stood on one line.
+ *
+ * It is no longer, and leaving it alone parks fighters permanently ONE UNIT
+ * out of reach. Measured before this guard existed, at `rankStride` 97:
+ * 16 of 24 bouts never settled, every survivor at full health, one side
+ * walking 354 times and the other 183. The mechanism is the one this module
+ * already documents for the 1-D case — *"parks a walker exactly ON its own
+ * gate threshold"* — arriving on the new axis: the clamp stopped a walker at
+ * `dx = 85` because it reasons only about x, while the gate is
+ * `round(sqrt(85^2 + 97^2)) = 129` against a reach of 129 and a STRICT `<`.
+ * Neither number is wrong; they were answering different questions.
+ *
+ * **So a foe blocks only when it is close enough in DEPTH to actually be in
+ * the way**, which is what "overlap" already meant: `physical_size` is the
+ * body's own extent, so two gladiators separated by more than that in y are
+ * not touching and never were. A rank you are not standing in is scenery.
+ *
+ * AUTHORED, and inside the silence that already covers it
+ * (`MAP_SILENCE.multi-slot-arena-geometry`): vanilla has one gladiator a side
+ * and both stand at `_y = 200`, so `|dy|` is 0 for every pair the build can
+ * make and this predicate is CONSTANTLY TRUE there. **1v1 is therefore
+ * byte-identical, and so is every bout with the second axis switched off** —
+ * a `null` y reads as 0 on both sides.
+ */
+function ss2BodyBlocks(actor, foe) {
+  const actorY = Number.isFinite(actor?.y) ? actor.y : 0;
+  const foeY = Number.isFinite(foe?.y) ? foe.y : 0;
+  return Math.abs(actorY - foeY) < ss2PhysicalSize(foe);
+}
+
 export function ss2WalkDestination(actor, foes, direction) {
   const step = ss2WalkDisplacement(ss2MovementSpeed(actor));
   let to = actor.x + direction * step;
   for (const foe of foes ?? []) {
+    if (!ss2BodyBlocks(actor, foe)) continue;
     if (!foe || foe.alive === false || !Number.isFinite(foe.x)) continue;
     // Ahead of the actor, in the direction of travel. `<= 0` covers a foe
     // behind and a foe exactly co-located: neither can be walked past.
@@ -1569,6 +1620,10 @@ export function ss2WalkDestination(actor, foes, direction) {
   if (realised !== 0) {
     for (const foe of foes ?? []) {
       if (!foe || foe.alive === false || !Number.isFinite(foe.x)) continue;
+      // The same depth predicate as the forward pass. Without it the guard
+      // would refuse a reversal because of a body in another rank that never
+      // blocked the walk in the first place.
+      if (!ss2BodyBlocks(actor, foe)) continue;
       const behindInTravel = (foe.x - actor.x) * realised > 0;
       const overshot = (to - foe.x) * realised > 0;
       if (behindInTravel && overshot) {
@@ -2806,7 +2861,45 @@ export function createSs2TeamRules({
    * hash, so two peers running different tolls would otherwise agree on every
    * hash and then diverge the first turn past the shorter grace.
    */
-  crowdPatience = SS2_CROWD.patience
+  crowdPatience = SS2_CROWD.patience,
+  /**
+   * How far apart consecutive RANKS stand on the second axis, in arena units.
+   * **`0` is the off switch and is the default**, and it is off STRUCTURALLY
+   * rather than by tuning: at 0 every gladiator gets the same `y`, so `ydist`
+   * is 0 for every pair, `ss2FightDistance` reduces exactly to the rounded
+   * x-separation, and the engine is the one-dimensional engine. There is no
+   * second code path to keep in step.
+   *
+   * ► **THIS IS THE OWNER'S DIAL, and it is the question the geometry cannot
+   *   answer: how much should standing in the right place matter?** It is one
+   *   number rather than a preset because the honest answer is somewhere in a
+   *   range and is game feel. What it buys, against the build's own metric
+   *   (`round(sqrt(xdist^2 + ydist^2))`) at strength 9, where a front rank
+   *   parks at `physical_size` 86 and reaches 130:
+   *
+   *   ```text
+   *     stride    dist to the next rank's parked foe    what it feels like
+   *        0                86  (level)                 today's game, exactly
+   *       40                95                          ranks visible, all engaged
+   *       60               105                          a rank is a real position
+   *       85               122                          the edge of reach
+   *       97               130  (out of reach)          ranks fight separately
+   *      130+              148+                         ranks are separate battles
+   *   ```
+   *
+   * **It is AUTHORED, and inside an existing declared silence rather than a
+   * new one.** `MAP_SILENCE.multi-slot-arena-geometry` already covers
+   * "positions, depths, and clip names for slots beyond the first" and already
+   * says this is authored mod surface. What is NOT authored is the metric: the
+   * build's `getfightdistance` is Euclidean over `(_x, _y)`, so once two
+   * gladiators are unlevel, how far apart they are is the build's answer and
+   * not ours. See `ss2FightDistance`.
+   *
+   * **It is in the rule-set ID when it is non-zero**, for exactly the reason
+   * `crowdPatience` is: the hash carries only the id, so two peers running
+   * different strides would agree on every hash and then diverge.
+   */
+  rankStride = 0
 } = {}) {
   if (!FIGHT_MODES.includes(fightMode)) {
     throw new TeamRuleSetError(`fightMode must be one of: ${FIGHT_MODES.join(", ")}.`);
@@ -2827,6 +2920,11 @@ export function createSs2TeamRules({
   if (observer !== null && typeof observer !== "function") {
     throw new TeamRuleSetError("observer must be a function.");
   }
+  if (!Number.isFinite(rankStride) || rankStride < 0) {
+    throw new TeamRuleSetError(
+      `rankStride must be a finite number of arena units >= 0 (0 disables the second axis); got ${String(rankStride)}.`
+    );
+  }
 
   // Captured rather than read off `this`: a rule set's methods are only ever
   // called as methods by the resolver today, but an unbound `resolveAction`
@@ -2834,9 +2932,14 @@ export function createSs2TeamRules({
   // The patience joins the id ONLY when it differs from the shipped default, so
   // an ordinary battle keeps the id every pinned hash was taken against and a
   // sweep's rule set can never be mistaken for it.
-  const ruleSetId = crowdPatience === SS2_CROWD.patience
-    ? `ss2-map-derived-${fightMode}`
-    : `ss2-map-derived-${fightMode}-patience-${crowdPatience === Infinity ? "none" : crowdPatience}`;
+  const patienceSuffix = crowdPatience === SS2_CROWD.patience
+    ? ""
+    : `-patience-${crowdPatience === Infinity ? "none" : crowdPatience}`;
+  // The stride joins the id ONLY when the second axis is on, so an ordinary
+  // battle keeps the id every pinned hash was taken against. Same rule as the
+  // patience above, and for the same reason: the hash carries only the id.
+  const strideSuffix = rankStride === 0 ? "" : `-rank-${rankStride}`;
+  const ruleSetId = `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}`;
 
   return defineTeamRuleSet({
     // The mode is in the id because `toTeamWireState` carries only id,
@@ -2904,6 +3007,46 @@ export function createSs2TeamRules({
       const side = teamIndex === 0 ? -1 : 1;
       const magnitude = SS2_ARENA.frontX + SS2_ARENA.allyStride * slotIndex;
       return clamp(side * magnitude, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+    },
+
+    /**
+     * Which RANK slot `slotIndex` stands in — the second axis.
+     *
+     * **`null` unless `rankStride` is non-zero, and that is the off switch.**
+     * A rule set that returns `null` here models no depth, `combatant.y` stays
+     * `null`, `ss2FightDistance` reads it as 0 and the engine is exactly the
+     * one-dimensional engine. Off is the DEFAULT and it is structural: there
+     * is no second code path that has to be kept in step with the first.
+     *
+     * `fixtureReplay` returns `null` for the same reason `startingPosition`
+     * does, and the reason is worth repeating rather than cross-referencing,
+     * because getting it wrong silently re-datums 23 runtime-verified
+     * fixtures: **a promoted golden is a measurement of ONE resolved action,
+     * staged in the running game at whatever geometry that capture happened to
+     * have.** Giving it a rank this engine invented, and then gating its swing
+     * on that invention, would make every golden replay through a geometry no
+     * capture observed. A fixture models no position, so it has none.
+     *
+     * ## The sign, and why slot 0 is 200
+     *
+     * Arena y is 200 at the front rank and DECREASES going back — the
+     * convention `src/adapter/slot-layout.js` already ships (`ARENA_Y` 200,
+     * `ALLY_Y_STRIDE` negative), which is in turn the convention
+     * `withDrawOrder` relies on to paint back-to-front. Slot 0 therefore sits
+     * at exactly the vanilla `_y` of 200 ("Battle entry" step 5), which keeps
+     * 1v1 the parity case on this axis exactly as it is on the other: with one
+     * slot a side, every gladiator is at 200, `ydist` is 0, and the bout is
+     * one-dimensional however large `rankStride` is.
+     *
+     * **Both sides use the same ranks rather than mirroring**, because a rank
+     * is depth into the screen and not a side: red slot 1 and blue slot 1
+     * stand in the same rank and therefore meet. Mirroring them would put
+     * every red in a rank with no blue in it, which is not a second interface
+     * but a wall.
+     */
+    startingY({ slotIndex }) {
+      if (fixtureReplay || rankStride === 0) return null;
+      return SS2_ARENA.frontY - rankStride * slotIndex;
     },
 
     maximumHealth(combatant) {

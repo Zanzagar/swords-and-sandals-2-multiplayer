@@ -43,6 +43,7 @@ import {
   ss2PhysicalSize,
   ss2Reach,
   ss2WalkDisplacement,
+  ss2WalkDestination,
   ss2TeamRules,
   SS2_ARENA,
   Ss2ActionType,
@@ -150,6 +151,113 @@ test("a level pair reduces EXACTLY to the rounded x-separation, so no pinned dis
   // combatant in the tree today has no second coordinate, and the 1-D answer
   // is the correct one for them.
   assert.equal(ss2FightDistance({ x: -250 }, { x: 250 }), 500);
+});
+
+/* ------------------------------------------------------------------ */
+/* The second axis                                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `rankStride` is the owner's dial and `0` is the off switch. What these pin
+ * is that OFF is off STRUCTURALLY rather than by tuning: with a stride of 0
+ * every gladiator carries `y: null`, `ss2FightDistance` reads that as 0, and
+ * there is no second code path that could drift from the first.
+ */
+test("the second axis is OFF by default, and off means the key is null rather than absent", () => {
+  const battle = bout(3);
+  for (const id of ["red-1", "red-2", "red-3"]) {
+    const combatant = combatantById(battle, id);
+    assert.equal(combatant.y, null, `${id} models no depth by default`);
+    assert.ok("y" in combatant, "the key is present either way, so two peers commit to one shape");
+  }
+  assert.equal(ss2TeamRules.id, "ss2-map-derived-tournament", "and the default id is untouched");
+});
+
+test("a non-zero rankStride ranks the slots, and slot 0 keeps the vanilla depth", () => {
+  const rules = createSs2TeamRules({ rankStride: 97 });
+  // Arena y is 200 at the front and DECREASES going back — the convention
+  // `slot-layout.js` already ships and `withDrawOrder` already relies on.
+  assert.equal(rules.startingY({ slotIndex: 0 }), 200, "slot 0 is the vanilla _y");
+  assert.equal(rules.startingY({ slotIndex: 1 }), 103);
+  assert.equal(rules.startingY({ slotIndex: 2 }), 6);
+
+  // BOTH SIDES USE THE SAME RANKS. Mirroring them would put every red in a
+  // rank with no blue in it, which is a wall and not a second interface.
+  assert.equal(
+    rules.startingY({ teamIndex: 0, slotIndex: 1 }),
+    rules.startingY({ teamIndex: 1, slotIndex: 1 }),
+    "red slot 1 and blue slot 1 stand in the same rank, so they can meet"
+  );
+});
+
+test("the stride joins the rule-set id, because the hash carries only the id", () => {
+  // Two peers running different strides would otherwise agree on every hash
+  // and then diverge the first time depth mattered. Same rule as crowdPatience.
+  assert.equal(createSs2TeamRules({ rankStride: 0 }).id, "ss2-map-derived-tournament");
+  assert.equal(createSs2TeamRules({ rankStride: 97 }).id, "ss2-map-derived-tournament-rank-97");
+  assert.throws(
+    () => createSs2TeamRules({ rankStride: -1 }),
+    (error) => error instanceof TeamRuleSetError && /rankStride/.test(error.message)
+  );
+});
+
+test("fixtureReplay models no depth even with the stride on, which is what keeps 23 goldens still", () => {
+  // The same firewall as `startingPosition`, and it must hold independently:
+  // giving a golden a rank this engine invented would replay a measured action
+  // through a geometry no capture observed.
+  const replay = createSs2TeamRules({ fixtureReplay: true, rankStride: 150 });
+  assert.equal(replay.startingY({ slotIndex: 2 }), null);
+  assert.equal(replay.startingPosition({ teamIndex: 0, slotIndex: 2 }), null);
+});
+
+/**
+ * ► **THE DEADLOCK THE SECOND AXIS CREATED, AND THE PREDICATE THAT CLOSES IT.**
+ *
+ * The overlap clamp parks a walker at `foe.x -/+ physical_size(foe)`, reasoning
+ * only about x. Once a foe stands at a different depth the GATE is the
+ * hypotenuse, so at `rankStride` 97 a walker parked at `dx = 85` sat at
+ * `round(sqrt(85^2 + 97^2)) = 129` against a reach of 129 and a strict `<` —
+ * one unit out of reach, permanently. Measured before the fix: 16 of 24 bouts
+ * never settled, every survivor at full health, one side walking 354 times.
+ *
+ * `ss2BodyBlocks` closes it by asking what "overlap" already meant: a body
+ * further away in depth than its own `physical_size` is not touching you.
+ */
+test("a foe standing in another rank does not block a walk, which is what makes a crossing possible", () => {
+  const near = { id: "a", x: 0, y: 200, alive: true, stats: { strength: 9, agility: 10 } };
+
+  // The baseline: what this walk does with nothing in its way at all.
+  const unobstructed = ss2WalkDestination(near, [], 1);
+
+  // A foe 150 ahead, LEVEL: the walk clamps against its body and stops short.
+  const level = [{ id: "b", x: 150, y: 200, alive: true, stats: { strength: 9 } }];
+  assert.equal(ss2WalkDestination(near, level, 1), 150 - 86, "a level foe clamps the walk at its physical_size");
+  assert.ok(unobstructed > 150 - 86, "and that is genuinely shorter than the free walk");
+
+  // The SAME foe, a rank away: 200 - 6 = 194 apart in depth, far more than its
+  // 86-unit body, so it is scenery and the walk runs exactly as if it were not
+  // there. This is the rule that makes a crossing possible.
+  const ranked = [{ id: "b", x: 150, y: 6, alive: true, stats: { strength: 9 } }];
+  assert.equal(
+    ss2WalkDestination(near, ranked, 1),
+    unobstructed,
+    "a foe in another rank must not clamp the walk at all"
+  );
+
+  // And the walk really does carry the actor PAST it, which is the crossing.
+  assert.ok(unobstructed > 150, `the walk must pass the ranked foe's x, got ${unobstructed}`);
+});
+
+test("with every gladiator level the depth predicate is constantly true, so 1v1 is untouched", () => {
+  // Vanilla has one gladiator a side and both stand at _y = 200, so `|dy|` is 0
+  // for every pair the build can make. This is the parity case on the new axis.
+  const actor = { id: "a", x: 0, y: 200, alive: true, stats: { strength: 9, agility: 10 } };
+  const foe = [{ id: "b", x: 300, y: 200, alive: true, stats: { strength: 9 } }];
+  const withDepth = ss2WalkDestination(actor, foe, 1);
+  // The same pair with no y at all: a null depth reads as 0 on both sides.
+  const bare = { id: "a", x: 0, alive: true, stats: { strength: 9, agility: 10 } };
+  const bareFoe = [{ id: "b", x: 300, alive: true, stats: { strength: 9 } }];
+  assert.equal(ss2WalkDestination(bare, bareFoe, 1), withDepth, "a null depth and a level pair are the same walk");
 });
 
 /* ------------------------------------------------------------------ */

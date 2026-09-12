@@ -206,7 +206,9 @@ function combatantView(combatant) {
     // geometry. Present either way — see `normaliseCombatant` for why the key
     // is never absent — so the soundness invariant above holds: it is in
     // `combatantProjection` too, and therefore inside `combatStateHash`.
-    x: combatant.x
+    x: combatant.x,
+    // The second axis, same contract. A rule set may model `x` and not `y`.
+    y: combatant.y
   });
 }
 
@@ -283,6 +285,16 @@ function applyEffects(battle, effects) {
         );
       }
       target.x = effect.to;
+    } else if (effect.kind === EffectKind.LATERAL) {
+      // The same division as POSITION above: the rule set owns the arena bound
+      // and has already applied it, and the resolver stores what it is handed.
+      if (target.y === null) {
+        throw new BattleError(
+          `Rule set ${battle.rules.id} moved ${effect.targetId} laterally, which models no depth. ` +
+          "A rule set that emits LATERAL effects must also declare startingY()."
+        );
+      }
+      target.y = effect.to;
     } else if (effect.kind === EffectKind.STATUS) {
       const present = target.status.includes(effect.status);
       if (effect.active === false && present) {
@@ -533,7 +545,8 @@ function combatantProjection(combatant) {
     health: combatant.health,
     alive: combatant.alive,
     status: [...combatant.status],
-    x: combatant.x
+    x: combatant.x,
+    y: combatant.y
   };
 }
 

@@ -78,7 +78,32 @@ export const EffectKind = Object.freeze({
    * have its clamped value survive the resolver. Signed, unlike an `amount` —
    * walking left is a negative COORDINATE, not a negative distance.
    */
-  POSITION: "position"
+  POSITION: "position",
+  /**
+   * Move a combatant to an absolute arena y — the SECOND axis.
+   *
+   * Absolute and signed for exactly the reasons `POSITION` is; this docstring
+   * does not repeat them.
+   *
+   * ► **WHY THIS IS A SEPARATE KIND RATHER THAN A `toY` ON `POSITION`.** The
+   *   build has no diagonal move: its movement phases are `walkleft`,
+   *   `walkright`, `runleft`/`runright`, `chargeleft`/`chargeright` and
+   *   `jumpleft`/`jumpright`, each of which changes ONE coordinate (the jump
+   *   changes `_y` over its frames and `_x` over its frames, but it is one
+   *   named phase either way). A move along x and a move along y are different
+   *   phases, so they are different effects, and `POSITION`'s validator stays
+   *   untouched.
+   *
+   *   The alternative — widening `POSITION` with an optional second field —
+   *   was rejected for the reason `src/render/scene.js` gives about
+   *   `move-clip`: a shape that silently grows a field is a shape whose
+   *   consumers silently stop covering it.
+   *
+   * **A rule set that emits this must declare `startingY`**, exactly as a
+   * `POSITION` emitter must declare `startingPosition`. The resolver enforces
+   * it the same way and with the same message shape.
+   */
+  LATERAL: "lateral"
 });
 
 const REQUIRED_FUNCTIONS = Object.freeze([
@@ -293,6 +318,14 @@ export function assertActionOutcome(outcome, ruleSetId) {
       if (!Number.isFinite(effect.to)) {
         throw new TeamRuleSetError(
           `Rule set ${ruleSetId} produced a position effect without a finite absolute \`to\` value.`
+        );
+      }
+    } else if (effect.kind === EffectKind.LATERAL) {
+      // Its own arm rather than `POSITION ||` above, so that a future change to
+      // either axis cannot silently re-validate the other.
+      if (!Number.isFinite(effect.to)) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a lateral effect without a finite absolute \`to\` value.`
         );
       }
     } else if (!Number.isFinite(effect.amount) || effect.amount < 0) {

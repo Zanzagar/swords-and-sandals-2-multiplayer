@@ -1038,9 +1038,18 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
   //   position, so two peers commit to the same projection shape whatever rule
   //   set they run — an absent key would let them disagree about whether the
   //   field exists at all, which is the one thing this pin is for.
+  //
+  // ► **`y` JOINED IT 2026-09-12 and moved every pinned hash a second time**,
+  //   on identical reasoning: present on EVERY combatant, `null` for a rule
+  //   set that models no depth. **A rule set may model `x` and not `y`** —
+  //   that is every rule set in the tree with the second axis switched off,
+  //   which is the default — so the two keys are independent and both are
+  //   unconditional. `ss2FightDistance` reads a `null` y as 0, which is what
+  //   makes the off state the one-dimensional engine exactly rather than
+  //   approximately.
   assert.deepEqual(Object.keys(projected), [
     "id", "name", "teamId", "seatId", "slotIndex", "aiFilled",
-    "stats", "loadout", "resources", "maxHealth", "health", "alive", "status", "x"
+    "stats", "loadout", "resources", "maxHealth", "health", "alive", "status", "x", "y"
   ], "the per-combatant projection shape is wire format too");
 });
 
@@ -1108,7 +1117,7 @@ test("a canonical SS2 battle hashes to a pinned value — one tripwire for the w
       { id: "blue", combatants: [ss2Combatant(minimal, { id: "villain", name: "Villain" })] }
     ]
   });
-  assert.equal(combatStateHash(battle), "8cf9b04e", [
+  assert.equal(combatStateHash(battle), "726642f4", [
     "The SS2 wire projection changed. That is not necessarily wrong — but it",
     "means every peer running the previous build now disagrees with this one",
     "about identical battles, and every stored completion token minted before",

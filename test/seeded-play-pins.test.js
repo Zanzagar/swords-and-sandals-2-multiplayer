@@ -102,8 +102,14 @@ const FIGHTER = Object.freeze({
  *   caught that — `rngCursor must have moved off 0: 0` — which is the guard
  *   doing exactly its job.
  *
- *   The approach is not left uncovered: `positionBuild` below pins it
- *   separately, so both states have a literal.
+ *   ~~The approach is not left uncovered: `positionBuild` below pins it
+ *   separately, so both states have a literal.~~ **THAT WAS FALSE FROM THE DAY
+ *   IT WAS WRITTEN UNTIL 2026-09-12: `positionBuild` was declared and never
+ *   called.** Two hits in the repository, this sentence and the declaration.
+ *   The approach now genuinely has a literal — see "the VANILLA-SEPARATION
+ *   opening" below — and the sentence is kept struck through rather than
+ *   deleted, because a claim that a thing is covered is more dangerous than no
+ *   claim at all: it is the reason nobody looked for eleven days.
  */
 function build(seed, stats, perSide = 1) {
   const side = (prefix) => ({
@@ -243,6 +249,33 @@ function driveFirst(battle, limit) {
  *   choice. The two SETTLED pins did not move at all: their fixture is staged
  *   in contact and the bout is decided before the reach ever separates them.
  */
+/**
+ * ► **ALL THREE MOVED AGAIN ON 2026-09-12, for a PROJECTION change again: `y`
+ *   joined `combatantProjection` as the SECOND AXIS.**
+ *
+ *     01621469 -> 32247fc9   (six actions in)
+ *     83b564ac -> abaca958   (settled 1v1)
+ *     797ff2be -> ef01645a   (settled 3v3)
+ *
+ *   **No arithmetic changed and no action sequence changed.** `y` is `null`
+ *   for every rule set in this file — `rankStride` defaults to 0, which is the
+ *   second axis switched OFF — so what moved is one key per combatant in the
+ *   serialised projection and nothing else. That is the whole point of the
+ *   key being unconditional: two peers commit to the same shape whether or not
+ *   they model depth, and the cost of that guarantee is exactly this, one
+ *   re-pin per projection change.
+ *
+ *   **The goldens did not move, for the third time and for the same reason**:
+ *   `fixtureReplay` returns `null` from `startingY` as it does from
+ *   `startingPosition`, and a golden's hash is compared against another hash
+ *   rather than against a literal.
+ *
+ *   Verified to be shape-only rather than behavioural: with the axis off,
+ *   `ss2FightDistance` reduces EXACTLY to the rounded x-separation (pinned in
+ *   `ss2-position.test.js` over 30,005 offsets), and every metric in
+ *   `tools/engagement-census.mjs` is byte-identical to the run before the
+ *   change — spread 99, mutual reach 41.0%, blows through a body 44.7%.
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -263,7 +296,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "01621469", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "32247fc9", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -275,7 +308,44 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "83b564ac", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "abaca958", WHY_IT_MOVED);
+});
+
+/**
+ * ► **THE PIN THIS FILE'S OWN HEADER SAID EXISTED, AND IT DID NOT. Added
+ *   2026-09-12.** The header at the top of `build` reads: *"The approach is not
+ *   left uncovered: `positionBuild` below pins it separately, so both states
+ *   have a literal."* `positionBuild` was declared and NEVER CALLED — two hits
+ *   in the whole repository, the claim and the declaration — so the
+ *   VANILLA-SEPARATION opening had no literal at all, while the file asserted
+ *   it did.
+ *
+ *   That gap matters more than an ordinary missing pin, because the approach is
+ *   exactly the state a second axis changes: at +/-250 the first actions are
+ *   walks, and a rule set with `rankStride` non-zero changes who is in reach of
+ *   whom on the way in. The contact-staged pins above cannot see any of it.
+ *
+ *   Guarded rather than trusted: a bout still at `rngCursor` 0 after six
+ *   actions is six walks and nothing else, which is a real state and one worth
+ *   pinning, but it must be ASSERTED as that state rather than assumed — the
+ *   defect that produced the contact staging in the first place.
+ */
+test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact pins cannot see", () => {
+  const battle = positionBuild(1, MINIMAL);
+
+  // The state under test: the rule set's own +/-250, a 500-unit separation,
+  // and therefore an approach rather than a brawl.
+  const hero = battle.teams[0].combatants[0];
+  const villain = battle.teams[1].combatants[0];
+  assert.equal(hero.x, -250, "the hero opens where startingPosition puts it");
+  assert.equal(villain.x, 250, "and the villain mirrors it");
+  assert.equal(hero.y, null, "with the second axis off by default, depth is null");
+
+  const taken = driveByTurn(battle, 6);
+  assert.equal(taken, 6, "the drive must have applied six actions");
+  assert.equal(battle.result, null, "an approach does not settle in six actions");
+
+  assert.equal(combatStateHash(battle), "f6af12c0", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
@@ -286,7 +356,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "797ff2be", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "ef01645a", WHY_IT_MOVED);
 });
 
 /**

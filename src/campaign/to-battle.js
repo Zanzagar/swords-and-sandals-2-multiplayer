@@ -150,6 +150,10 @@ export function rosterFromCampaignRecord(record, { blueprints, includeFallen = f
      * one happened to stop.
      */
     delete next.x;
+    // The second axis, for exactly the same reason and found by exactly the
+    // same failure. A record that carried depth would make every bout after
+    // the first open in whatever rank the last one happened to end in.
+    delete next.y;
     next.health = outcome.health;
     // Conditions persist across a bout because nothing in the record or the
     // rule set clears them at a boundary — `death()` clears them on a KILL,
