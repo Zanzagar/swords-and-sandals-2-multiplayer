@@ -494,12 +494,19 @@ test("and OUTSIDE 65 the build's own gate shuts, which is a fidelity gap and not
   assert.deepEqual([0, 1, 5, 9, 20, 40].map(blockedFrom), [66, 66, 65, 66, 65, 66]);
 
   // **THIS IS THE BUILD'S BEHAVIOUR, not this module's.** `battlevalues` gives
-  // the same two numbers, and the selector is the same strict `<`. What the
-  // build has and this module does NOT is the escape: `attacker.onEnterFrame`
-  // opens with `if (arena.fightdistance < 100) { hero._x +/-= 1; villain._x
-  // -/+= 1 }` (`+0x36c1`..`+0x37c8`), which drives the pair together a pixel a
-  // frame regardless of the clamp and takes the distance under 100 — inside
-  // every reach in the table. The resolver has no frames, so it cannot.
+  // the same two numbers, and the selector is the same strict `<`.
+  //
+  // ► ~~"What the build has and this module does NOT is the escape:
+  //   `onEnterFrame`'s sub-100 nudge, which drives the pair together a pixel a
+  //   frame and takes the distance under 100."~~ **WITHDRAWN 2026-09-12,
+  //   BROKEN TWICE.** (1) The nudge SEPARATES — `gladiator_dir` is FACING, not
+  //   side-of-arena (`+0x28f3` sets hero "right" exactly when
+  //   `hero._x < villain._x`), so both arms of `+0x36c1`..`+0x37c8` move the
+  //   pair APART, 2 px a frame, up to a gap of 100. (2) Even under the wrong
+  //   reading it would not follow: the guard is `fightdistance < 100` and the
+  //   blocked case needs a separation of at least
+  //   `min(weapon_range) = 80 + 44 = 124`, so the nudge cannot fire there at
+  //   all. **The build has no escape from this case; it simply has the case.**
   //
   // **A WEAPON CLOSES IT WITHOUT ANY OF THAT**: `[5]` = 2 adds another 44 and
   // pushes the boundary past anything two reachable builds can differ by.
@@ -650,10 +657,17 @@ test("with two foes ahead the walk stops at the nearest CLAMP LINE, not the near
 test("a walk INTO a foe you already overlap snaps back to the clamp line, which is the build unguarded", () => {
   // `+0x3de6` is unconditional on where the walker currently stands: if the
   // destination is past `defender._x - physical_size`, it becomes that value,
-  // even when that is BEHIND the walker. Reachable in the build because
-  // `onEnterFrame`'s sub-100 nudge (`+0x36c1`) drives the pair together a pixel
-  // a frame; not reachable here without staging it, which almost every other
-  // SS2 test in this repository does.
+  // even when that is BEHIND the walker.
+  //
+  // ► **THIS TEST'S STATED REACHABILITY RATIONALE WAS BACKWARDS (corrected
+  //   2026-09-12).** It read "reachable in the build because `onEnterFrame`'s
+  //   sub-100 nudge drives the pair together a pixel a frame". The nudge
+  //   SEPARATES (`+0x28f3` fixes `gladiator_dir` as FACING), so it is precisely
+  //   what FORBIDS the overlapping state in the build. What makes the case
+  //   worth testing is not that vanilla reaches it — it is that this repository
+  //   stages gladiators in contact in almost every other SS2 test, so a CALLER
+  //   reaches it, and `resolveAction` must answer something defensible. The
+  //   answer below is `+0x3de6` applied as written.
   const battle = createTeamBattle({
     seed: 1,
     rules: ss2TeamRules,

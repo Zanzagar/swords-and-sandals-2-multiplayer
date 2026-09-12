@@ -1017,8 +1017,26 @@ export const SS2_WEAPON_RANGE_STEP = 44;
  *   Line 59 of the same file continues `+ _root["weapon" + c.weapon][5] * 44`.
  *   There is no unarmed branch in `battlevalues` at all: every gladiator has a
  *   `weapon` id, and **the smallest `[5]` in all ninety rows is 1**, so the
- *   smallest `weapon_range` the build can produce is `physical_size + 44`.
- *   `physical_size` on its own is the reach of nothing.
+ *   smallest `weapon_range` the build can produce is `physical_size + 44` and
+ *   `physical_size` is never anybody's `weapon_range`.
+ *
+ *   ► **AN EARLIER VERSION OF THAT LAST CLAUSE READ "`physical_size` on its own
+ *     is the reach of nothing", WHICH IS FALSE — it is a live reach gate in the
+ *     build, just not this one.** The selector at frame 4 is TWO gates, and the
+ *     bow arm never reads `weapon_range`:
+ *     `using_bow ? (fightdistance < 100 + hero.physical_size)
+ *                : (fightdistance < hero.weapon_range)`
+ *     (`+0x00b9` the test, `+0x00f6` the warrior arm, `+0x0141`/`+0x0158`/
+ *     `+0x015f` the archer arm). The build hand-writes `100 + physical_size`
+ *     there precisely BECAUSE a bow's `physical_size + 4400` is useless as a
+ *     gate.
+ *
+ *   **AND THE `[5]` COLUMN IS NOT A 1-2-3 MULTIPLIER, which nothing here said.**
+ *   Measured over all ninety rows: `[5]` is 1 on 16 ids, 2 on 33, 3 on 20,
+ *   **4 on 3** (65, 75, 220) and **100 on 18** (the type-4 ranged rows, 61-64
+ *   and 66-80). The build's reach scale runs 44 to 4,400, and the settle sweeps
+ *   this module cites exercise only multipliers 1, 2 and 3 — 21 of 90 rows, 23%,
+ *   have never been in a modelled bout.
  *
  *   **This is the fourth time in this repository that a quoted offset's own
  *   neighbouring line held the answer** — `ranged-hurt-label-adjustment`,
@@ -1027,16 +1045,38 @@ export const SS2_WEAPON_RANGE_STEP = 44;
  *   rule caught it. **Read to the end of the statement, not to the end of the
  *   line.**
  *
- * **MEASURED INDEPENDENTLY OF THE BYTES, against the capture archive**
- * (`/mnt/c/ss2-capture/captures`, 1,551 logs, 3,102 `{"t":"state"}` records,
- * 2026-09-11). Inverting `min_damage - round(strength * 2)` onto the weapon
- * table's damage pairs resolves a weapon id for 3,091 of them, and **not one
- * implies a `weapon_range` below `physical_size + 44`.** The archive's own hero
- * is weapon 0 in all 1,500 of its records — strength 10, pair (1, 3),
- * `physical_size` 87, `weapon_range` **131**, not 87. (That inversion is
- * near-tautological as evidence FOR the table — `battlevalues` derives both
- * damages from the same row — but it is not tautological here, because
- * `rangeMultiplier` is a different column from the two it inverts.)
+ * ## THE ARCHIVE, AND HOW LITTLE OF THIS IT ACTUALLY WITNESSES
+ *
+ * ► **THE FIRST VERSION OF THIS BLOCK OVERSTATED THE ARCHIVE THREE WAYS, and a
+ *   write-nothing verifier broke all three. Re-counted here before believing
+ *   it.** `/mnt/c/ss2-capture/captures` holds 1,650 `.rufflelog` files, 1,551 of
+ *   which carry a `{"t":"state"}` record; 3,102 records parse with a strength
+ *   and a damage pair. Inverting `min_damage - round(strength * 2)` onto the
+ *   table's damage pairs:
+ *
+ *   1. **3,004 resolve and 98 do not** — not the "3,091" this block claimed,
+ *      which was an arithmetic slip reading my own tally. The 98 are two
+ *      homogeneous groups (pair (2,10) at strength 5, and (1,1) at strength 0).
+ *   2. **432 of the 3,004 are AMBIGUOUS, and every single one spans the range
+ *      column** — each admits a `[5]` = 1 row and a `[5]` = 100 row, e.g. pair
+ *      (4,16) admits ids 2, 21 and 61. So for 14% of the archive the inversion
+ *      cannot tell `physical_size + 44` from `physical_size + 4400`.
+ *   3. **"Not one implies a `weapon_range` below `physical_size + 44`" IS
+ *      UNFALSIFIABLE BY CONSTRUCTION**, and this block defended it with an
+ *      argument that does not work. The defence was "not tautological, because
+ *      `rangeMultiplier` is a different column from the two it inverts". But the
+ *      proposition quantifies over EVERY row, and the minimum `[5]` over all
+ *      ninety is 1 — so any resolution to any row implies it. No archive
+ *      content could ever have contradicted the claim. **Withdrawn.**
+ *
+ *   **WHAT SURVIVES, and it is narrower and real:** the archive's own hero
+ *   resolves UNIQUELY — pair (1, 3) matches exactly one row in the table, id 0 —
+ *   in all 1,500 of its records, at strength 10, so its `physical_size` is 87
+ *   and its `weapon_range` is **131, not 87**. That is a fact about the DAMAGE
+ *   columns; the range follows through the table, not through the archive.
+ *   **The archive records no `weapon`, `weapon_range`, `physical_size`,
+ *   `secondary_weapon`, `using_bow` or `equipped_weapon` field at all**, so it
+ *   witnesses the quantity in dispute only at this one remove.
  *
  * ## WHERE THE NUMBER COMES FROM NOW
  *
@@ -1205,7 +1245,18 @@ const SS2_WALK_STOP_GAP = 20;
  * `fightdistance` is recomputed every frame by `getfightdistance`. So inside 100
  * units the attacker's `_x` gains ±1 per frame BEFORE the tween, and the phase
  * realises 45 or 43 rather than 44 (7 frames / 10 frames, final gap 19 either
- * way). **44 is the displacement while the gladiators are more than 100 apart**,
+ * way).
+ *
+ * ► **"EITHER WAY" IS WRONG: THE SIGN IS DETERMINED, because the nudge always
+ *   SEPARATES** (derived 2026-09-12 — `gladiator_dir` is FACING, fixed by
+ *   `+0x28f3` setting hero "right" exactly when `hero._x < villain._x`, so both
+ *   arms of `+0x36c1`..`+0x37c8` move the pair apart). A walk TOWARD the foe
+ *   fights the repulsion and realises the SHORTER figure; a walk away is helped
+ *   and realises the LONGER. **The frame counts above are NOT re-derived** —
+ *   they came in with the paragraph — so this is a correction to the logic and a
+ *   lead on the numbers, not a derivation of them.
+ *
+ * **44 is the displacement while the gladiators are more than 100 apart**,
  * which is every walk of an approach from 500 and is not every walk in a bout:
  * the overlap clamp parks a walk at `defender._x ∓ physical_size`, and the
  * captured hero's `physical_size` is 87. Not modelled here — the resolver has no
@@ -1365,34 +1416,55 @@ export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
  * assertion checked.
  *
  * ► **ONE CASE THE BUILD HAS AND THIS DOES NOT MODEL, recorded because it
- *   bounds the clamp's meaning.** `attacker.onEnterFrame`'s first act
- *   (`+0x36c1`..`+0x37c8`) is `if (arena.fightdistance < 100) { hero._x ±= 1;
- *   villain._x ∓= 1 }`, so inside 100 units the build drives the two together a
- *   pixel a frame REGARDLESS of the clamp, and gladiators routinely end up
- *   closer than `physical_size`. The resolver has no frames, so it never
- *   reaches that state on its own. A caller that STAGES one — every other SS2
- *   test in this repository stages its gladiators in contact — and then forces a
- *   forward walk gets the build's answer: the clamp fires, the destination is
- *   behind the walker, and the walk moves it BACKWARD to the clamp line. That is
- *   `+0x3de6` as written, unconditional on where the walker currently stands.
+ *   bounds the clamp's meaning.** `+0x3de6` is unconditional on where the
+ *   walker currently stands, so a caller that STAGES two gladiators closer than
+ *   `physical_size` — every other SS2 test in this repository stages them in
+ *   contact — and then forces a forward walk gets the build's answer: the clamp
+ *   fires, the destination is behind the walker, and the walk moves it BACKWARD
+ *   to the clamp line. The resolver has no frames, so it never reaches that
+ *   state on its own.
  *
- *   ► **AND THAT UNMODELLED NUDGE IS LOAD-BEARING AT ONE BOUNDARY, FOUND BY A
- *     SWEEP THAT WAS WRITTEN TO ASSERT THE OPPOSITE.** "A clamped walk always
- *     lands inside the attacker's reach" is FALSE in general: `physical_size`
- *     spans 80 (strength 0) to 147 (strength 100), a range of 67, which is
- *     wider than the 44 a bare-handed `weapon_range` adds. So at a strength gap
- *     of **65-66** — flat across the range, because `physical_size` sits on
- *     both sides of the comparison — a BARE-HANDED walker parks at
- *     `physical_size(defender)` with its own gate shut, and is never offered a
- *     swing. **That is the build's behaviour, not this module's**: the same two
- *     fields, the same strict `<`. What the build has and this does not is the
- *     nudge, which takes the distance under 100 and inside every reach in the
- *     table. **A weapon closes it without any of that** — `[5]` = 2 adds
- *     another 44 — and it is not a hung bout either way: the bigger gladiator's
- *     reach covers the smaller one's personal space, so it closes and kills.
- *     Measured over 8 seeds at strength 1 against strength 70: 8/8 settle, the
- *     small side is offered a swing on 0 turns and the big side on many.
- *     Pinned in `test/ss2-position.test.js`, both halves.
+ *   ► ~~**"Reachable in the build because `onEnterFrame`'s sub-100 nudge drives
+ *     the pair together a pixel a frame."**~~ **THE NUDGE SEPARATES. WITHDRAWN
+ *     IN FULL 2026-09-12 by a write-nothing verifier, and re-derived here
+ *     before it was believed.** The bytes are
+ *     `if (arena.fightdistance < 100) { if (hero.gladiator_dir == "left")
+ *     { hero._x += 1; villain._x -= 1 } else { hero._x -= 1; villain._x += 1 } }`
+ *     (`+0x36c1` guard, `+0x372c`/`+0x375e` and `+0x3795`/`+0x37c7`), and the
+ *     hinge is what `gladiator_dir` MEANS. It is FACING, not side-of-arena: the
+ *     turnaround in this same block is
+ *     `if (hero._x < villain._x) { hero.gladiator_dir = "right";
+ *     villain.gladiator_dir = "left" }` (`+0x28f3` -> `+0x290e` / `+0x29cd`),
+ *     maintained every pass. So `dir == "left"` means the hero stands to the
+ *     RIGHT, and `hero._x += 1` with `villain._x -= 1` moves BOTH away. Both
+ *     arms separate, by 2 px a frame, until the gap reaches 100. **It is a
+ *     repulsion, and this docstring called it an attraction.**
+ *
+ * ► **THE INVARIANT "A CLAMPED WALK ALWAYS LANDS INSIDE THE ATTACKER'S REACH"
+ *   IS FALSE, found by a sweep written to assert the opposite.**
+ *   `physical_size` spans 80 (strength 0) to 147 (strength 100), a range of 67,
+ *   wider than the 44 a bare-handed `weapon_range` adds. So at a strength gap of
+ *   **65-66** — flat across the range, because `physical_size` sits on both
+ *   sides of the comparison — a BARE-HANDED walker parks at
+ *   `physical_size(defender)` with its own gate shut and is never offered a
+ *   swing. **That is the build's behaviour, not this module's**: the same two
+ *   fields, the same strict `<`.
+ *
+ *   ► ~~**"What the build has and this does not is the nudge, which takes the
+ *     distance under 100 and inside every reach in the table."**~~ **BROKEN
+ *     TWICE OVER, and the second break survives even under the wrong reading
+ *     above.** The nudge's guard is `fightdistance < 100`. The blocked case
+ *     requires `physical_size(defender) >= weapon_range(attacker)`, and
+ *     `weapon_range >= 80 + 1 * 44 = 124` for every gladiator the build can
+ *     make — so the parked separation is ALWAYS at least 124 and the nudge
+ *     cannot fire there at all. **The build has no escape from this case; it
+ *     simply has the case.** Nothing is owed to the resolver here.
+ *
+ *   **A weapon closes it** — `[5]` = 2 adds another 44 — and it is not a hung
+ *   bout either way: the bigger gladiator's reach covers the smaller one's
+ *   personal space, so it closes and kills. Measured over 8 seeds at strength 1
+ *   against strength 70: 8/8 settle, the small side offered a swing on 0 turns
+ *   and the big side on many. Pinned in `test/ss2-position.test.js`.
  *
  * **THE MULTI-FOE RULE IS AUTHORED, because vanilla cannot settle it**
  * (`MAP_SILENCE.multi-slot-arena-geometry`): vanilla has exactly one defender,
@@ -1519,6 +1591,15 @@ export const SS2_FACING_LEFT = "facing-left";
  *   identity: the `weapon` id itself is still outside this list, still outside
  *   `CANONICAL_RESOURCE_SOURCES`, and still gated in `ss2Combatant`.
  *   `ss2Reach` reads it; the controller gate reads `ss2Reach`.
+ *
+ *   ► **IT REACHES ONLY THE `derive: true` PATH, and the commit that added it
+ *     said so too broadly** — "every `ss2Combatant` built from a record that
+ *     resolves a `weapon` id carries one more hashed number". A `derive: false`
+ *     record carries `weapon_range` only if it STATES one, because
+ *     `ss2BattleValues` never runs. `tools/arena/roster.js` is the live
+ *     counterexample: it states `weapon: 1` and builds with `derive: false`, so
+ *     every demo gladiator declares 32 names and takes `ss2Reach`'s fallback.
+ *     Found by the entry-point verifier, 2026-09-12.
  *
  *   **It is deliberately absent from `SS2_RESOURCE_DEFAULTS`**, so a combatant
  *   that resolves no weapon id simply does not declare it and `ss2Reach` falls
@@ -2762,6 +2843,29 @@ export function createSs2TeamRules({
       // `fightdistance < hero.weapon_range` — frame 4 `DoAction@0x238bbf`
       // `+0x00f6`, re-derived 2026-09-11 from the map's own transcription of
       // the selector. STRICT `<`, as the build has it.
+      //
+      // ► **THAT IS THE HERO'S HALF OF THE SELECTOR AND THE ONLY HALF MODELLED.
+      //   TWO MORE REACH GATES EXIST IN THE BUILD (found 2026-09-12 by a wave,
+      //   re-derived here), and NEITHER is `weapon_range`:**
+      //
+      //   - The same selector's BOW arm, which never reads `weapon_range` at
+      //     all: `using_bow ? (fightdistance < 100 + hero.physical_size) : ...`
+      //     (`+0x00b9` the test, `+0x0141`/`+0x0158`/`+0x015f` the arm).
+      //   - **The VILLAIN's own AI gate, which is a different function from the
+      //     hero's controller entirely** — `sprite:862/frame:52/DoAction@0x23f835`
+      //     `+0x0356`..`+0x03d5`:
+      //         (villain.equipped_weapon == 1 && fightdistance < villain.weapon_range)
+      //      || (villain.equipped_weapon == 2 && fightdistance < 200)
+      //     Two short-circuit `&&`s joined by an `||`, with a HAND-WRITTEN 200
+      //     for the drawn-bow case. So in vanilla the two sides do not share a
+      //     gate, and the villain's depends on `equipped_weapon`.
+      //
+      //   This rule set applies the HERO's warrior gate to every combatant.
+      //   That is a narrowing, stated here rather than discovered later: the
+      //   resolver has no bow vocabulary, `using_bow` is forced false at battle
+      //   construction (map `:111`, root frame 221), and `MAP_SILENCE`'s
+      //   `multi-slot-arena-geometry` already records that vanilla's one-hero
+      //   one-villain shape cannot settle what a symmetric team battle does.
       //
       // A gladiator with NO position keeps the old position-blind vocabulary
       // exactly — three melee verbs against every foe — which is what

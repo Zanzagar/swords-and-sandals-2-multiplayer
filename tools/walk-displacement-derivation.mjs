@@ -12,7 +12,21 @@
  * re-checks. It reads the installed SWF and diffs the BUILD against
  * `src/team/ss2-rules.js` — the step factors, the boot and shinguard bonus
  * terms, the easing divisor, the stop tolerance, the two percentage helpers
- * INCLUDING their parameter registers, and the `movement_speed` clamp.
+ * INCLUDING their parameter registers, the `movement_speed` clamp, and the
+ * sub-100 nudge's DIRECTION.
+ *
+ * ## Why the nudge's direction is checked, and checked the long way
+ *
+ * Added 2026-09-12, after two source docstrings, two test comments and a commit
+ * message all said the nudge "drives the two together a pixel a frame". **It
+ * separates.** The instructive part is that the nudge's own bytes DO NOT SETTLE
+ * IT: `hero._x += 1` is toward or away depending entirely on what
+ * `gladiator_dir` means, and the rival convention ("the side I stand on") fits
+ * the same opcodes and yields the opposite answer. So this tool reads the
+ * TURNAROUND as well — `if (hero._x < villain._x) hero.gladiator_dir = "right"`
+ * — and DERIVES the direction from the two together, reporting SEPARATES or
+ * CLOSES as a conclusion rather than checking a constant. A checker that only
+ * confirmed the `±1` pattern would have been green through the whole error.
  *
  * REPORT ONLY. It reads the installed SWF and the committed module, and writes
  * nothing.
@@ -451,6 +465,111 @@ function main(argv) {
     }
     // Vacuity guard: an empty init block would make "0 Jump/Return" vacuously true.
     if (body.length === 0) problems.push("the fall-through scan found an EMPTY init block, so its 0 Jump/Return proves nothing");
+  }
+
+  // ------------------------------------------------------------------
+  // THE SUB-100 NUDGE, and which way it pushes.
+  //
+  // ► **THIS CHECK EXISTS BECAUSE THE ANSWER WAS WRITTEN DOWN BACKWARDS
+  //   (2026-09-12).** Two source docstrings, two test comments and a commit
+  //   message all said the nudge "drives the two together a pixel a frame". It
+  //   SEPARATES. The bytes alone do not settle it — `hero._x += 1` is toward or
+  //   away depending entirely on what `gladiator_dir` MEANS — so the rival
+  //   convention ("the side I stand on") fits the same opcodes and gives the
+  //   opposite answer. What settles it is the TURNAROUND in the same block, and
+  //   that is why this check reads both and derives the direction rather than
+  //   asserting it.
+  // ------------------------------------------------------------------
+  console.log("\nTHE SUB-100 NUDGE, and which way it pushes — derived from the turnaround, never assumed");
+  {
+    // The guard: the single `Push "fightdistance"` in this block, followed by a
+    // literal and a `Less2`.
+    let guard = null;
+    let nudgeAt = -1;
+    for (let index = 0; index < flat.length; index += 1) {
+      if (!pushedStrings(flat[index].instruction).includes("fightdistance")) continue;
+      for (let ahead = index + 1; ahead < Math.min(index + 6, flat.length); ahead += 1) {
+        const numbers = pushedNumbers(flat[ahead].instruction);
+        if (numbers.length === 0) continue;
+        if (flat[ahead + 1]?.instruction.name !== "Less2") break;
+        guard = { value: numbers[0], offset: flat[ahead].instruction.offset };
+        nudgeAt = index;
+        break;
+      }
+      if (guard) break;
+    }
+    if (!guard) {
+      problems.push("the sub-100 nudge's `fightdistance <` guard was not found; its direction is UNVERIFIED");
+      note("nudge guard NOT FOUND");
+    } else {
+      note(`guard: fightdistance < ${guard.value}   +0x${(guard.offset - block.offset).toString(16)}`);
+
+      // The branch: `hero.gladiator_dir == "left"` decides which arm runs.
+      // Within each arm, record whether hero._x is Incremented or Decremented.
+      const window = flat.slice(nudgeAt, nudgeAt + 140);
+      const test = window.find((entry) => pushedStrings(entry.instruction).includes("left"));
+      const arms = [];
+      for (let index = 0; index < window.length; index += 1) {
+        const op = window[index].instruction.name;
+        if (op !== "Increment" && op !== "Decrement") continue;
+        // Whose `_x`? the nearest preceding "hero"/"villain" push.
+        let who = null;
+        for (let back = index - 1; back >= 0 && back > index - 14; back -= 1) {
+          const pushes = pushedStrings(window[back].instruction);
+          if (pushes.includes("hero")) { who = "hero"; break; }
+          if (pushes.includes("villain")) { who = "villain"; break; }
+        }
+        if (who) arms.push({ who, op, offset: window[index].instruction.offset });
+      }
+      if (!test || arms.length !== 4) {
+        problems.push(`the nudge's two arms did not decode (test ${Boolean(test)}, ${arms.length} +/-1 sites, expected 4)`);
+      } else {
+        for (const arm of arms) {
+          note(`  ${arm.who}._x ${arm.op === "Increment" ? "+= 1" : "-= 1"}   +0x${(arm.offset - block.offset).toString(16)}`);
+        }
+
+        // THE HINGE: what `gladiator_dir` means, read off the turnaround.
+        // `if (hero._x < villain._x) { hero.gladiator_dir = <A>; ... }`
+        let facingWord = null;
+        for (let index = 0; index < flat.length; index += 1) {
+          if (flat[index].instruction.name !== "Less2") continue;
+          const before = flat.slice(Math.max(0, index - 26), index);
+          const names = before.flatMap((entry) => pushedStrings(entry.instruction));
+          if (!names.includes("hero") || !names.includes("villain") || !names.includes("_x")) continue;
+          const after = flat.slice(index + 1, index + 30);
+          const assign = after.find((entry) => {
+            const pushes = pushedStrings(entry.instruction);
+            return pushes.includes("gladiator_dir") && (pushes.includes("left") || pushes.includes("right"));
+          });
+          if (!assign) continue;
+          const pushes = pushedStrings(assign.instruction);
+          facingWord = { word: pushes.includes("right") ? "right" : "left", offset: assign.instruction.offset };
+          break;
+        }
+        if (!facingWord) {
+          problems.push("the gladiator_dir turnaround was not found, so the nudge's DIRECTION is UNVERIFIED (the bytes alone do not settle it)");
+          note("  turnaround NOT FOUND — direction UNVERIFIED");
+        } else {
+          const rel = `+0x${(facingWord.offset - block.offset).toString(16)}`;
+          note(`  turnaround: hero._x < villain._x  =>  hero.gladiator_dir = "${facingWord.word}"   ${rel}`);
+          // hero._x < villain._x means the hero is on the LEFT. If that state
+          // is spelt "right", the word is FACING. Then the nudge's `dir ==
+          // "left"` arm runs when the hero is on the RIGHT, and that arm does
+          // hero += 1 (further right) — away.
+          const heroIsFacing = facingWord.word === "right";
+          const leftArm = arms.slice(0, 2);
+          const heroInLeftArm = leftArm.find((arm) => arm.who === "hero");
+          const separates = heroIsFacing && heroInLeftArm?.op === "Increment";
+          note(`  gladiator_dir is ${heroIsFacing ? "FACING" : "SIDE-OF-ARENA"}, so the nudge ${separates ? "SEPARATES" : "CLOSES"}`);
+          if (!separates) {
+            problems.push(
+              "the nudge decodes as CLOSING; every comment in src/ and test/ now says it SEPARATES " +
+              "(see ss2WalkDestination). One of the two is wrong and it is no longer this tool's guess."
+            );
+          }
+        }
+      }
+    }
   }
 
   console.log("\nTHE MODULE'S OWN ARITHMETIC, against the build's numbers rather than against itself");

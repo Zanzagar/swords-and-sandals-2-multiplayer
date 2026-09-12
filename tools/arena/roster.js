@@ -64,19 +64,46 @@ export function demoGladiator(overrides = {}) {
     //   `weapon_range = physical_size + _root["weapon" + weapon][5] * 44`, so
     //   the `[5]` column had been pasted into the field it multiplies into.
     //   It was inert while `ss2Reach` ignored the field; the moment
-    //   `weapon_range` became a declared resource the demo's gladiators could
-    //   reach one unit and no bout in the arena ever settled.
+    //   `weapon_range` became a declared resource the demo's gladiators reached
+    //   one unit and NO ATTACK WAS EVER ON OFFER in the arena again.
+    //
+    //   ► ~~"and no bout in the arena ever settled"~~ **FALSE, and withdrawn
+    //     2026-09-12 by a write-nothing verifier. Re-measured here before it
+    //     was believed** — 24 bouts (1v1/2v2/3v3 x 8 seeds) through
+    //     `createVanillaBattleHost`, driving `options[0]`:
+    //
+    //       weapon_range: 1   24/24 settle, 20,424 actions,   0 attacks
+    //       absent (now)      24/24 settle,  2,764 actions, 637 attacks
+    //
+    //     **Every bout settled either way.** The crowd toll kills them. The
+    //     real diagnostic is "0 attacks and seven times the actions", and
+    //     saying "never settled" is EXACTLY the reporting error
+    //     `ss2WalkDestination`'s own docstring convicts an earlier session of —
+    //     "'settle' only because the crowd kills them ... missed by reporting
+    //     only what the assertion checked" — committed again, in the same
+    //     commit that quoted it.
     //
     //   **It is now ABSENT rather than corrected, on purpose.** `demoSide`
     //   below gives each slot its own `strength`, and `weapon_range` depends on
-    //   it — so ANY constant here is wrong for two of the three slots, which is
-    //   how the paste survived in the first place. Absent, `ss2Reach` derives
-    //   `physical_size + 44` per slot from that slot's own strength, and for
-    //   weapon 1 (`[5]` = 1, `ss2-weapon-table.js`) that is exactly the build's
-    //   number. **A stated derived field that no code reads is not verified by
-    //   a green suite.** `physical_size` below is the same shape of hazard and
-    //   is deliberately left alone: `src/adapter/presentation.js:408` reads it
-    //   for the clip SCALE, so changing it changes what the arena looks like.
+    //   it: slot reaches are 130, 129, 129 (strength 9, 8, 7 -> `physical_size`
+    //   86, 85, 85). ~~"ANY constant here is wrong for two of the three
+    //   slots"~~ — **wrong: 129 is wrong for exactly ONE.** Absent, `ss2Reach`
+    //   derives `physical_size + 44` per slot from that slot's own strength,
+    //   which for weapon 1 (`[5]` = 1, `ss2-weapon-table.js`) is the build's
+    //   number for all three.
+    //
+    //   ► **AND THE `weapon: 1` ABOVE REACHES NOTHING EITHER.** `demoSide`
+    //     builds with `derive: false`, so `ss2BattleValues` never runs and the
+    //     stated id never produces a `weapon_range`: every demo gladiator
+    //     declares 32 resources, not 33, and takes the fallback. The shop gate
+    //     at this roster's speeds (4-7) sells only `[5]` = 1 weapons anyway, so
+    //     the browser arena cannot exercise a different reach at all. **A
+    //     stated derived field that no code reads is not verified by a green
+    //     suite — and neither is a stated INPUT that no code derives from.**
+    //     `physical_size` below is the same hazard once more (86 is right at
+    //     strength 9, not 87) and is deliberately left alone:
+    //     `src/adapter/presentation.js:408` reads it for the clip SCALE, so
+    //     changing it changes what the arena looks like.
     weapon_min_damage: 3,
     weapon_max_damage: 8,
     weapon_enchantment_type: 0,
