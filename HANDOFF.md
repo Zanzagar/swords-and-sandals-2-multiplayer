@@ -102,6 +102,15 @@ priced on the weapon with strength in the denominator — and **both gated behin
   count is false one commit later. **Measure the live number, never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
 
+► **THIS SESSION COMMITTED FOUR AND MEASURED **ZERO** UNPUSHED AFTER ITS
+  HANDOFF COMMIT `209f5fd`; the commit carrying this sentence makes one.** An
+  event with the self-reference in it, for the reason every block below it
+  gives. **And the ZERO is the point, not the four:** every block above this
+  one records a backlog because pushing needed the owner's yes each time. Rule 7
+  applies as written now, so a session pushes as it goes and the steady state is
+  0. **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
 ► **`weapon_range` IS A PROJECTED RESOURCE AND THE BUILD'S OWN CLAMP IS BACK
   (2026-09-12, `6926069` + `3666c62`). RANKED ITEM 1 IS CLOSED.** `ss2Reach`
   returned `physical_size` and called it "the unarmed reach", citing
