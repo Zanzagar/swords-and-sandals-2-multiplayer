@@ -479,6 +479,65 @@ test("a rank change reaches the arena as a depth move, never as a walk", () => {
   );
 });
 
+/**
+ * ► **NOBODY STANDS INSIDE ANYBODY. Found by the OWNER looking at the arena,
+ *   2026-09-12 — two allies drawn inside each other — and it was two separate
+ *   defects wearing one symptom.**
+ *
+ * Measured before the fix, 24 seeds, 3v3: **83.0% of turns at stride 0 had a
+ * pair of allies overlapping, closest gap 0** — two gladiators on one point.
+ * After: 0.0% at every stride, and 0 overlapping pairs of any kind.
+ */
+test("a walk clamps against an ALLY's body, not only a foe's", () => {
+  // `ss2WalkDestination` iterated foes alone. That is not a decision anybody
+  // made: vanilla has exactly ONE defender, so "the defender" and "every other
+  // body" were the same list and nothing had to choose.
+  const actor = { id: "a", x: 0, alive: true, stats: { strength: 9, agility: 10 } };
+  const ally = [{ id: "friend", x: 150, alive: true, stats: { strength: 9 } }];
+  assert.equal(
+    ss2WalkDestination(actor, ally, 1), 150 - 86,
+    "a body is a body: physical_size does not know whose side it is on"
+  );
+});
+
+test("a walk through a whole team stops at the first body in the way", () => {
+  const actor = { id: "a", x: 0, alive: true, stats: { strength: 9, agility: 40 } };
+  // A long walk (agility 40 covers 940) into a queue: it must stop at the
+  // NEAREST body, not sail past the first two and clamp on the third.
+  const crowd = [
+    { id: "far", x: 600, alive: true, stats: { strength: 9 } },
+    { id: "near", x: 200, alive: true, stats: { strength: 9 } },
+    { id: "mid", x: 400, alive: true, stats: { strength: 9 } }
+  ];
+  assert.equal(ss2WalkDestination(actor, crowd, 1), 200 - 86);
+});
+
+test("a rank change into an occupied space is not offered", () => {
+  // A rank change keeps your x and changes your depth, so it can drop you on
+  // top of somebody standing at your x one rank away. The walk clamp cannot
+  // help — it clamps a walk, and this is not one. **This is the occupancy test
+  // discrete ranks were chosen to buy.**
+  const rules = createSs2TeamRules({ rankStride: 97 });
+  const view = (actorY, others) => ({
+    actor: { id: "me", x: 0, y: actorY, alive: true, stats: { strength: 9, agility: 10 },
+      resources: { staminaleft: { value: 100 } } },
+    allies: [],
+    foes: others
+  });
+
+  // Nobody behind: the verb is on offer.
+  const clear = rules.legalActions(view(200, [
+    { id: "far", x: 900, y: 103, alive: true, stats: { strength: 9 } }
+  ]), "me").map((option) => option.type);
+  assert.ok(clear.includes("rank-back"), "an empty rank behind is reachable");
+
+  // Somebody standing at my x, one rank back: refused.
+  const blocked = rules.legalActions(view(200, [
+    { id: "blocker", x: 10, y: 103, alive: true, stats: { strength: 9 } }
+  ]), "me").map((option) => option.type);
+  assert.ok(!blocked.includes("rank-back"), "a rank you would land inside somebody is not offered");
+});
+
 /* ------------------------------------------------------------------ */
 /* Construction geometry                                               */
 /* ------------------------------------------------------------------ */

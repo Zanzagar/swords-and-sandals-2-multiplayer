@@ -3350,9 +3350,32 @@ export function createSs2TeamRules({
       //   relationship to the opponent, which it cannot do because the
       //   opponent moves.
       if (Number.isFinite(view.actor.y)) {
+        // ► **AND THE RANK MUST BE FREE WHERE YOU WOULD LAND. Found by the
+        //   owner looking at the arena, 2026-09-12, in the same report that
+        //   found allies walking through each other.**
+        //
+        //   A rank change keeps your x and changes your depth, so it can drop
+        //   you exactly on top of somebody standing at your x in the next
+        //   rank. The walk clamp cannot help: it clamps a walk, and this is
+        //   not one. Measured before this gate, 24 seeds at stride 97: 11.7%
+        //   of turns had two bodies overlapping that a walk would never have
+        //   allowed to meet.
+        //
+        //   This is the occupancy test the design panel said discrete ranks
+        //   would buy — "blocking becomes one occupancy test instead of
+        //   pathfinding" — and it is the whole benefit of ranks being discrete
+        //   rather than a continuous depth. It costs one comparison per body.
+        const others = [
+          ...view.foes,
+          ...view.allies.filter((ally) => ally.id !== actorId)
+        ];
         for (const type of [Ss2ActionType.RANK_BACK, Ss2ActionType.RANK_FRONT]) {
           const to = ss2RankDestination(view.actor.y, SS2_RANK_DIRECTION[type], rankStride);
-          if (to !== null) actions.push({ type, targetId: actorId });
+          if (to === null) continue;
+          const occupied = others.some((other) =>
+            Number.isFinite(other.x) && other.y === to
+            && Math.abs(other.x - view.actor.x) < ss2PhysicalSize(other));
+          if (!occupied) actions.push({ type, targetId: actorId });
         }
       }
 
@@ -3526,7 +3549,32 @@ export function createSs2TeamRules({
         // `ss2WalkDestination` applies both of the build's clamps — the arena
         // bound from `nextphase` step 1, and the overlap clamp that stops a
         // walk carrying a gladiator into its opponent.
-        const to = ss2WalkDestination(actor, request.foes, walkDirection);
+        // ► **EVERY LIVING BODY, NOT JUST THE FOES. Found by the owner looking
+        //   at the arena, 2026-09-12: two ALLIES were drawn inside each other.**
+        //
+        //   `ss2WalkDestination` iterated `foes` alone, which is not a decision
+        //   anybody made — it is an artifact of vanilla having exactly ONE
+        //   defender, so "the defender" and "every other body" were the same
+        //   list and nothing had to choose. With allies in the arena they are
+        //   different lists, and the clamp was reading the wrong one.
+        //
+        //   Measured before the fix, 24 seeds, 3v3: **83.0% of turns at stride
+        //   0 had at least one pair of allies overlapping, and the closest gap
+        //   was 0** — two gladiators on the same point. `physical_size` is how
+        //   big a body is; it does not know whose side the body is on.
+        //
+        //   Self is excluded because `view.allies` includes the actor, and a
+        //   gladiator that clamped against itself would never move at all.
+        // `?? []` on BOTH, matching `ss2WalkDestination`'s own defensive
+        // style: `resolveAction` is called directly by tests that hand it a
+        // request carrying only the list they care about, and a rule set that
+        // threw on the other one would be demanding a shape its own contract
+        // does not require.
+        const bodies = [
+          ...(request.foes ?? []),
+          ...(request.allies ?? []).filter((ally) => ally.id !== actor.id)
+        ];
+        const to = ss2WalkDestination(actor, bodies, walkDirection);
         return {
           effects: [
             { kind: EffectKind.POSITION, targetId: actor.id, to },
