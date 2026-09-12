@@ -36,9 +36,11 @@ import {
 import { EffectKind, TeamRuleSetError } from "../src/team/rule-set.js";
 import {
   createSs2TeamRules,
+  ss2BattleValues,
   ss2Combatant,
   ss2FightDistance,
   ss2MovementSpeed,
+  ss2PhysicalSize,
   ss2Reach,
   ss2WalkDisplacement,
   ss2TeamRules,
@@ -46,6 +48,7 @@ import {
   Ss2ActionType,
   VANILLA_PHASE_LABEL
 } from "../src/team/ss2-rules.js";
+import { SS2_WEAPON_IDS, ss2WeaponEntry } from "../src/team/ss2-weapon-table.js";
 import {
   buildArenaLayout,
   CommandKind,
@@ -176,10 +179,26 @@ test("a rule set that declares no startingPosition models no position, and its c
 test("the melee verbs appear exactly when the build's own selector says closerange_warrior", () => {
   // Frame 4 `DoAction@0x238bbf` `+0x00f6`:
   //   fightdistance < hero.weapon_range ? closerange_warrior : longrange_warrior
-  // STRICT `<`, and `weapon_range` for an unarmed gladiator is `physical_size`
-  // = 80 + round(strength / 1.5) (`+0x30f1`, `ss2-item-tables.md:58`).
+  // STRICT `<`, re-read off the installed build 2026-09-11.
+  //
+  // ► **THIS ASSERTED 86 AND CITED `ss2-item-tables.md:58` FOR
+  //   "`weapon_range` for an unarmed gladiator is `physical_size`". THE CITE
+  //   WAS HALF OF A WRAPPED LINE.** Line 59 of that file continues
+  //   `+ _root["weapon" + c.weapon][5] * 44`. There is no unarmed branch in
+  //   `battlevalues`: every gladiator has a `weapon` id, and the smallest `[5]`
+  //   in all ninety rows is 1, so `physical_size` on its own is the reach of
+  //   nothing. **The archive agrees from the other side** — 3,102
+  //   `{"t":"state"}` records, and its own hero is weapon 0 at `physical_size`
+  //   87 with a `weapon_range` of 131. `ss2Reach` now reads the declared
+  //   resource and falls back to the build's bare-hands row.
   const reach = ss2Reach({ stats: { strength: 9 } });
-  assert.equal(reach, 86, "80 + round(9 / 1.5)");
+  assert.equal(reach, 130, "80 + round(9 / 1.5), then + 44 for weapon 0's multiplier of 1");
+  assert.equal(ss2PhysicalSize({ stats: { strength: 9 } }), 86, "and the two are different quantities");
+  assert.equal(
+    ss2Reach({ stats: { strength: 9 }, resources: { weapon_range: { value: 218 } } }),
+    218,
+    "a declared weapon_range wins: that is the whole point of projecting it"
+  );
 
   // The boundary, asserted on BOTH sides of the strict comparison rather than
   // near it: at exactly `reach` the build is on the long-range controller.
@@ -345,11 +364,209 @@ test("the derivation reproduces the 44 the project held for nine days, and only 
   assert.throws(() => ss2WalkDisplacement(4, { boot: Number.NaN }), TeamRuleSetError);
 });
 
+/* ------------------------------------------------------------------ */
+/* The two quantities: reach and personal space                        */
+/* ------------------------------------------------------------------ */
+
+test("weapon_range is the build's own lookup, and the range multiplier reaches the fight", () => {
+  // `battlevalues` `+0x3190`, re-read off the installed build 2026-09-11:
+  //   weapon_range = physical_size + _root["weapon" + c.weapon][5] * 44
+  // `[5]` runs 1, 2, 3, 4 across the melee rows and 100 on the eighteen type-4
+  // (ranged) ones, so the SPREAD is the thing to pin: a reach that ignores the
+  // column would give every one of these the same answer, which is precisely
+  // what shipped until this commit.
+  //
+  // Weapon ids paired with a speed the shop's own gate admits
+  // (`ss2-item-tables.md:530-552`), because `ss2Combatant` enforces it.
+  const reachOf = (weapon, speed, strength = 9) => {
+    const battle = createTeamBattle({
+      seed: 1,
+      rules: ss2TeamRules,
+      teams: [
+        {
+          id: "red",
+          combatants: [ss2Combatant(
+            gladiator({ weapon, speed, strength, weapon_min_damage: undefined, weapon_max_damage: undefined }),
+            { id: "hero" }
+          )]
+        },
+        { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "villain" })] }
+      ]
+    });
+    return ss2Reach(combatantById(battle, "hero"));
+  };
+  // strength 9 -> physical_size 86, and then one step of 44 per multiplier.
+  assert.equal(ss2PhysicalSize({ stats: { strength: 9 } }), 86);
+  assert.equal(reachOf(1, 5), 86 + 44, "weapon 1, [5] = 1");
+  assert.equal(reachOf(21, 5), 86 + 44, "weapon 21, [5] = 1 — a different band, same column");
+  assert.equal(reachOf(5, 15), 86 + 88, "weapon 5, [5] = 2");
+  assert.equal(reachOf(17, 51), 86 + 132, "weapon 17, [5] = 3");
+  assert.equal(
+    new Set([reachOf(1, 5), reachOf(5, 15), reachOf(17, 51)]).size,
+    3,
+    "three multipliers must give three reaches, or the column is being ignored again"
+  );
+
+  // And a gladiator that resolves no weapon id falls back to the build's OWN
+  // bare-hands row (id 0, `[5]` = 1) rather than to `physical_size`, which is
+  // the reach of nothing: the smallest `[5]` in all ninety rows is 1.
+  assert.equal(ss2Reach({ stats: { strength: 9 } }), 86 + 44);
+  assert.equal(
+    Math.min(...SS2_WEAPON_IDS.map((id) => ss2WeaponEntry(id).rangeMultiplier)),
+    1,
+    "if a zero-multiplier row ever appears, the fallback above stops being the minimum"
+  );
+});
+
+test("the bow override carries weapon_range too, which battlevalues does and this module used to drop", () => {
+  // `+0x3416`..`+0x344a`: one `if (using_bow)` block assigns `min_damage`,
+  // `max_damage` AND `weapon_range` from their secondary counterparts. The
+  // living head listed "no bow `weapon_range` override" as a surviving
+  // `ss2BattleValues` omission; this is it arriving.
+  //
+  // `secondary_weapon_range = physical_size + weapon[secondary_weapon][5] * 44`
+  // (`+0x32aa`) — the same lookup through the other slot.
+  const armed = ss2BattleValues({
+    strength: 9, speed: 5, vitality: 5, stamina: 4, herolevel: 3,
+    weapon: 1, secondary_weapon: 61, using_bow: false
+  });
+  assert.equal(armed.physical_size, 86);
+  assert.equal(armed.weapon_range, 86 + 44, "weapon 1's [5] is 1");
+  assert.equal(armed.secondary_weapon_range, 86 + 4400, "weapon 61 is ranged: [5] is 100");
+
+  const drawn = ss2BattleValues({
+    strength: 9, speed: 5, vitality: 5, stamina: 4, herolevel: 3,
+    weapon: 1, secondary_weapon: 61, using_bow: true
+  });
+  assert.equal(drawn.weapon_range, drawn.secondary_weapon_range, "the bow's range replaces the blade's");
+  assert.equal(drawn.weapon_range, 86 + 4400);
+  // The build is unguarded here and would write `undefined`; a resource bag
+  // carries finite numbers only, so an archer with no secondary weapon keeps
+  // its primary range rather than losing the field.
+  const unarmedBow = ss2BattleValues({
+    strength: 9, speed: 5, vitality: 5, stamina: 4, herolevel: 3, weapon: 1, using_bow: true
+  });
+  assert.equal(unarmedBow.weapon_range, 86 + 44);
+  assert.equal(unarmedBow.secondary_weapon_range, undefined);
+});
+
+test("a clamped walk lands inside the attacker's own reach — for every strength gap under 65", () => {
+  // ► **THE REGRESSION GUARD FOR THE DEADLOCK THIS COMMIT REMOVED, and it is a
+  //   sweep rather than one case because the first version of it — asserting
+  //   the invariant HOLDS everywhere — failed, and the failure is a real
+  //   finding kept below.** While `ss2Reach` answered for both sides, a walk
+  //   clamped at the foe's limit parked the walker exactly ON its own gate
+  //   threshold and the build's STRICT `<` never opened: measured here on the
+  //   `bout()` fixture, 0 turns with an attack on offer across 24 bouts and 0
+  //   of 8 3v3s settling. Two quantities is what fixes it.
+  for (const attacker of [1, 5, 9, 20, 40, 70, 100]) {
+    for (const defender of [1, 5, 9, 20, 40, 70, 100]) {
+      if (defender - attacker >= 65) continue;                 // see the block below
+      const clampDistance = ss2PhysicalSize({ stats: { strength: defender } });
+      const gate = ss2Reach({ stats: { strength: attacker } });
+      assert.ok(
+        clampDistance < gate,
+        `strength ${attacker} closing on strength ${defender}: a clamped walk lands at ` +
+        `${clampDistance} against a reach of ${gate}, and ${clampDistance} < ${gate} must hold`
+      );
+    }
+  }
+});
+
+test("and OUTSIDE 65 the build's own gate shuts, which is a fidelity gap and not a deadlock", () => {
+  // ► **FOUND BY THE SWEEP ABOVE FAILING, and recorded rather than asserted
+  //   away.** `physical_size` spans 80 (strength 0) to 147 (strength 100) — a
+  //   range of 67, WIDER than the 44 a bare-handed reach adds — so a big enough
+  //   strength gap puts the defender's personal space outside the attacker's
+  //   `weapon_range`, and a BARE-HANDED walker parks where its own gate is
+  //   shut. The boundary is a strength gap of 65/66, flat across the range
+  //   because `physical_size` is on both sides of the comparison.
+  assert.equal(ss2PhysicalSize({ stats: { strength: 0 } }), 80);
+  assert.equal(ss2PhysicalSize({ stats: { strength: 100 } }), 147);
+  const blockedFrom = (attacker) => {
+    for (let defender = attacker; defender <= 200; defender += 1) {
+      if (ss2PhysicalSize({ stats: { strength: defender } }) >= ss2Reach({ stats: { strength: attacker } })) {
+        return defender - attacker;
+      }
+    }
+    return null;
+  };
+  assert.deepEqual([0, 1, 5, 9, 20, 40].map(blockedFrom), [66, 66, 65, 66, 65, 66]);
+
+  // **THIS IS THE BUILD'S BEHAVIOUR, not this module's.** `battlevalues` gives
+  // the same two numbers, and the selector is the same strict `<`. What the
+  // build has and this module does NOT is the escape: `attacker.onEnterFrame`
+  // opens with `if (arena.fightdistance < 100) { hero._x +/-= 1; villain._x
+  // -/+= 1 }` (`+0x36c1`..`+0x37c8`), which drives the pair together a pixel a
+  // frame regardless of the clamp and takes the distance under 100 — inside
+  // every reach in the table. The resolver has no frames, so it cannot.
+  //
+  // **A WEAPON CLOSES IT WITHOUT ANY OF THAT**: `[5]` = 2 adds another 44 and
+  // pushes the boundary past anything two reachable builds can differ by.
+  const weak = { stats: { strength: 1 }, resources: { weapon_range: { value: 81 + 2 * 44 } } };
+  assert.ok(ss2PhysicalSize({ stats: { strength: 70 } }) < ss2Reach(weak), "a mult-2 weapon reaches");
+
+  // And it is NOT a hung bout: the bigger gladiator's reach covers the smaller
+  // one's personal space, so it closes, swings, and the bout settles. Measured
+  // here rather than argued.
+  const WALKS = new Set([Ss2ActionType.WALK_LEFT, Ss2ActionType.WALK_RIGHT]);
+  let settled = 0;
+  let weakAttackTurns = 0;
+  let strongAttackTurns = 0;
+  for (let seed = 1; seed <= 8; seed += 1) {
+    const battle = createTeamBattle({
+      seed,
+      rules: ss2TeamRules,
+      teams: [
+        { id: "red", combatants: [ss2Combatant(gladiator({ strength: 1 }), { id: "weak" })] },
+        {
+          id: "blue",
+          combatants: [ss2Combatant(gladiator({ strength: 70, gladiator_dir: "left" }), { id: "strong" })]
+        }
+      ]
+    });
+    let guard = 0;
+    while (!battle.result && guard < 1200) {
+      guard += 1;
+      const actor = currentCombatant(battle);
+      if (!actor) break;
+      const options = legalActions(battle);
+      if (options.length === 0) break;
+      if (options.some((option) => /attack$/.test(option.type))) {
+        if (actor.id === "weak") weakAttackTurns += 1; else strongAttackTurns += 1;
+      }
+      const view = {
+        turnNumber: battle.turnNumber,
+        actor: { ...actor },
+        allies: [],
+        foes: battle.teams.flatMap((team) => team.combatants)
+          .filter((combatant) => combatant.teamId !== actor.teamId && combatant.alive)
+          .map((combatant) => ({ ...combatant }))
+      };
+      applyAction(battle, { ...battle.rules.chooseAiAction(view, actor.id, options), actorId: actor.id });
+    }
+    if (battle.result) settled += 1;
+  }
+  assert.equal(settled, 8, "every bout must still settle — a shut gate on one side is not a hung bout");
+  assert.equal(weakAttackTurns, 0, "the smaller gladiator is never offered a swing, which is the gap named above");
+  assert.ok(strongAttackTurns > 0, "and the bigger one is, or this proves nothing about the cause");
+  assert.ok(WALKS.size === 2);
+});
+
 test("a walk may never carry a gladiator PAST a foe, which is the build's own clamp", () => {
-  // `walkright` `+0x3de6`: the destination is clipped when it would cross the
-  // defender. The build clips to `defender._x - game_defender.physical_size`;
-  // this resolver clips to `defender._x`, and `ss2WalkDestination`'s docstring
-  // carries the measurement that forced the difference.
+  // `walkright` `+0x3de6`, re-read off the installed build 2026-09-11:
+  //   if (destination > defender._x - game_defender.physical_size
+  //       && attacker.gladiator_dir == "right")
+  //     destination = defender._x - game_defender.physical_size
+  //
+  // ► **THIS ASSERTED `x === 250` — the FOE'S OWN POSITION — because the module
+  //   clipped to `defender._x`, a narrowing it shipped for one commit.** The
+  //   build's limit is the defender's PERSONAL SPACE, and the reason the
+  //   faithful limit deadlocked was never the clamp: `ss2Reach` was
+  //   `physical_size` on BOTH sides of a comparison the build makes between two
+  //   different fields, so a walker parked exactly ON its own gate threshold
+  //   and the build's STRICT `<` never opened. With `weapon_range` projected
+  //   the two are different numbers again and the build's own clamp is back.
   const fast = gladiator({ speed: 40 });          // movement_speed 60, step 940
   const battle = createTeamBattle({
     seed: 1,
@@ -361,7 +578,25 @@ test("a walk may never carry a gladiator PAST a foe, which is the build's own cl
   });
   assert.equal(ss2WalkDisplacement(ss2MovementSpeed(combatantById(battle, "hero"))), 940, "uncut, it crosses the arena");
   applyAction(battle, { actorId: "hero", type: Ss2ActionType.WALK_RIGHT, targetId: "hero" });
-  assert.equal(combatantById(battle, "hero").x, 250, "the clamp stopped it AT the foe, not 440 beyond it");
+  const villainSize = ss2PhysicalSize(combatantById(battle, "villain"));
+  assert.equal(villainSize, 86, "80 + round(9 / 1.5) — the DEFENDER's size, not the attacker's reach");
+  assert.equal(
+    combatantById(battle, "hero").x,
+    250 - villainSize,
+    "the clamp stopped it at the foe's personal space, not at the foe and not 440 beyond it"
+  );
+  // And that lands it strictly INSIDE its own reach, which is what makes the
+  // faithful clamp settle where the one-quantity version deadlocked: the gate
+  // is `fightdistance < weapon_range`, and `weapon_range` is at least
+  // `physical_size + 44` for every one of the ninety weapon rows.
+  assert.equal(
+    ss2FightDistance(combatantById(battle, "hero"), combatantById(battle, "villain")),
+    villainSize
+  );
+  assert.ok(
+    villainSize < ss2Reach(combatantById(battle, "hero")),
+    "the walk ends inside the strict `<`, which is the whole of the fix"
+  );
 
   // And it does not bind backwards: a foe behind the walker is not a wall.
   const away = createTeamBattle({
@@ -374,6 +609,76 @@ test("a walk may never carry a gladiator PAST a foe, which is the build's own cl
   });
   applyAction(away, { actorId: "hero", type: Ss2ActionType.WALK_LEFT, targetId: "hero" });
   assert.equal(combatantById(away, "hero").x, -250 - 108, "walking away is unclamped by the foe");
+});
+
+test("with two foes ahead the walk stops at the nearest CLAMP LINE, not the nearest foe", () => {
+  // AUTHORED — vanilla has exactly one defender, so nothing can settle the
+  // multi-foe rule (`MAP_SILENCE.multi-slot-arena-geometry`). What IS settled
+  // is that the 1v1 case must stay identical to the build's, and that is what
+  // picks this reading over "nearest by position": with unequal
+  // `physical_size` the two orders differ, and a bigger foe standing slightly
+  // FURTHER off is the one that stops you first.
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      // movement_speed 60, so an uncut step of 940 overshoots BOTH clamp lines
+      // from here — which is what makes this a test of the minimum and not of
+      // the displacement.
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 40 }), { id: "hero", x: -100 })] },
+      {
+        id: "blue",
+        combatants: [
+          // Nearer by position (500), smaller: its clamp line is 500 - 81 = 419.
+          ss2Combatant(gladiator({ strength: 1, gladiator_dir: "left" }), { id: "small", x: 500 }),
+          // Further by position (520), much bigger: its line is 520 - 127 = 393.
+          ss2Combatant(gladiator({ strength: 70, gladiator_dir: "left" }), { id: "big", x: 520 })
+        ]
+      }
+    ]
+  });
+  assert.equal(ss2PhysicalSize(combatantById(battle, "small")), 81);
+  assert.equal(ss2PhysicalSize(combatantById(battle, "big")), 127);
+  assert.ok(
+    combatantById(battle, "small").x < combatantById(battle, "big").x,
+    "the smaller foe must be the NEARER one, or this test is not about the two orders"
+  );
+  applyAction(battle, { actorId: "hero", type: Ss2ActionType.WALK_RIGHT, targetId: "hero" });
+  assert.equal(combatantById(battle, "hero").x, 520 - 127, "the further, bigger foe stops it first: 393, not 419");
+});
+
+test("a walk INTO a foe you already overlap snaps back to the clamp line, which is the build unguarded", () => {
+  // `+0x3de6` is unconditional on where the walker currently stands: if the
+  // destination is past `defender._x - physical_size`, it becomes that value,
+  // even when that is BEHIND the walker. Reachable in the build because
+  // `onEnterFrame`'s sub-100 nudge (`+0x36c1`) drives the pair together a pixel
+  // a frame; not reachable here without staging it, which almost every other
+  // SS2 test in this repository does.
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator(), { id: "hero", x: -20 })] },
+      { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "villain", x: 20 })] }
+    ]
+  });
+  // Staged well inside the villain's personal space: 40 apart, size 86.
+  assert.equal(ss2FightDistance(combatantById(battle, "hero"), combatantById(battle, "villain")), 40);
+  // In range, so the rule set offers only the RETREAT — this walk is forced
+  // straight at `resolveAction`, past `legalActions`, which is the only way to
+  // reach the case at all.
+  const resolved = ss2TeamRules.resolveAction({
+    type: Ss2ActionType.WALK_RIGHT,
+    actorId: "hero",
+    targetId: "hero",
+    actor: combatantById(battle, "hero"),
+    target: combatantById(battle, "hero"),
+    foes: [combatantById(battle, "villain")],
+    turnNumber: 1
+  }, { randomBetween: () => 0, randomNumber: () => 0 });
+  const move = resolved.effects.find((effect) => effect.kind === EffectKind.POSITION);
+  assert.equal(move.to, 20 - 86, "a forward walk from inside the clamp line moves BACKWARD to it");
+  assert.ok(move.to < -20, "which is behind where the walker started, and that is the build as written");
 });
 
 test("the arena clamp bounds a walk, and a step it swallows is still a resolved action", () => {

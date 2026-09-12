@@ -108,7 +108,18 @@ const vanillaGladiator = (overrides = {}) => ({
   weapon: 21,
   weapon_type: 3,
   weapon_weight: 9,
-  weapon_range: 1,
+  // ► **THIS FIELD READ `1` UNTIL 2026-09-11, AND `1` IS A MULTIPLIER, NOT A
+  //   RANGE.** `battlevalues` `+0x3190` is
+  //   `weapon_range = physical_size + _root["weapon" + weapon][5] * 44`, and
+  //   this template states `physical_size: 87` (strength 10) with `weapon: 21`,
+  //   whose `[5]` is 1 — so the build's own answer is `87 + 1 * 44` = **131**.
+  //   The old `1` was the `[5]` column pasted into the field it multiplies
+  //   into. It was inert while `ss2Reach` ignored the field and returned
+  //   `physical_size`; the moment `weapon_range` became a declared resource
+  //   (2026-09-11) this fixture's gladiators could reach one unit and the bout
+  //   below stopped settling at all. **A stated derived field that no code
+  //   reads is not verified by a green suite.**
+  weapon_range: 131,
   weapon_min_damage: 1,
   weapon_max_damage: 3,
   weapon_enchantment_type: 0,
@@ -2148,13 +2159,20 @@ test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declare
   // record ever gains a resources block, re-derive this: the unmapped piece
   // above becomes a real defect at that moment.
 
-  // The whole 32-name SS2 vocabulary reaches the projection, which is what the
+  // The whole 33-name SS2 vocabulary reaches the projection, which is what the
   // arithmetic needs and what the closed 20-name list could not supply.
+  // ► **32 UNTIL 2026-09-11, WHEN `weapon_range` JOINED `SS2_RESOURCE_NAMES`.**
+  //   It is the controller gate's own input (`fightdistance < weapon_range`,
+  //   frame 4 `DoAction@0x238bbf` `+0x00f6`), and a supplied gladiator that
+  //   could not carry it reached the fight with the wrong reach.
   const projected = Object.keys(host.wire().teams[0].combatants[0].resources);
-  assert.equal(projected.length, 32);
-  for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon"]) {
+  assert.equal(projected.length, 33);
+  for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon", "weapon_range"]) {
     assert.ok(projected.includes(name), `${name} must reach the projection`);
   }
+  // And the number it carries is the BUILD's, not the `[5]` multiplier this
+  // fixture used to state: `physical_size` 87 + weapon 21's `[5]` of 1 × 44.
+  assert.equal(host.wire().teams[0].combatants[0].resources.weapon_range.value, 131);
 });
 
 test("the opt-in is OPT-IN: without it the bag and the refusal are exactly as before", () => {

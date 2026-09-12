@@ -57,6 +57,13 @@ c.weapon_typename   = _root.weapontypes[c.weapon_type]               // +0x315e
 c.weapon_weight     = _root["weapon" + c.weapon][2]                  // +0x3174
 c.weapon_range      = c.physical_size
                     + _root["weapon" + c.weapon][5] * 44             // +0x3190
+                    // ^ ONE STATEMENT, WRAPPED. There is no unarmed branch:
+                    //   every character has a `weapon`, the smallest `[5]` in
+                    //   all ninety rows is 1, and `physical_size` alone is the
+                    //   reach of nothing. `src/team/ss2-rules.js`'s `ss2Reach`
+                    //   cited the first of these two lines for "an unarmed
+                    //   gladiator's weapon_range is exactly physical_size" and
+                    //   shipped that for twelve days (corrected 2026-09-11).
 c.weapon_min_damage = _root["weapon" + c.weapon][3]                  // +0x31be
 c.weapon_max_damage = _root["weapon" + c.weapon][4]                  // +0x31da
 

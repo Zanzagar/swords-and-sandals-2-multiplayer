@@ -59,7 +59,24 @@ export function demoGladiator(overrides = {}) {
     weapon: 1,
     weapon_type: 1,
     weapon_weight: 7,
-    weapon_range: 1,
+    // ► **`weapon_range: 1` STOOD HERE UNTIL 2026-09-11, AND `1` IS A
+    //   MULTIPLIER, NOT A RANGE.** `battlevalues` `+0x3190` is
+    //   `weapon_range = physical_size + _root["weapon" + weapon][5] * 44`, so
+    //   the `[5]` column had been pasted into the field it multiplies into.
+    //   It was inert while `ss2Reach` ignored the field; the moment
+    //   `weapon_range` became a declared resource the demo's gladiators could
+    //   reach one unit and no bout in the arena ever settled.
+    //
+    //   **It is now ABSENT rather than corrected, on purpose.** `demoSide`
+    //   below gives each slot its own `strength`, and `weapon_range` depends on
+    //   it — so ANY constant here is wrong for two of the three slots, which is
+    //   how the paste survived in the first place. Absent, `ss2Reach` derives
+    //   `physical_size + 44` per slot from that slot's own strength, and for
+    //   weapon 1 (`[5]` = 1, `ss2-weapon-table.js`) that is exactly the build's
+    //   number. **A stated derived field that no code reads is not verified by
+    //   a green suite.** `physical_size` below is the same shape of hazard and
+    //   is deliberately left alone: `src/adapter/presentation.js:408` reads it
+    //   for the clip SCALE, so changing it changes what the arena looks like.
     weapon_min_damage: 3,
     weapon_max_damage: 8,
     weapon_enchantment_type: 0,

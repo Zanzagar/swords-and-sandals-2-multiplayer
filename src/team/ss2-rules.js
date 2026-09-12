@@ -966,35 +966,105 @@ export function ss2FightDistance(a, b) {
 }
 
 /**
- * How far this gladiator's swing reaches, in arena units.
+ * HOW BIG A GLADIATOR IS — `physical_size = 80 + round(strength / 1.5)`,
+ * `battlevalues` `+0x30f1`. Re-read off the installed build 2026-09-11:
+ * `Push register:3, "physical_size", 80, register:3, "strength"`, then
+ * `Push 1.5; Divide; Math.round; Add2; SetMember`.
  *
- * `weapon_range = physical_size + weapon[5] * 44` (`battlevalues` `+0x3190`,
- * `docs/integration/ss2-item-tables.md:331`), and an UNARMED gladiator's
- * `weapon_range` is exactly `physical_size` (`ss2-item-tables.md:58`,
- * `c.weapon_range = c.physical_size`), with
- * `physical_size = 80 + round(strength / 1.5)` (`+0x30f1`).
+ * **This is the DEFENDER's quantity in the build's walk clamp** and it is not
+ * the same number as `ss2Reach`. Keeping them as one function is what deadlocked
+ * the faithful clamp; see `ss2WalkDestination`.
  *
- * **THIS RETURNS THE UNARMED REACH FOR EVERYONE, AND THAT IS A NARROWING OF
- * THE BUILD RATHER THAN A DERIVATION.** The weapon id is equipment IDENTITY
- * and is deliberately outside `SS2_RESOURCE_NAMES` and
- * `CANONICAL_RESOURCE_SOURCES` ("the piece *ids* are equipment identity, not a
- * numeric pool"), so by the time a combatant reaches the resolver the range
- * multiplier is gone. `ss2-weapon-table.js` HOLDS it — `rangeMultiplier` is
- * shipped — so the gap is the projection, not the data.
+ * It is derived from `stats.strength` rather than carried as a resource for the
+ * reason `ss2MovementSpeed` is: the map's persistence table (`:698`) lists
+ * `physical_size` among the fields "recomputed unconditionally", so it is a
+ * `battlevalues` OUTPUT and never a stored pool.
+ */
+export function ss2PhysicalSize(actor) {
+  return 80 + Math.round((actor?.stats?.strength ?? 0) / 1.5);
+}
+
+/**
+ * The build's range step: one point of a weapon's `[5]` multiplier is 44 arena
+ * units (`battlevalues` `+0x31b3`, `Push 44; Multiply`).
  *
- * The narrowing is conservative in the direction that matters: every real
- * weapon reaches AT LEAST this far, so a gladiator here closes further than
- * one in the build would need to and **never swings from outside the build's
- * own range**. What it costs is extra walking, which is a gameplay cost and is
- * measured in `test/ss2-position.test.js` rather than argued.
+ * **Unrelated to `SS2_ARENA.walkDistanceAtSpeedFloor`, which is also 44.** An
+ * adversarial reader once proposed the walk's 44 was a conflation with this one
+ * and was wrong; the two are named separately here so that the coincidence can
+ * never be read as a shared origin. This one is `weapon[5] * 44`; that one is
+ * `4 * 16` eased to a stop with 20 left to run.
+ */
+export const SS2_WEAPON_RANGE_STEP = 44;
+
+/**
+ * How far this gladiator's swing reaches, in arena units — the build's
+ * `weapon_range`, which is what the controller selector gates on.
  *
- * Declaring `weapon_range` as a resource is the opt-in that would close it,
- * and is the same shape as the `resources` override `toCanonicalCombatantSource`
- * already takes. It is deliberately NOT added here: `x` is already one
- * projection change in this commit, and it is the one that needs the review.
+ * ```text
+ * weapon_range = physical_size + _root["weapon" + c.weapon][5] * 44   +0x3190
+ * ```
+ *
+ * Re-read off the installed build (`77cb545c…`) 2026-09-11, and the gate it
+ * feeds is frame 4 `DoAction@0x238bbf` `+0x00f6`,
+ * `fightdistance < hero.weapon_range ? closerange_warrior : longrange_warrior`,
+ * STRICT `<`.
+ *
+ * ## THIS FUNCTION RETURNED `physical_size`, AND THAT VALUE IS NOT REACHABLE
+ *
+ * ► **The previous version returned `80 + round(strength / 1.5)` and called it
+ *   "the UNARMED reach", citing `ss2-item-tables.md:58`,
+ *   `c.weapon_range = c.physical_size`. THAT CITE IS HALF OF A WRAPPED LINE.**
+ *   Line 59 of the same file continues `+ _root["weapon" + c.weapon][5] * 44`.
+ *   There is no unarmed branch in `battlevalues` at all: every gladiator has a
+ *   `weapon` id, and **the smallest `[5]` in all ninety rows is 1**, so the
+ *   smallest `weapon_range` the build can produce is `physical_size + 44`.
+ *   `physical_size` on its own is the reach of nothing.
+ *
+ *   **This is the fourth time in this repository that a quoted offset's own
+ *   neighbouring line held the answer** — `ranged-hurt-label-adjustment`,
+ *   `swing-cost`, `movement-displacement`, and now this. The other three were
+ *   `MAP_SILENCE` entries; this one was a docstring, which is why no catalogue
+ *   rule caught it. **Read to the end of the statement, not to the end of the
+ *   line.**
+ *
+ * **MEASURED INDEPENDENTLY OF THE BYTES, against the capture archive**
+ * (`/mnt/c/ss2-capture/captures`, 1,551 logs, 3,102 `{"t":"state"}` records,
+ * 2026-09-11). Inverting `min_damage - round(strength * 2)` onto the weapon
+ * table's damage pairs resolves a weapon id for 3,091 of them, and **not one
+ * implies a `weapon_range` below `physical_size + 44`.** The archive's own hero
+ * is weapon 0 in all 1,500 of its records — strength 10, pair (1, 3),
+ * `physical_size` 87, `weapon_range` **131**, not 87. (That inversion is
+ * near-tautological as evidence FOR the table — `battlevalues` derives both
+ * damages from the same row — but it is not tautological here, because
+ * `rangeMultiplier` is a different column from the two it inverts.)
+ *
+ * ## WHERE THE NUMBER COMES FROM NOW
+ *
+ * `weapon_range` is a DECLARED RESOURCE (`SS2_RESOURCE_NAMES`), derived by
+ * `ss2BattleValues` from the `weapon` id exactly as the damage pair is. That is
+ * the opt-in this docstring used to name and defer, and it is the same standing
+ * `min_damage`/`max_damage` already have: a `battlevalues` output carried as a
+ * number, not an equipment id smuggled into the resource bag.
+ *
+ * **The fallback is DERIVED, not authored.** A combatant that declares no
+ * `weapon_range` gets `physical_size + ss2WeaponEntry(0).rangeMultiplier * 44`
+ * — weapon id 0, the build's own bare-hands row (`[0, 2, 5, 1, 3, 1]`), which is
+ * what the archive's hero actually carries. So the fallback is the build's
+ * minimum rather than a number chosen here.
+ *
+ * **What is still narrowed, and it is narrower than before rather than wider:**
+ * a gladiator that states neither a `weapon` nor a `weapon_range` reaches as
+ * far as bare hands, which is the shortest reach the build has. A bow is not
+ * modelled — `using_bow` is forced false at battle construction (map `:111`,
+ * root frame 221) and the resolver has no ranged vocabulary — so the
+ * `[5] * 44 = 4400` of the eighteen type-4 rows never reaches this function
+ * through a battle. `ss2BattleValues` carries the bow override anyway, because
+ * dropping it was a named gap.
  */
 export function ss2Reach(actor) {
-  return 80 + Math.round(actor.stats.strength / 1.5);
+  const declared = resourceValue(actor, "weapon_range", null);
+  if (Number.isFinite(declared) && declared > 0) return declared;
+  return ss2PhysicalSize(actor) + ss2WeaponEntry(0).rangeMultiplier * SS2_WEAPON_RANGE_STEP;
 }
 
 /**
@@ -1239,87 +1309,98 @@ export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
  * build applies to it.
  *
  * The outer clamp is `nextphase` step 1's arena bound, which this module has
- * always applied. **The inner one is new here and was found while reading the
- * walk branch**: the build refuses to let a walk carry a gladiator INTO its
- * opponent.
+ * always applied. The inner one is the build's refusal to let a walk carry a
+ * gladiator INTO its opponent, and **it is now the build's own, re-read off the
+ * installed SWF (`77cb545c…`) 2026-09-11:**
  *
  * ```text
- * walkright +0x3de6:  if (destination > defender._x - game_defender.physical_size
- *                         && attacker.gladiator_dir == "right")
- *                       destination = defender._x - game_defender.physical_size
- * walkleft  +0x3c07:  the mirror, with `<` and `+`
+ * walkright  +0x3de6  if (attacker.destination > defender._x - game_defender.physical_size
+ *            +0x3e14      && attacker.gladiator_dir == "right")
+ *            +0x3e2c    attacker.destination = defender._x - game_defender.physical_size
+ * walkleft   +0x3c07  the mirror: `<`, `+`, and `gladiator_dir == "left"`
  * ```
  *
- * The `gladiator_dir` guard is what makes it a FORWARD clamp: it binds only
- * when the defender is the way you are walking. `game_defender.physical_size`
- * is `ss2Reach`, which is the same quantity under this module's own name.
+ * Both are `Duplicate; Not; If; Pop` short-circuits, so the `gladiator_dir` test
+ * is the second half of an `&&` and the clamp is FORWARD-only: it binds just
+ * when the defender is the way you are walking. Computed ONCE inside the
+ * `destination == null` init block and never recomputed while the gladiator
+ * eases, so a model that re-clips every step is stricter than the build.
  *
- * **WHY THE RESOLVER'S LIMIT IS THE FOE'S POSITION AND NOT THE FOE'S PERSONAL
- * SPACE. MEASURED — AND THE FIRST TWO VERSIONS OF THIS PARAGRAPH WERE BOTH
- * WRONG, the first by asserting instead of measuring and the second by
- * measuring the wrong fixture. A write-nothing verifier broke it; the numbers
- * below are re-taken.**
+ * ## THE CLAMP IS THE DEFENDER'S `physical_size`, AND THE GATE IS THE
+ * ## ATTACKER'S `weapon_range`. THEY ARE TWO QUANTITIES.
  *
- * ► **WHAT THE SECOND VERSION GOT WRONG, because the shape of the error is the
- *   lesson.** It said "the 1v1/2v2/3v3 settle sweep FAILS, and 19,764 of 20,000
- *   actions in the first 1v1 it tries are walks". That figure cannot come from
- *   that sweep — its guard of 1200 over 8 seeds caps a 1v1 at 9,600 actions. It
- *   came from a DIFFERENT sweep with a different fixture and a 20,000 cap, and
- *   two measurements were written up as one. It also named the wrong mechanism:
- *   "whenever a foe is STRONGER than the actor". Every gladiator in that fixture
- *   is `strength` 9, so all six reaches are 86 and the deadlock follows from
- *   EQUALITY, not from a gap.
+ * ► **THE NARROWING THAT STOOD HERE FOR ONE COMMIT — "the limit is the foe's
+ *   `x`" — IS GONE, AND SO IS ITS CAUSE.** The cause was never the clamp: this
+ *   module used `ss2Reach` for BOTH sides of a comparison the build makes
+ *   between two different fields, so the clamp parked a walker exactly ON the
+ *   gate threshold and the build's STRICT `<` never opened. The fix named in
+ *   that paragraph is the one applied here — `weapon_range` is a projected
+ *   resource, `ss2PhysicalSize` is its own function, and the two are no longer
+ *   the same number. `weapon_range` is at least `physical_size + 44` for every
+ *   one of the ninety weapon rows, so a walk clamped at the defender's
+ *   `physical_size` lands strictly INSIDE the attacker's reach.
  *
- * **RE-MEASURED 2026-09-11 on the sweep that is actually in the suite** (8 seeds
- * a side, `test/ss2-position.test.js`'s own `bout()` fixture):
+ * **MEASURED 2026-09-11 on the sweep that is in the suite** (8 seeds a side,
+ * `test/ss2-position.test.js`'s own `bout()` fixture, all six gladiators
+ * `strength` 9):
  *
  * ```text
- *                      settled   walks/actions   turns an attack was on offer
- *   faithful limit 1v1    8/8     3416/3496 97.7%            0
- *                  2v2    8/8     6792/7000 97.0%            0
- *                  3v3    0/8     9264/9600 96.5%            0
- *   foe.x limit    1v1    8/8        32/168  19.0%          136
- *                  2v2    8/8        80/325  24.6%          245
- *                  3v3    8/8       128/477  26.8%          349
+ *                        settled   walks/actions   turns an attack was on offer
+ *   ss2Reach both ways  1v1  8/8    3416/3496 97.7%            0
+ *                       2v2  8/8    6792/7000 97.0%            0
+ *                       3v3  0/8    9264/9600 96.5%            0
+ *   foe.x narrowing     1v1  8/8      32/168  19.0%          136
+ *                       2v2  8/8      80/325  24.6%          245
+ *                       3v3  8/8     128/477  26.8%          349
+ *   build's own pair    1v1  8/8      32/168  19.0%          136
+ *   (shipped here)      2v2  8/8      80/325  24.6%          245
+ *                       3v3  8/8     128/477  26.8%          349
  * ```
  *
- * **The 1v1 and 2v2 rows "settle" only because the crowd kills them: an attack
- * is never once on offer in any of the 24 faithful bouts.** That is a worse
- * failure than the 3v3's, and the old write-up missed it by reporting only what
- * the assertion checked.
+ * The third block is byte-identical to the second and is FAITHFUL, which is the
+ * whole argument: the narrowing bought nothing the build's own pair does not.
+ * **The first block's 1v1 and 2v2 rows "settle" only because the crowd kills
+ * them — an attack is never once on offer in any of the 24 bouts** — which is a
+ * worse failure than the 3v3's and was missed once by reporting only what the
+ * assertion checked.
  *
- * ► **AND THE REAL CAUSE IS NOT THE CLAMP. It is that this module uses ONE
- *   quantity where the build uses TWO, which makes the narrowing below a
- *   PLACEHOLDER rather than a fix.** The build clamps on the DEFENDER's
- *   `physical_size` and gates on the ATTACKER's `weapon_range` —
- *   `physical_size + 44 * rangeMultiplier`, always at least 44 larger. Here both
- *   are `ss2Reach`, so the clamp parks the walker exactly ON the gate threshold
- *   and a STRICT `<` never opens. Measured: raising `ss2Reach` by 44 on BOTH
- *   sides changes nothing (byte-identical counts — the equality survives), while
- *   **clamping on the raw `physical_size` and gating on `physical_size + 44`
- *   settles 8/8 at every size with 19.0 / 24.6 / 26.8% walks — identical to the
- *   shipped narrowing, and faithful.**
+ * ► **ONE CASE THE BUILD HAS AND THIS DOES NOT MODEL, recorded because it
+ *   bounds the clamp's meaning.** `attacker.onEnterFrame`'s first act
+ *   (`+0x36c1`..`+0x37c8`) is `if (arena.fightdistance < 100) { hero._x ±= 1;
+ *   villain._x ∓= 1 }`, so inside 100 units the build drives the two together a
+ *   pixel a frame REGARDLESS of the clamp, and gladiators routinely end up
+ *   closer than `physical_size`. The resolver has no frames, so it never
+ *   reaches that state on its own. A caller that STAGES one — every other SS2
+ *   test in this repository stages its gladiators in contact — and then forces a
+ *   forward walk gets the build's answer: the clamp fires, the destination is
+ *   behind the walker, and the walk moves it BACKWARD to the clamp line. That is
+ *   `+0x3de6` as written, unconditional on where the walker currently stands.
  *
- *   So the route is the one `ss2Reach`'s docstring already names: declare
- *   `weapon_range` as a projected resource, then restore the build's own limit
- *   here and delete this narrowing. **Deliberately NOT done in the same commit**
- *   — that is a second projection change stacked on an `x` that has still not
- *   had `/codex:adversarial-review`, and stacking is what this repository keeps
- *   paying for. It is ranked for the next session WITH these numbers.
- *
- * So the limit is the foe's `x`: strictly weaker than the build's, in the SAME
- * direction as the `ss2Reach` narrowing it compensates for (gladiators here may
- * stand closer than the build would let them), and enough for the thing the
- * clamp is actually load-bearing for — **a walk may never carry a gladiator
- * PAST a foe.** That mattered little while every walk was 44; a `movement_speed`
- * 30 gladiator steps 461 and would otherwise cross the whole arena and come out
- * the far side, facing the wrong way, every time it closed.
+ *   ► **AND THAT UNMODELLED NUDGE IS LOAD-BEARING AT ONE BOUNDARY, FOUND BY A
+ *     SWEEP THAT WAS WRITTEN TO ASSERT THE OPPOSITE.** "A clamped walk always
+ *     lands inside the attacker's reach" is FALSE in general: `physical_size`
+ *     spans 80 (strength 0) to 147 (strength 100), a range of 67, which is
+ *     wider than the 44 a bare-handed `weapon_range` adds. So at a strength gap
+ *     of **65-66** — flat across the range, because `physical_size` sits on
+ *     both sides of the comparison — a BARE-HANDED walker parks at
+ *     `physical_size(defender)` with its own gate shut, and is never offered a
+ *     swing. **That is the build's behaviour, not this module's**: the same two
+ *     fields, the same strict `<`. What the build has and this does not is the
+ *     nudge, which takes the distance under 100 and inside every reach in the
+ *     table. **A weapon closes it without any of that** — `[5]` = 2 adds
+ *     another 44 — and it is not a hung bout either way: the bigger gladiator's
+ *     reach covers the smaller one's personal space, so it closes and kills.
+ *     Measured over 8 seeds at strength 1 against strength 70: 8/8 settle, the
+ *     small side is offered a swing on 0 turns and the big side on many.
+ *     Pinned in `test/ss2-position.test.js`, both halves.
  *
  * **THE MULTI-FOE RULE IS AUTHORED, because vanilla cannot settle it**
  * (`MAP_SILENCE.multi-slot-arena-geometry`): vanilla has exactly one defender,
- * so there is no build behaviour to copy. A walk stops at the NEAREST foe ahead
- * of it, which is the only reading that keeps the 1v1 case identical to the
- * build's.
+ * so there is no build behaviour to copy. A walk stops at the NEAREST binding
+ * foe ahead of it, which is the only reading that keeps the 1v1 case identical
+ * to the build's. Nearest by CLAMP LINE rather than by position, because with
+ * unequal `physical_size` the two orders differ: a bigger foe standing slightly
+ * further off is the one that stops you first.
  */
 export function ss2WalkDestination(actor, foes, direction) {
   const step = ss2WalkDisplacement(ss2MovementSpeed(actor));
@@ -1329,7 +1410,9 @@ export function ss2WalkDestination(actor, foes, direction) {
     // Ahead of the actor, in the direction of travel. `<= 0` covers a foe
     // behind and a foe exactly co-located: neither can be walked past.
     if ((foe.x - actor.x) * direction <= 0) continue;
-    if ((to - foe.x) * direction > 0) to = foe.x;
+    // `defender._x -/+ game_defender.physical_size`, by the direction of travel.
+    const limit = foe.x - direction * ss2PhysicalSize(foe);
+    if ((to - limit) * direction > 0) to = limit;
   }
   return clamp(to, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
 }
@@ -1427,6 +1510,21 @@ export const SS2_FACING_LEFT = "facing-left";
 /**
  * Every resource name this rule set reads. A blueprint that declares all of
  * them can never make the arithmetic fall back on a default.
+ *
+ * ► **`weapon_range` JOINED THIS LIST 2026-09-11, and it is a projection
+ *   change: every `ss2Combatant` built from a record that resolves a `weapon`
+ *   id now carries one more hashed number.** It is here for the same reason
+ *   `min_damage` and `max_damage` are — a `battlevalues` OUTPUT the rule set
+ *   reads and cannot otherwise see — and NOT as a way to carry equipment
+ *   identity: the `weapon` id itself is still outside this list, still outside
+ *   `CANONICAL_RESOURCE_SOURCES`, and still gated in `ss2Combatant`.
+ *   `ss2Reach` reads it; the controller gate reads `ss2Reach`.
+ *
+ *   **It is deliberately absent from `SS2_RESOURCE_DEFAULTS`**, so a combatant
+ *   that resolves no weapon id simply does not declare it and `ss2Reach` falls
+ *   back to the build's bare-hands row. A flat constant default would be wrong
+ *   at every strength, and a declared-but-defaulted key would move the hash of
+ *   every fixture that has no weapon — including all 23 promoted goldens.
  */
 export const SS2_RESOURCE_NAMES = Object.freeze([
   "armourclass",
@@ -1437,6 +1535,7 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   "herolevel",
   "max_damage",
   "min_damage",
+  "weapon_range",
   "secondary_weapon_enchantment_damage",
   "secondary_weapon_enchantment_potency",
   "secondary_weapon_enchantment_type",
@@ -1651,6 +1750,35 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
     derived.secondary_weapon = source.secondary_weapon;
   }
 
+  // `weapon_range` and `secondary_weapon_range` — the same lookup one column
+  // over, and the LAST of the three `weapon_range` omissions the living head
+  // listed under "`ss2BattleValues` reproduces a SUBSET of `battlevalues`".
+  //
+  //   weapon_range           = physical_size + _root["weapon" + weapon][5] * 44
+  //                                                                    +0x3190
+  //   secondary_weapon_range = physical_size
+  //                          + _root["weapon" + secondary_weapon][5] * 44
+  //                                                                    +0x32aa
+  //
+  // Both re-read off the installed build 2026-09-11. Derived only when the id
+  // RESOLVES to a table row, exactly as the damage pair is: `battlevalues`
+  // itself would compute `undefined * 44` for an id the build does not declare,
+  // so there is no behaviour to imitate and `ss2WeaponEntry` returns null rather
+  // than guessing. A combatant with no resolvable weapon declares no
+  // `weapon_range` and `ss2Reach` falls back to the bare-hands row.
+  //
+  // An EXPLICIT `weapon_range` still wins, for the reason the damage pair's
+  // does: derivation fills a hole, it never overwrites a measurement.
+  const primaryEntry = ss2WeaponEntry(source.weapon);
+  if (primaryEntry !== null && source.weapon_range === undefined) {
+    derived.weapon_range = derived.physical_size + primaryEntry.rangeMultiplier * SS2_WEAPON_RANGE_STEP;
+  }
+  const secondaryEntry = ss2WeaponEntry(source.secondary_weapon);
+  if (secondaryEntry !== null && source.secondary_weapon_range === undefined) {
+    derived.secondary_weapon_range =
+      derived.physical_size + secondaryEntry.rangeMultiplier * SS2_WEAPON_RANGE_STEP;
+  }
+
   // `+0x320c` and `+0x3326`, and they run BEFORE the min/max pair below — the
   // build's own order, which matters because both read `weapon_max_damage`
   // rather than the strength-scaled `max_damage`.
@@ -1675,6 +1803,22 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
     // pair's `round(strength * 1)` scaling rather than `round(strength * 2)`.
     derived.min_damage = derived.secondary_min_damage;
     derived.max_damage = derived.secondary_max_damage;
+    // ► **AND `weapon_range` WITH THEM (`+0x343e`), which this module dropped
+    //   until 2026-09-11** — the living head listed "no bow `weapon_range`
+    //   override" as one of three surviving `ss2BattleValues` omissions. All
+    //   three assignments sit in one `if (using_bow)` block: `Push "using_bow";
+    //   GetMember; Not; If` at `+0x3416`..`+0x341f` jumps PAST the block when
+    //   the flag is falsy, so the block runs when it is TRUE.
+    //
+    //   Guarded on the secondary range EXISTING, because the build's own
+    //   unguarded copy would write `undefined` for a gladiator with no
+    //   secondary weapon and this module has no way to represent that: a
+    //   resource bag carries finite numbers only. A bow-wielding gladiator with
+    //   no secondary weapon is not reachable through the shop, and the resolver
+    //   has no ranged vocabulary at all.
+    if (Number.isFinite(derived.secondary_weapon_range)) {
+      derived.weapon_range = derived.secondary_weapon_range;
+    }
   }
 
   derived.hitpointsmax = herolevel * 10 + number("vitality") * 20;

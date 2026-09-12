@@ -962,7 +962,18 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     "staminaleft", "staminamax",
     "weapon_enchantment_damage",
     "weapon_enchantment_potency",
-    "weapon_enchantment_type"
+    "weapon_enchantment_type",
+    // ► **ADDED 2026-09-11, DELIBERATELY, AND IT RE-HASHED EVERY BATTLE THAT
+    //   DECLARES IT.** `weapon_range` is the controller gate's own input —
+    //   `fightdistance < hero.weapon_range` (frame 4 `DoAction@0x238bbf`
+    //   `+0x00f6`, STRICT `<`) — and `ss2Reach` could not see it, so it
+    //   returned `physical_size` for everyone and the range multiplier of all
+    //   ninety weapon rows was invisible to the fight. A `battlevalues`
+    //   OUTPUT carried as a number, exactly as `min_damage`/`max_damage` are;
+    //   the weapon ID stays outside this list.
+    //   **The 23 promoted goldens did NOT move**: none of them states a
+    //   `weapon` or a `weapon_range`, so none declares the key.
+    "weapon_range"
   ], [
     "The SS2 resource vocabulary changed. `ss2Combatant` declares every one of",
     "these names, declared resources enter `combatantProjection`, and the",
@@ -980,9 +991,41 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
   // on the wire. They can drift apart — a name could be declared and dropped
   // from the projection, or a default could stop being written — so both are
   // pinned and the second is derived from the first rather than restated.
+  // ► **THE VOCABULARY IS NO LONGER A SINGLE SET, AND SAYING SO IS THE POINT
+  //   (2026-09-11).** `weapon_range` is declared EXACTLY when a `weapon` id
+  //   resolves to a table row, because `battlevalues` derives it from that row
+  //   (`+0x3190`) and there is no honest value for a combatant carrying no
+  //   weapon — the build would compute `undefined * 44`. So this pin asserts
+  //   BOTH shapes and the one name that separates them, rather than being
+  //   relaxed to a subset check, which would have stopped catching a name that
+  //   is declared and never projected.
+  const WEAPON_DERIVED = ["weapon_range"];
+
+  // (1) No weapon id: everything but the weapon-derived names.
   const battle = battleOf({}, {});
   const declared = Object.keys(combatantById(battle, "hero").resources).sort();
-  assert.deepEqual(declared, [...SS2_RESOURCE_NAMES].sort(), "declaration must match the vocabulary");
+  assert.deepEqual(
+    declared,
+    [...SS2_RESOURCE_NAMES].filter((name) => !WEAPON_DERIVED.includes(name)).sort(),
+    "a combatant with no weapon id declares the vocabulary minus what a weapon row derives"
+  );
+
+  // (2) A weapon id: the WHOLE vocabulary, and the number is the build's.
+  // Weapon 21 is the first hacking row; its `[5]` is 1, and `gladiator()` is
+  // strength 5, so `physical_size` is 83 and `weapon_range` is 127.
+  const armed = battleOf({ weapon: 21, weapon_min_damage: undefined, weapon_max_damage: undefined }, {});
+  const armedHero = combatantById(armed, "hero");
+  assert.deepEqual(
+    Object.keys(armedHero.resources).sort(),
+    [...SS2_RESOURCE_NAMES].sort(),
+    "declaration must match the vocabulary once a weapon row answers for the whole of it"
+  );
+  assert.equal(armedHero.resources.weapon_range.value, 127, "80 + round(5 / 1.5) + 1 * 44");
+  assert.equal(
+    Object.keys(toTeamWireState(armed).teams[0].combatants[0].resources).includes("weapon_range"),
+    true,
+    "and it reaches the projection, or the hash is blind to the controller gate's own input"
+  );
 
   const projected = toTeamWireState(battle).teams[0].combatants[0];
   assert.deepEqual(

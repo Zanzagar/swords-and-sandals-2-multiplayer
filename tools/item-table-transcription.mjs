@@ -22,7 +22,7 @@
  *
  * ## What it checks, and the part that is easy to miss
  *
- * Two independent things, because the first alone would not be worth much:
+ * Three independent things, because no one of them is worth much alone:
  *
  * 1. **The numbers.** Every field of every row, against the literal the
  *    document names, INCLUDING the instruction offset. A diff that skipped the
@@ -38,6 +38,19 @@
  *    THE HALF THAT MAKES THE OTHER HALF MEAN ANYTHING, and it is the half a
  *    checker written in a hurry leaves out.
  *
+ * 3. **What the statement DOES with the column** (added 2026-09-11). Check 2
+ *    proves `weapon_range` reads `[5]` and stops there, and the rest of that
+ *    statement is the whole of `ss2Reach`: `physical_size + [5] * 44`, with
+ *    `physical_size = 80 + round(strength / 1.5)`. **Check 2 was green for
+ *    twelve days while `ss2Reach` returned `physical_size` and ignored the
+ *    column entirely** — the docstring cited `ss2-item-tables.md:58`, which is
+ *    the FIRST of the two lines that expression wraps across, and line 59 is
+ *    the `+ _root["weapon" + c.weapon][5] * 44` it dropped. A document cite
+ *    cannot catch a half-read wrapped line. The bytes can, so the two literals
+ *    and both functions are now swept against them: `ss2PhysicalSize` over
+ *    strengths 0-200, `ss2Reach` over all ninety ids crossed with eight
+ *    strengths, and its undeclared fallback against the build's bare-hands row.
+ *
  * ## Inspection boundary
  *
  * Display names are game content. The document does not reproduce them and
@@ -51,6 +64,7 @@ import { fileURLToPath } from "node:url";
 
 import { analyseSwfBuffer } from "./inspect-swf.mjs";
 import { SS2_WEAPON_IDS, ss2WeaponEntry } from "../src/team/ss2-weapon-table.js";
+import { SS2_WEAPON_RANGE_STEP, ss2PhysicalSize, ss2Reach } from "../src/team/ss2-rules.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const DOC_PATH = path.join(REPO_ROOT, "docs", "integration", "ss2-item-tables.md");
@@ -253,6 +267,79 @@ function readerIndicesIn(analysis) {
 }
 
 /**
+ * THE TWO CONSTANTS THE RANGE FORMULA IS MADE OF, read off `battlevalues`.
+ *
+ * `readerIndicesIn` above proves that `weapon_range` reads column `[5]`. It
+ * proves nothing about what is DONE with it, and the whole of `ss2Reach`
+ * depends on the rest of the statement:
+ *
+ * ```text
+ * physical_size = 80 + Math.round(strength / 1.5)                    +0x30f1
+ * weapon_range  = physical_size + _root["weapon" + weapon][5] * 44   +0x3190
+ * ```
+ *
+ * ► **THIS CHECK EXISTS BECAUSE THE MISSING HALF OF THAT STATEMENT COST NINE
+ *   DAYS.** `ss2Reach` returned `physical_size` for every gladiator and cited
+ *   `ss2-item-tables.md:58` — the FIRST of the two lines the expression wraps
+ *   across — for "an unarmed gladiator's `weapon_range` is exactly
+ *   `physical_size`". Line 59 is `+ _root["weapon" + c.weapon][5] * 44`, and
+ *   there is no unarmed branch anywhere in `battlevalues`. A document cite
+ *   cannot catch that; the bytes can, so from here on they do.
+ *
+ * Located by SHAPE — keyed on the field names the build pushes, never on an
+ * offset. The offsets printed are output, not input.
+ */
+function rangeFormulaIn(analysis) {
+  const result = { step: null, sizeBase: null, sizeDivisor: null, at: {} };
+  for (const block of analysis.actionBlocks) {
+    const instructions = [...walk(block.instructions)];
+    const names = (instruction) =>
+      instruction.name === "Push" && Array.isArray(instruction.operand)
+        ? instruction.operand.filter((operand) => typeof operand.value === "string").map((operand) => operand.value)
+        : [];
+    const cite = (instruction) => `+0x${(instruction.offset - block.offset).toString(16)}`;
+
+    for (let index = 0; index < instructions.length; index += 1) {
+      const pushed = names(instructions[index]);
+
+      // `weapon_range = physical_size + ... * <step>`: the assignment names
+      // BOTH fields in one push, and the multiplier literal is the number
+      // immediately followed by `Multiply` inside the statement.
+      if (result.step === null && pushed.includes("weapon_range") && pushed.includes("physical_size")) {
+        for (let ahead = index + 1; ahead < Math.min(index + 24, instructions.length); ahead += 1) {
+          const value = numeric(instructions[ahead].operand?.[0]);
+          if (value === null) continue;
+          if (instructions[ahead + 1]?.name !== "Multiply") continue;
+          result.step = value;
+          result.at.step = cite(instructions[ahead]);
+          break;
+        }
+      }
+
+      // `physical_size = <base> + Math.round(strength / <divisor>)`: the
+      // assignment fuses the field name and the base into one push, and the
+      // divisor is the literal that `Divide` consumes.
+      if (result.sizeBase === null && pushed.includes("physical_size") && pushed.includes("strength")) {
+        const literals = instructions[index].operand.map(numeric).filter((value) => value !== null);
+        if (literals.length > 0) {
+          result.sizeBase = literals[0];
+          result.at.sizeBase = cite(instructions[index]);
+        }
+        for (let ahead = index + 1; ahead < Math.min(index + 12, instructions.length); ahead += 1) {
+          const value = numeric(instructions[ahead].operand?.[0]);
+          if (value === null) continue;
+          if (instructions[ahead + 1]?.name !== "Divide") continue;
+          result.sizeDivisor = value;
+          result.at.sizeDivisor = cite(instructions[ahead]);
+          break;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/**
  * The document's own two tables.
  *
  * §2.3 (the shop, ids 1-80) and §2.4 (id 0 and the off-shop ids) carry
@@ -362,6 +449,61 @@ function main(argv) {
     const ok = site.index === expected;
     if (!ok) problems.push(`${field}: the build reads index ${site.index}, the document says ${expected}`);
     console.log(`  ${field.padEnd(18)} index ${site.index} at ${site.at} ${ok ? "" : `!= documented ${expected}`}`);
+  }
+
+  console.log("\nthe range formula itself, because the column index is only half the statement:");
+  const formula = rangeFormulaIn(analysis);
+  if (formula.step === null) {
+    problems.push("the `* 44` in `weapon_range` was not found; SS2_WEAPON_RANGE_STEP is UNVERIFIED");
+    console.log("  range step         NOT FOUND");
+  } else {
+    const ok = formula.step === SS2_WEAPON_RANGE_STEP;
+    if (!ok) problems.push(`weapon_range multiplies [5] by ${formula.step}; SS2_WEAPON_RANGE_STEP is ${SS2_WEAPON_RANGE_STEP}`);
+    console.log(`  weapon_range = physical_size + [5] * ${formula.step}   ${formula.at.step}  ${ok ? "ok" : "DISAGREES"}`);
+  }
+  if (formula.sizeBase === null || formula.sizeDivisor === null) {
+    problems.push("`physical_size = 80 + round(strength / 1.5)` was not found; ss2PhysicalSize is UNVERIFIED");
+    console.log("  physical_size      NOT FOUND");
+  } else {
+    // Checked THROUGH the function rather than against two literals, so a
+    // rounding or ordering change is caught as well as a constant change.
+    const disagreements = [];
+    for (let strength = 0; strength <= 200; strength += 1) {
+      const build = formula.sizeBase + Math.round(strength / formula.sizeDivisor);
+      if (ss2PhysicalSize({ stats: { strength } }) !== build) disagreements.push(strength);
+    }
+    if (disagreements.length > 0) {
+      problems.push(`ss2PhysicalSize disagrees with the build at ${disagreements.length} strengths, first ${disagreements[0]}`);
+    }
+    console.log(
+      `  physical_size = ${formula.sizeBase} + round(strength / ${formula.sizeDivisor})   ` +
+      `${formula.at.sizeBase} / ${formula.at.sizeDivisor}  ${disagreements.length === 0 ? "ok" : "DISAGREES"}`
+    );
+  }
+  if (formula.step !== null && formula.sizeBase !== null && formula.sizeDivisor !== null) {
+    // And the whole of `ss2Reach`, over every id the build declares crossed
+    // with every strength, against the build's own three numbers. This is the
+    // check the old `physical_size`-only reach would have failed on all 90 ids.
+    const wrong = [];
+    for (const id of SS2_WEAPON_IDS) {
+      for (const strength of [0, 1, 5, 9, 20, 40, 70, 100]) {
+        const build = formula.sizeBase + Math.round(strength / formula.sizeDivisor)
+          + ss2WeaponEntry(id).rangeMultiplier * formula.step;
+        const shipped = ss2Reach({ stats: { strength }, resources: { weapon_range: { value: build } } });
+        if (shipped !== build) wrong.push(`id ${id} strength ${strength}: ${shipped} != ${build}`);
+      }
+    }
+    if (wrong.length > 0) problems.push(`ss2Reach disagrees at ${wrong.length} (id, strength) pairs, first ${wrong[0]}`);
+    // The FALLBACK is the build's bare-hands row, not `physical_size`.
+    const bare = formula.sizeBase + Math.round(9 / formula.sizeDivisor) + ss2WeaponEntry(0).rangeMultiplier * formula.step;
+    const fellBack = ss2Reach({ stats: { strength: 9 } });
+    if (fellBack !== bare) {
+      problems.push(`ss2Reach's undeclared fallback is ${fellBack}; weapon 0 at strength 9 is ${bare}`);
+    }
+    console.log(
+      `  ss2Reach over ${SS2_WEAPON_IDS.length} ids x 8 strengths: ${wrong.length === 0 ? "ok" : `${wrong.length} DISAGREE`}` +
+      `   undeclared fallback ${fellBack} (weapon 0 at strength 9: ${bare})`
+    );
   }
 
   console.log("\nweight-class direction, read off `weaponweights` rather than inferred:");

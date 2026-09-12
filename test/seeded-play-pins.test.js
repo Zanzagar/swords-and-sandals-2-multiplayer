@@ -216,6 +216,33 @@ function driveFirst(battle, limit) {
  *   `startingPosition`, so a fixture models no geometry, is never offered a
  *   walk, and replays through exactly the vocabulary it always did.
  */
+/**
+ * ► **THE SIX-ACTIONS-IN PIN MOVED ALONE ON 2026-09-11, and the one that did
+ *   NOT move is the interesting half.**
+ *
+ *     49866259 -> 01621469   (six actions in)
+ *     83b564ac   unchanged   (settled 1v1)
+ *     797ff2be   unchanged   (settled 3v3)
+ *
+ *   `weapon_range` became a declared resource and `ss2Reach` stopped returning
+ *   `physical_size`, so `MINIMAL`'s reach went 81 -> 125 (`physical_size` 81
+ *   plus weapon 0's multiplier of 1 times 44). **Neither the resource bag nor
+ *   the action sequence's first five entries changed** — `MINIMAL` states no
+ *   `weapon`, so it declares 32 names before and after — and the sixth action
+ *   changed for a reason worth reading:
+ *
+ *     old  action 5: hero walks left -30 -> -74; distance is now 104, which is
+ *                    NOT < the old reach of 81, so the villain drops to
+ *                    `longrange_warrior`, is offered BOTH walks, and closes.
+ *     new  action 5: 104 IS < 125, so the villain is still on
+ *                    `closerange_warrior` — three verbs and the RETREAT — and
+ *                    backs off instead.
+ *
+ *   So one gladiator stepping back 44 units no longer drops the other out of
+ *   range, which is the build's own behaviour arriving rather than a tuning
+ *   choice. The two SETTLED pins did not move at all: their fixture is staged
+ *   in contact and the bout is decided before the reach ever separates them.
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -236,7 +263,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "49866259", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "01621469", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
