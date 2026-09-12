@@ -8,10 +8,22 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-12 01:40 — the last authored number is derived](docs/handoffs/2026-09-12-0140--the-last-authored-number-is-derived.md).**
+Start there. **The walk displacement was in the build all along** —
+`movement_speed * 16` eased to a stop — so `MAP_SILENCE.movement-displacement` is
+removed and the authored 44 is exactly right AT THE CLAMP FLOOR and wrong by a
+factor of four above it. **The lesson outranks the number: a gap in that
+catalogue is a gap in a TRANSCRIPTION and says nothing about the build**, and
+three sessions in a row read one as if it did. A six-verifier wave then broke four
+things in the first version of the derivation — including the arithmetic — and
+**retracted `440dae9` in full: `phase_action` records the HERO only.**
+
+*(The brief it supersedes, whose ranked item 5 is DONE by a route it did not name
+and half of whose ranked item 3 was a wrong number rather than a decision:)*
 [2026-09-11 23:40 — two "owner's lane" items were a session away](docs/handoffs/2026-09-11-2340--two-owner-items-were-a-session-away.md).**
 Start there. **A session can read the installed SWF and the capture archive, and
 both were being treated as out of reach** — two ranked owner items closed on
-that basis. It also records this session putting a four-way design fork to the
+that basis. It also records that session putting a four-way design fork to the
 owner **on gladiators that cannot exist**, and the retraction.
 
 *(The brief it supersedes, written MID-session by the same session, whose
