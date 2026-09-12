@@ -207,31 +207,53 @@ units no longer drops the other out of range).
    and sends a crossing reversal NOWHERE. The 1v1 reversal is untouched.
    Pinned in `test/ss2-position.test.js`.
 
-3. **OWNER — CODEX FINDING [high]: a bow state enters melee, and MY COMMIT
-   CREATED IT.** `ss2Combatant` accepts `using_bow: true` with
-   `secondary_weapon: 63` and `equipped_weapon: 2`; the bow override I added
-   then projects `weapon_range` **4486**, and `legalActions` offers all three
-   melee verbs at the opening 500-unit separation. Reproduced. Before this work
-   `ss2Reach` returned ~86 and a bow could never open the melee gate, so this is
-   a REGRESSION, not a pre-existing gap. **It is ranked rather than fixed
-   because every repair is a policy choice** and the gate is the thing under
-   review: (a) refuse bow states at playable construction, which is Codex's own
-   recommendation; (b) model the build's ARCHER selector faithfully — the bow
-   arm gates on `100 + physical_size`, never on `weapon_range`
-   (`+0x0141`/`+0x0158`), which this session read and documented but did not
-   wire; or (c) build ranged combat properly. **(b) is the faithful one and is
-   small**, but it hands a bow gladiator melee verbs inside 186 units and
-   nothing else, which is a gameplay decision.
+3. ~~**OWNER — CODEX FINDING [high]: a bow state enters melee.**~~ **FIXED.** A
+   combatant with `using_bow` takes `battlevalues`'s bow override (`+0x343e`),
+   so its `weapon_range` becomes `secondary_weapon_range` through a type-4 row
+   whose `[5]` is 100 — 4,486 at strength 9, against an arena 4,200 wide. The
+   controller gate can then never be shut, and all three melee verbs were
+   offered at the opening 500-unit separation. **A regression this session
+   caused**: before `weapon_range` was projected, `ss2Reach` returned
+   `physical_size` and a bow could not open the gate at all.
 
-4. **CODEX FINDING [medium]: a missing reach silently substitutes bare hands.**
-   A `derive: false` record can keep `weapon: 5` and its derived damage while
-   omitting `weapon_range`; construction accepts it and `ss2Reach` falls back,
-   so a strength-9 gladiator reaches 130 where its own weapon says 174 — no
-   diagnostic. This is the `derive: false` hole the wave found, stated as a
-   defect rather than a documentation gap, and it is live in
-   `tools/arena/roster.js` today. The fix is to require a positive declared
-   reach for POSITIONED combatants and make bare hands an explicit choice,
-   exempting `fixtureReplay`.
+   Refused at the rule set's construction gate, beside the `staminamax <= 0`
+   fixpoint refusal it already had — **not** in `ss2Combatant`, because the
+   adapter builds combatants too, and **not** by sniffing `using_bow`, which
+   the resolver never sees. The criterion is stated in terms the rule set owns:
+   **a reach wider than its own arena**. Any future route to an arena-spanning
+   reach is caught by the same test, and a mult-3 melee weapon (323 at most) is
+   provably not.
+
+   **Clamping it would have been the wrong fix.** A bow is a different
+   CONTROLLER in the build, gated on `100 + physical_size` and wired to ranged
+   verbs this module does not have. Refusing until there is a ranged vocabulary
+   is honest; silently fighting an archer as a melee gladiator with an enormous
+   reach is not.
+
+4. ~~**CODEX FINDING [medium]: a missing reach silently substitutes bare
+   hands.**~~ **FIXED, and it caught its own live instance on the first run.**
+   `derive: false` means `ss2BattleValues` never runs, so a record stating
+   `weapon: 5` and no `weapon_range` reached the resolver with equipment
+   identity discarded and `ss2Reach` falling back — 130 where that weapon's row
+   says 174, with no diagnostic. `ss2Combatant` now refuses the contradiction
+   (it is the only place the weapon id still exists).
+
+   **Refused rather than derived**, because deriving is precisely what
+   `derive: false` exists to prevent — the flag protects a promoted golden's
+   MEASURED numbers, and a quiet exception for one field is how that protection
+   stops meaning anything. No golden is affected: none of the 23 states a
+   `weapon`, `secondary_weapon` or `weapon_range`.
+
+   ► **THE LIVE INSTANCE WAS `tools/arena/roster.js`, and the shape of why it
+     survived is the lesson.** Its `weapon: 1` produced no reach for a day, and
+     nothing showed, because the shop gate at that roster's speeds sells only
+     `[5]` = 1 weapons — so the bare-hands fallback happened to equal the right
+     answer. **Luck, not a contract.** The refusal therefore fires even when the
+     two numbers coincide, and says so in its message; a check that went quiet
+     wherever the numbers agreed would go quiet exactly where this one hid.
+     `demoSide` now derives `weapon_range` PER SLOT (130 / 129 / 129), taking
+     one field from `ss2BattleValues` and discarding the rest so the roster's
+     own stated damage and pools are still not recomputed.
 
 5. **CODEX FINDING [medium]: the projection format changed twice without a
    version bump.** `x` and then `weapon_range` changed every serialised combat

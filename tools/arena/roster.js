@@ -83,23 +83,24 @@ export function demoGladiator(overrides = {}) {
     //     only what the assertion checked" — committed again, in the same
     //     commit that quoted it.
     //
-    //   **It is now ABSENT rather than corrected, on purpose.** `demoSide`
-    //   below gives each slot its own `strength`, and `weapon_range` depends on
-    //   it: slot reaches are 130, 129, 129 (strength 9, 8, 7 -> `physical_size`
-    //   86, 85, 85). ~~"ANY constant here is wrong for two of the three
-    //   slots"~~ — **wrong: 129 is wrong for exactly ONE.** Absent, `ss2Reach`
-    //   derives `physical_size + 44` per slot from that slot's own strength,
-    //   which for weapon 1 (`[5]` = 1, `ss2-weapon-table.js`) is the build's
-    //   number for all three.
+    //   **IT IS NOT A TEMPLATE CONSTANT ANY MORE: `demoSide` DERIVES IT PER
+    //   SLOT** (2026-09-12). Each member has its own `strength`, so the reaches
+    //   are 130 / 129 / 129 (strength 9, 8, 7 -> `physical_size` 86, 85, 85) and
+    //   no constant is right for all three. ~~"ANY constant here is wrong for
+    //   two of the three slots"~~ — **that was wrong too: 129 is wrong for
+    //   exactly ONE.**
     //
-    //   ► **AND THE `weapon: 1` ABOVE REACHES NOTHING EITHER.** `demoSide`
-    //     builds with `derive: false`, so `ss2BattleValues` never runs and the
-    //     stated id never produces a `weapon_range`: every demo gladiator
-    //     declares 32 resources, not 33, and takes the fallback. The shop gate
-    //     at this roster's speeds (4-7) sells only `[5]` = 1 weapons anyway, so
-    //     the browser arena cannot exercise a different reach at all. **A
-    //     stated derived field that no code reads is not verified by a green
-    //     suite — and neither is a stated INPUT that no code derives from.**
+    //   ► **AND FOR A DAY THE `weapon: 1` ABOVE REACHED NOTHING AT ALL.**
+    //     `demoSide` builds with `derive: false`, so `ss2BattleValues` never
+    //     runs and the stated id produced no `weapon_range`: every demo
+    //     gladiator declared 32 resources and took `ss2Reach`'s bare-hands
+    //     fallback. It was invisible because the shop gate at this roster's
+    //     speeds (4-7) sells only `[5]` = 1 weapons, so the fallback happened to
+    //     equal the right answer — luck, not a contract. `ss2Combatant` now
+    //     REFUSES that contradiction outright, and this roster was the live
+    //     instance it caught. **A stated derived field that no code reads is not
+    //     verified by a green suite — and neither is a stated INPUT that no code
+    //     derives from.**
     //     `physical_size` below is the same hazard once more (86 is right at
     //     strength 9, not 87) and is deliberately left alone:
     //     `src/adapter/presentation.js:408` reads it for the clip SCALE, so
@@ -158,7 +159,7 @@ const BLUE_NAMES = ["Cidra", "Nym", "Orso"];
  * default them and fight a different gladiator. `derive: false` keeps the
  * stated values instead of letting `battlevalues` recompute them over the top.
  */
-export function demoSide(side, size, { ss2Combatant }) {
+export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
   const names = side === "red" ? RED_NAMES : BLUE_NAMES;
   const facing = side === "red" ? "right" : "left";
   return {
@@ -177,8 +178,24 @@ export function demoSide(side, size, { ss2Combatant }) {
         helmet: 2 - index,
         shield: index === 0 ? 2 : 0
       });
-      const canonical = ss2Combatant(vanilla, { id, name, controller: "local", derive: false });
-      return { id, controller: "local", vanilla, resources: canonical.resources, clip: { gladiator_dir: facing } };
+      // ► **`weapon_range` IS DERIVED PER SLOT, and `derive: false` is why it
+      //   has to be (2026-09-12).** These members state `weapon: 1` and build
+      //   with `derive: false`, so `ss2BattleValues` never runs and the weapon
+      //   id — which is equipment identity and does not survive into the
+      //   resolver — would reach the fight as nothing at all. `ss2Combatant`
+      //   now REFUSES that contradiction rather than silently handing the
+      //   gladiator bare hands, and this roster was the live instance of it.
+      //
+      //   One field is taken from the derivation and the rest is discarded, so
+      //   the stated `min_damage`, `max_damage`, `hitpointsmax` and
+      //   `staminamax` above are still the roster's own and are not recomputed
+      //   — which is the whole reason `derive: false` is passed below.
+      //   Per SLOT, not per template: each member has its own `strength`, so
+      //   the reaches are 130 / 129 / 129 and no constant is right for all
+      //   three.
+      const priced = { ...vanilla, weapon_range: ss2BattleValues(vanilla).weapon_range };
+      const canonical = ss2Combatant(priced, { id, name, controller: "local", derive: false });
+      return { id, controller: "local", vanilla: priced, resources: canonical.resources, clip: { gladiator_dir: facing } };
     })
   };
 }

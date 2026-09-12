@@ -2011,6 +2011,52 @@ export function ss2Combatant(
   // combatant reaches the resolver there is nothing left to gate on.
   assertSs2WeaponPurchasable(vanilla, id ? `Combatant ${id}` : "Combatant");
 
+  // ► **A STATED WEAPON WITH NO REACH IS REFUSED, NOT SILENTLY DISARMED (added
+  //   2026-09-12, found by `/codex:adversarial-review`).** `derive: false` says
+  //   "my derived fields are already known", and `ss2BattleValues` then never
+  //   runs — so a record stating `weapon: 5` and its damage pair but no
+  //   `weapon_range` reaches the resolver with equipment identity DISCARDED
+  //   (the id is not in `SS2_RESOURCE_NAMES`) and `ss2Reach` falls back to the
+  //   bare-hands row. Measured at strength 9: a reach of 130 where that
+  //   weapon's own row says 174, with no diagnostic anywhere.
+  //
+  //   **This is the only place the weapon id still exists**, which is why the
+  //   check is here rather than at the rule set's construction gate.
+  //
+  //   Refused rather than derived, because deriving is what `derive: false`
+  //   exists to prevent: the flag protects a promoted golden's MEASURED numbers
+  //   from being overwritten by computed ones, and quietly making an exception
+  //   for one field is how that protection stops meaning anything. **No golden
+  //   is affected** — none of the 23 states a `weapon`, a `secondary_weapon` or
+  //   a `weapon_range`, so none can reach this branch.
+  if (derive === false && !Number.isFinite(vanilla?.weapon_range)) {
+    const stated = ss2WeaponEntry(vanilla?.weapon);
+    if (stated !== null) {
+      const label = id ? `Combatant ${id}` : "Combatant";
+      const size = 80 + Math.round((Number(vanilla?.strength) || 0) / 1.5);
+      const bare = size + ss2WeaponEntry(0).rangeMultiplier * SS2_WEAPON_RANGE_STEP;
+      const armed = size + stated.rangeMultiplier * SS2_WEAPON_RANGE_STEP;
+      // The two COINCIDE whenever the stated weapon's multiplier is 1, and the
+      // refusal still stands: the record is contradictory in STRUCTURE, and a
+      // check that declined to fire wherever the numbers happened to agree
+      // would go quiet the moment a caller changed the strength or the id.
+      // That is exactly how `tools/arena/roster.js` carried this for a day.
+      const coincide = bare === armed;
+      throw new TeamRuleSetError(
+        `${label} states weapon ${stated.id} with derive: false and no weapon_range. The weapon id is ` +
+        "equipment identity and does not survive into the resolver, so nothing downstream can tell this " +
+        `gladiator from a bare-handed one: it would reach ${bare}, where its own row says ${armed} ` +
+        `(physical_size + ${stated.rangeMultiplier} * ${SS2_WEAPON_RANGE_STEP}, battlevalues +0x3190)` +
+        (coincide
+          ? " — the same number HERE, only because this weapon's multiplier is 1, which is luck and not a"
+            + " contract; change the id or the strength and the two diverge silently."
+          : ", and nothing would report the difference.") +
+        " State weapon_range, or drop the weapon id and be honestly bare-handed, or pass derive: true and " +
+        "let battlevalues compute it."
+      );
+    }
+  }
+
   const derived = derive ? ss2BattleValues(vanilla, { battleStarted }) : { ...vanilla };
   const resources = {};
   for (const key of SS2_RESOURCE_NAMES) {
@@ -2114,6 +2160,45 @@ function assertConstructionResources(carrier, where) {
       `${where} declares staminamax ${declaredResourceValue(carrier, "staminamax")}. At or below zero the ` +
       "forced-rest gate leaves rest as the only legal action and rest can change nothing, so the battle " +
       "is a fixpoint with no result. staminamax = 100 + stamina * 10 in the build, so it is never <= 0 there."
+    );
+  }
+  // ► **A REACH WIDER THAN THE ARENA IS A BOW, AND THIS RULE SET CANNOT MODEL
+  //   ONE (added 2026-09-12, found by `/codex:adversarial-review`).** A
+  //   combatant with `using_bow` true takes `battlevalues`'s bow override
+  //   (`+0x343e`), so its `weapon_range` becomes `secondary_weapon_range` —
+  //   `physical_size + [5] * 44` through a type-4 row, whose `[5]` is 100. At
+  //   the minimum `physical_size` of 80 that is 4,480, against an arena
+  //   `SS2_ARENA.clamp` 4,200 wide: **the controller gate can never be shut,
+  //   so every foe is in melee range from the opening separation of 500.**
+  //   Reproduced: strength 9 with `secondary_weapon: 63` and
+  //   `equipped_weapon: 2` was offered all three melee verbs at 500 units.
+  //
+  //   **This was a REGRESSION, not a pre-existing gap.** Until `weapon_range`
+  //   became a projected resource, `ss2Reach` returned `physical_size` for
+  //   everyone and a bow could not open the gate at all.
+  //
+  //   Refused HERE rather than in `ss2Combatant` because the adapter builds
+  //   combatants too, and the criterion is stated in terms this rule set owns —
+  //   the reach against its own arena — rather than by sniffing `using_bow`,
+  //   which the resolver never sees. Any future route to an arena-spanning
+  //   reach is caught by the same test.
+  //
+  //   **The fix is not to clamp it.** A bow is a different CONTROLLER in the
+  //   build, gated on `100 + physical_size` and wired to ranged verbs this
+  //   module does not have (see `legalActions`). Silently treating an archer as
+  //   a melee fighter with an enormous reach is the failure; refusing until
+  //   there is a ranged vocabulary is the honest answer.
+  const reach = declaredResourceValue(carrier, "weapon_range");
+  const arenaWidth = SS2_ARENA.clamp.max - SS2_ARENA.clamp.min;
+  if (Number.isFinite(reach) && reach > arenaWidth) {
+    throw new TeamRuleSetError(
+      `${where} declares weapon_range ${reach}, which is wider than the arena itself (${arenaWidth}). ` +
+      "That is the build's bow override: `weapon_range = secondary_weapon_range` through a type-4 row, " +
+      "whose range multiplier is 100 (battlevalues +0x343e, +0x32aa). The controller gate " +
+      "`fightdistance < weapon_range` can then never be shut, so this gladiator would be offered MELEE " +
+      "attacks against every foe from the opening separation. This rule set has no ranged vocabulary and " +
+      "does not model the archer controllers, so it refuses the state rather than fighting a gladiator the " +
+      "build would never have put on this frame. Give it a melee weapon, or leave using_bow false."
     );
   }
 }

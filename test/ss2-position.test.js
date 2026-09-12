@@ -760,6 +760,107 @@ test("a walk may never carry a gladiator past a foe — including when the CLAMP
   );
 });
 
+test("a reach wider than the arena is a bow, and this rule set refuses it rather than fighting it", () => {
+  // ► **THE REGRESSION TEST FOR A DEFECT THIS SESSION INTRODUCED AND
+  //   `/codex:adversarial-review` found.** Until `weapon_range` became a
+  //   projected resource, `ss2Reach` returned `physical_size` for everyone and
+  //   a bow could not open the melee gate at all. With the bow override
+  //   (`+0x343e`) carried, `weapon_range` becomes `secondary_weapon_range`
+  //   through a type-4 row whose `[5]` is 100 — and the controller gate
+  //   `fightdistance < weapon_range` can then never be shut.
+  const archer = ss2Combatant(
+    gladiator({
+      using_bow: true, secondary_weapon: 63, equipped_weapon: 2,
+      weapon_min_damage: undefined, weapon_max_damage: undefined,
+      secondary_weapon_min_damage: 6, secondary_weapon_max_damage: 36
+    }),
+    { id: "archer" }
+  );
+  // The projection is built — the refusal is the RULE SET's, at construction,
+  // so it catches the adapter's combatants as well as `ss2Combatant`'s.
+  assert.equal(archer.resources.weapon_range, 4486, "80 + round(9/1.5) + 100 * 44");
+  assert.ok(
+    archer.resources.weapon_range > SS2_ARENA.clamp.max - SS2_ARENA.clamp.min,
+    "and it exceeds the whole arena, which is what makes the gate a constant"
+  );
+
+  assert.throws(
+    () => createTeamBattle({
+      seed: 1,
+      rules: ss2TeamRules,
+      teams: [
+        { id: "red", combatants: [archer] },
+        { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "foe" })] }
+      ]
+    }),
+    (error) => error instanceof TeamRuleSetError && /wider than the arena/.test(error.message),
+    "a gladiator this rule set cannot model must be refused, not silently given melee at any range"
+  );
+
+  // A MELEE weapon of the widest multiplier the table has is NOT refused: the
+  // criterion has to separate the two, or it is just a ban on big numbers.
+  const heavy = ss2Combatant(
+    gladiator({ weapon: 20, speed: 60, weapon_min_damage: undefined, weapon_max_damage: undefined }),
+    { id: "heavy" }
+  );
+  assert.equal(ss2WeaponEntry(20).rangeMultiplier, 3);
+  assert.doesNotThrow(() => createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [heavy] },
+      { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "foe" })] }
+    ]
+  }));
+});
+
+test("a stated weapon with no reach is REFUSED, not silently disarmed", () => {
+  // ► **Also `/codex:adversarial-review`'s, and `tools/arena/roster.js` was the
+  //   live instance.** `derive: false` means `ss2BattleValues` never runs, and
+  //   the weapon id is equipment identity that does not survive into the
+  //   resolver — so the gladiator reaches the fight bare-handed with nothing
+  //   reporting the substitution.
+  assert.throws(
+    () => ss2Combatant(
+      gladiator({ weapon: 5, speed: 20, hitpointsmax: 40, staminamax: 140 }),
+      { id: "armed", derive: false }
+    ),
+    (error) => error instanceof TeamRuleSetError && /states weapon 5 with derive: false/.test(error.message),
+    "weapon 5 is [5] = 2, so bare hands is 44 short and the record is contradictory"
+  );
+
+  // It fires even when the two reaches COINCIDE, which is the case that hid in
+  // the demo roster for a day: weapon 1's multiplier is 1, so the fallback
+  // happens to be right — by luck, not by contract.
+  assert.equal(ss2WeaponEntry(1).rangeMultiplier, ss2WeaponEntry(0).rangeMultiplier);
+  assert.throws(
+    () => ss2Combatant(
+      gladiator({ weapon: 1, hitpointsmax: 40, staminamax: 140 }),
+      { id: "coincident", derive: false }
+    ),
+    (error) => error instanceof TeamRuleSetError && /luck and not a contract/.test(error.message)
+  );
+
+  // Three ways out, and all three are accepted.
+  assert.doesNotThrow(() => ss2Combatant(
+    gladiator({ weapon: 5, speed: 20, weapon_range: 171, hitpointsmax: 40, staminamax: 140 }),
+    { id: "stated", derive: false }
+  ), "state the reach");
+  assert.doesNotThrow(() => ss2Combatant(
+    gladiator({ hitpointsmax: 40, staminamax: 140 }),
+    { id: "bare", derive: false }
+  ), "or drop the id and be honestly bare-handed");
+  assert.doesNotThrow(() => ss2Combatant(
+    gladiator({ weapon: 5, speed: 20, weapon_min_damage: undefined, weapon_max_damage: undefined }),
+    { id: "derived" }
+  ), "or derive it");
+
+  // And NO promoted golden can reach this branch: none states a weapon id.
+  // (Asserted in `test/ss2-golden-resolver-replay.test.js`'s own fixtures; the
+  // point here is that the refusal is scoped to a contradiction, not to
+  // `derive: false` itself.)
+});
+
 test("the arena clamp bounds a walk, and a step it swallows is still a resolved action", () => {
   const battle = createTeamBattle({
     seed: 1,

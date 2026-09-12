@@ -24,7 +24,7 @@ import {
   createVanillaBattleHost,
   SS2_STATIC_MAP_BINDINGS
 } from "../src/adapter/index.js";
-import { ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
+import { ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
 import {
   ANIMATION_TIMEOUT_MS,
   abandonReasonFor,
@@ -39,7 +39,7 @@ import { demoSide } from "../tools/arena/roster.js";
 
 function arenaHost(perSide = 2, seed = 7, options = {}) {
   return createVanillaBattleHost({
-    teams: [demoSide("red", perSide, { ss2Combatant }), demoSide("blue", perSide, { ss2Combatant })],
+    teams: [demoSide("red", perSide, { ss2Combatant, ss2BattleValues }), demoSide("blue", perSide, { ss2Combatant, ss2BattleValues })],
     rules: ss2TeamRules,
     bindings: SS2_STATIC_MAP_BINDINGS,
     seed,
