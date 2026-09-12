@@ -8,6 +8,20 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-12 16:00 — one interface, so the second axis is a prerequisite](docs/handoffs/2026-09-12-1600--one-interface-and-the-second-axis-is-a-prerequisite.md).**
+Start there. **The owner watched a 3v3 and called it "super limited"** — everyone
+jumbles into one melee, no breakoff fight, no choice between duelling and
+brawling, nowhere to stand off and shoot. Measured, he is not describing a tuning
+problem: **a walk may never cross a FOE, so the two teams meet at exactly ONE
+interface and every fight must happen there.** 0 turns in 1,682 where any red
+stood right of any blue; never more than 1 simultaneous fight. **A second
+engagement is geometrically impossible and no AI change can create one**, which
+retires "fix the AI first, it may be enough". `tools/engagement-census.mjs` is
+the committed instrument: **a 3v3 uses 2.4% of a 4,200-unit arena and 44.7% of
+its blows pass through a living gladiator.**
+
+*(The brief it supersedes, whose ranked item 1 — LOOK AT THE ARENA — is what
+produced all of the above:)*
 [2026-09-12 11:30 — Codex found in one pass what twelve agents missed](docs/handoffs/2026-09-12-1130--codex-found-what-twelve-agents-missed.md).**
 Start there. **`/codex:adversarial-review` was never unrunnable by a session** —
 that instruction was false and had been copied through five handoffs, parking the
@@ -122,6 +136,31 @@ priced on the weapon with strength in the denominator — and **both gated behin
   applies as written now, so a session pushes as it goes and the steady state is
   0. **Measure the live number, never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **THERE IS EXACTLY ONE INTERFACE, AND THAT IS WHY THE ARENA FEELS SMALL
+  (2026-09-12, `58366d8`).** `ss2WalkDestination` refuses to carry a walk across
+  a FOE — the build's own clamp at `+0x3de6` — so no red ever reaches the far
+  side of a blue. **Measured over 24 bouts and 1,682 turns: 0 crossings, and
+  never more than ONE simultaneous fight.** The two teams therefore meet at a
+  single contact point and every blow in the bout is struck there. A breakoff
+  fight is not unlikely; it is impossible.
+  **This retires two plausible guesses of mine, both made before measuring:**
+  that the left-to-right order is frozen (it is not — a walk may cross an ALLY,
+  and the order reshuffles in 24 of 24 bouts), and that better TARGETING would
+  spread the fighters out (a no-op — the target picks a DIRECTION, the clamp
+  picks the STOP). **The order that costs nothing is measure, then guess.**
+  ► **`tools/engagement-census.mjs` IS THE INSTRUMENT, and it is committed
+    because every number in the design discussion before it was a scratch script
+    that died with its session.** Run it before and after any change to movement,
+    targeting, reach or the AI. Today: **a 3v3 uses 99 units of 4,200 (2.4%),
+    can-hit-every-foe is 41.0% of turns, and 44.7% of blows pass through a
+    living body.**
+  **RANKED FIRST: build the second axis.** It is a PREREQUISITE for everything
+  the owner asked for, not an improvement on it. Discrete nodes over a continuous
+  plane (the 9-agent panel's recommendation, and SS2's own movement is already
+  discrete phases). **The question that outranks the geometry is game feel and is
+  the owner's: how much should standing in the right place matter?** Build it
+  playable behind a flag and let him play it.
 
 ► **`weapon_range` IS A PROJECTED RESOURCE AND THE BUILD'S OWN CLAMP IS BACK
   (2026-09-12, `6926069` + `3666c62`). RANKED ITEM 1 IS CLOSED.** `ss2Reach`
