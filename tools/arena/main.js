@@ -567,9 +567,19 @@ function spectateStep() {
   const actorId = host.currentCombatantId();
   const options = host.legalActions();
   if (options.length === 0) return;
-  // Deterministic choice, derived from the battle's own turn number, so a
-  // spectated bout replays exactly like a played one.
-  const action = options[host.battle.turnNumber % options.length];
+  // ► **THIS WAS `options[host.battle.turnNumber % options.length]` UNTIL
+  //   2026-09-12, AND IT NEVER REACHED A SWING.** Out of range the SS2 option
+  //   list is `[walk-left, walk-right, rest]`, so cycling 0, 1, 2 is net-zero
+  //   displacement forever: the gladiators oscillated on the spot until the
+  //   crowd's patience killed them. Measured over 24 bouts, 20,712 actions and
+  //   **0 attacks** — and every one of them SETTLED, which is why nothing ever
+  //   looked wrong. Settling is not the diagnostic; an attack being on offer is.
+  //
+  //   The old comment said "deterministic, so a spectated bout replays exactly
+  //   like a played one". `chooseAiAction` is deterministic too — it is the
+  //   rule set's own AI over the resolver's own `actorView` — so that property
+  //   survives and the bout actually happens.
+  const action = host.suggestAction(actorId);
   try {
     const step = host.submit({ ...action, actorId });
     log(`${host.combatant(actorId)?.name ?? actorId}: ${action.type}`);

@@ -447,14 +447,33 @@ export function applyActionWithOutcome(battle, action) {
 /* AI                                                                  */
 /* ------------------------------------------------------------------ */
 
+/**
+ * What the rule set's AI would do for this combatant, WHOEVER is seated.
+ *
+ * `chooseAiAction` below is this plus a seat check, and the seat check is the
+ * whole difference: it exists so `advanceAiTurns` can never take a human's
+ * turn. A SPECTATOR asks a different question — "play this bout for me" — about
+ * seats that are deliberately human, and answering it through the AI-seat door
+ * would have meant either lying about the seat or bypassing the guard at the
+ * call site. Added 2026-09-12 for `tools/arena/main.js`'s spectate mode, which
+ * had invented its own choice policy for want of this and never reached a swing.
+ *
+ * It suggests and never applies, so the caller keeps the turn.
+ */
+export function suggestAction(battle, actorId = currentCombatant(battle)?.id) {
+  const actor = combatantById(battle, actorId);
+  if (!actor) throw new BattleError(`No combatant ${actorId} to suggest an action for.`);
+  const options = legalActions(battle, actor.id);
+  return battle.rules.chooseAiAction(Object.freeze(actorView(battle, actor)), actor.id, options);
+}
+
 /** Deterministic AI. Its actions use exactly the same protocol as players. */
 export function chooseAiAction(battle, actorId = currentCombatant(battle)?.id) {
   const actor = combatantById(battle, actorId);
   if (!actor || !isAiControlled(battle, actor)) {
     throw new BattleError("AI action requested for a non-AI combatant.");
   }
-  const options = legalActions(battle, actor.id);
-  return battle.rules.chooseAiAction(Object.freeze(actorView(battle, actor)), actor.id, options);
+  return suggestAction(battle, actor.id);
 }
 
 /** Runs all consecutive AI turns; stops as soon as a human/controller is due. */

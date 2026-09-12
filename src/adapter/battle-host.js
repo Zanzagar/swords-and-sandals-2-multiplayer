@@ -56,6 +56,7 @@ import {
   assertTeamRuleSet,
   BATTLE_RESULT_ACK_TYPE,
   chooseAiAction,
+  suggestAction,
   combatantById,
   combatStateHash,
   createTeamBattle,
@@ -635,6 +636,45 @@ class VanillaBattleHost {
   /** JSON-safe animation-gate state, for diagnostics and host/client compare. */
   actionAnimationState() {
     return this.#gate.toJSON();
+  }
+
+  /**
+   * ONE action, chosen by the rule set's own AI, NOT submitted.
+   *
+   * `runAiTurns` below submits a whole run and is a fast-forward: no animation
+   * ever plays. A surface that wants to WATCH a bout play itself needs the
+   * opposite — one action at a time, through its own gate — and until
+   * 2026-09-12 `tools/arena/main.js` had no way to ask for that, so it invented
+   * a choice policy instead:
+   *
+   * ```js
+   * const action = options[host.battle.turnNumber % options.length];
+   * ```
+   *
+   * **That policy never reaches a swing.** Out of range the SS2 option list is
+   * `[walk-left, walk-right, rest]`, and cycling 0, 1, 2 through it is
+   * net-zero displacement forever; the gladiators oscillate on the spot until
+   * the crowd's patience kills them. Measured over 24 bouts: 20,712 actions and
+   * **0 attacks**. Its own comment called it "deterministic, so a spectated
+   * bout replays exactly like a played one" — which it is, and which is not the
+   * same thing as being a choice.
+   *
+   * `chooseAiAction` is deterministic too (it is the rule set's, over the
+   * resolver's own `actorView`), so the property that comment wanted is kept
+   * and the bout actually happens.
+   *
+   * **It returns rather than submits on purpose.** The animation gate belongs
+   * to the shell; a method that submitted would take that decision away from
+   * the one caller whose whole job is to hold it.
+   *
+   * **And it is `suggestAction`, not `chooseAiAction`**: the demo roster's
+   * seats are all `controller: "local"`, and the resolver's AI door refuses a
+   * non-AI combatant on purpose, so that `runAiTurns` can never take a human's
+   * turn. A spectator is asking a different question about a deliberately human
+   * seat, and it gets its own door rather than a relaxed guard on that one.
+   */
+  suggestAction(actorId = this.currentCombatantId()) {
+    return suggestAction(this.#battle, actorId);
   }
 
   /**

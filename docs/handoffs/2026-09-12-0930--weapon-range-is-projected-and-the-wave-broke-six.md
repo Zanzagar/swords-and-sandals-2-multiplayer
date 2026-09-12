@@ -158,15 +158,44 @@ units no longer drops the other out of range).
 
 ## Highest-value work, ranked
 
-1. **The browser arena's SPECTATE mode never reaches a swing, and nobody has
-   watched it.** `tools/arena/main.js:572` drives `options[turnNumber %
-   options.length]`; out of range that list is `[walk-left, walk-right, rest]`,
-   so the cycle is net-zero displacement forever. Measured: 24/24 bouts, 20,712
-   actions, **0 attacks**, identical before and after this session's work — so
-   it is NOT caused by it and has presumably been true since position landed.
-   **This is the cheapest real defect on the board and it is a session's, not
-   the owner's.** The fix is a drive policy that closes; the QUESTION for the
-   owner is whether spectate should pick for itself at all.
+1. ~~**The browser arena's SPECTATE mode never reaches a swing.**~~ **FIXED.**
+   `tools/arena/main.js` drove `options[turnNumber % options.length]`, and out
+   of range the SS2 option list is `[walk-left, walk-right, rest]` — so cycling
+   0, 1, 2 is net-zero displacement forever. The gladiators oscillated on the
+   spot until the crowd's patience killed them. Measured over 24 bouts, before
+   and after:
+
+   ```text
+     modulo cycle      24/24 settle, 20,712 actions,   0 attacks
+     host.suggestAction 24/24 settle,  1,066 actions, 781 attacks
+   ```
+
+   **Every bout settled under the old policy too, which is why it survived** —
+   settling is not the diagnostic, an attack being on offer is. That is the same
+   reporting error twice more in one session, and it is now an assertion.
+
+   Three parts, and the middle one is the interesting one:
+   - `suggestAction(battle, actorId)` on the resolver: what the rule set's AI
+     would do, WHOEVER is seated. `chooseAiAction` is that plus a seat check,
+     and the check must stay — it is what stops `advanceAiTurns` taking a
+     human's turn. A spectator asks a different question about a deliberately
+     human seat, so it gets its own door rather than a relaxed guard.
+   - `host.suggestAction()` returns rather than submits, because the animation
+     gate belongs to the shell.
+   - **`test/render-arena-host.test.js` HAD RE-IMPLEMENTED THE CHOICE POLICY
+     VERBATIM** — the same modulo line — so the test and the shell were two
+     implementations of one decision, agreeing with each other while both were
+     wrong. **Second instance of that exact hazard in that same file**, whose
+     header already records the first (`timelinesForStep`). Both now call
+     `host.suggestAction`, and the sweep asserts an attack was on offer AND
+     taken.
+
+   ► **THE OWNER STILL HAS TO LOOK.** No agent here can watch the arena animate
+     (headless Chrome gives a `requestAnimationFrame` loop 2 frames whatever
+     `--virtual-time-budget` says). What is proven is that the spectated bout
+     now closes, swings and settles under `node --test`; what is not proven is
+     that it LOOKS right. `?spectate=1`.
+
 2. ~~**OWNER: `/codex:adversarial-review` ... unrunnable by a session
    (`disable-model-invocation: true`).**~~ **DONE 2026-09-12, AND THE
    INSTRUCTION WAS FALSE.** `disable-model-invocation` blocks Claude

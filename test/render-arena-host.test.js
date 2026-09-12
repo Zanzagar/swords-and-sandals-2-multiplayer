@@ -291,6 +291,23 @@ test("the arena server serves the repository and refuses what it must", async ()
  * timelines, advance time, report, submit again — for an entire bout.
  */
 test("a spectated bout runs to a decision on a fake clock, and never stalls", () => {
+  // ► **THIS TEST RE-IMPLEMENTED THE SHELL'S CHOICE POLICY VERBATIM, and that
+  //   is the second time this file has made that mistake (2026-09-12).** It
+  //   carried `options[host.battle.turnNumber % options.length]` — the same
+  //   line `tools/arena/main.js` carried — so the test and the shell were two
+  //   implementations of one decision that agreed with each other while both
+  //   were wrong. The header block above already records the first instance,
+  //   `timelinesForStep`, and the fix is the same: both call
+  //   `host.aiAction()`.
+  //
+  //   **And its assertions could not have caught it**: "settles" and
+  //   "actions > 3" are both satisfied by a bout of pure walking that the crowd
+  //   eventually kills. Measured under the old policy — 24 bouts, 20,712
+  //   actions, ZERO attacks, all 24 settling. So the sweep below now asserts
+  //   that an attack was actually ON OFFER and TAKEN, which is the fact that
+  //   distinguishes a fight from an oscillation.
+  let spectatedAttacks = 0;
+  let spectatedOffers = 0;
   for (const [perSide, seed] of [[1, 7], [2, 7], [3, 11]]) {
     const host = arenaHost(perSide, seed);
     let scene = applyCommands(emptyScene(), host.constructArena().commands);
@@ -315,7 +332,12 @@ test("a spectated bout runs to a decision on a fake clock, and never stalls", ()
       if (host.readyForNextAction().ready) {
         const options = host.legalActions();
         if (options.length === 0) break;
-        const step = host.submit({ ...options[host.battle.turnNumber % options.length], actorId: host.currentCombatantId() });
+        // The SHELL'S OWN CHOICE, not a copy of it. See the block above.
+        const actorId = host.currentCombatantId();
+        const chosen = host.suggestAction(actorId);
+        if (options.some((option) => /attack$/.test(option.type))) spectatedOffers += 1;
+        if (/attack$/.test(chosen.type)) spectatedAttacks += 1;
+        const step = host.submit({ ...chosen, actorId });
         const begun = beginStep(scene, step);
         scene = begun.scene;
         for (const [combatantId, entry] of begun.started) playing.set(combatantId, { ...entry, startedAt: clock });
@@ -356,6 +378,18 @@ test("a spectated bout runs to a decision on a fake clock, and never stalls", ()
       completionToken: scene.completionToken
     }), `${perSide}v${perSide} seed ${seed} could not settle after its animations finished`);
   }
+
+  // ► **THE ASSERTION THE OLD VERSION OF THIS TEST WAS MISSING.** Everything
+  //   above passed for a day while the spectated arena threw ZERO punches: the
+  //   gladiators oscillated on the spot and the crowd's patience ended each
+  //   bout, which satisfies "settles" and "more than 3 actions" perfectly. A
+  //   spectator watching that would have seen three rounds of shuffling and a
+  //   corpse.
+  assert.ok(spectatedOffers > 0, "the spectated bouts must have CLOSED to where an attack is on offer");
+  assert.ok(
+    spectatedAttacks > 0,
+    `and must have actually swung: ${spectatedAttacks} attacks over ${spectatedOffers} turns with one on offer`
+  );
 });
 
 test("a token whose action started NO timeline is finished, not waited on for ever", () => {
