@@ -8,6 +8,46 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-12 20:30 — the build had a second axis all along](docs/handoffs/2026-09-12-2030--the-build-had-a-second-axis-all-along.md).**
+Start there. **`getfightdistance` computes `ydist` from `_y` and returns
+`round(sqrt(xdist^2 + ydist^2))` — the build's own distance is EUCLIDEAN, and
+this repository recorded it as "the rounded x-separation" in FOUR places.** The
+two offsets the docstring always cited are both real; `ydist` is computed
+between them, at `+0x0338` / `+0x03de`. **Fifth instance of the signature
+failure, and the first found by reading the oracle rather than a
+transcription.** So the second axis is half DERIVED rather than wholly invented:
+the metric is the build's, while where a gladiator STANDS stays authored under
+`MAP_SILENCE.multi-slot-arena-geometry`.
+**It is built, measured and playable at `?rank=N`.** Ranked item 1 of the 16:00
+brief is DONE, and so is item 2. Measured over 24 seeds a size:
+
+```text
+                       stride 0   stride 97   stride 150
+  settled                24/24      24/24       24/24
+  can hit EVERY foe      41.0%      22.0%        6.1%
+  blows through a body   44.7%      20.3%        3.7%
+  most fights at once      1          2            3
+```
+
+**Two or three simultaneous fights where one was geometrically impossible, and
+every bout still settles.** `rankStride: 0` is the default and is off
+STRUCTURALLY — every gladiator gets `y: null`, which `ss2FightDistance` reads as
+0 — so there is no second code path to keep in step.
+► **THE TRAP, and it cost a commit: "move toward the nearest foe's rank" is a
+  PILE-UP MACHINE.** It collapses all six into one rank at the opening and
+  rebuilds the single interface in two dimensions. The census reported it
+  unasked — **strides 97 and 150 returned IDENTICAL numbers**, because once
+  everybody shares a rank the stride cannot matter. The rule that works is
+  *fight who is in front of you*: change rank only when your own rank holds no
+  foe. Pinned, and verified to fail on the naive rule.
+► **RANKED FIRST AND IT IS THE OWNER'S: play it.** `?rank=97` vs `?rank=150` vs
+  `?rank=0`. How much should standing in the right place matter is game feel and
+  no measurement can settle it.
+► **`figure.js` said "vanilla has one gladiator a side, so there is no second
+  axis to be faithful to", and that sentence is why nobody checked for eleven
+  days. A confident negative stops the check that would refute it.**
+
+*(The brief it supersedes, whose ranked items 1 and 2 are the work above:)*
 [2026-09-12 16:00 — one interface, so the second axis is a prerequisite](docs/handoffs/2026-09-12-1600--one-interface-and-the-second-axis-is-a-prerequisite.md).**
 Start there. **The owner watched a 3v3 and called it "super limited"** — everyone
 jumbles into one melee, no breakoff fight, no choice between duelling and
