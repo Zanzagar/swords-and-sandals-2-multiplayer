@@ -8,6 +8,14 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-11 23:40 — two "owner's lane" items were a session away](docs/handoffs/2026-09-11-2340--two-owner-items-were-a-session-away.md).**
+Start there. **A session can read the installed SWF and the capture archive, and
+both were being treated as out of reach** — two ranked owner items closed on
+that basis. It also records this session putting a four-way design fork to the
+owner **on gladiators that cannot exist**, and the retraction.
+
+*(The brief it supersedes, written MID-session by the same session, whose
+ranked items 1 and 5 are now done:)*
 [2026-09-11 21:15 — both halves of position are built](docs/handoffs/2026-09-11-2115--both-halves-of-position-are-built.md).**
 Start there. **Gladiators now stand somewhere and must walk to reach each
 other.** Both halves landed today — presentation in `3a8638b`, the resolver in
@@ -58,6 +66,64 @@ priced on the weapon with strength in the denominator — and **both gated behin
   reason every block below it is: a count is false one commit later.
   **Measure the live number, never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **THE `weaponweights` DIRECTION IS READ, AND THE REPOSITORY ALREADY HELD IT
+  (2026-09-11, `ac8c7f4`). RANKED ITEM 1 IS CLOSED.** Index 1 IS the heavy end,
+  so `ss2WeaponMass` is right and the swing cost is NOT backwards. Read
+  read-only off the installed build at `+0x3dd4`; the install is byte-identical
+  (`77cb545c…`).
+  **Two findings beside the answer:** `weaponweights` holds STRINGS, so
+  `attack_speed` is a weight-CLASS index and never a numeric speed; and
+  `SS2_SWING.weightIndexMax`'s comment said the index runs 1..6 when it runs
+  1..5 (measured across all ninety rows).
+  ► **AND THE PART THAT MATTERS MORE: `ss2-item-tables.md` has stated the
+    answer since 2026-08-30, TWO LINES under the offset that
+    `MAP_SILENCE.swing-cost` cites for the array's LOCATION while declaring its
+    values unheld.** That entry is what ranked this as the owner's work. **Third
+    instance in this repository of one failure — declaring the map silent
+    without reading the surrounding paragraph.** Corrected at the entry, the
+    document and the docstring; `tools/item-table-transcription.mjs` now checks
+    shape, direction and the push-order convention on every run.
+
+► **A SESSION CAN READ THE INSTALLED SWF AND THE CAPTURE ARCHIVE, AND BOTH WERE
+  BEING TREATED AS OUT OF REACH.** The build is at the path
+  `tools/item-table-transcription.mjs` already defaults to; the populated
+  archive is a SECOND CHECKOUT at `/mnt/c/ss2-capture/captures` (1,650
+  rufflelogs). Neither needs Ruffle, staging, or a capture window — they are
+  READS, and `AGENTS.md` reserves only launching Ruffle and touching the
+  install/save/snapshots to the supervised main session. Two ranked "owner's
+  lane" items were closed this way in one stretch. **Check reachability before
+  ranking something as the owner's.**
+
+► **THE APPROACH IS MEASURED (`0dd1811`).** `tools/approach-length-census.mjs`
+  reads the archive and counts movement phases before the controller flips to
+  `closerange_warrior` — which IS `fightdistance < hero.weapon_range` first
+  holding, so it observes the gate rather than inferring from when the autopilot
+  swung. **n = 1,512: median 5, mode 5 (36.3%), 82% between 4 and 7.**
+  **It is NOT a displacement** — both gladiators close and these are the HERO's
+  steps, so the interval has one end. `SS2_ARENA.walkDistance` stays AUTHORED.
+  What it does is put the five-walk figure on something measured.
+
+► **THE CROWD RE-MEASUREMENT, AND A NUMBER THIS SESSION WITHDREW (`4acf2c9`).**
+  ► **RETRACTED: "the longest self-terminating bout is 684 turns, so patience
+    200 no longer clears the tail."** That sweep invented five archetypes and
+    never checked them against `13 + 4L`: each declared `herolevel: 3` while
+    spending 40-53 points, each set `magicka: 0` below the floor of 1. **They
+    cannot exist**, and a four-way fork went to the owner on their behalf.
+    `tools/stat-vector-reachability.mjs` had implemented that budget for days.
+    Re-measured over reachable builds, **200 clears every self-terminating bout
+    with 70% headroom.**
+  **WHAT SURVIVED IS LARGER: `SS2_CROWD` is not a backstop, it is what makes
+  roughly HALF of all reachable matchups terminate at all** — 52-63% of CROSS
+  pairings never end without it, between builds a player can hold, carrying
+  weapons the measured shop gate permits. The mechanism is D1's from the
+  opposite direction: attacking heals the attacker (`:2530`), and a build that
+  spent its points anywhere but strength deals single digits. **Unlike D1 and
+  D2 this corner is reachable by ordinary progression.**
+  **OPEN, AND THE OWNER'S:** four costed options in
+  `docs/crowd-patience-findings-2026-09-11.md`. Recommended — re-document now
+  (the mechanic works; only its description is wrong), and price the per-phase
+  heal deliberately in its own session, which closes D1 and this together.
 
 ► **THIS SESSION'S SECOND STRETCH COMMITTED TWO AND MEASURED TWO UNPUSHED AFTER
   ITS HANDOFF COMMIT `4723e4c`; the correction commit carrying this sentence
