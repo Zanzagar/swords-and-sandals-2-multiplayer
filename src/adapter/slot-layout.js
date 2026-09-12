@@ -94,7 +94,7 @@ export const ALLY_SIDE_DEPTH_STRIDE = 10;
 export const ALLY_SLOT_DEPTH_STRIDE = 2;
 /** Authored. Rear slots step outward from centre and slightly up-stage. */
 export const ALLY_X_STRIDE = 130;
-export const ALLY_Y_STRIDE = -35;
+export const ALLY_Y_STRIDE = -10;
 /** Authored. The adapter's own scratch root; not a vanilla path. */
 export const ADAPTER_STATE_ROOT = "_root.arena.team_arena.state";
 

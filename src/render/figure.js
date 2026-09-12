@@ -191,8 +191,37 @@ export function figureSpecFor(combatant, { side } = {}) {
  * (`MAP_SILENCE.multi-slot-arena-geometry`), so there is no second rank in the
  * build to observe and nothing here can be derived. Tuned by looking at the
  * rendered arena, which is the only way to tune it.
+ *
+ * ► **0.11 UNTIL 2026-09-12, WITH `ALLY_Y_STRIDE` AT -35, AND TOGETHER THEY
+ *   MADE THE PICTURE LIE.** The shell draws x at `scale` and arena-y at
+ *   `scale * 1.7` (`tools/arena/main.js` `toX`/`toY`), so one unit of y is 1.7
+ *   x-equivalent units on screen — a constant that lives in neither file a
+ *   reader of these two would think to open. A -35 stride therefore reached the
+ *   screen as ~59 x-equivalent units per rank, and this falloff then shrank the
+ *   back rank 30%, which is the standard perspective cue for "much further
+ *   away".
+ *
+ *   Measured as the worst drawn-separation over model-separation across every
+ *   pair the engine offers a melee verb on, 24 seeds through the arena's own
+ *   host path:
+ *
+ *   ```text
+ *                        1v1     2v2     3v3 worst
+ *     -35 / 0.11        1.000   1.216   1.658   (model 90, DRAWN 149)
+ *     -10 / 0.03        1.000   1.019   1.069   (model 90, drawn 96)
+ *   ```
+ *
+ *   **1v1 is 1.000 under both, which is what identifies the culprit**: the
+ *   whole disagreement is the rank stagger, not the model. The resolver was
+ *   telling the truth and the renderer was contradicting it.
+ *
+ *   **This is a floor, not a finished answer.** A one-dimensional model drawn
+ *   honestly shows what it actually contains: measured on the same sweep,
+ *   **44.7% of the blows thrown in a 3v3 pass through a living body**, and
+ *   58.4% of melee-legal pairs have someone standing in the way. No renderer
+ *   setting fixes that — it is the model, and it is the brief for a second axis.
  */
-export const DEPTH_SCALE_PER_RANK = 0.11;
+export const DEPTH_SCALE_PER_RANK = 0.03;
 
 /**
  * The scale a figure draws at: the build's own `physical_size` percentage,
