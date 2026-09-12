@@ -276,6 +276,25 @@ function driveFirst(battle, limit) {
  *   `tools/engagement-census.mjs` is byte-identical to the run before the
  *   change — spread 99, mutual reach 41.0%, blows through a body 44.7%.
  */
+/**
+ * ► **ALL THREE MOVED AGAIN ON 2026-09-12, and this time for a GAMEPLAY change
+ *   rather than a projection one: the owner played the arena and made the
+ *   second axis the shipped default** — *"97 looks great, 150 is too far"*.
+ *
+ *     32247fc9 -> 2d047e45   (six actions in)
+ *     abaca958 -> 1f2b26e4   (settled 1v1)
+ *     ef01645a -> e8f10147   (settled 3v3)
+ *     f6af12c0 -> d36b56ca   (vanilla-separation opening)
+ *
+ *   These pins stage their pair IN CONTACT at x = -/+30, both in slot 0, so
+ *   both gladiators sit in rank 0 and no `ydist` is ever non-zero in the
+ *   1v1 pins. **They moved because `y: 200` is now a projected value where it
+ *   used to be `null`** — a one-key serialisation change, as before — and the
+ *   3v3 pin moved for that AND because its six fighters now open in three
+ *   ranks and fight a different bout.
+ *
+ *   **The goldens did not move, for the fourth time and the same reason.**
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -296,7 +315,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "32247fc9", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "2d047e45", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -308,7 +327,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "abaca958", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "1f2b26e4", WHY_IT_MOVED);
 });
 
 /**
@@ -339,13 +358,17 @@ test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact
   const villain = battle.teams[1].combatants[0];
   assert.equal(hero.x, -250, "the hero opens where startingPosition puts it");
   assert.equal(villain.x, 250, "and the villain mirrors it");
-  assert.equal(hero.y, null, "with the second axis off by default, depth is null");
+  // Slot 0 of both sides stands in the front rank, which is the vanilla `_y`,
+  // so this opening is one-dimensional whatever the stride is — the parity
+  // case on the second axis exactly as it is on the first.
+  assert.equal(hero.y, 200, "slot 0 opens at the vanilla front rank");
+  assert.equal(villain.y, 200);
 
   const taken = driveByTurn(battle, 6);
   assert.equal(taken, 6, "the drive must have applied six actions");
   assert.equal(battle.result, null, "an approach does not settle in six actions");
 
-  assert.equal(combatStateHash(battle), "f6af12c0", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "d36b56ca", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
@@ -356,7 +379,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "ef01645a", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "e8f10147", WHY_IT_MOVED);
 });
 
 /**

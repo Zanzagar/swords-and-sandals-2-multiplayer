@@ -1141,7 +1141,7 @@ test("a canonical SS2 battle hashes to a pinned value — one tripwire for the w
       { id: "blue", combatants: [ss2Combatant(minimal, { id: "villain", name: "Villain" })] }
     ]
   });
-  assert.equal(combatStateHash(battle), "726642f4", [
+  assert.equal(combatStateHash(battle), "311a1016", [
     "The SS2 wire projection changed. That is not necessarily wrong — but it",
     "means every peer running the previous build now disagrees with this one",
     "about identical battles, and every stored completion token minted before",

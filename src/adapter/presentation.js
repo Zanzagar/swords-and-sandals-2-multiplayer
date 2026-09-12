@@ -263,6 +263,29 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
     // geometry and no label is reported by `presentResolvedEvents`, which says
     // which field was missing. Deriving `walkleft`/`walkright` from the sign
     // would put a guessed gait on screen every time the action was a charge.
+    // ► **A DEPTH MOVE PLAYS NOTHING, AND THAT IS A BINDING DECISION RATHER
+    //   THAN A MISSING ONE. Added 2026-09-12, after the sweep guard caught the
+    //   first version reporting 3,483 of them as unbound.**
+    //
+    //   A rank change is self-targeted, so without a case of its own it fell
+    //   through to the ATTACK branch below and was handed an actor label and a
+    //   `hurt5` for the target — **a step sideways bound as a blow.** The
+    //   sweep guard is what found it; nothing else would have.
+    //
+    //   Detected by `fromY`/`toY`, never by parsing the type string, for the
+    //   same reason every other case here is: the engine's token and the
+    //   build's label are different spellings and only the fields are
+    //   reliable. Here there is no build label at all — the build has no
+    //   sidestep phase — so the honest binding is BOTH ROLES NULL: the figure
+    //   moves (see `depthMovementFor`), and no clip is asked to play.
+    //
+    //   Returning `null` instead would report it as `unmapped`, which means
+    //   "this table has no answer". This table HAS an answer and the answer is
+    //   "nothing plays".
+    if (Number.isFinite(event.fromY) && Number.isFinite(event.toY)) {
+      return Object.freeze({ actor: null, target: null });
+    }
+
     if (Number.isFinite(event.from) && Number.isFinite(event.to)) {
       const phase = typeof event.vanillaLabel === "string" && event.vanillaLabel.length > 0
         ? event.vanillaLabel

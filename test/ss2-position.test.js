@@ -224,14 +224,24 @@ test("a level pair reduces EXACTLY to the rounded x-separation, so no pinned dis
  * every gladiator carries `y: null`, `ss2FightDistance` reads that as 0, and
  * there is no second code path that could drift from the first.
  */
-test("the second axis is OFF by default, and off means the key is null rather than absent", () => {
-  const battle = bout(3);
-  for (const id of ["red-1", "red-2", "red-3"]) {
-    const combatant = combatantById(battle, id);
-    assert.equal(combatant.y, null, `${id} models no depth by default`);
-    assert.ok("y" in combatant, "the key is present either way, so two peers commit to one shape");
-  }
-  assert.equal(ss2TeamRules.id, "ss2-map-derived-tournament", "and the default id is untouched");
+test("the second axis is ON by default at the owner's chosen stride, and OFF still means null", () => {
+  // ► **THE DEFAULT FLIPPED 2026-09-12: the owner played the arena and picked
+  //   97 — "97 looks great, 150 is too far".** Until then the axis shipped off
+  //   while it was unproven. What this pins is that BOTH states still exist and
+  //   that `null` still means "this rule set models no depth".
+  const ranked = bout(3);
+  assert.deepEqual(
+    ["red-1", "red-2", "red-3"].map((id) => combatantById(ranked, id).y),
+    [200, 103, 6],
+    "the shipped default ranks the slots"
+  );
+  assert.equal(ss2TeamRules.id, "ss2-map-derived-tournament", "and the DEFAULT carries no suffix");
+
+  // The one-dimensional engine is still reachable, still the before-picture,
+  // and still says so in its id.
+  const flat = createSs2TeamRules({ rankStride: 0 });
+  assert.equal(flat.startingY({ slotIndex: 2 }), null, "rankStride 0 models no depth");
+  assert.equal(flat.id, "ss2-map-derived-tournament-rank-0", "a non-default stride names itself");
 });
 
 test("a non-zero rankStride ranks the slots, and slot 0 keeps the vanilla depth", () => {
@@ -254,8 +264,11 @@ test("a non-zero rankStride ranks the slots, and slot 0 keeps the vanilla depth"
 test("the stride joins the rule-set id, because the hash carries only the id", () => {
   // Two peers running different strides would otherwise agree on every hash
   // and then diverge the first time depth mattered. Same rule as crowdPatience.
-  assert.equal(createSs2TeamRules({ rankStride: 0 }).id, "ss2-map-derived-tournament");
-  assert.equal(createSs2TeamRules({ rankStride: 97 }).id, "ss2-map-derived-tournament-rank-97");
+  // The suffix names what differs from the SHIPPED DEFAULT, so it flipped with
+  // the default: 97 is bare and 0 is the one that has to announce itself.
+  assert.equal(createSs2TeamRules({ rankStride: 97 }).id, "ss2-map-derived-tournament");
+  assert.equal(createSs2TeamRules({ rankStride: 0 }).id, "ss2-map-derived-tournament-rank-0");
+  assert.equal(createSs2TeamRules({ rankStride: 150 }).id, "ss2-map-derived-tournament-rank-150");
   assert.throws(
     () => createSs2TeamRules({ rankStride: -1 }),
     (error) => error instanceof TeamRuleSetError && /rankStride/.test(error.message)
@@ -344,8 +357,18 @@ function rankedBout(perSide, rankStride, seed = 1) {
 }
 
 test("the rank verbs are offered only when the rule set models depth and a rank exists that way", () => {
-  // Axis OFF: the verbs never appear, whatever else is true.
-  const flatOptions = legalActions(bout(3)).map((option) => option.type);
+  // Axis OFF: the verbs never appear, whatever else is true. `bout` now builds
+  // the SHIPPED rule set, which models depth, so the off case is built
+  // explicitly rather than by default.
+  const flatBattle = createTeamBattle({
+    seed: 1,
+    rules: createSs2TeamRules({ rankStride: 0 }),
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator({ gladiator_dir: "right" }), { id: "red-1", name: "r" })] },
+      { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "blue-1", name: "b" })] }
+    ]
+  });
+  const flatOptions = legalActions(flatBattle).map((option) => option.type);
   assert.ok(!flatOptions.includes("rank-back"), "no depth, no rank verbs");
   assert.ok(!flatOptions.includes("rank-front"));
 
@@ -1224,9 +1247,16 @@ test("a walk may never carry a gladiator past a foe — including when the CLAMP
   //   `20 - 86 = -66`, and the actor travelled left THROUGH the foe at -10 —
   //   past a foe, which is the one thing `ss2WalkDestination` is load-bearing
   //   for.
+  // ► **PINNED TO THE ONE-DIMENSIONAL ENGINE, and that is the point rather
+  //   than a convenience.** This case needs two foes ON ONE LINE. Once
+  //   `rankStride` became the shipped default the two blue slots open in
+  //   different RANKS, `ss2BodyBlocks` stops either clamping the other, and
+  //   the scenario simply cannot arise — the test would pass while proving
+  //   nothing. The reversal guard still governs every walk inside a rank, so
+  //   it is still worth pinning; it is pinned where it can fire.
   const battle = createTeamBattle({
     seed: 1,
-    rules: ss2TeamRules,
+    rules: createSs2TeamRules({ rankStride: 0 }),
     teams: [
       { id: "red", combatants: [ss2Combatant(gladiator(), { id: "actor", x: 0 })] },
       {

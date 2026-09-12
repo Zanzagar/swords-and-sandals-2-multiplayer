@@ -941,6 +941,26 @@ export const SS2_ARENA = Object.freeze({
    */
   rankCount: 3,
   /**
+   * How far apart consecutive ranks stand, and **the owner picked it by
+   * playing the arena on 2026-09-12: "97 looks great, 150 is too far."**
+   *
+   * It is not a tuned number either: 97 is
+   * `floor(sqrt(reach^2 - physical_size^2))` at the demo roster's strength 9 —
+   * the exact depth at which a second rank leaves the front rank's reach. One
+   * rank back is a real position; two is a different fight.
+   *
+   * Measured at this value, 24 seeds, 3v3: every bout settles, blows through a
+   * living body fall from 44.7% to 15.0%, can-hit-every-foe from 41.0% to
+   * 13.6%, and there are two simultaneous fights on 463 turns where one was
+   * geometrically impossible. At 150 there are three, and 15 of 24 bouts
+   * stopped settling before the rank verbs existed — which is what "too far"
+   * looks like in the numbers.
+   *
+   * **`createSs2TeamRules({ rankStride: 0 })` is still the one-dimensional
+   * engine**, and it is how the before-picture is reproduced.
+   */
+  rankStride: 97,
+  /**
    * AUTHORED, and it matches the adapter's `ALLY_X_STRIDE` on purpose: vanilla
    * has no second ally, so nothing can settle it (`MAP_SILENCE`,
    * `multi-slot-arena-geometry`). Allies stand FURTHER OUT than slot 0, so
@@ -2993,7 +3013,7 @@ export function createSs2TeamRules({
    * `crowdPatience` is: the hash carries only the id, so two peers running
    * different strides would agree on every hash and then diverge.
    */
-  rankStride = 0
+  rankStride = SS2_ARENA.rankStride
 } = {}) {
   if (!FIGHT_MODES.includes(fightMode)) {
     throw new TeamRuleSetError(`fightMode must be one of: ${FIGHT_MODES.join(", ")}.`);
@@ -3032,7 +3052,11 @@ export function createSs2TeamRules({
   // The stride joins the id ONLY when the second axis is on, so an ordinary
   // battle keeps the id every pinned hash was taken against. Same rule as the
   // patience above, and for the same reason: the hash carries only the id.
-  const strideSuffix = rankStride === 0 ? "" : `-rank-${rankStride}`;
+  // The suffix names what differs from the SHIPPED DEFAULT, exactly as the
+  // patience one does — so it is empty at the default and present otherwise,
+  // including at 0. A rule set with the second axis switched off is a
+  // different engine from the shipped one and its id has to say so.
+  const strideSuffix = rankStride === SS2_ARENA.rankStride ? "" : `-rank-${rankStride}`;
   const ruleSetId = `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}`;
 
   return defineTeamRuleSet({
