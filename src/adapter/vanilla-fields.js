@@ -387,8 +387,20 @@ export const MAP_SILENCE = Object.freeze([
       "the HERO's steps, so the closure per step is unknown and the interval has one end, not two. What " +
       "it does is corroborate the FIVE-WALK figure the authored 44 was consistency-checked against — now " +
       "from the build's own gate, across the whole archive, instead of from one uncited line in a frozen " +
-      "handoff. **What remains is narrower and still open: the VILLAIN's own phase sequence**, which " +
-      "closes the second end of the interval and which these traces do not record. " +
+      "handoff. **What remains is narrower and still open**, and the first statement of what remains was " +
+      "WRONG — corrected here the same day. It said the missing piece was \"the VILLAIN's own phase " +
+      "sequence, which these traces do not record\". **The traces DO record it.** `phase_action` is the " +
+      "game's own variable and fires for both sides: in `arena-champ-1/obs-champ-1-a1` it fires 206 times " +
+      "against 140 autopilot steps, and all 66 unpaired records are `rest` — the villain's, provably, " +
+      "because the autopilot's whole vocabulary is `normal_attack`/`walkright`/`walkleft` and it never " +
+      "chooses rest. **In that session the villain never moves at all, so the hero closed the whole " +
+      "distance alone** — which is the clean case the derivation wants. " +
+      "**THE ACTUAL MISSING PIECE IS THE HERO'S `weapon_range` IN THE SAME SESSION**: the flip condition " +
+      "is `fightdistance < hero.weapon_range`, and these traces carry no `strength`, `weapon`, " +
+      "`physical_size`, `weapon_range` or `fightdistance` value anywhere. With it, a session where the " +
+      "villain is stationary bounds the per-phase displacement from BOTH ends — " +
+      "`500 - N*d < weapon_range <= 500 - (N-1)*d` — and turns `SS2_ARENA.walkDistance` from authored " +
+      "into derived. That is the cheapest remaining route to the last authored number setting bout pace. " +
       "**NO GOLDEN CAN SETTLE IT, and that is structural rather than an accident of which 23 we have.** " +
       "Measured 2026-09-10: a golden's scenario carries exactly attack, defence, strength, charisma, " +
       "magicka, min_damage, max_damage, hitpoints, hitpointsmax, staminaleft, staminamax, armourclass, " +

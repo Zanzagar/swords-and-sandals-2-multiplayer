@@ -110,6 +110,25 @@ priced on the weapon with strength in the denominator — and **both gated behin
   steps, so the interval has one end. `SS2_ARENA.walkDistance` stays AUTHORED.
   What it does is put the five-walk figure on something measured.
 
+► **THE DISPLACEMENT IS CLOSER THAN THE 23:40 HANDOFF SAYS, and its ranked
+  item 5 contains a FALSE clause — corrected here because that brief is
+  frozen.** It says the villain's phase sequence "these traces do not record".
+  **They record it.** `phase_action` is the game's own variable and fires for
+  BOTH sides: 206 records against 140 autopilot steps in
+  `arena-champ-1/obs-champ-1-a1`, and all 66 unpaired ones are `rest` — the
+  villain's, provably, because the autopilot's entire vocabulary is
+  `normal_attack`/`walkright`/`walkleft` and it never rests. **In that session
+  the villain never moves, so the hero closed the whole distance alone** —
+  exactly the clean case the derivation needs.
+  **THE REAL GAP IS THE HERO'S `weapon_range` IN THE SAME SESSION.** The flip
+  condition is `fightdistance < hero.weapon_range` and these traces carry no
+  `strength`, `weapon`, `physical_size`, `weapon_range` or `fightdistance`
+  anywhere. Supply it and a stationary-villain session bounds the displacement
+  from both ends — `500 - N*d < weapon_range <= 500 - (N-1)*d` — turning
+  `SS2_ARENA.walkDistance` from AUTHORED into derived. **That is the cheapest
+  remaining route to the last authored number that sets bout pace**, and it is
+  a session's work, not the owner's.
+
 ► **THE CROWD RE-MEASUREMENT, AND A NUMBER THIS SESSION WITHDREW (`4acf2c9`).**
   ► **RETRACTED: "the longest self-terminating bout is 684 turns, so patience
     200 no longer clears the tail."** That sweep invented five archetypes and
