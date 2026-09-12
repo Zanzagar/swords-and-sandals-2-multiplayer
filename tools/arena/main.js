@@ -453,11 +453,33 @@ function render(now = performance.now()) {
 /* Side panel                                                          */
 /* ------------------------------------------------------------------ */
 
+/**
+ * The roster list's own order: by SIDE, then by slot. Stable, and nothing to do
+ * with paint order.
+ *
+ * ► **THIS ITERATED `scene.drawOrder` UNTIL 2026-09-12, and that stopped being
+ *   harmless the moment draw order became correct.** `withDrawOrder` used to
+ *   sort by clip depth, which happened to group the two sides; it now sorts
+ *   back-to-front by arena `y`, because that is what painting needs — and the
+ *   side panel silently became a back-to-front list with the two teams
+ *   interleaved (Tarn, Orso, Vasso, Nym, Cidra, Ruk). A player reads this list;
+ *   it should not be ordered by who is painted first. Caught by SCREENSHOTTING
+ *   the arena and noticing the panel had changed, which no test was watching.
+ */
+function rosterOrder() {
+  return [...scene.drawOrder].sort((left, right) => {
+    const leftAt = host.layout.placementFor(left);
+    const rightAt = host.layout.placementFor(right);
+    if (leftAt.side !== rightAt.side) return leftAt.side === "hero" ? -1 : 1;
+    return leftAt.slotIndex - rightAt.slotIndex;
+  });
+}
+
 function renderRoster() {
   const byId = combatantsById();
   const acting = host.battle.result ? null : host.currentCombatantId();
   el("roster").replaceChildren(
-    ...scene.drawOrder.map((combatantId) => {
+    ...rosterOrder().map((combatantId) => {
       const combatant = byId.get(combatantId);
       const placement = host.layout.placementFor(combatantId);
       const node = document.createElement("div");
