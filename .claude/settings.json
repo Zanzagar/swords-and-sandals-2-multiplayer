@@ -23,6 +23,9 @@
       "Bash(git branch -D main)",
       "Bash(git branch -D master)"
     ],
+    "allow": [
+      "Bash(git push *)"
+    ],
     "ask": [
       "Bash(git commit --amend *)",
       "Bash(git rebase *)",
@@ -32,10 +35,9 @@
       "Bash(git branch -d *)",
       "Bash(gh pr create *)",
       "Bash(gh pr merge *)",
-      "Bash(gh repo delete *)",
-      "Bash(git push *)"
+      "Bash(gh repo delete *)"
     ]
   },
-  "_ss2_tightening": "SS2 tightens rule 7. `Bash(git push *)` is in ASK, not allowed, because AGENTS.md says 'Ask before pushing anything' \u2014 this repository derives its fixtures from a licensed game, so what leaves the machine is the owner's call, not a convenience. Deny still beats ask, so main stays blocked outright and every other push prompts. Nothing is DENIED that has a legitimate form: a first draft also denied pushes to the working branch, which would have blocked work the owner had explicitly authorised.",
+  "_ss2_tightening": "SS2 USED TO TIGHTEN RULE 7, AND NO LONGER DOES. `Bash(git push *)` was in ASK, not allowed, because AGENTS.md said 'Ask before pushing anything' \u2014 this repository derives its fixtures from a licensed game, so what leaves the machine was treated as the owner's call rather than a convenience. DROPPED BY THE OWNER 2026-09-12, in chat and at the approval screen, explicitly asking that pushing no longer prompt. So the project is back to harness rule 7 (push feature branches freely) and `Bash(git push *)` is in ALLOW. WHAT STILL BINDS, and it is the part that carried the actual safety: DENY beats everything, so `main`, `master`, `--force`, `-f` and `--force-with-lease` are blocked outright and no allow entry can reach them. Nothing is DENIED that has a legitimate form: a first draft also denied pushes to the working branch, which would have blocked work the owner had explicitly authorised. ONE THING TO WATCH, stated rather than asserted: `Bash(git push --delete *)` and `Bash(git push origin --delete *)` are still in ASK, and this project has NOT measured whether a broad ALLOW entry wins over a narrower ASK one in this build. If a remote-branch deletion ever runs without prompting, move those two entries into DENY \u2014 do not assume the ASK held. (The `_ss2_workflow` field below records what it cost the last time this file asserted an unmeasured precedence claim.)",
   "_ss2_workflow": "`Workflow` WAS in ASK so the owner approved each fan-out wave and saw what it spawns (harness docs/adr/0001). DROPPED BY THE OWNER 2026-09-09, on this reasoning: the dialog bought VISIBILITY, not safety — the deterministic guard is the 6-questions/6-verifiers hard cap inside .claude/workflows/question-fanout-audit.js, which still binds, and the main session states a wave's spawn count in the transcript before launching. The owner had also just asked for maximum usage, so a per-wave confirmation was pure friction. WHAT THIS COSTS: nothing now prompts before N agents start, so the cap in the committed script and the ONE-WAVE-AT-A-TIME rule in AGENTS.md are the whole of the control; authoring an inline workflow to get past that cap was already a rule violation and now has no dialog behind it. RE-ADD THE ENTRY if waves are ever launched without their spawn count being said first. NOTE ON THE OLD CLAIM HERE: this field used to assert that bypass-permissions mode skips ASK rules by design. The owner reported being prompted for these workflows WHILE bypass was active, which contradicts it. That assertion was never measured by this project and should not be relied on — if you need to know whether an ASK rule survives bypass in a given build, test it rather than citing this file."
 }

@@ -504,7 +504,10 @@ exploit.
   A timestamped event stays true; a count does not. **Measure the live number,
   never read it:**
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-  `Bash(git push *)` stays in `ask`, so ask before every push regardless.
+  ~~`Bash(git push *)` stays in `ask`, so ask before every push regardless.~~
+  ► **NO LONGER TRUE (owner, 2026-09-12): it is in `permissions.allow` and a
+    push does not prompt.** `main`, `master` and every force form stay DENIED,
+    which is where the safety actually lived.
 
   ► **AND THE REWRITE STILL LEFT A DECAYING CLAUSE IN, WHICH IS THE WHOLE
     LESSON REPEATING ITSELF INSIDE THE PARAGRAPH ABOUT IT.** The version that
@@ -562,8 +565,14 @@ forbids the one behaviour all five designs were built around.
   THE TRANSCRIPT BEFORE LAUNCHING IT** — that is now the only place the owner
   sees the number, and it is on the session, not the harness. Authoring an
   inline workflow to get past the committed cap was already a rule violation and
-  now has no dialog behind it. **`Bash(git push *)` STAYS in ASK**: that gate is
-  about what leaves this machine, not about cost. The settings file carries the
+  now has no dialog behind it. ~~**`Bash(git push *)` STAYS in ASK**: that gate
+  is about what leaves this machine, not about cost.~~
+  ► **AND IT WENT THE SAME WAY THREE DAYS LATER (owner, 2026-09-12).** Moved to
+    `permissions.allow`; rule 7 applies as written. The distinction this
+    sentence drew — cost versus what leaves the machine — did not survive the
+    owner deciding that the prompt was friction in both cases. **The deny list
+    is now the whole of the push control**, and it is the half that was always
+    load-bearing. The settings file carries the
   full rationale, including a claim it used to make about bypass mode that the
   owner's own experience contradicted — do not cite that claim, measure it.
 

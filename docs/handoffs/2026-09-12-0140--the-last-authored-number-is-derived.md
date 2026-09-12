@@ -224,6 +224,13 @@ session, exactly as the 23:40 brief recommended.
   how to read it. Mine taught six agents a parse that drops 69% of the archive's
   lines. See `docs/overnight-agent-plan.md`, which also now records that the
   scratchpad is SHARED and three agents had files silently clobbered.
-- **Ask before every push.** `main` stays denied outright.
+- ~~**Ask before every push.**~~ **DROPPED BY THE OWNER at the end of this
+  session, 2026-09-12: `Bash(git push *)` is in `permissions.allow` and rule 7
+  applies as written — push a feature branch without asking.** `main` and
+  `master` stay DENIED outright, as do `--force`, `-f` and `--force-with-lease`;
+  deny beats everything. See `.claude/settings.json`'s `_ss2_tightening`, which
+  also names the one thing to watch (the two `--delete` forms are still in
+  `ask`, and this project has not measured whether a broad allow beats a narrow
+  ask in this build).
 - **A handoff commit is not finished until `node --test --test-concurrency=1` is
   green, and its suite and push lines must be measured AFTER that commit.**

@@ -69,9 +69,17 @@ there never reaches the next reader.
   ENFORCED, not advisory: `.claude/settings.json` carries them as
   `permissions.deny`/`ask`, so they bind Claude, Codex and a human here
   identically.
-  **This project TIGHTENS rule 7 (push feature branches freely) to ASK BEFORE
-  EVERY PUSH**, because the fixtures derive from a licensed game and what
-  leaves this machine is the owner's call. `main` is denied outright.
+  ~~**This project TIGHTENS rule 7 (push feature branches freely) to ASK BEFORE
+  EVERY PUSH**~~ **— DROPPED BY THE OWNER 2026-09-12. Rule 7 applies as
+  written: push a feature branch without asking.** The tightening existed
+  because the fixtures derive from a licensed game and what left this machine
+  was treated as the owner's call; the owner removed it in chat and at the
+  approval screen. **What still binds is the part that carried the safety:
+  `main` and `master` are DENIED outright, as are `--force`, `-f` and
+  `--force-with-lease`, and deny beats everything — no allow entry reaches
+  them.** `Bash(git push *)` is now in `permissions.allow`; the two
+  `git push --delete` forms stay in `ask`, and `.claude/settings.json` records
+  the one thing to watch there.
 
 ## If you are a subagent
 
