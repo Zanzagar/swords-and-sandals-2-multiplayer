@@ -255,7 +255,7 @@ export const Ss2ActionType = Object.freeze({
   // reachable only through the taunted chain, which nothing here sets;
   // `charge*` and `jump*` are wired but their displacement is unknown
   // separately from the walk's, and one unmeasured distance is enough. See
-  // `SS2_ARENA.walkDistance`.
+  // `ss2WalkDisplacement`, which is `movement_speed * 16` eased to a stop.
   WALK_LEFT: "walk-left",
   WALK_RIGHT: "walk-right",
   // The four status phases. FOUR types rather than one `status-phase`, because
@@ -878,12 +878,20 @@ function statusConsumptionEffects(actor, flags = SS2_DEATH_CLEAR_FLAGS) {
 /* ------------------------------------------------------------------ */
 
 /**
- * WHERE GLADIATORS STAND, AND HOW FAR A STEP CARRIES THEM.
+ * WHERE GLADIATORS STAND.
  *
- * Three of these four are the build's, cited. The fourth is AUTHORED and is
- * the only unmeasured number this rule set's movement adds; see
- * `MAP_SILENCE.movement-displacement` in `src/adapter/vanilla-fields.js` for
- * the measurement that would settle it without a new capture.
+ * ► **THIS USED TO SAY "AND HOW FAR A STEP CARRIES THEM", and that the fourth
+ *   of four numbers here was "the only unmeasured number this rule set's
+ *   movement adds". Both clauses are gone (2026-09-11): the step is
+ *   `ss2WalkDisplacement`, derived from the build, and it is per-actor rather
+ *   than a constant, so it does not belong in a frozen table at all.** What is
+ *   left here is geometry — where the build puts a gladiator and what bounds it
+ *   — plus one pin on the derivation's floor case.
+ *
+ * `allyStride` remains AUTHORED, because vanilla has no second ally
+ * (`MAP_SILENCE.multi-slot-arena-geometry`), and `clamp` remains the build's
+ * number only as far as this repository knows — read its caveat before citing
+ * it.
  */
 export const SS2_ARENA = Object.freeze({
   /**
@@ -911,29 +919,36 @@ export const SS2_ARENA = Object.freeze({
    */
   clamp: Object.freeze({ min: -2100, max: 2100 }),
   /**
-   * **AUTHORED. THE ONE NUMBER HERE THAT NO BYTE SUPPORTS.**
+   * ► **NO LONGER AUTHORED, AND NO LONGER WHAT A WALK MOVES. DERIVED
+   *   2026-09-11; the key was renamed from `walkDistance` so that every reader
+   *   of the old name fails loudly instead of quietly reading one case of a
+   *   law.**
    *
-   * How far a completed `walkleft`/`walkright` phase carries a gladiator. The
-   * map gives every movement phase's stamina COST with an offset (`walkleft`
-   * `+0x3b37` and its seven siblings) and no phase's DISTANCE; the only `_x`
-   * writes it records anywhere are the four clamps above.
+   * 44 is `ss2WalkDisplacement(4)` — the displacement of one completed walk
+   * phase at the `movement_speed` clamp FLOOR with no boots — read out of the
+   * walk branches of overlay frame 52. The derivation, the offsets and the
+   * easing tween that turns a `movement_speed * 16` destination into a realised
+   * 44 are all in `ss2WalkDisplacement`'s docstring. **A walk is per-actor from
+   * here on**: `movement_speed` 12 walks 172.
    *
-   * 44 is not invented from nothing, and it is not measured either. It is the
-   * single figure in the whole repository —
-   * `docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md:194`,
-   * *"one walk is 44 px"*, uncited, in a FROZEN handoff — and an adversarial
-   * reader proposed it is a conflation with the range multiplier in
-   * `weapon_range = physical_size + weapon[5] * 44`. It survives one check
-   * from a different direction: the same handoff line reports, from real
-   * rounds, that only 26.6% reached range in FEWER than five walks, and at
-   * 44px with both gladiators closing, four walks each leaves the champion
-   * staging at `fightdistance` 148 against its `weapon_range` 144 (out) and
-   * five leaves 60 (in).
+   * This value is kept for exactly two jobs, and neither is "how far a walk
+   * goes": it is the slowest walk the build can produce, which makes it the
+   * worst case for any pacing bound; and it is the pin that proves the
+   * derivation still reproduces the figure the project held for nine days.
    *
-   * **That is a CONSISTENCY CHECK, not a promotion. It may never be cited as
-   * evidence about the game.**
+   * **THE HISTORY IS KEPT BECAUSE IT IS THE INSTRUCTIVE PART.** 44 entered this
+   * repository through one uncited line in a frozen handoff
+   * (`docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md:194`,
+   * *"one walk is 44 px"*), and an adversarial reader proposed it was a
+   * conflation with the range multiplier in
+   * `weapon_range = physical_size + weapon[5] * 44`. **That reader was wrong and
+   * the uncited line was right** — the two 44s are unrelated, and the walk's
+   * falls out of `64 - 20` where 64 is `4 * 16` and 20 is the tween's stop
+   * tolerance. Being right by luck is still not evidence, which is why it sat
+   * under `MAP_SILENCE.movement-displacement` for nine days; what closed it was
+   * reading the bytes, and the bytes were always readable.
    */
-  walkDistance: 44
+  walkDistanceAtSpeedFloor: 44
 });
 
 /**
@@ -998,6 +1013,196 @@ export function ss2Reach(actor) {
  */
 export function ss2MovementSpeed(actor) {
   return clamp(Math.round((actor.stats.agility ?? 0) * 1.5), 4, 60);
+}
+
+/**
+ * The build's easing divisor and stop tolerance, named because both appear in
+ * four movement branches and a bare `8` beside a bare `20` reads like a tidy-up
+ * rather than a transcription. `ceil(gap / 8)` per frame, phase over at 20.
+ */
+const SS2_WALK_EASING_DIVISOR = 8;
+const SS2_WALK_STOP_GAP = 20;
+
+/**
+ * HOW FAR ONE COMPLETED `walkleft` / `walkright` PHASE CARRIES A GLADIATOR —
+ * **DERIVED FROM THE BUILD, 2026-09-11, and no longer authored.**
+ *
+ * `MAP_SILENCE.movement-displacement` recorded this as the one number in the
+ * arena model that no byte supported, and `SS2_ARENA.walkDistance` (now `walkDistanceAtSpeedFloor`) carried 44
+ * on the strength of a single uncited line in a frozen handoff. **The battle
+ * map is silent; the BUILD is not.** The walk branches of overlay frame 52
+ * (`sprite:862/frame:52/DoAction@0x240c7f`, block base `0x240c85`) compute the
+ * step, and they were never read because the map's `staminacost` table stops at
+ * the cost:
+ *
+ * ```text
+ * walkleft  +0x3b2c   walkright +0x3d0b      (the phase_decision test)
+ *   staminacost   = round(movement_speed / 2)        +0x3b37 / +0x3d16
+ *   if (attacker.destination == null) {              +0x3b72 / +0x3d51
+ *     attacker.gotoAndPlay("StepBack" | "StepForward")
+ *     attacker_x_walk = game_attacker.movement_speed * 16    +0x3b99 / +0x3d78
+ *     walk_bonus      = get_percentage(100 + game_attacker.boot * 2, 100)
+ *                                                    +0x3ba3 / +0x3d82
+ *     attacker_x_walk = add_percentage(attacker_x_walk, walk_bonus)
+ *                                                    +0x3bd1 / +0x3db0
+ *     attacker.destination = attacker._x -/+ attacker_x_walk
+ *                                                    +0x3bf1 / +0x3dd0
+ *     // and the overlap clamp — see `ss2WalkDestination`
+ *   }
+ *   attacker._x -/+= Math.ceil((attacker._x - attacker.destination) / 8)
+ *                                                    +0x3c75 / +0x3e54
+ *   if (!(attacker._x >/< attacker.destination +/- 20)) {
+ *     attacker.destination = null; nextphase();       +0x3cb8 / +0x3e97
+ *   }
+ * ```
+ *
+ * The two helpers are in the same block and are read rather than guessed —
+ * their parameters sit in registers 2 and 1 respectively, which is why reading
+ * the body without the `DefineFunction2` header would inverse both:
+ *   `get_percentage(a, b) = (a / b) * 100`      (`+0x1089`)
+ *   `add_percentage(a, b) = ceil(a * b / 100)`  (`+0x10ba`)
+ * so `walk_bonus` is `100 + 2 * boot` and the boot term SPEEDS A WALK UP.
+ *
+ * **THE PART THAT MAKES 44 AN ANSWER RATHER THAN A COINCIDENCE.** The step is
+ * a DESTINATION, not a displacement: `_x` eases toward it by `ceil(delta / 8)`
+ * per frame and the phase ENDS the first frame the remaining gap is 20 or
+ * less. So a phase realises `attacker_x_walk` MINUS whatever gap was left when
+ * it stopped, and at the `movement_speed` floor of 4 with no boots that is
+ * exactly 44:
+ *
+ * ```text
+ * 64 -> 56 -> 49 -> 42 -> 36 -> 31 -> 27 -> 23 -> 20   (stop; 64 - 20 = 44)
+ * ```
+ *
+ * The 44 in that frozen handoff was RIGHT, and the adversarial reader who
+ * proposed it was a conflation with the `weapon_range` multiplier was wrong —
+ * but only for a gladiator at the clamp floor. **It is not a constant.** A
+ * gladiator with `agility` 8 (`movement_speed` 12) walks 172 per phase, and
+ * treating 44 as universal was understating a fast gladiator's reach across
+ * the arena by a factor of four.
+ *
+ * Corroborated at runtime from the capture archive, independently of these
+ * bytes — see `tools/walk-displacement-derivation.mjs` and
+ * `tools/approach-length-census.mjs`.
+ */
+export function ss2WalkDisplacement(movementSpeed, { boot = 0 } = {}) {
+  if (!Number.isFinite(movementSpeed) || movementSpeed < 0) {
+    throw new TeamRuleSetError(`ss2WalkDisplacement: movementSpeed must be a finite non-negative number, got ${movementSpeed}.`);
+  }
+  if (!Number.isFinite(boot) || boot < 0) {
+    throw new TeamRuleSetError(`ss2WalkDisplacement: boot must be a finite non-negative number, got ${boot}.`);
+  }
+  // `attacker_x_walk`, both halves: the base step and the boot bonus.
+  const step = Math.ceil(movementSpeed * 16 * (100 + 2 * boot) / 100);
+  // The easing tween, run to the build's own stop condition. A step of 20 or
+  // less never moves the gladiator at all, because the phase ends on the frame
+  // it starts — which is the build's behaviour and not a guard invented here.
+  let gap = step;
+  while (gap > SS2_WALK_STOP_GAP) gap -= Math.ceil(gap / SS2_WALK_EASING_DIVISOR);
+  return step - gap;
+}
+
+/**
+ * The other six movement phases, transcribed from the same block so that
+ * nobody has to read it twice. **NONE of them is wired into the rule set** —
+ * `Ss2ActionType` has two walks and no run, charge or jump — and this table is
+ * here because `MAP_SILENCE.movement-displacement` said "nothing states a
+ * displacement for the other six phases at all", which was as wrong about the
+ * build as the walk entry was.
+ *
+ * | phase | site | destination |
+ * | --- | --- | --- |
+ * | `runleft`     | `+0x3f4f` | `_x - movement_speed * 40` |
+ * | `runright`    | `+0x40d8` | `_x + movement_speed * 40` |
+ * | `chargeleft`  | `+0x44da` | `_x - movement_speed * 20` |
+ * | `chargeright` | `+0x426e` | `_x + movement_speed * 20` |
+ * | `jumpleft`    | `+0x4b69` | per FRAME: `_x -= ceil(round(movement_speed * 0.6) * (100 + 2 * shinguard) / 100)` |
+ * | `jumpright`   | `+0x487c` | per FRAME: `_x += ceil(round(movement_speed * 0.6) * (100 + 2 * shinguard) / 100)` |
+ *
+ * Three things in that table are worth more than the numbers:
+ * - **Only the walk takes a boot bonus**, and only the jump takes a shinguard
+ *   one (`+0x48a9`). Run and charge take neither and have no intermediate
+ *   variable at all.
+ * - **A jump is not a destination.** It adds to `_x` every frame of the
+ *   `Superjump` clip and lifts `_y` by `attacker.leap` (`+0x4913`), so its
+ *   total displacement is a property of the ANIMATION's length and is the one
+ *   movement phase these bytes do not settle.
+ * - **A charge has its own clamp**, against `defender._x - game_attacker.weapon_range`
+ *   (`+0x429f`) rather than the defender's personal space: a charge closes to
+ *   the attacker's own reach, which is what makes it an opener.
+ */
+export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
+  walk: 16,
+  run: 40,
+  charge: 20,
+  jump: 0.6
+});
+
+/**
+ * WHERE A WALK PUTS A GLADIATOR — the displacement, and then the two clamps the
+ * build applies to it.
+ *
+ * The outer clamp is `nextphase` step 1's arena bound, which this module has
+ * always applied. **The inner one is new here and was found while reading the
+ * walk branch**: the build refuses to let a walk carry a gladiator INTO its
+ * opponent.
+ *
+ * ```text
+ * walkright +0x3de6:  if (destination > defender._x - game_defender.physical_size
+ *                         && attacker.gladiator_dir == "right")
+ *                       destination = defender._x - game_defender.physical_size
+ * walkleft  +0x3c07:  the mirror, with `<` and `+`
+ * ```
+ *
+ * The `gladiator_dir` guard is what makes it a FORWARD clamp: it binds only
+ * when the defender is the way you are walking. `game_defender.physical_size`
+ * is `ss2Reach`, which is the same quantity under this module's own name.
+ *
+ * **WHY THE RESOLVER'S LIMIT IS THE FOE'S POSITION AND NOT THE FOE'S PERSONAL
+ * SPACE. MEASURED, and the first version of this paragraph asserted the
+ * measurement instead of taking it — which is the error this repository keeps
+ * paying for, so the number is here and the guess is gone.** The faithful limit
+ * DEADLOCKS the approach, and the reason is a narrowing this module already
+ * documents: `ss2Reach` omits the weapon range multiplier (see its docstring),
+ * so the melee gate opens at the actor's own `physical_size` while the build's
+ * opens at `physical_size + 44 * rangeMultiplier`. Whenever a foe's
+ * `physical_size` exceeds the actor's own gate, the build's clamp parks the
+ * walker further out than its gate needs, so the gate keeps offering a walk the
+ * clamp keeps refusing to advance, for ever.
+ *
+ * Built with `foe.x - direction * ss2Reach(foe)` and swept 2026-09-11:
+ * **the 1v1/2v2/3v3 settle sweep FAILS, and 19,764 of 20,000 actions in the
+ * first 1v1 it tries are walks** — a gladiator stepping back and forth against
+ * a limit it cannot cross. With the limit at the foe's `x` the same sweep
+ * settles every bout and the clamp never binds at all in it, which is the other
+ * half of the measurement: this clamp is insurance against a fast gladiator,
+ * not a mechanic the AI leans on.
+ *
+ * So the limit is the foe's `x`: strictly weaker than the build's, in the SAME
+ * direction as the `ss2Reach` narrowing it compensates for (gladiators here may
+ * stand closer than the build would let them), and enough for the thing the
+ * clamp is actually load-bearing for — **a walk may never carry a gladiator
+ * PAST a foe.** That mattered little while every walk was 44; a `movement_speed`
+ * 30 gladiator steps 461 and would otherwise cross the whole arena and come out
+ * the far side, facing the wrong way, every time it closed.
+ *
+ * **THE MULTI-FOE RULE IS AUTHORED, because vanilla cannot settle it**
+ * (`MAP_SILENCE.multi-slot-arena-geometry`): vanilla has exactly one defender,
+ * so there is no build behaviour to copy. A walk stops at the NEAREST foe ahead
+ * of it, which is the only reading that keeps the 1v1 case identical to the
+ * build's.
+ */
+export function ss2WalkDestination(actor, foes, direction) {
+  const step = ss2WalkDisplacement(ss2MovementSpeed(actor));
+  let to = actor.x + direction * step;
+  for (const foe of foes ?? []) {
+    if (!foe || foe.alive === false || !Number.isFinite(foe.x)) continue;
+    // Ahead of the actor, in the direction of travel. `<= 0` covers a foe
+    // behind and a foe exactly co-located: neither can be walked past.
+    if ((foe.x - actor.x) * direction <= 0) continue;
+    if ((to - foe.x) * direction > 0) to = foe.x;
+  }
+  return clamp(to, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
 }
 
 /** The living foe standing closest, or null. Ties break by id, deterministically. */
@@ -2239,11 +2444,16 @@ export function createSs2TeamRules({
      *        `ss2-weapon-table.js` already ships `rangeMultiplier`)
      *     the selector, frame 4 `DoAction@0x238bbf` `+0x00f6` / `+0x015f`.
      *
-     *   **What is actually missing is one number, and it is not this one: how
-     *   far a movement phase moves `_x`.** See
-     *   `MAP_SILENCE.movement-displacement` in `src/adapter/vanilla-fields.js`,
-     *   which records the gap, the single uncited figure the repository does
-     *   hold, and the measurement that would settle it without a new capture.
+     *   ~~**What is actually missing is one number, and it is not this one: how
+     *   far a movement phase moves `_x`.**~~ **CLOSED 2026-09-11, AND THE ENTRY
+     *   IT POINTED AT IS GONE.** `MAP_SILENCE.movement-displacement` recorded
+     *   that gap and told the next reader it needed the capture archive. It did
+     *   not: `walkright` `+0x3d78` sets `destination = _x + movement_speed * 16`,
+     *   two instructions from the stamina cost the entry was quoting. See
+     *   `ss2WalkDisplacement`. **So the paragraph below is now a list of FOUR
+     *   derived inputs and no missing one** — which is worth noticing, because
+     *   this comment block spent two revisions naming whichever input was
+     *   currently believed to be unknowable.
      *
      *   **Declaring the map silent is the cheapest way in this repository to
      *   turn a measurement into a guess** — the second instance found in two
@@ -2435,12 +2645,13 @@ export function createSs2TeamRules({
         const transition = phaseTransitionEffects(actor, {
           staminaCost: Math.round(ss2MovementSpeed(actor) / 2)
         });
-        // `nextphase` step 1 clamps the active x before anything else it does.
-        const to = clamp(
-          actor.x + walkDirection * SS2_ARENA.walkDistance,
-          SS2_ARENA.clamp.min,
-          SS2_ARENA.clamp.max
-        );
+        // **THE DISPLACEMENT IS THE BUILD'S AND IS PER-ACTOR.** It was a flat
+        // authored 44 until 2026-09-11; `ss2WalkDisplacement` derives it from
+        // `movement_speed` out of the same branch this cost comes from, and
+        // `ss2WalkDestination` applies both of the build's clamps — the arena
+        // bound from `nextphase` step 1, and the overlap clamp that stops a
+        // walk carrying a gladiator into its opponent.
+        const to = ss2WalkDestination(actor, request.foes, walkDirection);
         return {
           effects: [
             { kind: EffectKind.POSITION, targetId: actor.id, to },

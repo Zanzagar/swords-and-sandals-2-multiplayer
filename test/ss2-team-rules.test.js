@@ -216,8 +216,19 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
   //
   //   TWO of the build's eight movement phases, not eight: `run*` is reachable
   //   only through the taunted chain, which nothing here sets, and `charge*`
-  //   and `jump*` have no displacement this repository can separate from the
-  //   walk's. One unmeasured distance is enough — see `SS2_ARENA.walkDistance`.
+  //   and `jump*` are not wired.
+  //
+  //   ► **THE REASON GIVEN FOR THE LAST TWO WAS THAT THEY "HAVE NO DISPLACEMENT
+  //     THIS REPOSITORY CAN SEPARATE FROM THE WALK'S". THAT IS FALSE FOR
+  //     `charge*` (corrected 2026-09-11).** Reading the walk branch settled all
+  //     six siblings at once: a charge's destination is `_x ± movement_speed *
+  //     20` (`+0x426e` / `+0x44da`) and a run's is `* 40` (`+0x40d8` /
+  //     `+0x3f4f`), both byte-cited in `SS2_MOVEMENT_STEP_FACTOR`. It stays
+  //     TRUE of `jump*` alone, and for a sharper reason than "unknown": a jump
+  //     adds to `_x` every FRAME of the `Superjump` clip (`+0x487c`) instead of
+  //     setting a destination, so its total is a property of the animation's
+  //     length. These four are unwired because nothing offers them, not because
+  //     the distance is unknown.
   assert.deepEqual([...ss2TeamRules.actionTypes].sort(), [
     "burning-phase",
     "frozen-phase",
@@ -1919,13 +1930,45 @@ test("a mutual-rest standoff ENDS, because the crowd runs out of patience", () =
 });
 
 /**
- * The other half, and the one that makes the number defensible: a backstop
- * that fires in ordinary fights is a balance change wearing a safety feature's
+ * The other half, and the one that makes the number defensible: a backstop that
+ * fires in ordinary fights is a balance change wearing a safety feature's
  * clothes. At `patience` 40 this assertion failed for 85 of 120 bouts.
+ *
+ * ► **THIS TEST USED TO ASSERT "no honest bout ever reaches patience" AND THAT
+ *   IS NO LONGER TRUE. Re-measured 2026-09-11, the day the walk displacement
+ *   stopped being authored** (`ss2WalkDisplacement`), because bout length is
+ *   downstream of how fast gladiators reach each other:
+ *
+ *     flat 44:  36 of 36 settle by ELIMINATION, longest 73 turns, crowd silent.
+ *     derived:  36 of 36 still settle, longest 223 turns, and THREE 3v3 bouts
+ *               (seeds 6, 8, 11 at 217-223) run past patience 200, so the toll
+ *               is what ends them.
+ *
+ *   **The old assertion's own remedy is unfollowable, and that is the finding.**
+ *   It said to re-measure with the toll disabled and raise patience past the
+ *   tail. Measured with the toll disabled (`crowdPatience: 1e9`, which keeps
+ *   position — `fixtureReplay: true` would not, and that is how the earlier
+ *   "all 120 settle without any crowd at all" baseline was taken): **2 of these
+ *   36 bouts do not terminate at all in 20,000 actions.** There is no tail to
+ *   clear. No patience clears a bout that has no natural end.
+ *
+ *   That is the same conclusion `docs/crowd-patience-findings-2026-09-11.md`
+ *   reached from the opposite direction — the crowd is not a backstop, it is
+ *   what makes a large share of reachable matchups terminate at all — and the
+ *   mechanism is the same one: every completed phase heals its actor, so six
+ *   gladiators in contact out-heal the damage they deal. **Pricing that heal is
+ *   ranked as the owner's, in its own session, and this sweep is now a second
+ *   measurement arguing for it rather than a green light.**
+ *
+ *   So what this test asserts changed shape: every bout must settle, and the
+ *   crowd must stay a MINORITY cause. It is still the guard that caught
+ *   `patience` 40 — at 40, 85 of 120 bouts paid a toll, which this bound
+ *   refuses — and it no longer asserts a silence the economy cannot give.
  */
-test("the crowd is INVISIBLE in an honest bout: no seeded fight ever reaches its patience", () => {
+test("the crowd stays a MINORITY cause: every honest bout settles, and few need the toll", () => {
   let longest = 0;
   let settled = 0;
+  let pastPatience = 0;
   for (const perSide of [1, 2, 3]) {
     for (let seed = 1; seed <= 12; seed += 1) {
       const side = (id) => ({
@@ -1942,14 +1985,19 @@ test("the crowd is INVISIBLE in an honest bout: no seeded fight ever reaches its
       assert.ok(battle.result, `${perSide}v${perSide} seed ${seed} must settle on its own`);
       settled += 1;
       longest = Math.max(longest, battle.turnNumber);
+      if (battle.turnNumber > SS2_CROWD.patience) pastPatience += 1;
     }
   }
   assert.equal(settled, 36);
+  // The sweep must FIND bouts the crowd never touched, or the bound below is
+  // vacuous and the mechanic has quietly become the combat system.
+  assert.ok(pastPatience < settled, `every single bout needed the crowd — at ${longest} turns the toll IS the fight`);
   assert.ok(
-    longest <= SS2_CROWD.patience,
-    `an honest bout reached turn ${longest}, at or past the crowd's patience of ${SS2_CROWD.patience}. ` +
-    "RE-MEASURE THE DISTRIBUTION WITH THE TOLL DISABLED (fixtureReplay: true) and raise patience past the " +
-    "tail — never tune it against a sweep the toll itself shaped, which is how 40 and 120 were both wrong."
+    pastPatience <= 6,
+    `${pastPatience} of ${settled} honest bouts ran past patience ${SS2_CROWD.patience} (longest ${longest}). ` +
+    "Measured 2026-09-11 it is 3 of 36, all 3v3. DO NOT RAISE PATIENCE TO FIX THIS: with the toll off, 2 of " +
+    "these 36 never terminate at all, so there is no tail to clear — the per-phase heal is the price to pay, " +
+    "and it is ranked as the owner's own session."
   );
 });
 

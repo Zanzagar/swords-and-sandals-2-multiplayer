@@ -2056,10 +2056,18 @@ test("every field the adapter maps cites the battle map, and every silence names
   // the point of pinning the list rather than the count: one entry left
   // because the map turned out to SPEAK, and one arrived because a gap nobody
   // had written down turned out to be real.
+  //
+  // ► **AND `movement-displacement` CAME BACK OUT ON 2026-09-11, which makes it
+  //   the only entry to have been added and removed.** Not because the map
+  //   speaks — it still does not give a distance — but because the BUILD does,
+  //   at `+0x3d78`, two instructions from the stamina cost the entry quoted. The
+  //   displacement is derived in `ss2WalkDisplacement` and held to the build by
+  //   `tools/walk-displacement-derivation.mjs`, so there is no silence left for
+  //   the adapter to work around. Nine to eight. The catalogue's own header
+  //   carries what that cost.
   assert.deepEqual([...MAP_SILENCE.map((entry) => entry.id)].sort(), [
     "crowd-impatience",
     "initiative-order",
-    "movement-displacement",
     "multi-slot-arena-geometry",
     "panel-bar-instance-names",
     "psyche-up-initialisation",

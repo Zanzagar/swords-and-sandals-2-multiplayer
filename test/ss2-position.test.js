@@ -9,10 +9,13 @@
  *
  * WHAT IS MEASURED HERE AND WHAT IS AUTHORED. The controller gate, the walk's
  * stamina cost, the construction geometry and `fightdistance` are the build's,
- * each cited at its assertion. **`SS2_ARENA.walkDistance` is AUTHORED** — the
- * map gives every movement phase's cost with an offset and no phase's distance
- * — so nothing below may be read as evidence about how far SS2 moves a
- * gladiator. See `MAP_SILENCE.movement-displacement`.
+ * each cited at its assertion. **THE DISPLACEMENT IS NOW THE BUILD'S TOO**
+ * (2026-09-11): `ss2WalkDisplacement` derives it from `movement_speed` out of
+ * the walk branches of overlay frame 52, so the one authored number in this
+ * file is gone and `SS2_ARENA.walkDistanceAtSpeedFloor` is a pin on the
+ * derivation's floor case rather than a figure. What is still AUTHORED here is
+ * `allyStride` and the multi-foe reading of the overlap clamp, both because
+ * vanilla has no second ally to settle them.
  *
  * THE ASSERTIONS PROVE, THEY DO NOT STATE: every sweep asserts it FOUND the
  * case it was sweeping for.
@@ -37,6 +40,7 @@ import {
   ss2FightDistance,
   ss2MovementSpeed,
   ss2Reach,
+  ss2WalkDisplacement,
   ss2TeamRules,
   SS2_ARENA,
   Ss2ActionType,
@@ -271,17 +275,89 @@ test("a walk costs round(movement_speed / 2) and is a COMPLETED PHASE, so it reg
   assert.equal(after.health, before.health + 4, "a walk is a completed phase, not a free step");
 });
 
-test("a walk moves by SS2_ARENA.walkDistance, which is AUTHORED and may not be cited as evidence", () => {
+test("a walk moves by ss2WalkDisplacement, which is the BUILD's and scales with movement_speed", () => {
   const battle = bout(1);
   const id = actorId(battle);
-  const before = combatantById(battle, id).x;
+  const actor = combatantById(battle, id);
+  const before = actor.x;
+  // `gladiator()` is speed 5, so `movement_speed` is `clamp(round(7.5), 4, 60)`
+  // = 8 and the step is 108 — NOT the 44 this assertion carried until the
+  // displacement was derived. A walk is per-actor now.
+  assert.equal(ss2MovementSpeed(actor), 8);
+  assert.equal(ss2WalkDisplacement(8), 108);
   applyAction(battle, { actorId: id, type: Ss2ActionType.WALK_RIGHT, targetId: id });
-  assert.equal(combatantById(battle, id).x, before + SS2_ARENA.walkDistance);
+  assert.equal(combatantById(battle, id).x, before + 108);
+});
 
-  // Stated here so a reader of this file meets it: the map gives every movement
-  // phase's COST with a byte offset and no phase's DISTANCE. 44 comes from one
-  // uncited line in a frozen handoff and survives only a consistency check.
-  assert.equal(SS2_ARENA.walkDistance, 44);
+test("the derivation reproduces the 44 the project held for nine days, and only at the speed FLOOR", () => {
+  // THE PIN THAT MAKES THE DERIVATION ACCOUNTABLE TO ITS OWN HISTORY. 44 was
+  // authored from one uncited line in a frozen handoff; an adversarial reader
+  // proposed it was a conflation with `weapon_range`'s 44. Neither: it is
+  // `4 * 16 = 64` eased to a stop with 20 left to run. The uncited line was
+  // right and it was right by luck, which is why it took bytes to close.
+  assert.equal(ss2WalkDisplacement(4), 44);
+  assert.equal(ss2WalkDisplacement(4), SS2_ARENA.walkDistanceAtSpeedFloor);
+
+  // The easing, frame by frame, because `64 - 20` is the whole argument and a
+  // reader should be able to check it without the SWF: `gap -= ceil(gap / 8)`
+  // until the gap is 20 or less.
+  const frames = [];
+  for (let gap = 64; gap > 20; gap -= Math.ceil(gap / 8)) frames.push(gap);
+  assert.deepEqual(frames, [64, 56, 49, 42, 36, 31, 27, 23]);
+
+  // And it is NOT a constant. The floor is the slowest walk the build can
+  // produce; every faster gladiator walks further, which is what made treating
+  // 44 as universal a four-fold understatement at `movement_speed` 12.
+  assert.deepEqual(
+    [4, 5, 6, 8, 12, 20, 30, 60].map((speed) => ss2WalkDisplacement(speed)),
+    [44, 61, 76, 108, 172, 301, 461, 940]
+  );
+  // The boot term is `100 + 2 * boot` percent, so boots make a walk LONGER.
+  // Read off the `DefineFunction2` headers rather than the bodies: the two
+  // helpers take their parameters in registers 2 and 1, and reading the bodies
+  // alone inverts both.
+  assert.equal(ss2WalkDisplacement(4, { boot: 0 }), 44);
+  assert.equal(ss2WalkDisplacement(4, { boot: 5 }), 52);
+  assert.ok(ss2WalkDisplacement(4, { boot: 9 }) > ss2WalkDisplacement(4, { boot: 0 }));
+
+  // A step inside the stop tolerance never moves the gladiator at all, because
+  // the phase ends on the frame it begins. Unreachable through the rule set —
+  // the `movement_speed` floor of 4 makes the smallest real step 64 — and
+  // asserted so the helper's edge is the build's and not a guard invented here.
+  assert.equal(ss2WalkDisplacement(1), 0);
+  assert.throws(() => ss2WalkDisplacement(-1), TeamRuleSetError);
+  assert.throws(() => ss2WalkDisplacement(4, { boot: Number.NaN }), TeamRuleSetError);
+});
+
+test("a walk may never carry a gladiator PAST a foe, which is the build's own clamp", () => {
+  // `walkright` `+0x3de6`: the destination is clipped when it would cross the
+  // defender. The build clips to `defender._x - game_defender.physical_size`;
+  // this resolver clips to `defender._x`, and `ss2WalkDestination`'s docstring
+  // carries the measurement that forced the difference.
+  const fast = gladiator({ speed: 40 });          // movement_speed 60, step 940
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(fast, { id: "hero", x: -250 })] },
+      { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "villain", x: 250 })] }
+    ]
+  });
+  assert.equal(ss2WalkDisplacement(ss2MovementSpeed(combatantById(battle, "hero"))), 940, "uncut, it crosses the arena");
+  applyAction(battle, { actorId: "hero", type: Ss2ActionType.WALK_RIGHT, targetId: "hero" });
+  assert.equal(combatantById(battle, "hero").x, 250, "the clamp stopped it AT the foe, not 440 beyond it");
+
+  // And it does not bind backwards: a foe behind the walker is not a wall.
+  const away = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator(), { id: "hero", x: -250 })] },
+      { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "villain", x: 250 })] }
+    ]
+  });
+  applyAction(away, { actorId: "hero", type: Ss2ActionType.WALK_LEFT, targetId: "hero" });
+  assert.equal(combatantById(away, "hero").x, -250 - 108, "walking away is unclamped by the foe");
 });
 
 test("the arena clamp bounds a walk, and a step it swallows is still a resolved action", () => {
@@ -310,7 +386,7 @@ test("a POSITION effect is absolute, and a rule set that models no position cann
   applyAction(battle, { actorId: id, type: Ss2ActionType.WALK_RIGHT, targetId: id });
   const move = battle.lastResolution.effects.find((effect) => effect.kind === EffectKind.POSITION);
   assert.ok(move, "the walk must have emitted one, or the rest of this proves nothing");
-  assert.equal(move.to, from + 44, "absolute, never a delta: a coordinate, not a distance");
+  assert.equal(move.to, from + 108, "absolute, never a delta: a coordinate, not a distance");
   // Not a literal 206: whichever SIDE opens, it started on the vanilla mark and
   // moved one authored step in the +x direction. Asserting 206 assumed the hero
   // always goes first, and with both slot-0 gladiators on the same speed the
@@ -341,11 +417,23 @@ test("a POSITION effect is absolute, and a rule set that models no position cann
 /* ------------------------------------------------------------------ */
 
 test("the AI closes the distance and every bout still settles, at 1v1, 2v2 and 3v3", () => {
-  // THE COST OF THE APPROACH, MEASURED RATHER THAN ARGUED. It is a real design
-  // number and it is the reason this test reports it: at 3v3 more than half the
-  // actions in a bout are walks. Nothing here calls that wrong — every bout
-  // settles — but a pacing change of that size should be a decision somebody
-  // made, not a number nobody looked at.
+  // THE COST OF THE APPROACH, MEASURED RATHER THAN ARGUED — and the measurement
+  // MOVED when the displacement stopped being authored, which is the reason
+  // this comment carries both columns.
+  //
+  //                                  flat 44   derived
+  //   1v1 walks / actions            37.0%      19.0%
+  //   2v2                            45.8%      24.6%
+  //   3v3                            52.2%      26.8%
+  //   3v3 actions before first blow     35         17
+  //
+  // Swept over these same 8 seeds a side on 2026-09-11, before and after.
+  // **"53% of a 3v3 is walking" was ranked as a PACING DECISION for the owner,
+  // with `SS2_ARENA.frontX` and the walk distance named as the two levers. Half
+  // of it was a wrong number**: `movement_speed` 8 walks 108, not 44, so the
+  // flat constant had gladiators crossing the arena at a quarter of the build's
+  // own pace. What is left after the derivation is a real design question and a
+  // much smaller one.
   const WALKS = new Set([Ss2ActionType.WALK_LEFT, Ss2ActionType.WALK_RIGHT]);
   for (const perSide of [1, 2, 3]) {
     let settled = 0;
@@ -459,12 +547,12 @@ test("a walk reaches the arena as a move-clip and its own gait, never as the idl
 
   const moves = commands.filter((command) => command.kind === CommandKind.MOVE_CLIP);
   assert.equal(moves.length, 1);
-  assert.deepEqual([moves[0].from, moves[0].to], [from, from + 44]);
+  assert.deepEqual([moves[0].from, moves[0].to], [from, from + 108]);
 
   // And it reaches a scene as a step, with a gait that travels.
   const scene = applyCommands(emptyScene(), commands);
-  assert.equal(scene.actors[id].x, from + 44);
-  assert.deepEqual({ ...scene.actors[id].motion }, { from, to: from + 44, sequence: 1, actionToken: null });
+  assert.equal(scene.actors[id].x, from + 108);
+  assert.deepEqual({ ...scene.actors[id].motion }, { from, to: from + 108, sequence: 1, actionToken: null });
   assert.equal(timelineFor("walkright", { role: "actor" }).travel, true);
 });
 
@@ -477,7 +565,7 @@ test("the projection carries x, so two peers that disagree about where a gladiat
   const right = bout(1);
   assert.equal(combatStateHash(left), combatStateHash(right), "identical battles agree");
 
-  combatantById(right, "red-1").x -= SS2_ARENA.walkDistance;
+  combatantById(right, "red-1").x -= SS2_ARENA.walkDistanceAtSpeedFloor;
   assert.notEqual(combatStateHash(left), combatStateHash(right), "and one step apart is a visible disagreement");
 });
 

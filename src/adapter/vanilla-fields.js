@@ -255,6 +255,26 @@ const CLIP_RESIDENT_SET = Object.freeze(new Set(CLIP_RESIDENT_FIELDS));
  *   turn a measurement into a guess: check the surrounding paragraph, not the
  *   sentence you are quoting.** Found by a write-nothing reader, re-derived
  *   here before it was believed.
+ *
+ * ► **AND `movement-displacement` WAS REMOVED 2026-09-11 FOR A THIRD REASON,
+ *   which is neither of the two above and is the one worth remembering.** That
+ *   entry was right that the battle-map DOCUMENT gives every movement phase's
+ *   stamina cost with a byte offset and no phase's distance. It was wrong about
+ *   what followed from that. Its `settledBy` sent a reader to the capture
+ *   archive — *"NO NEW CAPTURE ... this needs the capture machine"* — and the
+ *   answer was in the BUILD all along: the eight movement branches of overlay
+ *   frame 52 each compute a destination, `walkright` at `+0x3d78` being
+ *   `movement_speed * 16`. Nine days, two tools and one authored constant, and
+ *   nobody opened the branch whose stamina cost the entry was quoting from two
+ *   instructions away.
+ *
+ *   **The lesson is NOT "check the surrounding paragraph" again — it is that
+ *   this catalogue is about the MAP, and the map is a transcription.** A gap in
+ *   it is a gap in what somebody wrote down, never a gap in the build. An entry
+ *   whose `settledBy` reaches for a capture should have to say why the bytes
+ *   cannot answer it first. See `ss2WalkDisplacement` for the derivation and
+ *   `tools/walk-displacement-derivation.mjs` for the census that holds it to the
+ *   build.
  */
 export const MAP_SILENCE = Object.freeze([
   Object.freeze({
@@ -304,111 +324,6 @@ export const MAP_SILENCE = Object.freeze([
       "Slot 0 reuses the vanilla instance names, depths, and positions exactly; further slots use authored " +
       "names and a reserved depth band that provably avoids every depth the map records.",
     settledBy: "Nothing in vanilla; this is authored mod surface and is labelled as such."
-  }),
-  Object.freeze({
-    id: "movement-displacement",
-    subject: "how far a movement phase moves a gladiator's `_x`",
-    silence:
-      "The battle map gives every movement phase's stamina COST with a byte offset and no phase's " +
-      "DISTANCE: `walkleft` `+0x3b37`, `walkright` `+0x3d16`, `runleft` `+0x3ef5`, `runright` `+0x407e` all " +
-      "cost `round(movement_speed / 2)`; `chargeright` `+0x4214` and `chargeleft` `+0x4480` cost " +
-      "`round(movement_speed * 2)`; `jumpright` `+0x46ec` and `jumpleft` `+0x49c4` cost " +
-      "`round(movement_speed)`. The only `_x` writes it records anywhere are the four clamps opening " +
-      "`nextphase` (`If` at `+0x31cc`, `+0x31f8`, `+0x3224`, `+0x3250`, closed by `+0x3266`), and a clamp is " +
-      "a bound, not a step. **The repository is not wholly silent, and saying so loosely would repeat the " +
-      "error this list exists to prevent**: `docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md:194` " +
-      "states \"one walk is 44 px\" — one occurrence repo-wide, uncited, in a FROZEN handoff, and suspect " +
-      "because 44 is also the range multiplier in `weapon_range = physical_size + weapon[5] * 44` " +
-      "(`+0x3190`). It survives one check from the other direction: the same line reports that only 26.6% of " +
-      "real rounds reached range in fewer than five walks, and at 44px with both gladiators closing, four " +
-      "walks each leaves the champion staging at `fightdistance` 148 against its `weapon_range` 144 (out) " +
-      "and five leaves 60 (in). That is a CONSISTENCY CHECK against a different scenario, not a " +
-      "measurement, and it may never be cited as evidence about the game. Nothing states a displacement " +
-      "for the other six phases at all. What is NOT silent, and was wrongly recorded as such until " +
-      "2026-09-10: the controller selector (frame 4 `DoAction@0x238bbf` `+0x00f6`, `+0x015f`) and " +
-      "`getfightdistance` (`docs/integration/ss2-champion-dna.md:710-712`).",
-    adapterBehaviour:
-      "Nothing moves. No combatant projection carries a position, `combatStateHash` therefore commits to " +
-      "none, and `place-clip` is constructed at exactly one site — arena construction in " +
-      "`presentation.js` — and never again. The renderer's `advance` pose (`src/render/timeline.js`) is an " +
-      "authored within-slot lunge that returns the figure to where it started, so it invents no position " +
-      "the resolver would own. Measured 2026-09-10 while proving this entry out: a resolver-level position " +
-      "model works and reproduces the build's own five-walk approach, but movement with no presentation " +
-      "binding makes a walking gladiator emit `clip-goto Standing` — THE IDLE CLIP — plus a spurious " +
-      "`unmapped`, which is the identical defect the owner found by watching the arena on 2026-09-10. " +
-      "Movement needs a command kind of its own; reusing `place-clip` is not a style question but a " +
-      "defect, because `scene.js` overwrites all seven geometry fields and a partial command makes " +
-      "`toY(undefined)` NaN and the figure vanish. " +
-      "► **THE PRESENTATION HALF OF THAT IS NOW BUILT (2026-09-11), AND THE PARAGRAPH ABOVE IS " +
-      "CORRECTED HERE RATHER THAN REWRITTEN, because half of it still holds.** What changed: " +
-      "`CommandKind.MOVE_CLIP` exists and carries two endpoints and nothing else; " +
-      "`SS2_STATIC_MAP_BINDINGS` has a movement case keyed on the event's own geometry, emitting the " +
-      "build's phase name at ASSUMED provenance — the map gives movement as the unnamed frame range " +
-      "\"movement and charge (33-104)\" while naming `Standing`, `Block`, `rest` and `knockback` " +
-      "individually; `src/render/timeline.js` has four gait schedules and `travelAt`. **What has NOT " +
-      "changed, and is the part this entry is about: nothing moves, because nothing emits a " +
-      "`move-clip`.** No combatant projection carries a position and `combatStateHash` still commits " +
-      "to none. The displacement is STILL unsettled and the 44 below is still a consistency check — " +
-      "the presentation half needs no displacement at all, because a `move-clip` reports two " +
-      "coordinates the resolver computed rather than a distance the renderer applies. " +
-      "The rule-set half is ranked and preserved at " +
-      "`docs/reference/position-in-the-resolver.patch.md`. " +
-      "► **AND THAT HALF LANDED THE SAME DAY, so \"nothing moves\" is now FALSE and is corrected here " +
-      "rather than rewritten.** `ss2TeamRules` carries `SS2_ARENA`, a `startingPosition` hook, two walk " +
-      "verbs and the build's own controller gate; `x` is on the combatant projection and inside " +
-      "`combatStateHash`. **What has NOT changed is this entry's own subject: the DISPLACEMENT is still " +
-      "unsettled.** `SS2_ARENA.walkDistance` is 44 because of the one uncited handoff line below, and it " +
-      "is now load-bearing for how a bout paces — measured at landing, 10 walks in an average 1v1 and 48 " +
-      "in a 3v3, which is 53% of the actions. So the settling measurement below is worth MORE than it was, " +
-      "not less. The presentation half still needs no displacement at all: a `move-clip` reports two " +
-      "coordinates the resolver computed.",
-    settledBy:
-      "NO NEW CAPTURE. The arena route's autopilot presses `walkright`/`walkleft` until the close-range " +
-      "controller offers `normal_attack` (`docs/integration/ss2-arena-route.md`, \"The fight policy\"), and " +
-      "traces record `phase_action` values by name — the same evidence shape already surveyed " +
-      "archive-wide for the status phases. Counting the walk phases before the first attack in a staged " +
-      "session bounds the per-phase displacement, because both ends of the interval are computable: the " +
-      "champion staging's `strength:30`/`weapon:24` give `physical_size` 100 and `weapon_range` 144 " +
-      "against a construction `fightdistance` of 500, so the approach closes at least 356 units over N " +
-      "walks (the SUM over both sides — the villain AI closes too). Repeating it across stagings with " +
-      "different `speed` settles the second question, whether the displacement scales with " +
-      "`movement_speed` at all, because that staging pins `movement_speed` at its clamp floor of 4. The " +
-      "archive is not on a fresh-clone tree; this needs the capture machine, not the capture rig. " +
-      "► **THE COUNTING HALF IS DONE (2026-09-11), AND THE ARCHIVE WAS REACHABLE ALL ALONG.** It is a " +
-      "second checkout on the capture box — `/mnt/c/ss2-capture/captures`, 1,650 rufflelogs — so this " +
-      "sentence was right that a fresh clone cannot do it and wrong to imply nobody could. " +
-      "`tools/approach-length-census.mjs` reads it and reports the distribution, using a SHARPER boundary " +
-      "than the one prescribed above: the autopilot records the CONTROLLER, and the build picks " +
-      "`closerange_warrior` exactly when `fightdistance < hero.weapon_range`, so the flip from " +
-      "`longrange_warrior` IS the predicate first holding — an observation of the gate rather than an " +
-      "inference from when the autopilot chose to swing. **Result over 1,512 sessions: median 5, mode 5 " +
-      "(36.3%), min 2, max 17, 82% between 4 and 7.** " +
-      "**THAT IS NOT A DISPLACEMENT AND MUST NOT BE READ AS ONE.** Both gladiators close and these are " +
-      "the HERO's steps, so the closure per step is unknown and the interval has one end, not two. What " +
-      "it does is corroborate the FIVE-WALK figure the authored 44 was consistency-checked against — now " +
-      "from the build's own gate, across the whole archive, instead of from one uncited line in a frozen " +
-      "handoff. **What remains is narrower and still open**, and the first statement of what remains was " +
-      "WRONG — corrected here the same day. It said the missing piece was \"the VILLAIN's own phase " +
-      "sequence, which these traces do not record\". **The traces DO record it.** `phase_action` is the " +
-      "game's own variable and fires for both sides: in `arena-champ-1/obs-champ-1-a1` it fires 206 times " +
-      "against 140 autopilot steps, and all 66 unpaired records are `rest` — the villain's, provably, " +
-      "because the autopilot's whole vocabulary is `normal_attack`/`walkright`/`walkleft` and it never " +
-      "chooses rest. **In that session the villain never moves at all, so the hero closed the whole " +
-      "distance alone** — which is the clean case the derivation wants. " +
-      "**THE ACTUAL MISSING PIECE IS THE HERO'S `weapon_range` IN THE SAME SESSION**: the flip condition " +
-      "is `fightdistance < hero.weapon_range`, and these traces carry no `strength`, `weapon`, " +
-      "`physical_size`, `weapon_range` or `fightdistance` value anywhere. With it, a session where the " +
-      "villain is stationary bounds the per-phase displacement from BOTH ends — " +
-      "`500 - N*d < weapon_range <= 500 - (N-1)*d` — and turns `SS2_ARENA.walkDistance` from authored " +
-      "into derived. That is the cheapest remaining route to the last authored number setting bout pace. " +
-      "**NO GOLDEN CAN SETTLE IT, and that is structural rather than an accident of which 23 we have.** " +
-      "Measured 2026-09-10: a golden's scenario carries exactly attack, defence, strength, charisma, " +
-      "magicka, min_damage, max_damage, hitpoints, hitpointsmax, staminaleft, staminamax, armourclass, " +
-      "armourclass_max and gladiator_dir — and `speed` is not among them, in any of the 23. Since the " +
-      "resolver renames `speed` to `agility` and `ss2Combatant` reads `agility: derived.speed ?? 0`, every " +
-      "golden has agility 0 and therefore `movement_speed` pinned at the clamp FLOOR of 4. They all sit at " +
-      "one point of the curve, so no comparison between them can show a slope. A fixture that could settle " +
-      "this would have to declare `speed`, which no promoted golden does.",
   }),
   Object.freeze({
     id: "swing-cost",

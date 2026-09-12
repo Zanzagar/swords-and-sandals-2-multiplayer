@@ -914,6 +914,76 @@ completed rest adds `round(stamina * 15)` on top of the baseline
 `1 + round(stamina / 3)`, which is why the rest phase can refill a bar in one
 turn rather than trickling it back.
 
+### Movement DISPLACEMENT by phase — added 2026-09-11, and the gap it closes
+
+**This document carried the eight movement phases' stamina COST for twelve days
+and no phase's DISTANCE, and that omission became a `MAP_SILENCE` entry, an
+authored constant, and a ranked next step that sent a session to the capture
+archive.** The distance is in the same eight branches as the cost, a handful of
+instructions below it. Read 2026-09-11 off `77cb545c…`; every offset below is
+relative to the same block as the cost table above
+(`sprite:862/frame:52/DoAction@0x240c7f`, action data at `0x240c85`), and
+`tools/walk-displacement-derivation.mjs` re-reads all of it from the installed
+build on demand.
+
+A movement phase does not move a gladiator. It sets a **destination** and then
+eases toward it over several frames:
+
+```text
+if (attacker.destination == null) {                 // once per phase
+  attacker.gotoAndPlay(<clip>)
+  attacker.destination = attacker._x -/+ <step>
+  // clamped, per phase — see below
+}
+attacker._x -/+= Math.ceil((attacker._x - attacker.destination) / 8)   // every frame
+if (!(attacker._x >/< attacker.destination +/- 20)) {                  // within 20: done
+  attacker.destination = null
+  nextphase()
+}
+```
+
+| Phase | clip | `<step>` | site | bonus |
+| --- | --- | --- | --- | --- |
+| `walkleft` | `StepBack` | `movement_speed * 16` | `+0x3b99` | `boot` `+0x3bb5` |
+| `walkright` | `StepForward` | `movement_speed * 16` | `+0x3d78` | `boot` `+0x3d94` |
+| `runleft` | `RunBack` | `movement_speed * 40` | `+0x3f69` | none |
+| `runright` | `RunForward` | `movement_speed * 40` | `+0x40f2` | none |
+| `chargeleft` | — | `movement_speed * 20` | `+0x44f4` | none |
+| `chargeright` | — | `movement_speed * 20` | `+0x4288` | none |
+| `jumpleft` | `Superjump` | `round(movement_speed * 0.6)` **per frame** | `+0x4a3d` | `shinguard` `+0x4a6f` |
+| `jumpright` | `Superjump` | `round(movement_speed * 0.6)` **per frame** | `+0x476e` | `shinguard` `+0x47a1` |
+
+The bonus, where a phase takes one, is
+
+```text
+bonus = get_percentage(100 + <piece> * 2, 100)        // = 100 + 2 * piece
+step  = add_percentage(step, bonus)                   // = ceil(step * bonus / 100)
+```
+
+with both helpers defined in the same block (`+0x1089`, `+0x10ba`). **Their
+parameters sit in registers 2 and 1 respectively**, so reading the bodies
+without the `DefineFunction2` headers inverts both and turns a boot bonus into a
+boot penalty. Heavier boots make a walk LONGER; heavier shinguards make a jump
+longer.
+
+Three consequences worth stating separately, because each was got wrong once:
+
+1. **The realised displacement is the step MINUS the gap the phase stopped
+   with.** At the `movement_speed` clamp floor of 4 with no boots the step is 64
+   and the easing runs `64 -> 56 -> 49 -> 42 -> 36 -> 31 -> 27 -> 23 -> 20`,
+   stopping with 20 to run: **44**. That is where the repository's uncited
+   *"one walk is 44 px"* came from, and it is the floor case, not the rule.
+2. **Two phases clamp against the opponent and they clamp differently.** A walk
+   clips its destination to `defender._x -/+ game_defender.physical_size`
+   (`+0x3de6` / `+0x3c07`), guarded on the attacker's `gladiator_dir` so it binds
+   only forwards. A charge clips to
+   `defender._x -/+ game_attacker.weapon_range` (`+0x429f`) — the ATTACKER's
+   reach, which is what makes a charge an opener rather than a shove.
+3. **A jump is the one movement phase these bytes do not settle.** It adds to
+   `_x` every frame of the `Superjump` clip instead of setting a destination
+   (`+0x487c`, with `_y += attacker.leap` at `+0x4913`), so its total is a
+   property of the animation's length.
+
 ### The per-turn mutation is attacker-only
 
 `nextphase` `+0x32a1`–`+0x3304` is two consecutive statements on

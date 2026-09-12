@@ -264,7 +264,16 @@ Start there. **Ranked item 2 was blocked by a FALSE "the map is silent" claim**
 the corpus recorded the writer, so it was never a stale note. Corrected at its
 sentence, with every other input to the controller gate cited. The gap that IS
 real is now `MAP_SILENCE.movement-displacement`, careful about the one uncited
-figure the repo holds, and settleable with NO new capture. **A whole position
+figure the repo holds, and settleable with NO new capture.
+► **THAT GAP WAS NOT REAL EITHER, AND THE ENTRY IS GONE (2026-09-11).** It was a
+gap in the battle map DOCUMENT, which this file then read as a gap in the game.
+`walkright` `+0x3d78` sets `destination = _x + movement_speed * 16` — eight
+movement branches, each with its own factor, in the same block and a few
+instructions below the stamina cost the entry was quoting. **Three "the map is
+silent" claims in two days were all false in a different way**, and this was the
+third shape: the map really was silent, and silence in a transcription says
+nothing about the build. `ss2WalkDisplacement` derives it;
+`tools/walk-displacement-derivation.mjs` holds it to the installed SWF. **A whole position
 implementation was built in a scratch copy and works** — five walks a side,
 matching the archive — **and proved it must not land resolver-first**: a walk
 emits `clip-goto Standing`, the idle clip, because the bindings have no
@@ -364,6 +373,15 @@ exploit.
   needs. What the map genuinely does not give is the movement DISPLACEMENT,
   now recorded as `MAP_SILENCE.movement-displacement` with the measurement that
   settles it and no new capture required.
+  ► **CLOSED 2026-09-11 BY READING THE BUILD, NOT BY THE MEASUREMENT THIS
+    SENTENCE PRESCRIBES.** The prescribed measurement was an archive census that
+    bounds the displacement from one end; what settled it was the walk branch
+    itself. **`movement_speed * 16`, eased toward the destination by
+    `ceil(gap / 8)` a frame and ending when the gap is 20 or less — which makes
+    the authored 44 exactly right AT THE `movement_speed` FLOOR of 4, and wrong
+    by a factor of four at `movement_speed` 12.** The entry is removed,
+    `SS2_ARENA.walkDistance` is renamed `walkDistanceAtSpeedFloor`, and a walk is
+    per-actor. See `ss2WalkDisplacement` and the two tools.
   **A whole implementation was built and driven in a scratch copy** (never in
   this tree) and it works: `x` on the projection, vanilla start geometry,
   `walk-left`/`walk-right` with the map's own stamina costs, the controller

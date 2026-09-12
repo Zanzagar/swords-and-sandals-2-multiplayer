@@ -436,17 +436,30 @@ test("a survivor behind a casualty CHANGES SEAT, and the change is reported not 
   // because the fill template declares none of the required resources
   // (measured). So a survivor behind a casualty moves up, and the honest thing
   // is to say so.
+  // ► **THE SEARCH USED TO TAKE THE FIRST DEAD SLOT-0 FIGHTER AND GIVE UP IF
+  //   ITS TEAMMATE HAD ALSO DIED, WHICH MADE A REACHABLE CASE LOOK
+  //   UNREACHABLE** — found 2026-09-11 when deriving the walk displacement
+  //   moved these outcomes. Over 200 seeds of this shape the case now lands on
+  //   BLUE in 24 of them (`red-1:D red-2:D blue-1:D blue-2:A`), and every one
+  //   of those was discarded because `find` matched red-1 first and red-2 was
+  //   dead too. Widening the seed range would not have helped: 600 seeds found
+  //   nothing. **A vacuity guard that searches incompletely fails in the
+  //   direction that looks like a product regression**, so it considers every
+  //   dead slot-0 fighter, not the first.
   let bout = null;
   for (let seed = 1; seed <= 80 && bout === null; seed += 1) {
     const candidate = settledTeamBout(seed, "costly");
     if (candidate === null) continue;
     // Want a team whose slot-0 fighter died and whose slot-1 fighter lived.
-    const dead = candidate.record.outcomes.find((outcome) => !outcome.survived && outcome.slotIndex === 0);
-    if (!dead) continue;
-    const behind = candidate.record.outcomes.find(
-      (outcome) => outcome.survived && outcome.teamId === dead.teamId && outcome.slotIndex > 0
-    );
-    if (behind) bout = { ...candidate, dead, behind };
+    for (const dead of candidate.record.outcomes.filter((outcome) => !outcome.survived && outcome.slotIndex === 0)) {
+      const behind = candidate.record.outcomes.find(
+        (outcome) => outcome.survived && outcome.teamId === dead.teamId && outcome.slotIndex > 0
+      );
+      if (behind) {
+        bout = { ...candidate, dead, behind };
+        break;
+      }
+    }
   }
   assert.ok(bout, "no seed produced a surviving fighter standing behind a casualty");
 
