@@ -100,7 +100,7 @@ function squareShape({ id = 7, colour = { red: 0x11, green: 0x22, blue: 0x33, al
   return writer.buffer();
 }
 
-test("a solid-filled square becomes one SVG path in pixels, not twips", () => {
+test("a solid-filled square becomes one CLOSED SVG path in pixels, not twips", () => {
   const bytes = squareShape();
   const shape = parseShape(bytes, 0, bytes.length, 32);
 
@@ -112,7 +112,12 @@ test("a solid-filled square becomes one SVG path in pixels, not twips", () => {
   const paths = shapeToPaths(shape);
   assert.equal(paths.length, 1);
   // 200 twips is 10 pixels. A parser that forgot the conversion would say 200.
-  assert.equal(paths[0].d, "M0 0l10 0l0 10l-10 0l0 -10");
+  // ► **The `Z` is the whole point.** An earlier version emitted open subpaths
+  //   and a renderer closes a FILLED one with a straight chord from its end
+  //   back to its start — which on the real fighter came out as a fan of hard
+  //   wedges across his chest. The path must return to 0,0 and say so.
+  assert.equal(paths[0].d, "M0 0L10 0L10 10L0 10L0 0Z");
+  assert.equal(paths[0].fillRule, "evenodd");
   assert.equal(paths[0].fill, "#112233");
   assert.equal(paths[0].fillOpacity, 1);
   assert.equal(paths[0].approximated, null);
@@ -144,7 +149,7 @@ test("alpha survives on a shape version that carries it, and is absent on one th
   assert.equal(shapeToPaths(plain)[0].fillOpacity, 1);
 });
 
-test("a curved edge becomes a quadratic, with the control point relative", () => {
+test("a curved edge becomes a quadratic, with the control point absolute", () => {
   const writer = new ShapeWriter();
   writer.u16(3);
   writer.rect();
@@ -161,7 +166,7 @@ test("a curved edge becomes a quadratic, with the control point relative", () =>
   const bytes = writer.buffer();
   const paths = shapeToPaths(parseShape(bytes, 0, bytes.length, 32));
   // The anchor is relative to the CONTROL point, so the end is control+anchor.
-  assert.equal(paths[0].d, "M0 0q1 2 4 2");
+  assert.equal(paths[0].d, "M0 0Q1 2 4 2Z");
 });
 
 test("a gradient is flattened to its first stop and SAYS it was approximated", () => {
@@ -195,6 +200,122 @@ test("a gradient is flattened to its first stop and SAYS it was approximated", (
   const paths = shapeToPaths(shape);
   assert.equal(paths[0].fill, "#102030", "the first stop");
   assert.equal(paths[0].approximated, "gradient", "and it admits the approximation");
+});
+
+/**
+ * A square whose four edges are declared OUT OF ORDER and whose two halves put
+ * the fill on opposite sides — which is what the real build does everywhere.
+ *
+ * Edges 1 and 2 run clockwise with `fillStyle1` (fill on the LEFT). Edges 3 and
+ * 4 are declared as a separate run going the other way with `fillStyle0` (fill
+ * on the RIGHT), so a reader that does not reverse them produces two open
+ * fragments instead of one square.
+ */
+function splitSquareShape() {
+  const writer = new ShapeWriter();
+  writer.u16(9);
+  writer.rect();
+  writer.u8(1).u8(0x00).u8(0x40).u8(0x50).u8(0x60).u8(0xff);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+
+  const edge = (dx, dy) => {
+    writer.bit(1).bit(1).ub(10 - 2, 4);
+    writer.bit(1).sb(dx, 10).sb(dy, 10);
+  };
+
+  // Run A: from 0,0 along the top and down the right side, fill on the LEFT.
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1);
+  edge(200, 0);
+  edge(0, 200);
+
+  // Run B: from 0,0 DOWN the left side and along the bottom, fill on the RIGHT.
+  // Same boundary, opposite traversal — the exact case the old code lost.
+  // `fillStyle1` is explicitly cleared, because style state PERSISTS across
+  // records and leaving it set would put the same fill on both sides.
+  writer.bit(0).ub(0b00111, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1); // fillStyle0 = 1
+  writer.ub(0, 1); // fillStyle1 = 0
+  edge(0, 200);
+  edge(200, 0);
+
+  writer.bit(0).ub(0, 5);
+  return writer.buffer();
+}
+
+test("edges are STITCHED into one closed loop, whichever side the fill is on", () => {
+  const bytes = splitSquareShape();
+  const shape = parseShape(bytes, 0, bytes.length, 32);
+  const paths = shapeToPaths(shape);
+
+  assert.equal(paths.length, 1, "one fill style is one path element, not one per run");
+  const d = paths[0].d;
+  assert.equal((d.match(/M/g) || []).length, 1, "a square is ONE subpath, not two fragments");
+  assert.equal((d.match(/Z/g) || []).length, 1);
+  assert.equal(d, "M0 0L10 0L10 10L0 10L0 0Z");
+  assert.equal(paths[0].fill, "#405060");
+});
+
+test("an edge with the SAME fill on both sides is interior and contributes no boundary", () => {
+  // Style state persists across shape records, so a run that sets only
+  // `fillStyle0` inherits the previous run's `fillStyle1`. Walking such an edge
+  // both ways round traverses it twice and derails the stitch — which is how
+  // the first version of the stitching test failed.
+  const writer = new ShapeWriter();
+  writer.u16(13);
+  writer.rect();
+  writer.u8(1).u8(0x00).u8(0x11).u8(0x22).u8(0x33).u8(0xff);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+  const edge = (dx, dy) => {
+    writer.bit(1).bit(1).ub(10 - 2, 4);
+    writer.bit(1).sb(dx, 10).sb(dy, 10);
+  };
+  // fillStyle1 = 1 AND fillStyle0 = 1 on every edge of a closed square.
+  writer.bit(0).ub(0b00111, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1).ub(1, 1);
+  edge(200, 0);
+  edge(0, 200);
+  edge(-200, 0);
+  edge(0, -200);
+  writer.bit(0).ub(0, 5);
+  const bytes = writer.buffer();
+
+  const shape = parseShape(bytes, 0, bytes.length, 32);
+  assert.equal(shape.edges.length, 4, "the edges are READ — they are simply not boundary");
+  assert.deepEqual(shapeToPaths(shape), [], "and so the region has no outline to draw");
+});
+
+test("a chain that does not close is still emitted, because the geometry IS in the file", () => {
+  // Two edges that share no endpoint: a malformed or truncated region. Dropping
+  // it would silently lose geometry; the honest output is the open chains.
+  const writer = new ShapeWriter();
+  writer.u16(11);
+  writer.rect();
+  writer.u8(1).u8(0x00).u8(0x10).u8(0x20).u8(0x30).u8(0xff);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+  const edge = (dx, dy) => {
+    writer.bit(1).bit(1).ub(10 - 2, 4);
+    writer.bit(1).sb(dx, 10).sb(dy, 10);
+  };
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1);
+  edge(200, 0);
+  writer.bit(0).ub(0b00001, 5);
+  writer.ub(10, 5).sb(1000, 10).sb(1000, 10);
+  edge(200, 0);
+  writer.bit(0).ub(0, 5);
+  const bytes = writer.buffer();
+
+  const paths = shapeToPaths(parseShape(bytes, 0, bytes.length, 32));
+  assert.equal(paths.length, 1);
+  assert.equal((paths[0].d.match(/M/g) || []).length, 2, "two disjoint chains stay two subpaths");
 });
 
 test("a truncated shape throws by name rather than returning half a figure", () => {

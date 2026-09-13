@@ -186,15 +186,31 @@ function readStyleArray(reader, read, shapeVersion) {
 const round = (value) => Math.round(value * 100) / 100;
 
 /**
- * One shape's edges, as SVG subpaths grouped by the fill that owns them.
+ * One shape, as EDGES carrying the fill on each side of them.
  *
- * ► **SWF EDGES ARE NOT PATHS, and this is the part that trips every naive
- *   reader.** A shape is a single stream of edges, each of which may declare a
- *   fill on its LEFT (`fillStyle1`) and/or its RIGHT (`fillStyle0`). Edges
- *   sharing a fill are not contiguous and may be traversed in either direction.
- *   Grouping by fill and emitting each run as its own subpath — with an
- *   explicit `M` whenever the pen jumps — reproduces the filled regions without
- *   needing to reconstruct winding order.
+ * ► **SWF EDGES ARE NOT PATHS, and the first version of this parser got that
+ *   HALF right, which is worse than getting it wrong.** A shape is one stream
+ *   of edges, each declaring a fill on its LEFT (`fillStyle1`) and/or its RIGHT
+ *   (`fillStyle0`). Edges sharing a fill are not contiguous and may be
+ *   traversed in either direction.
+ *
+ *   The old code grouped them by fill and emitted each contiguous RUN as its
+ *   own subpath, with a comment claiming that "reproduces the filled regions
+ *   without needing to reconstruct winding order". **It does not, and the
+ *   failure is invisible in the data and obvious on screen.** An open subpath
+ *   that is filled gets closed by the renderer with a straight chord from its
+ *   end back to its start, so the torso came out as 127 open runs and a fan of
+ *   hard black and white WEDGES across the gladiator's chest.
+ *
+ *   **Nothing caught it for a session and no test could have**: the paths
+ *   parsed, the counts were right, 824 of 824 shapes "survived", and the `d`
+ *   strings were well-formed. It took rendering the figure and looking at it.
+ *
+ * So this returns edges, and `shapeToPaths` STITCHES them into closed loops:
+ * an edge whose fill is on the right is reversed, edges are chained end-to-start
+ * until the loop closes, and each loop is emitted as one subpath ending in `Z`.
+ *
+ * Coordinates are absolute TWIPS here and become pixels on the way out.
  */
 export function parseShape(buffer, start, end, tagCode) {
   const shapeVersion = tagCode === 2 ? 1 : tagCode === 22 ? 2 : tagCode === 32 ? 3 : 4;
@@ -218,24 +234,18 @@ export function parseShape(buffer, start, end, tagCode) {
   let fillBits = reader.readUB(4);
   let lineBits = reader.readUB(4);
 
-  const runs = [];
-  let current = null;
+  // Style arrays can be REPLACED mid-shape by StateNewStyles, and an edge's
+  // style indices refer to whichever generation was current when it was read.
+  // So each edge records its generation and resolves against that one.
+  const generations = [{ fills, lines }];
+  let generation = 0;
+
+  const edges = [];
   let x = 0;
   let y = 0;
   let fill0 = 0;
   let fill1 = 0;
   let line = 0;
-  let penDown = false;
-
-  const flush = () => {
-    if (current && current.d.length > 0) runs.push(current);
-    current = null;
-  };
-  const begin = () => {
-    flush();
-    current = { fill0, fill1, line, d: [] };
-    penDown = false;
-  };
 
   for (;;) {
     const isEdge = reader.readBit();
@@ -247,7 +257,6 @@ export function parseShape(buffer, start, end, tagCode) {
         const bits = reader.readUB(5);
         x = reader.readSB(bits);
         y = reader.readSB(bits);
-        penDown = false;
       }
       if (flags & 0x02) fill0 = reader.readUB(fillBits);
       if (flags & 0x04) fill1 = reader.readUB(fillBits);
@@ -256,7 +265,6 @@ export function parseShape(buffer, start, end, tagCode) {
         // StateNewStyles: the style arrays are REPLACED mid-shape, and the
         // index widths change with them. Missing this desynchronises every
         // subsequent record.
-        flush();
         reader.align();
         fills = readStyleArray(reader, () => readFillStyle(reader, withAlpha), shapeVersion);
         lines = readStyleArray(reader, () => readLineStyle(reader, withAlpha, shapeVersion), shapeVersion);
@@ -265,19 +273,17 @@ export function parseShape(buffer, start, end, tagCode) {
         fill0 = 0;
         fill1 = 0;
         line = 0;
+        generations.push({ fills, lines });
+        generation = generations.length - 1;
       }
-      begin();
       continue;
     }
 
-    if (!current) begin();
-    if (!penDown) {
-      current.d.push(`M${round(x / TWIPS_PER_PIXEL)} ${round(y / TWIPS_PER_PIXEL)}`);
-      penDown = true;
-    }
-
+    const startX = x;
+    const startY = y;
     const straight = reader.readBit();
     const bits = reader.readUB(4) + 2;
+    let control = null;
     if (straight) {
       let dx = 0;
       let dy = 0;
@@ -291,23 +297,19 @@ export function parseShape(buffer, start, end, tagCode) {
       }
       x += dx;
       y += dy;
-      current.d.push(`l${round(dx / TWIPS_PER_PIXEL)} ${round(dy / TWIPS_PER_PIXEL)}`);
     } else {
       const cx = reader.readSB(bits);
       const cy = reader.readSB(bits);
       const ax = reader.readSB(bits);
       const ay = reader.readSB(bits);
+      control = [x + cx, y + cy];
       x += cx + ax;
       y += cy + ay;
-      current.d.push(
-        `q${round(cx / TWIPS_PER_PIXEL)} ${round(cy / TWIPS_PER_PIXEL)} ` +
-        `${round((cx + ax) / TWIPS_PER_PIXEL)} ${round((cy + ay) / TWIPS_PER_PIXEL)}`
-      );
     }
+    edges.push({ from: [startX, startY], to: [x, y], control, fill0, fill1, line, generation });
   }
-  flush();
 
-  return { id, version: shapeVersion, bounds, fills, lines, runs };
+  return { id, version: shapeVersion, bounds, fills: generations[0].fills, lines: generations[0].lines, generations, edges };
 }
 
 /** `#rrggbb` plus a separate alpha, which SVG wants as its own attribute. */
@@ -320,8 +322,65 @@ export function cssColour(colour) {
   };
 }
 
+/** An edge walked backwards. A quadratic's control point is unchanged by it. */
+function reverseEdge(edge) {
+  return { ...edge, from: edge.to, to: edge.from };
+}
+
 /**
- * A shape as SVG path elements.
+ * Chain edges end-to-start into closed loops.
+ *
+ * ► **The endpoints are EXACT.** SWF edge coordinates are integer twips and
+ *   consecutive edges share them bit for bit, so the join is a dictionary
+ *   lookup rather than a distance test. A tolerance here would silently weld
+ *   two regions that merely pass close to each other.
+ *
+ * An edge set that does not close — which a malformed or truncated shape can
+ * produce — still yields its chain, emitted as an open subpath. Dropping it
+ * would lose geometry that IS in the file.
+ */
+function stitch(edges) {
+  const key = (point) => `${point[0]},${point[1]}`;
+  const byStart = new Map();
+  for (const edge of edges) {
+    const at = key(edge.from);
+    if (!byStart.has(at)) byStart.set(at, []);
+    byStart.get(at).push(edge);
+  }
+  const used = new Set();
+  const loops = [];
+  for (const edge of edges) {
+    if (used.has(edge)) continue;
+    const loop = [];
+    let current = edge;
+    while (current && !used.has(current)) {
+      used.add(current);
+      loop.push(current);
+      const candidates = byStart.get(key(current.to));
+      current = candidates?.find((candidate) => !used.has(candidate));
+    }
+    if (loop.length > 0) loops.push(loop);
+  }
+  return loops;
+}
+
+/** A chain of edges as one SVG subpath, in pixels, closed when it closes. */
+function loopToPath(loop, { close }) {
+  const px = (value) => round(value / TWIPS_PER_PIXEL);
+  const parts = [`M${px(loop[0].from[0])} ${px(loop[0].from[1])}`];
+  for (const edge of loop) {
+    if (edge.control) {
+      parts.push(`Q${px(edge.control[0])} ${px(edge.control[1])} ${px(edge.to[0])} ${px(edge.to[1])}`);
+    } else {
+      parts.push(`L${px(edge.to[0])} ${px(edge.to[1])}`);
+    }
+  }
+  if (close) parts.push("Z");
+  return parts.join("");
+}
+
+/**
+ * A shape as SVG path elements: one per FILLED REGION, plus one per stroke run.
  *
  * A gradient is flattened to its FIRST stop and reported as such rather than
  * resolved: a gradient needs a `<defs>` entry and a transform this parser
@@ -331,28 +390,72 @@ export function cssColour(colour) {
  */
 export function shapeToPaths(shape) {
   const paths = [];
-  for (const run of shape.runs) {
-    if (run.d.length === 0) continue;
-    const index = run.fill1 || run.fill0;
-    const style = index > 0 ? shape.fills[index - 1] : null;
-    let paint = { fill: "none", opacity: 1, approximated: null };
-    if (style?.kind === "solid") {
-      paint = { ...cssColour(style.colour), approximated: null };
-    } else if (style?.kind === "gradient") {
-      paint = { ...cssColour(style.stops[0]?.colour), approximated: "gradient" };
-    } else if (style?.kind === "bitmap") {
-      paint = { fill: "none", opacity: 1, approximated: "bitmap" };
+  const generations = shape.generations ?? [{ fills: shape.fills, lines: shape.lines }];
+
+  // FILLS. Every edge with this style on its LEFT as written, and every edge
+  // with it on its RIGHT reversed, so the whole boundary runs one way round.
+  for (let generation = 0; generation < generations.length; generation += 1) {
+    const styles = generations[generation].fills;
+    for (let index = 1; index <= styles.length; index += 1) {
+      const owned = [];
+      for (const edge of shape.edges) {
+        if (edge.generation !== generation) continue;
+        // ► **An edge with the SAME fill on both sides is INTERIOR to that
+        //   region and is not part of its boundary.** Style state persists
+        //   across shape records, so a run that sets only `fillStyle0` keeps
+        //   whatever `fillStyle1` the previous run left — which makes this
+        //   common rather than exotic. Taking such an edge both ways round
+        //   walks it twice and derails the stitch.
+        if (edge.fill0 === edge.fill1) continue;
+        if (edge.fill1 === index) owned.push(edge);
+        else if (edge.fill0 === index) owned.push(reverseEdge(edge));
+      }
+      if (owned.length === 0) continue;
+
+      const style = styles[index - 1];
+      let paint = { fill: "none", opacity: 1, approximated: null };
+      if (style?.kind === "solid") paint = { ...cssColour(style.colour), approximated: null };
+      else if (style?.kind === "gradient") paint = { ...cssColour(style.stops[0]?.colour), approximated: "gradient" };
+      else if (style?.kind === "bitmap") paint = { fill: "none", opacity: 1, approximated: "bitmap" };
+
+      // Every loop of one fill in ONE element: a region with a hole needs both
+      // rings under a single `fill-rule`, and separate elements cannot express
+      // the hole at all.
+      const d = stitch(owned).map((loop) => loopToPath(loop, { close: true })).join("");
+      paths.push({
+        d,
+        fill: paint.fill,
+        fillOpacity: paint.opacity,
+        fillRule: "evenodd",
+        approximated: paint.approximated,
+        stroke: null,
+        strokeWidth: 0
+      });
     }
-    const strokeStyle = run.line > 0 ? shape.lines[run.line - 1] : null;
-    const stroke = strokeStyle?.colour ? cssColour(strokeStyle.colour) : null;
-    paths.push({
-      d: run.d.join(""),
-      fill: paint.fill,
-      fillOpacity: paint.opacity,
-      approximated: paint.approximated,
-      stroke: stroke ? stroke.fill : null,
-      strokeWidth: strokeStyle ? round(strokeStyle.width / TWIPS_PER_PIXEL) : 0
-    });
   }
+
+  // STROKES. A stroke is drawn ALONG an edge and is not a region, so these are
+  // chained but never closed, and never given a fill.
+  for (let generation = 0; generation < generations.length; generation += 1) {
+    const styles = generations[generation].lines;
+    for (let index = 1; index <= styles.length; index += 1) {
+      const owned = shape.edges.filter((edge) => edge.generation === generation && edge.line === index);
+      if (owned.length === 0) continue;
+      const style = styles[index - 1];
+      const colour = style?.colour ? cssColour(style.colour) : null;
+      const d = stitch(owned).map((loop) => loopToPath(loop, { close: false })).join("");
+      paths.push({
+        d,
+        fill: "none",
+        fillOpacity: 1,
+        fillRule: null,
+        approximated: style?.fill ? "line-fill" : null,
+        stroke: colour ? colour.fill : "#000000",
+        strokeOpacity: colour ? colour.opacity : 1,
+        strokeWidth: round((style?.width ?? 0) / TWIPS_PER_PIXEL)
+      });
+    }
+  }
+
   return paths;
 }

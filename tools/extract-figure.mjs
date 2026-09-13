@@ -51,6 +51,7 @@
  *   node tools/extract-figure.mjs "<path to .swf>"
  *   node tools/extract-figure.mjs --out assets/figure
  *   node tools/extract-figure.mjs --clip 1241
+ *   node tools/extract-figure.mjs --sound assets/sound
  *   node tools/extract-figure.mjs --report              # measure, write nothing
  *
  * Node builtins only.
@@ -105,6 +106,7 @@ export function parseArguments(argv) {
   const options = {
     file: null,
     out: path.join(REPO_ROOT, "assets", "figure"),
+    sound: path.join(REPO_ROOT, "assets", "sound"),
     clip: DEFAULT_CLIP,
     report: false
   };
@@ -116,6 +118,13 @@ export function parseArguments(argv) {
         throw new ExtractFigureError("--out needs a directory path.");
       }
       options.out = path.resolve(next);
+      index += 1;
+    } else if (value === "--sound") {
+      const next = argv[index + 1];
+      if (typeof next !== "string" || next.startsWith("--")) {
+        throw new ExtractFigureError("--sound needs the directory `extract-sounds.mjs` wrote to.");
+      }
+      options.sound = path.resolve(next);
       index += 1;
     } else if (value === "--clip") {
       const next = argv[index + 1];
@@ -133,7 +142,7 @@ export function parseArguments(argv) {
       // ignored flag ran a different job and reported it as the one you asked
       // for.
       throw new ExtractFigureError(
-        `Unknown flag ${JSON.stringify(value)}. Known: --out, --clip, --report.`
+        `Unknown flag ${JSON.stringify(value)}. Known: --out, --sound, --clip, --report.`
       );
     } else if (options.file === null) {
       options.file = value;
@@ -340,49 +349,89 @@ export function poseBounds(shapes, poses) {
 }
 
 /**
- * A page that plays the extracted rig.
+ * A page that plays the extracted rig, AND sounds it.
  *
- * Deliberately dependency-free and deliberately dumb: it reads the two JSON
- * files this tool just wrote and draws them with `<svg>` transforms. If the
- * figure in here looks wrong, the extraction is wrong — there is no third thing
- * between them to blame.
+ * ► **THE FIRST VERSION NEEDED A SERVER AND THAT WAS A DESIGN ERROR.** It
+ *   `fetch`ed the two JSON files beside it, which a `file://` page may not do,
+ *   so opening it directly gave a BLANK PAGE with the reason only in a console
+ *   nobody was asked to open. The owner hit exactly that. A page whose entire
+ *   job is "a person looks at it" must not have a prerequisite, so the data is
+ *   INLINED and this file is self-contained: double-click it.
+ *
+ * ► **AND IT PLAYS THE SOUND BOUND TO THE ANIMATION ON SCREEN.** The two
+ *   extractions join perfectly, because both key on the BUILD'S OWN frame
+ *   labels — `tools/extract-sounds.mjs` binds a `StartSound` to the label it
+ *   fires under, and this binds a pose run to the same label. 80 of the 101
+ *   animations carry sound and 21 are silent, `Block` among them.
+ *
+ *   That join is what makes this page the check for BOTH extractions at once:
+ *   a walk that sounds like a leaping attack is visible here as a walking
+ *   gladiator making the wrong noise, which is the defect the owner caught by
+ *   ear last session and which no test in this repository could see.
+ *
+ * The mp3s are NOT inlined — they are referenced by relative path, because a
+ * media element may load `file://` where `fetch` may not, and 4.79 MB of base64
+ * helps nobody.
+ *
+ * Deliberately dependency-free and deliberately dumb. If the figure in here
+ * looks wrong, the extraction is wrong: there is no third thing to blame.
  */
-function previewHtml(clip, clipName) {
+function previewHtml({ clip, clipName, shapes, animations, soundBindings, soundPath }) {
+  // `</script>` cannot appear inside a script element even in a JSON island,
+  // and `<` is the only character that can start one.
+  const island = (value) => JSON.stringify(value).replace(/</g, "\\u003c");
+  const labels = Object.keys(animations);
+  const sounded = labels.filter((key) => (soundBindings?.[key] ?? []).length > 0).length;
   return `<!doctype html>
 <meta charset="utf-8">
 <title>Extracted figure — clip ${clip}${clipName ? ` (${clipName})` : ""}</title>
 <style>
   :root { color-scheme: dark; }
   body { margin: 0; font: 14px system-ui, sans-serif; background: #14161a; color: #e6e8ec; }
-  header { padding: 12px 16px; border-bottom: 1px solid #2a2e36; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  header { padding: 10px 16px; border-bottom: 1px solid #2a2e36; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
   select, button, input { font: inherit; background: #22262e; color: inherit; border: 1px solid #3a3f4a; border-radius: 6px; padding: 4px 8px; }
-  main { display: grid; place-items: center; padding: 16px; }
+  button { cursor: pointer; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 16px; }
   svg { background: #0e1013; border: 1px solid #2a2e36; border-radius: 8px; max-width: 100%; height: auto; }
   .meta { color: #9aa3b2; font-variant-numeric: tabular-nums; }
-  .warn { color: #f0b429; }
+  .silent { color: #f0b429; }
+  footer { padding: 10px 16px; border-top: 1px solid #2a2e36; color: #9aa3b2; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  footer button { padding: 2px 8px; }
 </style>
 <header>
   <label>Animation <select id="anim"></select></label>
   <button id="play">Pause</button>
   <label>fps <input id="fps" type="number" value="24" min="1" max="60" style="width:5em"></label>
+  <label><input type="checkbox" id="sound" checked> sound</label>
   <span class="meta" id="meta"></span>
 </header>
 <main><svg id="stage" width="520" height="620" preserveAspectRatio="xMidYMid meet"></svg></main>
-<script type="module">
-const [shapes, animations] = await Promise.all([
-  fetch("shapes.json").then((r) => r.json()),
-  fetch("animations.json").then((r) => r.json())
-]);
+<footer>
+  <span class="meta">${sounded} of ${labels.length} animations carry sound.</span>
+  <span id="bound"></span>
+</footer>
+<script type="application/json" id="shapes">${island(shapes)}</script>
+<script type="application/json" id="animations">${island(animations)}</script>
+<script type="application/json" id="bindings">${island(soundBindings ?? {})}</script>
+<script>
+const shapes = JSON.parse(document.getElementById("shapes").textContent);
+const animations = JSON.parse(document.getElementById("animations").textContent);
+const bindings = JSON.parse(document.getElementById("bindings").textContent);
+const SOUND_PATH = ${JSON.stringify(soundPath)};
+
 const stage = document.getElementById("stage");
 const picker = document.getElementById("anim");
 const meta = document.getElementById("meta");
+const bound = document.getElementById("bound");
 const fpsInput = document.getElementById("fps");
 const playButton = document.getElementById("play");
+const soundToggle = document.getElementById("sound");
 const keys = Object.keys(animations);
 for (const key of keys) {
   const option = document.createElement("option");
   option.value = key;
-  option.textContent = \`\${animations[key].label} (\${animations[key].poses.length}f)\`;
+  const files = bindings[key] || [];
+  option.textContent = animations[key].label + " (" + animations[key].poses.length + "f" + (files.length ? ", " + files.length + " snd" : ", silent") + ")";
   picker.append(option);
 }
 const NS = "http://www.w3.org/2000/svg";
@@ -390,34 +439,106 @@ let current = keys.includes("standing") ? "standing" : keys[0];
 let frame = 0;
 let playing = true;
 let last = 0;
+let soundIndex = 0;
+
+function playFor(key) {
+  if (!soundToggle.checked || !SOUND_PATH) return;
+  const files = bindings[key] || [];
+  if (files.length === 0) return;
+  // Cycle rather than always taking the first: the build fires several sounds
+  // per animation and the arena spreads across them by sequence number, so an
+  // audition that only ever played files[0] would check a fraction of what you
+  // will actually hear.
+  const file = files[soundIndex % files.length];
+  soundIndex += 1;
+  const audio = new Audio(SOUND_PATH + "/" + file);
+  audio.volume = 0.7;
+  audio.play().catch(() => {});
+}
+
+function showBound(key) {
+  const files = bindings[key] || [];
+  bound.replaceChildren();
+  if (files.length === 0) {
+    const span = document.createElement("span");
+    span.className = "silent";
+    span.textContent = "no StartSound on this label — silent in the build, and that is not a gap";
+    bound.append(span);
+    return;
+  }
+  for (const file of files) {
+    const button = document.createElement("button");
+    button.textContent = "▸ " + file;
+    button.addEventListener("click", () => {
+      const audio = new Audio(SOUND_PATH + "/" + file);
+      audio.volume = 0.7;
+      audio.play().catch(() => {});
+    });
+    bound.append(button);
+  }
+}
+
+// A SWF colour transform is channel * multiplier + offset, clamped. Applying
+// it here rather than ignoring it is the difference between a frozen gladiator
+// and a standing one: 4,544 placements in this clip carry one, and they are the
+// CONDITION TINTS — frozen, burning, poisoned, lifesteal, the two casts.
+function tintHex(hex, c) {
+  if (!c || !hex || hex === "none") return hex;
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (value, mul, off) => Math.max(0, Math.min(255, Math.round(value * mul + off)));
+  const r = ch((n >> 16) & 255, c[0], c[4]);
+  const g = ch((n >> 8) & 255, c[1], c[5]);
+  const b = ch(n & 255, c[2], c[6]);
+  return "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+
+function tintAlpha(alpha, c) {
+  if (!c) return alpha;
+  return Math.max(0, Math.min(1, alpha * c[3] + c[7] / 255));
+}
 
 function draw() {
   const animation = animations[current];
-  const pose = animation.poses[frame % animation.poses.length] ?? [];
+  const pose = animation.poses[frame % animation.poses.length] || [];
   const box = animation.bounds;
-  stage.setAttribute("viewBox", \`\${box.xMin} \${box.yMin} \${box.xMax - box.xMin} \${box.yMax - box.yMin}\`);
+  stage.setAttribute("viewBox", box.xMin + " " + box.yMin + " " + (box.xMax - box.xMin) + " " + (box.yMax - box.yMin));
   stage.replaceChildren();
   for (const placement of pose) {
     const shape = shapes[placement.shape];
     if (!shape) continue;
-    const [a, b, c, d, tx, ty] = placement.matrix;
+    const m = placement.matrix;
     const group = document.createElementNS(NS, "g");
-    group.setAttribute("transform", \`matrix(\${a} \${b} \${c} \${d} \${tx / 20} \${ty / 20})\`);
+    group.setAttribute("transform", "matrix(" + m[0] + " " + m[1] + " " + m[2] + " " + m[3] + " " + (m[4] / 20) + " " + (m[5] / 20) + ")");
     if (placement.limb) group.dataset.limb = placement.limb;
+    const c = placement.colour;
     for (const entry of shape.paths) {
       const node = document.createElementNS(NS, "path");
       node.setAttribute("d", entry.d);
-      node.setAttribute("fill", entry.fill);
-      node.setAttribute("fill-opacity", String(entry.fillOpacity));
+      node.setAttribute("fill", tintHex(entry.fill, c));
+      node.setAttribute("fill-opacity", String(tintAlpha(entry.fillOpacity, c)));
+      if (entry.fillRule) node.setAttribute("fill-rule", entry.fillRule);
       if (entry.stroke) {
-        node.setAttribute("stroke", entry.stroke);
+        node.setAttribute("stroke", tintHex(entry.stroke, c));
+        node.setAttribute("stroke-opacity", String(tintAlpha(entry.strokeOpacity ?? 1, c)));
         node.setAttribute("stroke-width", String(entry.strokeWidth));
+        node.setAttribute("stroke-linejoin", "round");
+        node.setAttribute("stroke-linecap", "round");
       }
       group.append(node);
     }
     stage.append(group);
   }
-  meta.textContent = \`frame \${(frame % animation.poses.length) + 1}/\${animation.poses.length} · clip frames \${animation.firstFrame}-\${animation.lastFrame} · \${pose.length} parts\`;
+  meta.textContent = "frame " + ((frame % animation.poses.length) + 1) + "/" + animation.poses.length +
+    " · clip frames " + animation.firstFrame + "-" + animation.lastFrame + " · " + pose.length + " parts";
+}
+
+function select(key) {
+  current = key;
+  frame = 0;
+  soundIndex = 0;
+  showBound(key);
+  draw();
+  playFor(key);
 }
 
 function tick(now) {
@@ -425,17 +546,22 @@ function tick(now) {
   if (playing && now - last >= step) {
     last = now;
     frame += 1;
+    // A new pass over the animation is a new performance of it, so it sounds
+    // again — which is what makes a wrong binding audible rather than a thing
+    // you had to catch in the first second.
+    if (frame % animations[current].poses.length === 0) playFor(current);
     draw();
   }
   requestAnimationFrame(tick);
 }
 
 picker.value = current;
-picker.addEventListener("change", () => { current = picker.value; frame = 0; draw(); });
+picker.addEventListener("change", () => select(picker.value));
 playButton.addEventListener("click", () => {
   playing = !playing;
   playButton.textContent = playing ? "Pause" : "Play";
 });
+showBound(current);
 draw();
 requestAnimationFrame(tick);
 </script>
@@ -513,6 +639,30 @@ export function assertReplaceableFile(target, swfPath) {
   }
 }
 
+/**
+ * The sound extractor's own label bindings, if it has run.
+ *
+ * ► **The two extractions join on the BUILD'S OWN frame labels and on nothing
+ *   else.** `extract-sounds.mjs` binds each `StartSound` to the label it fires
+ *   under; this tool cuts the timeline at the same labels. That shared
+ *   vocabulary is the build's, not a convention either tool invented, so the
+ *   join cannot silently drift — which is exactly what the PROSE buckets it
+ *   replaced did do.
+ *
+ * Absent or unreadable is not an error: the preview is simply silent, the same
+ * way the arena is silent with no assets extracted.
+ */
+export function readSoundBindings(soundDir) {
+  try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(soundDir, "manifest.json"), "utf8"));
+    const bindings = manifest?.bindings;
+    if (!bindings || typeof bindings !== "object") return null;
+    return { bindings, sha256: manifest?.source?.sha256 ?? null };
+  } catch {
+    return null;
+  }
+}
+
 function main(argv) {
   let options;
   try {
@@ -587,6 +737,19 @@ function main(argv) {
     animations[key] = { ...animation, bounds: poseBounds(result.shapes, animation.poses) };
   }
 
+  const sound = readSoundBindings(options.sound);
+  if (sound) {
+    const sounded = Object.keys(animations).filter((key) => (sound.bindings[key] ?? []).length > 0).length;
+    console.log(`sound      ${sounded} of ${Object.keys(animations).length} animations carry sound, from ${path.relative(REPO_ROOT, options.sound)}`);
+    if (sound.sha256 && sound.sha256 !== sha256) {
+      console.log("SOUND MISMATCH: the audio was extracted from a DIFFERENT build than this figure.");
+      console.log(`  figure ${sha256}`);
+      console.log(`  sound  ${sound.sha256}`);
+    }
+  } else {
+    console.log(`sound      none — run tools/extract-sounds.mjs to hear the preview`);
+  }
+
   const manifest = {
     tool: "tools/extract-figure.mjs",
     generated: new Date().toISOString(),
@@ -601,6 +764,7 @@ function main(argv) {
       shapes: shapeIds.length,
       shapeFailures: result.failures.length
     },
+    sound: sound ? { path: path.relative(REPO_ROOT, options.sound), sha256: sound.sha256 } : null,
     unsupported: result.unsupported,
     colourTransformed: result.colourTransformed,
     failures: result.failures
@@ -625,7 +789,14 @@ function main(argv) {
       write("manifest.json", `${JSON.stringify(manifest, null, 2)}\n`),
       write("shapes.json", `${JSON.stringify(result.shapes)}\n`),
       write("animations.json", `${JSON.stringify(animations)}\n`),
-      write("preview.html", previewHtml(result.clip, result.clipName))
+      write("preview.html", previewHtml({
+        clip: result.clip,
+        clipName: result.clipName,
+        shapes: result.shapes,
+        animations,
+        soundBindings: sound?.bindings ?? null,
+        soundPath: sound ? path.relative(options.out, options.sound).split(path.sep).join("/") : null
+      }))
     ];
   } catch (error) {
     // A refused target is a REPORT, not a stack trace: the thing it is most
@@ -651,13 +822,11 @@ function main(argv) {
     console.log(`wrote ${path.relative(REPO_ROOT, entry.target)}  ${(entry.bytes / 1024).toFixed(1)} KB`);
   }
   console.log(`build unchanged: ${after}`);
-  const served = path.relative(REPO_ROOT, options.out).split(path.sep).join("/");
   console.log("");
-  console.log("LOOK AT IT — this extraction has no other check. `preview.html` fetches the");
-  console.log("JSON beside it, which a file:// page may not do, so it needs an origin:");
+  console.log("LOOK AT IT — this extraction has no other check, and it now SOUNDS too.");
+  console.log("`preview.html` is SELF-CONTAINED: open the file, no server needed.");
   console.log("");
-  console.log("  node tools/arena-server.mjs");
-  console.log(`  # then open http://127.0.0.1:8123/${served}/preview.html`);
+  console.log(`  ${path.join(options.out, "preview.html")}`);
   console.log("");
   console.log("Nothing here is committed: `assets/` is gitignored and");
   console.log("test/asset-attestation.test.js fails if any of it is ever tracked.");
