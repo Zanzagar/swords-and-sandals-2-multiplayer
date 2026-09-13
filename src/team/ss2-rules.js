@@ -928,6 +928,12 @@ export const SS2_ARENA = Object.freeze({
    * (`MAP_SILENCE.multi-slot-arena-geometry`) — but how far apart two unlevel
    * gladiators then ARE is the build's own answer, because `getfightdistance`
    * is Euclidean over `(_x, _y)`. See `ss2FightDistance`.
+   *
+   * ► **AND THE BORROWING IS NOT FREE: vanilla spends `_y` on the JUMP ARC,
+   *   not on depth.** 200 is the ground, and in the build a gladiator leaves it
+   *   only by leaping. This engine reuses the same number as a rank datum,
+   *   which is coherent exactly as long as nothing jumps. See the
+   *   height-versus-depth block in `ss2FightDistance` before wiring one.
    */
   frontY: 200,
   /**
@@ -1042,6 +1048,40 @@ export const SS2_ARENA = Object.freeze({
  * says so in words: *"The **height** and distance of your jump is determined by
  * your agility"* (`sprite:862/frame:5/DoAction@0x238de2` `+0x0b9c`). So during a
  * jump the build's `fightdistance` is a true hypotenuse.
+ *
+ * ## ► THE BUILD'S `_y` IS HEIGHT. THIS ENGINE'S `y` IS DEPTH. THEY ARE NOT
+ * ## THE SAME AXIS, AND RIGHT NOW THEY SHARE A FIELD.
+ *
+ * **Read this before implementing `jump`, `run` or `charge`. It is the one
+ * hazard the second axis created that nothing in the suite can catch yet, and
+ * it is cheap to fix now and expensive after a jump exists.**
+ *
+ * Flash has ONE `_y` per clip and vanilla spends it on the leap arc: `leap` is
+ * clamped to `[8, 36]` and is NEGATIVE (up the screen), the landing test is
+ * `_y < grounded`, and `getfightdistance` counts it — which is the whole
+ * reason the formula above is a hypotenuse. **In vanilla, a bigger `ydist`
+ * means "one of us is in the air".**
+ *
+ * `combatant.y` in this engine means something else entirely: which RANK you
+ * stand in, depth into the arena, `frontY - rankStride * k`. That is authored
+ * mod surface (`MAP_SILENCE.multi-slot-arena-geometry`) and vanilla has no
+ * such quantity at all.
+ *
+ * **Both currently reach this function through the same term.** Nothing is
+ * wrong today, because no phase in this engine moves a gladiator vertically —
+ * `jump*` is unwired. The moment one does, a fighter one rank back (97) and a
+ * fighter mid-leap (36) become indistinguishable to every reach gate, and a
+ * jump will read as a lane change.
+ *
+ * **The fix, when jump lands, is THREE named axes and not two**: `x` along the
+ * arena, `y` depth, and a separate height, with the metric combining all
+ * three. Vanilla already counts height in fight distance, so keeping it in is
+ * the faithful choice; depth is the invented term and is the one that has to
+ * justify itself.
+ *
+ * The projection key-list pin in `ss2-team-rules.test.js` is the tripwire: a
+ * `height` field added to the combatant breaks it, which forces whoever adds
+ * it to read this paragraph rather than discover the conflation in play.
  *
  * ## What this means, stated narrowly, because the temptation is to overclaim
  *
@@ -1482,6 +1522,14 @@ export function ss2WalkDisplacement(movementSpeed, { boot = 0 } = {}) {
  *   **That is ONE agent's reading with no verifier aimed at it**, so it is a lead,
  *   not a derivation. What is certain is the per-frame shape and that `_y` moves
  *   by `attacker.leap` (`+0x4913`).
+ *
+ * ► **AND BEFORE YOU WIRE `jump*`, READ `ss2FightDistance`'s HEIGHT-VERSUS-DEPTH
+ *   BLOCK. `attacker.leap` moves `_y`, and THIS ENGINE HAS ALREADY SPENT `y` ON
+ *   SOMETHING ELSE** — the rank a gladiator stands in, added 2026-09-12.
+ *   Vanilla's `_y` is the leap arc and `getfightdistance` counts it; ours is
+ *   depth into the arena. Writing a jump into `combatant.y` would make a
+ *   fighter mid-leap indistinguishable from one standing a rank back, to every
+ *   reach gate at once. The answer is a THIRD named axis, not a shared one.
  *
  * **None of these six is wired into the rule set**, and there is a second reason
  * beyond "nothing offers them": `SS2_MOVEMENT_STEP_FACTOR.run` and `.charge` are

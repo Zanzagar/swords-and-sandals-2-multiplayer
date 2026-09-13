@@ -189,6 +189,12 @@ export function normaliseCombatant(source, teamId, index, rules, teamIndex = 0) 
      * why this is a separate hook rather than a widened `startingPosition`:
      * `y === null` means "this battle has no depth", which is exactly what a
      * one-dimensional arena is, and it reaches `ss2FightDistance` as 0.
+     *
+     * ► **THIS IS DEPTH, NOT HEIGHT, and the distinction is load-bearing the
+     *   moment anything jumps.** The build spends its own `_y` on the leap arc
+     *   and counts it in `getfightdistance`; this field means which rank you
+     *   stand in. A jump must NOT be written here — it needs its own axis. See
+     *   the height-versus-depth block in `ss2FightDistance`.
      */
     y: null
   };
