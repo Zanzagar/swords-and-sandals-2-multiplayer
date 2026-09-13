@@ -264,6 +264,116 @@ Nothing in the ranged phase re-checks ammunition either: the ranged branch of
 negative. In ordinary play the auto-swap below fires first; a capture harness
 that drives `getphase` directly can reach the defect.
 
+### The arrow itself: launch, flight, trail and impact (byte-read 2026-09-13)
+
+**The build models the projectile, and none of it was in this document.** All
+125 `bullet` references live in one block — `sprite:862[overlay]/frame:52/
+DoAction@0x240c7f`, the `phase_decision` state machine — and `maxscale`, which
+half of it keys on, appears nowhere else in this corpus. Read off `77cb545c…`
+with `tools/inspect-swf.mjs --references bullet --around 400`.
+
+The ranged phase branch runs every tick while `phase_decision` is one of the
+four ranged labels, and does four things in this order:
+
+1. `staminacost = round(strength * 3)` (`+0x6bb5`).
+2. **Once**, guarded on `attacker.struck == null`: `ammo_left -= 1`
+   (`+0x6bf5`), `bullet_in_air = true` (`+0x6c23`), `gotoAndPlay("bombard")` or
+   `("snipe")`, and `attack_direction = 21` / `22`.
+3. **The impact test** (`+0x6c97`-`+0x6d24`), every tick:
+
+   ```text
+   bullet._y > 160
+   || (bullet._x > defender._x && attacker.gladiator_dir == "right")
+   || (bullet._x < defender._x && attacker.gladiator_dir == "left")
+   ```
+
+   On impact: `checkattackroll()`, `bullet_in_air = false`,
+   `bullet.removeMovieClip()`. **So a ranged attack resolves when the arrow
+   ARRIVES, not when it is loosed** — and `bullet._y > 160` is the arrow
+   falling short and striking the ground, which resolves the attack all the
+   same.
+4. **The launch**, guarded on `attacker.fired == true` (`+0x6d59`) — a flag the
+   fighter ANIMATION sets at its release frame, so the arrow appears when the
+   bow is actually drawn and not when the phase starts.
+
+#### Launch
+
+```text
+  bulletdepth = 45000                                          +0x6d81
+  bullet = arena.gladiators.attachMovie("bullet", ...)          +0x6da2
+  bullet.gotoAndStop(game_attacker.secondary_weapon - 60)       +0x6dd4
+  bullet._x = attacker._x ± 30       (+ facing right)           +0x6dff / +0x6e23
+  bullet._y = attacker._y - (attacker._yscale * 2 + 30)         +0x6e42
+    SNIPE ONLY:
+  bullet._y = attacker._y - (attacker._yscale * 1.5 + 5)        +0x6e9e
+```
+
+**The arrow's art is the bow's id minus 60**, so the twenty ranged rows 61-80
+index frames 1-20 of character 47 — the same `- 60` the trail uses at `+0x7255`.
+And **a snipe is loosed lower than a bombard**: `1.5 * _yscale + 5` against
+`2 * _yscale + 30`, which is the flat shot against the lobbed one, set up before
+either has moved.
+
+#### Flight constants
+
+```text
+  bullet.bulletlife        = 1                                  +0x6ede
+  bullet.bulletcounter     = 1                                  +0x6ef1
+  bullet.gravity           = 2                                  +0x6efd
+  bullet.distance_to_enemy = abs(attacker._x - defender._x)     +0x6f28 / +0x6f63
+  bullet.Yvelocity         = ceil(distance_to_enemy / Xvelocity) +0x7139
+```
+
+`Xvelocity` and the arrow's own scale are banded on **`arena.maxscale`**, and
+the whole table is **BOMBARD ONLY** — the four tests are sequential `if`s rather
+than an else-if chain, so the last matching arm wins:
+
+| test | `_xscale` = `_yscale` | `Xvelocity` | site |
+| --- | --- | --- | --- |
+| `maxscale == 80` | *(unset; stays 100)* | `randomBetween(8, 18)` | `+0x6fd7` |
+| `maxscale < 80` | 100 | `randomBetween(16, 24)` | `+0x700e`, `+0x7033` |
+| `maxscale <= 60` | 130 | `randomBetween(20, 30)` | `+0x706b`, `+0x7090` |
+| `maxscale <= 40` | 160 | `randomBetween(30, 36)` | `+0x70c8`, `+0x70ed` |
+| **snipe** (the else of the bombard test at `+0x6fbb`) | *(unset)* | `randomBetween(60, 60)` = **60** | `+0x7112` |
+
+► **THE SCALE GOES UP AS `maxscale` GOES DOWN, which is the wrong way round for
+  perspective and the right way round for a CAMERA.** SS2 zooms the arena out as
+  the fighters separate; a zoomed-out view needs the arrow drawn larger to stay
+  visible and moving faster to cross the gap in a watchable time. **This is zoom
+  compensation, not depth perspective** — which matters to any reimplementation,
+  because a fixed camera has nothing to compensate for and would be copying the
+  table into a question it does not answer.
+
+#### Per frame — `bullet.onEnterFrame` (`+0x7177`)
+
+```text
+  bulletcounter += 1                                            +0x7189
+  if (bulletcounter >= 3) {                                     +0x71aa
+    bulletcounter = 1
+    attach `bullet_trail` at the bullet's _x, _y and _rotation  +0x71ee
+    trail.bullet.gotoAndStop(secondary_weapon - 60)             +0x7255
+  }
+  Yvelocity -= gravity                                          +0x727f
+  BOMBARD ONLY:  _y -= Yvelocity                                +0x72c7
+  _x += Xvelocity   (facing right; -= facing left)              +0x7314 / +0x7379
+```
+
+► **A BOMBARD ARCS AND A SNIPE FLIES FLAT.** The `_y` integration at `+0x72c7`
+  is inside a test for `bombardright`/`bombardleft` only, so a snipe never
+  changes `_y` at all: it is loosed lower, travels at a constant 60, and hits or
+  passes. The bombard starts with `Yvelocity = ceil(distance / Xvelocity)`,
+  loses 2 a frame, and therefore rises, stalls and falls — **the arc is aimed by
+  the range**, which is why a bombard's `_y > 160` ground-strike arm is
+  reachable and a snipe's is not.
+
+► **THE TRAIL IS ONE PUFF EVERY THREE FRAMES**, at the arrow's own position and
+  rotation, drawn from the same art. At 30 fps that is ten a second.
+
+**A typo in the build, harmless:** `+0x733a` reads `phase_decsion` — not
+`phase_decision` — so that test is always false and the `sniperight` arm below
+it never runs. The arm it guards is a duplicate of the one above, so nothing
+observable changes.
+
 ### Weapon mode and `swap_weapons`
 
 No controller frame wires `swap_weapons`. The only manual route is the battle
