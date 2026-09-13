@@ -577,8 +577,8 @@ function tintAlpha(alpha, c) {
   return Math.max(0, Math.min(1, alpha * c[3] + c[7] / 255));
 }
 
-// ► **ONE VIEWBOX FOR EVERY ANIMATION, and it is the STANDING one padded.**
-// Sizing per animation looked right until the morph effects landed: `death2`'s
+// ONE VIEWBOX FOR EVERY ANIMATION, and it is the STANDING one padded.
+// Sizing per animation looked right until the morph effects landed: death2's
 // own bounds are 781x312 against standing's 96x223, because the blood sprays
 // most of a screen to the left. Fitting that shrinks the gladiator to a speck
 // exactly when you want to watch him. A fixed box is also what a game camera
