@@ -63,6 +63,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { parseShape, shapeToPaths } from "./swf-shapes.mjs";
+import { parseMorphShape, morphShapeAt, morphToPaths, ratioOf } from "./swf-morph-shapes.mjs";
 import {
   indexCharacters,
   resolveTimeline,
@@ -235,6 +236,52 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
   const out = {};
   let placementCount = 0;
 
+  /**
+   * MORPH SHAPES, BAKED AT THE RATIO THEY ARE PLACED AT.
+   *
+   * ► **Measured before choosing this: the fighter clip has 290 morph
+   *   placements across all 2,222 frames, and all 290 are a DISTINCT
+   *   `(morph, ratio)` pair.** So there is nothing to deduplicate and nothing
+   *   to interpolate at runtime — baking each one costs 290 path sets and
+   *   lets a morph be an ordinary entry in `shapes`, keyed `"<id>@<ratio>"`.
+   *   The renderer needs no second code path and no morph parser in the
+   *   browser.
+   *
+   * The alternative — shipping both edge streams and lerping per frame — would
+   * put a second geometry pipeline in the renderer to serve 290 placements.
+   */
+  const morphDefinitions = new Map();
+  const morphShapes = {};
+  const morphFailures = [];
+  const morphKeyFor = (characterId, rawRatio) => {
+    const ratio = Number.isFinite(rawRatio) ? rawRatio : 0;
+    const key = `${characterId}@${ratio}`;
+    if (morphShapes[key]) return key;
+    let definition = morphDefinitions.get(characterId);
+    if (definition === undefined) {
+      const character = characters.get(characterId);
+      try {
+        definition = parseMorphShape(buffer, character.bodyStart, character.bodyEnd, character.tagCode);
+      } catch (error) {
+        definition = null;
+        morphFailures.push({ id: characterId, message: String(error.message).slice(0, 120) });
+      }
+      morphDefinitions.set(characterId, definition);
+    }
+    if (!definition) return null;
+    const frame = morphShapeAt(definition, ratioOf(ratio));
+    morphShapes[key] = {
+      bounds: {
+        xMin: px(frame.bounds.xMin), xMax: px(frame.bounds.xMax),
+        yMin: px(frame.bounds.yMin), yMax: px(frame.bounds.yMax)
+      },
+      morph: characterId,
+      ratio,
+      paths: morphToPaths(frame)
+    };
+    return key;
+  };
+
   for (const animation of animations) {
     const key = labelKey(animation.name);
     const poses = [];
@@ -258,6 +305,21 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
       const pose = [];
       for (const drawable of drawables) {
         placementCount += 1;
+        if (drawable.unsupported === "morph") {
+          const key = morphKeyFor(drawable.characterId, drawable.ratio);
+          if (key) {
+            const colour = packColour(drawable.colourTransform);
+            const placement = {
+              shape: key,
+              limb: depthNames.get(drawable.path[0]) ?? null,
+              depth: drawable.path,
+              matrix: roundMatrix(drawable.matrix)
+            };
+            if (colour) placement.colour = colour;
+            pose.push(placement);
+            continue;
+          }
+        }
         if (drawable.unsupported) {
           const tally = unsupported.get(drawable.unsupported) ?? new Set();
           tally.add(drawable.characterId);
@@ -308,8 +370,13 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
       failures.push({ id, message: String(error.message) });
     }
   }
+  // The baked morphs join the shape table: from here they are ordinary entries
+  // whose key happens to carry a ratio.
+  Object.assign(shapes, morphShapes);
+  for (const failure of morphFailures) failures.push({ id: failure.id, message: `morph: ${failure.message}` });
 
   return {
+    morphCount: Object.keys(morphShapes).length,
     clip,
     clipName: sprite.exportName ?? null,
     frameCount: sprite.frames,
@@ -510,11 +577,25 @@ function tintAlpha(alpha, c) {
   return Math.max(0, Math.min(1, alpha * c[3] + c[7] / 255));
 }
 
+// ► **ONE VIEWBOX FOR EVERY ANIMATION, and it is the STANDING one padded.**
+// Sizing per animation looked right until the morph effects landed: `death2`'s
+// own bounds are 781x312 against standing's 96x223, because the blood sprays
+// most of a screen to the left. Fitting that shrinks the gladiator to a speck
+// exactly when you want to watch him. A fixed box is also what a game camera
+// does — the effect leaves frame, the fighter does not.
+const BASE = animations.standing ? animations.standing.bounds : null;
+const PAD = 0.45;
+const VIEWBOX = BASE
+  ? [BASE.xMin - (BASE.xMax - BASE.xMin) * PAD, BASE.yMin - (BASE.yMax - BASE.yMin) * 0.1,
+     (BASE.xMax - BASE.xMin) * (1 + PAD * 2), (BASE.yMax - BASE.yMin) * 1.2].join(" ")
+  : null;
+
 function draw() {
   const animation = animations[current];
   const pose = animation.poses[frame % animation.poses.length] || [];
   const box = animation.bounds;
-  stage.setAttribute("viewBox", box.xMin + " " + box.yMin + " " + (box.xMax - box.xMin) + " " + (box.yMax - box.yMin));
+  stage.setAttribute("viewBox", VIEWBOX
+    || (box.xMin + " " + box.yMin + " " + (box.xMax - box.xMin) + " " + (box.yMax - box.yMin)));
   stage.replaceChildren();
   for (const placement of pose) {
     const shape = shapes[placement.shape];
@@ -712,6 +793,9 @@ function main(argv) {
   console.log(`clip       ${result.clip}${result.clipName ? ` (${result.clipName})` : ""}, ${result.frameCount} frames`);
   console.log(`animations ${animationKeys.length} labels, ${poseCount} poses, ${result.placementCount} placements`);
   console.log(`shapes     ${shapeIds.length} distinct, ${result.failures.length} failed to parse`);
+  if (result.morphCount > 0) {
+    console.log(`morphs     ${result.morphCount} baked frames — the effects: blood, the charge guard, potions, the heart`);
+  }
   if (result.colourTransformed.length > 0) {
     console.log(`tinted     ${result.colourTransformed.length} shapes carry a colour transform`);
   }
