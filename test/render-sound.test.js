@@ -64,10 +64,22 @@ test("each gait keeps its own clips, because the build gives them their own", ()
   assert.equal(chooseSound(TABLE, "movement:charge", 0), "charge.mp3");
 });
 
-test("a block is SILENT, and that is the build's answer rather than a gap", () => {
+test("a block is SILENT, and it is the BINDINGS that say so, not the table", () => {
   // `Block` and `BlockForward` carry no StartSound at all. The prose bucket hid
   // that by lending the range `Jump` and `Superjump`.
-  assert.deepEqual(soundLabelsFor("block"), []);
+  //
+  // ► **This used to assert `soundLabelsFor("block")` was EMPTY, and that was
+  //   the right silence for the wrong reason.** An empty list conflated two
+  //   different facts — "the build has no block clip" and "the build's block
+  //   makes no noise" — and only the second is true: the figure draws `Block`
+  //   and `BlockForward` from the same extraction. **An assertion that the
+  //   table omits the label would also have passed if the build DID bind a
+  //   sound to it**, which is exactly the kind of self-confirming check this
+  //   project keeps finding. So the labels are named, and the silence is
+  //   derived from bindings that do not mention them.
+  assert.deepEqual(soundLabelsFor("block"), ["block", "blockforward"]);
+  assert.equal(TABLE.block, undefined, "the extractor binds no sound to a block");
+  assert.equal(TABLE.blockforward, undefined);
   assert.equal(chooseSound(TABLE, "block", 0), null);
 });
 

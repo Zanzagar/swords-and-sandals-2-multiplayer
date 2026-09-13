@@ -22,6 +22,8 @@
  * as `figure.js` drawing authored vector art when no sprite has been extracted.
  */
 
+import { clipLabelsFor } from "./clip-labels.js";
+
 export class SoundError extends Error {
   constructor(message) {
     super(message);
@@ -44,61 +46,27 @@ export class SoundError extends Error {
  *   as either being right**, and nothing in the suite could tell: both sides
  *   were self-consistent and only an ear caught it.
  *
- * The extractor now binds by the clip's own `FrameLabel` tags — 80 of them
- * against the prose's 17 ranges — so this maps a family to the EXACT labels it
- * may sound as. The names are the build's, lower-cased, and none is inferred
- * from a pattern.
+ * ► **THE TABLE ITSELF NOW LIVES IN `clip-labels.js`, because the FIGURE needs
+ *   the same join.** `tools/extract-figure.mjs` cuts the fighter's timeline at
+ *   the same `FrameLabel` tags the sound extractor binds to, so sound and art
+ *   answer to ONE vocabulary — and a second consumer arriving is exactly when a
+ *   duplicated table starts to drift. What stays here is the SOUND POLICY.
  *
- * **A family with no entry is silent, and that is usually correct rather than
- * missing.** `Block` and `BlockForward` carry no `StartSound` at all — a block
- * in this build makes no noise — which the prose bucket hid by lending it a
- * jump.
+ * ► **AND `block` MOVED FROM "no entry" TO "an entry with no bindings", which
+ *   is the same silence for a better reason.** `Block` and `BlockForward` carry
+ *   no `StartSound` at all, so a block makes no noise — but the clips EXIST and
+ *   the figure draws them. Omitting `block` from the table made "the build has
+ *   no block animation" and "the build's block is silent" into ONE entry, which
+ *   is the same conflation the prose buckets made. Silence is now DERIVED from
+ *   the bindings, so it would stop being silent the day the build binds a sound.
  */
-const FAMILY_LABELS = Object.freeze({
-  // The build's own four gaits, each with its own pair of clips.
-  "movement:walk": ["stepforward", "stepback"],
-  "movement:run": ["runforward", "runback"],
-  "movement:charge": ["charge", "chargeattack"],
-  "movement:jump": ["jump", "superjump"],
-
-  attack: ["attack1", "attack2", "attack3", "attack4", "attack5", "attack6",
-    "attack7", "attack8", "attack9", "attack10", "attack11", "attack12"],
-  hurt: ["hurt1", "hurt2", "hurt3", "hurt4", "hurt5", "hurt6", "hurt7",
-    "hurt9", "hurt10", "hurt11", "hurt12", "hurt20"],
-  rest: ["rest"],
-  knockback: ["knockback_mov", "shove"],
-  taunt: ["taunt"],
-  ranged: ["bombard", "snipe"],
-
-  // Per-flag in the build, so per-flag here: a burning gladiator and a frozen
-  // one do not share a sound.
-  "condition:burning": ["burning"],
-  "condition:frozen": ["frozen"],
-  "condition:poisoned": ["poisoned"],
-  "condition:life_stolen": ["lifesteal"]
-});
-
-/**
- * Death is per-variant, and the variant IS the family suffix: `familyOf`
- * returns `death:<label>` using the build's own name, so no table is needed.
- * An unknown variant falls back to the whole set, because a death with a
- * neighbouring sound beats a death with none.
- */
-const DEATH_LABELS = Object.freeze([
-  "death1", "death2", "death3", "death4", "death5", "death6", "death7",
-  "death21", "death22", "death23", "deathspike", "deathtaunt", "death_poisoned"
-]);
 
 /** The build's own clip labels this family may sound as, or an empty list. */
 export function soundLabelsFor(family) {
-  if (typeof family !== "string" || family.length === 0) return [];
-  // A looping idle is deliberately silent: a sound on a loop never stops.
-  if (family === "standing" || family === "unknown") return [];
-  if (family.startsWith("death:")) {
-    const variant = family.slice("death:".length).toLowerCase();
-    return DEATH_LABELS.includes(variant) ? [variant] : DEATH_LABELS;
-  }
-  return FAMILY_LABELS[family] ?? [];
+  // A looping idle is deliberately silent: a sound on a loop never stops. That
+  // is a policy about SOUND and so it lives here, not in the shared vocabulary.
+  if (family === "standing") return [];
+  return clipLabelsFor(family);
 }
 
 /** The first label a family may sound as, or null. Kept for callers wanting one name. */

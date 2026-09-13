@@ -52,6 +52,9 @@ import {
   figureXAt,
   paintFigure,
   paintShadow,
+  paintExtractedFigure,
+  figurePackFrom,
+  hasExtractedArt,
   poseAt,
   timelineFor,
   timelinesForStep,
@@ -185,6 +188,50 @@ function log(message, { warn = false } = {}) {
 let soundBindings = Object.freeze({});
 let soundEnabled = true;
 const soundCache = new Map();
+
+/* ------------------------------------------------------------------ */
+/* Art — the player's OWN extracted rig, or the authored figure         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **NO EXTRACTED ART MEANS THE AUTHORED FIGURE, NEVER AN ERROR**, exactly as
+ *   no extracted audio means silence. A fresh clone has no `assets/` — that is
+ *   the point, the repo ships none — so these fetches are EXPECTED to 404 and
+ *   the arena must stay fully playable when they do. Run
+ *   `node tools/extract-figure.mjs` to fill it.
+ *
+ * WHICH pose is drawn is decided in `src/render/extracted-figure.js`, under the
+ * suite. All that lives here is the fetch and the `Path2D`, which are the two
+ * things a test cannot reach.
+ *
+ * The fallback is PER FAMILY, not per session: this engine can express phases
+ * the build has no clip for, so a gladiator may draw from the extracted rig for
+ * a walk and from `figure.js` for something vanilla never had.
+ */
+let figurePack = null;
+
+Promise.all([
+  fetch("/assets/figure/shapes.json").then((response) => (response.ok ? response.json() : null)),
+  fetch("/assets/figure/animations.json").then((response) => (response.ok ? response.json() : null))
+])
+  .then(([shapes, animations]) => {
+    if (!shapes || !animations) {
+      log("no extracted art — drawing the authored figure. `node tools/extract-figure.mjs` to use the build's own.");
+      return;
+    }
+    figurePack = figurePackFrom(shapes, animations);
+    log(`art: ${Object.keys(shapes).length} shape(s), ${figurePack.labels.length} animation(s) from your own install`);
+    // The provenance panel is rendered at startup, BEFORE this resolves. Without
+    // this it would go on claiming the figures are authored while the build's
+    // own rig is drawn over the sentence saying so.
+    renderProvenance();
+  })
+  .catch((error) => {
+    // A broken pack falls back rather than taking the arena down with it.
+    figurePack = null;
+    log(`extracted art unusable, drawing the authored figure (${String(error.message).slice(0, 80)})`);
+    renderProvenance();
+  });
 
 fetch("/assets/sound/manifest.json")
   .then((response) => (response.ok ? response.json() : null))
@@ -407,6 +454,23 @@ function viewport() {
   };
 }
 
+/**
+ * `Path2D` objects for extracted path data, by the `d` string.
+ *
+ * A pose is ~155 paths and six gladiators is ~930 a frame; building those from
+ * strings every frame is the one place this shell can be accidentally slow. The
+ * data is immutable and the key IS the geometry, so the cache never staleness.
+ */
+const pathCache = new Map();
+function path2dFor(d) {
+  let path = pathCache.get(d);
+  if (!path) {
+    path = new Path2D(d);
+    pathCache.set(d, path);
+  }
+  return path;
+}
+
 function drawOps(ops, view, origin) {
   // How big this figure draws. `src/render/figure.js` decides it, for the same
   // reason `figureXAt` and `timelinesForStep` live there: a number only the
@@ -415,7 +479,40 @@ function drawOps(ops, view, origin) {
   const size = origin.size ?? 1;
   for (const operation of ops) {
     context.globalAlpha = operation.alpha ?? 1;
-    if (operation.kind === "polygon") {
+    if (operation.kind === "path") {
+      // ► **THE EXTRACTED RIG, and it is the only operation that carries its
+      //   own MATRIX.** `src/render/extracted-figure.js` has already composed
+      //   the limb's placement with the clip-to-arena transform, so everything
+      //   left here is putting the figure's local arena space on the canvas:
+      //   translate to where it stands, scale by the view, flip y (arena y is
+      //   UP and canvas y is DOWN), mirror x when it faces left.
+      //
+      //   `translate`/`scale` rather than `setTransform`, so this composes with
+      //   whatever transform the canvas already carries instead of replacing it.
+      const flip = origin.facing === "left" ? -1 : 1;
+      const k = size * view.scale;
+      context.save();
+      context.translate(view.toX(origin.x), view.toY(origin.y, 0));
+      context.scale(k * flip, -k);
+      const m = operation.matrix;
+      context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+      const path = path2dFor(operation.d);
+      if (operation.fill && operation.fill !== "none") {
+        context.globalAlpha = (operation.alpha ?? 1) * (operation.fillOpacity ?? 1);
+        context.fillStyle = operation.fill;
+        context.fill(path, operation.fillRule ?? "evenodd");
+      }
+      if (operation.stroke && operation.strokeWidth > 0) {
+        context.globalAlpha = (operation.alpha ?? 1) * (operation.strokeOpacity ?? 1);
+        context.strokeStyle = operation.stroke;
+        // In the CURRENT transform's units, which the scale above then applies.
+        context.lineWidth = operation.strokeWidth;
+        context.lineJoin = "round";
+        context.lineCap = "round";
+        context.stroke(path);
+      }
+      context.restore();
+    } else if (operation.kind === "polygon") {
       context.beginPath();
       operation.points.forEach(([x, y], index) => {
         const px = view.toX(origin.x + x * size * (origin.facing === "left" ? -1 : 1));
@@ -600,14 +697,24 @@ function render(now = performance.now()) {
     // the pose and the travelled x are two readings of the same clock, and
     // computing it twice is how they drift apart.
     const at = entry ? Math.min(1, (now - entry.startedAt) / entry.timeline.durationMs) : 0;
+    // The timeline AND how far through it, kept together: the extracted rig
+    // needs both to pick a clip and a pose, and re-deriving either at the draw
+    // site is how the drawn figure and the drawn position drift apart.
     let pose;
+    let drawnTimeline;
+    let drawnAt;
     if (entry) {
+      drawnTimeline = entry.timeline;
+      drawnAt = at;
       pose = poseAt(entry.timeline, at);
     } else if (!combatant.alive) {
-      pose = poseAt(timelineFor("slain", { role: "defeated" }), 1);
+      drawnTimeline = timelineFor("slain", { role: "defeated" });
+      drawnAt = 1;
+      pose = poseAt(drawnTimeline, 1);
     } else {
-      const idle = timelineFor("Standing", { role: "actor" });
-      pose = poseAt(idle, ((now / idle.durationMs) % 1));
+      drawnTimeline = timelineFor("Standing", { role: "actor" });
+      drawnAt = (now / drawnTimeline.durationMs) % 1;
+      pose = poseAt(drawnTimeline, drawnAt);
     }
 
     // The lunge and the step, resolved into one coordinate by
@@ -648,7 +755,23 @@ function render(now = performance.now()) {
       })
     };
     drawOps(paintShadow(figure, pose), view, origin);
-    drawOps(paintFigure(figure, pose), view, origin);
+
+    // ► **THE FALLBACK IS PER FAMILY, not per session.** This engine can express
+    //   phases the build has no clip for — a lane change, for one — so a
+    //   gladiator may draw from the extracted rig for a walk and from
+    //   `figure.js` for something vanilla never had. An empty list from
+    //   `paintExtractedFigure` is that answer, and it is not an error.
+    const extracted = hasExtractedArt(figurePack)
+      ? paintExtractedFigure(figurePack, {
+        family: drawnTimeline.family,
+        label: drawnTimeline.label,
+        facing: actor.facing,
+        at: drawnAt,
+        height: figure.build.height,
+        fade: pose.fade
+      })
+      : [];
+    drawOps(extracted.length > 0 ? extracted : paintFigure(figure, pose), view, origin);
 
     // The name plate. It is the combatant's OWN name, never an item name.
     context.globalAlpha = combatant.alive ? 0.85 : 0.4;
@@ -777,9 +900,18 @@ function renderProvenance() {
   el("tier").textContent = `${(rules.verification ?? "unknown").toUpperCase()} — NOT RUNTIME-VERIFIED`;
   el("seed").textContent = `seed ${seed} · ${perSide}v${perSide} · the same seed and the same choices replay exactly`;
   el("provenance").innerHTML = "";
+  // ► **THIS PANEL MUST DESCRIBE WHAT IS ACTUALLY ON SCREEN, and for one commit
+  //   it did not.** It said the figures were authored vector art while the
+  //   extracted rig was being drawn over the top of that sentence. A surface
+  //   whose whole purpose is saying where its numbers came from cannot be wrong
+  //   about where its ART came from — so the line is derived from `figurePack`
+  //   rather than written once and left.
+  const figureLine = hasExtractedArt(figurePack)
+    ? ["The figures", "are the BUILD'S OWN, extracted from your install by `tools/extract-figure.mjs` into the gitignored `assets/`. No SS2 asset ships in this repository — a clone draws the authored art in `src/render/figure.js` until its owner extracts their own."]
+    : ["The figures", "are original vector art drawn from code in `src/render/painter.js`. No SS2 asset ships in this repository. Run `node tools/extract-figure.mjs` to draw the build's own instead."];
   const lines = [
     ["The arithmetic", "runs the same `ss2TeamRules` the test suite runs — map-derived from a licensed build, never observed in it."],
-    ["The figures", "are original vector art drawn from code in `src/render/painter.js`. No SS2 asset ships in this repository."],
+    figureLine,
     ["The animation timing", "is authored. No capture has ever recorded a clip label or a frame duration."],
     ["Slot 0 of each side", "reuses the battle map's own instance names, depths and positions. Everything past it is authored mod surface no capture can settle."]
   ];
@@ -830,12 +962,36 @@ function spectateStep() {
   }
 }
 
+/**
+ * ► **THE NEXT FRAME IS SCHEDULED IN A `finally`, and that is not defensive
+ *   programming — it is a scar.** `render(now)` used to be called before
+ *   `requestAnimationFrame(frame)` with nothing between them, so ANY throw
+ *   inside it stopped the arena permanently. That has already happened once on
+ *   this project: `src/render/cursor.js` exists because "the first spectated
+ *   bout froze after one action inside a `requestAnimationFrame` callback the
+ *   suite could not reach", and a malformed extracted pack was about to do it
+ *   again from a new direction.
+ *
+ *   **The suite cannot reach this file**, so the loop must survive the one
+ *   thing a test would otherwise have to catch. The error is logged once —
+ *   a per-frame log would bury the arena in its own noise.
+ */
+let loopErrorLogged = false;
+
 function frame(now) {
-  drainFinishedAnimations(now);
-  spectateStep();
-  settleIfReady();
-  render(now);
-  requestAnimationFrame(frame);
+  try {
+    drainFinishedAnimations(now);
+    spectateStep();
+    settleIfReady();
+    render(now);
+  } catch (error) {
+    if (!loopErrorLogged) {
+      loopErrorLogged = true;
+      log(`frame error, the arena keeps running: ${String(error?.message ?? error).slice(0, 160)}`);
+    }
+  } finally {
+    requestAnimationFrame(frame);
+  }
 }
 
 renderProvenance();

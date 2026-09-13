@@ -23,6 +23,13 @@
  *   joined it with movement, because pairing a travelling gait with the
  *   `move-clip` from its own batch is the same kind of decision: invisible on
  *   a screenshot, and wrong-able in silence.
+ * - `clip-labels.js` is the SINGLE join between this engine's family names and
+ *   the licensed build's own clip labels. Both extracted assets key on those
+ *   labels, so sound and art answer to one vocabulary rather than two that can
+ *   drift — which is exactly how a walk came to sound like a leaping attack.
+ * - `extracted-figure.js` draws the BUILD'S OWN rig when the player has
+ *   extracted it, and returns nothing when they have not. Same shape as
+ *   `sound.js`: the pack is an argument, never a table in the file.
  * - `timeline.js` owns TIME, because the presentation stream carries none, and
  *   states this surface's animation-timeout policy — part 4 of the
  *   acknowledgement seam, which `src/adapter/action-gate.js` deliberately left
@@ -35,3 +42,5 @@ export * from "./cursor.js";
 export * from "./painter.js";
 export * from "./timeline.js";
 export * from "./sound.js";
+export * from "./clip-labels.js";
+export * from "./extracted-figure.js";
