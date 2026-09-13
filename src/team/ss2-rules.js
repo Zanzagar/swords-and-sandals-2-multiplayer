@@ -1949,6 +1949,56 @@ function ss2RankArrivalX(actorX, bodies, destinationY) {
   return reachable.length > 0 ? reachable[0] : null;
 }
 
+/**
+ * The walk that takes an outflanking gladiator PAST its target, or null.
+ *
+ * Returns a walk only when every one of these holds, and each one is load
+ * bearing:
+ *
+ * 1. **The actor is in a different rank from the target.** In the target's own
+ *    rank the build's clamp forbids walking past it at all, so there is no far
+ *    side to reach and insisting would park the actor on the near one.
+ * 2. **An ally is ALREADY in reach of the target.** This is what keeps the
+ *    opening untouched — on turn one nothing is engaged, so this is false for
+ *    everybody and the pile-up rule that was removed in 2026-09-12 cannot come
+ *    back through this door.
+ * 3. **Every such ally is on the same side of the target as the actor.** If
+ *    somebody already holds the far side the pincer exists; adding a third body
+ *    to it is the queue this arm is for avoiding.
+ * 4. **The actor is not already past the target.** Once past, this returns null
+ *    and the rank arm brings it in behind.
+ *
+ * AUTHORED, and inside `MAP_SILENCE.multi-slot-arena-geometry` like every other
+ * multi-gladiator positioning rule: vanilla has one gladiator a side and cannot
+ * express a pincer, so there is nothing here to be faithful to.
+ */
+export function ss2FlankingWalk(view, target, options) {
+  const actor = view.actor;
+  if (!Number.isFinite(target.x) || !Number.isFinite(actor.x)) return null;
+  // (1) A different rank, or there is no way round.
+  if (target.y === actor.y) return null;
+
+  // (2) and (3): allies already engaging, and which side they hold.
+  const engaging = view.allies.filter((ally) =>
+    ally.id !== actor.id
+    && ally.alive !== false
+    && Number.isFinite(ally.x)
+    && ss2FightDistance(ally, target) < ss2Reach(ally));
+  if (engaging.length === 0) return null;
+
+  const actorSide = Math.sign(actor.x - target.x);
+  if (actorSide === 0) return null;
+  if (engaging.some((ally) => Math.sign(ally.x - target.x) !== actorSide)) return null;
+
+  // (4) Past it already? Then the rank arm should take over.
+  const beyond = target.x - actorSide * ss2PhysicalSize(target);
+  if ((actor.x - beyond) * actorSide <= 0) return null;
+
+  // Walk TOWARD and through: the far side is whichever way the target lies.
+  const towardType = target.x > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
+  return options.find((option) => option.type === towardType) ?? null;
+}
+
 function ss2RankDestination(actorY, direction, rankStride) {
   if (!Number.isFinite(actorY) || rankStride <= 0) return null;
   const to = actorY + direction * rankStride;
@@ -4307,6 +4357,36 @@ export function createSs2TeamRules({
         const positionedInDepth = Number.isFinite(view.actor.y);
         const ownRankHasFoe = positionedInDepth
           && view.foes.some((foe) => foe.y === view.actor.y);
+
+        // ► **GO ROUND A FOE AN ALLY IS ALREADY FIGHTING — the owner's own
+        //   observation, and it was measurably never happening.** Measured over
+        //   24 bouts before this arm existed: **208 turns where one side was
+        //   outnumbered two-to-one, and in 100% of them both attackers stood on
+        //   the SAME SIDE of their target.** Not once did anybody take the far
+        //   side, so a numbers advantage bought a queue rather than a pincer.
+        //
+        //   **It was never a geometry problem.** `ss2BodyBlocks` gates the walk
+        //   clamp on `|dy| < physical_size`, so at the shipped stride of 97 a
+        //   foe one rank away does NOT block: the far side is already legal to
+        //   walk to. What was missing is any reason to want it.
+        //
+        //   ► **AND THIS IS NOT THE RULE THAT CAUSED THE PILE-UP.** That one
+        //     was "move toward the nearest foe's rank", which fires at the
+        //     OPENING when nothing is engaged and collapses all six into one
+        //     rank — the tell being that strides 97 and 150 then return
+        //     identical censuses. This arm requires an ally to be ALREADY in
+        //     reach of the target, which is false for every gladiator on turn
+        //     one, so the opening is untouched. It delays a rank change rather
+        //     than adding one.
+        //
+        //   The move: while I am in a DIFFERENT rank from the target, keep
+        //   walking until I am past it, and only then let the rank arm below
+        //   bring me in — arriving behind.
+        const flank = positionedInDepth && nearest && Number.isFinite(nearest.y)
+          ? ss2FlankingWalk(view, nearest, options)
+          : null;
+        if (flank) return flank;
+
         if (positionedInDepth && !ownRankHasFoe && nearest && Number.isFinite(nearest.y)) {
           const towardRank = nearest.y > view.actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK;
           const step = options.find((option) => option.type === towardRank);
