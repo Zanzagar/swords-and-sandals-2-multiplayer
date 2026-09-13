@@ -8,7 +8,53 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-13 01:30 — the arena has two axes, and the build has its own voice](docs/handoffs/2026-09-13-0130--the-arena-has-two-axes-and-the-build-has-its-own-voice.md).**
+[2026-09-13 00:40 — the fighter is a rig, and Codex broke four things in it](docs/handoffs/2026-09-13-0040--the-fighter-is-a-rig-and-codex-broke-four-things.md).**
+Start there. **Ranked item 1 of the brief below is DONE: the fighter clip
+resolves.** 101 animations, 2,222 poses, 61 shapes, 0 parse failures, extracted
+from the player's own install into gitignored `assets/figure/`.
+
+```text
+  depth  name            resolves to            22,783 PlaceObject2 tags,
+   9/11  L/Rupperleg     677 -> 676 -> 675      of which 22,683 are MOVE-ONLY.
+  13/15  R/Llowerleg     680 -> 679 -> 678
+  17/19  L/Rfoot         682 -------> 681       The whole body is ELEVEN shapes
+  21/37  R/Lupperarm     685 -> 684 -> 683      and thirteen matrices a frame.
+     23  torso           688 -> 687 -> 686
+     25  head            697 -> 690/692/694/696 -> 689,691,693,695
+  33/41  R/Llowerarm     700 -> 699 -> 698
+     39  weapon          703 -> 702 -> 701   (13 frames: flame/frost/poison/wraith)
+     35  shield          704 ------->  EMPTY — attached at runtime, mechanism UNKNOWN
+```
+
+► **SCOPE BY DEPTH, NOT BY FRAME.** The brief below says to pick "the labelled
+  frames that matter" out of 2,222. Counted, that is the wrong axis: name the
+  rig's depths and all 2,222 frames come free.
+► **THE GIFT BELOW OMITS 34 MORPH SHAPES.** The closure from 1241 is **148
+  characters — 44 sprites, 70 shapes and 34 morphs** (`DefineMorphShape`/`2`),
+  which `swf-shapes.mjs` cannot read. All 34 are on EFFECT depths (1, 2, 43,
+  45, 47) and none on the rig, so the body is unaffected — but a flattener that
+  assumed shape would have lost them in silence.
+► **THE LESSON, SIXTH INSTANCE: two things that share an error confirm each
+  other, and this time both were mine.** I wrote `PlaceObject2`'s replace rule
+  backwards and then wrote a test asserting the backwards version. Green suite,
+  wrong code. **A test written by whoever wrote the code inherits the code's
+  model of the format and cannot check it.** `/adversarial-review` broke it:
+  **five findings, four real.** Ruffle settles the rule — `replace_with` then
+  `apply_place_object` — and the build has 144 matrix-less replaces. Correcting
+  it moves 55 placements across 7 sprites, **and clip 1241 is not one of them**,
+  measured by resolving every sprite both ways rather than inferred. I reasoned
+  about that twice and was wrong both times before diffing.
+► **LOOK AT `assets/figure/preview.html`** (`node tools/arena-server.mjs`, then
+  `http://127.0.0.1:8123/assets/figure/preview.html`). **Nobody has.** It is the
+  only check this extraction has, because no suite can tell a correct rig from a
+  plausible one.
+► **RANKED FIRST: stage 3** — the renderer prefers extracted art with
+  `figure.js` as the fallback, exactly as sound already does. **The open
+  question is not technical: the extracted rig is ONE body, while `figure.js`
+  draws eight armour slots and two team palettes.**
+
+*(The brief it supersedes, whose ranked item 1 is the work above:)*
+[2026-09-13 01:30 — the arena has two axes, and the build has its own voice](docs/handoffs/2026-09-12-2358--the-arena-has-two-axes-and-the-build-has-its-own-voice.md).**
 Start there. **The second axis is SHIPPED, not a flag** — `rankStride` defaults
 to 97 with three lanes, the owner's own choice after playing it. A gladiator
 turns to face whoever it is fighting (`changeCombatants` derives facing from

@@ -1,6 +1,14 @@
 ---
-handoff:      2026-09-13-0130--the-arena-has-two-axes-and-the-build-has-its-own-voice
-written:      2026-09-13 01:30 -0400
+handoff:      2026-09-12-2358--the-arena-has-two-axes-and-the-build-has-its-own-voice
+written:      2026-09-12 23:58 -0400. **RENAMED AND RESTAMPED 2026-09-13 by the
+              next session. It was `2026-09-13-0130` and said `01:30`, which is
+              92 minutes AFTER its own commit `615a852` landed at 2026-09-12
+              23:58:59 — you cannot commit a file before you write it. The
+              stamp is not cosmetic: `docs/handoffs/README.md` says the names
+              sort chronologically so `ls` puts the newest last, and under the
+              old name the NEXT handoff sorted BEFORE this one, so a session
+              following the documented protocol would have read a superseded
+              brief as current. Content is unchanged and still frozen.**
 sessionId:    cea2ec2e-6360-47c6-8941-5ff9ec5fb23a (https://claude.ai/code/session_01JUNedYJ2Pjhof8sHryquDf)
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
@@ -13,6 +21,10 @@ supersedes:   2026-09-12-2030--the-build-had-a-second-axis-all-along. **Its
               default. It has been the SHIPPED DEFAULT since `a431a45`.**
 ---
 # Handoff — the arena has two axes, and the build has its own voice
+
+*(Filename and `written:` restamped 2026-09-13 from `2026-09-13-0130` to match
+this brief's own commit time. Nothing below this line was touched. See the
+frontmatter for why the stamp mattered.)*
 
 ## The one-sentence version
 
