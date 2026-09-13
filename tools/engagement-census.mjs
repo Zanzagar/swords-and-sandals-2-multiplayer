@@ -227,8 +227,21 @@ const CENSUS_FLAGS = Object.freeze({
  *   a parser that answers a question nobody asked is the same defect wearing a
  *   command line.
  */
-function parseArguments(argv) {
-  const options = { seeds: 24, guard: 600, rankStride: 0 };
+export function parseArguments(argv) {
+  // ► **THE DEFAULT IS THE SHIPPED STRIDE, and it was 0 until 2026-09-13.**
+  //   The selection logic below was fixed a session earlier to compare against
+  //   `SS2_ARENA.rankStride` rather than against zero, which was right — but
+  //   the DEFAULT was left at 0, so a bare `node tools/engagement-census.mjs`
+  //   measured the one-dimensional engine while the handoff that shipped with
+  //   it documented that exact command as "the shipped engine". **The
+  //   instrument was honest (it prints "second axis OFF") and the instruction
+  //   above it was wrong**, which is the harder of the two to notice: the
+  //   header says one thing, the brief says another, and the table looks fine.
+  //
+  //   An instrument's default must be what SHIPS, or its headline numbers
+  //   describe a configuration nobody plays. `--rank-stride 0` is still how you
+  //   ask for the before-picture.
+  const options = { seeds: 24, guard: 600, rankStride: SS2_ARENA.rankStride };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
     const spec = CENSUS_FLAGS[flag];

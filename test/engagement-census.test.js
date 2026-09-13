@@ -21,7 +21,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { simultaneousFights, anyCrossing } from "../tools/engagement-census.mjs";
+import { simultaneousFights, anyCrossing, parseArguments } from "../tools/engagement-census.mjs";
 import { createSs2TeamRules, ss2TeamRules, SS2_ARENA } from "../src/team/ss2-rules.js";
 
 const fighter = (id, teamId, x, { strength = 9, y } = {}) => ({
@@ -168,6 +168,29 @@ test("the second axis is visible to both metrics, which is why they can report i
  * work cannot be allowed to report the wrong engine**, so the selection rule
  * is pinned here rather than left to be noticed.
  */
+/**
+ * ► **AND THE OTHER HALF OF THE SAME DRIFT SURVIVED A SESSION LONGER
+ *   (2026-09-13).** The selection rule above was fixed to compare against the
+ *   shipped stride, which was right — but `parseArguments` still DEFAULTED to
+ *   `rankStride: 0`, so a bare `node tools/engagement-census.mjs` measured the
+ *   one-dimensional engine.
+ *
+ *   **The instrument was honest about it and the handoff above it was not**:
+ *   the tool printed "second axis OFF", while the brief documented that exact
+ *   command as "the shipped engine" and printed a table of 97's numbers beside
+ *   it. Two artefacts, each internally consistent, disagreeing — which is
+ *   harder to spot than either being wrong alone.
+ *
+ * **An instrument's default must be what SHIPS**, or its headline numbers
+ * describe a configuration nobody plays.
+ */
+test("a bare census run measures the SHIPPED game, not the one-dimensional one", () => {
+  assert.equal(parseArguments([]).rankStride, SS2_ARENA.rankStride);
+  // And the before-picture is still one flag away.
+  assert.equal(parseArguments(["--rank-stride", "0"]).rankStride, 0);
+  assert.equal(parseArguments(["--rank-stride", "150"]).rankStride, 150);
+});
+
 test("the census selects the rule set by the SHIPPED default, not by zero", () => {
   // The singleton is correct only when the request IS the default.
   assert.equal(

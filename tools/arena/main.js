@@ -92,23 +92,42 @@ const spectate = params.get("spectate") === "1";
  * THE SECOND AXIS, and it is here so the owner can answer the question only he
  * can: **how much should standing in the right place matter?**
  *
- * `?rank=0` (the default) is the one-dimensional game exactly. `?rank=97` is
- * the measured sweet spot — everything still settles, blows through a living
- * body fall from 44.7% to 14.7%, and a breakoff fight exists. `?rank=150` is
- * past the top of the dial: three simultaneous fights, but 15 of 24 bouts
- * never settle. Measure any change with `node tools/engagement-census.mjs
- * --rank-stride N`; this is the same number that tool takes.
+ * The default is the SHIPPED stride, `SS2_ARENA.rankStride` (97) — the measured
+ * sweet spot, where everything still settles, blows through a living body fall
+ * from 44.7% to 14.7%, and a breakoff fight exists. `?rank=0` is the
+ * one-dimensional game exactly; `?rank=150` is past the top of the dial (three
+ * simultaneous fights, but 15 of 24 bouts never settle). Measure any change
+ * with `node tools/engagement-census.mjs --rank-stride N`; this is the same
+ * number that tool takes.
  *
  * 97 is not tuned — it is `floor(sqrt(reach^2 - physical_size^2))`, the depth
  * at which a second rank leaves the front rank's reach.
+ *
+ * ► **THIS READ `Number(params.get("rank")) || 0` AND SELECTED THE SINGLETON ON
+ *   ZERO, WHICH IS THE EXACT DEFECT `tools/engagement-census.mjs` WAS FIXED FOR
+ *   ON 2026-09-12 — it simply survived here, in the file the owner actually
+ *   plays.** `ss2TeamRules` is `createSs2TeamRules()` and so carries the
+ *   DEFAULT stride, 97. Once 97 became the default, `?rank=0` stopped meaning
+ *   "off": it handed back the shipped engine while the docstring above promised
+ *   "the one-dimensional game exactly". Measured on this tree before the fix —
+ *   `?rank=0` gave combatant `y` of `200, 103, 6`, three ranks, while
+ *   `createSs2TeamRules({ rankStride: 0 })` gives `null, null, null`.
+ *
+ *   **So the arena could not be put into the 1-D game at all, and said it
+ *   could.** Compare against the SHIPPED value, not against zero: the singleton
+ *   is correct only when the request IS the default.
  */
-const rankStride = Math.max(0, Number(params.get("rank")) || 0);
+const rankStride = params.has("rank")
+  ? Math.max(0, Number(params.get("rank")) || 0)
+  : SS2_ARENA.rankStride;
 
 const host = createVanillaBattleHost({
   teams: [demoSide("red", perSide, { ss2Combatant, ss2BattleValues }), demoSide("blue", perSide, { ss2Combatant, ss2BattleValues })],
-  // The module singleton when the axis is off, so the shipped arena is the
-  // shipped rule set and not a lookalike built with the defaults.
-  rules: rankStride === 0 ? ss2TeamRules : createSs2TeamRules({ rankStride }),
+  // The module singleton when the request IS the shipped stride, so the shipped
+  // arena is the shipped rule set and not a lookalike built with the defaults.
+  rules: rankStride === SS2_ARENA.rankStride
+    ? ss2TeamRules
+    : createSs2TeamRules({ rankStride }),
   bindings: SS2_STATIC_MAP_BINDINGS,
   seed,
   awaitAnimations: true
