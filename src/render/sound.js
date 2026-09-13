@@ -89,9 +89,51 @@ export function soundBucketFor(family) {
  * `hurt`, 15 in `death` on the shipped build — and this spreads across them
  * rather than always taking the first, so a bout does not become one noise.
  */
-export function chooseSound(bindings, family, sequence) {
+export function chooseSound(bindings, family, sequence, label = null) {
   const labels = soundLabelsFor(family);
   if (labels.length === 0) return null;
+
+  // ► **THE ENGINE'S OWN LABEL WINS WHEN IT IS ONE OF THE FAMILY'S, and this
+  //   was a live defect until 2026-09-13 — the SEVENTH instance of this
+  //   project's signature failure, and the one that had been audible the
+  //   longest.**
+  //
+  //   `animationFor` in `extracted-figure.js` has had this rule since the rig
+  //   landed, with its own comment explaining exactly why: the resolver has
+  //   already chosen WHICH of twelve attack clips this swing is, and taking the
+  //   family's first label draws `attack1` for every attack in the game.
+  //   **Sound had no such rule.** It bucketed by family and spread across every
+  //   file in it by a counter — so the figure played `attack3` while the
+  //   speaker played whichever of `1092`-`1095` the sequence number landed on.
+  //
+  //   The two halves of one join, disagreeing, with the correct rule written
+  //   out in full on the other side of it. It is the same conflation the
+  //   `block` and `hurt8` corrections closed, arriving a third time in the
+  //   module those corrections were written for.
+  //
+  //   **The ranged vocabulary is what made it undeniable.** `bombard` and
+  //   `snipe` share one `ranged` family and have DIFFERENT sounds — 1192.mp3
+  //   and 1193.mp3 — so a snipe would have loosed a bombard, audibly, the first
+  //   time anyone drew a bow. Fixed before the feature shipped rather than
+  //   after the owner heard it, which is the only reason this one did not cost
+  //   a session.
+  //
+  //   Membership is the guard, exactly as it is in `animationFor`, and for the
+  //   same reason: `taunt` is both an attack label and a death variant, so a
+  //   bare "is this label bound?" would play the attacking taunt for a
+  //   gladiator dying of one.
+  const own = typeof label === "string" ? label.toLowerCase() : null;
+  if (own && labels.includes(own)) {
+    const bound = bindings?.[own];
+    if (Array.isArray(bound) && bound.length > 0) {
+      const index = Number.isFinite(sequence) ? Math.abs(Math.trunc(sequence)) % bound.length : 0;
+      return bound[index];
+    }
+    // A label the build binds NO sound to is SILENT, and that is an answer.
+    // Falling through to the family bucket here would lend `hurt8` a noise
+    // from `hurt1` — the precise conflation `clip-labels.js` exists to stop.
+    return null;
+  }
   // Every file the build could play for this animation, in label order, so the
   // pick is stable across runs and across re-extractions.
   const files = [];

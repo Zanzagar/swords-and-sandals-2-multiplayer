@@ -154,6 +154,34 @@ export const VANILLA_FIELD_GROUPS = Object.freeze({
     // other field in this group that has a `secondary_` twin carries it.
     "secondary_weapon_enchantment_damage"
   ]),
+  /**
+   * ► **THE ONE ENTRY IN THIS CATALOGUE THAT IS NOT A COMBATANT FIELD, and it
+   *   is here because refusing it would have been the wrong kind of strict.**
+   *
+   *   Every other group names something the build stores ON a gladiator.
+   *   `criticalhit` is a bare `SetVariable` on the overlay timeline inside
+   *   `checkattackroll` — `+0x2de1` (the taunt sentinel 21), `+0x2e7e`
+   *   (bombard's `randomBetween(-20, 20)`), `+0x2eeb` (snipe's flat 0), and one
+   *   per melee band. It belongs to the ACTION, not to either fighter.
+   *
+   *   It is catalogued anyway because the guard this list feeds asks one
+   *   question — *can a reader point at a vanilla quantity behind this name?* —
+   *   and the answer is yes twice over: the dispatcher table's whole "Critical
+   *   sample" column is this variable, and a live capture emitted it as a raw
+   *   21 (`session-adc21`, §"Direction 20 is the taunt path"). What it does NOT
+   *   have is a save-schema home, and pretending otherwise by filing it under
+   *   "Derived combat" would have been the quiet error.
+   *
+   *   **The engine carries it PER COMBATANT, which is narrower than the
+   *   build.** See `criticalhit` in `SS2_RESOURCE_NAMES` for why, and for what
+   *   that costs: vanilla's bash can inherit the OTHER fighter's critical, and
+   *   this one inherits only its own.
+   */
+  actionTransient: group(
+    "battle-map: Hit and damage path / Attack roll dispatcher (critical sample)",
+    ["criticalhit"],
+    "A timeline variable, not a combatant field: it belongs to the action and the build stores it nowhere."
+  ),
   chanceCache: group("battle-map: Hit and damage path / Chance calculation", [
     "power_percentage",
     "normal_percentage",

@@ -374,6 +374,39 @@ function driveFirst(battle, limit) {
  *   **No golden moved, for the fifth time.** A back attack needs positions on
  *   both fighters and a fixture has none.
  */
+/**
+ * ► **ALL FOUR MOVED AGAIN ON 2026-09-13, FOR A PROJECTION CHANGE: the ranged
+ *   vocabulary put SIX NEW RESOURCES on every combatant.**
+ *
+ *     f2e862f9   (six actions in)          was 98689216
+ *     f45930aa   (settled 1v1)             was 31eabd22
+ *     73b6a92d   (vanilla-separation)      was da0edf09
+ *     e54cebb5   (settled 3v3)             was e9dbb913
+ *
+ *   `ammo_left`, `maximum_ammo`, `criticalhit`, `secondary_weapon_min_damage`,
+ *   `secondary_weapon_max_damage` and `secondary_weapon_range` joined
+ *   `SS2_RESOURCE_NAMES`, and every one of them has a default — so every
+ *   gladiator declares all six and the resource bag grew by six keys on both
+ *   sides of every battle here. **A serialisation change, exactly like `x` and
+ *   `y` before it**, and it moves all four pins including the one that never
+ *   attacks, because the combatant projection is in every hash whether anybody
+ *   swings or not.
+ *
+ *   ► **AND THAT IS THE TELL THAT IT IS A PROJECTION CHANGE AND NOT A GAMEPLAY
+ *     ONE.** None of these four battles contains an archer: `MINIMAL` states no
+ *     `secondary_weapon`, so every one of them has `secondary_weapon_range` 0,
+ *     is never offered a swap, and fights the bout it always fought. A change
+ *     that altered how these bouts PLAY would have moved the three that fight
+ *     and left the walking one alone — which is precisely what the facing
+ *     change did on 2026-09-12, four blocks above. All four moving together is
+ *     the signature of a key-set change.
+ *
+ *   **No golden moved, for the sixth time, and the reason is the same one that
+ *   has held every time**: a promoted golden states none of these six names, so
+ *   it declares none of the keys. `ss2Combatant` fills the bag from
+ *   `SS2_RESOURCE_DEFAULTS` only for records it DERIVES, and every golden is
+ *   built with `derive: false`.
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -394,7 +427,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "98689216", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "f2e862f9", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -406,7 +439,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "31eabd22", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "f45930aa", WHY_IT_MOVED);
 });
 
 /**
@@ -447,7 +480,7 @@ test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact
   assert.equal(taken, 6, "the drive must have applied six actions");
   assert.equal(battle.result, null, "an approach does not settle in six actions");
 
-  assert.equal(combatStateHash(battle), "da0edf09", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "73b6a92d", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
@@ -458,7 +491,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "e9dbb913", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "e54cebb5", WHY_IT_MOVED);
 });
 
 /**

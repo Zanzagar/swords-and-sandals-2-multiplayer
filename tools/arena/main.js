@@ -305,9 +305,9 @@ for (const type of ["pointerdown", "keydown", "touchstart"]) {
 const VOICES = 16;
 const voices = [];
 
-function playFor(family, sequence) {
+function playFor(family, sequence, label = null) {
   if (!soundEnabled) return;
-  const file = chooseSound(soundBindings, family, sequence);
+  const file = chooseSound(soundBindings, family, sequence, label);
   if (!file) return;
   let source = soundCache.get(file);
   if (!source) {
@@ -357,9 +357,15 @@ function beginStep(step) {
   for (const entry of started.values()) entry.startedAt = performance.now();
   for (const [combatantId, entry] of started) playing.set(combatantId, entry);
 
-  // A sound per animation that STARTS, keyed on the same family the schedule
-  // was chosen by, so the two can never disagree about what is playing.
-  for (const [, entry] of started) playFor(entry.timeline.family, step.actionBoundary ?? 0);
+  // A sound per animation that STARTS, keyed on the same family AND THE SAME
+  // LABEL the schedule was chosen by, so the two can never disagree about what
+  // is playing. **The label was missing until 2026-09-13** and the figure and
+  // the speaker were choosing independently within a family — `attack3` on
+  // screen against whichever of the attack sounds a counter landed on. See
+  // `chooseSound`, which carries the whole story.
+  for (const [, entry] of started) {
+    playFor(entry.timeline.family, step.actionBoundary ?? 0, entry.timeline.label);
+  }
 
   for (const token of step.actionTokens) {
     if (!pendingTokens.includes(token)) pendingTokens.push(token);

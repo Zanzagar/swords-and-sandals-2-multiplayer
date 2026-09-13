@@ -241,9 +241,24 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
   //   than as one list with a weaker rule. An authored token that quietly
   //   acquired a fabricated label, or a map-derived token that quietly lost a
   //   real one, both fail here — which a single relaxed check would let past.
+  //
+  // ► **FOUR ARCHER VERBS JOINED IT 2026-09-13 AND EVERY ONE IS MAP-DERIVED**,
+  //   so they go on the other side of the split from the rank verbs. Each names
+  //   a real `getphase` label with an offset behind it: `bombard`/`snipe` from
+  //   the shared ranged branch (`+0x6b53`-`+0x6c8c`), `bash_attack` `+0x6463`,
+  //   `swap_weapons` `+0x4d23`.
+  //
+  //   **The two shots keep the UNHANDED spelling and that is the derivation,
+  //   not a simplification.** The build has four phase labels —
+  //   `bombardleft/right`, `snipeleft/right` — and they all reach one branch
+  //   which plays `gotoAndPlay("bombard")` or `("snipe")`. The clip has no
+  //   handed variant to play, so a handed token here would name an animation
+  //   that does not exist.
   const AUTHORED_TOKENS = ["rank-back", "rank-front"];
 
   assert.deepEqual([...ss2TeamRules.actionTypes].sort(), [
+    "bash-attack",
+    "bombard",
     "burning-phase",
     "frozen-phase",
     "life-stolen-phase",
@@ -254,6 +269,8 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "rank-back",
     "rank-front",
     "rest",
+    "snipe",
+    "swap-weapons",
     "walk-left",
     "walk-right"
   ]);
@@ -818,13 +835,29 @@ test("armour absorbs first and the overflow reaches health — the split no gold
       for (const piece of SS2_ARMOUR_PIECES) {
         assert.equal(villain.resources[piece].value, scenario.villain[piece], `${label} seed ${seed}: ${piece}`);
       }
-      // The build's own first-touch order over distinct fields: armourclass,
-      // armourclass_max, the destroyed piece, hitpoints, staminaleft. Nothing
-      // pinned it, so reversing the two armour writes passed the whole suite.
+      // The build's own first-touch order over distinct fields: the
+      // ATTACKER's two, then armourclass, armourclass_max, the destroyed
+      // piece, hitpoints, staminaleft. Nothing pinned it, so reversing the two
+      // armour writes passed the whole suite.
+      //
+      // ► **THE ATTACKER'S TWO JOINED THE FRONT 2026-09-13 WITH THE RANGED
+      //   VOCABULARY, and they are at the front because that is where the
+      //   build makes them.** `ammo_left -= 1` happens in the ranged PHASE
+      //   branch (`+0x6bf5`), before the animation and long before the roll —
+      //   the build resolves a shot when the arrow lands. `criticalhit` is
+      //   assigned at the top of every `checkattackroll` arm (`+0x2e7e`,
+      //   `+0x2eeb`), ahead of the damage term and therefore ahead of the hit
+      //   test, which is why a MISS still writes it and why a bash can inherit
+      //   one. Neither appears on this melee path — the ranks are here so that
+      //   an archer's effect list is pinned by the same assertion rather than
+      //   by a second one that could drift.
       const emitted = battle.lastResolution.effects.map(
         (effect) => effect.resource ?? effect.status ?? effect.kind
       );
-      const rank = { armourclass: 0, armourclass_max: 1, damage: 3, staminaleft: 4 };
+      const rank = {
+        ammo_left: -2, criticalhit: -1,
+        armourclass: 0, armourclass_max: 1, damage: 3, staminaleft: 4
+      };
       const ranked = emitted.map((name) => rank[name] ?? (SS2_ARMOUR_PIECES.includes(name) ? 2 : 5));
       assert.deepEqual(ranked, [...ranked].sort((a, b) => a - b), `${label}: ${emitted.join(", ")}`);
 
@@ -969,17 +1002,34 @@ test("facing changes the armour-debris draw's shape, so it is tape-load-bearing"
 
 test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash", () => {
   assert.deepEqual([...SS2_RESOURCE_NAMES], [
+    // ► **SIX NAMES JOINED IT 2026-09-13 WITH THE RANGED VOCABULARY, AND EVERY
+    //   ONE OF THEM MOVED EVERY PINNED HASH.** Deliberate, and listed here by
+    //   what each buys:
+    //     `ammo_left` / `maximum_ammo`   the shot counter and its tier bound
+    //     `criticalhit`                  the transient `bash_attack` inherits
+    //     `secondary_weapon_*`           the bow's damage pair and its reach
+    //
+    //   **No golden moved.** A promoted golden states none of these, so none
+    //   declares the key — the same reason `weapon_range` left them alone in
+    //   September. What DID move is every seeded-play pin, and each is named in
+    //   the commit that moved it.
+    "ammo_left",
     "armourclass", "armourclass_max",
     "boot", "boot_defence",
     "breastplate", "breastplate_defence",
-    "character_level", "charisma", "equipped_weapon",
+    "character_level", "charisma",
+    "criticalhit",
+    "equipped_weapon",
     "gauntlet", "gauntlet_defence",
     "greaves", "greaves_defence",
     "helmet", "helmet_defence",
-    "herolevel", "max_damage", "min_damage",
+    "herolevel", "max_damage", "maximum_ammo", "min_damage",
     "secondary_weapon_enchantment_damage",
     "secondary_weapon_enchantment_potency",
     "secondary_weapon_enchantment_type",
+    "secondary_weapon_max_damage",
+    "secondary_weapon_min_damage",
+    "secondary_weapon_range",
     "shield", "shield_defence",
     "shinguard", "shinguard_defence",
     "shoulderguard", "shoulderguard_defence",
@@ -1091,6 +1141,24 @@ test("the SS2 resource DEFAULTS are pinned: they are wire format too", () => {
     // crippling. Changing it re-hashes every battle that does not state one.
     attack_speed: 3,
     character_level: 1, charisma: 0, equipped_weapon: 1, herolevel: 1,
+    // ► **THE RANGED DEFAULTS, 2026-09-13, and every one of them is a zero that
+    //   MEANS something rather than a filler.**
+    //   `ammo_left`/`maximum_ammo` 0: no bow, so no shots — the state root
+    //     frame 221 puts every gladiator in.
+    //   `criticalhit` 0: no inherited critical, which is also the value `snipe`
+    //     itself writes (`+0x2eeb`), so it is the build's spelling and not a
+    //     sentinel chosen here. It can never manufacture the armour bypass a 20
+    //     does, which is the safe direction for a value that is only ever read
+    //     by `bash_attack`.
+    //   the three `secondary_weapon_*` 0: an empty secondary slot, which
+    //     `legalActions` reads as "no swap on offer" and
+    //     `assertConstructionResources` refuses to see combined with
+    //     `equipped_weapon` 2.
+    ammo_left: 0, maximum_ammo: 0,
+    criticalhit: 0,
+    secondary_weapon_max_damage: 0,
+    secondary_weapon_min_damage: 0,
+    secondary_weapon_range: 0,
     secondary_weapon_enchantment_damage: 0,
     secondary_weapon_enchantment_potency: 0,
     secondary_weapon_enchantment_type: 0,
@@ -1141,7 +1209,7 @@ test("a canonical SS2 battle hashes to a pinned value — one tripwire for the w
       { id: "blue", combatants: [ss2Combatant(minimal, { id: "villain", name: "Villain" })] }
     ]
   });
-  assert.equal(combatStateHash(battle), "f122d207", [
+  assert.equal(combatStateHash(battle), "3698d1e3", [
     "The SS2 wire projection changed. That is not necessarily wrong — but it",
     "means every peer running the previous build now disagrees with this one",
     "about identical battles, and every stored completion token minted before",
@@ -1494,7 +1562,19 @@ test("the primary/secondary selector reads the VICTIM's weapon slot — reproduc
   };
   for (const [slot, expected] of [[1, 9], [2, 20]]) {
     const battle = statusBattle({
-      heroFields: { equipped_weapon: slot },
+      // ► **THE HERO CARRIES A BOW HERE BECAUSE SLOT 2 NOW MEANS ONE.** Until
+      //   the ranged vocabulary landed, `equipped_weapon` was an inert selector
+      //   input and staging a 2 against an empty secondary slot cost nothing.
+      //   It is now a real mode — `assertConstructionResources` refuses a drawn
+      //   bow with nothing in the slot, exactly as the build hides its own swap
+      //   button without a secondary weapon — so the staging has to be a
+      //   gladiator that could actually be holding what it says it is holding.
+      //
+      //   **It changes nothing this test measures.** The damage asserted is the
+      //   VILLAIN's enchantment tick, read off the villain's own fields; the
+      //   hero's weapon decides only which of the villain's two enchantments is
+      //   selected, which is the reproduced defect under test.
+      heroFields: { equipped_weapon: slot, secondary_weapon: 61 },
       villainFields,
       status: [ss2StatusToken("burning", "villain")]
     });

@@ -110,7 +110,16 @@ export function demoGladiator(overrides = {}) {
     weapon_enchantment_type: 0,
     weapon_enchantment_potency: 0,
     weapon_enchantment_damage: 0,
-    equipped_weapon: 3,
+    // ► **WAS `3` UNTIL 2026-09-13, AND 3 IS NOT A VALUE THIS FIELD HAS.** The
+    //   build writes `equipped_weapon` at exactly two sites, both in the
+    //   `swap_weapons` toggle, and both write 1 or 2 (`+0x4dbd`, `+0x4eba`).
+    //   A 3 was harmless while nothing read it; the ranged vocabulary reads it
+    //   as the bow-mode flag (`ss2InBowMode`) and the enchantment selector
+    //   already read it as a slot index (`+0x530e`). **A stated field is
+    //   harmless right up until something reads it — the fourth time this
+    //   roster has taught that lesson**, and the three above it are recorded a
+    //   few lines up.
+    equipped_weapon: 1,
     using_bow: false,
 
     breastplate: 3, breastplate_defence: 18,
@@ -168,6 +177,31 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
     members: Array.from({ length: size }, (unused, index) => {
       const id = `${side}-${index + 1}`;
       const name = names[index] ?? id;
+      // ► **SLOT 2 OF EACH SIDE CARRIES A BOW, ADDED 2026-09-13 WITH THE
+      //   RANGED VOCABULARY — and it is slot 2 rather than slot 3 on purpose.**
+      //
+      //   Ranks are assigned by slot index, so slot 2 stands one rank back:
+      //   behind its own front line, level with the enemy archer, and with a
+      //   rank between it and the enemy's front. That is the geometry every
+      //   part of the ranged rules has to answer for at once — the minimum
+      //   range, the Euclidean distance across ranks, and the authored
+      //   line-of-sight rule. Slot 3 would only appear in a 3v3; slot 2 shows
+      //   up in a 2v2 as well, so the arena has an archer in it more often
+      //   than not.
+      //
+      //   **It carries a sword too, and starts holding the sword** —
+      //   `equipped_weapon` 1, as root frame 221 forces for everyone. Drawing
+      //   the bow is a turn it has to spend, which is the owner's decision of
+      //   2026-09-13 and is the build's own answer. Watch for it on turn one:
+      //   nothing is in reach at the opening separation of 500, so the AI's one
+      //   voluntary swap fires instead of a step.
+      //
+      //   Weapon 61 is the cheapest ranged row and the gate is `speed >= 3`
+      //   (`3 * band_position`, band position 1); this slot runs speed 4 or 5,
+      //   so it is gear the shop would actually have sold it — which the
+      //   primary weapon above was changed for on 2026-09-10 for the same
+      //   reason.
+      const archer = index === 1;
       const vanilla = demoGladiator({
         character_name: name,
         // A little spread so initiative is not a coin flip and the slots are
@@ -176,7 +210,8 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
         strength: 9 - index,
         breastplate: 3 - index,
         helmet: 2 - index,
-        shield: index === 0 ? 2 : 0
+        shield: index === 0 ? 2 : 0,
+        ...(archer ? { secondary_weapon: 61 } : {})
       });
       // ► **`weapon_range` IS DERIVED PER SLOT, and `derive: false` is why it
       //   has to be (2026-09-12).** These members state `weapon: 1` and build
@@ -202,8 +237,34 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
       //   different gladiators draw at one size, defeating the thing it feeds.
       //   **A stated derived field is harmless right up until something reads
       //   it**, which is the third time this roster has taught that lesson.
+      // ► **AND THE BOW'S FIVE NUMBERS COME FROM THE SAME DERIVATION, FOR THE
+      //   SAME REASON AND AFTER THE SAME HAZARD (2026-09-13).** `derive: false`
+      //   keeps this roster's stated damage and pools, and it also means a
+      //   stated `secondary_weapon: 61` reaches the resolver as nothing at all
+      //   — the id is equipment identity and does not survive. Without these
+      //   five the archer would build, be offered no swap (a
+      //   `secondary_weapon_range` of 0 reads as "no bow"), and fight the whole
+      //   bout with a sword while the record said it carried a bow. **Silently**
+      //   — which is the failure mode `weapon_range` had here on 2026-09-11 and
+      //   `physical_size` had on 2026-09-12.
+      //
+      //   `maximum_ammo` is tiered on `herolevel`, which is 4 for every member
+      //   of this roster, so all five arrows come from the level-under-9 arm.
       const derived = ss2BattleValues(vanilla);
-      const priced = { ...vanilla, weapon_range: derived.weapon_range, physical_size: derived.physical_size };
+      const priced = {
+        ...vanilla,
+        weapon_range: derived.weapon_range,
+        physical_size: derived.physical_size,
+        ...(archer
+          ? {
+            secondary_weapon_range: derived.secondary_weapon_range,
+            secondary_weapon_min_damage: derived.secondary_weapon_min_damage,
+            secondary_weapon_max_damage: derived.secondary_weapon_max_damage,
+            maximum_ammo: derived.maximum_ammo,
+            ammo_left: derived.ammo_left
+          }
+          : {})
+      };
       const canonical = ss2Combatant(priced, { id, name, controller: "local", derive: false });
       return { id, controller: "local", vanilla: priced, resources: canonical.resources, clip: { gladiator_dir: facing } };
     })

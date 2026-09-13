@@ -240,6 +240,27 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
       return Object.freeze({ actor: label("rest", LabelProvenance.MAP_NAMED), target: null });
     }
 
+    // ► **THE SWAP PLAYS `Block`, AND THE BUILD SAYS SO OUTRIGHT.** The
+    //   `swap_weapons` phase is four statements and the third is
+    //   `attacker.gotoAndPlay("Block")` — overlay frame 52
+    //   `DoAction@0x240c7f` `+0x4d65`, read off the installed build
+    //   2026-09-13. So this is MAP_NAMED, not assumed: the guard stance is
+    //   what a gladiator does while it changes weapons.
+    //
+    //   **And it is SILENT, correctly.** `Block` and `BlockForward` carry no
+    //   `StartSound` at all, which `src/render/clip-labels.js` records at the
+    //   `block` family — so a swap makes no noise, because the build binds none
+    //   rather than because anything here decided it should not.
+    //
+    //   Matched on the type rather than on a field, like `rest` above it and
+    //   unlike movement: a swap carries no geometry to detect it by, and its
+    //   own `vanillaLabel` is the PHASE name (`swap_weapons`), which is not a
+    //   clip label — the same phase-name-is-not-a-clip-name distinction the
+    //   ranged verbs turn on.
+    if (event.type === "swap-weapons") {
+      return Object.freeze({ actor: label("Block", LabelProvenance.MAP_NAMED), target: null });
+    }
+
     // MOVEMENT. Detected by the event carrying arena geometry — a finite
     // `from` and `to` — never by parsing the type string, for the same reason
     // the condition case below does not: the engine's token (`walk-left`) and
@@ -347,6 +368,20 @@ function attackLabel(direction) {
   if (direction === 20) return label("taunt", LabelProvenance.MAP_NAMED);
   if (direction === 21) return label("bombard", LabelProvenance.MAP_NAMED);
   if (direction === 22) return label("snipe", LabelProvenance.MAP_NAMED);
+  // ► **DIRECTION 23 IS `bash_attack` AND IT PLAYS `Attack2` — read off the
+  //   installed build 2026-09-13, not inferred from the number.**
+  //
+  //   `+0x64c3` sets `attack_direction = 23`, and the very next statement is
+  //   `attacker.gotoAndPlay("Attack2")` at `+0x64ce`. The fall-through below
+  //   would have produced `attack23`, and **there is no such clip**: the
+  //   fighter carries `attack1`-`attack12` and nothing higher, so a bash would
+  //   have found no animation and silently dropped to authored art.
+  //
+  //   That is exactly the shape of the `hurt21`/`hurt22`/`hurt23` error this
+  //   function's own block below records — a label invented by arithmetic on a
+  //   direction number, when the build names one outright a few bytes away. It
+  //   is MAP_NAMED because the build names it.
+  if (direction === 23) return label("attack2", LabelProvenance.MAP_NAMED);
   return label(`attack${direction}`, LabelProvenance.ASSUMED);
 }
 

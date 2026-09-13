@@ -272,6 +272,36 @@ export const Ss2ActionType = Object.freeze({
   //   prevent.
   RANK_BACK: "rank-back",
   RANK_FRONT: "rank-front",
+  // ► **THE ARCHER'S FOUR VERBS. Every one is the build's own phase, and the
+  //   whole set arrives together because none of them works alone.**
+  //
+  //   `bombard` and `snipe` are the two shots. `bash_attack` is what an archer
+  //   does when somebody is standing on top of it — the build gives an archer
+  //   NO shot at close quarters and this one melee verb instead. `swap_weapons`
+  //   is the turn that arms the bow, and it is a turn rather than a mode
+  //   because the build spends one: `getphase("swap_weapons")` is a phase with
+  //   its own `staminacost` (`+0x4d35`), reachable only from the inventory
+  //   overlay, and root frame 221 starts every gladiator in melee mode.
+  //
+  //   **Which controller frame wires which is the whole design, and it is a
+  //   table in the map** (§"Buttons wired per controller frame", `:227-228`):
+  //   `longrange_archer` wires `bombardleft/right` and `snipeleft/right` and NO
+  //   melee verb; `closerange_archer` wires `bash_attack` and NO shot. The
+  //   selector between them is `fightdistance < 100 + physical_size`
+  //   (frame 4 `DoAction@0x238bbf` `+0x015f`), so an archer has a MINIMUM
+  //   range and loses the bow inside it. See `legalActions`.
+  //
+  //   `bash_attack` is `attack_direction` 23 and the two shots are 21 and 22 —
+  //   **CONSTANTS, assigned with no RNG call at all** (`+0x64c3`, `+0x6c67`,
+  //   `+0x6c8c`), unlike the three melee bands which each draw their direction.
+  //   `ATTACK_BANDS` therefore carries a fixed `direction` for these three and
+  //   `low`/`high` for the melee bands, and the resolver draws only when the
+  //   band says to. Getting that wrong would put a sample on the ordered
+  //   channel the build never takes.
+  BOMBARD: "bombard",
+  SNIPE: "snipe",
+  BASH_ATTACK: "bash-attack",
+  SWAP_WEAPONS: "swap-weapons",
   // The four status phases. FOUR types rather than one `status-phase`, because
   // the build's decision IS the specific label — `getphase("frozen")` and
   // `getphase("poisoned")` are different decisions reaching different arms of
@@ -734,6 +764,29 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // `src/adapter/presentation.js`, the movement case.
   [Ss2ActionType.WALK_LEFT]: "walkleft",
   [Ss2ActionType.WALK_RIGHT]: "walkright",
+  // ► **THE RANGED PHASES ARE HANDED IN THE BUILD AND THE CLIP IS NOT**, and
+  //   conflating the two would play the wrong animation.
+  //
+  //   The build has FOUR phase labels — `bombardleft`, `bombardright`,
+  //   `snipeleft`, `sniperight` — which `longrange_archer` wires by facing.
+  //   All four fall into ONE branch (`+0x6b53`-`+0x6b9d`), and that branch
+  //   calls `attacker.gotoAndPlay("bombard")` (`+0x6c52`) or
+  //   `gotoAndPlay("snipe")` (`+0x6c77`): **unhanded**. So the phase name has a
+  //   side and the clip does not, and it is the clip the presentation needs.
+  //
+  //   These entries are therefore the UNHANDED spellings, because this table
+  //   feeds `src/render/clip-labels.js` and the fighter clip carries exactly
+  //   `bombard` and `snipe` among its 101 `FrameLabel`s — no handed variant of
+  //   either exists to play.
+  [Ss2ActionType.BOMBARD]: "bombard",
+  [Ss2ActionType.SNIPE]: "snipe",
+  // `bash_attack` `+0x6463`, one word with an underscore like the melee verbs
+  // beside it. **Its CLIP is `Attack2`** (`+0x64ce`,
+  // `attacker.gotoAndPlay("Attack2")`) — derived, not guessed, and it is the
+  // reason `src/adapter/presentation.js` no longer reports a nonexistent
+  // `attack23` for direction 23.
+  [Ss2ActionType.BASH_ATTACK]: "bash_attack",
+  [Ss2ActionType.SWAP_WEAPONS]: "swap_weapons",
   // Three spellings for one effect, and the map is explicit that they are not
   // interchangeable: the FIELD is `poison`, the DECISION label is `poisoned`,
   // and `life_stolen` keeps its spelling as a decision but reaches
@@ -1178,6 +1231,52 @@ export function ss2PhysicalSize(actor) {
 export const SS2_WEAPON_RANGE_STEP = 44;
 
 /**
+ * HOW MANY SHOTS A BOW HOLDS — `maximum_ammo`, tiered by `herolevel`.
+ *
+ * **Re-read off the installed build 2026-09-13** (`77cb545c…`, the same oracle
+ * every golden cites) with the project's own inspector rather than copied from
+ * the map's prose, because this table is the whole of the ammunition economy
+ * and a transcription error in it is a balance change nothing would catch:
+ *
+ * ```
+ * node tools/inspect-swf.mjs "$ss2Install/swf/swords_sandals2_download.swf" \
+ *   --references 'maximum_ammo' --around 6 --max-actions 400
+ * ```
+ *
+ * ```text
+ *   herolevel <  9  ->  5    +0x364b
+ *   herolevel < 23  -> 10    +0x368e
+ *   herolevel < 28  -> 15    +0x36d1
+ *   herolevel < 35  -> 20    +0x3714
+ *   herolevel < 45  -> 25    +0x3757
+ *   otherwise       -> 30    +0x3781
+ * ```
+ *
+ * The chain runs `+0x3634`-`+0x378d` inside `battlevalues`, six `Less2` tests
+ * each jumping past its own assignment. **The last arm re-tests
+ * `herolevel < 35` at `+0x3769`-`+0x377c` and it changes nothing**, because the
+ * only way to reach it is for `herolevel < 45` to have failed — re-derived here
+ * rather than taken on the map's word, since a redundant test is exactly the
+ * shape of thing a transcription gets subtly wrong.
+ *
+ * **The tier assignment is UNCONDITIONAL in the build**, outside the
+ * `battle_started` skip, unlike the `ammo_left` refill below it. So it is
+ * derived here unconditionally too and a stated `maximum_ammo` does NOT win —
+ * which is the opposite of the rule the damage pair follows, deliberately: the
+ * damage pair's rule protects MEASURED numbers in promoted goldens, and no
+ * golden states an ammunition field at all.
+ */
+export function ss2MaximumAmmo(herolevel) {
+  const level = Number.isFinite(herolevel) ? herolevel : 0;
+  if (level < 9) return 5;
+  if (level < 23) return 10;
+  if (level < 28) return 15;
+  if (level < 35) return 20;
+  if (level < 45) return 25;
+  return 30;
+}
+
+/**
  * How far this gladiator's swing reaches, in arena units — the build's
  * `weapon_range`, which is what the controller selector gates on.
  *
@@ -1283,9 +1382,104 @@ export const SS2_WEAPON_RANGE_STEP = 44;
  * dropping it was a named gap.
  */
 export function ss2Reach(actor) {
+  // ► **A DRAWN BOW REACHES WITH THE BOW, and this is the read-time half of
+  //   `battlevalues`'s `weapon_range = secondary_weapon_range` (`+0x343e`).**
+  //   The bag keeps the melee reach in `weapon_range` because the bow's is
+  //   recoverable and the melee one would not be; see `SS2_RESOURCE_NAMES`.
+  if (ss2InBowMode(actor)) {
+    const bow = resourceValue(actor, "secondary_weapon_range", 0);
+    if (Number.isFinite(bow) && bow > 0) return bow;
+  }
   const declared = resourceValue(actor, "weapon_range", null);
   if (Number.isFinite(declared) && declared > 0) return declared;
   return ss2PhysicalSize(actor) + ss2WeaponEntry(0).rangeMultiplier * SS2_WEAPON_RANGE_STEP;
+}
+
+/**
+ * Is the bow DRAWN? `equipped_weapon == 2`.
+ *
+ * ► **ONE FIELD, NOT TWO, AND THE BUILD IS WHY.** Vanilla carries both
+ *   `using_bow` (a boolean) and `equipped_weapon` (1 or 2), and the
+ *   `swap_weapons` toggle writes them in the same breath — `equipped_weapon = 2`
+ *   with `using_bow = true` at `+0x4dbd`/`+0x4dce`, and the mirrored pair at
+ *   `+0x4eba`/`+0x4ecb`. **There is no site in the build that sets one without
+ *   the other**, so they are one fact with two spellings.
+ *
+ *   `equipped_weapon` is the spelling this engine can carry, because a
+ *   resource bag holds finite numbers by construction and `equipped_weapon` is
+ *   already in it. A `using_bow` status token would be a second copy of the
+ *   same fact on the other channel, free to disagree — and the build's own
+ *   villain AI reads `equipped_weapon`, not `using_bow`, for its attack gate
+ *   (`sprite:862/frame:52/DoAction@0x23f835` `+0x0356`), so it is also the
+ *   reading at least one of the two sides actually uses.
+ */
+export function ss2InBowMode(actor) {
+  return resourceValue(actor, "equipped_weapon", SS2_RESOURCE_DEFAULTS.equipped_weapon) === 2;
+}
+
+/**
+ * The pair the swing actually uses, which is NOT the pair in the bag when the
+ * bow is drawn.
+ *
+ * `battlevalues` `+0x3424`-`+0x343d`: bow mode overwrites `min_damage` and
+ * `max_damage` with `secondary_min_damage` / `secondary_max_damage`, and those
+ * two carry `round(strength * 1)` (`+0x33d3`, `+0x33f7`) where the melee pair
+ * carries `round(strength * 2)` (`+0x3356`, `+0x3386`).
+ *
+ * ► **SO A BOW SCALES WITH STRENGTH AT HALF THE RATE A SWORD DOES, and that is
+ *   the build's own answer to "why would anyone stay in melee".** It is worth
+ *   naming because it is counter-intuitive: the ranged band's raw table damage
+ *   is the highest in the game (id 80 is 23-529 against the best sword's
+ *   160-480), and the halved strength term is what pays for it.
+ */
+export function ss2ActiveDamagePair(actor) {
+  const strength = actor?.stats?.strength ?? 0;
+  if (!ss2InBowMode(actor)) {
+    return {
+      min_damage: resourceValue(actor, "min_damage", 0),
+      max_damage: resourceValue(actor, "max_damage", 0)
+    };
+  }
+  return {
+    min_damage: Math.round(strength) + resourceValue(actor, "secondary_weapon_min_damage", 0),
+    max_damage: Math.round(strength) + resourceValue(actor, "secondary_weapon_max_damage", 0)
+  };
+}
+
+/**
+ * THE ARCHER'S MINIMUM RANGE — `100 + physical_size`, so 180 at strength 0 and
+ * 186 at the demo roster's strength 9.
+ *
+ * The controller selector, frame 4 `DoAction@0x238bbf`, in full:
+ *
+ * ```text
+ * if (_root.game.hero.using_bow != true) {              // +0x00b9
+ *   fightdistance < hero.weapon_range                   // +0x00f6
+ *     ? gotoAndPlay("closerange_warrior") : gotoAndPlay("longrange_warrior");
+ * } else {
+ *   fightdistance < 100 + hero.physical_size            // +0x015f
+ *     ? gotoAndPlay("closerange_archer") : gotoAndPlay("longrange_archer");
+ * }
+ * ```
+ *
+ * ► **READ THE POLARITY BEFORE USING IT: THIS IS A FLOOR, NOT A CEILING.** The
+ *   warrior arm's `fightdistance < weapon_range` selects the frame that can
+ *   ATTACK, so reach is a maximum. The archer arm has the same shape and the
+ *   opposite meaning, because `closerange_archer` is the frame that CANNOT
+ *   shoot — it wires `bash_attack` and no bombard or snipe at all. So an
+ *   archer may only shoot what is at least this far away, and has no maximum
+ *   range whatsoever: the gate never reads `weapon_range`, which is precisely
+ *   why a bow's 4,480-unit reach never mattered in vanilla.
+ *
+ * **The two sides of the build do not share this gate**, and neither half is
+ * this one: `villainChooseAction` tests
+ * `equipped_weapon == 2 && fightdistance < 200` (`+0x0356`-`+0x03d5`), a
+ * hand-written 200 with no minimum at all. This engine applies the HERO's gate
+ * to everybody, exactly as it already applies the hero's warrior gate to
+ * everybody, because the hero's rule is the player's rule.
+ */
+export function ss2ArcherMinimumRange(actor) {
+  return 100 + ss2PhysicalSize(actor);
 }
 
 /**
@@ -1700,6 +1894,74 @@ function ss2BodyBlocks(actor, foe) {
   return Math.abs(actorY - foeY) < ss2PhysicalSize(foe);
 }
 
+/**
+ * ► **DOES A BODY STAND IN THE WAY OF THE SHOT? AUTHORED — owner's decision,
+ *   2026-09-13 — and the build CANNOT answer it.**
+ *
+ * Vanilla has one gladiator a side, so there is never a third body to stand
+ * between them and no bytecode anywhere tests for one. This sits squarely
+ * inside `MAP_SILENCE.multi-slot-arena-geometry`, which already covers
+ * "positions, depths, and clip names for slots beyond the first".
+ *
+ * **`ss2BodyBlocks` is the precedent and this is deliberately the same shape.**
+ * That predicate asks whether a body is close enough IN DEPTH to be in the way
+ * of a walk, and answers with `|dy| < physical_size(body)` — the body's own
+ * extent. This asks the same question of a straight line between two points
+ * and answers it the same way: the blocker's perpendicular distance from the
+ * shot line, against its own `physical_size`.
+ *
+ * Three properties it was built to have, each of which a simpler rule loses:
+ *
+ * 1. **A body BEHIND the archer, or BEYOND the target, never blocks.** The
+ *    projection is clamped to the segment, so only somebody actually between
+ *    the two can interpose. A rule that used raw distance-to-line would let a
+ *    gladiator standing behind you block your own shot.
+ * 2. **The TARGET never blocks itself**, and neither does the shooter. Both are
+ *    excluded by id rather than by geometry, because at the moment of the shot
+ *    the target's projection onto the line is the line's own endpoint.
+ * 3. **It is OFF when the second axis is off, structurally.** With
+ *    `rankStride` 0 every gladiator has `y: null`, every body sits on one line,
+ *    and a blocker's perpendicular distance is 0 — which would block every
+ *    shot in a 1-D arena. So the whole predicate is skipped unless BOTH ends
+ *    model depth, and a bout with the axis off behaves exactly as it would
+ *    have with no line-of-sight rule at all. **1v1 is untouched on both axes.**
+ *
+ * The owner's reason for wanting it, 2026-09-13: range should interact with
+ * the second axis, and Euclidean distance alone does not make a rank SCREEN
+ * anything — it only makes the back rank further away. A front rank that can
+ * body-block for its archers is the thing that makes where you stand a
+ * decision rather than a number.
+ */
+export function ss2ShotBlocked(actor, target, bodies) {
+  if (!Number.isFinite(actor?.x) || !Number.isFinite(target?.x)) return false;
+  // Structural off-switch: with no depth on either end there is no geometry to
+  // be blocked IN, only a line every body is standing on.
+  if (!Number.isFinite(actor?.y) || !Number.isFinite(target?.y)) return false;
+  const dx = target.x - actor.x;
+  const dy = target.y - actor.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared === 0) return false;
+  for (const body of bodies ?? []) {
+    if (!body || body.alive === false) continue;
+    if (body.id === actor.id || body.id === target.id) continue;
+    if (!Number.isFinite(body.x) || !Number.isFinite(body.y)) continue;
+    // Where the body falls along the shot, as a fraction of the way there.
+    // Clamped OUT rather than in: a `t` outside `(0, 1)` means the body is not
+    // between the two at all, and clamping it to an endpoint would make
+    // everybody standing behind the archer a blocker.
+    const t = ((body.x - actor.x) * dx + (body.y - actor.y) * dy) / lengthSquared;
+    if (t <= 0 || t >= 1) continue;
+    const offX = actor.x + t * dx - body.x;
+    const offY = actor.y + t * dy - body.y;
+    // `<` and not `<=`, matching `ss2BodyBlocks`, so a body exactly its own
+    // extent away is clear. Squared on both sides to keep it integer-exact and
+    // free of a square root whose rounding would decide edge cases.
+    const size = ss2PhysicalSize(body);
+    if (offX * offX + offY * offY < size * size) return true;
+  }
+  return false;
+}
+
 export function ss2WalkDestination(actor, foes, direction) {
   const step = ss2WalkDisplacement(ss2MovementSpeed(actor));
   let to = actor.x + direction * step;
@@ -2013,11 +2275,43 @@ const SS2_RANK_DIRECTION = Object.freeze({
   [Ss2ActionType.RANK_FRONT]: 1
 });
 
+/**
+ * Each attacking verb's `attack_direction` and its `staminacost` factor.
+ *
+ * ► **`low`/`high` MEANS "DRAW ONE", `direction` MEANS "DO NOT". The
+ *   distinction is a tape-length fact, not a style choice.** The three melee
+ *   bands each assign their direction with a `randomBetween` —
+ *   `randomBetween(9, 12)` at `+0x608a`, `(5, 8)` at `+0x61f1`, `(1, 4)` at
+ *   `+0x635c`. The three verbs added with the bow assign a CONSTANT and call no
+ *   RNG at all: `attack_direction = 23` at `+0x64c3`, `= 21` at `+0x6c67`,
+ *   `= 22` at `+0x6c8c`. A `randomBetween(21, 21)` here would be harmless
+ *   arithmetic and a real defect — it would take a sample off the ordered
+ *   channel that the build never takes, so every peer replaying the same tape
+ *   would fall one entry out of step from the first shot onward.
+ *
+ * The factors are the build's own, one shared branch per row:
+ *   `power_attack`  `round(strength * 3)`  `+0x603c`
+ *   `normal_attack` `round(strength * 2)`  `+0x61a3`
+ *   `quick_attack`  `round(strength)`      `+0x6317`
+ *   `bash_attack`   `round(strength * 2)`  `+0x6475`
+ *   bombard / snipe `round(strength * 3)`  `+0x6bb5`, ONE branch for all four
+ *                                          handed labels
+ */
 const ATTACK_BANDS = Object.freeze({
   [Ss2ActionType.QUICK_ATTACK]: Object.freeze({ low: 1, high: 4, strengthFactor: 1 }),
   [Ss2ActionType.NORMAL_ATTACK]: Object.freeze({ low: 5, high: 8, strengthFactor: 2 }),
-  [Ss2ActionType.POWER_ATTACK]: Object.freeze({ low: 9, high: 12, strengthFactor: 3 })
+  [Ss2ActionType.POWER_ATTACK]: Object.freeze({ low: 9, high: 12, strengthFactor: 3 }),
+  [Ss2ActionType.BOMBARD]: Object.freeze({ direction: 21, strengthFactor: 3, ranged: true }),
+  [Ss2ActionType.SNIPE]: Object.freeze({ direction: 22, strengthFactor: 3, ranged: true }),
+  [Ss2ActionType.BASH_ATTACK]: Object.freeze({ direction: 23, strengthFactor: 2 })
 });
+
+/** The three melee verbs, which are the ONLY ones `closerange_warrior` wires. */
+const MELEE_ATTACKS = Object.freeze([
+  Ss2ActionType.QUICK_ATTACK,
+  Ss2ActionType.NORMAL_ATTACK,
+  Ss2ActionType.POWER_ATTACK
+]);
 
 /** The label the direction draw takes on the ordered channel. See the header. */
 export const ATTACK_DIRECTION_ROLL_LABEL = "attack-direction-roll";
@@ -2120,15 +2414,71 @@ export const SS2_BACK_ATTACK_BONUS = 0.5;
  *   every fixture that has no weapon — including all 23 promoted goldens.
  */
 export const SS2_RESOURCE_NAMES = Object.freeze([
+  "ammo_left",
   "armourclass",
   "armourclass_max",
   "character_level",
   "charisma",
+  // ► **THE TRANSIENT `bash_attack` INHERITS, AND IT IS THE ONE FIELD HERE
+  //   THAT IS NARROWER THAN THE BUILD'S. Say so at the field, not in a
+  //   handoff.**
+  //
+  //   `checkattackroll` assigns `criticalhit` on every attacking branch — even
+  //   a miss, because the assignment is ahead of the hit test — and direction
+  //   23 assigns NOTHING, so a bash reads whatever the last branch left
+  //   (`+0x64c3` sets only the direction; the map states the inheritance at
+  //   §"Two transient/boundary behaviors", and records it as a static
+  //   candidate that no capture has promoted).
+  //
+  //   **In the build the variable lives on the OVERLAY TIMELINE, not on a
+  //   gladiator** — it is a bare `SetVariable` at `+0x2e7e`/`+0x2eeb`, and a
+  //   live trace caught it leaking out as a raw 21 (§"Direction 20 is the taunt
+  //   path", session-adc21). So vanilla's bash inherits whatever EITHER fighter
+  //   last rolled. Here it is per-combatant: the actor's own last swing.
+  //
+  //   That is a narrowing and it is deliberate. With six gladiators on the
+  //   frame "the previous action" names nobody in particular, and the
+  //   alternative — battle-level state — is not something a rule set has:
+  //   `actorView` hands over `turnNumber`, `actor`, `allies` and `foes` and
+  //   nothing else, so a shared transient would be a resolver-contract change
+  //   carrying its own decision. **At 1v1 against a fighter that never bashes
+  //   the two readings coincide**, and no promoted golden resolves direction 23
+  //   at all, so no measurement distinguishes them today.
+  //
+  //   It matters because a critical BYPASSES ARMOUR: `effectiveMethod` of
+  //   `critical` skips the armour branch entirely in the candidate ingress, so
+  //   a bash that follows your own critical lands in full on hitpoints.
+  "criticalhit",
   "equipped_weapon",
   "herolevel",
   "max_damage",
+  "maximum_ammo",
   "min_damage",
   "weapon_range",
+  // ► **THE BOW'S OWN THREE NUMBERS, CARRIED BESIDE THE MELEE ONES RATHER THAN
+  //   REPLACING THEM — and that is the one shape decision `swap_weapons`
+  //   turns on.**
+  //
+  //   `battlevalues`'s bow block OVERWRITES `min_damage`, `max_damage` and
+  //   `weapon_range` in place (`+0x3424`-`+0x344a`). The build can afford that
+  //   because it recomputes all three from the weapon ids on every call, and
+  //   `nextphase` calls it for both combatants at every phase transition. This
+  //   engine cannot: equipment identity is deliberately OUTSIDE the resource
+  //   bag, so by the time a combatant reaches the resolver the ids are gone and
+  //   an overwritten melee pair could never be rebuilt.
+  //
+  //   So the bag carries BOTH sets and `equipped_weapon` says which is live.
+  //   `ss2ActiveDamagePair` and `ss2Reach` do the selection at READ time, which
+  //   is the same function the build computes at write time — and it means a
+  //   swap writes exactly ONE resource (`equipped_weapon`) instead of three,
+  //   so there is no way for the two halves to fall out of step.
+  //
+  //   **`weapon_min_damage`/`weapon_max_damage` are deliberately NOT here.**
+  //   They are the build's raw table columns, needed only to rebuild a pair
+  //   that this engine never destroys.
+  "secondary_weapon_max_damage",
+  "secondary_weapon_min_damage",
+  "secondary_weapon_range",
   "secondary_weapon_enchantment_damage",
   "secondary_weapon_enchantment_potency",
   "secondary_weapon_enchantment_type",
@@ -2225,8 +2575,41 @@ export const SS2_RESOURCE_DEFAULTS = Object.freeze({
   armourclass_max: 0,
   character_level: 1,
   charisma: 0,
+  /**
+   * No shots and no bow, which is the state root frame 221 puts every
+   * gladiator in at battle construction (`equipped_weapon = 1`,
+   * `using_bow = false`, map `:111`). A combatant that states neither an
+   * `ammo_left` nor a `maximum_ammo` is a melee fighter and these two never
+   * move.
+   */
+  ammo_left: 0,
+  maximum_ammo: 0,
+  /**
+   * **ZERO IS "NO INHERITED CRITICAL", AND IT IS THE SAFE DIRECTION.** The
+   * build's transient is whatever the last branch left, and a fresh battle has
+   * had no branches — so the first bash of a bout inherits nothing, here and
+   * there alike. 0 is also the value `snipe` writes (`+0x2eeb`), so it is the
+   * build's own spelling for "not a critical" rather than a sentinel chosen
+   * here, and it can never manufacture the armour bypass that 20 does.
+   */
+  criticalhit: 0,
   equipped_weapon: 1,
   herolevel: 1,
+  /**
+   * The bow's three numbers default to 0, which is what `battlevalues`
+   * computes for a gladiator carrying nothing in that slot: its own
+   * `secondary_weapon_min_damage` for an unresolvable id is `undefined`, which
+   * `+0x3395`'s `Add2` treats as 0, and `ss2WeaponEntry` returns null so no
+   * `secondary_weapon_range` is derived at all.
+   *
+   * **A zero here is "no bow", and `legalActions` reads it that way**: a
+   * gladiator with `secondary_weapon_range` 0 is never offered the swap, so it
+   * can never arm a weapon with no reach and no damage and then be stuck
+   * holding it.
+   */
+  secondary_weapon_max_damage: 0,
+  secondary_weapon_min_damage: 0,
+  secondary_weapon_range: 0,
   /**
    * The MIDDLE of the six-entry `weaponweights` index, so a combatant that
    * states no weapon swings something unremarkable rather than free or
@@ -2251,8 +2634,16 @@ export const SS2_RESOURCE_DEFAULTS = Object.freeze({
 
 /** Resource names this rule set can write. Each write is guarded on declaration. */
 export const SS2_WRITTEN_RESOURCES = Object.freeze([
+  "ammo_left",
   "armourclass",
   "armourclass_max",
+  "criticalhit",
+  // **`swap_weapons` writes exactly ONE resource.** The build's toggle sets
+  // `equipped_weapon` and `using_bow` together (`+0x4dbd`/`+0x4dce`,
+  // `+0x4eba`/`+0x4ecb`) and leaves the three derived numbers to the next
+  // `battlevalues`; here the derived numbers are selected at read time, so the
+  // mode flag is the whole of the state change.
+  "equipped_weapon",
   "staminaleft",
   ...SS2_ARMOUR_PIECES
 ].sort());
@@ -2342,6 +2733,21 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
     if (source.secondary_weapon_max_damage === undefined) source.secondary_weapon_max_damage = secondaryPair[1];
     derived.secondary_weapon = source.secondary_weapon;
   }
+  // ► **THE FOUR RAW COLUMNS HAVE TO REACH `derived`, and until `swap_weapons`
+  //   existed nothing noticed that they did not.** `derived` is spread from
+  //   `source` at the top of this function, BEFORE the four assignments above,
+  //   so a pair filled in from the weapon table landed on `source` and stopped
+  //   there — invisible to `ss2Combatant`, which builds its bag out of
+  //   `derived`. That was harmless while `min_damage` was computed once and
+  //   never recomputed; it is not harmless now, because a swap back to melee
+  //   rebuilds the melee pair FROM these columns and would have rebuilt it
+  //   from zero.
+  for (const column of [
+    "weapon_min_damage", "weapon_max_damage",
+    "secondary_weapon_min_damage", "secondary_weapon_max_damage"
+  ]) {
+    if (Number.isFinite(source[column])) derived[column] = source[column];
+  }
 
   // `weapon_range` and `secondary_weapon_range` — the same lookup one column
   // over, and the LAST of the three `weapon_range` omissions the living head
@@ -2414,6 +2820,10 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
     }
   }
 
+  // `+0x3634`-`+0x378d`, and it sits OUTSIDE the `battle_started` skip, so it
+  // is recomputed on every call exactly like `hitpointsmax` below it.
+  derived.maximum_ammo = ss2MaximumAmmo(herolevel);
+
   derived.hitpointsmax = herolevel * 10 + number("vitality") * 20;
   derived.staminamax = 100 + number("stamina") * 10;
   derived.movement_speed = clamp(Math.round(number("speed") * 1.5), 4, 60);
@@ -2436,7 +2846,11 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
     .reduce((total, piece) => total + derived[`${piece}_defence`], 0);
   derived.armourclass = derived.armourclass_max;
   if (!(number("staminaleft") > 0)) derived.staminaleft = derived.staminamax;
-  if (!(number("ammo_left") > 0)) derived.ammo_left = number("maximum_ammo");
+  // `+0x3b45`-`+0x3b81`. **From `derived.maximum_ammo`, not `source`'s** — the
+  // tier above has already recomputed it this call, and reading the stated
+  // value here would refill a level-45 archer to whatever number its record
+  // happened to carry.
+  if (!(number("ammo_left") > 0)) derived.ammo_left = derived.maximum_ammo;
   return derived;
 }
 
@@ -2650,43 +3064,85 @@ function assertConstructionResources(carrier, where) {
       "is a fixpoint with no result. staminamax = 100 + stamina * 10 in the build, so it is never <= 0 there."
     );
   }
-  // ► **A REACH WIDER THAN THE ARENA IS A BOW, AND THIS RULE SET CANNOT MODEL
-  //   ONE (added 2026-09-12, found by `/codex:adversarial-review`).** A
-  //   combatant with `using_bow` true takes `battlevalues`'s bow override
-  //   (`+0x343e`), so its `weapon_range` becomes `secondary_weapon_range` —
-  //   `physical_size + [5] * 44` through a type-4 row, whose `[5]` is 100. At
-  //   the minimum `physical_size` of 80 that is 4,480, against an arena
-  //   `SS2_ARENA.clamp` 4,200 wide: **the controller gate can never be shut,
-  //   so every foe is in melee range from the opening separation of 500.**
-  //   Reproduced: strength 9 with `secondary_weapon: 63` and
-  //   `equipped_weapon: 2` was offered all three melee verbs at 500 units.
+  // ► **EVERY GLADIATOR ENTERS THE ARENA IN MELEE MODE, BECAUSE THE BUILD PUTS
+  //   THEM THERE. Root frame 221 sets `equipped_weapon = 1` and
+  //   `using_bow = false` at battle construction (map `:111`), and no
+  //   controller frame wires `swap_weapons` at all — the only route to a drawn
+  //   bow is the inventory overlay, mid-battle, one turn at a time.**
   //
-  //   **This was a REGRESSION, not a pre-existing gap.** Until `weapon_range`
-  //   became a projected resource, `ss2Reach` returned `physical_size` for
-  //   everyone and a bow could not open the gate at all.
+  //   So a combatant that arrives ALREADY in bow mode is a state the build
+  //   cannot produce, and it is refused here rather than accommodated.
   //
-  //   Refused HERE rather than in `ss2Combatant` because the adapter builds
-  //   combatants too, and the criterion is stated in terms this rule set owns —
-  //   the reach against its own arena — rather than by sniffing `using_bow`,
-  //   which the resolver never sees. Any future route to an arena-spanning
-  //   reach is caught by the same test.
+  //   ► **THIS REPLACES A NARROWER GUARD THAT HAD A HOLE, and the hole is worth
+  //     recording because it is the shape of thing that survives a green
+  //     suite.** The old refusal fired on `weapon_range > arena width`, on the
+  //     reasoning that a bow's `[5]` multiplier is 100 so its reach is at least
+  //     4,480 against a 4,200-unit arena. **Two of the twenty ranged rows do
+  //     not have `[5]` = 100: ids 65 and 75 carry 4** (item tables `:472`,
+  //     `:482`, re-read 2026-09-13), giving `physical_size + 176` — about 262,
+  //     comfortably inside the arena. Measured before this change: a strength-9
+  //     gladiator with `secondary_weapon: 65` and `equipped_weapon: 2` BUILT a
+  //     battle, walked in, and was offered all three melee verbs at 262 units —
+  //     a longer reach than any sword in the game, swung with a bow.
   //
-  //   **The fix is not to clamp it.** A bow is a different CONTROLLER in the
-  //   build, gated on `100 + physical_size` and wired to ranged verbs this
-  //   module does not have (see `legalActions`). Silently treating an archer as
-  //   a melee fighter with an enormous reach is the failure; refusing until
-  //   there is a ranged vocabulary is the honest answer.
+  //     The guard was not merely incomplete; it was keyed on a CONSEQUENCE
+  //     (the reach) instead of the STATE (the mode), and the consequence had an
+  //     exception nobody had counted. This one is keyed on the mode, which has
+  //     none.
+  //
+  //   **Bow mode is now perfectly legal, at construction as well as mid-fight,
+  //   and what is refused is a bow that is not there.**
+  //
+  //   ► **THE FIRST VERSION OF THIS GUARD REFUSED `equipped_weapon == 2`
+  //     OUTRIGHT, on the grounds that root frame 221 forces every gladiator to
+  //     START in melee mode — and that is true and was still the wrong rule.**
+  //     A state the build reaches on turn two is not an impossible state; it is
+  //     a state a capture can observe, a campaign can resume into, and
+  //     `ss2Combatant(..., { battleStarted: true })` exists specifically to
+  //     rebuild. Refusing it keyed the guard on where a fight BEGINS instead of
+  //     on what is actually wrong, which is the same mistake the arena-width
+  //     version made one revision earlier. **It is worth recording that the
+  //     mistake was repeated immediately, with the correction to the previous
+  //     one written directly above it.**
+  //
+  //     Nothing is lost by permitting it, because the melee-verbs-with-a-bow
+  //     defect is no longer held shut by a guard at all: `legalActions` wires
+  //     the archer frames, and neither of them offers a melee verb whatever the
+  //     reach says. The vocabulary closes it structurally.
+  //
+  //   What remains refused is the genuine contradiction: bow mode with no bow.
+  //   A gladiator whose secondary slot is empty has a `secondary_weapon_range`
+  //   of 0 and a zero damage pair, so drawing it would arm a weapon that can
+  //   neither reach nor hurt anything — and `ss2ActiveDamagePair` would hand
+  //   the swing `round(strength)` and nothing else. The build cannot produce
+  //   this either: its swap button is `_visible = false` without a secondary
+  //   weapon (`+0x0e77`-`+0x0e96`).
+  const equipped = declaredResourceValue(carrier, "equipped_weapon");
+  const bowReach = declaredResourceValue(carrier, "secondary_weapon_range");
+  if (equipped === 2 && !(bowReach > 0)) {
+    throw new TeamRuleSetError(
+      `${where} declares equipped_weapon 2 — a DRAWN BOW — with secondary_weapon_range ` +
+      `${bowReach === undefined ? "undeclared" : bowReach}, so there is no bow in the slot to draw. ` +
+      "The build hides its own swap button outright when the hero has no secondary weapon " +
+      "(sprite 862 frame 1 +0x0e77-+0x0e96), and this engine offers no swap-weapons turn without one " +
+      "either. Declare a secondary_weapon so battlevalues can derive its range, or leave " +
+      "equipped_weapon at 1."
+    );
+  }
+  // The reach backstop, kept. It can no longer be the primary guard — ids 65
+  // and 75 slip under it, see above — but a `weapon_range` this wide still
+  // means somebody ran `ss2BattleValues` with `using_bow: true` and baked the
+  // override into the bag, which is a different mistake with the same symptom.
   const reach = declaredResourceValue(carrier, "weapon_range");
   const arenaWidth = SS2_ARENA.clamp.max - SS2_ARENA.clamp.min;
   if (Number.isFinite(reach) && reach > arenaWidth) {
     throw new TeamRuleSetError(
       `${where} declares weapon_range ${reach}, which is wider than the arena itself (${arenaWidth}). ` +
-      "That is the build's bow override: `weapon_range = secondary_weapon_range` through a type-4 row, " +
-      "whose range multiplier is 100 (battlevalues +0x343e, +0x32aa). The controller gate " +
-      "`fightdistance < weapon_range` can then never be shut, so this gladiator would be offered MELEE " +
-      "attacks against every foe from the opening separation. This rule set has no ranged vocabulary and " +
-      "does not model the archer controllers, so it refuses the state rather than fighting a gladiator the " +
-      "build would never have put on this frame. Give it a melee weapon, or leave using_bow false."
+      "That is the build's bow override baked in: `weapon_range = secondary_weapon_range` through a " +
+      "type-4 row (battlevalues +0x343e, +0x32aa). This engine keeps the MELEE reach in weapon_range and " +
+      "the bow's in secondary_weapon_range, and selects between them on equipped_weapon at read time, so " +
+      "a bow never needs to overwrite it. Build the record with using_bow false and give it a " +
+      "secondary_weapon; the swap-weapons turn does the rest."
     );
   }
 }
@@ -2726,6 +3182,21 @@ function vanillaRecordOf(view, role) {
   }
   const status = new Set(view.status ?? []);
   const read = (name, fallback = 0) => resourceValue(view, name, fallback);
+  // ► **THE ONE FIELD THAT DEPENDS ON WHICH WEAPON IS IN HAND.** In melee mode
+  //   this is exactly `read("min_damage")` / `read("max_damage")` and the
+  //   record is byte-for-byte what it always was — which is what keeps all 23
+  //   promoted goldens replaying unchanged, since none of them declares an
+  //   `equipped_weapon` of 2 and none can (`assertConstructionResources`
+  //   refuses it outright). With the bow drawn it is the secondary pair, which
+  //   is `battlevalues` `+0x3424`-`+0x343d`. See `ss2ActiveDamagePair`.
+  //
+  //   **Applied only in bow mode, never as a rewrite of the melee path.** The
+  //   melee reads below keep their own fallback chain verbatim
+  //   (`min_damage` defaulting to 1, `max_damage` falling back to
+  //   `min_damage`), because a pure DEFENDER need not declare the pair at all
+  //   and routing it through a helper that floors at 0 would quietly move a
+  //   number for every undeclared defender in the corpus.
+  const bowPair = ss2InBowMode(view) ? ss2ActiveDamagePair(view) : null;
   const record = {
     attack: view.stats.attack,
     defence: view.stats.defense,
@@ -2738,8 +3209,8 @@ function vanillaRecordOf(view, role) {
     armourclass_max: read("armourclass_max", read("armourclass")),
     staminaleft: read("staminaleft"),
     staminamax: read("staminamax"),
-    min_damage: read("min_damage", 1),
-    max_damage: read("max_damage", read("min_damage", 1)),
+    min_damage: bowPair ? bowPair.min_damage : read("min_damage", 1),
+    max_damage: bowPair ? bowPair.max_damage : read("max_damage", read("min_damage", 1)),
     character_level: read("character_level", 1),
     equipped_weapon: read("equipped_weapon", 1),
     weapon_enchantment_type: read("weapon_enchantment_type"),
@@ -3590,6 +4061,28 @@ export function createSs2TeamRules({
      */
     legalActions(view, actorId) {
       const rest = { type: Ss2ActionType.REST, targetId: actorId };
+
+      // ► **AN EMPTY QUIVER FORCES THE SWAP, AND IT OUTRANKS THE FORCED REST.
+      //   That ordering is the build's and it is not the obvious one.**
+      //
+      //   Frame 1's forced chain (map §"Turn gating, forced phases", the table
+      //   at `:299-307`) runs in a fixed order and the FIRST call that lands
+      //   takes the turn, because `getphase` sets `turnphase = 2` and every
+      //   later call that pass is a silent no-op. Row 1 is
+      //   `ammo_left <= 0 && using_bow == true -> getphase("swap_weapons")`
+      //   (`+0x0cce`-`+0x0d0e`); row 2 is the zero-stamina rest
+      //   (`+0x0d2e`). So **an archer out of arrows at zero stamina puts the
+      //   bow away rather than resting** — it spends a stamina it does not have
+      //   on a swap, and `phaseTransitionEffects` clamps the floor at 0 exactly
+      //   as `check_stats` does (`+0x114b`).
+      //
+      //   Placed above the zero-stamina return for that reason alone. It is the
+      //   kind of ordering that reads like a bug until you follow the
+      //   `turnphase` gate, which is why the offsets are here.
+      const outOfAmmo = ss2InBowMode(view.actor)
+        && resourceValue(view.actor, "ammo_left", 0) <= 0;
+      if (outOfAmmo) return [{ type: Ss2ActionType.SWAP_WEAPONS, targetId: actorId }];
+
       if (resourceValue(view.actor, "staminaleft", 0) <= 0) return [rest];
 
       // THE FORCED STATUS PHASE, ranked exactly where the build ranks it.
@@ -3610,6 +4103,15 @@ export function createSs2TeamRules({
       const actions = [];
       const reach = ss2Reach(view.actor);
       const positioned = Number.isFinite(view.actor.x);
+      // Every OTHER living body, which is what can stand in the way of a shot.
+      // Allies included, and deliberately: `ss2WalkDestination` learned the
+      // same lesson on 2026-09-12 — `physical_size` is how big a body is and
+      // does not know whose side it is on. Self is excluded because
+      // `view.allies` includes the actor.
+      const shotBodies = [
+        ...view.foes,
+        ...view.allies.filter((ally) => ally.id !== actorId)
+      ];
 
       // THE CONTROLLER FRAME, reproduced. The build picks one of four frames
       // per turn and each wires a different eight buttons; for a melee hero
@@ -3634,20 +4136,110 @@ export function createSs2TeamRules({
       //     for the drawn-bow case. So in vanilla the two sides do not share a
       //     gate, and the villain's depends on `equipped_weapon`.
       //
-      //   This rule set applies the HERO's warrior gate to every combatant.
-      //   That is a narrowing, stated here rather than discovered later: the
-      //   resolver has no bow vocabulary, `using_bow` is forced false at battle
-      //   construction (map `:111`, root frame 221), and `MAP_SILENCE`'s
-      //   `multi-slot-arena-geometry` already records that vanilla's one-hero
-      //   one-villain shape cannot settle what a symmetric team battle does.
+      //   This rule set applies the HERO's gate — BOTH arms of it — to every
+      //   combatant. That is a narrowing, stated here rather than discovered
+      //   later, and `MAP_SILENCE`'s `multi-slot-arena-geometry` already
+      //   records that vanilla's one-hero one-villain shape cannot settle what
+      //   a symmetric team battle does. **Until 2026-09-13 only the warrior arm
+      //   existed and the sentence here said so; the bow arm is now modelled
+      //   and `ss2ArcherMinimumRange` is it.**
       //
       // A gladiator with NO position keeps the old position-blind vocabulary
       // exactly — three melee verbs against every foe — which is what
       // `fixtureReplay` asks for and what every rule set declaring no
       // `startingPosition` gets.
+
+      // ► **WHICH CONTROLLER FRAME THIS TURN IS, CHOSEN ONCE — and "once" is
+      //   the load-bearing word.**
+      //
+      //   The build picks ONE of four frames per turn and each wires a
+      //   different eight buttons. With one opponent that is the same thing as
+      //   deciding per-foe; with three it is not, and the difference IS the
+      //   design the owner chose. An archer whose controller were chosen
+      //   per-foe could bash the fighter on top of it AND shoot the one across
+      //   the arena in the same turn, which would make closing on an archer
+      //   worth nothing — and closing on an archer is the whole counterplay the
+      //   minimum range exists to create.
+      //
+      //   **The NEAREST living foe decides it**, because `fightdistance` in the
+      //   build is the distance to "the opponent" and with several the nearest
+      //   is the only reading that keeps the 1v1 case identical. So: somebody
+      //   is on top of you or nobody is, and that settles your whole vocabulary
+      //   for the turn.
+      //
+      //   The melee arm below is UNCHANGED and still per-foe, because that is
+      //   what it has always been and the warrior frames wire the same three
+      //   buttons whichever foe is nearest.
+      const bowDrawn = ss2InBowMode(view.actor);
+      const nearestForFrame = nearestFoe(view);
+      const nearestDistance = nearestForFrame
+        ? ss2FightDistance(view.actor, nearestForFrame)
+        : null;
+      // `closerange_archer` when the nearest foe is inside the floor, exactly
+      // as the selector has it — STRICT `<`, `+0x015f`. An archer with no
+      // position, or with no living foe, is on the long-range frame: there is
+      // nobody on top of it.
+      const archerClosedOn = bowDrawn
+        && nearestDistance !== null
+        && nearestDistance < ss2ArcherMinimumRange(view.actor);
+
       let anyInReach = !positioned;
       for (const foe of view.foes) {
         const distance = ss2FightDistance(view.actor, foe);
+        if (bowDrawn) {
+          // ► **THE ARCHER FRAMES, and neither wires a single melee verb.**
+          //   `closerange_archer` wires `bash_attack` and no shot;
+          //   `longrange_archer` wires both shots and no bash. Map table
+          //   `:227-228`, `:231`, and it is why a drawn bow can never be
+          //   offered `quick`/`normal`/`power` however long its reach is —
+          //   which is the defect the old construction refusal existed to
+          //   prevent, now closed by the vocabulary instead of by a guard.
+          // ► **A POSITION-BLIND ARCHER GETS EVERY ARCHER VERB, which is the
+          //   SAME widening the melee path above has always had and needed
+          //   saying twice.** `distance === null` means this rule set models no
+          //   geometry — `fixtureReplay`, or any rule set declaring no
+          //   `startingPosition` — so there is no `fightdistance` to select a
+          //   controller frame with, exactly as there is none to test a reach
+          //   against. A melee fighter in that position gets all three melee
+          //   verbs rather than one frame's subset; an archer gets all three of
+          //   its own.
+          //
+          //   **The first version of this branch fell through the `continue`
+          //   below and left such an archer MUTE** — no shot, no bash, only a
+          //   swap and a rest, which is a gladiator that can do nothing but put
+          //   its bow away. Found by a test measuring the build's own stamina
+          //   costs, which needs `fixtureReplay` to get them and therefore
+          //   needs a position-blind archer to exist.
+          if (distance === null) {
+            anyInReach = true;
+            if (resourceValue(view.actor, "ammo_left", 0) > 0) {
+              actions.push({ type: Ss2ActionType.BOMBARD, targetId: foe.id });
+              actions.push({ type: Ss2ActionType.SNIPE, targetId: foe.id });
+            }
+            actions.push({ type: Ss2ActionType.BASH_ATTACK, targetId: foe.id });
+            continue;
+          }
+          if (archerClosedOn) {
+            // Bash has no reach test of its own in the build: the controller
+            // IS the gate, and it was chosen on the nearest foe. So bash
+            // reaches exactly as far as the frame does.
+            if (distance < ss2ArcherMinimumRange(view.actor)) {
+              anyInReach = true;
+              actions.push({ type: Ss2ActionType.BASH_ATTACK, targetId: foe.id });
+            }
+            continue;
+          }
+          // A shot needs the foe at or beyond the floor, ammunition, and — the
+          // one authored clause — a clear lane. `ss2ShotBlocked` is inert
+          // whenever the second axis is off, so a 1-D arena is unaffected.
+          if (distance < ss2ArcherMinimumRange(view.actor)) continue;
+          if (resourceValue(view.actor, "ammo_left", 0) <= 0) continue;
+          if (ss2ShotBlocked(view.actor, foe, shotBodies)) continue;
+          anyInReach = true;
+          actions.push({ type: Ss2ActionType.BOMBARD, targetId: foe.id });
+          actions.push({ type: Ss2ActionType.SNIPE, targetId: foe.id });
+          continue;
+        }
         const inReach = distance === null || distance < reach;
         if (!inReach) continue;
         anyInReach = true;
@@ -3673,10 +4265,25 @@ export function createSs2TeamRules({
         // `jumpleft`/`walkleft`, facing left `jumpright`/`walkright`, both of
         // which are RETREAT. **Once you are in range the build lets you back
         // out and never further in.** `longrange_warrior` wires both.
+        //
+        // ► **THE ARCHER FRAMES SPLIT THE SAME WAY AND THE PREDICATE IS NOT
+        //   `anyInReach`.** `closerange_archer` wires one walk and it is the
+        //   retreat (`jumpleft`/`walkleft` facing right, mirrored facing left —
+        //   map `:229-230`), exactly like `closerange_warrior`;
+        //   `longrange_archer` wires both (`:227-228`).
+        //
+        //   For a warrior "in reach" and "on the close frame" are the same
+        //   condition, so `anyInReach` says both. **For an archer they are
+        //   opposites**: a shot on offer means you are on the LONG frame, which
+        //   wires both walks. Reusing `anyInReach` here would have pinned an
+        //   archer to retreating whenever it had a shot and let it advance
+        //   freely whenever it was being bashed — the rule inverted, in the one
+        //   place it is most punishing.
         const nearest = nearestFoe(view);
         const towardIsRight = nearest ? nearest.x > view.actor.x : true;
         const away = towardIsRight ? Ss2ActionType.WALK_LEFT : Ss2ActionType.WALK_RIGHT;
-        const offered = anyInReach
+        const onCloseFrame = bowDrawn ? archerClosedOn : anyInReach;
+        const offered = onCloseFrame
           ? [away]
           : [Ss2ActionType.WALK_LEFT, Ss2ActionType.WALK_RIGHT];
         // ► **ORDERED BY DIRECTION, LEFT BEFORE RIGHT — the build's own slot
@@ -3774,6 +4381,38 @@ export function createSs2TeamRules({
           if (ss2RankArrivalX(view.actor.x, others, to) === null) continue;
           actions.push({ type, targetId: actorId });
         }
+      }
+
+      // ► **THE SWAP IS NOT A CONTROLLER BUTTON, AND THAT IS WHY IT IS HERE —
+      //   after every frame-specific verb, offered on all four frames alike.**
+      //
+      //   The map is explicit: *"No controller frame wires `swap_weapons`."*
+      //   The only manual route is the battle inventory overlay,
+      //   `swap_inventory.onRelease` in sprite 862 frame 1
+      //   `DoAction@0x2378cc` `+0x1015`, whose whole body is
+      //   `getphase("swap_weapons")` at `+0x1067`. An overlay button is
+      //   available whatever frame the controller is resting on, so this is
+      //   offered whatever the gladiator is otherwise able to do — including
+      //   while it is being bashed at point-blank range, which is exactly the
+      //   moment an archer wants it.
+      //
+      //   ► **AND IT IS GATED ON OWNING A BOW, which the build gates the same
+      //     way**: the swap button is `_visible = false` when the hero has no
+      //     secondary weapon (`+0x0e77`-`+0x0e96`). The test here is a
+      //     `secondary_weapon_range` above zero rather than a weapon id,
+      //     because equipment identity does not survive into the resolver —
+      //     and a zero reach is precisely what `ss2BattleValues` leaves for a
+      //     gladiator whose secondary slot holds nothing.
+      //
+      //   **The build never checks that the secondary weapon IS a bow**
+      //   (`+0x4d23`, a plain toggle), and neither does this. A gladiator who
+      //   swaps to a sword gets the archer controllers and their minimum range
+      //   anyway, which is a vanilla quirk reproduced rather than a rule
+      //   invented — it is unreachable through the shop, since `buyweapon`
+      //   routes only the ranged band to the secondary slot
+      //   (`assertSs2WeaponPurchasable`).
+      if (resourceValue(view.actor, "secondary_weapon_range", 0) > 0) {
+        actions.push({ type: Ss2ActionType.SWAP_WEAPONS, targetId: actorId });
       }
 
       actions.push(rest);
@@ -3917,6 +4556,59 @@ export function createSs2TeamRules({
       //   action, so breaking off cannot outrun the clock. That matters more
       //   here than anywhere: with free disengage and a second axis, the toll
       //   is the only thing standing between the arena and a kiting stalemate.
+      // ► **THE SWAP, AND IT IS A WHOLE TURN FOR ONE STAMINA. Owner's decision,
+      //   2026-09-13: keep the build's answer.**
+      //
+      //   `swap_weapons` is a phase like any other — overlay frame 52
+      //   `DoAction@0x240c7f` `+0x4d23` — so it goes through
+      //   `phaseTransitionEffects` exactly as a walk does and gets the same
+      //   regeneration and heal a completed phase gets. `staminacost = 1`
+      //   (`+0x4d35`), which is the cheapest non-negative cost in the whole
+      //   table and is almost certainly meant to be nominal: what the swap
+      //   really costs is the TURN.
+      //
+      //   The toggle itself is two lines: `using_bow != true` sets
+      //   `equipped_weapon = 2` and `using_bow = true` (`+0x4dbd`, `+0x4dce`);
+      //   otherwise `equipped_weapon = 1` and `using_bow = false` (`+0x4eba`,
+      //   `+0x4ecb`). One resource moves here because the other three derived
+      //   numbers are selected at read time — see `SS2_RESOURCE_NAMES`.
+      //
+      //   **It is NOT repriced by `ss2SwingCost` and pays no attack-speed
+      //   term**, because it is not a swing. The crowd's toll above applies,
+      //   like it does to every action including the ones that are not choices:
+      //   putting the bow away must not outrun the clock either.
+      if (request.type === Ss2ActionType.SWAP_WEAPONS) {
+        const drawn = ss2InBowMode(actor);
+        const transition = phaseTransitionEffects(actor, { staminaCost: 1 });
+        const effects = [...transition.effects];
+        // Guarded on declaration like every other resource write in this file:
+        // the resolver refuses an undeclared name mid-list and leaves the
+        // earlier effects applied, which is a partial action with no rollback.
+        if (declaredResourceNames(actor).has("equipped_weapon")) {
+          effects.push({
+            kind: EffectKind.RESOURCE,
+            targetId: actor.id,
+            resource: "equipped_weapon",
+            to: drawn ? 1 : 2
+          });
+        }
+        return {
+          effects: [...effects, ...crowd],
+          events: [{
+            type: Ss2ActionType.SWAP_WEAPONS,
+            actorId: actor.id,
+            targetId: actor.id,
+            // What the gladiator is holding AFTER the swap, so a UI can say
+            // "draws a bow" rather than having to diff two projections.
+            equippedWeapon: drawn ? 1 : 2,
+            drewBow: !drawn,
+            vanillaLabel: VANILLA_PHASE_LABEL[Ss2ActionType.SWAP_WEAPONS],
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
+          }]
+        };
+      }
+
       const rankDirection = SS2_RANK_DIRECTION[request.type];
       if (rankDirection) {
         const to = ss2RankDestination(actor.y, rankDirection, rankStride);
@@ -4101,7 +4793,14 @@ export function createSs2TeamRules({
       const hero = vanillaRecordOf(actor, "attacker");
       const villain = vanillaRecordOf(target, "defender");
 
-      const attackDirection = rolls.randomBetween(ATTACK_DIRECTION_ROLL_LABEL, band.low, band.high);
+      // ► **A CONSTANT DIRECTION TAKES NO SAMPLE.** See `ATTACK_BANDS`: the
+      //   three melee bands each draw, and `bash_attack`, `bombard` and `snipe`
+      //   each assign a literal with no RNG call anywhere in the branch. A
+      //   `randomBetween(21, 21)` would give the same number and the wrong
+      //   tape, which desyncs a peer rather than moving a value.
+      const attackDirection = Number.isFinite(band.direction)
+        ? band.direction
+        : rolls.randomBetween(ATTACK_DIRECTION_ROLL_LABEL, band.low, band.high);
       const attackerBefore = { ...hero };
       const defenderBefore = { ...villain };
       const scenario = {
@@ -4110,7 +4809,14 @@ export function createSs2TeamRules({
         fightMode,
         hero,
         villain,
-        result: null
+        result: null,
+        // ► **WHAT `bash_attack` INHERITS.** Direction 23 assigns no
+        //   `criticalhit` of its own and the candidate REFUSES to guess one —
+        //   it throws unless `scenario.transient.criticalhit` is finite. This
+        //   is the channel: the actor's own last resolved swing wrote it, and
+        //   a gladiator that has not swung yet carries the default 0. Only
+        //   direction 23 reads it; the other six arms overwrite it.
+        transient: { criticalhit: resourceValue(actor, "criticalhit", 0) }
       };
       const outcome = resolveSs2PhysicalAttackCandidate(scenario, rolls);
 
@@ -4190,7 +4896,53 @@ export function createSs2TeamRules({
         && ss2IsBackAttack(actor, target);
       const backAttackDamage = backAttack ? Math.round(struck * backAttackBonus) : 0;
 
+      // ► **THE ATTACKER'S OWN TWO WRITES, AND THEY GO FIRST BECAUSE THE BUILD
+      //   MAKES THEM FIRST.**
+      //
+      //   `ammo_left -= 1` happens in the ranged PHASE branch
+      //   (`+0x6bf5`-`+0x6c14`), before the animation plays and long before the
+      //   roll — the build resolves a shot when the arrow lands, not when it is
+      //   loosed. `criticalhit` is assigned at the top of each
+      //   `checkattackroll` arm (`+0x2e7e` bombard, `+0x2eeb` snipe), ahead of
+      //   the damage term and therefore ahead of the hit test — **so a MISS
+      //   still writes it**, which is the whole reason a bash can inherit one.
+      //
+      //   Both precede the defender's effects, matching that order. Resource
+      //   effects are absolute, so only the order between distinct fields is
+      //   observable, and this is it.
+      const actorWrites = [];
+      const declaredOnActor = declaredResourceNames(actor);
+      // ► **THE DECREMENT IS UNGUARDED IN THE BUILD AND FLOORED HERE, and the
+      //   difference is a defect vanilla actually has.** `+0x6bf5` subtracts 1
+      //   with no test at all; the map records the consequence at
+      //   §"The ammunition-visibility defect" — the zero-ammo branch assigns
+      //   `visible` instead of `_visible`, so the buttons are never hidden and
+      //   a harness driving `getphase` directly can drive the counter NEGATIVE.
+      //   It is unreachable in ordinary play because the forced auto-swap fires
+      //   first, and `legalActions` reproduces that gate. The floor is here so
+      //   that a caller submitting the action directly gets 0 rather than a
+      //   negative pool the resolver would have to represent.
+      if (band.ranged && declaredOnActor.has("ammo_left")) {
+        actorWrites.push({
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: "ammo_left",
+          to: Math.max(0, resourceValue(actor, "ammo_left", 0) - 1)
+        });
+      }
+      // The PRE-DEFLECTION sample, which is what the build's variable holds:
+      // `deflect_critical` runs later and writes `criticalhit` nowhere.
+      if (declaredOnActor.has("criticalhit") && Number.isFinite(outcome.calculation?.criticalSample)) {
+        actorWrites.push({
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: "criticalhit",
+          to: outcome.calculation.criticalSample
+        });
+      }
+
       const effects = [
+        ...actorWrites,
         ...defenderEffects(defenderBefore, scenario.villain, target),
         ...(backAttackDamage > 0
           ? [{ kind: EffectKind.DAMAGE, targetId: target.id, amount: backAttackDamage }]
@@ -4287,6 +5039,13 @@ export function createSs2TeamRules({
       const forced = options.find((option) => SS2_FLAG_FOR_STATUS_PHASE[option.type]);
       if (forced) return forced;
 
+      // ► **A FORCED SWAP IS NOT A CHOICE EITHER, and it is returned beside the
+      //   forced phase for the same reason.** An archer out of arrows is handed
+      //   exactly one option by `legalActions`; weighing it would build the
+      //   attacker record and demand a damage pair the gladiator may not have
+      //   declared, throwing instead of taking the only move it has.
+      if (options.length === 1 && options[0].type === Ss2ActionType.SWAP_WEAPONS) return options[0];
+
       const restOption = options.find((option) => option.type === Ss2ActionType.REST);
       const actor = view.actor;
       if (restOption && resourceValue(actor, "staminaleft", 0) <= 10) return restOption;
@@ -4313,9 +5072,50 @@ export function createSs2TeamRules({
       // forced phase above is: ranking the melee verbs demands the damage
       // pair, and a gladiator still walking toward the fight should not have
       // to declare one to take a step.
-      const meleeOnOffer = options.some((option) => ATTACK_BANDS[option.type]);
-      if (!meleeOnOffer) {
+      // ► **RENAMED FROM `meleeOnOffer` WHEN THE BOW ARRIVED, and the rename is
+      //   the fix rather than a tidy-up.** `ATTACK_BANDS` now holds six verbs,
+      //   so this predicate means "can I attack anybody from here" — which is
+      //   exactly what the walk arm below needs, and which the archer would
+      //   have broken had the predicate stayed melee-only.
+      //
+      //   The trap, predicted in the ranged brief before any of this was
+      //   written: an archer has a verb on offer while NO melee verb is, so an
+      //   arm keyed on melee would have walked it out of its own firing range
+      //   and into the fight it is built to avoid. **Closed by the vocabulary,
+      //   not by a second geometry check** — which is the same mechanism the
+      //   comment below relies on and the reason it holds.
+      const attackOnOffer = options.some((option) => ATTACK_BANDS[option.type]);
+      if (!attackOnOffer) {
         const nearest = nearestFoe(view);
+
+        // ► **DRAW THE BOW RATHER THAN WALK. The one voluntary swap this AI
+        //   makes, and it is deliberately the only one.**
+        //
+        //   Reaching here means nothing is in reach, so the alternative is a
+        //   step; a gladiator that owns a loaded bow and has a foe already
+        //   beyond the archer's minimum range is better off arming it than
+        //   closing. Ranked above both the rank arm and the walk for that
+        //   reason: those exist to close a distance this gladiator does not
+        //   need to close.
+        //
+        //   **It never fires while anything is in reach**, because the whole
+        //   block is behind `!attackOnOffer` — so an archer is never caught
+        //   mid-swap by somebody it could have hit.
+        //
+        //   ► **AND THERE IS NO SWAP BACK, which is the build's own answer and
+        //     not an omission.** `closerange_archer` wires no swap button; the
+        //     only route is the inventory overlay. An archer that gets closed
+        //     on therefore bashes and backs away rather than drawing a sword,
+        //     which is what gives closing on an archer its value. It is also
+        //     what keeps this arm from oscillating: with a swap in only one
+        //     direction, a gladiator cannot flip modes as the distance moves.
+        //     Running out of arrows still swaps it back — that one is forced,
+        //     in `legalActions`.
+        if (!ss2InBowMode(actor) && resourceValue(actor, "ammo_left", 0) > 0) {
+          const swap = options.find((option) => option.type === Ss2ActionType.SWAP_WEAPONS);
+          const range = nearest ? ss2FightDistance(actor, nearest) : null;
+          if (swap && range !== null && range >= ss2ArcherMinimumRange(actor)) return swap;
+        }
         // ► **CHANGE RANK BEFORE WALKING, when the fight is in another rank.**
         //
         //   Ranked BEFORE the walk for a measured reason: with the second axis
@@ -4429,17 +5229,37 @@ export function createSs2TeamRules({
       const attacker = vanillaRecordOf(actor, "attacker");
       const defender = vanillaRecordOf(engaged, "defender");
       const chances = calculateSs2AttackChances(attacker, defender);
+      // Each verb's chance times its own damage term, straight off the
+      // dispatcher table (map §"Chance calculation" and the direction table):
+      // 21 rolls `randomBetween(min, max)` so its expected damage is the mean,
+      // 22 is flat `min_damage`, 23 is `ceil(min_damage / 2)`.
+      //
+      // **`attacker.min_damage` here is already the ACTIVE pair** — a drawn bow
+      // put the secondary numbers on the record in `vanillaRecordOf`, so this
+      // weighs a shot with the bow's damage and never the sword's.
       const expected = {
         [Ss2ActionType.QUICK_ATTACK]: (chances.quick / 100) * attacker.min_damage,
         [Ss2ActionType.NORMAL_ATTACK]:
           (chances.normal / 100) * ((attacker.min_damage + attacker.max_damage) / 2),
-        [Ss2ActionType.POWER_ATTACK]: (chances.power / 100) * attacker.max_damage
+        [Ss2ActionType.POWER_ATTACK]: (chances.power / 100) * attacker.max_damage,
+        [Ss2ActionType.BOMBARD]:
+          (chances.bombard / 100) * ((attacker.min_damage + attacker.max_damage) / 2),
+        [Ss2ActionType.SNIPE]: (chances.snipe / 100) * attacker.min_damage,
+        [Ss2ActionType.BASH_ATTACK]: (chances.bash / 100) * Math.ceil(attacker.min_damage / 2)
       };
-      // Ties break toward the heavier attack, deterministically.
+      // Ties break toward the heavier attack, deterministically. The archer's
+      // verbs join the list rather than forming a second one, because a
+      // gladiator is never offered both sets — the controller frame it is on
+      // wires one or the other, never a mix (`legalActions`). `bombard` is
+      // ahead of `snipe` for the same reason `power` is ahead of `quick`: it is
+      // the heavier of the two.
       const preference = [
         Ss2ActionType.POWER_ATTACK,
         Ss2ActionType.NORMAL_ATTACK,
-        Ss2ActionType.QUICK_ATTACK
+        Ss2ActionType.QUICK_ATTACK,
+        Ss2ActionType.BOMBARD,
+        Ss2ActionType.SNIPE,
+        Ss2ActionType.BASH_ATTACK
       ];
       let best = null;
       for (const type of preference) {

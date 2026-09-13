@@ -2156,8 +2156,25 @@ test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declare
   const pieces = new Set(unmapped.map((entry) => entry.resource));
   for (const resource of pieces) {
     assert.ok(
-      ["boot", "breastplate", "gauntlet", "greaves", "helmet", "shield", "shinguard", "shoulderguard"].includes(resource),
-      `only armour piece ids should be unmapped here, not ${resource}`
+      [
+        "boot", "breastplate", "gauntlet", "greaves", "helmet", "shield", "shinguard", "shoulderguard",
+        // ► **`criticalhit` JOINED THE UNMAPPED LIST 2026-09-13, AND UNLIKE THE
+        //   ARMOUR PIECES IT IS NOT A GAP — IT IS THE RIGHT ANSWER.**
+        //
+        //   A piece id is unmapped because the adapter's write allowlist has
+        //   not been widened to cover it, which is a real if reported hole.
+        //   `criticalhit` is unmapped because **there is nothing to mirror it
+        //   TO**: the build keeps it as a bare `SetVariable` on the overlay
+        //   timeline inside `checkattackroll` (`+0x2e7e`, `+0x2eeb`), not as a
+        //   field on either gladiator. A vanilla mirror that grew a
+        //   `criticalhit` member on a character would be inventing a save-schema
+        //   field the build does not have.
+        //
+        //   So this entry staying reported-and-unwritten is the contract
+        //   working, and widening the allowlist to "fix" it would be the defect.
+        "criticalhit"
+      ].includes(resource),
+      `only armour piece ids and the criticalhit transient should be unmapped here, not ${resource}`
     );
   }
   // And the reason must name the real problem: the field EXISTS and is cited.
@@ -2173,14 +2190,20 @@ test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declare
   // record ever gains a resources block, re-derive this: the unmapped piece
   // above becomes a real defect at that moment.
 
-  // The whole 33-name SS2 vocabulary reaches the projection, which is what the
+  // The whole 39-name SS2 vocabulary reaches the projection, which is what the
   // arithmetic needs and what the closed 20-name list could not supply.
   // ► **32 UNTIL 2026-09-11, WHEN `weapon_range` JOINED `SS2_RESOURCE_NAMES`.**
   //   It is the controller gate's own input (`fightdistance < weapon_range`,
   //   frame 4 `DoAction@0x238bbf` `+0x00f6`), and a supplied gladiator that
   //   could not carry it reached the fight with the wrong reach.
+  // ► **33 UNTIL 2026-09-13, WHEN THE RANGED VOCABULARY ADDED SIX**:
+  //   `ammo_left`, `maximum_ammo`, `criticalhit`, and the three
+  //   `secondary_weapon_*` numbers the bow fights with. The count is asserted
+  //   rather than the list because the list itself is pinned in
+  //   `ss2-team-rules.test.js`; what this one is for is that the SUPPLIED path
+  //   carries all of it, which is the thing the closed list used to break.
   const projected = Object.keys(host.wire().teams[0].combatants[0].resources);
-  assert.equal(projected.length, 33);
+  assert.equal(projected.length, 39);
   for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon", "weapon_range"]) {
     assert.ok(projected.includes(name), `${name} must reach the projection`);
   }
