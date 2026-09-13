@@ -28,6 +28,7 @@
  */
 
 import { createServer } from "node:http";
+import { networkInterfaces } from "node:os";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
@@ -60,6 +61,41 @@ function parsePort(argv) {
   const value = Number(argv[index + 1]);
   if (!Number.isInteger(value) || value < 1 || value > 65535) {
     throw new Error(`--port needs a port number, not ${JSON.stringify(argv[index + 1])}.`);
+  }
+  return value;
+}
+
+/**
+ * Which interface to bind. **Loopback unless asked otherwise**, and the default
+ * has not changed.
+ *
+ * ► **WHY THIS FLAG EXISTS, measured rather than assumed (2026-09-13).**
+ *   **Windows cannot reach WSL's loopback on this machine.** Verified from the
+ *   Windows side: `Invoke-WebRequest http://127.0.0.1:8123/` TIMES OUT, while
+ *   the identical request from inside WSL returns 200. WSL2's localhost
+ *   forwarding is simply not working here, so a browser on Windows could never
+ *   open the arena at all — **and nobody noticed for three sessions, because
+ *   every check of this server was made with `curl` from inside WSL**, which is
+ *   the one place it was always going to work.
+ *
+ *   Binding the WSL interface fixes it: a probe on `0.0.0.0` answered from
+ *   Windows at the distribution's own address on the first try.
+ *
+ * ► **WHAT THIS DOES AND DOES NOT CHANGE ABOUT EXPOSURE.** Under WSL2's default
+ *   NAT networking that address is host-only — it is not on the LAN — but this
+ *   flag does not verify that, and on another machine `--host 0.0.0.0` is a
+ *   real network interface. **So it is opt-in, it is never the default, and the
+ *   banner says loudly what the server became.** What does NOT change is the
+ *   only guard that was ever load-bearing: `captures/`, `local-mod-work/`,
+ *   `.git/` and every `.swf`, `.sol`, `.exe` and `.dll` are refused outright,
+ *   whoever asks and from wherever.
+ */
+function parseHost(argv) {
+  const index = argv.indexOf("--host");
+  if (index === -1) return "127.0.0.1";
+  const value = argv[index + 1];
+  if (typeof value !== "string" || value.length === 0 || value.startsWith("--")) {
+    throw new Error("--host needs an address, such as 0.0.0.0 to reach a Windows browser from WSL.");
   }
   return value;
 }
@@ -124,17 +160,44 @@ async function serve(request, response) {
   createReadStream(absolute).pipe(response);
 }
 
+/** Non-loopback IPv4 addresses, so the banner can print a URL that works. */
+function localAddresses() {
+  const found = [];
+  for (const entries of Object.values(networkInterfaces())) {
+    for (const entry of entries ?? []) {
+      if (entry.family === "IPv4" && !entry.internal) found.push(entry.address);
+    }
+  }
+  return found.length > 0 ? found : ["127.0.0.1"];
+}
+
 const isMain = process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
 if (isMain) {
-  const port = parsePort(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const port = parsePort(argv);
+  const host = parseHost(argv);
   createServer((request, response) => {
     serve(request, response).catch(() => {
       response.writeHead(500, { "content-type": "text/plain; charset=utf-8" });
       response.end("Server error.\n");
     });
-  }).listen(port, "127.0.0.1", () => {
+  }).listen(port, host, () => {
     console.log(`  The arena is served from ${REPO_ROOT}`);
-    console.log(`  Loopback only: http://127.0.0.1:${port}/`);
+    if (host === "127.0.0.1" || host === "localhost" || host === "::1") {
+      console.log(`  Loopback only: http://127.0.0.1:${port}/`);
+      console.log("");
+      console.log("  If a browser cannot reach that, you are probably on WSL with localhost");
+      console.log("  forwarding broken. Measured on this machine: Windows times out on the WSL");
+      console.log("  loopback while curl inside WSL gets 200. Then:");
+      console.log(`    node tools/arena-server.mjs --host 0.0.0.0`);
+    } else {
+      console.log(`  Bound to ${host}:${port} — NOT loopback only.`);
+      for (const address of localAddresses()) {
+        console.log(`    http://${address}:${port}/tools/arena/index.html`);
+      }
+      console.log("");
+      console.log("  Anything that can reach this interface can read the working tree.");
+    }
     console.log("");
     console.log("  It serves the repository's own working tree so the page can import src/ directly.");
     console.log("  captures/, local-mod-work/, .git/ and every .swf are refused outright.");

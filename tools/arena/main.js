@@ -250,24 +250,78 @@ fetch("/assets/sound/manifest.json")
     log("no extracted assets — running silent.");
   });
 
+/**
+ * ► **AUTOPLAY IS BLOCKED UNTIL THE PAGE IS INTERACTED WITH, AND SPECTATE MODE
+ *   NEVER INTERACTS.** Every browser refuses `play()` on a page the user has
+ *   not touched. The first version caught that rejection and threw it away with
+ *   a comment saying it was "not an error worth a log line" — so a spectated
+ *   bout ran silent for its opening actions with no explanation anywhere, which
+ *   the owner reported as "some early attacks don't kick in".
+ *
+ *   **Swallowing it was the mistake, not the rejection.** It is now said ONCE,
+ *   and the next real interaction unblocks the arena.
+ */
+let audioBlocked = false;
+let audioBlockLogged = false;
+
+function unblockAudio() {
+  if (!audioBlocked) return;
+  audioBlocked = false;
+  log("audio unblocked — sound is on from here.");
+}
+for (const type of ["pointerdown", "keydown", "touchstart"]) {
+  window.addEventListener(type, unblockAudio, { passive: true });
+}
+
+/**
+ * ► **ONE `Audio` ELEMENT PER FILE MEANT ONE SOUND AT A TIME, and the owner
+ *   heard exactly that: "sounds get cut off and don't play out."** The cache
+ *   held a single element per file and every play did `currentTime = 0` on it.
+ *   With six gladiators that is not "restart rather than overlap" — it is the
+ *   previous sound being TRUNCATED mid-note, and a walk and a walk in the same
+ *   step both land on `706.mp3`, so they cut each other off.
+ *
+ *   The cached element is now a PRELOAD SOURCE and each play gets its own clone,
+ *   so overlapping sounds overlap the way they do in the build. `VOICES` caps
+ *   how many can be in flight, because an unbounded clone-per-action is how a
+ *   long bout turns into a memory leak with a soundtrack.
+ */
+const VOICES = 16;
+const voices = [];
+
 function playFor(family, sequence) {
   if (!soundEnabled) return;
   const file = chooseSound(soundBindings, family, sequence);
   if (!file) return;
-  let audio = soundCache.get(file);
-  if (!audio) {
-    audio = new Audio(`/assets/sound/${encodeURIComponent(file)}`);
-    soundCache.set(file, audio);
+  let source = soundCache.get(file);
+  if (!source) {
+    source = new Audio(`/assets/sound/${encodeURIComponent(file)}`);
+    source.preload = "auto";
+    soundCache.set(file, source);
   }
-  // Restart rather than overlap: two swings in quick succession should sound
-  // like two swings, not one smeared one.
-  try {
-    audio.currentTime = 0;
-    const played = audio.play();
-    if (played && typeof played.catch === "function") played.catch(() => {});
-  } catch {
-    // A browser that refuses to play before the first interaction is not an
-    // error worth a log line on every action.
+  // Retire finished voices before adding one, and drop the oldest if the cap is
+  // reached — a stale element is cheaper to reclaim than to leave playing.
+  for (let index = voices.length - 1; index >= 0; index -= 1) {
+    if (voices[index].ended || voices[index].paused) voices.splice(index, 1);
+  }
+  if (voices.length >= VOICES) {
+    const oldest = voices.shift();
+    try { oldest.pause(); } catch { /* already gone */ }
+  }
+
+  const voice = source.cloneNode();
+  voice.volume = source.volume;
+  voices.push(voice);
+  const played = voice.play();
+  if (played && typeof played.catch === "function") {
+    played.catch(() => {
+      // NotAllowedError until the page is interacted with. Said once.
+      audioBlocked = true;
+      if (!audioBlockLogged) {
+        audioBlockLogged = true;
+        log("your browser is blocking audio until you interact with the page — click the arena once.", { warn: true });
+      }
+    });
   }
 }
 
