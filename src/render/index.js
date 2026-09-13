@@ -34,3 +34,4 @@ export * from "./figure.js";
 export * from "./cursor.js";
 export * from "./painter.js";
 export * from "./timeline.js";
+export * from "./sound.js";

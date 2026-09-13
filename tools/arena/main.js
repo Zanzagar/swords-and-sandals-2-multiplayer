@@ -54,7 +54,9 @@ import {
   paintShadow,
   poseAt,
   timelineFor,
-  timelinesForStep
+  timelinesForStep,
+  bindingsFrom,
+  chooseSound
 } from "/src/render/index.js";
 import { demoSide } from "/tools/arena/roster.js";
 
@@ -147,6 +149,62 @@ function log(message, { warn = false } = {}) {
  * it carries is what the gate is waiting for, and it is reported only when the
  * longest timeline under it has actually run.
  */
+/* ------------------------------------------------------------------ */
+/* Sound — the player's OWN extracted assets, or silence                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **NO EXTRACTED ASSETS MEANS SILENCE, NEVER AN ERROR.** A fresh clone has
+ *   no `assets/` — that is the point, the repo ships none — so the manifest
+ *   fetch is expected to 404 and the arena must stay fully playable when it
+ *   does. Run `node tools/extract-sounds.mjs <your swf>` to fill it.
+ *
+ * WHICH sound plays is decided in `src/render/sound.js`, under the suite. All
+ * that lives here is the `Audio` element and the volume, which are the two
+ * things a test cannot reach.
+ */
+let soundBindings = Object.freeze({});
+let soundEnabled = true;
+const soundCache = new Map();
+
+fetch("/assets/sound/manifest.json")
+  .then((response) => (response.ok ? response.json() : null))
+  .then((manifest) => {
+    if (!manifest) {
+      log("no extracted assets — running silent. `node tools/extract-sounds.mjs <your swf>` to add sound.");
+      return;
+    }
+    soundBindings = bindingsFrom(manifest);
+    const buckets = Object.keys(soundBindings).length;
+    log(`sound: ${manifest.count} file(s) from ${manifest.source?.sha256?.slice(0, 12) ?? "an unknown build"}, ${buckets} animation bucket(s)`);
+  })
+  .catch(() => {
+    // Total on purpose: a stack trace where a footstep should be is a worse
+    // outcome than quiet.
+    log("no extracted assets — running silent.");
+  });
+
+function playFor(family, sequence) {
+  if (!soundEnabled) return;
+  const file = chooseSound(soundBindings, family, sequence);
+  if (!file) return;
+  let audio = soundCache.get(file);
+  if (!audio) {
+    audio = new Audio(`/assets/sound/${encodeURIComponent(file)}`);
+    soundCache.set(file, audio);
+  }
+  // Restart rather than overlap: two swings in quick succession should sound
+  // like two swings, not one smeared one.
+  try {
+    audio.currentTime = 0;
+    const played = audio.play();
+    if (played && typeof played.catch === "function") played.catch(() => {});
+  } catch {
+    // A browser that refuses to play before the first interaction is not an
+    // error worth a log line on every action.
+  }
+}
+
 function beginStep(step) {
   scene = applyCommands(scene, step.commands);
 
@@ -163,6 +221,10 @@ function beginStep(step) {
   // late does not make a timeline look overdue before it has drawn once.
   for (const entry of started.values()) entry.startedAt = performance.now();
   for (const [combatantId, entry] of started) playing.set(combatantId, entry);
+
+  // A sound per animation that STARTS, keyed on the same family the schedule
+  // was chosen by, so the two can never disagree about what is playing.
+  for (const [, entry] of started) playFor(entry.timeline.family, step.actionBoundary ?? 0);
 
   for (const token of step.actionTokens) {
     if (!pendingTokens.includes(token)) pendingTokens.push(token);
