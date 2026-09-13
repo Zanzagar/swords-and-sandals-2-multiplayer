@@ -30,3 +30,14 @@ test/observations/**/*.jsonl
 # a subagent committed 67 of those.
 assets/*
 !assets/README.md
+
+# Agent worktrees. `Workflow`'s `isolation: "worktree"` creates one git worktree
+# per agent under here, and each is a NESTED REPOSITORY — so a `git add -A` while
+# a workflow is running stages seventeen gitlinks in one go. That happened on
+# 2026-09-13 and was pushed before it was noticed.
+#
+# No content escaped (a gitlink is a pointer, and `assets/` has its own two
+# lines of defence), but this is the same `git add -A` shape that committed 67
+# raw traces on 2026-09-01. Ignoring the directory is the cheap half of the fix;
+# the other half is not reaching for `git add -A` while agents are running.
+.claude/worktrees/
