@@ -1,5 +1,32 @@
 # Brief — RANGED COMBAT, for the next session
 
+► **CLOSED 2026-09-13. RANGED IS BUILT.** Commit `7310583`. Every question
+  below is answered, every "what is needed" is done, and the refusal this brief
+  warned against lifting is gone — replaced by the vocabulary, which is what it
+  said it was waiting for.
+
+  **This file is now HISTORY. Read it to check a claim about how ranged got
+  here; do not read it to learn what ranged IS.** That lives in the code:
+  `Ss2ActionType`'s archer block, `legalActions`' two archer frames,
+  `ss2ShotBlocked`, `ss2MaximumAmmo`, and `test/ss2-ranged.test.js`, which
+  executes every branch of it.
+
+  **What the owner decided, 2026-09-13**, against the four questions below:
+  the swap costs a turn (the build's answer), an archer closed on inside
+  `100 + physical_size` loses the bow and bashes (the build's answer),
+  ammunition is finite and tiered (the build's answer), and a body between you
+  and your target DOES block the shot (authored — the build cannot answer).
+
+  **One premise in this brief was WRONG and it mattered.** It says a bow's
+  `weapon_range` is ">= 4480". Two of the twenty ranged rows carry a range
+  multiplier of 4 rather than 100 — ids 65 and 75 — so their reach is about
+  262, and they walked straight past the construction refusal this brief called
+  correct. Reproduced: `secondary_weapon: 65` with `equipped_weapon: 2` built a
+  battle and was offered all three melee verbs at 262 units. The refusal was
+  keyed on a consequence with an exception nobody had counted; see the commit.
+
+---
+
 **This is not a handoff.** It is the one ranked item the owner deliberately kept
 for a session he is awake for, written while its ground was fresh so the next
 agent does not re-derive it. The session handoff is the newest dated file in

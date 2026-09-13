@@ -268,6 +268,64 @@ test("reach follows the weapon in hand, and the MELEE reach is never destroyed",
   assert.equal(ss2Reach(view(1)), melee, "and the melee reach is still there afterwards");
 });
 
+test("a RESTORED archer keeps its sword's numbers, and swapping back finds them intact", () => {
+  // ► **THE REGRESSION TEST FOR A DEFECT `/codex:adversarial-review` FOUND IN
+  //   `7310583`, and for the third instance of one mistake in one session.**
+  //
+  //   `battlevalues`'s bow block overwrites `min_damage`, `max_damage` and
+  //   `weapon_range` in place. This engine's whole shape is that those three
+  //   hold the MELEE numbers with the bow's beside them, so a record carrying
+  //   `using_bow: true` — which `battleStarted: true` exists to rebuild, from a
+  //   capture or a resumed campaign — poured the bow's numbers into the melee
+  //   slots and **they never came back**. Swapping to melee then fought with
+  //   bow damage and bow reach for the rest of the bout.
+  //
+  //   **The guard that should have caught it was keyed on
+  //   `weapon_range > arena width`** — the exact criterion corrected two
+  //   hundred lines earlier in the same session, with the exact same two
+  //   exceptions. Bows 65 and 75 carry a range multiplier of 4, so their 262
+  //   sails under it. Both are swept here.
+  const sword = ss2Combatant(bowman(), { id: "sword" }).resources;
+  assert.equal(sword.min_damage, 21, "round(9 * 2) + weapon 1's min of 3");
+  assert.equal(sword.max_damage, 27);
+  assert.equal(sword.weapon_range, 130);
+
+  for (const bow of [61, 63, 65, 75, 80]) {
+    const restored = ss2Combatant(
+      {
+        ...bowman({ secondary_weapon: bow }),
+        equipped_weapon: 2, using_bow: true,
+        hitpoints: 90, hitpointsmax: 100, staminamax: 150, staminaleft: 90,
+        min_damage: 1, max_damage: 1
+      },
+      { id: "restored", battleStarted: true }
+    ).resources;
+
+    // The three melee fields are the SWORD's, whatever is in hand.
+    assert.equal(restored.min_damage, sword.min_damage, `bow ${bow}: melee min_damage`);
+    assert.equal(restored.max_damage, sword.max_damage, `bow ${bow}: melee max_damage`);
+    assert.equal(restored.weapon_range, sword.weapon_range, `bow ${bow}: melee reach`);
+
+    const view = (slot) => ({
+      stats: { strength: 9 },
+      resources: Object.fromEntries(
+        Object.entries({ ...restored, equipped_weapon: slot }).map(([key, value]) => [key, { value }])
+      )
+    });
+    // Drawn, it fights as the bow...
+    const drawn = ss2ActiveDamagePair(view(2));
+    assert.equal(drawn.min_damage, 9 + ss2WeaponEntry(bow).minDamage, `bow ${bow}: drawn min`);
+    assert.equal(ss2Reach(view(2)), restored.secondary_weapon_range, `bow ${bow}: drawn reach`);
+    // ...and sheathed, it is the swordsman it always was.
+    assert.deepEqual(
+      ss2ActiveDamagePair(view(1)),
+      { min_damage: sword.min_damage, max_damage: sword.max_damage },
+      `bow ${bow}: swapping back must find the sword's own damage`
+    );
+    assert.equal(ss2Reach(view(1)), sword.weapon_range, `bow ${bow}: and the sword's own reach`);
+  }
+});
+
 test("the archer's minimum range is 100 + physical_size, and it is a FLOOR", () => {
   // Frame 4 `DoAction@0x238bbf` `+0x015f`:
   //   using_bow ? (fightdistance < 100 + physical_size

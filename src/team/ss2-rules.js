@@ -2948,6 +2948,51 @@ export function ss2Combatant(
   }
 
   const derived = derive ? ss2BattleValues(vanilla, { battleStarted }) : { ...vanilla };
+
+  // ► **THE BOW OVERRIDE MUST NOT REACH THE BAG, AND THE FIRST VERSION OF THIS
+  //   FILE LET IT — found by `/codex:adversarial-review` of `7310583`,
+  //   reproduced here before it was believed.**
+  //
+  //   `battlevalues`'s bow block overwrites `min_damage`, `max_damage` and
+  //   `weapon_range` IN PLACE (`+0x3424`-`+0x344a`). This engine's whole shape
+  //   is that those three hold the MELEE numbers and the bow's live beside them
+  //   in `secondary_*`, with `equipped_weapon` selecting at read time. So a
+  //   record carrying `using_bow: true` — which is what
+  //   `ss2Combatant(..., { battleStarted: true })` exists to rebuild, from a
+  //   capture or a resumed campaign — poured the bow's numbers into the melee
+  //   slots, and **they never came back**: swapping to melee then fought with
+  //   the bow's damage and the bow's reach for the rest of the bout.
+  //
+  //   Measured, strength 9, weapon 1, `secondary_weapon: 65`,
+  //   `equipped_weapon: 2`:
+  //
+  //   ```text
+  //     the sword's own numbers   21-27,  reach 130
+  //     after restore + swap      17-73,  reach 262
+  //   ```
+  //
+  //   ► **AND THE GUARD THAT SHOULD HAVE CAUGHT IT WAS KEYED ON THE EXACT
+  //     CRITERION I HAD JUST CORRECTED, TWENTY MINUTES EARLIER, IN A COMMENT
+  //     TWO HUNDRED LINES ABOVE.** The reach backstop fires on
+  //     `weapon_range > arena width`, and bows 65 and 75 carry a range
+  //     multiplier of 4 rather than 100, so their 262 sails under it — the same
+  //     two rows, the same exception, the third time in one session. **Writing
+  //     down why a consequence-keyed guard is wrong does not stop you leaving
+  //     one in place.**
+  //
+  //   The fix is at the ROOT rather than in a third guard: derive a SECOND time
+  //   with the bow put away, and take the three melee fields from that run. The
+  //   bow's own numbers are unaffected (`secondary_weapon_range` and the
+  //   secondary pair are computed outside the block), and everything else —
+  //   including `shield_defence`, which the build really does zero while a bow
+  //   is drawn (`+0x3623`) — keeps the mode the record actually states.
+  if (derive && vanilla?.using_bow === true) {
+    const sheathed = ss2BattleValues({ ...vanilla, using_bow: false }, { battleStarted });
+    for (const field of ["min_damage", "max_damage", "weapon_range"]) {
+      if (Number.isFinite(sheathed[field])) derived[field] = sheathed[field];
+    }
+  }
+
   const resources = {};
   for (const key of SS2_RESOURCE_NAMES) {
     const value = Number.isFinite(derived[key]) ? derived[key] : SS2_RESOURCE_DEFAULTS[key];

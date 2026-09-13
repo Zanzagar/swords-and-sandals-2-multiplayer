@@ -8,18 +8,56 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-13 16:00 — everything but ranged is closed](docs/handoffs/2026-09-13-1600--everything-but-ranged-is-closed.md).**
-Start there, then **[`docs/handoffs/RANGED-BRIEF.md`](docs/handoffs/RANGED-BRIEF.md)** —
-**RANGED IS THE ONLY THING LEFT, the owner has asked for a FULL SWEEP of it, and
-he has already answered the question that gated the design.**
+[2026-09-13 21:30 — ranged is built and the guard had a hole](docs/handoffs/2026-09-13-2130--ranged-is-built-and-the-guard-had-a-hole.md).**
 
-► **OWNER, 2026-09-13: "range will interact with the second axis."** And it is
-  cheaper than it sounds — `getfightdistance` is EUCLIDEAN over both axes and
-  `ss2FightDistance` already implements it, **so a foe two ranks back is already
-  further away** and `fightdistance < N` is already a 2-D gate. What it does NOT
-  settle is whether a rank BETWEEN you and your target blocks the shot; vanilla
-  has one gladiator a side and cannot answer, so line of sight is AUTHORED
-  inside `MAP_SILENCE.multi-slot-arena-geometry`.
+► **RANGED IS DONE.** The bow, `bombard`, `snipe`, `bash_attack` and the
+  `swap_weapons` turn that arms one. `7310583`. **`docs/handoffs/RANGED-BRIEF.md`
+  IS CLOSED AND IS NOW HISTORY** — read it to check how ranged got here, never
+  to learn what it is. That lives in the code and in
+  `test/ss2-ranged.test.js`, which executes every branch of it.
+
+  **The owner decided all four open questions on 2026-09-13 and took the
+  BUILD'S OWN answer to three**: the swap costs a turn, an archer closed on
+  inside `100 + physical_size` loses the bow and bashes, ammunition is finite
+  and tiered. The fourth is the only authored rule in the feature — a body
+  between you and your target BLOCKS the shot (`ss2ShotBlocked`).
+
+► **A GUARD KEYED ON A CONSEQUENCE HAS AN EXCEPTION NOBODY COUNTED.** The
+  construction refusal that held ranged shut fired on `weapon_range > arena
+  width`, because a type-4 row's range multiplier is 100. **Ids 65 and 75 carry
+  4** (item tables `:472`/`:482`), so their reach is ~262 and they walked
+  straight past it — reproduced, all three melee verbs at 262 units with a bow
+  drawn. **And I then made the same mistake one revision later**, refusing
+  `equipped_weapon == 2` outright because root frame 221 starts everyone in
+  melee mode — true, and still keyed on the wrong thing, because a state the
+  build reaches on turn two is one a capture can observe.
+
+► **THE SOUND HAD BEEN PICKING ITS OWN CLIP SINCE SOUND LANDED — the SEVENTH
+  instance.** `animationFor` has always preferred the engine's own label over
+  the family's first, with a comment saying why; `chooseSound` spread across the
+  whole family by a counter. The figure played `attack3` while the speaker
+  played whichever of `1092`-`1095` the counter reached. **Two halves of one
+  join disagreeing, with the correct rule written out in full on the other side
+  of it.** Ranged made it undeniable — `bombard` and `snipe` share a family and
+  have different sounds — and it was caught before it shipped rather than after
+  the owner heard it.
+
+► **`whichweapon` IS NEVER ASSIGNED ANYWHERE IN THE BUILD**, and `battlevalues`
+  reads `attack_type` and `attack_speed` off it (`+0x3450`, `+0x346a`) — the
+  only four references in the SWF. So the build's own `attack_speed` is
+  `undefined` in BOTH weapon modes and this engine's derivation of it is
+  authored in both. Recorded, not acted on.
+
+*(The brief it supersedes, whose ONE ranked item is the work above:)*
+[2026-09-13 16:00 — everything but ranged is closed](docs/handoffs/2026-09-13-1600--everything-but-ranged-is-closed.md).**
+
+► **OWNER, 2026-09-13: "range will interact with the second axis."** And it was
+  cheaper than it sounded — `getfightdistance` is EUCLIDEAN over both axes and
+  `ss2FightDistance` already implemented it, **so a foe two ranks back was
+  already further away** and `fightdistance < N` was already a 2-D gate. What it
+  did not settle was whether a rank BETWEEN you and your target blocks the shot;
+  that is `ss2ShotBlocked` now, authored inside
+  `MAP_SILENCE.multi-slot-arena-geometry`.
 ► **THE LAST OPEN DECISION IS CLOSED: `BATTLE_STATE_VERSION` IS DERIVED**, owner
   2026-09-13 — derive rather than bump, because bumping fixes the instance and
   deriving removes the failure mode. `fnv1a` over the sorted
