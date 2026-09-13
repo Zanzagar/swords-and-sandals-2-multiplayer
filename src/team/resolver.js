@@ -52,7 +52,55 @@ import {
 
 export { BattleError };
 
-export const BATTLE_STATE_VERSION = 1;
+/**
+ * THE FIELDS TWO PEERS EXCHANGE, and the thing the version is computed FROM.
+ *
+ * Kept beside `combatantProjection` as a declared list rather than read out of
+ * it at load time: a probe object would have to be constructed and kept
+ * correct, and a module that can fail to load is a worse trade than one whose
+ * list is checked by a test. **`test/team-resolver.test.js` asserts that this
+ * list is exactly what `combatantProjection` returns**, so adding a field
+ * without adding it here fails the suite.
+ */
+export const COMBATANT_PROJECTION_FIELDS = Object.freeze([
+  "alive", "aiFilled", "health", "id", "loadout", "maxHealth", "name",
+  "resources", "seatId", "slotIndex", "stats", "status", "teamId", "x", "y"
+]);
+
+/**
+ * The wire format's version, DERIVED FROM ITS OWN SHAPE.
+ *
+ * ► **IT WAS A HAND-WRITTEN `1` AND THE FORMAT CHANGED FOUR TIMES UNDER IT** —
+ *   `x`, `weapon_range`, `y`, and the limb matrices. Two peers on either side
+ *   of any of those changes both advertised version 1 and disagreed about
+ *   identical battles, and turning a feature off could not restore
+ *   compatibility because the SHAPE had moved, not the behaviour.
+ *
+ *   Four sessions in a row noticed and deferred it. **The owner's decision,
+ *   2026-09-13: derive it, rather than bump it.** Bumping fixes the instance;
+ *   deriving removes the failure mode, because the number now cannot fail to
+ *   change when the fields do.
+ *
+ * Hashed with the same `fnv1a` the combat-state hash uses — deliberately, so
+ * the two numbers a peer compares are made the same way and neither needs
+ * `node:crypto`, which this module cannot have because it runs in a browser.
+ *
+ * Order-independent: the field list is sorted before hashing, so reordering the
+ * literal is not a format change and does not invalidate a peer. Adding,
+ * removing or RENAMING a field is, and does.
+ *
+ * ► **AN INTEGER, because `provenance.battle.stateVersion` in a sealed
+ *   campaign record is contracted to be a positive one** — `fnv1a` returns hex
+ *   and handing that straight over failed 90 tests on ONE schema line. The hex
+ *   is parsed back to the 32-bit number it always was.
+ *
+ * The value is opaque by design — it is an IDENTITY, not an ordering. **Nothing
+ * may infer "newer" from a bigger number**, which is exactly the mistake a
+ * hand-maintained integer invites and the reason this one is a hash rather than
+ * a counter. Two versions are equal or they are not; there is no "later".
+ */
+export const BATTLE_STATE_VERSION =
+  Number.parseInt(fnv1a([...COMBATANT_PROJECTION_FIELDS].sort().join(",")), 16);
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const clone = (value) => JSON.parse(JSON.stringify(value));

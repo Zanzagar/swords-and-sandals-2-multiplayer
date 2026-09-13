@@ -333,6 +333,26 @@ function driveFirst(battle, limit) {
  *     e8f10147 -> 9659846e   (settled 3v3)
  *     c46c6c20   unchanged   (vanilla-separation opening)
  *
+ *   **AND ALL FOUR MOVED AGAIN 2026-09-13, for a reason that is not a shape
+ *   change at all:**
+ *
+ *     e54ef067 -> 98689216   (six actions in)
+ *     4da9fa2b -> 31eabd22   (settled 1v1)
+ *     c46c6c20 -> da0edf09   (vanilla-separation opening)
+ *     9659846e -> e9dbb913   (settled 3v3)
+ *
+ *   `BATTLE_STATE_VERSION` stopped being a hand-written `1` and became a hash
+ *   of `COMBATANT_PROJECTION_FIELDS`. The projection's FIELDS did not change —
+ *   only the version travelling inside it did, from 1 to 573176825. **That is
+ *   the last time these pins will move for a version reason**, because the
+ *   number is now a function of the shape rather than of somebody remembering
+ *   to bump it. It is an IDENTITY, not an ordering: nothing may read the larger
+ *   number as newer.
+ *
+ *   Owner's decision, 2026-09-13, after four sessions of deferring it: derive
+ *   the version rather than bump it. Bumping fixes the instance; deriving
+ *   removes the failure mode.
+ *
  *   `toTeamWireState` projects the event log, so two always-present fields on
  *   every ATTACK event move every hash that covers one — even though not one
  *   of these battles contains a back attack. **Not one of them CAN**: the 1v1s
@@ -374,7 +394,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "e54ef067", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "98689216", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -386,7 +406,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "4da9fa2b", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "31eabd22", WHY_IT_MOVED);
 });
 
 /**
@@ -427,7 +447,7 @@ test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact
   assert.equal(taken, 6, "the drive must have applied six actions");
   assert.equal(battle.result, null, "an approach does not settle in six actions");
 
-  assert.equal(combatStateHash(battle), "c46c6c20", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "da0edf09", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
@@ -438,7 +458,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "9659846e", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "e9dbb913", WHY_IT_MOVED);
 });
 
 /**

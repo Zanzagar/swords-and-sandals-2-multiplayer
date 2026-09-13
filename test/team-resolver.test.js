@@ -630,6 +630,28 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
  *   defaults to 0 and these blueprints use the placeholder rules, so nothing
  *   about fill behaviour changed, only the serialised shape.
  *
+ * ► **ALL SIX COMBAT HASHES MOVED 2026-09-13 AND ALL SIX LEGACY HASHES DID
+ *   NOT — the same asymmetry, from a different cause.** `BATTLE_STATE_VERSION`
+ *   stopped being a hand-written `1` and became a hash of
+ *   `COMBATANT_PROJECTION_FIELDS`, so the version travelling in the combat
+ *   projection changed value:
+ *
+ *     587a06a9 -> 65644544    8aa7093a -> 55da0ba5    2d3b42b3 -> 38990090
+ *     3f2c43a4 -> c789c001    c6d2995a -> cb72c02b    7d672ad1 -> 36fc4dea
+ *
+ *   **The legacy column is byte-identical, and it took a fix to keep it that
+ *   way.** `src/engine.js` projected `battle.version`, so the derived number
+ *   leaked straight into the façade and moved all six legacy hashes too — this
+ *   test caught it, and its own name is the reason it should have. A
+ *   projection frozen at a historical field list cannot take its version from
+ *   a format it does not project, so the façade now carries its own
+ *   `LEGACY_WIRE_VERSION = 1`. **Nothing that has ever moved the team version
+ *   — `x`, `weapon_range`, `y`, the limb matrices — is in the façade's shape.**
+ *
+ *   **NO GOLDEN MOVED**: the 23 replay against hashes computed within the same
+ *   run, not against stored constants, and all 13 golden tests stayed green
+ *   throughout.
+ *
  * These literals were not hand-written. They were read off a run of the roster
  * at the commit before this change, over the five shapes a single-template team
  * can take: implicit empty slots, `null` and `{ fill: "ai" }` markers, the two
@@ -641,7 +663,7 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
 const UNCHANGED_FILL_BLUEPRINTS = [
   {
     name: "implicit empty slots",
-    combat: "587a06a9",
+    combat: "65644544",
     legacy: "ecffd39f",
     blueprint: {
       seed: 3,
@@ -653,7 +675,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "null and object markers",
-    combat: "8aa7093a",
+    combat: "55da0ba5",
     legacy: "5a573636",
     blueprint: {
       seed: 3,
@@ -665,7 +687,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "string markers",
-    combat: "2d3b42b3",
+    combat: "38990090",
     legacy: "b2dfc69d",
     blueprint: {
       seed: 5,
@@ -677,7 +699,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a populated team template",
-    combat: "3f2c43a4",
+    combat: "c789c001",
     legacy: "1529c5aa",
     blueprint: {
       seed: 7,
@@ -701,7 +723,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a template carrying an explicit id",
-    combat: "c6d2995a",
+    combat: "cb72c02b",
     legacy: "be79738c",
     blueprint: {
       seed: 11,
@@ -713,7 +735,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a team that supplies no fighters at all",
-    combat: "7d672ad1",
+    combat: "36fc4dea",
     legacy: "8e29b02b",
     blueprint: {
       seed: 13,
@@ -2028,4 +2050,83 @@ test("a seeded battle's projection is untouched, so no pinned hash moves", () =>
   // And the presence of those fields is itself what separates a tape peer from
   // a seeded peer sitting at state 0 / cursor 0, who would otherwise collide.
   assert.equal(Object.hasOwn(toTeamWireState(tapeBattle([unitSample(0.5)])), "rngMode"), true);
+});
+
+/* ------------------------------------------------------------------ */
+/* THE WIRE VERSION IS DERIVED FROM THE WIRE SHAPE                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **`BATTLE_STATE_VERSION` WAS A HAND-WRITTEN `1` AND THE FORMAT CHANGED
+ *   FOUR TIMES UNDER IT** — `x`, `weapon_range`, `y`, and the limb matrices.
+ *   Two peers on either side of any of those both advertised version 1 and
+ *   disagreed about identical battles, and turning the feature off could not
+ *   restore compatibility because the SHAPE had moved, not the behaviour.
+ *
+ *   Four sessions noticed and deferred it. **Owner's decision, 2026-09-13:
+ *   DERIVE it rather than bump it** — bumping fixes the instance, deriving
+ *   removes the failure mode.
+ *
+ * These tests are the half that makes the derivation trustworthy: the declared
+ * field list is checked against what the projection ACTUALLY emits, so a field
+ * added without declaring it fails here rather than silently keeping the old
+ * version number.
+ */
+test("the declared projection fields are EXACTLY what the wire carries", () => {
+  const battle = createTeamBattle({
+    teams: [
+      { id: "red", combatants: [{ id: "red-1", name: "Red" }] },
+      { id: "blue", combatants: [{ id: "blue-1", name: "Blue" }] }
+    ],
+    seed: 3
+  });
+  const wire = toTeamWireState(battle);
+  const combatant = wire.teams[0].combatants[0];
+  assert.deepEqual(
+    Object.keys(combatant).sort(),
+    [...resolver.COMBATANT_PROJECTION_FIELDS].sort(),
+    "a field added to combatantProjection must be declared, or the version cannot notice it"
+  );
+});
+
+test("the version CHANGES when the field set does, which is the whole point", () => {
+  const versionOf = (fields) => Number.parseInt(resolver.fnv1a([...fields].sort().join(",")), 16);
+  const current = versionOf(resolver.COMBATANT_PROJECTION_FIELDS);
+  assert.equal(current, resolver.BATTLE_STATE_VERSION);
+
+  // Adding a field — which is what happened four times under a constant 1.
+  assert.notEqual(versionOf([...resolver.COMBATANT_PROJECTION_FIELDS, "facing"]), current);
+  // Removing one.
+  assert.notEqual(versionOf(resolver.COMBATANT_PROJECTION_FIELDS.filter((f) => f !== "y")), current);
+  // And RENAMING one, which a hand-written integer would never catch.
+  assert.notEqual(
+    versionOf(resolver.COMBATANT_PROJECTION_FIELDS.map((f) => (f === "x" ? "posX" : f))),
+    current
+  );
+});
+
+test("REORDERING the field list is not a format change, because the sort comes first", () => {
+  const versionOf = (fields) => Number.parseInt(resolver.fnv1a([...fields].sort().join(",")), 16);
+  const shuffled = [...resolver.COMBATANT_PROJECTION_FIELDS].reverse();
+  assert.equal(versionOf(shuffled), resolver.BATTLE_STATE_VERSION,
+    "a peer must not be invalidated by somebody tidying the literal");
+});
+
+test("the version reaches the battle, and it is an IDENTITY rather than an ordering", () => {
+  const battle = createTeamBattle({
+    teams: [
+      { id: "red", combatants: [{ id: "red-1", name: "Red" }] },
+      { id: "blue", combatants: [{ id: "blue-1", name: "Blue" }] }
+    ],
+    seed: 1
+  });
+  assert.equal(battle.version, resolver.BATTLE_STATE_VERSION);
+  // ► Nothing may infer "newer" from a bigger number — that is exactly the
+  //   mistake a hand-maintained integer invites, and the reason this is opaque.
+  // A POSITIVE INTEGER, because `provenance.battle.stateVersion` in a sealed
+  // campaign record is contracted to be one — handing it `fnv1a`'s hex string
+  // failed 90 tests on that single schema line.
+  assert.equal(typeof resolver.BATTLE_STATE_VERSION, "number");
+  assert.ok(Number.isInteger(resolver.BATTLE_STATE_VERSION));
+  assert.ok(resolver.BATTLE_STATE_VERSION > 0);
 });

@@ -128,10 +128,26 @@ export function createBattle({ teams, seed = 1, rules = classicStyleRules, ...op
  * or the hash is not a desync check — so a battle whose rule set uses
  * resources must be compared with `combatStateHash`, not `stateHash`. See the
  * note on `stateHash` below.
+ *
+ * ► **AND IT CARRIES ITS OWN FROZEN VERSION, which it did not until 2026-09-13.**
+ *   It used to project `battle.version`. That was harmless while the team
+ *   resolver's version was a hand-written `1` that never changed — and the
+ *   moment that version became DERIVED from the team wire format's shape, this
+ *   façade's hash moved with it. **A projection frozen at a historical field
+ *   list cannot take its version from a format it does not project**: this one
+ *   carries neither `x`, nor `y`, nor the resource bag, so nothing that has
+ *   changed the team version has ever changed THIS shape.
+ *
+ *   The test that caught it says so in its own name — "the pinned hashes do
+ *   not move" — and it was right: the façade's six legacy hashes are
+ *   byte-identical again, which is the evidence that deriving the team version
+ *   stayed inside the team seam.
  */
+export const LEGACY_WIRE_VERSION = 1;
+
 export function toWireState(battle) {
   return {
-    version: battle.version,
+    version: LEGACY_WIRE_VERSION,
     seed: battle.seed,
     rngState: battle.rngState,
     teams: battle.teams.map((team) => ({
