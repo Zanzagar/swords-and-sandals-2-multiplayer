@@ -228,6 +228,127 @@ function tint(hex, colour) {
   return `#${[red, green, blue].map((part) => part.toString(16).padStart(2, "0")).join("")}`;
 }
 
+/**
+ * WHERE EACH WARDROBE PIECE ATTACHES, and it is the build's own table.
+ *
+ * Disassembled from `updatecharacter` — the root `DoAction` at `0x40bf76`,
+ * body `0x40bf7c` — which makes 20 `attachMovie` calls. Each reads
+ * `<limb>.attachMovie("<slot>" + character.<field>, "<instance>", <depth>)`,
+ * with an init object only where an offset is needed.
+ *
+ * ► **FIFTEEN OF THE SEVENTEEN PIECES HAVE NO OFFSET AT ALL.** They are
+ *   attached at the limb clip's own origin and the art is authored to fit
+ *   there. **The only non-zero offset in the whole routine is the shield's
+ *   `_y: 50`** — measured, not assumed, and the reason this table carries an
+ *   offset column at all.
+ *
+ * ► **`helmet` AND `hair` SHARE DEPTH 5**, so a helmet REPLACES the hair. That
+ *   is the build's rule, falling out of the byte layout rather than a paint
+ *   order anyone here chose — and a renderer that invented its own would draw
+ *   hair through a helm while looking perfectly plausible.
+ *
+ * ► **AND THE SHIELD HANGS OFF THE RIGHT FOREARM, not the depth-35 `shield`
+ *   sprite.** That sprite is empty, which read for two sessions as a
+ *   placeholder nobody had filled. An empty slot can mean you are looking at
+ *   the wrong slot.
+ *
+ * The `field` is the character resource whose VALUE is the linkage suffix:
+ * `helmet3` is the art for helmet 3, so the item row's own id is the selector.
+ */
+export const ATTACHMENTS = Object.freeze([
+  { slot: "features", field: "features", limb: "head", depth: 4 },
+  { slot: "facehair", field: "facehairstyle", limb: "head", depth: 3 },
+  { slot: "hair", field: "hairstyle", limb: "head", depth: 5 },
+  { slot: "helmet", field: "helmet", limb: "head", depth: 5 },
+  { slot: "breastplate", field: "breastplate", limb: "torso", depth: 1 },
+  { slot: "shoulderguard", field: "shoulderguard", limb: "Lupperarm", depth: 1 },
+  { slot: "shoulderguard", field: "shoulderguard", limb: "Rupperarm", depth: 1 },
+  { slot: "gauntlet", field: "gauntlet", limb: "Llowerarm", depth: 1 },
+  { slot: "gauntlet", field: "gauntlet", limb: "Rlowerarm", depth: 2 },
+  { slot: "greaves", field: "greaves", limb: "Lupperleg", depth: 1 },
+  { slot: "greaves", field: "greaves", limb: "Rupperleg", depth: 1 },
+  { slot: "shinguard", field: "shinguard", limb: "Llowerleg", depth: 1 },
+  { slot: "shinguard", field: "shinguard", limb: "Rlowerleg", depth: 1 },
+  { slot: "boot", field: "boot", limb: "Lfoot", depth: 1 },
+  { slot: "boot", field: "boot", limb: "Rfoot", depth: 1 },
+  // The one offset in the routine, and it is 50 twips down the forearm.
+  { slot: "shield", field: "shield", limb: "Rlowerarm", depth: 3, offset: { x: 0, y: 50 } }
+]);
+
+/**
+ * A combatant's wire projection -> the loadout the dressing table indexes.
+ *
+ * ► **The resource names ARE the build's own**, which is not a coincidence and
+ *   is the whole reason this is four lines: `ss2Combatant` already carries
+ *   `helmet`, `breastplate`, `shoulderguard`, `gauntlet`, `greaves`,
+ *   `shinguard`, `boot` and `shield` because the item tables do. The linkage
+ *   suffix is the same number. Nothing is mapped or renamed here.
+ *
+ * `hairstyle`, `facehairstyle` and `features` are the build's appearance
+ * fields and this engine does not model them yet, so they are absent and the
+ * gladiator simply has no hair. **Absent is not zero** — a `0` would be a
+ * claim that the build's piece 0 is what he wears.
+ */
+export function loadoutFrom(combatant) {
+  if (!combatant || typeof combatant !== "object") return null;
+  const loadout = {};
+  for (const attachment of ATTACHMENTS) {
+    const value = resourceValue(combatant, attachment.field);
+    if (Number.isFinite(value)) loadout[attachment.field] = value;
+  }
+  return Object.keys(loadout).length > 0 ? loadout : null;
+}
+
+/**
+ * A resource's number, from either shape the projection can be in.
+ *
+ * ► **A PROJECTED resource is `{value, min, max}`, and a ROSTER one is a plain
+ *   number — and I tested against the roster.** `loadoutFrom` originally read
+ *   `combatant.resources[field]` as a number, which is true of the objects
+ *   `demoSide` builds and false of everything `host.combatant()` returns. The
+ *   node check passed, the arena drew a naked gladiator, and nothing said why:
+ *   `Number.isFinite({value: 2})` is false, so every slot was silently skipped.
+ *
+ *   **Testing against the wrong shape is the same failure as testing against
+ *   your own model** — the third variant of it this session. Both shapes are
+ *   handled here, and the projected one is what the arena actually passes.
+ */
+function resourceValue(combatant, name) {
+  const entry = combatant?.resources?.[name] ?? combatant?.[name];
+  if (Number.isFinite(entry)) return entry;
+  if (entry && Number.isFinite(entry.value)) return entry.value;
+  return null;
+}
+
+/**
+ * `limb x piece`, in CLIP space and twips, with the attachment's offset folded
+ * into the translation.
+ *
+ * Both matrices are `[a, b, c, d, tx, ty]` with the translation in TWIPS and
+ * the rest unitless, which is the form the extractor writes. Composing here
+ * rather than after the arena transform is what lets the offset be a plain
+ * addition: `_y: 50` is fifty twips in the LIMB's space, and it rotates with
+ * the forearm exactly as the build's does.
+ */
+export function composeInClipSpace(limb, piece, offset) {
+  const [la, lb, lc, ld, ltx, lty] = limb;
+  const [pa, pb, pc, pd, ptx, pty] = piece;
+  const ox = offset?.x ?? 0;
+  const oy = offset?.y ?? 0;
+  // The offset applies to the PIECE inside the limb, so it shifts the piece's
+  // own translation before the limb's rotation is applied to the result.
+  const tx = ptx + ox;
+  const ty = pty + oy;
+  return [
+    la * pa + lc * pb,
+    lb * pa + ld * pb,
+    la * pc + lc * pd,
+    lb * pc + ld * pd,
+    la * tx + lc * ty + ltx,
+    lb * tx + ld * ty + lty
+  ];
+}
+
 /** Negative zero normalised away; see `paintExtractedFigure` for why. */
 const zero = (value) => (Object.is(value, -0) ? 0 : value);
 
@@ -248,7 +369,10 @@ function tintAlpha(alpha, colour) {
  * @returns {ReadonlyArray<object>} operations in paint order, or `[]`
  */
 export function paintExtractedFigure(pack, options = {}) {
-  const { family, label = null, facing = "right", at = 0, height = 1, fade = 0 } = options;
+  const {
+    family, label = null, facing = "right", at = 0, height = 1, fade = 0,
+    wardrobe = null, loadout = null
+  } = options;
   const chosen = animationFor(pack, { family, label, facing });
   if (!chosen) return [];
 
@@ -261,6 +385,7 @@ export function paintExtractedFigure(pack, options = {}) {
   const alpha = 1 - (Number.isFinite(fade) ? fade : 0);
   const ops = [];
 
+  // THE BODY first, then what the build hangs on it.
   for (const placement of pose) {
     const shape = pack.shapes[placement.shape];
     // Unreachable for an animation `isDrawable` accepted, and kept anyway: a
@@ -310,5 +435,59 @@ export function paintExtractedFigure(pack, options = {}) {
       }));
     }
   }
+
+  // ── DRESS IT ────────────────────────────────────────────────────────────
+  // Attached pieces are drawn AFTER the body, in the build's own table order.
+  // Within a limb the build separates them by depth; across limbs the body's
+  // own paint order already holds, and a piece never crosses limbs.
+  const limbs = chosen.animation.limbs?.[poseIndexAt(chosen.animation.poses.length, at)];
+  if (wardrobe && loadout && limbs) {
+    for (const attachment of ATTACHMENTS) {
+      const id = loadout[attachment.field];
+      if (!Number.isFinite(id)) continue;
+      // ► **A HELMET REPLACES THE HAIR**, because the build gives them the same
+      //   depth on the same limb. Derived, not chosen.
+      if (attachment.slot === "hair" && Number.isFinite(loadout.helmet)) continue;
+      const piece = wardrobe.pieces?.[attachment.slot]?.[id];
+      if (!piece || !Array.isArray(piece.placements)) continue;
+      const limbMatrix = limbs[attachment.limb];
+      if (!Array.isArray(limbMatrix)) continue;
+
+      for (const placement of piece.placements) {
+        const pieceShape = wardrobe.shapes?.[placement.shape];
+        if (!pieceShape || !Array.isArray(pieceShape.paths)) continue;
+        // limb (in clip space) x the piece's own placement, then the same
+        // clip-to-arena transform the body uses. Composed in TWIPS throughout,
+        // which is why the offset can simply be added to the translation.
+        const composed = composeInClipSpace(limbMatrix, placement.matrix, attachment.offset);
+        const matrix = Object.freeze([
+          zero(scale * composed[0]),
+          zero(-scale * composed[1]),
+          zero(scale * composed[2]),
+          zero(-scale * composed[3]),
+          zero(scale * (composed[4] / TWIPS_PER_PIXEL - pack.centreX)),
+          zero(-scale * (composed[5] / TWIPS_PER_PIXEL - pack.groundY))
+        ]);
+        for (const entry of pieceShape.paths) {
+          if (!entry.d) continue;
+          ops.push(Object.freeze({
+            kind: "path",
+            d: entry.d,
+            matrix,
+            limb: attachment.limb,
+            slot: attachment.slot,
+            fill: entry.fill,
+            fillOpacity: entry.fillOpacity ?? 1,
+            fillRule: entry.fillRule ?? "evenodd",
+            stroke: entry.stroke ?? null,
+            strokeOpacity: entry.strokeOpacity ?? 1,
+            strokeWidth: entry.strokeWidth ?? 0,
+            alpha
+          }));
+        }
+      }
+    }
+  }
+
   return Object.freeze(ops);
 }

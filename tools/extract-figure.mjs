@@ -238,10 +238,22 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
   for (const animation of animations) {
     const key = labelKey(animation.name);
     const poses = [];
+    // ► **THE LIMB'S OWN MATRIX, kept beside the flattened pose.** A flattened
+    //   placement carries the FULLY composed transform — limb x wrapper x inner
+    //   — which is what you need to draw the body and is NOT what you need to
+    //   dress it. `attachMovie` puts a piece INSIDE the limb clip, so a helmet
+    //   is positioned by the head's transform alone. The product cannot be
+    //   un-multiplied afterwards, so it is recorded here or not at all.
+    const limbPoses = [];
     for (let frame = animation.firstFrame; frame <= animation.lastFrame; frame += 1) {
       const displayList = frames[frame - 1];
       if (!displayList) continue;
       const depthNames = buildDepthNames(displayList);
+      const limbs = {};
+      for (const entry of displayList) {
+        if (entry.name) limbs[entry.name] = roundMatrix(entry.matrix ?? { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 });
+      }
+      limbPoses.push(limbs);
       const drawables = flattenFrame(buffer, characters, displayList, { cache });
       const pose = [];
       for (const drawable of drawables) {
@@ -270,7 +282,8 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
       label: animation.name,
       firstFrame: animation.firstFrame,
       lastFrame: animation.lastFrame,
-      poses
+      poses,
+      limbs: limbPoses
     };
   }
 

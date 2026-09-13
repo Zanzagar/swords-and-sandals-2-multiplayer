@@ -55,6 +55,7 @@ import {
   paintExtractedFigure,
   figurePackFrom,
   hasExtractedArt,
+  loadoutFrom,
   poseAt,
   timelineFor,
   timelinesForStep,
@@ -210,17 +211,26 @@ const soundCache = new Map();
  */
 let figurePack = null;
 
+let wardrobe = null;
+
 Promise.all([
   fetch("/assets/figure/shapes.json").then((response) => (response.ok ? response.json() : null)),
-  fetch("/assets/figure/animations.json").then((response) => (response.ok ? response.json() : null))
+  fetch("/assets/figure/animations.json").then((response) => (response.ok ? response.json() : null)),
+  // The wardrobe is OPTIONAL on top of the rig: a player who ran the figure
+  // extractor but not the wardrobe one gets a naked gladiator rather than none.
+  fetch("/assets/figure/wardrobe.json").then((response) => (response.ok ? response.json() : null)).catch(() => null)
 ])
-  .then(([shapes, animations]) => {
+  .then(([shapes, animations, dressing]) => {
+    wardrobe = dressing;
     if (!shapes || !animations) {
       log("no extracted art — drawing the authored figure. `node tools/extract-figure.mjs` to use the build's own.");
       return;
     }
     figurePack = figurePackFrom(shapes, animations);
-    log(`art: ${Object.keys(shapes).length} shape(s), ${figurePack.labels.length} animation(s) from your own install`);
+    const pieces = wardrobe ? Object.values(wardrobe.pieces ?? {}).reduce((n, slot) => n + Object.keys(slot).length, 0) : 0;
+    log(`art: ${Object.keys(shapes).length} shape(s), ${figurePack.labels.length} animation(s)` +
+      (wardrobe ? `, ${pieces} wardrobe piece(s)` : ", no wardrobe — `node tools/extract-wardrobe.mjs` to dress him") +
+      " from your own install");
     // The provenance panel is rendered at startup, BEFORE this resolves. Without
     // this it would go on claiming the figures are authored while the build's
     // own rig is drawn over the sentence saying so.
@@ -822,7 +832,9 @@ function render(now = performance.now()) {
         facing: actor.facing,
         at: drawnAt,
         height: figure.build.height,
-        fade: pose.fade
+        fade: pose.fade,
+        wardrobe,
+        loadout: loadoutFrom(combatant)
       })
       : [];
     drawOps(extracted.length > 0 ? extracted : paintFigure(figure, pose), view, origin);

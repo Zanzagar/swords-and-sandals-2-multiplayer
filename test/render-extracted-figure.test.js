@@ -24,6 +24,7 @@ import {
   poseIndexAt
 } from "../src/render/extracted-figure.js";
 import { clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
+import { ATTACHMENTS, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
 
 /** A square shape one pixel on a side, so a matrix is the only thing moving it. */
 const SHAPES = Object.freeze({
@@ -274,4 +275,60 @@ test("a pose that references only KNOWN shapes draws every one of them", () => {
   });
   const ops = paintExtractedFigure(pack, { family: "rest", label: "rest", at: 0, height: 1 });
   assert.deepEqual(ops.map((op) => op.limb), ["shield", "torso"], "in the pose's own paint order");
+});
+
+
+test("a loadout reads BOTH resource shapes, because the roster's and the projection's differ", () => {
+  // ► **THIS IS THE BUG I SHIPPED FOR ONE COMMIT.** `loadoutFrom` read
+  //   `resources[field]` as a number. That is true of the objects `demoSide`
+  //   builds and FALSE of everything `host.combatant()` returns, which wraps
+  //   every resource as `{value, min, max}`. `Number.isFinite({value: 2})` is
+  //   false, so every slot was silently skipped and the arena drew a naked
+  //   gladiator while my node check — run against the ROSTER — passed.
+  //
+  //   **Testing against the wrong shape is the same failure as testing against
+  //   your own model.** Both shapes are pinned here.
+  const projected = { resources: { helmet: { value: 2, min: 0, max: null }, breastplate: { value: 3, min: 0, max: null } } };
+  assert.deepEqual(loadoutFrom(projected), { helmet: 2, breastplate: 3 });
+
+  const roster = { resources: { helmet: 2, breastplate: 3 } };
+  assert.deepEqual(loadoutFrom(roster), { helmet: 2, breastplate: 3 });
+
+  // A flat combatant with no `resources` wrapper at all.
+  assert.deepEqual(loadoutFrom({ helmet: 5 }), { helmet: 5 });
+
+  // Absent is not zero: a slot the projection does not carry must not become
+  // piece 0, which is a real shield in this build.
+  assert.equal(loadoutFrom({}), null);
+  assert.equal(loadoutFrom(null), null);
+  assert.equal(loadoutFrom({ resources: { helmet: { value: null } } }), null);
+});
+
+test("the attachment table is the BUILD'S, and the shield's offset is the only one", () => {
+  // Disassembled from `updatecharacter` at `0x40bf76`. Fifteen pieces attach at
+  // the limb's own origin; the shield alone carries an init object.
+  assert.equal(ATTACHMENTS.length, 16);
+  const withOffset = ATTACHMENTS.filter((a) => a.offset);
+  assert.equal(withOffset.length, 1);
+  assert.equal(withOffset[0].slot, "shield");
+  assert.deepEqual(withOffset[0].offset, { x: 0, y: 50 });
+  assert.equal(withOffset[0].limb, "Rlowerarm", "NOT the empty depth-35 `shield` sprite");
+
+  // Helmet and hair share a depth, which is what makes a helmet replace hair.
+  const head = ATTACHMENTS.filter((a) => a.limb === "head");
+  const helmet = head.find((a) => a.slot === "helmet");
+  const hair = head.find((a) => a.slot === "hair");
+  assert.equal(helmet.depth, hair.depth, "the build gives them the same depth");
+});
+
+test("an attached piece composes limb x piece in CLIP space, offset included", () => {
+  const identity = [1, 0, 0, 1, 0, 0];
+  // A limb translated 100 twips right, a piece at the limb's origin.
+  assert.deepEqual(composeInClipSpace([1, 0, 0, 1, 100, 0], identity), [1, 0, 0, 1, 100, 0]);
+  // The offset moves the PIECE inside the limb, so it adds before the limb's
+  // own translation — and with a rotated limb it rotates with it.
+  assert.deepEqual(composeInClipSpace([1, 0, 0, 1, 100, 0], identity, { x: 0, y: 50 }), [1, 0, 0, 1, 100, 50]);
+  // A quarter-turn limb: the shield's +50 in y becomes -50 in x.
+  const turned = composeInClipSpace([0, 1, -1, 0, 0, 0], identity, { x: 0, y: 50 });
+  assert.deepEqual([turned[4], turned[5]], [-50, 0]);
 });
