@@ -604,43 +604,49 @@ test("line of sight is INERT with the second axis off, so a 1-D arena is untouch
   const flat = (id, x) => ({ id, x, y: null, alive: true, stats: { strength: 9 } });
   assert.equal(ss2ShotBlocked(flat("a", -250), flat("t", 250), [flat("b", 0)]), false);
 
+  // ► **THE BODY IN THE MIDDLE IS A FOE, and after 2026-09-13 it has to be.**
+  //   Only enemies screen, so staging this with an ALLY would pass whatever the
+  //   axis were doing and prove nothing at all — the test would have gone quiet
+  //   the moment the blocking rule changed, while still reading as a pin on it.
+  //   With a foe there, the axis-off switch is the only thing that can keep
+  //   this shot legal, which is exactly the claim.
   const battle = staged({
     rankStride: 0,
-    red: [
-      { fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -250 },
-      { fields: gladiator(), id: "red-2", x: 0 }
-    ],
-    blue: [{ fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250 }]
+    red: [{ fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -250 }],
+    blue: [
+      { fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250 },
+      { fields: gladiator({ gladiator_dir: "left" }), id: "blue-2", x: 0 }
+    ]
   });
   assert.equal(combatantById(battle, "red-1").y, null, "the axis really is off");
-  assert.ok(
-    typesOf(battle, "red-1").includes(Ss2ActionType.BOMBARD),
-    "an ally standing directly between them cannot block a shot in an arena with no depth"
+  const targets = legalActions(battle, "red-1")
+    .filter((option) => option.type === Ss2ActionType.BOMBARD)
+    .map((option) => option.targetId)
+    .sort();
+  assert.deepEqual(
+    targets,
+    ["blue-1", "blue-2"],
+    "a foe standing directly between them cannot screen anybody in an arena with no depth"
   );
 });
 
-test("a blocked lane removes the shot from legalActions, and stepping aside restores it", () => {
-  const build = (allyY) => staged({
-    red: [
-      { fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -250, y: 103 },
-      { fields: gladiator(), id: "red-2", x: 0, y: allyY }
-    ],
-    blue: [{ fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250, y: 103 }]
-  });
-
-  const blocked = build(103);
-  assert.ok(
-    !typesOf(blocked, "red-1").some((type) => type === Ss2ActionType.BOMBARD || type === Ss2ActionType.SNIPE),
-    "an ally in the lane costs the archer both shots"
-  );
-  // And it is the LANE, not the presence of an ally: the same ally one rank
-  // forward is out of the way.
-  const clear = build(200);
-  assert.ok(typesOf(clear, "red-1").includes(Ss2ActionType.BOMBARD), "one rank over and the shot is back");
-
-  // ALLIES BLOCK TOO, which is the lesson `ss2WalkDestination` learned on
-  // 2026-09-12: `physical_size` is how big a body is and does not know whose
-  // side it is on.
+test("a FOE in the lane screens the one behind it, and an ALLY in the same spot does not", () => {
+  // ► **ONLY THE ENEMY SCREENS, and the owner's own question is why — he
+  //   watched a 3v3 and asked whether an archer should be able to attack either
+  //   enemy. It could reach exactly ONE, for the whole bout.**
+  //
+  //   Measured on the demo roster at the opening before the fix: the archer
+  //   stands at `(-380, 103)` and its own rank-0 ally at `(-250, 200)`, which
+  //   sits 76.1 units off the lane to the enemy's rank 0 against its own
+  //   `physical_size` of 86. **Structural, not a seed** — allies stagger
+  //   diagonally, so the rank-0 ally always lands just off the rank-1 archer's
+  //   diagonal. An archer that stands back for a better view and gets FEWER
+  //   targets than a swordsman is the opposite of the feature.
+  //
+  //   **This is deliberately the opposite of `ss2WalkDestination`'s rule**,
+  //   which iterates every living body because a walk is a body moving through
+  //   space and cannot pass through anyone. A shot passes over a formation that
+  //   is cooperating with the shooter. Two questions, two answers.
   const foeInTheWay = staged({
     red: [{ fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -250, y: 103 }],
     blue: [
@@ -648,10 +654,35 @@ test("a blocked lane removes the shot from legalActions, and stepping aside rest
       { fields: gladiator({ gladiator_dir: "left" }), id: "blue-2", x: 0, y: 103 }
     ]
   });
-  const targets = legalActions(foeInTheWay, "red-1")
+  const screened = legalActions(foeInTheWay, "red-1")
     .filter((option) => option.type === Ss2ActionType.BOMBARD)
     .map((option) => option.targetId);
-  assert.deepEqual(targets, ["blue-2"], "the nearer foe is shootable; the one it screens is not");
+  assert.deepEqual(screened, ["blue-2"], "the nearer foe is shootable; the one it screens is not");
+
+  // ► **THE SAME BODY ON THE SAME SPOT, WEARING THE OTHER COLOUR, DOES NOT
+  //   BLOCK.** Identical geometry, identical `physical_size`; the only thing
+  //   that changes is whose side it is on. That is the whole rule, and stating
+  //   it as one comparison makes it impossible to satisfy by accident.
+  const allyInTheWay = staged({
+    red: [
+      { fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -250, y: 103 },
+      { fields: gladiator(), id: "red-2", x: 0, y: 103 }
+    ],
+    blue: [{ fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250, y: 103 }]
+  });
+  assert.equal(
+    ss2ShotBlocked(
+      combatantById(allyInTheWay, "red-1"),
+      combatantById(allyInTheWay, "blue-1"),
+      [combatantById(allyInTheWay, "red-2")]
+    ),
+    true,
+    "the GEOMETRY still says that body is in the lane — the predicate is pure and knows no sides"
+  );
+  assert.ok(
+    typesOf(allyInTheWay, "red-1").includes(Ss2ActionType.BOMBARD),
+    "but the RULE only hands it the foes, so an ally standing there costs nothing"
+  );
 });
 
 /* ------------------------------------------------------------------ */

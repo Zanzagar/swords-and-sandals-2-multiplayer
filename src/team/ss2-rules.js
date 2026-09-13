@@ -4153,10 +4153,39 @@ export function createSs2TeamRules({
       // same lesson on 2026-09-12 — `physical_size` is how big a body is and
       // does not know whose side it is on. Self is excluded because
       // `view.allies` includes the actor.
-      const shotBodies = [
-        ...view.foes,
-        ...view.allies.filter((ally) => ally.id !== actorId)
-      ];
+      // ► **ONLY THE ENEMY SCREENS. Owner's correction, 2026-09-13, on looking
+      //   at the arena: "should be able to attack either of the enemies from
+      //   ranged, though, yes?" — and the answer was NO, it could reach exactly
+      //   one, for the whole bout.**
+      //
+      //   Measured on the demo roster at the opening, 3v3, before this change:
+      //   the archer stands at `(-380, 103)` and its own rank-0 ally at
+      //   `(-250, 200)`. That ally sits **76.1 units off the lane** to the
+      //   enemy's rank 0, against its own `physical_size` of 86, and 22% of the
+      //   way along the shot. So `blue-1` was blocked by `red-1` and `blue-3`
+      //   by `blue-2`, leaving one legal target out of three — and it is
+      //   STRUCTURAL, not a seed: allies stagger diagonally (`allyStride` out
+      //   in x, `rankStride` back in y), so the rank-0 ally always lands just
+      //   off the rank-1 archer's diagonal.
+      //
+      //   An archer that stands back to get a better view and ends up with
+      //   FEWER targets than a swordsman is the opposite of the feature. The
+      //   tactical idea survives intact, and sharpens: **the enemy's front rank
+      //   screens the enemy's back rank** — `blue-3` behind `blue-2` is still a
+      //   shot you have to move for — while your own line is not the thing
+      //   standing in your way.
+      //
+      //   ► **AND THIS IS THE OPPOSITE OF WHAT `ss2WalkDestination` LEARNED ON
+      //     2026-09-12, deliberately, because a walk and a shot are not the
+      //     same question.** That clamp iterates EVERY living body and its
+      //     comment is emphatic that `physical_size` "does not know whose side
+      //     the body is on" — correctly, because a walk is a body moving
+      //     through space and cannot pass through anyone, friend or foe. A shot
+      //     passes OVER a formation that is cooperating with the shooter: your
+      //     own line knows an archer is behind it and leaves the lane, and the
+      //     enemy does not. Copying the walk's rule here without asking which
+      //     question it answered is what produced the one-target archer.
+      const shotBodies = view.foes;
 
       // THE CONTROLLER FRAME, reproduced. The build picks one of four frames
       // per turn and each wires a different eight buttons; for a melee hero
