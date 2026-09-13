@@ -16,3 +16,17 @@ captures/*
 # them. Ignoring is the second line of defence; the first is the test in
 # test/ss2-capture-attestation.test.js that fails if any are tracked.
 test/observations/**/*.jsonl
+
+# ► **EXTRACTED SS2 ASSETS ARE LOCAL-ONLY, and this is the Doom/WAD rule.**
+# `AGENTS.md`: "Ship no SS2 asset... someone who clones it must still need
+# their own licensed copy to play. This is about what leaves the repo, never
+# about what you may build in it." So a player extracts from their OWN install
+# into `assets/`, the renderer prefers them when present, and a fresh clone
+# falls back to the authored vector art in `src/render/figure.js`.
+#
+# Ignoring is the second line of defence. The first is the test in
+# test/asset-attestation.test.js, which FAILS if any extracted asset is tracked
+# — exactly as test/ss2-capture-attestation.test.js does for raw traces, after
+# a subagent committed 67 of those.
+assets/*
+!assets/README.md
