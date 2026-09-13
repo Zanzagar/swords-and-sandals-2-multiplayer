@@ -94,6 +94,30 @@
  *   not painted into the head shape; it is a pair of attached clips with their
  *   own timelines, and the fighter clip animates the EXPRESSION.
  *
+ * ## WHAT IS NOT HERE: the weapon ENCHANTMENT, and where the search stopped
+ *
+ * `weapon0` is character 703 — the rig's own weapon slot — and it is the ONLY
+ * weapon symbol carrying enchantment labels: **13 frames, `flame` at 2, `frost`
+ * at 5, `poison` at 8, `wraith` at 11, with an unlabelled frame 1 and a frame-1
+ * `stop()`.** The other twenty multi-frame weapons have 2 frames and no labels
+ * at all.
+ *
+ * The resources exist too — `weapon_enchantment_type` and
+ * `weapon_enchantment_potency`, both defaulting to 0 — and the shop writes
+ * `type = 1` on EVERY weapon purchase, which is why the obvious mapping
+ * (`1 = flame`) cannot be right: it would set every bought weapon alight.
+ *
+ * ► **AND `updatecharacter` DOES NOT SELECT THE FRAME.** Disassembled: it
+ *   contains no `gotoAndStop` whatsoever, and every one of its eighteen
+ *   references to the enchantment fields is a Push copying them into or out of
+ *   `characterDNA`. **So the selector is somewhere else and this session did not
+ *   find it.** Everything is taken at frame 1, which is the unenchanted weapon
+ *   and is correct until the selector is located.
+ *
+ * That is a gap in the search, not in the build. Whoever picks it up: the string
+ * `flame` occurs in the file and the clip is 703; start from the other readers
+ * of `weapon_enchantment_type` rather than from this routine.
+ *
  * Usage:
  *   node tools/extract-wardrobe.mjs --report          # measure, write nothing
  *   node tools/extract-wardrobe.mjs                   # writes assets/figure/wardrobe.json
@@ -318,7 +342,23 @@ function main(argv) {
     const ids = Object.keys(pieces).map(Number).sort((a, b) => a - b);
     total += ids.length;
     const parts = ids.reduce((sum, id) => sum + pieces[id].placements.length, 0);
-    console.log(`  ${slot.padEnd(16)} ${String(ids.length).padStart(3)} pieces  ids ${ids[0]}..${ids[ids.length - 1]}  ${parts} placement(s)`);
+    // ► **`ids 1..24` READS AS A CONTIGUOUS RANGE AND IS A MIN AND A MAX.**
+    //   `features` has 19 symbols between 1 and 24, and printing the endpoints
+    //   alone made five absent ids look like an extraction failure for a
+    //   session. They are simply not in the build: no `features2`, `3`, `4`,
+    //   `5` or `21` is exported. Gaps are named now.
+    //   A SPARSE id space is not a gap, though: `weapon` runs 0..220 with 89
+    //   pieces and listing 131 absent numbers is noise. Only a nearly-complete
+    //   range gets its holes named; a sparse one gets a count.
+    const gaps = [];
+    for (let id = ids[0]; id <= ids[ids.length - 1]; id += 1) if (!pieces[id]) gaps.push(id);
+    const span = ids[ids.length - 1] - ids[0] + 1;
+    const gapNote = gaps.length === 0
+      ? ""
+      : gaps.length <= 8
+        ? `  MISSING ${gaps.join(",")}`
+        : `  (sparse: ${gaps.length} of ${span} ids unused)`;
+    console.log(`  ${slot.padEnd(16)} ${String(ids.length).padStart(3)} pieces  ids ${ids[0]}..${ids[ids.length - 1]}  ${parts} placement(s)${gapNote}`);
   }
   console.log("");
   console.log(`total      ${total} wardrobe pieces, ${Object.keys(result.shapes).length} distinct shapes`);
