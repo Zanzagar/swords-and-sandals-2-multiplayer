@@ -46,6 +46,8 @@ import {
   SceneError,
   timelineFor,
   timelinesForStep,
+  figureYAt,
+  figureScaleFor,
   TimelineError,
   travelAt
 } from "../src/render/index.js";
@@ -638,4 +640,65 @@ test("the timeout policy names itself, and waits before it gives up", () => {
   assert.ok(reason.length > 0, "the gate refuses an unexplained abandonment");
   assert.match(reason, /gave up/, "it must say the surface gave up, not that the animation finished");
   assert.match(reason, /attack7/, "and name the timeline it gave up on");
+});
+
+/**
+ * ► **THE LANE-CHANGE TWEEN, and the four things that were missing rather than
+ *   the one (2026-09-12).** The owner played a lane change and said "the lane
+ *   jump looked like a jump and there was no animation". A verifier then broke
+ *   the obvious one-line fix — start a timeline from the depth move — by
+ *   showing it produces a figure that STILL teleports plus a false "travelling
+ *   gait with no move-clip" complaint, because there was no slot to carry the
+ *   depth motion, no consumer to interpolate it, no schedule to run it and a
+ *   paint order that snapped.
+ */
+test("a depth move starts its own schedule and carries its own motion", () => {
+  const commands = [
+    { kind: "move-clip-depth", sequence: 1, combatantId: "red-1", instancePath: "p", fromY: 200, toY: 103 }
+  ];
+  const { started, notices } = timelinesForStep(commands);
+
+  const entry = started.get("red-1");
+  assert.ok(entry, "a lane change must start a timeline even though it plays no clip");
+  assert.equal(entry.timeline.family, "movement:sidestep");
+  assert.equal(entry.timeline.depthTravel, true, "it travels on the SECOND axis");
+  assert.equal(entry.timeline.travel, false, "and must never travel on the first, or it slides sideways");
+  assert.deepEqual(entry.depthMotion, { from: 200, to: 103 });
+  assert.equal(entry.motion, null, "there is no x motion, and that is not a defect");
+  assert.equal(entry.token, null, "a lane change is not gated on an animation to report back");
+
+  // The false complaint the one-line fix produced.
+  assert.deepEqual(notices, [], "a lane change must not be reported as a gait missing its move-clip");
+});
+
+test("figureYAt interpolates the depth, and holds still without a depth schedule", () => {
+  const sidestep = timelineFor("sidestep", { role: "actor" });
+  const motion = { from: 200, to: 103 };
+  assert.equal(figureYAt({ restingY: 103, timeline: sidestep, depthMotion: motion, at: 0 }), 200);
+  assert.equal(figureYAt({ restingY: 103, timeline: sidestep, depthMotion: motion, at: 0.5 }), 151.5);
+  assert.equal(figureYAt({ restingY: 103, timeline: sidestep, depthMotion: motion, at: 1 }), 103);
+
+  // An x gait must not drag the figure through depth.
+  const walk = timelineFor("walkleft", { role: "actor" });
+  assert.equal(walk.travel, true);
+  assert.equal(
+    figureYAt({ restingY: 103, timeline: walk, depthMotion: motion, at: 0.5 }), 103,
+    "a walk holds its depth, whatever motion it is handed"
+  );
+  // And no schedule at all is a figure standing still.
+  assert.equal(figureYAt({ restingY: 103, timeline: null, depthMotion: motion, at: 0.5 }), 103);
+});
+
+test("the depth falloff follows a LIVE rank, so a figure shrinks as it steps back", () => {
+  // `slotIndex` is a roster index and never changes during a bout, so keying
+  // the perspective on it left a lane change with no scale cue at all — a pure
+  // vertical translation, which in this game is what a jump is.
+  const front = figureScaleFor({ yscale: 100, rank: 0 });
+  const mid = figureScaleFor({ yscale: 100, rank: 0.5 });
+  const back = figureScaleFor({ yscale: 100, rank: 1 });
+  assert.ok(front > mid && mid > back, `the figure must shrink continuously: ${front} ${mid} ${back}`);
+
+  // The fallback survives for every rule set that models no depth.
+  assert.equal(figureScaleFor({ yscale: 100, slotIndex: 0 }), front);
+  assert.equal(figureScaleFor({ yscale: 100, slotIndex: 1 }), back);
 });

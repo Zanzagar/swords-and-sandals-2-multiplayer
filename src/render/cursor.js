@@ -72,17 +72,54 @@ export function timelinesForStep(commands) {
   }
   const batch = [...commands];
   const stepped = new Map();
+  const depthStepped = new Map();
   for (const command of batch) {
     if (command.kind === "move-clip") stepped.set(command.combatantId, { from: command.from, to: command.to });
+    // ► **THE SECOND AXIS NEEDS ITS OWN SLOT, and the first version of the
+    //   lane-change tween failed because it did not have one.** The obvious
+    //   fix — "start a timeline from the depth move" — yields an entry whose
+    //   `motion` is null, so the figure still teleports AND the travel notice
+    //   below fires a false complaint about a missing `move-clip`.
+    if (command.kind === "move-clip-depth") {
+      depthStepped.set(command.combatantId, { from: command.fromY, to: command.toY });
+    }
   }
 
   const started = new Map();
   const notices = [];
+
+  // ► **A LANE CHANGE STARTS ITS OWN TIMELINE, because nothing else will.**
+  //   The cursor starts timelines from `clip-goto`, and a rank change emits
+  //   none on purpose: the build has no sidestep phase, so the binding table
+  //   answers "nothing plays" rather than naming a clip
+  //   (`presentation.js`, the depth case). That is the right answer for a
+  //   CLIP and the wrong one for MOTION — the figure still has to get there.
+  //
+  //   So the authored `movement:sidestep` schedule is started here, from the
+  //   command itself, and it carries no `token`: a lane change is not gated on
+  //   an animation the surface has to report back, because there is no
+  //   animation to report.
+  for (const [combatantId, depthMotion] of depthStepped) {
+    started.set(combatantId, {
+      timeline: timelineFor("sidestep", { role: "actor" }),
+      token: null,
+      motion: null,
+      depthMotion
+    });
+  }
+
   for (const command of batch) {
     if (command.kind !== "clip-goto") continue;
     const timeline = timelineFor(command.label, { role: command.role });
     const motion = timeline.travel ? (stepped.get(command.combatantId) ?? null) : null;
-    started.set(command.combatantId, { timeline, token: command.actionToken ?? null, motion });
+    started.set(command.combatantId, {
+      timeline,
+      token: command.actionToken ?? null,
+      motion,
+      // A clip-goto never carries depth motion, but the entry shape is one
+      // shape: a consumer must not have to ask which kind of entry it has.
+      depthMotion: depthStepped.get(command.combatantId) ?? null
+    });
     if (!timeline.recognised) {
       notices.push({
         combatantId: command.combatantId,

@@ -41,13 +41,14 @@ import {
   createVanillaBattleHost,
   SS2_STATIC_MAP_BINDINGS
 } from "/src/adapter/index.js";
-import { ss2BattleValues, ss2Combatant, ss2TeamRules, createSs2TeamRules } from "/src/team/ss2-rules.js";
+import { ss2BattleValues, ss2Combatant, ss2TeamRules, createSs2TeamRules, SS2_ARENA } from "/src/team/ss2-rules.js";
 import {
   animationCursor,
   applyCommands,
   emptyScene,
   figureSpecFor,
   figureScaleFor,
+  figureYAt,
   figureXAt,
   paintFigure,
   paintShadow,
@@ -63,6 +64,16 @@ import { demoSide } from "/tools/arena/roster.js";
 
 /** Arena y of the front rank — the vanilla `_y`, and `toY`'s own datum. */
 const ARENA_FRONT_Y = 200;
+
+/**
+ * How many ranks back a drawn depth is, FRACTIONALLY, for the perspective
+ * falloff. Falls back to the roster's slot for any rule set that models no
+ * depth, which is what `figureScaleFor` keyed on before the second axis.
+ */
+function rankOf(drawnY, slotIndex) {
+  if (!Number.isFinite(drawnY) || !(SS2_ARENA.rankStride > 0)) return slotIndex;
+  return Math.max(0, (ARENA_FRONT_Y - drawnY) / SS2_ARENA.rankStride);
+}
 
 const params = new URLSearchParams(location.search);
 const perSide = Math.min(3, Math.max(1, Number(params.get("teams")) || 2));
@@ -460,7 +471,42 @@ function render(now = performance.now()) {
   drawArenaBowl(view);
 
   const byId = combatantsById();
+
+  // ► **PAINT ORDER FOLLOWS THE DEPTH BEING DRAWN, NOT THE ONE BEING HELD
+  //   (2026-09-12).** `scene.drawOrder` sorts on the actor's `y`, which the
+  //   fold sets to the DESTINATION the instant a lane change resolves — so a
+  //   figure sliding from the front lane to the back painted in its
+  //   destination order for the whole slide, popping behind its opponent
+  //   before it had visibly moved.
+  //
+  //   The scene's order stays the authoritative RESTING order and is not
+  //   touched: this re-sorts by the same rule — ascending arena y is
+  //   back-to-front — using the interpolated depth the shell is actually
+  //   about to draw. A figure that is not mid-step sorts identically, so an
+  //   ordinary bout is unaffected.
+  const drawnYById = new Map();
   for (const combatantId of scene.drawOrder) {
+    const actor = scene.actors[combatantId];
+    if (!actor?.placed || !Number.isFinite(actor.y)) continue;
+    // The same clock the draw loop below reads, for the same reason it
+    // computes `at` once: two readings of one clock drift apart.
+    const entry = playing.get(combatantId);
+    const at = entry ? Math.min(1, (now - entry.startedAt) / entry.timeline.durationMs) : 0;
+    drawnYById.set(combatantId, figureYAt({
+      restingY: actor.y,
+      timeline: entry?.timeline ?? null,
+      depthMotion: entry?.depthMotion ?? null,
+      at
+    }));
+  }
+  const paintOrder = [...scene.drawOrder].sort((left, right) => {
+    const a = drawnYById.get(left);
+    const b = drawnYById.get(right);
+    if (!Number.isFinite(a) || !Number.isFinite(b) || a === b) return 0;
+    return a - b;
+  });
+
+  for (const combatantId of paintOrder) {
     const actor = scene.actors[combatantId];
     if (!actor.placed) continue;
     const combatant = byId.get(combatantId);
@@ -486,6 +532,14 @@ function render(now = performance.now()) {
     // The lunge and the step, resolved into one coordinate by
     // `src/render/timeline.js` — where the suite can reach the decision, the
     // way `animationCursor` is. This shell computes no arithmetic of its own.
+    const drawnY = Number.isFinite(actor.y)
+      ? figureYAt({
+        restingY: actor.y,
+        timeline: entry?.timeline ?? null,
+        depthMotion: entry?.depthMotion ?? null,
+        at
+      })
+      : actor.y;
     const origin = {
       x: figureXAt({
         restingX: actor.x,
@@ -495,9 +549,22 @@ function render(now = performance.now()) {
         motion: entry?.motion ?? null,
         at
       }),
-      y: actor.y,
+      // ► **THE INTERPOLATED DEPTH, not the destination.** `actor.y` is already
+      //   where the lane change ENDS — the scene's fold is not a tween — so
+      //   drawing it directly is what made a lane change a single-frame
+      //   teleport. `figureYAt` is the mirror of `figureXAt` beside it.
+      y: drawnY,
       facing: actor.facing,
-      size: figureScaleFor({ yscale: actor.yscale, slotIndex: combatant.slotIndex })
+      // And the SIZE follows that same interpolated depth rather than the
+      // roster's `slotIndex`, which never changes during a bout. Without this
+      // the figure keeps its front-lane size for the whole slide, so nothing
+      // about the movement says "further away" — leaving a pure vertical
+      // translation, which in this game is what a jump looks like.
+      size: figureScaleFor({
+        yscale: actor.yscale,
+        rank: rankOf(drawnY, combatant.slotIndex),
+        slotIndex: combatant.slotIndex
+      })
     };
     drawOps(paintShadow(figure, pose), view, origin);
     drawOps(paintFigure(figure, pose), view, origin);

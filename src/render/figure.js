@@ -284,7 +284,7 @@ export const DEPTH_SCALE_PER_RANK = 0.03;
  *   geometry` still owns where an ally stands — it makes the DISTANCE between
  *   two unlevel gladiators derived rather than invented.
  *
- * @param {object} actor `{ yscale, slotIndex }` — composed by the caller from
+ * @param {object} actor `{ yscale, rank?, slotIndex }` — composed by the caller from
  *   the scene actor (which carries `yscale`) and the wire combatant (which
  *   carries `slotIndex`). Deliberately NOT a new field on `place-clip`: rank is
  *   a property of the roster, the projection already states it, and widening a
@@ -301,7 +301,25 @@ export function figureScaleFor(actor, { depthPerRank = DEPTH_SCALE_PER_RANK } = 
   // stated size draws nominal, and a NEGATIVE one is the villain's mirror on the
   // x axis only, so the magnitude is what matters here.
   const size = Number.isFinite(stated) && stated !== 0 ? Math.abs(stated) / 100 : 1;
-  const rank = Number.isFinite(actor?.slotIndex) ? Math.max(0, actor.slotIndex) : 0;
+  // ► **A LIVE `rank` WINS OVER `slotIndex`, AND THAT IS WHAT MAKES A LANE
+  //   CHANGE LOOK LIKE DEPTH RATHER THAN A LEAP (2026-09-12).**
+  //
+  //   `slotIndex` is a ROSTER index: it never changes during a bout, so a
+  //   figure moving from the front lane to the back kept its front-lane size
+  //   for the whole slide. Nothing about the movement said "further away" —
+  //   no scale change, no horizontal component — leaving a pure vertical
+  //   translation, which in THIS game is what a jump is. The owner played it
+  //   and said exactly that.
+  //
+  //   `rank` is FRACTIONAL on purpose: the shell passes the interpolated
+  //   position, so the figure shrinks continuously across the step instead of
+  //   snapping at the end. `slotIndex` remains the fallback for every caller
+  //   that has no live depth — which is every caller whose rule set models
+  //   none.
+  const stated_rank = Number(actor?.rank);
+  const rank = Number.isFinite(stated_rank)
+    ? Math.max(0, stated_rank)
+    : (Number.isFinite(actor?.slotIndex) ? Math.max(0, actor.slotIndex) : 0);
   const depth = Math.max(0.25, 1 - depthPerRank * rank);
   return size * depth;
 }

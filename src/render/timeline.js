@@ -95,7 +95,13 @@ const MOVEMENT_GAITS = Object.freeze(new Map([
   ["walkleft", "walk"], ["walkright", "walk"],
   ["runleft", "run"], ["runright", "run"],
   ["chargeleft", "charge"], ["chargeright", "charge"],
-  ["jumpleft", "jump"], ["jumpright", "jump"]
+  ["jumpleft", "jump"], ["jumpright", "jump"],
+  // ► **AUTHORED, AND IT IS THE ONLY ENTRY HERE THAT IS.** The eight above are
+  //   the build's own phase names with byte offsets. `sidestep` names no
+  //   vanilla phase — the build has no lane to change — so it is spelled
+  //   without a direction, because a lane change has none: the figure travels
+  //   from the command's `fromY` to its `toY` whichever way that points.
+  ["sidestep", "sidestep"]
 ]));
 
 /**
@@ -150,7 +156,7 @@ function pose(overrides) {
   return Object.freeze({ ...NEUTRAL, ...overrides });
 }
 
-function schedule(family, beats, keyframes, { loop = false, travel = false } = {}) {
+function schedule(family, beats, keyframes, { loop = false, travel = false, depthTravel = false } = {}) {
   return Object.freeze({
     family,
     durationMs: beats * BEAT_MS,
@@ -162,6 +168,16 @@ function schedule(family, beats, keyframes, { loop = false, travel = false } = {
      * surface never has to know which families are movement.
      */
     travel,
+    /**
+     * The same for the SECOND axis: the figure's y runs from the
+     * `move-clip-depth`'s `fromY` to its `toY`.
+     *
+     * A separate flag rather than a wider `travel`, for the reason the command
+     * kinds are separate: a schedule that travels in x must never be handed a
+     * depth motion, and a lane change must never slide the figure sideways.
+     * No schedule sets both, and nothing yet needs one that does.
+     */
+    depthTravel,
     keyframes: Object.freeze(keyframes.map((frame) => Object.freeze({ at: frame.at, pose: pose(frame.pose) }))),
     // Not decoration: nothing upstream carries timing, so a surface must be
     // able to say that what it just played was invented here.
@@ -297,6 +313,31 @@ const FAMILIES = Object.freeze({
     { at: 0.75, pose: { legSpread: 0.45, bob: 0.06, lean: 0.08, armSwing: 0.15 } },
     { at: 1, pose: {} }
   ], { travel: true }),
+
+  /**
+   * ► **THE LANE CHANGE, AND IT IS AUTHORED TWICE OVER.** The build has no
+   *   sidestep phase — its eight movement phases all change `_x` — so there is
+   *   no clip label to be faithful to and no frame count to copy. This is mod
+   *   surface for the second axis, named so it cannot be mistaken for one of
+   *   the six map-named gaits above it.
+   *
+   * `depthTravel` rather than `travel`, and the distinction is the whole
+   * point: `travel` means "interpolate the actor's X from its `motion`", and a
+   * lane change moves the other axis. A schedule that set `travel` would have
+   * the shell slide the figure sideways across the arena.
+   *
+   * Longer than a walk (10 frames against 8) on purpose: a lane change moves
+   * 97 arena units of depth, which reaches the screen as 1.16 times the
+   * figure's own drawn height. Covering that in a walk's time is what made the
+   * first version read as a leap.
+   */
+  "movement:sidestep": () => schedule("movement:sidestep", 10, [
+    { at: 0, pose: {} },
+    { at: 0.2, pose: { legSpread: 0.3, bob: 0.04, lean: 0.06 } },
+    { at: 0.5, pose: { legSpread: 0.5, bob: 0.02, lean: 0.02 } },
+    { at: 0.8, pose: { legSpread: 0.3, bob: 0.04, lean: -0.04 } },
+    { at: 1, pose: {} }
+  ], { depthTravel: true }),
 
   "movement:run": () => schedule("movement:run", 6, [
     { at: 0, pose: {} },
@@ -495,6 +536,31 @@ export const ADVANCE_UNITS = 74;
  * @param {object} [options.motion] the scene actor's `motion`, or null
  * @param {number} [options.at] 0..1 through the schedule
  */
+/**
+ * WHERE A FIGURE IS DRAWN ON THE SECOND AXIS, part-way through a lane change.
+ *
+ * ► **Without this a lane change is a single-frame TELEPORT, and the owner
+ *   played it and said so: "the lane jump looked like a jump and there was no
+ *   animation".** It was worse than unanimated — it was a whole-body vertical
+ *   translation of 1.16 figure-heights with no horizontal component and no
+ *   scale change, which in THIS game is the definition of a leap, because
+ *   vanilla spends `_y` on the jump arc.
+ *
+ * The mirror of `figureXAt` and deliberately the same shape: the scene actor's
+ * `y` is already the DESTINATION — the fold is not a tween — and
+ * `depthMotion` carries the origin to interpolate from.
+ */
+export function figureYAt({ restingY, timeline = null, depthMotion = null, at = 0 }) {
+  if (!Number.isFinite(restingY)) {
+    throw new TimelineError("figureYAt needs the scene actor's own y; an actor with no depth has none to draw at.");
+  }
+  if (!Number.isFinite(at)) {
+    throw new TimelineError("figureYAt needs the fraction of the way through the gait.");
+  }
+  if (timeline?.depthTravel && depthMotion) return travelAt(depthMotion, at);
+  return restingY;
+}
+
 export function figureXAt({ restingX, facing, pose, timeline = null, motion = null, at = 0 }) {
   if (!Number.isFinite(restingX)) {
     throw new TimelineError("figureXAt needs the scene actor's own x; an unplaced actor has none to draw at.");
