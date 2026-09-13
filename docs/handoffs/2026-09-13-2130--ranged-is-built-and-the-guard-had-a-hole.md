@@ -5,10 +5,11 @@ sessionId:    b4ca2b15-791c-4a4f-bc62-ef21baf9e095 (https://claude.ai/code/sessi
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-commits:      de54749..HEAD, two of them: `7310583` builds ranged and
-              `301277a` fixes what Codex found in it. **Re-measure.**
+commits:      de54749..HEAD: `7310583` builds ranged, `301277a` fixes what
+              Codex found in it, `849ca06` fixes what the OWNER found by
+              looking at it. **Re-measure; never copy.**
 suite:        1129 / 1128 / 0 / 1 (fresh-clone profile — `captures/` holds only
-              its manifest and README), measured after `301277a` BY EXIT CODE.
+              its manifest and README), measured after `849ca06` BY EXIT CODE.
               **Re-measure; never copy.**
 agentRuns:    one Codex `/adversarial-review` on `HEAD~1..HEAD`, model pinned
               `gpt-6-astra`. No fan-out wave: ADR 0001 makes a wave the LAST
@@ -62,6 +63,11 @@ He took **the build's own answer to three of them**:
    `herolevel` — and running dry FORCES a swap back to melee.
 4. **A body between you and your target blocks the shot.** This one the build
    cannot answer and it is the single authored rule in the feature.
+   **CORRECTED THE SAME EVENING, by the owner looking at it: only an ENEMY
+   screens.** He asked whether an archer should be able to attack either enemy
+   and the answer was no — it could reach exactly one, blocked by its OWN ALLY,
+   structurally, because allies stagger diagonally and the rank-0 ally always
+   lands just off the rank-1 archer's lane. See the block below.
 
 ## THE LESSON, and it is one lesson told THREE TIMES in one session
 
@@ -133,6 +139,37 @@ hide.
   reason this one did not cost a session. `test/ss2-ranged.test.js` pins it
   across every sequence number, because the defect was a counter and one sample
   could have landed on the right file by luck.
+
+## THE OWNER FOUND THE NEXT ONE IN A MINUTE, AND IT IS THE USUAL ROUTE
+
+► **THE ARCHER HAD ONE TARGET.** Measured at the opening, before the fix: the
+  archer at `(-380, 103)` and its own rank-0 ally at `(-250, 200)`, which sits
+  **76.1 units off the lane** to the enemy's front against its own
+  `physical_size` of 86. So `blue-1` was blocked by `red-1` and `blue-3` by
+  `blue-2` — one legal target out of three, every seed, every size.
+
+  **Only the ENEMY screens now.** The tactical idea survives and sharpens: the
+  enemy's front rank screens the enemy's BACK rank, so a shot at their rear is
+  still something you move for. What is gone is your own line standing in your
+  way.
+
+  ► **AND IT IS DELIBERATELY THE OPPOSITE OF `ss2WalkDestination`'s RULE**,
+    which iterates every living body because `physical_size` "does not know
+    whose side the body is on". That is right for a WALK — a body moving
+    through space cannot pass through anyone. **A shot passes OVER a formation
+    that is cooperating with the shooter.** Two questions, two answers; copying
+    one into the other is what produced the one-target archer.
+
+  `ss2ShotBlocked` is unchanged and still knows no sides — it is pure geometry
+  and the policy is the caller's. **A test would have gone quiet over this**:
+  the axis-off pin staged its blocker as an ALLY, so after the change it would
+  have passed whatever the second axis was doing while still reading as a pin on
+  it. Restaged with a foe.
+
+  Bombards went 237 -> 240 and swaps 92 -> 96, which are the arithmetic maxima
+  (2 archers x 5 arrows x 24 seeds, and 2 swaps each). **Every archer now finds
+  a target every turn it has an arrow** rather than dying with arrows left
+  because the only foe it could see was already dead.
 
 ## What was re-read off the installed build rather than taken from prose
 
@@ -214,7 +251,9 @@ alone, as the facing change did in September.
 
 ## Highest-value work, ranked
 
-1. **LOOK AT IT, AND LISTEN TO IT. This is the owner's and it is five minutes.**
+1. **LOOK AT IT AGAIN, AND LISTEN TO IT. This is the owner's and it is five
+   minutes — and it has already paid once tonight**, in the block above: he
+   watched one 3v3 and found that the archer had a single legal target.
    The arena has an archer in slot 2 of each side now, one rank back. Watch it
    draw the bow on turn one, shoot, run dry and be forced back to melee — and
    **listen**, because the sound fix means every clip now plays its own sound

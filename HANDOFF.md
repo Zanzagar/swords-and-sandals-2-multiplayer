@@ -20,7 +20,14 @@ THIS file is right and the handoff was frozen at the end of its session.
   BUILD'S OWN answer to three**: the swap costs a turn, an archer closed on
   inside `100 + physical_size` loses the bow and bashes, ammunition is finite
   and tiered. The fourth is the only authored rule in the feature — a body
-  between you and your target BLOCKS the shot (`ss2ShotBlocked`).
+  between you and your target BLOCKS the shot (`ss2ShotBlocked`) — **and he
+  corrected it the same evening by looking at the arena: only an ENEMY
+  screens.** The archer had ONE legal target, blocked by its own ally, every
+  seed and every size, because allies stagger diagonally and the rank-0 ally
+  always lands just off the rank-1 archer's lane. **Deliberately the opposite of
+  `ss2WalkDestination`'s rule**, which blocks on every body because a walk is a
+  body moving through space; a shot passes over a formation cooperating with the
+  shooter. Two questions, two answers.
 
 ► **A GUARD KEYED ON A CONSEQUENCE HAS AN EXCEPTION NOBODY COUNTED.** The
   construction refusal that held ranged shut fired on `weapon_range > arena
