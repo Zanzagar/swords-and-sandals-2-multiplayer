@@ -333,8 +333,20 @@ function resourceValue(combatant, name) {
 export function composeInClipSpace(limb, piece, offset) {
   const [la, lb, lc, ld, ltx, lty] = limb;
   const [pa, pb, pc, pd, ptx, pty] = piece;
-  const ox = offset?.x ?? 0;
-  const oy = offset?.y ?? 0;
+  // ► **THE OFFSET IS IN ACTIONSCRIPT PIXELS AND THE MATRICES ARE IN TWIPS, and
+  //   the first version added them directly — a factor of twenty out.**
+  //   `attachMovie`'s init object sets `_x`/`_y`, which are MovieClip
+  //   properties in local PIXELS; a SWF matrix stores its translation in twips.
+  //
+  //   The build's own numbers settle it without reaching for the specification:
+  //   the same routine sets `head.eyes._y = -14`, and the head shape is 55
+  //   pixels tall. As pixels that is a quarter of the head — an eye placement.
+  //   As twips it is 0.7 pixels, an invisible nudge nobody would write. So the
+  //   shield's `_y: 50` is fifty PIXELS down the forearm, not 2.5.
+  //
+  //   Found by Codex; the derivation above is this session's own.
+  const ox = (offset?.x ?? 0) * TWIPS_PER_PIXEL;
+  const oy = (offset?.y ?? 0) * TWIPS_PER_PIXEL;
   // The offset applies to the PIECE inside the limb, so it shifts the piece's
   // own translation before the limb's rotation is applied to the result.
   const tx = ptx + ox;
@@ -418,6 +430,9 @@ export function paintExtractedFigure(pack, options = {}) {
         d: entry.d,
         matrix,
         limb: placement.limb ?? null,
+        // The rig depth this part hangs at, so an attached piece can be merged
+        // into the body's own paint order rather than stacked after all of it.
+        rigDepth: Array.isArray(placement.depth) ? placement.depth[0] : null,
         fill: tint(entry.fill, colour),
         fillOpacity: tintAlpha(entry.fillOpacity ?? 1, colour),
         fillRule: entry.fillRule ?? "evenodd",
@@ -442,6 +457,24 @@ export function paintExtractedFigure(pack, options = {}) {
   // own paint order already holds, and a piece never crosses limbs.
   const limbs = chosen.animation.limbs?.[poseIndexAt(chosen.animation.poses.length, at)];
   if (wardrobe && loadout && limbs) {
+    // ► **PAINT ORDER IS THE LIMB'S DEPTH, THEN THE ATTACHMENT'S — not "all
+    //   armour last".** The first version appended every piece after every body
+    //   part, in table order, and never read `attachment.depth` at all. The
+    //   build does not do that: `attachMovie` puts a piece INSIDE a limb clip,
+    //   so it paints at that LIMB's place in the rig's order. Appending them
+    //   all at the end lets a breastplate cover the head and paints the shield
+    //   over everything regardless of where the forearm is.
+    //
+    //   The limb's depth is recovered from the pose itself — a body placement
+    //   carries `depth: [23, 1, 1]` alongside `limb: "torso"` — so nothing new
+    //   has to be extracted for it.
+    const limbDepth = new Map();
+    for (const placement of pose) {
+      if (placement.limb && Array.isArray(placement.depth)) {
+        if (!limbDepth.has(placement.limb)) limbDepth.set(placement.limb, placement.depth[0]);
+      }
+    }
+    const dressed = [];
     for (const attachment of ATTACHMENTS) {
       const id = loadout[attachment.field];
       if (!Number.isFinite(id)) continue;
@@ -456,6 +489,15 @@ export function paintExtractedFigure(pack, options = {}) {
       for (const placement of piece.placements) {
         const pieceShape = wardrobe.shapes?.[placement.shape];
         if (!pieceShape || !Array.isArray(pieceShape.paths)) continue;
+        // ► **A MALFORMED WARDROBE MUST NOT THROW HERE.** The pack is validated
+        //   per animation; the WARDROBE was not, and a placement with a shape
+        //   but no matrix gave `TypeError: piece is not iterable` out of
+        //   `render()`. The shell catches that and schedules another frame
+        //   against the same bad data, so it aborts the draw EVERY frame while
+        //   the bout carries on underneath — a worse failure than falling back,
+        //   because it never stops. Skip the piece, keep the body.
+        if (!Array.isArray(placement.matrix) || placement.matrix.length < 6
+          || !placement.matrix.every((value) => Number.isFinite(value))) continue;
         // limb (in clip space) x the piece's own placement, then the same
         // clip-to-arena transform the body uses. Composed in TWIPS throughout,
         // which is why the offset can simply be added to the translation.
@@ -470,12 +512,13 @@ export function paintExtractedFigure(pack, options = {}) {
         ]);
         for (const entry of pieceShape.paths) {
           if (!entry.d) continue;
-          ops.push(Object.freeze({
+          dressed.push(Object.freeze({
             kind: "path",
             d: entry.d,
             matrix,
             limb: attachment.limb,
             slot: attachment.slot,
+            sortKey: [limbDepth.get(attachment.limb) ?? Number.MAX_SAFE_INTEGER, attachment.depth],
             fill: entry.fill,
             fillOpacity: entry.fillOpacity ?? 1,
             fillRule: entry.fillRule ?? "evenodd",
@@ -487,6 +530,21 @@ export function paintExtractedFigure(pack, options = {}) {
         }
       }
     }
+
+    // Merge into the body's own order: a piece sits with its limb, at its own
+    // depth within it. A STABLE sort, so two pieces at one depth keep the
+    // build's table order rather than swapping unpredictably.
+    dressed.sort((left, right) =>
+      (left.sortKey[0] - right.sortKey[0]) || (left.sortKey[1] - right.sortKey[1]));
+    let cursor = 0;
+    const merged = [];
+    for (const op of ops) {
+      const depth = Number.isFinite(op.rigDepth) ? op.rigDepth : Number.MAX_SAFE_INTEGER;
+      while (cursor < dressed.length && dressed[cursor].sortKey[0] < depth) merged.push(dressed[cursor++]);
+      merged.push(op);
+    }
+    while (cursor < dressed.length) merged.push(dressed[cursor++]);
+    return Object.freeze(merged);
   }
 
   return Object.freeze(ops);

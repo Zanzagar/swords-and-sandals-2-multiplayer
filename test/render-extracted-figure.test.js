@@ -347,12 +347,14 @@ test("an attached piece composes limb x piece in CLIP space, offset included", (
   const identity = [1, 0, 0, 1, 0, 0];
   // A limb translated 100 twips right, a piece at the limb's origin.
   assert.deepEqual(composeInClipSpace([1, 0, 0, 1, 100, 0], identity), [1, 0, 0, 1, 100, 0]);
-  // The offset moves the PIECE inside the limb, so it adds before the limb's
-  // own translation — and with a rotated limb it rotates with it.
-  assert.deepEqual(composeInClipSpace([1, 0, 0, 1, 100, 0], identity, { x: 0, y: 50 }), [1, 0, 0, 1, 100, 50]);
-  // A quarter-turn limb: the shield's +50 in y becomes -50 in x.
+  // ► **THE OFFSET IS IN ACTIONSCRIPT PIXELS AND EVERYTHING ELSE IS IN TWIPS.**
+  //   `_x`/`_y` are MovieClip properties in local pixels, so `_y: 50` is 1000
+  //   twips. Adding it raw was a factor of twenty out, and this test asserted
+  //   the raw version alongside the code that produced it.
+  assert.deepEqual(composeInClipSpace([1, 0, 0, 1, 100, 0], identity, { x: 0, y: 50 }), [1, 0, 0, 1, 100, 1000]);
+  // A quarter-turn limb: the shield's +50px in y becomes -1000 twips in x.
   const turned = composeInClipSpace([0, 1, -1, 0, 0, 0], identity, { x: 0, y: 50 });
-  assert.deepEqual([turned[4], turned[5]], [-50, 0]);
+  assert.deepEqual([turned[4], turned[5]], [-1000, 0]);
 });
 
 
@@ -443,8 +445,58 @@ test("the shield's 50-twip offset moves it, and moves it on the LIMB's axis", ()
   assert.equal(shield.limb, "Rlowerarm");
   assert.equal(gauntlet.limb, "Rlowerarm");
   const scale = 150 / 100;
-  // +50 twips DOWN in clip space is 2.5 px, which is 2.5 * scale UP in arena y.
-  assert.equal(Math.round((gauntlet.matrix[5] - shield.matrix[5]) * 1000) / 1000, 2.5 * scale);
+  // ► **THIS ASSERTED 2.5 AND THAT WAS THE BUG.** `attachMovie`'s init object
+  //   sets `_x`/`_y`, which are ActionScript MovieClip properties in local
+  //   PIXELS; the matrices are in TWIPS. Adding them directly was a factor of
+  //   twenty out, and the test pinned the wrong answer with the code.
+  //
+  //   The build's own numbers settle it: the same routine sets
+  //   `head.eyes._y = -14` and the head shape is 55 pixels tall. As pixels that
+  //   is a quarter of the head — an eye placement. As twips it is 0.7 pixels,
+  //   which nobody would write.
+  assert.equal(Math.round((gauntlet.matrix[5] - shield.matrix[5]) * 1000) / 1000, 50 * scale);
+});
+
+test("a malformed wardrobe is SKIPPED, because throwing here aborts the render loop forever", () => {
+  // ► The shell catches a throw from `render()` and schedules another frame
+  //   against the SAME bad data, so an exception here does not fall back — it
+  //   aborts the draw every frame while the bout carries on underneath.
+  const pack = packOf();
+  const broken = {
+    shapes: SHAPES,
+    pieces: {
+      breastplate: { 3: { linkage: "breastplate3", placements: [{ shape: 2 }] } },
+      helmet: { 2: { linkage: "helmet2", placements: [{ shape: 2, matrix: [1, 0, 0, 1, Number.NaN, 0] }] } },
+      boot: { 4: { linkage: "boot4", placements: [{ shape: 2, matrix: [1, 0, 0, 1] }] } },
+      shield: { 5: { linkage: "shield5", placements: [{ shape: 2, matrix: [1, 0, 0, 1, 0, 0] }] } }
+    }
+  };
+  const loadout = { breastplate: 3, helmet: 2, boot: 4, shield: 5 };
+  let ops;
+  assert.doesNotThrow(() => {
+    ops = paintExtractedFigure(pack, { family: "standing", label: "Standing", at: 0, height: 1, wardrobe: broken, loadout });
+  });
+  // The three malformed pieces are skipped; the good one and the BODY survive.
+  assert.deepEqual(ops.filter((op) => op.slot).map((op) => op.slot), ["shield"]);
+  assert.ok(ops.some((op) => !op.slot), "the body is still drawn");
+});
+
+test("a piece paints with ITS LIMB, not after all of the body", () => {
+  // ► The first version appended every attachment after every body part, in
+  //   table order, and never read `attachment.depth`. `attachMovie` puts a
+  //   piece INSIDE a limb clip, so it paints at that limb's place in the rig.
+  //   Appending them all at the end lets a breastplate cover the head.
+  const pack = packOf();
+  const ops = paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", at: 0, height: 1,
+    wardrobe: wardrobeOf({ breastplate: [3] }), loadout: { breastplate: 3 }
+  });
+  const torsoAt = ops.findIndex((op) => !op.slot && op.limb === "torso");
+  const armourAt = ops.findIndex((op) => op.slot === "breastplate");
+  assert.ok(torsoAt >= 0 && armourAt >= 0);
+  assert.ok(armourAt > torsoAt, "the breastplate paints over its own torso");
+  // And every body op carries the rig depth the merge sorts on.
+  assert.ok(ops.filter((op) => !op.slot).every((op) => Number.isFinite(op.rigDepth)));
 });
 
 test("a loadout slot the wardrobe has no piece for is skipped, not drawn as nothing", () => {
