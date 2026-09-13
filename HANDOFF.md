@@ -8,6 +8,50 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-13 02:35 — the wardrobe was in the linkage table all along](docs/handoffs/2026-09-13-0235--the-wardrobe-was-in-the-linkage-table-all-along.md).**
+Start there. **The arena draws the build's own gladiator**, and a 12-agent wave
+found that **the fighter clip does not dress itself**: the mechanism is at the
+ROOT (`DoAction` at `0x40bf76`, body `0x40bf7c`, a 149-entry constant pool) and
+the whole wardrobe is exported by linkage name.
+
+```text
+  weapon  89  ids 0..220      shield    25  ids 0..25     387 pieces
+  helmet  40  ids 1..120      facehair  24  ids 1..24     12 slots
+  hair    40  ids 1..40       features  19  ids 1..24     401 shapes
+  boot / shinguard / breastplate / shoulderguard / greaves / gauntlet
+          25 each, ids 2..26                              0 failures
+```
+
+► **THE ITEM ROW'S ID *IS* THE ART COLUMN.** 89 weapon symbols against the item
+  tables' ~90 weapon rows. This repository carried `MAP_SILENCE`-shaped doubt
+  about appearance that the export table answers outright.
+► **AN EMPTY SLOT MAY MEAN YOU ARE LOOKING AT THE WRONG SLOT.** Sprite 704 at
+  depth 35 named `shield` holds nothing, and I read that as a placeholder
+  nobody had filled — ranking it as work and citing the head's invisible parts
+  as a second witness. **The shield attaches to the RIGHT FOREARM at depth 3.**
+  `attachMovie` onto a NAMED LIMB, `Color` onto that limb's `bareskin` child —
+  so the grey canvas is right for a better reason: there is a named tint target
+  under every limb. **`helmet` and `hair` share depth 5, so a helmet REPLACES
+  the hair** — a game rule falling out of the byte layout.
+► **`--host 0.0.0.0` IS NOT OPTIONAL HERE: Windows cannot reach WSL's
+  loopback.** `Invoke-WebRequest http://127.0.0.1:8123/` from Windows TIMES OUT
+  while `curl` inside WSL gets 200. **Three sessions called this server healthy
+  on the strength of `curl` from the one place it was always going to work**,
+  so the owner's browser could never open the arena. `preview.html` is
+  unaffected — it is self-contained.
+► **THE OWNER FOUND FOUR DEFECTS BY PLAYING IT.** Sounds cut off (one `Audio`
+  element per file, and the build SHARES files across labels — `706.mp3` serves
+  FIVE); sounds not starting (autoplay blocked, and spectate never interacts —
+  the rejection was caught and discarded); a blank preview; and **a 2v1 that
+  will not flank**. That last is NOT a bug: a walk may never cross a foe, and
+  `chooseAiAction` has no pincer concept. **0 crossings in 3,424 turns.** He is
+  right that it is the weaker play, and it is ranked.
+► **RANKED FIRST: DRESS THE GLADIATOR.** Everything is derived and extracted;
+  the one gap is the per-piece `_x`/`_y` offsets in the `attachMovie` init
+  objects.
+
+*(The brief it supersedes, whose ranked items 1 and 2 are done — and whose item
+2 was built on the shield misreading above:)*
 [2026-09-13 00:40 — the fighter is a rig, and Codex broke four things in it](docs/handoffs/2026-09-13-0040--the-fighter-is-a-rig-and-codex-broke-four-things.md).**
 Start there. **Ranked item 1 of the brief below is DONE: the fighter clip
 resolves.** 101 animations, 2,222 poses, 61 shapes, 0 parse failures, extracted

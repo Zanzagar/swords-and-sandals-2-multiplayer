@@ -54,6 +54,46 @@
  * the tables were never missing an art column, because the ID was the art
  * column all along.
  *
+ * ## WHERE EACH PIECE GOES, decoded from the same function
+ *
+ * `updatecharacter(whichcharacter, whichavatar)` makes 20 `attachMovie` calls.
+ * Disassembled from the action records at `0x40bf7c` — AS2 pushes arguments in
+ * REVERSE, so each call reads `Push <depth>, <instance>, <linkage>, <argc>,
+ * <scope>, <limb>; GetMember; Push "attachMovie"; CallMethod`:
+ *
+ * ```text
+ *   target limb    instance       depth  linkage
+ *   head           features         4    "features"      + char.features
+ *   head           facehair         3    "facehair"      + char.facehairstyle
+ *   head           hair             5    "hair"          + char.hairstyle
+ *   head           helmet           5    "helmet"        + char.helmet
+ *   torso          breastplate      1    "breastplate"   + char.breastplate
+ *   Lupperarm      shoulderguard    1    "shoulderguard" + char.shoulderguard
+ *   Rupperarm      shoulderguard    1    "shoulderguard" + char.shoulderguard
+ *   Llowerarm      gauntlet         1    "gauntlet"      + char.gauntlet
+ *   Rlowerarm      gauntlet         2    "gauntlet"      + char.gauntlet
+ *   Lupperleg      greaves          1    "greaves"       + char.greaves
+ *   Rupperleg      greaves          1    "greaves"       + char.greaves
+ *   Llowerleg      shinguard        1    "shinguard"     + char.shinguard
+ *   Rlowerleg      shinguard        1    "shinguard"     + char.shinguard
+ *   Lfoot          boot             1    "boot"          + char.boot
+ *   Rfoot          boot             1    "boot"          + char.boot
+ *   Rlowerarm      shield           3    "shield"        + char.shield
+ *   (head)         eyes             1    "eyes1"
+ *   (head)         mouth            2    "mouth1"
+ * ```
+ *
+ * ► **`helmet` AND `hair` SHARE DEPTH 5, so a helmet REPLACES the hair.** That
+ *   is a game rule falling straight out of the byte layout, not a decision
+ *   anyone here has to make — and it is the kind of thing a renderer that
+ *   invented its own paint order would get wrong while looking plausible.
+ *
+ * ► **AND `eyes`/`mouth` ARE ATTACHED TOO, at depths 1 and 2 of the head**,
+ *   which is what the 118 `head.eyes.gotoAndPlay` and 106
+ *   `head.mouth.gotoAndPlay` calls inside clip 1241 are driving. The face is
+ *   not painted into the head shape; it is a pair of attached clips with their
+ *   own timelines, and the fighter clip animates the EXPRESSION.
+ *
  * Usage:
  *   node tools/extract-wardrobe.mjs --report          # measure, write nothing
  *   node tools/extract-wardrobe.mjs                   # writes assets/figure/wardrobe.json
