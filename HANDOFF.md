@@ -8,6 +8,44 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-13 01:30 — the arena has two axes, and the build has its own voice](docs/handoffs/2026-09-13-0130--the-arena-has-two-axes-and-the-build-has-its-own-voice.md).**
+Start there. **The second axis is SHIPPED, not a flag** — `rankStride` defaults
+to 97 with three lanes, the owner's own choice after playing it. A gladiator
+turns to face whoever it is fighting (`changeCombatants` derives facing from
+position; turning was never an action in the build), a blow from behind costs
+extra, and **the build's own sound effects play in the arena** — extracted from
+the player's install, never from this repository.
+
+```text
+                       stride 0    SHIPPED (97)
+  settled                24/24        24/24
+  can hit EVERY foe      13.3%        20.2%
+  blows through body      0.0%        15.6%
+  most fights at once        1            2
+```
+
+► **THE LESSON, and it is the FIFTH instance: a SUMMARY in a transcription is
+  not a catalogue.** The owner heard a jump sound on a walk. The cause was
+  bucketing extracted sounds by the battle map's PROSE ranges — "movement and
+  charge (33-104)" is four different clips including a leaping attack, and
+  "Block (118/179)" swallowed both jumps. **`Block` carries no sound at all**,
+  which the prose hid by lending it one. The clip enumerates itself: **101
+  frame labels against 17 prose ranges.** Nothing in the suite could catch it,
+  because BOTH SIDES of the lookup bucketed the same coarse way and agreed —
+  **two coarse mappings agreeing is not the same as either being right.**
+► **ASSETS COME OUT OF YOUR OWN INSTALL AND NEVER INTO THE REPO.** `assets/` is
+  gitignored AND `test/asset-attestation.test.js` fails if anything under it is
+  tracked — two lines of defence, because the ignore rule alone has already
+  failed once here. Doom/WAD model, and `AGENTS.md` already said so.
+► **RANKED FIRST: stage 2 of asset extraction** — resolve the display list, so
+  the 70 shapes the fighter clip reaches become a gladiator standing. The
+  handoff carries the SWF structure already derived; do not re-derive it.
+► **THE ONLY OWNER DECISION STILL OPEN is the projection version bump**, now
+  the fourth format change under a constant `BATTLE_STATE_VERSION`. Nothing is
+  deployed, so it is free.
+
+*(The brief it supersedes, whose central claim is now WRONG — it says the second
+axis sits behind a flag that is off by default:)*
 [2026-09-12 20:30 — the build had a second axis all along](docs/handoffs/2026-09-12-2030--the-build-had-a-second-axis-all-along.md).**
 Start there. **`getfightdistance` computes `ydist` from `_y` and returns
 `round(sqrt(xdist^2 + ydist^2))` — the build's own distance is EUCLIDEAN, and
