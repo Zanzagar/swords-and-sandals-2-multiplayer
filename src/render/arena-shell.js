@@ -143,3 +143,104 @@ export function figureProvenance({ hasExtractedArt = false, wardrobePieces = 0 }
     + "No SS2 asset ships in this repository — a clone draws the authored art in `src/render/figure.js` "
     + "until its owner extracts their own.";
 }
+
+/**
+ * How many gladiators a side, from the query string.
+ *
+ * Clamped to 1..3 because the arena's own rosters and the rank geometry are
+ * built for at most three, and a `?teams=99` should give you a 3v3 rather than
+ * an exception or a field of gladiators standing on each other.
+ */
+export function perSideFrom(params, { max = 3, fallback = 2 } = {}) {
+  // ► **THE SHELL'S `|| 2` DOES MORE THAN CATCH `NaN`, and extracting it
+  //   carelessly changed behaviour.** `Number(null)` is 0, not `NaN`, so an
+  //   ABSENT `?teams` arrives here as a perfectly finite zero — and a first
+  //   version that only guarded `Number.isFinite` clamped it to 1, turning the
+  //   default arena from a 2v2 into a 1v1. An extraction has to preserve what
+  //   the line did, including the parts that were accidental.
+  //   **ONE DELIBERATE DIFFERENCE, stated rather than hidden:** the original
+  //   `Math.min(3, Math.max(1, Number(v) || 2))` returns 2.7 for `?teams=2.7`
+  //   and hands a fractional team size to the roster builder. This truncates.
+  //   That is a fix, not a faithful reproduction, and it is the only input on
+  //   which the two disagree — checked across null, "", 0, 1, 2, 3, 99, -4,
+  //   "banana" and "2.7".
+  const raw = params && typeof params.get === "function" ? Number(params.get("teams")) : Number.NaN;
+  const requested = Number.isFinite(raw) && raw !== 0 ? raw : fallback;
+  return Math.min(max, Math.max(1, Math.trunc(requested)));
+}
+
+/**
+ * How many ranks back a drawn depth is, FRACTIONALLY, for the perspective
+ * falloff.
+ *
+ * ► **FRACTIONAL AND FROM THE DRAWN y, NOT THE SLOT INDEX.** A figure part-way
+ *   through a lane change is between ranks, and taking its `slotIndex` instead
+ *   keeps it at its starting size for the whole slide — which leaves a pure
+ *   vertical translation, and in this game that is what a JUMP looks like.
+ *   The slot index is the fallback for a figure with no depth at all.
+ */
+export function rankOfDepth(drawnY, slotIndex, { frontY, rankStride }) {
+  if (!Number.isFinite(drawnY) || !(rankStride > 0)) return slotIndex;
+  return Math.max(0, (frontY - drawnY) / rankStride);
+}
+
+/**
+ * The viewport's SCALE and HORIZON for a roster, which is the arithmetic two
+ * live defects lived in.
+ *
+ * ► **THE BACK RANK WAS DRAWN STANDING IN THE CROWD.** The extent scan read
+ *   `Math.abs(actor.x)` and nothing else, which was complete while every
+ *   gladiator stood on one line and wrong the moment they did not.
+ * ► **AND FITTING ONLY THE WIDTH DROVE THE HORIZON OFF THE TOP OF THE CANVAS.**
+ *   At stride 150 the solved horizon came out at -191 on an 800px canvas: no
+ *   crowd, no barrier, the whole view sand. `depthScaleCap` is the same
+ *   inequality solved the other way.
+ *
+ * Both were found by SCREENSHOTTING, because nothing could test this file.
+ *
+ * With the second axis off `depthUnits` is ~20 and the depth terms are hundreds
+ * of times looser than the width term, so they never bind and the
+ * one-dimensional arena is pixel-identical. That is asserted, not assumed.
+ */
+export function viewportFor({ width, height, actors = [], frontY, minExtent = 250 }) {
+  let extent = minExtent;
+  let rearY = frontY;
+  for (const actor of actors) {
+    if (!actor || actor.placed === false) continue;
+    if (Number.isFinite(actor.x)) extent = Math.max(extent, Math.abs(actor.x));
+    if (Number.isFinite(actor.y)) rearY = Math.min(rearY, actor.y);
+  }
+  // A gladiator is about 150 arena units tall and swings about half that wide.
+  const halfWidth = extent + 105;
+  const depthUnits = frontY - rearY;
+  const MIN_HORIZON_FRACTION = 0.18;
+  const depthScaleCap = (height * (1 - MIN_HORIZON_FRACTION)) * 0.62 / (depthUnits * 1.7 + 30);
+  const scale = Math.min(width / (halfWidth * 2), height / 250, depthScaleCap);
+  const depthSpan = depthUnits * scale * 1.7;
+  const FLOOR_MARGIN = scale * 30;
+  const horizon = Math.max(
+    height * MIN_HORIZON_FRACTION,
+    Math.min(height * 0.58, height - (FLOOR_MARGIN + depthSpan) / 0.62)
+  );
+  return { scale, horizon, extent, depthUnits };
+}
+
+/**
+ * The roster panel's order: heroes first, then by slot.
+ *
+ * ► **THE PANEL WENT BACK-TO-FRONT WITH THE TEAMS INTERLEAVED** because it
+ *   borrowed the scene's `drawOrder`, which is PAINT order — back rank first,
+ *   both sides mixed. A reader's list and a painter's list are different
+ *   questions and sharing one answer was the defect. Caught by screenshotting.
+ *
+ * `placementOf` is passed in so this needs no host: it maps an id to
+ * `{side, slotIndex}`.
+ */
+export function rosterOrderOf(ids, placementOf) {
+  return [...(ids ?? [])].sort((left, right) => {
+    const leftAt = placementOf(left);
+    const rightAt = placementOf(right);
+    if (leftAt.side !== rightAt.side) return leftAt.side === "hero" ? -1 : 1;
+    return leftAt.slotIndex - rightAt.slotIndex;
+  });
+}

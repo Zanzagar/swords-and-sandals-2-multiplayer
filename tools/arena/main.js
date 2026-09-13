@@ -60,6 +60,10 @@ import {
   selectRules,
   retireVoices,
   figureProvenance,
+  perSideFrom,
+  rankOfDepth,
+  viewportFor,
+  rosterOrderOf,
   poseAt,
   timelineFor,
   timelinesForStep,
@@ -80,13 +84,11 @@ const ARENA_FRONT_Y = 200;
  * falloff. Falls back to the roster's slot for any rule set that models no
  * depth, which is what `figureScaleFor` keyed on before the second axis.
  */
-function rankOf(drawnY, slotIndex) {
-  if (!Number.isFinite(drawnY) || !(SS2_ARENA.rankStride > 0)) return slotIndex;
-  return Math.max(0, (ARENA_FRONT_Y - drawnY) / SS2_ARENA.rankStride);
-}
+const rankOf = (drawnY, slotIndex) =>
+  rankOfDepth(drawnY, slotIndex, { frontY: ARENA_FRONT_Y, rankStride: SS2_ARENA.rankStride });
 
 const params = new URLSearchParams(location.search);
-const perSide = Math.min(3, Math.max(1, Number(params.get("teams")) || 2));
+const perSide = perSideFrom(params);
 const seed = Number(params.get("seed")) || 7;
 /**
  * Spectate mode: both sides pick for themselves, one action at a time, THROUGH
@@ -454,62 +456,17 @@ function viewport() {
   const width = canvas.width;
   const height = canvas.height;
 
-  let extent = 250;
-  // ► **THE DEPTH BAND, added 2026-09-12 with the second axis. Without it the
-  //   BACK RANK IS DRAWN STANDING IN THE CROWD** — caught by screenshotting
-  //   the arena at `?rank=97`, which is the only thing that can catch it: the
-  //   suite cannot reach this file, and every test passed with the rear rank
-  //   167 pixels above the sand.
-  //
-  //   This scan used to read `Math.abs(actor.x)` and nothing else, which was
-  //   right while every gladiator stood on one line. `rearY` is the smallest
-  //   arena y on stage — arena y DECREASES going back — and 200 is the front
-  //   rank, so `200 - rearY` is how deep the roster reaches.
-  let rearY = ARENA_FRONT_Y;
-  for (const combatantId of scene.drawOrder) {
-    const actor = scene.actors[combatantId];
-    if (!actor.placed) continue;
-    extent = Math.max(extent, Math.abs(actor.x));
-    if (Number.isFinite(actor.y)) rearY = Math.min(rearY, actor.y);
-  }
-  // A gladiator is about 150 arena units tall and swings about half that wide.
-  const halfWidth = extent + 105;
-  // How deep the roster reaches, in arena units. 0 when everybody is level.
-  const depthUnits = ARENA_FRONT_Y - rearY;
-  // ► **THE DEPTH ALSO CONSTRAINS THE SCALE, and leaving it out drove the
-  //   horizon OFF THE TOP OF THE CANVAS.** At `?rank=150` the solved horizon
-  //   came out at -191 on an 800px canvas: no crowd, no barrier, the whole
-  //   view sand. Fitting only the width is what the comment above describes,
-  //   and it was complete while every gladiator stood on one line.
-  //
-  //   Keeping at least `MIN_HORIZON_FRACTION` of the canvas as arena bowl and
-  //   solving the same inequality the other way gives the largest scale the
-  //   depth allows. With the second axis off, `depthUnits` is ~20 and this
-  //   term is hundreds of times looser than the width term, so it never binds
-  //   and the ordinary arena is untouched — verified: the axis-off horizon is
-  //   still exactly `height * 0.58`.
-  const MIN_HORIZON_FRACTION = 0.18;
-  const depthScaleCap = (height * (1 - MIN_HORIZON_FRACTION)) * 0.62 / (depthUnits * 1.7 + 30);
-  const scale = Math.min(width / (halfWidth * 2), height / 250, depthScaleCap);
-  // The ground plane starts here. Everything above it is the arena bowl, which
-  // is why the horizon sits near the middle rather than at the bottom: a bout
-  // is much wider than it is tall, so fitting the width leaves vertical room,
-  // and an empty sky is the wrong thing to spend it on.
-  // How far up the canvas the rearmost rank reaches, in pixels, under `toY`'s
-  // own 1.7 depth multiplier. Zero when everybody stands on the front line.
-  const depthSpan = (ARENA_FRONT_Y - rearY) * scale * 1.7;
-  // The sand must reach BEHIND the rearmost rank, with room for its feet.
-  // `toY` puts a figure at `horizon + (height - horizon) * 0.62 - depthSpan`,
-  // so keeping that below the horizon by `FLOOR_MARGIN` solves for the highest
-  // horizon the roster allows. With the second axis off the span is ~20 units
-  // and this term never binds, so the ordinary arena is pixel-identical.
-  const FLOOR_MARGIN = scale * 30;
-  // `depthScaleCap` above guarantees the solved value clears the floor, so this
-  // is a belt-and-braces bound rather than the thing doing the work.
-  const horizon = Math.max(
-    height * MIN_HORIZON_FRACTION,
-    Math.min(height * 0.58, height - (FLOOR_MARGIN + depthSpan) / 0.62)
-  );
+  // WHICH scale and horizon fit this roster is decided in
+  // `src/render/arena-shell.js`, under the suite — two live defects lived in
+  // that arithmetic and both were found by screenshotting, because nothing
+  // could test this file. What stays here is `toX`/`toY`, which close over the
+  // canvas and are the mapping rather than the decision.
+  const { scale, horizon } = viewportFor({
+    width,
+    height,
+    frontY: ARENA_FRONT_Y,
+    actors: scene.drawOrder.map((combatantId) => scene.actors[combatantId])
+  });
 
   return {
     scale,
@@ -870,12 +827,7 @@ function render(now = performance.now()) {
  *   the arena and noticing the panel had changed, which no test was watching.
  */
 function rosterOrder() {
-  return [...scene.drawOrder].sort((left, right) => {
-    const leftAt = host.layout.placementFor(left);
-    const rightAt = host.layout.placementFor(right);
-    if (leftAt.side !== rightAt.side) return leftAt.side === "hero" ? -1 : 1;
-    return leftAt.slotIndex - rightAt.slotIndex;
-  });
+  return rosterOrderOf(scene.drawOrder, (id) => host.layout.placementFor(id));
 }
 
 function renderRoster() {

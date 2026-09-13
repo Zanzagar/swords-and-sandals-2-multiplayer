@@ -83,6 +83,11 @@ lever and is the owner's call.
 
 ---
 
+## DECIDED BY THE OWNER — do not reopen
+
+**2026-09-13: range WILL interact with the second axis.** See question 3 below
+for what that does and does not settle.
+
 ## THE QUESTIONS THAT ARE THE OWNER'S, not an agent's
 
 These are game feel and no measurement settles them. **Ask before building:**
@@ -93,10 +98,24 @@ These are game feel and no measurement settles them. **Ask before building:**
    `100 + physical_size` — roughly "you may only shoot what is NOT on top of
    you". Is that the game you want, or should an archer be able to fire into
    melee at a penalty?
-3. **Does the second axis interact with range?** A bow that ignores rank makes
-   the depth axis decorative for archers; a bow that needs line of sight down a
-   rank makes it central. **This is the one that touches everything else built
-   this week.**
+3. ~~**Does the second axis interact with range?**~~ **ANSWERED BY THE OWNER,
+   2026-09-13: "yes, range will interact with the second axis."**
+
+   ► **AND IT IS CHEAPER THAN IT SOUNDS, because the metric already does half
+     of it.** `getfightdistance` returns
+     `round(sqrt(xdist^2 + ydist^2))` — the build's own distance is EUCLIDEAN
+     over both axes, derived 2026-09-12 — and `ss2FightDistance` already
+     implements it. **So a foe two ranks back is ALREADY further away**, and a
+     range gate expressed as `fightdistance < N` is already a 2-D gate. Nothing
+     needs adding for that much.
+
+     What is NOT settled by it: whether a rank between you and your target
+     BLOCKS the shot. The build cannot answer — vanilla has one gladiator a
+     side, so there is never a body in the way — which puts line-of-sight
+     squarely inside `MAP_SILENCE.multi-slot-arena-geometry` and makes it
+     authored. **`ss2BodyBlocks` is the existing precedent** for that shape of
+     rule: it gates the walk clamp on `|dy| < physical_size(foe)` and is
+     authored inside the same silence.
 4. **Ammunition: finite or not?** The resources exist. Nothing consumes them.
 
 ---

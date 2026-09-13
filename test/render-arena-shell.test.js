@@ -14,9 +14,13 @@ import test from "node:test";
 import {
   ArenaShellError,
   figureProvenance,
+  perSideFrom,
+  rankOfDepth,
   rankStrideFrom,
   retireVoices,
-  selectRules
+  rosterOrderOf,
+  selectRules,
+  viewportFor
 } from "../src/render/arena-shell.js";
 
 const params = (query) => new URLSearchParams(query);
@@ -109,4 +113,96 @@ test("the provenance line is DERIVED, because it claimed authored art over the e
   assert.match(dressed, /387 extracted wardrobe piece/);
   // Whatever it says, it must never stop saying the repo ships nothing.
   for (const line of [authored, naked, dressed]) assert.match(line, /No SS2 asset ships in this repository/);
+});
+
+/* ------------------------------------------------------------------ */
+/* Four more decisions, every one of which has had a LIVE defect        */
+/* ------------------------------------------------------------------ */
+
+test("?teams clamps to 1..3 rather than throwing or stacking gladiators", () => {
+  assert.equal(perSideFrom(params("")), 2, "the default is a duel's worth");
+  assert.equal(perSideFrom(params("teams=1")), 1);
+  assert.equal(perSideFrom(params("teams=3")), 3);
+  assert.equal(perSideFrom(params("teams=99")), 3, "a big number is a 3v3, not an exception");
+  // ► These three pin what the shell's `|| 2` ACTUALLY did, which is not what
+  //   it looks like it did: `Number(null)` and `Number("0")` are both 0, so
+  //   absent and zero take the fallback, while a negative is truthy and clamps.
+  assert.equal(perSideFrom(params("teams=0")), 2, "zero is falsy, so it takes the fallback");
+  assert.equal(perSideFrom(params("teams=-4")), 1, "but a negative is truthy and clamps to 1");
+  assert.equal(perSideFrom(params("teams=banana")), 2);
+  assert.equal(perSideFrom(null), 2);
+  // The one deliberate difference from the shell expression this replaced: it
+  // returned 2.7 here and handed a fractional team size to the roster builder.
+  assert.equal(perSideFrom(params("teams=2.7")), 2, "a fractional roster is not a roster");
+});
+
+test("the perspective rank is FRACTIONAL and comes from the drawn y, not the slot", () => {
+  // ► Taking `slotIndex` keeps a figure at its starting size for the whole lane
+  //   change, which leaves a pure vertical translation — and in this game that
+  //   is what a JUMP looks like. The owner reported exactly that.
+  const arena = { frontY: 200, rankStride: 97 };
+  assert.equal(rankOfDepth(200, 0, arena), 0, "the front rank is rank 0");
+  assert.equal(rankOfDepth(103, 1, arena), 1);
+  assert.equal(rankOfDepth(151.5, 0, arena), 0.5, "mid-slide is BETWEEN ranks");
+  assert.equal(rankOfDepth(300, 0, arena), 0, "in front of the front rank clamps at 0");
+  // No depth at all, or the axis off: fall back to the slot.
+  assert.equal(rankOfDepth(null, 2, arena), 2);
+  assert.equal(rankOfDepth(103, 2, { frontY: 200, rankStride: 0 }), 2);
+});
+
+test("the viewport fits the DEPTH as well as the width, or the horizon leaves the canvas", () => {
+  // ► At stride 150 the solved horizon came out at -191 on an 800px canvas: no
+  //   crowd, no barrier, the whole view sand. Found by screenshotting.
+  const flat = viewportFor({
+    width: 1280, height: 800, frontY: 200,
+    actors: [{ x: -250, y: 200, placed: true }, { x: 250, y: 200, placed: true }]
+  });
+  assert.equal(flat.depthUnits, 0);
+  assert.ok(flat.horizon > 0 && flat.horizon < 800, "a flat roster gives an on-canvas horizon");
+  assert.equal(Math.round(flat.horizon), Math.round(800 * 0.58), "and with no depth it is exactly the old value");
+
+  const deep = viewportFor({
+    width: 1280, height: 800, frontY: 200,
+    actors: [{ x: -250, y: 200, placed: true }, { x: 250, y: -100, placed: true }]
+  });
+  assert.equal(deep.depthUnits, 300);
+  assert.ok(deep.horizon >= 800 * 0.18, "the horizon never leaves the canvas");
+  assert.ok(deep.scale < flat.scale, "a deeper roster must draw smaller to fit");
+});
+
+test("the viewport's extent scan reads y as well as x, or the back rank stands in the crowd", () => {
+  // ► The scan read `Math.abs(actor.x)` and nothing else, which was complete
+  //   while every gladiator stood on one line.
+  const seen = viewportFor({
+    width: 1280, height: 800, frontY: 200,
+    actors: [{ x: 100, y: 6, placed: true }, { x: -100, y: 200, placed: true }]
+  });
+  assert.equal(seen.depthUnits, 194, "the rearmost y is what sets the depth");
+
+  // An UNPLACED actor is not on stage and must not widen the view.
+  const ignored = viewportFor({
+    width: 1280, height: 800, frontY: 200,
+    actors: [{ x: 2000, y: -900, placed: false }, { x: 100, y: 200, placed: true }]
+  });
+  assert.equal(ignored.depthUnits, 0);
+  assert.equal(ignored.extent, 250, "and the minimum extent still holds the view open");
+});
+
+test("the ROSTER panel is heroes-then-slot, not the painter's back-to-front order", () => {
+  // ► It borrowed the scene's `drawOrder`, which is PAINT order — back rank
+  //   first, both sides interleaved. A reader's list and a painter's list are
+  //   different questions; sharing one answer was the defect.
+  const placement = {
+    "blue-2": { side: "villain", slotIndex: 1 },
+    "red-0": { side: "hero", slotIndex: 0 },
+    "blue-0": { side: "villain", slotIndex: 0 },
+    "red-2": { side: "hero", slotIndex: 2 }
+  };
+  const paintOrder = ["blue-2", "red-2", "blue-0", "red-0"];
+  assert.deepEqual(
+    rosterOrderOf(paintOrder, (id) => placement[id]),
+    ["red-0", "red-2", "blue-0", "blue-2"]
+  );
+  assert.deepEqual(rosterOrderOf([], () => ({})), []);
+  assert.deepEqual(rosterOrderOf(null, () => ({})), []);
 });
