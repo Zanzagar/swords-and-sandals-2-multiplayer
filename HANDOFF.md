@@ -8,6 +8,42 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-13 16:00 — everything but ranged is closed](docs/handoffs/2026-09-13-1600--everything-but-ranged-is-closed.md).**
+Start there, then **[`docs/handoffs/RANGED-BRIEF.md`](docs/handoffs/RANGED-BRIEF.md)** —
+**RANGED IS THE ONLY THING LEFT, the owner has asked for a FULL SWEEP of it, and
+he has already answered the question that gated the design.**
+
+► **OWNER, 2026-09-13: "range will interact with the second axis."** And it is
+  cheaper than it sounds — `getfightdistance` is EUCLIDEAN over both axes and
+  `ss2FightDistance` already implements it, **so a foe two ranks back is already
+  further away** and `fightdistance < N` is already a 2-D gate. What it does NOT
+  settle is whether a rank BETWEEN you and your target blocks the shot; vanilla
+  has one gladiator a side and cannot answer, so line of sight is AUTHORED
+  inside `MAP_SILENCE.multi-slot-arena-geometry`.
+► **THE LAST OPEN DECISION IS CLOSED: `BATTLE_STATE_VERSION` IS DERIVED**, owner
+  2026-09-13 — derive rather than bump, because bumping fixes the instance and
+  deriving removes the failure mode. `fnv1a` over the sorted
+  `COMBATANT_PROJECTION_FIELDS`, **1 -> 573176825**, an IDENTITY not an
+  ordering, with a test asserting the declared list is what the projection
+  actually returns. **Eleven pinned hashes moved, all accounted for by name; NO
+  GOLDEN MOVED.** Two stings: `src/engine.js` projected `battle.version` so the
+  number leaked into the frozen compatibility façade (it carries
+  `LEGACY_WIRE_VERSION = 1` now), and **90 tests failed on ONE schema line**
+  because `fnv1a` returns hex where a sealed record wants a positive integer.
+► **DONE AND NOT TO BE REOPENED:** the rig (101 animations, 290 baked morph
+  frames — the blood), the wardrobe (387 pieces attached by the build's own
+  table), sound bound by frame label, a 2v1 that PINCERS (0% -> 17.8%), and
+  eight decisions moved out of the browser shell.
+► **`ids 1..24` IS A MIN AND A MAX, NOT A RANGE.** Five absent `features` ids
+  became a ranked open question that way. The build only ever exported
+  nineteen. The report names gaps now — and the one real signal it uncovered is
+  that `shield` is missing exactly id 13.
+► **THE WEAPON ENCHANTMENT SELECTOR HAS NOT BEEN FOUND**, and that is recorded
+  as a gap in the SEARCH rather than guessed at: `weapon0` is character 703 with
+  `flame`/`frost`/`poison`/`wraith` at frames 2/5/8/11, the resources exist, and
+  **`updatecharacter` contains no `gotoAndStop` at all.**
+
+*(The brief it supersedes, whose every ranked item is now done or handed off:)*
 [2026-09-13 11:45 — the gladiator is dressed, and the shell has a seam](docs/handoffs/2026-09-13-1145--the-gladiator-is-dressed-and-the-shell-has-a-seam.md).**
 Start there. **The arena draws the build's own gladiator wearing his own
 armour** — 387 wardrobe pieces attached by the build's own table, all 44 morph
