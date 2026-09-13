@@ -93,15 +93,20 @@ class BitReader {
     return value;
   }
 
-  /** RECT: a 5-bit width then four signed fields of that width. */
-  skipRect() {
+  /** RECT: a 5-bit width then four signed fields of that width, in twips. */
+  readRect() {
     this.align();
     const bits = this.readUB(5);
-    this.readSB(bits);
-    this.readSB(bits);
-    this.readSB(bits);
-    this.readSB(bits);
+    const xMin = this.readSB(bits);
+    const xMax = this.readSB(bits);
+    const yMin = this.readSB(bits);
+    const yMax = this.readSB(bits);
     this.align();
+    return { xMin, xMax, yMin, yMax };
+  }
+
+  skipRect() {
+    this.readRect();
   }
 
   skipMatrix() {
@@ -197,9 +202,13 @@ export function parseShape(buffer, start, end, tagCode) {
   const reader = new BitReader(buffer, start, end);
 
   const id = reader.readUI16();
-  reader.skipRect();
+  // The declaring RECT, kept rather than skipped: a caller composing this shape
+  // into a scene needs a viewBox, and recovering one from relative path data
+  // means re-walking every edge. It is in TWIPS, like every other coordinate on
+  // the wire, and unlike the path data this parser emits in pixels.
+  const bounds = reader.readRect();
   if (shapeVersion === 4) {
-    reader.skipRect();
+    reader.skipRect(); // DefineShape4's edge bounds, which include stroke width.
     reader.readUI8();
   }
 
@@ -298,7 +307,7 @@ export function parseShape(buffer, start, end, tagCode) {
   }
   flush();
 
-  return { id, version: shapeVersion, fills, lines, runs };
+  return { id, version: shapeVersion, bounds, fills, lines, runs };
 }
 
 /** `#rrggbb` plus a separate alpha, which SVG wants as its own attribute. */
