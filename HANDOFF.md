@@ -44,14 +44,37 @@ from the player's own install into gitignored `assets/figure/`.
   it moves 55 placements across 7 sprites, **and clip 1241 is not one of them**,
   measured by resolving every sprite both ways rather than inferred. I reasoned
   about that twice and was wrong both times before diffing.
-► **LOOK AT `assets/figure/preview.html`** (`node tools/arena-server.mjs`, then
-  `http://127.0.0.1:8123/assets/figure/preview.html`). **Nobody has.** It is the
-  only check this extraction has, because no suite can tell a correct rig from a
-  plausible one.
+► **OPEN `assets/figure/preview.html`. No server — it is self-contained.** It
+  is the only check this extraction has, because no suite can tell a correct rig
+  from a plausible one, **and it earned that on first use.** The first version
+  `fetch`ed its data, so a `file://` open gave the owner a BLANK PAGE; and once
+  it rendered, the gladiator had black-and-white WEDGES across his chest.
+  `shapeToPaths` emitted each edge run as its own OPEN subpath, and a renderer
+  closes a filled open subpath with a straight chord. **Torso: 127 open runs ->
+  10 closed regions.** Every number in the extraction called that correct — 824
+  of 824 shapes "survived", the `d` strings were well-formed — and the two tests
+  pinning path data asserted the OPEN strings, because I wrote them from the
+  same wrong model. **The stitch: reverse a `fillStyle0` edge, chain on EXACT
+  integer twips, one element per fill under `fill-rule: evenodd`, close with
+  `Z`. An edge with the same fill on both sides is INTERIOR and is not
+  boundary** — style state persists across records, so that is common.
+► **THE PREVIEW NOW SOUNDS, so it checks BOTH extractions at once.** The two
+  join on the build's own frame labels and nothing else. 80 of 101 animations
+  carry sound; the other 21 say so rather than looking broken. **Nobody has
+  listened yet — that is now one action: open it, pick `StepForward`.**
+► **COLOUR TRANSFORMS ARE THE CONDITION TINTS — 4,544 placements carry one**
+  (`death_poisoned` 735, `cast1` 732, `frozen` 560, `poisoned` 286, `lifesteal`
+  272, `lightning` 224). A frozen gladiator is blue and encased in ice.
+► **THE BASE BODY ART IS A GREY CANVAS BUILT TO BE TINTED** — `#cccccc`,
+  `#666666`, `#333333`, tan sandals, one skin-toned fill under the head. **So
+  team colours are the art's own mechanism, not a fight with it.** That answers
+  the open question the stage-3 item was blocked on. The head's three extra
+  parts are all `fillOpacity: 0` placeholder slots, exactly like the empty
+  `shield` — two independent pieces of evidence that face, hair and armour are
+  attached at runtime by a mechanism still unfound.
 ► **RANKED FIRST: stage 3** — the renderer prefers extracted art with
-  `figure.js` as the fallback, exactly as sound already does. **The open
-  question is not technical: the extracted rig is ONE body, while `figure.js`
-  draws eight armour slots and two team palettes.**
+  `figure.js` as the fallback, exactly as sound already does. **What is still
+  open is the eight armour SLOTS, which the base clip does not dress.**
 
 *(The brief it supersedes, whose ranked item 1 is the work above:)*
 [2026-09-13 01:30 — the arena has two axes, and the build has its own voice](docs/handoffs/2026-09-12-2358--the-arena-has-two-axes-and-the-build-has-its-own-voice.md).**

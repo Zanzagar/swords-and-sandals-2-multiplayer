@@ -5,9 +5,9 @@ sessionId:    cc273a6b-2487-427e-99ee-afcb84b34564 (https://claude.ai/code/sessi
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-commits:      615a852..ede9350 (2), pushed. This handoff commit makes 3.
-suite:        1030 / 1029 / 0 / 1 (fresh-clone profile), measured after
-              `ede9350` and BEFORE this handoff. **Re-measure; never copy.**
+commits:      615a852..c9f060a (4), all pushed.
+suite:        1033 / 1032 / 0 / 1 (fresh-clone profile), measured after
+              `c9f060a`. **Re-measure; never copy.**
 agentRuns:    none. No wave was launched and none was warranted — see "How this
               session was run" below.
 supersedes:   2026-09-12-2358--the-arena-has-two-axes-and-the-build-has-its-own-voice.
@@ -93,15 +93,19 @@ would have lost all 34 in silence, so the module reports by kind instead.
 ```
 node tools/extract-figure.mjs --report     # measures, writes nothing
 node tools/extract-figure.mjs              # writes assets/figure/
-node tools/arena-server.mjs                # then open:
-#   http://127.0.0.1:8123/assets/figure/preview.html
+# then OPEN THE FILE. No server. It is self-contained.
+#   assets/figure/preview.html
 ```
 
-**LOOK AT THE PREVIEW. It is the only check this extraction has.** A suite
-cannot tell a correct rig from a plausible one — that is the whole reason the
-tool writes HTML. I checked it by plotting the extracted data as ASCII (head
-over torso, mirrored limbs, weapon in hand; `StepForward` strides, `Attack1`
-swings), which is a real look but not a human one.
+**LOOK AT THE PREVIEW. It is the only check this extraction has**, and it now
+SOUNDS as well — it plays the sound bound to the animation on screen, so it is
+the check for BOTH extractions at once.
+
+► **THE FIRST VERSION NEEDED A SERVER AND THE OWNER GOT A BLANK PAGE.** It
+  `fetch`ed the JSON beside it, which a `file://` page may not do, and the
+  `127.0.0.1:8123` link I printed was dead the moment the server stopped. **A
+  page whose whole job is "a person looks at it" must not have a
+  prerequisite.** Fixed by inlining the data.
 
 ## What Codex found, and what verifying it cost
 
@@ -126,16 +130,58 @@ after, and the fix is format correctness that will matter for the next clip.
   to change any matrix. **The right answer arrived from measuring, and both
   wrong answers arrived from reasoning about what "should" follow.**
 
+## AND THEN I LOOKED AT IT, WHICH FOUND THE REAL DEFECT
+
+**The gladiator had black-and-white WEDGES across his chest.** `shapeToPaths`
+grouped edges by fill and emitted each contiguous RUN as its own subpath, with a
+comment claiming that reproduced the filled regions. It does not: **a renderer
+closes a FILLED open subpath with a straight chord from its end to its start.**
+
+```text
+  torso 686:  127 open subpaths  ->  10 closed regions
+  all 61:     ~900 open runs     ->  155 paths
+```
+
+**Nothing in the suite could have caught it.** The paths parsed, the counts were
+right, 824 of 824 shapes "survived", the `d` strings were well-formed — and the
+two tests pinning path data asserted the OPEN strings, because I wrote them from
+the same wrong model. **Sixth instance again, one commit after the last one.**
+
+Edges are now stitched into closed loops: a `fillStyle0` edge is reversed so the
+boundary runs one way, edges chain on EXACT integer twips (a tolerance would
+weld two regions that merely pass near each other), every loop of one fill goes
+in ONE element under `fill-rule: evenodd` so holes work, and each closes with
+`Z`. **An edge with the same fill on BOTH sides is interior and contributes no
+boundary** — style state persists across records, so that is common rather than
+exotic, and taking such an edge both ways round derails the stitch.
+
+## WHAT THE RENDER SETTLED, and it was ranked item 1's open question
+
+**The base body art is a GREY CANVAS** — `#cccccc`, `#666666`, `#333333`, with
+tan sandals and one skin-toned fill under the head. It is built to be TINTED at
+runtime, which is how SS2 offers a skin colour. **So team colours are not a
+fight with the build's art; they are what the art is for.**
+
+**Colour transforms are the CONDITION TINTS: 4,544 placements carry one** —
+`death_poisoned` 735, `cast1` 732, `frozen` 560, `poisoned` 286, `lifesteal`
+272, `lightning` 224, plus motion-blur alpha on the runs and 0.75 on the weapon
+during `block`. A frozen gladiator is blue and encased in ice.
+
+**The head's three extra parts are ALL `fillOpacity: 0` placeholder slots**,
+exactly like the empty `shield` sprite. Face, hair and armour are attached at
+runtime by the mechanism still unfound — which is now TWO independent pieces of
+evidence for the same missing answer.
+
 ## Highest-value work, ranked
 
 1. **STAGE 3: the renderer prefers extracted art, with `figure.js` as the
    fallback** — exactly as sound already does. The data is in the shape the
-   renderer wants: `shapes.json` is paths, `animations.json` is per-limb
-   matrices, and `src/render/painter.js` already emits draw operations. **The
-   open question is not technical: the extracted rig is ONE gladiator with one
-   body, while `figure.js` draws eight armour slots and two team palettes from
-   the wire projection. Decide what a team colour means on the build's own art
-   before writing the adapter.**
+   renderer wants: `shapes.json` is closed paths, `animations.json` is per-limb
+   matrices plus colour transforms, and `src/render/painter.js` already emits
+   draw operations. **The open question this brief opened is now ANSWERED by
+   the render: the base art is a grey canvas built to be tinted, so team
+   colours are the art's own mechanism rather than a fight with it.** What is
+   still open is the eight armour SLOTS, which the base clip does not dress.
 2. **How is the shield attached?** 704 is empty and `attachMovie`/`gotoAndStop`
    in the clip's 236 `DoAction` tags is where the answer is. The same mechanism
    almost certainly dresses the armour, which is the whole of item 1's
@@ -196,15 +242,22 @@ CODE.** That is the 09-12 lesson applied rather than restated.
 
 ## What is NOT verified
 
-- **NOBODY HAS SEEN THE PREVIEW.** I looked at the geometry, not at the drawing.
-  Fills, stroke widths, paint order and the 24 colour-transformed shapes have
-  never been judged by an eye. **First thing to ask.**
-- **And still unanswered from the 23:58 brief: the owner has not re-run the
-  sound extractor and listened since the label fix.** That question survives
-  this session unasked.
+- **THE PREVIEW HAS NOW BEEN SEEN — by me, headless, as a still.** `Standing`
+  and `frozen` both render correctly. **Nobody has watched it MOVE**, and
+  animation still cannot be captured here (`--virtual-time-budget` deadlocks on
+  the rAF loop, and CDP does not cross the WSL/Windows boundary). A tween that
+  is wrong only between keyframes would survive every check made so far.
+- **NOBODY HAS HEARD IT.** The sound is wired to the animation on screen and the
+  bindings are provably post-fix (`unlabelledSounds: 0`), but the owner has
+  still not listened. **That is now one action rather than two: open the
+  preview, pick `StepForward`, listen.**
 - **Paint order within a limb is the SWF's depth order and has never been
   checked against a picture.** It is right for the rig by construction; the
   effect depths are another matter.
+- **`fill-rule: evenodd` is a CHOICE.** SWF fills are non-zero by nature, and
+  evenodd was picked because the stitched loops of one region are not
+  consistently wound. It is correct on everything rendered so far; a shape with
+  nested holes could disagree.
 - **Gradients are flattened to their first stop** by the shape parser. 61 shapes
   reach the fighter; how many are gradient-approximated is in
   `assets/figure/shapes.json` as `approximated` per shape and has not been
@@ -224,7 +277,10 @@ CODE.** That is the 09-12 lesson applied rather than restated.
   wrong and was worth fixing anyway.
 - **Measure, then guess.** I reasoned twice about whether the replace fix
   touched the fighter and was wrong both times before diffing every sprite.
-- **LOOK AT IT.** `preview.html` exists because no suite can check a rig.
+- **LOOK AT IT.** `preview.html` exists because no suite can check a rig — and
+  it earned that on its first use, by showing wedges across the chest that
+  every number in the extraction called correct. **And a check with a
+  prerequisite is not a check:** it must open with no server.
 - **Ship no SS2 asset.** `assets/` is gitignored AND
   `test/asset-attestation.test.js` fails if anything under it is tracked —
   verified to bite on a figure asset this session, not asserted to.
