@@ -295,6 +295,35 @@ function driveFirst(battle, limit) {
  *
  *   **The goldens did not move, for the fourth time and the same reason.**
  */
+/**
+ * ► **TWO OF THE FOUR MOVED ON 2026-09-12 AND TWO DID NOT, which is the whole
+ *   story: FACING IS NOW DERIVED FROM POSITION, as the build derives it.**
+ *
+ *     2d047e45 -> a6b17667   (six actions in)
+ *     d36b56ca -> c46c6c20   (vanilla-separation opening)
+ *     1f2b26e4   unchanged   (settled 1v1)
+ *     e8f10147   unchanged   (settled 3v3)
+ *
+ *   `changeCombatants` recomputes `gladiator_dir` from the sign of the
+ *   x-separation at every phase advance and this engine had been setting it
+ *   ONCE, at construction. It is carried as the `facing-left` status, so a
+ *   fighter that walks past its opponent now turns round and the status list
+ *   changes — which is a projection change and therefore a hash change.
+ *
+ *   **The two that moved are the two that WALK.** The six-actions-in pin and
+ *   the vanilla-separation opening both spend their early actions approaching;
+ *   the two SETTLED pins stage their pair in contact at -/+30, close before
+ *   anyone crosses, and nobody in them ever turns. That split is the evidence
+ *   that this change does what it says: it moves exactly the battles where
+ *   somebody's position stopped justifying their facing.
+ *
+ *   **No golden moved**, and here the firewall matters more than usual: a
+ *   fixture models no position, so it has nothing to derive a facing FROM and
+ *   gets no effect at all. `gladiator_dir` is load-bearing in the golden
+ *   pipeline — `ss2-attack-candidate.js:214` picks the debris direction from
+ *   it and `:576` signs the knockback force with it — so a recomputed facing
+ *   would have silently re-datumed measured fixtures.
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -315,7 +344,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "2d047e45", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "a6b17667", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -368,7 +397,7 @@ test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact
   assert.equal(taken, 6, "the drive must have applied six actions");
   assert.equal(battle.result, null, "an approach does not settle in six actions");
 
-  assert.equal(combatStateHash(battle), "d36b56ca", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "c46c6c20", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {

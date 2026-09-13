@@ -220,6 +220,16 @@ export const CANONICAL_HEALTH_SOURCES = Object.freeze({
 export const CANONICAL_STATUS_TOKENS = STATUS_FLAG_FIELDS;
 
 /**
+ * The canonical token an SS2 rule set uses for a left-facing gladiator.
+ *
+ * Spelled here rather than imported, because the adapter may not depend on a
+ * rule-set module — and it is NOT in `STATUS_FLAG_FIELDS` on purpose: those
+ * are fields of the persistent combat object, and facing is clip-resident
+ * (`CLIP_RESIDENT_FIELDS`). Same concept, different write target.
+ */
+export const CANONICAL_FACING_LEFT = "facing-left";
+
+/**
  * Vanilla fields another canonical source already owns. A declared resource
  * may never name one: allowing it would let the resource branch write
  * `hitpoints` with a number canonical health never produced, which is the one
@@ -1161,6 +1171,32 @@ export function vanillaWritesForResolvedAction({
   const emitStatus = (id, status, active, reason) => {
     const key = `${id}:${status}`;
     if (emitted.has(key)) return;
+    // ► **FACING IS A STATUS WITH A REAL VANILLA FIELD, and it is the one
+    //   status that does NOT live in `STATUS_FLAG_FIELDS`. Wired 2026-09-12.**
+    //
+    //   The rule set now recomputes facing from position on every move, as the
+    //   build's `changeCombatants` does at every phase advance, and carries it
+    //   on the canonical status list as `SS2_FACING_LEFT` — which is how this
+    //   engine has always spelled `gladiator_dir` (`ss2-rules.js` in at
+    //   `:2389`, out at `:2590`).
+    //
+    //   Without this arm it fell to the branch below and was reported as "no
+    //   vanilla flag carries this status", which is FALSE: `gladiator_dir` is
+    //   exactly the flag that carries it. It is simply not in
+    //   `STATUS_FLAG_FIELDS` because it is CLIP-RESIDENT — the map is explicit
+    //   that the persistent combat objects do not hold it and the fighter
+    //   clips do (`CLIP_RESIDENT_FIELDS`), so it needs a different WRITE
+    //   TARGET rather than a different concept. `facingWrite` already built
+    //   that write and nothing was calling it on this path.
+    if (status === CANONICAL_FACING_LEFT) {
+      emitted.add(key);
+      const mirror = mirrorFor(id);
+      if (!mirror) return;
+      const to = active ? "left" : "right";
+      if (mirror.clip?.gladiator_dir === to) return;
+      writes.push(facingWrite(id, placementFor(id), mirror, to));
+      return;
+    }
     if (!isStatusFlagField(status)) {
       // The adapter will not invent a vanilla field for a status the build
       // does not have. It is reported once, not guessed at.

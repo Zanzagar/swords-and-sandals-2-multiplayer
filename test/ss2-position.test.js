@@ -45,6 +45,7 @@ import {
   ss2Reach,
   ss2WalkDisplacement,
   ss2WalkDestination,
+  ss2FacingEffects,
   ss2TeamRules,
   SS2_ARENA,
   Ss2ActionType,
@@ -689,6 +690,88 @@ test("the count is of EVERYBODY alive, not of your own foes — the 3v1 fires ba
     oneOfThree.includes("rank-front"),
     "one of three against a lone survivor must keep both directions"
   );
+});
+
+/**
+ * ► **FACING IS DERIVED FROM POSITION, and in the build it never was an
+ *   action.** The owner asked whether turning could stop costing a turn; the
+ *   oracle's answer is that it never cost one. 49 references to
+ *   `gladiator_dir` in the whole SWF, exactly SIX writes, not one of them in a
+ *   button handler — and `changeCombatants` recomputes it at every phase
+ *   advance from `hero._x < villain._x` (`+0x28f3` / `+0x290e` / `+0x29cd`,
+ *   and the `Greater` mirror at `+0x2a09`).
+ */
+test("facing follows the nearest foe's side, and is not an action", () => {
+  // No `turn` verb exists, at any position.
+  const battle = rankedBout(3, 97);
+  const offered = legalActions(battle, actorId(battle)).map((option) => option.type);
+  assert.ok(!offered.some((type) => /turn|face|about/.test(type)), `no turning verb: ${offered.join(", ")}`);
+
+  // The derivation itself: a foe to your right faces you right, and vice versa.
+  const left = [{ id: "a", x: 0, alive: true, status: [] }];
+  const right = [{ id: "b", x: 100, alive: true, status: [] }];
+  assert.deepEqual(
+    ss2FacingEffects(left, right),
+    [{ kind: EffectKind.STATUS, targetId: "b", status: "facing-left", active: true }],
+    "b stands right of a, so b turns to face left and a is already right"
+  );
+});
+
+test("an exact tie leaves facing alone, because both of the build's tests are STRICT", () => {
+  // `Less2` and `Greater`: a co-located pair runs neither branch, so whatever
+  // facing it had survives. Reproduced rather than smoothed into a default.
+  const a = [{ id: "a", x: 50, alive: true, status: [] }];
+  const b = [{ id: "b", x: 50, alive: true, status: ["facing-left"] }];
+  assert.deepEqual(ss2FacingEffects(a, b), [], "co-located gladiators keep the facing they had");
+});
+
+test("a gladiator that walks PAST its opponent turns round", () => {
+  // The whole point of deriving it. Nothing in the engine could produce this
+  // before: facing was set once, at construction, and never revisited.
+  const before = [{ id: "a", x: 0, alive: true, status: [] }];
+  const foe = [{ id: "b", x: 100, alive: true, status: ["facing-left"] }];
+  assert.deepEqual(ss2FacingEffects(before, foe), [], "a is left of b and both already face correctly");
+
+  const after = [{ id: "a", x: 300, alive: true, status: [] }];
+  const effects = ss2FacingEffects(after, foe);
+  assert.deepEqual(
+    effects.map((effect) => [effect.targetId, effect.active]),
+    [["a", true], ["b", false]],
+    "having crossed, a faces left and b faces right — both turn"
+  );
+});
+
+test("a rule set that models no position derives NO facing, which is what keeps 23 goldens still", () => {
+  // ► **THE FIREWALL MATTERS MORE HERE THAN ANYWHERE ELSE ON THIS AXIS.**
+  //   `gladiator_dir` is load-bearing in the golden pipeline —
+  //   `ss2-attack-candidate.js:214` picks the debris direction from it and
+  //   `:576` signs the knockback force with it — so a recomputed facing would
+  //   silently re-datum measured fixtures.
+  //
+  //   The gate is STRUCTURAL rather than a flag: a fixture has no `x`, so
+  //   there is nothing to derive a facing from and no effect is produced.
+  const unpositioned = [{ id: "a", alive: true, status: [] }];
+  const foe = [{ id: "b", x: 100, alive: true, status: [] }];
+  assert.deepEqual(ss2FacingEffects(unpositioned, foe), [], "no position, no derived facing");
+
+  const replay = createSs2TeamRules({ fixtureReplay: true });
+  assert.equal(replay.startingPosition({ teamIndex: 0, slotIndex: 0 }), null, "and a fixture has no position");
+});
+
+test("facing is per-fighter above 1v1, which the build's PAIR write cannot express", () => {
+  // The build writes both gladiators in one breath, so vanilla can never have
+  // two facing the same way. That does not survive teams: with three a side, A
+  // may face B while B faces C. Authored, and stated rather than discovered.
+  const reds = [{ id: "r1", x: 0, alive: true, status: [] }];
+  const blues = [
+    { id: "b1", x: -200, alive: true, status: [] },
+    { id: "b2", x: 400, alive: true, status: [] }
+  ];
+  const effects = ss2FacingEffects(reds, blues);
+  const byId = Object.fromEntries(effects.map((effect) => [effect.targetId, effect.active]));
+  assert.equal(byId["r1"], true, "r1's nearest foe is b1 at -200, so it turns left");
+  assert.equal(byId["b2"], true, "b2's nearest foe is r1 at 0, so it also turns left");
+  // Both now face left: r1 faces b1, b2 faces r1. Not mutual, and it cannot be.
 });
 
 /* ------------------------------------------------------------------ */

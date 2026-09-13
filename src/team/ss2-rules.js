@@ -1756,6 +1756,108 @@ export function ss2WalkDestination(actor, foes, direction) {
   return clamp(to, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
 }
 
+/**
+ * WHICH WAY EVERY GLADIATOR IS FACING, recomputed from where they stand.
+ *
+ * ► **THE BUILD DOES THIS EVERY PHASE ADVANCE AND THIS ENGINE DID IT ONCE, AT
+ *   CONSTRUCTION. Closed 2026-09-12 at the owner's prompting** — he asked
+ *   whether turning could stop being an action, and the answer is that in the
+ *   build it never was one.
+ *
+ * `changeCombatants` (`sprite:862[overlay]/frame:52/DoAction@0x240c7f`) holds
+ * the whole of it, and it is four writes in two mirrored branches:
+ *
+ * ```text
+ *   +0x28f3  Less2      if (hero._x < villain._x)
+ *   +0x290e    hero.gladiator_dir    = "right"
+ *   +0x29cd    villain.gladiator_dir = "left"
+ *   +0x2a09  Greater    the mirror
+ *   +0x2a24    hero.gladiator_dir    = "left"
+ *   +0x2ae3    villain.gladiator_dir = "right"
+ * ```
+ *
+ * Three things in those bytes decide the shape of this function, and all three
+ * were re-derived against the oracle rather than taken from the transcription:
+ *
+ * 1. **It is not an action.** The whole SWF holds 49 references to
+ *    `gladiator_dir` and exactly SIX writes — two at arena setup, these four —
+ *    and not one is inside a button handler. There is no turn phase, no turn
+ *    button, and nothing to spend a turn on. **So making turning free is not a
+ *    design choice; it is restoring what the build does.**
+ * 2. **It is derived from X ALONE.** Both tests read `_x` and nothing between
+ *    `+0x28bf` and `+0x2aea` reads `_y`. A gladiator does not turn to face a
+ *    different RANK — which matters here, because this engine has ranks and
+ *    the build does not.
+ * 3. **It is STRICT on both arms.** `Less2` and `Greater`, so an exact tie runs
+ *    neither branch and the previous facing survives. Reproduced below rather
+ *    than smoothed over: a co-located pair keeps whatever it had.
+ *
+ * ## What this engine cannot reproduce, stated rather than discovered later
+ *
+ * **The build writes BOTH fighters in one breath, so facing is a PAIR
+ * property and vanilla can never have two gladiators facing the same way.**
+ * That does not survive teams: with three a side, A may face B while B faces
+ * C, and no pair-write can express it. So this derives each fighter's facing
+ * INDEPENDENTLY, from its own nearest foe — which reduces to the build's
+ * mutual answer at 1v1, where each one's nearest foe is the other, and is
+ * authored mod surface above it (`MAP_SILENCE.multi-slot-arena-geometry`).
+ *
+ * ## Why it is a STATUS and not a new field
+ *
+ * Because it already is one: `SS2_FACING_LEFT` round-trips through the status
+ * list (`:2389` in, `:2590` out) and reaches vanilla as `gladiator_dir`. This
+ * adds no vocabulary; it stops the existing one lying.
+ *
+ * ## Why no `fixtureReplay` gate is needed, which is the part worth checking
+ *
+ * A gladiator with no `x` has nothing to derive a facing FROM, so this returns
+ * no effects for it. `fixtureReplay` returns `null` from `startingPosition`,
+ * so every promoted golden is exactly that case and cannot be touched. **That
+ * matters more here than anywhere else on this axis**: `gladiator_dir` is
+ * load-bearing in the golden pipeline — `ss2-attack-candidate.js:214` picks
+ * the debris direction from it and `:576` signs the knockback force with it —
+ * so a recomputed facing would silently re-datum measured fixtures. The gate
+ * is structural rather than a flag, and `run-1v1-fixture.js:115` listing
+ * `gladiator_dir` is why it has to be.
+ */
+export function ss2FacingEffects(sideA, sideB) {
+  const effects = [];
+  const positioned = (combatant) => combatant && combatant.alive !== false && Number.isFinite(combatant.x);
+  const consider = (crowd, opposition) => {
+    for (const combatant of crowd) {
+      if (!positioned(combatant)) continue;
+      let nearest = null;
+      let best = Infinity;
+      for (const foe of opposition) {
+        if (!positioned(foe)) continue;
+        const gap = Math.abs(foe.x - combatant.x);
+        // Ties break by id, for the same reason `nearestFoe` does: two foes
+        // equidistant must not make the facing depend on array order.
+        if (gap < best || (gap === best && nearest && foe.id < nearest.id)) {
+          nearest = foe;
+          best = gap;
+        }
+      }
+      if (!nearest) continue;
+      // The build's two STRICT tests. An exact tie runs neither arm, so the
+      // facing it already has survives — reproduced, not smoothed.
+      if (nearest.x === combatant.x) continue;
+      const facesLeft = nearest.x < combatant.x;
+      const carries = (combatant.status ?? []).includes(SS2_FACING_LEFT);
+      if (facesLeft === carries) continue;
+      effects.push({
+        kind: EffectKind.STATUS,
+        targetId: combatant.id,
+        status: SS2_FACING_LEFT,
+        active: facesLeft
+      });
+    }
+  };
+  consider(sideA, sideB);
+  consider(sideB, sideA);
+  return effects;
+}
+
 /** The living foe standing closest, or null. Ties break by id, deterministically. */
 function nearestFoe(view) {
   let best = null;
@@ -3583,6 +3685,43 @@ export function createSs2TeamRules({
         ? [{ kind: EffectKind.DAMAGE, targetId: actor.id, amount: toll }]
         : [];
 
+      // ► **FACING, RECOMPUTED EVERY ACTION AS THE BUILD RECOMPUTES IT EVERY
+      //   PHASE ADVANCE.** See `ss2FacingEffects`. Threaded exactly like the
+      //   crowd's toll above and for the same reason: every return path has to
+      //   carry it, including the ones that are not choices, or a gladiator
+      //   keeps a facing its position stopped justifying.
+      //
+      //   **It takes the actor's position AFTER the move, not before.** The
+      //   build's `changeCombatants` runs at phase advance — once the walk has
+      //   completed — so deriving from the pre-move x would face everybody the
+      //   way they were standing one action ago. The two movement branches
+      //   below pass their own destination; everything else cannot move
+      //   anybody and passes the actor unchanged.
+      // ► **ONLY THE TWO MOVEMENT BRANCHES CARRY IT, and that is equivalence
+      //   rather than economy.** Facing is a function of `x` alone
+      //   (`ss2FacingEffects`), and in this engine exactly two verbs move
+      //   anybody: a walk and a rank change. An attack, a rest and a status
+      //   phase cannot change a facing, so recomputing on them emits an effect
+      //   that is always a no-op.
+      //
+      //   It is not merely wasteful. The first version threaded it through
+      //   every return the way the crowd's toll is threaded, and it appended a
+      //   facing write to the status list of a KILLING BLOW — turning a
+      //   gladiator that had just died, inside the effect list that clears its
+      //   conditions in `death()`'s own measured order. The order survived,
+      //   because the append lands after it; the lesson is that the crowd's
+      //   toll has to reach every path and this does not, and copying the
+      //   pattern without asking which was which is how a measured sequence
+      //   acquires a passenger.
+      const facingAfter = (movedActor) => {
+        const mine = (request.allies ?? []).map((ally) => (ally.id === actor.id ? movedActor : ally));
+        return ss2FacingEffects(
+          mine.some((ally) => ally.id === actor.id) ? mine : [movedActor, ...mine],
+          request.foes ?? []
+        );
+      };
+
+
       const statusFlag = SS2_FLAG_FOR_STATUS_PHASE[request.type];
       if (statusFlag) {
         const phase = resolveStatusPhase(request, statusFlag, fightMode, observer);
@@ -3680,7 +3819,10 @@ export function createSs2TeamRules({
               ? []
               : [{ kind: EffectKind.POSITION, targetId: actor.id, to: arrivalX }]),
             ...transition.effects,
-            ...crowd
+            ...crowd,
+            // A rank change can move x when it sidesteps a body, so facing is
+            // derived from where it actually landed.
+            ...facingAfter({ ...actor, x: arrivalX })
           ],
           events: [{
             type: request.type,
@@ -3764,7 +3906,11 @@ export function createSs2TeamRules({
           effects: [
             { kind: EffectKind.POSITION, targetId: actor.id, to },
             ...transition.effects,
-            ...crowd
+            ...crowd,
+            // The whole point of the post-move derivation: a walk that carries
+            // you past the midpoint turns you round, and the build turns you
+            // round AFTER the walk lands.
+            ...facingAfter({ ...actor, x: to })
           ],
           events: [{
             type: request.type,
