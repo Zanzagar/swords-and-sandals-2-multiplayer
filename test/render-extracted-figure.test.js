@@ -23,7 +23,7 @@ import {
   paintExtractedFigure,
   poseIndexAt
 } from "../src/render/extracted-figure.js";
-import { clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
+import { UNMAPPED_CLIP_LABELS, allUnmappedLabels, clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
 import { ATTACHMENTS, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
 
 /** A square shape one pixel on a side, so a matrix is the only thing moving it. */
@@ -534,4 +534,39 @@ test("every hurt, death and attack the CLIP has is a label the engine can reach"
 
   const deaths = clipLabelsFor("death:unknown");
   assert.equal(deaths.length, 13);
+});
+
+test("EVERY one of the fighter's labels is either played or declared unplayed", () => {
+  // ► **THIS TEST EXISTS BECAUSE OF `hurt8`.** One label went missing from the
+  //   hurt family because the build binds it no sound, and nothing noticed —
+  //   the same conflation corrected for `block` hours earlier. Fixing one
+  //   instance of a habit does not fix the habit; this closes it.
+  //
+  //   Measured on the shipped build: the fighter clip carries 101 labels, 60
+  //   reachable by a family and 41 declared unplayed with a reason. A label
+  //   that is in neither set is a SILENT DROP, which is what this catches.
+  const families = [
+    "standing", "rest", "block",
+    "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
+    "attack", "hurt", "knockback", "taunt", "taunted", "ranged",
+    "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
+    "death:unknown"
+  ];
+  const mapped = new Set(families.flatMap((family) => clipLabelsFor(family)));
+  const declared = new Set(allUnmappedLabels());
+
+  // Nothing may be in both: a label is played or it is not.
+  const both = [...mapped].filter((label) => declared.has(label));
+  assert.deepEqual(both, [], "a label cannot be both played and declared unplayed");
+
+  assert.equal(mapped.size, 60);
+  assert.equal(declared.size, 41);
+  assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
+
+  // And the defence system is declared UNBUILT rather than quietly absent: 13
+  // `defend` reactions mirroring the 13 hurts and 12 attacks, which this engine
+  // has no verb for. Naming them is how the next reader finds them.
+  const defence = UNMAPPED_CLIP_LABELS.unbuiltDefence;
+  for (let n = 1; n <= 12; n += 1) assert.ok(defence.includes(`defend${n}`));
+  assert.ok(defence.includes("defend20"));
 });

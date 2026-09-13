@@ -142,6 +142,88 @@ export function clipLabelsFor(family) {
   return FAMILY_LABELS[family] ?? [];
 }
 
+/**
+ * THE BUILD'S LABELS THIS ENGINE DELIBERATELY DOES NOT PLAY — declared, so that
+ * a label can never again go missing by accident.
+ *
+ * ► **WHY THIS EXISTS: `hurt8`.** The clip carries `hurt1`-`hurt12` and
+ *   `hurt20`; this file held twelve of the thirteen, and the one it dropped was
+ *   the one the build binds no sound to. "The build plays no sound here" had
+ *   become "the animation does not exist" — the same conflation corrected for
+ *   `block` hours earlier. **Fixing one instance of a habit does not fix the
+ *   habit**, so the habit is closed here instead: every one of the fighter's
+ *   101 labels is either in a family above or named below, and a test asserts
+ *   that the two sets together cover the clip exactly.
+ *
+ * Grouped by WHY, because "unmapped" covers three different situations and only
+ * one of them is a gap:
+ */
+export const UNMAPPED_CLIP_LABELS = Object.freeze({
+  /**
+   * NOT ANIMATIONS. Structural frames with nothing to play.
+   */
+  structural: Object.freeze(["initialize", "portrait"]),
+
+  /**
+   * CONTINUATIONS of an animation that already started, including its sound.
+   * Playing one on its own would restart a performance mid-way.
+   */
+  continuations: Object.freeze(["celebrate1a", "flame_repeat", "psyche_charging", "psyche_charging2"]),
+
+  /**
+   * ► **THE BUILD HAS A DEFENCE SYSTEM THIS ENGINE HAS NOT BUILT.**
+   *   `defend1`-`defend12` and `defend20` are THIRTEEN reactions, exactly
+   *   mirroring `hurt1`-`hurt12`/`hurt20` and `attack1`-`attack12`. `Block`
+   *   (11f) and `BlockForward` (18f) — the two the `block` family does play —
+   *   are the static guard, a different thing.
+   *
+   *   **They are listed and not mapped on purpose.** Which defend answers which
+   *   attack is not derived, and guessing an index mapping across two
+   *   thirteen-member sets is precisely the move this project keeps retracting.
+   *   A capture, or the build's own selector, would settle it.
+   */
+  unbuiltDefence: Object.freeze([
+    "defend1", "defend2", "defend3", "defend4", "defend5", "defend6", "defend7",
+    "defend8", "defend9", "defend10", "defend11", "defend12", "defend20",
+    "roll", "fumble1"
+  ]),
+
+  /**
+   * SPELLS AND PSYCHE. **The engine already carries the RESOURCES —
+   * `psyche_up`, `spell_colossus`, `spell_bloodlust` are combatant fields — and
+   * has no verb, no family and no animation binding for any of them.** The art
+   * has been sitting in the clip the whole time.
+   */
+  unbuiltSpells: Object.freeze([
+    "psyche_up", "psyche_up2", "psyche_up3", "cast1", "cast2",
+    "colossus", "lightning", "rejuvinate", "drink_potion"
+  ]),
+
+  /**
+   * VICTORY AND SURRENDER. Six crowd-facing celebrations and two yields, none
+   * of which this engine can express: a bout ends and nobody gloats.
+   */
+  unbuiltOutcome: Object.freeze([
+    "wincrowd1", "wincrowd2", "wincrowd3", "wincrowd4", "wincrowd5", "wincrowd6",
+    "yield1", "yield2", "celebrate1"
+  ]),
+
+  /**
+   * NAMED BY A FAMILY THROUGH A SIBLING. `knockback` the LABEL is a separate
+   * 6-frame clip from `knockback_mov` and `shove`, which are what the
+   * `knockback` family actually plays. Listed so the count reconciles.
+   */
+  supersededBySibling: Object.freeze(["knockback"]),
+
+  /** Unclassified, and honestly so. */
+  unknown: Object.freeze(["little_fat_kid"])
+});
+
+/** Every label named above, flattened. */
+export function allUnmappedLabels() {
+  return Object.values(UNMAPPED_CLIP_LABELS).flat();
+}
+
 /** Every label this module can name, for a consumer that wants to check coverage. */
 export function allClipLabels() {
   const names = new Set(DEATH_LABELS);
