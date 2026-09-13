@@ -193,55 +193,44 @@ export function readSoundTags(buffer) {
 }
 
 /**
- * WHICH ANIMATION EACH SOUND BELONGS TO, derived rather than chosen by ear.
+ * WHICH ANIMATION EACH SOUND BELONGS TO, from the build's own FRAME LABELS.
  *
- * The build says it itself. `StartSound` (tag 15) sits on a specific FRAME of a
- * specific timeline, and export 1241 — the fighter clip, `hero_battle` in the
- * map's linkage table — carries 99 of the file's 138. The battle map already
- * catalogues that clip's labelled frame ranges, so a sound firing on frame N
- * belongs to whichever labelled animation contains N.
+ * ► **THE FIRST VERSION BUCKETED BY THE BATTLE MAP'S PROSE RANGES AND THE
+ *   OWNER HEARD IT IMMEDIATELY: "I am hearing a block sound and jump sound for
+ *   walking."** He was right, and the prose is why.
  *
- * That makes this the same kind of artefact as every byte offset in this
- * repository: analysis OF the build, holding no content FROM it. A map of
- * integers to animation names is not an asset, and it is written into the
- * manifest beside the audio rather than committed, because the ids are
- * specific to the build they were read out of.
+ *   The map summarises export 1241 as `Standing` (2), "movement and charge
+ *   (33-104)", `Block` (118/179), "attack directions 1-12 (190-360)" and so
+ *   on. Those are RANGES OVER SEVERAL ANIMATIONS, and bucketing by them put
+ *   four different clips in one bag:
  *
- * **The ranges are quoted, not invented** — battle map, "Key fighter animation
- * labels on export 1241". Anything landing outside all of them is reported as
- * `unlabelled` rather than forced into the nearest bucket: measured on the
- * shipped build, 19 sounds do, and pretending otherwise would put a death
- * groan on a footstep.
+ *   ```text
+ *     33 StepBack   50 StepForward   68 Charge   104 Chargeattack
+ *    118 BlockForward   136 Jump   148 Superjump   173 Roll   179 Block
+ *   ```
+ *
+ *   So "movement" held `Chargeattack` — a leaping attack — and the "block"
+ *   range held `Jump` and `Superjump`. A walk drew from four clips and sounded
+ *   like whichever it got. **`Block` and `BlockForward` carry no sound at all**,
+ *   which the prose bucket hid completely.
+ *
+ *   **Fifth instance of this project's standing lesson, arriving from a new
+ *   direction: a gap or a summary in a TRANSCRIPTION says nothing about the
+ *   build.** The map's own text warns that these labels are UI effects; it
+ *   never claimed to enumerate them. The SWF does, in `FrameLabel` tags, and
+ *   reading those gives 80 labels where the prose gave 17 ranges.
+ *
+ * So: a sound is bound to the label it fires UNDER — the nearest preceding
+ * `FrameLabel` on the same clip — and nothing is bucketed by arithmetic on
+ * frame numbers.
  */
 const FIGHTER_CLIP_ID = 1241;
-const FIGHTER_FRAME_LABELS = Object.freeze([
-  ["standing", 2, 2],
-  ["movement", 33, 104],
-  ["block", 118, 179],
-  ["attack", 190, 360],
-  ["defence", 395, 553],
-  ["defend20", 572, 572],
-  ["death", 585, 1083],
-  ["hurt", 1144, 1362],
-  ["rest", 1380, 1380],
-  ["knockback", 1428, 1428],
-  ["taunt", 1482, 1512],
-  ["bombard", 1567, 1567],
-  ["snipe", 1590, 1590],
-  ["psyche_up", 1609, 1609],
-  ["condition", 1911, 2004],
-  ["yield_cast", 2072, 2126],
-  ["spell_transform", 2147, 2200]
-]);
 
-function labelForFrame(frame) {
-  const found = FIGHTER_FRAME_LABELS.find(([, low, high]) => frame >= low && frame <= high);
-  return found ? found[0] : "unlabelled";
-}
-
-/** Every `StartSound` on the fighter clip, bucketed by the animation it fires in. */
+/** Every `FrameLabel` and `StartSound` on the fighter clip, in frame order. */
 export function deriveSoundBindings(buffer) {
+  const labels = [];
   const fired = [];
+
   const walk = (start, end, spriteId, depth) => {
     let cursor = start;
     let frame = 1;
@@ -259,8 +248,12 @@ export function deriveSoundBindings(buffer) {
       const bodyEnd = Math.min(bodyStart + length, end);
       if (code === 0) break;
       if (code === 1) frame += 1;
-      else if (code === 15 && spriteId === FIGHTER_CLIP_ID && bodyEnd - bodyStart >= 2) {
-        fired.push({ soundId: buffer.readUInt16LE(bodyStart), frame });
+      else if (code === 43 && spriteId === FIGHTER_CLIP_ID) {
+        // FrameLabel: a null-terminated name.
+        const read = readCString(buffer, bodyStart, bodyEnd);
+        if (read.value) labels.push({ frame, name: read.value });
+      } else if (code === 15 && spriteId === FIGHTER_CLIP_ID && bodyEnd - bodyStart >= 2) {
+        fired.push({ frame, soundId: buffer.readUInt16LE(bodyStart) });
       } else if (code === 39 && depth < 4) {
         walk(bodyStart + 4, bodyEnd, buffer.readUInt16LE(bodyStart), depth + 1);
       }
@@ -269,14 +262,29 @@ export function deriveSoundBindings(buffer) {
   };
   walk(tagStreamStart(buffer), buffer.length, 0, 0);
 
+  labels.sort((left, right) => left.frame - right.frame);
+  const labelAt = (frame) => {
+    let best = null;
+    for (const label of labels) {
+      if (label.frame <= frame && (!best || label.frame > best.frame)) best = label;
+    }
+    return best ? best.name : null;
+  };
+
   const bindings = {};
+  let unlabelled = 0;
   for (const hit of fired) {
-    const label = labelForFrame(hit.frame);
-    if (!bindings[label]) bindings[label] = [];
-    if (!bindings[label].includes(hit.soundId)) bindings[label].push(hit.soundId);
+    const name = labelAt(hit.frame);
+    if (!name) { unlabelled += 1; continue; }
+    // Lower-cased because the clip labels are capitalised (`Attack1`) and the
+    // engine's own tokens are not (`attack1`). One spelling on both sides of
+    // the lookup, decided here rather than at every call site.
+    const key = name.toLowerCase();
+    if (!bindings[key]) bindings[key] = [];
+    if (!bindings[key].includes(hit.soundId)) bindings[key].push(hit.soundId);
   }
   for (const list of Object.values(bindings)) list.sort((left, right) => left - right);
-  return { bindings, startSoundCount: fired.length };
+  return { bindings, startSoundCount: fired.length, labelCount: labels.length, unlabelled };
 }
 
 /** A filename that is safe, stable and says which symbol it came from. */
@@ -355,7 +363,7 @@ function main(argv) {
   }
 
   written.sort((left, right) => right.bytes - left.bytes);
-  const { bindings, startSoundCount } = deriveSoundBindings(buffer);
+  const { bindings, startSoundCount, labelCount, unlabelled } = deriveSoundBindings(buffer);
   const byId = new Map(written.map((entry) => [entry.id, entry.file]));
   // Bindings are emitted as FILENAMES, so a player never has to re-derive the
   // id-to-file mapping, and a sound whose format could not be repacked simply
@@ -384,6 +392,8 @@ function main(argv) {
      */
     bindings: boundFiles,
     startSoundCount,
+    frameLabelCount: labelCount,
+    unlabelledSounds: unlabelled,
     sounds: written
   };
   fs.writeFileSync(path.join(options.out, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
@@ -391,11 +401,8 @@ function main(argv) {
   const totalBytes = written.reduce((sum, entry) => sum + entry.bytes, 0);
   console.log(`wrote ${written.length} file(s) to ${options.out}`);
   console.log(`      ${(totalBytes / 1024 / 1024).toFixed(2)} MB, plus manifest.json\n`);
-  console.log("bound to animations, from the build's own StartSound placement:");
-  for (const [label, files] of Object.entries(boundFiles).sort((a, b) => b[1].length - a[1].length)) {
-    console.log(`  ${label.padEnd(16)} ${String(files.length).padStart(2)} sound(s)`);
-  }
-  console.log("");
+  console.log(`bound to ${Object.keys(boundFiles).length} animation labels, from the clip's own FrameLabel tags`);
+  console.log(`  (${labelCount} labels on the fighter clip; ${unlabelled} sound(s) fired before any label)\n`);
   console.log("largest, which are usually music rather than effects:");
   for (const entry of written.slice(0, 5)) {
     console.log(`  ${entry.file.padEnd(34)} ${String(entry.approxSeconds).padStart(7)}s  ${entry.channels === 2 ? "stereo" : "mono  "}  ${(entry.bytes / 1024).toFixed(0).padStart(6)} KB`);

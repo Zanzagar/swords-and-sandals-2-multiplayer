@@ -9,9 +9,9 @@
  * ## Where the bindings come from, and why they are not in this file
  *
  * `tools/extract-sounds.mjs` derives them from the build's own `StartSound`
- * placement: export 1241 is the fighter clip, the battle map catalogues its
- * labelled frame ranges, and a sound firing on frame N belongs to whichever
- * animation contains N. The result is written into `assets/sound/manifest.json`
+ * placement: export 1241 is the fighter clip, its `FrameLabel` tags name 101
+ * animations, and a sound belongs to the label it fires UNDER. The result is
+ * written into `assets/sound/manifest.json`
  * beside the extracted audio, **not committed**, because the sound ids are
  * specific to the build they were read out of — and because a clone must still
  * need its own licensed copy.
@@ -30,24 +30,81 @@ export class SoundError extends Error {
 }
 
 /**
- * The animation bucket a timeline family belongs to.
+ * WHICH OF THE BUILD'S OWN CLIP LABELS a timeline family may play a sound from.
  *
- * `timelineFor(label).family` is already the label's decoded meaning —
- * `movement:walk`, `attack`, `death:death3`, `condition:burning` — and the
- * extractor's buckets are the battle map's own label ranges. The two meet at
- * the prefix, so this is a split rather than a second table to keep in step.
+ * ► **THE FIRST VERSION SPLIT THE FAMILY ON `:` AND USED THE PREFIX AS A
+ *   BUCKET, AND THE OWNER HEARD IT: "I am hearing a block sound and jump sound
+ *   for walking."**
  *
- * Returns null for a family with no bucket, which is not a defect: `standing`
- * is a loop nobody should hear and `knockback` has no `StartSound` on the
- * fighter clip at all.
+ *   It worked only because the extractor was ALSO bucketing coarsely, by the
+ *   battle map's prose ranges — so `movement` meant "frames 33-104", which is
+ *   `StepBack`, `StepForward`, `Charge` AND `Chargeattack`, four different
+ *   clips; and `block` meant "118-179", which swallowed `Jump` and
+ *   `Superjump`. **Two coarse mappings agreeing with each other is not the same
+ *   as either being right**, and nothing in the suite could tell: both sides
+ *   were self-consistent and only an ear caught it.
+ *
+ * The extractor now binds by the clip's own `FrameLabel` tags — 80 of them
+ * against the prose's 17 ranges — so this maps a family to the EXACT labels it
+ * may sound as. The names are the build's, lower-cased, and none is inferred
+ * from a pattern.
+ *
+ * **A family with no entry is silent, and that is usually correct rather than
+ * missing.** `Block` and `BlockForward` carry no `StartSound` at all — a block
+ * in this build makes no noise — which the prose bucket hid by lending it a
+ * jump.
  */
+const FAMILY_LABELS = Object.freeze({
+  // The build's own four gaits, each with its own pair of clips.
+  "movement:walk": ["stepforward", "stepback"],
+  "movement:run": ["runforward", "runback"],
+  "movement:charge": ["charge", "chargeattack"],
+  "movement:jump": ["jump", "superjump"],
+
+  attack: ["attack1", "attack2", "attack3", "attack4", "attack5", "attack6",
+    "attack7", "attack8", "attack9", "attack10", "attack11", "attack12"],
+  hurt: ["hurt1", "hurt2", "hurt3", "hurt4", "hurt5", "hurt6", "hurt7",
+    "hurt9", "hurt10", "hurt11", "hurt12", "hurt20"],
+  rest: ["rest"],
+  knockback: ["knockback_mov", "shove"],
+  taunt: ["taunt"],
+  ranged: ["bombard", "snipe"],
+
+  // Per-flag in the build, so per-flag here: a burning gladiator and a frozen
+  // one do not share a sound.
+  "condition:burning": ["burning"],
+  "condition:frozen": ["frozen"],
+  "condition:poisoned": ["poisoned"],
+  "condition:life_stolen": ["lifesteal"]
+});
+
+/**
+ * Death is per-variant, and the variant IS the family suffix: `familyOf`
+ * returns `death:<label>` using the build's own name, so no table is needed.
+ * An unknown variant falls back to the whole set, because a death with a
+ * neighbouring sound beats a death with none.
+ */
+const DEATH_LABELS = Object.freeze([
+  "death1", "death2", "death3", "death4", "death5", "death6", "death7",
+  "death21", "death22", "death23", "deathspike", "deathtaunt", "death_poisoned"
+]);
+
+/** The build's own clip labels this family may sound as, or an empty list. */
+export function soundLabelsFor(family) {
+  if (typeof family !== "string" || family.length === 0) return [];
+  // A looping idle is deliberately silent: a sound on a loop never stops.
+  if (family === "standing" || family === "unknown") return [];
+  if (family.startsWith("death:")) {
+    const variant = family.slice("death:".length).toLowerCase();
+    return DEATH_LABELS.includes(variant) ? [variant] : DEATH_LABELS;
+  }
+  return FAMILY_LABELS[family] ?? [];
+}
+
+/** The first label a family may sound as, or null. Kept for callers wanting one name. */
 export function soundBucketFor(family) {
-  if (typeof family !== "string" || family.length === 0) return null;
-  const prefix = family.split(":")[0];
-  // `standing` is deliberately excluded: it loops forever, and a sound on a
-  // loop is a sound that never stops.
-  if (prefix === "standing" || prefix === "unknown") return null;
-  return prefix;
+  const labels = soundLabelsFor(family);
+  return labels.length > 0 ? labels[0] : null;
 }
 
 /**
@@ -65,10 +122,17 @@ export function soundBucketFor(family) {
  * rather than always taking the first, so a bout does not become one noise.
  */
 export function chooseSound(bindings, family, sequence) {
-  const bucket = soundBucketFor(family);
-  if (!bucket) return null;
-  const files = bindings?.[bucket];
-  if (!Array.isArray(files) || files.length === 0) return null;
+  const labels = soundLabelsFor(family);
+  if (labels.length === 0) return null;
+  // Every file the build could play for this animation, in label order, so the
+  // pick is stable across runs and across re-extractions.
+  const files = [];
+  for (const label of labels) {
+    const bound = bindings?.[label];
+    if (!Array.isArray(bound)) continue;
+    for (const file of bound) if (!files.includes(file)) files.push(file);
+  }
+  if (files.length === 0) return null;
   const index = Number.isFinite(sequence) ? Math.abs(Math.trunc(sequence)) % files.length : 0;
   return files[index];
 }

@@ -10,47 +10,103 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { bindingsFrom, chooseSound, soundBucketFor } from "../src/render/sound.js";
+import { bindingsFrom, chooseSound, soundLabelsFor } from "../src/render/sound.js";
 import { timelineFor } from "../src/render/timeline.js";
 
+/**
+ * Keyed on the build's OWN clip labels, which is what the extractor now emits.
+ * The previous version of this table was keyed on coarse buckets and was
+ * therefore agreeing with a bug.
+ */
 const TABLE = Object.freeze({
-  movement: ["m1.mp3", "m2.mp3", "m3.mp3", "m4.mp3"],
-  attack: ["a1.mp3", "a2.mp3", "a3.mp3"],
-  hurt: ["h1.mp3", "h2.mp3"],
+  stepforward: ["step-f.mp3"],
+  stepback: ["step-b.mp3"],
+  jump: ["jump.mp3"],
+  superjump: ["superjump.mp3"],
+  charge: ["charge.mp3"],
+  chargeattack: ["chargeattack.mp3"],
+  attack1: ["a1.mp3"],
+  attack2: ["a2.mp3"],
+  attack3: ["a3.mp3"],
+  hurt1: ["h1.mp3"],
   rest: ["r1.mp3"],
-  death: ["d1.mp3"]
+  death3: ["d3.mp3"]
 });
 
-test("a timeline family maps to the battle map's own animation bucket", () => {
-  // `timelineFor(label).family` is the label's decoded meaning and the
-  // extractor's buckets are the map's label RANGES. They meet at the prefix,
-  // which is why this is a split and not a second table to keep in step.
-  assert.equal(soundBucketFor("movement:walk"), "movement");
-  assert.equal(soundBucketFor("movement:charge"), "movement");
-  assert.equal(soundBucketFor("attack"), "attack");
-  assert.equal(soundBucketFor("hurt"), "hurt");
-  assert.equal(soundBucketFor("death:death3"), "death");
-  assert.equal(soundBucketFor("condition:burning"), "condition");
+/**
+ * ► **THE OWNER CAUGHT THIS BY EAR: "I am hearing a block sound and jump sound
+ *   for walking."** Both sides of the lookup were bucketing by the battle map's
+ *   PROSE ranges, so `movement` meant frames 33-104 — `StepBack`,
+ *   `StepForward`, `Charge` and `Chargeattack`, four separate clips — and
+ *   `block` meant 118-179, which swallowed `Jump` and `Superjump`.
+ *
+ *   Nothing in the suite could tell, because both sides were self-consistent.
+ *   These tests pin the labels themselves so a coarse mapping cannot come back.
+ */
+test("a walk sounds as a walk, and never as a charge or a jump", () => {
+  const walk = soundLabelsFor("movement:walk");
+  assert.deepEqual(walk, ["stepforward", "stepback"]);
+  for (const forbidden of ["charge", "chargeattack", "jump", "superjump"]) {
+    assert.ok(!walk.includes(forbidden), `a walk must not sound as ${forbidden}`);
+  }
+  // And through the real lookup, at every sequence it can take.
+  for (let sequence = 0; sequence < 6; sequence += 1) {
+    const file = chooseSound(TABLE, "movement:walk", sequence);
+    assert.ok(["step-f.mp3", "step-b.mp3"].includes(file), `seq ${sequence} played ${file}`);
+  }
+});
+
+test("each gait keeps its own clips, because the build gives them their own", () => {
+  assert.deepEqual(soundLabelsFor("movement:run"), ["runforward", "runback"]);
+  assert.deepEqual(soundLabelsFor("movement:charge"), ["charge", "chargeattack"]);
+  assert.deepEqual(soundLabelsFor("movement:jump"), ["jump", "superjump"]);
+  assert.equal(chooseSound(TABLE, "movement:jump", 0), "jump.mp3");
+  assert.equal(chooseSound(TABLE, "movement:charge", 0), "charge.mp3");
+});
+
+test("a block is SILENT, and that is the build's answer rather than a gap", () => {
+  // `Block` and `BlockForward` carry no StartSound at all. The prose bucket hid
+  // that by lending the range `Jump` and `Superjump`.
+  assert.deepEqual(soundLabelsFor("block"), []);
+  assert.equal(chooseSound(TABLE, "block", 0), null);
+});
+
+test("an attack is one of twelve clips, not one bucket", () => {
+  const labels = soundLabelsFor("attack");
+  assert.equal(labels.length, 12);
+  assert.equal(labels[0], "attack1");
+  assert.equal(labels[11], "attack12");
+  // Only the three the table holds are reachable; the rest simply contribute
+  // nothing rather than becoming broken references.
+  const heard = new Set([0, 1, 2].map((sequence) => chooseSound(TABLE, "attack", sequence)));
+  assert.deepEqual([...heard].sort(), ["a1.mp3", "a2.mp3", "a3.mp3"]);
+});
+
+test("a death sounds as its OWN variant, which the family already names", () => {
+  assert.deepEqual(soundLabelsFor("death:death3"), ["death3"]);
+  assert.equal(chooseSound(TABLE, "death:death3", 0), "d3.mp3");
+  // An unknown variant falls back to the whole set rather than to silence.
+  assert.ok(soundLabelsFor("death:unknown").length > 1);
 });
 
 test("a looping idle is silent, because a sound on a loop never stops", () => {
-  assert.equal(soundBucketFor("standing"), null);
-  assert.equal(soundBucketFor("unknown"), null);
-  assert.equal(soundBucketFor(""), null);
-  assert.equal(soundBucketFor(null), null);
+  assert.deepEqual(soundLabelsFor("standing"), []);
+  assert.deepEqual(soundLabelsFor("unknown"), []);
+  assert.deepEqual(soundLabelsFor(""), []);
+  assert.deepEqual(soundLabelsFor(null), []);
 });
 
-test("the families the renderer actually produces all resolve", () => {
-  // Derived from real labels rather than from the family strings, so a rename
-  // in `familyOf` cannot quietly orphan a bucket.
+test("the families the renderer actually produces all resolve to real labels", () => {
+  // Derived from real labels rather than family strings, so a rename in
+  // `familyOf` cannot quietly orphan a mapping.
   for (const [label, expected] of [
-    ["walkleft", "movement"], ["runright", "movement"], ["chargeleft", "movement"],
-    ["attack4", "attack"], ["hurt5", "hurt"], ["rest", "rest"], ["Block", "block"]
+    ["walkleft", "stepforward"], ["runright", "runforward"],
+    ["chargeleft", "charge"], ["jumpright", "jump"],
+    ["attack4", "attack1"], ["hurt5", "hurt1"], ["rest", "rest"]
   ]) {
     const family = timelineFor(label, { role: "actor" }).family;
-    assert.equal(soundBucketFor(family), expected, `${label} -> ${family}`);
+    assert.equal(soundLabelsFor(family)[0], expected, `${label} -> ${family}`);
   }
-  assert.equal(soundBucketFor(timelineFor("Standing", { role: "actor" }).family), null);
 });
 
 test("the choice is DETERMINISTIC, because the same bout must replay the same", () => {
@@ -74,7 +130,7 @@ test("no extracted assets means SILENCE, never an error", () => {
   assert.equal(chooseSound({}, "attack", 0), null);
   assert.equal(chooseSound(null, "attack", 0), null);
   assert.equal(chooseSound(undefined, "attack", 0), null);
-  assert.equal(chooseSound(TABLE, "taunt", 0), null, "a bucket the build fired no sound in");
+  assert.equal(chooseSound(TABLE, "taunt", 0), null, "a label this table holds no file for");
 });
 
 test("a malformed manifest leaves the arena silent and playable, not broken", () => {
@@ -93,7 +149,7 @@ test("bindingsFrom survives a real manifest shape", () => {
   const manifest = {
     source: { file: "x.swf", sha256: "abc" },
     count: 2,
-    bindings: { movement: ["33-step.mp3"], attack: ["190-swing.mp3"] },
+    bindings: { stepforward: ["33-step.mp3"], attack1: ["190-swing.mp3"] },
     sounds: []
   };
   const bindings = bindingsFrom(manifest);
