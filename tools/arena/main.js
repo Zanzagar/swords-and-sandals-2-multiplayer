@@ -56,6 +56,10 @@ import {
   figurePackFrom,
   hasExtractedArt,
   loadoutFrom,
+  rankStrideFrom,
+  selectRules,
+  retireVoices,
+  figureProvenance,
   poseAt,
   timelineFor,
   timelinesForStep,
@@ -121,17 +125,17 @@ const spectate = params.get("spectate") === "1";
  *   could.** Compare against the SHIPPED value, not against zero: the singleton
  *   is correct only when the request IS the default.
  */
-const rankStride = params.has("rank")
-  ? Math.max(0, Number(params.get("rank")) || 0)
-  : SS2_ARENA.rankStride;
+const rankStride = rankStrideFrom(params, SS2_ARENA.rankStride);
 
 const host = createVanillaBattleHost({
   teams: [demoSide("red", perSide, { ss2Combatant, ss2BattleValues }), demoSide("blue", perSide, { ss2Combatant, ss2BattleValues })],
   // The module singleton when the request IS the shipped stride, so the shipped
   // arena is the shipped rule set and not a lookalike built with the defaults.
-  rules: rankStride === SS2_ARENA.rankStride
-    ? ss2TeamRules
-    : createSs2TeamRules({ rankStride }),
+  rules: selectRules(rankStride, {
+    shippedStride: SS2_ARENA.rankStride,
+    singleton: ss2TeamRules,
+    create: createSs2TeamRules
+  }),
   bindings: SS2_STATIC_MAP_BINDINGS,
   seed,
   awaitAnimations: true
@@ -309,14 +313,13 @@ function playFor(family, sequence) {
     source.preload = "auto";
     soundCache.set(file, source);
   }
-  // Retire finished voices before adding one, and drop the oldest if the cap is
-  // reached — a stale element is cheaper to reclaim than to leave playing.
-  for (let index = voices.length - 1; index >= 0; index -= 1) {
-    if (voices[index].ended || voices[index].paused) voices.splice(index, 1);
-  }
-  if (voices.length >= VOICES) {
-    const oldest = voices.shift();
-    try { oldest.pause(); } catch { /* already gone */ }
+  // WHICH voices survive is decided in `src/render/arena-shell.js`, under the
+  // suite; stopping them is this shell's job because only it holds an `Audio`.
+  const { keep, evict } = retireVoices(voices, VOICES);
+  voices.length = 0;
+  voices.push(...keep);
+  for (const spent of evict) {
+    try { spent.pause(); } catch { /* already gone */ }
   }
 
   const voice = source.cloneNode();
@@ -972,9 +975,13 @@ function renderProvenance() {
   //   whose whole purpose is saying where its numbers came from cannot be wrong
   //   about where its ART came from — so the line is derived from `figurePack`
   //   rather than written once and left.
-  const figureLine = hasExtractedArt(figurePack)
-    ? ["The figures", "are the BUILD'S OWN, extracted from your install by `tools/extract-figure.mjs` into the gitignored `assets/`. No SS2 asset ships in this repository — a clone draws the authored art in `src/render/figure.js` until its owner extracts their own."]
-    : ["The figures", "are original vector art drawn from code in `src/render/painter.js`. No SS2 asset ships in this repository. Run `node tools/extract-figure.mjs` to draw the build's own instead."];
+  const wardrobePieces = wardrobe
+    ? Object.values(wardrobe.pieces ?? {}).reduce((total, slot) => total + Object.keys(slot).length, 0)
+    : 0;
+  const figureLine = ["The figures", figureProvenance({
+    hasExtractedArt: hasExtractedArt(figurePack),
+    wardrobePieces
+  })];
   const lines = [
     ["The arithmetic", "runs the same `ss2TeamRules` the test suite runs — map-derived from a licensed build, never observed in it."],
     figureLine,

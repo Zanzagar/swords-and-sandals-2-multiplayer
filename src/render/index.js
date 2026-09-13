@@ -27,6 +27,10 @@
  *   the licensed build's own clip labels. Both extracted assets key on those
  *   labels, so sound and art answer to one vocabulary rather than two that can
  *   drift — which is exactly how a walk came to sound like a leaping attack.
+ * - `arena-shell.js` holds the decisions the browser shell was making where no
+ *   test could reach them. `tools/arena/main.js` cannot be imported by node at
+ *   all, and it has given up five live defects in one day; what was logic
+ *   rather than drawing lives here instead.
  * - `extracted-figure.js` draws the BUILD'S OWN rig when the player has
  *   extracted it, and returns nothing when they have not. Same shape as
  *   `sound.js`: the pack is an argument, never a table in the file.
@@ -44,3 +48,4 @@ export * from "./timeline.js";
 export * from "./sound.js";
 export * from "./clip-labels.js";
 export * from "./extracted-figure.js";
+export * from "./arena-shell.js";
