@@ -68,7 +68,10 @@ import {
   timelineFor,
   timelinesForStep,
   bindingsFrom,
-  chooseSound
+  chooseSound,
+  projectileFlight,
+  projectileAt,
+  projectileTrail
 } from "/src/render/index.js";
 import { demoSide } from "/tools/arena/roster.js";
 
@@ -78,6 +81,18 @@ import { demoSide } from "/tools/arena/roster.js";
 
 /** Arena y of the front rank — the vanilla `_y`, and `toY`'s own datum. */
 const ARENA_FRONT_Y = 200;
+
+/**
+ * Arena units per figure height, so a projectile height — which
+ * `src/render/projectile.js` reports in FIGURE HEIGHTS, because that is the one
+ * unit the build's screen pixels can honestly be ported into — becomes the
+ * `lift` that `toY` takes. The same named duplicate `painter.js`,
+ * `extracted-figure.js` and `projectile.js` each carry, for the reason those
+ * state: four constants answering to one authored figure, where a silent
+ * divergence shows up as an arrow flying at a height the gladiator who loosed
+ * it does not agree with.
+ */
+const FIGURE_HEIGHT = 150;
 
 /**
  * How many ranks back a drawn depth is, FRACTIONALLY, for the perspective
@@ -811,6 +826,97 @@ function render(now = performance.now()) {
     context.font = `${Math.max(10, view.scale * 15)}px ui-sans-serif, system-ui, sans-serif`;
     context.textAlign = "center";
     context.fillText(combatant.name, view.toX(actor.x), view.toY(actor.y, -22));
+    context.globalAlpha = 1;
+  }
+
+  drawProjectiles(view, now);
+}
+
+/**
+ * The arrows, drawn LAST and therefore over everything.
+ *
+ * **That is the build's own answer, not a convenience**: it attaches the bullet
+ * to `arena.gladiators` at depth 45000 (`+0x6d81`), where the two fighters are
+ * at 300 and 301, so an arrow passes in front of every body in the arena.
+ *
+ * ► **THE FLIGHT IS FITTED TO THE SHOOTER'S ANIMATION, AND THAT IS A STATED
+ *   DIVERGENCE.** The build holds the whole phase open until the arrow lands —
+ *   `bullet_in_air != true` is one of the conditions on the phase-completion
+ *   guard (`+0x3829`) — so a long bombard genuinely takes a long turn there. A
+ *   derived flight is `ceil(distance / Xvelocity)` frames, which at 30 fps is
+ *   about two seconds for a bombard across the arena; this shell's actions are
+ *   a fraction of that, and an arrow outliving its own action would still be in
+ *   the air when the scene that owns it is replaced.
+ *
+ *   So the SHAPE is the build's and only the wall clock is ours: the arc, the
+ *   pitch, the lane interpolation, and snipe-flat-against-bombard-arced all
+ *   come from `src/render/projectile.js` and all survive. Closing the gap
+ *   properly means holding the action open for the flight, which is the
+ *   animation gate's business and not this shell's.
+ */
+function drawProjectiles(view, now) {
+  for (const shot of scene.projectiles) {
+    const entry = playing.get(shot.combatantId);
+    // No running timeline means the shooter's animation is already over and the
+    // arrow has nothing to ride. Drawing it at frame 0 for ever would pin an
+    // arrow to the bow; drawing nothing is the honest answer.
+    if (!entry) continue;
+    const at = Math.min(1, Math.max(0, (now - entry.startedAt) / entry.timeline.durationMs));
+    const flight = projectileFlight({
+      kind: shot.projectile,
+      from: shot.from,
+      to: shot.to,
+      sequence: shot.sequence
+    });
+    const point = projectileAt(flight, at * flight.flightFrames);
+    const trail = projectileTrail(flight, at * flight.flightFrames);
+
+    // ► **THE ARROW RIDES `figureScaleFor`, WHICH IS THE WHOLE POINT OF THE
+    //   THIRD AXIS.** A shot that crosses from one lane to another is at a
+    //   different depth every frame, so it draws at the scale of the rank it is
+    //   passing through — the same function the gladiators use, with the same
+    //   fractional rank, rather than a second one that could disagree with
+    //   them. An arrow that stayed one size while flying between two figures of
+    //   visibly different sizes is the tell this exists to prevent.
+    const drawnY = Number.isFinite(point.y) ? point.y : ARENA_FRONT_Y;
+    const size = figureScaleFor({ yscale: 100, rank: rankOf(drawnY, 0), slotIndex: 0 });
+
+    for (const [index, puff] of trail.entries()) {
+      const puffY = Number.isFinite(puff.y) ? puff.y : ARENA_FRONT_Y;
+      context.globalAlpha = 0.10 + 0.05 * index;
+      context.fillStyle = "#d8cdb4";
+      const radius = Math.max(1, view.scale * 2.5 * size);
+      context.beginPath();
+      context.arc(view.toX(puff.x), view.toY(puffY, puff.height * FIGURE_HEIGHT), radius, 0, Math.PI * 2);
+      context.fill();
+    }
+
+    // The shaft, drawn along its own pitch. Authored art: the build's arrow is
+    // character 47, frame `secondary_weapon - 60`, and nothing under `assets/`
+    // has extracted it — so this is the same authored fallback `figure.js` is
+    // to the extracted rig, and it says so rather than pretending otherwise.
+    context.save();
+    context.globalAlpha = 1;
+    context.translate(view.toX(point.x), view.toY(drawnY, point.height * FIGURE_HEIGHT));
+    // Canvas y is DOWN and the pitch is up-positive, so the rotation is negated
+    // exactly as `drawOps` flips the figure's own y.
+    context.rotate(-point.rotation);
+    const length = Math.max(6, view.scale * 26 * size);
+    context.strokeStyle = "#e8e0cc";
+    context.lineWidth = Math.max(1, view.scale * 1.6 * size);
+    context.beginPath();
+    context.moveTo(-length / 2, 0);
+    context.lineTo(length / 2, 0);
+    context.stroke();
+    // The head, so the direction of travel reads at a glance.
+    context.fillStyle = "#cfc3a4";
+    context.beginPath();
+    context.moveTo(length / 2, 0);
+    context.lineTo(length / 2 - length * 0.22, -length * 0.10);
+    context.lineTo(length / 2 - length * 0.22, length * 0.10);
+    context.closePath();
+    context.fill();
+    context.restore();
     context.globalAlpha = 1;
   }
 }

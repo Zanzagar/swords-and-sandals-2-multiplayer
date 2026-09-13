@@ -70,6 +70,7 @@ const HANDLED = Object.freeze([
   "place-clip",
   "move-clip",
   "move-clip-depth",
+  "fire-projectile",
   "bind-globals",
   "clip-goto",
   "panel-refresh",
@@ -128,6 +129,27 @@ export function emptyScene() {
     arenaLabel: null,
     /** The completion token the surface must hand back to settle. Null until a result. */
     completionToken: null,
+    /**
+     * Arrows loosed by the batch just folded, and ONLY that batch.
+     *
+     * ► **THE ONE FIELD HERE THAT DOES NOT CARRY FORWARD, and it is deliberate
+     *   rather than an oversight — a third behaviour among three needs a
+     *   reason.** `actors`, `globals` and the two labels are STATE: they persist
+     *   because the arena still looks like that. `unmapped` ACCUMULATES because
+     *   it is a diagnostic log and losing an entry would lose the report.
+     *
+     *   **An arrow is neither. It is an EVENT**, belonging to the action that
+     *   loosed it, and the build says so in the plainest possible way: it
+     *   `attachMovie`s the bullet on release and `removeMovieClip()`s it on
+     *   impact (`+0x6da2`, `+0x6d41`). Carrying one forward would leave arrows
+     *   hanging in the air over later turns; accumulating them would fill the
+     *   arena with every shot of the bout.
+     *
+     *   A batch is one action and an action looses at most one arrow, so this
+     *   is empty or a single entry in practice — an array because the shape
+     *   should not have to change the first time something fires twice.
+     */
+    projectiles: Object.freeze([]),
     unmapped: Object.freeze([]),
     /** The highest resolver sequence any command in this scene carried. */
     sequence: 0
@@ -199,6 +221,9 @@ export function applyCommands(scene, commands) {
   }
 
   const actors = { ...scene.actors };
+  // NOT seeded from `scene.projectiles`: an arrow belongs to the action that
+  // loosed it. See `emptyScene`.
+  const projectiles = [];
   const unmapped = [...scene.unmapped];
   let globals = scene.globals;
   let overlayLabel = scene.overlayLabel;
@@ -285,6 +310,31 @@ export function applyCommands(scene, commands) {
             actionToken: command.actionToken ?? null
           })
         });
+        break;
+      }
+
+      case "fire-projectile": {
+        // ► **IT TOUCHES NO ACTOR AT ALL, which is what makes it different
+        //   from every other kind in this fold.** An arrow is its own clip in
+        //   the build — attached to `arena.gladiators` at depth 45000, not to
+        //   either fighter — so folding it into the shooter would give a
+        //   gladiator a position it does not have and a painter something to
+        //   draw twice.
+        //
+        // The endpoints are carried through UNCHANGED rather than turned into
+        // a trajectory here, because a scene is a description of what is on the
+        // arena and the flight is arithmetic. `src/render/projectile.js` owns
+        // that, derives it from the build, and is where a surface goes for the
+        // curve.
+        projectiles.push(Object.freeze({
+          combatantId: command.combatantId,
+          targetId: command.targetId,
+          projectile: command.projectile,
+          from: command.from,
+          to: command.to,
+          hit: command.hit === true,
+          sequence: command.sequence
+        }));
         break;
       }
 
@@ -386,6 +436,7 @@ export function applyCommands(scene, commands) {
     overlayLabel,
     arenaLabel,
     completionToken,
+    projectiles: Object.freeze(projectiles),
     unmapped: Object.freeze(unmapped),
     sequence
   });

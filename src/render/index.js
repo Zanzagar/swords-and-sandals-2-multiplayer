@@ -34,6 +34,9 @@
  * - `extracted-figure.js` draws the BUILD'S OWN rig when the player has
  *   extracted it, and returns nothing when they have not. Same shape as
  *   `sound.js`: the pack is an argument, never a table in the file.
+ * - `projectile.js` owns the ARROW's flight — the build's own ballistic, with
+ *   its single screen `_y` split into this engine's DEPTH and HEIGHT, which is
+ *   the one axis vanilla cannot have and the one the second axis needs.
  * - `timeline.js` owns TIME, because the presentation stream carries none, and
  *   states this surface's animation-timeout policy — part 4 of the
  *   acknowledgement seam, which `src/adapter/action-gate.js` deliberately left
@@ -48,4 +51,5 @@ export * from "./timeline.js";
 export * from "./sound.js";
 export * from "./clip-labels.js";
 export * from "./extracted-figure.js";
+export * from "./projectile.js";
 export * from "./arena-shell.js";

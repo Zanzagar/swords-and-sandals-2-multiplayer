@@ -130,6 +130,35 @@ export const CommandKind = Object.freeze({
    * The figure moves; what it is playing while it moves is whatever it was
    * already playing, which is the honest answer and not a gap.
    */
+  /**
+   * An arrow leaves the bow.
+   *
+   * ► **THE BUILD ATTACHES A CLIP FOR THIS AND SO DOES THIS COMMAND, which is
+   *   why it is not a `clip-goto` or an `attach-clip`.** Vanilla's ranged phase
+   *   does `arena.gladiators.attachMovie("bullet", …)` at depth 45000
+   *   (`+0x6da2`), flies it with its own `onEnterFrame`, and
+   *   `removeMovieClip()`s it on impact (`+0x6d41`). It is a clip with a
+   *   LIFETIME rather than a label a figure plays, and nothing else in this
+   *   vocabulary has one: every other kind here addresses a figure that is
+   *   already on the arena and stays there.
+   *
+   * It carries the two ENDPOINTS and not a trajectory. The flight is the
+   * renderer's arithmetic (`src/render/projectile.js`, which derives it from
+   * the build), exactly as `clip-goto` carries a label and lets the renderer
+   * resolve the schedule — and for the same reason: the adapter names what
+   * happened, the renderer decides what it looks like, and the adapter does not
+   * import from `src/render/`.
+   *
+   * ► **IT IS COSMETIC, AND SAYING SO IS LOAD-BEARING.** The build resolves a
+   *   ranged attack when the arrow ARRIVES — `checkattackroll()` is called from
+   *   the impact test (`+0x6d29`) — and this engine resolves it synchronously
+   *   when the action is submitted. So the arrow here DISPLAYS an outcome that
+   *   is already decided and cannot change it. Wiring it the build's way would
+   *   be a resolver change, not a renderer one; a surface that dropped this
+   *   command entirely would show a bout that is correct in every number and
+   *   merely missing an arrow.
+   */
+  FIRE_PROJECTILE: "fire-projectile",
   MOVE_CLIP_DEPTH: "move-clip-depth",
   BIND_GLOBALS: "bind-globals",
   CLIP_GOTO: "clip-goto",
@@ -197,6 +226,18 @@ export const PLACEHOLDER_ANIMATION_BINDINGS = Object.freeze({
 
 /** Map, "Attack roll dispatcher": which directions are the ranged band. */
 const RANGED_DIRECTIONS = Object.freeze(new Set([21, 22, 23]));
+/**
+ * Which directions actually LOOSE something — 21 and 22, and NOT 23.
+ *
+ * ► **A SEPARATE SET FROM `RANGED_DIRECTIONS` ABOVE, and collapsing the two
+ *   would put an arrow in the air for a bash.** Direction 23 is in the ranged
+ *   BAND for the purpose that set serves — the hurt label is rewritten
+ *   `direction - 20` for all three (`+0x2093`-`+0x20d6`) — but `bash_attack` is
+ *   a blow with the bow, not a shot: its branch (`+0x6463`) attaches no
+ *   `bullet`, sets no `bullet_in_air`, and plays `Attack2`. Only the shared
+ *   ranged branch at `+0x6b53` fires one.
+ */
+const PROJECTILE_DIRECTIONS = Object.freeze(new Map([[21, "bombard"], [22, "snipe"]]));
 /** Map `+0x2093`–`+0x20d6`: the ranged band's hurt label is `direction - 20`. */
 const RANGED_DIRECTION_OFFSET = 20;
 
@@ -535,6 +576,47 @@ function panelRefresh(sequence, placement, combatant) {
  * inert to fold, and suppressing it would make "walked into the wall" and
  * "never walked" the same stream.
  */
+/**
+ * The `fire-projectile` for an event that loosed one, or null.
+ *
+ * **Detected by `attackDirection`, never by parsing the type string** — the
+ * same rule every other case in this file follows, and here it is the strongest
+ * it ever gets: 21 and 22 are the build's own constants, assigned at `+0x6c67`
+ * and `+0x6c8c`, while the engine's tokens (`bombard`, `snipe`) are this
+ * repository's spelling and could be renamed tomorrow.
+ *
+ * **Null when either end models no position**, which is a rule set that models
+ * no geometry — `fixtureReplay`, or a position-blind archer. There is nothing
+ * to fly an arrow BETWEEN, and inventing two points to fly it between would put
+ * a trajectory on screen that the model does not have.
+ */
+function projectileFor(wire, combatants, event) {
+  const projectile = PROJECTILE_DIRECTIONS.get(Number(event.attackDirection));
+  if (!projectile) return null;
+  const shooter = combatants.get(event.actorId);
+  const target = combatants.get(event.targetId);
+  if (!Number.isFinite(shooter?.x) || !Number.isFinite(target?.x)) return null;
+  return Object.freeze({
+    kind: CommandKind.FIRE_PROJECTILE,
+    sequence: event.sequence,
+    combatantId: event.actorId,
+    targetId: event.targetId,
+    projectile,
+    // ► **`y` IS ARENA DEPTH AND IS CARRIED EVEN WHEN NULL**, the same rule the
+    //   combatant projection follows for `x` and `y`: present on every command
+    //   so two surfaces commit to one shape, and `null` meaning "this rule set
+    //   models no depth" rather than "the field is missing". The renderer reads
+    //   a null pair as a flat, one-lane flight.
+    from: Object.freeze({ x: shooter.x, y: Number.isFinite(shooter.y) ? shooter.y : null }),
+    to: Object.freeze({ x: target.x, y: Number.isFinite(target.y) ? target.y : null }),
+    // Whether the shot LANDED, so a surface can stop the arrow at the body or
+    // carry it past. The build cannot express this — its arrow resolves the
+    // attack on arrival, so there is no outcome yet to report — and here there
+    // always is, because the shot is already resolved. Cosmetic either way.
+    hit: event.hit === true
+  });
+}
+
 function movementFor(layout, event) {
   if (!Number.isFinite(event.from) || !Number.isFinite(event.to)) return null;
   // Resolved HERE rather than by the caller, and that is not tidiness. This is
@@ -777,6 +859,14 @@ export function presentResolvedEvents(wire, {
     if (movement) commands.push(movement);
     if (depthMovement) commands.push(depthMovement);
     if (chosen.actor) commands.push(clipGoto(event.sequence, actorPlacement, chosen.actor, "actor"));
+    // AFTER the actor's clip, because the bow has to be drawn before the arrow
+    // leaves it. The build is stricter still — it will not attach the `bullet`
+    // until the fighter animation sets `attacker.fired` at its own release
+    // frame (`+0x6d59`) — and a surface that wants that fidelity has the
+    // actor's timeline in hand to take the cue from. Ordering the two commands
+    // is as far as this vocabulary can carry it.
+    const projectile = projectileFor(wire, combatants, event);
+    if (projectile) commands.push(projectile);
     if (chosen.target && targetPlacement) {
       commands.push(clipGoto(event.sequence, targetPlacement, chosen.target, "target"));
     } else if (chosen.target && selfTargeted) {
