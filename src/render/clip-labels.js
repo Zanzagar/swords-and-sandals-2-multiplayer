@@ -70,8 +70,17 @@ const FAMILY_LABELS = Object.freeze({
 
   attack: Object.freeze(["attack1", "attack2", "attack3", "attack4", "attack5", "attack6",
     "attack7", "attack8", "attack9", "attack10", "attack11", "attack12"]),
+  // ► **`hurt8` WAS MISSING, AND IT WAS MISSING FOR THE `block` REASON.** The
+  //   clip carries `hurt1`-`hurt12` and `hurt20`, thirteen animations, and this
+  //   list held twelve. The one it dropped is the one the build binds NO SOUND
+  //   to — so "the build plays no sound here" had been written down as "the
+  //   animation does not exist", exactly the conflation corrected for `block`
+  //   earlier the same day. Fixing one instance of a habit does not fix the
+  //   habit. **Deaths are 13 of 13 and attacks 12 of 12; `hurt8` was the only
+  //   hole left.** It draws now, and it is still silent — because silence is
+  //   derived from the bindings, which is the whole point of the correction.
   hurt: Object.freeze(["hurt1", "hurt2", "hurt3", "hurt4", "hurt5", "hurt6", "hurt7",
-    "hurt9", "hurt10", "hurt11", "hurt12", "hurt20"]),
+    "hurt8", "hurt9", "hurt10", "hurt11", "hurt12", "hurt20"]),
   knockback: Object.freeze(["knockback_mov", "shove"]),
   taunt: Object.freeze(["taunt"]),
   taunted: Object.freeze(["taunted"]),

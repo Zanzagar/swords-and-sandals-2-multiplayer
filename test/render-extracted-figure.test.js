@@ -510,3 +510,28 @@ test("a loadout slot the wardrobe has no piece for is skipped, not drawn as noth
   });
   assert.deepEqual(ops.filter((op) => op.slot).map((op) => op.slot), ["breastplate"]);
 });
+
+test("every hurt, death and attack the CLIP has is a label the engine can reach", () => {
+  // ► **`hurt8` WAS MISSING FOR THE `block` REASON**: the build binds it no
+  //   sound, and that got written down as the animation not existing. Deaths
+  //   were 13 of 13 and attacks 12 of 12, so it was the only hole — and it
+  //   survived the `block` correction made earlier the same day, because fixing
+  //   one instance of a habit does not fix the habit.
+  //
+  //   The numbers are the build's, quoted not stored: the fighter clip carries
+  //   `hurt1`-`hurt12` and `hurt20`, `death1`-`death7`, `death21`-`death23`,
+  //   `deathspike`, `deathtaunt`, `death_poisoned`, and `attack1`-`attack12`.
+  const hurts = clipLabelsFor("hurt");
+  for (let n = 1; n <= 12; n += 1) {
+    assert.ok(hurts.includes(`hurt${n}`), `hurt${n} is in the clip and must be reachable`);
+  }
+  assert.ok(hurts.includes("hurt20"));
+  assert.equal(hurts.length, 13);
+
+  const attacks = clipLabelsFor("attack");
+  for (let n = 1; n <= 12; n += 1) assert.ok(attacks.includes(`attack${n}`));
+  assert.equal(attacks.length, 12);
+
+  const deaths = clipLabelsFor("death:unknown");
+  assert.equal(deaths.length, 13);
+});
