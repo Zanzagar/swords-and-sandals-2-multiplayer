@@ -5,9 +5,10 @@ sessionId:    b4ca2b15-791c-4a4f-bc62-ef21baf9e095 (https://claude.ai/code/sessi
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-commits:      de54749..HEAD. **Re-measure; never copy.**
+commits:      de54749..HEAD, two of them: `7310583` builds ranged and
+              `301277a` fixes what Codex found in it. **Re-measure.**
 suite:        1129 / 1128 / 0 / 1 (fresh-clone profile — `captures/` holds only
-              its manifest and README), measured after `7310583` BY EXIT CODE.
+              its manifest and README), measured after `301277a` BY EXIT CODE.
               **Re-measure; never copy.**
 agentRuns:    one Codex `/adversarial-review` on `HEAD~1..HEAD`, model pinned
               `gpt-6-astra`. No fan-out wave: ADR 0001 makes a wave the LAST
@@ -62,7 +63,7 @@ He took **the build's own answer to three of them**:
 4. **A body between you and your target blocks the shot.** This one the build
    cannot answer and it is the single authored rule in the feature.
 
-## THE LESSON, and it is one lesson told twice in twenty minutes
+## THE LESSON, and it is one lesson told THREE TIMES in one session
 
 ► **A GUARD KEYED ON A CONSEQUENCE HAS AN EXCEPTION NOBODY COUNTED.**
 
@@ -87,9 +88,31 @@ had been live since the guard was written.
   contradiction, bow mode with an EMPTY secondary slot, which is what the build
   hides its own swap button for.
 
-**What actually closes the defect is the VOCABULARY, not a guard at all**:
-neither archer frame wires a melee verb, whatever the reach says. A sweep over
-all twenty ranged rows pins it, so a third exception cannot hide.
+► **AND THEN CODEX FOUND THE THIRD, WHICH WAS THE BACKSTOP I HAD LEFT IN
+  PLACE.** `/adversarial-review` on `7310583` (model pinned `gpt-6-astra`, one
+  finding, verified by reproduction before it was believed):
+  `ss2Combatant(..., { battleStarted: true })` runs `ss2BattleValues` with
+  `using_bow` true, the bow block overwrites the three melee fields in place,
+  and **they never come back**. A restored archer that swapped to melee fought
+  at 17-73 damage and reach 262 where its own sword says 21-27 and 130 — and
+  the reach backstop did not fire, because it was still keyed on
+  `weapon_range > arena width` and bow 65's 262 sails under it. **The same two
+  rows, the same exception, in a guard sitting directly below the comment
+  explaining why that criterion is wrong.**
+
+  Fixed at the root rather than with a fourth guard: when a record states
+  `using_bow`, derive a second time with the bow put away and take the three
+  melee fields from that run. A legitimately-derived record can no longer carry
+  an arena-spanning `weapon_range` at all, so the backstop now fires only on a
+  hand-written bag, which is what it is kept for.
+
+**WRITING DOWN WHY A CONSEQUENCE-KEYED GUARD IS WRONG DOES NOT STOP YOU LEAVING
+ONE IN PLACE.** That is the transferable part, and it cost three rounds here.
+
+**What actually closes the melee-verbs-with-a-bow defect is the VOCABULARY, not
+a guard at all**: neither archer frame wires a melee verb, whatever the reach
+says. A sweep over all twenty ranged rows pins it, so a fourth exception cannot
+hide.
 
 ## THE SEVENTH INSTANCE, and this one had been audible for a day
 
