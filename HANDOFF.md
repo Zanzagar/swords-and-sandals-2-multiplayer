@@ -8,6 +8,44 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-13 11:45 — the gladiator is dressed, and the shell has a seam](docs/handoffs/2026-09-13-1145--the-gladiator-is-dressed-and-the-shell-has-a-seam.md).**
+Start there. **The arena draws the build's own gladiator wearing his own
+armour** — 387 wardrobe pieces attached by the build's own table, all 44 morph
+shapes rendering as the blood in the death animations, and a 2v1 that pincers.
+
+► **NEXT IS RANGED AND IT HAS ITS OWN BRIEF:
+  [`docs/handoffs/RANGED-BRIEF.md`](docs/handoffs/RANGED-BRIEF.md).** The owner
+  kept it for a session he is awake for. **Everything presentational is already
+  built** — `bombard` and `snipe` are extracted, bound to sound and mapped —
+  **so the work is the resolver's alone.** The one thing not to do is in there:
+  the module refuses a bow at construction and that refusal is CORRECT.
+► **A GREEN SUITE IS NOT COVERAGE, and twenty agents proved it.** A mutation
+  audit broke one line at a time: 15 of 17 applied mutations went red and **2
+  SURVIVED — both in the dressing path, and not because it was under-asserted
+  but because it had NEVER BEEN EXECUTED.** `paintExtractedFigure` was called
+  nine times suite-wide, every time with no wardrobe. **And the test that
+  looked like coverage asserted `helmet.depth === hair.depth` on the DATA
+  TABLE** — the fact the rule is derived from, never the rule — so it passed
+  with the rule deleted. Run the audit again after any substantial render
+  change.
+► **FLANKING: a 2v1 now pincers.** The owner watched one and said the survivors
+  stood behind each other rather than going round. Measured: **208 outnumbered
+  turns, 100% same-side, 0 crossings in 3,424 turns.** It was never geometry —
+  `ss2BodyBlocks` is `|dy| < physical_size`, so at stride 97 a foe one rank away
+  never blocked. **Pincered 0% -> 17.8%, simultaneous fights 273 -> 413 turns,
+  24/24 still settle, and the pile-up tell is absent** (97 and 150 return
+  clearly different censuses). No golden moved: with the axis off every `y` is
+  null and the arm is inert.
+► **`grep` IS NOT A GATE.** I piped the suite through `grep` and committed on
+  `fail 2` — grep succeeds when it MATCHES. **Use the exit code.** And do not
+  reach for `git add -A` while agents are running: it staged seventeen worktree
+  gitlinks and I pushed them.
+► **`--host 0.0.0.0`, NOT `127.0.0.1`.** WSL2 localhost forwarding here is
+  INTERMITTENT — it worked at 01:05 and timed out at 03:30 unchanged. Three
+  sessions called this server healthy from inside WSL, the one place it was
+  always going to work.
+
+*(The brief it supersedes, whose ranked items 1, 2 and 3 are all done:)*
 [2026-09-13 02:35 — the wardrobe was in the linkage table all along](docs/handoffs/2026-09-13-0235--the-wardrobe-was-in-the-linkage-table-all-along.md).**
 Start there. **The arena draws the build's own gladiator**, and a 12-agent wave
 found that **the fighter clip does not dress itself**: the mechanism is at the
