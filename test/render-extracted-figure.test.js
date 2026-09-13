@@ -44,10 +44,32 @@ function packOf(extra = {}) {
       poses: [
         [{ shape: 1, limb: "torso", depth: [23, 1], matrix: [1, 0, 0, 1, 0, -1000] }],
         [{ shape: 1, limb: "torso", depth: [23, 1], matrix: [1, 0, 0, 1, 0, -1200] }]
+      ],
+      // The LIMB matrices, which is what an attached piece is positioned by.
+      // Without these the dressing loop cannot run at all — which is exactly
+      // how it went untested.
+      limbs: [
+        { torso: [1, 0, 0, 1, 0, -1000], head: [1, 0, 0, 1, 0, -1800], Rlowerarm: [1, 0, 0, 1, 200, -1400] },
+        { torso: [1, 0, 0, 1, 0, -1200], head: [1, 0, 0, 1, 0, -1900], Rlowerarm: [1, 0, 0, 1, 200, -1500] }
       ]
     },
     ...extra
   });
+}
+
+/** A minimal wardrobe: one square piece per slot asked for, at the limb origin. */
+function wardrobeOf(slots) {
+  const pieces = {};
+  for (const [slot, ids] of Object.entries(slots)) {
+    pieces[slot] = {};
+    for (const id of ids) {
+      pieces[slot][id] = {
+        linkage: `${slot}${id}`, character: 9000 + id, frames: 1,
+        placements: [{ shape: 2, matrix: [1, 0, 0, 1, 0, 0] }]
+      };
+    }
+  }
+  return { pieces, shapes: SHAPES };
 }
 
 const anim = (poses, bounds = { xMin: -20, xMax: 20, yMin: -100, yMax: 0 }) =>
@@ -331,4 +353,108 @@ test("an attached piece composes limb x piece in CLIP space, offset included", (
   // A quarter-turn limb: the shield's +50 in y becomes -50 in x.
   const turned = composeInClipSpace([0, 1, -1, 0, 0, 0], identity, { x: 0, y: 50 });
   assert.deepEqual([turned[4], turned[5]], [-50, 0]);
+});
+
+
+/* ------------------------------------------------------------------ */
+/* DRESSING — added 2026-09-13 after a mutation audit found the loop    */
+/* was never executed by any test at all.                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **TWO MUTATIONS SURVIVED THE SUITE AND BOTH WERE HERE.** A 20-agent audit
+ *   broke one line at a time and ran the suite: 15 of 17 applied mutations went
+ *   red, and the two that did not were "drop the ground datum for attached
+ *   pieces" and "let hair draw through a helmet".
+ *
+ *   One agent instrumented it and proved the cause rather than guessing:
+ *   `paintExtractedFigure` is called NINE times across the whole suite and
+ *   every one of them passes no wardrobe, no loadout and no limbs — so the
+ *   entire dressing block was dead code as far as the tests were concerned.
+ *
+ *   **And the test that LOOKED like coverage was not.** "the attachment table
+ *   is the BUILD'S" asserts `helmet.depth === hair.depth` on the data table —
+ *   the fact the suppression rule is DERIVED from, never the suppression
+ *   itself — so it passes unchanged with the rule deleted.
+ */
+test("an attached piece lands on the SAME ground datum as the body it hangs off", () => {
+  // The mutation that survived: dropping `- pack.groundY` from the attachment
+  // matrix. Every piece would then be displaced by groundY * scale — gear
+  // floating above or sunk below the gladiator — with the suite green.
+  const pack = figurePackFrom(SHAPES, {
+    standing: {
+      label: "Standing",
+      // Feet at clip y 40, NOT at the origin, so a dropped datum shows.
+      bounds: { xMin: 0, xMax: 10, yMin: -60, yMax: 40 },
+      poses: [[{ shape: 1, limb: "torso", depth: [23], matrix: [1, 0, 0, 1, 0, 800] }]],
+      limbs: [{ torso: [1, 0, 0, 1, 0, 800] }]
+    }
+  });
+  const ops = paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", at: 0, height: 1,
+    wardrobe: wardrobeOf({ breastplate: [3] }), loadout: { breastplate: 3 }
+  });
+  const body = ops.find((op) => !op.slot);
+  const piece = ops.find((op) => op.slot === "breastplate");
+  assert.ok(body && piece, "the pose must contain both a body op and an attached one");
+  // 800 twips is clip y 40, which IS the ground, so both land at arena y 0.
+  assert.equal(body.matrix[5], 0);
+  assert.equal(piece.matrix[5], 0, "the piece shares the body's datum, not the clip's origin");
+});
+
+test("a HELMET suppresses the hair, which is behaviour and not a fact about the table", () => {
+  const pack = packOf();
+  const wardrobe = wardrobeOf({ helmet: [3], hair: [4] });
+  const slots = (loadout) => paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", at: 0, height: 1, wardrobe, loadout
+  }).filter((op) => op.slot).map((op) => op.slot);
+
+  assert.deepEqual(slots({ hairstyle: 4 }), ["hair"], "hair alone draws");
+  assert.deepEqual(slots({ helmet: 3 }), ["helmet"], "a helmet alone draws");
+  assert.deepEqual(slots({ hairstyle: 4, helmet: 3 }), ["helmet"],
+    "and together the helmet REPLACES the hair — they share depth 5 in the build");
+});
+
+test("the dressing loop actually RUNS, which is the assertion that was missing", () => {
+  // A positive control for the two above: if this ever returns no attached ops,
+  // the tests beside it are passing vacuously again.
+  const pack = packOf();
+  const ops = paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", at: 0, height: 1,
+    wardrobe: wardrobeOf({ breastplate: [3], shield: [5] }),
+    loadout: { breastplate: 3, shield: 5 }
+  });
+  const attached = ops.filter((op) => op.slot);
+  assert.equal(attached.length, 2, "one op per piece, since each test piece is one path");
+  assert.deepEqual(attached.map((op) => op.slot).sort(), ["breastplate", "shield"]);
+  assert.equal(attached.find((op) => op.slot === "shield").limb, "Rlowerarm");
+});
+
+test("the shield's 50-twip offset moves it, and moves it on the LIMB's axis", () => {
+  const pack = packOf();
+  const wardrobe = wardrobeOf({ shield: [5], gauntlet: [2] });
+  const ops = paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", at: 0, height: 1, wardrobe,
+    loadout: { shield: 5, gauntlet: 2 }
+  });
+  const shield = ops.find((op) => op.slot === "shield");
+  const gauntlet = ops.find((op) => op.slot === "gauntlet");
+  // Both hang off Rlowerarm at [1,0,0,1,200,-1400]; only the shield is offset.
+  assert.equal(shield.limb, "Rlowerarm");
+  assert.equal(gauntlet.limb, "Rlowerarm");
+  const scale = 150 / 100;
+  // +50 twips DOWN in clip space is 2.5 px, which is 2.5 * scale UP in arena y.
+  assert.equal(Math.round((gauntlet.matrix[5] - shield.matrix[5]) * 1000) / 1000, 2.5 * scale);
+});
+
+test("a loadout slot the wardrobe has no piece for is skipped, not drawn as nothing", () => {
+  // The six body-armour families start at id 2, so `1` means UNEQUIPPED in the
+  // build's own encoding — and the demo roster uses it.
+  const pack = packOf();
+  const ops = paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", at: 0, height: 1,
+    wardrobe: wardrobeOf({ breastplate: [3] }),
+    loadout: { breastplate: 3, gauntlet: 1, shinguard: 1 }
+  });
+  assert.deepEqual(ops.filter((op) => op.slot).map((op) => op.slot), ["breastplate"]);
 });
