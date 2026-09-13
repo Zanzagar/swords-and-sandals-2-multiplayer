@@ -324,6 +324,36 @@ function driveFirst(battle, limit) {
  *   it and `:576` signs the knockback force with it — so a recomputed facing
  *   would have silently re-datumed measured fixtures.
  */
+/**
+ * ► **ALL FOUR MOVED ON 2026-09-12 FOR A SHAPE CHANGE, NOT A BEHAVIOUR ONE:
+ *   the attack event gained `backAttack` and `backAttackDamage`.**
+ *
+ *     a6b17667 -> e54ef067   (six actions in)
+ *     1f2b26e4 -> 4da9fa2b   (settled 1v1)
+ *     e8f10147 -> 9659846e   (settled 3v3)
+ *     c46c6c20   unchanged   (vanilla-separation opening)
+ *
+ *   `toTeamWireState` projects the event log, so two always-present fields on
+ *   every ATTACK event move every hash that covers one — even though not one
+ *   of these battles contains a back attack. **Not one of them CAN**: the 1v1s
+ *   are duels, where the defender's nearest foe IS its attacker and so the
+ *   attacker is never behind it.
+ *
+ *   ► **AND THE ONE THAT DID NOT MOVE IS THE USEFUL ONE.** The
+ *   vanilla-separation opening is six WALKS and no attacks, so it carries no
+ *   attack event for the new fields to widen. I mapped the new hashes to the
+ *   wrong tests on the first pass and that pin is what caught it: a pin that
+ *   holds when you expect it to move is telling you something about the
+ *   battle, not about the change.
+ *
+ *   The fields are unconditional rather than omitted-when-false on purpose,
+ *   the same rule as `x` and `y` in the combatant projection: two peers commit
+ *   to one event shape, and a reader can tell "not a back attack" from "this
+ *   build does not know what a back attack is".
+ *
+ *   **No golden moved, for the fifth time.** A back attack needs positions on
+ *   both fighters and a fixture has none.
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -344,7 +374,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "a6b17667", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "e54ef067", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -356,7 +386,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "1f2b26e4", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "4da9fa2b", WHY_IT_MOVED);
 });
 
 /**
@@ -408,7 +438,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "e8f10147", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "9659846e", WHY_IT_MOVED);
 });
 
 /**

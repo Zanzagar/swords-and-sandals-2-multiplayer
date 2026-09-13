@@ -2033,6 +2033,15 @@ export const SS2_STATUS_FLAGS = Object.freeze([...SS2_DEATH_CLEAR_FLAGS, ...SS2_
 export const SS2_FACING_LEFT = "facing-left";
 
 /**
+ * What a blow from behind adds, as a fraction of the damage that landed.
+ *
+ * AUTHORED — vanilla has no directional attack advantage at all
+ * (`ss2IsBackAttack`). Chosen by measurement rather than taste: see the commit
+ * that introduced it for the flanker's win rate at 0, 0.5 and 1.0.
+ */
+export const SS2_BACK_ATTACK_BONUS = 0.5;
+
+/**
  * Every resource name this rule set reads. A blueprint that declares all of
  * them can never make the arithmetic fall back on a default.
  *
@@ -2722,6 +2731,51 @@ const declaredResourceNames = (view) => new Set(Object.keys(view.resources ?? {}
  * resolver refuses an undeclared name mid-list and leaves the earlier effects
  * applied, which would be a partial action with no rollback.
  */
+/**
+ * IS THE ATTACKER BEHIND THE DEFENDER?
+ *
+ * ► **AUTHORED, AND THE THING THAT LOOKS LIKE EVIDENCE FOR IT IS A TRAP.** The
+ *   build has a variable and a parameter literally named `attack_direction`,
+ *   and it is NOT a bearing: it is a clip-name suffix and an armour-zone
+ *   selector. `defender_hurt` builds `animstate = "hurt" + attack_direction`
+ *   (`+0x2086`) and `defender_blocked` builds `"defend" + attack_direction`
+ *   (`+0x2160`), while `remove_armour(whichcharacter, whichavatar,
+ *   attack_direction)` tests `{1,5,8,9}` to pick the helmet group. Re-derived
+ *   against the oracle 2026-09-12.
+ *
+ *   **Vanilla has no backstab, no flank and no surround.** `attack_chances`
+ *   contains no positional term of any kind — no `gladiator_dir`, no `_x`, no
+ *   `fightdistance`. So this is mod surface and is labelled as such rather
+ *   than dressed in that tempting citation.
+ *
+ * ## Why it exists, and it is a measurement rather than a taste
+ *
+ * The lane geometry made flanking POSSIBLE and nothing made it WORTH DOING.
+ * Measured 2026-09-12: the route — rank out, walk past, rank back — is legal
+ * on 59.4% of turns, costs three actions, and **a gladiator scripted to flank
+ * once per bout went 7-17 against one that did not.** It bought nothing,
+ * because no gate, damage band or AI rule read which side of you an enemy
+ * stood on. This is what the far side is for.
+ *
+ * ## The definition
+ *
+ * A defender faces its nearest foe (`ss2FacingEffects`). An attacker standing
+ * on the OTHER side of it is behind it. Both need a position: a rule set that
+ * models none can never produce a back attack, which is the same structural
+ * gate that keeps all 23 promoted goldens out of this — and it matters,
+ * because a golden replays a measured swing whose damage is the measurement.
+ */
+export function ss2IsBackAttack(attacker, defender) {
+  if (!Number.isFinite(attacker?.x) || !Number.isFinite(defender?.x)) return false;
+  // A co-located pair has no sides, exactly as the build's strict tests leave
+  // a co-located pair's facing alone.
+  if (attacker.x === defender.x) return false;
+  const facesLeft = (defender.status ?? []).includes(SS2_FACING_LEFT);
+  // Facing left means the nearest foe is to the left, so an attacker to the
+  // RIGHT is behind. And the mirror.
+  return facesLeft === (attacker.x > defender.x);
+}
+
 function defenderEffects(before, after, target) {
   const declared = declaredResourceNames(target);
   const effects = [];
@@ -3218,7 +3272,29 @@ export function createSs2TeamRules({
    * `crowdPatience` is: the hash carries only the id, so two peers running
    * different strides would agree on every hash and then diverge.
    */
-  rankStride = SS2_ARENA.rankStride
+  rankStride = SS2_ARENA.rankStride,
+  /**
+   * What a blow struck from BEHIND adds, as a fraction of the damage the
+   * measured swing already did. `0` disables it and is not the default.
+   *
+   * ► **AUTHORED, and layered ON TOP of the build's arithmetic rather than
+   *   inside it.** The swing resolves exactly as it always did — same
+   *   `attack_chances`, same roll, same damage — and the bonus is a SEPARATE
+   *   damage effect that names itself in the effect log. Delete it and the
+   *   measured engine is bit-for-bit back. That is deliberate: the to-hit and
+   *   damage arithmetic is the golden pipeline, 23 runtime-verified fixtures
+   *   replay through it, and an authored term reaching inside it would re-datum
+   *   every one of them.
+   *
+   * **It cannot fire without positions on both fighters**, so a fixture — which
+   * models none — can never produce one. Structural gate, not a flag.
+   *
+   * See `ss2IsBackAttack` for why vanilla's `attack_direction` is NOT evidence
+   * for this, and for the measurement that asked for it: flanking was legal on
+   * 59.4% of turns, cost three actions, and went 7-17 because it bought
+   * nothing.
+   */
+  backAttackBonus = SS2_BACK_ATTACK_BONUS
 } = {}) {
   if (!FIGHT_MODES.includes(fightMode)) {
     throw new TeamRuleSetError(`fightMode must be one of: ${FIGHT_MODES.join(", ")}.`);
@@ -3238,6 +3314,11 @@ export function createSs2TeamRules({
   }
   if (observer !== null && typeof observer !== "function") {
     throw new TeamRuleSetError("observer must be a function.");
+  }
+  if (!Number.isFinite(backAttackBonus) || backAttackBonus < 0) {
+    throw new TeamRuleSetError(
+      `backAttackBonus must be a finite fraction >= 0 (0 disables it); got ${String(backAttackBonus)}.`
+    );
   }
   if (!Number.isFinite(rankStride) || rankStride < 0) {
     throw new TeamRuleSetError(
@@ -3262,7 +3343,8 @@ export function createSs2TeamRules({
   // including at 0. A rule set with the second axis switched off is a
   // different engine from the shipped one and its id has to say so.
   const strideSuffix = rankStride === SS2_ARENA.rankStride ? "" : `-rank-${rankStride}`;
-  const ruleSetId = `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}`;
+  const backSuffix = backAttackBonus === SS2_BACK_ATTACK_BONUS ? "" : `-back-${backAttackBonus}`;
+  const ruleSetId = `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}`;
 
   return defineTeamRuleSet({
     // The mode is in the id because `toTeamWireState` carries only id,
@@ -4041,8 +4123,28 @@ export function createSs2TeamRules({
       const transition = eliminated
         ? { effects: [], staminaGained: 0, healed: 0 }
         : phaseTransitionEffects(actor, { staminaCost });
+      // ► **THE BACK ATTACK, AND IT IS A SEPARATE EFFECT ON PURPOSE.** The
+      //   swing above has already resolved through the build's own
+      //   `attack_chances` and damage bands, untouched — this reads the damage
+      //   it did and adds an authored fraction as its own DAMAGE effect, which
+      //   names itself in the log and can be deleted to restore the measured
+      //   engine bit-for-bit. An authored term reaching INSIDE that arithmetic
+      //   would re-datum 23 runtime-verified fixtures.
+      //
+      //   It needs a landed blow: a miss emits `amount: 0` (see
+      //   `defenderEffects`, which always emits one), and half of nothing is
+      //   nothing, so a missed back attack is correctly worth no bonus.
+      const struck = Math.max(0, defenderBefore.hitpoints - scenario.villain.hitpoints);
+      const backAttack = backAttackBonus > 0
+        && struck > 0
+        && ss2IsBackAttack(actor, target);
+      const backAttackDamage = backAttack ? Math.round(struck * backAttackBonus) : 0;
+
       const effects = [
         ...defenderEffects(defenderBefore, scenario.villain, target),
+        ...(backAttackDamage > 0
+          ? [{ kind: EffectKind.DAMAGE, targetId: target.id, amount: backAttackDamage }]
+          : []),
         ...statusEffects(attackerBefore, scenario.hero, defenderBefore, scenario.villain, actor, target),
         ...transition.effects
       ];
@@ -4056,6 +4158,11 @@ export function createSs2TeamRules({
         hit: calculation.hit,
         chance: calculation.chance,
         rollNeeded: calculation.rollNeeded,
+        // Reported so a UI can say "from behind" and a sweep can count them,
+        // and so the authored half of the damage is never mistaken for the
+        // measured half.
+        backAttack,
+        backAttackDamage,
         diceroll: calculation.diceroll,
         dispatchedMethod: calculation.dispatchedMethod ?? null,
         howDied: outcome.resultEvent?.howDied ?? null,

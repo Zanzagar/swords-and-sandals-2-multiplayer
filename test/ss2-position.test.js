@@ -46,6 +46,8 @@ import {
   ss2WalkDisplacement,
   ss2WalkDestination,
   ss2FacingEffects,
+  ss2IsBackAttack,
+  SS2_BACK_ATTACK_BONUS,
   ss2TeamRules,
   SS2_ARENA,
   Ss2ActionType,
@@ -772,6 +774,59 @@ test("facing is per-fighter above 1v1, which the build's PAIR write cannot expre
   assert.equal(byId["r1"], true, "r1's nearest foe is b1 at -200, so it turns left");
   assert.equal(byId["b2"], true, "b2's nearest foe is r1 at 0, so it also turns left");
   // Both now face left: r1 faces b1, b2 faces r1. Not mutual, and it cannot be.
+});
+
+/**
+ * ► **A BLOW FROM BEHIND, AND IT IS AUTHORED — the thing that looks like
+ *   evidence for it in the build is a trap.** `attack_direction` is a
+ *   clip-name suffix (`animstate = "hurt" + attack_direction`, `+0x2086`) and
+ *   an armour-zone selector, not a bearing. `attack_chances` has no positional
+ *   term of any kind. Re-derived against the oracle 2026-09-12.
+ *
+ * It exists because the lane geometry made flanking POSSIBLE and nothing made
+ * it worth doing: measured, a gladiator that flanked bought nothing, because
+ * no gate or damage band read which side of you an enemy stood on.
+ */
+test("a back attack needs the defender facing away, and positions on both", () => {
+  const facing = (x, facesLeft) => ({ id: "d", x, status: facesLeft ? ["facing-left"] : [] });
+
+  assert.equal(ss2IsBackAttack({ x: 100 }, facing(0, true)), true, "facing left, struck from the right");
+  assert.equal(ss2IsBackAttack({ x: -100 }, facing(0, true)), false, "facing left, struck from the left");
+  assert.equal(ss2IsBackAttack({ x: -100 }, facing(0, false)), true, "facing right, struck from the left");
+  assert.equal(ss2IsBackAttack({ x: 100 }, facing(0, false)), false, "facing right, struck from the right");
+
+  // Co-located has no sides, matching the build's strict facing tests.
+  assert.equal(ss2IsBackAttack({ x: 0 }, facing(0, true)), false);
+  // And no position means no back attack — the structural gate that keeps all
+  // 23 promoted goldens out of this, since a fixture models no geometry.
+  assert.equal(ss2IsBackAttack({}, facing(0, true)), false);
+  assert.equal(ss2IsBackAttack({ x: 100 }, { id: "d", status: ["facing-left"] }), false);
+});
+
+test("a DUEL can never produce a back attack, which is why no 1v1 pin moved", () => {
+  // The defender faces its nearest foe. In a duel that IS its attacker, so the
+  // attacker is in front of it by construction, wherever the two stand.
+  for (const [attackerX, defenderX] of [[-100, 0], [100, 0], [-500, 0], [500, 0]]) {
+    const defenderFacesLeft = attackerX < defenderX;
+    const defender = { id: "d", x: defenderX, status: defenderFacesLeft ? ["facing-left"] : [] };
+    assert.equal(
+      ss2IsBackAttack({ x: attackerX }, defender), false,
+      `a duel at ${attackerX}/${defenderX} must never be a back attack`
+    );
+  }
+});
+
+test("the bonus is LAYERED on the measured swing, not mixed into it", () => {
+  // ► **The swing resolves through the build's own `attack_chances` and damage
+  //   bands untouched; the bonus is a SEPARATE damage effect.** Delete it and
+  //   the measured engine is bit-for-bit back — which is the whole reason 23
+  //   runtime-verified fixtures still replay.
+  assert.equal(createSs2TeamRules({ backAttackBonus: 0 }).id, "ss2-map-derived-tournament-back-0");
+  assert.equal(createSs2TeamRules({ backAttackBonus: SS2_BACK_ATTACK_BONUS }).id, "ss2-map-derived-tournament");
+  assert.throws(
+    () => createSs2TeamRules({ backAttackBonus: -1 }),
+    (error) => error instanceof TeamRuleSetError && /backAttackBonus/.test(error.message)
+  );
 });
 
 /* ------------------------------------------------------------------ */
