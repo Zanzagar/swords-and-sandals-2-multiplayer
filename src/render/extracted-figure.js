@@ -114,6 +114,28 @@ export function figurePackFrom(shapes, animations) {
   });
 }
 
+/**
+ * How many ARENA UNITS one unit of the fighter clip's own space is worth.
+ *
+ * ► **EXPOSED BECAUSE THE BLOOD NEEDS IT AND GOT IT WRONG WITHOUT IT.** The
+ *   build's `bounceitem` spawns drops by calling `attachMovie` on the FIGHTER
+ *   CLIP — `register:1`, the clip itself, not the arena — so every number in
+ *   that particle system is in the clip's own space. The extracted `standing`
+ *   bounds say what that space is: `y` runs `-220.85` to `1.8`, so **the origin
+ *   is the soles of the feet and the head is at -220**, which is exactly the
+ *   band the drops spawn in (`-220 + RandomNumber(150)`) and exactly where the
+ *   bounce triggers (`_y > 0`, the ground).
+ *
+ *   A surface that anchored those numbers in ARENA units would spray blood four
+ *   hundred units into the sky. This is the same factor `paintExtractedFigure`
+ *   already composes into every limb matrix, named once so the two cannot
+ *   disagree.
+ */
+export function clipToArenaScale(pack, height = 1) {
+  if (!hasExtractedArt(pack)) return null;
+  return (UNIT * height) / pack.clipHeight;
+}
+
 /** Whether a pack is usable at all. Cheap, and the shell's fallback test. */
 export function hasExtractedArt(pack) {
   return Boolean(pack && pack.animations && pack.shapes && pack.clipHeight > 0);

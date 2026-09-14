@@ -55,6 +55,7 @@ import {
   paintExtractedFigure,
   figurePackFrom,
   hasExtractedArt,
+  clipToArenaScale,
   loadoutFrom,
   rankStrideFrom,
   selectRules,
@@ -948,6 +949,14 @@ function render(now = performance.now()) {
         x: origin.x,
         y: origin.y,
         size: origin.size,
+        // ► **THE DROPS ARE IN THE FIGHTER CLIP'S OWN SPACE, NOT THE ARENA'S**,
+        //   because the build attaches them to the clip rather than to the
+        //   arena. The clip's origin is the soles of the feet and its head is
+        //   at -220, so a spawn band of -220..-70 is head-to-waist — and
+        //   anchoring those numbers in arena units would spray blood four
+        //   hundred units into the sky. This is the same factor every limb
+        //   matrix already carries.
+        clipScale: (clipToArenaScale(figurePack, figure.build.height) ?? 1) * origin.size,
         spray: spawnDrops({
           seed: step.actionBoundary ?? scene.sequence,
           armoured: armour > 0,
@@ -984,22 +993,24 @@ function drawDrops(view, now) {
       const at = dropAt(drop, frame);
       if (!at) continue;
       const ops = propOpsFor(propPack, { linkage: drop.prop, frame: drop.artFrame });
-      // Screen y is DOWN in the build's own numbers and arena lift is UP, so
-      // the drop's `y` is negated once, here, at the point it is drawn —
-      // exactly as the figure's own limbs are flipped once in `drawOps`.
-      const lift = -at.y;
+      // Clip space -> arena units, then screen y is DOWN in the build's own
+      // numbers while arena lift is UP, so the drop's `y` is negated once,
+      // here, at the point it is drawn — exactly as the figure's own limbs are
+      // flipped once in `drawOps`.
+      const lift = -at.y * spray.clipScale;
+      const offsetX = at.x * spray.clipScale;
       if (!ops) {
         context.globalAlpha = 0.85;
         context.fillStyle = drop.prop === "sparks" ? "#ffd889" : "#7a1010";
         const radius = Math.max(1, view.scale * 2 * spray.size);
         context.beginPath();
-        context.arc(view.toX(spray.x + at.x), view.toY(spray.y, lift), radius, 0, Math.PI * 2);
+        context.arc(view.toX(spray.x + offsetX), view.toY(spray.y, lift), radius, 0, Math.PI * 2);
         context.fill();
         context.globalAlpha = 1;
         continue;
       }
       paintProp(ops, view, {
-        x: spray.x + at.x, y: spray.y, lift, size: spray.size, rotation: at.rotation
+        x: spray.x + offsetX, y: spray.y, lift, size: spray.clipScale, rotation: at.rotation
       });
     }
   }

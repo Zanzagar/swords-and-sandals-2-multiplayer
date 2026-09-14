@@ -18,6 +18,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  clipToArenaScale,
+  figurePackFrom,
   clipEffectTableFrom,
   dropAt,
   dropRandom,
@@ -201,4 +203,62 @@ test("frame 0 is the spawn state, and a negative frame is not the future", () =>
   assert.equal(start.x, 0, "and x is an OFFSET from wherever the caller anchors the spray");
   assert.equal(start.artFrame, 4, "carrying its own art frame through");
   assert.deepEqual(dropAt(drop, -5), start, "a negative frame clamps to the spawn");
+});
+
+/* ------------------------------------------------------------------ */
+/* The space the drops live in                                         */
+/* ------------------------------------------------------------------ */
+
+test("a drop's numbers are the FIGHTER CLIP's space, and the scale proves itself", () => {
+  // ► **THE BUILD ATTACHES A DROP TO THE CLIP, NOT TO THE ARENA.**
+  //   `bounceitem` calls `attachMovie` on `register:1` — the fighter clip
+  //   itself, which the branch above it compares against
+  //   `_root.arena.gladiators.hero`. So every number in the particle system is
+  //   in the clip's own space, and a surface that read them as arena units
+  //   would spray blood four hundred units into the sky. **The first shell
+  //   integration did exactly that.**
+  //
+  //   The proof the conversion is right is an INVARIANT rather than a constant:
+  //   the clip's `standing` bounds run y -220.85 to 1.8, so its origin is the
+  //   soles of the feet and its head is at -220 — and converting -220 must land
+  //   on the arena height of a figure, which `painter.js` calls 150.
+  const pack = figurePackFrom(
+    { 1: { bounds: { xMin: -40, xMax: 40, yMin: -220.85, yMax: 1.8 }, paths: [{ d: "M0 0L1 1", fill: "#aaa" }] } },
+    {
+      standing: {
+        label: "standing", firstFrame: 1, lastFrame: 1,
+        bounds: { xMin: -48.54, xMax: 47.85, yMin: -220.85, yMax: 1.8 },
+        poses: [[{ shape: 1, limb: "torso", depth: [1], matrix: [1, 0, 0, 1, 0, 0] }]]
+      }
+    }
+  );
+  const scale = clipToArenaScale(pack, 1);
+  assert.ok(scale > 0, "a usable pack has a scale");
+
+  const headInArena = 220 * scale;
+  assert.ok(
+    Math.abs(headInArena - 150) < 5,
+    `the clip's head (-220) must land at a figure's arena height of 150, got ${headInArena.toFixed(1)}`
+  );
+
+  // A taller build scales proportionally — the height is the caller's.
+  assert.ok(Math.abs(clipToArenaScale(pack, 2) - scale * 2) < 1e-9);
+
+  // ► **AND NO PACK IS NULL, NOT 1.** A player who has not extracted the rig
+  //   draws the authored figure, and silently returning a scale of 1 would put
+  //   a spray in clip units on an arena-unit canvas.
+  assert.equal(clipToArenaScale(null, 1), null);
+  assert.equal(clipToArenaScale({}, 1), null);
+});
+
+test("the spawn band really is head-to-waist in that space", () => {
+  // -220 is the top of the head and 0 is the feet, so `-220 + RandomNumber(150)`
+  // is the top two thirds of the body. Stated as an assertion because it is the
+  // thing that makes the band look deliberate rather than arbitrary.
+  const { spawn } = SS2_DROP;
+  const highest = spawn.y.base;
+  const lowest = spawn.y.base + spawn.y.span - 1;
+  assert.equal(highest, -220, "the crown of the head");
+  assert.ok(lowest < 0, `and the lowest drop is still above the feet: ${lowest}`);
+  assert.ok(lowest > -100, "roughly the waist, not the ankles");
 });
