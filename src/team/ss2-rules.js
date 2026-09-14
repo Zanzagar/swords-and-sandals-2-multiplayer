@@ -4153,10 +4153,43 @@ export function createSs2TeamRules({
       // same lesson on 2026-09-12 — `physical_size` is how big a body is and
       // does not know whose side it is on. Self is excluded because
       // `view.allies` includes the actor.
-      // ► **ONLY THE ENEMY SCREENS. Owner's correction, 2026-09-13, on looking
-      //   at the arena: "should be able to attack either of the enemies from
-      //   ranged, though, yes?" — and the answer was NO, it could reach exactly
-      //   one, for the whole bout.**
+      // ► **A BOMBARD GOES OVER EVERYTHING AND A SNIPE DOES NOT, AND THAT IS
+      //   THE BUILD'S OWN BALLISTIC RATHER THAN A BALANCE CHOICE. Owner's
+      //   decision, 2026-09-13, and it turned out to be derivable.**
+      //
+      //   The two shots fly differently in vanilla — `_y -= Yvelocity` is
+      //   inside a bombard-only test (`+0x72c7`), so a bombard arcs and a snipe
+      //   holds one height for its whole flight. Measured off
+      //   `src/render/projectile.js`, which reproduces that integration, in
+      //   FIGURE HEIGHTS where a gladiator is exactly 1.0:
+      //
+      //   ```text
+      //     snipe      0.674 flat, the whole way          chest height
+      //     bombard    >= 1.055 everywhere a body could
+      //                stand, across every range from
+      //                200 to 4,000 units                 over their heads
+      //   ```
+      //
+      //   The bombard's low point is always at the LAUNCH end, because it
+      //   leaves at head height and climbs; the only place it drops back below
+      //   is the final approach onto the target, where nobody else can be
+      //   standing. **So a lobbed arrow genuinely passes over a body and a flat
+      //   one genuinely does not**, and the legality rule is that fact rather
+      //   than a rule laid on top of it.
+      //
+      //   `ss2ShotBlocked` needed NO new geometry for this — it is already a
+      //   2-D segment test over `(x, depth)` and handles a cross-lane shot
+      //   correctly. What changes is which bodies are handed to it.
+      //
+      // ► **AND A SNIPE IS BLOCKED BY YOUR OWN SIDE TOO, which is the half that
+      //   reverses this morning's correction — deliberately, and only because
+      //   bombard now covers the case that correction existed to fix.**
+      //   Earlier today the archer had ONE legal target because its own rank-0
+      //   ally screened it, so ally-blocking was dropped wholesale. The real
+      //   fault was applying a flat shot's rule to a lobbed one: with bombard
+      //   unblocked the archer always has every foe available, so the precise
+      //   shot can demand a clean lane without crippling anything. A flat arrow
+      //   at chest height does not care whose chest is in front of it.
       //
       //   Measured on the demo roster at the opening, 3v3, before this change:
       //   the archer stands at `(-380, 103)` and its own rank-0 ally at
@@ -4185,7 +4218,15 @@ export function createSs2TeamRules({
       //     own line knows an archer is behind it and leaves the lane, and the
       //     enemy does not. Copying the walk's rule here without asking which
       //     question it answered is what produced the one-target archer.
-      const shotBodies = view.foes;
+      //
+      //   EVERY other living body, then, and only the SNIPE is handed it. Self
+      //   is excluded because `view.allies` includes the actor; the target is
+      //   excluded by `ss2ShotBlocked` itself, since at the moment of the shot
+      //   its own projection onto the line is the line's endpoint.
+      const snipeBodies = [
+        ...view.foes,
+        ...view.allies.filter((ally) => ally.id !== actorId)
+      ];
 
       // THE CONTROLLER FRAME, reproduced. The build picks one of four frames
       // per turn and each wires a different eight buttons; for a melee hero
@@ -4303,15 +4344,20 @@ export function createSs2TeamRules({
             }
             continue;
           }
-          // A shot needs the foe at or beyond the floor, ammunition, and — the
-          // one authored clause — a clear lane. `ss2ShotBlocked` is inert
-          // whenever the second axis is off, so a 1-D arena is unaffected.
+          // A shot needs the foe at or beyond the floor and an arrow to spend.
           if (distance < ss2ArcherMinimumRange(view.actor)) continue;
           if (resourceValue(view.actor, "ammo_left", 0) <= 0) continue;
-          if (ss2ShotBlocked(view.actor, foe, shotBodies)) continue;
           anyInReach = true;
+          // **THE LOB IS ALWAYS AVAILABLE.** It clears every body that could be
+          // standing between the two — measured off the ballistic, not assumed;
+          // see the block above `snipeBodies`.
           actions.push({ type: Ss2ActionType.BOMBARD, targetId: foe.id });
-          actions.push({ type: Ss2ActionType.SNIPE, targetId: foe.id });
+          // **THE FLAT SHOT NEEDS A CLEAN LANE**, and it is blocked by anybody
+          // at all. `ss2ShotBlocked` is inert whenever the second axis is off,
+          // so a 1-D arena is unaffected.
+          if (!ss2ShotBlocked(view.actor, foe, snipeBodies)) {
+            actions.push({ type: Ss2ActionType.SNIPE, targetId: foe.id });
+          }
           continue;
         }
         const inReach = distance === null || distance < reach;

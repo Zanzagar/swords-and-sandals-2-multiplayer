@@ -164,6 +164,67 @@ test("a bombard arcs, peaks at the MIDPOINT, and comes back down; a snipe is fla
   assert.equal(snipeHeights.size, 1, "a snipe holds one height for the whole flight");
 });
 
+test("a BOMBARD clears a standing body and a SNIPE does not — the measurement the RULE rests on", () => {
+  // ► **THIS IS THE LOAD-BEARING TEST FOR A GAME RULE THAT LIVES IN ANOTHER
+  //   FILE.** `ss2-rules.js` offers a bombard against any foe in any lane and
+  //   gates a snipe on a clear line, and it does that because a lobbed arrow
+  //   genuinely passes over a body while a flat one does not. **That is a
+  //   property of THIS module's arithmetic**, so if the launch height or the
+  //   arc changed, the rule over there would quietly stop being true and
+  //   nothing would say so.
+  //
+  //   A gladiator is exactly 1.0 figure heights tall, which is what
+  //   `bombardLaunchHeight` is anchored to.
+  const BODY_HEIGHT = 1;
+
+  // A blocker can only stand BETWEEN the two, and no nearer either end than one
+  // body — closer than that and they are standing inside somebody. `86` is
+  // `physical_size` at the demo roster's strength 9.
+  const BODY_WIDTH = 86;
+  let worstClearance = Infinity;
+  let sawARange = false;
+  for (const distance of [200, 400, 630, 1000, 2000, 4000]) {
+    const flight = projectileFlight({
+      kind: ProjectileKind.BOMBARD,
+      from: { x: 0, y: 200 },
+      to: { x: distance, y: 200 },
+      sequence: 3
+    });
+    let lowest = Infinity;
+    // Sub-frame steps: the arrow is only sampled per frame in play, but the
+    // CLAIM is about the continuous curve, and a coarse sweep could step over
+    // the low point.
+    for (let t = 0; t <= flight.flightFrames; t += 0.1) {
+      const point = projectileAt(flight, t);
+      if (point.x < BODY_WIDTH || point.x > distance - BODY_WIDTH) continue;
+      lowest = Math.min(lowest, point.height);
+    }
+    if (lowest === Infinity) continue;   // too short for anybody to stand in
+    sawARange = true;
+    worstClearance = Math.min(worstClearance, lowest);
+    assert.ok(
+      lowest > BODY_HEIGHT,
+      `bombard over ${distance}: lowest ${lowest.toFixed(3)} must clear a body of ${BODY_HEIGHT}`
+    );
+  }
+  assert.ok(sawARange, "the sweep must contain a range with room for a blocker, or it proves nothing");
+  assert.ok(worstClearance > 1, `worst clearance across every range: ${worstClearance.toFixed(3)}`);
+
+  // ► **AND THE SNIPE MUST FAIL THE SAME TEST**, or the two rules are not
+  //   telling the two shots apart and the whole split is decoration.
+  const snipe = projectileFlight({
+    kind: ProjectileKind.SNIPE,
+    from: { x: 0, y: 200 },
+    to: { x: 630, y: 200 },
+    sequence: 3
+  });
+  const snipeHeight = projectileAt(snipe, snipe.flightFrames / 2).height;
+  assert.ok(
+    snipeHeight < BODY_HEIGHT,
+    `a snipe flies at ${snipeHeight.toFixed(3)} — chest height, and straight through anybody in the way`
+  );
+});
+
 test("a snipe is loosed LOWER than a bombard, which is the build's own relationship", () => {
   // `_y = attacker._y - (_yscale * 2 + 30)` for a bombard (`+0x6e42`) against
   // `_yscale * 1.5 + 5` for a snipe (`+0x6e9e`) — 230 against 155 screen pixels

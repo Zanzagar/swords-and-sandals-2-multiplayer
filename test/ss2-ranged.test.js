@@ -630,58 +630,117 @@ test("line of sight is INERT with the second axis off, so a 1-D arena is untouch
   );
 });
 
-test("a FOE in the lane screens the one behind it, and an ALLY in the same spot does not", () => {
-  // ► **ONLY THE ENEMY SCREENS, and the owner's own question is why — he
-  //   watched a 3v3 and asked whether an archer should be able to attack either
-  //   enemy. It could reach exactly ONE, for the whole bout.**
+test("a BOMBARD goes over everything and a SNIPE needs a clean lane, ANY body", () => {
+  // ► **THE OWNER'S DESIGN, 2026-09-13 — and it turned out to be DERIVABLE
+  //   rather than a balance choice.** The two shots fly differently in vanilla:
+  //   `_y -= Yvelocity` is inside a bombard-only test (`+0x72c7`), so a bombard
+  //   arcs and a snipe holds one height the whole way. Measured off
+  //   `src/render/projectile.js`, in FIGURE HEIGHTS where a gladiator is 1.0:
   //
-  //   Measured on the demo roster at the opening before the fix: the archer
-  //   stands at `(-380, 103)` and its own rank-0 ally at `(-250, 200)`, which
-  //   sits 76.1 units off the lane to the enemy's rank 0 against its own
-  //   `physical_size` of 86. **Structural, not a seed** — allies stagger
-  //   diagonally, so the rank-0 ally always lands just off the rank-1 archer's
-  //   diagonal. An archer that stands back for a better view and gets FEWER
-  //   targets than a swordsman is the opposite of the feature.
+  //   ```text
+  //     snipe     0.674 flat                         chest height
+  //     bombard   >= 1.055 everywhere a body could
+  //               stand, at every range 200..4,000   over their heads
+  //   ```
   //
-  //   **This is deliberately the opposite of `ss2WalkDestination`'s rule**,
-  //   which iterates every living body because a walk is a body moving through
-  //   space and cannot pass through anyone. A shot passes over a formation that
-  //   is cooperating with the shooter. Two questions, two answers.
-  const foeInTheWay = staged({
-    red: [{ fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -250, y: 103 }],
-    blue: [
-      { fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250, y: 103 },
-      { fields: gladiator({ gladiator_dir: "left" }), id: "blue-2", x: 0, y: 103 }
-    ]
-  });
-  const screened = legalActions(foeInTheWay, "red-1")
-    .filter((option) => option.type === Ss2ActionType.BOMBARD)
-    .map((option) => option.targetId);
-  assert.deepEqual(screened, ["blue-2"], "the nearer foe is shootable; the one it screens is not");
-
-  // ► **THE SAME BODY ON THE SAME SPOT, WEARING THE OTHER COLOUR, DOES NOT
-  //   BLOCK.** Identical geometry, identical `physical_size`; the only thing
-  //   that changes is whose side it is on. That is the whole rule, and stating
-  //   it as one comparison makes it impossible to satisfy by accident.
-  const allyInTheWay = staged({
+  //   The bombard's low point is always at the LAUNCH end — it leaves at head
+  //   height and climbs — and the only place it comes back down is the final
+  //   approach onto the target, where nobody else can be standing. So a lobbed
+  //   arrow passes over a body and a flat one does not, and the rule IS that
+  //   fact.
+  //
+  // ► **AND THE SNIPE IS BLOCKED BY YOUR OWN SIDE, which reverses the earlier
+  //   correction of the same day — deliberately, and only because bombard now
+  //   covers the case that correction existed to fix.** The archer had ONE
+  //   legal target because its own rank-0 ally screened it, so ally-blocking was
+  //   dropped wholesale; the real fault was applying a flat shot's rule to a
+  //   lobbed one.
+  const withBodyAt = (id, team, y) => staged({
     red: [
       { fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -250, y: 103 },
-      { fields: gladiator(), id: "red-2", x: 0, y: 103 }
+      ...(team === "red" ? [{ fields: gladiator(), id, x: 0, y }] : [])
     ],
-    blue: [{ fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250, y: 103 }]
+    blue: [
+      { fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250, y: 103 },
+      ...(team === "blue" ? [{ fields: gladiator({ gladiator_dir: "left" }), id, x: 0, y }] : [])
+    ]
   });
-  assert.equal(
-    ss2ShotBlocked(
-      combatantById(allyInTheWay, "red-1"),
-      combatantById(allyInTheWay, "blue-1"),
-      [combatantById(allyInTheWay, "red-2")]
-    ),
-    true,
-    "the GEOMETRY still says that body is in the lane — the predicate is pure and knows no sides"
+  const shotsAt = (battle, target) => {
+    const offered = legalActions(battle, "red-1")
+      .filter((option) => option.targetId === target)
+      .map((option) => option.type);
+    return {
+      bombard: offered.includes(Ss2ActionType.BOMBARD),
+      snipe: offered.includes(Ss2ActionType.SNIPE)
+    };
+  };
+
+  // An ALLY squarely in the lane.
+  const ally = withBodyAt("red-2", "red", 103);
+  assert.deepEqual(
+    shotsAt(ally, "blue-1"),
+    { bombard: true, snipe: false },
+    "the lob goes over your own man; the flat shot does not"
   );
-  assert.ok(
-    typesOf(allyInTheWay, "red-1").includes(Ss2ActionType.BOMBARD),
-    "but the RULE only hands it the foes, so an ally standing there costs nothing"
+
+  // A FOE on the identical spot — same geometry, same physical_size, other
+  // colour. Both must behave the same, because an arrow at chest height does
+  // not care whose chest it is.
+  const foe = withBodyAt("blue-2", "blue", 103);
+  assert.deepEqual(
+    shotsAt(foe, "blue-1"),
+    { bombard: true, snipe: false },
+    "and a foe in the lane screens the one behind it from the flat shot only"
+  );
+  assert.deepEqual(
+    shotsAt(foe, "blue-2"),
+    { bombard: true, snipe: true },
+    "while the screen itself is shootable both ways"
+  );
+
+  // ► **`ss2ShotBlocked` NEEDED NO NEW GEOMETRY FOR ANY OF THIS.** It is
+  //   already a 2-D segment test over `(x, depth)`, so a cross-lane shot is
+  //   handled by the same arithmetic; what changed is which bodies are handed
+  //   to it. A body one rank clear of the lane blocks nothing.
+  const clear = withBodyAt("red-2", "red", 200);
+  assert.deepEqual(
+    shotsAt(clear, "blue-1"),
+    { bombard: true, snipe: true },
+    "one rank over and the flat shot is back"
+  );
+});
+
+test("the demo roster's archer can lob at EVERY lane and snipe only down a clear one", () => {
+  // The shape the owner actually looks at, asserted rather than described.
+  // Allies stagger diagonally, so at the opening the rank-0 ally sits just off
+  // the rank-1 archer's diagonal to the enemy front, and the enemy's own rank-1
+  // screens their rank-2.
+  const battle = staged({
+    red: [
+      { fields: gladiator(), id: "red-1", x: -250, y: 200 },
+      { fields: bowman({ equipped_weapon: 2 }), id: "red-2", x: -380, y: 103 },
+      { fields: gladiator(), id: "red-3", x: -510, y: 6 }
+    ],
+    blue: [
+      { fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250, y: 200 },
+      { fields: gladiator({ gladiator_dir: "left" }), id: "blue-2", x: 380, y: 103 },
+      { fields: gladiator({ gladiator_dir: "left" }), id: "blue-3", x: 510, y: 6 }
+    ]
+  });
+  const offered = (type) => legalActions(battle, "red-2")
+    .filter((option) => option.type === type)
+    .map((option) => option.targetId)
+    .sort();
+
+  assert.deepEqual(
+    offered(Ss2ActionType.BOMBARD),
+    ["blue-1", "blue-2", "blue-3"],
+    "the lob reaches every enemy in every lane, which is the whole point of it"
+  );
+  assert.deepEqual(
+    offered(Ss2ActionType.SNIPE),
+    ["blue-2"],
+    "the flat shot reaches only down its own lane: blue-1 is screened by red-1 and blue-3 by blue-2"
   );
 });
 
