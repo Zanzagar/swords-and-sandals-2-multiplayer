@@ -81,6 +81,17 @@ const FAMILY_LABELS = Object.freeze({
   //   derived from the bindings, which is the whole point of the correction.
   hurt: Object.freeze(["hurt1", "hurt2", "hurt3", "hurt4", "hurt5", "hurt6", "hurt7",
     "hurt8", "hurt9", "hurt10", "hurt11", "hurt12", "hurt20"]),
+
+  // ► **THE THIRTEEN DEFENCES, AND THEY ARE THE EXACT MIRROR OF `hurt`.** A
+  //   blow that lands calls `defender_hurt` and plays `hurt<direction>`; a blow
+  //   that MISSES calls `defender_blocked` and plays `defend<direction>`
+  //   (`sprite:862[overlay]/frame:52/DoAction@0x240c7f` `+0x2160`), with the
+  //   same 21-23 rewrite and `defend12` at direction 30. This is NOT the
+  //   `block` family: `Block` and `BlockForward` are the static guard a
+  //   gladiator holds while it swaps weapons, which is a different thing that
+  //   happens at a different time.
+  defend: Object.freeze(["defend1", "defend2", "defend3", "defend4", "defend5", "defend6",
+    "defend7", "defend8", "defend9", "defend10", "defend11", "defend12", "defend20"]),
   knockback: Object.freeze(["knockback_mov", "shove"]),
   taunt: Object.freeze(["taunt"]),
   taunted: Object.freeze(["taunted"]),
@@ -171,22 +182,33 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
   continuations: Object.freeze(["celebrate1a", "flame_repeat", "psyche_charging", "psyche_charging2"]),
 
   /**
-   * ► **THE BUILD HAS A DEFENCE SYSTEM THIS ENGINE HAS NOT BUILT.**
-   *   `defend1`-`defend12` and `defend20` are THIRTEEN reactions, exactly
-   *   mirroring `hurt1`-`hurt12`/`hurt20` and `attack1`-`attack12`. `Block`
-   *   (11f) and `BlockForward` (18f) — the two the `block` family does play —
-   *   are the static guard, a different thing.
+   * ► ~~**THE BUILD HAS A DEFENCE SYSTEM THIS ENGINE HAS NOT BUILT.**~~
+   *   **BUILT 2026-09-14, AND THE SELECTOR WAS NEVER UNDERIVED.** This entry
+   *   said: *"Which defend answers which attack is not derived, and guessing an
+   *   index mapping across two thirteen-member sets is precisely the move this
+   *   project keeps retracting. A capture, or the build's own selector, would
+   *   settle it."* **The build's own selector settles it, and it is twelve
+   *   instructions long.** `defender_blocked()` at
+   *   `sprite:862[overlay]/frame:52/DoAction@0x240c7f` `+0x2138`:
    *
-   *   **They are listed and not mapped on purpose.** Which defend answers which
-   *   attack is not derived, and guessing an index mapping across two
-   *   thirteen-member sets is precisely the move this project keeps retracting.
-   *   A capture, or the build's own selector, would settle it.
+   *   ```text
+   *     animstate = "defend" + attack_direction                     +0x2160
+   *     if (attack_direction >= 21 && attack_direction <= 23)
+   *         animstate = "defend" + (attack_direction - 20)          +0x219b
+   *     if (attack_direction == 30) animstate = "defend12"          +0x21c6
+   *     defender.gotoAndPlay(animstate)                             +0x224a
+   *   ```
+   *
+   *   **The caution was right and the conclusion was wrong.** Refusing to guess
+   *   an index mapping is correct; recording it as underived without asking the
+   *   bytes is the same failure as a `MAP_SILENCE` entry that never read the
+   *   next paragraph, which this repository has now logged four times. The
+   *   entry cost about ten minutes to close and had stood for two sessions.
+   *
+   *   They are a FAMILY now; `roll` and `fumble1` stay here because nothing
+   *   dispatches them and nothing in the build says what would.
    */
-  unbuiltDefence: Object.freeze([
-    "defend1", "defend2", "defend3", "defend4", "defend5", "defend6", "defend7",
-    "defend8", "defend9", "defend10", "defend11", "defend12", "defend20",
-    "roll", "fumble1"
-  ]),
+  unbuiltDefence: Object.freeze(["roll", "fumble1"]),
 
   /**
    * SPELLS AND PSYCHE. **The engine already carries the RESOURCES —

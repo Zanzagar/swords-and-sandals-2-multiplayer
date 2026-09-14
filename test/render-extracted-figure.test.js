@@ -542,11 +542,16 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   //   the same conflation corrected for `block` hours earlier. Fixing one
   //   instance of a habit does not fix the habit; this closes it.
   //
-  //   Measured on the shipped build: the fighter clip carries 101 labels, 60
-  //   reachable by a family and 41 declared unplayed with a reason. A label
+  //   Measured on the shipped build: the fighter clip carries 101 labels, 73
+  //   reachable by a family and 28 declared unplayed with a reason. A label
   //   that is in neither set is a SILENT DROP, which is what this catches.
+  //
+  //   **The split moved 60/41 -> 73/28 on 2026-09-14** when the thirteen
+  //   `defend` clips stopped being declared unbuilt and became a family: the
+  //   build's own `defender_blocked()` names which one answers which attack,
+  //   so the mapping never needed the capture the old note asked for.
   const families = [
-    "standing", "rest", "block",
+    "standing", "rest", "block", "defend",
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
     "attack", "hurt", "knockback", "taunt", "taunted", "ranged",
     "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
@@ -559,14 +564,18 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   const both = [...mapped].filter((label) => declared.has(label));
   assert.deepEqual(both, [], "a label cannot be both played and declared unplayed");
 
-  assert.equal(mapped.size, 60);
-  assert.equal(declared.size, 41);
+  assert.equal(mapped.size, 73);
+  assert.equal(declared.size, 28);
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
-  // And the defence system is declared UNBUILT rather than quietly absent: 13
-  // `defend` reactions mirroring the 13 hurts and 12 attacks, which this engine
-  // has no verb for. Naming them is how the next reader finds them.
+  // ► **THE DEFENCE SYSTEM IS BUILT, and this used to assert the opposite.**
+  //   All thirteen `defend` clips are now PLAYED — `defender_blocked()` picks
+  //   which one by `attack_direction`, exactly as `defender_hurt` picks a
+  //   `hurt`. The old assertion here required them to be in `unbuiltDefence`,
+  //   which is what a correct pin looks like right up until the thing is built.
+  for (let n = 1; n <= 12; n += 1) assert.ok(mapped.has(`defend${n}`), `defend${n} must play`);
+  assert.ok(mapped.has("defend20"));
   const defence = UNMAPPED_CLIP_LABELS.unbuiltDefence;
-  for (let n = 1; n <= 12; n += 1) assert.ok(defence.includes(`defend${n}`));
-  assert.ok(defence.includes("defend20"));
+  assert.deepEqual([...defence], ["roll", "fumble1"],
+    "only the two nothing dispatches are still declared unplayed");
 });

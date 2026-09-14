@@ -224,6 +224,12 @@ function familyOf(label, role) {
   if (label === "bombard" || label === "snipe") return "ranged";
   if (/^attack\d+$/.test(label)) return "attack";
   if (/^hurt\d+$/.test(label)) return "hurt";
+  // ► **`defendN` IS ITS OWN FAMILY AND NOT `block`.** A miss dispatches
+  //   `defender_blocked()`, which plays one of thirteen ACTIVE parries keyed on
+  //   the attack direction; `Block` is the STATIC guard held during a weapon
+  //   swap. Folding them together is tempting because the build's function is
+  //   called `defender_blocked` — and it would give a parry the guard's pose.
+  if (/^defend\d+$/.test(label)) return "defend";
   return "unknown";
 }
 
@@ -386,6 +392,29 @@ const FAMILIES = Object.freeze({
   block: () => schedule("block", 5, [
     { at: 0, pose: {} },
     { at: 0.35, pose: { armSwing: 0.3, lean: -0.25, legSpread: 0.4, bob: -0.15 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * THE ACTIVE PARRY — what a gladiator does when a blow MISSES.
+   *
+   * ► **IT IS THE ANSWER TO `hurt`, AND THE SHAPE SAYS SO.** `hurt` recoils
+   *   BACKWARD off a blow that landed; this drives the arm ACROSS to meet one
+   *   that did not, and the body turns into it rather than away. Six frames
+   *   against `hurt`'s five, because a parry is a committed movement and a
+   *   flinch is not.
+   *
+   * ► **AUTHORED, LIKE EVERY OTHER POSE IN THIS FILE, and the extracted rig
+   *   overrides it.** `paintExtractedFigure` prefers the build's own thirteen
+   *   `defend` clips when the player has extracted them; this is the fallback a
+   *   clone with no assets gets, and it exists so the label has somewhere to
+   *   play rather than freezing the bout — which is exactly what
+   *   `test/render-arena-host.test.js` caught when the label landed without it.
+   */
+  defend: () => schedule("defend", 6, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: 0.75, lean: 0.2, legSpread: 0.35, bob: -0.1 } },
+    { at: 0.6, pose: { armSwing: 0.45, lean: 0.1, legSpread: 0.5 } },
     { at: 1, pose: {} }
   ]),
 

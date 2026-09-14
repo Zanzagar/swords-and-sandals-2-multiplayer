@@ -244,6 +244,13 @@ const PROJECTILE_DIRECTIONS = Object.freeze(new Map([[21, "bombard"], [22, "snip
 const RANGED_DIRECTION_OFFSET = 20;
 
 /**
+ * The grievous blow's direction. Named because the two dispatchers disagree
+ * about it and the disagreement is the build's: `defender_hurt` sends 30 to
+ * `knockback`, `defender_blocked` sends it to `defend12` (`+0x21c6`).
+ */
+const GRIEVOUS_DIRECTION = 30;
+
+/**
  * SS2 vocabulary bindings, derived from the static map only.
  *
  * NOT runtime-verified. The promoted goldens in
@@ -378,7 +385,10 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
 
     if (event.hit === false) {
       // Map, "Attack roll dispatcher": "A miss calls `defender_blocked()`."
-      return Object.freeze({ actor: attackLabel(direction), target: label("Block", LabelProvenance.MAP_NAMED) });
+      // ► **AND `defender_blocked()` DOES NOT PLAY `Block`.** It plays one of
+      //   THIRTEEN `defend` clips, picked by the same `attack_direction` that
+      //   picks the `hurt` clip when the blow lands. See `defendLabel`.
+      return Object.freeze({ actor: attackLabel(direction), target: defendLabel(direction) });
     }
     switch (event.dispatchedMethod) {
       case "taunt":
@@ -426,6 +436,53 @@ function attackLabel(direction) {
   //   is MAP_NAMED because the build names it.
   if (direction === 23) return label("attack2", LabelProvenance.MAP_NAMED);
   return label(`attack${direction}`, LabelProvenance.ASSUMED);
+}
+
+/**
+ * WHAT A GLADIATOR DOES WHEN A BLOW MISSES — one of thirteen, not one of one.
+ *
+ * ► **THIS ENGINE PLAYED `Block` ON EVERY MISS, AND `Block` IS A DIFFERENT
+ *   THING.** `Block` (11 frames) and `BlockForward` (18) are the STATIC GUARD —
+ *   what a gladiator holds while it swaps weapons, which the build says
+ *   outright at `+0x4d65`. A miss dispatches `defender_blocked()`, and that
+ *   function plays an ACTIVE parry keyed on the attack:
+ *
+ * ```text
+ *   sprite:862[overlay]/frame:52/DoAction@0x240c7f  — defender_blocked()
+ *     +0x2160   animstate = "defend" + attack_direction
+ *     +0x219b   if (attack_direction >= 21 && attack_direction <= 23)
+ *                   animstate = "defend" + (attack_direction - 20)
+ *     +0x21c6   if (attack_direction == 30) animstate = "defend12"
+ *     +0x224a   defender.gotoAndPlay(animstate)
+ * ```
+ *
+ * ► **IT IS THE EXACT MIRROR OF `hurtLabel`, INCLUDING THE RANGED REWRITE** —
+ *   the same `- 20` over directions 21-23, so a dodged bombard plays `defend1`,
+ *   the same clip a dodged direction-1 swing plays. The one asymmetry is
+ *   direction 30: a landed grievous blow plays `knockback`, a missed one plays
+ *   `defend12`. That asymmetry is the build's, not a simplification here.
+ *
+ * ► **AND `clip-labels.js` RECORDED THIS MAPPING AS UNDERIVABLE FOR TWO
+ *   SESSIONS.** Its note said guessing an index mapping across two
+ *   thirteen-member sets was the move this project keeps retracting — correct —
+ *   and then concluded that only a capture could settle it, which was not. The
+ *   selector is twelve instructions in a function the map already names.
+ *   **Refusing to guess is right; recording something as underived without
+ *   asking the bytes is the failure that refusal is supposed to prevent.**
+ */
+function defendLabel(direction) {
+  // A non-numeric direction lands on the middle of the band, exactly as
+  // `hurtLabel` does — a gladiator that parries something is better than one
+  // that stands still while a sword goes through it.
+  if (!Number.isFinite(direction)) return label("defend5", LabelProvenance.ASSUMED);
+  // Direction 30 is the grievous blow. `defender_hurt` sends it to `knockback`;
+  // `defender_blocked` sends it to `defend12`, by name rather than by
+  // arithmetic, which is why it is written out rather than folded in.
+  if (direction === GRIEVOUS_DIRECTION) return label("defend12", LabelProvenance.MAP_NAMED);
+  if (RANGED_DIRECTIONS.has(direction)) {
+    return label(`defend${direction - RANGED_DIRECTION_OFFSET}`, LabelProvenance.MAP_NAMED);
+  }
+  return label(`defend${direction}`, LabelProvenance.MAP_NAMED);
 }
 
 function hurtLabel(direction) {

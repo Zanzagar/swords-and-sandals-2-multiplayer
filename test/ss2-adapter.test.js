@@ -1522,7 +1522,15 @@ test("animation labels carry their provenance, and none of them claims verificat
     ["bombard", LabelProvenance.MAP_NAMED],
     ["hurt1", LabelProvenance.MAP_NAMED],
     ["attack7", LabelProvenance.ASSUMED],
-    ["Block", LabelProvenance.MAP_NAMED]
+    // ► `["Block", MAP_NAMED]` STOOD HERE UNTIL 2026-09-14 AND WAS THE WRONG
+    //   CLIP. A miss dispatches `defender_blocked()`, and that function plays
+    //   `"defend" + attack_direction` (`+0x2160`) — one of THIRTEEN active
+    //   parries. `Block` is the STATIC guard, which the build plays during a
+    //   weapon swap and nowhere else. Same failure shape as the `hurt21` line
+    //   above: the assertion agreed with the code and neither agreed with the
+    //   build, so the suite was green while the adapter named a clip the
+    //   defender never plays.
+    ["defend7", LabelProvenance.MAP_NAMED]
   ]);
   assert.equal(
     labels.some(([, provenance]) => provenance === "runtime-verified"),
@@ -2185,4 +2193,47 @@ test("assertDistinctPlacements refuses two fighters on the same spot, which its 
     const layout = buildArenaLayout({ teams });
     assert.equal(assertDistinctPlacements(layout.placements), true, `${perSide}v${perSide} must still pass`);
   }
+});
+
+test("a MISS plays one of thirteen defends, keyed the same way a hit picks its hurt", () => {
+  // ► `defender_blocked()` at `sprite:862[overlay]/frame:52/DoAction@0x240c7f`
+  //   `+0x2138`:
+  //     +0x2160  animstate = "defend" + attack_direction
+  //     +0x219b  if (attack_direction >= 21 && attack_direction <= 23)
+  //                  animstate = "defend" + (attack_direction - 20)
+  //     +0x21c6  if (attack_direction == 30) animstate = "defend12"
+  //   Read off the installed build 2026-09-14.
+  const defendFor = (attackDirection, dispatchedMethod = "normal") => {
+    const wire = {
+      teams: [
+        { id: "red", combatants: [{ id: "red-1", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] },
+        { id: "blue", combatants: [{ id: "blue-1", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] }
+      ],
+      events: [{ sequence: 1, turn: 1, type: "normal", actorId: "red-1", targetId: "blue-1", hit: false, attackDirection, dispatchedMethod }]
+    };
+    const layout = buildArenaLayout(wire);
+    const { commands } = presentResolvedEvents(wire, { layout, bindings: SS2_STATIC_MAP_BINDINGS });
+    const gotos = commands.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+    return gotos[gotos.length - 1];
+  };
+
+  // The melee band is the direction, straight through.
+  for (const direction of [1, 2, 5, 8, 11, 12, 20]) {
+    assert.equal(defendFor(direction).label, `defend${direction}`);
+    assert.equal(defendFor(direction).labelProvenance, LabelProvenance.MAP_NAMED);
+  }
+  // ► THE RANGED BAND REUSES THE MELEE PARRIES, exactly as the hurt band reuses
+  //   the melee hurts: a dodged bombard plays the same clip a dodged
+  //   direction-1 swing plays. The build's arithmetic, not a simplification.
+  assert.equal(defendFor(21).label, "defend1");
+  assert.equal(defendFor(22).label, "defend2");
+  assert.equal(defendFor(23).label, "defend3");
+  // ► AND DIRECTION 30 IS THE ONE PLACE THE TWO DISPATCHERS DISAGREE: a landed
+  //   grievous blow plays `knockback`, a missed one plays `defend12` — by name
+  //   at `+0x21c6`, not by arithmetic.
+  assert.equal(defendFor(30).label, "defend12");
+  assert.notEqual(defendFor(30).label, "knockback");
+  // A missing direction still parries rather than standing still.
+  assert.equal(defendFor(undefined).label, "defend5");
+  assert.equal(defendFor(undefined).labelProvenance, LabelProvenance.ASSUMED);
 });
