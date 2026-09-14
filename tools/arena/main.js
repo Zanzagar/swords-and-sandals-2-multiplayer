@@ -58,6 +58,9 @@ import {
   clipToArenaScale,
   loadoutFrom,
   attachmentsFor,
+  facePackFrom,
+  faceOpsFor,
+  mergeFaceOps,
   rankStrideFrom,
   selectRules,
   retireVoices,
@@ -1019,6 +1022,28 @@ function loadBitmaps(manifest) {
   }
 }
 
+/**
+ * THE FACE, and it is why a gladiator stops being a blank oval.
+ *
+ * ► **`heldFace` IS NOT A CACHE — IT IS FLASH'S OWN BEHAVIOUR.** The build
+ *   issues 228 expression calls across 83 animations, and the other 18 bind
+ *   nothing while 10 more set eyes and never a mouth. A `gotoAndPlay` on a
+ *   label a clip does not have is a NO-OP in Flash: the playhead stays where it
+ *   was. So an expression PERSISTS until something changes it, and without this
+ *   map the mouth would snap back to `normal` every time an animation that
+ *   never mentions it began.
+ */
+let facePack = null;
+const heldFace = new Map();
+
+fetch("/assets/icons/icons.json")
+  .then((response) => (response.ok ? response.json() : null))
+  .then((data) => {
+    facePack = facePackFrom(data);
+    if (facePack) log("face: eyes and mouth from your own install.");
+  })
+  .catch(() => { /* no icons extracted; the gladiator keeps his blank head */ });
+
 fetch("/assets/bitmaps/manifest.json")
   .then((response) => (response.ok ? response.json() : null))
   .then((manifest) => {
@@ -1398,19 +1423,37 @@ function render(now = performance.now()) {
     //   gladiator may draw from the extracted rig for a walk and from
     //   `figure.js` for something vanilla never had. An empty list from
     //   `paintExtractedFigure` is that answer, and it is not an error.
+    // The options BOTH the body and the face answer to. Built once so the face
+    // cannot drift onto a different animation than the body is drawing — which
+    // is the same reason `at` is computed once above.
+    const figureOptions = {
+      family: drawnTimeline.family,
+      label: drawnTimeline.label,
+      facing: actor.facing,
+      at: drawnAt,
+      height: figure.build.height,
+      fade: pose.fade
+    };
     const extracted = hasExtractedArt(figurePack)
       ? paintExtractedFigure(figurePack, {
-        family: drawnTimeline.family,
-        label: drawnTimeline.label,
-        facing: actor.facing,
-        at: drawnAt,
-        height: figure.build.height,
-        fade: pose.fade,
+        ...figureOptions,
         wardrobe,
         loadout: reportedLoadout(combatant)
       })
       : [];
-    drawOps(extracted.length > 0 ? extracted : paintFigure(figure, pose), view, origin);
+    // ► **`mergeFaceOps`, NEVER `concat`.** The eyes and the mouth are two
+    //   attachments on the HEAD at depths 1 and 2, so concatenating paints them
+    //   over the helmet. The merge puts them at their own depths inside the
+    //   head, which is where the build puts them.
+    const face = extracted.length > 0
+      ? faceOpsFor(facePack, figurePack, { ...figureOptions, held: heldFace.get(combatantId) ?? null })
+      : null;
+    if (face) heldFace.set(combatantId, { eyes: face.eyes.expression, mouth: face.mouth.expression });
+    drawOps(
+      face ? mergeFaceOps(extracted, face.ops) : (extracted.length > 0 ? extracted : paintFigure(figure, pose)),
+      view,
+      origin
+    );
 
     // ► **THE CLIP THROWS ITS OWN BLOOD, at the pose the build throws it.**
     //   Fired once per pose per timeline — `firedEffects` is the guard — because

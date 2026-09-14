@@ -37,6 +37,16 @@
  * - `props.js` draws the BUILD'S OWN arrow and trail when the player has
  *   extracted them, and returns null when they have not — the same shape as
  *   `extracted-figure.js` and `sound.js`, pack as an argument.
+ * - `filters.js` owns the build's COLOUR arithmetic — the colour transform, the
+ *   colour matrix, blend modes and filters — in ONE place, because three copies
+ *   of it appeared in a single evening and two of them rounded where the
+ *   player's `(channel * multTerm) >> 8` floors.
+ * - `face.js` draws the eyes and the mouth, keyed on the ANIMATION the body is
+ *   playing: the build issues 228 expression calls across 83 animations, so a
+ *   gladiator's face is a function of what he is doing, which is the same join
+ *   sound and art already use.
+ * - `text.js` turns the build's own embedded glyph outlines into draw
+ *   operations, and `screen.js` turns any of the 26 root screens into them.
  * - `arena-backdrop.js` is the ARENA ITSELF rather than a thing standing in it:
  *   the six objects root frame 221 places, the 1:1 mapping from arena units to
  *   stage pixels that every other coordinate here is expressed in, and the
@@ -65,5 +75,9 @@ export * from "./extracted-figure.js";
 export * from "./projectile.js";
 export * from "./props.js";
 export * from "./arena-backdrop.js";
+export * from "./filters.js";
+export * from "./face.js";
+export * from "./text.js";
+export * from "./screen.js";
 export * from "./clip-effects.js";
 export * from "./arena-shell.js";
