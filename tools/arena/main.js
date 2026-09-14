@@ -70,8 +70,7 @@ import {
   bindingsFrom,
   chooseSound,
   projectileFlight,
-  projectileAt,
-  projectileTrail,
+  projectileDrawAt,
   flightDurationMs
 } from "/src/render/index.js";
 import { demoSide } from "/tools/arena/roster.js";
@@ -83,17 +82,6 @@ import { demoSide } from "/tools/arena/roster.js";
 /** Arena y of the front rank — the vanilla `_y`, and `toY`'s own datum. */
 const ARENA_FRONT_Y = 200;
 
-/**
- * Arena units per figure height, so a projectile height — which
- * `src/render/projectile.js` reports in FIGURE HEIGHTS, because that is the one
- * unit the build's screen pixels can honestly be ported into — becomes the
- * `lift` that `toY` takes. The same named duplicate `painter.js`,
- * `extracted-figure.js` and `projectile.js` each carry, for the reason those
- * state: four constants answering to one authored figure, where a silent
- * divergence shows up as an arrow flying at a height the gladiator who loosed
- * it does not agree with.
- */
-const FIGURE_HEIGHT = 150;
 
 /**
  * How many ranks back a drawn depth is, FRACTIONALLY, for the perspective
@@ -906,28 +894,28 @@ function drawProjectiles(view, now) {
     //
     //   `inFlight` is pruned by the same comparison in the action loop, so an
     //   arrow being drawn and an arrow holding the gate open are one fact.
-    const { flight } = shot;
-    const at = Math.min(1, Math.max(0, (now - shot.startedAt) / shot.durationMs));
-    const point = projectileAt(flight, at * flight.flightFrames);
-    const trail = projectileTrail(flight, at * flight.flightFrames);
+    // ► **EVERY DECISION IS `projectileDrawAt`'s, under the suite.** Where the
+    //   arrow is, how big it draws, what a null depth means and where each
+    //   trail puff sits are all arithmetic, and this file cannot be tested —
+    //   it has given up six live defects in three days and every one was found
+    //   by screenshotting. What is left here is canvas calls.
+    //
+    //   The SIZE in particular is the owner's own lane question: the arrow
+    //   rides `figureScaleFor` on its interpolated depth, so it shrinks and
+    //   grows exactly as the gladiators it flies between do.
+    const drawn = projectileDrawAt(
+      shot.flight,
+      (now - shot.startedAt) / shot.durationMs,
+      { frontY: ARENA_FRONT_Y, rankStride, figureScaleFor, rankOfDepth }
+    );
+    const { size } = drawn;
 
-    // ► **THE ARROW RIDES `figureScaleFor`, WHICH IS THE WHOLE POINT OF THE
-    //   THIRD AXIS.** A shot that crosses from one lane to another is at a
-    //   different depth every frame, so it draws at the scale of the rank it is
-    //   passing through — the same function the gladiators use, with the same
-    //   fractional rank, rather than a second one that could disagree with
-    //   them. An arrow that stayed one size while flying between two figures of
-    //   visibly different sizes is the tell this exists to prevent.
-    const drawnY = Number.isFinite(point.y) ? point.y : ARENA_FRONT_Y;
-    const size = figureScaleFor({ yscale: 100, rank: rankOf(drawnY, 0), slotIndex: 0 });
-
-    for (const [index, puff] of trail.entries()) {
-      const puffY = Number.isFinite(puff.y) ? puff.y : ARENA_FRONT_Y;
+    for (const [index, puff] of drawn.trail.entries()) {
       context.globalAlpha = 0.10 + 0.05 * index;
       context.fillStyle = "#d8cdb4";
-      const radius = Math.max(1, view.scale * 2.5 * size);
+      const radius = Math.max(1, view.scale * 2.5 * puff.size);
       context.beginPath();
-      context.arc(view.toX(puff.x), view.toY(puffY, puff.height * FIGURE_HEIGHT), radius, 0, Math.PI * 2);
+      context.arc(view.toX(puff.x), view.toY(puff.y, puff.lift), radius, 0, Math.PI * 2);
       context.fill();
     }
 
@@ -937,10 +925,10 @@ function drawProjectiles(view, now) {
     // to the extracted rig, and it says so rather than pretending otherwise.
     context.save();
     context.globalAlpha = 1;
-    context.translate(view.toX(point.x), view.toY(drawnY, point.height * FIGURE_HEIGHT));
+    context.translate(view.toX(drawn.x), view.toY(drawn.y, drawn.lift));
     // Canvas y is DOWN and the pitch is up-positive, so the rotation is negated
     // exactly as `drawOps` flips the figure's own y.
-    context.rotate(-point.rotation);
+    context.rotate(-drawn.rotation);
     const length = Math.max(6, view.scale * 26 * size);
     context.strokeStyle = "#e8e0cc";
     context.lineWidth = Math.max(1, view.scale * 1.6 * size);

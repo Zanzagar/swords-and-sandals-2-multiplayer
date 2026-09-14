@@ -33,8 +33,11 @@ import {
   bombardVelocityFor,
   flightDurationMs,
   projectileAt,
+  projectileDrawAt,
   projectileFlight,
   projectileTrail,
+  figureScaleFor,
+  rankOfDepth,
   ProjectileError,
   ProjectileKind,
   SS2_PROJECTILE
@@ -450,6 +453,108 @@ test("the scene folds an arrow, and does NOT carry it into the next action", () 
   const next = applyCommands(scene, []);
   assert.equal(next.projectiles.length, 0, "the next batch starts with an empty sky");
   assert.equal(Object.keys(next.actors).length, Object.keys(scene.actors).length, "while actors DO carry forward");
+});
+
+/* ------------------------------------------------------------------ */
+/* Drawing: the decisions the shell is not allowed to make              */
+/* ------------------------------------------------------------------ */
+
+test("an arrow crossing lanes SHRINKS, at the same scale as the figures it flies between", () => {
+  // ► **THE OWNER'S OWN QUESTION, AND THE REASON THIS FUNCTION EXISTS AT ALL.**
+  //   `tools/arena/main.js` cannot be tested — it has given up six live defects
+  //   in three days, every one found by screenshotting — so the arithmetic
+  //   lives here and the shell makes canvas calls.
+  //
+  //   The arrow rides `figureScaleFor` on its INTERPOLATED depth, which is the
+  //   same function with the same fractional rank the gladiators use. An arrow
+  //   that held one size while flying between two figures of visibly different
+  //   sizes is the tell this exists to prevent.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+
+  // Rank 2 (the back) to rank 0 (the front): the arrow flies TOWARD the viewer.
+  const forward = projectileFlight({
+    kind: ProjectileKind.BOMBARD, from: { x: -400, y: 6 }, to: { x: 400, y: 200 }, sequence: 2
+  });
+  const start = projectileDrawAt(forward, 0, view);
+  const end = projectileDrawAt(forward, 1, view);
+  assert.ok(start.size < end.size, `it must grow coming forward: ${start.size} -> ${end.size}`);
+
+  // And the arrow's size at each end must be the size a GLADIATOR standing
+  // there draws at — the claim is not "it changes" but "it agrees".
+  assert.equal(start.size, figureScaleFor({ yscale: 100, rank: 2, slotIndex: 0 }), "at the back rank");
+  assert.equal(end.size, figureScaleFor({ yscale: 100, rank: 0, slotIndex: 0 }), "and at the front");
+
+  // The reverse shot shrinks, or the scaling is keyed on something other than
+  // depth and happens to be monotone.
+  const away = projectileFlight({
+    kind: ProjectileKind.BOMBARD, from: { x: -400, y: 200 }, to: { x: 400, y: 6 }, sequence: 2
+  });
+  assert.ok(
+    projectileDrawAt(away, 0, view).size > projectileDrawAt(away, 1, view).size,
+    "and shrink going away"
+  );
+
+  // A LEVEL shot does not change size at all, which is the control: with both
+  // ends in one rank there is no depth to interpolate.
+  const level = projectileFlight({
+    kind: ProjectileKind.BOMBARD, from: { x: -400, y: 103 }, to: { x: 400, y: 103 }, sequence: 2
+  });
+  assert.equal(projectileDrawAt(level, 0, view).size, projectileDrawAt(level, 1, view).size);
+});
+
+test("the TRAIL tapers across lanes too, each puff at its own depth", () => {
+  // Each puff takes the scale of the rank IT is at, not the arrow's — which is
+  // the whole reason depth is interpolated rather than fixed at the launch. A
+  // trail drawn at one size across three ranks reads as a flat sticker.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const flight = projectileFlight({
+    kind: ProjectileKind.BOMBARD, from: { x: -600, y: 6 }, to: { x: 600, y: 200 }, sequence: 1
+  });
+  const drawn = projectileDrawAt(flight, 1, view, {});
+  assert.ok(drawn.trail.length >= 3, `the sweep needs several puffs: ${drawn.trail.length}`);
+  const sizes = drawn.trail.map((puff) => puff.size);
+  for (let index = 1; index < sizes.length; index += 1) {
+    assert.ok(sizes[index] > sizes[index - 1], `puff ${index} must be nearer than ${index - 1}`);
+  }
+});
+
+test("a null depth draws at the FRONT RANK, and that decision is not the shell's", () => {
+  // With the second axis off every gladiator has `y: null` and `projectileAt`
+  // faithfully reports null — "this model has no depth". A canvas still has to
+  // put the arrow somewhere, and the front rank is where every figure in such a
+  // game already stands.
+  const view = { frontY: 200, rankStride: 0, figureScaleFor, rankOfDepth };
+  const flat = projectileFlight({
+    kind: ProjectileKind.SNIPE, from: { x: -300, y: null }, to: { x: 300, y: null }, sequence: 0
+  });
+  const drawn = projectileDrawAt(flat, 0.5, view);
+  assert.equal(drawn.y, 200, "the front rank, not null and not NaN");
+  assert.ok(Number.isFinite(drawn.size) && drawn.size > 0, "and a size a painter can use");
+  for (const puff of drawn.trail) assert.equal(puff.y, 200, "trail puffs too");
+});
+
+test("the lift arrives in ARENA UNITS, so a surface hands it straight to toY", () => {
+  // The flight reports height in FIGURE HEIGHTS — the one unit the build's
+  // screen pixels can honestly be ported into — and the conversion happens
+  // once, here, rather than in every surface that draws one.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const flight = projectileFlight({
+    kind: ProjectileKind.SNIPE, from: { x: -300, y: 200 }, to: { x: 300, y: 200 }, sequence: 0
+  });
+  const drawn = projectileDrawAt(flight, 0.5, view);
+  const height = projectileAt(flight, 0.5 * flight.flightFrames).height;
+  assert.equal(drawn.lift, height * 150, "figure heights x the arena height of a figure");
+  assert.ok(drawn.lift > 50, "and it is a real arena distance, not a fraction");
+});
+
+test("projectileDrawAt REFUSES to import the painter, so the injection is not optional", () => {
+  // `src/render/projectile.js` is pure arithmetic and must not reach for
+  // `figure.js`; the caller passes the scale function in. A missing one is a
+  // programming error worth naming rather than a silent nominal size.
+  const flight = projectileFlight({
+    kind: ProjectileKind.SNIPE, from: { x: 0, y: 200 }, to: { x: 300, y: 200 }, sequence: 0
+  });
+  assert.throws(() => projectileDrawAt(flight, 0.5, { frontY: 200, rankStride: 97 }), ProjectileError);
 });
 
 /* ------------------------------------------------------------------ */

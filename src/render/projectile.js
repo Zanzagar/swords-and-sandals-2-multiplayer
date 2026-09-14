@@ -342,6 +342,77 @@ function rotationAt(flight, t) {
  * `keep` is this engine's own bound on how many stay on screen, which the build
  * did not need because a bout is short and a trail puff is small.
  */
+/**
+ * EVERYTHING A SURFACE NEEDS TO DRAW ONE ARROW THIS FRAME, so the surface makes
+ * no decisions of its own.
+ *
+ * ► **IT EXISTS BECAUSE `tools/arena/main.js` HAS GIVEN UP SIX LIVE DEFECTS IN
+ *   THREE DAYS AND NOTHING CAN TEST IT.** That file's own history is a list of
+ *   decisions moved out of it — `viewportFor`, `figureScaleFor`, `figureXAt`,
+ *   `rankOfDepth`, `perSideFrom`, `rosterOrderOf` — every one of which had a
+ *   live defect in it, and every one of which was found by screenshotting
+ *   rather than by the suite. The projectile drawing arrived with four more
+ *   decisions in it, and this is where they go.
+ *
+ *   **The most load-bearing of them is the SIZE**, which is the owner's own
+ *   question about an arrow crossing lanes: it rides `figureScaleFor` on the
+ *   arrow's INTERPOLATED depth, so it shrinks and grows exactly as the
+ *   gladiators it is flying between do. A shell computing that inline is a
+ *   number the suite cannot reach.
+ *
+ * @param {object} flight   from `projectileFlight`
+ * @param {number} at       progress through the flight, 0..1
+ * @param {object} view     `{ frontY, rankStride, figureScaleFor }`
+ * @returns {object} `{ x, y, lift, rotation, size, trail }` — `lift` is already
+ *   in ARENA UNITS, so a surface hands it straight to its own `toY`.
+ */
+export function projectileDrawAt(flight, at, { frontY, rankStride, figureScaleFor, rankOfDepth, keep } = {}) {
+  if (typeof figureScaleFor !== "function" || typeof rankOfDepth !== "function") {
+    throw new ProjectileError(
+      "projectileDrawAt needs figureScaleFor and rankOfDepth injected; this module does not import the painter."
+    );
+  }
+  const progress = Math.min(1, Math.max(0, Number.isFinite(at) ? at : 0));
+  const frame = progress * flight.flightFrames;
+  const point = projectileAt(flight, frame);
+  // ► **A NULL DEPTH DRAWS AT THE FRONT RANK, and the decision belongs here
+  //   rather than in the shell.** A rule set with the second axis off gives
+  //   every gladiator `y: null` and `projectileAt` faithfully reports null —
+  //   "this model has no depth" — but a canvas has to put the arrow somewhere.
+  //   The front rank is where every figure in such a game already stands, so
+  //   the arrow flies level with them.
+  const depth = Number.isFinite(point.y) ? point.y : frontY;
+  const size = figureScaleFor({
+    yscale: 100,
+    rank: rankOfDepth(depth, 0, { frontY, rankStride }),
+    slotIndex: 0
+  });
+  const lift = (shotPoint) => shotPoint.height * ARENA_UNITS_PER_FIGURE_HEIGHT;
+  return Object.freeze({
+    x: point.x,
+    y: depth,
+    lift: lift(point),
+    rotation: point.rotation,
+    size,
+    trail: Object.freeze(projectileTrail(flight, frame, keep === undefined ? {} : { keep }).map((puff) => {
+      const puffDepth = Number.isFinite(puff.y) ? puff.y : frontY;
+      return Object.freeze({
+        x: puff.x,
+        y: puffDepth,
+        lift: lift(puff),
+        // Each puff at ITS OWN depth's scale, not the arrow's: a trail across
+        // lanes tapers, which is the whole reason the depth is interpolated
+        // rather than fixed at the launch.
+        size: figureScaleFor({
+          yscale: 100,
+          rank: rankOfDepth(puffDepth, 0, { frontY, rankStride }),
+          slotIndex: 0
+        })
+      });
+    }))
+  });
+}
+
 export function projectileTrail(flight, frame, { keep = 6 } = {}) {
   const puffs = [];
   const t = Math.min(flight.flightFrames, Math.max(0, Number.isFinite(frame) ? frame : 0));
