@@ -80,6 +80,14 @@ import {
   arrowOpsFor,
   arrowTrailOpsFor,
   arenaSceneryFor,
+  arenaScreenLayersFor,
+  splitArenaScreen,
+  SS2_ARENA_DRESSING,
+  hasArenaScreen,
+  cameraFor,
+  cameraStep,
+  stageFitFor,
+  stageProjectorFor,
   clipEffectTableFrom,
   effectsForAnimation,
   spawnDrops,
@@ -584,9 +592,83 @@ const context = canvas.getContext("2d");
  * looking at it can tell you. So the view fits the placements it has, with a
  * margin for the figures' own width, and 1v1 fills the stage as well as 3v3.
  */
+/**
+ * WHICH OF THE SIX ARENAS, WHICH OF THE SKIES, AND WHETHER IT RAINS.
+ *
+ * ► **THE GAME HAS SIX ARENAS AND THIS PAGE USED TO SHOW ONE.** The build
+ *   dresses `sand` and `crowd` from one `current_arena` index and the sky from
+ *   `time_of_day`; all three are query parameters here so they can be LOOKED
+ *   AT, which is the only check any of this has. `?arena=4&sky=11&rain=13`.
+ *
+ * Out-of-range values fall back to frame 1 in `frameForLayer` rather than
+ * throwing — it is a URL, not a config file, which is the rule `rankStrideFrom`
+ * already set.
+ */
+const arenaDressing = {
+  arena: Number(params.get("arena")) || SS2_ARENA_DRESSING.arena,
+  timeOfDay: Number(params.get("sky")) || SS2_ARENA_DRESSING.timeOfDay,
+  weather: Number(params.get("rain")) || SS2_ARENA_DRESSING.weather
+};
+
+/**
+ * THE CAMERA, and it is the build's own — `combatscale`, which runs every
+ * enterFrame in the shipped build. See `src/render/arena-backdrop.js`: reading
+ * it the other way round cost this session a retraction.
+ *
+ * Module state because it is a TWEEN: the zoom eases toward its target by a
+ * fifth a frame and the pan by a sixteenth, so each frame needs the last one.
+ * It is re-seeded settled whenever the roster changes size, so a new bout opens
+ * framed rather than easing in from the previous bout's last position.
+ */
+let camera = null;
+let cameraSeededFor = null;
+
+/** Every placed actor's arena x — what the camera has to frame. */
+function placedXs() {
+  return scene.drawOrder
+    .map((combatantId) => scene.actors[combatantId])
+    .filter((actor) => actor && actor.placed !== false && Number.isFinite(actor.x))
+    .map((actor) => actor.x);
+}
+
+function stepCamera() {
+  const xs = placedXs();
+  const signature = xs.length;
+  if (!camera || cameraSeededFor !== signature) {
+    camera = cameraFor(xs);
+    cameraSeededFor = signature;
+    return;
+  }
+  camera = cameraStep(camera, xs);
+}
+
+/**
+ * Arena units -> canvas pixels.
+ *
+ * ► **TWO VIEWS, AND WHICH ONE YOU GET DEPENDS ON WHETHER THE PLAYER HAS
+ *   EXTRACTED THE ARENA.** Same arrangement as the figures and the sound: the
+ *   build's own art when it is there, this repository's own when it is not.
+ *
+ * - **The STAGE view** is the build's: a fixed 640x420 stage letterboxed into
+ *   the canvas, the arena at its measured origin inside it, and the camera
+ *   panning and zooming `gladiators` the way `combatscale` does. Nothing is
+ *   fitted to the roster — a 1v1 and a 3v3 get the same frame and differ in how
+ *   far the camera has pulled back inside it. **That is what "the backdrop sets
+ *   the scale" means** (owner, 2026-09-13).
+ * - **The FITTED view** is the authored fallback, unchanged. `viewportFor` fits
+ *   the roster because the authored bowl has no fixed size to be faithful to.
+ *
+ * All the arithmetic in both now lives in `src/render/`, under the suite. This
+ * function chooses between them and holds no numbers of its own — which is the
+ * standing lesson about this file, arriving for the sixth time.
+ */
 function viewport() {
   const width = canvas.width;
   const height = canvas.height;
+
+  if (hasArenaScreen(propPack, propOpsFor)) {
+    return stageProjectorFor(camera, stageFitFor({ width, height }));
+  }
 
   // WHICH scale and horizon fit this roster is decided in
   // `src/render/arena-shell.js`, under the suite — two live defects lived in
@@ -606,6 +688,10 @@ function viewport() {
     toX: (x) => width / 2 + x * scale,
     // Arena y is 200 at the front rank and DECREASES further back, so a bigger
     // y is nearer the viewer and further down the canvas.
+    // ► The `1.7` here is the AUTHORED depth factor and stays with the authored
+    //   bowl. The extracted arena uses 1, because the build's sand is painted
+    //   for the build's own `_y` range and 1.7 puts the back rank in the crowd.
+    //   See `RANK_DEPTH_FACTOR` in `src/render/arena-backdrop.js`.
     toY: (y, lift) => horizon + (height - horizon) * 0.62 - (ARENA_FRONT_Y - y) * scale * 1.7 - lift * scale
   };
 }
@@ -788,6 +874,59 @@ function drawArenaBowl(view) {
   context.stroke();
 }
 
+/**
+ * THE BUILD'S OWN ARENA SCREEN — the backdrop, the sky, the sand, the crowd,
+ * the rain, the UI bar and the ornamental border, at the stage coordinates root
+ * frame 221 places them at.
+ *
+ * ► **DRAWN IN STAGE SPACE, WITH NO Y-FLIP, and that is the difference from
+ *   every other painter in this file.** `drawOps` and `paintProp` both do
+ *   `context.scale(k, -k)` because a FIGURE's local space has its origin at the
+ *   soles of the feet and its head at negative y, so drawing it needs arena y
+ *   (which is up) rather than screen y (which is down). Scenery has no such
+ *   local space: it is placed straight onto the stage in the build's own
+ *   coordinates, which are already screen coordinates. Flipping it would draw
+ *   the sky under the sand.
+ *
+ * ► **AND THE PLACEMENT TRANSLATIONS ARE IN TWIPS.** Every extracted matrix in
+ *   this repository carries `tx`/`ty` in twips while its path data is in pixels
+ *   — stated in `extracted-figure.js` and handled there, and latent everywhere
+ *   else because every prop drawn until now had an IDENTITY matrix and a zero
+ *   translation. The arena's layers are the first with real offsets, so the
+ *   `/ TWIPS_PER_PIXEL` below is the first place it bites.
+ */
+const TWIPS_PER_PIXEL = 20;
+
+function paintArenaLayer(layer, fit) {
+  const { x, y, scale } = layer.placement;
+  context.save();
+  context.translate(fit.offsetX, fit.offsetY);
+  context.scale(fit.scale, fit.scale);
+  context.translate(x, y);
+  if (scale !== 1) context.scale(scale, scale);
+  for (const operation of layer.ops) {
+    const m = operation.matrix;
+    context.save();
+    context.transform(m[0], m[1], m[2], m[3], m[4] / TWIPS_PER_PIXEL, m[5] / TWIPS_PER_PIXEL);
+    const path = path2dFor(operation.d);
+    if (operation.fill && operation.fill !== "none") {
+      context.globalAlpha = operation.fillOpacity ?? 1;
+      context.fillStyle = operation.fill;
+      context.fill(path, operation.fillRule ?? "evenodd");
+    }
+    if (operation.stroke && operation.strokeWidth > 0) {
+      context.globalAlpha = operation.strokeOpacity ?? 1;
+      context.strokeStyle = operation.stroke;
+      context.lineWidth = operation.strokeWidth;
+      context.lineJoin = "round";
+      context.stroke(path);
+    }
+    context.restore();
+  }
+  context.globalAlpha = 1;
+  context.restore();
+}
+
 function combatantsById() {
   const wire = host.wire();
   return new Map(wire.teams.flatMap((team) => team.combatants).map((combatant) => [combatant.id, combatant]));
@@ -799,10 +938,26 @@ function render(now = performance.now()) {
   canvas.width = Math.max(1, Math.floor(rect.width * ratio));
   canvas.height = Math.max(1, Math.floor(rect.height * ratio));
 
+  // ► **THE CAMERA IS STEPPED ONCE A FRAME, BEFORE THE VIEW IS BUILT.** It is
+  //   a tween — the zoom eases by a fifth and the pan by a sixteenth — so
+  //   stepping it twice would run it at double speed, and stepping it after
+  //   `viewport()` would draw a frame behind the positions it was computed
+  //   from. Both are the class of defect this file keeps producing.
+  stepCamera();
+
   const view = viewport();
   context.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawArenaBowl(view);
+  // The BUILD'S OWN arena when the player has extracted it, this repository's
+  // own bowl when they have not — the same fallback the figures and the sound
+  // already have, and a clone with no assets is unchanged.
+  const fit = stageFitFor({ width: canvas.width, height: canvas.height });
+  const screen = splitArenaScreen(arenaScreenLayersFor(propPack, propOpsFor, camera, arenaDressing));
+  if (screen.behind.length > 0 || screen.inFront.length > 0) {
+    for (const layer of screen.behind) paintArenaLayer(layer, fit);
+  } else {
+    drawArenaBowl(view);
+  }
 
   const byId = combatantsById();
 
@@ -994,6 +1149,13 @@ function render(now = performance.now()) {
 
   drawProjectiles(view, now);
   drawDrops(view, now);
+
+  // ► **THE RAIN, THE UI BAR AND THE BORDER GO ON TOP, and the build's own
+  //   depths are what say so.** They sit at root depths 80, 438 and 1193,
+  //   above the arena's 59 — so an arrow crossing the ornamental frame passes
+  //   BEHIND it. Painting every layer before every body is the version of this
+  //   that looks right on a still and is wrong in motion.
+  for (const layer of screen.inFront) paintArenaLayer(layer, fit);
 }
 
 /**

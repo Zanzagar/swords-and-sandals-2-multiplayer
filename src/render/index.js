@@ -37,6 +37,11 @@
  * - `props.js` draws the BUILD'S OWN arrow and trail when the player has
  *   extracted them, and returns null when they have not — the same shape as
  *   `extracted-figure.js` and `sound.js`, pack as an argument.
+ * - `arena-backdrop.js` is the ARENA ITSELF rather than a thing standing in it:
+ *   the six objects root frame 221 places, the 1:1 mapping from arena units to
+ *   stage pixels that every other coordinate here is expressed in, and the
+ *   camera the build wrote and then never called. It is the datum the rest of
+ *   this directory has been implying.
  * - `clip-effects.js` is the build's own `bounceitem` — the blood and sparks a
  *   fighter animation throws, a real bouncing particle system rather than a
  *   puff of art, and the rule that ARMOUR strikes sparks where flesh bleeds.
@@ -59,5 +64,6 @@ export * from "./clip-labels.js";
 export * from "./extracted-figure.js";
 export * from "./projectile.js";
 export * from "./props.js";
+export * from "./arena-backdrop.js";
 export * from "./clip-effects.js";
 export * from "./arena-shell.js";

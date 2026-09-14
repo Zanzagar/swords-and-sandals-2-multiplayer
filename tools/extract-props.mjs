@@ -123,45 +123,128 @@ export const PROP_EXPORTS = Object.freeze([
     /**
      * ► **THE ARENA SCREEN'S BACKDROP, and it is EXACTLY THE STAGE.** Root
      *   frame 221 places character 643 at depth 1, `(0, 0)`, unscaled, and it
-     *   measures **640 x 420 px** — the SWF's declared stage, to the pixel. So
-     *   this is the sky and ground the whole fight happens against.
+     *   measures **640 x 420 px** — the SWF's declared `FrameSize` RECT, to the
+     *   pixel. So this is the sky and ground the whole fight happens against.
      */
     character: 643,
     name: "backdrop",
     framesWanted: 1,
     indexedBy: "frame 1; it has only one",
-    reader: "unread today — see the arena mapping in the battle map"
+    reader: "src/render/arena-backdrop.js — the stage-locked backdrop layer"
   },
   {
     /**
-     * ► **THE CROWD, 200 frames of it**, placed at depth 3 and scaled 1.04.
-     *   Frame 1 alone here: the other 199 are the crowd moving, which is a
-     *   second question from what the crowd IS.
+     * ► **CHARACTER 1729 IS THE `sky`, AND THIS ENTRY USED TO CALL IT THE
+     *   CROWD.** Root frame 221 places it at depth 3 under the instance name
+     *   `sky`, scaled 1.04 — the only scaled placement on the frame. The build
+     *   names it three independent ways: the `PlaceObject2` name, `_root.sky`
+     *   in `day_night_cycle` (root frame 35), and its own child sprite
+     *   `cloud_patterns` (char 1690). **The real crowd is character 2112**,
+     *   which is a different clip in a different coordinate space.
+     *
+     * ► **AND ITS 200 FRAMES ARE A LOOKUP, NOT AN ANIMATION** — the same shape
+     *   as `bullet`'s. `_root.sky.gotoAndStop(time_of_day)` (`+0x0d33`) with
+     *   `_global.time_of_day = 1 + random(23)`, and `_root.sky.cacheAsBitmap =
+     *   true` immediately after, which a clip that played could not be. The
+     *   old entry said "frame 1 of 200; the rest is its animation" and was
+     *   wrong on both halves. **Every frame is taken, because each is a
+     *   different hour of the day and the renderer gets to choose.**
      */
     character: 1729,
-    name: "crowd",
-    framesWanted: 1,
-    indexedBy: "frame 1 of 200; the rest is its animation",
-    reader: "unread today"
+    name: "sky",
+    indexedBy: "time_of_day, which is 1 + random(23)",
+    reader: "src/render/arena-backdrop.js — the stage-locked sky layer"
   },
   {
     /**
-     * ► **THE ARENA ITSELF, and it is reached by CHARACTER ID because the build
-     *   does not export it.** `_root.arena` is character 2249, placed at root
-     *   frame 221 as a named INSTANCE — so there is no linkage name to ask for
-     *   and `ExportAssets` never mentions it.
+     * ► **THE GROUND, and it is INSIDE the arena clip** — sprite 2249 depth 1,
+     *   instance `sand`, at arena-local `(-323.95, -56.75)`. Its own art spans
+     *   local y -56.75..256.2, which is the range that decides how far back a
+     *   rank may stand before it is off the painted sand.
      *
-     *   Frame 1 alone: the clip carries 334 frames, but those are the bout's
-     *   own states (`combatwon`, `combatlost`, the intro), not a backdrop
-     *   animation. What frame 1 holds is the arena a fight happens in.
+     * ► **SIX FRAMES, ONE PER ARENA.** `sand.gotoAndStop(current_arena)`
+     *   (`+0x0d0f`). So the game has six grounds, not one, and taking frame 1
+     *   would ship a sixth of what was measured.
      */
-    character: 2249,
-    name: "arena",
+    character: 673,
+    name: "sand",
+    indexedBy: "current_arena, 1..6",
+    reader: "src/render/arena-backdrop.js — the ground, in the arena's own space"
+  },
+  {
+    /**
+     * ► **THE ACTUAL CROWD: character 2112**, sprite 2249 depth 3, instance
+     *   `crowd`, at arena-local `(1.05, -110.50)`. Eight tiled stands (char
+     *   1774 at half scale) and three animated crowd blocks (char 2098).
+     *
+     * ► **`crowd.gotoAndStop(current_arena)`** (`+0x0c99`) — six again, and the
+     *   same index as the sand, so a renderer picks one arena and both agree.
+     *
+     * ► **IT IS THE ONE PIECE OF SCENERY THE CAMERA MOVES**: `combatscale` ends
+     *   `crowd._y = -200 + ceil(zoomscale)` (`+0x0ab1`), so the stands rise as
+     *   the camera pulls back.
+     */
+    character: 2112,
+    name: "crowd",
+    indexedBy: "current_arena, 1..6",
+    reader: "src/render/arena-backdrop.js — the stands, and the build's one parallax"
+  },
+  {
+    /**
+     * ► **THE WEATHER, AND ITS FIRST NINE FRAMES ARE EMPTY.** Root frame 221
+     *   depth 80, instance `rain`. Frames 1-9 place nothing at all; 10-17 carry
+     *   characters 1812-1815. **A `framesWanted: 1` entry here would emit an
+     *   empty prop and look like a failed read** — which is exactly what the
+     *   first version of the arena-screen table assumed it was.
+     */
+    character: 1816,
+    name: "rain",
+    indexedBy: "frame; 1-9 are empty and 10-17 carry the weather",
+    reader: "src/render/arena-backdrop.js — the stage-locked weather layer"
+  },
+  {
+    /**
+     * ► **THE BOTTOM UI BAR**, root frame 221 depth 438, instance
+     *   `fiz_info_panel`, 641 x 26.55 px at `(-0.5, 401)` — so it hangs five
+     *   pixels below the stage. It carries two `DefineEditText` children, which
+     *   are REPORTED as unsupported rather than dropped; this renderer draws
+     *   its own text over the bar.
+     */
+    character: 1531,
+    name: "panel",
     framesWanted: 1,
-    indexedBy: "frame 1 is the arena; the other 333 are bout states",
-    reader: "unread today — see the placement note in the handoff before drawing it"
+    indexedBy: "frame 1",
+    reader: "src/render/arena-backdrop.js — the UI bar, painted over the fighters"
+  },
+  {
+    /**
+     * ► **THE ORNAMENTAL FRAME**, root frame 221 depth 1193 — the highest depth
+     *   on the screen, so it paints over everything including the arrows. 732 x
+     *   505 px at `(-25.55, -33)`: larger than the 640 x 420 stage on every
+     *   side, which is what lets it frame the picture rather than sit inside it.
+     */
+    character: 646,
+    name: "border",
+    framesWanted: 1,
+    indexedBy: "frame 1",
+    reader: "src/render/arena-backdrop.js — the frame, painted last"
   }
 ]);
+
+/**
+ * ► **CHARACTER 2249, THE ARENA CLIP, IS DELIBERATELY NOT DECLARED, AND IT
+ *   USED TO BE.** Taking it whole gave one FUSED frame: the sand and the crowd
+ *   flattened into nine placements with no way to tell them apart, plus the
+ *   `about_fight_mov` text field that showed up as this tool's only failure.
+ *   That is strictly worse than taking `sand` and `crowd` separately, because
+ *   **the camera moves one of them and not the other** — `crowd._y` tracks the
+ *   zoom and the sand does not — and a fused blob cannot express that. It also
+ *   lost the six arenas, since the fused frame 1 is arena 1 of 6.
+ *
+ *   The arena clip's other 333 frames are `combat_won`, `combat_lost`,
+ *   `combat_exp` and the intro — bout STATES, a different asset and a different
+ *   question from the ground a fight happens on.
+ */
 
 export class ExtractPropsError extends Error {
   constructor(message) {
@@ -199,9 +282,16 @@ const px = (twips) => Math.round((twips / TWIPS_PER_PIXEL) * 100) / 100;
 /**
  * The same rounding `extract-wardrobe.mjs` uses, and deliberately the same
  * numbers: a matrix is `{a, b, c, d, tx, ty}` from the display list and reaches
- * JSON as a six-element array, scale terms to 5 places and translations —
- * already pixels — to 1. Duplicated rather than imported so this file stays
+ * JSON as a six-element array, scale terms to 5 places and translations to 1.
+ * Duplicated rather than imported so this file stays
  * runnable on its own, which is the convention every tool here follows.
+ *
+ * ► **THE TRANSLATIONS ARE TWIPS AND THIS COMMENT USED TO SAY THEY WERE
+ *   PIXELS.** `readMatrix` leaves `tx`/`ty` in twips and `composeMatrix` keeps
+ *   them there, deliberately, because composing in twips is exact; only the
+ *   path data and the bounds go through `px()`. A consumer must divide by 20.
+ *   Latent until now because every prop declared here had an identity matrix
+ *   with a zero translation — the arena screen is the first with real offsets.
  *
  * ► **`-0` IS NORMALISED TO `0`.** It round-trips through JSON as `-0` and
  *   compares unequal under `Object.is`, which is how a byte-identical

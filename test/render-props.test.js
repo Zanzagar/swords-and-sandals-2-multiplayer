@@ -296,15 +296,49 @@ test("every declared prop names what reads it, so a dead entry is visible", () =
     assert.ok(prop.indexedBy.length > 0, `${key} must say what its frame number MEANS`);
     assert.ok(prop.reader.length > 0, `${key} must name what reads it, or say plainly that nothing does`);
   }
-  // The arena is the one entry reached by id, and it takes ONE frame — its
-  // other 333 are the bout's own states, a different asset and a different
-  // question.
-  const arena = PROP_EXPORTS.find((prop) => prop.name === "arena");
-  assert.equal(arena.character, 2249, "_root.arena, placed at root frame 221");
-  assert.equal(arena.linkage, undefined, "and it has no linkage name to ask for");
-  assert.equal(arena.framesWanted, 1);
   const arrow = PROP_EXPORTS.find((prop) => prop.linkage === "bullet");
   assert.equal(arrow.indexedBy, "secondary_weapon - 60", "the build's own lookup");
+});
+
+test("THE FUSED `arena` ENTRY IS GONE, and it must not come back", () => {
+  // ► **IT USED TO TAKE CHARACTER 2249 WHOLE, AND THAT LOST THREE THINGS.**
+  //   The arena clip's frame 1 flattens to nine placements with no way to tell
+  //   the sand from the stands — and **the camera moves one of them and not the
+  //   other**, so a fused blob cannot express `crowd._y = -200 +
+  //   ceil(zoomscale)`. It also collapsed the SIX arenas to one, because the
+  //   fused frame 1 is arena 1 of 6, and it dragged in the `about_fight_mov`
+  //   text field, which was this tool's only reported failure for weeks.
+  //
+  //   `sand` (673) and `crowd` (2112) replace it and are strictly more.
+  assert.equal(PROP_EXPORTS.find((prop) => prop.name === "arena"), undefined,
+    "character 2249 is not declared; take `sand` and `crowd` separately");
+  for (const [name, character] of [["sand", 673], ["crowd", 2112]]) {
+    const entry = PROP_EXPORTS.find((prop) => prop.name === name);
+    assert.ok(entry, `${name} must be declared`);
+    assert.equal(entry.character, character);
+    assert.equal(entry.framesWanted, undefined, `${name} takes ALL six arenas, not frame 1`);
+    assert.match(entry.indexedBy, /current_arena/, `${name} says the index is the arena`);
+  }
+});
+
+test("CHARACTER 1729 IS THE SKY, and calling it the crowd would mis-draw in SILENCE", () => {
+  // ► **THIS ENTRY WAS NAMED `crowd` AND IS THE SKY.** The build says so three
+  //   ways: root frame 221 places it under the instance name `sky`,
+  //   `day_night_cycle` calls `_root.sky.gotoAndStop(time_of_day)`, and its own
+  //   child sprite is `cloud_patterns`. The real crowd is character 2112.
+  //
+  //   The failure mode is the reason this test exists: the renderer looks a
+  //   layer up BY KEY, so a `crowd` key holding the sky paints a 640x211 sky
+  //   where the stands belong and draws no stands at all — no error, no gap,
+  //   just the wrong picture.
+  const sky = PROP_EXPORTS.find((prop) => prop.name === "sky");
+  const crowd = PROP_EXPORTS.find((prop) => prop.name === "crowd");
+  assert.equal(sky.character, 1729);
+  assert.equal(crowd.character, 2112);
+  assert.notEqual(sky.character, crowd.character, "two clips, two keys, never one");
+  assert.match(sky.indexedBy, /time_of_day/,
+    "and its 200 frames are an HOUR lookup, not an animation");
+  assert.equal(sky.framesWanted, undefined, "so every frame is taken");
 });
 
 /* ------------------------------------------------------------------ */
