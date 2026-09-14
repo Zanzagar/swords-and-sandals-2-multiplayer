@@ -31,6 +31,18 @@
  *
  * A solid red morph on an effect depth. It is blood.
  *
+ * ## AND THE FILLS THIS BUILD CANNOT EXERCISE ARE STILL READ IN FULL
+ *
+ * Re-measured against the oracle: **97 fills across those 44 morphs and every
+ * one of them SOLID — zero gradient fills, zero bitmap fills.** So the
+ * gradient and bitmap branches of `readMorphFillStyle` are DEAD against this
+ * build and cannot be checked against it. They are written against the format
+ * and checked against hand-built buffers, because until recently they threw
+ * away the gradient matrix, the spread and interpolation bits, every stop
+ * ratio, and the bitmap's matrix — which is the exact loss
+ * `tools/swf-shapes.mjs` was repaired for and this file was not. The value is
+ * for the modded build in the second install lane, not for this one.
+ *
  * ## THE PART THAT IS NOT OBVIOUS: the two edge streams are PAIRED, not aligned
  *
  * `StartEdges` and `EndEdges` are two `SHAPE` records — no style array, just
@@ -132,22 +144,62 @@ class BitReader {
     return { xMin, xMax, yMin, yMax };
   }
 
-  skipMatrix() {
+  /**
+   * A fill's own MATRIX, read rather than skipped.
+   *
+   * ► **THIS USED TO BE `skipMatrix`, AND IT IS THE DEFECT
+   *   `tools/swf-shapes.mjs` ALREADY REPAIRED FOR STATIC SHAPES.** A bitmap
+   *   fill is an image plus the transform that places it in the shape's space;
+   *   without the transform there is nothing to draw, so the parser reported
+   *   `kind: "bitmap"` and a renderer had no choice but to paint nothing. That
+   *   lost the arena wall out of static shapes. The same hole was left here.
+   *
+   * Scale and skew are 16.16 fixed point. The translation stays in TWIPS — 20
+   * to the pixel — which is the convention every matrix in this repository
+   * uses, and is NOT the convention of the `d` path data emitted beside it,
+   * which is already pixels.
+   */
+  readFillMatrix() {
     this.align();
+    let a = 1;
+    let d = 1;
+    let b = 0;
+    let c = 0;
     if (this.readBit()) {
       const bits = this.readUB(5);
-      this.readSB(bits);
-      this.readSB(bits);
+      a = this.readSB(bits) / 65536;
+      d = this.readSB(bits) / 65536;
     }
     if (this.readBit()) {
       const bits = this.readUB(5);
-      this.readSB(bits);
-      this.readSB(bits);
+      // RotateSkew0 then RotateSkew1 on the wire, which are `b` then `c`. The
+      // order reads backwards against the usual picture of a matrix, and a
+      // reader that fills them in left-to-right transposes every rotation.
+      b = this.readSB(bits) / 65536;
+      c = this.readSB(bits) / 65536;
     }
     const translateBits = this.readUB(5);
-    this.readSB(translateBits);
-    this.readSB(translateBits);
+    const tx = this.readSB(translateBits);
+    const ty = this.readSB(translateBits);
     this.align();
+    return { a, b, c, d, tx, ty };
+  }
+
+  /**
+   * FIXED8: a SIGNED 8.8 fixed-point number. A focal point is one, and it is
+   * legal for it to be negative — the focus sits on the far side of centre.
+   *
+   * ► **`tools/swf-shapes.mjs` reads this field as UNSIGNED
+   *   (`readUI16() / 256`), which turns -0.5 into 255.5.** The two agree on
+   *   every non-negative value, so nothing drawn today differs; the divergence
+   *   is deliberate rather than copied, and is reported rather than fixed in
+   *   place, because that file is not this module's to edit.
+   */
+  readFixed8() {
+    this.align();
+    const value = this.buffer.readInt16LE(this.byte);
+    this.byte += 2;
+    return value / 256;
   }
 }
 
@@ -156,32 +208,98 @@ function readColour(reader) {
   return { red: reader.readUI8(), green: reader.readUI8(), blue: reader.readUI8(), alpha: reader.readUI8() };
 }
 
-/** A MORPHFILLSTYLE: every field twice, start and end. */
+/**
+ * A MORPHFILLSTYLE: every field twice, start and end.
+ *
+ * ► **THE GRADIENT AND BITMAP BRANCHES USED TO THROW AWAY EVERYTHING BUT THE
+ *   COLOURS.** Both matrices were skipped, the spread and interpolation bits
+ *   were masked off with no record, the stop RATIOS were read and discarded,
+ *   and a bitmap kept only its id — nothing a renderer could draw.
+ *   `tools/swf-shapes.mjs` was repaired for static shapes and this parser was
+ *   not, so the same art would have been lost twice by two different files.
+ *
+ * ► **NOTHING IN THE GRADIENT OR BITMAP BRANCH HAS EVER RUN AGAINST THE
+ *   ORACLE, AND SAYING SO IS THE POINT.** Re-measured against the installed
+ *   build: 44 morph shapes, all tag 46, 97 fills, and every one of them SOLID
+ *   — zero gradient fills, zero bitmap fills, 8,720 edges, 0 parse failures.
+ *   So both branches are written against the FORMAT and checked against
+ *   hand-built buffers in `test/swf-morph-shapes.test.js`, and no claim about
+ *   the shipped build is made for either. What they buy is that the next
+ *   modded build, or the next asset family, does not lose art in silence.
+ */
 function readMorphFillStyle(reader) {
   const type = reader.readUI8();
   if (type === 0x00) {
     return { kind: "solid", start: readColour(reader), end: readColour(reader) };
   }
   if (type === 0x10 || type === 0x12 || type === 0x13) {
-    reader.skipMatrix(); // start gradient matrix
-    reader.skipMatrix(); // end gradient matrix
-    const count = reader.readUI8() & 0x0f;
+    const startMatrix = reader.readFillMatrix();
+    const endMatrix = reader.readFillMatrix();
+    // A MORPHGRADIENT packs spread, interpolation and the stop count into one
+    // byte, exactly as a static GRADIENT does.
+    //
+    // ► **THE TOP FOUR BITS USED TO BE MASKED AWAY WITH `& 0x0f` AND NO
+    //   RECORD.** A reflected or linear-RGB morph ramp would then have been
+    //   drawn as a padded sRGB one with nothing anywhere saying so — the same
+    //   silent loss `tools/swf-shapes.mjs` now reports for static gradients.
+    const packed = reader.readUI8();
+    const spread = (packed >> 6) & 0x03;
+    const interpolation = (packed >> 4) & 0x03;
+    const count = packed & 0x0f;
     const stops = [];
     for (let index = 0; index < count; index += 1) {
-      // A MORPHGRADRECORD is start ratio + colour THEN end ratio + colour.
-      reader.readUI8();
+      // A MORPHGRADRECORD is start ratio + colour THEN end ratio + colour, and
+      // BOTH ratios are real: a morph interpolates WHERE a stop sits along the
+      // ramp as well as what colour it is. Discarding them is what made every
+      // stop come out at ratio 0.
+      const startRatio = reader.readUI8();
       const start = readColour(reader);
-      reader.readUI8();
+      const endRatio = reader.readUI8();
       const end = readColour(reader);
-      stops.push({ start, end });
+      stops.push({ startRatio, start, endRatio, end });
     }
-    return { kind: "gradient", stops };
+    // A focal gradient's extra pair of FIXED8s.
+    //
+    // ► **Keyed off the STYLE TYPE, not the morph version.** 0x13 is only
+    //   emitted by SWF 8 and later, which is also the only thing that emits
+    //   `DefineMorphShape2`, so a 0x13 inside a tag 46 should not exist.
+    //   Reading the pair anyway is the safe move rather than the risky one,
+    //   because getting the byte count wrong here is a NAMED failure rather
+    //   than plausible nonsense: MEASURED by running the pre-repair parser
+    //   against `gradientBytes({ type: 0x13 })`, the four unread bytes
+    //   desynchronise the LINE style array and `readColour` runs past the end
+    //   of the tag. Where the line array survives, the start edge stream then
+    //   ends somewhere the header's offset does not name. Both are a
+    //   `MorphParseError` that says which.
+    const focal = type === 0x13;
+    const startFocalPoint = focal ? reader.readFixed8() : 0;
+    const endFocalPoint = focal ? reader.readFixed8() : 0;
+    return {
+      kind: "gradient",
+      // 0x10 linear, 0x12 radial, 0x13 focal-radial.
+      gradientType: type === 0x10 ? "linear" : "radial",
+      focal,
+      startFocalPoint,
+      endFocalPoint,
+      startMatrix,
+      endMatrix,
+      spread,
+      interpolation,
+      stops
+    };
   }
   if (type === 0x40 || type === 0x41 || type === 0x42 || type === 0x43) {
     const bitmapId = reader.readUI16();
-    reader.skipMatrix();
-    reader.skipMatrix();
-    return { kind: "bitmap", bitmapId };
+    const startMatrix = reader.readFillMatrix();
+    const endMatrix = reader.readFillMatrix();
+    // ► **0x40/0x42 TILE, 0x41/0x43 CLIP TO ONE COPY.** A renderer that
+    //   ignored `repeat` would draw one copy and leave the rest of the region
+    //   bare, which reads as a missing asset rather than as a wrong flag.
+    const repeat = type === 0x40 || type === 0x42;
+    // 0x42/0x43 are the NON-SMOOTHED forms. Recorded because it is the build's
+    // own intent about scaling, not because anything here acts on it yet.
+    const smoothed = type === 0x40 || type === 0x41;
+    return { kind: "bitmap", bitmapId, startMatrix, endMatrix, repeat, smoothed };
   }
   throw new MorphParseError(`unknown morph fill style type 0x${type.toString(16)}.`);
 }
@@ -342,6 +460,27 @@ export function parseMorphShape(buffer, start, end, tagCode) {
 
 const lerp = (from, to, ratio) => from + (to - from) * ratio;
 
+/**
+ * A morph fill's two MATRICES as the one matrix at `ratio`.
+ *
+ * Scale and skew are already plain numbers; `tx`/`ty` are TWIPS and stay
+ * twips, because every consumer in this repository divides a translation by 20
+ * and the path `d` data emitted beside this is already in pixels. Total: a
+ * style that somehow carries only one matrix yields that one rather than null,
+ * and a style carrying neither yields null rather than throwing.
+ */
+function morphMatrixAt(startMatrix, endMatrix, ratio) {
+  if (!startMatrix || !endMatrix) return startMatrix ?? endMatrix ?? null;
+  return {
+    a: lerp(startMatrix.a, endMatrix.a, ratio),
+    b: lerp(startMatrix.b, endMatrix.b, ratio),
+    c: lerp(startMatrix.c, endMatrix.c, ratio),
+    d: lerp(startMatrix.d, endMatrix.d, ratio),
+    tx: lerp(startMatrix.tx, endMatrix.tx, ratio),
+    ty: lerp(startMatrix.ty, endMatrix.ty, ratio)
+  };
+}
+
 /** A morph colour pair at a ratio, as the byte-valued colour a caller expects. */
 export function morphColourAt(style, ratio) {
   if (!style?.start || !style?.end) return null;
@@ -386,9 +525,34 @@ export function morphShapeAt(morph, ratio) {
   const fills = morph.fills.map((style) => {
     if (style.kind === "solid") return { kind: "solid", colour: morphColourAt(style, clamped) };
     if (style.kind === "gradient") {
-      return { kind: "gradient", stops: style.stops.map((stop) => ({ ratio: 0, colour: morphColourAt(stop, clamped) })) };
+      return {
+        kind: "gradient",
+        gradientType: style.gradientType,
+        focal: style.focal,
+        focalPoint: lerp(style.startFocalPoint ?? 0, style.endFocalPoint ?? 0, clamped),
+        matrix: morphMatrixAt(style.startMatrix, style.endMatrix, clamped),
+        spread: style.spread,
+        interpolation: style.interpolation,
+        // ► **EVERY STOP USED TO BE GIVEN `ratio: 0`, UNCONDITIONALLY.** That
+        //   is not an approximation that a count could confess to, it is a
+        //   WRONG COLOUR: with every stop piled on the left edge of the ramp,
+        //   the whole region paints as the LAST stop. The ratio interpolates
+        //   the same way the colour does, and stays a BYTE here (0..255) so
+        //   that this matches what `tools/swf-shapes.mjs`'s `parseShape`
+        //   returns and one renderer can read both.
+        stops: style.stops.map((stop) => ({
+          ratio: Math.round(lerp(stop.startRatio ?? 0, stop.endRatio ?? 0, clamped)),
+          colour: morphColourAt(stop, clamped)
+        }))
+      };
     }
-    return { kind: "bitmap", bitmapId: style.bitmapId };
+    return {
+      kind: "bitmap",
+      bitmapId: style.bitmapId,
+      matrix: morphMatrixAt(style.startMatrix, style.endMatrix, clamped),
+      repeat: style.repeat,
+      smoothed: style.smoothed
+    };
   });
   const lines = morph.lines.map((style) => ({
     width: lerp(style.startWidth, style.endWidth, clamped),
@@ -456,7 +620,13 @@ function cssColour(colour) {
 
 /**
  * A morph at a ratio as SVG path elements, in the same shape
- * `tools/swf-shapes.mjs`'s `shapeToPaths` returns.
+ * `tools/swf-shapes.mjs`'s `shapeToPaths` returns — including the part that
+ * was missing: a gradient hands on the REAL gradient beside a flat first-stop
+ * fallback, and a bitmap hands on its id, its matrix and its repeat flag
+ * beside `fill: "none"`. Both still set `approximated`, because a caller that
+ * cannot draw the real thing must still be able to COUNT what it could not
+ * draw; an approximation that is not counted is indistinguishable from a
+ * correct read.
  *
  * ► **The stitching is the same rule and that is deliberate**, including the
  *   part that matters: an edge with the SAME fill on both sides is INTERIOR and
@@ -479,14 +649,53 @@ export function morphToPaths(shape) {
     const style = shape.fills[index - 1];
     let paint = { fill: "none", opacity: 1, approximated: null };
     if (style?.kind === "solid") paint = { ...cssColour(style.colour), approximated: null };
-    else if (style?.kind === "gradient") paint = { ...cssColour(style.stops[0]?.colour), approximated: "gradient" };
-    else if (style?.kind === "bitmap") paint = { fill: "none", opacity: 1, approximated: "bitmap" };
+    else if (style?.kind === "gradient") {
+      // ► **THE FLAT FALLBACK IS STILL THE FIRST STOP AND IT IS STILL WRONG
+      //   IN BOTH DIRECTIONS** — a ramp that STARTS transparent draws nothing,
+      //   a ramp that FADES to transparent draws fully opaque. It is kept for
+      //   a surface that cannot make a gradient at all, and the real thing is
+      //   handed on beside it rather than instead of it.
+      paint = {
+        ...cssColour(style.stops[0]?.colour),
+        approximated: "gradient",
+        gradient: {
+          type: style.gradientType,
+          focal: style.focal,
+          focalPoint: style.focalPoint,
+          matrix: style.matrix,
+          spread: style.spread,
+          interpolation: style.interpolation,
+          // ► **`ratio / 255`, NEVER "evenly spaced".** A morph's stops are
+          //   interpolated by `morphShapeAt`, so by here they are ordinary
+          //   bytes and the conversion is the same one static shapes use.
+          stops: (style.stops ?? []).map((stop) => ({
+            offset: (stop.ratio ?? 0) / 255,
+            ...cssColour(stop.colour)
+          }))
+        }
+      };
+    } else if (style?.kind === "bitmap") {
+      // ► **THIS USED TO BE `fill: "none"` WITH NO ID AND NO MATRIX, WHICH IS
+      //   A SILENT DROP.** `approximated: "bitmap"` told a counter that
+      //   something was approximated and told a renderer nothing it could act
+      //   on, so there was no way back to the picture. The bitmap and its
+      //   placement are handed on now; a caller that cannot draw an image
+      //   still gets `fill: "none"` and can say what it skipped.
+      paint = {
+        fill: "none",
+        opacity: 1,
+        approximated: "bitmap",
+        bitmap: { id: style.bitmapId, matrix: style.matrix, repeat: style.repeat }
+      };
+    }
     paths.push({
       d: stitch(owned).map((loop) => loopToPath(loop, { close: true })).join(""),
       fill: paint.fill,
       fillOpacity: paint.opacity,
       fillRule: "evenodd",
       approximated: paint.approximated,
+      ...(paint.bitmap ? { bitmap: paint.bitmap } : {}),
+      ...(paint.gradient ? { gradient: paint.gradient } : {}),
       stroke: null,
       strokeWidth: 0
     });
