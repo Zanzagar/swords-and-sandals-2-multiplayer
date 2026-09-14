@@ -8,8 +8,85 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-14 02:00 — I read the corpse, and the arena is drawn](docs/handoffs/2026-09-14-0200--i-read-the-corpse-and-the-arena-is-drawn.md).**
+Start there. **The arena screen draws — seven layers in the build's own nesting
+order, with the build's own pan-and-zoom camera moving the fight inside it — and
+getting there cost a full retraction of that session's own central conclusion.**
+
+► **`combatCamera` IS A `return;` AND `combatscale` IS THE CAMERA. THE ARENA
+  PANS AND ZOOMS.** A session concluded the opposite — that the shipped arena
+  was a FIXED camera and that this file's standing claim should be retired — and
+  began correcting the battle map to match. `combatCamera`'s body at file
+  `0x6e46c2` is `96 01 00 03 3e`: **`Push undefined; Return`**, with 470
+  unreachable bytes after it, and it is the ONLY function body in the build that
+  begins that way. `combatscale` is called every enterFrame from
+  `gladiators.onEnterFrame` (`+0x0e98`), guarded on
+  `_global.phasecomplete != false`, in the scope where it is defined.
+  **The committed record was right.**
+  ► **TWO CHEAP FAILURES PRODUCED IT, and both left artefacts.** The session's
+    own disassembly printed `Push undefined / Return` as its FIRST TWO LINES and
+    it wrote a reason for them not to count — the docstring it then produced
+    cites the body as starting one instruction AFTER the `Return`. And
+    `--references combatscale` reported five hits; it read two. **Explaining
+    away evidence is worse than missing it, because it leaves a written reason
+    behind that the next reader believes.** Eighth instance of the signature
+    failure here, and the first where the refuted claim was the author's own and
+    hours old.
+  ► **ONE CAPPED WAVE CAUGHT IT — 5 questions, 6 write-nothing verifiers, 0
+    dead, VERIFIED.** The brief stated the conclusion as a numbered hypothesis
+    and invited its destruction; two investigators aimed at DIFFERENT questions
+    broke it by different routes inside twenty minutes, one walking the call
+    graph and one enumerating every positional write in the build without
+    reading the camera functions at all. **Fan out on questions, not replicas**
+    has now paid twice.
+
+► **THE ARENA SIZE TABLE WAS OUT BY A FACTOR OF TWENTY IN THREE OF ITS FIVE
+  ROWS**, in `ss2-battle-map.md` and in the 01:30 handoff. Matrices from
+  `swf-display-list.mjs` carry `tx`/`ty` in TWIPS; `shapeToPaths` emits PIXELS.
+  Compose them and the OFFSET inflates twentyfold while the SIZE does not.
+  `1729` is 640x211 not 8417x1032; `2249` is 1363x422 not 24177x2489; `1531` is
+  641x27 not 1919x210. **The two rows that were right are exactly the two whose
+  contents sit at the origin — the two the bug could not reach.** A table that
+  is correct wherever it cannot be wrong reads as a table that was checked.
+
+► **CHARACTER 1729 IS `sky`, NOT THE CROWD.** The build names it three ways; the
+  real crowd is **2112**, inside the arena clip. The misnaming had reached
+  `extract-props.mjs`, where the sky shipped under the key `crowd` — and the
+  renderer looks layers up BY KEY, so it would have painted a 640x211 sky where
+  the stands belong and drawn no stands at all. **No error, no gap, just the
+  wrong picture.**
+
+► **SIX ARENAS AND TWENTY-THREE HOURS, where this repository had one of each.**
+  `sand` (673) and `crowd` (2112) share ONE `current_arena` index over six
+  frames; the sky is `time_of_day = 1 + random(23)` over 200 declared frames
+  holding SIX distinct drawings. **The count of SLOTS is not the count of
+  MEANINGS** — the lesson `bullet`'s fifty frames and five arrows already
+  taught, arriving in a second place. `?arena=`, `?sky=`, `?rain=`.
+
+► **THE BOUT OPENS AT A ZOOM OF FIVE AND RUSHES IN** (`_global.zoomscale = 5`,
+  `+0x0c7c`) — the build's establishing shot. **Seven declared zoom bands
+  resolve to FIVE**, because the fourth (`> 200 && !(> 400)`) swallows the 70
+  and 60 arms whole and bites into the 80 arm; all seven are kept and the dead
+  ones are pinned as dead. **The depth factor moved 1.7 -> 1 and the ART decided
+  it**: the build's sand spans arena-local y -56.75..256.2, and at 1.7 the back
+  rank sits at -129.8, standing in the crowd.
+
+► **NOBODY HAS LOOKED AT THE ARENA SCREEN.** That is ranked item 1 and it is the
+  owner's; a camera that frames the fight and one that frames the sand pass the
+  suite identically.
+
+► **A HANDOFF STAMPED ITSELF TWO HOURS INTO THE FUTURE AND BROKE THE ONE
+  PROPERTY THE CONVENTION RESTS ON.** `docs/handoffs/README.md` promises that
+  `ls docs/handoffs/` puts the newest last, and AGENTS.md's first instruction
+  depends on it. The `0130` brief's own commit landed at 2026-09-13 23:23, so
+  the next session's honest stamp would have sorted BEFORE it. **Stamp from the
+  clock, check that it sorts after what it supersedes**, and see that handoff's
+  "THE STAMP" section for the two-line test that would make it mechanical.
+
+*(The brief it supersedes, whose ranked item 1 is DONE and whose size table is
+WRONG in three of five rows:)*
 [2026-09-14 01:30 — the arena is 1:1, and three readings were mine](docs/handoffs/2026-09-14-0130--the-arena-is-1to1-and-three-readings-were-mine.md).**
-Start there. **The arena is measured down to its ground line and nothing draws
+**The arena is measured down to its ground line and nothing draws
 it yet**; blood, sparks, the arena's edges and the enchantment selector all
 landed tonight.
 
