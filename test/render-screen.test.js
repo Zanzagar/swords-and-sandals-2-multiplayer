@@ -57,6 +57,36 @@ function readRealJson(relative) {
 const REAL_SCREENS = readRealJson("assets/screens/screens.json");
 const REAL_MANIFEST = readRealJson("assets/screens/manifest.json");
 
+/**
+ * The stage-space box of everything a screen actually paints.
+ *
+ * Coordinates are pulled out of the `d` string with a number regexp and pushed
+ * through the operation's matrix exactly as `tools/arena/main.js` does —
+ * **translation divided by 20, geometry not** — which is the point: this helper
+ * is a stand-in for the painter, so a units error at the seam shows up here.
+ * A quadratic's control point is counted as a corner, which only ever makes the
+ * box larger and cannot manufacture a pass for a screen drawn off-stage.
+ */
+function visibleBoxOf(ops) {
+  const box = { xMin: Infinity, yMin: Infinity, xMax: -Infinity, yMax: -Infinity, points: 0 };
+  for (const op of ops) {
+    const stroked = typeof op.stroke === "string" && op.strokeWidth > 0 && op.strokeOpacity > 0;
+    if (op.fillOpacity === 0 && !stroked) continue;
+    const m = op.matrix;
+    const numbers = (op.d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+    for (let index = 0; index + 1 < numbers.length; index += 2) {
+      const x = m[0] * numbers[index] + m[2] * numbers[index + 1] + m[4] / 20;
+      const y = m[1] * numbers[index] + m[3] * numbers[index + 1] + m[5] / 20;
+      if (x < box.xMin) box.xMin = x;
+      if (x > box.xMax) box.xMax = x;
+      if (y < box.yMin) box.yMin = y;
+      if (y > box.yMax) box.yMax = y;
+      box.points += 1;
+    }
+  }
+  return box;
+}
+
 /** Floating point: a box width is a difference of two divisions, not a literal. */
 function assertClose(actual, expected, what) {
   assert.equal(Math.abs(actual - expected) < 1e-9, true, `${what}: ${actual} is not ${expected}`);
@@ -712,14 +742,58 @@ test("the real pack: the arena is the screen at root frame 221", () => {
   }
   const record = screenFor(screenPackFrom(REAL_SCREENS), "arena");
   assert.equal(record.labelFrame, 221);
-  const depths = new Set(record.objects.map((object) => object.depth));
-  // Every STAGE-space layer `arena-backdrop.js` declares is a root depth on
-  // this screen; the arena-space ones (the sand, the crowd) are inside the
-  // arena clip and are not root placements at all.
+  // ► **TWO TOOLS READING THE SAME BYTES, AND THEY AGREE TO THE HUNDREDTH.**
+  //   `SS2_ARENA_SCREEN_LAYERS` was derived by hand off root frame 221's
+  //   placement matrices for `arena-backdrop.js`; the numbers below come out of
+  //   `extract-screens.mjs`'s flattener, which was written separately and knows
+  //   nothing about that table. Every STAGE-space layer matches. The
+  //   arena-space ones — the sand, the crowd — are inside the arena clip and
+  //   are not root placements at all, so they are correctly absent here.
+  let checked = 0;
   for (const layer of SS2_ARENA_SCREEN_LAYERS) {
     if (layer.space !== "stage") continue;
-    assert.equal(depths.has(layer.depth), true,
+    const object = record.objects.find((candidate) => candidate.depth === layer.depth);
+    assert.notEqual(object, undefined,
       `root frame 221 has no depth ${layer.depth} for the ${layer.prop} layer`);
+    assert.equal(object.character, layer.character, `${layer.prop} is a different character`);
+    assertClose(object.matrix[4] / 20, layer.x, `${layer.prop} x`);
+    assertClose(object.matrix[5] / 20, layer.y, `${layer.prop} y`);
+    // The sky is the one scaled layer and the table rounds it: 1.04 against the
+    // wire's 1.03998, which is a readability choice and not a disagreement.
+    assert.equal(Math.abs(object.matrix[0] - layer.scale) < 0.0001, true,
+      `${layer.prop} scale ${object.matrix[0]} against the declared ${layer.scale}`);
+    checked += 1;
   }
+  assert.equal(checked, 5, "five stage-space layers were compared, not zero");
   assert.equal(record.counts.ops > 0, true, "and it resolves to a picture");
+});
+
+test("the real pack: every screen paints visible geometry across the stage", () => {
+  // ► **WHAT THIS CATCHES: art that does not land on the stage at all**, and a
+  //   screen whose placements all resolve to nothing visible. Verified by
+  //   injecting a stray offset into every operation's translation, which turns
+  //   this red.
+  //
+  // ► **WHAT IT DOES NOT CATCH, AND SAYING SO IS THE POINT.** A uniform x20 or
+  //   /20 at this module's seam is INVISIBLE here, measured: `visibleBoxOf`
+  //   divides the translation by 20 exactly as the painter does, so a scaling
+  //   error in the module and the division in the helper cancel. The units are
+  //   pinned by the synthetic "UNITS:" test above, which compares the array
+  //   itself. Overstating this one would be the same failure it exists to
+  //   notice.
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  const pack = screenPackFrom(REAL_SCREENS);
+  const names = screenNames(pack);
+  assert.equal(names.length > 0, true, "otherwise the loop below asserts nothing");
+  for (const name of names) {
+    const box = visibleBoxOf(screenFor(pack, name).ops);
+    assert.equal(box.points > 0, true, `${name} drew no visible geometry at all`);
+    assert.equal(box.xMin < SS2_STAGE.width / 2 && box.xMax > SS2_STAGE.width / 2, true,
+      `${name} spans x ${box.xMin.toFixed(1)}..${box.xMax.toFixed(1)}, which does not straddle the stage centre`);
+    assert.equal(box.yMin < SS2_STAGE.height / 2 && box.yMax > SS2_STAGE.height / 2, true,
+      `${name} spans y ${box.yMin.toFixed(1)}..${box.yMax.toFixed(1)}, which does not straddle the stage centre`);
+  }
 });

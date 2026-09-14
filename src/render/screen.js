@@ -116,6 +116,28 @@
  *   screens has a non-zero `alphaOffset` at all**, so every gradient here
  *   folds exactly. `gradientAlphaOffsetApproximated` counts the other case.
  *
+ * ## THIS FILE'S COLOUR TRANSFORM IS A DUPLICATE, AND THE TWO DISAGREE
+ *
+ * ► **`src/render/filters.js` LANDED IN THE SAME SESSION WITH
+ *   `applyColourTransform`, AND IT ROUNDS WHERE THIS FILE TRUNCATES.** That
+ *   file was written by a sibling agent while this one was being measured, so
+ *   neither imported the other; the same thing happened to `indexFonts` and
+ *   `parseEditText` in `tools/extract-screens.mjs`, whose header records it.
+ *
+ * ► **MEASURED, not asserted: 69 of the 1023 hex fills that sit under a colour
+ *   transform on these 26 screens come out ONE UNIT apart** between the two.
+ *   `#ffffff` at multiplier 0.30078125 is `#4c4c70` here and `#4d4d71` there.
+ *   The alpha halves agree.
+ *
+ * ► **The wire says truncate.** `readColourTransform` in
+ *   `tools/swf-display-list.mjs` reads the multiply term as `readSB(bits) /
+ *   256`, so the term is signed 8.8 fixed point and the player's own
+ *   `(channel * multTerm) >> 8` is an arithmetic shift. `Math.trunc(value *
+ *   multiplier) + offset` reproduces that; `Math.round(value * multiplier +
+ *   offset)` does not. **Whoever folds these should keep the truncation and
+ *   delete one of the two implementations** — one of them is a ±1 error on
+ *   every screen it touches, and which one is not a matter of taste.
+ *
  * ## A SCREEN IS ONE FRAME, AND TWO OF THE TWENTY-SIX MOVE
  *
  * The pack holds the label frame only. `stillness` carries the extractor's
@@ -127,6 +149,7 @@
  */
 
 import { SS2_STAGE } from "./arena-backdrop.js";
+import { applyColourTransform } from "./filters.js";
 
 /** Never thrown by a reader. Exported so a caller can name the type it isn't getting. */
 export class ScreenError extends Error {
@@ -514,9 +537,16 @@ function clipFor(pack, clip, approximations) {
  *   CXFORMWITHALPHA multiply term is 8.8 fixed point and the player computes
  *   `(channel * multTerm) >> 8`, which truncates. `0.5` on `#ff0000` is
  *   `255 * 128 >> 8 = 127`, so `#7f0000` and not `#800000`. Every multiplier on
- *   these 26 screens is in 0..1 so trunc and floor agree here; `Math.trunc` is
- *   written because the wire term is SIGNED and the two would part company if a
- *   negative one ever arrived.
+ *   these 26 screens is in 0..1 so trunc and floor agree here.
+ *
+ * ► **IT SAID `Math.trunc` "BECAUSE THE WIRE TERM IS SIGNED", AND THAT REASON
+ *   ARGUES FOR THE OPPOSITE FUNCTION.** The player computes
+ *   `(channel * multTerm) >> 8`, and `>>` is an ARITHMETIC shift — it rounds
+ *   toward NEGATIVE INFINITY. So on exactly the negative multiplier the old
+ *   comment was guarding against, `Math.trunc` (toward zero) is the one that
+ *   parts company with the build and `Math.floor` is the one that matches.
+ *   Corrected 2026-09-14; the shared implementation lives in
+ *   `src/render/filters.js` and floors.
  *
  * ► **The ALPHA half is deliberately NOT done this way** — see
  *   `transformOpacity`. `shapeToPaths` rounds an opacity to three decimals
@@ -524,7 +554,7 @@ function clipFor(pack, clip, approximations) {
  *   false precision dressed as fidelity.
  */
 function channelOf(value, multiplier, offset) {
-  const out = Math.trunc(value * numberOr(multiplier, 1)) + numberOr(offset, 0);
+  const out = Math.floor(value * numberOr(multiplier, 1)) + numberOr(offset, 0);
   return out < 0 ? 0 : out > 255 ? 255 : out;
 }
 
@@ -623,12 +653,21 @@ function transformGradient(gradient, colour, approximations) {
  * The screen's text placements, joined to the extractor's `unresolved` roster
  * so each one carries the KIND it was counted under.
  *
- * ► **THE WORDS ARE KNOWN AND THE LETTERFORMS ARE NOT.** This pack carries no
- *   glyph outlines — `tools/swf-fonts.mjs` has them and nothing writes them to
- *   `assets/` yet — so these are not path operations and must never be dropped
- *   into `ops` as though they were. What they are is everything a surface with
- *   a substitute face needs: the string, the box, the font's name and weight,
- *   the colour, the alignment. 187 of them across the 26 screens.
+ * ► **THE WORDS ARE KNOWN AND THE LETTERFORMS ARE NOT — IN *THIS* PACK.**
+ *   `assets/screens/screens.json` carries no glyph outlines, so these are not
+ *   path operations and must never be dropped into `ops` as though they were.
+ *   What they are is everything a surface with a face needs: the string, the
+ *   box in pixels, the font's id, name and weight, the colour, the alignment.
+ *   187 of them across the 26 screens.
+ *
+ * ► **AND A SIBLING SHIPPED THE OTHER HALF IN THE SAME SESSION.**
+ *   `tools/extract-text.mjs` writes `assets/text/` and `src/render/text.js`
+ *   exports `textOpsFor`/`staticTextOpsFor`. These entries are the input that
+ *   module wants, so the join is a caller's two lines and not a rewrite here —
+ *   deliberately NOT imported, because a pack this file cannot see must not
+ *   become a dependency a clone without it trips over. When that join is made,
+ *   `textNotDrawn` stops being the whole story and whoever makes it should say
+ *   what the new count is.
  *
  * ► **AND THE GEOMETRY IS CONVERTED TO PIXELS HERE.** The pack states a text
  *   box, a font height and a run's advances in TWIPS; `matrix` stays in the

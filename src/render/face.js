@@ -245,12 +245,22 @@ export function expressionFor(pack, { part, label = null, frame = null, held = n
   // holds until the next one fires. Every labelled run on both clips ends in a
   // `stop()` and holds ONE placement for its whole length (measured:
   // `distinctPoses` is 1 for all 22), so there is no sub-animation to time.
+  //
+  // ► **SCANNED RATHER THAN SHORT-CIRCUITED, because "the extractor writes them
+  //   in frame order" is an assumption and this is a reader.** It is TRUE of
+  //   every one of the 83 bindings on this oracle, and a reader that breaks out
+  //   of the loop on the first later frame would silently show the wrong
+  //   expression the day a pack is written in any other order. Eight calls is
+  //   the longest list in the build.
   let chosen = null;
   for (const call of calls) {
     if (!Number.isFinite(call?.frame)) continue;
-    if (frame === null) { chosen = call; break; }
-    if (call.frame <= frame) chosen = call;
-    else break;
+    if (frame === null) {
+      if (chosen === null || call.frame < chosen.frame) chosen = call;
+      continue;
+    }
+    if (call.frame > frame) continue;
+    if (chosen === null || call.frame >= chosen.frame) chosen = call;
   }
   if (!chosen) {
     // `celebrate1` and `flame_repeat` set their faces five and six frames in.
@@ -361,6 +371,12 @@ export function faceOpsFor(icons, figure, options = {}) {
   const pose = chosen.animation.poses[poseIndex];
   const alpha = 1 - (Number.isFinite(fade) ? fade : 0);
   const scale = clipToArenaScale(figure, height);
+  // ► **A NON-FINITE TRANSFORM WOULD EMIT NaN MATRICES, WHICH DRAW NOTHING AND
+  //   SAY NOTHING** — the exact shape of every defect this programme has found.
+  //   `figurePackFrom` guarantees these on a pack it built, so this catches a
+  //   hand-assembled one, and it catches it out loud.
+  const transformable = Number.isFinite(scale) && scale !== 0
+    && Number.isFinite(figure.centreX) && Number.isFinite(figure.groundY);
   const ops = [];
   const drawn = {};
 
@@ -369,6 +385,11 @@ export function faceOpsFor(icons, figure, options = {}) {
     const face = icons.parts[part];
     const resolution = resolutions[part];
     if (!face || !resolution.expression) continue;
+    if (!transformable) {
+      count(approximations, "no-arena-transform");
+      skipped.push(Object.freeze({ part, expression: resolution.expression, reason: "no-arena-transform" }));
+      continue;
+    }
 
     const limbName = face.attachedTo ?? FALLBACK_LIMB;
     const limbMatrix = limbs?.[limbName];
@@ -452,6 +473,25 @@ export function faceOpsFor(icons, figure, options = {}) {
           part, expression: resolution.expression, character: placement.character ?? null, reason: "no-matrix"
         }));
         continue;
+      }
+
+      // ► **WHAT THIS READER WOULD OTHERWISE DROP IN SILENCE.** Measured on
+      //   this oracle every one of the face's 421 placements carries exactly
+      //   `{kind, character, matrix}` — no colour transform and no mask — so
+      //   both branches below are dead against this build. They exist because
+      //   the arena walls went missing exactly this way: a reader that copies
+      //   the fields it knows about and never mentions the ones it did not is
+      //   indistinguishable from a reader that got it right. A colour transform
+      //   is NOT applied here rather than applied badly: `extracted-figure.js`
+      //   owns the only `tint` in this directory and does not export it, and a
+      //   second copy of it would be free to drift from the first.
+      if (placement.colour) {
+        notes.push(Object.freeze({ part, reason: "colour-transform-dropped", character: placement.character }));
+        count(approximations, "colour-transform-dropped");
+      }
+      if (placement.mask) {
+        notes.push(Object.freeze({ part, reason: "mask-dropped", character: placement.character }));
+        count(approximations, "mask-dropped");
       }
 
       // limb (clip space, TWIPS) x the expression's own placement, with the

@@ -770,3 +770,63 @@ test("every operation the face emits is in the shape the shell already draws", (
     assert.equal(Number.isFinite(op.strokeWidth), true);
   }
 });
+
+test("the call in force is found by SCANNING, so a pack written out of frame order still works", () => {
+  // "the extractor writes them in frame order" is true of all 83 bindings on
+  // this oracle and is still an assumption. A reader that stopped at the first
+  // later frame would show the wrong expression for a pack written any other
+  // way, and would show it silently.
+  const pack = facePack({
+    bindings: {
+      taunt: {
+        animation: "Taunt",
+        eyes: [
+          { frame: 13, asked: "Up", resolved: "Up", status: "exact", expression: "up" },
+          { frame: 10, asked: "Angry", resolved: "Angry", status: "exact", expression: "angry" }
+        ],
+        mouth: []
+      }
+    }
+  });
+  const frames = [10, 12, 13, 14].map((frame) => expressionFor(pack, { part: "eyes", label: "taunt", frame }).expression);
+  assert.deepEqual(frames, ["angry", "angry", "up", "up"]);
+  assert.equal(
+    expressionFor(pack, { part: "eyes", label: "taunt", frame: null }).expression, "angry",
+    "and `the expression it opens with` is the EARLIEST call, not the first one listed"
+  );
+});
+
+test("a figure pack with no usable arena transform draws no face and says so", () => {
+  // ► **A NaN MATRIX DRAWS NOTHING AND REPORTS NOTHING**, which is the exact
+  //   shape of every defect this programme has found. `figurePackFrom`
+  //   guarantees these fields; a hand-assembled pack does not.
+  const broken = { ...figurePack(), centreX: Number.NaN };
+  const face = faceOpsFor(facePack(), broken, { family: "standing", label: "standing", at: 0 });
+  assert.equal(face.ops.length, 0);
+  assert.equal(face.approximations["no-arena-transform"], 2, "both parts, counted");
+  assertCountsAreRecomputable(face);
+});
+
+test("a colour transform or a mask on a face placement is COUNTED, never dropped in silence", () => {
+  // ► **THIS IS THE ARENA-WALL DEFECT, AND IT IS DEAD AGAINST THIS ORACLE.**
+  //   All 421 face placements in the build carry exactly `{kind, character,
+  //   matrix}`. A reader that only works on the data it was written against is
+  //   not a reader — and the wall went missing precisely because a reader copied
+  //   the fields it knew and never mentioned the one it did not.
+  const pack = facePack({
+    eyes: {
+      expressions: {
+        normal: expressionOf("Normal", 1, 9, [{
+          kind: "shape", character: 889, matrix: [1, 0, 0, 1, 0, 0],
+          colour: [1, 1, 1, 1, 40, 0, 0, 0], mask: { shape: 890, matrix: [1, 0, 0, 1, 0, 0] }
+        }])
+      }
+    }
+  });
+  const face = faceOpsFor(pack, figurePack(), { family: "standing", label: "standing", at: 0 });
+  assert.equal(face.approximations["colour-transform-dropped"], 1);
+  assert.equal(face.approximations["mask-dropped"], 1);
+  const [eyes] = opsFor(face, "eyes");
+  assert.equal(eyes.fill, "#ffffff", "the colour is carried UNTINTED rather than tinted by a second copy of `tint`");
+  assertCountsAreRecomputable(face);
+});

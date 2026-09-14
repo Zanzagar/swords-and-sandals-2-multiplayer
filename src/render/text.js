@@ -59,6 +59,21 @@
  * - **A static run's advances are BAKED and are not the font's.** Over the 4060
  *   resolvable entries, `fontAdvance * height / 20480` matches the baked advance
  *   within a twip on only 78% of them. `staticTextOpsFor` uses the baked ones.
+ *
+ * ## What it costs, measured on this machine rather than guessed
+ *
+ * ```text
+ *   textOpsFor, a 30-character line at a 10px em   119 us   (25 operations)
+ *   layoutText alone, same line                      7 us
+ *   all 180 of the build's static runs redrawn     209 ms   (3554 operations)
+ * ```
+ *
+ * ► **SO NINETY-FOUR PERCENT OF A DRAW IS `scaleGlyphPath` REBUILDING PATH
+ *   STRINGS**, and about 134 such lines fit in a 16ms frame. That is ample for a
+ *   UI bar and nowhere near enough to redraw a screen of body text every frame.
+ *   There is deliberately no cache in here — this module is pure, and a
+ *   module-level memo is a global that grows — so **a caller that redraws the
+ *   same string every frame should hold onto the frozen array it gets back**.
  */
 
 /** `DefineFont3`'s em square. Exported so a caller need not re-derive it. */
@@ -108,11 +123,19 @@ export function fontIdsIn(pack) {
   return Object.keys(pack.fonts).map(Number).filter(Number.isFinite).sort((left, right) => left - right);
 }
 
-/** One font, or null. The id may be a number or the string JSON gave it. */
+/**
+ * One font, or null. The id may be a number or the string JSON gave it.
+ *
+ * ► **A FONT WITH AN EMPTY GLYPH TABLE ANSWERS NOTHING, so it is null here.**
+ *   A truncated pack would otherwise lay out a whole sentence of `.notdef`
+ *   boxes — every character honestly marked missing, and the caller robbed of
+ *   the null that sends it back to its own authored art. One box among real
+ *   letters is information; a line of them is a broken pack pretending to draw.
+ */
 export function fontFor(pack, fontId) {
   if (!pack || !pack.fonts || fontId === null || fontId === undefined) return null;
   const font = pack.fonts[fontId] ?? pack.fonts[String(fontId)];
-  return font && Array.isArray(font.glyphs) ? font : null;
+  return font && Array.isArray(font.glyphs) && font.glyphs.length > 0 ? font : null;
 }
 
 /**
@@ -261,6 +284,13 @@ export function layoutText(pack, options = {}) {
   const useKerning = options.kerning !== false;
   const multiline = options.multiline !== false;
   const maxWidth = Number.isFinite(options.maxWidth) && options.maxWidth > 0 ? options.maxWidth : Infinity;
+  // A FIRST-LINE indent, the way a `DefineEditText`'s layout block means it.
+  // Every one of this build's 256 fields sets it to zero, so this arm is
+  // exercised by `test/render-text.test.js` and by nothing else — said out loud
+  // because untested code that looks tested is this project's house defect. It
+  // is here rather than dropped because the pack CARRIES the number, and a
+  // field whose indent quietly did nothing would be an uncounted approximation.
+  const indent = Number.isFinite(options.indent) ? options.indent : 0;
   const originX = Number.isFinite(options.x) ? options.x : 0;
   const originY = Number.isFinite(options.y) ? options.y : 0;
 
@@ -316,23 +346,45 @@ export function layoutText(pack, options = {}) {
   // allowed to run past the edge, because a field that overflows its own box is
   // how a UI bar starts drawing over the border.
   const lines = [];
+  const firstOfParagraph = new Set();
   for (const paragraph of laidOut) {
-    if (!Number.isFinite(maxWidth) || paragraph.width <= maxWidth || paragraph.glyphs.length === 0) {
+    firstOfParagraph.add(lines.length);
+    const firstLimit = maxWidth - indent;
+    if (!Number.isFinite(maxWidth) || paragraph.width <= firstLimit || paragraph.glyphs.length === 0) {
       lines.push(paragraph.glyphs);
       continue;
     }
     let current = [];
     let lineStart = 0;
     let lastBreak = -1;
+    const startedAt = lines.length;
     for (const glyph of paragraph.glyphs) {
+      // ► **A LINE NEVER STARTS WITH THE SPACE THAT BROKE IT.** The first
+      //   version of this loop carried the breaking space onto the next line,
+      //   which produced a line holding one space, which the trim below then
+      //   emptied — a blank line in the middle of a wrapped paragraph, from
+      //   text that has none.
+      if (current.length === 0) {
+        if (glyph.char === " ") continue;
+        lineStart = glyph.x;
+      }
+      const limit = lines.length === startedAt ? firstLimit : maxWidth;
       const wouldEnd = glyph.x - lineStart + glyph.advance;
-      if (current.length > 0 && wouldEnd > maxWidth) {
+      if (current.length > 0 && wouldEnd > limit) {
+        // Break at the last space when there is one; otherwise mid-word, because
+        // a word wider than the box has to go somewhere and running past the
+        // edge is how a field starts drawing over the border beside it.
         const breakAt = lastBreak >= 0 ? lastBreak : current.length - 1;
         const carried = current.slice(breakAt + 1);
         lines.push(current.slice(0, breakAt + 1));
         current = carried;
-        lineStart = carried.length > 0 ? carried[0].x : glyph.x;
         lastBreak = -1;
+        if (current.length === 0) {
+          if (glyph.char === " ") continue;
+          lineStart = glyph.x;
+        } else {
+          lineStart = current[0].x;
+        }
       }
       if (glyph.char === " ") lastBreak = current.length;
       current.push(glyph);
@@ -356,16 +408,20 @@ export function layoutText(pack, options = {}) {
       glyphs: glyphs.map((glyph) => ({ ...glyph, x: glyph.x - start })),
       width,
       text: glyphs.map((glyph) => glyph.char).join(""),
-      y: originY + index * lineHeight
+      y: originY + index * lineHeight,
+      indented: firstOfParagraph.has(index) && indent !== 0
     });
   }
 
   const box = Number.isFinite(maxWidth) ? maxWidth : widest;
   for (const line of placed) {
-    const slack = box - line.width;
-    if (options.align === "center") line.x = originX + slack / 2;
-    else if (options.align === "right") line.x = originX + slack;
-    else line.x = originX;
+    // An indented line has that much less box to be aligned within, so a
+    // centred first line stays centred in what is left of it.
+    const inset = line.indented ? indent : 0;
+    const slack = box - inset - line.width;
+    if (options.align === "center") line.x = originX + inset + slack / 2;
+    else if (options.align === "right") line.x = originX + inset + slack;
+    else line.x = originX + inset;
   }
 
   return Object.freeze({
@@ -614,6 +670,7 @@ export function fieldLayoutOptionsFor(pack, id, { text, gutter = FIELD_GUTTER_PX
     y: top + gutter + metrics.ascent,
     align: field.align ?? "left",
     maxWidth: field.wordWrap && field.multiline ? inner : Infinity,
+    indent: (field.indent ?? 0) / TWIPS_PER_PIXEL,
     // The field's own leading is TWIPS and adds to the font's line box.
     lineHeight: metrics.lineHeight + (field.leading ?? 0) / TWIPS_PER_PIXEL,
     multiline: Boolean(field.multiline),

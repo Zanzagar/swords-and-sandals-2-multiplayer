@@ -46,6 +46,7 @@
  */
 
 import { clipLabelsFor, directionalLabel } from "./clip-labels.js";
+import { applyColourTransform, applyColourTransformAlpha } from "./filters.js";
 
 export class ExtractedFigureError extends Error {
   constructor(message, options = {}) {
@@ -238,16 +239,19 @@ export function poseIndexAt(count, at) {
 }
 
 /** `channel * multiplier + offset`, clamped — the SWF's own colour transform. */
+/**
+ * ► **THIS USED TO HAVE ITS OWN COPY OF THE ARITHMETIC AND IT ROUNDED.**
+ *   `src/render/filters.js` now owns the one implementation, and it FLOORS,
+ *   because `readColourTransform` reads the multiply term as signed 8.8 fixed
+ *   point and the player computes `(channel * multTerm) >> 8` — an arithmetic
+ *   shift. Measured across the real pack, rounding disagreed with flooring on
+ *   69 of 1023 tinted fills, always by one unit.
+ *
+ *   Three modules had grown a copy of this by the end of one evening; a fourth
+ *   would have been inevitable. Delegating is what stops the next one.
+ */
 function tint(hex, colour) {
-  if (!colour || typeof hex !== "string" || hex === "none" || hex[0] !== "#") return hex;
-  const value = Number.parseInt(hex.slice(1), 16);
-  if (!Number.isFinite(value)) return hex;
-  const channel = (raw, multiplier, offset) =>
-    Math.max(0, Math.min(255, Math.round(raw * multiplier + offset)));
-  const red = channel((value >> 16) & 255, colour[0], colour[4]);
-  const green = channel((value >> 8) & 255, colour[1], colour[5]);
-  const blue = channel(value & 255, colour[2], colour[6]);
-  return `#${[red, green, blue].map((part) => part.toString(16).padStart(2, "0")).join("")}`;
+  return applyColourTransform(hex, colour);
 }
 
 /**
@@ -443,8 +447,7 @@ export function composeInClipSpace(limb, piece, offset) {
 const zero = (value) => (Object.is(value, -0) ? 0 : value);
 
 function tintAlpha(alpha, colour) {
-  if (!colour) return alpha;
-  return Math.max(0, Math.min(1, alpha * colour[3] + colour[7] / 255));
+  return applyColourTransformAlpha(alpha, colour);
 }
 
 /**

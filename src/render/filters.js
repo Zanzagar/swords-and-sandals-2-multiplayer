@@ -143,7 +143,7 @@ export function isIdentityColourTransform(eight) {
 
 /** `channel * multiplier + offset`, clamped to 0..255 and rounded. */
 function channelOf(raw, multiplier, offset) {
-  return Math.max(0, Math.min(255, Math.round(raw * multiplier + offset)));
+  return Math.max(0, Math.min(255, Math.floor(raw * multiplier) + offset));
 }
 
 /** Two lower-case hex digits, so `#0a0b0c` never comes back as `#a b c`. */
@@ -184,6 +184,31 @@ function parseHexColour(hex) {
  * Returns the input unchanged for `"none"`, for a gradient or bitmap sentinel,
  * and for anything that is not `#rrggbb`. Use `colourTransformApplies` when you
  * need to KNOW whether it landed rather than assume it did.
+ */
+/**
+ * ► **FLOOR, NOT ROUND, AND THE BYTES SETTLE IT.** Three modules grew their own
+ *   copy of this arithmetic tonight and two of them rounded. Measured on the
+ *   real pack, **69 of the 1023 hex fills that sit under a colour transform
+ *   come out one unit apart** — `#ffffff` at multiplier 0.30078125 is `#4c4c70`
+ *   floored and `#4d4d71` rounded.
+ *
+ *   It is not a matter of taste. `readColourTransform` reads the multiply term
+ *   as `readSB(bits) / 256`, so it is SIGNED 8.8 FIXED POINT, and the player
+ *   computes `(channel * multTerm) >> 8` — an ARITHMETIC SHIFT, which is
+ *   `floor`. Rounding is a plus-or-minus one error on every pixel it touches,
+ *   and `Math.trunc` differs from `floor` the moment a multiplier is negative,
+ *   which the signed field permits.
+ *
+ *   Found by the screens agent noticing its own result disagreed with this
+ *   file's; the incumbent in `extracted-figure.js` had rounded since tinting
+ *   landed and now delegates here.
+ *
+ * ► **ONE CAVEAT, NAMED RATHER THAN CHASED.** `composeColourTransform`
+ *   MULTIPLIES two 8.8 multipliers into one float; the player applies each
+ *   transform in turn, shifting each time. Flooring once at the end is not
+ *   bit-identical to flooring twice. The difference is sub-unit and no case in
+ *   this build nests two non-identity transforms on one fill, so it is recorded
+ *   here rather than modelled.
  */
 export function applyColourTransform(fill, transform) {
   const eight = Array.isArray(transform) ? transform : colourTransformFrom(transform);
