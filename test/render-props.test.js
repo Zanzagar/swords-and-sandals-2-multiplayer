@@ -26,9 +26,12 @@ import {
   hasExtractedProps,
   propFrameCount,
   propOpsFor,
-  propPackFrom
+  propPackFrom,
+  arenaSceneryFor,
+  SS2_ARENA_SCENERY
 } from "../src/render/index.js";
 import { ss2ArrowFrameFor, ss2RangedWeaponFor, ss2WeaponEntry, SS2_WEAPON_IDS } from "../src/team/ss2-weapon-table.js";
+import { SS2_ARENA } from "../src/team/ss2-rules.js";
 import { CommandKind, SS2_STATIC_MAP_BINDINGS, buildArenaLayout, presentResolvedEvents } from "../src/adapter/index.js";
 import { PROP_EXPORTS } from "../tools/extract-props.mjs";
 import { argumentsOfCall } from "../tools/extract-clip-effects.mjs";
@@ -282,7 +285,10 @@ test("every declared prop names what reads it, so a dead entry is visible", () =
     //   is a named instance on a root frame, so it is asked for by character
     //   id. An entry carrying neither would extract nothing and say nothing.
     const key = prop.linkage ?? prop.name;
-    assert.match(key, /^[a-z_]+$/, "a lower-case identifier either way");
+    // `rockMC` is the build's own spelling and it is camelCase, so the pattern
+    // is the build's naming rather than a house style: an entry must match a
+    // linkage name that actually exists, not one this repository would prefer.
+    assert.match(key, /^[A-Za-z_]+$/, "the build's own identifier either way");
     assert.ok(
       typeof prop.linkage === "string" || Number.isFinite(prop.character),
       `${key} must state a linkage OR a character id`
@@ -367,4 +373,59 @@ test("a call this cannot read statically is REFUSED, never guessed at", () => {
   for (const notACall of [null, undefined, { name: "GetVariable" }, { name: "Push" }, { name: "Push", operand: [] }]) {
     assert.equal(argumentsOfCall(notACall), null, "and nothing that is not a set-up push reads as one");
   }
+});
+
+/* ------------------------------------------------------------------ */
+/* The arena's own scenery                                             */
+/* ------------------------------------------------------------------ */
+
+test("the arena's edges are the build's own coordinates, and they bracket the walk clamp", () => {
+  // ► **ROOT FRAME 221 IS A CONSTRUCTION SCRIPT — its display list is EMPTY —
+  //   and two `rockMC` are the only scenery in its 488 instructions.**
+  //
+  //   ```text
+  //     attachMovie("rockMC", "rockLeft",  200)   ._x = -2160
+  //     attachMovie("rockMC", "rockRight", 201)   ._x =  2160
+  //     both ._y = 210 ; arena.gladiators at (0, 0)
+  //   ```
+  assert.deepEqual(
+    SS2_ARENA_SCENERY.map((piece) => [piece.instance, piece.x, piece.y]),
+    [["rockLeft", -2160, 210], ["rockRight", 2160, 210]]
+  );
+
+  // ► **TWO INDEPENDENT READINGS OF THE BUILD AGREEING ABOUT WHERE THE ARENA
+  //   STOPS.** `SS2_ARENA.clamp` came out of `nextphase` step 1 long before
+  //   anybody looked at the scenery, and the rocks stand just outside it — so
+  //   the build marks the end of the walkable ground with a rock at each end.
+  for (const piece of SS2_ARENA_SCENERY) {
+    assert.ok(
+      Math.abs(piece.x) > Math.abs(SS2_ARENA.clamp.min),
+      `${piece.instance} at ${piece.x} must lie OUTSIDE the walk clamp of ${SS2_ARENA.clamp.min}`
+    );
+    assert.ok(Math.abs(piece.x) - Math.abs(SS2_ARENA.clamp.min) < 200, "and only just outside it");
+  }
+
+  // Mirrored, and nearer the viewer than the fighters' line — a depth cue, not
+  // a mistake.
+  assert.equal(SS2_ARENA_SCENERY[0].x, -SS2_ARENA_SCENERY[1].x);
+  for (const piece of SS2_ARENA_SCENERY) {
+    assert.ok(piece.y > SS2_ARENA.frontY, `${piece.instance} sits nearer than the fighters' ${SS2_ARENA.frontY}`);
+  }
+});
+
+test("scenery resolves to draw operations, and a missing pack draws none", () => {
+  const pack = propPackFrom({
+    props: { rockMC: { frames: [[{ shape: 42, matrix: [1, 0, 0, 1, 0, 0] }]] } },
+    shapes: { 42: { bounds: {}, paths: [{ d: "M0 0L9 9", fill: "#555" }] } }
+  });
+  const scenery = arenaSceneryFor(pack);
+  assert.equal(scenery.length, 2, "both rocks");
+  for (const piece of scenery) {
+    assert.ok(piece.ops.length > 0, "each with its own ops resolved");
+    assert.equal(piece.ops[0].kind, "path");
+  }
+
+  // A partial extraction loses the rock, not the arena.
+  assert.deepEqual(arenaSceneryFor(null), []);
+  assert.deepEqual(arenaSceneryFor(propPackFrom({ props: { bullet: { frames: [[]] } }, shapes: {} })), []);
 });

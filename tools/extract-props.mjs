@@ -96,6 +96,31 @@ export const PROP_EXPORTS = Object.freeze([
   },
   {
     /**
+     * ► **THE ARENA'S EDGES, and they are the only scenery the build attaches.**
+     *   Root frame 221 puts one `rockMC` at each end of the ground:
+     *
+     *   ```text
+     *     rockLeft._x  = -2160     rockRight._x = 2160
+     *     both        ._y  =   210
+     *     arena.gladiators is at (0, 0)
+     *   ```
+     *
+     *   **They sit just outside the walk clamp.** `SS2_ARENA.clamp` is ±2100 —
+     *   derived from `nextphase` step 1 long before anybody looked at the
+     *   scenery — and the rocks are at ±2160, sixty units further out. So the
+     *   build marks the edge of the ground a gladiator can reach with a rock at
+     *   each end, and two independent derivations agree about where the arena
+     *   stops.
+     *
+     *   `_y` 210 against the fighters' 200 puts them ten units NEARER the
+     *   viewer, which is a depth cue rather than a mistake.
+     */
+    linkage: "rockMC",
+    indexedBy: "frame 1; the build never advances it",
+    reader: "tools/arena/main.js — the arena's two edges"
+  },
+  {
+    /**
      * ► **THE ARENA ITSELF, and it is reached by CHARACTER ID because the build
      *   does not export it.** `_root.arena` is character 2249, placed at root
      *   frame 221 as a named INSTANCE — so there is no linkage name to ask for

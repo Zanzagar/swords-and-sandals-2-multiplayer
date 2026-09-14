@@ -129,3 +129,59 @@ export function arrowOpsFor(pack, artFrame) {
 export function arrowTrailOpsFor(pack, artFrame) {
   return propOpsFor(pack, { linkage: "bullet_trail", frame: Number.isFinite(artFrame) ? artFrame : 1 });
 }
+
+/**
+ * THE ARENA'S OWN SCENERY, at the coordinates the build states.
+ *
+ * ► **ROOT FRAME 221 IS A CONSTRUCTION SCRIPT AND THIS IS WHAT IT BUILDS.** The
+ *   arena screen's display list is EMPTY — the whole thing is 488 instructions
+ *   of `attachMovie` — and the only scenery among them is two `rockMC`
+ *   instances:
+ *
+ *   ```text
+ *     _root.arena.gladiators.attachMovie("rockMC", "rockLeft",  200)
+ *     _root.arena.gladiators.attachMovie("rockMC", "rockRight", 201)
+ *     rockLeft._x  = -2160   rockRight._x = 2160   both _y = 210
+ *     arena.gladiators is at (0, 0)
+ *   ```
+ *
+ * ► **AND THE COORDINATES NEED NO CONVERSION, unlike the blood.** These are
+ *   attached to `arena.gladiators`, the same object the fighters are attached
+ *   to at `_x = ±250` — which is where `SS2_ARENA.frontX` came from. So they
+ *   are arena units already. The drops looked like this and were NOT, because
+ *   `bounceitem` attaches to the fighter CLIP instead; the difference is which
+ *   object the `attachMovie` is called on, and it is worth checking rather than
+ *   assuming.
+ *
+ * ► **THEY MARK THE EDGE OF THE WALKABLE GROUND.** `SS2_ARENA.clamp` is ±2100,
+ *   derived from `nextphase` step 1 long before anybody looked at the scenery,
+ *   and the rocks stand sixty units outside it. Two independent readings of the
+ *   build agreeing about where the arena stops.
+ *
+ * `_y` 210 against the fighters' 200 puts them ten units nearer the viewer,
+ * which is a depth cue and is why they are returned with a `y` rather than
+ * assumed level.
+ */
+export const SS2_ARENA_SCENERY = Object.freeze([
+  Object.freeze({ linkage: "rockMC", instance: "rockLeft", x: -2160, y: 210, depth: 200 }),
+  Object.freeze({ linkage: "rockMC", instance: "rockRight", x: 2160, y: 210, depth: 201 })
+]);
+
+/**
+ * The scenery a surface can actually draw, each with its ops resolved, or an
+ * empty list when the props have not been extracted.
+ *
+ * Returns the DECLARED entries filtered to the drawable ones rather than
+ * throwing, for the reason every reader here does: a partial extraction must
+ * leave a playable arena, and a missing rock is a missing rock.
+ */
+export function arenaSceneryFor(pack) {
+  if (!hasExtractedProps(pack)) return [];
+  const out = [];
+  for (const piece of SS2_ARENA_SCENERY) {
+    const ops = propOpsFor(pack, { linkage: piece.linkage, frame: 1 });
+    if (!ops) continue;
+    out.push(Object.freeze({ ...piece, ops }));
+  }
+  return Object.freeze(out);
+}

@@ -79,6 +79,7 @@ import {
   propOpsFor,
   arrowOpsFor,
   arrowTrailOpsFor,
+  arenaSceneryFor,
   clipEffectTableFrom,
   effectsForAnimation,
   spawnDrops,
@@ -838,6 +839,23 @@ function render(now = performance.now()) {
     if (!Number.isFinite(a) || !Number.isFinite(b) || a === b) return 0;
     return a - b;
   });
+
+  // ► **THE ARENA'S OWN EDGES, DRAWN BEFORE THE FIGHTERS.** Two `rockMC` at
+  //   ±2160 — the build's own coordinates, in arena units, sixty units outside
+  //   the walk clamp they mark the end of. They are scenery, so they paint
+  //   under every body rather than over it, which is the opposite of the arrows
+  //   and the blood.
+  for (const piece of arenaSceneryFor(propPack)) {
+    paintProp(piece.ops, view, {
+      x: piece.x,
+      y: piece.y,
+      lift: 0,
+      // Scenery is drawn at the arena's own scale, not a figure's: it IS the
+      // ground rather than something standing on it.
+      size: figureScaleFor({ yscale: 100, rank: rankOf(piece.y, 0), slotIndex: 0 }),
+      rotation: 0
+    });
+  }
 
   for (const combatantId of paintOrder) {
     const actor = scene.actors[combatantId];
