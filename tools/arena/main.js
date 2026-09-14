@@ -907,6 +907,18 @@ function paintArenaLayer(layer, fit) {
   for (const operation of layer.ops) {
     const m = operation.matrix;
     context.save();
+    // ► **THE CLIP GOES ON BEFORE THE SHAPE'S OWN TRANSFORM**, because the
+    //   cutter's matrix is composed in the SAME space as the shape's and not
+    //   inside it. Setting it after would clip the moon's glow by a mask
+    //   already moved by the glow's own placement — which is a plausible
+    //   picture and the wrong one.
+    if (operation.clip) {
+      const c = operation.clip.matrix;
+      context.save();
+      context.transform(c[0], c[1], c[2], c[3], c[4] / TWIPS_PER_PIXEL, c[5] / TWIPS_PER_PIXEL);
+      context.clip(path2dFor(operation.clip.d), "evenodd");
+      context.restore();
+    }
     context.transform(m[0], m[1], m[2], m[3], m[4] / TWIPS_PER_PIXEL, m[5] / TWIPS_PER_PIXEL);
     const path = path2dFor(operation.d);
     if (operation.fill && operation.fill !== "none") {

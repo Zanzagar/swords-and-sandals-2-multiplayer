@@ -619,3 +619,15 @@ test("the dressing reaches the resolver, and each layer records the frame it too
   assert.equal(layers.find((layer) => layer.prop === "sand").frame, 4,
     "a drawn layer says which frame it came from");
 });
+
+test("the sky clock runs 1..200, so the NIGHT frames are selectable", () => {
+  // ► `time_of_day` starts at `1 + random(23)` and `day_night_cycle` increments
+  //   it toward 200 on a 1500ms interval while a battle is on. Reading the
+  //   bound as 1..23 made frames 112..200 — the masked night frames — look
+  //   unreachable, and nearly got the moon's glow written off as a non-defect.
+  const sky = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "sky");
+  for (const hour of [1, 23, 25, 112, 199, 200]) {
+    assert.equal(frameForLayer(sky, { timeOfDay: hour }), hour,
+      `hour ${hour} must be selectable`);
+  }
+});

@@ -659,12 +659,17 @@ export function stageProjectorFor(camera, fit) {
  *   each, as the first version of the extractor did, shipped one sixth of what
  *   was measured and called it "the arena".
  *
- * ► **AND TWENTY-THREE HOURS OF SKY THAT RESOLVE TO SIX.**
- *   `_root.sky.gotoAndStop(time_of_day)` with `_global.time_of_day = 1 +
- *   random(23)`; the clip declares 200 frames and they hold six distinct
- *   drawings. The count of SLOTS is not the count of MEANINGS — the same
- *   lesson `bullet`'s fifty frames and five arrows already taught, arriving in
- *   a second place.
+ * ► **AND THE SKY IS A CLOCK RUNNING 1..200, NOT A DIE ROLL.**
+ *   `_root.sky.gotoAndStop(time_of_day)`; `_global.time_of_day = 1 +
+ *   random(23)` is only where it STARTS. `day_night_cycle` runs on a 1500ms
+ *   `setInterval` and, while a battle is on, increments it toward 200 and
+ *   re-seeks the sky every tick — so **the sky moves while you fight**, and a
+ *   new day resets it to 25. All 200 frames are reachable.
+ *
+ *   **This one nearly cost the night sky.** Reading the bound as 1..23 made
+ *   every masked frame (112..200) look unreachable, and "the masks are not a
+ *   defect" was one sentence from being written down. They are the night, and
+ *   they carry the moon's glow.
  *
  * Defaults are arena 1, hour 1 and dry. **Dry is frame 1 of `rain`, which draws
  * nothing** — the clip's first nine frames are empty, so the resting state is a

@@ -94,11 +94,27 @@ export function propOpsFor(pack, { linkage, frame = 1 } = {}) {
   for (const placement of placements) {
     const shape = pack.shapes[placement.shape];
     if (!shape || !Array.isArray(shape.paths)) continue;
+    // ► **THE CLIP IS RESOLVED ONCE PER PLACEMENT, NOT ONCE PER PATH.** A
+    //   shape is many paths and they share one cutter; building it per path
+    //   would hand the surface N identical clip regions to set and clear.
+    let clip = null;
+    if (placement.clip) {
+      const cutter = pack.shapes[placement.clip.shape];
+      if (cutter && Array.isArray(cutter.paths) && cutter.paths.length > 0) {
+        clip = Object.freeze({
+          matrix: placement.clip.matrix,
+          // Every loop of the cutter, because a mask with a hole is still one
+          // region and dropping the extra loops would clip to the outline.
+          d: cutter.paths.map((cut) => cut.d).join("")
+        });
+      }
+    }
     for (const path of shape.paths) {
       ops.push(Object.freeze({
         kind: "path",
         d: path.d,
         matrix: placement.matrix,
+        ...(clip ? { clip } : {}),
         fill: path.fill ?? null,
         fillRule: path.fillRule ?? "evenodd",
         fillOpacity: path.fillOpacity ?? 1,

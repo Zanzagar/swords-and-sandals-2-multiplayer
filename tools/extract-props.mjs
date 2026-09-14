@@ -143,16 +143,29 @@ export const PROP_EXPORTS = Object.freeze([
      *   which is a different clip in a different coordinate space.
      *
      * ► **AND ITS 200 FRAMES ARE A LOOKUP, NOT AN ANIMATION** — the same shape
-     *   as `bullet`'s. `_root.sky.gotoAndStop(time_of_day)` (`+0x0d33`) with
-     *   `_global.time_of_day = 1 + random(23)`, and `_root.sky.cacheAsBitmap =
-     *   true` immediately after, which a clip that played could not be. The
-     *   old entry said "frame 1 of 200; the rest is its animation" and was
-     *   wrong on both halves. **Every frame is taken, because each is a
-     *   different hour of the day and the renderer gets to choose.**
+     *   as `bullet`'s. `_root.sky.gotoAndStop(time_of_day)` (`+0x0d33`), and
+     *   `_root.sky.cacheAsBitmap = true` immediately after, which a clip that
+     *   played could not be. The old entry said "frame 1 of 200; the rest is
+     *   its animation" and was wrong on both halves.
+     *
+     * ► **AND `time_of_day` IS A CLOCK, NOT A DIE ROLL — I HAD THAT WRONG
+     *   TOO.** `_global.time_of_day = 1 + random(23)` is only where it STARTS.
+     *   `day_night_cycle` runs on a 1500ms `setInterval` (`+0x0a9d`) and, while
+     *   a battle is on, does `if (time_of_day < 200 && special_event_happening
+     *   != true) { time_of_day++; townsquare.gotoAndStop(time_of_day);
+     *   sky.gotoAndStop(time_of_day); }` (`+0x0bd0`..`+0x0c44`). A new day
+     *   resets it to 25 (`+0x0a50`). **So the whole 1..200 range is reachable,
+     *   and the sky moves while you fight.**
+     *
+     *   That matters because it nearly cost the masks: I had read the bound as
+     *   1..23, noticed every masked frame was 112..200, and was one sentence
+     *   from recording "the masks are unreachable, so this is not a defect."
+     *   **Frames 112-200 are the night**, and dropping their masks dropped the
+     *   moon's glow on 89 of 200 frames.
      */
     character: 1729,
     name: "sky",
-    indexedBy: "time_of_day, which is 1 + random(23)",
+    indexedBy: "time_of_day, a CLOCK that starts at 1 + random(23) and climbs to 200",
     reader: "src/render/arena-backdrop.js — the stage-locked sky layer"
   },
   {
@@ -359,14 +372,40 @@ export function extractProps(buffer) {
       if (!displayList) { frames.push([]); continue; }
       let drawables;
       try {
-        drawables = flattenFrame(buffer, characters, displayList, { cache });
+        // ► **CLIP PATHS ARE ASKED FOR HERE AND NOWHERE ELSE.** The sky's night
+        //   frames put a shape mask over the moon's glow, and without this the
+        //   extraction reported 178 failures and dropped both halves — a moon
+        //   with no glow on 89 of 200 frames. The flag is opt-in precisely so
+        //   that the figure and wardrobe extractions, which are pinned by tests
+        //   and by a preview the owner has looked at, do not silently gain
+        //   geometry they never had.
+        drawables = flattenFrame(buffer, characters, displayList, { cache, resolveMasks: true });
       } catch (error) {
         failures.push({ linkage: key, id, message: `frame ${index + 1}: ${String(error.message).slice(0, 90)}` });
         frames.push([]);
         continue;
       }
+      // THE MASKS ON THIS FRAME, by their own path — so a masked placement can
+      // name its cutter without depth alone having to be unique across nesting.
+      const masks = new Map();
+      for (const drawable of drawables) {
+        if (drawable.isMask && !drawable.unsupported) masks.set(drawable.path.join("/"), drawable);
+      }
+
       const placements = [];
       for (const drawable of drawables) {
+        // A MASK IS A CUTTER, NOT A DRAWING. Painting it would put the stencil
+        // on the canvas instead of the thing it cuts, so it is carried on the
+        // placements it clips and never emitted as one of its own.
+        if (drawable.isMask) {
+          if (drawable.unsupported) {
+            failures.push({
+              linkage: key, id,
+              message: `frame ${index + 1} carries ${drawable.unsupported} (character ${drawable.characterId})`
+            });
+          }
+          continue;
+        }
         // An unsupported drawable is REPORTED and skipped, never silently
         // dropped — the three combat icons are mostly `DefineEditText`, which
         // is why they are not in `PROP_EXPORTS` at all.
@@ -377,11 +416,17 @@ export function extractProps(buffer) {
           });
           continue;
         }
+        const cutter = drawable.maskPath ? masks.get(drawable.maskPath.join("/")) : null;
+        if (cutter) shapeIds.add(cutter.characterId);
         shapeIds.add(drawable.characterId);
         placements.push({
           shape: drawable.characterId,
           matrix: roundMatrix(drawable.matrix),
-          ...(drawable.colourTransform ? { colour: drawable.colourTransform } : {})
+          ...(drawable.colourTransform ? { colour: drawable.colourTransform } : {}),
+          // The clip travels WITH the thing it clips rather than as a sibling,
+          // because a renderer has to set it before the fill and clear it after,
+          // and a list of cutters somewhere else is an invitation to forget.
+          ...(cutter ? { clip: { shape: cutter.characterId, matrix: roundMatrix(cutter.matrix) } } : {})
         });
       }
       frames.push(placements);

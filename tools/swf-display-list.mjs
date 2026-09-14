@@ -758,9 +758,28 @@ export function resolveTimeline(buffer, sprite, { frames: wanted = null } = {}) 
  *   Measured on the shipped build: the fighter clip uses NO masks at all, so
  *   neither case changes this extraction. Thirty placements elsewhere in the
  *   file do.
+ *
+ * ► **`resolveMasks` TURNS "REFUSE" INTO "CLIP", AND IT IS OPT-IN FOR A
+ *   REASON.** With it set, a mask whose character is a SHAPE stops being
+ *   `unsupported`: the mask comes back as `isMask: true` carrying its own
+ *   character and composed matrix, and everything it covers comes back
+ *   drawable with `maskPath` naming which mask cuts it. A caller that can
+ *   compose a clip path then draws exactly what the build draws.
+ *
+ *   **It is off by default because turning it on CHANGES WHAT COMES BACK.**
+ *   `extract-figure.mjs` and `extract-wardrobe.mjs` both skip anything carrying
+ *   an `unsupported`, so flipping this globally would silently add geometry to
+ *   two extractions that are already pinned by tests and by a preview the owner
+ *   has looked at. A new capability that rewrites an old answer is not a
+ *   capability, it is a regression with a feature's name.
+ *
+ *   **A mask that is a SPRITE stays unsupported even when this is set.** It
+ *   would need its own flatten and a multi-shape clip path, the shipped build
+ *   has none on any declared prop, and refusing what has not been measured is
+ *   the rule this module already follows for morphs.
  */
 export function flattenFrame(buffer, characters, displayList, options = {}) {
-  const { spriteFrames = {}, maxDepth = 8, cache = new Map() } = options;
+  const { spriteFrames = {}, maxDepth = 8, cache = new Map(), resolveMasks = false } = options;
   const drawables = [];
 
   /**
@@ -787,8 +806,15 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
     // Masking does not cross into a nested sprite's own depth numbering, so
     // this is rebuilt per level rather than threaded through the recursion.
     const maskedBy = new Map();
+    // And which of those masks this module can actually turn into a clip path:
+    // a SHAPE mask is one path, a sprite mask is a whole display list and is
+    // refused. Computed here so a masked entry can be told which kind cuts it
+    // BEFORE it is pushed.
+    const clippable = new Set();
     for (const entry of entries) {
       if (typeof entry.clipDepth === "number" && entry.clipDepth > 0) {
+        const mask = characters.get(entry.characterId);
+        if (resolveMasks && mask && mask.kind === "shape") clippable.add(entry.depth);
         for (const other of entries) {
           if (other.depth > entry.depth && other.depth <= entry.clipDepth) {
             if (!maskedBy.has(other.depth)) maskedBy.set(other.depth, entry.depth);
@@ -811,9 +837,15 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
       // instead of the thing it cuts. It is REPORTED rather than dropped,
       // because a caller that exports what it covers needs to know it is there.
       if (isMask) {
+        const resolvable = clippable.has(entry.depth);
         drawables.push({
-          characterId: entry.characterId, kind: "mask", matrix, colourTransform, path,
-          name: entry.name, clipDepth: entry.clipDepth, unsupported: "mask",
+          characterId: entry.characterId,
+          // The kind stays "mask" either way: it is a CUTTER, and a caller that
+          // paints it has put the stencil on the canvas instead of the picture.
+          kind: "mask", matrix, colourTransform, path,
+          name: entry.name, clipDepth: entry.clipDepth,
+          isMask: true,
+          unsupported: resolvable ? null : "mask",
           maskedBy: mask ?? null
         });
         continue;
@@ -849,10 +881,18 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
         ratio: entry.ratio,
         blendMode: entry.blendMode,
         maskedBy: mask ?? null,
-        // A shape under a mask is not "correctly resolved geometry": this module
-        // composes no clip path, so exporting it whole would draw more than the
-        // build does. It is reported as unsupported for that reason alone.
-        unsupported: character.kind === "shape" ? (mask === undefined ? null : "masked") : character.kind
+        // ► A shape under a mask is not "correctly resolved geometry" UNLESS
+        //   the caller asked for clip paths: without one, exporting it whole
+        //   draws more than the build does, which is why it is reported rather
+        //   than returned. With `resolveMasks` and a SHAPE mask, it is exact
+        //   and comes back drawable with `maskPath` naming the cutter.
+        unsupported: character.kind === "shape"
+          ? (mask === undefined || clippable.has(mask) ? null : "masked")
+          : character.kind,
+        // The mask's OWN path, so a caller can find it in this same array
+        // without re-deriving which level it was on. Depth alone is ambiguous
+        // across nesting; this is not.
+        maskPath: mask === undefined ? null : [...parentPath, mask]
       });
     }
   };

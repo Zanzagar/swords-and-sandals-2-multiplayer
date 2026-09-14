@@ -463,3 +463,58 @@ test("scenery resolves to draw operations, and a missing pack draws none", () =>
   assert.deepEqual(arenaSceneryFor(null), []);
   assert.deepEqual(arenaSceneryFor(propPackFrom({ props: { bullet: { frames: [[]] } }, shapes: {} })), []);
 });
+
+/* ------------------------------------------------------------------ */
+/* Masks                                                               */
+/* ------------------------------------------------------------------ */
+
+test("a MASKED placement carries its cutter, and the cutter is never drawn itself", () => {
+  // ► **A MASK IS A CUTTER, NOT A DRAWING.** The extractor drops the mask's own
+  //   placement and hands its geometry to everything it clips, because a
+  //   renderer has to set the clip before the fill and clear it after — and a
+  //   list of cutters somewhere else is an invitation to forget one.
+  const pack = propPackFrom({
+    props: {
+      night: {
+        linkage: "night",
+        frames: [[
+          { shape: 10, matrix: [1, 0, 0, 1, 0, 0], clip: { shape: 11, matrix: [0.5, 0, 0, 0.5, -20, -40] } },
+          { shape: 10, matrix: [1, 0, 0, 1, 100, 0] }
+        ]]
+      }
+    },
+    shapes: {
+      10: { paths: [{ d: "M0 0L10 0L10 10Z", fill: "#fff" }, { d: "M0 0L5 5Z", fill: "#000" }] },
+      11: { paths: [{ d: "M0 0L8 0L8 8Z" }, { d: "M2 2L4 2L4 4Z" }] }
+    }
+  });
+
+  const ops = propOpsFor(pack, { linkage: "night", frame: 1 });
+  assert.equal(ops.length, 4, "two placements of a two-path shape");
+
+  const clipped = ops.filter((op) => op.clip);
+  assert.equal(clipped.length, 2, "BOTH paths of the masked placement are clipped");
+  assert.deepEqual(clipped[0].clip.matrix, [0.5, 0, 0, 0.5, -20, -40], "the cutter's own matrix");
+  // ► **EVERY LOOP OF THE CUTTER, because a mask with a hole is still ONE
+  //   region.** Keeping only the first would clip to the outline and fill the
+  //   hole back in.
+  assert.equal(clipped[0].clip.d, "M0 0L8 0L8 8ZM2 2L4 2L4 4Z");
+  assert.equal(clipped[0].clip, clipped[1].clip, "resolved once per placement, not once per path");
+
+  const unclipped = ops.filter((op) => !op.clip);
+  assert.equal(unclipped.length, 2, "the unmasked placement is untouched");
+  assert.ok(!ops.some((op) => op.d === "M0 0L8 0L8 8ZM2 2L4 2L4 4Z"),
+    "the cutter must never appear as a drawing of its own");
+});
+
+test("a clip naming a shape the pack does not hold is dropped, not half-applied", () => {
+  // Better to draw the thing unclipped than to throw where a sky should be —
+  // the same total-rather-than-throwing rule every reader in this file follows.
+  const pack = propPackFrom({
+    props: { x: { linkage: "x", frames: [[{ shape: 1, matrix: [1, 0, 0, 1, 0, 0], clip: { shape: 99, matrix: [1, 0, 0, 1, 0, 0] } }]] } },
+    shapes: { 1: { paths: [{ d: "M0 0L1 1Z" }] } }
+  });
+  const ops = propOpsFor(pack, { linkage: "x", frame: 1 });
+  assert.equal(ops.length, 1);
+  assert.equal(ops[0].clip, undefined, "an unresolvable cutter is absent, not a broken object");
+});
