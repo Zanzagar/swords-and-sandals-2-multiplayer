@@ -21,6 +21,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import {
   RANK_DEPTH_FACTOR,
   SS2_ARENA_ORIGIN,
@@ -49,9 +53,17 @@ import {
   frameForLayer,
   stageFitFor,
   stageProjectorFor,
-  zoomTargetFor
+  zoomTargetFor,
+  SS2_UI_BAR_READOUTS,
+  SS2_UI_BAR_UNPLACED,
+  uiBarReadoutsFor,
+  hasUiBarReadouts
 } from "../src/render/arena-backdrop.js";
 import { SS2_ARENA } from "../src/team/ss2-rules.js";
+import { fieldsPlacedIn, textPackFrom } from "../src/render/text.js";
+import { indexCharacters, resolveTimeline, flattenFrame } from "../tools/swf-display-list.mjs";
+import { parseShape } from "../tools/swf-shapes.mjs";
+import { rootTimeline } from "../tools/extract-screens.mjs";
 
 /**
  * Stage coordinates are the product of measured decimals (319.95, 166.75) and a
@@ -725,3 +737,348 @@ test("the focus is the middle of EVERYBODY, not of the closest duel", () => {
   assert.equal(midwaypointFor(lopsided), 50, "the closest engagement is 100 apart");
   assert.equal(focusXFor(lopsided), -200, "but the camera centres the whole scene");
 });
+
+/* ---------------------------------------------------------------- */
+/* THE UI BAR — the sentence that was false, and the tally that
+   replaces it                                                       */
+/* ---------------------------------------------------------------- */
+
+/**
+ * ► **THE NOTE ON THE PANEL LAYER CLAIMED THIS RENDERER DREW THE BAR'S TEXT,
+ *   AND IT NEVER HAS.** The tests below pin the two things that were actually
+ *   measurable and were never checked: WHICH fields the bar places, and the
+ *   fact that this engine has no live value for either of them. The second is
+ *   the one that matters — an unresolved readout that reports as resolved is
+ *   the exact shape of the defect this project has now recorded six times.
+ *
+ * ► **AND THE LIVING HEAD'S `sound:ON` / `tooltips:off` IS THE BAKED FRAME, NOT
+ *   THE GAME.** Every runtime write in the build disagrees with it in case, in
+ *   both fields and in opposite directions. Nothing here asserts a string,
+ *   because nothing in the module holds one; the measurement is in the module's
+ *   header with the offsets it was read at.
+ */
+
+/** A pack shaped like `text.js`'s, placing whatever fields a test names. */
+function barPack(placements) {
+  return textPackFrom({
+    fonts: { 1526: { id: 1526, glyphs: [{ code: 65, char: "A", path: "M0 0L1 0Z", advance: 100 }] } },
+    fields: Object.fromEntries(placements.map((entry) => [entry.id, { id: entry.id, bounds: { xMin: 0, xMax: 100, yMin: 0, yMax: 100 } }])),
+    placements: Object.fromEntries(placements.map((entry) => [entry.id, [{
+      owner: entry.owner ?? 1531, frame: 1, depth: entry.depth, name: entry.name, matrix: entry.matrix
+    }]]))
+  });
+}
+
+/** The two the build really places, in the pack's own shape. */
+function realBarPlacements() {
+  return [
+    { id: 1527, depth: 5, name: "soundvar", matrix: [0.99974, 0, 0, 1, 1820, 60] },
+    { id: 1528, depth: 6, name: "tooltips_text", matrix: [1.0006, 0, 0, 1, 40, 60] }
+  ];
+}
+
+test("THE PANEL LAYER NO LONGER CLAIMS TO DRAW TEXT, and points at what does describe it", () => {
+  const panel = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.character === 1531);
+  assert.ok(panel, "the UI bar is a layer of the arena screen");
+  // ► The literal sentence that was false: "it carries live text this renderer
+  //   draws itself". A note that says anything of the kind is the defect back.
+  assert.doesNotMatch(panel.note, /draws itself|renderer draws|live text/i,
+    `the panel note claims to draw text: ${panel.note}`);
+  // And the replacement is not merely a deletion: the layer carries the
+  // description, so a reader following the layer table reaches it.
+  assert.equal(panel.readouts, SS2_UI_BAR_READOUTS);
+  assert.equal(panel.readouts.length, 2);
+  // No OTHER layer may quietly acquire the same claim.
+  for (const layer of SS2_ARENA_SCREEN_LAYERS) {
+    assert.doesNotMatch(layer.note, /draws itself|renderer draws/i, `layer ${layer.character}: ${layer.note}`);
+  }
+});
+
+test("the bar declares TWO readouts, each naming the build site its value comes from", () => {
+  assert.deepEqual(SS2_UI_BAR_READOUTS.map((entry) => entry.field), [1527, 1528]);
+  assert.deepEqual(SS2_UI_BAR_READOUTS.map((entry) => entry.instance), ["soundvar", "tooltips_text"]);
+  assert.deepEqual(SS2_UI_BAR_READOUTS.map((entry) => entry.depth), [5, 6]);
+  assert.deepEqual(SS2_UI_BAR_READOUTS.map((entry) => entry.button), [1529, 1530]);
+  // Every readout names a state key and a site in the build; a declaration with
+  // neither is an assertion about the game with no way to check it.
+  for (const entry of SS2_UI_BAR_READOUTS) {
+    assert.ok(entry.valueOf.length > 0, `readout ${entry.field} names no state key`);
+    assert.match(entry.site, /^sprite:1531\//, `readout ${entry.field} site: ${entry.site}`);
+    assert.ok(entry.drivenBy.length > 0, `readout ${entry.field} says nothing about what drives it`);
+  }
+  // ► **AND NO STRING THE BAR DISPLAYS IS IN THE MODULE.** A colon-joined
+  //   readout string ("sound:on", "Tooltips:off") baked as a constant is the
+  //   thing the pack-as-argument rule forbids, and it would also be wrong: the
+  //   build writes four of them and the field holds a fifth.
+  for (const entry of SS2_UI_BAR_READOUTS) {
+    for (const value of Object.values(entry)) {
+      if (typeof value !== "string") continue;
+      assert.doesNotMatch(value, /\b(sound|tooltips|graphics|fullscreen):(on|off|high|low)\b/i,
+        `readout ${entry.field} bakes a displayed string: ${value}`);
+    }
+  }
+});
+
+test("A CLONE WITH NO PACK GETS AN EMPTY LIST AND A NON-ZERO INVOICE", () => {
+  // ► **THE HONESTY PROPERTY, AND IT IS THE ONE THAT IS EASY TO GET WRONG.**
+  //   Counting unresolved readouts over the RETURNED list reports 0 here —
+  //   nothing came back, so nothing is outstanding — which is exactly "an
+  //   approximation that is not counted". It must be 2.
+  const empty = uiBarReadoutsFor(null, fieldsPlacedIn);
+  assert.deepEqual(empty.readouts, []);
+  assert.equal(empty.unresolved, 2, "a bar with nothing on it still owes two readouts");
+  assert.equal(empty.tally.missing, 2);
+  assert.equal(empty.tally.placed, 0);
+  assert.equal(empty.tally.valued, 0);
+  // The bar's own placement survives, because it is measured off the root
+  // frame and does not need a pack at all.
+  assert.deepEqual({ x: empty.bar.x, y: empty.bar.y }, { x: -0.5, y: 401 });
+  assert.equal(hasUiBarReadouts(null, fieldsPlacedIn), false);
+  // A reader that throws is a pack with no bar, not a crash.
+  const thrower = () => { throw new Error("no such pack"); };
+  const broken = uiBarReadoutsFor({ fonts: {} }, thrower);
+  assert.deepEqual(broken.readouts, []);
+  assert.equal(broken.unresolved, 2);
+});
+
+test("THE TALLY IS A RECOUNT OF THE READOUTS, and it closes", () => {
+  const pack = barPack(realBarPlacements());
+  for (const values of [{}, { sound: "x" }, { sound: "x", tooltips: "y" }]) {
+    const bar = uiBarReadoutsFor(pack, fieldsPlacedIn, values);
+    const { tally } = bar;
+    assert.equal(tally.declared, SS2_UI_BAR_READOUTS.length);
+    assert.equal(tally.placed, bar.readouts.length, "placed is the length of what came back");
+    assert.equal(tally.missing, tally.declared - tally.placed);
+    assert.equal(tally.valued, bar.readouts.filter((entry) => entry.text !== null).length);
+    assert.equal(tally.unvalued, bar.readouts.filter((entry) => entry.text === null).length);
+    assert.equal(tally.valued + tally.unvalued, tally.placed);
+    // The headline number, recomputed the way the module promises: against what
+    // the bar HAS, never against what came back.
+    assert.equal(tally.unresolved, tally.declared - tally.valued);
+    assert.equal(bar.unresolved, tally.unresolved);
+    assert.equal(tally.unplacedInBuild, SS2_UI_BAR_UNPLACED.length);
+  }
+  // A partial pack: one field placed, one gone.
+  const half = uiBarReadoutsFor(barPack([realBarPlacements()[0]]), fieldsPlacedIn, { sound: "x" });
+  assert.equal(half.tally.placed, 1);
+  assert.equal(half.tally.missing, 1);
+  assert.equal(half.tally.valued, 1);
+  assert.equal(half.unresolved, 1, "the field the pack never placed is still owed");
+});
+
+test("a supplied value is carried with its provenance, and an empty one is NOT a value", () => {
+  const pack = barPack(realBarPlacements());
+  const bar = uiBarReadoutsFor(pack, fieldsPlacedIn, { sound: "sound:on" });
+  const sound = bar.readouts.find((entry) => entry.field === 1527);
+  const tooltips = bar.readouts.find((entry) => entry.field === 1528);
+  assert.equal(sound.text, "sound:on");
+  assert.equal(sound.source, "caller");
+  assert.equal(tooltips.text, null, "nothing was supplied for the tooltips readout");
+  assert.equal(tooltips.source, null, "and an absent value has no provenance");
+  // ► An empty string, a number and an object are all "no value". Accepting any
+  //   of them would draw a blank readout and report it as resolved, which is
+  //   the same defect as defaulting to a placeholder.
+  for (const junk of ["", 0, 42, null, undefined, {}, ["x"]]) {
+    const one = uiBarReadoutsFor(pack, fieldsPlacedIn, { sound: junk });
+    assert.equal(one.readouts.find((entry) => entry.field === 1527).text, null,
+      `${JSON.stringify(junk)} was taken as a live value`);
+    assert.equal(one.unresolved, 2);
+  }
+});
+
+test("A FIELD THE PACK PLACES AND THIS MODULE HAS NEVER HEARD OF IS REPORTED", () => {
+  // ► The other direction of the same rule. If a future build, or a repaired
+  //   extractor, puts a third readout on the bar, silently dropping it is the
+  //   uncounted approximation again — so it is named in the tally.
+  const pack = barPack([...realBarPlacements(),
+    { id: 9999, depth: 7, name: "somethingelse", matrix: [1, 0, 0, 1, 0, 0] }]);
+  const bar = uiBarReadoutsFor(pack, fieldsPlacedIn);
+  assert.deepEqual(bar.tally.undeclared, [9999]);
+  assert.equal(bar.tally.placed, 2, "and it is not smuggled into the drawable list");
+  assert.deepEqual(bar.readouts.map((entry) => entry.field), [1527, 1528]);
+  // The ordinary case reports an empty list, not a missing key.
+  assert.deepEqual(uiBarReadoutsFor(barPack(realBarPlacements()), fieldsPlacedIn).tally.undeclared, []);
+});
+
+test("THE BAR IS A STAGE LAYER, so no camera in the world moves its readouts", () => {
+  // ► `layerPlacementFor` already says the panel is `space: "stage"`. This is
+  //   the same claim cashed out where a renderer would actually get it wrong:
+  //   the readout coordinates must be the bar's placement plus the field's, and
+  //   nothing else. A pan term leaking in here would slide the UI with the
+  //   fight.
+  const pack = barPack(realBarPlacements());
+  const bar = uiBarReadoutsFor(pack, fieldsPlacedIn);
+  const panel = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.character === 1531);
+  for (const readout of bar.readouts) {
+    near(readout.stageX, panel.x + readout.x, `readout ${readout.field} stage x`);
+    near(readout.stageY, panel.y + readout.y, `readout ${readout.field} stage y`);
+  }
+  // And the layer itself is placed identically whatever the camera is doing.
+  const settled = settle(ROSTERS["3v3"]);
+  assert.deepEqual(layerPlacementFor(panel, settled), layerPlacementFor(panel, cameraFor(ROSTERS["1v1"])));
+  assert.notEqual(settled.gladiatorsX, undefined);
+});
+
+test("the pack's matrix is what places a readout, and it is TWIPS", () => {
+  // The field placements are the only numbers here that come from an
+  // extraction, so the conversion is pinned on its own: 1820 twips is 91px and
+  // 40 twips is 2px, and the declaration's fallback says the same.
+  const bar = uiBarReadoutsFor(barPack(realBarPlacements()), fieldsPlacedIn);
+  assert.deepEqual(bar.readouts.map((entry) => entry.placedFrom), ["pack", "pack"]);
+  assert.deepEqual(bar.readouts.map((entry) => [entry.x, entry.y]), [[91, 3], [2, 3]]);
+  assert.deepEqual(bar.readouts.map((entry) => [entry.stageX, entry.stageY]), [[90.5, 404], [1.5, 404]]);
+  assert.deepEqual(bar.readouts.map((entry) => entry.nameMatches), [true, true]);
+  // ► **AND THE PACK WINS WHEN THE TWO DISAGREE**, which is the assertion that
+  //   makes the line above mean anything: the declared fallback happens to be
+  //   the same 91px, so returning it unconditionally would pass every check
+  //   that only ever sees the real numbers.
+  const moved = uiBarReadoutsFor(
+    barPack([{ id: 1527, depth: 5, name: "soundvar", matrix: [1, 0, 0, 1, 400, 800] }]), fieldsPlacedIn);
+  assert.deepEqual([moved.readouts[0].x, moved.readouts[0].y], [20, 40]);
+  assert.deepEqual([moved.readouts[0].stageX, moved.readouts[0].stageY], [19.5, 441]);
+  // A pack that places the field with NO matrix falls back to the declaration
+  // and says so, rather than reporting a made-up coordinate as measured.
+  const noMatrix = uiBarReadoutsFor(
+    barPack([{ id: 1527, depth: 5, name: "soundvar", matrix: null }]), fieldsPlacedIn);
+  assert.equal(noMatrix.readouts[0].placedFrom, "declaration");
+  assert.deepEqual([noMatrix.readouts[0].x, noMatrix.readouts[0].y], [91, 3]);
+  assert.equal(noMatrix.readouts[0].matrix, null);
+  // A renamed instance is REPORTED, not overwritten with what this file expects.
+  const renamed = uiBarReadoutsFor(
+    barPack([{ id: 1527, depth: 5, name: "somethingelse", matrix: [1, 0, 0, 1, 20, 20] }]), fieldsPlacedIn);
+  assert.equal(renamed.readouts[0].packName, "somethingelse");
+  assert.equal(renamed.readouts[0].nameMatches, false);
+});
+
+/* ---------------------------------------------------------------- */
+/* Against the pack this machine has actually extracted              */
+/* ---------------------------------------------------------------- */
+
+const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
+const PACK_PATH = path.join(REPO_ROOT, "assets", "text", "text.json");
+const skipPack = fs.existsSync(PACK_PATH) ? false : "no extracted text pack on this machine";
+
+test("THE REAL PACK PLACES EXACTLY THE TWO READOUTS DECLARED, where they are declared",
+  { skip: skipPack }, () => {
+    // ► The cross-check the declaration cannot do for itself: the `x`/`y` a
+    //   clone falls back to are compared against the matrices the extraction
+    //   read off the build, so a typo in either side is visible.
+    const pack = textPackFrom(JSON.parse(fs.readFileSync(PACK_PATH, "utf8")));
+    const bar = uiBarReadoutsFor(pack, fieldsPlacedIn);
+    assert.deepEqual(bar.readouts.map((entry) => entry.field), [1527, 1528]);
+    assert.deepEqual(bar.tally.undeclared, [], "the build places no third readout on the bar");
+    assert.equal(bar.tally.missing, 0);
+    for (const readout of bar.readouts) {
+      const declared = SS2_UI_BAR_READOUTS.find((entry) => entry.field === readout.field);
+      assert.equal(readout.packName, declared.instance, `readout ${readout.field} is renamed in the build`);
+      near(readout.x, declared.x, `readout ${readout.field} declared x disagrees with the pack`);
+      near(readout.y, declared.y, `readout ${readout.field} declared y disagrees with the pack`);
+    }
+    assert.deepEqual(bar.readouts.map((entry) => [entry.x, entry.y]), [[91, 3], [2, 3]]);
+    // ► **AND THIS ENGINE STILL HAS NOTHING TO SAY IN EITHER OF THEM.** That is
+    //   the true state today and it is recorded as a number rather than as a
+    //   blank box nobody counted.
+    assert.equal(bar.unresolved, 2);
+    assert.equal(hasUiBarReadouts(pack, fieldsPlacedIn), true);
+  });
+
+/* ---------------------------------------------------------------- */
+/* Against the installed build                                       */
+/* ---------------------------------------------------------------- */
+
+const ORACLE =
+  "/mnt/c/Program Files (x86)/Steam/steamapps/common/Swords and Sandals Classic Collection/swf/swords_sandals2_download.swf";
+const skipOracle = fs.existsSync(ORACLE) ? false : "no installed build on this machine";
+
+/** The oracle, read fresh per test. Nothing here writes to it. */
+function oracleBuffer() {
+  return fs.readFileSync(ORACLE);
+}
+
+test("THE BAR IS FOUR PLATES, TWO BUTTONS AND TWO FIELDS — and 641 x 27 is the PLATE",
+  { skip: skipOracle }, () => {
+    // ► Where "the bar renders as blank boxes" actually comes from. Four
+    //   placements bottom out on one shape (char 487) and draw; both text
+    //   placements come back `unsupported: "text"` and are dropped. The note on
+    //   the panel layer is checked against the number measured here, so the
+    //   table cannot drift from the build the way the committed size table did.
+    const buffer = oracleBuffer();
+    const { characters } = indexCharacters(buffer);
+    const list = resolveTimeline(buffer, characters.get(1531), { frames: [1] }).frames[0];
+    assert.deepEqual(list.map((entry) => entry.depth), [1, 3, 5, 6, 7, 9]);
+    assert.deepEqual(list.map((entry) => entry.characterId), [488, 488, 1527, 1528, 1529, 1530]);
+    assert.deepEqual(list.filter((entry) => entry.name).map((entry) => entry.name),
+      ["myFootprint", "myFootprint", "soundvar", "tooltips_text"]);
+
+    const drawables = flattenFrame(buffer, characters, list, {});
+    const text = drawables.filter((entry) => entry.kind === "text");
+    assert.equal(text.length, 2, "the two fields reach the flattener");
+    for (const entry of text) {
+      assert.equal(entry.unsupported, "text", `char ${entry.characterId} is dropped for another reason`);
+    }
+    const shapes = drawables.filter((entry) => entry.kind === "shape");
+    assert.equal(shapes.length, 4, "four plate placements, which are the boxes you see");
+    assert.deepEqual([...new Set(shapes.map((entry) => entry.characterId))], [487],
+      "and all four are the same rectangle at four scales");
+
+    // The plate's own extent, in bar pixels: the union of the four placements.
+    const bounds = parseShape(buffer, characters.get(487).bodyStart, characters.get(487).bodyEnd,
+      characters.get(487).tagCode).bounds;
+    let xMin = Infinity; let xMax = -Infinity; let yMin = Infinity; let yMax = -Infinity;
+    for (const drawable of shapes) {
+      const { a, d, tx, ty } = drawable.matrix;
+      for (const [x, y] of [[bounds.xMin, bounds.yMin], [bounds.xMax, bounds.yMax]]) {
+        xMin = Math.min(xMin, (a * x + tx) / 20); xMax = Math.max(xMax, (a * x + tx) / 20);
+        yMin = Math.min(yMin, (d * y + ty) / 20); yMax = Math.max(yMax, (d * y + ty) / 20);
+      }
+    }
+    const width = Math.round(xMax - xMin);
+    const height = Math.round(yMax - yMin);
+    assert.deepEqual({ width, height }, { width: 641, height: 27 });
+    const panel = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.character === 1531);
+    assert.match(panel.note, new RegExp(`${width} x ${height}`),
+      `the panel note does not carry the plate size measured here: ${panel.note}`);
+  });
+
+test("THE TWO READOUTS THE BUILD WRITES AND NEVER PLACES ARE COUNTED, and they are dead",
+  { skip: skipOracle }, () => {
+    // ► This is where a count of FOUR fields comes from, and it is why the
+    //   declaration carries them instead of omitting them. Each name occurs
+    //   ONCE in the whole file — its own constant pool entry — and no timeline
+    //   anywhere places an instance by that name.
+    const buffer = oracleBuffer();
+    assert.equal(buffer.length, 7586504, "the oracle is not the build these offsets were read from");
+    for (const entry of SS2_UI_BAR_UNPLACED) {
+      const needle = Buffer.from(entry.instance, "latin1");
+      const hits = [];
+      let at = 0;
+      while ((at = buffer.indexOf(needle, at)) !== -1) { hits.push(at); at += 1; }
+      assert.equal(hits.length, entry.occurrences,
+        `${entry.instance} occurs ${hits.length} times, not ${entry.occurrences}`);
+      assert.deepEqual(hits, [entry.byteOffset], `${entry.instance} is not at its recorded offset`);
+    }
+
+    // And no sprite, and not the root, ever places an instance under either
+    // name — which is what makes every one of those writes land on `undefined`.
+    const { characters } = indexCharacters(buffer);
+    const timelines = [...characters.values()].filter((entry) => entry.kind === "sprite");
+    timelines.push(rootTimeline(buffer));
+    const dead = new Set(SS2_UI_BAR_UNPLACED.map((entry) => entry.instance));
+    const live = new Set(SS2_UI_BAR_READOUTS.map((entry) => entry.instance));
+    let found = 0;
+    let walked = 0;
+    for (const timeline of timelines) {
+      let resolved;
+      try { resolved = resolveTimeline(buffer, timeline, {}); } catch { continue; }
+      walked += 1;
+      for (const frame of resolved.frames ?? []) {
+        for (const entry of frame) {
+          assert.ok(!dead.has(entry.name),
+            `${entry.name} IS placed, on timeline ${timeline.id} at depth ${entry.depth}`);
+          if (live.has(entry.name)) found += 1;
+        }
+      }
+    }
+    assert.ok(walked > 700, `only ${walked} timelines walked — the search did not happen`);
+    assert.equal(found, live.size, "and both LIVE readouts are placed exactly once");
+  });

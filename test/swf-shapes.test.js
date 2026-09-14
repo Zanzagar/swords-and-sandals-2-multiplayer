@@ -203,6 +203,98 @@ test("a gradient is flattened to its first stop and SAYS it was approximated", (
 });
 
 /**
+ * A DefineShape3 holding ONE gradient fill and one edge, with the gradient's
+ * type and focal point under the caller's control.
+ *
+ * Built here rather than lifted from the build for the usual reason — nothing
+ * in this file may come from the licensed copy — and lifted from the build is
+ * not an option anyway: **the installed build has ZERO focal gradients** (87
+ * linear, 10 radial, 0 focal across 8,875 fills in 824 shapes, re-counted with
+ * `parseShape` itself). A focal gradient's bytes therefore exist nowhere except
+ * here, which is precisely why the field went unchecked for as long as it did.
+ */
+function gradientShape({ id = 5, type = 0x10, focalPoint = 0 } = {}) {
+  const writer = new ShapeWriter();
+  writer.u16(id);
+  writer.rect();
+  writer.u8(1).u8(type);
+  writer.align();
+  writer.bit(0).bit(0).ub(0, 5).align();   // identity MATRIX
+  writer.u8(2);                            // spread 0, interpolation 0, two stops
+  writer.u8(0).u8(0x10).u8(0x20).u8(0x30).u8(0xff);
+  writer.u8(255).u8(0x90).u8(0xa0).u8(0xb0).u8(0xff);
+  // FOCALGRADIENT's FocalPoint is a FIXED8 and comes AFTER the stops. The
+  // encoder is the SIGNED one deliberately: a test that wrote the unsigned
+  // form would agree with an unsigned reader and prove nothing.
+  if (type === 0x13) writer.u16(Math.round(focalPoint * 256) & 0xffff);
+  writer.u8(0);                            // no line styles
+  writer.ub(1, 4).ub(0, 4);
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(8, 5).sb(0, 8).sb(0, 8);
+  writer.ub(1, 1);
+  writer.bit(1).bit(1).ub(8 - 2, 4).bit(1).sb(20, 8).sb(20, 8);
+  writer.bit(0).ub(0, 5);
+  return writer.buffer();
+}
+
+test("A FOCAL GRADIENT'S FOCAL POINT IS SIGNED, so a focus past centre is not 255.5", () => {
+  // ► **This read `readUI16() / 256` and the SWF specification states the field
+  //   as a SIGNED 8.8 fixed-point value in -1.0 to 1.0.** Unsigned, -0.5 comes
+  //   back as 255.5: not a coordinate any renderer can place, and not wild
+  //   enough to look like a parse failure. `tools/swf-morph-shapes.mjs` read it
+  //   signed from the day it was written and SAID SO IN A COMMENT about this
+  //   file, so the two parsers disagreed about one field for as long as both
+  //   existed.
+  const negative = gradientShape({ type: 0x13, focalPoint: -0.5 });
+  const shape = parseShape(negative, 0, negative.length, 32);
+  assert.equal(shape.fills[0].kind, "gradient");
+  assert.equal(shape.fills[0].focal, true);
+  assert.equal(shape.fills[0].focalPoint, -0.5, "-0.5, not 255.5");
+
+  // The two readings AGREE on every non-negative value, which is why nothing
+  // drawn today changes — asserted so that a future "simplification" back to
+  // the unsigned read cannot hide behind the positive case passing.
+  const positive = gradientShape({ type: 0x13, focalPoint: 0.75 });
+  assert.equal(parseShape(positive, 0, positive.length, 32).fills[0].focalPoint, 0.75);
+
+  const ends = gradientShape({ type: 0x13, focalPoint: -1 });
+  assert.equal(parseShape(ends, 0, ends.length, 32).fills[0].focalPoint, -1, "the bottom of the stated range");
+});
+
+test("the signed focal point REACHES THE PATH, because a parser nobody reads is not a fix", () => {
+  // The focal point is only useful where a renderer can see it. `shapeToPaths`
+  // copies the gradient across, so a fix in `readFillStyle` that stopped at the
+  // fill style would leave every consumer on the old value.
+  const bytes = gradientShape({ type: 0x13, focalPoint: -0.25 });
+  const paths = shapeToPaths(parseShape(bytes, 0, bytes.length, 32));
+  assert.equal(paths[0].approximated, "gradient");
+  assert.equal(paths[0].gradient.focal, true);
+  assert.equal(paths[0].gradient.focalPoint, -0.25);
+  // A focal-radial gradient is still a RADIAL one to a renderer, and
+  // `test/extraction-honesty.test.js` only admits "linear" and "radial".
+  assert.equal(paths[0].gradient.type, "radial");
+});
+
+test("a NON-focal gradient reads no focal field at all, and its stops stay intact", () => {
+  // ► The focal point is two bytes that are PRESENT only for 0x13. Reading them
+  //   unconditionally would consume the next fill's type byte; not reading them
+  //   for 0x13 would leave them to be read as one. Both desynchronise
+  //   everything after, so the branch is asserted from both sides.
+  const linear = gradientShape({ type: 0x10 });
+  const shape = parseShape(linear, 0, linear.length, 32);
+  assert.equal(shape.fills[0].focal, false);
+  assert.equal(shape.fills[0].focalPoint, 0);
+  assert.equal(shape.fills[0].stops.length, 2);
+  assert.deepEqual(shape.fills[0].stops.map((stop) => stop.ratio), [0, 255]);
+
+  const radial = gradientShape({ type: 0x12 });
+  const radialShape = parseShape(radial, 0, radial.length, 32);
+  assert.equal(radialShape.fills[0].focal, false);
+  assert.equal(shapeToPaths(radialShape)[0].gradient.type, "radial");
+  assert.equal(radialShape.fills[0].stops[1].colour.red, 0x90, "the stops were not eaten by a phantom read");
+});
+
+/**
  * A square whose four edges are declared OUT OF ORDER and whose two halves put
  * the fill on opposite sides — which is what the real build does everywhere.
  *

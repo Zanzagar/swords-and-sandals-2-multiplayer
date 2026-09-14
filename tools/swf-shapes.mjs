@@ -151,6 +151,31 @@ class BitReader {
   skipMatrix() {
     this.readFillMatrix();
   }
+
+  /**
+   * FIXED8: a SIGNED 8.8 fixed-point number, which the specification states as
+   * ranging -1.0 to 1.0 for a focal point.
+   *
+   * ► **THIS USED TO BE `readUI16() / 256`, WHICH TURNS -0.5 INTO 255.5.** A
+   *   focal gradient's focus is allowed to sit on the far side of centre, and
+   *   the far side is the negative half of the range; read unsigned it comes
+   *   back as something in 128..255.996, which is not a coordinate any renderer
+   *   can place and is not out-of-range enough to look like a parse failure.
+   *   `tools/swf-morph-shapes.mjs` has read it signed since it was written, and
+   *   said in a comment that this file did not — so the two parsers disagreed
+   *   about the same field for as long as both existed.
+   *
+   *   **Dead against this oracle and fixed anyway:** re-measured on the
+   *   installed build, all 824 shapes carry 8,875 fills of which 87 are linear
+   *   gradients, 10 radial and ZERO focal, so no focal point of either sign has
+   *   ever been read from it. The second install lane is where this pays.
+   */
+  readFixed8() {
+    this.align();
+    const value = this.buffer.readInt16LE(this.byte);
+    this.byte += 2;
+    return value / 256;
+  }
 }
 
 function readColour(reader, withAlpha) {
@@ -187,10 +212,12 @@ function readFillStyle(reader, withAlpha) {
       const ratio = reader.readUI8();
       stops.push({ ratio, colour: readColour(reader, withAlpha) });
     }
-    // A FOCAL gradient's extra field. Measured: this build has ZERO of them
-    // (87 linear, 10 radial, 0 focal), so this line has never executed against
-    // the oracle — recorded rather than budgeted for.
-    const focalPoint = type === 0x13 ? reader.readUI16() / 256 : 0;
+    // A FOCAL gradient's extra field, a SIGNED FIXED8 in -1..1 — see
+    // `readFixed8`, and note that this line USED TO READ IT UNSIGNED. Measured:
+    // this build has ZERO focal gradients (87 linear, 10 radial, 0 focal across
+    // 8,875 fills in 824 shapes), so this line has never executed against the
+    // oracle — recorded rather than budgeted for.
+    const focalPoint = type === 0x13 ? reader.readFixed8() : 0;
     return {
       kind: "gradient",
       // 0x10 linear, 0x12 radial, 0x13 focal-radial.

@@ -797,3 +797,197 @@ test("the real pack: every screen paints visible geometry across the stage", () 
       `${name} spans y ${box.yMin.toFixed(1)}..${box.yMax.toFixed(1)}, which does not straddle the stage centre`);
   }
 });
+
+/* ------------------------------------------------------------------ */
+/* The tint, pinned by VALUE                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The anchor placement: `daybreak` depth 3, the only use of shape 1681 on that
+ * screen, one white path under a 0.30078125 multiplier with a blue offset of
+ * 36. Chosen because it is the boundary case — floor and round disagree on it —
+ * and because "exactly one placement, exactly one path" makes it locatable
+ * without an op index that the next extractor pass would shift.
+ */
+const ANCHOR_SHAPE = 1681;
+
+/**
+ * Every operation of a real screen beside the pack entry that produced it.
+ *
+ * `emitDrawable` walks drawables in order and each shape's paths in order,
+ * emits one operation per path that has geometry, and skips a drawable whose
+ * shape is missing or pathless. Replaying that walk is what lets the
+ * assertions below name a SOURCE fill and a transform instead of an op index,
+ * and the `joined.length === ops.length` check at each call site is what keeps
+ * the replay honest: a walk that drifted would stop lining up and say so
+ * rather than compare the wrong pairs quietly.
+ *
+ * A function declaration rather than an arrow, for the reason `readRealJson`
+ * gives: `ss2-assertion-quality.test.js` finds a helper's body by looking for
+ * the next brace before the next newline.
+ */
+function joinOpsToPack(raw, record, name) {
+  const joined = [];
+  for (const drawable of raw.screens[name].drawables ?? []) {
+    const shape = raw.shapes[drawable.shape];
+    if (!shape || !Array.isArray(shape.paths) || shape.paths.length === 0) continue;
+    for (const entry of shape.paths) {
+      if (typeof entry.d !== "string" || entry.d.length === 0) continue;
+      joined.push({ entry, colour: drawable.colour ?? null, op: record.ops[joined.length] });
+    }
+  }
+  return joined;
+}
+
+/** `clamp(channel * multiplier + offset)` per channel under a chosen rounder. */
+function channelwise(fill, colour, rounder) {
+  const byte = (index) => Number.parseInt(fill.slice(1 + index * 2, 3 + index * 2), 16);
+  const multipliers = [colour.redMultiplier, colour.greenMultiplier, colour.blueMultiplier];
+  const offsets = [colour.redOffset, colour.greenOffset, colour.blueOffset];
+  const one = (index) => clampByte(rounder(byte(index) * finite(multipliers[index], 1)) + finite(offsets[index], 0));
+  return "#" + [0, 1, 2].map((index) => one(index).toString(16).padStart(2, "0")).join("");
+}
+
+/** 0..255, so a clamp bug in the module cannot hide behind a clamp bug here. */
+function clampByte(value) {
+  return value < 0 ? 0 : value > 255 ? 255 : value;
+}
+
+function finite(value, fallback) {
+  return Number.isFinite(value) ? value : fallback;
+}
+
+test("the real pack: one tinted fill pinned by VALUE, against the PLAYER's arithmetic", () => {
+  // ► **THE TINT HAD NEVER BEEN PINNED BY VALUE, AND THAT IS HOW THE
+  //   ROUND/FLOOR CHANGE WENT THROUGH UNNOTICED.** Every colour assertion in
+  //   this file compared the module against a recomputation that shared its
+  //   arithmetic, so both halves moved together and the suite stayed green
+  //   while every tinted screen shifted by one unit. This one does not
+  //   recompute: it states the bytes, and it states them against the PLAYER's
+  //   own operation rather than against this renderer's.
+  //
+  //   `0.30078125` is not a decimal anybody chose. It is `77 / 256` — the
+  //   CXFORMWITHALPHA multiply term is 8.8 FIXED POINT, `readColourTransform`
+  //   in `tools/swf-display-list.mjs` divides the signed byte pair by 256, and
+  //   the player computes `(channel * 77) >> 8`. A right-shift rounds toward
+  //   negative infinity, which is `Math.floor` and is not `Math.round`.
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  const pack = screenPackFrom(REAL_SCREENS);
+  const record = screenFor(pack, "daybreak");
+
+  const placements = REAL_SCREENS.screens.daybreak.drawables.filter((d) => d.shape === ANCHOR_SHAPE);
+  assert.equal(placements.length, 1, "the anchor is only an anchor while exactly one placement uses that shape");
+  const colour = placements[0].colour;
+  const source = REAL_SCREENS.shapes[ANCHOR_SHAPE].paths;
+  assert.equal(source.length, 1, "and while that shape is a single path");
+  assert.equal(source[0].fill, "#ffffff", "the untinted fill this pins the transform of");
+  assert.equal(colour.redMultiplier, 77 / 256, "the wire's 8.8 multiply term is 77");
+  assert.equal(colour.blueOffset, 36, "and the blue channel carries an offset, so the three bytes differ");
+
+  const ops = record.ops.filter((op) => op.shape === ANCHOR_SHAPE);
+  assert.equal(ops.length, 1, "otherwise the pin below is ambiguous");
+  assert.equal(ops[0].fill, "#4c4c70", "daybreak depth 3: white under 77/256 with a blue offset of 36");
+  assert.equal(ops[0].depth, 3, "and it is the placement this anchor names");
+
+  // The player's own arithmetic, in the player's own integers. 76, not 77.
+  assert.equal((255 * 77) >> 8, 0x4c, "the arithmetic shift the renderer has to reproduce");
+  assert.equal(((255 * 77) >> 8) + 36, 0x70);
+  // ► **AND THE PIN IS ON THE BOUNDARY, not merely somewhere the two agree.**
+  //   Without this the assertion above would survive a change back to rounding
+  //   on any fill whose channels happen not to land on a fraction.
+  assert.equal(Math.round(255 * (77 / 256)), 0x4d, "rounding moves this channel");
+  assert.notEqual(ops[0].fill, "#4d4d71", "which is what a rounding implementation emits here");
+
+  // ► **THE ALPHA HALF, ALSO BY VALUE, AND ON A TRANSFORM THAT MOVES ONLY
+  //   ALPHA.** Shape 1751 sits under `alphaMultiplier` 179/256 with the RGB
+  //   half at the identity, so it pins two things at once: that the opacity
+  //   lands, and that an alpha-only transform leaves the colour BYTES alone
+  //   rather than round-tripping them through the hex writer.
+  const alphaOnly = record.ops.filter((op) => op.shape === 1751);
+  assert.equal(alphaOnly.length, 3, "three paths share that placement");
+  assert.deepEqual(alphaOnly.map((op) => op.fillOpacity), [179 / 256, 179 / 256, 179 / 256]);
+  assert.deepEqual(alphaOnly.map((op) => op.fill), ["#990066", "#3366ff", "#66cc33"]);
+});
+
+test("the real pack: every tinted value FLOORS, and rounding would move 69 of the 1023", () => {
+  // ► **THE MEASUREMENT THAT SETTLED FLOOR vs ROUND, KEPT AS AN ASSERTION.**
+  //   `src/render/screen.js` carried its own colour transform until the two
+  //   were folded; the two differed only in the rounder, and **69 of the 1023
+  //   hex values that sit under a colour transform on these 26 screens came
+  //   out one unit apart**. Re-deriving 0 against floor would be
+  //   self-confirming on its own — a rounding module compared against a
+  //   rounding recomputation also scores 0 — so the load is carried by the
+  //   SECOND count: the module must disagree with a rounding implementation on
+  //   exactly 69. Both numbers move if the arithmetic does.
+  //
+  // ► **AND THE INVOICE.** `checked` counts what was compared and `passedThrough`
+  //   counts what could not be: a fill under a transform that is not a hex
+  //   colour has nothing to fold into, which is a real limit of this seam and
+  //   not a gap in the test. An approximation that is not counted is
+  //   indistinguishable from a correct read.
+  //
+  // ► **AND TWO THINGS THIS CANNOT CATCH, MEASURED BY MUTATION RATHER THAN
+  //   GUESSED, because a test whose reach is overstated is the same defect as
+  //   a tally that is.** Swapping `Math.floor` for `Math.trunc` in
+  //   `filters.js` leaves all 36 tests here GREEN: every RGB multiplier on
+  //   this pack is one of 0, 0.30078125, 0.5078125, 0.55859375 or 1 and none
+  //   is negative, so the two functions never part company on real data.
+  //   Dropping the `/ 255` that converts the wire's alpha offset into this
+  //   renderer's 0..1 units also leaves `alphaMismatch` at 0, because every
+  //   `alphaOffset` on all 26 screens is zero. Both are held by the SYNTHETIC
+  //   fixtures above — `ALPHA_OFFSET` catches the second — and by nothing on
+  //   the real pack. The real pack cannot exercise a case the build does not
+  //   contain, and saying so is the point.
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  const pack = screenPackFrom(REAL_SCREENS);
+  let checked = 0;
+  let flooredMismatch = 0;
+  let roundedMismatch = 0;
+  let passedThrough = 0;
+  let alphaChecked = 0;
+  let alphaMismatch = 0;
+  for (const name of screenNames(pack)) {
+    const record = screenFor(pack, name);
+    const joined = joinOpsToPack(REAL_SCREENS, record, name);
+    assert.equal(joined.length, record.ops.length, `${name}: the replay of the emission walk drifted`);
+    for (const { entry, colour, op } of joined) {
+      if (!colour) continue;
+      const sourceStops = entry.gradient?.stops ?? [];
+      const outStops = op.gradient?.stops ?? [];
+      const pairs = [[entry.fill, op.fill], [entry.stroke, op.stroke]];
+      const alphas = [[finite(entry.fillOpacity, 1), op.fillOpacity], [finite(entry.strokeOpacity, 1), op.strokeOpacity]];
+      for (const [index, stop] of sourceStops.entries()) {
+        pairs.push([stop.fill, outStops[index]?.fill]);
+        alphas.push([finite(stop.opacity, 1), outStops[index]?.opacity]);
+      }
+      for (const [source, out] of pairs) {
+        if (typeof source === "string" && source.length === 7 && source[0] === "#") {
+          checked += 1;
+          if (out !== channelwise(source, colour, Math.floor)) flooredMismatch += 1;
+          if (out !== channelwise(source, colour, Math.round)) roundedMismatch += 1;
+        } else if (source !== null && source !== undefined) {
+          passedThrough += 1;
+          assert.equal(out, source, "a fill with no colour in it must survive a transform untouched");
+        }
+      }
+      for (const [source, out] of alphas) {
+        alphaChecked += 1;
+        const want = source * finite(colour.alphaMultiplier, 1) + finite(colour.alphaOffset, 0) / 255;
+        alphaMismatch += out === Math.max(0, Math.min(1, want)) ? 0 : 1;
+      }
+    }
+  }
+  assert.equal(checked, 1023, "the population this measurement has always been quoted over");
+  assert.equal(flooredMismatch, 0, "the module must agree with the arithmetic shift on every one of them");
+  assert.equal(roundedMismatch, 69,
+    "the module must DISAGREE with a rounding implementation on exactly these — if this reads 0 the module is rounding");
+  assert.equal(passedThrough, 164, "fills under a transform with no colour to fold into: all of them `none`");
+  assert.equal(alphaChecked, 1955, "and the alpha half was compared too, rather than assumed");
+  assert.equal(alphaMismatch, 0, "the alpha half stays floating point: 0..1 opacity, offset divided by 255");
+});

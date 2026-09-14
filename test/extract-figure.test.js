@@ -25,10 +25,12 @@ import { fileURLToPath } from "node:url";
 
 import {
   ExtractFigureError,
+  approximationTally,
   assertReplaceableFile,
   assertWritableOutput,
   labelKey,
   parseArguments,
+  pathApproximations,
   poseBounds
 } from "../tools/extract-figure.mjs";
 
@@ -121,6 +123,113 @@ test("an ordinary file and a missing file are both replaceable", () => {
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
+});
+
+/**
+ * A shapes map shaped exactly the way `extractFigure` builds one: ordinary
+ * `DefineShape` entries carrying their own per-shape counters, plus baked morph
+ * entries keyed `"<id>@<ratio>"`.
+ *
+ * ► **The morph entry carrying NO counters is the bug, not a quirk of this
+ *   fixture.** `morphKeyFor` wrote `{bounds, morph, ratio, paths}` and the
+ *   manifest's tally summed each entry's `approximatedByKind` — which for all
+ *   290 baked morphs was `undefined`, contributed nothing through `?? {}`, and
+ *   left the paths in `shapes.json` uncounted in the file a human reads. Both
+ *   halves are written here so the tally is checked against the pack it will
+ *   actually meet.
+ */
+function mixedShapes() {
+  return {
+    59: {
+      bounds: { xMin: 0, xMax: 1, yMin: 0, yMax: 1 },
+      approximated: 1,
+      approximatedByKind: { gradient: 1 },
+      paths: [
+        { d: "M0 0Z", approximated: "gradient" },
+        { d: "M0 0Z", approximated: null }
+      ]
+    },
+    "1105@0": {
+      bounds: { xMin: 0, xMax: 1, yMin: 0, yMax: 1 },
+      morph: 1105,
+      ratio: 0,
+      paths: [
+        { d: "M0 0Z", approximated: "gradient" },
+        { d: "M0 0Z", approximated: "bitmap" },
+        { d: "M0 0Z", approximated: null }
+      ]
+    }
+  };
+}
+
+test("THE MANIFEST'S TALLY COUNTS AN APPROXIMATED MORPH PATH, which it used not to", () => {
+  // ► This summed `shape.approximatedByKind` and the 290 baked morph entries
+  //   have no such field, so an approximated morph path reached `shapes.json`
+  //   and reached no tally — a pack of morphs alone reported `total: 0` against
+  //   data holding two. That is the arena-walls defect one shape-kind over, and
+  //   it is the sixth recurrence on this project.
+  //
+  //   **DEAD against the installed build and fixed anyway:** re-counted with
+  //   `parseMorphShape`, its 44 morphs carry 97 fills and every one is SOLID,
+  //   so nothing there can be marked approximated today and the manifest's 8
+  //   was right by luck. It stops being luck on any build with a gradient in a
+  //   morph, and nothing would have said so.
+  const tally = approximationTally(mixedShapes());
+  assert.equal(tally.total, 3, "two gradients and a bitmap, one of each from the morph");
+  assert.deepEqual(tally.byKind, { gradient: 2, bitmap: 1 });
+  assert.equal(tally.paths, 5);
+});
+
+test("a pack of MORPHS ALONE tallies its approximations rather than reading zero", () => {
+  // The sharpest form of the same defect, and the one worth a test of its own:
+  // with no ordinary shape present to contribute a counter, the old sum had
+  // nothing to add up and reported a clean pack.
+  const shapes = mixedShapes();
+  const morphsOnly = { "1105@0": shapes["1105@0"] };
+  const tally = approximationTally(morphsOnly);
+  assert.notEqual(tally.total, 0, "a tally of zero over approximated data is the whole defect");
+  assert.equal(tally.total, 2);
+  assert.deepEqual(tally.byKind, { gradient: 1, bitmap: 1 });
+  assert.equal(tally.paths, 3);
+});
+
+test("the tally IGNORES a per-shape counter that disagrees with the shape's own paths", () => {
+  // ► A number written beside the data is not the data. This is what makes the
+  //   manifest recomputable rather than merely copied: a per-shape counter that
+  //   has drifted — stale, hand-edited, or written by an older extractor —
+  //   cannot move the manifest's total.
+  const shapes = {
+    7: {
+      approximated: 99,
+      approximatedByKind: { gradient: 99 },
+      paths: [{ d: "M0 0Z", approximated: "bitmap" }]
+    }
+  };
+  assert.deepEqual(approximationTally(shapes), { paths: 1, total: 1, byKind: { bitmap: 1 } });
+});
+
+test("an empty or absent pack tallies zero rather than throwing, because --report runs before anything is written", () => {
+  assert.deepEqual(approximationTally({}), { paths: 0, total: 0, byKind: {} });
+  assert.deepEqual(approximationTally(undefined), { paths: 0, total: 0, byKind: {} });
+  assert.deepEqual(approximationTally({ 1: {} }), { paths: 0, total: 0, byKind: {} });
+});
+
+test("pathApproximations is the per-shape invoice, and it is derived rather than remembered", () => {
+  assert.deepEqual(
+    pathApproximations([
+      { approximated: "gradient" },
+      { approximated: "gradient" },
+      { approximated: "bitmap" },
+      { approximated: null },
+      {}
+    ]),
+    { approximated: 3, approximatedByKind: { gradient: 2, bitmap: 1 } }
+  );
+  // A shape that approximates nothing still SAYS so, with an empty invoice
+  // rather than a missing one — the distinction the morph entries lacked.
+  assert.deepEqual(pathApproximations([{ approximated: null }]), { approximated: 0, approximatedByKind: {} });
+  assert.deepEqual(pathApproximations([]), { approximated: 0, approximatedByKind: {} });
+  assert.deepEqual(pathApproximations(undefined), { approximated: 0, approximatedByKind: {} });
 });
 
 test("an unknown flag THROWS rather than running a different job and reporting it as this one", () => {

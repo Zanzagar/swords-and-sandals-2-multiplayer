@@ -168,6 +168,154 @@
  * is the invention this whole file exists to avoid; if the frame reads as too
  * empty when somebody looks at it, the lever is `SS2_CAMERA.bands` and the
  * change should be recorded as authored rather than folded in as derived.
+ *
+ * ## THE UI BAR, AND THE SENTENCE THAT WAS FALSE FOR AS LONG AS IT EXISTED
+ *
+ * The panel layer's note used to read *"the bottom UI bar, 641 x 27, and it
+ * carries live text this renderer draws itself"*. **This renderer has never
+ * drawn a glyph.** Not one file under `src/render/` CALLS `fillText` — grep it
+ * and every hit, in `text.js` and in this comment, is prose — and `text.js`
+ * emits path operations rather than calling it at all. The whole arena path has
+ * exactly one real `fillText`, at `tools/arena/main.js:1498`, and it draws a
+ * combatant's NAME above their head. The bar has always rendered as its plate
+ * art and two empty boxes.
+ *
+ *   **Re-derive that with `grep -n`, not `grep -c`**, which is the mistake this
+ *   paragraph made in its first draft: a COUNT does not distinguish a call from
+ *   a sentence about one, and the first version of this very note cited a count
+ *   of 0 for a file that mentions `fillText` three times.
+ *
+ * ► **WHAT THE BAR ACTUALLY PLACES IS SIX THINGS, AND FOUR OF THEM DRAW.**
+ *   Sprite 1531's only frame, resolved with `resolveTimeline` and flattened:
+ *
+ * ```text
+ *   depth  char  instance         kind    at (bar px)     what it is
+ *       1   488  myFootprint      sprite  (  0.00, -1.00)  plate, x6.41 y0.140
+ *       3   488  myFootprint      sprite  (  0.00, -2.55)  plate, x6.41 y0.0155
+ *       5  1527  soundvar         text    ( 91.00,  3.00)  the sound readout
+ *       6  1528  tooltips_text    text    (  2.00,  3.00)  the tooltips readout
+ *       7  1529  (unnamed)        sprite  ( 92.95, -3.60)  the sound BUTTON
+ *       9  1530  (unnamed)        sprite  (  2.45, -2.50)  the tooltips BUTTON
+ * ```
+ *
+ *   All four sprites bottom out on the same shape, char 487 (a 100 x 178.55px
+ *   rectangle), so the bar is one plate and two inset boxes drawn four times at
+ *   four scales. **The two boxes are the buttons, not the text** — the fields
+ *   sit UNDER them at depths 5 and 6.
+ *
+ * ► **AND `flattenFrame` SAYS SO ITSELF.** Both text placements come back with
+ *   `unsupported: "text"`, so `extract-props.mjs` honestly reports them and
+ *   drops them — `assets/props/props.json`'s `panel` holds four shape ops and
+ *   nothing else. Nothing lied; the note did.
+ *
+ * ► **THE BAR IS NOT THE ARENA'S, IT IS THE WHOLE GAME'S.** Depth 438 carries
+ *   char 1531 on root frames **10 through 270** — 261 of the movie's 270 — so
+ *   every screen in the build wears it, and frame 221 is only where this file
+ *   meets it. Its `tx` is -20 twips on frame 10 and -10 on 11..270, which is
+ *   why the table above says -0.50 and why that number is stated per-frame
+ *   rather than as "the bar's x".
+ *
+ * ## WHAT THE BUILD WRITES INTO THE TWO FIELDS, and it is not what they hold
+ *
+ * Both fields are addressed by INSTANCE name and `.text`; the `DefineEditText`
+ * `variable` field is the empty string on both, so nothing is bound by
+ * variable. Measured with `--references` against the oracle:
+ *
+ * ```text
+ *   1527 soundvar        baked "sound:ON\r"    written "sound:on" / "sound:off"
+ *   1528 tooltips_text   baked "tooltips:off"  written "Tooltips:on" / "Tooltips:off"
+ * ```
+ *
+ * ► **EVERY RUNTIME WRITE DISAGREES WITH THE BAKED STRING IN CASE**, in both
+ *   fields and in opposite directions — the sound field is baked upper and
+ *   written lower, the tooltips field baked lower and written capitalised. So
+ *   "the bar reads `sound:ON` / `tooltips:off`", which is what the living head
+ *   has recorded, is true of the SHIPPED FRAME and false of every state the
+ *   player can reach. A renderer that hard-coded either pair would be right
+ *   about exactly one moment of the game.
+ *
+ * ► **`soundvar` IS A FUNCTION OF `_root.pSound`.** `sprite:1531/frame:1/
+ *   DoAction@0x3d3686` sets `_root.pSound = "on"` (`+0x0109`) and defines
+ *   `_root.toggleSound` (`+0x0117`), whose two arms set `setVolume(0)` +
+ *   `pSound = "off"` + `soundvar.text` (`+0x0170`) and `setVolume(100)` +
+ *   `pSound = "on"` + `soundvar.text` (`+0x01a0`). It is called from the
+ *   depth-7 button's own clip action (`instance:7/clip-action:0 +0x0023`).
+ *
+ * ► **`tooltips_text` IS A FUNCTION OF A BOOLEAN, AND IT IS NOT THE TOOLTIP
+ *   LINE.** The depth-9 button's clip action flips `tooltips`, then writes
+ *   `"Tooltips:on"` (`+0x00bd`) or `"Tooltips:off"` (`+0x00e2`). The actual
+ *   tooltip text goes somewhere else entirely: `_root.tooltips(tooltip_text,
+ *   tool_dur, toolx, tooly)` (defined at `root/frame:10/DoAction@0x3c3178`)
+ *   writes `tooltip_box.tooltip` (`+0x020f`) and moves `tooltip_box` to the
+ *   cursor. **So this field is a toggle LABEL, and reading it as "the tooltip
+ *   line" — which is
+ *   what a name like `tooltips_text` invites — would put every hint in the game
+ *   on the wrong object.**
+ *
+ * ## TWO MORE READOUTS ARE WRITTEN AND THE BUILD PLACES NEITHER
+ *
+ * The same frame-1 script writes `gfxvar.text = "graphics:high"` (`+0x00e7`)
+ * and `_root.fiz_info_panel.fullscreenvar.text` (`+0x01ea`, `+0x0209`), and
+ * `_root.toggleFS` (`+0x021d`) writes `fullscreenvar` twice more.
+ *
+ * ► **NEITHER NAME IS AN INSTANCE ANYWHERE IN THE BUILD.** Byte-scanned over
+ *   all 7,586,504 bytes: `gfxvar` occurs ONCE, at `0x3d3691`, and
+ *   `fullscreenvar` ONCE, at `0x3d3734` — both inside that one script's
+ *   constant pool. Walking every sprite's and the root's display list for a
+ *   placement named either finds none. So `GetVariable`/`GetMember` yields
+ *   `undefined` and every one of those writes lands on `undefined.text`.
+ *   `toggleFS` occurs once — its own definition — so it is never called either,
+ *   and `gfxvar` has no OFF state to be written: scanning the whole file for
+ *   `graphics:` followed by letters returns ONE hit, `graphics:high` at
+ *   `0x3d369d`. (That scan was first written into this comment as a regexp
+ *   literal, whose closing delimiter ended the block comment and broke the
+ *   module — a one-character reminder that a docstring is still code.)
+ *
+ * ► **THE WHOLE SET, SCANNED RATHER THAN LISTED FROM MEMORY.** Exactly NINE
+ *   colon-joined readout strings exist in the oracle: `sound:ON` (baked, and
+ *   the only one with a trailing `\r`), `sound:off`, `sound:on`;
+ *   `tooltips:off` (baked), `Tooltips:on`, `Tooltips:off`; and
+ *   `graphics:high`, `fullscreen:on`, `fullscreen:off`. **Six of the nine can
+ *   reach a screen and three cannot**, because the three belong to the two
+ *   readouts the build never places.
+ *
+ * ► **THIS IS WHERE "FOUR FIELDS" CAME FROM, AND IT IS WHY THE COUNT MATTERS.**
+ *   The panel the build's code was written against has four readouts; the panel
+ *   it ships has two. Anyone reading the script rather than the display list
+ *   counts four and is wrong about the picture. They are declared below as
+ *   `SS2_UI_BAR_UNPLACED` and counted, rather than omitted — an absence nobody
+ *   counted is the failure this project has now recorded six times.
+ *
+ * ## SO THE SEAM IS: IDENTITY AND PLACEMENT HERE, GLYPHS IN `text.js`
+ *
+ * `uiBarReadoutsFor` deliberately draws nothing and imports nothing.
+ *
+ * ► **THIS FILE IS THE ARENA'S GEOMETRY AND ITS LAYER STACK**, which is exactly
+ *   what "which field, at what stage coordinate, whose value is a function of
+ *   what" is; it is NOT a type renderer, and `text.js` already is one. Importing
+ *   `text.js` here would put the only edge in the wrong direction — the text
+ *   renderer is a leaf that knows nothing about arenas, and it should stay one.
+ *   So `fieldsPlacedIn` is INJECTED, the way `propOpsFor` already is in
+ *   `arenaScreenLayersFor`, and for the same stated reason: the pack format
+ *   lives in exactly one file. A caller composes the two:
+ *
+ * ```js
+ *   const bar = uiBarReadoutsFor(pack, fieldsPlacedIn, { sound: "sound:on" });
+ *   for (const readout of bar.readouts) {
+ *     const ops = fieldOpsFor(pack, readout.field,
+ *       { matrix: readout.matrix, text: readout.text ?? undefined });
+ *   }
+ * ```
+ *
+ * ► **AND NO STRING THE BUILD DISPLAYS IS A CONSTANT IN THIS FILE.** All nine
+ *   above are quoted in this comment as MEASUREMENTS, with the offsets they
+ *   were read at, and `test/render-arena-backdrop.test.js` asserts that none of
+ *   them has drifted down into the declarations. A readout's live value comes from the caller; passing `text:
+ *   undefined` to `fieldOpsFor` makes the PACK's baked string the fallback,
+ *   which is the game's own opening frame and is the pack's business, not this
+ *   module's. A clone with no licensed copy gets an empty readout list and a
+ *   tally that says two are missing, never a throw and never a picture of a bar
+ *   with nothing owed on it.
  */
 
 /** No pack, or a pack with nothing this file can draw, is not an error. */
@@ -232,6 +380,86 @@ export const SS2_GROUND_LINE = SS2_ARENA_ORIGIN.y + 200;
  *   clone with no extraction still runs.
  */
 export const RANK_DEPTH_FACTOR = 1;
+
+/**
+ * Twips per stage pixel — the SWF format's own constant, applied to the `tx`
+ * and `ty` a placement matrix carries.
+ *
+ * ► **RESTATED RATHER THAN IMPORTED FROM `text.js`, ON PURPOSE.** That module
+ *   exports the same 20 under its own name because it needs it for four
+ *   different unit conversions. Importing it here would create the one edge
+ *   this file's UI-bar seam exists to avoid — see the header — for a number
+ *   that is fixed by the file format and cannot drift. It is private, so there
+ *   are not two exported spellings of one constant for a caller to choose
+ *   between.
+ */
+const TWIPS_PER_STAGE_PIXEL = 20;
+
+/**
+ * THE UI BAR'S READOUTS: which text characters sprite 1531 places, and what
+ * each one's value is a function of in the build.
+ *
+ * **No string the bar displays is here.** `valueOf` names the key a caller
+ * supplies a value under; `drivenBy` and `site` name where the build computes
+ * it, so the claim is checkable against the oracle rather than believed. The
+ * four strings themselves are quoted in this file's header, as measurements
+ * with their offsets.
+ *
+ * ► **`tooltips_text` IS THE TOGGLE'S LABEL, NOT THE TOOLTIP LINE**, and the
+ *   name says otherwise, which is why it is written down. The hint text goes to
+ *   `tooltip_box.tooltip` via `_root.tooltips(text, dur, x, y)`, a different
+ *   object on a different timeline.
+ *
+ * `x` and `y` are the placement the build gives each field INSIDE the bar, in
+ * pixels, stated here so a clone with no pack still knows the layout. They are
+ * re-derived from the pack whenever there is one — `uiBarReadoutsFor` prefers
+ * the pack's own matrix and says which it used.
+ */
+export const SS2_UI_BAR_READOUTS = Object.freeze([
+  Object.freeze({
+    field: 1527, instance: "soundvar", depth: 5, valueOf: "sound",
+    x: 91, y: 3,
+    drivenBy: "_root.pSound, through _root.toggleSound",
+    site: "sprite:1531/frame:1/DoAction@0x3d3686 +0x0170 / +0x01a0",
+    button: 1529
+  }),
+  Object.freeze({
+    field: 1528, instance: "tooltips_text", depth: 6, valueOf: "tooltips",
+    x: 2, y: 3,
+    drivenBy: "the tooltips flag the depth-9 button flips",
+    site: "sprite:1531/frame:1/instance:9/clip-action:0 +0x00bd / +0x00e2",
+    button: 1530
+  })
+]);
+
+/**
+ * THE TWO READOUTS THE BUILD'S OWN SCRIPT WRITES AND THE BUILD NEVER PLACES.
+ *
+ * ► **AN ABSENCE NOBODY COUNTED IS THIS PROJECT'S SIGNATURE DEFECT**, so these
+ *   are declared rather than omitted. Each name occurs exactly ONCE in the
+ *   oracle's 7,586,504 bytes, inside sprite 1531's frame-1 constant pool, and
+ *   walking every sprite's and the root's display list finds no placement named
+ *   either. So each write lands on `undefined.text` and changes nothing on the
+ *   screen.
+ *
+ * **This is where a count of FOUR fields comes from.** Read the script and the
+ * bar has four readouts; read the display list and it has two. The script is
+ * the older document.
+ */
+export const SS2_UI_BAR_UNPLACED = Object.freeze([
+  Object.freeze({
+    instance: "gfxvar", valueOf: "graphics",
+    site: "sprite:1531/frame:1/DoAction@0x3d3686 +0x00e7",
+    byteOffset: 0x3d3691, occurrences: 1,
+    note: "written once, unconditionally; scanning the file for graphics:* finds one string, not two"
+  }),
+  Object.freeze({
+    instance: "fullscreenvar", valueOf: "fullscreen",
+    site: "sprite:1531/frame:1/DoAction@0x3d3686 +0x01ea / +0x0209, and _root.toggleFS +0x025b / +0x0284",
+    byteOffset: 0x3d3734, occurrences: 1,
+    note: "toggleFS is defined at +0x021d and its name occurs once, so it is never called either"
+  })
+]);
 
 /**
  * THE SIX OBJECTS OF ROOT FRAME 221, in the build's own depth order.
@@ -305,9 +533,17 @@ export const SS2_ARENA_SCREEN_LAYERS = Object.freeze([
     note: "weather; frames 1-9 are empty and that is the clip at rest"
   }),
   Object.freeze({
+    // ► **THE NOTE HERE USED TO SAY THE RENDERER DREW THE BAR'S TEXT. IT NEVER
+    //   HAS.** What draws is the plate: four placements of shape 487 at four
+    //   scales, 641 x 27 of art, plus two BUTTONS — which is what the empty
+    //   boxes are. The two `DefineEditText` fields under them come back from
+    //   `flattenFrame` as `unsupported: "text"` and are dropped, so the bar has
+    //   always rendered wordless. `readouts` is the description that replaces
+    //   the claim; `uiBarReadoutsFor` resolves it against a pack.
     order: 7, depth: 438, character: 1531, instance: "fiz_info_panel", prop: "panel",
     space: "stage", behindFighters: false, x: -0.5, y: 401, scale: 1,
-    note: "the bottom UI bar, 641 x 27, and it carries live text this renderer draws itself"
+    readouts: SS2_UI_BAR_READOUTS,
+    note: "the bottom UI bar: 641 x 27 of plate and buttons, plus two text fields NOTHING here draws"
   }),
   Object.freeze({
     order: 8, depth: 1193, character: 646, instance: null, prop: "border",
@@ -874,4 +1110,159 @@ export function splitArenaScreen(layers) {
 /** Whether a pack holds enough of the arena screen to be worth drawing. */
 export function hasArenaScreen(pack, propOpsFor) {
   return arenaScreenLayersFor(pack, propOpsFor).length > 0;
+}
+
+/**
+ * WHAT THE BOTTOM BAR SHOWS: every readout, where it sits on the STAGE, what
+ * its value is a function of, and — counted, in the same record — what this
+ * engine cannot supply.
+ *
+ * ► **IT DRAWS NOTHING AND IT IS NOT A TYPE RENDERER.** The whole of the
+ *   glyph work lives in `src/render/text.js`; this returns the identity and the
+ *   coordinates, which is this file's subject. See the header for the argument.
+ *   `fieldsPlacedIn` is the function of that name from `text.js`, INJECTED the
+ *   way `propOpsFor` is above so the pack format stays in one file and this one
+ *   keeps no edge to the text renderer.
+ *
+ * ► **THE TALLY IS THE POINT, NOT A GARNISH.** A caller must not be able to
+ *   take the picture without the invoice:
+ *
+ * ```text
+ *   declared          how many readouts this module knows the bar to have
+ *   placed            how many of those the pack actually places
+ *   missing           declared - placed: a truncated or absent pack
+ *   valued            how many the caller supplied live text for
+ *   unvalued          placed - valued: drawable, with nothing to say
+ *   unresolved        missing + unvalued, and it is the HEADLINE number
+ *   undeclared        ids the pack places that this module has never heard of
+ *   unplacedInBuild   readouts the build's own script writes into nothing
+ * ```
+ *
+ *   **`unresolved` is deliberately `declared - valued` rather than a count over
+ *   `readouts`.** A count over the returned list reads ZERO on a clone with no
+ *   pack — nothing in the list, nothing unresolved — which is precisely the
+ *   shape of "an approximation that is not counted", the most expensive lesson
+ *   on this project. It cannot be zero while anything is absent.
+ *   `test/render-arena-backdrop.test.js` recomputes every one of these from
+ *   `readouts`, the way `test/extraction-honesty.test.js` recomputes a
+ *   manifest's.
+ *
+ * ► **A READOUT WITH NO VALUE IS `text: null`, NEVER A PLACEHOLDER.** Defaulting
+ *   it to the pack's baked string here would report a live readout where there
+ *   is none, and the baked string is provably not what a running game shows —
+ *   every runtime write in the build disagrees with it in case. A caller that
+ *   deliberately wants the shipped opening frame gets it by passing `text:
+ *   undefined` to `fieldOpsFor`, which falls back to the field's own tag; that
+ *   is the pack's business and it stays there.
+ *
+ * Total, never throwing, for the reason `arenaScreenLayersFor` is: a clone with
+ * no licensed copy must get an empty list and an honest tally rather than a
+ * stack trace.
+ *
+ * @param {object|null} pack             a text pack, or null
+ * @param {Function}    fieldsPlacedIn   `text.js`'s reader, injected
+ * @param {object}      values           live text per `valueOf` key
+ */
+export function uiBarReadoutsFor(pack, fieldsPlacedIn, values = {}) {
+  const layer = SS2_ARENA_SCREEN_LAYERS.find((entry) => entry.character === 1531) ?? null;
+  const bar = Object.freeze({
+    character: 1531,
+    instance: "fiz_info_panel",
+    depth: 438,
+    x: layer ? layer.x : 0,
+    y: layer ? layer.y : 0
+  });
+
+  let placed = [];
+  if (pack && typeof fieldsPlacedIn === "function") {
+    try {
+      placed = fieldsPlacedIn(pack, bar.character) ?? [];
+    } catch {
+      // A pack that throws on this lookup is a pack with no bar, not a crash.
+      placed = [];
+    }
+  }
+  const byId = new Map();
+  for (const entry of placed) {
+    if (entry && Number.isFinite(entry.id)) byId.set(entry.id, entry);
+  }
+
+  const readouts = [];
+  let missing = 0;
+  let valued = 0;
+  for (const declared of SS2_UI_BAR_READOUTS) {
+    const found = byId.get(declared.field) ?? null;
+    if (!found) { missing += 1; continue; }
+    // The pack's matrix is the measurement; the declaration's x/y is the
+    // fallback a clone reads, and the two are reported separately so a
+    // disagreement is visible rather than averaged away.
+    const matrix = Array.isArray(found.matrix) && found.matrix.length === 6 ? found.matrix : null;
+    const x = matrix ? matrix[4] / TWIPS_PER_STAGE_PIXEL : declared.x;
+    const y = matrix ? matrix[5] / TWIPS_PER_STAGE_PIXEL : declared.y;
+    const supplied = values?.[declared.valueOf];
+    const text = typeof supplied === "string" && supplied.length > 0 ? supplied : null;
+    if (text !== null) valued += 1;
+    readouts.push(Object.freeze({
+      field: declared.field,
+      instance: declared.instance,
+      depth: declared.depth,
+      valueOf: declared.valueOf,
+      drivenBy: declared.drivenBy,
+      site: declared.site,
+      button: declared.button,
+      matrix: matrix ? Object.freeze([...matrix]) : null,
+      placedFrom: matrix ? "pack" : "declaration",
+      // Inside the bar…
+      x,
+      y,
+      // …and on the stage, which is where a surface actually paints it. The bar
+      // is a `stage` layer, so no camera term appears here and none should.
+      stageX: bar.x + x,
+      stageY: bar.y + y,
+      // The instance name the pack read off the PlaceObject, kept separate from
+      // the declared one so a rename in the build shows up as a mismatch rather
+      // than being silently overwritten by what this file expected.
+      packName: found.name ?? null,
+      nameMatches: found.name === declared.instance,
+      text,
+      source: text === null ? null : "caller"
+    }));
+  }
+
+  const declaredIds = new Set(SS2_UI_BAR_READOUTS.map((entry) => entry.field));
+  const undeclared = placed
+    .filter((entry) => entry && Number.isFinite(entry.id) && !declaredIds.has(entry.id))
+    .map((entry) => entry.id);
+
+  const declared = SS2_UI_BAR_READOUTS.length;
+  // Counted against what the bar HAS, not against what came back — see above.
+  const unresolved = declared - valued;
+  return Object.freeze({
+    bar,
+    readouts: Object.freeze(readouts),
+    unresolved,
+    unplaced: SS2_UI_BAR_UNPLACED,
+    tally: Object.freeze({
+      declared,
+      placed: readouts.length,
+      missing,
+      valued,
+      unvalued: readouts.length - valued,
+      unresolved,
+      undeclared: Object.freeze(undeclared),
+      unplacedInBuild: SS2_UI_BAR_UNPLACED.length
+    })
+  });
+}
+
+/**
+ * Whether a pack can place the bar's readouts at all — the `hasArenaScreen` of
+ * the UI bar, so a caller can choose its own art without inspecting a tally.
+ *
+ * **It does NOT mean there is anything to say.** A pack can place both fields
+ * while this engine has no value for either, which is the state today; that is
+ * what `unresolved` is for.
+ */
+export function hasUiBarReadouts(pack, fieldsPlacedIn) {
+  return uiBarReadoutsFor(pack, fieldsPlacedIn).readouts.length > 0;
 }

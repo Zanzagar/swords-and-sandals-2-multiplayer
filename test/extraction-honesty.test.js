@@ -121,6 +121,62 @@ for (const pack of PACKS) {
   });
 }
 
+/**
+ * A per-shape invoice, recomputed the same way `countApproximations` recomputes
+ * a pack's. A `function` declaration for the same reason that one is.
+ */
+function invoiceFor(shape) {
+  const byKind = {};
+  for (const entry of shape.paths ?? []) {
+    if (entry.approximated) byKind[entry.approximated] = (byKind[entry.approximated] ?? 0) + 1;
+  }
+  return { approximated: Object.values(byKind).reduce((sum, n) => sum + n, 0), approximatedByKind: byKind };
+}
+
+for (const pack of PACKS) {
+  test(`${pack.name}: a per-entry invoice is carried by EVERY entry or by none, and matches its own paths`, () => {
+    // ► **A PACK THAT INVOICES SOME OF ITS ENTRIES IS WORSE THAN ONE THAT
+    //   INVOICES NONE.** The figure pack carried `approximated` and
+    //   `approximatedByKind` on its 61 ordinary shapes and on NONE of its 290
+    //   baked morphs, so a reader who checked one entry concluded the pack had
+    //   invoices — and `tools/extract-figure.mjs` built the manifest's own
+    //   total by summing a field that 83% of the pack did not have. That is
+    //   how an approximated morph path could reach `shapes.json` and reach no
+    //   tally at all.
+    //
+    //   `props` and `wardrobe` carry no per-entry invoice at all, which is
+    //   uniform and therefore honest: their manifest tallies are recomputed
+    //   above and that is their only count. Adding invoices to
+    //   `tools/extract-props.mjs` or `tools/extract-wardrobe.mjs` later means
+    //   adding them to EVERY entry, and this fails by name if it does not.
+    const data = readJson(pack.data);
+    if (!data) {
+      assert.equal(data, null, `${pack.data} is absent, so there is nothing to check`);
+      return;
+    }
+    const entries = Object.entries(pack.shapesOf(data) ?? {});
+    assert.ok(entries.length > 0, `${pack.name} has no shapes at all, which means the pack is stale`);
+
+    // EITHER field counts as a claim, so half an invoice cannot pass as none.
+    const claiming = entries.filter(([, shape]) =>
+      shape.approximatedByKind !== undefined || shape.approximated !== undefined);
+    const silent = entries.filter(([, shape]) =>
+      shape.approximatedByKind === undefined && shape.approximated === undefined).map(([id]) => id);
+    assert.ok(claiming.length === 0 || silent.length === 0,
+      `${pack.name}: ${claiming.length} of ${entries.length} entries carry a per-entry invoice and ` +
+      `${silent.length} do not (${silent.slice(0, 5).join(", ")}${silent.length > 5 ? ", ..." : ""}). ` +
+      "A partial invoice reads as a complete one.");
+
+    for (const [id, shape] of claiming) {
+      const measured = invoiceFor(shape);
+      assert.deepEqual(shape.approximatedByKind, measured.approximatedByKind,
+        `${pack.name} shape ${id}: its own invoice disagrees with its own paths`);
+      assert.equal(shape.approximated, measured.approximated,
+        `${pack.name} shape ${id}: the total and the kinds must agree with each other too`);
+    }
+  });
+}
+
 test("an approximated path always says WHICH approximation, never just that there was one", () => {
   // ► A bare truthy flag would satisfy the counts above and tell a reader
   //   nothing. The kinds are the actionable part: a gradient needs stops and a

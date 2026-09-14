@@ -47,6 +47,13 @@
  *   sound and art already use.
  * - `text.js` turns the build's own embedded glyph outlines into draw
  *   operations, and `screen.js` turns any of the 26 root screens into them.
+ * - `screen-text.js` is the JOIN between those two, and it is a file rather
+ *   than a caller's for-loop because four things about that seam are silent
+ *   when got wrong — the largest being that `staticTextOpsFor`'s `matrix`
+ *   option REPLACES a `DefineText`'s own matrix instead of composing with it,
+ *   which draws 22 of the 26 screens' 70 static runs up to 94.42 px from where
+ *   the build puts them, inside the screen and perfectly legible. It takes
+ *   `screen.js`'s `textNotDrawn: 187` down to 28 and invoices every one.
  * - `arena-backdrop.js` is the ARENA ITSELF rather than a thing standing in it:
  *   the six objects root frame 221 places, the 1:1 mapping from arena units to
  *   stage pixels that every other coordinate here is expressed in, and the
@@ -79,5 +86,6 @@ export * from "./filters.js";
 export * from "./face.js";
 export * from "./text.js";
 export * from "./screen.js";
+export * from "./screen-text.js";
 export * from "./clip-effects.js";
 export * from "./arena-shell.js";

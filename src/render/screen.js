@@ -116,27 +116,78 @@
  *   screens has a non-zero `alphaOffset` at all**, so every gradient here
  *   folds exactly. `gradientAlphaOffsetApproximated` counts the other case.
  *
- * ## THIS FILE'S COLOUR TRANSFORM IS A DUPLICATE, AND THE TWO DISAGREE
+ * ## THIS FILE'S COLOUR TRANSFORM WAS A DUPLICATE. THERE IS NOW ONE.
  *
- * ► **`src/render/filters.js` LANDED IN THE SAME SESSION WITH
- *   `applyColourTransform`, AND IT ROUNDS WHERE THIS FILE TRUNCATES.** That
- *   file was written by a sibling agent while this one was being measured, so
- *   neither imported the other; the same thing happened to `indexFonts` and
+ * ► **FOLDED ONTO `src/render/filters.js` 2026-09-14.** The RGB half is
+ *   `applyColourTransform`, the alpha half is `applyColourTransformAlpha`, and
+ *   this file's own `channelOf` and its private `transformFill` /
+ *   `transformOpacity` wrappers are gone. The import at the top of this file
+ *   had been sitting here UNUSED since filters.js landed: the two
+ *   implementations were written in the same session by sibling agents,
+ *   neither importing the other, exactly as happened to `indexFonts` and
  *   `parseEditText` in `tools/extract-screens.mjs`, whose header records it.
+ *   An import of a thing a file never calls is what that looks like afterwards.
  *
- * ► **MEASURED, not asserted: 69 of the 1023 hex fills that sit under a colour
- *   transform on these 26 screens come out ONE UNIT apart** between the two.
- *   `#ffffff` at multiplier 0.30078125 is `#4c4c70` here and `#4d4d71` there.
- *   The alpha halves agree.
+ * ► **THE FOLD WAS MEASURED TO MOVE NOTHING, and measurement is the only
+ *   thing that licenses a quiet fold.** Every value this module hands to the
+ *   transform was run through both implementations on the real pack: 27786
+ *   fill sites across the 26 screens, of which **1023 are hex fills sitting
+ *   under a colour transform**, and 27786 alpha sites. **0 differ.** The whole
+ *   emitted operation list — fills, stops, opacities, matrices, counts —
+ *   digests identically before and after. A fold argued from reading rather
+ *   than counted is the fold that moves a pixel.
  *
- * ► **The wire says truncate.** `readColourTransform` in
- *   `tools/swf-display-list.mjs` reads the multiply term as `readSB(bits) /
- *   256`, so the term is signed 8.8 fixed point and the player's own
- *   `(channel * multTerm) >> 8` is an arithmetic shift. `Math.trunc(value *
- *   multiplier) + offset` reproduces that; `Math.round(value * multiplier +
- *   offset)` does not. **Whoever folds these should keep the truncation and
- *   delete one of the two implementations** — one of them is a ±1 error on
- *   every screen it touches, and which one is not a matter of taste.
+ * ► **THE DISAGREEMENT THIS REPLACES, KEPT BECAUSE IT IS THE EVIDENCE.** The
+ *   two did once disagree, because filters.js ROUNDED: **69 of those 1023 hex
+ *   fills came out ONE UNIT apart.** `#ffffff` under multiplier 0.30078125
+ *   with blueOffset 36 is `#4c4c70` floored and `#4d4d71` rounded. Re-measured
+ *   2026-09-14 against the same pack: still 69, still those values, and they
+ *   fall on 13 of the 26 screens with 43 of them on `dungeon` alone.
+ *   `test/render-screen.test.js` now pins the 69, the 1023 and that hex
+ *   against the real pack, so a silent return to rounding turns the suite red
+ *   instead of shifting every tinted screen by one unit.
+ *
+ * ► **FLOOR WON, AND THE WIRE SETTLED IT RATHER THAN TASTE.**
+ *   `readColourTransform` in `tools/swf-display-list.mjs` reads the multiply
+ *   term as `readSB(bits) / 256`, so it is SIGNED 8.8 fixed point and the
+ *   player computes `(channel * multTerm) >> 8` — an ARITHMETIC shift, which
+ *   rounds toward NEGATIVE INFINITY. `Math.floor` reproduces that; `Math.round`
+ *   does not; `Math.trunc` parts company the moment a multiplier goes negative,
+ *   which the signed field permits. **On THIS pack the trunc/floor distinction
+ *   is latent and not exercised** — measured, every RGB multiplier is one of
+ *   0, 0.30078125, 0.5078125, 0.55859375 or 1, and no multiplier anywhere is
+ *   negative, so trunc and floor agree on all 1023. Worth knowing before
+ *   someone "simplifies" floor back to trunc on the evidence of a green suite.
+ *
+ * ► **THE ALPHA HALF IS FLOATING POINT ON PURPOSE, and that survived the
+ *   fold.** `applyColourTransformAlpha` multiplies in 0..1 and divides the
+ *   offset by 255 rather than reconstructing a byte and truncating it, which
+ *   is right HERE for a reason that is a property of this pack rather than of
+ *   the wire: `shapeToPaths` has already rounded every opacity to three
+ *   decimals before it reaches `assets/screens/screens.json`, so the number
+ *   this module holds is not the build's alpha byte and cannot be turned back
+ *   into one. Truncating it would be false precision dressed as fidelity. The
+ *   unit hazard that arithmetic carries — a 0..1 opacity against a 0..255
+ *   offset — is the same class of error as mixing twips and pixels, and both
+ *   are named in this header.
+ *
+ * ► **WHAT DELIBERATELY DID NOT FOLD.** `touchesRgb` below has no counterpart
+ *   in filters.js. `colourTransformApplies` there answers "would this change
+ *   THIS fill"; the question `bitmapColourTransformDropped` has to ask is
+ *   "does this transform carry colour a raster has nowhere to put", which is a
+ *   property of the transform alone and has no fill in it.
+ *
+ * ► **AND THE FOLD FIXED A LATENT DEFECT NOBODY HAD HIT.** A colour transform
+ *   exists in this tree in TWO shapes — the named object
+ *   (`redMultiplier` … `alphaOffset`) that `tools/extract-props.mjs` and this
+ *   screens pack write, and the eight-number ARRAY that
+ *   `tools/extract-figure.mjs` writes. The deleted `transformFill` read the
+ *   named fields off whatever it was given, so an array-shaped transform read
+ *   as all-undefined, fell through `numberOr` to the identity, and was
+ *   DROPPED IN SILENCE — no tint and no tally, this project's standing defect
+ *   wearing a new hat. `colourTransformFrom` accepts both shapes. Measured:
+ *   this pack carries 0 array-shaped transforms, so nothing was ever actually
+ *   lost; the hole was real and unexercised.
  *
  * ## A SCREEN IS ONE FRAME, AND TWO OF THE TWENTY-SIX MOVE
  *
@@ -149,7 +200,11 @@
  */
 
 import { SS2_STAGE } from "./arena-backdrop.js";
-import { applyColourTransform } from "./filters.js";
+import {
+  applyColourTransform,
+  applyColourTransformAlpha,
+  colourTransformFrom
+} from "./filters.js";
 
 /** Never thrown by a reader. Exported so a caller can name the type it isn't getting. */
 export class ScreenError extends Error {
@@ -414,7 +469,16 @@ function emitDrawable(pack, drawable, filtered, blended, approximations, ops) {
     approximations.shapesWithNoPaths += 1;
     return;
   }
-  const colour = drawable.colour ?? null;
+  // ► **NORMALISED ONCE PER PLACEMENT, NOT ONCE PER FILL** — same argument as
+  //   the clip below. `colourTransformFrom` allocates and freezes an
+  //   eight-number array, a shape is many paths sharing one transform, and
+  //   `applyColourTransform` takes that array straight through without
+  //   re-normalising. Measured on the real pack: 780 conversions here against
+  //   the 55572 that handing `drawable.colour` to each call would do — 27786
+  //   fill sites and 27786 alpha sites. It also accepts the eight-number ARRAY
+  //   shape `tools/extract-figure.mjs` writes, which the private implementation
+  //   this replaces read as the identity and dropped in silence.
+  const colour = colourTransformFrom(drawable.colour ?? null);
   const under = { filtered: matchesPrefix(path, filtered), blendMode: blendFor(path, blended) };
   // ► **THE CLIP IS RESOLVED ONCE PER PLACEMENT, NOT ONCE PER PATH** — same as
   //   `propOpsFor`. A shape is many paths sharing one cutter, and building it
@@ -429,11 +493,11 @@ function emitDrawable(pack, drawable, filtered, blended, approximations, ops) {
       approximations.pathsWithoutGeometry += 1;
       continue;
     }
-    const fillOpacity = transformOpacity(numberOr(entry.fillOpacity, 1), colour);
-    const fill = transformFill(entry.fill ?? null, colour);
-    const stroke = transformFill(entry.stroke ?? null, colour);
+    const fillOpacity = applyColourTransformAlpha(numberOr(entry.fillOpacity, 1), colour);
+    const fill = applyColourTransform(entry.fill ?? null, colour);
+    const stroke = applyColourTransform(entry.stroke ?? null, colour);
     const strokeWidth = numberOr(entry.strokeWidth, 0);
-    const strokeOpacity = transformOpacity(numberOr(entry.strokeOpacity, 1), colour);
+    const strokeOpacity = applyColourTransformAlpha(numberOr(entry.strokeOpacity, 1), colour);
     if (under.filtered) approximations.filtersNotApplied += 1;
     if (under.blendMode !== null) approximations.blendModesNotApplied += 1;
     if (entry.bitmap) {
@@ -529,88 +593,26 @@ function clipFor(pack, clip, approximations) {
 /* ------------------------------------------------------------------ */
 
 /**
- * `clamp(value * multiplier + offset)` on one 0..255 channel — Flash's own
- * formula, which is affine and therefore folds into a stop or a flat fill
- * exactly rather than needing a compositing pass.
+ * Whether a normalised transform carries COLOUR — red, green or blue moved at
+ * all — as opposed to moving only alpha.
  *
- * ► **TRUNCATED, NOT ROUNDED, AND THAT IS THE BUILD'S ARITHMETIC.** A
- *   CXFORMWITHALPHA multiply term is 8.8 fixed point and the player computes
- *   `(channel * multTerm) >> 8`, which truncates. `0.5` on `#ff0000` is
- *   `255 * 128 >> 8 = 127`, so `#7f0000` and not `#800000`. Every multiplier on
- *   these 26 screens is in 0..1 so trunc and floor agree here.
+ * ► **NOT THE SAME QUESTION AS `colourTransformApplies` IN `filters.js`, and
+ *   that is why this one is still here after the fold.** That one asks "would
+ *   this transform change THIS fill", which needs a fill to answer. The
+ *   question `bitmapColourTransformDropped` has to ask is "does this transform
+ *   carry colour a raster has nowhere to put", and there is no fill in it: a
+ *   bitmap's op reports `fill: "none"` precisely so the raster is not painted
+ *   over, so the fill-shaped question answers no for every bitmap and would
+ *   count nothing forever. An approximation counted by a predicate that cannot
+ *   fire is the six-times-repeated defect on this project in its purest form.
  *
- * ► **IT SAID `Math.trunc` "BECAUSE THE WIRE TERM IS SIGNED", AND THAT REASON
- *   ARGUES FOR THE OPPOSITE FUNCTION.** The player computes
- *   `(channel * multTerm) >> 8`, and `>>` is an ARITHMETIC shift — it rounds
- *   toward NEGATIVE INFINITY. So on exactly the negative multiplier the old
- *   comment was guarding against, `Math.trunc` (toward zero) is the one that
- *   parts company with the build and `Math.floor` is the one that matches.
- *   Corrected 2026-09-14; the shared implementation lives in
- *   `src/render/filters.js` and floors.
- *
- * ► **The ALPHA half is deliberately NOT done this way** — see
- *   `transformOpacity`. `shapeToPaths` rounds an opacity to three decimals
- *   before it reaches this pack, so reconstructing a byte to truncate would be
- *   false precision dressed as fidelity.
+ * Takes the eight-number array `colourTransformFrom` returns, so it reads both
+ * pack shapes rather than only the named-object one.
  */
-function channelOf(value, multiplier, offset) {
-  const out = Math.floor(value * numberOr(multiplier, 1)) + numberOr(offset, 0);
-  return out < 0 ? 0 : out > 255 ? 255 : out;
-}
-
-/** Whether a transform touches red, green or blue at all. */
 function touchesRgb(colour) {
   if (!colour) return false;
-  return numberOr(colour.redMultiplier, 1) !== 1
-    || numberOr(colour.greenMultiplier, 1) !== 1
-    || numberOr(colour.blueMultiplier, 1) !== 1
-    || numberOr(colour.redOffset, 0) !== 0
-    || numberOr(colour.greenOffset, 0) !== 0
-    || numberOr(colour.blueOffset, 0) !== 0;
-}
-
-/**
- * A `#rrggbb` fill with the transform folded in.
- *
- * `"none"` and anything that is not a six-digit hex comes back UNCHANGED: a
- * bitmap fill is reported as `fill: "none"` with the raster beside it, and
- * rewriting that to a colour would hide the bitmap behind a flat square — the
- * failure mode `propOpsFor`'s header records.
- */
-function transformFill(fill, colour) {
-  if (typeof fill !== "string" || fill.length !== 7 || fill[0] !== "#") return fill;
-  if (!colour || !touchesRgb(colour)) return fill;
-  const red = Number.parseInt(fill.slice(1, 3), 16);
-  const green = Number.parseInt(fill.slice(3, 5), 16);
-  const blue = Number.parseInt(fill.slice(5, 7), 16);
-  if (!Number.isFinite(red) || !Number.isFinite(green) || !Number.isFinite(blue)) return fill;
-  return "#"
-    + hex2(channelOf(red, colour.redMultiplier, colour.redOffset))
-    + hex2(channelOf(green, colour.greenMultiplier, colour.greenOffset))
-    + hex2(channelOf(blue, colour.blueMultiplier, colour.blueOffset));
-}
-
-function hex2(value) {
-  return value.toString(16).padStart(2, "0");
-}
-
-/**
- * An opacity in 0..1 with the alpha half of the transform folded in.
- *
- * The offset is in the wire's 0..255 units and the opacity is in 0..1, which is
- * the conversion a reader writing `opacity * multiplier + offset` would get
- * wrong by a factor of 255 and would never see, because every alphaOffset on
- * these 26 screens is zero.
- *
- * Floating point rather than the integer truncation `channelOf` uses, because
- * the opacity reaching this pack has already been rounded to three decimals by
- * `shapeToPaths` — it is not the build's alpha byte and cannot be turned back
- * into one.
- */
-function transformOpacity(opacity, colour) {
-  if (!colour) return opacity;
-  const out = opacity * numberOr(colour.alphaMultiplier, 1) + numberOr(colour.alphaOffset, 0) / 255;
-  return out < 0 ? 0 : out > 1 ? 1 : out;
+  return colour[0] !== 1 || colour[1] !== 1 || colour[2] !== 1
+    || colour[4] !== 0 || colour[5] !== 0 || colour[6] !== 0;
 }
 
 /**
@@ -631,7 +633,7 @@ function transformGradient(gradient, colour, approximations) {
   if (!colour) return gradient;
   const stops = Array.isArray(gradient.stops) ? gradient.stops : [];
   if (stops.length === 0) return gradient;
-  if (numberOr(colour.alphaOffset, 0) !== 0) {
+  if (colour[7] !== 0) {
     const opacities = new Set(stops.map((stop) => numberOr(stop.opacity, 1)));
     if (opacities.size > 1) approximations.gradientAlphaOffsetApproximated += 1;
   }
@@ -639,8 +641,8 @@ function transformGradient(gradient, colour, approximations) {
     ...gradient,
     stops: Object.freeze(stops.map((stop) => Object.freeze({
       ...stop,
-      fill: transformFill(stop.fill, colour),
-      opacity: transformOpacity(numberOr(stop.opacity, 1), colour)
+      fill: applyColourTransform(stop.fill, colour),
+      opacity: applyColourTransformAlpha(numberOr(stop.opacity, 1), colour)
     })))
   });
 }
@@ -789,6 +791,11 @@ function hexOf(colour) {
 function opacityOf(colour) {
   if (!colour || typeof colour !== "object" || colour.alpha === undefined) return 1;
   return clampByte(colour.alpha) / 255;
+}
+
+/** Two lower-case hex digits, so `#0a0b0c` never comes back as `#a b c`. */
+function hex2(value) {
+  return value.toString(16).padStart(2, "0");
 }
 
 function clampByte(value) {

@@ -209,6 +209,62 @@ export function buildDepthNames(displayList) {
 }
 
 /**
+ * One path list's own invoice: how many of its paths are drawn as something
+ * simpler than the build draws them, and of which kinds.
+ *
+ * Derived from the paths every time rather than accumulated alongside them, so
+ * a caller cannot build the list and forget the count — which is the whole
+ * failure this project keeps paying for.
+ */
+export function pathApproximations(paths) {
+  const approximatedByKind = {};
+  for (const entry of paths ?? []) {
+    if (entry.approximated) {
+      approximatedByKind[entry.approximated] = (approximatedByKind[entry.approximated] ?? 0) + 1;
+    }
+  }
+  return {
+    approximated: Object.values(approximatedByKind).reduce((sum, count) => sum + count, 0),
+    approximatedByKind
+  };
+}
+
+/**
+ * THE MANIFEST'S TALLY, READ OFF THE PATHS THEMSELVES.
+ *
+ * ► **THIS USED TO SUM EACH SHAPE'S OWN `approximatedByKind` FIELD, AND THE 290
+ *   BAKED MORPH ENTRIES DO NOT HAVE ONE.** `morphKeyFor` writes `{bounds,
+ *   morph, ratio, paths}` and nothing else, so `?? {}` contributed nothing and
+ *   an approximated morph path landed in `shapes.json` while the manifest a
+ *   human reads counted it zero — which is bit for bit the defect this file was
+ *   repaired for once already, one shape-kind over. Reproduced before fixing: a
+ *   pack of morphs alone reported `total: 0` against data holding two.
+ *
+ *   **The effect is DEAD against this oracle and the code was still wrong.**
+ *   Re-measured on the installed build: 44 morph shapes, 97 fills, every one of
+ *   them SOLID — zero gradients, zero bitmaps — so `morphToPaths` cannot
+ *   currently mark anything approximated and the tally reads 8 against data
+ *   holding 8. A modded build in the second install lane, or any morph with a
+ *   gradient in it, makes the undercount real and silent.
+ *
+ * Summing the per-shape fields was also structurally weaker than reading the
+ * paths: it trusted a number written beside the data instead of the data. This
+ * is now the same arithmetic `test/extraction-honesty.test.js` performs, which
+ * is what makes that file's check a check rather than a coincidence.
+ */
+export function approximationTally(shapes) {
+  const byKind = {};
+  let paths = 0;
+  for (const shape of Object.values(shapes ?? {})) {
+    for (const entry of shape.paths ?? []) {
+      paths += 1;
+      if (entry.approximated) byKind[entry.approximated] = (byKind[entry.approximated] ?? 0) + 1;
+    }
+  }
+  return { paths, total: Object.values(byKind).reduce((sum, count) => sum + count, 0), byKind };
+}
+
+/**
  * Everything the extraction needs, without writing a byte.
  *
  * Separated from `main` so the report path and the write path cannot disagree
@@ -270,6 +326,7 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
     }
     if (!definition) return null;
     const frame = morphShapeAt(definition, ratioOf(ratio));
+    const paths = morphToPaths(frame);
     morphShapes[key] = {
       bounds: {
         xMin: px(frame.bounds.xMin), xMax: px(frame.bounds.xMax),
@@ -277,7 +334,13 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
       },
       morph: characterId,
       ratio,
-      paths: morphToPaths(frame)
+      // ► **A MORPH ENTRY USED TO CARRY NO TALLY AT ALL** while every ordinary
+      //   shape entry beside it carried one. A reader of the pack could not
+      //   tell "this morph approximates nothing" from "nobody counted", and
+      //   the manifest's own sum was built out of exactly this missing field.
+      //   The invoice travels with the picture here too.
+      ...pathApproximations(paths),
+      paths
     };
     return key;
   };
@@ -368,13 +431,10 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
         //   then never rolled up into the manifest at all — so `assets/figure/
         //   manifest.json` reported no approximations while eight body
         //   gradients sat in `shapes.json`. Kept per shape AND summed by kind
-        //   below, because "8 approximated" and "8 gradients" lead to different
-        //   next actions.
-        approximated: paths.filter((entry) => entry.approximated).length,
-        approximatedByKind: paths.reduce((byKind, entry) => {
-          if (entry.approximated) byKind[entry.approximated] = (byKind[entry.approximated] ?? 0) + 1;
-          return byKind;
-        }, {}),
+        //   for the manifest, because "8 approximated" and "8 gradients" lead
+        //   to different next actions. The manifest's sum no longer reads these
+        //   fields — it recounts the paths — so the two cannot drift apart.
+        ...pathApproximations(paths),
         paths
       };
     } catch (error) {
@@ -799,11 +859,22 @@ function main(argv) {
   const animationKeys = Object.keys(result.animations);
   const poseCount = animationKeys.reduce((total, key) => total + result.animations[key].poses.length, 0);
 
+  // Counted here rather than beside the manifest, because `--report` returns
+  // before the manifest is built and USED TO SAY NOTHING ABOUT APPROXIMATIONS
+  // AT ALL — a measuring mode that reported the picture and not the invoice.
+  // It walks the PATHS, not the per-shape counters: see `approximationTally`
+  // for the 290 baked morph entries that made those two readings differ.
+  const tally = approximationTally(result.shapes);
+
   console.log(`build      ${file}`);
   console.log(`sha256     ${sha256}${sha256 === ORACLE_SHA256 ? "  (the oracle)" : "  ** NOT the oracle **"}`);
   console.log(`clip       ${result.clip}${result.clipName ? ` (${result.clipName})` : ""}, ${result.frameCount} frames`);
   console.log(`animations ${animationKeys.length} labels, ${poseCount} poses, ${result.placementCount} placements`);
   console.log(`shapes     ${shapeIds.length} distinct, ${result.failures.length} failed to parse`);
+  console.log(
+    `paths      ${tally.paths}, of which ${tally.total} are APPROXIMATED` +
+    `${tally.total > 0 ? ` (${Object.entries(tally.byKind).map(([kind, count]) => `${count} ${kind}`).join(", ")})` : ""}`
+  );
   if (result.morphCount > 0) {
     console.log(`morphs     ${result.morphCount} baked frames — the effects: blood, the charge guard, potions, the heart`);
   }
@@ -858,21 +929,6 @@ function main(argv) {
     console.log(`sound      none — run tools/extract-sounds.mjs to hear the preview`);
   }
 
-  // Summed here rather than in `extractFigure`, because the per-shape numbers
-  // are already on the shapes and a second traversal is cheaper than a second
-  // return value that could drift from them.
-  const approximationTally = (() => {
-    const byKind = {};
-    let paths = 0;
-    for (const shape of Object.values(result.shapes)) {
-      paths += (shape.paths ?? []).length;
-      for (const [kind, count] of Object.entries(shape.approximatedByKind ?? {})) {
-        byKind[kind] = (byKind[kind] ?? 0) + count;
-      }
-    }
-    return { paths, total: Object.values(byKind).reduce((sum, count) => sum + count, 0), byKind };
-  })();
-
   const manifest = {
     tool: "tools/extract-figure.mjs",
     generated: new Date().toISOString(),
@@ -889,11 +945,11 @@ function main(argv) {
       // an approximation that is not counted is indistinguishable from a
       // correct read. `shapeFailures` is what could not be PARSED; this is what
       // parsed and is drawn as something simpler than the build draws it.
-      paths: approximationTally.paths,
-      approximated: approximationTally.total,
+      paths: tally.paths,
+      approximated: tally.total,
       shapeFailures: result.failures.length
     },
-    approximated: approximationTally,
+    approximated: tally,
     sound: sound ? { path: path.relative(REPO_ROOT, options.sound), sha256: sound.sha256 } : null,
     unsupported: result.unsupported,
     colourTransformed: result.colourTransformed,
