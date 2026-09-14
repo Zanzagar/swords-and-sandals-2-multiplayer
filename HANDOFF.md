@@ -8,8 +8,62 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-14 14:00 — five modules exist and two are not drawn yet](docs/handoffs/2026-09-14-1400--five-modules-exist-and-two-are-not-drawn-yet.md).**
+[2026-09-14 17:12 — the screens are drawn, and five are black on purpose](docs/handoffs/2026-09-14-1712--the-screens-are-drawn-and-five-are-black-on-purpose.md).**
 Start there.
+
+► **ALL 26 SCREENS DRAW, AND THE ARENA'S BAR READS ITS OWN WORDS.**
+  `tools/screens/index.html` — `?screen=<name>`, arrows to walk. `help` renders
+  WHOLE: parchment, shield, mace, helm, the return button and **656 glyph
+  operations of readable English in the build's own Goudy Handtooled.** The
+  arena's UI bar reads `TOOLTIPS:OFF   SOUND:ON`. **`src/render/screen-text.js`
+  is the join** and takes `screen.js`'s `textNotDrawn: 187` down to 28.
+
+► **`?probe=1` MAKES A PAGE READ ITS OWN CANVAS BACK**, and it is the only
+  reason "1698 operations painted" and "the canvas is black" got settled instead
+  of argued. It reports distinct colours, opaque pixels, the fit and the
+  placement. **`tools/shot.sh` now takes a PAGE PATH as its fifth argument** —
+  it hardcoded the arena, so a second page could not be shot at all.
+
+► **THE BAR WAS WHITE FOR THE SAME REASON IT WAS WORDLESS, AND THAT IS ONE
+  DEFECT.** `propOpsFor` in `src/render/props.js` drops each placement's colour
+  transform; the plate is `rgb x0, alpha x0.5` and the fields are `#ffffff`.
+  **`tools/arena/main.js` composes it in the SHELL today and says so in its own
+  log panel** — a decision where no test reaches it, which is the arrangement
+  five live defects have come out of. **Ranked first: move it into `props.js`.**
+  It fixes the layers, the arrow trail and the scenery together, and unblocks
+  `bullet_trail`'s 7-frame alpha fade, whose seventh puff should be invisible
+  and currently draws solid.
+
+► **THE FILTERS ARE BLOCKED IN THE EXTRACTORS, NOT THE RENDERER.** The previous
+  handoff ranked "apply the filters" second; the data never leaves
+  `extract-props.mjs` (which discards the `filters`/`blendMode` `flattenFrame`
+  already returns) or `extract-screens.mjs` (which writes `filters: true` where
+  the LIST belongs). The arena page reports `props: NO filter data in the pack`
+  rather than inventing one. **1525 of `townsquare`'s operations — 93% of that
+  screen — sit under a FILTERLIST nothing applies.**
+
+► **ASK WHAT YOUR EVIDENCE COULD POSSIBLY VARY OVER.** The sharpest finding of
+  two waves. A fold was justified by the operation list for all 26 screens
+  digesting byte-identically before and after; a verifier then **deleted the
+  colour transform from gradient stops entirely and the digest did not move**,
+  because all 107 transformed stops sit under ALPHA-ONLY transforms. A digest
+  over data that cannot vary is not evidence. Siblings: an `assert.equal(X, X)`
+  on the only number reporting the bar's two dead readouts, and a headline
+  extractor fix that could be deleted green because **no test called
+  `extractFigure` at all.**
+
+► **`flattenFrame` FREEZES NESTED SPRITES AT FRAME 1, AND ON FIVE SCREENS THAT
+  IS A CLOSED BLACK CURTAIN** — `townsquare` 9, `daybreak`/`special_event`/
+  `magicshop`/`arena_intro` 8 each, against 0 on the six that draw clean. Same
+  root cause as the sky's 8 unreachable gradients, in a second place, now
+  counted per screen as `nestedSpriteFrame1`.
+
+► **TWO BUILD WAVES, 20 AGENTS, 20 RETURNED, 0 DEAD, 0 OWNERSHIP VIOLATIONS —
+  AND ALL TEN VERIFIER VERDICTS PARTIALLY-BROKEN, which is 16 of 16 here.**
+  Four wave-2 tracks existed only to close what wave 1's verifiers broke. One
+  changed NO source file: all eight of its defects were in the test.
+  **I briefed four wrong premises and agents broke all four**, because the
+  briefs numbered them and invited it.
 
 ► **THE ARENA RENDERS THE BUILD'S OWN ART.** Six DISTINCT arenas — measured,
   96-100% different over 2,728 sampled points, with the six sand colours in the
