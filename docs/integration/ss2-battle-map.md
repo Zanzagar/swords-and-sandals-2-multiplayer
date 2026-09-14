@@ -333,13 +333,51 @@ So by `itemglow`, **potency 2 is a flaming weapon, 3 a frosted one, 4 poisoned,
   Until then: the selector is no longer a gap, and the SECOND question it opened
   is written down instead of guessed at.
 
-### The arena screen is BUILT BY ACTIONSCRIPT, not by the timeline (2026-09-13)
+### The arena screen: a timeline backdrop PLUS a construction script (2026-09-13)
 
-**Root frame 221 is labelled `arena` and its display list is EMPTY.** Resolved
-with the project's own display-list reader over the root timeline — which is a
-timeline like any other, it simply is not a `DefineSprite` — frames 214 through
-230 place nothing at all. The screen is assembled by the frame's own
-ActionScript: **488 instructions**, `root/frame:221/DoAction@0x671acd`.
+► **CORRECTED THE SAME EVENING. THIS SECTION FIRST SAID "root frame 221's
+  display list is EMPTY", AND THAT WAS A BUG IN THE READING, NOT A FACT ABOUT
+  THE BUILD.** `resolveTimeline` returns ONE ENTRY PER FRAME OF THE TIMELINE,
+  not one per frame requested — so `resolveTimeline(root, {frames: [221]})`
+  puts frame 221's snapshot at `frames[220]` and `frames[0]` is frame 1, which
+  is `null` because it was not asked for. **I read `frames[0]`, got null, and
+  reported an empty arena.** The same mistake would have been caught by asking
+  for any two frames and noticing they were both empty.
+
+  Two conclusions that were built on it are withdrawn: that "there is no
+  backdrop asset" and that the arena is *only* a recipe. Both halves are real.
+
+**Root frame 221 is labelled `arena` and places SIX objects**, and then runs
+**488 instructions** of `DoAction@0x671acd` that attach more into one of them.
+
+```text
+  depth    1  char  643   640 x  420 px at (0, 0)      THE BACKDROP — the
+                                                       stage size to the pixel
+  depth    3  char 1729  8417 x 1032 px, 200 frames    the crowd, animated
+  depth   59  char 2249 24177 x 2489 px, 334 frames    `_root.arena` itself,
+                                        at (320, 167)  which the script fills
+  depth   80  char 1816             17 frames          an overlay
+  depth  438  char 1531  1919 x  210 px                a UI bar (carries text)
+  depth 1193  char  646   732 x  505 px                the frame/border
+```
+
+#### The mapping this settles, and it is the one the scale question needed
+
+The stage is **640 x 420**. `_root.arena` sits at **(320, 167)** and is
+UNSCALED. Its `gladiators` child is created at `(0, 0)` of it, and the fighters
+are constructed at `_x = ±250`, `_y = 200` inside that.
+
+```text
+  one arena unit          = one stage pixel      (every transform is 1.00)
+  arena origin            = (320, 167) on stage
+  the GROUND LINE         = stage y 167 + 200    = 367
+  a fighter at _x ±250    = stage x 70 and 570
+  the rocks at _x ±2160   = far off stage — the arena PANS
+```
+
+**So the backdrop does set the scale, and the scale is 1:1.** The arena content
+is thirty-odd screens wide and the camera follows the fight across it, which is
+what `midway_focus` and `arena.maxscale` are for.
 
 ```text
   _root.arena.gladiators = createEmptyMovieClip(...)
@@ -351,12 +389,11 @@ ActionScript: **488 instructions**, `root/frame:221/DoAction@0x671acd`.
   then skincharacter, _xscale/_yscale from strength, gladiator_dir, shadows
 ```
 
-► **SO THERE IS NO BACKDROP ASSET TO EXTRACT, and looking for one is the wrong
-  shape of question.** The arena is a construction RECIPE. The scenery is two
-  `rockMC` instances and a `midway_focus`; the crowd band lives inside character
-  2249 (`_root.arena` itself, a named instance carrying 334 frames of bout
-  states); and the fighters are two `hero_battle` clips positioned and scaled by
-  the same `physical_size` arithmetic this repository already reproduces.
+► **THE SCRIPT'S HALF is the two `rockMC`, a `midway_focus`, and the two
+  `hero_battle` clips positioned and scaled by the same `physical_size`
+  arithmetic this repository already reproduces. The TIMELINE's half is the
+  backdrop, the crowd, the border and the arena clip itself.** Neither alone is
+  the arena.
 
   **Much of this frame is already modelled**: "Battle entry" step 5 above is
   these same instructions, `ss2PhysicalSize` is the `_xscale`/`_yscale` term,

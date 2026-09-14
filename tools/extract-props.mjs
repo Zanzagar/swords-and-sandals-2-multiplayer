@@ -121,6 +121,31 @@ export const PROP_EXPORTS = Object.freeze([
   },
   {
     /**
+     * ► **THE ARENA SCREEN'S BACKDROP, and it is EXACTLY THE STAGE.** Root
+     *   frame 221 places character 643 at depth 1, `(0, 0)`, unscaled, and it
+     *   measures **640 x 420 px** — the SWF's declared stage, to the pixel. So
+     *   this is the sky and ground the whole fight happens against.
+     */
+    character: 643,
+    name: "backdrop",
+    framesWanted: 1,
+    indexedBy: "frame 1; it has only one",
+    reader: "unread today — see the arena mapping in the battle map"
+  },
+  {
+    /**
+     * ► **THE CROWD, 200 frames of it**, placed at depth 3 and scaled 1.04.
+     *   Frame 1 alone here: the other 199 are the crowd moving, which is a
+     *   second question from what the crowd IS.
+     */
+    character: 1729,
+    name: "crowd",
+    framesWanted: 1,
+    indexedBy: "frame 1 of 200; the rest is its animation",
+    reader: "unread today"
+  },
+  {
+    /**
      * ► **THE ARENA ITSELF, and it is reached by CHARACTER ID because the build
      *   does not export it.** `_root.arena` is character 2249, placed at root
      *   frame 221 as a named INSTANCE — so there is no linkage name to ask for

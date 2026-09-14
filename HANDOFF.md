@@ -35,13 +35,19 @@ THIS file is right and the handoff was frozen at the end of its session.
   `test/render-projectile.test.js` — the game rule rests on a property of the
   renderer's arithmetic, so that is where a changed launch height would be
   caught.
-► **THE ARENA IS A CONSTRUCTION SCRIPT, NOT A BACKDROP, and I asked for a
-  backdrop twice.** Root frame 221 is labelled `arena` and its display list is
-  EMPTY; the screen is 488 instructions of `attachMovie` — two `rockMC`, a
-  `midway_focus`, two `hero_battle` clips, then `skincharacter` and the
-  `_xscale` from strength. **Half of it is already modelled** ("Battle entry"
-  step 5 IS these instructions), and what is missing is the SCENERY. It is all
-  STATIC, so `extract-clip-effects.mjs`'s technique reaches it.
+► **THE ARENA IS A TIMELINE BACKDROP *PLUS* A CONSTRUCTION SCRIPT, and my
+  "the display list is EMPTY" was a BUG IN MY READING.** `resolveTimeline`
+  returns one entry per frame OF THE TIMELINE, not per frame requested, so
+  `frames[0]` was frame 1 (null, unasked-for) and not frame 221. Root frame 221
+  places SIX objects — **char 643 is the backdrop and is 640x420, the stage size
+  to the pixel**; 1729 is the animated crowd; 2249 is `_root.arena` at
+  (320, 167), which the 488-instruction script then fills with two `rockMC`, a
+  `midway_focus` and the two fighters.
+► **AND THAT SETTLES THE SCALE QUESTION: IT IS 1:1.** Every transform on that
+  frame is 1.00, so **one arena unit is one stage pixel**; the arena origin is
+  (320, 167); **the ground line is stage y 367**; a fighter at `_x ±250` lands
+  at stage x 70 and 570; the rocks at ±2160 are far off stage, which is what
+  `midway_focus` and `maxscale` pan across.
 ► **AN AVM1 INTERPRETER IS TRACTABLE — 58 distinct opcodes build-wide — AND IS
   NOT NEEDED YET.** Every effect call and every arena `attachMovie` pushes
   literals, so an interpreter would compute tables that can be read out. What
