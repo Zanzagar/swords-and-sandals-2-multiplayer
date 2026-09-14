@@ -458,6 +458,17 @@ export function paintExtractedFigure(pack, options = {}) {
         fill: tint(entry.fill, colour),
         fillOpacity: tintAlpha(entry.fillOpacity ?? 1, colour),
         fillRule: entry.fillRule ?? "evenodd",
+        // ► **THIS IS THE ARENA-WALL DEFECT, UNFIXED, ON THE FIGHTER.** Both
+        //   loops in this file copied named fields one at a time and neither
+        //   copied `approximated` — so eight body gradients and three wardrobe
+        //   ones arrived at the painter as ordinary flat fills with no trace of
+        //   what was lost. `src/render/props.js` had the identical bug and its
+        //   own comment states the rule: an approximation that is not carried
+        //   is indistinguishable from a correct read. Found by the asset census
+        //   on 2026-09-14, in the same sweep that found it here.
+        ...(entry.gradient ? { gradient: entry.gradient } : {}),
+        ...(entry.bitmap ? { bitmap: entry.bitmap } : {}),
+        ...(entry.approximated ? { approximated: entry.approximated } : {}),
         stroke: entry.stroke ? tint(entry.stroke, colour) : null,
         strokeOpacity: tintAlpha(entry.strokeOpacity ?? 1, colour),
         // ► **IN THE SHAPE'S OWN PIXELS, UNSCALED, and the first version

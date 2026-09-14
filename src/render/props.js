@@ -130,6 +130,7 @@ export function propOpsFor(pack, { linkage, frame = 1 } = {}) {
         //   **An approximation that is not carried is indistinguishable from a
         //   correct read.**
         ...(path.bitmap ? { bitmap: path.bitmap } : {}),
+        ...(path.gradient ? { gradient: path.gradient } : {}),
         ...(path.approximated ? { approximated: path.approximated } : {})
       }));
     }

@@ -1030,6 +1030,78 @@ fetch("/assets/bitmaps/manifest.json")
   .catch(() => { /* no bitmaps extracted; the vector layer still draws */ });
 
 /**
+ * A canvas gradient built in the SWF's own canonical gradient space.
+ *
+ * ► **BUILT AS A TRANSFORM, NOT AS TWO MAPPED ENDPOINTS, AND THE BUILD FORCES
+ *   THAT.** A SWF gradient is defined over a fixed square running -16384..16384
+ *   in its OWN space, and the fill matrix maps that square into the shape. It
+ *   is tempting to map the two endpoints into shape space and call
+ *   `createLinearGradient` on them — and that is wrong for any matrix with
+ *   skew, because the ramp would stay perpendicular to its own axis when the
+ *   build's does not. Measured on the oracle: **four linear gradients are
+ *   genuinely skewed** (chars 808, 813 and 1516 twice, at 54-76 degrees), and
+ *   **two radials are strongly anisotropic** — char 1227 at 26:1 and char 1230
+ *   at 1:22 — which `createRadialGradient` cannot express at all with one
+ *   radius. Applying the matrix handles all six uniformly and needs no cases.
+ *
+ * ► **±16384 IS NOT TWIPS.** It is the gradient's own space; the matrix is what
+ *   turns it into shape twips, and the path is in shape PIXELS — so the matrix
+ *   is divided by 20 exactly as a bitmap fill's is. Reading the square as twips
+ *   puts a factor of twenty in the wrong place and was a premise the asset
+ *   census had to break.
+ *
+ * ► **`offset` IS `ratio / 255`, never "evenly spaced"** — only 75 of the
+ *   build's 97 gradients span the full range; the rest start as late as 175 or
+ *   end as early as 131 and rely on PAD, which is canvas's default too.
+ *   Measured: every one of the 97 is spread PAD and interpolation normal-RGB,
+ *   so nothing here emulates either.
+ */
+const GRADIENT_SQUARE = 16384;
+
+function paintGradientFill(operation, path) {
+  const g = operation.gradient;
+  if (!g || !Array.isArray(g.stops) || g.stops.length === 0) return false;
+  const m = g.matrix;
+  context.save();
+  context.transform(
+    m.a / TWIPS_PER_PIXEL, m.b / TWIPS_PER_PIXEL,
+    m.c / TWIPS_PER_PIXEL, m.d / TWIPS_PER_PIXEL,
+    m.tx / TWIPS_PER_PIXEL, m.ty / TWIPS_PER_PIXEL
+  );
+  const ramp = g.type === "radial"
+    ? context.createRadialGradient(0, 0, 0, 0, 0, GRADIENT_SQUARE)
+    : context.createLinearGradient(-GRADIENT_SQUARE, 0, GRADIENT_SQUARE, 0);
+  for (const stop of g.stops) {
+    // `addColorStop` refuses a non-finite offset and throws, which would take
+    // the whole frame down — a clamp is cheaper than a try/catch per stop.
+    const offset = Math.min(1, Math.max(0, Number.isFinite(stop.offset) ? stop.offset : 0));
+    ramp.addColorStop(offset, rgbaOf(stop.fill, stop.opacity ?? 1));
+  }
+  context.fillStyle = ramp;
+  // The path was built in SHAPE space and we are in GRADIENT space, so it
+  // cannot simply be filled here — it is the clip, and the ramp covers it.
+  context.restore();
+  context.save();
+  context.clip(path, operation.fillRule ?? "evenodd");
+  context.transform(
+    m.a / TWIPS_PER_PIXEL, m.b / TWIPS_PER_PIXEL,
+    m.c / TWIPS_PER_PIXEL, m.d / TWIPS_PER_PIXEL,
+    m.tx / TWIPS_PER_PIXEL, m.ty / TWIPS_PER_PIXEL
+  );
+  context.fillStyle = ramp;
+  context.fillRect(-GRADIENT_SQUARE, -GRADIENT_SQUARE, GRADIENT_SQUARE * 2, GRADIENT_SQUARE * 2);
+  context.restore();
+  return true;
+}
+
+/** `#rrggbb` plus an opacity, as the `rgba()` canvas wants for a gradient stop. */
+function rgbaOf(fill, opacity) {
+  if (typeof fill !== "string" || fill[0] !== "#" || fill.length !== 7) return `rgba(0,0,0,${opacity})`;
+  const value = Number.parseInt(fill.slice(1), 16);
+  return `rgba(${(value >> 16) & 255},${(value >> 8) & 255},${value & 255},${opacity})`;
+}
+
+/**
  * Paint one path's BITMAP fill, clipped to the path.
  *
  * ► **THE MATRIX MAPS BITMAP PIXELS TO SHAPE TWIPS, AND THE PATH IS IN SHAPE
@@ -1092,6 +1164,9 @@ function paintArenaLayer(layer, fit) {
     if (operation.bitmap) {
       context.globalAlpha = operation.fillOpacity ?? 1;
       paintBitmapFill(operation, path);
+    } else if (operation.gradient) {
+      context.globalAlpha = 1;
+      paintGradientFill(operation, path);
     } else if (operation.fill && operation.fill !== "none") {
       context.globalAlpha = operation.fillOpacity ?? 1;
       context.fillStyle = operation.fill;

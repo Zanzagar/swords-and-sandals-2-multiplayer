@@ -170,16 +170,35 @@ function readFillStyle(reader, withAlpha) {
   const type = reader.readUI8();
   if (type === 0x00) return { kind: "solid", colour: readColour(reader, withAlpha) };
   if (type === 0x10 || type === 0x12 || type === 0x13) {
-    reader.skipMatrix();
+    const matrix = reader.readFillMatrix();
     // GRADIENT: spread/interpolation/count packed into one byte.
-    const count = reader.readUI8() & 0x0f;
+    // ► **THE TOP FOUR BITS USED TO BE MASKED AWAY WITH NO RECORD.** Measured on
+    //   the oracle, all 97 gradients are spread 0 (PAD) and interpolation 0
+    //   (normal RGB), which are also canvas's own defaults — so nothing is lost
+    //   TODAY. The code could not tell you that, and a modded build using
+    //   reflect or a linear-RGB ramp would have lost it in silence. Reported
+    //   now, so the second install lane says something instead of nothing.
+    const packed = reader.readUI8();
+    const spread = (packed >> 6) & 0x03;
+    const interpolation = (packed >> 4) & 0x03;
+    const count = packed & 0x0f;
     const stops = [];
     for (let index = 0; index < count; index += 1) {
       const ratio = reader.readUI8();
       stops.push({ ratio, colour: readColour(reader, withAlpha) });
     }
-    if (type === 0x13) reader.readUI16();
-    return { kind: "gradient", stops };
+    // A FOCAL gradient's extra field. Measured: this build has ZERO of them
+    // (87 linear, 10 radial, 0 focal), so this line has never executed against
+    // the oracle — recorded rather than budgeted for.
+    const focalPoint = type === 0x13 ? reader.readUI16() / 256 : 0;
+    return {
+      kind: "gradient",
+      // 0x10 linear, 0x12 radial, 0x13 focal-radial.
+      gradientType: type === 0x10 ? "linear" : "radial",
+      focal: type === 0x13,
+      focalPoint,
+      matrix, spread, interpolation, stops
+    };
   }
   if (type === 0x40 || type === 0x41 || type === 0x42 || type === 0x43) {
     const bitmapId = reader.readUI16();
@@ -448,7 +467,36 @@ export function shapeToPaths(shape) {
       const style = styles[index - 1];
       let paint = { fill: "none", opacity: 1, approximated: null };
       if (style?.kind === "solid") paint = { ...cssColour(style.colour), approximated: null };
-      else if (style?.kind === "gradient") paint = { ...cssColour(style.stops[0]?.colour), approximated: "gradient" };
+      else if (style?.kind === "gradient") {
+        // ► **THE FLAT FALLBACK IS STILL THE FIRST STOP, AND IT IS STILL WRONG
+        //   IN BOTH DIRECTIONS.** Measured on the oracle: 3 gradients START at
+        //   alpha 0, so a caller taking stop[0] draws NOTHING (helmet116's
+        //   plume vanishes that way, and the splash screen's two); and 19 FADE
+        //   to alpha 0, so taking stop[0] draws them FULLY OPAQUE — the arena's
+        //   own 648x440 purple veil becomes a solid slab. The fallback is kept
+        //   for a surface that cannot make a gradient, and the real thing is
+        //   handed on beside it.
+        paint = {
+          ...cssColour(style.stops[0]?.colour),
+          approximated: "gradient",
+          gradient: {
+            type: style.gradientType,
+            focal: style.focal,
+            focalPoint: style.focalPoint,
+            matrix: style.matrix,
+            spread: style.spread,
+            interpolation: style.interpolation,
+            // ► **`ratio / 255`, NEVER "evenly spaced".** Only 75 of 97
+            //   gradients span the full 0..255: the rest start as late as 175
+            //   or end as early as 131 and rely on PAD. Spacing stops evenly
+            //   is wrong on 22 of them.
+            stops: style.stops.map((stop) => ({
+              offset: stop.ratio / 255,
+              ...cssColour(stop.colour)
+            }))
+          }
+        };
+      }
       else if (style?.kind === "bitmap") {
         // ► **THIS USED TO BE `fill: "none"` AND THAT WAS A SILENT DROP.** The
         //   SS2 arena's walls and crowds are bitmap fills, so every arena
@@ -476,6 +524,7 @@ export function shapeToPaths(shape) {
         fillRule: "evenodd",
         approximated: paint.approximated,
         ...(paint.bitmap ? { bitmap: paint.bitmap } : {}),
+        ...(paint.gradient ? { gradient: paint.gradient } : {}),
         stroke: null,
         strokeWidth: 0
       });
