@@ -223,6 +223,32 @@ function roundMatrix(matrix) {
  * fighter's own limbs go through — frame 1, which is where a piece with no
  * timeline of its own sits and where `attachMovie` leaves it.
  */
+/**
+ * HOW MANY REGIONS THIS EXTRACTION COULD NOT READ EXACTLY, BY KIND.
+ *
+ * ► **`failures` IS NOT THIS LIST, AND TREATING IT AS ONE LOST A HELMET.**
+ *   `failures` holds what could not be PARSED. This holds what parsed and is
+ *   DRAWN AS SOMETHING SIMPLER than the build draws it — a gradient flattened
+ *   to one stop, a bitmap fill with no image. helmet116's plume is the case
+ *   that proves the difference: it parsed perfectly, shipped in the pack, was
+ *   reported as a success, and rendered at opacity zero.
+ *
+ *   **An approximation that is not counted is indistinguishable from a correct
+ *   read**, and a count that is never printed is not a count.
+ */
+function tallyApproximations(shapes) {
+  const byKind = {};
+  let paths = 0;
+  for (const shape of Object.values(shapes)) {
+    for (const path of shape.paths ?? []) {
+      paths += 1;
+      if (path.approximated) byKind[path.approximated] = (byKind[path.approximated] ?? 0) + 1;
+    }
+  }
+  const total = Object.values(byKind).reduce((sum, count) => sum + count, 0);
+  return { paths, total, byKind };
+}
+
 export function extractWardrobe(buffer) {
   const { characters, names } = indexCharacters(buffer);
 
@@ -296,6 +322,14 @@ export function extractWardrobe(buffer) {
     pieces,
     shapes,
     failures,
+    // ► **WHAT PARSED BUT IS DRAWN AS SOMETHING SIMPLER.** This list used not to
+    //   exist, and its absence hid a real piece: helmet116's plume is a 4-stop
+    //   radial whose FIRST stop is `#ffffff` at alpha 0, so the flat fallback
+    //   drew an 1104-character path at opacity ZERO — shipped in the pack,
+    //   reported as a success, and invisible. `failures` holds what could not be
+    //   PARSED; this holds what could not be drawn EXACTLY, and conflating them
+    //   is how an extraction reports zero while losing a helmet.
+    approximated: tallyApproximations(shapes),
     multiFrame: frames,
     unsupported: Object.fromEntries(
       [...unsupported.entries()].map(([kind, ids]) => [kind, [...ids].sort((left, right) => left - right)])
@@ -390,7 +424,14 @@ function main(argv) {
     generated: new Date().toISOString(),
     source: { path: file, sha256, isOracle: sha256 === ORACLE_SHA256 },
     slots: WARDROBE_SLOTS,
-    counts: { pieces: total, shapes: Object.keys(result.shapes).length, failures: result.failures.length },
+    counts: {
+      pieces: total,
+      shapes: Object.keys(result.shapes).length,
+      paths: result.approximated.paths,
+      approximated: result.approximated.total,
+      failures: result.failures.length
+    },
+    approximated: result.approximated,
     pieces: result.pieces,
     shapes: result.shapes,
     unsupported: result.unsupported,

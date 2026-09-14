@@ -326,6 +326,34 @@ function roundMatrix(matrix) {
  * array here would put an off-by-one between this data and every offset in the
  * map that indexes it, which is the kind of seam that goes wrong silently.
  */
+/**
+ * HOW MANY REGIONS THIS EXTRACTION COULD NOT READ EXACTLY, BY KIND.
+ *
+ * ► **THE RULE THIS PROJECT LEARNED THE EXPENSIVE WAY.** The arena's walls were
+ *   invisible for months because `shapeToPaths` emitted `approximated: "bitmap"`
+ *   with `fill: "none"`, the field died at the next seam, and this tool's own
+ *   report said ZERO failures. Fixing the seam was necessary and not
+ *   sufficient: the REPORT a human reads still said zero while the data carried
+ *   eleven. **An approximation that is not counted is indistinguishable from a
+ *   correct read**, and a count that is never printed is not a count.
+ *
+ *   `failures` remains what it always was — things that could not be PARSED.
+ *   This is the other list: things that parsed and are drawn as something
+ *   simpler than the build draws them.
+ */
+function tallyApproximations(shapes) {
+  const byKind = {};
+  let paths = 0;
+  for (const shape of Object.values(shapes)) {
+    for (const path of shape.paths ?? []) {
+      paths += 1;
+      if (path.approximated) byKind[path.approximated] = (byKind[path.approximated] ?? 0) + 1;
+    }
+  }
+  const total = Object.values(byKind).reduce((sum, count) => sum + count, 0);
+  return { paths, total, byKind };
+}
+
 export function extractProps(buffer) {
   const { characters, names } = indexCharacters(buffer);
   const byName = new Map([...names].map(([id, name]) => [name, id]));
@@ -466,7 +494,7 @@ export function extractProps(buffer) {
     }
   }
 
-  return { props, shapes, failures };
+  return { props, shapes, failures, approximated: tallyApproximations(shapes) };
 }
 
 function main(argv) {
@@ -485,7 +513,7 @@ function main(argv) {
     );
   }
 
-  const { props, shapes, failures } = extractProps(buffer);
+  const { props, shapes, failures, approximated } = extractProps(buffer);
 
   fs.mkdirSync(options.out, { recursive: true });
   const payload = JSON.stringify({ props, shapes }, null, 1);
@@ -502,6 +530,9 @@ function main(argv) {
       reader: prop.reader
     }])),
     shapeCount: Object.keys(shapes).length,
+    // Printed AND stored, because a count that only exists in memory is the
+    // same silence the `failures` list was built to break.
+    approximated,
     failures
   }, null, 1));
 
@@ -512,7 +543,11 @@ function main(argv) {
       `${String(prop.frameCount).padStart(3)} frames, ${prop.distinctFrames} distinct  (${prop.indexedBy})`
     );
   }
-  lines.push(`  ${Object.keys(shapes).length} shapes, ${failures.length} failures`);
+  const approxParts = Object.entries(approximated.byKind).map(([kind, count]) => `${count} ${kind}`);
+  lines.push(
+    `  ${Object.keys(shapes).length} shapes, ${approximated.paths} paths, ${failures.length} failures, ` +
+    `${approximated.total} approximated${approxParts.length ? ` (${approxParts.join(", ")})` : ""}`
+  );
   if (options.report) for (const failure of failures.slice(0, 20)) lines.push(`    ! ${failure.linkage}: ${failure.message}`);
   process.stdout.write(`${lines.join("\n")}\n`);
 }

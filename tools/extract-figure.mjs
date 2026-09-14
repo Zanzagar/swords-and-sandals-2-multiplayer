@@ -363,7 +363,18 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
           xMin: px(shape.bounds.xMin), xMax: px(shape.bounds.xMax),
           yMin: px(shape.bounds.yMin), yMax: px(shape.bounds.yMax)
         },
+        // ► **A COUNT THAT COLLAPSES THE KIND IS HALF A COUNT.** This was one
+        //   integer folding gradient, bitmap and line-fill together, and it was
+        //   then never rolled up into the manifest at all — so `assets/figure/
+        //   manifest.json` reported no approximations while eight body
+        //   gradients sat in `shapes.json`. Kept per shape AND summed by kind
+        //   below, because "8 approximated" and "8 gradients" lead to different
+        //   next actions.
         approximated: paths.filter((entry) => entry.approximated).length,
+        approximatedByKind: paths.reduce((byKind, entry) => {
+          if (entry.approximated) byKind[entry.approximated] = (byKind[entry.approximated] ?? 0) + 1;
+          return byKind;
+        }, {}),
         paths
       };
     } catch (error) {
@@ -847,6 +858,21 @@ function main(argv) {
     console.log(`sound      none — run tools/extract-sounds.mjs to hear the preview`);
   }
 
+  // Summed here rather than in `extractFigure`, because the per-shape numbers
+  // are already on the shapes and a second traversal is cheaper than a second
+  // return value that could drift from them.
+  const approximationTally = (() => {
+    const byKind = {};
+    let paths = 0;
+    for (const shape of Object.values(result.shapes)) {
+      paths += (shape.paths ?? []).length;
+      for (const [kind, count] of Object.entries(shape.approximatedByKind ?? {})) {
+        byKind[kind] = (byKind[kind] ?? 0) + count;
+      }
+    }
+    return { paths, total: Object.values(byKind).reduce((sum, count) => sum + count, 0), byKind };
+  })();
+
   const manifest = {
     tool: "tools/extract-figure.mjs",
     generated: new Date().toISOString(),
@@ -859,8 +885,15 @@ function main(argv) {
       poses: poseCount,
       placements: result.placementCount,
       shapes: shapeIds.length,
+      // The rule this whole run enforces, cashed out in the file a human reads:
+      // an approximation that is not counted is indistinguishable from a
+      // correct read. `shapeFailures` is what could not be PARSED; this is what
+      // parsed and is drawn as something simpler than the build draws it.
+      paths: approximationTally.paths,
+      approximated: approximationTally.total,
       shapeFailures: result.failures.length
     },
+    approximated: approximationTally,
     sound: sound ? { path: path.relative(REPO_ROOT, options.sound), sha256: sound.sha256 } : null,
     unsupported: result.unsupported,
     colourTransformed: result.colourTransformed,
