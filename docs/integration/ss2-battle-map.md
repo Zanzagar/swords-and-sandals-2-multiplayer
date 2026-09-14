@@ -264,6 +264,42 @@ Nothing in the ranged phase re-checks ammunition either: the ranged branch of
 negative. In ordinary play the auto-swap below fires first; a capture harness
 that drives `getphase` directly can reach the defect.
 
+### The arena screen is BUILT BY ACTIONSCRIPT, not by the timeline (2026-09-13)
+
+**Root frame 221 is labelled `arena` and its display list is EMPTY.** Resolved
+with the project's own display-list reader over the root timeline — which is a
+timeline like any other, it simply is not a `DefineSprite` — frames 214 through
+230 place nothing at all. The screen is assembled by the frame's own
+ActionScript: **488 instructions**, `root/frame:221/DoAction@0x671acd`.
+
+```text
+  _root.arena.gladiators = createEmptyMovieClip(...)
+  ….gladiators.attachMovie("midway_focus", "midway_focus", 6)
+  ….gladiators.attachMovie("rockMC", "rockLeft",  200)
+  ….gladiators.attachMovie("rockMC", "rockRight", 201)
+  ….gladiators.attachMovie("hero_battle", "arena_hero",    …)
+  ….gladiators.attachMovie("hero_battle", "arena_villain", …)
+  then skincharacter, _xscale/_yscale from strength, gladiator_dir, shadows
+```
+
+► **SO THERE IS NO BACKDROP ASSET TO EXTRACT, and looking for one is the wrong
+  shape of question.** The arena is a construction RECIPE. The scenery is two
+  `rockMC` instances and a `midway_focus`; the crowd band lives inside character
+  2249 (`_root.arena` itself, a named instance carrying 334 frames of bout
+  states); and the fighters are two `hero_battle` clips positioned and scaled by
+  the same `physical_size` arithmetic this repository already reproduces.
+
+  **Much of this frame is already modelled**: "Battle entry" step 5 above is
+  these same instructions, `ss2PhysicalSize` is the `_xscale`/`_yscale` term,
+  and `src/adapter/slot-layout.js` is the placement. What is NOT yet read out is
+  the scenery — the two rocks, their coordinates, and the crowd.
+
+► **AND IT IS STATIC, like the fighter clip's effect calls.** Every
+  `attachMovie` above pushes a literal linkage name, instance name and depth. So
+  the same technique `tools/extract-clip-effects.mjs` uses — read the call
+  sites, refuse anything that is not a literal — reaches it, and an AVM1
+  interpreter is not what stands between this engine and the arena's scenery.
+
 ### The arrow itself: launch, flight, trail and impact (byte-read 2026-09-13)
 
 **The build models the projectile, and none of it was in this document.** All
