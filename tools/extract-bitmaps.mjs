@@ -156,6 +156,37 @@ function pngChunk(type, data) {
 }
 
 /**
+ * A SWF alpha PLANE as an RGBA PNG whose alpha channel IS the plane.
+ *
+ * ► **THE OBVIOUS ENCODING IS THE WRONG ONE, AND IT COST A BLACK BOX ROUND THE
+ *   EMPEROR'S THRONE.** The first version wrote the plane as an 8-bit
+ *   GREYSCALE png — white where opaque, black where clear — which looks exactly
+ *   like a mask and reads exactly like a mask to a human. **Canvas compositing
+ *   does not read luminance.** `destination-in` keeps the destination wherever
+ *   the SOURCE'S ALPHA is non-zero, and a greyscale PNG has no alpha channel at
+ *   all, so every pixel was fully opaque and the mask did nothing.
+ *
+ *   The symptom was a JPEG's black backing square drawn over the arena — and it
+ *   had a second, sneakier face: the crowd's awning gaps came out black, which
+ *   I first diagnosed as "the sky layer is not drawing". One bug, two
+ *   explanations, and the wrong one was the plausible one.
+ *
+ * So the plane goes into the ALPHA channel, with the colour channels left white
+ * so that the file is also legible to a human opening it.
+ */
+export function encodeAlphaPng(width, height, plane) {
+  const pixels = Buffer.alloc(width * height * 4);
+  for (let index = 0; index < width * height; index += 1) {
+    const at = index * 4;
+    pixels[at] = 255;
+    pixels[at + 1] = 255;
+    pixels[at + 2] = 255;
+    pixels[at + 3] = plane[index];
+  }
+  return encodePng(width, height, 6, pixels);
+}
+
+/**
  * A minimal PNG encoder — enough for a greyscale alpha mask and for RGBA.
  *
  * Written here rather than taken as a dependency because `package.json`
@@ -311,7 +342,7 @@ export function extractBitmaps(buffer) {
           //   would need a JPEG decoder node does not ship, and a tool that
           //   guesses at that would be inventing pixels.
           alphaPng: alpha && alpha.length >= size.width * size.height
-            ? encodePng(size.width, size.height, 0, alpha.subarray(0, size.width * size.height))
+            ? encodeAlphaPng(size.width, size.height, alpha.subarray(0, size.width * size.height))
             : null
         };
         if (alpha && !bitmaps[id].alphaPng) {
