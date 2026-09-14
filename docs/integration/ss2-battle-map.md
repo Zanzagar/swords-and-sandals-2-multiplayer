@@ -264,6 +264,75 @@ Nothing in the ranged phase re-checks ammunition either: the ranged branch of
 negative. In ordinary play the auto-swap below fires first; a capture harness
 that drives `getphase` directly can reach the defect.
 
+### The weapon enchantment selector is `itemglow`, and it keys on POTENCY (2026-09-13)
+
+**Found, after four sessions of being recorded as a gap.** The standing note
+said `updatecharacter` contains no `gotoAndStop` at all and told the next reader
+to start from the other readers of `weapon_enchantment_type`. That was the right
+instruction and this is where it leads.
+
+`skincharacter` (root frame 35 `DoAction@0x40bf76`) picks the slot and calls it:
+
+```text
+  if (equipped_weapon == 1)                                        +0x1ae7
+    itemglow(weapon, weapon_enchantment_type,
+                     weapon_enchantment_potency)                   +0x1b16
+  else if (equipped_weapon == 2)                                   +0x1b29
+    itemglow(weapon, secondary_weapon_enchantment_type,
+                     secondary_weapon_enchantment_potency)         +0x1b58
+```
+
+`itemglow(whichitem, enchant_type, enchant_potency)` is defined at
+`root/frame:35/DoAction@0x3fa76f` `+0x0011`, and its body is a two-level chain
+of `gotoAndStop` on the weapon clip:
+
+```text
+  potency < 2                     gotoAndStop(1)     no glow      +0x005f
+  potency == 2 && type == 1/2/3   gotoAndStop(2/3/4)              +0x0094…
+  potency == 3 && type == 1/2/3   gotoAndStop(5/6/7)              +0x0111…
+  potency == 4 && type == 1/2/3   gotoAndStop(8/9/10)             +0x018e…
+  potency == 5 && type == 1/2/3   gotoAndStop(11/12/13)           +0x020b…
+```
+
+which is `frame = (potency - 2) * 3 + type + 1`, and 1 below potency 2.
+
+**The outer test is on `register:3` and the inner on `register:2`.** The
+function's own `DefineFunction2` names its parameters
+`(whichitem, enchant_type, enchant_potency)`, and the call site's push order
+resolves through `CallMethod` to `arg1 = weapon, arg2 = type, arg3 = potency` —
+so the outer, coarse selector is **POTENCY**.
+
+#### And that puts it in tension with the damage path, which is recorded and NOT resolved
+
+Character 703 (`weapon0`) carries thirteen frames and four labels, each spanning
+exactly the three frames one potency tier uses:
+
+```text
+  flame    frames  2-4        poison   frames  8-10
+  frost    frames  5-7        wraith   frames 11-13
+```
+
+So by `itemglow`, **potency 2 is a flaming weapon, 3 a frosted one, 4 poisoned,
+5 wraith** — and `enchant_type` 1-3 chooses a variant within the tier.
+
+► **BUT `damagecharacter`'S ENCHANTMENT PROC KEYS THE CONDITION ON *TYPE*, with
+  values 2-5**: type 2 -> `burning`, 3 -> `frozen`, 4 -> `poison`, 5 ->
+  `life_stolen` (§"The enchantment effect is a SKIPPED TURN"). Those four
+  conditions line up with the four labels one-for-one — flame/burning,
+  frost/frozen, poison/poison, wraith/life_stolen — but they are selected by a
+  **different field, over a different range**, from the one the glow uses.
+
+  **Both readings are byte-verified and this document does not pick between
+  them.** One of three things is true: the two fields carry the same number in
+  practice on every reachable gladiator, the art and the effect genuinely
+  disagree for some loadouts, or one of the two is a build defect. **A capture
+  of a gladiator with a known enchantment settles it and nothing else does** —
+  the shop is where `weapon_enchantment_type` and `_potency` are written, and
+  neither has been observed at runtime.
+
+  Until then: the selector is no longer a gap, and the SECOND question it opened
+  is written down instead of guessed at.
+
 ### The arena screen is BUILT BY ACTIONSCRIPT, not by the timeline (2026-09-13)
 
 **Root frame 221 is labelled `arena` and its display list is EMPTY.** Resolved
