@@ -342,6 +342,8 @@ export function applyCommands(scene, commands) {
            * table.
            */
           artFrame: Number.isFinite(command.artFrame) ? command.artFrame : null,
+          /** The target's own body extent; the flight stops at it, not in it. */
+          targetSize: Number.isFinite(command.targetSize) ? command.targetSize : 0,
           // The ACTION this arrow belongs to, carried through because a surface
           // that holds its gate open for the flight needs to know which token
           // to hold — and reading it back off the command stream instead would

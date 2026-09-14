@@ -76,6 +76,7 @@
 
 import { EliminationEvent } from "../team/elimination.js";
 import { ss2ArrowFrameFor, ss2RangedWeaponFor } from "../team/ss2-weapon-table.js";
+import { ss2PhysicalSize } from "../team/ss2-rules.js";
 import { BATTLE_RESULT_PENDING_TYPE } from "../team/settlement.js";
 import { bindingPlanFor, resultLabelsFor } from "./slot-layout.js";
 import { GLADIATOR_CLIP_ROOT, HERO_SIDE, isPlainVanillaObject } from "./vanilla-fields.js";
@@ -634,6 +635,16 @@ function projectileFor(wire, combatants, event) {
     projectile,
     /** 1-based, as `gotoAndStop` indexes it, or null when the bow is unknown. */
     artFrame: ss2ArrowFrameFor(bow),
+    /**
+     * The TARGET's `physical_size`, so the flight ends at its body rather than
+     * inside it — the owner watched an arrow clip into the model.
+     *
+     * `80 + round(strength / 1.5)` (`battlevalues` `+0x30f1`), taken from the
+     * projection's own stats rather than re-stated here: it is the same number
+     * the walk clamp uses to stop a gladiator against a body, and two copies of
+     * it could disagree.
+     */
+    targetSize: ss2PhysicalSize(target),
     // ► **`y` IS ARENA DEPTH AND IS CARRIED EVEN WHEN NULL**, the same rule the
     //   combatant projection follows for `x` and `y`: present on every command
     //   so two surfaces commit to one shape, and `null` meaning "this rule set

@@ -317,47 +317,102 @@ test("a one-lane arena flies a flat depth, and an unmodelled one flies none", ()
 /* Pitch and trail                                                     */
 /* ------------------------------------------------------------------ */
 
-test("a bombard pitches nose-up, levels at the apex and noses down; a snipe never pitches", () => {
-  // The build carries `bullet._rotation` and hands it to every trail puff
-  // (`+0x7205`) but never assigns it in the action code — it is the clip's own
-  // tween there. Here it is DERIVED from the velocity, which is the only honest
-  // source: an arrow points where it is going.
-  const flight = shot({ from: { x: -600, y: 200 }, to: { x: 600, y: 200 } });
+test("a bombard TUMBLES and a snipe lies FLAT — the build's rotation, not a pitch", () => {
+  // ► **THIS REPLACES AN INVENTION, AND THE OWNER SAW THE INVENTION.** What
+  //   stood here pinned an angle derived from the velocity vector, on the
+  //   reasoning that "an arrow points where it is going", and on a report that
+  //   the build "never assigns `bullet._rotation` in the action code". **That
+  //   report was wrong** — it assigns it at `+0x7498`, `+0x74b0` and `+0x74f3`,
+  //   all inside the bullet's own `onEnterFrame`, past where the read stopped.
   //
-  // ► **THE ANGLE IS THE VELOCITY VECTOR'S OWN, in the arena's frame**, so a
-  //   renderer drawing an arrow along +x and rotating by it gets the head
-  //   leading in both directions. The first version returned a pitch with the
-  //   sign folded by `direction`, which made every LEFT-flying arrow leave the
-  //   bow nose-DOWN — invisible until somebody watched the blue side shoot,
-  //   and caught here rather than there.
+  //   ```text
+  //     sniperight   _rotation =  90                      +0x7498
+  //     snipeleft    _rotation = -90                      +0x74b0
+  //     bombard      bulletrotus = round(bulletlife * gravity * 2 / Xvelocity)
+  //                  _rotation   = ±bulletrotus, clamp 170
+  //   ```
   //
-  //   So "nose-up" is the VERTICAL component being positive, which is the claim
-  //   in both directions; the raw angle is near 0 flying right and near pi
-  //   flying left, and comparing those two numbers directly would be comparing
-  //   two different things.
-  const rise = (flight_, t) => Math.sin(projectileAt(flight_, t).rotation);
-  const launch = rise(flight, 0);
-  const apex = rise(flight, flight.flightFrames / 2);
-  const landing = rise(flight, flight.flightFrames);
+  //   **The art is VERTICAL** — the arrow shape is 11.4 x 58.4 px — so rotation
+  //   0 points at the sky and the ±90 is what lays a snipe flat.
+  const degrees = (flight, t) => Math.round((projectileAt(flight, t).rotation * 180) / Math.PI);
 
-  assert.ok(launch > 0, `it leaves nose-up: ${launch}`);
-  assert.ok(Math.abs(apex) < Math.abs(launch), "and levels off at the top");
-  assert.ok(landing < 0, `and comes down nose-first: ${landing}`);
-  // A lob is symmetric: it lands as steeply as it left.
-  assert.ok(Math.abs(Math.abs(landing) - launch) < 0.2, "and the descent mirrors the climb");
-
-  const leftward = shot({ from: { x: 600, y: 200 }, to: { x: -600, y: 200 } });
-  assert.ok(rise(leftward, 0) > 0, "the blue side's arrows leave nose-up as well");
-  assert.ok(rise(leftward, leftward.flightFrames) < 0, "and come down nose-first as well");
-  assert.ok(
-    Math.cos(projectileAt(leftward, 0).rotation) < 0,
-    "and they point LEFT, or the head is on the wrong end"
-  );
-
-  const snipe = shot({ kind: ProjectileKind.SNIPE });
+  const snipe = shot({ kind: ProjectileKind.SNIPE, from: { x: -600, y: 200 }, to: { x: 600, y: 200 } });
   for (let t = 0; t <= snipe.flightFrames; t += 1) {
-    assert.equal(projectileAt(snipe, t).rotation, 0, "a flat shot has no pitch to report");
+    assert.equal(degrees(snipe, t), 90, `a snipe holds a constant 90 at t=${t}`);
   }
+
+  // ► **`bulletlife` ACCUMULATES DISTANCE, NOT FRAMES** — `bulletlife +=
+  //   Xvelocity` from a start of **1** (`+0x73d9`, `+0x6ede`) — so the velocity
+  //   divides straight back out and the tumble is `round(4t + 4/Xvelocity)`:
+  //   four degrees a frame however fast the shot, plus a sub-degree offset from
+  //   that start of 1.
+  //
+  //   **The first version of this asserted a flat `4t` and asserted it across
+  //   three flights that all had the SAME velocity** — every `shot()` here
+  //   defaults to sequence 0 — so the cross-velocity claim never fired and the
+  //   offset showed up as an off-by-one. The sequences differ now, and the
+  //   tolerance is the offset the build's own `+1` produces rather than a
+  //   fudge.
+  const tumbles = [];
+  for (const sequence of [0, 4, 10]) {
+    const bombard = shot({ from: { x: 0, y: 200 }, to: { x: 2400, y: 200 }, sequence });
+    tumbles.push([bombard.xVelocity, [1, 5, 10, 20].map((t) => degrees(bombard, t))]);
+  }
+  assert.equal(new Set(tumbles.map(([velocity]) => velocity)).size, 3, "three genuinely different velocities");
+  for (const [velocity, samples] of tumbles) {
+    samples.forEach((value, index) => {
+      const frame = [1, 5, 10, 20][index];
+      assert.ok(
+        Math.abs(value - 4 * frame) <= 1,
+        `velocity ${velocity} at t=${frame}: ${value} must be within a degree of ${4 * frame}`
+      );
+    });
+  }
+  assert.deepEqual(tumbles[0][1], [5, 21, 41, 81], "and the exact numbers at the slowest velocity");
+
+  // It CLAMPS rather than spinning for ever.
+  const long = shot({ from: { x: 0, y: 200 }, to: { x: 4000, y: 200 } });
+  assert.ok(long.flightFrames > 170 / 4, "the sweep needs a flight long enough to reach the clamp");
+  assert.equal(degrees(long, long.flightFrames), SS2_PROJECTILE.tumbleClamp);
+  assert.equal(SS2_PROJECTILE.tumbleClamp, 170, "just short of a half turn");
+
+  // ► **THE SIGN IS THE SHOOTER'S FACING, NOT THE VELOCITY** (`+0x7511`), so a
+  //   left-flying shot mirrors rather than repeating the same turn.
+  const rightward = shot({ from: { x: -600, y: 200 }, to: { x: 600, y: 200 } });
+  const leftward = shot({ from: { x: 600, y: 200 }, to: { x: -600, y: 200 } });
+  assert.equal(degrees(leftward, 10), -degrees(rightward, 10));
+  const snipeLeft = shot({ kind: ProjectileKind.SNIPE, from: { x: 600, y: 200 }, to: { x: -600, y: 200 } });
+  assert.equal(degrees(snipeLeft, 3), -90, "and a snipe flying left lies flat the other way");
+});
+
+test("the flight ends at the target's BODY, not inside it", () => {
+  // ► **OWNER'S REPORT, 2026-09-13: the projectile "kinda clipped to the model
+  //   at the end".** The build's impact test is `bullet._x > defender._x`
+  //   (`+0x6cb4`) — it crosses the centre and is removed the same tick, which
+  //   reads fine at vanilla's scale and badly here: a `physical_size` of ~86
+  //   against a flight of a few hundred means the last frames are drawn INSIDE
+  //   the figure, and over it, because the build attaches at depth 45000.
+  //
+  //   Stopping at the surface is the same geometry `ss2WalkDestination` uses to
+  //   stop a walk against a body, so it is the engine's existing answer rather
+  //   than a new one.
+  const centred = shot({ from: { x: -300, y: 200 }, to: { x: 300, y: 200 } });
+  assert.equal(projectileAt(centred, centred.flightFrames).x, 300, "targetSize 0 is the build's literal behaviour");
+
+  const bodied = projectileFlight({
+    kind: ProjectileKind.BOMBARD, from: { x: -300, y: 200 }, to: { x: 300, y: 200 },
+    targetSize: 86, sequence: 0
+  });
+  assert.equal(projectileAt(bodied, bodied.flightFrames).x, 300 - 86, "and a body stops it at its own edge");
+  assert.equal(bodied.impact.centreX, 300, "while the centre is still reported, for anything that wants it");
+  assert.ok(bodied.distance < centred.distance, "a shorter flight, because it ends sooner");
+
+  // Mirrored, or the blue side's arrows would stop a body-width PAST the foe.
+  const leftward = projectileFlight({
+    kind: ProjectileKind.BOMBARD, from: { x: 300, y: 200 }, to: { x: -300, y: 200 },
+    targetSize: 86, sequence: 0
+  });
+  assert.equal(projectileAt(leftward, leftward.flightFrames).x, -300 + 86);
 });
 
 test("the trail is one puff every third frame, and the oldest fall off", () => {

@@ -407,7 +407,8 @@ function beginStep(step) {
       kind: shotRecord.projectile,
       from: shotRecord.from,
       to: shotRecord.to,
-      sequence: shotRecord.sequence
+      sequence: shotRecord.sequence,
+      targetSize: shotRecord.targetSize
     });
     inFlight.push({
       flight,
@@ -929,9 +930,12 @@ function paintProp(ops, view, { x, y, lift, size, rotation }) {
   context.save();
   context.globalAlpha = 1;
   context.translate(view.toX(x), view.toY(y, lift));
-  // Canvas y is DOWN and the pitch is up-positive, so the rotation is negated
-  // exactly as the flip below negates the figure's own y.
-  if (rotation) context.rotate(-rotation);
+  // ► **NOT NEGATED, and that is the build's convention rather than a slip.**
+  //   `bullet._rotation` is degrees CLOCKWISE in screen space, which is what
+  //   `rotationAt` now returns in radians — so it is applied here, in screen
+  //   space, BEFORE the y-flip below. Negating it would mirror the tumble and
+  //   send a snipe pointing backwards.
+  if (rotation) context.rotate(rotation);
   const k = size * view.scale;
   context.scale(k, -k);
   for (const operation of ops) {

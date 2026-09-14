@@ -87,6 +87,16 @@ export const SS2_PROJECTILE = Object.freeze({
   bombardVelocityMax: 18,
   /** `bulletcounter >= 3` spawns a trail puff and resets (`+0x71aa`). */
   trailEveryFrames: 3,
+  /**
+   * `if (bulletrotus > 170) bulletrotus = 170` (`+0x74c3`-`+0x74e0`). A lobbed
+   * projectile stops just short of a half turn rather than spinning for ever.
+   */
+  tumbleClamp: 170,
+  /**
+   * A snipe's constant `_rotation` (`+0x7498` / `+0x74b0`), which is what lays
+   * the VERTICAL art flat. See `rotationAt`.
+   */
+  flatRotation: 90,
   /** `bullet._x = attacker._x ± 30` (`+0x6dff` / `+0x6e23`). */
   launchOffsetX: 30,
   /**
@@ -190,9 +200,11 @@ export function bombardVelocityFor(sequence) {
  * @param {object} shot.from          `{ x, y, height }` — the shooter
  * @param {object} shot.to            `{ x, y }` — the target
  * @param {number} [shot.sequence]    the presentation stream's counter
+ * @param {number} [shot.targetSize]  the target's `physical_size`, so the
+ *   flight ends at its body rather than inside it
  * @returns {object} frozen flight, or throws if the two ends are not placed
  */
-export function projectileFlight({ kind, from, to, sequence = 0 } = {}) {
+export function projectileFlight({ kind, from, to, sequence = 0, targetSize = 0 } = {}) {
   if (kind !== ProjectileKind.BOMBARD && kind !== ProjectileKind.SNIPE) {
     throw new ProjectileError(
       `A projectile is a ${ProjectileKind.BOMBARD} or a ${ProjectileKind.SNIPE}; got ${String(kind)}.`
@@ -207,8 +219,25 @@ export function projectileFlight({ kind, from, to, sequence = 0 } = {}) {
   // `_x` only, and the arrow travels along x while the depth interpolates
   // underneath it. Using the Euclidean distance would be inventing a longer
   // flight than the build flies.
-  const distance = Math.abs(to.x - from.x);
+  // ► **THE FLIGHT ENDS AT THE TARGET'S BODY, NOT ITS CENTRE — owner's report,
+  //   2026-09-13: the projectile "kinda clipped to the model at the end".**
+  //
+  //   The build's impact test is `bullet._x > defender._x` (`+0x6cb4`), so its
+  //   arrow crosses the centre and is removed the same tick. That reads fine at
+  //   vanilla's scale and badly here: a gladiator's `physical_size` is ~86 arena
+  //   units against a flight of a few hundred, so an arrow travelling the last
+  //   `Xvelocity` units a frame ends up drawn INSIDE the figure — and it is
+  //   drawn over everything, because the build attaches it at depth 45000.
+  //
+  //   Stopping at the body's own surface is the same geometry
+  //   `ss2WalkDestination` already uses for the walk clamp — `defender._x ∓
+  //   physical_size` — so it is the engine's existing answer to "where does a
+  //   thing stop against a body", not a new one. `targetSize` of 0 restores the
+  //   build's literal behaviour for any caller that does not model bodies.
+  const bodyStop = Number.isFinite(targetSize) ? Math.max(0, targetSize) : 0;
   const direction = to.x >= from.x ? 1 : -1;
+  const surfaceX = to.x - direction * bodyStop;
+  const distance = Math.abs(surfaceX - from.x);
   const xVelocity = arc ? bombardVelocityFor(sequence) : SS2_PROJECTILE.snipeVelocity;
   // The launch sits `± 30` toward the target, which is the bow arm rather than
   // the gladiator's centre.
@@ -243,7 +272,9 @@ export function projectileFlight({ kind, from, to, sequence = 0 } = {}) {
       height: launchHeight
     }),
     impact: Object.freeze({
-      x: to.x,
+      // The SURFACE, not the centre. See `bodyStop` above.
+      x: surfaceX,
+      centreX: to.x,
       y: Number.isFinite(to?.y) ? to.y : null
     })
   });
@@ -301,36 +332,55 @@ export function projectileAt(flight, frame) {
 }
 
 /**
- * The arrow's pitch, in radians, positive nose-up.
+ * THE PROJECTILE'S ROTATION — the build's own, and mine was an invention.
  *
- * The build carries `bullet._rotation` and hands it to every trail puff
- * (`+0x7205`) but never assigns it in the action code — it is a property of the
- * clip's own tween there. Here it is DERIVED from the velocity, which is the
- * only honest source: an arrow points where it is going.
+ * ► **I REPORTED THAT "the build carries `bullet._rotation` but never assigns
+ *   it in the action code" AND THAT WAS WRONG.** It assigns it at three sites
+ *   — `+0x7498`, `+0x74b0`, `+0x74f3` — all inside the bullet's own
+ *   `onEnterFrame`, past the point I had stopped reading. What stood here
+ *   instead was an angle derived from the velocity vector, on the reasoning
+ *   that "an arrow points where it is going". **The build does something
+ *   completely different, and the owner saw it: the projectile looked wrong in
+ *   flight.**
  *
- * A snipe never pitches, because its height never changes.
+ * ## The art is VERTICAL, and that is why ±90 exists
+ *
+ * Measured off the extracted pack: the arrow (shape 46) is **11.4 x 58.4 px** —
+ * tall and thin. It is drawn pointing UP, not along the direction of travel. So
+ * a projectile at rotation 0 points at the sky, and the build's `±90` is what
+ * lays it flat.
+ *
+ * ## A snipe is FLAT and a bombard TUMBLES
+ *
+ * ```text
+ *   sniperight   _rotation =  90                        +0x7498
+ *   snipeleft    _rotation = -90                        +0x74b0
+ *   bombard      bulletrotus = round(bulletlife * gravity * 2 / Xvelocity)
+ *                _rotation   = ±bulletrotus, clamped at 170
+ *                                                       +0x742f, +0x74e0, +0x74f3
+ * ```
+ *
+ * **`bulletlife` accumulates DISTANCE, not frames** — `bulletlife += Xvelocity`
+ * once a frame from a start of 1 (`+0x73d9`, `+0x6ede`) — so the `Xvelocity`
+ * divides straight back out and the tumble is **~4 degrees per frame whatever
+ * the velocity**, stopping at 170. A lobbed stone turns almost half a circle
+ * over its flight; a fast snipe never turns at all.
+ *
+ * The sign is the SHOOTER'S FACING, not the velocity: `+bulletrotus` facing
+ * right and `-bulletrotus` facing left (`+0x7511`-`+0x753f`).
+ *
+ * @returns {number} radians, CLOCKWISE-POSITIVE in screen space — the same
+ *   convention Flash's `_rotation` uses, so a surface applies it before any
+ *   y-flip rather than negating it.
  */
 function rotationAt(flight, t) {
-  if (!flight.arc) return 0;
-  // d(height)/dt of the rise term, converted OUT of figure heights and into
-  // arena units so it can be compared with a horizontal speed that is already
-  // in them. See `ARENA_UNITS_PER_FIGURE_HEIGHT`.
-  //
-  // ► **THE VELOCITY VECTOR'S OWN ANGLE, IN THE ARENA'S FRAME — not a pitch
-  //   with the direction folded into its sign, which is what the first version
-  //   returned and which sent every LEFT-flying arrow off the bow nose-DOWN.**
-  //   A renderer draws the shaft along +x and rotates by this, so the head
-  //   leads in both directions only if the horizontal component keeps its sign:
-  //   near 0 flying right, near pi flying left.
-  //
-  //   Caught by a test rather than by watching the blue side shoot, which is
-  //   the only other way it was ever going to be found.
-  //
-  // `atan2` rather than a ratio so a vertical component at zero horizontal
-  // speed is still a well-defined angle.
-  const peak = Math.max(1, (flight.yVelocity * flight.yVelocity) / 4);
-  const dHeight = ((flight.yVelocity - 2 * t - 1) / peak) * ARENA_UNITS_PER_FIGURE_HEIGHT;
-  return Math.atan2(dHeight, flight.xVelocity * flight.direction);
+  const degrees = flight.arc
+    ? Math.min(
+      SS2_PROJECTILE.tumbleClamp,
+      Math.round((1 + t * flight.xVelocity) * SS2_PROJECTILE.gravity * 2 / flight.xVelocity)
+    )
+    : SS2_PROJECTILE.flatRotation;
+  return (degrees * flight.direction * Math.PI) / 180;
 }
 
 /**
