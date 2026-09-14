@@ -62,6 +62,7 @@ import {
 import { SS2_ARENA } from "../src/team/ss2-rules.js";
 import { fieldsPlacedIn, textPackFrom } from "../src/render/text.js";
 import { indexCharacters, resolveTimeline, flattenFrame } from "../tools/swf-display-list.mjs";
+import { analyseSwfBuffer } from "../tools/inspect-swf.mjs";
 import { parseShape } from "../tools/swf-shapes.mjs";
 import { rootTimeline } from "../tools/extract-screens.mjs";
 
@@ -756,6 +757,31 @@ test("the focus is the middle of EVERYBODY, not of the closest duel", () => {
  *   both fields and in opposite directions. Nothing here asserts a string,
  *   because nothing in the module holds one; the measurement is in the module's
  *   header with the offsets it was read at.
+ *
+ * ► **SEVEN OF THESE ASSERTIONS COULD NOT FAIL, AND AN ADVERSARIAL VERIFIER
+ *   PROVED IT BY MUTATING THE IMPLEMENTATION LINE BY LINE.** Eleven one-line
+ *   mutations — `SS2_UI_BAR_UNPLACED.slice(0, 1)`, `unvalued: declared -
+ *   valued`, `depth: 439`, `instance: "wrong_panel"`, `unplaced: []`,
+ *   `found.matrix ?? null`, a `site` of `+0xDEAD`, a `drivenBy` of "the phase
+ *   of the moon" — left all 60 tests green. The FACTS were right; nothing held
+ *   them. Each is now pinned, and the comment at each assertion names the
+ *   mutation it exists to catch. **The worst of them was
+ *   `assert.equal(tally.unplacedInBuild, SS2_UI_BAR_UNPLACED.length)` against a
+ *   module computing `unplacedInBuild: SS2_UI_BAR_UNPLACED.length` — the same
+ *   expression on both sides, which is not an assertion at all.**
+ *
+ * ► **WHAT IS STILL PROSE, SAID PLAINLY RATHER THAN DRESSED AS A MEASUREMENT.**
+ *   A declaration's `note` is unpinned English and stays that way: asserting
+ *   its text would restate the constant, which is the defect above wearing a
+ *   different hat. What each note CLAIMS is pinned separately and against the
+ *   build — that `gfxvar` has one state and `fullscreenvar` two, that each dead
+ *   name occurs once at a recorded offset. `site` and `drivenBy` USED to be in
+ *   that category and no longer are: a byte offset's truth is a property of the
+ *   SWF, so it is checked against the SWF, in "EVERY DECLARED SITE…" below.
+ *   **On a clone with no installed build that test skips and those two fields
+ *   are unpinned prose.** That is the honest state, and it is written here
+ *   rather than papered over with a clone-side assertion that compares the
+ *   string to itself.
  */
 
 /** A pack shaped like `text.js`'s, placing whatever fields a test names. */
@@ -803,7 +829,14 @@ test("the bar declares TWO readouts, each naming the build site its value comes 
   // neither is an assertion about the game with no way to check it.
   for (const entry of SS2_UI_BAR_READOUTS) {
     assert.ok(entry.valueOf.length > 0, `readout ${entry.field} names no state key`);
-    assert.match(entry.site, /^sprite:1531\//, `readout ${entry.field} site: ${entry.site}`);
+    // ► A SHAPE CHECK, and it is all a clone can honestly do. `/^sprite:1531\//`
+    //   alone passed a site of `DoAction@0xDEAD +0xBEEF`; this at least demands
+    //   a resolvable block path and a four-digit offset into it, which is what
+    //   "EVERY DECLARED SITE…" then resolves AGAINST THE BUILD. Without the
+    //   oracle these two fields are unpinned prose — said out loud in this
+    //   section's header rather than covered by an assertion that restates them.
+    assert.match(entry.site, /^sprite:1531\/frame:1\/[A-Za-z0-9:@/-]+ \+0x[0-9a-f]{4}\b/,
+      `readout ${entry.field} site: ${entry.site}`);
     assert.ok(entry.drivenBy.length > 0, `readout ${entry.field} says nothing about what drives it`);
   }
   // ► **AND NO STRING THE BAR DISPLAYS IS IN THE MODULE.** A colon-joined
@@ -839,31 +872,106 @@ test("A CLONE WITH NO PACK GETS AN EMPTY LIST AND A NON-ZERO INVOICE", () => {
   const broken = uiBarReadoutsFor({ fonts: {} }, thrower);
   assert.deepEqual(broken.readouts, []);
   assert.equal(broken.unresolved, 2);
+  // A clone still gets the dead list, which is the half of the invoice that
+  // does not depend on having a pack at all.
+  assert.deepEqual(empty.unplaced.map((entry) => entry.instance), ["gfxvar", "fullscreenvar"]);
 });
 
-test("THE TALLY IS A RECOUNT OF THE READOUTS, and it closes", () => {
+test("THE BAR IS THE PLACEMENT ROOT FRAME 221 GIVES IT — all five fields, not just the two that were read", () => {
+  // ► **THREE OF THE FIVE WERE UNPINNED AND TWO OF THOSE ARE THE BAR'S
+  //   IDENTITY.** `depth: 438 -> 439` and `instance: "fiz_info_panel" ->
+  //   "wrong_panel"` each left all 60 tests green. Only `character` was held,
+  //   and only by accident: it is the pack lookup key, so changing it broke
+  //   five tests for a reason unrelated to what it means. A caller that orders
+  //   its layers by `bar.depth` paints the UI bar under the border and nothing
+  //   here would have said so.
+  //
+  //   The five are LITERALS so a clone with no build fails on a typo; they are
+  //   MEASURED off root frame 221 in "THE BAR OBJECT IS ROOT FRAME 221'S OWN
+  //   PLACEMENT" below, which is the only place they are derived.
+  for (const [what, bar] of [
+    ["no pack", uiBarReadoutsFor(null, fieldsPlacedIn).bar],
+    ["real pack", uiBarReadoutsFor(barPack(realBarPlacements()), fieldsPlacedIn).bar],
+    ["a pack whose reader throws", uiBarReadoutsFor({ fonts: {} }, () => { throw new Error("no"); }).bar]
+  ]) {
+    assert.deepEqual({ ...bar }, { character: 1531, instance: "fiz_info_panel", depth: 438, x: -0.5, y: 401 },
+      `${what}: the bar is not the placement root frame 221 gives it`);
+  }
+  // The layer table is the OTHER copy of this placement. The two disagreeing is
+  // the defect — the module reads its x/y from the table and its depth and name
+  // from nowhere, so only the table's x/y were ever exercised.
+  const panel = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.character === 1531);
+  assert.deepEqual([panel.depth, panel.instance, panel.x, panel.y], [438, "fiz_info_panel", -0.5, 401]);
+});
+
+/**
+ * Every identity the tally promises, recomputed from `readouts` — and it is
+ * called on EVERY shape of bar below, which is the whole of the fix.
+ *
+ * ► **THE HALF PACK IS THE ONLY CASE THAT SEPARATES `unvalued`'s TWO CANDIDATE
+ *   FORMULAS, AND IT WAS THE ONE CASE THAT DID NOT RECOUNT.** With both fields
+ *   placed, `readouts.length`, `declared` and 2 are the same number, so
+ *   `unvalued: declared - valued` passed every check here. The fix is not a new
+ *   assertion — it is running the existing one where the formulas differ.
+ *
+ * ► **`declared` AND `unplacedInBuild` ARE COMPARED AGAINST LITERALS, ON
+ *   PURPOSE.** `assert.equal(tally.declared, SS2_UI_BAR_READOUTS.length)`
+ *   against a module computing `declared = SS2_UI_BAR_READOUTS.length` is the
+ *   same expression on both sides and cannot fail; the same was true of
+ *   `unplacedInBuild`, which is how `SS2_UI_BAR_UNPLACED.slice(0, 1)` survived.
+ *   Both literals are 2 because sprite 1531's own scripts write four readouts
+ *   and the display list places two of them — DERIVED from the oracle in "THE
+ *   BAR'S SCRIPT NAMES FOUR READOUTS…" below, which is where the numbers live.
+ */
+function recount(bar, what) {
+  const { tally } = bar;
+  assert.equal(tally.declared, 2, `${what}: the bar declares two readouts`);
+  assert.equal(tally.placed, bar.readouts.length, `${what}: placed is the length of what came back`);
+  assert.equal(tally.missing, tally.declared - tally.placed, `${what}: missing`);
+  assert.equal(tally.valued, bar.readouts.filter((entry) => entry.text !== null).length, `${what}: valued`);
+  // ► Counted over the RETURNED list, which is exactly what makes it differ
+  //   from `declared - valued` whenever the pack is partial or absent.
+  assert.equal(tally.unvalued, bar.readouts.filter((entry) => entry.text === null).length, `${what}: unvalued`);
+  assert.equal(tally.valued + tally.unvalued, tally.placed, `${what}: every placed readout is valued or not`);
+  // The headline number, recomputed the way the module promises: against what
+  // the bar HAS, never against what came back.
+  assert.equal(tally.unresolved, tally.declared - tally.valued, `${what}: unresolved`);
+  assert.equal(bar.unresolved, tally.unresolved, `${what}: the two spellings of unresolved`);
+  assert.equal(tally.unplacedInBuild, 2, `${what}: the build writes two readouts into nothing`);
+  // ► **AND THE DEAD LIST IS ON THE RESULT, NOT ONLY ON THE MODULE.** A caller
+  //   reads `bar.unplaced`; nothing read it THERE, so `unplaced: []` passed
+  //   every test while the module-level export stayed intact and the caller got
+  //   a bar with no invoice on it.
+  assert.deepEqual(bar.unplaced.map((entry) => entry.instance), ["gfxvar", "fullscreenvar"],
+    `${what}: the dead readouts the result hands the caller`);
+  assert.equal(bar.unplaced.length, tally.unplacedInBuild, `${what}: the dead list and its own count disagree`);
+}
+
+test("THE TALLY IS A RECOUNT OF THE READOUTS, and it closes on EVERY shape of pack", () => {
   const pack = barPack(realBarPlacements());
   for (const values of [{}, { sound: "x" }, { sound: "x", tooltips: "y" }]) {
-    const bar = uiBarReadoutsFor(pack, fieldsPlacedIn, values);
-    const { tally } = bar;
-    assert.equal(tally.declared, SS2_UI_BAR_READOUTS.length);
-    assert.equal(tally.placed, bar.readouts.length, "placed is the length of what came back");
-    assert.equal(tally.missing, tally.declared - tally.placed);
-    assert.equal(tally.valued, bar.readouts.filter((entry) => entry.text !== null).length);
-    assert.equal(tally.unvalued, bar.readouts.filter((entry) => entry.text === null).length);
-    assert.equal(tally.valued + tally.unvalued, tally.placed);
-    // The headline number, recomputed the way the module promises: against what
-    // the bar HAS, never against what came back.
-    assert.equal(tally.unresolved, tally.declared - tally.valued);
-    assert.equal(bar.unresolved, tally.unresolved);
-    assert.equal(tally.unplacedInBuild, SS2_UI_BAR_UNPLACED.length);
+    recount(uiBarReadoutsFor(pack, fieldsPlacedIn, values), `full pack ${JSON.stringify(values)}`);
   }
-  // A partial pack: one field placed, one gone.
+  // ► **THE PARTIAL PACK, WHICH IS THE CASE THAT CAN TELL THE FORMULAS APART.**
+  //   One field placed and valued: counted over the readouts `unvalued` is 0,
+  //   counted over `declared` it is 1. This is where that is asserted.
   const half = uiBarReadoutsFor(barPack([realBarPlacements()[0]]), fieldsPlacedIn, { sound: "x" });
+  recount(half, "half pack, valued");
   assert.equal(half.tally.placed, 1);
   assert.equal(half.tally.missing, 1);
   assert.equal(half.tally.valued, 1);
+  assert.equal(half.tally.unvalued, 0, "the one field the pack DOES place has a value, so nothing drawable is silent");
   assert.equal(half.unresolved, 1, "the field the pack never placed is still owed");
+  // The same half pack with nothing supplied: now `unvalued` is 1 and
+  // `declared - valued` is 2, so the two formulas part company the other way.
+  const silent = uiBarReadoutsFor(barPack([realBarPlacements()[0]]), fieldsPlacedIn);
+  recount(silent, "half pack, unvalued");
+  assert.equal(silent.tally.unvalued, 1, "one readout is drawable with nothing to say in it");
+  assert.equal(silent.unresolved, 2);
+  // And the empty bar, where the recount is 0 and `declared - valued` is 2.
+  const empty = uiBarReadoutsFor(null, fieldsPlacedIn);
+  recount(empty, "no pack");
+  assert.equal(empty.tally.unvalued, 0, "nothing came back, so nothing came back unvalued");
 });
 
 test("a supplied value is carried with its provenance, and an empty one is NOT a value", () => {
@@ -893,6 +1001,7 @@ test("A FIELD THE PACK PLACES AND THIS MODULE HAS NEVER HEARD OF IS REPORTED", (
   const pack = barPack([...realBarPlacements(),
     { id: 9999, depth: 7, name: "somethingelse", matrix: [1, 0, 0, 1, 0, 0] }]);
   const bar = uiBarReadoutsFor(pack, fieldsPlacedIn);
+  recount(bar, "a pack with a third field on the bar");
   assert.deepEqual(bar.tally.undeclared, [9999]);
   assert.equal(bar.tally.placed, 2, "and it is not smuggled into the drawable list");
   assert.deepEqual(bar.readouts.map((entry) => entry.field), [1527, 1528]);
@@ -948,6 +1057,34 @@ test("the pack's matrix is what places a readout, and it is TWIPS", () => {
     barPack([{ id: 1527, depth: 5, name: "somethingelse", matrix: [1, 0, 0, 1, 20, 20] }]), fieldsPlacedIn);
   assert.equal(renamed.readouts[0].packName, "somethingelse");
   assert.equal(renamed.readouts[0].nameMatches, false);
+
+  // ► **A MALFORMED MATRIX IS NOT A MATRIX, AND THE GUARD THAT SAYS SO WAS
+  //   UNTESTED CODE THAT LOOKED TESTED.** The `matrix: null` case above passes
+  //   identically whether the module checks the shape or writes `found.matrix
+  //   ?? null` — both map null to null — so dropping `Array.isArray(...) &&
+  //   ... .length === 6` left all 60 tests green. What separates the two forms
+  //   is a matrix that is TRUTHY AND WRONG: on a five-element array `matrix[4]`
+  //   is the ty and `matrix[5]` is `undefined`, so the readout comes back at
+  //   `(1, NaN)` labelled `placedFrom: "pack"` — a made-up coordinate reported
+  //   as a measurement, which is the one thing this module exists not to do. On
+  //   a non-iterable the spread throws outright and the whole bar is lost, so
+  //   the guard is also what keeps this function total.
+  //
+  //   `fieldsPlacedIn` passes `placement.matrix ?? null` through verbatim and
+  //   `textPackFrom` validates nothing, so every one of these really does reach
+  //   the guard — checked by reading `src/render/text.js:161`, not assumed.
+  for (const junk of [[1, 0, 0, 1, 20], [1, 0, 0, 1, 20, 20, 20], [], "1,0,0,1,20,20",
+    { 4: 20, 5: 20, length: 6 }, 12345, true]) {
+    const bad = uiBarReadoutsFor(
+      barPack([{ id: 1527, depth: 5, name: "soundvar", matrix: junk }]), fieldsPlacedIn);
+    const readout = bad.readouts[0];
+    const shown = JSON.stringify(junk);
+    assert.equal(readout.placedFrom, "declaration", `${shown} was reported as a measured placement`);
+    assert.equal(readout.matrix, null, `${shown} came back on the readout as a matrix`);
+    assert.deepEqual([readout.x, readout.y], [91, 3], `${shown} moved the readout off its declaration`);
+    assert.ok(Number.isFinite(readout.stageX) && Number.isFinite(readout.stageY),
+      `${shown} produced a non-finite stage coordinate`);
+  }
 });
 
 /* ---------------------------------------------------------------- */
@@ -995,6 +1132,166 @@ function oracleBuffer() {
   return fs.readFileSync(ORACLE);
 }
 
+/**
+ * Every instruction in an action block, INCLUDING the bodies of the functions
+ * defined inside it.
+ *
+ * ► **A FLAT SCAN OF THE TOP LEVEL MISSES FOUR OF THE EIGHT OFFSETS THE
+ *   DECLARATIONS CITE.** `toggleSound` (`+0x0117`) and `toggleFS` (`+0x021d`)
+ *   are `DefineFunction2` payloads on sprite 1531's frame-1 script, and four of
+ *   the writes the `site` strings name happen inside them. The offsets in a
+ *   `site` are relative to the BLOCK, not to the function, which is why this
+ *   flattens rather than recursing into a separate address space.
+ */
+function actionsIn(instructions, out = []) {
+  for (const instruction of instructions) {
+    out.push(instruction);
+    if (instruction.name === "DefineFunction" || instruction.name === "DefineFunction2" || instruction.name === "With") {
+      actionsIn(instruction.operand?.body ?? [], out);
+    } else if (instruction.name === "Try") {
+      for (const body of instruction.operand?.bodies ?? []) actionsIn(body.body, out);
+    }
+  }
+  return out;
+}
+
+/**
+ * A declaration's `site`, split into the action block it names and the offsets
+ * into it — `"sprite:1531/frame:1/DoAction@0x3d3686 +0x0170 / +0x01a0"` becomes
+ * that context and `[0x0170, 0x01a0]`.
+ *
+ * The context is everything before the first ` +0x`, so the prose a `site` may
+ * carry between offsets (`", and _root.toggleFS"`) is stepped over rather than
+ * parsed. `@0x3d3686` is not picked up as an offset because it has no `+`.
+ */
+function parseSite(site) {
+  return {
+    context: site.split(" +0x")[0],
+    offsets: [...site.matchAll(/\+0x([0-9a-fA-F]{4})\b/g)].map((match) => parseInt(match[1], 16))
+  };
+}
+
+test("THE BAR OBJECT IS ROOT FRAME 221'S OWN PLACEMENT — depth and name included",
+  { skip: skipOracle }, () => {
+    // ► **WHERE 438 AND "fiz_info_panel" ACTUALLY COME FROM.** Both were shipped
+    //   correct and both were unpinned: 438 -> 439 and "fiz_info_panel" ->
+    //   "wrong_panel" each survived all 60 tests. The module's header prints
+    //   this row of root frame 221 as a measurement, so it is measured.
+    const buffer = oracleBuffer();
+    const frame221 = resolveTimeline(buffer, rootTimeline(buffer), {}).frames[220];
+    const placement = frame221.find((entry) => entry.characterId === 1531);
+    assert.ok(placement, "root frame 221 no longer places character 1531");
+
+    const { bar } = uiBarReadoutsFor(null, fieldsPlacedIn);
+    assert.equal(bar.character, placement.characterId, "the bar's character");
+    assert.equal(bar.instance, placement.name, "the bar's instance name");
+    assert.equal(bar.depth, placement.depth, "the bar's depth");
+    near(bar.x, placement.matrix.tx / 20, "the bar's stage x");
+    near(bar.y, placement.matrix.ty / 20, "the bar's stage y");
+
+    // The layer table carries the same placement a second time; the two
+    // disagreeing is the defect, and only its x/y was ever exercised.
+    const panel = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.character === 1531);
+    assert.deepEqual([panel.depth, panel.instance], [placement.depth, placement.name]);
+    near(panel.x, placement.matrix.tx / 20, "the layer table's x");
+    near(panel.y, placement.matrix.ty / 20, "the layer table's y");
+
+    // ► **AND IT IS THE ONLY THING AT THAT DEPTH ON THE FRAME**, so "depth 438"
+    //   IDENTIFIES the bar rather than merely being true of it — which is what a
+    //   caller ordering its layer stack by depth is relying on.
+    assert.deepEqual(frame221.filter((entry) => entry.depth === bar.depth).map((entry) => entry.characterId), [1531],
+      "depth 438 no longer picks out the UI bar alone");
+  });
+
+test("EVERY DECLARED SITE IS AN OFFSET IN THE BUILD THAT PUSHES THE NAME IT CLAIMS",
+  { skip: skipOracle }, () => {
+    // ► **`site` AND `drivenBy` WERE PROSE THE MODULE PRESENTED AS MEASUREMENTS.**
+    //   The only check on `site` was `/^sprite:1531\//`, so a site of
+    //   `DoAction@0xDEAD +0xBEEF / +0xBEEF` passed; the only check on `drivenBy`
+    //   was `length > 0`, so "the phase of the moon" passed. A byte offset's
+    //   truth is a property of the SWF and of nothing else, so it is checked
+    //   against the SWF: the block the site names must exist, and at every
+    //   offset it cites the build must push the readout's own instance name.
+    //
+    //   **On a machine with no installed build this skips and those two fields
+    //   are unpinned prose.** Stated, not papered over — the alternative is a
+    //   clone-side assertion comparing the string to itself, which is the
+    //   defect this test exists to remove.
+    const { analysis } = analyseSwfBuffer(oracleBuffer());
+    const blocks = new Map(analysis.actionBlocks.map((block) => [block.context, block]));
+    let checked = 0;
+    for (const entry of [...SS2_UI_BAR_READOUTS, ...SS2_UI_BAR_UNPLACED]) {
+      const { context, offsets } = parseSite(entry.site);
+      const block = blocks.get(context);
+      assert.ok(block, `${entry.instance}: no action block at ${context}`);
+      assert.ok(offsets.length > 0, `${entry.instance}: site cites no offset: ${entry.site}`);
+      const flattened = actionsIn(block.instructions);
+      const byOffset = new Map(flattened.map((one) => [one.offset - block.offset, one]));
+      for (const offset of offsets) {
+        const at = `+0x${offset.toString(16).padStart(4, "0")}`;
+        const instruction = byOffset.get(offset);
+        assert.ok(instruction, `${entry.instance}: ${at} is not an instruction boundary in ${context}`);
+        assert.equal(instruction.name, "Push", `${entry.instance}: ${at} is ${instruction.name}, not a Push`);
+        const pushed = (instruction.operand ?? []).map((value) => value.value);
+        assert.ok(pushed.includes(entry.instance),
+          `${entry.instance}: ${at} pushes ${JSON.stringify(pushed)}`);
+        checked += 1;
+      }
+
+      // ► **AND `drivenBy` NAMES SOMETHING THAT SCRIPT ACTUALLY MENTIONS.** It
+      //   is prose and it stays prose — but prose claiming `_root.pSound` drives
+      //   a field whose script has no `pSound` in it is a false measurement, and
+      //   that much IS checkable. Every DOTTED name must resolve to a string the
+      //   block pushes, and at least one name overall must, so a sentence that
+      //   names nothing in the build fails here.
+      if (entry.drivenBy === undefined) continue;
+      const constants = new Set(flattened
+        .filter((one) => one.name === "Push")
+        .flatMap((one) => (one.operand ?? []).map((value) => value.value))
+        .filter((value) => typeof value === "string"));
+      let resolved = 0;
+      for (const token of entry.drivenBy.match(/[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*/g) ?? []) {
+        const member = token.split(".").pop();
+        if (token.includes(".")) {
+          assert.ok(constants.has(member),
+            `${entry.instance}: drivenBy names ${token}, and ${member} is not pushed anywhere in ${context}`);
+        }
+        if (constants.has(member)) resolved += 1;
+      }
+      assert.ok(resolved > 0,
+        `${entry.instance}: drivenBy names nothing the build's own script mentions: ${entry.drivenBy}`);
+    }
+
+    // ► **A `note` IS PROSE AND STAYS PROSE — BUT AN OFFSET INSIDE PROSE IS
+    //   STILL A MEASUREMENT.** `fullscreenvar`'s note says `toggleFS` is defined
+    //   at `+0x021d`, which is either true of the build or it is not. Asserting
+    //   the note's TEXT would restate the constant — the defect this whole
+    //   section exists to remove, and the reason mutating a note to nonsense
+    //   still passes here, which is said out loud in the section header. What
+    //   is checked is the part that has a truth value.
+    let notedOffsets = 0;
+    for (const entry of SS2_UI_BAR_UNPLACED) {
+      const block = blocks.get(parseSite(entry.site).context);
+      const byOffset = new Map(actionsIn(block.instructions).map((one) => [one.offset - block.offset, one]));
+      for (const match of (entry.note ?? "").matchAll(/\+0x([0-9a-fA-F]{4})\b/g)) {
+        const offset = parseInt(match[1], 16);
+        assert.ok(byOffset.has(offset),
+          `${entry.instance}: its note cites +0x${match[1]}, which is not an instruction boundary in that script`);
+        notedOffsets += 1;
+      }
+    }
+    assert.equal(notedOffsets, 1, "one note cites one offset — `toggleFS` at +0x021d");
+    // The tally this test owes: NINE cited offsets across the four declarations
+    // — 2 for `soundvar`, 2 for `tooltips_text`, 1 for `gfxvar` and 4 for
+    // `fullscreenvar`, whose two write sites are doubled by `toggleFS` — every
+    // one of them resolved. A `site` that quietly lost an offset would
+    // otherwise shrink the loop and still pass, which is the same uncounted
+    // swallow as the one below. (Written as 10 on the first pass, from adding
+    // up the module header rather than the declarations; this assertion is what
+    // caught it, which is the only reason it is worth having.)
+    assert.equal(checked, 9, "the four declarations cite nine offsets between them");
+  });
+
 test("THE BAR IS FOUR PLATES, TWO BUTTONS AND TWO FIELDS — and 641 x 27 is the PLATE",
   { skip: skipOracle }, () => {
     // ► Where "the bar renders as blank boxes" actually comes from. Four
@@ -1040,14 +1337,71 @@ test("THE BAR IS FOUR PLATES, TWO BUTTONS AND TWO FIELDS — and 641 x 27 is the
       `the panel note does not carry the plate size measured here: ${panel.note}`);
   });
 
-test("THE TWO READOUTS THE BUILD WRITES AND NEVER PLACES ARE COUNTED, and they are dead",
+test("THE BAR'S SCRIPT NAMES FOUR READOUTS AND THE DISPLAY LIST PLACES TWO — the partition is DERIVED",
   { skip: skipOracle }, () => {
-    // ► This is where a count of FOUR fields comes from, and it is why the
-    //   declaration carries them instead of omitting them. Each name occurs
-    //   ONCE in the whole file — its own constant pool entry — and no timeline
-    //   anywhere places an instance by that name.
+    // ► **NOTHING PINNED THE LENGTH OF EITHER LIST, AND THE ASSERTION THAT
+    //   LOOKED LIKE IT DID WAS `assert.equal(X, X)`.** The test read
+    //   `tally.unplacedInBuild === SS2_UI_BAR_UNPLACED.length` against a module
+    //   computing `unplacedInBuild: SS2_UI_BAR_UNPLACED.length` — the same
+    //   expression on both sides. Slicing `fullscreenvar` off the declaration
+    //   left all 60 tests green, and the only record that the build writes two
+    //   readouts into nothing quietly became a record of one.
+    //
+    //   So the partition is DERIVED here rather than declared. Scan sprite
+    //   1531's own scripts for the build's `<name>.text = "<string>"` idiom —
+    //   `[Push name][GetVariable|GetMember][Push "text", <string>][SetMember]`
+    //   — which is literally where the count of FOUR comes from; then split
+    //   those four by whether any timeline in the build places an instance
+    //   under that name. The two halves must BE the two declared lists. Add a
+    //   readout, drop one, or rename one, and this fails and says which.
     const buffer = oracleBuffer();
     assert.equal(buffer.length, 7586504, "the oracle is not the build these offsets were read from");
+
+    const { analysis } = analyseSwfBuffer(buffer);
+    const written = new Map();
+    for (const block of analysis.actionBlocks.filter((one) => one.context.startsWith("sprite:1531/"))) {
+      const all = actionsIn(block.instructions);
+      for (let index = 3; index < all.length; index += 1) {
+        if (all[index].name !== "SetMember") continue;
+        const value = all[index - 1];
+        const getter = all[index - 2];
+        const target = all[index - 3];
+        if (value.name !== "Push" || target.name !== "Push") continue;
+        if (getter.name !== "GetMember" && getter.name !== "GetVariable") continue;
+        const pushed = value.operand ?? [];
+        if (pushed.length !== 2 || pushed[0].value !== "text" || typeof pushed[1].value !== "string") continue;
+        const name = target.operand?.[target.operand.length - 1]?.value;
+        if (typeof name !== "string") continue;
+        if (!written.has(name)) written.set(name, []);
+        written.get(name).push(pushed[1].value);
+      }
+    }
+    assert.deepEqual([...written.keys()].sort(), ["fullscreenvar", "gfxvar", "soundvar", "tooltips_text"],
+      "sprite 1531's scripts no longer write the four readouts these two lists partition");
+
+    // ► **AND EACH DECLARED `valueOf` IS THE KEY THE BUILD'S OWN STRING USES.**
+    //   The bar writes `graphics:high` into `gfxvar` and `sound:on` into
+    //   `soundvar`; the part before the colon is the state key, which is the key
+    //   a caller supplies a value under. Compared case-insensitively because the
+    //   build writes `Tooltips:on` into a field whose BAKED text is
+    //   `tooltips:off` — that disagreement is the measurement recorded in the
+    //   module's header, not a normalisation to be hidden here.
+    for (const entry of [...SS2_UI_BAR_READOUTS, ...SS2_UI_BAR_UNPLACED]) {
+      const strings = written.get(entry.instance) ?? [];
+      assert.ok(strings.length > 0, `${entry.instance}: the build's scripts write no string into it`);
+      for (const value of strings) {
+        assert.ok(value.toLowerCase().startsWith(`${entry.valueOf.toLowerCase()}:`),
+          `${entry.instance}: declared valueOf ${JSON.stringify(entry.valueOf)} is not the key of ${JSON.stringify(value)}`);
+      }
+    }
+    // The asymmetry each dead entry's `note` claims in prose, measured: `gfxvar`
+    // has ONE state and so could never have been a toggle; `fullscreenvar` has
+    // two. The `note` text itself stays unpinned English — asserting it would
+    // restate the constant, which is the defect at the top of this test.
+    assert.deepEqual([...new Set(written.get("gfxvar"))], ["graphics:high"]);
+    assert.deepEqual([...new Set(written.get("fullscreenvar"))].sort(), ["fullscreen:off", "fullscreen:on"]);
+
+    // Each dead name occurs ONCE in the whole file — its own constant pool entry.
     for (const entry of SS2_UI_BAR_UNPLACED) {
       const needle = Buffer.from(entry.instance, "latin1");
       const hits = [];
@@ -1058,27 +1412,60 @@ test("THE TWO READOUTS THE BUILD WRITES AND NEVER PLACES ARE COUNTED, and they a
       assert.deepEqual(hits, [entry.byteOffset], `${entry.instance} is not at its recorded offset`);
     }
 
-    // And no sprite, and not the root, ever places an instance under either
-    // name — which is what makes every one of those writes land on `undefined`.
+    // ── The other half of the partition: which of the four are ever PLACED ──
     const { characters } = indexCharacters(buffer);
     const timelines = [...characters.values()].filter((entry) => entry.kind === "sprite");
     timelines.push(rootTimeline(buffer));
-    const dead = new Set(SS2_UI_BAR_UNPLACED.map((entry) => entry.instance));
-    const live = new Set(SS2_UI_BAR_READOUTS.map((entry) => entry.instance));
-    let found = 0;
+    assert.equal(timelines.length, 741,
+      "740 sprites and the root — the build this partition was measured on");
+
+    const placements = new Map();
     let walked = 0;
+    let threw = 0;
+    const unresolvable = [];
     for (const timeline of timelines) {
       let resolved;
-      try { resolved = resolveTimeline(buffer, timeline, {}); } catch { continue; }
+      try {
+        resolved = resolveTimeline(buffer, timeline, {});
+      } catch (error) {
+        threw += 1;
+        unresolvable.push(`${timeline.id}: ${error.message}`);
+        continue;
+      }
       walked += 1;
       for (const frame of resolved.frames ?? []) {
         for (const entry of frame) {
-          assert.ok(!dead.has(entry.name),
-            `${entry.name} IS placed, on timeline ${timeline.id} at depth ${entry.depth}`);
-          if (live.has(entry.name)) found += 1;
+          if (!entry.name || !written.has(entry.name)) continue;
+          if (!placements.has(entry.name)) placements.set(entry.name, []);
+          placements.get(entry.name).push(`timeline ${timeline.id} depth ${entry.depth}`);
         }
       }
     }
-    assert.ok(walked > 700, `only ${walked} timelines walked — the search did not happen`);
-    assert.equal(found, live.size, "and both LIVE readouts are placed exactly once");
+
+    // ► **THE CATCH USED TO SWALLOW WITHOUT COUNTING, UNDER `walked > 700`.**
+    //   741 timelines resolve and none throws, so a loose floor left FORTY of
+    //   them free to start throwing, be skipped in silence, and still report
+    //   that no timeline places these names — a search that stopped searching,
+    //   passing as a search that found nothing. An uncounted swallow is the same
+    //   defect class as an uncounted approximation, so it is counted, and the
+    //   assertion is on the count rather than on a floor.
+    assert.equal(threw, 0,
+      `${threw} timelines could not be resolved and were skipped: ${unresolvable.slice(0, 3).join("; ")}`);
+    assert.equal(walked, timelines.length, "every timeline in the build was walked");
+
+    const names = [...written.keys()].sort();
+    assert.deepEqual(names.filter((name) => placements.has(name)),
+      SS2_UI_BAR_READOUTS.map((entry) => entry.instance).sort(),
+      "the readouts the build PLACES are not the ones declared live");
+    assert.deepEqual(names.filter((name) => !placements.has(name)),
+      SS2_UI_BAR_UNPLACED.map((entry) => entry.instance).sort(),
+      "the readouts the build writes into NOTHING are not the ones declared dead");
+    for (const entry of SS2_UI_BAR_UNPLACED) {
+      assert.deepEqual(placements.get(entry.instance) ?? [], [],
+        `${entry.instance} IS placed, which is what makes its writes land on undefined`);
+    }
+    for (const entry of SS2_UI_BAR_READOUTS) {
+      assert.equal((placements.get(entry.instance) ?? []).length, 1,
+        `${entry.instance} is placed ${(placements.get(entry.instance) ?? []).length} times, not once`);
+    }
   });

@@ -189,11 +189,29 @@ class BitReader {
    * FIXED8: a SIGNED 8.8 fixed-point number. A focal point is one, and it is
    * legal for it to be negative — the focus sits on the far side of centre.
    *
-   * ► **`tools/swf-shapes.mjs` reads this field as UNSIGNED
+   * ► ~~**`tools/swf-shapes.mjs` reads this field as UNSIGNED
    *   (`readUI16() / 256`), which turns -0.5 into 255.5.** The two agree on
    *   every non-negative value, so nothing drawn today differs; the divergence
    *   is deliberate rather than copied, and is reported rather than fixed in
-   *   place, because that file is not this module's to edit.
+   *   place, because that file is not this module's to edit.~~
+   *
+   *   **CORRECTED 2026-09-14: `920e9b1` FIXED IT, AND THE CLAIM ABOVE OUTLIVED
+   *   THE DIVERGENCE BY ONE COMMIT.** `tools/swf-shapes.mjs` now reads
+   *   `readInt16LE(...) / 256` — the same two lines as below — so the two
+   *   parsers agree on the whole range, negative half included. Re-derived
+   *   rather than taken on trust: `git log -S "readInt16LE" -- tools/swf-shapes.mjs`
+   *   names that commit and no earlier one.
+   *
+   *   The struck sentence is kept because it is the ONLY record in this
+   *   repository that the two parsers ever disagreed about the same field, and
+   *   because the call it describes is the one that worked: reporting a defect
+   *   in a file this module may not edit is what eventually got it fixed.
+   *   Nothing drawn from the installed build ever differed either way — that
+   *   build has **ZERO focal gradients** (87 linear and 10 radial among 8,875
+   *   fill styles in 824 shapes, counting every style-array generation;
+   *   84/9/0 of 7,595 counting first generations only), so neither version of
+   *   this line has ever executed against the oracle. Re-counted 2026-09-14
+   *   with `parseShape` over the installed build.
    */
   readFixed8() {
     this.align();

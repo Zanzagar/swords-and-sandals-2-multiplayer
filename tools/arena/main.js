@@ -88,6 +88,15 @@ import {
   splitArenaScreen,
   SS2_ARENA_DRESSING,
   hasArenaScreen,
+  uiBarReadoutsFor,
+  textPackFrom,
+  fieldsPlacedIn,
+  fieldOpsFor,
+  colourTransformFrom,
+  colourTransformApplies,
+  applyColourTransform,
+  applyColourTransformAlpha,
+  canvasFilterFor,
   cameraFor,
   cameraStep,
   stageFitFor,
@@ -280,9 +289,34 @@ fetch("/assets/props/props.json")
       return;
     }
     log(`props: ${propFrameCount(propPack, "bullet")} arrow frame(s) from your own install`);
+    // ASK before drawing: `probeColourTransform` decides whether this shell has
+    // to compose the placement's colour transform or whether `props.js` has
+    // started doing it. See the section above `paintArenaLayer`.
+    probeColourTransform(propPack);
+    reportArenaEffects(propPack);
     renderProvenance();
   })
   .catch(() => { propPack = null; });
+
+/**
+ * The build's own embedded glyph outlines, or null — the UI bar's words.
+ *
+ * ► **NO EXTRACTED TEXT MEANS A WORDLESS BAR, NEVER AN ERROR**, exactly as no
+ *   extracted audio means silence. Same fetch-and-fall-back shape as the props
+ *   and the figures, and for the same reason: this repository ships no SS2
+ *   asset, so a 404 here is the supported case and not a failure.
+ */
+fetch("/assets/text/text.json")
+  .then((response) => (response.ok ? response.json() : null))
+  .then((data) => {
+    textPack = textPackFrom(data);
+    if (!textPack) {
+      log("no extracted text — the UI bar draws no words. `node tools/extract-text.mjs` to add them.");
+      return;
+    }
+    reportUiBar();
+  })
+  .catch(() => { textPack = null; });
 
 /**
  * Which frame of the fighter clip throws blood or sparks, from
@@ -743,7 +777,7 @@ function viewport() {
   const width = canvas.width;
   const height = canvas.height;
 
-  if (hasArenaScreen(propPack, propOpsFor)) {
+  if (arenaScreenAvailable()) {
     return stageProjectorFor(camera, stageFitFor({ width, height }));
   }
 
@@ -1163,6 +1197,538 @@ function paintBitmapFill(operation, path) {
   return true;
 }
 
+/* ------------------------------------------------------------------ */
+/* The colour transform the pack carries and the painter never saw     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * EVERY PLACEMENT IN THE PROPS PACK CARRIES A COLOUR TRANSFORM AND
+ * `propOpsFor` READS PAST IT — which is why the arena's UI bar renders as a
+ * blank white strip, and it is not a filter.
+ *
+ * Measured in node against this repository's own `assets/props/props.json`
+ * (`src/render/filters.js`'s `colourTransformFrom` decides what counts as
+ * non-identity, so the count is the renderer's and not a second opinion):
+ *
+ * ```text
+ *   3,345 placements, 2,330 of them under a NON-IDENTITY colour transform
+ *   8,682 draw operations, 7,246 of them under one
+ *       0 of those 7,246 land on a fill the arithmetic cannot express
+ *   7,215 of the 7,246 are the SKY, whose day/night colouring is this
+ *         transform and not, as the brief for this work said, a ColorMatrix
+ * ```
+ *
+ * The bar itself is FOUR placements of ONE white rectangle (shape 487):
+ *
+ * ```text
+ *   plate    rgb x0, alpha x0.5   black at half alpha — the bar's own ground
+ *   rule     identity             the 2.8px white highlight along its top
+ *   button   alpha x0             the sound toggle's INVISIBLE hit plate
+ *   button   alpha x0             the tooltips toggle's, likewise
+ * ```
+ *
+ * Drop the transform and all four draw as opaque white — which is exactly the
+ * 1,268 pixels of `#ffffff` a row census measures across canvas rows 980..1024
+ * at 1600x1200. **Both text fields are `#ffffff` as well**, so drawing the
+ * bar's words onto that plate would have changed nothing a sampler could see:
+ * the two halves of this are one defect, not two.
+ *
+ * ► **THE DURABLE HOME FOR THIS IS `propOpsFor` IN `src/render/props.js`, NOT
+ *   HERE.** That function already copies `fill`, `fillOpacity`, `stroke`,
+ *   `strokeOpacity`, the bitmap and the gradient off each path, and the matrix
+ *   and the clip off each placement; `colour` is the one field on a placement
+ *   it never reads. `screen.js` and `extracted-figure.js` both apply it, both
+ *   through `filters.js`, so the arithmetic is settled and only the arena's
+ *   reader is missing. This session did not own that file, so the transform is
+ *   composed HERE, at the seam `arenaScreenLayersFor` already injects
+ *   `propOpsFor` through — and `probeColourTransform` turns this off the moment
+ *   `props.js` starts carrying it, so the two can never both apply it.
+ */
+let colourTransformMode = "unprobed";
+
+/**
+ * Counted per DRAW OPERATION rather than per placement, because the operation
+ * is what the painter consumes and therefore the unit an absence would be
+ * invisible in. `unpairable` is the one that matters: it is ops this shell
+ * declined to tint because it could not prove which placement they came from.
+ */
+const colourTransformTally = { ops: 0, tinted: 0, colourNotApplied: 0, unpairable: 0 };
+
+/** The first placement in a pack carrying a transform a hex fill can take. */
+function firstTintedPlacement(pack) {
+  for (const prop of Object.values(pack?.props ?? {})) {
+    for (const frame of prop?.frames ?? []) {
+      for (const placement of frame ?? []) {
+        const transform = colourTransformFrom(placement?.colour ?? null);
+        if (!transform) continue;
+        const shape = pack?.shapes?.[placement.shape];
+        const path = Array.isArray(shape?.paths) ? shape.paths[0] : null;
+        if (!path || !colourTransformApplies(path.fill, transform)) continue;
+        return { placement, path, transform };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * A pack holding exactly ONE placement, so the ops that come back cannot
+ * belong to anything else. Used only by the probe; the hot path pairs ops to
+ * placements by counting paths instead of allocating one of these per frame.
+ */
+function onePlacementPack(pack, placement) {
+  return { props: { probe: { frames: [[placement]] } }, shapes: pack.shapes };
+}
+
+/**
+ * ASK `propOpsFor` WHETHER IT ALREADY APPLIES THE TRANSFORM rather than
+ * believing what it did this afternoon.
+ *
+ * ► **FIVE OTHER AGENTS ARE EDITING `src/render/` WHILE THIS IS WRITTEN**, and
+ *   a shell that applies a transform the module has just learned to apply
+ *   squares every multiplier — `#ffffff` at 0.3 would come out `#161616`
+ *   instead of `#4c4c4c`, which looks like a rendering choice rather than a
+ *   bug. So this runs one placement through the real function once, compares
+ *   the op it gets back with the path it started from, and decides. It is four
+ *   lines of measurement in place of an assumption with a shelf life.
+ */
+function probeColourTransform(pack) {
+  const sample = firstTintedPlacement(pack);
+  if (!sample) {
+    colourTransformMode = "nothing-to-do";
+    return;
+  }
+  let ops = null;
+  try {
+    ops = propOpsFor(onePlacementPack(pack, sample.placement), { linkage: "probe", frame: 1 });
+  } catch {
+    ops = null;
+  }
+  if (!ops || ops.length === 0) {
+    // The probe could not be run, so the honest state is "unknown" and the
+    // shell leaves the pixels alone rather than guessing in either direction.
+    colourTransformMode = "unprobed";
+    log("colour transform: could not probe `propOpsFor`; the arena draws untinted.", { warn: true });
+    return;
+  }
+  const expectedFill = applyColourTransform(sample.path.fill, sample.transform);
+  const expectedAlpha = applyColourTransformAlpha(sample.path.fillOpacity ?? 1, sample.transform);
+  const alreadyApplied = ops[0].fill === expectedFill
+    && Math.abs((ops[0].fillOpacity ?? 1) - expectedAlpha) < 1e-9;
+  colourTransformMode = alreadyApplied ? "upstream" : "shell";
+  // ► **KEPT SHORT ON PURPOSE.** `main { flex-wrap }` in the page makes the
+  //   stage as tall as the taller column, so a log line that WRAPS grows the
+  //   canvas and moves the whole arena down. Measured: the first draft of these
+  //   messages shifted the stage 70px and made the before/after shots
+  //   incomparable. The long version of each is in the comment above it.
+  log(alreadyApplied
+    ? "colour transform: propOpsFor applies it; nothing added here."
+    : "colour transform: composed here — belongs in src/render/props.js.");
+}
+
+/**
+ * `propOpsFor` WITH THE PLACEMENT'S COLOUR TRANSFORM PUT BACK ON.
+ *
+ * ► **THE OPS ARE PAIRED TO PLACEMENTS BY COUNTING PATHS, AND THE COUNT IS
+ *   CHECKED EVERY CALL.** `propOpsFor` emits one operation per path of each
+ *   placement's shape, in placement order, skipping a placement whose shape is
+ *   missing — so the pairing is arithmetic rather than a guess. If the total
+ *   does not come out equal, this returns the ops UNTINTED and adds them to
+ *   `unpairable`, because a wrong pairing paints the sky's midnight blue onto
+ *   the clouds and nothing says so. Measured: the sky's 200 frames have seven
+ *   distinct operation counts (2, 3, 26, 37, 38, 70, 93), so the check has
+ *   teeth against a frame index this shell got wrong as well as against a
+ *   change in `propOpsFor`.
+ *
+ * ► **THE FRAME CLAMP IS REPLICATED FROM `props.js` AND THAT IS A COUPLING.**
+ *   It is stated in that module's own public comment — past the end of a clip
+ *   the playhead stays put, so the last frame is what the build would be
+ *   showing — and the op-count check above is what catches it if the two ever
+ *   disagree.
+ */
+function tintedPropOpsFor(pack, options) {
+  const ops = propOpsFor(pack, options);
+  if (!ops || colourTransformMode !== "shell") return ops;
+
+  const frames = pack?.props?.[options?.linkage]?.frames;
+  if (!Array.isArray(frames) || frames.length === 0) return ops;
+  const wanted = Number.isFinite(options?.frame) ? Math.trunc(options.frame) : 1;
+  const placements = frames[Math.min(frames.length, Math.max(1, wanted)) - 1] ?? [];
+
+  let expected = 0;
+  for (const placement of placements) {
+    const shape = pack.shapes?.[placement.shape];
+    if (shape && Array.isArray(shape.paths)) expected += shape.paths.length;
+  }
+  if (expected !== ops.length) {
+    colourTransformTally.unpairable += ops.length;
+    return ops;
+  }
+
+  const out = [];
+  let at = 0;
+  for (const placement of placements) {
+    const shape = pack.shapes?.[placement.shape];
+    if (!shape || !Array.isArray(shape.paths)) continue;
+    const transform = colourTransformFrom(placement.colour ?? null);
+    for (let index = 0; index < shape.paths.length; index += 1) {
+      const operation = ops[at];
+      at += 1;
+      colourTransformTally.ops += 1;
+      if (!transform || !operation) {
+        out.push(operation);
+        continue;
+      }
+      // A transform whose colour half cannot reach a gradient or a bitmap fill
+      // is COUNTED, not silently half-applied: the alpha still lands and the
+      // colour does not, and that difference is exactly the kind of partial
+      // read this project keeps paying for. Measured over the whole pack it is
+      // currently zero, which is why the counter has to exist to stay honest.
+      const reaches = colourTransformApplies(operation.fill, transform)
+        || colourTransformApplies(operation.stroke, transform);
+      if (!reaches && (transform[0] !== 1 || transform[1] !== 1 || transform[2] !== 1
+        || transform[4] !== 0 || transform[5] !== 0 || transform[6] !== 0)) {
+        colourTransformTally.colourNotApplied += 1;
+      }
+      colourTransformTally.tinted += 1;
+      out.push(Object.freeze({
+        ...operation,
+        fill: applyColourTransform(operation.fill, transform),
+        fillOpacity: applyColourTransformAlpha(operation.fillOpacity ?? 1, transform),
+        stroke: applyColourTransform(operation.stroke, transform),
+        strokeOpacity: applyColourTransformAlpha(operation.strokeOpacity ?? 1, transform)
+      }));
+    }
+  }
+  return Object.freeze(out);
+}
+
+/**
+ * WHETHER THIS PACK HOLDS THE ARENA SCREEN, ASKED ONCE PER PACK.
+ *
+ * `hasArenaScreen` builds every layer's operations to answer it, and
+ * `viewport()` was asking it on EVERY FRAME while `render()` built the same
+ * layers again immediately afterwards — so the arena's whole backdrop was
+ * composed twice a frame before anything was drawn. The answer depends only on
+ * the pack (no camera, default dressing), so it is memoised on the pack's own
+ * identity and a pack that arrives later still gets asked.
+ */
+let arenaScreenAnswer = null;
+function arenaScreenAvailable() {
+  if (!arenaScreenAnswer || arenaScreenAnswer.pack !== propPack) {
+    arenaScreenAnswer = { pack: propPack, yes: hasArenaScreen(propPack, tintedPropOpsFor) };
+  }
+  return arenaScreenAnswer.yes;
+}
+
+/* ------------------------------------------------------------------ */
+/* The UI bar's words                                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * WHAT THE BAR SAYS, AND WHICH HALF OF IT IS REAL.
+ *
+ * `uiBarReadoutsFor` deliberately refuses to invent a value: it returns the two
+ * readouts sprite 1531 places with `text: null` until a caller supplies one,
+ * and counts what is still owed. This surface supplies ONE of the two and says
+ * so, rather than filling both and reporting a bar with nothing outstanding.
+ *
+ * - **`soundvar` (1527) gets a LIVE value.** This arena has a sound system and
+ *   now has a toggle, so `soundOn()` is a real fact about what the player is
+ *   hearing — not a picture of one. The build drives its own from
+ *   `_root.pSound` through `_root.toggleSound`, which this engine does not
+ *   have and is not pretending to.
+ * - **`tooltips_text` (1528) gets the PACK'S BAKED STRING**, via `text:
+ *   undefined`, which `fieldOpsFor` falls back to the field's own tag for.
+ *   That is the build's opening frame and it is the pack's business. **It stays
+ *   in the unresolved count**: this engine has no tooltip system, so the words
+ *   are the shipped label and not a readout of anything.
+ *
+ * ► **THE STRINGS ARE THE BUILD'S OWN RUNTIME SPELLING AND I RE-DERIVED THEM
+ *   FROM THE ORACLE RATHER THAN COPYING THE CLAIM.** Read out of
+ *   `swords_sandals2_download.swf`, sha256 77cb545c…45bb8ca — the same hash
+ *   `assets/props/manifest.json` cites:
+ *
+ * ```text
+ *   sprite:1531/frame:1/DoAction@0x3d3686 +0x017d   soundvar.text = "sound:off"
+ *   sprite:1531/frame:1/DoAction@0x3d3686 +0x01ad   soundvar.text = "sound:on"
+ * ```
+ *
+ *   Both disagree in CASE with the string baked into character 1527, which is
+ *   `"sound:ON\r"` — so the baked value is provably not what a running game
+ *   shows, and that is the whole reason this readout is supplied rather than
+ *   defaulted. `tooltips_text` is written `"Tooltips:on"` / `"Tooltips:off"` at
+ *   `sprite:1531/frame:1/instance:9/clip-action:0 +0x00c5 / +0x00ea` against a
+ *   baked `"tooltips:off"`, and is NOT used here for the reason above.
+ */
+let textPack = null;
+
+/** Whether this arena will actually make a noise if something asks it to. */
+function soundOn() {
+  return soundEnabled && !audioBlocked;
+}
+
+/** `{value, ops, tally}` for the bar's current reading, rebuilt only on change. */
+let barText = null;
+
+/**
+ * ► **`fieldOpsFor` ALLOCATES A GLYPH OUTLINE PER CHARACTER AND `text.js` SAYS
+ *   OUTRIGHT THAT A CALLER REDRAWING THE SAME STRING EVERY FRAME SHOULD HOLD
+ *   ONTO THE ARRAY.** The bar changes when the player toggles the sound and at
+ *   no other time, so it is built on the transition and kept.
+ */
+function uiBarOps() {
+  if (!textPack) return null;
+  const value = soundOn() ? "sound:on" : "sound:off";
+  if (barText && barText.pack === textPack && barText.value === value) return barText.ops;
+
+  const bar = uiBarReadoutsFor(textPack, fieldsPlacedIn, { sound: value });
+  const ops = [];
+  const baked = [];
+  for (const readout of bar.readouts) {
+    // `text: undefined` is what makes `fieldOpsFor` fall back to the field's
+    // own baked string.
+    //
+    // ► ~~`null` would be drawn as the four characters "null".~~ **It would
+    //   not, and I wrote that here before checking.** `fieldLayoutOptionsFor`
+    //   tests `text === undefined || text === null` and falls back on both, so
+    //   `?? undefined` is belt-and-braces rather than the thing that makes this
+    //   work. Measured: `fieldOpsFor(pack, 1528, {text: null})` draws
+    //   "tooltips:off", the same as `{text: undefined}` and the same as passing
+    //   no key at all. The `??` stays because the CONTRACT `text.js` documents
+    //   is `text: undefined`, and a reader should not have to know that null
+    //   happens to be handled too.
+    const drawn = fieldOpsFor(textPack, readout.field, {
+      matrix: readout.matrix,
+      text: readout.text ?? undefined
+    });
+    if (readout.text === null) baked.push(readout.instance);
+    if (drawn) ops.push(...drawn);
+  }
+  const sound = bar.readouts.find((readout) => readout.valueOf === "sound") ?? null;
+  barText = {
+    pack: textPack,
+    value,
+    ops: Object.freeze(ops),
+    tally: bar.tally,
+    baked,
+    // The bar-local x the pack places the sound readout at. `soundButtonPlate`
+    // uses it to tell the two alpha-zero button plates apart by POSITION, so
+    // neither this file nor that one has to know which one comes first.
+    soundX: sound ? sound.x : 0
+  };
+  return barText.ops;
+}
+
+/** The invoice for the bar, printed where a screenshot catches it. */
+function reportUiBar() {
+  const ops = uiBarOps();
+  if (!barText) return;
+  const { tally, baked } = barText;
+  log(`ui bar: ${tally.placed}/${tally.declared} placed, ${tally.valued} live, ` +
+    `${ops.length} glyph ops, unresolved ${tally.unresolved}.`, { warn: tally.unresolved > 0 });
+  if (baked.length > 0) log(`ui bar: ${baked.join(", ")} = the pack's baked string.`, { warn: true });
+  if (tally.unplacedInBuild > 0) log(`ui bar: ${tally.unplacedInBuild} readout(s) the build never places.`);
+}
+
+/**
+ * WHERE THE BAR'S SOUND BUTTON IS ON THE CANVAS, in canvas pixels, or null.
+ *
+ * Set while the bar is painted rather than computed from constants: the layer's
+ * placement and the fit are both already in hand there, and a hit box derived
+ * from anything else is a second copy of the layout that can drift from the one
+ * the player is looking at.
+ */
+let soundButtonBox = null;
+
+/**
+ * The build's own invisible hit plate for the sound toggle, in the bar's local
+ * pixels — **found by its `alphaMultiplier` of 0 and its x, never by index.**
+ * Two of the bar's four rectangles are alpha-zero button plates; the sound one
+ * is whichever sits nearest the `soundvar` readout the pack places.
+ */
+function soundButtonPlate(pack, readoutX) {
+  const placements = pack?.props?.panel?.frames?.[0] ?? [];
+  let best = null;
+  for (const placement of placements) {
+    const transform = colourTransformFrom(placement?.colour ?? null);
+    if (!transform || transform[3] !== 0) continue;
+    const shape = pack?.shapes?.[placement.shape];
+    if (!shape?.bounds || !Array.isArray(placement.matrix)) continue;
+    const [a, , , d, tx, ty] = placement.matrix;
+    const x = tx / TWIPS_PER_PIXEL;
+    const y = ty / TWIPS_PER_PIXEL;
+    const box = {
+      x0: x + shape.bounds.xMin * a, x1: x + shape.bounds.xMax * a,
+      y0: y + shape.bounds.yMin * d, y1: y + shape.bounds.yMax * d
+    };
+    const distance = Math.abs(box.x0 - readoutX);
+    if (!best || distance < best.distance) best = { box, distance };
+  }
+  return best ? best.box : null;
+}
+
+/**
+ * ► **THE BAR IS A CONTROL NOW, AND THAT IS THE POINT OF GIVING THE READOUT A
+ *   LIVE VALUE.** A readout with no way to change is decoration; the build's
+ *   bar has two buttons and this engine now honours one of them. The other
+ *   stays inert because there is no tooltip system to toggle, which is the same
+ *   answer the unresolved count gives.
+ */
+canvas.addEventListener("click", (event) => {
+  if (!soundButtonBox) return;
+  const rect = canvas.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return;
+  const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+  const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+  if (x < soundButtonBox.x0 || x > soundButtonBox.x1) return;
+  if (y < soundButtonBox.y0 || y > soundButtonBox.y1) return;
+  soundEnabled = !soundEnabled;
+  log(`sound ${soundEnabled ? "on" : "off"} — the bar's own toggle.`);
+});
+
+/* ------------------------------------------------------------------ */
+/* What the arena still cannot draw, counted                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **NOTHING IN THIS REPOSITORY EXTRACTS A FILTER'S PARAMETERS, so no filter
+ *   can be applied anywhere — not here, not on the 26 screens.** Re-derived
+ *   this session rather than taken from the brief, which said the data reached
+ *   this file:
+ *
+ * ```text
+ *   assets/props/props.json    "filter" occurs 0 times, "blend" 0 times
+ *   placement keys, ALL of them: clip, colour, matrix, shape
+ *   tools/extract-props.mjs:453 copies drawable.colourTransform and nothing else
+ *   assets/screens/screens.json carries `filteredPlacements: [{character, path}]`
+ *   tools/extract-screens.mjs:944 writes `filters: true` — a BOOLEAN, not a list
+ * ```
+ *
+ *   `tools/swf-display-list.mjs` does decode a FILTERLIST into typed records
+ *   (`parseFilterList`, and `flattenFrame`'s drawables carry `filters`), so the
+ *   data exists one layer upstream and dies in the two extractors. Until one of
+ *   them writes it out, `src/render/filters.js`'s `canvasFilterFor`,
+ *   `blendModeFor`, `colourMatrixFilterString`, `blurSigma`, `applyColourMatrix`
+ *   and `summariseFilterUse` have **no caller anywhere in `src/` or `tools/`
+ *   except the probe below** — grep says so, and the probe is the exception
+ *   this sentence had to grow the moment it was written. There is nothing for
+ *   this shell to apply to the arena's pixels. Inventing one would be drawing a
+ *   glow the build never asked for.
+ *
+ * This prints the absence with the pack's own numbers, because an absence
+ * nobody counts is this project's signature defect.
+ */
+function reportArenaEffects(pack) {
+  let placements = 0;
+  let tinted = 0;
+  let withFilters = 0;
+  let withBlend = 0;
+  for (const prop of Object.values(pack?.props ?? {})) {
+    for (const frame of prop?.frames ?? []) {
+      for (const placement of frame ?? []) {
+        placements += 1;
+        if (colourTransformFrom(placement?.colour ?? null)) tinted += 1;
+        if (placement?.filters) withFilters += 1;
+        if (Number.isFinite(placement?.blendMode) && placement.blendMode > 1) withBlend += 1;
+      }
+    }
+  }
+  log(`props: ${placements} placements, ${tinted} tinted, ` +
+    `${withFilters} filtered, ${withBlend} blended.`);
+
+  // ► **THE THREE LINKAGES THIS SHELL CANNOT REACH, COUNTED RATHER THAN
+  //   OMITTED.** `arenaScreenLayersFor` takes the props reader as an argument,
+  //   so the arena's own layers go through `tintedPropOpsFor`; `arrowOpsFor`,
+  //   `arrowTrailOpsFor` and `arenaSceneryFor` call `propOpsFor` INSIDE
+  //   `props.js` and there is no seam to compose at. Reimplementing their
+  //   fallback rules here to get one would put two copies of each in the tree,
+  //   so the loss is invoiced instead — and it is the strongest argument that
+  //   the transform belongs in `propOpsFor` rather than in this file.
+  const unreachable = {};
+  for (const linkage of ["bullet", "bullet_trail", "rockMC"]) {
+    let count = 0;
+    for (const frame of pack?.props?.[linkage]?.frames ?? []) {
+      for (const placement of frame ?? []) {
+        if (!colourTransformFrom(placement?.colour ?? null)) continue;
+        const shape = pack?.shapes?.[placement.shape];
+        if (Array.isArray(shape?.paths)) count += shape.paths.length;
+      }
+    }
+    if (count > 0) unreachable[linkage] = count;
+  }
+  const missed = Object.values(unreachable).reduce((total, count) => total + count, 0);
+  log(missed === 0
+    ? "props: every tinted op goes through the injected reader."
+    : `props: ${missed} tinted op(s) out of reach (` +
+      Object.entries(unreachable).map(([name, count]) => `${name} ${count}`).join(", ") + ").",
+    { warn: missed > 0 });
+  if (withFilters === 0) log("props: NO filter data in the pack — see extract-props.mjs.", { warn: true });
+}
+
+/**
+ * IS `ctx.filter` USABLE AND WHAT DOES IT COST — asked of the real browser,
+ * behind `?filterprobe=1`, because both questions were answered by reading in
+ * the brief and reading is what produced the claim above that was wrong.
+ *
+ * ► **THE FILTER RECORDS HERE ARE SYNTHETIC AND SAY SO.** They are the shape
+ *   `parseFilterList` emits, invented for the probe, because the pack carries
+ *   none. Nothing in this probe reaches the arena's pixels.
+ */
+function probeCanvasFilter() {
+  const synthetic = [
+    { type: "glow", blurX: 8, blurY: 8, passes: 2, strength: 2, inner: false, knockout: false,
+      colour: { red: 255, green: 220, blue: 90, alpha: 255 } },
+    { type: "blur", blurX: 6, blurY: 6, passes: 3 }
+  ];
+  const built = canvasFilterFor(synthetic, { scale: 1 });
+  log(`filter probe: canvasFilterFor -> ${JSON.stringify(built.filter)} ` +
+    `(applied ${built.counts.applied}, refused ${built.counts.refused}, noOp ${built.counts.noOp})`);
+
+  context.save();
+  context.filter = "none";
+  context.filter = built.filter ?? "none";
+  const accepted = context.filter;
+  log(`filter probe: the browser read it back as ${JSON.stringify(accepted)} — ` +
+    (accepted !== "none" && accepted.length > 0 ? "ACCEPTED" : "REJECTED"));
+
+  // ► **THE FIRST VERSION OF THIS PRINTED `0.00ms plain and 0.00ms filtered`
+  //   AND I ALMOST REPORTED IT.** Canvas fills are QUEUED: the loop returns
+  //   before any of them has been rasterised, so timing the loop times the
+  //   queueing. `getImageData` forces the surface to be finished, which is what
+  //   makes the number a measurement of drawing rather than of bookkeeping —
+  //   and 400 fills is below the noise floor either way.
+  const SAMPLES = 4000;
+  const wallStart = Date.now();
+  const time = (filter) => {
+    context.filter = filter;
+    const started = performance.now();
+    for (let n = 0; n < SAMPLES; n += 1) {
+      context.fillStyle = "#123456";
+      context.fillRect((n * 7) % 200, (n * 11) % 200, 24, 24);
+    }
+    context.getImageData(0, 0, 1, 1);
+    return performance.now() - started;
+  };
+  const wallOf = () => Date.now() - wallStart;
+  time("none");
+  const plain = time("none");
+  const filtered = time(built.filter ?? "none");
+  const wallDelta = wallOf();
+  context.filter = "none";
+  context.restore();
+  log(`filter probe: ${SAMPLES} fills took ${plain.toFixed(2)}ms plain and ` +
+    `${filtered.toFixed(2)}ms filtered (${(filtered / Math.max(plain, 0.001)).toFixed(1)}x).`);
+  // ► **AND WHETHER THAT NUMBER MEANS ANYTHING, REPORTED BESIDE IT.**
+  //   `tools/shot.sh` drives Chrome with `--virtual-time-budget`, under which
+  //   `performance.now()` is VIRTUAL: it advances when the page yields and not
+  //   while script runs, so every synchronous measurement in a screenshot comes
+  //   back 0.00ms however much work was done. The clock is printed raw so a
+  //   reader can see that rather than believing a zero.
+  log(`filter probe: clock now=${performance.now().toFixed(2)} wall=${wallDelta.toFixed(2)}` +
+    (plain === 0 && filtered === 0 ? " — BOTH ZERO, the clock is virtual; open the page in a real browser to time this." : ""));
+}
+
 function paintArenaLayer(layer, fit) {
   const { x, y, scale } = layer.placement;
   context.save();
@@ -1286,7 +1852,7 @@ function render(now = performance.now()) {
   // own bowl when they have not — the same fallback the figures and the sound
   // already have, and a clone with no assets is unchanged.
   const fit = stageFitFor({ width: canvas.width, height: canvas.height });
-  const screen = splitArenaScreen(arenaScreenLayersFor(propPack, propOpsFor, camera, arenaDressing));
+  const screen = splitArenaScreen(arenaScreenLayersFor(propPack, tintedPropOpsFor, camera, arenaDressing));
   if (screen.behind.length > 0 || screen.inFront.length > 0) {
     for (const layer of screen.behind) paintArenaLayer(layer, fit);
   } else {
@@ -1507,7 +2073,32 @@ function render(now = performance.now()) {
   //   above the arena's 59 — so an arrow crossing the ornamental frame passes
   //   BEHIND it. Painting every layer before every body is the version of this
   //   that looks right on a still and is wrong in motion.
-  for (const layer of screen.inFront) paintArenaLayer(layer, fit);
+  for (const layer of screen.inFront) {
+    paintArenaLayer(layer, fit);
+    if (layer.character !== 1531) continue;
+    // ► **THE WORDS GO ON WITH THE BAR, NOT AFTER THE LOOP.** The bar is root
+    //   depth 438 and the ornamental border is 1193, so the border paints OVER
+    //   the bar in the build — and text drawn after the loop would sit on top
+    //   of the frame. `splitArenaScreen` has already put both in the in-front
+    //   half; all this does is keep their order.
+    //
+    // ► **AND IT REUSES `paintArenaLayer` RATHER THAN ADDING A SECOND PAINTER.**
+    //   `fieldOpsFor` emits the same `{kind: "path", d, matrix, fill, ...}`
+    //   shape `propOpsFor` does — `d` in pixels, `matrix[4]`/`[5]` in twips —
+    //   so the loop that draws the plate draws the letters, at the same layer
+    //   placement, with no new code at all.
+    const words = uiBarOps();
+    if (words && words.length > 0) paintArenaLayer({ placement: layer.placement, ops: words }, fit);
+    // The hit box for the bar's sound button, in canvas pixels, derived from
+    // the same placement and fit the bar was just drawn with.
+    const plate = barText ? soundButtonPlate(propPack, barText.soundX) : null;
+    soundButtonBox = plate ? {
+      x0: fit.offsetX + fit.scale * (layer.placement.x + plate.x0),
+      x1: fit.offsetX + fit.scale * (layer.placement.x + plate.x1),
+      y0: fit.offsetY + fit.scale * (layer.placement.y + plate.y0),
+      y1: fit.offsetY + fit.scale * (layer.placement.y + plate.y1)
+    } : null;
+  }
 }
 
 /**
@@ -1524,7 +2115,7 @@ function drawDrops(view, now) {
     for (const drop of spray.spray) {
       const at = dropAt(drop, frame);
       if (!at) continue;
-      const ops = propOpsFor(propPack, { linkage: drop.prop, frame: drop.artFrame });
+      const ops = tintedPropOpsFor(propPack, { linkage: drop.prop, frame: drop.artFrame });
       // Clip space -> arena units, then screen y is DOWN in the build's own
       // numbers while arena lift is UP, so the drop's `y` is negated once,
       // here, at the point it is drawn — exactly as the figure's own limbs are
@@ -1923,5 +2514,11 @@ function frame(now) {
 renderProvenance();
 renderControls();
 log(`arena built: ${scene.drawOrder.length} fighters, ${perSide}v${perSide}, seed ${seed}`);
+// ► **RUN AFTER THE ARENA IS WARM, NOT DURING MODULE INIT.** The canvas is
+//   still at its default 300x150 until the first `render()` sizes it, and a
+//   timing measurement taken against that is a measurement of a different
+//   canvas. Two seconds is past the packs landing as well, so the log line
+//   lands at the TOP of the panel where a screenshot catches it.
+if (params.has("filterprobe")) setTimeout(probeCanvasFilter, 2000);
 requestAnimationFrame(frame);
 window.addEventListener("resize", () => render());

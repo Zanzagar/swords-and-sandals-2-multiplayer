@@ -72,6 +72,20 @@ import {
   IDENTITY_COLOUR_TRANSFORM
 } from "./swf-display-list.mjs";
 
+/**
+ * ► **THE COLOUR TRANSFORM IS NOT THIS FILE'S TO IMPLEMENT, AND IT USED TO BE.**
+ *   `src/render/filters.js` owns the one implementation — it FLOORS, because
+ *   `readColourTransform` reads the multiply term as signed 8.8 fixed point and
+ *   the player computes `(channel * multTerm) >> 8`, an arithmetic shift. The
+ *   copy that used to sit in `previewHtml` ROUNDED, which is a plus-or-minus-one
+ *   error on every channel it touched, in the one artefact whose entire job is
+ *   to be COMPARED BY EYE against the running game. Measured before removing
+ *   it, on the pack this tool writes: **11,018 of 47,025 channel computations
+ *   across the 4,544 tinted placements came out one unit apart** — 1,765 of the
+ *   3,290 distinct (fill, transform) pairs. See `previewTints`.
+ */
+import { applyColourTransform, applyColourTransformAlpha } from "../src/render/filters.js";
+
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 /**
@@ -500,6 +514,83 @@ export function poseBounds(shapes, poses) {
 }
 
 /**
+ * EVERY TINTED COLOUR THE PREVIEW CAN ASK FOR, COMPUTED HERE BY `filters.js` SO
+ * THE PAGE HOLDS NO COLOUR ARITHMETIC OF ITS OWN.
+ *
+ * ► **THIS EXISTS BECAUSE THE PREVIEW HELD A FIFTH COPY OF THE COLOUR
+ *   TRANSFORM AND THE COPY WAS WRONG.** The emitted page computed
+ *   `Math.round(value * mul + off)`; the player computes
+ *   `(channel * multTerm) >> 8`, which FLOORS. So the picture a person checks
+ *   this extraction against disagreed with what the renderer draws, in the file
+ *   whose own header calls it "the reason this tool writes HTML at all".
+ *
+ *   Measured on the pack this tool writes before removing it: **11,018 of
+ *   47,025 channel computations across the 4,544 tinted placements came out one
+ *   unit apart**, and 1,765 of the 3,290 distinct (fill, transform) pairs. The
+ *   alpha half was NOT wrong — `tintAlpha` already matched
+ *   `applyColourTransformAlpha` term for term, offset divided by 255 and
+ *   multiplier not — and it is routed through here anyway, because a copy that
+ *   agrees today is a copy that can stop agreeing.
+ *
+ * ► **AND IT IS NOT FIXED BY CHANGING `round` TO `floor` IN PLACE.** A sixth
+ *   copy that happens to agree is still a sixth copy, and the page cannot
+ *   `import` anything: it is opened from `file://` with no server, which is a
+ *   constraint this file has already paid for once. So the arithmetic runs
+ *   ONCE, HERE, through `src/render/filters.js`, and the page does a lookup.
+ *
+ * The table is keyed by the placement's own colour array joined with commas —
+ * the page computes the same key from the same array — and holds only the
+ * (colour, value) pairs the poses actually reach, so a lookup cannot miss.
+ * Measured on the oracle's pack: 250 distinct transforms and 3,290 distinct
+ * (fill, transform) pairs — an 84 KB island on a page that was already 6.4 MB.
+ *
+ * ► **A MISS IS COUNTED AND SHOWN RATHER THAN SWALLOWED.** If a lookup ever
+ *   does fail, the page draws the untinted colour — the only thing it can do —
+ *   and says so in its own footer, because an approximation that is not counted
+ *   is indistinguishable from a correct read.
+ *
+ * @param shapes      the pack this tool writes: `{[id]: {paths: [...]}}`
+ * @param animations  the poses, whose placements carry the eight-number colour
+ */
+export function previewTints(shapes, animations) {
+  const fills = {};
+  const alphas = {};
+  let fillPairs = 0;
+  let alphaPairs = 0;
+  for (const animation of Object.values(animations ?? {})) {
+    for (const pose of animation?.poses ?? []) {
+      for (const placement of pose) {
+        const colour = placement?.colour;
+        if (!colour) continue;
+        const key = colour.join(",");
+        const fillRow = fills[key] ?? (fills[key] = {});
+        const alphaRow = alphas[key] ?? (alphas[key] = {});
+        const shape = shapes?.[placement.shape];
+        if (!shape) continue;
+        for (const entry of shape.paths ?? []) {
+          // EXACTLY the values the page will look up, and in the same shape:
+          // its `tintHex` returns early on a falsy fill and on "none", and its
+          // `tintAlpha` defaults a missing stroke opacity to 1. A table built
+          // from anything else is a table with holes in it.
+          for (const hex of [entry.fill, entry.stroke]) {
+            if (!hex || hex === "none" || hex in fillRow) continue;
+            fillRow[hex] = applyColourTransform(hex, colour);
+            fillPairs += 1;
+          }
+          for (const alpha of [entry.fillOpacity, entry.strokeOpacity ?? 1]) {
+            const slot = String(alpha);
+            if (slot in alphaRow) continue;
+            alphaRow[slot] = applyColourTransformAlpha(alpha, colour);
+            alphaPairs += 1;
+          }
+        }
+      }
+    }
+  }
+  return { fills, alphas, transforms: Object.keys(fills).length, fillPairs, alphaPairs };
+}
+
+/**
  * A page that plays the extracted rig, AND sounds it.
  *
  * ► **THE FIRST VERSION NEEDED A SERVER AND THAT WAS A DESIGN ERROR.** It
@@ -527,12 +618,15 @@ export function poseBounds(shapes, poses) {
  * Deliberately dependency-free and deliberately dumb. If the figure in here
  * looks wrong, the extraction is wrong: there is no third thing to blame.
  */
-function previewHtml({ clip, clipName, shapes, animations, soundBindings, soundPath }) {
+export function previewHtml({ clip, clipName, shapes, animations, soundBindings, soundPath }) {
   // `</script>` cannot appear inside a script element even in a JSON island,
   // and `<` is the only character that can start one.
   const island = (value) => JSON.stringify(value).replace(/</g, "\\u003c");
   const labels = Object.keys(animations);
   const sounded = labels.filter((key) => (soundBindings?.[key] ?? []).length > 0).length;
+  // Every tinted colour these poses can ask for, computed by filters.js so
+  // that nothing below has to. See `previewTints`.
+  const tints = previewTints(shapes, animations);
   return `<!doctype html>
 <meta charset="utf-8">
 <title>Extracted figure — clip ${clip}${clipName ? ` (${clipName})` : ""}</title>
@@ -559,21 +653,29 @@ function previewHtml({ clip, clipName, shapes, animations, soundBindings, soundP
 <main><svg id="stage" width="520" height="620" preserveAspectRatio="xMidYMid meet"></svg></main>
 <footer>
   <span class="meta">${sounded} of ${labels.length} animations carry sound.</span>
+  <span class="meta" id="tintnote"></span>
   <span id="bound"></span>
 </footer>
 <script type="application/json" id="shapes">${island(shapes)}</script>
 <script type="application/json" id="animations">${island(animations)}</script>
 <script type="application/json" id="bindings">${island(soundBindings ?? {})}</script>
+<script type="application/json" id="tints">${island({ fills: tints.fills, alphas: tints.alphas })}</script>
 <script>
 const shapes = JSON.parse(document.getElementById("shapes").textContent);
 const animations = JSON.parse(document.getElementById("animations").textContent);
 const bindings = JSON.parse(document.getElementById("bindings").textContent);
+const TINTS = JSON.parse(document.getElementById("tints").textContent);
+const FILL_TINTS = TINTS.fills;
+const ALPHA_TINTS = TINTS.alphas;
+const TINT_PAIRS = ${tints.fillPairs};
+const TINT_TRANSFORMS = ${tints.transforms};
 const SOUND_PATH = ${JSON.stringify(soundPath)};
 
 const stage = document.getElementById("stage");
 const picker = document.getElementById("anim");
 const meta = document.getElementById("meta");
 const bound = document.getElementById("bound");
+const tintNote = document.getElementById("tintnote");
 const fpsInput = document.getElementById("fps");
 const playButton = document.getElementById("play");
 const soundToggle = document.getElementById("sound");
@@ -629,23 +731,43 @@ function showBound(key) {
   }
 }
 
-// A SWF colour transform is channel * multiplier + offset, clamped. Applying
-// it here rather than ignoring it is the difference between a frozen gladiator
-// and a standing one: 4,544 placements in this clip carry one, and they are the
-// CONDITION TINTS — frozen, burning, poisoned, lifesteal, the two casts.
+// ► **THE COLOUR ARITHMETIC USED TO BE HERE, AND IT WAS WRONG.** This page did
+// the tint itself — Math.round of value x mul + off — as the FIFTH copy of the
+// colour transform in this tree, and the one feeding the artefact a human
+// checks the extraction against. The player FLOORS: readColourTransform reads
+// the multiply term as signed 8.8 fixed point, and (channel x multTerm) >> 8 is
+// an arithmetic shift. Measured on this pack, 11,018 of 47,025 channel
+// computations came out one unit apart from what src/render/filters.js draws.
+//
+// So there is no colour arithmetic left in this page. previewTints precomputed
+// every (colour, value) pair these poses can reach, through filters.js itself,
+// and these two functions are lookups. 4,544 placements in this clip carry a
+// colour transform and they are the CONDITION TINTS — frozen, burning,
+// poisoned, lifesteal, the two casts.
+//
+// (No backticks and no dollar-brace below: this script is emitted from a
+// template literal, and a stray one of either ends the page mid-sentence.)
+//
+// A miss is impossible by construction and is COUNTED anyway: the table was
+// built by walking the same poses this draws, so a miss means the two walks
+// disagree, which is worth a line in the footer rather than a silent flat
+// colour.
+let tintMisses = 0;
+
 function tintHex(hex, c) {
   if (!c || !hex || hex === "none") return hex;
-  const n = parseInt(hex.slice(1), 16);
-  const ch = (value, mul, off) => Math.max(0, Math.min(255, Math.round(value * mul + off)));
-  const r = ch((n >> 16) & 255, c[0], c[4]);
-  const g = ch((n >> 8) & 255, c[1], c[5]);
-  const b = ch(n & 255, c[2], c[6]);
-  return "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+  const row = FILL_TINTS[c.join(",")];
+  const tinted = row ? row[hex] : undefined;
+  if (tinted === undefined) { tintMisses += 1; return hex; }
+  return tinted;
 }
 
 function tintAlpha(alpha, c) {
   if (!c) return alpha;
-  return Math.max(0, Math.min(1, alpha * c[3] + c[7] / 255));
+  const row = ALPHA_TINTS[c.join(",")];
+  const tinted = row ? row[String(alpha)] : undefined;
+  if (tinted === undefined) { tintMisses += 1; return alpha; }
+  return tinted;
 }
 
 // ONE VIEWBOX FOR EVERY ANIMATION, and it is the STANDING one padded.
@@ -695,6 +817,11 @@ function draw() {
   }
   meta.textContent = "frame " + ((frame % animation.poses.length) + 1) + "/" + animation.poses.length +
     " · clip frames " + animation.firstFrame + "-" + animation.lastFrame + " · " + pose.length + " parts";
+  // The tint invoice, on screen rather than in a console nobody opens.
+  tintNote.textContent = tintMisses === 0
+    ? TINT_PAIRS + " precomputed tints across " + TINT_TRANSFORMS + " colour transforms"
+    : tintMisses + " TINT LOOKUPS MISSED — those fills are drawn UNTINTED";
+  tintNote.className = tintMisses === 0 ? "meta" : "silent";
 }
 
 function select(key) {

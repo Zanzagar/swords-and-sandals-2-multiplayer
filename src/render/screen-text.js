@@ -12,10 +12,14 @@
  * two lines"*, and deliberately does not import it, so that a clone with no
  * `assets/text/` does not trip over a pack `screen.js` cannot see.
  *
- * ► **IT IS NOT TWO LINES, AND THE FOUR THINGS THAT MAKE IT MORE ARE WHY THIS
- *   IS A FILE RATHER THAN A CALLER'S FOR-LOOP.** Each was measured against the
- *   two real packs while this was being written, each is silent when got wrong,
- *   and each is pinned in `test/render-screen-text.test.js`:
+ * ► **IT IS NOT TWO LINES, AND THE FIVE THINGS THAT MAKE IT MORE ARE WHY THIS
+ *   IS A FILE RATHER THAN A CALLER'S FOR-LOOP.** *(FOUR when this was written.
+ *   The fifth was found by an adversarial verifier reading the committed file,
+ *   and it is the same defect as the other four one level down: an
+ *   approximation that reached no tally. Corrected here rather than in a note
+ *   above, because the count is the claim.)* Each was measured against the two
+ *   real packs, each is silent when got wrong, and each is pinned in
+ *   `test/render-screen-text.test.js`:
  *
  *   1. **`staticTextOpsFor`'s `matrix` option REPLACES the character's own
  *      matrix; it does not compose with it.** A `DefineText` carries its own
@@ -38,13 +42,67 @@
  *      and would vanish from an ops-only tally. `htmlMarkupStripped` counts
  *      PLACEMENTS and `htmlMarkupStrippedOps` counts operations; on this pack
  *      they are 5 and 65. A tally that only saw the 65 would report four
- *      approximations as zero.
+ *      approximations as zero. *(BOTH numbers are now taken from the
+ *      placement. The 65 used to be a filter over the operations, which
+ *      undercounts where two marks collide — see ONE MARK PER OPERATION
+ *      below.)*
  *   4. **108 of the 187 placements sit under a FILTERLIST nothing applies** —
  *      58%, the same defect `screen.js` reports for 69% of its path operations,
  *      and invisible in exactly the same way. `screen.js` marks its own ops
  *      `filtered: true`; the text placements it hands over carry no such mark,
  *      so this file re-reads `filteredPlacements` from the pack and marks and
  *      counts them itself.
+ *   5. **AN APPROXIMATION THIS FILE HAS NO NAME FOR IS STILL COUNTED, UNDER
+ *      THE NAME `text.js` GAVE IT.** The tally used to be five `if`s and an
+ *      unconditional add, filling eight keys, and every one of them was keyed
+ *      on a literal: four camelCase strings this module invented and ONE
+ *      borrowed from the other vocabulary, `"html-markup-stripped"`. Every
+ *      other mark `text.js` stamps — `advance-from-outline` and
+ *      `advance-from-sibling-font` on a glyph, `glyph-missing` on an operation,
+ *      and whatever a re-extraction adds next — reached the placement record
+ *      and then no number at all. **A tally keyed on a literal is a tally that
+ *      stops counting when the data grows**, which is the bitmap note that died
+ *      at the next seam and left the arena walls invisible, wearing a different
+ *      hat. `approximatedByKind` and `approximatedOpsByKind` now count EVERY
+ *      mark under its own name, `approximations` is a PROJECTION of those two,
+ *      and `unrosteredApproximations` names, by name, every kind the projection
+ *      has no key for.
+ *
+ * ## TWO VOCABULARIES, ONE TABLE, AND THE ROSTER AS A PROJECTION
+ *
+ * `text.js` writes kebab-case marks that describe what the EXTRACTOR could not
+ * do (`html-markup-stripped`, `glyph-missing`, `advance-from-outline`); this
+ * module's roster is camelCase and describes what the SCREEN is missing
+ * (`filtersNotApplied`, `placeholderDrawn`). `APPROXIMATION_MARKS` below is the
+ * only place in this file where a string from either vocabulary appears, and
+ * the counting loop names none of them.
+ *
+ * Two rules do the counting, and they are stated here because they are the
+ * whole of the arithmetic:
+ *
+ * - A mark on a PLACEMENT counts one placement, and — unless the table says
+ *   otherwise — counts every operation that placement emitted. A field whose
+ *   markup was stripped stripped it from the whole field.
+ * - A mark on an OPERATION counts that operation, and counts its placement
+ *   ONCE however many of its operations carry it.
+ *
+ * ## ONE MARK PER OPERATION — WHY THE `…Ops` COUNTS ARE NOT READ OFF THE OPS
+ *
+ * ► **AN OPERATION CAN CARRY ONLY ONE `approximated` STRING.** `fieldOpsFor`
+ *   stamps `op.approximated ?? field.approximated` (`text.js:713`), so an
+ *   operation already marked `glyph-missing` never receives its field's
+ *   `html-markup-stripped`, and an ops-only filter for the field's mark loses
+ *   it. An earlier version of this file counted `htmlMarkupStrippedOps` with
+ *   exactly that filter.
+ *
+ * The root cause is in `text.js` and **this file does not own `text.js`**, so
+ * the fix here is to stop asking the operation and ask the PLACEMENT instead:
+ * every operation a stripped field emitted is drawn from stripped markup,
+ * whatever single mark its own slot happens to hold. That is the rule above,
+ * and it gives the same 65 on this pack — where 0 of the 187 placements emit a
+ * notdef operation, so the two readings have never yet disagreed — while being
+ * immune to the collision. **If `text.js` ever grows a list of marks per
+ * operation, this is the seam that should stop deriving and start reading.**
  *
  * ## THE PACKS ARE ARGUMENTS, BOTH OF THEM, AND EITHER MAY BE ABSENT
  *
@@ -206,10 +264,29 @@ export const SCREEN_TEXT_UNDRAWN_KINDS = Object.freeze([
 /**
  * Every way a placement that DID draw is still not what the build shows.
  *
- * The `…Ops` members count operations and the others count placements. Both
- * are here because they answer different questions and because, on this pack,
- * one of them is zero exactly where the other is not: four of the five HTML
- * fields emit no operation, so an ops-only count reports 1 where the truth is 5.
+ * ► **THIS ROSTER IS A PROJECTION OF THE OPEN TALLY, NOT THE TALLY ITSELF.**
+ *   `screenTextFor` counts every mark it meets under the mark's OWN name in
+ *   `approximatedByKind` and `approximatedOpsByKind`, then copies across the
+ *   ones named here. A kind this roster has no key for — a glyph whose advance
+ *   the extractor approximated, a sixth field kind a re-extraction introduces
+ *   — is still counted, and `unrosteredApproximations` names it. The roster
+ *   itself stays FIXED so a caller rendering the invoice from these eight keys
+ *   does not have its layout move under it; `tools/screens/main.js` does
+ *   exactly that.
+ *
+ * ~~The `…Ops` members count operations and the others count placements.~~
+ * **HALF WRONG, AND CORRECTED AT THE CLAIM: `glyphsNotdef` COUNTS OPERATIONS
+ * TOO.** It is the number of hollow `.notdef` boxes drawn, not the number of
+ * placements that drew one, and it has no `Ops` suffix to say so. The key is
+ * left alone rather than renamed because the operation count is the useful one
+ * and it is what the screen viewer already shows; the placement-level count of
+ * the same thing is `approximatedByKind.glyphsNotdef`. Every OTHER `…Ops`
+ * member counts operations and every other member counts placements.
+ *
+ * Both kinds are here because they answer different questions and because, on
+ * this pack, one of them is zero exactly where the other is not: four of the
+ * five HTML fields emit no operation, so an ops-only count reports 1 where the
+ * truth is 5.
  */
 export const SCREEN_TEXT_APPROXIMATION_KINDS = Object.freeze([
   "filtersNotApplied",
@@ -221,6 +298,58 @@ export const SCREEN_TEXT_APPROXIMATION_KINDS = Object.freeze([
   "lineHeightFromSize",
   "newlineCollapsed"
 ]);
+
+/**
+ * THE ONE TABLE WHERE THE TWO VOCABULARIES MEET, and the reason the counting
+ * loop in `screenTextFor` contains no string literal at all.
+ *
+ * Keyed by the mark as it appears — camelCase for the ones `finish` pushes onto
+ * a placement, kebab-case for the ones `text.js` stamps on a field or an
+ * operation. Each entry says which roster key the mark projects onto:
+ *
+ * ```text
+ *   placements  roster key counting PLACEMENTS carrying the mark, or null
+ *   ops         roster key counting OPERATIONS affected by it,    or null
+ *   spreads     whether a mark on a PLACEMENT is taken to affect every
+ *               operation that placement emitted
+ * ```
+ *
+ * `null` means "the roster has no name for this number", NOT "do not count it":
+ * it is still in `approximatedByKind`/`approximatedOpsByKind` under its own
+ * name. A mark absent from this table entirely is counted the same way AND
+ * listed in `unrosteredApproximations`, which is the difference between a kind
+ * this module has thought about and a kind it has never seen.
+ *
+ * ► **`glyphsNotdef` APPEARS TWICE AND MUST NOT BE COUNTED TWICE.** `finish`
+ *   pushes the camelCase `glyphsNotdef` onto a placement that drew at least one
+ *   hollow box, and `text.js` stamps the kebab-case `glyph-missing` on each of
+ *   those boxes. They are the same finding at two scales, so the placement mark
+ *   does NOT spread (its operations are already counted by the operation mark)
+ *   and the roster's `glyphsNotdef` is projected from the OPERATION mark. On
+ *   this build the two are exactly redundant — every `notdef: true` operation
+ *   `text.js` emits also carries `approximated: "glyph-missing"`, both notdef
+ *   branches set both fields — and the test asserts that they still agree.
+ *
+ * A Map rather than an object literal because the keys are pack data: a mark
+ * called `constructor` or `__proto__` would find a prototype member on an
+ * object and be silently mis-rostered.
+ */
+const APPROXIMATION_MARKS = new Map([
+  ["filtersNotApplied", { placements: "filtersNotApplied", ops: "filtersNotAppliedOps", spreads: true }],
+  ["html-markup-stripped", { placements: "htmlMarkupStripped", ops: "htmlMarkupStrippedOps", spreads: true }],
+  ["placeholderDrawn", { placements: "placeholderDrawn", ops: null, spreads: true }],
+  ["lineHeightFromSize", { placements: "lineHeightFromSize", ops: null, spreads: true }],
+  ["newlineCollapsed", { placements: "newlineCollapsed", ops: null, spreads: true }],
+  ["glyphsNotdef", { placements: null, ops: null, spreads: false }],
+  ["glyph-missing", { placements: null, ops: "glyphsNotdef", spreads: false }]
+]);
+
+/**
+ * What an unfamiliar mark gets: counted under its own name, projected onto no
+ * roster key, and — being a field- or placement-level mark until something
+ * says otherwise — taken to affect every operation the placement emitted.
+ */
+const UNROSTERED_MARK = Object.freeze({ placements: null, ops: null, spreads: true });
 
 /**
  * TWO PLACEMENT MATRICES, COMPOSED — outer over inner, the Flash way.
@@ -493,8 +622,14 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
   const ops = [];
   const undrawnByKind = {};
   for (const kind of SCREEN_TEXT_UNDRAWN_KINDS) undrawnByKind[kind] = 0;
-  const approximations = {};
-  for (const kind of SCREEN_TEXT_APPROXIMATION_KINDS) approximations[kind] = 0;
+  // ► **THE OPEN TALLY IS THE ONE THAT COUNTS AND THE ROSTER IS COPIED OUT OF
+  //   IT BELOW.** Maps, not objects, for the reason `APPROXIMATION_MARKS` is
+  //   one: these keys come from the packs, and a mark called `__proto__` would
+  //   hit a setter on an object literal and vanish — an uncounted
+  //   approximation produced by the code that exists to stop them.
+  const approximatedByKind = new Map();
+  const approximatedOpsByKind = new Map();
+  const unrostered = new Set();
 
   for (const placement of record.text) {
     const filtered = underAnyPrefix(placement.path, prefixes);
@@ -507,22 +642,48 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
     //   `screenFor(...).text.length` on every one of the 26 screens.
     if (!resolved) continue;
     placements.push(resolved);
-    for (const op of resolved.ops) ops.push(op);
     if (resolved.undrawn) undrawnByKind[resolved.undrawn] += 1;
-    if (filtered) {
-      approximations.filtersNotApplied += 1;
-      approximations.filtersNotAppliedOps += resolved.ops.length;
+
+    // The marks the OPERATIONS carry, gathered on the pass that collects them.
+    const opMarks = new Map();
+    for (const op of resolved.ops) {
+      ops.push(op);
+      if (typeof op.approximated !== "string" || op.approximated.length === 0) continue;
+      opMarks.set(op.approximated, (opMarks.get(op.approximated) ?? 0) + 1);
     }
-    // ► Counted from the PLACEMENT and not from the operations. Four of the
-    //   five HTML fields draw nothing, so an ops-only count reports 1 of 5.
-    if (resolved.approximated.includes("html-markup-stripped")) {
-      approximations.htmlMarkupStripped += 1;
-      approximations.htmlMarkupStrippedOps += resolved.ops.filter((op) => op.approximated === "html-markup-stripped").length;
+
+    // Rule one: a mark on the PLACEMENT counts one placement and, unless the
+    // table says it does not spread, every operation the placement emitted.
+    const placementMarks = new Set(resolved.approximated);
+    for (const mark of placementMarks) {
+      const entry = markEntry(mark, unrostered);
+      bump(approximatedByKind, mark, 1);
+      if (entry.spreads) bump(approximatedOpsByKind, mark, resolved.ops.length);
     }
-    if (resolved.approximated.includes("placeholderDrawn")) approximations.placeholderDrawn += 1;
-    if (resolved.approximated.includes("lineHeightFromSize")) approximations.lineHeightFromSize += 1;
-    if (resolved.approximated.includes("newlineCollapsed")) approximations.newlineCollapsed += 1;
-    approximations.glyphsNotdef += resolved.notdef;
+    // Rule two: a mark on an OPERATION counts that operation, and counts its
+    // placement ONCE — skipped entirely when the placement already carries the
+    // same mark, which is how `html-markup-stripped` avoids being counted from
+    // both ends.
+    for (const [mark, count] of opMarks) {
+      if (placementMarks.has(mark)) continue;
+      // Called for its side effect and not its answer: `spreads` is a rule about
+      // placement marks, and an operation mark counts only its own operations.
+      // What is wanted here is the question being ASKED, so an unfamiliar mark
+      // on an operation is named rather than silently counted.
+      markEntry(mark, unrostered);
+      bump(approximatedByKind, mark, 1);
+      bump(approximatedOpsByKind, mark, count);
+    }
+  }
+
+  // THE PROJECTION. Every roster key is copied out of the open tally, so the
+  // two cannot drift; a key no mark projects onto stays at the zero it was
+  // initialised with.
+  const approximations = {};
+  for (const kind of SCREEN_TEXT_APPROXIMATION_KINDS) approximations[kind] = 0;
+  for (const [mark, entry] of APPROXIMATION_MARKS) {
+    if (entry.placements !== null) approximations[entry.placements] = approximatedByKind.get(mark) ?? 0;
+    if (entry.ops !== null) approximations[entry.ops] = approximatedOpsByKind.get(mark) ?? 0;
   }
 
   const drawn = placements.filter((entry) => entry.drawn).length;
@@ -535,6 +696,22 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
     placements: Object.freeze(placements),
     undrawnByKind: Object.freeze(undrawnByKind),
     approximations: Object.freeze(approximations),
+    // ► **THE OPEN TALLY, BY THE MARK'S OWN NAME.** Kinds that did not occur
+    //   are ABSENT rather than zero: a key here is a thing that happened. The
+    //   two vocabularies are deliberately mixed — `filtersNotApplied` beside
+    //   `advance-from-outline` — because renaming one into the other is what
+    //   loses the kinds this module has no name for.
+    approximatedByKind: frozenCounts(approximatedByKind),
+    approximatedOpsByKind: frozenCounts(approximatedOpsByKind),
+    // ► **EVERY KIND THE ROSTER HAS NO KEY FOR, BY NAME.** Empty on this
+    //   extraction, which is a measurement of one pack and not a guarantee: the
+    //   text pack's own manifest counts 112 `advance-from-outline` and 2
+    //   `advance-from-sibling-font` glyphs in font 1510, and the only static on
+    //   these 26 screens that names that font draws a single EMPTY glyph, so
+    //   not one of the 114 reaches an operation here. A re-extraction, or one
+    //   more placement, and it does — and then this array says so instead of
+    //   the count being 187 approximations reported as 0.
+    unrosteredApproximations: Object.freeze([...unrostered].sort()),
     counts: Object.freeze({
       // The same number `screen.js` reports as `approximations.textNotDrawn`.
       placements: placements.length,
@@ -613,6 +790,44 @@ export function screenWithTextFor(screenPack, textPack, name, options = {}) {
 export function joinableScreenNames(screenPack, textPack) {
   if (!hasJoinableText(screenPack, textPack)) return Object.freeze([]);
   return screenNames(screenPack);
+}
+
+/* ------------------------------------------------------------------ */
+/* The tally                                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * What `APPROXIMATION_MARKS` says about a mark, and a note in `unrostered` when
+ * it says nothing at all.
+ *
+ * The side effect is the point: the ONLY way a kind reaches
+ * `unrosteredApproximations` is by being looked up here, so a mark cannot be
+ * counted without the question "is this one we have a name for?" being asked
+ * about it.
+ */
+function markEntry(mark, unrostered) {
+  const entry = APPROXIMATION_MARKS.get(mark);
+  if (entry !== undefined) return entry;
+  unrostered.add(mark);
+  return UNROSTERED_MARK;
+}
+
+/** Add to a counter in a Map, creating it at zero first. */
+function bump(counts, key, by) {
+  if (by <= 0) return;
+  counts.set(key, (counts.get(key) ?? 0) + by);
+}
+
+/**
+ * A counting Map as a frozen plain object, sorted by kind so two runs of the
+ * same screen read the same.
+ *
+ * `Object.fromEntries` defines own data properties, so a kind called
+ * `__proto__` lands as a key here rather than reassigning the prototype — the
+ * hazard that made the accumulator a Map in the first place.
+ */
+function frozenCounts(counts) {
+  return Object.freeze(Object.fromEntries([...counts].sort((left, right) => (left[0] < right[0] ? -1 : left[0] > right[0] ? 1 : 0))));
 }
 
 /* ------------------------------------------------------------------ */

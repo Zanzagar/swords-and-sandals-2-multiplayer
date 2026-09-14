@@ -1,6 +1,12 @@
 /**
- * THE JOIN — twenty-five screens of words, and the four things that make the
+ * THE JOIN — twenty-six screens of words, and the five things that make the
  * join more than a for-loop.
+ *
+ * *(“twenty-five” and “four” when this was written. The screen count was always
+ * wrong — `THE 187 PLACEMENTS` three hundred lines below asserts 26 and has
+ * since it was committed — and the fifth hazard was found by an adversarial
+ * verifier reading the committed module. Corrected AT the claim, because a
+ * count in a header is a claim like any other.)*
  *
  * `screen.js` returns 187 text placements it cannot draw; `text.js` can draw a
  * static run or an edit field; `screen-text.js` is the seam between them. Four
@@ -19,7 +25,13 @@
  *   3. that `html-markup-stripped` is counted per PLACEMENT, because four of
  *      the five such fields draw nothing and an operations-only tally reports
  *      one approximation where there are five;
- *   4. that a placement under a FILTERLIST is marked and counted — 108 of 187.
+ *   4. that a placement under a FILTERLIST is marked and counted — 108 of 187;
+ *   5. that a mark `text.js` stamps and this module has NO NAME FOR is still
+ *      counted, under `text.js`'s name for it, and reported in
+ *      `unrosteredApproximations` rather than dropped — the tally used to be
+ *      keyed on the string literal `"html-markup-stripped"` and on nothing
+ *      else, so the 114 glyph-level approximations in the real pack's font 1510
+ *      could reach an operation and no number at all.
  *
  * ► **THE SYNTHETIC PACKS BELOW ARE THE CONTRACT AND THEY HAVE TO BE
  *   SYNTHETIC.** `assets/` is gitignored and `test/asset-attestation.test.js`
@@ -55,7 +67,7 @@ import {
   screenWithTextFor
 } from "../src/render/screen-text.js";
 import { screenFor, screenNames, screenPackFrom } from "../src/render/screen.js";
-import { TEXT_UNITS_PER_EM, TWIPS_PER_PIXEL, textPackFrom } from "../src/render/text.js";
+import { TEXT_UNITS_PER_EM, TWIPS_PER_PIXEL, fontFor, staticTextOpsFor, textPackFrom } from "../src/render/text.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
@@ -169,6 +181,38 @@ function field400() {
     // run found exactly that.
     variable: "about_fight_text", text: "AB"
   };
+}
+
+/**
+ * The same pack with font 7's two inked glyphs carrying GLYPH-LEVEL
+ * approximation marks, which is what the real pack's font 1510 looks like: 112
+ * of its 114 glyphs are `advance-from-outline` and 2 are
+ * `advance-from-sibling-font`, per `assets/text/manifest.json`'s own
+ * `approximated.byKind`.
+ *
+ * Synthetic rather than real for the reason every fixture here is, and because
+ * the real pack cannot exercise this at all: measured, the ONLY static on the
+ * 26 screens that names font 1510 is 1511, whose single glyph is empty, so not
+ * one of those 114 marks reaches an operation on this build. The hole was
+ * LATENT, and a latent hole needs a pack that opens it.
+ */
+function approximatedGlyphTextPack() {
+  const base = syntheticTextPack();
+  const font = syntheticFont({
+    glyphs: [
+      { code: 32, char: " ", path: "", empty: true, advance: 10000 },
+      { code: 65, char: "A", path: GLYPH_BOX, empty: false, advance: 12000, approximated: "advance-from-outline" },
+      { code: 66, char: "B", path: GLYPH_BOX, empty: false, advance: 8000, approximated: "advance-from-sibling-font" },
+      { code: 10, char: "\n", path: "", empty: true, advance: 0 }
+    ]
+  });
+  return textPackFrom({
+    unitsPerEm: base.unitsPerEm,
+    fonts: { ...base.fonts, 7: font },
+    statics: base.statics,
+    fields: base.fields,
+    placements: base.placements
+  });
 }
 
 const SYNTHETIC_SHAPE = {
@@ -544,6 +588,16 @@ test("a glyph index the font cannot answer for draws a box and is counted", () =
   assert.equal(broken.ops[0].approximated, "glyph-missing");
   assert.deepEqual([...broken.approximated], ["glyphsNotdef"]);
   assert.equal(record.approximations.glyphsNotdef, 1, "and it reaches the screen's tally");
+  // ► **THE FLAG AND THE MARK ARE THE SAME FINDING AND MUST AGREE.**
+  //   `text.js` sets `notdef: true` and `approximated: "glyph-missing"` in the
+  //   same two branches; the roster's `glyphsNotdef` is projected from the
+  //   MARK, so if either ever stops implying the other this is the assertion
+  //   that says so rather than a number quietly halving.
+  assert.equal(record.approximations.glyphsNotdef, record.placements.reduce((sum, one) => sum + one.notdef, 0));
+  assert.equal(record.approximatedOpsByKind["glyph-missing"], 1);
+  assert.equal(record.approximatedByKind.glyphsNotdef, 1, "one PLACEMENT drew a box; the roster key counts BOXES");
+  assert.equal(record.approximatedOpsByKind.glyphsNotdef, undefined,
+    "► and the placement-level mark does NOT spread onto its operations, which would count the box twice");
 });
 
 test("a font with no layout block, and a newline in a single-line field, both reach the tally", () => {
@@ -588,6 +642,115 @@ test("a field whose font has no glyphs is font-missing, told apart from a missin
   const placement = screenFor(syntheticScreens(), "forum").text.find((entry) => entry.character === 400);
   assert.equal(placementTextFor(hollow, placement).undrawn, "font-missing");
   assert.equal(placementTextFor(text, placement).undrawn, null, "and the real font draws it");
+});
+
+test("A GLYPH-LEVEL APPROXIMATION REACHES THE TALLY UNDER text.js's OWN NAME FOR IT", () => {
+  // ► Hazard 5. `text.js` stamps a glyph's `approximated` onto every operation
+  //   it draws from that glyph (`opsFromLayout` and `staticTextOpsFor` both do
+  //   it). `SCREEN_TEXT_APPROXIMATION_KINDS` has no key for either glyph kind
+  //   and never will — the roster is fixed so a viewer's layout does not move
+  //   — so the open tally is the only thing standing between 114 marked glyphs
+  //   and a screen that reports zero approximations while drawing them.
+  const record = screenTextFor(syntheticScreens(), approximatedGlyphTextPack(), "forum");
+
+  // static 300 draws "AA", static 301 draws "B", field 400 draws "AB".
+  assert.equal(record.approximatedOpsByKind["advance-from-outline"], 3, "three operations came off an outline-derived advance");
+  assert.equal(record.approximatedOpsByKind["advance-from-sibling-font"], 2);
+  assert.equal(record.approximatedByKind["advance-from-outline"], 2, "and two placements drew one");
+  assert.equal(record.approximatedByKind["advance-from-sibling-font"], 2);
+  assert.equal(record.approximatedOpsByKind["advance-from-outline"] + record.approximatedOpsByKind["advance-from-sibling-font"],
+    record.counts.ops, "every operation this screen drew is marked, and every mark is counted");
+
+  // ► **AND THE ROSTER IS UNCHANGED**, which is the whole design: a kind it
+  //   has no key for is NAMED rather than squeezed into a key that means
+  //   something else.
+  assert.deepEqual(Object.keys(record.approximations), [...SCREEN_TEXT_APPROXIMATION_KINDS]);
+  assert.deepEqual([...record.unrosteredApproximations], ["advance-from-outline", "advance-from-sibling-font"],
+    "► the two kinds this module has no name for are reported BY NAME");
+  assert.equal(record.counts.drawn + record.counts.undrawn, record.counts.placements);
+
+  // The pack WITHOUT the marks reports none of it, so the assertions above are
+  // reading the glyphs and not a constant.
+  const plain = screenTextFor(syntheticScreens(), syntheticTextPack(), "forum");
+  assert.deepEqual([...plain.unrosteredApproximations], [], "the unmarked pack has nothing unrostered");
+  assert.equal(plain.approximatedOpsByKind["advance-from-outline"], undefined,
+    "and a kind that did not occur is ABSENT from the open tally, not a zero");
+});
+
+test("A FIELD KIND THIS MODULE HAS NEVER SEEN IS COUNTED AND NAMED, not folded into the html count", () => {
+  // ► Hazard 5 again, at the field level. `finish` pushes whatever string
+  //   `field.approximated` holds onto the placement; the tally used to
+  //   increment a key only for the literal "html-markup-stripped". On this pack
+  //   all five field marks are that kind, so the hole is invisible TODAY and
+  //   opens the moment a re-extraction adds a sixth.
+  const text = syntheticTextPack({
+    fields: {
+      406: { id: 406, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, font: 7, fontHeight: 409.6,
+        colour: "#ffffff", alpha: 1, align: "left", leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+        multiline: false, wordWrap: false, password: false, readOnly: true, html: true,
+        variable: "sixth_kind", text: "AB", approximated: "entities-not-decoded" }
+    }
+  });
+  const raw = syntheticScreensRaw();
+  raw.screens.forum.textFields.push({
+    id: 406, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
+    colour: { red: 255, green: 255, blue: 255, alpha: 255 }, align: 0, leading: 0,
+    leftMargin: 0, rightMargin: 0, indent: 0, variableName: "sixth_kind",
+    initialText: "A&amp;B", multiline: false, wordWrap: false, readOnly: true,
+    path: [62], matrix: [1, 0, 0, 1, 0, 0]
+  });
+  const record = screenTextFor(screenPackFrom(raw), text, "forum");
+  const entry = record.placements.find((one) => one.character === 406);
+  assert.equal(entry.drawn, true, "it draws — the caller is told, the screen is not blank");
+  assert.equal(entry.approximated.includes("entities-not-decoded"), true, "the mark is on the placement");
+  assert.equal(record.approximatedByKind["entities-not-decoded"], 1, "► and it reaches a NUMBER, which is the point");
+  assert.equal(record.approximatedOpsByKind["entities-not-decoded"], 2, "on both operations the field emitted");
+  assert.equal(record.unrosteredApproximations.includes("entities-not-decoded"), true,
+    "► and is named, so a reader knows the roster is not showing it");
+  assert.equal(record.approximations.htmlMarkupStripped, 1,
+    "► and is NOT quietly added to the html count — only field 401 is an html field here");
+  assert.equal(record.approximations.htmlMarkupStrippedOps, 0, "which draws nothing");
+  assert.equal(record.approximatedOpsByKind["html-markup-stripped"], undefined,
+    "► a kind that affected NO operation is absent from the open tally; the roster reads the absence as the zero it is");
+  // The open tally is sorted by kind, so a reader diffing two runs of the same
+  // screen sees a changed COUNT rather than a reordered object. Insertion order
+  // here would be filtersNotApplied, placeholderDrawn, html-markup-stripped,
+  // entities-not-decoded, which is deliberately not the sorted one.
+  assert.deepEqual(Object.keys(record.approximatedByKind),
+    ["entities-not-decoded", "filtersNotApplied", "html-markup-stripped", "placeholderDrawn"]);
+});
+
+test("THE TWO MARKS COLLIDE ON ONE OPERATION, and the ops count survives it", () => {
+  // ► `fieldOpsFor` stamps `op.approximated ?? field.approximated`
+  //   (`text.js:713`), so an operation already marked `glyph-missing` never
+  //   receives its field's `html-markup-stripped`. An ops-only filter for the
+  //   field's mark therefore UNDERCOUNTS, which is what this file used to do.
+  //   Zero on the real build — 0 notdef operations across the 187 placements —
+  //   and one line of a re-extraction away from not being.
+  const raw = syntheticScreensRaw();
+  raw.screens.forum.textFields.push({
+    id: 402, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
+    colour: { red: 255, green: 255, blue: 255, alpha: 255 }, align: 0, leading: 0,
+    leftMargin: 0, rightMargin: 0, indent: 0, variableName: "loud_html",
+    initialText: "<p align=\"center\">AB</p>", multiline: false, wordWrap: false, readOnly: true,
+    path: [58], matrix: [1, 0, 0, 1, 0, 0]
+  });
+  // "Z" is not in the synthetic font, so the field draws one real glyph and one
+  // hollow box — the collision, in two operations.
+  const record = screenTextFor(screenPackFrom(raw), syntheticTextPack(), "forum", { values: { loud_html: "AZ" } });
+  const loud = record.placements.find((one) => one.character === 402);
+  assert.equal(loud.ops.length, 2);
+  assert.equal(loud.notdef, 1);
+  assert.deepEqual(loud.ops.map((op) => op.approximated), ["html-markup-stripped", "glyph-missing"],
+    "► ONE mark per operation: the box says glyph-missing and cannot also say html-markup-stripped");
+  assert.equal(record.ops.filter((op) => op.approximated === "html-markup-stripped").length, 1,
+    "► so an ops-only filter for the field's mark sees ONE of the two");
+  assert.equal(record.approximations.htmlMarkupStrippedOps, 2,
+    "► and the tally reports TWO, because the count is taken from the PLACEMENT the field marked");
+  assert.equal(record.approximatedOpsByKind["html-markup-stripped"], 2);
+  assert.equal(record.approximatedOpsByKind["glyph-missing"], 1, "and the box is still counted as a box");
+  assert.equal(record.approximations.glyphsNotdef, 1);
+  assert.equal(record.approximations.htmlMarkupStripped, 2, "both html fields are counted as placements");
 });
 
 test("screenTextOpsFor hands back the picture with no invoice, and null when there is none", () => {
@@ -667,6 +830,44 @@ test("PAINT ORDER IS THE WHOLE PATH, so words interleave with shapes rather than
   assert.equal(merged.counts.ops, merged.counts.shapeOps + merged.counts.glyphOps);
   assert.equal(merged.counts.textStillNotDrawn, 3,
     "► and screen.js's textNotDrawn of 6 has become 3, which is the number its header asked for");
+});
+
+test("A PATH PAINTS BEFORE EVERY PATH IT IS A PREFIX OF — the tiebreak, which nothing pinned", () => {
+  // ► **`comparePath`'s LAST LINE WAS UNREACHABLE BY EVERY ASSERTION IN THIS
+  //   FILE.** Mutating `return a.length - b.length` to `return 0` left all 31
+  //   tests green, because NO pair of paths on the 26 real screens is a strict
+  //   prefix of another — measured, 0 such pairs among the 13612 adjacent
+  //   operation pairs and 0 among the distinct paths. The behaviour is stated
+  //   in the function's own docstring and in `screen.js`'s, and this module
+  //   already fixed the identical construct in `underAnyPrefix` after a
+  //   mutation run deleted a redundant guard with the suite still green. So it
+  //   is pinned here rather than argued about: the module's own header says a
+  //   hand-edited pack whose drawables are out of order must come out painted
+  //   in the right order, and that is exactly the pack this test builds.
+  //
+  //   The order has to be WRONG in the concatenation for the tiebreak to show:
+  //   `screenWithTextFor` puts the shape operations first, so a SHAPE at [50,1]
+  //   under a WORD at [50] is the one arrangement a stable sort alone cannot
+  //   repair. The synthetic screen already has that shape.
+  const raw = syntheticScreensRaw();
+  raw.screens.forum.textFields.push({
+    id: 400, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
+    colour: { red: 255, green: 255, blue: 255, alpha: 255 }, align: 0, leading: 0,
+    leftMargin: 0, rightMargin: 0, indent: 0, variableName: "about_fight_text",
+    initialText: "AB", multiline: false, wordWrap: false, readOnly: true,
+    path: [50], matrix: [1, 0, 0, 1, 0, 0]
+  });
+  const merged = screenWithTextFor(screenPackFrom(raw), syntheticTextPack(), "forum");
+  const order = merged.ops.map((op) => op.path.join("/"));
+  assert.deepEqual(order, ["3", "45", "45", "46", "50", "50", "50/1", "55/2", "55/2", "60"],
+    "► the two glyphs at [50] paint UNDER the shape at [50, 1], which is what a chain of depths means");
+  assert.equal(order.indexOf("50") < order.indexOf("50/1"), true);
+  assert.equal(merged.ops[order.indexOf("50")].source, "text", "and the shorter path is the word");
+  assert.equal(merged.ops[order.indexOf("50/1")].source, undefined, "and the longer is the shape");
+  // The concatenation the sort was handed, so the assertion above is testing
+  // the comparator and not the order the two halves happened to arrive in.
+  assert.equal(merged.screen.ops.map((op) => op.path.join("/")).indexOf("50/1"), 1,
+    "the shape at [50, 1] was second in the shape half, ahead of every glyph operation");
 });
 
 test("every operation carries the trail back to the placement that put it there", () => {
@@ -900,6 +1101,66 @@ test("THE FIVE HTML FIELDS, of which FOUR draw nothing at all", () => {
   assert.equal(filtered, 108, "108 of the 187 placements sit under a FILTERLIST nothing applies");
   assert.equal(filteredOps, 1643, "and 1643 of the 2236 glyph operations — a different question, and a different number");
   assert.equal(placeholders, 91, "and 91 draw the author's placeholder rather than a live value");
+});
+
+test("THE OPEN TALLY ON THE REAL PACKS, and the 114 GLYPH MARKS THAT REACH NOTHING", () => {
+  if (!REAL_SCREENS || !REAL_TEXT) {
+    assert.equal(REAL_SCREENS === null || REAL_TEXT === null, true, "no extraction on this machine");
+    return;
+  }
+  const screens = screenPackFrom(REAL_SCREENS);
+  const text = textPackFrom(REAL_TEXT);
+
+  // ► **THE FINDING THAT MADE HAZARD 5 INVISIBLE, MEASURED RATHER THAN
+  //   ASSUMED.** Font 1510 is the one font in this build with no layout block,
+  //   and the extractor had to derive every one of its advances — 112 from the
+  //   glyph outline, 2 from a sibling font. `text.js` stamps a glyph's mark
+  //   onto every operation it draws from that glyph, so those 114 marks are one
+  //   placement away from an operation. They do not reach one HERE, and this is
+  //   why: exactly ONE static in the whole pack names font 1510, and its single
+  //   glyph is empty.
+  const font = fontFor(text, 1510);
+  const glyphKinds = {};
+  for (const glyph of font.glyphs) glyphKinds[glyph.approximated ?? "(none)"] = (glyphKinds[glyph.approximated ?? "(none)"] ?? 0) + 1;
+  assert.deepEqual(glyphKinds, { "advance-from-outline": 112, "advance-from-sibling-font": 2 },
+    "every one of font 1510's 114 glyphs carries an approximated advance");
+  const on1510 = Object.entries(text.statics)
+    .filter(([, item]) => (item.records ?? []).some((record) => record.font === 1510))
+    .map(([id]) => Number(id));
+  assert.deepEqual(on1510, [1511], "and one static names it");
+  assert.equal((staticTextOpsFor(text, 1511) ?? []).length, 0, "► which draws NOTHING — its one glyph is empty");
+
+  const byKind = {};
+  const opsByKind = {};
+  const unrostered = new Set();
+  let notdef = 0;
+  for (const name of joinableScreenNames(screens, text)) {
+    const record = screenTextFor(screens, text, name);
+    for (const [kind, count] of Object.entries(record.approximatedByKind)) byKind[kind] = (byKind[kind] ?? 0) + count;
+    for (const [kind, count] of Object.entries(record.approximatedOpsByKind)) opsByKind[kind] = (opsByKind[kind] ?? 0) + count;
+    for (const kind of record.unrosteredApproximations) unrostered.add(kind);
+    for (const placement of record.placements) notdef += placement.notdef;
+
+    // THE PROJECTION, on every screen: each roster key is copied out of the
+    // open tally, so a roster that disagreed with it would be a second opinion.
+    assert.equal(record.approximations.filtersNotApplied, record.approximatedByKind.filtersNotApplied ?? 0, name);
+    assert.equal(record.approximations.filtersNotAppliedOps, record.approximatedOpsByKind.filtersNotApplied ?? 0, name);
+    assert.equal(record.approximations.htmlMarkupStripped, record.approximatedByKind["html-markup-stripped"] ?? 0, name);
+    assert.equal(record.approximations.htmlMarkupStrippedOps, record.approximatedOpsByKind["html-markup-stripped"] ?? 0, name);
+    assert.equal(record.approximations.placeholderDrawn, record.approximatedByKind.placeholderDrawn ?? 0, name);
+    assert.equal(record.approximations.glyphsNotdef, record.approximatedOpsByKind["glyph-missing"] ?? 0, name);
+    assert.equal(record.approximations.lineHeightFromSize, record.approximatedByKind.lineHeightFromSize ?? 0, name);
+    assert.equal(record.approximations.newlineCollapsed, record.approximatedByKind.newlineCollapsed ?? 0, name);
+  }
+
+  assert.deepEqual(byKind, { filtersNotApplied: 108, placeholderDrawn: 91, "html-markup-stripped": 5 },
+    "three kinds occur across the 26 screens, and these are the placements each affects");
+  assert.deepEqual(opsByKind, { filtersNotApplied: 1643, placeholderDrawn: 689, "html-markup-stripped": 65 },
+    "and these are the operations — 689 of the 2236 glyphs are the author's placeholder, a number nothing reported before");
+  assert.equal(notdef, 0, "0 notdef operations across the 187 placements, so the two marks have never yet collided here");
+  assert.deepEqual([...unrostered], [],
+    "► NOTHING is unrostered on this extraction — a measurement of ONE pack, not a property of the format: "
+    + "font 1510's 114 marks are one non-empty placement away from landing here");
 });
 
 test("splash says \"play\", in the build's own letterforms, at the build's own place", () => {

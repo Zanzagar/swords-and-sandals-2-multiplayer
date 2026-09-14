@@ -17,6 +17,23 @@
  *   wrote — rather than against a number typed in here. On a fresh clone those
  *   tests assert the absence instead of skipping, so the suite's skip count
  *   does not move.
+ *
+ * ► **AND A REAL-PACK ASSERTION IS ONLY AS STRONG AS THE RANGE THE PACK CAN
+ *   TAKE. This file got that wrong once and the correction is the shape of
+ *   half the work below.** `assert.equal(checked, 1023)` read as a coverage
+ *   number; measured 2026-09-14, 330 of those 1023 sit under ALPHA-ONLY colour
+ *   transforms and compare an untransformed value against an untransformed
+ *   recomputation, which cannot discriminate anything under any rounder. All
+ *   107 of the pack's transformed gradient stops are in that 330, which is why
+ *   deleting the stop-fill transform from `screen.js` altogether left this
+ *   file at 36 pass / 0 fail and the real pack's operation digest
+ *   byte-identical.
+ *
+ *   The rule that follows: **whenever a count or a digest is offered as
+ *   evidence, ask what values it can actually take.** Where the answer is
+ *   "one", the case belongs in a synthetic fixture that says out loud that the
+ *   build does not contain it — `tintPack` below — and the real-pack assertion
+ *   should state its own reach rather than its own size.
  */
 
 import assert from "node:assert/strict";
@@ -168,6 +185,107 @@ const BLUE_102 = { redMultiplier: 0, greenMultiplier: 0, blueMultiplier: 0, alph
 const HALF_RED = { redMultiplier: 0.5, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 1, redOffset: 0, greenOffset: 0, blueOffset: 0, alphaOffset: 0 };
 const HALF_ALPHA = { redMultiplier: 1, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 0.5, redOffset: 0, greenOffset: 0, blueOffset: 0, alphaOffset: 0 };
 const ALPHA_OFFSET = { redMultiplier: 1, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 1, redOffset: 0, greenOffset: 0, blueOffset: 0, alphaOffset: -64 };
+
+/* ------------------------------------------------------------------ */
+/* A SECOND PACK, for the two cases neither `market` NOR the real       */
+/* extraction can reach                                                 */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THE REAL PACK CANNOT EXERCISE GRADIENT-STOP TINTING AT ALL, AND UNTIL
+ *   2026-09-14 NOTHING IN THIS SUITE COULD EITHER.** Measured over all 26
+ *   screens by walking `assets/screens/screens.json` directly: 107 gradient
+ *   stops sit under a colour transform and **all 107 of those transforms are
+ *   ALPHA-ONLY** — every RGB multiplier 1, every RGB offset 0, across the four
+ *   distinct transforms involved (`[1,1,1,0.94921875,…]`, `[1,1,1,0,…]`,
+ *   `[1,1,1,0.80078125,…]`, `[1,1,1,0.4609375,…]`) on 21 gradient paths. So
+ *   `transformGradient`'s `fill: applyColourTransform(stop.fill, colour)` is
+ *   a line the whole real pack holds at the identity.
+ *
+ *   Measured by mutation on 2026-09-14, before this block existed: deleting
+ *   that transform outright — `fill: stop.fill` — left this file at **36 pass
+ *   / 0 fail** and left the sha256 of every operation and every tally across
+ *   all 26 real screens **byte-identical** (`eaf4c165…`, 13638 ops). **A digest
+ *   over data that cannot vary is not evidence**, and that is the general
+ *   lesson rather than a detail about gradients.
+ *
+ *   `market`'s own gradients are under `HALF_ALPHA` and `ALPHA_OFFSET`, which
+ *   are alpha-only too, which is why the stop-fill assertion further down —
+ *   `["#9c2b00", "#ffcc83"]` — survived that mutation as well: it asserts the
+ *   UNTRANSFORMED values and cannot tell a working transform from a deleted
+ *   one.
+ *
+ * ► **AND THE SAME IS TRUE OF THE BITMAP COUNTER'S OFFSET HALF.** 29 bitmap
+ *   paths across the 26 screens, 8 of them under a colour transform, and all 8
+ *   under the SAME alpha-only transform `[1,1,1,0.19921875,0,0,0,0]` (shape
+ *   718 on splash, new_or_continue, credits, help, gameover, bugs,
+ *   gameover_demo and enter_highscore). `bitmapColourTransformDropped` is
+ *   therefore 0 on real data and `touchesRgb` never returns true on it.
+ *   `market`'s `HALF_RED` bitmap pins the MULTIPLIER half; nothing pinned the
+ *   OFFSET half, and deleting `colour[4] !== 0 || colour[5] !== 0 ||
+ *   colour[6] !== 0` left the file 36 pass / 0 fail.
+ *
+ *   The offset half is not dead because offsets are rare — 133 of the 287
+ *   tinted drawables carry one. It is dead because **no transform on this pack
+ *   has identity multipliers AND a non-zero offset**: measured, the five
+ *   combinations that occur are mult+offset (123), alpha-only (123),
+ *   mult+alpha (26), mult+offset+alpha (10) and mult-only (5), and
+ *   `rgbMult=false, rgbOff=true` occurs ZERO times. So the multiplier half
+ *   subsumes the offset half on this build and only this build.
+ *
+ * These four drawables are the missing cases and nothing else. They are a
+ * SEPARATE pack rather than four more rows in `market` so that every count
+ * `market` pins keeps meaning what it meant.
+ */
+const RGB_MULT_AND_OFFSET = { redMultiplier: 0.5, greenMultiplier: 0.25, blueMultiplier: 1, alphaMultiplier: 0.5, redOffset: 0, greenOffset: 8, blueOffset: -40, alphaOffset: 0 };
+const RGB_OFFSET_ONLY = { redMultiplier: 1, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 1, redOffset: 17, greenOffset: 0, blueOffset: -9, alphaOffset: 0 };
+const ALPHA_ONLY_075 = { redMultiplier: 1, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 0.75, redOffset: 0, greenOffset: 0, blueOffset: 0, alphaOffset: 0 };
+
+function tintPack() {
+  return {
+    screens: {
+      forge: {
+        name: "forge",
+        labelFrame: 100, firstFrame: 100, lastFrame: 100,
+        objects: [
+          { depth: 2, character: 12, kind: "shape", matrix: [1, 0, 0, 1, 0, 0], drawables: 1 },
+          { depth: 3, character: 12, kind: "shape", matrix: [1, 0, 0, 1, 0, 0], drawables: 1 },
+          { depth: 4, character: 13, kind: "shape", matrix: [1, 0, 0, 1, 0, 0], drawables: 1 },
+          { depth: 5, character: 13, kind: "shape", matrix: [1, 0, 0, 1, 0, 0], drawables: 1 }
+        ],
+        drawables: [
+          // The case the real pack has none of: a gradient under a transform
+          // that moves RED, GREEN and BLUE. Both stops are chosen so the
+          // rounder is visible — 255 * 0.5 is 127.5 — and so that one channel
+          // clamps at the bottom.
+          { shape: 12, path: [2, 1], matrix: [1, 0, 0, 1, 0, 0], colour: RGB_MULT_AND_OFFSET },
+          // The case the real pack has 107 stops of, beside it, so a transform
+          // that fired when it should not also turns this red.
+          { shape: 12, path: [3, 1], matrix: [1, 0, 0, 1, 0, 0], colour: ALPHA_ONLY_075 },
+          // A bitmap under IDENTITY multipliers and non-zero offsets: the only
+          // shape of transform for which `touchesRgb`'s offset half is the
+          // thing that answers.
+          { shape: 13, path: [4, 1], matrix: [1, 0, 0, 1, 0, 0], colour: RGB_OFFSET_ONLY },
+          // And a bitmap under alpha alone, so a `touchesRgb` that always
+          // returned true would be caught by the same assertion.
+          { shape: 13, path: [5, 1], matrix: [1, 0, 0, 1, 0, 0], colour: ALPHA_ONLY_075 }
+        ],
+        unresolved: [], textFields: [], staticText: [],
+        multiFrameSprites: [], filteredPlacements: [], blendedPlacements: [],
+        rangeVariance: { frames: 0, firstDifferingFrame: null, depthsAdded: [], depthsRemoved: [] },
+        approximations: {},
+        counts: { objects: 4, drawables: 4 },
+        resolvedNothing: false
+      }
+    },
+    shapes: SHAPES,
+    fonts: {}
+  };
+}
+
+function forgeOf() {
+  return screenFor(screenPackFrom(tintPack()), "forge");
+}
 
 /**
  * `market` exercises every branch; `gate` exists only so that ordering can be
@@ -404,12 +522,86 @@ test("a gradient's transform goes into its STOPS, which is where the painter rea
   // `paintGradientFill` in `tools/arena/main.js` sets `globalAlpha = 1` and
   // builds the ramp from each stop's own opacity. A reader that folded the
   // transform only into `fillOpacity` would draw the gradient at full strength.
+  //
+  // ► **THE `fill` ASSERTION BELOW CANNOT FAIL, AND IT IS KEPT ANYWAY WITH THE
+  //   REASON ON IT.** `HALF_ALPHA` moves alpha alone, so the two stop fills
+  //   come back exactly as they went in: this line pins that an alpha-only
+  //   transform does NOT touch the colour bytes, which is a real property, and
+  //   it says nothing whatever about whether the RGB half works. Measured by
+  //   mutation 2026-09-14: deleting `applyColourTransform` from
+  //   `transformGradient` entirely leaves this test green. The test directly
+  //   below is the one that goes red.
   const record = marketOf();
   const op = record.ops.find((op) => op.depth === 7 && op.gradient);
   assert.deepEqual(op.gradient.stops.map((stop) => stop.opacity), [0.5, 0.25]);
   assert.deepEqual(op.gradient.stops.map((stop) => stop.fill), ["#9c2b00", "#ffcc83"]);
   assert.equal(op.gradient.type, "linear", "and the rest of the gradient is carried through");
   assert.equal(op.gradient.matrix.tx, 3310);
+});
+
+test("a gradient stop under an RGB transform is TINTED — the case the real pack cannot reach", () => {
+  // ► **THE LINE THIS PINS WAS PINNED BY NOTHING.** `transformGradient` does
+  //   `fill: applyColourTransform(stop.fill, colour)`; deleting that call and
+  //   writing `fill: stop.fill` left this file at 36 pass / 0 fail AND left the
+  //   digest of every operation and tally across all 26 real screens
+  //   byte-identical, because all 107 of the real pack's transformed gradient
+  //   stops are under alpha-only transforms. See `tintPack` above for the
+  //   measurement. Every value below was computed by hand from the wire's own
+  //   arithmetic and then checked against the module, not read off it.
+  //
+  //   `#9c2b00` under (x0.5, x0.25 +8, x1 -40):
+  //     red   floor(156 * 0.5)  = 78  + 0   =  78 = 0x4e
+  //     green floor(43 * 0.25)  = 10  + 8   =  18 = 0x12   (10.75 floors to 10)
+  //     blue  floor(0 * 1)      = 0   - 40  = -40 -> 0     (clamped at the bottom)
+  //   `#ffcc83` under the same:
+  //     red   floor(255 * 0.5)  = 127 + 0   = 127 = 0x7f   (127.5: ROUNDING gives 0x80)
+  //     green floor(204 * 0.25) = 51  + 8   =  59 = 0x3b
+  //     blue  floor(131 * 1)    = 131 - 40  =  91 = 0x5b
+  const record = forgeOf();
+  const tinted = record.ops.find((op) => op.depth === 2);
+  assert.deepEqual(tinted.gradient.stops.map((stop) => stop.fill), ["#4e1200", "#7f3b5b"],
+    "if these read #9c2b00 / #ffcc83 the stop-fill transform has been dropped");
+  // The alpha half of the same transform, into the stops and not into fillOpacity.
+  assert.deepEqual(tinted.gradient.stops.map((stop) => stop.opacity), [0.5, 0.25]);
+  // ► **AND THE FLAT FALLBACK BESIDE IT GETS THE SAME TREATMENT.** The
+  //   operation carries the transformed first-stop colour as `fill` for a
+  //   painter with no gradient support; if the two disagreed, a surface
+  //   switching between them would change colour.
+  assert.equal(tinted.fill, "#4e1200", "the flat fallback is the transformed first stop, not the raw one");
+
+  // ► **AND THE SAME ASSERTION IN THE OTHER DIRECTION**, so a transform that
+  //   fired when it should not is caught too: `ALPHA_ONLY_075` must leave the
+  //   colour bytes exactly alone while moving both opacities.
+  const untinted = record.ops.find((op) => op.depth === 3);
+  assert.deepEqual(untinted.gradient.stops.map((stop) => stop.fill), ["#9c2b00", "#ffcc83"]);
+  assert.deepEqual(untinted.gradient.stops.map((stop) => stop.opacity), [0.75, 0.375]);
+});
+
+test("touchesRgb answers on OFFSETS as well as multipliers, which no pack in this tree exercises", () => {
+  // ► **HALF OF `touchesRgb` WAS DEAD.** Reducing its body to the three
+  //   multiplier checks left this file at 36 pass / 0 fail. `market`'s
+  //   `HALF_RED` bitmap pins the multiplier half; the offset half answered for
+  //   nothing, because no transform on the real pack — and none in `market` —
+  //   has identity multipliers together with a non-zero RGB offset. Measured:
+  //   the combination `rgbMult=false, rgbOff=true` occurs 0 times across the
+  //   26 screens' 287 tinted drawables.
+  //
+  //   This is not a reason to delete the offset half. The predicate answers
+  //   "does this transform carry colour a raster has nowhere to put", and an
+  //   offset carries colour: `#000000` under redOffset 17 is `#110000`, which
+  //   a bitmap op reporting `fill: "none"` genuinely loses. The half that was
+  //   unexercised is now exercised, HERE, where the fixture says out loud that
+  //   the build does not contain the case.
+  const record = forgeOf();
+  assert.equal(record.approximations.bitmapOps, 2, "two bitmap paths, both under a transform");
+  assert.equal(record.approximations.bitmapColourTransformDropped, 1,
+    "the OFFSET-ONLY transform is colour a raster cannot take; the alpha-only one is not");
+  // Both keep `fill: "none"` — the raster is not painted over either way, so
+  // the count is the only thing that distinguishes them.
+  assert.deepEqual(record.ops.filter((op) => op.bitmap).map((op) => op.fill), ["none", "none"]);
+  // And the alpha half still lands on the bitmap, which is the part that DOES
+  // survive: 1 under the offset-only transform, 0.75 under the alpha-only one.
+  assert.deepEqual(record.ops.filter((op) => op.bitmap).map((op) => op.fillOpacity), [1, 0.75]);
 });
 
 test("an alphaOffset across stops of differing opacity is COUNTED, not pretended exact", () => {
@@ -517,6 +709,26 @@ test("button and morph approximations are counted in OPERATIONS, keyed off the p
   assert.equal(record.approximations.buttonUpStateOps, 2, "the UP records only: no over, down or hit");
   assert.equal(record.approximations.bakedMorphOps, 1, "a morph baked at one ratio, not interpolated");
   assert.equal(record.ops.find((op) => op.via === "morph 600").via, "morph 600");
+});
+
+test("gradientOps is counted, which until 2026-09-14 no assertion in this file checked", () => {
+  // ► **A TALLY NOTHING CHECKED.** Found by mutation: changing
+  //   `approximations.gradientOps += 1` to `+= 0` in `screen.js` left this
+  //   file and `render-filters.test.js` entirely green. `gradientOps` is the
+  //   count of operations emitted with a real gradient beside a flat
+  //   first-stop fallback — the thing a painter without gradient support
+  //   silently draws wrong — and it was reaching manifests unverified. The
+  //   sibling counters around it (`bitmapOps`, `bakedMorphOps`,
+  //   `buttonUpStateOps`, `clipsUnresolved`, `invisibleOps`) were all pinned;
+  //   this one was skipped.
+  const record = marketOf();
+  assert.equal(record.approximations.gradientOps, 3,
+    "shape 12 twice and shape 15 once: three gradient PATHS, one operation each");
+  assert.equal(record.ops.filter((op) => op.gradient).length, 3,
+    "and the count is the operations, recomputed here rather than trusted");
+  assert.equal(record.approximations.fromPack.gradientPaths, 3,
+    "the extractor's own number agrees — kept separate, not merged");
+  assert.equal(forgeOf().approximations.gradientOps, 2, "and it is not a constant");
 });
 
 test("the extractor's own tally is carried BESIDE this file's, never merged into it", () => {
@@ -912,45 +1124,92 @@ test("the real pack: one tinted fill pinned by VALUE, against the PLAYER's arith
   assert.deepEqual(alphaOnly.map((op) => op.fill), ["#990066", "#3366ff", "#66cc33"]);
 });
 
-test("the real pack: every tinted value FLOORS, and rounding would move 69 of the 1023", () => {
+/**
+ * Whether a transform on the real pack can change a COLOUR at all, as opposed
+ * to moving only alpha.
+ *
+ * The same question `touchesRgb` asks inside `screen.js`, restated here from
+ * the pack's own named fields rather than imported: a test that borrowed the
+ * module's predicate to decide what the module should be doing would be
+ * grading its own homework.
+ *
+ * A function declaration rather than an arrow, for the reason `readRealJson`
+ * gives.
+ */
+function transformMovesColour(colour) {
+  return finite(colour.redMultiplier, 1) !== 1 || finite(colour.greenMultiplier, 1) !== 1 ||
+    finite(colour.blueMultiplier, 1) !== 1 || finite(colour.redOffset, 0) !== 0 ||
+    finite(colour.greenOffset, 0) !== 0 || finite(colour.blueOffset, 0) !== 0;
+}
+
+/** Whether a transform on the real pack can change an OPACITY at all. */
+function transformMovesAlpha(colour) {
+  return finite(colour.alphaMultiplier, 1) !== 1 || finite(colour.alphaOffset, 0) !== 0;
+}
+
+test("the real pack: every tinted value FLOORS, and rounding would move 69 of the 693 that CAN move", () => {
   // ► **THE MEASUREMENT THAT SETTLED FLOOR vs ROUND, KEPT AS AN ASSERTION.**
   //   `src/render/screen.js` carried its own colour transform until the two
-  //   were folded; the two differed only in the rounder, and **69 of the 1023
-  //   hex values that sit under a colour transform on these 26 screens came
-  //   out one unit apart**. Re-deriving 0 against floor would be
-  //   self-confirming on its own — a rounding module compared against a
-  //   rounding recomputation also scores 0 — so the load is carried by the
-  //   SECOND count: the module must disagree with a rounding implementation on
+  //   were folded; the two differed only in the rounder, and **69 of the hex
+  //   values that sit under a colour transform on these 26 screens came out
+  //   one unit apart**. Re-deriving 0 against floor would be self-confirming
+  //   on its own — a rounding module compared against a rounding
+  //   recomputation also scores 0 — so the load is carried by the SECOND
+  //   count: the module must disagree with a rounding implementation on
   //   exactly 69. Both numbers move if the arithmetic does.
   //
-  // ► **AND THE INVOICE.** `checked` counts what was compared and `passedThrough`
-  //   counts what could not be: a fill under a transform that is not a hex
-  //   colour has nothing to fold into, which is a real limit of this seam and
-  //   not a gap in the test. An approximation that is not counted is
-  //   indistinguishable from a correct read.
+  // ► **AND THE 1023 THIS USED TO ASSERT WAS NOT A COVERAGE NUMBER, WHICH IS
+  //   WHY IT IS NOW FOUR NUMBERS.** `assert.equal(checked, 1023)` read as
+  //   though 1023 values had been put at risk. Measured 2026-09-14 by walking
+  //   the pack directly: **330 of those 1023 sit under an ALPHA-ONLY
+  //   transform** — every RGB multiplier 1, every RGB offset 0 — so for each
+  //   of them the module returns its input and `channelwise` recomputes its
+  //   input, under EITHER rounder. They cannot discriminate anything, ever,
+  //   and they were being counted beside the 693 that can. 107 of the 330 are
+  //   gradient stops (ALL of the pack's transformed stops; see `tintPack`
+  //   above) and 223 are flat fills and strokes.
   //
-  // ► **AND TWO THINGS THIS CANNOT CATCH, MEASURED BY MUTATION RATHER THAN
+  //   **A count of things checked is not a count of things that could have
+  //   failed**, and the same trap is in the alpha half below: 1274 of the 1955
+  //   opacity comparisons are under `alphaMultiplier === 1, alphaOffset === 0`
+  //   and are equally incapable of failing. Both splits are now asserted, so
+  //   the invoice states its own reach.
+  //
+  // ► **AND THE INVOICE.** `passedThrough` counts what could not be compared:
+  //   a fill under a transform that is not a hex colour has nothing to fold
+  //   into, which is a real limit of this seam and not a gap in the test. An
+  //   approximation that is not counted is indistinguishable from a correct
+  //   read.
+  //
+  // ► **AND THREE THINGS THIS CANNOT CATCH, MEASURED BY MUTATION RATHER THAN
   //   GUESSED, because a test whose reach is overstated is the same defect as
   //   a tally that is.** Swapping `Math.floor` for `Math.trunc` in
-  //   `filters.js` leaves all 36 tests here GREEN: every RGB multiplier on
-  //   this pack is one of 0, 0.30078125, 0.5078125, 0.55859375 or 1 and none
-  //   is negative, so the two functions never part company on real data.
-  //   Dropping the `/ 255` that converts the wire's alpha offset into this
-  //   renderer's 0..1 units also leaves `alphaMismatch` at 0, because every
-  //   `alphaOffset` on all 26 screens is zero. Both are held by the SYNTHETIC
-  //   fixtures above — `ALPHA_OFFSET` catches the second — and by nothing on
-  //   the real pack. The real pack cannot exercise a case the build does not
-  //   contain, and saying so is the point.
+  //   `filters.js` leaves every test here GREEN: every RGB multiplier on this
+  //   pack is one of 0, 0.30078125, 0.5078125, 0.55859375 or 1 and none is
+  //   negative, so the two functions never part company on real data. Dropping
+  //   the `/ 255` that converts the wire's alpha offset into this renderer's
+  //   0..1 units also leaves `alphaMismatch` at 0, because every `alphaOffset`
+  //   on all 26 screens is zero. And deleting the colour transform from
+  //   `transformGradient`'s stop fills moves NOTHING here, because the 107
+  //   stops are all alpha-only. All three are held by SYNTHETIC fixtures above
+  //   — `ALPHA_OFFSET` catches the second and `tintPack` catches the third —
+  //   and by nothing on the real pack. The real pack cannot exercise a case
+  //   the build does not contain, and saying so is the point.
   if (!REAL_SCREENS) {
     assert.equal(REAL_SCREENS, null, "no extraction on this machine");
     return;
   }
   const pack = screenPackFrom(REAL_SCREENS);
-  let checked = 0;
+  let checkedUnderRgb = 0;
+  let checkedUnderAlphaOnly = 0;
+  let stopsChecked = 0;
+  let stopsUnderRgb = 0;
   let flooredMismatch = 0;
   let roundedMismatch = 0;
+  let roundedMismatchUnderAlphaOnly = 0;
   let passedThrough = 0;
-  let alphaChecked = 0;
+  let alphaMoving = 0;
+  let alphaIdentity = 0;
   let alphaMismatch = 0;
   for (const name of screenNames(pack)) {
     const record = screenFor(pack, name);
@@ -958,36 +1217,67 @@ test("the real pack: every tinted value FLOORS, and rounding would move 69 of th
     assert.equal(joined.length, record.ops.length, `${name}: the replay of the emission walk drifted`);
     for (const { entry, colour, op } of joined) {
       if (!colour) continue;
+      const movesColour = transformMovesColour(colour);
+      const movesAlpha = transformMovesAlpha(colour);
       const sourceStops = entry.gradient?.stops ?? [];
       const outStops = op.gradient?.stops ?? [];
-      const pairs = [[entry.fill, op.fill], [entry.stroke, op.stroke]];
+      const pairs = [[entry.fill, op.fill, false], [entry.stroke, op.stroke, false]];
       const alphas = [[finite(entry.fillOpacity, 1), op.fillOpacity], [finite(entry.strokeOpacity, 1), op.strokeOpacity]];
       for (const [index, stop] of sourceStops.entries()) {
-        pairs.push([stop.fill, outStops[index]?.fill]);
+        pairs.push([stop.fill, outStops[index]?.fill, true]);
         alphas.push([finite(stop.opacity, 1), outStops[index]?.opacity]);
       }
-      for (const [source, out] of pairs) {
+      for (const [source, out, isStop] of pairs) {
         if (typeof source === "string" && source.length === 7 && source[0] === "#") {
-          checked += 1;
+          if (movesColour) checkedUnderRgb += 1; else checkedUnderAlphaOnly += 1;
+          if (isStop) {
+            stopsChecked += 1;
+            if (movesColour) stopsUnderRgb += 1;
+          }
           if (out !== channelwise(source, colour, Math.floor)) flooredMismatch += 1;
-          if (out !== channelwise(source, colour, Math.round)) roundedMismatch += 1;
+          if (out !== channelwise(source, colour, Math.round)) {
+            roundedMismatch += 1;
+            if (!movesColour) roundedMismatchUnderAlphaOnly += 1;
+          }
         } else if (source !== null && source !== undefined) {
           passedThrough += 1;
           assert.equal(out, source, "a fill with no colour in it must survive a transform untouched");
         }
       }
       for (const [source, out] of alphas) {
-        alphaChecked += 1;
+        if (movesAlpha) alphaMoving += 1; else alphaIdentity += 1;
         const want = source * finite(colour.alphaMultiplier, 1) + finite(colour.alphaOffset, 0) / 255;
         alphaMismatch += out === Math.max(0, Math.min(1, want)) ? 0 : 1;
       }
     }
   }
-  assert.equal(checked, 1023, "the population this measurement has always been quoted over");
+  // ► **THE POPULATION THAT COULD HAVE FAILED**, stated first and separately
+  //   from the population that was merely looked at.
+  assert.equal(checkedUnderRgb, 693,
+    "hex values under a transform that moves red, green or blue — the only ones that can discriminate");
+  assert.equal(checkedUnderAlphaOnly, 330,
+    "and the ones that cannot: an alpha-only transform returns its input under either rounder");
+  assert.equal(checkedUnderRgb + checkedUnderAlphaOnly, 1023,
+    "the population this measurement has always been quoted over, now split by what it can prove");
+
+  // ► **THE STRUCTURAL FACT THAT MADE THE GRADIENT HOLE INVISIBLE, ASSERTED
+  //   RATHER THAN LEFT IN A COMMENT.** If a future extraction ever puts a
+  //   gradient stop under an RGB transform, this line goes red and whoever
+  //   sees it learns that the real pack has started covering a case only
+  //   `tintPack` used to reach.
+  assert.equal(stopsChecked, 107, "every transformed gradient stop on the 26 screens");
+  assert.equal(stopsUnderRgb, 0,
+    "and not one of them is under a transform that moves colour, so no assertion over this pack can pin stop tinting");
+
   assert.equal(flooredMismatch, 0, "the module must agree with the arithmetic shift on every one of them");
   assert.equal(roundedMismatch, 69,
     "the module must DISAGREE with a rounding implementation on exactly these — if this reads 0 the module is rounding");
+  assert.equal(roundedMismatchUnderAlphaOnly, 0,
+    "and all 69 fall in the 693, which is what makes them attributable rather than a bare total");
   assert.equal(passedThrough, 164, "fills under a transform with no colour to fold into: all of them `none`");
-  assert.equal(alphaChecked, 1955, "and the alpha half was compared too, rather than assumed");
+
+  assert.equal(alphaMoving, 681, "opacity comparisons under a transform that actually moves alpha");
+  assert.equal(alphaIdentity, 1274, "and the ones that cannot fail: alphaMultiplier 1 with alphaOffset 0");
+  assert.equal(alphaMoving + alphaIdentity, 1955, "the alpha half was compared too, rather than assumed");
   assert.equal(alphaMismatch, 0, "the alpha half stays floating point: 0..1 opacity, offset divided by 255");
 });

@@ -134,7 +134,7 @@ function invoiceFor(shape) {
 }
 
 for (const pack of PACKS) {
-  test(`${pack.name}: a per-entry invoice is carried by EVERY entry or by none, and matches its own paths`, () => {
+  test(`${pack.name}: a per-entry invoice is carried by EVERY entry or by none, and matches its own paths`, (t) => {
     // ► **A PACK THAT INVOICES SOME OF ITS ENTRIES IS WORSE THAN ONE THAT
     //   INVOICES NONE.** The figure pack carried `approximated` and
     //   `approximatedByKind` on its 61 ordinary shapes and on NONE of its 290
@@ -174,6 +174,15 @@ for (const pack of PACKS) {
       assert.equal(shape.approximated, measured.approximated,
         `${pack.name} shape ${id}: the total and the kinds must agree with each other too`);
     }
+
+    // ► **SAY WHICH HALF OF THIS TEST ACTUALLY RAN.** The loop above is the
+    //   only part that compares anything, and for `props` (0 of 56 invoiced)
+    //   and `wardrobe` (0 of 401) it runs ZERO times — those packs reach only
+    //   the all-or-none branch, which is trivially true when nothing claims.
+    //   Three green lines reading `a per-entry invoice ...` looked like three
+    //   packs covered; one was.
+    t.diagnostic(`${pack.name}: ${entries.length} entries, ${claiming.length} invoiced and ` +
+      `compared, ${silent.length} silent`);
   });
 }
 
@@ -254,4 +263,61 @@ test("A GRADIENT APPROXIMATION CARRIES ITS STOPS, and the flat fallback is wrong
     }
   }
   assert.ok(gradients > 0, "the sky is a gradient; finding none means the pack is stale");
+});
+
+/**
+ * ► **WHAT THE THREE PER-PACK TESTS ABOVE ACTUALLY EXERCISED, IN ONE PLACE.**
+ *   Each of them prints a green line whether or not it compared a single
+ *   entry, and on 2026-09-14 two of the three compared none: `props` invoices
+ *   0 of its 56 entries and `wardrobe` 0 of its 401, so their per-entry loops
+ *   ran zero times and only the trivially-true `claiming.length === 0` branch
+ *   fired. `figure` invoices all 351 and is the only pack under that check.
+ *
+ *   That is not a defect in those packs — a pack that invoices NOTHING is
+ *   uniform and therefore honest, and `tools/extract-props.mjs` and
+ *   `tools/extract-wardrobe.mjs` are not this file's to change. The defect
+ *   would be reading `3 packs checked` as `3 packs covered`, which is exactly
+ *   the reading this test exists to prevent.
+ */
+test("the per-entry invoice check names the packs it covers, and fails if it covers none", (t) => {
+  const census = PACKS.map((pack) => {
+    const data = readJson(pack.data);
+    if (!data) return { name: pack.name, present: false, entries: 0, invoiced: 0 };
+    const entries = Object.entries(pack.shapesOf(data) ?? {});
+    const invoiced = entries.filter(([, shape]) =>
+      shape.approximatedByKind !== undefined || shape.approximated !== undefined).length;
+    return { name: pack.name, present: true, entries: entries.length, invoiced };
+  });
+  for (const row of census) {
+    t.diagnostic(row.present
+      ? `${row.name}: ${row.invoiced} of ${row.entries} entries carry an invoice to compare`
+      : `${row.name}: no extraction on this machine — checked nothing`);
+  }
+
+  const present = census.filter((row) => row.present);
+  if (present.length === 0) {
+    // A fresh clone. Named rather than passed over: on that profile EVERY
+    // check in this file is vacuous, and `AGENTS.md` calls that profile
+    // expected — which is precisely why the figure extractor's own invoice
+    // is now pinned in `test/extract-figure.test.js`, against bytes built in
+    // that file, with no `assets/` and no licensed build in sight.
+    assert.equal(present.length, 0, "no extraction present, so this file checked nothing at all");
+    return;
+  }
+
+  const exercised = present.filter((row) => row.invoiced > 0);
+  assert.ok(exercised.length > 0,
+    `${present.length} extracted pack(s) are present and NONE of them carries a per-entry ` +
+    `invoice (${present.map((row) => `${row.name} 0/${row.entries}`).join(", ")}), so the ` +
+    "per-entry comparison loop above ran zero times for every pack and the check is " +
+    "decorative. The figure pack carried invoices on 351 of 351 entries when this was " +
+    "written; losing them means the extractor stopped writing them.");
+
+  // Every present pack is still all-or-none. Rolled up here as well as checked
+  // per pack, because this is the sentence a reader of the census needs.
+  for (const row of present) {
+    assert.ok(row.invoiced === 0 || row.invoiced === row.entries,
+      `${row.name}: ${row.invoiced} of ${row.entries} entries invoice. A partial invoice ` +
+      "reads as a complete one.");
+  }
 });

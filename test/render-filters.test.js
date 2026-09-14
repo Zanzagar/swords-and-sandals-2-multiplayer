@@ -169,7 +169,74 @@ test("a malformed transform is null rather than a partly-applied one", () => {
 test("channel * multiplier + offset, clamped — on a worked example", () => {
   // 0x80 = 128. 128 * 0.5 + 10 = 74 = 0x4a. 128 * 2 + 0 = 256, clamped to 255.
   // 128 * 1 - 200 = -72, clamped to 0.
+  //
+  // ► **NOT ONE CHANNEL HERE LANDS ON A FRACTION, so this line cannot tell
+  //   floor from round and never could.** 128 * 0.5 is exactly 64, 128 * 2 is
+  //   exactly 256, 128 * 1 is exactly 128. Measured 2026-09-14 by mutation:
+  //   swapping `Math.floor` for `Math.round` in `channelOf` leaves ALL 38
+  //   tests in this file green. The whole suite catches it — but only in
+  //   `test/render-screen.test.js`, in a module that merely CALLS this one.
+  //   The test below is the missing pin in the file that owns the arithmetic.
   assert.equal(applyColourTransform("#808080", [0.5, 2, 1, 1, 10, 0, -200, 0]), "#4aff00");
+});
+
+test("the multiply term FLOORS, pinned on a channel that lands on a half", () => {
+  // ► **THE ARITHMETIC THIS MODULE OWNS, PINNED WHERE IT IS OWNED.** After the
+  //   2026-09-14 fold `filters.js` holds the only copy of the colour transform
+  //   in this tree, and until this test the only assertion that could tell
+  //   floor from round lived in `render-screen.test.js`. A module whose most
+  //   dangerous property is pinned exclusively by one of its consumers is one
+  //   refactor away from being unpinned.
+  //
+  //   `readColourTransform` reads the multiply term as `readSB(bits) / 256` —
+  //   signed 8.8 fixed point — and the player computes `(channel * term) >> 8`,
+  //   an arithmetic shift, which rounds toward negative infinity. 255 * 0.5 is
+  //   127.5: the shift gives 127 and `Math.round` gives 128. Measured on the
+  //   real screens pack, that one-unit difference falls on 69 of the 1023
+  //   tinted values.
+  assert.equal(applyColourTransform("#ff0000", [0.5, 1, 1, 1, 0, 0, 0, 0]), "#7f0000",
+    "if this reads #800000 the module is rounding");
+  assert.equal(Math.round(255 * 0.5), 128, "and rounding really would move this channel");
+  assert.equal((255 * 128) >> 8, 0x7f, "the player's own integers, for comparison");
+  // ► **AND THE FLOOR IS ON THE PRODUCT, NOT ON THE SUM — but the two orders
+  //   are INDISTINGUISHABLE ON ANY WIRE DATA, and saying so is the point.**
+  //   For a whole-number offset `floor(p) + k` and `floor(p + k)` are equal for
+  //   every p, and `readColourTransform` reads every offset with `readSB`, so
+  //   nothing off the bytes can tell them apart. Only a COMPOSED fractional
+  //   offset can, and this build writes none — measured below. The order is
+  //   still pinned, because the player's `(channel * term) >> 8` shifts before
+  //   it adds, and a test that can only fire on a case the build does not
+  //   contain is worth exactly one line and no more.
+  //   `floor(255 * 0.5) + 0.75` is 127.75 -> 127; `floor(255 * 0.5 + 0.75)` is 128.
+  assert.equal(applyColourTransform("#ff0000", [0.5, 1, 1, 1, 0.75, 0, 0, 0]), "#7f0000",
+    "the floor falls on the product; flooring the sum instead gives #800000");
+});
+
+test("a FRACTIONAL offset still produces a colour, not a nine-character string", () => {
+  // ► **A DEFECT FOUND 2026-09-14 AND FIXED IN `channelOf`, with the fix worth
+  //   exactly nothing on any pack this tree currently writes — which is why it
+  //   needs a test and not a measurement.** Every offset that comes off the
+  //   wire is a whole number: `readColourTransform` reads it with `readSB`.
+  //   But `composeColourTransform` computes a composed offset as
+  //   `parentMultiplier * childOffset + parentOffset`, and this build's
+  //   multipliers are eighths and 77/256s, so a nested placement can produce a
+  //   fractional one. Before the fix the fraction survived the clamp and
+  //   reached `hex2`, where `(128.5).toString(16)` is `"80.8"` and the whole
+  //   return value was `"#80.88080"`.
+  //
+  //   Counted across every pack in this tree before fixing it — screens 341
+  //   named plus 10 arrays, props 3,345, animations 4,544, icons 131 — **0
+  //   fractional offsets**, so no pixel has ever been wrong. A digest over any
+  //   of those packs is constant under this defect BY CONSTRUCTION, which is
+  //   the same reason a digest could not see the gradient-stop hole.
+  for (const offset of [0.5, 1.25, -0.5, 1 / 3]) {
+    const out = applyColourTransform("#808080", [1, 1, 1, 1, offset, 0, 0, 0]);
+    assert.equal(out.length, 7, `offset ${offset} must still yield #rrggbb, got ${out}`);
+    assert.equal(/^#[0-9a-f]{6}$/.test(out), true, `offset ${offset} produced ${out}`);
+  }
+  // And the floor is the rule, so half a unit of offset moves nothing.
+  assert.equal(applyColourTransform("#808080", [1, 1, 1, 1, 0.5, 0, 0, 0]), "#808080");
+  assert.equal(applyColourTransform("#808080", [1, 1, 1, 1, 1.5, 0, 0, 0]), "#818080");
 });
 
 test("a THREE-DIGIT hex is refused instead of becoming a different colour", () => {
@@ -183,6 +250,29 @@ test("a THREE-DIGIT hex is refused instead of becoming a different colour", () =
   assert.equal(applyColourTransform("#abc", [2, 2, 2, 1, 100, 100, 100, 0]), "#abc");
   assert.equal(applyColourTransform("#zzzzzz", [2, 2, 2, 1, 0, 0, 0, 0]), "#zzzzzz");
   assert.equal(applyColourTransform("none", [2, 2, 2, 1, 0, 0, 0, 0]), "none");
+});
+
+test("a hex LONGER than seven characters is refused too, which nothing pinned", () => {
+  // ► **`parseHexColour`'s docstring says STRICTLY SEVEN CHARACTERS and only
+  //   the SHORT case was tested.** Found 2026-09-14 by mutation: relaxing
+  //   `hex.length !== 7` to `hex.length < 7` left every test in this file and
+  //   in `render-screen.test.js` green. The reader's loop takes exactly six
+  //   digits from index 1, so under that relaxation `#aabbccdd` — the
+  //   eight-digit `#rrggbbaa` spelling, which is a real thing a producer can
+  //   emit — parses as `aabbcc`, gets tinted, and comes back as a DIFFERENT
+  //   colour with its alpha silently gone. That is the same defect the
+  //   three-digit case above is about, pointing the other way, and the
+  //   assertion for it did not exist.
+  //
+  //   No pack in this tree writes one today: `tools/swf-shapes.mjs` zero-pads
+  //   every channel and emits `#rrggbb` only. "The producer happens not to do
+  //   that" is the reason nobody has been bitten, not a reason for a reader to
+  //   be wrong if it ever does.
+  const tint = [2, 2, 2, 1, 0, 0, 0, 0];
+  assert.equal(applyColourTransform("#aabbccdd", tint), "#aabbccdd", "returned unchanged, not parsed as #aabbcc");
+  assert.equal(applyColourTransform("#1234567", tint), "#1234567");
+  assert.equal(colourTransformApplies("#aabbccdd", tint), false,
+    "and it is reported as a tint that did NOT land, so a caller can count it");
 });
 
 test("a tint that could not be applied is DISTINGUISHABLE from no tint at all", () => {
@@ -254,6 +344,31 @@ test("a matrix whose alpha row is plain is EXACT per fill; one that paints the e
   const paintsTheBox = [...GREYSCALE_CELLS.slice(0, 19), 128];
   assert.equal(colourMatrixIsFillExact(paintsTheBox), false);
   assert.equal(applyColourMatrix("#ff0000", paintsTheBox, 1).approximated, "colourMatrixAlphaRow");
+
+  // ► **ALL FIVE CELLS OF THAT ROW, because only the fifth was pinned.** Found
+  //   2026-09-14 by mutation: deleting the `cells[15]` term from the predicate
+  //   left every test in this file green, and the same is true of 16, 17 and
+  //   18 — the assertion above perturbs the OFFSET at 19 and nothing else. A
+  //   predicate whose five terms are covered by one is four unexercised
+  //   branches wearing a passing test.
+  //
+  //   Each of the four is a different way for output alpha to stop being input
+  //   alpha: 15, 16 and 17 make it depend on RED, GREEN and BLUE, and 18 scales
+  //   it. Measured on the oracle, all 636 of the build's matrices have the
+  //   plain row, so NONE of these four is reachable from this build — which is
+  //   exactly why they need a synthetic fixture rather than a census.
+  for (const [index, value, what] of [[15, 0.5, "red feeds alpha"], [16, 0.5, "green feeds alpha"],
+    [17, 0.5, "blue feeds alpha"], [18, 0.5, "alpha is scaled"]]) {
+    const perturbed = [...GREYSCALE_CELLS];
+    perturbed[index] = value;
+    assert.equal(colourMatrixIsFillExact(perturbed), false, `cell ${index}: ${what}`);
+    assert.equal(applyColourMatrix("#ff0000", perturbed, 1).approximated, "colourMatrixAlphaRow",
+      `cell ${index} must be reported as an approximation, not applied silently`);
+  }
+  // And the tolerance is a tolerance, not a hole: float noise still reads exact.
+  const noisy = [...GREYSCALE_CELLS];
+  noisy[18] = 1 + 1e-9;
+  assert.ok(colourMatrixIsFillExact(noisy), "1e-9 is inside the 1e-6 tolerance and must stay exact");
 });
 
 test("a colour matrix on a NON-SOLID fill is reported by name, not quietly skipped", () => {
@@ -517,6 +632,42 @@ test("a MIXED list partitions every record into exactly one bucket", () => {
   assert.equal(result.counts.noOp, 3);
   assert.equal(result.counts.refused, 2);
   assert.equal(result.filter.split(") ").length, 3, "three filter functions in the string");
+
+  // ► **`approximated` EQUALS `applied` IDENTICALLY, AND THAT IS AN INVARIANT
+  //   OF THIS MAPPER RATHER THAN A COINCIDENCE OF THIS FIXTURE.** Found
+  //   2026-09-14 by mutation: computing `approximated` as a bare
+  //   `applied.length` left the whole suite green, because no branch in
+  //   `canvasFilterFor` pushes `exact: true` — every CSS blur is a Gaussian
+  //   standing in for box blurs and every drop-shadow carries that plus the
+  //   sigma-to-radius doubling. Asserting the identity is the honest version
+  //   of that fact: if someone adds a genuinely exact filter the line goes red
+  //   and the header paragraph claiming otherwise gets rewritten, instead of
+  //   quietly outliving the code.
+  assert.equal(result.counts.approximated, result.counts.applied,
+    "every filter this mapper can express is an approximation; none is exact");
+  assert.equal(result.applied.every((entry) => entry.exact === false), true);
+  assert.equal(result.applied.every((entry) => typeof entry.approximated === "string"), true,
+    "and each names WHICH approximation, which is the part that discriminates");
+});
+
+test("a zero or negative scale falls back to 1 rather than emitting blur(-5px)", () => {
+  // ► **UNPINNED UNTIL 2026-09-14.** Found by mutation: relaxing the guard
+  //   from `Number.isFinite(scale) && scale > 0` to `Number.isFinite(scale)`
+  //   left the whole suite green. A negative scale would produce
+  //   `blur(-5.5px)` and negative shadow offsets — a filter string a browser
+  //   drops on the floor, silently, which is exactly the failure mode this
+  //   module's four buckets exist to make impossible. Nothing in this tree
+  //   passes a negative scale today; `stageFitFor` returns a positive one.
+  const records = [blurRecord(11), shadowRecord()];
+  const reference = canvasFilterFor(records, { scale: 1 });
+  for (const scale of [0, -1, -2.5, Number.NaN, undefined, "2"]) {
+    assert.equal(canvasFilterFor(records, { scale }).filter, reference.filter,
+      `scale ${String(scale)} must fall back to 1`);
+  }
+  assert.equal(/-\d/.test(canvasFilterFor(records, { scale: -2 }).filter), false,
+    "and no length in the string is negative");
+  // The guard is a guard, not a cap: a real scale still multiplies.
+  assert.notEqual(canvasFilterFor(records, { scale: 2 }).filter, reference.filter);
 });
 
 test("no filters at all is an empty result, not a thrown error or a bogus string", () => {

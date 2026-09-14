@@ -212,6 +212,15 @@ test("a gradient is flattened to its first stop and SAYS it was approximated", (
  * linear, 10 radial, 0 focal across 8,875 fills in 824 shapes, re-counted with
  * `parseShape` itself). A focal gradient's bytes therefore exist nowhere except
  * here, which is precisely why the field went unchecked for as long as it did.
+ *
+ * ► **THE 8,875 COUNTS EVERY STYLE-ARRAY GENERATION, and saying so is the
+ *   difference between a number and a claim.** `StateNewStyles` replaces the
+ *   fill array mid-shape — 58 of the 824 shapes do it, 1,743 generations in
+ *   all — while `parseShape` returns `fills: generations[0].fills`. Recount
+ *   the obvious way and you get **7,595 fills, 84 linear, 9 radial**, and this
+ *   comment looks wrong; a verifier reached exactly that conclusion on
+ *   2026-09-14. **Focal is 0 under both countings**, so nothing about this
+ *   fixture or the parser changes either way.
  */
 function gradientShape({ id = 5, type = 0x10, focalPoint = 0 } = {}) {
   const writer = new ShapeWriter();

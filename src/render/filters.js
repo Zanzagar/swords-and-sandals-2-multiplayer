@@ -141,9 +141,43 @@ export function isIdentityColourTransform(eight) {
   return true;
 }
 
-/** `channel * multiplier + offset`, clamped to 0..255 and rounded. */
+/**
+ * `floor(channel * multiplier) + offset`, clamped to 0..255.
+ *
+ * ► **IT FLOORS. IT DOES NOT ROUND, AND THE ONE-WORD DOCSTRING THIS REPLACES
+ *   SAID IT ROUNDED** — in the file that, since the 2026-09-14 fold, owns the
+ *   only copy of this arithmetic. The body has floored since the fold; the
+ *   sentence above it had not been updated, so the file's own header argued for
+ *   `floor` (with the 69-of-1023 measurement behind it) while the line a reader
+ *   actually reaches said the opposite. Corrected AT the claim rather than
+ *   deleted, because which of the two a reader believed is the whole history
+ *   of this defect.
+ *
+ * ► **AND THE ORDER IS PART OF THE CONTRACT, not an accident of spelling.**
+ *   The player computes `(channel * multTerm) >> 8` and THEN adds the offset,
+ *   so the floor falls on the PRODUCT and not on the sum. `readColourTransform`
+ *   reads every offset with `readSB`, so a wire offset is always a whole
+ *   number and the two orders agree on anything that came straight off the
+ *   bytes — but see the clamp note below for where they stop agreeing.
+ *
+ * ► **THE FINAL `Math.floor` IS A DEFECT FIX, 2026-09-14, and it changes NO
+ *   value on any pack in this tree.** `composeColourTransform` in
+ *   `tools/swf-display-list.mjs` computes a composed offset as
+ *   `parentMultiplier * childOffset + parentOffset`, which is a FRACTION the
+ *   moment a parent multiplier is not a whole number. Without the floor, that
+ *   fraction survived the clamp and reached `hex2`, and
+ *   `(76.5).toString(16)` is `"4c.8"`: this function returned
+ *   **`"#80.88080"` — a nine-character string that is not a colour** — for
+ *   `applyColourTransform("#808080", [1,1,1,1,0.5,0,0,0])`. Measured before
+ *   fixing it, across every pack this tree writes: `screens.json` 341 named
+ *   transforms and 10 eight-number arrays, `props.json` 3,345,
+ *   `animations.json` 4,544, `icons.json` 131 — **0 fractional offsets in any
+ *   of them**, so nothing has ever been drawn wrong by it. It is the exact
+ *   shape this project keeps finding: real, reachable, unexercised, and
+ *   invisible to a digest over data that cannot vary.
+ */
 function channelOf(raw, multiplier, offset) {
-  return Math.max(0, Math.min(255, Math.floor(raw * multiplier) + offset));
+  return Math.max(0, Math.min(255, Math.floor(Math.floor(raw * multiplier) + offset)));
 }
 
 /** Two lower-case hex digits, so `#0a0b0c` never comes back as `#a b c`. */
@@ -441,6 +475,22 @@ function rgbaOf(colour, alpha) {
  *
  * - `applied`  went into the string. `exact: false` means it went in as an
  *              approximation and `approximated` names which one.
+ *              ► **AND `exact: true` NEVER OCCURS HERE, so `counts.approximated`
+ *                IS IDENTICALLY `counts.applied`.** Found 2026-09-14 by
+ *                mutation: replacing the `approximated` computation with a bare
+ *                `applied.length` left the whole suite green, because there is
+ *                no branch below that pushes an exact filter — every CSS blur
+ *                is a Gaussian standing in for box blurs, and every
+ *                drop-shadow carries that plus the sigma-to-radius doubling.
+ *                The field is kept because it is DERIVED from the records
+ *                rather than counted separately (a second counter is a second
+ *                thing to drift), and because `approximatedByKind` really does
+ *                discriminate — but **a number that can only take one value is
+ *                not evidence**, and reading `approximated` as "how many of the
+ *                applied ones were inexact" overstates it. The identity is now
+ *                asserted in `test/render-filters.test.js` so that adding a
+ *                genuinely exact filter turns the suite red and forces this
+ *                paragraph to be rewritten rather than quietly outlived.
  * - `deferred` this module CAN apply it, just not as a filter string — only
  *              colour matrices, which go to `applyColourMatrix` instead. They
  *              are also handed back whole in `colourMatrices`.
@@ -464,6 +514,10 @@ export function canvasFilterFor(filters, { scale = 1 } = {}) {
   const refused = [];
   const colourMatrices = [];
   const parts = [];
+  // `scale > 0`, not merely finite: a zero or negative scale would emit
+  // `blur(-5px)` and negative shadow offsets, which is a silently broken
+  // filter string rather than a refused one. Pinned in the test file; nothing
+  // in this tree passes a negative scale today.
   const factor = Number.isFinite(scale) && scale > 0 ? scale : 1;
 
   for (const filter of Array.isArray(filters) ? filters : []) {
@@ -550,6 +604,10 @@ export function canvasFilterFor(filters, { scale = 1 } = {}) {
     refused.push(Object.freeze({ type, reason: "filterHasNoCanvasEquivalent", nearest: null }));
   }
 
+  // Derived from the records, never counted alongside them. See the header:
+  // on this mapper every applied filter is inexact, so this equals
+  // `applied.length` identically and is pinned as an invariant rather than
+  // being read as a ratio.
   const approximated = applied.filter((entry) => entry.exact === false).length;
   return Object.freeze({
     filter: parts.length > 0 ? parts.join(" ") : null,

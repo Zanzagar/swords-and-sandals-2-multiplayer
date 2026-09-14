@@ -169,6 +169,18 @@ class BitReader {
    *   installed build, all 824 shapes carry 8,875 fills of which 87 are linear
    *   gradients, 10 radial and ZERO focal, so no focal point of either sign has
    *   ever been read from it. The second install lane is where this pays.
+   *
+   *   ► **AND THE METHOD BELONGS BESIDE THE NUMBER: 8,875 COUNTS EVERY
+   *     STYLE-ARRAY GENERATION.** A `StateNewStyles` record REPLACES the fill
+   *     array mid-shape; 58 of the 824 shapes do it, for 1,743 generations in
+   *     all. `parseShape` returns `fills: generations[0].fills`, so a later
+   *     reader recounting the obvious way gets **7,595 fills, 84 linear, 9
+   *     radial** and concludes this comment is wrong — a verifier's first
+   *     census did exactly that on 2026-09-14. Both countings are right and
+   *     neither is the other; **focal is 0 under BOTH**, which is the only
+   *     part any code here depends on. Re-counted 2026-09-14 by walking every
+   *     `DefineShape*` in the oracle (sha256 `77cb545c…`) with `parseShape`
+   *     and tallying both ways.
    */
   readFixed8() {
     this.align();
@@ -216,7 +228,11 @@ function readFillStyle(reader, withAlpha) {
     // `readFixed8`, and note that this line USED TO READ IT UNSIGNED. Measured:
     // this build has ZERO focal gradients (87 linear, 10 radial, 0 focal across
     // 8,875 fills in 824 shapes), so this line has never executed against the
-    // oracle — recorded rather than budgeted for.
+    // oracle — recorded rather than budgeted for. **8,875 counts every
+    // style-array generation; counting only `generations[0]`, which is what
+    // this function's caller exposes as `.fills`, the same census reads 7,595
+    // fills, 84 linear and 9 radial. Focal is 0 either way** — see
+    // `readFixed8` for why the method is now stated beside the number.
     const focalPoint = type === 0x13 ? reader.readFixed8() : 0;
     return {
       kind: "gradient",

@@ -109,12 +109,34 @@
  *   alpha survives, into `fillOpacity`. Measured on this pack: **0 bitmap
  *   fills sit under an RGB colour transform**, so nothing is currently lost —
  *   `bitmapColourTransformDropped` is the count that would say so if that
- *   changed.
+ *   changed. ► **RE-MEASURED 2026-09-14 WITH THE DENOMINATOR, because "0" with
+ *   no denominator does not say whether the counter is silent or dead:** 29
+ *   bitmap paths across the 26 screens, 8 of them under a colour transform,
+ *   and all 8 under the SAME transform `[1,1,1,0.19921875,0,0,0,0]` — shape
+ *   718 on splash, new_or_continue, credits, help, gameover, bugs,
+ *   gameover_demo and enter_highscore. So the counter is DEAD on real data,
+ *   not merely quiet, and `touchesRgb` never returns true outside a synthetic
+ *   fixture. See its own comment below for which half of it was pinned by
+ *   nothing at all until `test/render-screen.test.js`'s `tintPack` landed.
  * - a non-zero `alphaOffset` on a gradient whose stops differ in opacity is
  *   not equivalent to transforming the stops, because a canvas ramp
  *   interpolates between them. Measured: **no drawable on any of the 26
  *   screens has a non-zero `alphaOffset` at all**, so every gradient here
  *   folds exactly. `gradientAlphaOffsetApproximated` counts the other case.
+ *
+ * ► **AND THE RGB HALF OF THE GRADIENT FOLD IS UNREACHABLE ON THIS PACK, which
+ *   is a stronger statement than "it folds exactly" and was not being made.**
+ *   Measured 2026-09-14: 21 gradient paths sit under a colour transform,
+ *   carrying 107 stops between them, and **all 107 are under ALPHA-ONLY
+ *   transforms** — four distinct ones, every RGB multiplier 1 and every RGB
+ *   offset 0. So `transformGradient`'s `fill: applyColourTransform(...)` is
+ *   held at the identity by every screen in the build. Deleting that call
+ *   outright left `test/render-screen.test.js` at 36 pass / 0 fail and left
+ *   the sha256 of all 13638 operations and their tallies across the 26 screens
+ *   BYTE-IDENTICAL. **A digest over data that cannot vary is not evidence** —
+ *   which is a statement about how the 2026-09-14 fold was argued, not about
+ *   gradients, and the same question is worth asking of every count in this
+ *   file. `tintPack` in the test file now reaches the case the build does not.
  *
  * ## THIS FILE'S COLOUR TRANSFORM WAS A DUPLICATE. THERE IS NOW ONE.
  *
@@ -136,6 +158,25 @@
  *   emitted operation list — fills, stops, opacities, matrices, counts —
  *   digests identically before and after. A fold argued from reading rather
  *   than counted is the fold that moves a pixel.
+ *
+ *   ► **AND HERE IS WHAT THAT DIGEST IS BLIND TO, WRITTEN AT THE CLAIM RATHER
+ *     THAN UNDER IT. A digest over data that cannot vary is not evidence.**
+ *     Re-measured 2026-09-14: only **693 of those 1023** sit under a transform
+ *     that moves red, green or blue at all. The other **330 are under
+ *     ALPHA-ONLY transforms** — 223 flat fills and strokes, plus **every one of
+ *     the 107 transformed gradient stops** — and for each of them both
+ *     implementations return the input unchanged, under either rounder, by
+ *     construction. The same split runs through the alpha half: 1274 of the
+ *     1955 opacity comparisons are under `alphaMultiplier === 1,
+ *     alphaOffset === 0`.
+ *
+ *     So the digest genuinely proves the fold moved nothing THAT THIS PACK CAN
+ *     REACH, and proves nothing at all about the lines the pack holds at the
+ *     identity — which is how `transformGradient`'s stop-fill transform came to
+ *     be pinned by no assertion in the suite. **A count of values compared is
+ *     not a count of values that could have differed**, and the same question
+ *     is worth putting to every tally in this file. The rewritten real-pack
+ *     test now asserts the split, and `tintPack` covers what the pack cannot.
  *
  * ► **THE DISAGREEMENT THIS REPLACES, KEPT BECAUSE IT IS THE EVIDENCE.** The
  *   two did once disagree, because filters.js ROUNDED: **69 of those 1023 hex
@@ -608,6 +649,26 @@ function clipFor(pack, clip, approximations) {
  *
  * Takes the eight-number array `colourTransformFrom` returns, so it reads both
  * pack shapes rather than only the named-object one.
+ *
+ * ► **BOTH HALVES ARE DEAD ON THE REAL PACK AND ONLY ONE OF THEM WAS PINNED
+ *   ANYWHERE.** Measured 2026-09-14: all 8 bitmap paths that sit under a
+ *   colour transform are under the same alpha-only one, so this returns false
+ *   every time it is called on real data. Deleting the three OFFSET checks —
+ *   `colour[4]`, `colour[5]`, `colour[6]` — left the whole test file green;
+ *   deleting the three MULTIPLIER checks did not, because `market`'s
+ *   `HALF_RED` bitmap fixture covers them.
+ *
+ *   The offset half is not dead because offsets are rare: 133 of the 287
+ *   tinted drawables on this pack carry one. It is dead because the
+ *   combination `identity multipliers WITH a non-zero offset` occurs ZERO
+ *   times here, so the multiplier half happens to subsume it. That is a fact
+ *   about this build, not about the format, and it is exactly the kind of fact
+ *   that turns into a silent hole when the pack changes. **KEPT AND NOW
+ *   EXERCISED** — `tintPack` in `test/render-screen.test.js` puts a bitmap
+ *   under identity multipliers and offsets 17/0/-9, which is the only shape of
+ *   transform for which these three checks are the thing that answers. An
+ *   offset really does carry colour a raster cannot take: `#000000` under
+ *   redOffset 17 is `#110000`.
  */
 function touchesRgb(colour) {
   if (!colour) return false;
