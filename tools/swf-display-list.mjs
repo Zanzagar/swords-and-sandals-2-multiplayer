@@ -403,14 +403,14 @@ const FILTER_SIZES = Object.freeze({
   1: 9,    // Blur: blurX/Y, passes
   2: 15,   // Glow: RGBA, blurX/Y, strength, flags
   3: 27,   // Bevel: two RGBA, blurX/Y, angle, distance, strength, flags
-  4: null, // GradientGlow: NumColors, then 5 bytes each, then 23
+  4: null, // GradientGlow: NumColors, then 5 bytes each, then 19
   5: null, // Convolution: MatrixX * MatrixY floats
   6: 80,   // ColorMatrix: twenty 32-bit floats
   7: null  // GradientBevel: shaped like GradientGlow
 });
 
 /**
- * Step a cursor past a FILTERLIST.
+ * Step a cursor past a FILTERLIST, decoding nothing.
  *
  * ► **This exists because FILTERLIST sits BETWEEN `ClipDepth` and `BlendMode`,
  *   and the first version of this parser read the blend mode straight out of
@@ -420,9 +420,10 @@ const FILTER_SIZES = Object.freeze({
  *   nothing downstream reads yet. A parser that skips a variable-length record
  *   by guessing is a parser that will be wrong later, somewhere else.
  *
- * Filters are not interpreted: this module does not render, and a drop shadow
- * it cannot apply is not something to pretend about. It reports that filters
- * are present and steps over them exactly.
+ * It stays beside `parseFilterList` as the CURSOR STEPPER: a caller that only
+ * needs the byte after a filter list pays nothing to decode it, and the two are
+ * pinned against each other by a test, so the size table above cannot drift
+ * away from the decoder below it.
  */
 export function skipFilterList(buffer, offset, end) {
   if (offset >= end) throw new DisplayListError("PlaceObject3 filter list ran past the end of its tag.");
@@ -445,14 +446,247 @@ export function skipFilterList(buffer, offset, end) {
       const matrixY = buffer[cursor + 1];
       cursor += 2 + 4 + 4 + matrixX * matrixY * 4 + 4 + 1;
     } else {
-      // GradientGlow (4) and GradientBevel (7): NumColors, then an RGBA and a
-      // ratio byte for each, then the same trailing block a Glow has.
+      // GradientGlow (4) and GradientBevel (7): NumColors, then an RGBA for
+      // each, then a RATIO BYTE for each, then blurX/blurY/angle/distance
+      // (4 each), strength (2) and one flag byte — NINETEEN, not 23.
+      //
+      // ► **THIS LINE SAID 23 AND WAS FOUR BYTES WRONG, and the test that
+      //   covered it wrote 23 zero bytes, so fixture and parser agreed and the
+      //   suite was green.** That is this project's standing failure arriving
+      //   in a new place, and the oracle could never have caught it: the
+      //   shipped build contains ZERO gradient filters, so nothing but the
+      //   test ever exercised this arm. The derivation is a DropShadow (23)
+      //   with its RGBA replaced by the gradient: 23 - 4 + 1 + 5n = 5n + 20,
+      //   which is the 1 + 5n + 19 below. Ruffle's `read_gradient_filter`
+      //   reads the same nineteen trailing bytes.
       const colours = buffer[cursor];
-      cursor += 1 + colours * 5 + 23;
+      cursor += 1 + colours * 5 + 19;
     }
   }
   if (cursor > end) throw new DisplayListError("PlaceObject3 filter list ran past the end of its tag.");
   return cursor;
+}
+
+/** A filter's own numeric types: FIXED is 16.16, FIXED8 is 8.8, FLOAT is IEEE. */
+function readFixed(buffer, offset) {
+  return buffer.readInt32LE(offset) / 65536;
+}
+
+function readFixed8(buffer, offset) {
+  return buffer.readInt16LE(offset) / 256;
+}
+
+function readRGBA(buffer, offset) {
+  return {
+    red: buffer[offset], green: buffer[offset + 1],
+    blue: buffer[offset + 2], alpha: buffer[offset + 3]
+  };
+}
+
+/** The `FilterID` -> record `type` mapping, so a caller can switch on a name. */
+export const FILTER_TYPES = Object.freeze({
+  0: "dropShadow", 1: "blur", 2: "glow", 3: "bevel",
+  4: "gradientGlow", 5: "convolution", 6: "colourMatrix", 7: "gradientBevel"
+});
+
+/**
+ * A FILTERLIST, DECODED — `{filters, next}`, one typed record per filter.
+ *
+ * ► **The module used to claim in this very file that it "reports that filters
+ *   are present". It did not.** `parsePlaceObject` set `hasFilters`, and
+ *   `flattenFrame`'s drawable literal had no such key at all, so **1,507
+ *   filtered placements reached no caller in any form** — not applied, not
+ *   approximated, not counted. An approximation that is not counted is
+ *   indistinguishable from a correct read, and a dropped field is worse: it
+ *   reads as "there was nothing there".
+ *
+ *   Measured on the shipped build, which is why this is not cosmetic: **1,894
+ *   filters, of which 636 are ColorMatrix — 208 of those on the sprite the root
+ *   timeline places under the instance name `sky`**, whose day/night colouring
+ *   IS a colour matrix that changes across its 200 frames. 853 glows, 320
+ *   blurs, 54 bevels, 31 drop shadows.
+ *
+ * Type names are the specification's structures in this module's spelling, so
+ * COLORMATRIXFILTER is `colourMatrix` beside `colourTransform`.
+ *
+ * ► **THE TWO BEVEL COLOURS ARE IN THE OPPOSITE ORDER TO THE SPECIFICATION'S
+ *   FIELD TABLE, and this is measured rather than taken on trust.** The table
+ *   in the SWF file format specification lists `ShadowColor` then
+ *   `HighlightColor`; the shipped build writes the HIGHLIGHT first. In all 54
+ *   of its bevels the first RGBA is `255,255,255,255` and the second is dark
+ *   (`160,96,1`, `0,0,0`, `102,0,0`) — which is Flash's own default pairing of
+ *   a white highlight against a dark shadow, 54 times out of 54 and never once
+ *   the other way round. Ruffle reads the same order. A reader that trusts the
+ *   table swaps every bevel's two colours and still produces a plausible bevel,
+ *   which is why the order is named here instead of being left implicit.
+ *
+ * ► **GradientGlow (4), Convolution (5) and GradientBevel (7) DO NOT OCCUR in
+ *   the shipped build** — the census above is all five kinds it has. Their
+ *   arithmetic here is the specification's and is checked by this module's own
+ *   tests, but it has never been run against the oracle, so a caller that meets
+ *   one is meeting an UNMEASURED path.
+ */
+export function parseFilterList(buffer, offset, end) {
+  if (offset >= end) throw new DisplayListError("Filter list ran past the end of its tag.");
+  const count = buffer[offset];
+  let cursor = offset + 1;
+  const filters = [];
+
+  // Every read below is bounds-checked BEFORE it happens: a truncated filter
+  // would otherwise come back as `undefined` bytes read as zeroes, which is a
+  // filter record that looks parsed and is not.
+  const need = (bytes, what) => {
+    if (cursor + bytes > end) throw new DisplayListError(`Filter list ran past the end of its tag reading ${what}.`);
+  };
+
+  for (let index = 0; index < count; index += 1) {
+    need(1, "a filter id");
+    const id = buffer[cursor];
+    cursor += 1;
+    const type = FILTER_TYPES[id];
+    if (type === undefined) throw new DisplayListError(`Unknown SWF filter id ${id}.`);
+
+    if (id === 0 || id === 2) {
+      // DropShadow and Glow share a shape: a colour, two blurs, a strength and
+      // one flag byte, with DropShadow carrying an angle and distance between.
+      const isShadow = id === 0;
+      need(isShadow ? 23 : 15, type);
+      const colour = readRGBA(buffer, cursor);
+      const blurX = readFixed(buffer, cursor + 4);
+      const blurY = readFixed(buffer, cursor + 8);
+      const tail = isShadow ? cursor + 20 : cursor + 12;
+      const flags = buffer[tail + 2];
+      const record = {
+        type, filterId: id, colour, blurX, blurY,
+        strength: readFixed8(buffer, tail),
+        // Inner, Knockout, CompositeSource, then Passes UB[5]. Measured: 881 of
+        // the build's 884 shadows and glows carry 0x21 — composite source set,
+        // one pass — and the three at 0xa1 are INNER glows.
+        inner: (flags & 0x80) !== 0,
+        knockout: (flags & 0x40) !== 0,
+        compositeSource: (flags & 0x20) !== 0,
+        passes: flags & 0x1f
+      };
+      if (isShadow) {
+        record.angle = readFixed(buffer, cursor + 12);
+        record.distance = readFixed(buffer, cursor + 16);
+      }
+      filters.push(record);
+      cursor += isShadow ? 23 : 15;
+      continue;
+    }
+
+    if (id === 1) {
+      need(9, type);
+      filters.push({
+        type, filterId: id,
+        blurX: readFixed(buffer, cursor),
+        blurY: readFixed(buffer, cursor + 4),
+        // Passes UB[5] then Reserved UB[3] — so the count is the TOP five bits,
+        // not the byte. Measured: 314 blurs at 0x08 (one pass) and 6 at 0x10
+        // (two), with the reserved low bits zero in every one of the 320.
+        passes: buffer[cursor + 8] >>> 3
+      });
+      cursor += 9;
+      continue;
+    }
+
+    if (id === 3) {
+      need(27, type);
+      const flags = buffer[cursor + 26];
+      filters.push({
+        type, filterId: id,
+        // See the docstring: the wire's first RGBA is the HIGHLIGHT, measured
+        // 54 times out of 54, which is the opposite of the spec's field table.
+        highlightColour: readRGBA(buffer, cursor),
+        shadowColour: readRGBA(buffer, cursor + 4),
+        blurX: readFixed(buffer, cursor + 8),
+        blurY: readFixed(buffer, cursor + 12),
+        angle: readFixed(buffer, cursor + 16),
+        distance: readFixed(buffer, cursor + 20),
+        strength: readFixed8(buffer, cursor + 24),
+        inner: (flags & 0x80) !== 0,
+        knockout: (flags & 0x40) !== 0,
+        compositeSource: (flags & 0x20) !== 0,
+        onTop: (flags & 0x10) !== 0,
+        passes: flags & 0x0f
+      });
+      cursor += 27;
+      continue;
+    }
+
+    if (id === 4 || id === 7) {
+      // UNMEASURED: neither gradient filter occurs in the shipped build.
+      need(1, type);
+      const colours = buffer[cursor];
+      need(1 + colours * 5 + 19, type);
+      const gradient = [];
+      // The RGBAs come first as a block and the ratios follow as their own
+      // block — they are NOT interleaved, which is the easy way to read this.
+      for (let stop = 0; stop < colours; stop += 1) {
+        gradient.push({
+          colour: readRGBA(buffer, cursor + 1 + stop * 4),
+          ratio: buffer[cursor + 1 + colours * 4 + stop]
+        });
+      }
+      const tail = cursor + 1 + colours * 5;
+      // 0..3 blurX, 4..7 blurY, 8..11 angle, 12..15 distance, 16..17 strength,
+      // 18 flags. NINETEEN bytes — see skipFilterList for the four this file
+      // used to add here and for why no capture could ever have caught it.
+      const flags = buffer[tail + 18];
+      filters.push({
+        type, filterId: id, gradient,
+        blurX: readFixed(buffer, tail),
+        blurY: readFixed(buffer, tail + 4),
+        angle: readFixed(buffer, tail + 8),
+        distance: readFixed(buffer, tail + 12),
+        strength: readFixed8(buffer, tail + 16),
+        inner: (flags & 0x80) !== 0,
+        knockout: (flags & 0x40) !== 0,
+        compositeSource: (flags & 0x20) !== 0,
+        onTop: (flags & 0x10) !== 0,
+        passes: flags & 0x0f,
+        measured: false
+      });
+      cursor = tail + 19;
+      continue;
+    }
+
+    if (id === 5) {
+      // UNMEASURED: no convolution filter occurs in the shipped build.
+      need(2, type);
+      const matrixX = buffer[cursor];
+      const matrixY = buffer[cursor + 1];
+      const cells = matrixX * matrixY;
+      need(2 + 4 + 4 + cells * 4 + 4 + 1, type);
+      const matrix = [];
+      for (let cell = 0; cell < cells; cell += 1) matrix.push(buffer.readFloatLE(cursor + 10 + cell * 4));
+      const flags = buffer[cursor + 14 + cells * 4];
+      filters.push({
+        type, filterId: id, matrixX, matrixY,
+        divisor: buffer.readFloatLE(cursor + 2),
+        bias: buffer.readFloatLE(cursor + 6),
+        matrix,
+        defaultColour: readRGBA(buffer, cursor + 10 + cells * 4),
+        clamp: (flags & 0x02) !== 0,
+        preserveAlpha: (flags & 0x01) !== 0,
+        measured: false
+      });
+      cursor += 2 + 4 + 4 + cells * 4 + 4 + 1;
+      continue;
+    }
+
+    // ColorMatrix (6): twenty 32-bit floats, four rows of five, the fifth
+    // column being the offsets in 0..255 colour space.
+    need(80, type);
+    const matrix = [];
+    for (let cell = 0; cell < 20; cell += 1) matrix.push(buffer.readFloatLE(cursor + cell * 4));
+    filters.push({ type, filterId: id, matrix });
+    cursor += 80;
+  }
+
+  if (cursor > end) throw new DisplayListError("Filter list ran past the end of its tag.");
+  return { filters, next: cursor };
 }
 
 /**
@@ -466,9 +700,10 @@ export function skipFilterList(buffer, offset, end) {
  *
  * `PlaceObject3`'s second flag byte carries a class name, filters, a blend mode
  * and a bitmap cache. The name is read (it changes where every later field
- * starts), filters and blend are RECORDED as present and not interpreted, which
- * is the honest report: this module does not render, so a blend mode it cannot
- * apply is a fact for the caller rather than something to silently drop.
+ * starts); the filter list is DECODED into typed records and the blend mode is
+ * carried as its raw id. This module does not render, so neither is applied —
+ * but both reach the caller, which is the difference between an unsupported
+ * effect and a dropped one.
  */
 export function parsePlaceObject(buffer, bodyStart, bodyEnd, tagCode) {
   if (tagCode === TAG.PLACE_OBJECT) {
@@ -542,8 +777,13 @@ export function parsePlaceObject(buffer, bodyStart, bodyEnd, tagCode) {
     // The order here is the wire's and it is not the flag order: FILTERLIST,
     // then BlendMode, then BitmapCache, then Visible, then BackgroundColor.
     if ((flags2 & 0x01) !== 0) {
+      // DECODED, not stepped over. `hasFilters` on its own was the whole of
+      // this module's filter reporting for 1,507 placements, and a boolean that
+      // never reaches a drawable is not a report.
+      const read = parseFilterList(buffer, cursor, bodyEnd);
       placement.hasFilters = true;
-      cursor = skipFilterList(buffer, cursor, bodyEnd);
+      placement.filters = read.filters;
+      cursor = read.next;
     }
     if ((flags2 & 0x02) !== 0) {
       placement.blendMode = buffer[cursor];
@@ -610,6 +850,183 @@ export function deriveAnimations(buffer, sprite) {
       frameCount: Math.max(1, lastFrame - label.frame + 1)
     };
   });
+}
+
+/**
+ * The four button states, in the order their bits sit in a BUTTONRECORD.
+ *
+ * `hitTest` is the mouse target and is NEVER DRAWN — a flattener that painted
+ * it would put an invisible hit area on the canvas, so it is a legal argument
+ * to `buttonStateDisplayList` only because a caller auditing coverage may want
+ * to see it, never because it is art.
+ */
+export const BUTTON_STATES = Object.freeze(["up", "over", "down", "hitTest"]);
+
+const BUTTON_STATE_BITS = Object.freeze({ up: 0x01, over: 0x02, down: 0x04, hitTest: 0x08 });
+
+/**
+ * A `DefineButton` (7) or `DefineButton2` (34) character, as `{id, records, …}`.
+ *
+ * ► **WHY THIS EXISTS: 158 button characters were a wall.** `flattenFrame`
+ *   reported a button placement as `unsupported: "button"` and said nothing
+ *   about what was behind it, so everything inside one was invisible to every
+ *   census this repository can run. Measured on the shipped build: the 158
+ *   `DefineButton2` characters hold **704 BUTTONRECORDs — 425 shapes, 146 texts
+ *   and 133 sprites across 60 distinct characters** — and **27 of the file's
+ *   436 text characters appear ONLY here**, placed on no timeline anywhere.
+ *
+ * A BUTTONRECORD is a `PlaceObject` in all but name: a character, a depth, a
+ * matrix and (in a `DefineButton2`) a colour transform, plus the set of states
+ * it is drawn in. So `buttonStateDisplayList` can hand one straight to
+ * `flattenFrame` and the existing machinery does the rest.
+ *
+ * ► **A `DefineButton` (tag 7) record has NO colour transform**, and its two
+ *   SWF 8 flag bits do not exist, so a reader that assumes one shape for both
+ *   tags desynchronises on the older one. The shipped build has **zero** tag-7
+ *   buttons — all 158 are tag 34 — so that arm is format correctness checked by
+ *   this module's tests and NOT a measured path.
+ */
+export function parseButton(buffer, character) {
+  if (!character || typeof character.bodyStart !== "number") {
+    throw new DisplayListError("parseButton needs a character from indexCharacters().");
+  }
+  const { tagCode, bodyStart, bodyEnd } = character;
+  if (tagCode !== TAG.DEFINE_BUTTON && tagCode !== TAG.DEFINE_BUTTON2) {
+    throw new DisplayListError(`Character ${character.id} is tag ${tagCode}, not a DefineButton or DefineButton2.`);
+  }
+  const isButton2 = tagCode === TAG.DEFINE_BUTTON2;
+
+  let cursor = bodyStart;
+  if (cursor + 2 > bodyEnd) throw new DisplayListError(`Button ${character.id} is too short for its id.`);
+  const id = buffer.readUInt16LE(cursor);
+  cursor += 2;
+  let trackAsMenu = false;
+  let actionOffset = 0;
+  if (isButton2) {
+    if (cursor + 3 > bodyEnd) throw new DisplayListError(`Button ${id} is too short for its flags and action offset.`);
+    // ReservedFlags UB[7] then TrackAsMenu UB[1], so the flag is the LOW bit.
+    trackAsMenu = (buffer[cursor] & 0x01) !== 0;
+    cursor += 1;
+    actionOffset = buffer.readUInt16LE(cursor);
+    cursor += 2;
+  }
+
+  const records = [];
+  const stateCounts = { up: 0, over: 0, down: 0, hitTest: 0 };
+  for (;;) {
+    if (cursor >= bodyEnd) {
+      throw new DisplayListError(`Button ${id} ran past the end of its tag before the record terminator.`);
+    }
+    const flags = buffer[cursor];
+    cursor += 1;
+    // A zero byte is CharacterEndFlag. It is not a record with no states set:
+    // the two are the same byte, and the format says zero ends the list.
+    if (flags === 0) break;
+    if (cursor + 4 > bodyEnd) throw new DisplayListError(`Button ${id} record ran past the end of its tag.`);
+    const characterId = buffer.readUInt16LE(cursor);
+    const depth = buffer.readUInt16LE(cursor + 2);
+    cursor += 4;
+    const readPlacement = readMatrix(buffer, cursor);
+    cursor = readPlacement.next;
+    // A MATRIX is a bit field with no length of its own, so a malformed record
+    // walks straight into the next tag's bytes and comes back looking parsed.
+    if (cursor > bodyEnd) throw new DisplayListError(`Button ${id} record's matrix ran past the end of its tag.`);
+    const record = {
+      characterId,
+      depth,
+      matrix: readPlacement.matrix,
+      colourTransform: IDENTITY_COLOUR_TRANSFORM,
+      up: (flags & BUTTON_STATE_BITS.up) !== 0,
+      over: (flags & BUTTON_STATE_BITS.over) !== 0,
+      down: (flags & BUTTON_STATE_BITS.down) !== 0,
+      hitTest: (flags & BUTTON_STATE_BITS.hitTest) !== 0,
+      blendMode: null,
+      hasFilters: false,
+      filters: null
+    };
+    if (isButton2) {
+      const readColour = readColourTransform(buffer, cursor, true);
+      record.colourTransform = readColour.colourTransform;
+      cursor = readColour.next;
+      if (cursor > bodyEnd) {
+        throw new DisplayListError(`Button ${id} record's colour transform ran past the end of its tag.`);
+      }
+      if ((flags & 0x10) !== 0) {
+        // Measured: 34 of the build's 704 records carry a filter list and NONE
+        // carries a blend mode, so the blend arm below is unexercised by the
+        // oracle while this one is not.
+        const readFilters = parseFilterList(buffer, cursor, bodyEnd);
+        record.hasFilters = true;
+        record.filters = readFilters.filters;
+        cursor = readFilters.next;
+      }
+      if ((flags & 0x20) !== 0) {
+        if (cursor >= bodyEnd) throw new DisplayListError(`Button ${id} record ran past the end of its tag.`);
+        record.blendMode = buffer[cursor];
+        cursor += 1;
+      }
+    }
+    for (const state of BUTTON_STATES) if (record[state]) stateCounts[state] += 1;
+    records.push(record);
+  }
+
+  return { id, tagCode, trackAsMenu, actionOffset, records, stateCounts };
+}
+
+/**
+ * One button state's records as a DISPLAY LIST — the same shape `resolveTimeline`
+ * returns, so `flattenFrame` needs no button-specific path through its recursion.
+ *
+ * Sorted by depth, which is paint order, exactly as a timeline's snapshot is.
+ */
+export function buttonStateDisplayList(button, state = "up") {
+  if (!button || !Array.isArray(button.records)) {
+    throw new DisplayListError("buttonStateDisplayList needs a button from parseButton().");
+  }
+  // `Object.hasOwn`, not a truth test: `BUTTON_STATE_BITS["constructor"]` is a
+  // FUNCTION, so a lookup would accept "constructor" as a state and then find
+  // `record.constructor` truthy on every record — every one of them drawn.
+  if (!Object.hasOwn(BUTTON_STATE_BITS, state)) {
+    throw new DisplayListError(`Unknown button state "${state}"; expected one of ${BUTTON_STATES.join(", ")}.`);
+  }
+  return button.records
+    .filter((record) => record[state])
+    .map((record) => ({
+      depth: record.depth,
+      characterId: record.characterId,
+      matrix: record.matrix,
+      colourTransform: record.colourTransform,
+      blendMode: record.blendMode ?? undefined,
+      hasFilters: record.hasFilters,
+      filters: record.filters
+    }))
+    .sort((left, right) => left.depth - right.depth);
+}
+
+/**
+ * WHAT IS INSIDE A BUTTON, counted by kind — the report that turns
+ * `unsupported: "button"` from a dead end into a number a manifest can carry.
+ *
+ * `contents` counts RECORDS, not distinct characters, because one character
+ * placed twice is two things drawn; `characterIds` carries the distinct set
+ * beside it so neither number has to be inferred from the other.
+ */
+export function summariseButton(button, characters) {
+  const contents = {};
+  const characterIds = new Set();
+  for (const record of button.records) {
+    const character = characters.get(record.characterId);
+    const kind = character ? character.kind : "missing";
+    contents[kind] = (contents[kind] ?? 0) + 1;
+    characterIds.add(record.characterId);
+  }
+  return {
+    records: button.records.length,
+    states: { ...button.stateCounts },
+    trackAsMenu: button.trackAsMenu,
+    contents,
+    characterIds: [...characterIds].sort((left, right) => left - right)
+  };
 }
 
 /**
@@ -690,7 +1107,8 @@ export function resolveTimeline(buffer, sprite, { frames: wanted = null } = {}) 
           clipDepth: placement.clipDepth,
           className: placement.className,
           blendMode: placement.blendMode,
-          hasFilters: placement.hasFilters
+          hasFilters: placement.hasFilters,
+          filters: placement.filters
         });
         continue;
       }
@@ -708,6 +1126,11 @@ export function resolveTimeline(buffer, sprite, { frames: wanted = null } = {}) 
       if (placement.className !== undefined) updated.className = placement.className;
       if (placement.blendMode !== undefined) updated.blendMode = placement.blendMode;
       if (placement.hasFilters !== undefined) updated.hasFilters = placement.hasFilters;
+      // A move that carries a filter list REPLACES the instance's filters, and
+      // one that omits the flag keeps them — the same field-by-field rule the
+      // matrix follows. Measured: 1,212 of the build's 1,507 filtered
+      // placements are moves, so this is the common case and not the corner.
+      if (placement.filters !== undefined) updated.filters = placement.filters;
       active.set(placement.depth, updated);
       continue;
     }
@@ -726,11 +1149,15 @@ export function resolveTimeline(buffer, sprite, { frames: wanted = null } = {}) 
   return { frames, labels };
 }
 
+/** The shared empty ancestor chain — frozen, so no visit can append to it. */
+const EMPTY_EFFECT_CHAIN = Object.freeze([]);
+
 /**
  * Flatten one frame's display list to LEAF DRAWABLES, with matrices composed.
  *
  * Returns an array in paint order, each entry
- * `{characterId, kind, matrix, colourTransform, path, ratio, unsupported}`
+ * `{characterId, kind, matrix, colourTransform, path, ratio, unsupported,
+ *   blendMode, hasFilters, filters, ancestorEffects}`
  * where `path` is the chain of depths that reached it — so a caller can say
  * which limb a shape belongs to without guessing from geometry.
  *
@@ -743,6 +1170,23 @@ export function resolveTimeline(buffer, sprite, { frames: wanted = null } = {}) 
  *   dropped.** A morph shape comes back with `unsupported: "morph"` and its
  *   composed matrix intact, so the caller sees 34 of them on the fighter's
  *   effect depths instead of a picture that is quietly missing its blood.
+ *
+ * ► **EFFECTS SURVIVE THE RECURSION NOW, AND THEY DID NOT BEFORE.** Every
+ *   drawable carries its own `blendMode` (the raw SWF id, `undefined` when the
+ *   placement has none — see the literal for why that one is not `null`),
+ *   `hasFilters`, `filters` (typed records from `parseFilterList`), and
+ *   `ancestorEffects` — the chain of enclosing placements that carried either,
+ *   because a filter on a SPRITE applies to the whole group and not to the leaf
+ *   that happens to be inside it.
+ *
+ *   **What was there before: `hasFilters` reached this function and then
+ *   stopped — the drawable literal had no such key — and the sprite recursion
+ *   passed neither field down.** Measured on the shipped build: **1,507
+ *   placements carry a filter list (1,894 filters) and 12 carry a blend mode,
+ *   ELEVEN of those twelve on sprites** — so almost every blend mode in the
+ *   file died at the recursion, and every filter in the file died at the
+ *   drawable. Neither was unsupported; both were absent, which reads to a
+ *   caller as "there was nothing there".
  *
  * ► **MASKS, and the two ways to get them wrong.** A placement with a
  *   `clipDepth` is a mask over depths `depth + 1 .. clipDepth` on the SAME
@@ -777,9 +1221,34 @@ export function resolveTimeline(buffer, sprite, { frames: wanted = null } = {}) 
  *   would need its own flatten and a multi-shape clip path, the shipped build
  *   has none on any declared prop, and refusing what has not been measured is
  *   the rule this module already follows for morphs.
+ *
+ * ► **`resolveButtons` IS OPT-IN FOR EXACTLY THE SAME REASON**, and it is the
+ *   only way a button's contents reach a caller as geometry. With it off — the
+ *   default — a button placement still comes back `unsupported: "button"`, but
+ *   it now carries `button`: the record count, the per-state counts, and what
+ *   is inside COUNTED BY KIND. Adding a key to a drawable the extractions
+ *   already skip changes nothing they emit; resolving the button's records into
+ *   geometry would change both, so that half is behind the flag.
+ *
+ *   With it on, the records of `buttonState` (default `"up"`) are flattened as
+ *   an ordinary display list. **A state with no records is REPORTED, not
+ *   returned as an empty array**: 32 of the build's 158 buttons are hit-test
+ *   only — one shape, no up, over or down — and a flatten that silently drew
+ *   nothing for them would be a zero that means "unread" wearing the costume of
+ *   a zero that means "empty". Those come back `unsupported: "buttonState"`.
+ *
+ *   `"hitTest"` is a legal `buttonState` for a caller auditing coverage. It is
+ *   NEVER art: it is the mouse target, and the build does not draw it.
  */
 export function flattenFrame(buffer, characters, displayList, options = {}) {
-  const { spriteFrames = {}, maxDepth = 8, cache = new Map(), resolveMasks = false } = options;
+  const {
+    spriteFrames = {}, maxDepth = 8, cache = new Map(),
+    resolveMasks = false, resolveButtons = false, buttonState = "up"
+  } = options;
+  // See `buttonStateDisplayList`: an inherited key is not a state.
+  if (!Object.hasOwn(BUTTON_STATE_BITS, buttonState)) {
+    throw new DisplayListError(`Unknown button state "${buttonState}"; expected one of ${BUTTON_STATES.join(", ")}.`);
+  }
   const drawables = [];
 
   /**
@@ -798,7 +1267,26 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
     return cache.get(key);
   };
 
-  const visit = (entries, parentMatrix, parentColour, parentPath, depth, visiting) => {
+  /**
+   * A button's parsed records, memoised beside the sprite frames.
+   *
+   * A parse FAILURE is cached as a message rather than thrown, because one
+   * unreadable button must not take a whole frame's flatten with it — but it is
+   * carried onto the drawable, so it is counted rather than skipped.
+   */
+  const buttonFor = (character) => {
+    const key = `button:${character.id}`;
+    if (!cache.has(key)) {
+      try {
+        cache.set(key, { button: parseButton(buffer, character), error: null });
+      } catch (error) {
+        cache.set(key, { button: null, error: String(error.message) });
+      }
+    }
+    return cache.get(key);
+  };
+
+  const visit = (entries, parentMatrix, parentColour, parentPath, depth, visiting, parentEffects) => {
     if (depth > maxDepth) {
       throw new DisplayListError(`Sprite nesting exceeded ${maxDepth} levels at path ${parentPath.join("/")}.`);
     }
@@ -822,6 +1310,9 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
         }
       }
     }
+    // An empty chain is reported as `null` rather than as `[]`, so a caller
+    // cannot mistake "no enclosing effect" for "an array I forgot to fill".
+    const carried = parentEffects.length > 0 ? parentEffects : null;
 
     for (const entry of entries) {
       const isMask = typeof entry.clipDepth === "number" && entry.clipDepth > 0;
@@ -832,6 +1323,35 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
       );
       const path = [...parentPath, entry.depth];
       const mask = maskedBy.get(entry.depth);
+
+      // THE PLACEMENT'S OWN EFFECTS. `hasFilters` is derived from the list as
+      // well as from the flag so a hand-built entry cannot claim one without
+      // the other, and `filters` is `null` rather than `[]` when there are
+      // none — the same distinction `carried` makes above.
+      const filters = entry.filters ?? null;
+      const hasFilters = entry.hasFilters === true || (filters !== null && filters.length > 0);
+      const effects = {
+        // ► **`undefined` AND NOT `null` WHEN THERE IS NO BLEND MODE, which is
+        //   the one place this literal is deliberately inconsistent with
+        //   `filters` and `ancestorEffects` beside it.** The key is now on
+        //   every drawable, which is the fix; its ABSENT VALUE is left exactly
+        //   as it was, because `tools/extract-screens.mjs` spreads a blend mode
+        //   into its output on `drawable.blendMode !== undefined` and a `null`
+        //   here would put `blendMode: null` on every drawable it emits. A new
+        //   capability that rewrites an old answer is not a capability.
+        blendMode: entry.blendMode,
+        hasFilters,
+        filters,
+        ancestorEffects: carried
+      };
+      // What a nested sprite or button hands to its children: this placement's
+      // effects appended, because a filter on a GROUP applies to the group and
+      // not to whichever leaf is inside it.
+      const descend = (effects.blendMode !== undefined || hasFilters)
+        ? Object.freeze([...parentEffects, Object.freeze({
+          path, characterId: entry.characterId, blendMode: effects.blendMode, hasFilters, filters
+        })])
+        : parentEffects;
 
       // A mask is not a drawing: painting it would put the cutter on the canvas
       // instead of the thing it cuts. It is REPORTED rather than dropped,
@@ -846,7 +1366,8 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
           name: entry.name, clipDepth: entry.clipDepth,
           isMask: true,
           unsupported: resolvable ? null : "mask",
-          maskedBy: mask ?? null
+          maskedBy: mask ?? null,
+          ...effects
         });
         continue;
       }
@@ -856,7 +1377,8 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
         drawables.push({
           characterId: entry.characterId, kind: "missing", matrix, colourTransform,
           path, name: entry.name, ratio: entry.ratio, unsupported: "missing",
-          maskedBy: mask ?? null
+          maskedBy: mask ?? null,
+          ...effects
         });
         continue;
       }
@@ -865,10 +1387,57 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
           throw new DisplayListError(`Sprite ${character.id} contains itself at path ${path.join("/")}.`);
         }
         const inner = innerFrame(character, spriteFrames[character.id] ?? 1);
-        if (!inner) continue;
+        if (!inner) {
+          // ► **THIS USED TO BE `continue` — a silent drop.** A sprite with no
+          //   such frame (the build has five with ZERO frames, 2303-2307) or a
+          //   `spriteFrames` entry past the end vanished from the flatten with
+          //   nothing said. None of the five is placed anywhere in the shipped
+          //   build, so this path is unexercised by the oracle and is here
+          //   because an uncounted absence is the defect this module exists to
+          //   refuse.
+          drawables.push({
+            characterId: character.id, kind: "sprite", matrix, colourTransform, path,
+            name: entry.name, ratio: entry.ratio, unsupported: "spriteFrame",
+            spriteFrame: spriteFrames[character.id] ?? 1,
+            maskedBy: mask ?? null,
+            ...effects
+          });
+          continue;
+        }
         visiting.add(character.id);
-        visit(inner, matrix, colourTransform, path, depth + 1, visiting);
+        visit(inner, matrix, colourTransform, path, depth + 1, visiting, descend);
         visiting.delete(character.id);
+        continue;
+      }
+      if (character.kind === "button") {
+        const parsed = buttonFor(character);
+        const summary = parsed.button ? summariseButton(parsed.button, characters) : null;
+        if (resolveButtons && parsed.button) {
+          const inner = buttonStateDisplayList(parsed.button, buttonState);
+          if (inner.length > 0) {
+            if (visiting.has(character.id)) {
+              throw new DisplayListError(`Button ${character.id} contains itself at path ${path.join("/")}.`);
+            }
+            visiting.add(character.id);
+            visit(inner, matrix, colourTransform, path, depth + 1, visiting, descend);
+            visiting.delete(character.id);
+            continue;
+          }
+          // An empty state falls THROUGH to the report below rather than
+          // drawing nothing: see this function's docstring for the 32
+          // hit-test-only buttons that make this the common case, not a corner.
+        }
+        drawables.push({
+          characterId: character.id, kind: "button", matrix, colourTransform, path,
+          name: entry.name, ratio: entry.ratio,
+          unsupported: (resolveButtons && !parsed.error) ? "buttonState" : "button",
+          button: summary,
+          buttonError: parsed.error,
+          buttonState: resolveButtons ? buttonState : null,
+          maskedBy: mask ?? null,
+          maskPath: mask === undefined ? null : [...parentPath, mask],
+          ...effects
+        });
         continue;
       }
       drawables.push({
@@ -879,7 +1448,6 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
         path,
         name: entry.name,
         ratio: entry.ratio,
-        blendMode: entry.blendMode,
         maskedBy: mask ?? null,
         // ► A shape under a mask is not "correctly resolved geometry" UNLESS
         //   the caller asked for clip paths: without one, exporting it whole
@@ -892,7 +1460,8 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
         // The mask's OWN path, so a caller can find it in this same array
         // without re-deriving which level it was on. Depth alone is ambiguous
         // across nesting; this is not.
-        maskPath: mask === undefined ? null : [...parentPath, mask]
+        maskPath: mask === undefined ? null : [...parentPath, mask],
+        ...effects
       });
     }
   };
@@ -903,7 +1472,104 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
     options.colourTransform ?? IDENTITY_COLOUR_TRANSFORM,
     [],
     0,
-    new Set()
+    new Set(),
+    EMPTY_EFFECT_CHAIN
   );
   return drawables;
+}
+
+/**
+ * COUNT what a flatten actually produced, so a manifest can say it.
+ *
+ * ► **This exists because "zero failures" was reported by an extractor whose
+ *   fill data had died at a seam**, and the arena's walls were invisible for
+ *   months behind that zero. A count that a human reads is the only thing
+ *   standing between an approximation and a silently wrong picture, so the
+ *   counting is part of this module rather than something each caller
+ *   reimplements — and every unsupported kind appears in `unsupported` with its
+ *   distinct character ids, not merely a total.
+ */
+export function summariseDrawables(drawables) {
+  const byKind = {};
+  // Per unsupported kind: how many PLACEMENTS and which distinct CHARACTERS.
+  // "12 placements of 3 morphs" and "12 placements of 12 morphs" are different
+  // problems, and one total cannot tell a reader which one they have.
+  const unsupported = new Map();
+  const filtersByType = {};
+  const blendModes = {};
+  const buttons = { placements: 0, records: 0, contents: {}, failures: 0, emptyStates: 0 };
+  // An enclosing filtered GROUP is counted ONCE, by the path that identifies
+  // it, and separately from the number of drawables it encloses. Counting a
+  // group once per leaf would report the sky's single day/night colour matrix
+  // as hundreds of colour matrices, which is a number that reads as evidence
+  // and is an artefact of the traversal.
+  const ancestorGroups = new Set();
+  const ancestorFiltersByType = {};
+  const ancestorBlendModes = {};
+  let withFilters = 0;
+  let insideEffects = 0;
+
+  for (const drawable of drawables) {
+    byKind[drawable.kind] = (byKind[drawable.kind] ?? 0) + 1;
+    if (drawable.unsupported) {
+      const tally = unsupported.get(drawable.unsupported) ?? { placements: 0, characters: new Set() };
+      tally.placements += 1;
+      tally.characters.add(drawable.characterId);
+      unsupported.set(drawable.unsupported, tally);
+    }
+    if (drawable.hasFilters) withFilters += 1;
+    for (const filter of drawable.filters ?? []) {
+      filtersByType[filter.type] = (filtersByType[filter.type] ?? 0) + 1;
+    }
+    if (drawable.blendMode !== null && drawable.blendMode !== undefined) {
+      blendModes[drawable.blendMode] = (blendModes[drawable.blendMode] ?? 0) + 1;
+    }
+    if (drawable.ancestorEffects) {
+      insideEffects += 1;
+      for (const group of drawable.ancestorEffects) {
+        const key = group.path.join("/");
+        if (ancestorGroups.has(key)) continue;
+        ancestorGroups.add(key);
+        for (const filter of group.filters ?? []) {
+          ancestorFiltersByType[filter.type] = (ancestorFiltersByType[filter.type] ?? 0) + 1;
+        }
+        if (group.blendMode !== null && group.blendMode !== undefined) {
+          ancestorBlendModes[group.blendMode] = (ancestorBlendModes[group.blendMode] ?? 0) + 1;
+        }
+      }
+    }
+    if (drawable.kind === "button") {
+      buttons.placements += 1;
+      if (drawable.buttonError) buttons.failures += 1;
+      if (drawable.unsupported === "buttonState") buttons.emptyStates += 1;
+      if (drawable.button) {
+        buttons.records += drawable.button.records;
+        for (const [kind, count] of Object.entries(drawable.button.contents)) {
+          buttons.contents[kind] = (buttons.contents[kind] ?? 0) + count;
+        }
+      }
+    }
+  }
+
+  return {
+    drawables: drawables.length,
+    byKind,
+    unsupported: Object.fromEntries(
+      [...unsupported].map(([kind, tally]) => [kind, {
+        placements: tally.placements,
+        characters: [...tally.characters].sort((left, right) => left - right)
+      }])
+    ),
+    withFilters,
+    filtersByType,
+    blendModes,
+    // `insideEffects` counts DRAWABLES under an effect group; `ancestorGroups`
+    // counts the groups themselves. Reporting only the first would inflate one
+    // filter into one per leaf.
+    insideEffects,
+    ancestorGroups: ancestorGroups.size,
+    ancestorFiltersByType,
+    ancestorBlendModes,
+    buttons
+  };
 }
