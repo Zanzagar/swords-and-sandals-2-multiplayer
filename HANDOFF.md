@@ -73,7 +73,36 @@ getting there cost a full retraction of that session's own central conclusion.**
 
 ► **NOBODY HAS LOOKED AT THE ARENA SCREEN.** That is ranked item 1 and it is the
   owner's; a camera that frames the fight and one that frames the sand pass the
-  suite identically.
+  suite identically. **Serve it with
+  `node tools/arena-server.mjs --host 0.0.0.0` and open
+  `http://<the WSL IP>:8123/tools/arena/index.html` from Windows** — the IP,
+  not `127.0.0.1`, and `hostname -I` gives it. Verified reachable from Windows
+  2026-09-14 by `Invoke-WebRequest`, which is the check three sessions skipped
+  by curling from inside WSL.
+
+► **ITS RANKED ITEMS 2 AND 5 ARE DONE, in the same session that wrote it.**
+  ► **THE MASKS RESOLVE: 180 extraction failures -> 2.** `flattenFrame` gained
+    an OPT-IN `resolveMasks`, so a masked placement carries its cutter to the
+    canvas. The night sky had been dropping the mask AND what it covers — the
+    moon's glow on 89 of 200 frames. **And it was nearly written off as
+    unreachable**: every masked frame is 112..200, and I had read `time_of_day`
+    as `1 + random(23)`. **It is a CLOCK** — `day_night_cycle` increments it
+    toward 200 on a 1500ms interval while a battle is on and re-seeks the sky
+    every tick, so the sky MOVES WHILE YOU FIGHT and 112..200 is the night.
+    Second time in two sessions that a bound inferred from ONE assignment site
+    was wrong. **One assignment is not a range.**
+  ► **A MISS IS A PARRY, AND THIS ENGINE HAD BEEN PLAYING THE GUARD.**
+    `defender_blocked()` plays `"defend" + attack_direction` (`+0x2160`), one of
+    thirteen, with the same 21-23 rewrite as `hurt` and `defend12` at direction
+    30; `Block` is the STATIC guard held during a weapon swap. The thirteen
+    `defend` clips are a family now and the label census moves 60/41 to 73/28.
+    **`clip-labels.js` had recorded the mapping as underivable for two
+    sessions** — *"a capture, or the build's own selector, would settle it"* —
+    and the selector is twelve instructions in a function the map already names.
+    **Refusing to guess an index mapping is right; recording it as underived
+    without asking the bytes is the failure that refusal exists to prevent**,
+    and that is the fourth instance here. Two tests pinned the old behaviour and
+    both are corrected at the assertion.
 
 ► **A HANDOFF STAMPED ITSELF TWO HOURS INTO THE FUTURE AND BROKE THE ONE
   PROPERTY THE CONVENTION RESTS ON.** `docs/handoffs/README.md` promises that
