@@ -8,6 +8,47 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-14 02:55 — the backgrounds were JPEGs and I drew none of them](docs/handoffs/2026-09-14-0255--the-backgrounds-were-jpegs-and-i-drew-none-of-them.md).**
+Start there.
+
+► **THE ARENA'S WALLS ARE RASTER AND THIS PIPELINE DREW NONE OF THEM.** The
+  owner asked *"where are the backgrounds that are actually in game? Did you
+  make these?"* — nothing was invented, and what was on screen was the vector
+  underlay: a neon-green placeholder, flat sand, a gradient collapsed to one
+  stop, and an INVISIBLE wall. `shapeToPaths` emitted `fill: "none"` with an
+  honest `approximated: "bitmap"`, the note died at the next seam, and the
+  extractor reported ZERO failures.
+  ► **THE RULE, and it is the most expensive lesson this project has:
+    AN APPROXIMATION THAT IS NOT COUNTED IS INDISTINGUISHABLE FROM A CORRECT
+    READ.** Once it had a name the same omission was found FOUR more times.
+    `test/extraction-honesty.test.js` recomputes every manifest's tally from
+    that pack's own data, so the next one fails by name.
+  **Now drawing: 14 bitmaps, 97 gradients, SIX arenas, a 200-frame sky, rain.**
+
+► **YOU CAN SCREENSHOT THE ARENA FROM WSL.** Chrome is on the WINDOWS side;
+  `tools/shot.sh <name> "<query>"` drives it headless against the server and
+  writes a PNG. **Three of this session's defects were invisible to the suite
+  and obvious in a screenshot**, and one of them I had already explained away in
+  writing. **Looking at the ASSET is not looking at the RENDER** — the alpha
+  masks were perfect and the render was black.
+
+► **THE ASSET CENSUS IS DONE: 6 read-only agents, 44 sized work items**, and it
+  broke four of my premises. Delivered since: 9 fonts / 1027 glyphs / 4061 glyph
+  entries round-tripping to readable English; all 26 root screens; faces, icons
+  and the combat panel; opt-in buttons and filters. **`weapon` and
+  `secondary_weapon` are now declared resources** — appearance selectors no rule
+  reads — because 89 of the 387 wardrobe pieces were indexed by nothing.
+  **No golden moved, measured: 138 golden/fixture/replay/observation tests pass
+  by exit code.** The vocabulary pin's warning that a change "re-hashes every
+  battle in existence, including all 23 golden replays" is BROADER THAN WHAT
+  HAPPENS, and has been for the last two additions.
+
+► **THE TYPEFACES ARE COMMERCIALLY LICENSED** — Bitstream and Monotype, named in
+  the build's own `DefineFontName`. The tools parse and REPORT and write no font
+  file. **Whether glyph outlines may ever leave a machine is the OWNER'S call
+  and is open.**
+
+*(The brief it supersedes, whose ranked items 1, 2 and 5 are closed:)*
 [2026-09-14 02:00 — I read the corpse, and the arena is drawn](docs/handoffs/2026-09-14-0200--i-read-the-corpse-and-the-arena-is-drawn.md).**
 Start there. **The arena screen draws — seven layers in the build's own nesting
 order, with the build's own pan-and-zoom camera moving the fight inside it — and
