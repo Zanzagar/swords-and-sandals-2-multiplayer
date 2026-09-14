@@ -970,6 +970,101 @@ function drawArenaBowl(view) {
  */
 const TWIPS_PER_PIXEL = 20;
 
+/**
+ * THE BUILD'S OWN RASTER ART, loaded once and composited once.
+ *
+ * ► **THE ARENA'S WALLS AND CROWDS ARE JPEGs AND THIS PAGE DREW NONE OF THEM.**
+ *   A bitmap-filled shape arrived as `fill: "none"` and painted nothing, so
+ *   every arena was bare solid colour with the entire stand missing — and the
+ *   extractor reported zero failures, because an approximation nobody counts
+ *   looks exactly like a correct read. The owner asked the right question:
+ *   *"where are the backgrounds that are actually in game? Did you make
+ *   these?"*
+ *
+ * ► **A JPEG WITH AN ALPHA CHANNEL IS TWO FILES AND ONE CANVAS.** SWF stores
+ *   the colour as JPEG and the alpha as a separate zlib'd plane;
+ *   `tools/extract-bitmaps.mjs` writes them as `<id>.jpg` and `<id>-alpha.png`
+ *   because compositing them in node would need a JPEG decoder it does not
+ *   ship. They are composited HERE, once, with `destination-in` — which is the
+ *   one place a canvas is actually the right tool.
+ */
+const bitmapCache = new Map();
+
+function loadBitmaps(manifest) {
+  for (const [id, entry] of Object.entries(manifest?.bitmaps ?? {})) {
+    const colour = new Image();
+    colour.src = `/assets/bitmaps/${entry.file}`;
+    if (!entry.alpha) {
+      bitmapCache.set(Number(id), colour);
+      continue;
+    }
+    const alpha = new Image();
+    alpha.src = `/assets/bitmaps/${entry.alpha}`;
+    // Both have to have arrived before the two can be combined; whichever
+    // lands second does the work.
+    const combine = () => {
+      if (!colour.complete || !alpha.complete || !colour.naturalWidth || !alpha.naturalWidth) return;
+      const off = document.createElement("canvas");
+      off.width = entry.width;
+      off.height = entry.height;
+      const ctx = off.getContext("2d");
+      ctx.drawImage(colour, 0, 0, entry.width, entry.height);
+      ctx.globalCompositeOperation = "destination-in";
+      ctx.drawImage(alpha, 0, 0, entry.width, entry.height);
+      bitmapCache.set(Number(id), off);
+    };
+    colour.addEventListener("load", combine);
+    alpha.addEventListener("load", combine);
+  }
+}
+
+fetch("/assets/bitmaps/manifest.json")
+  .then((response) => (response.ok ? response.json() : null))
+  .then((manifest) => {
+    if (!manifest) return;
+    loadBitmaps(manifest);
+    const failures = manifest.failures?.length ?? 0;
+    log(`bitmaps: ${Object.keys(manifest.bitmaps ?? {}).length} from your own install`
+      + (failures ? `, ${failures} undecodable` : ""), { warn: failures > 0 });
+  })
+  .catch(() => { /* no bitmaps extracted; the vector layer still draws */ });
+
+/**
+ * Paint one path's BITMAP fill, clipped to the path.
+ *
+ * ► **THE MATRIX MAPS BITMAP PIXELS TO SHAPE TWIPS, AND THE PATH IS IN SHAPE
+ *   PIXELS.** So every term is divided by 20 — which is why `a` is almost
+ *   always exactly 20 in the build and comes out as 1. Getting this wrong by
+ *   the factor of twenty draws one corner of the wall across the whole arena,
+ *   which reads as a texture bug rather than a units bug.
+ */
+function paintBitmapFill(operation, path) {
+  const image = bitmapCache.get(operation.bitmap.id);
+  if (!image || (image.naturalWidth === 0 && image.width === 0)) return false;
+  const m = operation.bitmap.matrix;
+  context.save();
+  context.clip(path, operation.fillRule ?? "evenodd");
+  context.transform(
+    m.a / TWIPS_PER_PIXEL, m.b / TWIPS_PER_PIXEL,
+    m.c / TWIPS_PER_PIXEL, m.d / TWIPS_PER_PIXEL,
+    m.tx / TWIPS_PER_PIXEL, m.ty / TWIPS_PER_PIXEL
+  );
+  if (operation.bitmap.repeat) {
+    const pattern = context.createPattern(image, "repeat");
+    if (pattern) {
+      context.fillStyle = pattern;
+      // In the bitmap's own space now, so the region to cover is the path's
+      // bounds transformed back — a generous rectangle is cheaper than exact
+      // and the clip above is what actually bounds it.
+      context.fillRect(-4000, -4000, 8000, 8000);
+    }
+  } else {
+    context.drawImage(image, 0, 0);
+  }
+  context.restore();
+  return true;
+}
+
 function paintArenaLayer(layer, fit) {
   const { x, y, scale } = layer.placement;
   context.save();
@@ -994,7 +1089,10 @@ function paintArenaLayer(layer, fit) {
     }
     context.transform(m[0], m[1], m[2], m[3], m[4] / TWIPS_PER_PIXEL, m[5] / TWIPS_PER_PIXEL);
     const path = path2dFor(operation.d);
-    if (operation.fill && operation.fill !== "none") {
+    if (operation.bitmap) {
+      context.globalAlpha = operation.fillOpacity ?? 1;
+      paintBitmapFill(operation, path);
+    } else if (operation.fill && operation.fill !== "none") {
       context.globalAlpha = operation.fillOpacity ?? 1;
       context.fillStyle = operation.fill;
       context.fill(path, operation.fillRule ?? "evenodd");

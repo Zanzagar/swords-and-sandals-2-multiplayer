@@ -120,7 +120,17 @@ export function propOpsFor(pack, { linkage, frame = 1 } = {}) {
         fillOpacity: path.fillOpacity ?? 1,
         stroke: path.stroke ?? null,
         strokeWidth: path.strokeWidth ?? 0,
-        strokeOpacity: path.strokeOpacity ?? 1
+        strokeOpacity: path.strokeOpacity ?? 1,
+        // ► **THE BITMAP FILL, AND DROPPING IT HERE MADE THE ARENA WALLS
+        //   INVISIBLE.** `shapeToPaths` has always reported
+        //   `approximated: "bitmap"` on a raster fill, and this reader copied
+        //   named fields one at a time and never copied that — so a shape
+        //   filled with the arena's stone wall arrived as `fill: "none"` with
+        //   no trace of what was lost, and the extractor counted zero failures.
+        //   **An approximation that is not carried is indistinguishable from a
+        //   correct read.**
+        ...(path.bitmap ? { bitmap: path.bitmap } : {}),
+        ...(path.approximated ? { approximated: path.approximated } : {})
       }));
     }
   }

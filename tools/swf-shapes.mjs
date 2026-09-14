@@ -109,22 +109,47 @@ class BitReader {
     this.readRect();
   }
 
-  skipMatrix() {
+  /**
+   * A fill's own MATRIX, read rather than skipped.
+   *
+   * ► **THIS USED TO BE `skipMatrix`, AND SKIPPING IT IS WHY THE ARENA WALL WAS
+   *   INVISIBLE.** A bitmap fill is an image plus the transform that places it
+   *   in the shape's space — without the transform there is nothing to draw,
+   *   so the parser reported `kind: "bitmap"` and the renderer had no choice
+   *   but to paint nothing. `skipMatrix` remains as a wrapper because gradients
+   *   still discard theirs.
+   *
+   * Scale and skew are 16.16 fixed point; the translation stays in TWIPS, the
+   * same convention `tools/swf-display-list.mjs` states for placement matrices.
+   */
+  readFillMatrix() {
     this.align();
+    let a = 1;
+    let d = 1;
+    let b = 0;
+    let c = 0;
     if (this.readBit()) {
       const bits = this.readUB(5);
-      this.readSB(bits);
-      this.readSB(bits);
+      a = this.readSB(bits) / 65536;
+      d = this.readSB(bits) / 65536;
     }
     if (this.readBit()) {
       const bits = this.readUB(5);
-      this.readSB(bits);
-      this.readSB(bits);
+      // RotateSkew0 then RotateSkew1 on the wire, which are `b` then `c` — the
+      // order reads backwards against the usual picture of a matrix, and a
+      // reader that fills them left-to-right transposes every rotation.
+      b = this.readSB(bits) / 65536;
+      c = this.readSB(bits) / 65536;
     }
     const translateBits = this.readUB(5);
-    this.readSB(translateBits);
-    this.readSB(translateBits);
+    const tx = this.readSB(translateBits);
+    const ty = this.readSB(translateBits);
     this.align();
+    return { a, b, c, d, tx, ty };
+  }
+
+  skipMatrix() {
+    this.readFillMatrix();
   }
 }
 
@@ -158,8 +183,16 @@ function readFillStyle(reader, withAlpha) {
   }
   if (type === 0x40 || type === 0x41 || type === 0x42 || type === 0x43) {
     const bitmapId = reader.readUI16();
-    reader.skipMatrix();
-    return { kind: "bitmap", bitmapId };
+    const matrix = reader.readFillMatrix();
+    // ► **0x40/0x42 TILE, 0x41/0x43 CLIP TO ONE COPY** — and the arena wall is
+    //   a tiled one, repeated eight times across the stands. A renderer that
+    //   ignored `repeat` would draw one wall and leave the rest of the arena
+    //   bare, which looks like a missing asset rather than a wrong flag.
+    const repeat = type === 0x40 || type === 0x42;
+    // 0x42/0x43 are the NON-SMOOTHED forms. Recorded because it is the build's
+    // own intent about scaling, not because anything here acts on it yet.
+    const smoothed = type === 0x40 || type === 0x41;
+    return { kind: "bitmap", bitmapId, matrix, repeat, smoothed };
   }
   throw new ShapeParseError(`unknown fill style type 0x${type.toString(16)}.`);
 }
@@ -416,7 +449,21 @@ export function shapeToPaths(shape) {
       let paint = { fill: "none", opacity: 1, approximated: null };
       if (style?.kind === "solid") paint = { ...cssColour(style.colour), approximated: null };
       else if (style?.kind === "gradient") paint = { ...cssColour(style.stops[0]?.colour), approximated: "gradient" };
-      else if (style?.kind === "bitmap") paint = { fill: "none", opacity: 1, approximated: "bitmap" };
+      else if (style?.kind === "bitmap") {
+        // ► **THIS USED TO BE `fill: "none"` AND THAT WAS A SILENT DROP.** The
+        //   SS2 arena's walls and crowds are bitmap fills, so every arena
+        //   rendered as bare solid colour with the whole stand missing — and
+        //   because `approximated` was never carried past this function,
+        //   nothing downstream could tell a missing wall from a wall that was
+        //   not there. The bitmap and its placement are handed on now; a caller
+        //   that cannot draw an image still gets `fill: "none"` and can say so.
+        paint = {
+          fill: "none",
+          opacity: 1,
+          approximated: "bitmap",
+          bitmap: { id: style.bitmapId, matrix: style.matrix, repeat: style.repeat }
+        };
+      }
 
       // Every loop of one fill in ONE element: a region with a hole needs both
       // rings under a single `fill-rule`, and separate elements cannot express
@@ -428,6 +475,7 @@ export function shapeToPaths(shape) {
         fillOpacity: paint.opacity,
         fillRule: "evenodd",
         approximated: paint.approximated,
+        ...(paint.bitmap ? { bitmap: paint.bitmap } : {}),
         stroke: null,
         strokeWidth: 0
       });
