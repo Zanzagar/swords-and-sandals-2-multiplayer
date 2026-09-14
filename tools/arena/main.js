@@ -57,6 +57,7 @@ import {
   hasExtractedArt,
   clipToArenaScale,
   loadoutFrom,
+  attachmentsFor,
   rankStrideFrom,
   selectRules,
   retireVoices,
@@ -1185,6 +1186,56 @@ function paintArenaLayer(layer, fit) {
   context.restore();
 }
 
+/**
+ * ONE-TIME INSTRUMENTATION OF THE WIRE-TO-DRAW SEAM.
+ *
+ * ► **THE WEAPON IS DECLARED, REACHES THE WIRE, AND DOES NOT APPEAR.**
+ *   Measured in node: `ss2Combatant` declares `weapon: 1` on this roster's exact
+ *   `derive: false` path, `attachmentsFor` returns the weapon row, and
+ *   `paintExtractedFigure` called directly produces eight weapon ops spanning
+ *   66% of the figure's width. It is absent from four headless screenshots.
+ *
+ *   So the break is in THIS file, which the suite cannot reach — and the
+ *   previous session lost an hour reasoning about the seam instead of looking
+ *   at it. This prints what the shell actually hands the painter, ONCE, into
+ *   the log panel that a screenshot captures. It is the cheapest possible
+ *   instrument and it should have been the first move.
+ *
+ * ► **AND IT ANSWERED IN ONE SHOT: NOTHING WAS BROKEN AT THIS SEAM.**
+ *   `loadout.weapon=1`, the weapon row is offered, and the painter returns 132
+ *   ops. Rendered at 2400x1500 the sword is plainly there — grey blade, brown
+ *   grip — **drawn across the hips rather than held.** So the defect was never
+ *   "the weapon does not reach the renderer"; it is a TRANSFORM, and an hour of
+ *   reasoning about plumbing was spent on a question a screenshot answered.
+ *
+ * Kept behind `?seam=1` rather than deleted: it cost two minutes, it is the
+ * only window into the one file the suite cannot reach, and the next question
+ * about this seam will not be the last.
+ */
+let loadoutReported = false;
+const SEAM_PROBE = params.has("seam");
+
+function reportedLoadout(combatant) {
+  const loadout = loadoutFrom(combatant);
+  if (SEAM_PROBE && !loadoutReported) {
+    loadoutReported = true;
+    const rows = attachmentsFor(loadout);
+    log(`seam: loadout.weapon=${loadout?.weapon ?? "ABSENT"} equipped=${loadout?.equipped_weapon ?? "ABSENT"}`);
+    log(`seam: weapon row offered=${rows.some((r) => r.slot === "weapon")} shield row=${rows.some((r) => r.slot === "shield")}`);
+    // The decisive number: how many ops the painter returns for the weapon slot.
+    const probe = hasExtractedArt(figurePack)
+      ? paintExtractedFigure(figurePack, {
+        family: "standing", label: "Standing", facing: "right", at: 0,
+        height: 150, wardrobe, loadout
+      })
+      : [];
+    const bySlot = {};
+    for (const op of probe) if (op.slot) bySlot[op.slot] = (bySlot[op.slot] ?? 0) + 1;
+    log(`seam: painter ops=${probe.length} dressed=${JSON.stringify(bySlot)}`);
+  }
+  return loadout;
+}
+
 function combatantsById() {
   const wire = host.wire();
   return new Map(wire.teams.flatMap((team) => team.combatants).map((combatant) => [combatant.id, combatant]));
@@ -1356,7 +1407,7 @@ function render(now = performance.now()) {
         height: figure.build.height,
         fade: pose.fade,
         wardrobe,
-        loadout: loadoutFrom(combatant)
+        loadout: reportedLoadout(combatant)
       })
       : [];
     drawOps(extracted.length > 0 ? extracted : paintFigure(figure, pose), view, origin);
