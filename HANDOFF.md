@@ -8,6 +8,12 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-14 01:30 — the arena is 1:1, and three readings were mine](docs/handoffs/2026-09-14-0130--the-arena-is-1to1-and-three-readings-were-mine.md).**
+Start there. **The arena is measured down to its ground line and nothing draws
+it yet**; blood, sparks, the arena's edges and the enchantment selector all
+landed tonight.
+
+*(The brief it supersedes, whose ranked items 4, 5 and 6 are closed:)*
 [2026-09-13 21:30 — ranged is built and the guard had a hole](docs/handoffs/2026-09-13-2130--ranged-is-built-and-the-guard-had-a-hole.md).**
 
 ► **RANGED IS DONE.** The bow, `bombard`, `snipe`, `bash_attack` and the
