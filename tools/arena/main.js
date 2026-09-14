@@ -75,8 +75,15 @@ import {
   propPackFrom,
   hasExtractedProps,
   propFrameCount,
+  propOpsFor,
   arrowOpsFor,
-  arrowTrailOpsFor
+  arrowTrailOpsFor,
+  clipEffectTableFrom,
+  effectsForAnimation,
+  spawnDrops,
+  dropAt,
+  SS2_DROP,
+  PROJECTILE_FRAME_MS
 } from "/src/render/index.js";
 import { demoSide } from "/tools/arena/roster.js";
 
@@ -263,6 +270,27 @@ fetch("/assets/props/props.json")
   })
   .catch(() => { propPack = null; });
 
+/**
+ * Which frame of the fighter clip throws blood or sparks, from
+ * `tools/extract-clip-effects.mjs`. Optional on top of the props, exactly as
+ * the wardrobe is optional on top of the rig.
+ */
+let clipEffects = null;
+fetch("/assets/props/clip-effects.json")
+  .then((response) => (response.ok ? response.json() : null))
+  .then((data) => { clipEffects = clipEffectTableFrom(data); })
+  .catch(() => { clipEffects = null; });
+
+/**
+ * Blood and sparks currently in the air, each with its own clock.
+ *
+ * ► **NOT held against the gladiator that threw them.** The build attaches a
+ *   drop to `arena.gladiators` at depth 45300 and lets it outlive whatever
+ *   spawned it — a death sprays and the body is already gone — so these are the
+ *   arena's, like the arrows, and they are pruned by their own 25-frame life.
+ */
+let drops = [];
+
 Promise.all([
   fetch("/assets/figure/shapes.json").then((response) => (response.ok ? response.json() : null)),
   fetch("/assets/figure/animations.json").then((response) => (response.ok ? response.json() : null)),
@@ -423,7 +451,27 @@ function beginStep(step) {
   // entry with no `startedAt` reads as infinitely overdue to `animationCursor`.
   // Stamped here rather than inside `timelinesForStep` so a frame that arrives
   // late does not make a timeline look overdue before it has drawn once.
-  for (const entry of started.values()) entry.startedAt = performance.now();
+  for (const entry of started.values()) {
+    entry.startedAt = performance.now();
+    // ► **WHICH POSE THROWS BLOOD, from the clip's own call sites.** The table
+    //   is keyed by the fighter clip's frame numbers and
+    //   `effectsForAnimation` converts them to pose indices once, so the shell
+    //   compares a pose it already has rather than re-deriving a frame.
+    //
+    //   A pack that has not been extracted yields an empty list, which is the
+    //   same fallback everything else here has: no blood, still a bout.
+    const animation = figurePack?.animations?.[entry.timeline.label?.toLowerCase?.()];
+    entry.effects = clipEffects && animation ? effectsForAnimation(clipEffects, animation) : [];
+    // The POSE COUNT comes from the extracted animation, not from the timeline:
+    // a timeline's `durationMs` is this engine's own schedule and its pose
+    // count is the build's. Kept beside the effects so the draw loop compares
+    // two numbers from the same source.
+    // `poses` is the ARRAY of poses, not a count — `animation.poses.length` is
+    // the number. Reading it as a count gave `at * [object Array]` = NaN, so
+    // every comparison was false and nothing ever fired.
+    entry.effectPoses = Array.isArray(animation?.poses) ? animation.poses.length : 0;
+    entry.firedEffects = new Set();
+  }
   for (const [combatantId, entry] of started) playing.set(combatantId, entry);
 
   // A sound per animation that STARTS, keyed on the same family AND THE SAME
@@ -462,6 +510,9 @@ function drainFinishedAnimations(now) {
   // drawn, in one place, so the two can never disagree about whether it is
   // still there.
   inFlight = inFlight.filter((shot) => now - shot.startedAt < shot.durationMs);
+  // A drop lives 25 of the build's frames and is REMOVED rather than fading
+  // (`+0x046a`). Pruned by the same comparison that decides whether to draw it.
+  drops = drops.filter((spray) => (now - spray.startedAt) / PROJECTILE_FRAME_MS <= SS2_DROP.lifeFrames);
   const cursor = animationCursor(pendingTokens, playing, now, { projectiles: inFlight });
   for (const combatantId of cursor.expired) playing.delete(combatantId);
 
@@ -878,6 +929,33 @@ function render(now = performance.now()) {
       : [];
     drawOps(extracted.length > 0 ? extracted : paintFigure(figure, pose), view, origin);
 
+    // ► **THE CLIP THROWS ITS OWN BLOOD, at the pose the build throws it.**
+    //   Fired once per pose per timeline — `firedEffects` is the guard — because
+    //   a draw loop visits the same pose many times at 60fps and the build
+    //   spawns on a frame, not on a redraw.
+    //
+    //   **Armour strikes SPARKS and flesh BLEEDS** (`bounceitem` `+0x018e`),
+    //   and the projection already carries the `armourclass` that decides it.
+    for (const effect of entry?.effects ?? []) {
+      if (drawnAt * (effect.poseCount || entry.effectPoses || 1) < effect.poseIndex) continue;
+      if (entry.firedEffects.has(effect.poseIndex)) continue;
+      entry.firedEffects.add(effect.poseIndex);
+      const armour = combatant.resources?.armourclass?.value ?? 0;
+      drops.push({
+        startedAt: now,
+        // Anchored where the figure IS this frame, not where it rests: a
+        // gladiator hit mid-step bleeds from where it was struck.
+        x: origin.x,
+        y: origin.y,
+        size: origin.size,
+        spray: spawnDrops({
+          seed: step.actionBoundary ?? scene.sequence,
+          armoured: armour > 0,
+          frames: propFrameCount(propPack, armour > 0 ? "sparks" : "blood") || 1
+        })
+      });
+    }
+
     // The name plate. It is the combatant's OWN name, never an item name.
     context.globalAlpha = combatant.alive ? 0.85 : 0.4;
     context.fillStyle = "#e8e4dc";
@@ -888,6 +966,44 @@ function render(now = performance.now()) {
   }
 
   drawProjectiles(view, now);
+  drawDrops(view, now);
+}
+
+/**
+ * The blood and the sparks, drawn last with the arrows and for the same reason:
+ * the build attaches them at depth 45300, above every body in the arena.
+ *
+ * Their offsets are ARENA UNITS already — a drop is attached to
+ * `arena.gladiators`, the same space the gladiators' own `_x` lives in — so
+ * nothing is converted here. See `src/render/clip-effects.js`.
+ */
+function drawDrops(view, now) {
+  for (const spray of drops) {
+    const frame = (now - spray.startedAt) / PROJECTILE_FRAME_MS;
+    for (const drop of spray.spray) {
+      const at = dropAt(drop, frame);
+      if (!at) continue;
+      const ops = propOpsFor(propPack, { linkage: drop.prop, frame: drop.artFrame });
+      // Screen y is DOWN in the build's own numbers and arena lift is UP, so
+      // the drop's `y` is negated once, here, at the point it is drawn —
+      // exactly as the figure's own limbs are flipped once in `drawOps`.
+      const lift = -at.y;
+      if (!ops) {
+        context.globalAlpha = 0.85;
+        context.fillStyle = drop.prop === "sparks" ? "#ffd889" : "#7a1010";
+        const radius = Math.max(1, view.scale * 2 * spray.size);
+        context.beginPath();
+        context.arc(view.toX(spray.x + at.x), view.toY(spray.y, lift), radius, 0, Math.PI * 2);
+        context.fill();
+        context.globalAlpha = 1;
+        continue;
+      }
+      paintProp(ops, view, {
+        x: spray.x + at.x, y: spray.y, lift, size: spray.size, rotation: at.rotation
+      });
+    }
+  }
+  context.globalAlpha = 1;
 }
 
 /**
