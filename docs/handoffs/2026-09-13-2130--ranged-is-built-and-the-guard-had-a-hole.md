@@ -5,14 +5,17 @@ sessionId:    b4ca2b15-791c-4a4f-bc62-ef21baf9e095 (https://claude.ai/code/sessi
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-commits:      de54749..HEAD, nine of them. `7310583` builds ranged; `301277a`
+commits:      de54749..HEAD, SIXTEEN of them. `7310583` builds ranged; `301277a`
               fixes what Codex found; `849ca06` and `75839cc` fix what the OWNER
               found by looking at it; `117df5d` derives the projectile;
               `c0b2bdc` flies it; `416d380` makes the phase wait for it;
-              `201fde3` moves its drawing under the suite.
+              `201fde3` moves its drawing under the suite; `2ca9fb3` extracts
+              the build's own arrows; `e35e64e` fixes the rotation and the
+              clipping; `1af20b2` derives the clip's effect table; `ec14f5d`
+              records that the arena is a SCRIPT and not a backdrop.
               **Re-measure; never copy.**
-suite:        1155 / 1154 / 0 / 1 (fresh-clone profile — `captures/` holds only
-              its manifest and README), measured after `201fde3` BY EXIT CODE.
+suite:        1172 / 1171 / 0 / 1 (fresh-clone profile — `captures/` holds only
+              its manifest and README), measured after `ec14f5d` BY EXIT CODE.
               **Re-measure; never copy.**
 agentRuns:    one Codex `/adversarial-review` on `HEAD~1..HEAD`, model pinned
               `gpt-6-astra`. No fan-out wave: ADR 0001 makes a wave the LAST
@@ -304,6 +307,49 @@ moving TOGETHER is itself the signature of a key-set change rather than a
 gameplay one — a change to how these bouts play would have left the walking pin
 alone, as the facing change did in September.
 
+## THE ARENA IS A CONSTRUCTION SCRIPT, and "extract the backdrop" was the wrong question
+
+**Root frame 221 is labelled `arena` and its display list is EMPTY** — resolved
+with this project's own reader over the root timeline, which is a timeline like
+any other and simply not a `DefineSprite`. Frames 214 to 230 place nothing. The
+screen is **488 instructions** that build it:
+
+```text
+  gladiators = createEmptyMovieClip(...)
+  attachMovie("rockMC", "rockLeft",  200)
+  attachMovie("rockMC", "rockRight", 201)
+  attachMovie("midway_focus", "midway_focus", 6)
+  attachMovie("hero_battle", "arena_hero" / "arena_villain")
+  then skincharacter, _xscale/_yscale from strength, facing, shadows
+```
+
+► **SO THERE IS NO BACKDROP ASSET, and I asked for one twice.** The owner
+  decided "the backdrop should set the scale"; the premise was mine and it was
+  wrong. The arena is a RECIPE — two rocks, a midway focus, a crowd band inside
+  character 2249, and two fighter clips — and **half of it is already
+  modelled**: "Battle entry" step 5 IS these instructions, `ss2PhysicalSize` is
+  the `_xscale` term, `slot-layout.js` is the placement.
+
+  What is genuinely missing is the SCENERY: two `rockMC` instances, their
+  coordinates, and the crowd.
+
+► **AND IT IS STATIC.** Every `attachMovie` pushes a literal linkage name,
+  instance name and depth — so `tools/extract-clip-effects.mjs`'s technique
+  reaches it and **an AVM1 interpreter is not what stands in the way.** Same
+  answer as the clip effects, arrived at the same way.
+
+## AN AVM1 INTERPRETER IS TRACTABLE AND IS NOT NEEDED YET
+
+Measured, because the owner asked for "the bigger implementation if it is the
+proper way": **the build's whole opcode surface is 58 distinct instructions**,
+so an interpreter is a real option rather than a fantasy. But every effect call
+and every arena `attachMovie` is STATIC, so an interpreter would spend its run
+computing tables that can be read out directly.
+
+**What would change that**, recorded so a later reader checks rather than
+trusts: a call whose arguments come from a variable, a conditional deciding
+whether to call, or a count that depends on the damage. None exists today.
+
 ## Highest-value work, ranked
 
 1. **LOOK AT IT AGAIN, AND LISTEN TO IT. This is the owner's and it is five
@@ -323,28 +369,35 @@ alone, as the facing change did in September.
    substantial render change and this touched the renderer, the adapter and the
    rule set. It found two survivors last time in code no test had executed, and
    this diff added a lot of code.
-3. **`snipe` IS NEVER CHOSEN BY THE AI, and it is now doubly so.** The
-   expected-damage policy already preferred the lob (13.1 against 11.9 on this
-   roster; snipe wins 10.7% of a 1,600-combination stat sweep) and the flat shot
-   is usually screened as well. **That policy is this module's own invention** —
-   `chooseAiAction`'s header says so — and a different one would fire it, so
-   inventing a preference to make content appear is exactly the move this
-   project keeps retracting. **Snipe is a player's shot today**, and that is a
-   decision to take deliberately rather than a defect to fix quietly.
-4. **The arrow's ART is authored.** The build's is character 47 at frame
-   `secondary_weapon - 60` — twenty frames, one per ranged row — and nothing
-   under `assets/` has extracted it. Same authored fallback `figure.js` is to
-   the extracted rig, and the same fix: a small extraction.
-5. **The weapon ENCHANTMENT selector has still not been found.** Unchanged from
+3. ~~**`snipe` is never chosen by the AI**~~ **CLOSED, AND THE REPORT WAS
+   WRONG THREE TIMES.** The policy was already correct: snipe's chance is
+   CLAMPED at 99 and bombard's is not, so the lob wins against a soft target and
+   the accurate shot overtakes it at foe defence ~20. **The demo roster has
+   defence 5.** Driven through the resolver, an archer facing defence 20 snipes
+   five times out of five. I had measured one roster and generalised.
+4. **THE ARENA'S SCENERY — the next real piece, and the ground is prepared.**
+   Read the two `rockMC` coordinates and the crowd out of root frame 221 with
+   `extract-clip-effects.mjs`'s technique, then decide how the build's pixel
+   space maps onto this engine's 4,200 arena units. **The owner has already
+   decided the scenery sets the scale**; what is not yet known is where its
+   GROUND LINE is, and guessing it puts gladiators in the sky. `viewportFor` is
+   twenty lines with two live defects in its history — do not guess there.
+5. **The clip effect table is extracted and nothing reads it.**
+   `assets/props/clip-effects.json` says which frame of the fighter clip spawns
+   how much blood; the renderer knows which frame it is playing. Wiring is
+   small. **Blood volume tracks the attack band** — 3 / 6 / 9 drops by hurt
+   label, 15 on every death — so a power hit already bleeds three times a quick
+   one, for free, the moment anything reads it.
+6. **The weapon ENCHANTMENT selector has still not been found.** Unchanged from
    the last handoff: `weapon0` is character 703 with `flame`/`frost`/`poison`/
    `wraith` at frames 2/5/8/11, and `updatecharacter` contains no `gotoAndStop`
    at all. Start from the other readers of `weapon_enchantment_type`.
-6. **`tools/arena/main.js` still has partial test reach** — the draw dispatch,
+7. **`tools/arena/main.js` still has partial test reach** — the draw dispatch,
    the autoplay handling and the rAF loop. **It has given up SIX live defects in
    three days.** This session added ~90 lines to it and then took the four
    DECISIONS back out into `projectileDrawAt`; what is left there is canvas
    calls.
-7. **The build has a DEFENCE SYSTEM nobody has built**: `defend1`-`defend12` and
+8. **The build has a DEFENCE SYSTEM nobody has built**: `defend1`-`defend12` and
    `defend20`, thirteen reactions mirroring the hurts and the attacks. Recorded
    in `UNMAPPED_CLIP_LABELS.unbuiltDefence` and deliberately unmapped, because
    which defend answers which attack is not derived.

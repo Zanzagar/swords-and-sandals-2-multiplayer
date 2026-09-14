@@ -35,6 +35,21 @@ THIS file is right and the handoff was frozen at the end of its session.
   `test/render-projectile.test.js` — the game rule rests on a property of the
   renderer's arithmetic, so that is where a changed launch height would be
   caught.
+► **THE ARENA IS A CONSTRUCTION SCRIPT, NOT A BACKDROP, and I asked for a
+  backdrop twice.** Root frame 221 is labelled `arena` and its display list is
+  EMPTY; the screen is 488 instructions of `attachMovie` — two `rockMC`, a
+  `midway_focus`, two `hero_battle` clips, then `skincharacter` and the
+  `_xscale` from strength. **Half of it is already modelled** ("Battle entry"
+  step 5 IS these instructions), and what is missing is the SCENERY. It is all
+  STATIC, so `extract-clip-effects.mjs`'s technique reaches it.
+► **AN AVM1 INTERPRETER IS TRACTABLE — 58 distinct opcodes build-wide — AND IS
+  NOT NEEDED YET.** Every effect call and every arena `attachMovie` pushes
+  literals, so an interpreter would compute tables that can be read out. What
+  would change that is recorded at `tools/extract-clip-effects.mjs`.
+► **BLOOD VOLUME TRACKS THE ATTACK BAND**, derived from the 32 `bounceitem`
+  call sites: 3 drops on a quick hit, 6 on a normal, 9 on a power, 15 on every
+  death. `hurtN` IS the attack direction, so the renderer already knows which.
+  Extracted; nothing reads it yet.
 ► **THE ARROW FLIES, and the build had already modelled all of it.** 125
   `bullet` references in one block; `maxscale` appears nowhere else in the
   corpus. **The build has TWO coordinates and this engine has THREE** — vanilla's
