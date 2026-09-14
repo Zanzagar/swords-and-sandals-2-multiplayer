@@ -31,6 +31,7 @@ import {
 import { ss2ArrowFrameFor, ss2RangedWeaponFor, ss2WeaponEntry, SS2_WEAPON_IDS } from "../src/team/ss2-weapon-table.js";
 import { CommandKind, SS2_STATIC_MAP_BINDINGS, buildArenaLayout, presentResolvedEvents } from "../src/adapter/index.js";
 import { PROP_EXPORTS } from "../tools/extract-props.mjs";
+import { argumentsOfCall } from "../tools/extract-clip-effects.mjs";
 
 /**
  * A pack in the shape `tools/extract-props.mjs` writes: props keyed by linkage,
@@ -298,4 +299,72 @@ test("every declared prop names what reads it, so a dead entry is visible", () =
   assert.equal(arena.framesWanted, 1);
   const arrow = PROP_EXPORTS.find((prop) => prop.linkage === "bullet");
   assert.equal(arrow.indexedBy, "secondary_weapon - 60", "the build's own lookup");
+});
+
+/* ------------------------------------------------------------------ */
+/* The clip's own effect calls, read without an interpreter            */
+/* ------------------------------------------------------------------ */
+
+test("an AVM1 call's arguments read BACKWARDS off the push, and pool entries are literals", () => {
+  // ► **BOTH HALVES OF THIS WERE REAL BUGS, caught by the extractor reporting
+  //   28 of 32 call sites as unreadable when they were all plain constants.**
+  //
+  //   1. **AVM1 pops arguments in reverse.** `Push 15, "blood", 2, "bounceitem"`
+  //      leaves the name on top; the name pops first, then the count, then
+  //      `"blood"`, then `15`. So the LAST operand pushed is the FIRST
+  //      parameter, and reading forwards gave `bounceitem(15, "blood")` — the
+  //      prop name reported as a count.
+  //   2. **An identifier is a `constant`, not a `string`.** This build interns
+  //      almost every name in a `ConstantPool`, so a `Push` carries
+  //      `{type: "constant", index, value}` where a naive reader expects
+  //      `{type: "string"}`.
+  const pooled = {
+    name: "Push",
+    operand: [
+      { type: "integer", value: 15 },
+      { type: "constant", index: 6, value: "blood" },
+      { type: "integer", value: 2 },
+      { type: "constant", index: 7, value: "bounceitem" }
+    ]
+  };
+  assert.deepEqual(argumentsOfCall(pooled), { callee: "bounceitem", args: ["blood", 15] });
+
+  // The same call with inline strings rather than pool entries, which is what
+  // the later frames of the clip actually emit.
+  const inline = {
+    name: "Push",
+    operand: [
+      { type: "integer", value: 3 },
+      { type: "string", value: "blood" },
+      { type: "integer", value: 2 },
+      { type: "string", value: "bounceitem" }
+    ]
+  };
+  assert.deepEqual(argumentsOfCall(inline), { callee: "bounceitem", args: ["blood", 3] });
+});
+
+test("a call this cannot read statically is REFUSED, never guessed at", () => {
+  // ► **THE GUARD THAT MAKES THIS A DERIVATION RATHER THAN A GUESS.** The clip
+  //   has exactly one call whose arguments are not literals — frame 1041's
+  //   `bounceitem(head, 1)`, a decapitation that passes the rig's own limb —
+  //   and the extractor reports it instead of inventing a prop name for it.
+  //
+  //   **This is also the measurement that says an AVM1 interpreter is not
+  //   needed here.** An interpreter would be the proper way if the calls were
+  //   dynamic; 27 of 28 are not.
+  const shortOfArguments = {
+    name: "Push",
+    // argc says 2 and only one operand precedes it: the other came off a
+    // GetVariable this reader cannot see.
+    operand: [
+      { type: "integer", value: 1 },
+      { type: "integer", value: 2 },
+      { type: "constant", index: 6, value: "bounceitem" }
+    ]
+  };
+  assert.equal(argumentsOfCall(shortOfArguments), null);
+
+  for (const notACall of [null, undefined, { name: "GetVariable" }, { name: "Push" }, { name: "Push", operand: [] }]) {
+    assert.equal(argumentsOfCall(notACall), null, "and nothing that is not a set-up push reads as one");
+  }
 });
