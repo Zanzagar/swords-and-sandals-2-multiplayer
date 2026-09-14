@@ -276,10 +276,26 @@ test("every declared prop names what reads it, so a dead entry is visible", () =
   //   and call it coverage. The rule is that an entry names its reader.
   assert.ok(PROP_EXPORTS.length > 0);
   for (const prop of PROP_EXPORTS) {
-    assert.match(prop.linkage, /^[a-z_]+$/, "the build's own linkage name");
-    assert.ok(prop.indexedBy.length > 0, `${prop.linkage} must say what its frame number MEANS`);
-    assert.ok(prop.reader.length > 0, `${prop.linkage} must name what reads it, or say plainly that nothing does`);
+    // ► **TWO WAYS TO NAME AN ASSET, AND AN ENTRY MUST PICK ONE.** Every prop
+    //   is in `ExportAssets` and is asked for by linkage; the arena is NOT — it
+    //   is a named instance on a root frame, so it is asked for by character
+    //   id. An entry carrying neither would extract nothing and say nothing.
+    const key = prop.linkage ?? prop.name;
+    assert.match(key, /^[a-z_]+$/, "a lower-case identifier either way");
+    assert.ok(
+      typeof prop.linkage === "string" || Number.isFinite(prop.character),
+      `${key} must state a linkage OR a character id`
+    );
+    assert.ok(prop.indexedBy.length > 0, `${key} must say what its frame number MEANS`);
+    assert.ok(prop.reader.length > 0, `${key} must name what reads it, or say plainly that nothing does`);
   }
+  // The arena is the one entry reached by id, and it takes ONE frame — its
+  // other 333 are the bout's own states, a different asset and a different
+  // question.
+  const arena = PROP_EXPORTS.find((prop) => prop.name === "arena");
+  assert.equal(arena.character, 2249, "_root.arena, placed at root frame 221");
+  assert.equal(arena.linkage, undefined, "and it has no linkage name to ask for");
+  assert.equal(arena.framesWanted, 1);
   const arrow = PROP_EXPORTS.find((prop) => prop.linkage === "bullet");
   assert.equal(arrow.indexedBy, "secondary_weapon - 60", "the build's own lookup");
 });

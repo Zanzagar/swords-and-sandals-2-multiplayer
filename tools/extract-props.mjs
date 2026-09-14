@@ -93,6 +93,23 @@ export const PROP_EXPORTS = Object.freeze([
     linkage: "sparks",
     indexedBy: "frame, as an animation",
     reader: "unread today"
+  },
+  {
+    /**
+     * ► **THE ARENA ITSELF, and it is reached by CHARACTER ID because the build
+     *   does not export it.** `_root.arena` is character 2249, placed at root
+     *   frame 221 as a named INSTANCE — so there is no linkage name to ask for
+     *   and `ExportAssets` never mentions it.
+     *
+     *   Frame 1 alone: the clip carries 334 frames, but those are the bout's
+     *   own states (`combatwon`, `combatlost`, the intro), not a backdrop
+     *   animation. What frame 1 holds is the arena a fight happens in.
+     */
+    character: 2249,
+    name: "arena",
+    framesWanted: 1,
+    indexedBy: "frame 1 is the arena; the other 333 are bout states",
+    reader: "unread today — see the placement note in the handoff before drawing it"
   }
 ]);
 
@@ -166,34 +183,45 @@ export function extractProps(buffer) {
   const cache = new Map();
 
   for (const declared of PROP_EXPORTS) {
-    const id = byName.get(declared.linkage);
+    // ► **BY NAME WHERE THE BUILD EXPORTS ONE, BY CHARACTER ID WHERE IT DOES
+    //   NOT.** Every wardrobe piece and every prop above is in `ExportAssets`;
+    //   the arena is not — it is a named INSTANCE on a root frame, which is a
+    //   different thing. An entry states which it is and this loop does not
+    //   guess: a `character` with no matching id fails loudly rather than
+    //   silently extracting nothing.
+    const key = declared.linkage ?? declared.name;
+    const id = declared.character ?? byName.get(declared.linkage);
     if (id === undefined) {
-      failures.push({ linkage: declared.linkage, message: "no export of that name in this build" });
+      failures.push({ linkage: key, message: "no export of that name in this build" });
       continue;
     }
     const character = characters.get(id);
     if (!character || character.kind !== "sprite") {
-      failures.push({ linkage: declared.linkage, id, message: `exported as a ${character?.kind ?? "nothing"}` });
+      failures.push({ linkage: key, id, message: `is a ${character?.kind ?? "nothing"}, not a sprite` });
       continue;
     }
-    const wanted = Array.from({ length: character.frames }, (unused, index) => index + 1);
+    // **Frame 1 only when the entry says so** — the arena's other 333 frames
+    // are `combatwon`, `combatlost` and the intro, which is a different asset
+    // and a different question from the ground a fight happens on.
+    const frameCount = declared.framesWanted === 1 ? 1 : character.frames;
+    const wanted = Array.from({ length: frameCount }, (unused, index) => index + 1);
     let resolved;
     try {
       resolved = resolveTimeline(buffer, character, { frames: wanted });
     } catch (error) {
-      failures.push({ linkage: declared.linkage, id, message: String(error.message).slice(0, 120) });
+      failures.push({ linkage: key, id, message: String(error.message).slice(0, 120) });
       continue;
     }
 
     const frames = [];
-    for (let index = 0; index < character.frames; index += 1) {
+    for (let index = 0; index < frameCount; index += 1) {
       const displayList = resolved.frames[index];
       if (!displayList) { frames.push([]); continue; }
       let drawables;
       try {
         drawables = flattenFrame(buffer, characters, displayList, { cache });
       } catch (error) {
-        failures.push({ linkage: declared.linkage, id, message: `frame ${index + 1}: ${String(error.message).slice(0, 90)}` });
+        failures.push({ linkage: key, id, message: `frame ${index + 1}: ${String(error.message).slice(0, 90)}` });
         frames.push([]);
         continue;
       }
@@ -204,7 +232,7 @@ export function extractProps(buffer) {
         // is why they are not in `PROP_EXPORTS` at all.
         if (drawable.unsupported) {
           failures.push({
-            linkage: declared.linkage, id,
+            linkage: key, id,
             message: `frame ${index + 1} carries ${drawable.unsupported} (character ${drawable.characterId})`
           });
           continue;
@@ -224,10 +252,11 @@ export function extractProps(buffer) {
     //   arrows: a lookup clip whose frames mostly repeat is telling you the
     //   index has fewer meanings than it has slots.
     const signatures = frames.map((placements) => placements.map((p) => p.shape).sort().join(","));
-    props[declared.linkage] = {
-      linkage: declared.linkage,
+    props[key] = {
+      linkage: key,
       character: id,
-      frameCount: character.frames,
+      frameCount,
+      declaredFrames: character.frames,
       indexedBy: declared.indexedBy,
       reader: declared.reader,
       distinctFrames: new Set(signatures.filter((s) => s.length > 0)).size,

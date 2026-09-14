@@ -1182,6 +1182,49 @@ test("an AI archer draws its bow, empties the quiver, and is forced back to mele
   );
 });
 
+test("the AI snipes when snipe is BETTER, and the demo roster is simply too soft for it", () => {
+  // ► **THIS CORRECTS A REPORT MADE THREE TIMES TODAY: that snipe "is never
+  //   chosen by the AI" and that firing it needed a policy decision.** That was
+  //   measured on the demo roster alone and generalised, which is the
+  //   signature failure this project keeps finding in itself. The policy was
+  //   already right.
+  //
+  //   **Snipe's chance is CLAMPED at 99** and bombard's is not, so against a
+  //   soft target snipe wastes accuracy it cannot use while bombard's heavier
+  //   damage term wins. As the foe's defence rises the clamp stops binding and
+  //   the accurate shot overtakes the heavy one. Measured for the demo
+  //   archer — strength 8, attack 8, bow 61, secondary pair 12-24:
+  //
+  //   ```text
+  //     foe defence    bombard EV    snipe EV    chances
+  //         5             13.14        11.88      73 / 99
+  //        15              7.74         7.68      43 / 64
+  //        20              6.30         6.36      35 / 53   <- snipe
+  //   ```
+  //
+  //   **The demo roster's gladiators have defence 5.** So the AI lobbing every
+  //   arrow in the arena is the policy working, not the policy failing.
+  const archerVs = (defence) => {
+    const battle = staged({
+      seed: 5,
+      red: [{ fields: bowman({ strength: 8, attack: 8, equipped_weapon: 2 }), id: "red-1", x: -300, y: 200 }],
+      blue: [{
+        fields: gladiator({ gladiator_dir: "left", speed: 3, attack: 3, defence, vitality: 40 }),
+        id: "blue-1", x: 300, y: 200
+      }]
+    });
+    return suggestAction(battle, "red-1").type;
+  };
+
+  assert.equal(archerVs(5), Ss2ActionType.BOMBARD, "against the demo roster's own defence, the lob wins");
+  assert.equal(archerVs(20), Ss2ActionType.SNIPE, "and against a tough one the accurate shot does");
+
+  // The crossover must be a real boundary, not a coincidence of one seed: the
+  // choice has to be stable either side of it.
+  assert.equal(archerVs(15), Ss2ActionType.BOMBARD);
+  assert.equal(archerVs(25), Ss2ActionType.SNIPE);
+});
+
 test("VANILLA_PHASE_LABEL names a real getphase label for all four new verbs", () => {
   assert.equal(VANILLA_PHASE_LABEL[Ss2ActionType.BOMBARD], "bombard");
   assert.equal(VANILLA_PHASE_LABEL[Ss2ActionType.SNIPE], "snipe");
