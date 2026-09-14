@@ -25,6 +25,25 @@ import {
 } from "../src/render/extracted-figure.js";
 import { UNMAPPED_CLIP_LABELS, allUnmappedLabels, clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
 import { ATTACHMENTS, attachmentsFor, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
+import nodeFs from "node:fs";
+import nodePath from "node:path";
+import { fileURLToPath as toPath } from "node:url";
+
+/**
+ * The player's own EXTRACTED packs, or null on a clone with no licensed copy.
+ *
+ * Named `REAL_*` because this file already has a synthetic `SHAPES` fixture a
+ * few lines below, and the two must never be confused: one is three hand-built
+ * shapes that prove the algebra, the other is 351 shapes out of the build that
+ * prove the algebra was pointed at the right thing.
+ */
+function readRealPack(relative) {
+  const at = nodePath.join(toPath(new URL("..", import.meta.url)), relative);
+  return nodeFs.existsSync(at) ? JSON.parse(nodeFs.readFileSync(at, "utf8")) : null;
+}
+const REAL_SHAPES = readRealPack("assets/figure/shapes.json");
+const REAL_ANIMATIONS = readRealPack("assets/figure/animations.json");
+const REAL_WARDROBE = readRealPack("assets/figure/wardrobe.json");
 
 /** A square shape one pixel on a side, so a matrix is the only thing moving it. */
 const SHAPES = Object.freeze({
@@ -642,4 +661,60 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   const defence = UNMAPPED_CLIP_LABELS.unbuiltDefence;
   assert.deepEqual([...defence], ["roll", "fumble1"],
     "only the two nothing dispatches are still declared unplayed");
+});
+
+test("AN ATTACHED WEAPON LANDS WHERE THE RIG'S OWN WEAPON ART DOES", () => {
+  // ► **THE GLADIATOR WAS NEVER WEAPONLESS, AND THAT IS THE FINDING.** The rig
+  //   draws char 701 — `weapon0`'s own art, a 9.45 x 26.4px gold object — at
+  //   the `weapon` limb, rig depth 39, in every pose. Attaching an equipped
+  //   weapon puts a bigger drawing at the SAME place: `updatecharacter` targets
+  //   `weapon.realweapon`, which is a child of that same limb.
+  //
+  //   So the test is not "is there a weapon" but "does the attached one land
+  //   where the rig's does". Measured on the standing pose, the two centres
+  //   agree on y to within 1% of the figure's height; they differ on x exactly
+  //   as two shapes of different size rotated about one origin must.
+  //
+  //   **This retired a ranked bug that four screenshots had called an absence.**
+  //   The weapon limb is rotated about 101 degrees in Standing, so the sword
+  //   lies across the hips — which is the BUILD'S pose, not a transform error,
+  //   and at 1000px the whole figure is 45 pixels tall so a 73-unit sword is
+  //   twenty. A render too small to show the thing is not evidence of absence.
+  const pack = REAL_SHAPES && REAL_ANIMATIONS ? figurePackFrom(REAL_SHAPES, REAL_ANIMATIONS) : null;
+  if (!pack || !REAL_WARDROBE) {
+    assert.equal(pack === null || REAL_WARDROBE === null, true, "no extraction on this machine");
+    return;
+  }
+  const paint = (loadout) => paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", facing: "right", at: 0,
+    height: 150, wardrobe: REAL_WARDROBE, loadout
+  });
+  const centre = (ops, pick) => {
+    let y0 = Infinity;
+    let y1 = -Infinity;
+    let seen = 0;
+    for (const op of ops) {
+      if (!pick(op)) continue;
+      const numbers = (op.d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+      for (let index = 0; index + 1 < numbers.length; index += 2) {
+        const y = op.matrix[1] * numbers[index] + op.matrix[3] * numbers[index + 1] + op.matrix[5];
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+      seen += 1;
+    }
+    return seen > 0 ? { centre: (y0 + y1) / 2, ops: seen } : null;
+  };
+
+  const armed = paint({ weapon: 1, equipped_weapon: 1 });
+  const rigWeapon = centre(armed, (op) => op.rigDepth === 39);
+  const attached = centre(armed, (op) => op.slot === "weapon");
+  assert.ok(rigWeapon, "the rig draws its own weapon art at depth 39 in every pose");
+  assert.ok(attached, "and an equipped weapon is attached at the same limb");
+
+  const figure = centre(armed, () => true);
+  const drift = Math.abs(rigWeapon.centre - attached.centre) / Math.abs(figure.centre * 2);
+  assert.ok(drift < 0.05,
+    `the attached weapon is ${(drift * 100).toFixed(1)}% of the figure's height away from the rig's own `
+    + "weapon art — it should share the limb, so this is a transform error");
 });
