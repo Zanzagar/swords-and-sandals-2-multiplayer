@@ -8,6 +8,63 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
+[2026-09-14 14:00 — five modules exist and two are not drawn yet](docs/handoffs/2026-09-14-1400--five-modules-exist-and-two-are-not-drawn-yet.md).**
+Start there.
+
+► **THE ARENA RENDERS THE BUILD'S OWN ART.** Six DISTINCT arenas — measured,
+  96-100% different over 2,728 sampled points, with the six sand colours in the
+  RENDER matching the six read off the BYTES — a 200-frame day/night sky, real
+  gradients, and a gladiator with a FACE keyed to the animation he is playing.
+  `?arena=1..6`, `?sky=1..200`, `?rain=10..17`, `?seam=1`.
+
+► **RANKED FIRST: DRAW WHAT ALREADY EXISTS.** `src/render/text.js` and
+  `src/render/screen.js` are finished, tested, exported — and **nothing calls
+  them.** 1027 glyphs round-trip to readable English and all 26 root screens are
+  extracted, while the arena's UI bar is still blank boxes and 25 screens have
+  never been on a screen. `src/render/filters.js` is the same story: it decodes
+  colour matrices, blend modes and blurs, and `main.js` sets neither
+  `globalCompositeOperation` nor `ctx.filter`. **The sky's day/night colouring
+  IS a ColorMatrix — 208 of them in that one clip.**
+
+► **TWO TOOLS, AND REACH FOR THEM FIRST.** `tools/shot.sh` drives the WINDOWS
+  Chrome headless against the server; `tools/sample-png.mjs` reads the pixels
+  back. Three defects this session were invisible to a green suite and obvious
+  in a render — and **two confident WRONG conclusions came from renders that
+  were too small.** A sword was called missing through four screenshots and was
+  there the whole time; an agent suspected missing hair from a crop that had cut
+  it off. **A render too small to show the defect is not evidence of its
+  absence, and it manufactures defects too.** The face was verified by
+  DIFFERENCING two identical renders — pale pixels in the head went 6 to 185 —
+  rather than by looking.
+
+► **THE COLOUR TRANSFORM MUST FLOOR, AND TWO OF THREE COPIES ROUNDED.**
+  `readColourTransform` gives signed 8.8 and the player computes
+  `(channel * multTerm) >> 8`, an arithmetic shift. **69 of 1023 tinted fills
+  were a unit out**, three copies of the arithmetic appeared in one evening, and
+  **no test caught the change** — the figure's tint has never been pinned by
+  value. One implementation now, in `src/render/filters.js`.
+
+► **DO NOT `git add -A` WHILE AGENTS ARE RUNNING**, which this file already said
+  and I did anyway: commit `0775463` carries five agents' mid-flight work under
+  a message about a pixel sampler, and four of the five caught it themselves.
+  `e3f3832` is the correction. **And do not use a TOTAL TEST COUNT as a gate
+  during a fan-out** — it moved 1397 to 1573 in one run and an agent briefly saw
+  the tree red. `fail == 0` and the exit code are the gate.
+
+► **PUT YOUR OWN CONCLUSIONS IN AN AGENT BRIEF AS NUMBERED HYPOTHESES.** Every
+  premise break this session came from having done that — including two wrong
+  byte-facts of mine: the only Blur(11,11) in the build is on `cloud_patterns`
+  (the MOON has an animated blur to 48 plus 175 glows), and "4,544 colour
+  transforms" is the fighter clip's number, not the build's 3,413 of 29,966.
+
+► **OPEN AND THE OWNER'S: the 9 embedded typefaces are COMMERCIALLY LICENSED**
+  (Bitstream, Monotype, named in the build's own `DefineFontName`). Glyph
+  outlines are extracted only to gitignored `assets/text/` — the same Doom/WAD
+  model as every other asset here — and **no font file is written**. If the
+  answer is no, three files and one directory come out and nothing else depends
+  on them.
+
+*(The brief it supersedes, whose ranked items 1 and 2 are closed:)*
 [2026-09-14 02:55 — the backgrounds were JPEGs and I drew none of them](docs/handoffs/2026-09-14-0255--the-backgrounds-were-jpegs-and-i-drew-none-of-them.md).**
 Start there.
 
