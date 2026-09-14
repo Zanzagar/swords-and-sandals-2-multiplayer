@@ -20,14 +20,32 @@ THIS file is right and the handoff was frozen at the end of its session.
   BUILD'S OWN answer to three**: the swap costs a turn, an archer closed on
   inside `100 + physical_size` loses the bow and bashes, ammunition is finite
   and tiered. The fourth is the only authored rule in the feature — a body
-  between you and your target BLOCKS the shot (`ss2ShotBlocked`) — **and he
-  corrected it the same evening by looking at the arena: only an ENEMY
-  screens.** The archer had ONE legal target, blocked by its own ally, every
-  seed and every size, because allies stagger diagonally and the rank-0 ally
-  always lands just off the rank-1 archer's lane. **Deliberately the opposite of
-  `ss2WalkDestination`'s rule**, which blocks on every body because a walk is a
-  body moving through space; a shot passes over a formation cooperating with the
-  shooter. Two questions, two answers.
+  between you and your target BLOCKS the shot — **and it took TWO corrections
+  from the owner looking at the arena to get right.**
+
+► **A BOMBARD GOES OVER AND A SNIPE DOES NOT, AND THE BUILD SAYS WHICH.** The
+  two shots fly differently here because they fly differently in vanilla:
+  `_y -= Yvelocity` is inside a bombard-only test (`+0x72c7`). Measured off the
+  reproduced ballistic, where a gladiator is exactly 1.000 figure heights tall:
+  **a snipe flies flat at 0.674 — chest height — and a bombard is never below
+  1.055 anywhere a body could stand, at every range from 200 to 4,000 units.**
+  So the lob is offered against every foe in every lane and the flat shot needs
+  a clean one, blocked by ANY body including your own side. **The rule IS that
+  measurement**, and the test that pins it lives in
+  `test/render-projectile.test.js` — the game rule rests on a property of the
+  renderer's arithmetic, so that is where a changed launch height would be
+  caught.
+► **THE ARROW FLIES, and the build had already modelled all of it.** 125
+  `bullet` references in one block; `maxscale` appears nowhere else in the
+  corpus. **The build has TWO coordinates and this engine has THREE** — vanilla's
+  `bullet._y` carries the arc because both its gladiators stand at `_y = 200`,
+  while here arena `y` is DEPTH and height is the renderer's `lift`. That third
+  axis is where the owner's scaling question lands: the arrow rides
+  `figureScaleFor` on its interpolated depth, pinned by a test asserting its
+  size AGREES with a gladiator standing in that rank. **The scale table is NOT
+  ported** — it is camera-zoom compensation and this camera is fixed. **And the
+  phase waits for the arrow**, because `bullet_in_air` sits on vanilla's own
+  completion guard.
 
 ► **A GUARD KEYED ON A CONSEQUENCE HAS AN EXCEPTION NOBODY COUNTED.** The
   construction refusal that held ranged shut fired on `weapon_range > arena

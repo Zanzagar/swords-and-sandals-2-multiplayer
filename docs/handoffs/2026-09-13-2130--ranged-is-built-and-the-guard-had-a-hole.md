@@ -5,11 +5,14 @@ sessionId:    b4ca2b15-791c-4a4f-bc62-ef21baf9e095 (https://claude.ai/code/sessi
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-commits:      de54749..HEAD: `7310583` builds ranged, `301277a` fixes what
-              Codex found in it, `849ca06` fixes what the OWNER found by
-              looking at it. **Re-measure; never copy.**
-suite:        1129 / 1128 / 0 / 1 (fresh-clone profile — `captures/` holds only
-              its manifest and README), measured after `849ca06` BY EXIT CODE.
+commits:      de54749..HEAD, nine of them. `7310583` builds ranged; `301277a`
+              fixes what Codex found; `849ca06` and `75839cc` fix what the OWNER
+              found by looking at it; `117df5d` derives the projectile;
+              `c0b2bdc` flies it; `416d380` makes the phase wait for it;
+              `201fde3` moves its drawing under the suite.
+              **Re-measure; never copy.**
+suite:        1155 / 1154 / 0 / 1 (fresh-clone profile — `captures/` holds only
+              its manifest and README), measured after `201fde3` BY EXIT CODE.
               **Re-measure; never copy.**
 agentRuns:    one Codex `/adversarial-review` on `HEAD~1..HEAD`, model pinned
               `gpt-6-astra`. No fan-out wave: ADR 0001 makes a wave the LAST
@@ -61,13 +64,37 @@ He took **the build's own answer to three of them**:
 2. **An archer closed on loses the bow and bashes.** No firing into melee.
 3. **Ammunition is finite and tiered** — 5 / 10 / 15 / 20 / 25 / 30 by
    `herolevel` — and running dry FORCES a swap back to melee.
-4. **A body between you and your target blocks the shot.** This one the build
-   cannot answer and it is the single authored rule in the feature.
-   **CORRECTED THE SAME EVENING, by the owner looking at it: only an ENEMY
-   screens.** He asked whether an archer should be able to attack either enemy
-   and the answer was no — it could reach exactly one, blocked by its OWN ALLY,
-   structurally, because allies stagger diagonally and the rank-0 ally always
-   lands just off the rank-1 archer's lane. See the block below.
+4. **A body between you and your target blocks the shot** — **and which shot
+   it is decides everything, which took two corrections to get right and both
+   came from the owner looking at the arena.**
+
+   First: only an ENEMY screens, because the archer had exactly ONE legal
+   target, blocked by its own ally, structurally, every seed and every size.
+
+   Then, the same evening: *"snipe shouldnt be allowed to be used in line if one
+   gladiator is behind his teammate. Bombard should be usable on both enemies in
+   any lane."* **And that turned out to be DERIVABLE.** The two shots fly
+   differently because they fly differently in vanilla — `_y -= Yvelocity` is
+   inside a bombard-only test (`+0x72c7`):
+
+   ```text
+     snipe     0.674 figure heights, flat          chest height
+     bombard   >= 1.055 everywhere a body could
+               stand, at every range 200..4,000    over their heads
+   ```
+
+   **A gladiator is exactly 1.000 tall.** So the lob passes over a body and the
+   flat shot does not, and the rule IS that fact. Bombard is offered against
+   every foe in every lane; snipe needs a clean lane and is blocked by ANY body,
+   your own side included — which is safe only because the lob covers the case
+   the first correction existed to fix.
+
+   ► **THE LOAD-BEARING TEST IS IN `test/render-projectile.test.js`, NOT IN THE
+     RULE SET.** The game rule rests on a property of the renderer's arithmetic,
+     so if the launch height or the arc ever moved, the rule would quietly stop
+     being true. That test sweeps six ranges at sub-frame steps and asserts the
+     bombard clears a body at every one — **and that the snipe FAILS the same
+     test**, or the two rules are not telling the shots apart.
 
 ## THE LESSON, and it is one lesson told THREE TIMES in one session
 
@@ -171,6 +198,34 @@ hide.
   a target every turn it has an arrow** rather than dying with arrows left
   because the only foe it could see was already dead.
 
+## THE ARROW, and the build had already modelled it
+
+**125 `bullet` references, all in one block, and `maxscale` — which half of them
+key on — appears NOWHERE else in this corpus.** Derived in `117df5d` and written
+up at `docs/integration/ss2-battle-map.md` §"The arrow itself"; flown in
+`c0b2bdc`.
+
+► **THE BUILD HAS TWO COORDINATES AND THIS ENGINE HAS THREE, and everything
+  follows from that.** Vanilla's `bullet._y` is screen y and carries the ARC —
+  which it can, because both gladiators stand at `_y = 200`. Here arena `y` is
+  DEPTH and height is the renderer's `lift`, so the single `_y` integration
+  splits into the ballistic and the lane. **That third axis is where the owner's
+  scaling question lands**, and the arrow rides `figureScaleFor` on its
+  interpolated depth — the same function with the same fractional rank the
+  gladiators use, pinned by a test that asserts the arrow's size AGREES with a
+  gladiator standing in that rank rather than merely changing.
+
+► **THE SCALE TABLE IS NOT PORTED, and that is a finding.** The build bands the
+  arrow's scale on `arena.maxscale` — bigger as `maxscale` falls — which is
+  backwards for perspective and correct for a CAMERA: SS2 zooms out as the
+  fighters separate. **This engine's camera is fixed per roster**, so the table
+  answers a question nobody asked.
+
+► **THE PHASE WAITS FOR THE ARROW** (`416d380`), because `bullet_in_air != true`
+  sits on vanilla's phase-completion guard (`+0x3829`). Before that the arrow
+  rode the shooter's timeline and vanished mid-flight: `ranged` is 9 beats
+  (1,080ms) against a measured flight of 633-2,533ms, median 1,300.
+
 ## What was re-read off the installed build rather than taken from prose
 
 `77cb545c…`, via `tools/inspect-swf.mjs`:
@@ -252,8 +307,12 @@ alone, as the facing change did in September.
 ## Highest-value work, ranked
 
 1. **LOOK AT IT AGAIN, AND LISTEN TO IT. This is the owner's and it is five
-   minutes — and it has already paid once tonight**, in the block above: he
-   watched one 3v3 and found that the archer had a single legal target.
+   minutes — and it paid TWICE tonight**, in the blocks above: one 3v3 told him
+   the archer had a single legal target, and a second told him a lob and a flat
+   shot should not obey one rule. **Now there are arrows with trajectories in
+   it**, which is the first thing in this arena that moves on its own — worth
+   watching for whether the arc reads as a lob at the arena's scale, and whether
+   a cross-lane shot's taper looks right against the figures it flies between.
    The arena has an archer in slot 2 of each side now, one rank back. Watch it
    draw the bow on turn one, shoot, run dry and be forced back to melee — and
    **listen**, because the sound fix means every clip now plays its own sound
@@ -264,16 +323,28 @@ alone, as the facing change did in September.
    substantial render change and this touched the renderer, the adapter and the
    rule set. It found two survivors last time in code no test had executed, and
    this diff added a lot of code.
-3. **`snipe` is untested in play** (item above). Either accept it as the build's
-   own arithmetic — it is — or find the roster where it bites and watch one.
-4. **The weapon ENCHANTMENT selector has still not been found.** Unchanged from
+3. **`snipe` IS NEVER CHOSEN BY THE AI, and it is now doubly so.** The
+   expected-damage policy already preferred the lob (13.1 against 11.9 on this
+   roster; snipe wins 10.7% of a 1,600-combination stat sweep) and the flat shot
+   is usually screened as well. **That policy is this module's own invention** —
+   `chooseAiAction`'s header says so — and a different one would fire it, so
+   inventing a preference to make content appear is exactly the move this
+   project keeps retracting. **Snipe is a player's shot today**, and that is a
+   decision to take deliberately rather than a defect to fix quietly.
+4. **The arrow's ART is authored.** The build's is character 47 at frame
+   `secondary_weapon - 60` — twenty frames, one per ranged row — and nothing
+   under `assets/` has extracted it. Same authored fallback `figure.js` is to
+   the extracted rig, and the same fix: a small extraction.
+5. **The weapon ENCHANTMENT selector has still not been found.** Unchanged from
    the last handoff: `weapon0` is character 703 with `flame`/`frost`/`poison`/
    `wraith` at frames 2/5/8/11, and `updatecharacter` contains no `gotoAndStop`
    at all. Start from the other readers of `weapon_enchantment_type`.
-5. **`tools/arena/main.js` still has partial test reach** — the draw dispatch,
+6. **`tools/arena/main.js` still has partial test reach** — the draw dispatch,
    the autoplay handling and the rAF loop. **It has given up SIX live defects in
-   three days**, and this session added a line to it.
-6. **The build has a DEFENCE SYSTEM nobody has built**: `defend1`-`defend12` and
+   three days.** This session added ~90 lines to it and then took the four
+   DECISIONS back out into `projectileDrawAt`; what is left there is canvas
+   calls.
+7. **The build has a DEFENCE SYSTEM nobody has built**: `defend1`-`defend12` and
    `defend20`, thirteen reactions mirroring the hurts and the attacks. Recorded
    in `UNMAPPED_CLIP_LABELS.unbuiltDefence` and deliberately unmapped, because
    which defend answers which attack is not derived.
