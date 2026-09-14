@@ -339,6 +339,7 @@ fetch("/assets/sound/manifest.json")
       return;
     }
     soundBindings = bindingsFrom(manifest);
+    primeSoundCache();
     const buckets = Object.keys(soundBindings).length;
     log(`sound: ${manifest.count} file(s) from ${manifest.source?.sha256?.slice(0, 12) ?? "an unknown build"}, ${buckets} animation bucket(s)`);
   })
@@ -362,13 +363,74 @@ fetch("/assets/sound/manifest.json")
 let audioBlocked = false;
 let audioBlockLogged = false;
 
+/**
+ * ► **A LOG LINE IS NOT A PROMPT, AND THE OWNER MISSED IT.** The blocked-audio
+ *   warning went into the log panel, forty lines deep, next to every other
+ *   message — so a spectated bout ran silent and the one sentence explaining
+ *   why scrolled away. Reported as *"did sounds disappear? I haven't heard them
+ *   in a while."*
+ *
+ *   It is a BANNER over the stage now, it says what to do, and it clears itself
+ *   on the click that fixes it. The log line stays as the record.
+ */
+function showAudioPrompt() {
+  let banner = document.getElementById("audio-prompt");
+  if (banner) return;
+  banner = document.createElement("button");
+  banner.id = "audio-prompt";
+  banner.type = "button";
+  banner.textContent = "🔇  Your browser is blocking sound — click here to turn it on";
+  banner.addEventListener("click", unblockAudio);
+  el("stage").append(banner);
+}
+
+function hideAudioPrompt() {
+  document.getElementById("audio-prompt")?.remove();
+}
+
 function unblockAudio() {
+  hideAudioPrompt();
   if (!audioBlocked) return;
   audioBlocked = false;
   log("audio unblocked — sound is on from here.");
 }
 for (const type of ["pointerdown", "keydown", "touchstart"]) {
   window.addEventListener(type, unblockAudio, { passive: true });
+}
+
+/**
+ * FETCH AND DECODE EVERY BOUND SOUND BEFORE IT IS NEEDED.
+ *
+ * ► **`cloneNode()` OF AN UNLOADED `Audio` STARTS ITS OWN FETCH**, so the FIRST
+ *   play of each file waited on a network round trip and a decode — which is
+ *   heard as a footstep that lands after the foot. The owner reported it as
+ *   *"some were delayed with their action"*, and it would have thinned out on
+ *   its own over a long bout, which is exactly the shape of a bug that gets
+ *   called a fluke.
+ *
+ *   Measured before doing this: **57 distinct bound files, 0.90 MB in total,
+ *   mean 16 KB, none over 120 KB.** So the whole combat soundtrack costs less
+ *   than one of the arena's own JSON files and there is nothing to be clever
+ *   about. The big ambient tracks are NOT bound to a clip label and are not
+ *   touched.
+ */
+function primeSoundCache() {
+  const files = new Set();
+  for (const bound of Object.values(soundBindings ?? {})) {
+    for (const file of Array.isArray(bound) ? bound : [bound]) {
+      if (typeof file === "string" && file.length > 0) files.add(file);
+    }
+  }
+  for (const file of files) {
+    if (soundCache.has(file)) continue;
+    const source = new Audio(`/assets/sound/${encodeURIComponent(file)}`);
+    source.preload = "auto";
+    // `load()` is what actually starts it; `preload` alone is a hint the
+    // browser may ignore for an element that is not in the document.
+    try { source.load(); } catch { /* a browser that refuses still plays later */ }
+    soundCache.set(file, source);
+  }
+  log(`sound: ${files.size} clip(s) preloaded from your own install.`);
 }
 
 /**
@@ -414,6 +476,7 @@ function playFor(family, sequence, label = null) {
     played.catch(() => {
       // NotAllowedError until the page is interacted with. Said once.
       audioBlocked = true;
+      showAudioPrompt();
       if (!audioBlockLogged) {
         audioBlockLogged = true;
         log("your browser is blocking audio until you interact with the page — click the arena once.", { warn: true });
@@ -623,16 +686,26 @@ const arenaDressing = {
 let camera = null;
 let cameraSeededFor = null;
 
-/** Every placed actor's arena x — what the camera has to frame. */
-function placedXs() {
+/**
+ * Every placed actor as `{x, side}` — what the camera has to frame, and which
+ * of them are fighting each other.
+ *
+ * ► **THE SIDE IS LOAD-BEARING AND USED TO BE DROPPED HERE.** Without it the
+ *   camera cannot tell the distance between two OPPONENTS from the width of the
+ *   whole formation, so a 3v3 opening read as a 1020-unit fight and pulled back
+ *   to a zoom of 30. Measured: the 3v3 then used 58% of the stage, LESS than
+ *   the 2v2's 76%, with gladiators 45px tall instead of 75px. The owner saw it
+ *   on the first screenshot. See `midwaypointFor`.
+ */
+function placedActors() {
   return scene.drawOrder
-    .map((combatantId) => scene.actors[combatantId])
-    .filter((actor) => actor && actor.placed !== false && Number.isFinite(actor.x))
-    .map((actor) => actor.x);
+    .map((combatantId) => ({ id: combatantId, actor: scene.actors[combatantId] }))
+    .filter(({ actor }) => actor && actor.placed !== false && Number.isFinite(actor.x))
+    .map(({ id, actor }) => ({ x: actor.x, side: host.layout.placementFor(id)?.side ?? null }));
 }
 
 function stepCamera() {
-  const xs = placedXs();
+  const xs = placedActors();
   const signature = xs.length;
   if (!camera || cameraSeededFor !== signature) {
     camera = cameraFor(xs);

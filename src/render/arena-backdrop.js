@@ -383,31 +383,122 @@ export const SS2_CAMERA = Object.freeze({
    *   would be smoother, would look deliberate, and would delete the build's
    *   own establishing shot.
    */
-  zoomStart: 5
+  zoomStart: 5,
+  /**
+   * The floor the fit clamp will not go below — the build's own smallest band.
+   * A roster wide enough to need less than this is one the arena cannot frame
+   * at all, and drawing it at 15 with the flanks off the edge is a better
+   * answer than drawing six specks.
+   */
+  zoomMinimum: 15
 });
 
 /**
- * `midwaypoint`, the single number the whole camera keys on.
+ * Every placed actor as `{x, side}`, from either shape a caller may hand in.
+ *
+ * A bare number is an actor with NO side, which is how the one-dimensional
+ * callers and the tests express "just these positions".
+ */
+function actorsFrom(input) {
+  const out = [];
+  for (const entry of input ?? []) {
+    if (Number.isFinite(entry)) out.push({ x: entry, side: null });
+    else if (entry && Number.isFinite(entry.x)) out.push({ x: entry.x, side: entry.side ?? null });
+  }
+  return out;
+}
+
+/**
+ * `midwaypoint`, the single number the build's zoom bands key on.
  *
  * `getfightdistance` sets it at `+0x0467`: `Math.round(fightdistance / 2)`,
- * where `fightdistance` is the build's own EUCLIDEAN distance over both axes.
- * So it is half the separation, and this engine's `ss2FightDistance` already
- * computes the distance it halves.
+ * where `fightdistance` is the build's own EUCLIDEAN distance between THE HERO
+ * AND THE VILLAIN. So it is half the separation of **the two gladiators who are
+ * fighting each other** — not half the width of the scene.
  *
- * ► **THE GENERALISATION TO MORE THAN TWO GLADIATORS IS OURS AND IS NAMED
- *   HERE.** Vanilla has one pair, so "half the separation" and "half the
- *   spread of everybody on the field" are the same number and the bytes cannot
- *   distinguish them. With six on the field they are not, and the camera has to
- *   frame all six — so `midwaypointFor` takes the SPREAD. At two placed actors
- *   on one rank it reduces to the build's own value exactly, which is asserted
- *   rather than assumed.
+ * ► **AND CONFLATING THOSE TWO WAS A REAL DEFECT, FOUND BY LOOKING AT IT.**
+ *   The first version of this function took the SPREAD of every placed actor,
+ *   on the reasoning that vanilla has one pair so the bytes cannot distinguish
+ *   the two readings. True, and it picked the wrong one. Measured at the
+ *   default 3v3 with `rankStride` 97:
  *
- * @param {number[]} xs  arena x of every PLACED actor
+ * ```text
+ *                 spread   midwaypoint   zoom   stage used   figure height
+ *     1v1            500          250      50         55%         75 px
+ *     2v2            760          380      50         76%         75 px
+ *     3v3           1020          510      30         58%         45 px
+ * ```
+ *
+ *   **The 3v3 was both smaller AND using less of the screen than the 2v2**,
+ *   which is not perspective, it is a band cliff: crossing `midwaypoint` 400
+ *   drops the zoom from 50 to 30, a 40% shrink for a 34% wider fight. The
+ *   spread at a 3v3 opening is dominated by the outermost ALLIES, who are not
+ *   fighting anybody — so the camera was pulling back to frame a formation
+ *   while the fight happened in the middle of it. The owner saw it immediately:
+ *   *"the zoom appears to be way too far out"*.
+ *
+ * ► **SO THIS IS THE CLOSEST ENGAGEMENT, which IS the build's meaning.** The
+ *   minimum separation over opposing pairs: at one pair it is exactly
+ *   `fightdistance`, and at six it is "how close is the closest fight", which
+ *   is the question the bands were calibrated against. **Keeping everybody on
+ *   stage is a separate job and is done separately**, by `fitZoomFor` — because
+ *   a camera has two duties and giving one number both of them is what went
+ *   wrong here.
+ *
+ * @param {Array<number|{x:number, side:*}>} input  every PLACED actor
  */
-export function midwaypointFor(xs) {
-  const placed = (xs ?? []).filter((x) => Number.isFinite(x));
+export function midwaypointFor(input) {
+  const placed = actorsFrom(input);
   if (placed.length < 2) return 0;
-  return Math.round((Math.max(...placed) - Math.min(...placed)) / 2);
+  const sides = new Set(placed.map((actor) => actor.side).filter((side) => side !== null));
+  if (sides.size < 2) {
+    // No sides to oppose — the whole field is the fight, which is also the
+    // vanilla case and reduces to `fightdistance / 2` at two actors.
+    const xs = placed.map((actor) => actor.x);
+    return Math.round((Math.max(...xs) - Math.min(...xs)) / 2);
+  }
+  let closest = Infinity;
+  for (const actor of placed) {
+    for (const other of placed) {
+      if (other.side === actor.side) continue;
+      closest = Math.min(closest, Math.abs(actor.x - other.x));
+    }
+  }
+  return Number.isFinite(closest) ? Math.round(closest / 2) : 0;
+}
+
+/**
+ * A gladiator's own half-width in arena units, for the fit below.
+ *
+ * AUTHORED, and it is the same figure `viewportFor` has carried since the
+ * arena was first drawn: about 105 units of reach and body either side of where
+ * a gladiator stands. It is a margin, not a measurement — being ten units out
+ * moves the fit by under two percent.
+ */
+export const FIGURE_HALF_WIDTH = 105;
+
+/**
+ * THE ZOOM AT WHICH EVERY PLACED ACTOR STILL FITS THE STAGE.
+ *
+ * ► **THIS IS OURS, AND IT IS THE HALF OF THE CAMERA VANILLA NEVER NEEDED.**
+ *   Two gladiators who start 500 apart and only close never threaten the edge
+ *   of a 640px stage, so the build's bands never had to care. Six do: a 3v3
+ *   opens 1020 wide and the rank verbs can spread it further.
+ *
+ * It is a CEILING, never a floor — `cameraStep` takes the smaller of this and
+ * the band, so it can only ever pull the camera BACK. That ordering is what
+ * keeps the build's own 1v1 byte-for-byte unchanged: at two gladiators this
+ * number is ~90 and the band is 50, so the band wins and nothing here applies.
+ */
+export function fitZoomFor(input) {
+  const placed = actorsFrom(input);
+  if (placed.length === 0) return SS2_CAMERA.bands[0].scale;
+  const xs = placed.map((actor) => actor.x);
+  const needed = (Math.max(...xs) - Math.min(...xs)) + FIGURE_HALF_WIDTH * 2;
+  if (needed <= 0) return SS2_CAMERA.bands[0].scale;
+  // Floored, not rounded: rounding up is the direction that puts a shoulder
+  // off the edge, and the whole point of this number is that it does not.
+  return Math.max(SS2_CAMERA.zoomMinimum, Math.floor((SS2_STAGE.width / needed) * 100));
 }
 
 /**
@@ -424,10 +515,15 @@ export function midwaypointFor(xs) {
  *   divergence is the same one named above and is stated in both places rather
  *   than in neither.
  */
-export function focusXFor(xs) {
-  const placed = (xs ?? []).filter((x) => Number.isFinite(x));
+export function focusXFor(input) {
+  const placed = actorsFrom(input).map((actor) => actor.x);
   if (placed.length === 0) return 0;
-  return Math.min(...placed) + midwaypointFor(placed);
+  // ► **THE FOCUS IS THE MIDDLE OF EVERYBODY, NOT THE MIDDLE OF THE CLOSEST
+  //   FIGHT**, and that is deliberate now that the two differ. The zoom's job
+  //   is to follow the drama; the focus's job is to keep the scene centred, and
+  //   pointing the camera at one duel would slide the rest of the roster off
+  //   the opposite edge. At vanilla's single pair the two are the same point.
+  return (Math.min(...placed) + Math.max(...placed)) / 2;
 }
 
 /**
@@ -512,10 +608,25 @@ export function cameraFor(xs) {
     midwaypoint,
     focusX: focusXFor(xs),
     zoomscale: SS2_CAMERA.zoomStart,
-    maxscale: zoomTargetFor(midwaypoint),
+    maxscale: targetZoomFor(midwaypoint, xs),
     gladiatorsX: 0,
     crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(SS2_CAMERA.zoomStart)
   });
+}
+
+/**
+ * The zoom the camera is easing toward: **the build's band, pulled back only as
+ * far as fitting everybody requires.**
+ *
+ * ► **THE `min` IS THE WHOLE DESIGN.** The band is the build's own drama and it
+ *   wins whenever it can; the fit can only ever OVERRIDE IT DOWNWARD, never
+ *   raise it. So a vanilla 1v1 — where the fit is around 90 and the band is 50
+ *   — is exactly what it was before this function existed, and a 3v3 that would
+ *   have its flanks off the edge gets pulled back by the smallest amount that
+ *   puts them on.
+ */
+export function targetZoomFor(midwaypoint, input) {
+  return Math.min(zoomTargetFor(midwaypoint), fitZoomFor(input));
 }
 
 /**
@@ -539,7 +650,7 @@ export function cameraStep(camera, xs) {
   // the focus scaled by the zoom the gladiators layer is CURRENTLY at.
   const focusStageX = SS2_ARENA_ORIGIN.x + camera.gladiatorsX + focusX * (zoom / 100);
   const gladiatorsX = panStep(camera.gladiatorsX, focusStageX);
-  const maxscale = zoomTargetFor(midwaypoint);
+  const maxscale = targetZoomFor(midwaypoint, xs);
   const zoomscale = easeZoom(zoom, maxscale);
   return Object.freeze({
     midwaypoint,

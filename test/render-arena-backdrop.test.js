@@ -43,6 +43,9 @@ import {
   SS2_ARENA_OFFSET,
   SS2_ARENA_DRESSING,
   SS2_GLADIATORS_ORDER,
+  FIGURE_HALF_WIDTH,
+  fitZoomFor,
+  targetZoomFor,
   frameForLayer,
   stageFitFor,
   stageProjectorFor,
@@ -630,4 +633,95 @@ test("the sky clock runs 1..200, so the NIGHT frames are selectable", () => {
     assert.equal(frameForLayer(sky, { timeOfDay: hour }), hour,
       `hour ${hour} must be selectable`);
   }
+});
+
+/* ---------------------------------------------------------------- */
+/* Framing — the defect the owner found by looking at it            */
+/* ---------------------------------------------------------------- */
+
+/** The roster shapes the browser arena actually builds, at `rankStride` 97. */
+const ROSTERS = Object.freeze({
+  "1v1": [{ x: -250, side: "hero" }, { x: 250, side: "villain" }],
+  "2v2": [{ x: -380, side: "hero" }, { x: -250, side: "hero" },
+    { x: 250, side: "villain" }, { x: 380, side: "villain" }],
+  "3v3": [{ x: -510, side: "hero" }, { x: -380, side: "hero" }, { x: -250, side: "hero" },
+    { x: 250, side: "villain" }, { x: 380, side: "villain" }, { x: 510, side: "villain" }]
+});
+
+test("midwaypoint is the CLOSEST ENGAGEMENT, not the width of the formation", () => {
+  // ► **THE DEFECT THE OWNER SAW: "the zoom appears to be way too far out".**
+  //   The first version took the spread of every placed actor, so a 3v3 opening
+  //   — dominated by the outermost ALLIES, who are fighting nobody — reported
+  //   510 and dropped the zoom to 30. The build's own number is half the
+  //   distance between the two gladiators who are fighting.
+  //
+  //   All three rosters open with the same 500-unit gap between the front
+  //   ranks, so all three must report the same midwaypoint.
+  for (const [name, roster] of Object.entries(ROSTERS)) {
+    assert.equal(midwaypointFor(roster), 250, `${name} opens at the same engagement distance`);
+  }
+  // Without sides there is nothing to oppose, so it falls back to the spread —
+  // which is the vanilla case and what every one-dimensional caller wants.
+  assert.equal(midwaypointFor([-250, 250]), 250);
+  assert.equal(midwaypointFor([-510, -380, -250, 250, 380, 510]), 510);
+});
+
+test("A WIDER ROSTER IS NEVER MORE ZOOMED OUT THAN A NARROWER ONE AT THE SAME RANGE", () => {
+  // ► This is the assertion that would have caught it. Measured before the fix:
+  //   1v1 zoom 50, 2v2 zoom 50, **3v3 zoom 30** — the widest fight drawn
+  //   smallest, because it crossed a band boundary the band was never meant to
+  //   answer. Nothing in the suite looked at framing at all.
+  const zooms = Object.fromEntries(Object.entries(ROSTERS).map(([name, roster]) => {
+    let camera = cameraFor(roster);
+    for (let frame = 0; frame < 200; frame += 1) camera = cameraStep(camera, roster);
+    return [name, camera.zoomscale];
+  }));
+  assert.equal(zooms["1v1"], zooms["2v2"], `1v1 ${zooms["1v1"]} vs 2v2 ${zooms["2v2"]}`);
+  assert.equal(zooms["2v2"], zooms["3v3"], `2v2 ${zooms["2v2"]} vs 3v3 ${zooms["3v3"]}`);
+  assert.equal(zooms["1v1"], zoomTargetFor(250), "and it is the build's own band for that range");
+});
+
+test("EVERY roster fills most of the stage, and every gladiator stays on it", () => {
+  for (const [name, roster] of Object.entries(ROSTERS)) {
+    let camera = cameraFor(roster);
+    for (let frame = 0; frame < 200; frame += 1) camera = cameraStep(camera, roster);
+    const drawn = roster.map((actor) => arenaToStage(camera, { x: actor.x, y: 200, lift: 0 }).x);
+    for (let index = 0; index < drawn.length; index += 1) {
+      assert.ok(drawn[index] > 0 && drawn[index] < SS2_STAGE.width,
+        `${name}: actor at ${roster[index].x} drew at stage ${drawn[index].toFixed(0)}`);
+    }
+    // ► **AND IT MUST NOT WASTE THE FRAME**, which is the other half of the
+    //   complaint: the broken 3v3 used 58% of the stage, LESS than the 2v2's
+    //   76%, while being a third wider.
+    const used = (Math.max(...drawn) - Math.min(...drawn) + FIGURE_HALF_WIDTH * 2 * camera.zoomscale / 100)
+      / SS2_STAGE.width;
+    assert.ok(used > 0.5, `${name} used only ${(used * 100).toFixed(0)}% of the stage`);
+  }
+});
+
+test("the fit zoom is a CEILING and never raises the build's band", () => {
+  // ► The ordering is the whole design: the band is the build's drama and wins
+  //   whenever it can; the fit can only pull back. If this ever inverts, a
+  //   vanilla 1v1 stops matching the build.
+  for (const roster of Object.values(ROSTERS)) {
+    const band = zoomTargetFor(midwaypointFor(roster));
+    const target = targetZoomFor(midwaypointFor(roster), roster);
+    assert.ok(target <= band, `the fit raised the zoom from ${band} to ${target}`);
+  }
+  // At a vanilla 1v1 the fit is slack and the band is untouched.
+  assert.ok(fitZoomFor(ROSTERS["1v1"]) > zoomTargetFor(250), "the 1v1 is band-limited, not fit-limited");
+  assert.equal(targetZoomFor(250, ROSTERS["1v1"]), zoomTargetFor(250));
+  // A roster too wide for the stage is pulled back, but never below the build's
+  // smallest band.
+  const sprawl = [{ x: -2100, side: "hero" }, { x: 2100, side: "villain" }];
+  assert.ok(fitZoomFor(sprawl) >= SS2_CAMERA.zoomMinimum);
+  assert.ok(fitZoomFor(sprawl) < 30, "a 4200-unit arena cannot be framed at 30");
+});
+
+test("the focus is the middle of EVERYBODY, not of the closest duel", () => {
+  // Pointing the camera at one engagement slides the rest of the roster off the
+  // far edge — so the two jobs use two different numbers on purpose.
+  const lopsided = [{ x: -600, side: "hero" }, { x: 100, side: "hero" }, { x: 200, side: "villain" }];
+  assert.equal(midwaypointFor(lopsided), 50, "the closest engagement is 100 apart");
+  assert.equal(focusXFor(lopsided), -200, "but the camera centres the whole scene");
 });
