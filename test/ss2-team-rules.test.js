@@ -1024,6 +1024,26 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     "greaves", "greaves_defence",
     "helmet", "helmet_defence",
     "herolevel", "max_damage", "maximum_ammo", "min_damage",
+    // ► **ADDED 2026-09-14 WITH `weapon` BELOW, DELIBERATELY, SO A GLADIATOR
+    //   CAN HOLD HIS WEAPON.** These two are APPEARANCE selectors and no rule
+    //   reads either: the damage bands, the ranges and the enchantments are all
+    //   separate declared resources already derived FROM them. What they carry
+    //   is the linkage suffix — `weapon` 1 is the art `weapon1` — which
+    //   `updatecharacter` attaches and which this engine could not see.
+    //
+    //   **89 of the 387 extracted wardrobe pieces, the ENTIRE weapon slot, were
+    //   indexed by nothing** until these existed, because a renderer cannot
+    //   draw a number the wire does not carry. Adding the rows to `ATTACHMENTS`
+    //   was necessary and could not have been sufficient.
+    //
+    //   **The 23 promoted goldens did NOT move, MEASURED rather than assumed:**
+    //   138 golden, fixture, replay and observation tests pass by exit code
+    //   after this change. A fixture declares its own resource bag and is never
+    //   offered these names — which is why this test's own failure message
+    //   ("re-hashes every battle in existence, including all 23 golden
+    //   replays") is broader than what actually happens, and has been for both
+    //   of the last two additions.
+    "secondary_weapon",
     "secondary_weapon_enchantment_damage",
     "secondary_weapon_enchantment_potency",
     "secondary_weapon_enchantment_type",
@@ -1034,6 +1054,7 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     "shinguard", "shinguard_defence",
     "shoulderguard", "shoulderguard_defence",
     "staminaleft", "staminamax",
+    "weapon",
     "weapon_enchantment_damage",
     "weapon_enchantment_potency",
     "weapon_enchantment_type",
@@ -1047,7 +1068,7 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     //   the weapon ID stays outside this list.
     //   **The 23 promoted goldens did NOT move**: none of them states a
     //   `weapon` or a `weapon_range`, so none declares the key.
-    "weapon_range"
+    "weapon_range",
   ], [
     "The SS2 resource vocabulary changed. `ss2Combatant` declares every one of",
     "these names, declared resources enter `combatantProjection`, and the",
@@ -1073,27 +1094,39 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
   //   BOTH shapes and the one name that separates them, rather than being
   //   relaxed to a subset check, which would have stopped catching a name that
   //   is declared and never projected.
-  const WEAPON_DERIVED = ["weapon_range"];
+  // ► **THE VOCABULARY HAS THREE TIERS NOW, NOT TWO (2026-09-14).** It was
+  //   "everything, minus what a weapon row derives"; declaring the two weapon
+  //   IDS split the second tier again, because a gladiator can carry a melee
+  //   weapon and no bow. So:
+  //     always                      — the bulk of the bag
+  //     a MELEE weapon id resolves  — `weapon`, and `weapon_range` derived from it
+  //     a SECONDARY id resolves     — `secondary_weapon`
+  //   Asserting the tiers rather than relaxing to a subset check is what keeps
+  //   this catching a name that is declared and never projected.
+  const MELEE_DERIVED = ["weapon_range", "weapon"];
+  const RANGED_DERIVED = ["secondary_weapon"];
 
-  // (1) No weapon id: everything but the weapon-derived names.
+  // (1) No weapon id at all: everything but what either weapon slot answers for.
   const battle = battleOf({}, {});
   const declared = Object.keys(combatantById(battle, "hero").resources).sort();
   assert.deepEqual(
     declared,
-    [...SS2_RESOURCE_NAMES].filter((name) => !WEAPON_DERIVED.includes(name)).sort(),
+    [...SS2_RESOURCE_NAMES].filter((name) => !MELEE_DERIVED.includes(name) && !RANGED_DERIVED.includes(name)).sort(),
     "a combatant with no weapon id declares the vocabulary minus what a weapon row derives"
   );
 
-  // (2) A weapon id: the WHOLE vocabulary, and the number is the build's.
+  // (2) A melee weapon id: everything except the secondary slot's own id.
   // Weapon 21 is the first hacking row; its `[5]` is 1, and `gladiator()` is
   // strength 5, so `physical_size` is 83 and `weapon_range` is 127.
   const armed = battleOf({ weapon: 21, weapon_min_damage: undefined, weapon_max_damage: undefined }, {});
   const armedHero = combatantById(armed, "hero");
   assert.deepEqual(
     Object.keys(armedHero.resources).sort(),
-    [...SS2_RESOURCE_NAMES].sort(),
+    [...SS2_RESOURCE_NAMES].filter((name) => !RANGED_DERIVED.includes(name)).sort(),
     "declaration must match the vocabulary once a weapon row answers for the whole of it"
   );
+  assert.ok(!Object.keys(armedHero.resources).includes("secondary_weapon"),
+    "a gladiator with no bow declares no secondary weapon id — absent is not zero, and zero is a real row");
   assert.equal(armedHero.resources.weapon_range.value, 127, "80 + round(5 / 1.5) + 1 * 44");
   assert.equal(
     Object.keys(toTeamWireState(armed).teams[0].combatants[0].resources).includes("weapon_range"),

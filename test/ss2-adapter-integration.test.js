@@ -2202,9 +2202,18 @@ test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declare
   //   rather than the list because the list itself is pinned in
   //   `ss2-team-rules.test.js`; what this one is for is that the SUPPLIED path
   //   carries all of it, which is the thing the closed list used to break.
+  // ► **39 UNTIL 2026-09-14, WHEN THE TWO WEAPON IDS JOINED** so the renderer
+  //   could draw the weapon a gladiator is holding. They are the first entries
+  //   here that no rule reads — pure appearance selectors — and they are in the
+  //   bag rather than beside it because the bag is the only per-combatant
+  //   channel that is on the view AND the projection AND `combatStateHash`.
   const projected = Object.keys(host.wire().teams[0].combatants[0].resources);
-  assert.equal(projected.length, 39);
-  for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon", "weapon_range"]) {
+  // ► 40, not 41: this gladiator carries a melee weapon and NO bow, so
+  //   `secondary_weapon` is not declared. Absent is not zero, and zero is a
+  //   real weapon row — see the three-tier note in `ss2-team-rules.test.js`.
+  assert.equal(projected.length, 40);
+  for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon",
+    "weapon_range", "weapon"]) {
     assert.ok(projected.includes(name), `${name} must reach the projection`);
   }
   // And the number it carries is the BUILD's, not the `[5]` multiplier this

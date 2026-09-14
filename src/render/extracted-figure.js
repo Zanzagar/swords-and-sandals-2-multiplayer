@@ -293,9 +293,59 @@ export const ATTACHMENTS = Object.freeze([
   { slot: "shinguard", field: "shinguard", limb: "Rlowerleg", depth: 1 },
   { slot: "boot", field: "boot", limb: "Lfoot", depth: 1 },
   { slot: "boot", field: "boot", limb: "Rfoot", depth: 1 },
-  // The one offset in the routine, and it is 50 twips down the forearm.
-  { slot: "shield", field: "shield", limb: "Rlowerarm", depth: 3, offset: { x: 0, y: 50 } }
+
+  // ► **THE SHIELD IS MELEE-ONLY, AND THIS ROW USED TO BE UNCONDITIONAL.**
+  //   `updatecharacter` attaches it inside the `equipped_weapon == 1` branch
+  //   (`+0x0fa5` tests it, `+0x0fb7` jumps past on anything else, and the
+  //   shield attach is at `+0x1026` INSIDE that branch). So a gladiator with a
+  //   bow drawn carries no shield in vanilla, and this engine gave him one.
+  { slot: "shield", field: "shield", limb: "Rlowerarm", depth: 3, whenEquipped: 1, offset: { x: 0, y: 50 } },
+
+  // ► **THE WEAPON, WHICH WAS MISSING ENTIRELY — 89 OF THE 387 EXTRACTED
+  //   WARDROBE PIECES, THE WHOLE SLOT, INDEXED BY NOTHING.** The table had
+  //   sixteen rows and `updatecharacter` makes twenty `attachMovie` calls; a
+  //   test asserted `ATTACHMENTS.length === 16` and so certified the
+  //   incomplete table as complete. Found by the asset census 2026-09-14.
+  //
+  //   **It attaches into `weapon.realweapon`, not into `weapon`** — a NESTED
+  //   target, at depth 0, with an init object of `{_x: 0, _y: 0}`. And
+  //   `realweapon` is NOT at identity: measured on the oracle, char 703 places
+  //   char 702 named `realweapon` at `tx = ty = -70` TWIPS. Assuming identity
+  //   would put every weapon 3.5 pixels out, which is small enough to look like
+  //   a drawing style and never like a bug.
+  //
+  //   Which weapon depends on what is drawn: the primary in melee, the
+  //   SECONDARY when a bow is up (`+0x1087` reads `secondary_weapon` in the
+  //   `equipped_weapon == 2` branch). Both land on the same target and only one
+  //   can be attached at a time, which is why they are two rows and not one.
+  {
+    slot: "weapon", field: "weapon", limb: "weapon", depth: 0, whenEquipped: 1,
+    nested: { name: "realweapon", matrix: [1, 0, 0, 1, -70, -70] }
+  },
+  {
+    slot: "weapon", field: "secondary_weapon", limb: "weapon", depth: 0, whenEquipped: 2,
+    nested: { name: "realweapon", matrix: [1, 0, 0, 1, -70, -70] }
+  }
 ]);
+
+/**
+ * WHICH ATTACHMENTS APPLY AT THIS LOADOUT.
+ *
+ * ► **`equipped_weapon` IS A SELECTOR, NOT A DECORATION.** `updatecharacter`
+ *   branches on it (`+0x0fa5` / `+0x1051`) and the branches attach DIFFERENT
+ *   things: melee gets the primary weapon AND the shield, ranged gets the
+ *   secondary weapon and no shield at all. A table that ignored it dressed
+ *   every archer with a shield he cannot be holding.
+ *
+ * A combatant with no `equipped_weapon` at all is treated as MELEE, because
+ * that is what root frame 221 starts everyone in — but the absence is a real
+ * one and is not invented into a `1` on the combatant.
+ */
+export function attachmentsFor(loadout) {
+  const equipped = Number.isFinite(loadout?.equipped_weapon) ? loadout.equipped_weapon : 1;
+  return ATTACHMENTS.filter((attachment) =>
+    attachment.whenEquipped === undefined || attachment.whenEquipped === equipped);
+}
 
 /**
  * A combatant's wire projection -> the loadout the dressing table indexes.
@@ -318,6 +368,12 @@ export function loadoutFrom(combatant) {
     const value = resourceValue(combatant, attachment.field);
     if (Number.isFinite(value)) loadout[attachment.field] = value;
   }
+  // ► **THE SELECTOR IS NOT AN ATTACHMENT FIELD AND STILL HAS TO TRAVEL.**
+  //   `equipped_weapon` dresses nothing itself; it decides WHICH rows apply.
+  //   Reading it from the same projection keeps the decision with the data
+  //   rather than making the renderer ask the combatant a second question.
+  const equipped = resourceValue(combatant, "equipped_weapon");
+  if (Number.isFinite(equipped)) loadout.equipped_weapon = equipped;
   return Object.keys(loadout).length > 0 ? loadout : null;
 }
 
@@ -508,7 +564,7 @@ export function paintExtractedFigure(pack, options = {}) {
       }
     }
     const dressed = [];
-    for (const attachment of ATTACHMENTS) {
+    for (const attachment of attachmentsFor(loadout)) {
       const id = loadout[attachment.field];
       if (!Number.isFinite(id)) continue;
       // ► **A HELMET REPLACES THE HAIR**, because the build gives them the same
@@ -534,7 +590,15 @@ export function paintExtractedFigure(pack, options = {}) {
         // limb (in clip space) x the piece's own placement, then the same
         // clip-to-arena transform the body uses. Composed in TWIPS throughout,
         // which is why the offset can simply be added to the translation.
-        const composed = composeInClipSpace(limbMatrix, placement.matrix, attachment.offset);
+        // ► **A NESTED TARGET IS A THIRD MATRIX AND IT IS NOT IDENTITY.** The
+        //   weapon attaches into `weapon.realweapon`, which sits at -70/-70
+        //   twips inside the weapon clip. Composed BEFORE the piece so the
+        //   order matches the build's own containment: limb, then the child
+        //   clip, then the piece inside it.
+        const target = attachment.nested
+          ? composeInClipSpace(limbMatrix, attachment.nested.matrix, null)
+          : limbMatrix;
+        const composed = composeInClipSpace(target, placement.matrix, attachment.offset);
         const matrix = Object.freeze([
           zero(scale * composed[0]),
           zero(-scale * composed[1]),

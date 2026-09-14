@@ -2455,6 +2455,32 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   "maximum_ammo",
   "min_damage",
   "weapon_range",
+  // ► **THE TWO ITEM IDS, DECLARED 2026-09-14 SO THE GLADIATOR CAN HOLD HIS
+  //   WEAPON.** They are APPEARANCE selectors, not arithmetic: no rule here
+  //   reads either, and both damage bands, the ranges and the enchantments are
+  //   already separate declared resources derived FROM them. What they do is
+  //   carry the linkage suffix — `weapon` 1 is the art `weapon1` — which is
+  //   what `updatecharacter` attaches and what this engine could not see.
+  //
+  //   **Until now 89 of the 387 extracted wardrobe pieces — the whole weapon
+  //   slot, 23% of the wardrobe — were indexed by nothing**, because the ids
+  //   never reached the projection. Adding the rows to `ATTACHMENTS` was
+  //   necessary and could not have been sufficient: a renderer cannot draw a
+  //   number the wire does not carry.
+  //
+  //   ► **THIS IS A PROJECTION CHANGE AND IT MOVES HASHED STATE**, exactly as
+  //     `weapon_range` did on 2026-09-11. `combatStateHash` covers the resource
+  //     bag, so a seeded pin moves; `BATTLE_STATE_VERSION` does NOT, because it
+  //     hashes `COMBATANT_PROJECTION_FIELDS` and `resources` was already in it.
+  //     **No golden may move**: a fixture declares its own resources and is
+  //     never offered these.
+  //
+  //   Deliberately absent from `SS2_RESOURCE_DEFAULTS`, for the reason
+  //   `weapon_range` is: a combatant that never had a weapon id must read as
+  //   ABSENT rather than as the build's weapon 0, which is a real bare-handed
+  //   row and would be a claim rather than a silence.
+  "weapon",
+  "secondary_weapon",
   // ► **THE BOW'S OWN THREE NUMBERS, CARRIED BESIDE THE MELEE ONES RATHER THAN
   //   REPLACING THEM — and that is the one shape decision `swap_weapons`
   //   turns on.**

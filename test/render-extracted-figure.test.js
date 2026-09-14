@@ -24,7 +24,7 @@ import {
   poseIndexAt
 } from "../src/render/extracted-figure.js";
 import { UNMAPPED_CLIP_LABELS, allUnmappedLabels, clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
-import { ATTACHMENTS, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
+import { ATTACHMENTS, attachmentsFor, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
 
 /** A square shape one pixel on a side, so a matrix is the only thing moving it. */
 const SHAPES = Object.freeze({
@@ -326,10 +326,21 @@ test("a loadout reads BOTH resource shapes, because the roster's and the project
   assert.equal(loadoutFrom({ resources: { helmet: { value: null } } }), null);
 });
 
-test("the attachment table is the BUILD'S, and the shield's offset is the only one", () => {
-  // Disassembled from `updatecharacter` at `0x40bf76`. Fifteen pieces attach at
-  // the limb's own origin; the shield alone carries an init object.
-  assert.equal(ATTACHMENTS.length, 16);
+test("the attachment table is the BUILD'S, and it is no longer SHORT", () => {
+  // ► **THIS ASSERTION USED TO READ `ATTACHMENTS.length === 16` AND THAT
+  //   CERTIFIED AN INCOMPLETE TABLE AS COMPLETE.** `updatecharacter` makes
+  //   TWENTY attachMovie calls; the table had sixteen rows. The four missing
+  //   were eyes, mouth and both weapon slots — so **89 of the 387 extracted
+  //   wardrobe pieces, the entire weapon slot, were indexed by nothing** and
+  //   every gladiator was faceless. A pinned count is only as good as the
+  //   derivation behind it, and this one had none.
+  //
+  //   Eyes and mouth are NOT here: they take a fixed linkage (`eyes1`,
+  //   `mouth1`) out of `assets/icons/`, not a wardrobe slot keyed by item id,
+  //   so they are a different mechanism and are tracked separately rather than
+  //   forced into this table to make a number come out right.
+  assert.equal(ATTACHMENTS.length, 18, "16 wardrobe rows + the two weapon slots");
+
   const withOffset = ATTACHMENTS.filter((a) => a.offset);
   assert.equal(withOffset.length, 1);
   assert.equal(withOffset[0].slot, "shield");
@@ -341,6 +352,59 @@ test("the attachment table is the BUILD'S, and the shield's offset is the only o
   const helmet = head.find((a) => a.slot === "helmet");
   const hair = head.find((a) => a.slot === "hair");
   assert.equal(helmet.depth, hair.depth, "the build gives them the same depth");
+});
+
+test("A BOW DRAWN MEANS NO SHIELD, and the primary weapon is put away", () => {
+  // ► `updatecharacter` branches on `equipped_weapon`: `+0x0fa5` tests it,
+  //   `+0x0fb7` jumps past the whole melee block on anything else, and the
+  //   shield attach at `+0x1026` is INSIDE that block. The `== 2` branch at
+  //   `+0x1051` attaches `secondary_weapon` and no shield at all.
+  const melee = attachmentsFor({ equipped_weapon: 1 }).map((a) => a.field);
+  const ranged = attachmentsFor({ equipped_weapon: 2 }).map((a) => a.field);
+
+  assert.ok(melee.includes("shield"), "a melee gladiator carries his shield");
+  assert.ok(melee.includes("weapon"), "and his primary weapon");
+  assert.ok(!melee.includes("secondary_weapon"), "and not the bow at the same time");
+
+  assert.ok(!ranged.includes("shield"), "AN ARCHER HAS NO SHIELD — this engine gave him one");
+  assert.ok(!ranged.includes("weapon"), "nor his primary weapon");
+  assert.ok(ranged.includes("secondary_weapon"), "he holds the bow");
+
+  // Everything that is not weapon-dependent applies in both.
+  const always = ATTACHMENTS.filter((a) => a.whenEquipped === undefined).map((a) => a.slot);
+  for (const slot of always) {
+    assert.ok(attachmentsFor({ equipped_weapon: 1 }).some((a) => a.slot === slot), `${slot} in melee`);
+    assert.ok(attachmentsFor({ equipped_weapon: 2 }).some((a) => a.slot === slot), `${slot} at range`);
+  }
+});
+
+test("an ABSENT equipped_weapon is melee, because that is what the build starts everyone in", () => {
+  // Root frame 221 constructs both fighters in melee, so treating absence as 1
+  // is the build's own default rather than a guess — but the absence is real
+  // and is NOT written back onto the combatant as a fabricated 1.
+  assert.deepEqual(attachmentsFor({}).map((a) => a.field), attachmentsFor({ equipped_weapon: 1 }).map((a) => a.field));
+  assert.deepEqual(attachmentsFor(null).map((a) => a.field), attachmentsFor({ equipped_weapon: 1 }).map((a) => a.field));
+  assert.equal(loadoutFrom({ resources: { helmet: 3 } }).equipped_weapon, undefined,
+    "absent stays absent on the loadout");
+});
+
+test("THE WEAPON ATTACHES INTO A NESTED CLIP, and that clip is not at the origin", () => {
+  // ► Measured on the oracle: char 703 (`weapon0`) places char 702 named
+  //   `realweapon` at tx = ty = -70 TWIPS. The build attaches the weapon into
+  //   `weapon.realweapon`, so assuming the nested target were identity would
+  //   put every weapon 3.5 pixels out — small enough to read as a drawing
+  //   style and never as a bug.
+  for (const row of ATTACHMENTS.filter((a) => a.slot === "weapon")) {
+    assert.equal(row.limb, "weapon");
+    assert.equal(row.depth, 0, "attached at depth 0 of realweapon");
+    assert.ok(row.nested, "the weapon has a nested target");
+    assert.equal(row.nested.name, "realweapon");
+    assert.deepEqual(row.nested.matrix, [1, 0, 0, 1, -70, -70]);
+  }
+  // And composing through it actually moves the piece, which is the whole point.
+  const identity = [1, 0, 0, 1, 0, 0];
+  const throughNested = composeInClipSpace(composeInClipSpace(identity, [1, 0, 0, 1, -70, -70]), identity);
+  assert.deepEqual(throughNested, [1, 0, 0, 1, -70, -70]);
 });
 
 test("an attached piece composes limb x piece in CLIP space, offset included", () => {
