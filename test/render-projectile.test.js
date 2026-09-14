@@ -27,9 +27,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  animationCursor,
   applyCommands,
   emptyScene,
   bombardVelocityFor,
+  flightDurationMs,
   projectileAt,
   projectileFlight,
   projectileTrail,
@@ -387,6 +389,76 @@ test("the scene folds an arrow, and does NOT carry it into the next action", () 
   const next = applyCommands(scene, []);
   assert.equal(next.projectiles.length, 0, "the next batch starts with an empty sky");
   assert.equal(Object.keys(next.actors).length, Object.keys(scene.actors).length, "while actors DO carry forward");
+});
+
+/* ------------------------------------------------------------------ */
+/* The gate: an arrow in the air is work in progress                    */
+/* ------------------------------------------------------------------ */
+
+test("an arrow in the air holds the action open, which is the build's own guard", () => {
+  // ► **VANILLA WILL NOT COMPLETE A RANGED PHASE WHILE THE BULLET IS FLYING.**
+  //   `bullet_in_air != true` sits on the phase-completion guard (`+0x3829`),
+  //   beside `attacker.struck` and `grounded`. So a long bombard genuinely takes
+  //   a long turn there, and the animation gate here is given the same fact
+  //   rather than a timeline that has already finished.
+  //
+  //   The numbers are why it matters: `ranged` is 9 beats (1,080ms) and a
+  //   58-frame bombard across the arena is over 1,900. Without this the arrow
+  //   vanished for most of its own flight.
+  const flight = shot({ from: { x: -600, y: 200 }, to: { x: 600, y: 200 } });
+  const durationMs = flightDurationMs(flight);
+  assert.equal(durationMs, flight.flightFrames * (1000 / 30), "the build's own 30 fps");
+
+  const arrow = { token: 7, startedAt: 0, durationMs };
+  // Nothing else is running: without the arrow the token would be finished.
+  assert.deepEqual(
+    animationCursor([7], new Map(), 10).finished,
+    [7],
+    "the control: an empty arena finishes the token at once"
+  );
+  assert.deepEqual(
+    animationCursor([7], new Map(), 10, { projectiles: [arrow] }).finished,
+    [],
+    "and an arrow still in the air holds it open"
+  );
+  assert.deepEqual(
+    animationCursor([7], new Map(), durationMs + 1, { projectiles: [arrow] }).finished,
+    [7],
+    "until it lands"
+  );
+});
+
+test("an arrow is not subject to the abandon grace, because it cannot fail to arrive", () => {
+  // A timeline overrunning its own duration is ABANDONED after
+  // `ANIMATION_TIMEOUT_MS`, because a surface may simply never report it. A
+  // projectile's duration is arithmetic this engine computed, not a signal it
+  // is waiting on — so there is nothing to give up on, and reporting one as
+  // abandoned would record the gate being forced open by a surface that was in
+  // fact working correctly.
+  const flight = shot();
+  const arrow = { token: 3, startedAt: 0, durationMs: flightDurationMs(flight) };
+  const long = animationCursor([3], new Map(), 1e6, { projectiles: [arrow] });
+  assert.equal(long.abandon, null, "no arrow is ever abandoned");
+  assert.deepEqual(long.finished, [3], "it simply lands");
+});
+
+test("an arrow with no action token holds nothing open", () => {
+  // A shot emitted outside any action — which `presentResolvedEvents` does not
+  // do today, and which a different binding table might — must not wedge a gate
+  // waiting on a token nobody is holding.
+  const arrow = { token: null, startedAt: 0, durationMs: 5000 };
+  assert.deepEqual(animationCursor([9], new Map(), 10, { projectiles: [arrow] }).finished, [9]);
+});
+
+test("the scene carries the action token through, so the shell has ONE source", () => {
+  const fired = firedFor({ type: "bombard", attackDirection: 21 });
+  const scene = applyCommands(emptyScene(), fired);
+  assert.equal(
+    scene.projectiles[0].actionToken,
+    fired[0].actionToken ?? null,
+    "whatever presentResolvedEvents stamped, the scene reports"
+  );
+  assert.ok("actionToken" in scene.projectiles[0], "and the key is always present, never conditional");
 });
 
 test("a fire-projectile touches no actor, so nothing is drawn twice", () => {

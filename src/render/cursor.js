@@ -143,12 +143,15 @@ export function timelinesForStep(commands) {
  * @param {Map<string, {timeline: object, startedAt: number, token: number|null}>} playing
  *   the timelines currently running, keyed by combatant id
  * @param {number} now the surface's clock
+ * @param {object} [options]
+ * @param {Iterable<{token: number|null, startedAt: number, durationMs: number}>}
+ *   [options.projectiles] arrows still in the air
  * @returns {{finished: number[], expired: string[], abandon: {token: number, reason: string}|null}}
  *   `expired` names the combatants whose timelines have run out, so the caller
  *   can stop posing them; `abandon` is at most one token, because giving up is
  *   a decision and doing several at once hides which one ran out.
  */
-export function animationCursor(pendingTokens, playing, now) {
+export function animationCursor(pendingTokens, playing, now, { projectiles = [] } = {}) {
   if (!Array.isArray(pendingTokens)) {
     throw new CursorError("animationCursor needs the pending token list.");
   }
@@ -181,6 +184,24 @@ export function animationCursor(pendingTokens, playing, now) {
         abandon = { token: entry.token, reason };
       }
     }
+  }
+
+  // ► **AN ARROW IN THE AIR IS WORK IN PROGRESS, AND THAT IS THE BUILD'S OWN
+  //   RULE (added 2026-09-13).** Vanilla will not complete a ranged phase while
+  //   the bullet is still flying: `bullet_in_air != true` sits on the
+  //   phase-completion guard (`+0x3829`) beside `attacker.struck` and
+  //   `grounded`. So a long bombard takes a long turn there, and this gate is
+  //   given the same fact.
+  //
+  //   **Deliberately NOT folded into `playing`**, which is keyed by combatant
+  //   and is what the painter poses: an arrow is nobody's figure, exactly as
+  //   `scene.projectiles` is nobody's actor. It is also NOT subject to the
+  //   abandon grace above — a projectile's duration is arithmetic this engine
+  //   computed rather than a timeline a surface has to report back, so it
+  //   cannot fail to arrive and there is nothing to give up on.
+  for (const shot of projectiles) {
+    if (!shot || shot.token === null || shot.token === undefined) continue;
+    if (now - shot.startedAt < shot.durationMs) running.add(shot.token);
   }
 
   // The correction: a token nothing is still running is FINISHED, including a

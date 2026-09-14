@@ -333,7 +333,13 @@ export function applyCommands(scene, commands) {
           from: command.from,
           to: command.to,
           hit: command.hit === true,
-          sequence: command.sequence
+          sequence: command.sequence,
+          // The ACTION this arrow belongs to, carried through because a surface
+          // that holds its gate open for the flight needs to know which token
+          // to hold — and reading it back off the command stream instead would
+          // give the shell a second source for a fact the scene already has.
+          // `presentResolvedEvents` stamps it onto every command it emits.
+          actionToken: command.actionToken ?? null
         }));
         break;
       }

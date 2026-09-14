@@ -71,7 +71,8 @@ import {
   chooseSound,
   projectileFlight,
   projectileAt,
-  projectileTrail
+  projectileTrail,
+  flightDurationMs
 } from "/src/render/index.js";
 import { demoSide } from "/tools/arena/roster.js";
 
@@ -164,6 +165,18 @@ let scene = applyCommands(emptyScene(), host.constructArena().commands);
 const playing = new Map();
 /** Tokens whose timelines are still running, in the order they were dispatched. */
 let pendingTokens = [];
+/**
+ * Arrows currently in the air, each with its OWN clock and its own token.
+ *
+ * ► **NOT `playing`, and not `scene.projectiles` either.** `playing` is keyed by
+ *   combatant and is what the painter poses; an arrow is nobody's figure.
+ *   `scene.projectiles` is the batch's own record and is replaced whole on the
+ *   next fold, which is correct for a scene and useless as a clock — an arrow
+ *   outlives the action that loosed it by design now, because the build will
+ *   not complete a ranged phase while one is flying (`bullet_in_air` on the
+ *   phase-completion guard, `+0x3829`).
+ */
+let inFlight = [];
 let settled = false;
 
 const el = (id) => document.getElementById(id);
@@ -365,6 +378,29 @@ function beginStep(step) {
   const { started, notices } = timelinesForStep(step.commands);
   for (const notice of notices) log(notice.reason, { warn: true });
 
+  // The arrows this batch loosed, each given its own clock and the same action
+  // token the shooter's timeline carries — so the gate waits for the arrow AND
+  // the animation, whichever is longer, which is what the build does.
+  //
+  // Read off the SCENE rather than the command stream, because the scene has
+  // already folded them and a shell reading both would be holding two sources
+  // for one fact. `scene.projectiles` is this batch's own and does not carry
+  // forward, which is exactly the list wanted here.
+  for (const shotRecord of scene.projectiles) {
+    const flight = projectileFlight({
+      kind: shotRecord.projectile,
+      from: shotRecord.from,
+      to: shotRecord.to,
+      sequence: shotRecord.sequence
+    });
+    inFlight.push({
+      flight,
+      token: shotRecord.actionToken,
+      startedAt: performance.now(),
+      durationMs: flightDurationMs(flight)
+    });
+  }
+
   // The clock is stamped BEFORE the entries reach `playing`, not after: an
   // entry with no `startedAt` reads as infinitely overdue to `animationCursor`.
   // Stamped here rather than inside `timelinesForStep` so a frame that arrives
@@ -404,7 +440,11 @@ function beginStep(step) {
  * spectated bout after one action, and could not be reached by a test.
  */
 function drainFinishedAnimations(now) {
-  const cursor = animationCursor(pendingTokens, playing, now);
+  // An arrow that has landed stops being work in progress AND stops being
+  // drawn, in one place, so the two can never disagree about whether it is
+  // still there.
+  inFlight = inFlight.filter((shot) => now - shot.startedAt < shot.durationMs);
+  const cursor = animationCursor(pendingTokens, playing, now, { projectiles: inFlight });
   for (const combatantId of cursor.expired) playing.delete(combatantId);
 
   // The surface gave up. That is a different fact from the animation having
@@ -855,19 +895,19 @@ function render(now = performance.now()) {
  *   animation gate's business and not this shell's.
  */
 function drawProjectiles(view, now) {
-  for (const shot of scene.projectiles) {
-    const entry = playing.get(shot.combatantId);
-    // No running timeline means the shooter's animation is already over and the
-    // arrow has nothing to ride. Drawing it at frame 0 for ever would pin an
-    // arrow to the bow; drawing nothing is the honest answer.
-    if (!entry) continue;
-    const at = Math.min(1, Math.max(0, (now - entry.startedAt) / entry.timeline.durationMs));
-    const flight = projectileFlight({
-      kind: shot.projectile,
-      from: shot.from,
-      to: shot.to,
-      sequence: shot.sequence
-    });
+  for (const shot of inFlight) {
+    // ► **THE ARROW'S OWN CLOCK, not the shooter's timeline.** It rode the
+    //   shooter's animation until 2026-09-13, which meant it VANISHED the
+    //   moment that animation ended — and for a bombard across the arena that
+    //   is most of the flight, because `ranged` is 9 beats (1,080ms) against a
+    //   58-frame shot at over 1,900. The build has the opposite arrangement:
+    //   the PHASE waits for the arrow (`bullet_in_air` on the completion guard,
+    //   `+0x3829`), so the arrow is never the thing that gets cut short.
+    //
+    //   `inFlight` is pruned by the same comparison in the action loop, so an
+    //   arrow being drawn and an arrow holding the gate open are one fact.
+    const { flight } = shot;
+    const at = Math.min(1, Math.max(0, (now - shot.startedAt) / shot.durationMs));
     const point = projectileAt(flight, at * flight.flightFrames);
     const trail = projectileTrail(flight, at * flight.flightFrames);
 

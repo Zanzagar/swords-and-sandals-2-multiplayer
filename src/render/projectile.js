@@ -145,6 +145,37 @@ const ARENA_UNITS_PER_FIGURE_HEIGHT = 150;
  *   sequence number, exactly as `chooseSound` spreads across a family. Same
  *   bout, same seed, same arrows, every time.
  */
+/**
+ * How long one of the build's frames lasts.
+ *
+ * **The SWF header says 30 fps** — `tools/inspect-swf.mjs` prints it on every
+ * run ("Movie: 30 fps, 270 root frames") — and every per-frame constant in this
+ * module is in the build's frames, so this is the one place they become time.
+ */
+export const PROJECTILE_FRAME_MS = 1000 / 30;
+
+/**
+ * How long the arrow is in the air, in milliseconds.
+ *
+ * ► **THIS IS WHAT HOLDS THE ACTION OPEN, and it is the build's own rule.**
+ *   Vanilla will not complete a ranged phase while the arrow is still flying:
+ *   `bullet_in_air != true` is one of the conditions on the phase-completion
+ *   guard (`+0x3829`), alongside `attacker.struck` and `grounded`. So a long
+ *   bombard genuinely takes a long turn there, and the animation gate here is
+ *   given the same fact rather than a timeline that has already finished.
+ *
+ *   Before this, the arrow was drawn only while the SHOOTER's animation ran and
+ *   vanished when it ended — which for a bombard across the arena is most of
+ *   the flight, because `ranged` is 9 beats (1,080ms) and a 58-frame bombard is
+ *   over 1,900.
+ */
+export function flightDurationMs(flight) {
+  if (!flight || !Number.isFinite(flight.flightFrames)) {
+    throw new ProjectileError("flightDurationMs needs a flight from projectileFlight().");
+  }
+  return flight.flightFrames * PROJECTILE_FRAME_MS;
+}
+
 export function bombardVelocityFor(sequence) {
   const span = SS2_PROJECTILE.bombardVelocityMax - SS2_PROJECTILE.bombardVelocityMin + 1;
   const index = Number.isFinite(sequence) ? Math.abs(Math.trunc(sequence)) % span : 0;
