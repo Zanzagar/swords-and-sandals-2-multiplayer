@@ -334,6 +334,14 @@ export function applyCommands(scene, commands) {
           to: command.to,
           hit: command.hit === true,
           sequence: command.sequence,
+          /**
+           * Which of the build's five arrows this bow looses — 1-based, as
+           * `gotoAndStop` indexes it, or null when the bow could not be
+           * identified. `src/adapter/presentation.js` derives it; a scene
+           * carries it so a surface never has to reach back for the weapon
+           * table.
+           */
+          artFrame: Number.isFinite(command.artFrame) ? command.artFrame : null,
           // The ACTION this arrow belongs to, carried through because a surface
           // that holds its gate open for the flight needs to know which token
           // to hold — and reading it back off the command stream instead would

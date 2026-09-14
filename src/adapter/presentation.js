@@ -75,6 +75,7 @@
  */
 
 import { EliminationEvent } from "../team/elimination.js";
+import { ss2ArrowFrameFor, ss2RangedWeaponFor } from "../team/ss2-weapon-table.js";
 import { BATTLE_RESULT_PENDING_TYPE } from "../team/settlement.js";
 import { bindingPlanFor, resultLabelsFor } from "./slot-layout.js";
 import { GLADIATOR_CLIP_ROOT, HERO_SIDE, isPlainVanillaObject } from "./vanilla-fields.js";
@@ -590,18 +591,49 @@ function panelRefresh(sequence, placement, combatant) {
  * to fly an arrow BETWEEN, and inventing two points to fly it between would put
  * a trajectory on screen that the model does not have.
  */
+/**
+ * One numeric resource off a PROJECTED combatant.
+ *
+ * The projection wraps each resource as `{value, min, max}` — `resources.js`'s
+ * own shape — so a bare `combatant.resources[name]` is an object and reads as
+ * NaN through arithmetic. Named here rather than reaching for the team
+ * resolver's `resourceValue`, because the adapter does not import it.
+ */
+function resourceValueOf(combatant, name) {
+  const entry = combatant?.resources?.[name];
+  const value = entry && typeof entry === "object" ? entry.value : entry;
+  return Number.isFinite(value) ? value : null;
+}
+
 function projectileFor(wire, combatants, event) {
   const projectile = PROJECTILE_DIRECTIONS.get(Number(event.attackDirection));
   if (!projectile) return null;
   const shooter = combatants.get(event.actorId);
   const target = combatants.get(event.targetId);
   if (!Number.isFinite(shooter?.x) || !Number.isFinite(target?.x)) return null;
+  // ► **WHICH ARROW, and it is a TABLE READ rather than an inference.** The
+  //   build picks the art with `gotoAndStop(secondary_weapon - 60)`
+  //   (`+0x6dd4`), and equipment identity deliberately does not survive into
+  //   the resolver — but the weapon table's own raw damage columns do, because
+  //   the swing needs them. `ss2RangedWeaponFor` searches the ranged band
+  //   alone, where all twenty pairs are distinct; see its header for why the
+  //   band restriction is the build's own and not a convenience.
+  //
+  //   **Null is a real answer** and the renderer draws its authored arrow for
+  //   it: a gladiator whose secondary slot holds something the shop would never
+  //   have put there has no bow art to ask for.
+  const bow = ss2RangedWeaponFor(
+    resourceValueOf(shooter, "secondary_weapon_min_damage"),
+    resourceValueOf(shooter, "secondary_weapon_max_damage")
+  );
   return Object.freeze({
     kind: CommandKind.FIRE_PROJECTILE,
     sequence: event.sequence,
     combatantId: event.actorId,
     targetId: event.targetId,
     projectile,
+    /** 1-based, as `gotoAndStop` indexes it, or null when the bow is unknown. */
+    artFrame: ss2ArrowFrameFor(bow),
     // ► **`y` IS ARENA DEPTH AND IS CARRIED EVEN WHEN NULL**, the same rule the
     //   combatant projection follows for `x` and `y`: present on every command
     //   so two surfaces commit to one shape, and `null` meaning "this rule set

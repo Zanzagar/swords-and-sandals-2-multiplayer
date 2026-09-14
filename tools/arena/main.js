@@ -71,7 +71,12 @@ import {
   chooseSound,
   projectileFlight,
   projectileDrawAt,
-  flightDurationMs
+  flightDurationMs,
+  propPackFrom,
+  hasExtractedProps,
+  propFrameCount,
+  arrowOpsFor,
+  arrowTrailOpsFor
 } from "/src/render/index.js";
 import { demoSide } from "/tools/arena/roster.js";
 
@@ -235,6 +240,29 @@ let figurePack = null;
 
 let wardrobe = null;
 
+/**
+ * The build's own arrow and trail, or null.
+ *
+ * Loaded on its OWN fetch rather than joined to the figure's `Promise.all`,
+ * because the two extractions are independent: a player who has run
+ * `extract-figure.mjs` but not `extract-props.mjs` should get the build's
+ * gladiator firing this shell's authored arrow, not lose both. Same
+ * arrangement the wardrobe has for the same reason.
+ */
+let propPack = null;
+fetch("/assets/props/props.json")
+  .then((response) => (response.ok ? response.json() : null))
+  .then((data) => {
+    propPack = propPackFrom(data);
+    if (!hasExtractedProps(propPack)) {
+      log("no extracted props — drawing an authored arrow. `node tools/extract-props.mjs` to use the build's own.");
+      return;
+    }
+    log(`props: ${propFrameCount(propPack, "bullet")} arrow frame(s) from your own install`);
+    renderProvenance();
+  })
+  .catch(() => { propPack = null; });
+
 Promise.all([
   fetch("/assets/figure/shapes.json").then((response) => (response.ok ? response.json() : null)),
   fetch("/assets/figure/animations.json").then((response) => (response.ok ? response.json() : null)),
@@ -383,6 +411,7 @@ function beginStep(step) {
     });
     inFlight.push({
       flight,
+      artFrame: shotRecord.artFrame,
       token: shotRecord.actionToken,
       startedAt: performance.now(),
       durationMs: flightDurationMs(flight)
@@ -882,6 +911,51 @@ function render(now = performance.now()) {
  *   properly means holding the action open for the flight, which is the
  *   animation gate's business and not this shell's.
  */
+/**
+ * One extracted PROP, drawn at an arena point that has a HEIGHT.
+ *
+ * ► **A SEPARATE HELPER FROM `drawOps`, and the difference is the whole
+ *   reason.** That one translates with `view.toY(origin.y, 0)` — no lift —
+ *   because a gladiator stands on the sand and its vertical motion is inside
+ *   the pose. A prop in flight is at a real height above the ground, and
+ *   passing a lift to `drawOps` would have been silently ignored and drawn
+ *   every arrow along the floor.
+ *
+ * Otherwise identical to `drawOps`'s path branch: translate, scale by the view,
+ * flip y (arena y is UP and canvas y is DOWN), then compose the placement's own
+ * matrix.
+ */
+function paintProp(ops, view, { x, y, lift, size, rotation }) {
+  context.save();
+  context.globalAlpha = 1;
+  context.translate(view.toX(x), view.toY(y, lift));
+  // Canvas y is DOWN and the pitch is up-positive, so the rotation is negated
+  // exactly as the flip below negates the figure's own y.
+  if (rotation) context.rotate(-rotation);
+  const k = size * view.scale;
+  context.scale(k, -k);
+  for (const operation of ops) {
+    const m = operation.matrix;
+    context.save();
+    context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+    const path = path2dFor(operation.d);
+    if (operation.fill && operation.fill !== "none") {
+      context.globalAlpha = operation.fillOpacity ?? 1;
+      context.fillStyle = operation.fill;
+      context.fill(path, operation.fillRule ?? "evenodd");
+    }
+    if (operation.stroke && operation.strokeWidth > 0) {
+      context.globalAlpha = operation.strokeOpacity ?? 1;
+      context.strokeStyle = operation.stroke;
+      context.lineWidth = operation.strokeWidth;
+      context.lineJoin = "round";
+      context.stroke(path);
+    }
+    context.restore();
+  }
+  context.restore();
+}
+
 function drawProjectiles(view, now) {
   for (const shot of inFlight) {
     // ► **THE ARROW'S OWN CLOCK, not the shooter's timeline.** It rode the
@@ -910,8 +984,20 @@ function drawProjectiles(view, now) {
     );
     const { size } = drawn;
 
+    // ► **THE BUILD'S OWN TRAIL PUFF WHEN THE PLAYER HAS EXTRACTED IT, and an
+    //   authored dot when they have not.** Same per-family fallback the figure
+    //   already has: an empty answer from the pack is an answer, not an error.
+    const trailOps = arrowTrailOpsFor(propPack, shot.artFrame);
     for (const [index, puff] of drawn.trail.entries()) {
       context.globalAlpha = 0.10 + 0.05 * index;
+      if (trailOps) {
+        // NOT `drawOps`: that helper translates with `toY(origin.y, 0)` and has
+        // no lift, so every puff would have been drawn on the sand. A prop in
+        // the air needs the lift the flight computed, which is what
+        // `paintProp` below exists for.
+        paintProp(trailOps, view, { x: puff.x, y: puff.y, lift: puff.lift, size: puff.size, rotation: 0 });
+        continue;
+      }
       context.fillStyle = "#d8cdb4";
       const radius = Math.max(1, view.scale * 2.5 * puff.size);
       context.beginPath();
@@ -919,10 +1005,22 @@ function drawProjectiles(view, now) {
       context.fill();
     }
 
-    // The shaft, drawn along its own pitch. Authored art: the build's arrow is
-    // character 47, frame `secondary_weapon - 60`, and nothing under `assets/`
-    // has extracted it — so this is the same authored fallback `figure.js` is
-    // to the extracted rig, and it says so rather than pretending otherwise.
+    // ► **THE BUILD'S OWN ARROW WHEN IT HAS BEEN EXTRACTED.** Character 47,
+    //   frame `secondary_weapon - 60`, which the adapter derived from the
+    //   weapon table and stamped on the command — this shell decides nothing
+    //   about which arrow, only whether it has one.
+    const arrowOps = arrowOpsFor(propPack, shot.artFrame);
+    if (arrowOps) {
+      paintProp(arrowOps, view, {
+        x: drawn.x, y: drawn.y, lift: drawn.lift, size: drawn.size, rotation: drawn.rotation
+      });
+      context.globalAlpha = 1;
+      continue;
+    }
+
+    // The authored shaft, drawn along its own pitch — the same fallback
+    // `figure.js` is to the extracted rig, and it says so rather than
+    // pretending otherwise.
     context.save();
     context.globalAlpha = 1;
     context.translate(view.toX(drawn.x), view.toY(drawn.y, drawn.lift));

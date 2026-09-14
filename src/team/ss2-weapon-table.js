@@ -206,3 +206,70 @@ export const SS2_WEAPON_TYPES = Object.freeze({
   3: "hacking",
   4: "ranged"
 });
+
+/**
+ * WHICH BOW a secondary damage pair belongs to — the only honest route this
+ * engine has back to a ranged weapon's identity.
+ *
+ * ► **WHY IT IS NEEDED AT ALL.** The build picks the arrow's art with
+ *   `bullet.gotoAndStop(game_attacker.secondary_weapon - 60)` (`+0x6dd4`), and
+ *   **equipment identity deliberately does not survive into the resolver** —
+ *   `ss2Combatant`'s own comment calls the weapon id "the only place the weapon
+ *   id still exists". So by the time a presentation surface has an arrow to
+ *   draw, the id is long gone.
+ *
+ *   What IS carried is `secondary_weapon_min_damage` /
+ *   `secondary_weapon_max_damage`: the weapon table's own raw columns, in the
+ *   resource bag since the ranged vocabulary landed, because the swing needs
+ *   them. Those columns are keyed by id in the build's own table, so looking
+ *   one up is a TABLE READ rather than an inference.
+ *
+ * ► **AND THE STRENGTH OF IT IS STATED RATHER THAN ASSUMED, because this
+ *   repository has withdrawn an inversion claim before.** `ss2Reach`'s header
+ *   records that 432 of 3,004 archive records invert AMBIGUOUSLY across the
+ *   whole ninety-row table. That is true and it is about a different question:
+ *   the PRIMARY pair over every row.
+ *
+ *   Restricted to the ranged band, measured: **all twenty `(min, max)` pairs
+ *   are distinct**, so within the band the lookup is exact. The restriction is
+ *   the build's own — `buyweapon` routes a ranged purchase to
+ *   `secondary_weapon` and nothing else reaches that slot through the shop
+ *   (ss2-item-tables.md:826-828, the same citation
+ *   `assertSs2WeaponPurchasable` already carries).
+ *
+ *   **Every ranged pair DOES collide with a melee row** — (4,16) is ids 2, 21
+ *   and 61 — which is exactly why this searches the band and never the table.
+ *   A gladiator carrying a sword in the secondary slot is a state the shop
+ *   cannot produce; this returns null for it rather than guessing a bow.
+ *
+ * @returns {number|null} the ranged weapon id 61-80, or null
+ */
+export function ss2RangedWeaponFor(minDamage, maxDamage) {
+  if (!Number.isFinite(minDamage) || !Number.isFinite(maxDamage)) return null;
+  for (const entry of BY_ID.values()) {
+    if (entry.type !== 4) continue;
+    if (entry.minDamage === minDamage && entry.maxDamage === maxDamage) return entry.id;
+  }
+  return null;
+}
+
+/**
+ * The frame of the build's `bullet` clip a given bow looses.
+ *
+ * `secondary_weapon - 60`, one-based, matching `gotoAndStop`.
+ *
+ * ► **THE CLIP HAS FIFTY FRAMES AND FIVE ARROWS, found by extracting it
+ *   2026-09-13 and recorded because nothing in the corpus said so.** Frames 1-5
+ *   resolve to characters 42, 43, 44, 45 and 46; **every frame from 6 to 50
+ *   draws 46 again.** So bows 61-65 each have their own arrow and bows 66-80
+ *   share one, and a surface that drew twenty distinct arrows would be drawing
+ *   fifteen that do not exist.
+ *
+ *   The frame number is returned unclamped and honest — the art pack reports
+ *   what is actually on that frame — because clamping here would hide the
+ *   fact from anybody reading this function.
+ */
+export function ss2ArrowFrameFor(weaponId) {
+  if (!Number.isFinite(weaponId) || weaponId < 61 || weaponId > 80) return null;
+  return weaponId - 60;
+}
