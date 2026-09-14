@@ -347,37 +347,143 @@ So by `itemglow`, **potency 2 is a flaming weapon, 3 a frosted one, 4 poisoned,
   Two conclusions that were built on it are withdrawn: that "there is no
   backdrop asset" and that the arena is *only* a recipe. Both halves are real.
 
-**Root frame 221 is labelled `arena` and places SIX objects**, and then runs
-**488 instructions** of `DoAction@0x671acd` that attach more into one of them.
+**Root frame 221 is labelled `arena` and its display list holds SIX objects**,
+and it then runs **488 instructions** of `DoAction@0x671acd` that attach more
+into one of them. (Frame 221's own tag stream places only `arena` and `rain`;
+the other four persist from earlier root frames — `sky` from frame 96. What a
+renderer needs is the CUMULATIVE list, which is what this table is.)
 
 ```text
-  depth    1  char  643   640 x  420 px at (0, 0)      THE BACKDROP — the
-                                                       stage size to the pixel
-  depth    3  char 1729  8417 x 1032 px, 200 frames    the crowd, animated
-  depth   59  char 2249 24177 x 2489 px, 334 frames    `_root.arena` itself,
-                                        at (320, 167)  which the script fills
-  depth   80  char 1816             17 frames          an overlay
-  depth  438  char 1531  1919 x  210 px                a UI bar (carries text)
-  depth 1193  char  646   732 x  505 px                the frame/border
+  depth    1  char  643   640 x 420 px  at (  0.00,   0.00)  THE BACKDROP — the
+                                                             stage, to the pixel
+  depth    3  char 1729   640 x 211 px  at (315.70, 216.85)  `sky` — scale 1.04,
+                                        200 frames           NOT the crowd
+  depth   59  char 2249  1363 x 422 px  at (319.95, 166.75)  `arena`, 334 frames,
+                                                             which the script fills
+  depth   80  char 1816    17 frames    at (-310.35, -66.35) `rain`; frames 1-9
+                                                             draw NOTHING
+  depth  438  char 1531   641 x  27 px  at ( -0.50, 401.00)  `fiz_info_panel`
+                                                             (carries text)
+  depth 1193  char  646   732 x 505 px  at (-25.55, -33.00)  the frame/border
 ```
+
+► ~~`depth 3 char 1729 8417 x 1032 px, the crowd`~~ ~~`depth 59 char 2249
+  24177 x 2489`~~ ~~`depth 438 char 1531 1919 x 210`~~ **— THREE OF THESE SIX
+  ROWS WERE OUT BY A FACTOR OF TWENTY, CORRECTED 2026-09-14, AND THE CAUSE IS A
+  UNITS SEAM.** A matrix out of `tools/swf-display-list.mjs` carries `tx`/`ty`
+  in TWIPS — `readMatrix`'s own docstring says so — while `shapeToPaths` and
+  every `px()` helper emit PIXELS. Compose a pixel bound with a twips
+  translation and the OFFSET inflates twentyfold while the size does not, so the
+  error is invisible on anything placed at the origin and enormous on anything
+  else. **The two rows that were right (643 and 646) are exactly the two whose
+  contents sit at the origin**, which is how a table that the bug could not
+  reach read as a table that had been checked. Re-measured off `77cb545c…` and
+  independently reproduced by two agents on separate routes.
+
+► **AND `char 1729` IS `sky`, NOT THE CROWD.** The build names it three ways:
+  the `PlaceObject2` instance name, `_root.sky.gotoAndStop(time_of_day)` in
+  `day_night_cycle`, and its own child sprite `cloud_patterns`. **The crowd is
+  character 2112**, inside the arena clip at depth 3. That misnaming reached
+  `tools/extract-props.mjs`, where the sky shipped under the key `crowd` —
+  which a renderer that looks layers up by key would have drawn as a sky where
+  the stands belong, silently.
 
 #### The mapping this settles, and it is the one the scale question needed
 
-The stage is **640 x 420**. `_root.arena` sits at **(320, 167)** and is
+The stage is **640 x 420**. `_root.arena` sits at **(319.95, 166.75)** and is
 UNSCALED. Its `gladiators` child is created at `(0, 0)` of it, and the fighters
 are constructed at `_x = ±250`, `_y = 200` inside that.
 
 ```text
-  one arena unit          = one stage pixel      (every transform is 1.00)
-  arena origin            = (320, 167) on stage
-  the GROUND LINE         = stage y 167 + 200    = 367
-  a fighter at _x ±250    = stage x 70 and 570
-  the rocks at _x ±2160   = far off stage — the arena PANS
+  one arena unit          = one stage pixel      (the ARENA's transform is 1.00)
+  arena origin            = (319.95, 166.75) on stage
+  the GROUND LINE         = stage y 166.75 + 200 = 366.75   at full zoom
+  a fighter at _x ±250    = stage x 69.95 and 569.95
 ```
 
+*(“every transform on that frame is 1.00” was also wrong: `sky` is scaled 1.04.
+What is 1.00 is the arena's own placement, which is the transform the 1:1 claim
+actually rests on.)*
+
 **So the backdrop does set the scale, and the scale is 1:1.** The arena content
-is thirty-odd screens wide and the camera follows the fight across it, which is
-what `midway_focus` and `arena.maxscale` are for.
+is wider than the stage and the camera follows the fight across it, which is
+what `midway_focus` and `maxscale` are for.
+
+#### THE CAMERA: `combatscale` is LIVE and `combatCamera` is a `return;`
+
+`sprite:2249/frame:1/DoAction@0x6e421b` defines `getfightdistance`,
+`combatCamera` and `combatscale`, and installs `crowd.onEnterFrame` (`+0x0d54`)
+and `gladiators.onEnterFrame` (`+0x0e68`).
+
+```text
+  gladiators.onEnterFrame:
+    getfightdistance()                                       +0x0e73
+    if (_global.phasecomplete != false) combatscale()        +0x0e98   <- LIVE
+```
+
+► **`combatCamera`'s BODY IS `return;`.** Its `DefineFunction2` header at
+  `+0x048a` gives CodeSize 476 and a body starting at file `0x6e46c2`
+  (`+0x04a1`), and its first five bytes are `96 01 00 03 3e` — `Push undefined;
+  Return`. The 470 bytes after it are unreachable, including
+  `maxscale = 1500 - midwaypoint` clamped `[15, 100]`. It is still CALLED every
+  tick, from `nextphase` (`sprite:862[overlay]/frame:52` `+0x31af`), and does
+  nothing. **It is the only one of the build's function bodies that begins that
+  way**, so it is a deliberate disable rather than a compiler artefact.
+
+  So `maxscale` is set ONLY by `combatscale`'s band chain and takes the values
+  80/50/30/20/15 — which is what makes the arrow's `== 80` / `< 80` / `<= 60` /
+  `<= 40` banding below meaningful.
+
+► **`maxscale` AND `zoomscale` ARE ON `_global`, NOT ON THE ARENA.** Both
+  functions carry flags `0x016a`, which preloads `_root` into register 1 and
+  `_global` into register 2, so every `register:2, "maxscale"` is
+  `_global.maxscale`. This document called it `arena.maxscale`; harmless to the
+  arithmetic, corrected here.
+
+► **`_global.zoomscale = 5`** at `+0x0c7c`, on the arena clip's own frame 1 —
+  so a bout OPENS at a twentieth of full size and rushes in over about sixteen
+  frames. That is the build's establishing shot.
+
+```text
+  combatscale(), +0x0693..+0x0ad8
+    midway_focus._x = leftmost(hero, villain)._x + midwaypoint
+    p = {x: round(midway_focus._x), y: round(midway_focus._y)}
+    gladiators.localToGlobal(p)
+    if (p.x < 300) gladiators._x += (300 - p.x) / 16              PAN
+    if (p.x > 340) gladiators._x -= (p.x - 340) / 16
+    maxscale: mp<240 -> 80; >240&&<=300 -> 70; >300&&<=400 -> 60;
+              >200&&<=400 -> 50; >400&&<=700 -> 30;
+              >700&&<=1500 -> 20; >1500 -> 15
+    zoomscale eases toward maxscale by /5, snapping inside ±4
+    gladiators._xscale = _yscale = ceil(zoomscale)                ZOOM
+    crowd._y = -200 + ceil(zoomscale)
+```
+
+► **THE BANDS ARE SEQUENTIAL `if`s, SO THE LAST MATCH WINS — AND THE FOURTH ARM
+  EATS THREE OF THEM.** `> 200 && !(> 400)` swallows the 70 and 60 arms whole
+  and takes a slice out of the 80 arm. Seven declared bands, five reachable
+  values: `mp <= 200 -> 80`, `200 < mp <= 400 -> 50`, `400 < mp <= 700 -> 30`,
+  `700 < mp <= 1500 -> 20`, `mp > 1500 -> 15`.
+
+► **`midwaypoint = round(fightdistance / 2)`**, set inside `getfightdistance` at
+  `+0x0467` — so the camera keys on the build's own EUCLIDEAN distance, which
+  this engine already computes as `ss2FightDistance`.
+
+► **THE CROWD'S HORIZONTAL PARALLAX IS AUTHORED AND INERT.**
+  `crowd.onEnterFrame` tracks `arena.gladiators.camPoint.x` against the same
+  300..340 dead zone — and **`camPoint` is never assigned anywhere in the
+  build**: the string occurs exactly once in 7,586,504 bytes, at `0x6e4430`, as
+  one constant-pool entry read four times inside that handler. So both tests
+  compare against `undefined` and neither fires. Its VERTICAL parallax, from
+  `combatscale`, is live.
+
+► **SIX ARENAS AND TWENTY-THREE HOURS.** `sand.gotoAndStop(current_arena)`
+  (`+0x0d0f`) and `crowd.gotoAndStop(current_arena)` (`+0x0c99`) — six frames
+  each, one index for both. `_root.sky.gotoAndStop(time_of_day)` (`+0x0d33`)
+  with `_global.time_of_day = 1 + random(23)`; the clip declares 200 frames and
+  they resolve to six distinct drawings. **The count of SLOTS is not the count
+  of MEANINGS** — the same lesson `bullet`'s fifty frames and five arrows
+  taught, in a second place.
 
 ```text
   _root.arena.gladiators = createEmptyMovieClip(...)
@@ -466,7 +572,8 @@ either has moved.
   bullet.Yvelocity         = ceil(distance_to_enemy / Xvelocity) +0x7139
 ```
 
-`Xvelocity` and the arrow's own scale are banded on **`arena.maxscale`**, and
+`Xvelocity` and the arrow's own scale are banded on **`_global.maxscale`** (this
+document called it `arena.maxscale`; see the camera section above), and
 the whole table is **BOMBARD ONLY** — the four tests are sequential `if`s rather
 than an else-if chain, so the last matching arm wins:
 
@@ -482,9 +589,19 @@ than an else-if chain, so the last matching arm wins:
   perspective and the right way round for a CAMERA.** SS2 zooms the arena out as
   the fighters separate; a zoomed-out view needs the arrow drawn larger to stay
   visible and moving faster to cross the gap in a watchable time. **This is zoom
-  compensation, not depth perspective** — which matters to any reimplementation,
-  because a fixed camera has nothing to compensate for and would be copying the
-  table into a question it does not answer.
+  compensation, not depth perspective.**
+
+  ► **AND THE CAMERA IT COMPENSATES FOR IS REAL, which was checked the hard
+    way.** The paragraph here used to end "a fixed camera has nothing to
+    compensate for" as a caution to a reimplementation; on 2026-09-14 a session
+    read `combatCamera` — the disabled one — concluded the shipped arena was
+    fixed, and started removing this table's reason for existing. It is not
+    fixed: `combatscale` runs every enterFrame. **Reachable `maxscale` values
+    are 80/50/30/20/15**, so the `== 80` arm fires when the fighters are close
+    (`midwaypoint <= 200`) and the `<= 40` arm at long range, exactly as the
+    table implies. `src/render/arena-backdrop.js` reproduces the camera; the
+    scale table itself is still NOT ported, because this engine's camera is the
+    renderer's own and its arrow rides `figureScaleFor` instead.
 
 #### Per frame — `bullet.onEnterFrame` (`+0x7177`)
 

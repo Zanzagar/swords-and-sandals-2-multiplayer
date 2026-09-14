@@ -133,10 +133,13 @@ export function arrowTrailOpsFor(pack, artFrame) {
 /**
  * THE ARENA'S OWN SCENERY, at the coordinates the build states.
  *
- * ► **ROOT FRAME 221 IS A CONSTRUCTION SCRIPT AND THIS IS WHAT IT BUILDS.** The
- *   arena screen's display list is EMPTY — the whole thing is 488 instructions
- *   of `attachMovie` — and the only scenery among them is two `rockMC`
- *   instances:
+ * ► **ROOT FRAME 221 IS A CONSTRUCTION SCRIPT *AND* A DISPLAY LIST, and this is
+ *   what the SCRIPT half builds.** ~~The arena screen's display list is
+ *   EMPTY~~ — it is not, and that sentence was a wrong reading of
+ *   `resolveTimeline`'s return shape that reached three files. The frame holds
+ *   six objects (see `arena-backdrop.js`); the 488 instructions of
+ *   `attachMovie` are the other half, and the only scenery among THEM is two
+ *   `rockMC` instances:
  *
  *   ```text
  *     _root.arena.gladiators.attachMovie("rockMC", "rockLeft",  200)
