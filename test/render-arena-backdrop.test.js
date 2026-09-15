@@ -1524,9 +1524,27 @@ test("the arena layers DO leave the stage, which is why the clip exists", () => 
   //   The living head's extents table said the sky spans -12.0..207.7 and that
   //   the band at -75..-45 was therefore "not the sky's main body". That table
   //   was computed at FRAME 1. At frame 60 the sky reaches -164.8.
+  // ► **A FRESH CLONE MUST NOT GO RED HERE, AND MY FIRST VERSION MADE IT.**
+  //   `assets/` is gitignored, so a clone has no pack; this opened with
+  //   `assert.fail(...)` on that path and turned the documented clone profile
+  //   (all pass, 1 skipped) into a FAILURE. Caught by an adversarial verifier
+  //   that exported HEAD with `git archive` — i.e. without the gitignored
+  //   assets — for an unrelated check and reported the red as an artefact of
+  //   its own method. **It was not the method; it was this test.**
+  //
+  //   The convention is `test/render-props.test.js`'s: assert the absence and
+  //   return, so the suite's SKIP count stays meaningful and a missing pack is
+  //   still stated rather than passed over in silence. The anchor check is the
+  //   other half — `fs.existsSync` on a derived path is a way of PASSING, so a
+  //   broken derivation must announce itself rather than read as a clone.
+  const anchor = path.join(REPO_ROOT, "tools", "extract-props.mjs");
+  assert.ok(fs.existsSync(anchor),
+    `${anchor} is not there, so REPO_ROOT is wrong and "this machine has no extracted pack" ` +
+    "below would be a broken path derivation reading as a fresh clone");
   const packPath = path.join(REPO_ROOT, "assets", "props", "props.json");
   if (!fs.existsSync(packPath)) {
-    assert.fail(`the props pack is missing at ${packPath}; this check must not skip silently`);
+    assert.equal(fs.existsSync(packPath), false, "no extraction on this machine");
+    return;
   }
   const pack = JSON.parse(fs.readFileSync(packPath, "utf8"));
 
