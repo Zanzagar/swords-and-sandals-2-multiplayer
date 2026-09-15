@@ -451,6 +451,134 @@ export function blurSigma(width, passes = 1) {
   return Math.sqrt(n * Math.max(0, d * d - 1) / 12);
 }
 
+/**
+ * WHAT A SWF BLUR ACTUALLY REACHES, MEASURED UNDER A PLAYER.
+ *
+ * Distances are in movie pixels, outward from the edge of an opaque source, on
+ * a glow of `#00ccff` at alpha 255, strength 1, `passes` 1. `faint` is where
+ * the glow's own channel is last at or above 32/255; `lastVisible` is where it
+ * is last above 2/255.
+ *
+ * ```text
+ *     blurX    faint   lastVisible     blurX/4   blurX/2
+ *        2      0.67       0.67          0.5       1
+ *        4      1.33       2.00          1         2
+ *        8      2.00       3.33          2         4
+ *       16      4.00       7.33          4         8
+ *       32      8.00      15.33          8        16
+ *       48     12.00      22.67         12        24
+ * ```
+ *
+ * ► **`faint` IS `blurX / 4` EXACTLY, AND `lastVisible` IS `blurX / 2` LESS
+ *   TWO THIRDS OF A PIXEL, ACROSS A TWENTY-FOUR-FOLD RANGE.** That is a box
+ *   blur of width `blurX`, whose support is exactly `+-blurX/2` — the shape
+ *   `blurSigma` above says it is, now measured rather than assumed.
+ *
+ * HOW: `tools/swf-probe.mjs blur` writes a six-cell movie in which one shape
+ * definition is placed six times under glows differing ONLY in `blurX`;
+ * `tools/ruffle-shot.ps1` renders it; the six source squares are then LOCATED
+ * IN THE RENDER (six 36-pixel white runs on one scanline) rather than
+ * predicted from the window, because Ruffle applies the desktop's HiDPI factor
+ * and a predicted geometry was wrong by exactly that factor on the first try.
+ *
+ * ► **THE ORACLE IS RUFFLE, NOT ADOBE'S PLAYER, AND THAT IS A REAL LIMIT.**
+ *   Ruffle is a reimplementation aiming at Flash's behaviour, and it is the
+ *   player this project already captures through — but nothing here has
+ *   compared it against Adobe's binary. Every number above is "what a faithful
+ *   Flash player draws" only to the extent that Ruffle is one. Whoever next has
+ *   Adobe's player in front of them should re-shoot `probe-blur.swf` and say.
+ */
+export const SS2_MEASURED_GLOW_EXTENTS = Object.freeze([
+  Object.freeze({ blurX: 2, faint: 0.67, lastVisible: 0.67 }),
+  Object.freeze({ blurX: 4, faint: 1.33, lastVisible: 2.00 }),
+  Object.freeze({ blurX: 8, faint: 2.00, lastVisible: 3.33 }),
+  Object.freeze({ blurX: 16, faint: 4.00, lastVisible: 7.33 }),
+  Object.freeze({ blurX: 32, faint: 8.00, lastVisible: 15.33 }),
+  Object.freeze({ blurX: 48, faint: 12.00, lastVisible: 22.67 })
+]);
+
+/**
+ * HOW MANY SIGMAS OF RADIUS `drop-shadow` IS GIVEN — **1, AND IT WAS 2 UNTIL
+ * SOMETHING RENDERED IT.**
+ *
+ * ► **THE OLD VALUE CITED THE CSS SPECIFICATION CORRECTLY AND THE BROWSER DOES
+ *   SOMETHING ELSE.** The comment it carried read: *"`drop-shadow`'s third
+ *   length is a box-shadow blur radius, which the filter spec defines as 2x the
+ *   standard deviation `blur()` takes. Handing sigma to both draws this at half
+ *   width."* That is what the specification says. **It is not what Chrome
+ *   draws.** Three cells, one render, one 24px source, differing only in the
+ *   filter (`tools/glow-compare/units.html`, `S = blurSigma(8) = 2.2913`):
+ *
+ * ```text
+ *     filter                  lit width   reach beyond the source edge
+ *     blur(S)                    34 px          5 px
+ *     drop-shadow(0 0 S)         34 px          5 px     <- identical
+ *     drop-shadow(0 0 2S)        44 px         10 px     <- exactly double
+ * ```
+ *
+ *   `blur(R)` and `drop-shadow(0 0 R)` blur by the SAME amount here, so that
+ *   third length is a standard deviation. Doubling it doubled the blur on every
+ *   glow and every shadow in the build.
+ *
+ * ► **AND THE ORACLE AGREES ABOUT WHICH ONE IS RIGHT.** Blue channel outward
+ *   from the source edge, `blurX` 8, strength 1 — the same filter record
+ *   rendered under a player by `tools/swf-probe.mjs` and through this module:
+ *
+ * ```text
+ *     movie px:          0    1    2    3    4    5    6    7    8    9   10
+ *     ORACLE (Ruffle):  63   39   26    2    0    0    0    0    0    0    0
+ *     OURS at 2 sigma:  63   52   41   31   23   16   11    7    4    2    1
+ *     OURS at 1 sigma:  62   38   19    8    2    0    0    0    0    0    0
+ * ```
+ *
+ *   **The peak was never wrong — 63 against 63. Only the width was.** An L1 fit
+ *   over twelve radii rendered in Chrome (`tools/glow-compare/sweep.html`) puts
+ *   the minimum at 2.29, which is `blurSigma(8)`:
+ *
+ * ```text
+ *     radius   1.5    2.0   2.29    2.5    3.0    4.58 (shipped)
+ *     residual  41     17     17     21     51     121
+ * ```
+ *
+ * ► **IT IS A RULE, NOT A CONSTANT THAT FITTED ONCE.** The check that could
+ *   have broken it is whether it holds at other widths, and
+ *   `SS2_MEASURED_GLOW_EXTENTS` says it does across six spanning 24x.
+ *
+ * ► **`blur()` IS DELIBERATELY UNCHANGED, AND THAT WAS MEASURED TOO RATHER THAN
+ *   ASSUMED.** The obvious guess — that the sibling branch carries the same
+ *   error — is WRONG, and rendering it is what said so. A plain `BlurFilter`
+ *   ladder (`tools/swf-probe.mjs plainblur`) reaches `blurX / 2` under the
+ *   player, and `blur(sigma)` against `blur(sigma/2)` in Chrome:
+ *
+ * ```text
+ *     blurX               2      4      8     16     32     48
+ *     oracle reach     0.67   2.00   4.00   7.33  15.33  22.67
+ *     blur(sigma)         0      2      5     10     19     27    <- shipped
+ *     blur(sigma/2)       0      0      2      5     10     14
+ * ```
+ *
+ *   `blur(sigma)` is the closer of the two at every width. **Halving it would
+ *   have been a correction applied by analogy to a branch that did not have the
+ *   defect** — which is this project's signature failure with the nouns
+ *   changed.
+ *
+ * ► **WHAT REMAINS, COUNTED.** A Gaussian at sigma still reaches ~5 where the
+ *   box reaches 3.33 (`blurX` 8), because a box blur has finite support and a
+ *   Gaussian does not. That residual is what `approximated: "boxBlurAsGaussian"`
+ *   has always named; it is now about 1.5x rather than 3x, and it is reduced,
+ *   not removed. Closing it means blurring in an offscreen rather than in a
+ *   filter string.
+ *
+ * ► **MEASURED IN CHROME, WHICH IS THE BROWSER THIS PROJECT SHOOTS WITH.** An
+ *   engine that follows the specification literally would halve these glows.
+ *   Nothing here has rendered Firefox or Safari, and whoever does should say.
+ *
+ * 847 of the build's 859 blur-bearing filter records are `passes: 1`, so the
+ * single-box case this was measured on is the representative one rather than a
+ * corner; the 12 remaining are `passes: 2`.
+ */
+export const SHADOW_RADIUS_PER_SIGMA = 1;
+
 /** At most four decimals, with no trailing zeros, so `11` is not `11.0000`. */
 function length(value) {
   const rounded = Math.round(value * 10000) / 10000;
@@ -563,10 +691,13 @@ export function canvasFilterFor(filters, { scale = 1 } = {}) {
       parts.push(
         `drop-shadow(${length(Math.cos(angle) * distance * factor)}px ` +
         `${length(Math.sin(angle) * distance * factor)}px ` +
-        // ► **TWICE SIGMA.** `drop-shadow`'s third length is a box-shadow blur
-        //   radius, which the filter spec defines as 2x the standard deviation
-        //   `blur()` takes. Handing sigma to both draws this at half width.
-        `${length(2 * sigma * factor)}px ${rgbaOf(colour, alpha)})`
+        // ► **`SHADOW_RADIUS_PER_SIGMA` SIGMAS — 1, and it was 2 until it was
+        //   measured.** See that constant for the two rendered profiles, the
+        //   residual sweep that chose it, and the six-width check that makes it
+        //   a rule rather than a number that fitted once. The short version:
+        //   twice sigma matched the box blur's standard deviation and drew
+        //   every glow in the build about 2.5x too wide.
+        `${length(SHADOW_RADIUS_PER_SIGMA * sigma * factor)}px ${rgbaOf(colour, alpha)})`
       );
       applied.push(Object.freeze({
         type,

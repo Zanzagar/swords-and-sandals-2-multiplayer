@@ -2133,11 +2133,23 @@ test("a filter group is a SUBTREE: it carries what canvas made of the filters, a
 
   const glow = groups.find((group) => group.path.join() === "7,2");
   // ► **BY VALUE, and the value is the build's own.** `GLOW_ORANGE` is copied
-  //   out of `splash`'s character 1509. If `canvasFilterFor` ever stopped
-  //   doubling sigma for `drop-shadow`'s third length — the hazard its own
-  //   header names — this string would read 1.4142px and this assertion, not
-  //   a screenshot, is what says so.
-  assert.equal(glow.filter, "drop-shadow(0px 0px 2.8284px rgba(255, 153, 0, 1))");
+  //   out of `splash`'s character 1509.
+  //
+  // ► **THIS COMMENT PREDICTED ITS OWN CORRECTION AND GUESSED THE SIGN WRONG.**
+  //   It read: *"If `canvasFilterFor` ever stopped doubling sigma for
+  //   `drop-shadow`'s third length — the hazard its own header names — this
+  //   string would read 1.4142px and this assertion, not a screenshot, is what
+  //   says so."* It stopped doubling on 2026-09-15, this string does read
+  //   1.4142px, and the assertion did say so — but the doubling was the
+  //   defect, not the hazard. Chrome blurs `drop-shadow(0 0 R)` exactly as much
+  //   as `blur(R)`, measured in one render on one source, so the radius is a
+  //   standard deviation and doubling it doubled every glow in the build. See
+  //   `SHADOW_RADIUS_PER_SIGMA` in `src/render/filters.js`.
+  //
+  //   **A SCREENSHOT IS WHAT SAID SO IN THE END**, which is the part worth
+  //   keeping: this assertion pinned the string faithfully for as long as the
+  //   string was wrong.
+  assert.equal(glow.filter, "drop-shadow(0px 0px 1.4142px rgba(255, 153, 0, 1))");
   assert.deepEqual(glow.refused.map((entry) => `${entry.type}:${entry.reason}`),
     ["bevel:filterHasNoCanvasEquivalent"],
     "the inner bevel beside it is REFUSED BY NAME — canvas has no bevel and no inset drop-shadow");
@@ -2291,7 +2303,7 @@ test("the pack's SECOND filter list is in the roster, reaching nothing, and sayi
   assert.equal(group.button, 777);
   assert.equal(group.leaf, "text");
   assert.equal(group.opCount, 0, "it reaches no shape operation");
-  assert.equal(group.filter, "drop-shadow(0px 0px 2.8284px rgba(255, 153, 0, 1))",
+  assert.equal(group.filter, "drop-shadow(0px 0px 1.4142px rgba(255, 153, 0, 1))",
     "and its filter is real, which is exactly why a roster that dropped it would be lying");
   assert.deepEqual([...group.unresolvedKinds], ["text-static"],
     "what it DOES reach, by name, out of this screen's own unresolved list");
@@ -2596,7 +2608,7 @@ test("the real pack: the two bevels are refused BY NAME, and their groups still 
     assert.deepEqual(entry.group.refused.map((record) => record.type), ["bevel"]);
     assert.deepEqual(entry.group.refused.map((record) => record.nearest), [null],
       "and NO nearest match is offered, because a nearest-match bevel is the silent-approximation defect");
-    assert.equal(entry.group.filter, "drop-shadow(0px 0px 2.8284px rgba(255, 153, 0, 1))",
+    assert.equal(entry.group.filter, "drop-shadow(0px 0px 1.4142px rgba(255, 153, 0, 1))",
       "the glow on the same list still paints");
     assert.equal(entry.group.opCount, 1);
     assert.deepEqual(entry.group.counts, { total: 2, applied: 1, deferred: 0, noOp: 0, refused: 1, approximated: 1 });

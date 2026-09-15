@@ -1,0 +1,60 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Blur radius sweep — fitting CSS drop-shadow to the measured box blur</title>
+<style>
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; image-rendering: pixelated; }
+</style>
+<!--
+  FITTING ONE NUMBER AGAINST THE ORACLE, RATHER THAN CHOOSING IT.
+
+  `canvasFilterFor` hands `drop-shadow` a radius of 2 * blurSigma, where
+  `blurSigma` returns the standard deviation of the box blur the SWF filter
+  declares. That is the textbook equivalence and it is wrong in the way that
+  matters: **matching standard deviations does not match SUPPORT.** A width-8
+  box blur puts every pixel it touches inside +-4; the equal-sigma Gaussian
+  puts about 8% of its mass beyond that, and the measured tail runs to 9.
+
+  Measured against Ruffle, blue channel outward from the source edge, in movie
+  pixels, glow #00ccff blurX = blurY = 8 passes 1 strength 1:
+
+      ORACLE:   63  39  26   2   0   0   0   0   0   0   0
+      OURS:     63  52  41  31  23  16  11   7   4   2   1
+
+  The peak agrees exactly. Only the width is wrong.
+
+  So this page draws the SAME source under a sweep of radii and nothing else,
+  so that the radius can be CHOSEN BY RESIDUAL against that profile rather than
+  by eye. 847 of the build's 859 blur-bearing filter records are passes = 1, so
+  this single-box case is the representative one and not a corner.
+
+  ► **WHAT THIS IS NOT.** It is not a claim that a Gaussian can be a box blur.
+    It cannot: one has finite support and the other does not. It is a claim
+    that IF the renderer is going to approximate one with the other, the
+    parameter should be the one that minimises the measured difference, and the
+    residual that remains should be reported rather than implied.
+-->
+<canvas id="stage" width="1200" height="100"></canvas>
+<script type="module">
+const RADII = [1.0, 1.5, 2.0, 2.29, 2.5, 3.0, 3.5, 4.0, 4.58, 5.0, 6.0, 7.0];
+const CELL = 100;
+const BOX = 24;
+
+const canvas = document.getElementById("stage");
+const context = canvas.getContext("2d");
+
+function draw() {
+  context.fillStyle = "#000000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  RADII.forEach((radius, index) => {
+    context.save();
+    context.filter = `drop-shadow(0px 0px ${radius}px rgba(0, 204, 255, 1))`;
+    context.fillStyle = "#ffffff";
+    context.fillRect(index * CELL + (CELL - BOX) / 2, (CELL - BOX) / 2, BOX, BOX);
+    context.restore();
+  });
+}
+
+(function frame() { draw(); requestAnimationFrame(frame); })();
+window.__sweep = { radii: RADII, cell: CELL, box: BOX };
+</script>

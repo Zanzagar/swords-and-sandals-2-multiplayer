@@ -28,7 +28,7 @@ import {
   poseIndexAt,
   weaponEnchantmentFor
 } from "../src/render/extracted-figure.js";
-import { canvasFilterFor } from "../src/render/filters.js";
+import { SHADOW_RADIUS_PER_SIGMA, canvasFilterFor } from "../src/render/filters.js";
 import { UNMAPPED_CLIP_LABELS, allUnmappedLabels, clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
 import { ATTACHMENTS, attachmentsFor, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
 import nodeFs from "node:fs";
@@ -976,7 +976,14 @@ test("the filter's SCALE composes the clip-to-arena factor, which only this modu
   // The pack is 100 clip pixels tall and UNIT is 150, so height 1 is 1.5.
   // `canvasFilterFor` prints at most four decimals, so the comparison is made
   // at the precision the STRING actually carries rather than at float exactness.
-  assert.equal(base, Math.round(2 * blurSigmaOf(22) * 1.5 * 10000) / 10000);
+  // ► **`SHADOW_RADIUS_PER_SIGMA`, NOT 2 — it halved on 2026-09-15.** This read
+  //   `2 * blurSigmaOf(22) * 1.5` until a render said that Chrome blurs
+  //   `drop-shadow(0 0 R)` by exactly as much as `blur(R)`, so the radius is a
+  //   standard deviation and doubling it doubled every glow in the build. What
+  //   this test is actually about — that the clip-to-arena factor and the
+  //   canvas scale both reach the radius — is untouched, and the three
+  //   assertions below it are the ones carrying that.
+  assert.equal(base, Math.round(SHADOW_RADIUS_PER_SIGMA * blurSigmaOf(22) * 1.5 * 10000) / 10000);
   // Tolerance 1e-3 and not 1e-9: the string carries four decimals, so doubling
   // a printed radius cannot be exact and asserting that it is would be pinning
   // the formatter rather than the arithmetic.

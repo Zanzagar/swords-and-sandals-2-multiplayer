@@ -1,0 +1,61 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>CSS blur() reach — the sibling branch of the drop-shadow fit</title>
+<style>
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; image-rendering: pixelated; }
+</style>
+<!--
+  THE `blur()` BRANCH, MEASURED SEPARATELY FROM THE `drop-shadow` ONE.
+
+  `canvasFilterFor` sends glows and shadows to `drop-shadow()` and plain blurs
+  to `blur()`, and **the two CSS functions take their length in different
+  units** — `blur(s)` is a Gaussian of standard deviation s, while
+  `drop-shadow`'s third length is a box-shadow radius, twice one. A correction
+  measured on one therefore says nothing about the other, and deriving the
+  second from the first would be authoring rather than measuring.
+
+  Measured under Ruffle, `tools/swf-probe.mjs plainblur`, a 24px cyan square
+  under a BlurFilter at passes 1, reach outward from the source edge in movie
+  pixels:
+
+      blurX          2      4      8     16     32     48
+      reach       0.67   2.00   4.00   7.33  15.33  22.67
+      blurX/2        1      2      4      8     16     24
+
+  So a SWF blur of width w reaches exactly w/2 — a box blur's support — which
+  is the same answer the glow ladder gave, from a different filter record.
+
+  This page draws the same source under CSS `blur()` at both candidate
+  standard deviations, so the reach can be compared rather than predicted.
+-->
+<canvas id="stage" width="960" height="160"></canvas>
+<script type="module">
+import { blurSigma } from "/src/render/filters.js";
+
+const WIDTHS = [2, 4, 8, 16, 32, 48];
+const CELL = 160;
+const BOX = 24;
+// Which multiple of the box blur's sigma to hand `blur()`. `?k=1` is what this
+// module shipped; `?k=0.5` is the candidate. A query parameter rather than two
+// pages, so the two renders differ in exactly one number.
+const K = Number(new URLSearchParams(location.search).get("k") ?? 1);
+
+const canvas = document.getElementById("stage");
+const context = canvas.getContext("2d");
+
+function draw() {
+  context.fillStyle = "#000000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  WIDTHS.forEach((width, index) => {
+    context.save();
+    context.filter = `blur(${blurSigma(width, 1) * K}px)`;
+    context.fillStyle = "#00ccff";
+    context.fillRect(index * CELL + (CELL - BOX) / 2, (CELL - BOX) / 2, BOX, BOX);
+    context.restore();
+  });
+}
+
+(function frame() { draw(); requestAnimationFrame(frame); })();
+window.__blurLadder = { widths: WIDTHS, cell: CELL, box: BOX, k: K };
+</script>

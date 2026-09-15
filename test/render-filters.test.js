@@ -44,6 +44,8 @@ import {
   applyColourTransform,
   applyColourTransformAlpha,
   blendModeFor,
+  SHADOW_RADIUS_PER_SIGMA,
+  SS2_MEASURED_GLOW_EXTENTS,
   blurSigma,
   canvasFilterFor,
   colourMatrixFilterString,
@@ -455,23 +457,78 @@ test("sigma is the box-blur variance identity, and passes change it", () => {
   assert.equal(blurSigma(Number.NaN, Number.NaN), 0);
 });
 
-test("blur() takes SIGMA and drop-shadow() takes TWICE it", () => {
-  // ► THE DEFECT THIS NAMES: the CSS filter spec defines `blur(R)` with R as a
-  //   standard deviation, but `drop-shadow`'s third length as a box-shadow blur
-  //   radius, which is 2x the standard deviation. Handing sigma to both — the
-  //   obvious move — draws every glow and shadow at half its width.
+test("drop-shadow() takes SHADOW_RADIUS_PER_SIGMA sigmas, and that is 1 BY MEASUREMENT", () => {
+  // ► **THIS TEST USED TO ASSERT TWICE SIGMA AND ITS COMMENT WAS RIGHT ABOUT
+  //   THE SPEC AND WRONG ABOUT THE PICTURE.** It read: *"the CSS filter spec
+  //   defines `blur(R)` with R as a standard deviation, but `drop-shadow`'s
+  //   third length as a box-shadow blur radius, which is 2x the standard
+  //   deviation."* All true. What it does not follow from is that the right
+  //   radius is the one matching the BOX BLUR's standard deviation — a box and
+  //   a Gaussian cannot be matched on moment and support at once, and matching
+  //   the moment drew every glow in the build about 2.5x too wide.
+  //
+  //   Settled 2026-09-15 by rendering both: `tools/swf-probe.mjs` writes a SWF
+  //   carrying the filter, `tools/ruffle-shot.ps1` renders it under a player,
+  //   and `tools/glow-compare/` draws the same source through this module.
+  //   See `SHADOW_RADIUS_PER_SIGMA` for the two profiles and the residual
+  //   sweep. `blur()` is untouched: its argument IS a standard deviation.
   const blurred = canvasFilterFor([blurRecord(16)]);
   const glowed = canvasFilterFor([glowRecord({ blurX: 16, blurY: 16, distance: 0, angle: 0 })]);
   const sigma = lengthsIn(blurred.filter)[0];
   const shadowRadius = lengthsIn(glowed.filter)[2];
   assert.ok(sigma > 0, "a 16-pixel box blur has a real sigma");
-  // Compared with a tolerance, and the tolerance is NAMED rather than nudged
-  // until green: the emitter rounds every length to four decimals
-  // INDEPENDENTLY, so `2 * sigma` is rounded from the doubled value and not
-  // doubled from the rounded one. The first draft of this test asserted exact
-  // equality and went red at 9.2195 against 9.2196 — a formatting artefact,
-  // not a wrong radius. What is under test is the RELATIONSHIP.
-  assert.ok(Math.abs(shadowRadius - 2 * sigma) <= 2e-4, `${shadowRadius} is not twice ${sigma}`);
+  // Compared with a NAMED tolerance rather than one nudged until green: the
+  // emitter rounds every length to four decimals INDEPENDENTLY, so the radius
+  // is rounded from the scaled value and not scaled from the rounded one.
+  assert.ok(Math.abs(shadowRadius - SHADOW_RADIUS_PER_SIGMA * sigma) <= 2e-4,
+    `${shadowRadius} is not ${SHADOW_RADIUS_PER_SIGMA}x ${sigma}`);
+});
+
+test("THE EMITTED RADIUS LANDS NEAR A REAL PLAYER'S REACH, and doubling it does not", () => {
+  // ► **THE ASSERTION THAT COULD HAVE VARIED, and the reason the constant above
+  //   is not just a number someone preferred.** The test before it compares the
+  //   emitter to ITSELF — it would pass at any multiplier, because both sides
+  //   move together. This one compares it to TWO things measured outside this
+  //   process: what a player draws, and what this browser draws.
+  //
+  //   `CHROME_REACH_PER_RADIUS` is measured, not derived:
+  //   `tools/glow-compare/units.html` renders one source under `blur(S)`,
+  //   `drop-shadow(0 0 S)` and `drop-shadow(0 0 2S)` in a single frame, and the
+  //   reach comes out 5, 5 and 10 movie px at S = 2.2913. Linear in the radius,
+  //   and the same for both functions — which is the finding that condemned the
+  //   doubling. 5 / 2.2913 = 2.18; the blur ladder over six widths puts it
+  //   between 1.79 and 2.18, quantised at the narrow end by the pixel grid, so
+  //   2.1 is the middle of a measured range rather than one reading.
+  //
+  //   ► **THE FIRST DRAFT OF THIS TEST PASSED FOR THE WRONG REASON.** It used
+  //     `3.33 * radius / 2`, taking the CSS specification's word that
+  //     `drop-shadow`'s length is twice a standard deviation. That model is
+  //     false in this browser, and it happened to land inside the tolerance
+  //     because its two errors ran opposite ways. A model that cannot be right
+  //     is not made acceptable by an assertion that passes under it.
+  const CHROME_REACH_PER_RADIUS = 2.1;
+
+  for (const { blurX, lastVisible } of SS2_MEASURED_GLOW_EXTENTS) {
+    const emitted = lengthsIn(canvasFilterFor([glowRecord({ blurX, blurY: blurX, distance: 0, angle: 0 })]).filter)[2];
+    const ratio = (CHROME_REACH_PER_RADIUS * emitted) / lastVisible;
+
+    // ► **THE BAND IS THE COUNTED APPROXIMATION, STATED AS A NUMBER.** A
+    //   Gaussian standing in for a box blur always over-reaches: the box stops
+    //   dead at blurX/2 and the Gaussian trails off. Measured, that costs
+    //   between 1.17x and 1.57x across these six widths. This asserts the
+    //   overshoot EXISTS and is bounded — a renderer that matched exactly would
+    //   fail here and should, because it would mean the offscreen blur got
+    //   built and this constant is no longer what decides the picture.
+    assert.ok(ratio > 1.0 && ratio < 1.8,
+      `blurX ${blurX}: emitted radius ${emitted} predicts a reach of ` +
+      `${(CHROME_REACH_PER_RADIUS * emitted).toFixed(2)} movie px against a player's measured ` +
+      `${lastVisible} — a ratio of ${ratio.toFixed(2)}, outside the measured 1.17..1.57 band`);
+
+    // And the value this replaced is outside that band at every width, so the
+    // assertion above is not one that would hold either way.
+    assert.ok(ratio * 2 >= 1.8,
+      `blurX ${blurX}: the old doubled radius would also have passed, so this test does not discriminate`);
+  }
 });
 
 test("a drop shadow's distance and angle become dx and dy", () => {

@@ -1589,8 +1589,14 @@ test("the sky's group filters are a BLUR and two GLOWS the painter still has to 
   const groups = propEffectGroupsFor(REAL_PROPS, { linkage: "sky", frame: 200 });
   assert.deepEqual(groups.map((group) => [group.character, group.ops, group.filter]), [
     [1680, 1, null],
-    [1728, 56, "drop-shadow(0px 0px 15px rgba(0, 204, 255, 1))"],
-    [1702, 12, "drop-shadow(0px 0px 4.5826px rgba(0, 255, 255, 1))"],
+    // ► **THESE TWO RADII HALVED ON 2026-09-15 and the reason is measured, not
+    //   tidied.** `drop-shadow` used to be handed twice the box blur's sigma,
+    //   which matched its standard deviation and drew about 2.5x too wide
+    //   against a real player. See `SHADOW_RADIUS_PER_SIGMA` in
+    //   `src/render/filters.js` for the two rendered profiles and the sweep
+    //   that chose 1. The moon's glow was `30px` at 2x and is `15px`.
+    [1728, 56, "drop-shadow(0px 0px 7.5px rgba(0, 204, 255, 1))"],
+    [1702, 12, "drop-shadow(0px 0px 2.2913px rgba(0, 255, 255, 1))"],
     [1690, 1, "blur(3.1623px)"]
   ], "a cyan moon glow over 56 paths, a cyan star glow over 12, and an 11px cloud blur over 1");
 
@@ -1598,7 +1604,7 @@ test("the sky's group filters are a BLUR and two GLOWS the painter still has to 
   //   `ctx.filter` lengths are not scaled by `setTransform` and the arena draws
   //   the 550x400 stage fitted to the canvas.
   const doubled = propEffectGroupsFor(REAL_PROPS, { linkage: "sky", frame: 200, scale: 2 });
-  assert.equal(doubled[1].filter, "drop-shadow(0px 0px 30px rgba(0, 204, 255, 1))");
+  assert.equal(doubled[1].filter, "drop-shadow(0px 0px 15px rgba(0, 204, 255, 1))");
   assert.equal(doubled[3].filter, "blur(6.3246px)");
 
   // ► **NOT ONE OF THOSE STRINGS IS ON AN OPERATION**, which is the whole

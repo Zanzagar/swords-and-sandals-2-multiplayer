@@ -1,0 +1,61 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Does blur(R) blur as much as drop-shadow(0 0 R)?</title>
+<style>
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; image-rendering: pixelated; }
+</style>
+<!--
+  ONE QUESTION, ONE RENDER: does this browser's `drop-shadow` take a STANDARD
+  DEVIATION in its third length, or twice one?
+
+  `src/render/filters.js` doubled it for years on the second belief, citing the
+  CSS filter specification, which defines `drop-shadow`'s third length as a
+  box-shadow blur radius and a box-shadow blur radius as twice the standard
+  deviation that `blur()` takes. **That is what the specification says. It is
+  not what Chrome draws**, and the difference is a factor of two on every glow
+  and every shadow in the build.
+
+  The comparison has to be in ONE render on ONE source or it is not a
+  comparison: three cells, the same 24px square, differing only in the filter.
+  If cells 1 and 2 match, the radius is a standard deviation. If cell 1 matches
+  cell 3, it is twice one.
+
+  Cell 1  blur(S)                  S = blurSigma(8) = 2.2913
+  Cell 2  drop-shadow(0 0 S)
+  Cell 3  drop-shadow(0 0 2S)      what this module used to emit
+-->
+<canvas id="stage" width="480" height="160"></canvas>
+<script type="module">
+import { blurSigma } from "/src/render/filters.js";
+
+const S = blurSigma(8, 1);
+const CELL = 160;
+const BOX = 24;
+const CASES = [
+  { label: "blur(S)", filter: `blur(${S}px)` },
+  { label: "drop-shadow(0 0 S)", filter: `drop-shadow(0px 0px ${S}px rgba(0, 204, 255, 1))` },
+  { label: "drop-shadow(0 0 2S)", filter: `drop-shadow(0px 0px ${2 * S}px rgba(0, 204, 255, 1))` }
+];
+
+const canvas = document.getElementById("stage");
+const context = canvas.getContext("2d");
+
+function draw() {
+  context.fillStyle = "#000000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  CASES.forEach((entry, index) => {
+    context.save();
+    context.filter = entry.filter;
+    // Cell 1 blurs the SOURCE and cells 2 and 3 blur a SHADOW behind it, so the
+    // source is drawn in the glow's own colour throughout. Otherwise cell 1
+    // would be measured on a white spread and the others on a cyan one.
+    context.fillStyle = "#00ccff";
+    context.fillRect(index * CELL + (CELL - BOX) / 2, (CELL - BOX) / 2, BOX, BOX);
+    context.restore();
+  });
+}
+
+(function frame() { draw(); requestAnimationFrame(frame); })();
+window.__units = { sigma: S, cases: CASES.map((c) => c.filter), cell: CELL, box: BOX };
+</script>

@@ -253,17 +253,27 @@ function approximatedGlyphTextPack() {
 /**
  * A glow in the shape `tools/extract-screens.mjs` writes one, with the numbers
  * chosen so the canvas string can be checked by hand: `blurSigma(4, 1)` is
- * `sqrt(15/12)` = 1.118033988…, `drop-shadow`'s third length is TWICE that
- * (`filters.js`'s own note: CSS takes a box-shadow radius there and `blur()`
- * takes a standard deviation), and `canvasFilterFor` rounds to four decimals —
- * so this filter is exactly `drop-shadow(0px 0px 2.2361px rgba(0, 0, 0, 1))`
- * and the test below asserts that literal rather than recomputing it.
+ * `sqrt(15/12)` = 1.118033988…, `drop-shadow`'s third length is
+ * `SHADOW_RADIUS_PER_SIGMA` times that, and `canvasFilterFor` rounds to four
+ * decimals — so this filter is exactly
+ * `drop-shadow(0px 0px 1.118px rgba(0, 0, 0, 1))` and the test below asserts
+ * that literal rather than recomputing it.
+ *
+ * ► **THIS LITERAL HALVED ON 2026-09-15, AND THE NOTE IT USED TO CARRY WAS THE
+ *   REASON IT WAS WRONG.** It read *"`drop-shadow`'s third length is TWICE
+ *   that (`filters.js`'s own note: CSS takes a box-shadow radius there and
+ *   `blur()` takes a standard deviation)"* — a correct reading of the CSS spec
+ *   that still drew every glow in the build about 2.5x too wide, because it
+ *   matched the GAUSSIAN's standard deviation to the BOX BLUR's and those two
+ *   kernels cannot be matched on moment and support at once. Settled by
+ *   rendering the same filter under a real player and under this module; see
+ *   `SHADOW_RADIUS_PER_SIGMA` in `src/render/filters.js`.
  */
 const SYNTHETIC_GLOW = Object.freeze({
   type: "glow", filterId: 2, colour: { red: 0, green: 0, blue: 0, alpha: 255 },
   blurX: 4, blurY: 4, strength: 1, inner: false, knockout: false, compositeSource: true, passes: 1
 });
-const SYNTHETIC_GLOW_STRING = "drop-shadow(0px 0px 2.2361px rgba(0, 0, 0, 1))";
+const SYNTHETIC_GLOW_STRING = "drop-shadow(0px 0px 1.118px rgba(0, 0, 0, 1))";
 
 const SYNTHETIC_SHAPE = {
   character: 10,
@@ -1563,10 +1573,15 @@ test("THE ARENA UI BAR NOW GLOWS — one soft edge around the words, not one aro
 
   // The literal, not a recomputation: this is the build's own glow — blurX and
   // blurY of 1.5 at one pass, so `blurSigma` is sqrt((2.25-1)/12) = 0.322749…,
-  // and `drop-shadow`'s third length is TWICE that. A module that handed sigma
-  // straight to `drop-shadow` would write 0.3227px here and draw the bar at
-  // half the intended width; one that forgot the alpha would write rgba(...,0).
-  const GLOW = "drop-shadow(0px 0px 0.6455px rgba(0, 0, 0, 1))";
+  // and `drop-shadow`'s third length is `SHADOW_RADIUS_PER_SIGMA` times that.
+  // One that forgot the alpha would write rgba(..., 0).
+  //
+  // ► **THIS WAS `0.6455px` UNTIL 2026-09-15, under a comment saying a module
+  //   handing sigma straight to `drop-shadow` "would draw the bar at half the
+  //   intended width".** That is exactly what this module now does, on purpose,
+  //   because the intended width was measured against a real player and the
+  //   doubled radius was about 2.5x too wide. See `SHADOW_RADIUS_PER_SIGMA`.
+  const GLOW = "drop-shadow(0px 0px 0.3227px rgba(0, 0, 0, 1))";
   assert.equal(sound.filter, GLOW, "a tight black glow, which is what makes the readout legible on the backdrop");
   assert.equal(tooltips.filter, GLOW);
   assert.equal(sound.approximated.includes("filtersCarried"), true);
@@ -1649,23 +1664,32 @@ test("EVERY GLOW ON EVERY WORD IN THE BUILD REACHES THE PAINTER — 112 of 113, 
   assert.equal(totals.noPath, 0, "no filter entry in the pack has lost its path");
 
   // ► **THE FIVE GLOWS, BY STRING AND BY COUNT.** Every one of these could have
-  //   come out a dozen other ways — sigma rather than twice sigma, a stage scale
-  //   baked in, the strength lost, the colour byte-swapped — so the literals are
-  //   the assertion and the counts say which words wear which.
+  //   come out a dozen other ways — a stage scale baked in, the strength lost,
+  //   the colour byte-swapped — so the literals are the assertion and the
+  //   counts say which words wear which.
+  //
+  // ► **AND ON 2026-09-15 EVERY ONE OF THEM HALVED, which is this table doing
+  //   its job.** The radius handed to `drop-shadow` went from twice the box
+  //   blur's sigma to once it, because the doubled value matched the two
+  //   kernels' standard deviations and drew about 2.5x too wide against a
+  //   player. The old comment here listed "sigma rather than twice sigma" as
+  //   one of the ways these strings could come out WRONG; it is now the way
+  //   they come out right. See `SHADOW_RADIUS_PER_SIGMA` in
+  //   `src/render/filters.js` for the rendered profiles that settled it.
   assert.deepEqual(strings, {
     // 1527 and 1528 on all 26 screens: the arena UI bar's two readouts.
-    "drop-shadow(0px 0px 0.6455px rgba(0, 0, 0, 1))": 52,
+    "drop-shadow(0px 0px 0.3227px rgba(0, 0, 0, 1))": 52,
     // The house glow, on 43 different characters.
-    "drop-shadow(0px 0px 1px rgba(0, 0, 0, 1))": 52,
+    "drop-shadow(0px 0px 0.5px rgba(0, 0, 0, 1))": 52,
     // `townsquare`'s five button labels — and these five reached NOTHING until
     // this module stopped reading `filteredPlacements` alone.
-    "drop-shadow(0px 0px 2.2361px rgba(102, 0, 0, 1))": 5,
+    "drop-shadow(0px 0px 1.118px rgba(102, 0, 0, 1))": 5,
     // "emperor's reign" in midnight blue, on `splash` and `new_or_continue` —
     // ONE character on TWO screens, which is why the count is 2 and not 1.
-    "drop-shadow(0px 0px 1.3165px rgba(0, 0, 51, 1))": 2,
+    "drop-shadow(0px 0px 0.6582px rgba(0, 0, 51, 1))": 2,
     // The widest glow in the build's text, and it is two letters: character
     // 2123, the word "vs" on `arena_intro`.
-    "drop-shadow(0px 0px 4.5826px rgba(0, 0, 0, 1))": 1,
+    "drop-shadow(0px 0px 2.2913px rgba(0, 0, 0, 1))": 1,
     // `gameover_demo`'s 2292, whose filter list is empty.
     null: 1
   });
@@ -1742,7 +1766,7 @@ test("THE 113 ARE RECONCILED AGAINST THE PACK'S OWN TWO FILTER ARRAYS, and 5 of 
   const buttons = townsquare.filterGroups.filter((group) => group.source === "buttonRecord");
   assert.deepEqual(buttons.map((group) => group.character), [1789, 1793, 1797, 1801, 1805]);
   assert.deepEqual([...new Set(buttons.map((group) => group.filter))],
-    ["drop-shadow(0px 0px 2.2361px rgba(102, 0, 0, 1))"]);
+    ["drop-shadow(0px 0px 1.118px rgba(102, 0, 0, 1))"]);
   assert.deepEqual(buttons.map((group) => group.path.join(",")),
     ["59,353,1", "59,355,1", "59,357,1", "59,359,1", "59,361,1"]);
 });
