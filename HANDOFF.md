@@ -158,7 +158,26 @@ item 2 is HALF closed — the extractors carry the filters, nothing reads them:)
   never been on a screen. `src/render/filters.js` is the same story: it decodes
   colour matrices, blend modes and blurs, and `main.js` sets neither
   `globalCompositeOperation` nor `ctx.filter`. **The sky's day/night colouring
-  IS a ColorMatrix — 208 of them in that one clip.**
+  IS a ColorMatrix — ~~208 of them~~ 150 of them in that one clip, 148 of them
+  non-identity.**
+  ► **THE CLAIM IS RIGHT AND THE NUMBER WAS WRONG, and between them they cost a
+    day.** `208` is the sky's BLUR count. Measured 2026-09-15 from
+    `props.sky.effects.inherited.filtersByType`:
+    `{colourMatrix: 150, blur: 208, glow: 212}`.
+  ► **AND A FIX WROTE THE OPPOSITE CLAIM INTO THE CODE, WHERE IT WAS BELIEVED.**
+    The 2026-09-14 colour-transform work put *"its day/night colouring IS this
+    transform, swept across 200 frames, and not a ColorMatrix"* into
+    `src/render/props.js`'s header. **That is false, it contradicted this file,
+    and this file was right.** I then paraphrased the CODE rather than the
+    living head into an agent brief, and the agent broke it by measuring:
+    backdrop shape 1679 at frame 1 is `#2d2dfd`→`#5fbefe` after the colour
+    transform and `#440037`→`#79689f` after the group matrix. **The transform
+    moves the sky a few units; the MATRIX moves it blue → maroon → black.**
+    Both are real and the matrix is the day/night cycle.
+  ► **THE LESSON IS THE PRECEDENCE RULE AT THE TOP OF THIS FILE, WHICH I BROKE.**
+    When the code and the living head disagree, THIS FILE IS RIGHT until
+    something re-measures. Quoting a source file into a brief is not
+    re-measuring.
 
 ► **TWO TOOLS, AND REACH FOR THEM FIRST.** `tools/shot.sh` drives the WINDOWS
   Chrome headless against the server; `tools/sample-png.mjs` reads the pixels

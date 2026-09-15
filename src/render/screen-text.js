@@ -46,12 +46,18 @@
  *      placement. The 65 used to be a filter over the operations, which
  *      undercounts where two marks collide — see ONE MARK PER OPERATION
  *      below.)*
- *   4. **108 of the 187 placements sit under a FILTERLIST nothing applies** —
+ *   4. ~~**108 of the 187 placements sit under a FILTERLIST nothing applies** —
  *      58%, the same defect `screen.js` reports for 69% of its path operations,
  *      and invisible in exactly the same way. `screen.js` marks its own ops
  *      `filtered: true`; the text placements it hands over carry no such mark,
  *      so this file re-reads `filteredPlacements` from the pack and marks and
- *      counts them itself.
+ *      counts them itself.~~ **113, NOT 108, AND THEY ARE NOW DRAWN RATHER
+ *      THAN COUNTED — see FILTERS ON WORDS below.** Both halves of the struck
+ *      sentence were wrong in the same way: re-reading `filteredPlacements`
+ *      here was a SECOND reader of the pack, and it saw neither the pack's
+ *      second filter list (`filteredButtonRecords`, five entries, which is the
+ *      whole of the 108/113 gap) nor `entry.filters`, so the glows could not
+ *      have been drawn from here even in principle.
  *   5. **AN APPROXIMATION THIS FILE HAS NO NAME FOR IS STILL COUNTED, UNDER
  *      THE NAME `text.js` GAVE IT.** The tally used to be five `if`s and an
  *      unconditional add, filling eight keys, and every one of them was keyed
@@ -186,6 +192,95 @@
  * wrong. On sorted input the sort is a no-op, and the test asserts that the
  * shape operations come back in exactly the order `screenFor` emitted them.
  *
+ * ## FILTERS ON WORDS — THE GLOW IS ON THE FIELD, NEVER ON THE LETTER
+ *
+ * 112 of this build's 113 filtered text placements carry a GLOW and nothing
+ * else, and until 2026-09-15 not one of them reached anything at all. They were
+ * counted — `filtersNotApplied`, 108 of them under the old reader — and a count
+ * is what you write down when you cannot draw the thing.
+ *
+ * ► **`screen.js` NOW HANDS OVER THE FILTER RECORDS, SO THIS FILE READS ITS
+ *   `filterGroups` ROSTER AND STOPPED READING THE PACK ITSELF.** That roster is
+ *   built from BOTH of the pack's filter lists and carries `entry.filters`
+ *   verbatim; the reader it replaces did neither. The whole of the 108-to-113
+ *   difference is `filteredButtonRecords` — five `leaf: "text"` entries on
+ *   `townsquare` (characters 1789, 1793, 1797, 1801, 1805 at paths
+ *   `[59,353,1]` … `[59,361,1]`) carrying a dark red
+ *   `drop-shadow(0px 0px 2.2361px rgba(102, 0, 0, 1))` that nothing in either
+ *   module had ever seen.
+ *
+ * ### THE ONE RULE, AND THE LEVEL AT WHICH IT BITES
+ *
+ * ► **FLASH RASTERISES A FILTERED GROUP AND FILTERS THE COMPOSITE**, which is
+ *   the rule `screen.js` states for shapes and which costs it a 1523-operation
+ *   group. Here it looks at first as though it costs nothing: measured on this
+ *   build, **all 113 groups that reach a word sit EXACTLY on the field they
+ *   filter** — the group's path IS the placement's path, all 187 text paths are
+ *   distinct, and not one is shared with a shape operation. A `DefineEditText`
+ *   or `DefineText` is a LEAF of the display list, so the filtered subtree and
+ *   the field are the same thing and per-group and per-leaf genuinely coincide.
+ *   **That is the case `screen.js`'s header invites someone to find, and this
+ *   is it.**
+ *
+ * ► **AND IT IS A TRAP, BECAUSE THE LEAF IS THE FIELD AND NOT THE GLYPH.** A
+ *   field is not one drawable here: it is between 1 and 630 glyph operations.
+ *   Across the 26 screens, **1689 glyph operations sit under those 113 fields**
+ *   — a median of 8 per field, and `help`'s character 1542 is a single static
+ *   run of 630 letters of tooltip prose. Setting `ctx.filter` per operation
+ *   would draw **630 separate haloes, one around each letter**, where the build
+ *   draws one soft edge around the paragraph. It is not a rough version of the
+ *   right picture; it is a different picture, and it looks deliberate. So the
+ *   filter is emitted ONCE PER PLACEMENT — `placement.filter` and
+ *   `placement.filterStages` — and **nothing is stamped on a glyph operation**,
+ *   which `test/render-screen-text.test.js` asserts rather than leaving to
+ *   habit.
+ *
+ * ### WHAT A PAINTER DOES WITH THEM
+ *
+ * For each placement with a non-null `filter`: rasterise that placement's own
+ * `ops` to an offscreen, set the offscreen's `ctx.filter`, composite it. For
+ * the general case walk `record.filterGroups`, which gives each filtered
+ * subtree the half-open range `[opFirst, opEnd)` into `record.ops` that it
+ * covers, the placements under it, and `shapeOpCount` — the SHAPE operations
+ * the same subtree covers, which is 0 on every one of this build's 113 and
+ * which a per-field routine cannot rasterise. Three hazards, all of them
+ * `screen.js`'s too:
+ *
+ * - **`filter` is the SCALE-1 string.** `ctx.filter` lengths are not scaled by
+ *   `ctx.setTransform` (`filters.js` says so and says it is unmeasured), and
+ *   `stageFitFor` letterboxes the stage, so a painter calls
+ *   `canvasFilterFor(stage.filters, { scale })` itself. The records travel on
+ *   every stage for exactly that.
+ * - **`colourMatrices` is NOT in `filter`.** 0 on this build's text and 31
+ *   string-less groups on its shapes; `filtersDeferredToColourMatrix` counts it
+ *   here so a painter reading `filter` alone can be told it dropped one.
+ * - **`record.ops` is re-sorted by `screenWithTextFor`**, so a painter working
+ *   on the MERGED array re-matches on `path` rather than reusing the range.
+ *   That is exact and cheap for text: every operation of a placement carries
+ *   the PLACEMENT's path.
+ *
+ * ### THE FIVE GLOWS, BY NAME
+ *
+ * ```text
+ *   52  drop-shadow(0px 0px 0.6455px rgba(0, 0, 0, 1))    1527, 1528
+ *   52  drop-shadow(0px 0px 1px rgba(0, 0, 0, 1))         43 characters
+ *    5  drop-shadow(0px 0px 2.2361px rgba(102, 0, 0, 1))  1789…1805 (buttons)
+ *    2  drop-shadow(0px 0px 1.3165px rgba(0, 0, 51, 1))   1520, "emperor's
+ *                                                       reign" on splash and
+ *                                                       new_or_continue
+ *    1  drop-shadow(0px 0px 4.5826px rgba(0, 0, 0, 1))    2123, the word "vs"
+ *                                                       on arena_intro
+ *    1  (no filter record at all)                         2292 (gameover_demo)
+ * ```
+ *
+ * The first row is the arena's UI bar: **characters 1527 and 1528, `soundvar`
+ * and `tooltips_text`, the two `DefineEditText` children of sprite 1531 that
+ * `props.js` records under `effects.own.dropped` because it has no shape to put
+ * them on.** They are on all 26 screens, they are 52 of the 113, and their
+ * words — `sound:ON` and `tooltips:off` — have been drawing flat since the join
+ * was written. Three modules met the same two characters from three directions;
+ * this is the one that can finally draw them.
+ *
  * ## A FIELD'S VALUE IS A VARIABLE, NOT A STRING IN THE FILE
  *
  * A `DefineEditText`'s `text` is a PLACEHOLDER the author left in the `.fla`;
@@ -217,6 +312,16 @@
  * `screenTextFor` is the primary entry point and returns both;
  * `screenTextOpsFor` is the picture without the invoice and says so.
  *
+ * The invoice has four names for what became of a filter, and they are four
+ * different questions about the same 113 placements rather than a partition:
+ * `filtersCarried` (112) is a canvas filter string handed over,
+ * `filtersDeferredToColourMatrix` (0) is a matrix `filter` cannot express,
+ * `filtersRefused` (0) is a record canvas cannot express at all, and
+ * `filtersNotApplied` (1) is a placement under a filter that got none of the
+ * three. `counts.underAFilter` (113) is the denominator for all four, and
+ * `counts.underANoOpFilterOnly` (0) is the part of the last one that is not a
+ * loss.
+ *
  * `counts.drawn + counts.undrawn === counts.placements`, and that total is the
  * same 187 `screen.js` counts as `textNotDrawn`. **On this pack, with no values
  * bound, 159 of the 187 draw and 28 do not** — 23 of them fields waiting on a
@@ -226,12 +331,19 @@
  *
  * ## WHAT IT COSTS
  *
- * Measured on this machine, three runs after a warm-up: **all 26 screens
+ * ~~Measured on this machine, three runs after a warm-up: **all 26 screens
  * through `screenTextFor` in 336 ms**, of which 113 ms is `screenFor`'s shape
- * work and **223 ms is this file's 2236 glyph operations**. The widest single
- * screen's text half is `help`, at 34 ms — one static run drawing 630 letters
- * of tooltip prose. Nearly all of that is `scaleGlyphPath` rebuilding path
- * strings, which is `text.js`'s own finding and not a new one.
+ * work and **223 ms is this file's 2236 glyph operations**.~~ **RE-MEASURED
+ * 2026-09-15, AFTER THE FILTER WORK: 106-124 ms for all 26 screens, of which
+ * 35 ms is `screenFor`.** The struck numbers are not what the filter groups
+ * cost — they are three times too high across the board, so they were measured
+ * on a busier machine, and today's were taken with several agents running, so
+ * treat the RATIO rather than either absolute. What matters for this seam is
+ * that matching 248 filter groups against 187 placements is 26 screens x
+ * (groups x text) prefix tests and does not show up at all. The widest single
+ * screen's text half is `help`, one static run drawing 630 letters of tooltip
+ * prose. Nearly all of the time is `scaleGlyphPath` rebuilding path strings,
+ * which is `text.js`'s own finding and not a new one.
  *
  * Each field is laid out ONCE, inside ~~`fieldOpsFor`~~ **`fieldTextFor`**. An
  * earlier draft laid it out twice — the second pass purely to read
@@ -255,6 +367,7 @@
  * back.
  */
 
+import { canvasFilterFor } from "./filters.js";
 import { screenFor, screenNames } from "./screen.js";
 import {
   TWIPS_PER_PIXEL,
@@ -324,8 +437,59 @@ export const SCREEN_TEXT_UNDRAWN_KINDS = Object.freeze([
  * truth is 5.
  */
 export const SCREEN_TEXT_APPROXIMATION_KINDS = Object.freeze([
+  // ► **THE TENTH THROUGH FIFTEENTH KEYS, ADDED 2026-09-15, AND THE FIRST TWO
+  //   CHANGED MEANING UNDER THEM.** Until then this module knew only that a
+  //   placement sat under a FILTERLIST — `screen.js` handed over a path and
+  //   nothing else — so `filtersNotApplied` counted all 108 of them and there
+  //   was no second number to compare it with. `screen.js` now hands over the
+  //   filter RECORDS on each group, `canvasFilterFor` turns 112 of the 113 into
+  //   a real `drop-shadow(...)`, and "under a filterlist" and "under a
+  //   filterlist this module can do nothing with" stopped being the same
+  //   question. They are split here rather than renamed, because
+  //   `tools/screens/main.js` prints this roster key by key and a key that
+  //   vanishes takes its row with it.
+  //
+  // ~~A placement under a FILTERLIST nothing applies.~~ **NARROWED: a placement
+  // under a filter group this module hands the painter NOTHING for — no canvas
+  // filter string and no colour matrix.** On the real packs that is 1 placement
+  // and 0 operations (`gameover_demo`'s character 2292, whose `filters` list is
+  // empty), where it used to be 108 and 1643.
   "filtersNotApplied",
   "filtersNotAppliedOps",
+  // The other side of that split, and the one that is now the big number: the
+  // placement's glow reached the painter. 112 placements and 1680 operations.
+  // It is in THIS roster and not a "drawn correctly" one because a CSS
+  // `drop-shadow` is not a Flash glow — `canvasFilterFor` marks every one of
+  // the 112 `exact: false`, `shadowStrengthAsAlpha`, because all 112 are
+  // strength 10 and CSS can only scale the shadow colour's alpha.
+  "filtersCarried",
+  "filtersCarriedOps",
+  // ► **THE HAZARD `screen.js` NAMES FOR ITS OWN PAINTER, ONE LEVEL DOWN.** A
+  //   colour matrix is NOT in `filter` — `canvasFilterFor` defers it to
+  //   `applyColourMatrix` — so a painter that reads `filter` and nothing else
+  //   drops it while reporting that it applied the filters. ZERO on this
+  //   build's text (`screen.js` counts 57 such groups among the SHAPES, 31 of
+  //   them producing no string at all); the synthetic pack puts one on a field
+  //   so the counter has an input that reaches it.
+  "filtersDeferredToColourMatrix",
+  "filtersDeferredToColourMatrixOps",
+  // A filter record canvas cannot express at all — an inner glow, a knockout,
+  // a bevel. ZERO on this build's text, and the zero is not vacuous: the
+  // synthetic pack in `test/render-screen-text.test.js` puts an inner glow on a
+  // field and watches both numbers move.
+  "filtersRefused",
+  "filtersRefusedOps",
+  // ► **THE ONE THAT SAYS A PER-FIELD RASTERISE WOULD BE WRONG.** A glow on a
+  //   text field is a glow on the field's rendered result, so the painter
+  //   rasterises the field's glyphs once and filters the composite — but that
+  //   is only the whole story when the filtered SUBTREE is the field and
+  //   nothing else. When the group is an ancestor covering other fields or
+  //   shapes as well, the field is a part of a bigger picture and the painter
+  //   must composite the GROUP. Measured on this build: 0 — all 113 groups sit
+  //   exactly on the field they filter — and the synthetic pack's `[55]` over
+  //   the field at `[55, 2]` is the case that makes the counter move.
+  "filtersOnAWiderGroup",
+  "filtersOnAWiderGroupOps",
   "htmlMarkupStripped",
   "htmlMarkupStrippedOps",
   "placeholderDrawn",
@@ -381,7 +545,18 @@ export const SCREEN_TEXT_APPROXIMATION_KINDS = Object.freeze([
  * object and be silently mis-rostered.
  */
 const APPROXIMATION_MARKS = new Map([
+  // ► **THE FOUR FILTER MARKS ARE NOT MUTUALLY EXCLUSIVE, AND THAT IS THE
+  //   POINT.** They answer four different questions about one placement, so a
+  //   field under a group carrying one glow and one bevel is BOTH
+  //   `filtersCarried` and `filtersRefused`, and their sum is not the number of
+  //   filtered placements. The denominator for all four is
+  //   `counts.underAFilter`, which is counted once per placement and is the
+  //   only number any of them may be read as a fraction of.
   ["filtersNotApplied", { placements: "filtersNotApplied", ops: "filtersNotAppliedOps", spreads: true }],
+  ["filtersCarried", { placements: "filtersCarried", ops: "filtersCarriedOps", spreads: true }],
+  ["filtersDeferredToColourMatrix", { placements: "filtersDeferredToColourMatrix", ops: "filtersDeferredToColourMatrixOps", spreads: true }],
+  ["filtersRefused", { placements: "filtersRefused", ops: "filtersRefusedOps", spreads: true }],
+  ["filtersOnAWiderGroup", { placements: "filtersOnAWiderGroup", ops: "filtersOnAWiderGroupOps", spreads: true }],
   ["html-markup-stripped", { placements: "htmlMarkupStripped", ops: "htmlMarkupStrippedOps", spreads: true }],
   ["placeholderDrawn", { placements: "placeholderDrawn", ops: null, spreads: true }],
   ["lineHeightFromSize", { placements: "lineHeightFromSize", ops: null, spreads: true }],
@@ -458,6 +633,26 @@ export function hasJoinableText(screenPack, textPack) {
  *
  * Exported because this is the unit worth testing: everything below is a loop
  * over it and a sum.
+ *
+ * ► **`options.filterGroups` REPLACED `options.filtered` ON 2026-09-15, AND THE
+ *   OLD OPTION IS NOW IGNORED RATHER THAN HONOURED.** It was a boolean meaning
+ *   "there is a filterlist somewhere above this", which is all `screen.js` could
+ *   say at the time; a caller still passing it gets a placement with no stages,
+ *   which is the honest answer — a boolean cannot say what the filter WAS, and
+ *   inventing an empty stage from one would report a dropped filter that may
+ *   never have existed. Nothing outside this module ever set it (grepped), and
+ *   `screenTextFor` is the only caller in the tree.
+ *
+ * @param {object} textPack from `textPackFrom`
+ * @param {object} placement an entry from `screenFor(...).text`
+ * @param {object} [options]
+ * @param {object[]} [options.filterGroups] the filtered subtrees this placement
+ *   sits under, OUTERMOST FIRST — `screenFor(...).filterGroups`, filtered by
+ *   path prefix. Each needs a `path` and a `filters` list; `coversTextPlacements`
+ *   and `coversShapeOps` beside them let `filterStagesFor` use a measurement
+ *   instead of its local path-equality fallback.
+ * @param {object|Map|Function} [options.values] live values, by variable name
+ * @param {number} [options.gutter] the field inset, in pixels
  */
 export function placementTextFor(textPack, placement, options = {}) {
   // `hasExtractedText` rather than a truthiness check: a pack with no font that
@@ -629,7 +824,8 @@ function boundValue(base, values) {
  * depths that put it there without having to find which placement it came from.
  */
 function finish(base, resolved, options, placement) {
-  const filtered = options.filtered === true;
+  const stages = filterStagesFor(base, options);
+  const filtered = stages.length > 0;
   const stamped = resolved.ops.map((op) => Object.freeze({
     ...op,
     source: "text",
@@ -641,7 +837,18 @@ function finish(base, resolved, options, placement) {
   }));
 
   const approximated = [];
-  if (filtered) approximated.push("filtersNotApplied");
+  // ► **FOUR QUESTIONS WHERE THERE USED TO BE ONE `if (filtered)`.** The old
+  //   line read `if (filtered) approximated.push("filtersNotApplied")`, which
+  //   was the only honest thing to say when the only thing this module knew
+  //   about a filter was that there was one. Now that the records travel, a
+  //   glow that reached the painter must not be reported as a glow that did
+  //   not; and a glow that could not be expressed, and a group wider than the
+  //   field, are two more facts that the single boolean could not carry.
+  if (stages.some((stage) => stage.filter !== null)) approximated.push("filtersCarried");
+  if (stages.some((stage) => stage.colourMatrices.length > 0)) approximated.push("filtersDeferredToColourMatrix");
+  if (filtered && !stages.some((stage) => stage.carries)) approximated.push("filtersNotApplied");
+  if (stages.some((stage) => stage.refused.length > 0)) approximated.push("filtersRefused");
+  if (stages.some((stage) => !stage.ownsThisFieldAlone)) approximated.push("filtersOnAWiderGroup");
   // Whatever the field itself declares, under the extractor's own name for it —
   // never folded into a count of `html-markup-stripped`, which is hazard 5.
   for (const mark of resolved.marks ?? []) {
@@ -678,8 +885,98 @@ function finish(base, resolved, options, placement) {
     // with one long line is one placement and one line, and a tally that only
     // knew the placement count could not tell that from all three spilling.
     overflowing,
+    // ► **THE FILTER, ONCE PER FIELD — see FILTERS ON WORDS in this file's
+    //   header.** `filter` is the scale-1 `ctx.filter` string for an offscreen
+    //   holding exactly THIS placement's `ops`, and it is null whenever that is
+    //   not the whole story: no filter, more than one nested stage, or a group
+    //   wider than the field. `filterStages` is always the authority and is
+    //   always present; `filter` is the shortcut for the case that is 112 of
+    //   the build's 113.
+    filter: filtered && stages.length === 1 && stages[0].ownsThisFieldAlone ? stages[0].filter : null,
+    filterStages: Object.freeze(stages),
     approximated: Object.freeze(approximated)
   });
+}
+
+/**
+ * THE FILTERED SUBTREES THIS PLACEMENT SITS IN, INNERMOST FIRST — the order a
+ * painter applies them.
+ *
+ * `options.filterGroups` is what `screenTextFor` reads off `screenFor`'s own
+ * `filterGroups` roster, OUTERMOST FIRST; a caller driving `placementTextFor`
+ * on its own may hand over anything with a `path` and a `filters` list.
+ *
+ * ► **THE STRING IS BUILT HERE, FROM `group.filters`, RATHER THAN COPIED OFF
+ *   `group.filter`.** `screen.js` has already computed the same string for the
+ *   same records, so copying would be one call cheaper and would make this
+ *   module's output depend on which producer filled the group in. Building it
+ *   means a hand-made group `{ path, filters }` and one of `screen.js`'s behave
+ *   identically, and it keeps `canvasFilterFor` the ONE translator the brief
+ *   asks for rather than making `screen.js` a second one. The two derivations
+ *   are asserted to agree on all 113 of the build's text groups.
+ *
+ * ► **AND IT IS THE SCALE-1 STRING**, for the reason `screen.js` states at its
+ *   own decision 3: `ctx.filter` lengths are not scaled by `ctx.setTransform`
+ *   (`filters.js` says so and says it is unmeasured), and `stageFitFor`
+ *   letterboxes the stage, so a painter drawing at any other scale calls
+ *   `canvasFilterFor(stage.filters, { scale })` itself. `filters` travels on
+ *   every stage for exactly that.
+ *
+ * ► **AN EMPTY PATH IS SKIPPED AND COUNTED, NOT HONOURED.** `[]` is vacuously a
+ *   prefix of every path, so a truncated pack whose one filter entry lost its
+ *   path would put a glow on every word on the screen — an approximation
+ *   INVENTED rather than dropped, which is the same defect from the other end.
+ *   `screenTextFor` counts those under `filterGroupsWithNoPath`.
+ */
+function filterStagesFor(base, options) {
+  const groups = Array.isArray(options.filterGroups) ? options.filterGroups : [];
+  const stages = [];
+  for (let index = groups.length - 1; index >= 0; index -= 1) {
+    const group = groups[index];
+    const path = Array.isArray(group?.path) ? group.path : null;
+    if (path === null || path.length === 0) continue;
+    if (!isPrefixOf(base.path, path)) continue;
+    const built = canvasFilterFor(group.filters);
+    stages.push(Object.freeze({
+      path: Object.freeze([...path]),
+      source: typeof group.source === "string" ? group.source : null,
+      character: Number.isFinite(group.character) ? group.character : null,
+      // The records verbatim, so a painter rebuilds the string at its own scale.
+      filters: Object.freeze([...(Array.isArray(group.filters) ? group.filters : [])]),
+      filter: built.filter,
+      applied: built.applied,
+      deferred: built.deferred,
+      noOps: built.noOps,
+      refused: built.refused,
+      colourMatrices: built.colourMatrices,
+      counts: built.counts,
+      // ► **WHAT "CARRIED" MEANS, IN ONE PLACE.** A stage carries something
+      //   when the painter is handed a filter string OR a colour matrix to
+      //   apply to the rasterised field. A `noOp` carries nothing and needs
+      //   nothing — `canvasFilterFor` has already MEASURED that it draws no
+      //   pixels — and a refusal carries nothing and needs something, which is
+      //   why they are two counters rather than one.
+      carries: built.filter !== null || built.colourMatrices.length > 0,
+      // ► **THE GROUP IS THIS FIELD AND NOTHING ELSE — TWO TESTS, AND THE
+      //   MEASURED ONE WINS WHEN IT IS THERE.** `screenTextFor` counts, for
+      //   each group, how many text placements and how many SHAPE operations
+      //   sit under it, and hands both down; one text placement and no shapes
+      //   is the case where rasterising this field alone and filtering it is
+      //   exactly the build's own picture.
+      //
+      //   A caller driving this function on its own has measured nothing, and
+      //   falls back to path EQUALITY: a `DefineEditText` or `DefineText` is a
+      //   LEAF of the display list — it has no children — so a filtered subtree
+      //   whose path IS the placement's path can contain nothing but the
+      //   placement. That is exact for a text leaf and it is the reason the two
+      //   tests agree on all 113 of this build's text groups, which
+      //   `test/render-screen-text.test.js` asserts rather than this paragraph.
+      ownsThisFieldAlone: Number.isFinite(group.coversTextPlacements) && Number.isFinite(group.coversShapeOps)
+        ? group.coversTextPlacements === 1 && group.coversShapeOps === 0
+        : path.length === base.path.length
+    }));
+  }
+  return stages;
 }
 
 /**
@@ -702,17 +999,57 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
   const record = screenFor(screenPack, name);
   if (!record) return null;
 
-  // `screen.js` does not carry the filter prefixes onto a text placement the
-  // way it does onto an operation, so they are re-read here. Same rule it
-  // states: by PATH PREFIX, because a filter on a nested clip affects
-  // everything inside it and nothing beside it.
-  // Keyed on the NAME asked for, not on the record's own `name`: `screenFor`
-  // looks the screen up by the key, and a pack whose entry carries a different
-  // `name` field would otherwise have its filters read off a different screen.
-  const prefixes = filterPrefixesOf(screenPack.screens[name] ?? screenPack.screens[record.name]);
+  // ► ~~`screen.js` does not carry the filter prefixes onto a text placement the
+  //   way it does onto an operation, so they are re-read here.~~ **REPLACED
+  //   2026-09-15, AND THE DELETED VERSION HAD TWO DEFECTS THAT ONLY A SECOND
+  //   READER CAN HAVE.** `filterPrefixesOf` read `screen.filteredPlacements`
+  //   out of the raw pack itself, which meant (a) it never saw
+  //   `filteredButtonRecords`, the pack's SECOND filter list — five entries,
+  //   all on `townsquare`, all `leaf: "text"`, so this module counted 108
+  //   filtered placements where the truth is 113 — and (b) it read `path` and
+  //   dropped `filters`, so nothing here could have drawn a glow even in
+  //   principle. `screenFor`'s own `filterGroups` roster is built from BOTH
+  //   lists and carries the records; reading it is one derivation instead of
+  //   two, and `test/render-screen-text.test.js` pins the 113 against the raw
+  //   pack's own two arrays so the two modules cannot drift.
+  //
+  // ► **AND IT IS READ TOTALLY.** An older or hand-stubbed `screen.js` with no
+  //   `filterGroups` must not throw and must not silently report a build with
+  //   no filters on its words: `filterGroupsPresent` on the record says which
+  //   of those two worlds this is.
+  const filterGroupsPresent = Array.isArray(record.filterGroups);
+  const groups = filterGroupsPresent ? record.filterGroups : [];
+  let filterGroupsWithNoPath = 0;
+  // How much of the screen each filtered subtree actually covers, measured
+  // BEFORE any placement is resolved, because "is this group just this one
+  // field?" is a question about the whole screen and a placement cannot answer
+  // it about itself.
+  const coverageAt = new Map();
+  for (const group of groups) {
+    if (!Array.isArray(group?.path)) continue;
+    if (group.path.length === 0) { filterGroupsWithNoPath += 1; continue; }
+    let coversTextPlacements = 0;
+    for (const placement of record.text) {
+      if (isPrefixOf(placement.path, group.path)) coversTextPlacements += 1;
+    }
+    coverageAt.set(group.path.join(","), {
+      coversTextPlacements,
+      // `screen.js` counts the SHAPE operations under the group. `-1` rather
+      // than 0 when it did not say, so "unknown" cannot read as "none": -1 is
+      // finite, so `filterStagesFor` still takes the MEASURED branch and it
+      // answers no — a group whose shape coverage is unknown is not claimed to
+      // own one field alone. Optimism here is what puts a per-field glow on a
+      // composite that was never rasterised as one.
+      coversShapeOps: Number.isFinite(group.opCount) ? group.opCount : -1
+    });
+  }
 
   const placements = [];
   const ops = [];
+  // Where each placement's operations start and end in `ops`. Filled while the
+  // operations are pushed, so the group ranges below index the array they were
+  // derived from — the same reasoning `screen.js` gives for its own ranges.
+  const opSpans = [];
   const undrawnByKind = {};
   for (const kind of SCREEN_TEXT_UNDRAWN_KINDS) undrawnByKind[kind] = 0;
   // ► **THE OPEN TALLY IS THE ONE THAT COUNTS AND THE ROSTER IS COPIED OUT OF
@@ -725,8 +1062,20 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
   const unrostered = new Set();
 
   for (const placement of record.text) {
-    const filtered = underAnyPrefix(placement.path, prefixes);
-    const resolved = placementTextFor(textPack, placement, { ...options, filtered });
+    // OUTERMOST FIRST, which is the order `filterStagesFor` reverses into the
+    // order a painter applies them. `screen.js` sorts its drafts ancestor-first
+    // by `comparePath`, so the roster is already in that order and this filter
+    // preserves it; sorting again here would be a second opinion about nesting.
+    const covering = groups
+      .filter((group) => Array.isArray(group?.path)
+        && group.path.length > 0
+        && isPrefixOf(placement.path, group.path))
+      // The coverage this module measured, carried on a shallow copy so that
+      // `filterStagesFor` uses the measurement rather than its own local
+      // fallback. `screen.js`'s `opCount` is the SHAPE operations under the
+      // group; the text count is this file's, because `screen.js` emits no text.
+      .map((group) => ({ ...group, ...(coverageAt.get(group.path.join(",")) ?? {}) }));
+    const resolved = placementTextFor(textPack, placement, { ...options, filterGroups: covering });
     // ► **UNREACHABLE, AND SAID OUT LOUD BECAUSE A SILENT `continue` IS HOW A
     //   COUNT DRIFTS.** `hasJoinableText` above has already established the
     //   text pack, and `screen.js` only ever puts frozen objects in `text`, so
@@ -753,6 +1102,7 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
     //   changed shape, and it takes both. Anything that is neither reads as no
     //   marks, the way every other reader here treats pack data.
     const opMarks = new Map();
+    opSpans.push({ first: ops.length, end: ops.length + resolved.ops.length });
     for (const op of resolved.ops) {
       ops.push(op);
       for (const mark of new Set(approximationMarksOf(op.approximated))) {
@@ -782,6 +1132,78 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
       bump(approximatedByKind, mark, 1);
       bump(approximatedOpsByKind, mark, count);
     }
+  }
+
+  // ► **THE GROUP ROSTER — THE THING A PAINTER ACTUALLY WALKS.** The invoice
+  //   above says how many fields carry a glow; this says WHICH, with the
+  //   operations each one covers. Built out of the placements' own stages
+  //   rather than recomputed from `groups`, so the roster and the placements
+  //   cannot give two answers about the same filter.
+  //
+  //   ► **THE RANGE IS INTO THIS RECORD'S `ops` AND NOWHERE ELSE.** Same cost
+  //     and same caveat `screen.js` states for its own: it is derived in this
+  //     call from the array it indexes, and `ops` is frozen before it leaves —
+  //     but `screenWithTextFor` re-sorts the concatenation of two arrays, so a
+  //     painter working on the MERGED list re-matches on `path`. That is exact
+  //     and cheap for text: every operation of a placement carries the
+  //     PLACEMENT's path, so one comparison finds the whole field.
+  const filterGroups = [];
+  const groupAt = new Map();
+  for (let index = 0; index < placements.length; index += 1) {
+    const span = opSpans[index];
+    for (const stage of placements[index].filterStages) {
+      const key = stage.path.join(",");
+      let entry = groupAt.get(key);
+      if (entry === undefined) {
+        const from = groups.find((group) => Array.isArray(group?.path) && group.path.join(",") === key);
+        entry = {
+          path: stage.path,
+          source: stage.source,
+          character: stage.character,
+          filters: stage.filters,
+          filter: stage.filter,
+          applied: stage.applied,
+          deferred: stage.deferred,
+          noOps: stage.noOps,
+          refused: stage.refused,
+          colourMatrices: stage.colourMatrices,
+          counts: stage.counts,
+          carries: stage.carries,
+          // The stage's own answer, not a second rule: `filterStagesFor`
+          // already decided this from the coverage measured above, and two
+          // spellings of one question is how the counts in this file drift.
+          ownsOneFieldAlone: stage.ownsThisFieldAlone,
+          // ► **THE SHAPE OPERATIONS THE SAME GROUP COVERS, FROM `screen.js`.**
+          //   Zero on every one of this build's 113 text groups — they sit on
+          //   leaf text fields — and non-zero would mean the painter must
+          //   rasterise shapes and words TOGETHER before filtering, which no
+          //   per-field routine can do. Carried rather than assumed, and
+          //   `-1` when `screen.js` did not say.
+          shapeOpCount: Number.isFinite(from?.opCount) ? from.opCount : -1,
+          placements: [],
+          opFirst: span.first,
+          opEnd: span.first,
+          opCount: 0
+        };
+        groupAt.set(key, entry);
+        filterGroups.push(entry);
+      }
+      entry.placements.push(index);
+      if (span.end > span.first) {
+        if (entry.opCount === 0) entry.opFirst = span.first;
+        entry.opEnd = Math.max(entry.opEnd, span.end);
+        entry.opCount += span.end - span.first;
+      }
+    }
+  }
+  let filterGroupsCarrying = 0;
+  let filterGroupsWiderThanOneField = 0;
+  for (const group of filterGroups) {
+    group.contiguous = group.opEnd - group.opFirst === group.opCount;
+    if (group.carries) filterGroupsCarrying += 1;
+    if (!group.ownsOneFieldAlone) filterGroupsWiderThanOneField += 1;
+    group.placements = Object.freeze(group.placements);
+    Object.freeze(group);
   }
 
   // THE PROJECTION. Every roster key is copied out of the open tally, so the
@@ -820,6 +1242,17 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
     //   more placement, and it does — and then this array says so instead of
     //   the count being 187 approximations reported as 0.
     unrosteredApproximations: Object.freeze([...unrostered].sort()),
+    // ► **THE FILTERED SUBTREES THAT REACH A WORD, WITH THE OPERATIONS EACH
+    //   ONE COVERS.** This is the list a painter walks: for each entry,
+    //   rasterise `ops[opFirst .. opEnd)` to an offscreen, set the offscreen's
+    //   `ctx.filter` to `filter` (rebuilt at the painter's own scale from
+    //   `filters`), and composite it. See FILTERS ON WORDS in this file's
+    //   header for why that is once per FIELD and not once per glyph.
+    filterGroups: Object.freeze(filterGroups),
+    // Whether `screenFor` gave us a roster at all. FALSE means every filter
+    // count below is a zero this module could not have measured, which is a
+    // different thing from a build with no filters on its words.
+    filterGroupsPresent,
     counts: Object.freeze({
       // The same number `screen.js` reports as `approximations.textNotDrawn`.
       placements: placements.length,
@@ -828,7 +1261,39 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
       ops: ops.length,
       statics: placements.filter((entry) => entry.kind === "text-static").length,
       fields: placements.filter((entry) => entry.kind === "text-edit").length,
-      bound: placements.filter((entry) => entry.valueSource === "bound").length
+      bound: placements.filter((entry) => entry.valueSource === "bound").length,
+      // ► **THE DENOMINATOR FOR ALL SIX FILTER ROSTER KEYS, AND THE ONLY
+      //   NUMBER ANY OF THEM MAY BE READ AS A FRACTION OF.** The four marks
+      //   overlap by design (a group carrying one glow and one bevel is both
+      //   carried and refused), so their sum is not this and never was.
+      //   Measured across the 26 screens: 113 of the 187 placements and 1689 of
+      //   the 2236 glyph operations.
+      underAFilter: placements.filter((entry) => entry.filterStages.length > 0).length,
+      underAFilterOps: placements.reduce((sum, entry) => sum + (entry.filterStages.length > 0 ? entry.ops.length : 0), 0),
+      // ► **THE PART OF `filtersNotApplied` THAT IS NOT A LOSS, so the
+      //   difference between the two names the silent one.** A filter
+      //   `canvasFilterFor` has MEASURED to draw nothing — `Blur(0, 0)`, a
+      //   zero-strength glow — is dropped on purpose and costs the picture
+      //   nothing; a filter list that is empty, or one every record of which
+      //   was refused, is a real hole. `screen.js` reports the same pair for
+      //   its operations and for the same reason. On this build:
+      //   `filtersNotApplied` 1, this 0, so the one hole is real — it is
+      //   `gameover_demo`'s character 2292, whose `filters` list is empty.
+      underANoOpFilterOnly: placements.filter((entry) => entry.filterStages.length > 0
+        && !entry.filterStages.some((stage) => stage.carries)
+        && entry.filterStages.every((stage) => stage.counts.total === stage.counts.noOp && stage.counts.noOp > 0)).length,
+      // The groups themselves, as their own denominator: 113 reach a word, 112
+      // of them carry something a painter can use, 0 cover anything but the one
+      // field they sit on.
+      filterGroups: filterGroups.length,
+      filterGroupsCarrying,
+      filterGroupsWiderThanOneField,
+      // ► **AN ENTRY WHOSE `path` IS `[]` IS SKIPPED, AND SKIPPING IT SILENTLY
+      //   IS THE DEFECT THIS COUNTS AWAY.** An empty path is vacuously a prefix
+      //   of every path on the screen, so honouring one would put a glow on
+      //   every word — an approximation INVENTED rather than dropped. 0 on this
+      //   build; a truncated pack is what makes it move.
+      filterGroupsWithNoPath
     })
   });
 }
@@ -838,8 +1303,12 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
  *
  * ► **THIS THROWS THE COUNTS AWAY AND THAT IS THE WHOLE RISK OF USING IT** —
  *   the same warning `screenOpsFor` carries, for the same reason. On this pack
- *   it silently drops 28 placements this renderer could not draw and 108 it
- *   drew without their filters. Use `screenTextFor`.
+ *   it silently drops 28 placements this renderer could not draw and — worse
+ *   now than when this sentence was written — **the 113 filter groups that go
+ *   with the words**: a bare operation array carries no `filterGroups` and no
+ *   placement, so ~~108 it drew without their filters~~ every one of the 1689
+ *   glyph operations under a glow comes back flat, with nothing to say so. Use
+ *   `screenTextFor`.
  */
 export function screenTextOpsFor(screenPack, textPack, name, options = {}) {
   const record = screenTextFor(screenPack, textPack, name, options);
@@ -854,6 +1323,16 @@ export function screenTextOpsFor(screenPack, textPack, name, options = {}) {
  * appears in both would otherwise be counted twice by whoever adds them up.
  * `counts.textStillNotDrawn` is the one number that changes meaning — it is
  * what is left of `screen.approximations.textNotDrawn` after this join.
+ *
+ * ► **AND SO IS THE TEXT'S FILTER ROSTER: `record.text.filterGroups`.** It is
+ *   deliberately not copied up beside `screen.filterGroups`, for the same
+ *   reason the invoices are not summed — two rosters at one level invite a
+ *   painter to concatenate them, and they index DIFFERENT arrays
+ *   (`screen.ops` and `text.ops`), neither of which is the merged `ops` this
+ *   record returns. A painter working on the merged array re-matches on `path`;
+ *   `tools/screens/main.js` already does exactly that, and it finds the glyph
+ *   operations under the text groups because `screen.filterGroups` carries all
+ *   248 group PATHS including the 113 that reach no shape.
  *
  * ► **THE SHAPE INVOICE IS NESTED, NOT ABSENT.** `screen.approximations`,
  *   `screen.blankets` and the rest of `screenFor`'s record are reachable here as
@@ -981,38 +1460,31 @@ function frozenCounts(counts) {
 /* Paths                                                               */
 /* ------------------------------------------------------------------ */
 
-/** The `filteredPlacements` paths of one raw screen entry, defensively. */
-function filterPrefixesOf(screen) {
-  const out = [];
-  for (const entry of Array.isArray(screen?.filteredPlacements) ? screen.filteredPlacements : []) {
-    if (Array.isArray(entry?.path)) out.push(entry.path);
-  }
-  return out;
-}
-
 /**
- * Whether a leaf sits under any of them. Same rule as `screen.js`'s.
+ * ~~The `filteredPlacements` paths of one raw screen entry, defensively.~~
+ * ~~Whether a leaf sits under any of them. Same rule as `screen.js`'s.~~
+ * **BOTH DELETED 2026-09-15, AND THEY WERE A SECOND READER OF THE PACK.**
+ * `filterPrefixesOf` read `screen.filteredPlacements` out of the raw entry and
+ * `underAnyPrefix` matched against it; between them they saw neither the pack's
+ * second filter list (`filteredButtonRecords` — five entries, and this module
+ * therefore reported 108 filtered placements where the truth is 113) nor
+ * `entry.filters` (so no glow could have been drawn from here even in
+ * principle). `screenFor`'s `filterGroups` roster answers both, is built from
+ * both lists, and is the one derivation. What survives of them is the single
+ * prefix test below and the EMPTY-PATH guard, which is the half that was load-
+ * bearing: a length guard was redundant — the comparison runs off the end of
+ * the shorter array and gets `undefined` — and a mutation run deleted it with
+ * the suite still green, while an empty path is vacuously a prefix of
+ * everything and would put a glow on every word on the screen.
  *
- * ► **THE ONLY GUARD HERE THAT DOES ANYTHING IS THE EMPTY ONE.** A prefix
- *   LONGER than the path needs no test — the comparison below reaches an index
- *   past the end of `path`, gets `undefined`, and fails — and an earlier
- *   version of this function carried that redundant length check, which a
- *   mutation run deleted with the whole suite still green. An EMPTY prefix is
- *   different: it is vacuously a prefix of everything, so a hand-edited pack
- *   with one `filteredPlacements` entry missing its path would mark every word
- *   on the screen filtered and quietly inflate the tally.
+ * Whether `path` sits inside the subtree rooted at `prefix`.
  */
-function underAnyPrefix(path, prefixes) {
-  if (!Array.isArray(path)) return false;
-  for (const prefix of prefixes) {
-    if (prefix.length === 0) continue;
-    let matches = true;
-    for (let index = 0; index < prefix.length; index += 1) {
-      if (path[index] !== prefix[index]) { matches = false; break; }
-    }
-    if (matches) return true;
+function isPrefixOf(path, prefix) {
+  if (!Array.isArray(path) || !Array.isArray(prefix)) return false;
+  for (let index = 0; index < prefix.length; index += 1) {
+    if (path[index] !== prefix[index]) return false;
   }
-  return false;
+  return true;
 }
 
 /** Lexicographic on the chain of depths, shorter first. `screen.js`'s own. */

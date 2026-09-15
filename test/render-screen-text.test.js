@@ -25,7 +25,17 @@
  *   3. that `html-markup-stripped` is counted per PLACEMENT, because four of
  *      the five such fields draw nothing and an operations-only tally reports
  *      one approximation where there are five;
- *   4. that a placement under a FILTERLIST is marked and counted — 108 of 187;
+ *   4. ~~that a placement under a FILTERLIST is marked and counted — 108 of
+ *      187;~~ **that a placement under a filter CARRIES ITS GLOW — 113 of 187,
+ *      and 112 of the 113 hand a painter a real `drop-shadow(...)`.** Two
+ *      things were wrong with the struck line and both were invisible: the
+ *      fixture's `filteredPlacements` entries carried a path and NO `filters`
+ *      key, so every assertion about filters here was invariant under the
+ *      records being right, wrong or absent; and 108 was the count from
+ *      `filteredPlacements` alone, missing the pack's second filter list
+ *      entirely. The glow is emitted ONCE PER FIELD and on no glyph — a field
+ *      is up to 630 glyph operations and per-glyph would halo every letter —
+ *      which the tests assert from both ends;
  *   5. that a mark `text.js` stamps and this module has NO NAME FOR is still
  *      counted, under `text.js`'s name for it, and reported in
  *      `unrosteredApproximations` rather than dropped — the tally used to be
@@ -66,6 +76,7 @@ import {
   screenTextOpsFor,
   screenWithTextFor
 } from "../src/render/screen-text.js";
+import { canvasFilterFor } from "../src/render/filters.js";
 import { screenFor, screenNames, screenPackFrom } from "../src/render/screen.js";
 import {
   TEXT_UNITS_PER_EM,
@@ -239,6 +250,21 @@ function approximatedGlyphTextPack() {
   });
 }
 
+/**
+ * A glow in the shape `tools/extract-screens.mjs` writes one, with the numbers
+ * chosen so the canvas string can be checked by hand: `blurSigma(4, 1)` is
+ * `sqrt(15/12)` = 1.118033988…, `drop-shadow`'s third length is TWICE that
+ * (`filters.js`'s own note: CSS takes a box-shadow radius there and `blur()`
+ * takes a standard deviation), and `canvasFilterFor` rounds to four decimals —
+ * so this filter is exactly `drop-shadow(0px 0px 2.2361px rgba(0, 0, 0, 1))`
+ * and the test below asserts that literal rather than recomputing it.
+ */
+const SYNTHETIC_GLOW = Object.freeze({
+  type: "glow", filterId: 2, colour: { red: 0, green: 0, blue: 0, alpha: 255 },
+  blurX: 4, blurY: 4, strength: 1, inner: false, knockout: false, compositeSource: true, passes: 1
+});
+const SYNTHETIC_GLOW_STRING = "drop-shadow(0px 0px 2.2361px rgba(0, 0, 0, 1))";
+
 const SYNTHETIC_SHAPE = {
   character: 10,
   paths: [{ d: "M0 0L10 0L10 10L0 10Z", fill: "#ff0000", fillOpacity: 1, fillRule: "evenodd", stroke: null, strokeWidth: 0 }]
@@ -300,7 +326,21 @@ function syntheticScreensRaw() {
         ],
         // [55] covers the field at [55, 2]; [45, 9, 9] is LONGER than the
         // static's path at [45] and must not match it.
-        filteredPlacements: [{ character: 99, path: [55] }, { character: 98, path: [45, 9, 9] }],
+        //
+        // ► **THE `filters` LIST IS THE HALF THAT WAS MISSING UNTIL
+        //   2026-09-15, AND ITS ABSENCE MADE EVERY FILTER ASSERTION IN THIS
+        //   FILE VACUOUS.** Both entries carried a path and nothing else, so
+        //   the module's filter output was invariant under the records being
+        //   right, wrong or absent — the same defect `render-screen.test.js`
+        //   found in its own fixture on the same day. A real glow here is what
+        //   gives `filtersCarried` and `placement.filter` an input.
+        //   `SYNTHETIC_GLOW` is deliberately the same shape the extractor
+        //   writes, and 98's records stay absent so the two cases can be told
+        //   apart by something other than the path.
+        filteredPlacements: [
+          { character: 99, path: [55], filters: [SYNTHETIC_GLOW] },
+          { character: 98, path: [45, 9, 9], filters: [SYNTHETIC_GLOW] }
+        ],
         blendedPlacements: [],
         rangeVariance: { frames: 0, firstDifferingFrame: null, depthsAdded: [], depthsRemoved: [] },
         approximations: {},
@@ -314,6 +354,13 @@ function syntheticScreensRaw() {
 
 function syntheticScreens() {
   return screenPackFrom(syntheticScreensRaw());
+}
+
+/** The synthetic screens pack with its filter list replaced wholesale. */
+function packWithFilters(filteredPlacements) {
+  const raw = syntheticScreensRaw();
+  raw.screens.forum.filteredPlacements = filteredPlacements;
+  return screenPackFrom(raw);
 }
 
 /** A point pushed through a matrix, in TWIPS throughout — the composition's own space. */
@@ -738,10 +785,10 @@ test("A FIELD KIND THIS MODULE HAS NEVER SEEN IS COUNTED AND NAMED, not folded i
     "► a kind that affected NO operation is absent from the open tally; the roster reads the absence as the zero it is");
   // The open tally is sorted by kind, so a reader diffing two runs of the same
   // screen sees a changed COUNT rather than a reordered object. Insertion order
-  // here would be filtersNotApplied, placeholderDrawn, html-markup-stripped,
+  // here would be filtersCarried, placeholderDrawn, html-markup-stripped,
   // entities-not-decoded, which is deliberately not the sorted one.
   assert.deepEqual(Object.keys(record.approximatedByKind),
-    ["entities-not-decoded", "filtersNotApplied", "html-markup-stripped", "placeholderDrawn"]);
+    ["entities-not-decoded", "filtersCarried", "html-markup-stripped", "placeholderDrawn"]);
 });
 
 test("A FIELD DECLARING TWO REASONS LOSES NEITHER — the same shape question, one level up", () => {
@@ -847,28 +894,235 @@ test("screenTextOpsFor hands back the picture with no invoice, and null when the
 /* Filters, and paint order                                            */
 /* ------------------------------------------------------------------ */
 
-test("A TEXT PLACEMENT UNDER A FILTERLIST IS MARKED AND COUNTED, matched by path PREFIX", () => {
-  // ► Hazard 4. `screen.js` marks its own operations `filtered` and says
-  //   nothing about the text placements it hands over, so this module re-reads
-  //   `filteredPlacements` itself. Matching is by prefix, not by root depth: a
-  //   filter on a nested clip affects everything inside it and nothing beside
-  //   it. The pack below also carries a prefix LONGER than a placement's own
-  //   path, which must not match — without that case the length guard could
-  //   return either answer with every other test still green.
+test("A TEXT PLACEMENT UNDER A FILTERLIST CARRIES ITS GLOW, matched by path PREFIX", () => {
+  // ► Hazard 4, and it is no longer only a count. `screen.js` marks its own
+  //   operations `filtered` and says nothing about the text placements it hands
+  //   over; this module reads its `filterGroups` roster, which carries the
+  //   filter RECORDS. Matching is by prefix, not by root depth: a filter on a
+  //   nested clip affects everything inside it and nothing beside it. The pack
+  //   also carries a prefix LONGER than a placement's own path, which must not
+  //   match — without that case the length guard could return either answer
+  //   with every other test still green.
   const record = screenTextFor(syntheticScreens(), syntheticTextPack(), "forum");
   const under = record.placements.find((entry) => entry.character === 400);
   assert.deepEqual([...under.path], [55, 2]);
-  assert.equal(under.approximated.includes("filtersNotApplied"), true, "[55] is a prefix of [55, 2]");
+  assert.equal(under.approximated.includes("filtersCarried"), true, "[55] is a prefix of [55, 2]");
+  assert.equal(under.approximated.includes("filtersNotApplied"), false,
+    "► and the OLD mark is gone, because the glow is no longer dropped");
   assert.equal(under.ops.every((op) => op.filtered === true), true, "and the mark rides on every operation");
+
+  // ► **THE GLOW IS ON THE FIELD, ONCE.** The literal is computed in
+  //   `SYNTHETIC_GLOW`'s own comment from the SWF's blur radius, and it is a
+  //   string that could have come out of this module a dozen wrong ways —
+  //   sigma instead of twice sigma, the wrong colour, the stage scale baked in.
+  assert.equal(under.filter, SYNTHETIC_GLOW_STRING);
+  assert.equal(under.filterStages.length, 1, "one filtered subtree over this field");
+  assert.deepEqual([...under.filterStages[0].path], [55]);
+  assert.equal(under.filterStages[0].filter, SYNTHETIC_GLOW_STRING);
+  assert.deepEqual([...under.filterStages[0].filters], [SYNTHETIC_GLOW],
+    "► and the RECORDS travel too, because `filter` is the scale-1 string and a painter rebuilds it");
+  assert.equal(under.filterStages[0].ownsThisFieldAlone, true,
+    "[55] holds this one field and no shape, so rasterising the field IS rasterising the group");
+
+  // ► **AND ON NOT ONE GLYPH.** A `ctx.filter` per operation is four words of
+  //   painter and the wrong picture: `under` is two letters here and 630 on the
+  //   build's `help`, and per-glyph would halo each letter separately.
+  for (const op of under.ops) {
+    for (const key of ["filter", "filters", "filterStages", "filterGroup", "colourMatrices", "refused", "deferred"]) {
+      assert.equal(key in op, false, `no operation may carry ${key} — see FILTERS ON WORDS in screen-text.js`);
+    }
+  }
 
   const beside = record.placements.find((entry) => entry.character === 300);
   assert.deepEqual([...beside.path], [45]);
-  assert.equal(beside.approximated.includes("filtersNotApplied"), false,
+  assert.equal(beside.approximated.includes("filtersCarried"), false,
     "[45, 9, 9] is longer than [45] and is not a prefix of it");
+  assert.equal(beside.filter, null, "so it carries no filter at all");
+  assert.deepEqual([...beside.filterStages], []);
   assert.equal(beside.ops.some((op) => op.filtered === true), false);
 
-  assert.equal(record.approximations.filtersNotApplied, 1, "ONE placement");
-  assert.equal(record.approximations.filtersNotAppliedOps, 2, "carrying TWO operations — the two counts are not the same number");
+  assert.equal(record.approximations.filtersCarried, 1, "ONE placement");
+  assert.equal(record.approximations.filtersCarriedOps, 2, "carrying TWO operations — the two counts are not the same number");
+  assert.equal(record.approximations.filtersNotApplied, 0, "and nothing was dropped");
+  assert.equal(record.approximations.filtersNotAppliedOps, 0);
+  assert.equal(record.counts.underAFilter, 1, "the denominator all four filter numbers are read against");
+  assert.equal(record.counts.underAFilterOps, 2);
+
+  // The group roster: one entry, naming the operations it covers.
+  assert.equal(record.counts.filterGroups, 1);
+  assert.equal(record.counts.filterGroupsCarrying, 1);
+  assert.equal(record.counts.filterGroupsWiderThanOneField, 0);
+  const group = record.filterGroups[0];
+  assert.deepEqual([...group.path], [55]);
+  assert.deepEqual([...group.placements], [record.placements.indexOf(under)]);
+  assert.equal(group.shapeOpCount, 0, "`screen.js` puts no shape under [55]");
+  assert.equal(group.opEnd - group.opFirst, 2);
+  assert.equal(group.opCount, 2);
+  assert.equal(group.contiguous, true);
+  assert.deepEqual(record.ops.slice(group.opFirst, group.opEnd), [...under.ops],
+    "► the RANGE really indexes this record's own `ops`, which is the only way a painter can use it");
+});
+
+test("THE FIXTURE'S FILTER RECORDS ARE LOAD-BEARING — strip them and the glow goes, not just a number", () => {
+  // ► **THE MUTATION THAT WAS GREEN FOR MONTHS.** Until 2026-09-15 the
+  //   `filteredPlacements` entries in this file carried a `path` and no
+  //   `filters` at all, and every filter assertion here passed anyway, because
+  //   the module read the path and threw the records away. This test is the
+  //   guard against that returning: with the records removed the group is still
+  //   FOUND — the placement is still marked filtered, still counted — and
+  //   nothing is carried. A module that went back to reading paths alone would
+  //   turn the previous test red; a module that stopped finding groups at all
+  //   would turn this one red.
+  const raw = syntheticScreensRaw();
+  raw.screens.forum.filteredPlacements = [{ character: 99, path: [55] }];
+  const record = screenTextFor(screenPackFrom(raw), syntheticTextPack(), "forum");
+  const under = record.placements.find((entry) => entry.character === 400);
+  assert.equal(under.filter, null, "no records, no string");
+  assert.equal(under.filterStages.length, 1, "but the subtree is still there and still named");
+  assert.deepEqual([...under.filterStages[0].filters], []);
+  assert.equal(record.approximations.filtersCarried, 0);
+  assert.equal(record.approximations.filtersNotApplied, 1, "► and THIS is what the old number meant");
+  assert.equal(record.approximations.filtersNotAppliedOps, 2);
+  assert.equal(record.counts.underAFilter, 1, "the denominator does not move — the same placement is under the same filter");
+  assert.equal(record.counts.underANoOpFilterOnly, 0,
+    "an EMPTY list is a hole, not a filter measured to draw nothing — the difference is the silent loss");
+});
+
+test("CARRIED, DEFERRED AND REFUSED ARE THREE DIFFERENT ANSWERS, and all three are counted", () => {
+  // ► Every one of the three is ZERO on the real build except `filtersCarried`,
+  //   and a zero nothing can disturb is not a counter. These are the inputs
+  //   that reach them: an INNER glow (canvas `drop-shadow` has no inset form,
+  //   3 of them in the oracle), a COLOUR MATRIX (deferred to
+  //   `applyColourMatrix`, 636 in the oracle and 0 on text), and a
+  //   ZERO-STRENGTH glow (208 in the oracle), which is measured to draw nothing
+  //   and so is a no-op rather than a loss.
+  const inner = { ...SYNTHETIC_GLOW, inner: true };
+  const matrix = { type: "colourMatrix", matrix: [0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 1, 0] };
+  const dead = { ...SYNTHETIC_GLOW, strength: 0 };
+
+  const refusedRecord = screenTextFor(packWithFilters([{ character: 99, path: [55], filters: [inner] }]),
+    syntheticTextPack(), "forum");
+  assert.equal(refusedRecord.approximations.filtersRefused, 1);
+  assert.equal(refusedRecord.approximations.filtersRefusedOps, 2);
+  assert.equal(refusedRecord.approximations.filtersCarried, 0, "an inner glow is not a carried glow");
+  assert.equal(refusedRecord.approximations.filtersNotApplied, 1, "and the field is left without it");
+  assert.deepEqual([...refusedRecord.filterGroups[0].refused].map((entry) => entry.reason),
+    ["innerShadowHasNoCanvasFilter"], "named by `canvasFilterFor`, not renamed here");
+
+  const matrixRecord = screenTextFor(packWithFilters([{ character: 99, path: [55], filters: [matrix] }]),
+    syntheticTextPack(), "forum");
+  assert.equal(matrixRecord.approximations.filtersDeferredToColourMatrix, 1);
+  assert.equal(matrixRecord.approximations.filtersDeferredToColourMatrixOps, 2);
+  assert.equal(matrixRecord.approximations.filtersCarried, 0,
+    "► a colour matrix is NOT in `filter`, and a painter reading `filter` alone must be told");
+  assert.equal(matrixRecord.placements.find((entry) => entry.character === 400).filter, null);
+  assert.equal(matrixRecord.approximations.filtersNotApplied, 0, "but it IS carried — on `colourMatrices`");
+  assert.equal(matrixRecord.filterGroups[0].colourMatrices.length, 1);
+
+  const deadRecord = screenTextFor(packWithFilters([{ character: 99, path: [55], filters: [dead] }]),
+    syntheticTextPack(), "forum");
+  assert.equal(deadRecord.approximations.filtersNotApplied, 1, "nothing was handed over");
+  assert.equal(deadRecord.counts.underANoOpFilterOnly, 1,
+    "► and nothing NEEDED to be: `canvasFilterFor` measured that this glow draws no pixels");
+  assert.equal(deadRecord.approximations.filtersRefused, 0, "which is not the same as canvas being unable to");
+
+  // All four marks on ONE placement at once, because they are four questions
+  // and not a partition — a sum of them would be 4 where there is 1 placement.
+  const both = screenTextFor(packWithFilters([{ character: 99, path: [55], filters: [SYNTHETIC_GLOW, inner, matrix] }]),
+    syntheticTextPack(), "forum");
+  assert.equal(both.approximations.filtersCarried, 1);
+  assert.equal(both.approximations.filtersRefused, 1);
+  assert.equal(both.approximations.filtersDeferredToColourMatrix, 1);
+  assert.equal(both.approximations.filtersNotApplied, 0);
+  assert.equal(both.counts.underAFilter, 1, "► ONE placement, three marks — the denominator is not their sum");
+});
+
+test("A GROUP WIDER THAN THE FIELD IS NAMED, because a per-field rasterise would be the wrong picture", () => {
+  // ► ZERO on the real build — all 113 of its text groups sit exactly on the
+  //   field they filter — so the counter needs a pack that opens the case. Two
+  //   shapes of "wider": a group over TWO fields, and a group over a field AND
+  //   a shape operation. In both, Flash rasterises everything under the group
+  //   and filters the composite, so `placement.filter` must go null and the
+  //   painter must walk `record.filterGroups` instead.
+  const raw = syntheticScreensRaw();
+  // A second field under [55], beside the one at [55, 2].
+  raw.screens.forum.textFields.push({
+    id: 402, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
+    colour: { red: 255, green: 255, blue: 255, alpha: 255 }, align: 0, leading: 0,
+    leftMargin: 0, rightMargin: 0, indent: 0, variableName: "loud_html",
+    initialText: "<p>AB</p>", multiline: false, wordWrap: false, readOnly: true,
+    path: [55, 4], matrix: [1, 0, 0, 1, 0, 0]
+  });
+  raw.screens.forum.unresolved.push({ kind: "text-edit", character: 402, path: [55, 4], detail: "second field under [55]" });
+  raw.screens.forum.filteredPlacements = [{ character: 99, path: [55], filters: [SYNTHETIC_GLOW] }];
+  const twoFields = screenTextFor(screenPackFrom(raw), syntheticTextPack(), "forum");
+  assert.equal(twoFields.approximations.filtersOnAWiderGroup, 2, "BOTH fields are under it");
+  assert.equal(twoFields.approximations.filtersOnAWiderGroupOps, 4);
+  assert.equal(twoFields.counts.filterGroupsWiderThanOneField, 1, "and it is ONE group — a different question");
+  for (const character of [400, 402]) {
+    assert.equal(twoFields.placements.find((entry) => entry.character === character).filter, null,
+      "► the per-field shortcut is refused, because this field is not the whole of the group");
+  }
+  assert.equal(twoFields.filterGroups[0].filter, SYNTHETIC_GLOW_STRING,
+    "the group still carries the glow — it is the painter's unit now, not the field");
+  assert.deepEqual([...twoFields.filterGroups[0].placements].length, 2);
+  assert.equal(twoFields.approximations.filtersCarried, 2, "and both fields are still counted as carrying it");
+
+  // A group over a field and a SHAPE: [50] holds the shape at [50, 1].
+  const mixed = syntheticScreensRaw();
+  mixed.screens.forum.textFields.push({
+    id: 404, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
+    colour: { red: 255, green: 255, blue: 255, alpha: 255 }, align: 0, leading: 0,
+    leftMargin: 0, rightMargin: 0, indent: 0, variableName: "beside_a_shape",
+    initialText: "AB", multiline: false, wordWrap: false, readOnly: true,
+    path: [50, 2], matrix: [1, 0, 0, 1, 0, 0]
+  });
+  mixed.screens.forum.unresolved.push({ kind: "text-edit", character: 404, path: [50, 2], detail: "a field beside a shape" });
+  mixed.screens.forum.filteredPlacements = [{ character: 95, path: [50], filters: [SYNTHETIC_GLOW] }];
+  const record = screenTextFor(screenPackFrom(mixed), syntheticTextPack(), "forum",
+    { values: { beside_a_shape: "AB" } });
+  const field = record.placements.find((entry) => entry.character === 404);
+  assert.equal(field.filterStages[0].ownsThisFieldAlone, false,
+    "► one text placement, but a SHAPE under the same group — the field is not the whole composite");
+  assert.equal(field.filter, null);
+  assert.equal(record.approximations.filtersOnAWiderGroup, 1);
+  assert.equal(record.filterGroups[0].shapeOpCount, 1,
+    "and `screen.js`'s own count of the shapes under it is what says so");
+  assert.equal(screenFor(screenPackFrom(mixed), "forum").filterGroups.find((g) => g.path.join() === "50").opCount, 1,
+    "cross-checked against screen.js directly, so this is not this module quoting itself");
+});
+
+test("THE CROSS-MODULE CONTRACT: screen.js supplies the roster, and losing it must be LOUD", () => {
+  // ► **THE DEPENDENCY THIS FILE ACQUIRED ON 2026-09-15, PINNED FROM BOTH
+  //   ENDS.** Everything above reads `screenFor(...).filterGroups`. If that
+  //   ever stops being an array — an older `screen.js`, a revert, a stub — this
+  //   module reports zero filters on every screen and looks entirely correct,
+  //   which is the failure this project keeps paying for. So the contract is
+  //   asserted directly rather than inferred from a count that would read the
+  //   same either way.
+  assert.equal(Array.isArray(screenFor(syntheticScreens(), "forum").filterGroups), true,
+    "screen.js must hand over a filter roster");
+  assert.equal(screenTextFor(syntheticScreens(), syntheticTextPack(), "forum").filterGroupsPresent, true);
+  // ► **AND `placementTextFor` IS TOTAL WITHOUT ONE**, which is the branch a
+  //   caller driving the atom on its own takes. It is reachable here and is NOT
+  //   reachable through `screenTextFor`, so `filterGroupsPresent` is a flag for
+  //   a runtime consumer and this is the assertion with teeth.
+  const placement = { kind: "text-static", character: 300, path: [45], matrix: [1, 0, 0, 1, 0, 0] };
+  for (const groups of [undefined, null, [], "filters", 7, [{}], [{ path: null }], [{ path: [] }]]) {
+    const resolved = placementTextFor(syntheticTextPack(), placement, { filterGroups: groups });
+    assert.equal(resolved.filter, null, `${JSON.stringify(groups)} is not a filter group`);
+    assert.deepEqual([...resolved.filterStages], [], "and produces no stage rather than throwing");
+    assert.equal(resolved.approximated.includes("filtersNotApplied"), false,
+      "► an absent group is NOT a dropped filter, and counting it as one invents an approximation");
+  }
+  // A group that IS one, handed straight to the atom with no screen in sight.
+  const lit = placementTextFor(syntheticTextPack(), placement, {
+    filterGroups: [{ path: [45], filters: [SYNTHETIC_GLOW], source: "placement", character: 99 }]
+  });
+  assert.equal(lit.filter, SYNTHETIC_GLOW_STRING, "the atom builds the string itself, from `filters`");
+  assert.equal(lit.filterStages[0].ownsThisFieldAlone, true,
+    "and with nothing measured it falls back to path EQUALITY, which is exact for a display-list leaf");
+  assert.equal(lit.approximated.includes("filtersCarried"), true);
 });
 
 test("a filter entry with no path at all filters NOTHING, rather than the whole screen", () => {
@@ -1169,8 +1423,8 @@ test("THE FIVE HTML FIELDS, of which FOUR draw nothing at all", () => {
     const record = screenTextFor(screens, text, name);
     placements += record.approximations.htmlMarkupStripped;
     ops += record.approximations.htmlMarkupStrippedOps;
-    filtered += record.approximations.filtersNotApplied;
-    filteredOps += record.approximations.filtersNotAppliedOps;
+    filtered += record.counts.underAFilter;
+    filteredOps += record.counts.underAFilterOps;
     placeholders += record.approximations.placeholderDrawn;
     for (const entry of record.placements) {
       if (entry.approximated.includes("html-markup-stripped") && entry.drawn) drew += 1;
@@ -1179,8 +1433,8 @@ test("THE FIVE HTML FIELDS, of which FOUR draw nothing at all", () => {
   assert.equal(placements, 5, "five fields carry real markup");
   assert.equal(drew, 1, "► and only ONE of them emits an operation");
   assert.equal(ops, 65, "so an operations-only tally would report 1 approximation where there are 5");
-  assert.equal(filtered, 108, "108 of the 187 placements sit under a FILTERLIST nothing applies");
-  assert.equal(filteredOps, 1643, "and 1643 of the 2236 glyph operations — a different question, and a different number");
+  assert.equal(filtered, 113, "► 113 of the 187 placements sit under a filter, where this file said 108 until 2026-09-15");
+  assert.equal(filteredOps, 1689, "and 1689 of the 2236 glyph operations — a different question, and a different number");
   assert.equal(placeholders, 91, "and 91 draw the author's placeholder rather than a live value");
 });
 
@@ -1226,6 +1480,12 @@ test("THE OPEN TALLY ON THE REAL PACKS, and the 114 GLYPH MARKS THAT REACH NOTHI
     // open tally, so a roster that disagreed with it would be a second opinion.
     assert.equal(record.approximations.filtersNotApplied, record.approximatedByKind.filtersNotApplied ?? 0, name);
     assert.equal(record.approximations.filtersNotAppliedOps, record.approximatedOpsByKind.filtersNotApplied ?? 0, name);
+    assert.equal(record.approximations.filtersCarried, record.approximatedByKind.filtersCarried ?? 0, name);
+    assert.equal(record.approximations.filtersCarriedOps, record.approximatedOpsByKind.filtersCarried ?? 0, name);
+    assert.equal(record.approximations.filtersRefused, record.approximatedByKind.filtersRefused ?? 0, name);
+    assert.equal(record.approximations.filtersDeferredToColourMatrix,
+      record.approximatedByKind.filtersDeferredToColourMatrix ?? 0, name);
+    assert.equal(record.approximations.filtersOnAWiderGroup, record.approximatedByKind.filtersOnAWiderGroup ?? 0, name);
     assert.equal(record.approximations.htmlMarkupStripped, record.approximatedByKind["html-markup-stripped"] ?? 0, name);
     assert.equal(record.approximations.htmlMarkupStrippedOps, record.approximatedOpsByKind["html-markup-stripped"] ?? 0, name);
     assert.equal(record.approximations.placeholderDrawn, record.approximatedByKind.placeholderDrawn ?? 0, name);
@@ -1234,9 +1494,9 @@ test("THE OPEN TALLY ON THE REAL PACKS, and the 114 GLYPH MARKS THAT REACH NOTHI
     assert.equal(record.approximations.newlineCollapsed, record.approximatedByKind.newlineCollapsed ?? 0, name);
   }
 
-  assert.deepEqual(byKind, { filtersNotApplied: 108, placeholderDrawn: 91, "html-markup-stripped": 5 },
-    "three kinds occur across the 26 screens, and these are the placements each affects");
-  assert.deepEqual(opsByKind, { filtersNotApplied: 1643, placeholderDrawn: 689, "html-markup-stripped": 65 },
+  assert.deepEqual(byKind, { filtersCarried: 112, filtersNotApplied: 1, placeholderDrawn: 91, "html-markup-stripped": 5 },
+    "four kinds occur across the 26 screens, and these are the placements each affects");
+  assert.deepEqual(opsByKind, { filtersCarried: 1680, filtersNotApplied: 9, placeholderDrawn: 689, "html-markup-stripped": 65 },
     "and these are the operations — 689 of the 2236 glyphs are the author's placeholder, a number nothing reported before");
   assert.equal(notdef, 0, "0 notdef operations across the 187 placements, so the two marks have never yet collided here");
   assert.deepEqual([...unrostered], [],
@@ -1282,6 +1542,292 @@ test("the arena's UI bar reads \"sound:ON\" and \"tooltips:off\", where the buil
   const tooltips = record.placements.find((entry) => entry.character === 1528);
   assert.equal(tooltips.ops.map((op) => op.glyph.char).join(""), "tooltips:off");
   assert.equal(record.counts.placements, 3, "the arena carries three text placements");
+});
+
+test("THE ARENA UI BAR NOW GLOWS — one soft edge around the words, not one around each letter", () => {
+  if (!REAL_SCREENS || !REAL_TEXT) {
+    assert.equal(REAL_SCREENS === null || REAL_TEXT === null, true, "no extraction on this machine");
+    return;
+  }
+  // ► **THE TWO CHARACTERS THREE MODULES HAVE NOW MET FROM THREE DIRECTIONS.**
+  //   `props.js` records 1527 and 1528 under `effects.own.dropped` on the
+  //   arena's `panel` — a glow each, with no shape in the props pack to put it
+  //   on. `screen.js` counts them among the 113 filter groups that reach no
+  //   shape operation. They are `DefineEditText` children of sprite 1531, they
+  //   are on all 26 screens, and their glow reaches a drawable HERE or nowhere.
+  const record = screenTextFor(screenPackFrom(REAL_SCREENS), textPackFrom(REAL_TEXT), "arena");
+  const sound = record.placements.find((entry) => entry.character === 1527);
+  const tooltips = record.placements.find((entry) => entry.character === 1528);
+  assert.deepEqual([...sound.path], [438, 5], "inside the fiz_info_panel at root depth 438");
+  assert.deepEqual([...tooltips.path], [438, 6]);
+
+  // The literal, not a recomputation: this is the build's own glow — blurX and
+  // blurY of 1.5 at one pass, so `blurSigma` is sqrt((2.25-1)/12) = 0.322749…,
+  // and `drop-shadow`'s third length is TWICE that. A module that handed sigma
+  // straight to `drop-shadow` would write 0.3227px here and draw the bar at
+  // half the intended width; one that forgot the alpha would write rgba(...,0).
+  const GLOW = "drop-shadow(0px 0px 0.6455px rgba(0, 0, 0, 1))";
+  assert.equal(sound.filter, GLOW, "a tight black glow, which is what makes the readout legible on the backdrop");
+  assert.equal(tooltips.filter, GLOW);
+  assert.equal(sound.approximated.includes("filtersCarried"), true);
+  assert.equal(sound.approximated.includes("filtersNotApplied"), false,
+    "► it used to be this mark and nothing else, on all 52 copies of this pair");
+
+  // ► **ONCE PER FIELD.** `sound:ON` is 8 glyph operations and `tooltips:off`
+  //   is 12. A `ctx.filter` per operation would draw 20 haloes where the build
+  //   draws two, and each would sit around ONE letter.
+  assert.equal(sound.ops.map((op) => op.glyph.char).join(""), "sound:ON");
+  assert.equal(sound.ops.length, 8);
+  assert.equal(tooltips.ops.map((op) => op.glyph.char).join(""), "tooltips:off");
+  assert.equal(tooltips.ops.length, 12);
+  assert.equal(record.counts.filterGroups, 3, "three groups on the arena, one per placement");
+  for (const group of record.filterGroups) {
+    assert.equal(group.placements.length, 1, "each sits on exactly one field");
+    assert.equal(group.shapeOpCount, 0, "and on no shape at all — which is why screen.js could not draw it");
+    assert.equal(group.ownsOneFieldAlone, true);
+  }
+
+  // THE PAINTER'S UNIT, checked the way a painter would use it.
+  const soundGroup = record.filterGroups.find((group) => group.character === 1527);
+  assert.deepEqual(record.ops.slice(soundGroup.opFirst, soundGroup.opEnd), [...sound.ops],
+    "the range names exactly this field's eight operations in this record's own `ops`");
+});
+
+test("EVERY GLOW ON EVERY WORD IN THE BUILD REACHES THE PAINTER — 112 of 113, and the 113th is EMPTY", () => {
+  if (!REAL_SCREENS || !REAL_TEXT) {
+    assert.equal(REAL_SCREENS === null || REAL_TEXT === null, true, "no extraction on this machine");
+    return;
+  }
+  const screens = screenPackFrom(REAL_SCREENS);
+  const text = textPackFrom(REAL_TEXT);
+  const strings = {};
+  const totals = { underAFilter: 0, underAFilterOps: 0, carried: 0, carriedOps: 0, notApplied: 0, notAppliedOps: 0,
+    refused: 0, deferred: 0, wider: 0, groups: 0, noPath: 0, noOpOnly: 0 };
+  let glyphsUnderAGlow = 0;
+  let widest = { glyphs: -1 };
+  for (const name of joinableScreenNames(screens, text)) {
+    const record = screenTextFor(screens, text, name);
+    totals.underAFilter += record.counts.underAFilter;
+    totals.underAFilterOps += record.counts.underAFilterOps;
+    totals.carried += record.approximations.filtersCarried;
+    totals.carriedOps += record.approximations.filtersCarriedOps;
+    totals.notApplied += record.approximations.filtersNotApplied;
+    totals.notAppliedOps += record.approximations.filtersNotAppliedOps;
+    totals.refused += record.approximations.filtersRefused;
+    totals.deferred += record.approximations.filtersDeferredToColourMatrix;
+    totals.wider += record.approximations.filtersOnAWiderGroup;
+    totals.groups += record.counts.filterGroups;
+    totals.noPath += record.counts.filterGroupsWithNoPath;
+    totals.noOpOnly += record.counts.underANoOpFilterOnly;
+    for (const placement of record.placements) {
+      if (placement.filterStages.length === 0) continue;
+      glyphsUnderAGlow += placement.ops.length;
+      strings[String(placement.filter)] = (strings[String(placement.filter)] ?? 0) + 1;
+      if (placement.ops.length > widest.glyphs) {
+        widest = { glyphs: placement.ops.length, character: placement.character, name };
+      }
+    }
+  }
+
+  // ► **THE DENOMINATOR FIRST.** 113 of the 187 placements and 1689 of the 2236
+  //   glyph operations, which is the population every number below is a part of.
+  assert.equal(totals.underAFilter, 113);
+  assert.equal(totals.underAFilterOps, 1689);
+  assert.equal(totals.groups, 113, "one group per filtered field on this build");
+  assert.equal(totals.carried, 112, "► 112 of the 113 hand the painter a canvas filter string");
+  assert.equal(totals.carriedOps, 1680);
+  assert.equal(totals.notApplied, 1, "and exactly one does not");
+  assert.equal(totals.notAppliedOps, 9);
+  assert.equal(totals.carried + totals.notApplied, totals.underAFilter,
+    "carried and not-applied partition the 113 — the other three marks overlap them and each other");
+  assert.equal(totals.carriedOps + totals.notAppliedOps, totals.underAFilterOps);
+  assert.equal(totals.noOpOnly, 0,
+    "► and the one that got nothing is a REAL hole, not a filter measured to draw nothing: its `filters` list is empty");
+  assert.equal(totals.refused, 0, "canvas can express every filter this build puts on a word");
+  assert.equal(totals.deferred, 0, "and not one of them is a colour matrix");
+  assert.equal(totals.wider, 0, "and not one group covers anything but the field it sits on");
+  assert.equal(totals.noPath, 0, "no filter entry in the pack has lost its path");
+
+  // ► **THE FIVE GLOWS, BY STRING AND BY COUNT.** Every one of these could have
+  //   come out a dozen other ways — sigma rather than twice sigma, a stage scale
+  //   baked in, the strength lost, the colour byte-swapped — so the literals are
+  //   the assertion and the counts say which words wear which.
+  assert.deepEqual(strings, {
+    // 1527 and 1528 on all 26 screens: the arena UI bar's two readouts.
+    "drop-shadow(0px 0px 0.6455px rgba(0, 0, 0, 1))": 52,
+    // The house glow, on 43 different characters.
+    "drop-shadow(0px 0px 1px rgba(0, 0, 0, 1))": 52,
+    // `townsquare`'s five button labels — and these five reached NOTHING until
+    // this module stopped reading `filteredPlacements` alone.
+    "drop-shadow(0px 0px 2.2361px rgba(102, 0, 0, 1))": 5,
+    // "emperor's reign" in midnight blue, on `splash` and `new_or_continue` —
+    // ONE character on TWO screens, which is why the count is 2 and not 1.
+    "drop-shadow(0px 0px 1.3165px rgba(0, 0, 51, 1))": 2,
+    // The widest glow in the build's text, and it is two letters: character
+    // 2123, the word "vs" on `arena_intro`.
+    "drop-shadow(0px 0px 4.5826px rgba(0, 0, 0, 1))": 1,
+    // `gameover_demo`'s 2292, whose filter list is empty.
+    null: 1
+  });
+
+  // ► **WHAT A PER-GLYPH MISTAKE WOULD COST, IN THE BUILD'S OWN NUMBERS.**
+  //   1689 glyph operations sit under those 113 fields. Setting `ctx.filter`
+  //   per operation draws 1689 haloes where the build draws 113 — and the
+  //   worst single case is `help`'s tooltip prose, one static run of 630
+  //   letters that would come back with 630 separate dark outlines.
+  assert.equal(glyphsUnderAGlow, 1689);
+  assert.equal(widest.glyphs, 630);
+  assert.equal(widest.character, 1542);
+  assert.equal(widest.name, "help");
+  assert.equal(Math.round(glyphsUnderAGlow / totals.underAFilter), 15,
+    "15 glyph operations per filtered field on average — so per-glyph is 15x the haloes, not a rounding error");
+
+  // ► **AND THE ONE THAT GETS NOTHING IS NAMED, against the pack on disk.** A
+  //   `filtersNotApplied` of 1 is only evidence if it can be said WHICH one; a
+  //   bare 1 is what a dead counter that fires once also looks like.
+  const orphan = screenTextFor(screens, text, "gameover_demo").placements
+    .filter((placement) => placement.approximated.includes("filtersNotApplied"));
+  assert.equal(orphan.length, 1);
+  assert.equal(orphan[0].character, 2292);
+  assert.equal(orphan[0].ops.length, 9, "nine glyphs drawing flat");
+  assert.deepEqual([...orphan[0].filterStages[0].filters], [],
+    "► because the pack says its filter list is EMPTY — not refused, not a no-op, empty");
+  const onDisk = (REAL_SCREENS.screens.gameover_demo.filteredPlacements ?? [])
+    .find((entry) => entry.character === 2292);
+  assert.deepEqual(onDisk.filters, [], "which is what `assets/screens/screens.json` holds for [357]");
+  assert.deepEqual(onDisk.path, [357]);
+});
+
+test("THE 113 ARE RECONCILED AGAINST THE PACK'S OWN TWO FILTER ARRAYS, and 5 of them are the ones that were missed", () => {
+  if (!REAL_SCREENS || !REAL_TEXT) {
+    assert.equal(REAL_SCREENS === null || REAL_TEXT === null, true, "no extraction on this machine");
+    return;
+  }
+  // ► **COUNTED FROM THE RAW JSON, NOT FROM `screen.js` AND NOT FROM THIS
+  //   MODULE.** The 108-to-113 correction is the whole of this change's effect
+  //   on the invoice, so it is checked against the arrays on disk: a module
+  //   that quoted `screen.js` back at itself would agree with anything.
+  const screens = screenPackFrom(REAL_SCREENS);
+  const text = textPackFrom(REAL_TEXT);
+  let fromPlacements = 0;
+  let fromButtonRecords = 0;
+  let placementEntries = 0;
+  let buttonRecordEntries = 0;
+  const mine = { placement: 0, buttonRecord: 0 };
+  for (const name of joinableScreenNames(screens, text)) {
+    const entry = REAL_SCREENS.screens[name];
+    const record = screenTextFor(screens, text, name);
+    const textPaths = new Set(record.placements.map((placement) => placement.path.join(",")));
+    for (const filtered of entry.filteredPlacements ?? []) {
+      placementEntries += 1;
+      if (textPaths.has((filtered.path ?? []).join(","))) fromPlacements += 1;
+    }
+    for (const filtered of entry.filteredButtonRecords ?? []) {
+      buttonRecordEntries += 1;
+      if (textPaths.has((filtered.path ?? []).join(","))) fromButtonRecords += 1;
+    }
+    for (const group of record.filterGroups) mine[group.source] += 1;
+  }
+  assert.equal(placementEntries, 243, "the pack's first filter list");
+  assert.equal(buttonRecordEntries, 5, "and its SECOND, which this module could not see until 2026-09-15");
+  assert.equal(fromPlacements, 108, "► 108 — the number this file's header claimed for years, and it was a SUBSET");
+  assert.equal(fromButtonRecords, 5, "► and the five it never counted: townsquare's button labels");
+  assert.equal(fromPlacements + fromButtonRecords, 113);
+  assert.deepEqual(mine, { placement: 108, buttonRecord: 5 },
+    "and the module's own roster attributes them to the same two lists");
+
+  // The five, by character and by the glow they carry — a dark red that nothing
+  // in this tree had ever produced a string for.
+  const townsquare = screenTextFor(screens, text, "townsquare");
+  const buttons = townsquare.filterGroups.filter((group) => group.source === "buttonRecord");
+  assert.deepEqual(buttons.map((group) => group.character), [1789, 1793, 1797, 1801, 1805]);
+  assert.deepEqual([...new Set(buttons.map((group) => group.filter))],
+    ["drop-shadow(0px 0px 2.2361px rgba(102, 0, 0, 1))"]);
+  assert.deepEqual(buttons.map((group) => group.path.join(",")),
+    ["59,353,1", "59,355,1", "59,357,1", "59,359,1", "59,361,1"]);
+});
+
+test("THE STRING IS CANVASFILTERFOR'S, DERIVED A THIRD TIME FROM THE PACK ON DISK", () => {
+  if (!REAL_SCREENS || !REAL_TEXT) {
+    assert.equal(REAL_SCREENS === null || REAL_TEXT === null, true, "no extraction on this machine");
+    return;
+  }
+  // ► **ONE TRANSLATOR, AND THE CHECK THAT IT IS.** `canvasFilterFor` is the
+  //   only thing in this tree that turns a SWF filter list into a `ctx.filter`
+  //   string; `screen.js` calls it for its groups and `screen-text.js` calls it
+  //   again for its stages. This rebuilds every one of the 113 from the RAW
+  //   JSON'S OWN `filters` array and requires all three to agree — so a second
+  //   translator written here, or a string copied and then adjusted, is red.
+  const screens = screenPackFrom(REAL_SCREENS);
+  const text = textPackFrom(REAL_TEXT);
+  let checked = 0;
+  let scaled = 0;
+  for (const name of joinableScreenNames(screens, text)) {
+    const entry = REAL_SCREENS.screens[name];
+    const raw = new Map();
+    for (const list of [entry.filteredPlacements ?? [], entry.filteredButtonRecords ?? []]) {
+      for (const filtered of list) raw.set((filtered.path ?? []).join(","), filtered.filters ?? []);
+    }
+    const fromScreen = new Map();
+    for (const group of screenFor(screens, name).filterGroups) fromScreen.set(group.path.join(","), group.filter);
+    for (const placement of screenTextFor(screens, text, name).placements) {
+      for (const stage of placement.filterStages) {
+        const key = stage.path.join(",");
+        assert.equal(stage.filter, canvasFilterFor(raw.get(key)).filter, `${name} ${key}: the pack's own records`);
+        assert.equal(stage.filter, fromScreen.get(key), `${name} ${key}: and screen.js's derivation`);
+        checked += 1;
+        // ► **AND IT IS THE SCALE-1 STRING.** `stageFitFor` letterboxes the
+        //   640x420 stage, so the scale is almost never 1; a painter rebuilds
+        //   from `stage.filters`. This asserts the records are ENOUGH to do it:
+        //   at scale 2 every length doubles and the emitted string changes.
+        if (stage.filter !== null) {
+          const twice = canvasFilterFor(stage.filters, { scale: 2 }).filter;
+          assert.notEqual(twice, stage.filter, `${name} ${key}: a scaled rebuild must differ from the scale-1 string`);
+          scaled += 1;
+        }
+      }
+    }
+  }
+  assert.equal(checked, 113, "every filtered field on the build, not a sample");
+  assert.equal(scaled, 112, "and every one that produced a string can be rebuilt at another scale");
+});
+
+test("NOT ONE OF THE 2236 GLYPH OPERATIONS CARRIES A FILTER, on any of the 26 screens", () => {
+  if (!REAL_SCREENS || !REAL_TEXT) {
+    assert.equal(REAL_SCREENS === null || REAL_TEXT === null, true, "no extraction on this machine");
+    return;
+  }
+  // ► **THE ABSENCE IS THE DESIGN, and it is asserted rather than left to
+  //   habit — the same assertion `render-screen.test.js` makes about shape
+  //   operations.** `for (const op of ops) { ctx.filter = op.filter; draw(op) }`
+  //   is the easiest painter to write and the wrong picture; the only way to
+  //   stop it being written is for there to be nothing on the operation to
+  //   write it from. The mark an operation DOES carry is the boolean `filtered`,
+  //   which answers "is this inside something" and cannot be mistaken for
+  //   "here is how to draw it".
+  const screens = screenPackFrom(REAL_SCREENS);
+  const text = textPackFrom(REAL_TEXT);
+  let operations = 0;
+  let marked = 0;
+  for (const name of joinableScreenNames(screens, text)) {
+    const record = screenTextFor(screens, text, name);
+    for (const op of record.ops) {
+      operations += 1;
+      if (op.filtered === true) marked += 1;
+      for (const key of ["filter", "filters", "filterStages", "filterGroup", "colourMatrices", "refused", "deferred"]) {
+        assert.equal(key in op, false, `${name}: an operation carries ${key}`);
+      }
+    }
+    // And the range on each group really does name operations in THIS array,
+    // which is the only thing that makes the roster usable.
+    for (const group of record.filterGroups) {
+      const union = group.placements.flatMap((index) => [...record.placements[index].ops]);
+      assert.deepEqual(record.ops.slice(group.opFirst, group.opEnd), union, `${name} ${group.path.join(",")}`);
+      assert.equal(group.contiguous, true);
+    }
+  }
+  assert.equal(operations, 2236);
+  assert.equal(marked, 1689, "► 1689 operations know they are inside a filter and none of them knows which one");
 });
 
 test("binding _root.strength turns a hole on levelup into eight drawn glyphs", () => {

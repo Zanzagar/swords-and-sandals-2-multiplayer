@@ -100,11 +100,136 @@
  *                       size of the stage. The invoice read clean for a week.
  *                       See `stageBlanketsOf`.
  *
- * The loudest of those numbers: **9423 of the 13638 path operations across the
- * 26 screens sit under a placement carrying a FILTERLIST that nothing applies**
- * — 69%. Drop shadows and glows are missing everywhere and the picture is
- * otherwise right, which is exactly the kind of wrongness that reads as
- * finished.
+ * ~~The loudest of those numbers: **9423 of the 13638 path operations across
+ * the 26 screens sit under a placement carrying a FILTERLIST that nothing
+ * applies** — 69%. Drop shadows and glows are missing everywhere and the
+ * picture is otherwise right, which is exactly the kind of wrongness that
+ * reads as finished.~~ **SUPERSEDED 2026-09-15 — see FILTER GROUPS below.**
+ * 9423 is still the right number and it is still reported, under the name it
+ * deserves (`opsUnderFilterGroup`); what changed is that this module now hands
+ * a painter the filters themselves, so "nothing applies" stopped being a
+ * property of this file and became a property of whatever draws it.
+ *
+ * ## FILTER GROUPS — THE PART OF A FILTER THAT IS NOT A PROPERTY OF A LEAF
+ *
+ * ► **FLASH RASTERISES A FILTERED GROUP AND FILTERS THE COMPOSITE.** So a
+ *   filter belongs to a SUBTREE, never to the paths inside it, and the obvious
+ *   implementation — stamp the filter string onto each operation and let the
+ *   painter set `ctx.filter` per operation — is not a rough version of the
+ *   right picture, it is a different picture that looks plausible. Measured on
+ *   this pack: `townsquare`'s placement at path `[59,1]` covers **1523 of its
+ *   1638 operations**. Blurring 1523 paths one at a time blurs 1523 internal
+ *   seams that do not exist in the build's own rasterisation. That is why the
+ *   record carries `filterGroups` and why nothing here writes a filter string
+ *   onto an operation.
+ *
+ * ► **AND UNTIL 2026-09-15 THIS FILE READ ONLY `entry.path` OFF
+ *   `filteredPlacements` AND THREW `entry.filters` AWAY.** Its output was
+ *   therefore invariant under those typed filter records being correct,
+ *   garbage or absent — the synthetic fixture in `test/render-screen.test.js`
+ *   had no `filters` key at all and every assertion stayed green. A count that
+ *   cannot vary with the data it describes is not a reading of the data.
+ *
+ * ### WHAT A GROUP CARRIES, AND THE THREE DECISIONS IN IT
+ *
+ * 1. **A GROUP NAMES ITS OPERATIONS BY A HALF-OPEN RANGE `[opFirst, opEnd)`
+ *    INTO `ops`, WITH ITS `path` BESIDE IT AS THE AUTHORITY.** The alternative
+ *    was a list of indices, or the path alone with the painter re-matching
+ *    every frame. **The cost of the range is that it is an index into an array
+ *    and an index can go stale; what pays for it is that it is DERIVED, in
+ *    this same call, from the very `ops` array it indexes** — `ops` is frozen
+ *    before it leaves, and both are rebuilt by every `screenFor` call, so the
+ *    range cannot drift from the operations the way a cached one could. What
+ *    it CANNOT survive is a caller that re-sorts or filters `ops` itself;
+ *    `splitScreenChrome` does exactly that, and a caller compositing the two
+ *    halves separately must re-match on `path` rather than reuse the range.
+ *    Measured on this pack: all 135 groups that reach an operation are
+ *    CONTIGUOUS in `ops` — the extractor emits drawables in path order, so a
+ *    subtree is a run — and `contiguous` on each group says so rather than
+ *    being assumed. When it is false the range still BRACKETS the group and
+ *    the painter must re-match; `filterGroupsNotContiguous` counts it.
+ *
+ * 2. **NESTING COMPOSES UP THE TREE. IT DOES NOT PICK A WINNER, AND THAT IS A
+ *    DIFFERENT ANSWER FROM `blendFor` TWENTY LINES AWAY.** A blend mode is a
+ *    compositing operator for one draw, so the innermost is the one actually
+ *    compositing the leaf and the outer one is not a second chance to blend.
+ *    A filter is a rasterise-then-transform, and the outer group's filter
+ *    applies to the RESULT of the inner one, so neither wins. **Measured
+ *    before choosing, because a rule chosen on unreachable data is a rule
+ *    nobody has tested: 5395 of the 13638 operations across the 26 screens sit
+ *    under exactly TWO filtered ancestors — 40% — and none under three.** The
+ *    case that settles it is `townsquare` again: `[59,1]` is a COLOUR MATRIX
+ *    over 1523 operations and `[59,1,3]`, `[59,1,8]`, `[59,1,317]` and
+ *    `[59,1,319]` are blurs nested inside it. "Innermost wins" would silently
+ *    drop the town's entire colour grade from 1523 operations while leaving
+ *    four small blurs in place, and the picture would look finished. So each
+ *    group carries `parent` and `children` and the painter walks the tree.
+ *
+ * 3. **`filter` IS THE SCALE-1 STRING AND `filters` IS THE RECORD. A PAINTER
+ *    DRAWING THE STAGE AT ANY OTHER SCALE MUST RECOMPUTE.** `ctx.filter`
+ *    lengths are NOT scaled by `ctx.setTransform` (see `filters.js`, where the
+ *    `scale` parameter and the fact that it is a hypothesis are both stated),
+ *    and `stageFitFor` letterboxes this 640 x 420 stage into whatever the
+ *    surface is, so the scale is almost never 1. Baking one scale in here
+ *    would ship every blur at the wrong width. The BUCKETS —
+ *    `applied` / `deferred` / `noOps` / `refused` — are scale-INVARIANT
+ *    (`scale` only multiplies lengths, and every classification in
+ *    `canvasFilterFor` is made before the factor is applied), so only the
+ *    string has to be rebuilt. That invariance is pinned by a test rather than
+ *    left as a reading.
+ *
+ * ### WHAT A PAINTER HAS TO DO WITH THEM
+ *
+ * Draw `ops` in order. On reaching `group.opFirst` for a group with no parent,
+ * rasterise that group's whole range to an offscreen — recursing into each
+ * child at ITS `opFirst`, filtering the child's offscreen and compositing it
+ * in — then apply the group's own `filter` to the finished offscreen and
+ * composite it onto the stage, and resume at `group.opEnd`. Operations in no
+ * group's range are drawn straight. **`colourMatrices` on a group is NOT in
+ * `filter`**: it is deferred to `applyColourMatrix`, and a painter that only
+ * reads `filter` draws `townsquare`'s 1523-operation group ungraded while
+ * reporting that it applied the filters. Measured: 57 of the 248 groups carry
+ * a colour matrix and **31 of those 57 produce no filter string at all**, so a
+ * painter that skips null-`filter` groups skips 31 groups entirely — and
+ * `opsWithDeferredColourMatrix` (8850 operations) is larger than
+ * `opsWithCanvasFilter` (6440), which is the opposite of what "drop shadows
+ * and glows are missing" led this project to expect.
+ *
+ * ► **NOTHING IS STAMPED ON AN OPERATION, DELIBERATELY.** A `filterGroup`
+ *   index on each op would make the per-operation `ctx.filter` loop the
+ *   easiest thing to write, and that loop is the wrong picture. The only mark
+ *   an operation carries is the boolean `filtered`, which answers "is this
+ *   inside something" and cannot be mistaken for "here is how to draw it".
+ *
+ * ### THE 108 GROUPS THAT REACH NO OPERATION AT ALL — 44% OF THE ROSTER
+ *
+ * ► **107 of them are GLOWS ON TEXT, and the 108th is a placement whose filter
+ *   list is EMPTY.** Re-derived 2026-09-15 against this pack: of the 243
+ *   filtered placements on the 26 screens, 108 cover zero operations, and
+ *   every one of the 108 resolves to `text-edit` (92) or `text-static` (16)
+ *   entries in that screen's own `unresolved` list. `screen.js` emits no text,
+ *   so a glow on a text field reaches no drawable here. Characters 1527 and
+ *   1528 — the two on every screen's `fiz_info_panel`, and 52 of the 243
+ *   placements are one of them — are the same pair `props.js` records under
+ *   `effects.own.dropped` on the arena's `panel`, one glow each with no shape
+ *   in the pack to put it on. `text.js` names them: two `DefineEditText`
+ *   children of sprite 1531, `soundvar` and `tooltips_text`. **Three modules
+ *   have now met the same two characters from three directions**, which is
+ *   worth more than any one of them saying it.
+ *   **This is not a defect in this file and it is not this file's to fix**
+ *   (`screen-text.js` is the join), **but it is this file's to COUNT**, or the
+ *   invoice cannot tell "no filters here" from "filters that reach nothing I
+ *   emit". `filterGroupsReachingNothing` and its by-kind breakdown are that
+ *   count, with `filterGroups` as the denominator. **The roster totals: 248
+ *   groups, 135 reaching an operation, 113 reaching none** — 92 `text-edit`
+ *   and 21 `text-static`, the extra five being the button records below.
+ *
+ * ► **AND THE FIVE `filteredButtonRecords` ARE IN THE ROSTER TOO.** All five
+ *   are on `townsquare`, all five have `leaf: "text"`, and all five reach zero
+ *   operations. They are a SECOND source of filters in the pack, and a roster
+ *   built only from `filteredPlacements` would have left them invisible rather
+ *   than counted — which is the defect this whole file is arranged against.
+ *   `source` on each group says which list it came from.
  *
  * ## COLOUR TRANSFORMS ARE APPLIED HERE, AND THAT IS DELIBERATE
  *
@@ -253,6 +378,7 @@ import { SS2_STAGE } from "./arena-backdrop.js";
 import {
   applyColourTransform,
   applyColourTransformAlpha,
+  canvasFilterFor,
   colourTransformFrom
 } from "./filters.js";
 
@@ -516,8 +642,83 @@ export function screenFor(pack, name) {
     // Emitted, and putting no pixel down — see `drawsAnything`, which is not
     // the same test as `fillOpacity === 0`.
     invisibleOps: 0,
-    // Emitted, and a FILTERLIST on the placement is stepped over, not applied.
+    // ── FILTERS. **`filtersNotApplied` USED TO BE ALL FIVE OF THESE ADDED
+    //    TOGETHER**, which is why it counted 9423 and read as a defect in this
+    //    file rather than a job for the painter. ~~"Emitted, and a FILTERLIST
+    //    on the placement is stepped over, not applied."~~ Superseded
+    //    2026-09-15: applied, deferred, refused, no-op and UNREACHABLE are
+    //    five different facts and a caller that cannot tell them apart cannot
+    //    tell a missing glow from a glow on a word this module never draws.
+    //
+    //    Operations under at least one filter group. THE DENOMINATOR for the
+    //    four below; 9423 of 13638 across the 26 screens, the number the old
+    //    `filtersNotApplied` was reporting.
+    opsUnderFilterGroup: 0,
+    // Under a group whose filters produced a canvas `ctx.filter` string. A
+    // painter that composites groups changes these pixels.
+    opsWithCanvasFilter: 0,
+    // Under a group carrying a colour matrix, which is NOT in that string and
+    // is deferred to `applyColourMatrix`. A painter reading `filter` alone
+    // draws these ungraded while believing it applied the filters.
+    opsWithDeferredColourMatrix: 0,
+    // Under a group at least one of whose filters was REFUSED by name — an
+    // inner glow or a bevel, which canvas cannot express. These lose something
+    // even when the group paints.
+    opsUnderRefusedFilter: 0,
+    // Under a group where EVERY filter reaching the operation was a no-op or
+    // an empty list — a `Blur(0,0)` or a zero-strength glow. Nothing is lost
+    // here: the build draws nothing for these either. Counted separately
+    // precisely so that the number below is not read as a loss when it is not.
+    opsUnderNoOpFilterOnly: 0,
+    // **REDEFINED 2026-09-15, AND THE NAME IS NOW EARNED:** operations under a
+    // filter group that hands a painter NOTHING — no filter string and no
+    // colour matrix, because everything reaching them was refused, a no-op, or
+    // an empty list. `tools/screens/main.js` prints this row and its sentence
+    // ("sit under a FILTERLIST nothing applies") stays true of the narrower
+    // set. ► **SUBTRACT `opsUnderNoOpFilterOnly` AND WHAT IS LEFT IS THE
+    //   SILENT LOSS** — operations under a filter that canvas refused with
+    //   nothing else to fall back on. Measured on this pack: 24 and 24, so the
+    //   difference is ZERO and every operation this module can hand nothing
+    //   for is one where the build had nothing to hand. The three groups are
+    //   `magicshop [64,10,12]` (11 ops), `enter_highscore [364,12]` (11) and
+    //   `levelup [406,2]` (2), all zero-strength glows. **The bare zero would
+    //   be indistinguishable from a dead counter**, which is why it is stated
+    //   as a difference between two live numbers and not asserted on its own.
     filtersNotApplied: 0,
+    // ── THE GROUPS THEMSELVES. `filterGroups` is the denominator for every
+    //    group-level count under it.
+    filterGroups: 0,
+    filterGroupsFromPlacements: 0,
+    filterGroupsFromButtonRecords: 0,
+    filterGroupsReachingOps: 0,
+    // **44% OF THE ROSTER ON THIS PACK, AND ALL OF IT TEXT.** A group whose
+    // path covers no operation this module emits. Counted BY NAME below rather
+    // than as a bare total, because "no filters on this screen" and "filters
+    // that reach nothing I emit" are opposite findings with the same zero.
+    filterGroupsReachingNothing: 0,
+    filterGroupsReachingNothingByKind: null,
+    // Groups with a filtered ancestor. Flash filters innermost-first and feeds
+    // each result into the next, so these do NOT pick a winner — see the
+    // header, and see `blendFor`, which faces the same question and answers it
+    // the other way for a reason.
+    filterGroupsNested: 0,
+    // Groups at a path another group already holds. **The one arrangement in
+    // which `ownOpCount` is wrong** — see `filterGroupsOf`, where the
+    // subtraction is. Zero on this pack, and counted rather than assumed.
+    filterGroupsSharingAPath: 0,
+    // Groups whose operations are NOT a contiguous run in `ops`, so
+    // `[opFirst, opEnd)` brackets them rather than naming them and a painter
+    // must re-match on `path`. Zero on this pack; a real number, not an
+    // assumption, because the range is what a painter would otherwise trust.
+    filterGroupsNotContiguous: 0,
+    // The filter RECORDS across those groups, summed from `canvasFilterFor`'s
+    // own buckets rather than recounted here.
+    filtersTotal: 0,
+    filtersApplied: 0,
+    filtersDeferredToColourMatrix: 0,
+    filtersNoOp: 0,
+    filtersRefused: 0,
+    filtersRefusedByReason: null,
     // Emitted, and the blend mode is carried on the operation but applied by
     // nothing — the leaf drawables in this pack carry no blend mode of their
     // own, so it is joined from the placement that owns them.
@@ -566,13 +767,19 @@ export function screenFor(pack, name) {
   };
 
   const drawables = Array.isArray(screen.drawables) ? screen.drawables : [];
-  const filtered = prefixesOf(screen.filteredPlacements);
+  // ► **THE DRAFTS ARE BUILT BEFORE THE OPERATIONS AND THE GROUPS AFTER THEM**,
+  //   because the boolean `filtered` on an operation needs only the paths and
+  //   the group's `[opFirst, opEnd)` needs the operations that carry them. One
+  //   pass over the pack's two filter lists, read once.
+  const filterDrafts = filterGroupDraftsOf(screen);
+  const filtered = filterDrafts.map((draft) => draft.path);
   const blended = blendPrefixesOf(screen.blendedPlacements);
 
   const ops = [];
   for (const drawable of drawables) {
     emitDrawable(pack, drawable, filtered, blended, approximations, ops);
   }
+  const filterGroups = filterGroupsOf(filterDrafts, ops, screen, approximations);
 
   const text = textOf(pack, screen, approximations);
   const unresolvedByKind = kindsOf(screen);
@@ -587,6 +794,15 @@ export function screenFor(pack, name) {
     stage: SS2_STAGE,
     placement: SCREEN_STAGE_PLACEMENT,
     ops: Object.freeze(ops),
+    // ► **THE FILTERED SUBTREES, WHICH ARE WHAT A FILTER IS.** Each one names
+    //   the operations it owns, what `canvasFilterFor` made of its filter list,
+    //   and where it sits in the nesting. See the header for what a painter
+    //   does with them and for why nothing is stamped on an operation. Shaped
+    //   so that `summariseFilterUse(record.filterGroups)` from `filters.js`
+    //   works on it directly — each group carries that function's `counts`,
+    //   `refused` and `applied` — rather than a second tally kept here that
+    //   can drift away from the first while both stay green.
+    filterGroups,
     // Every operation that, on its own, covers the stage and hides what was
     // painted before it. Usually empty; when it is not, it is the first thing
     // a person looking at a black rectangle needs. See `stageBlanketsOf`.
@@ -702,7 +918,10 @@ function emitDrawable(pack, drawable, filtered, blended, approximations, ops) {
     const stroke = applyColourTransform(entry.stroke ?? null, colour);
     const strokeWidth = numberOr(entry.strokeWidth, 0);
     const strokeOpacity = applyColourTransformAlpha(numberOr(entry.strokeOpacity, 1), colour);
-    if (under.filtered) approximations.filtersNotApplied += 1;
+    // ► **THE DENOMINATOR, NOT THE VERDICT.** This says the operation is inside
+    //   a filtered subtree; what that subtree can and cannot be drawn as is
+    //   settled per GROUP, after every operation exists, by `filterGroupsOf`.
+    if (under.filtered) approximations.opsUnderFilterGroup += 1;
     if (under.blendMode !== null) approximations.blendModesNotApplied += 1;
     if (entry.bitmap) {
       approximations.bitmapOps += 1;
@@ -1588,13 +1807,227 @@ function kindsOf(screen) {
   return byKind;
 }
 
-/** The nesting paths of every placement carrying a FILTERLIST on this screen. */
-function prefixesOf(placements) {
-  const out = [];
-  for (const entry of Array.isArray(placements) ? placements : []) {
-    if (Array.isArray(entry?.path)) out.push(entry.path);
+/**
+ * ~~The nesting paths of every placement carrying a FILTERLIST on this
+ * screen.~~ **REPLACED 2026-09-15 BY `filterGroupDraftsOf`, AND THE DELETED
+ * VERSION IS THE BUG.** `prefixesOf` read `entry.path` and dropped
+ * `entry.filters` on the floor, so everything this module said about filters
+ * was invariant under those records being correct, garbage or absent. The
+ * fixture in `test/render-screen.test.js` carried a `filteredPlacements` entry
+ * with NO `filters` key for months and nothing went red.
+ *
+ * A draft is one filtered subtree before its operations are known: the path it
+ * owns, the filters themselves, and which of the pack's TWO filter lists it
+ * came from. Sorted by `comparePath`, which puts an ancestor before its
+ * descendants and otherwise follows the extractor's own drawable order, so a
+ * group's parent is always earlier in the array than the group.
+ *
+ * Total, like every reader here: an entry with no usable `path` is skipped and
+ * a missing `filters` becomes an empty list, which `canvasFilterFor` reports as
+ * a group that applies nothing rather than throwing.
+ */
+function filterGroupDraftsOf(screen) {
+  const drafts = [];
+  collectFilterDrafts(drafts, screen?.filteredPlacements, "placement");
+  // ► **THE SECOND LIST, AND LEAVING IT OUT WOULD HAVE BEEN INVISIBLE.** Five
+  //   records, every one on `townsquare`, every one `leaf: "text"`, every one
+  //   reaching zero operations here. A roster that omitted them would have
+  //   been right about the picture and silent about the omission.
+  collectFilterDrafts(drafts, screen?.filteredButtonRecords, "buttonRecord");
+  drafts.sort((left, right) => comparePath(left.path, right.path));
+  return drafts;
+}
+
+/** One of the pack's filter lists, appended to the drafts. */
+function collectFilterDrafts(drafts, entries, source) {
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    if (!Array.isArray(entry?.path)) continue;
+    drafts.push({
+      path: Object.freeze([...entry.path]),
+      character: Number.isFinite(entry.character) ? entry.character : null,
+      leaf: typeof entry.leaf === "string" ? entry.leaf : null,
+      button: Number.isFinite(entry.button) ? entry.button : null,
+      filters: Object.freeze(Array.isArray(entry.filters) ? [...entry.filters] : []),
+      source
+    });
   }
-  return out;
+}
+
+/**
+ * THE FILTERED SUBTREES OF ONE SCREEN, each with the operations it owns, what
+ * canvas can make of its filters, and where it sits in the nesting.
+ *
+ * ► **THE THREE DECISIONS IN HERE ARE IN THIS FILE'S HEADER, UNDER "FILTER
+ *   GROUPS"** — why the operations are named by a half-open RANGE and what
+ *   that costs, why nesting COMPOSES instead of picking a winner (which is the
+ *   opposite of `blendFor` below, on purpose), and why `filter` is the scale-1
+ *   string while `filters` is carried verbatim beside it. They are decisions
+ *   rather than readings and they belong where a reader meets the output.
+ *
+ * Every count this fills in has a denominator, and the one that matters most
+ * is `filterGroupsReachingNothing`: 108 of the 243 placements on this pack
+ * cover no operation at all, and a roster that simply did not mention them
+ * would read exactly like a build with no such filters.
+ */
+function filterGroupsOf(drafts, ops, screen, approximations) {
+  const unresolved = Array.isArray(screen?.unresolved) ? screen.unresolved : [];
+  const groups = [];
+  const refusedByReason = {};
+  const reachingNothingByKind = {};
+
+  for (let index = 0; index < drafts.length; index += 1) {
+    const draft = drafts[index];
+    // Scale 1. A painter drawing the stage at any other scale rebuilds the
+    // string from `filters`; the buckets below do not move with scale.
+    const built = canvasFilterFor(draft.filters);
+
+    // The operations this subtree owns, found ONCE, over the array the range
+    // will index. `first`/`last` bracket them and `count` is exact, so a run
+    // that is not contiguous is reported rather than mis-stated.
+    let first = -1;
+    let last = -1;
+    let count = 0;
+    for (let at = 0; at < ops.length; at += 1) {
+      if (!isPrefix(ops[at].path, draft.path)) continue;
+      if (first < 0) first = at;
+      last = at;
+      count += 1;
+    }
+    const opFirst = first < 0 ? 0 : first;
+    const opEnd = first < 0 ? 0 : last + 1;
+    const contiguous = opEnd - opFirst === count;
+
+    // The INNERMOST filtered ancestor: the longest path that is a strict
+    // prefix of this one. Drafts are sorted ancestor-first, so it is always an
+    // index already in `groups`.
+    let parent = null;
+    for (let other = 0; other < groups.length; other += 1) {
+      const candidate = groups[other];
+      if (candidate.path.length >= draft.path.length) continue;
+      if (!isPrefix(draft.path, candidate.path)) continue;
+      if (parent === null || candidate.path.length > groups[parent].path.length) parent = other;
+    }
+
+    // What the subtree covers that this module does NOT emit. For the 113
+    // groups that reach no operation this is the whole answer — they are text
+    // — and for the rest it is the part of the group a painter will not see.
+    const kinds = new Set();
+    let unresolvedUnder = 0;
+    for (const entry of unresolved) {
+      if (!Array.isArray(entry?.path) || !isPrefix(entry.path, draft.path)) continue;
+      unresolvedUnder += 1;
+      kinds.add(typeof entry.kind === "string" ? entry.kind : "unknown");
+    }
+
+    groups.push({
+      index,
+      path: draft.path,
+      character: draft.character,
+      source: draft.source,
+      ...(draft.leaf !== null ? { leaf: draft.leaf } : {}),
+      ...(draft.button !== null ? { button: draft.button } : {}),
+      // The records as the pack states them, so a painter can rebuild the
+      // string at its own scale — see decision 3 in the header.
+      filters: draft.filters,
+      filter: built.filter,
+      applied: built.applied,
+      deferred: built.deferred,
+      noOps: built.noOps,
+      refused: built.refused,
+      colourMatrices: built.colourMatrices,
+      counts: built.counts,
+      parent,
+      children: [],
+      opFirst,
+      opEnd,
+      opCount: count,
+      contiguous,
+      // Filled in below, once every group exists.
+      ownOpCount: count,
+      unresolvedUnder,
+      unresolvedKinds: Object.freeze([...kinds].sort())
+    });
+
+    for (const entry of built.refused) {
+      const key = `${entry.type ?? "unknown"}:${entry.reason}`;
+      refusedByReason[key] = (refusedByReason[key] ?? 0) + 1;
+    }
+  }
+
+  // Children, and the operations a group draws ITSELF. Siblings cannot
+  // overlap — neither path is a prefix of the other — and every child's
+  // operations are inside its parent's, so subtracting each child's count once
+  // is exact rather than an estimate.
+  //
+  // ► **UNLESS TWO GROUPS SHARE A PATH, WHICH IS THE ONE WAY `ownOpCount` CAN
+  //   LIE.** Two placements at the same path are siblings by the rule above —
+  //   neither is a STRICT prefix of the other — so both would be subtracted
+  //   from a common parent and the same operations taken out twice. Measured
+  //   2026-09-15: **0 shared paths across the 248 groups**, counting
+  //   `filteredPlacements` and `filteredButtonRecords` together. That is a
+  //   property of this extraction and not of the format, so it is COUNTED
+  //   rather than assumed, and `ownOpCount` is exact exactly when
+  //   `filterGroupsSharingAPath` is 0.
+  const seenPaths = new Set();
+  for (const group of groups) {
+    const key = group.path.join(",");
+    if (seenPaths.has(key)) approximations.filterGroupsSharingAPath += 1;
+    seenPaths.add(key);
+    if (group.parent === null) continue;
+    groups[group.parent].children.push(group.index);
+    groups[group.parent].ownOpCount -= group.opCount;
+  }
+
+  // The op-level five facts. Recomputed from the groups over the operations,
+  // not accumulated while emitting: an operation under two groups is ONE
+  // operation in each of these counts, and incrementing per (op, group) pair
+  // would inflate every one of them by 40% on this pack.
+  for (const op of ops) {
+    let underAny = false;
+    let string = false;
+    let matrix = false;
+    let refused = false;
+    for (const group of groups) {
+      if (!isPrefix(op.path, group.path)) continue;
+      underAny = true;
+      if (group.filter !== null) string = true;
+      if (group.colourMatrices.length > 0) matrix = true;
+      if (group.refused.length > 0) refused = true;
+    }
+    if (!underAny) continue;
+    if (string) approximations.opsWithCanvasFilter += 1;
+    if (matrix) approximations.opsWithDeferredColourMatrix += 1;
+    if (refused) approximations.opsUnderRefusedFilter += 1;
+    if (!string && !matrix) approximations.filtersNotApplied += 1;
+    if (!string && !matrix && !refused) approximations.opsUnderNoOpFilterOnly += 1;
+  }
+
+  approximations.filterGroups = groups.length;
+  for (const group of groups) {
+    if (group.source === "placement") approximations.filterGroupsFromPlacements += 1;
+    if (group.source === "buttonRecord") approximations.filterGroupsFromButtonRecords += 1;
+    if (group.opCount > 0) approximations.filterGroupsReachingOps += 1;
+    else {
+      approximations.filterGroupsReachingNothing += 1;
+      const key = group.unresolvedKinds.length > 0 ? group.unresolvedKinds.join("+") : "nothing-in-the-pack";
+      reachingNothingByKind[key] = (reachingNothingByKind[key] ?? 0) + 1;
+    }
+    if (group.parent !== null) approximations.filterGroupsNested += 1;
+    if (group.opCount > 0 && !group.contiguous) approximations.filterGroupsNotContiguous += 1;
+    approximations.filtersTotal += group.counts.total;
+    approximations.filtersApplied += group.counts.applied;
+    approximations.filtersDeferredToColourMatrix += group.counts.deferred;
+    approximations.filtersNoOp += group.counts.noOp;
+    approximations.filtersRefused += group.counts.refused;
+  }
+  approximations.filterGroupsReachingNothingByKind = Object.freeze(reachingNothingByKind);
+  approximations.filtersRefusedByReason = Object.freeze(refusedByReason);
+
+  for (const group of groups) {
+    group.children = Object.freeze(group.children);
+    Object.freeze(group);
+  }
+  return Object.freeze(groups);
 }
 
 /** The same for blend modes, keeping the mode itself. */

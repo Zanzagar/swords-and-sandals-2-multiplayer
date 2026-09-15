@@ -64,9 +64,14 @@
  * ## MEASURED ON THIS PACK, 2026-09-14, BY THIS FILE'S OWN COUNTERS
  *
  * 26 screens, 13638 shape operations, 2236 glyph operations, 187 text
- * placements. **9423 of the 13638 shape operations — 69% — sit under a
+ * placements. ~~**9423 of the 13638 shape operations — 69% — sit under a
  * FILTERLIST that nothing applies**, which is drop shadows and glows missing
- * everywhere while the picture otherwise looks right. 29 operations carry a
+ * everywhere while the picture otherwise looks right.~~ **APPLIED SINCE
+ * 2026-09-15 — see finding 4 below.** 9423 is still the count of shape
+ * operations inside a filtered subtree and the sentence about them was true
+ * for a day; what is left unapplied is now named rather than lumped: 8850
+ * operations await a colour matrix, 2 sit under a refused filter, and 24 are
+ * under a measured no-op. 29 operations carry a
  * bitmap fill and all six bitmap characters they name are in
  * `assets/bitmaps/`; a clone without that directory loses them and the invoice
  * says how many. 182 operations put no pixel down by construction, 26 of which
@@ -122,6 +127,27 @@
  *   pointee**, which is the same shape as the eight other explaining-away
  *   failures recorded in `HANDOFF.md`.
  *
+ * ► **4. THE 113 FILTER GROUPS `screen.js` HAS TO CALL UNREACHABLE ARE MOSTLY
+ *   REACHABLE FROM HERE, AND NOBODY HAD LOOKED BECAUSE NOBODY WAS COMPOSITING.**
+ *   `screen.js` emits no text, so a glow on a text field reaches no drawable it
+ *   knows about, and its roster records 113 of its 248 groups reaching nothing.
+ *   **This page draws the MERGED order, and the glyph operations
+ *   `screen-text.js` emits carry the SAME `path` array**, so matching a group's
+ *   path against the merged list finds them: measured 2026-09-15 across all 26
+ *   screens, **98 of those 113 groups reach a glyph operation and only 15 reach
+ *   nothing at all**. 1689 glyph operations sit inside a filter group, 650 of
+ *   them on `help` under a single drop shadow — which is precisely the
+ *   `filtersNotAppliedOps 650` the words panel beside them has been reporting
+ *   since this page was built. **Two counts on one panel described the same
+ *   650 operations for a day and nothing joined them**, which is the failure
+ *   mode this page exists to catch, committed by this page.
+ *
+ *   The compositing itself is in "The filtered groups, composited offscreen"
+ *   below; what belongs here is why the discovery needed a picture. The
+ *   module-side number was not wrong — `screen.js` genuinely emits no text and
+ *   genuinely cannot reach those groups. It took a caller holding BOTH halves
+ *   to notice that the halves fit together.
+ *
  * ► **3. OPERATIONS SPILL OFF THE STAGE AND THIS PAGE USED TO DRAW THEM.** The
  *   weapon shop's first render put the shopkeeper's head in the page's own
  *   margin, below the letterbox. Flash clips to the stage; this now does too,
@@ -151,6 +177,8 @@
  *   node tools/arena-server.mjs        # then open /tools/screens/index.html
  *   ?screen=<name>                     # one of the 26; `screenNames` order
  *   ?chrome=0 ?text=0 ?bitmaps=0       # take a half away and watch the invoice
+ *   ?filters=0                         # stop compositing the filtered groups
+ *   ?probe=1                           # read the canvas back and log what is on it
  *   ?holes=1                           # outline the text boxes nothing filled
  *   ?v.<variableName>=<value>          # bind a live value into an edit field
  */
@@ -170,7 +198,8 @@ import {
   SCREEN_TEXT_APPROXIMATION_KINDS,
   SS2_STAGE,
   stageFitFor,
-  TWIPS_PER_PIXEL
+  TWIPS_PER_PIXEL,
+  canvasFilterFor
 } from "/src/render/index.js";
 
 /* ------------------------------------------------------------------ */
@@ -208,7 +237,14 @@ const show = {
   //   staging is, and that is a fact about the pack.
   clip: params.get("clip") !== "0",
   holes: params.get("holes") === "1",
-  edge: params.get("edge") === "1"
+  edge: params.get("edge") === "1",
+  // ► **AND THIS ONE MAKES A PRESENCE VISIBLE, WHICH IS THE OTHER HALF.**
+  //   `?filters=0` draws every operation straight onto the canvas, exactly as
+  //   this page did before 2026-09-15, so the filtered picture and the
+  //   unfiltered one can be put side by side at the same window size. Without
+  //   it a soft edge is unfalsifiable: nothing on the page says what it would
+  //   have looked like without the offscreen pass.
+  filters: params.get("filters") !== "0"
 };
 
 /** Live values for edit fields, from `?v.<variableName>=<value>`. */
@@ -449,7 +485,8 @@ const TOGGLE_LABELS = Object.freeze({
   bitmaps: "bitmaps",
   clip: "clip to stage",
   holes: "outline holes",
-  edge: "stage edge"
+  edge: "stage edge",
+  filters: "filter groups"
 });
 
 function buildToggles() {
@@ -516,36 +553,36 @@ function rgbaOf(fill, opacity) {
  *   flat fallback beside it. **A consumer that applies both darkens twice**,
  *   which is why `globalAlpha` is set to 1 here and not to the operation's.
  */
-function paintGradientFill(operation, path) {
+function paintGradientFill(ctx, operation, path) {
   const g = operation.gradient;
   if (!g || !Array.isArray(g.stops) || g.stops.length === 0) return false;
   const m = g.matrix;
   if (!m) return false;
-  const apply = () => context.transform(
+  const apply = () => ctx.transform(
     m.a / TWIPS_PER_PIXEL, m.b / TWIPS_PER_PIXEL,
     m.c / TWIPS_PER_PIXEL, m.d / TWIPS_PER_PIXEL,
     m.tx / TWIPS_PER_PIXEL, m.ty / TWIPS_PER_PIXEL
   );
-  context.save();
+  ctx.save();
   apply();
   const ramp = g.type === "radial"
-    ? context.createRadialGradient(0, 0, 0, 0, 0, GRADIENT_SQUARE)
-    : context.createLinearGradient(-GRADIENT_SQUARE, 0, GRADIENT_SQUARE, 0);
+    ? ctx.createRadialGradient(0, 0, 0, 0, 0, GRADIENT_SQUARE)
+    : ctx.createLinearGradient(-GRADIENT_SQUARE, 0, GRADIENT_SQUARE, 0);
   for (const stop of g.stops) {
     // `addColorStop` throws on a non-finite offset, which would take the whole
     // frame down; a clamp is cheaper than a try/catch per stop.
     const offset = Math.min(1, Math.max(0, Number.isFinite(stop.offset) ? stop.offset : 0));
     ramp.addColorStop(offset, rgbaOf(stop.fill, stop.opacity ?? 1));
   }
-  context.restore();
+  ctx.restore();
   // The path is in SHAPE space and the ramp is in GRADIENT space, so the path
   // cannot simply be filled: it is the CLIP, and the ramp covers it.
-  context.save();
-  context.clip(path, operation.fillRule ?? "evenodd");
+  ctx.save();
+  ctx.clip(path, operation.fillRule ?? "evenodd");
   apply();
-  context.fillStyle = ramp;
-  context.fillRect(-GRADIENT_SQUARE, -GRADIENT_SQUARE, GRADIENT_SQUARE * 2, GRADIENT_SQUARE * 2);
-  context.restore();
+  ctx.fillStyle = ramp;
+  ctx.fillRect(-GRADIENT_SQUARE, -GRADIENT_SQUARE, GRADIENT_SQUARE * 2, GRADIENT_SQUARE * 2);
+  ctx.restore();
   return true;
 }
 
@@ -557,31 +594,31 @@ function paintGradientFill(operation, path) {
  *   of twenty draws one corner of the image across the whole screen, which
  *   reads as a texture bug rather than as a units bug.
  */
-function paintBitmapFill(operation, path) {
+function paintBitmapFill(ctx, operation, path) {
   const image = bitmaps.get(operation.bitmap?.id);
   if (!image || (image.naturalWidth === 0 && image.width === 0)) return false;
   const m = operation.bitmap.matrix;
-  context.save();
-  context.clip(path, operation.fillRule ?? "evenodd");
+  ctx.save();
+  ctx.clip(path, operation.fillRule ?? "evenodd");
   if (m) {
-    context.transform(
+    ctx.transform(
       m.a / TWIPS_PER_PIXEL, m.b / TWIPS_PER_PIXEL,
       m.c / TWIPS_PER_PIXEL, m.d / TWIPS_PER_PIXEL,
       m.tx / TWIPS_PER_PIXEL, m.ty / TWIPS_PER_PIXEL
     );
   }
   if (operation.bitmap.repeat) {
-    const pattern = context.createPattern(image, "repeat");
+    const pattern = ctx.createPattern(image, "repeat");
     if (pattern) {
-      context.fillStyle = pattern;
+      ctx.fillStyle = pattern;
       // In the bitmap's own space now, so a generous rectangle is cheaper than
       // an exact one and the clip above is what actually bounds it.
-      context.fillRect(-4000, -4000, 8000, 8000);
+      ctx.fillRect(-4000, -4000, 8000, 8000);
     }
   } else {
-    context.drawImage(image, 0, 0);
+    ctx.drawImage(image, 0, 0);
   }
-  context.restore();
+  ctx.restore();
   return true;
 }
 
@@ -611,12 +648,423 @@ function emptyTally() {
     gradientDrawn: 0,
     clipsApplied: 0,
     strokesDrawn: 0,
-    // Carried on the operation by the pack, applied by nothing here.
+    // ~~Carried on the operation by the pack, applied by nothing here.~~
+    // **`filteredOps` IS STILL "an operation inside something filtered" AND IS
+    // STILL NOT THE NUMBER APPLIED** — the applied count is `filters` below,
+    // which this page tallies from what it actually composited. The two are
+    // different questions and the panel shows both.
     filteredOps: 0,
     blendOps: 0,
     notdefOps: 0,
-    hiddenByToggle: 0
+    hiddenByToggle: 0,
+    // THIS PAGE'S OWN FILTER INVOICE. Not one field here is copied from
+    // `screen.approximations`; two of them are the same question the module
+    // answers by a different route, and `crossCheck` compares those two.
+    filters: emptyFilterCounts()
   };
+}
+
+/**
+ * ► **EVERY ONE OF THESE IS COUNTED BY NAME AND HAS A DENOMINATOR ON THE
+ *   PANEL**, because a bare zero cannot be told from a dead counter. `groups`
+ *   is the denominator for the group counts, the screen's operation count for
+ *   the operation counts, and `filterTokens` for `filterTokensUnparsed`.
+ */
+function emptyFilterCounts() {
+  return {
+    // What was available to composite.
+    available: 0,
+    groupsWithNoPath: 0,
+    groupsReachingNothingHere: 0,
+    groupsReachingSomething: 0,
+    groupsReachingOnlyGlyphs: 0,
+    groupsWithNoFilterString: 0,
+    groupsStringVanishedAtScale: 0,
+    groupsNotContiguousHere: 0,
+    // What was composited.
+    groupsComposited: 0,
+    composites: 0,
+    offscreenPasses: 0,
+    offscreenPixels: 0,
+    runsReopened: 0,
+    padMax: 0,
+    padLimit: 0,
+    padClamped: 0,
+    // Operations, shape and glyph kept apart because the module's own counts
+    // are shape-only and a merged number could not be compared with them.
+    opsUnderAnyGroup: 0,
+    glyphOpsUnderAnyGroup: 0,
+    opsUnderFilterString: 0,
+    glyphOpsUnderFilterString: 0,
+    glyphOpsComposited: 0,
+    // Still NOT applied, and the panel must keep saying so.
+    groupsWithColourMatrix: 0,
+    opsUnderColourMatrix: 0,
+    groupsRefused: 0,
+    opsUnderRefusedFilter: 0,
+    groupsNoOpOnly: 0,
+    // The parser's own honesty, and the guard against a module stamping a
+    // filter onto an operation behind this page's back.
+    filterTokens: 0,
+    filterTokensUnparsed: 0,
+    opsArrivingPreMarked: 0,
+    // Conditions, and the clock.
+    scale: 0,
+    widestBleed: 0,
+    widestFilterAtOne: null,
+    widestFilterAsSet: null,
+    canvasFilterWorks: false,
+    compositeMs: 0,
+    walkMs: 0
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* The filtered groups, composited offscreen                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **FLASH RASTERISES A FILTERED GROUP AND FILTERS THE COMPOSITE**, so the
+ *   one-line implementation — `ctx.filter = group.filter` before each of the
+ *   group's own operations — is NOT a rough version of the right picture, it
+ *   is a different picture that looks plausible. `src/render/screen.js` states
+ *   the case that settles it and this page can now show it: `townsquare`'s
+ *   placement at path `[59,1]` covers 1523 operations, and blurring those one
+ *   at a time blurs 1523 internal seams the build's own rasterisation does not
+ *   have. So a group's operations are drawn to an OFFSCREEN canvas,
+ *   `ctx.filter` is set ONCE, and the offscreen is drawn back.
+ *
+ * ## WHY THE GROUP'S `[opFirst, opEnd)` RANGE IS NOT USED HERE, AT ALL
+ *
+ * `screen.js` derives that range against its OWN shape-only `ops` array, and
+ * says in its header that a caller which re-sorts or filters `ops` must
+ * re-match on `path` instead. **This page is exactly that caller, twice over:**
+ * it draws `screenWithTextFor`'s MERGED order (shapes and glyph outlines
+ * interleaved by depth) and then `visibleOps` filters it by the toggles. Using
+ * the range here would index the wrong array with numbers that look right.
+ *
+ * ► **AND RE-MATCHING ON `path` IS NOT MERELY THE SAFE ROUTE — IT IS THE ONE
+ *   THAT FINDS 98 GROUPS `screen.js` HAS TO CALL UNREACHABLE.** Measured
+ *   2026-09-15 on this pack, by matching every group's path against the merged
+ *   order of all 26 screens: `screen.js` counts **113 of its 248 groups
+ *   reaching no operation**, because it emits no text — but the glyph
+ *   operations `screen-text.js` emits **carry the same `path` array**, and
+ *   **98 of those 113 groups reach a glyph operation.** Only 15 reach nothing
+ *   here. **1689 glyph operations across the 26 screens sit inside a filter
+ *   group**, and on `help` that is **650 of them under one drop shadow** —
+ *   which is the `filtersNotAppliedOps 650` this page's own words panel has
+ *   been reporting since it was built. They are composited now.
+ *
+ * ## THE OFFSCREEN IS CANVAS-SIZED PLUS A PAD, AND THE PAD IS THE FILTER'S OWN
+ *
+ * A blur or a glow draws OUTSIDE the geometry that produced it, so an
+ * offscreen cut to a group's tight bounding box clips the effect into a hard
+ * edge. This one is not cut to the bounds at all: it is the whole canvas, so
+ * every destination pixel's source is present — except at the canvas edge,
+ * where source geometry up to one bleed-radius OUTSIDE the canvas can still
+ * reach a pixel INSIDE it. That is what the pad is for and it is the only
+ * thing it is for.
+ *
+ * ► **THE BLEED RADIUS IS READ OFF THE FILTER STRING THAT IS ABOUT TO BE SET**,
+ *   not off the filter records, because the string is what the browser will
+ *   actually apply and it is already at this frame's scale. Two constants, both
+ *   derived rather than picked:
+ *
+ *   - `blur(Rpx)` — R is a standard deviation (`filters.js` says so and says
+ *     why the two CSS radii are not the same quantity). A Gaussian is truncated
+ *     at **3 sigma**, which holds 99.73% of its mass; SVG's own three-box-blur
+ *     approximation of it has a HARD support of 3 x 1.5 x (3*sqrt(2*pi)/4)
+ *     sigma = 2.82 sigma, so 3 sigma covers the exact kernel to 0.3% and the
+ *     approximate one completely.
+ *   - `drop-shadow(dx dy R c)` — R is a BOX-SHADOW blur radius, which is TWICE
+ *     the standard deviation, so its support is 3 x R/2 = **1.5 R**, offset by
+ *     `dx`/`dy`.
+ *
+ *   Measured on this pack at scale 1: median bleed 1.97 stage px, p90 9.49,
+ *   max 67.54 (one glow on `createchar`, `createboss`, `load_saved_gladiators`,
+ *   `delete_gladiator` and `church`). **Every one of the 214 function tokens in
+ *   the 213 filter strings parses** — 158 `drop-shadow`, 56 `blur` — and
+ *   `filterTokensUnparsed` is the denominator'd counter that says so, because a
+ *   token this parser does not know reads as bleed 0 and clips silently.
+ *
+ * ## THE SCALE IS DEVICE PIXELS PER STAGE PIXEL, AND PASSING 1 WOULD UNDER-BLUR
+ *
+ * `ctx.filter` lengths are NOT scaled by `ctx.setTransform` — `filters.js`
+ * states this and states that it is an unmeasured hypothesis about browsers —
+ * so `canvasFilterFor` takes a `scale` and the group's `filter` field, built at
+ * scale 1, is the wrong string for every window this page has ever been opened
+ * in. The right factor is `fit.scale * placement.scale`, and `fit.scale`
+ * ALREADY carries the `devicePixelRatio`: `draw()` sizes the canvas in DEVICE
+ * pixels and hands those dimensions to `stageFitFor`, so its scale is device
+ * pixels per stage pixel and multiplying by the ratio again would double every
+ * blur. The probe prints the factor so a screenshot says which one was used.
+ *
+ * ► **WHAT IS NOT SETTLED: whether Flash's `blurX` is in the FILTERED CLIP's
+ *   own space or in stage space.** If it is the clip's own, a group whose
+ *   geometry is scaled by its placement wants that factor as well. 70 of the
+ *   213 string-bearing groups have geometry whose average `sqrt(|det|)` is more
+ *   than 2% off 1, so the question is reachable rather than academic; there is
+ *   no browser and no capture on this route to settle it, so the count is on
+ *   the panel as `groups with scaled geometry` and the stage factor is used.
+ */
+
+/** A Gaussian's practical support: 3 sigma holds 99.73% of it. */
+const GAUSSIAN_SUPPORT_SIGMAS = 3;
+
+/** `drop-shadow`'s third length is a box-shadow radius — twice the sigma. */
+const SHADOW_RADIUS_PER_SIGMA = 2;
+
+/**
+ * One CSS filter function and its arguments, nested parens and all, so that
+ * `rgba(…)` INSIDE a `drop-shadow(…)` is consumed as part of it and never
+ * counted as a token of its own.
+ */
+const FILTER_FUNCTION = /([a-z-]+)\(([^()]*(?:\([^()]*\)[^()]*)*)\)/g;
+
+/** Every `<number>px` in a filter function's arguments, in order. */
+const FILTER_LENGTH = /-?\d*\.?\d+(?=px)/g;
+
+/**
+ * How far outside its own geometry a filter string draws, in the units of the
+ * string itself — so a string built at this frame's scale answers in device
+ * pixels. Unknown functions are COUNTED, never assumed harmless.
+ */
+function filterBleedFor(filter, counts) {
+  if (typeof filter !== "string" || filter.length === 0) return 0;
+  let bleed = 0;
+  FILTER_FUNCTION.lastIndex = 0;
+  let match;
+  while ((match = FILTER_FUNCTION.exec(filter)) !== null) {
+    counts.filterTokens += 1;
+    const name = match[1];
+    const args = match[2];
+    if (name === "blur") {
+      const sigma = Number.parseFloat(args);
+      if (Number.isFinite(sigma)) bleed = Math.max(bleed, GAUSSIAN_SUPPORT_SIGMAS * Math.abs(sigma));
+      else counts.filterTokensUnparsed += 1;
+      continue;
+    }
+    if (name === "drop-shadow") {
+      const lengths = args.match(FILTER_LENGTH);
+      if (lengths && lengths.length >= 3) {
+        const dx = Math.abs(Number.parseFloat(lengths[0]));
+        const dy = Math.abs(Number.parseFloat(lengths[1]));
+        const radius = Math.abs(Number.parseFloat(lengths[2]));
+        bleed = Math.max(bleed, Math.max(dx, dy) + (GAUSSIAN_SUPPORT_SIGMAS / SHADOW_RADIUS_PER_SIGMA) * radius);
+      } else counts.filterTokensUnparsed += 1;
+      continue;
+    }
+    // Not a length-bearing filter this parser knows. It may still bleed, so it
+    // is counted rather than treated as zero — a silent zero here is a clipped
+    // effect that reads as a hard edge and blames the pack.
+    counts.filterTokensUnparsed += 1;
+  }
+  return bleed;
+}
+
+/**
+ * ► **DOES THIS BROWSER HONOUR `ctx.filter` AT ALL?** Safari shipped it in 17;
+ *   before that the assignment is a silent no-op and every group would be
+ *   rasterised to an offscreen, composited back UNFILTERED, and counted as
+ *   composited — a page confidently reporting an effect it did not draw. The
+ *   round-trip is the only way to tell from inside.
+ */
+const CANVAS_FILTER_WORKS = (() => {
+  try {
+    const probe = document.createElement("canvas").getContext("2d");
+    probe.filter = "blur(2px)";
+    return probe.filter === "blur(2px)";
+  } catch { return false; }
+})();
+
+/**
+ * The offscreens, pooled by DEPTH in the group tree and never shrunk.
+ *
+ * Depth, not group: a group is finished and composited before its next sibling
+ * opens, so only the open ancestors need buffers at once. Measured on this
+ * pack, `screen.js`'s own figure: no operation sits under three filtered
+ * ancestors, so this pool is two or three canvases and not 198.
+ */
+const offscreens = [];
+function offscreenAt(depth, width, height) {
+  let layer = offscreens[depth];
+  if (!layer) {
+    const element = document.createElement("canvas");
+    layer = { canvas: element, context: element.getContext("2d") };
+    offscreens[depth] = layer;
+  }
+  if (layer.canvas.width < width || layer.canvas.height < height) {
+    // Assigning either dimension resets the canvas, which is exactly what is
+    // wanted — the caller clears the sub-rectangle it uses in any case.
+    layer.canvas.width = Math.max(layer.canvas.width, width);
+    layer.canvas.height = Math.max(layer.canvas.height, height);
+  }
+  return layer;
+}
+
+/** `screenFor`'s prefix test, as the group roster's own paths are matched. */
+function pathHasPrefix(path, prefix) {
+  if (!Array.isArray(path) || !Array.isArray(prefix)) return false;
+  if (prefix.length > path.length) return false;
+  for (let index = 0; index < prefix.length; index += 1) {
+    if (path[index] !== prefix[index]) return false;
+  }
+  return true;
+}
+
+/**
+ * WHICH GROUPS COVER WHICH OF THE OPERATIONS THIS FRAME WILL ACTUALLY DRAW.
+ *
+ * Every count here is this page's own, taken over the merged, toggled list it
+ * is about to paint — never copied from `screen.approximations`. Two of them
+ * are deliberately the SAME QUESTION the module answers by a different route
+ * (`opsUnderAnyGroup` against `opsUnderFilterGroup`, `opsUnderFilterString`
+ * against `opsWithCanvasFilter`, both restricted to shape operations so the
+ * populations match), and `crossCheck` below compares them and calls a
+ * difference a finding.
+ */
+function filterLayersFor(ops, groups, scale, counts) {
+  const chains = new Array(ops.length).fill(null);
+  if (!Array.isArray(groups) || groups.length === 0) return chains;
+
+  for (const group of groups) {
+    if (!group || !Array.isArray(group.path)) { counts.groupsWithNoPath += 1; continue; }
+    const indices = [];
+    let glyphs = 0;
+    for (let index = 0; index < ops.length; index += 1) {
+      if (!pathHasPrefix(ops[index].path, group.path)) continue;
+      indices.push(index);
+      if (ops[index].source === "text") glyphs += 1;
+    }
+    // ► **NOTHING MAY ARRIVE PRE-MARKED.** `screen.js` asserts that no operation
+    //   carries `filter`, `filters`, `filterGroup`, `colourMatrices`, `refused`
+    //   or `deferred`, precisely so the per-operation `ctx.filter` loop cannot
+    //   be written by habit. If a module starts stamping one, this page would
+    //   apply the group's filter a second time on top of it — so it is counted
+    //   here and shouted in the log rather than discovered in a screenshot.
+    for (const index of indices) {
+      const op = ops[index];
+      if (op.filter !== undefined || op.filters !== undefined || op.filterGroup !== undefined) {
+        counts.opsArrivingPreMarked += 1;
+      }
+    }
+
+    const shapes = indices.length - glyphs;
+    const hasString = typeof group.filter === "string" && group.filter.length > 0;
+    const matrices = Array.isArray(group.colourMatrices) ? group.colourMatrices.length : 0;
+    const refusals = Array.isArray(group.refused) ? group.refused.length : 0;
+    const noOps = Array.isArray(group.noOps) ? group.noOps.length : 0;
+
+    if (indices.length === 0) { counts.groupsReachingNothingHere += 1; continue; }
+    counts.groupsReachingSomething += 1;
+    if (shapes === 0) counts.groupsReachingOnlyGlyphs += 1;
+    if (matrices > 0) { counts.groupsWithColourMatrix += 1; }
+    if (refusals > 0) { counts.groupsRefused += 1; }
+    if (noOps > 0 && !hasString && matrices === 0) counts.groupsNoOpOnly += 1;
+    if (!hasString) { counts.groupsWithNoFilterString += 1; continue; }
+
+    const contiguous = indices[indices.length - 1] - indices[0] + 1 === indices.length;
+    if (!contiguous) counts.groupsNotContiguousHere += 1;
+
+    // The string at THIS frame's scale, and the bleed read back off it. The
+    // group's own `filter` field is the scale-1 string and is never used to
+    // paint — only to say, on the panel, what the pack asked for.
+    const built = canvasFilterFor(group.filters, { scale });
+    if (typeof built.filter !== "string" || built.filter.length === 0) {
+      // Scale cannot turn a string into nothing (every classification in
+      // `canvasFilterFor` happens before the factor is applied), so this is a
+      // contradiction rather than a case — counted, never swallowed.
+      counts.groupsStringVanishedAtScale += 1;
+      continue;
+    }
+    const bleed = filterBleedFor(built.filter, counts);
+    // The widest bleed is the one whose scaling is most visible, so it is the
+    // one the panel prints twice — see the note at that row.
+    if (bleed > counts.widestBleed || counts.widestFilterAsSet === null) {
+      counts.widestBleed = bleed;
+      counts.widestFilterAsSet = built.filter;
+      counts.widestFilterAtOne = typeof group.filter === "string" ? group.filter : null;
+    }
+
+    const layer = {
+      group,
+      path: group.path,
+      filter: built.filter,
+      bleed,
+      matched: indices.length,
+      glyphs,
+      shapes,
+      contiguous,
+      depth: 0,
+      pad: 0
+    };
+    counts.groupsComposited += 1;
+    counts.glyphOpsComposited += glyphs;
+    for (const index of indices) (chains[index] ??= []).push(layer);
+  }
+
+  // OUTERMOST FIRST. A longer path is deeper, and two groups never share a path
+  // on this pack (`screen.js` counts `filterGroupsSharingAPath`, measured 0);
+  // if they ever do, the order between them is arbitrary but both still apply.
+  for (const chain of chains) {
+    if (chain && chain.length > 1) chain.sort((a, b) => a.path.length - b.path.length);
+  }
+
+  // The five op-level facts, counted PER OPERATION in their own pass. An
+  // operation under two groups is ONE operation in each of these; incrementing
+  // inside the loop above would inflate every one of them, and 40% of this
+  // pack's operations sit under exactly two filtered ancestors.
+  for (let index = 0; index < ops.length; index += 1) {
+    const op = ops[index];
+    const glyph = op.source === "text";
+    let underAny = false;
+    let underString = false;
+    let underMatrix = false;
+    let underRefused = false;
+    for (const group of groups) {
+      if (!group || !pathHasPrefix(op.path, group.path)) continue;
+      underAny = true;
+      if (typeof group.filter === "string" && group.filter.length > 0) underString = true;
+      if (Array.isArray(group.colourMatrices) && group.colourMatrices.length > 0) underMatrix = true;
+      if (Array.isArray(group.refused) && group.refused.length > 0) underRefused = true;
+    }
+    if (underAny) { if (glyph) counts.glyphOpsUnderAnyGroup += 1; else counts.opsUnderAnyGroup += 1; }
+    if (underString) { if (glyph) counts.glyphOpsUnderFilterString += 1; else counts.opsUnderFilterString += 1; }
+    if (underMatrix) counts.opsUnderColourMatrix += 1;
+    if (underRefused) counts.opsUnderRefusedFilter += 1;
+  }
+
+  return chains;
+}
+
+/** Shared empty chain, so the hot loop allocates nothing per operation. */
+const EMPTY_CHAIN = Object.freeze([]);
+
+/**
+ * The transform chain from a device pixel to a stage pixel, on ANY context —
+ * the main one and every offscreen, from one place, because two copies of a
+ * transform chain is how an offscreen ends up half a pixel out and the seam
+ * shows as a dark line.
+ *
+ * ► **THE STAGE CLIP IS ONLY EVER SET ON THE MAIN CONTEXT.** Flash rasterises
+ *   a filtered clip whole and the STAGE clips the composite afterwards, so
+ *   clipping inside an offscreen would cut the geometry before its own blur
+ *   and manufacture a hard edge at the stage border out of nothing. The clip on
+ *   the main context survives `save()`/`setTransform(identity)` — a clip is a
+ *   device-space region once set — so every composite lands inside it.
+ */
+function applyStageChain(ctx, fit, placement, { pad = 0, clip = false } = {}) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (pad !== 0) ctx.translate(pad, pad);
+  ctx.translate(fit.offsetX, fit.offsetY);
+  ctx.scale(fit.scale, fit.scale);
+  if (clip) {
+    ctx.beginPath();
+    ctx.rect(0, 0, SS2_STAGE.width, SS2_STAGE.height);
+    ctx.clip();
+  }
+  ctx.translate(placement.x, placement.y);
+  if (placement.scale !== 1) ctx.scale(placement.scale, placement.scale);
 }
 
 /**
@@ -633,142 +1081,252 @@ function emptyTally() {
  *   extractor flattens the root display list, so these coordinates are already
  *   stage coordinates and stage y is down. Flipping would draw the sky under
  *   the ground.
+ *
+ * ► **AND THE LOOP IS A STACK NOW, NOT A LOOP.** Each operation names the
+ *   filtered groups it is inside; when that chain deepens an offscreen opens,
+ *   when it shallows the offscreen is filtered ONCE and drawn back into
+ *   whatever is under it. An operation in no group goes straight to the main
+ *   context exactly as it always did, so the 5518 operations across the 26
+ *   screens that are in no group take the identical path they took before.
  */
-function paintOps(ops, fit, placement, tally) {
+function paintOps(ops, fit, placement, tally, groups) {
+  const counts = tally.filters;
+  // DEVICE PIXELS PER STAGE PIXEL. `fit.scale` already carries
+  // `devicePixelRatio` because `draw()` sizes the canvas in device pixels
+  // before calling `stageFitFor`; multiplying by the ratio again here would
+  // ship every blur at twice its width, and passing 1 would ship it at a third.
+  const scale = fit.scale * (placement.scale ?? 1);
+  counts.scale = scale;
+  counts.available = Array.isArray(groups) ? groups.length : 0;
+  // ► **THE ONE BOUND ON THE PAD, AND IT IS DERIVED RATHER THAN PICKED.** A
+  //   bleed wider than the canvas itself can only be fed by geometry further
+  //   from the stage than the stage is wide, so padding past that buys nothing
+  //   and costs an offscreen more than three times the canvas in each
+  //   direction. Measured on this pack: the widest bleed is 67.54 stage pixels
+  //   (one glow, on five screens), so at every window this page has been opened
+  //   in the limit is an order of magnitude clear and `padClamped` stays 0 —
+  //   which is why `padMax / padLimit` is on the panel as a RATIO. A bare
+  //   `padClamped: 0` could not be told from a counter that never fires.
+  counts.padLimit = Math.max(1, Math.min(canvas.width, canvas.height));
+  counts.canvasFilterWorks = CANVAS_FILTER_WORKS;
+
+  const chains = show.filters && CANVAS_FILTER_WORKS
+    ? filterLayersFor(ops, groups, scale, counts)
+    : new Array(ops.length).fill(null);
+
   context.save();
-  context.translate(fit.offsetX, fit.offsetY);
-  context.scale(fit.scale, fit.scale);
-  // ► **THE STAGE IS A CLIP, NOT A HINT.** Set in STAGE space, before the
-  //   placement, so it bounds the screen the way the player's own stage does
-  //   and not the way this page's canvas happens to be shaped.
-  if (show.clip) {
-    context.beginPath();
-    context.rect(0, 0, SS2_STAGE.width, SS2_STAGE.height);
-    context.clip();
+  applyStageChain(context, fit, placement, { clip: show.clip });
+
+  /** The open offscreens, outermost first. Empty means the main context. */
+  const stack = [];
+  const targetOf = () => (stack.length > 0 ? stack[stack.length - 1].context : context);
+
+  const compositeStarted = performance.now();
+  let compositeMs = 0;
+
+  function openLayer(layer) {
+    const parent = stack.length > 0 ? stack[stack.length - 1] : null;
+    // CUMULATIVE. A child's bleed has to survive its parent's own pad, or the
+    // outer band of the child is thrown away before the parent ever blurs it.
+    const wanted = Math.ceil(layer.bleed) + (parent ? parent.pad : 0);
+    const pad = Math.min(wanted, counts.padLimit);
+    if (pad < wanted) counts.padClamped += 1;
+    if (pad > counts.padMax) counts.padMax = pad;
+    const width = canvas.width + pad * 2;
+    const height = canvas.height + pad * 2;
+    const off = offscreenAt(stack.length, width, height);
+    const ctx = off.context;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.filter = "none";
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.clearRect(0, 0, width, height);
+    applyStageChain(ctx, fit, placement, { pad });
+    counts.offscreenPasses += 1;
+    counts.offscreenPixels += width * height;
+    stack.push({ layer, pad, width, height, canvas: off.canvas, context: ctx });
   }
-  context.translate(placement.x, placement.y);
-  if (placement.scale !== 1) context.scale(placement.scale, placement.scale);
 
-  for (const operation of ops) {
-    tally.seen += 1;
-    if (operation.source === "text") tally.glyphOps += 1;
-    else tally.shapeOps += 1;
-    if (operation.filtered) tally.filteredOps += 1;
-    if (operation.blendMode !== undefined && operation.blendMode !== null) tally.blendOps += 1;
-    if (operation.notdef) tally.notdefOps += 1;
-
-    if (operation.kind !== "path") {
-      tally.reasons["not-a-path"] += 1;
-      tally.drewNothing += 1;
-      continue;
-    }
-    if (typeof operation.d !== "string" || operation.d.length === 0) {
-      tally.reasons["no-geometry"] += 1;
-      tally.drewNothing += 1;
-      continue;
-    }
-
-    const matrix = Array.isArray(operation.matrix) && operation.matrix.length === 6
-      ? operation.matrix
-      : [1, 0, 0, 1, 0, 0];
-
-    context.save();
-    // ► **THE CLIP GOES ON BEFORE THE SHAPE'S OWN TRANSFORM**, because the
-    //   cutter's matrix is composed in the SAME space as the shape's and not
-    //   inside it. Setting it afterwards clips a glow by a mask already moved
-    //   by the glow's own placement — a plausible picture, and the wrong one.
-    if (operation.clip && typeof operation.clip.d === "string") {
-      const c = Array.isArray(operation.clip.matrix) && operation.clip.matrix.length === 6
-        ? operation.clip.matrix
-        : [1, 0, 0, 1, 0, 0];
-      context.save();
-      context.transform(c[0], c[1], c[2], c[3], c[4] / TWIPS_PER_PIXEL, c[5] / TWIPS_PER_PIXEL);
-      context.clip(path2dFor(operation.clip.d), "evenodd");
-      context.restore();
-      tally.clipsApplied += 1;
-    }
-    context.transform(
-      matrix[0], matrix[1], matrix[2], matrix[3],
-      matrix[4] / TWIPS_PER_PIXEL, matrix[5] / TWIPS_PER_PIXEL
+  function closeLayer() {
+    const entry = stack.pop();
+    const parent = stack.length > 0 ? stack[stack.length - 1] : null;
+    const dest = parent ? parent.context : context;
+    const destPad = parent ? parent.pad : 0;
+    const started = performance.now();
+    dest.save();
+    dest.setTransform(1, 0, 0, 1, 0, 0);
+    dest.filter = entry.layer.filter;
+    dest.globalAlpha = 1;
+    dest.globalCompositeOperation = "source-over";
+    // The pooled canvas may be LARGER than this pass needs — it grows and is
+    // never shrunk — so the sub-rectangle is named explicitly rather than
+    // trusting `canvas.width`, which would drag a previous screen's stale band
+    // in along the right and bottom edges.
+    dest.drawImage(
+      entry.canvas, 0, 0, entry.width, entry.height,
+      destPad - entry.pad, destPad - entry.pad, entry.width, entry.height
     );
-    const path = path2dFor(operation.d);
+    dest.restore();
+    compositeMs += performance.now() - started;
+    counts.composites += 1;
+  }
 
-    let painted = false;
-    let reason = "no-fill-and-no-stroke";
-    if (operation.bitmap) {
-      tally.bitmapOps += 1;
-      const alpha = operation.fillOpacity ?? 1;
-      if (!show.bitmaps) {
-        reason = "bitmap-turned-off";
-      } else if (!(alpha > 0)) {
-        // ► **A FULLY TRANSPARENT PAINT CALL IS NOT A PAINT, and counting it as
-        //   one is how this page's own tally would stop meaning "pixels".** The
-        //   cross-check against `screen.js`'s `invisibleOps` is only worth
-        //   anything while both sides are answering the same question, and
-        //   `drawsAnything` there reads a bitmap's alpha off `fillOpacity`
-        //   exactly like this.
-        reason = "transparent-fill";
-      } else {
-        context.globalAlpha = alpha;
-        if (paintBitmapFill(operation, path)) {
-          painted = true;
-          tally.bitmapDrawn += 1;
-        } else {
-          reason = "bitmap-image-missing";
-        }
-      }
-    } else if (operation.gradient) {
-      tally.gradientOps += 1;
-      // ► **A GRADIENT'S ALPHA IS IN ITS STOPS AND NOWHERE ELSE**, which is
-      //   also why `globalAlpha` stays at 1 below: the operation's
-      //   `fillOpacity` carries the same colour-transform factor for the flat
-      //   fallback beside it, and applying both darkens twice.
-      const inks = (operation.gradient.stops ?? []).some((stop) => (stop?.opacity ?? 1) > 0);
-      if (!inks) {
-        reason = "transparent-fill";
-      } else {
-        context.globalAlpha = 1;
-        if (paintGradientFill(operation, path)) {
-          painted = true;
-          tally.gradientDrawn += 1;
-        } else {
-          reason = "gradient-unusable";
-        }
-      }
-    } else if (typeof operation.fill === "string" && operation.fill !== "none") {
-      const alpha = operation.fillOpacity ?? 1;
-      if (alpha > 0) {
-        context.globalAlpha = alpha;
-        context.fillStyle = operation.fill;
-        context.fill(path, operation.fillRule ?? "evenodd");
+  for (let index = 0; index < ops.length; index += 1) {
+    const chain = chains[index];
+    const wanted = chain ?? EMPTY_CHAIN;
+    // How much of the open stack this operation still belongs to.
+    let shared = 0;
+    while (shared < stack.length && shared < wanted.length && stack[shared].layer === wanted[shared]) shared += 1;
+    while (stack.length > shared) closeLayer();
+    for (let depth = shared; depth < wanted.length; depth += 1) {
+      // Re-opening a group that was already closed means its operations were
+      // NOT a contiguous run here, so its filter is applied once per run
+      // instead of once. `groupsNotContiguousHere` already counted the group;
+      // this counts the extra passes, which is the cost.
+      if (wanted[depth].opened) counts.runsReopened += 1;
+      wanted[depth].opened = true;
+      openLayer(wanted[depth]);
+    }
+    paintOne(targetOf(), ops[index], tally);
+  }
+  // ► **THIS LINE IS UNREACHABLE AGAINST THIS PACK AND IS SAID SO RATHER THAN
+  //   ASSUMED TESTED.** It composites a group whose operations run to the very
+  //   end of the list. Measured 2026-09-15 over all 26 screens: **0 of them end
+  //   inside a composited group** — every one ends with the SAME three
+  //   operations, the depth-1193 chrome piece, which is outside every group,
+  //   and `?chrome=0` does not change that either. So a mutation that replaced
+  //   this with a bare `stack.pop()` survived every check this page can make.
+  //   It stays because the format permits the case and dropping a rasterised
+  //   group is invisible in a picture; what would catch it is the panel's
+  //   `composited back N / M` row, which a mutation dropping one composite
+  //   MID-walk does turn red (9 / 13 on `townsquare`).
+  while (stack.length > 0) closeLayer();
+
+  context.restore();
+  context.filter = "none";
+  context.globalAlpha = 1;
+  counts.compositeMs = compositeMs;
+  counts.walkMs = performance.now() - compositeStarted;
+}
+
+/** One operation, onto whichever surface is currently open. */
+function paintOne(ctx, operation, tally) {
+  tally.seen += 1;
+  if (operation.source === "text") tally.glyphOps += 1;
+  else tally.shapeOps += 1;
+  if (operation.filtered) tally.filteredOps += 1;
+  if (operation.blendMode !== undefined && operation.blendMode !== null) tally.blendOps += 1;
+  if (operation.notdef) tally.notdefOps += 1;
+
+  if (operation.kind !== "path") {
+    tally.reasons["not-a-path"] += 1;
+    tally.drewNothing += 1;
+    return;
+  }
+  if (typeof operation.d !== "string" || operation.d.length === 0) {
+    tally.reasons["no-geometry"] += 1;
+    tally.drewNothing += 1;
+    return;
+  }
+
+  const matrix = Array.isArray(operation.matrix) && operation.matrix.length === 6
+    ? operation.matrix
+    : [1, 0, 0, 1, 0, 0];
+
+  ctx.save();
+  // ► **THE CLIP GOES ON BEFORE THE SHAPE'S OWN TRANSFORM**, because the
+  //   cutter's matrix is composed in the SAME space as the shape's and not
+  //   inside it. Setting it afterwards clips a glow by a mask already moved
+  //   by the glow's own placement — a plausible picture, and the wrong one.
+  if (operation.clip && typeof operation.clip.d === "string") {
+    const c = Array.isArray(operation.clip.matrix) && operation.clip.matrix.length === 6
+      ? operation.clip.matrix
+      : [1, 0, 0, 1, 0, 0];
+    ctx.save();
+    ctx.transform(c[0], c[1], c[2], c[3], c[4] / TWIPS_PER_PIXEL, c[5] / TWIPS_PER_PIXEL);
+    ctx.clip(path2dFor(operation.clip.d), "evenodd");
+    ctx.restore();
+    tally.clipsApplied += 1;
+  }
+  ctx.transform(
+    matrix[0], matrix[1], matrix[2], matrix[3],
+    matrix[4] / TWIPS_PER_PIXEL, matrix[5] / TWIPS_PER_PIXEL
+  );
+  const path = path2dFor(operation.d);
+
+  let painted = false;
+  let reason = "no-fill-and-no-stroke";
+  if (operation.bitmap) {
+    tally.bitmapOps += 1;
+    const alpha = operation.fillOpacity ?? 1;
+    if (!show.bitmaps) {
+      reason = "bitmap-turned-off";
+    } else if (!(alpha > 0)) {
+      // ► **A FULLY TRANSPARENT PAINT CALL IS NOT A PAINT, and counting it as
+      //   one is how this page's own tally would stop meaning "pixels".** The
+      //   cross-check against `screen.js`'s `invisibleOps` is only worth
+      //   anything while both sides are answering the same question, and
+      //   `drawsAnything` there reads a bitmap's alpha off `fillOpacity`
+      //   exactly like this.
+      reason = "transparent-fill";
+    } else {
+      ctx.globalAlpha = alpha;
+      if (paintBitmapFill(ctx, operation, path)) {
         painted = true;
+        tally.bitmapDrawn += 1;
       } else {
-        reason = "transparent-fill";
+        reason = "bitmap-image-missing";
       }
     }
-
-    if (typeof operation.stroke === "string" && operation.stroke !== "none"
-      && operation.strokeWidth > 0 && (operation.strokeOpacity ?? 1) > 0) {
-      context.globalAlpha = operation.strokeOpacity ?? 1;
-      context.strokeStyle = operation.stroke;
-      // In the CURRENT transform's units, which the stage fit then scales.
-      context.lineWidth = operation.strokeWidth;
-      context.lineJoin = "round";
-      context.stroke(path);
-      painted = true;
-      tally.strokesDrawn += 1;
+  } else if (operation.gradient) {
+    tally.gradientOps += 1;
+    // ► **A GRADIENT'S ALPHA IS IN ITS STOPS AND NOWHERE ELSE**, which is
+    //   also why `globalAlpha` stays at 1 below: the operation's
+    //   `fillOpacity` carries the same colour-transform factor for the flat
+    //   fallback beside it, and applying both darkens twice.
+    const inks = (operation.gradient.stops ?? []).some((stop) => (stop?.opacity ?? 1) > 0);
+    if (!inks) {
+      reason = "transparent-fill";
+    } else {
+      ctx.globalAlpha = 1;
+      if (paintGradientFill(ctx, operation, path)) {
+        painted = true;
+        tally.gradientDrawn += 1;
+      } else {
+        reason = "gradient-unusable";
+      }
     }
-
-    context.globalAlpha = 1;
-    context.restore();
-    if (painted) tally.painted += 1;
-    else {
-      tally.drewNothing += 1;
-      tally.reasons[reason] += 1;
+  } else if (typeof operation.fill === "string" && operation.fill !== "none") {
+    const alpha = operation.fillOpacity ?? 1;
+    if (alpha > 0) {
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = operation.fill;
+      ctx.fill(path, operation.fillRule ?? "evenodd");
+      painted = true;
+    } else {
+      reason = "transparent-fill";
     }
   }
-  context.restore();
-  context.globalAlpha = 1;
+
+  if (typeof operation.stroke === "string" && operation.stroke !== "none"
+    && operation.strokeWidth > 0 && (operation.strokeOpacity ?? 1) > 0) {
+    ctx.globalAlpha = operation.strokeOpacity ?? 1;
+    ctx.strokeStyle = operation.stroke;
+    // In the CURRENT transform's units, which the stage fit then scales.
+    ctx.lineWidth = operation.strokeWidth;
+    ctx.lineJoin = "round";
+    ctx.stroke(path);
+    painted = true;
+    tally.strokesDrawn += 1;
+  }
+
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  if (painted) tally.painted += 1;
+  else {
+    tally.drewNothing += 1;
+    tally.reasons[reason] += 1;
+  }
 }
 
 /**
@@ -895,7 +1453,13 @@ function draw() {
   //   `requestAnimationFrame` around a composite, which is a different
   //   instrument and is not installed here.
   const started = performance.now();
-  paintOps(ops, fit, current.placement ?? SCREEN_STAGE_PLACEMENT, tally);
+  // ► **THE GROUP ROSTER COMES OFF `current.screen`, NOT `current`.**
+  //   `screenWithTextFor` returns the merged record and keeps `screenFor`'s
+  //   own record whole underneath it; `filterGroups` lives there. If a future
+  //   `screen.js` stops emitting it, `counts.available` reads 0 and the panel
+  //   and the log both say so rather than showing a page with no filters on it.
+  paintOps(ops, fit, current.placement ?? SCREEN_STAGE_PLACEMENT, tally,
+    current.screen?.filterGroups ?? null);
   lastPaintMs = performance.now() - started;
   lastTally = tally;
   lastHoles = show.holes ? outlineHoles(current, fit) : 0;
@@ -925,7 +1489,26 @@ function draw() {
         top,
         `fit scale=${fit.scale.toFixed(4)} off=${fit.offsetX.toFixed(1)},${fit.offsetY.toFixed(1)}`,
         `placement=${JSON.stringify(current.placement ?? SCREEN_STAGE_PLACEMENT)}`,
-        `ops=${ops.length} painted=${tally.painted} paintMs=${lastPaintMs.toFixed(2)}`
+        `ops=${ops.length} painted=${tally.painted} paintMs=${lastPaintMs.toFixed(2)}`,
+        // ► **THE PROBE IS THE ONLY WAY ANYONE VERIFIES THE COMPOSITING FROM A
+        //   SCREENSHOT.** A blur is a soft edge and a soft edge is exactly what
+        //   a JPEG artefact looks like, so the picture alone cannot say whether
+        //   the offscreen pass ran. These lines say how many groups were
+        //   composited, at what scale, with what pad, and how many operations
+        //   went through them — and the colour histogram above moves with them:
+        //   a blurred screen has strictly MORE distinct colours than a flat one.
+        `filters: ${tally.filters.groupsComposited}/${tally.filters.available} group(s) composited, ` +
+          `${tally.filters.composites} composite(s), ${tally.filters.offscreenPasses} offscreen pass(es)`,
+        `filters: scale=${tally.filters.scale.toFixed(4)} padMax=${tally.filters.padMax}px ` +
+          `limit=${tally.filters.padLimit}px clamped=${tally.filters.padClamped} ` +
+          `ctx.filter=${tally.filters.canvasFilterWorks ? "honoured" : "IGNORED BY THIS BROWSER"}`,
+        `filters: ops under a string ${tally.filters.opsUnderFilterString} shape + ` +
+          `${tally.filters.glyphOpsUnderFilterString} glyph; still deferred ` +
+          `${tally.filters.opsUnderColourMatrix} (colour matrix) and ` +
+          `${tally.filters.opsUnderRefusedFilter} (refused)`,
+        `filters: ${tally.filters.compositeMs.toFixed(2)} ms compositing of ` +
+          `${tally.filters.walkMs.toFixed(2)} ms walking; tokens ` +
+          `${tally.filters.filterTokens - tally.filters.filterTokensUnparsed}/${tally.filters.filterTokens} parsed`
       ];
       for (const line of lines) log(`probe: ${line}`);
     } catch (error) {
@@ -1090,13 +1673,164 @@ function renderInvoice() {
     nodes.push(...row("bound to a live value", text.counts.bound, { tone: text.counts.bound > 0 ? "ok" : null }));
   }
 
-  nodes.push(heading("drawn, and not what the build shows"));
-  nodes.push(...row("filters not applied (ops)", a.filtersNotApplied, {
-    tone: approximate(a.filtersNotApplied),
-    why: a.filtersNotApplied > 0
-      ? `${Math.round((a.filtersNotApplied / Math.max(1, screen.ops.length)) * 100)}% of this screen's shapes sit under a FILTERLIST nothing applies — drop shadows and glows`
+  // ► **THIS BLOCK USED TO BE ONE ROW, `filters not applied (ops)`, AND IT
+  //   READ 9423 ACROSS THE 26 SCREENS WHILE MEANING FIVE DIFFERENT THINGS.**
+  //   `screen.js` narrowed that key on 2026-09-15 and replaced the population
+  //   with six honest numbers; this page then started COMPOSITING the groups,
+  //   so there are now two invoices for the same question and they are printed
+  //   side by side on purpose. The module's are labelled `screen.js`, this
+  //   page's are labelled `this page`, and `crossCheck` compares the two that
+  //   are genuinely the same question.
+  nodes.push(heading("filters — what screen.js says"));
+  if (a.opsUnderFilterGroup === undefined) {
+    nodes.push(...row("THE GROUP ROSTER IS ABSENT", "screen.js", {
+      tone: "bad",
+      why: "this build of src/render/screen.js emits no opsUnderFilterGroup — nothing below can be cross-checked"
+    }));
+  }
+  nodes.push(...row("filter groups", a.filterGroups ?? "?", { tone: (a.filterGroups ?? 0) > 0 ? "ok" : null }));
+  nodes.push(...row("  reaching a SHAPE op", a.filterGroupsReachingOps ?? "?"));
+  nodes.push(...row("  reaching nothing it emits", a.filterGroupsReachingNothing ?? "?", {
+    tone: approximate(a.filterGroupsReachingNothing ?? 0),
+    why: (a.filterGroupsReachingNothing ?? 0) > 0
+      ? "screen.js emits no text, so a glow on a text field reaches no shape — see what THIS page found below"
       : null
   }));
+  nodes.push(...row("shape ops under a filter group", a.opsUnderFilterGroup ?? "?", {
+    tone: (a.opsUnderFilterGroup ?? 0) > 0 ? "ok" : null,
+    why: (a.opsUnderFilterGroup ?? 0) > 0
+      ? `${Math.round(((a.opsUnderFilterGroup ?? 0) / Math.max(1, screen.ops.length)) * 100)}% of this screen's shapes sit inside a filtered subtree`
+      : null
+  }));
+  nodes.push(...row("  with a canvas filter", a.opsWithCanvasFilter ?? "?", { tone: (a.opsWithCanvasFilter ?? 0) > 0 ? "ok" : null }));
+  nodes.push(...row("  awaiting a colour matrix", a.opsWithDeferredColourMatrix ?? "?", { tone: approximate(a.opsWithDeferredColourMatrix ?? 0) }));
+  nodes.push(...row("  under a REFUSED filter", a.opsUnderRefusedFilter ?? "?", { tone: approximate(a.opsUnderRefusedFilter ?? 0) }));
+  nodes.push(...row("filters not applied (ops)", a.filtersNotApplied, {
+    tone: approximate(a.filtersNotApplied - (a.opsUnderNoOpFilterOnly ?? 0)),
+    why: a.filtersNotApplied > 0
+      ? `${a.opsUnderNoOpFilterOnly ?? "?"} of them are no-op filters the build draws nothing for either; the rest are a silent loss`
+      : null
+  }));
+
+  nodes.push(heading("filters — what this page composited"));
+  const f = lastTally.filters;
+  if (!f.canvasFilterWorks) {
+    nodes.push(...row("ctx.filter", "IGNORED", {
+      tone: "bad",
+      why: "this browser does not honour canvas filters — nothing below was drawn, whatever it counts"
+    }));
+  }
+  if (!show.filters) {
+    nodes.push(...row("compositing", "OFF", {
+      tone: "hot",
+      why: "?filters=0 — every operation drawn straight, exactly as this page did before 2026-09-15"
+    }));
+  }
+  nodes.push(...row("groups composited offscreen", `${f.groupsComposited} / ${f.available}`, {
+    tone: f.groupsComposited > 0 ? "ok" : "bad",
+    why: f.groupsComposited > 0
+      ? "one ctx.filter per GROUP, never per operation — see the header for the 1523-path reason"
+      : "no group on this screen carries a filter string this renderer can build"
+  }));
+  nodes.push(...row("  reaching only GLYPH ops", f.groupsReachingOnlyGlyphs, {
+    tone: f.groupsReachingOnlyGlyphs > 0 ? "ok" : null,
+    why: f.groupsReachingOnlyGlyphs > 0
+      ? "screen.js has to call these unreachable; they are glows on words and they are drawn here"
+      : null
+  }));
+  nodes.push(...row("  no canvas filter string", f.groupsWithNoFilterString, {
+    tone: approximate(f.groupsWithNoFilterString),
+    why: f.groupsWithNoFilterString > 0
+      ? "a colour matrix, a refusal or a measured no-op — nothing to set ctx.filter to"
+      : null
+  }));
+  nodes.push(...row("  reaching nothing even here", f.groupsReachingNothingHere, { tone: approximate(f.groupsReachingNothingHere) }));
+  nodes.push(...row("  NOT a contiguous run here", f.groupsNotContiguousHere, {
+    tone: missing(f.groupsNotContiguousHere),
+    why: f.groupsNotContiguousHere > 0
+      ? `filtered once per run instead of once — ${f.runsReopened} extra pass(es)`
+      : null
+  }));
+  nodes.push(...row("shape ops inside a group here", f.opsUnderAnyGroup, { tone: f.opsUnderAnyGroup > 0 ? "ok" : null }));
+  nodes.push(...row("  shape ops with a canvas filter", f.opsUnderFilterString, { tone: f.opsUnderFilterString > 0 ? "ok" : null }));
+  nodes.push(...row("GLYPH ops inside a group here", f.glyphOpsUnderAnyGroup, {
+    tone: f.glyphOpsUnderAnyGroup > 0 ? "ok" : null,
+    why: f.glyphOpsUnderAnyGroup > 0
+      ? "screen.js counts none of these: it emits no text. They carry the same path and they composite."
+      : null
+  }));
+  nodes.push(...row("  GLYPH ops with a canvas filter", f.glyphOpsUnderFilterString, { tone: f.glyphOpsUnderFilterString > 0 ? "ok" : null }));
+  nodes.push(...row("filter scale (device px / stage px)", f.scale.toFixed(4), {
+    why: "ctx.filter lengths are NOT scaled by setTransform, so the string is rebuilt at this factor every frame"
+  }));
+  // ► **THE ONE ROW A SCREENSHOT CAN FALSIFY THE SCALE WITH.** Every other
+  //   number here would read exactly the same if `canvasFilterFor` were handed
+  //   `scale: 1` — the buckets are scale-invariant by design, the counts are of
+  //   operations, and a blur at a third of its width still looks like a blur.
+  //   So the pack's scale-1 string and the string this frame actually set are
+  //   printed together: their lengths must differ by the factor above, and if
+  //   the two rows are identical at any scale but 1 the scale is not applied.
+  if (f.widestFilterAtOne !== null) {
+    nodes.push(...row("widest filter, as the pack states it", f.widestFilterAtOne, { tone: null }));
+    nodes.push(...row("widest filter, as SET this frame", f.widestFilterAsSet, {
+      tone: f.scale !== 1 && f.widestFilterAsSet === f.widestFilterAtOne ? "bad" : "ok",
+      why: f.scale !== 1 && f.widestFilterAsSet === f.widestFilterAtOne
+        ? "IDENTICAL at a scale that is not 1 — the scale is not reaching canvasFilterFor"
+        : `every length above is ${f.scale.toFixed(4)}x the row before it`
+    }));
+  }
+  nodes.push(...row("offscreen pad, max / limit", `${f.padMax} / ${f.padLimit} px`, {
+    tone: f.padClamped > 0 ? "bad" : null,
+    why: f.padClamped > 0
+      ? `${f.padClamped} group(s) CLAMPED — their bleed is cut and will show as a hard edge`
+      : "3 sigma for blur(), 1.5 x radius + offset for drop-shadow() — read off the scaled string"
+  }));
+  nodes.push(...row("offscreen passes", `${f.offscreenPasses} (${(f.offscreenPixels / 1e6).toFixed(1)} Mpx)`));
+  nodes.push(...row("composited back", `${f.composites} / ${f.offscreenPasses}`, {
+    tone: f.composites < f.offscreenPasses ? "bad" : null,
+    why: f.composites < f.offscreenPasses
+      ? "a group was rasterised to an offscreen and never drawn back — those operations are MISSING from the picture"
+      : null
+  }));
+  nodes.push(...row("compositing time", `${f.compositeMs.toFixed(2)} of ${f.walkMs.toFixed(2)} ms`));
+  nodes.push(...row("filter tokens parsed", `${f.filterTokens - f.filterTokensUnparsed} / ${f.filterTokens}`, {
+    tone: f.filterTokensUnparsed > 0 ? "bad" : null,
+    why: f.filterTokensUnparsed > 0
+      ? "a filter function this page's bleed parser does not know — its bleed read as 0 and was CLIPPED"
+      : null
+  }));
+  if (f.groupsStringVanishedAtScale > 0) {
+    nodes.push(...row("STRING VANISHED AT SCALE", f.groupsStringVanishedAtScale, {
+      tone: "bad",
+      why: "canvasFilterFor built a string at scale 1 and none at this scale — its classification is meant to be scale-invariant"
+    }));
+  }
+  if (f.opsArrivingPreMarked > 0) {
+    nodes.push(...row("OPS ARRIVING PRE-MARKED", f.opsArrivingPreMarked, {
+      tone: "bad",
+      why: "an operation carries its own filter field — something upstream is stamping, and this page would apply it TWICE"
+    }));
+  }
+
+  nodes.push(heading("filters still NOT applied, by name"));
+  nodes.push(...row("groups awaiting a colour matrix", f.groupsWithColourMatrix, {
+    tone: approximate(f.groupsWithColourMatrix),
+    why: f.groupsWithColourMatrix > 0
+      ? "applyColourMatrix is not a ctx.filter; townsquare's 1523-op group is one of these and is composited UNGRADED"
+      : null
+  }));
+  nodes.push(...row("  ops awaiting a colour matrix", f.opsUnderColourMatrix, { tone: approximate(f.opsUnderColourMatrix) }));
+  nodes.push(...row("groups with a REFUSED filter", f.groupsRefused, {
+    tone: missing(f.groupsRefused),
+    why: f.groupsRefused > 0 ? "an inner bevel or an inner glow — canvas has no inset filter at all" : null
+  }));
+  nodes.push(...row("  ops under a refused filter", f.opsUnderRefusedFilter, { tone: missing(f.opsUnderRefusedFilter) }));
+  nodes.push(...row("groups that are ONLY no-ops", f.groupsNoOpOnly, {
+    tone: null,
+    why: f.groupsNoOpOnly > 0 ? "Blur(0,0) or a zero-strength glow — the build draws nothing for these either" : null
+  }));
+
+  nodes.push(heading("drawn, and not what the build shows"));
   nodes.push(...row("blend modes not applied", a.blendModesNotApplied, { tone: approximate(a.blendModesNotApplied) }));
   nodes.push(...row("bitmap operations", a.bitmapOps, {
     tone: approximate(a.bitmapOps),
@@ -1254,6 +1988,64 @@ function crossCheck() {
     log(`${currentName}: ${lastTally.painted} op(s) painted, ${mine} invisible — and screen.js agrees on the ${theirs}.`);
   } else {
     log(`${currentName}: DISAGREEMENT — this painter drew nothing for ${mine} op(s), screen.js counts ${theirs} invisible.`, { bad: true });
+  }
+  crossCheckFilters(hidden);
+}
+
+/**
+ * ► **THE SECOND PAIR OF TALLIES, AND THE ONLY TWO FIELDS OF THEM THAT ARE THE
+ *   SAME QUESTION.** `screen.js` counts operations under a filter group by
+ *   walking its own shape-only `ops` against `[opFirst, opEnd)` ranges; this
+ *   page counts them by re-matching every group's `path` against the MERGED,
+ *   toggled order it is about to paint. Two routes, two arrays, two matching
+ *   rules — so restricting this page's count to SHAPE operations makes the
+ *   populations identical and any difference a finding about one of the two.
+ *
+ *   Measured 2026-09-15 across all 26 screens with no toggle hiding anything:
+ *   **0 disagreements on either field**, over values from 0 to 1527. The
+ *   glyph operations are deliberately NOT in this comparison — there is no
+ *   module number to compare them against, which is the whole finding — so
+ *   they are logged beside it as their own sentence.
+ */
+let lastFilterCrossCheck = null;
+function crossCheckFilters(hidden) {
+  const f = lastTally.filters;
+  const a = current.screen.approximations;
+  if (!show.filters || !f.canvasFilterWorks) {
+    const why = !show.filters ? "?filters=0" : "this browser ignores ctx.filter";
+    const key = `${currentName}|off|${why}`;
+    if (key === lastFilterCrossCheck) return;
+    lastFilterCrossCheck = key;
+    log(`filter cross-check skipped: compositing is off (${why}).`, { warn: true });
+    return;
+  }
+  if (a.opsUnderFilterGroup === undefined) {
+    log(`${currentName}: screen.js emits no filter-group counts — nothing to cross-check against.`, { bad: true });
+    return;
+  }
+  const key = `${currentName}|${hidden}|${f.opsUnderAnyGroup}|${f.opsUnderFilterString}|${f.glyphOpsUnderFilterString}|${f.groupsComposited}`;
+  if (key === lastFilterCrossCheck) return;
+  lastFilterCrossCheck = key;
+  if (hidden) {
+    log(`filter cross-check skipped: a toggle is hiding ${lastTally.hiddenByToggle} operation(s).`);
+  } else {
+    const under = f.opsUnderAnyGroup === a.opsUnderFilterGroup;
+    const string = f.opsUnderFilterString === a.opsWithCanvasFilter;
+    if (under && string) {
+      log(`${currentName}: ${f.opsUnderAnyGroup} shape op(s) under a group, ${f.opsUnderFilterString} with a string — screen.js agrees on both.`);
+    } else {
+      log(`${currentName}: DISAGREEMENT — this page matched ${f.opsUnderAnyGroup}/${f.opsUnderFilterString} shape op(s) by path, `
+        + `screen.js counts ${a.opsUnderFilterGroup}/${a.opsWithCanvasFilter} by range. One of the two is wrong.`, { bad: true });
+    }
+  }
+  if (f.glyphOpsUnderFilterString > 0) {
+    log(`${currentName}: ${f.groupsComposited} group(s) composited offscreen, `
+      + `${f.glyphOpsUnderFilterString} of the operations under them are GLYPHS — `
+      + `screen.js counts those as reaching nothing, because it emits no text.`);
+  }
+  if (f.groupsWithColourMatrix > 0 || f.groupsRefused > 0) {
+    log(`${currentName}: still not applied — ${f.opsUnderColourMatrix} op(s) awaiting a colour matrix, `
+      + `${f.opsUnderRefusedFilter} under a refused filter.`, { warn: true });
   }
 }
 

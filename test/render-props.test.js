@@ -27,6 +27,8 @@ import {
   arrowOpsFor,
   arrowTrailOpsFor,
   hasExtractedProps,
+  propEffectGroupsFor,
+  propEffectsUnreachable,
   propFrameCount,
   propInvoiceFor,
   propOpsFor,
@@ -1035,20 +1037,33 @@ test("the arena's UI BAR is a black plate and two invisible hit plates, not a wh
   assert.equal(ops[3].fillOpacity, 0, "and the tooltips toggle's");
 });
 
-test("the SKY's day/night colouring is this transform, pinned by value on two frames", () => {
+test("the SKY's day/night colouring is this transform AND the group's matrix, pinned by value", () => {
   assertRealPackPathIsDerivable();
   if (!REAL_PROPS) {
     assert.equal(REAL_PROPS, null, "no extraction on this machine");
     return;
   }
+  // ► **THE TITLE USED TO SAY "IS THIS TRANSFORM" AND THAT WAS HALF THE
+  //   STORY.** `sky` sits inside 362 enclosing effect groups carrying 150
+  //   colour matrices, 148 of them non-identity, and until 2026-09-15 this
+  //   module read none of them. The transform moves the sky by a few units; the
+  //   matrix moves it from blue to maroon to black.
+  //
   // Frame 1, second placement: shape 1681 is a flat `#ffffff` sheet under
   // multiplier 0.30078125 with blueOffset 36. Floored that is `#4c4c70`;
   // ROUNDED it is `#4d4d71`, which is the same one-unit disagreement
   // `render-screen.test.js` pins on its own pack — 3,888 of this pack's 4,575
   // colour-moving fills move under that change.
+  //
+  // ► **AND THE FLOOR/ROUND PIN SURVIVES THE MATRIX, which is the only reason
+  //   it is still here rather than moved.** Group 1's matrix takes `#4c4c70` to
+  //   `#010024` and `#4d4d71` to `#020125`, so the one-unit disagreement is
+  //   still one unit after the fold and a return to rounding still turns this
+  //   red. Had the two collided, this assertion would have had to move to a
+  //   placement outside a group.
   const dawn = propOpsFor(REAL_PROPS, { linkage: "sky", frame: 1 });
-  assert.equal(dawn[1].fill, "#4c4c70", "the sheet, floored");
-  assert.notEqual(dawn[1].fill, "#4d4d71", "and not rounded");
+  assert.equal(dawn[1].fill, "#010024", "~~`#4c4c70`~~ the sheet, floored and then through group 1's matrix");
+  assert.notEqual(dawn[1].fill, "#020125", "and not rounded — `#4d4d71` folds to this");
 
   // Frame 88, first placement: shape 1679's `#2d2dfd`→`#5fbefe` ramp under
   // multiplier 0.91015625 with every offset 23. **The RGB half of the gradient
@@ -1148,4 +1163,596 @@ test("what the real pack's colour transforms COULD have varied over, counted", (
     sky += propInvoiceFor(REAL_PROPS, { linkage: "sky", frame }).tintedOps;
   }
   assert.equal(sky, 7215);
+});
+
+/* ------------------------------------------------------------------ */
+/* The ENCLOSING GROUP'S filters, blend mode and colour matrices        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A pack whose placements sit inside EFFECT GROUPS, in the shape
+ * `inheritedEffectsFor` in `tools/extract-props.mjs` writes: indices into the
+ * prop's own `effectGroups`, OUTERMOST FIRST.
+ *
+ * ► **EVERY CASE HERE IS ONE THE REAL PACK CANNOT REACH, which is the only
+ *   reason a synthetic fixture earns its place beside a measured one.**
+ *   Measured on `assets/props/props.json` 2026-09-15: all 3,209 of its chains
+ *   have length ONE, all 150 of its group matrices have the plain alpha row,
+ *   **0 of its 1,690 matrix-covered operations is a bitmap or a `"none"` fill
+ *   and 0 carries a stroke**, no placement names a group the pack does not
+ *   hold, and its one blend mode is canvas-exact. So `nestedGroupPlacements`,
+ *   `groupMatrixNotFillExact`, `groupMatrixDroppedOps`, `groupMatrixStrokeOps`,
+ *   `groupsUnresolved` and `groupBlendModesRefused` are ALL dead over there and
+ *   this is the only thing that can move any of them.
+ *
+ * ► **THE TWO MATRICES DELIBERATELY DO NOT COMMUTE.** `MIX` sets blue from red
+ *   and `HALVE_RED` halves red, so applying them innermost-first and
+ *   outermost-first give different colours — `#404040` against `#404080` from
+ *   `#804020`. A fixture whose matrices were two independent channel tweaks
+ *   would pass under either order and pin nothing about the chain.
+ */
+const HALVE_RED = Object.freeze([0.5, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]);
+const MIX_BLUE_FROM_RED = Object.freeze([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0]);
+const QUADRUPLE_RED = Object.freeze([4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]);
+/** The one shape of matrix `colourMatrixIsFillExact` refuses: it moves ALPHA. */
+const LIFT_ALPHA = Object.freeze([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 64]);
+
+const groupPack = () => propPackFrom({
+  props: {
+    // One matrix over one solid fill AND a stroke — the stroke line is the one
+    // the real pack cannot reach at all.
+    solid: {
+      effectGroups: [{ path: [1], character: 100, filters: [{ type: "colourMatrix", matrix: HALVE_RED }] }],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    // The placement's colour transform AND the group's matrix, chosen so the
+    // two ORDERS disagree: transform-then-matrix is `#804080`, the other way
+    // round is `#8040a0`.
+    tinted: {
+      effectGroups: [{ path: [1], character: 101, filters: [{ type: "colourMatrix", matrix: MIX_BLUE_FROM_RED }] }],
+      frames: [[{
+        shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0],
+        colour: { redMultiplier: 1, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 1, redOffset: 0, greenOffset: 0, blueOffset: 32, alphaOffset: 0 }
+      }]]
+    },
+    ramp: {
+      effectGroups: [{ path: [1], character: 102, filters: [{ type: "colourMatrix", matrix: MIX_BLUE_FROM_RED }] }],
+      frames: [[{ shape: 11, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    // A matrix that pushes red past 255 on a GRADIENT stop, which is the one
+    // place the fold is genuinely an approximation: canvas would interpolate
+    // and then clamp, this clamps and then interpolates.
+    saturating: {
+      effectGroups: [{ path: [1], character: 103, filters: [{ type: "colourMatrix", matrix: QUADRUPLE_RED }] }],
+      frames: [[{ shape: 11, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    // A raster with NO fill for the matrix to land on.
+    raster: {
+      effectGroups: [{ path: [1], character: 104, filters: [{ type: "colourMatrix", matrix: HALVE_RED }] }],
+      frames: [[{ shape: 12, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    alphaRow: {
+      effectGroups: [{ path: [1], character: 105, filters: [{ type: "colourMatrix", matrix: LIFT_ALPHA }] }],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    // TWO placements under ONE blur group, so the record has to be SHARED.
+    blurred: {
+      effectGroups: [{ path: [3], character: 106, filters: [{ type: "blur", blurX: 4, blurY: 4, passes: 1 }] }],
+      frames: [[
+        { shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] },
+        { shape: 13, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }
+      ]]
+    },
+    // A blur that is not a blur, which must NOT produce a filter string.
+    flat: {
+      effectGroups: [{ path: [3], character: 107, filters: [{ type: "blur", blurX: 0, blurY: 0, passes: 1 }] }],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    // A group carrying BOTH — the blur rides, the matrix folds.
+    both: {
+      effectGroups: [{
+        path: [3], character: 108,
+        filters: [{ type: "blur", blurX: 4, blurY: 4, passes: 1 }, { type: "colourMatrix", matrix: HALVE_RED }]
+      }],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    lit: {
+      effectGroups: [{ path: [1], character: 109, blendMode: 5 }],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    layered: {
+      effectGroups: [{ path: [1], character: 110, blendMode: 2 }],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    // A blend mode that changes nothing must not read as "this group blends".
+    normalBlend: {
+      effectGroups: [{ path: [1], character: 111, blendMode: 0 }],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] }]]
+    },
+    // OUTERMOST FIRST, so the matrices apply 1 then 0.
+    nested: {
+      effectGroups: [
+        { path: [1], character: 112, filters: [{ type: "colourMatrix", matrix: MIX_BLUE_FROM_RED }] },
+        { path: [1, 2], character: 113, filters: [{ type: "colourMatrix", matrix: HALVE_RED }] }
+      ],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0, 1] }]]
+    },
+    phantom: {
+      effectGroups: [{ path: [1], character: 114, filters: [{ type: "colourMatrix", matrix: HALVE_RED }] }],
+      frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [7] }]]
+    },
+    bare: { frames: [[{ shape: 10, matrix: [1, 0, 0, 1, 0, 0] }]] }
+  },
+  shapes: {
+    10: { paths: [{ d: "M0 0L1 1Z", fill: "#804020", fillOpacity: 1, stroke: "#204080", strokeWidth: 2, strokeOpacity: 1 }] },
+    11: {
+      paths: [{
+        d: "M0 0L2 2Z", fill: "#2d2dfd", fillOpacity: 1,
+        gradient: { type: "linear", stops: [{ offset: 0, fill: "#2d2dfd", opacity: 1 }, { offset: 1, fill: "#5fbefe", opacity: 1 }] }
+      }]
+    },
+    12: { paths: [{ d: "M0 0L3 3Z", fill: "none", fillOpacity: 1, bitmap: { id: 9 }, approximated: "bitmap" }] },
+    13: { paths: [{ d: "M0 0L4 4Z", fill: "#111111" }, { d: "M4 4L5 5Z", fill: "#222222" }] }
+  }
+});
+
+test("a group's COLOUR MATRIX lands on the fill, the stroke and every gradient stop", () => {
+  // ► **PINNED BY VALUE, and the arithmetic is `applyColourMatrix`'s.**
+  //   `HALVE_RED` on `#804020` is `#404020` — 128 halved is 64 — and on the
+  //   stroke `#204080` it is `#104080`. A reader that only checked "the fill
+  //   changed" would pass with the matrix applied twice, or with the wrong one.
+  const ops = propOpsFor(groupPack(), { linkage: "solid", frame: 1 });
+  assert.equal(ops.length, 1);
+  assert.equal(ops[0].fill, "#404020", "128 red halved to 64");
+  assert.equal(ops[0].stroke, "#104080", "and the stroke takes the same matrix — the real pack cannot reach this line");
+
+  // ► **THE STOPS, because `paintGradientFill` builds the ramp from them and
+  //   never reads `fill`.** A matrix folded only into `fill` would leave the
+  //   sky's entire backdrop gradient untouched — 993 of the real pack's 1,690
+  //   matrix-covered operations are gradients.
+  const ramp = propOpsFor(groupPack(), { linkage: "ramp", frame: 1 });
+  assert.deepEqual(ramp[0].gradient.stops.map((stop) => stop.fill), ["#2d2d2d", "#5fbe5f"],
+    "blue := red on both stops");
+  assert.equal(ramp[0].fill, "#2d2d2d", "and the flat fallback follows the first stop");
+});
+
+test("the PLACEMENT'S transform goes first and the GROUP'S matrix second, and the two orders differ", () => {
+  // ► **THE BUILD'S OWN ORDER.** Flash transforms the leaf, rasterises the
+  //   group and filters THAT. `#804020` under blueOffset 32 is `#804040`, and
+  //   `MIX_BLUE_FROM_RED` then sets blue from red: `#804080`. Swapping the two
+  //   gives `#8040a0` — a plausible picture and the wrong one.
+  const ops = propOpsFor(groupPack(), { linkage: "tinted", frame: 1 });
+  assert.equal(ops[0].fill, "#804080", "transform first, then the group's matrix");
+  assert.notEqual(ops[0].fill, "#8040a0", "and NOT the matrix first");
+});
+
+test("a NESTED chain applies innermost first, links `enclosedBy` outward, and is counted", () => {
+  // `inheritedEffects: [0, 1]` is OUTERMOST FIRST — `inheritedEffectsFor` in
+  // `tools/extract-props.mjs` states that as a guarantee to this reader and
+  // pins it with its own two-deep fixture, because nothing in the shipped build
+  // can tell that order from its reverse. Here it is load-bearing: group 1
+  // (inner) halves red to 64, then group 0 sets blue from red — `#404040`.
+  // Outermost-first would give `#404080`.
+  const pack = groupPack();
+  const ops = propOpsFor(pack, { linkage: "nested", frame: 1 });
+  assert.equal(ops[0].fill, "#404040", "inner matrix, then outer");
+  assert.notEqual(ops[0].fill, "#404080", "and not outer then inner");
+
+  assert.equal(ops[0].group.id, 1, "the op carries the INNERMOST group");
+  assert.equal(ops[0].group.enclosedBy.id, 0, "which names the one outside it");
+  assert.equal(ops[0].group.enclosedBy.enclosedBy, null, "and the chain ends");
+  assert.deepEqual(ops[0].group.path, [1, 2]);
+  // ► **THE OUTER GROUP'S DENOMINATOR COUNTS THIS OPERATION TOO**, because its
+  //   composite contains it. An `ops: 0` beside a `placements: 1` would tell a
+  //   painter the outer buffer is empty.
+  assert.equal(ops[0].group.ops, 1);
+  assert.equal(ops[0].group.enclosedBy.ops, 1, "the enclosing group sees it as well");
+  assert.equal(ops[0].group.enclosedBy.placements, 1);
+
+  const invoice = propInvoiceFor(pack, { linkage: "nested", frame: 1 });
+  assert.equal(invoice.nestedGroupPlacements, 1,
+    "a painter needs a STACK of buffers for this one — 0 of the real pack's 3,209 chains is deeper than one");
+  assert.equal(invoice.groupedPlacements, 1, "the denominator it is read against");
+  assert.equal(invoice.effectGroups, 2, "both groups are in the frame's table");
+});
+
+test("a BLUR is NEVER stamped on an operation — it rides on the group record", () => {
+  // ► **THIS IS THE ASSERTION THE WHOLE DESIGN EXISTS FOR.** Flash filters the
+  //   COMPOSITE. Stamping `blur(1.118px)` onto each leaf and setting
+  //   `ctx.filter` per operation blurs every path separately, which is not an
+  //   approximation of the right picture but a different one — and it would
+  //   look plausible. So the operations carry no filter of any kind and the
+  //   painter is handed a group to composite.
+  const pack = groupPack();
+  const ops = propOpsFor(pack, { linkage: "blurred", frame: 1 });
+  assert.equal(ops.length, 3, "one path from shape 10 and two from shape 13");
+  for (const op of ops) {
+    assert.equal(op.filter, undefined, "no filter string on the operation");
+    assert.equal(op.blur, undefined);
+    assert.equal(op.fill, op.fill.toLowerCase(), "and the fills are untouched by the blur");
+  }
+  assert.equal(ops[0].fill, "#804020", "the blur changed no colour at all");
+
+  // ► **ONE RECORD, SHARED BY IDENTITY, because that is how a painter knows
+  //   where the group ENDS.** A fresh record per operation would make
+  //   `op.group !== previous` true every time and turn every group into a group
+  //   of one — the per-leaf picture arrived at by accident.
+  assert.ok(ops[0].group === ops[1].group && ops[1].group === ops[2].group,
+    "all three operations hold the SAME object");
+  assert.equal(ops[0].group.filter, "blur(1.118px)",
+    "sqrt((4*4 - 1) / 12) — `blurSigma`'s box-to-Gaussian bridge, not the raw radius");
+  assert.equal(ops[0].group.ops, 3, "the denominator: three operations under this one group");
+  assert.equal(ops[0].group.placements, 2);
+  assert.equal(ops[0].group.colourMatricesFolded, 0, "and nothing was folded, so nothing is hidden");
+
+  // An operation under NO group has no field at all, so presence is the test.
+  assert.equal(propOpsFor(pack, { linkage: "bare", frame: 1 })[0].group, undefined);
+});
+
+test("`scale` changes the filter STRING and nothing else, because ctx.filter ignores the transform", () => {
+  const pack = groupPack();
+  const one = propEffectGroupsFor(pack, { linkage: "blurred", frame: 1 });
+  const two = propEffectGroupsFor(pack, { linkage: "blurred", frame: 1, scale: 2 });
+  assert.equal(one[0].filter, "blur(1.118px)");
+  assert.equal(two[0].filter, "blur(2.2361px)", "doubled, because `ctx.filter` lengths are NOT scaled by `setTransform`");
+  // ► **THE OPERATIONS' OWN COLOURS DO NOT MOVE WITH IT**, because a colour
+  //   matrix has no length in it.
+  assert.deepEqual(
+    propOpsFor(pack, { linkage: "both", frame: 1 }).map((op) => op.fill),
+    propOpsFor(pack, { linkage: "both", frame: 1, scale: 2 }).map((op) => op.fill));
+
+  // ► **BUT THE RECORD STAMPED ON THEM DOES, AND THAT IS THE ROUTE THROUGH THE
+  //   INJECTED SEAM.** `arenaScreenLayersFor` picks the frame itself, so a
+  //   painter cannot call `propEffectGroupsFor` for the matching frame without
+  //   re-deriving one — it injects a reader that carries the scale instead. If
+  //   this ever stops working, every arena blur is drawn at stage scale on a
+  //   canvas that is not.
+  const injected = (p, options) => propOpsFor(p, { ...options, scale: 2 });
+  assert.equal(injected(pack, { linkage: "blurred", frame: 1 })[0].group.filter, "blur(2.2361px)");
+  assert.equal(propOpsFor(pack, { linkage: "blurred", frame: 1 })[0].group.filter, "blur(1.118px)",
+    "and the default is still 1, so an unaware caller is unchanged");
+});
+
+test("a group carrying BOTH a blur and a matrix folds one and hands over the other", () => {
+  const pack = groupPack();
+  const ops = propOpsFor(pack, { linkage: "both", frame: 1 });
+  assert.equal(ops[0].fill, "#404020", "the matrix is IN the fill");
+  assert.equal(ops[0].group.filter, "blur(1.118px)", "the blur is ON the record");
+  assert.equal(ops[0].group.colourMatricesFolded, 1,
+    "and the record says the matrix is already spent, so a painter cannot apply it twice");
+  assert.deepEqual(ops[0].group.counts, { total: 2, applied: 1, deferred: 1, noOp: 0, refused: 0, approximated: 1 });
+
+  const invoice = propInvoiceFor(pack, { linkage: "both", frame: 1 });
+  assert.equal(invoice.groupMatrixFoldedUnderAFilter, 1,
+    "the list is [blur, colourMatrix] and this module applies the matrix first regardless — named, not silent");
+  assert.equal(invoice.groupFilterOps, 1, "and the operation is still waiting on a painter for the blur");
+});
+
+test("a Blur(0,0) produces NO filter string, so `filter: null` is not the same as no group", () => {
+  const pack = groupPack();
+  const groups = propEffectGroupsFor(pack, { linkage: "flat", frame: 1 });
+  assert.equal(groups.length, 1, "the group is there");
+  assert.equal(groups[0].filter, null, "and it asks the painter for nothing");
+  assert.equal(groups[0].counts.noOp, 1, "counted as a measured no-op rather than as an absence");
+  const invoice = propInvoiceFor(pack, { linkage: "flat", frame: 1 });
+  assert.equal(invoice.groupFilterOps, 0, "so this operation is NOT waiting on a painter");
+  assert.equal(invoice.groupedOps, 1, "the denominator that says the zero above is a zero out of one");
+});
+
+test("a BLEND MODE reaches the painter as a composite, and an inexpressible one is refused BY NAME", () => {
+  const pack = groupPack();
+  const lit = propOpsFor(pack, { linkage: "lit", frame: 1 })[0].group;
+  assert.equal(lit.composite, "lighten", "SWF blend mode 5 — this is `bullet_trail`'s, and it is EXACT in canvas");
+  assert.equal(lit.blendModeRefused, null);
+
+  const layered = propOpsFor(pack, { linkage: "layered", frame: 1 })[0].group;
+  assert.equal(layered.composite, null, "mode 2 is `layer`, which is an instruction to buffer and not a blend");
+  assert.equal(layered.blendModeRefused, "blendModeNeedsAGroupBuffer",
+    "named rather than silently becoming source-over");
+  assert.equal(propInvoiceFor(pack, { linkage: "layered", frame: 1 }).groupBlendModesRefused, 1);
+
+  // ► **`normal` MUST NOT COUNT AS A BLEND**, or "this group blends" is true of
+  //   every group that mentions the field — the identity-transform mistake in a
+  //   second field, and this repository has now made it once.
+  const plain = propOpsFor(pack, { linkage: "normalBlend", frame: 1 })[0].group;
+  assert.equal(plain.composite, null);
+  assert.equal(propInvoiceFor(pack, { linkage: "normalBlend", frame: 1 }).groupBlendModes, 0);
+  assert.equal(propInvoiceFor(pack, { linkage: "lit", frame: 1 }).groupBlendModes, 1);
+});
+
+test("what the group fold CANNOT reach, counted against its denominator", () => {
+  const pack = groupPack();
+  // A raster with `fill: "none"`: there is nothing for the matrix to land on,
+  // and that is NOT the same fact as there being no matrix. **0 of the real
+  // pack's 1,690 matrix-covered operations is one of these**, so this fixture
+  // is the only thing that can move the counter.
+  const raster = propOpsFor(pack, { linkage: "raster", frame: 1 });
+  assert.equal(raster[0].fill, "none", "untouched, because it could not be touched");
+  assert.deepEqual(raster[0].bitmap, { id: 9 }, "and the raster is still named");
+  const dropped = propInvoiceFor(pack, { linkage: "raster", frame: 1 });
+  assert.equal(dropped.groupMatrixDroppedOps, 1);
+  assert.equal(dropped.groupMatrixOps, 1, "out of one — the denominator is what makes the 1 readable");
+  assert.equal(dropped.groupMatrixSolidOps, 0);
+
+  // A matrix whose ALPHA ROW is not `(0,0,0,1,0)` paints the group's empty area
+  // too, which nothing drawing per fill can express. All 150 of the real pack's
+  // group matrices have the plain row, so this is dead over there.
+  const lifted = propInvoiceFor(pack, { linkage: "alphaRow", frame: 1 });
+  assert.equal(lifted.groupMatrixNotFillExact, 1, "per-fill is an APPROXIMATION for this one");
+  assert.equal(propInvoiceFor(pack, { linkage: "solid", frame: 1 }).groupMatrixNotFillExact, 0,
+    "and exact for the plain-alpha-row one beside it, so the counter is not simply always on");
+
+  // A placement naming a group the pack does not hold draws UNFILTERED. Silent
+  // for as long as this file ignored the field entirely.
+  const phantom = propOpsFor(pack, { linkage: "phantom", frame: 1 });
+  assert.equal(phantom[0].group, undefined, "no record, because there is no group");
+  assert.equal(phantom[0].fill, "#804020", "and the fill is the untouched one");
+  const unresolved = propInvoiceFor(pack, { linkage: "phantom", frame: 1 });
+  assert.equal(unresolved.groupsUnresolved, 1);
+  assert.equal(unresolved.groupedPlacements, 1, "the placement still counts as grouped — it says it is");
+  assert.equal(unresolved.effectGroups, 0, "but no group was resolved for it");
+});
+
+test("the GRADIENT fold clamps at the stops, which is the one approximation in it", () => {
+  // ► **COUNTED AS A POPULATION, NOT AS A SUBSET, and the header says why.**
+  //   Canvas interpolates the ramp and then clamps; this clamps each stop and
+  //   then interpolates, so the two differ wherever a stop saturates. Measured
+  //   on the real pack: 3,137 of 3,694 folded stops have a channel outside
+  //   0..255 before clamping. Detecting that per stop needs `applyColourMatrix`
+  //   to report that it clamped, which it does not.
+  const ops = propOpsFor(groupPack(), { linkage: "saturating", frame: 1 });
+  assert.deepEqual(ops[0].gradient.stops.map((stop) => stop.fill), ["#b42dfd", "#ffbefe"],
+    "45 x4 is 180 (`#b4`); 95 x4 is 380, which CLAMPS to 255 — and canvas would have clamped after interpolating");
+  const invoice = propInvoiceFor(groupPack(), { linkage: "saturating", frame: 1 });
+  assert.equal(invoice.groupMatrixGradientOps, 1, "the whole population is what is counted");
+  assert.equal(invoice.groupMatrixSolidOps, 0, "a gradient operation is not also counted as a solid one");
+});
+
+test("`propOpsFor` STILL returns a frozen flat array, and the group record is frozen with it", () => {
+  // The injected seam `arenaScreenLayersFor(pack, propOpsFor, ...)` takes this
+  // function as an argument, so the return shape is a contract and not a
+  // convenience. Adding a field to an operation keeps it; adding a second
+  // return value would not.
+  const ops = propOpsFor(groupPack(), { linkage: "blurred", frame: 1 });
+  assert.ok(Array.isArray(ops) && Object.isFrozen(ops));
+  assert.ok(Object.isFrozen(ops[0]));
+  assert.ok(Object.isFrozen(ops[0].group), "the record too — its denominators are final once the walk ends");
+  assert.ok(Object.isFrozen(ops[0].group.path));
+  assert.throws(() => { ops[0].group.ops = 99; }, TypeError);
+});
+
+test("`propEffectGroupsFor` is the SAME walk and the same values — but not the same objects", () => {
+  // ► **EQUAL, NOT IDENTICAL, and the docstring claimed identical until this
+  //   ran.** A second call is a second walk. What is identical is the record
+  //   shared between operations WITHIN one array, which is the identity a
+  //   painter actually uses.
+  const pack = groupPack();
+  const ops = propOpsFor(pack, { linkage: "blurred", frame: 1 });
+  const groups = propEffectGroupsFor(pack, { linkage: "blurred", frame: 1 });
+  assert.equal(groups.length, 1);
+  assert.notEqual(groups[0], ops[0].group, "a separate call is a separate walk");
+  assert.deepEqual(groups[0], ops[0].group, "carrying the same answer");
+  assert.deepEqual(propEffectGroupsFor(pack, { linkage: "bare", frame: 1 }), [],
+    "a prop inside no group has an empty table, not a null");
+  assert.deepEqual(propEffectGroupsFor(null, { linkage: "blurred", frame: 1 }), [],
+    "and no pack is the same empty answer every reader here gives");
+});
+
+test("THE SKY'S DAY/NIGHT CYCLE IS THE GROUP'S COLOUR MATRIX, and nothing read it until now", () => {
+  // ► **THE PRIZE, AND THE HEADER OF `props.js` SAID THE OPPOSITE FOR A DAY.**
+  //   ~~"its day/night colouring IS this transform … and not a ColorMatrix"~~.
+  //   The transform is real and moves the sky by a few units; the ENCLOSING
+  //   GROUP'S matrix is what takes it from blue to maroon to black. Backdrop
+  //   shape 1679 is one gradient operation on every one of the 200 frames, and
+  //   its group is a single non-identity matrix on 139 of them.
+  assertRealPackPathIsDerivable();
+  if (!REAL_PROPS) {
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  const backdropAt = (frame) => propOpsFor(REAL_PROPS, { linkage: "sky", frame })[0];
+
+  // Pinned by value on three frames of the cycle. Each is the `#2d2dfd`→`#5fbefe`
+  // ramp after its placement's transform and then its group's matrix; without
+  // the matrix all three read within a few units of `#2d2dfd`, which is one
+  // daytime sky called a day/night cycle.
+  assert.deepEqual(backdropAt(1).gradient.stops.map((stop) => stop.fill), ["#440037", "#79689f"],
+    "frame 1 is a deep maroon dawn, not `#2d2dfd`");
+  assert.deepEqual(backdropAt(120).gradient.stops.map((stop) => stop.fill), ["#2c02a5", "#4387b5"]);
+  assert.deepEqual(backdropAt(200).gradient.stops.map((stop) => stop.fill), ["#000030", "#3f5f75"],
+    "and frame 200 is night");
+
+  // ► **THE NUMBER OF FRAMES THAT ACTUALLY MOVE, so this is not three lucky
+  //   pins over a constant.** The backdrop's group carries a matrix on all 200
+  //   frames and 139 of them are non-identity; those are exactly the frames
+  //   whose first stop differs from what the transform alone would give.
+  let moved = 0;
+  for (let frame = 1; frame <= 200; frame += 1) {
+    const groups = propEffectGroupsFor(REAL_PROPS, { linkage: "sky", frame });
+    const backdrop = groups.find((group) => group.character === 1680);
+    assert.ok(backdrop, `frame ${frame} has a group over the backdrop`);
+    assert.equal(backdrop.colourMatricesFolded + backdrop.counts.noOp, 1,
+      "one matrix, folded or measured identical — never simply absent");
+    if (backdrop.colourMatricesFolded === 1) moved += 1;
+  }
+  assert.equal(moved, 139, "139 of the 200 frames carry a NON-identity matrix; the other 61 are the identity");
+});
+
+test("the sky's group filters are a BLUR and two GLOWS the painter still has to composite", () => {
+  assertRealPackPathIsDerivable();
+  if (!REAL_PROPS) {
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  // Frame 200 is the night: the moon (character 1728, 56 operations), the stars
+  // (1702, 12) and the cloud bank (1690, 1) each under their own group.
+  const groups = propEffectGroupsFor(REAL_PROPS, { linkage: "sky", frame: 200 });
+  assert.deepEqual(groups.map((group) => [group.character, group.ops, group.filter]), [
+    [1680, 1, null],
+    [1728, 56, "drop-shadow(0px 0px 15px rgba(0, 204, 255, 1))"],
+    [1702, 12, "drop-shadow(0px 0px 4.5826px rgba(0, 255, 255, 1))"],
+    [1690, 1, "blur(3.1623px)"]
+  ], "a cyan moon glow over 56 paths, a cyan star glow over 12, and an 11px cloud blur over 1");
+
+  // ► **AND THE SAME FRAME AT 2x ASKS FOR TWICE THE RADIUS**, because
+  //   `ctx.filter` lengths are not scaled by `setTransform` and the arena draws
+  //   the 550x400 stage fitted to the canvas.
+  const doubled = propEffectGroupsFor(REAL_PROPS, { linkage: "sky", frame: 200, scale: 2 });
+  assert.equal(doubled[1].filter, "drop-shadow(0px 0px 30px rgba(0, 204, 255, 1))");
+  assert.equal(doubled[3].filter, "blur(6.3246px)");
+
+  // ► **NOT ONE OF THOSE STRINGS IS ON AN OPERATION**, which is the whole
+  //   design: 56 paths blurred separately is a different picture from one
+  //   blurred composite, and it would look plausible.
+  for (const op of propOpsFor(REAL_PROPS, { linkage: "sky", frame: 200 })) {
+    assert.equal(op.filter, undefined);
+  }
+});
+
+test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 745 group instances cover ONE operation", () => {
+  // ► **THE QUESTION PREMISE 4 OF THE BRIEF ASKS, ANSWERED FROM THE PACK.** A
+  //   group over exactly one drawable IS its own composite, so for those 486
+  //   per-leaf and per-group coincide EXACTLY. The 259 that do not are the
+  //   moon (56 operations), the stars (23 and 12) and a four-path group — and
+  //   every one of them carries a GLOW rather than a matrix, so the half this
+  //   module folds is the half where the distinction cannot arise.
+  assertRealPackPathIsDerivable();
+  if (!REAL_PROPS) {
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  const spread = {};
+  let instances = 0;
+  let matrixOverMany = 0;
+  for (const linkage of Object.keys(REAL_PROPS.props)) {
+    for (let frame = 1; frame <= propFrameCount(REAL_PROPS, linkage); frame += 1) {
+      for (const group of propEffectGroupsFor(REAL_PROPS, { linkage, frame })) {
+        instances += 1;
+        spread[group.ops] = (spread[group.ops] ?? 0) + 1;
+        if (group.ops > 1 && group.filter !== null && group.colourMatricesFolded > 0) matrixOverMany += 1;
+      }
+    }
+  }
+  assert.equal(instances, 745, "group instances across every frame of every prop");
+  assert.deepEqual(spread, { 1: 486, 4: 7, 12: 102, 23: 61, 56: 89 },
+    "and the LARGEST covers 56 operations — this pack is not the screens pack's 1,523");
+  assert.equal(spread[1], 486, "so 65% of them are cases where per-leaf would have been exactly right");
+  assert.equal(matrixOverMany, 0,
+    "no group covering several operations carries BOTH a matrix and a filter string, so the fold never rides one of the hard cases");
+});
+
+test("what the real pack's GROUP EFFECTS could have varied over, counted with denominators", () => {
+  // ► **EVERY NUMBER HERE WAS MEASURED BY WALKING `assets/props/props.json`
+  //   DIRECTLY** — `inheritedEffects` against `effectGroups`, with
+  //   `canvasFilterFor` asked for the verdicts — before this module could fold
+  //   anything, and is asserted against the module's own invoice so the two
+  //   readings have to keep agreeing.
+  assertRealPackPathIsDerivable();
+  if (!REAL_PROPS) {
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  const total = {};
+  for (const linkage of Object.keys(REAL_PROPS.props)) {
+    for (let frame = 1; frame <= propFrameCount(REAL_PROPS, linkage); frame += 1) {
+      for (const [key, value] of Object.entries(propInvoiceFor(REAL_PROPS, { linkage, frame }))) {
+        total[key] = (total[key] ?? 0) + value;
+      }
+    }
+  }
+  // Populations first, so nothing below is a bare number.
+  assert.equal(total.placements, 3345);
+  assert.equal(total.groupedPlacements, 3209, "96% of them sit inside an effect group");
+  assert.equal(total.ops, 8682);
+  assert.equal(total.groupedOps, 8125);
+  assert.equal(total.effectGroups, 745, "group INSTANCES — 363 distinct groups, reached across 302 frames");
+
+  // `canvasFilterFor`'s four verdicts, summed. 515 applied is 130 blurs and
+  // 385 glow/shadow instances; 348 deferred is the colour matrices this module
+  // folds; 250 no-ops are Blur(0,0) and zero-strength glows.
+  assert.equal(total.groupFilters, 1113);
+  assert.equal(total.groupFiltersApplied + total.groupFiltersDeferred
+    + total.groupFiltersNoOp + total.groupFiltersRefused, total.groupFilters,
+    "the four buckets partition the total exactly — a fifth outcome would show up here");
+  assert.equal(total.groupFiltersApplied, 515);
+  assert.equal(total.groupFiltersDeferred, 348);
+  assert.equal(total.groupFiltersNoOp, 250);
+  assert.equal(total.groupFiltersRefused, 0,
+    "**zero out of 1,113** — this build's props use no bevel and no inner glow, so the refusal arm is DEAD here");
+
+  // What is still not drawn: operations under a blur or glow, waiting on a
+  // painter that composites to a buffer.
+  assert.equal(total.groupFilterOps, 5810, "out of 8,125 grouped operations");
+
+  // The fold itself. The four below partition `groupMatrixOps` exactly.
+  assert.equal(total.groupMatrixOps, 1690);
+  assert.equal(total.groupMatrixSolidOps + total.groupMatrixGradientOps + total.groupMatrixDroppedOps,
+    total.groupMatrixOps, "solid + gradient + dropped is the whole population");
+  assert.equal(total.groupMatrixSolidOps, 697);
+  assert.equal(total.groupMatrixGradientOps, 993, "and the gradients are the majority, which is the sky's backdrop");
+  assert.equal(total.groupMatrixFoldedUnderAFilter, 148, "`cloud_patterns`, whose list really is [blur, colourMatrix]");
+
+  // ► **FIVE COUNTERS ARE DEAD ON THIS PACK AND THE SYNTHETIC ONE IS WHAT
+  //   MOVES THEM.** Each is asserted here WITH the denominator it is read
+  //   against, because a zero with no denominator cannot say whether a counter
+  //   is quiet or cannot fire — six defects old in this repository.
+  assert.equal(total.groupMatrixDroppedOps, 0, "0 of 1,690: every matrix-covered operation has a fill or a ramp");
+  assert.equal(total.groupMatrixStrokeOps, 0, "0 of 1,690: not one of them carries a stroke");
+  assert.equal(total.groupMatrixNotFillExact, 0, "0 of 1,690: all 150 group matrices have the plain alpha row");
+  assert.equal(total.nestedGroupPlacements, 0, "0 of 3,209: every chain is one deep, so no painter needs a stack");
+  assert.equal(total.groupsUnresolved, 0, "0 of 3,209: every index resolves");
+  assert.equal(total.groupBlendModesRefused, 0, "0 of 7: the one blend mode here is canvas-exact");
+  assert.equal(total.groupBlendModes, 7, "`bullet_trail`'s `lighten`, once per each of its seven frames");
+});
+
+test("the TRAIL'S `lighten` is on the enclosing group, not on the placement", () => {
+  // ► **THE MODULE HEADER SAID THIS COULD NOT BE READ AT ALL.** ~~"no blend
+  //   mode at all, for any prop"~~ — the datum was never on the placement: it
+  //   is the single entry in `bullet_trail`'s `effectGroups`,
+  //   `{path: [1], character: 47, blendMode: 5}`, and all seven frames point at
+  //   it. `blendModeFor` calls mode 5 `lighten` and EXACT.
+  assertRealPackPathIsDerivable();
+  if (!REAL_PROPS) {
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  for (let frame = 1; frame <= propFrameCount(REAL_PROPS, "bullet_trail"); frame += 1) {
+    const ops = propOpsFor(REAL_PROPS, { linkage: "bullet_trail", frame });
+    assert.equal(ops[0].group.composite, "lighten", `frame ${frame} composites with lighten`);
+    assert.equal(ops[0].group.filter, null, "and carries no filter — the fade is the placement's alpha");
+    assert.equal(ops[0].group.ops, 4, "all four paths of the puff are under it");
+    assert.ok(ops.every((op) => op.group === ops[0].group), "sharing one record");
+  }
+  // ► **AND THE FADE IS STILL THE PLACEMENT'S TRANSFORM**, untouched by any of
+  //   this, which is what says the group work did not disturb the fix above it.
+  assert.equal(propOpsFor(REAL_PROPS, { linkage: "bullet_trail", frame: 7 })[0].fillOpacity, 0);
+
+  // The ARROW itself is inside no group at all, so a sweep over it says nothing
+  // about any of this — the same vacuity its colour transform has.
+  const arrow = propOpsFor(REAL_PROPS, { linkage: "bullet", frame: 1 });
+  assert.equal(arrow[0].group, undefined);
+  assert.equal(propInvoiceFor(REAL_PROPS, { linkage: "bullet", frame: 1 }).groupedPlacements, 0);
+});
+
+test("the UI BAR'S TWO GLOWS REACH NO DRAWABLE AT ALL, and that is reported rather than zero", () => {
+  // ► **THE ONE EFFECT NOTHING HERE CAN DRAW.** Characters 1527 and 1528 carry
+  //   a glow each on `panel`, and both are TEXT FIELDS — `extract-props.mjs`
+  //   skips a drawable it cannot turn into paths and drops the filter with it,
+  //   recording the loss under `effects.own.dropped`. There is no shape in the
+  //   pack for the glow to sit on, so every per-frame counter is honestly zero
+  //   and honestly silent. What it would take is the join `screen-text.js`
+  //   already is on the screens side: the filter carried against the FIELD and
+  //   applied to a text operation.
+  assertRealPackPathIsDerivable();
+  if (!REAL_PROPS) {
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  assert.deepEqual(propEffectsUnreachable(REAL_PROPS),
+    { props: 1, placements: 2, filters: 2, byType: { glow: 2 } });
+  // The panel itself resolves to four operations under NO group, so nothing in
+  // the frame's own invoice could ever mention them.
+  assert.equal(propInvoiceFor(REAL_PROPS, { linkage: "panel", frame: 1 }).effectGroups, 0);
+  assert.equal(propEffectsUnreachable(propPackFrom({ props: { x: { frames: [[]] } }, shapes: {} })).filters, 0,
+    "and a pack with no effect data reports zero rather than throwing");
 });

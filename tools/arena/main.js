@@ -88,6 +88,8 @@ import {
   arenaScreenLayersFor,
   splitArenaScreen,
   SS2_ARENA_DRESSING,
+  SS2_ARENA_SCREEN_LAYERS,
+  propEffectsUnreachable,
   hasArenaScreen,
   uiBarReadoutsFor,
   textPackFrom,
@@ -668,7 +670,21 @@ function settleIfReady() {
 /* ------------------------------------------------------------------ */
 
 const canvas = el("arena");
-const context = canvas.getContext("2d");
+
+/**
+ * THE SURFACE, AND THE BINDING EVERY PAINTER ACTUALLY DRAWS THROUGH.
+ *
+ * ► **`context` IS A `let` SINCE 2026-09-15, AND THE REASON IS THE ONE THING
+ *   THIS FILE MUST NOT GET WRONG.** `paintGroupRuns` composites a filtered or
+ *   blended group by REBINDING this name to an offscreen for the length of one
+ *   run — see its docstring for why that beats threading a `ctx` parameter
+ *   through six painters in the one file `node --test` cannot import. `surface`
+ *   is the real canvas and never moves, so `render()` can re-assert the
+ *   invariant at the top of every frame and an exception mid-run cannot leave
+ *   the whole arena being drawn into a buffer nobody looks at.
+ */
+const surface = canvas.getContext("2d");
+let context = surface;
 
 /*
  * `ADVANCE_UNITS` used to live here. It moved to `src/render/timeline.js` on
@@ -1479,23 +1495,29 @@ canvas.addEventListener("click", (event) => {
  *                                 306, defers 148, calls 116 no-ops, refuses 0
  * ```
  *
- * ► **WHAT IS STILL TRUE IS THE HALF ABOUT THE INSTALLED PACKS, AND ONLY
+ * ► ~~**WHAT IS STILL TRUE IS THE HALF ABOUT THE INSTALLED PACKS, AND ONLY
  *   UNTIL THEY ARE REGENERATED.** `assets/` is deliberately stale on this
  *   route — measured here: `assets/screens/screens.json` holds 243
  *   `filteredPlacements` and **0** of them carry a typed list, and
- *   `assets/props/props.json` carries no `effectGroups` at all. So a reader
- *   who greps the PACK still sees what the block above described, and
- *   `reportArenaEffects` below now says which of the two it is looking at
- *   instead of blaming the extractor.
+ *   `assets/props/props.json` carries no `effectGroups` at all.~~
+ *   **THE PACKS WERE REGENERATED ON 2026-09-15 AND BOTH HALVES OF THAT ARE NOW
+ *   FALSE.** Re-measured on the installed packs the same day: `screens.json`'s
+ *   243 `filteredPlacements` carry a typed list on **242** of them, and
+ *   `props.json` carries **363** `effectGroups`. The stale-pack WARNING below
+ *   stays, because it is what tells the two apart on somebody else's machine;
+ *   the sentence claiming this machine's packs are the stale ones does not.
  *
- * ► **AND THE SENTENCE THAT SURVIVES ALL OF IT: THIS SHELL STILL APPLIES NO
+ * ► ~~**AND THE SENTENCE THAT SURVIVES ALL OF IT: THIS SHELL STILL APPLIES NO
  *   FILTER TO A PIXEL.** `context.filter` is set nowhere in this file except
- *   the probe below. That is now a gap in the RENDERER rather than a gap in
- *   the data, which is a different job and a bigger one — the group's own
- *   matrix is not carried (`notCarried.effectGroupMatrix`, 363 of them), so a
- *   glow would be drawn in the wrong place before it was drawn in the wrong
- *   colour. Inventing one here would still be drawing a glow the build never
- *   asked for.
+ *   the probe below.~~ **IT DOES NOW, SINCE 2026-09-15** — see
+ *   `paintGroupRuns`, which composites each filtered or blended group through
+ *   an offscreen. What survives of that paragraph is the CAVEAT, and it is
+ *   worth more than the claim was: **the group's own matrix is not carried**
+ *   (`notCarried.effectGroupMatrix`, 363 of them, one per group), so a radius
+ *   is scaled by the stage and the layer and by nothing the group sprite
+ *   itself does. That is an approximation this file cannot close from this
+ *   pack, so it is printed below rather than hidden behind a picture that
+ *   looks finished.
  *
  * This prints the absence with the pack's own numbers, because an absence
  * nobody counts is this project's signature defect.
@@ -1615,6 +1637,53 @@ function reportArenaEffects(pack) {
   if (groups === 0 && withFilters === 0) {
     log("props: no effect data — re-run extract-props.mjs.", { warn: true });
   }
+
+  // ► **WHAT THE GROUPS ASK OF A PAINTER, FROM `canvasFilterFor`'S OWN
+  //   VERDICTS RATHER THAN A SECOND OPINION.** `propInvoiceFor` sums them over
+  //   the distinct groups each frame reaches, so these are per-pack roll-ups of
+  //   the same buckets `tools/extract-props.mjs` writes into the manifest and
+  //   the two can be checked against each other. On this build: 570 filter
+  //   records over 363 groups, 0 refused — the 54 bevels canvas cannot express
+  //   are all on screens, none on props.
+  log(`props: group filters — ${invoice.groupFiltersApplied ?? 0} drawn, ` +
+    `${invoice.groupFiltersDeferred ?? 0} folded as colour, ${invoice.groupFiltersNoOp ?? 0} no-op, ` +
+    `${invoice.groupFiltersRefused ?? 0} refused, of ${invoice.groupFilters ?? 0}.`,
+    { warn: (invoice.groupFiltersRefused ?? 0) > 0 });
+  log(`props: ${invoice.groupFilterOps ?? 0}/${invoice.groupedOps ?? 0} op(s) await a buffer; ` +
+    `${invoice.groupBlendModes ?? 0} blend mode(s), ${invoice.groupBlendModesRefused ?? 0} refused.`);
+
+  // ► **THE GROUP'S OWN MATRIX IS NOT IN THE PACK, WHICH IS WHY EVERY RADIUS
+  //   HERE IS AT THE STAGE SCALE AND NOT THE GROUP'S.** A blur is authored in
+  //   the group sprite's own space, and `extract-props.mjs` records the matrix
+  //   it did not carry as `effects.notCarried.effectGroupMatrix` — one per
+  //   group, 363 of them on this build. So `paintGroupRuns` scales a radius by
+  //   the stage and by the layer, and by nothing the group itself does. Printed
+  //   because a renderer that is 4% or 200% wrong on every blur and says
+  //   nothing is indistinguishable from one that is right.
+  let groupMatrixGap = 0;
+  for (const prop of Object.values(pack?.props ?? {})) {
+    const missing = prop?.effects?.notCarried?.effectGroupMatrix;
+    if (Number.isFinite(missing)) groupMatrixGap += missing;
+  }
+  if (groupMatrixGap > 0) {
+    log(`props: ${groupMatrixGap}/${groups} group matrix(es) NOT in the pack — ` +
+      "blur radii are at the stage scale only.", { warn: true });
+  }
+
+  // ► **THE ARENA UI BAR'S OWN GLOWS, WHICH NOTHING ON THIS ROUTE CAN DRAW.**
+  //   Characters 1527 and 1528 are `DefineEditText` fields on `panel` and the
+  //   extractor drops a drawable it cannot turn into paths, so their two glows
+  //   are dropped with them and there is no shape in the pack for a glow to sit
+  //   on. `propEffectsUnreachable` reports them per PACK because they are a
+  //   property of the extraction and not of a frame. Saying so out loud beats
+  //   drawing the bar as though the bar were complete.
+  const unreachable = propEffectsUnreachable(pack);
+  if (unreachable.filters > 0) {
+    const kinds = Object.entries(unreachable.byType)
+      .map(([type, count]) => `${count} ${type}`).join(", ");
+    log(`props: ${unreachable.filters} filter(s) reach NO shape — ${kinds} on ` +
+      `${unreachable.placements} text field(s); the UI bar's own glows are NOT drawn.`, { warn: true });
+  }
 }
 
 /**
@@ -1680,6 +1749,651 @@ function probeCanvasFilter() {
     (plain === 0 && filtered === 0 ? " — BOTH ZERO, the clock is virtual; open the page in a real browser to time this." : ""));
 }
 
+/* ------------------------------------------------------------------ */
+/* THE ENCLOSING GROUPS, COMPOSITED                                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * WHAT FLASH DOES WITH A FILTER, AND WHAT THIS PAINTER HAD TO DO ABOUT IT.
+ *
+ * ► **A FILTER IS A FILTER OF THE COMPOSITE, NEVER OF A LEAF.** The player
+ *   rasterises a filtered sprite and transforms the RESULT. `src/render/props.js`
+ *   therefore folds the one kind that is exact per fill — the colour matrix —
+ *   and hands everything else back as `op.group`, a frozen record SHARED by
+ *   every operation under that group. Until this section existed nothing read
+ *   it, so **363 groups carrying 208 blurs, 212 glows and 1 blend mode reached
+ *   the canvas as though they were not there** — `ctx.filter` and
+ *   `globalCompositeOperation` appeared nowhere in this file.
+ *
+ * ► **AND THE OBVIOUS IMPLEMENTATION IS THE WRONG PICTURE.** Setting
+ *   `ctx.filter` around each operation blurs every path SEPARATELY, which is a
+ *   different image with an internal seam at every path edge — and it looks
+ *   plausible, which is why it is the version that ships. Measured on this
+ *   repository's own pack rather than argued: of the **5,810 `sky` operations
+ *   that sit under a group with a filter, 4,312 carry a CLIP**, and canvas
+ *   applies `ctx.filter` to the source and THEN clips — so a per-leaf blur is
+ *   cut off at the cutter's edge, where the build's blur spills past it. The
+ *   two are not close.
+ *
+ * So each run of operations under one filtered or blended group is drawn into
+ * an offscreen, and the offscreen is composited back ONCE.
+ *
+ * ## THE TWO TRAPS, AND WHY NEITHER IS REACHABLE HERE
+ *
+ * ► **THE BLEED.** An offscreen sized to the geometry CUTS THE BLUR OFF at the
+ *   geometry's edge, which is a hard line where the build has a soft one. So
+ *   the buffer is the geometry's device box **expanded by `filterBleedOf`**,
+ *   and the operations are drawn into that larger region — everything outside
+ *   the geometry draws nothing anyway, so the expansion costs pixels and never
+ *   content. `filterBleedOf` is deliberately over-generous (three times the sum
+ *   of EVERY length in the filter string, plus 4): a CSS Gaussian's support is
+ *   3 sigma and `drop-shadow`'s radius is twice its sigma, so three times the
+ *   stated length bounds both, and over-padding costs area while under-padding
+ *   costs the picture.
+ *
+ * ► **THE SCALE, WHICH ON THIS SURFACE IS THREE DIFFERENT NUMBERS.**
+ *   `ctx.filter` lengths are in the surface's own pixels — `filters.js` states
+ *   that as an UNMEASURED hypothesis about the browser, and this painter is
+ *   arranged so that the hypothesis cannot matter: **the buffer is composited
+ *   back at the IDENTITY transform**, where a filter measured in user units and
+ *   a filter measured in device units are the same filter. What remains is
+ *   making the radius right in device pixels, and that is `propOpsFor`'s
+ *   `scale` option, injected at the seam `arena-backdrop.js` already provides.
+ *
+ *   The three scales, measured rather than assumed:
+ *
+ *   - a STAGE layer is drawn at `fit.scale * layer.placement.scale` — 1.04 for
+ *     `sky`, which is the one layer on the build's own arena frame that is not
+ *     unscaled, and 1 for the other five;
+ *   - `paintProp` draws at `size * view.scale`, and `view.scale` is
+ *     `fit.scale * camera.zoomscale / 100` — **so a radius that ignored the
+ *     camera would be wrong at every zoom but one**;
+ *   - and the GROUP'S OWN MATRIX IS NOT IN THE PACK AT ALL.
+ *     `assets/props/props.json` records `effects.notCarried.effectGroupMatrix`
+ *     = 362 on `sky` and 1 on `bullet_trail`, one per group, so the radius is
+ *     scaled by the stage and NOT by whatever the group sprite's own placement
+ *     does. That is an approximation, it is `reportArenaEffects`'s job to print
+ *     it, and it is not this file's to fix — see `blockedOutsideOwnership`.
+ *
+ *   ► **THE CAMERA ONE IS LUCKY RATHER THAN HANDLED, AND IS COUNTED SO THAT
+ *     LUCK CANNOT BE MISTAKEN FOR CARE.** Every operation reaching `paintProp`
+ *     comes from `arrowOpsFor`, `arrowTrailOpsFor`, `arenaSceneryFor` or
+ *     `drawDrops`, all of which call `propOpsFor` INSIDE `props.js` with no
+ *     scale — so their filter strings would be at scale 1. On this build that
+ *     is harmless because the only group on that route is `bullet_trail`'s,
+ *     which carries a blend mode and NO filter (`blur`/`glow` count 0 across
+ *     `bullet`, `bullet_trail`, `blood`, `sparks` and `rockMC`). A pack where
+ *     that stopped being true would be silently blurred at the wrong width, so
+ *     `groupPaint.filterAtStageScale` counts every operation it happens to.
+ *
+ * ## WHAT IS STILL NOT RIGHT, COUNTED RATHER THAN QUIET
+ *
+ * - **A NESTED group composites only its INNERMOST record.** `op.group` is the
+ *   innermost and `enclosedBy` walks out; doing this properly needs a stack of
+ *   buffers. Every chain in this build's pack is one deep
+ *   (`propInvoiceFor().nestedGroupPlacements` is 0), so `groupsNested` is the
+ *   counter that says when that stops being true.
+ * - **A group whose operations are NOT CONTIGUOUS is composited once per run**,
+ *   which filters each piece separately — the per-leaf mistake at a coarser
+ *   grain. Measured: 0 of the 745 group instances in this pack reach more than
+ *   one run, because the extractor emits placements in path order.
+ *   `groupsSplit` counts it, and the synthetic ops in
+ *   `test/render-arena-shell.test.js` are the only thing that can move it.
+ * - **A blend mode canvas cannot express is dropped by name**, not silently:
+ *   `blendModeFor` refuses `layer`, `subtract`, `invert`, `alpha` and `erase`,
+ *   and `groupsBlendRefused` counts them. This build uses one blend mode,
+ *   `lighten`, and `filters.js` says outright that the id-to-name table is the
+ *   SPECIFICATION'S and not a measurement — so what is drawn here is the
+ *   spec's reading of id 5 and nothing in this repository has verified it.
+ */
+
+/**
+ * `?groups=0` draws exactly what this file drew before any of it existed.
+ *
+ * Kept because the ONLY check on this section is a screenshot, and a screenshot
+ * of one picture says nothing: the pair is the measurement. It also means a
+ * player on a browser where `ctx.filter` is ruinous has a way back.
+ */
+const GROUP_COMPOSITING = params.get("groups") !== "0";
+
+/**
+ * One frame's worth of what the compositor did, accumulated by
+ * `paintGroupRuns` and printed ONCE by `reportGroupPaint`.
+ *
+ * ► **DENOMINATORS FIRST, for the reason `propInvoiceFor`'s invoice has them.**
+ *   `groupsSplit`, `groupsNested`, `groupsBlendRefused` and `boxUnknown` are
+ *   all ZERO on this build's pack, and a zero with nothing beside it cannot be
+ *   told from a counter that is never reached. `ops`, `groupedOps`, `groups`
+ *   and `buffers` are what say which.
+ */
+const groupPaint = {
+  ops: 0,
+  groupedOps: 0,
+  runs: 0,
+  groups: 0,
+  // What got a buffer, and what was drawn straight onto the canvas.
+  buffers: 0,
+  bufferedOps: 0,
+  direct: 0,
+  // Groups whose only effect was a colour matrix `props.js` has already folded
+  // into the fills. They need no buffer and are not a loss.
+  inert: 0,
+  // Off the canvas entirely, so the buffer was skipped. A saving, not a loss —
+  // but it is the one branch that draws NOTHING, so it is counted rather than
+  // trusted.
+  offscreen: 0,
+  // THE APPROXIMATIONS.
+  groupsSplit: 0,
+  groupsNested: 0,
+  groupsBlendRefused: 0,
+  boxUnknown: 0,
+  boxClamped: 0,
+  filterAtStageScale: 0,
+  notComposited: 0
+};
+
+/**
+ * THE RUNS ONE FLAT OPERATION ARRAY BREAKS INTO, and the invoice for them.
+ *
+ * ► **THE TEST IS OBJECT IDENTITY, NOT `group.id`.** `props.js` interns one
+ *   frozen record per group per frame precisely so that `op.group !== previous`
+ *   is the whole of the question; comparing ids would merge two DIFFERENT
+ *   groups that happen to share an index across two props, and comparing
+ *   `JSON.stringify` would be both slower and wrong for the same reason.
+ *
+ * Pure: it reads nothing but the array it is handed, which is what lets
+ * `test/render-arena-shell.test.js` lift it out of this file's source and run
+ * it. Node cannot import this module — absolute URL specifiers, `document`,
+ * `Audio` at module scope — so lifting the text IS the only surface a test has,
+ * and a function that closed over `context` or `canvas` would not have one.
+ */
+function groupRunsOf(ops) {
+  const list = Array.isArray(ops) ? ops : [];
+  const runs = [];
+  const tally = {
+    ops: 0, groupedOps: 0, runs: 0, groups: 0,
+    buffered: 0, bufferedOps: 0, direct: 0, inert: 0,
+    split: 0, nested: 0, blendRefused: 0
+  };
+  const seen = new Map();
+  let current = null;
+  for (let index = 0; index < list.length; index += 1) {
+    const operation = list[index];
+    const group = operation && typeof operation === "object" && operation.group ? operation.group : null;
+    tally.ops += 1;
+    if (group) tally.groupedOps += 1;
+    if (!current || current.group !== group) {
+      current = { group, from: index, to: index, buffered: false };
+      runs.push(current);
+      tally.runs += 1;
+      if (group) {
+        const before = seen.get(group) ?? 0;
+        seen.set(group, before + 1);
+        if (before === 0) {
+          tally.groups += 1;
+          if (group.blendModeRefused) tally.blendRefused += 1;
+          if (group.enclosedBy) tally.nested += 1;
+          if (!group.filter && !group.composite) tally.inert += 1;
+        } else if (before === 1) {
+          // Counted ONCE per split group rather than once per extra run, so it
+          // reads against `groups` as its denominator.
+          tally.split += 1;
+        }
+        current.buffered = Boolean(group.filter || group.composite);
+      }
+    }
+    current.to = index + 1;
+  }
+  for (const run of runs) {
+    if (run.buffered) {
+      tally.buffered += 1;
+      tally.bufferedOps += run.to - run.from;
+    } else {
+      tally.direct += 1;
+    }
+  }
+  return { runs, tally };
+}
+
+/**
+ * A CONSERVATIVE box around one path's `d`, in the path's own space.
+ *
+ * ► **EVERY NUMBER IN THIS BUILD'S PATH DATA IS A COORDINATE, WHICH IS WHY
+ *   READING IT AS PAIRS IS CORRECT AND NOT A SHORTCUT.** Measured across every
+ *   shape in `assets/props/props.json`: the only commands that occur are
+ *   **M 1477, L 5481, Q 1740, Z 388** — no `A`, no `H`, no `V`, no `S`, none of
+ *   the forms whose parameters are not points. A quadratic lies inside the
+ *   convex hull of its control points, so taking the hull of every number pair
+ *   OVER-estimates a curve and never clips one.
+ *
+ * ► **AND AN ODD COUNT RETURNS `null` RATHER THAN DROPPING THE LAST NUMBER.**
+ *   That is the shape a new command letter would arrive in, and a box that
+ *   silently lost a coordinate would clip the drawing instead of failing. The
+ *   caller falls back to the whole canvas and `groupPaint.boxUnknown` says so.
+ *
+ * ► **THAT `% 2 !== 0` IS REDUNDANT AND IS KEPT ANYWAY, MEASURED RATHER THAN
+ *   ASSUMED.** Deleting it (mutation M19, 2026-09-15) left the whole suite
+ *   green, because an odd count always reaches `numbers[index + 1] ===
+ *   undefined` on its last pair and the `Number.isFinite` guard below returns
+ *   `null` for it anyway. It stays because it NAMES the condition a reader
+ *   needs to know about — the two guards catch one fault for two different
+ *   reasons — and it is recorded here as an equivalent mutant so that nobody
+ *   later reports it as untested coverage.
+ */
+function pathBoxOf(d) {
+  if (typeof d !== "string" || d.length === 0) return null;
+  const numbers = d.match(/[-+]?[0-9]*[.]?[0-9]+(?:[eE][-+]?[0-9]+)?/g);
+  if (!numbers || numbers.length < 2 || numbers.length % 2 !== 0) return null;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (let index = 0; index < numbers.length; index += 2) {
+    const x = Number(numbers[index]);
+    const y = Number(numbers[index + 1]);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+/** `outer` then `inner`, as canvas's own `transform()` composes them. */
+function composedMatrix(outer, inner) {
+  return [
+    outer[0] * inner[0] + outer[2] * inner[1],
+    outer[1] * inner[0] + outer[3] * inner[1],
+    outer[0] * inner[2] + outer[2] * inner[3],
+    outer[1] * inner[2] + outer[3] * inner[3],
+    outer[0] * inner[4] + outer[2] * inner[5] + outer[4],
+    outer[1] * inner[4] + outer[3] * inner[5] + outer[5]
+  ];
+}
+
+/**
+ * A box through a matrix, as the AXIS-ALIGNED hull of its four corners.
+ *
+ * ► **ALL FOUR CORNERS, because two of them is only right for a matrix with no
+ *   rotation and no mirror.** `paintProp` scales by `(k, -k)` — the arena's y
+ *   is up and the canvas's is down — and rotates every arrow by its pitch, so
+ *   the two-corner version would have been wrong on the first shot fired.
+ */
+function boxThrough(box, matrix) {
+  if (!box || !Array.isArray(matrix) || matrix.length < 6) return null;
+  const corners = [
+    [box.minX, box.minY], [box.maxX, box.minY],
+    [box.minX, box.maxY], [box.maxX, box.maxY]
+  ];
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const [x, y] of corners) {
+    const px = matrix[0] * x + matrix[2] * y + matrix[4];
+    const py = matrix[1] * x + matrix[3] * y + matrix[5];
+    if (!Number.isFinite(px) || !Number.isFinite(py)) return null;
+    if (px < minX) minX = px;
+    if (px > maxX) maxX = px;
+    if (py < minY) minY = py;
+    if (py > maxY) maxY = py;
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+/**
+ * HOW FAR A CANVAS FILTER STRING REACHES PAST THE THING IT IS FILTERING, in
+ * the same pixels the string's own lengths are in.
+ *
+ * ► **OVER-GENEROUS ON PURPOSE, AND THE ASYMMETRY IS THE WHOLE ARGUMENT.**
+ *   Padding too much costs buffer area; padding too little cuts the blur off at
+ *   a hard edge and puts the per-leaf picture back in a place no count would
+ *   notice. A CSS Gaussian's support is 3 sigma; `blur(R)` takes R AS sigma
+ *   while `drop-shadow(dx dy R c)` takes R as a box-shadow radius, which is
+ *   TWICE sigma (`filters.js` states both and applies the doubling) — so three
+ *   times the stated length bounds the reach of either, and summing across a
+ *   chained string bounds the chain.
+ *
+ * ► **IT READS LENGTHS, NOT ARGUMENTS, so the `dx`/`dy` of a drop shadow are
+ *   included in the sum rather than treated separately.** They are offsets and
+ *   not radii, so summing them is more padding than is needed and never less.
+ *   This build's shadows are all at `0px 0px` anyway — `canvasFilterFor` emits
+ *   a glow as a zero-offset `drop-shadow` — so the distinction is unexercised
+ *   here and the generous reading is what makes that safe.
+ */
+function filterBleedOf(filter) {
+  if (typeof filter !== "string" || filter.length === 0) return 0;
+  const lengths = filter.match(/[-+]?[0-9]*[.]?[0-9]+px/g);
+  if (!lengths) return 0;
+  let total = 0;
+  for (const token of lengths) {
+    const value = Number(token.slice(0, token.length - 2));
+    if (Number.isFinite(value)) total += Math.abs(value);
+  }
+  return total * 3 + 4;
+}
+
+/**
+ * The device-space box one run of operations covers, or `null` when any one of
+ * them cannot be read.
+ *
+ * `translationDivisor` is 20 where the painter divides the placement's
+ * translation by twips (`paintArenaLayer`) and 1 where it does not
+ * (`paintProp`) — **passed in rather than assumed, because the two painters in
+ * this file genuinely disagree about it** and a box that disagreed with the
+ * draw would cut the layer in half at a plausible-looking angle.
+ */
+function runBoxOf(ops, run, ctm, translationDivisor) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (let index = run.from; index < run.to; index += 1) {
+    const operation = ops[index];
+    const local = pathBoxOf(operation && operation.d);
+    const matrix = operation && operation.matrix;
+    if (!local || !Array.isArray(matrix) || matrix.length < 6) return null;
+    // A stroke is centred on the path, so it reaches half its width outside —
+    // padded by a whole width because half of an approximation is not a saving.
+    const pad = Math.abs(Number(operation.strokeWidth) || 0);
+    const padded = {
+      minX: local.minX - pad, minY: local.minY - pad,
+      maxX: local.maxX + pad, maxY: local.maxY + pad
+    };
+    const placed = [
+      matrix[0], matrix[1], matrix[2], matrix[3],
+      matrix[4] / translationDivisor, matrix[5] / translationDivisor
+    ];
+    const box = boxThrough(padded, composedMatrix(ctm, placed));
+    if (!box) return null;
+    if (box.minX < minX) minX = box.minX;
+    if (box.minY < minY) minY = box.minY;
+    if (box.maxX > maxX) maxX = box.maxX;
+    if (box.maxY > maxY) maxY = box.maxY;
+  }
+  if (!Number.isFinite(minX) || !Number.isFinite(minY)) return null;
+  return { minX, minY, maxX, maxY };
+}
+
+/**
+ * The buffer REGION for a run: its box grown by the filter's bleed, snapped to
+ * whole pixels and clipped to the surface.
+ *
+ * A `null` box means "this run could not be measured", and the honest answer to
+ * that is the WHOLE SURFACE — never a guess at a smaller one. An empty result
+ * means the run is entirely off the canvas and nothing has to be drawn at all.
+ */
+function bufferRegionOf(box, bleed, width, height) {
+  const left = box ? Math.floor(box.minX - bleed) : 0;
+  const top = box ? Math.floor(box.minY - bleed) : 0;
+  const right = box ? Math.ceil(box.maxX + bleed) : width;
+  const bottom = box ? Math.ceil(box.maxY + bleed) : height;
+  const x = Math.max(0, Math.min(width, left));
+  const y = Math.max(0, Math.min(height, top));
+  const x1 = Math.max(0, Math.min(width, right));
+  const y1 = Math.max(0, Math.min(height, bottom));
+  return {
+    x, y,
+    width: Math.max(0, x1 - x),
+    height: Math.max(0, y1 - y),
+    clamped: Boolean(box) && (left < 0 || top < 0 || right > width || bottom > height)
+  };
+}
+
+/* --- Everything below here touches the DOM and cannot be lifted out. ----- */
+
+/**
+ * ONE OFFSCREEN PER NESTING DEPTH, reused across frames and resized only when
+ * it has to be.
+ *
+ * ► **A FRESH CANVAS PER GROUP IS A FRESH ALLOCATION PER GROUP PER FRAME.**
+ *   At `?sky=124` — the frame with the most filtered groups in the pack —
+ *   three are composited, and an arrow in flight adds six more for its trail. Keyed by
+ *   DEPTH rather than pooled arbitrarily so that a buffer can never be the one
+ *   being drawn into further up the stack.
+ *
+ * ► **SHRINKS AS WELL AS GROWS.** `clearRect` costs the buffer's whole area, so
+ *   a buffer left at the size of the biggest run ever seen would make every
+ *   20-pixel trail puff pay for the sky. The hysteresis (only shrink past 2x)
+ *   stops a resize on every frame, and a resize clears the canvas by itself.
+ */
+const groupBuffers = [];
+let groupDepth = 0;
+
+function groupBufferAt(depth, width, height) {
+  let buffer = groupBuffers[depth];
+  if (!buffer) {
+    const offscreen = document.createElement("canvas");
+    buffer = { canvas: offscreen, context: offscreen.getContext("2d") };
+    groupBuffers[depth] = buffer;
+  }
+  const wanted = Math.max(1, Math.ceil(width));
+  const tall = Math.max(1, Math.ceil(height));
+  if (buffer.canvas.width < wanted || buffer.canvas.height < tall
+    || buffer.canvas.width > wanted * 2 || buffer.canvas.height > tall * 2) {
+    // Assigning either dimension clears the canvas, which is the cheap path.
+    buffer.canvas.width = wanted;
+    buffer.canvas.height = tall;
+  } else {
+    buffer.context.setTransform(1, 0, 0, 1, 0, 0);
+    buffer.context.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
+  }
+  buffer.context.setTransform(1, 0, 0, 1, 0, 0);
+  buffer.context.globalAlpha = 1;
+  buffer.context.globalCompositeOperation = "source-over";
+  buffer.context.filter = "none";
+  return buffer;
+}
+
+/**
+ * Whether this browser can be asked to do any of it.
+ *
+ * `getTransform` is what copies the destination's transform onto the buffer, so
+ * without it a run would be drawn at the wrong place rather than unfiltered —
+ * which is worse than not compositing at all. Asked once and logged, because a
+ * silent fallback is the thing this file keeps being punished for.
+ */
+let groupCompositingAnswer = null;
+function groupCompositingAvailable() {
+  if (groupCompositingAnswer === null) {
+    groupCompositingAnswer = GROUP_COMPOSITING
+      && typeof context.getTransform === "function"
+      && typeof document.createElement === "function";
+    if (!groupCompositingAnswer) {
+      log(GROUP_COMPOSITING
+        ? "groups: this browser has no ctx.getTransform — filters and blends are NOT drawn."
+        : "groups: ?groups=0 — filters and blends are NOT drawn, on purpose.", { warn: true });
+    }
+  }
+  return groupCompositingAnswer;
+}
+
+/**
+ * DRAW ONE FLAT OPERATION ARRAY, COMPOSITING EACH FILTERED OR BLENDED GROUP.
+ *
+ * ► **THE DESTINATION IS SWAPPED BY REBINDING `context`, AND THAT IS A CHOICE
+ *   RATHER THAN A SHORTCUT.** Every painter in this file — `paintGradientFill`,
+ *   `paintBitmapFill`, `paintLayerOperation`, `paintPropOperation` — already
+ *   reads the module's one `context` binding, so rebinding it is the seam they
+ *   all share. Threading a `ctx` parameter through them instead would be a
+ *   six-function change in THE ONE FILE THE SUITE CANNOT IMPORT, which is the
+ *   opposite of what this file's history asks for. The restore is in a
+ *   `finally`, and `render()` re-asserts `context = surface` at the top of every
+ *   frame so that an exception mid-run cannot leave the whole arena being
+ *   painted into an offscreen nobody looks at.
+ *
+ * @param {object[]} ops
+ * @param {object}   route  `{ translationDivisor, filtersScaled }` — how THIS
+ *                          painter reads a placement matrix, and whether the
+ *                          filter strings on the groups were built at the
+ *                          device scale
+ * @param {Function} drawOne  draws one operation into the current `context`
+ */
+function paintGroupRuns(ops, route, drawOne) {
+  const plan = groupRunsOf(ops);
+  groupPaint.ops += plan.tally.ops;
+  groupPaint.groupedOps += plan.tally.groupedOps;
+  groupPaint.runs += plan.tally.runs;
+  groupPaint.groups += plan.tally.groups;
+  groupPaint.direct += plan.tally.direct;
+  groupPaint.inert += plan.tally.inert;
+  groupPaint.groupsSplit += plan.tally.split;
+  groupPaint.groupsNested += plan.tally.nested;
+  groupPaint.groupsBlendRefused += plan.tally.blendRefused;
+
+  const composite = groupCompositingAvailable();
+  for (const run of plan.runs) {
+    if (!run.buffered || !composite) {
+      if (run.buffered) groupPaint.notComposited += run.to - run.from;
+      for (let index = run.from; index < run.to; index += 1) drawOne(ops[index]);
+      continue;
+    }
+    if (run.group.filter && !route.filtersScaled) groupPaint.filterAtStageScale += run.to - run.from;
+
+    const ctm = context.getTransform();
+    const outer = [ctm.a, ctm.b, ctm.c, ctm.d, ctm.e, ctm.f];
+    const box = runBoxOf(ops, run, outer, route.translationDivisor);
+    if (!box) groupPaint.boxUnknown += 1;
+    const region = bufferRegionOf(box, filterBleedOf(run.group.filter), canvas.width, canvas.height);
+    if (region.clamped) groupPaint.boxClamped += 1;
+    if (region.width === 0 || region.height === 0) {
+      groupPaint.offscreen += 1;
+      continue;
+    }
+
+    const buffer = groupBufferAt(groupDepth, region.width, region.height);
+    // The buffer's origin is the region's top-left, so the SAME device
+    // transform draws the same pixels one translation over.
+    buffer.context.setTransform(1, 0, 0, 1, -region.x, -region.y);
+    buffer.context.transform(outer[0], outer[1], outer[2], outer[3], outer[4], outer[5]);
+    const destination = context;
+    context = buffer.context;
+    groupDepth += 1;
+    try {
+      for (let index = run.from; index < run.to; index += 1) drawOne(ops[index]);
+    } finally {
+      groupDepth -= 1;
+      context = destination;
+    }
+
+    groupPaint.buffers += 1;
+    groupPaint.bufferedOps += run.to - run.from;
+    context.save();
+    // ► **IDENTITY, WHICH IS WHAT MAKES THE UNMEASURED SCALE HYPOTHESIS STOP
+    //   MATTERING.** Whether a browser measures `ctx.filter` in user units or
+    //   in device pixels, the two coincide when the transform is the identity —
+    //   so the only remaining question is whether the RADIUS was built at the
+    //   device scale, which is `route.filtersScaled` above.
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.globalAlpha = 1;
+    if (run.group.filter) context.filter = run.group.filter;
+    if (run.group.composite) context.globalCompositeOperation = run.group.composite;
+    context.drawImage(
+      buffer.canvas, 0, 0, region.width, region.height,
+      region.x, region.y, region.width, region.height
+    );
+    context.restore();
+  }
+  return plan;
+}
+
+/**
+ * The compositor's invoice, printed ONCE — after the first frame that actually
+ * had a group in it, because a frame before the pack has loaded says nothing.
+ *
+ * ► **WHAT THESE NUMBERS COULD HAVE VARIED OVER, STATED.** They are per FRAME
+ *   and they move with `?sky=`, with the camera, and with whether an arrow is
+ *   in the air. Measured: at the shipped dressing `sky` frame 1 reaches 2
+ *   groups over 2 operations and exactly ONE of them is filtered; `?sky=124`
+ *   reaches 4 groups over 70 operations, 3 of them filtered and covering 69 of
+ *   the 70; and a shot in flight adds six more, one per `bullet_trail` puff,
+ *   each carrying a blend mode and no filter. A run at one dressing that
+ *   reported the same numbers as another would be the finding.
+ */
+let groupPaintHigh = -1;
+let groupPaintReports = 0;
+
+function resetGroupPaint() {
+  for (const key of Object.keys(groupPaint)) groupPaint[key] = 0;
+}
+
+function reportGroupPaint() {
+  if (groupPaint.groups === 0 || groupPaint.groups <= groupPaintHigh) return;
+  groupPaintHigh = groupPaint.groups;
+  // ► **CAPPED AT THREE, BECAUSE A TRAIL BUILDS UP ONE PUFF AT A TIME.** An
+  //   arrow attaches its six `bullet_trail` groups over six frames, so every
+  //   one of those frames is a new high water mark — six reports of three
+  //   lines each, into a 40-line panel, and the load-time invoice scrolls off
+  //   the top. Three is the busiest frame this page reaches in practice and
+  //   the cap is stated rather than left as an accident of the ramp.
+  groupPaintReports += 1;
+  if (groupPaintReports > 3) return;
+  log(`groups: ${groupPaint.groups} group(s) over ${groupPaint.groupedOps}/${groupPaint.ops} ops, ` +
+    `${groupPaint.buffers} buffered (${groupPaint.bufferedOps} ops).`);
+  log(`groups: ${groupPaint.inert} matrix-only (already folded), ${groupPaint.offscreen} off-canvas, ` +
+    `${groupPaint.direct} run(s) straight, ${groupPaint.boxClamped} buffer(s) clipped by the canvas.`);
+  const lost = groupPaint.groupsSplit + groupPaint.groupsNested
+    + groupPaint.groupsBlendRefused + groupPaint.boxUnknown
+    + groupPaint.filterAtStageScale + groupPaint.notComposited;
+  log(`groups: approximated — split ${groupPaint.groupsSplit}, nested ${groupPaint.groupsNested}, ` +
+    `blend refused ${groupPaint.groupsBlendRefused}, unmeasurable ${groupPaint.boxUnknown}, ` +
+    `unscaled ${groupPaint.filterAtStageScale}, not composited ${groupPaint.notComposited} ` +
+    `(of ${groupPaint.groups} groups / ${groupPaint.groupedOps} ops).`, { warn: lost > 0 });
+}
+
+/**
+ * ONE operation of an arena-screen layer, into whatever `context` currently is.
+ *
+ * Lifted out of `paintArenaLayer`'s loop so that `paintGroupRuns` can call it
+ * for a run at a time — into the canvas for an unfiltered run and into an
+ * offscreen for a filtered one. The body is unchanged.
+ */
+function paintLayerOperation(operation) {
+  const m = operation.matrix;
+  context.save();
+  // ► **THE CLIP GOES ON BEFORE THE SHAPE'S OWN TRANSFORM**, because the
+  //   cutter's matrix is composed in the SAME space as the shape's and not
+  //   inside it. Setting it after would clip the moon's glow by a mask
+  //   already moved by the glow's own placement — which is a plausible
+  //   picture and the wrong one.
+  //
+  // ► **AND IT IS INSIDE THE GROUP'S BUFFER, WHICH IS THE ONLY PLACE IT CAN
+  //   BE RIGHT.** Canvas applies `ctx.filter` to the source and clips the
+  //   RESULT, so a per-operation filter would be cut off at the cutter's edge
+  //   while the build's blur spills past it. 4,312 of the 5,810 `sky`
+  //   operations under a filtered group carry one of these, so that is not a
+  //   corner case — it is most of the sky.
+  if (operation.clip) {
+    const c = operation.clip.matrix;
+    context.save();
+    context.transform(c[0], c[1], c[2], c[3], c[4] / TWIPS_PER_PIXEL, c[5] / TWIPS_PER_PIXEL);
+    context.clip(path2dFor(operation.clip.d), "evenodd");
+    context.restore();
+  }
+  context.transform(m[0], m[1], m[2], m[3], m[4] / TWIPS_PER_PIXEL, m[5] / TWIPS_PER_PIXEL);
+  const path = path2dFor(operation.d);
+  if (operation.bitmap) {
+    context.globalAlpha = operation.fillOpacity ?? 1;
+    paintBitmapFill(operation, path);
+  } else if (operation.gradient) {
+    context.globalAlpha = 1;
+    paintGradientFill(operation, path);
+  } else if (operation.fill && operation.fill !== "none") {
+    context.globalAlpha = operation.fillOpacity ?? 1;
+    context.fillStyle = operation.fill;
+    context.fill(path, operation.fillRule ?? "evenodd");
+  }
+  if (operation.stroke && operation.strokeWidth > 0) {
+    context.globalAlpha = operation.strokeOpacity ?? 1;
+    context.strokeStyle = operation.stroke;
+    context.lineWidth = operation.strokeWidth;
+    context.lineJoin = "round";
+    context.stroke(path);
+  }
+  context.restore();
+}
+
 function paintArenaLayer(layer, fit) {
   const { x, y, scale } = layer.placement;
   context.save();
@@ -1687,43 +2401,12 @@ function paintArenaLayer(layer, fit) {
   context.scale(fit.scale, fit.scale);
   context.translate(x, y);
   if (scale !== 1) context.scale(scale, scale);
-  for (const operation of layer.ops) {
-    const m = operation.matrix;
-    context.save();
-    // ► **THE CLIP GOES ON BEFORE THE SHAPE'S OWN TRANSFORM**, because the
-    //   cutter's matrix is composed in the SAME space as the shape's and not
-    //   inside it. Setting it after would clip the moon's glow by a mask
-    //   already moved by the glow's own placement — which is a plausible
-    //   picture and the wrong one.
-    if (operation.clip) {
-      const c = operation.clip.matrix;
-      context.save();
-      context.transform(c[0], c[1], c[2], c[3], c[4] / TWIPS_PER_PIXEL, c[5] / TWIPS_PER_PIXEL);
-      context.clip(path2dFor(operation.clip.d), "evenodd");
-      context.restore();
-    }
-    context.transform(m[0], m[1], m[2], m[3], m[4] / TWIPS_PER_PIXEL, m[5] / TWIPS_PER_PIXEL);
-    const path = path2dFor(operation.d);
-    if (operation.bitmap) {
-      context.globalAlpha = operation.fillOpacity ?? 1;
-      paintBitmapFill(operation, path);
-    } else if (operation.gradient) {
-      context.globalAlpha = 1;
-      paintGradientFill(operation, path);
-    } else if (operation.fill && operation.fill !== "none") {
-      context.globalAlpha = operation.fillOpacity ?? 1;
-      context.fillStyle = operation.fill;
-      context.fill(path, operation.fillRule ?? "evenodd");
-    }
-    if (operation.stroke && operation.strokeWidth > 0) {
-      context.globalAlpha = operation.strokeOpacity ?? 1;
-      context.strokeStyle = operation.stroke;
-      context.lineWidth = operation.strokeWidth;
-      context.lineJoin = "round";
-      context.stroke(path);
-    }
-    context.restore();
-  }
+  // ► **`filtersScaled: true` BECAUSE `render()` INJECTS THE STAGE SCALE.**
+  //   The reader handed to `arenaScreenLayersFor` asks `propOpsFor` for
+  //   `fit.scale * layer.scale`, so the radii on these groups are already in
+  //   the device pixels the composite step measures them in. The 20 is this
+  //   painter's own twips divisor, three lines below in `paintLayerOperation`.
+  paintGroupRuns(layer.ops, { translationDivisor: TWIPS_PER_PIXEL, filtersScaled: true }, paintLayerOperation);
   context.globalAlpha = 1;
   context.restore();
 }
@@ -1783,7 +2466,54 @@ function combatantsById() {
   return new Map(wire.teams.flatMap((team) => team.combatants).map((combatant) => [combatant.id, combatant]));
 }
 
+/**
+ * THE PROPS READER THE ARENA SCREEN IS DRAWN THROUGH, at THIS canvas's scale.
+ *
+ * ► **THE ONLY THING IT ADDS IS `scale`, AND THE LAST WRAPPER AT THIS SEAM WAS
+ *   A DEFECT.** `tintedPropOpsFor` re-applied the placement's colour transform
+ *   to what `propOpsFor` returned and squared every multiplier; it was deleted
+ *   on 2026-09-14 and `test/render-arena-shell.test.js` reads this file as text
+ *   to keep it deleted. This wrapper changes NO fill, NO opacity and NO
+ *   geometry — measured across all twelve linkages and all 302 frames of this
+ *   repository's own pack, the operations are byte-identical at scale 1 and at
+ *   scale 3.75 in every field except `group.filter`, which is the string whose
+ *   radii are in canvas pixels and is the whole reason to pass a scale at all.
+ *
+ * ► **AND THE LAYER'S OWN SCALE IS IN IT, WHICH IS NOT THE SAME AS THE FIT'S.**
+ *   `sky` is placed at 1.04 — the build's own arena frame puts exactly one
+ *   object on it that is not unscaled — so a reader that passed `fit.scale`
+ *   alone would draw every sky blur 4% narrow. `paintArenaLayer` applies the
+ *   same two factors to the geometry, ten lines apart, which is what makes them
+ *   one number rather than two that can drift.
+ */
+function stagePropOpsFor(fit) {
+  return (pack, options) => propOpsFor(pack, {
+    ...options,
+    scale: fit.scale * layerScaleOf(options && options.linkage)
+  });
+}
+
+/** The `scale` the arena-screen layer table places this linkage at, or 1. */
+function layerScaleOf(linkage) {
+  for (const layer of SS2_ARENA_SCREEN_LAYERS) {
+    if (layer.prop === linkage) return Number.isFinite(layer.scale) ? layer.scale : 1;
+  }
+  return 1;
+}
+
 function render(now = performance.now()) {
+  // ► **THE INVARIANT, RE-ASSERTED ONCE A FRAME.** `paintGroupRuns` rebinds
+  //   `context` to an offscreen while it composites a group and restores it in
+  //   a `finally`; this is the belt to that braces, so a throw anywhere in a
+  //   frame cannot make the NEXT frame draw the whole arena into a buffer.
+  context = surface;
+  // The compositor's tally is PER FRAME, so it is zeroed here rather than
+  // accumulated: a running total over an unknown number of frames cannot be
+  // read against the per-frame denominators `reportGroupPaint` prints beside
+  // it. `groupPaintHigh` is what makes the report fire again when a frame
+  // reaches MORE groups than any before it — which is what an arrow in flight
+  // does, six `bullet_trail` groups at a time.
+  resetGroupPaint();
   const rect = canvas.parentElement.getBoundingClientRect();
   const ratio = window.devicePixelRatio || 1;
   canvas.width = Math.max(1, Math.floor(rect.width * ratio));
@@ -1803,7 +2533,7 @@ function render(now = performance.now()) {
   // own bowl when they have not — the same fallback the figures and the sound
   // already have, and a clone with no assets is unchanged.
   const fit = stageFitFor({ width: canvas.width, height: canvas.height });
-  const screen = splitArenaScreen(arenaScreenLayersFor(propPack, propOpsFor, camera, arenaDressing));
+  const screen = splitArenaScreen(arenaScreenLayersFor(propPack, stagePropOpsFor(fit), camera, arenaDressing));
   if (screen.behind.length > 0 || screen.inFront.length > 0) {
     for (const layer of screen.behind) paintArenaLayer(layer, fit);
   } else {
@@ -2050,6 +2780,12 @@ function render(now = performance.now()) {
       y1: fit.offsetY + fit.scale * (layer.placement.y + plate.y1)
     } : null;
   }
+
+  // What the group compositor did with THIS frame, once. It is after the whole
+  // frame rather than inside `paintGroupRuns` because the arena screen, the
+  // scenery, the drops and the arrows all feed the same tally and a line
+  // printed mid-frame would report a third of it.
+  reportGroupPaint();
 }
 
 /**
@@ -2127,6 +2863,36 @@ function drawDrops(view, now) {
  * flip y (arena y is UP and canvas y is DOWN), then compose the placement's own
  * matrix.
  */
+/**
+ * ONE operation of a prop, into whatever `context` currently is.
+ *
+ * ► **IT DOES NOT DIVIDE THE TRANSLATION BY TWIPS AND `paintLayerOperation`
+ *   DOES.** That difference predates this section and is left exactly as it
+ *   was; what is new is that `runBoxOf` is TOLD which of the two it is
+ *   measuring, because a bounding box that disagreed with the draw by a factor
+ *   of twenty would put the buffer somewhere the geometry is not and lose the
+ *   run without a mark.
+ */
+function paintPropOperation(operation) {
+  const m = operation.matrix;
+  context.save();
+  context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+  const path = path2dFor(operation.d);
+  if (operation.fill && operation.fill !== "none") {
+    context.globalAlpha = operation.fillOpacity ?? 1;
+    context.fillStyle = operation.fill;
+    context.fill(path, operation.fillRule ?? "evenodd");
+  }
+  if (operation.stroke && operation.strokeWidth > 0) {
+    context.globalAlpha = operation.strokeOpacity ?? 1;
+    context.strokeStyle = operation.stroke;
+    context.lineWidth = operation.strokeWidth;
+    context.lineJoin = "round";
+    context.stroke(path);
+  }
+  context.restore();
+}
+
 function paintProp(ops, view, { x, y, lift, size, rotation }) {
   context.save();
   context.globalAlpha = 1;
@@ -2139,25 +2905,18 @@ function paintProp(ops, view, { x, y, lift, size, rotation }) {
   if (rotation) context.rotate(rotation);
   const k = size * view.scale;
   context.scale(k, -k);
-  for (const operation of ops) {
-    const m = operation.matrix;
-    context.save();
-    context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-    const path = path2dFor(operation.d);
-    if (operation.fill && operation.fill !== "none") {
-      context.globalAlpha = operation.fillOpacity ?? 1;
-      context.fillStyle = operation.fill;
-      context.fill(path, operation.fillRule ?? "evenodd");
-    }
-    if (operation.stroke && operation.strokeWidth > 0) {
-      context.globalAlpha = operation.strokeOpacity ?? 1;
-      context.strokeStyle = operation.stroke;
-      context.lineWidth = operation.strokeWidth;
-      context.lineJoin = "round";
-      context.stroke(path);
-    }
-    context.restore();
-  }
+  // ► **`filtersScaled: false`, AND THAT IS AN ADMISSION RATHER THAN A
+  //   SETTING.** Every array that reaches here comes from `arrowOpsFor`,
+  //   `arrowTrailOpsFor`, `arenaSceneryFor` or `drawDrops`, each of which calls
+  //   `propOpsFor` INSIDE `props.js` with no scale — so any filter string on
+  //   these groups would be at scale 1 while the draw is at `size * view.scale`,
+  //   which carries the camera's zoom. On this build no group on that route
+  //   carries a filter at all (`bullet_trail`'s has a blend mode and nothing
+  //   else; `bullet`, `blood`, `sparks` and `rockMC` have no groups), so
+  //   `groupPaint.filterAtStageScale` is 0 — and it is counted precisely so
+  //   that a pack where it stops being 0 says so instead of drawing every blur
+  //   at the wrong width.
+  paintGroupRuns(ops, { translationDivisor: 1, filtersScaled: false }, paintPropOperation);
   context.restore();
 }
 

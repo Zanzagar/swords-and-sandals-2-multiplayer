@@ -14,8 +14,10 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { arrowTrailOpsFor, propFrameCount, propInvoiceFor, propOpsFor, propPackFrom } from "../src/render/props.js";
-import { arenaScreenLayersFor, SS2_ARENA_DRESSING } from "../src/render/arena-backdrop.js";
+import {
+  arrowTrailOpsFor, propEffectsUnreachable, propFrameCount, propInvoiceFor, propOpsFor, propPackFrom
+} from "../src/render/props.js";
+import { arenaScreenLayersFor, stageFitFor, SS2_ARENA_DRESSING } from "../src/render/arena-backdrop.js";
 import { projectileDrawAt, projectileFlight, SS2_PROJECTILE } from "../src/render/projectile.js";
 import { applyColourTransform, applyColourTransformAlpha, colourTransformFrom } from "../src/render/filters.js";
 import {
@@ -535,18 +537,30 @@ test("the two transform READS that survive in the shell are named, so a third is
   ], "the import, the hit-plate finder, and the tinted-placement count");
 });
 
-test("the shell hands `propOpsFor` to the backdrop UNWRAPPED, at all three call sites", () => {
-  // ► **THE INJECTION SEAM STAYS; ONLY THE SHIM GOES.** `arenaScreenLayersFor`
+test("the shell wraps `propOpsFor` for the STAGE SCALE and for nothing else", () => {
+  // ► **THE INJECTION SEAM STAYS; ONLY THE SHIM WENT.** `arenaScreenLayersFor`
   //   and `hasArenaScreen` take the props reader as an argument so
   //   `arena-backdrop.js` stays a pure description of the arena with no edge to
-  //   the pack format. What changed is WHICH function goes through it.
+  //   the pack format. What changed on 2026-09-14 is WHICH function goes
+  //   through it; what changed on 2026-09-15 is that the backdrop's one is
+  //   wrapped again — and the whole point of this test is that the new wrapper
+  //   is not the old one coming back.
+  //
+  // ► ~~`assert.ok(code.includes("arenaScreenLayersFor(propPack, propOpsFor,
+  //   camera, arenaDressing)"))`~~ **— WHICH WAS A BAN ON WRAPPING AT ALL, AND
+  //   THAT IS MORE THAN THE DEFECT EVER JUSTIFIED.** `tintedPropOpsFor` was
+  //   wrong because it RE-APPLIED a colour transform `props.js` had already
+  //   applied, not because it was a function. `stagePropOpsFor` adds one
+  //   option, `scale`, whose only effect is the length in a filter string —
+  //   pinned by value in the test below this one, across every linkage and
+  //   every frame of the real pack, not by reading the wrapper.
   const source = readShellSource();
   assert.ok(source, "tools/arena/main.js is tracked and must be readable");
   const { code } = codeOnly(source);
   assert.ok(code.includes("hasArenaScreen(propPack, propOpsFor)"),
-    "the memoised availability question");
-  assert.ok(code.includes("arenaScreenLayersFor(propPack, propOpsFor, camera, arenaDressing)"),
-    "the per-frame backdrop");
+    "the memoised availability question, which needs no scale and is still unwrapped");
+  assert.ok(code.includes("arenaScreenLayersFor(propPack, stagePropOpsFor(fit), camera, arenaDressing)"),
+    "the per-frame backdrop, through the scale wrapper");
   assert.ok(code.includes("propOpsFor(propPack, { linkage: drop.prop, frame: drop.artFrame })"),
     "and the blood and sparks, which went through the shim too");
   // ► **THAT THIRD ONE IS A HOLE IN THIS TEST AND IS NAMED RATHER THAN
@@ -554,7 +568,82 @@ test("the shell hands `propOpsFor` to the backdrop UNWRAPPED, at all three call 
   //   between them in this build's pack, so the shim could never have changed a
   //   drop's pixels and no value assertion anywhere can tell the two readers
   //   apart there. The line above is the only evidence that call site is right.
-  assert.equal(countOf(code, "propOpsFor"), 4, "one import and exactly three call sites");
+  assert.equal(countOf(code, "propOpsFor"), 4,
+    "one import, the wrapper's body, the availability question and the drops");
+
+  // THE WRAPPER'S WHOLE BODY, so that a second option — or an applier — cannot
+  // be added to it without this going red. It is three lines and they are all
+  // of it.
+  assert.ok(code.includes(
+    "return (pack, options) => propOpsFor(pack, {\n"
+    + "    ...options,\n"
+    + "    scale: fit.scale * layerScaleOf(options && options.linkage)\n"
+    + "  });"
+  ), "stagePropOpsFor adds `scale` and touches nothing else");
+  assert.equal(countOf(code, "stagePropOpsFor"), 2, "declared once, called once");
+});
+
+test("the scale the backdrop is read at moves the FILTER STRING and nothing else", () => {
+  // ► **THIS IS THE VALUE HALF OF THE TEST ABOVE, AND WITHOUT IT THE WRAPPER IS
+  //   ONLY READ.** `propOpsFor`'s own header says the buckets are
+  //   scale-invariant and only the emitted lengths move; that is a claim about
+  //   `filters.js`, and this re-derives it over every linkage and every frame
+  //   of the pack the player actually extracted rather than quoting it.
+  if (!REAL_PROPS) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  const withoutGroup = (ops) => (ops ?? []).map(({ group, ...rest }) => rest);
+  let frames = 0;
+  let moved = 0;
+  let same = 0;
+  for (const linkage of Object.keys(REAL_PROPS.props)) {
+    for (let frame = 1; frame <= propFrameCount(REAL_PROPS, linkage); frame += 1) {
+      frames += 1;
+      const plain = propOpsFor(REAL_PROPS, { linkage, frame }) ?? [];
+      const scaled = propOpsFor(REAL_PROPS, { linkage, frame, scale: 3.75 }) ?? [];
+      assert.deepEqual(withoutGroup(scaled), withoutGroup(plain),
+        `${linkage} frame ${frame}: a scale must move no fill, no opacity and no geometry`);
+      const seen = new Set();
+      for (let index = 0; index < plain.length; index += 1) {
+        const before = plain[index].group;
+        if (!before || seen.has(before)) continue;
+        seen.add(before);
+        if (before.filter === scaled[index].group.filter) same += 1; else moved += 1;
+      }
+    }
+  }
+  assert.equal(frames, 302, "every frame of every linkage in the pack");
+  // ► **BOTH SIDES PINNED, BECAUSE EITHER ONE ALONE IS SATISFIED BY A BUG.**
+  //   If the scale were ignored, `moved` would be 0 and every blur would draw
+  //   at 1/`fit.scale` of its width; if the buckets were NOT scale-invariant,
+  //   the deepEqual above would already have failed.
+  //
+  // ► **AND THE 289 THAT DO NOT MOVE ARE TWO POPULATIONS, WHICH IS WORTH MORE
+  //   THAN THE TOTAL WAS.** 281 of them carry no filter string at all — 274
+  //   colour-matrix-only groups whose matrices `props.js` has already folded
+  //   into the fills, plus `bullet_trail`'s 7 blend-mode instances. The other
+  //   **8 carry a string whose every length is ZERO**:
+  //   `drop-shadow(0px 0px 0px rgba(229, 26, 26, 1))` and its neighbours, the
+  //   dawn cloud bank at `sky` frames 100-105 and the moon at 124-125, where
+  //   the glow's blur has ramped to nothing while its strength has not. Zero
+  //   times any scale is zero, so those eight are scale-invariant for a real
+  //   reason and not because the option was ignored.
+  assert.equal(moved, 456, "the filter strings that move with the stage scale");
+  assert.equal(same, 289, "and the ones with nothing in them to move");
+  assert.equal(moved + same, 745, "which is every group instance in the pack");
+  const flat = [];
+  for (let frame = 100; frame <= 105; frame += 1) {
+    for (const op of propOpsFor(REAL_PROPS, { linkage: "sky", frame, scale: 9 }) ?? []) {
+      if (op.group && op.group.filter && op.group.filter.includes("0px 0px 0px")) {
+        flat.push(op.group.character);
+        break;
+      }
+    }
+  }
+  assert.deepEqual(flat, [1702, 1702, 1702, 1702, 1702, 1702],
+    "the zero-radius glows are still zero at scale 9, on the cloud bank");
 });
 
 test("the log panel no longer claims the transform is composed in the shell", () => {
@@ -771,4 +860,995 @@ test("the shell's invoice is the UPSTREAM one, summed over the pack the same way
     "reportArenaEffects sums per linkage");
   assert.match(code, /propInvoiceFor\(pack, \{ linkage, frame \}\)/,
     "out of the upstream invoice, per frame, exactly as above");
+});
+
+/* ------------------------------------------------------------------ */
+/* THE ENCLOSING GROUPS, COMPOSITED                                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THE SHELL'S OWN FUNCTIONS ARE LIFTED OUT OF ITS SOURCE AND RUN, WHICH IS
+ *   NOT THE SAME AS RE-IMPLEMENTING THEM HERE.** Node cannot import
+ *   `tools/arena/main.js` — absolute URL specifiers, `document`, `Audio` at
+ *   module scope — so every other test in this file reads the shell as TEXT and
+ *   asserts what it says. Text assertions catch a deletion and are blind to a
+ *   wrong number: `assert.ok(code.includes("filterBleedOf"))` stays green while
+ *   the bleed is a tenth of what it must be.
+ *
+ *   So the group compositor's decisions were written as functions that close
+ *   over NOTHING, and these tests cut them out of the file and execute them.
+ *   A copy of the code in this file would have been a second implementation
+ *   that agrees with itself; this one goes red when the shell changes, which
+ *   is the whole point.
+ *
+ * ► **AND THE LIFT ASSERTS THAT IT ENGAGED, BECAUSE A LIFT THAT RETURNED
+ *   NOTHING WOULD MAKE EVERY TEST BELOW VACUOUS.** `new Function` throws on a
+ *   truncated body, and `liftFromShell` refuses a name it cannot find rather
+ *   than returning `undefined` for it — the shape `assert.equal(X, X)` has in
+ *   this project's own ledger of what has gone wrong here.
+ */
+function shellFunctionSource(code, name) {
+  const at = code.indexOf(`function ${name}(`);
+  if (at < 0) return null;
+  let index = code.indexOf("{", at);
+  if (index < 0) return null;
+  let depth = 0;
+  let mode = "code";
+  let quote = "";
+  for (; index < code.length; index += 1) {
+    const ch = code[index];
+    if (mode === "string") {
+      if (ch === "\\") { index += 1; continue; }
+      if (ch === quote) mode = "code";
+      continue;
+    }
+    if (ch === "\"" || ch === "'" || ch === "`") { quote = ch; mode = "string"; continue; }
+    if (ch === "{") depth += 1;
+    else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) return code.slice(at, index + 1);
+    }
+  }
+  return null;
+}
+
+/** The named functions, cut out of the shell's stripped source and evaluated. */
+function liftFromShell(names) {
+  const source = readShellSource();
+  assert.ok(source, "tools/arena/main.js is tracked and must be readable");
+  const { code, mode } = codeOnly(source);
+  assert.equal(mode, "code", "the comment strip ended outside every comment and string");
+  const parts = [];
+  for (const name of names) {
+    const part = shellFunctionSource(code, name);
+    assert.ok(part, `${name} is declared in tools/arena/main.js as a plain function`);
+    assert.ok(part.length > 60, `${name} came out at ${part.length} chars, which is not a function body`);
+    parts.push(part);
+  }
+  const built = new Function(`${parts.join("\n")}\nreturn { ${names.join(", ")} };`)();
+  for (const name of names) assert.equal(typeof built[name], "function", `${name} evaluated to a function`);
+  return built;
+}
+
+const COMPOSITOR = liftFromShell([
+  "groupRunsOf", "pathBoxOf", "composedMatrix", "boxThrough",
+  "filterBleedOf", "runBoxOf", "bufferRegionOf"
+]);
+
+/** A group record shaped as `props.js` freezes one, for the synthetic cases. */
+function groupRecord(fields = {}) {
+  return {
+    id: 0, path: [], character: null, enclosedBy: null, filter: null,
+    composite: null, blendModeRefused: null, colourMatricesFolded: 0,
+    ops: 0, placements: 0, counts: {}, ...fields
+  };
+}
+
+test("a run ends where the GROUP OBJECT changes, never where its id does", () => {
+  // ► **`props.js` INTERNS ONE RECORD PER GROUP PER FRAME SO THAT IDENTITY IS
+  //   THE QUESTION**, and its own header says a painter flushes on `!==`.
+  //   Comparing `group.id` instead would merge two different groups that happen
+  //   to share an index — which is exactly what happens when one frame's
+  //   operations come from two props, since the index is into each prop's OWN
+  //   `effectGroups`. The two records below are `id: 3` twice on purpose.
+  const first = groupRecord({ id: 3, filter: "blur(2px)" });
+  const second = groupRecord({ id: 3, filter: "blur(9px)" });
+  const { runs, tally } = COMPOSITOR.groupRunsOf([{ group: first }, { group: second }]);
+  assert.equal(runs.length, 2, "two records at one id are two runs, not one");
+  assert.equal(tally.groups, 2);
+  assert.equal(tally.split, 0, "and neither of them is split");
+  assert.deepEqual(runs.map((run) => run.group.filter), ["blur(2px)", "blur(9px)"]);
+});
+
+test("a group with only a colour matrix gets NO buffer, because props.js already folded it", () => {
+  // ► **THE ONE CASE A BUFFER WOULD BE PURE COST.** `props.js` folds a group's
+  //   colour matrices into every fill, stroke and gradient stop — the fold is
+  //   exact per fill for all 150 of this build's group matrices — so such a
+  //   group has nothing left for a painter to do. 274 of the pack's 745 group
+  //   instances are this case — and the sweep below pins that number, because
+  //   this comment said 289 until it was run, which is the count of instances
+  //   whose filter STRING does not move with the scale and is a different
+  //   question one line away. Buffering them anyway would be invisible on a
+  //   screenshot and would cost an offscreen per group per frame.
+  const inert = groupRecord({ id: 1, colourMatricesFolded: 2 });
+  const { runs, tally } = COMPOSITOR.groupRunsOf([{ group: inert }, { group: inert }]);
+  assert.equal(runs.length, 1);
+  assert.equal(runs[0].buffered, false, "nothing to composite");
+  assert.equal(tally.inert, 1, "and it is COUNTED, so the zero-buffer frame is explicable");
+  assert.equal(tally.buffered, 0);
+  assert.equal(tally.direct, 1);
+
+  // A blend mode alone is enough to need one; so is a filter alone.
+  for (const [field, value] of [["composite", "lighten"], ["filter", "blur(1px)"]]) {
+    const live = groupRecord({ id: 2, [field]: value });
+    const plan = COMPOSITOR.groupRunsOf([{ group: live }]);
+    assert.equal(plan.runs[0].buffered, true, `${field} alone needs a buffer`);
+    assert.equal(plan.tally.inert, 0);
+  }
+});
+
+test("an ungrouped operation is its own run and is drawn straight onto the canvas", () => {
+  const group = groupRecord({ id: 7, filter: "blur(2px)" });
+  const { runs, tally } = COMPOSITOR.groupRunsOf([{}, { group }, { group }, { d: "M0 0" }]);
+  assert.deepEqual(runs.map((run) => [run.group ? run.group.id : null, run.from, run.to, run.buffered]), [
+    [null, 0, 1, false],
+    [7, 1, 3, true],
+    [null, 3, 4, false]
+  ]);
+  assert.equal(tally.ops, 4);
+  assert.equal(tally.groupedOps, 2, "the denominator the buffered count is read against");
+  assert.equal(tally.bufferedOps, 2);
+  assert.equal(tally.direct, 2);
+  // Total-ness: a malformed array must not stop the arena being painted.
+  assert.deepEqual(COMPOSITOR.groupRunsOf(null).runs, []);
+  assert.equal(COMPOSITOR.groupRunsOf(undefined).tally.ops, 0);
+  assert.equal(COMPOSITOR.groupRunsOf([null, undefined]).tally.groupedOps, 0);
+});
+
+test("a group whose operations are NOT CONTIGUOUS is counted ONCE, and the real pack has none", () => {
+  // ► **THIS IS THE PER-LEAF MISTAKE AT A COARSER GRAIN.** A group reaching two
+  //   runs is filtered twice, on two buffers, with a seam between them — the
+  //   same class of wrong picture as blurring each path, arrived at from the
+  //   other direction. It cannot happen on this pack (`props.js` emits
+  //   placements in path order), so this synthetic case is the ONLY thing that
+  //   can move the counter and the sweep below is what says the counter is
+  //   quiet rather than dead.
+  const split = groupRecord({ id: 4, filter: "blur(2px)" });
+  const other = groupRecord({ id: 5, composite: "lighten" });
+  const plan = COMPOSITOR.groupRunsOf([
+    { group: split }, { group: other }, { group: split }, { group: split }
+  ]);
+  assert.equal(plan.runs.length, 3, "the group comes back and is a second run");
+  assert.equal(plan.tally.groups, 2, "but it is still two GROUPS");
+  assert.equal(plan.tally.split, 1, "counted once per split group, not once per extra run");
+  assert.equal(plan.tally.buffered, 3, "and all three runs are composited");
+
+  // ► **THREE RUNS OF ONE GROUP IS STILL *ONE* SPLIT GROUP** — the count reads
+  //   against `groups` and cannot exceed it. Below, BOTH groups are
+  //   interleaved, so both are split and the answer is 2 rather than 1: the
+  //   first draft of this assertion said 1 and was counting the first group
+  //   while looking straight at the second.
+  const thrice = COMPOSITOR.groupRunsOf([
+    { group: split }, { group: other }, { group: split }, { group: other }, { group: split }
+  ]);
+  assert.equal(thrice.runs.length, 5, "five runs from two groups");
+  assert.equal(thrice.tally.groups, 2);
+  assert.equal(thrice.tally.split, 2, "and both of them are split, not just the one that repeats most");
+  assert.ok(thrice.tally.split <= thrice.tally.groups, "the count can never exceed its denominator");
+});
+
+test("a NESTED group and a REFUSED blend mode are counted, because neither is drawn right", () => {
+  // ► **ONLY THE INNERMOST RECORD IS COMPOSITED.** `op.group` is the innermost
+  //   and `enclosedBy` walks out; doing it properly needs a stack of buffers,
+  //   and every chain in this build's pack is one deep. So the outer filter of
+  //   a nested pair is silently dropped — which is why it is not silent.
+  const outer = groupRecord({ id: 1, filter: "blur(8px)" });
+  const inner = groupRecord({ id: 2, filter: "blur(2px)", enclosedBy: outer });
+  const refused = groupRecord({ id: 3, composite: null, blendModeRefused: "erase" });
+  const plan = COMPOSITOR.groupRunsOf([{ group: inner }, { group: refused }]);
+  assert.equal(plan.tally.nested, 1, "the outer blur is not drawn and says so");
+  assert.equal(plan.tally.blendRefused, 1, "canvas cannot express `erase`");
+  assert.equal(plan.runs[1].buffered, false,
+    "a refused blend with no filter has nothing canvas can do, so it gets no buffer");
+});
+
+test("the REAL pack's groups: the sky's are contiguous, and the moon is ONE buffer of 56 paths", () => {
+  if (!REAL_PROPS) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE WHOLE PACK, SO THE TWO ZEROS BELOW HAVE A DENOMINATOR.** 745 group
+  //   instances across 302 frames of 12 linkages; 0 split and 0 nested. Both
+  //   counters are exercised by the synthetic cases above, so these zeros are
+  //   the pack being tidy and not the counters being dead.
+  let instances = 0;
+  let split = 0;
+  let nested = 0;
+  let buffered = 0;
+  let inert = 0;
+  for (const linkage of Object.keys(REAL_PROPS.props)) {
+    for (let frame = 1; frame <= propFrameCount(REAL_PROPS, linkage); frame += 1) {
+      const { tally } = COMPOSITOR.groupRunsOf(propOpsFor(REAL_PROPS, { linkage, frame }) ?? []);
+      instances += tally.groups;
+      split += tally.split;
+      nested += tally.nested;
+      buffered += tally.buffered;
+      inert += tally.inert;
+    }
+  }
+  assert.equal(instances, 745, "every group instance the pack reaches, frame by frame");
+  assert.equal(split, 0, "no group's operations are interrupted by another group's");
+  assert.equal(nested, 0, "and no chain is deeper than one");
+  assert.equal(buffered, 471, "the instances that need an offscreen — 464 filtered plus 7 blended");
+  assert.equal(inert, 274, "and the colour-matrix-only ones that do not");
+  assert.equal(buffered + inert, instances, "which partitions the roster exactly");
+
+  // ► **THE ONE GROUP THE WHOLE DESIGN IS FOR.** `sky` frame 150 draws the moon
+  //   as 56 separate paths under a single `drop-shadow`. Per-leaf that is 56
+  //   glows with 56 internal edges; this is ONE run, so it is one buffer and
+  //   one `ctx.filter`.
+  const moon = COMPOSITOR.groupRunsOf(propOpsFor(REAL_PROPS, { linkage: "sky", frame: 150 }));
+  const biggest = moon.runs.filter((run) => run.buffered)
+    .sort((left, right) => (right.to - right.from) - (left.to - left.from))[0];
+  assert.equal(biggest.to - biggest.from, 56, "fifty-six paths in one composite");
+  assert.equal(biggest.group.character, 1728, "character 1728, the moon");
+  assert.match(biggest.group.filter, /^drop-shadow\(/);
+  assert.equal(moon.tally.groups, 4);
+  assert.equal(moon.tally.buffered, 3, "the moon, the cloud bank and the small blur");
+  assert.equal(moon.tally.inert, 1, "and the backdrop's colour matrix, already folded");
+
+  // ► **THE SHIPPED DRESSING, WHICH IS WHAT A SCREENSHOT OF THIS PAGE SHOWS.**
+  //   `?sky=1` is ONE filtered group over ONE operation — so the default
+  //   picture moves by a single 3.16px blur at scale 1, and a reader expecting
+  //   the moon has to ask for `?sky=150`.
+  const shipped = COMPOSITOR.groupRunsOf(propOpsFor(REAL_PROPS, { linkage: "sky", frame: 1 }));
+  assert.equal(shipped.tally.ops, 2);
+  assert.equal(shipped.tally.groups, 2);
+  assert.equal(shipped.tally.buffered, 1);
+  assert.equal(shipped.tally.bufferedOps, 1);
+  assert.equal(shipped.runs.find((run) => run.buffered).group.filter, "blur(3.1623px)");
+
+  // ► **THE PACK'S ONE BLEND MODE, AND IT IS NOT THE SKY.** `bullet_trail`'s
+  //   group carries `lighten` and NO filter, over all four paths of one puff.
+  const puff = COMPOSITOR.groupRunsOf(propOpsFor(REAL_PROPS, { linkage: "bullet_trail", frame: 1 }));
+  assert.equal(puff.tally.groups, 1);
+  assert.equal(puff.tally.buffered, 1);
+  assert.equal(puff.tally.bufferedOps, 4);
+  assert.equal(puff.runs[0].group.composite, "lighten");
+  assert.equal(puff.runs[0].group.filter, null, "a blend mode with nothing to filter");
+  assert.equal(puff.runs[0].group.blendModeRefused, null);
+});
+
+test("per-leaf and per-group COINCIDE for 286 of the pack's 745 groups, and it is still not taken", () => {
+  if (!REAL_PROPS) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE BRIEF ASKED WHICH CASES COINCIDE, AND THE ANSWER IS A REAL ONE.** A
+  //   group over exactly ONE unclipped path IS its own composite, so setting
+  //   `ctx.filter` around that one fill draws the same image as rasterising and
+  //   filtering it. Measured here rather than argued: 286 of the 745 group
+  //   instances are a single filtered operation, and NONE of the 286 carries a
+  //   clip. The shell buffers them anyway, and this is the reason:
+  //
+  //   a per-leaf `ctx.filter` is set while the canvas transform carries
+  //   `fit.scale * layer.scale` and the placement's own matrix, and whether
+  //   `ctx.filter` lengths are scaled by the transform is an UNMEASURED
+  //   hypothesis (`filters.js` says so in its own header, and there is no
+  //   browser on this route). Compositing the buffer at the IDENTITY transform
+  //   makes the two readings of that hypothesis the same reading. Taking the
+  //   shortcut for these 286 would make a quarter of the pack's groups depend
+  //   on a fact nobody here has measured, to save an offscreen.
+  let single = 0;
+  let singleClipped = 0;
+  let multi = 0;
+  for (const linkage of Object.keys(REAL_PROPS.props)) {
+    for (let frame = 1; frame <= propFrameCount(REAL_PROPS, linkage); frame += 1) {
+      for (const run of COMPOSITOR.groupRunsOf(propOpsFor(REAL_PROPS, { linkage, frame }) ?? []).runs) {
+        if (!run.buffered || !run.group.filter) continue;
+        if (run.to - run.from === 1) {
+          single += 1;
+          if (propOpsFor(REAL_PROPS, { linkage, frame })[run.from].clip) singleClipped += 1;
+        } else {
+          multi += 1;
+        }
+      }
+    }
+  }
+  assert.equal(single, 286, "single-operation filtered groups, where the two pictures coincide");
+  assert.equal(singleClipped, 0, "and not one of them is clipped, which is what makes them coincide");
+  assert.equal(multi, 178, "the filtered groups where they do NOT coincide");
+  assert.equal(single + multi, 464, "and together they are every filtered instance");
+
+  // ► **AND THE CASE THAT BREAKS THE SHORTCUT EVEN WITHOUT THE HYPOTHESIS.**
+  //   Canvas applies `ctx.filter` to the source and clips the RESULT, so a
+  //   per-operation filter on a clipped path is cut off at the cutter's edge
+  //   where the build's blur spills past it. Most of the sky is that case.
+  let underFilter = 0;
+  let clipped = 0;
+  for (let frame = 1; frame <= propFrameCount(REAL_PROPS, "sky"); frame += 1) {
+    for (const op of propOpsFor(REAL_PROPS, { linkage: "sky", frame }) ?? []) {
+      if (!op.group || !op.group.filter) continue;
+      underFilter += 1;
+      if (op.clip) clipped += 1;
+    }
+  }
+  assert.equal(underFilter, 5810, "sky operations sitting under a filtered group");
+  assert.equal(clipped, 4312, "of which this many carry a clip a per-leaf filter would cut");
+});
+
+test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 23 shapes inside it", () => {
+  if (!REAL_PROPS) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE BOX IS READ AS NUMBER PAIRS, AND THAT IS ONLY CORRECT BECAUSE OF
+  //   WHICH COMMANDS OCCUR.** Every path in this pack is M, L, Q and Z, whose
+  //   parameters are all points; a quadratic lies inside the hull of its
+  //   control points, so the pair scan over-estimates a curve and never clips
+  //   one. This walks all 258 paths rather than trusting that.
+  let paths = 0;
+  let unreadable = 0;
+  for (const shape of Object.values(REAL_PROPS.shapes)) {
+    for (const path of shape.paths ?? []) {
+      paths += 1;
+      if (!COMPOSITOR.pathBoxOf(path.d)) unreadable += 1;
+    }
+  }
+  assert.equal(paths, 258, "every path in every shape the pack holds");
+  assert.equal(unreadable, 0, "and the pair scan reads all of them");
+
+  // ► **THE CROSS-CHECK IS THE EXTRACTOR'S OWN `bounds`, WRITTEN BY A DIFFERENT
+  //   CODE PATH, AND IT IS WHAT PROVES THE STROKE PAD NECESSARY.** A stroke is
+  //   centred on its path and reaches outside it, so a box built on the
+  //   coordinates alone is short by up to the stroke's width — on 23 of this
+  //   pack's 56 shapes, measured. A buffer built on that box clips those
+  //   shapes' outlines.
+  //
+  // ► **AND IT GOES THROUGH `runBoxOf`, WHICH OWNS THE PAD, RATHER THAN
+  //   APPLYING THE PAD HERE.** The first draft of this block did its own
+  //   padding and compared the two answers — so it proved that padding works
+  //   and said NOTHING about whether the shell does it. Mutation M4, deleting
+  //   the pad from `runBoxOf` in a scratch copy, left the whole suite green.
+  //   That is this project's signature defect committed in a test written to
+  //   catch it.
+  const identity = [1, 0, 0, 1, 0, 0];
+  let shapes = 0;
+  let shortOfItsOwnBounds = 0;
+  let savedByThePad = 0;
+  for (const shape of Object.values(REAL_PROPS.shapes)) {
+    const bounds = shape.bounds;
+    if (!bounds || !Array.isArray(shape.paths) || shape.paths.length === 0) continue;
+    shapes += 1;
+    const asOps = shape.paths.map((path) => ({
+      d: path.d, matrix: identity, strokeWidth: path.strokeWidth ?? 0
+    }));
+    const box = COMPOSITOR.runBoxOf(asOps, { from: 0, to: asOps.length }, identity, 1);
+    assert.ok(box, "every shape in the pack measures");
+    const short = Math.max(box.minX - bounds.xMin, box.minY - bounds.yMin,
+      bounds.xMax - box.maxX, bounds.yMax - box.maxY);
+    if (short > 0.001) shortOfItsOwnBounds += 1;
+    // What the pad is worth on THIS shape: the unpadded box would have been
+    // short, and the padded one is not.
+    const bare = shape.paths.map((path) => ({ d: path.d, matrix: identity, strokeWidth: 0 }));
+    const bareBox = COMPOSITOR.runBoxOf(bare, { from: 0, to: bare.length }, identity, 1);
+    const bareShort = Math.max(bareBox.minX - bounds.xMin, bareBox.minY - bounds.yMin,
+      bounds.xMax - bareBox.maxX, bounds.yMax - bareBox.maxY);
+    if (bareShort > 0.001 && short <= 0.001) savedByThePad += 1;
+  }
+  assert.equal(shapes, 56, "every shape the pack holds declares bounds");
+  assert.equal(shortOfItsOwnBounds, 0, "and runBoxOf's box contains every one of them");
+  assert.equal(savedByThePad, 23, "23 of which only because the stroke width is added");
+
+  // And the pad is read off the OPERATION, so a wider stroke moves the box.
+  const stroked = [{ d: "M0 0L10 0L10 10L0 10Z", matrix: identity, strokeWidth: 6 }];
+  assert.deepEqual(COMPOSITOR.runBoxOf(stroked, { from: 0, to: 1 }, identity, 1),
+    { minX: -6, minY: -6, maxX: 16, maxY: 16 }, "a 6-wide stroke pushes the box out by 6 on every side");
+
+  // An odd number count is what a command whose parameters are NOT points would
+  // arrive as, and the honest answer is `null` — the caller then uses the whole
+  // surface, which is slow and correct, rather than a box missing a coordinate.
+  assert.equal(COMPOSITOR.pathBoxOf("M0 0L10"), null, "an odd count is refused, not truncated");
+  assert.equal(COMPOSITOR.pathBoxOf(""), null);
+  assert.equal(COMPOSITOR.pathBoxOf(null), null);
+  assert.deepEqual(COMPOSITOR.pathBoxOf("M0 0L10 -4Q20 30 5 5Z"),
+    { minX: 0, minY: -4, maxX: 20, maxY: 30 },
+    "the quadratic's CONTROL point is in the box, which over-estimates and never clips");
+});
+
+test("filterBleedOf bounds the reach of every filter string the pack produces", () => {
+  if (!REAL_PROPS) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE ASYMMETRY IS THE WHOLE ARGUMENT: TOO MUCH PADDING COSTS PIXELS AND
+  //   TOO LITTLE COSTS THE PICTURE.** A CSS Gaussian's support is 3 sigma, and
+  //   `blur(R)` takes R AS sigma while `drop-shadow`'s R is twice sigma — so
+  //   3 x R bounds the reach of either. This checks every distinct string the
+  //   real pack makes, at scale 1, rather than the two in the docstring.
+  const strings = new Set();
+  for (const linkage of Object.keys(REAL_PROPS.props)) {
+    for (let frame = 1; frame <= propFrameCount(REAL_PROPS, linkage); frame += 1) {
+      for (const op of propOpsFor(REAL_PROPS, { linkage, frame }) ?? []) {
+        if (op.group && op.group.filter) strings.add(op.group.filter);
+      }
+    }
+  }
+  assert.equal(strings.size, 211, "the distinct filter strings this pack asks for");
+  let tightest = Infinity;
+  for (const filter of strings) {
+    const lengths = filter.match(/[-+]?[0-9]*[.]?[0-9]+px/g) ?? [];
+    assert.ok(lengths.length > 0, `${filter} states at least one length`);
+    const widest = Math.max(...lengths.map((token) => Math.abs(Number(token.slice(0, token.length - 2)))));
+    const bleed = COMPOSITOR.filterBleedOf(filter);
+    assert.ok(bleed >= 3 * widest, `${filter} needs ${3 * widest}px of room and gets ${bleed}px`);
+    tightest = Math.min(tightest, bleed / (3 * widest));
+  }
+  // The margin at its narrowest, so "it is generous" is a number rather than an
+  // adjective. 1.0889 is `drop-shadow(0px 0px 15px …)`: 49px of padding for
+  // 45px of Gaussian support.
+  assert.ok(tightest > 1.05 && tightest < 1.2, `tightest margin was ${tightest}x`);
+
+  assert.equal(COMPOSITOR.filterBleedOf(null), 0, "no filter, no bleed");
+  assert.equal(COMPOSITOR.filterBleedOf(""), 0);
+  assert.equal(COMPOSITOR.filterBleedOf("none"), 0, "and a string with no length in it");
+  // A chained string sums, because the second filter is applied to the first
+  // one's already-spread result.
+  assert.equal(COMPOSITOR.filterBleedOf("blur(2px) blur(3px)"), 19);
+});
+
+test("the buffer region GROWS by the bleed, falls back to the WHOLE surface, and can be empty", () => {
+  // ► **THE FALLBACK IS THE WHOLE SURFACE AND NOT A GUESS AT A SMALLER ONE.**
+  //   `runBoxOf` returns null when it cannot read a path; a painter that
+  //   answered that with a plausible box would clip the run and nothing would
+  //   say so.
+  const everything = COMPOSITOR.bufferRegionOf(null, 4, 800, 600);
+  assert.deepEqual(
+    { x: everything.x, y: everything.y, width: everything.width, height: everything.height },
+    { x: 0, y: 0, width: 800, height: 600 }
+  );
+  assert.equal(everything.clamped, false, "an unmeasurable run is not a clamped one");
+
+  // The bleed is added on EVERY side, or a blur is cut off on the side that
+  // was forgotten — which reads as a straight edge in a soft glow.
+  const grown = COMPOSITOR.bufferRegionOf({ minX: 100, minY: 200, maxX: 140, maxY: 260 }, 10, 800, 600);
+  assert.deepEqual(grown, { x: 90, y: 190, width: 60, height: 80, clamped: false });
+
+  // Clipped by the surface, and it says so: the spill that falls off the canvas
+  // is spill the destination would have cut anyway.
+  const clamped = COMPOSITOR.bufferRegionOf({ minX: -5, minY: 10, maxX: 30, maxY: 40 }, 4, 100, 100);
+  assert.deepEqual(clamped, { x: 0, y: 6, width: 34, height: 38, clamped: true });
+
+  // Entirely off the canvas: an EMPTY region, which the painter skips.
+  const gone = COMPOSITOR.bufferRegionOf({ minX: -500, minY: -500, maxX: -400, maxY: -400 }, 4, 100, 100);
+  assert.equal(gone.width, 0);
+  assert.equal(gone.height, 0);
+
+  // Whole pixels, so a buffer is never asked for a fractional canvas.
+  const snapped = COMPOSITOR.bufferRegionOf({ minX: 10.4, minY: 10.4, maxX: 20.6, maxY: 20.6 }, 0.5, 800, 600);
+  assert.equal(snapped.x, 9, "floored outwards");
+  assert.equal(snapped.width, 13, "and ceiled outwards, so the box is never shaved");
+});
+
+test("runBoxOf is told which painter's twips convention it is measuring, because they differ", () => {
+  // ► **`paintLayerOperation` DIVIDES A PLACEMENT'S TRANSLATION BY 20 AND
+  //   `paintPropOperation` DOES NOT.** That predates the compositor and is left
+  //   alone; what matters here is that a box computed with the wrong divisor
+  //   puts the buffer twenty times too far from the geometry, draws nothing
+  //   into it, and composites an empty rectangle — a layer that silently
+  //   vanishes. The two answers below are the same operation read both ways.
+  const ops = [{ d: "M0 0L10 0L10 10L0 10Z", matrix: [1, 0, 0, 1, 200, 400], strokeWidth: 0 }];
+  const run = { from: 0, to: 1, group: null, buffered: true };
+  const identity = [1, 0, 0, 1, 0, 0];
+  assert.deepEqual(COMPOSITOR.runBoxOf(ops, run, identity, 20),
+    { minX: 10, minY: 20, maxX: 20, maxY: 30 });
+  assert.deepEqual(COMPOSITOR.runBoxOf(ops, run, identity, 1),
+    { minX: 200, minY: 400, maxX: 210, maxY: 410 });
+
+  // ► **ALL FOUR CORNERS THROUGH THE MATRIX, because `paintProp` scales by
+  //   `(k, -k)` and rotates every arrow by its pitch.** A two-corner hull is
+  //   right only for a matrix that maps one diagonal of the box onto the hull
+  //   of all four — which every pure scale, every flip and (as it happens)
+  //   every quarter turn does.
+  //
+  // ► **SO THE FIRST THREE CASES HERE WERE ALL SATISFIED BY THE TWO-CORNER
+  //   VERSION, AND MUTATION M14 PROVED IT** — a square box, a y-flip and a
+  //   quarter turn each came back identical with two corners and the suite
+  //   stayed green. What separates them is a NON-SQUARE box under a rotation
+  //   that is not a multiple of 90 degrees, which is what `[3, 4, -4, 3]` is
+  //   (a 53-degree turn at 5x, chosen so every corner lands on an integer).
+  const oblong = { minX: 0, minY: 0, maxX: 10, maxY: 2 };
+  assert.deepEqual(COMPOSITOR.boxThrough(oblong, [3, 4, -4, 3, 0, 0]),
+    { minX: -8, minY: 0, maxX: 30, maxY: 46 },
+    "the two corners the box is NAMED by map to (0,0) and (22,46), which misses 38 units of it");
+  assert.deepEqual(COMPOSITOR.boxThrough({ minX: -1, minY: -1, maxX: 1, maxY: 1 }, [0, 2, -2, 0, 10, 20]),
+    { minX: 8, minY: 18, maxX: 12, maxY: 22 }, "a quarter turn keeps the box around the shape");
+  const flipped = COMPOSITOR.runBoxOf(ops, run, [2, 0, 0, -2, 0, 0], 1);
+  assert.deepEqual(flipped, { minX: 400, minY: -820, maxX: 420, maxY: -800 },
+    "and a y-flip puts the box above the origin, not below it");
+  const turned = COMPOSITOR.runBoxOf(
+    [{ d: "M0 0L10 0L10 2L0 2Z", matrix: [1, 0, 0, 1, 0, 0], strokeWidth: 0 }],
+    run, [3, 4, -4, 3, 0, 0], 1
+  );
+  assert.deepEqual(turned, { minX: -8, minY: 0, maxX: 30, maxY: 46 },
+    "and runBoxOf carries the four-corner hull, not just boxThrough");
+
+  // The composition is canvas's own: outer, then inner.
+  assert.deepEqual(COMPOSITOR.composedMatrix([2, 0, 0, 2, 5, 5], [1, 0, 0, 1, 3, 4]),
+    [2, 0, 0, 2, 11, 13], "the inner translation is scaled by the outer transform");
+
+  // One unreadable operation loses the whole run's box, which is the safe
+  // direction: the caller uses the whole surface.
+  assert.equal(COMPOSITOR.runBoxOf([{ d: "M0 0L1", matrix: [1, 0, 0, 1, 0, 0] }], run, identity, 1), null);
+  assert.equal(COMPOSITOR.runBoxOf([{ d: "M0 0L1 1", matrix: null }], run, identity, 1), null);
+});
+
+test("the sky's buffer lands where the sky is drawn, at the fit the shell computes", () => {
+  if (!REAL_PROPS) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE BOX IS BUILT FROM THE SAME TRANSFORM CHAIN `paintArenaLayer`
+  //   APPLIES, RE-DERIVED HERE RATHER THAN COPIED FROM IT.** `stageFitFor` then
+  //   the layer's placement then the layer's own scale — and `runBoxOf` is
+  //   handed the product, exactly as the shell hands it `getTransform()` after
+  //   the same three calls. If the shell's chain and this one disagree the box
+  //   is in the wrong place, and this is the only surface that can say so.
+  const fit = stageFitFor({ width: 1280, height: 840 });
+  assert.equal(fit.scale, 2, "a 1280x840 canvas is exactly twice the 640x420 stage");
+  const layers = arenaScreenLayersFor(REAL_PROPS, propOpsFor, null, SS2_ARENA_DRESSING);
+  const sky = layers.find((layer) => layer.prop === "sky");
+  assert.ok(sky, "the pack holds the sky");
+  assert.equal(sky.placement.scale, 1.04, "the one object on the arena frame that is not unscaled");
+
+  const ctm = [
+    fit.scale * sky.placement.scale, 0, 0, fit.scale * sky.placement.scale,
+    fit.offsetX + fit.scale * sky.placement.x,
+    fit.offsetY + fit.scale * sky.placement.y
+  ];
+  const plan = COMPOSITOR.groupRunsOf(sky.ops);
+  const run = plan.runs.find((candidate) => candidate.buffered);
+  const box = COMPOSITOR.runBoxOf(sky.ops, run, ctm, 20);
+  assert.ok(box, "the filtered run measures");
+  // The blurred object is the sky's own cloud layer: it spans the stage and
+  // then some, which is why the region below comes back clamped to the canvas.
+  const region = COMPOSITOR.bufferRegionOf(box, COMPOSITOR.filterBleedOf(run.group.filter), 1280, 840);
+  assert.ok(region.width > 0 && region.height > 0, "and it is on the canvas");
+  assert.ok(region.width <= 1280 && region.height <= 840, "never larger than the surface");
+  // ► **THE BUFFER IS A BAND, NOT THE WHOLE CANVAS, AND THAT IS THE WHOLE
+  //   POINT OF MEASURING THE BOX.** The blurred object at the shipped dressing
+  //   is a cloud layer 1256 x 272 device pixels in a 1280 x 840 canvas — 39% of
+  //   the area a canvas-sized buffer would clear and filter every frame. It
+  //   overhangs left, right and top, so the region comes back CLAMPED: the
+  //   spill it loses is spill the destination would have cut anyway.
+  assert.deepEqual(
+    { x: region.x, y: region.y, width: region.width, height: region.height },
+    { x: 24, y: 20, width: 1256, height: 272 },
+    "the sky's blurred layer is a band across the top of the stage"
+  );
+  assert.equal(region.clamped, true, "clipped by the canvas on at least one side, and it says so");
+  assert.ok(region.width * region.height < 1280 * 840 * 0.5,
+    "less than half the work a canvas-sized buffer would do");
+
+  // ► **AND THE SAME RUN AT A SMALLER CANVAS, so the numbers above are not a
+  //   property of one size.** Halve the canvas and the region halves with it.
+  const small = stageFitFor({ width: 640, height: 420 });
+  const smallCtm = [
+    small.scale * sky.placement.scale, 0, 0, small.scale * sky.placement.scale,
+    small.offsetX + small.scale * sky.placement.x,
+    small.offsetY + small.scale * sky.placement.y
+  ];
+  const smallBox = COMPOSITOR.runBoxOf(sky.ops, run, smallCtm, 20);
+  assert.ok(smallBox.maxX - smallBox.minX < (box.maxX - box.minX) * 0.55,
+    "half the stage scale is about half the box");
+});
+
+test("the shell composites at the IDENTITY transform, and sets no filter per operation", () => {
+  const source = readShellSource();
+  assert.ok(source, "tools/arena/main.js is tracked and must be readable");
+  const { code } = codeOnly(source);
+
+  // ► **THE FOUR LINES THAT ARE THE WHOLE COMPOSITE, PINNED IN ORDER.** Setting
+  //   the transform to the identity BEFORE the filter and the draw is what makes
+  //   `filters.js`'s unmeasured "are ctx.filter lengths scaled by setTransform"
+  //   hypothesis stop mattering: under the identity the two readings are one
+  //   reading. Drawing the buffer back under the layer's own transform would put
+  //   the whole question back, and would also scale the buffer's pixels twice.
+  assert.ok(code.includes(
+    "    context.setTransform(1, 0, 0, 1, 0, 0);\n"
+    + "    context.globalAlpha = 1;\n"
+    + "    if (run.group.filter) context.filter = run.group.filter;\n"
+    + "    if (run.group.composite) context.globalCompositeOperation = run.group.composite;\n"
+    + "    context.drawImage("
+  ), "the composite is identity-transformed, then filtered, then blended, then drawn");
+
+  // ► **AND THE FILTER IS SET NOWHERE ELSE THAT COULD REACH AN OPERATION.**
+  //   `context.filter` appears in the probe (which draws into its own save/
+  //   restore and never touches the arena), on the buffer's reset, and once in
+  //   the composite. A fifth occurrence inside `paintLayerOperation` or
+  //   `paintPropOperation` is the per-leaf picture arriving by habit.
+  for (const painter of ["paintLayerOperation", "paintPropOperation"]) {
+    const body = shellFunctionSource(code, painter);
+    assert.ok(body, `${painter} is declared`);
+    assert.equal(countOf(body, "filter"), 0, `${painter} sets no filter on an operation`);
+    assert.equal(countOf(body, "globalCompositeOperation"), 0,
+      `${painter} sets no blend mode on an operation`);
+  }
+
+  // The destination swap, and the belt to its braces.
+  assert.ok(code.includes("const surface = canvas.getContext(\"2d\");\nlet context = surface;"),
+    "`context` is rebindable and `surface` is the canvas it must come back to");
+  assert.ok(code.includes("    } finally {\n      groupDepth -= 1;\n      context = destination;\n    }"),
+    "the rebinding is undone in a finally, not after the loop");
+  assert.ok(shellFunctionSource(code, "render").includes("context = surface;"),
+    "and every frame re-asserts the invariant before it draws anything");
+
+  // ► **THE ESCAPE HATCH IS THE MEASUREMENT.** The only check on any of this is
+  //   a screenshot, and one picture says nothing; `?groups=0` is the other half
+  //   of the pair.
+  assert.ok(code.includes("params.get(\"groups\") !== \"0\""), "`?groups=0` turns the compositor off");
+
+  // ► **AND THE COUNT FOR WHAT `?groups=0` COSTS IS PINNED AS TEXT, WHICH IS
+  //   WEAKER THAN THE REST OF THIS FILE AND IS SAID SO.** `notComposited` only
+  //   moves when the compositor is OFF — by the flag, or on a browser with no
+  //   `ctx.getTransform` — and that branch lives in `paintGroupRuns`, which
+  //   touches the DOM and cannot be lifted out. Mutation M20 killed the
+  //   increment and every value assertion in this file stayed green; this line
+  //   is the only thing that sees it. A reader should know that "the escape
+  //   hatch reports what it skipped" rests on a `includes`, not on a number.
+  assert.ok(code.includes("if (run.buffered) groupPaint.notComposited += run.to - run.from;"),
+    "turning the compositor off still COUNTS the operations it stopped compositing");
+});
+
+test("the shell says out loud that the UI bar's own glows are NOT drawn", () => {
+  const source = readShellSource();
+  assert.ok(source, "tools/arena/main.js is tracked and must be readable");
+  const { code } = codeOnly(source);
+  assert.ok(code.includes("propEffectsUnreachable(pack)"),
+    "the per-pack count of filters that reach no shape at all");
+  assert.match(code, /the UI bar's own glows are NOT drawn/,
+    "and it is in the log line, not only in a comment");
+  assert.match(code, /group matrix\(es\) NOT in the pack/,
+    "as is the 363 group matrices a radius cannot be scaled by");
+
+  if (!REAL_PROPS) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_PROPS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **TWO GLOWS, ON TWO TEXT FIELDS, ON ONE PROP — AND NO RENDERER CAN DRAW
+  //   THEM FROM THIS PACK.** Characters 1527 and 1528 are `DefineEditText`
+  //   fields on `panel`; the extractor drops a drawable it cannot turn into
+  //   paths and drops their filters with them, so there is no shape for a glow
+  //   to sit on. Every count in `propInvoiceFor` is honestly zero about them,
+  //   which is exactly why the bar must not be logged as complete.
+  const unreachable = propEffectsUnreachable(REAL_PROPS);
+  assert.equal(unreachable.props, 1, "one prop lost something");
+  assert.equal(unreachable.placements, 2, "two text fields");
+  assert.equal(unreachable.filters, 2);
+  assert.deepEqual(unreachable.byType, { glow: 2 }, "both of them glows");
+  // And the denominator that says this is not everything the pack lost: the
+  // bar's own four plate operations are all still there.
+  const panel = arenaScreenLayersFor(REAL_PROPS, propOpsFor, null, SS2_ARENA_DRESSING)
+    .find((layer) => layer.prop === "panel");
+  assert.equal(panel.ops.length, 4, "the plate is drawn; it is the WORDS' glows that are not");
+  assert.equal(panel.ops.filter((op) => op.group).length, 0, "and no group reaches the bar at all");
+});
+
+/**
+ * A RECORDING 2D CONTEXT, so the DOM-touching half of the compositor can be run
+ * in node as well.
+ *
+ * ► **EVERYTHING ABOVE THIS POINT TESTS FUNCTIONS THAT TOUCH NOTHING, AND THE
+ *   DEFECTS THIS FILE EXISTS FOR WERE NEVER IN THOSE.** `paintGroupRuns` is
+ *   where the buffer is sized, the transform copied, the destination swapped
+ *   and the composite issued — six live defects in three days came out of code
+ *   shaped like that, and a text assertion cannot see any of it. So the shell's
+ *   own `paintGroupRuns`, `groupBufferAt` and `groupCompositingAvailable` are
+ *   lifted out with the pure helpers and run against a context that records
+ *   what it was asked to do.
+ *
+ *   It tracks the TRANSFORM for real — a 2x3 matrix with a save/restore stack —
+ *   because "is the buffer drawn at the same place the canvas would have drawn
+ *   it" is the question, and a double that only counted calls could not answer
+ *   it.
+ */
+function recordingContext(label, journal) {
+  let matrix = [1, 0, 0, 1, 0, 0];
+  const stack = [];
+  const compose = (outer, inner) => [
+    outer[0] * inner[0] + outer[2] * inner[1], outer[1] * inner[0] + outer[3] * inner[1],
+    outer[0] * inner[2] + outer[2] * inner[3], outer[1] * inner[2] + outer[3] * inner[3],
+    outer[0] * inner[4] + outer[2] * inner[5] + outer[4], outer[1] * inner[4] + outer[3] * inner[5] + outer[5]
+  ];
+  const context = {
+    label, filter: "none", globalAlpha: 1, globalCompositeOperation: "source-over",
+    fillStyle: null, strokeStyle: null, lineWidth: 0, lineJoin: null,
+    getTransform: () => ({ a: matrix[0], b: matrix[1], c: matrix[2], d: matrix[3], e: matrix[4], f: matrix[5] }),
+    setTransform: (...args) => {
+      if (args.length === 1) {
+        const given = args[0];
+        matrix = [given.a, given.b, given.c, given.d, given.e, given.f];
+      } else {
+        matrix = args.slice(0, 6);
+      }
+    },
+    transform: (...args) => { matrix = compose(matrix, args); },
+    translate: (x, y) => { matrix = compose(matrix, [1, 0, 0, 1, x, y]); },
+    scale: (x, y) => { matrix = compose(matrix, [x, 0, 0, y, 0, 0]); },
+    rotate: () => {},
+    save: () => stack.push({
+      matrix: matrix.slice(), filter: context.filter,
+      alpha: context.globalAlpha, blend: context.globalCompositeOperation
+    }),
+    restore: () => {
+      const saved = stack.pop();
+      if (!saved) return;
+      matrix = saved.matrix;
+      context.filter = saved.filter;
+      context.globalAlpha = saved.alpha;
+      context.globalCompositeOperation = saved.blend;
+    },
+    clearRect: () => {},
+    clip: () => {},
+    fill: () => {},
+    stroke: () => {},
+    drawImage: (image, ...args) => journal.push({
+      into: label, from: image.label, args,
+      matrix: matrix.slice(), filter: context.filter,
+      blend: context.globalCompositeOperation, alpha: context.globalAlpha
+    })
+  };
+  return context;
+}
+
+function recordingCanvas(label, journal, width, height) {
+  const context = recordingContext(label, journal);
+  let wide = width;
+  let tall = height;
+  return {
+    label,
+    getContext: () => context,
+    get width() { return wide; },
+    set width(value) { wide = value; },
+    get height() { return tall; },
+    set height(value) { tall = value; }
+  };
+}
+
+/** The shell's compositor, wired to recording canvases. */
+function compositorHarness({ width = 1280, height = 840, compositing = true } = {}) {
+  const source = readShellSource();
+  assert.ok(source, "tools/arena/main.js is tracked and must be readable");
+  const { code } = codeOnly(source);
+  const names = [
+    "groupRunsOf", "pathBoxOf", "composedMatrix", "boxThrough", "filterBleedOf",
+    "runBoxOf", "bufferRegionOf", "groupBufferAt", "groupCompositingAvailable", "paintGroupRuns"
+  ];
+  const parts = names.map((name) => {
+    const part = shellFunctionSource(code, name);
+    assert.ok(part, `${name} is declared in tools/arena/main.js as a plain function`);
+    return part;
+  });
+  const journal = [];
+  const logLines = [];
+  const offscreens = [];
+  const canvas = recordingCanvas("destination", journal, width, height);
+  const groupPaint = {
+    ops: 0, groupedOps: 0, runs: 0, groups: 0, buffers: 0, bufferedOps: 0, direct: 0,
+    inert: 0, offscreen: 0, groupsSplit: 0, groupsNested: 0, groupsBlendRefused: 0,
+    boxUnknown: 0, boxClamped: 0, filterAtStageScale: 0, notComposited: 0
+  };
+  // `context` and `groupDepth` are REASSIGNED by `paintGroupRuns`, so they have
+  // to be `let` in the scope the lifted bodies close over — which is what makes
+  // this a test of the shell's rebinding rather than of a copy of it.
+  const built = new Function(
+    "destinationContext", "canvas", "document", "log", "groupPaint", "GROUP_COMPOSITING",
+    `let context = destinationContext;
+     let groupDepth = 0;
+     let groupCompositingAnswer = null;
+     const groupBuffers = [];
+     ${parts.join("\n")}
+     return {
+       paintGroupRuns,
+       contextLabel: () => context.label,
+       currentTransform: () => context.getTransform(),
+       depth: () => groupDepth
+     };`
+  )(
+    canvas.getContext("2d"),
+    canvas,
+    {
+      createElement: () => {
+        const made = recordingCanvas(`buffer${offscreens.length}`, journal, 1, 1);
+        offscreens.push(made);
+        return made;
+      }
+    },
+    (message) => logLines.push(message),
+    groupPaint,
+    compositing
+  );
+  return { ...built, canvas, context: canvas.getContext("2d"), journal, logLines, groupPaint, offscreens };
+}
+
+test("a buffered run is drawn into an OFFSCREEN, at the same device place the canvas would have", () => {
+  const harness = compositorHarness();
+  const blurred = groupRecord({ id: 1, character: 9, filter: "blur(4px)" });
+  const blended = groupRecord({ id: 2, character: 8, composite: "lighten" });
+  const square = "M0 0L100 0L100 100L0 100Z";
+  const ops = [
+    { d: square, matrix: [1, 0, 0, 1, 0, 0], strokeWidth: 0 },
+    { d: square, matrix: [1, 0, 0, 1, 4000, 2000], strokeWidth: 0, group: blurred },
+    { d: square, matrix: [1, 0, 0, 1, 5200, 2000], strokeWidth: 0, group: blurred },
+    { d: square, matrix: [1, 0, 0, 1, 12000, 8000], strokeWidth: 0, group: blended }
+  ];
+
+  // The transform `paintArenaLayer` would be holding: the stage fit, then the
+  // layer's placement.
+  harness.context.setTransform(1, 0, 0, 1, 0, 0);
+  harness.context.translate(10, 20);
+  harness.context.scale(2, 2);
+
+  const drawn = [];
+  harness.paintGroupRuns(ops, { translationDivisor: 20, filtersScaled: true }, () => {
+    drawn.push({ into: harness.contextLabel(), depth: harness.depth() });
+  });
+
+  // ► **THE UNGROUPED OPERATION GOES ON THE CANVAS AND THE GROUPED ONES DO
+  //   NOT.** If this ever reads `["destination", "destination", ...]` the
+  //   buffers are being made and thrown away, and the picture is the one that
+  //   was there before any of this existed.
+  assert.deepEqual(drawn.map((entry) => entry.into),
+    ["destination", "buffer0", "buffer0", "buffer0"]);
+  assert.deepEqual(drawn.map((entry) => entry.depth), [0, 1, 1, 1],
+    "the depth is raised while a buffer is being filled, so a nested run could not reuse it");
+  assert.equal(harness.contextLabel(), "destination",
+    "and the destination is restored when the last run is done");
+
+  // ► **TWO COMPOSITES, EACH AT THE IDENTITY TRANSFORM.** The blur's region is
+  //   the two squares' device box (410,220)-(730,420) grown by
+  //   `filterBleedOf("blur(4px)")` = 16 on every side; the blend's carries no
+  //   bleed at all and is clipped by the right and bottom edges of the canvas.
+  assert.equal(harness.journal.length, 2, "one drawImage per buffered run, and not one per operation");
+  const [blurComposite, blendComposite] = harness.journal;
+  assert.deepEqual(blurComposite.matrix, [1, 0, 0, 1, 0, 0],
+    "the buffer goes back at the IDENTITY transform, not under the layer's");
+  assert.equal(blurComposite.filter, "blur(4px)");
+  assert.equal(blurComposite.blend, "source-over", "a filter is not a blend mode");
+  assert.equal(blurComposite.alpha, 1);
+  assert.deepEqual(blurComposite.args, [0, 0, 352, 232, 394, 204, 352, 232],
+    "the whole buffer, back at the region it was measured from");
+  assert.equal(blendComposite.filter, "none", "this group has nothing to filter");
+  assert.equal(blendComposite.blend, "lighten", "and canvas's name for SWF blend mode 5");
+  assert.deepEqual(blendComposite.args, [0, 0, 70, 20, 1210, 820, 70, 20],
+    "clipped by the canvas's right and bottom edges");
+
+  assert.equal(harness.groupPaint.buffers, 2);
+  assert.equal(harness.groupPaint.bufferedOps, 3);
+  assert.equal(harness.groupPaint.direct, 1);
+  assert.equal(harness.groupPaint.boxClamped, 1, "one of the two regions ran off the canvas");
+  assert.equal(harness.groupPaint.filterAtStageScale, 0, "the caller said the radii were scaled");
+});
+
+test("the buffer's transform is the destination's, shifted by the region — or the run lands nowhere", () => {
+  // ► **THIS IS THE DEFECT A SCREENSHOT WOULD SHOW AS AN EMPTY LAYER.** The
+  //   operations are drawn into a buffer whose origin is the region's top-left,
+  //   so the buffer's transform has to be the destination's with that origin
+  //   subtracted. Get it wrong and the geometry is drawn off the edge of a
+  //   correctly-sized buffer, and a correctly-placed empty rectangle is
+  //   composited over the canvas.
+  const harness = compositorHarness();
+  const group = groupRecord({ id: 1, filter: "blur(4px)" });
+  const ops = [{ d: "M0 0L100 0L100 100L0 100Z", matrix: [1, 0, 0, 1, 4000, 2000], strokeWidth: 0, group }];
+  harness.context.setTransform(1, 0, 0, 1, 0, 0);
+  harness.context.translate(10, 20);
+  harness.context.scale(2, 2);
+  const outer = harness.context.getTransform();
+
+  let inside = null;
+  harness.paintGroupRuns(ops, { translationDivisor: 20, filtersScaled: true }, () => {
+    // The transform the BUFFER is holding at the moment an operation is drawn
+    // into it — read off the same context `paintPropOperation` would be using.
+    const held = harness.currentTransform();
+    inside = [held.a, held.b, held.c, held.d, held.e, held.f];
+  });
+  const region = harness.journal[0].args;
+
+  // ► **AND THE OFFSCREEN IS ACTUALLY THE REGION'S SIZE**, which mutation M28
+  //   showed nothing was checking: with the resize deleted, `groupBufferAt`
+  //   handed back the 1x1 canvas `document.createElement` makes and every
+  //   buffered run was clipped to a single pixel — composited at the right
+  //   place, at the right size, holding nothing. The whole suite stayed green.
+  assert.equal(harness.offscreens.length, 1, "one offscreen, reused");
+  assert.equal(harness.offscreens[0].width, region[2], "sized to the region's width");
+  assert.equal(harness.offscreens[0].height, region[3], "and to its height");
+
+  assert.deepEqual(inside.slice(0, 4), [outer.a, outer.b, outer.c, outer.d],
+    "the scale and rotation are the destination's, untouched");
+  assert.deepEqual([inside[4], inside[5]], [outer.e - region[4], outer.f - region[5]],
+    "and the translation is the destination's minus the region's origin");
+
+  // The op's own device position inside the buffer, worked out end to end: the
+  // square's top-left is at (410,220) on the canvas and the region starts at
+  // (394,204), so it must land at (16,16) in the buffer — the bleed, exactly.
+  const placed = COMPOSITOR.composedMatrix(inside, [1, 0, 0, 1, 4000 / 20, 2000 / 20]);
+  assert.deepEqual([placed[4], placed[5]], [16, 16],
+    "which puts the geometry one bleed in from the buffer's edge on every side");
+});
+
+test("?groups=0 draws every operation straight onto the canvas, and COUNTS what it skipped", () => {
+  // ► **THE ESCAPE HATCH HAS TO BE THE OLD PICTURE EXACTLY**, or the pair of
+  //   screenshots it exists for compares two new things. No buffer is made, no
+  //   filter is set, every operation reaches the destination.
+  const harness = compositorHarness({ compositing: false });
+  const group = groupRecord({ id: 1, filter: "blur(4px)", composite: "lighten" });
+  const ops = [
+    { d: "M0 0L10 0L10 10L0 10Z", matrix: [1, 0, 0, 1, 0, 0], strokeWidth: 0, group },
+    { d: "M0 0L10 0L10 10L0 10Z", matrix: [1, 0, 0, 1, 0, 0], strokeWidth: 0, group }
+  ];
+  const drawn = [];
+  harness.paintGroupRuns(ops, { translationDivisor: 20, filtersScaled: true }, () => {
+    drawn.push(harness.contextLabel());
+  });
+  assert.deepEqual(drawn, ["destination", "destination"]);
+  assert.equal(harness.journal.length, 0, "nothing was composited");
+  assert.equal(harness.groupPaint.buffers, 0);
+  assert.equal(harness.groupPaint.notComposited, 2, "and the two operations it skipped are counted");
+  assert.deepEqual(harness.logLines, [
+    "groups: ?groups=0 — filters and blends are NOT drawn, on purpose."
+  ], "said once, in the panel a screenshot catches");
+});
+
+test("an unmeasurable run falls back to the WHOLE canvas rather than a plausible box", () => {
+  // ► **`runBoxOf` RETURNS NULL AND THE PAINTER MUST NOT GUESS.** A path whose
+  //   coordinates cannot be read as pairs is what a command letter this
+  //   extractor has never emitted would look like; the safe answer is slow, and
+  //   the unsafe one is a layer clipped to a rectangle nobody chose.
+  const harness = compositorHarness({ width: 400, height: 300 });
+  const group = groupRecord({ id: 1, filter: "blur(1px)" });
+  const ops = [{ d: "M0 0A50 50 0 0 1 10 10", matrix: [1, 0, 0, 1, 0, 0], strokeWidth: 0, group }];
+  harness.paintGroupRuns(ops, { translationDivisor: 20, filtersScaled: true }, () => {});
+  assert.equal(harness.groupPaint.boxUnknown, 1, "and it says it could not measure the run");
+  assert.deepEqual(harness.journal[0].args, [0, 0, 400, 300, 0, 0, 400, 300],
+    "so the buffer is the whole surface");
+  assert.equal(harness.groupPaint.boxClamped, 0, "an unmeasurable run is not a clamped one");
+});
+
+test("a run entirely off the canvas is SKIPPED, and the skip is counted rather than silent", () => {
+  const harness = compositorHarness({ width: 400, height: 300 });
+  const group = groupRecord({ id: 1, composite: "lighten" });
+  const ops = [{ d: "M0 0L10 0L10 10L0 10Z", matrix: [1, 0, 0, 1, -20000, -20000], strokeWidth: 0, group }];
+  let drew = 0;
+  harness.paintGroupRuns(ops, { translationDivisor: 20, filtersScaled: true }, () => { drew += 1; });
+  assert.equal(drew, 0, "nothing is drawn for a run nobody can see");
+  assert.equal(harness.journal.length, 0, "and nothing is composited");
+  assert.equal(harness.groupPaint.offscreen, 1, "counted, because this is the one branch that draws NOTHING");
+  assert.equal(harness.groupPaint.buffers, 0);
+});
+
+test("a filter that reached paintProp's route at scale 1 is COUNTED, because the camera would be in it", () => {
+  // ► **THE ONE THING THAT WOULD MAKE EVERY BLUR ON A PROP THE WRONG WIDTH.**
+  //   `arrowOpsFor`, `arrowTrailOpsFor`, `arenaSceneryFor` and `drawDrops` all
+  //   call `propOpsFor` inside `props.js` with no scale, while `paintProp` draws
+  //   at `size * view.scale` and `view.scale` carries the camera's zoom. No
+  //   group on that route carries a filter in this build — `bullet_trail`'s has
+  //   a blend mode and nothing else — so the counter is 0, and it exists so
+  //   that a pack where that changes is loud instead of soft-edged.
+  const harness = compositorHarness();
+  const filtered = groupRecord({ id: 1, filter: "blur(4px)" });
+  const blended = groupRecord({ id: 2, composite: "lighten" });
+  const ops = [
+    { d: "M0 0L10 0L10 10L0 10Z", matrix: [1, 0, 0, 1, 100, 100], strokeWidth: 0, group: filtered },
+    { d: "M0 0L10 0L10 10L0 10Z", matrix: [1, 0, 0, 1, 100, 100], strokeWidth: 0, group: blended }
+  ];
+  harness.paintGroupRuns(ops, { translationDivisor: 1, filtersScaled: false }, () => {});
+  assert.equal(harness.groupPaint.filterAtStageScale, 1,
+    "the filtered operation is counted; the blended one has no length to get wrong");
+  assert.equal(harness.groupPaint.buffers, 2, "both are still composited, at whatever radius they carry");
 });

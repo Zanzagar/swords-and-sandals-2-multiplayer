@@ -42,6 +42,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { canvasFilterFor } from "../src/render/filters.js";
 import {
   SCREEN_CHROME,
   SCREEN_CHROME_DEPTHS,
@@ -298,6 +299,46 @@ const SHAPES = Object.freeze({
   17: { character: 17, paths: [] }
 });
 
+/* ------------------------------------------------------------------ */
+/* FILTERS, in the shape `tools/swf-display-list.mjs` decodes them      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **EVERY FIELD BELOW IS THE ORACLE'S OWN, COPIED OUT OF
+ *   `assets/screens/screens.json` RATHER THAN INVENTED**, so the strings these
+ *   produce are the strings the build produces. `GLOW_ORANGE` is `splash`'s
+ *   character 1509 at [52,1]; `INNER_BEVEL` is the bevel beside it on the same
+ *   list — one of the 54 in the build, all inner, all refused. `BLUR_4`'s
+ *   radii are `townsquare`'s [3] and `GLOW_ZERO` is the strength-0 shape that
+ *   277 of the build's 853 glows share with it.
+ */
+const GLOW_ORANGE = {
+  type: "glow", filterId: 2, colour: { red: 255, green: 153, blue: 0, alpha: 255 },
+  blurX: 5, blurY: 5, strength: 10, inner: false, knockout: false, compositeSource: true, passes: 1
+};
+const INNER_BEVEL = {
+  type: "bevel", filterId: 3,
+  highlightColour: { red: 255, green: 255, blue: 255, alpha: 255 },
+  shadowColour: { red: 0, green: 0, blue: 0, alpha: 255 },
+  blurX: 0, blurY: 0, angle: 0.7853851318359375, distance: 4, strength: 1,
+  inner: true, knockout: false, compositeSource: true, onTop: false, passes: 2
+};
+const BLUR_4 = { type: "blur", filterId: 1, blurX: 4, blurY: 4, passes: 1 };
+const GLOW_ZERO = {
+  type: "glow", filterId: 2, colour: { red: 255, green: 255, blue: 255, alpha: 255 },
+  blurX: 6, blurY: 6, strength: 0, inner: false, knockout: false, compositeSource: true, passes: 1
+};
+/** A greyscale matrix in FLASH's coefficients, which is why no CSS shorthand fits it. */
+const MATRIX_GREY = {
+  type: "colourMatrix", filterId: 6,
+  matrix: [
+    0.3086, 0.6094, 0.082, 0, 0,
+    0.3086, 0.6094, 0.082, 0, 0,
+    0.3086, 0.6094, 0.082, 0, 0,
+    0, 0, 0, 1, 0
+  ]
+};
+
 const ALPHA_ZERO = { redMultiplier: 1, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 0, redOffset: 0, greenOffset: 0, blueOffset: 0, alphaOffset: 0 };
 const BLUE_102 = { redMultiplier: 0, greenMultiplier: 0, blueMultiplier: 0, alphaMultiplier: 1, redOffset: 0, greenOffset: 0, blueOffset: 102, alphaOffset: 0 };
 const HALF_RED = { redMultiplier: 0.5, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 1, redOffset: 0, greenOffset: 0, blueOffset: 0, alphaOffset: 0 };
@@ -472,7 +513,41 @@ function rawPack() {
           path: [45]
         }],
         multiFrameSprites: [{ character: 703, frames: 13 }],
-        filteredPlacements: [{ character: 60, path: [7, 2] }],
+        // ► **THIS ENTRY USED TO BE `{ character: 60, path: [7, 2] }` AND
+        //   CARRIED NO `filters` KEY AT ALL, WHICH IS THE BUG IT HID.**
+        //   `screen.js` read only `entry.path`, so everything the module said
+        //   about filters was invariant under these records being right, wrong
+        //   or absent — and this fixture proved it by being absent and green.
+        //   The five below are chosen to reach every arm of `canvasFilterFor`
+        //   that the real pack reaches, plus the two it does not.
+        filteredPlacements: [
+          // One string and one REFUSAL on the same list, over the single
+          // stroke-only operation at [7,2,1]. The real pack has exactly this
+          // shape twice (`splash` and `new_or_continue` at [52,1]).
+          { character: 60, path: [7, 2], filters: [GLOW_ORANGE, INNER_BEVEL] },
+          // ► **NESTING, BESIDE THE BLEND MODES ON THE SAME TWO PATHS.** The
+          //   outer group is a COLOUR MATRIX over three operations and the
+          //   inner is a BLUR over one of them — `townsquare`'s [59,1] and
+          //   [59,1,8] in miniature. The blend modes at [9] and [9,4] answer
+          //   "innermost wins"; these two must NOT, and having both on one
+          //   pair of paths is what makes a rule copied from the wrong
+          //   neighbour fail here.
+          { character: 70, path: [9], filters: [MATRIX_GREY] },
+          { character: 71, path: [9, 4], filters: [BLUR_4] },
+          // A glow at strength 0: `canvasFilterFor` calls it a no-op, and
+          // nothing is lost because the build draws nothing for it either.
+          // The real pack has three of these, over 24 operations.
+          { character: 72, path: [19], filters: [GLOW_ZERO] },
+          // An EMPTY filter list. The oracle holds five.
+          { character: 73, path: [16], filters: [] }
+        ],
+        // The pack's SECOND filter list, which a roster built from
+        // `filteredPlacements` alone would leave invisible. [45] is the static
+        // text, so this one reaches no operation at all — the same position
+        // all five of the real pack's button records are in.
+        filteredButtonRecords: [
+          { character: 74, path: [45], button: 777, leaf: "text", filters: [GLOW_ORANGE] }
+        ],
         blendedPlacements: [
           { character: 70, path: [9], blendMode: 3 },
           { character: 71, path: [9, 4], blendMode: 9 }
@@ -1180,10 +1255,16 @@ test("filters are counted per OPERATION and matched by path PREFIX, not by root 
   // of its buttons glows, which is a count that lies in the safe-looking
   // direction.
   const record = marketOf();
-  assert.equal(record.approximations.filtersNotApplied, 1);
+  // ► **THIS ASSERTION USED TO READ `filtersNotApplied, 1`.** The count is now
+  //   `opsUnderFilterGroup`, which is the population — operations inside a
+  //   filtered subtree — and `filtersNotApplied` has been narrowed to the ones
+  //   a painter is handed nothing for. Six of the fixture's 26 operations.
+  assert.equal(record.approximations.opsUnderFilterGroup, 6);
+  assert.equal(record.ops.length, 26, "and 26 is the denominator, so the 6 is not the whole screen");
   const filtered = record.ops.filter((op) => op.filtered === true);
-  assert.equal(filtered.length, 1);
-  assert.deepEqual(filtered[0].path, [7, 2, 1]);
+  assert.deepEqual(filtered.map((op) => op.path),
+    [[7, 2, 1], [9, 4, 1], [9, 5], [9, 5], [16, 1], [19, 1]],
+    "by path, not by count: a prefix match that spread to a sibling would keep the count and change this list");
   const sibling = record.ops.find((op) => op.depth === 7 && op.gradient);
   assert.equal(sibling.filtered, undefined, "the sibling at [7,3,1] is not under the filter");
   // ► A placement SHORTER than the prefix is not inside it, and a guard that
@@ -1255,8 +1336,10 @@ test("the extractor's own tally is carried BESIDE this file's, never merged into
   assert.equal(record.approximations.fromPack.staticTextGlyphs, 4);
   assert.equal(record.approximations.fromPack.filters, 1,
     "the extractor counted PLACEMENTS with a filter list");
-  assert.equal(record.approximations.filtersNotApplied, 1,
+  assert.equal(record.approximations.opsUnderFilterGroup, 6,
     "this file counts OPERATIONS under one — a different population, kept separate");
+  assert.equal(record.approximations.filterGroups, 6,
+    "and GROUPS is a third population again: five placements plus one button record, against the extractor's one");
 });
 
 test("the three unresolved kinds reach the caller unchanged", () => {
@@ -1999,4 +2082,643 @@ test("the real pack: the raster rejects 35 of the 42 operations the box admits, 
   assert.deepEqual([...rejectedByShape.entries()].sort((a, b) => a[0] - b[0]), [[645, 26], [1555, 5], [2114, 4]],
     "the 35 it rejects, by character: the border on 26 screens; a black shape on 5 whose box is all but the stage and whose "
     + "fill is 6% of it; and arena_intro's four black shapes at one depth, 4% to 6% each and 8% as a union");
+});
+
+
+/* ------------------------------------------------------------------ */
+/* FILTER GROUPS                                                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THE DEFECT THESE TESTS EXIST FOR: UNTIL 2026-09-15 `screen.js` READ
+ *   `entry.path` OFF `filteredPlacements` AND THREW `entry.filters` AWAY.**
+ *   Every number the module reported about filters was therefore invariant
+ *   under those typed records being right, wrong or absent — and the fixture
+ *   in this file proved it, because its one filtered placement carried no
+ *   `filters` key at all and the suite was green. **A tally that cannot vary
+ *   with the data it describes is not a reading of the data**, which is the
+ *   same argument this file already makes about gradient-stop tinting eight
+ *   hundred lines up.
+ *
+ * ► **AND THE OBVIOUS FIX WOULD HAVE BEEN WORSE THAN THE GAP.** Flash
+ *   rasterises a filtered group and filters the COMPOSITE. Stamping the filter
+ *   string onto each leaf and letting a painter set `ctx.filter` per operation
+ *   blurs `townsquare`'s 1523 paths one at a time, along 1523 internal seams
+ *   the build does not have — a different picture that looks plausible, which
+ *   is the worst kind this project produces. So what is pinned below is the
+ *   GROUP: its range, its nesting, and the fact that no operation carries a
+ *   filter at all.
+ */
+
+/** `market`'s groups, in the order `screenFor` emits them. */
+function marketGroups() {
+  return marketOf().filterGroups;
+}
+
+/** Which operations actually sit under a path, recomputed in the test. */
+function opsUnderPath(record, prefix) {
+  const out = [];
+  record.ops.forEach((op, index) => {
+    if (prefix.length > op.path.length) return;
+    for (let at = 0; at < prefix.length; at += 1) if (op.path[at] !== prefix[at]) return;
+    out.push(index);
+  });
+  return out;
+}
+
+test("a filter group is a SUBTREE: it carries what canvas made of the filters, and names the ops it owns", () => {
+  const record = marketOf();
+  const groups = record.filterGroups;
+  assert.equal(groups.length, 6, "five placements and one button record");
+
+  const glow = groups.find((group) => group.path.join() === "7,2");
+  // ► **BY VALUE, and the value is the build's own.** `GLOW_ORANGE` is copied
+  //   out of `splash`'s character 1509. If `canvasFilterFor` ever stopped
+  //   doubling sigma for `drop-shadow`'s third length — the hazard its own
+  //   header names — this string would read 1.4142px and this assertion, not
+  //   a screenshot, is what says so.
+  assert.equal(glow.filter, "drop-shadow(0px 0px 2.8284px rgba(255, 153, 0, 1))");
+  assert.deepEqual(glow.refused.map((entry) => `${entry.type}:${entry.reason}`),
+    ["bevel:filterHasNoCanvasEquivalent"],
+    "the inner bevel beside it is REFUSED BY NAME — canvas has no bevel and no inset drop-shadow");
+  assert.deepEqual(glow.counts, { total: 2, applied: 1, deferred: 0, noOp: 0, refused: 1, approximated: 1 },
+    "one list, two filters, and the two land in different buckets");
+  assert.deepEqual([...glow.path], [7, 2]);
+  assert.equal(glow.character, 60, "the trail back into the pack");
+  assert.equal(glow.source, "placement");
+
+  // The range, against the operations recomputed here rather than against
+  // itself. `assert.equal(X, X)` is the shape this project has been bitten by.
+  assert.deepEqual(opsUnderPath(record, [7, 2]), [8]);
+  assert.equal(glow.opFirst, 8);
+  assert.equal(glow.opEnd, 9);
+  assert.equal(glow.opCount, 1);
+  assert.equal(glow.ownOpCount, 1, "nothing is nested inside it");
+  assert.equal(glow.contiguous, true);
+  assert.deepEqual(record.ops.slice(glow.opFirst, glow.opEnd).map((op) => op.path), [[7, 2, 1]],
+    "and the range resolves to the operation the path names, which is the only thing the range is for");
+});
+
+test("the 1523-operation case in miniature: a group covers three ops and OWNS two of them", () => {
+  // `townsquare`'s [59,1] covers 1523 of 1638 and has four blur groups inside
+  // it. This is that arrangement at a size a person can read.
+  const record = marketOf();
+  const outer = record.filterGroups.find((group) => group.path.join() === "9");
+  const inner = record.filterGroups.find((group) => group.path.join() === "9,4");
+
+  assert.deepEqual(opsUnderPath(record, [9]), [10, 11, 12]);
+  assert.deepEqual(opsUnderPath(record, [9, 4]), [10]);
+  assert.equal(outer.opCount, 3);
+  assert.equal(inner.opCount, 1);
+  assert.equal(outer.ownOpCount, 2,
+    "the operations the painter draws STRAIGHT into the outer offscreen — the third arrives already filtered");
+  assert.equal(inner.ownOpCount, 1);
+  assert.equal(outer.opFirst <= inner.opFirst && inner.opEnd <= outer.opEnd, true,
+    "a child's range is INSIDE its parent's, which is what lets a painter walk the parent and recurse at the child");
+
+  // ► **A COLOUR MATRIX IS NOT IN THE FILTER STRING, AND THAT IS THE TRAP.**
+  //   `canvasFilterFor` defers it to `applyColourMatrix`; a painter that reads
+  //   `filter` alone finds null here, draws nothing special, and reports that
+  //   it applied the filters. On the real pack that is 1523 operations of
+  //   `townsquare` drawn ungraded.
+  assert.equal(outer.filter, null);
+  assert.equal(outer.colourMatrices.length, 1);
+  assert.deepEqual(outer.deferred.map((entry) => entry.reason), ["applyColourMatrixToTheFill"]);
+  assert.equal(inner.filter, "blur(1.118px)", "and the inner one IS a string: 4/2 radii, averaged, over sqrt(3) per pass");
+});
+
+test("NESTING COMPOSES; the BLEND MODE on the same two paths picks a winner. Both rules, one fixture", () => {
+  // ► **THE TWO QUESTIONS LOOK IDENTICAL AND HAVE OPPOSITE ANSWERS.** A blend
+  //   mode is the compositing operator for one draw, so the innermost is the
+  //   one actually compositing the leaf — `blendFor` says so and is right. A
+  //   filter is a rasterise-then-transform, and the outer group's filter
+  //   applies to the RESULT of the inner one, so neither wins. The fixture
+  //   puts a blend mode and a filter on the SAME two paths, [9] and [9,4], so
+  //   a rule copied from the neighbouring function fails here instead of
+  //   passing everywhere.
+  const record = marketOf();
+  const outer = record.filterGroups.find((group) => group.path.join() === "9");
+  const inner = record.filterGroups.find((group) => group.path.join() === "9,4");
+
+  assert.equal(inner.parent, outer.index, "the filter tree keeps BOTH");
+  assert.deepEqual([...outer.children], [inner.index]);
+  assert.equal(outer.parent, null);
+  assert.deepEqual([...inner.children], []);
+  assert.equal(record.approximations.filterGroupsNested, 1);
+
+  const leaf = record.ops[inner.opFirst];
+  assert.deepEqual([...leaf.path], [9, 4, 1]);
+  assert.equal(leaf.blendMode, 9, "ONE blend mode reaches the leaf, and it is the inner one");
+  assert.equal(record.filterGroups.filter((group) => opsUnderPath(record, [...group.path]).includes(inner.opFirst)).length, 2,
+    "and TWO filter groups reach the same leaf, which is the whole difference between the two rules");
+});
+
+test("NOTHING is stamped on an operation: the only mark is the boolean that cannot be mistaken for a recipe", () => {
+  // ► **A `filterGroup` INDEX ON EACH OP WOULD MAKE THE WRONG PAINTER THE
+  //   EASY ONE TO WRITE** — `for (op of ops) { ctx.filter = groups[op.group].filter; draw(op); }`
+  //   is four words long and blurs 1523 seams that do not exist. The refusal
+  //   is the design, so it is asserted rather than left to habit.
+  const record = marketOf();
+  for (const op of record.ops) {
+    for (const key of ["filter", "filters", "filterGroup", "filterGroups", "colourMatrices", "refused", "deferred"]) {
+      assert.equal(key in op, false, `operation at ${op.path.join(",")} carries \`${key}\``);
+    }
+    if ("filtered" in op) assert.equal(op.filtered, true, "and the one mark it does carry is a bare true");
+  }
+});
+
+test("the five facts `filtersNotApplied` used to add together, each with its denominator", () => {
+  // ► **IT MEANT "NOT APPLIED" AND SOME NOW ARE.** Applied, deferred, refused,
+  //   no-op and unreachable are five different facts, and the single number
+  //   that used to stand for all five reported 9423 on the real pack — which
+  //   read as a defect in this module rather than as a job for a painter.
+  const a = marketOf().approximations;
+
+  assert.equal(a.opsUnderFilterGroup, 6, "the denominator: operations inside a filtered subtree, out of 26");
+  assert.equal(a.opsWithCanvasFilter, 2, "[7,2,1] under the glow and [9,4,1] under the blur");
+  assert.equal(a.opsWithDeferredColourMatrix, 3, "all three under [9], including the one that is also blurred");
+  assert.equal(a.opsUnderRefusedFilter, 1, "the bevel reaches exactly one operation");
+  assert.equal(a.opsUnderNoOpFilterOnly, 2, "the strength-0 glow at [19] and the EMPTY filter list at [16]");
+  assert.equal(a.filtersNotApplied, 2, "operations a painter is handed nothing for");
+  // ► **THE SUBTRACTION IS THE FINDING, NOT EITHER NUMBER.** What is left when
+  //   the harmless no-ops come out is the SILENT loss: an operation under a
+  //   filter canvas refused with nothing else to fall back on. Zero here and
+  //   zero on the real pack — and a bare zero would be indistinguishable from
+  //   a dead counter, which is why it is stated as a difference between two
+  //   counters that are both demonstrably alive.
+  assert.equal(a.filtersNotApplied - a.opsUnderNoOpFilterOnly, 0);
+  // ► **THEY OVERLAP, SO THEY DO NOT PARTITION — and each operation is still
+  //   counted ONCE in each.** [9,4,1] is under the blur AND under the outer
+  //   colour matrix, so it is in two of the four; incrementing per (op, group)
+  //   pair instead of per operation would count it twice in ONE of them and
+  //   inflate the real pack's figures by 40%, the fraction of its operations
+  //   that sit under two filtered ancestors.
+  assert.equal(a.opsWithCanvasFilter + a.opsWithDeferredColourMatrix
+    + a.opsUnderRefusedFilter + a.opsUnderNoOpFilterOnly, 8,
+    "eight category memberships across six operations: the excess IS the overlap");
+  const record = marketOf();
+  const both = record.filterGroups.filter((group) => opsUnderPath(record, [...group.path]).includes(10));
+  assert.deepEqual(both.map((group) => group.path.join()), ["9", "9,4"],
+    "and this is the operation in two of them, named rather than inferred from the arithmetic");
+  assert.equal(a.opsWithDeferredColourMatrix <= a.opsUnderFilterGroup, true,
+    "while no single category can exceed the population it is drawn from");
+
+  assert.equal(a.filterGroups, 6, "the group denominator");
+  assert.equal(a.filterGroupsFromPlacements, 5);
+  assert.equal(a.filterGroupsFromButtonRecords, 1);
+  assert.equal(a.filterGroupsReachingOps, 5);
+  assert.equal(a.filterGroupsReachingNothing, 1);
+  assert.deepEqual(a.filterGroupsReachingNothingByKind, { "text-static": 1 },
+    "BY NAME: 'no filters on this screen' and 'filters that reach nothing I emit' are opposite findings with the same zero");
+  assert.equal(a.filterGroupsNotContiguous, 0);
+
+  assert.deepEqual(
+    [a.filtersTotal, a.filtersApplied, a.filtersDeferredToColourMatrix, a.filtersNoOp, a.filtersRefused],
+    [6, 3, 1, 1, 1],
+    "the filter RECORDS, summed from canvasFilterFor's own buckets rather than recounted");
+  assert.equal(a.filtersApplied + a.filtersDeferredToColourMatrix + a.filtersNoOp + a.filtersRefused, a.filtersTotal,
+    "and those four DO partition, which is the property that would break if a branch stopped counting");
+  assert.deepEqual(a.filtersRefusedByReason, { "bevel:filterHasNoCanvasEquivalent": 1 });
+});
+
+test("the pack's SECOND filter list is in the roster, reaching nothing, and saying so", () => {
+  // ► **A ROSTER BUILT FROM `filteredPlacements` ALONE WOULD HAVE BEEN RIGHT
+  //   ABOUT THE PICTURE AND SILENT ABOUT THE OMISSION**, which is this
+  //   project's standing defect. The real pack holds five of these, all on
+  //   `townsquare`, all `leaf: "text"`, all reaching zero operations.
+  const group = marketGroups().find((entry) => entry.source === "buttonRecord");
+  assert.deepEqual([...group.path], [45]);
+  assert.equal(group.button, 777);
+  assert.equal(group.leaf, "text");
+  assert.equal(group.opCount, 0, "it reaches no shape operation");
+  assert.equal(group.filter, "drop-shadow(0px 0px 2.8284px rgba(255, 153, 0, 1))",
+    "and its filter is real, which is exactly why a roster that dropped it would be lying");
+  assert.deepEqual([...group.unresolvedKinds], ["text-static"],
+    "what it DOES reach, by name, out of this screen's own unresolved list");
+  assert.equal(group.unresolvedUnder, 1);
+});
+
+test("`filter` is the SCALE-1 string; the buckets do not move with scale and `filters` is the record", () => {
+  // ► **`ctx.filter` LENGTHS ARE NOT SCALED BY `ctx.setTransform`** (see
+  //   `filters.js`, which states that this is a hypothesis and why), and
+  //   `stageFitFor` letterboxes the 640x420 stage into whatever the surface
+  //   is, so the scale is almost never 1. Baking one in here would ship every
+  //   blur at the wrong width on every screen. The group therefore carries the
+  //   pack's own records and a painter rebuilds the string.
+  const group = marketGroups().find((entry) => entry.path.join() === "9,4");
+  assert.deepEqual([...group.filters], [BLUR_4], "the pack's record, verbatim, not a re-spelling of it");
+
+  const doubled = canvasFilterFor(group.filters, { scale: 2 });
+  assert.equal(group.filter, "blur(1.118px)");
+  assert.equal(doubled.filter, "blur(2.2361px)", "twice the length, which is the whole reason the record travels");
+  assert.deepEqual(doubled.counts, group.counts,
+    "and the BUCKETS are scale-invariant — every classification is made before the factor is applied");
+
+  const bevelled = marketGroups().find((entry) => entry.path.join() === "7,2");
+  assert.deepEqual(canvasFilterFor(bevelled.filters, { scale: 2 }).counts, bevelled.counts,
+    "a refusal at scale 1 is a refusal at scale 2: no scale makes canvas grow a bevel");
+});
+
+/**
+ * A PACK WHOSE DRAWABLES ARE OUT OF PATH ORDER, which the real extractor's
+ * never are.
+ *
+ * ► **`filterGroupsNotContiguous` IS ZERO ON THE REAL PACK, AND A COUNTER THAT
+ *   IS ONLY EVER ZERO IS INDISTINGUISHABLE FROM A DEAD ONE.** All 135 groups
+ *   that reach an operation there are a contiguous run in `ops`, because
+ *   `tools/extract-screens.mjs` emits drawables in path order — measured
+ *   2026-09-15, 0 adjacent pairs out of order across the 26 screens. That is a
+ *   property of the extractor and not a guarantee of the format, and the range
+ *   on a group is what a painter would otherwise trust blindly. So the case is
+ *   reached here instead.
+ */
+function interleavedPack() {
+  return {
+    screens: {
+      split: {
+        name: "split",
+        labelFrame: 1, firstFrame: 1, lastFrame: 1,
+        objects: [],
+        drawables: [
+          { shape: 11, path: [5, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          { shape: 11, path: [6, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          { shape: 11, path: [5, 2], matrix: [1, 0, 0, 1, 0, 0] }
+        ],
+        unresolved: [], textFields: [], staticText: [],
+        multiFrameSprites: [],
+        filteredPlacements: [{ character: 80, path: [5], filters: [BLUR_4] }],
+        blendedPlacements: [],
+        rangeVariance: { frames: 0, firstDifferingFrame: null, depthsAdded: [], depthsRemoved: [] },
+        approximations: {},
+        counts: { objects: 0, drawables: 3 },
+        resolvedNothing: false
+      }
+    },
+    shapes: SHAPES,
+    fonts: {}
+  };
+}
+
+test("a group whose operations are NOT a run is REPORTED, not mis-stated by its range", () => {
+  const record = screenFor(screenPackFrom(interleavedPack()), "split");
+  assert.equal(record.ops.length, 3);
+  const group = record.filterGroups[0];
+
+  assert.deepEqual(opsUnderPath(record, [5]), [0, 2], "operation 1 is at [6,1] and is NOT in the group");
+  assert.equal(group.opCount, 2, "the count is exact");
+  assert.equal(group.contiguous, false);
+  assert.equal(record.approximations.filterGroupsNotContiguous, 1);
+  assert.equal(group.opFirst, 0);
+  assert.equal(group.opEnd, 3, "the range BRACKETS the group rather than naming it");
+  assert.equal(group.opEnd - group.opFirst > group.opCount, true,
+    "which is precisely the statement `contiguous: false` is making, and a painter must re-match on `path`");
+  // ► And the bracket is a real bracket: nothing in the group is outside it,
+  //   so a painter that re-matches inside the range still finds everything.
+  for (const index of opsUnderPath(record, [5])) {
+    assert.equal(index >= group.opFirst && index < group.opEnd, true, `operation ${index} is outside its own group's range`);
+  }
+  assert.equal(record.approximations.opsUnderFilterGroup, 2, "and the op-level count is not fooled by the interleaving");
+});
+
+/**
+ * THE REAL PACK'S FILTER GROUPS, AND THE NUMBER THAT SETTLES WHETHER THIS
+ * MODULE IS READING THE RECORDS AT ALL.
+ *
+ * ► **EVERY COUNT BELOW COULD HAVE TAKEN A DIFFERENT VALUE, AND THE PREVIOUS
+ *   IMPLEMENTATION PROVES IT: it produced NO filter string, NO bucket and NO
+ *   group, because it read `entry.path` and dropped `entry.filters`.** The
+ *   assertions that matter most are the ones tied to
+ *   `assets/screens/manifest.json`, which a DIFFERENT pass of the extractor
+ *   wrote from the SWF and which knows nothing about `canvasFilterFor`: its
+ *   `filtersByType` block and this module's four buckets have to recompose
+ *   into each other, and there is no way for one to be derived from the other.
+ */
+test("the real pack: 248 filter groups, and the four buckets recompose to the manifest's own census", () => {
+  if (!REAL_SCREENS || !REAL_MANIFEST) {
+    assert.equal(REAL_SCREENS === null || REAL_MANIFEST === null, true, "no extraction on this machine");
+    return;
+  }
+  const pack = screenPackFrom(REAL_SCREENS);
+  const names = screenNames(pack);
+  const total = {
+    filterGroups: 0, filterGroupsFromPlacements: 0, filterGroupsFromButtonRecords: 0,
+    filterGroupsReachingOps: 0, filterGroupsReachingNothing: 0,
+    filterGroupsNested: 0, filterGroupsNotContiguous: 0,
+    filtersTotal: 0, filtersApplied: 0, filtersDeferredToColourMatrix: 0,
+    filtersNoOp: 0, filtersRefused: 0,
+    opsUnderFilterGroup: 0, opsWithCanvasFilter: 0, opsWithDeferredColourMatrix: 0,
+    opsUnderRefusedFilter: 0, opsUnderNoOpFilterOnly: 0, filtersNotApplied: 0
+  };
+  const reachingNothingByKind = {};
+  const refusedByReason = {};
+  const strings = new Set();
+  let ops = 0;
+  for (const name of names) {
+    const record = screenFor(pack, name);
+    ops += record.ops.length;
+    for (const key of Object.keys(total)) total[key] += record.approximations[key];
+    for (const [kind, count] of Object.entries(record.approximations.filterGroupsReachingNothingByKind)) {
+      reachingNothingByKind[kind] = (reachingNothingByKind[kind] ?? 0) + count;
+    }
+    for (const [reason, count] of Object.entries(record.approximations.filtersRefusedByReason)) {
+      refusedByReason[reason] = (refusedByReason[reason] ?? 0) + count;
+    }
+    for (const group of record.filterGroups) if (group.filter !== null) strings.add(group.filter);
+  }
+  assert.equal(names.length, 26);
+  assert.equal(ops, 13638);
+
+  // ── THE ROSTER, against the manifest's independently written counts.
+  const manifestPlacements = Object.values(REAL_MANIFEST.screens)
+    .reduce((sum, screen) => sum + (screen.approximations?.filters ?? 0), 0);
+  const manifestButtonRecords = Object.values(REAL_MANIFEST.screens)
+    .reduce((sum, screen) => sum + (screen.approximations?.filtersInButtonRecords ?? 0), 0);
+  assert.equal(manifestPlacements, 243, "the manifest's own count of placements carrying a filter list");
+  assert.equal(manifestButtonRecords, 5, "and of filtered records inside buttons — its second list");
+  assert.equal(total.filterGroupsFromPlacements, manifestPlacements, "one group per filtered placement, no more and no fewer");
+  assert.equal(total.filterGroupsFromButtonRecords, manifestButtonRecords);
+  assert.equal(total.filterGroups, 248);
+
+  // ── THE BUCKETS. `filtersByType` is the extractor's census of the FILTER
+  //    RECORDS; the four buckets are `canvasFilterFor`'s verdicts on the same
+  //    records. Neither is computed from the other.
+  const byType = REAL_MANIFEST.filtersByType;
+  assert.deepEqual(byType, { dropShadow: 16, glow: 145, bevel: 2, blur: 56, colourMatrix: 57 });
+  assert.equal(total.filtersTotal, Object.values(byType).reduce((sum, count) => sum + count, 0),
+    "276 filter records, reached from two different directions");
+  assert.equal(total.filtersRefused, byType.bevel,
+    "► EVERY REFUSAL ON THESE SCREENS IS A BEVEL — canvas has no bevel, and there is no nearest match on offer");
+  assert.deepEqual(refusedByReason, { "bevel:filterHasNoCanvasEquivalent": 2 });
+  assert.equal(total.filtersDeferredToColourMatrix, byType.colourMatrix,
+    "and every colour matrix is deferred to `applyColourMatrix`, not smuggled into the string as a CSS shorthand");
+  assert.equal(total.filtersApplied + total.filtersNoOp, byType.dropShadow + byType.glow + byType.blur,
+    "the shadow-shaped and blur-shaped records either produce a string or are named as no-ops; none goes missing");
+  assert.equal(total.filtersApplied, 214);
+  assert.equal(total.filtersNoOp, 3, "three zero-strength glows — the build has 208 of them, three of which are here");
+
+  // ── THE STRINGS. 20 distinct ones across 248 groups, which is the count that
+  //    would read 0 under the implementation this replaces.
+  assert.equal(strings.size, 20);
+  assert.equal([...strings].every((filter) => /^(blur|drop-shadow)\(/.test(filter)), true,
+    "and each is built from the two CSS functions filters.js will emit, never a `saturate()` fitted to a matrix");
+
+  // ── WHAT REACHES AN OPERATION AND WHAT DOES NOT.
+  assert.equal(total.filterGroupsReachingOps, 135);
+  assert.equal(total.filterGroupsReachingNothing, 113, "45% of the roster: 108 placements plus all 5 button records");
+  assert.deepEqual(reachingNothingByKind, { "text-edit": 92, "text-static": 21 },
+    "► AND ALL 113 ARE TEXT. `screen.js` emits no text, so a glow on a field reaches no drawable here — "
+    + "`screen-text.js` is the join. Counted BY NAME because 'no filters here' and 'filters that reach "
+    + "nothing I emit' are opposite findings with the same zero");
+  assert.equal(total.filterGroupsReachingOps + total.filterGroupsReachingNothing, total.filterGroups,
+    "and the two halves partition the roster, so a group cannot fall out of both");
+
+  // ── THE OPERATION-LEVEL FIVE.
+  assert.equal(total.opsUnderFilterGroup, 9423,
+    "► THE NUMBER THE OLD `filtersNotApplied` REPORTED, unchanged and renamed: 69% of 13638");
+  assert.equal(total.opsWithCanvasFilter, 6440);
+  assert.equal(total.opsWithDeferredColourMatrix, 8850,
+    "more operations are waiting on a colour matrix than on a filter string, which is the opposite of what "
+    + "'drop shadows and glows are missing' suggested");
+  assert.equal(total.opsUnderRefusedFilter, 2, "the two bevels reach one operation each");
+  assert.equal(total.filtersNotApplied, 24, "operations a painter is handed nothing at all for");
+  assert.equal(total.opsUnderNoOpFilterOnly, 24);
+  assert.equal(total.filtersNotApplied - total.opsUnderNoOpFilterOnly, 0,
+    "► AND THE DIFFERENCE IS THE SILENT LOSS: every one of the 24 is a zero-strength glow, which the build "
+    + "draws nothing for either. A bare zero here would not be worth reading; a difference between two live "
+    + "counters is");
+
+  // ── CONTIGUITY, with its denominator.
+  assert.equal(total.filterGroupsNotContiguous, 0);
+  assert.equal(total.filterGroupsReachingOps, 135,
+    "and 135 is the population that could have been non-contiguous, so the zero above is a finding about the "
+    + "extractor's drawable order rather than a counter nobody incremented");
+});
+
+test("the real pack: nesting is COMMON — 40% of operations sit under two filtered ancestors", () => {
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE RULE FOR NESTED FILTERS WAS CHOSEN AFTER MEASURING HOW OFTEN IT
+  //   FIRES, because a rule chosen on unreachable data is a rule nobody has
+  //   tested.** It fires constantly. Had this come back `{0: …, 1: …}` the
+  //   honest write-up would have been "this never happens on this build".
+  const pack = screenPackFrom(REAL_SCREENS);
+  const ancestors = {};
+  let nested = 0;
+  let groups = 0;
+  for (const name of screenNames(pack)) {
+    const record = screenFor(pack, name);
+    nested += record.approximations.filterGroupsNested;
+    groups += record.approximations.filterGroups;
+    for (const op of record.ops) {
+      const count = record.filterGroups.filter((group) => {
+        if (group.path.length > op.path.length) return false;
+        return group.path.every((step, at) => op.path[at] === step);
+      }).length;
+      ancestors[count] = (ancestors[count] ?? 0) + 1;
+    }
+  }
+  assert.deepEqual(ancestors, { 0: 4215, 1: 4028, 2: 5395 },
+    "recomputed here from the paths, not read off the groups' own bookkeeping");
+  assert.equal(ancestors[2] / (ancestors[0] + ancestors[1] + ancestors[2]) > 0.39, true, "40% of 13638");
+  assert.equal(3 in ancestors, false, "and nothing on this build is three deep, which is worth knowing before writing for it");
+  assert.equal(nested, 67, "67 of the 248 groups have a filtered ancestor");
+  assert.equal(groups, 248);
+});
+
+test("the real pack: the 1523-operation group is a COLOUR MATRIX with four blurs nested inside it", () => {
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THIS IS THE CASE THAT RULES OUT BOTH EASY ANSWERS.** Stamping the
+  //   filter onto each leaf would blur 1523 paths individually along seams the
+  //   build does not have. "Innermost wins", which is the right answer for a
+  //   blend mode twenty lines away in `screen.js`, would drop this colour
+  //   matrix from all 1523 and leave four small blurs standing — the town
+  //   drawn at full daylight with four blurred props in it, and it would look
+  //   finished.
+  const record = screenFor(screenPackFrom(REAL_SCREENS), "townsquare");
+  assert.equal(record.ops.length, 1638);
+  const big = record.filterGroups.find((group) => group.path.join() === "59,1");
+  assert.equal(big.opCount, 1523, "93% of the screen, in ONE group");
+  assert.equal(big.filter, null, "and it produces NO canvas filter string at all");
+  assert.equal(big.colourMatrices.length, 1);
+  assert.deepEqual(big.colourMatrices[0].slice(0, 5), [0.48145002126693726, 0.4570499658584595, 0.061500001698732376, 0, -75],
+    "a Flash-coefficient grade with a -75 offset on every colour row: this is the town's whole mood");
+  assert.equal(big.contiguous, true);
+  assert.equal(big.opFirst, 3);
+  assert.equal(big.opEnd, 1526);
+  assert.deepEqual(opsUnderPath(record, [59, 1]).length, 1523, "recomputed from the paths, against the range");
+  assert.equal(record.ops.slice(big.opFirst, big.opEnd).length, 1523);
+
+  assert.deepEqual(big.children.map((index) => record.filterGroups[index].path.join()),
+    ["59,1,3", "59,1,8", "59,1,317", "59,1,319"]);
+  assert.deepEqual(big.children.map((index) => record.filterGroups[index].opCount), [8, 308, 207, 421]);
+  assert.equal(big.ownOpCount, 579, "1523 less the 944 that arrive already filtered by a child");
+  assert.equal(big.ownOpCount + big.children.reduce((sum, index) => sum + record.filterGroups[index].opCount, 0), big.opCount,
+    "and the parts add up, which is what would break if a child were counted twice or missed");
+  for (const index of big.children) {
+    const child = record.filterGroups[index];
+    assert.equal(child.parent, big.index);
+    assert.equal(child.opFirst >= big.opFirst && child.opEnd <= big.opEnd, true,
+      `child ${child.path.join(",")} is not inside its parent's range`);
+  }
+
+  // A ONE-OPERATION GROUP on the same screen, so the mapping is pinned at both
+  // ends of the 1-to-1523 range rather than only at the loud end.
+  const small = record.filterGroups.find((group) => group.path.join() === "3,55");
+  assert.equal(small.opCount, 1);
+  assert.equal(small.opEnd - small.opFirst, 1);
+  assert.equal(small.filter, "blur(3.1623px)");
+  assert.equal(small.colourMatrices.length, 1, "a blur AND a matrix on one list: the string is not the whole story");
+  assert.deepEqual([...record.ops[small.opFirst].path], [3, 55, 1]);
+});
+
+test("the real pack: the two bevels are refused BY NAME, and their groups still paint the glow beside them", () => {
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **A REFUSAL IS NOT A FAILURE TO PAINT.** Both bevels sit on a list with
+  //   a glow, so the group has a string and the operation is drawn — with one
+  //   filter of its two missing, which is a fact only `refused` carries.
+  const pack = screenPackFrom(REAL_SCREENS);
+  const found = [];
+  for (const name of screenNames(pack)) {
+    for (const group of screenFor(pack, name).filterGroups) {
+      if (group.refused.length > 0) found.push({ name, path: group.path.join(), group });
+    }
+  }
+  assert.deepEqual(found.map((entry) => `${entry.name} [${entry.path}]`), ["splash [52,1]", "new_or_continue [52,1]"]);
+  for (const entry of found) {
+    assert.deepEqual(entry.group.refused.map((record) => record.type), ["bevel"]);
+    assert.deepEqual(entry.group.refused.map((record) => record.nearest), [null],
+      "and NO nearest match is offered, because a nearest-match bevel is the silent-approximation defect");
+    assert.equal(entry.group.filter, "drop-shadow(0px 0px 2.8284px rgba(255, 153, 0, 1))",
+      "the glow on the same list still paints");
+    assert.equal(entry.group.opCount, 1);
+    assert.deepEqual(entry.group.counts, { total: 2, applied: 1, deferred: 0, noOp: 0, refused: 1, approximated: 1 });
+  }
+});
+
+test("the real pack: every group's range agrees with a fresh prefix match, on all 248", () => {
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE INVARIANT THE RANGE LIVES OR DIES BY.** `[opFirst, opEnd)` is an
+  //   index into an array, and the argument for it is that it is derived, in
+  //   the same call, from the very `ops` it indexes. This checks that claim on
+  //   every group on every screen rather than on the one that was easy to
+  //   read, and it is what would go red if `ops` were ever reordered after the
+  //   groups were built.
+  const pack = screenPackFrom(REAL_SCREENS);
+  let checked = 0;
+  let contiguous = 0;
+  const sizes = {};
+  for (const name of screenNames(pack)) {
+    const record = screenFor(pack, name);
+    for (const group of record.filterGroups) {
+      const indices = opsUnderPath(record, [...group.path]);
+      assert.equal(group.opCount, indices.length, `${name} [${group.path.join(",")}] count`);
+      sizes[group.opCount] = (sizes[group.opCount] ?? 0) + 1;
+      if (indices.length === 0) {
+        assert.equal(group.opFirst, group.opEnd, `${name} [${group.path.join(",")}] should name an empty range`);
+      } else {
+        assert.equal(group.opFirst, indices[0]);
+        assert.equal(group.opEnd, indices[indices.length - 1] + 1);
+        if (group.contiguous) {
+          assert.deepEqual(record.ops.slice(group.opFirst, group.opEnd).map((op) => op.path.join(",")),
+            indices.map((index) => record.ops[index].path.join(",")),
+            `${name} [${group.path.join(",")}] claims contiguity it does not have`);
+          contiguous += 1;
+        }
+      }
+      checked += 1;
+    }
+  }
+  assert.equal(checked, 248);
+  assert.equal(contiguous, 135, "every group that reaches an operation is a contiguous run, and all 135 were checked");
+  // ► **THE DISTRIBUTION, because "135 groups" says nothing about whether the
+  //   hard case is in there.** It is bimodal: 113 reach nothing, 81 reach ten
+  //   or fewer, and five reach 1523 apiece.
+  assert.deepEqual(sizes, {
+    0: 113, 1: 29, 2: 26, 3: 26, 4: 1, 6: 10, 8: 5, 11: 2, 21: 5,
+    157: 4, 173: 6, 207: 5, 308: 5, 421: 5, 467: 1, 1523: 5
+  });
+});
+
+/**
+ * TWO GROUPS AT ONE PATH — the only arrangement in which `ownOpCount` lies.
+ *
+ * ► **ZERO ON THE REAL PACK, WHICH IS WHY IT NEEDS A FIXTURE.** Two placements
+ *   at the same path are SIBLINGS under the parent rule (neither is a strict
+ *   prefix of the other), so both are subtracted from their common parent and
+ *   the same operations come out twice — here, an `ownOpCount` of -1 for one
+ *   operation. The module does not pretend otherwise and does not clamp it:
+ *   clamping would turn a visible wrong number into an invisible one.
+ *   `filterGroupsSharingAPath` is the count that says the subtraction can be
+ *   trusted, and a counter that is only ever zero is a counter nobody has run.
+ */
+function twinnedPack() {
+  return {
+    screens: {
+      twin: {
+        name: "twin",
+        labelFrame: 1, firstFrame: 1, lastFrame: 1,
+        objects: [],
+        drawables: [{ shape: 11, path: [5, 1], matrix: [1, 0, 0, 1, 0, 0] }],
+        unresolved: [], textFields: [], staticText: [],
+        multiFrameSprites: [],
+        filteredPlacements: [
+          { character: 90, path: [5], filters: [BLUR_4] },
+          { character: 91, path: [5, 1], filters: [GLOW_ORANGE] },
+          { character: 92, path: [5, 1], filters: [BLUR_4] }
+        ],
+        blendedPlacements: [],
+        rangeVariance: { frames: 0, firstDifferingFrame: null, depthsAdded: [], depthsRemoved: [] },
+        approximations: {},
+        counts: { objects: 0, drawables: 1 },
+        resolvedNothing: false
+      }
+    },
+    shapes: SHAPES,
+    fonts: {}
+  };
+}
+
+test("two groups at one path are COUNTED, because that is the case `ownOpCount` cannot survive", () => {
+  const record = screenFor(screenPackFrom(twinnedPack()), "twin");
+  assert.equal(record.approximations.filterGroupsSharingAPath, 1, "three groups, two of them at [5,1]");
+  const root = record.filterGroups.find((group) => group.path.join() === "5");
+  const twins = record.filterGroups.filter((group) => group.path.join() === "5,1");
+  assert.equal(twins.length, 2);
+  assert.deepEqual(twins.map((group) => group.parent), [root.index, root.index], "siblings, not a chain");
+  assert.equal(root.opCount, 1);
+  assert.equal(root.ownOpCount, -1,
+    "one operation taken out twice — REPORTED rather than clamped, so the counter above is what a reader checks first");
+  assert.equal(marketOf().approximations.filterGroupsSharingAPath, 0,
+    "and it is 0 where the paths are distinct, so it is not simply always non-zero");
+});
+
+test("the real pack: no two groups share a path, so every `ownOpCount` on it is exact", () => {
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  const pack = screenPackFrom(REAL_SCREENS);
+  let shared = 0;
+  let groups = 0;
+  let negative = 0;
+  for (const name of screenNames(pack)) {
+    const record = screenFor(pack, name);
+    shared += record.approximations.filterGroupsSharingAPath;
+    groups += record.filterGroups.length;
+    for (const group of record.filterGroups) if (group.ownOpCount < 0) negative += 1;
+  }
+  assert.equal(groups, 248, "the denominator the zero below is drawn from");
+  assert.equal(shared, 0);
+  assert.equal(negative, 0, "which is the consequence, checked independently of the counter that predicts it");
 });

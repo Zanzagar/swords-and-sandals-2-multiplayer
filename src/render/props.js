@@ -47,10 +47,22 @@
  * ```text
  *   3,345 placements    2,330 under a NON-IDENTITY transform   (1,015 identity)
  *   8,682 operations    7,246 under one
- *   7,215 of those 7,246 are the SKY — its day/night colouring IS this
- *         transform, swept across 200 frames, and not a ColorMatrix
+ *   7,215 of those 7,246 are the SKY — ~~its day/night colouring IS this
+ *         transform, swept across 200 frames, and not a ColorMatrix~~
  *       0 of the 7,246 land on a fill the arithmetic cannot express
  * ```
+ *
+ * ► **THAT STRUCK LINE WAS WRONG, AND IT IS THE WHOLE REASON FOR THE SECTION
+ *   BELOW.** The transform is real and is applied; it is not what makes the sky
+ *   go dark. Measured 2026-09-15 on the regenerated pack: `sky` carries **362
+ *   enclosing effect groups over its 3,202 placements, 150 colour matrices
+ *   among them, 148 of those non-identity**, and until that date nothing in
+ *   this file read one. The backdrop gradient of frame 1 is `#2d2dfd`→`#5fbefe`
+ *   after the transform and **`#440037`→`#79689f` after the group's matrix**;
+ *   frame 200's is `#000030`. The transform moves the sky by a few units and
+ *   the matrix moves it from blue to maroon to black. `HANDOFF.md`'s living
+ *   head had it right — *"the sky's day/night colouring IS a ColorMatrix"* —
+ *   and this header contradicted it for a day.
  *
  * ► **MOST PLACEMENTS IN THIS PACK ARE TINTED, WHICH IS THE OPPOSITE OF THE
  *   SCREENS PACK AND OF WHAT THE BRIEF FOR THIS WORK ASSUMED.** 70% of them,
@@ -88,6 +100,84 @@
  *   green. `tintPack` in `test/render-props.test.js` is what stands under it —
  *   the same hole the screens pack has at gradient stops, in a different field.
  *
+ * ## THE ENCLOSING GROUP'S FILTERS — read here since 2026-09-15
+ *
+ * A placement in this pack may sit inside a filtered SPRITE, and the pack says
+ * so: `inheritedEffects` on the placement holds indices, OUTERMOST FIRST, into
+ * its prop's own `effectGroups`. **`emitPropOps` read none of it until that
+ * date** — the same shape of hole as `colour` above and as the bitmap fill
+ * before that, and again with no count saying so.
+ *
+ * ```text
+ *   3,345 placements    3,209 inside an effect group      (136 inside none)
+ *     363 groups        362 on `sky`, 1 on `bullet_trail`
+ *     570 filter records on them: 212 glow, 208 blur, 150 colourMatrix
+ *       1 blend mode: `bullet_trail`'s `lighten`
+ * ```
+ *
+ * ► **A FILTER ON A GROUP IS A FILTER OF THE COMPOSITE, so this module folds
+ *   exactly one of the three kinds and REFUSES to fold the other two.** Flash
+ *   rasterises the group and filters the result. Stamping a blur onto each leaf
+ *   blurs every path separately, which is a different picture that looks
+ *   plausible — the defect this project keeps paying for. So:
+ *
+ *   - **Colour matrices ARE folded, into every fill, stroke and gradient stop,
+ *     because per-fill application is EXACT.** The proof is
+ *     `colourMatrixIsFillExact`'s docstring in `filters.js`: a matrix is
+ *     affine, alpha-over is a convex combination, so `M(blend(a,b))` equals
+ *     `blend(M(a),M(b))` — with the one exception of a matrix whose alpha row
+ *     is not `(0,0,0,1,0)`, which paints the group's empty area too. **All 150
+ *     of this pack's group matrices have the plain alpha row** (`mExact` 150 of
+ *     150, measured by walking `effectGroups` and calling that predicate), so
+ *     the fold is exact for every one of them — and `groupMatrixNotFillExact`
+ *     counts the case anyway, because that is a fact about THIS BUILD and not
+ *     about the format.
+ *   - **Blurs and glows are NOT folded.** They ride on the op as a frozen
+ *     GROUP RECORD for a painter that can composite to a buffer, and
+ *     `groupFilterOps` counts how many operations are waiting on one.
+ *   - **Blend modes are not folded either**, for the same reason, and ride on
+ *     the same record as `composite`.
+ *
+ * ► **AND THIS PACK IS NOT THE CATASTROPHE THE SCREENS PACK IS — MEASURED, NOT
+ *   ASSUMED.** Per FRAME (which is the unit a painter draws), **486 of the 745
+ *   group instances cover exactly ONE operation**, and the largest covers 56.
+ *   A group over one drawable IS its own composite, so for those 486 per-leaf
+ *   and per-group coincide EXACTLY and a painter that simply set `ctx.filter`
+ *   around the single path would be right. The 259 that do not coincide are
+ *   `sky`'s moon (56 ops), its stars (23) and its cloud bank (12) — and they
+ *   are exactly the groups carrying glows rather than matrices, so the half
+ *   this module folds is the half where the distinction does not arise.
+ *   Reproduce by counting ops under each `inheritedEffects` index per frame;
+ *   the distribution is `{1:486, 4:7, 12:102, 23:61, 56:89}`.
+ *
+ * ► **THE GRADIENT FOLD IS THE ONE APPROXIMATION IN IT, AND IT IS LARGE.** A
+ *   matrix folded into the stops is exact only while no stop SATURATES: canvas
+ *   interpolates the ramp and then would clamp, this clamps at the stops and
+ *   then interpolates. Measured on the real pack: **3,137 of the 3,694 folded
+ *   stops have at least one channel outside 0..255 before clamping**, over 993
+ *   gradient operations. That is counted as `groupMatrixGradientOps` — the
+ *   whole population, not the saturating subset, because detecting saturation
+ *   needs `applyColourMatrix` to report that it clamped and this module refuses
+ *   to grow a second copy of that arithmetic to find out. **Not folding is the
+ *   worse answer**: it is the sky's entire day/night cycle.
+ *
+ * ► **THE GROUP'S OWN MATRIX IS NOT IN THE PACK** — `tools/extract-props.mjs`
+ *   counts 362 of them in `notCarried.effectGroupMatrix` — so a blur radius
+ *   here is in the group's own space and a painter must scale it by the STAGE
+ *   scale. That is what `canvasFilterFor`'s `scale` option is for, and
+ *   `propEffectGroupsFor` takes it and passes it straight through.
+ *
+ * ► **WHAT STILL REACHES NOTHING: the arena UI bar's two own glows.**
+ *   `panel` carries `notCarried.unsupportedDrawableFilters: 2` — characters
+ *   1527 and 1528, glows on TEXT FIELDS, whose drawables the extractor skips
+ *   because a text field is not a shape. There is no shape in the pack for a
+ *   glow to sit on, so no renderer can draw them from this pack at all. What it
+ *   would take: `screen-text.js` emits those fields, so the two would have to
+ *   be joined to a TEXT operation rather than a path one, and the pack would
+ *   have to carry the filter against the field instead of dropping it with the
+ *   drawable. `propEffectsUnreachable` reports them rather than letting a zero
+ *   elsewhere read as "nothing lost".
+ *
  * ## THE INVOICE IS A SECOND FUNCTION, NOT A SECOND RETURN VALUE
  *
  * `propOpsFor` returns a flat frozen array and callers index it, so the two
@@ -106,11 +196,34 @@
  * The cost is honest and stated: asking for both walks the frame twice. The
  * invoice is a diagnostic — a manifest line, a test — and nothing on the
  * per-frame paint path asks for it.
+ *
+ * ► **THE GROUP RECORD IS THE EXCEPTION, AND IT RIDES ON THE OP RATHER THAN
+ *   BESIDE IT.** `op.group` is a FROZEN RECORD, INTERNED — every operation
+ *   under one group holds the same object, so `op.group !== previous` is all a
+ *   painter needs to know where to flush a buffer, and it needs no second call
+ *   and no second argument threaded through `arenaScreenLayersFor`'s injected
+ *   seam. Rejected: *an id plus a lookup table*, which would have made the
+ *   painter call a second function with the same `{linkage, frame}` and be
+ *   silently wrong the moment the two arguments drifted apart.
+ *   `propEffectGroupsFor` still exists for a caller that wants the table
+ *   WITHOUT the operations — a manifest line, a test — and runs the same walk.
+ *
+ * ► **THE RECORD DELIBERATELY DOES NOT CARRY ITS COLOUR MATRICES.** They are
+ *   already folded into the fills by the time the record is frozen, and handing
+ *   them back as well is an invitation to apply them twice. `filter` is the
+ *   blur/glow string and NOTHING in it is a colour matrix —
+ *   `colourMatrixFilterString` refuses every one of them, so there is no route
+ *   by which one could be in there. What the record carries instead is
+ *   `colourMatricesFolded`, a count.
  */
 
 import {
+  applyColourMatrix,
   applyColourTransform,
   applyColourTransformAlpha,
+  blendModeFor,
+  canvasFilterFor,
+  colourMatrixIsFillExact,
   colourTransformFrom
 } from "./filters.js";
 
@@ -184,7 +297,64 @@ function emptyInvoice() {
     // names as `screen.js` uses, deliberately: they are the same two facts and
     // a manifest that joins the two packs should not have to translate.
     bitmapColourTransformDropped: 0,
-    gradientAlphaOffsetApproximated: 0
+    gradientAlphaOffsetApproximated: 0,
+
+    /* THE ENCLOSING GROUPS. Denominators first, for the reason above. -------- */
+
+    // Populations. `groupedOps` is the denominator every count below it is read
+    // against; `ops` is the denominator IT is read against.
+    effectGroups: 0,
+    groupedPlacements: 0,
+    groupedOps: 0,
+    // A chain deeper than one needs a STACK of buffers, not one buffer. Every
+    // one of this pack's 3,209 chains has length 1 and every group path has
+    // length 1, so this is 0 on the real pack and the synthetic pack in
+    // `test/render-props.test.js` is the only thing that can move it.
+    nestedGroupPlacements: 0,
+    // A group index a placement names and the prop does not hold, counted ONCE
+    // per distinct index per frame — the same population `effectGroups` above
+    // it counts, so the two are read against each other. Was a silent skip for
+    // as long as this file ignored the field entirely.
+    groupsUnresolved: 0,
+
+    // What `canvasFilterFor` says a renderer can do with the groups' filters,
+    // summed over the DISTINCT groups this frame reaches. Its verdicts, not a
+    // second opinion — the same arrangement `tools/extract-props.mjs` uses so
+    // that "the pack carries it" and "the renderer can draw it" cannot drift.
+    groupFilters: 0,
+    groupFiltersApplied: 0,
+    groupFiltersDeferred: 0,
+    groupFiltersNoOp: 0,
+    groupFiltersRefused: 0,
+    groupBlendModes: 0,
+    groupBlendModesRefused: 0,
+
+    // ► **THE ONE NUMBER THAT SAYS WHAT IS STILL NOT DRAWN.** Operations under
+    //   a group whose blur or glow this module CANNOT fold and hands to the
+    //   painter instead. It is not a loss while a painter composites them and
+    //   it is a total loss while none does, so it is counted either way and the
+    //   arena's log prints it against `groupedOps`.
+    groupFilterOps: 0,
+
+    // What the colour-matrix fold reached. `groupMatrixOps` is the denominator
+    // and the four below it partition it exactly.
+    groupMatrixOps: 0,
+    groupMatrixSolidOps: 0,
+    groupMatrixGradientOps: 0,
+    groupMatrixDroppedOps: 0,
+    groupMatrixStrokeOps: 0,
+    // Dead on this build and kept for the reason the two above it are: **all
+    // 150 group matrices here have the plain alpha row**, so per-fill is exact
+    // for every one and this cannot fire. A matrix that painted the group's
+    // empty area would, and nothing but the synthetic pack can show it.
+    groupMatrixNotFillExact: 0,
+    // The matrix was folded although its own group ALSO blurs or glows, so this
+    // module has chosen an order the filter list may not state. Exact for a
+    // matrix with no offset, and near-exact otherwise away from an alpha edge,
+    // because a blur's weights sum to 1 and carry an affine map straight
+    // through. 148 of `sky`'s frames reach this through `cloud_patterns`, whose
+    // list really is `[blur, colourMatrix]`.
+    groupMatrixFoldedUnderAFilter: 0
   };
 }
 
@@ -255,13 +425,146 @@ function transformGradient(gradient, colour, invoice) {
 }
 
 /**
+ * The chain of colour matrices for a placement inside NO group — one shared
+ * frozen empty array rather than a fresh `[]` per placement, because this pack
+ * walks 3,345 of them per full sweep.
+ */
+const EMPTY_MATRICES = Object.freeze([]);
+
+/**
+ * ONE enclosing group, resolved once per frame, as the frozen record every
+ * operation under it will SHARE.
+ *
+ * ► **INTERNED, AND THE IDENTITY IS THE POINT.** A painter walks the flat op
+ *   array and flushes its buffer when `op.group` stops being the same OBJECT.
+ *   Building a fresh record per operation would make that comparison always
+ *   true and every group a group of one — which is the per-leaf picture the
+ *   module header refuses, arrived at by accident instead of on purpose.
+ *
+ * ► **MUTABLE UNTIL THE WALK ENDS.** `ops` and `placements` are denominators and
+ *   cannot be known until the last placement has been seen, so the record is
+ *   filled in as the walk runs and frozen by `emitPropOps` before it returns.
+ *   Nothing outside this file ever sees an unfrozen one.
+ *
+ * Returns `{ record, matrices, fillExact, filtered }` — the matrices kept OUT
+ * of the record deliberately; see the module header.
+ */
+function effectGroupEntryFor(prop, id, cache, scale, invoice, records) {
+  if (cache.has(id)) return cache.get(id);
+  const group = Array.isArray(prop.effectGroups) ? prop.effectGroups[id] : undefined;
+  if (!group || typeof group !== "object") {
+    // A placement that says it is inside a group whose record is not in the
+    // pack draws UNFILTERED, which is the same class of silence as an
+    // unresolved clip cutter and is counted the same way. Once per distinct
+    // index per frame, because the `null` goes in the cache beside it.
+    invoice.groupsUnresolved += 1;
+    cache.set(id, null);
+    return null;
+  }
+  const built = canvasFilterFor(group.filters ?? [], { scale });
+  const blend = group.blendMode === undefined || group.blendMode === null
+    ? null
+    : blendModeFor(group.blendMode);
+  invoice.effectGroups += 1;
+  invoice.groupFilters += built.counts.total;
+  invoice.groupFiltersApplied += built.counts.applied;
+  invoice.groupFiltersDeferred += built.counts.deferred;
+  invoice.groupFiltersNoOp += built.counts.noOp;
+  invoice.groupFiltersRefused += built.counts.refused;
+  // `normal` is what a group with no blend mode already does, so counting it
+  // would make "this group blends" true for every group that mentions the
+  // field at all — the identity-transform mistake in a second field.
+  const blends = Boolean(blend) && (blend.refused !== null || blend.composite !== "source-over");
+  if (blends) {
+    invoice.groupBlendModes += 1;
+    if (blend.refused) invoice.groupBlendModesRefused += 1;
+  }
+  const entry = {
+    record: {
+      id,
+      // The group's own display path, as the pack states it — so a reader can
+      // find the group in the same frame's placements without re-deriving
+      // which level it was on.
+      path: Object.freeze([...(Array.isArray(group.path) ? group.path : [])]),
+      character: Number.isFinite(group.character) ? group.character : null,
+      // The next group OUT, as the same kind of record, or null. A painter that
+      // walks this composites the outermost buffer last.
+      enclosedBy: null,
+      // The blur/glow string only. Never a colour matrix — see the header.
+      filter: built.filter,
+      composite: blends && !blend.refused ? blend.composite : null,
+      blendModeRefused: blend?.refused ?? null,
+      colourMatricesFolded: built.colourMatrices.length,
+      // Denominators, filled in by the walk.
+      ops: 0,
+      placements: 0,
+      counts: built.counts
+    },
+    matrices: built.colourMatrices,
+    // Computed ONCE per group rather than once per operation: it is a property
+    // of the matrices and a `sky` frame has 56 operations under one of them.
+    fillExact: built.colourMatrices.every((matrix) => colourMatrixIsFillExact(matrix)),
+    filtered: built.filter !== null
+  };
+  cache.set(id, entry);
+  // First appearance order, which is the order the operations themselves come
+  // out in, so a reader of the table and a reader of the ops see one sequence.
+  records.push(entry.record);
+  return entry;
+}
+
+/**
+ * A fill and its opacity with every matrix in a chain applied, innermost first.
+ *
+ * Returns `applied: false` and the INPUT untouched when the fill is not
+ * something `applyColourMatrix` can transform — a bitmap-only path, `"none"`,
+ * a missing fill. The caller counts that; it must not read as a correct fold.
+ */
+function foldColourMatrices(fill, opacity, matrices) {
+  let currentFill = fill;
+  let currentOpacity = opacity;
+  for (const matrix of matrices) {
+    const result = applyColourMatrix(currentFill, matrix, currentOpacity);
+    if (!result.applied) return { fill, fillOpacity: opacity, applied: false };
+    currentFill = result.fill;
+    currentOpacity = result.fillOpacity;
+  }
+  return { fill: currentFill, fillOpacity: currentOpacity, applied: matrices.length > 0 };
+}
+
+/**
+ * A gradient with the group's colour matrices folded into every stop.
+ *
+ * Structurally `transformGradient` one field over, and exact for the same
+ * reason — the ramp interpolates linearly and an affine map commutes with a
+ * convex combination — **with one difference that is not small: this one
+ * CLAMPS at the stops.** See the module header for the 3,137-of-3,694
+ * measurement and for why folding anyway is the better of the two answers.
+ */
+function gradientUnderColourMatrices(gradient, matrices) {
+  const stops = Array.isArray(gradient.stops) ? gradient.stops : [];
+  if (stops.length === 0 || matrices.length === 0) return gradient;
+  return Object.freeze({
+    ...gradient,
+    stops: Object.freeze(stops.map((stop) => {
+      const folded = foldColourMatrices(stop.fill, Number.isFinite(stop.opacity) ? stop.opacity : 1, matrices);
+      return Object.freeze({ ...stop, fill: folded.fill, opacity: folded.fillOpacity });
+    }))
+  });
+}
+
+/**
  * ONE frame of one prop, expanded to one operation per path of each placement's
  * shape, with the invoice filled in as it goes.
  *
- * Shared by `propOpsFor` and `propInvoiceFor` so that the counts and the
- * operations can never describe two different walks.
+ * Shared by `propOpsFor`, `propInvoiceFor` and `propEffectGroupsFor` so that
+ * the counts, the operations and the group table can never describe three
+ * different walks.
+ *
+ * @param {object[]} [collected]  when given, the frame's DISTINCT group records
+ *                                are pushed into it in first-appearance order
  */
-function emitPropOps(pack, { linkage, frame = 1 } = {}, invoice) {
+function emitPropOps(pack, { linkage, frame = 1, scale = 1 } = {}, invoice, collected = null) {
   const ops = [];
   if (!hasExtractedProps(pack)) return ops;
   const prop = pack.props[linkage];
@@ -275,6 +578,15 @@ function emitPropOps(pack, { linkage, frame = 1 } = {}, invoice) {
   const index = Number.isFinite(frame) ? Math.min(prop.frames.length, Math.max(1, Math.trunc(frame))) : 1;
   const placements = prop.frames[index - 1];
   if (!Array.isArray(placements) || placements.length === 0) return ops;
+
+  // ► **ONE `canvasFilterFor` PER GROUP PER FRAME, NOT ONE PER OPERATION.**
+  //   Same argument as the colour transform and the clip below it, and bigger:
+  //   `sky` frame 200 has 70 operations under 4 groups, so the cache turns 70
+  //   filter builds into 4. The cache is per CALL, which is per frame, so a
+  //   record can never be shared between two frames that happen to name the
+  //   same group index — the records carry per-frame denominators.
+  const groupCache = new Map();
+  const records = [];
 
   for (const placement of placements) {
     invoice.placements += 1;
@@ -298,6 +610,37 @@ function emitPropOps(pack, { linkage, frame = 1 } = {}, invoice) {
     //   `tools/extract-figure.mjs` writes only when it is not the identity.
     const colour = colourTransformFrom(placement.colour ?? null);
     if (colour) invoice.tintedPlacements += 1;
+
+    // ► **THE ENCLOSING GROUPS, RESOLVED ONCE PER PLACEMENT.** `inheritedEffects`
+    //   is OUTERMOST FIRST — `inheritedEffectsFor` in `tools/extract-props.mjs`
+    //   states that as a guarantee to this reader — so the matrices have to be
+    //   applied in REVERSE: the innermost group filters its own composite
+    //   before the group enclosing it filters the result.
+    const chain = Array.isArray(placement.inheritedEffects) ? placement.inheritedEffects : [];
+    let group = null;
+    let matrices = EMPTY_MATRICES;
+    let fillExact = true;
+    let filtered = false;
+    if (chain.length > 0) {
+      invoice.groupedPlacements += 1;
+      if (chain.length > 1) invoice.nestedGroupPlacements += 1;
+      const folded = [];
+      let inner = null;
+      for (let depth = chain.length - 1; depth >= 0; depth -= 1) {
+        const entry = effectGroupEntryFor(prop, chain[depth], groupCache, scale, invoice, records);
+        if (!entry) continue;
+        entry.record.placements += 1;
+        // Inner-to-outer, so the record built on the previous turn of this loop
+        // is the one this group ENCLOSES.
+        if (inner) inner.enclosedBy = entry.record;
+        if (group === null) group = entry.record;
+        inner = entry.record;
+        folded.push(...entry.matrices);
+        if (!entry.fillExact) fillExact = false;
+        if (entry.filtered) filtered = true;
+      }
+      matrices = folded;
+    }
 
     const shape = pack.shapes[placement.shape];
     if (!shape) {
@@ -354,6 +697,73 @@ function emitPropOps(pack, { linkage, frame = 1 } = {}, invoice) {
         invoice.gradientOps += 1;
         gradient = transformGradient(path.gradient, colour, invoice);
       }
+
+      // ► **THE PLACEMENT'S TRANSFORM FIRST, THEN THE GROUP'S MATRIX, AND THE
+      //   ORDER IS THE BUILD'S.** Flash applies a placement's colour transform
+      //   to the leaf, rasterises the group, and filters THAT. So the transform
+      //   is folded here and the matrix on top of it; reversing the two
+      //   produces a plausible picture and the wrong one.
+      let fill = applyColourTransform(path.fill ?? null, colour);
+      let fillOpacity = applyColourTransformAlpha(path.fillOpacity ?? 1, colour);
+      let stroke = applyColourTransform(path.stroke ?? null, colour);
+      let strokeOpacity = applyColourTransformAlpha(path.strokeOpacity ?? 1, colour);
+      if (group) {
+        invoice.groupedOps += 1;
+        // ► **EVERY RECORD IN THE CHAIN, NOT JUST THE INNERMOST.** An outer
+        //   group's composite CONTAINS these operations too, so an `ops` that
+        //   counted only the innermost would hand a painter a denominator of
+        //   zero for the outer buffer it is being asked to build — while
+        //   `placements` beside it said otherwise. Every chain in the real pack
+        //   is one deep, so only the synthetic pack can tell the two apart.
+        for (let record = group; record; record = record.enclosedBy) record.ops += 1;
+        if (filtered) invoice.groupFilterOps += 1;
+      }
+      if (matrices.length > 0) {
+        invoice.groupMatrixOps += 1;
+        if (!fillExact) invoice.groupMatrixNotFillExact += 1;
+        if (filtered) invoice.groupMatrixFoldedUnderAFilter += 1;
+        if (gradient) {
+          // ► **THE STOPS, BECAUSE THAT IS WHERE THE PAINTER READS THE RAMP.**
+          //   `paintGradientFill` in `tools/arena/main.js` builds from each
+          //   stop's own colour and never consults `fill`, so a matrix folded
+          //   only into `fill` would leave the sky's whole backdrop untouched —
+          //   993 of this pack's 1,690 matrix-covered operations are gradients.
+          //   The flat fallback is folded as well, for a surface with no
+          //   gradient support.
+          invoice.groupMatrixGradientOps += 1;
+          gradient = gradientUnderColourMatrices(gradient, matrices);
+          const flat = foldColourMatrices(fill, fillOpacity, matrices);
+          fill = flat.fill;
+          fillOpacity = flat.fillOpacity;
+        } else {
+          const folded = foldColourMatrices(fill, fillOpacity, matrices);
+          if (folded.applied) {
+            invoice.groupMatrixSolidOps += 1;
+            fill = folded.fill;
+            fillOpacity = folded.fillOpacity;
+          } else {
+            // ► **NO FILL FOR THE MATRIX TO LAND ON, WHICH IS NOT THE SAME AS
+            //   NO MATRIX.** A bitmap-only path or a `"none"` fill: the group's
+            //   colour matrix is simply lost for that operation, exactly as the
+            //   RGB half of the colour transform is lost on a raster. **0 of
+            //   this pack's 1,690 matrix-covered operations is one**, so the
+            //   synthetic pack in the test file is the only thing that can move
+            //   this — a zero here with no denominator beside it would say
+            //   nothing at all.
+            invoice.groupMatrixDroppedOps += 1;
+          }
+        }
+        const foldedStroke = foldColourMatrices(stroke, strokeOpacity, matrices);
+        if (foldedStroke.applied) {
+          // Dead on the real pack for the same reason the colour transform's
+          // stroke line is: **0 of its 1,690 matrix-covered operations carries
+          // a stroke at all.** `tintPack` is what stands under this line.
+          invoice.groupMatrixStrokeOps += 1;
+          stroke = foldedStroke.fill;
+          strokeOpacity = foldedStroke.fillOpacity;
+        }
+      }
+
       ops.push(Object.freeze({
         kind: "path",
         d: path.d,
@@ -363,12 +773,19 @@ function emitPropOps(pack, { linkage, frame = 1 } = {}, invoice) {
         //   returns its input untouched for `null`, for `"none"` and for
         //   anything that is not `#rrggbb`, so the four lines below are also
         //   the plain copy they used to be whenever there is nothing to apply.
-        fill: applyColourTransform(path.fill ?? null, colour),
+        fill,
         fillRule: path.fillRule ?? "evenodd",
-        fillOpacity: applyColourTransformAlpha(path.fillOpacity ?? 1, colour),
-        stroke: applyColourTransform(path.stroke ?? null, colour),
+        fillOpacity,
+        stroke,
         strokeWidth: path.strokeWidth ?? 0,
-        strokeOpacity: applyColourTransformAlpha(path.strokeOpacity ?? 1, colour),
+        strokeOpacity,
+        // ► **THE ENCLOSING GROUP, AS THE SHARED FROZEN RECORD.** Absent when
+        //   the placement is inside none, so a painter can branch on presence
+        //   and `op.group !== previous` is where it flushes its buffer. The
+        //   colour matrices are already in the four fields above; what is left
+        //   on the record is the blur, the glow and the blend mode, which no
+        //   per-operation arithmetic can express.
+        ...(group ? { group } : {}),
         // ► **THE BITMAP FILL, AND DROPPING IT HERE MADE THE ARENA WALLS
         //   INVISIBLE.** `shapeToPaths` has always reported
         //   `approximated: "bitmap"` on a raster fill, and this reader copied
@@ -384,6 +801,12 @@ function emitPropOps(pack, { linkage, frame = 1 } = {}, invoice) {
       }));
     }
   }
+  // ► **FROZEN LAST, because the denominators on them are not known until
+  //   here.** Every operation emitted above already holds the record by
+  //   reference, so freezing now is the same object those operations point at
+  //   and not a copy they would have missed.
+  for (const record of records) Object.freeze(record);
+  if (collected) for (const record of records) collected.push(record);
   return ops;
 }
 
@@ -411,6 +834,15 @@ function emitPropOps(pack, { linkage, frame = 1 } = {}, invoice) {
  *   an INJECTED SEAM rather than one file. The counts live in
  *   `propInvoiceFor`.
  *
+ * ► **AN OPERATION MAY NOW CARRY `group`, AND THAT IS WHY IT DOES.** The
+ *   enclosing group's blur, glow and blend mode cannot be folded into a path —
+ *   Flash filters the COMPOSITE — so they ride as a shared frozen record on
+ *   each operation under them, inside the same flat array. A painter flushes
+ *   its buffer where `op.group` stops being the same object; a painter that
+ *   ignores the field draws exactly what it drew before, which is what every
+ *   caller in this tree does today. The group's colour MATRICES are not on the
+ *   record: they are already in `fill`, `stroke` and the gradient stops.
+ *
  * @param {object} pack     from `propPackFrom`
  * @param {object} options
  * @param {string} options.linkage  the build's own export name
@@ -437,6 +869,93 @@ export function propInvoiceFor(pack, options = {}) {
   const invoice = emptyInvoice();
   emitPropOps(pack, options, invoice);
   return Object.freeze(invoice);
+}
+
+/**
+ * THE ENCLOSING EFFECT GROUPS ONE FRAME REACHES, in first-appearance order.
+ *
+ * The same records `propOpsFor` stamps on its operations, built by the same
+ * private walk. ► **EQUAL, NOT IDENTICAL — a separate call is a separate walk,
+ * so `propEffectGroupsFor(...)[0] === propOpsFor(...)[0].group` is FALSE.** The
+ * identity that matters is WITHIN one array: every operation under one group
+ * holds one object, which is what lets a painter flush on `!==`. This sentence
+ * asserted the other thing for as long as it took to run it.
+ *
+ * The table exists for a caller that wants to know what a frame is asking of a
+ * painter WITHOUT walking its operations: a manifest line, a log line, a test.
+ *
+ * Each record:
+ *
+ * ```text
+ *   id                    index into the prop's own `effectGroups`
+ *   path, character       where the group sits in the build's display list
+ *   enclosedBy            the next group OUT, or null
+ *   filter                the canvas filter string for its blurs and glows,
+ *                         or null — NEVER a colour matrix
+ *   composite             `globalCompositeOperation` for its blend mode, or null
+ *   blendModeRefused      why canvas cannot express it, or null
+ *   colourMatricesFolded  how many matrices `propOpsFor` has ALREADY applied
+ *   ops, placements       what sits under it IN THIS FRAME — the denominators
+ *   counts                `canvasFilterFor`'s own applied/deferred/noOp/refused
+ * ```
+ *
+ * ► **`scale` IS THE STAGE SCALE AND IT CHANGES THE STRING, NOT THE BUCKETS.**
+ *   `ctx.filter` lengths are not scaled by `ctx.setTransform`, so a painter
+ *   drawing the stage at 2x must ask for 2 or every blur is half the size.
+ *   Nothing else in this module's output moves with it — a colour matrix has no
+ *   length in it — so an operation's fills are identical at every scale.
+ *
+ * ► **`propOpsFor` TAKES IT TOO, AND THAT IS THE ROUTE THROUGH THE INJECTED
+ *   SEAM.** `arenaScreenLayersFor(pack, propOpsFor, …)` decides the frame
+ *   itself, so a painter cannot call this function for the matching frame
+ *   without re-deriving one — but it CAN inject
+ *   `(pack, options) => propOpsFor(pack, { ...options, scale: fit.scale })`,
+ *   and the records stamped on the operations then carry radii in canvas
+ *   pixels. That is why the option lives on both and not only here.
+ *
+ * @param {object} pack     from `propPackFrom`
+ * @param {object} options  `{ linkage, frame, scale }`, as `propOpsFor` takes
+ */
+export function propEffectGroupsFor(pack, options = {}) {
+  const groups = [];
+  emitPropOps(pack, options, emptyInvoice(), groups);
+  return Object.freeze(groups);
+}
+
+/**
+ * THE EFFECTS THAT NEVER REACH THIS MODULE AT ALL, per pack.
+ *
+ * ► **THE ARENA UI BAR'S TWO GLOWS, AND NO RENDERER CAN DRAW THEM FROM THIS
+ *   PACK.** `tools/extract-props.mjs` skips a drawable it cannot turn into
+ *   paths — a TEXT FIELD is the case that occurs — and records what it dropped
+ *   with it under `effects.own.dropped`. On this build that is characters 1527
+ *   and 1528 on `panel`, one glow each: there is no shape in the pack for the
+ *   glow to sit on, so every count in `propInvoiceFor` is honestly zero and
+ *   honestly silent about them. **What it would take** is the join
+ *   `screen-text.js` already is on the screens side — the filter carried
+ *   against the text FIELD and applied to a text operation — plus an extractor
+ *   that does not drop the filter with the drawable.
+ *
+ * ► **PER PACK, NOT PER FRAME, ON PURPOSE.** It is a property of the extraction
+ *   and does not vary with which frame is being drawn, so putting it in the
+ *   per-frame invoice would make any roll-up multiply it by the frame count.
+ *
+ * Returns `{ props, placements, filters, byType }`, all zero on a pack with no
+ * effect data — which is also what a pack written before 2026-09-14 looks like.
+ */
+export function propEffectsUnreachable(pack) {
+  const out = { props: 0, placements: 0, filters: 0, byType: {} };
+  for (const prop of Object.values(pack?.props ?? {})) {
+    const dropped = prop?.effects?.own?.dropped;
+    if (!dropped || !Number.isFinite(dropped.filters) || dropped.filters <= 0) continue;
+    out.props += 1;
+    out.placements += Number.isFinite(dropped.placements) ? dropped.placements : 0;
+    out.filters += dropped.filters;
+    for (const [type, count] of Object.entries(dropped.filtersByType ?? {})) {
+      out.byType[type] = (out.byType[type] ?? 0) + count;
+    }
+  }
+  return Object.freeze({ ...out, byType: Object.freeze(out.byType) });
 }
 
 /**
@@ -526,14 +1045,21 @@ export function arrowOpsFor(pack, artFrame) {
  *   that lookup is `tools/extract-props.mjs`'s to do and not this module's to
  *   invent: there is nothing in the pack for this function to read.
  *
- * ► **NOR THE `lighten` COMPOSITE.** Every one of sprite 48's seven
+ * ► ~~**NOR THE `lighten` COMPOSITE.** Every one of sprite 48's seven
  *   placements sets blend mode 5, and `emitPropOps` emits `matrix`, `clip`,
- *   `colour` and the path's own paint — no blend mode at all, for any prop. So
- *   the puff draws as ordinary source-over alpha, which is a DIMMER puff over a
- *   light backdrop and a wrong one over a dark sky. Named rather than left for
- *   a screenshot to find, because it is the same class of silent omission that
- *   left the arena walls invisible: the datum exists upstream, nothing here
- *   reads it, and no count says so.
+ *   `colour` and the path's own paint — no blend mode at all, for any prop.~~
+ *   **— HALF FIXED ON 2026-09-15, AND THE HALF THAT IS LEFT IS NOT THIS
+ *   MODULE'S.** The blend mode is not on the placement at all: it is on the
+ *   ENCLOSING GROUP, the single entry in `bullet_trail`'s `effectGroups`
+ *   (`{path: [1], character: 47, blendMode: 5}`), and every one of its seven
+ *   frames' placements points at it. `propOpsFor` now hands that group's record
+ *   to the painter on each operation as `group.composite === "lighten"` —
+ *   `blendModeFor` calls it EXACT — so the datum reaches the draw call.
+ *   **Until a painter sets `globalCompositeOperation` from it the puff still
+ *   draws source-over**, which is a dimmer puff over a light backdrop and a
+ *   wrong one over a dark sky; the difference from the struck sentence is that
+ *   the loss is now counted (`groupBlendModes`) and reachable rather than
+ *   absent.
  *
  * @param {object} pack        from `propPackFrom`
  * @param {number} ageFrames   frames since the puff was attached; 0 is newest
