@@ -8,8 +8,69 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-14 17:12 — the screens are drawn, and five are black on purpose](docs/handoffs/2026-09-14-1712--the-screens-are-drawn-and-five-are-black-on-purpose.md).**
+[2026-09-15 00:46 — the tint landed, and the trail vanished](docs/handoffs/2026-09-15-0046--the-tint-landed-and-the-trail-vanished.md).**
 Start there.
+
+► **THE COLOUR TRANSFORM IS IN `src/render/props.js` AND THE SHELL'S COPY IS
+  GONE.** `propOpsFor` carries each placement's transform onto fill, stroke,
+  both opacities and every gradient stop, through `filters.js`. The arena's UI
+  bar plate measures `#30160c` where it measured `#ffffff`. `tools/arena/main.js`
+  lost `tintedPropOpsFor`, `probeColourTransform` and its own tally; the two
+  cases the fold cannot express are counted in a new `propInvoiceFor`, **with
+  denominators, because both are DEAD on the real pack** and a bare zero would
+  not say so.
+
+► **APPLYING IT CORRECTLY REVEALED THAT FOURTEEN OF THE TWENTY BOWS DREW NO
+  ARROW TRAIL.** `arrowTrailOpsFor` was indexing `bullet_trail`'s seven-frame
+  TIME fade with the WEAPON's art index; bows 67..80 clamped onto frame 7, whose
+  `alphaMultiplier` is 0. **Wrong before, and invisible, because the alpha was
+  being dropped anyway.** The build settles it —
+  `trail.bullet.gotoAndStop(secondary_weapon - 60)` puts the weapon index on a
+  CHILD inside the puff, and sprite 48's seven frames are one drawing at seven
+  alphas ending in `this.removeMovieClip()`: **the puff's whole life, not a
+  lookup with fourteen dark entries.** `tools/extract-props.mjs` had quoted those
+  exact bytes and written the wrong conclusion beside them. The parameter is
+  `ageFrames` now, 0-BASED on purpose where `arrowOpsFor`'s is 1-based.
+
+► **THE FILTERS LEAVE THE EXTRACTORS NOW, AND NOTHING READS THEM.** `props.json`
+  carries 363 effect groups over 3209 placements; `screens.json` carries 276
+  typed filters. **The picture has not changed by one pixel**: `prefixesOf` in
+  `screen.js` reads only `entry.path`, so its output is invariant under those
+  records being correct, garbage or absent. The evidence that CAN vary was
+  measured — `canvasFilterFor` over the real rosters, 0 applied before, **214
+  now**. Ranked first: read them.
+
+► **CORRECTING THE POINTER IS NOT CORRECTING THE POINTEE.** `text.js` struck its
+  own copy of the alignment claim and NAMED `tools/screens/main.js` as stale —
+  and did not change it, so a reader of that file still met a live bug report for
+  a fixed bug. **Ninth instance of the signature failure here, and the first
+  created by a previous fix's own note.** Related and cheap: seven in-tree
+  pointers cited `screen.js:647` and `props.js:366`, neither of which held that
+  code. **Cite SYMBOLS, not line numbers.**
+
+► **A TEST CAN MEASURE A COUNTERFACTUAL AND CALL IT A RE-DERIVATION.** One fed
+  the FIXED wrapper the OLD argument and reported 15 dark bows; the shipped
+  defect was 14, because bow 66 drew faint rather than invisible. A comment
+  claiming to "RE-DERIVE rather than quote" made it worse than a quotation.
+
+► **AND ONE VERIFIER FINDING IS RECORDED AS WRONG RATHER THAN OBEYED.** Two
+  `approximated` shapes do coexist in one merged array — 209 strings, 65 lists —
+  **and there is exactly one documented reader that takes both**, the op-level
+  consumer uses it, and the placement-level field is uniformly an array. A
+  tolerant reader at a named seam is a design, not a data loss. **Do not rewrite
+  four files to satisfy it.**
+
+► **TWO BUILD WAVES, 24 AGENTS, 0 DEAD, 0 OWNERSHIP VIOLATIONS, AND TWELVE
+  VERIFIER VERDICTS: 1 CONFIRMED, 10 PARTIALLY-BROKEN, 1 BROKEN — 22 of 23 on
+  this project.** Both waves used disjoint FILE OWNERSHIP with a monitor running
+  against the matrix, and the shell track was sequenced AFTER the module it
+  depends on so nothing could double-apply. **No agent regenerated `assets/`**:
+  extractors ran into scratch and the main session regenerated serially, which is
+  how the new pack shape met the renderer for the first time — no regression.
+
+*(The brief it supersedes, whose ranked items 1, 3, 4 and 6 are CLOSED and whose
+item 2 is HALF closed — the extractors carry the filters, nothing reads them:)*
+[2026-09-14 17:12 — the screens are drawn, and five are black on purpose](docs/handoffs/2026-09-14-1712--the-screens-are-drawn-and-five-are-black-on-purpose.md).
 
 ► **ALL 26 SCREENS DRAW, AND THE ARENA'S BAR READS ITS OWN WORDS.**
   `tools/screens/index.html` — `?screen=<name>`, arrows to walk. `help` renders
@@ -24,23 +85,42 @@ Start there.
   placement. **`tools/shot.sh` now takes a PAGE PATH as its fifth argument** —
   it hardcoded the arena, so a second page could not be shot at all.
 
-► **THE BAR WAS WHITE FOR THE SAME REASON IT WAS WORDLESS, AND THAT IS ONE
-  DEFECT.** `propOpsFor` in `src/render/props.js` drops each placement's colour
+► ~~**THE BAR WAS WHITE FOR THE SAME REASON IT WAS WORDLESS, AND THAT IS ONE
+  DEFECT.**~~ **FIXED 2026-09-15 — see the top of this file.** The diagnosis
+  below was correct and is kept as the record of how it was found; **its
+  instruction ("Ranked first: move it into `props.js`") is DONE**, and
+  `probeColourTransform` no longer exists to turn itself off.
+  ~~`propOpsFor` in `src/render/props.js` drops each placement's colour
   transform; the plate is `rgb x0, alpha x0.5` and the fields are `#ffffff`.
   **`tools/arena/main.js` composes it in the SHELL today and says so in its own
   log panel** — a decision where no test reaches it, which is the arrangement
   five live defects have come out of. **Ranked first: move it into `props.js`.**
   It fixes the layers, the arrow trail and the scenery together, and unblocks
   `bullet_trail`'s 7-frame alpha fade, whose seventh puff should be invisible
-  and currently draws solid.
+  and currently draws solid.~~
+  ► **AND THE LAST SENTENCE OF IT WAS THE WRONG WAY ROUND, which only applying
+    the fix could show.** The seventh puff was never the problem: the fade is
+    indexed by the puff's AGE and the shipped caller was passing the WEAPON's
+    art index, so fourteen of the twenty bows drew NO trail at all. "The
+    scenery" was wrong too — `rockMC` carries 1 placement and 0 tinted, so the
+    fix could not reach it. **A prediction of what a fix will repair is not
+    evidence about what is broken.**
 
-► **THE FILTERS ARE BLOCKED IN THE EXTRACTORS, NOT THE RENDERER.** The previous
-  handoff ranked "apply the filters" second; the data never leaves
-  `extract-props.mjs` (which discards the `filters`/`blendMode` `flattenFrame`
-  already returns) or `extract-screens.mjs` (which writes `filters: true` where
-  the LIST belongs). The arena page reports `props: NO filter data in the pack`
-  rather than inventing one. **1525 of `townsquare`'s operations — 93% of that
-  screen — sit under a FILTERLIST nothing applies.**
+► ~~**THE FILTERS ARE BLOCKED IN THE EXTRACTORS, NOT THE RENDERER.**~~
+  **THE EXTRACTOR HALF IS DONE 2026-09-15; THE BLOCK IS NOW THE RENDERER.** The
+  diagnosis was right and is why the work went where it did: ~~the data never
+  leaves `extract-props.mjs` (which discards the `filters`/`blendMode`
+  `flattenFrame` already returns) or `extract-screens.mjs` (which writes
+  `filters: true` where the LIST belongs)~~ — both carry them now, 363 effect
+  groups over 3209 placements and 276 typed filters respectively, and the arena
+  page no longer reports `props: NO filter data in the pack`.
+  ► **BUT NOTHING READS THEM AND THE PICTURE IS UNCHANGED.** `prefixesOf` in
+    `screen.js` reads only `entry.path`, so its output is invariant under those
+    records being correct, garbage or absent — a verifier proved the obvious
+    "did the op count move?" check could not have varied. The evidence that CAN
+    vary: **`canvasFilterFor` over the real rosters, 0 applied before, 214
+    now.** **1525 of `townsquare`'s operations — 93% of that screen — still sit
+    under a FILTERLIST nothing applies.** That is ranked first.
 
 ► **ASK WHAT YOUR EVIDENCE COULD POSSIBLY VARY OVER.** The sharpest finding of
   two waves. A fold was justified by the operation list for all 26 screens
