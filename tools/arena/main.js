@@ -100,6 +100,7 @@ import {
   cameraFor,
   cameraStep,
   stageFitFor,
+  stageClipRectFor,
   stageProjectorFor,
   clipEffectTableFrom,
   effectsForAnimation,
@@ -2178,6 +2179,9 @@ function probeCanvasFilter() {
  * player on a browser where `ctx.filter` is ruinous has a way back.
  */
 const GROUP_COMPOSITING = params.get("groups") !== "0";
+// `?clip=0` restores the pre-2026-09-15 picture: the stage letterboxed and
+// every painter drawing straight through the bars. See `render`.
+const STAGE_CLIP = params.get("clip") !== "0";
 
 /**
  * One frame's worth of what the compositor did, accumulated by
@@ -2988,6 +2992,44 @@ function render(now = performance.now()) {
   // own bowl when they have not — the same fallback the figures and the sound
   // already have, and a clone with no assets is unchanged.
   const fit = stageFitFor({ width: canvas.width, height: canvas.height });
+
+  // ► **EVERYTHING THIS FRAME DRAWS IS CLIPPED TO THE STAGE, AND THAT IS THE
+  //   GREEN BAND.** `stageFitFor` letterboxes the 640x420 stage into the
+  //   canvas and every painter below then drew straight through the bars it
+  //   creates — the sky reaches stage y -164.8 at `sky=60` and the crowd
+  //   leaves the stage on every frame. `stageClipRectFor` and the measurement
+  //   that settled it are in `src/render/arena-backdrop.js`; the short version
+  //   is that a real player rasterises out-of-stage content and MASKS it, and
+  //   this renderer was doing the first half only.
+  //
+  //   It wraps the WHOLE frame rather than the scenery alone, because a
+  //   gladiator walking off the edge, an arrow leaving the arena and the
+  //   border's own overhang are all the same question, and clipping three of
+  //   the four would be a harder thing to reason about than clipping none.
+  //   `restore` is in a `finally` for the reason `context` is reassigned in
+  //   one: a throw mid-frame must not leave the next frame clipped to a stale
+  //   rectangle.
+  //   ► **AND IT HAS A KILL SWITCH, `?clip=0`**, for the same reason
+  //     `?filters=0` and `?groups=0` do: this repository's rule is that the
+  //     difference between two shots is the measurement, and a change with no
+  //     off switch cannot be measured, only asserted. With `clip=0` the page
+  //     draws exactly what it drew before this landed — green band included.
+  const stageRect = stageClipRectFor(fit);
+  context.save();
+  if (STAGE_CLIP) {
+    context.beginPath();
+    context.rect(stageRect.x, stageRect.y, stageRect.width, stageRect.height);
+    context.clip();
+  }
+  try {
+    renderStage(view, fit, now);
+  } finally {
+    context.restore();
+  }
+}
+
+/** Everything inside the stage rectangle — see `render` for why it is clipped. */
+function renderStage(view, fit, now) {
   const screen = splitArenaScreen(arenaScreenLayersFor(propPack, stagePropOpsFor(fit), camera, arenaDressing));
   if (screen.behind.length > 0 || screen.inFront.length > 0) {
     for (const layer of screen.behind) paintArenaLayer(layer, fit);

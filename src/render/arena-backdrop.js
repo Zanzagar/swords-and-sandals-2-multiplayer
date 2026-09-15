@@ -966,6 +966,79 @@ export function stageFitFor({ width, height }) {
 }
 
 /**
+ * THE LETTERBOX, AS A RECTANGLE TO CLIP TO — the other half of `stageFitFor`,
+ * which computed a letterbox and then let every painter draw through it.
+ *
+ * ► **THIS IS THE GREEN BAND, AND IT TOOK A RUNTIME ORACLE TO SETTLE.** A
+ *   neon band above the top of the stage was recorded as "known, measured,
+ *   unexplained" across five handoffs, and one session withdrew a diagnosis of
+ *   it within the hour. It is not one layer misplaced: **the sky clip simply
+ *   extends past the stage, and how far depends on the frame.** Measured over
+ *   the pack, in stage pixels, with the placement applied:
+ *
+ * ```text
+ *     sky frame    1      60      112     180      200
+ *     top edge   -12.0  -164.8   -12.0   -50.9   -114.1
+ *     ops above    1      17        1      42       57
+ * ```
+ *
+ *   The extents table in `HANDOFF.md` that made this look like a 15-pixel
+ *   disagreement was computed at frame 1 — **the one frame where the sky
+ *   barely leaves the stage.** `crowd` leaves it on every frame and every
+ *   arena, spanning x -289.5..1073.3 against a 640-wide stage.
+ *
+ * ► **AND THE PLAYER'S ANSWER IS A MASK, MEASURED RATHER THAN REASONED.**
+ *   `tools/swf-probe.mjs` writes a 200x200 movie with one control rectangle
+ *   inside the stage and four outside it, one past each edge;
+ *   `tools/ruffle-shot.ps1` renders it. Varying ONLY Ruffle's `--letterbox`:
+ *
+ * ```text
+ *     outside-stage edge   letterbox on   letterbox off
+ *     above  (red)           #000000        #ff0000
+ *     below  (green)         #000000        #00ff00
+ *     left   (blue)          #000000        #0000ff
+ *     right  (yellow)        #000000        #ffff00
+ *     inside control         #ffffff        #ffffff      <- the null control
+ * ```
+ *
+ *   So a player DOES rasterise display-list content outside its stage rect,
+ *   and what decides whether anyone sees it is a mask over the stage — not
+ *   clipping at draw time. **Our renderer had neither**: it computes a
+ *   letterbox in `stageFitFor` and then paints into the bars it just created,
+ *   which is a behaviour no player has.
+ *
+ * ► **WHAT IS MEASURED AND WHAT IS NOT.** Measured: the four-edge table above,
+ *   with its null control; that SS2's own header declares 0,0..640x420 and its
+ *   backdrop art (char 643) is 640x420 to the pixel; that the build never sets
+ *   `Stage.scaleMode` anywhere in its bytes, so it expresses no opinion and
+ *   takes the player default. NOT measured: whether the shipped Adobe AIR host
+ *   (`swords_and_sandals_classic.swf`, a 640x480 stage around this 640x420
+ *   one) masks its child. That link is reasoned, not measured, and whoever
+ *   next runs the real game should look at the 60-pixel band and say.
+ *
+ *   The case for clipping does not rest on that link: the build's own border
+ *   art is 732x505 on a 640x420 stage — **oversized on every edge on purpose**,
+ *   which is a thing you draw only when you know the overhang is cut off.
+ *
+ * Returned in CANVAS pixels, ready for `ctx.rect(...)` then `ctx.clip()`, and
+ * computed here rather than in a shell for the reason every decision in this
+ * module is: `tools/arena/main.js` cannot be imported by node, so arithmetic
+ * that lives there is unreachable by the suite, and that arrangement has
+ * produced five live defects in a day.
+ */
+export function stageClipRectFor(fit) {
+  const scale = Number.isFinite(fit?.scale) && fit.scale > 0 ? fit.scale : 1;
+  const offsetX = Number.isFinite(fit?.offsetX) ? fit.offsetX : 0;
+  const offsetY = Number.isFinite(fit?.offsetY) ? fit.offsetY : 0;
+  return Object.freeze({
+    x: offsetX,
+    y: offsetY,
+    width: SS2_STAGE.width * scale,
+    height: SS2_STAGE.height * scale
+  });
+}
+
+/**
  * ARENA UNITS -> CANVAS PIXELS, as the two closures every drawing site in the
  * shell already calls.
  *

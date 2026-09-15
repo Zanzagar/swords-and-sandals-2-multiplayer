@@ -52,6 +52,7 @@ import {
   targetZoomFor,
   frameForLayer,
   stageFitFor,
+  stageClipRectFor,
   stageProjectorFor,
   zoomTargetFor,
   SS2_UI_BAR_READOUTS,
@@ -60,6 +61,7 @@ import {
   hasUiBarReadouts
 } from "../src/render/arena-backdrop.js";
 import { SS2_ARENA } from "../src/team/ss2-rules.js";
+import { propOpsFor } from "../src/render/props.js";
 import { fieldsPlacedIn, textPackFrom } from "../src/render/text.js";
 import { indexCharacters, resolveTimeline, flattenFrame } from "../tools/swf-display-list.mjs";
 import { analyseSwfBuffer } from "../tools/inspect-swf.mjs";
@@ -1469,3 +1471,96 @@ test("THE BAR'S SCRIPT NAMES FOUR READOUTS AND THE DISPLAY LIST PLACES TWO — t
         `${entry.instance} is placed ${(placements.get(entry.instance) ?? []).length} times, not once`);
     }
   });
+
+/* ------------------------------------------------------------------ *
+ * THE STAGE CLIP — the green band, closed 2026-09-15.
+ * ------------------------------------------------------------------ */
+
+test("the stage clip rectangle IS the letterboxed stage, at every canvas shape", () => {
+  for (const size of [
+    { width: 640, height: 420 },   // exact
+    { width: 1280, height: 420 },  // wider than the stage: bars left and right
+    { width: 640, height: 840 },   // taller: bars top and bottom
+    { width: 1920, height: 1080 },
+    { width: 401, height: 953 }    // deliberately not a round ratio
+  ]) {
+    const fit = stageFitFor(size);
+    const rect = stageClipRectFor(fit);
+    assert.equal(rect.x, fit.offsetX, `clip x disagrees with the fit at ${size.width}x${size.height}`);
+    assert.equal(rect.y, fit.offsetY, `clip y disagrees with the fit at ${size.width}x${size.height}`);
+    assert.equal(rect.width, SS2_STAGE.width * fit.scale, "clip width is not the stage");
+    assert.equal(rect.height, SS2_STAGE.height * fit.scale, "clip height is not the stage");
+    // The letterbox is whatever is left, and it must be symmetric — a clip that
+    // was right on one edge and wrong on the other would still satisfy the four
+    // assertions above if they were written against the rect alone.
+    assert.ok(Math.abs((size.width - (rect.x + rect.width)) - rect.x) < 1e-9,
+      "the left and right bars are not equal, so the stage is not centred");
+    assert.ok(Math.abs((size.height - (rect.y + rect.height)) - rect.y) < 1e-9,
+      "the top and bottom bars are not equal, so the stage is not centred");
+  }
+});
+
+test("a malformed fit yields the stage at 1:1 rather than a NaN rectangle", () => {
+  // Total for the reason every reader in this module is: a partial extraction
+  // must leave a playable arena. A NaN rect passed to `ctx.rect` clips away the
+  // WHOLE canvas silently, which is a black page rather than a missing layer.
+  for (const bad of [null, undefined, {}, { scale: 0 }, { scale: -1 }, { scale: NaN }]) {
+    const rect = stageClipRectFor(bad);
+    assert.ok(Number.isFinite(rect.x) && Number.isFinite(rect.y), `x/y not finite for ${JSON.stringify(bad)}`);
+    assert.ok(rect.width > 0 && rect.height > 0, `empty rect for ${JSON.stringify(bad)}`);
+    assert.equal(rect.width, SS2_STAGE.width);
+    assert.equal(rect.height, SS2_STAGE.height);
+  }
+});
+
+test("the arena layers DO leave the stage, which is why the clip exists", () => {
+  // ► **THIS IS THE ASSERTION THAT COULD HAVE VARIED, and the reason it is
+  //   written against the real pack.** A test that only checked the rectangle's
+  //   arithmetic would pass with the clip deleted and with the sky drawn
+  //   anywhere at all. What makes the clip load-bearing is that the pack really
+  //   does put paint outside 640x420 — so that is what is asserted, at the sky
+  //   frame the band was reported at, against the frame where it was not.
+  //
+  //   The living head's extents table said the sky spans -12.0..207.7 and that
+  //   the band at -75..-45 was therefore "not the sky's main body". That table
+  //   was computed at FRAME 1. At frame 60 the sky reaches -164.8.
+  const packPath = path.join(REPO_ROOT, "assets", "props", "props.json");
+  if (!fs.existsSync(packPath)) {
+    assert.fail(`the props pack is missing at ${packPath}; this check must not skip silently`);
+  }
+  const pack = JSON.parse(fs.readFileSync(packPath, "utf8"));
+
+  const topOf = (linkage, frame) => {
+    const ops = propOpsForPack(pack, linkage, frame);
+    const layer = SS2_ARENA_SCREEN_LAYERS.find((entry) => entry.prop === linkage);
+    const place = layerPlacementFor(layer, { crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(SS2_CAMERA.zoomStart) });
+    let top = Infinity;
+    for (const op of ops) {
+      if (op.kind !== "path" || typeof op.d !== "string") continue;
+      const numbers = (op.d.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi) ?? []).map(Number);
+      const [a, b, c, d, tx, ty] = op.matrix ?? [1, 0, 0, 1, 0, 0];
+      for (let i = 0; i + 1 < numbers.length; i += 2) {
+        const y = b * numbers[i] + d * numbers[i + 1] + ty / 20;
+        top = Math.min(top, place.y + (place.scale ?? 1) * y);
+      }
+      void a; void c;
+    }
+    return top;
+  };
+
+  const skyAtOne = topOf("sky", 1);
+  const skyAtSixty = topOf("sky", 60);
+  assert.ok(skyAtSixty < -100,
+    `the sky's top edge at frame 60 is ${skyAtSixty.toFixed(1)}, so nothing leaves the stage and this clip guards nothing`);
+  assert.ok(skyAtOne > skyAtSixty + 100,
+    `frame 1 (${skyAtOne.toFixed(1)}) and frame 60 (${skyAtSixty.toFixed(1)}) agree, so a frame-1 extents table was never the trap it was`);
+  assert.ok(topOf("crowd", 1) < 0, "the crowd sits inside the stage, which contradicts its eight tiled stands");
+});
+
+function propOpsForPack(pack, linkage, frame) {
+  const frames = pack?.props?.[linkage]?.frames;
+  assert.ok(Array.isArray(frames) && frames.length > 0, `the pack has no frames for ${linkage}`);
+  const ops = propOpsFor(pack, { linkage, frame });
+  assert.ok(Array.isArray(ops) && ops.length > 0, `${linkage} frame ${frame} produced no operations`);
+  return ops;
+}

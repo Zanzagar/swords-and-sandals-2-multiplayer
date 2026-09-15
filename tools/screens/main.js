@@ -198,6 +198,7 @@ import {
   SCREEN_TEXT_APPROXIMATION_KINDS,
   SS2_STAGE,
   stageFitFor,
+  stageClipRectFor,
   TWIPS_PER_PIXEL,
   canvasFilterFor
 } from "/src/render/index.js";
@@ -1450,8 +1451,16 @@ function draw() {
 
   // The stage's own ground, so the letterbox and the screen are distinguishable
   // from each other and from a page that drew nothing at all.
+  //
+  // ► **THE RECTANGLE IS `stageClipRectFor(fit)` NOW RATHER THAN A SECOND COPY
+  //   OF THE ARITHMETIC.** This file had `fit.offsetX, fit.offsetY,
+  //   SS2_STAGE.width * fit.scale, SS2_STAGE.height * fit.scale` written out,
+  //   which is exactly what that function returns — and "three copies of the
+  //   arithmetic appeared in one evening" is a sentence this repository has
+  //   already had to write about the colour transform.
+  const stageRect = stageClipRectFor(fit);
   context.fillStyle = "#000000";
-  context.fillRect(fit.offsetX, fit.offsetY, SS2_STAGE.width * fit.scale, SS2_STAGE.height * fit.scale);
+  context.fillRect(stageRect.x, stageRect.y, stageRect.width, stageRect.height);
 
   const tally = emptyTally();
   const ops = visibleOps(current, tally);
@@ -1469,6 +1478,19 @@ function draw() {
   //   `requestAnimationFrame` around a composite, which is a different
   //   instrument and is not installed here.
   const started = performance.now();
+  // ► **CLIPPED TO THE STAGE, for the reason recorded at `stageClipRectFor`:**
+  //   a player rasterises out-of-stage content and MASKS it, measured four
+  //   edges at a time against Ruffle, and this renderer was doing the first
+  //   half only.
+  //
+  //   The clip closes before `outlineStage` and before `?probe=1`: the stage
+  //   OUTLINE is a debug overlay drawn ON the boundary, and clipping it would
+  //   shave half its stroke and make the instrument disagree with the picture
+  //   it is there to explain.
+  context.save();
+  context.beginPath();
+  context.rect(stageRect.x, stageRect.y, stageRect.width, stageRect.height);
+  context.clip();
   // ► **THE GROUP ROSTER COMES OFF `current.screen`, NOT `current`.**
   //   `screenWithTextFor` returns the merged record and keeps `screenFor`'s
   //   own record whole underneath it; `filterGroups` lives there. If a future
@@ -1476,6 +1498,7 @@ function draw() {
   //   and the log both say so rather than showing a page with no filters on it.
   paintOps(ops, fit, current.placement ?? SCREEN_STAGE_PLACEMENT, tally,
     current.screen?.filterGroups ?? null);
+  context.restore();
   lastPaintMs = performance.now() - started;
   lastTally = tally;
   lastHoles = show.holes ? outlineHoles(current, fit) : 0;
