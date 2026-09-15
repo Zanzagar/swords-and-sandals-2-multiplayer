@@ -264,7 +264,7 @@ Nothing in the ranged phase re-checks ammunition either: the ranged branch of
 negative. In ordinary play the auto-swap below fires first; a capture harness
 that drives `getphase` directly can reach the defect.
 
-### The weapon enchantment selector is `itemglow`, and it keys on POTENCY (2026-09-13)
+### The weapon enchantment selector is `itemglow`, and it keys on TYPE (2026-09-13, ~~POTENCY~~ CORRECTED 2026-09-15)
 
 **Found, after four sessions of being recorded as a gap.** The standing note
 said `updatecharacter` contains no `gotoAndStop` at all and told the next reader
@@ -287,20 +287,102 @@ instruction and this is where it leads.
 of `gotoAndStop` on the weapon clip:
 
 ```text
-  potency < 2                     gotoAndStop(1)     no glow      +0x005f
-  potency == 2 && type == 1/2/3   gotoAndStop(2/3/4)              +0x0094…
-  potency == 3 && type == 1/2/3   gotoAndStop(5/6/7)              +0x0111…
-  potency == 4 && type == 1/2/3   gotoAndStop(8/9/10)             +0x018e…
-  potency == 5 && type == 1/2/3   gotoAndStop(11/12/13)           +0x020b…
+  type < 2                        gotoAndStop(1)     no glow      @0x3fa7d4
+  type == 2 && potency == 1/2/3   gotoAndStop(2/3/4)              @0x3fa809…
+  type == 3 && potency == 1/2/3   gotoAndStop(5/6/7)              @0x3fa886…
+  type == 4 && potency == 1/2/3   gotoAndStop(8/9/10)             @0x3fa903…
+  type == 5 && potency == 1/2/3   gotoAndStop(11/12/13)           @0x3fa980…
 ```
 
-which is `frame = (potency - 2) * 3 + type + 1`, and 1 below potency 2.
+which is `frame = 3 * (type - 2) + potency + 1`, and 1 below type 2.
 
-**The outer test is on `register:3` and the inner on `register:2`.** The
-function's own `DefineFunction2` names its parameters
-`(whichitem, enchant_type, enchant_potency)`, and the call site's push order
-resolves through `CallMethod` to `arg1 = weapon, arg2 = type, arg3 = potency` —
-so the outer, coarse selector is **POTENCY**.
+► ~~**The outer test is on `register:3` and the inner on `register:2` … so the
+  outer, coarse selector is POTENCY.**~~ **THE TWO PREMISES ARE RIGHT AND THE
+  CONCLUSION INVERTS THEM. Corrected 2026-09-15; the table above is rewritten,
+  not annotated, because a reader who copies a code block does not read the
+  paragraph under it.**
+
+  The outer test really is on `register:3` — and `itemglow`'s own
+  `DefineFunction2` binds its parameters to registers explicitly:
+  `[{register: 3, name: "enchant_type"}, {register: 2, name: "enchant_potency"}]`.
+  **So `register:3` IS `enchant_type`**, and the outer, coarse selector is
+  **TYPE**. The old sentence read the register numbers off the body correctly,
+  read the parameter names off the header correctly, and then paired them the
+  wrong way round.
+
+  **Seven independent witnesses agree, and the first of them is the author's
+  own name table:**
+
+  1. `weaponenchantments = new Array("", "", "Flame", "Frost", "Poison", "Wraith")`
+     at `0x3fe79c`, and `weaponenchantments_potency = new Array("", "Weak",
+     "Medium", "Strong")` at `0x3fe786` — both inside
+     `root/frame:35/DoAction@0x3fa9dc`'s `With` block at `0x3fe769`.
+     `battlevalues` reads
+     `weapon_enchantment_type_name = weaponenchantments[weapon_enchantment_type]`
+     (`0x3fdbd8`). **The ELEMENTS are indexed by type; the three STRENGTHS are
+     indexed by potency.** Nothing survives this one.
+  2. **Arity.** The magic shop has FOUR element buttons (2006-2009 write
+     `enchant_type` 2/3/4/5) and THREE gem buttons (2010-2012 write
+     `enchant_potency` 3/2/1, captioned "Strong/Medium/Weak … 30%/20%/10%
+     chance"). Three gems cannot select among four elements.
+  3. **Sprite 703's own FrameLabels**: `flame` 2, `frost` 5, `poison` 8,
+     `wraith` 11 — each spanning exactly three frames. The ELEMENT names the
+     label; the three frames inside it are the three potencies.
+  4. **The glow parameters.** Within a label the colour is constant and the blur
+     RAMPS (3/5/11 inner, 6/10/15 outer); between labels the colour changes.
+     Strength grows with potency, which is what potency means.
+  5. **`damagecharacter`** tests `weapon_enchantment_type == 2/3/4/5` for
+     `burning`/`frozen`/`poison`/`life_stolen` and gates the proc on
+     `randomBetween(1,100) < weapon_enchantment_potency * 10`.
+  6. **`randomise_gladiator`** draws `weapon_enchantment_type =
+     randomBetween(2, 5)` (`0x4048ed`) and `weapon_enchantment_potency` from
+     1..3 banded by `herolevel` (`0x404906`/`0x404962`/`0x404998`).
+  7. **Every call site pushes the same pair in the same order** — potency, then
+     type, then `argCount` — at all nine `enchant_weapon` sites and all four
+     `itemglow` sites, popping to `(…, type, potency)`.
+
+#### The "tension with the damage path" below was an artefact of the inversion, and there is none
+
+**This section used to say a capture was the only thing that could settle it.
+That was wrong and it would have spent a capture session on a question the bytes
+answer.** `itemglow` and `damagecharacter` key the element on the SAME field
+over the SAME range — `enchant_type` ∈ 2..5 — and the four glow colours line up
+with the four statuses one-for-one. The paragraph is kept below as the record of
+how the wrong reading was reached.
+
+#### Three things the corrected reading exposes, none of them recorded before 2026-09-15
+
+► **`else frame 1` IS NOT WHAT THE FUNCTION DOES, and this is the half that
+  matters for a reimplementation.** The only frame-1 arm is `enchant_type < 2`.
+  The body ends at the `Pop` at `0x3fa9da` with **no trailing default**
+  (`codeStart 0x3fa7c3 + codeSize 536 = 0x3fa9db`, which holds the outer
+  `End`). So for a type ≥ 6, for a type in 2..5 whose potency is not in
+  `{1,2,3}` — **potency 0 included, which is exactly what `randomise_gladiator`
+  zeroes to** — and for a non-numeric type, `gotoAndStop` is called ZERO times
+  and **the clip keeps whatever frame it was already on.** Model it as twelve
+  cells plus a `< 2` cell plus an unwritten no-op, never as twelve cells plus a
+  default.
+
+► **THE NaN POLARITY IS THE NEGATED FORM, and it is reachable from the save.**
+  The default arm compiles to `Less2` (`0x3fa7cd`) then `Not` (`0x3fa7ce`), and
+  this file's own § "AVM1 has ONE comparison opcode" records that `Less2; Not`
+  returns TRUE for NaN. A NaN `enchant_type` therefore SKIPS `gotoAndStop(1)`
+  and then fails all four `Equals2` tests — a no-op. `weapon_enchantment_type =
+  Number(characterDNA[33])` (`0x40c869`) coerces a serialised field, so a short
+  or hand-edited DNA leaves the weapon wearing the PREVIOUS fighter's glow.
+
+► **OPPONENTS CAN BE ENCHANTED, so the glow is reachable in ordinary play.**
+  `randomise_gladiator` (`DefineFunction2 @0x403d57`) computes
+  `enchanted_possibility = randomBetween(herolevel * 10, 500)` (`0x404897`) and,
+  when it exceeds 450, enchants — gated at `0x404892` on `weapon != 0`, so only
+  an armed gladiator. Six call sites, five on `game.villain`.
+  ► **AND THE PRIMARY'S LEVEL-BANDED POTENCY LADDER IS DEAD CODE.** All three
+    arms (`0x404912`, `0x404962`, `0x404998`) fall into an UNCONDITIONAL
+    `weapon_enchantment_potency = randomBetween(1, 3)` at `0x404999`. So
+    opponent PRIMARY potency is uniform 1..3 at every level, while the SECONDARY
+    ladder (joining at `0x404ad1`) is genuinely level-banded. **It also costs a
+    second RNG draw**, which any replay reproducing the build's stream must
+    make.
 
 #### And that puts it in tension with the damage path, which is recorded and NOT resolved
 
@@ -312,8 +394,13 @@ exactly the three frames one potency tier uses:
   frost    frames  5-7        wraith   frames 11-13
 ```
 
-So by `itemglow`, **potency 2 is a flaming weapon, 3 a frosted one, 4 poisoned,
-5 wraith** — and `enchant_type` 1-3 chooses a variant within the tier.
+~~So by `itemglow`, **potency 2 is a flaming weapon, 3 a frosted one, 4 poisoned,
+5 wraith** — and `enchant_type` 1-3 chooses a variant within the tier.~~
+**INVERTED; struck 2026-09-15. TYPE 2 is flame, 3 frost, 4 poison, 5 wraith, and
+POTENCY 1-3 chooses Weak/Medium/Strong within the element.** The labels do span
+three frames each — that observation was right — but the three frames are the
+three POTENCIES, which is why the blur ramps across them while the colour does
+not.
 
 ► **BUT `damagecharacter`'S ENCHANTMENT PROC KEYS THE CONDITION ON *TYPE*, with
   values 2-5**: type 2 -> `burning`, 3 -> `frozen`, 4 -> `poison`, 5 ->
@@ -322,16 +409,18 @@ So by `itemglow`, **potency 2 is a flaming weapon, 3 a frosted one, 4 poisoned,
   frost/frozen, poison/poison, wraith/life_stolen — but they are selected by a
   **different field, over a different range**, from the one the glow uses.
 
-  **Both readings are byte-verified and this document does not pick between
-  them.** One of three things is true: the two fields carry the same number in
-  practice on every reachable gladiator, the art and the effect genuinely
-  disagree for some loadouts, or one of the two is a build defect. **A capture
-  of a gladiator with a known enchantment settles it and nothing else does** —
-  the shop is where `weapon_enchantment_type` and `_potency` are written, and
-  neither has been observed at runtime.
+  ~~**Both readings are byte-verified and this document does not pick between
+  them.** … **A capture of a gladiator with a known enchantment settles it and
+  nothing else does.**~~ **RESOLVED 2026-09-15 FROM THE BYTES, AND NO CAPTURE IS
+  NEEDED.** There was never a tension: BOTH key the element on `enchant_type`
+  over 2..5. The appearance of one came entirely from reading `itemglow`'s outer
+  register as potency. See the seven witnesses above.
 
-  Until then: the selector is no longer a gap, and the SECOND question it opened
-  is written down instead of guessed at.
+  **The lesson is worth more than the correction.** This document had the right
+  registers, the right parameter names and the right frame labels, paired two of
+  them wrongly, and then wrote the contradiction that followed as an OPEN
+  QUESTION FOR A CAPTURE. An inconsistency between two readings of the same build
+  is first evidence that one reading is wrong — the instrument before the world.
 
 ### The arena screen: a timeline backdrop PLUS a construction script (2026-09-13)
 

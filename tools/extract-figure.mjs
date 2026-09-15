@@ -84,7 +84,13 @@ import {
  *   across the 4,544 tinted placements came out one unit apart** — 1,765 of the
  *   3,290 distinct (fill, transform) pairs. See `previewTints`.
  */
-import { applyColourTransform, applyColourTransformAlpha } from "../src/render/filters.js";
+import {
+  applyColourTransform,
+  applyColourTransformAlpha,
+  blendModeFor,
+  canvasFilterFor,
+  summariseFilterUse
+} from "../src/render/filters.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
@@ -279,12 +285,437 @@ export function approximationTally(shapes) {
 }
 
 /**
+ * COUNT SOMETHING THIS EXTRACTION COULD NOT CARRY, BY NAME.
+ *
+ * Every effect-related drop in this file goes through here, so `notCarried` in
+ * `manifest.json` is the complete list of what this pack knows about and does
+ * not say. `tools/extract-props.mjs` has the same function and the same note,
+ * and its note records what happened when the claim stopped being true: two
+ * skips went round it and the pack-wide `0 own filters` turned out to be a
+ * measurement of the skip list rather than of the build.
+ *
+ * ► **THAT IS NOT A HYPOTHETICAL HERE.** Before this change,
+ *   `tools/extract-figure.mjs` matched ZERO of `hasFilters|ancestorEffects|
+ *   \.filters|blendMode` — so the figure pack did not drop effects loudly, it
+ *   dropped them SILENTLY, and `--report` had no line where a loss could even
+ *   be printed. The 30 placements in `hero_battle` that sit under a glowing
+ *   group were dropped 30 times a run with nothing said.
+ */
+function refuse(notCarried, kind, howMany = 1) {
+  notCarried[kind] = (notCarried[kind] ?? 0) + howMany;
+}
+
+/**
+ * ONE PLACEMENT'S OWN EFFECTS — its own, and on no account its ancestors'.
+ *
+ * ► **MEASURED ON THE ORACLE, AND IT IS THE REASON THIS IS SEPARATE FROM
+ *   `effectGroupsFor` BELOW: ZERO of clip 1241's 37,077 placements carries a
+ *   filter or a blend mode of its own.** Every effect this rig has lives on an
+ *   ENCLOSING SPRITE. So a fix that spread `drawable.filters` onto the
+ *   placement and stopped there would write nothing 37,077 times and report
+ *   success, and the arena would still have no filter data for the fighter.
+ *
+ * ► **AND THE ZERO IS A REAL DENOMINATOR, NOT A SKIP LIST.** In the props
+ *   extractor the equivalent zero was an artefact: its sweep ran below an
+ *   `unsupported` skip, and the build's only two own-filtered placements were
+ *   exactly two of the drawables that skip removed. Re-measured here for the
+ *   same trap: clip 1241 flattens to 37,077 drawables, of which **290 are
+ *   morphs (all baked, none skipped) and 0 are unsupported by any other kind**
+ *   — so nothing at all is removed above this function and 37,077 really is
+ *   the population. `refusedEffectsOf` invoices the skip anyway, because a
+ *   modded build in a second install lane is where that stops being true.
+ *
+ * `hasFilters` with an EMPTY list is a real distinction and is refused by name
+ * rather than written as `filters: []`: a `PlaceObject3` may carry a filter
+ * list of count zero, which means "this instance has had its filters cleared",
+ * not "nobody asked". Zero of this clip's placements does that either.
+ */
+function ownEffectsOf(drawable, notCarried) {
+  const effects = {};
+  const filters = Array.isArray(drawable.filters) && drawable.filters.length > 0 ? drawable.filters : null;
+  if (filters) {
+    effects.filters = filters;
+    // Carried, and flagged: `parseFilterList` marks the filter kinds that occur
+    // ZERO times in the shipped build, so a record with this flag reached a
+    // code path no capture has ever exercised.
+    for (const filter of filters) if (filter.measured === false) refuse(notCarried, "unmeasuredFilterRecord");
+  } else if (drawable.hasFilters) {
+    refuse(notCarried, "emptyFilterList");
+  }
+  if (drawable.blendMode !== undefined && drawable.blendMode !== null) effects.blendMode = drawable.blendMode;
+  return effects;
+}
+
+/**
+ * THE OWN EFFECTS ON A DRAWABLE THIS TOOL IS ABOUT TO THROW AWAY, INVOICED
+ * WHERE THE THROWING AWAY HAPPENS.
+ *
+ * ► **THE SKIP IS THE ONLY PLACE A ZERO CAN BE MANUFACTURED.** This file has
+ *   exactly one skip — the `unsupported` branch in `extractFigure`, which also
+ *   catches a MORPH whose definition would not parse — and until now it
+ *   recorded the KIND and the character id and nothing else. Any effect on
+ *   such a drawable vanished. Against the installed build the branch fires
+ *   **0 times out of 37,077**, so everything this function counts here is a
+ *   counted zero rather than a measured loss; **that is a fact about this
+ *   build, not about this code**, and the two look identical from the manifest
+ *   unless the number has a name.
+ *
+ * ► **IT REFUSES RATHER THAN CARRIES, AND THAT IS NOT A DODGE.** A skipped
+ *   drawable has no geometry in this pack, so there is nothing for its glow to
+ *   sit on. What is owed is a number with a name.
+ */
+function refusedEffectsOf(drawable, refusedOwn, notCarried) {
+  refusedOwn.skipped += 1;
+  const filters = Array.isArray(drawable.filters) && drawable.filters.length > 0 ? drawable.filters : null;
+  const blend = drawable.blendMode !== undefined && drawable.blendMode !== null ? drawable.blendMode : null;
+  if (filters) {
+    refusedOwn.filterLists.push(filters);
+    refuse(notCarried, "unsupportedDrawableFilters", filters.length);
+  } else if (drawable.hasFilters) {
+    // The same distinction `ownEffectsOf` draws, on a drawable that is leaving:
+    // a CLEARED filter list is a fact about the instance, and losing it
+    // silently alongside the drawable would make it look like nobody asked.
+    refuse(notCarried, "unsupportedDrawableEmptyFilterList");
+  }
+  if (blend !== null) {
+    refusedOwn.blendModes.push(blend);
+    refuse(notCarried, "unsupportedDrawableBlendMode");
+  }
+  // ► **AND THE ANCESTOR CHAIN GOES TOO.** A skipped drawable that sat inside a
+  //   glowing sprite loses the glow as well as its own effects, and the group
+  //   itself may never be reached by any surviving leaf — so the pack would
+  //   hold no trace of it. Counted per GROUP, the same unit `effectGroupsFor`
+  //   counts on.
+  const chain = Array.isArray(drawable.ancestorEffects) ? drawable.ancestorEffects : [];
+  for (const group of chain) {
+    refusedOwn.groupsOnSkipped += 1;
+    const groupFilters = Array.isArray(group.filters) && group.filters.length > 0 ? group.filters : null;
+    if (groupFilters) refuse(notCarried, "unsupportedDrawableInheritedFilters", groupFilters.length);
+    if (group.blendMode !== undefined && group.blendMode !== null) {
+      refuse(notCarried, "unsupportedDrawableInheritedBlendMode");
+    }
+  }
+}
+
+/**
+ * THE ENCLOSING SPRITES THAT CARRY THIS PLACEMENT'S EFFECTS, as indices into
+ * ONE ANIMATION'S `effectGroups` table — deduped BY THE WHOLE RECORD.
+ *
+ * ► **WHY THE KEY IS `JSON.stringify` OF THE WHOLE RECORD AND NOT THE PATH.
+ *   MEASURED ON THE ORACLE, clip 1241, all 101 labels, all 2,222 frames:**
+ *
+ *   ```text
+ *     key                  per-animation tables     distinct across the clip
+ *     path only             4 groups /  8 filters    1 group  /  2 filters
+ *     THE WHOLE RECORD     12 groups / 24 filters   10 groups / 20 filters
+ *   ```
+ *
+ *   Every one of the 30 group-instances in this clip is the SAME sprite at the
+ *   SAME depth — character 1195, `guard_charge`, at top-level path `43`,
+ *   enclosing shape 856 at `43/1/1`. So a path key, or a path+character key,
+ *   collapses the lot to ONE record and a renderer draws one frozen glow.
+ *   **What it throws away is a tween**: the outer `#00ffff` glow runs
+ *   `blurX` 22 → 21.4 → 20.8 → 20.2 → 19.6 → 19 → 17.5 → 16 → 14.5 → 13 with
+ *   `strength` 2.699 → 0.977 → 2.699 over `psyche_up2`, which is the psych-up
+ *   PULSE. Ten of those eleven-ish frames are distinct records; the path key
+ *   reports one and loses the animation.
+ *
+ * ► **12 AND NOT 10 BECAUSE THE TABLE IS PER ANIMATION, and that is the shape
+ *   this pack wants.** `psyche_up`, `psyche_charging` and `psyche_up2` each
+ *   hold the blur-22 record, so 12 table entries are 10 distinct records.
+ *   Splitting it that way keeps an animation self-contained — a renderer that
+ *   loads one label needs nothing outside it — and keeps the top-level keys of
+ *   `animations.json` exactly the label keys `labelKey` produces, which
+ *   `src/render/extracted-figure.js` turns straight into `pack.labels`. A
+ *   single clip-wide table would have to live under a top-level key there and
+ *   would show up as a phantom 102nd animation. Both numbers are in the
+ *   invoice — `inherited.groups` is 12, `inherited.distinctGroups` is 10 — so
+ *   neither reading can be had by accident.
+ */
+function effectGroupsFor(drawable, groups, groupIndex, notCarried) {
+  const chain = drawable.ancestorEffects;
+  if (!Array.isArray(chain) || chain.length === 0) return null;
+  const indices = [];
+  for (const group of chain) {
+    const filters = Array.isArray(group.filters) && group.filters.length > 0 ? group.filters : null;
+    const record = {
+      // The chain of depths that reaches the group, so a reader can find it in
+      // the same frame's placements without re-deriving which level it was on.
+      path: [...(group.path ?? [])],
+      character: group.characterId,
+      ...(group.blendMode !== undefined && group.blendMode !== null ? { blendMode: group.blendMode } : {}),
+      ...(filters ? { filters } : {})
+    };
+    const key = JSON.stringify(record);
+    let at = groupIndex.get(key);
+    if (at === undefined) {
+      at = groups.length;
+      groups.push(record);
+      groupIndex.set(key, at);
+      if (!filters && group.hasFilters) refuse(notCarried, "emptyFilterList");
+      for (const filter of filters ?? []) if (filter.measured === false) refuse(notCarried, "unmeasuredFilterRecord");
+      // ► **A GROUP HAS NO MATRIX HERE, AND A BLUR RADIUS IS IN PIXELS.**
+      //   `flattenFrame`'s ancestor record is `{path, characterId, blendMode,
+      //   hasFilters, filters}` — no matrix — so a renderer scaling `blur(11)`
+      //   by the group's own transform cannot, and must fall back to the stage
+      //   scale `canvasFilterFor` already takes. Composing it here would mean a
+      //   second copy of that recursion in this file. Counted instead, once per
+      //   table entry, which on this build is 12.
+      refuse(notCarried, "effectGroupMatrix");
+    }
+    indices.push(at);
+  }
+  return indices;
+}
+
+/**
+ * THE WHOLE RIG'S EFFECT INVOICE, RECOUNTED FROM THE PACK ITSELF: what the
+ * placements carry, what encloses them, WHAT A RENDERER WOULD ACTUALLY DO WITH
+ * EACH — applied, deferred to the colour-matrix path, measured no-op, or
+ * refused by name — and what could not be carried at all.
+ *
+ * ► **IT WALKS THE ANIMATIONS, exactly as `approximationTally` walks the
+ *   shapes, and for the same reason.** That function used to sum a field
+ *   written beside each shape, the 290 baked morphs had no such field, and the
+ *   manifest a human reads counted an approximated morph path as zero. A
+ *   counter kept alongside the data is a second thing to drift; a recount is
+ *   not. So `main` hands this the animations object it is about to WRITE, and
+ *   the numbers in `manifest.json` are numbers about the file on disk.
+ *
+ * ► **WHAT CANNOT BE RECOUNTED, AND IS THEREFORE PASSED IN.** `notCarried` and
+ *   `dropped` describe things that are NOT in the pack — that is what makes
+ *   them losses. No walk of the pack can find them, so they are carried from
+ *   the extraction in `carried` and the split is named here rather than blurred:
+ *   everything under `own` and `inherited` and `use` is a fact about the file,
+ *   everything under `dropped` and `notCarried` is a fact about the run.
+ *
+ * ► **`scale` IS DELIBERATELY LEFT AT 1 in `canvasFilterFor`.** The invoice is
+ *   about which filters can be expressed at all; the stage-to-canvas scale is
+ *   the renderer's and changes the NUMBERS in the string, never the four
+ *   buckets.
+ *
+ * ► **THE VERDICTS COME FROM `src/render/filters.js`, NOT FROM A TABLE HERE**,
+ *   so "the pack carries it" and "the renderer can draw it" cannot drift apart
+ *   while both stay green.
+ */
+export function effectTally(animations, carried = {}) {
+  const notCarried = { ...(carried.notCarried ?? {}) };
+  const dropped = carried.dropped ?? {};
+  const droppedFilterLists = dropped.filterLists ?? [];
+  const droppedBlendModes = dropped.blendModes ?? [];
+
+  const groupFilterLists = [];
+  const groupBlendModes = [];
+  const ownFilterLists = [];
+  const ownBlendModes = [];
+  const distinct = new Set();
+  let placements = 0;
+  let groups = 0;
+  let underGroup = 0;
+  let groupInstances = 0;
+
+  for (const animation of Object.values(animations ?? {})) {
+    for (const group of animation?.effectGroups ?? []) {
+      groups += 1;
+      distinct.add(JSON.stringify(group));
+      const filters = Array.isArray(group.filters) && group.filters.length > 0 ? group.filters : [];
+      groupFilterLists.push(filters);
+      if (group.blendMode !== undefined && group.blendMode !== null) groupBlendModes.push(group.blendMode);
+    }
+    for (const pose of animation?.poses ?? []) {
+      for (const placement of pose) {
+        placements += 1;
+        const filters = Array.isArray(placement.filters) && placement.filters.length > 0 ? placement.filters : null;
+        if (filters) ownFilterLists.push(filters);
+        if (placement.blendMode !== undefined && placement.blendMode !== null) {
+          ownBlendModes.push(placement.blendMode);
+        }
+        const indices = Array.isArray(placement.effects) ? placement.effects : null;
+        if (indices && indices.length > 0) {
+          underGroup += 1;
+          groupInstances += indices.length;
+        }
+      }
+    }
+  }
+
+  const byType = (lists) => {
+    const counts = {};
+    for (const list of lists) for (const filter of list) counts[filter.type] = (counts[filter.type] ?? 0) + 1;
+    return counts;
+  };
+  const sum = (lists) => lists.reduce((total, list) => total + list.length, 0);
+
+  const blend = { exact: {}, refused: {} };
+  for (const id of [...groupBlendModes, ...ownBlendModes]) {
+    const verdict = blendModeFor(id);
+    const key = verdict.composite && verdict.exact ? "exact" : "refused";
+    const label = key === "exact" ? verdict.name : `${verdict.name ?? id}:${verdict.refused}`;
+    blend[key][label] = (blend[key][label] ?? 0) + 1;
+  }
+
+  return {
+    // What the rig's OWN placements carry. Zero everywhere in the shipped
+    // build; see `ownEffectsOf` for why that zero is the headline and not a
+    // footnote, and why `placements` is printed beside it.
+    own: {
+      placements,
+      filteredPlacements: ownFilterLists.length,
+      filters: sum(ownFilterLists),
+      filtersByType: byType(ownFilterLists),
+      blendModePlacements: ownBlendModes.length,
+      // ► **THE ZEROES ABOVE ARE ONLY HONEST NEXT TO THIS.** They count
+      //   drawables this tool EMITTED. `dropped` counts effects on drawables it
+      //   SKIPPED — which in the props pack is where 100% of the own filters
+      //   turned out to be. Always present, even when empty, so "nothing was
+      //   skipped" and "nobody counted the skips" are different shapes.
+      dropped: {
+        drawables: dropped.skipped ?? 0,
+        placements: droppedFilterLists.length,
+        filters: sum(droppedFilterLists),
+        filtersByType: byType(droppedFilterLists),
+        blendModePlacements: droppedBlendModes.length,
+        inheritedGroups: dropped.groupsOnSkipped ?? 0
+      }
+    },
+    // What ENCLOSES them. `groups` counts TABLE ENTRIES across every
+    // animation, `distinctGroups` counts the records that are actually
+    // different (12 and 10 on this build — see `effectGroupsFor`), and
+    // `placements` counts the leaves inside them. Reporting only the last
+    // would report one pulsing glow as 30 glows.
+    inherited: {
+      groups,
+      distinctGroups: distinct.size,
+      placements: underGroup,
+      groupInstances,
+      filters: sum(groupFilterLists),
+      filtersByType: byType(groupFilterLists),
+      blendModes: groupBlendModes.length
+    },
+    // ► **THE TWO ARE COUNTED ON DIFFERENT UNITS, ON PURPOSE.** A group's
+    //   filters are counted ONCE however many leaves sit under it, because the
+    //   build applies them once to the group; a placement's own are counted per
+    //   placement, because each placement really does get its own. Adding them
+    //   on one unit would either inflate this clip's two glows to sixty or
+    //   deflate an own-filtered placement to one.
+    //
+    // ► **AND `use` IS COSTED PER TABLE ENTRY, not per distinct record**, so
+    //   the blur-22 group that three labels share is costed three times. That
+    //   is what a renderer actually pays: it builds the filter string once per
+    //   animation it plays.
+    use: {
+      filters: summariseFilterUse([...groupFilterLists, ...ownFilterLists].map((list) => canvasFilterFor(list))),
+      blendModes: blend
+    },
+    notCarried
+  };
+}
+
+/**
  * Everything the extraction needs, without writing a byte.
  *
  * Separated from `main` so the report path and the write path cannot disagree
  * about what was measured, and so a caller can measure a build it does not want
  * to extract.
  */
+/**
+ * WHAT `flattenFrame`'s FRAME-1 FREEZE NEVER LOOKED AT — measured by walking
+ * the clip's own placements and re-resolving each multi-frame child.
+ *
+ * ► **THIS EXISTS BECAUSE THE INVOICE ABOVE IT SHIPPED A CLEAN BILL OF HEALTH
+ *   OVER TWENTY-FOUR GLOWS.** `--report` read
+ *   *"DROPPED 0 filters and 0 inherited groups with 0 skipped drawables"* while
+ *   sprite 703 `weapon0` sat at depth 39 of this very clip carrying two glows
+ *   on each of its frames 2..13 — the weapon enchantment. Nothing in this file
+ *   was wrong: every branch that can drop an effect really did drop none. The
+ *   flatten pins every nested sprite to frame 1 (`spriteFrames[id] ?? 1` in
+ *   `flattenFrame`), so those filters are not DROPPED, they are NEVER READ, and
+ *   a loss counter that only counts drops cannot see them. **An approximation
+ *   that is not counted is indistinguishable from a correct read**, and this is
+ *   that rule arriving one level below where the file was watching for it.
+ *
+ * ► **AND FRAME 1 IS NOT A NEUTRAL SAMPLE OF SPRITE 703, IT IS A LOADED ONE.**
+ *   `itemglow(whichitem, enchant_type, enchant_potency)` — root frame 35,
+ *   `DefineFunction2` at file offset `0x3fa786` — drives that clip to frames
+ *   2..13, and frame 1 is exactly the UNENCHANTED weapon. Freezing there does
+ *   not sample the thirteen frames badly; it selects the one on which the
+ *   effect is off. `tools/extract-enchantments.mjs` owns that table.
+ *
+ * ► **IT COUNTS, IT DOES NOT CARRY.** Carrying would mean a second frame axis
+ *   on every pose in this pack to serve one clip, and the thing a renderer
+ *   actually needs is a twelve-cell lookup, which is a different tool's output.
+ *   What is owed here is a NUMBER WITH A NAME so a reader of `manifest.json`
+ *   cannot mistake "this pack has no other effects" for "nobody looked".
+ *
+ * Returns `{sprites, frames, filters, byCharacter}` — `sprites` the distinct
+ * multi-frame children frozen, `frames` the frames of them never resolved,
+ * `filters` the filter records on those frames, and `byCharacter` the per-child
+ * detail so the report can NAME the clip rather than print a bare count.
+ */
+export function frozenNestedSpriteCensus(buffer, characters, frames, animations, cache = new Map()) {
+  // Which characters are placed anywhere under this clip, at any depth. Built
+  // from the SAME display lists the walk above uses, so a child this census
+  // names is one the pack really contains — never one merely reachable in the
+  // file.
+  const placed = new Map();
+  const visit = (entries, depth, visiting) => {
+    if (depth > 8) return;
+    for (const entry of entries) {
+      const character = characters.get(entry.characterId);
+      if (!character || character.kind !== "sprite") continue;
+      if (visiting.has(character.id)) continue;
+      if (character.frames > 1) {
+        placed.set(character.id, character);
+        // A multi-frame child is where the freeze bites, and this census does
+        // not descend past it: everything below is frozen too, and counting it
+        // here would report the same loss twice under two names.
+        continue;
+      }
+      const resolved = resolveTimeline(buffer, character, { frames: [1] });
+      const inner = resolved.frames[0];
+      if (!inner) continue;
+      visiting.add(character.id);
+      visit(inner, depth + 1, visiting);
+      visiting.delete(character.id);
+    }
+  };
+  for (const animation of animations) {
+    for (let frame = animation.firstFrame; frame <= animation.lastFrame; frame += 1) {
+      const displayList = frames[frame - 1];
+      if (displayList) visit(displayList, 0, new Set());
+    }
+  }
+
+  const byCharacter = [];
+  let unresolvedFrames = 0;
+  let filters = 0;
+  for (const character of [...placed.values()].sort((left, right) => left.id - right.id)) {
+    // Frames 2..N — the ones the freeze never asks for. Frame 1 IS read by the
+    // walk above, so counting it here would inflate the loss by a frame per
+    // child.
+    let behind = 0;
+    for (let frame = 2; frame <= character.frames; frame += 1) {
+      const resolved = resolveTimeline(buffer, character, { frames: [frame] });
+      const inner = resolved.frames[frame - 1];
+      if (!inner) continue;
+      for (const drawable of flattenFrame(buffer, characters, inner, { cache })) {
+        behind += (drawable.filters ?? []).length;
+        for (const group of drawable.ancestorEffects ?? []) behind += (group.filters ?? []).length;
+      }
+    }
+    unresolvedFrames += character.frames - 1;
+    filters += behind;
+    byCharacter.push({
+      character: character.id,
+      name: character.exportName ?? null,
+      frames: character.frames,
+      framesNotResolved: character.frames - 1,
+      filtersBehindTheFreeze: behind
+    });
+  }
+  return { sprites: byCharacter.length, frames: unresolvedFrames, filters, byCharacter };
+}
+
 export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
   const { characters } = indexCharacters(buffer);
   const sprite = characters.get(clip);
@@ -305,6 +736,15 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
   const colourTransformed = new Set();
   const out = {};
   let placementCount = 0;
+
+  // ► **EFFECT LOSSES ARE CLIP-WIDE, EFFECT TABLES ARE PER ANIMATION.** These
+  //   two accumulate across every label because a loss is a fact about the
+  //   RUN; the `effectGroups` table below is rebuilt per animation because a
+  //   group is a fact about a timeline a renderer plays on its own. See
+  //   `effectGroupsFor` for the 12-versus-10 that distinction costs, and
+  //   `effectTally` for how both reach the manifest.
+  const notCarried = {};
+  const refusedOwn = { skipped: 0, groupsOnSkipped: 0, filterLists: [], blendModes: [] };
 
   /**
    * MORPH SHAPES, BAKED AT THE RATIO THEY ARE PLACED AT.
@@ -362,6 +802,11 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
   for (const animation of animations) {
     const key = labelKey(animation.name);
     const poses = [];
+    // THIS ANIMATION'S EFFECT GROUPS, in first-seen order, deduped by the WHOLE
+    // record. `groupIndex` is the dedup and never leaves this scope; `groups`
+    // is written into the pack and is what a placement's `effects` indexes.
+    const groups = [];
+    const groupIndex = new Map();
     // ► **THE LIMB'S OWN MATRIX, kept beside the flattened pose.** A flattened
     //   placement carries the FULLY composed transform — limb x wrapper x inner
     //   — which is what you need to draw the body and is NOT what you need to
@@ -382,37 +827,59 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
       const pose = [];
       for (const drawable of drawables) {
         placementCount += 1;
+        // ► **THE MORPH BRANCH AND THE ORDINARY BRANCH USED TO BUILD TWO
+        //   PLACEMENT LITERALS, AND THAT IS HOW A FIELD GOES MISSING FROM ONE
+        //   OF THEM.** `morphKeyFor`'s copy already lagged once: it wrote no
+        //   approximation invoice while every shape beside it did. So the two
+        //   now differ only in WHICH KEY names the geometry, and everything
+        //   that is true of a placement — colour, own effects, enclosing
+        //   groups — is written once, below, for both. The 290 baked morphs in
+        //   this clip carry no effects on this build; they are in the invoice's
+        //   denominator all the same.
+        let shapeKey = null;
         if (drawable.unsupported === "morph") {
-          const key = morphKeyFor(drawable.characterId, drawable.ratio);
-          if (key) {
-            const colour = packColour(drawable.colourTransform);
-            const placement = {
-              shape: key,
-              limb: depthNames.get(drawable.path[0]) ?? null,
-              depth: drawable.path,
-              matrix: roundMatrix(drawable.matrix)
-            };
-            if (colour) placement.colour = colour;
-            pose.push(placement);
-            continue;
-          }
+          shapeKey = morphKeyFor(drawable.characterId, drawable.ratio);
+        } else if (!drawable.unsupported) {
+          shapeIds.add(drawable.characterId);
+          shapeKey = drawable.characterId;
         }
-        if (drawable.unsupported) {
+        if (shapeKey === null) {
+          // The one skip in this file: an unsupported drawable, or a morph
+          // whose definition would not parse. Both are REPORTED — and now both
+          // invoice the effects that leave with them, which is the difference
+          // between a measured zero and a measurement of this branch.
           const tally = unsupported.get(drawable.unsupported) ?? new Set();
           tally.add(drawable.characterId);
           unsupported.set(drawable.unsupported, tally);
+          refusedEffectsOf(drawable, refusedOwn, notCarried);
           continue;
         }
-        shapeIds.add(drawable.characterId);
         const colour = packColour(drawable.colourTransform);
-        if (colour) colourTransformed.add(drawable.characterId);
+        if (colour && typeof shapeKey === "number") colourTransformed.add(shapeKey);
+        const own = ownEffectsOf(drawable, notCarried);
+        const inherited = effectGroupsFor(drawable, groups, groupIndex, notCarried);
         const placement = {
-          shape: drawable.characterId,
+          shape: shapeKey,
           limb: depthNames.get(drawable.path[0]) ?? null,
           depth: drawable.path,
           matrix: roundMatrix(drawable.matrix)
         };
         if (colour) placement.colour = colour;
+        // THIS PLACEMENT'S OWN filter list and blend mode, spread the same
+        // conditional way `colour` is and absent when it has none. `filters`
+        // on a placement means the placement's own and nothing else — measured
+        // 0 of 37,077 on this build, so this is the dead half of the fix and is
+        // written that way deliberately.
+        if (own.filters) placement.filters = own.filters;
+        if (own.blendMode !== undefined) placement.blendMode = own.blendMode;
+        // ► **ITS ANCESTORS' ARE A DIFFERENT KEY WITH A DIFFERENT NAME**,
+        //   holding indices into THIS ANIMATION's `effectGroups` and NOT filter
+        //   records, so no reader can take an enclosing sprite's blur for this
+        //   leaf's. Outermost first, which is the order a renderer has to nest
+        //   its buffers in — every chain in clip 1241 is length 1, so that
+        //   order is unmeasurable against this build and is pinned by fixture
+        //   instead.
+        if (inherited) placement.effects = inherited;
         pose.push(placement);
       }
       poses.push(pose);
@@ -421,6 +888,12 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
       label: animation.name,
       firstFrame: animation.firstFrame,
       lastFrame: animation.lastFrame,
+      // ALWAYS PRESENT, EMPTY WHERE THERE ARE NONE — 97 of this clip's 101
+      // labels have no effects at all. An absent key would make "this
+      // animation encloses nothing" and "this pack predates effect groups" the
+      // same shape, and telling those apart is the whole point of writing a
+      // count down.
+      effectGroups: groups,
       poses,
       limbs: limbPoses
     };
@@ -460,6 +933,26 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
   Object.assign(shapes, morphShapes);
   for (const failure of morphFailures) failures.push({ id: failure.id, message: `morph: ${failure.message}` });
 
+  // ► **AND THE PART NO WALK OF THE *RUN* CAN FIND EITHER, WHICH IS THE ONE
+  //   THAT SHIPPED A CLEAN BILL OF HEALTH OVER 24 MISSING GLOWS.** See
+  //   `frozenNestedSpriteCensus`: everything above this line measures drawables
+  //   the flatten RETURNED, and `flattenFrame` freezes every nested sprite on
+  //   frame 1, so a filter that lives on frame 2 of a child is not dropped by
+  //   any branch here — it is never looked at. The census is the only thing in
+  //   this file that can see it.
+  //   ► `frozen.sprites` is a COUNT, not an array, and the first version of
+  //     these three lines read `frozen.sprites.length` — `undefined > 0` is
+  //     false, so the sprite line silently never fired while the filter line
+  //     beside it did. Caught by printing the invoice rather than by the suite.
+  //     A guard that cannot fire is the same defect this function exists to
+  //     count, committed inside the fix for it.
+  const frozen = frozenNestedSpriteCensus(buffer, characters, frames, animations, cache);
+  if (frozen.sprites > 0) refuse(notCarried, "nestedSpriteFrame1", frozen.sprites);
+  if (frozen.frames > 0) refuse(notCarried, "nestedSpriteFramesNotResolved", frozen.frames);
+  if (frozen.filters > 0) refuse(notCarried, "filtersBehindNestedFreeze", frozen.filters);
+
+  const effectLoss = { notCarried, dropped: refusedOwn, frozen };
+
   return {
     morphCount: Object.keys(morphShapes).length,
     clip,
@@ -469,6 +962,9 @@ export function extractFigure(buffer, { clip = DEFAULT_CLIP } = {}) {
     shapes,
     failures,
     placementCount,
+    effectLoss,
+    frozenNested: frozen,
+    effects: effectTally(out, effectLoss),
     colourTransformed: [...colourTransformed].sort((left, right) => left - right),
     unsupported: Object.fromEntries(
       [...unsupported.entries()].map(([kind, ids]) => [kind, [...ids].sort((left, right) => left - right)])
@@ -1008,6 +1504,53 @@ function main(argv) {
   if (result.colourTransformed.length > 0) {
     console.log(`tinted     ${result.colourTransformed.length} shapes carry a colour transform`);
   }
+  // ► **THE ZERO AND THE LOSS ON THE SAME LINE.** `own 0` is the whole truth
+  //   about this build only because `dropped 0` sits beside it: in the props
+  //   pack the identical zero was an artefact of a skip that dropped every
+  //   own-filtered placement before anything counted them. A reader must be
+  //   able to tell "none exist" from "I dropped them before looking" without
+  //   opening the manifest.
+  const effects = result.effects;
+  console.log(
+    `effects    ${effects.inherited.groups} group${effects.inherited.groups === 1 ? "" : "s"} in the tables ` +
+    `(${effects.inherited.distinctGroups} distinct), ${effects.inherited.filters} filters, ` +
+    `over ${effects.inherited.placements} of ${effects.own.placements} placements`
+  );
+  console.log(
+    `           own ${effects.own.filters} filters / ${effects.own.blendModePlacements} blend modes on ` +
+    `${effects.own.filteredPlacements} placements; DROPPED ${effects.own.dropped.filters} filters and ` +
+    `${effects.own.dropped.inheritedGroups} inherited groups with ${effects.own.dropped.drawables} skipped drawables`
+  );
+  console.log(
+    `           a renderer applies ${effects.use.filters.applied} of ${effects.use.filters.total}` +
+    `${effects.use.filters.deferred > 0 ? `, defers ${effects.use.filters.deferred}` : ""}` +
+    `${effects.use.filters.noOp > 0 ? `, ${effects.use.filters.noOp} draw nothing` : ""}` +
+    `${effects.use.filters.refused > 0 ? `, REFUSES ${effects.use.filters.refused}` : ""}` +
+    `${Object.keys(effects.use.filters.approximatedByKind).length > 0
+      ? ` (${Object.entries(effects.use.filters.approximatedByKind).map(([kind, count]) => `${count} ${kind}`).join(", ")})`
+      : ""}`
+  );
+  for (const [reason, count] of Object.entries(effects.use.filters.refusedByReason)) {
+    console.log(`           REFUSED ${count} x ${reason}`);
+  }
+  const notCarried = Object.entries(effects.notCarried);
+  console.log(
+    `           notCarried ${notCarried.length === 0 ? "{}" : notCarried.map(([kind, count]) => `${count} ${kind}`).join(", ")}`
+  );
+  // ► **THE LINE ABOVE USED TO BE THE WHOLE STORY AND IT READ AS A CLEAN BILL
+  //   OF HEALTH.** `DROPPED 0 filters ... 0 skipped drawables` is true of every
+  //   branch in this file and says nothing about the frames the flatten never
+  //   asked for. NAME the children rather than print a bare count: "24
+  //   filtersBehindNestedFreeze" does not tell a reader that the 24 are the
+  //   weapon enchantment, and that is the whole value of the number.
+  for (const child of result.frozenNested?.byCharacter ?? []) {
+    if (child.filtersBehindTheFreeze === 0) continue;
+    console.log(
+      `FROZEN     ${child.filtersBehindTheFreeze} filters on character ${child.character}` +
+      `${child.name ? ` (${child.name})` : ""} sit on its frames 2..${child.frames}, which flattenFrame ` +
+      `never resolves — see tools/extract-enchantments.mjs`
+    );
+  }
   for (const [kind, ids] of Object.entries(result.unsupported)) {
     console.log(`SKIPPED    ${ids.length} ${kind} characters this tool cannot turn into paths: ${ids.join(", ")}`);
   }
@@ -1077,6 +1620,13 @@ function main(argv) {
       shapeFailures: result.failures.length
     },
     approximated: tally,
+    // ► **RECOUNTED FROM THE ANIMATIONS ABOUT TO BE WRITTEN, not copied from
+    //   `result.effects`.** `animations` here is `result.animations` with a
+    //   `bounds` added per label, so the two must agree — and asserting that
+    //   they do is what stops this becoming a counter kept beside the data.
+    //   `test/extract-figure.test.js` pins the equality; recomputing here is
+    //   what gives it something to pin.
+    effects: effectTally(animations, result.effectLoss),
     sound: sound ? { path: path.relative(REPO_ROOT, options.sound), sha256: sound.sha256 } : null,
     unsupported: result.unsupported,
     colourTransformed: result.colourTransformed,

@@ -44,12 +44,16 @@ import {
   deriveTimelineActions,
   extractIcons,
   flattenIconFrame,
+  ownEffectsOf,
   parseArguments,
+  refusedEffectsOf,
   parseEditText,
   parseStaticText,
   readRect,
   roundColour,
-  roundMatrix
+  roundMatrix,
+  tallyIconEffects,
+  toPlacement
 } from "../tools/extract-icons.mjs";
 import { IDENTITY_MATRIX } from "../tools/swf-display-list.mjs";
 
@@ -360,6 +364,328 @@ test("every drawable this tool cannot turn into geometry names its KIND", () => 
     13: "bitmap-placement", 14: "button-placement", 9999: "missing"
   });
   assert.equal(drawables.length, 6, "nothing was dropped on the way through");
+});
+
+/* ------------------------------------------------------------------ */
+/* 4b. THE EFFECTS — the third silent drop, and the one that was the    */
+/*     easiest to miss because NOTHING upstream was broken              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THE DEFECT THESE TESTS PIN.** `flattenIconFrame` is this tool's own walk
+ *   — written because `flattenFrame` drops six masks in `combat_panel` — and
+ *   `flattenFrame`'s effect threading did not come with it. It read `matrix`,
+ *   `colourTransform`, `name`, `ratio` and `clipDepth` off an entry and never
+ *   `filters`, `hasFilters` or `blendMode`. All 176 filters the icon roster
+ *   reaches died HERE, on the way out of a walk that reported no failure and no
+ *   approximation, because a field nobody reads is indistinguishable from a
+ *   field nobody sent.
+ *
+ *   **Nothing upstream needed changing**, which is the uncomfortable part and
+ *   the reason the first test below asserts the premise rather than assuming
+ *   it: `parsePlaceObject` has decoded filter lists into typed records, and
+ *   `resolveTimeline` has merged them field-by-field across a move, for as long
+ *   as this walk has existed.
+ */
+
+/**
+ * One GLOW record on the wire: the filter id 2, then RGBA, two 16.16 blurs, an
+ * 8.8 strength and a flag byte.
+ */
+function glowFilter({ colour = [0, 0, 255, 255], blurX = 4, blurY = 4, strength = 2, inner = false } = {}) {
+  const body = Buffer.alloc(16);
+  body.writeUInt8(2, 0);
+  for (let index = 0; index < 4; index += 1) body.writeUInt8(colour[index], index + 1);
+  body.writeInt32LE(Math.round(blurX * 65536), 5);
+  body.writeInt32LE(Math.round(blurY * 65536), 9);
+  body.writeInt16LE(Math.round(strength * 256), 13);
+  // Inner, Knockout, CompositeSource, then Passes UB[5]. 0x21 is what 881 of
+  // the build's 884 glows and shadows carry: composite source set, one pass.
+  body.writeUInt8((inner ? 0x80 : 0) | 0x21, 15);
+  return body;
+}
+
+/**
+ * A FILTERLIST: a COUNT byte and then that many records.
+ *
+ * ► The count is a separate byte from the first record's id, and conflating the
+ *   two is not a subtle bug — the first draft of this helper emitted the glow's
+ *   id 2 AS the count, so the parser read two filters where there was one and
+ *   threw reading past the tag. It failed loudly, which is the only reason this
+ *   note is a note and not a wrong fixture agreeing with a wrong walk.
+ */
+const filterList = (...records) => Buffer.concat([Buffer.from([records.length]), ...records]);
+
+/** A filter list of COUNT ZERO — the wire's way of saying "cleared", not "none". */
+const clearedFilterList = () => filterList();
+
+/**
+ * A `PlaceObject3` carrying a character and, optionally, a filter list and a
+ * blend mode. The field ORDER here is the wire's — name, then clipDepth, then
+ * FILTERS, then blend mode — and getting it wrong would make this fixture
+ * disagree with `parsePlaceObject` and prove nothing.
+ */
+function place3Tag(depth, characterId, { filters = null, blendMode = null, clipDepth = null, name = null } = {}) {
+  let flags = 0x02;
+  let flags2 = 0;
+  if (name !== null) flags |= 0x20;
+  if (clipDepth !== null) flags |= 0x40;
+  if (filters !== null) flags2 |= 0x01;
+  if (blendMode !== null) flags2 |= 0x02;
+  const head = Buffer.alloc(6);
+  head.writeUInt8(flags, 0);
+  head.writeUInt8(flags2, 1);
+  head.writeUInt16LE(depth, 2);
+  head.writeUInt16LE(characterId, 4);
+  const parts = [head];
+  if (name !== null) parts.push(Buffer.from(`${name}\0`, "utf8"));
+  if (clipDepth !== null) {
+    const tail = Buffer.alloc(2);
+    tail.writeUInt16LE(clipDepth, 0);
+    parts.push(tail);
+  }
+  if (filters !== null) parts.push(filters);
+  if (blendMode !== null) parts.push(Buffer.from([blendMode]));
+  return tagBytes(70, Buffer.concat(parts));
+}
+
+test("THE ENTRIES WERE CARRYING THE FILTERS ALL ALONG — this walk simply never read them", () => {
+  // ► **THE PREMISE, ASSERTED RATHER THAN ASSUMED.** This fixture is a real
+  //   `PlaceObject3` with a real filter list, resolved by the real
+  //   `resolveTimeline` inside `flattenIconFrame`'s own `innerFrame`. If the
+  //   filter reaches the drawable, the fix was threading and nothing else; if
+  //   it does not, the job was somewhere upstream and this test says so before
+  //   any number in the invoice can be believed.
+  const { buffer, characters } = buildFixture([
+    // Three levels, because the glow has to be on the placement of a SPRITE to
+    // be a group at all: on the placement of a shape it is that shape's own,
+    // which is a different claim and the next test's.
+    { id: 700, frames: 1, tags: [place3Tag(1, 710, { filters: filterList(glowFilter({ blurX: 6, blurY: 6 })) }), showFrameTag()] },
+    { id: 710, frames: 1, tags: [placeTag(1, 701), showFrameTag()] }
+  ]);
+  leaf(characters, 701, "shape");
+  const { drawables } = flattenIconFrame(buffer, characters, [
+    { depth: 3, characterId: 700, matrix: IDENTITY_MATRIX }
+  ]);
+  assert.equal(drawables.length, 1);
+  const leafShape = drawables[0];
+  assert.equal(leafShape.characterId, 701);
+  // The glow is on the placement of sprite 710 INSIDE sprite 700, so for the
+  // shape below it, it is an ancestor effect and not its own.
+  assert.equal(leafShape.filters, null, "the enclosing placement's glow is not this leaf's own");
+  assert.equal(leafShape.hasFilters, false);
+  assert.equal(leafShape.ancestorEffects.length, 1);
+  const [group] = leafShape.ancestorEffects;
+  assert.deepEqual(group.path, [3, 1], "the group names the path that reaches it, not just its depth");
+  assert.equal(group.characterId, 710);
+  assert.equal(group.hasFilters, true);
+  assert.equal(group.filters.length, 1);
+  assert.equal(group.filters[0].type, "glow");
+  assert.equal(group.filters[0].blurX, 6, "the 16.16 fixed point is decoded, not carried as an integer");
+  assert.equal(group.filters[0].colour.blue, 255);
+});
+
+test("a placement's OWN filter and blend mode reach its own drawable, and its ancestors' do not", () => {
+  const { buffer, characters } = buildFixture([
+    { id: 1, frames: 1, tags: [showFrameTag()] }
+  ]);
+  leaf(characters, 10, "shape");
+  const { drawables } = flattenIconFrame(buffer, characters, [
+    { depth: 1, characterId: 10, matrix: IDENTITY_MATRIX, hasFilters: true, filters: [{ type: "glow" }], blendMode: 3 },
+    { depth: 2, characterId: 10, matrix: IDENTITY_MATRIX }
+  ]);
+  const [own, bare] = drawables;
+  assert.deepEqual(own.filters, [{ type: "glow" }]);
+  assert.equal(own.hasFilters, true);
+  assert.equal(own.blendMode, 3);
+  assert.equal(own.ancestorEffects, null, "an empty chain is NULL and never [] — see `flattenFrame`'s own note");
+  // ► **PAIRED, because a one-sided negative is not a test.** The same run has
+  //   to show a drawable that carries all three, or "absent here" and "nobody
+  //   writes them" have the same answer and a full revert stays green.
+  assert.equal(bare.filters, null);
+  assert.equal(bare.hasFilters, false);
+  assert.equal(bare.blendMode, undefined,
+    "undefined and NOT null, matching flattenFrame's literal: a reader moving between the two walks " +
+    "must not meet the same absence in two spellings");
+  assert.equal(bare.ancestorEffects, null);
+});
+
+test("A MULTI-FRAME CHILD CARRIES THE CHAIN THAT ENCLOSES IT — and its OWN effects are not in that chain", () => {
+  // ► **THE DOUBLE-COUNT TRAP.** A `clip` placement is the one drawable that is
+  //   both a leaf here and a group elsewhere. Handing it the chain it hands its
+  //   own children would invoice its filters twice — once as own, once as
+  //   inherited — and the pack total would read 178 for a build holding 176.
+  //   `inventory_buttons`' greyed-out `battlebutton` is exactly this shape.
+  const { buffer, characters } = buildFixture([
+    { id: 800, frames: 1, tags: [place3Tag(1, 815, { filters: filterList(glowFilter()) }), showFrameTag()] },
+    { id: 815, frames: 5, tags: [placeTag(1, 807), showFrameTag()] }
+  ]);
+  leaf(characters, 807, "shape");
+  const { drawables } = flattenIconFrame(buffer, characters, [
+    // The outer sprite 800 carries no effect of its own; the glow is on ITS
+    // placement of the five-frame child, so the child's own list holds it.
+    { depth: 2, characterId: 800, matrix: IDENTITY_MATRIX, hasFilters: true, filters: [{ type: "blur" }] }
+  ]);
+  assert.equal(drawables.length, 1);
+  const [child] = drawables;
+  assert.equal(child.kind, "clip", "five frames are five meanings and are not flattened away");
+  assert.equal(child.characterId, 815);
+  assert.equal(child.filters.length, 1);
+  assert.equal(child.filters[0].type, "glow", "the child placement's OWN filter");
+  assert.equal(child.ancestorEffects.length, 1, "exactly the chain that ENCLOSES it");
+  assert.equal(child.ancestorEffects[0].characterId, 800);
+  assert.deepEqual(child.ancestorEffects[0].filters, [{ type: "blur" }]);
+  assert.equal(
+    child.ancestorEffects.some((group) => group.characterId === 815), false,
+    "a clip must not appear in its own ancestor chain, or its filters are invoiced twice");
+});
+
+test("A FILTER LIST OF COUNT ZERO IS 'CLEARED', NOT 'NOBODY ASKED' — and it is refused BY NAME", () => {
+  // ► **38 OF THESE ARE IN THE SHIPPED BUILD**, all on `inventory_buttons`'
+  //   battlebutton. Writing one as `filters: []` claims a list the renderer
+  //   should apply; writing it as `filters: null` claims nobody ever set one.
+  //   Both are wrong, so the list is dropped and the DROP is counted.
+  const { buffer, characters } = buildFixture([
+    { id: 1, frames: 1, tags: [showFrameTag()] },
+    { id: 900, frames: 1, tags: [place3Tag(1, 901, { filters: clearedFilterList() }), showFrameTag()] }
+  ]);
+  leaf(characters, 901, "shape");
+  const { drawables } = flattenIconFrame(buffer, characters, [
+    { depth: 1, characterId: 900, matrix: IDENTITY_MATRIX }
+  ]);
+  const [shape] = drawables;
+  assert.equal(shape.ancestorEffects, null,
+    "a CLEARED list encloses nothing: there is no group to point at, only a fact to count");
+
+  // And the fact, counted, on the placement that carries it.
+  const notCarried = {};
+  const own = ownEffectsOf({ hasFilters: true, filters: [] }, notCarried);
+  assert.equal(Object.hasOwn(own, "filters"), false, "an empty list must never be written as `filters: []`");
+  assert.equal(notCarried.emptyFilterList, 1, "the distinction survives as a NUMBER with a name");
+  // Paired with the other two cases, or "1" above could be any of them.
+  const nobodyAsked = {};
+  ownEffectsOf({ hasFilters: false, filters: null }, nobodyAsked);
+  assert.deepEqual(nobodyAsked, {}, "a placement with no filter flag at all owes nothing");
+  const real = {};
+  const carried = ownEffectsOf({ hasFilters: true, filters: [{ type: "glow" }] }, real);
+  assert.deepEqual(carried.filters, [{ type: "glow" }]);
+  assert.deepEqual(real, {}, "a list with something in it is carried, not refused");
+});
+
+test("THE TWO REFUSAL BRANCHES THAT MEASURE ZERO ON THE BUILD ARE STILL EXERCISED HERE", () => {
+  // ► **A COUNTED ZERO WHOSE COUNTER IS NEVER RUN IS NOT A COUNTED ZERO.** Two
+  //   branches in the extractor's invoice report nothing against the oracle:
+  //   own effects on a drawable this tool DROPS (a refused mask, a missing
+  //   character), and a filter record `parseFilterList` flags as UNMEASURED —
+  //   the three filter kinds that occur zero times in the shipped build. Both
+  //   would be dead code proving its own absence, so both are driven here with
+  //   inputs the build does not contain.
+  const refusedOwn = { filterLists: [], blendModes: [] };
+  const notCarried = {};
+  const suffix = refusedEffectsOf(
+    { kind: "mask", characterId: 900, hasFilters: true, filters: [{ type: "blur" }, { type: "glow" }], blendMode: 3 },
+    refusedOwn, notCarried);
+  assert.equal(notCarried.droppedDrawableFilters, 2, "counted per FILTER, not per drawable");
+  assert.equal(notCarried.droppedDrawableBlendMode, 1);
+  assert.equal(refusedOwn.filterLists.length, 1);
+  assert.deepEqual(refusedOwn.blendModes, [3]);
+  // The failures list a human reads has to name the loss too: it used to say
+  // only what KIND of drawable went, which reads as "and it carried nothing".
+  assert.match(suffix, /dropping 2 own blur\+glow and own blend mode 3/);
+
+  const cleared = { filterLists: [], blendModes: [] };
+  const clearedTally = {};
+  assert.equal(refusedEffectsOf({ hasFilters: true, filters: [] }, cleared, clearedTally),
+    ", dropping an own filter list of COUNT ZERO",
+    "the failures line names it in words too, or a reader sees only the kind of drawable that went");
+  assert.equal(clearedTally.droppedDrawableEmptyFilterList, 1,
+    "a CLEARED list leaving with its drawable is still a fact about the instance");
+  assert.equal(cleared.filterLists.length, 0, "and it is not a filter list, so it joins none");
+
+  const unmeasured = {};
+  const carried = ownEffectsOf(
+    { hasFilters: true, filters: [{ type: "gradientGlow", measured: false }] }, unmeasured);
+  assert.equal(carried.filters.length, 1, "it is CARRIED — refusing it would lose the only record of it");
+  assert.equal(unmeasured.unmeasuredFilterRecord, 1,
+    "and flagged: this record reached a code path no capture has ever exercised");
+});
+
+test("A CUTTER'S OWN EFFECTS ARE COUNTED WHERE THEY ARE DROPPED, and the zero is the measurement", () => {
+  // ► **A BLURRED STENCIL IS NOT A REGION.** A mask reaches a placement as a
+  //   shape and a matrix; a path clip has no way to express a soft edge, so a
+  //   cutter's own filters are refused. Measured on the oracle: 6 shape cutters
+  //   in this roster and ZERO carrying anything — which is only worth saying
+  //   because this counter exists to say it. Without it, "no cutter has
+  //   filters" and "nobody looked" are the same output.
+  const { buffer, characters } = buildFixture([{ id: 1, frames: 1, tags: [showFrameTag()] }]);
+  leaf(characters, 727, "shape");
+  leaf(characters, 728, "shape");
+  const clean = flattenIconFrame(buffer, characters, [
+    { depth: 2, characterId: 727, clipDepth: 5, matrix: IDENTITY_MATRIX },
+    { depth: 3, characterId: 728, matrix: IDENTITY_MATRIX }
+  ]);
+  assert.deepEqual(clean.cutterEffects, { cutters: 1, filters: 0, emptyFilterLists: 0, blendModes: 0 });
+
+  const dirty = flattenIconFrame(buffer, characters, [
+    {
+      depth: 2, characterId: 727, clipDepth: 5, matrix: IDENTITY_MATRIX,
+      hasFilters: true, filters: [{ type: "blur" }], blendMode: 3
+    },
+    { depth: 3, characterId: 728, matrix: IDENTITY_MATRIX }
+  ]);
+  assert.deepEqual(dirty.cutterEffects, { cutters: 1, filters: 1, emptyFilterLists: 0, blendModes: 1 },
+    "and the counter moves for an input the shipped build does not contain, which is what makes the zero evidence");
+  const masked = dirty.drawables.find((drawable) => drawable.characterId === 728);
+  assert.equal(masked.filters, null, "the cutter's blur is NOT spread onto what it cuts");
+});
+
+test("a placement with no effects carries NEITHER key, the way `colour` and `mask` are spread", () => {
+  // ► **A ONE-SIDED NEGATIVE IS NOT A TEST** — `tools/extract-props.mjs`'s own
+  //   version of this assertion stayed green through a full revert of the file
+  //   it was testing, because deletion produces exactly the absence it wanted.
+  //   So the same run must show a placement carrying all three.
+  const bare = toPlacement({ kind: "shape", characterId: 10, matrix: IDENTITY_MATRIX });
+  assert.equal(Object.hasOwn(bare, "filters"), false,
+    "an absent list must be ABSENT, not `null` — a reader spreading it would write `filters: null`");
+  assert.equal(Object.hasOwn(bare, "blendMode"), false);
+  assert.equal(Object.hasOwn(bare, "inheritedEffects"), false);
+  assert.deepEqual(bare.matrix, [1, 0, 0, 1, 0, 0], "and what was always there is untouched");
+
+  const dressed = toPlacement(
+    { kind: "text", characterId: 11, matrix: IDENTITY_MATRIX },
+    { filters: [{ type: "glow" }], blendMode: 3 },
+    [0]
+  );
+  assert.equal(Object.hasOwn(dressed, "filters"), true, "or the absence above means only that nothing is written");
+  assert.equal(dressed.blendMode, 3);
+  assert.deepEqual(dressed.inheritedEffects, [0]);
+  assert.equal(Array.isArray(dressed.inheritedEffects) && typeof dressed.inheritedEffects[0] === "number", true,
+    "INDICES and never records: no reader may take an enclosing sprite's bevel for this leaf's glow");
+});
+
+test("a blend mode on an enclosing sprite reaches the leaf as a GROUP, not as its own", () => {
+  // Zero of the icon roster's placements carries a blend mode, so this path is
+  // unexercised by the oracle and is here for the reason the cutter counter is:
+  // an untested threading is one that will be found broken by a mod, not by a
+  // test. 12 placements elsewhere in the build carry one.
+  const { buffer, characters } = buildFixture([
+    // Two levels, because a blend mode on the placement of a SHAPE is that
+    // shape's own and would prove the opposite of what this test is about.
+    { id: 950, frames: 1, tags: [place3Tag(1, 960, { blendMode: 14 }), showFrameTag()] },
+    { id: 960, frames: 1, tags: [placeTag(1, 951), showFrameTag()] }
+  ]);
+  leaf(characters, 951, "shape");
+  const { drawables } = flattenIconFrame(buffer, characters, [
+    { depth: 1, characterId: 950, matrix: IDENTITY_MATRIX }
+  ]);
+  const [shape] = drawables;
+  assert.equal(shape.characterId, 951);
+  assert.equal(shape.blendMode, undefined, "the leaf has none of its own");
+  assert.equal(shape.ancestorEffects.length, 1);
+  assert.equal(shape.ancestorEffects[0].characterId, 960);
+  assert.equal(shape.ancestorEffects[0].blendMode, 14, "hardlight, carried as the raw SWF id this repo never renames");
+  assert.equal(shape.ancestorEffects[0].hasFilters, false,
+    "a group may carry a blend mode and no filters — and must still be a group");
 });
 
 /* ------------------------------------------------------------------ */
@@ -748,4 +1074,299 @@ test("the six calls that name a missing label are the ones this session found",
       assert.equal(row.part, "mouth", "every unreachable expression is on the mouth");
     }
     assert.deepEqual([...new Set(missing.map((row) => row.asked))].sort(), ["Smile", "pain"]);
+  });
+
+/* ------------------------------------------------------------------ */
+/* 9. THE EFFECTS INVOICE, against the real build                      */
+/* ------------------------------------------------------------------ */
+
+/** Every extracted entry that carries an invoice, in one sequence. */
+function everyEntry(result) {
+  return [
+    ...Object.values(result.faces),
+    ...Object.values(result.clips),
+    ...Object.values(result.nested)
+  ];
+}
+
+/**
+ * One entry's placement lists.
+ *
+ * ► **A FACE IS NOT SHAPED LIKE A CLIP, and this is where that shows.** An icon
+ *   clip keeps `frames`; a face keeps its placements inside
+ *   `expressions[label].poses`, because the face is indexed by LABEL and a
+ *   second copy of the same 121 frames would be a second thing to drift. The
+ *   runs are slices of one frame list, so a label the extractor did not cover
+ *   would go uncounted here — which is only safe because every face measures
+ *   ZERO effects, and the tests below assert that separately rather than
+ *   assuming it.
+ */
+function framesOf(entry) {
+  if (Array.isArray(entry.frames)) return entry.frames;
+  return Object.values(entry.expressions ?? {}).flatMap((expression) => expression.poses);
+}
+
+test("THE ROSTER'S 176 FILTERS, CLIP BY CLIP — the table in the extractor's own header",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    // ► **THE NUMBERS THIS WHOLE JOB EXISTS FOR.** Before today `extract-icons`
+    //   matched ZERO of `hasFilters|ancestorEffects|\.filters|blendMode`, so
+    //   every one of these was 0 and the pack said nothing about it — no
+    //   failure, no approximation, no empty key. This test goes red if a filter
+    //   stops arriving AND if one arrives on the wrong clip.
+    const result = oracleExtraction();
+    const own = (key) => result.clips[key].effects.own.filters;
+    const group = (key) => result.clips[key].effects.inherited.filters;
+    assert.deepEqual(
+      Object.fromEntries(Object.keys(result.clips).map((key) => [key, [own(key), group(key)]])),
+      {
+        inventory_buttons: [2, 0],
+        cast_spell_image: [40, 0],
+        damage_icon: [24, 0],
+        defend_icon: [24, 0],
+        miss_icon: [34, 0],
+        bonus_icon: [35, 0],
+        addstats_icon: [0, 0],
+        combat_panel: [15, 2]
+      });
+    // The faces and the nested children carry NONE, and that zero is a
+    // measurement too — it is the reason the face is cheap to draw.
+    for (const face of Object.values(result.faces)) {
+      assert.equal(face.effects.own.filters, 0, `${face.linkage} gained a filter`);
+      assert.equal(face.effects.inherited.filters, 0);
+      assert.ok(face.effects.notCarried, "and a face still carries the invoice, empty or not");
+    }
+    for (const [id, clip] of Object.entries(result.nested)) {
+      assert.equal(clip.effects.own.filters + clip.effects.inherited.filters, 0, `nested ${id} gained a filter`);
+    }
+    const total = everyEntry(result)
+      .reduce((sum, entry) => sum + entry.effects.own.filters + entry.effects.inherited.filters, 0);
+    assert.equal(total, 176, "174 own and 2 on enclosing groups");
+  });
+
+test("NOT ONE OF THE 176 IS ON A SHAPE — which is why carrying them on the geometry path would have moved nothing",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    // ► **THE TRAP THIS TEST IS ABOUT.** Every icon filter is on a numeral —
+    //   `DefineEditText` and `DefineText` placements, which this tool emits with
+    //   `unsupported: "text-placement"` and does not turn into geometry — or on
+    //   a `clip` placement it refuses to descend into. A fix that spread
+    //   `filters` onto shapes and stopped would have written nothing, 176 times,
+    //   and every test above would still have been green.
+    const result = oracleExtraction();
+    const kinds = {};
+    let filtered = 0;
+    for (const entry of everyEntry(result)) {
+      for (const frame of framesOf(entry)) {
+        for (const placement of frame) {
+          if (!placement.filters) continue;
+          filtered += placement.filters.length;
+          kinds[placement.kind] = (kinds[placement.kind] ?? 0) + placement.filters.length;
+        }
+      }
+    }
+    assert.equal(filtered, 174, "recounted from the pack's own placements, not read off the invoice");
+    assert.deepEqual(kinds, { text: 172, clip: 2 });
+    assert.equal(kinds.shape ?? 0, 0);
+    // And the invoice says so in a field, rather than leaving a reader to do
+    // the count above by hand.
+    const onUnsupported = everyEntry(result)
+      .reduce((sum, entry) => sum + entry.effects.own.filtersOnUnsupportedPlacements, 0);
+    assert.equal(onUnsupported, 172, "the text placements; the 2 on a `clip` placement are not unsupported");
+  });
+
+test("THE TWO BEVELS get their own line, because they are the only ones any pack here reaches",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    // ► `src/render/filters.js` records 54 bevels build-wide, and `HANDOFF.md`'s
+    //   ranked item 4 records that that figure has no reachable denominator —
+    //   no pack in this repository can reach any of them except these two. A row
+    //   inside a `filtersByType` bag would never be summed by anybody.
+    const result = oracleExtraction();
+    const panel = result.clips.combat_panel;
+    assert.deepEqual(panel.effects.bevels,
+      { total: 2, inner: 2, onTop: 0, knockout: 0, zeroBlur: 2, own: 0, inherited: 2 });
+    assert.equal(panel.effectGroups.length, 2, "two placements of sprite 52, at depths 1 and 7");
+    for (const group of panel.effectGroups) {
+      assert.equal(group.character, 52);
+      assert.deepEqual(group.filters.map((filter) => filter.type), ["bevel"]);
+      // ► **BOTH ARE INNER WITH ZERO BLUR**, so even a renderer that grew a
+      //   bevel mapper would be drawing a hard one-pixel edge, not a soft one.
+      //   The flags are the finding; the count is just how many carry them.
+      assert.equal(group.filters[0].inner, true);
+      assert.equal(group.filters[0].blurX, 0);
+      assert.equal(group.filters[0].blurY, 0);
+    }
+    assert.deepEqual(panel.effects.use.filters.refusedByReason, { "bevel:filterHasNoCanvasEquivalent": 2 },
+      "the verdict comes from src/render/filters.js and not from a table in the extractor");
+    const packBevels = everyEntry(result).reduce((sum, entry) => sum + entry.effects.bevels.total, 0);
+    assert.equal(packBevels, 2, "and no other entry has one");
+  });
+
+test("EVERY FILTER GETS EXACTLY ONE VERDICT, and the verdicts come from the renderer",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    // An invoice whose buckets do not add up to its total is an invoice that
+    // has lost something between the counting and the printing.
+    const result = oracleExtraction();
+    const manifest = buildManifest(result, { file: "x.swf", sha256: ORACLE_SHA256 });
+    const use = manifest.effects.use;
+    assert.equal(use.total, manifest.effects.ownFilters + manifest.effects.inheritedFilters,
+      "every carried filter is offered to canvasFilterFor exactly once");
+    assert.equal(use.applied + use.deferred + use.noOp + use.refused, use.total,
+      "and lands in exactly one bucket");
+    // ► **THE SHAPE OF THE ANSWER, not just its arithmetic.** 172 glows the
+    //   renderer draws as `drop-shadow` with the strength folded into the
+    //   alpha; 2 greyscale colour matrices it will NOT approximate with a CSS
+    //   `saturate()` (the build uses Flash's 0.3086/0.6094/0.0820, not CSS's
+    //   Rec.709) and defers to `applyColourMatrix`; 2 bevels refused by name.
+    assert.deepEqual(
+      { applied: use.applied, deferred: use.deferred, noOp: use.noOp, refused: use.refused },
+      { applied: 172, deferred: 2, noOp: 0, refused: 2 });
+    assert.deepEqual(use.approximatedByKind, { shadowStrengthAsAlpha: 172 });
+    assert.equal(use.approximated, use.applied,
+      "on this mapper every applied filter is inexact; a divergence here means one stopped being counted");
+    // ZERO blend modes on this roster — carried as a counted zero, and the
+    // threading that would report one is exercised synthetically above.
+    assert.equal(manifest.effects.ownBlendModePlacements + manifest.effects.inheritedBlendModes, 0);
+    assert.deepEqual(manifest.effects.blendModes, { exact: {}, refused: {} });
+  });
+
+test("THE 38 CLEARED FILTER LISTS ARE REFUSED BY NAME, and no placement carries an empty one",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    // ► **`inventory_buttons` PLACES ITS BATTLEBUTTON UNDER A GREY-OUT ON TWO
+    //   FRAMES AND EXPLICITLY CLEARS THE FILTER ON 38 OTHERS.** "Cleared" and
+    //   "never set" are different facts about the same instance, and writing
+    //   the first as `filters: []` would hand a renderer a list to apply.
+    const result = oracleExtraction();
+    assert.equal(result.clips.inventory_buttons.effects.notCarried.emptyFilterList, 38);
+    const packEmpty = everyEntry(result)
+      .reduce((sum, entry) => sum + (entry.effects.notCarried.emptyFilterList ?? 0), 0);
+    assert.equal(packEmpty, 38, "all of them on the one strip");
+    for (const entry of everyEntry(result)) {
+      for (const frame of framesOf(entry)) {
+        for (const placement of frame) {
+          if (!Object.hasOwn(placement, "filters")) continue;
+          assert.ok(Array.isArray(placement.filters) && placement.filters.length > 0,
+            `${entry.character} wrote an empty filter list, which claims a list a renderer should apply`);
+        }
+      }
+    }
+    // And the two that ARE carried are the grey-out, on frames 10 and 11.
+    const greyed = result.clips.inventory_buttons.frames
+      .map((frame, index) => [index + 1, frame.find((placement) => placement.filters)])
+      .filter(([, placement]) => placement);
+    assert.deepEqual(greyed.map(([frame]) => frame), [10, 11]);
+    for (const [, placement] of greyed) {
+      assert.equal(placement.kind, "clip", "the battlebutton is a two-frame child, not scenery");
+      assert.equal(placement.character, 58);
+      assert.equal(placement.filters[0].type, "colourMatrix");
+      assert.equal(Math.round(placement.filters[0].matrix[0] * 10000) / 10000, 0.3086,
+        "Flash's greyscale coefficient, which is why canvasFilterFor refuses to call it saturate()");
+    }
+  });
+
+test("EVERY inheritedEffects INDEX POINTS INTO ITS OWN ENTRY'S effectGroups",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    // ► An index into a table one entry away is a join a reader makes wrong
+    //   once and never checks again. The tables are per entry on purpose, so
+    //   the only thing that can break is the range — and an out-of-range index
+    //   reads as `undefined` at the far end, which draws nothing and says
+    //   nothing.
+    const result = oracleExtraction();
+    let pointed = 0;
+    for (const entry of everyEntry(result)) {
+      for (const frame of framesOf(entry)) {
+        for (const placement of frame) {
+          if (!placement.inheritedEffects) continue;
+          pointed += 1;
+          for (const index of placement.inheritedEffects) {
+            assert.ok(Number.isInteger(index) && index >= 0 && index < entry.effectGroups.length,
+              `character ${entry.character} points at group ${index} of ${entry.effectGroups.length}`);
+          }
+        }
+      }
+    }
+    assert.equal(pointed, 2, "two shapes under the panel's two bevel groups — and a zero here would be vacuous");
+    assert.equal(
+      everyEntry(result).reduce((sum, entry) => sum + entry.effects.inherited.placements, 0), pointed,
+      "the invoice's leaf count, recounted from the placements themselves");
+  });
+
+test("THE BOUNDARY THIS TOOL REFUSES TO CROSS IS A NUMBER, not a sentence",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    // ► **A multi-frame child is NOT descended into** — that is this whole
+    //   tool's reason to exist — so no filter inside one is counted in its
+    //   parent's invoice. Saying that in prose would leave a reader unable to
+    //   tell "nothing is behind that boundary" from "nobody looked". The child
+    //   is extracted as its own entry, so the number is a join away, and the
+    //   join is done here rather than left to them.
+    const result = oracleExtraction();
+    const manifest = buildManifest(result, { file: "x.swf", sha256: ORACLE_SHA256 });
+    assert.equal(manifest.effects.undescendedClipPlacements, 190);
+    assert.deepEqual(manifest.effects.undescendedChildren, [58, 78, 116, 151, 161, 815]);
+    assert.equal(manifest.effects.undescendedChildFilters, 2,
+      "the strip's two colour matrices, sitting behind cast_spell_image's boundary");
+    // ► **THE ONE THAT MUST NEVER BE SILENT.** A child nothing extracted is a
+    //   whole subtree of effects counted nowhere at all.
+    assert.equal(manifest.effects.undescendedChildrenNotExtracted, 0);
+    for (const entry of everyEntry(result)) {
+      assert.deepEqual(entry.effects.undescended.childrenNotExtracted, [],
+        `character ${entry.character} points at a child that was never extracted`);
+    }
+    // And the join is real: the 2 are the strip's OWN, counted once in the pack
+    // total and never added to it a second time.
+    assert.equal(result.clips.cast_spell_image.effects.undescended.filtersInChildEntries, 2);
+    assert.deepEqual(result.clips.cast_spell_image.effects.undescended.children, [116]);
+    assert.equal(result.clips.inventory_buttons.effects.own.filters, 2, "the same two, where they are actually counted");
+  });
+
+test("THE MANIFEST'S EFFECT TOTALS ARE RECOMPUTED FROM THE PACK'S OWN ENTRIES",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    // ► **THE DEFECT THIS PATTERN EXISTS TO STOP.** The figure extractor's
+    //   manifest once summed a per-entry field that 83% of its pack did not
+    //   have and published zero against data holding two. So every number below
+    //   is counted here, from `frames` and `effectGroups`, and compared with
+    //   what `tallyIconEffects` published — two independent paths to one number.
+    const result = oracleExtraction();
+    const manifest = buildManifest(result, { file: "x.swf", sha256: ORACLE_SHA256 });
+    let groups = 0;
+    let ownFilters = 0;
+    let ownPlacements = 0;
+    let under = 0;
+    let inheritedFilters = 0;
+    for (const entry of everyEntry(result)) {
+      groups += entry.effectGroups.length;
+      for (const group of entry.effectGroups) inheritedFilters += (group.filters ?? []).length;
+      for (const frame of framesOf(entry)) {
+        for (const placement of frame) {
+          if (placement.filters) { ownPlacements += 1; ownFilters += placement.filters.length; }
+          if (placement.inheritedEffects) under += 1;
+        }
+      }
+    }
+    assert.deepEqual(
+      {
+        groups: manifest.effects.groups,
+        ownFilters: manifest.effects.ownFilters,
+        ownFilteredPlacements: manifest.effects.ownFilteredPlacements,
+        placementsUnderAGroup: manifest.effects.placementsUnderAGroup,
+        inheritedFilters: manifest.effects.inheritedFilters
+      },
+      { groups, ownFilters, ownFilteredPlacements: ownPlacements, placementsUnderAGroup: under, inheritedFilters });
+    assert.equal(ownFilters, 174, "or the two paths agree on a number that is not the build's");
+    assert.deepEqual(tallyIconEffects(result), manifest.effects, "the manifest publishes the tally, not a copy of it");
+
+    // ► **A ROW PER ENTRY, INCLUDING THE NINE THAT ARE ALL ZEROES.** A manifest
+    //   that invoices only the entries with something to say tells a reader who
+    //   checks one row that everything is invoiced.
+    const rows = [
+      ...Object.values(manifest.faces), ...Object.values(manifest.icons), ...Object.values(manifest.nested)
+    ];
+    assert.equal(rows.length, everyEntry(result).length);
+    assert.equal(rows.length, 15, "two faces, eight icon clips and five nested children");
+    for (const row of rows) {
+      assert.ok(row.effects, "every row carries an effects row");
+      assert.equal(typeof row.effects.ownFilters, "number");
+      assert.equal(typeof row.effects.bevels, "number");
+      assert.ok(row.effects.use && typeof row.effects.use.total === "number");
+    }
+    assert.equal(rows.filter((row) => row.effects.ownFilters === 0).length, 8,
+      "eight entries measure zero, and they are invoiced exactly as loudly as the seven that do not");
   });

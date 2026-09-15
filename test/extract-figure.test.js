@@ -43,16 +43,24 @@ import {
   assertReplaceableFile,
   assertWritableOutput,
   extractFigure,
+  frozenNestedSpriteCensus,
   labelKey,
   parseArguments,
   pathApproximations,
+  effectTally,
   poseBounds,
   previewHtml,
   previewTints
 } from "../tools/extract-figure.mjs";
+import { extractEnchantments } from "../tools/extract-enchantments.mjs";
 // The OWNER of the colour transform, imported so this file compares the
 // preview against it rather than against a second copy of the arithmetic.
-import { applyColourTransform, applyColourTransformAlpha } from "../src/render/filters.js";
+import {
+  applyColourTransform,
+  applyColourTransformAlpha,
+  canvasFilterFor,
+  summariseFilterUse
+} from "../src/render/filters.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const SWF = "/somewhere/else/swords_sandals2_download.swf";
@@ -339,6 +347,9 @@ class Swf {
     this.bytes.push(value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, (value >>> 24) & 0xff);
     return this;
   }
+  /** FIXED is 16.16 and FIXED8 is 8.8 — the two a filter's fields are written in. */
+  fixed(value) { this.align(); const buffer = Buffer.alloc(4); buffer.writeInt32LE(Math.round(value * 65536)); return this.raw(buffer); }
+  fixed8(value) { this.align(); const buffer = Buffer.alloc(2); buffer.writeInt16LE(Math.round(value * 256)); return this.raw(buffer); }
   string(value) {
     this.align();
     for (const byte of Buffer.from(value, "utf8")) this.bytes.push(byte);
@@ -347,6 +358,37 @@ class Swf {
   }
   raw(bytes) { this.align(); for (const byte of bytes) this.bytes.push(byte); return this; }
   rgba(red, green, blue, alpha) { return this.u8(red).u8(green).u8(blue).u8(alpha); }
+
+  /**
+   * ONE filter, field for field. Only the three kinds these tests need — a
+   * GLOW that `canvasFilterFor` applies, a BLUR whose two radii differ so that
+   * it applies as an APPROXIMATION with a name, and a BEVEL, which is the one
+   * filter kind the renderer refuses outright.
+   *
+   * ► **Every field is distinct and none is zero unless asked for**, so a
+   *   decoder that reads the right NUMBER of bytes from the wrong offsets
+   *   fails here rather than looking plausible. `flags` 0x21 is
+   *   composite-source with one pass, which is what 881 of the build's 884
+   *   glows and shadows carry.
+   */
+  filter({ id, colour = { red: 0, green: 255, blue: 255, alpha: 255 }, blurX = 22, blurY = 22, strength = 2.5, flags = 0x21 }) {
+    this.u8(id);
+    if (id === 1) this.fixed(blurX).fixed(blurY).u8(flags);
+    else if (id === 2) this.rgba(colour.red, colour.green, colour.blue, colour.alpha).fixed(blurX).fixed(blurY).fixed8(strength).u8(flags);
+    else if (id === 3) {
+      this.rgba(255, 255, 255, 255).rgba(160, 96, 1, 255)
+        .fixed(blurX).fixed(blurY).fixed(0.75).fixed(-6).fixed8(strength).u8(flags);
+    } else throw new Error(`this test writer has no filter ${id}`);
+    return this;
+  }
+
+  /** A FILTERLIST. A list of COUNT ZERO is legal and means "cleared". */
+  filterList(filters) {
+    this.align();
+    this.u8(filters.length);
+    for (const filter of filters) this.filter(filter);
+    return this;
+  }
 
   /** A RECT is as wide as its widest field says it is, which is why this measures. */
   rect(xMin = 0, xMax = 0, yMin = 0, yMax = 0) {
@@ -536,6 +578,35 @@ function place2({ depth, characterId, matrix, colourTransform, ratio, name }) {
   if (ratio !== undefined) writer.u16(ratio);
   if (name !== undefined) writer.string(name);
   return swfTag(26, writer);
+}
+
+/**
+ * A `PlaceObject3` body, in the SPECIFICATION's order and not the flag order:
+ * the FILTERLIST sits between ClipDepth and BlendMode, which is the seam a
+ * parser that guesses a filter list's length desynchronises on.
+ *
+ * `filters: []` is a real and different thing from `filters: undefined` — the
+ * flag is set and the count is zero, which means "this instance has had its
+ * filters CLEARED". The extractor refuses that by name rather than writing
+ * `filters: []`, and this is the only way to produce the bytes for it.
+ */
+function place3({ depth, characterId, matrix, name, filters, blendMode, move = false }) {
+  const writer = new Swf();
+  let flags = 0;
+  let flags2 = 0;
+  if (move) flags |= 0x01;
+  if (characterId !== undefined) flags |= 0x02;
+  if (matrix) flags |= 0x04;
+  if (name !== undefined) flags |= 0x20;
+  if (filters) flags2 |= 0x01;
+  if (blendMode !== undefined) flags2 |= 0x02;
+  writer.u8(flags).u8(flags2).u16(depth);
+  if (characterId !== undefined) writer.u16(characterId);
+  if (matrix) writer.matrix(matrix);
+  if (name !== undefined) writer.string(name);
+  if (filters) writer.filterList(filters);
+  if (blendMode !== undefined) writer.u8(blendMode);
+  return swfTag(70, writer);
 }
 
 const showFrame = () => swfTag(1, Buffer.alloc(0));
@@ -793,4 +864,533 @@ test("the emitted page carries the table and NOT the arithmetic", () => {
   // The page is opened from file:// and inlines its data for that reason; a
   // fetch would give a blank page with the reason in a console nobody opens.
   assert.ok(!html.includes("fetch("), "the preview must stay self-contained");
+});
+
+/**
+ * ---------------------------------------------------------------------------
+ * THE EFFECTS THE FIGURE PACK USED TO DROP WITHOUT SAYING SO
+ * ---------------------------------------------------------------------------
+ *
+ * ► **WHAT WAS WRONG.** `flattenFrame` hands every drawable a `blendMode`, a
+ *   `hasFilters`, a `filters` list and an `ancestorEffects` chain. At HEAD
+ *   this tool matched ZERO of `hasFilters|ancestorEffects|\.filters|blendMode`
+ *   — re-derived with `grep -cE` before the change, against 52 in
+ *   `tools/extract-props.mjs` and 38 in `tools/extract-screens.mjs`. So the
+ *   fighter's only filtered sprite was discarded on every run, and `--report`
+ *   had no line on which the loss could have appeared.
+ *
+ * ► **WHAT THE REAL BUILD SAYS, and it is quoted here, never stored.** Clip
+ *   1241 flattens to 37,077 placements. **ZERO carry an own filter or blend
+ *   mode**; **30 sit under an ancestor effect group**, all of them shape 856
+ *   at path `43/1/1` under limb `guard_charge` — character 1195 at path `43`,
+ *   carrying two glows, a constant `#000066` inner and an `#00ffff` outer
+ *   whose blur tweens 22 → 13. Those 30 dedupe to **12 table entries across
+ *   four labels, 10 distinct records, 24 filter records**, and the renderer
+ *   applies all 24 as `shadowStrengthAsAlpha`. Reproduce with
+ *   `node tools/extract-figure.mjs --report`.
+ *
+ * ► **AND THAT IS WHY THE FIXTURE BELOW EXISTS RATHER THAN A SECOND READING
+ *   OF THE ORACLE.** Two of the numbers the real build reports — `own 0` and
+ *   `dropped 0` — cannot fail for any input in this build, so asserting them
+ *   against it would be asserting nothing. `effectBuild` puts BOTH code paths
+ *   under load: placements with their own filters and their own blend modes, a
+ *   filter list of COUNT ZERO, a drawable that is skipped while carrying a
+ *   glow AND sitting inside a glowing group, and a morph, all in a rig whose
+ *   enclosing glow TWEENS so that the dedup key is doing work.
+ */
+
+/** A `blur` whose two radii DIFFER, so `canvasFilterFor` applies it as a named approximation. */
+const ANISOTROPIC_BLUR = { id: 1, blurX: 5.5, blurY: 6.25, flags: 0x08 };
+/** A `bevel`. The one filter kind `src/render/filters.js` refuses outright. */
+const BEVEL = { id: 3 };
+/** `#00ffff` at a given blur, which is the shape of the real build's outer psych-up glow. */
+const cyanGlow = (blur) => ({ id: 2, blurX: blur, blurY: blur, strength: 2.5 });
+
+const GROUP_SPRITE = 500;
+/** The OUTER and INNER halves of a nested pair, so one leaf sits under TWO groups. */
+const OUTER_SPRITE = 501;
+const INNER_SPRITE = 502;
+/** A group whose ONLY effect is a blend mode, placed twice with two different ones. */
+const BLEND_SPRITE = 503;
+/** A group around the MORPH, so a baked morph is a leaf under a group and not only a denominator. */
+const MORPH_SPRITE = 504;
+/** A character id NOTHING defines, which is the cheapest drawable `flattenFrame` calls unsupported. */
+const GHOST = 999;
+
+/**
+ * A rig that exercises EVERY effect path this tool has.
+ *
+ * ```text
+ *   depth 1  shape 11   "torso"    nothing at all
+ *   depth 2  sprite 500 "aura"     A GLOW THAT TWEENS: 22, 19, 13, 22, then 22
+ *              inside: shape 10 (emitted, under the group)
+ *                      character 999, WHICH DOES NOT EXIST (skipped, and it
+ *                      carries its own glow as well as the group's)
+ *   depth 3  shape 12   "shield"   own filters [anisotropic blur, bevel] + multiply
+ *   depth 4  shape 11   "cleared"  a filter list of COUNT ZERO
+ *   depth 5  shape 11   "erased"   blend mode 11, "alpha", which is REFUSED
+ *   depth 6  sprite 504 "blood"    a glow around the BAKED MORPH, so the morph
+ *                                  branch is a leaf under a group and not only
+ *                                  a number in the denominator
+ *   depth 7  sprite 501 "nest"     a glow OUTSIDE a glow: sprite 502 inside it
+ *                                  carries its own, so the shape at the bottom
+ *                                  sits under a chain of TWO
+ *   depth 8  sprite 503 "tinted"   NO filters, a blend mode — and a DIFFERENT
+ *                                  one on frame 2, so two records differ in
+ *                                  the dedup key's third field and nothing else
+ * ```
+ *
+ * Two labels, because the per-animation table is the design decision that
+ * needs a test: `Glow` covers frames 1-4 and `Glow Again` covers 5-6, and both
+ * hold the blur-22 record. That is 4 table entries over 3 distinct records —
+ * the same 12-over-10 the real build shows, small enough to count by hand.
+ */
+function effectBuild() {
+  const aura = (blur) => place3({ depth: 2, characterId: GROUP_SPRITE, name: "aura", filters: [cyanGlow(blur)] });
+  return swfFile([
+    solidShape(10, [0x20, 0x40, 0x60, 0xff]),
+    solidShape(11, [0xff, 0xff, 0xff, 0xff]),
+    strokedShape(12),
+    gradientMorph(77),
+    defineSprite(GROUP_SPRITE, 1, [
+      place2({ depth: 1, characterId: 10, matrix: {} }),
+      place3({ depth: 2, characterId: GHOST, matrix: {}, filters: [cyanGlow(5)] }),
+      showFrame()
+    ]),
+    // ► **A CHAIN OF LENGTH TWO, because every chain in clip 1241 is length
+    //   ONE and so the ORDER of a placement's `effects` is unmeasurable
+    //   against the installed build.** A renderer has to nest its buffers
+    //   outermost-first; without these bytes that guarantee is a sentence in a
+    //   comment and nothing else. Blur 9 outside, blur 3 inside, so the order
+    //   is readable rather than inferred.
+    defineSprite(INNER_SPRITE, 1, [place2({ depth: 1, characterId: 10, matrix: {} }), showFrame()]),
+    // ► **A GROUP CARRYING NO FILTERS AT ALL.** A blend mode alone makes an
+    //   enclosing sprite a group, and it is part of the dedup key. Without
+    //   this, deleting `blendMode` from that key changes nothing anywhere and
+    //   the key's third field is untested — which is how it was, and the
+    //   mutation that found it survived the whole suite.
+    defineSprite(BLEND_SPRITE, 1, [place2({ depth: 1, characterId: 10, matrix: {} }), showFrame()]),
+    // ► **AND A GROUP AROUND THE MORPH**, because a baked morph that is only
+    //   ever in the DENOMINATOR proves nothing about whether the morph branch
+    //   carries effects. Delete the effects from the morph placement and this
+    //   is what goes red.
+    defineSprite(MORPH_SPRITE, 1, [
+      place2({ depth: 1, characterId: 77, matrix: {}, ratio: 32768 }),
+      showFrame()
+    ]),
+    defineSprite(OUTER_SPRITE, 1, [
+      place3({ depth: 1, characterId: INNER_SPRITE, matrix: {}, filters: [cyanGlow(3)] }),
+      showFrame()
+    ]),
+    defineSprite(RIG_CLIP, 6, [
+      frameLabel("Glow"),
+      place2({ depth: 1, characterId: 11, matrix: { tx: 5 }, name: "torso" }),
+      aura(22),
+      place3({ depth: 3, characterId: 12, matrix: { tx: 80 }, name: "shield", filters: [ANISOTROPIC_BLUR, BEVEL], blendMode: 3 }),
+      place3({ depth: 4, characterId: 11, matrix: { tx: 160 }, name: "cleared", filters: [] }),
+      place3({ depth: 5, characterId: 11, matrix: { tx: 200 }, name: "erased", blendMode: 11 }),
+      place3({ depth: 6, characterId: MORPH_SPRITE, matrix: {}, name: "blood", filters: [cyanGlow(7)] }),
+      place3({ depth: 7, characterId: OUTER_SPRITE, matrix: { tx: 240 }, name: "nest", filters: [cyanGlow(9)] }),
+      place3({ depth: 8, characterId: BLEND_SPRITE, matrix: { tx: 280 }, name: "tinted", blendMode: 4 }),
+      showFrame(),
+      aura(19),
+      place3({ depth: 8, characterId: BLEND_SPRITE, matrix: { tx: 280 }, name: "tinted", blendMode: 5 }),
+      showFrame(),
+      aura(13), showFrame(),
+      aura(22), showFrame(),
+      frameLabel("Glow Again"),
+      aura(22), showFrame(),
+      showFrame()
+    ]),
+    exportAssets([[RIG_CLIP, "hero_battle"]])
+  ]);
+}
+
+test("THE EFFECT-GROUP TABLE IS KEYED ON THE WHOLE RECORD, and the path-only key loses the tween", () => {
+  const result = extractFigure(effectBuild(), { clip: RIG_CLIP });
+  const glow = result.animations.glow;
+  const again = result.animations["glow-again"];
+
+  // The enclosing sprite is at ONE depth and is ONE character on every frame,
+  // so path — and path+character, and path+filter-KINDS — collapse all of this
+  // to a single record. Counted here rather than claimed:
+  const pathKey = new Set();
+  const wholeKey = new Set();
+  for (const animation of Object.values(result.animations)) {
+    for (const group of animation.effectGroups) {
+      pathKey.add(JSON.stringify(group.path));
+      wholeKey.add(JSON.stringify(group));
+    }
+  }
+  assert.equal(pathKey.size, 5, "five enclosing depths: aura, morph, the nested pair, and the blend-only one");
+  assert.equal(wholeKey.size, 8, "the whole record ALSO sees the aura's three blurs and the two blend modes");
+
+  // ► **THE NUMBER THE PATH KEY WOULD HAVE COST, on the path where it costs
+  //   anything.** The aura is ONE sprite at ONE depth, so a path key — and a
+  //   path+character key, and a path+filter-KINDS key — collapses its three
+  //   records to one. 3 → 1 here; on the installed build 10 → 1, and the
+  //   discarded difference is the psych-up PULSE: blur 22 → 21.4 → 20.8 →
+  //   20.2 → 19.6 → 19 → 17.5 → 16 → 14.5 → 13 with the strength swinging
+  //   2.699 → 0.977 → 2.699. A path key reports ONE glow and the aura stops
+  //   moving.
+  const auraRecords = (animation) => animation.effectGroups.filter((group) => group.path.join("/") === "2");
+  assert.deepEqual(auraRecords(glow).map((group) => group.filters[0].blurX), [22, 19, 13],
+    "frames 1 and 4 share a record; 2 and 3 are their own");
+  assert.equal(new Set(auraRecords(glow).map((group) => group.path.join("/"))).size, 1,
+    "and all three sit on ONE path, which is what makes the path key wrong");
+  assert.deepEqual(auraRecords(again).map((group) => group.filters[0].blurX), [22]);
+  assert.equal(result.effects.inherited.groups, 13, "TABLE ENTRIES, summed over the labels");
+  assert.equal(result.effects.inherited.distinctGroups, 8, "the records that are actually different");
+
+  // ► **THE TWO SIDES OF THE INVOICE ARE COUNTED ON DIFFERENT UNITS, ON
+  //   PURPOSE, and this is the assertion that pins it.** A GROUP's filters are
+  //   counted ONCE however many leaves sit under it, because the build applies
+  //   them once to the group. Count them per leaf instead and this rig's four
+  //   glows become six — and on the installed build the props pack's single
+  //   sky colour matrix became 3,202 colour matrices, which is how the unit
+  //   error was found. `placements` and `groupInstances` are the per-leaf
+  //   numbers and they live under their own names.
+  assert.equal(result.effects.inherited.filters, 10, "one per TABLE ENTRY, not one per enclosed leaf");
+  assert.deepEqual(result.effects.inherited.filtersByType, { glow: 10 });
+  assert.equal(result.effects.inherited.placements, 24, "four enclosed leaves, over six frames");
+  assert.equal(result.effects.inherited.groupInstances, 30,
+    "three leaves are under ONE group each and the nested leaf is under TWO");
+  assert.equal(result.effects.inherited.blendModes, 3,
+    "a group's blend mode counts per TABLE ENTRY too: screen once, lighten in both labels");
+
+  // A placement's `effects` are INDICES into its OWN animation's table, so
+  // frame 1 and frame 4 point at the same entry and frames 2 and 3 do not.
+  const auraOn = (animation) =>
+    animation.poses.map((pose) => pose.find((placement) => placement.limb === "aura").effects);
+  assert.deepEqual(auraOn(glow), [[0], [5], [7], [0]]);
+  assert.deepEqual(auraOn(again), [[0], [0]], "a second label re-derives the record it shares");
+
+  // ► **OUTERMOST FIRST, and this is the assertion that makes that a fact
+  //   rather than a sentence.** A renderer nests its buffers in this order;
+  //   reverse the chain and the inner glow is applied to the outer group's
+  //   output instead of the other way round. **Every chain in clip 1241 is
+  //   length ONE, so the installed build cannot tell the two orders apart** —
+  //   the claim is unfalsifiable against the oracle and is pinned here or
+  //   nowhere.
+  const nested = glow.poses[0].find((placement) => placement.limb === "nest");
+  assert.equal(nested.effects.length, 2, "one leaf, two enclosing groups");
+  assert.deepEqual(nested.effects.map((index) => glow.effectGroups[index].path), [[7], [7, 1]],
+    "the OUTER group first — its path is the prefix of the inner one's");
+  assert.deepEqual(nested.effects.map((index) => glow.effectGroups[index].filters[0].blurX), [9, 3]);
+
+  // ► **THE DEDUP KEY'S THIRD FIELD, which nothing else here can reach.** The
+  //   sprite at depth 8 carries NO filters and two different blend modes on
+  //   two frames, so these two records differ in `blendMode` and in nothing
+  //   else. Drop `blendMode` from the key and they merge — a mutation that
+  //   survived this whole file until this fixture existed.
+  const blends = glow.effectGroups.filter((group) => group.path.join("/") === "8");
+  assert.deepEqual(blends.map((group) => group.blendMode), [4, 5]);
+  assert.deepEqual(blends.map((group) => group.filters), [undefined, undefined],
+    "a blend mode ALONE makes an enclosing sprite a group");
+  assert.deepEqual(
+    glow.poses.map((pose) => pose.find((placement) => placement.limb === "tinted").effects),
+    [[4], [6], [6], [6]], "frame 1 is screen; 2, 3 and 4 are lighten"
+  );
+
+  // And they index a table that is THERE — the bug this shape is chosen to
+  // make impossible is a renderer looking up index 2 in a one-entry table.
+  for (const animation of Object.values(result.animations)) {
+    for (const pose of animation.poses) {
+      for (const placement of pose) {
+        for (const index of placement.effects ?? []) {
+          assert.ok(animation.effectGroups[index], `${animation.label}: effects index ${index} reaches nothing`);
+        }
+      }
+    }
+  }
+});
+
+test("EVERY animation carries an effectGroups table, empty ones included", () => {
+  // ► **ALL OR NONE, the rule `pathApproximations` already answers to.** A
+  //   pack that carries the key on 4 of 101 labels reads as a pack that
+  //   carries the key, and a renderer written against it breaks on the 97th.
+  //   Measured on the installed build: 4 labels have a non-empty table and 97
+  //   have an empty one; all 101 have the key.
+  const result = extractFigure(effectBuild(), { clip: RIG_CLIP });
+  for (const [key, animation] of Object.entries(result.animations)) {
+    assert.ok(Array.isArray(animation.effectGroups), `${key} carries no effectGroups table`);
+  }
+
+  // The rig with no effects at all still carries empty tables, which is the
+  // case that tells "this animation encloses nothing" from "this pack predates
+  // the key".
+  const plain = extractFigure(rigBuild(), { clip: RIG_CLIP });
+  assert.deepEqual(Object.values(plain.animations).map((animation) => animation.effectGroups), [[], []]);
+  assert.equal(plain.effects.inherited.groups, 0);
+  assert.deepEqual(plain.effects.notCarried, {}, "a rig with no effects loses nothing");
+});
+
+test("A PLACEMENT'S OWN FILTERS AND BLEND MODE ARE CARRIED — the half that is DEAD on the oracle", () => {
+  // ► **0 of the installed build's 37,077 placements carries either**, so this
+  //   code path cannot be exercised by the real build at all and would sit
+  //   unwritten-and-unnoticed exactly the way `ownEffectsOf`'s equivalent did
+  //   in the props extractor — where the pack-wide `0 own filters` turned out
+  //   to be a measurement of a skip list. These bytes are the only thing in
+  //   this repository that can tell the two apart.
+  const result = extractFigure(effectBuild(), { clip: RIG_CLIP });
+  const frame = result.animations.glow.poses[0];
+
+  const shield = frame.find((placement) => placement.limb === "shield");
+  assert.deepEqual(shield.filters.map((filter) => filter.type), ["blur", "bevel"],
+    "the placement's OWN list, in the order the wire carries it");
+  assert.equal(shield.filters[0].blurX, 5.5);
+  assert.equal(shield.filters[0].blurY, 6.25, "the two radii differ, and that difference must survive");
+  assert.equal(shield.blendMode, 3);
+
+  const erased = frame.find((placement) => placement.limb === "erased");
+  assert.equal(erased.blendMode, 11, "a blend mode with no filters is still an effect");
+  assert.equal(erased.filters, undefined, "and it must not gain an empty list on the way out");
+
+  // ► **A FILTER LIST OF COUNT ZERO IS NOT AN ABSENT ONE.** It means the
+  //   instance's filters were CLEARED. Writing it as `filters: []` would let a
+  //   reader treat it as "nobody asked"; it is refused BY NAME instead.
+  const cleared = frame.find((placement) => placement.limb === "cleared");
+  assert.equal(cleared.filters, undefined, "an empty list must never be written as one");
+  assert.equal(result.effects.notCarried.emptyFilterList, 6, "once per frame it is on the stage");
+
+  assert.equal(result.effects.own.filteredPlacements, 6);
+  assert.equal(result.effects.own.filters, 12);
+  assert.deepEqual(result.effects.own.filtersByType, { blur: 6, bevel: 6 });
+  assert.equal(result.effects.own.blendModePlacements, 12, "shield and erased, on each of six frames");
+});
+
+test("THE SKIP INVOICES WHAT LEAVES WITH IT — its own effects AND the group it was sitting in", () => {
+  // ► **THIS IS THE DEFECT THAT ATE THE PROPS EXTRACTOR'S HEADLINE.** Its
+  //   placement loop skipped unsupported drawables above the effect sweep, the
+  //   build's only two own-filtered placements were two of those skips, and
+  //   the pack reported `0 own filters` about a build that had two. This file
+  //   has exactly one skip — an unsupported drawable, or a morph whose
+  //   definition will not parse — and it fires 0 times out of 37,077 against
+  //   the installed build, which is a fact about THAT BUILD and is
+  //   indistinguishable from an uncounted drop unless something can make it
+  //   fire.
+  const result = extractFigure(effectBuild(), { clip: RIG_CLIP });
+
+  assert.deepEqual(result.unsupported, { missing: [GHOST] }, "the ghost is still reported as a kind");
+  assert.equal(result.effects.own.dropped.drawables, 6, "one per frame");
+  assert.equal(result.effects.own.dropped.placements, 6);
+  assert.equal(result.effects.own.dropped.filters, 6);
+  assert.deepEqual(result.effects.own.dropped.filtersByType, { glow: 6 });
+  assert.equal(result.effects.own.dropped.inheritedGroups, 6,
+    "it was inside the aura, and that is a second loss with a second name");
+  assert.deepEqual(result.effects.notCarried.unsupportedDrawableFilters, 6);
+  assert.deepEqual(result.effects.notCarried.unsupportedDrawableInheritedFilters, 6);
+
+  // Nothing from the ghost reaches the pack — refusing is not carrying, and
+  // the point of the invoice is that the two are told apart in the manifest.
+  for (const animation of Object.values(result.animations)) {
+    for (const pose of animation.poses) {
+      for (const placement of pose) assert.notEqual(placement.shape, GHOST);
+    }
+  }
+});
+
+test("notCarried IS A NAMED-REASON TALLY AND IT IS COMPLETE, never a boolean and never a subset", () => {
+  // ► **ASSERTED AS A WHOLE OBJECT, on purpose.** Checking reasons one at a
+  //   time lets a reason be DELETED without anything going red: removing the
+  //   `effectGroupMatrix` refusal left this file green until this line existed,
+  //   and that refusal is the pack's only record that a group's blur radius is
+  //   in unscaled pixels with no matrix to scale it by.
+  const result = extractFigure(effectBuild(), { clip: RIG_CLIP });
+  assert.deepEqual(result.effects.notCarried, {
+    // Once per TABLE ENTRY: `flattenFrame`'s ancestor record carries no matrix,
+    // so a renderer cannot scale a group's blur by the group's own transform.
+    effectGroupMatrix: 13,
+    // The ghost's own glow, and the aura's glow that went with it.
+    unsupportedDrawableFilters: 6,
+    unsupportedDrawableInheritedFilters: 6,
+    // A filter list of COUNT ZERO — "cleared", not "nobody asked".
+    emptyFilterList: 6
+  });
+
+  // On the installed build the whole ledger is `{ effectGroupMatrix: 12 }`:
+  // nothing is skipped, nothing carries an own list, and no instance has had
+  // its filters cleared. Reproduce with `node tools/extract-figure.mjs --report`.
+  assert.equal(Object.values(result.effects.notCarried).every((count) => Number.isInteger(count)), true,
+    "a count, never a boolean");
+});
+
+test("THE MORPH PATH IS IN THE INVOICE, so a zero there is not a measurement of the skip list", () => {
+  // `morphKeyFor`'s placements used to be built by a second literal that
+  // already lagged the first one once — it carried no approximation invoice
+  // while every shape beside it did. A baked morph is an ordinary placement
+  // now, effects and all.
+  const result = extractFigure(effectBuild(), { clip: RIG_CLIP });
+  const blood = result.animations.glow.poses[0].find((placement) => placement.limb === "blood");
+  assert.equal(blood.shape, "77@32768", "still the baked key, not the character id");
+  // ► **AND IT CARRIES ITS ENCLOSING GROUP**, which is the assertion the first
+  //   version of this fixture could not make: the morph sat under nothing, so
+  //   deleting the effects from the morph branch changed no number anywhere.
+  assert.deepEqual(blood.effects, [1]);
+  assert.equal(result.animations.glow.effectGroups[1].filters[0].blurX, 7,
+    "the glow that is on the morph and not on anything else");
+
+  // ► **AND IT IS IN THE DENOMINATOR.** 48 emitted placements over 6 frames —
+  //   torso, the aura's leaf, shield, cleared, erased, the morph, the nested
+  //   leaf and the blend-only leaf — with the ghost's 6 skipped alongside. On
+  //   the installed build the same reading is 37,077 placements, of which 290
+  //   are baked morphs and 0 are skipped.
+  assert.equal(result.effects.own.placements, 48);
+  assert.equal(result.placementCount, 54, "the 48 emitted plus the 6 skipped");
+  assert.equal(result.morphCount, 1);
+});
+
+test("THE INVOICE IS RECOUNTED FROM THE PACK, never accumulated beside it", () => {
+  // ► **THE RULE THIS FILE ALREADY PAID FOR ONCE.** `approximationTally` used
+  //   to sum a field written next to each shape; the 290 baked morphs had no
+  //   such field, and the manifest a human reads counted an approximated morph
+  //   path as zero. A counter kept beside the data is a second thing to drift.
+  //   So `effectTally` walks the animations, `main` hands it the object it is
+  //   about to WRITE, and this pins the two readings together.
+  const result = extractFigure(effectBuild(), { clip: RIG_CLIP });
+  assert.deepEqual(effectTally(result.animations, result.effectLoss), result.effects);
+
+  // What `main` actually writes: the same animations with a `bounds` per
+  // label. A field added on the way out must not move a number.
+  const written = {};
+  for (const [key, animation] of Object.entries(result.animations)) {
+    written[key] = { ...animation, bounds: poseBounds(result.shapes, animation.poses) };
+  }
+  assert.deepEqual(effectTally(written, result.effectLoss), result.effects,
+    "the manifest's invoice must describe the file on disk");
+
+  // ► **AND THE SPLIT IS NAMED.** `own`, `inherited` and `use` are facts about
+  //   the PACK and are recountable from it; `dropped` and `notCarried` describe
+  //   what is NOT in the pack, so no walk can find them and they are carried.
+  //   Drop the carried half and exactly those two fields empty out — which is
+  //   what makes them the ones that can rot unnoticed.
+  const withoutLosses = effectTally(result.animations);
+  assert.deepEqual(withoutLosses.inherited, result.effects.inherited);
+  assert.deepEqual(withoutLosses.use, result.effects.use);
+  assert.deepEqual(withoutLosses.notCarried, {});
+  assert.equal(withoutLosses.own.dropped.filters, 0);
+  assert.equal(withoutLosses.own.placements, result.effects.own.placements);
+});
+
+test("`use` IS src/render/filters.js's VERDICT and not a table in the extractor", () => {
+  // ► **The arrangement `tools/extract-props.mjs` set and the reason it is
+  //   worth the import:** "the pack carries it" and "the renderer can draw it"
+  //   cannot drift apart while both stay green. A filter kind the renderer
+  //   learns to draw changes this number without anybody editing the extractor,
+  //   and a filter kind it stops drawing turns this red.
+  const result = extractFigure(effectBuild(), { clip: RIG_CLIP });
+  const use = result.effects.use.filters;
+
+  // Recomputed HERE from the pack's own filter lists, through the same owner.
+  const lists = [];
+  for (const animation of Object.values(result.animations)) {
+    for (const group of animation.effectGroups) lists.push(group.filters ?? []);
+    for (const pose of animation.poses) for (const placement of pose) if (placement.filters) lists.push(placement.filters);
+  }
+  assert.deepEqual(use, summariseFilterUse(lists.map((list) => canvasFilterFor(list))));
+
+  assert.equal(use.total, 22, "10 group glows, and a blur and a bevel on each of six placements");
+  assert.equal(use.applied, 16, "the glows and the blurs");
+  assert.equal(use.refused, 6, "every bevel — the one kind canvas has no expression for");
+  assert.deepEqual(use.approximatedByKind, { shadowStrengthAsAlpha: 10, anisotropicBlur: 6 },
+    "a blur whose radii differ is applied AS AN APPROXIMATION, and it is named");
+  assert.deepEqual(use.refusedByReason, { "bevel:filterHasNoCanvasEquivalent": 6 },
+    "a refusal with no reason is not an invoice");
+
+  // The blend modes go through `blendModeFor` for the same reason: `multiply`
+  // is exact, `alpha` needs a group buffer no filter string can express.
+  assert.deepEqual(result.effects.use.blendModes.exact, { screen: 1, lighten: 2, multiply: 6 },
+    "a GROUP's blend mode is costed per table entry; a PLACEMENT's per placement");
+  assert.deepEqual(result.effects.use.blendModes.refused, { "alpha:blendModeNeedsAGroupBuffer": 6 });
+});
+
+test("effectTally survives a pack that has none of this, because --report runs before anything is written", () => {
+  assert.equal(effectTally({}).inherited.groups, 0);
+  assert.equal(effectTally(undefined).own.placements, 0);
+  assert.equal(effectTally({ glow: {} }).own.placements, 0);
+  assert.deepEqual(effectTally({ glow: { poses: [[{ shape: 1 }]] } }).own, {
+    placements: 1, filteredPlacements: 0, filters: 0, filtersByType: {}, blendModePlacements: 0,
+    dropped: { drawables: 0, placements: 0, filters: 0, filtersByType: {}, blendModePlacements: 0, inheritedGroups: 0 }
+  });
+});
+
+
+/* ------------------------------------------------------------------ */
+/* THE FREEZE INVOICE — and it is checked AGAINST A SECOND TOOL         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THIS TEST EXISTS BECAUSE THE INVOICE ONE LINE ABOVE IT SHIPPED A CLEAN
+ *   BILL OF HEALTH OVER TWENTY-FOUR GLOWS.** `--report` printed *"DROPPED 0
+ *   filters and 0 inherited groups with 0 skipped drawables"* while sprite 703
+ *   `weapon0` carried two glows on each of its frames 2..13 inside this very
+ *   clip. Every drop counter in `tools/extract-figure.mjs` was telling the
+ *   truth; `flattenFrame` pins a nested sprite to frame 1, so those filters
+ *   were never READ, and a counter that counts drops cannot see a thing that
+ *   was never looked at.
+ *
+ * ► **AND IT IS NOT ASSERTED AGAINST A CONSTANT, BECAUSE A CONSTANT HERE WOULD
+ *   BE THIS FILE AGREEING WITH ITSELF.** The 24 is cross-checked against
+ *   `tools/extract-enchantments.mjs`, which reaches the same number by a
+ *   COMPLETELY different route: it disassembles `itemglow`'s twelve-arm ladder
+ *   out of the AVM1 bytes, derives the art clip from the call sites' member
+ *   name rather than being told `703`, and re-flattens that clip at each of its
+ *   thirteen frames. Two tools, two routes, one number — and either one drifting
+ *   turns this red.
+ */
+const ORACLE_BUILD =
+  "/mnt/c/Program Files (x86)/Steam/steamapps/common/Swords and Sandals Classic Collection/swf/swords_sandals2_download.swf";
+const haveOracleBuild = fs.existsSync(ORACLE_BUILD);
+
+test("the frame-1 freeze INVOICES what it never looked at, and a second tool agrees on the number",
+  { skip: haveOracleBuild ? false : "no installed build on this machine" }, () => {
+    const buffer = fs.readFileSync(ORACLE_BUILD);
+    const figure = extractFigure(buffer, {});
+
+    // The census names its children rather than counting them, because "24
+    // filters behind a freeze" does not tell a reader they are the weapon
+    // enchantment, and that is the whole value of the number.
+    const frozen = figure.frozenNested;
+    assert.equal(frozen.sprites, 3, "three multi-frame children are frozen on frame 1");
+    assert.equal(frozen.frames, 30, "and 30 of their frames are never resolved");
+
+    const carrying = frozen.byCharacter.filter((child) => child.filtersBehindTheFreeze > 0);
+    assert.equal(carrying.length, 1, "exactly one of the three hides anything");
+    assert.equal(carrying[0].character, 703);
+    assert.equal(carrying[0].name, "weapon0");
+
+    // ► THE CROSS-CHECK. `extractEnchantments` never reads this file and is
+    //   never told 703; it derives the clip from `itemglow`'s call sites.
+    const enchantments = extractEnchantments(buffer);
+    const byRoute = enchantments.art.frames.reduce(
+      (sum, frame) => sum + (frame.filters ?? []).length, 0);
+    assert.equal(
+      carrying[0].filtersBehindTheFreeze, byRoute,
+      "the figure census and the enchantment ladder must agree about how many filters sit behind the freeze"
+    );
+    assert.equal(byRoute, 24, "and the build's number is 24 — two glows on each of frames 2..13");
+
+    // The loss reaches the invoice under NAMED reasons, never as a bare zero
+    // somewhere else. `nestedSpriteFrame1` is the name `src/render/screen.js`
+    // already uses for the same freeze counted over screens.
+    assert.equal(figure.effects.notCarried.nestedSpriteFrame1, 3);
+    assert.equal(figure.effects.notCarried.nestedSpriteFramesNotResolved, 30);
+    assert.equal(figure.effects.notCarried.filtersBehindNestedFreeze, 24);
+  });
+
+/**
+ * The census over a build with NO multi-frame child says so with a zero that
+ * has a denominator, rather than not appearing.
+ *
+ * ► **AND THIS IS THE HALF THE ORACLE CANNOT TEST.** Every number in the test
+ *   above is a fact about one build; none of them can distinguish "the census
+ *   works" from "the census happens to return the right constants". Here the
+ *   input is built to have nothing behind any freeze, so a census that returned
+ *   a hard-coded 24 fails.
+ */
+test("the freeze census reports an honest zero when nothing is frozen", () => {
+  const census = frozenNestedSpriteCensus(
+    Buffer.alloc(0), new Map(), [], [], new Map()
+  );
+  assert.deepEqual(census, { sprites: 0, frames: 0, filters: 0, byCharacter: [] });
 });

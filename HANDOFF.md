@@ -34,12 +34,64 @@ Start there.
   against. Counted as `groupsMatrixOnlyWithFilteredDescendant` rather than
   guessed at; closing it needs `getImageData` or an inline SVG filter.
 
-► **THE FIGURE AND ICON EXTRACTORS READ NO FILTER FIELDS AT ALL, AND THEY ARE
-  DROPPING THE ELEMENTAL WEAPON GLOW.** Sprite 703 `weapon0` carries 24 glows,
-  two on every frame 2..13 — and the enchantments are flame/frost/poison/wraith
-  at frames 2/5/8/11. **The glow IS the enchantment visual**, which this file
-  records as not found. The SELECTOR is still open. Sprite 1241 `hero_battle`
-  carries a pulsing glow tween at frames 1614..1643.
+► ~~**THE FIGURE AND ICON EXTRACTORS READ NO FILTER FIELDS AT ALL**~~ **— BOTH
+  CARRY THEM NOW (2026-09-15), AND A THIRD TOOL OWNS THE ENCHANTMENT.** The
+  figure pack carries 12 effect-group tables (10 distinct) over 30 placements;
+  the icons pack carries 174 own filters and 2 enclosing groups, including the
+  only two bevels it can reach. **The SELECTOR sentence below was stale when it
+  was written** — see the correction at the `ids 1..24` bullet.
+
+► **THE FRAME-1 FREEZE HID TWENTY-FOUR GLOWS BEHIND A CLEAN BILL OF HEALTH, AND
+  THAT IS THE FINDING, NOT THE GLOWS.** `--report` printed *"DROPPED 0 filters
+  and 0 inherited groups with 0 skipped drawables"* while sprite 703 `weapon0`
+  sat at depth 39 of clip 1241 carrying two glows on each of frames 2..13. Every
+  drop counter was telling the truth: `flattenFrame` pins a nested sprite to
+  frame 1, so those filters were never DROPPED, they were **never read**, and a
+  counter that counts drops cannot see what was never looked at.
+  **`frozenNestedSpriteCensus` now measures it: 3 frozen children, 30 frames
+  never resolved, 24 filters behind them, all 24 on `weapon0`** — and the report
+  NAMES the child rather than printing a bare number.
+  ► **AND FRAME 1 IS A LOADED SAMPLE, NOT A NEUTRAL ONE**: `itemglow` drives
+    that clip to frames 2..13, so frame 1 is precisely the UNENCHANTED weapon.
+    A freeze that always lands on the frame where the effect is off will always
+    report that there is no effect.
+  ► This closes, for two packs, the gap ranked 4th on 2026-09-15: *"nothing
+    counts filters discarded by that freeze."* `src/render/screen.js`'s
+    `nestedSpriteFrame1` still counts SPRITES only.
+
+► **THE ENCHANTMENT IS A TWELVE-CELL LADDER AND `tools/extract-enchantments.mjs`
+  DERIVES IT FROM THE BYTES** — 107 of 107 instructions accounted for, the art
+  clip derived from the call sites' member name rather than declared, and seven
+  cross-checks green. `frame = 3 * (type - 2) + potency + 1`;
+  type 2/3/4/5 = Flame/Frost/Poison/Wraith, potency 1/2/3 = Weak/Medium/Strong.
+  **`test/extract-figure.test.js` cross-checks its 24 against the figure
+  census's 24 by a completely different route**, so either tool drifting turns
+  the suite red.
+
+► **AND THE BATTLE MAP HAD THE ARGUMENTS THE WRONG WAY ROUND SINCE 2026-09-13,
+  WHICH IS THE MOST DANGEROUS PLACE IN THIS REPOSITORY FOR AN ERROR TO LIVE** —
+  AGENTS.md says candidates are derived from it. It read `itemglow`'s outer
+  register as POTENCY, concluded that potency 2..5 chose the element, found the
+  resulting contradiction with `damagecharacter`, and **wrote it down as an open
+  question that "only a capture of a gladiator with a known enchantment
+  settles"**. There is no tension and no capture is needed: the function's own
+  `DefineFunction2` binds `enchant_type` to `register:3`, which is the register
+  the outer test reads. **Seven witnesses**, the first being the build's own
+  `weaponenchantments = ["","","Flame","Frost","Poison","Wraith"]` at `0x3fe79c`.
+  **An inconsistency between two readings of one build is evidence that a
+  reading is wrong before it is evidence about the build.**
+
+► **`else frame 1` IS NOT WHAT `itemglow` DOES.** The only frame-1 arm is
+  `enchant_type < 2`; the body ends with no trailing default, so for a type ≥ 6,
+  for a potency outside 1..3 (**including the 0 `randomise_gladiator` zeroes
+  to**), and for a NaN type, `gotoAndStop` is never called and the clip keeps
+  its current frame. The NaN path is reachable from `characterDNA[33]`.
+
+► **OPPONENTS CAN BE ENCHANTED — and the primary's level-banded potency ladder
+  is DEAD CODE.** All three banded arms fall into an unconditional
+  `randomBetween(1, 3)` at `0x404999`, so opponent primary potency is uniform at
+  every level while the secondary's is genuinely banded. It costs a second RNG
+  draw, which a replay reproducing the build's stream must make.
 
 ► **THERE IS NO BUILD-LEVEL FILTER DENOMINATOR.** 1,894 filter records on 1,507
   placements; a reader can reach 848 — 44.8% — and the two pack numbers are not
@@ -531,10 +583,22 @@ landed tonight.
   became a ranked open question that way. The build only ever exported
   nineteen. The report names gaps now — and the one real signal it uncovered is
   that `shield` is missing exactly id 13.
-► **THE WEAPON ENCHANTMENT SELECTOR HAS NOT BEEN FOUND**, and that is recorded
-  as a gap in the SEARCH rather than guessed at: `weapon0` is character 703 with
-  `flame`/`frost`/`poison`/`wraith` at frames 2/5/8/11, the resources exist, and
-  **`updatecharacter` contains no `gotoAndStop` at all.**
+► ~~**THE WEAPON ENCHANTMENT SELECTOR HAS NOT BEEN FOUND**~~ **— FOUND
+  2026-09-13, AND THIS LINE WENT ON SAYING OTHERWISE FOR TWO DAYS.** It is
+  `itemglow(whichitem, enchant_type, enchant_potency)`, root frame 35,
+  `DefineFunction2` at `0x3fa786`, and `docs/integration/ss2-battle-map.md` has
+  recorded it since the day it was found. **The clause below is the reason the
+  search kept missing it and is exactly right** — `updatecharacter` contains no
+  `gotoAndStop`, because the selector is a SEPARATE root function that
+  `updatecharacter`'s neighbour `skincharacter` calls. Kept, corrected here:
+  `weapon0` is character 703 with `flame`/`frost`/`poison`/`wraith` at frames
+  2/5/8/11, the resources exist, and **`updatecharacter` contains no
+  `gotoAndStop` at all.**
+  ► **A LIVING-HEAD LINE THAT SAYS "NOT FOUND" ABOUT SOMETHING A COMMITTED
+    DOCUMENT FOUND IS WORSE THAN NO LINE**, because AGENTS.md sends every
+    session here first. The correction belongs AT the instruction, which is
+    what this is. **Whoever closes a gap: close it in the living head too, not
+    only where you were working.**
 
 *(The brief it supersedes, whose every ranked item is now done or handed off:)*
 [2026-09-13 11:45 — the gladiator is dressed, and the shell has a seam](docs/handoffs/2026-09-13-1145--the-gladiator-is-dressed-and-the-shell-has-a-seam.md).**

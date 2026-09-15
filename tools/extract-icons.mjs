@@ -54,6 +54,63 @@
  *   loses. `tools/swf-display-list.mjs` is not this file's to change; the count
  *   is the report.
  *
+ * ► **THE ICONS ARE WHERE THIS BUILD KEEPS ITS GLOWS, AND THIS PACK DROPPED
+ *   ALL 176 OF THEM.** Every number on the fight is a text field with its own
+ *   glow, and until today not one reached the pack: `flattenIconFrame` never
+ *   read `filters`, `blendMode` or `hasFilters` off an entry, so the arena drew
+ *   flat numerals on a flat panel. `combat_panel`'s fifteen glows sit on nine
+ *   distinct fields, and their `variable` names say what a renderer loses
+ *   without them: `hitpoints` (twice, once per fighter), `armourpoints`,
+ *   `herotext`, `villaintext`, `crowd_text`, and three static labels.
+ *   Measured on the oracle, by clip:
+ *
+ *   ```text
+ *     clip                    own  group    what
+ *     cast_spell_image  120    40      0    glow on text 119, one per frame
+ *     bonus_icon        153    35      0    glow on text 152
+ *     miss_icon         823    34      0    glow on text 822
+ *     damage_icon       817    24      0    glow on text 816
+ *     defend_icon       821    24      0    glow on text 820
+ *     combat_panel      751    15      2    glow on 15 text placements, 9 fields; 2 BEVELS
+ *     inventory_buttons 116     2      0    a grey-out on the battlebutton (frames 10-11)
+ *     addstats_icon 162, eyes1 898, mouth1 909, and every nested child: 0
+ *                            ---    ---
+ *                            174      2     = 176
+ *   ```
+ *
+ * ► **AND NOT ONE OF THE 176 IS ON A SHAPE.** 172 of the 174 own filters are on
+ *   `text-placement` drawables — the kind this tool emits, points at a field in
+ *   `texts`, and does not turn into geometry — and the other 2 are on a `clip`
+ *   placement it deliberately refuses to descend into. The 2 group filters
+ *   enclose shapes but are not on them. **So a fix that carried filters on the
+ *   ordinary shape path alone would have moved 0 of 176 and reported success**,
+ *   which is why `own.filtersOnUnsupportedPlacements` is a field and not a
+ *   remark. (An earlier draft of this block said 159 and called
+ *   `combat_panel`'s 15 "the ordinary path". Both were wrong: those 15 are text
+ *   too, and the real number is 172 — measured with `--report`, which prints
+ *   it.)
+ *
+ * ► **THE STRIP'S TWO ARE A GREY-OUT, AND 38 MORE FRAMES CANCEL IT.**
+ *   `inventory_buttons` places `battlebutton` under a colour matrix on frames
+ *   **10 and 11** — and it is Flash's GREYSCALE matrix, the
+ *   `0.3086/0.6094/0.0820` triple `src/render/filters.js` says matches no CSS
+ *   shorthand at all, so `canvasFilterFor` defers both to `applyColourMatrix`
+ *   rather than approximating them. On 38 OTHER frames the same depth carries
+ *   a filter list of COUNT ZERO: a `PlaceObject3` saying "this instance's
+ *   filters are cleared", which is not the same claim as "nobody asked".
+ *   Writing that as `filters: []` and writing it as `filters: null` are both
+ *   lies in one direction or the other, so it is refused by name and counted:
+ *   `notCarried.emptyFilterList: 38`.
+ *
+ * ► **THE ONLY TWO BEVELS ANY PACK IN THIS REPOSITORY CAN REACH** are
+ *   `combat_panel`'s, on the two placements of sprite 52 at depths 1 and 7.
+ *   Both are INNER, both have `blurX`/`blurY` of ZERO and strength 1, and
+ *   `canvasFilterFor` refuses both as `filterHasNoCanvasEquivalent`. They get
+ *   their own named line in the invoice (`effects.bevels`) rather than a row in
+ *   a `filtersByType` bag nobody sums, because the build-wide "54 bevels" in
+ *   `src/render/filters.js`'s docstring has no reachable denominator and these
+ *   two are the whole of what a renderer here will ever be handed.
+ *
  * ► **TWO OF THE FIVE FEEDBACK ICONS ARE DEAD IN THIS BUILD.** `miss_icon`
  *   (823) and `addstats_icon` (162) are exported and never used: each of those
  *   two strings occurs **once** in the whole 7,586,504-byte file, and that one
@@ -112,6 +169,14 @@ import {
 } from "./swf-display-list.mjs";
 import { assertReplaceableFile, assertWritableOutput, labelKey } from "./extract-figure.mjs";
 import { analyseSwfBuffer } from "./inspect-swf.mjs";
+// THE READER, IMPORTED SO THE INVOICE IS THE READER'S OWN VERDICT — the same
+// arrangement `tools/extract-props.mjs` uses and for the same reason. What this
+// pack can say about a filter is exactly what `canvasFilterFor` does with it:
+// applied, deferred to `applyColourMatrix`, measured no-op, or refused by name.
+// A table of verdicts kept here would be a second thing to drift, and "the pack
+// carries it" and "the renderer can draw it" could then disagree while both
+// stayed green. It costs this tool nothing: `src/render/` has no DOM.
+import { blendModeFor, canvasFilterFor, summariseFilterUse } from "../src/render/filters.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
@@ -126,6 +191,9 @@ const TWIPS_PER_PIXEL = 20;
 
 /** Guards `visit` against a sprite that reaches itself; the same cap the display list uses. */
 const MAX_NESTING = 8;
+
+/** The shared empty ancestor chain — frozen, so no visit can append to it. */
+const EMPTY_EFFECT_CHAIN = Object.freeze([]);
 
 export class ExtractIconsError extends Error {
   constructor(message) {
@@ -558,6 +626,416 @@ export function parseStaticText(buffer, bodyStart) {
 }
 
 /* ------------------------------------------------------------------ */
+/* EFFECTS — the invoice vocabulary, the same one extract-props uses    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ONE NAMED REASON SOMETHING WAS NOT CARRIED, counted.
+ *
+ * `notCarried` is a tally of named reasons and never a boolean, because
+ * "something was lost" and "seven things were lost" are different facts and
+ * only the second one can be checked against the build later.
+ *
+ * Every effect this file drops goes through here. If you add a drop that does
+ * not, that sentence becomes a lie — which is exactly what happened to
+ * `tools/extract-props.mjs`, whose own version of this note was false for as
+ * long as two skips went round it.
+ */
+function refuse(notCarried, kind, howMany = 1) {
+  notCarried[kind] = (notCarried[kind] ?? 0) + howMany;
+}
+
+/**
+ * ONE PLACEMENT'S OWN EFFECTS — its own, and on no account its ancestors'.
+ *
+ * ► **UNLIKE THE PROPS PACK, THIS ZERO IS NOT ZERO: 174 of this roster's 176
+ *   filters are a placement's own.** The props extractor found every effect it
+ *   could reach on an ENCLOSING sprite and said so; here it is the other way
+ *   round, and the reason is what the icons ARE. A damage splat is a number,
+ *   the number is a `DefineEditText`, and the glow that makes it legible over
+ *   a gladiator is on the text's own placement.
+ *
+ * ► **SO THE INTERESTING NUMBER IS NOT `filters` BUT WHERE THEY LAND.** 172 of
+ *   the 174 are on drawables this tool emits with `unsupported:
+ *   "text-placement"` — carried, pointing at a field in `texts`, but not
+ *   geometry — and the other 2 are on a `clip` placement whose child is
+ *   extracted separately. **NOT ONE is on a shape.** A reader who checks
+ *   `own.filters` and not `own.filtersOnUnsupportedPlacements` will think the
+ *   shapes are glowing, and every one of them is a numeral instead.
+ *
+ * `hasFilters` with an EMPTY list is refused by name rather than written as
+ * `filters: []`: a `PlaceObject3` can carry a filter list of count zero, which
+ * means "this instance has had its filters CLEARED", not "nobody asked".
+ * Measured here: 38 of them, all on `inventory_buttons`' battlebutton.
+ */
+export function ownEffectsOf(drawable, notCarried) {
+  const effects = {};
+  const filters = Array.isArray(drawable.filters) && drawable.filters.length > 0 ? drawable.filters : null;
+  if (filters) {
+    effects.filters = filters;
+    // `parseFilterList` marks the three filter kinds that occur ZERO times in
+    // the shipped build. A record carrying this flag reached a code path no
+    // capture has ever exercised, so it is carried AND counted.
+    for (const filter of filters) if (filter.measured === false) refuse(notCarried, "unmeasuredFilterRecord");
+  } else if (drawable.hasFilters) {
+    refuse(notCarried, "emptyFilterList");
+  }
+  if (drawable.blendMode !== undefined && drawable.blendMode !== null) effects.blendMode = drawable.blendMode;
+  return effects;
+}
+
+/**
+ * THE OWN EFFECTS ON A DRAWABLE THIS TOOL IS ABOUT TO THROW AWAY, INVOICED
+ * WHERE THE THROWING AWAY HAPPENS.
+ *
+ * `extractClipFrames` drops exactly two kinds: a `mask` it cannot turn into a
+ * clip path, and a `missing` character. Both are already reported into
+ * `failures` by KIND; this adds what went out with them.
+ *
+ * ► **MEASURED ON THE ORACLE: ZERO, on both kinds, across the whole roster.**
+ *   That is a COUNTED zero and not an absent one, which is the entire
+ *   difference between this function existing and not. The props extractor
+ *   published `0 own filters` for weeks because its equivalent skip invoiced
+ *   nothing and the build's only two own-filtered placements were exactly the
+ *   two it skipped. Here the same sweep can come back non-zero the moment a
+ *   mod puts a glow on a stencil, and the number will say so.
+ *
+ * Returns a reason suffix for the `failures` message, so the human-readable
+ * list names the loss too.
+ */
+export function refusedEffectsOf(drawable, refusedOwn, notCarried) {
+  const filters = Array.isArray(drawable.filters) && drawable.filters.length > 0 ? drawable.filters : null;
+  const blend = drawable.blendMode !== undefined && drawable.blendMode !== null ? drawable.blendMode : null;
+  if (filters) {
+    refusedOwn.filterLists.push(filters);
+    refuse(notCarried, "droppedDrawableFilters", filters.length);
+  } else if (drawable.hasFilters) {
+    refuse(notCarried, "droppedDrawableEmptyFilterList");
+  }
+  if (blend !== null) {
+    refusedOwn.blendModes.push(blend);
+    refuse(notCarried, "droppedDrawableBlendMode");
+  }
+  const parts = [];
+  if (filters) parts.push(`${filters.length} own ${filters.map((filter) => filter.type).join("+")}`);
+  else if (drawable.hasFilters) parts.push("an own filter list of COUNT ZERO");
+  if (blend !== null) parts.push(`own blend mode ${blend}`);
+  return parts.length ? `, dropping ${parts.join(" and ")}` : "";
+}
+
+/**
+ * THE ENCLOSING SPRITES THAT CARRY AN EFFECT OVER THIS LEAF, as indices into
+ * one deduplicated table per clip.
+ *
+ * ► **THE KEY IS THE WHOLE RECORD, `JSON.stringify` and all.** A tidier key —
+ *   path, or path plus character — collapses two groups that differ only in
+ *   their filters' NUMBERS, and the numbers are the effect. `combat_panel`'s
+ *   two bevel groups survive a path key because their paths differ (1 and 7),
+ *   which is luck, not design: the sky in `tools/extract-props.mjs` disagreed
+ *   with the build by fifty times under exactly that key.
+ *
+ * ► **A GROUP HAS NO MATRIX HERE.** The chain records `{path, characterId,
+ *   blendMode, hasFilters, filters}` and nothing else, so a renderer scaling a
+ *   blur radius by the group's own transform cannot, and must fall back to the
+ *   stage scale `canvasFilterFor` already takes. Composing it would mean a
+ *   second copy of this walk's recursion inside itself. Counted instead, once
+ *   per group: `notCarried.effectGroupMatrix`.
+ */
+function inheritedEffectsFor(drawable, groups, groupIndex, notCarried) {
+  const chain = drawable.ancestorEffects;
+  if (!Array.isArray(chain) || chain.length === 0) return null;
+  const indices = [];
+  for (const group of chain) {
+    const filters = Array.isArray(group.filters) && group.filters.length > 0 ? group.filters : null;
+    const record = {
+      // The chain of depths that reaches the group, so a reader can find it in
+      // the same frame's placements without re-deriving which level it was on.
+      path: [...(group.path ?? [])],
+      character: group.characterId,
+      ...(group.blendMode !== undefined && group.blendMode !== null ? { blendMode: group.blendMode } : {}),
+      ...(filters ? { filters } : {})
+    };
+    const key = JSON.stringify(record);
+    let at = groupIndex.get(key);
+    if (at === undefined) {
+      at = groups.length;
+      groups.push(record);
+      groupIndex.set(key, at);
+      if (!filters && group.hasFilters) refuse(notCarried, "emptyFilterList");
+      for (const filter of filters ?? []) if (filter.measured === false) refuse(notCarried, "unmeasuredFilterRecord");
+      refuse(notCarried, "effectGroupMatrix");
+    }
+    indices.push(at);
+  }
+  return indices;
+}
+
+/**
+ * THE BEVELS, ON THEIR OWN LINE.
+ *
+ * ► **BECAUSE THESE TWO ARE THE WHOLE REACHABLE POPULATION.** `HANDOFF.md`'s
+ *   ranked item 4 records that the build-wide "54 bevels" in
+ *   `src/render/filters.js` is a docstring figure with no reachable
+ *   denominator — no pack in this repository reaches any of them except
+ *   `combat_panel`'s two. A `filtersByType` bag would list `bevel: 2` next to
+ *   `glow: 15` and nobody would ever sum it; a named line cannot be missed.
+ *
+ * ► **AND THE FLAGS ARE THE POINT, not the count.** Both are INNER with
+ *   `blurX`/`blurY` of ZERO, so even a renderer that grew a bevel mapper would
+ *   draw nothing blurred: this is a hard one-pixel edge, and CSS has no inset
+ *   filter to put it in. `canvasFilterFor` refuses them by name and this line
+ *   says WHICH KIND of bevel was refused, which is what a future mapper needs.
+ */
+function bevelCensus(lists) {
+  const census = { total: 0, inner: 0, onTop: 0, knockout: 0, zeroBlur: 0 };
+  for (const list of lists) {
+    for (const filter of list) {
+      if (filter.type !== "bevel") continue;
+      census.total += 1;
+      if (filter.inner) census.inner += 1;
+      if (filter.onTop) census.onTop += 1;
+      if (filter.knockout) census.knockout += 1;
+      if (!(filter.blurX > 0) && !(filter.blurY > 0)) census.zeroBlur += 1;
+    }
+  }
+  return census;
+}
+
+/** Filters counted by their `type`, over a list of filter LISTS. */
+function filtersByType(lists) {
+  const counts = {};
+  for (const list of lists) for (const filter of list) counts[filter.type] = (counts[filter.type] ?? 0) + 1;
+  return counts;
+}
+
+/**
+ * ONE CLIP'S EFFECT INVOICE: what its placements carry, what encloses them,
+ * WHAT A RENDERER WOULD ACTUALLY DO WITH EACH — applied, deferred to the
+ * colour-matrix path, measured no-op, or refused by name — and what could not
+ * be carried at all.
+ *
+ * ► **OWN AND INHERITED ARE COUNTED ON DIFFERENT UNITS, ON PURPOSE.** A
+ *   group's filters are counted ONCE however many leaves sit under it, because
+ *   the build applies them once to the group; a placement's own are counted per
+ *   placement, because each placement really does get its own. Adding the two
+ *   on one unit would either inflate `combat_panel`'s two bevels by the leaves
+ *   beneath them or deflate 40 glowing frames to one.
+ *
+ * ► **`scale` IS DELIBERATELY LEFT AT 1** in the `use` verdicts. The invoice is
+ *   about which filters can be expressed at all; the stage-to-canvas scale is
+ *   the renderer's and changes the NUMBERS in the string, never the buckets.
+ */
+function effectInvoiceFor({
+  groups, ownFilterLists, ownBlendModes, underGroup, unsupportedOwnFilterLists,
+  undescended, notCarried, refusedOwn
+}) {
+  const groupFilterLists = groups.map((group) => group.filters ?? []);
+  const groupBlendModes = groups.map((group) => group.blendMode).filter((id) => id !== undefined && id !== null);
+
+  const blend = { exact: {}, refused: {} };
+  for (const id of [...groupBlendModes, ...ownBlendModes]) {
+    const verdict = blendModeFor(id);
+    const key = verdict.composite && verdict.exact ? "exact" : "refused";
+    const label = key === "exact" ? verdict.name : `${verdict.name ?? id}:${verdict.refused}`;
+    blend[key][label] = (blend[key][label] ?? 0) + 1;
+  }
+
+  return {
+    own: {
+      filteredPlacements: ownFilterLists.length,
+      filters: ownFilterLists.reduce((sum, list) => sum + list.length, 0),
+      filtersByType: filtersByType(ownFilterLists),
+      blendModePlacements: ownBlendModes.length,
+      // ► **THE NUMBER ABOVE IS ONLY HONEST NEXT TO THIS ONE.** These are own
+      //   filters on placements this tool EMITS but cannot turn into geometry —
+      //   `text-placement` in every case measured, 172 of the roster's 174. The
+      //   placement is carried and points at a field in `texts`, so nothing is
+      //   lost; but a reader who takes `filters` for "glowing shapes" has been
+      //   told the opposite of the truth.
+      filtersOnUnsupportedPlacements: unsupportedOwnFilterLists.reduce((sum, list) => sum + list.length, 0),
+      unsupportedFilteredPlacements: unsupportedOwnFilterLists.length,
+      // Own effects on drawables this tool DROPPED — a refused mask, a missing
+      // character. Always present, zero on this build, and a counted zero is
+      // the only kind that can become non-zero visibly.
+      dropped: {
+        placements: refusedOwn.filterLists.length,
+        filters: refusedOwn.filterLists.reduce((sum, list) => sum + list.length, 0),
+        filtersByType: filtersByType(refusedOwn.filterLists),
+        blendModePlacements: refusedOwn.blendModes.length
+      }
+    },
+    // What ENCLOSES them. `groups` counts the sprites, `placements` the leaves
+    // inside them; reporting only the second would call two bevels two hundred.
+    inherited: {
+      groups: groups.length,
+      placements: underGroup,
+      filters: groupFilterLists.reduce((sum, list) => sum + list.length, 0),
+      filtersByType: filtersByType(groupFilterLists),
+      blendModes: groupBlendModes.length
+    },
+    // ► **THE BOUNDARY THIS TOOL REFUSES TO CROSS, AS A NUMBER RATHER THAN A
+    //   SENTENCE.** A multi-frame child is emitted as a `clip` placement and
+    //   never descended into, so no filter INSIDE one is counted in this
+    //   invoice. `filtersInChildEntries` is filled in afterwards by
+    //   `crossReferenceChildEffects`, from the child's OWN entry in this same
+    //   pack — one level, because the child's entry names its own children in
+    //   turn. `childrenNotExtracted` is the failure mode that must never be
+    //   silent: a child nothing extracted is a whole subtree of effects nobody
+    //   counted anywhere.
+    undescended,
+    bevels: {
+      ...bevelCensus([...groupFilterLists, ...ownFilterLists]),
+      own: bevelCensus(ownFilterLists).total,
+      inherited: bevelCensus(groupFilterLists).total
+    },
+    use: {
+      filters: summariseFilterUse([...groupFilterLists, ...ownFilterLists].map((list) => canvasFilterFor(list))),
+      blendModes: blend
+    },
+    notCarried
+  };
+}
+
+/**
+ * THE WHOLE PACK'S EFFECTS, added up from the entries' OWN invoices.
+ *
+ * ► **RECOMPUTED FROM WHAT WAS WRITTEN, never counted alongside it.** The
+ *   figure extractor's manifest once summed a per-entry field that 83% of its
+ *   pack did not have and reported zero against data holding two. Every number
+ *   below comes from `faces`/`icons`/`nested`, which is the pack a reader can
+ *   open.
+ *
+ * ► **`undescendedChildFilters` IS NOT ADDED TO ANYTHING.** It counts filters
+ *   that are already in the total under the CHILD's own entry, so folding it in
+ *   would count them twice. It is here to answer one question — "how much sits
+ *   behind a boundary this tool refuses to cross?" — and that is 2, both on
+ *   `cast_spell_image`'s nested copy of the inventory strip.
+ */
+export function tallyIconEffects(result) {
+  const add = (into, from) => {
+    for (const [key, count] of Object.entries(from ?? {})) into[key] = (into[key] ?? 0) + count;
+    return into;
+  };
+  const totals = {
+    groups: 0, placementsUnderAGroup: 0, inheritedFilters: 0, inheritedBlendModes: 0,
+    ownFilteredPlacements: 0, ownFilters: 0, ownBlendModePlacements: 0,
+    ownFiltersOnUnsupportedPlacements: 0,
+    // Never folded into the three above. The pack does not hold these; it knows
+    // they exist and says so, which is a different claim.
+    droppedOwnFilteredPlacements: 0, droppedOwnFilters: 0, droppedOwnBlendModePlacements: 0,
+    undescendedClipPlacements: 0, undescendedChildFilters: 0, undescendedChildrenNotExtracted: 0
+  };
+  const inheritedByType = {};
+  const ownByType = {};
+  const droppedOwnByType = {};
+  const notCarried = {};
+  const bevels = { total: 0, inner: 0, onTop: 0, knockout: 0, zeroBlur: 0, own: 0, inherited: 0 };
+  const use = { total: 0, applied: 0, deferred: 0, noOp: 0, refused: 0, approximated: 0 };
+  const refusedByReason = {};
+  const approximatedByKind = {};
+  const blend = { exact: {}, refused: {} };
+  // DISTINCT children, not placements: 190 clip placements in this roster reach
+  // five children between them, and a reader told "190 children" would go
+  // looking for 185 entries that do not exist.
+  const undescendedChildren = new Set();
+
+  for (const entry of iconEntries(result)) {
+    const effects = entry.effects;
+    if (!effects) continue;
+    for (const child of effects.undescended.children) undescendedChildren.add(child);
+    totals.groups += effects.inherited.groups;
+    totals.placementsUnderAGroup += effects.inherited.placements;
+    totals.inheritedFilters += effects.inherited.filters;
+    totals.inheritedBlendModes += effects.inherited.blendModes;
+    totals.ownFilteredPlacements += effects.own.filteredPlacements;
+    totals.ownFilters += effects.own.filters;
+    totals.ownBlendModePlacements += effects.own.blendModePlacements;
+    totals.ownFiltersOnUnsupportedPlacements += effects.own.filtersOnUnsupportedPlacements;
+    totals.droppedOwnFilteredPlacements += effects.own.dropped.placements;
+    totals.droppedOwnFilters += effects.own.dropped.filters;
+    totals.droppedOwnBlendModePlacements += effects.own.dropped.blendModePlacements;
+    totals.undescendedClipPlacements += effects.undescended.clipPlacements;
+    totals.undescendedChildFilters += effects.undescended.filtersInChildEntries;
+    totals.undescendedChildrenNotExtracted += effects.undescended.childrenNotExtracted.length;
+    add(inheritedByType, effects.inherited.filtersByType);
+    add(ownByType, effects.own.filtersByType);
+    add(droppedOwnByType, effects.own.dropped.filtersByType);
+    add(notCarried, effects.notCarried);
+    add(bevels, effects.bevels);
+    for (const key of Object.keys(use)) use[key] += effects.use.filters[key] ?? 0;
+    add(refusedByReason, effects.use.filters.refusedByReason);
+    add(approximatedByKind, effects.use.filters.approximatedByKind);
+    add(blend.exact, effects.use.blendModes.exact);
+    add(blend.refused, effects.use.blendModes.refused);
+  }
+
+  return {
+    ...totals, inheritedByType, ownByType, droppedOwnByType,
+    undescendedChildren: [...undescendedChildren].sort((left, right) => left - right),
+    bevels,
+    use: { ...use, refusedByReason, approximatedByKind },
+    blendModes: blend,
+    notCarried,
+    // ► **WHAT THIS PACK CANNOT SEE AT ALL, said in words because it is a SCOPE
+    //   and not a measurement.** Every clip here is flattened in isolation, and
+    //   all eight of the declared ones are ATTACHED by ActionScript at a depth
+    //   (`attachMovie`), not placed on a root frame — so there is no outer
+    //   placement to carry an effect, and nothing is being lost. `eyes1` and
+    //   `mouth1` ARE placed, inside `head` inside the fighter rig, and an
+    //   effect on that placement belongs to `tools/extract-figure.mjs`.
+    scope: "each clip is flattened in isolation; an effect on an outer placement of it belongs to the pack that holds that placement",
+    // ► **AND THE OTHER SCOPE, WHICH IS THIS TOOL'S WHOLE POINT.** A nested
+    //   sprite with more than one frame is NOT descended into — it is its own
+    //   entry — so its effects are counted THERE and not in its parent's
+    //   invoice. `undescendedClipPlacements` is how many such boundaries exist
+    //   and `undescendedChildFilters` is what sits immediately behind them.
+    nestedScope: "a multi-frame child is its own entry; its effects are invoiced there, never in its parent"
+  };
+}
+
+/** Every extracted entry that carries an invoice, in one sequence. */
+function iconEntries(result) {
+  return [
+    ...Object.values(result.faces ?? {}),
+    ...Object.values(result.clips ?? {}),
+    ...Object.values(result.nested ?? {})
+  ];
+}
+
+/**
+ * FILL IN WHAT SITS BEHIND EACH REFUSED-DESCENT BOUNDARY, from the pack itself.
+ *
+ * ► **THIS IS A JOIN, NOT A SECOND WALK.** Every `clip` placement's child is
+ *   extracted as its own entry by the worklist in `extractIcons`, so the
+ *   filters inside it have already been counted — once, in the right place.
+ *   What a reader cannot do without this is get from a parent's invoice to
+ *   that number, and "see the child's entry" is the sentence this function
+ *   exists to replace with a figure.
+ *
+ * ► **ONE LEVEL, AND IT SAYS SO.** A child's own `undescended` names its own
+ *   children, so the chain is walkable; summing it recursively here would
+ *   double-count the moment two parents share a child, which `inventory_buttons`
+ *   and `cast_spell_image` nearly do already.
+ */
+function crossReferenceChildEffects(result) {
+  const byCharacter = new Map();
+  for (const entry of iconEntries(result)) byCharacter.set(entry.character, entry);
+  for (const entry of iconEntries(result)) {
+    const undescended = entry.effects?.undescended;
+    if (!undescended) continue;
+    let filters = 0;
+    const missing = [];
+    for (const child of undescended.children) {
+      const found = byCharacter.get(child);
+      if (!found || !found.effects) { missing.push(child); continue; }
+      filters += found.effects.own.filters + found.effects.inherited.filters;
+    }
+    undescended.filtersInChildEntries = filters;
+    undescended.childrenNotExtracted = missing;
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* The flatten this tool does itself                                   */
 /* ------------------------------------------------------------------ */
 
@@ -574,6 +1052,30 @@ export function parseStaticText(buffer, bodyStart) {
  *    is lost with no `unsupported` set and no failure raised. The six gauges in
  *    `combat_panel` are all of that shape.
  *
+ * ► **AND EFFECTS ARE THREADED THE SAME WAY, WHICH THEY WERE NOT.** Because
+ *   this walk is its own, `flattenFrame`'s effect threading did not come with
+ *   it: this function read `matrix`, `colourTransform`, `name`, `ratio` and
+ *   `clipDepth` off an entry and never `filters`, `hasFilters` or `blendMode`,
+ *   so all 176 filters the roster reaches died HERE — not in `toPlacement`,
+ *   not in the manifest. The entries were carrying them the whole time;
+ *   `resolveTimeline` has decoded filter lists into typed records since the day
+ *   `parsePlaceObject` learned to, and merges them field-by-field across a
+ *   move. Nothing upstream needed changing, which is the uncomfortable part.
+ *
+ *   Every drawable now carries `blendMode`, `hasFilters`, `filters` and
+ *   `ancestorEffects` — the chain of ENCLOSING placements that carried either,
+ *   because a filter on a sprite applies to the whole group and not to
+ *   whichever leaf happens to be inside it. An empty chain is `null` and never
+ *   `[]`, so a caller cannot read "no enclosing effect" as "an array I forgot
+ *   to fill"; `blendMode` is `undefined` when absent, matching
+ *   `flattenFrame`'s literal so a reader moving between the two is not caught
+ *   by a `null` that means the same thing in a different spelling.
+ *
+ *   **A `clip` placement carries the chain that ENCLOSES it and not its own
+ *   contribution to that chain** — its own effects are on the placement, and
+ *   appending them to its own ancestor list would count them twice. What is
+ *   inside it is not counted here at all: that child is its own entry.
+ *
  * Every drawable this cannot turn into geometry carries `unsupported` naming
  * the kind, and the caller counts it. Nothing is dropped.
  */
@@ -581,6 +1083,13 @@ export function flattenIconFrame(buffer, characters, entries, options = {}) {
   const { cache = new Map(), spriteFrame = () => 1 } = options;
   const drawables = [];
   let clipsAcrossSpriteBoundary = 0;
+  // A CUTTER'S OWN EFFECTS ARE NOT CARRIED, and this is where that is decided,
+  // so this is where it is counted. `mask` reaches a placement as a shape and a
+  // matrix — a REGION — and a blurred stencil is a soft-edged region no path
+  // clip can express. Measured on the oracle: 6 shape cutters in this roster,
+  // ZERO of them carrying anything, so these are counted zeroes. They stop
+  // being zero the moment somebody mods a mask, and then they say so.
+  const cutterEffects = { cutters: 0, filters: 0, emptyFilterLists: 0, blendModes: 0 };
 
   const innerFrame = (sprite, wanted) => {
     const key = `${sprite.id}@${wanted}`;
@@ -591,7 +1100,7 @@ export function flattenIconFrame(buffer, characters, entries, options = {}) {
     return cache.get(key);
   };
 
-  const visit = (list, parentMatrix, parentColour, parentPath, inheritedMask, depth, visiting) => {
+  const visit = (list, parentMatrix, parentColour, parentPath, inheritedMask, depth, visiting, parentEffects) => {
     if (depth > MAX_NESTING) {
       throw new ExtractIconsError(`Sprite nesting exceeded ${MAX_NESTING} at path ${parentPath.join("/")}.`);
     }
@@ -611,11 +1120,35 @@ export function flattenIconFrame(buffer, characters, entries, options = {}) {
       }
     }
 
+    // An empty chain is reported as `null` rather than `[]`, so a caller cannot
+    // mistake "no enclosing effect" for "an array I forgot to fill". Computed
+    // once per LEVEL, because every entry on one level shares one ancestry.
+    const carried = parentEffects.length > 0 ? parentEffects : null;
+
     for (const entry of list) {
       const isMask = typeof entry.clipDepth === "number" && entry.clipDepth > 0;
       const matrix = composeMatrix(parentMatrix, entry.matrix ?? IDENTITY_MATRIX);
       const colour = composeColourTransform(parentColour, entry.colourTransform ?? IDENTITY_COLOUR_TRANSFORM);
       const here = [...parentPath, entry.depth];
+
+      // THIS PLACEMENT'S OWN EFFECTS. `hasFilters` is derived from the list as
+      // well as from the flag, so a hand-built entry cannot claim one without
+      // the other; `filters` is `null` rather than `[]` when there are none,
+      // which is the distinction `carried` makes above and NOT the same thing
+      // as a filter list of count zero — that one keeps `hasFilters` true and
+      // is refused by name in `ownEffectsOf`.
+      const filters = entry.filters ?? null;
+      const hasFilters = entry.hasFilters === true || (filters !== null && filters.length > 0);
+      const effects = { blendMode: entry.blendMode, hasFilters, filters, ancestorEffects: carried };
+      // What a nested sprite hands its children: this placement's effects
+      // appended, because a filter on a GROUP applies to the group and not to
+      // whichever leaf is inside it. Frozen, so no descendant can append to a
+      // chain a sibling is also holding.
+      const descend = (entry.blendMode !== undefined || hasFilters)
+        ? Object.freeze([...parentEffects, Object.freeze({
+          path: here, characterId: entry.characterId, blendMode: entry.blendMode, hasFilters, filters
+        })])
+        : parentEffects;
 
       // A mask is a CUTTER. Painting it puts the stencil on the canvas instead
       // of the picture, so it is never emitted as a drawable of its own — it
@@ -626,9 +1159,17 @@ export function flattenIconFrame(buffer, characters, entries, options = {}) {
           drawables.push({
             kind: "mask", characterId: entry.characterId, matrix, colour: null,
             path: here, name: entry.name ?? null, mask: null,
-            unsupported: mask ? `mask-${mask.kind}` : "mask-missing"
+            unsupported: mask ? `mask-${mask.kind}` : "mask-missing",
+            ...effects
           });
+          continue;
         }
+        // A USABLE cutter, which never becomes a drawable: its own effects end
+        // here and are counted here. See `cutterEffects` above.
+        cutterEffects.cutters += 1;
+        if (filters !== null && filters.length > 0) cutterEffects.filters += filters.length;
+        else if (hasFilters) cutterEffects.emptyFilterLists += 1;
+        if (entry.blendMode !== undefined && entry.blendMode !== null) cutterEffects.blendModes += 1;
         continue;
       }
 
@@ -647,7 +1188,8 @@ export function flattenIconFrame(buffer, characters, entries, options = {}) {
       if (!character) {
         drawables.push({
           kind: "missing", characterId: entry.characterId, matrix, colour: roundColour(colour),
-          path: here, name: entry.name ?? null, mask, unsupported: "missing"
+          path: here, name: entry.name ?? null, mask, unsupported: "missing",
+          ...effects
         });
         continue;
       }
@@ -660,7 +1202,15 @@ export function flattenIconFrame(buffer, characters, entries, options = {}) {
           drawables.push({
             kind: "clip", characterId: character.id, matrix, colour: roundColour(colour),
             path: here, name: entry.name ?? null, mask, frameCount: character.frames,
-            unsupported: null
+            unsupported: null,
+            // ► **`effects` AND NOT `descend`.** This placement's own filters
+            //   belong to the placement — `inventory_buttons` tints its
+            //   battlebutton exactly here — and appending them to its own
+            //   ancestor chain would invoice them twice, once as own and once
+            //   as inherited. What is INSIDE the child is not counted on this
+            //   drawable at all; the child is its own entry and carries its own
+            //   invoice, and the boundary is counted in `undescended`.
+            ...effects
           });
           if (inherited) clipsAcrossSpriteBoundary += 1;
           continue;
@@ -671,7 +1221,7 @@ export function flattenIconFrame(buffer, characters, entries, options = {}) {
         const inner = innerFrame(character, spriteFrame(character.id));
         if (!inner) continue;
         visiting.add(character.id);
-        visit(inner, matrix, colour, here, mask, depth + 1, visiting);
+        visit(inner, matrix, colour, here, mask, depth + 1, visiting, descend);
         visiting.delete(character.id);
         continue;
       }
@@ -690,17 +1240,32 @@ export function flattenIconFrame(buffer, characters, entries, options = {}) {
         // `text-placement` rather than `text`, because the MANIFEST also counts
         // the text CHARACTERS behind them and two tallies called the same thing
         // read as one number that contradicts itself.
-        unsupported: character.kind === "shape" ? null : `${character.kind}-placement`
+        unsupported: character.kind === "shape" ? null : `${character.kind}-placement`,
+        ...effects
       });
     }
   };
 
-  visit(entries, IDENTITY_MATRIX, IDENTITY_COLOUR_TRANSFORM, [], null, 0, new Set());
-  return { drawables, clipsAcrossSpriteBoundary };
+  visit(entries, IDENTITY_MATRIX, IDENTITY_COLOUR_TRANSFORM, [], null, 0, new Set(), EMPTY_EFFECT_CHAIN);
+  return { drawables, clipsAcrossSpriteBoundary, cutterEffects };
 }
 
-/** One placement, as it reaches JSON. */
-function toPlacement(drawable) {
+/**
+ * One placement, as it reaches JSON.
+ *
+ * `own` is this placement's own effects from `ownEffectsOf` and `inherited` is
+ * a list of indices into the clip's `effectGroups`; both are spread the same
+ * conditional way `colour` and `mask` are, so a placement with no effects is
+ * byte-identical to what this tool wrote before today.
+ *
+ * ► **OWN AND INHERITED ARE DIFFERENT KEYS WITH DIFFERENT TYPES, on purpose.**
+ *   `filters` holds filter RECORDS and means this placement's own and nothing
+ *   else; `inheritedEffects` holds INDICES and never records, so no reader can
+ *   take an enclosing sprite's bevel for this leaf's glow. Outermost first,
+ *   which is the order a renderer nests its buffers in — unmeasurable on this
+ *   roster, where every chain is length 1, and pinned by fixture instead.
+ */
+export function toPlacement(drawable, own = {}, inherited = null) {
   return {
     kind: drawable.kind === "shape" ? "shape" : drawable.kind,
     character: drawable.characterId,
@@ -711,7 +1276,9 @@ function toPlacement(drawable) {
     // The clip travels WITH the thing it clips: a renderer has to set it before
     // the fill and clear it after, and a list of cutters somewhere else is an
     // invitation to forget one.
-    ...(drawable.mask ? { mask: { shape: drawable.mask.shape, matrix: roundMatrix(drawable.mask.matrix) } } : {})
+    ...(drawable.mask ? { mask: { shape: drawable.mask.shape, matrix: roundMatrix(drawable.mask.matrix) } } : {}),
+    ...own,
+    ...(inherited ? { inheritedEffects: inherited } : {})
   };
 }
 
@@ -733,6 +1300,29 @@ function extractClipFrames(buffer, characters, character, cache, sink) {
   const signatures = [];
   let clipsAcrossSpriteBoundary = 0;
 
+  // THIS CLIP'S EFFECT GROUPS, ONCE EACH, with the placements pointing at them
+  // by index. Per clip rather than per pack because an index into a table one
+  // entry away is a join a reader has to make by hand, and `frames` is already
+  // per clip.
+  const groups = [];
+  const groupIndex = new Map();
+  // Everything this clip's effects could not carry, by NAME. Per clip AND summed
+  // for the manifest: "38 somewhere" and "38 on inventory_buttons" are different
+  // problems and one total cannot tell a reader which one they have.
+  const notCarried = {};
+  const ownFilterLists = [];
+  const ownBlendModes = [];
+  // The same list again, restricted to placements this tool emits but cannot
+  // turn into geometry. 172 of the roster's 174 own filters are here.
+  const unsupportedOwnFilterLists = [];
+  // And the same two for drawables this tool DROPS — kept apart from the
+  // carried ones, because adding them would make `own.filters` count things the
+  // pack does not hold, which is the opposite mistake.
+  const refusedOwn = { filterLists: [], blendModes: [] };
+  const undescended = { clipPlacements: 0, children: [], filtersInChildEntries: 0, childrenNotExtracted: [] };
+  const childIds = new Set();
+  let underGroup = 0;
+
   for (let index = 0; index < character.frames; index += 1) {
     const list = resolved.frames[index];
     if (!list) { frames.push([]); signatures.push(""); continue; }
@@ -746,6 +1336,16 @@ function extractClipFrames(buffer, characters, character, cache, sink) {
       continue;
     }
     clipsAcrossSpriteBoundary += flattened.clipsAcrossSpriteBoundary;
+    // A CUTTER'S OWN EFFECTS, counted where `flattenIconFrame` decided not to
+    // carry them. Zero on this build; see that function for why the zero is
+    // written down rather than assumed.
+    if (flattened.cutterEffects.filters > 0) refuse(notCarried, "clipFilters", flattened.cutterEffects.filters);
+    if (flattened.cutterEffects.emptyFilterLists > 0) {
+      refuse(notCarried, "clipEmptyFilterList", flattened.cutterEffects.emptyFilterLists);
+    }
+    if (flattened.cutterEffects.blendModes > 0) {
+      refuse(notCarried, "clipBlendMode", flattened.cutterEffects.blendModes);
+    }
     const placements = [];
     for (const drawable of flattened.drawables) {
       if (drawable.unsupported) {
@@ -755,6 +1355,11 @@ function extractClipFrames(buffer, characters, character, cache, sink) {
       if (drawable.kind === "text") sink.textIds.add(drawable.characterId);
       if (drawable.kind === "clip") {
         sink.clipIds.add(drawable.characterId);
+        // THE BOUNDARY THIS TOOL REFUSES TO CROSS, counted per placement and
+        // the child named once. The effects INSIDE it are invoiced on the
+        // child's own entry, never here.
+        undescended.clipPlacements += 1;
+        childIds.add(drawable.characterId);
         if (drawable.name) {
           if (!sink.clipNames.has(drawable.characterId)) sink.clipNames.set(drawable.characterId, new Set());
           sink.clipNames.get(drawable.characterId).add(drawable.name);
@@ -762,13 +1367,27 @@ function extractClipFrames(buffer, characters, character, cache, sink) {
       }
       if (drawable.mask) sink.shapeIds.add(drawable.mask.shape);
       if (drawable.kind === "mask" || drawable.kind === "missing") {
+        // ► **AND ITS OWN EFFECTS GO OUT WITH IT, INVOICED.** For as long as
+        //   this `continue` sat above any effect accounting, an own filter on a
+        //   refused mask left no trace anywhere — not in `notCarried`, not in
+        //   the invoice, not in this message — and a pack-wide zero would have
+        //   been a measurement of this line rather than of the build.
+        const lost = refusedEffectsOf(drawable, refusedOwn, notCarried);
         sink.failures.push({
           character: character.id, frame: index + 1,
-          message: `${drawable.unsupported} at path ${drawable.path.join("/")} (character ${drawable.characterId})`
+          message: `${drawable.unsupported} at path ${drawable.path.join("/")} (character ${drawable.characterId})${lost}`
         });
         continue;
       }
-      placements.push(toPlacement(drawable));
+      const own = ownEffectsOf(drawable, notCarried);
+      if (own.filters) {
+        ownFilterLists.push(own.filters);
+        if (drawable.unsupported) unsupportedOwnFilterLists.push(own.filters);
+      }
+      if (own.blendMode !== undefined) ownBlendModes.push(own.blendMode);
+      const inherited = inheritedEffectsFor(drawable, groups, groupIndex, notCarried);
+      if (inherited) underGroup += 1;
+      placements.push(toPlacement(drawable, own, inherited));
     }
     frames.push(placements);
     signatures.push(JSON.stringify(placements));
@@ -782,13 +1401,23 @@ function extractClipFrames(buffer, characters, character, cache, sink) {
     if (seen.has(signature)) duplicateOf[index + 1] = seen.get(signature);
     else seen.set(signature, index + 1);
   }
+  undescended.children = [...childIds].sort((left, right) => left - right);
   return {
     frames,
     declaredFrames: character.frames,
     distinctFrames: seen.size,
     emptyFrames: signatures.reduce((count, signature) => count + (signature === "" ? 1 : 0), 0),
     duplicateOf,
-    clipsAcrossSpriteBoundary
+    clipsAcrossSpriteBoundary,
+    // ► **ALWAYS PRESENT, EMPTY WHERE THERE ARE NONE.** Eight of the fifteen
+    //   entries have no effects at all; an absent key would make "this clip has
+    //   no groups" and "this pack predates groups" the same shape, and telling
+    //   those two apart is the whole reason a count gets written down.
+    effectGroups: groups,
+    effects: effectInvoiceFor({
+      groups, ownFilterLists, ownBlendModes, underGroup,
+      unsupportedOwnFilterLists, undescended, notCarried, refusedOwn
+    })
   };
 }
 
@@ -1162,6 +1791,14 @@ export function extractIcons(buffer) {
       declaredFrames: taken.declaredFrames,
       distinctFrames: taken.distinctFrames,
       duplicateOf: taken.duplicateOf,
+      // The same two keys the icon clips get, spelled out because this literal
+      // is explicit where theirs spreads `taken`. A face with no effects still
+      // carries an empty table and a zeroed invoice: **`eyes1` and `mouth1`
+      // carry NOTHING, and that zero is the measurement.** Leaving the keys off
+      // the two entries that measure zero is how a pack ends up invoicing only
+      // the entries that had something to say.
+      effectGroups: taken.effectGroups,
+      effects: taken.effects,
       timeline: actions,
       clipEvents: eventsFor(id),
       expressionCount: Object.keys(expressions).length,
@@ -1322,17 +1959,78 @@ export function extractIcons(buffer) {
     Object.values(clips).reduce((total, clip) => total + clip.clipsAcrossSpriteBoundary, 0) +
     Object.values(nested).reduce((total, clip) => total + clip.clipsAcrossSpriteBoundary, 0);
 
-  return {
+  const result = {
     faces, clips, nested, expressionScript, shapes, texts,
     failures: sink.failures,
     approximations: sink.approximations,
     clipsAcrossSpriteBoundary
   };
+  // AFTER the worklist, because it needs every child's entry to exist. This
+  // turns "the filters inside an undescended child are counted elsewhere" from
+  // a sentence into a number a reader can check against the child's own row.
+  crossReferenceChildEffects(result);
+  return result;
 }
 
 /* ------------------------------------------------------------------ */
 /* Writing                                                             */
 /* ------------------------------------------------------------------ */
+
+/**
+ * ONE ENTRY'S EFFECTS, compressed to the numbers a human scanning the manifest
+ * has to see — and NOT a re-measurement. Every field is read straight off the
+ * invoice in `icons.json`, so the manifest cannot disagree with the pack.
+ *
+ * `bevels` gets a line of its own here because a row inside `filtersByType` is
+ * a row nobody sums, and bevel is the one kind canvas refuses outright.
+ *
+ * ► ~~*these two are the only bevels any pack in this repository reaches*~~
+ *   **WRONG, AND CORRECTED 2026-09-15 BY A VERIFIER WHO WENT AND LOOKED.**
+ *   `assets/screens/screens.json` ALREADY carries two bevel records, at
+ *   `.screens.splash.filteredPlacements[1].filters[1]` and
+ *   `.screens.new_or_continue.filteredPlacements[1].filters[1]`. They are a
+ *   DIFFERENT two: character 1509, shadow `#000000`, distance 4, 2 passes —
+ *   ONE distinct value recorded on two cumulative screens — against these,
+ *   which are character 52, shadow `#a06001`, distance -6, 1 pass, on two
+ *   distinct placements of `combat_panel`. **Four records, three distinct
+ *   values, two packs.**
+ *
+ * ► **AND THE BUILD-WIDE 54 SITS AT FOUR SITES, NOT TWO.** Measured over the
+ *   oracle by recursive `PlaceObject3` census: sprite 751 depth 1 and depth 7
+ *   (1 each, character 52), sprite 1521 depth 1 (**51 records with 51 DISTINCT
+ *   VALUES** — a tween of `distance` from 4 to 5), and sprite 2136 depth 1,
+ *   instance `villainname`, character 2134 (1 record, shadow `#660000`).
+ *   1 + 1 + 51 + 1 = 54.
+ *
+ * ► **THE REACHABLE DENOMINATOR FOR SPRITE 1521'S FIFTY-ONE IS ONE**, because
+ *   `flattenFrame` freezes it on frame 1 — the same frame-1 freeze that hid the
+ *   weapon enchantment from the figure pack, in a second place. And the
+ *   `villainname` bevel is reachable by NO pack at all: its target is a
+ *   `DefineEditText`, which the screens tool refuses by kind. So of 54 bevels
+ *   in the build, a reader can reach 4 records carrying 3 values.
+ */
+function effectRow(effects) {
+  if (!effects) return null;
+  return {
+    ownFilters: effects.own.filters,
+    ownFiltersOnUnsupportedPlacements: effects.own.filtersOnUnsupportedPlacements,
+    ownBlendModes: effects.own.blendModePlacements,
+    droppedOwnFilters: effects.own.dropped.filters,
+    groups: effects.inherited.groups,
+    inheritedFilters: effects.inherited.filters,
+    placementsUnderAGroup: effects.inherited.placements,
+    bevels: effects.bevels.total,
+    // The boundary, as a number: how many multi-frame children were refused
+    // descent, and how many filters sit immediately behind them in THEIR
+    // entries rather than in this one.
+    undescendedClipPlacements: effects.undescended.clipPlacements,
+    undescendedChildren: effects.undescended.children,
+    filtersInChildEntries: effects.undescended.filtersInChildEntries,
+    childrenNotExtracted: effects.undescended.childrenNotExtracted,
+    use: effects.use.filters,
+    notCarried: effects.notCarried
+  };
+}
 
 export function buildManifest(result, { file, sha256 }) {
   const clipRow = (clip) => ({
@@ -1351,7 +2049,14 @@ export function buildManifest(result, { file, sha256 }) {
     // drawable list can carry, and a renderer that does not know it is there
     // paints a full health bar over a dying gladiator.
     clipEvents: (clip.clipEvents ?? []).map((event) =>
-      `${event.instance}[${event.handler}] ${event.instructions} instructions, touches ${event.touches.join(" ")}`)
+      `${event.instance}[${event.handler}] ${event.instructions} instructions, touches ${event.touches.join(" ")}`),
+    // ► **ONE ROW PER ENTRY, ALWAYS, INCLUDING THE NINE THAT ARE ALL ZEROES.**
+    //   A manifest that carries an effects row only for the entries that have
+    //   effects tells a reader who checks one row that the pack invoices
+    //   everything, and tells a reader who checks a different row nothing at
+    //   all. `test/extraction-honesty.test.js` exists because this pack once
+    //   invoiced 0 of 56 shapes and that was at least uniform.
+    effects: effectRow(clip.effects)
   });
   return {
     source: path.basename(file),
@@ -1369,7 +2074,8 @@ export function buildManifest(result, { file, sha256 }) {
       unrecognisedActions: face.timeline.other,
       clipEvents: face.clipEvents.length,
       expressions: Object.values(face.expressions).map((expression) =>
-        `${expression.label}[${expression.firstFrame}-${expression.lastFrame}] ${expression.distinctPoses} distinct`)
+        `${expression.label}[${expression.firstFrame}-${expression.lastFrame}] ${expression.distinctPoses} distinct`),
+      effects: effectRow(face.effects)
     }])),
     icons: Object.fromEntries(Object.entries(result.clips).map(([key, clip]) => [key, clipRow(clip)])),
     nested: Object.fromEntries(Object.entries(result.nested).map(([key, clip]) => [key, {
@@ -1394,6 +2100,16 @@ export function buildManifest(result, { file, sha256 }) {
      * for months because a dropped field made one look like the other.
      */
     approximations: result.approximations,
+    /**
+     * EVERY EFFECT THE PACK CARRIES, RECOMPUTED FROM THE PACK'S OWN ENTRIES.
+     *
+     * ► **Summed from what was written, never counted alongside it.** The
+     *   figure extractor's manifest once summed a per-entry field that 83% of
+     *   its pack did not have and reported zero against data holding two. Every
+     *   number here comes from `faces`/`icons`/`nested` in `icons.json`, so a
+     *   reader can check any of them by hand.
+     */
+    effects: tallyIconEffects(result),
     /**
      * The clips this tool assigned across a nested-sprite boundary, which is the
      * number `tools/swf-display-list.mjs`'s `flattenFrame` loses with no
@@ -1467,6 +2183,35 @@ function main(argv) {
   const approximated = Object.entries(result.approximations).filter(([, count]) => count > 0);
   lines.push(`  approximations: ${approximated.length === 0 ? "none" : approximated.map(([kind, count]) => `${kind}=${count}`).join(" ")}`);
   lines.push(`  clips recovered across a nested-sprite boundary: ${result.clipsAcrossSpriteBoundary}`);
+
+  // ► **THE EFFECTS INVOICE, PRINTED. A COUNT THAT IS NEVER PRINTED IS NOT A
+  //   COUNT** — the arena's walls were invisible for months while the data held
+  //   eleven approximations and the report a human read said zero.
+  const effects = tallyIconEffects(result);
+  const tally = (counts) => Object.entries(counts).map(([kind, count]) => `${kind}=${count}`).join(" ") || "none";
+  lines.push(
+    `  effects: ${effects.ownFilters} own filters on ${effects.ownFilteredPlacements} placements ` +
+    `(${effects.ownFiltersOnUnsupportedPlacements} of them on placements with no geometry), ` +
+    `${effects.inheritedFilters} on ${effects.groups} enclosing groups over ${effects.placementsUnderAGroup} leaves, ` +
+    `${effects.ownBlendModePlacements + effects.inheritedBlendModes} blend modes, ` +
+    `${effects.droppedOwnFilters} DROPPED with a refused drawable`
+  );
+  lines.push(`    by type: own ${tally(effects.ownByType)} | group ${tally(effects.inheritedByType)}`);
+  lines.push(
+    `    bevels: ${effects.bevels.total} (${effects.bevels.inner} inner, ${effects.bevels.zeroBlur} with zero blur) ` +
+    "— canvas refuses every one; assets/screens/screens.json reaches 2 more, and " +
+    "the build's other 50 are behind a frame-1 freeze (see effectRow)"
+  );
+  lines.push(
+    `    a renderer would: ${effects.use.applied} applied, ${effects.use.deferred} deferred to the colour matrix, ` +
+    `${effects.use.noOp} measured no-ops, ${effects.use.refused} refused (${tally(effects.use.refusedByReason)})`
+  );
+  lines.push(
+    `    NOT counted here: ${effects.undescendedChildFilters} filters inside ${effects.undescendedChildren.length} ` +
+    `undescended children (${effects.undescendedClipPlacements} placements) — invoiced on those children's own entries` +
+    `${effects.undescendedChildrenNotExtracted > 0 ? `, ${effects.undescendedChildrenNotExtracted} CHILD ENTRIES MISSING` : ""}`
+  );
+  lines.push(`    notCarried: ${tally(effects.notCarried)}`);
 
   if (options.report) {
     process.stdout.write(`icons (measured, nothing written)\n${lines.join("\n")}\n`);
