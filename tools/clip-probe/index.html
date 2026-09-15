@@ -1,0 +1,377 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Canvas clip probe — does an active clip change pixels inside itself?</title>
+<!--
+  ► **THIS ASKS CHROME A QUESTION WITH A KNOWN ANSWER, THE WAY `tools/swf-probe.mjs`
+    ASKS RUFFLE ONE.** It contains no SS2 asset and needs no pack: every shape it
+    draws is written here.
+
+  ## The question
+
+  `src/render/arena-backdrop.js`'s `stageClipRectFor` put a `ctx.clip()` around the
+  whole arena frame on 2026-09-15. Differencing the arena with and without it left a
+  residual INSIDE the rectangle — pixels the clip cannot have removed, because they
+  are hundreds of pixels from every edge of it — and the handoff that shipped the clip
+  recorded it as "known, measured, unexplained".
+
+  Three explanations were already ruled out BY RENDER rather than by reasoning:
+  a clip inflated by 10,000px is pixel-identical to no clip at all, `?groups=0`
+  reproduces the residual exactly, and the same URL twice differences to zero.
+
+  ## Why a synthetic page and not the arena
+
+  The arena offers one sample and no control. Here the variable is the clip and
+  nothing else: the SAME content is drawn at the SAME position on the SAME canvas for
+  every trial, and only the clip varies. Drawing the trials side by side instead would
+  have varied the position too, which is its own antialiasing question.
+
+  ## The controls, which are the part that earns the answer
+
+  - **A NULL CONTROL.** Trial 1 draws the content twice with no clip at all. If that
+    is not 0 differing pixels the page is measuring non-determinism and every other
+    number on it is noise. The first SWF probe on this project drew nothing at all and
+    its inside-the-stage control is the only reason anybody noticed.
+  - **A POSITIVE CONTROL.** The last trial clips through the middle of the content, so
+    a comparison that cannot report a difference fails visibly rather than reading as
+    a clean bill of health.
+  - **THE EDGE TEST.** For every trial the page reports how many of the differing
+    pixels sit on a strong local colour gradient. "The clip perturbs antialiasing" and
+    "the clip perturbs everything a little" predict very different numbers here, and
+    nothing else on the page separates them.
+
+  It reads its OWN canvas back and prints the verdict, so the measurement does not
+  depend on a screenshot being differenced correctly afterwards. Serve the repository
+  (`node tools/arena-server.mjs --host 0.0.0.0`) and open
+  `/tools/clip-probe/index.html`.
+-->
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 18px; background: #17151a; color: #e8e4dd;
+         font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  h1 { font-size: 15px; margin: 0 0 10px; color: #f3e3a8; }
+  canvas { border: 1px solid #3a3542; image-rendering: pixelated; }
+  table { border-collapse: collapse; margin-top: 12px; font-size: 12.5px; }
+  th, td { padding: 3px 10px 3px 0; text-align: left; vertical-align: top; }
+  th { color: #9a93a6; font-weight: normal; }
+  .pass { color: #7fd17f; }
+  .fail { color: #ff8f6b; }
+  .note { color: #9a93a6; max-width: 88ch; line-height: 1.5; margin-top: 12px; }
+</style>
+<h1>Canvas clip probe</h1>
+<canvas id="c" width="300" height="300"></canvas>
+<div id="out"></div>
+<div id="sweep"></div>
+<script type="module">
+const params = new URLSearchParams(location.search);
+const canvas = document.getElementById("c");
+// ► **THE CANVAS SIZE IS A PARAMETER BECAUSE THE ARENA'S IS NOT 300x300.** Its
+//   letterbox offsets and stage size fall out of the canvas it is fitted into, and
+//   whether those land on integers is exactly the variable under test here.
+canvas.width = Number(params.get("w")) || 300;
+canvas.height = Number(params.get("h")) || 300;
+const ctx = canvas.getContext("2d", { willReadFrequently: true });
+const W = canvas.width, H = canvas.height;
+
+/**
+ * Content with a great many antialiased edges and no flat expanse worth speaking
+ * of — that is the whole point, since the arena's residual landed on edges. It is
+ * kept well inside the canvas (a 40px margin) so that every clip below except the
+ * positive control provably cuts none of it.
+ */
+/**
+ * The background, drawn OUTSIDE every clip.
+ *
+ * ► **THIS WAS THE PROBE'S OWN FIRST DEFECT AND ITS POSITIVE CONTROL CAUGHT IT.**
+ *   The clear and the background fill started out inside `drawContent`, so under a
+ *   clip they were clipped too — which left the previous trial's pixels standing
+ *   outside the rectangle, identical to the baseline by construction. The trial that
+ *   was supposed to cut the content in half reported 293 differing pixels and the
+ *   page said so in its own verdict line. A null control alone would not have found
+ *   it: the null control was correct.
+ */
+function prepare() {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#101014";
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+/**
+ * The CENTRE content: a great many antialiased edges and almost no flat expanse,
+ * because the arena's residual landed on edges. It is kept inside a 100px radius so
+ * that a clip inset 39px provably cuts none of it.
+ */
+function drawCentre() {
+  // ► **CENTRED ON THE CANVAS, NOT ON 150,150 — AND THE FIRST VERSION WAS NOT.**
+  //   At the arena's 870x688 the wheel sat in the top-left corner while the centre
+  //   box this page reports sat empty in the middle, so every "CENTRE px" read 0 and
+  //   read as an answer. A region with nothing drawn in it cannot differ, which is
+  //   this repository's own rule about evidence that cannot vary, in a new place.
+  const CX = W / 2, CY = H / 2;
+  for (let i = 0; i < 14; i += 1) {
+    const angle = (i / 14) * Math.PI * 2;
+    ctx.save();
+    ctx.translate(CX, CY);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(18, 0);
+    ctx.lineTo(104, 27);
+    ctx.lineTo(96, -31);
+    ctx.closePath();
+    ctx.fillStyle = `hsl(${i * 26}, 62%, 52%)`;
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.lineWidth = 1.3;
+  for (let i = 0; i < 9; i += 1) {
+    ctx.beginPath();
+    ctx.arc(CX, CY, 44.5 + i * 6.7, 0.3 + i, 4.1 + i);
+    ctx.strokeStyle = `hsl(${200 + i * 7}, 70%, ${40 + i * 4}%)`;
+    ctx.stroke();
+  }
+}
+
+/**
+ * ► **CONTENT THAT LEAVES THE CLIP, WHICH IS THE ARENA'S ACTUAL CASE AND WAS
+ *   MISSING FROM THE FIRST VERSION OF THIS PAGE.** The arena's stage clip does not
+ *   cut nothing: the sky reaches stage y -164.8 and the crowd spans x -289.5..1073.3
+ *   against a 640-wide stage, so the rectangle removes real drawing on every edge.
+ *   "A clip that cuts nothing changes nothing" and "a clip that cuts something
+ *   changes nothing ELSEWHERE" are different claims and only the second one is about
+ *   the arena. These bars run off all four sides.
+ */
+function drawOverhang() {
+  ctx.fillStyle = "#6b5a3a";
+  // Tiled across the WHOLE edge rather than a fixed eleven tiles, for the same
+  // reason the wheel is centred: a canvas larger than the first one left three
+  // edges bare and the trial still called itself "cuts the overhang".
+  for (let x = -40; x < W + 40; x += 31.3) {
+    ctx.fillRect(x, -25, 22.7, 60.4);
+    ctx.fillRect(x, H - 35.5, 22.7, 60.4);
+  }
+  for (let y = -40; y < H + 40; y += 31.3) {
+    ctx.fillRect(-25, y, 60.4, 22.7);
+    ctx.fillRect(W - 35.5, y, 60.4, 22.7);
+  }
+}
+
+/** One trial: background unclipped, then the chosen content under `clipRect`. */
+function shot(clipRect, { overhang }) {
+  prepare();
+  ctx.save();
+  if (clipRect) {
+    ctx.beginPath();
+    ctx.rect(clipRect.x, clipRect.y, clipRect.width, clipRect.height);
+    ctx.clip();
+  }
+  try {
+    if (overhang) drawOverhang();
+    drawCentre();
+  } finally { ctx.restore(); }
+  return ctx.getImageData(0, 0, W, H);
+}
+
+/**
+ * ► **THE EDGE TEST IS THE DISCRIMINATING PART.** A count of differing pixels says
+ *   THAT something changed; the share of them sitting on a strong local gradient
+ *   says WHAT changed. The unchanged-pixel share of the same image is printed beside
+ *   it as the denominator, because "99% of the movers are on edges" means nothing
+ *   until you know what share of the image is edge — in the arena that denominator
+ *   was 5.8% against 99.8%, which is what made the answer readable.
+ *
+ * ► **AND IT COUNTS THE CENTRE SEPARATELY.** When the clip cuts the overhang the
+ *   pixels it removed are a difference by definition and say nothing. The question is
+ *   whether the CENTRE — which no clip here touches — moved with them.
+ */
+function compare(base, other, centre) {
+  const a = base.data, b = other.data;
+  let differing = 0, maxDelta = 0, onEdgeDiff = 0, onEdgeSame = 0, same = 0;
+  let centreDiff = 0, centreMax = 0, centreOnEdge = 0;
+  const at = (x, y, c) => (y * W + x) * 4 + c;
+  const gradient = (x, y) => {
+    let g = 0;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+      for (let c = 0; c < 3; c += 1) g = Math.max(g, Math.abs(a[at(x, y, c)] - a[at(nx, ny, c)]));
+    }
+    return g;
+  };
+  for (let y = 0; y < H; y += 1) {
+    for (let x = 0; x < W; x += 1) {
+      let d = 0;
+      for (let c = 0; c < 3; c += 1) d = Math.max(d, Math.abs(a[at(x, y, c)] - b[at(x, y, c)]));
+      const edge = gradient(x, y) >= 16;
+      const inCentre = x >= centre.x && x < centre.x + centre.width
+        && y >= centre.y && y < centre.y + centre.height;
+      if (d) {
+        differing += 1;
+        maxDelta = Math.max(maxDelta, d);
+        if (edge) onEdgeDiff += 1;
+        if (inCentre) { centreDiff += 1; centreMax = Math.max(centreMax, d); if (edge) centreOnEdge += 1; }
+      } else {
+        same += 1;
+        if (edge) onEdgeSame += 1;
+      }
+    }
+  }
+  return {
+    differing, maxDelta, centreDiff, centreMax,
+    edgeShareOfMovers: differing ? onEdgeDiff / differing : 0,
+    centreEdgeShare: centreDiff ? centreOnEdge / centreDiff : 0,
+    edgeShareOfStayers: same ? onEdgeSame / same : 0
+  };
+}
+
+const INSET = (n) => ({ x: n, y: n, width: W - 2 * n, height: H - 2 * n });
+/**
+ * The centre region: a centred box well clear of every clip rectangle below. It is
+ * derived from the canvas rather than pinned, because the canvas is now a parameter
+ * and a box pinned at 100,100 stops being central the moment the size changes.
+ */
+const CENTRE = (() => {
+  const side = Math.min(160, Math.round(Math.min(W, H) * 0.35));
+  return { x: Math.round((W - side) / 2), y: Math.round((H - side) / 2), width: side, height: side };
+})();
+
+/**
+ * ► **THE ARENA'S OWN RECTANGLE, DERIVED HERE BY THE SAME ARITHMETIC AND NOT COPIED
+ *   FROM IT.** `stageFitFor` scales a 640x420 stage to fit and centres it; the
+ *   offsets and the scaled size are floats and land on an integer only by accident.
+ *   At the 870x688 canvas the arena had at 1200x800 they are y 58.53 and h 570.94.
+ *   The snapped row is the candidate FIX: the same rectangle rounded to whole device
+ *   pixels, which moves each edge by at most half of one.
+ */
+const STAGE = { width: 640, height: 420 };
+const arenaFit = (() => {
+  const scale = Math.min(W / STAGE.width, H / STAGE.height);
+  return { scale, offsetX: (W - STAGE.width * scale) / 2, offsetY: (H - STAGE.height * scale) / 2 };
+})();
+const arenaRect = {
+  x: arenaFit.offsetX, y: arenaFit.offsetY,
+  width: STAGE.width * arenaFit.scale, height: STAGE.height * arenaFit.scale
+};
+const snappedRect = (() => {
+  const left = Math.round(arenaRect.x), top = Math.round(arenaRect.y);
+  return {
+    x: left, y: top,
+    width: Math.round(arenaRect.x + arenaRect.width) - left,
+    height: Math.round(arenaRect.y + arenaRect.height) - top
+  };
+})();
+const isWhole = (r) => [r.x, r.y, r.width, r.height].every((v) => Number.isInteger(v));
+
+/**
+ * ► **EVERY TRIAL IS COMPARED AGAINST A BASELINE DRAWN WITH THE SAME CONTENT.** A
+ *   trial that draws the overhang is compared against the unclipped overhang shot,
+ *   never against the one without it, or the comparison would be measuring the
+ *   overhang rather than the clip.
+ */
+const TRIALS = [
+  { name: "null control — no clip, drawn twice", clip: null, overhang: false, expect: "0" },
+  { name: "clip = the canvas rect exactly", clip: INSET(0), overhang: false, expect: "0 if a clip containing the surface is dropped" },
+  { name: "clip = canvas inflated by 10000px", clip: { x: -10000, y: -10000, width: W + 20000, height: H + 20000 }, overhang: false, expect: "0 — the arena's own control (a)" },
+  { name: "clip inset 1px — cuts nothing drawn", clip: INSET(1), overhang: false, expect: "0" },
+  { name: "clip inset 20px — cuts nothing drawn", clip: INSET(20), overhang: false, expect: "0" },
+  { name: "clip inset 39px — 1px clear of the content", clip: INSET(39), overhang: false, expect: "0" },
+  { name: "null control WITH overhang — no clip, twice", clip: null, overhang: true, expect: "0" },
+  { name: "THE ARENA'S CASE — clip inset 20px, cuts the overhang", clip: INSET(20), overhang: true, expect: "edges cut; CENTRE is the question" },
+  { name: "THE ARENA'S CASE — clip inset 39px, cuts the overhang", clip: INSET(39), overhang: true, expect: "edges cut; CENTRE is the question" },
+  { name: "FRACTIONAL clip inset 20.37px — cuts nothing drawn", clip: INSET(20.37), overhang: false, expect: "CENTRE is the question" },
+  { name: "FRACTIONAL clip inset 20.37px, cuts the overhang", clip: INSET(20.37), overhang: true, expect: "CENTRE is the question" },
+  { name: `THE ARENA'S OWN RECTANGLE as stageClipRectFor returns it${isWhole(arenaRect) ? " (whole here)" : ""}`, clip: arenaRect, overhang: true, expect: "CENTRE is the question" },
+  { name: "THE CANDIDATE FIX — the same rectangle snapped to whole pixels", clip: snappedRect, overhang: true, expect: "CENTRE 0 if snapping is the fix" },
+  // ► **THE POSITIVE CONTROL IS DERIVED FROM THE CONTENT, NOT FROM A FIXED INSET —
+  //   AND IT FAILED TWICE BEFORE IT WAS.** `INSET(120)` cuts the wheel in half on a
+  //   300x300 canvas and misses it entirely on the arena's 870x688, where it reported
+  //   0 and the page called every row above it noise. A control pinned to a number is
+  //   a control only at the size it was written at.
+  { name: "positive control — a clip through the middle of the content", clip: { x: Math.round(W / 2) - 60, y: Math.round(H / 2) - 60, width: 120, height: 120 }, overhang: false, expect: "MANY, or this page cannot measure" }
+];
+
+const basePlain = shot(null, { overhang: false });
+const baseOverhang = shot(null, { overhang: true });
+const rows = TRIALS.map((trial) => ({
+  trial,
+  result: compare(trial.overhang ? baseOverhang : basePlain, shot(trial.clip, trial), CENTRE)
+}));
+// Leave the canvas showing the content unclipped rather than whatever the last trial
+// drew, so a screenshot of this page shows what was being measured.
+shot(null, { overhang: true });
+
+const nullControl = rows[0].result;
+const nullOverhang = rows[6].result;
+const positive = rows[rows.length - 1].result;
+const centreTrials = rows.filter((row) => row.trial.name.startsWith("THE ARENA") || row.trial.name.startsWith("FRACTIONAL"));
+const html = [];
+html.push(`<table><tr><th>trial</th><th>differing px</th><th>max Δ</th>` +
+  `<th>on a strong edge</th><th>CENTRE px</th><th>centre max Δ</th><th>expected</th></tr>`);
+for (const { trial, result } of rows) {
+  const cls = trial.expect.startsWith("0") ? (result.differing === 0 ? "pass" : "fail")
+    : trial.expect.startsWith("MANY") ? (result.differing > 2000 ? "pass" : "fail") : "";
+  html.push(`<tr><td>${trial.name}</td>` +
+    `<td class="${cls}">${result.differing}</td>` +
+    `<td>${result.maxDelta}</td>` +
+    `<td>${result.differing ? (100 * result.edgeShareOfMovers).toFixed(1) + "%" : "—"}</td>` +
+    `<td>${result.centreDiff}</td>` +
+    `<td>${result.centreMax}</td>` +
+    `<td>${trial.expect}</td></tr>`);
+}
+html.push(`</table>`);
+const controlsGood = nullControl.differing === 0 && nullOverhang.differing === 0 && positive.differing > 2000;
+const centreMoved = centreTrials.some((row) => row.result.centreDiff > 0);
+html.push(`<div class="note">canvas ${W}x${H} — stage fit scale ${arenaFit.scale.toFixed(6)}; ` +
+  `arena rect ${arenaRect.x.toFixed(3)}, ${arenaRect.y.toFixed(3)}, ${arenaRect.width.toFixed(3)} x ${arenaRect.height.toFixed(3)} ` +
+  `(${isWhole(arenaRect) ? "WHOLE PIXELS" : "fractional"}); snapped ${snappedRect.x}, ${snappedRect.y}, ${snappedRect.width} x ${snappedRect.height}; ` +
+  `centre box ${CENTRE.x},${CENTRE.y} ${CENTRE.width}x${CENTRE.height}</div>`);
+html.push(`<div class="note">edge share of the whole image: ` +
+  `${(100 * nullControl.edgeShareOfStayers).toFixed(1)}% — the denominator for the column above.</div>`);
+html.push(`<div class="note"><strong>${
+  !controlsGood
+    ? "THE CONTROLS FAILED, so every row above is noise: null " +
+      `${nullControl.differing}/${nullOverhang.differing}, positive ${positive.differing}.`
+    : centreMoved
+      ? "A CLIP DOES CHANGE PIXELS 100px INSIDE ITSELF: " +
+        centreTrials.filter((row) => row.result.centreDiff > 0).map((row) => row.trial.name).join("; ") +
+        " — and the trials that did NOT move say which property of the rectangle is responsible."
+      : "A CLIP CHANGES NOTHING 100px INSIDE ITSELF, whether or not it cuts content at the " +
+        "edges — so the arena's interior residual is NOT the clip's rasterisation and " +
+        "something else in that frame varies with ?clip."
+}</strong></div>`);
+document.getElementById("out").innerHTML = html.join("");
+
+/**
+ * ► **HOW MUCH FRACTION IS ENOUGH, AND WHICH EDGE.** The table above says a
+ *   fractional rectangle perturbs the interior and a whole one does not. It does
+ *   not say whether a rectangle that is fractional on ONE axis is half as bad, or
+ *   whether a tiny fraction is safe — and "snap it to the nearest half pixel"
+ *   is exactly the kind of near-fix someone would reach for without this row.
+ *   Each trial keeps the same rectangle and moves only the named edges.
+ */
+const WHOLE = { x: 20, y: 20, width: W - 40, height: H - 40 };
+const nudge = (parts) => ({ ...WHOLE, ...parts });
+const SWEEP = [
+  { name: "whole — the reference", clip: WHOLE },
+  { name: "y fractional by 0.5 only", clip: nudge({ y: 20.5 }) },
+  { name: "x fractional by 0.5 only", clip: nudge({ x: 20.5 }) },
+  { name: "height fractional by 0.5 only", clip: nudge({ height: H - 40 + 0.5 }) },
+  { name: "y fractional by 0.001", clip: nudge({ y: 20.001 }) },
+  { name: "y fractional by 0.25", clip: nudge({ y: 20.25 }) },
+  { name: "every edge fractional by 0.5", clip: { x: 20.5, y: 20.5, width: W - 41, height: H - 41 } }
+];
+const sweepRows = SWEEP.map((trial) => ({
+  trial, result: compare(baseOverhang, shot(trial.clip, { overhang: true }), CENTRE)
+}));
+const sweepHtml = ['<h1 style="margin-top:18px">Which edge, and how much</h1>',
+  '<table><tr><th>rectangle</th><th>CENTRE px</th><th>centre max &#916;</th><th>whole-frame differing px</th></tr>'];
+for (const { trial, result } of sweepRows) {
+  sweepHtml.push(`<tr><td>${trial.name}</td>` +
+    `<td class="${result.centreDiff === 0 ? "pass" : "fail"}">${result.centreDiff}</td>` +
+    `<td>${result.centreMax}</td><td>${result.differing}</td></tr>`);
+}
+sweepHtml.push('</table>');
+document.getElementById("sweep").innerHTML = sweepHtml.join("");
+
+</script>

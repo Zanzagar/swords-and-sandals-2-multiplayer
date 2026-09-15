@@ -1073,13 +1073,26 @@ const EMPTY_CHAIN = Object.freeze([]);
 function applyStageChain(ctx, fit, placement, { pad = 0, clip = false } = {}) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   if (pad !== 0) ctx.translate(pad, pad);
-  ctx.translate(fit.offsetX, fit.offsetY);
-  ctx.scale(fit.scale, fit.scale);
+  // ► **CLIPPED IN DEVICE SPACE TO `stageClipRectFor`'S SNAPPED RECTANGLE, NOT IN
+  //   STAGE SPACE TO 0,0,640,420.** The two describe the same region and the
+  //   second one lands on fractional device pixels, which makes Chrome clip
+  //   through an antialiased mask and perturbs every antialiased edge INSIDE the
+  //   stage. That was the arena's unexplained residual and this page had the same
+  //   rectangle by a different route — correcting one and leaving the other is
+  //   the pointer-not-the-pointee failure this repository keeps recording. The
+  //   measurement is in `stageClipRectFor`'s docstring and in
+  //   `tools/clip-probe/index.html`.
+  //
+  //   It must happen BEFORE the fit transform, because a clip is a device-space
+  //   region once set and `ctx.rect` under a scale is not.
   if (clip) {
+    const stageRect = stageClipRectFor(fit);
     ctx.beginPath();
-    ctx.rect(0, 0, SS2_STAGE.width, SS2_STAGE.height);
+    ctx.rect(stageRect.x, stageRect.y, stageRect.width, stageRect.height);
     ctx.clip();
   }
+  ctx.translate(fit.offsetX, fit.offsetY);
+  ctx.scale(fit.scale, fit.scale);
   ctx.translate(placement.x, placement.y);
   if (placement.scale !== 1) ctx.scale(placement.scale, placement.scale);
 }

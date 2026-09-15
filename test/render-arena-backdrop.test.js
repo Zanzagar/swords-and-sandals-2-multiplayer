@@ -1486,17 +1486,36 @@ test("the stage clip rectangle IS the letterboxed stage, at every canvas shape",
   ]) {
     const fit = stageFitFor(size);
     const rect = stageClipRectFor(fit);
-    assert.equal(rect.x, fit.offsetX, `clip x disagrees with the fit at ${size.width}x${size.height}`);
-    assert.equal(rect.y, fit.offsetY, `clip y disagrees with the fit at ${size.width}x${size.height}`);
-    assert.equal(rect.width, SS2_STAGE.width * fit.scale, "clip width is not the stage");
-    assert.equal(rect.height, SS2_STAGE.height * fit.scale, "clip height is not the stage");
-    // The letterbox is whatever is left, and it must be symmetric — a clip that
-    // was right on one edge and wrong on the other would still satisfy the four
-    // assertions above if they were written against the rect alone.
-    assert.ok(Math.abs((size.width - (rect.x + rect.width)) - rect.x) < 1e-9,
-      "the left and right bars are not equal, so the stage is not centred");
-    assert.ok(Math.abs((size.height - (rect.y + rect.height)) - rect.y) < 1e-9,
-      "the top and bottom bars are not equal, so the stage is not centred");
+    // ► **THESE FOUR WERE `assert.equal(rect.x, fit.offsetX)` UNTIL 2026-09-15,
+    //   AND THEY ARE CORRECTED HERE RATHER THAN DELETED.** The rectangle is now
+    //   snapped to whole device pixels, because a FRACTIONAL clip perturbs
+    //   antialiasing everywhere inside itself — the measurement is in
+    //   `stageClipRectFor`'s own docstring. What survives is that each edge is
+    //   still the letterboxed stage to within half a pixel, which is what the
+    //   old assertions were really pinning.
+    const where = `${size.width}x${size.height}`;
+    assert.ok(Math.abs(rect.x - fit.offsetX) <= 0.5, `clip x is more than half a pixel off the fit at ${where}`);
+    assert.ok(Math.abs(rect.y - fit.offsetY) <= 0.5, `clip y is more than half a pixel off the fit at ${where}`);
+    assert.ok(Math.abs((rect.x + rect.width) - (fit.offsetX + SS2_STAGE.width * fit.scale)) <= 0.5,
+      `the clip's RIGHT edge is more than half a pixel off the fit at ${where}`);
+    assert.ok(Math.abs((rect.y + rect.height) - (fit.offsetY + SS2_STAGE.height * fit.scale)) <= 0.5,
+      `the clip's BOTTOM edge is more than half a pixel off the fit at ${where}`);
+    // ► **THE ASSERTION THE WHOLE CHANGE EXISTS FOR.** Half-pixel proximity is
+    //   satisfied by the OLD float rectangle too, so on its own it could not tell
+    //   the fix from the defect.
+    for (const [name, value] of Object.entries(rect)) {
+      assert.ok(Number.isInteger(value),
+        `the clip rectangle's ${name} is ${value} at ${where}, and a fractional clip ` +
+        "perturbs antialiasing everywhere inside it");
+    }
+    // The letterbox is whatever is left, and it must still be symmetric to within
+    // the rounding — a clip that was right on one edge and wrong on the other
+    // would satisfy every assertion above if they were written against the rect
+    // alone. One device pixel is the most that rounding two edges can introduce.
+    assert.ok(Math.abs((size.width - (rect.x + rect.width)) - rect.x) <= 1,
+      "the left and right bars differ by more than the rounding, so the stage is not centred");
+    assert.ok(Math.abs((size.height - (rect.y + rect.height)) - rect.y) <= 1,
+      "the top and bottom bars differ by more than the rounding, so the stage is not centred");
   }
 });
 

@@ -1043,11 +1043,41 @@ export function stageClipRectFor(fit) {
   const scale = Number.isFinite(fit?.scale) && fit.scale > 0 ? fit.scale : 1;
   const offsetX = Number.isFinite(fit?.offsetX) ? fit.offsetX : 0;
   const offsetY = Number.isFinite(fit?.offsetY) ? fit.offsetY : 0;
+  // ► **SNAPPED TO WHOLE DEVICE PIXELS, AND THAT IS THE WHOLE OF THE 2026-09-15
+  //   RESIDUAL.** `stageFitFor` divides by two and multiplies by a float, so this
+  //   rectangle lands on an integer only by accident — at the arena's 870x688 it
+  //   was y 58.531, height 570.938. A FRACTIONAL clip rectangle makes Chrome clip
+  //   through an antialiased mask instead of a whole-pixel scissor, and that mask
+  //   perturbs every antialiased edge INSIDE the rectangle, hundreds of pixels
+  //   from any boundary. Each edge moves by at most half a device pixel.
+  //
+  //   Measured in `tools/clip-probe/index.html`, which draws the same content on
+  //   the same canvas and varies ONLY the rectangle, with a null control at 0 and
+  //   a positive control at 19,911. At 870x688, in a 160x160 box ~200px clear of
+  //   every edge:
+  //
+  //     clip rectangle                          differing px   in the centre box
+  //     whole-pixel, cutting nothing                      0            0
+  //     whole-pixel inset 20 / 39, CUTTING content   46,393 / 81,393   0
+  //     fractional inset 20.37, cutting nothing       3,359 (99.6%     2,548 (max delta 6)
+  //                                                    on edges)
+  //     the arena's own 0, 58.531, 870 x 570.938     53,720            2,548
+  //     the same rectangle snapped (0, 59, 870x570)  50,361            0
+  //
+  //   So it is the FRACTION and not the cutting: a whole-pixel clip that removes
+  //   tens of thousands of pixels at the edges changes nothing in the middle.
+  //   ► **AND THE ARENA CONFIRMED IT AT FULL SIZE** — see the handoff for the
+  //     before/after counts against `?clip=0`.
+  const left = Math.round(offsetX);
+  const top = Math.round(offsetY);
   return Object.freeze({
-    x: offsetX,
-    y: offsetY,
-    width: SS2_STAGE.width * scale,
-    height: SS2_STAGE.height * scale
+    x: left,
+    y: top,
+    // Rounded as EDGES rather than as a width, so each side is within half a pixel
+    // of the true letterbox. Rounding a width instead would let the right edge
+    // drift by a whole pixel when the left one had already moved.
+    width: Math.max(1, Math.round(offsetX + SS2_STAGE.width * scale) - left),
+    height: Math.max(1, Math.round(offsetY + SS2_STAGE.height * scale) - top)
   });
 }
 
