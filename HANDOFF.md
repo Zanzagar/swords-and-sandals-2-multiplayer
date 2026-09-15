@@ -74,17 +74,38 @@ Start there.
     `blur(sigma/2)` at all six measured widths. **A correction that fits one
     branch is not a correction to its sibling** — and only rendering it said so.
 
-► **THE STRENGTH HALF OF EVERY GLOW IS STILL DISCARDED, AND IT IS A SPECIFIED
-  JOB NOW RATHER THAN A QUESTION.** The oracle says a player computes
-  `min(1, blurredAlpha * strength)`: strength 2 draws exactly twice strength 1,
-  and 10 and 16 add a saturated PLATEAU. We emit alpha 1 for every strength at
-  or above 1, so five different strengths draw one row. **The enchantment pack
-  carries strength 2 and 2.796875 over 48 records, so the weapon glow is on
-  screen at between a half and a third of its intended strength.** No single
-  `drop-shadow` can express it; the exact canvas sequence is written out at the
-  `approximated:` marker in `src/render/filters.js`, and `tools/glow-compare/`
-  is its acceptance test. **Do not stack `drop-shadow`s instead** — they
-  composite `source-over`, which is `1 - (1-a)^k` and not `k*a`.
+► **AND THE STRENGTH HALF IS DRAWN NOW TOO — RANKED FIRST IN THIS FILE AND
+  CLOSED IN THE SAME SESSION.** `glowAmplificationFor` in
+  `src/render/filters.js` returns a PLAN and `amplifyGlows` in
+  `tools/arena/main.js` executes it: silhouette the group buffer under a WHITE
+  drop-shadow, draw it `ceil(strength)` times with `lighter` (the last at
+  `globalAlpha = strength % 1`), colourise with `source-in`, draw under.
+  **Additive compositing sums premultiplied channels and clamps at 1, so the
+  alpha out is exactly `min(1, blurredAlpha * strength)` — an identity, not a
+  fit**, which is the only reason it is allowed. White is load-bearing: it is
+  the one colour whose premultiplied channels equal its alpha, so the additive
+  step cannot shift a hue. Verified against the oracle BEFORE the compositor was
+  touched (`tools/glow-compare/amplified.html`):
+
+```text
+    strength        oracle              ours
+       1        63  39  26   2      62  38  19   8     <- the null control
+       2       126  78  52   4     124  76  38  16
+       4       252 156 104   8     248 152  76  32
+      16       255 255 255  48     255 255 255 128
+```
+
+  In the arena, against its own kill switch `?amplify=0`: **0 differing pixels
+  with no enchantment, 3,015 with one** — bounded to the weapon, mean shift
+  B +28.6 — and the log reports `4 group(s) drew an AMPLIFIED glow (8 step(s))`.
+  ► **IT DECLINES A MIXED LIST AND THAT IS THE DESIGN.** A glow beside a blur or
+    a colour matrix composes in an order this does not model; 44 lists land
+    there and keep the counted `shadowStrengthSaturated` loss. 370 are a single
+    saturating glow and 24 are the enchantment's PAIR — **every one of its 12
+    art frames carries two saturating glows, so a single-glow shortcut would
+    have silently dropped the second colour.**
+  ► **DO NOT STACK `drop-shadow`s INSTEAD** — `source-over` gives
+    `1 - (1-a)^k`, not `k*a`. It looks closer and is a different curve.
 
 ► **THE MUTATION AUDIT CAME BACK OPPOSITE TO ITS OWN PREMISE.** Deferred four
   times; **54 mutations, 47 KILLED, 7 SURVIVED** across six `src/render/` files

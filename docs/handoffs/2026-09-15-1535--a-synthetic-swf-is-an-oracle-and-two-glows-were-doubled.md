@@ -10,7 +10,7 @@ commits:      29be32c..HEAD — `3b851c3` (the probe, the oracle, the stage clip
               `4a0eb33` (the mutation audit), plus this line's own commit.
               **Re-measure; never copy.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** It moved
-              1889 -> 1894 here (+5 tests, no test removed). `fail == 0` and
+              1889 -> 1900 here (+11 tests, no test removed). `fail == 0` and
               the exit code are the gate; the total is not.
 agentRuns:    ONE wave, 6 agents in two batches of 3 (memory, not caution:
               ~5 GB free and a suite run is the heavy thing). **6 started, 6
@@ -20,9 +20,9 @@ agentRuns:    ONE wave, 6 agents in two batches of 3 (memory, not caution:
               acting on it, because two of mine dissolved when I did.**
               Verifiers: 7 started, 7 returned, 0 dead — 6 CONFIRMED, 1
               PARTIALLY-BROKEN, 0 BROKEN.
-next:         **RANKED BELOW. Item 1 is a specified engineering job with a
-              measured target and an acceptance test already built — it is not
-              a question any more.** Item 3 is still the owner's.
+next:         **RANKED BELOW, AND THE ITEM THAT WAS RANKED FIRST IS CLOSED** —
+              the glow draws its strength, verified against the oracle and
+              against its own `?amplify=0` kill switch. Item 2 is the owner's.
 ---
 # Handoff — a synthetic SWF is an oracle, and two glows were doubled
 
@@ -109,6 +109,21 @@ every glow and every shadow in the build was drawn at twice its blur.**
   **The peak was never wrong — 63 against 63. Only the width was.** Seven pinned
   literals across five test files moved, every one corrected at its assertion.
 
+► **AND THE STRENGTH HALF IS DRAWN NOW, WHICH THIS FILE ORIGINALLY RANKED FIRST
+  AND HANDED ON.** `glowAmplificationFor` describes the sequence and
+  `amplifyGlows` runs it — silhouette white, amplify additively, colourise with
+  `source-in`, draw under. `lighter` sums premultiplied channels and clamps at
+  1, so the alpha out is exactly `min(1, blurredAlpha * strength)`: **an
+  identity, not a fit.** Against the oracle, strengths 1 / 2 / 4 / 16:
+
+```text
+    oracle   63 39 26 2  |  126 78 52 4  |  252 156 104 8  |  255 255 255 48
+    ours     62 38 19 8  |  124 76 38 16 |  248 152  76 32 |  255 255 255 128
+```
+
+  In the arena against `?amplify=0`: **0 differing pixels unenchanted, 3,015
+  with an enchantment**, bounded to the weapon, mean shift B +28.6.
+
 ► **AND `blur()` IS DELIBERATELY UNCHANGED, WHICH IS THE PART THAT WAS NEARLY
   GOT WRONG.** The obvious move is to apply the same halving to the sibling
   branch. It is wrong, and rendering it is what said so:
@@ -126,51 +141,20 @@ every glow and every shadow in the build was drawn at twice its blur.**
 
 ## Highest-value work, ranked
 
-1. **THE STRENGTH HALF OF EVERY GLOW IS STILL DISCARDED, AND IT IS NOW A
-   SPECIFIED JOB RATHER THAN A QUESTION.** The oracle says a player computes
-   `min(1, blurredAlpha * strength)`:
+1. **RE-SHOOT THE PROBES UNDER ADOBE'S PLAYER IF YOU EVER HAVE ONE.** Every
+   number in this file is "what a faithful Flash player draws" only to the
+   extent that Ruffle is one. Ruffle is a reimplementation; nothing here has
+   compared it against Adobe's binary. `probe-blur.swf`, `probe-glow.swf` and
+   `probe-clip.swf` are three files and five minutes, and the glow work below
+   now rests on them.
 
-```text
-     strength     0    1    2    3
-            1    63   39   26    2
-            2   126   78   52    4      <- exactly twice
-            4   252  156  104    8
-           10   255  255  255   30      <- a saturated PLATEAU
-           16   255  255  255   48
-```
+2. **THE TWELVE GROUPS IN THE FIGURE PACK REACH NO GLADIATOR — STILL THE
+   OWNER'S.** All 12 group entries and 30 grouped placements sit on `psyche_up`,
+   `psyche_up2`, `psyche_charging` and `psyche_charging2`, all four declared
+   unplayed. Making them reachable means deciding what those spells ARE.
 
-   We emit alpha 1 for every strength at or above 1, so all five draw the
-   `strength 1` row. **The enchantment pack carries strength 2 and 2.796875 over
-   48 records, so the weapon glow that shipped yesterday is on screen at between
-   a half and a third of its intended strength.**
-   ► No single `drop-shadow` can express it — the peak is capped at alpha 1 — so
-     unlike the radius this cannot be refitted. **The exact canvas sequence is
-     written out at the `approximated:` marker in `src/render/filters.js`**:
-     shadow-only via `destination-out`, amplify by drawing it `ceil(strength)`
-     times at `lighter` (additive compositing clamps at 1, so the alpha is
-     exactly `min(1, a * strength)` — an identity, not a fit), colourise with
-     `source-in`, draw under the source.
-   ► **DO NOT STACK `drop-shadow`s INSTEAD.** They composite `source-over`,
-     which gives `1 - (1-a)^k`, not `k*a`. It looks closer and is a different
-     curve.
-   ► **I SCOPED THIS OUT OF THIS SESSION ON PURPOSE.** It needs two extra
-     offscreens and a changed paint order inside `paintGroupRuns`, which is the
-     hot path, and its verification needs a harness that exercises the
-     COMPOSITOR rather than `ctx.filter`. Everything else it needs exists:
-     `tools/glow-compare/` is the acceptance test and the target profile above
-     is measured.
+3. **THE 392-PIXEL CLIP RESIDUAL, in "Known, measured, unexplained" below.**
 
-2. **RE-SHOOT THE PROBES UNDER ADOBE'S PLAYER IF YOU EVER HAVE ONE.** Every
-   number above is "what a faithful Flash player draws" only to the extent that
-   Ruffle is one. Ruffle is a reimplementation; nothing here has compared it
-   against Adobe's binary. `probe-blur.swf` and `probe-glow.swf` are two files
-   and five minutes.
-
-3. **THE TWELVE GROUPS IN THE FIGURE PACK REACH NO GLADIATOR — STILL THE
-   OWNER'S.** Unchanged from the 10:15 brief: all 12 group entries and 30
-   grouped placements sit on `psyche_up`, `psyche_up2`, `psyche_charging` and
-   `psyche_charging2`, all four declared unplayed. Making them reachable means
-   deciding what those spells ARE.
 
 ## THE MUTATION AUDIT — complete: 54 mutations, 47 KILLED, 7 SURVIVED
 
