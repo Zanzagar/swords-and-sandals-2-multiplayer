@@ -795,3 +795,74 @@ test("every result is frozen, so a caller cannot edit a count into agreeing with
   assert.ok(Object.isFrozen(applyColourMatrix("#ff0000", GREYSCALE_CELLS, 1)));
   assert.ok(Object.isFrozen(blendModeFor(3)));
 });
+
+/* ------------------------------------------------------------------ *
+ * The two boundaries the 2026-09-15 mutation audit found unnamed.
+ * ------------------------------------------------------------------ */
+
+test("THE ALPHA CLAMP IS A CLAMP: strength above the saturation point emits 1, and below it scales", () => {
+  // ► **THIS EXISTS BECAUSE AN AUDIT AGENT WARNED THE CLAMP WAS UNGUARDED, AND
+  //   THE WARNING WAS WRONG.** It reported that mutating `rgbaOf`'s
+  //   `Math.max(0, Math.min(1, alpha))` was killed *only* by whole-pack
+  //   reconciliation, and that "no assertion anywhere names the clamp" — so if
+  //   the pack were regenerated from mutated code the guard would go quiet.
+  //   **Re-derived in the agent's own frozen tree at its own line number: the
+  //   mutation is killed there by two NAMED unit assertions in this file**
+  //   ("strength is folded into the shadow's alpha…" and "the summary adds up
+  //   and buckets…"), neither of which is a reconciliation test.
+  //
+  //   Kept anyway, because it is not the same assertion: those two pin the
+  //   MARK a glow carries, and this pins the NUMBER the clamp emits on both
+  //   sides of the boundary. That is a different question and a cheap one.
+  const alphaOf = (filter) => Number(filter.match(/rgba\([^)]*,\s*([0-9.]+)\)/)[1]);
+  const at = (strength) => alphaOf(canvasFilterFor([glowRecord({ blurX: 8, blurY: 8, strength, distance: 0, angle: 0 })]).filter);
+
+  // Below the clamp it scales linearly and the value is the strength itself,
+  // because every glow colour in this build carries alpha 255.
+  assert.equal(at(0.25), 0.25);
+  assert.equal(at(0.5), 0.5);
+  // AT the boundary, and above it, the SAME number comes out — which is the
+  // loss `shadowStrengthSaturated` counts, asserted here rather than implied.
+  assert.equal(at(1), 1);
+  assert.equal(at(2), 1);
+  assert.equal(at(10), 1);
+  // And it clamps the OTHER way too: a negative strength must not emit a
+  // negative alpha, which is a silently broken filter string rather than a
+  // refused one. (Nothing in this build carries one; the clamp is still the
+  // thing under test.)
+  const negative = canvasFilterFor([glowRecord({ blurX: 8, blurY: 8, strength: -3, distance: 0, angle: 0 })]);
+  // `null`, not `""` — the module's own contract for "no filter applies", and
+  // the first draft of this test asserted the empty string and was wrong about
+  // the code rather than finding a defect in it.
+  assert.equal(negative.filter, null, "a negative strength emits no filter at all");
+  assert.equal(negative.applied.length, 0, "and nothing is reported as applied");
+  assert.deepEqual(negative.noOps.map((entry) => entry.reason), ["zeroStrength"],
+    "it is counted as a no-op BY NAME rather than dropped");
+});
+
+test("THE SATURATION SPLIT NAMES THREE DIFFERENT LOSSES, at the boundary and either side", () => {
+  // ► **THE SECOND OF THE TWO THE AUDIT REPORTED AS UNGUARDED — also already
+  //   guarded, and re-derived the same way.** The `strength === 1` ternary decides which of three names a glow's
+  //   approximation carries, and the distinction is the whole point: a
+  //   SATURATED strength is DISCARDED (two different strengths draw
+  //   byte-identically), where a sub-unit one is merely APPROXIMATED. Naming
+  //   them apart is what turned an invisible loss into a counted one.
+  const markOf = (strength) =>
+    canvasFilterFor([glowRecord({ blurX: 8, blurY: 8, strength, distance: 0, angle: 0 })]).applied[0].approximated;
+
+  assert.equal(markOf(1), "boxBlurAsGaussian", "strength 1 loses nothing to strength at all");
+  assert.equal(markOf(0.5), "shadowStrengthAsAlpha", "below the clamp the strength survives, as alpha");
+  // ► **THE BOUNDARY ITSELF**, which is where a `>` for a `>=` would hide: at
+  //   exactly 1 the alpha reaches the clamp, so anything above it is lost.
+  assert.equal(markOf(1.0001), "shadowStrengthSaturated", "just above the clamp the strength is DISCARDED");
+  assert.equal(markOf(2), "shadowStrengthSaturated");
+  assert.equal(markOf(10), "shadowStrengthSaturated");
+
+  // And the loss is real, not notional: the two strengths the enchantment pack
+  // actually carries produce the SAME string, which is the defect ranked first
+  // in the 2026-09-15 handoff.
+  const two = canvasFilterFor([glowRecord({ blurX: 8, blurY: 8, strength: 2, distance: 0, angle: 0 })]).filter;
+  const nearlyThree = canvasFilterFor([glowRecord({ blurX: 8, blurY: 8, strength: 2.796875, distance: 0, angle: 0 })]).filter;
+  assert.equal(two, nearlyThree,
+    "the two enchantment strengths now differ — if this fails, the amplified glow landed and this test states the OLD behaviour");
+});
