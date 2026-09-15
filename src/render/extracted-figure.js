@@ -1079,7 +1079,12 @@ function emitFigureOps(pack, options, invoice, collected = null) {
   // ► **THE LIMB MATRICES AND THE ENCHANTMENT ARE RESOLVED BEFORE THE BODY
   //   LOOP, AND THAT ORDER IS THE FIX FOR A WRONG PICTURE.** Both used to sit
   //   inside the dressing block below, which meant the glow could only reach
-  //   the ATTACHED blade. See `weaponGlowScope`.
+  //   the ATTACHED blade. See `weaponGlowEntryFor`, which is where that prose
+  //   lives — **these two sites used to cite a `weaponGlowScope` that has never
+  //   existed anywhere in this repository**, found 2026-09-15 by a
+  //   mutation-audit agent that went looking for it. A pointer to nothing sends
+  //   a reader hunting, and this file's own header already records that
+  //   correcting a pointer is not correcting the pointee.
   const limbs = chosen.animation.limbs?.[poseIndexAt(chosen.animation.poses.length, at)];
   // ► **RESOLVED ONCE PER PAINT, NOT ONCE PER ATTACHMENT.** It is a property of
   //   the loadout, and at most one of the two weapon rows can apply.
@@ -1182,7 +1187,8 @@ function emitFigureOps(pack, options, invoice, collected = null) {
     ]);
 
     // ► **THE RIG'S OWN WEAPON ART IS INSIDE THE GLOW, AND SAYING OTHERWISE WAS
-    //   MY BRIEF'S ERROR, FAITHFULLY IMPLEMENTED.** See `weaponGlowScope`:
+    //   MY BRIEF'S ERROR, FAITHFULLY IMPLEMENTED.** See `weaponGlowEntryFor`
+    //   (the second of two sites that cited a non-existent `weaponGlowScope`):
     //   char 701 sits at depth `[39, 1, 1]`, i.e. INSIDE the `realweapon`
     //   placement that wears the filter, so the build's glow encloses it. The
     //   placement carries no `effects` chain of its own — the chain is what the

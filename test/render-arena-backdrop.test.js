@@ -1564,3 +1564,34 @@ function propOpsForPack(pack, linkage, frame) {
   assert.ok(Array.isArray(ops) && ops.length > 0, `${linkage} frame ${frame} produced no operations`);
   return ops;
 }
+
+test("THE PROJECTOR'S HORIZON IS ARENA y=0 IN CANVAS SPACE, not the ground line", () => {
+  // ► **A MUTATION AUDIT FOUND THIS LINE UNGUARDED ON 2026-09-15.** Replacing
+  //   `SS2_ARENA_ORIGIN.y` with `SS2_GROUND_LINE` in `stageProjectorFor`'s
+  //   `horizon` — a plausible-looking swap that moves the value 200 arena units
+  //   down a 420-unit stage — left the whole suite green. The line was REACHED
+  //   by three tests; none of them discriminated, because the only assertion on
+  //   it anywhere was `assert.ok(Number.isFinite(view.horizon))`, which is true
+  //   of both numbers and of most wrong ones.
+  //
+  // ► **DERIVED BY A DIFFERENT ROUTE THAN THE FIELD IT CHECKS, which is what
+  //   makes it an assertion rather than a restatement.** `horizon` is built
+  //   from `fit.offsetY + SS2_ARENA_ORIGIN.y * fit.scale`; `toY` composes
+  //   `arenaToStage` with the fit. Asserting one equals the other pins the
+  //   MEANING the field's own docstring claims — "the arena's own origin in
+  //   canvas space" — rather than re-typing its arithmetic.
+  for (const size of [{ width: 1280, height: 840 }, { width: 640, height: 420 }, { width: 900, height: 700 }]) {
+    for (const zoomscale of [100, 60, 5]) {
+      const camera = { zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale), panX: 0 };
+      const fit = stageFitFor(size);
+      const projector = stageProjectorFor(camera, fit);
+      assert.equal(projector.horizon, projector.toY(0, 0),
+        `horizon and toY(0,0) disagree at ${size.width}x${size.height} zoom ${zoomscale}`);
+      // And it is NOT the ground line, which is the mutant that survived: the
+      // two differ by the arena's own depth, so a test that passed for both
+      // would be pinning nothing.
+      assert.notEqual(projector.horizon, projector.toY(SS2_ARENA.frontY ?? 200, 0),
+        "the horizon sits on the ground line, so the arena has no depth at all");
+    }
+  }
+});

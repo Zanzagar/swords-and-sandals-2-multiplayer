@@ -8,15 +8,17 @@ branch:       arena/champion-capture. **Measure the push count yourself, AFTER
 commits:      29be32c..HEAD — `3b851c3`, `385576a` pushed before this one.
               **Re-measure; never copy.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** It moved
-              1889 -> 1893 here (+4 tests, no test removed). `fail == 0` and
+              1889 -> 1894 here (+5 tests, no test removed). `fail == 0` and
               the exit code are the gate; the total is not.
 agentRuns:    ONE wave, 6 agents in two batches of 3 (memory, not caution:
-              ~5 GB free and a suite run is the heavy thing). **See the
-              MUTATION AUDIT section — collect the batch-2 results yourself
-              before quoting any number from it.**
+              ~5 GB free and a suite run is the heavy thing). **6 started, 6
+              returned, 0 dead.** 54 mutations, 47 KILLED, 7 SURVIVED — the
+              OPPOSITE of the 2026-09-07 engine audit. Of the 7, exactly ONE
+              was a real gap and it is fixed; **re-derive any survivor before
+              acting on it, because two of mine dissolved when I did.**
 next:         **RANKED BELOW. Item 1 is a specified engineering job with a
               measured target and an acceptance test already built — it is not
-              a question any more.** Item 4 is still the owner's.
+              a question any more.** Item 3 is still the owner's.
 ---
 # Handoff — a synthetic SWF is an oracle, and two glows were doubled
 
@@ -154,35 +156,57 @@ every glow and every shadow in the build was drawn at twice its blur.**
      `tools/glow-compare/` is the acceptance test and the target profile above
      is measured.
 
-2. **COLLECT THE MUTATION AUDIT'S SECOND BATCH.** See its own section below.
-   Batch 1 is in and **runs opposite to what I briefed**.
-
-3. **RE-SHOOT THE PROBES UNDER ADOBE'S PLAYER IF YOU EVER HAVE ONE.** Every
+2. **RE-SHOOT THE PROBES UNDER ADOBE'S PLAYER IF YOU EVER HAVE ONE.** Every
    number above is "what a faithful Flash player draws" only to the extent that
    Ruffle is one. Ruffle is a reimplementation; nothing here has compared it
    against Adobe's binary. `probe-blur.swf` and `probe-glow.swf` are two files
    and five minutes.
 
-4. **THE TWELVE GROUPS IN THE FIGURE PACK REACH NO GLADIATOR — STILL THE
+3. **THE TWELVE GROUPS IN THE FIGURE PACK REACH NO GLADIATOR — STILL THE
    OWNER'S.** Unchanged from the 10:15 brief: all 12 group entries and 30
    grouped placements sit on `psyche_up`, `psyche_up2`, `psyche_charging` and
    `psyche_charging2`, all four declared unplayed. Making them reachable means
    deciding what those spells ARE.
 
-## THE MUTATION AUDIT — batch 1 only; batch 2 was still running
+## THE MUTATION AUDIT — complete: 54 mutations, 47 KILLED, 7 SURVIVED
 
-**Do not quote batch 2 from this file. It is not here.** Six agents, two batches
-of three, each in a private `cp -a` copy of frozen HEAD (`.git` included — the
-2026-09-07 trap), mutating one `src/render/` file by LINE NUMBER and running the
-whole suite after each.
+Six agents, two batches of three, 6/6 returned, each in a private `cp -a` copy
+of frozen HEAD (`.git` included — the 2026-09-07 trap), mutating one
+`src/render/` file by LINE NUMBER and running the whole suite after each. Every
+agent measured the 1889/1888/0/1 baseline in its own copy first.
 
-**Batch 1: 27 mutations, 24 KILLED, 3 SURVIVED.** `filters.js` 9/9 killed,
-`screen.js` 8 of 9, `props.js` 7 of 9.
+```text
+    filters.js            9/9 killed      screen.js             8/9
+    extracted-figure.js   8/9             arena-backdrop.js     8/9
+    props.js              7/9             screen-text.js        7/9
+```
 
 ► **THAT IS THE OPPOSITE OF WHAT I BRIEFED AND THE OPPOSITE OF THE 2026-09-07
   AUDIT'S HEADLINE (37 of 48 SURVIVED).** The render code is among the
   best-pinned in the repository; the engine was not. **A four-times-deferred
-  task came back saying the fear behind it was wrong.**
+  task came back saying the fear behind it was wrong**, and three agents
+  independently warned that carrying that document's ratio forward as the
+  expected shape would be a misread.
+
+► **AND OF THE 7 SURVIVORS, ONLY ONE WAS A REAL COVERAGE GAP. IT IS FIXED.**
+  `src/render/arena-backdrop.js:992` — `stageProjectorFor`'s `horizon` accepted
+  `SS2_GROUND_LINE` in place of `SS2_ARENA_ORIGIN.y`, moving it 200 arena units
+  down a 420-unit stage with the suite green. Three tests REACHED the line and
+  none discriminated, because the only assertion on it anywhere was
+  `assert.ok(Number.isFinite(view.horizon))` — true of both numbers and of most
+  wrong ones. **Now asserted as `projector.horizon === projector.toY(0, 0)`**,
+  derived through `arenaToStage` rather than by re-typing the field's own
+  arithmetic, at three canvas sizes and three zooms. Verified to KILL the exact
+  mutation that survived: re-applied, the suite goes to 1 fail and it is that
+  test.
+
+► **THE OTHER SIX ARE "THE BUILD CONTAINS NO INPUT THAT DISCRIMINATES", NOT
+  GAPS — and the agents' own instrumentation is what established it.**
+  `screen-text.js:1043`'s branch never runs (3,395 groups evaluated, 0 with a
+  non-finite `opCount`); `:895` needs nested filter stages and the suite builds
+  none (0 of 2,807); `extracted-figure.js:1280` is semantically equivalent on
+  this build's data. **Both `props.js` survivors I re-derived myself and both
+  dissolved** — see below.
 
 ► **BOTH `props.js` SURVIVORS DISSOLVED WHEN I RE-DERIVED THEM, AND THE
   AGENT'S HEADLINE WAS THE WRONG ONE.** It reported `:506` as "the strongest
@@ -208,12 +232,61 @@ whole suite after each.
     nothing**; the field rules say to check that and it is the check that
     decided both of these.
 
-► **THREE OF MY BRIEF'S FACTS WERE WRONG AND THE AGENTS BROKE ALL THREE.**
-  `groupRunsOf` is at `tools/arena/main.js:2237`, not in `src/render/screen.js`
-  where I put it. `prefixesOf` was DELETED on 2026-09-15 and replaced by
-  `filterGroupDraftsOf` — **and the living head was still citing it as current
-  in two places, which is corrected there now.** And the 2026-09-07 baseline of
-  816 describes a tree 2.3x smaller than today's.
+► **FOUR OF MY BRIEF'S FACTS WERE WRONG AND THE AGENTS BROKE ALL FOUR.**
+  `groupRunsOf` is at `tools/arena/main.js:2237` and `figureEffectCensusOf` at
+  `tools/arena/main.js:358` — **I put BOTH arena-shell functions in
+  `src/render/` files, the same mistake twice in one brief.** `prefixesOf` was
+  DELETED on 2026-09-15 and replaced by `filterGroupDraftsOf`, **and the living
+  head was still citing it as current in two places, corrected there now.** And
+  the 2026-09-07 baseline of 816 describes a tree 2.3x smaller than today's.
+
+► **AND ONE AGENT FOUND A POINTER TO NOTHING, WHICH IS FIXED.**
+  `src/render/extracted-figure.js:1082` and `:1185` both said *"See
+  `weaponGlowScope`"* and **no such function has ever existed anywhere in this
+  repository** — the prose lives in `weaponGlowEntryFor` at `:653`. Both now
+  cite it. That is the ninth-and-tenth instance of the pointer failure this
+  file keeps recording, found by an agent that simply went looking for the
+  symbol it was told to read.
+
+## Known, measured, unexplained
+
+► **THE STAGE CLIP CHANGES 392 PIXELS INSIDE THE STAGE, AND I DO NOT KNOW
+  WHY.** 0.222% of the 176,211 pixels inside the fitted stage, scattered over
+  x 91..518 / y 208..418 — which is where the fighters stand — in their own
+  browns and greys, at a maximum per-channel delta of 7/255 (258 of the 392 are
+  a delta of 1). **No feature is missing and nothing is visibly wrong**; this is
+  a residual, not a defect I am shipping knowingly as one.
+
+  What it is NOT, each ruled out by a render rather than by reasoning:
+  - **Not "a clip is active".** A clip inflated by 10,000px — one that cannot
+    remove anything — is PIXEL-IDENTICAL to no clip at all: 0 differing pixels,
+    max delta 0. So Chrome's clipped-fill path does not perturb rasterisation,
+    and the cause is the rectangle actually cutting something.
+  - **Not the group compositor.** `?groups=0` gives the identical 392 with the
+    identical histogram.
+  - **Not the glow-radius change.** The three shots were re-taken together at
+    one code state and reproduce exactly.
+  - **Not non-determinism.** The same URL twice differences to 0.
+
+  **The obvious next move is the one I did not have: the arena page cannot
+  report its own canvas rect.** Every "inside the stage" number above rests on a
+  canvas rectangle I derived from the page layout rather than asked the page
+  for, and a first attempt at this check reported a false FAILURE for exactly
+  that reason. `tools/screens/main.js` has `?probe=1`, which reads the canvas
+  back and prints the fit; **the arena has no equivalent, and adding one is the
+  cheapest way to finish this.**
+  ► **I WROTE THAT PROBE AND THEN TOOK IT BACK OUT, WHICH IS WORTH KNOWING
+    BEFORE YOU WRITE IT AGAIN.** `reportStageFit` logged the canvas rect, the
+    fit and the stage rectangle in both device and page coordinates, called from
+    `render` immediately after `stageClipRectFor`. **Its lines never appeared in
+    the log panel**, with or without the `params.has("probe")` gate, while the
+    clip two lines below it demonstrably worked in the same frame — so the call
+    site executes and the logging does not, and I did not find out why. It is
+    removed rather than shipped, because a probe whose output nobody has seen is
+    worse than no probe: the next person would trust its silence.
+    **Start by checking how `log` behaves during the first `render`** — the
+    panel renders `logLines.slice().reverse()` and caps at 40, and the startup
+    lines around it survive, which is what makes the absence odd.
 
 ## Hard rules
 

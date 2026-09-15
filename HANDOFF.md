@@ -87,14 +87,30 @@ Start there.
   composite `source-over`, which is `1 - (1-a)^k` and not `k*a`.
 
 ► **THE MUTATION AUDIT CAME BACK OPPOSITE TO ITS OWN PREMISE.** Deferred four
-  times; batch 1 is 27 mutations, **24 KILLED, 3 SURVIVED** (`filters.js` 9/9,
-  `screen.js` 8/9, `props.js` 7/9), against the 2026-09-07 engine audit's 37 of
-  48 SURVIVING. **The render code is among the best-pinned in the repository.**
-  The two survivors worth acting on are both in `src/render/props.js` and both
-  were proved reachable by instrumentation: `:506` (`.every` to `.some`) is
-  executed 10,947 times a run and returns a DIFFERENT value on 5,890 of them
-  with the suite green; `:384` drops blue from `touchesRgb` and never
-  discriminates.
+  times; **54 mutations, 47 KILLED, 7 SURVIVED** across six `src/render/` files
+  (`filters.js` 9/9, `screen.js`/`extracted-figure.js`/`arena-backdrop.js` 8/9,
+  `props.js`/`screen-text.js` 7/9), against the 2026-09-07 engine audit's 37 of
+  48 SURVIVING. **The render code is among the best-pinned in the repository
+  and the engine was not; do not carry that document's ratio forward as the
+  expected shape here.**
+  ► **EXACTLY ONE SURVIVOR WAS A REAL COVERAGE GAP, AND IT IS CLOSED.**
+    `stageProjectorFor`'s `horizon` took `SS2_GROUND_LINE` for
+    `SS2_ARENA_ORIGIN.y` — 200 arena units down a 420-unit stage — with the
+    suite green, because the only assertion on it anywhere was
+    `Number.isFinite`. Now `projector.horizon === projector.toY(0, 0)`, derived
+    through `arenaToStage` rather than by re-typing the field's arithmetic, and
+    **verified to kill the exact mutation that survived.**
+  ► **THE OTHER SIX ARE "NO INPUT IN THE BUILD DISCRIMINATES THEM", NOT GAPS,
+    AND TWO OF THEM I HAD ALREADY MIS-BELIEVED.** An agent reported
+    `props.js:506` (`.every` to `.some`) as "the strongest form of
+    under-asserted" on 5,890 measured divergences a run. Re-derived: the only
+    reader is gated on `matrices.length > 0`, and the divergent case is the
+    EMPTY array — 745 real group instances, 397 with 0 matrices, 348 with 1,
+    none with 2+. A semantic no-op. `:384` drops blue from `touchesRgb` and the
+    pack holds 2,330 non-identity transforms, 340 touching RGB, **0 blue-only.**
+    **"Reachable" and "discriminating" are different questions and
+    instrumentation that measures an expression rather than an OUTCOME conflates
+    them.**
 
 *(The brief it supersedes, whose ranked items 2 and 4 are CLOSED:)*
 [2026-09-15 10:15 — the glow is drawn, and I measured the instrument twice](docs/handoffs/2026-09-15-1015--the-glow-is-drawn-and-i-measured-the-instrument-twice.md).
