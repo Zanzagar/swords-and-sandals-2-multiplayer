@@ -8,8 +8,9 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-15 07:18 — the glow is drawn, and it hangs the page](docs/handoffs/2026-09-15-0718--the-glow-is-drawn-and-it-hangs-the-page.md).**
-Start there.
+[2026-09-15 10:15 — the glow is drawn, and I measured the instrument twice](docs/handoffs/2026-09-15-1015--the-glow-is-drawn-and-i-measured-the-instrument-twice.md).**
+Start there. *(It supersedes the 07:18 brief, **whose title and ranked item 1
+are both wrong**; that file is kept only as the record of how.)*
 
 ► **THE FILTERS ARE APPLIED. `screen.js` EMITS 248 GROUPS AND BOTH SHELLS
   COMPOSITE EACH ONE THROUGH ONE OFFSCREEN WITH ONE `ctx.filter`** — never per
