@@ -5,8 +5,10 @@ sessionId:    b0bd5c51-edb6-460a-893e-dfcabc590319
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-commits:      2281ef4..HEAD. **Re-measure; never copy.**
-suite:        **Re-measure BY EXIT CODE, after your own commit.** It moved
+commits:      2281ef4..HEAD — SIX commits, all pushed, **0 unpushed measured
+              AFTER this handoff commit**. **Re-measure; never copy.**
+suite:        1803 / 1802 / 0 fail / 1 skipped, EXIT 0, **measured AFTER this
+              handoff commit.** **Re-measure BY EXIT CODE.** It moved
               1651 -> 1712 -> 1739 -> 1740 -> 1803 across three waves and two
               serial passes. `fail == 0` and the exit code are the gate; the
               total is not.
