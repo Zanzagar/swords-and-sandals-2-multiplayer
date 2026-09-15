@@ -5,7 +5,9 @@ sessionId:    470865d7-a62b-4a17-9461-cd2c38d762a3
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-commits:      29be32c..HEAD — `3b851c3`, `385576a` pushed before this one.
+commits:      29be32c..HEAD — `3b851c3` (the probe, the oracle, the stage clip),
+              `385576a` (the doubled blur), `355f3e9` (my overclaim corrected),
+              `4a0eb33` (the mutation audit), plus this line's own commit.
               **Re-measure; never copy.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** It moved
               1889 -> 1894 here (+5 tests, no test removed). `fail == 0` and
