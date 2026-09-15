@@ -8,8 +8,54 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-15 00:46 — the tint landed, and the trail vanished](docs/handoffs/2026-09-15-0046--the-tint-landed-and-the-trail-vanished.md).**
+[2026-09-15 04:00 — the filters land, and the sky has a clock](docs/handoffs/2026-09-15-0400--the-filters-land-and-the-sky-has-a-clock.md).**
 Start there.
+
+► **THE FILTERS ARE APPLIED. `screen.js` EMITS 248 GROUPS AND BOTH SHELLS
+  COMPOSITE EACH ONE THROUGH ONE OFFSCREEN WITH ONE `ctx.filter`** — never per
+  leaf, because a group's filter is a filter of the COMPOSITE and stamping it on
+  each of `townsquare`'s 1523 paths is a different picture, not an approximation
+  of the right one. Nested groups COMPOSE rather than innermost-winning: 40% of
+  operations sit under exactly two filtered ancestors, so the rule is reachable
+  and tested rather than assumed. **Both shells carry a kill switch —
+  `?filters=0` and `?groups=0` — that reproduces exactly what the page drew
+  before, so the difference between two shots is the measurement.**
+
+► **AND FOLDING THE SKY'S ENCLOSING ColorMatrix GAVE IT A DAY/NIGHT CYCLE IT HAS
+  NEVER HAD**: frame 1 `#440037`→`#79689f` dawn, frame 60 `#2d2dfd`→`#5fbefe`
+  midday, frame 200 `#000030`→`#3f5f75` night. **Before the fold every frame was
+  the midday blue** while `time_of_day` climbed 1..200 and re-seeked the sky
+  every 1500ms.
+
+► **A COLOUR-MATRIX-ONLY GROUP IS NOT COMPOSITED AT ALL — 31 groups, 8210 of
+  13638 operations, 60%.** Canvas has no arbitrary colour-matrix filter, so
+  those groups open no offscreen. **Five of the 31 have a DESCENDANT that does
+  composite**, producing exactly the innermost-wins picture `screen.js` argues
+  against. Counted as `groupsMatrixOnlyWithFilteredDescendant` rather than
+  guessed at; closing it needs `getImageData` or an inline SVG filter.
+
+► **THE FIGURE AND ICON EXTRACTORS READ NO FILTER FIELDS AT ALL, AND THEY ARE
+  DROPPING THE ELEMENTAL WEAPON GLOW.** Sprite 703 `weapon0` carries 24 glows,
+  two on every frame 2..13 — and the enchantments are flame/frost/poison/wraith
+  at frames 2/5/8/11. **The glow IS the enchantment visual**, which this file
+  records as not found. The SELECTOR is still open. Sprite 1241 `hero_battle`
+  carries a pulsing glow tween at frames 1614..1643.
+
+► **THERE IS NO BUILD-LEVEL FILTER DENOMINATOR.** 1,894 filter records on 1,507
+  placements; a reader can reach 848 — 44.8% — and the two pack numbers are not
+  on the same unit, so they cannot be summed. Nothing in the suite re-derives
+  the build partition.
+
+► **WHEN THE CODE AND THIS FILE DISAGREE, THIS FILE WINS UNTIL SOMETHING
+  RE-MEASURES — AND I BROKE THAT RULE.** Yesterday's colour-transform commit
+  wrote *"the sky's colouring is the transform and not a ColorMatrix"* into
+  `src/render/props.js`, contradicting this file. **I then paraphrased the CODE
+  into an agent brief**, telling it not to assume a matrix; it measured and broke
+  the premise. Struck at both ends. **Quoting a source file into a brief is not
+  re-measuring.**
+
+*(The brief it supersedes, whose ranked item 1 is DONE for shapes and text:)*
+[2026-09-15 00:46 — the tint landed, and the trail vanished](docs/handoffs/2026-09-15-0046--the-tint-landed-and-the-trail-vanished.md).
 
 ► **THE COLOUR TRANSFORM IS IN `src/render/props.js` AND THE SHELL'S COPY IS
   GONE.** `propOpsFor` carries each placement's transform onto fill, stroke,
