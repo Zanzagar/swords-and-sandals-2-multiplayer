@@ -18,6 +18,8 @@ agentRuns:    ONE wave, 6 agents in two batches of 3 (memory, not caution:
               OPPOSITE of the 2026-09-07 engine audit. Of the 7, exactly ONE
               was a real gap and it is fixed; **re-derive any survivor before
               acting on it, because two of mine dissolved when I did.**
+              Verifiers: 7 started, 7 returned, 0 dead — 6 CONFIRMED, 1
+              PARTIALLY-BROKEN, 0 BROKEN.
 next:         **RANKED BELOW. Item 1 is a specified engineering job with a
               measured target and an acceptance test already built — it is not
               a question any more.** Item 3 is still the owner's.
@@ -249,6 +251,40 @@ agent measured the 1889/1888/0/1 baseline in its own copy first.
   cite it. That is the ninth-and-tenth instance of the pointer failure this
   file keeps recording, found by an agent that simply went looking for the
   symbol it was told to read.
+
+► **THE VERIFIERS: 7 STARTED, 7 RETURNED, 0 DEAD — 6 CONFIRMED-SURVIVOR, 1
+  PARTIALLY-BROKEN, 0 BROKEN.** Each was given ONE named claim and wrote
+  nothing. They rate two of the six `cosmetic`, one `dead-code`, and three
+  `render-correctness`. **The verifier on `arena-backdrop.js:992` independently
+  confirmed my own fix without being told about it**: it exported HEAD with
+  `git archive`, applied the mutation at its NEW line (1078, not 992), and
+  watched the test I had just written kill it.
+
+► **AND THAT SAME VERIFIER CAUGHT A DEFECT I HAD SHIPPED, WHILE LOOKING AT
+  SOMETHING ELSE.** Its HEAD export went red unmutated too, and it reported the
+  red as *"an artifact of exporting without gitignored assets, not caused by the
+  mutation"*. **It was not the method. It was my test.** The stage-clip check I
+  added opened with `assert.fail(...)` when `assets/props/props.json` is absent
+  — deliberately, to avoid a silent skip — which turns a FRESH CLONE red for
+  anyone without an extraction. Corrected to `render-props.test.js`'s
+  convention: assert the absence and return.
+  ► **A verifier careful enough to say WHICH of two explanations it was, about
+    its own method, is the only reason that survived to be read.**
+
+► **AND MEASURING THAT TURNED UP A WRONG NUMBER IN `AGENTS.md`, NOW CORRECTED
+  THERE.** Its test-profile section said a fresh clone shows **1 skipped**.
+  Measured in a real `git clone` at this commit: **9.** The extra 8 are gated on
+  the extracted TEXT pack, gitignored like every other asset; the documented 1
+  describes a tree that HAS `assets/`. A cloner measuring 9 against a documented
+  1 has a correct tree and a wrong document — and `AGENTS.md`'s own next
+  sentence tells them a skip is "a real finding, not noise".
+
+► **ONE CAVEAT ON EVERY NUMBER IN THIS SECTION, RAISED BY A VERIFIER:** the
+  frozen tree the agents measured is `29be32c`, and the repo moved four commits
+  past it during the session. **Replaying these mutations BY LINE NUMBER against
+  the current tree edits the wrong lines** — at HEAD, `arena-backdrop.js:992` is
+  a docstring. Re-locate by symbol, which is what this repository already tells
+  you to cite.
 
 ## Known, measured, unexplained
 

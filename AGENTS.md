@@ -199,8 +199,13 @@ and the path is unreachable from Linux anyway.
   the gitignored `captures/` archive: **all tests pass, 0 skipped.** (The
   directory merely existing is not enough — it is committed, holding a manifest
   and a README — so a tree with `captures/` and 1 skipped is CORRECT.)
-- A fresh clone or worktree without that archive: **1 skipped**, and the skip is
-  the raw-trace archive existence check. This is EXPECTED, not a defect.
+- A working tree with `assets/` but no probe session: **1 skipped**, the
+  raw-trace archive existence check. EXPECTED, not a defect.
+- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS 9 — measured 2026-09-15,
+  where this line used to say 1 and mean the tree above.** The other 8 are gated
+  on the extracted TEXT pack, which is gitignored like every other asset. A
+  cloner who measures 9 against a documented 1 has a correct tree and a wrong
+  document.
 
 **Otherwise a skipped test is a real finding, not noise.** Expect the exact count
 the newest handoff states; if you measure a different number, say so rather than
