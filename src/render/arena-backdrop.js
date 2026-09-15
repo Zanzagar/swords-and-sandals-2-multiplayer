@@ -1003,9 +1003,22 @@ export function stageFitFor({ width, height }) {
  *
  *   So a player DOES rasterise display-list content outside its stage rect,
  *   and what decides whether anyone sees it is a mask over the stage — not
- *   clipping at draw time. **Our renderer had neither**: it computes a
- *   letterbox in `stageFitFor` and then paints into the bars it just created,
- *   which is a behaviour no player has.
+ *   clipping at draw time.
+ *
+ * ► **AND THE SCREENS PAGE ALREADY KNEW, WHICH I FOUND OUT BY NEARLY BREAKING
+ *   IT.** `tools/screens/main.js` has clipped to the stage BY DEFAULT since
+ *   2026-09-14, under its own `?clip=0` toggle, with a docstring reading *"THE
+ *   STAGE CLIP IS ON BY DEFAULT BECAUSE THE PLAYER CLIPS"* and measurements
+ *   beside it — `magicshop` reaches stage y 929, `dungeon` 926, `weaponshop`
+ *   771, `arena_intro` x -1383..1026. **So the gap was the ARENA page alone,
+ *   not "the renderer", and I wrote the broader claim before reading the file
+ *   that contradicted it.** What is genuinely new here is the MEASUREMENT: that
+ *   page asserts what a player does, and nothing had rendered one until now.
+ *   ► **I ALSO ADDED A SECOND CLIP TO THAT PAGE AND TOOK IT BACK OUT.** It was
+ *     unconditional, so it made the existing `clip` toggle inert — two halves
+ *     of one join disagreeing, with the correct rule already written on the
+ *     other side of it. The page keeps its own clip; what it took from here is
+ *     `stageClipRectFor` for the rectangle it was spelling out by hand.
  *
  * ► **WHAT IS MEASURED AND WHAT IS NOT.** Measured: the four-edge table above,
  *   with its null control; that SS2's own header declares 0,0..640x420 and its

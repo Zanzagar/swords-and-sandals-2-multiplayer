@@ -8,9 +8,98 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-15 10:15 — the glow is drawn, and I measured the instrument twice](docs/handoffs/2026-09-15-1015--the-glow-is-drawn-and-i-measured-the-instrument-twice.md).**
-Start there. *(It supersedes the 07:18 brief, **whose title and ranked item 1
-are both wrong**; that file is kept only as the record of how.)*
+[2026-09-15 15:35 — a synthetic SWF is an oracle, and two glows were doubled](docs/handoffs/2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md).**
+Start there.
+
+► **THIS REPOSITORY CAN NOW ASK A FLASH PLAYER A QUESTION WITH A KNOWN ANSWER,
+  AND THAT IS THE DURABLE PART OF 2026-09-15.** `tools/swf-probe.mjs` writes a
+  minimal SWF — a few hundred bytes of this project's own shapes, carrying a
+  chosen filter — and `tools/ruffle-shot.ps1` renders it under Ruffle and reads
+  the client area back. **Two questions that had each been ranked open and each
+  been called "a session's work to set up" were both answered in one afternoon**
+  and neither needed the game: a synthetic movie isolates the variable, where
+  one frame of the real build offers one sample and no control.
+  ► **AND IT KEEPS THE ORACLE CLEAN.** The probes contain no SS2 bytes and run
+    under `--storage memory`, so the installed build and its save are untouched.
+
+► **THE GREEN BAND IS CLOSED, AND IT WAS NEVER A BAND.** Carried as "known,
+  measured, unexplained" across five handoffs. **The sky simply leaves the
+  stage, and how far depends on the frame** — top edge -12.0 at frame 1,
+  **-164.8 at frame 60**, -114.1 at 200, with 1, 17 and 57 operations above the
+  stage respectively. `crowd` leaves it on every frame of every arena, spanning
+  x -289.5..1073.3 against a 640-wide stage.
+  ► **THE EXTENTS TABLE IN THIS FILE IS WHAT MISDIRECTED IT, AND IT WAS
+    CORRECT.** It was computed AT FRAME 1 — the one frame where the sky barely
+    leaves the stage — on a surface with 200 of them. **A table computed at one
+    frame is not a table**, and the 17:12 handoff had already written that rule
+    about a different measurement.
+  ► **THE PLAYER'S ANSWER IS A MASK, MEASURED FOUR EDGES AT A TIME.** Varying
+    only Ruffle's `--letterbox` over a probe with one rectangle inside the stage
+    and four outside it: every outside edge reads `#000000` with the letterbox
+    on and its own colour with it off, while the inside control reads `#ffffff`
+    in both. **So a player rasterises out-of-stage content and MASKS it**, and
+    the ARENA page was computing a letterbox in `stageFitFor` and then painting
+    through the bars it had just made. `stageClipRectFor` is the other half;
+    `?clip=0` restores the old picture; the difference is **43,985 px, 6.98% of
+    the page**, against a null control of exactly 0.
+  ► **THE SCREENS PAGE ALREADY KNEW, AND I WROTE A BROADER CLAIM THAN I HAD
+    BEFORE READING IT.** `tools/screens/main.js` has clipped by default since
+    2026-09-14 under its own `?clip=0`, saying so in a docstring — *"THE STAGE
+    CLIP IS ON BY DEFAULT BECAUSE THE PLAYER CLIPS"* — with `magicshop`
+    reaching stage y 929 and `arena_intro` x -1383..1026 beside it. **So the gap
+    was one page, not "the renderer", and what is new here is the MEASUREMENT
+    rather than the conclusion.** I also added a second, unconditional clip to
+    that page, which made its own toggle inert; taken back out the same
+    session.
+  ► **NOT MEASURED, AND SAY SO:** whether the shipped Adobe AIR host (a 640x480
+    stage around this 640x420 one) masks its child. The case does not rest on
+    it — the build's own border art is 732x505 on a 640x420 stage, oversized on
+    every edge, which is a thing you draw only when the overhang is cut off.
+
+► **EVERY GLOW AND EVERY SHADOW IN THE BUILD WAS DRAWN AT TWICE ITS BLUR, BEHIND
+  A CORRECT CITATION OF THE CSS SPECIFICATION.** `canvasFilterFor` handed
+  `drop-shadow` twice the box blur's sigma because the spec defines that third
+  length as a box-shadow radius and a box-shadow radius as twice a standard
+  deviation. **Both clauses are true and Chrome does something else** — one
+  render, one source, three cells: `blur(S)` and `drop-shadow(0 0 S)` reach 5 px
+  and are pixel-identical, `drop-shadow(0 0 2S)` reaches 10. The oracle agrees
+  about which is right: at `blurX` 8 strength 1 it draws `63 39 26 2 0`, we drew
+  `63 52 41 31 23 16 11 7 4 2 1`, and at one sigma we draw `62 38 19 8 2 0`.
+  **The peak was never wrong — 63 against 63. Only the width was.**
+  ► **WHEN YOUR RENDERER AND A SPECIFICATION DISAGREE, RENDER BOTH.** A
+    specification says what a browser SHOULD do.
+  ► **AND `blur()` IS DELIBERATELY UNCHANGED, WHICH IS THE HALF THAT WAS NEARLY
+    GOT WRONG.** Applying the same halving to the sibling branch is the obvious
+    move and it is wrong: `blur(sigma)` is closer to the oracle than
+    `blur(sigma/2)` at all six measured widths. **A correction that fits one
+    branch is not a correction to its sibling** — and only rendering it said so.
+
+► **THE STRENGTH HALF OF EVERY GLOW IS STILL DISCARDED, AND IT IS A SPECIFIED
+  JOB NOW RATHER THAN A QUESTION.** The oracle says a player computes
+  `min(1, blurredAlpha * strength)`: strength 2 draws exactly twice strength 1,
+  and 10 and 16 add a saturated PLATEAU. We emit alpha 1 for every strength at
+  or above 1, so five different strengths draw one row. **The enchantment pack
+  carries strength 2 and 2.796875 over 48 records, so the weapon glow is on
+  screen at between a half and a third of its intended strength.** No single
+  `drop-shadow` can express it; the exact canvas sequence is written out at the
+  `approximated:` marker in `src/render/filters.js`, and `tools/glow-compare/`
+  is its acceptance test. **Do not stack `drop-shadow`s instead** — they
+  composite `source-over`, which is `1 - (1-a)^k` and not `k*a`.
+
+► **THE MUTATION AUDIT CAME BACK OPPOSITE TO ITS OWN PREMISE.** Deferred four
+  times; batch 1 is 27 mutations, **24 KILLED, 3 SURVIVED** (`filters.js` 9/9,
+  `screen.js` 8/9, `props.js` 7/9), against the 2026-09-07 engine audit's 37 of
+  48 SURVIVING. **The render code is among the best-pinned in the repository.**
+  The two survivors worth acting on are both in `src/render/props.js` and both
+  were proved reachable by instrumentation: `:506` (`.every` to `.some`) is
+  executed 10,947 times a run and returns a DIFFERENT value on 5,890 of them
+  with the suite green; `:384` drops blue from `touchesRgb` and never
+  discriminates.
+
+*(The brief it supersedes, whose ranked items 2 and 4 are CLOSED:)*
+[2026-09-15 10:15 — the glow is drawn, and I measured the instrument twice](docs/handoffs/2026-09-15-1015--the-glow-is-drawn-and-i-measured-the-instrument-twice.md).
+*(It supersedes the 07:18 brief, **whose title and ranked item 1 are both
+wrong**; that file is kept only as the record of how.)*
 
 ► **THE FILTERS ARE APPLIED. `screen.js` EMITS 248 GROUPS AND BOTH SHELLS
   COMPOSITE EACH ONE THROUGH ONE OFFSCREEN WITH ONE `ctx.filter`** — never per
@@ -236,13 +325,23 @@ are both wrong**; that file is kept only as the record of how.)*
   exact bytes and written the wrong conclusion beside them. The parameter is
   `ageFrames` now, 0-BASED on purpose where `arrowOpsFor`'s is 1-based.
 
-► **THE FILTERS LEAVE THE EXTRACTORS NOW, AND NOTHING READS THEM.** `props.json`
-  carries 363 effect groups over 3209 placements; `screens.json` carries 276
-  typed filters. **The picture has not changed by one pixel**: `prefixesOf` in
-  `screen.js` reads only `entry.path`, so its output is invariant under those
-  records being correct, garbage or absent. The evidence that CAN vary was
-  measured — `canvasFilterFor` over the real rosters, 0 applied before, **214
-  now**. Ranked first: read them.
+► ~~**THE FILTERS LEAVE THE EXTRACTORS NOW, AND NOTHING READS THEM.**~~
+  **CLOSED — AND `prefixesOf` NO LONGER EXISTS, WHICH THIS PARAGRAPH WENT ON
+  ASSERTING.** `props.json` carries 363 effect groups over 3209 placements;
+  `screens.json` carries 276 typed filters. The diagnosis below was right and is
+  why the work went where it did: ~~`prefixesOf` in `screen.js` reads only
+  `entry.path`, so its output is invariant under those records being correct,
+  garbage or absent~~ — **it was REPLACED on 2026-09-15 by
+  `filterGroupDraftsOf`, and `src/render/screen.js` says so at its own
+  docstring.** The only `prefixesOf` left in that file is the struck sentence
+  recording the deletion. The evidence that CAN vary was measured —
+  `canvasFilterFor` over the real rosters, 0 applied before, **214 now**.
+  ► **CAUGHT 2026-09-15 BY A MUTATION-AUDIT AGENT THAT HAD BEEN BRIEFED THE
+    STALE NAME AND CHECKED IT.** Two more of that brief's premises were mine and
+    also wrong: `groupRunsOf` is in `tools/arena/main.js:2237`, NOT in
+    `src/render/screen.js` as I wrote, and `docs/mutation-audit-2026-09-07.md`'s
+    baseline of 816 describes a tree 2.3x smaller than today's 1889. **Three
+    wrong facts in one brief, all three broken by the agent reading them.**
 
 ► **CORRECTING THE POINTER IS NOT CORRECTING THE POINTEE.** `text.js` struck its
   own copy of the alignment claim and NAMED `tools/screens/main.js` as stale —
@@ -318,13 +417,15 @@ item 2 is HALF closed — the extractors carry the filters, nothing reads them:)
   `filters: true` where the LIST belongs)~~ — both carry them now, 363 effect
   groups over 3209 placements and 276 typed filters respectively, and the arena
   page no longer reports `props: NO filter data in the pack`.
-  ► **BUT NOTHING READS THEM AND THE PICTURE IS UNCHANGED.** `prefixesOf` in
-    `screen.js` reads only `entry.path`, so its output is invariant under those
-    records being correct, garbage or absent — a verifier proved the obvious
-    "did the op count move?" check could not have varied. The evidence that CAN
-    vary: **`canvasFilterFor` over the real rosters, 0 applied before, 214
-    now.** **1525 of `townsquare`'s operations — 93% of that screen — still sit
-    under a FILTERLIST nothing applies.** That is ranked first.
+  ► ~~**BUT NOTHING READS THEM AND THE PICTURE IS UNCHANGED.**~~ **CLOSED, and
+    the function named here is GONE.** ~~`prefixesOf` in `screen.js` reads only
+    `entry.path`, so its output is invariant under those records being correct,
+    garbage or absent~~ — a verifier proved the obvious "did the op count move?"
+    check could not have varied, and the fix **replaced `prefixesOf` with
+    `filterGroupDraftsOf` on 2026-09-15**. Kept for the diagnosis, corrected for
+    the name: citing a deleted function as current is how a reader goes looking
+    for a bug that was fixed. The evidence that CAN vary: **`canvasFilterFor`
+    over the real rosters, 0 applied before, 214 now.**
 
 ► **ASK WHAT YOUR EVIDENCE COULD POSSIBLY VARY OVER.** The sharpest finding of
   two waves. A fold was justified by the operation list for all 26 screens

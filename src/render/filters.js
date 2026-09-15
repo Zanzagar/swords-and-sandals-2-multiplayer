@@ -719,6 +719,51 @@ export function canvasFilterFor(filters, { scale = 1 } = {}) {
         //   or above the clamp with the whole suite green**, and every one of
         //   the enchantment ladder's 24 can. The blur alone was carrying the
         //   distinctness, and the invoice said "approximated" either way.
+        // ► **WHAT `shadowStrengthSaturated` COSTS, MEASURED 2026-09-15, AND
+        //   HOW TO CLOSE IT.** The oracle ladder (`tools/swf-probe.mjs glow`,
+        //   six strengths, one source, `blurX` 8) says a player computes
+        //   `min(1, blurredAlpha * strength)` — blue channel outward from the
+        //   source edge:
+        //
+        // ```text
+        //     strength     0    1    2    3
+        //            1    63   39   26    2
+        //            2   126   78   52    4     <- exactly twice
+        //            4   252  156  104    8
+        //           10   255  255  255   30     <- a saturated PLATEAU
+        //           16   255  255  255   48
+        // ```
+        //
+        //   We emit alpha 1 for every strength at or above 1, so all of those
+        //   draw the `strength 1` row. **The enchantment pack carries strength
+        //   2 and 2.796875 over its 48 records, so the weapon glow is on screen
+        //   at between a half and a third of its intended strength.**
+        //
+        // ► **NO SINGLE `drop-shadow` CAN EXPRESS IT** — the peak is capped at
+        //   alpha 1 — so this is not a radius that can be refitted the way the
+        //   blur one was. It needs the COMPOSITOR, which already renders every
+        //   group to an offscreen (`paintGroupRuns`) and so already has the
+        //   buffer this wants. The exact sequence, which is canvas compositing
+        //   only and needs no per-pixel pass:
+        //
+        //     1. shadow-only: `drop-shadow(0 0 R rgba(255,255,255,1))` over the
+        //        group buffer, then the buffer again at `destination-out` to
+        //        cut the source back out. Leaves a WHITE silhouette whose alpha
+        //        is the blurred alpha.
+        //     2. amplify: draw that silhouette `ceil(strength)` times at
+        //        `lighter`, the last at `globalAlpha = strength % 1`. Additive
+        //        compositing clamps at 1, so the alpha is exactly
+        //        `min(1, blurredAlpha * strength)`. White stays white, so
+        //        un-premultiplying does not drift.
+        //     3. colourise: `source-in` and fill the region with the glow
+        //        colour. Colour `c` at the amplified alpha — Flash's formula.
+        //     4. draw it UNDER the group buffer.
+        //
+        //   **Do not approximate this by stacking `drop-shadow`s instead.**
+        //   Stacking composites `source-over`, which gives `1 - (1-a)^k` and
+        //   not `k*a`; it looks closer and is a different curve. The `lighter`
+        //   step above is an identity, not a fit, and `tools/glow-compare/` is
+        //   the acceptance test — the two profiles should agree row for row.
         approximated: strength === 1
           ? "boxBlurAsGaussian"
           : (alpha >= 1 ? "shadowStrengthSaturated" : "shadowStrengthAsAlpha")
