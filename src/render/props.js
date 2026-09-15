@@ -224,7 +224,8 @@ import {
   blendModeFor,
   canvasFilterFor,
   colourMatrixIsFillExact,
-  colourTransformFrom
+  colourTransformFrom,
+  glowAmplificationFor,
 } from "./filters.js";
 
 export class PropsError extends Error {
@@ -492,6 +493,11 @@ function effectGroupEntryFor(prop, id, cache, scale, invoice, records) {
       enclosedBy: null,
       // The blur/glow string only. Never a colour matrix — see the header.
       filter: built.filter,
+      // ► **THE AMPLIFIED PLAN TRAVELS BESIDE THE STRING, NEVER INSTEAD OF IT.**
+      //   `null` for all but a saturating glow list, and a painter that does not
+      //   know the field keeps drawing exactly what it drew before. See
+      //   `glowAmplificationFor` for what it describes and why it declines.
+      amplify: glowAmplificationFor(group.filters ?? [], { scale }),
       composite: blends && !blend.refused ? blend.composite : null,
       blendModeRefused: blend?.refused ?? null,
       colourMatricesFolded: built.colourMatrices.length,

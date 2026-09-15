@@ -36,6 +36,9 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   IDENTITY_COLOUR_TRANSFORM,
@@ -47,6 +50,7 @@ import {
   SHADOW_RADIUS_PER_SIGMA,
   SS2_MEASURED_GLOW_EXTENTS,
   blurSigma,
+  glowAmplificationFor,
   canvasFilterFor,
   colourMatrixFilterString,
   colourMatrixFrom,
@@ -866,3 +870,93 @@ test("THE SATURATION SPLIT NAMES THREE DIFFERENT LOSSES, at the boundary and eit
   assert.equal(two, nearlyThree,
     "the two enchantment strengths now differ — if this fails, the amplified glow landed and this test states the OLD behaviour");
 });
+
+/* ------------------------------------------------------------------ *
+ * The amplified glow — what `drop-shadow` cannot express.
+ * ------------------------------------------------------------------ */
+
+test("A SATURATING GLOW GETS A PLAN, and repeats plus lastAlpha ARE the strength", () => {
+  // ► **THE ONE PROPERTY THE WHOLE SEQUENCE RESTS ON.** `repeats - 1` full
+  //   additive draws plus one at `lastAlpha` must sum to the strength exactly,
+  //   because `lighter` sums premultiplied channels and clamps at 1 — so the
+  //   alpha that comes out is `min(1, blurredAlpha * sum)`. If the sum drifts,
+  //   the identity becomes a fit and this file's own header forbids that.
+  for (const strength of [1, 2, 2.796875, 4, 10, 16]) {
+    const plan = glowAmplificationFor([glowRecord({ blurX: 8, blurY: 8, strength, distance: 0, angle: 0 })]);
+    assert.ok(plan, `strength ${strength} produced no plan`);
+    assert.equal(plan.steps.length, 1);
+    const [step] = plan.steps;
+    assert.ok(step.repeats >= 1 && Number.isInteger(step.repeats), `repeats ${step.repeats} is not a positive integer`);
+    assert.ok(step.lastAlpha > 0 && step.lastAlpha <= 1, `lastAlpha ${step.lastAlpha} is outside (0, 1]`);
+    assert.ok(Math.abs((step.repeats - 1 + step.lastAlpha) - strength) < 1e-3,
+      `${step.repeats - 1} + ${step.lastAlpha} is not ${strength}`);
+    // An integer strength must not spend a final draw at zero alpha.
+    if (Number.isInteger(strength)) assert.equal(step.lastAlpha, 1, `strength ${strength} wastes a composite`);
+    // The silhouette is WHITE — the only colour whose premultiplied channels
+    // equal its alpha, which is what keeps the additive step from shifting hue.
+    assert.match(step.silhouette, /rgba\(255, 255, 255, 1\)\)$/, "the silhouette is not white");
+  }
+});
+
+test("A GLOW BELOW THE CLAMP IS DECLINED, because the existing path is already exact there", () => {
+  // Below the clamp `alpha = colourAlpha * strength` never saturates, so
+  // `drop-shadow` draws `blurredAlpha * strength` — the right answer. Planning
+  // it anyway would change the render path of 100+ filters for no gain.
+  for (const strength of [0.01953125, 0.296875, 0.5, 0.98828125]) {
+    assert.equal(glowAmplificationFor([glowRecord({ blurX: 8, blurY: 8, strength, distance: 0, angle: 0 })]), null,
+      `strength ${strength} was planned, and it does not need to be`);
+  }
+  // And a strength of exactly 1 sits AT the clamp: planned, because it is the
+  // null control that proves the sequence reproduces the old path.
+  assert.ok(glowAmplificationFor([glowRecord({ blurX: 8, blurY: 8, strength: 1, distance: 0, angle: 0 })]));
+});
+
+test("A MIXED LIST IS DECLINED BY NAME, rather than half-applied", () => {
+  // ► **THE DECLINE IS THE DESIGN, not a gap.** A glow beside a blur or a
+  //   colour matrix composes in an order this sequence does not model, and
+  //   guessing at it would trade a COUNTED loss (`shadowStrengthSaturated`)
+  //   for an uncounted one. Measured over the packs: 44 lists mix a saturating
+  //   glow with something else and land here.
+  const glow = glowRecord({ blurX: 8, blurY: 8, strength: 10, distance: 0, angle: 0 });
+  assert.equal(glowAmplificationFor([glow, blurRecord(4)]), null, "glow + blur must decline");
+  assert.equal(glowAmplificationFor([glow, { type: "bevel" }]), null, "glow + bevel must decline");
+  assert.equal(glowAmplificationFor([{ ...glow, inner: true }]), null, "an INNER glow must decline");
+  assert.equal(glowAmplificationFor([{ ...glow, knockout: true }]), null, "a KNOCKOUT glow must decline");
+  assert.equal(glowAmplificationFor([]), null, "an empty list has nothing to amplify");
+  // A zero-radius blur draws nothing, so it does not disqualify the list.
+  assert.ok(glowAmplificationFor([glow, blurRecord(0)]), "a NO-OP blur must not decline the list");
+});
+
+test("THE ENCHANTMENT'S PAIR BOTH PLAN, in the build's own order and colours", () => {
+  // ► **THE FLAGSHIP CASE, AND IT IS A PAIR RATHER THAN ONE GLOW.** Each of the
+  //   12 enchantment art frames carries a list of TWO saturating glows. Flash
+  //   applies a list in order, each filter to the accumulated bitmap, so the
+  //   plan must carry two steps in that order — a single-glow shortcut would
+  //   silently drop the second colour.
+  const pack = readEnchantmentPack();
+  if (!pack) {
+    assert.equal(pack, null, "no extracted enchantment pack on this machine");
+    return;
+  }
+  const withFilters = (pack.art?.frames ?? []).filter((frame) => Array.isArray(frame.filters) && frame.filters.length > 0);
+  assert.equal(withFilters.length, 12, "the ladder is twelve cells");
+  for (const frame of withFilters) {
+    assert.equal(frame.filters.length, 2, "each cell carries a PAIR of glows");
+    const plan = glowAmplificationFor(frame.filters);
+    assert.ok(plan, "the enchantment pair produced no plan");
+    assert.equal(plan.steps.length, 2, "both glows must become steps, in order");
+    assert.deepEqual(plan.steps.map((step) => step.colour),
+      frame.filters.map((f) => `rgba(${f.colour.red}, ${f.colour.green}, ${f.colour.blue}, 1)`),
+      "the steps' colours are not the record's, in order");
+  }
+});
+
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+function readEnchantmentPack() {
+  const at = path.join(REPO_ROOT, "assets", "figure", "enchantments.json");
+  const anchor = path.join(REPO_ROOT, "tools", "extract-enchantments.mjs");
+  assert.ok(fs.existsSync(anchor),
+    `${anchor} is not there, so REPO_ROOT is wrong and "no pack on this machine" would be a broken derivation`);
+  return fs.existsSync(at) ? JSON.parse(fs.readFileSync(at, "utf8")) : null;
+}

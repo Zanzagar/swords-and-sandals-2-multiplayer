@@ -379,7 +379,8 @@ import {
   applyColourTransform,
   applyColourTransformAlpha,
   canvasFilterFor,
-  colourTransformFrom
+  colourTransformFrom,
+  glowAmplificationFor,
 } from "./filters.js";
 
 /** Never thrown by a reader. Exported so a caller can name the type it isn't getting. */
@@ -1930,6 +1931,11 @@ function filterGroupsOf(drafts, ops, screen, approximations) {
       // string at its own scale — see decision 3 in the header.
       filters: draft.filters,
       filter: built.filter,
+      // ► **THE AMPLIFIED PLAN TRAVELS BESIDE THE STRING, NEVER INSTEAD OF IT.**
+      //   `null` for all but a saturating glow list, and a painter that does not
+      //   know the field keeps drawing exactly what it drew before. See
+      //   `glowAmplificationFor` for what it describes and why it declines.
+      amplify: glowAmplificationFor(draft.filters, { scale: 1 }),
       applied: built.applied,
       deferred: built.deferred,
       noOps: built.noOps,

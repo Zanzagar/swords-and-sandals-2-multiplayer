@@ -2182,6 +2182,9 @@ const GROUP_COMPOSITING = params.get("groups") !== "0";
 // `?clip=0` restores the pre-2026-09-15 picture: the stage letterboxed and
 // every painter drawing straight through the bars. See `render`.
 const STAGE_CLIP = params.get("clip") !== "0";
+// `?amplify=0` restores the pre-2026-09-15 glow: `ctx.filter` alone, with every
+// strength at or above the clamp drawing identically. See `amplifyGlows`.
+const GLOW_AMPLIFY = params.get("amplify") !== "0";
 
 /**
  * One frame's worth of what the compositor did, accumulated by
@@ -2209,6 +2212,13 @@ const groupPaint = {
   // but it is the one branch that draws NOTHING, so it is counted rather than
   // trusted.
   offscreen: 0,
+  // ► **WHAT THE STRING PATH COULD NOT DRAW AND THE SEQUENCE DID.** Counted
+  //   rather than assumed, because "the amplified glow is wired in" and "a
+  //   frame reached one" are different claims and this file has shipped the
+  //   first while the second was false before. A frame with an enchanted
+  //   gladiator should report a non-zero here; one without should report 0.
+  glowAmplifiedGroups: 0,
+  glowsAmplified: 0,
   // THE APPROXIMATIONS.
   groupsSplit: 0,
   groupsNested: 0,
@@ -2557,6 +2567,121 @@ function groupCompositingAvailable() {
  *                          device scale
  * @param {Function} drawOne  draws one operation into the current `context`
  */
+/**
+ * A pool of scratch surfaces for the amplified-glow sequence, one per NAME per
+ * depth — nested groups composite while an outer one is outstanding, so sharing
+ * by name alone would let the inner pass clear the outer pass's working copy.
+ */
+const glowScratch = new Map();
+
+function glowScratchAt(name, depth, width, height) {
+  const key = `${name}:${depth}`;
+  let found = glowScratch.get(key);
+  if (!found) {
+    const element = document.createElement("canvas");
+    found = { canvas: element, context: element.getContext("2d") };
+    glowScratch.set(key, found);
+  }
+  const wanted = Math.max(1, Math.ceil(width));
+  const tall = Math.max(1, Math.ceil(height));
+  if (found.canvas.width !== wanted || found.canvas.height !== tall) {
+    found.canvas.width = wanted;
+    found.canvas.height = tall;
+  } else {
+    found.context.setTransform(1, 0, 0, 1, 0, 0);
+    found.context.clearRect(0, 0, wanted, tall);
+  }
+  found.context.setTransform(1, 0, 0, 1, 0, 0);
+  found.context.globalAlpha = 1;
+  found.context.globalCompositeOperation = "source-over";
+  found.context.filter = "none";
+  return found;
+}
+
+/**
+ * THE GLOW A PLAYER DRAWS, RUN ON A COMPOSITED GROUP BUFFER.
+ *
+ * ► **THIS FILE HOLDS THE DRAWING AND NONE OF THE DECIDING**, which is the rule
+ *   the living head keeps restating: `tools/arena/main.js` cannot be imported
+ *   by node, so anything decided here is unreachable by the suite, and five
+ *   live defects have come out of that arrangement. Every number below —
+ *   which filters amplify, how many additive draws, the final draw's alpha, the
+ *   silhouette's own radius and the colour — is computed by
+ *   `glowAmplificationFor` in `src/render/filters.js` and pinned there.
+ *
+ * ► **THE SEQUENCE IS AN IDENTITY, NOT A FIT, and the verification is on
+ *   disk.** `tools/glow-compare/amplified.html` runs these same four steps on
+ *   the six-strength ladder `tools/swf-probe.mjs` hands Ruffle. Measured, blue
+ *   channel outward from the source edge, strength 1 / 2 / 4:
+ *
+ * ```text
+ *     oracle   63 39 26 2  |  126 78 52 4  |  252 156 104 8
+ *     ours     62 38 19 8  |  124 76 38 16 |  248 152  76 32
+ * ```
+ *
+ *   The peaks agree to within 1.6% and the doubling is exact, which is the
+ *   strength. What remains is the box-versus-Gaussian tail that
+ *   `boxBlurAsGaussian` has always counted — multiplied faithfully rather than
+ *   introduced here.
+ *
+ * ► **STRENGTH 1 IS THE NULL CONTROL.** At strength 1 the old string path is
+ *   already exact, and the plan there is a single draw at full alpha; both
+ *   render `62 38 19 8 2`, identically. A sequence that changed that number
+ *   would be wrong before it ever reached a saturating glow.
+ *
+ * Returns the surface to draw, or `null` when there is nothing to amplify — so
+ * a caller that ignores the return keeps its previous behaviour exactly.
+ */
+function amplifyGlows(source, region, plan) {
+  const steps = plan?.steps;
+  if (!Array.isArray(steps) || steps.length === 0) return null;
+  const width = region.width;
+  const height = region.height;
+  if (!(width > 0) || !(height > 0)) return null;
+
+  // The bitmap each filter applies to. Flash walks a filter list in order, each
+  // filter over the accumulated result, so this is reassigned per step rather
+  // than every step reading the original.
+  let current = glowScratchAt("current", groupDepth, width, height);
+  current.context.drawImage(source, 0, 0);
+
+  for (const step of steps) {
+    // 1. SILHOUETTE — white, because white is the only colour whose
+    //    premultiplied channels equal its alpha, so the additive step cannot
+    //    shift a hue.
+    const silhouette = glowScratchAt("silhouette", groupDepth, width, height);
+    silhouette.context.filter = step.silhouette;
+    silhouette.context.drawImage(current.canvas, 0, 0);
+    silhouette.context.filter = "none";
+
+    // 2. AMPLIFY — `lighter` sums premultiplied channels and clamps at 1, so
+    //    the alpha out is exactly min(1, blurredAlpha * strength).
+    const accumulator = glowScratchAt("accumulator", groupDepth, width, height);
+    accumulator.context.globalCompositeOperation = "lighter";
+    for (let draw = 0; draw < step.repeats; draw += 1) {
+      accumulator.context.globalAlpha = draw === step.repeats - 1 ? step.lastAlpha : 1;
+      accumulator.context.drawImage(silhouette.canvas, 0, 0);
+    }
+    accumulator.context.globalAlpha = 1;
+
+    // 3. COLOURISE — which also erases the source's own colours, which rode
+    //    along inside the silhouette and are not wanted in the glow.
+    accumulator.context.globalCompositeOperation = "source-in";
+    accumulator.context.fillStyle = step.colour;
+    accumulator.context.fillRect(0, 0, width, height);
+    accumulator.context.globalCompositeOperation = "source-over";
+
+    // 4. UNDER — the glow, then the bitmap that cast it, on top.
+    const next = glowScratchAt("next", groupDepth, width, height);
+    next.context.drawImage(accumulator.canvas, 0, 0);
+    next.context.drawImage(current.canvas, 0, 0);
+    const held = glowScratchAt("held", groupDepth, width, height);
+    held.context.drawImage(next.canvas, 0, 0);
+    current = held;
+  }
+  return current;
+}
+
 function paintGroupRuns(ops, route, drawOne) {
   const plan = groupRunsOf(ops);
   groupPaint.ops += plan.tally.ops;
@@ -2606,6 +2731,24 @@ function paintGroupRuns(ops, route, drawOne) {
 
     groupPaint.buffers += 1;
     groupPaint.bufferedOps += run.to - run.from;
+
+    // ► **A SATURATING GLOW IS DRAWN, NOT DESCRIBED.** `ctx.filter` cannot
+    //   express a SWF glow's `strength` — the whole loss ranked first in the
+    //   2026-09-15 handoff — so when `src/render/filters.js` hands back a plan,
+    //   the sequence below runs instead of the filter string. `amplifyGlows`
+    //   returns the canvas to draw; when there is no plan it returns null and
+    //   the string path below is untouched.
+    //   The composite below then sets `context.filter` only when there is NO
+    //   plan: the sequence has already drawn the blur, so applying the string
+    //   as well would blur the result a second time.
+    const amplified = run.group.amplify && GLOW_AMPLIFY
+      ? amplifyGlows(buffer.canvas, region, run.group.amplify)
+      : null;
+    if (amplified) {
+      groupPaint.glowsAmplified += run.group.amplify.steps.length;
+      groupPaint.glowAmplifiedGroups += 1;
+    }
+
     context.save();
     // ► **IDENTITY, WHICH IS WHAT MAKES THE UNMEASURED SCALE HYPOTHESIS STOP
     //   MATTERING.** Whether a browser measures `ctx.filter` in user units or
@@ -2614,10 +2757,10 @@ function paintGroupRuns(ops, route, drawOne) {
     //   device scale, which is `route.filtersScaled` above.
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.globalAlpha = 1;
-    if (run.group.filter) context.filter = run.group.filter;
+    if (run.group.filter && !amplified) context.filter = run.group.filter;
     if (run.group.composite) context.globalCompositeOperation = run.group.composite;
     context.drawImage(
-      buffer.canvas, 0, 0, region.width, region.height,
+      (amplified ?? buffer).canvas, 0, 0, region.width, region.height,
       region.x, region.y, region.width, region.height
     );
     context.restore();
@@ -2774,6 +2917,13 @@ function reportGroupPaint() {
     `${groupPaint.buffers} buffered (${groupPaint.bufferedOps} ops).`);
   log(`groups: ${groupPaint.inert} matrix-only (already folded), ${groupPaint.offscreen} off-canvas, ` +
     `${groupPaint.direct} run(s) straight, ${groupPaint.boxClamped} buffer(s) clipped by the canvas.`);
+  // ► **PRINTED EVEN WHEN ZERO, because zero is the answer that matters.** A
+  //   frame with no enchanted gladiator reaches no amplified glow and should
+  //   say 0; one with a glowing weapon should not. "It is wired in" and "a
+  //   frame reached it" are different claims and this file has shipped the
+  //   first while the second was false.
+  log(`groups: ${groupPaint.glowAmplifiedGroups} group(s) drew an AMPLIFIED glow ` +
+    `(${groupPaint.glowsAmplified} step(s)) — what \`ctx.filter\` cannot express.`);
   const lost = groupPaint.groupsSplit + groupPaint.groupsNested
     + groupPaint.groupsBlendRefused + groupPaint.boxUnknown
     + groupPaint.filterAtStageScale + groupPaint.notComposited;

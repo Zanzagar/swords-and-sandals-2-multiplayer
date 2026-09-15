@@ -367,7 +367,9 @@
  * back.
  */
 
-import { canvasFilterFor } from "./filters.js";
+import { canvasFilterFor,
+  glowAmplificationFor,
+} from "./filters.js";
 import { screenFor, screenNames } from "./screen.js";
 import {
   TWIPS_PER_PIXEL,
@@ -944,6 +946,11 @@ function filterStagesFor(base, options) {
       // The records verbatim, so a painter rebuilds the string at its own scale.
       filters: Object.freeze([...(Array.isArray(group.filters) ? group.filters : [])]),
       filter: built.filter,
+      // ► **THE AMPLIFIED PLAN TRAVELS BESIDE THE STRING, NEVER INSTEAD OF IT.**
+      //   `null` for all but a saturating glow list, and a painter that does not
+      //   know the field keeps drawing exactly what it drew before. See
+      //   `glowAmplificationFor` for what it describes and why it declines.
+      amplify: glowAmplificationFor(group.filters, { scale: 1 }),
       applied: built.applied,
       deferred: built.deferred,
       noOps: built.noOps,

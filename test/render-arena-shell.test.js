@@ -1514,10 +1514,20 @@ test("the shell composites at the IDENTITY transform, and sets no filter per ope
   assert.ok(code.includes(
     "    context.setTransform(1, 0, 0, 1, 0, 0);\n"
     + "    context.globalAlpha = 1;\n"
-    + "    if (run.group.filter) context.filter = run.group.filter;\n"
+    + "    if (run.group.filter && !amplified) context.filter = run.group.filter;\n"
     + "    if (run.group.composite) context.globalCompositeOperation = run.group.composite;\n"
     + "    context.drawImage("
   ), "the composite is identity-transformed, then filtered, then blended, then drawn");
+
+  // ► **`&& !amplified` IS THE ONE CHANGE THIS LINE HAS TAKEN, AND IT IS LOAD-
+  //   BEARING.** When `glowAmplificationFor` returns a plan, the sequence in
+  //   `amplifyGlows` has ALREADY applied the blur; setting the string as well
+  //   would blur the composite a second time. The order this test exists to
+  //   pin — identity, then filter, then blend, then draw — is untouched.
+  assert.ok(code.includes("      ? amplifyGlows(buffer.canvas, region, run.group.amplify)\n"),
+    "the amplified path is taken from the group's own plan, not decided in the shell");
+  assert.equal(countOf(code, "glowAmplificationFor"), 0,
+    "the SHELL must not decide which glows amplify — that is filters.js's, where the suite reaches it");
 
   // ► **AND THE FILTER IS SET NOWHERE ELSE THAT COULD REACH AN OPERATION.**
   //   `context.filter` appears in the probe (which draws into its own save/

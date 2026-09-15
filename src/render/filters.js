@@ -591,6 +591,126 @@ function rgbaOf(colour, alpha) {
 }
 
 /**
+ * THE GLOW A PLAYER ACTUALLY DRAWS, AS A SEQUENCE OF CANVAS OPERATIONS.
+ *
+ * ► **WHY A PLAN AND NOT A FILTER STRING.** A SWF glow computes
+ *   `alphaOut = min(1, blur(sourceAlpha) * strength)`. CSS `drop-shadow` can
+ *   only fold `strength` into the shadow COLOUR's alpha, which clamps at 1 — so
+ *   every strength at or above the clamp emits the same string and draws the
+ *   same pixels. Measured under Ruffle at `blurX` 8, blue channel outward from
+ *   the source edge:
+ *
+ * ```text
+ *     strength     0    1    2    3
+ *            1    63   39   26    2
+ *            2   126   78   52    4     <- exactly twice
+ *            4   252  156  104    8
+ *           10   255  255  255   30     <- a saturated PLATEAU
+ *           16   255  255  255   48
+ * ```
+ *
+ *   **No single `drop-shadow` can express that**: the peak is capped at alpha 1.
+ *   The build carries 304 filters at strength 10 and 68 at 2 or 2.796875, and
+ *   every one of the enchantment ladder's 24 saturates — so the weapon glow
+ *   ships at between a half and a third of its intended strength.
+ *
+ * ## The sequence, and why each step is exact rather than fitted
+ *
+ * Given a canvas holding the bitmap the filter applies to:
+ *
+ * 1. **Silhouette.** Draw it under `drop-shadow(0 0 R rgba(255,255,255,1))`.
+ *    The result's alpha is the blurred alpha; **white is not a cosmetic
+ *    choice** — it is the only colour whose premultiplied channels equal its
+ *    alpha, so the additive step below cannot distort a hue.
+ * 2. **Amplify.** Draw that silhouette `repeats` times with
+ *    `globalCompositeOperation = "lighter"`, the last at
+ *    `globalAlpha = lastAlpha`. Additive compositing sums premultiplied
+ *    channels and clamps at 1, so the alpha that comes out is exactly
+ *    `min(1, blurredAlpha * strength)`. **This is an identity, not an
+ *    approximation** — which is the whole reason it is allowed here.
+ * 3. **Colourise.** `globalCompositeOperation = "source-in"` and fill the
+ *    region with `colour`. Colour `c` at the amplified alpha, which is Flash's
+ *    formula.
+ * 4. **Under.** Draw the glow, then the original bitmap on top of it.
+ *
+ * ► **DO NOT STACK `drop-shadow`s INSTEAD.** They composite `source-over`,
+ *   which gives `1 - (1-a)^k`, not `k*a`. It looks closer and is a different
+ *   curve, and "repeat it until it looks right" is what the handoff that
+ *   ranked this work forbade in as many words.
+ *
+ * ## When it declines, and that is most of the build
+ *
+ * A plan is returned ONLY when every filter the list APPLIES is a glow or
+ * shadow whose alpha has reached the clamp. Mixed lists — a glow beside a blur,
+ * or beside a colour matrix — keep the existing single-string path, because the
+ * two mechanisms compose in an order this does not model and guessing at it
+ * would trade a counted loss for an uncounted one. Measured over the packs:
+ * **370 lists are a single saturating glow alone and 24 are the enchantment's
+ * pair (both saturating); 44 mix a saturating glow with something else and are
+ * declined.**
+ *
+ * `null` means "use `filter`", and `shadowStrengthSaturated` keeps counting the
+ * loss for every list that lands there.
+ *
+ * @param {object[]} filters  records from `parseFilterList`
+ * @param {object} options
+ * @param {number} options.scale  stage-to-canvas scale, as `canvasFilterFor`
+ */
+export function glowAmplificationFor(filters, { scale = 1 } = {}) {
+  const list = Array.isArray(filters) ? filters : [];
+  const factor = Number.isFinite(scale) && scale > 0 ? scale : 1;
+  const steps = [];
+
+  for (const filter of list) {
+    const type = filter?.type;
+    // A no-op contributes nothing to the picture either way, so it does not
+    // disqualify a list — but it does not become a step either.
+    if (type === "blur") {
+      const sigma = (blurSigma(filter.blurX, filter.passes) + blurSigma(filter.blurY, filter.passes)) / 2;
+      if (sigma <= 0) continue;
+      return null;
+    }
+    if (type !== "glow" && type !== "dropShadow") {
+      if (type === "colourMatrix" && isIdentityColourMatrix(colourMatrixFrom(filter) ?? [])) continue;
+      return null;
+    }
+    if (filter.inner || filter.knockout || filter.compositeSource === false) return null;
+
+    const strength = Number.isFinite(filter.strength) ? filter.strength : 1;
+    const colour = filter.colour ?? { red: 0, green: 0, blue: 0, alpha: 255 };
+    const colourAlpha = (Number.isFinite(colour.alpha) ? colour.alpha : 255) / 255;
+    const alpha = colourAlpha * strength;
+    if (alpha <= 0) continue;            // counted as a no-op by canvasFilterFor
+    if (alpha < 1) return null;          // already exact through the alpha channel
+
+    const sigma = (blurSigma(filter.blurX, filter.passes) + blurSigma(filter.blurY, filter.passes)) / 2;
+    const angle = Number.isFinite(filter.angle) ? filter.angle : 0;
+    const distance = Number.isFinite(filter.distance) ? filter.distance : 0;
+
+    // ► **`repeats` AND `lastAlpha` TOGETHER ARE THE STRENGTH, EXACTLY.**
+    //   `repeats - 1` full draws plus one at `lastAlpha` sum to `alpha`. An
+    //   integer strength gets `lastAlpha` 1 rather than 0, because a final
+    //   draw at zero alpha is a wasted composite and `ceil` would otherwise
+    //   make 2 into three draws.
+    const repeats = Math.ceil(alpha);
+    const lastAlpha = alpha - (repeats - 1);
+    steps.push(Object.freeze({
+      kind: "amplifiedGlow",
+      silhouette:
+        `drop-shadow(${length(Math.cos(angle) * distance * factor)}px ` +
+        `${length(Math.sin(angle) * distance * factor)}px ` +
+        `${length(SHADOW_RADIUS_PER_SIGMA * sigma * factor)}px rgba(255, 255, 255, 1))`,
+      repeats,
+      lastAlpha: Math.round(lastAlpha * 10000) / 10000,
+      colour: `rgba(${colour.red | 0}, ${colour.green | 0}, ${colour.blue | 0}, 1)`,
+      strength
+    }));
+  }
+
+  return steps.length > 0 ? Object.freeze({ steps: Object.freeze(steps) }) : null;
+}
+
+/**
  * A FILTERLIST as a canvas `ctx.filter` string, with everything it could not
  * express reported by name.
  *
