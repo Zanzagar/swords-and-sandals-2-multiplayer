@@ -3773,33 +3773,30 @@ if (ENCHANT_DEMO) {
     `potency ${fields.secondary_weapon_enchantment_potency}. ` +
     "THE ENGINE PRODUCED NONE OF IT — a screenshot of this is not evidence about a battle.",
   { warn: true });
-  // ► **AND IT HANGS A HEADLESS RENDER. MEASURED 2026-09-15, CAUSE NOT FOUND.**
-  //   With a glow resolved, `?enchant=3.2` never finishes a headless screenshot:
-  //   `seed=7&perSide=1&seam=1` alone shoots in **3 seconds**, and the same URL
-  //   plus `enchant=3.2` is killed at 100s, 140s and 280s timeouts alike. The
-  //   wall time is IDENTICAL at `--virtual-time-budget` 1200, 2500 and 6000,
-  //   which is what says it is a hang and not a per-frame cost — a cost would
-  //   scale with the budget. `?groups=0` beside it renders normally, so it is
-  //   the compositing branch and not the glow's arithmetic.
+  // ► **IT COSTS ~4x A FRAME, AND `tools/shot.sh` CANNOT SHOOT IT — BUT IT DOES
+  //   NOT HANG, AND THE FIRST VERSION OF THIS COMMENT SAID IT DID.** Measured
+  //   2026-09-15 over CDP: the arena runs at **15.51 fps with the glow against
+  //   60.16 without** (64.5ms against 16.6ms a frame, two enchanted gladiators,
+  //   headless software rendering), and a CPU profile puts **95.8% of samples in
+  //   `(program)`** — native rasterisation, not script.
   //
-  //   **The geometry is NOT the cause and that is measured, not assumed.** The
-  //   shell's own `groupRunsOf`/`runBoxOf`/`filterBleedOf`/`bufferRegionOf`,
-  //   lifted into node and run over the real ops at the real CTM, give one
-  //   buffered run of 19 ops, box 538.2..725.2 x 391.5..475.4, bleed 28.2103,
-  //   region 244x141 UNCLAMPED, filter
-  //   `drop-shadow(0px 0px 2.6625px rgba(0, 204, 255, 1)) drop-shadow(0px 0px 5.4076px rgba(0, 0, 153, 1))`.
-  //   Everything node can see is sane, so whatever hangs is a canvas call node
-  //   cannot reach.
+  //   What stalls is `--virtual-time-budget`, which `tools/shot.sh` drives
+  //   Chrome with and which does not advance while a filtered composite is
+  //   outstanding. **A `FAILED` from `tools/shot.sh` is evidence about the
+  //   screenshot mode, not about this page.** `tools/shot-live.sh` shoots it in
+  //   real time and freezes at a frame number so two shots can be differenced.
   //
-  //   **It is confined to this flag.** `tools/arena/roster.js` and
-  //   `src/team/ss2-rules.js` both default `weapon_enchantment_type: 0`, so no
-  //   gladiator the engine produces carries an enchantment and no ordinary bout
-  //   can reach this path. That is why the feature ships rather than being
-  //   reverted — and why this warning is here rather than in a handoff nobody
-  //   opens while using the flag.
-  log("enchant: WARNING — a headless screenshot of this URL does not finish (3s without the glow, " +
-    "killed at 280s with it), and the wall time does not move with --virtual-time-budget, so it is a " +
-    "HANG and not a cost. Add ?groups=0 to shoot it. Cause not found; the box math is measured sane.",
+  //   **The glow is on screen and is the right colour for all four types** —
+  //   Flame R +64.6, Frost B +45.4, Poison G +37.9, Wraith neutral, each
+  //   dominant channel matching its own glow record, against a null control of
+  //   zero differing pixels.
+  //
+  //   The 4x is still a real cost and reducing it is open work; the buffer is
+  //   only 244x141, so the expense is the two `drop-shadow` passes themselves.
+  log("enchant: the glow costs about 4x a frame — 15.5 fps against 60.2 measured headless, 95.8% of " +
+    "it native rasterisation. tools/shot.sh CANNOT shoot this page (its --virtual-time-budget never " +
+    "advances while a filtered composite is outstanding); use tools/shot-live.sh, which shoots in real " +
+    "time and freezes at a frame number so two shots can be differenced.",
   { warn: true });
   if (!ENCHANT_DEMO.complete) {
     log("enchant: no potency given, so it is 0 — outside 1..3 the build calls gotoAndStop zero times and " +

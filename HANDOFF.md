@@ -34,21 +34,53 @@ Start there.
   against. Counted as `groupsMatrixOnlyWithFilteredDescendant` rather than
   guessed at; closing it needs `getImageData` or an inline SVG filter.
 
-► **THE RENDERER READS THEM NOW — AND THE ONE GROUP THAT REACHES A GLADIATOR
-  HANGS A HEADLESS RENDER, CAUSE NOT FOUND. RANKED FIRST.**
-  `paintExtractedFigure` interns one frozen record per group per paint and hangs
-  it on `op.group`, so the shell's existing `groupRunsOf`/`paintGroupRuns`
-  composite it. **`?enchant=3.2` never finishes a screenshot**: the same URL
-  without it shoots in 3 seconds and with it is killed at 100s, 140s and 280s —
-  **and the wall time does not move with `--virtual-time-budget`, which is what
-  says HANG rather than cost.** `?groups=0` beside it renders fine.
-  **The geometry is measured sane and is not the cause**: the shell's own
-  functions lifted into node give one buffered run of 19 ops, region 244x141
-  unclamped, a two-`drop-shadow` filter string. Whatever hangs is a canvas call
-  node cannot reach. **Confined to the `?enchant=` demo flag** — the roster and
-  `src/team/ss2-rules.js` both default `weapon_enchantment_type: 0`, so no bout
-  can reach it — which is why it ships with the warning printed at the flag
-  rather than reverted.
+► **THE RENDERER READS THEM NOW, AND THE WEAPON ENCHANTMENT IS ON SCREEN —
+  MEASURED, FOUR TYPES, FOUR COLOURS.** `paintExtractedFigure` interns one
+  frozen record per group per paint and hangs it on `op.group`, so the shell's
+  existing `groupRunsOf`/`paintGroupRuns` composite it. Differencing two shots
+  frozen at the same frame, canvas only, against `?groups=0`:
+
+```text
+  type 2  Flame   #ffcc00/#ff0000   R +64.6   G  +5.0   B -15.9    1586 movers
+  type 3  Frost   #00ccff/#000099   R -17.1   G  +5.6   B +45.4    1456
+  type 4  Poison  #00ff00/#006600   R -19.7   G +37.9   B -20.0    1188
+  type 5  Wraith  #cccccc/#000000   R +11.2   G  +7.7   B  +9.0    1042
+```
+
+  **Each dominant channel is that enchantment's own colour**, and the ladder
+  that picked the frame came from the AVM1 bytes while the colour came from the
+  render — two independent derivations agreeing. Wraith is the one that would
+  read as noise on hue alone; **the null control is exactly 0 pixels and two
+  byte-identical files**, so it is not noise.
+
+► ~~**IT HANGS A HEADLESS RENDER, CAUSE NOT FOUND.**~~ **WRONG, AND I PUBLISHED
+  IT. CORRECTED THE SAME SESSION.** The page does not hang. A CPU profile over
+  CDP puts **95.8% of samples in `(program)`** — native rasterisation, not
+  script — with `drawImage`, `fill` and the page's own `frame`/`render` all
+  ticking; measured in real time it runs at **15.51 fps against 60.16 without
+  the glow** (64.5ms against 16.6ms a frame). What stalls is
+  `--virtual-time-budget`, which is what `tools/shot.sh` drives Chrome with and
+  which does not advance while a filtered composite is outstanding.
+  ► **MY EVIDENCE FOR "HANG" WAS THAT THE WALL TIME DID NOT MOVE WITH THE
+    BUDGET. That was real and my inference from it was not** — it says virtual
+    time is not advancing, which is a fact about the SCREENSHOT MODE, not about
+    the page. **A `FAILED` from `tools/shot.sh` is evidence about the
+    instrument.**
+  ► **AND IT WAS MEASURED THROUGH A LEAKING ONE.** 73 Chrome processes were
+    alive from earlier `shot.sh` runs; past some point new ones cannot start, so
+    URLs that had worked minutes earlier failed too. That noise is what made the
+    wall times look identical and is half of why I got it wrong.
+
+► **`tools/shot-live.mjs` + `tools/shot-live.sh` ARE THE INSTRUMENT THAT SETTLED
+  IT, AND THEY ARE THE ONES TO REACH FOR NOW.** Real time over CDP, so a
+  filtered page shoots at all; the browser is killed in a `finally`, so it does
+  not leak; and **the page is frozen at a FRAME NUMBER with `performance.now`
+  and `Date.now` driven from that number**, which is what makes two shots
+  comparable. Without the clock pinned, the same pair differenced to 9,900
+  pixels at B +5.1 — the weapon had MOVED. With it: 2,822 pixels at **B +45.4**.
+  **A frame count alone is not determinism on a page that animates on elapsed
+  time.** It needs the WINDOWS node (Chrome binds its debug port to the Windows
+  loopback), which `shot-live.sh` resolves rather than pins.
 
 ► **AND THE TWELVE GROUPS IN THE FIGURE PACK REACH NO GLADIATOR AT ALL.** Three
   verifiers found this independently: every one of the 12 group entries and 30

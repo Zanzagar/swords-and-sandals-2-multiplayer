@@ -19,13 +19,62 @@ supersedes:   2026-09-15-0400--the-filters-land-and-the-sky-has-a-clock, whose
               ranked item 1 is DONE, item 4 is HALF done (the icons pack's two
               bevels are denominated; the build-wide 54 is now decomposed but
               still 50 unreachable), and whose items 2, 3, 5 and 6 are open.
-next:         **THE WEAPON GLOW HANGS A HEADLESS RENDER AND I DID NOT FIND WHY.
-              `?enchant=3.2` never finishes a screenshot; the same URL without
-              it shoots in 3 seconds; `?groups=0` beside it renders fine; and
-              the wall time does not move with `--virtual-time-budget`, which is
-              what says HANG and not cost.** See ranked item 1.
+next:         ~~**THE WEAPON GLOW HANGS A HEADLESS RENDER AND I DID NOT FIND
+              WHY.**~~ **CORRECTED BEFORE THIS HANDOFF WAS SUPERSEDED — IT DOES
+              NOT HANG.** The stall is `--virtual-time-budget`, which
+              `tools/shot.sh` drives Chrome with; the page runs at 15.51 fps
+              against 60.16. `tools/shot-live.sh` shoots it, and the glow is on
+              screen in all four enchantment colours. See "THE CORRECTION"
+              below, which is the first section of this file for that reason.
 ---
 # Handoff — the glow is drawn, and it hangs the page
+
+## THE CORRECTION, FIRST, BECAUSE THE TITLE AND THE RANKING BELOW ARE WRONG
+
+**The page does not hang, and I published that it did.** Corrected in the same
+session, after this file was written and pushed; the original text is left
+standing below so the mistake is legible rather than tidied away.
+
+- **A CPU profile over CDP puts 95.8% of samples in `(program)`** — native
+  rasterisation, not script — with `drawImage`, `fill` and the page's own
+  `frame`/`render` ticking. In real time the arena runs at **15.51 fps with the
+  glow against 60.16 without** (64.5ms against 16.6ms a frame, two enchanted
+  gladiators, headless software rendering).
+- **What stalls is `--virtual-time-budget`**, which is what `tools/shot.sh`
+  drives Chrome with and which does not advance while a filtered composite is
+  outstanding. **A `FAILED` from `tools/shot.sh` is evidence about the
+  screenshot mode, not about the page.**
+- **My stated evidence was that the wall time did not move with the budget.**
+  That observation was real; the inference was not. And it was taken through a
+  leaking instrument — 73 Chrome processes were alive, so URLs that had worked
+  minutes earlier failed too, which is what made the times look identical.
+- **The glow is on screen, in all four colours.** Two shots frozen at the same
+  frame, differenced against `?groups=0`, canvas only:
+
+```text
+  type 2  Flame   #ffcc00/#ff0000   R +64.6   G  +5.0   B -15.9    1586 movers
+  type 3  Frost   #00ccff/#000099   R -17.1   G  +5.6   B +45.4    1456
+  type 4  Poison  #00ff00/#006600   R -19.7   G +37.9   B -20.0    1188
+  type 5  Wraith  #cccccc/#000000   R +11.2   G  +7.7   B  +9.0    1042
+```
+
+  Each dominant channel is that enchantment's own colour. The ladder that chose
+  the frame came from the bytes; the colour came from the render. **Null
+  control: 0 pixels differing, two byte-identical files.**
+- **`tools/shot-live.mjs` / `tools/shot-live.sh` are the instrument**, and the
+  part that mattered was not CDP — it was pinning `performance.now` and
+  `Date.now` to the FRAME NUMBER. **A frame count alone is not determinism on a
+  page that animates on elapsed time**: without the clock the same pair
+  differenced to 9,900 pixels at B +5.1, with it 2,822 at B +45.4, and the
+  difference was the weapon having moved.
+
+**What still stands from the original ranking:** the 3.9x frame cost is real and
+worth reducing; the twelve figure-pack groups still reach no gladiator; the
+strength half of every glow is still not drawn.
+
+---
+
+*(Everything below is the handoff as first written and pushed.)*
 
 ## The one-sentence version
 
