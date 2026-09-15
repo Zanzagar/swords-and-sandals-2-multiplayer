@@ -3775,10 +3775,15 @@ if (ENCHANT_DEMO) {
   { warn: true });
   // ► **IT COSTS ~4x A FRAME, AND `tools/shot.sh` CANNOT SHOOT IT — BUT IT DOES
   //   NOT HANG, AND THE FIRST VERSION OF THIS COMMENT SAID IT DID.** Measured
-  //   2026-09-15 over CDP: the arena runs at **15.51 fps with the glow against
-  //   60.16 without** (64.5ms against 16.6ms a frame, two enchanted gladiators,
-  //   headless software rendering), and a CPU profile puts **95.8% of samples in
-  //   `(program)`** — native rasterisation, not script.
+  //   2026-09-15 over CDP, and **the flag that matters is `--disable-gpu`**:
+  //   under software rasterisation the arena runs at 15.51 fps with the glow
+  //   against 60.16 without (64.5ms against 16.6ms a frame), and with GPU
+  //   rasterisation it runs at **6.1ms a frame either way for two fighters and
+  //   11.8ms against 6.1ms for six** — about a millisecond a frame per
+  //   enchanted fighter. A CPU profile puts 95.8% of samples in `(program)`,
+  //   native rasterisation rather than script, which is why the flag decides it.
+  //   **The 3.9x is a property of the measuring configuration, not of this
+  //   feature.**
   //
   //   What stalls is `--virtual-time-budget`, which `tools/shot.sh` drives
   //   Chrome with and which does not advance while a filtered composite is
@@ -3791,12 +3796,13 @@ if (ENCHANT_DEMO) {
   //   dominant channel matching its own glow record, against a null control of
   //   zero differing pixels.
   //
-  //   The 4x is still a real cost and reducing it is open work; the buffer is
-  //   only 244x141, so the expense is the two `drop-shadow` passes themselves.
-  log("enchant: the glow costs about 4x a frame — 15.5 fps against 60.2 measured headless, 95.8% of " +
-    "it native rasterisation. tools/shot.sh CANNOT shoot this page (its --virtual-time-budget never " +
-    "advances while a filtered composite is outstanding); use tools/shot-live.sh, which shoots in real " +
-    "time and freezes at a frame number so two shots can be differenced.",
+  //   The buffer is only 244x141, so what costs anything at all is the two
+  //   `drop-shadow` passes themselves — which GPU rasterisation absorbs.
+  log("enchant: the glow costs about 1ms a frame per enchanted fighter with GPU rasterisation " +
+    "(6.1ms/frame either way at 2 fighters, 11.8 against 6.1 at 6). Under --disable-gpu it is 4x, " +
+    "which is the measuring configuration and not this feature. tools/shot.sh CANNOT shoot this page " +
+    "(its --virtual-time-budget never advances while a filtered composite is outstanding); use " +
+    "tools/shot-live.sh, which shoots in real time and freezes at a frame number.",
   { warn: true });
   if (!ENCHANT_DEMO.complete) {
     log("enchant: no potency given, so it is 0 — outside 1..3 the build calls gotoAndStop zero times and " +

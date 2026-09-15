@@ -22,10 +22,12 @@ supersedes:   2026-09-15-0400--the-filters-land-and-the-sky-has-a-clock, whose
 next:         ~~**THE WEAPON GLOW HANGS A HEADLESS RENDER AND I DID NOT FIND
               WHY.**~~ **CORRECTED BEFORE THIS HANDOFF WAS SUPERSEDED — IT DOES
               NOT HANG.** The stall is `--virtual-time-budget`, which
-              `tools/shot.sh` drives Chrome with; the page runs at 15.51 fps
-              against 60.16. `tools/shot-live.sh` shoots it, and the glow is on
-              screen in all four enchantment colours. See "THE CORRECTION"
-              below, which is the first section of this file for that reason.
+              `tools/shot.sh` drives Chrome with. **And the frame cost is not
+              3.9x either — that was `--disable-gpu`. With GPU rasterisation it
+              is ~1ms per enchanted fighter, free at two.** So ranked item 1 is
+              RETIRED; the live work is items 2 and 3. `tools/shot-live.sh`
+              shoots the page, and the glow is on screen in all four colours.
+              See "THE CORRECTION", the first section of this file.
 ---
 # Handoff — the glow is drawn, and it hangs the page
 
@@ -37,9 +39,22 @@ standing below so the mistake is legible rather than tidied away.
 
 - **A CPU profile over CDP puts 95.8% of samples in `(program)`** — native
   rasterisation, not script — with `drawImage`, `fill` and the page's own
-  `frame`/`render` ticking. In real time the arena runs at **15.51 fps with the
-  glow against 60.16 without** (64.5ms against 16.6ms a frame, two enchanted
-  gladiators, headless software rendering).
+  `frame`/`render` ticking.
+- **AND THE COST IS NOT 3.9x EITHER; I CORRECTED THIS TWICE.** The first
+  correction measured a browser started with `--disable-gpu`, which is software
+  rasterisation and the worst case. Varying only that flag:
+
+```text
+                        no glow   with glow          2 fighters    6 fighters
+    --disable-gpu       16.6 ms     64.5 ms  3.9x
+    GPU rasterisation    6.1 ms      6.1 ms  free    6.1 -> 6.1    6.1 -> 11.8
+```
+
+  **About a millisecond a frame per enchanted fighter — free at two, 85 fps at
+  six.** Ranked item 1 below is therefore RETIRED, not deferred. First I
+  measured the screenshot MODE and called it a property of the page; then I
+  measured the RASTERISER and called it a property of the feature. Both numbers
+  were real and both subjects were wrong.
 - **What stalls is `--virtual-time-budget`**, which is what `tools/shot.sh`
   drives Chrome with and which does not advance while a filtered composite is
   outstanding. **A `FAILED` from `tools/shot.sh` is evidence about the
@@ -68,9 +83,10 @@ standing below so the mistake is legible rather than tidied away.
   differenced to 9,900 pixels at B +5.1, with it 2,822 at B +45.4, and the
   difference was the weapon having moved.
 
-**What still stands from the original ranking:** the 3.9x frame cost is real and
-worth reducing; the twelve figure-pack groups still reach no gladiator; the
-strength half of every glow is still not drawn.
+**What still stands from the original ranking:** ~~the 3.9x frame cost~~ is
+retired, see above; the twelve figure-pack groups still reach no gladiator
+(ranked item 2); the strength half of every glow is still carried and not drawn
+(ranked item 3). **Those two are the live work.**
 
 ---
 

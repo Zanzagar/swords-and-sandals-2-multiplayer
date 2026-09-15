@@ -54,13 +54,30 @@ Start there.
   byte-identical files**, so it is not noise.
 
 ► ~~**IT HANGS A HEADLESS RENDER, CAUSE NOT FOUND.**~~ **WRONG, AND I PUBLISHED
-  IT. CORRECTED THE SAME SESSION.** The page does not hang. A CPU profile over
-  CDP puts **95.8% of samples in `(program)`** — native rasterisation, not
-  script — with `drawImage`, `fill` and the page's own `frame`/`render` all
-  ticking; measured in real time it runs at **15.51 fps against 60.16 without
-  the glow** (64.5ms against 16.6ms a frame). What stalls is
-  `--virtual-time-budget`, which is what `tools/shot.sh` drives Chrome with and
-  which does not advance while a filtered composite is outstanding.
+  IT. CORRECTED THE SAME SESSION — TWICE, BECAUSE THE FIRST CORRECTION WAS ALSO
+  MEASURED ON THE WRONG CONFIGURATION.** The page does not hang. A CPU profile
+  over CDP puts **95.8% of samples in `(program)`** — native rasterisation, not
+  script. What stalls is `--virtual-time-budget`, which is what `tools/shot.sh`
+  drives Chrome with and which does not advance while a filtered composite is
+  outstanding.
+  ► **AND THE COST IS NOT 3.9x, WHICH IS WHAT I SAID NEXT.** That number came
+    from a browser started with `--disable-gpu`, i.e. software rasterisation —
+    the worst case, and not what anyone plays in. Varying only that flag:
+
+```text
+                        no glow   with glow        2 fighters   6 fighters
+    --disable-gpu       16.6 ms     64.5 ms  3.9x
+    GPU rasterisation    6.1 ms      6.1 ms  free    6.1 -> 6.1  6.1 -> 11.8
+```
+
+    **About one millisecond a frame per enchanted fighter, free at two, 85 fps
+    at six.** So the "frame cost worth reducing" I ranked first is an artefact
+    of the measuring configuration and is RETIRED, not deferred.
+  ► **THE LESSON IS THE ONE THIS FILE KEEPS RECORDING, ARRIVING TWICE IN AN
+    HOUR: ASK WHAT YOUR EVIDENCE COULD VARY OVER.** First I measured the
+    screenshot MODE and reported it as a property of the page; then I measured
+    the RASTERISER and reported it as a property of the feature. Both times the
+    number was real and the subject was wrong.
   ► **MY EVIDENCE FOR "HANG" WAS THAT THE WALL TIME DID NOT MOVE WITH THE
     BUDGET. That was real and my inference from it was not** — it says virtual
     time is not advancing, which is a fact about the SCREENSHOT MODE, not about
