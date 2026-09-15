@@ -687,17 +687,38 @@ test("the summary adds up and buckets refusals and approximations BY NAME", () =
   // human reads have to come from these same records.
   const first = canvasFilterFor([blurRecord(11), { type: "bevel", filterId: 3 }]);
   const second = canvasFilterFor([glowRecord({ inner: true }), glowRecord({ strength: 2 }), blurRecord(0, 0)]);
-  const summary = summariseFilterUse([first, second]);
-  assert.equal(summary.total, 5);
-  assert.equal(summary.applied, 2);
+  // ► **THE THIRD LIST IS THE ONE THAT SEPARATES TWO LOSSES THAT USED TO SHARE
+  //   A NAME.** A strength of 2 on an opaque colour SATURATES — the alpha
+  //   clamps at 1, so the number contributes nothing and two different
+  //   strengths draw identically. A strength of 0.5 genuinely SCALES. Both are
+  //   approximations; only one of them discards its input, and folding them
+  //   together is how 17 of the figure pack's 18 glow strengths became
+  //   mutable-with-the-suite-green.
+  const third = canvasFilterFor([glowRecord({ strength: 0.5 })]);
+  const summary = summariseFilterUse([first, second, third]);
+  assert.equal(summary.total, 6);
+  assert.equal(summary.applied, 3);
   assert.equal(summary.refused, 2);
   assert.equal(summary.noOp, 1);
-  assert.equal(summary.approximated, 2);
+  assert.equal(summary.approximated, 3);
   assert.deepEqual(summary.refusedByReason, {
     "bevel:filterHasNoCanvasEquivalent": 1,
     "glow:innerShadowHasNoCanvasFilter": 1
   });
-  assert.deepEqual(summary.approximatedByKind, { boxBlurAsGaussian: 1, shadowStrengthAsAlpha: 1 });
+  assert.deepEqual(summary.approximatedByKind, {
+    boxBlurAsGaussian: 1, shadowStrengthSaturated: 1, shadowStrengthAsAlpha: 1
+  });
+  // And the saturation is real, not a label: the two strings are identical.
+  assert.equal(
+    canvasFilterFor([glowRecord({ strength: 2 })]).filter,
+    canvasFilterFor([glowRecord({ strength: 99 })]).filter,
+    "two strengths above the clamp draw the SAME thing, which is why the kind is named apart"
+  );
+  assert.notEqual(
+    canvasFilterFor([glowRecord({ strength: 0.5 })]).filter,
+    canvasFilterFor([glowRecord({ strength: 0.25 })]).filter,
+    "while two below it do not"
+  );
 });
 
 test("the summary ignores junk instead of inventing totals from it", () => {

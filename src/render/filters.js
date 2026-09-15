@@ -575,7 +575,22 @@ export function canvasFilterFor(filters, { scale = 1 } = {}) {
         // it can only scale the shadow colour's alpha. Measured: 277 glows at
         // strength 10, which saturate to opaque, and every one of the 31
         // shadows is below 1.
-        approximated: strength === 1 ? "boxBlurAsGaussian" : "shadowStrengthAsAlpha"
+        //
+        // ► **AND THE SATURATED CASE IS A DIFFERENT KIND OF LOSS, WHICH THIS
+        //   USED TO FOLD INTO THE ONE ABOVE.** When `alpha` clamps at 1 the
+        //   strength does not scale ANYTHING: two filters differing only in a
+        //   strength above the clamp produce byte-identical strings, so the
+        //   value is not approximated, it is DISCARDED. Naming them apart was
+        //   the difference between a counted approximation and an invisible
+        //   one — found 2026-09-15 by a verifier that mutated the figure pack's
+        //   strengths and watched nothing move: of the 18 strength values in
+        //   `psyche_up2`'s nine glow records, **17 can be set to any number at
+        //   or above the clamp with the whole suite green**, and every one of
+        //   the enchantment ladder's 24 can. The blur alone was carrying the
+        //   distinctness, and the invoice said "approximated" either way.
+        approximated: strength === 1
+          ? "boxBlurAsGaussian"
+          : (alpha >= 1 ? "shadowStrengthSaturated" : "shadowStrengthAsAlpha")
       }));
       continue;
     }

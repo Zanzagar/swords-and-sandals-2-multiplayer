@@ -1219,7 +1219,14 @@ test("EVERY FILTER GETS EXACTLY ONE VERDICT, and the verdicts come from the rend
     assert.deepEqual(
       { applied: use.applied, deferred: use.deferred, noOp: use.noOp, refused: use.refused },
       { applied: 172, deferred: 2, noOp: 0, refused: 2 });
-    assert.deepEqual(use.approximatedByKind, { shadowStrengthAsAlpha: 172 });
+    // ► **`shadowStrengthSaturated`, NOT `shadowStrengthAsAlpha` — and the split
+    //   is a finding, not a rename.** CSS `drop-shadow` has no strength, so
+    //   `canvasFilterFor` folds it into the shadow colour's alpha; when that
+    //   alpha clamps at 1 the strength contributes NOTHING and two different
+    //   strengths draw byte-identically. **All 172 of this pack's glows are in
+    //   that state**, so the pack carries 172 strength values the renderer
+    //   cannot express at all — which the old single name could not say.
+    assert.deepEqual(use.approximatedByKind, { shadowStrengthSaturated: 172 });
     assert.equal(use.approximated, use.applied,
       "on this mapper every applied filter is inexact; a divergence here means one stopped being counted");
     // ZERO blend modes on this roster — carried as a counted zero, and the

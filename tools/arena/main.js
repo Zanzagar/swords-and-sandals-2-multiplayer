@@ -335,24 +335,142 @@ fetch("/assets/props/clip-effects.json")
  */
 let drops = [];
 
+/**
+ * WHAT THE RIG'S OWN PACK SAYS ABOUT EFFECT GROUPS, counted from the raw
+ * `animations.json` before `figurePackFrom` ever sees it.
+ *
+ * ► **IT IS THE DENOMINATOR `reportFigureGroups` IS READ AGAINST.** "0 groups
+ *   this frame" is the correct answer whenever no fighter is in `psyche_up2`,
+ *   and is indistinguishable from "this counter is never reached" without the
+ *   pack's own total beside it. It is also the one number that would move if
+ *   `tools/extract-figure.mjs` stopped carrying the filters again — the freeze
+ *   that hid 24 glows until 2026-09-15 is exactly what a zero here looks like.
+ *
+ * ► **AND IT COUNTS PLACEMENTS AS WELL AS GROUPS, because the two disagree.**
+ *   A group-table entry is a record; a placement is a leaf that names one. This
+ *   build has more placements than groups in three of the four labels and nine
+ *   of each in the fourth, which is what a tweened glow looks like.
+ *
+ * Pure — it reads the object it is handed and nothing else — so the test lifts
+ * it out of this file and runs it against the real pack.
+ */
+function figureEffectCensusOf(animations) {
+  const census = {
+    animations: 0, withEffects: 0, groups: 0,
+    placements: 0, effectedPlacements: 0,
+    ownFilters: 0, ownBlendModes: 0, labels: []
+  };
+  if (!animations || typeof animations !== "object") return census;
+  for (const [label, animation] of Object.entries(animations)) {
+    if (!animation || typeof animation !== "object") continue;
+    census.animations += 1;
+    const groups = Array.isArray(animation.effectGroups) ? animation.effectGroups.length : 0;
+    let effected = 0;
+    for (const frame of Array.isArray(animation.poses) ? animation.poses : []) {
+      for (const placement of Array.isArray(frame) ? frame : []) {
+        if (!placement || typeof placement !== "object") continue;
+        census.placements += 1;
+        // A placement's OWN filter list and blend mode, which are a DIFFERENT
+        // thing from the enclosing group's and are 0 of 37,077 on this build.
+        // Counted so that a pack where they appear is loud rather than silently
+        // drawn flat — this painter has nowhere to put them.
+        if (Array.isArray(placement.filters) && placement.filters.length > 0) census.ownFilters += 1;
+        if (placement.blendMode !== undefined && placement.blendMode !== null) census.ownBlendModes += 1;
+        if (Array.isArray(placement.effects) && placement.effects.length > 0) effected += 1;
+      }
+    }
+    census.groups += groups;
+    census.effectedPlacements += effected;
+    if (groups > 0 || effected > 0) {
+      census.withEffects += 1;
+      census.labels.push(label);
+    }
+  }
+  return census;
+}
+
+/**
+ * WHAT `assets/figure/enchantments.json` SAYS ABOUT ITSELF, for the log panel.
+ *
+ * It reads the pack's OWN invoice rather than re-deriving anything: the ladder
+ * is twelve cells because `tools/extract-enchantments.mjs` accounted for all
+ * 107 instructions of `itemglow`'s body, and this file is in no position to
+ * check that. Total on a missing or malformed pack, because a 404 here is the
+ * supported case — this repository ships no SS2 asset.
+ */
+function enchantmentCensusOf(pack) {
+  const invoice = pack && typeof pack === "object" && pack.invoice && typeof pack.invoice === "object"
+    ? pack.invoice : null;
+  const ladder = invoice && typeof invoice.ladder === "object" && invoice.ladder ? invoice.ladder : {};
+  const art = invoice && typeof invoice.art === "object" && invoice.art ? invoice.art : {};
+  const rows = pack && typeof pack === "object" && pack.types && Array.isArray(pack.types.rows)
+    ? pack.types.rows : [];
+  const count = (value) => (Number.isFinite(value) ? value : 0);
+  return {
+    cells: count(ladder.cells),
+    types: count(ladder.types),
+    potencies: count(ladder.potencies),
+    frames: count(art.frames),
+    framesWithAGlow: count(art.framesWithAGlow),
+    groups: count(art.distinctEnclosingGroups),
+    filters: count(art.enclosingFilters),
+    names: rows.map((row) => (row && typeof row.name === "string" ? row.name : "?"))
+  };
+}
+
+/**
+ * The rig's effect-group census, so `reportFigureGroups` always has a
+ * denominator — an empty one until the pack lands, never `undefined`.
+ */
+let figureEffects = figureEffectCensusOf(null);
+
+/**
+ * The twelve-cell weapon-enchantment ladder and its art.
+ *
+ * OPTIONAL on top of the rig, exactly as the wardrobe is and for the same
+ * reason: a player who ran `tools/extract-figure.mjs` but not
+ * `tools/extract-enchantments.mjs` gets an unglowing sword rather than no
+ * gladiator. A missing pack is one log line and the picture that was drawn
+ * before it existed.
+ */
+let enchantments = null;
+
 Promise.all([
   fetch("/assets/figure/shapes.json").then((response) => (response.ok ? response.json() : null)),
   fetch("/assets/figure/animations.json").then((response) => (response.ok ? response.json() : null)),
   // The wardrobe is OPTIONAL on top of the rig: a player who ran the figure
   // extractor but not the wardrobe one gets a naked gladiator rather than none.
-  fetch("/assets/figure/wardrobe.json").then((response) => (response.ok ? response.json() : null)).catch(() => null)
+  fetch("/assets/figure/wardrobe.json").then((response) => (response.ok ? response.json() : null)).catch(() => null),
+  fetch("/assets/figure/enchantments.json").then((response) => (response.ok ? response.json() : null)).catch(() => null)
 ])
-  .then(([shapes, animations, dressing]) => {
+  .then(([shapes, animations, dressing, enchantmentPack]) => {
     wardrobe = dressing;
+    enchantments = enchantmentPack;
+    figureEffects = figureEffectCensusOf(animations);
     if (!shapes || !animations) {
       log("no extracted art — drawing the authored figure. `node tools/extract-figure.mjs` to use the build's own.");
       return;
     }
-    figurePack = figurePackFrom(shapes, animations);
+    figurePack = figurePackFrom(shapes, animations, enchantments);
     const pieces = wardrobe ? Object.values(wardrobe.pieces ?? {}).reduce((n, slot) => n + Object.keys(slot).length, 0) : 0;
     log(`art: ${Object.keys(shapes).length} shape(s), ${figurePack.labels.length} animation(s)` +
       (wardrobe ? `, ${pieces} wardrobe piece(s)` : ", no wardrobe — `node tools/extract-wardrobe.mjs` to dress him") +
       " from your own install");
+    log(`art effects: ${figureEffects.groups} effect group(s) over ` +
+      `${figureEffects.effectedPlacements}/${figureEffects.placements} placement(s) in ` +
+      `${figureEffects.withEffects}/${figureEffects.animations} animation(s)` +
+      (figureEffects.labels.length > 0 ? ` (${figureEffects.labels.join(", ")})` : "") +
+      `; ${figureEffects.ownFilters} placement(s) carry their own filter, ` +
+      `${figureEffects.ownBlendModes} their own blend mode.`);
+    if (!enchantments) {
+      log("no enchantment pack — a weapon draws unglowed. `node tools/extract-enchantments.mjs` to add the ladder.");
+    } else {
+      const ladder = enchantmentCensusOf(enchantments);
+      log(`enchantments: ${ladder.cells} cell(s) — ${ladder.types} type(s) x ${ladder.potencies} potency(ies)` +
+        (ladder.names.length > 0 ? ` (${ladder.names.join(", ")})` : "") +
+        `, ${ladder.framesWithAGlow}/${ladder.frames} art frame(s) glow, ` +
+        `${ladder.groups} enclosing group(s), ${ladder.filters} filter(s).`);
+    }
     // The provenance panel is rendered at startup, BEFORE this resolves. Without
     // this it would go on claiming the figures are authored while the build's
     // own rig is drawn over the sentence saying so.
@@ -722,6 +840,69 @@ const arenaDressing = {
 };
 
 /**
+ * `?enchant=<type>.<potency>` — A DEMO OVERRIDE, AND IT IS NOT A BATTLE.
+ *
+ * ► **NOTHING ON THIS ROSTER CARRIES AN ENCHANTMENT, SO WITHOUT THIS NOBODY
+ *   CAN LOOK AT ONE.** `tools/arena/roster.js` builds its gladiators from
+ *   `ss2Combatant` with no enchantment fields at all, and
+ *   `randomise_gladiator` zeroes them in the build — so every weapon in this
+ *   page draws bare, forever, and the whole twelve-cell ladder is invisible.
+ *   This forces a pair onto every fighter so the art can be SEEN.
+ *
+ * ► **AND IT IS ANNOUNCED IN THE LOG PANEL AS AN OVERRIDE, IN THE PANEL A
+ *   SCREENSHOT CATCHES, BECAUSE A PICTURE OF IT IS NOT EVIDENCE.** This
+ *   project's corpus is measured, and a screenshot of a forced glow filed
+ *   beside one of a real bout would be a fabricated observation. The line says
+ *   so on the shot itself, not only here.
+ *
+ * ► **BOTH SLOTS, AND THAT IS THE POINT OF THE FOUR-PART FORM.** The build
+ *   reads the EQUIPPED slot's own pair for the glow — `itemglow(weapon,
+ *   weapon_enchantment_type, weapon_enchantment_potency)` in melee and
+ *   `itemglow(weapon, secondary_weapon_enchantment_type,
+ *   secondary_weapon_enchantment_potency)` with a bow up — while
+ *   `damagecharacter` gates the PROC on `weapon_enchantment_potency` whichever
+ *   is equipped. `?enchant=3.2` sets both pairs, so a glow appears whatever is
+ *   in hand; `?enchant=3.2.5.1` sets them apart, which is the configuration
+ *   where a renderer that reused the proc's rule would draw the wrong colour.
+ *
+ * ► **A MISSING POTENCY IS 0 AND IS NOT QUIETLY PROMOTED TO 1.** In the build,
+ *   a potency outside 1..3 calls `gotoAndStop` ZERO times and the clip keeps
+ *   whatever frame it is on — there is no trailing default — so `?enchant=3`
+ *   really does mean "no cell". Defaulting it would invent a measurement, and
+ *   `Number(params.get(...)) || 0` inventing a default is the exact defect
+ *   `rankStrideFrom` exists over, forty lines up. `complete` is what the log
+ *   line warns on instead.
+ *
+ * Pure, so the test lifts it out of this file and runs it: a URL is not a
+ * config file and nothing here may throw.
+ */
+function enchantDemoFrom(params) {
+  const raw = params && typeof params.get === "function" ? params.get("enchant") : null;
+  if (raw === null || raw === undefined || String(raw).length === 0) return null;
+  const parts = String(raw).split(".");
+  const at = (index) => {
+    const value = Number(parts[index]);
+    return Number.isFinite(value) ? value : 0;
+  };
+  const type = at(0);
+  const potency = parts.length > 1 ? at(1) : 0;
+  return {
+    text: String(raw),
+    // Both halves given? A one-part `?enchant=3` is a type with no cell.
+    complete: parts.length > 1,
+    fields: {
+      weapon_enchantment_type: type,
+      weapon_enchantment_potency: potency,
+      // The bow slot follows the melee slot unless the URL splits them.
+      secondary_weapon_enchantment_type: parts.length > 2 ? at(2) : type,
+      secondary_weapon_enchantment_potency: parts.length > 3 ? at(3) : potency
+    }
+  };
+}
+
+const ENCHANT_DEMO = enchantDemoFrom(params);
+
+/**
  * THE CAMERA, and it is the build's own — `combatscale`, which runs every
  * enterFrame in the shipped build. See `src/render/arena-backdrop.js`: reading
  * it the other way round cost this session a retraction.
@@ -834,81 +1015,223 @@ function path2dFor(d) {
   return path;
 }
 
-function drawOps(ops, view, origin) {
-  // How big this figure draws. `src/render/figure.js` decides it, for the same
-  // reason `figureXAt` and `timelinesForStep` live there: a number only the
-  // shell can see is a number the suite cannot reach. `1` is a figure at its
-  // nominal size in the front rank.
+/**
+ * THE FIGURE'S OWN SPACE AS A CANVAS MATRIX — where it stands, how big it
+ * draws, that arena y is UP while canvas y is DOWN, and which way it faces.
+ *
+ * ► **IT IS HOISTED OUT OF THE PER-OPERATION DRAW BECAUSE THE COMPOSITOR
+ *   MEASURES ITS BUFFER AGAINST `context.getTransform()`, AND THAT IS THE
+ *   WHOLE OF WHY `drawOps` CHANGED.** The old body applied
+ *   `translate`/`scale` inside the SAME `save()` as the operation's own
+ *   matrix, once per operation. That is pixel-identical to applying it once
+ *   outside — `composedMatrix(figureOriginMatrix(...), op.matrix)` is the same
+ *   product, and the test asserts it — but it left the CTM at whatever the
+ *   canvas already held for the whole of `paintGroupRuns`. `runBoxOf` would
+ *   then have measured a run in the figure's LOCAL units, which are a few
+ *   hundred wide and centred on the soles of the feet: `bufferRegionOf` would
+ *   have handed back a small rectangle in the canvas's top-left corner, and
+ *   every glowing weapon would have been composited as an empty box.
+ *
+ * ► **`view.toX`/`view.toY` ARE CALLED ONCE HERE, NOT PER OPERATION.** They are
+ *   the only part of this that reads the canvas, and a figure is ~130
+ *   operations a frame.
+ */
+function figureOriginMatrix(view, origin) {
   const size = origin.size ?? 1;
-  for (const operation of ops) {
-    context.globalAlpha = operation.alpha ?? 1;
-    if (operation.kind === "path") {
-      // ► **THE EXTRACTED RIG, and it is the only operation that carries its
-      //   own MATRIX.** `src/render/extracted-figure.js` has already composed
-      //   the limb's placement with the clip-to-arena transform, so everything
-      //   left here is putting the figure's local arena space on the canvas:
-      //   translate to where it stands, scale by the view, flip y (arena y is
-      //   UP and canvas y is DOWN), mirror x when it faces left.
-      //
-      //   `translate`/`scale` rather than `setTransform`, so this composes with
-      //   whatever transform the canvas already carries instead of replacing it.
-      const flip = origin.facing === "left" ? -1 : 1;
-      const k = size * view.scale;
-      context.save();
-      context.translate(view.toX(origin.x), view.toY(origin.y, 0));
-      context.scale(k * flip, -k);
-      const m = operation.matrix;
-      context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-      const path = path2dFor(operation.d);
-      if (operation.fill && operation.fill !== "none") {
-        context.globalAlpha = (operation.alpha ?? 1) * (operation.fillOpacity ?? 1);
-        context.fillStyle = operation.fill;
-        context.fill(path, operation.fillRule ?? "evenodd");
-      }
-      if (operation.stroke && operation.strokeWidth > 0) {
-        context.globalAlpha = (operation.alpha ?? 1) * (operation.strokeOpacity ?? 1);
-        context.strokeStyle = operation.stroke;
-        // In the CURRENT transform's units, which the scale above then applies.
-        context.lineWidth = operation.strokeWidth;
-        context.lineJoin = "round";
-        context.lineCap = "round";
-        context.stroke(path);
-      }
+  const flip = origin.facing === "left" ? -1 : 1;
+  const k = size * view.scale;
+  return [k * flip, 0, 0, -k, view.toX(origin.x), view.toY(origin.y, 0)];
+}
+
+/**
+ * WHICH SPACE EACH RUN OF OPERATIONS IS IN, as maximal adjacent runs.
+ *
+ * A `path` operation is the EXTRACTED rig: it carries its own matrix in the
+ * figure's local space and is drawn under `figureOriginMatrix`. Every other
+ * kind is the authored fallback — `paintFigure`'s polygons and circles,
+ * `paintShadow`'s ellipse — which works out canvas pixels for itself through
+ * `view.toX`/`view.toY` and must NOT have that transform on the context.
+ *
+ * ► **EVERY CALL IN THIS BUILD IS HOMOGENEOUS, AND THIS IS A PARTITION
+ *   ANYWAY.** `paintShadow` is all ellipses, `paintFigure` all polygons and
+ *   circles, `paintExtractedFigure` and `mergeFaceOps` all paths — so this
+ *   returns exactly one run every time it is called today, and the test says
+ *   so against the real pack rather than leaving it as a claim. The
+ *   alternative — a single `kind === "path"` test at the top of `drawOps` —
+ *   would silently drop half of a mixed list, and `mergeFaceOps` is precisely
+ *   the seam where a mixed list would first appear.
+ */
+function opSpaceRunsOf(ops) {
+  const list = Array.isArray(ops) ? ops : [];
+  const runs = [];
+  let current = null;
+  for (let index = 0; index < list.length; index += 1) {
+    const operation = list[index];
+    const space = operation && typeof operation === "object" && operation.kind === "path" ? "figure" : "canvas";
+    if (!current || current.space !== space) {
+      current = { space, from: index, to: index };
+      runs.push(current);
+    }
+    current.to = index + 1;
+  }
+  return runs;
+}
+
+/**
+ * HOW `paintGroupRuns` MUST READ AN EXTRACTED-FIGURE OPERATION.
+ *
+ * - `translationDivisor: 1` — `drawFigureOperation` hands `operation.matrix`
+ *   straight to `context.transform` with no twips divisor, so the box has to be
+ *   measured the same way. `paintArenaLayer` is the 20; `paintProp` is the
+ *   other 1.
+ * - `filtersScaled: false` — **and this is a CLAIM ABOUT ANOTHER MODULE, so it
+ *   is the conservative one, and it is deliberately BEHIND the call site.**
+ *   `render` now passes `scale: (origin.size ?? 1) * view.scale` to
+ *   `paintExtractedFigure`, which is exactly the factor the CTM carries — so
+ *   the radii SHOULD arrive in device pixels and this should be `true`.
+ *
+ *   It is not, yet, because nothing can watch it be used. Measured on this tree
+ *   2026-09-15: `figureEffectGroupsFor` returns ZERO group records for every
+ *   psyche label at every `at`, so there is no figure filter string in this
+ *   repository to read at two scales and compare, and `filtersScaled: true`
+ *   would be an assertion no test could go red on.
+ *
+ * ► **AND THE COST OF BEING WRONG EITHER WAY IS ONE COUNTER, WHICH IS WHY THIS
+ *   IS SAFE TO LEAVE CONSERVATIVE.** `paintGroupRuns` reads the flag in exactly
+ *   one place — `groupPaint.filterAtStageScale += run.to - run.from` — and
+ *   nowhere else. The buffer, the region, the bleed and the composite are
+ *   identical whichever way it is set; `test/render-arena-shell.test.js`
+ *   asserts that, because the argument depends on it. So `false` over-reports
+ *   an approximation and `true` under-reports one, and over-reporting is the
+ *   half this file's history says to take.
+ *
+ *   **Flip it in the commit that makes a figure group observable**, beside a
+ *   test that reads two `figureEffectGroupsFor` results at two scales and
+ *   asserts the radius moved.
+ *
+ * A function rather than a bare `const` so that the test can LIFT it and assert
+ * the values, instead of matching the source text and going green on a comment.
+ */
+function figureRouteFor() {
+  return { translationDivisor: 1, filtersScaled: false };
+}
+
+/**
+ * ONE extracted-rig operation, into whatever `context` currently is.
+ *
+ * Split out of `drawOps` so that `paintGroupRuns` can call it a run at a time —
+ * into the canvas for an ungrouped run and into an offscreen for a filtered or
+ * blended one. The body is the old `kind === "path"` branch with the origin
+ * transform lifted off it; nothing else moved.
+ */
+function drawFigureOperation(operation) {
+  context.globalAlpha = operation.alpha ?? 1;
+  // ► **THE EXTRACTED RIG, and it is the only operation that carries its own
+  //   MATRIX.** `src/render/extracted-figure.js` has already composed the
+  //   limb's placement with the clip-to-arena transform; `figureOriginMatrix`
+  //   is on the context above, so all that is left here is the placement.
+  //
+  //   `transform` rather than `setTransform`, so this composes with the
+  //   figure's space instead of replacing it — and so that it still composes
+  //   correctly when the destination is a group buffer whose transform is the
+  //   canvas's shifted by the buffer's origin.
+  const m = operation.matrix;
+  context.save();
+  context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+  const path = path2dFor(operation.d);
+  if (operation.fill && operation.fill !== "none") {
+    context.globalAlpha = (operation.alpha ?? 1) * (operation.fillOpacity ?? 1);
+    context.fillStyle = operation.fill;
+    context.fill(path, operation.fillRule ?? "evenodd");
+  }
+  if (operation.stroke && operation.strokeWidth > 0) {
+    context.globalAlpha = (operation.alpha ?? 1) * (operation.strokeOpacity ?? 1);
+    context.strokeStyle = operation.stroke;
+    // In the CURRENT transform's units, which the scale above then applies.
+    context.lineWidth = operation.strokeWidth;
+    context.lineJoin = "round";
+    context.lineCap = "round";
+    context.stroke(path);
+  }
+  context.restore();
+}
+
+/**
+ * ONE authored-fallback operation. Unchanged from the branch it was cut out of:
+ * it computes canvas pixels itself, so it runs with NO figure transform on the
+ * context.
+ */
+function drawAuthoredOperation(operation, view, origin) {
+  const size = origin.size ?? 1;
+  context.globalAlpha = operation.alpha ?? 1;
+  if (operation.kind === "polygon") {
+    context.beginPath();
+    operation.points.forEach(([x, y], index) => {
+      const px = view.toX(origin.x + x * size * (origin.facing === "left" ? -1 : 1));
+      const py = view.toY(origin.y, y * size);
+      if (index === 0) context.moveTo(px, py);
+      else context.lineTo(px, py);
+    });
+    context.closePath();
+    if (operation.fill && operation.fill !== "transparent") {
+      context.fillStyle = operation.fill;
+      context.fill();
+    }
+    if (operation.stroke) {
+      context.strokeStyle = operation.stroke;
+      context.lineWidth = Math.max(1, view.scale * 2);
+      context.stroke();
+    }
+  } else if (operation.kind === "circle" || operation.kind === "ellipse") {
+    const px = view.toX(origin.x + operation.x * size * (origin.facing === "left" ? -1 : 1));
+    const py = view.toY(origin.y, operation.y * size);
+    const rx = (operation.r ?? operation.rx) * size * view.scale;
+    const ry = (operation.r ?? operation.ry) * size * view.scale;
+    context.beginPath();
+    context.ellipse(px, py, Math.abs(rx), Math.abs(ry), 0, 0, Math.PI * 2);
+    if (operation.fill && operation.fill !== "transparent") {
+      context.fillStyle = operation.fill;
+      context.fill();
+    }
+    if (operation.stroke) {
+      context.strokeStyle = operation.stroke;
+      context.lineWidth = Math.max(1, view.scale * 2);
+      context.stroke();
+    }
+  }
+}
+
+/**
+ * ► **THE FIGURE'S OPERATIONS GO THROUGH THE GROUP COMPOSITOR, AND UNTIL
+ *   2026-09-15 THEY DID NOT.** This was a flat `for (const operation of ops)`
+ *   loop. `paintArenaLayer` and `paintProp` both route through
+ *   `paintGroupRuns`; the figure — the one drawable in this file whose pack
+ *   carries the build's twelve weapon-enchantment glows — was the third painter
+ *   and was not wired to it at all, so an `op.group` arriving from
+ *   `src/render/extracted-figure.js` would have been drawn per leaf and the
+ *   glow would never have appeared. `groupRunsOf` and `paintGroupRuns`
+ *   themselves needed NO change; the routing did.
+ */
+function drawOps(ops, view, origin) {
+  for (const run of opSpaceRunsOf(ops)) {
+    if (run.space === "canvas") {
+      for (let index = run.from; index < run.to; index += 1) drawAuthoredOperation(ops[index], view, origin);
+      continue;
+    }
+    // The whole array, whenever it IS the whole array — which is every call in
+    // this build. A `slice` per figure per frame is 360 allocations a second
+    // for a copy of a list nothing is going to modify.
+    const slice = run.from === 0 && run.to === ops.length ? ops : ops.slice(run.from, run.to);
+    const m = figureOriginMatrix(view, origin);
+    context.save();
+    context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+    try {
+      countFigureGroups(paintGroupRuns(slice, figureRouteFor(), drawFigureOperation));
+    } finally {
+      // ► **A `finally`, for the reason `paintGroupRuns` has one.** A throw
+      //   inside a painter must not leave the figure's transform on the context
+      //   for the name plate, the arrows and the UI bar that are drawn next.
       context.restore();
-    } else if (operation.kind === "polygon") {
-      context.beginPath();
-      operation.points.forEach(([x, y], index) => {
-        const px = view.toX(origin.x + x * size * (origin.facing === "left" ? -1 : 1));
-        const py = view.toY(origin.y, y * size);
-        if (index === 0) context.moveTo(px, py);
-        else context.lineTo(px, py);
-      });
-      context.closePath();
-      if (operation.fill && operation.fill !== "transparent") {
-        context.fillStyle = operation.fill;
-        context.fill();
-      }
-      if (operation.stroke) {
-        context.strokeStyle = operation.stroke;
-        context.lineWidth = Math.max(1, view.scale * 2);
-        context.stroke();
-      }
-    } else if (operation.kind === "circle" || operation.kind === "ellipse") {
-      const px = view.toX(origin.x + operation.x * size * (origin.facing === "left" ? -1 : 1));
-      const py = view.toY(origin.y, operation.y * size);
-      const rx = (operation.r ?? operation.rx) * size * view.scale;
-      const ry = (operation.r ?? operation.ry) * size * view.scale;
-      context.beginPath();
-      context.ellipse(px, py, Math.abs(rx), Math.abs(ry), 0, 0, Math.PI * 2);
-      if (operation.fill && operation.fill !== "transparent") {
-        context.fillStyle = operation.fill;
-        context.fill();
-      }
-      if (operation.stroke) {
-        context.strokeStyle = operation.stroke;
-        context.lineWidth = Math.max(1, view.scale * 2);
-        context.stroke();
-      }
     }
   }
   context.globalAlpha = 1;
@@ -2310,12 +2633,126 @@ function paintGroupRuns(ops, route, drawOne) {
  *   the 70; and a shot in flight adds six more, one per `bullet_trail` puff,
  *   each carrying a blend mode and no filter. A run at one dressing that
  *   reported the same numbers as another would be the finding.
+ *
+ * ► **THE `ops` DENOMINATOR ABOVE IS A PROPS-ONLY MEASUREMENT AND STOPPED
+ *   BEING ONE ON 2026-09-15.** `drawOps` now routes the extracted figure
+ *   through `paintGroupRuns` too, and a figure is ~130 operations — so `ops`
+ *   here is now the props' plus every fighter's, and the "2 operations" and
+ *   "70 operations" above describe the props alone. The GROUP counts are
+ *   unaffected while the rig's pack contributes none. The figure's own
+ *   numbers, with their own denominators, are `reportFigureGroups`.
  */
 let groupPaintHigh = -1;
 let groupPaintReports = 0;
 
 function resetGroupPaint() {
   for (const key of Object.keys(groupPaint)) groupPaint[key] = 0;
+}
+
+/**
+ * THE FIGURE'S OWN HALF OF THE COMPOSITOR'S INVOICE, per frame.
+ *
+ * ► **SEPARATE FROM `groupPaint` BECAUSE THE FIGURE AND THE PROPS ANSWER
+ *   DIFFERENT QUESTIONS, AND SHARING ONE TALLY WOULD HIDE BOTH.** A frame is
+ *   ~130 operations per fighter and six fighters — so rolled into
+ *   `groupPaint.ops` the props' own denominators (2 operations at the shipped
+ *   sky, 70 at `?sky=124`) would be lost in four figures of rig. The figure's
+ *   operations DO still feed `groupPaint`, because `paintGroupRuns` writes
+ *   there and that total is genuinely "what the compositor did this frame"; the
+ *   props line's numbers therefore moved on 2026-09-15 and the comment above
+ *   `reportGroupPaint` says which measurement that invalidated.
+ *
+ * ► **AND THE DENOMINATORS ARE THE POINT, for `groupPaint`'s own stated
+ *   reason.** `groups: 0` beside nothing cannot be told from a counter that is
+ *   never reached — which is exactly the state this file is in until
+ *   `src/render/extracted-figure.js` attaches an `op.group`. `ops`, `figures`
+ *   and the pack census beside them are what say "reached, and empty".
+ */
+/**
+ * ► **`plannedBuffers` IS NOT `groupPaint.buffers`, AND THE FIRST VERSION OF
+ *   THIS OBJECT CALLED IT `buffered` AND PRINTED IT AS THOUGH IT WERE.**
+ *   `groupRunsOf` sets `run.buffered = Boolean(group.filter || group.composite)`
+ *   from the RECORD alone — it never consults `groupCompositingAvailable()`,
+ *   never sees `?groups=0`, and never sees the region check that skips an
+ *   off-canvas run. So this counts buffers the compositor was ASKED for.
+ *   `groupPaint.buffers` beside it counts buffers actually opened, because it
+ *   is incremented inside the composite branch after the region test.
+ *
+ *   **At `?groups=0` the old name reported buffers while zero were made.**
+ *   Renamed rather than recomputed: the planned number is the useful one here
+ *   (it says what the pack asked for), and the made number already has an
+ *   honest home. What was wrong was one word in a log line.
+ */
+const figureGroupPaint = {
+  figures: 0,
+  ops: 0,
+  groupedOps: 0,
+  groups: 0,
+  plannedBuffers: 0,
+  plannedBufferOps: 0,
+  direct: 0,
+  inert: 0,
+  split: 0,
+  nested: 0,
+  blendRefused: 0
+};
+
+function resetFigureGroupPaint() {
+  for (const key of Object.keys(figureGroupPaint)) figureGroupPaint[key] = 0;
+}
+
+/** One figure's plan, added to this frame's figure invoice. */
+function countFigureGroups(plan) {
+  if (!plan || typeof plan !== "object" || !plan.tally) return;
+  figureGroupPaint.figures += 1;
+  figureGroupPaint.ops += plan.tally.ops;
+  figureGroupPaint.groupedOps += plan.tally.groupedOps;
+  figureGroupPaint.groups += plan.tally.groups;
+  figureGroupPaint.plannedBuffers += plan.tally.buffered;
+  figureGroupPaint.plannedBufferOps += plan.tally.bufferedOps;
+  figureGroupPaint.direct += plan.tally.direct;
+  figureGroupPaint.inert += plan.tally.inert;
+  figureGroupPaint.split += plan.tally.split;
+  figureGroupPaint.nested += plan.tally.nested;
+  figureGroupPaint.blendRefused += plan.tally.blendRefused;
+}
+
+/**
+ * ► **PRINTED ON THE FIRST FRAME THAT DREW A FIGURE AT ALL, AND AGAIN ON EVERY
+ *   NEW HIGH-WATER MARK — SO THE ZERO IS PRINTED TOO.** `reportGroupPaint`
+ *   returns early on `groups === 0`, which is right for the props (the pack has
+ *   363 groups and a frame with none is a frame that drew no scenery) and would
+ *   be exactly wrong here: the interesting state today IS the zero, and it is
+ *   only readable beside `ops` and the pack's own census.
+ */
+let figureGroupsHigh = -1;
+let figureGroupsReports = 0;
+
+function reportFigureGroups() {
+  if (figureGroupPaint.ops === 0 || figureGroupPaint.groups <= figureGroupsHigh) return;
+  figureGroupsHigh = figureGroupPaint.groups;
+  figureGroupsReports += 1;
+  // Four, for `reportGroupPaint`'s reason: `psyche_up2` raises the mark one
+  // group at a time as its nine frames play, and the load-time lines must not
+  // scroll out of a 40-line panel.
+  if (figureGroupsReports > 4) return;
+  log(`figure groups: ${figureGroupPaint.groups} group(s) over ` +
+    `${figureGroupPaint.groupedOps}/${figureGroupPaint.ops} op(s) in ` +
+    `${figureGroupPaint.figures} figure(s) this frame, ` +
+    `${figureGroupPaint.plannedBuffers} buffer(s) ASKED FOR ` +
+    `(${figureGroupPaint.plannedBufferOps} op(s)) — see the \`groups:\` line for how many were ` +
+    `actually opened, which is 0 at ?groups=0, ` +
+    `${figureGroupPaint.direct} straight, ${figureGroupPaint.inert} matrix-only.`);
+  const lost = figureGroupPaint.split + figureGroupPaint.nested + figureGroupPaint.blendRefused;
+  log(`figure groups: approximated — split ${figureGroupPaint.split}, ` +
+    `nested ${figureGroupPaint.nested}, blend refused ${figureGroupPaint.blendRefused} ` +
+    `(a run the compositor SKIPPED as off-canvas or clipped is counted in \`groups:\`, not here — ` +
+    `this route has no counter of its own for it); ` +
+    `the rig's pack carries ${figureEffects.groups} group(s) over ` +
+    `${figureEffects.effectedPlacements}/${figureEffects.placements} placement(s) in ` +
+    `${figureEffects.withEffects}/${figureEffects.animations} animation(s)` +
+    (figureEffects.labels.length > 0 ? ` (${figureEffects.labels.join(", ")})` : "") + ".",
+  { warn: lost > 0 });
 }
 
 function reportGroupPaint() {
@@ -2441,11 +2878,28 @@ let loadoutReported = false;
 const SEAM_PROBE = params.has("seam");
 
 function reportedLoadout(combatant) {
-  const loadout = loadoutFrom(combatant);
+  const declared = loadoutFrom(combatant);
+  // ► **THE DEMO OVERRIDE GOES ON THE LOADOUT, NOT ON THE COMBATANT.** The
+  //   combatant is the wire projection — the thing the resolver produced — and
+  //   writing an enchantment into it would put a number the engine never
+  //   computed into the same object every panel readout is copied from.
+  //   `loadoutFrom` has already projected the resource shapes, so these four
+  //   plain numbers are the shape the painter reads.
+  const loadout = ENCHANT_DEMO && declared ? { ...declared, ...ENCHANT_DEMO.fields } : declared;
   if (SEAM_PROBE && !loadoutReported) {
     loadoutReported = true;
     const rows = attachmentsFor(loadout);
     log(`seam: loadout.weapon=${loadout?.weapon ?? "ABSENT"} equipped=${loadout?.equipped_weapon ?? "ABSENT"}`);
+    // ► **BOTH PAIRS, BECAUSE THE GLOW READS THE EQUIPPED SLOT'S OWN.** With a
+    //   bow up the build calls `itemglow` with the SECONDARY pair while
+    //   `damagecharacter` still gates the proc on the melee potency, so a probe
+    //   that printed one pair could not tell a correct picture from the
+    //   configuration where the two disagree.
+    log(`seam: enchant melee=${loadout?.weapon_enchantment_type ?? "ABSENT"}` +
+      `.${loadout?.weapon_enchantment_potency ?? "ABSENT"} ` +
+      `bow=${loadout?.secondary_weapon_enchantment_type ?? "ABSENT"}` +
+      `.${loadout?.secondary_weapon_enchantment_potency ?? "ABSENT"}` +
+      (ENCHANT_DEMO ? " (FORCED by ?enchant=, not the engine's)" : ""));
     log(`seam: weapon row offered=${rows.some((r) => r.slot === "weapon")} shield row=${rows.some((r) => r.slot === "shield")}`);
     // The decisive number: how many ops the painter returns for the weapon slot.
     const probe = hasExtractedArt(figurePack)
@@ -2514,6 +2968,7 @@ function render(now = performance.now()) {
   // reaches MORE groups than any before it — which is what an arrow in flight
   // does, six `bullet_trail` groups at a time.
   resetGroupPaint();
+  resetFigureGroupPaint();
   const rect = canvas.parentElement.getBoundingClientRect();
   const ratio = window.devicePixelRatio || 1;
   canvas.width = Math.max(1, Math.floor(rect.width * ratio));
@@ -2679,7 +3134,26 @@ function render(now = performance.now()) {
       facing: actor.facing,
       at: drawnAt,
       height: figure.build.height,
-      fade: pose.fade
+      fade: pose.fade,
+      // ► **CANVAS PIXELS PER ARENA UNIT — the same `k` `figureOriginMatrix`
+      //   puts on the context, and the one factor the figure painter cannot
+      //   work out for itself.** A group's blur radius is in the fighter clip's
+      //   own pixels; `src/render/extracted-figure.js` knows clip-to-arena
+      //   (`pack.clipHeight` and `height`) and this file knows arena-to-canvas
+      //   (`view.scale`, which carries the camera's zoom and the device pixel
+      //   ratio, times `origin.size`, which carries the rank). Neither half is
+      //   the whole factor. Without this the glow is drawn at the radius it
+      //   would have on an unzoomed 640x420 stage, which on this canvas is
+      //   between two and four times too narrow.
+      //
+      // ► **AND `figureRouteFor()` STILL SAYS `filtersScaled: false`, WHICH IS
+      //   DELIBERATE AND IS THE THING TO CLOSE NEXT.** Measured on this tree
+      //   2026-09-15: `figureEffectGroupsFor` returns ZERO group records for
+      //   every psyche label at every `at`, so nothing in this repository can
+      //   observe a figure filter string yet and "the radius is now in device
+      //   pixels" is a claim no test could go red on. Flipping the route is one
+      //   line, and it belongs in the commit that makes that test possible.
+      scale: (origin.size ?? 1) * view.scale
     };
     const extracted = hasExtractedArt(figurePack)
       ? paintExtractedFigure(figurePack, {
@@ -2786,6 +3260,7 @@ function render(now = performance.now()) {
   // scenery, the drops and the arrows all feed the same tally and a line
   // printed mid-frame would report a third of it.
   reportGroupPaint();
+  reportFigureGroups();
 }
 
 /**
@@ -3290,6 +3765,48 @@ function frame(now) {
 renderProvenance();
 renderControls();
 log(`arena built: ${scene.drawOrder.length} fighters, ${perSide}v${perSide}, seed ${seed}`);
+if (ENCHANT_DEMO) {
+  const fields = ENCHANT_DEMO.fields;
+  log(`enchant: DEMO OVERRIDE ?enchant=${ENCHANT_DEMO.text} — every fighter's melee slot is forced to ` +
+    `type ${fields.weapon_enchantment_type} potency ${fields.weapon_enchantment_potency}, ` +
+    `bow slot type ${fields.secondary_weapon_enchantment_type} ` +
+    `potency ${fields.secondary_weapon_enchantment_potency}. ` +
+    "THE ENGINE PRODUCED NONE OF IT — a screenshot of this is not evidence about a battle.",
+  { warn: true });
+  // ► **AND IT HANGS A HEADLESS RENDER. MEASURED 2026-09-15, CAUSE NOT FOUND.**
+  //   With a glow resolved, `?enchant=3.2` never finishes a headless screenshot:
+  //   `seed=7&perSide=1&seam=1` alone shoots in **3 seconds**, and the same URL
+  //   plus `enchant=3.2` is killed at 100s, 140s and 280s timeouts alike. The
+  //   wall time is IDENTICAL at `--virtual-time-budget` 1200, 2500 and 6000,
+  //   which is what says it is a hang and not a per-frame cost — a cost would
+  //   scale with the budget. `?groups=0` beside it renders normally, so it is
+  //   the compositing branch and not the glow's arithmetic.
+  //
+  //   **The geometry is NOT the cause and that is measured, not assumed.** The
+  //   shell's own `groupRunsOf`/`runBoxOf`/`filterBleedOf`/`bufferRegionOf`,
+  //   lifted into node and run over the real ops at the real CTM, give one
+  //   buffered run of 19 ops, box 538.2..725.2 x 391.5..475.4, bleed 28.2103,
+  //   region 244x141 UNCLAMPED, filter
+  //   `drop-shadow(0px 0px 2.6625px rgba(0, 204, 255, 1)) drop-shadow(0px 0px 5.4076px rgba(0, 0, 153, 1))`.
+  //   Everything node can see is sane, so whatever hangs is a canvas call node
+  //   cannot reach.
+  //
+  //   **It is confined to this flag.** `tools/arena/roster.js` and
+  //   `src/team/ss2-rules.js` both default `weapon_enchantment_type: 0`, so no
+  //   gladiator the engine produces carries an enchantment and no ordinary bout
+  //   can reach this path. That is why the feature ships rather than being
+  //   reverted — and why this warning is here rather than in a handoff nobody
+  //   opens while using the flag.
+  log("enchant: WARNING — a headless screenshot of this URL does not finish (3s without the glow, " +
+    "killed at 280s with it), and the wall time does not move with --virtual-time-budget, so it is a " +
+    "HANG and not a cost. Add ?groups=0 to shoot it. Cause not found; the box math is measured sane.",
+  { warn: true });
+  if (!ENCHANT_DEMO.complete) {
+    log("enchant: no potency given, so it is 0 — outside 1..3 the build calls gotoAndStop zero times and " +
+      "the weapon keeps its current frame. Nothing will glow. Use ?enchant=<type>.<potency>, e.g. ?enchant=3.2.",
+    { warn: true });
+  }
+}
 // ► **RUN AFTER THE ARENA IS WARM, NOT DURING MODULE INIT.** The canvas is
 //   still at its default 300x150 until the first `render()` sizes it, and a
 //   timing measurement taken against that is a measurement of a different

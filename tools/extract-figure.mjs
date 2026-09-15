@@ -88,6 +88,7 @@ import {
   applyColourTransform,
   applyColourTransformAlpha,
   blendModeFor,
+  blurSigma,
   canvasFilterFor,
   summariseFilterUse
 } from "../src/render/filters.js";
@@ -1087,6 +1088,250 @@ export function previewTints(shapes, animations) {
 }
 
 /**
+ * EVERY EFFECT GROUP IN THE PACK, AS SOMETHING THE PAGE CAN DRAW — plus the
+ * invoice of what it will NOT draw, by name and with denominators.
+ *
+ * ► **THE FILTER ARITHMETIC RUNS HERE FOR THE SAME REASON THE TINTS DO.** The
+ *   page cannot `import`: it is opened from `file://` with no server. So every
+ *   number below comes out of `src/render/filters.js` — `blurSigma` for the
+ *   box-blur-to-Gaussian bridge, `canvasFilterFor` for the VERDICT on each
+ *   filter, `blendModeFor` for the blend modes — and the page is left holding
+ *   primitives and strings. A sixth copy of the blur bridge in a template
+ *   literal is the colour-transform mistake with different nouns.
+ *
+ * ► **AND THE VERDICT IS `canvasFilterFor`'s, NOT AN SVG TABLE OF ITS OWN.**
+ *   SVG can express things canvas cannot — an inset glow, a colour matrix, an
+ *   anisotropic blur — and a mapper here that took them would make this page
+ *   draw a picture `src/render/screen.js` never draws, which is the opposite of
+ *   what a check is for. So a filter is drawn here only where
+ *   `canvasFilterFor([filter])` puts it in `applied`, and everything else is
+ *   refused with ITS reason. Measured on the oracle's pack: 24 of 24 group
+ *   filters are `applied`, 0 deferred, 0 no-op, 0 refused — so on THIS build
+ *   the two agree completely and the gate costs nothing. It is here for the
+ *   modded-build lane, where it will not.
+ *
+ * ► **ONE PLACE THE SVG IS DELIBERATELY BETTER THAN THE CANVAS STRING, AND IT
+ *   IS SAID ON THE PAGE RATHER THAN SMUGGLED.** Flash's glow `strength`
+ *   RE-MULTIPLIES the blurred alpha and clamps it: `min(1, a * strength)` per
+ *   pixel. A CSS `drop-shadow()` has no such knob, so `canvasFilterFor` folds
+ *   strength into the flood colour's alpha and clamps THAT — which on this
+ *   pack's `strength` 2.699 glow is a soft halo where the build draws a solid
+ *   one. `feComponentTransfer`/`feFuncA slope` is the build's own rule exactly,
+ *   so this page uses it and `packNote` states that the canvas path
+ *   approximates the same 24 filters differently. A preview that quietly drew
+ *   the approximation would check the renderer instead of the extraction.
+ *
+ * ► **`scale` IS 1 AND THAT IS A FACT ABOUT THIS PAGE, NOT A DEFAULT NOBODY
+ *   THOUGHT ABOUT.** The preview's SVG user units ARE stage pixels — the
+ *   viewBox is in them and `draw()` divides the matrix translate by 20 to get
+ *   them — and the group wrapper this filter hangs on carries NO transform of
+ *   its own, so the filter resolves in stage space. Which is also the reason
+ *   `notCarried.effectGroupMatrix` is named in `packNote`: the group's own
+ *   matrix is not in the pack, so a blur radius is drawn in STAGE pixels and
+ *   never scaled by the transform the enclosing sprite actually had.
+ *
+ * @param animations  the pack this tool writes, keyed by `labelKey`
+ * @param options.scale  stage-to-user-unit scale; see above for why it is 1
+ * @returns `{defs, pad, animations, labelsWithEffects, packNote, noneNote, totals}`
+ */
+export function previewEffects(animations, { scale = 1 } = {}) {
+  const factor = Number.isFinite(scale) && scale > 0 ? scale : 1;
+  const r4 = (value) => Math.round(value * 10000) / 10000;
+  const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+  // One `<filter>` per DISTINCT drawable result, keyed by the primitives it
+  // comes to — so the twelve table entries this build holds become the ten
+  // defs they really are, and a page that plays three labels loads one glow.
+  const defs = [];
+  const defIndex = new Map();
+  const perFilter = [];
+  const byAnimation = {};
+  const labelsWithEffects = [];
+  const blendRefusedNames = {};
+  let pad = 0;
+  let blendModes = 0;
+
+  /** One SWF filter record as the SVG primitives that draw it, or `null`. */
+  const stageFor = (filter) => {
+    const sx = r4(blurSigma(filter.blurX, filter.passes) * factor);
+    const sy = r4(blurSigma(filter.blurY, filter.passes) * factor);
+    if (filter.type === "blur") {
+      // FOUR sigma, not three. The filter region is padded by this, and a
+      // region one pixel too small does not look like a bug — it looks like a
+      // correct render of a slightly smaller glow, with a straight edge where
+      // the box cut it. Three sigma is 99.7% of a Gaussian; `strength`
+      // re-multiplies the tail, so the cheap margin is bought.
+      return { kind: "blur", sx, sy, extent: 4 * Math.max(sx, sy) };
+    }
+    const colour = filter.colour ?? { red: 0, green: 0, blue: 0, alpha: 255 };
+    const angle = Number.isFinite(filter.angle) ? filter.angle : 0;
+    const distance = Number.isFinite(filter.distance) ? filter.distance : 0;
+    const dx = r4(Math.cos(angle) * distance * factor);
+    const dy = r4(Math.sin(angle) * distance * factor);
+    return {
+      kind: "glow",
+      sx,
+      sy,
+      dx,
+      dy,
+      // `rgb()` and not `#rrggbb`: there is no channel arithmetic in this file
+      // and formatting one would be the start of some.
+      colour: `rgb(${colour.red | 0}, ${colour.green | 0}, ${colour.blue | 0})`,
+      alpha: r4((Number.isFinite(colour.alpha) ? colour.alpha : 255) / 255),
+      // The build's own rule, not the canvas string's. See the header.
+      strength: Number.isFinite(filter.strength) ? filter.strength : 1,
+      extent: 4 * Math.max(sx, sy) + Math.max(Math.abs(dx), Math.abs(dy))
+    };
+  };
+
+  for (const [key, animation] of Object.entries(animations ?? {})) {
+    const table = Array.isArray(animation?.effectGroups) ? animation.effectGroups : [];
+    if (table.length === 0) continue;
+    labelsWithEffects.push(key);
+
+    const groups = [];
+    let drawn = 0;
+    let refused = 0;
+    let filters = 0;
+    for (const group of table) {
+      const list = Array.isArray(group?.filters) ? group.filters : [];
+      const stages = [];
+      const reasons = [];
+      for (const filter of list) {
+        filters += 1;
+        // THE GATE. `canvasFilterFor` on a ONE-FILTER list, because its mapper
+        // is per-filter and stateless — no branch in it reads a previous
+        // filter — so the per-filter verdicts sum to the whole-list verdict and
+        // this can say WHICH filter landed where, which the list form cannot.
+        const verdict = canvasFilterFor([filter], { scale: factor });
+        perFilter.push(verdict);
+        if (verdict.counts.applied !== 1) {
+          refused += 1;
+          for (const entry of [...verdict.refused, ...verdict.deferred, ...verdict.noOps]) {
+            reasons.push(`${entry.type ?? "unknown"}:${entry.reason}`);
+          }
+          continue;
+        }
+        stages.push(stageFor(filter));
+        drawn += 1;
+      }
+      // A blend mode is COUNTED AND REFUSED rather than mapped. `mix-blend-mode`
+      // could carry eight of the fifteen, but ZERO of this build's figure groups
+      // carries one, and a mapper for a case the build does not contain is the
+      // "zero focal gradients" mistake — untestable here, and it would draw
+      // where `src/render/screen.js` composites.
+      let blendRefused = null;
+      if (group?.blendMode !== undefined && group?.blendMode !== null) {
+        blendModes += 1;
+        const verdict = blendModeFor(group.blendMode);
+        blendRefused = `${verdict.name ?? group.blendMode}:notDrawnInSvgPreview`;
+        blendRefusedNames[blendRefused] = (blendRefusedNames[blendRefused] ?? 0) + 1;
+      }
+      if (stages.length === 0) {
+        groups.push({ def: null, refused: reasons, blendRefused });
+        continue;
+      }
+      const signature = JSON.stringify(stages);
+      let at = defIndex.get(signature);
+      if (at === undefined) {
+        at = defs.length;
+        defs.push({ id: `fx${at}`, stages });
+        defIndex.set(signature, at);
+        pad = Math.max(pad, stages.reduce((total, stage) => total + stage.extent, 0));
+      }
+      groups.push({ def: defs[at].id, refused: reasons, blendRefused });
+    }
+
+    // What a viewer of THIS animation is looking at. Composed here because the
+    // page holds no counters: a count kept in the page is a second thing to
+    // drift from the file it claims to describe.
+    const frames = Array.isArray(animation?.poses) ? animation.poses : [];
+    let framesWith = 0;
+    let placements = 0;
+    for (const pose of frames) {
+      let any = false;
+      for (const placement of pose) {
+        if (Array.isArray(placement?.effects) && placement.effects.length > 0) {
+          placements += 1;
+          any = true;
+        }
+      }
+      if (any) framesWith += 1;
+    }
+    const widest = (group) => Math.max(
+      0,
+      ...(Array.isArray(group?.filters) ? group.filters : []).map((f) => (Number.isFinite(f.blurX) ? f.blurX : 0))
+    );
+    const distinct = new Set(table.map((group) => JSON.stringify(group))).size;
+    const tween = distinct > 1
+      ? ` It CHANGES frame to frame — ${distinct} distinct records, widest blurX ` +
+        `${r4(widest(table[0]))} to ${r4(widest(table[table.length - 1]))}px.`
+      : " Every frame under it carries the SAME record — a still glow, not a tween.";
+    byAnimation[key] = {
+      groups,
+      note: `${animation.label}: ${plural(table.length, "effect group")} over ` +
+        `${framesWith} of ${plural(frames.length, "frame")}, ${plural(placements, "placement")} inside them; ` +
+        `${plural(filters, "filter")}, ${drawn} drawn, ${refused} refused.${tween}`
+    };
+  }
+
+  // Recounted from the pack by the function `manifest.json`'s own numbers come
+  // out of, so the page and the manifest cannot tell a reader different things
+  // about the same file.
+  const tally = effectTally(animations);
+  const use = summariseFilterUse(perFilter);
+  const labels = Object.keys(animations ?? {});
+  const refusedByReason = Object.entries({ ...use.refusedByReason, ...blendRefusedNames })
+    .map(([reason, count]) => `${reason} x${count}`)
+    .join(", ");
+  const anisotropic = use.approximatedByKind.anisotropicBlur ?? 0;
+
+  const packNote =
+    `EFFECTS — ${tally.inherited.placements} of ${tally.own.placements} placements sit under an effect group, ` +
+    `in ${labelsWithEffects.length} of ${labels.length} animations` +
+    (labelsWithEffects.length > 0 ? ` (${labelsWithEffects.join(", ")})` : "") + `. ` +
+    `${tally.inherited.groups} group tables, ${tally.inherited.distinctGroups} distinct, drawn from ${defs.length} SVG filters. ` +
+    `${use.total} filters: ${use.applied} drawn, ${use.deferred} deferred, ${use.noOp} no-op, ${use.refused} refused` +
+    (refusedByReason ? ` (${refusedByReason})` : "") + `. ` +
+    `NOT DRAWN: ${tally.inherited.groups} group matrices — the pack carries no matrix for a group ` +
+    `(notCarried.effectGroupMatrix), so every blur radius here is in STAGE pixels and is NOT scaled by the ` +
+    `enclosing sprite's own transform. ${blendModes} group blend modes. ` +
+    `${tally.own.filteredPlacements} placements carry a filter of their own and ${tally.own.blendModePlacements} a blend mode, ` +
+    `so nothing on this page is a leaf's own effect. ` +
+    `DRAWN DIFFERENTLY FROM THE CANVAS PATH: strength is applied as the build applies it — clamp(alpha x strength) ` +
+    `through feComponentTransfer — where src/render/filters.js folds it into the flood alpha instead ` +
+    `(${(use.approximatedByKind.shadowStrengthAsAlpha ?? 0) + (use.approximatedByKind.shadowStrengthSaturated ?? 0)} of ${use.total} filters differ that way, ` +
+    `${use.approximatedByKind.shadowStrengthSaturated ?? 0} of them with the strength DISCARDED at the alpha clamp); and ` +
+    `feGaussianBlur takes the two radii separately where the canvas string averages them (${anisotropic} differ). ` +
+    // ► **NOT READ OFF `approximatedByKind.boxBlurAsGaussian`, WHICH IS ZERO HERE AND MEANS THE OPPOSITE OF
+    //   WHAT IT LOOKS LIKE.** `canvasFilterFor` labels each applied filter with ONE approximation, and a
+    //   glow whose `strength` is not 1 gets `shadowStrengthAsAlpha` — so all 24 of this pack's glows are
+    //   counted there and the box-blur key reads 0. It is not "no box blurs were approximated"; it is
+    //   "every one of them was ALSO approximated in a second way that won the label". Drafted from that
+    //   key, this sentence said "standing in for 0 box blurs", which is a lie about a sigma every one of
+    //   them went through. The denominator is the drawn count, because `blurSigma` ran on all of them.
+    `Every one of the ${use.applied} drawn blurs through filters.js blurSigma — a Gaussian standing in for ` +
+    `the build's box blurs, same variance and a different kernel.`;
+
+  const noneNote = labelsWithEffects.length > 0
+    ? `no effect group in this animation — ${labelsWithEffects.length} of ${labels.length} have one: ${labelsWithEffects.join(", ")}`
+    : `no effect group in this animation, and none in any of the ${labels.length} in this pack`;
+
+  return {
+    defs,
+    // The filter region is padded by the WIDEST effect any def reaches, so a
+    // glow is never cropped by the box it is drawn in. A region too small is
+    // the one failure here that looks like a correct render of a smaller glow.
+    pad: Math.ceil(pad) + 1,
+    animations: byAnimation,
+    labelsWithEffects,
+    packNote,
+    noneNote,
+    totals: { use, groups: tally.inherited.groups, defs: defs.length, blendModes }
+  };
+}
+
+/**
  * A page that plays the extracted rig, AND sounds it.
  *
  * ► **THE FIRST VERSION NEEDED A SERVER AND THAT WAS A DESIGN ERROR.** It
@@ -1123,6 +1368,10 @@ export function previewHtml({ clip, clipName, shapes, animations, soundBindings,
   // Every tinted colour these poses can ask for, computed by filters.js so
   // that nothing below has to. See `previewTints`.
   const tints = previewTints(shapes, animations);
+  // And every effect group, as SVG primitives plus the invoice of what is NOT
+  // drawn. Same reason as the tints: the page cannot import filters.js, so
+  // filters.js runs here. See `previewEffects`.
+  const effects = previewEffects(animations);
   return `<!doctype html>
 <meta charset="utf-8">
 <title>Extracted figure — clip ${clip}${clipName ? ` (${clipName})` : ""}</title>
@@ -1138,12 +1387,21 @@ export function previewHtml({ clip, clipName, shapes, animations, soundBindings,
   .silent { color: #f0b429; }
   footer { padding: 10px 16px; border-top: 1px solid #2a2e36; color: #9aa3b2; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   footer button { padding: 2px 8px; }
+  footer .row { flex-basis: 100%; line-height: 1.5; }
 </style>
 <header>
   <label>Animation <select id="anim"></select></label>
+  <button id="prev" title="step back one frame">&#9664;</button>
   <button id="play">Pause</button>
+  <button id="next" title="step on one frame">&#9654;</button>
   <label>fps <input id="fps" type="number" value="24" min="1" max="60" style="width:5em"></label>
   <label><input type="checkbox" id="sound" checked> sound</label>
+  <label><input type="checkbox" id="fit"> fit</label>
+  <label>effects <select id="fx">
+    <option value="composite">composite &mdash; as the build does</option>
+    <option value="path">per-path &mdash; WRONG, for comparison</option>
+    <option value="off">off</option>
+  </select></label>
   <span class="meta" id="meta"></span>
 </header>
 <main><svg id="stage" width="520" height="620" preserveAspectRatio="xMidYMid meet"></svg></main>
@@ -1151,11 +1409,20 @@ export function previewHtml({ clip, clipName, shapes, animations, soundBindings,
   <span class="meta">${sounded} of ${labels.length} animations carry sound.</span>
   <span class="meta" id="tintnote"></span>
   <span id="bound"></span>
+  <span class="meta row" id="fxnote"></span>
+  <span class="meta row" id="fxpack"></span>
 </footer>
 <script type="application/json" id="shapes">${island(shapes)}</script>
 <script type="application/json" id="animations">${island(animations)}</script>
 <script type="application/json" id="bindings">${island(soundBindings ?? {})}</script>
 <script type="application/json" id="tints">${island({ fills: tints.fills, alphas: tints.alphas })}</script>
+<script type="application/json" id="effects">${island({
+  defs: effects.defs,
+  pad: effects.pad,
+  animations: effects.animations,
+  packNote: effects.packNote,
+  noneNote: effects.noneNote
+})}</script>
 <script>
 const shapes = JSON.parse(document.getElementById("shapes").textContent);
 const animations = JSON.parse(document.getElementById("animations").textContent);
@@ -1166,6 +1433,9 @@ const ALPHA_TINTS = TINTS.alphas;
 const TINT_PAIRS = ${tints.fillPairs};
 const TINT_TRANSFORMS = ${tints.transforms};
 const SOUND_PATH = ${JSON.stringify(soundPath)};
+// Every filter this page can draw, already decided by src/render/filters.js —
+// see previewEffects. The page builds DOM out of it and computes nothing.
+const FX = JSON.parse(document.getElementById("effects").textContent);
 
 const stage = document.getElementById("stage");
 const picker = document.getElementById("anim");
@@ -1175,12 +1445,22 @@ const tintNote = document.getElementById("tintnote");
 const fpsInput = document.getElementById("fps");
 const playButton = document.getElementById("play");
 const soundToggle = document.getElementById("sound");
+const fxSelect = document.getElementById("fx");
+const fxNote = document.getElementById("fxnote");
+const fxPack = document.getElementById("fxpack");
+const stepBack = document.getElementById("prev");
+const stepOn = document.getElementById("next");
+const fitToggle = document.getElementById("fit");
 const keys = Object.keys(animations);
 for (const key of keys) {
   const option = document.createElement("option");
   option.value = key;
   const files = bindings[key] || [];
-  option.textContent = animations[key].label + " (" + animations[key].poses.length + "f" + (files.length ? ", " + files.length + " snd" : ", silent") + ")";
+  // ► **THE PICKER SAYS WHICH LABELS HAVE AN EFFECT AT ALL.** 4 of 101 do on
+  //   this build, and a page that does not point at them is a page on which the
+  //   whole effect extraction is invisible unless you already knew where to look.
+  const marked = FX.animations[key] ? ", fx" : "";
+  option.textContent = animations[key].label + " (" + animations[key].poses.length + "f" + (files.length ? ", " + files.length + " snd" : ", silent") + marked + ")";
   picker.append(option);
 }
 const NS = "http://www.w3.org/2000/svg";
@@ -1274,42 +1554,244 @@ function tintAlpha(alpha, c) {
 // does — the effect leaves frame, the fighter does not.
 const BASE = animations.standing ? animations.standing.bounds : null;
 const PAD = 0.45;
+// Four NUMBERS rather than the string it used to be: the filter region below
+// is computed from the same box, and a region derived by re-parsing a string
+// this file had just built is a second copy of the box.
 const VIEWBOX = BASE
   ? [BASE.xMin - (BASE.xMax - BASE.xMin) * PAD, BASE.yMin - (BASE.yMax - BASE.yMin) * 0.1,
-     (BASE.xMax - BASE.xMin) * (1 + PAD * 2), (BASE.yMax - BASE.yMin) * 1.2].join(" ")
+     (BASE.xMax - BASE.xMin) * (1 + PAD * 2), (BASE.yMax - BASE.yMin) * 1.2]
   : null;
 
+// ---------------------------------------------------------------------------
+// THE EFFECT GROUPS, WHICH THIS PAGE CARRIED AND DID NOT DRAW
+// ---------------------------------------------------------------------------
+//
+// ► **A GROUP'S FILTER IS A FILTER OF THE COMPOSITE, NOT OF EACH LEAF.** That
+//   is src/render/screen.js's rule and it is the whole reason the wrappers
+//   below exist. The build's glow sits on a SPRITE; everything inside that
+//   sprite is rendered, THEN blurred once, THEN the glow goes under it.
+//   Stamping the same filter on each path draws N glows that overlap and pile
+//   up at the seams — a different picture, and a plausible-looking one, which
+//   is why the mode switch offers it BY NAME instead of leaving it as a thing
+//   you could reach by accident.
+//
+// ► **THE WRAPPER CARRIES NO TRANSFORM, AND THAT IS LOAD-BEARING.** An SVG
+//   filter on an element whose own transform scales by 0.7 resolves its
+//   stdDeviation in THAT element's units. The wrapper sits ABOVE the placement
+//   matrices, so the filter resolves in stage pixels — which is the only space
+//   the pack's blur radii are stated in, the group's own matrix not being
+//   carried at all (notCarried.effectGroupMatrix, named in the footer).
+//
+// (No arithmetic here: every sigma, offset, colour and slope was computed by
+// src/render/filters.js in previewEffects. This builds DOM out of numbers.)
+
+const prim = (name, attributes) => {
+  const node = document.createElementNS(NS, name);
+  for (const key of Object.keys(attributes)) node.setAttribute(key, String(attributes[key]));
+  return node;
+};
+
+// Black, carrying the input's alpha — SourceAlpha for a stage whose input is
+// the previous stage's output rather than the original graphic. The build
+// applies its filters in list order, each to the result of the last.
+const ALPHA_ONLY = "0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0";
+
+const FX_DEFS = document.createElementNS(NS, "defs");
+const FX_FILTERS = [];
+for (const def of FX.defs) {
+  const filter = prim("filter", {
+    id: def.id,
+    // userSpaceOnUse, NOT the default. The default region is the content's
+    // bounding box padded by 10%: a 16px orb padded by 1.6px shears a 25px
+    // glow into a square, and a sheared glow does not look like a bug, it
+    // looks like a correct render of a smaller one. Set per draw, below.
+    filterUnits: "userSpaceOnUse",
+    // ► **sRGB, NOT THE SVG DEFAULT.** SVG filters interpolate in linearRGB
+    //   unless told otherwise and Flash composites in sRGB. Left at the
+    //   default, every one of these glows comes out the wrong colour and the
+    //   wrong softness — and still looks like a glow, on the one page whose
+    //   job is to be compared by eye against the running game.
+    "color-interpolation-filters": "sRGB"
+  });
+  let source = "SourceGraphic";
+  for (let i = 0; i < def.stages.length; i += 1) {
+    const st = def.stages[i];
+    const out = "r" + i;
+    if (st.kind === "blur") {
+      filter.append(prim("feGaussianBlur", { in: source, stdDeviation: st.sx + " " + st.sy, result: out }));
+      source = out;
+      continue;
+    }
+    // The build's glow, in the build's own order: blur THE ALPHA, offset it,
+    // re-multiply it by strength and clamp, colour it, and put it UNDER the
+    // thing that cast it.
+    filter.append(prim("feColorMatrix", { in: source, type: "matrix", values: ALPHA_ONLY, result: "a" + i }));
+    filter.append(prim("feGaussianBlur", { in: "a" + i, stdDeviation: st.sx + " " + st.sy, result: "b" + i }));
+    let cast = "b" + i;
+    if (st.dx !== 0 || st.dy !== 0) {
+      filter.append(prim("feOffset", { in: cast, dx: st.dx, dy: st.dy, result: "o" + i }));
+      cast = "o" + i;
+    }
+    // STRENGTH, AS THE BUILD APPLIES IT: clamp(alpha x strength), per pixel. A
+    // linear transfer function is clamped to 0..1 by the filter spec, which is
+    // exactly Flash's re-multiply-and-clamp. The canvas path in filters.js
+    // cannot do this and folds strength into the flood alpha instead; the
+    // footer says so, with the count.
+    const transfer = prim("feComponentTransfer", { in: cast, result: "s" + i });
+    transfer.append(prim("feFuncA", { type: "linear", slope: st.strength, intercept: 0 }));
+    filter.append(transfer);
+    filter.append(prim("feFlood", { "flood-color": st.colour, "flood-opacity": st.alpha, result: "c" + i }));
+    filter.append(prim("feComposite", { in: "c" + i, in2: "s" + i, operator: "in", result: "g" + i }));
+    const merge = prim("feMerge", { result: out });
+    // feMerge draws its nodes in order, so the glow goes down FIRST and the
+    // thing that cast it sits on top. The other order hides the fighter.
+    merge.append(prim("feMergeNode", { in: "g" + i }));
+    merge.append(prim("feMergeNode", { in: source }));
+    filter.append(merge);
+    source = out;
+  }
+  FX_FILTERS.push(filter);
+  FX_DEFS.append(filter);
+}
+
+// The region every filter is evaluated in: the box actually on screen, padded
+// by the widest reach any def has (FX.pad, computed from the sigmas by
+// previewEffects). Re-set only when the box changes, which is never while one
+// animation plays.
+let fxRegion = "";
+function setFilterRegion(view) {
+  const key = view.join(" ");
+  if (key === fxRegion) return;
+  fxRegion = key;
+  for (const filter of FX_FILTERS) {
+    filter.setAttribute("x", String(view[0] - FX.pad));
+    filter.setAttribute("y", String(view[1] - FX.pad));
+    filter.setAttribute("width", String(view[2] + FX.pad * 2));
+    filter.setAttribute("height", String(view[3] + FX.pad * 2));
+  }
+}
+
+// composite | path | off. See the mode notes for what each one claims to be.
+let fxMode = "composite";
+const FX_MODE = {
+  composite: "effects: COMPOSITE — one filter over the whole group, which is what the build does.",
+  path: "effects: PER-PATH — WRONG ON PURPOSE, and shown so the difference is visible: the group's filter stamped on every path separately. The pile-up at the seams is the error.",
+  off: "effects: OFF — the pack's filters are carried and not drawn."
+};
+
+// The open group wrappers, outermost first, and the element each depth appends
+// into. THIS IS THE WHOLE OF "has the group changed": a run of placements that
+// agree on their chain share one wrapper and composite once, and the run
+// flushes when the chain does not match. Same shape as groupRunsOf in the
+// arena shell, expressed as nesting because SVG nests.
+//
+// Comparing INDICES is sound only because effectGroupsFor keys its table on the
+// whole record, PATH INCLUDED: two placements that share an index share a path,
+// a character and a filter list, which is the same sprite. Keyed on the filters
+// alone, two different sprites wearing the same glow would dedupe to one index
+// and this would composite them together — one buffer where the build has two.
+const openChain = [];
+const containers = [];
+const NO_EFFECTS = [];
+
+function containerFor(chain, table, reuse) {
+  let common = 0;
+  if (reuse) {
+    while (common < chain.length && common < openChain.length && chain[common] === openChain[common]) common += 1;
+  }
+  openChain.length = common;
+  containers.length = common + 1;
+  for (let i = common; i < chain.length; i += 1) {
+    const wrapper = document.createElementNS(NS, "g");
+    const entry = table[chain[i]];
+    // A placement that says it is inside a group whose record is not in the
+    // pack draws UNFILTERED — the only thing it can do — and the footer's
+    // denominators are what let a reader see that it happened.
+    if (entry && entry.def) wrapper.setAttribute("filter", "url(#" + entry.def + ")");
+    wrapper.dataset.effectGroup = String(chain[i]);
+    containers[i].append(wrapper);
+    containers.push(wrapper);
+    openChain.push(chain[i]);
+  }
+  return containers[chain.length];
+}
+
+function placementGroup(placement) {
+  const m = placement.matrix;
+  const group = document.createElementNS(NS, "g");
+  group.setAttribute("transform", "matrix(" + m[0] + " " + m[1] + " " + m[2] + " " + m[3] + " " + (m[4] / 20) + " " + (m[5] / 20) + ")");
+  if (placement.limb) group.dataset.limb = placement.limb;
+  return group;
+}
+
+function pathNode(entry, c) {
+  const node = document.createElementNS(NS, "path");
+  node.setAttribute("d", entry.d);
+  node.setAttribute("fill", tintHex(entry.fill, c));
+  node.setAttribute("fill-opacity", String(tintAlpha(entry.fillOpacity, c)));
+  if (entry.fillRule) node.setAttribute("fill-rule", entry.fillRule);
+  if (entry.stroke) {
+    node.setAttribute("stroke", tintHex(entry.stroke, c));
+    node.setAttribute("stroke-opacity", String(tintAlpha(entry.strokeOpacity ?? 1, c)));
+    node.setAttribute("stroke-width", String(entry.strokeWidth));
+    node.setAttribute("stroke-linejoin", "round");
+    node.setAttribute("stroke-linecap", "round");
+  }
+  return node;
+}
+
+// ► **MEASURED WHEN THE GLOWS FIRST DREW, AND IT IS A FINDING ABOUT THIS PAGE
+//   RATHER THAN ABOUT THE PACK.** The fixed standing box is -91.9..91.2 wide.
+//   The psych-up orb starts at x -65.7 and TRAVELS: it is outside that box from
+//   psyche_up2 frame 5 on, and on every one of psyche_charging2's eight frames
+//   (-121.1..-78.3). So the second half of the one tween in this pack, and the
+//   whole of its brightest glow, were cropped by the viewport — which before
+//   this change cost nothing, because the orb was an opaque 16px dot, and now
+//   costs the thing the page is for.
+//
+//   The fixed box is NOT overturned: it is there because death2's blood sprays
+//   781px and fitting that shrinks the gladiator to a speck, and that reasoning
+//   still holds. "fit" is opt-in, off by default, and pads by the widest reach
+//   any filter has — the pack's own bounds are GEOMETRY bounds (poseBounds
+//   walks shape corners) and contain no glow, so fitting to them unpadded
+//   would crop the halo while looking like it had fixed the problem.
 function draw() {
   const animation = animations[current];
   const pose = animation.poses[frame % animation.poses.length] || [];
   const box = animation.bounds;
-  stage.setAttribute("viewBox", VIEWBOX
-    || (box.xMin + " " + box.yMin + " " + (box.xMax - box.xMin) + " " + (box.yMax - box.yMin)));
-  stage.replaceChildren();
+  const fitted = [box.xMin - FX.pad, box.yMin - FX.pad,
+                  box.xMax - box.xMin + FX.pad * 2, box.yMax - box.yMin + FX.pad * 2];
+  const view = fitToggle.checked || !VIEWBOX ? fitted : VIEWBOX;
+  stage.setAttribute("viewBox", view.join(" "));
+  setFilterRegion(view);
+  // The defs survive the wipe: they are built once and the filters are
+  // referenced by id, so rebuilding them every frame would be ten filters of
+  // DOM churn at 24fps for no change.
+  stage.replaceChildren(FX_DEFS);
+  const info = FX.animations[current];
+  const table = info ? info.groups : NO_EFFECTS;
+  openChain.length = 0;
+  containers.length = 1;
+  containers[0] = stage;
   for (const placement of pose) {
     const shape = shapes[placement.shape];
     if (!shape) continue;
-    const m = placement.matrix;
-    const group = document.createElementNS(NS, "g");
-    group.setAttribute("transform", "matrix(" + m[0] + " " + m[1] + " " + m[2] + " " + m[3] + " " + (m[4] / 20) + " " + (m[5] / 20) + ")");
-    if (placement.limb) group.dataset.limb = placement.limb;
     const c = placement.colour;
-    for (const entry of shape.paths) {
-      const node = document.createElementNS(NS, "path");
-      node.setAttribute("d", entry.d);
-      node.setAttribute("fill", tintHex(entry.fill, c));
-      node.setAttribute("fill-opacity", String(tintAlpha(entry.fillOpacity, c)));
-      if (entry.fillRule) node.setAttribute("fill-rule", entry.fillRule);
-      if (entry.stroke) {
-        node.setAttribute("stroke", tintHex(entry.stroke, c));
-        node.setAttribute("stroke-opacity", String(tintAlpha(entry.strokeOpacity ?? 1, c)));
-        node.setAttribute("stroke-width", String(entry.strokeWidth));
-        node.setAttribute("stroke-linejoin", "round");
-        node.setAttribute("stroke-linecap", "round");
+    const chain = fxMode === "off" || !Array.isArray(placement.effects) ? NO_EFFECTS : placement.effects;
+    if (fxMode === "path") {
+      // THE WRONG PICTURE, DRAWN ON REQUEST. A fresh wrapper per path, so each
+      // one is its own composite — which is what "stamp the filter per leaf"
+      // actually looks like.
+      for (const entry of shape.paths) {
+        const group = placementGroup(placement);
+        group.append(pathNode(entry, c));
+        containerFor(chain, table, false).append(group);
       }
-      group.append(node);
+      continue;
     }
-    stage.append(group);
+    const group = placementGroup(placement);
+    for (const entry of shape.paths) group.append(pathNode(entry, c));
+    containerFor(chain, table, true).append(group);
   }
   meta.textContent = "frame " + ((frame % animation.poses.length) + 1) + "/" + animation.poses.length +
     " · clip frames " + animation.firstFrame + "-" + animation.lastFrame + " · " + pose.length + " parts";
@@ -1318,6 +1800,12 @@ function draw() {
     ? TINT_PAIRS + " precomputed tints across " + TINT_TRANSFORMS + " colour transforms"
     : tintMisses + " TINT LOOKUPS MISSED — those fills are drawn UNTINTED";
   tintNote.className = tintMisses === 0 ? "meta" : "silent";
+  // What this animation's effects are, and what is being done with them. The
+  // sentences were composed by previewEffects from the pack; the page picks
+  // one. A viewer who cannot tell a complete picture from a partial one is
+  // looking at an unlabelled approximation.
+  fxNote.textContent = FX_MODE[fxMode] + " " + (info ? info.note : FX.noneNote);
+  fxNote.className = fxMode === "composite" ? "meta row" : "meta row silent";
 }
 
 function select(key) {
@@ -1349,6 +1837,28 @@ playButton.addEventListener("click", () => {
   playing = !playing;
   playButton.textContent = playing ? "Pause" : "Play";
 });
+fxSelect.addEventListener("change", () => {
+  fxMode = fxSelect.value;
+  draw();
+});
+// ► **STEPPING IS WHAT MAKES A TWEEN CHECKABLE.** psyche_up2's glow is nine
+//   distinct records over nine frames at 24fps — under four tenths of a second
+//   — so "does the pack carry a MOVING effect or one frozen value" is a
+//   question you cannot answer by watching it loop. Stepping pauses first,
+//   because a step that keeps playing is not a step.
+function step(by) {
+  playing = false;
+  playButton.textContent = "Play";
+  const count = animations[current].poses.length;
+  frame = ((frame + by) % count + count) % count;
+  draw();
+}
+stepBack.addEventListener("click", () => step(-1));
+stepOn.addEventListener("click", () => step(1));
+fitToggle.addEventListener("change", draw);
+// The pack-wide effect invoice is a fact about the file, not about the frame,
+// so it is written once and not on every draw.
+fxPack.textContent = FX.packNote;
 showBound(current);
 draw();
 requestAnimationFrame(tick);

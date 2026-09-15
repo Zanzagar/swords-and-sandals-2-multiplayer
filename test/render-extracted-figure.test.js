@@ -16,13 +16,19 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  ENCHANTMENT_FIELDS,
   ExtractedFigureError,
   animationFor,
+  clipToArenaScale,
+  figureEffectGroupsFor,
+  figureInvoiceFor,
   figurePackFrom,
   hasExtractedArt,
   paintExtractedFigure,
-  poseIndexAt
+  poseIndexAt,
+  weaponEnchantmentFor
 } from "../src/render/extracted-figure.js";
+import { canvasFilterFor } from "../src/render/filters.js";
 import { UNMAPPED_CLIP_LABELS, allUnmappedLabels, clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
 import { ATTACHMENTS, attachmentsFor, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
 import nodeFs from "node:fs";
@@ -717,4 +723,671 @@ test("AN ATTACHED WEAPON LANDS WHERE THE RIG'S OWN WEAPON ART DOES", () => {
   assert.ok(drift < 0.05,
     `the attached weapon is ${(drift * 100).toFixed(1)}% of the figure's height away from the rig's own `
     + "weapon art — it should share the limb, so this is a transform error");
+});
+
+/* ------------------------------------------------------------------ */
+/* EFFECT GROUPS AND THE WEAPON ENCHANTMENT — added 2026-09-15.         */
+/*                                                                      */
+/* ► **READ THIS BEFORE TRUSTING ANY NUMBER BELOW.** The four labels     */
+/*   that carry every one of this build's effect groups — `psyche_up`,   */
+/*   `psyche_up2`, `psyche_charging`, `psyche_charging2` — are ALL       */
+/*   declared unplayed (`unbuiltSpells` and `continuations`), so         */
+/*   `animationFor` cannot reach one and `paintExtractedFigure` on the   */
+/*   real pack, as the engine stands, emits ZERO group records. The      */
+/*   tests that exercise the real glow records therefore mount           */
+/*   `psyche_up2` UNDER A REACHABLE LABEL: the filter payloads are the   */
+/*   build's own bytes, the dispatch is the test's. A test that only     */
+/*   painted a reachable family would assert against a population of     */
+/*   nought and stay green with the whole feature deleted.               */
+/* ------------------------------------------------------------------ */
+
+const REAL_ENCHANTMENTS = readRealPack("assets/figure/enchantments.json");
+
+/** Three paths on one shape, so "how many ops sit under one group" can vary. */
+const GLOW_SHAPES = Object.freeze({
+  1: SHAPES[1],
+  2: SHAPES[2],
+  7: {
+    bounds: { xMin: 0, xMax: 1, yMin: 0, yMax: 1 },
+    paths: [
+      { d: "M0 0L1 0L1 1Z", fill: "#111111" },
+      { d: "M0 0L0 1L1 1Z", fill: "#222222" },
+      { d: "M0 0L1 1L0 1Z", fill: "#333333" }
+    ]
+  }
+});
+
+/** One glow, in the shape `parseFilterList` emits and `canvasFilterFor` reads. */
+const aGlow = (blur, strength = 2, colour = { red: 0, green: 255, blue: 255, alpha: 255 }) => ({
+  type: "glow", colour, blurX: blur, blurY: blur, strength,
+  inner: false, knockout: false, compositeSource: true, passes: 1
+});
+
+/**
+ * A pack whose `standing` clip is one pose of `shape` under `effects`, with a
+ * `weapon` limb so the enchantment half can be reached as well.
+ */
+function glowPackOf({
+  groups = [], effects = null, own = null, shape = 7, limbScale = 1,
+  enchantments = null, placements = 1, rigWeapon = false
+} = {}) {
+  const pose = [];
+  for (let n = 0; n < placements; n += 1) {
+    pose.push({
+      shape, limb: "torso", depth: [23, 1, 1], matrix: [1, 0, 0, 1, 0, -1000 - n],
+      ...(effects ? { effects } : {}),
+      ...(own ?? {})
+    });
+  }
+  // ► **THE RIG'S OWN WEAPON ART, WHICH THIS FIXTURE DID NOT HAVE — AND ITS
+  //   ABSENCE IS WHY THE SCOPE TEST BELOW COULD NOT FAIL.** In the real pack
+  //   every pose carries `{limb: "weapon", depth: [39, 1, 1]}`, shape 701,
+  //   INSIDE the `realweapon` placement that wears the glow. A fixture without
+  //   one cannot tell "the glow covers the attachment only" from "the glow
+  //   covers the whole weapon limb", which are different pictures — so the
+  //   assertion passed under both and proved nothing about either.
+  if (rigWeapon) {
+    pose.push({ shape, limb: "weapon", depth: [39, 1, 1], matrix: [1, 0, 0, 1, 200, -1400] });
+  }
+  return figurePackFrom(GLOW_SHAPES, {
+    standing: {
+      label: "Standing", firstFrame: 1, lastFrame: 1,
+      bounds: { xMin: -20, xMax: 20, yMin: -100, yMax: 0 },
+      effectGroups: groups,
+      poses: [pose],
+      limbs: [{
+        torso: [1, 0, 0, 1, 0, -1000],
+        weapon: [limbScale, 0, 0, limbScale, 200, -1400]
+      }]
+    }
+  }, enchantments);
+}
+
+const paintGlow = (pack, options = {}) =>
+  paintExtractedFigure(pack, { family: "standing", label: "Standing", at: 0, height: 1, ...options });
+
+test("THE FOUR CLIPS THAT CARRY EVERY EFFECT GROUP ARE UNREACHABLE — say it, do not discover it", () => {
+  // ► **THIS IS A FINDING, NOT A SETUP STEP.** All 12 group-table entries and
+  //   all 30 grouped placements in `assets/figure/animations.json` sit on
+  //   `psyche_up`, `psyche_up2`, `psyche_charging` and `psyche_charging2`, and
+  //   every one of those four is DECLARED UNPLAYED — the first two in
+  //   `unbuiltSpells`, the last two in `continuations`. So the glow this module
+  //   now carries reaches no gladiator in the arena until a family dispatches a
+  //   psyche clip, and a sweep over the playable families would report the
+  //   feature working over a population of zero.
+  //
+  //   Pinned so that BUILDING the psyche family turns this red and forces the
+  //   paragraph above to be rewritten rather than quietly outlived — the same
+  //   job the `defend` assertion did until the defence system landed.
+  const declared = new Set(allUnmappedLabels());
+  for (const label of ["psyche_up", "psyche_up2", "psyche_charging", "psyche_charging2"]) {
+    assert.ok(declared.has(label), `${label} is declared unplayed — see the note above`);
+  }
+  if (!REAL_ANIMATIONS) return;
+  // And they really are the only carriers, recomputed from the pack.
+  const carriers = Object.entries(REAL_ANIMATIONS)
+    .filter(([, animation]) => Array.isArray(animation?.effectGroups) && animation.effectGroups.length > 0)
+    .map(([label]) => label)
+    .sort();
+  assert.deepEqual(carriers, ["psyche_charging", "psyche_charging2", "psyche_up", "psyche_up2"]);
+  for (const label of carriers) assert.equal(declared.has(label), true);
+});
+
+test("a pack with NO effect groups and NO enchantments emits the operations it always did", () => {
+  // ► **THE ARENA DRAWS A GLADIATOR ON EVERY FRAME, so a regression here is the
+  //   whole screen.** `group` is spread LAST and only when there is one, so an
+  //   operation from a pack without effects is byte-identical — key ORDER
+  //   included, which `JSON.stringify` is sensitive to and `deepEqual` is not.
+  const pack = packOf();
+  const ops = paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", at: 0, height: 1,
+    wardrobe: wardrobeOf({ breastplate: [3] }), loadout: { breastplate: 3 }
+  });
+  assert.ok(ops.length > 0);
+  assert.equal(ops.some((op) => "group" in op), false, "nothing carries a group");
+  const body = ops.find((op) => !op.slot);
+  const piece = ops.find((op) => op.slot === "breastplate");
+  assert.deepEqual(Object.keys(body), [
+    "kind", "d", "matrix", "limb", "rigDepth", "fill", "fillOpacity", "fillRule",
+    "stroke", "strokeOpacity", "strokeWidth", "alpha"
+  ]);
+  assert.deepEqual(Object.keys(piece), [
+    "kind", "d", "matrix", "limb", "slot", "sortKey", "fill", "fillOpacity",
+    "fillRule", "stroke", "strokeOpacity", "strokeWidth", "alpha"
+  ]);
+});
+
+test("`group` is ADDITIVE, which is how a reader turns the whole effect OFF", () => {
+  // The same pose painted with and without the `effects` index: strip `group`
+  // and the two are identical, so a painter that ignores the field draws
+  // exactly what it drew before the field existed. That is the off switch —
+  // there is no option, because an option would be a second thing to get wrong.
+  const groups = [{ path: [43], character: 1195, filters: [aGlow(22, 2.69921875)] }];
+  const withGroup = paintGlow(glowPackOf({ groups, effects: [0] }));
+  const without = paintGlow(glowPackOf({ groups }));
+  assert.equal(withGroup.length, 3);
+  assert.equal(withGroup.every((op) => op.group), true);
+  assert.equal(without.some((op) => "group" in op), false);
+  const stripped = withGroup.map((op) => {
+    const { group, ...rest } = op;
+    return rest;
+  });
+  assert.equal(JSON.stringify(stripped), JSON.stringify(without.map((op) => ({ ...op }))));
+});
+
+test("ONE FROZEN RECORD PER GROUP PER PAINT — interned, because identity is the flush test", () => {
+  // ► `groupRunsOf` in `tools/arena/main.js` flushes its buffer on
+  //   `op.group !== previous` and says in its own docstring that the test is
+  //   OBJECT IDENTITY and not `group.id`. A fresh record per operation would
+  //   make that always true and every group a group of one.
+  // ► **TWO PLACEMENTS, NOT ONE, AND THE FIRST VERSION OF THIS TEST HAD ONE.**
+  //   A single placement resolves its group ONCE, so every operation under it
+  //   shares a record whether or not anything is cached — the assertion passed
+  //   with the cache deleted. Measured by mutation: `cache.set` removed, suite
+  //   still green. **The real pack cannot exercise this either** — all 30 of
+  //   its grouped placements are one per pose — so this synthetic pose is the
+  //   only thing in the tree standing under `op.group !== previous`.
+  const groups = [{ path: [43], character: 1195, filters: [aGlow(22)] }];
+  const ops = paintGlow(glowPackOf({ groups, effects: [0], placements: 2 }));
+  assert.equal(ops.length, 6, "two placements of a three-path shape");
+  const [first] = ops;
+  assert.ok(first.group);
+  assert.equal(ops.every((op) => op.group === first.group), true,
+    "ONE object across BOTH placements — a per-placement record makes every group a group of one");
+  assert.equal(Object.isFrozen(first.group), true);
+  assert.equal(Object.isFrozen(first.group.path), true);
+  // The denominators are filled in by the walk and are right at the end of it.
+  assert.equal(first.group.ops, 6);
+  assert.equal(first.group.placements, 2);
+  assert.deepEqual([...first.group.path], [43]);
+  assert.equal(first.group.character, 1195);
+  assert.equal(first.group.enclosedBy, null);
+  // A SEPARATE call is a separate walk, so the records are equal and not
+  // identical — the same caveat `propEffectGroupsFor` carries.
+  const table = figureEffectGroupsFor(glowPackOf({ groups, effects: [0], placements: 2 }), {
+    family: "standing", label: "Standing", at: 0, height: 1
+  });
+  assert.equal(table.length, 1, "TWO placements, ONE record in the table");
+  assert.notEqual(table[0], first.group);
+  assert.equal(table[0].filter, first.group.filter);
+});
+
+test("the record's FILTER is `canvasFilterFor`'s verdict, recomputed here from the pack", () => {
+  // ► **THE POINT IS THAT THE PACK AND THE RENDERER CANNOT DRIFT.** If this
+  //   module ever grew its own filter table, this assertion is what would catch
+  //   it — the expected string is built by the same function the extractor's
+  //   invoice uses, from the pack's own filter records, at the same scale.
+  if (!REAL_SHAPES || !REAL_ANIMATIONS) return;
+  const source = REAL_ANIMATIONS.psyche_up2;
+  assert.ok(Array.isArray(source?.effectGroups) && source.effectGroups.length === 9,
+    "psyche_up2 carries nine group records — the psych-up PULSE");
+  const pack = figurePackFrom(REAL_SHAPES, { ...REAL_ANIMATIONS, standing: source });
+  const clipToArena = clipToArenaScale(pack, 1);
+  const seen = [];
+  for (let pose = 0; pose < source.poses.length; pose += 1) {
+    const at = (pose + 0.5) / source.poses.length;
+    const [record] = figureEffectGroupsFor(pack, { family: "standing", label: "Standing", at, height: 1 });
+    assert.ok(record, `pose ${pose} sits inside a group`);
+    const index = source.poses[pose].find((p) => Array.isArray(p.effects))?.effects[0];
+    const expected = canvasFilterFor(source.effectGroups[index].filters, { scale: clipToArena });
+    assert.equal(record.filter, expected.filter, `pose ${pose}`);
+    assert.deepEqual(record.counts, expected.counts);
+    seen.push(record.filter);
+  }
+  // ► **AND THE TWEEN IS WHAT MAKES THIS EVIDENCE.** Nine poses, nine DISTINCT
+  //   filter strings: the outer `#00ffff` glow sweeps blurX 22 -> 14.5 while
+  //   its strength dips through 0.9766 and climbs back. A reader that collapsed
+  //   the table by path would emit one string nine times and still be green
+  //   against a single-pose assertion.
+  assert.equal(new Set(seen).size, 9, "nine poses, nine glows — the pulse");
+  assert.match(seen[0], /rgba\(0, 255, 255, 1\)/);
+  assert.match(seen[5], /rgba\(0, 255, 255, 0\.9766\)/, "strength 0.9765625 is the dip");
+});
+
+test("EVERY GLOW IN BOTH PACKS HAS `inner: false` — the blur SIZE is the convention, not the flag", () => {
+  // ► **A BRIEF FOR this work asserted the opposite and nearly shipped twelve
+  //   INVERTED glows.** `canvasFilterFor` REFUSES an inner glow by name
+  //   (`innerShadowHasNoCanvasFilter`), so a pack that really carried one would
+  //   show up as `groupFiltersRefused`, not as a wrong picture — but the reading
+  //   that "inner"/"outer" names the SWF flag is what has to be killed, and the
+  //   bytes are what kills it.
+  for (const [where, filters] of [
+    ["figure", Object.values(REAL_ANIMATIONS ?? {}).flatMap((a) => (a.effectGroups ?? []).flatMap((g) => g.filters ?? []))],
+    ["enchantments", (REAL_ENCHANTMENTS?.art?.frames ?? []).flatMap((f) => f.filters ?? [])]
+  ]) {
+    if (filters.length === 0) continue;
+    assert.equal(filters.every((f) => f.inner === false), true, `${where}: every glow is an OUTER glow`);
+    assert.equal(filters.every((f) => f.type === "glow"), true, `${where}: glows only — no colour matrix to fold`);
+  }
+});
+
+test("the filter's SCALE composes the clip-to-arena factor, which only this module knows", () => {
+  // ► A group's blur radius is in the FIGHTER CLIP's pixels; an operation's
+  //   matrix is in arena units. The two must be in one space or a painter
+  //   draws a correctly placed shape with a wrongly sized glow. `height`
+  //   changes the first factor, the `scale` option the second, and both land.
+  const groups = [{ path: [43], character: 1195, filters: [aGlow(22)] }];
+  const radius = (options) => {
+    const [op] = paintGlow(glowPackOf({ groups, effects: [0] }), options);
+    return Number(op.group.filter.match(/([\d.]+)px rgba/)[1]);
+  };
+  const base = radius({});
+  assert.ok(base > 0);
+  // The pack is 100 clip pixels tall and UNIT is 150, so height 1 is 1.5.
+  // `canvasFilterFor` prints at most four decimals, so the comparison is made
+  // at the precision the STRING actually carries rather than at float exactness.
+  assert.equal(base, Math.round(2 * blurSigmaOf(22) * 1.5 * 10000) / 10000);
+  // Tolerance 1e-3 and not 1e-9: the string carries four decimals, so doubling
+  // a printed radius cannot be exact and asserting that it is would be pinning
+  // the formatter rather than the arithmetic.
+  assert.ok(Math.abs(radius({ height: 2 }) - 2 * base) < 1e-3, "twice as tall, twice the glow");
+  assert.ok(Math.abs(radius({ scale: 2 }) - 2 * base) < 1e-3, "twice the canvas scale, twice the glow");
+  assert.equal(radius({ scale: 0 }), base, "a non-positive scale falls back to 1");
+});
+
+/** `blurSigma`'s arithmetic, restated here so the test does not import the answer. */
+function blurSigmaOf(width) {
+  return Math.sqrt(Math.max(0, width * width - 1) / 12);
+}
+
+test("an `effects` index the table does not hold draws UNFILTERED and is COUNTED", () => {
+  // The silent version of this is the defect this whole programme exists to
+  // refuse: the placement says it is inside a group, the group is not there,
+  // and the shape draws bare with nothing saying so.
+  const pack = glowPackOf({ groups: [{ path: [43], character: 1195, filters: [aGlow(22)] }], effects: [4] });
+  const ops = paintGlow(pack);
+  assert.equal(ops.length, 3);
+  assert.equal(ops.some((op) => "group" in op), false, "it draws, and it draws unfiltered");
+  const invoice = figureInvoiceFor(pack, { family: "standing", label: "Standing", at: 0, height: 1 });
+  assert.equal(invoice.groupsUnresolved, 1, "counted ONCE per distinct index per paint");
+  assert.equal(invoice.inheritedPlacements, 1, "and the placement is still in the denominator");
+  assert.equal(invoice.groupedOps, 0);
+});
+
+test("a NESTED chain composites innermost-first and every record counts the ops", () => {
+  // ► Dead on the real pack — all 30 chains are one deep — so this synthetic
+  //   pack is the only thing that can tell `enclosedBy` from `null`, and
+  //   `groupRunsOf` composites only the innermost record.
+  const groups = [
+    { path: [43], character: 1195, filters: [aGlow(22)] },
+    { path: [43, 1], character: 1196, filters: [aGlow(6)] }
+  ];
+  const pack = glowPackOf({ groups, effects: [0, 1] });   // OUTERMOST FIRST
+  const [op] = paintGlow(pack);
+  assert.equal(op.group.id, 1, "the innermost group is the one on the operation");
+  assert.equal(op.group.enclosedBy.id, 0, "and it names the one outside it");
+  assert.equal(op.group.enclosedBy.enclosedBy, null);
+  // Both buffers contain these operations, so both denominators are 3.
+  assert.equal(op.group.ops, 3);
+  assert.equal(op.group.enclosedBy.ops, 3);
+  const invoice = figureInvoiceFor(pack, { family: "standing", label: "Standing", at: 0, height: 1 });
+  assert.equal(invoice.nestedGroupPlacements, 1);
+  assert.equal(invoice.effectGroups, 2);
+  assert.equal(invoice.groupsBelowTopLevel, 1, "the inner group's path is two deep — its space is not the clip's");
+});
+
+test("a placement's OWN filter is a group of one placement — dead on this build, carried anyway", () => {
+  // ► **0 of this build's 37,077 placements carries `filters` or `blendMode`**,
+  //   so nothing but this pack reaches the branch. It is carried rather than
+  //   counted because a filter on ONE leaf IS per-leaf — there is no composite
+  //   to get wrong — and a field this reader walked past would be the sixth
+  //   instance of the standing defect.
+  if (REAL_ANIMATIONS) {
+    let own = 0;
+    let placements = 0;
+    for (const animation of Object.values(REAL_ANIMATIONS)) {
+      for (const pose of animation.poses ?? []) {
+        for (const p of pose) {
+          placements += 1;
+          if (p.filters || p.blendMode !== undefined) own += 1;
+        }
+      }
+    }
+    assert.equal(placements, 37077, "the denominator, recomputed");
+    assert.equal(own, 0, "and the numerator — so only the synthetic pack below reaches this");
+  }
+  const pack = glowPackOf({
+    groups: [{ path: [43], character: 1195, filters: [aGlow(22)] }],
+    effects: [0],
+    own: { filters: [aGlow(4)], blendMode: 5 }
+  });
+  const [op] = paintGlow(pack);
+  assert.equal(op.group.id, null, "a placement's own group is not an index into any table");
+  assert.deepEqual([...op.group.path], [23, 1, 1], "its path is the depth chain that reached it");
+  assert.equal(op.group.composite, "lighten", "blend mode 5, through `blendModeFor`");
+  assert.equal(op.group.enclosedBy.id, 0, "and the inherited group encloses it");
+  const invoice = figureInvoiceFor(pack, { family: "standing", label: "Standing", at: 0, height: 1 });
+  assert.equal(invoice.ownEffectPlacements, 1);
+  assert.equal(invoice.groupBlendModes, 1);
+  assert.equal(invoice.groupBlendModesRefused, 0);
+});
+
+test("a COLOUR MATRIX on a group is DEFERRED and counted, never silently dropped", () => {
+  // ► **This module folds no colour matrix, and `props.js` does.** The field is
+  //   named `colourMatricesDeferred` for exactly that reason. 0 of this build's
+  //   24 figure filters and 0 of its 24 enchantment filters is one, so the
+  //   synthetic pack is the only witness — and a zero with no denominator would
+  //   say nothing at all.
+  const matrix = [0.5, 0, 0, 0, 10, 0, 0.5, 0, 0, 10, 0, 0, 0.5, 0, 10, 0, 0, 0, 1, 0];
+  const pack = glowPackOf({
+    groups: [{ path: [43], character: 1195, filters: [aGlow(22), { type: "colourMatrix", matrix }] }],
+    effects: [0]
+  });
+  const [op] = paintGlow(pack);
+  assert.equal(op.group.colourMatricesDeferred, 1);
+  assert.equal(op.fill, "#111111", "the fill is UNTOUCHED — deferred means not applied");
+  assert.ok(op.group.filter, "and the glow beside it still reaches the painter");
+  const invoice = figureInvoiceFor(pack, { family: "standing", label: "Standing", at: 0, height: 1 });
+  assert.equal(invoice.groupColourMatrices, 1);
+  assert.equal(invoice.groupColourMatrixOps, 3, "every operation under it, so the loss has a size");
+  assert.equal(invoice.groupFiltersDeferred, 1);
+});
+
+/* ---- THE WEAPON ENCHANTMENT --------------------------------------- */
+
+test("THE TWELVE CELLS COME OUT OF THE PACK, and the closed form is not written here", () => {
+  if (!REAL_ENCHANTMENTS) return;
+  const pack = figurePackFrom(SHAPES, { standing: anim([[]]) }, REAL_ENCHANTMENTS);
+  const ladder = pack.enchantments;
+  assert.ok(ladder, "the real pack parses");
+  assert.equal(ladder.cells, 12);
+  assert.equal(ladder.frames, 13);
+  assert.equal(ladder.belowType, 2);
+  assert.equal(ladder.bareFrame, 1);
+  assert.equal(ladder.inner.instance, "realweapon");
+
+  const frames = new Set();
+  for (let type = 0; type <= 7; type += 1) {
+    for (let potency = 0; potency <= 4; potency += 1) {
+      const loadout = {
+        weapon: 1, equipped_weapon: 1,
+        weapon_enchantment_type: type, weapon_enchantment_potency: potency
+      };
+      const answer = weaponEnchantmentFor(pack, loadout);
+      if (type < 2) {
+        // ► `enchant_type < 2 -> gotoAndStop(1)`, and the arm FALLS THROUGH to
+        //   four tests it cannot pass, so frame 1 is where it stays.
+        assert.equal(answer.reason, "bare", `type ${type} potency ${potency}`);
+        assert.equal(answer.frame, 1);
+        assert.equal(answer.filters, null, "frame 1 is the bare blade");
+      } else if (type <= 5 && potency >= 1 && potency <= 3) {
+        assert.equal(answer.reason, "cell", `type ${type} potency ${potency}`);
+        // The frame is READ, and only then checked against the closed form the
+        // pack itself fitted — so this file is not a second witness to it.
+        assert.equal(answer.frame, 3 * (type - 2) + potency + 1);
+        assert.equal(answer.filters.length, 2, "two glows per enchanted frame");
+        frames.add(answer.frame);
+      } else {
+        // ► **NO TRAILING DEFAULT: `gotoAndStop` is called ZERO times.**
+        assert.equal(answer.reason, "noOp", `type ${type} potency ${potency}`);
+        assert.equal(answer.frame, null, "a no-op has no frame, because the build sets none");
+        assert.equal(answer.filters, null);
+      }
+    }
+  }
+  assert.equal(frames.size, 12, "twelve cells, twelve distinct frames");
+});
+
+test("OUT OF DOMAIN LEAVES THE ART BARE — a no-op, and NOT frame 1", () => {
+  // ► `itemglow` calls `gotoAndStop` zero times for a type of 9 or a potency of
+  //   0, so the clip KEEPS ITS CURRENT FRAME. A stateless renderer has no
+  //   current frame, so "keep what you had" is "add nothing to this paint" —
+  //   and the operations must therefore be identical to the unenchanted ones,
+  //   which is stronger than merely having no group.
+  if (!REAL_ENCHANTMENTS) return;
+  const wardrobe = wardrobeOf({ weapon: [1] });
+  const pack = glowPackOf({ enchantments: REAL_ENCHANTMENTS });
+  const paint = (extra) => paintGlow(pack, {
+    wardrobe, loadout: { weapon: 1, equipped_weapon: 1, ...extra }
+  });
+  const bare = paint({});
+  for (const [name, extra] of [
+    ["type 9", { weapon_enchantment_type: 9, weapon_enchantment_potency: 2 }],
+    ["potency 0", { weapon_enchantment_type: 3, weapon_enchantment_potency: 0 }],
+    ["potency 4", { weapon_enchantment_type: 3, weapon_enchantment_potency: 4 }],
+    ["type NaN", { weapon_enchantment_type: Number.NaN, weapon_enchantment_potency: 2 }],
+    ["type 0 — the BARE cell, a real gotoAndStop(1)", { weapon_enchantment_type: 0, weapon_enchantment_potency: 0 }],
+    ["absent", {}]
+  ]) {
+    assert.equal(JSON.stringify(paint(extra)), JSON.stringify(bare), name);
+    assert.equal(paint(extra).some((op) => "group" in op), false, name);
+  }
+  // And the reasons stay DISTINCT even though the picture is the same, because
+  // "the build chose frame 1" and "the build chose nothing" are different facts.
+  const reasonOf = (extra) => weaponEnchantmentFor(pack, { weapon: 1, equipped_weapon: 1, ...extra }).reason;
+  assert.equal(reasonOf({ weapon_enchantment_type: 0, weapon_enchantment_potency: 0 }), "bare");
+  assert.equal(reasonOf({ weapon_enchantment_type: 9, weapon_enchantment_potency: 2 }), "noOp");
+  assert.equal(reasonOf({}), "absent");
+  assert.equal(weaponEnchantmentFor(pack, { weapon: 1, equipped_weapon: 3 }).reason, "noSlot");
+  assert.equal(weaponEnchantmentFor(glowPackOf({}), { weapon: 1, equipped_weapon: 1 }).reason, "noPack");
+});
+
+test("THE GLOW READS THE EQUIPPED SLOT'S OWN PAIR — which is NOT `activeEnchantment`'s rule", () => {
+  // ► **THE ONE THAT IS EASY TO GET BACKWARDS.** `damagecharacter` gates the
+  //   PROC on `weapon_enchantment_potency` for both slots, because that test is
+  //   hoisted out of the `equipped_weapon` branch; `skincharacter` passes the
+  //   equipped slot's OWN pair to `itemglow`. Reusing the proc's rule for the
+  //   art draws the wrong glow the moment a bow is up and the two potencies
+  //   differ — which is exactly the case constructed here.
+  if (!REAL_ENCHANTMENTS) return;
+  const pack = glowPackOf({ enchantments: REAL_ENCHANTMENTS });
+  const loadout = {
+    weapon: 1, secondary_weapon: 62, equipped_weapon: 2,
+    weapon_enchantment_type: 2, weapon_enchantment_potency: 1,
+    secondary_weapon_enchantment_type: 5, secondary_weapon_enchantment_potency: 3
+  };
+  const answer = weaponEnchantmentFor(pack, loadout);
+  assert.equal(answer.whenEquipped, 2, "the BOW's row is the one that attaches");
+  assert.equal(answer.type, 5);
+  assert.equal(answer.potency, 3, "the SECONDARY potency, not the primary one");
+  assert.equal(answer.frame, 13);
+  // `activeEnchantment`'s rule would pair type 5 with the PRIMARY potency 1 and
+  // land on frame 11 — a real cell, a real glow, and the wrong one.
+  assert.notEqual(answer.frame, 3 * (5 - 2) + 1 + 1);
+  // And melee reads the melee pair, so the two rows are genuinely different.
+  const melee = weaponEnchantmentFor(pack, { ...loadout, equipped_weapon: 1 });
+  assert.equal(melee.whenEquipped, 1);
+  assert.deepEqual([melee.type, melee.potency, melee.frame], [2, 1, 2]);
+});
+
+test("THE GLOW COVERS THE WHOLE WEAPON LIMB — the rig's own art AND the attached blade", () => {
+  // ► **THIS TEST ASSERTED THE OPPOSITE UNTIL 2026-09-15, AND ITS FIXTURE COULD
+  //   NOT TELL THE TWO APART.** It was titled "AND ON NOTHING ELSE" and checked
+  //   that no body operation glowed — but `glowPackOf` built a pose whose only
+  //   body placement was on `torso`, so the real discriminating input, a
+  //   placement on the WEAPON limb, was absent. Both the wrong scope and the
+  //   right one passed it.
+  //
+  //   The build: char 703 `weapon0` is the glow SHELL; its depth-1 placement of
+  //   char 702 `realweapon` WEARS the filter; and inside `realweapon` sit BOTH
+  //   char 701 (the rig's own weapon art, `limb: "weapon"`, depth `[39, 1, 1]`
+  //   on all 2,216 such placements in the real pack) and whatever
+  //   `attachMovie("weapon" + id, …)` puts there. **So the glow encloses both**,
+  //   and the faithful scope is their union — exactly `op.limb === "weapon"`.
+  if (!REAL_ENCHANTMENTS) return;
+  const pack = glowPackOf({ enchantments: REAL_ENCHANTMENTS, rigWeapon: true });
+  const ops = paintGlow(pack, {
+    wardrobe: wardrobeOf({ weapon: [1], breastplate: [3] }),
+    loadout: {
+      weapon: 1, breastplate: 3, equipped_weapon: 1,
+      weapon_enchantment_type: 3, weapon_enchantment_potency: 2
+    }
+  });
+  const glowing = ops.filter((op) => op.group);
+  assert.ok(glowing.length > 0);
+  // BOTH sides of the union are present — this is the assertion the old fixture
+  // could not make, and it is what fails if the scope narrows back.
+  assert.equal(glowing.some((op) => op.slot === "weapon"), true, "the attached blade glows");
+  assert.equal(glowing.some((op) => !op.slot && op.limb === "weapon"), true,
+    "and so does the rig's own weapon art, which is INSIDE `realweapon`");
+  assert.deepEqual([...new Set(glowing.map((op) => op.limb))], ["weapon"],
+    "and nothing outside the weapon limb glows");
+  assert.equal(ops.filter((op) => !op.slot && op.limb !== "weapon").some((op) => "group" in op), false,
+    "the rest of the BODY does not glow");
+  assert.equal(ops.find((op) => op.slot === "breastplate").group, undefined, "nor does the armour");
+  // ► **ONE RECORD OVER BOTH, NOT TWO EQUAL ONES.** `groupRunsOf` flushes on
+  //   object identity, so two records would composite one glow through two
+  //   buffers — a different picture from one buffer over the whole limb.
+  assert.equal(new Set(glowing.map((op) => op.group)).size, 1, "one interned record over the union");
+  const indices = ops.map((op, at) => (op.group ? at : -1)).filter((at) => at >= 0);
+  assert.equal(indices.every((at, n) => n === 0 || at === indices[n - 1] + 1), true,
+    "and the run is CONTIGUOUS through the wardrobe merge, so it is ONE buffer");
+  // Interned, and the record names where the filter actually sits in the build.
+  const [first] = glowing;
+  assert.equal(glowing.every((op) => op.group === first.group), true);
+  assert.equal(first.group.id, 6, "frost, medium — the ladder's frame 6");
+  assert.equal(first.group.character, 702, "the character `realweapon` places");
+  assert.deepEqual([...first.group.path], [1]);
+  assert.match(first.group.filter, /rgba\(0, 204, 255, 1\)/, "frost is #00ccff over #000099");
+  assert.match(first.group.filter, /rgba\(0, 0, 153, 1\)/);
+});
+
+test("the weapon LIMB'S OWN SCALE is part of the glow's radius", () => {
+  // ► The glow lives in the glow shell's space and `limbs.weapon` is what maps
+  //   that into the clip's, so the radius passes through it. On the real rig
+  //   the correction is under 1.4% — small enough that assuming it away would
+  //   never have been caught, which is why it is composed instead of assumed.
+  if (!REAL_ENCHANTMENTS) return;
+  const radius = (limbScale) => {
+    const ops = paintGlow(glowPackOf({ enchantments: REAL_ENCHANTMENTS, limbScale }), {
+      wardrobe: wardrobeOf({ weapon: [1] }),
+      loadout: { weapon: 1, equipped_weapon: 1, weapon_enchantment_type: 3, weapon_enchantment_potency: 2 }
+    });
+    return Number(ops.find((op) => op.slot === "weapon").group.filter.match(/([\d.]+)px rgba/)[1]);
+  };
+  const base = radius(1);
+  assert.ok(base > 0);
+  assert.ok(Math.abs(radius(2) - 2 * base) < 1e-3, "a limb at twice the scale wears twice the glow");
+  // A degenerate limb would size the glow by zero; it is counted, not guessed.
+  const degenerate = figureInvoiceFor(glowPackOf({ enchantments: REAL_ENCHANTMENTS, limbScale: 0 }), {
+    family: "standing", label: "Standing", at: 0, height: 1,
+    wardrobe: wardrobeOf({ weapon: [1] }),
+    loadout: { weapon: 1, equipped_weapon: 1, weapon_enchantment_type: 3, weapon_enchantment_potency: 2 }
+  });
+  assert.equal(degenerate.enchantmentLimbScaleDegenerate, 1);
+});
+
+test("`loadoutFrom` carries the four enchantment fields, in BOTH combatant shapes", () => {
+  // ► A PROJECTED resource is `{value, min, max}` and a ROSTER one is a plain
+  //   number; this file has already shipped a defect for testing only one.
+  const projected = {
+    resources: {
+      weapon: { value: 1, min: 0, max: 99 },
+      equipped_weapon: { value: 2, min: 1, max: 2 },
+      weapon_enchantment_type: { value: 2, min: 0, max: 5 },
+      weapon_enchantment_potency: { value: 1, min: 0, max: 3 },
+      secondary_weapon_enchantment_type: { value: 5, min: 0, max: 5 },
+      secondary_weapon_enchantment_potency: { value: 3, min: 0, max: 3 }
+    }
+  };
+  const roster = {
+    weapon: 1, equipped_weapon: 2,
+    weapon_enchantment_type: 2, weapon_enchantment_potency: 1,
+    secondary_weapon_enchantment_type: 5, secondary_weapon_enchantment_potency: 3
+  };
+  for (const [shape, combatant] of [["projected", projected], ["roster", roster]]) {
+    const loadout = loadoutFrom(combatant);
+    for (const field of ENCHANTMENT_FIELDS) {
+      assert.ok(Number.isFinite(loadout[field]), `${shape}: ${field} travels`);
+    }
+    assert.equal(loadout.weapon_enchantment_potency, 1, shape);
+    assert.equal(loadout.secondary_weapon_enchantment_potency, 3, shape);
+  }
+  // ABSENT STAYS ABSENT — a `0` would claim the build's enchantment 0.
+  const bare = loadoutFrom({ resources: { helmet: 3 } });
+  for (const field of ENCHANTMENT_FIELDS) assert.equal(field in bare, false, `${field} is absent, not 0`);
+});
+
+test("THE INVOICE HAS A DENOMINATOR FOR EVERY ZERO, and the reasons partition the slots", () => {
+  if (!REAL_ENCHANTMENTS) return;
+  const wardrobe = wardrobeOf({ weapon: [1], breastplate: [3] });
+  const invoiceOf = (loadout) => figureInvoiceFor(
+    glowPackOf({ enchantments: REAL_ENCHANTMENTS }),
+    { family: "standing", label: "Standing", at: 0, height: 1, wardrobe, loadout }
+  );
+  const enchanted = invoiceOf({
+    weapon: 1, breastplate: 3, equipped_weapon: 1,
+    weapon_enchantment_type: 3, weapon_enchantment_potency: 2
+  });
+  // Denominators first, and they are the populations the counts are read over.
+  assert.equal(enchanted.placements, 1);
+  assert.equal(enchanted.ops, 3);
+  assert.equal(enchanted.attachedPlacements, 2, "two pieces, one placement each");
+  assert.equal(enchanted.attachedOps, 2);
+  assert.equal(enchanted.enchantmentLadder, 1, "a ladder was loaded");
+  // The five reasons partition `enchantmentSlots` EXACTLY.
+  for (const loadout of [
+    { weapon: 1, equipped_weapon: 1, weapon_enchantment_type: 3, weapon_enchantment_potency: 2 },
+    { weapon: 1, equipped_weapon: 1, weapon_enchantment_type: 0, weapon_enchantment_potency: 0 },
+    { weapon: 1, equipped_weapon: 1, weapon_enchantment_type: 9, weapon_enchantment_potency: 2 },
+    { weapon: 1, equipped_weapon: 1 },
+    { weapon: 1, equipped_weapon: 3 },
+    { breastplate: 3 }
+  ]) {
+    const invoice = invoiceOf(loadout);
+    assert.equal(
+      invoice.enchantmentCell + invoice.enchantmentBare + invoice.enchantmentNoOp
+      + invoice.enchantmentAbsent + invoice.enchantmentNoPack,
+      invoice.enchantmentSlots,
+      `the reasons partition the slots for ${JSON.stringify(loadout)}`
+    );
+    assert.ok(invoice.enchantmentOps <= invoice.attachedOps);
+  }
+  assert.equal(invoiceOf({ weapon: 1, equipped_weapon: 3 }).enchantmentSlots, 0, "no weapon row, no slot");
+  // And a pack with NO ladder reports `noPack` rather than a silent zero.
+  const noPack = figureInvoiceFor(glowPackOf({}), {
+    family: "standing", label: "Standing", at: 0, height: 1, wardrobe,
+    loadout: { weapon: 1, equipped_weapon: 1, weapon_enchantment_type: 3, weapon_enchantment_potency: 2 }
+  });
+  assert.equal(noPack.enchantmentLadder, 0);
+  assert.equal(noPack.enchantmentSlots, 1);
+  assert.equal(noPack.enchantmentNoPack, 1);
+});
+
+test("a malformed or absent enchantments pack still dresses a gladiator", () => {
+  // Same contract as the wardrobe: a second extractor the player did not run
+  // must cost the glow and nothing else.
+  for (const broken of [null, undefined, {}, { selector: { matched: false } },
+    { selector: { matched: true, cells: [] }, art: { frames: [] } },
+    { selector: { matched: true, cells: [{ type: 2, potency: 1, frame: 2 }] } }]) {
+    const pack = figurePackFrom(SHAPES, { standing: anim([[{ shape: 1, limb: "torso", depth: [23], matrix: [1, 0, 0, 1, 0, 0] }]]) }, broken);
+    assert.equal(pack.enchantments, null, JSON.stringify(broken));
+    assert.equal(paintExtractedFigure(pack, { family: "standing", label: "Standing", at: 0 }).length, 1);
+  }
+});
+
+test("a run of grouped operations stays CONTIGUOUS through the wardrobe merge", () => {
+  // ► `groupRunsOf` opens one offscreen per RUN, so a group broken into three
+  //   runs is three buffers and three composites of one third of a picture
+  //   each. The merge only ever inserts before the first operation of a new
+  //   depth, and every op under one group shares a depth — so this holds by
+  //   construction, and here is the assertion that says so.
+  if (!REAL_ENCHANTMENTS) return;
+  const ops = paintGlow(
+    glowPackOf({
+      groups: [{ path: [43], character: 1195, filters: [aGlow(22)] }],
+      effects: [0],
+      enchantments: REAL_ENCHANTMENTS
+    }),
+    {
+      wardrobe: wardrobeOf({ weapon: [1], breastplate: [3] }),
+      loadout: {
+        weapon: 1, breastplate: 3, equipped_weapon: 1,
+        weapon_enchantment_type: 3, weapon_enchantment_potency: 2
+      }
+    }
+  );
+  const runs = [];
+  let previous;
+  for (const op of ops) {
+    const group = op.group ?? null;
+    if (runs.length === 0 || group !== previous) runs.push({ group, ops: 0 });
+    runs[runs.length - 1].ops += 1;
+    previous = group;
+  }
+  const grouped = runs.filter((run) => run.group);
+  assert.equal(grouped.length, 2, "the body's glow and the weapon's, one run each");
+  const seen = new Set(grouped.map((run) => run.group));
+  assert.equal(seen.size, 2, "no group is split across two runs");
+  for (const run of grouped) assert.equal(run.ops, run.group.ops, "the run IS the group's own denominator");
 });

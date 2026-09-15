@@ -886,7 +886,8 @@ test("the emitted page carries the table and NOT the arithmetic", () => {
  *   carrying two glows, a constant `#000066` inner and an `#00ffff` outer
  *   whose blur tweens 22 → 13. Those 30 dedupe to **12 table entries across
  *   four labels, 10 distinct records, 24 filter records**, and the renderer
- *   applies all 24 as `shadowStrengthAsAlpha`. Reproduce with
+ *   applies all 24 as `shadowStrengthSaturated` — every one of their strengths clamps
+ *   the alpha at 1, so the value is discarded rather than scaled. Reproduce with
  *   `node tools/extract-figure.mjs --report`.
  *
  * ► **AND THAT IS WHY THE FIXTURE BELOW EXISTS RATHER THAN A SECOND READING
@@ -1292,8 +1293,9 @@ test("`use` IS src/render/filters.js's VERDICT and not a table in the extractor"
   assert.equal(use.total, 22, "10 group glows, and a blur and a bevel on each of six placements");
   assert.equal(use.applied, 16, "the glows and the blurs");
   assert.equal(use.refused, 6, "every bevel — the one kind canvas has no expression for");
-  assert.deepEqual(use.approximatedByKind, { shadowStrengthAsAlpha: 10, anisotropicBlur: 6 },
-    "a blur whose radii differ is applied AS AN APPROXIMATION, and it is named");
+  assert.deepEqual(use.approximatedByKind, { shadowStrengthSaturated: 10, anisotropicBlur: 6 },
+    "a blur whose radii differ is applied AS AN APPROXIMATION, and it is named — and a glow "
+    + "whose strength SATURATES the alpha is a different loss from one that scales it");
   assert.deepEqual(use.refusedByReason, { "bevel:filterHasNoCanvasEquivalent": 6 },
     "a refusal with no reason is not an invoice");
 

@@ -34,6 +34,62 @@ Start there.
   against. Counted as `groupsMatrixOnlyWithFilteredDescendant` rather than
   guessed at; closing it needs `getImageData` or an inline SVG filter.
 
+► **THE RENDERER READS THEM NOW — AND THE ONE GROUP THAT REACHES A GLADIATOR
+  HANGS A HEADLESS RENDER, CAUSE NOT FOUND. RANKED FIRST.**
+  `paintExtractedFigure` interns one frozen record per group per paint and hangs
+  it on `op.group`, so the shell's existing `groupRunsOf`/`paintGroupRuns`
+  composite it. **`?enchant=3.2` never finishes a screenshot**: the same URL
+  without it shoots in 3 seconds and with it is killed at 100s, 140s and 280s —
+  **and the wall time does not move with `--virtual-time-budget`, which is what
+  says HANG rather than cost.** `?groups=0` beside it renders fine.
+  **The geometry is measured sane and is not the cause**: the shell's own
+  functions lifted into node give one buffered run of 19 ops, region 244x141
+  unclamped, a two-`drop-shadow` filter string. Whatever hangs is a canvas call
+  node cannot reach. **Confined to the `?enchant=` demo flag** — the roster and
+  `src/team/ss2-rules.js` both default `weapon_enchantment_type: 0`, so no bout
+  can reach it — which is why it ships with the warning printed at the flag
+  rather than reverted.
+
+► **AND THE TWELVE GROUPS IN THE FIGURE PACK REACH NO GLADIATOR AT ALL.** Three
+  verifiers found this independently: every one of the 12 group entries and 30
+  grouped placements sits on `psyche_up`, `psyche_up2`, `psyche_charging` or
+  `psyche_charging2`, and all four are **declared unplayed** in
+  `src/render/clip-labels.js`. Swept 44,880 and 73,440 family x label x facing
+  combinations: reached 0 times. So the body half of the effect work is dead
+  until a family dispatches a psyche clip, and **the only figure group that
+  reaches the compositor today is the weapon enchantment.** Pinned by a test, so
+  building the psyche family turns the suite red rather than quietly outliving
+  the paragraph.
+
+► **THE GLOW COVERS THE WHOLE WEAPON LIMB, AND MY OWN BRIEF SAID OTHERWISE.** I
+  wrote that the filter "encloses the attached blade and not the `weapon` limb's
+  own rig art either", an agent implemented it faithfully, and a verifier broke
+  it from the bytes. Char 701 — the rig's own weapon art — sits at depth
+  `[39, 1, 1]` on all 2,216 such placements, i.e. INSIDE the `realweapon`
+  placement that wears the filter. The faithful scope is the union,
+  `op.limb === "weapon"`: **19 ops, not 8**, still contiguous, still one buffer.
+  **The test that should have caught the change could not**: its fixture's only
+  body placement was on `torso`, so both scopes passed it. Fixture and assertion
+  corrected, and the correction is mutation-checked.
+
+► **THE STRENGTH HALF OF EVERY GLOW IS CARRIED AND NOT DRAWN.** `rgbaOf` clamps
+  alpha to [0,1] and alpha is `colour.alpha/255 * strength`, so every strength at
+  or above the clamp emits `1` and two different strengths draw byte-identically.
+  A verifier proved it by flattening all nine of `psyche_up2`'s outer strengths
+  and watching the ten filter strings stay ten — **the blur alone was carrying
+  the distinctness**, and 17 of 18 strength values could be set to anything with
+  the suite green. `canvasFilterFor` now names `shadowStrengthSaturated` apart
+  from `shadowStrengthAsAlpha`, which turns an invisible loss into a counted one:
+  the figure pack reads **23 saturated / 1 scaled** (the 1 is the single value
+  below the clamp, 0.9765625) and **all 24 enchantment filters saturate.**
+
+► **`tools/shot.sh` LEAKS A CHROME PROCESS PER INVOCATION — 73 were alive.**
+  They accumulate until new ones cannot start, and the symptom is screenshots
+  failing for URLs that worked minutes earlier, which reads as a page defect and
+  is not. **Kill them before trusting a FAILED shot**:
+  `powershell.exe -NoProfile -Command "Stop-Process -Name chrome -Force"`. This
+  masked the real hang above for half an hour by making working URLs fail too.
+
 ► ~~**THE FIGURE AND ICON EXTRACTORS READ NO FILTER FIELDS AT ALL**~~ **— BOTH
   CARRY THEM NOW (2026-09-15), AND A THIRD TOOL OWNS THE ENCHANTMENT.** The
   figure pack carries 12 effect-group tables (10 distinct) over 30 placements;

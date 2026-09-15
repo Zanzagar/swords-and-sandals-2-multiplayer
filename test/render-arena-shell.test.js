@@ -20,6 +20,10 @@ import {
 import { arenaScreenLayersFor, stageFitFor, SS2_ARENA_DRESSING } from "../src/render/arena-backdrop.js";
 import { projectileDrawAt, projectileFlight, SS2_PROJECTILE } from "../src/render/projectile.js";
 import { applyColourTransform, applyColourTransformAlpha, colourTransformFrom } from "../src/render/filters.js";
+import { figurePackFrom, loadoutFrom, paintExtractedFigure } from "../src/render/extracted-figure.js";
+import { figureSpecFor } from "../src/render/figure.js";
+import { poseAt, timelineFor } from "../src/render/timeline.js";
+import { paintFigure, paintShadow } from "../src/render/painter.js";
 import {
   ArenaShellError,
   figureProvenance,
@@ -912,6 +916,54 @@ function shellFunctionSource(code, name) {
   return null;
 }
 
+/**
+ * The KEY NAMES of one of the shell's `const <name> = { … };` tallies, read out
+ * of its source rather than restated here.
+ *
+ * ► **WRITTEN AFTER A HAND-WRITTEN COPY OF `figureGroupPaint` DRIFTED.** The
+ *   shell renamed two counters; this file's duplicate did not; `countFigureGroups`
+ *   incremented keys that did not exist and the assertions compared against
+ *   `NaN`. The whole point of `liftFromShell` is that the thing under test is
+ *   the shell's own text — a tally literal transcribed by hand defeats it for
+ *   the one part of the harness that carries the numbers.
+ */
+/** A brace-balanced object literal starting at `from`, string-aware. */
+function objectLiteralAt(code, from) {
+  const at = code.indexOf("{", from);
+  if (at < 0) return null;
+  let depth = 0;
+  let mode = "code";
+  let quote = "";
+  for (let index = at; index < code.length; index += 1) {
+    const ch = code[index];
+    if (mode === "string") {
+      if (ch === "\\") { index += 1; continue; }
+      if (ch === quote) mode = "code";
+      continue;
+    }
+    if (ch === "\"" || ch === "'" || ch === "`") { quote = ch; mode = "string"; continue; }
+    if (ch === "{") depth += 1;
+    else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) return code.slice(at, index + 1);
+    }
+  }
+  return null;
+}
+
+function shellTallyKeys(name) {
+  const source = readShellSource();
+  assert.ok(source, "tools/arena/main.js is tracked and must be readable");
+  const { code } = codeOnly(source);
+  const at = code.indexOf(`const ${name} = {`);
+  assert.ok(at >= 0, `${name} is declared in tools/arena/main.js as a const object literal`);
+  const body = objectLiteralAt(code, at + `const ${name} = `.length);
+  assert.ok(body, `${name}'s literal is brace-balanced`);
+  const keys = [...body.matchAll(/(?:^|[{,])\s*([A-Za-z_$][\w$]*)\s*:/g)].map((match) => match[1]);
+  assert.ok(keys.length > 3, `${name} came out with ${keys.length} keys, which is not a tally`);
+  return keys;
+}
+
 /** The named functions, cut out of the shell's stripped source and evaluated. */
 function liftFromShell(names) {
   const source = readShellSource();
@@ -1558,7 +1610,7 @@ test("the shell says out loud that the UI bar's own glows are NOT drawn", () => 
  *   it" is the question, and a double that only counted calls could not answer
  *   it.
  */
-function recordingContext(label, journal) {
+function recordingContext(label, journal, strokes = []) {
   let matrix = [1, 0, 0, 1, 0, 0];
   const stack = [];
   const compose = (outer, inner) => [
@@ -1598,6 +1650,14 @@ function recordingContext(label, journal) {
     clip: () => {},
     fill: () => {},
     stroke: () => {},
+    // ► **INTO `strokes`, NEVER INTO `journal`.** `journal` is the composite
+    //   record every test above indexes by position, and a painter that moved
+    //   a pen would otherwise shift `journal[0]` out from under them.
+    beginPath: () => {},
+    closePath: () => {},
+    moveTo: (x, y) => strokes.push({ into: label, call: "moveTo", x, y, matrix: matrix.slice() }),
+    lineTo: (x, y) => strokes.push({ into: label, call: "lineTo", x, y, matrix: matrix.slice() }),
+    ellipse: (x, y, rx, ry) => strokes.push({ into: label, call: "ellipse", x, y, rx, ry, matrix: matrix.slice() }),
     drawImage: (image, ...args) => journal.push({
       into: label, from: image.label, args,
       matrix: matrix.slice(), filter: context.filter,
@@ -1607,8 +1667,8 @@ function recordingContext(label, journal) {
   return context;
 }
 
-function recordingCanvas(label, journal, width, height) {
-  const context = recordingContext(label, journal);
+function recordingCanvas(label, journal, width, height, strokes) {
+  const context = recordingContext(label, journal, strokes);
   let wide = width;
   let tall = height;
   return {
@@ -1628,7 +1688,15 @@ function compositorHarness({ width = 1280, height = 840, compositing = true } = 
   const { code } = codeOnly(source);
   const names = [
     "groupRunsOf", "pathBoxOf", "composedMatrix", "boxThrough", "filterBleedOf",
-    "runBoxOf", "bufferRegionOf", "groupBufferAt", "groupCompositingAvailable", "paintGroupRuns"
+    "runBoxOf", "bufferRegionOf", "groupBufferAt", "groupCompositingAvailable", "paintGroupRuns",
+    // ► **AND THE FIGURE'S OWN PAINTERS, BECAUSE `drawOps` IS WHERE THE
+    //   ROUTING DECISION LIVES AND A TEXT ASSERTION CANNOT SEE IT.** Every
+    //   defect this section exists over was in code shaped like `drawOps`: a
+    //   transform applied in the wrong place, a buffer measured against the
+    //   wrong CTM. Running the real function against a recording context is
+    //   the only thing that can tell a hoisted transform from a deleted one.
+    "path2dFor", "figureOriginMatrix", "opSpaceRunsOf", "figureRouteFor",
+    "countFigureGroups", "drawFigureOperation", "drawAuthoredOperation", "drawOps"
   ];
   const parts = names.map((name) => {
     const part = shellFunctionSource(code, name);
@@ -1636,9 +1704,10 @@ function compositorHarness({ width = 1280, height = 840, compositing = true } = 
     return part;
   });
   const journal = [];
+  const strokes = [];
   const logLines = [];
   const offscreens = [];
-  const canvas = recordingCanvas("destination", journal, width, height);
+  const canvas = recordingCanvas("destination", journal, width, height, strokes);
   const groupPaint = {
     ops: 0, groupedOps: 0, runs: 0, groups: 0, buffers: 0, bufferedOps: 0, direct: 0,
     inert: 0, offscreen: 0, groupsSplit: 0, groupsNested: 0, groupsBlendRefused: 0,
@@ -1647,15 +1716,29 @@ function compositorHarness({ width = 1280, height = 840, compositing = true } = 
   // `context` and `groupDepth` are REASSIGNED by `paintGroupRuns`, so they have
   // to be `let` in the scope the lifted bodies close over — which is what makes
   // this a test of the shell's rebinding rather than of a copy of it.
+  // ► **THE KEYS COME OUT OF THE SHELL'S OWN LITERAL, NOT OUT OF A COPY HERE.**
+  //   This used to be a hand-written duplicate, and it drifted the moment
+  //   `buffered`/`bufferedOps` were renamed to `plannedBuffers`/
+  //   `plannedBufferOps` in the shell: `countFigureGroups` then did
+  //   `undefined += n` and the tally came back `NaN`, which is a silent wrong
+  //   number rather than a failure. A second copy of a key list is a second
+  //   thing to get wrong — so the list is READ, and `shellTallyKeys` fails by
+  //   name if the literal ever stops being readable.
+  const figureGroupPaint = Object.fromEntries(
+    shellTallyKeys("figureGroupPaint").map((key) => [key, 0]));
   const built = new Function(
     "destinationContext", "canvas", "document", "log", "groupPaint", "GROUP_COMPOSITING",
+    "figureGroupPaint", "Path2D",
     `let context = destinationContext;
      let groupDepth = 0;
      let groupCompositingAnswer = null;
      const groupBuffers = [];
+     const pathCache = new Map();
      ${parts.join("\n")}
      return {
        paintGroupRuns,
+       drawOps,
+       figureOriginMatrix,
        contextLabel: () => context.label,
        currentTransform: () => context.getTransform(),
        depth: () => groupDepth
@@ -1665,16 +1748,22 @@ function compositorHarness({ width = 1280, height = 840, compositing = true } = 
     canvas,
     {
       createElement: () => {
-        const made = recordingCanvas(`buffer${offscreens.length}`, journal, 1, 1);
+        const made = recordingCanvas(`buffer${offscreens.length}`, journal, 1, 1, strokes);
         offscreens.push(made);
         return made;
       }
     },
     (message) => logLines.push(message),
     groupPaint,
-    compositing
+    compositing,
+    figureGroupPaint,
+    // `Path2D` does not exist in node. The shell only ever hands the object
+    // back to `ctx.fill`/`ctx.stroke`, which the recorder ignores, so the `d`
+    // it was built from is all this has to carry.
+    class { constructor(d) { this.d = d; } }
   );
-  return { ...built, canvas, context: canvas.getContext("2d"), journal, logLines, groupPaint, offscreens };
+  return { ...built, canvas, context: canvas.getContext("2d"), journal, strokes, logLines, groupPaint,
+    figureGroupPaint, offscreens };
 }
 
 test("a buffered run is drawn into an OFFSCREEN, at the same device place the canvas would have", () => {
@@ -1851,4 +1940,627 @@ test("a filter that reached paintProp's route at scale 1 is COUNTED, because the
   assert.equal(harness.groupPaint.filterAtStageScale, 1,
     "the filtered operation is counted; the blended one has no length to get wrong");
   assert.equal(harness.groupPaint.buffers, 2, "both are still composited, at whatever radius they carry");
+});
+
+/* ------------------------------------------------------------------ */
+/* THE FIGURE'S OWN GROUPS                                             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THE FIGURE WAS THE ONE PAINTER IN THIS FILE THAT WAS NOT WIRED TO THE
+ *   COMPOSITOR, AND NOTHING SAID SO.** `paintArenaLayer` and `paintProp` both
+ *   route their operations through `paintGroupRuns`; `drawOps` — which draws
+ *   the extracted rig, the face and the authored fallback — was a flat
+ *   `for (const operation of ops)` loop until 2026-09-15. Every test above
+ *   passed, because every one of them is about the props.
+ *
+ *   So an `op.group` arriving from `src/render/extracted-figure.js` would have
+ *   been drawn per leaf: twelve enclosing glows, each applied to nothing,
+ *   silently. The tests below are about the route the figure now takes, and the
+ *   two numbers that would make it draw in the wrong place if they were wrong.
+ */
+const FIGURE = liftFromShell([
+  "figureOriginMatrix", "opSpaceRunsOf", "figureRouteFor",
+  "figureEffectCensusOf", "enchantmentCensusOf", "enchantDemoFrom"
+]);
+
+/** The player's own extracted rig, or null on a clone with no licensed copy. */
+function readRealFigure() {
+  const shapesAt = path.join(REPO_ROOT, "assets/figure/shapes.json");
+  const animationsAt = path.join(REPO_ROOT, "assets/figure/animations.json");
+  if (!fs.existsSync(shapesAt) || !fs.existsSync(animationsAt)) return null;
+  const animations = JSON.parse(fs.readFileSync(animationsAt, "utf8"));
+  const pack = figurePackFrom(JSON.parse(fs.readFileSync(shapesAt, "utf8")), animations);
+  return { pack, animations };
+}
+
+const REAL_FIGURE = readRealFigure();
+
+/** The player's own enchantment ladder, or null. */
+function readRealEnchantments() {
+  const at = path.join(REPO_ROOT, "assets/figure/enchantments.json");
+  return fs.existsSync(at) ? JSON.parse(fs.readFileSync(at, "utf8")) : null;
+}
+
+const REAL_ENCHANTMENTS = readRealEnchantments();
+
+/** A standing gladiator's operations, as the shell asks for them. */
+function realFigureOps() {
+  // ► **`height` IS `figure.build.height`, WHICH IS ABOUT 1 — NOT 150.** The
+  //   `?seam=1` probe in the shell passes 150 and is a probe; the draw path
+  //   passes `figure.build.height`, `0.92 + vitality/20 * 0.16`. Writing 150
+  //   here scales every matrix by 150 and puts the whole figure off the canvas,
+  //   which is how this test was first written and is worth naming.
+  return paintExtractedFigure(REAL_FIGURE.pack, {
+    family: "standing", label: "Standing", facing: "right", at: 0,
+    height: 1, loadout: { weapon: 1, equipped_weapon: 1 }
+  });
+}
+
+test("the rig's effect-group census is re-derived from the pack, not asserted", () => {
+  if (!REAL_FIGURE) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_FIGURE, null, "no extraction on this machine");
+    return;
+  }
+  const census = FIGURE.figureEffectCensusOf(REAL_FIGURE.animations);
+
+  // ► **THE FOUR LABELS, AND THEY ARE THE PSYCHE-UP CLIPS.** `psyche_up2` is
+  //   the only one that TWEENS — nine frames, nine distinct outer-glow payloads
+  //   — which is why it alone carries nine group-table entries while the other
+  //   three carry one each.
+  assert.deepEqual(census.labels.slice().sort(),
+    ["psyche_charging", "psyche_charging2", "psyche_up", "psyche_up2"],
+    "only the psyche-up clips carry an effect group in this build");
+  assert.equal(census.groups, 12, "twelve group-table entries");
+  assert.equal(census.effectedPlacements, 30, "over thirty placements that name one");
+  assert.equal(census.withEffects, 4);
+  assert.equal(census.animations, 101, "out of a hundred and one animations");
+
+  // ► **THE DENOMINATOR THAT MAKES THE ZEROS READABLE.** A placement's OWN
+  //   filter list and blend mode are a DIFFERENT thing from its enclosing
+  //   group's, and this painter has nowhere to put either. Both are zero here,
+  //   over 37,077 placements — so `drawFigureOperation` dropping them is a
+  //   loss of nothing on this build, and a pack where that changes makes this
+  //   go red instead of drawing flat.
+  assert.equal(census.placements, 37077);
+  assert.equal(census.ownFilters, 0, "0 of 37,077 placements carry their own filter");
+  assert.equal(census.ownBlendModes, 0, "0 of 37,077 carry their own blend mode");
+
+  // And the count could not have come out of an empty walk.
+  assert.ok(census.placements > census.effectedPlacements * 100,
+    "the effected placements are a tiny fraction of the pack, which is what makes 30 a finding");
+});
+
+test("the census is total, because a malformed pack must not stop the arena being drawn", () => {
+  for (const nothing of [null, undefined, 7, "x", []]) {
+    const census = FIGURE.figureEffectCensusOf(nothing);
+    assert.equal(census.groups, 0);
+    assert.deepEqual(census.labels, []);
+  }
+  // An animation with a group table and no poses still counts its groups; one
+  // with effects and no table still counts its placements. The two halves are
+  // read separately on purpose — a pack that lost one would otherwise look
+  // like a pack that never had either.
+  const table = FIGURE.figureEffectCensusOf({ a: { effectGroups: [{}, {}], poses: null } });
+  assert.deepEqual([table.groups, table.effectedPlacements, table.withEffects], [2, 0, 1]);
+  const placed = FIGURE.figureEffectCensusOf({ a: { poses: [[{ effects: [0] }, { effects: [] }, null]] } });
+  assert.deepEqual([placed.groups, placed.effectedPlacements, placed.placements, placed.withEffects], [0, 1, 2, 1]);
+
+  // ► **THE TWO OWN-EFFECT COUNTERS WERE ONLY EVER EXERCISED AT ZERO, AND FOUR
+  //   MUTANTS SURVIVED BECAUSE OF IT.** The real pack has 0 of 37,077
+  //   placements carrying their own `filters` or `blendMode`, and every
+  //   synthetic input above omits both — so deleting `census.ownFilters += 1`
+  //   outright, deleting `census.ownBlendModes += 1`, dropping the
+  //   `.length > 0` guard, and swapping the blend-mode presence test for a
+  //   truthiness test (which loses a real blend id of 0) ALL left the suite
+  //   green. The census's own comment claims a pack where that changes "makes
+  //   this go red instead of drawing flat", which is true only if the counters
+  //   work, and nothing tested that they work.
+  //
+  //   This is the same hazard `tools/extract-figure.mjs`'s own test header
+  //   names — "`own 0` and `dropped 0` cannot fail for any input in this
+  //   build" — solved the same way: give the counter an input it must count.
+  //   **Note `blendMode: 0` is deliberate: it is a REAL blend id and a
+  //   truthiness test drops it.**
+  const owned = FIGURE.figureEffectCensusOf({
+    a: { poses: [[{ filters: [{ type: "glow" }], blendMode: 3 }, { filters: [], blendMode: 0 }, {}]] }
+  });
+  assert.equal(owned.ownFilters, 1, "an EMPTY own filter list is not an own filter");
+  assert.equal(owned.ownBlendModes, 2, "but blend mode 0 IS a blend mode");
+});
+
+test("the enchantment ladder is reported from the PACK'S OWN invoice, and is absent-safe", () => {
+  for (const nothing of [null, undefined, {}, { invoice: 3 }]) {
+    const empty = FIGURE.enchantmentCensusOf(nothing);
+    assert.equal(empty.cells, 0);
+    assert.deepEqual(empty.names, []);
+  }
+  if (!REAL_ENCHANTMENTS) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_ENCHANTMENTS, null, "no extraction on this machine");
+    return;
+  }
+  const ladder = FIGURE.enchantmentCensusOf(REAL_ENCHANTMENTS);
+  // ► **TWELVE CELLS, AND THIRTEEN FRAMES.** Frame 1 is the bare weapon — the
+  //   `enchant_type < 2` case — so the art has one more frame than the ladder
+  //   has cells, and a reader who saw only "12" beside "12" could not tell
+  //   which. `4 x 3` is the other half of the same statement.
+  assert.equal(ladder.cells, 12);
+  assert.equal(ladder.types, 4);
+  assert.equal(ladder.potencies, 3);
+  assert.equal(ladder.types * ladder.potencies, ladder.cells, "the ladder is the full product");
+  assert.equal(ladder.frames, 13, "twelve cells plus the bare frame");
+  assert.equal(ladder.framesWithAGlow, 12);
+  assert.equal(ladder.frames - ladder.framesWithAGlow, 1, "and exactly one frame is bare");
+  assert.deepEqual(ladder.names, ["Flame", "Frost", "Poison", "Wraith"]);
+  assert.ok(ladder.filters >= ladder.groups, "a group carries at least one filter");
+});
+
+test("operations are partitioned by SPACE, because the two halves of drawOps disagree about it", () => {
+  // ► **A `path` OPERATION IS IN THE FIGURE'S OWN SPACE AND EVERYTHING ELSE IS
+  //   IN CANVAS PIXELS.** `paintFigure`'s polygons and `paintShadow`'s ellipse
+  //   call `view.toX`/`view.toY` for themselves; putting `figureOriginMatrix`
+  //   on the context for those would apply the figure's placement twice.
+  assert.deepEqual(FIGURE.opSpaceRunsOf([]), []);
+  assert.deepEqual(FIGURE.opSpaceRunsOf(null), []);
+  assert.deepEqual(FIGURE.opSpaceRunsOf([{ kind: "path" }, { kind: "path" }]),
+    [{ space: "figure", from: 0, to: 2 }], "adjacent paths are ONE run, or every leaf is its own group");
+  assert.deepEqual(FIGURE.opSpaceRunsOf([{ kind: "ellipse" }, { kind: "path" }, { kind: "polygon" }]), [
+    { space: "canvas", from: 0, to: 1 },
+    { space: "figure", from: 1, to: 2 },
+    { space: "canvas", from: 2, to: 3 }
+  ]);
+  assert.deepEqual(FIGURE.opSpaceRunsOf([null, undefined]), [{ space: "canvas", from: 0, to: 2 }],
+    "a malformed operation is canvas-space, which draws nothing rather than mis-transforming");
+});
+
+test("every real draw call is ONE run, so the partition costs nothing on this build", () => {
+  if (!REAL_FIGURE) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_FIGURE, null, "no extraction on this machine");
+    return;
+  }
+  const extracted = realFigureOps();
+  assert.ok(extracted.length > 0, "the standing rig draws something, or every assertion below is vacuous");
+  assert.deepEqual(FIGURE.opSpaceRunsOf(extracted), [{ space: "figure", from: 0, to: extracted.length }],
+    "the extracted rig is all paths");
+
+  // The authored fallback, from the same painter the shell falls back to.
+  const figure = figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" });
+  const pose = poseAt(timelineFor({ family: "standing", label: null }), 0);
+  const authored = paintFigure(figure, pose);
+  const shadow = paintShadow(figure, pose);
+  assert.ok(authored.length > 0 && shadow.length > 0);
+  assert.deepEqual(FIGURE.opSpaceRunsOf(authored), [{ space: "canvas", from: 0, to: authored.length }],
+    "the authored figure is all polygons and circles");
+  assert.deepEqual(FIGURE.opSpaceRunsOf(shadow), [{ space: "canvas", from: 0, to: shadow.length }]);
+});
+
+test("the hoisted origin transform is the OLD per-operation one, exactly", () => {
+  // ► **THE HOIST IS THE WHOLE CHANGE TO `drawOps`, SO IT IS MEASURED RATHER
+  //   THAN ARGUED.** The old body did `translate` then `scale` then `transform`
+  //   inside each operation's own `save()`. The new one does `transform(the
+  //   origin matrix)` once, outside, and each operation does `transform(its own
+  //   matrix)`. These two sequences are run against the same recording context
+  //   and the resulting matrices compared — if they ever differ, every figure
+  //   on the page is drawn somewhere else.
+  const journal = [];
+  const view = { scale: 2, toX: (x) => 640 + x * 2, toY: (y, lift) => 500 - (200 - y) * 2 * 1.7 - lift * 2 };
+  const placement = [0.7, 0.1, -0.2, 0.7, -11.5, 53.7];
+
+  for (const origin of [
+    { x: 120, y: 200, facing: "right", size: 1 },
+    { x: -40, y: 103, facing: "left", size: 0.74 },
+    { x: 0, y: 200, facing: "right" }
+  ]) {
+    const size = origin.size ?? 1;
+    const flip = origin.facing === "left" ? -1 : 1;
+    const k = size * view.scale;
+
+    const before = recordingContext("before", journal);
+    before.save();
+    before.translate(view.toX(origin.x), view.toY(origin.y, 0));
+    before.scale(k * flip, -k);
+    before.transform(...placement);
+    const wasAt = before.getTransform();
+
+    const after = recordingContext("after", journal);
+    const m = FIGURE.figureOriginMatrix(view, origin);
+    after.save();
+    after.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+    after.save();
+    after.transform(...placement);
+    const isAt = after.getTransform();
+
+    assert.deepEqual(
+      [isAt.a, isAt.b, isAt.c, isAt.d, isAt.e, isAt.f],
+      [wasAt.a, wasAt.b, wasAt.c, wasAt.d, wasAt.e, wasAt.f],
+      `${origin.facing} at size ${size} draws in the same place as it did before the hoist`);
+  }
+
+  // And the matrix itself, so a reader can see what it is: scale, y flip, mirror.
+  assert.deepEqual(FIGURE.figureOriginMatrix(view, { x: 120, y: 200, facing: "right", size: 1 }),
+    [2, 0, 0, -2, 880, 500], "arena y is UP and canvas y is DOWN, which is the negative d");
+  assert.deepEqual(FIGURE.figureOriginMatrix(view, { x: 120, y: 200, facing: "left", size: 1 }),
+    [-2, 0, 0, -2, 880, 500], "facing left mirrors x and nothing else");
+});
+
+test("the figure's route divides no twips, and filtersScaled is a COUNTER rather than a picture", () => {
+  assert.deepEqual(FIGURE.figureRouteFor(), { translationDivisor: 1, filtersScaled: false });
+
+  // ► **WHAT `filtersScaled` ACTUALLY DOES, MEASURED — BECAUSE THE CHOICE IS
+  //   ONLY DEFENSIBLE IF THIS IS TRUE.** The route's flag is read in exactly one
+  //   place, `groupPaint.filterAtStageScale += ...`, so `false` while the radii
+  //   ARE scaled over-reports an approximation and `true` while they are NOT
+  //   under-reports one. Neither changes a pixel: the same buffer, the same
+  //   region, the same filter string, the same composite. That asymmetry — loud
+  //   and harmless versus quiet and harmless — is why the conservative value is
+  //   the right interim one while the shell hands the painter a `scale` no test
+  //   can yet watch being used.
+  //
+  //   If this ever goes red, `filtersScaled` has grown teeth and the comment on
+  //   `figureRouteFor` is wrong about the cost of getting it backwards.
+  const group = groupRecord({ id: 0, filter: "drop-shadow(0px 0px 10px #000066)" });
+  const ops = [{ kind: "path", d: "M0 0L40 0L40 40L0 40Z", matrix: [1, 0, 0, 1, 200, 200], strokeWidth: 0, group }];
+  const shots = {};
+  for (const filtersScaled of [false, true]) {
+    const harness = compositorHarness({ width: 1280, height: 840 });
+    harness.paintGroupRuns(ops, { translationDivisor: 1, filtersScaled }, () => {});
+    shots[String(filtersScaled)] = {
+      journal: harness.journal.map((entry) => ({ args: entry.args, filter: entry.filter, blend: entry.blend })),
+      counted: harness.groupPaint.filterAtStageScale
+    };
+  }
+  assert.deepEqual(shots.true.journal, shots.false.journal,
+    "the flag composites the SAME buffer at the SAME place with the SAME filter string");
+  assert.equal(shots.false.counted, 1, "and all it moves is the honesty counter");
+  assert.equal(shots.true.counted, 0);
+});
+
+test("a real weapon glow is composited AT THE WEAPON, which the identity transform would not be", () => {
+  if (!REAL_FIGURE) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_FIGURE, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THIS IS THE DEFECT THE HOIST EXISTS FOR, MEASURED ON THE REAL RIG.**
+  //   `runBoxOf` measures a run against `context.getTransform()`. With the
+  //   figure's placement applied per operation — where it used to be — the CTM
+  //   during `paintGroupRuns` is whatever the canvas already held, and the
+  //   weapon's box comes out in the figure's LOCAL units: x -26..-7, y 47..56,
+  //   which is a 28x78 sliver against the canvas's left edge. The glow would
+  //   have been composited there, ~850 pixels from the weapon.
+  const weapon = realFigureOps().filter((operation) => operation.limb === "weapon");
+  assert.ok(weapon.length > 0, "the rig has a weapon limb, or this test measures nothing");
+
+  const view = { scale: 2, toX: (x) => 640 + x * 2, toY: (y, lift) => 500 - (200 - y) * 2 * 1.7 - lift * 2 };
+  const origin = { x: 120, y: 200, facing: "right", size: 1 };
+  const m = FIGURE.figureOriginMatrix(view, origin);
+  // H3's inner glow, as `canvasFilterFor` emits one.
+  const group = groupRecord({ id: 0, character: 1195, filter: "drop-shadow(0px 0px 10px #000066)" });
+  const ops = weapon.map((operation) => ({ ...operation, group }));
+
+  const regions = {};
+  for (const [label, ctm] of [["hoisted", m], ["identity", [1, 0, 0, 1, 0, 0]]]) {
+    const harness = compositorHarness({ width: 1280, height: 840 });
+    harness.context.setTransform(...ctm);
+    harness.paintGroupRuns(ops, FIGURE.figureRouteFor(), () => {});
+    assert.equal(harness.journal.length, 1, `${label}: one drawImage per buffered run`);
+    const args = harness.journal[0].args;
+    regions[label] = { x: args[4], y: args[5], width: args[6], height: args[7] };
+    assert.equal(harness.groupPaint.buffers, 1);
+    assert.equal(harness.groupPaint.bufferedOps, weapon.length, "every weapon operation went into the buffer");
+    assert.equal(harness.groupPaint.filterAtStageScale, weapon.length,
+      "and the route says out loud that the radius is not in device pixels");
+  }
+
+  // Where the weapon actually IS on the canvas, worked out here with plain
+  // arithmetic rather than through the shell's own helpers.
+  let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
+  for (const operation of weapon) {
+    const numbers = operation.d.match(/[-+]?[0-9]*[.]?[0-9]+(?:[eE][-+]?[0-9]+)?/g).map(Number);
+    const p = operation.matrix;
+    for (let index = 0; index < numbers.length; index += 2) {
+      const lx = numbers[index];
+      const ly = numbers[index + 1];
+      // the placement, then the figure's own space
+      const fx = p[0] * lx + p[2] * ly + p[4];
+      const fy = p[1] * lx + p[3] * ly + p[5];
+      const dx = m[0] * fx + m[2] * fy + m[4];
+      const dy = m[1] * fx + m[3] * fy + m[5];
+      if (dx < minX) minX = dx;
+      if (dx > maxX) maxX = dx;
+      if (dy < minY) minY = dy;
+      if (dy > maxY) maxY = dy;
+    }
+  }
+  const hoisted = regions.hoisted;
+  assert.ok(hoisted.x <= minX && hoisted.y <= minY
+    && hoisted.x + hoisted.width >= maxX && hoisted.y + hoisted.height >= maxY,
+  `the buffer [${hoisted.x},${hoisted.y},${hoisted.width},${hoisted.height}] must contain the weapon ` +
+    `[${minX.toFixed(1)},${minY.toFixed(1)}]-[${maxX.toFixed(1)},${maxY.toFixed(1)}]`);
+  assert.ok(hoisted.x > 700 && hoisted.x < 880,
+    "and it is beside the gladiator, who stands at device x 880");
+
+  // ► **AND THE OLD ARRANGEMENT PUTS IT SOMEWHERE ELSE ENTIRELY**, which is
+  //   what makes the assertion above an assertion rather than a tautology.
+  const stray = regions.identity;
+  assert.ok(stray.x + stray.width < minX,
+    `the un-hoisted buffer ends at ${stray.x + stray.width} and the weapon starts at ${minX.toFixed(1)}`);
+  assert.notDeepEqual(stray, hoisted);
+});
+
+test("?groups=0 draws the figure's grouped operations straight, and counts what it skipped", () => {
+  // The kill switch is the other half of the screenshot pair, and it has to
+  // reach the figure now that the figure goes through the compositor.
+  const harness = compositorHarness({ compositing: false });
+  const group = groupRecord({ id: 0, filter: "drop-shadow(0px 0px 10px #000066)" });
+  const ops = [
+    { kind: "path", d: "M0 0L10 0L10 10L0 10Z", matrix: [1, 0, 0, 1, 0, 0], strokeWidth: 0, group },
+    { kind: "path", d: "M0 0L10 0L10 10L0 10Z", matrix: [1, 0, 0, 1, 0, 0], strokeWidth: 0, group }
+  ];
+  const drawn = [];
+  harness.paintGroupRuns(ops, FIGURE.figureRouteFor(), () => drawn.push(harness.contextLabel()));
+  assert.deepEqual(drawn, ["destination", "destination"]);
+  assert.equal(harness.journal.length, 0, "no offscreen, no composite");
+  assert.equal(harness.groupPaint.notComposited, 2, "and the two it skipped are counted, not silent");
+  assert.deepEqual(harness.logLines, ["groups: ?groups=0 — filters and blends are NOT drawn, on purpose."]);
+});
+
+test("?enchant= is parsed as a pair per SLOT, and an absent potency is not promoted to a cell", () => {
+  assert.equal(FIGURE.enchantDemoFrom(params("")), null);
+  assert.equal(FIGURE.enchantDemoFrom(params("enchant=")), null, "an empty value is no override");
+  assert.equal(FIGURE.enchantDemoFrom(params("seed=7")), null);
+  assert.equal(FIGURE.enchantDemoFrom(null), null, "and it never throws on a URL");
+
+  // ► **BOTH SLOTS, BECAUSE THE BUILD READS THE EQUIPPED SLOT'S OWN PAIR FOR
+  //   THE GLOW.** `itemglow(weapon, weapon_enchantment_type, ...)` in melee and
+  //   `itemglow(weapon, secondary_weapon_enchantment_type, ...)` with a bow up.
+  //   A two-part `?enchant=` sets them alike so a glow appears whatever is in
+  //   hand; the four-part form sets them APART, which is the configuration
+  //   where a renderer that reused `damagecharacter`'s rule — it gates the PROC
+  //   on `weapon_enchantment_potency` whichever slot is equipped — draws the
+  //   wrong cell.
+  const both = FIGURE.enchantDemoFrom(params("enchant=3.2"));
+  assert.equal(both.complete, true);
+  assert.equal(both.text, "3.2");
+  assert.deepEqual(both.fields, {
+    weapon_enchantment_type: 3, weapon_enchantment_potency: 2,
+    secondary_weapon_enchantment_type: 3, secondary_weapon_enchantment_potency: 2
+  });
+
+  const split = FIGURE.enchantDemoFrom(params("enchant=3.2.5.1"));
+  assert.deepEqual(split.fields, {
+    weapon_enchantment_type: 3, weapon_enchantment_potency: 2,
+    secondary_weapon_enchantment_type: 5, secondary_weapon_enchantment_potency: 1
+  });
+
+  // ► **`?enchant=3` IS POTENCY 0, AND 0 IS THE BUILD'S UNWRITTEN NO-OP.** For
+  //   a potency outside 1..3 `itemglow` calls `gotoAndStop` ZERO times and the
+  //   clip keeps its current frame — there is no trailing default — so nothing
+  //   glows. Defaulting it to 1 here would invent a measurement, and
+  //   `complete` is what the log line warns on instead.
+  const bare = FIGURE.enchantDemoFrom(params("enchant=3"));
+  assert.equal(bare.complete, false);
+  assert.equal(bare.fields.weapon_enchantment_potency, 0);
+  assert.equal(bare.fields.secondary_weapon_enchantment_potency, 0);
+
+  // A URL is not a config file: nonsense is zero, never a throw and never NaN.
+  const junk = FIGURE.enchantDemoFrom(params("enchant=banana.x"));
+  assert.deepEqual(junk.fields, {
+    weapon_enchantment_type: 0, weapon_enchantment_potency: 0,
+    secondary_weapon_enchantment_type: 0, secondary_weapon_enchantment_potency: 0
+  });
+  for (const value of Object.values(junk.fields)) assert.ok(Number.isFinite(value));
+});
+
+test("the shell loads the enchantment pack, routes the figure, and labels the demo as a demo", () => {
+  const source = readShellSource();
+  assert.ok(source, "tools/arena/main.js is tracked and must be readable");
+  const { code } = codeOnly(source);
+
+  // 1. The pack: optional, failing soft, and handed to the figure pack.
+  assert.ok(code.includes('fetch("/assets/figure/enchantments.json").then((response) => '
+    + '(response.ok ? response.json() : null)).catch(() => null)'),
+  "the enchantment pack is fetched the way the wardrobe is — optional, and a 404 is not a failure");
+  assert.ok(code.includes("figurePackFrom(shapes, animations, enchantments)"),
+    "and it reaches the figure pack as its third argument");
+  assert.match(code, /no enchantment pack — a weapon draws unglowed/,
+    "a missing pack is ONE line and the picture that was there before");
+
+  // 2. The route. `drawOps` was a flat loop; it is the compositor's now.
+  const drawOps = shellFunctionSource(code, "drawOps");
+  assert.ok(drawOps, "drawOps is declared");
+  assert.ok(drawOps.includes("paintGroupRuns(slice, figureRouteFor(), drawFigureOperation)"),
+    "the figure's operations go through the same compositor the props do");
+  assert.ok(drawOps.includes("figureOriginMatrix(view, origin)") && drawOps.includes("context.transform("),
+    "with the figure's own space ON the context, which is what runBoxOf measures against");
+  assert.ok(drawOps.includes("} finally {"), "and the transform is restored in a finally");
+
+  // ► **AND THE FACTOR THE FIGURE PAINTER CANNOT WORK OUT FOR ITSELF.** A
+  //   group's blur radius is in the fighter clip's pixels; the painter knows
+  //   clip-to-arena and this file knows arena-to-canvas, so neither half is the
+  //   whole factor. The number handed over has to be the CTM's own scale, or
+  //   the radius is right for a canvas nobody is looking at.
+  assert.ok(code.includes("scale: (origin.size ?? 1) * view.scale"),
+    "the figure painter is told how many canvas pixels an arena unit is");
+  for (const origin of [{ x: 0, y: 200, facing: "right", size: 0.74 }, { x: 9, y: 103, facing: "left" }]) {
+    const view = { scale: 3.75, toX: (x) => x, toY: (y) => y };
+    assert.equal((origin.size ?? 1) * view.scale, Math.abs(FIGURE.figureOriginMatrix(view, origin)[3]),
+      "and it is the SAME number the context is transformed by, not a second one that can drift");
+  }
+  assert.match(code, /seam: enchant melee=/, "the ?seam=1 probe prints both slots' pairs");
+  assert.match(code, /FORCED by \?enchant=, not the engine's/,
+    "and says when the pair it printed was the demo's rather than the engine's");
+
+  // ► **AND THE PER-LEAF PICTURE IS REFUSED HERE TOO.** The same assertion the
+  //   props' two painters carry: an operation-level `filter` or blend mode is
+  //   the mistake this whole section exists to prevent, and the figure is the
+  //   painter it would arrive at next.
+  const painter = shellFunctionSource(code, "drawFigureOperation");
+  assert.ok(painter, "drawFigureOperation is declared");
+  assert.equal(countOf(painter, "filter"), 0, "drawFigureOperation sets no filter on an operation");
+  assert.equal(countOf(painter, "globalCompositeOperation"), 0, "and no blend mode");
+
+  // 3. The demo control says what it is, on the screenshot.
+  assert.match(code, /DEMO OVERRIDE \?enchant=/, "the override announces itself in the log panel");
+  assert.match(code, /THE ENGINE PRODUCED NONE OF IT — a screenshot of this is not evidence about a battle/,
+    "and says why a picture of it must not be filed as an observation");
+  assert.ok(code.includes("{ ...declared, ...ENCHANT_DEMO.fields }"),
+    "the override goes on the LOADOUT, never on the wire projection the panels are copied from");
+
+  // 4. The figure's own report, with denominators — `groupPaint`'s own rule.
+  const report = shellFunctionSource(code, "reportFigureGroups");
+  assert.ok(report, "reportFigureGroups is declared");
+  assert.ok(report.includes("${figureGroupPaint.groupedOps}/${figureGroupPaint.ops}"),
+    "grouped operations over TOTAL operations, so a zero can be told from a counter never reached");
+  assert.ok(report.includes("figureEffects.groups") && report.includes("figureEffects.placements"),
+    "and the pack's own census beside it, so a zero frame is explicable");
+  assert.ok(report.includes("figureGroupPaint.ops === 0"),
+    "it reports the ZERO — unlike reportGroupPaint, which returns early on it");
+});
+
+/** The device box of a list of operations, worked out here rather than lifted. */
+function deviceBoxOf(ops, origin) {
+  let minX = Infinity; let minY = Infinity; let maxX = -Infinity; let maxY = -Infinity;
+  for (const operation of ops) {
+    const numbers = operation.d.match(/[-+]?[0-9]*[.]?[0-9]+(?:[eE][-+]?[0-9]+)?/g).map(Number);
+    const p = operation.matrix;
+    for (let index = 0; index < numbers.length; index += 2) {
+      const fx = p[0] * numbers[index] + p[2] * numbers[index + 1] + p[4];
+      const fy = p[1] * numbers[index] + p[3] * numbers[index + 1] + p[5];
+      const dx = origin[0] * fx + origin[2] * fy + origin[4];
+      const dy = origin[1] * fx + origin[3] * fy + origin[5];
+      if (dx < minX) minX = dx;
+      if (dx > maxX) maxX = dx;
+      if (dy < minY) minY = dy;
+      if (dy > maxY) maxY = dy;
+    }
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+test("drawOps ITSELF composites a real weapon glow, and hands back the context it borrowed", () => {
+  if (!REAL_FIGURE) {
+    assertRealPackPathIsDerivable();
+    assert.equal(REAL_FIGURE, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE ROUTE, RUN RATHER THAN READ.** Everything above this tests
+  //   `paintGroupRuns` with a transform the test put on the context itself.
+  //   This runs the SHELL'S OWN `drawOps` — the function that decides which
+  //   transform goes on, which operations go through the compositor and which
+  //   do not — against the real rig. Deleting the hoist, dropping the
+  //   `paintGroupRuns` call, or partitioning the wrong way all land here as a
+  //   composite in the wrong place or no composite at all.
+  const harness = compositorHarness({ width: 1280, height: 840 });
+  const view = { scale: 2, toX: (x) => 640 + x * 2, toY: (y, lift) => 500 - (200 - y) * 2 * 1.7 - lift * 2 };
+  const origin = { x: 120, y: 200, facing: "right", size: 1 };
+
+  const all = realFigureOps();
+  const group = groupRecord({ id: 0, character: 1195, filter: "drop-shadow(0px 0px 10px #000066)" });
+  // The build's own arrangement: the glow is on the placement of `realweapon`,
+  // so it encloses the attached weapon art and NOTHING else on the figure.
+  const ops = all.map((operation) => (operation.limb === "weapon" ? { ...operation, group } : operation));
+  const weapon = ops.filter((operation) => operation.group);
+  assert.ok(weapon.length > 0 && weapon.length < ops.length,
+    "some of the figure is glowing and some of it is not, or this measures one case");
+
+  const before = harness.context.getTransform();
+  harness.drawOps(ops, view, origin);
+  const after = harness.context.getTransform();
+
+  // ► **ONE COMPOSITE, NOT ONE PER LEAF.** Nine weapon paths under one group is
+  //   one offscreen and one `drawImage`; nine of them is the per-leaf picture
+  //   `src/render/screen.js` refuses, arrived at by accident.
+  assert.equal(harness.journal.length, 1, "one drawImage for the whole group");
+  assert.equal(harness.offscreens.length, 1, "and one offscreen");
+  const [, , , , x, y, width, height] = harness.journal[0].args;
+  assert.equal(harness.journal[0].filter, "drop-shadow(0px 0px 10px #000066)");
+  assert.deepEqual(harness.journal[0].matrix, [1, 0, 0, 1, 0, 0],
+    "composited at the identity, like every other group in this file");
+
+  const box = deviceBoxOf(weapon, harness.figureOriginMatrix(view, origin));
+  assert.ok(x <= box.minX && y <= box.minY && x + width >= box.maxX && y + height >= box.maxY,
+    `the buffer [${x},${y},${width},${height}] must contain the weapon `
+    + `[${box.minX.toFixed(1)},${box.minY.toFixed(1)}]-[${box.maxX.toFixed(1)},${box.maxY.toFixed(1)}]`);
+  assert.ok(x > 700 && x < 880, "which is beside the gladiator standing at device x 880, not at the origin");
+
+  // The figure's own invoice, from the real draw.
+  assert.equal(harness.figureGroupPaint.figures, 1);
+  assert.equal(harness.figureGroupPaint.ops, ops.length, "the denominator is every operation drawn");
+  assert.equal(harness.figureGroupPaint.groupedOps, weapon.length);
+  assert.equal(harness.figureGroupPaint.groups, 1);
+  // ► **`plannedBuffers`, NOT `buffered` — the rename is a correction, not a
+  //   tidy-up.** `groupRunsOf` derives `run.buffered` from the group RECORD and
+  //   never consults `groupCompositingAvailable()`, so the old name reported
+  //   buffers at `?groups=0` where the compositor opens none. `groupPaint.buffers`
+  //   is the count of buffers actually made.
+  assert.equal(harness.figureGroupPaint.plannedBuffers, 1);
+  assert.equal(harness.figureGroupPaint.plannedBufferOps, weapon.length);
+  assert.ok(harness.figureGroupPaint.direct > 0, "and the ungrouped body went straight onto the canvas");
+
+  // ► **AND THE BORROWED CONTEXT IS GIVEN BACK.** `drawOps` puts the figure's
+  //   space on the destination; the name plate, the arrows and the UI bar are
+  //   drawn straight after it in canvas pixels.
+  assert.deepEqual([after.a, after.b, after.c, after.d, after.e, after.f],
+    [before.a, before.b, before.c, before.d, before.e, before.f]);
+  assert.equal(harness.contextLabel(), "destination");
+});
+
+test("the authored fallback is drawn with NO figure transform, because it computes pixels itself", () => {
+  // ► **THE OTHER HALF OF THE PARTITION, AND THE ONE THAT WOULD BREAK
+  //   SILENTLY.** `paintFigure`'s polygons already went through `view.toX`, so
+  //   leaving `figureOriginMatrix` on the context would apply the gladiator's
+  //   position, size and facing to them a SECOND time. A clone with no
+  //   extracted art draws nothing else — the whole page would be this bug.
+  const harness = compositorHarness({ width: 1280, height: 840 });
+  const view = { scale: 2, toX: (x) => 640 + x * 2, toY: (y, lift) => 500 - (200 - y) * 2 * 1.7 - lift * 2 };
+  const origin = { x: 120, y: 200, facing: "right", size: 1 };
+  const figure = figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" });
+  const pose = poseAt(timelineFor({ family: "standing", label: null }), 0);
+
+  harness.drawOps(paintFigure(figure, pose), view, origin);
+  harness.drawOps(paintShadow(figure, pose), view, origin);
+
+  assert.ok(harness.strokes.length > 0, "the authored figure drew something");
+  for (const stroke of harness.strokes) {
+    assert.equal(stroke.into, "destination", "straight onto the canvas — it carries no group");
+    assert.deepEqual(stroke.matrix, [1, 0, 0, 1, 0, 0],
+      "and at the transform the context already held, NOT under figureOriginMatrix");
+  }
+  // The ellipse of the shadow is at the gladiator's feet in canvas pixels,
+  // which is what "it computes them itself" means.
+  const shadow = harness.strokes.find((stroke) => stroke.call === "ellipse");
+  assert.ok(shadow, "the shadow is an ellipse");
+  assert.equal(shadow.x, view.toX(origin.x));
+  assert.equal(harness.journal.length, 0, "nothing was composited, because nothing was grouped");
+  assert.equal(harness.figureGroupPaint.figures, 0, "and the figure invoice never saw a figure-space run");
+});
+
+test("the demo override reaches the painter's own loadout shape, both slots intact", () => {
+  // ► **THE OVERRIDE IS A SPREAD ONTO `loadoutFrom`'s RESULT, SO THE FIELD
+  //   NAMES ARE A CONTRACT WITH ANOTHER MODULE AND ARE CHECKED AGAINST IT.**
+  //   A rename on either side leaves `?enchant=` silently drawing a bare
+  //   weapon: the URL parses, the log line prints, the fields land on an object
+  //   nothing reads. That is the failure this asserts away.
+  const demo = FIGURE.enchantDemoFrom(params("enchant=3.2.5.1"));
+  const loadout = { ...loadoutFrom({ weapon: 1, equipped_weapon: 2 }), ...demo.fields };
+  for (const [field, value] of Object.entries(demo.fields)) {
+    assert.equal(loadout[field], value, `${field} is a field the figure painter's loadout carries`);
+  }
+
+  // ► **AND THE TWO PAIRS STAY APART.** The build reads the EQUIPPED slot's own
+  //   pair for the glow — the bow slot here, since `equipped_weapon` is 2 —
+  //   while `damagecharacter` gates the PROC on `weapon_enchantment_potency`
+  //   whichever is equipped. A loadout that collapsed them would draw the melee
+  //   cell on a drawn bow and nothing would say so.
+  assert.equal(loadout.equipped_weapon, 2, "a bow is up");
+  assert.notEqual(loadout.weapon_enchantment_type, loadout.secondary_weapon_enchantment_type);
+  assert.notEqual(loadout.weapon_enchantment_potency, loadout.secondary_weapon_enchantment_potency);
+
+  // The declared loadout survives the spread: an override adds an enchantment,
+  // it does not replace the gladiator's kit.
+  assert.equal(loadout.weapon, 1, "the weapon the roster declared is still there");
 });
