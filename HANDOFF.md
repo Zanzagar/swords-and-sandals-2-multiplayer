@@ -8,7 +8,7 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-15 04:00 — the filters land, and the sky has a clock](docs/handoffs/2026-09-15-0400--the-filters-land-and-the-sky-has-a-clock.md).**
+[2026-09-15 07:18 — the glow is drawn, and it hangs the page](docs/handoffs/2026-09-15-0718--the-glow-is-drawn-and-it-hangs-the-page.md).**
 Start there.
 
 ► **THE FILTERS ARE APPLIED. `screen.js` EMITS 248 GROUPS AND BOTH SHELLS
