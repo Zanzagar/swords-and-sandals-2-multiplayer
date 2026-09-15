@@ -699,6 +699,10 @@ function emptyFilterCounts() {
     glyphOpsComposited: 0,
     // Still NOT applied, and the panel must keep saying so.
     groupsWithColourMatrix: 0,
+    // A matrix-only group that has a STRICT DESCENDANT group carrying a
+    // canvas filter string: the descendant composites and this one does not,
+    // which is the innermost-wins picture screen.js argues against.
+    groupsMatrixOnlyWithFilteredDescendant: 0,
     opsUnderColourMatrix: 0,
     groupsRefused: 0,
     opsUnderRefusedFilter: 0,
@@ -961,7 +965,19 @@ function filterLayersFor(ops, groups, scale, counts) {
     if (matrices > 0) { counts.groupsWithColourMatrix += 1; }
     if (refusals > 0) { counts.groupsRefused += 1; }
     if (noOps > 0 && !hasString && matrices === 0) counts.groupsNoOpOnly += 1;
-    if (!hasString) { counts.groupsWithNoFilterString += 1; continue; }
+    if (!hasString) {
+      counts.groupsWithNoFilterString += 1;
+      // Counted BEFORE the `continue`, because after it there is no group
+      // left to ask about — which is how "composited ungraded" got written
+      // in the panel for a step that never runs.
+      if (matrices > 0 && groups.some((other) => other !== group
+        && other.filter && Array.isArray(other.path)
+        && other.path.length > group.path.length
+        && group.path.every((seg, at) => other.path[at] === seg))) {
+        counts.groupsMatrixOnlyWithFilteredDescendant += 1;
+      }
+      continue;
+    }
 
     const contiguous = indices[indices.length - 1] - indices[0] + 1 === indices.length;
     if (!contiguous) counts.groupsNotContiguousHere += 1;
@@ -1815,8 +1831,32 @@ function renderInvoice() {
   nodes.push(heading("filters still NOT applied, by name"));
   nodes.push(...row("groups awaiting a colour matrix", f.groupsWithColourMatrix, {
     tone: approximate(f.groupsWithColourMatrix),
+    // ► **THIS ROW SAID "composited UNGRADED" AND THAT WAS FALSE.** A group
+    //   with no canvas filter string is `continue`d past in `filterLayersFor`
+    //   before any offscreen is opened, so it is NOT composited at all —
+    //   "composited ungraded" describes a step that never runs. Corrected
+    //   2026-09-15 after a verifier caught it and the main session re-derived
+    //   the numbers. **A wrong description of a known gap is worse than no
+    //   description: it tells the next reader the gap is smaller than it is.**
     why: f.groupsWithColourMatrix > 0
-      ? "applyColourMatrix is not a ctx.filter; townsquare's 1523-op group is one of these and is composited UNGRADED"
+      ? "applyColourMatrix is not a ctx.filter, so these groups open NO offscreen and are not composited at all — see the row below for what that costs"
+      : null
+  }));
+  // ► **THE COST, STATED WHERE THE GAP IS, because the group count alone reads
+  //   as small.** 31 of the 248 groups carry only a colour matrix, and 8210 of
+  //   the 13638 operations across the 26 screens — 60% — sit under one.
+  //   **FIVE of those 31 have a DESCENDANT group that DOES composite**, so the
+  //   picture they produce is exactly the "innermost wins" answer
+  //   `src/render/screen.js`'s header argues is the wrong one: `townsquare`'s
+  //   [59,1] colour grade over 1523 operations is dropped while its four nested
+  //   blurs are drawn. Canvas has no arbitrary colour-matrix filter
+  //   (`colourMatrixFilterString` refuses every one), so closing this needs
+  //   either per-pixel `getImageData` over each group's offscreen or an inline
+  //   SVG `filter` referenced by `url(#id)` — neither is installed here.
+  nodes.push(...row("  groups whose DESCENDANT composites anyway", f.groupsMatrixOnlyWithFilteredDescendant, {
+    tone: missing(f.groupsMatrixOnlyWithFilteredDescendant),
+    why: f.groupsMatrixOnlyWithFilteredDescendant > 0
+      ? "the inner filter lands and the outer grade does not — the innermost-wins picture screen.js argues against"
       : null
   }));
   nodes.push(...row("  ops awaiting a colour matrix", f.opsUnderColourMatrix, { tone: approximate(f.opsUnderColourMatrix) }));
