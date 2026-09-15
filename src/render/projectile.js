@@ -450,6 +450,20 @@ export function projectileDrawAt(flight, at, { frontY, rankStride, figureScaleFo
         x: puff.x,
         y: puffDepth,
         lift: lift(puff),
+        // ► **THE PUFF'S OWN ROTATION, AND THIS MAPPER DROPPED IT UNTIL
+        //   2026-09-15.** `projectileTrail`'s docstring three functions up has
+        //   always said a puff is dropped "at the arrow's own position AND
+        //   ROTATION (`+0x71aa`-`+0x7205`)" — and `projectileAt` has always
+        //   returned it — but this object copied x, y, lift and size and walked
+        //   past `rotation`, so `tools/arena/main.js` had nothing to pass and
+        //   hardcoded `rotation: 0`. A bombard's puffs therefore lay flat along
+        //   an arc whose arrow was pitching, which reads as a deliberate look.
+        //   **It is the same defect as the colour transform this file's sibling
+        //   carried for a month: the value was computed, documented, and
+        //   dropped one seam short of the painter.** Each puff keeps the
+        //   rotation the arrow HAD when it was dropped, not the arrow's current
+        //   one, which is why it is read off `puff` and not off `point`.
+        rotation: puff.rotation,
         // Each puff at ITS OWN depth's scale, not the arrow's: a trail across
         // lanes tapers, which is the whole reason the depth is interpolated
         // rather than fixed at the launch.

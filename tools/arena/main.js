@@ -81,6 +81,7 @@ import {
   hasExtractedProps,
   propFrameCount,
   propOpsFor,
+  propInvoiceFor,
   arrowOpsFor,
   arrowTrailOpsFor,
   arenaSceneryFor,
@@ -93,9 +94,6 @@ import {
   fieldsPlacedIn,
   fieldOpsFor,
   colourTransformFrom,
-  colourTransformApplies,
-  applyColourTransform,
-  applyColourTransformAlpha,
   canvasFilterFor,
   cameraFor,
   cameraStep,
@@ -289,10 +287,6 @@ fetch("/assets/props/props.json")
       return;
     }
     log(`props: ${propFrameCount(propPack, "bullet")} arrow frame(s) from your own install`);
-    // ASK before drawing: `probeColourTransform` decides whether this shell has
-    // to compose the placement's colour transform or whether `props.js` has
-    // started doing it. See the section above `paintArenaLayer`.
-    probeColourTransform(propPack);
     reportArenaEffects(propPack);
     renderProvenance();
   })
@@ -1198,210 +1192,59 @@ function paintBitmapFill(operation, path) {
 }
 
 /* ------------------------------------------------------------------ */
-/* The colour transform the pack carries and the painter never saw     */
+/* The colour transform was composed HERE, and is not any more         */
 /* ------------------------------------------------------------------ */
 
 /**
- * EVERY PLACEMENT IN THE PROPS PACK CARRIES A COLOUR TRANSFORM AND
- * `propOpsFor` READS PAST IT — which is why the arena's UI bar renders as a
- * blank white strip, and it is not a filter.
+ * ► **THIS FILE APPLIED THE PLACEMENT'S COLOUR TRANSFORM UNTIL 2026-09-14 AND
+ *   THE WHOLE APPARATUS IS GONE.** `tintedPropOpsFor` wrapped `propOpsFor` and
+ *   re-tinted what came back; `probeColourTransform` ran one placement through
+ *   the real function at load to decide whether it still had to;
+ *   `firstTintedPlacement` and `onePlacementPack` fed that probe;
+ *   `colourTransformMode` held what the probe decided — the name this list
+ *   forgot until 2026-09-14, when a track checking the six names
+ *   `test/render-arena-shell.test.js` greps for found that five of them were
+ *   recorded here and the sixth was recorded nowhere, so the one identifier a
+ *   reader could not account for was the one the guard could not justify; and
+ *   `colourTransformTally` counted what the wrapper did. `propOpsFor` in
+ *   `src/render/props.js` now folds the transform onto every fill, stroke,
+ *   opacity and gradient stop itself, so this shell injects that function
+ *   UNWRAPPED at the seam `arena-backdrop.js` already provides, and composes
+ *   nothing.
  *
- * Measured in node against this repository's own `assets/props/props.json`
- * (`src/render/filters.js`'s `colourTransformFrom` decides what counts as
- * non-identity, so the count is the renderer's and not a second opinion):
+ * ► **TWO APPLICATIONS SQUARE THE MULTIPLIER, WHICH IS WHY THE PROBE EXISTED
+ *   AND WHY DELETION BEATS LEAVING IT PROBING.** Measured in node against this
+ *   repository's own `assets/props/props.json`: the UI bar's plate is shape 487
+ *   — a white rectangle — under `rgb x0, alpha x0.5`, and it comes out
+ *   `#000000` at 0.5 applied once and `#000000` at **0.25** applied twice. A
+ *   half-transparent bar is a design decision; a quarter-transparent one is a
+ *   bug wearing a design decision's clothes. **And the bar's own FILL cannot
+ *   see the difference** — 0 x 0 is 0, so the hex is `#000000` either way and
+ *   only the alpha moves. At the shipped dressing exactly **2 of the arena
+ *   screen's 17 operations** change under a second application: this plate's
+ *   alpha and one `sky` fill. A test that pinned the plate's colour would have
+ *   watched the squaring happen.
  *
- * ```text
- *   3,345 placements, 2,330 of them under a NON-IDENTITY colour transform
- *   8,682 draw operations, 7,246 of them under one
- *       0 of those 7,246 land on a fill the arithmetic cannot express
- *   7,215 of the 7,246 are the SKY, whose day/night colouring is this
- *         transform and not, as the brief for this work said, a ColorMatrix
- * ```
+ * ► **AND THE TALLY WAS WRITE-ONLY, WHICH IS THIS PROJECT'S SIGNATURE DEFECT
+ *   COMMITTED IN THIS FILE.** `colourTransformTally` had four increment sites
+ *   and **no reader anywhere in the tree** — nothing logged it, no panel showed
+ *   it, no test asked for it. So nothing is lost by deleting it; what is worth
+ *   recording is that `unpairable`, the count of operations this shell could
+ *   not match back to a placement, would have fired into silence if the pairing
+ *   had ever slipped. The replacement is `propInvoiceFor`, printed by
+ *   `reportArenaEffects`, and it comes from the same walk that emits the
+ *   operations instead of from a second one that can disagree with it.
  *
- * The bar itself is FOUR placements of ONE white rectangle (shape 487):
- *
- * ```text
- *   plate    rgb x0, alpha x0.5   black at half alpha — the bar's own ground
- *   rule     identity             the 2.8px white highlight along its top
- *   button   alpha x0             the sound toggle's INVISIBLE hit plate
- *   button   alpha x0             the tooltips toggle's, likewise
- * ```
- *
- * Drop the transform and all four draw as opaque white — which is exactly the
- * 1,268 pixels of `#ffffff` a row census measures across canvas rows 980..1024
- * at 1600x1200. **Both text fields are `#ffffff` as well**, so drawing the
- * bar's words onto that plate would have changed nothing a sampler could see:
- * the two halves of this are one defect, not two.
- *
- * ► **THE DURABLE HOME FOR THIS IS `propOpsFor` IN `src/render/props.js`, NOT
- *   HERE.** That function already copies `fill`, `fillOpacity`, `stroke`,
- *   `strokeOpacity`, the bitmap and the gradient off each path, and the matrix
- *   and the clip off each placement; `colour` is the one field on a placement
- *   it never reads. `screen.js` and `extracted-figure.js` both apply it, both
- *   through `filters.js`, so the arithmetic is settled and only the arena's
- *   reader is missing. This session did not own that file, so the transform is
- *   composed HERE, at the seam `arenaScreenLayersFor` already injects
- *   `propOpsFor` through — and `probeColourTransform` turns this off the moment
- *   `props.js` starts carrying it, so the two can never both apply it.
+ * ► **WHAT STILL READS A TRANSFORM HERE, AND WHY THAT IS NOT APPLYING ONE.**
+ *   `colourTransformFrom` survives in `soundButtonPlate`, which finds the bar's
+ *   invisible hit plate by its `alphaMultiplier` of 0, and in
+ *   `reportArenaEffects`, which counts tinted placements. Both ASK what a
+ *   placement carries; neither changes a pixel. `applyColourTransform`,
+ *   `applyColourTransformAlpha` and `colourTransformApplies` are no longer
+ *   imported into this file at all, and `test/render-arena-shell.test.js` reads
+ *   this file as text to keep it that way — node cannot import a browser module
+ *   with absolute URL specifiers, so the source IS the only surface a test has.
  */
-let colourTransformMode = "unprobed";
-
-/**
- * Counted per DRAW OPERATION rather than per placement, because the operation
- * is what the painter consumes and therefore the unit an absence would be
- * invisible in. `unpairable` is the one that matters: it is ops this shell
- * declined to tint because it could not prove which placement they came from.
- */
-const colourTransformTally = { ops: 0, tinted: 0, colourNotApplied: 0, unpairable: 0 };
-
-/** The first placement in a pack carrying a transform a hex fill can take. */
-function firstTintedPlacement(pack) {
-  for (const prop of Object.values(pack?.props ?? {})) {
-    for (const frame of prop?.frames ?? []) {
-      for (const placement of frame ?? []) {
-        const transform = colourTransformFrom(placement?.colour ?? null);
-        if (!transform) continue;
-        const shape = pack?.shapes?.[placement.shape];
-        const path = Array.isArray(shape?.paths) ? shape.paths[0] : null;
-        if (!path || !colourTransformApplies(path.fill, transform)) continue;
-        return { placement, path, transform };
-      }
-    }
-  }
-  return null;
-}
-
-/**
- * A pack holding exactly ONE placement, so the ops that come back cannot
- * belong to anything else. Used only by the probe; the hot path pairs ops to
- * placements by counting paths instead of allocating one of these per frame.
- */
-function onePlacementPack(pack, placement) {
-  return { props: { probe: { frames: [[placement]] } }, shapes: pack.shapes };
-}
-
-/**
- * ASK `propOpsFor` WHETHER IT ALREADY APPLIES THE TRANSFORM rather than
- * believing what it did this afternoon.
- *
- * ► **FIVE OTHER AGENTS ARE EDITING `src/render/` WHILE THIS IS WRITTEN**, and
- *   a shell that applies a transform the module has just learned to apply
- *   squares every multiplier — `#ffffff` at 0.3 would come out `#161616`
- *   instead of `#4c4c4c`, which looks like a rendering choice rather than a
- *   bug. So this runs one placement through the real function once, compares
- *   the op it gets back with the path it started from, and decides. It is four
- *   lines of measurement in place of an assumption with a shelf life.
- */
-function probeColourTransform(pack) {
-  const sample = firstTintedPlacement(pack);
-  if (!sample) {
-    colourTransformMode = "nothing-to-do";
-    return;
-  }
-  let ops = null;
-  try {
-    ops = propOpsFor(onePlacementPack(pack, sample.placement), { linkage: "probe", frame: 1 });
-  } catch {
-    ops = null;
-  }
-  if (!ops || ops.length === 0) {
-    // The probe could not be run, so the honest state is "unknown" and the
-    // shell leaves the pixels alone rather than guessing in either direction.
-    colourTransformMode = "unprobed";
-    log("colour transform: could not probe `propOpsFor`; the arena draws untinted.", { warn: true });
-    return;
-  }
-  const expectedFill = applyColourTransform(sample.path.fill, sample.transform);
-  const expectedAlpha = applyColourTransformAlpha(sample.path.fillOpacity ?? 1, sample.transform);
-  const alreadyApplied = ops[0].fill === expectedFill
-    && Math.abs((ops[0].fillOpacity ?? 1) - expectedAlpha) < 1e-9;
-  colourTransformMode = alreadyApplied ? "upstream" : "shell";
-  // ► **KEPT SHORT ON PURPOSE.** `main { flex-wrap }` in the page makes the
-  //   stage as tall as the taller column, so a log line that WRAPS grows the
-  //   canvas and moves the whole arena down. Measured: the first draft of these
-  //   messages shifted the stage 70px and made the before/after shots
-  //   incomparable. The long version of each is in the comment above it.
-  log(alreadyApplied
-    ? "colour transform: propOpsFor applies it; nothing added here."
-    : "colour transform: composed here — belongs in src/render/props.js.");
-}
-
-/**
- * `propOpsFor` WITH THE PLACEMENT'S COLOUR TRANSFORM PUT BACK ON.
- *
- * ► **THE OPS ARE PAIRED TO PLACEMENTS BY COUNTING PATHS, AND THE COUNT IS
- *   CHECKED EVERY CALL.** `propOpsFor` emits one operation per path of each
- *   placement's shape, in placement order, skipping a placement whose shape is
- *   missing — so the pairing is arithmetic rather than a guess. If the total
- *   does not come out equal, this returns the ops UNTINTED and adds them to
- *   `unpairable`, because a wrong pairing paints the sky's midnight blue onto
- *   the clouds and nothing says so. Measured: the sky's 200 frames have seven
- *   distinct operation counts (2, 3, 26, 37, 38, 70, 93), so the check has
- *   teeth against a frame index this shell got wrong as well as against a
- *   change in `propOpsFor`.
- *
- * ► **THE FRAME CLAMP IS REPLICATED FROM `props.js` AND THAT IS A COUPLING.**
- *   It is stated in that module's own public comment — past the end of a clip
- *   the playhead stays put, so the last frame is what the build would be
- *   showing — and the op-count check above is what catches it if the two ever
- *   disagree.
- */
-function tintedPropOpsFor(pack, options) {
-  const ops = propOpsFor(pack, options);
-  if (!ops || colourTransformMode !== "shell") return ops;
-
-  const frames = pack?.props?.[options?.linkage]?.frames;
-  if (!Array.isArray(frames) || frames.length === 0) return ops;
-  const wanted = Number.isFinite(options?.frame) ? Math.trunc(options.frame) : 1;
-  const placements = frames[Math.min(frames.length, Math.max(1, wanted)) - 1] ?? [];
-
-  let expected = 0;
-  for (const placement of placements) {
-    const shape = pack.shapes?.[placement.shape];
-    if (shape && Array.isArray(shape.paths)) expected += shape.paths.length;
-  }
-  if (expected !== ops.length) {
-    colourTransformTally.unpairable += ops.length;
-    return ops;
-  }
-
-  const out = [];
-  let at = 0;
-  for (const placement of placements) {
-    const shape = pack.shapes?.[placement.shape];
-    if (!shape || !Array.isArray(shape.paths)) continue;
-    const transform = colourTransformFrom(placement.colour ?? null);
-    for (let index = 0; index < shape.paths.length; index += 1) {
-      const operation = ops[at];
-      at += 1;
-      colourTransformTally.ops += 1;
-      if (!transform || !operation) {
-        out.push(operation);
-        continue;
-      }
-      // A transform whose colour half cannot reach a gradient or a bitmap fill
-      // is COUNTED, not silently half-applied: the alpha still lands and the
-      // colour does not, and that difference is exactly the kind of partial
-      // read this project keeps paying for. Measured over the whole pack it is
-      // currently zero, which is why the counter has to exist to stay honest.
-      const reaches = colourTransformApplies(operation.fill, transform)
-        || colourTransformApplies(operation.stroke, transform);
-      if (!reaches && (transform[0] !== 1 || transform[1] !== 1 || transform[2] !== 1
-        || transform[4] !== 0 || transform[5] !== 0 || transform[6] !== 0)) {
-        colourTransformTally.colourNotApplied += 1;
-      }
-      colourTransformTally.tinted += 1;
-      out.push(Object.freeze({
-        ...operation,
-        fill: applyColourTransform(operation.fill, transform),
-        fillOpacity: applyColourTransformAlpha(operation.fillOpacity ?? 1, transform),
-        stroke: applyColourTransform(operation.stroke, transform),
-        strokeOpacity: applyColourTransformAlpha(operation.strokeOpacity ?? 1, transform)
-      }));
-    }
-  }
-  return Object.freeze(out);
-}
 
 /**
  * WHETHER THIS PACK HOLDS THE ARENA SCREEN, ASKED ONCE PER PACK.
@@ -1416,7 +1259,7 @@ function tintedPropOpsFor(pack, options) {
 let arenaScreenAnswer = null;
 function arenaScreenAvailable() {
   if (!arenaScreenAnswer || arenaScreenAnswer.pack !== propPack) {
-    arenaScreenAnswer = { pack: propPack, yes: hasArenaScreen(propPack, tintedPropOpsFor) };
+    arenaScreenAnswer = { pack: propPack, yes: hasArenaScreen(propPack, propOpsFor) };
   }
   return arenaScreenAnswer.yes;
 }
@@ -1592,10 +1435,10 @@ canvas.addEventListener("click", (event) => {
 /* ------------------------------------------------------------------ */
 
 /**
- * ► **NOTHING IN THIS REPOSITORY EXTRACTS A FILTER'S PARAMETERS, so no filter
- *   can be applied anywhere — not here, not on the 26 screens.** Re-derived
- *   this session rather than taken from the brief, which said the data reached
- *   this file:
+ * ► ~~**NOTHING IN THIS REPOSITORY EXTRACTS A FILTER'S PARAMETERS, so no
+ *   filter can be applied anywhere — not here, not on the 26 screens.**
+ *   Re-derived this session rather than taken from the brief, which said the
+ *   data reached this file:~~
  *
  * ```text
  *   assets/props/props.json    "filter" occurs 0 times, "blend" 0 times
@@ -1605,16 +1448,54 @@ canvas.addEventListener("click", (event) => {
  *   tools/extract-screens.mjs:944 writes `filters: true` — a BOOLEAN, not a list
  * ```
  *
- *   `tools/swf-display-list.mjs` does decode a FILTERLIST into typed records
+ * ►  ~~`tools/swf-display-list.mjs` does decode a FILTERLIST into typed records
  *   (`parseFilterList`, and `flattenFrame`'s drawables carry `filters`), so the
  *   data exists one layer upstream and dies in the two extractors. Until one of
  *   them writes it out, `src/render/filters.js`'s `canvasFilterFor`,
  *   `blendModeFor`, `colourMatrixFilterString`, `blurSigma`, `applyColourMatrix`
  *   and `summariseFilterUse` have **no caller anywhere in `src/` or `tools/`
  *   except the probe below** — grep says so, and the probe is the exception
- *   this sentence had to grow the moment it was written. There is nothing for
- *   this shell to apply to the arena's pixels. Inventing one would be drawing a
- *   glow the build never asked for.
+ *   this sentence had to grow the moment it was written.~~ **Grep no longer
+ *   says so, and the sentence that had to grow one exception should have been
+ *   read as a warning about its own shelf life.**
+ *
+ * ► **FALSE SINCE THE DAY IT WAS WRITTEN — BOTH EXTRACTORS NOW WRITE THE
+ *   FILTER'S NUMBERS, and the same wave that made it false left it standing
+ *   here.** Struck rather than deleted, because the interesting part is that a
+ *   block explicitly labelled "re-derived, not taken from the brief" still went
+ *   stale inside one session: re-derivation dates a claim, it does not pin it.
+ *   Re-re-derived 2026-09-14 by this track, in node, on this tree:
+ *
+ * ```text
+ *   tools/extract-props.mjs:113   imports blendModeFor, canvasFilterFor and
+ *                                 summariseFilterUse FROM src/render/filters.js
+ *                                 and calls them at :797 and :842
+ *   tools/extract-screens.mjs:850 writes `filters: typed` — the list, not a
+ *                                 boolean (and :1341 for a button's records)
+ *   node tools/extract-props.mjs --out <scratch>
+ *                                 363 effect groups over 3,209 placements,
+ *                                 570 filters (150 colourMatrix, 208 blur,
+ *                                 212 glow), 1 blend mode; a renderer applies
+ *                                 306, defers 148, calls 116 no-ops, refuses 0
+ * ```
+ *
+ * ► **WHAT IS STILL TRUE IS THE HALF ABOUT THE INSTALLED PACKS, AND ONLY
+ *   UNTIL THEY ARE REGENERATED.** `assets/` is deliberately stale on this
+ *   route — measured here: `assets/screens/screens.json` holds 243
+ *   `filteredPlacements` and **0** of them carry a typed list, and
+ *   `assets/props/props.json` carries no `effectGroups` at all. So a reader
+ *   who greps the PACK still sees what the block above described, and
+ *   `reportArenaEffects` below now says which of the two it is looking at
+ *   instead of blaming the extractor.
+ *
+ * ► **AND THE SENTENCE THAT SURVIVES ALL OF IT: THIS SHELL STILL APPLIES NO
+ *   FILTER TO A PIXEL.** `context.filter` is set nowhere in this file except
+ *   the probe below. That is now a gap in the RENDERER rather than a gap in
+ *   the data, which is a different job and a bigger one — the group's own
+ *   matrix is not carried (`notCarried.effectGroupMatrix`, 363 of them), so a
+ *   glow would be drawn in the wrong place before it was drawn in the wrong
+ *   colour. Inventing one here would still be drawing a glow the build never
+ *   asked for.
  *
  * This prints the absence with the pack's own numbers, because an absence
  * nobody counts is this project's signature defect.
@@ -1624,6 +1505,7 @@ function reportArenaEffects(pack) {
   let tinted = 0;
   let withFilters = 0;
   let withBlend = 0;
+  let underAGroup = 0;
   for (const prop of Object.values(pack?.props ?? {})) {
     for (const frame of prop?.frames ?? []) {
       for (const placement of frame ?? []) {
@@ -1631,39 +1513,108 @@ function reportArenaEffects(pack) {
         if (colourTransformFrom(placement?.colour ?? null)) tinted += 1;
         if (placement?.filters) withFilters += 1;
         if (Number.isFinite(placement?.blendMode) && placement.blendMode > 1) withBlend += 1;
+        if (Array.isArray(placement?.inheritedEffects) && placement.inheritedEffects.length > 0) underAGroup += 1;
       }
+    }
+  }
+  // ► **THE TWO OWN-EFFECT COUNTS ARE `0 of 3,345` AND THE REASON IS NOT
+  //   "THE BUILD HAS NONE".** Re-measured 2026-09-14 by regenerating the pack
+  //   into scratch: this build has exactly TWO own-filtered placements (two
+  //   glows on characters 1527/1528, `panel`'s edit-text fields) and
+  //   `extract-props.mjs` skips both drawables, invoicing them as
+  //   `droppedOwnFilteredPlacements: 2` rather than writing them out. Its one
+  //   own blend mode is on a GROUP, not a placement. So no input this
+  //   extractor can produce from the shipped SWF makes either line above
+  //   non-zero — the code path is live (`ownEffectsOf` does write `filters`
+  //   and `blendMode` onto a placement) and a modded build in a second install
+  //   lane is where it fires first. The group counter below is the one that
+  //   moves on this build, and printing them side by side is the only way a
+  //   reader can tell "the pack has no effects" from "the effects are not on
+  //   the placements".
+  let groups = 0;
+  let groupFilters = 0;
+  let groupBlend = 0;
+  for (const prop of Object.values(pack?.props ?? {})) {
+    for (const group of prop?.effectGroups ?? []) {
+      groups += 1;
+      groupFilters += Array.isArray(group?.filters) ? group.filters.length : 0;
+      if (Number.isFinite(group?.blendMode) && group.blendMode > 1) groupBlend += 1;
     }
   }
   log(`props: ${placements} placements, ${tinted} tinted, ` +
     `${withFilters} filtered, ${withBlend} blended.`);
+  // Two short lines rather than one long one, for the reason the lines above
+  // are short: the aside is 330px wide and a wrapping log grows the column.
+  log(`props: ${groups} effect group(s) over ${underAGroup} placement(s).`);
+  log(`props: group effects — ${groupFilters} filter(s), ${groupBlend} blend.`);
 
-  // ► **THE THREE LINKAGES THIS SHELL CANNOT REACH, COUNTED RATHER THAN
-  //   OMITTED.** `arenaScreenLayersFor` takes the props reader as an argument,
-  //   so the arena's own layers go through `tintedPropOpsFor`; `arrowOpsFor`,
-  //   `arrowTrailOpsFor` and `arenaSceneryFor` call `propOpsFor` INSIDE
-  //   `props.js` and there is no seam to compose at. Reimplementing their
-  //   fallback rules here to get one would put two copies of each in the tree,
-  //   so the loss is invoiced instead — and it is the strongest argument that
-  //   the transform belongs in `propOpsFor` rather than in this file.
-  const unreachable = {};
-  for (const linkage of ["bullet", "bullet_trail", "rockMC"]) {
-    let count = 0;
-    for (const frame of pack?.props?.[linkage]?.frames ?? []) {
-      for (const placement of frame ?? []) {
-        if (!colourTransformFrom(placement?.colour ?? null)) continue;
-        const shape = pack?.shapes?.[placement.shape];
-        if (Array.isArray(shape?.paths)) count += shape.paths.length;
+  // ► **THE INVOICE IS UPSTREAM NOW, AND THIS PRINTS THAT ONE RATHER THAN
+  //   KEEPING A SECOND.** Until 2026-09-14 this block counted the tinted
+  //   operations the shell could NOT reach: `arenaScreenLayersFor` takes the
+  //   props reader as an argument, but `arrowOpsFor`, `arrowTrailOpsFor` and
+  //   `arenaSceneryFor` call `propOpsFor` INSIDE `props.js`, so a transform
+  //   composed out here could never touch them. The count was **28** — every
+  //   operation of `bullet_trail`'s seven-frame fade, the puffs that drew
+  //   solid. **It is zero now BECAUSE the transform moved into `propOpsFor`,
+  //   not because the counter broke**, which is exactly the reading a bare
+  //   vanishing number invites, so the line below says which invoice it is.
+  //
+  // ► **AND THE ROLL-UP IS BUILT HERE BECAUSE `propInvoiceFor` IS PER FRAME BY
+  //   DESIGN** — which frame is being drawn is the caller's business in that
+  //   module, and it declined to make itself the exception. Twelve linkages
+  //   across their frames, once at load: measured at ~10ms against this
+  //   repository's own pack, against a 16ms frame budget it never shares.
+  //
+  // ► **THE DENOMINATORS ARE PRINTED BESIDE THE TWO APPROXIMATION COUNTS ON
+  //   PURPOSE, BECAUSE BOTH COUNTS ARE DEAD ON THIS BUILD'S PROPS.** Measured:
+  //   41 bitmap operations, 0 of them under a transform of any kind, and 0 of
+  //   the pack's 3,345 placements carrying a non-zero alpha offset. So the two
+  //   zeros cannot move, and a zero with no denominator cannot say whether a
+  //   counter is quiet or cannot fire. That distinction is six defects old in
+  //   this repository.
+  const invoice = {};
+  for (const linkage of Object.keys(pack?.props ?? {})) {
+    for (let frame = 1; frame <= propFrameCount(pack, linkage); frame += 1) {
+      for (const [key, value] of Object.entries(propInvoiceFor(pack, { linkage, frame }))) {
+        invoice[key] = (invoice[key] ?? 0) + value;
       }
     }
-    if (count > 0) unreachable[linkage] = count;
   }
-  const missed = Object.values(unreachable).reduce((total, count) => total + count, 0);
-  log(missed === 0
-    ? "props: every tinted op goes through the injected reader."
-    : `props: ${missed} tinted op(s) out of reach (` +
-      Object.entries(unreachable).map(([name, count]) => `${name} ${count}`).join(", ") + ").",
-    { warn: missed > 0 });
-  if (withFilters === 0) log("props: NO filter data in the pack — see extract-props.mjs.", { warn: true });
+  // ► **KEPT SHORT, for the reason the probe's own log lines were.** The aside
+  //   is 330px wide at 11.5px monospace, so a long line wraps and a wrapping
+  //   log grows the column; the long version of each of these is the comment
+  //   above it. (Not re-measured in a browser this session — no agent in this
+  //   wave may launch one — so these match the length of the lines already
+  //   here rather than a fresh measurement of the wrap point.)
+  log(`props: tint applied in props.js — ${invoice.tintedOps ?? 0}/${invoice.ops ?? 0} ops.`);
+  const lost = (invoice.bitmapColourTransformDropped ?? 0) + (invoice.gradientAlphaOffsetApproximated ?? 0);
+  log(`props: tint lost — bitmap ${invoice.bitmapColourTransformDropped ?? 0}/${invoice.bitmapOps ?? 0}, ` +
+    `gradient ${invoice.gradientAlphaOffsetApproximated ?? 0}/${invoice.gradientOps ?? 0}.`,
+    { warn: lost > 0 });
+  // Three silent `continue`s in `propOpsFor` that used to draw nothing and say
+  // nothing. Printed only when they fire, because on this pack they do not.
+  const dropped = (invoice.shapesMissing ?? 0) + (invoice.shapesWithNoPaths ?? 0) + (invoice.clipsUnresolved ?? 0);
+  if (dropped > 0) {
+    log(`props: ${invoice.shapesMissing} shape(s) missing, ${invoice.shapesWithNoPaths} pathless, ` +
+      `${invoice.clipsUnresolved} clip(s) unresolved.`, { warn: true });
+  }
+  // ► ~~`if (withFilters === 0) log("props: NO filter data in the pack — see
+  //   extract-props.mjs.")`~~ **— WHICH BLAMED A TOOL THAT HAD ALREADY FIXED
+  //   IT.** `withFilters` counts OWN filters on a placement and cannot be
+  //   non-zero on this build (see above), so that line fired unconditionally
+  //   and pointed the reader at `extract-props.mjs`, which since 2026-09-14
+  //   writes 363 groups and 570 filters. A warning that cannot turn itself off
+  //   is not a measurement, and one that names the wrong culprit costs the next
+  //   reader the trip.
+  //
+  //   What is worth warning about is the STALE PACK: `assets/` here is
+  //   regenerated by hand, so a pack written before the effect invoice carries
+  //   none of this and looks exactly like a build with no effects. The
+  //   condition below is now "no effect data of EITHER kind", which the
+  //   installed pack trips and a freshly extracted one does not.
+  if (groups === 0 && withFilters === 0) {
+    log("props: no effect data — re-run extract-props.mjs.", { warn: true });
+  }
 }
 
 /**
@@ -1852,7 +1803,7 @@ function render(now = performance.now()) {
   // own bowl when they have not — the same fallback the figures and the sound
   // already have, and a clone with no assets is unchanged.
   const fit = stageFitFor({ width: canvas.width, height: canvas.height });
-  const screen = splitArenaScreen(arenaScreenLayersFor(propPack, tintedPropOpsFor, camera, arenaDressing));
+  const screen = splitArenaScreen(arenaScreenLayersFor(propPack, propOpsFor, camera, arenaDressing));
   if (screen.behind.length > 0 || screen.inFront.length > 0) {
     for (const layer of screen.behind) paintArenaLayer(layer, fit);
   } else {
@@ -2115,7 +2066,7 @@ function drawDrops(view, now) {
     for (const drop of spray.spray) {
       const at = dropAt(drop, frame);
       if (!at) continue;
-      const ops = tintedPropOpsFor(propPack, { linkage: drop.prop, frame: drop.artFrame });
+      const ops = propOpsFor(propPack, { linkage: drop.prop, frame: drop.artFrame });
       // Clip space -> arena units, then screen y is DOWN in the build's own
       // numbers while arena lift is UP, so the drop's `y` is negated once,
       // here, at the point it is drawn — exactly as the figure's own limbs are
@@ -2241,17 +2192,83 @@ function drawProjectiles(view, now) {
     // ► **THE BUILD'S OWN TRAIL PUFF WHEN THE PLAYER HAS EXTRACTED IT, and an
     //   authored dot when they have not.** Same per-family fallback the figure
     //   already has: an empty answer from the pack is an answer, not an error.
-    const trailOps = arrowTrailOpsFor(propPack, shot.artFrame);
+    //
+    // ► **THE SECOND ARGUMENT IS THE PUFF'S AGE, AND THIS LINE PASSED THE
+    //   WEAPON UNTIL 2026-09-14 — 15 OF THE 20 BOWS DREW NO TRAIL AT ALL.**
+    //   ~~`const trailOps = arrowTrailOpsFor(propPack, shot.artFrame);`~~, once
+    //   outside the loop. `shot.artFrame` is `secondary_weapon - 60`, the
+    //   ARROW's lookup into `bullet`'s fifty frames; `bullet_trail` has seven,
+    //   and they are one puff's ALPHA FADE over time. Re-measured in node
+    //   against this repository's own pack, through `arrowTrailOpsFor` itself:
+    //   at ages 0..6 the four operations come back at fillOpacity
+    //   **0.699, 0.582, 0.465, 0.352, 0.234, 0.117, 0**, so feeding it a weapon
+    //   index put every bow from 66 up on the clamped last frame at alpha 0.
+    //   It drew SOLID and looked fine for as long as this shell ignored the
+    //   transform; `props.js` folding the transform onto `fillOpacity` is what
+    //   turned an old wrong index into an invisible trail. See
+    //   `arrowTrailOpsFor` for the bytes that settle which quantity it is.
+    //
+    // ► **INDEX 0 IS THE OLDEST PUFF, SO THE AGE COUNTS DOWN THE ARRAY**, and
+    //   getting this backwards fades the trail towards the archer and looks
+    //   deliberate. Checked twice rather than read once: `projectileTrail`
+    //   (`src/render/projectile.js`) pushes `projectileAt(flight, at)` for
+    //   `at = 3, 6, 9 …` ASCENDING and then keeps the LAST six, and measured on
+    //   a 100-frame bombard at 70% of the flight the six puffs sit 128, 104,
+    //   80, 56, 32 and 8 units behind the head — monotonically CLOSER as the
+    //   index rises. The authored ramp below is brightest at the last index for
+    //   the same reason, which is a third, independent agreement.
+    //
+    // ► **ONE AGE STEP PER PUFF IS A CHOICE AND NOT A MEASUREMENT. Say so
+    //   here, because the seven alphas beside it are measured and the two read
+    //   alike.** In the build a puff ages ONE frame per frame while
+    //   `SS2_PROJECTILE.trailEveryFrames` attaches a new one every THREE, so at
+    //   any instant the live puffs are 0, 3 and 6 frames old — alphas 0.699,
+    //   0.352, 0 — a TWO-puff trail. Spending one age step per puff instead
+    //   spreads the whole seven-step ramp across all six, which is a longer,
+    //   smoother comet and is what this shell draws on purpose. The faithful
+    //   version needs each puff's age IN FRAMES (`1 + floor(t - at)`), which
+    //   `projectileTrail` knows and does not carry: its entries are
+    //   `{x, y, lift, size}`. That is a change to `src/render/projectile.js`,
+    //   not to this line.
+    //
+    // ► **AND THE CALL MOVED INSIDE THE LOOP, WHICH THE OLD ONE WAS HOISTED OUT
+    //   OF.** Six lookups per arrow per frame instead of one: measured at
+    //   1.4us each against this repository's own pack, so **0.009ms of a 16ms
+    //   frame** for an arrow in flight. Hoisting it back is what forces one
+    //   age on all six puffs, which is the shape the defect had.
     for (const [index, puff] of drawn.trail.entries()) {
-      context.globalAlpha = 0.10 + 0.05 * index;
-      if (trailOps) {
+      const puffOps = arrowTrailOpsFor(propPack, drawn.trail.length - 1 - index);
+      if (puffOps) {
         // NOT `drawOps`: that helper translates with `toY(origin.y, 0)` and has
         // no lift, so every puff would have been drawn on the sand. A prop in
         // the air needs the lift the flight computed, which is what
         // `paintProp` below exists for.
-        paintProp(trailOps, view, { x: puff.x, y: puff.y, lift: puff.lift, size: puff.size, rotation: 0 });
+        //
+        // ► **AND NO `globalAlpha` IS SET FOR THIS BRANCH, WHICH IS THE OTHER
+        //   HALF OF THE FIX.** The authored ramp used to be set for both
+        //   branches and `paintProp` overwrote it immediately — `globalAlpha =
+        //   1` on entry, then `operation.fillOpacity ?? 1` per operation — so
+        //   an extracted puff never wore it. The fade rides `fillOpacity` now
+        //   and `paintProp` already reads it.
+        //
+        // ► **AND THE PUFF WEARS THE ROTATION THE ARROW HAD WHEN IT WAS
+        //   DROPPED.** ~~`rotation: 0`~~ was hardcoded here because
+        //   `projectileDrawAt` did not carry one — it computed each puff's
+        //   rotation and dropped it on the way out, one seam short of this
+        //   call. The build attaches the puff "at the bullet's _x, _y AND
+        //   _rotation" (`+0x71ee`), so a flat trail behind a pitching bombard
+        //   was wrong and looked deliberate. `src/render/projectile.js` carries
+        //   it now; this reads it rather than assuming it.
+        paintProp(puffOps, view, {
+          x: puff.x, y: puff.y, lift: puff.lift, size: puff.size, rotation: puff.rotation
+        });
         continue;
       }
+      // The authored dot, for a player with no extracted pack — the supported
+      // way to run the arena without a licensed copy. Its ramp is authored, it
+      // is applied where nothing overwrites it, and it is brightest at the
+      // newest puff exactly as the build's is.
+      context.globalAlpha = 0.10 + 0.05 * index;
       context.fillStyle = "#d8cdb4";
       const radius = Math.max(1, view.scale * 2.5 * puff.size);
       context.beginPath();

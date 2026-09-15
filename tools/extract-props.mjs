@@ -32,6 +32,61 @@
  *   Nothing in the corpus said this. It reads from the `gotoAndStop` as though
  *   there were twenty arts, and there are five.
  *
+ * ► **EVERY FILTER THIS PACK CAN DRAW IS ON AN ENCLOSING SPRITE — AND THE TWO
+ *   THAT ARE NOT ARE REFUSED BY NAME, WHICH IS NOT THE SAME AS ABSENT.** This
+ *   tool used to read the matrix, the colour transform and the mask off each
+ *   drawable and drop `filters`, `blendMode` and `ancestorEffects` — all three
+ *   of which `flattenFrame` returns — so the arena page reported *"props: NO
+ *   filter data in the pack"* and was right. Carrying them measures: **0 of the
+ *   3,345 placements this tool EMITS carries a filter or a blend mode of its
+ *   own**, while 3,209 of them sit inside one of **363 effect groups holding
+ *   570 filters** (150 colourMatrix, 208 blur, 212 glow) and one blend mode.
+ *
+ *   ~~*and that zero is the whole finding*~~ — **IT WAS NOT, AND SAYING SO
+ *   COST THIS FILE ITS HEADLINE.** A verifier re-derived it and found the zero
+ *   was produced by a `continue`, not by the build: the flatten returns **3,436
+ *   drawables, of which exactly 2 are `unsupported`, and BOTH of those carry
+ *   their own glow** (`panel` frame 1, the two `DefineEditText` children 1527
+ *   and 1528: colour 0,0,0,255, blurX/blurY 1.5, strength 10, 1 pass). They
+ *   were dropped above `ownEffectsOf` and counted nowhere, so the build's ONLY
+ *   two own-filtered placements were 100% of what the measurement could not
+ *   see. `0 own` is now printed beside `2 refused with an unsupported
+ *   drawable`, and `notCarried.unsupportedDrawableFilters` holds the 2. A zero
+ *   meaning "none exist" and a zero meaning "I dropped them before looking"
+ *   must never look the same again.
+ *
+ *   **The own/inherited difference is still the point, and it is not
+ *   bookkeeping.** The groups are stored ONCE each and the leaves point at them
+ *   by index. A filter on a sprite applies to the
+ *   group; stamping the sky's blur onto each of the 200 leaves inside it would
+ *   blur each cloud separately and apply its colour matrix two hundred times
+ *   where the build applies it once — a picture that is wrong in a way that
+ *   looks deliberate. An ancestor's blur on a leaf is worse than a dropped one.
+ *
+ * ► **AND THE SKY'S COLOUR MATRIX IS TWEENED, which is why the groups are not
+ *   seven.** `sky` has 7 enclosing sprites and 362 group RECORDS, because
+ *   `cloud_patterns` and its neighbours carry a colour matrix whose twenty
+ *   cells change frame by frame — 79 distinct matrices on character 1680 alone,
+ *   climbing from `0.381, 0.228, 0.391 … -58` at frame 1 to `0.544, 0.402,
+ *   0.054 … -79` at frame 200. That IS the day/night cycle. A census that
+ *   ignores the filter's NUMBERS reports 7 groups and 10 filters on the sky and
+ *   reads as a tidy answer; this session wrote that census first and it was
+ *   wrong by **52x** (362 records against 7), which is the reason the dedupe
+ *   key below is the whole record. The measured table for every key is at
+ *   `inheritedEffectsFor`, because that is where a maintainer changes it.
+ *
+ * ► **AND `bullet_trail`'s FRAME NUMBER WAS DECLARED AS THE WRONG THING, which
+ *   is the same class of mistake one level up.** Its entry read
+ *   `indexedBy: "secondary_weapon - 60"` under a docstring quoting
+ *   `trail.bullet.gotoAndStop(secondary_weapon - 60)` — and `trail.bullet` is a
+ *   CHILD of the trail, not the trail. Sprite 48 has **seven** frames, each
+ *   placing character 47 under the instance name `bullet` at alpha 0.699,
+ *   0.582, 0.465, 0.352, 0.234, 0.117, 0. The frame is the puff's AGE. Seven
+ *   slots could never have addressed twenty bows, and `src/render/props.js`
+ *   trusted the field and drew NO trail for 14 of 20 of them. The arrow inside
+ *   the puff is now measured into `nestedLookup` by re-flattening — 50 frames,
+ *   the same five arrows — rather than frozen at frame 1 and unremarked.
+ *
  * ## The rule every extractor here obeys
  *
  * **Assets come out of the player's own install and never into the repository.**
@@ -49,6 +104,13 @@ import { fileURLToPath } from "node:url";
 
 import { parseShape, shapeToPaths } from "./swf-shapes.mjs";
 import { indexCharacters, resolveTimeline, flattenFrame } from "./swf-display-list.mjs";
+// THE READER, IMPORTED SO THE INVOICE IS THE READER'S OWN VERDICT. What this
+// pack can say about a filter is exactly what `canvasFilterFor` does with it —
+// applied, deferred to `applyColourMatrix`, measured no-op, or refused by name.
+// A second opinion computed here would be a second thing to drift, and
+// `tools/extract-figure.mjs` already imports from this module for the same
+// reason. It costs this tool nothing: `src/render/` has no DOM and no canvas.
+import { blendModeFor, canvasFilterFor, summariseFilterUse } from "../src/render/filters.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
@@ -79,9 +141,53 @@ export const PROP_EXPORTS = Object.freeze([
     reader: "src/render/projectile.js — the arrow in flight"
   },
   {
+    /**
+     * ► **THIS ENTRY'S `indexedBy` WAS WRONG, AND THE DOCSTRING BESIDE IT
+     *   QUOTED THE BYTES THAT SAY SO.** It used to read
+     *   ~~`indexedBy: "secondary_weapon - 60"`~~ under the note
+     *   `trail.bullet.gotoAndStop(secondary_weapon - 60)` (`+0x7255`) — and
+     *   **`trail.bullet` is a CHILD of the trail, not the trail**. Seven slots
+     *   could never have addressed twenty bows.
+     *
+     *   Re-derived from the display list on the oracle, which is stronger
+     *   evidence than the AS2 line and does not need an interpreter: sprite 48
+     *   has **seven frames, and every one of them places character 47 at depth
+     *   1 under the instance name `bullet`**, blend mode 5 (`lighten`), with
+     *   `alphaMultiplier` running **0.699, 0.582, 0.465, 0.352, 0.234, 0.117,
+     *   0**. That is a monotonic fade to nothing: the frame is the puff's AGE,
+     *   played from 1 each time `bulletcounter >= 3` attaches one (`+0x71aa`).
+     *   The WEAPON picks the arrow drawing carried INSIDE the puff, on char 47
+     *   — which is `bullet` itself, the same fifty-frame lookup.
+     *
+     *   Reproduce: resolve character 48's timeline and print each frame's
+     *   placements; the name, the character id and the alpha ramp are all
+     *   there. `tools/extract-icons.mjs` already spells this shape three times
+     *   (*"the SPELL is chosen on the nested strip"*), so the house style for
+     *   "my frame is time and the variant is a child's" predates this fix.
+     *
+     * ► **THE COST OF THE WRONG FIELD WAS REAL.** `src/render/props.js`
+     *   trusted it and indexed the seven-frame fade with the weapon's art
+     *   frame, clamped: bows 67-80 all landed on frame 7, whose placement
+     *   carries `alphaMultiplier: 0`, so the arena drew NO trail at all for 14
+     *   of 20 bows.
+     */
     linkage: "bullet_trail",
-    /** `trail.bullet.gotoAndStop(secondary_weapon - 60)` (`+0x7255`). */
-    indexedBy: "secondary_weapon - 60",
+    indexedBy: "frame, as the puff's AGE — a seven-step alpha fade played from 1; the ARROW is chosen on the nested `bullet` child",
+    /**
+     * THE LOOKUP THIS PROP'S OWN FRAMES DO NOT HOLD, declared so the extractor
+     * measures it instead of freezing it silently.
+     *
+     * `flattenFrame` stops every nested sprite on frame 1, which is right for
+     * scenery and wrong here: the puff's arrow is a fifty-frame lookup and
+     * frame 1 is bow 61's. Without this block the pack says "one shape, seven
+     * alphas" and a reader has no way to learn that the shape is a variable.
+     */
+    nested: {
+      instance: "bullet",
+      character: 47,
+      indexedBy: "secondary_weapon - 60",
+      reader: "src/render/projectile.js — the arrow carried inside the puff"
+    },
     reader: "src/render/projectile.js — one puff every third frame"
   },
   {
@@ -320,6 +426,459 @@ function roundMatrix(matrix) {
 }
 
 /**
+ * COUNT SOMETHING THIS EXTRACTION COULD NOT CARRY, BY NAME.
+ *
+ * Every drop in this file goes through here, so `notCarried` in the manifest is
+ * the complete list of what the pack knows about and does not say — which is
+ * the only version of dropping this project allows.
+ *
+ * ► **THAT SENTENCE WAS FALSE WHEN IT WAS WRITTEN, AND IT IS THE REASON
+ *   `refusedEffectsOf` EXISTS.** Two drops went round it: the `unsupported`
+ *   and mask skips in the placement loop discarded a drawable whole, own
+ *   filters and all, and reported only the KIND — `frame 1 carries text
+ *   (character 1527)`, with no mention of the glow on it. `panel`'s invoice
+ *   said `notCarried: {}` for the one prop in the build that lost something.
+ *   The claim holds again only because those two skips now invoice what they
+ *   throw away; if you add a third skip, it goes through here or the sentence
+ *   goes back to being a lie.
+ */
+function refuse(notCarried, kind, howMany = 1) {
+  notCarried[kind] = (notCarried[kind] ?? 0) + howMany;
+}
+
+/**
+ * ONE PLACEMENT'S OWN EFFECTS — its own, and on no account its ancestors'.
+ *
+ * ► **MEASURED ON THE ORACLE, AND IT IS THE REASON THIS FUNCTION IS SEPARATE
+ *   FROM THE ONE BELOW: ZERO of the 3,345 placements this tool EMITS carries a
+ *   filter or a blend mode of its own.** Every effect this pack can draw lives
+ *   on an ENCLOSING SPRITE. So a fix that spread `drawable.filters` onto the
+ *   placement and stopped there would write an empty object 3,345 times and
+ *   report success, and the arena would still have no filter data.
+ *
+ * ► **WHAT THAT ZERO IS NOT.** ~~*Every effect in the props pack lives on an
+ *   enclosing sprite — 7 groups, 10 filters, 1 blend mode. Reproduce with
+ *   `--report`: the line reads `0 own` and it is not a rounding of something
+ *   small.*~~ **Both halves of that were wrong and the second one was the
+ *   dangerous half.**
+ *
+ *   - The counts were a SKY-ONLY census under a key that ignores a filter's
+ *     numbers. The pack holds **363 groups and 570 filters**; see
+ *     `inheritedEffectsFor` for the whole table. One blend mode is right.
+ *   - `--report` reading `0 own` proved nothing about the build, because the
+ *     sweep ran only over drawables that survived the `unsupported` skip
+ *     upstream — and the build's **only two own-filtered placements are exactly
+ *     the two that skip removes**: `panel` frame 1's `DefineEditText` children
+ *     1527 and 1528, each carrying its own glow. 3,436 drawables, 2
+ *     unsupported, 2 own-filtered, and the intersection is both of them. The
+ *     number could not have come back non-zero for any input in this build.
+ *
+ *   `refusedEffectsOf` now invoices those two where they are dropped, `--report`
+ *   prints the refusal on the same line as the zero, and
+ *   `effects.own.dropped` carries it per prop. The code path here is kept
+ *   because it is one spread and because a modded build in a second install
+ *   lane is where it fires first — but a reader who sees "filters are carried
+ *   now" must be able to find BOTH numbers in one look.
+ *
+ * `hasFilters` with an EMPTY list is a real distinction and is refused by name
+ * rather than written as `filters: []`: a `PlaceObject3` can carry a filter
+ * list of count zero, which means "this instance has had its filters cleared",
+ * not "nobody asked".
+ */
+function ownEffectsOf(drawable, notCarried) {
+  const effects = {};
+  const filters = Array.isArray(drawable.filters) && drawable.filters.length > 0 ? drawable.filters : null;
+  if (filters) {
+    effects.filters = filters;
+    // Carried, and flagged: `parseFilterList` marks the three filter kinds that
+    // occur ZERO times in the shipped build, so a record with this flag reached
+    // a code path no capture has ever exercised.
+    for (const filter of filters) if (filter.measured === false) refuse(notCarried, "unmeasuredFilterRecord");
+  } else if (drawable.hasFilters) {
+    refuse(notCarried, "emptyFilterList");
+  }
+  if (drawable.blendMode !== undefined && drawable.blendMode !== null) effects.blendMode = drawable.blendMode;
+  return effects;
+}
+
+/**
+ * THE OWN EFFECTS ON A DRAWABLE THIS TOOL IS ABOUT TO THROW AWAY, INVOICED
+ * WHERE THE THROWING AWAY HAPPENS.
+ *
+ * ► **THIS IS THE DEFECT THAT ATE THIS FILE'S HEADLINE, so it is worth saying
+ *   plainly.** The placement loop skips two kinds of drawable — one that is
+ *   `unsupported` (a `DefineEditText`, a button, a morph) and a mask that could
+ *   not be resolved. Both skips reported the KIND into `failures` and said
+ *   nothing about effects, which was survivable right up until somebody counted
+ *   own filters across the build, got `0`, and published it. The build has
+ *   exactly two own-filtered placements and they are exactly two of these
+ *   skips, so the sweep measured its own skip list.
+ *
+ * ► **IT REFUSES RATHER THAN CARRIES, AND THAT IS NOT A DODGE.** A skipped
+ *   drawable has no geometry in this pack — `panel`'s two are edit-text fields
+ *   this renderer draws itself — so there is nothing for the glow to sit on.
+ *   What is owed is a number with a name, not a placement: `--report` prints it
+ *   on the same line as the zero, and a reader can no longer confuse "none
+ *   exist" with "I dropped them before looking".
+ *
+ * Returns a one-line reason suffix for the `failures` entry, so the human-
+ * readable list names the loss too — `failures` used to say `carries text
+ * (character 1527)` about a drawable that was also carrying a glow.
+ */
+function refusedEffectsOf(drawable, refusedOwn, notCarried) {
+  const filters = Array.isArray(drawable.filters) && drawable.filters.length > 0 ? drawable.filters : null;
+  const blend = drawable.blendMode !== undefined && drawable.blendMode !== null ? drawable.blendMode : null;
+  if (filters) {
+    refusedOwn.filterLists.push(filters);
+    refuse(notCarried, "unsupportedDrawableFilters", filters.length);
+  } else if (drawable.hasFilters) {
+    // The same distinction `ownEffectsOf` draws, on a drawable that is leaving:
+    // a CLEARED filter list is a fact about the instance, and losing it
+    // silently alongside the drawable would make it look like nobody asked.
+    refuse(notCarried, "unsupportedDrawableEmptyFilterList");
+  }
+  if (blend !== null) {
+    refusedOwn.blendModes.push(blend);
+    refuse(notCarried, "unsupportedDrawableBlendMode");
+  }
+  const parts = [];
+  if (filters) parts.push(`${filters.length} own ${filters.map((filter) => filter.type).join("+")}`);
+  else if (drawable.hasFilters) parts.push("an own filter list of COUNT ZERO");
+  if (blend !== null) parts.push(`own blend mode ${blend}`);
+  return parts.length ? `, dropping ${parts.join(" and ")}` : "";
+}
+
+/**
+ * A LOOKUP THIS PROP'S FRAMES DO NOT HOLD, BECAUSE IT BELONGS TO A NESTED CLIP
+ * — measured by re-flattening, never declared from the map.
+ *
+ * ► **WHY THIS EXISTS: A PROP'S FRAME NUMBER IS NOT ALWAYS ITS ONLY INDEX.**
+ *   `flattenFrame` stops every nested sprite on frame 1, which is what the
+ *   scenery wants. `bullet_trail` is the counter-example and it is the one the
+ *   arena draws: its seven frames are the puff's AGE, and the ARROW inside it
+ *   is character 47 — `bullet` itself, a fifty-frame lookup on
+ *   `secondary_weapon - 60`. Frozen at frame 1, the pack says "seven alphas of
+ *   ONE shape", and it is bow 61's shape for all twenty bows.
+ *
+ * ► **IT IS MEASURED AND IT CAN FAIL.** `spriteFrames` is `flattenFrame`'s own
+ *   option for stopping a nested sprite elsewhere, so this re-flattens every
+ *   frame of the prop against every frame of the child and CHECKS that the only
+ *   thing that moved is one shape id. Anything else — a matrix that shifts, a
+ *   placement that appears, two slots moving at once — and this refuses by name
+ *   and emits nothing, because a lookup table that is right for most bows is
+ *   worse than no table. Measured on the oracle: `bullet_trail` x `bullet`
+ *   passes, and the fifty frames resolve to the same five arrows 42, 43, 44,
+ *   45, 46 that `bullet`'s own extraction finds, at the same identity matrix.
+ *
+ * ► **WHY A TABLE AND NOT 350 MORE PLACEMENTS.** The substitution is exact and
+ *   one-dimensional, so seven frames plus a fifty-long shape table says
+ *   everything 350 emitted placements would, and leaves `frames` the shape
+ *   every existing reader already indexes. The renderer's join is: take frame
+ *   `age`, replace shape `replaces` with `shapeByFrame[index - 1]`.
+ */
+function nestedLookupFor(buffer, characters, resolved, frameCount, declared, cache, notCarried) {
+  const child = characters.get(declared.character);
+  if (!child || child.kind !== "sprite") {
+    refuse(notCarried, "nestedLookupCharacterMissing");
+    return null;
+  }
+  // Everything about a drawable EXCEPT which shape it is. If any of this moves
+  // when the child's frame moves, the substitution is not one-dimensional and
+  // a shape table would be a lie about the other fields.
+  const signature = (drawables) => drawables.map((drawable) => JSON.stringify({
+    unsupported: drawable.unsupported ?? null, isMask: drawable.isMask ?? false,
+    matrix: drawable.matrix, colour: drawable.colourTransform, path: drawable.path,
+    blendMode: drawable.blendMode ?? null, filters: drawable.filters ?? null
+  }));
+  const flattenAt = (displayList, nestedFrame) => flattenFrame(buffer, characters, displayList, {
+    cache, resolveMasks: true, spriteFrames: { [declared.character]: nestedFrame }
+  });
+
+  // The prop's own frames as this tool already emits them — child on frame 1.
+  const bases = [];
+  try {
+    for (let index = 0; index < frameCount; index += 1) {
+      const displayList = resolved.frames[index];
+      if (!displayList) { bases.push(null); continue; }
+      const drawables = flattenAt(displayList, 1);
+      bases.push({ shapes: drawables.map((drawable) => drawable.characterId), sig: signature(drawables) });
+    }
+  } catch (error) {
+    refuse(notCarried, "nestedLookupUnflattenable");
+    return null;
+  }
+  const slots = new Set(bases.filter(Boolean).flatMap((base) => base.shapes));
+  if (slots.size !== 1) {
+    // More than one distinct shape in the prop means "the shape that moved"
+    // is ambiguous. Refused rather than guessed: a table that is right for
+    // most bows is worse than no table.
+    refuse(notCarried, "nestedLookupSlotNotUnique");
+    return null;
+  }
+  const replaces = [...slots][0];
+
+  const table = [];
+  for (let nestedFrame = 1; nestedFrame <= child.frames; nestedFrame += 1) {
+    let moved = null;
+    for (let index = 0; index < frameCount; index += 1) {
+      const displayList = resolved.frames[index];
+      if (!displayList) continue;
+      const base = bases[index];
+      let drawables;
+      try {
+        drawables = flattenAt(displayList, nestedFrame);
+      } catch (error) {
+        refuse(notCarried, "nestedLookupUnflattenable");
+        return null;
+      }
+      const sig = signature(drawables);
+      if (sig.length !== base.sig.length || sig.some((value, at) => value !== base.sig[at])) {
+        refuse(notCarried, "nestedLookupMovesMoreThanAShape");
+        return null;
+      }
+      const shapes = drawables.map((drawable) => drawable.characterId);
+      const distinct = new Set(shapes);
+      if (distinct.size !== 1) {
+        refuse(notCarried, "nestedLookupSlotNotUnique");
+        return null;
+      }
+      const next = [...distinct][0];
+      // Every frame of the prop must resolve the child's frame N to the SAME
+      // shape, or the table has two answers for one index.
+      if (moved !== null && moved !== next) {
+        refuse(notCarried, "nestedLookupSlotNotUniform");
+        return null;
+      }
+      moved = next;
+    }
+    if (moved === null) {
+      refuse(notCarried, "nestedLookupNothingToSubstitute");
+      return null;
+    }
+    table.push(moved);
+  }
+
+  return {
+    instance: declared.instance,
+    character: declared.character,
+    indexedBy: declared.indexedBy,
+    reader: declared.reader,
+    frameCount: child.frames,
+    // The shape every emitted placement of this prop holds, and therefore the
+    // one a renderer swaps out. Named rather than assumed, so a pack whose
+    // frame 1 art changes cannot quietly redirect the substitution.
+    replaces,
+    // ► **THE SAME FINDING `bullet` MAKES, FROM THE TRAIL'S SIDE.** Fifty slots
+    //   and five distinct arrows: bows 61-65 each have their own and 66-80 all
+    //   share one. A table whose distinct count equals its length would be the
+    //   surprise here, not this.
+    distinctShapes: new Set(table).size,
+    shapeByFrame: table
+  };
+}
+
+/**
+ * THE EFFECT GROUPS A PLACEMENT SITS INSIDE, as indices into the prop's own
+ * `effectGroups` list, OUTERMOST FIRST — or `null` when it sits inside none.
+ *
+ * ► **NOTHING IN THE SHIPPED BUILD CAN TELL THAT ORDER FROM ITS REVERSE, AND
+ *   THIS COMMENT USED TO STATE IT AS THOUGH MEASURED.** Every one of the 3,209
+ *   chains here has length 1 and every one of the 363 group paths has length 1,
+ *   so reversing the loop below changes nothing about this pack. It is a
+ *   guarantee to the RENDERER, not a finding about the game: a caller that
+ *   nests buffers composites the outermost group first. It is pinned by a
+ *   fixture that nests two filtered sprites (`test/extract-props.test.js`,
+ *   "A TWO-DEEP CHAIN"), because a guarantee no input can violate is a
+ *   guarantee nothing is checking.
+ *
+ * ► **A FILTER ON A SPRITE IS NOT A FILTER ON THE LEAF, and writing it onto the
+ *   leaf would be worse than dropping it.** The sky's `cloud_patterns` carries
+ *   one blur and one colour matrix over its whole group; stamping them onto
+ *   each of the 200 leaves would blur each cloud separately and apply the
+ *   matrix 200 times where the build applies it once. So the group is stored
+ *   ONCE, the leaves point at it, and a renderer that can composite to a buffer
+ *   draws what the build draws — while one that cannot at least knows what it
+ *   is not doing.
+ *
+ * ► **THE DEDUPE KEY IS THE WHOLE RECORD AND IT USED TO BE THE PATH, which
+ *   loses the moon.** `summariseDrawables` in `tools/swf-display-list.mjs`
+ *   dedupes ancestor groups by `group.path.join("/")` alone. That is right for
+ *   ONE frame, where a path is unique — and wrong the moment a caller
+ *   accumulates across frames, which is what this loop does. Measured on the
+ *   oracle: `sky` has TWO different groups at depth 3, character 1692 on frames
+ *   25-110 and character 1728 on frames 112-200, and keying on the path alone
+ *   silently merges them and drops the second one's glow and blur — frames
+ *   112-200 being the night, and character 1728 being the moon.
+ *
+ * ► **AND HERE IS WHAT EACH KEY ACTUALLY COUNTS.** This docstring used to end
+ *   ~~*"7 groups and 10 filters by the whole record; 6 and 8 by the path"*~~,
+ *   which named the wrong key for the big number: **7/10 is not the whole
+ *   record, it is the discredited small census** the header calls wrong by 52x,
+ *   and it is SKY-ONLY. Re-derived from a pack written by this file
+ *   (`--out <scratch> --report`, then count `props[*].effectGroups` under each
+ *   key):
+ *
+ *   ```text
+ *     key                       sky            whole pack
+ *     path                      6 groups /  8    7 groups /  8 filters
+ *     path + character          7 / 10           8 / 10
+ *     path + filter types       7 / 10           8 / 10
+ *     THE WHOLE RECORD        362 / 570        363 / 570   <- what this writes
+ *   ```
+ *
+ *   The three small keys agree with each other and disagree with the build by
+ *   fifty times, because every one of them throws away the twenty numbers in a
+ *   tweened colour matrix. That is the day/night cycle, and losing it is the
+ *   reason `key` below is `JSON.stringify(record)` and not something tidier.
+ */
+function inheritedEffectsFor(drawable, groups, groupIndex, notCarried) {
+  const chain = drawable.ancestorEffects;
+  if (!Array.isArray(chain) || chain.length === 0) return null;
+  const indices = [];
+  for (const group of chain) {
+    const filters = Array.isArray(group.filters) && group.filters.length > 0 ? group.filters : null;
+    const record = {
+      // The chain of depths that reaches the group, so a reader can find it in
+      // the same frame's placements without re-deriving which level it was on.
+      path: [...(group.path ?? [])],
+      character: group.characterId,
+      ...(group.blendMode !== undefined && group.blendMode !== null ? { blendMode: group.blendMode } : {}),
+      ...(filters ? { filters } : {})
+    };
+    const key = JSON.stringify(record);
+    let at = groupIndex.get(key);
+    if (at === undefined) {
+      at = groups.length;
+      groups.push(record);
+      groupIndex.set(key, at);
+      if (!filters && group.hasFilters) refuse(notCarried, "emptyFilterList");
+      for (const filter of filters ?? []) if (filter.measured === false) refuse(notCarried, "unmeasuredFilterRecord");
+      // ► **A GROUP HAS NO MATRIX HERE, AND A BLUR RADIUS IS IN PIXELS.**
+      //   `flattenFrame`'s ancestor record is `{path, characterId, blendMode,
+      //   hasFilters, filters}` — no matrix — so a renderer scaling `blur(11)`
+      //   by the group's own transform cannot, and must fall back to the stage
+      //   scale `canvasFilterFor` already takes. Composing it here would mean a
+      //   second copy of that recursion in this file, which is the seam this
+      //   project keeps paying for. Counted instead, once per group.
+      refuse(notCarried, "effectGroupMatrix");
+    }
+    indices.push(at);
+  }
+  return indices;
+}
+
+/**
+ * ONE PROP'S EFFECT INVOICE: what it carries, what encloses it, WHAT A
+ * RENDERER WOULD ACTUALLY DO WITH EACH — applied, deferred to the
+ * colour-matrix path, measured no-op, or refused by name — and what could not
+ * be carried at all.
+ *
+ * ► **The verdicts come from `src/render/filters.js` and not from a table
+ *   here**, so "the pack carries it" and "the renderer can draw it" cannot
+ *   drift apart while both stay green — which is exactly the arrangement
+ *   `test/extraction-honesty.test.js` was written to force for approximations.
+ *
+ * ► **`scale` IS DELIBERATELY LEFT AT 1.** The invoice is about which filters
+ *   can be expressed at all; the stage-to-canvas scale is the renderer's and
+ *   changes the NUMBERS in the string, never the four buckets. A scale baked in
+ *   here would be a measurement of a choice this file does not get to make.
+ */
+function effectSummaryFor(groups, ownFilterLists, ownBlendModes, underGroup, notCarried, refusedOwn) {
+  const byType = (lists) => {
+    const counts = {};
+    for (const list of lists) for (const filter of list) counts[filter.type] = (counts[filter.type] ?? 0) + 1;
+    return counts;
+  };
+  const groupFilterLists = groups.map((group) => group.filters ?? []);
+  const groupBlendModes = groups.map((group) => group.blendMode).filter((id) => id !== undefined && id !== null);
+
+  const blend = { exact: {}, refused: {} };
+  for (const id of [...groupBlendModes, ...ownBlendModes]) {
+    const verdict = blendModeFor(id);
+    const key = verdict.composite && verdict.exact ? "exact" : "refused";
+    const label = key === "exact" ? verdict.name : `${verdict.name ?? id}:${verdict.refused}`;
+    blend[key][label] = (blend[key][label] ?? 0) + 1;
+  }
+
+  return {
+    // What this prop's OWN placements carry. Zero everywhere in the shipped
+    // build; see `ownEffectsOf` for why that zero is the headline and not a
+    // footnote.
+    own: {
+      filteredPlacements: ownFilterLists.length,
+      filters: ownFilterLists.reduce((sum, list) => sum + list.length, 0),
+      filtersByType: byType(ownFilterLists),
+      blendModePlacements: ownBlendModes.length,
+      // ► **THE FOUR ZEROES ABOVE ARE ONLY HONEST NEXT TO THIS.** They count
+      //   drawables this tool EMITTED. `dropped` counts own effects on
+      //   drawables it SKIPPED — and in the shipped build that is where 100% of
+      //   the own filters are, so a reader who sees `filteredPlacements: 0` and
+      //   stops has been told the opposite of the truth. Always present, even
+      //   when empty, for the reason `effectGroups` is always present.
+      dropped: {
+        placements: refusedOwn.filterLists.length,
+        filters: refusedOwn.filterLists.reduce((sum, list) => sum + list.length, 0),
+        filtersByType: byType(refusedOwn.filterLists),
+        blendModePlacements: refusedOwn.blendModes.length
+      }
+    },
+    // What ENCLOSES them. `groups` counts the sprites; `placements` counts the
+    // leaves inside them, and reporting only the second would report the sky's
+    // one colour matrix as 3,202 colour matrices.
+    inherited: {
+      groups: groups.length,
+      placements: underGroup,
+      filters: groupFilterLists.reduce((sum, list) => sum + list.length, 0),
+      filtersByType: byType(groupFilterLists),
+      blendModes: groupBlendModes.length
+    },
+    // ► **THE TWO ARE COUNTED ON DIFFERENT UNITS, ON PURPOSE.** A group's
+    //   filters are counted ONCE however many leaves are inside it, because the
+    //   build applies them once to the group; a placement's own are counted per
+    //   placement, because each placement really does get its own. Adding them
+    //   on one unit would either inflate the sky's colour matrix by its 3,202
+    //   leaves or deflate an own-filtered prop to one.
+    use: {
+      filters: summariseFilterUse([...groupFilterLists, ...ownFilterLists].map((list) => canvasFilterFor(list))),
+      blendModes: blend
+    },
+    notCarried
+  };
+}
+
+/**
+ * ONE SHAPE'S OWN INVOICE: how many of its paths are drawn as something simpler
+ * than the build draws them, and of which kinds.
+ *
+ * ► **DERIVED FROM THE PATHS EVERY TIME, never accumulated beside them**, so a
+ *   caller cannot build the list and forget the count. This is the third copy
+ *   of this five-line function in the tree — `tools/extract-figure.mjs`
+ *   exports one and `test/extraction-honesty.test.js` has its own — and the
+ *   duplication is deliberate for the reason `roundMatrix` above is duplicated:
+ *   each tool stays runnable on its own. The drift that duplication invites is
+ *   the one thing that cannot go unnoticed here, because the honesty test
+ *   RECOMPUTES this from the pack's own data on every run and fails by name if
+ *   the two disagree.
+ *
+ * ► **ALL 56 SHAPES OR NONE.** That test's own note: *"A pack that invoices
+ *   some of its entries is worse than one that invoices none"*, because a
+ *   reader who checks one entry concludes the pack has invoices. This pack had
+ *   0 of 56 before today, which was uniform and honest; it now has 56.
+ */
+function pathApproximations(paths) {
+  const approximatedByKind = {};
+  for (const entry of paths ?? []) {
+    if (entry.approximated) {
+      approximatedByKind[entry.approximated] = (approximatedByKind[entry.approximated] ?? 0) + 1;
+    }
+  }
+  return {
+    approximated: Object.values(approximatedByKind).reduce((sum, count) => sum + count, 0),
+    approximatedByKind
+  };
+}
+
+/**
  * Every frame of every declared prop, plus the shapes they reach.
  *
  * **Frames are 1-BASED, matching the build's own `gotoAndStop`.** A zero-based
@@ -352,6 +911,89 @@ function tallyApproximations(shapes) {
   }
   const total = Object.values(byKind).reduce((sum, count) => sum + count, 0);
   return { paths, total, byKind };
+}
+
+/**
+ * THE WHOLE PACK'S EFFECTS, added up from the props' OWN invoices.
+ *
+ * ► **Summed from what was written, never counted alongside it.** The figure
+ *   extractor's manifest once summed a per-entry field that 83% of its pack did
+ *   not have, and reported zero against data holding two. Every number below
+ *   comes from `props[*].effects`, which is in the pack a reader can check.
+ */
+export function tallyEffects(props) {
+  const add = (into, from) => {
+    for (const [key, count] of Object.entries(from ?? {})) into[key] = (into[key] ?? 0) + count;
+    return into;
+  };
+  const totals = {
+    groups: 0, placementsUnderAGroup: 0, inheritedFilters: 0, inheritedBlendModes: 0,
+    ownFilteredPlacements: 0, ownFilters: 0, ownBlendModePlacements: 0,
+    // Never folded into the three above them. The pack does not hold these; it
+    // knows they exist and says so, which is a different claim.
+    droppedOwnFilteredPlacements: 0, droppedOwnFilters: 0, droppedOwnBlendModePlacements: 0
+  };
+  const inheritedByType = {};
+  const ownByType = {};
+  const droppedOwnByType = {};
+  const notCarried = {};
+  const use = { total: 0, applied: 0, deferred: 0, noOp: 0, refused: 0, approximated: 0 };
+  const refusedByReason = {};
+  const approximatedByKind = {};
+  const blend = { exact: {}, refused: {} };
+
+  for (const prop of Object.values(props)) {
+    const effects = prop.effects;
+    if (!effects) continue;
+    totals.groups += effects.inherited.groups;
+    totals.placementsUnderAGroup += effects.inherited.placements;
+    totals.inheritedFilters += effects.inherited.filters;
+    totals.inheritedBlendModes += effects.inherited.blendModes;
+    totals.ownFilteredPlacements += effects.own.filteredPlacements;
+    totals.ownFilters += effects.own.filters;
+    totals.ownBlendModePlacements += effects.own.blendModePlacements;
+    totals.droppedOwnFilteredPlacements += effects.own.dropped?.placements ?? 0;
+    totals.droppedOwnFilters += effects.own.dropped?.filters ?? 0;
+    totals.droppedOwnBlendModePlacements += effects.own.dropped?.blendModePlacements ?? 0;
+    add(inheritedByType, effects.inherited.filtersByType);
+    add(ownByType, effects.own.filtersByType);
+    add(droppedOwnByType, effects.own.dropped?.filtersByType);
+    add(notCarried, effects.notCarried);
+    for (const key of Object.keys(use)) use[key] += effects.use.filters[key] ?? 0;
+    add(refusedByReason, effects.use.filters.refusedByReason);
+    add(approximatedByKind, effects.use.filters.approximatedByKind);
+    add(blend.exact, effects.use.blendModes.exact);
+    add(blend.refused, effects.use.blendModes.refused);
+  }
+
+  return {
+    ...totals, inheritedByType, ownByType, droppedOwnByType,
+    use: { ...use, refusedByReason, approximatedByKind },
+    blendModes: blend,
+    notCarried,
+    // ► **WHAT THIS PACK CANNOT SEE AT ALL, said once in words because it is a
+    //   SCOPE and not a measurement.** A prop is flattened as a clip in
+    //   isolation, so an effect on the ROOT's placement of that clip is outside
+    //   this extraction by construction — and one is real: root frames 96-226,
+    //   the arena screen's own frame 221 among them, place character 1729
+    //   (`sky`) under `blur(5, 5, 1 pass)`. That belongs to the screen the clip
+    //   is placed on, is `tools/extract-screens.mjs`'s to carry, and would be
+    //   an invention here, because `bullet` is attached by ActionScript and
+    //   sits on no root frame at all. Reproduce: resolve the root timeline and
+    //   read the `filters` on the placement of 1729.
+    scope: "a prop is flattened as a clip in isolation; effects on the ROOT's placement of it are not here",
+    // ► **AND THE OTHER SCOPE, WHICH IS ABOUT FRAMES RATHER THAN EFFECTS.**
+    //   `flattenFrame` stops every nested sprite on frame 1. That is right for
+    //   scenery and wrong wherever the build indexes a child by script —
+    //   `bullet_trail`'s arrow is the case that bit, and it is measured now
+    //   (`nestedLookup`), but ONLY where `PROP_EXPORTS` declares the child.
+    //   Nothing here sweeps for undeclared ones, so a nested lookup nobody has
+    //   noticed is still frozen at frame 1 and reads as a single drawing. Said
+    //   in words because it is a scope: a count would need a second copy of
+    //   `flattenFrame`'s recursion, which is the seam this file refuses to
+    //   duplicate.
+    nestedScope: "nested sprites are frozen on frame 1 except where PROP_EXPORTS declares the child's own index"
+  };
 }
 
 export function extractProps(buffer) {
@@ -395,6 +1037,22 @@ export function extractProps(buffer) {
     }
 
     const frames = [];
+    // THE PROP'S EFFECT GROUPS, ONCE EACH, and the placements point at them.
+    // Per prop rather than per pack because an index into a list one prop away
+    // is a join a reader has to make by hand, and `frames` is already per prop.
+    const groups = [];
+    const groupIndex = new Map();
+    // Everything this prop's effects could not carry, by name. Per prop AND
+    // summed for the manifest: "7 somewhere" and "7 on the sky" are different
+    // problems and one total cannot tell a reader which one they have.
+    const notCarried = {};
+    const ownFilterLists = [];
+    const ownBlendModes = [];
+    // The same two lists for drawables this tool DROPS. Kept apart from the
+    // carried ones on purpose: adding them would make `own.filters` count
+    // things the pack does not hold, which is the opposite mistake.
+    const refusedOwn = { filterLists: [], blendModes: [] };
+    let underGroup = 0;
     for (let index = 0; index < frameCount; index += 1) {
       const displayList = resolved.frames[index];
       if (!displayList) { frames.push([]); continue; }
@@ -427,9 +1085,13 @@ export function extractProps(buffer) {
         // placements it clips and never emitted as one of its own.
         if (drawable.isMask) {
           if (drawable.unsupported) {
+            // The mask's own effects go out with it, and are invoiced by name
+            // for the same reason the unsupported branch below invoices its
+            // own: a drop nobody counted is indistinguishable from an absence.
+            const lost = refusedEffectsOf(drawable, refusedOwn, notCarried);
             failures.push({
               linkage: key, id,
-              message: `frame ${index + 1} carries ${drawable.unsupported} (character ${drawable.characterId})`
+              message: `frame ${index + 1} carries ${drawable.unsupported} (character ${drawable.characterId})${lost}`
             });
           }
           continue;
@@ -437,16 +1099,38 @@ export function extractProps(buffer) {
         // An unsupported drawable is REPORTED and skipped, never silently
         // dropped — the three combat icons are mostly `DefineEditText`, which
         // is why they are not in `PROP_EXPORTS` at all.
+        //
+        // ► **AND ITS OWN EFFECTS ARE REPORTED TOO, WHICH THEY WERE NOT.** This
+        //   `continue` sits ABOVE `ownEffectsOf`, so for as long as it invoiced
+        //   nothing, the build's two own-filtered placements (`panel`'s two
+        //   edit-text children, each with its own glow) left no trace anywhere
+        //   — not in `notCarried`, not in the invoice, not in this message —
+        //   and the pack-wide `0 own filters` was a measurement of this line.
         if (drawable.unsupported) {
+          const lost = refusedEffectsOf(drawable, refusedOwn, notCarried);
           failures.push({
             linkage: key, id,
-            message: `frame ${index + 1} carries ${drawable.unsupported} (character ${drawable.characterId})`
+            message: `frame ${index + 1} carries ${drawable.unsupported} (character ${drawable.characterId})${lost}`
           });
           continue;
         }
         const cutter = drawable.maskPath ? masks.get(drawable.maskPath.join("/")) : null;
-        if (cutter) shapeIds.add(cutter.characterId);
+        if (cutter) {
+          shapeIds.add(cutter.characterId);
+          // A CUTTER'S OWN EFFECTS ARE NOT CARRIED. `clip` is a shape and a
+          // matrix — a region — and a blurred stencil is a soft-edged region
+          // that a path clip cannot express at all. Zero of this build's 89
+          // cutters carries one, so this is a counted zero rather than a
+          // measured loss; it stops being zero the moment somebody mods a mask.
+          if (cutter.hasFilters) refuse(notCarried, "clipFilters");
+          if (cutter.blendMode !== undefined && cutter.blendMode !== null) refuse(notCarried, "clipBlendMode");
+        }
         shapeIds.add(drawable.characterId);
+        const own = ownEffectsOf(drawable, notCarried);
+        if (own.filters) ownFilterLists.push(own.filters);
+        if (own.blendMode !== undefined) ownBlendModes.push(own.blendMode);
+        const inherited = inheritedEffectsFor(drawable, groups, groupIndex, notCarried);
+        if (inherited) underGroup += 1;
         placements.push({
           shape: drawable.characterId,
           matrix: roundMatrix(drawable.matrix),
@@ -454,7 +1138,18 @@ export function extractProps(buffer) {
           // The clip travels WITH the thing it clips rather than as a sibling,
           // because a renderer has to set it before the fill and clear it after,
           // and a list of cutters somewhere else is an invitation to forget.
-          ...(cutter ? { clip: { shape: cutter.characterId, matrix: roundMatrix(cutter.matrix) } } : {})
+          ...(cutter ? { clip: { shape: cutter.characterId, matrix: roundMatrix(cutter.matrix) } } : {}),
+          // THIS PLACEMENT'S OWN filter list and blend mode, spread the same
+          // conditional way `colour` and `clip` are, and absent when it has
+          // none. `filters` here means the placement's own and nothing else.
+          ...own,
+          // ► **AND ITS ANCESTORS' ARE A DIFFERENT KEY WITH A DIFFERENT NAME**,
+          //   holding indices into this prop's `effectGroups` and NOT filter
+          //   records, so no reader can take an enclosing sprite's blur for
+          //   this leaf's. Outermost first, which is the order a renderer has
+          //   to nest its buffers in — an unmeasurable guarantee on this build
+          //   (every chain is length 1) and pinned by fixture instead.
+          ...(inherited ? { inheritedEffects: inherited } : {})
         });
       }
       frames.push(placements);
@@ -465,6 +1160,9 @@ export function extractProps(buffer) {
     //   arrows: a lookup clip whose frames mostly repeat is telling you the
     //   index has fewer meanings than it has slots.
     const signatures = frames.map((placements) => placements.map((p) => p.shape).sort().join(","));
+    const nestedLookup = declared.nested
+      ? nestedLookupFor(buffer, characters, resolved, frameCount, declared.nested, cache, notCarried)
+      : null;
     props[key] = {
       linkage: key,
       character: id,
@@ -473,6 +1171,18 @@ export function extractProps(buffer) {
       indexedBy: declared.indexedBy,
       reader: declared.reader,
       distinctFrames: new Set(signatures.filter((s) => s.length > 0)).size,
+      // ALWAYS PRESENT, EMPTY WHERE THERE ARE NONE — 8 of the 12 props have no
+      // effects at all. An absent key would make "this prop has no groups" and
+      // "this pack predates groups" the same shape, and telling those apart is
+      // the whole point of writing a count down.
+      effectGroups: groups,
+      // ► **PRESENT ONLY WHERE THE ENTRY DECLARES ONE, unlike `effectGroups`
+      //   beside it, and the asymmetry is deliberate.** An always-present
+      //   `nestedLookup: null` would claim this tool went looking on all twelve
+      //   props; it goes looking exactly where `PROP_EXPORTS` says the build
+      //   indexes a child, and a refusal is in `notCarried` under its own name.
+      ...(nestedLookup ? { nestedLookup } : {}),
+      effects: effectSummaryFor(groups, ownFilterLists, ownBlendModes, underGroup, notCarried, refusedOwn),
       frames
     };
   }
@@ -482,19 +1192,69 @@ export function extractProps(buffer) {
     const character = characters.get(id);
     try {
       const shape = parseShape(buffer, character.bodyStart, character.bodyEnd, character.tagCode);
+      const paths = shapeToPaths(shape);
       shapes[id] = {
         bounds: {
           xMin: px(shape.bounds.xMin), xMax: px(shape.bounds.xMax),
           yMin: px(shape.bounds.yMin), yMax: px(shape.bounds.yMax)
         },
-        paths: shapeToPaths(shape)
+        // THE INVOICE TRAVELS WITH THE SHAPE. `tallyApproximations` below adds
+        // the same numbers up for the manifest, but a reader holding one entry
+        // should not have to walk the whole pack to learn that this shape is
+        // the one drawn as a flat fill where the build draws a gradient.
+        ...pathApproximations(paths),
+        paths
       };
     } catch (error) {
       failures.push({ linkage: `shape ${id}`, id, message: String(error.message).slice(0, 120) });
     }
   }
 
-  return { props, shapes, failures, approximated: tallyApproximations(shapes) };
+  return {
+    props, shapes, failures,
+    approximated: tallyApproximations(shapes),
+    effects: tallyEffects(props)
+  };
+}
+
+/**
+ * THE MANIFEST A HUMAN READS, as an object — built here rather than inline in
+ * `main` so a test can hold it.
+ *
+ * ► **BECAUSE IT WAS DELETABLE WITH THE SUITE GREEN.** A verifier removed
+ *   `effects: prop.effects` from this object and all fifteen tests still
+ *   passed: `main()` was exercised by nothing, and the per-entry invoice — the
+ *   ONLY place a reader sees what one prop lost — was guarded by no assertion
+ *   anywhere in the repository. A number nothing can turn red is not published,
+ *   it is stored. `test/extract-props.test.js` now writes this object from the
+ *   synthetic build and checks each entry.
+ */
+export function manifestFor({ source, sha256, props, shapes, failures, approximated, effects }) {
+  return {
+    source,
+    sha256,
+    extractedFrom: "ExportAssets linkage names; frames are 1-based, as gotoAndStop indexes them",
+    props: Object.fromEntries(Object.entries(props).map(([name, prop]) => [name, {
+      character: prop.character,
+      frameCount: prop.frameCount,
+      distinctFrames: prop.distinctFrames,
+      indexedBy: prop.indexedBy,
+      reader: prop.reader,
+      // A SECOND INDEX WHERE THERE IS ONE, so the manifest says what the pack
+      // says: `bullet_trail`'s seven frames are an age and its arrow is a
+      // fifty-frame lookup on a child. Absent where nothing was declared.
+      ...(prop.nestedLookup ? { nestedLookup: prop.nestedLookup } : {}),
+      // THE PER-ENTRY INVOICE. Every prop carries one — including the eight
+      // with nothing in it, for the reason `effectGroups` is always present.
+      effects: prop.effects
+    }])),
+    shapeCount: Object.keys(shapes).length,
+    // Printed AND stored, because a count that only exists in memory is the
+    // same silence the `failures` list was built to break.
+    approximated,
+    effects,
+    failures
+  };
 }
 
 function main(argv) {
@@ -513,28 +1273,14 @@ function main(argv) {
     );
   }
 
-  const { props, shapes, failures, approximated } = extractProps(buffer);
+  const { props, shapes, failures, approximated, effects } = extractProps(buffer);
 
   fs.mkdirSync(options.out, { recursive: true });
   const payload = JSON.stringify({ props, shapes }, null, 1);
   fs.writeFileSync(path.join(options.out, "props.json"), payload);
-  fs.writeFileSync(path.join(options.out, "manifest.json"), JSON.stringify({
-    source: path.basename(options.file),
-    sha256,
-    extractedFrom: "ExportAssets linkage names; frames are 1-based, as gotoAndStop indexes them",
-    props: Object.fromEntries(Object.entries(props).map(([name, prop]) => [name, {
-      character: prop.character,
-      frameCount: prop.frameCount,
-      distinctFrames: prop.distinctFrames,
-      indexedBy: prop.indexedBy,
-      reader: prop.reader
-    }])),
-    shapeCount: Object.keys(shapes).length,
-    // Printed AND stored, because a count that only exists in memory is the
-    // same silence the `failures` list was built to break.
-    approximated,
-    failures
-  }, null, 1));
+  fs.writeFileSync(path.join(options.out, "manifest.json"), JSON.stringify(manifestFor({
+    source: path.basename(options.file), sha256, props, shapes, failures, approximated, effects
+  }), null, 1));
 
   const lines = [`props -> ${options.out}`];
   for (const prop of Object.values(props)) {
@@ -542,12 +1288,54 @@ function main(argv) {
       `  ${prop.linkage.padEnd(13)} char ${String(prop.character).padStart(4)}  ` +
       `${String(prop.frameCount).padStart(3)} frames, ${prop.distinctFrames} distinct  (${prop.indexedBy})`
     );
+    // ► **THE SECOND INDEX, PRINTED WHERE THE FIRST ONE IS.** `bullet_trail`
+    //   read as "7 frames, 1 distinct" for as long as this tool froze its child
+    //   — a line that says "one drawing" about a clip with fifty. A reader of
+    //   the report has to see both or the frozen one looks complete.
+    if (prop.nestedLookup) {
+      const nested = prop.nestedLookup;
+      lines.push(
+        `                 └ ${nested.instance} (char ${nested.character}): ` +
+        `${nested.frameCount} frames, ${nested.distinctShapes} distinct shapes over shape ${nested.replaces}  ` +
+        `(${nested.indexedBy})`
+      );
+    }
   }
   const approxParts = Object.entries(approximated.byKind).map(([kind, count]) => `${count} ${kind}`);
   lines.push(
     `  ${Object.keys(shapes).length} shapes, ${approximated.paths} paths, ${failures.length} failures, ` +
     `${approximated.total} approximated${approxParts.length ? ` (${approxParts.join(", ")})` : ""}`
   );
+  const named = (counts) => Object.entries(counts).map(([kind, count]) => `${count} ${kind}`).join(", ") || "none";
+  // ► **THE OWN/INHERITED SPLIT IS THE FIRST THING PRINTED, because the whole
+  //   finding is that one of them is zero.** A line reading "10 filters" would
+  //   let a reader conclude the placements carry them. They carry none: every
+  //   filter this pack can draw is on an enclosing sprite and is stored once,
+  //   and the leaves point at it.
+  //
+  // ► **AND THE REFUSAL IS PRINTED ON THE SAME LINE, NOT UNDER `notCarried`
+  //   TWELVE LINES DOWN.** For as long as it was not, the zero in front of it
+  //   read as "the build has none" when it meant "the two that exist were
+  //   skipped upstream of the counter". Whoever quotes this line quotes both
+  //   halves or neither.
+  const dropped = effects.droppedOwnFilters + effects.droppedOwnBlendModePlacements > 0
+    ? `  [+ ${effects.droppedOwnFilters} own filter(s) and ${effects.droppedOwnBlendModePlacements} own blend mode(s) ` +
+      `REFUSED on ${effects.droppedOwnFilteredPlacements} skipped drawable(s): ${named(effects.droppedOwnByType)}]`
+    : "  [+ 0 refused on a skipped drawable]";
+  lines.push(
+    `  effects: ${effects.ownFilters} own filter(s) on ${effects.ownFilteredPlacements} placement(s), ` +
+    `${effects.ownBlendModePlacements} own blend mode(s)${dropped}`
+  );
+  lines.push(
+    `           ${effects.groups} enclosing group(s) over ${effects.placementsUnderAGroup} placement(s): ` +
+    `${named(effects.inheritedByType)}, ${effects.inheritedBlendModes} blend mode(s)`
+  );
+  lines.push(
+    `           a renderer: ${effects.use.applied} applied, ${effects.use.deferred} deferred, ` +
+    `${effects.use.noOp} no-op, ${effects.use.refused} refused` +
+    `${Object.keys(effects.use.refusedByReason).length ? ` (${named(effects.use.refusedByReason)})` : ""}`
+  );
+  lines.push(`           not carried: ${named(effects.notCarried)}`);
   if (options.report) for (const failure of failures.slice(0, 20)) lines.push(`    ! ${failure.linkage}: ${failure.message}`);
   process.stdout.write(`${lines.join("\n")}\n`);
 }

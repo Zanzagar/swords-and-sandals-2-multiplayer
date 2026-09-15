@@ -32,8 +32,10 @@ import {
   FIELD_GUTTER_PX,
   TEXT_UNITS_PER_EM,
   TWIPS_PER_PIXEL,
+  approximationMarksOf,
   fieldLayoutOptionsFor,
   fieldOpsFor,
+  fieldTextFor,
   fieldsPlacedIn,
   fontFor,
   fontIdsIn,
@@ -258,7 +260,8 @@ test("A MISSING GLYPH IS DRAWN AS A BOX, COUNTED, AND MARKED ON THE OPERATION", 
   const ops = textOpsFor(pack, { font: 7, size: 20.48, text: "A中B" });
   const notdef = ops.filter((op) => op.notdef);
   assert.equal(notdef.length, 1);
-  assert.equal(notdef[0].approximated, "glyph-missing");
+  assert.deepEqual(notdef[0].approximated, ["glyph-missing"],
+    "a LIST of reasons, even when there is one of them — see `marksOf` in text.js");
   assert.equal(notdef[0].fill, null, "a hollow box, so it reads as a hole rather than a letter");
   assert.ok(notdef[0].strokeWidth > 0, "and it is actually visible");
   assert.equal(notdef[0].glyph.index, -1);
@@ -283,7 +286,7 @@ test("a glyph whose advance the pack derived carries that mark onto every operat
   assert.equal(layout.approximated.byKind["advance-from-outline"], 2);
   assert.equal(layout.approximated.byKind["advance-from-sibling-font"], 1);
   const ops = textOpsFor(pack, { font: 7, size: 20.48, text: "A A" });
-  for (const op of ops) assert.equal(op.approximated, "advance-from-outline");
+  for (const op of ops) assert.deepEqual(op.approximated, ["advance-from-outline"]);
 });
 
 /* ---------------------------------------------------------------- */
@@ -363,6 +366,237 @@ test("alignment spends the slack inside maxWidth, and left is the default", () =
   assert.equal(layoutText(pack, { font: 7, size: 20.48, text: "A", align: "right" }).lines[0].x, 0);
 });
 
+test("A FIELD THAT DOES NOT WRAP IS STILL ALIGNED IN ITS OWN BOX", () => {
+  // ► **THE NO-OP.** `fieldLayoutOptionsFor` gives a non-wrapping field
+  //   `maxWidth: Infinity`, and `layoutText` used to align inside
+  //   `Number.isFinite(maxWidth) ? maxWidth : widest` — the widest LINE, so the
+  //   slack was zero and `center` and `right` landed exactly where `left` does.
+  //   Re-derived from `assets/text/text.json` on 2026-09-14: 108 of the build's
+  //   256 fields (81 of the 101 centred, 27 of the 30 right) do not set both
+  //   `wordWrap` and `multiline` and were aligned by nothing at all.
+  //
+  //   The numbers here are checkable in the head. The box is 4000 twips = 200px,
+  //   the gutter takes 2 off each side, so the inner box is 196. One 'A' is
+  //   12000 glyph units at a 20.48px em = 12px. Left puts the pen at the gutter,
+  //   2; centre at 2 + (196 - 12) / 2 = 94; right at 2 + 184 = 186. An emitted
+  //   matrix translates in TWIPS, so those are 40, 1880 and 3720.
+  const fieldWith = (align) => ({
+    5: {
+      id: 5, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 },
+      font: 7, fontHeight: 409.6, colour: "#ffffff", alpha: 1, align,
+      leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+      multiline: false, wordWrap: false, password: false, border: false,
+      readOnly: true, html: false, maxLength: null, variable: "v", text: "A"
+    }
+  });
+  const penTwipsFor = (align) => {
+    const pack = syntheticPack({ fields: fieldWith(align) });
+    const options = fieldLayoutOptionsFor(pack, 5);
+    // The wrap width is still infinite — this field must never break a line —
+    // and the ALIGN width is the box. Two jobs, two numbers.
+    assert.equal(options.maxWidth, Infinity, `${align}: a non-wrapping field must still never wrap`);
+    assert.equal(options.alignWidth, 196, `${align}: the box less both gutters`);
+    const ops = fieldOpsFor(pack, 5);
+    assert.equal(ops.length, 1);
+    return ops[0].matrix[4];
+  };
+  assert.equal(penTwipsFor("left"), 40);
+  assert.equal(penTwipsFor("center"), 1880);
+  assert.equal(penTwipsFor("right"), 3720);
+});
+
+test("a field that DOES wrap aligns in the same box it breaks at", () => {
+  // The other half of the split: when the two widths coincide, nothing changed.
+  // Four 'A's at 12px in a 46px inner box break 3 + 1, and each line is centred
+  // in 46 — the first by (46 - 36) / 2 = 5, the second by (46 - 12) / 2 = 17,
+  // both offset by the 2px gutter.
+  const pack = syntheticPack({
+    fields: {
+      5: {
+        id: 5, bounds: { xMin: 0, xMax: 1000, yMin: 0, yMax: 2000 },
+        font: 7, fontHeight: 409.6, colour: "#ffffff", alpha: 1, align: "center",
+        leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+        multiline: true, wordWrap: true, password: false, border: false,
+        readOnly: true, html: false, maxLength: null, variable: "v", text: "AAAA"
+      }
+    }
+  });
+  const options = fieldLayoutOptionsFor(pack, 5);
+  assert.equal(options.maxWidth, 46);
+  assert.equal(options.alignWidth, 46, "the same number by two names, which is the case that always worked");
+  const layout = layoutText(pack, options);
+  assert.deepEqual(layout.lines.map((line) => line.text), ["AAA", "A"]);
+  assert.deepEqual(layout.lines.map((line) => line.x), [2 + 5, 2 + 17]);
+  assert.equal(layout.overflowing, 0);
+});
+
+test("A LINE WIDER THAN ITS BOX KEEPS THE NEGATIVE SLACK, and the choice is counted", () => {
+  // ► **AN ASSUMPTION, PINNED SO THAT CHANGING IT IS A DECISION.** Once a
+  //   non-wrapping field is aligned in its own box, its line can be wider than
+  //   that box, and `DefineEditText` carries an align field and no overflow
+  //   rule — nothing in the bytes settles what the player does, and the oracle
+  //   is read-only on this route. Taken as: centre means centre, so an
+  //   over-long line spills at both ends. The alternative is `Math.max(0, …)`
+  //   on the slack, which would make an overflowing line left-aligned.
+  //   Measured over the real pack with its own placeholder text: 0 of 272 lines
+  //   overflow, so nothing but this test exercises the arm — which is exactly
+  //   why it is here rather than left to a screenshot nobody has taken.
+  const pack = syntheticPack({
+    fields: {
+      5: {
+        id: 5, bounds: { xMin: 0, xMax: 800, yMin: 0, yMax: 1000 },
+        font: 7, fontHeight: 409.6, colour: "#ffffff", alpha: 1, align: "center",
+        leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+        multiline: false, wordWrap: false, password: false, border: false,
+        readOnly: true, html: false, maxLength: null, variable: "v", text: "AAA"
+      }
+    }
+  });
+  // A 40px box, 36 of it inner; three 'A's are 36 wide... so make them overflow
+  // by asking for four: 48 in a 36 box, 12 over, 6 of it off each end.
+  const options = fieldLayoutOptionsFor(pack, 5, { text: "AAAA" });
+  assert.equal(options.alignWidth, 36);
+  const layout = layoutText(pack, options);
+  assert.equal(layout.lines.length, 1, "it does not wrap: that is what makes overflow possible");
+  assert.equal(layout.lines[0].width, 48);
+  assert.equal(layout.lines[0].x, 2 + (36 - 48) / 2, "the pen starts 4px LEFT of the field's own left edge");
+  assert.equal(layout.overflowing, 1, "► and the count says the assumption was reached");
+  assert.equal(layout.box, 36);
+});
+
+test("A CENTRED FIELD'S MARGINS COME OFF THE ALIGNMENT BOX, not just the wrap width", () => {
+  // ► **THE HALF OF `alignWidth: inner` THAT NOTHING COULD FALSIFY.** `inner` is
+  //   `width - gutter * 2 - leftMargin - rightMargin`, and an adversarial
+  //   verifier measured on 2026-09-14 that replacing it with
+  //   `Math.max(0, width - gutter * 2)` — a different alignment box for any
+  //   field with margins — left the whole 1712-test suite green. It could,
+  //   because all 256 fields in the build declare both margins zero and every
+  //   synthetic field in this file set them to zero as well; the one test that
+  //   used a margin asserted `maxWidth` and never `alignWidth`. So the margin
+  //   term was evidence-free in BOTH directions: no input could falsify it and
+  //   no assertion pinned it.
+  //
+  //   Checkable in the head. The box is 4000 twips = 200 px, the gutter takes 2
+  //   off each side, a 40-twip left margin takes 2 more and a 60-twip right
+  //   margin 3, so the alignment box is 200 - 4 - 2 - 3 = 191 and the pen
+  //   origin is 0 + 2 + 2 = 4. One 'A' advances 12 px. Centred:
+  //   4 + (191 - 12) / 2 = 93.5 px = 1870 twips. Right: 4 + 179 = 183 px =
+  //   3660 twips. Under the margin-free box of 196 the same two numbers would
+  //   be 96 px and 188 px — 1920 and 3760 twips — so this test is exactly the
+  //   mutation the verifier ran, pinned by value.
+  const fieldWith = (align) => ({
+    5: {
+      id: 5, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 },
+      font: 7, fontHeight: 409.6, colour: "#ffffff", alpha: 1, align,
+      leftMargin: 40, rightMargin: 60, indent: 0, leading: 0,
+      multiline: false, wordWrap: false, password: false, border: false,
+      readOnly: true, html: false, maxLength: null, variable: "v", text: "A"
+    }
+  });
+  for (const align of ["left", "center", "right"]) {
+    const options = fieldLayoutOptionsFor(syntheticPack({ fields: fieldWith(align) }), 5);
+    assert.equal(options.alignWidth, 191, `${align}: both gutters AND both margins come off the box`);
+    assert.notEqual(options.alignWidth, 200 - FIELD_GUTTER_PX * 2,
+      `${align}: ► the margin-free box is a DIFFERENT number, which is what makes this assertion worth making`);
+    assert.equal(options.x, 4, `${align}: the pen origin is the gutter plus the LEFT margin only`);
+    assert.equal(options.maxWidth, Infinity, `${align}: and it still must never wrap`);
+  }
+
+  const penTwipsFor = (align) => {
+    const pack = syntheticPack({ fields: fieldWith(align) });
+    const ops = fieldOpsFor(pack, 5);
+    assert.equal(ops.length, 1);
+    return ops[0].matrix[4];
+  };
+  assert.equal(penTwipsFor("left"), 80, "the gutter plus the left margin, in twips");
+  assert.equal(penTwipsFor("center"), 1870, "► 1920 if the right margin is not taken off the box");
+  assert.equal(penTwipsFor("right"), 3660, "► 3760 if the right margin is not taken off the box");
+
+  // An independent statement of the same claim: a right-aligned line's far edge
+  // is the far edge of the alignment box, which is the field's own right edge
+  // less the gutter and the right margin — 200 - 2 - 3 = 195. Derived from the
+  // field's tag, not from the numbers above.
+  const pack = syntheticPack({ fields: fieldWith("right") });
+  const options = fieldLayoutOptionsFor(pack, 5);
+  const line = layoutText(pack, options).lines[0];
+  assert.equal(line.x + line.width, 195);
+  assert.equal(line.x + line.width, options.x + options.alignWidth);
+});
+
+test("fieldTextFor HANDS BACK THE INVOICE fieldOpsFor cannot carry, off one layout pass", () => {
+  // ► **AN ARRAY CANNOT CARRY A COUNT.** `layoutText` reports `overflowing` —
+  //   how many lines came out wider than the box they were aligned in, which is
+  //   a condition that did not EXIST until a non-wrapping field started being
+  //   aligned in its own box. Every caller on the screen route reached the ops
+  //   through `fieldOpsFor`, which returns an array and dropped the number, so
+  //   the one thing the alignment fix newly made possible was the one thing
+  //   nothing downstream could count.
+  const pack = syntheticPack({
+    fields: {
+      5: {
+        id: 5, bounds: { xMin: 0, xMax: 800, yMin: 0, yMax: 1000 },
+        font: 7, fontHeight: 409.6, colour: "#ffffff", alpha: 1, align: "center",
+        leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+        multiline: false, wordWrap: false, password: false, border: false,
+        readOnly: true, html: false, maxLength: null, variable: "v", text: "A"
+      }
+    }
+  });
+  // The placeholder fits: one 'A' is 12px in a 36px box.
+  const fits = fieldTextFor(pack, 5);
+  assert.equal(fits.overflowing, 0, "► a zero that an input can move, which is what makes the 1 below evidence");
+  assert.equal(fits.box, 36);
+  assert.equal(fits.lines, 1);
+  assert.equal(fits.width, 12);
+
+  // A bound value four glyphs long is 48px in the same 36px box.
+  const spills = fieldTextFor(pack, 5, { text: "AAAA" });
+  assert.equal(spills.overflowing, 1, "► the line is wider than the box it was centred in");
+  assert.equal(spills.width, 48);
+  assert.ok(spills.width > spills.box, "which is what overflowing MEANS, derived a second way");
+  assert.equal(spills.ops[0].matrix[4], (2 + (36 - 48) / 2) * TWIPS_PER_PIXEL,
+    "and the pen really is left of the field's own left edge");
+
+  // The shallow view is the same operations and nothing else — so a caller that
+  // does not want the invoice pays nothing, and a caller that does is not
+  // laying the field out twice to get it.
+  assert.deepEqual(fieldOpsFor(pack, 5, { text: "AAAA" }), spills.ops);
+  assert.equal(fieldOpsFor(pack, 5, { text: "AAAA" }).length, 4);
+
+  // The one place the two disagree, stated rather than left to be discovered: a
+  // field that lays out and inks nothing is an ANSWER here and an absence there.
+  const blank = fieldTextFor(pack, 5, { text: "   " });
+  assert.deepEqual(blank.ops, [], "three spaces advance and draw nothing");
+  assert.equal(blank.overflowing, 0);
+  assert.equal(fieldOpsFor(pack, 5, { text: "   " }), null);
+  // And both are total on rubbish, the way every reader in this module is.
+  assert.equal(fieldTextFor(pack, 999), null);
+  assert.equal(fieldTextFor(null, 5), null);
+});
+
+test("approximationMarksOf IS THE ONE READER, because this tree emits BOTH shapes under that key", () => {
+  // ► **ONE KEY, TWO TYPES, IN ONE ARRAY.** `text.js` puts a frozen LIST on an
+  //   operation; `emitDrawable` in `src/render/screen.js` and `emitPropOps`
+  //   in `src/render/props.js` copy
+  //   the extractor's STRING through untouched, and `screenWithTextFor` merges
+  //   both into one paint order — measured 2026-09-14 over the 26 screens: 274
+  //   marked operations, 209 strings and 65 lists. Whichever shape a reader
+  //   guesses, it is silently wrong about the other half of the same array, and
+  //   a silent wrong count is this project's most expensive defect. So there is
+  //   one reader and it takes both.
+  assert.deepEqual(approximationMarksOf("gradient"), ["gradient"], "the shape screen.js and props.js emit");
+  assert.deepEqual(approximationMarksOf(["html-markup-stripped"]), ["html-markup-stripped"], "the shape text.js emits");
+  assert.deepEqual(approximationMarksOf(["glyph-missing", "html-markup-stripped"]), ["glyph-missing", "html-markup-stripped"],
+    "order is precedence, most specific first");
+  assert.deepEqual(approximationMarksOf(["a", "a"]), ["a"], "a field and its glyph naming the same kind is ONE reason");
+  // Total on everything else: a hand-edited pack must not be able to put a
+  // number or an object into a tally, and an absent key is no marks, not a throw.
+  for (const rubbish of [undefined, null, 0, 42, "", {}, [], [1, {}, null], true]) {
+    assert.deepEqual(approximationMarksOf(rubbish), [], `approximationMarksOf(${JSON.stringify(rubbish) ?? "undefined"})`);
+  }
+  assert.equal(Object.isFrozen(approximationMarksOf("gradient")), true);
+});
+
 /* ---------------------------------------------------------------- */
 /* Fields                                                            */
 /* ---------------------------------------------------------------- */
@@ -436,7 +670,88 @@ test("an HTML field carries its approximation onto every operation it draws", ()
   });
   const ops = fieldOpsFor(pack, 5);
   assert.equal(ops.length, 2);
-  for (const op of ops) assert.equal(op.approximated, "html-markup-stripped");
+  for (const op of ops) assert.deepEqual(op.approximated, ["html-markup-stripped"]);
+});
+
+test("TWO REASONS ON ONE OPERATION, AND NEITHER OF THEM IS LOST", () => {
+  // ► **THE DEFECT THIS REPLACES.** `fieldOpsFor` used to stamp
+  //   `approximated: op.approximated ?? field.approximated`, so a hollow
+  //   `.notdef` box inside one of the build's five HTML fields kept
+  //   `glyph-missing` and dropped `html-markup-stripped` on the floor. An
+  //   approximation that overwrites another approximation is the same defect as
+  //   one that is never counted, wearing a hat. `src/render/screen-text.js`
+  //   found it from the outside, could not fix it, and named this as the cause.
+  const pack = syntheticPack({
+    fields: {
+      5: {
+        id: 5, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 },
+        font: 7, fontHeight: 409.6, colour: "#ffffff", alpha: 1, align: "left",
+        leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+        multiline: false, wordWrap: false, password: false, border: false,
+        readOnly: true, html: true, maxLength: null, variable: "v",
+        text: "AB", markup: "<b>AB</b>", approximated: "html-markup-stripped"
+      }
+    }
+  });
+  // "中" is not in the synthetic font, so this field draws one real glyph and
+  // one box: the collision, in two operations.
+  const ops = fieldOpsFor(pack, 5, { text: "A中" });
+  assert.equal(ops.length, 2);
+  assert.deepEqual(ops[0].approximated, ["html-markup-stripped"], "the letter carries the field's reason");
+  assert.deepEqual(ops[1].approximated, ["glyph-missing", "html-markup-stripped"],
+    "► and the BOX carries both — its own reason first, then the field's");
+  assert.equal(ops[1].notdef, true);
+  // ORDER IS PRECEDENCE: `marks[0]` is what the old single slot held, so a
+  // reader that only looks at the first reason sees what it always saw.
+  assert.equal(ops[1].approximated[0], "glyph-missing");
+});
+
+test("a field and its glyph naming the SAME reason is one reason, not two", () => {
+  // A count of "how many kinds is this operation approximate in" must not go up
+  // because two levels agreed. `screenTextFor` counts one operation once per
+  // kind, and a duplicate here would show up there as a doubled ops count.
+  const pack = syntheticPack({
+    font: { glyphs: [
+      { code: 65, char: "A", path: "M0 -10000L10000 -10000L10000 0L0 0Z", empty: false, failed: false, advance: 12000, ink: null, approximated: "html-markup-stripped" }
+    ], kerning: [] },
+    fields: {
+      5: {
+        id: 5, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 },
+        font: 7, fontHeight: 409.6, colour: "#ffffff", alpha: 1, align: "left",
+        leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+        multiline: false, wordWrap: false, password: false, border: false,
+        readOnly: true, html: true, maxLength: null, variable: "v",
+        text: "A", approximated: "html-markup-stripped"
+      }
+    }
+  });
+  assert.deepEqual(fieldOpsFor(pack, 5)[0].approximated, ["html-markup-stripped"]);
+});
+
+test("a STATIC RUN's own approximation reaches its operations, which it never used to", () => {
+  // ► **UNEXERCISED BY THE REAL PACK AND SAID SO OUT LOUD: 0 of the build's 180
+  //   statics carry `approximated`.** `tools/extract-text.mjs` tallies the field
+  //   on a static (`for (const item of statics) if (item.approximated)`), so the
+  //   shape is the extractor's and not this test's invention — and before this
+  //   change the mark would have reached no operation at all, which is the same
+  //   hole `fieldOpsFor` had. Synthetic, because untested code that looks tested
+  //   is this project's house defect.
+  const pack = syntheticPack({
+    statics: {
+      3: {
+        id: 3, bounds: { xMin: 0, xMax: 2000, yMin: 0, yMax: 500 }, matrix: [1, 0, 0, 1, 0, 0],
+        text: "A?", unresolved: 1, approximated: "text-from-glyph-table",
+        records: [{
+          font: 7, fontInherited: false, height: 409.6, colour: "#ffffff", alpha: 1, x: 0, y: 0,
+          glyphs: [[1, 240], [99, 300]]
+        }]
+      }
+    }
+  });
+  const ops = staticTextOpsFor(pack, 3);
+  assert.equal(ops.length, 2);
+  assert.deepEqual(ops[0].approximated, ["text-from-glyph-table"], "the drawn letter carries the run's reason");
+  assert.deepEqual(ops[1].approximated, ["glyph-missing", "text-from-glyph-table"], "and the box carries both");
 });
 
 test("an outer matrix composes on the outside, with its translation still in twips", () => {
@@ -508,7 +823,7 @@ test("a static run whose glyph index the font cannot answer for draws a box, not
   });
   const ops = staticTextOpsFor(pack, 3);
   assert.equal(ops.length, 1);
-  assert.equal(ops[0].approximated, "glyph-missing");
+  assert.deepEqual(ops[0].approximated, ["glyph-missing"]);
   assert.ok(ops[0].d.length > 0, "a box, drawn, rather than a silent gap in the sentence");
 });
 
@@ -524,6 +839,26 @@ const skip = havePack ? false : "no extracted text pack on this machine";
 function realPack() {
   return textPackFrom(JSON.parse(fs.readFileSync(PACK_PATH, "utf8")));
 }
+
+test("THE REAL-PACK HALF OF THIS FILE IS ANCHORED: a broken path FAILS here rather than skipping seven tests", () => {
+  // ► **AN `fs.existsSync` GUARD ON ITS OWN CANNOT TELL "no licensed copy here"
+  //   FROM "REPO_ROOT IS WRONG".** Seven tests below are gated on `havePack`,
+  //   and if the derivation of `PACK_PATH` ever breaks they do not fail — they
+  //   quietly skip, and a skip reads as a clone with no game rather than as a
+  //   defect. This project has already paid for that exact shape once, in
+  //   `test/extraction-honesty.test.js`, which ran `assert.equal(null, null)`
+  //   and reported a pass. So the ANCHOR is a TRACKED file on the same derived
+  //   root: if `tools/extract-text.mjs` is not where `REPO_ROOT` says it is,
+  //   the root is wrong, and this test fails by name instead of seven others
+  //   going quiet. Measured by mutation 2026-09-14: pointing `REPO_ROOT` one
+  //   directory too deep turns this red and the other seven to `skipped`, which
+  //   is precisely the difference between a finding and a shrug.
+  const anchorAt = path.join(REPO_ROOT, "tools", "extract-text.mjs");
+  assert.ok(fs.existsSync(anchorAt),
+    `${anchorAt} is not there, so REPO_ROOT is wrong and the absence of ${PACK_PATH} would mean nothing`);
+  assert.equal(skip === false, havePack,
+    `the seven real-pack tests below run exactly when ${PACK_PATH} is present, and that is the ONLY reason they may skip`);
+});
 
 test("every glyph in the build uses only M, L, Q and Z — which is what makes scaling safe", { skip }, () => {
   // ► `scaleGlyphPath` substitutes every number in the string. That is safe only
@@ -602,6 +937,102 @@ test("THE BUILD'S OWN BOUNDS AGREE WITH WHERE THIS MODULE DRAWS EVERY STATIC RUN
   assert.deepEqual(offenders, [], "a run drawn outside the box the exporter measured for it");
   assert.equal(inside, drawn);
   assert.ok(worstLeft < 1, `the worst left-edge disagreement is ${worstLeft.toFixed(3)}px`);
+});
+
+test("THE BUILD'S OWN CENTRED FIELD LANDS IN THE MIDDLE OF ITS BOX, NOT AT ITS LEFT EDGE", { skip }, () => {
+  // ► **FIELD 1619 IS THE ONE THE SCREEN VIEWER CAUGHT.** It is `createchar`'s
+  //   strength readout: `align: "center"`, `wordWrap: false`, `multiline:
+  //   false`, and it drew on top of its own label because alignment had no box
+  //   to spend. Every number below comes out of the field's own tag:
+  //
+  //     bounds  -40..899 twips  ->  -2..44.95 px, a 46.95 px box
+  //     inner   46.95 - 2 * 2   ->  42.95 px once both gutters are off
+  //     "6"     11100 units at a 14px em (280 twips) -> 7.588 px
+  //     centred (42.95 - 7.588) / 2 = 17.681 px from the left of the inner box
+  //
+  //   The pen was at 0 in the field's own space and is now at 17.681, which an
+  //   emitted matrix carries in TWIPS: 353.621. In stage space, with the
+  //   placement `createchar` gives it (tx 1285 twips = 64.25 px), the digit's
+  //   INK moves from 64.65 px to 82.33 — clear of the label that ends at 72.
+  const pack = realPack();
+  const field = pack.fields[1619];
+  assert.equal(field.align, "center", "the tag says centre, and that is what makes this a defect rather than a taste");
+  assert.equal(field.wordWrap, false);
+  assert.equal(field.multiline, false);
+
+  const options = fieldLayoutOptionsFor(pack, 1619);
+  assert.equal(options.maxWidth, Infinity, "it must still never wrap");
+  assert.equal(options.alignWidth, 42.95);
+  const ops = fieldOpsFor(pack, 1619);
+  assert.equal(ops.length, 1, "one digit");
+  assert.equal(ops[0].matrix[4], 353.621, "the pen, in twips — 0 before this was fixed");
+  assert.ok(ops[0].matrix[4] > 0, "and not the left edge, which is where every centred field used to draw");
+
+  // A field-space claim needs a stage-space check or it is just arithmetic
+  // about itself: the ink, pushed through the field box the way the screen
+  // places it, must sit inside the right half of that box.
+  const ink = inkOfOps(ops);
+  assert.ok(ink.xMin > 17 && ink.xMax < 26, `ink at ${ink.xMin.toFixed(2)}..${ink.xMax.toFixed(2)} in the field's own space`);
+});
+
+test("EVERY CENTRED AND RIGHT-ALIGNED FIELD IN THE BUILD NOW SPENDS ITS SLACK", { skip }, () => {
+  // ► The census behind the 108. Re-derived here from the pack rather than
+  //   quoted: a field is affected when it declares centre or right AND does not
+  //   set both `wordWrap` and `multiline`, and the check is that each one now
+  //   draws its first glyph somewhere other than the left gutter — unless its
+  //   text fills the box exactly, which none of them does.
+  const pack = realPack();
+  let centre = 0;
+  let right = 0;
+  let left = 0;
+  let affectedCentre = 0;
+  let affectedRight = 0;
+  let affected = 0;
+  let movedOffTheLeftEdge = 0;
+  let drew = 0;
+  let margins = 0;
+  for (const [id, field] of Object.entries(pack.fields)) {
+    if (field.align === "center") centre += 1;
+    if (field.align === "right") right += 1;
+    if (field.align === "left") left += 1;
+    if ((field.leftMargin ?? 0) !== 0 || (field.rightMargin ?? 0) !== 0) margins += 1;
+    const aligned = field.align === "center" || field.align === "right";
+    if (!aligned || (field.wordWrap && field.multiline)) continue;
+    affected += 1;
+    if (field.align === "center") affectedCentre += 1;
+    else affectedRight += 1;
+    const options = fieldLayoutOptionsFor(pack, id);
+    const ops = fieldOpsFor(pack, id);
+    if (!ops) continue;
+    drew += 1;
+    const layout = layoutText(pack, options);
+    // Its own pen, in its own space: the gutter plus whatever alignment spent.
+    if (layout.lines[0].x > options.x) movedOffTheLeftEdge += 1;
+  }
+  // ► **THE CENSUS IN FULL, BECAUSE THE SHORT FORM IS ALREADY WRONG SOMEWHERE
+  //   ELSE.** The wave brief this fix came from said "108 of 256 — 101 centre,
+  //   30 right", which drops the intermediate 131 and invites the next reader to
+  //   check 101 + 30 against 108, decide the census is garbled, and re-derive it
+  //   badly. Every step is asserted here, against the pack, so the garbled form
+  //   cannot be copied back in from a handoff without turning something red.
+  assert.equal(Object.keys(pack.fields).length, 256, "every edit field in the build");
+  assert.equal(left + centre + right, 256, "► and alignment partitions them: there is no fourth value");
+  assert.equal(left, 125, "left-aligned, which were never affected");
+  assert.equal(centre, 101, "the build's centred fields");
+  assert.equal(right, 30, "and its right-aligned ones");
+  assert.equal(centre + right, 131, "► 131 — the number the one-line summary dropped");
+  assert.equal(affected, 108, "► the 108: centred or right, and not wrapping — a SUBSET of the 131");
+  assert.equal(affectedCentre, 81, "81 of the 101 centred");
+  assert.equal(affectedRight, 27, "and 27 of the 30 right");
+  assert.equal(affectedCentre + affectedRight, affected, "which is where the 108 comes from");
+  assert.equal(drew, 77, "of which this many draw anything at all with the pack's own placeholder text");
+  assert.equal(movedOffTheLeftEdge, 77, "► and every one of them is now somewhere other than the left gutter");
+  // The other half of `alignWidth: inner`, stated as the measurement it is:
+  // nothing in the build exercises the margin term, which is why the synthetic
+  // test above has to.
+  assert.equal(margins, 0,
+    "► no field in the build declares a margin, so the margin term of `alignWidth` is pinned by " +
+    "`A CENTRED FIELD'S MARGINS COME OFF THE ALIGNMENT BOX` and by nothing on this pack");
 });
 
 test("the arena's UI bar can be drawn: two fields, their text, and where they sit", { skip }, () => {

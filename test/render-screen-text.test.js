@@ -67,7 +67,14 @@ import {
   screenWithTextFor
 } from "../src/render/screen-text.js";
 import { screenFor, screenNames, screenPackFrom } from "../src/render/screen.js";
-import { TEXT_UNITS_PER_EM, TWIPS_PER_PIXEL, fontFor, staticTextOpsFor, textPackFrom } from "../src/render/text.js";
+import {
+  TEXT_UNITS_PER_EM,
+  TWIPS_PER_PIXEL,
+  approximationMarksOf,
+  fontFor,
+  staticTextOpsFor,
+  textPackFrom
+} from "../src/render/text.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
@@ -78,8 +85,25 @@ const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
  * finds a helper's body by looking for the next brace before the next newline,
  * so a multi-line arrow reads as bodyless and every test calling it is reported
  * as asserting nothing.
+ *
+ * ► **ANCHORED, BECAUSE AN UNANCHORED `fs.existsSync` IS A SILENT PASS.** Until
+ *   2026-09-15 this read `fs.existsSync(at) ? … : null` and nothing checked that
+ *   `REPO_ROOT` pointed anywhere real. A verifier broke it by changing the
+ *   `new URL("..")` above to `new URL("../..")`: all **thirteen** real-pack
+ *   tests in this file turned into `assert.equal(null, null)`, the suite
+ *   reported them as passes, and **no counter moved** — a broken path derivation
+ *   was indistinguishable from a fresh clone. The anchor is a file git TRACKS,
+ *   so it is present in every clone including one with no `assets/` at all:
+ *   if it is missing, `REPO_ROOT` is wrong and that is a FAILURE, while a
+ *   missing pack beside a present anchor is the honest fresh-clone case.
+ *   Same pattern as `assertRealPackPathIsDerivable` in `render-props.test.js`
+ *   and as the raw-trace archive check AGENTS.md describes.
  */
 function readRealJson(relative) {
+  const anchor = path.join(REPO_ROOT, "tools", "extract-screens.mjs");
+  assert.ok(fs.existsSync(anchor),
+    `${anchor} is not there, so REPO_ROOT is wrong and every "no extraction on this machine" ` +
+    "guard below would be a broken path derivation reading as a fresh clone");
   const at = path.join(REPO_ROOT, relative);
   return fs.existsSync(at) ? JSON.parse(fs.readFileSync(at, "utf8")) : null;
 }
@@ -570,7 +594,7 @@ test("A PLACEMENT'S APPROXIMATION IS COUNTED EVEN WHEN IT DRAWS NOTHING", () => 
   assert.deepEqual([...blank.approximated], ["html-markup-stripped"],
     "► the mark is on the placement, which is the only place it can be");
   const loud = record.placements.find((entry) => entry.character === 402);
-  assert.equal(loud.ops.every((op) => op.approximated === "html-markup-stripped"), true,
+  assert.equal(loud.ops.every((op) => [...op.approximated].includes("html-markup-stripped")), true,
     "and on every operation it did emit, so a surface cannot draw one without it");
 });
 
@@ -585,7 +609,7 @@ test("a glyph index the font cannot answer for draws a box and is counted", () =
   assert.equal(broken.drawn, true, "it draws — as a hollow box, which is information");
   assert.equal(broken.notdef, 1);
   assert.equal(broken.ops[0].notdef, true);
-  assert.equal(broken.ops[0].approximated, "glyph-missing");
+  assert.deepEqual([...broken.ops[0].approximated], ["glyph-missing"]);
   assert.deepEqual([...broken.approximated], ["glyphsNotdef"]);
   assert.equal(record.approximations.glyphsNotdef, 1, "and it reaches the screen's tally");
   // ► **THE FLAG AND THE MARK ARE THE SAME FINDING AND MUST AGREE.**
@@ -720,13 +744,69 @@ test("A FIELD KIND THIS MODULE HAS NEVER SEEN IS COUNTED AND NAMED, not folded i
     ["entities-not-decoded", "filtersNotApplied", "html-markup-stripped", "placeholderDrawn"]);
 });
 
-test("THE TWO MARKS COLLIDE ON ONE OPERATION, and the ops count survives it", () => {
-  // ► `fieldOpsFor` stamps `op.approximated ?? field.approximated`
-  //   (`text.js:713`), so an operation already marked `glyph-missing` never
-  //   receives its field's `html-markup-stripped`. An ops-only filter for the
-  //   field's mark therefore UNDERCOUNTS, which is what this file used to do.
-  //   Zero on the real build — 0 notdef operations across the 187 placements —
-  //   and one line of a re-extraction away from not being.
+test("A FIELD DECLARING TWO REASONS LOSES NEITHER — the same shape question, one level up", () => {
+  // ► **THE LAST `typeof … approximated` IN `src/` WAS HERE.** `fieldPlacement`
+  //   read the field's own mark with `typeof field.approximated === "string"`,
+  //   which is a SECOND reader of the key whose two shapes cost this wave a
+  //   finding. `tools/extract-text.mjs` writes a string today, so this is the
+  //   latent form rather than the live one — and latent is exactly what the
+  //   operation-level version was until `text.js` grew a list. One reader now
+  //   (`approximationMarksOf`), so both shapes count the same.
+  const withMarks = (approximated) => {
+    const text = syntheticTextPack({
+      fields: {
+        407: { id: 407, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, font: 7, fontHeight: 409.6,
+          colour: "#ffffff", alpha: 1, align: "left", leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+          multiline: false, wordWrap: false, password: false, readOnly: true, html: true,
+          variable: "two_reasons", text: "AB", approximated }
+      }
+    });
+    const raw = syntheticScreensRaw();
+    raw.screens.forum.textFields.push({
+      id: 407, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
+      colour: { red: 255, green: 255, blue: 255, alpha: 255 }, align: 0, leading: 0,
+      leftMargin: 0, rightMargin: 0, indent: 0, variableName: "two_reasons",
+      initialText: "A&amp;B", multiline: false, wordWrap: false, readOnly: true,
+      path: [63], matrix: [1, 0, 0, 1, 0, 0]
+    });
+    const record = screenTextFor(screenPackFrom(raw), text, "forum");
+    return { record, entry: record.placements.find((one) => one.character === 407) };
+  };
+
+  // The shape the extractor writes today: unchanged behaviour.
+  const one = withMarks("html-markup-stripped");
+  assert.deepEqual([...one.entry.approximated], ["html-markup-stripped", "placeholderDrawn"],
+    "the field's own reason, then the fact that what drew was the placeholder");
+  assert.equal(one.record.approximations.htmlMarkupStripped, 2, "field 401 and this one");
+
+  // The shape it could write tomorrow: BOTH reasons reach a number.
+  const two = withMarks(["html-markup-stripped", "entities-not-decoded"]);
+  assert.deepEqual([...two.entry.approximated], ["html-markup-stripped", "entities-not-decoded", "placeholderDrawn"],
+    "► order is precedence, and neither of the field's reasons is dropped");
+  assert.equal(two.record.approximatedByKind["entities-not-decoded"], 1, "► the second reason reaches a NUMBER");
+  assert.equal(two.record.approximatedOpsByKind["entities-not-decoded"], 2, "on both operations the field emitted");
+  assert.equal(two.record.approximations.htmlMarkupStripped, 2, "and the first one still does");
+  assert.equal(two.record.unrosteredApproximations.includes("entities-not-decoded"), true);
+
+  // And rubbish in that slot is no marks, never a throw and never a mark called
+  // "42" — the same totality every other reader of pack data here has.
+  const rubbish = withMarks(42);
+  assert.deepEqual([...rubbish.entry.approximated], ["placeholderDrawn"],
+    "no mark from the field, and the placement's own reasons untouched");
+  assert.equal(rubbish.record.approximatedByKind["42"], undefined);
+});
+
+test("THE TWO MARKS COLLIDE ON ONE OPERATION, and BOTH survive it", () => {
+  // ► ~~`fieldOpsFor` stamps `op.approximated ?? field.approximated`, so an
+  //   operation already marked `glyph-missing` never receives its field's
+  //   `html-markup-stripped`.~~ **FIXED AT THE CAUSE 2026-09-14: an operation's
+  //   `approximated` is a LIST and the box below carries both reasons.** This
+  //   test is kept and inverted rather than deleted, because it is the one
+  //   place either reading can be checked against the other: the derived count
+  //   (from the PLACEMENT, which is what this module does) and the direct count
+  //   (filtering the operations) must now agree. They agreed before by luck —
+  //   0 notdef operations across the real build's 187 placements — and the
+  //   luck is what this case removes.
   const raw = syntheticScreensRaw();
   raw.screens.forum.textFields.push({
     id: 402, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
@@ -741,12 +821,13 @@ test("THE TWO MARKS COLLIDE ON ONE OPERATION, and the ops count survives it", ()
   const loud = record.placements.find((one) => one.character === 402);
   assert.equal(loud.ops.length, 2);
   assert.equal(loud.notdef, 1);
-  assert.deepEqual(loud.ops.map((op) => op.approximated), ["html-markup-stripped", "glyph-missing"],
-    "► ONE mark per operation: the box says glyph-missing and cannot also say html-markup-stripped");
-  assert.equal(record.ops.filter((op) => op.approximated === "html-markup-stripped").length, 1,
-    "► so an ops-only filter for the field's mark sees ONE of the two");
+  assert.deepEqual(loud.ops.map((op) => [...op.approximated]),
+    [["html-markup-stripped"], ["glyph-missing", "html-markup-stripped"]],
+    "► TWO reasons on the box, its own first: it says glyph-missing AND html-markup-stripped");
+  assert.equal(record.ops.filter((op) => [...(op.approximated ?? [])].includes("html-markup-stripped")).length, 2,
+    "► an ops-only filter for the field's mark now sees BOTH — it used to see one");
   assert.equal(record.approximations.htmlMarkupStrippedOps, 2,
-    "► and the tally reports TWO, because the count is taken from the PLACEMENT the field marked");
+    "► and the derived tally, taken from the PLACEMENT the field marked, agrees with it");
   assert.equal(record.approximatedOpsByKind["html-markup-stripped"], 2);
   assert.equal(record.approximatedOpsByKind["glyph-missing"], 1, "and the box is still counted as a box");
   assert.equal(record.approximations.glyphsNotdef, 1);
@@ -1248,4 +1329,201 @@ test("every screen's merged picture is in path order and keeps its shape operati
   }
   assert.equal(shapeOps, 13638, "the 13638 path operations screen.js's header states");
   assert.equal(glyphOps, 2236);
+});
+
+test("ONE MERGED ARRAY, TWO SHAPES OF `approximated`, AND ONE READER THAT TAKES BOTH", () => {
+  // ► **THIS IS THE PRODUCER/READER SEAM MISMATCH THE LAST FIX CREATED WHILE
+  //   CURING ONE.** `text.js` now puts a frozen LIST on each glyph operation;
+  //   `emitDrawable` in `src/render/screen.js` still copies the extractor's
+  //   STRING onto each
+  //   shape operation. `screenWithTextFor` concatenates the two, so ONE array
+  //   carries both types under one key — and whichever shape a reader guesses,
+  //   it counts nothing for the other half and says nothing about it. That is
+  //   the exact failure mode the tally in this module exists to catch.
+  //
+  //   Pinned synthetically as well as on the pack, because the synthetic case is
+  //   the CONTRACT: one screen, one shape operation marked `"gradient"` as a
+  //   string, one glyph operation marked `["html-markup-stripped"]` as a list,
+  //   in one paint order.
+  const raw = syntheticScreensRaw();
+  raw.shapes = {
+    10: {
+      character: 10,
+      paths: [{ d: "M0 0L10 0L10 10L0 10Z", fill: "#ff0000", fillOpacity: 1, fillRule: "evenodd",
+        stroke: null, strokeWidth: 0, approximated: "gradient" }]
+    }
+  };
+  // Field 402 is the HTML field with words left in it, so it DRAWS and its
+  // `html-markup-stripped` reaches an operation as a list.
+  raw.screens.forum.textFields.push({
+    id: 402, bounds: { xMin: 0, xMax: 4000, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
+    colour: { red: 255, green: 255, blue: 255, alpha: 255 }, align: 0, leading: 0,
+    leftMargin: 0, rightMargin: 0, indent: 0, variableName: "loud_html",
+    initialText: "<p align=\"left\">AB</p>", multiline: false, wordWrap: false, readOnly: true,
+    path: [58], matrix: [1, 0, 0, 1, 0, 0]
+  });
+  raw.screens.forum.unresolved.push({ kind: "text-edit", character: 402, path: [58], detail: "variable loud_html" });
+
+  const merged = screenWithTextFor(screenPackFrom(raw), syntheticTextPack(), "forum");
+  const marked = merged.ops.filter((op) => op.approximated !== undefined && op.approximated !== null);
+  const strings = marked.filter((op) => typeof op.approximated === "string");
+  const lists = marked.filter((op) => Array.isArray(op.approximated));
+  assert.equal(strings.length, 3, "three shape operations, each carrying the extractor's string");
+  assert.equal(lists.length, 2, "two glyph operations, each carrying text.js's list");
+  assert.equal(strings.length + lists.length, marked.length, "► and there is no third shape in the array");
+
+  // ► THE TWO GUESSES A READER WOULD MAKE, AND WHAT EACH ONE COSTS. Neither is
+  //   written anywhere in src/ any more; they are here so the size of the trap
+  //   is a number rather than a warning.
+  const ifStringOnly = marked.filter((op) => typeof op.approximated === "string").length;
+  const ifArrayOnly = marked.filter((op) => Array.isArray(op.approximated)).length;
+  assert.equal(marked.length - ifStringOnly, 2, "a `typeof === \"string\"` reader silently drops the glyph marks");
+  assert.equal(marked.length - ifArrayOnly, 3, "an `Array.isArray` reader silently drops the shape marks");
+
+  // ► THE INVARIANT, which is what `src/` actually relies on: the one reader
+  //   returns at least one mark for every marked operation, whichever half it
+  //   came from. This survives the proper repair — `screen.js` and `props.js`
+  //   emitting lists too — which is why it, and not the 3/2 split above, is what
+  //   the real-pack test below asserts.
+  for (const op of marked) {
+    const marks = approximationMarksOf(op.approximated);
+    assert.ok(marks.length > 0,
+      `a marked operation at path [${op.path}] read as NO marks: ${JSON.stringify(op.approximated)}`);
+    assert.ok(marks.every((mark) => typeof mark === "string" && mark.length > 0));
+  }
+  assert.deepEqual(approximationMarksOf(strings[0].approximated), ["gradient"]);
+  assert.deepEqual(approximationMarksOf(lists[0].approximated), ["html-markup-stripped"]);
+});
+
+test("EVERY MARK ON EVERY MERGED OPERATION IN THE BUILD IS READABLE — 274 of them, in two shapes", () => {
+  if (!REAL_SCREENS || !REAL_TEXT) {
+    assert.equal(REAL_SCREENS === null || REAL_TEXT === null, true, "no extraction on this machine");
+    return;
+  }
+  const screens = screenPackFrom(REAL_SCREENS);
+  const text = textPackFrom(REAL_TEXT);
+  let marked = 0;
+  let readable = 0;
+  let strings = 0;
+  let lists = 0;
+  const byKind = {};
+  for (const name of joinableScreenNames(screens, text)) {
+    for (const op of screenWithTextFor(screens, text, name).ops) {
+      if (op.approximated === undefined || op.approximated === null) continue;
+      marked += 1;
+      if (typeof op.approximated === "string") strings += 1;
+      else if (Array.isArray(op.approximated)) lists += 1;
+      else assert.fail(`${name}: an operation carries a ${typeof op.approximated} under \`approximated\``);
+      const marks = approximationMarksOf(op.approximated);
+      if (marks.length > 0) readable += 1;
+      for (const mark of marks) byKind[mark] = (byKind[mark] ?? 0) + 1;
+    }
+  }
+  // ► **THE TOTAL IS THE ASSERTION; THE SPLIT IS THE DIAGNOSIS.** 274 marked
+  //   operations, and every one of them readable by the one reader. Today the
+  //   split is 209 strings (`gradient` x180, `bitmap` x29, from
+  //   `emitDrawable` in `src/render/screen.js`) and 65 lists
+  //   (`html-markup-stripped`, from
+  //   `src/render/text.js`) — but the RIGHT repair is for `screen.js` and
+  //   `props.js` to emit lists as well, which would make it 0 / 274 and must not
+  //   turn this red. So the split is asserted only as "both halves add up", and
+  //   what is pinned is that no mark is lost.
+  assert.equal(marked, 274, "operations carrying a mark across the 26 screens");
+  assert.equal(readable, marked, "► and every one of them read as at least one mark");
+  assert.equal(strings + lists, marked, "no third shape under that key");
+  assert.deepEqual(byKind, { gradient: 180, bitmap: 29, "html-markup-stripped": 65 },
+    "the kinds, whichever shape they arrived in");
+});
+
+test("AN OVERFLOWING CENTRED FIELD IS COUNTED BY NAME — the condition the alignment fix created", () => {
+  // ► **BEFORE THE FIX THIS COULD NOT HAPPEN; AFTER IT, NOTHING COUNTED IT.** A
+  //   non-wrapping field used to be aligned in a box exactly as wide as its own
+  //   longest line, so the slack could never be negative and a field could not
+  //   draw outside its own box. Aligning it in the field's box made that
+  //   possible — and `layoutText`'s `overflowing` was unreachable from the only
+  //   route that draws a screen, because `fieldOpsFor` returns an array and an
+  //   array cannot carry a count. `fieldTextFor` carries it and this tally
+  //   counts it.
+  const raw = syntheticScreensRaw();
+  // A 40px box — 36 of it inner — centred, holding a one-glyph placeholder.
+  raw.screens.forum.textFields.push({
+    id: 406, bounds: { xMin: 0, xMax: 800, yMin: 0, yMax: 1000 }, fontId: 7, fontHeight: 409.6,
+    colour: { red: 255, green: 255, blue: 255, alpha: 255 }, align: 1, leading: 0,
+    leftMargin: 0, rightMargin: 0, indent: 0, variableName: "strength",
+    initialText: "A", multiline: false, wordWrap: false, readOnly: true,
+    path: [62], matrix: [1, 0, 0, 1, 2000, 0]
+  });
+  raw.screens.forum.unresolved.push({ kind: "text-edit", character: 406, path: [62], detail: "variable strength" });
+  const screens = screenPackFrom(raw);
+  const text = syntheticTextPack({
+    fields: {
+      406: { id: 406, bounds: { xMin: 0, xMax: 800, yMin: 0, yMax: 1000 }, font: 7, fontHeight: 409.6,
+        colour: "#ffffff", alpha: 1, align: "center", leftMargin: 0, rightMargin: 0, indent: 0, leading: 0,
+        multiline: false, wordWrap: false, password: false, readOnly: true, html: false,
+        variable: "strength", text: "A" }
+    }
+  });
+
+  // The placeholder fits, so the counter is at zero — the value it has to be
+  // able to LEAVE for the assertion below to be evidence.
+  const fits = screenTextFor(screens, text, "forum");
+  assert.equal(fits.approximations.fieldOverflows, 0);
+  assert.equal(fits.placements.find((entry) => entry.character === 406).overflowing, 0);
+
+  // A bound value of four glyphs is 48px in a 36px box.
+  const spills = screenTextFor(screens, text, "forum", { values: { strength: "AAAA" } });
+  const placement = spills.placements.find((entry) => entry.character === 406);
+  assert.equal(spills.approximations.fieldOverflows, 1, "► one PLACEMENT overflows");
+  assert.equal(placement.overflowing, 1, "► carrying one overflowing LINE");
+  assert.ok(placement.approximated.includes("fieldOverflows"),
+    `the placement's own marks are ${JSON.stringify(placement.approximated)}`);
+  assert.equal(spills.approximatedByKind.fieldOverflows, 1, "and the OPEN tally has it under the same name");
+  assert.deepEqual(spills.unrosteredApproximations, [],
+    "► rostered, not hot: a kind added on purpose must not read as one nobody has thought about");
+  assert.ok(SCREEN_TEXT_APPROXIMATION_KINDS.includes("fieldOverflows"));
+
+  // ► AND THE THING THE NUMBER IS ABOUT: the ink really does leave the box. The
+  //   field sits at stage x = 100px (2000 twips) and is 40px wide, so its box is
+  //   100..140; the centred 48px line starts 6px left of the box's own left edge.
+  const ink = inkOf(placement.ops);
+  assert.ok(ink.xMin < 100, `the first glyph is at ${ink.xMin.toFixed(2)}, left of the field box at 100`);
+  assert.ok(ink.xMax > 140 - 2, `and the last runs to ${ink.xMax.toFixed(2)}, past the box's right edge at 140`);
+});
+
+test("THE BUILD'S OWN FIELD 1619 SPILLS THE MOMENT A REAL VALUE IS BOUND TO IT", () => {
+  if (!REAL_SCREENS || !REAL_TEXT) {
+    assert.equal(REAL_SCREENS === null || REAL_TEXT === null, true, "no extraction on this machine");
+    return;
+  }
+  // ► **WHAT MAKES THE ZERO ABOVE NON-VACUOUS.** With the pack's own placeholder
+  //   text not one of the 272 laid-out lines overflows, so `fieldOverflows` is 0
+  //   on all 26 screens — and a counter that no input can move is not a check.
+  //   The input that moves it is the thing a screen is FOR. `createchar`'s field
+  //   1619 is the strength readout: a 42.95px box whose placeholder is "6".
+  const screens = screenPackFrom(REAL_SCREENS);
+  const text = textPackFrom(REAL_TEXT);
+  let asShipped = 0;
+  for (const name of joinableScreenNames(screens, text)) {
+    asShipped += screenTextFor(screens, text, name).approximations.fieldOverflows;
+  }
+  assert.equal(asShipped, 0, "every field in the build fits its own box with its own placeholder");
+
+  const bound = screenTextFor(screens, text, "createchar", {
+    values: (base) => (base.kind === "text-edit" ? "888888888888" : undefined)
+  });
+  assert.ok(bound.approximations.fieldOverflows > 0,
+    "► binding a twelve-digit value to createchar's fields must reach the counter");
+  const placement = bound.placements.find((entry) => entry.character === 1619);
+  assert.equal(placement.overflowing, 1);
+  assert.ok(placement.approximated.includes("fieldOverflows"));
+  assert.equal(bound.approximatedByKind.fieldOverflows, bound.approximations.fieldOverflows,
+    "the roster key is a projection of the open tally, not a second count");
+
+  // The field's box starts 62.25px into the stage and its ink now starts left of
+  // that — across the "strength" label, which is the defect the alignment fix
+  // was made to cure, arriving from the other end.
+  const boxLeftPx = text.fields[1619].bounds.xMin / TWIPS_PER_PIXEL + 64.25;
+  const ink = inkOf(placement.ops);
+  assert.ok(ink.xMin < boxLeftPx,
+    `ink starts at ${ink.xMin.toFixed(2)}px, the box at ${boxLeftPx.toFixed(2)}px`);
 });

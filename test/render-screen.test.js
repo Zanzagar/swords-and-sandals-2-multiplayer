@@ -52,7 +52,8 @@ import {
   screenNames,
   screenOpsFor,
   screenPackFrom,
-  splitScreenChrome
+  splitScreenChrome,
+  STAGE_BLANKET
 } from "../src/render/screen.js";
 import { SS2_ARENA_SCREEN_LAYERS, SS2_STAGE, stageFitFor } from "../src/render/arena-backdrop.js";
 
@@ -73,6 +74,28 @@ function readRealJson(relative) {
 
 const REAL_SCREENS = readRealJson("assets/screens/screens.json");
 const REAL_MANIFEST = readRealJson("assets/screens/manifest.json");
+
+test("THE REAL-PACK HALF OF THIS FILE IS ANCHORED: a broken path FAILS here rather than emptying twelve tests", () => {
+  // ► **AN `fs.existsSync` GUARD CANNOT TELL "no licensed copy here" FROM
+  //   "REPO_ROOT IS WRONG".** Twelve tests below open with `if (!REAL_SCREENS)`
+  //   and assert the absence instead of skipping, which keeps the suite's skip
+  //   count still — but the absence they assert is `readRealJson` returning
+  //   null, and that is what a broken derivation of REPO_ROOT returns too. Then
+  //   twelve tests quietly become `assert.equal(null, null)` and report a pass.
+  //   `test/extraction-honesty.test.js` did exactly that on this project once.
+  //
+  //   So the ANCHOR is a TRACKED file on the same derived root, the way
+  //   `test/render-text.test.js` anchors its pack path: if `src/render/screen.js`
+  //   is not where REPO_ROOT says it is, the root is wrong and this test fails
+  //   by name instead of twelve others going silent.
+  const anchorAt = path.join(REPO_ROOT, "src", "render", "screen.js");
+  assert.ok(fs.existsSync(anchorAt),
+    `${anchorAt} is not there, so REPO_ROOT is wrong and the absence of assets/screens/screens.json would mean nothing`);
+  assert.equal(REAL_SCREENS === null, !fs.existsSync(path.join(REPO_ROOT, "assets", "screens", "screens.json")),
+    "the real-pack tests run exactly when the extracted pack is present, and that is the ONLY reason they may assert an absence");
+  assert.equal(REAL_MANIFEST === null, !fs.existsSync(path.join(REPO_ROOT, "assets", "screens", "manifest.json")),
+    "and the manifest half is gated on its own file, not on the pack's");
+});
 
 /**
  * The stage-space box of everything a screen actually paints.
@@ -102,6 +125,101 @@ function visibleBoxOf(ops) {
     }
   }
   return box;
+}
+
+/**
+ * Whether an operation puts FILL ink down — the test's own reading of the
+ * question `blanketOpacityOf` answers with a number.
+ *
+ * Written out rather than imported because the module's version is not
+ * exported and, more to the point, an assertion that calls the code it is
+ * checking checks nothing. The three places alpha hides are the reason this is
+ * not `op.fillOpacity > 0`: a gradient keeps it in its STOPS, a bitmap has no
+ * colour in the operation at all, and `fill: "none"` paints nothing whatever
+ * the opacity says — which is why a stroke-only path is not ink here even
+ * though it draws.
+ */
+function opPutsFillInkDown(op) {
+  if (op.gradient) {
+    const stops = Array.isArray(op.gradient.stops) ? op.gradient.stops : [];
+    return stops.length > 0 && stops.every((stop) => (typeof stop?.opacity === "number" ? stop.opacity : 1) > 0);
+  }
+  if (op.bitmap) return op.fillOpacity > 0;
+  if (typeof op.fill !== "string" || op.fill === "none") return false;
+  return op.fillOpacity > 0;
+}
+
+/**
+ * The effective alpha of an operation where it paints, 0..1 — this file's own
+ * reading of `blanketOpacityOf`, and the numeric form of the predicate above.
+ */
+function blanketAlphaOf(op) {
+  if (op.gradient) {
+    const stops = Array.isArray(op.gradient.stops) ? op.gradient.stops : [];
+    if (stops.length === 0) return 0;
+    return Math.min(...stops.map((stop) => (typeof stop?.opacity === "number" ? stop.opacity : 1)));
+  }
+  if (op.bitmap) return typeof op.fillOpacity === "number" ? op.fillOpacity : 1;
+  if (typeof op.fill !== "string" || op.fill === "none") return 0;
+  return typeof op.fillOpacity === "number" ? op.fillOpacity : 1;
+}
+
+/**
+ * The fraction of the stage an operation's BOX covers, clipped to the stage.
+ *
+ * The module transforms the four corners of the path-space box; this transforms
+ * every coordinate in the `d` and takes the box of those. The module's is never
+ * the smaller of the two, so this route could have admitted FEWER operations
+ * than the module's pre-filter — measured over the 26 screens, it admits
+ * exactly the same 42, which is worth knowing and is not a tautology.
+ */
+function stageBoxCoverageOf(op) {
+  const box = visibleBoxOf([op]);
+  if (!Number.isFinite(box.xMin)) return 0;
+  const left = Math.max(0, box.xMin);
+  const top = Math.max(0, box.yMin);
+  const right = Math.min(SS2_STAGE.width, box.xMax);
+  const bottom = Math.min(SS2_STAGE.height, box.yMax);
+  if (right <= left || bottom <= top) return 0;
+  return ((right - left) * (bottom - top)) / (SS2_STAGE.width * SS2_STAGE.height);
+}
+
+/**
+ * The fraction of the stage an operation covers WHEN ITS FILL AND ITS BOX ARE
+ * THE SAME REGION, or null when they are not and only a raster could say.
+ *
+ * ► **THE ONE CASE A TEST CAN DECIDE WITHOUT REIMPLEMENTING THE RASTER.** An
+ *   axis-aligned rectangle under a matrix with no rotation or skew fills its
+ *   own bounding box exactly: no curve to flatten, no second subpath for
+ *   even-odd to punch a hole with, no rotation to make the box larger than the
+ *   shape. Everything else returns null and is left to the module — which is
+ *   the honest line, because a test that reimplements the scanline sampler and
+ *   agrees with it has checked that two copies of one idea agree.
+ *
+ * Units, the seam this project has lost three defects to: the translation is
+ * divided by 20 and the geometry is not.
+ */
+function stageRectangleCoverageOf(op) {
+  if (op.matrix[1] !== 0 || op.matrix[2] !== 0) return null;
+  if (/[QqCcAaSsTt]/.test(op.d)) return null;
+  if ((op.d.match(/[Mm]/g) ?? []).length !== 1) return null;
+  const numbers = (op.d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+  const points = [];
+  for (let index = 0; index + 1 < numbers.length; index += 2) points.push([numbers[index], numbers[index + 1]]);
+  if (points.length === 5 && points[0][0] === points[4][0] && points[0][1] === points[4][1]) points.pop();
+  if (points.length !== 4) return null;
+  const xs = [...new Set(points.map((point) => point[0]))];
+  const ys = [...new Set(points.map((point) => point[1]))];
+  if (xs.length !== 2 || ys.length !== 2) return null;
+  const m = op.matrix;
+  const [x1, x2] = xs.map((x) => m[0] * x + m[4] / 20).sort((a, b) => a - b);
+  const [y1, y2] = ys.map((y) => m[3] * y + m[5] / 20).sort((a, b) => a - b);
+  const left = Math.max(0, x1);
+  const top = Math.max(0, y1);
+  const right = Math.min(SS2_STAGE.width, x2);
+  const bottom = Math.min(SS2_STAGE.height, y2);
+  if (right <= left || bottom <= top) return 0;
+  return ((right - left) * (bottom - top)) / (SS2_STAGE.width * SS2_STAGE.height);
 }
 
 /** Floating point: a box width is a difference of two divisions, not a literal. */
@@ -392,6 +510,403 @@ function rawPack() {
 function marketOf() {
   return screenFor(screenPackFrom(rawPack()), "market");
 }
+
+/* ------------------------------------------------------------------ */
+/* Operations that blanket the stage                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A PACK BUILT ENTIRELY OUT OF THE WAYS SOMETHING CAN LOOK LIKE A CURTAIN.
+ *
+ * ► **THE REAL PACK HAS SEVEN BLANKETS AND ONLY THREE OF THE FIVE REJECTION
+ *   REASONS, WHICH IS WHY THIS EXISTS.** Measured across all 26 real screens:
+ *   a full-stage ring occurs (the border, 26 times), a full-stage operation at
+ *   zero opacity occurs (character 642, 26 times) and a part-transparent
+ *   full-stage bitmap occurs (character 718, 8 times) — but **no full-stage
+ *   operation is ever cut down by a clip, none is drawn off-stage, none is
+ *   stroke-only, no gradient covering the stage has a transparent stop, and no
+ *   path in the pack uses a command `flattenToEdges` cannot read.** Every one
+ *   of those is a way for `stageBlanketsOf` to be wrong in the direction that
+ *   over-counts, and the build cannot tell us about any of them.
+ *
+ * ► **AND THE ROTATED ONE IS NOT DECORATION.** `bboxStageCoverage` takes the
+ *   path-space box and transforms its FOUR CORNERS, which is a different box
+ *   from the one you get by transforming the points — and under `b = c = 0`,
+ *   which is every matrix in the real pack that matters here, the two are
+ *   identical. A 90-degree rotation is the only thing in this file that can
+ *   tell a correct corner transform from one that quietly drops `b` and `c`.
+ */
+const STAGE_SHAPES = Object.freeze({
+  // Exactly the 640 x 420 stage.
+  20: { character: 20, paths: [{ d: "M0 0L640 0L640 420L0 420Z", fill: "#000000", fillOpacity: 1, fillRule: "evenodd", approximated: null, stroke: null, strokeWidth: 0 }] },
+  // A RING: one path, two subpaths, even-odd. Its BOX is bigger than the stage
+  // and its FILL is a 10-pixel frame. This is the ornamental border's shape and
+  // it is the single case a box-only implementation gets wrong 26 times.
+  21: { character: 21, paths: [{ d: "M-20 -20L660 -20L660 440L-20 440ZM10 10L630 10L630 410L10 410Z", fill: "#000000", fillOpacity: 1, fillRule: "evenodd", approximated: null, stroke: null, strokeWidth: 0 }] },
+  // A full-stage gradient whose SECOND STOP IS TRANSPARENT. `fillOpacity` is 1,
+  // so anything reading only that field calls this a curtain.
+  22: { character: 22, paths: [{
+    d: "M0 0L640 0L640 420L0 420Z", fill: "#9c2b00", fillOpacity: 1, fillRule: "evenodd", approximated: "gradient",
+    gradient: { type: "linear", focal: false, focalPoint: 0, spread: 0, interpolation: 0, matrix: { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 },
+      stops: [{ offset: 0, fill: "#9c2b00", opacity: 1 }, { offset: 1, fill: "#ffcc83", opacity: 0 }] },
+    stroke: null, strokeWidth: 0 }] },
+  // The same gradient with both stops opaque, so the gradient branch is not
+  // merely "the thing that always says no".
+  23: { character: 23, paths: [{
+    d: "M0 0L640 0L640 420L0 420Z", fill: "#9c2b00", fillOpacity: 1, fillRule: "evenodd", approximated: "gradient",
+    gradient: { type: "linear", focal: false, focalPoint: 0, spread: 0, interpolation: 0, matrix: { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 },
+      stops: [{ offset: 0, fill: "#9c2b00", opacity: 1 }, { offset: 1, fill: "#ffcc83", opacity: 1 }] },
+    stroke: null, strokeWidth: 0 }] },
+  // A full-stage raster. `fill` is "none" — the operation has no colour in it
+  // at all — so a flat-fill reading calls this invisible and skips it.
+  24: { character: 24, paths: [{ d: "M0 0L640 0L640 420L0 420Z", fill: "none", fillOpacity: 1, fillRule: "evenodd", approximated: "bitmap",
+    bitmap: { id: 99, matrix: { a: 20, b: 0, c: 0, d: 20, tx: 0, ty: 0 }, repeat: false }, stroke: null, strokeWidth: 0 }] },
+  // A CUBIC. `shapeToPaths` emits no such command today; this is what a future
+  // one must not be able to shrink a shape with.
+  25: { character: 25, paths: [{ d: "M0 0C0 0 640 0 640 420Z", fill: "#000000", fillOpacity: 1, fillRule: "evenodd", approximated: null, stroke: null, strokeWidth: 0 }] },
+  // Stroke-only, and a CLOSED LOOP round the whole stage rather than a
+  // diagonal line — because a diagonal encloses nothing, so the raster rejects
+  // it whatever the opacity reader says, and a test that cannot tell the two
+  // apart is not testing the opacity reader. `fill: "none"` at fillOpacity 1
+  // is the invisibility trap `STROKE_ONLY` above is named for; here it is the
+  // trap at stage size.
+  26: { character: 26, paths: [{ d: "M0 0L640 0L640 420L0 420Z", fill: "none", fillOpacity: 1, fillRule: "evenodd", approximated: null, stroke: "#ffffff", strokeWidth: 500, strokeOpacity: 1 }] },
+  // A 20 x 20 cutter.
+  27: { character: 27, paths: [{ d: "M0 0L20 0L20 20L0 20Z", fill: "#ffffff", fillOpacity: 1, fillRule: "evenodd", approximated: null, stroke: null, strokeWidth: 0 }] },
+  // 420 wide and 640 tall — the stage turned on its side, so it covers only
+  // when the rotation in its matrix is actually applied.
+  28: { character: 28, paths: [{ d: "M0 0L420 0L420 640L0 640Z", fill: "#123456", fillOpacity: 1, fillRule: "evenodd", approximated: null, stroke: null, strokeWidth: 0 }] },
+  // A square turned 45 degrees. The quarter-turn above is covered by the two
+  // DIAGONAL corners of the path-space box on their own; this one is not —
+  // rotate its box's diagonal pair and you get a zero-width strip. It is the
+  // only shape here that needs all four corners transformed.
+  29: { character: 29, paths: [{ d: "M-520 -520L520 -520L520 520L-520 520Z", fill: "#654321", fillOpacity: 1, fillRule: "evenodd", approximated: null, stroke: null, strokeWidth: 0 }] },
+  // A rectangle whose TOP EDGE IS A QUADRATIC bulging up off the stage. Its
+  // straight-line chord runs at y = 60, so the top 55 pixels are outside the
+  // chord and inside the curve: flattened properly it covers 97.5% of the
+  // stage, and flattened as a chord it covers 86% and is not a blanket. It is
+  // the only shape here whose answer depends on the curve subdivision at all.
+  31: { character: 31, paths: [{ d: "M0 420L0 60Q320 -140 640 60L640 420Z", fill: "#204060", fillOpacity: 1, fillRule: "evenodd", approximated: null, stroke: null, strokeWidth: 0 }] }
+});
+
+const FIFTH_ALPHA = { redMultiplier: 1, greenMultiplier: 1, blueMultiplier: 1, alphaMultiplier: 0.2, redOffset: 0, greenOffset: 0, blueOffset: 0, alphaOffset: 0 };
+
+function curtainPack() {
+  return {
+    screens: {
+      curtain: {
+        name: "curtain",
+        labelFrame: 1, firstFrame: 1, lastFrame: 1,
+        objects: [],
+        drawables: [
+          // 0 — the curtain: opaque, black, the whole stage.
+          { shape: 20, path: [10, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          // 1 — the same shape at alphaMultiplier 0. This is character 643 on
+          //     all 26 real screens and it must never be a blanket.
+          { shape: 20, path: [11, 1], matrix: [1, 0, 0, 1, 0, 0], colour: ALPHA_ZERO },
+          // 2 — the ring.
+          { shape: 21, path: [12, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          // 3 — gradient with a transparent stop.
+          { shape: 22, path: [13, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          // 4 — gradient, both stops opaque: A BLANKET.
+          { shape: 23, path: [14, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          // 5 — raster at full opacity: A BLANKET.
+          { shape: 24, path: [15, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          // 6 — the same raster at a fifth of the alpha.
+          { shape: 24, path: [16, 1], matrix: [1, 0, 0, 1, 0, 0], colour: FIFTH_ALPHA },
+          // 7 — the curtain CUT DOWN to 20 x 20.
+          { shape: 20, path: [17, 1], matrix: [1, 0, 0, 1, 0, 0], clip: { shape: 27, matrix: [1, 0, 0, 1, 0, 0] } },
+          // 8 — geometry this file cannot flatten.
+          { shape: 25, path: [18, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          // 9 — stroke only.
+          { shape: 26, path: [19, 1], matrix: [1, 0, 0, 1, 0, 0] },
+          // 10 — the curtain translated a full stage width to the right.
+          { shape: 20, path: [20, 1], matrix: [1, 0, 0, 1, 12800, 0] },
+          // 11 — the stage on its side, rotated a quarter turn onto it:
+          //      (x, y) -> (640 - y, x). A BLANKET, and the only one whose
+          //      matrix has anything in `b` or `c`.
+          { shape: 28, path: [21, 1], matrix: [0, 1, -1, 0, 12800, 0] },
+          // 12 — the same trick at 45 degrees, centred on the stage. A BLANKET.
+          { shape: 29, path: [22, 1], matrix: [Math.SQRT1_2, Math.SQRT1_2, -Math.SQRT1_2, Math.SQRT1_2, 6400, 4200] },
+          // 13 — covers the stage only because its top edge CURVES off it.
+          //      A BLANKET, at 97.5% rather than 100%.
+          { shape: 31, path: [23, 1], matrix: [1, 0, 0, 1, 0, 0] }
+        ],
+        unresolved: [], textFields: [], staticText: [],
+        multiFrameSprites: [], filteredPlacements: [], blendedPlacements: [],
+        rangeVariance: { frames: 0, firstDifferingFrame: null, depthsAdded: [], depthsRemoved: [] },
+        approximations: {},
+        counts: { objects: 0, drawables: 14 },
+        resolvedNothing: false
+      }
+    },
+    shapes: STAGE_SHAPES,
+    fonts: {}
+  };
+}
+
+function curtainOf() {
+  return screenFor(screenPackFrom(curtainPack()), "curtain");
+}
+
+test("a blanket is counted by what it COVERS and what it HIDES, not by its bounding box", () => {
+  const record = curtainOf();
+  assert.equal(record.ops.length, 14, "one operation per drawable, so an index below is a drawable index");
+
+  // ► **THE COUNT, AND THE FIVE REJECTIONS THAT ARE THE WHOLE POINT OF IT.**
+  //   Four of the twelve cover the stage opaquely. Every other one of the
+  //   twelve is a way to look like a curtain without being one, and each is
+  //   named beside its index so a change to this number says WHICH case moved.
+  assert.deepEqual(record.blankets.map((entry) => entry.index), [0, 4, 5, 11, 12, 13],
+    "the rect, the opaque gradient, the raster, two rotations and the curved one — and nothing else");
+  assert.equal(record.approximations.blanketsTheStage, 6, "and the tally agrees with the roster");
+
+  // ► **AN UNPARSEABLE CANDIDATE IS COUNTED, NOT SWALLOWED.** It is a full-stage
+  //   black cubic: it passes the opacity test and the box test and then cannot
+  //   be measured, which without this counter is indistinguishable from a
+  //   correct "no".
+  assert.equal(record.approximations.blanketGeometryUnparsed, 1, "the cubic at index 8");
+  assert.equal(record.blankets.some((entry) => entry.index === 8), false,
+    "and it is NOT in the roster: not measured is not the same as measured and rejected");
+});
+
+test("each rejected candidate is rejected for its OWN reason, checked one at a time", () => {
+  const pack = curtainPack();
+  // A drawable on its own screen, so a rejection cannot hide behind another
+  // drawable's acceptance — the failure mode where four cases share one number.
+  const alone = (index) => {
+    const one = curtainPack();
+    one.screens.curtain.drawables = [pack.screens.curtain.drawables[index]];
+    return screenFor(screenPackFrom(one), "curtain");
+  };
+  assert.equal(alone(0).approximations.blanketsTheStage, 1, "the control: this one really does cover the stage");
+  assert.equal(alone(1).approximations.blanketsTheStage, 0, "alphaMultiplier 0 — character 643 on all 26 real screens");
+  assert.equal(alone(2).approximations.blanketsTheStage, 0, "a RING: box bigger than the stage, fill a 10-pixel frame");
+  assert.equal(alone(3).approximations.blanketsTheStage, 0, "a gradient whose alpha is in a STOP and not in `fillOpacity`");
+  assert.equal(alone(4).approximations.blanketsTheStage, 1, "and the opaque gradient is not rejected with it");
+  assert.equal(alone(5).approximations.blanketsTheStage, 1, "a raster: `fill` is \"none\" and it still covers everything");
+  assert.equal(alone(6).approximations.blanketsTheStage, 0, "the same raster at alpha 0.2");
+  assert.equal(alone(7).approximations.blanketsTheStage, 0, "clipped to 20 x 20 out of 640 x 420");
+  assert.equal(alone(8).approximations.blanketsTheStage, 0, "a command this file cannot flatten is never counted as covering");
+  assert.equal(alone(9).approximations.blanketsTheStage, 0, "stroke-only: the coverage test is over the FILL region");
+  assert.equal(alone(10).approximations.blanketsTheStage, 0, "translated a whole stage width off to the right");
+  assert.equal(alone(11).approximations.blanketsTheStage, 1, "and a quarter turn still covers the stage");
+  assert.equal(alone(12).approximations.blanketsTheStage, 1, "so does 45 degrees, which needs all four corners of the box");
+  assert.equal(alone(13).approximations.blanketsTheStage, 1, "and one that covers only because its top edge CURVES off the stage");
+  assert.equal(alone(13).blankets[0].coverage < 1, true,
+    "► and it is 97.5%, not 100% — the only entry here whose coverage is neither 0 nor 1");
+
+  // ► **THE RING IS THE ASSERTION THAT PROVES THERE IS A RASTER HERE AT ALL.**
+  //   Its bounding box is 680 x 460 against a 640 x 420 stage — 100% by box —
+  //   and its fill covers a tenth of that. A box-only implementation passes
+  //   every other line in this test and fails this one.
+  const ring = STAGE_SHAPES[21].paths[0].d;
+  const numbers = ring.match(/-?\d+(?:\.\d+)?/g).map(Number);
+  const xs = numbers.filter((_, index) => index % 2 === 0);
+  const ys = numbers.filter((_, index) => index % 2 === 1);
+  assert.equal(Math.min(...xs) <= 0 && Math.max(...xs) >= SS2_STAGE.width, true, "its box spans the stage horizontally");
+  assert.equal(Math.min(...ys) <= 0 && Math.max(...ys) >= SS2_STAGE.height, true, "and vertically");
+});
+
+test("a blanket entry carries what a FIX would act on, not just a tally", () => {
+  const record = curtainOf();
+  const curtain = record.blankets[0];
+  assert.equal(curtain.index, 0);
+  assert.equal(curtain.opsBefore, 0, "nothing was painted before it, so it hides nothing — a backdrop, not a curtain");
+
+  // ► **AND WHAT IS PAINTED OVER IT AFTERWARDS, which is the half that decides
+  //   whether a black stage is this operation or the page's own ground.** See
+  //   `stageBlanketsOf`'s "curtain, or the page's own black ground?". `inkAfter`
+  //   counts FILL ink, so the three of the thirteen that put none down are
+  //   excluded by NAME here rather than by a number nobody can decompose: index
+  //   1 is the same shape at alphaMultiplier 0, index 3 is the gradient with a
+  //   transparent stop, and index 9 is the stroke-only loop — whose `fill` is
+  //   "none" at fillOpacity 1, so it DOES draw and is deliberately not ink by
+  //   this reading.
+  assert.equal(curtain.opsAfter, 13, "thirteen operations are painted over it");
+  assert.equal(curtain.inkAfter, 10, "ten of them put fill ink down");
+  assert.deepEqual(record.ops.map((op, index) => (opPutsFillInkDown(op) ? null : index)).filter((index) => index !== null),
+    [1, 3, 9], "and the three that do not are NAMED, by this file's own reading of the operation — 13 minus 3 is 10");
+  assert.equal(record.blankets.at(-1).opsAfter, 0, "the last operation on the stage has nothing over it at all");
+  assert.equal(record.blankets.at(-1).inkAfter, 0, "so neither number is a constant");
+  assert.equal(curtain.shape, 20, "the shape id, so the pack can be opened at it");
+  assert.equal(curtain.depth, 10, "the ROOT depth, which is what `screen.objects` is keyed by");
+  assert.deepEqual([...curtain.path], [10, 1], "and the whole nesting path");
+  assert.equal(curtain.fill, "#000000");
+  assert.equal(curtain.opacity, 1);
+  assert.equal(curtain.coverage, 1, "the raster, not the box");
+  assert.equal(curtain.bitmap, false);
+  assert.equal(curtain.gradient, false);
+  assert.equal(curtain.clipped, false);
+
+  const raster = record.blankets.find((entry) => entry.index === 5);
+  assert.equal(raster.bitmap, true,
+    "► a raster's own per-pixel alpha is NOT read here, so a caller discounting bitmaps needs this flag");
+  assert.equal(raster.fill, "none", "and it has no colour in the operation at all");
+
+  const gradient = record.blankets.find((entry) => entry.index === 4);
+  assert.equal(gradient.gradient, true);
+  assert.equal(gradient.opacity, 1, "the MINIMUM stop opacity, because a ramp that goes clear anywhere hides nothing there");
+
+  assert.equal(Object.isFrozen(record.blankets), true);
+  assert.equal(Object.isFrozen(record.blankets[0]), true);
+});
+
+test("`opsBefore` is what separates a backdrop from a curtain", () => {
+  // ► Same twelve drawables, curtain moved to the END. The count does not
+  //   move; `opsBefore` does, and that is the number a person reading an
+  //   invoice needs. A count alone cannot tell `dungeon`'s backdrop (op 3 of
+  //   75) from `townsquare`'s curtain (op 1632 of 1638).
+  const moved = curtainPack();
+  const drawables = moved.screens.curtain.drawables;
+  drawables.push(drawables.shift());
+  const record = screenFor(screenPackFrom(moved), "curtain");
+  assert.equal(record.approximations.blanketsTheStage, 6, "the same six cover the stage wherever they are painted");
+  const curtain = record.blankets.find((entry) => entry.shape === 20 && !entry.clipped);
+  assert.equal(curtain.opsBefore, 13, "and now it is painted last, over all thirteen of them");
+  assert.equal(curtainOf().blankets[0].opsBefore, 0, "against 0 before the move — so this is not a constant");
+});
+
+test("a screen with nothing over it has an empty roster and a zero tally — and the same pack with a curtain has one", () => {
+  const record = marketOf();
+  assert.deepEqual(record.blankets, [], "`market`'s shapes are 10 to 40 units across on a 640 x 420 stage");
+  assert.equal(record.approximations.blanketsTheStage, 0);
+  assert.equal(record.approximations.blanketGeometryUnparsed, 0);
+  assert.equal(forgeOf().approximations.blanketsTheStage, 0, "and `forge`'s are smaller still");
+
+  // ► **THE CONTROL, ADDED 2026-09-14 BECAUSE THE THREE LINES ABOVE WERE
+  //   SATISFIED BY DELETING THE FEATURE.** A wave-2 verifier stubbed
+  //   `stageBlanketsOf` to `return Object.freeze([])` and this test stayed
+  //   green — an empty roster is what a stub returns. **A test that asserts an
+  //   absence needs the presence beside it or it is a test of nothing.** So:
+  //   the same pack, the same twenty operations, with ONE full-stage black
+  //   rectangle appended, and the roster must come back holding exactly that
+  //   one. Under the stub this is 0 and red.
+  const withCurtain = rawPack();
+  withCurtain.shapes = { ...withCurtain.shapes, 20: STAGE_SHAPES[20] };
+  withCurtain.screens.market.drawables.push({ shape: 20, path: [1200, 1], matrix: [1, 0, 0, 1, 0, 0] });
+  const covered = screenFor(screenPackFrom(withCurtain), "market");
+  assert.equal(covered.ops.length, record.ops.length + 1, "one operation more than the screen that has no curtain");
+  assert.equal(covered.approximations.blanketsTheStage, 1);
+  assert.equal(covered.blankets[0].index, record.ops.length, "and it is the appended one, not something that was there all along");
+  assert.equal(covered.blankets[0].fill, "#000000");
+  assert.equal(covered.blankets[0].opsBefore, record.ops.length, "painted over every one of them");
+  assert.equal(covered.blankets[0].opsAfter, 0, "with nothing over it");
+});
+
+test("STAGE_BLANKET states its own thresholds and they are the ones used", () => {
+  // ► **A THRESHOLD NAMED IN A COMMENT AND HARD-CODED IN THE LOOP IS TWO
+  //   THRESHOLDS.** This builds a rect covering exactly the stated coverage
+  //   either side of the line and asserts the line is where the constant says.
+  assert.equal(STAGE_BLANKET.coverage, 0.95);
+  assert.equal(STAGE_BLANKET.opacity, 0.95);
+  const widthFor = (fraction) => SS2_STAGE.width * fraction;
+  const rectPack = (fraction, opacity) => ({
+    screens: { one: {
+      name: "one", labelFrame: 1, drawables: [{ shape: 30, path: [1], matrix: [1, 0, 0, 1, 0, 0] }],
+      unresolved: [], textFields: [], staticText: [], multiFrameSprites: [],
+      filteredPlacements: [], blendedPlacements: [], approximations: {}
+    } },
+    shapes: { 30: { character: 30, paths: [{
+      d: `M0 0L${widthFor(fraction)} 0L${widthFor(fraction)} 420L0 420Z`,
+      fill: "#000000", fillOpacity: opacity, fillRule: "evenodd", approximated: null, stroke: null, strokeWidth: 0 }] } },
+    fonts: {}
+  });
+  const blanketsIn = (fraction, opacity) =>
+    screenFor(screenPackFrom(rectPack(fraction, opacity)), "one").approximations.blanketsTheStage;
+  assert.equal(blanketsIn(1, 1), 1, "the whole stage at full opacity");
+  assert.equal(blanketsIn(0.99, 1), 1, "99% of the width is still a blanket");
+  assert.equal(blanketsIn(0.9, 1), 0, "90% is not — the parchment backdrop on 13 real screens rasterises to 92.04%");
+  assert.equal(blanketsIn(1, 0.96), 1, "opacity 0.96 hides what is under it");
+  assert.equal(blanketsIn(1, 0.9), 0, "opacity 0.9 does not");
+  // ► ~~**AND THE OPACITY HALF OF THE PREDICATE IS DEAD ON THE REAL PACK.**
+  //   Every operation there that passes the coverage test is at opacity exactly
+  //   1, and the next value down any large operation takes is 0.94921875 —
+  //   which is excluded by COVERAGE, not by opacity. These two lines are the
+  //   only place in this repository where the opacity threshold decides
+  //   anything.~~
+  //
+  //   **EVERY CLAUSE OF THAT IS WRONG, RE-MEASURED 2026-09-14, AND THE TEST
+  //   BELOW IS THE CORRECTION.** The opacity test is the only thing keeping 34
+  //   stage-covering operations out of the roster: 26 copies of character 642
+  //   at alphaMultiplier 0 and 8 of character 718 at 0.19921875. The parchment
+  //   is excluded by opacity FIRST — the module tests alpha before it tests the
+  //   box, and 0.94921875 < 0.95 — and by the box second, at 0.9479. The
+  //   sweep that produced "dead" ran the threshold from 0.2 to 0.99, and
+  //   0.19921875 is 0.00078125 below the bottom of that range: a grid that
+  //   starts just above the population it would have found. **Ask what a
+  //   measurement could have come out as** — this one could not have come out
+  //   any other way.
+});
+
+test("the opacity half of the predicate is what keeps 34 full-stage rectangles out of the roster", () => {
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **A REAL-PACK TEST FOR A PREDICATE THAT WAS DOCUMENTED AS DEAD, AND IT
+  //   NEEDS NO RASTER AT ALL.** For an AXIS-ALIGNED RECTANGLE under an
+  //   axis-aligned matrix, the bounding box IS the filled region — there is no
+  //   third thing for a scanline to discover. So this file can decide, on its
+  //   own arithmetic, which operations cover the stage, and then check the
+  //   module against every one of them in both directions: the opaque ones must
+  //   all be counted, the faint ones must all be rejected.
+  //
+  //   Teeth, measured: deleting `if (opacity < STAGE_BLANKET.opacity) continue;`
+  //   from `stageBlanketsOf` turns this red at 34 rejected-and-counted;
+  //   stubbing the raster out turns it red at 0 counted.
+  const pack = screenPackFrom(REAL_SCREENS);
+  let rectangles = 0;
+  let covering = 0;
+  const opaque = new Map();
+  const faint = new Map();
+  let opaqueCounted = 0;
+  let faintCounted = 0;
+  for (const name of screenNames(pack)) {
+    const record = screenFor(pack, name);
+    const countedHere = new Set(record.blankets.map((entry) => entry.index));
+    record.ops.forEach((op, index) => {
+      const covered = stageRectangleCoverageOf(op);
+      if (covered === null) return;
+      rectangles += 1;
+      if (covered < STAGE_BLANKET.coverage) return;
+      covering += 1;
+      const alpha = blanketAlphaOf(op);
+      const into = alpha >= STAGE_BLANKET.opacity ? opaque : faint;
+      into.set(op.shape, (into.get(op.shape) ?? 0) + 1);
+      if (!countedHere.has(index)) return;
+      if (alpha >= STAGE_BLANKET.opacity) opaqueCounted += 1;
+      else faintCounted += 1;
+    });
+  }
+
+  assert.equal(rectangles, 419, "axis-aligned rectangles across the 26 screens — the population this reasoning is valid over");
+  assert.equal(covering, 41, "of which 41 cover the stage, so the box alone would report 41 blankets");
+  // Sorted by CHARACTER and not by count: two of these tie at 1, and a sort on
+  // the count would then be pinning the order screens happen to be walked in.
+  assert.deepEqual([...opaque.entries()].sort((a, b) => a[0] - b[0]), [[647, 5], [1774, 1], [2285, 1]],
+    "seven of the 41 are opaque: the five curtains and the two bitmap backdrops");
+  assert.deepEqual([...faint.entries()].sort((a, b) => a[0] - b[0]), [[642, 26], [718, 8]],
+    "and 34 are not — the chrome backdrop at alphaMultiplier 0, and a bitmap under a 0.19921875 alpha transform");
+  assert.equal(opaqueCounted, 7, "every opaque one is in the roster");
+  assert.equal(faintCounted, 0, "and not one of the 34 faint ones is — which is the whole of what the opacity test does here");
+
+  // ► **THE VALUE THAT MAKES THE SWEEP'S RANGE THE FINDING.** 0.19921875 is
+  //   0.00078125 below the 0.2 the old sweep started at. If this ever reads a
+  //   different number, the "dead predicate" story is worth re-running rather
+  //   than re-believing.
+  const alphas = new Set();
+  for (const name of screenNames(pack)) {
+    for (const op of screenFor(pack, name).ops) {
+      const covered = stageRectangleCoverageOf(op);
+      if (covered === null || covered < STAGE_BLANKET.coverage) continue;
+      const alpha = blanketAlphaOf(op);
+      if (alpha < STAGE_BLANKET.opacity) alphas.add(alpha);
+    }
+  }
+  assert.deepEqual([...alphas].sort((a, b) => a - b), [0, 0.19921875],
+    "the two alphas the rejected 34 take, and the larger one is what a sweep from 0.2 could not see");
+});
 
 /* ------------------------------------------------------------------ */
 /* Running with no pack, which is how a fresh clone runs               */
@@ -1280,4 +1795,208 @@ test("the real pack: every tinted value FLOORS, and rounding would move 69 of th
   assert.equal(alphaIdentity, 1274, "and the ones that cannot fail: alphaMultiplier 1 with alphaOffset 0");
   assert.equal(alphaMoving + alphaIdentity, 1955, "the alpha half was compared too, rather than assumed");
   assert.equal(alphaMismatch, 0, "the alpha half stays floating point: 0..1 opacity, offset divided by 255");
+});
+
+/**
+ * THE SEVEN, AND THE CLAIM THIS TEST EXISTS TO BREAK.
+ *
+ * ► **THE SESSION THAT COMMISSIONED THIS COUNT NAMED SIX BLACK SCREENS BY
+ *   THEIR `nestedSpriteFrame1` COUNT, AND THAT NUMBER IS NOT THE ONE.**
+ *   `tools/extract-screens.mjs` line 1119 sets it to `nested.multiFrame.length`
+ *   — the number of DISTINCT multi-frame sprite characters on the screen, not
+ *   a number of operations and not a number of curtains. Re-derived from
+ *   `assets/screens/manifest.json`: it is non-zero on **20 of the 26 screens**,
+ *   and the six named (townsquare 9, daybreak 8, special_event 8,
+ *   special_event_result 8, magicshop 8, arena_intro 8) are simply its six
+ *   largest values. `armoury`, `weaponshop`, `foyer`, `church`, `levelup` and
+ *   `arena` all carry 6 or 7 and none of them has a curtain.
+ *
+ *   The two sets are not each other in EITHER direction, which is what the
+ *   assertions below pin: 15 screens carry a frozen sprite and no blanket, and
+ *   `gameover` carries a blanket with `nestedSpriteFrame1` at 0.
+ *
+ * ► **WHAT IS TRUE IS THE ROOT CAUSE, FOR FIVE OF THE SEVEN.** Every curtain is
+ *   character 647, `#000000` at opacity 1, covering 100% of the stage, and each
+ *   sits under a root sprite the pack states as multi-frame: **character 1525
+ *   (168 frames)** at depth 185 on `splash` and `new_or_continue` and depth 428
+ *   on `townsquare`, and **character 1772, `day_night` (127 frames)** at depth
+ *   408 on `daybreak` and `dungeon`. Flattened at frame 1, a fade-in and a
+ *   night overlay are both a closed black curtain. The other two blankets are
+ *   BACKDROPS — `dungeon` op 3 of 75 and `gameover` op 5 of 18, both rasters —
+ *   and they are correct.
+ */
+test("the real pack: seven operations cover the stage, and the tally is not `nestedSpriteFrame1`", () => {
+  if (!REAL_SCREENS || !REAL_MANIFEST) {
+    assert.equal(REAL_SCREENS === null || REAL_MANIFEST === null, true, "no extraction on this machine");
+    return;
+  }
+  const pack = screenPackFrom(REAL_SCREENS);
+  const names = screenNames(pack);
+  let blankets = 0;
+  let unparsed = 0;
+  const withBlanket = [];
+  const withFrozenSprite = [];
+  const coverages = new Set();
+  const alphas = new Set();
+  for (const name of names) {
+    const record = screenFor(pack, name);
+    blankets += record.approximations.blanketsTheStage;
+    unparsed += record.approximations.blanketGeometryUnparsed;
+    for (const entry of record.blankets) {
+      coverages.add(entry.coverage);
+      alphas.add(entry.opacity);
+    }
+    if (record.approximations.blanketsTheStage > 0) withBlanket.push(name);
+    // The extractor's own number, read from the pack rather than recomputed
+    // here, so the two tallies stay independent.
+    if ((REAL_MANIFEST.screens[name].approximations?.nestedSpriteFrame1 ?? 0) > 0) withFrozenSprite.push(name);
+  }
+  assert.equal(names.length, 26);
+  assert.equal(blankets, 7, "seven operations across the 26 screens cover the stage opaquely");
+  assert.deepEqual(withBlanket,
+    ["splash", "new_or_continue", "daybreak", "dungeon", "townsquare", "gameover"],
+    "on six screens, in root-timeline order");
+  assert.equal(unparsed, 0,
+    "and nothing was skipped unmeasured — the pack's 4915 shape paths use only M, L, Q and Z");
+
+  // ► **IS 6-AND-20 A PARTITION WORTH DEFENDING? THE MARGIN SAYS YES, AND THE
+  //   MARGIN IS THE ANSWER RATHER THAN THE COUNT.** Every one of the seven
+  //   covers the stage ENTIRELY and is at alpha exactly 1 — nothing in the
+  //   roster is near either threshold. The other side of the line is in "the
+  //   raster rejects 35 of the 42 operations the box admits": the nearest
+  //   thing to a blanket that is NOT one covers 0.060 of the stage. So the
+  //   coverage threshold could be anything from 0.07 to 1.0 and this partition
+  //   would not move by one screen. **It is the pair of thresholds that draws
+  //   it, not either one** — see `STAGE_BLANKET`, whose grid used to say
+  //   otherwise.
+  assert.deepEqual([...coverages], [1], "all seven cover the whole stage, not 0.95 of it");
+  assert.deepEqual([...alphas], [1], "and all seven are opaque, not 0.95 opaque");
+
+  // ► **THE PREMISE THIS BREAKS, ASSERTED IN BOTH DIRECTIONS.**
+  assert.equal(withFrozenSprite.length, 20, "`nestedSpriteFrame1` is non-zero on 20 of the 26 screens");
+  assert.equal(withFrozenSprite.filter((name) => !withBlanket.includes(name)).length, 15,
+    "15 screens have a sprite frozen at frame 1 and nothing covering the stage");
+  assert.deepEqual(withBlanket.filter((name) => !withFrozenSprite.includes(name)), ["gameover"],
+    "and one screen has a blanket with no frozen sprite at all — its backdrop is simply a full-stage JPEG");
+});
+
+test("the real pack: `townsquare`'s curtain is one operation, and it is named", () => {
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  const record = screenFor(screenPackFrom(REAL_SCREENS), "townsquare");
+  assert.equal(record.ops.length, 1638);
+  assert.equal(record.blankets.length, 1, "one operation, out of 1638, is why the canvas reads 99.1% #000000");
+  const curtain = record.blankets[0];
+  assert.equal(curtain.index, 1632, "second from last: only the ornamental border is painted after it");
+  assert.equal(curtain.opsBefore, 1632, "and it covers every one of the 1632 painted before it");
+
+  // ► **THE FOUR NUMBERS THAT TELL A CURTAIN FROM THE PAGE'S OWN BLACK
+  //   GROUND, which the browser probe that started this cannot do.**
+  //   `tools/screens/main.js` fills the canvas `#000000` before it draws
+  //   anything, so "439266 opaque pixels, 435374 of them black" is also what a
+  //   run that drew NOTHING would report. These are the reading that settles
+  //   it, and they are all in the record: 1632 of the 1638 operations put ink
+  //   down (so the stage is not empty), an opaque black fill covers all of it
+  //   (so the ground is not what is showing), and of the five operations after
+  //   it three put ink down and none is in this roster — so none of them
+  //   repaints the stage. See `stageBlanketsOf`'s own section on it.
+  assert.equal(record.approximations.invisibleOps, 6,
+    "6 of the 1638 draw nothing, so 1632 put ink down — a black stage that was simply EMPTY would have these two equal");
+  assert.equal(curtain.opsAfter, 5);
+  assert.equal(curtain.inkAfter, 3, "two buttons and the border; the other two are at fillOpacity 0");
+  assert.equal(record.blankets.filter((entry) => entry.index > curtain.index).length, 0,
+    "and nothing after it covers the stage, so the curtain is the last word on it");
+  assert.equal(curtain.shape, 647);
+  assert.equal(curtain.depth, 428);
+  assert.equal(curtain.fill, "#000000");
+  assert.equal(curtain.opacity, 1);
+  assert.equal(curtain.coverage, 1);
+  assert.equal(curtain.bitmap, false, "a flat fill, not a raster — there is nothing to look up in assets/bitmaps/");
+
+  // ► **THE JOIN A FIX WOULD MAKE, MADE HERE SO THE CLAIM IS NOT PROSE.** The
+  //   entry's `depth` is a root depth, and `screen.objects` is the root display
+  //   list, so the character and its frame count are one lookup away.
+  const object = record.objects.find((entry) => entry.depth === curtain.depth);
+  assert.equal(object.character, 1525);
+  assert.equal(object.kind, "sprite");
+  assert.equal(object.declaredFrames, 168,
+    "168 frames, rendered at frame 1 — `flattenFrame` has no playhead to read and frame 1 is the closed curtain");
+
+  // And the same character is the curtain on two more screens, at a different
+  // root depth, which is what makes it a sprite and not a townsquare accident.
+  for (const [name, depth] of [["splash", 185], ["new_or_continue", 185]]) {
+    const other = screenFor(screenPackFrom(REAL_SCREENS), name);
+    assert.equal(other.blankets[0].depth, depth);
+    assert.equal(other.objects.find((entry) => entry.depth === depth).character, 1525);
+  }
+});
+
+test("the real pack: the raster rejects 35 of the 42 operations the box admits, and 26 of them are the border", () => {
+  if (!REAL_SCREENS) {
+    assert.equal(REAL_SCREENS, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THIS TEST USED TO ASSERT ONLY `counted === 0` UNDER A COMMENT SAYING IT
+  //   "PROVES THE RASTER IS DOING WORK", AND IT PROVED NOTHING.** A wave-2
+  //   verifier stubbed `stageBlanketsOf` to `return Object.freeze([])` — the
+  //   feature deleted, the API kept — and this test stayed GREEN, because a
+  //   raster that counts nothing also counts the border nothing. **An assertion
+  //   that something is ABSENT passes when the thing that would find it is
+  //   gone.** Re-derived here before rewriting: under that stub, 7 other tests
+  //   in this file go red and this one and "a screen with nothing over it"
+  //   stayed green.
+  //
+  //   ► And its arithmetic was wrong as well: it said a box-only implementation
+  //     "would report 33 blankets instead of 7". ~~33~~ **42.** 33 is 26 + 7,
+  //     done in somebody's head; the measured population is 42, because nine
+  //     more operations have a stage-sized box, survive the opacity test and
+  //     are thrown out by the raster. `src/render/screen.js` said 42 in its own
+  //     header the whole time.
+  //
+  //   So the test now walks BOTH sides on one sweep and pins both: what a box
+  //   test alone would admit (computed here, from each operation's own `d` and
+  //   matrix, every coordinate pushed through the matrix rather than the box's
+  //   four corners), and what the module's raster actually returns. It goes red
+  //   when the raster stops working (moduleCounts falls to 0) and when it
+  //   over-fires (a box-only implementation counts 42 and the border 26).
+  const pack = screenPackFrom(REAL_SCREENS);
+  let spanningBox = 0;
+  let borderCounted = 0;
+  let boxAdmits = 0;
+  let moduleCounts = 0;
+  const rejectedByShape = new Map();
+  for (const name of screenNames(pack)) {
+    const record = screenFor(pack, name);
+    const countedHere = new Set(record.blankets.map((entry) => entry.index));
+    moduleCounts += record.blankets.length;
+    record.ops.forEach((op, index) => {
+      if (op.shape === 645) {
+        const box = visibleBoxOf([op]);
+        if (box.xMin <= 0 && box.yMin <= 0 && box.xMax >= SS2_STAGE.width && box.yMax >= SS2_STAGE.height) spanningBox += 1;
+        if (countedHere.has(index)) borderCounted += 1;
+      }
+      // What a box-only `stageBlanketsOf` would admit: the module's two
+      // published thresholds, with the FILL region never looked at. Note the
+      // border is NOT the only thing this catches, which is the point — the
+      // 0.95 here admits a box a little smaller than the stage too.
+      if (blanketAlphaOf(op) < STAGE_BLANKET.opacity) return;
+      if (stageBoxCoverageOf(op) < STAGE_BLANKET.coverage) return;
+      boxAdmits += 1;
+      if (countedHere.has(index)) return;
+      rejectedByShape.set(op.shape, (rejectedByShape.get(op.shape) ?? 0) + 1);
+    });
+  }
+
+  assert.equal(spanningBox, 26, "character 645 is the border, and its box is bigger than the stage on every screen");
+  assert.equal(borderCounted, 0, "and it is a frame: it covers the edge and not the middle");
+
+  // ► **THE THREE LINES THAT GIVE THE TWO ABOVE THEIR TEETH.** Without them
+  //   every assertion in this test is satisfied by a raster that does nothing.
+  assert.equal(boxAdmits, 42, "a box-only implementation would report 42 blankets");
+  assert.equal(moduleCounts, 7, "the raster reports 7 — so it is neither absent nor a box test");
+  assert.deepEqual([...rejectedByShape.entries()].sort((a, b) => a[0] - b[0]), [[645, 26], [1555, 5], [2114, 4]],
+    "the 35 it rejects, by character: the border on 26 screens; a black shape on 5 whose box is all but the stage and whose "
+    + "fill is 6% of it; and arena_intro's four black shapes at one depth, 4% to 6% each and 8% as a union");
 });

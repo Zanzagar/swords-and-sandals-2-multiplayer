@@ -76,9 +76,97 @@
  *                         are hit areas and expand to nothing LEGITIMATELY.
  *                         Counted so an empty expansion is never mistaken for
  *                         a failed one.
- *   `filters`             a placement carrying a FILTERLIST that is stepped
- *                         over, not applied. 51 of the 320 top-level
- *                         placements on these screens have one.
+ *   `filters`             a placement carrying a FILTERLIST that is not
+ *                         applied. 51 of the 320 top-level placements on these
+ *                         screens have one; 243 counting every nesting level.
+ *                         ► **THE NAME IS WRONG AND IS KEPT ANYWAY.** It counts
+ *                         filtered PLACEMENTS, not filters: the same 243
+ *                         placements carry **271** typed filter records, so
+ *                         reading this as "filters not applied" under-reports
+ *                         by 28. `filterRecords` beside it is the filter count.
+ *                         Renaming it would break `approximations.fromPack`
+ *                         readers in files this one does not own, so the
+ *                         correction lives here, at the instruction.
+ *   `filterRecords`       the TYPED FILTERS those placements carry — 271 across
+ *                         the 26 screens: 140 glow, 57 colourMatrix, 56 blur,
+ *                         16 dropShadow, 2 bevel. Every one is now written out
+ *                         beside its placement, so `src/render/filters.js` can
+ *                         read them; the approximation is that this tool still
+ *                         applies none of them itself.
+ *   `filterListEmpty`     a placement whose FILTERLIST is present and CARRIES
+ *                         NOTHING — 5 in the build, 1 reached by a screen. It
+ *                         is counted inside `filters` above because the flag is
+ *                         set, and there is nothing there to apply, so a reader
+ *                         that subtracts this gets the honest denominator.
+ *   `filtersInButtonRecords`
+ *                         FILTERS (not records) on a BUTTONRECORD, which
+ *                         `filteredPlacements` does not reach at all:
+ *                         `nestedSprites` walks sprites and the button's
+ *                         records are expanded somewhere else entirely.
+ *                         Measured on the oracle: the build's 158 buttons hold
+ *                         704 records, 34 of them filtered, 13 of those UP —
+ *                         and the 26 screens reach 5 UP records carrying 5
+ *                         filters. They are listed in `filteredButtonRecords`
+ *                         with their own paths rather than merged into
+ *                         `filteredPlacements`, because two producers writing
+ *                         one list with different path conventions is how a
+ *                         seam rots.
+ *   `buttonRecordsFiltered`
+ *                         the same roster counted in RECORDS — 5 here, equal to
+ *                         the filter count only by coincidence. Both are
+ *                         printed because the whole point of `filterRecords`
+ *                         beside `filters` is that placements and filters are
+ *                         not the same number, and the button pair had the same
+ *                         ambiguity until 2026-09-14.
+ *   `buttonRecordsFilteredOverText`
+ *                         ► **OF THOSE 5 RECORDS, 5 PLACE A `DefineText`, SO
+ *                         THE ROSTER REACHES NO DRAWABLE ON THIS BUILD AT
+ *                         ALL.** Not 5 of the screens' — ALL THIRTEEN filtered
+ *                         UP records in the file place a text character
+ *                         (measured by kind: `{ text: 13 }`). The five are the
+ *                         town square's menu glows, on "Armoury |
+ *                         Weaponsmith | Enter the Arena | Magic Shop |
+ *                         Church"; each entry's path is EXACTLY the path of one
+ *                         `staticText` entry, and a prefix match against
+ *                         `drawables` finds zero. Counted rather than left to
+ *                         be discovered, because a roster described as though
+ *                         it reaches operations, which reaches none, is the
+ *                         same defect as a count that cannot vary.
+ *   `filterListEmptyInButtonRecords`
+ *                         a BUTTONRECORD declaring a FILTERLIST that carries
+ *                         nothing — the button-side twin of `filterListEmpty`.
+ *                         ~~Dropped by a bare `continue` before any counter.~~
+ *                         Corrected 2026-09-14: the placement path treats this
+ *                         case as evidence and the button path threw it away
+ *                         silently, which is two treatments of one fact. It is
+ *                         now rostered with `filters: []` exactly as a
+ *                         placement is. 0 on this build, so the correction
+ *                         moves no number and is latent, not live.
+ *   `filterListUnreadInButtonRecords`
+ *                         `hasFilters` set with no array behind it. Structurally
+ *                         unreachable — `parseButtonRecords` sets both off one
+ *                         flag bit — and counted for the same reason
+ *                         `filterListUnread` is. 0, always.
+ *   `filtersInButtonSubtrees`
+ *                         ► **A FILTERED `PlaceObject3` INSIDE A SPRITE THAT AN
+ *                         UP RECORD PLACES.** `nestedSprites` walks the ROOT
+ *                         display list, so until 2026-09-14 these were in
+ *                         neither roster and in no count: 49 UP records across
+ *                         the build place a sprite, and anything filtered
+ *                         inside one was invisible to `filteredPlacements`, to
+ *                         `filterRecords`, and to the 9,423-operation prize,
+ *                         with nothing saying so. The walk now runs, and its
+ *                         finds go into `filteredPlacements` — the same roster,
+ *                         because they are the same TAG under the same path
+ *                         convention `flattenFrame` gives their leaves, and
+ *                         only a BUTTONRECORD's own list needs a second
+ *                         roster. **Measured 0 on this build**, so the number
+ *                         in `filters` did not move; what changed is that a
+ *                         future one would be counted instead of dropped.
+ *   `buttonSubtreesUnreadable`
+ *                         an UP record's sprite whose timeline would not
+ *                         resolve, so its subtree could not be searched for
+ *                         filters. A `catch` with a name on it. 0 here.
  *   `blendModes`          a placement carrying a non-normal blend mode.
  *   `gradientPaths`       `shapeToPaths` hands the real gradient on beside a
  *   `bitmapPaths`         flat first-stop fallback; a bitmap fill comes back
@@ -143,7 +231,14 @@ import {
   tagStreamStart,
   readMatrix,
   readColourTransform,
-  skipFilterList,
+  // ► **`parseFilterList`, NOT `skipFilterList`, and the two return the SAME
+  //   cursor.** This file stepped over every BUTTONRECORD's filter list for as
+  //   long as it has existed, which cost nothing while nothing downstream could
+  //   apply a filter and costs 10 records the moment something can. The stepper
+  //   and the decoder are pinned against each other by a test in
+  //   `test/swf-display-list.test.js`, so `read.next` here is byte-for-byte
+  //   where `skipFilterList` used to leave the cursor.
+  parseFilterList,
   IDENTITY_COLOUR_TRANSFORM
 } from "./swf-display-list.mjs";
 
@@ -153,8 +248,15 @@ const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const DEFAULT_SWF =
   "/mnt/c/Program Files (x86)/Steam/steamapps/common/Swords and Sandals Classic Collection/swf/swords_sandals2_download.swf";
 
-/** The oracle's sha256. Recorded and REPORTED — never enforced. */
-const ORACLE_SHA256 = "77cb545c2061ab41246251467a4edf5926ab6fd1ddd95dc9527d7ba9c45bb8ca";
+/**
+ * The oracle's sha256. Recorded and REPORTED — never enforced.
+ *
+ * Exported so the test file can ANCHOR its `fs.existsSync(ORACLE)` guard on it:
+ * a path that exists is not the same fact as the build every number in this
+ * file was measured against, and a guard that cannot tell them apart skips
+ * silently on the wrong install.
+ */
+export const ORACLE_SHA256 = "77cb545c2061ab41246251467a4edf5926ab6fd1ddd95dc9527d7ba9c45bb8ca";
 
 const TWIPS_PER_PIXEL = 20;
 
@@ -336,7 +438,12 @@ export function parseButtonRecords(buffer, character) {
     }
     // FILTERLIST then BlendMode, in that order — the same wire order
     // `parsePlaceObject` documents, and the same trap.
-    if (isButton2 && (flags & 0x10) !== 0) cursor = skipFilterList(buffer, cursor, character.bodyEnd);
+    let filters = null;
+    if (isButton2 && (flags & 0x10) !== 0) {
+      const read = parseFilterList(buffer, cursor, character.bodyEnd);
+      filters = read.filters;
+      cursor = read.next;
+    }
     if (isButton2 && (flags & 0x20) !== 0) cursor += 1;
     records.push({
       states: flags & 0x0f,
@@ -344,7 +451,12 @@ export function parseButtonRecords(buffer, character) {
       depth,
       matrix: matrix.matrix,
       colourTransform,
-      hasFilters: isButton2 && (flags & 0x10) !== 0
+      hasFilters: isButton2 && (flags & 0x10) !== 0,
+      // The typed records, or `null` when the flag is clear — the same
+      // "absent is not empty" distinction `flattenFrame` makes, because a
+      // button record declaring a list that carries nothing is a real thing on
+      // the wire and is not the same fact as a record with no list at all.
+      filters
     });
   }
   if (!terminated) {
@@ -694,15 +806,50 @@ function isIdentityColour(transform) {
  * Recursion is bounded by `maxDepth` and by a visiting set, matching
  * `flattenFrame`'s own guards, so a self-containing sprite cannot spin here.
  */
-function nestedSprites(buffer, characters, entries, { maxDepth = 8, cache }) {
+function nestedSprites(buffer, characters, entries, { maxDepth = 8, cache, trail = [] }) {
   const found = new Map();
   const filters = [];
   const blends = [];
+  // Counted here rather than recomputed by a caller, so the list and its own
+  // tallies are written by one walk and cannot drift apart — the rule the
+  // unresolved roster below already follows.
+  let filterRecords = 0;
+  let emptyLists = 0;
+  let unreadLists = 0;
   const visit = (list, depth, visiting, trail) => {
     if (depth > maxDepth) return;
     for (const entry of list) {
       const at = [...trail, entry.depth];
-      if (entry.hasFilters) filters.push({ character: entry.characterId, path: at });
+      if (entry.hasFilters) {
+        // ► **THE LIST, NOT A BOOLEAN.** This pushed `{character, path}` and
+        //   threw `entry.filters` away, so `screen.filteredPlacements` told
+        //   `src/render/screen.js` only THAT a prefix was filtered — which is
+        //   why that file counts `filtersNotApplied` and applies nothing. The
+        //   records go out VERBATIM in `parseFilterList`'s own spelling
+        //   (`{type, filterId, blurX, blurY, passes, colour, strength, angle,
+        //   distance, inner, knockout, compositeSource, matrix}`), because
+        //   `src/render/filters.js`'s `canvasFilterFor` already reads exactly
+        //   that shape and a producer inventing a second spelling at a seam is
+        //   this project's most repeated defect.
+        const typed = Array.isArray(entry.filters) ? entry.filters : null;
+        if (typed === null) {
+          // STRUCTURALLY UNREACHABLE against this build and counted anyway:
+          // `parsePlaceObject` sets `hasFilters` and `filters` off the same
+          // flag bit and `resolveTimeline` carries both, so a placement cannot
+          // claim one without the other. If that ever stops being true this is
+          // a number in the manifest rather than a list that is silently one
+          // entry short. It has never been anything but 0 here.
+          unreadLists += 1;
+        } else {
+          filterRecords += typed.length;
+          if (typed.length === 0) emptyLists += 1;
+        }
+        filters.push({
+          character: entry.characterId,
+          path: at,
+          ...(typed === null ? { filtersUnread: true } : { filters: typed })
+        });
+      }
       if (entry.blendMode !== undefined && entry.blendMode > 1) {
         blends.push({ character: entry.characterId, path: at, blendMode: entry.blendMode });
       }
@@ -723,8 +870,40 @@ function nestedSprites(buffer, characters, entries, { maxDepth = 8, cache }) {
       visiting.delete(character.id);
     }
   };
-  visit(entries, 0, new Set(), []);
-  return { multiFrame: [...found.values()], filters, blends };
+  // `trail` is the path the CALLER has already walked, and it is not a
+  // convenience: the button arm below searches a sprite that an UP record
+  // placed, and the paths it must produce are `[...button, record.depth, ...]`
+  // — exactly what `flattenFrame` gives that sprite's leaves. Defaulting it to
+  // `[]` keeps the root walk spelled the way it always was.
+  visit(entries, 0, new Set(), trail);
+  return { multiFrame: [...found.values()], filters, blends, filterRecords, emptyLists, unreadLists };
+}
+
+/**
+ * Every typed filter in one or more rosters, tallied by its own `type`.
+ *
+ * ► **A RECORD WITH NO `type` IS COUNTED AS `unknown`, NOT SKIPPED.** The five
+ *   filter kinds this build uses all decode to a name, and the three it does
+ *   not use (`gradientGlow`, `convolution`, `gradientBevel`) decode to one too
+ *   — `parseFilterList` throws on an id it cannot name, so `unknown` should be
+ *   unreachable. It is here because a bucket that silently drops what it cannot
+ *   classify is the same defect as a `catch { continue; }`.
+ *
+ * A function declaration, not an arrow: `ss2-assertion-quality.test.js` reads a
+ * helper body by looking for the next brace before the next newline, so a
+ * multi-line arrow reads as bodyless.
+ */
+function filtersByType(...rosters) {
+  const byType = {};
+  for (const roster of rosters) {
+    for (const entry of Array.isArray(roster) ? roster : []) {
+      for (const filter of Array.isArray(entry?.filters) ? entry.filters : []) {
+        const type = typeof filter?.type === "string" ? filter.type : "unknown";
+        byType[type] = (byType[type] ?? 0) + 1;
+      }
+    }
+  }
+  return byType;
 }
 
 /**
@@ -941,7 +1120,19 @@ export function extractScreens(buffer) {
         ...(entry.ratio !== undefined ? { ratio: entry.ratio } : {}),
         ...(entry.clipDepth !== undefined ? { clipDepth: entry.clipDepth } : {}),
         ...(entry.blendMode !== undefined ? { blendMode: entry.blendMode } : {}),
-        ...(entry.hasFilters ? { filters: true } : {}),
+        // ► **THIS SAID `filters: true`.** The key and its truthiness are
+        //   unchanged — an array is truthy and so was the boolean, so a reader
+        //   testing `if (object.filters)` reads the same answer — but the value
+        //   is now the typed records, which is the only form anything can use.
+        //   An EMPTY array is the build's own "a filter list is declared and
+        //   carries nothing", 5 of those on the wire, and it stays truthy here
+        //   exactly as `hasFilters` did, so this is not a silent reclassification
+        //   of those five. A placement that somehow claims filters without
+        //   carrying them keeps the bare `true` — which is all that word ever
+        //   meant — rather than being written out as an empty list it is not.
+        ...(entry.hasFilters
+          ? { filters: Array.isArray(entry.filters) ? entry.filters : true }
+          : {}),
         ...(character?.kind === "sprite" ? { declaredFrames: character.frames } : {}),
         // Filled in after flattening: how much of the picture this object is
         // actually responsible for. Zero here is the loud case.
@@ -972,10 +1163,30 @@ export function extractScreens(buffer) {
 
     const approximations = {
       nestedSpriteFrame1: 0, buttonUpState: 0, buttonNoUpState: 0,
-      filters: 0, blendModes: 0, gradientPaths: 0, bitmapPaths: 0,
+      filters: 0, filterRecords: 0, filterListEmpty: 0, filterListUnread: 0,
+      filtersInButtonRecords: 0, buttonRecordsFiltered: 0,
+      buttonRecordsFilteredOverText: 0,
+      filterListEmptyInButtonRecords: 0, filterListUnreadInButtonRecords: 0,
+      filtersInButtonSubtrees: 0, buttonSubtreesUnreadable: 0,
+      blendModes: 0, gradientPaths: 0, bitmapPaths: 0,
       invisibleDrawables: 0, staticTextGlyphs: 0, staticTextGlyphsUndecoded: 0,
       bakedMorphs: 0
     };
+    // The filters this screen's BUTTONS carry, which `nestedSprites` cannot
+    // see: it walks sprites, and a button's records are expanded in the button
+    // arm below. Kept as its own roster rather than merged into
+    // `filteredPlacements` — see the header for why.
+    const filteredButtonRecords = [];
+    // ► And the filtered PLACEMENTS found INSIDE those buttons, which do belong
+    //   in `filteredPlacements`: they are ordinary `PlaceObject3`s under the
+    //   path `flattenFrame` gives their leaves, not BUTTONRECORDs. Collected
+    //   here and merged below, because `approximations.filters` is set after
+    //   this loop from the root walk's length.
+    const buttonSubtreeFilters = [];
+    // Its own tallies, accumulated by the same walk that builds the list, the
+    // rule `nestedSprites` already follows: a count recomputed by a caller can
+    // drift from the roster it claims to describe.
+    const buttonSubtreeTally = { records: 0, empty: 0, unread: 0 };
     const unresolvedByKind = {};
     const byTopDepth = new Map();
 
@@ -1077,6 +1288,96 @@ export function extractScreens(buffer) {
             `${records.length} records, none of them UP — this button draws nothing by design`);
           continue;
         }
+        // ► **A BUTTONRECORD'S OWN FILTERLIST, WHICH NOTHING HAS EVER
+        //   REPORTED.** `parseButtonRecords` stepped over it; now it decodes
+        //   it, and the UP records — the only ones this tool draws — carry
+        //   theirs out here. The path is the button's own path with the
+        //   record's depth appended, which is EXACTLY the path `pushDrawable`
+        //   builds for the leaves underneath it.
+        //
+        // ► ~~"so a reader matching by prefix reaches the same operations with
+        //   no second convention."~~ **THAT HALF WAS WRONG AND IS CORRECTED
+        //   HERE, 2026-09-14.** The path convention is right; what sits under
+        //   it on this build is not an operation. All 13 filtered UP records in
+        //   the file place a `DefineText` — measured by kind, `{ text: 13 }` —
+        //   and text goes to `screen.staticText`, never to `screen.drawables`.
+        //   So a reader matching `drawables` by prefix reaches ZERO of the five
+        //   this screen pack carries, and a reader matching `staticText` by
+        //   EXACT path reaches all five: they are the town square's menu glows.
+        //   `leaf` below says which table to look in rather than leaving the
+        //   next reader to find that out the way this one did, and
+        //   `buttonRecordsFilteredOverText` counts it so the roster can never
+        //   again be described as reaching operations it does not reach.
+        for (const record of up) {
+          // `hasFilters`, not `filters.length` — the FLAG is the fact. A record
+          // with no list at all is not a drop; a record declaring a list that
+          // carries nothing is, and it used to leave here through a bare
+          // `continue` that no counter saw. The placement path has always
+          // treated that case as evidence (`filterListEmpty`); two paths
+          // treating one fact oppositely is how this repository loses things.
+          if (!record.hasFilters) continue;
+          const typed = Array.isArray(record.filters) ? record.filters : null;
+          if (typed === null) {
+            // The button twin of `filterListUnread`, and unreachable for the
+            // same reason: `parseButtonRecords` sets `hasFilters` and `filters`
+            // off one flag bit. Counted anyway, so a future parser that breaks
+            // that pairing shows up as a number rather than as a short list.
+            approximations.filterListUnreadInButtonRecords += 1;
+          } else {
+            approximations.filtersInButtonRecords += typed.length;
+            if (typed.length === 0) approximations.filterListEmptyInButtonRecords += 1;
+          }
+          approximations.buttonRecordsFiltered += 1;
+          const leaf = characters.get(record.characterId)?.kind ?? "missing";
+          if (leaf === "text") approximations.buttonRecordsFilteredOverText += 1;
+          filteredButtonRecords.push({
+            character: record.characterId,
+            path: [...drawable.path, record.depth],
+            button: drawable.characterId,
+            // The kind of character the record places, so a consumer knows
+            // whether to prefix-match `drawables` or exact-match `staticText`.
+            // On this build it is "text" every time.
+            leaf,
+            ...(typed === null ? { filtersUnread: true } : { filters: typed })
+          });
+        }
+        // ► **AND THE SUBTREE UNDERNEATH IT, WHICH WAS IN NEITHER ROSTER.**
+        //   `nestedSprites` walks the ROOT display list; a button's records are
+        //   expanded here, so a filtered `PlaceObject3` inside a sprite that an
+        //   UP record places reached `filteredPlacements` in no form — 49 UP
+        //   records across the build place a sprite. **Measured 0 filtered
+        //   placements inside them on this build**, which is why nothing has
+        //   ever noticed. 0 that a walk produced is a reading; 0 that no walk
+        //   produced is an absence of evidence, and the two are the defect this
+        //   file exists to keep apart.
+        for (const record of up) {
+          const inner = characters.get(record.characterId);
+          if (!inner || inner.kind !== "sprite") continue;
+          const key = `${inner.id}@1`;
+          if (!cache.has(key)) {
+            try {
+              cache.set(key, resolveTimeline(buffer, inner, { frames: [1] }).frames[0] ?? null);
+            } catch (error) {
+              // Named, not swallowed. A sprite whose timeline will not resolve
+              // is a subtree this walk could not search, and a reader is owed
+              // the difference between "searched, found none" and "not searched".
+              approximations.buttonSubtreesUnreadable += 1;
+              note("button-subtree-unreadable", drawable,
+                `record depth ${record.depth} places sprite ${inner.id}: ${String(error.message).slice(0, 80)}`);
+              continue;
+            }
+          }
+          const list = cache.get(key);
+          if (!list) continue;
+          const under = nestedSprites(buffer, characters, list, {
+            cache, trail: [...drawable.path, record.depth]
+          });
+          for (const entry of under.filters) buttonSubtreeFilters.push(entry);
+          approximations.filtersInButtonSubtrees += under.filters.length;
+          buttonSubtreeTally.records += under.filterRecords;
+          buttonSubtreeTally.empty += under.emptyLists;
+          buttonSubtreeTally.unread += under.unreadLists;
+        }
         let inner;
         try {
           inner = flattenFrame(buffer, characters, up, {
@@ -1117,10 +1418,29 @@ export function extractScreens(buffer) {
 
     const nested = nestedSprites(buffer, characters, displayList, { cache });
     approximations.nestedSpriteFrame1 = nested.multiFrame.length;
-    approximations.filters = nested.filters.length;
+    // ► `filters` COUNTS PLACEMENTS AND `filterRecords` COUNTS FILTERS, and on
+    //   this build they are 243 and 271. The first name is wrong and is kept
+    //   because `approximations.fromPack` is read by files this one does not
+    //   own; see the header, where the correction sits at the instruction.
+    // ► THE BUTTON SUBTREES JOIN THE ROOT WALK'S FIND HERE, not beside it. They
+    //   are the same tag under the same path convention, so a second roster
+    //   would be a second convention for one fact — and `filtersInButtonSubtrees`
+    //   is how many of the merged total came from under a button. 0 on this
+    //   build, so every number below is unchanged by the merge and can still be
+    //   compared with the pack committed before it.
+    //   APPENDED, not merged in path order: the root walk's entries keep the
+    //   order they have always had, so on a build where `buttonSubtreeFilters`
+    //   is empty — this one — the roster is byte-identical to the one the
+    //   committed pack carries, and a diff against it means something.
+    const filteredPlacements = [...nested.filters, ...buttonSubtreeFilters];
+    approximations.filters = filteredPlacements.length;
+    approximations.filterRecords = nested.filterRecords + buttonSubtreeTally.records;
+    approximations.filterListEmpty = nested.emptyLists + buttonSubtreeTally.empty;
+    approximations.filterListUnread = nested.unreadLists + buttonSubtreeTally.unread;
     approximations.blendModes = nested.blends.length;
     screen.multiFrameSprites = nested.multiFrame.sort((left, right) => left.character - right.character);
-    screen.filteredPlacements = nested.filters;
+    screen.filteredPlacements = filteredPlacements;
+    screen.filteredButtonRecords = filteredButtonRecords;
     screen.blendedPlacements = nested.blends;
     screen.rangeVariance = rangeVariance(resolved.frames, screen.firstFrame, screen.lastFrame);
 
@@ -1136,6 +1456,12 @@ export function extractScreens(buffer) {
       unresolvedByKind,
       textFields: screen.textFields.length,
       staticText: screen.staticText.length,
+      // RECOUNTED off the two rosters, never accumulated beside them, so a
+      // filter that reaches the pack without reaching this tally is impossible
+      // rather than merely unlikely. Both rosters are counted because a reader
+      // asking "what effects does this screen use" does not care which of the
+      // two producers wrote the record down.
+      filtersByType: filtersByType(screen.filteredPlacements, screen.filteredButtonRecords),
       // ► The loud one. An object that contributed no leaf is either an empty
       //   clip (the rain's frames 1-9 place nothing) or a read that went
       //   nowhere, and the two are indistinguishable unless both are named.
@@ -1327,6 +1653,15 @@ export function parseArguments(argv) {
 export function buildManifest({ screens, shapes, fonts, failures, totals }, { source, sha256 }) {
   const approximationTotals = {};
   const unresolvedTotals = {};
+  // ► **RECOUNTED FROM THE ROSTERS, NOT SUMMED FROM `counts.filtersByType`.**
+  //   Summing the per-screen tally would make this agree with that tally by
+  //   construction, which is the `assert.equal(X, X)` this project keeps
+  //   finding; going back to the lists means a screen whose own tally has
+  //   drifted shows up as a disagreement instead of being laundered.
+  const filterTotals = filtersByType(
+    ...Object.values(screens).map((screen) => screen.filteredPlacements ?? []),
+    ...Object.values(screens).map((screen) => screen.filteredButtonRecords ?? [])
+  );
   for (const screen of Object.values(screens)) {
     for (const [kind, count] of Object.entries(screen.approximations ?? {})) {
       approximationTotals[kind] = (approximationTotals[kind] ?? 0) + count;
@@ -1360,6 +1695,13 @@ export function buildManifest({ screens, shapes, fonts, failures, totals }, { so
     fonts: fonts ?? {},
     // Per USE across the 26 screens — a shape on the chrome is counted 26 times.
     approximationsByUse: approximationTotals,
+    // ► **WHAT THE BUILD ASKS FOR ON THESE SCREENS, BY KIND.** Also per USE, so
+    //   a glow on the chrome is counted 26 times; the point is the SHAPE of the
+    //   demand, which decides what a renderer has to be able to express.
+    //   `src/render/filters.js` can emit a CSS string for glow, blur and
+    //   dropShadow, defers colourMatrix to `applyColourMatrix`, and refuses
+    //   bevel by name — so this table is the list of what it will be asked.
+    filtersByType: filterTotals,
     // Per PATH in the shared shape table — each distinct shape counted once.
     approximationsByPath: pathApproximations,
     unresolvedByKind: unresolvedTotals,
@@ -1406,7 +1748,22 @@ function main(argv) {
   );
   fs.writeFileSync(path.join(options.out, "manifest.json"), JSON.stringify(manifest, null, 1));
 
-  const lines = [`screens -> ${options.out}`];
+  process.stdout.write(`${summaryLines(extraction, manifest, options).join("\n")}\n`);
+}
+
+/**
+ * The lines a human reads after a run.
+ *
+ * ► **EXPORTED SO THE UNITS CAN BE TESTED.** This was inline in `main` and so
+ *   could only be checked by eye, which is how it came to print
+ *   "(on 243 placements + 5 in button records)" — the left number in
+ *   PLACEMENTS, the right in FILTERS, and on this build the button roster holds
+ *   5 records carrying 5 filters, so the two readings coincided and nothing
+ *   could tell them apart. A summary whose only reader is a person is a summary
+ *   whose mistakes survive.
+ */
+export function summaryLines(extraction, manifest, options = {}) {
+  const lines = [`screens -> ${options.out ?? "(nowhere)"}`];
   for (const screen of Object.values(extraction.screens)) {
     const approximated = Object.entries(screen.approximations ?? {})
       .filter(([, count]) => count > 0)
@@ -1436,10 +1793,27 @@ function main(argv) {
     "  unresolved by kind:   " +
     (Object.entries(manifest.unresolvedByKind).map(([kind, count]) => `${kind} ${count}`).join(", ") || "none")
   );
+  // ► **EVERY NUMBER ON THE FILTER LINES NAMES ITS UNIT.** ~~"(on 243
+  //   placements + 5 in button records)"~~ — corrected 2026-09-14. That is
+  //   exactly the confusion `filterRecords` exists beside `filters` to prevent,
+  //   printed one line away from it. The type tally spans BOTH rosters, which
+  //   the old line also did not say; it is on its own line now so that nothing
+  //   reads as "these filters sit on those placements".
+  const byUse = manifest.approximationsByUse ?? {};
+  const typedFilters = Object.values(manifest.filtersByType ?? {}).reduce((sum, count) => sum + count, 0);
+  lines.push(
+    "  filters by type:      " +
+    (Object.entries(manifest.filtersByType ?? {}).map(([kind, count]) => `${kind} ${count}`).join(", ") || "none")
+  );
+  lines.push(
+    `  ${typedFilters} filters in all: ${byUse.filterRecords ?? 0} on ${byUse.filters ?? 0} filtered placements, ` +
+    `${byUse.filtersInButtonRecords ?? 0} on ${byUse.buttonRecordsFiltered ?? 0} filtered button records ` +
+    `(${byUse.buttonRecordsFilteredOverText ?? 0} of those over TEXT, reaching no drawable)`
+  );
   if (options.report) for (const failure of extraction.failures.slice(0, 30)) {
     lines.push(`    ! ${failure.screen ?? "-"} ${failure.kind} ${failure.character ?? ""}: ${failure.message}`);
   }
-  process.stdout.write(`${lines.join("\n")}\n`);
+  return lines;
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {

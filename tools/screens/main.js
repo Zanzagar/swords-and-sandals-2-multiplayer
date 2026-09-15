@@ -91,19 +91,36 @@
  *   Not worked around here: a renderer that special-cases a black rectangle is
  *   a renderer that lies about the pack.
  *
- * ► **2. 108 OF THE BUILD'S 256 EDIT FIELDS ARE LAID OUT LEFT-ALIGNED WHEN THE
- *   TAG SAYS CENTRE OR RIGHT.** Visible on `createchar` as the stat column:
- *   every number is drawn ON TOP of its own label. Measured — field 1619 is
- *   `align: "center"`, `wordWrap: false`, `multiline: false`, box x 62.3..109.2
- *   in stage pixels, and its digit draws at 64.6, the box's left edge plus the
- *   gutter. `fieldLayoutOptionsFor` in `src/render/text.js` passes
+ * ► **2. ~~108 OF THE BUILD'S 256 EDIT FIELDS ARE LAID OUT LEFT-ALIGNED WHEN
+ *   THE TAG SAYS CENTRE OR RIGHT.~~ FIXED 2026-09-15 IN `src/render/text.js`.**
+ *   ~~Visible on `createchar` as the stat column: every number is drawn ON TOP
+ *   of its own label.~~ The diagnosis below was right and is kept because it is
+ *   how the defect was found; **every present-tense sentence in it is now
+ *   false**, and the quoted line no longer reads that way:
+ *
+ *   ~~*Field 1619 is `align: "center"`, `wordWrap: false`, `multiline: false`,
+ *   box x 62.3..109.2 in stage pixels, and its digit draws at 64.6, the box's
+ *   left edge plus the gutter. `fieldLayoutOptionsFor` passes
  *   `maxWidth: field.wordWrap && field.multiline ? inner : Infinity`, and
  *   `layoutText` then computes `box = Number.isFinite(maxWidth) ? maxWidth :
- *   widest`, so the slack is zero and alignment is a no-op. Centred, that digit
- *   would sit at 82.2 — clear of the label, which ends at 72. One parameter is
- *   carrying two jobs: WRAPPING genuinely needs `wordWrap && multiline`,
- *   ALIGNING only needs a box, and every field has one. **Not fixed here —
- *   `src/render/text.js` is not this file's to edit.**
+ *   widest`, so the slack is zero and alignment is a no-op.*~~
+ *
+ *   One parameter was carrying two jobs: WRAPPING genuinely needs
+ *   `wordWrap && multiline`, ALIGNING only needs a box, and every field has
+ *   one. `fieldLayoutOptionsFor` now carries a separate `alignWidth`, so that
+ *   digit is centred — clear of the label, which ends at 72. **The prediction
+ *   above was 82.2 px and the digit's ink measures 82.33 px**; both are kept,
+ *   because the first is a hand-computed box centre and the second is the
+ *   glyph's actual left edge, and collapsing them to one number would hide
+ *   that they are different quantities.
+ *
+ * ► **AND THIS BLOCK IS WHY A POINTER MUST BE CORRECTED AT THE POINTEE.**
+ *   `src/render/text.js` struck its own copy of this claim when it made the
+ *   fix, and named THIS block as stale — but naming it did not change it, so
+ *   the text a reader of this file actually reached still said the bug was
+ *   live. A verifier found it. **Correcting the pointer is not correcting the
+ *   pointee**, which is the same shape as the eight other explaining-away
+ *   failures recorded in `HANDOFF.md`.
  *
  * ► **3. OPERATIONS SPILL OFF THE STAGE AND THIS PAGE USED TO DRAW THEM.** The
  *   weapon shop's first render put the shopkeeper's head in the page's own
@@ -864,6 +881,19 @@ function draw() {
 
   const tally = emptyTally();
   const ops = visibleOps(current, tally);
+  // ► **THIS TIMES THE ENQUEUE, NOT THE PAINT, AND THE PANEL USED TO CLAIM
+  //   OTHERWISE.** It read `paint time 0.0 ms` beside `1698 operations
+  //   painted`, which the 2026-09-14 handoff flagged as "not a credible number"
+  //   — and it was right that the READOUT was wrong, though not about where.
+  //   The arithmetic here is fine. What it measures is the wall time of the JS
+  //   loop that hands commands to the 2-D context; the browser batches and
+  //   defers the actual rasterisation, and `performance.now()` is deliberately
+  //   coarsened, so a sub-tick answer is the EXPECTED result rather than a
+  //   broken one. **A measurement that cannot be what its label says is worse
+  //   than no measurement**, so the label is what changed: the panel now says
+  //   what this stopwatch actually spans. Timing the real paint needs
+  //   `requestAnimationFrame` around a composite, which is a different
+  //   instrument and is not installed here.
   const started = performance.now();
   paintOps(ops, fit, current.placement ?? SCREEN_STAGE_PLACEMENT, tally);
   lastPaintMs = performance.now() - started;
@@ -1034,7 +1064,10 @@ function renderInvoice() {
   nodes.push(...row("gradient fills drawn", `${lastTally.gradientDrawn} / ${lastTally.gradientOps}`,
     { tone: lastTally.gradientDrawn < lastTally.gradientOps ? "bad" : null }));
   nodes.push(...row("clips applied", lastTally.clipsApplied));
-  nodes.push(...row("paint time", `${lastPaintMs.toFixed(1)} ms`));
+  // Named for what the stopwatch in `draw()` actually spans — see the note
+  // there. It is NOT the rasterisation, and calling it "paint time" is how
+  // a credible-looking 0.0 ms got onto the panel beside 1698 operations.
+  nodes.push(...row("ops enqueued in", `${lastPaintMs.toFixed(2)} ms`));
 
   nodes.push(heading("words"));
   nodes.push(...row("text placements", current.counts.textPlacements));

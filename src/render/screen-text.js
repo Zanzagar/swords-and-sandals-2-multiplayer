@@ -35,7 +35,7 @@
  *      pack is the one you must not draw.** Five fields carry real markup;
  *      `screens.json` keeps `initialText` verbatim (`<p align="left">…`) while
  *      `text.json` carries the stripped plain text. Feeding a placement's own
- *      `text` to `fieldOpsFor` paints the tags. So the VALUE drawn here comes
+ *      `text` to `fieldTextFor` paints the tags. So the VALUE drawn here comes
  *      from the text pack or from the caller, never from the screen placement.
  *   3. **Four of those five fields are BLANK once stripped**, so their
  *      `approximated: "html-markup-stripped"` mark reaches no operation at all
@@ -88,21 +88,44 @@
  *
  * ## ONE MARK PER OPERATION — WHY THE `…Ops` COUNTS ARE NOT READ OFF THE OPS
  *
- * ► **AN OPERATION CAN CARRY ONLY ONE `approximated` STRING.** `fieldOpsFor`
+ * ► ~~**AN OPERATION CAN CARRY ONLY ONE `approximated` STRING.** `fieldOpsFor`
  *   stamps `op.approximated ?? field.approximated` (`text.js:713`), so an
  *   operation already marked `glyph-missing` never receives its field's
- *   `html-markup-stripped`, and an ops-only filter for the field's mark loses
- *   it. An earlier version of this file counted `htmlMarkupStrippedOps` with
- *   exactly that filter.
+ *   `html-markup-stripped`.~~ **FIXED AT THE CAUSE 2026-09-14: `approximated`
+ *   ON AN OPERATION IS NOW A LIST**, the field's reasons are merged into each
+ *   operation's own in `opsFromLayout`, and a `.notdef` box in an HTML field
+ *   carries `["glyph-missing", "html-markup-stripped"]`. The paragraph is kept
+ *   rather than deleted because the RULES below were written against it and
+ *   still stand. An earlier version of this file counted `htmlMarkupStrippedOps`
+ *   with an ops-only filter, which undercounted for exactly this reason.
  *
- * The root cause is in `text.js` and **this file does not own `text.js`**, so
- * the fix here is to stop asking the operation and ask the PLACEMENT instead:
- * every operation a stripped field emitted is drawn from stripped markup,
- * whatever single mark its own slot happens to hold. That is the rule above,
- * and it gives the same 65 on this pack — where 0 of the 187 placements emit a
- * notdef operation, so the two readings have never yet disagreed — while being
- * immune to the collision. **If `text.js` ever grows a list of marks per
- * operation, this is the seam that should stop deriving and start reading.**
+ * ► **BUT "NOW A LIST" IS TRUE OF THIS FILE'S OPERATIONS AND OF NO OTHERS, AND
+ *   READING IT AS SETTLED IS THE TRAP.** `emitDrawable` in
+ *   `src/render/screen.js` and `emitPropOps` in `src/render/props.js` still put
+ *   the extractor's STRING under the same key, and `screenWithTextFor` puts
+ *   both in one array — 209 strings to 65
+ *   lists over the 26 screens, measured 2026-09-14. So the fix for a
+ *   producer/reader seam mismatch made a producer/producer one. There is exactly
+ *   one reader of that key in `src/` — `approximationMarksOf`, in `text.js` —
+ *   and everything here goes through it; see the note on `screenWithTextFor`
+ *   for the census and for what the proper repair is.
+ *
+ * **This file still DERIVES the `…Ops` counts from the placement rather than
+ * reading them off the operations, and that is now a choice rather than a
+ * workaround.** Two of the marks `finish` pushes — `filtersNotApplied` and
+ * `placeholderDrawn` — are facts about the PLACEMENT that reach no operation at
+ * all, so the placement rule has to exist whatever the operations carry; having
+ * one rule for both is what keeps the arithmetic to the two lines above. The
+ * two readings agreed before the fix by luck — re-measured 2026-09-14: 65 of
+ * the 2236 glyph operations these 26 screens draw carry a mark at all, none
+ * carries two, and none is a notdef box — and now agree by construction
+ * wherever a mark reaches an operation at all, because `fieldTextFor` puts the
+ * field's reasons on every operation it emits.
+ * `test/render-screen-text.test.js` asserts that on the colliding case rather
+ * than trusting this paragraph. **The real pack cannot tell the two readings
+ * apart, so that synthetic case is the only thing standing behind this
+ * paragraph: a mutation that makes this loop read the list as a string moves
+ * no number on any of the 26 screens.**
  *
  * ## THE PACKS ARE ARGUMENTS, BOTH OF THEM, AND EITHER MAY BE ABSENT
  *
@@ -210,21 +233,33 @@
  * of tooltip prose. Nearly all of that is `scaleGlyphPath` rebuilding path
  * strings, which is `text.js`'s own finding and not a new one.
  *
- * Each field is laid out ONCE, inside `fieldOpsFor`. An earlier draft laid it
- * out twice — the second pass purely to read `layoutText`'s `approximated`
- * block — and a mutation run showed why that was wrong beyond the cost: the
- * second call took a `gutter` argument that no assertion could reach, because
- * neither approximation it reports depends on the gutter. Both are now read
- * from the field's own tag instead, which is one line each and cannot drift
- * from the operations beside them. As in `text.js` there is no cache in here —
- * this module is pure — so a surface redrawing a screen every frame holds onto
- * the frozen array it gets back.
+ * Each field is laid out ONCE, inside ~~`fieldOpsFor`~~ **`fieldTextFor`**. An
+ * earlier draft laid it out twice — the second pass purely to read
+ * `layoutText`'s `approximated` block — and a mutation run showed why that was
+ * wrong beyond the cost: the second call took a `gutter` argument that no
+ * assertion could reach, because neither approximation it reports depends on
+ * the gutter. Both are read from the field's own tag instead, which is one line
+ * each and cannot drift from the operations beside them.
+ *
+ * ► **AND THE THIRD NUMBER, `overflowing`, COULD NOT BE READ THAT WAY — WHICH
+ *   IS WHY THE CALL CHANGED RATHER THAN THE PASS COUNT.** It depends on the
+ *   VALUE and on the gutter, not on the tag, so there was nowhere to read it
+ *   from; and `fieldOpsFor` returns a bare array, so the one route that draws a
+ *   screen could not see it. `text.js` now offers `fieldTextFor`, the deep call
+ *   that hands over the operations and the layout's own counts together. Still
+ *   one layout pass per field, and the `fieldOverflows` tally below is no longer
+ *   a number nothing on this route could reach.
+ *
+ * As in `text.js` there is no cache in here — this module is pure — so a
+ * surface redrawing a screen every frame holds onto the frozen array it gets
+ * back.
  */
 
 import { screenFor, screenNames } from "./screen.js";
 import {
   TWIPS_PER_PIXEL,
-  fieldOpsFor,
+  approximationMarksOf,
+  fieldTextFor,
   fontFor,
   hasExtractedText,
   lineMetricsFor,
@@ -296,7 +331,18 @@ export const SCREEN_TEXT_APPROXIMATION_KINDS = Object.freeze([
   "placeholderDrawn",
   "glyphsNotdef",
   "lineHeightFromSize",
-  "newlineCollapsed"
+  "newlineCollapsed",
+  // ► **THE NINTH KEY, ADDED 2026-09-14 FOR A CONDITION THE ALIGNMENT FIX
+  //   CREATED.** A non-wrapping field used to be aligned in a box exactly as
+  //   wide as its own longest line, so its slack could not go negative and it
+  //   could not draw outside itself; aligning it in its own box made that
+  //   possible, and for a while nothing on this route counted it. It counts
+  //   PLACEMENTS with at least one overflowing line; the line count is on each
+  //   placement as `overflowing`. There is deliberately no `…Ops` twin: a
+  //   multiline field can overflow one line of three, so "operations affected"
+  //   is not the placement's whole operation list and a spread count here would
+  //   be a number that looks measured and is not.
+  "fieldOverflows"
 ]);
 
 /**
@@ -341,6 +387,7 @@ const APPROXIMATION_MARKS = new Map([
   ["lineHeightFromSize", { placements: "lineHeightFromSize", ops: null, spreads: true }],
   ["newlineCollapsed", { placements: "newlineCollapsed", ops: null, spreads: true }],
   ["glyphsNotdef", { placements: null, ops: null, spreads: false }],
+  ["fieldOverflows", { placements: "fieldOverflows", ops: null, spreads: false }],
   ["glyph-missing", { placements: null, ops: "glyphsNotdef", spreads: false }]
 ]);
 
@@ -485,7 +532,29 @@ function fieldPlacement(textPack, base, placement, options) {
   const source = bound === undefined ? "placeholder" : "bound";
   const value = bound === undefined ? placeholder : String(bound);
 
-  const ops = fieldOpsFor(textPack, base.character, { matrix, text: value, gutter: options.gutter }) ?? [];
+  const drawn = fieldTextFor(textPack, base.character, { matrix, text: value, gutter: options.gutter });
+  const ops = drawn ? drawn.ops : [];
+  // ► **THE LINES THAT CAME OUT WIDER THAN THE BOX THEY WERE ALIGNED IN.**
+  //   Before `text.js` learned to align a non-wrapping field in its own box,
+  //   that box WAS the line's own width, the slack could not be negative, and a
+  //   field could not spill out of itself. It can now, and an overflowing
+  //   centred field draws over whatever is beside it — which is the defect the
+  //   alignment fix was made to cure, reappearing from the other end. `text.js`
+  //   counts it; nothing on this route read the count, because `fieldOpsFor`
+  //   returns an array and an array cannot carry one. `fieldTextFor` is the
+  //   deep call that hands over both, at the cost of no extra layout pass.
+  //
+  //   ► **ZERO ON THIS PACK, AND NOT VACUOUSLY SO.** With the pack's own
+  //     placeholder text all 272 laid-out lines fit (re-derived 2026-09-14), so
+  //     the number below is 0 on every one of the 26 screens as they stand.
+  //     What makes it non-zero is the thing a screen is FOR: a bound value.
+  //     `createchar`'s field 1619 is a 42.95 px box holding the placeholder
+  //     "6"; bind a twelve-digit value to it and the line is 91.05 px, this is
+  //     1, and the first glyph lands 22 px left of the box, on the "strength"
+  //     label. `test/render-screen-text.test.js` binds exactly that and asserts
+  //     the count moves — so it is a counter with an input that reaches it, not
+  //     a zero nothing could disturb.
+  const overflowing = drawn ? drawn.overflowing : 0;
   // ► **THE TWO APPROXIMATIONS `layoutText` WOULD REPORT ARE READ DIRECTLY
   //   INSTEAD OF LAYING THE FIELD OUT A SECOND TIME.** An earlier draft called
   //   `fieldLayoutOptionsFor` and `layoutText` here purely to reach
@@ -493,6 +562,9 @@ function fieldPlacement(textPack, base, placement, options) {
   //   worse, took a `gutter` argument that no assertion could reach: neither
   //   kind it reports depends on the gutter, so deleting the argument left the
   //   whole suite green. Both conditions are one line of the field's own tag.
+  //   (`overflowing` above is the case that argument DOES reach — the gutter
+  //   sets the box width — and it comes off the same single pass rather than a
+  //   second one.)
   // `lineMetricsFor` says so itself when a font carries no layout block.
   const lineHeightFromSize = lineMetricsFor(font, field.fontHeight / TWIPS_PER_PIXEL).approximated === "line-height-from-size";
   // `splitLines` joins a single-line field's breaks into one line with spaces.
@@ -513,9 +585,16 @@ function fieldPlacement(textPack, base, placement, options) {
     value,
     source,
     matrix,
-    html: typeof field.approximated === "string" ? field.approximated : null,
+    // ► **THE FIELD'S OWN MARKS, THROUGH THE SAME ONE READER.** `tools/extract-text.mjs`
+    //   writes a STRING here (`html-markup-stripped` on five of the 256 fields),
+    //   and this line used to be the last `typeof … approximated` in `src/` — a
+    //   second reader of the same key, which is how the shapes diverged in the
+    //   first place. It costs nothing to read both, and "there is one reader" is
+    //   only true if there is.
+    marks: approximationMarksOf(field.approximated),
     lineHeightFromSize,
-    newlineCollapsed
+    newlineCollapsed,
+    overflowing
   }, options, placement);
 }
 
@@ -563,7 +642,11 @@ function finish(base, resolved, options, placement) {
 
   const approximated = [];
   if (filtered) approximated.push("filtersNotApplied");
-  if (resolved.html) approximated.push(resolved.html);
+  // Whatever the field itself declares, under the extractor's own name for it —
+  // never folded into a count of `html-markup-stripped`, which is hazard 5.
+  for (const mark of resolved.marks ?? []) {
+    if (!approximated.includes(mark)) approximated.push(mark);
+  }
   if (base.kind === "text-edit" && resolved.source === "placeholder" && stamped.length > 0) {
     approximated.push("placeholderDrawn");
   }
@@ -571,6 +654,11 @@ function finish(base, resolved, options, placement) {
   if (notdef > 0) approximated.push("glyphsNotdef");
   if (resolved.lineHeightFromSize) approximated.push("lineHeightFromSize");
   if (resolved.newlineCollapsed) approximated.push("newlineCollapsed");
+  // A static run has no box to overflow — its advances ARE its width — so only
+  // `fieldPlacement` ever supplies this, and `?? 0` is the static's answer
+  // rather than a defensive default.
+  const overflowing = Number.isFinite(resolved.overflowing) ? resolved.overflowing : 0;
+  if (overflowing > 0) approximated.push("fieldOverflows");
 
   return Object.freeze({
     ...base,
@@ -585,6 +673,11 @@ function finish(base, resolved, options, placement) {
     drawn: stamped.length > 0,
     undrawn: resolved.undrawn,
     notdef,
+    // LINES wider than their box, where `approximations.fieldOverflows` counts
+    // PLACEMENTS that have at least one. Both are wanted: a three-line field
+    // with one long line is one placement and one line, and a tally that only
+    // knew the placement count could not tell that from all three spilling.
+    overflowing,
     approximated: Object.freeze(approximated)
   });
 }
@@ -645,11 +738,26 @@ export function screenTextFor(screenPack, textPack, name, options = {}) {
     if (resolved.undrawn) undrawnByKind[resolved.undrawn] += 1;
 
     // The marks the OPERATIONS carry, gathered on the pass that collects them.
+    //
+    // ► **AN OPERATION CARRIES A LIST *OR* A STRING, AND EITHER GUESS ALONE IS
+    //   WRONG ABOUT HALF THE TREE.** `text.js` used to put one string in that
+    //   slot; it now puts every reason in a frozen array (see ONE MARK PER
+    //   OPERATION in this file's header) — but `emitDrawable` in
+    //   `src/render/screen.js` and `emitPropOps` in `src/render/props.js` still
+    //   copy the extractor's STRING through untouched, and `screenWithTextFor`
+    //   below puts both kinds in one array.
+    //   So a `typeof op.approximated === "string"` guard would silently count
+    //   nothing here, and an `Array.isArray` guard would silently count nothing
+    //   on the merged list. Neither guess is written down twice: the ONE reader
+    //   is `approximationMarksOf`, in `text.js` beside the producer that
+    //   changed shape, and it takes both. Anything that is neither reads as no
+    //   marks, the way every other reader here treats pack data.
     const opMarks = new Map();
     for (const op of resolved.ops) {
       ops.push(op);
-      if (typeof op.approximated !== "string" || op.approximated.length === 0) continue;
-      opMarks.set(op.approximated, (opMarks.get(op.approximated) ?? 0) + 1);
+      for (const mark of new Set(approximationMarksOf(op.approximated))) {
+        opMarks.set(mark, (opMarks.get(mark) ?? 0) + 1);
+      }
     }
 
     // Rule one: a mark on the PLACEMENT counts one placement and, unless the
@@ -747,10 +855,49 @@ export function screenTextOpsFor(screenPack, textPack, name, options = {}) {
  * `counts.textStillNotDrawn` is the one number that changes meaning — it is
  * what is left of `screen.approximations.textNotDrawn` after this join.
  *
+ * ► **THE SHAPE INVOICE IS NESTED, NOT ABSENT.** `screen.approximations`,
+ *   `screen.blankets` and the rest of `screenFor`'s record are reachable here as
+ *   `record.screen.…`, and `tools/screens/main.js` already binds them that way
+ *   (`const screen = current.screen; const a = screen.approximations;`). They
+ *   are deliberately NOT copied up: two tallies summed into one top-level block
+ *   would double-count every number that appears in both, and a second copy of
+ *   `blankets` is a second thing to drift. A verifier reading this join on
+ *   2026-09-14 concluded that a count on `screen` "still cannot be read" by the
+ *   viewer; it can, and is — what the viewer does not do is RENDER the blanket
+ *   roster, which is a gap in that file and not in this record's shape.
+ *
  * Returns null when there is no screen to draw; when the TEXT pack alone is
  * missing this still returns the screen, with an empty text half and
  * `textPresent: false`, because a caller that has screens and no fonts should
  * draw the screens.
+ *
+ * ► **`ops` CARRIES TWO SHAPES OF `approximated` AND A CONSUMER MUST BE TOLD
+ *   SO.** This is one array built out of two producers that disagree about the
+ *   type under that key, and the disagreement was created by the fix for a
+ *   producer/reader mismatch of exactly this kind:
+ *
+ * ```text
+ *   src/render/text.js    glyph ops   a frozen LIST of reasons
+ *   src/render/screen.js  shape ops   the extractor's STRING, copied (line 647)
+ *   src/render/props.js               the same line (line 366) — not in this
+ *                                     array, but the same key and the same shape
+ * ```
+ *
+ *   Measured over all 26 screens on 2026-09-14: **274 of the merged operations
+ *   carry a mark — 209 strings (`gradient` x180, `bitmap` x29) and 65 lists
+ *   (`html-markup-stripped` x65).** Nothing in this tree walks the MERGED array
+ *   for marks today, so it is a trap rather than a live defect; it is written
+ *   down here because the next person to walk it will otherwise write one
+ *   `typeof` and lose 65 or 209 marks with no error.
+ *
+ *   **Read the key with `approximationMarksOf` from `text.js` — the one reader
+ *   both shapes go through.** The tally in `screenTextFor` above already does.
+ *   The proper repair is for `screen.js` and `props.js` to emit lists too, at
+ *   which point the census becomes 0 / 274 and every reader here is unchanged;
+ *   `test/render-screen-text.test.js` asserts the INVARIANT (every mark on
+ *   every merged operation is readable, and no operation carries a shape that
+ *   is neither) rather than the 209/65 split, so converting them turns nothing
+ *   red.
  */
 export function screenWithTextFor(screenPack, textPack, name, options = {}) {
   const screen = screenFor(screenPack, name);

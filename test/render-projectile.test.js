@@ -573,6 +573,73 @@ test("the TRAIL tapers across lanes too, each puff at its own depth", () => {
   }
 });
 
+test("EACH PUFF WEARS THE ROTATION THE ARROW HAD WHEN IT WAS DROPPED", () => {
+  // ► **THE BUILD ATTACHES A PUFF AT THE BULLET'S `_x`, `_y` AND `_rotation`**
+  //   (`+0x71ee`), and `projectileAt` has always computed that rotation — but
+  //   `projectileDrawAt` copied x, y, lift and size out of it and dropped the
+  //   rotation, so `tools/arena/main.js` hardcoded `rotation: 0` and every puff
+  //   behind a pitching bombard lay flat. Fixed 2026-09-15.
+  //
+  // ► **A BOMBARD IS THE CASE THAT CAN TELL.** Its pitch changes every frame,
+  //   so its puffs must carry DIFFERENT rotations from one another; a snipe's
+  //   `_rotation` is the constant ±90 of `+0x7498`/`+0x74b0`, so a test using
+  //   one could not distinguish "carried" from "hardcoded to the same number".
+  //   That is what this test would have been if it had used the simpler shot.
+  // ► **AND THE PROGRESS MATTERS, WHICH IS HOW THE FIRST VERSION OF THIS TEST
+  //   FAILED.** It asked at progress 1 — the end of the flight — where the six
+  //   KEPT puffs are the newest six and the tumble has long since hit its 170°
+  //   clamp, so all six shared one rotation and the assertion below fired
+  //   against correct code. The tumble is ~4°/frame and a puff falls every
+  //   third, so consecutive puffs are 12° apart until the clamp: measured here,
+  //   12, 24, 36, 48 … 168, then 170 forever. **Both halves are pinned below**,
+  //   because a test that only saw the clamp could not tell a carried rotation
+  //   from a hardcoded one, and that is exactly the reading that fooled me.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const arc = projectileFlight({
+    kind: ProjectileKind.BOMBARD, from: { x: -200, y: 103 }, to: { x: 200, y: 103 }, sequence: 1
+  });
+  const early = projectileDrawAt(arc, 0.3, view, {});
+  assert.ok(early.trail.length >= 3, `the sweep needs several puffs: ${early.trail.length}`);
+
+  for (const [index, puff] of early.trail.entries()) {
+    assert.ok(Number.isFinite(puff.rotation), `puff ${index} must carry a finite rotation, not undefined`);
+  }
+  // Not merely present — DIFFERENT, which is what fails if the field is ever
+  // filled from the arrow's current rotation or from a constant.
+  const distinct = new Set(early.trail.map((puff) => puff.rotation));
+  assert.ok(distinct.size > 1,
+    `a tumbling bombard's early puffs must not share one rotation: ${[...distinct].join(", ")}`);
+
+  // And each is the rotation the arrow ACTUALLY had at that frame — the puffs
+  // are dropped every third frame, oldest first, so the Nth SURVIVING puff of
+  // an un-truncated trail was dropped at frame 3*(N+1). Asserting against
+  // `projectileAt` is what pins "the arrow's own rotation, then" rather than
+  // "some plausible changing number".
+  for (const [index, puff] of early.trail.entries()) {
+    const droppedAt = SS2_PROJECTILE.trailEveryFrames * (index + 1);
+    assert.equal(puff.rotation, projectileAt(arc, droppedAt).rotation,
+      `puff ${index} must wear the rotation the arrow had at frame ${droppedAt}`);
+  }
+
+  // THE CLAMP: `_rotation = ±bulletrotus, clamped at 170` (`+0x742f`,
+  // `+0x74e0`, `+0x74f3`). Late puffs SHOULD share one rotation, and a test
+  // that called that a bug would be wrong.
+  //
+  // ► **IT TAKES A LONGER FLIGHT THAN THE ONE ABOVE, and the second draft of
+  //   this test got that wrong too.** The 400-unit shot is 45 frames, so even
+  //   its newest six puffs sit at 120, 132, 144, 156, 168, 170 — still
+  //   climbing. The tumble needs ~42 frames to reach 170 at 4°/frame, and the
+  //   trail keeps only the newest six, so the clamp is only ALL of them on a
+  //   flight long enough that every kept puff was dropped after frame 42.
+  const far = projectileFlight({
+    kind: ProjectileKind.BOMBARD, from: { x: -600, y: 103 }, to: { x: 600, y: 103 }, sequence: 1
+  });
+  const late = projectileDrawAt(far, 1, view, {});
+  const lateDegrees = late.trail.map((puff) => Math.round((puff.rotation * 180) / Math.PI));
+  assert.deepEqual([...new Set(lateDegrees)], [SS2_PROJECTILE.tumbleClamp],
+    `past the clamp every puff is ${SS2_PROJECTILE.tumbleClamp}°: ${lateDegrees.join(", ")}`);
+});
+
 test("a null depth draws at the FRONT RANK, and that decision is not the shell's", () => {
   // With the second axis off every gladiator has `y: null` and `projectileAt`
   // faithfully reports null — "this model has no depth". A canvas still has to

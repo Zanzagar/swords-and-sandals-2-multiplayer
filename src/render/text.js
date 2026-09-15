@@ -59,6 +59,17 @@
  * - **A static run's advances are BAKED and are not the font's.** Over the 4060
  *   resolvable entries, `fontAdvance * height / 20480` matches the baked advance
  *   within a twip on only 78% of them. `staticTextOpsFor` uses the baked ones.
+ * - **A field ALIGNS in its own box and WRAPS only if it says it does**, and
+ *   those are two different widths. One `maxWidth` used to carry both, which
+ *   left 108 of the 256 fields centred or right-aligned in a box exactly as
+ *   wide as their own text — i.e. left-aligned. See `alignWidth` in
+ *   `layoutText` and the note beside it in `fieldLayoutOptionsFor`.
+ * - **An operation's `approximated` is a LIST of reasons, or absent.** It was
+ *   one string, and one string cannot hold two reasons: see `marksOf`.
+ *   ► **AND THE REST OF THE TREE STILL EMITS A STRING**, so the two shapes sit
+ *     in one array the moment `screen-text.js` merges shapes with words — 209
+ *     strings to 65 lists over the 26 screens today. Read the key with
+ *     `approximationMarksOf` and never with a `typeof`; the count is there.
  *
  * ## What it costs, measured on this machine rather than guessed
  *
@@ -264,8 +275,10 @@ function splitLines(text, multiline) {
  * @param {string} options.text
  * @param {number} [options.x]        pen origin, pixels
  * @param {number} [options.y]        first baseline, pixels
- * @param {string} [options.align]    left | center | right, within `maxWidth`
+ * @param {string} [options.align]    left | center | right, within the box
  * @param {number} [options.maxWidth] pixels; wraps when finite
+ * @param {number} [options.alignWidth] pixels; the box alignment measures
+ *        against, when that is not the wrap width. See the note at `box` below.
  * @param {number} [options.lineHeight] pixels, overriding the font's own
  * @param {number} [options.tracking] extra pixels between glyphs
  * @param {boolean} [options.kerning] default true
@@ -284,6 +297,12 @@ export function layoutText(pack, options = {}) {
   const useKerning = options.kerning !== false;
   const multiline = options.multiline !== false;
   const maxWidth = Number.isFinite(options.maxWidth) && options.maxWidth > 0 ? options.maxWidth : Infinity;
+  // ► **WRAPPING AND ALIGNING ARE TWO JOBS AND `maxWidth` USED TO DO BOTH**,
+  //   which made alignment a no-op for every field that does not wrap. See the
+  //   note at `box` below for the 108 fields it cost. `alignWidth` is the box
+  //   alignment measures against; `null` means "use the wrap width, or the
+  //   widest line when there is none", which is what this always did.
+  const alignWidth = Number.isFinite(options.alignWidth) && options.alignWidth > 0 ? options.alignWidth : null;
   // A FIRST-LINE indent, the way a `DefineEditText`'s layout block means it.
   // Every one of this build's 256 fields sets it to zero, so this arm is
   // exercised by `test/render-text.test.js` and by nothing else — said out loud
@@ -413,12 +432,62 @@ export function layoutText(pack, options = {}) {
     });
   }
 
-  const box = Number.isFinite(maxWidth) ? maxWidth : widest;
+  // ► **THE ALIGNMENT BOX, WHICH IS NOT ALWAYS THE WRAP WIDTH — AND WAS, FOR
+  //   108 OF THE BUILD'S 256 EDIT FIELDS.** This line used to read
+  //   `Number.isFinite(maxWidth) ? maxWidth : widest`, and `fieldLayoutOptionsFor`
+  //   passes `maxWidth: Infinity` for a field that does not wrap. `widest` is
+  //   then the longest line's OWN width, the slack is zero, and `center` and
+  //   `right` both land exactly where `left` does.
+  //
+  //   ► **THE CENSUS IN FULL, BECAUSE THE SHORT FORM OF IT IS ALREADY WRONG IN
+  //     A HANDOFF.** Re-derived from `assets/text/text.json` on 2026-09-14:
+  //
+  // ```text
+  //     256 fields      125 left       101 center       30 right
+  //     centre or right                     131
+  //     of those 131, NOT (wordWrap && multiline)   108   (81 centre, 27 right)
+  // ```
+  //
+  //     The 108 is a subset of the 131, and the 131 is the number the summary
+  //     this fix was briefed from dropped — it read "108 of 256 — 101 centre,
+  //     30 right", which invites the reader to check 101 + 30 against 108 and
+  //     conclude the whole census is garbled. It is not; the intermediate went
+  //     missing. Stated here in full so the wrong form cannot be copied back in
+  //     from a handoff, and pinned by `EVERY CENTRED AND RIGHT-ALIGNED FIELD IN
+  //     THE BUILD NOW SPENDS ITS SLACK` in `test/render-text.test.js`, which
+  //     asserts all six of these numbers against the pack rather than quoting
+  //     them.
+  //   Visible on `createchar`, where each stat number drew on top of its label.
+  //   Wrapping genuinely needs `wordWrap && multiline`; aligning only needs a
+  //   box, and every field has one.
+  const box = alignWidth ?? (Number.isFinite(maxWidth) ? maxWidth : widest);
+  let overflowing = 0;
   for (const line of placed) {
     // An indented line has that much less box to be aligned within, so a
     // centred first line stays centred in what is left of it.
     const inset = line.indented ? indent : 0;
     const slack = box - inset - line.width;
+    // ► **A LINE WIDER THAN ITS BOX GETS NEGATIVE SLACK AND IS ALLOWED TO KEEP
+    //   IT — AN ASSUMPTION, STATED HERE RATHER THAN IN A HANDOFF.** Once the
+    //   alignment box is the field's box rather than the line's own width, a
+    //   non-wrapping line CAN be wider than it, and nothing in the SWF says
+    //   what the player then does: `DefineEditText` carries an align field and
+    //   no overflow rule, and the oracle is read-only on this route so nothing
+    //   here has watched it happen. Taken as: centre means centre, so an
+    //   over-long line spills equally at both ends and a right-aligned one
+    //   spills to the left with its right edge flush. The alternative reading
+    //   — clamp the slack at zero, so an overflowing line falls back to
+    //   left-aligned — is one `Math.max(0, …)` away, and `overflowing` below is
+    //   how many lines the choice is worth, so a caller that does compare
+    //   against a screenshot can see the stake before changing it.
+    //   ► **AND ON THIS BUILD IT IS WORTH NOTHING YET, WHICH IS THE PART TO SAY
+    //     OUT LOUD.** Measured 2026-09-14 over all 256 fields with the pack's
+    //     own placeholder text: 0 of 272 lines overflow. So nothing on the real
+    //     pack chooses between the two readings, and the arm is exercised by
+    //     `test/render-text.test.js` alone. It is a live choice all the same —
+    //     a BOUND value is a live number or a fighter's name, and it is longer
+    //     than the placeholder whenever the placeholder is "6".
+    if (slack < 0) overflowing += 1;
     if (options.align === "center") line.x = originX + inset + slack / 2;
     else if (options.align === "right") line.x = originX + inset + slack;
     else line.x = originX + inset;
@@ -432,6 +501,15 @@ export function layoutText(pack, options = {}) {
     lineHeight,
     lines: Object.freeze(placed.map((line) => Object.freeze({ ...line, glyphs: Object.freeze(line.glyphs) }))),
     width: widest,
+    // The box alignment was measured against, which is `width` only when the
+    // caller gave neither an `alignWidth` nor a finite `maxWidth`. A caller
+    // checking "is this centred where I think it is" needs the box, and
+    // deriving it a second time at the call site is how two copies drift.
+    box,
+    // How many lines came out wider than that box — the size of the assumption
+    // documented at the `slack` line above, not an approximation of the
+    // extraction, so it is deliberately NOT in the `approximated` tally below.
+    overflowing,
     height: placed.length === 0 ? 0 : (placed.length - 1) * lineHeight + metrics.ascent + metrics.descent,
     missing: placed.reduce((sum, line) => sum + line.glyphs.filter((glyph) => glyph.missing).length, 0),
     approximated: Object.freeze({
@@ -457,14 +535,93 @@ function round3(value) {
 }
 
 /**
+ * EVERY REASON ONE OPERATION IS NOT EXACT, AS A FROZEN LIST — the shape every
+ * `approximated` this module stamps on an operation now has.
+ *
+ * ► **IT WAS A SINGLE STRING AND THAT MADE IT A LOSSY SLOT.** `fieldOpsFor`
+ *   stamped `op.approximated ?? field.approximated`, so a hollow `.notdef` box
+ *   inside one of the build's five HTML fields carried `glyph-missing` and
+ *   silently dropped `html-markup-stripped` — an approximation overwriting
+ *   another approximation, which is the same defect as one that is never
+ *   counted. `src/render/screen-text.js` met it from the outside, could not fix
+ *   it (it does not own this file), and worked around it by counting the FIELD's
+ *   mark from the placement instead; its header names this line as the cause
+ *   and says that if this module ever grows a list, that seam should stop
+ *   deriving and start reading. This is the list.
+ *
+ * ► **ORDER IS PRECEDENCE, MOST SPECIFIC FIRST**, so `marks[0]` is exactly what
+ *   the old single slot held: the operation's own reason, then the field's.
+ *   Duplicates collapse — a field and its glyph naming the same kind is one
+ *   reason, not two — because the consumer that counts these
+ *   (`screenTextFor`'s tally) counts an operation once per kind.
+ *
+ * Takes strings and lists in any mix, and drops everything that is neither, so
+ * a hand-edited pack cannot put a number or an object on an operation.
+ */
+function marksOf(...sources) {
+  const out = [];
+  for (const source of sources) {
+    for (const mark of Array.isArray(source) ? source : [source]) {
+      if (typeof mark !== "string" || mark.length === 0) continue;
+      if (!out.includes(mark)) out.push(mark);
+    }
+  }
+  return Object.freeze(out);
+}
+
+/**
+ * THE ONE READER FOR AN OPERATION'S `approximated`, WHICHEVER SHAPE IT IS IN —
+ * and the shape is NOT uniform across this tree, which is the point of putting
+ * the reader here instead of a `typeof` at each call site.
+ *
+ * ► **ONE KEY, TWO TYPES, IN ONE ARRAY.** `screen-text.js`'s `screenWithTextFor`
+ *   concatenates the shape operations from `src/render/screen.js` with the glyph
+ *   operations from this file, and the two halves do not agree on the shape of
+ *   this key:
+ *
+ * ```text
+ *   src/render/text.js    an operation carries a frozen LIST of reasons
+ *   src/render/screen.js  line 647: `...(entry.approximated ? { approximated: entry.approximated } : {})`
+ *   src/render/props.js   line 366: the same line, copying the extractor's STRING
+ * ```
+ *
+ *   Measured over all 26 screens on 2026-09-14, after this module grew the list:
+ *   **274 merged operations carry a mark — 209 as strings (`gradient` x180,
+ *   `bitmap` x29) and 65 as arrays (`html-markup-stripped` x65).** So a reader
+ *   that assumes EITHER shape is wrong about the other half of the same array,
+ *   and the `typeof op.approximated === "string"` guard this file's change made
+ *   obsolete for glyph operations is still the CORRECT guard for 209 of the 274.
+ *
+ * ► **THE RIGHT FIX IS NOT HERE.** It is for the two producers above to emit a
+ *   list too, at which point this reader keeps working unchanged and the census
+ *   becomes 0 strings / 274 arrays. Until then every consumer goes through this
+ *   function, so the seam has exactly one reader rather than one per caller —
+ *   the mismatch that created this finding was a reader written against one
+ *   producer.
+ *
+ * Total, like every other reader in this module: a number, an object or a
+ * hand-edited pack's `null` reads as no marks rather than throwing.
+ */
+export function approximationMarksOf(value) {
+  return marksOf(value);
+}
+
+/**
  * Turn a finished layout into draw operations.
  *
  * `matrix`, when given, is composed on the OUTSIDE — it is the placement that
  * puts the field or the run into its parent's space, with its own translation
  * in twips, exactly as the pack stores it.
+ *
+ * `marks` is every approximation that applies to the WHOLE run — the field's
+ * `html-markup-stripped`, say. It is merged into each operation's own list
+ * here, at the one point an operation is built, rather than stamped over the
+ * finished array afterwards: the stamping version could only write one mark per
+ * operation and quietly dropped whichever reason it met second.
  */
-function opsFromLayout(layout, font, { colour, alpha, matrix }) {
+function opsFromLayout(layout, font, { colour, alpha, matrix, marks }) {
   const ops = [];
+  const runMarks = marksOf(marks);
   const outer = Array.isArray(matrix) && matrix.length === 6 ? matrix : [1, 0, 0, 1, 0, 0];
   const [a, b, c, d, tx, ty] = outer;
 
@@ -500,13 +657,18 @@ function opsFromLayout(layout, font, { colour, alpha, matrix }) {
           strokeOpacity: alpha,
           glyph: Object.freeze({ font: font.id, index: -1, code: glyph.code, char: glyph.char }),
           // The tally travels ON the operation, so a surface that never calls
-          // `layoutText` still cannot draw an approximation without one.
-          approximated: "glyph-missing",
+          // `layoutText` still cannot draw an approximation without one — and
+          // it is a LIST, so the run's own reasons travel with it instead of
+          // being pushed out by this one. See `marksOf`.
+          approximated: marksOf("glyph-missing", runMarks),
           notdef: true
         }));
         continue;
       }
 
+      // Absent rather than empty when nothing is approximate, the same
+      // convention the packs use: a key here is a thing that happened.
+      const approximated = marksOf(source.approximated, runMarks);
       ops.push(Object.freeze({
         kind: "path",
         d: scaleGlyphPath(source.path, layout.scale),
@@ -518,7 +680,7 @@ function opsFromLayout(layout, font, { colour, alpha, matrix }) {
         strokeWidth: 0,
         strokeOpacity: 1,
         glyph: Object.freeze({ font: font.id, index: glyph.index, code: glyph.code, char: glyph.char }),
-        ...(source.approximated ? { approximated: source.approximated } : {})
+        ...(approximated.length > 0 ? { approximated } : {})
       }));
     }
   }
@@ -572,6 +734,16 @@ export function staticTextOpsFor(pack, id, options = {}) {
     : (Array.isArray(item.matrix) && item.matrix.length === 6 ? item.matrix : [1, 0, 0, 1, 0, 0]);
   const [a, b, c, d, tx, ty] = outer;
 
+  // ► **A RUN'S OWN APPROXIMATION USED TO REACH NO OPERATION AT ALL**, which is
+  //   the same hole `fieldOpsFor` had one level up and is fixed the same way:
+  //   the mark joins each operation's list instead of having nowhere to go.
+  //   `tools/extract-text.mjs` tallies `item.approximated` on a static, so the
+  //   shape is the extractor's, but **0 of this build's 180 statics carry one**
+  //   — so nothing on the real pack exercises this and `test/render-text.test.js`
+  //   builds a synthetic static that does, rather than leaving an arm that only
+  //   looks tested.
+  const itemMarks = marksOf(item.approximated);
+
   const ops = [];
   let penX = 0;
   let penY = 0;
@@ -610,10 +782,13 @@ export function staticTextOpsFor(pack, id, options = {}) {
           strokeWidth: Math.max(0.4, record.height / TWIPS_PER_PIXEL / 16),
           strokeOpacity: alpha,
           glyph: Object.freeze({ font: record.font, index, code: null, char: null }),
-          approximated: "glyph-missing",
+          approximated: marksOf("glyph-missing", itemMarks),
           notdef: true
         }));
       } else if (!glyph.empty && glyph.path) {
+        // Absent rather than empty when nothing is approximate — the same
+        // convention `opsFromLayout` keeps, and the packs' own.
+        const approximated = marksOf(glyph.approximated, itemMarks);
         ops.push(Object.freeze({
           kind: "path",
           d: scaleGlyphPath(glyph.path, scale),
@@ -625,7 +800,7 @@ export function staticTextOpsFor(pack, id, options = {}) {
           strokeWidth: 0,
           strokeOpacity: 1,
           glyph: Object.freeze({ font: record.font, index, code: glyph.code, char: glyph.char }),
-          ...(glyph.approximated ? { approximated: glyph.approximated } : {})
+          ...(approximated.length > 0 ? { approximated } : {})
         }));
       }
       // TWIPS, baked, already scaled to this record's height.
@@ -669,7 +844,52 @@ export function fieldLayoutOptionsFor(pack, id, { text, gutter = FIELD_GUTTER_PX
     // one place the sign matters.
     y: top + gutter + metrics.ascent,
     align: field.align ?? "left",
+    // ► **WRAPPING NEEDS BOTH FLAGS; ALIGNING NEEDS ONLY A BOX, AND EVERY FIELD
+    //   HAS ONE.** `maxWidth` decides where a line BREAKS, so a field that is
+    //   not `wordWrap && multiline` must be allowed to run on and gets
+    //   `Infinity`. `alignWidth` decides what `center` and `right` are measured
+    //   AGAINST, and that is the field's own inner box whether it wraps or not.
+    //   One parameter used to carry both jobs and the second one lost: 108 of
+    //   the build's 256 fields — 81 of the 101 centred and 27 of the 30 right
+    //   — drew left-aligned, and on `createchar` every stat number drew on top
+    //   of its own label.
+    //
+    //   ► ~~`tools/screens/main.js` reported this from the outside and could
+    //     not fix it, because it does not own this file.~~ ~~**IT DID, AND ITS
+    //     REPORT IS NOW STALE — DO NOT GO THERE TO READ ABOUT THIS.**~~
+    //     **BOTH ENDS ARE CORRECT NOW, 2026-09-15.** That file's header item 2
+    //     is struck at the claim, keeps its measurement as history, and no
+    //     longer states the defect in the present tense.
+    //
+    //     ► **AND THE TWO ROUNDS OF THIS COMMENT ARE THE LESSON.** Fixing the
+    //       code and NAMING the stale pointee was not enough: a reader of
+    //       `tools/screens/main.js` still met a live bug report for a bug that
+    //       was gone, because a note in THIS file does not change THAT one. A
+    //       verifier found it a day later. **Correcting the pointer is not
+    //       correcting the pointee.** Ninth instance of the signature failure
+    //       here, and the first where the previous fix's own note is what
+    //       created it.
+    //
+    //     The predicted position in that header was 82.2 px; the fix puts the
+    //     digit's ink at 82.33 px. Both are recorded rather than reconciled —
+    //     the prediction was a hand-computed box centre and the measurement is
+    //     the glyph's actual left edge, so they are two different quantities
+    //     and making them one number would hide that.
     maxWidth: field.wordWrap && field.multiline ? inner : Infinity,
+    // ► **`inner` TAKES THE MARGINS OFF TOO, AND NOTHING IN THE BUILD CAN TELL
+    //   YOU WHETHER THAT IS RIGHT.** All 256 fields declare `leftMargin: 0` and
+    //   `rightMargin: 0` (re-derived 2026-09-14), so on this pack
+    //   `alignWidth: inner` and `alignWidth: width - gutter * 2` are
+    //   indistinguishable — an adversarial verifier replaced one with the other
+    //   and the whole 1712-test suite stayed green. It is the player's
+    //   documented behaviour (a margin indents the text box, and alignment
+    //   happens inside what is left) and it is an ASSUMPTION here, the same
+    //   standing as `FIELD_GUTTER_PX`. It is no longer unpinned: `A CENTRED
+    //   FIELD'S MARGINS COME OFF THE ALIGNMENT BOX` in
+    //   `test/render-text.test.js` builds a field with margins and asserts both
+    //   this number and the glyph position it produces, so changing it is now a
+    //   decision someone has to make rather than a line that can be deleted.
+    alignWidth: inner,
     indent: (field.indent ?? 0) / TWIPS_PER_PIXEL,
     // The field's own leading is TWIPS and adds to the font's line box.
     lineHeight: metrics.lineHeight + (field.leading ?? 0) / TWIPS_PER_PIXEL,
@@ -694,8 +914,45 @@ export function fieldLayoutOptionsFor(pack, id, { text, gutter = FIELD_GUTTER_PX
  *   here. The pack marks those fields `approximated: "html-markup-stripped"`,
  *   the tally counts them, and this call carries the same mark onto every
  *   operation so a surface cannot draw one without the note attached.
+ *
+ * ► ~~`approximated: op.approximated ?? field.approximated`~~ **THAT `??` WAS A
+ *   DEFECT AND IS GONE.** It meant an operation could hold ONE reason, so a
+ *   hollow `.notdef` box inside an HTML field kept `glyph-missing` and dropped
+ *   the field's `html-markup-stripped` on the floor — an approximation
+ *   overwriting another approximation. `src/render/screen-text.js` found it,
+ *   named this line as the cause and could only work around it. The field's
+ *   marks now go into `opsFromLayout` with the run and join each operation's
+ *   own list; see `marksOf` for the shape and the ordering.
  */
 export function fieldOpsFor(pack, id, options = {}) {
+  const drawn = fieldTextFor(pack, id, options);
+  return drawn && drawn.ops.length > 0 ? drawn.ops : null;
+}
+
+/**
+ * THE SAME FIELD, WITH ITS INVOICE — the ops AND what laying them out cost.
+ *
+ * ► **IT EXISTS BECAUSE `fieldOpsFor` RETURNS AN ARRAY, AND AN ARRAY CANNOT
+ *   CARRY A COUNT.** `layoutText` reports `overflowing`, the number of lines
+ *   that came out wider than the box they were aligned in — the size of the
+ *   assumption documented at the `slack` line in `layoutText`. Every caller on
+ *   the screen route went through `fieldOpsFor`, which dropped it on the floor,
+ *   so the one condition this module's alignment fix newly made possible was
+ *   the one condition nothing downstream could count. `src/render/screen-text.js`
+ *   reads this instead, and its tally counts `fieldOverflows` by name.
+ *
+ * ► **AND IT IS ONE LAYOUT PASS, NOT TWO.** The obvious alternative — have the
+ *   caller run `fieldLayoutOptionsFor` + `layoutText` a second time purely to
+ *   reach the counts — is the arrangement `screen-text.js` deliberately deleted
+ *   once already, for costing a pass over every field on every screen. So the
+ *   deep call is the one that does the work and `fieldOpsFor` is the shallow
+ *   view of it, rather than the other way round.
+ *
+ * Returns null on the same inputs `fieldOpsFor` returns null for EXCEPT one: a
+ * field that lays out and inks nothing gives `{ ops: [], ... }` here and `null`
+ * there, because "this field drew nothing" is an answer and not an absence.
+ */
+export function fieldTextFor(pack, id, options = {}) {
   const field = pack?.fields?.[id] ?? pack?.fields?.[String(id)];
   const resolved = fieldLayoutOptionsFor(pack, id, options);
   if (!resolved) return null;
@@ -706,9 +963,25 @@ export function fieldOpsFor(pack, id, options = {}) {
   const ops = opsFromLayout(layout, font, {
     colour: typeof options.colour === "string" ? options.colour : resolved.colour,
     alpha: Number.isFinite(options.alpha) ? options.alpha : resolved.alpha,
-    matrix: options.matrix
+    matrix: options.matrix,
+    marks: field?.approximated
   });
-  if (ops.length === 0) return null;
-  if (!field?.approximated) return Object.freeze(ops);
-  return Object.freeze(ops.map((op) => Object.freeze({ ...op, approximated: op.approximated ?? field.approximated })));
+  return Object.freeze({
+    ops: Object.freeze(ops),
+    // The layout's own numbers, not a second opinion derived from the ops: the
+    // ops have been through a matrix and no longer know what box they were
+    // measured against.
+    box: layout.box,
+    width: layout.width,
+    lines: layout.lines.length,
+    // ► **THE NUMBER THAT HAD NOWHERE TO GO.** Lines wider than `box`. Zero on
+    //   every one of the build's 256 fields with the pack's own placeholder
+    //   text (272 lines, re-derived 2026-09-14) — and NOT vacuous, because a
+    //   field's value comes from outside the pack: binding `"888888888888"` to
+    //   `createchar`'s field 1619, whose box is 42.95 px, lays out a 91.05 px
+    //   line and makes this 1. `test/render-screen-text.test.js` binds exactly
+    //   that, so the counter is exercised by an input the game can produce
+    //   rather than only by a synthetic field.
+    overflowing: layout.overflowing
+  });
 }
