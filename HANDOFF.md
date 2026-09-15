@@ -8,8 +8,88 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-15 15:35 — a synthetic SWF is an oracle, and two glows were doubled](docs/handoffs/2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md).**
-Start there.
+[2026-09-15 19:00 — the residual was the rectangle, and a warning was wrong](docs/handoffs/2026-09-15-1900--the-residual-was-the-rectangle-and-a-warning-was-wrong.md).**
+Start there. *(It supersedes
+[2026-09-15 15:35 — a synthetic SWF is an oracle, and two glows were doubled](docs/handoffs/2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md),
+**whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
+and probe warning are both WITHDRAWN** — see the two entries below.)*
+
+► **THE 392-PIXEL CLIP RESIDUAL IS CLOSED, AND IT WAS THE RECTANGLE'S OWN
+  FRACTIONAL EDGES.** `stageFitFor` halves and multiplies by a float, so
+  `stageClipRectFor` landed on a whole pixel only by accident — at the arena's
+  870x688 canvas it was `0, 58.531, 870 x 570.938`. **A fractional clip makes
+  Chrome clip through an ANTIALIASED MASK instead of a whole-pixel scissor, and
+  that perturbs antialiased edges anywhere on the surface**, hundreds of pixels
+  from any boundary. It snaps to whole device pixels now, each edge moving by at
+  most half of one.
+  ► **`tools/clip-probe/index.html` IS THE INSTRUMENT AND IT IS THE REUSABLE
+    PART** — the canvas2d counterpart of `tools/swf-probe.mjs`. Same content,
+    same canvas, ONLY the rectangle varies; it reads its own pixels back and
+    prints the verdict, so no screenshot has to be differenced afterwards. Null
+    control 0, null-with-overhang 0, positive control 19,911. At 870x688, in a
+    160x160 box ~200px clear of every edge:
+
+```text
+    whole-pixel, cutting nothing                      0        centre 0
+    whole-pixel inset 20 / 39, CUTTING the overhang  46,393 / 81,393   centre 0
+    fractional inset 20.37, cutting nothing          3,359    centre 2,548  d<=6
+    the arena's own 0, 58.531, 870 x 570.938        53,720    centre 2,548  d<=6
+    the same rectangle SNAPPED (0, 59, 870 x 570)   50,361    centre 0
+```
+
+    **So it is the FRACTION and not the cutting** — a whole-pixel clip that
+    removes 81,393 pixels changes nothing in the middle. The sweep says which
+    edge and how much: **one fractional edge is as bad as four (centre 2,548 in
+    every case, identically), 0.25 does it and 0.001 does not** — a blitter
+    switching ONCE for the surface, not error accumulating with the fraction.
+  ► **AND IT HOLDS IN THE ARENA.** `seed=7`, frame 120, 1200x800, clipped
+    against `?clip=0`, movers 20px or more inside every clip edge: **644 BEFORE,
+    0 AFTER.** What is left inside the stage is 870 pixels — one full
+    canvas-width row AT the boundary, which is the clip's own edge. Null control
+    0 both times.
+  ► **CONTROL (a) IN THE HANDOFF THAT SHIPPED THE CLIP TESTED A CLIP THAT WAS
+    NOT THERE.** *"A clip inflated by 10,000px is pixel-identical to no clip, so
+    the cause is the rectangle actually cutting something."* The measurement
+    reproduces exactly; the inference does not. **An inflated rectangle
+    intersected with the device bounds is a solid rectangle, and Skia collapses
+    that case back to a black-and-white region clip** — so the control exercises
+    an ELIDED clip and can say nothing about one that is present. It is the
+    reason this question pointed at "what is being cut" for a session.
+  ► **AND "99.8% OF THE MOVERS SIT ON ANTIALIASED EDGES" IS CORROBORATING, NOT
+    DIAGNOSTIC — a verifier caught me on it.** The number is real (against 5.8%
+    of the unchanged pixels in the same region, and 0% in flat areas against
+    56%), and at a maximum delta of 8 a difference of ANY cause can only surface
+    on antialiased coverage. It separates the finding from uniform noise, which
+    was never a rival hypothesis. **The arm that actually decides it is the
+    integer/fractional pair, and that lives in the probe.**
+  ► **THE SCREENS PAGE HAD THE SAME RECTANGLE BY A DIFFERENT ROUTE** — it
+    clipped in STAGE space to `0,0,640,420` under the fit transform, which is
+    the same fractional device rect — and clips `stageClipRectFor`'s snapped
+    rectangle in DEVICE space now, before the transform. Correcting one and
+    leaving the other is the pointer-not-the-pointee failure this file keeps
+    recording.
+
+► **"THE CALL SITE EXECUTES AND THE LOGGING DOES NOT" WAS AN INVALID INFERENCE,
+  AND THE ARENA LOGS FROM INSIDE A FRAME PERFECTLY WELL.** The 15:35 handoff
+  warned the next reader off writing a `?probe=1` for the arena because
+  `reportStageFit`'s lines never reached the panel while "the clip two lines
+  below it demonstrably worked in the same frame". **The stage clip is COMMITTED
+  code (`3b851c3`), so a working clip cannot distinguish "my edited file was
+  loaded" from "a build without the probe was loaded"** — three agents aimed at
+  different questions broke that inference independently, and a 1200x2600 shot
+  settles it: the panel holds `figure groups: 0 group(s) over 0/488 op(s) in 4
+  figure(s) this frame` and `seam: painter ops=100 dressed=...`, both logged
+  from inside `renderStage`, i.e. inside `render()`. **`reportStageFit` was
+  never committed** — `git log --all -S reportStageFit` finds it only in that
+  handoff's own prose.
+  ► **THE PANEL IS ALSO OUT OF FRAME AT EVERY SIZE THE CLIP WAS SHOT AT.** At
+    1200x800 only the `SURFACE LOG` heading reaches the image. **Shoot 2600 tall
+    to read the log at all**, which is what the screens-page log shots already
+    did and nothing wrote down.
+  ► **THE BETTER PROBE IS NOT A LOG LINE.** Set `window.__stageFit` in `render`
+    and read it back with `Runtime.evaluate` — `tools/shot-live.mjs` already
+    polls `window.__frames` that way, so the plumbing exists, and the answer
+    comes back as a number rather than a picture of a number.
 
 ► **THIS REPOSITORY CAN NOW ASK A FLASH PLAYER A QUESTION WITH A KNOWN ANSWER,
   AND THAT IS THE DURABLE PART OF 2026-09-15.** `tools/swf-probe.mjs` writes a
@@ -144,9 +224,23 @@ wrong**; that file is kept only as the record of how.)*
   each of `townsquare`'s 1523 paths is a different picture, not an approximation
   of the right one. Nested groups COMPOSE rather than innermost-winning: 40% of
   operations sit under exactly two filtered ancestors, so the rule is reachable
-  and tested rather than assumed. **Both shells carry a kill switch —
+  and tested rather than assumed. ~~**Both shells carry a kill switch —
   `?filters=0` and `?groups=0` — that reproduces exactly what the page drew
-  before, so the difference between two shots is the measurement.**
+  before, so the difference between two shots is the measurement.**~~
+  ► **HALF WRONG, CORRECTED 2026-09-15 BY GREPPING THE SHELL RATHER THAN
+    BELIEVING THIS LINE. `tools/arena/main.js` HAS NO `?filters=0`.** It reads
+    `seed`, `spectate`, `rank`, `arena`, `sky`, `rain`, `enchant`, `groups`,
+    `clip`, `amplify`, `seam` and `filterprobe` — and it MENTIONS `?filters=0`
+    in a comment beside the stage clip, which is how the claim survived. Only
+    `tools/screens/main.js` has one. **A shot taken with `?filters=0` on the
+    arena is BYTE-IDENTICAL to one taken without it**, which reads as "the
+    toggle changed nothing" and is really "there is no toggle".
+  ► **AND `?groups=0` IS NEARLY INERT ON THE ARENA TOO**: at `seed=7`, frame
+    120, 1200x800 it is byte-identical to the default by md5 while the page's
+    own log says 2 groups composited and 1 buffered; at the 2026-09-15
+    dressing it moved 13-28 pixels in the whole frame. It is a real kill
+    switch and it is a weak control — **ask what it could have varied over
+    before ruling anything out with it.**
 
 ► **AND FOLDING THE SKY'S ENCLOSING ColorMatrix GAVE IT A DAY/NIGHT CYCLE IT HAS
   NEVER HAD**: frame 1 `#440037`→`#79689f` dawn, frame 60 `#2d2dfd`→`#5fbefe`
