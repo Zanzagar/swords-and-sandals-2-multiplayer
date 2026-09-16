@@ -209,3 +209,32 @@ test("the rasteriser is the EIGHTH argument, so every existing caller is unchang
     [before.host, before.name, before.query, before.width, before.height, before.freeze, before.page],
     ["172.27.81.183", "shot", "seed=7", 1600, 1100, 120, "/tools/arena/index.html"]);
 });
+
+/* ------------------------------------------------------------------ *
+ * THE TWO SHOT TOOLS MUST AGREE ABOUT THE RASTERISER.
+ * ------------------------------------------------------------------ */
+
+test("tools/shot.sh offers the SAME two rasterisers and the SAME default as this one", () => {
+  // ► **THIS TEST EXISTS BECAUSE THE TWO TOOLS DISAGREED SILENTLY FOR A
+  //   SESSION.** `shot-live` took the rasteriser as an argument while `shot.sh`
+  //   hardcoded `--disable-gpu`, so two shots taken with the two tools differed
+  //   by 15.9% of the arena frame before anything under test had changed, and
+  //   neither output said which browser it had used. A shell script is not
+  //   importable, so this reads it — which pins the CONTRACT (the two values and
+  //   the default) rather than the behaviour, and says so.
+  const script = fs.readFileSync(new URL("../tools/shot.sh", import.meta.url), "utf8");
+  assert.match(script, /RASTER="\$\{6:-cpu\}"/,
+    "shot.sh's rasteriser default is not cpu, so the two tools no longer shoot the same browser");
+  assert.match(script, /cpu\)\s*GPU_FLAG="--disable-gpu"/,
+    "shot.sh's cpu branch does not pass --disable-gpu");
+  assert.match(script, /gpu\)\s*GPU_FLAG=""/,
+    "shot.sh's gpu branch does not omit the flag");
+  assert.match(script, /Refusing the rasteriser/,
+    "shot.sh does not refuse an unknown rasteriser by name, so a typo selects one silently");
+  // And it must SAY which one it used, for the same reason this tool does.
+  assert.match(script, /rasteriser \$RASTER/,
+    "shot.sh does not print the rasteriser, and it cannot be recovered from the PNG");
+  // The flag it hardcoded is gone: a leftover would put both on the same branch.
+  assert.ok(!/--headless=new --disable-gpu/.test(script),
+    "shot.sh still hardcodes --disable-gpu somewhere, so its gpu argument does nothing");
+});
