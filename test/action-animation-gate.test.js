@@ -585,3 +585,55 @@ test("a rule set that legally emits no events collides two actions on one bounda
   );
   assert.deepEqual(boundaries, [1, 1], "two distinct actions, one boundary — that is the defect, not the throw");
 });
+
+/* ------------------------------------------------------------------ *
+ * DIRECTION 30 NAMES NO ATTACK CLIP, AND THE BINDINGS USED TO INVENT ONE.
+ * ------------------------------------------------------------------ */
+
+test("a grievous blow does NOT ask for attack30, because no such clip exists", () => {
+  // ► **THIS IS THE ASSERTION THAT COULD HAVE VARIED, AND NOTHING MADE IT UNTIL
+  //   2026-09-15.** `attackLabel` branched 20/21/22/23 and then fell through to
+  //   `attack${direction}`. The fighter carries `attack1`..`attack12` and
+  //   nothing higher, so direction 30 — the `psyche_up` discharge and
+  //   `cast_whirlwind`, the map's only two producers of it — asked for a clip
+  //   that has never existed, and `animationFor` answers a missing label by
+  //   falling back rather than by complaining.
+  //
+  //   It is the same defect the `direction === 23` branch above it was written
+  //   to fix, one number later, and it survived that fix because the suite
+  //   pinned 23 and not the CLASS.
+  const bound = SS2_STATIC_MAP_BINDINGS.action({
+    type: "attack", hit: true, dispatchedMethod: "grievous", attackDirection: 30
+  });
+  assert.notEqual(bound.actor.label, "attack30", "direction 30 is asking for a clip that does not exist");
+  assert.match(bound.actor.label, /^(attack([1-9]|1[0-2])|Standing|psyche_up[23]?)$/,
+    `a grievous blow bound the actor to ${bound.actor.label}, which is not a clip the fighter carries`);
+  // The TARGET half was always right and is pinned beside it, so a future edit
+  // cannot "fix" the actor by breaking the knockback.
+  assert.equal(bound.target.label, "knockback");
+});
+
+test("NO direction invents a clip outside attack1..attack12", () => {
+  // ► **THE GUARD IS THE RANGE, NOT THE ONE NUMBER.** Pinning 30 alone would
+  //   leave the next unbranched direction free to invent its own label, which is
+  //   exactly how 30 survived the fix for 23. The map's dispatcher table lists
+  //   20, 21, 22, 23 and 30 as non-`randomBetween` directions; the roll-drawn
+  //   ones are 1..12.
+  const carried = new Set(Array.from({ length: 12 }, (unused, index) => `attack${index + 1}`));
+  for (const direction of [0, 13, 14, 19, 20, 21, 22, 23, 24, 29, 30, 31, 99, -1, 1.5, NaN]) {
+    const bound = SS2_STATIC_MAP_BINDINGS.action({
+      type: "attack", hit: true, dispatchedMethod: "grievous", attackDirection: direction
+    });
+    const named = bound.actor.label;
+    assert.ok(!/^attack\d+$/.test(named) || carried.has(named),
+      `direction ${direction} invented the clip ${named}, and the fighter carries attack1..attack12`);
+  }
+  // And the twelve that DO exist still resolve to themselves, or the guard has
+  // eaten the ordinary case.
+  for (let direction = 1; direction <= 12; direction += 1) {
+    const bound = SS2_STATIC_MAP_BINDINGS.action({
+      type: "attack", hit: true, dispatchedMethod: "normal", attackDirection: direction
+    });
+    assert.equal(bound.actor.label, `attack${direction}`, `direction ${direction} stopped resolving to its own clip`);
+  }
+});

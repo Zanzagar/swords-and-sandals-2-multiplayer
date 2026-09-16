@@ -435,6 +435,31 @@ function attackLabel(direction) {
   //   direction number, when the build names one outright a few bytes away. It
   //   is MAP_NAMED because the build names it.
   if (direction === 23) return label("attack2", LabelProvenance.MAP_NAMED);
+  // ► **DIRECTION 30 IS NOT AN ATTACK CLIP AT ALL, AND THE FALL-THROUGH BELOW
+  //   WAS INVENTING ONE — the same defect the block above records for 23, one
+  //   number later and found by an agent reading for something else.**
+  //
+  //   The map gives direction 30 exactly two producers (§"Attack roll
+  //   dispatcher"): the `psyche_up` counter, facing right at `+0x669e` and left
+  //   at `+0x6717`, and `cast_whirlwind` at `+0x79d0`/`+0x7a49`. **Neither names
+  //   a clip here**, and for `psyche_up` no clip COULD be named from the
+  //   direction: the animation is chosen by the COUNTER, not the direction —
+  //   `psyche_up`, `psyche_up2` and `psyche_up3` for values 1, 2 and >= 3
+  //   (`+0x658a`, `+0x65b9`, `+0x65ef`). A function handed only a direction is
+  //   being asked a question the build answers somewhere else.
+  //
+  //   So it returns ABSENT rather than a guess. `attack30` has never existed —
+  //   the fighter carries `attack1`..`attack12` — and `animationFor` answers a
+  //   missing label by silently falling back, which is how a wrong gait reaches
+  //   the screen with nothing reporting it.
+  //
+  // ► **AND THE GUARD IS THE RANGE, NOT THE ONE NUMBER**, because the bug is the
+  //   invention and not the 30. Every direction outside 1..12 that no branch
+  //   above claims has no clip to name, and inventing `attack${direction}` for
+  //   it is the same mistake with a different digit waiting to happen.
+  if (!Number.isInteger(direction) || direction < 1 || direction > 12) {
+    return label("Standing", LabelProvenance.ASSUMED);
+  }
   return label(`attack${direction}`, LabelProvenance.ASSUMED);
 }
 

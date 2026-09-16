@@ -39,13 +39,35 @@
  * `+0x32a7`), and at `staminaleft <= 0` overlay frame 1 forces
  * `getphase("rest")` (`+0x0d2e`).
  *
- * Deferred, each for a stated reason: `bash_attack` (needs a `criticalhit`
- * inherited across actions, which the resolver has no channel for),
- * `bombard`/`snipe` (need `using_bow`, a `swap_weapons` turn and an
- * `ammo_left` model), `psyche_up` (needs a three-turn counter and a position
- * model), `taunt` (the candidate implements only the post-`checkattackroll`
- * arm, so it would consume the wrong number of samples). None of the four has
- * a single golden.
+ * ► **DEFERRED — AND THIS PARAGRAPH WAS STALE FOR THREE OF ITS FOUR ENTRIES
+ *   FOR TWO DAYS, WHICH IS WORSE THAN IT SOUNDS.** It named four actions as
+ *   blocked, each with a reason, and ended "None of the four has a single
+ *   golden". ~~`bash_attack` (needs a `criticalhit` inherited across actions,
+ *   which the resolver has no channel for), `bombard`/`snipe` (need
+ *   `using_bow`, a `swap_weapons` turn and an `ammo_left` model)~~ — **all
+ *   three SHIPPED on 2026-09-13.** `Ss2ActionType` exports `BASH_ATTACK`,
+ *   `BOMBARD` and `SNIPE`, `legalActions` pushes them, and each has a fixture.
+ *   **An implementer reading only this header would re-derive work that is
+ *   already in the file underneath it** — which is exactly what nearly
+ *   happened on 2026-09-15, and three agents aimed at different questions each
+ *   broke this paragraph independently.
+ *
+ * ► **WHAT IS GENUINELY DEFERRED IS TWO, AND ONE OF THE TWO REASONS IS ALSO
+ *   HALF WRONG.**
+ *   - `psyche_up` — ~~needs a three-turn counter and a position model~~. **The
+ *     POSITION MODEL LANDED 2026-09-11** (`567eb41`, "Gladiators stand
+ *     somewhere, and must walk to reach each other"): `ss2Reach`,
+ *     `ss2FightDistance`, `ss2WalkDestination`, `ss2ArcherMinimumRange`,
+ *     `ss2ShotBlocked` and `ss2FacingEffects` are all exported and the ranged
+ *     trio already gates on them. **Only the three-turn counter is missing**,
+ *     and a per-combatant NUMBER is a resource — the same channel `ammo_left`
+ *     and `criticalhit` used on 2026-09-13. See `SS2_RESOURCE_NAMES`, and read
+ *     `weapon_range`'s note on why a name may be deliberately ABSENT from
+ *     `SS2_RESOURCE_DEFAULTS` before adding one: a defaulted name moves every
+ *     golden replay hash and an undefaulted one does not.
+ *   - `taunt` — the candidate implements only the post-`checkattackroll` arm,
+ *     so it would consume the wrong number of samples. **This one is still
+ *     true**; it is the only entry in this paragraph that has not moved.
  *
  * ## What reaches the arithmetic, and how
  *
