@@ -2369,6 +2369,22 @@ const ATTACK_BANDS = Object.freeze({
  * table whose `rest` row is negative can only be a cost table. The damage is
  * `ceil(max_damage * 1.5)` with a `character_level * 10` floor, and it already
  * lives in `directionProfile`'s `direction === 30` arm.
+ *
+ * ► **AND THE CONSEQUENCE NOBODY WOULD NOTICE: THE AI NEVER PSYCHES UP.**
+ *   `suggestAction`'s `attackOnOffer` test and its expected-value table are
+ *   both keyed on `ATTACK_BANDS[option.type]`, and this action is deliberately
+ *   not a band — so no AI opponent selects the verb, in any position, at any
+ *   level. A human can psyche; a machine cannot.
+ *
+ *   **A side effect of a correct decision, not a defect, and written down
+ *   because the alternative is discovering it.** A sweep over real bouts would
+ *   report the feature working over a population of zero — exactly the failure
+ *   this project recorded about the twelve figure-pack effect groups a day
+ *   earlier, where the art was fine and nothing reached it.
+ *
+ *   Teaching the AI to charge is a real design question and is the OWNER'S: it
+ *   prices three turns of no damage against one blow of
+ *   `ceil(max_damage * 1.5)`, and the answer changes how every bout reads.
  */
 const PSYCHE_UP_DISCHARGE = Object.freeze({ direction: 30, strengthFactor: 1 });
 
@@ -3496,6 +3512,34 @@ function defenderEffects(before, after, target) {
   });
 
   writeResourceEffect("staminaleft");
+
+  // ► **TAKING DAMAGE INTERRUPTS A CHARGE, AND LEAVING THIS OUT MADE
+  //   `psyche_up` STRICTLY STRONGER THAN THE BUILD'S.** `damagecharacter`
+  //   resets the DEFENDER's counter at `+0x1be4`, which is the other half of
+  //   the rule `nextphase` carries for the actor — and it is the half that
+  //   prices the discharge: three presses of `ceil(max_damage * 1.5)` are only
+  //   expensive because three uninterrupted turns are hard to get.
+  //
+  //   `phaseTransitionEffects` cannot cover this path: it resets the ACTING
+  //   combatant, and here the combatant losing its charge is the one being hit.
+  //
+  //   ► **FOUND TWICE INDEPENDENTLY**, by reading the map's own sentence and by
+  //     an adversarial review that reproduced it — seed 2, `attack: 100`, a
+  //     villain at counter 3 keeping the charge through a landed blow and
+  //     discharging on its next turn.
+  //
+  //   Emitted only on a LANDED blow (a miss is a zero-damage effect, see above)
+  //   and only when the value would actually change, so an ordinary battle
+  //   between gladiators who never psyche carries no extra effect at all.
+  if (declared.has("psyche_up") && after.hitpoints < before.hitpoints
+    && resourceValue(target, "psyche_up", SS2_PSYCHE_UP.floor) !== SS2_PSYCHE_UP.floor) {
+    effects.push({
+      kind: EffectKind.RESOURCE,
+      targetId: target.id,
+      resource: "psyche_up",
+      to: SS2_PSYCHE_UP.floor
+    });
+  }
   return effects;
 }
 
@@ -5081,7 +5125,28 @@ export function createSs2TeamRules({
       //   they move one number.
       let psycheCounter = null;
       if (request.type === Ss2ActionType.PSYCHE_UP) {
-        psycheCounter = resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor);
+        // ► **CLAMPED TO THE FLOOR, BECAUSE A RECORD MAY STATE 0 AND THE BUILD
+        //   CANNOT HOLD 0 AFTER ANY TURN.** Both of the build's resets write 1
+        //   (`+0x35c7`-`+0x35ea`, `+0x1be4`), so 1 is "fresh"; but the map is
+        //   SILENT on the value before the first write, the adapter therefore
+        //   treats the field as "numeric defaulting to 0"
+        //   (`psyche-up-initialisation`), and `tools/arena/roster.js` has
+        //   authored `psyche_up: 0` since 2026-09-10.
+        //
+        //   Unclamped, such a gladiator needed FOUR presses to discharge and
+        //   played `psyche_up` TWICE — `clips[Math.min(0, 3) - 1]` is
+        //   `clips[-1]`, which fell through to `clips[0]`. So the arena's own
+        //   roster got a different action from the one the tests exercised,
+        //   which is the shape of defect this repository calls an integration
+        //   gap rather than a bug in either half.
+        //
+        //   **Reading below-floor as fresh is the reconciliation**, and it is
+        //   the map's own semantics rather than a convenience: anything under 1
+        //   is a state the build leaves nobody in.
+        psycheCounter = Math.max(
+          SS2_PSYCHE_UP.floor,
+          resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor)
+        );
         const clip = SS2_PSYCHE_UP.clips[
           Math.min(psycheCounter, SS2_PSYCHE_UP.dischargeAt) - 1
         ] ?? SS2_PSYCHE_UP.clips[0];
@@ -5468,18 +5533,36 @@ export function createSs2TeamRules({
       //   the map. Settling it needs a capture of two consecutive discharges
       //   with `-TraceWindow phase` — the ordinary window closes on
       //   `checkattackroll`'s return and BOTH writes happen after it.
+      //   ► **AND A LETHAL DISCHARGE LEAVES 1, NOT 2, BECAUSE THE CALLBACK
+      //     NEVER RUNS.** The `+0x6738` write-back is SYNCHRONOUS, inside
+      //     `checkattackroll`; the `+0x6761` increment is gated on
+      //     `attacker.struck == true` and fires on a LATER tick. But
+      //     `damagecharacter` calls `death()` synchronously in the same call,
+      //     and `death()` deletes `attacker.onEnterFrame` (`+0x2035`),
+      //     `defender.onEnterFrame` (`+0x2042`) and the `nextphase` variable
+      //     itself (`+0x2049`) — **so after a kill that later tick never
+      //     comes.** This is the same rule the stamina transition a few lines
+      //     up already applies with `eliminated`, and nineteen goldens measure
+      //     it there.
+      //
+      //     Without this, a gladiator who kills with a discharge kept an extra
+      //     charge and, with another enemy still standing, could discharge
+      //     again two presses sooner than the build allows. Raised by an
+      //     adversarial review and confirmed against the bytes this file
+      //     already cites.
       if (request.type === Ss2ActionType.PSYCHE_UP && declaredResourceNames(actor).has("psyche_up")) {
+        const landed = SS2_PSYCHE_UP.floor + (eliminated ? 0 : 1);
         effects.push({
           kind: EffectKind.RESOURCE,
           targetId: actor.id,
           resource: "psyche_up",
-          to: SS2_PSYCHE_UP.floor + 1
+          to: landed
         });
         for (const event of events) {
           if (event.type !== request.type) continue;
           event.clip = SS2_PSYCHE_UP.clips[SS2_PSYCHE_UP.clips.length - 1];
           event.counter = psycheCounter;
-          event.counterAfter = SS2_PSYCHE_UP.floor + 1;
+          event.counterAfter = landed;
           event.discharged = true;
         }
       }

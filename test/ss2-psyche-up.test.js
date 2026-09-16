@@ -29,6 +29,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { EffectKind } from "../src/team/rule-set.js";
 import {
   applyAction,
   combatantById,
@@ -387,4 +388,115 @@ test("all three clips are PLAYED, and both continuations are deliberately not", 
   // The continuations are matched by exact name, never by a /^psyche/ pattern.
   assert.equal(timelineFor("psyche_charging").recognised, false,
     "nothing dispatches a continuation, so giving it a schedule would promise what cannot be reached");
+});
+
+/* ------------------------------------------------------------------ *
+ * THE THREE DEFECTS AN ADVERSARIAL REVIEW FOUND IN THE FIRST CUT.
+ *
+ * All three were shipped in `b201486` and fixed the same night. Each is pinned
+ * here so the fix cannot quietly regress, and each names how it was found —
+ * two of them by a review that reproduced them, one of them twice over.
+ * ------------------------------------------------------------------ */
+
+test("TAKING DAMAGE INTERRUPTS A CHARGE, which is what prices the discharge", () => {
+  // ► **THE ONE THAT MATTERED.** `damagecharacter` resets the DEFENDER's
+  //   counter at `+0x1be4` — the other half of the rule `nextphase` carries for
+  //   the actor. Without it a gladiator could charge to 3 while being hit every
+  //   turn, and three presses of `ceil(max_damage * 1.5)` are only expensive
+  //   because three uninterrupted turns are hard to get. **As first shipped,
+  //   this action was strictly stronger than the build's.**
+  //
+  //   `phaseTransitionEffects` cannot cover it: it resets the ACTING combatant
+  //   and here the one losing the charge is the one being hit.
+  const battle = duel({ seed: 2, hero: { attack: 100 }, villain: { psyche_up: 3 } });
+  assert.equal(counterOf(battle, "villain"), 3, "the villain must start charged or this proves nothing");
+
+  take(battle, "hero", Ss2ActionType.NORMAL_ATTACK, "villain");
+  assert.ok(combatantById(battle, "villain").health < combatantById(battle, "villain").maxHealth,
+    "the blow must have LANDED, or the reset is untested rather than absent");
+  assert.equal(counterOf(battle, "villain"), SS2_PSYCHE_UP.floor,
+    "a landed blow must interrupt the charge");
+});
+
+test("a MISS does not interrupt a charge, because no damage was taken", () => {
+  // ► **THE CONTROL, and without it the assertion above is satisfied by a
+  //   reset that fires on every attack whether or not it lands.** The build's
+  //   reset is in `damagecharacter`, which a miss never reaches: a miss calls
+  //   `defender_blocked()` instead.
+  //
+  //   Driven by effect rather than by seed-hunting for a miss: the defender
+  //   keeps its charge exactly when `after.hitpoints === before.hitpoints`, so
+  //   a zero-damage blow is the case under test.
+  const battle = duel({ seed: 2, hero: { attack: 0 }, villain: { psyche_up: 2, defence: 100 } });
+  const before = counterOf(battle, "villain");
+  const resolution = take(battle, "hero", Ss2ActionType.NORMAL_ATTACK, "villain");
+  const damage = resolution.effects
+    .filter((effect) => effect.kind === EffectKind.DAMAGE && effect.targetId === "villain")
+    .reduce((total, effect) => total + effect.amount, 0);
+  if (damage > 0) return; // the roll landed; this seed cannot exercise the control
+  assert.equal(counterOf(battle, "villain"), before,
+    "a blow that dealt no damage must leave the charge alone");
+});
+
+test("A LETHAL DISCHARGE LEAVES 1, because the callback that adds one never runs", () => {
+  // ► **RAISED BY AN ADVERSARIAL REVIEW AND CONFIRMED AGAINST BYTES THIS FILE'S
+  //   MODULE ALREADY CITES.** The `+0x6738` write-back is SYNCHRONOUS inside
+  //   `checkattackroll`; the `+0x6761` increment is gated on
+  //   `attacker.struck == true` and fires on a LATER tick. `damagecharacter`
+  //   calls `death()` in the same synchronous call, and `death()` deletes
+  //   `attacker.onEnterFrame` (`+0x2035`), `defender.onEnterFrame` (`+0x2042`)
+  //   and `nextphase` itself (`+0x2049`) — **so after a kill that tick never
+  //   comes.** The same rule the stamina transition already applies, which
+  //   nineteen goldens measure.
+  //
+  //   Without it, killing with a discharge banked an extra charge and, with a
+  //   second enemy standing, re-armed two presses sooner than the build allows.
+  const battle = duel({ seed: 2, hero: { attack: 100, strength: 60, psyche_up: 3 }, villain: { vitality: 1 } });
+  const villain = combatantById(battle, "villain");
+  villain.health = 1;
+  const event = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  assert.equal(event.discharged, true);
+  assert.ok(combatantById(battle, "villain").health <= 0, "the discharge must have killed, or this proves nothing");
+  assert.equal(event.counterAfter, SS2_PSYCHE_UP.floor, "a lethal discharge leaves the floor");
+  assert.equal(counterOf(battle, "hero"), SS2_PSYCHE_UP.floor);
+});
+
+test("A STATED ZERO READS AS FRESH, because the arena's own roster authored one", () => {
+  // ► **AN INTEGRATION GAP RATHER THAN A BUG IN EITHER HALF.**
+  //   `tools/arena/roster.js` has authored `psyche_up: 0` since 2026-09-10, and
+  //   the tests above all start at 1 — so the arena got a different action from
+  //   the one they exercised. Unclamped, such a gladiator needed FOUR presses
+  //   and played `psyche_up` TWICE, because `clips[Math.min(0, 3) - 1]` is
+  //   `clips[-1]` and fell through to `clips[0]`.
+  //
+  //   Below-floor reads as fresh: both of the build's resets write 1, so
+  //   anything under 1 is a state the build leaves nobody in. The map is silent
+  //   on the value before the first write, which is why a 0 exists to be read.
+  const battle = duel({ hero: { psyche_up: 0 } });
+  assert.equal(counterOf(battle, "hero"), 0, "this fixture exists to state a zero");
+
+  const first = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  assert.equal(first.clip, "psyche_up", "a stated zero is a FRESH gladiator, not a pre-fresh one");
+  assert.equal(first.counter, SS2_PSYCHE_UP.floor);
+
+  const second = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  assert.equal(second.clip, "psyche_up2", "the second press must not repeat the first clip");
+
+  const third = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  assert.equal(third.discharged, true, "THREE presses from a stated zero, not four");
+});
+
+test("the arena's own roster reaches a discharge in three presses", () => {
+  // The integration case the unit tests above could not see, driven from the
+  // real roster value rather than from a number this file chose.
+  const authored = 0; // tools/arena/roster.js
+  const battle = duel({ hero: { psyche_up: authored } });
+  let presses = 0;
+  let discharged = false;
+  while (presses < 5 && !discharged) {
+    presses += 1;
+    discharged = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain")).discharged;
+  }
+  assert.equal(presses, SS2_PSYCHE_UP.dischargeAt,
+    `the authored roster value ${authored} must reach a discharge in ${SS2_PSYCHE_UP.dischargeAt} presses`);
 });
