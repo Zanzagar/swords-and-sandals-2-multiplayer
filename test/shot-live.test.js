@@ -18,6 +18,7 @@ import os from "node:os";
 import path from "node:path";
 
 import {
+  chromeFlagsFor,
   freezeScript,
   parseArguments,
   resolveWindowsNode,
@@ -165,4 +166,46 @@ test("the Windows node is RESOLVED across runtimes, not pinned to one directory"
   } finally {
     fs.rmSync(home, { recursive: true, force: true });
   }
+});
+
+/* ------------------------------------------------------------------ *
+ * THE RASTERISER — the one flag that has already been reported as a
+ * property of the page, now an argument instead of a constant.
+ * ------------------------------------------------------------------ */
+
+test("the rasteriser defaults to cpu, because that is what every number here was measured under", () => {
+  // ► **THIS IS A COMPATIBILITY ASSERTION, NOT AN ENDORSEMENT.** Every pixel
+  //   count in this repository was taken with `--disable-gpu`, including the
+  //   fractional-clip residual. Flipping the default would silently re-base all
+  //   of them against a rasteriser none of them were measured on.
+  assert.equal(parseArguments(["h", "n"]).rasteriser, "cpu");
+  assert.ok(chromeFlagsFor({ width: 1, height: 1, profile: "P", port: 1 }).includes("--disable-gpu"),
+    "the default must still pass --disable-gpu or every prior measurement changes meaning");
+});
+
+test("`gpu` OMITS --disable-gpu, and that is the entire difference between the two", () => {
+  const cpu = chromeFlagsFor({ width: 9, height: 9, profile: "P", port: 3, rasteriser: "cpu" });
+  const gpu = chromeFlagsFor({ width: 9, height: 9, profile: "P", port: 3, rasteriser: "gpu" });
+  assert.ok(cpu.includes("--disable-gpu"));
+  assert.ok(!gpu.includes("--disable-gpu"));
+  // ► **THE ASSERTION THAT MAKES THE PAIR A MEASUREMENT.** Two shots differ by
+  //   the rasteriser only if NOTHING ELSE about the browser differs, and a
+  //   future flag added to one branch and not the other would be invisible to
+  //   a test that only checked for `--disable-gpu`.
+  assert.deepEqual(cpu.filter((flag) => flag !== "--disable-gpu"), gpu,
+    "the two flag lists differ by more than --disable-gpu, so a pair of shots is not a measurement");
+});
+
+test("an unknown rasteriser is refused BY NAME rather than falling back to one of them", () => {
+  // A typo selecting software rasterisation silently is exactly how the 3.9x
+  // frame cost came to be published as a property of the glow.
+  assert.throws(() => parseArguments(["h", "n", "", "1", "1", "1", "/p", "GPU"]), /Refusing the rasteriser/);
+  assert.throws(() => parseArguments(["h", "n", "", "1", "1", "1", "/p", "software"]), /Refusing the rasteriser/);
+});
+
+test("the rasteriser is the EIGHTH argument, so every existing caller is unchanged", () => {
+  const before = parseArguments(["172.27.81.183", "shot", "seed=7", "1600", "1100", "120"]);
+  assert.deepEqual(
+    [before.host, before.name, before.query, before.width, before.height, before.freeze, before.page],
+    ["172.27.81.183", "shot", "seed=7", 1600, 1100, 120, "/tools/arena/index.html"]);
 });

@@ -4,14 +4,19 @@
 # --virtual-time-budget never completes on a page that composites a filter, and
 # its FAILED reads as a page defect when it is a screenshot-mode limit.
 #
-#   tools/shot-live.sh <name> "<query>" [width] [height] [freezeAtFrame] [page-path]
+#   tools/shot-live.sh <name> "<query>" [width] [height] [freezeAtFrame] [page-path] [cpu|gpu]
+#
+# The last argument picks the RASTERISER. `cpu` (the default) passes
+# --disable-gpu, which is what every pixel count in this repository was measured
+# under; `gpu` omits it. Vary ONLY that between two shots and the difference is
+# the rasteriser.
 #
 # Runs the driver under the WINDOWS node, because Chrome binds its debugging
 # port to the Windows loopback and ignores --remote-debugging-address, so a WSL
 # process cannot reach it. The WSL address is computed HERE, where `hostname -I`
 # means what it says, and handed over in SS2_HOST.
 set -eu
-NAME="${1:?name}"; QUERY="${2-}"; W="${3:-1200}"; H="${4:-800}"; FREEZE="${5:-120}"; PAGE="${6:-/tools/arena/index.html}"
+NAME="${1:?name}"; QUERY="${2-}"; W="${3:-1200}"; H="${4:-800}"; FREEZE="${5:-120}"; PAGE="${6:-/tools/arena/index.html}"; RASTER="${7:-cpu}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NODE="$(node -e 'import("./tools/shot-live.mjs").then((m)=>console.log(m.resolveWindowsNode()||""))' --input-type=module 2>/dev/null || true)"
 if [ -z "${NODE}" ] || [ ! -x "${NODE}" ]; then
@@ -21,4 +26,4 @@ if [ -z "${NODE}" ] || [ ! -x "${NODE}" ]; then
 fi
 HOST="$(hostname -I | awk '{print $1}')"
 exec "${NODE}" "$(wslpath -w "${HERE}/tools/shot-live.mjs")" \
-  "${HOST}" "${NAME}" "${QUERY}" "${W}" "${H}" "${FREEZE}" "${PAGE}"
+  "${HOST}" "${NAME}" "${QUERY}" "${W}" "${H}" "${FREEZE}" "${PAGE}" "${RASTER}"

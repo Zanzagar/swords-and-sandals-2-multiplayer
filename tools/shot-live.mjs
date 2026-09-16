@@ -62,7 +62,7 @@
  * pinning it, because the directory moves on update.
  *
  * ```
- *   tools/shot-live.sh <name> "<query>" [width] [height] [freezeAtFrame] [page-path]
+ *   tools/shot-live.sh <name> "<query>" [width] [height] [freezeAtFrame] [page-path] [cpu|gpu]
  *
  * (The `.mjs` takes the WSL address as its FIRST argument; the wrapper supplies
  * it. Call the wrapper.)
@@ -173,15 +173,55 @@ export function parseArguments(argv) {
   //   environment to a Windows one unless the name is listed in `WSLENV`, so the
   //   variable arrived undefined and the script refused with a message about
   //   itself. An argument crosses the boundary unconditionally.
-  const [host, name, query = "", width = "1200", height = "800", freeze = "120", page = "/tools/arena/index.html"] = argv;
+  const [host, name, query = "", width = "1200", height = "800", freeze = "120",
+    page = "/tools/arena/index.html", rasteriser = "cpu"] = argv;
   if (!/^[A-Za-z0-9._-]+$/.test(name)) {
     throw new Error(`Refusing the name "${name}": it becomes a filename, so keep it to letters, digits, dot, dash, underscore.`);
+  }
+  // ► **`cpu` IS THE DEFAULT BECAUSE IT IS WHAT EVERY EXISTING NUMBER WAS
+  //   MEASURED UNDER, NOT BECAUSE IT IS RIGHT.** Changing the default would
+  //   silently re-base every pixel count in this repository against a rasteriser
+  //   none of them were taken on. A value this refuses by name is better than a
+  //   typo quietly selecting the other one.
+  if (rasteriser !== "cpu" && rasteriser !== "gpu") {
+    throw new Error(`Refusing the rasteriser "${rasteriser}": it is "cpu" (adds --disable-gpu) or "gpu" (omits it).`);
   }
   return {
     host, name, query,
     width: Number(width), height: Number(height), freeze: Number(freeze),
-    page: page.startsWith("/") ? page : `/${page}`
+    page: page.startsWith("/") ? page : `/${page}`,
+    rasteriser
   };
+}
+
+/**
+ * THE FLAGS THIS STARTS CHROME WITH — a pure function, so the suite reaches the
+ * one decision on this route that has ever changed a measurement.
+ *
+ * ► **`--disable-gpu` IS SOFTWARE RASTERISATION, AND IT HAS ALREADY BEEN
+ *   REPORTED AS A PROPERTY OF THE PAGE ONCE.** The "3.9x frame cost" of the
+ *   weapon glow was this flag: with GPU rasterisation the same feature is about
+ *   a millisecond a frame per fighter and free at two. **Every pixel count in
+ *   this repository was taken with the flag on**, including the fractional-clip
+ *   residual that `stageClipRectFor` now snaps away, and nothing had ever varied
+ *   it — which is why it is an argument now rather than a constant.
+ *
+ * ► **AND THE OTHER FLAGS ARE NOT NEUTRAL EITHER, SO THEY ARE LISTED HERE
+ *   RATHER THAN BURIED IN THE SPAWN.** `--hide-scrollbars` changes the layout
+ *   width; `--window-size` is what `Emulation.setDeviceMetricsOverride` then
+ *   re-asserts. A reader comparing two numbers taken months apart needs to see
+ *   what was held fixed.
+ */
+export function chromeFlagsFor({ width, height, profile, port, rasteriser = "cpu" }) {
+  return [
+    "--headless=new",
+    ...(rasteriser === "cpu" ? ["--disable-gpu"] : []),
+    "--no-sandbox", "--hide-scrollbars",
+    `--user-data-dir=${profile}`,
+    `--window-size=${width},${height}`,
+    `--remote-debugging-port=${port}`, "--remote-allow-origins=*",
+    "about:blank"
+  ];
 }
 
 /**
@@ -234,7 +274,7 @@ async function connect(port) {
 async function main(argv) {
   const options = parseArguments(argv);
   if (!options) {
-    console.error("Usage: node tools/shot-live.mjs <host> <name> \"<query>\" [width] [height] [freezeAtFrame] [page-path]");
+    console.error("Usage: node tools/shot-live.mjs <host> <name> \"<query>\" [width] [height] [freezeAtFrame] [page-path] [cpu|gpu]");
     console.error("  Run it with the WINDOWS node — Chrome's debug port is not reachable from WSL.");
     process.exitCode = 1;
     return;
@@ -246,13 +286,10 @@ async function main(argv) {
   const profile = path.win32.join(SHOT_DIR, `profile-live-${options.name}`);
   fs.rmSync(profile, { recursive: true, force: true });
 
-  const chrome = spawn(CHROME, [
-    "--headless=new", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
-    `--user-data-dir=${profile}`,
-    `--window-size=${options.width},${options.height}`,
-    `--remote-debugging-port=${PORT}`, "--remote-allow-origins=*",
-    "about:blank"
-  ], { stdio: "ignore", detached: false });
+  const chrome = spawn(CHROME, chromeFlagsFor({
+    width: options.width, height: options.height, profile, port: PORT,
+    rasteriser: options.rasteriser
+  }), { stdio: "ignore", detached: false });
 
   let session = null;
   try {
@@ -290,10 +327,30 @@ async function main(argv) {
     }
     // One settle, so the frame the loop stopped on is the one on the surface.
     await new Promise((resolve) => setTimeout(resolve, 1200));
+    // ► **THE PAGE'S OWN STAGE RECTANGLE, READ BACK BESIDE THE PICTURE.** A
+    //   screenshot coordinate cannot be turned into a stage coordinate without
+    //   it, and every "inside the stage" number this project has published so
+    //   far was computed from a rectangle the READER derived off the page
+    //   layout — once wrongly, by ten thousand pixels of area. The arena sets
+    //   `window.__stageFit` from `stageFitReportFor` every frame; a page that
+    //   does not is silent rather than an error, because this tool shoots
+    //   several pages and only one of them has a stage.
+    const reported = await session.send("Runtime.evaluate", {
+      expression: "window.__stageFit ? JSON.stringify(window.__stageFit) : null",
+      returnByValue: true
+    });
+    const stageFit = reported?.result?.value ?? null;
+
     const { data } = await session.send("Page.captureScreenshot", { format: "png" });
     fs.writeFileSync(out, Buffer.from(data, "base64"));
     // The WSL spelling, because the caller reads it from Linux.
-    console.log(`${SHOT_DIR_WSL}/${options.name}.png  frame ${state.f}  ${fs.statSync(out).size} bytes`);
+    // ► **THE RASTERISER IS ON THE OUTPUT LINE BECAUSE IT IS NOT RECOVERABLE
+    //   FROM THE PNG.** Two shots that differ only in this flag are a
+    //   measurement; two shots whose flag nobody wrote down are a puzzle, and
+    //   this repository has already spent a session on one of those.
+    console.log(`${SHOT_DIR_WSL}/${options.name}.png  frame ${state.f}  ` +
+      `${fs.statSync(out).size} bytes  rasteriser ${options.rasteriser}`);
+    if (stageFit) console.log(`  stage: ${stageFit}`);
   } finally {
     session?.close();
     // ► **THE BROWSER IS KILLED HERE, WHICH IS THE WHOLE OF THE LEAK FIX.**

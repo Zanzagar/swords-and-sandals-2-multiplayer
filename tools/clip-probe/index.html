@@ -374,4 +374,15 @@ for (const { trial, result } of sweepRows) {
 sweepHtml.push('</table>');
 document.getElementById("sweep").innerHTML = sweepHtml.join("");
 
+// ► **A TICK, SO `tools/shot-live.sh` CAN SHOOT THIS PAGE AT ALL.** That tool
+//   freezes a page at a FRAME NUMBER by wrapping `requestAnimationFrame` before
+//   any page script runs, and it refuses to shoot a page that never reaches the
+//   frame — correctly, since a shot of a page that never got there is not the
+//   shot that was asked for. A static page never reaches frame 1. This draws
+//   nothing: the measurement above has already run and the canvas already holds
+//   what it measured. It exists so the RASTERISER can be varied, which
+//   `tools/shot.sh` cannot do and which is the one question this page could not
+//   answer about itself.
+(function tick() { requestAnimationFrame(tick); })();
+
 </script>

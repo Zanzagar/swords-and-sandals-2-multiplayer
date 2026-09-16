@@ -101,6 +101,7 @@ import {
   cameraStep,
   stageFitFor,
   stageClipRectFor,
+  stageFitReportFor,
   stageProjectorFor,
   clipEffectTableFrom,
   effectsForAnimation,
@@ -3165,6 +3166,32 @@ function render(now = performance.now()) {
   //     off switch cannot be measured, only asserted. With `clip=0` the page
   //     draws exactly what it drew before this landed — green band included.
   const stageRect = stageClipRectFor(fit);
+
+  // ► **THE PAGE REPORTS ITS OWN RECTANGLE, AS A VALUE RATHER THAN A LOG LINE.**
+  //   Every "inside the stage" number this project has published was computed
+  //   from a canvas rectangle the READER derived off the page layout — the
+  //   2026-09-15 residual was reported over a stage of 176,211 pixels that is
+  //   really 186,667, and a first attempt at the same check reported a false
+  //   FAILURE for exactly that reason. This is the page's own answer.
+  //
+  //   ► **AND IT IS DELIBERATELY NOT `log()`.** The previous attempt at this
+  //     logged into the surface panel, its lines were never seen, and the
+  //     session concluded that logging from inside `render` does not work and
+  //     wrote a warning telling the next reader not to try. That was wrong —
+  //     `reportGroupPaint`, `reportFigureGroups` and `reportedLoadout` all log
+  //     from inside this very call and their lines are in the panel — the panel
+  //     just sits BELOW THE FOLD at every window size the clip work was shot at.
+  //     A value on `window` is immune to both problems: read it with one
+  //     `Runtime.evaluate`, exactly as `tools/shot-live.mjs` already reads
+  //     `window.__frames`.
+  //
+  //   Set every frame rather than once, because the canvas is resized at the top
+  //   of every frame and a report taken at load describes the 300x150 default.
+  window.__stageFit = stageFitReportFor({
+    canvas: { width: canvas.width, height: canvas.height },
+    cssRect: { width: rect.width, height: rect.height }
+  });
+
   context.save();
   if (STAGE_CLIP) {
     context.beginPath();

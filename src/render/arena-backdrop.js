@@ -1039,6 +1039,72 @@ export function stageFitFor({ width, height }) {
  * that lives there is unreachable by the suite, and that arrangement has
  * produced five live defects in a day.
  */
+/**
+ * WHERE THE STAGE ACTUALLY IS, IN BOTH COORDINATE SYSTEMS — the arena's answer
+ * to "report your own canvas rect".
+ *
+ * ► **THIS EXISTS BECAUSE EVERY "INSIDE THE STAGE" NUMBER SO FAR WAS DERIVED
+ *   FROM A PAGE LAYOUT RATHER THAN ASKED OF THE PAGE.** The 2026-09-15 residual
+ *   was reported as "392 of the 176,211 pixels inside the fitted stage"; the
+ *   stage was 186,667 device pixels and the count was 399, and the error was in
+ *   the rectangle the reader assumed rather than in anything measured. A first
+ *   attempt at this check reported a false FAILURE for exactly that reason.
+ *
+ * ► **AND IT IS A VALUE, NOT A LOG LINE.** The previous attempt logged into the
+ *   surface panel and its output was never seen — for reasons that turned out to
+ *   be about the SHOT (the panel sits below the fold at every size the clip work
+ *   was taken at), not about the page. A value hung on `window` is read back
+ *   with one `Runtime.evaluate`, which `tools/shot-live.mjs` already does for
+ *   `window.__frames`, and it comes back as a number rather than as a picture of
+ *   a number.
+ *
+ * The shell supplies the three things no module here can see — `canvas.width`,
+ * `canvas.height` and the CSS rect the canvas occupies — and everything else is
+ * `stageFitFor` and `stageClipRectFor`, called rather than re-typed.
+ *
+ * @param {object} canvas   `{ width, height }` in DEVICE pixels — `canvas.width`.
+ * @param {object} cssRect  `{ width, height }` in PAGE pixels — the element's own
+ *                          `getBoundingClientRect()`. Optional; without it the
+ *                          page half of the answer is reported as null rather
+ *                          than guessed at.
+ */
+export function stageFitReportFor({ canvas, cssRect = null } = {}) {
+  const width = Number.isFinite(canvas?.width) && canvas.width > 0 ? canvas.width : SS2_STAGE.width;
+  const height = Number.isFinite(canvas?.height) && canvas.height > 0 ? canvas.height : SS2_STAGE.height;
+  const fit = stageFitFor({ width, height });
+  const device = stageClipRectFor(fit);
+  // ► **THE RATIO IS DERIVED FROM THE TWO RECTANGLES, NOT READ FROM
+  //   `devicePixelRatio`.** What matters to a reader turning a screenshot
+  //   coordinate into a stage coordinate is the ratio the canvas ACTUALLY has,
+  //   and a canvas whose backing store disagrees with its CSS box — which is
+  //   every canvas mid-resize — would be described wrongly by the global.
+  const ratio = Number.isFinite(cssRect?.width) && cssRect.width > 0 ? width / cssRect.width : null;
+  return Object.freeze({
+    canvas: Object.freeze({ width, height }),
+    css: cssRect
+      ? Object.freeze({ width: cssRect.width, height: cssRect.height })
+      : null,
+    ratio,
+    scale: fit.scale,
+    device,
+    page: ratio
+      ? Object.freeze({
+        x: device.x / ratio, y: device.y / ratio,
+        width: device.width / ratio, height: device.height / ratio
+      })
+      : null,
+    // The bars are what is left, and they are reported rather than left to be
+    // subtracted: "the stage is 870 wide on an 870 canvas" and "there are no
+    // left and right bars" are the same fact, and only one of them is obvious.
+    letterbox: Object.freeze({
+      left: device.x,
+      top: device.y,
+      right: width - (device.x + device.width),
+      bottom: height - (device.y + device.height)
+    })
+  });
+}
+
 export function stageClipRectFor(fit) {
   const scale = Number.isFinite(fit?.scale) && fit.scale > 0 ? fit.scale : 1;
   const offsetX = Number.isFinite(fit?.offsetX) ? fit.offsetX : 0;

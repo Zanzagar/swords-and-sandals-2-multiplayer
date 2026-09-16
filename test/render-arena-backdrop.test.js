@@ -53,6 +53,7 @@ import {
   frameForLayer,
   stageFitFor,
   stageClipRectFor,
+  stageFitReportFor,
   stageProjectorFor,
   zoomTargetFor,
   SS2_UI_BAR_READOUTS,
@@ -1630,5 +1631,74 @@ test("THE PROJECTOR'S HORIZON IS ARENA y=0 IN CANVAS SPACE, not the ground line"
       assert.notEqual(projector.horizon, projector.toY(SS2_ARENA.frontY ?? 200, 0),
         "the horizon sits on the ground line, so the arena has no depth at all");
     }
+  }
+});
+
+/* ------------------------------------------------------------------ *
+ * THE PAGE'S OWN STAGE RECTANGLE — `window.__stageFit`'s arithmetic.
+ * ------------------------------------------------------------------ */
+
+test("the report IS stageFitFor and stageClipRectFor, not a second copy of them", () => {
+  // ► **THE ASSERTION THAT COULD HAVE VARIED.** A report that re-typed the
+  //   letterbox arithmetic would agree with these two functions on the day it
+  //   was written and drift the moment either changed — which is precisely what
+  //   happened to the clip rectangle itself, written out longhand in
+  //   `tools/screens/main.js` while `stageClipRectFor` already returned it.
+  for (const size of [
+    { width: 870, height: 688 },   // the arena at a 1200x800 window
+    { width: 640, height: 420 },   // exact
+    { width: 1920, height: 1080 },
+    { width: 401, height: 953 },
+    { width: 1280, height: 420 }
+  ]) {
+    const report = stageFitReportFor({ canvas: size });
+    const fit = stageFitFor(size);
+    assert.equal(report.scale, fit.scale, `scale disagrees at ${size.width}x${size.height}`);
+    assert.deepEqual({ ...report.device }, { ...stageClipRectFor(fit) },
+      `the reported device rect is not stageClipRectFor's at ${size.width}x${size.height}`);
+  }
+});
+
+test("the letterbox is what is left, on all four edges, and it adds up", () => {
+  for (const size of [{ width: 870, height: 688 }, { width: 1280, height: 420 }, { width: 401, height: 953 }]) {
+    const report = stageFitReportFor({ canvas: size });
+    const { device, letterbox } = report;
+    assert.equal(letterbox.left + device.width + letterbox.right, size.width,
+      "the horizontal bars and the stage do not span the canvas");
+    assert.equal(letterbox.top + device.height + letterbox.bottom, size.height,
+      "the vertical bars and the stage do not span the canvas");
+    // Rounding two edges can make the bars differ by one device pixel and no
+    // more; anything larger means the stage stopped being centred.
+    assert.ok(Math.abs(letterbox.left - letterbox.right) <= 1, "left and right bars differ by more than the rounding");
+    assert.ok(Math.abs(letterbox.top - letterbox.bottom) <= 1, "top and bottom bars differ by more than the rounding");
+  }
+});
+
+test("without a CSS rect the PAGE half is null, and is not guessed at", () => {
+  // ► **A REPORT THAT INVENTED A RATIO WOULD BE WORSE THAN NO REPORT.** The
+  //   whole reason this function exists is that a derived rectangle was believed
+  //   over a measured one; defaulting `ratio` to 1 would put that same mistake
+  //   inside the fix.
+  const report = stageFitReportFor({ canvas: { width: 870, height: 688 } });
+  assert.equal(report.css, null);
+  assert.equal(report.ratio, null);
+  assert.equal(report.page, null);
+  assert.ok(report.device.width > 0, "the DEVICE half is still answered — it needs no CSS rect");
+});
+
+test("the ratio comes from the two rectangles, not from devicePixelRatio", () => {
+  // A canvas whose backing store is twice its CSS box — every HiDPI canvas, and
+  // every canvas caught mid-resize — must be described by what it IS.
+  const report = stageFitReportFor({ canvas: { width: 1740, height: 1376 }, cssRect: { width: 870, height: 688 } });
+  assert.equal(report.ratio, 2);
+  assert.equal(report.page.width, report.device.width / 2);
+  assert.equal(report.page.y, report.device.y / 2);
+});
+
+test("a malformed canvas reports the stage at 1:1 rather than a NaN rectangle", () => {
+  for (const bad of [null, undefined, {}, { width: 0, height: 0 }, { width: NaN, height: 10 }]) {
+    const report = stageFitReportFor({ canvas: bad });
+    for (const value of Object.values(report.device)) assert.ok(Number.isFinite(value), `NaN for ${JSON.stringify(bad)}`);
+    assert.ok(report.device.width > 0 && report.device.height > 0, `empty rect for ${JSON.stringify(bad)}`);
   }
 });
