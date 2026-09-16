@@ -8,7 +8,7 @@
  *   the sword is twenty. Both were failures of EYESIGHT, and both cost more
  *   than this decoder did.
  *
- *   So the loop is now: `tools/shot.sh` renders it, and this reads the pixels
+ *   So the loop is now: `tools/shot-live.sh` renders it, and this reads the pixels
  *   back. "Is stage (320, 10) the sky or the placeholder green" has an exact
  *   answer, and asking it exactly is cheaper than arguing about a thumbnail.
  *

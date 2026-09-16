@@ -4,7 +4,8 @@
  *
  * ## Why this exists
  *
- * `tools/shot.sh` made it possible to LOOK at the arena, and looking
+ * `tools/shot-live.sh` (and `tools/shot.sh` before it, retired 2026-09-16)
+ * made it possible to LOOK at the arena, and looking
  * immediately found three defects the suite could not. It also produced two
  * wrong conclusions in one evening:
  *

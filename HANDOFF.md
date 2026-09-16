@@ -506,7 +506,15 @@ wrong**; that file is kept only as the record of how.)*
   the figure pack reads **23 saturated / 1 scaled** (the 1 is the single value
   below the clamp, 0.9765625) and **all 24 enchantment filters saturate.**
 
-► **`tools/shot.sh` LEAKS A CHROME PROCESS PER INVOCATION — 73 were alive.**
+► ~~**`tools/shot.sh` LEAKS A CHROME PROCESS PER INVOCATION — 73 were alive.**~~
+  **RETIRED 2026-09-16 RATHER THAN FIXED, on the owner's steer ("only fix it if
+  we need the functionality").** We needed the functionality and not that tool:
+  its last justification was pages `shot-live` could not shoot — ones that draw
+  once and stop, which never reach a frame number — and **a freeze of 0 now
+  waits for QUIESCENCE instead.** Measured on the same static screen: the two
+  tools' renders are **BYTE-IDENTICAL, 76,983 bytes, 0 differing pixels**. A
+  test asserts the file stays gone. The paragraph below is kept because the
+  SYMPTOM is worth recognising if it ever recurs:
   They accumulate until new ones cannot start, and the symptom is screenshots
   failing for URLs that worked minutes earlier, which reads as a page defect and
   is not. **Kill them before trusting a FAILED shot**:

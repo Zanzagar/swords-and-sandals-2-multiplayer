@@ -64,6 +64,12 @@
  * ```
  *   tools/shot-live.sh <name> "<query>" [width] [height] [freezeAtFrame] [page-path] [cpu|gpu]
  *
+ * `freezeAtFrame` of 0 means "wait until the page goes QUIET" rather than
+ * "stop at frame N", which is how a page that draws once and stops is shot —
+ * `tools/screens` is one, and asking it for frame 1 catches it before its packs
+ * land. **That is what retired `tools/shot.sh`**, whose only remaining
+ * justification was static pages and which leaked a Chrome process per run.
+ *
  * (The `.mjs` takes the WSL address as its FIRST argument; the wrapper supplies
  * it. Call the wrapper.)
  * ```
@@ -141,6 +147,28 @@ export function resolveWindowsNode(home) {
  *   120", and shooting the second one would put an animating page in a file
  *   labelled as frozen.
  */
+/**
+ * ► **A FREEZE OF 0 MEANS "NEVER STOP", AND IT IS HOW A STATIC PAGE IS SHOT AT
+ *   ALL.** A page that draws once and stops — `tools/screens/index.html`, whose
+ *   redraw is dirty/frameQueued-guarded on purpose — never reaches frame 120,
+ *   and the driver correctly refuses a shot of a page that never got there.
+ *   Asking it for frame 1 instead shoots it BEFORE its packs land: measured
+ *   against the same screen shot the other way, **51.6% of the page differs,
+ *   with a 407,839-pixel spike at delta 178**, which is blank against drawn.
+ *   So the driver waits for QUIESCENCE instead, and the clause below is what
+ *   lets the page keep running until it is quiet.
+ *
+ * ► **THE VIRTUAL CLOCK STILL APPLIES.** A page that animates on elapsed time
+ *   is still a pure function of the frame number. What a freeze of 0 gives up
+ *   is only the guarantee that two shots stopped on the SAME frame — which a
+ *   page that has stopped animating does not need, and which is the whole
+ *   reason the frame freeze exists for the arena.
+ *
+ * ► **AND IT IS WHAT RETIRED `tools/shot.sh`.** That tool's only remaining
+ *   justification was pages this one could not shoot, and it leaked a Chrome
+ *   process per invocation — 73 were once alive, after which working URLs start
+ *   failing in a way that reads as a page defect.
+ */
 export function freezeScript(at, step = 1000 / 60) {
   return `(() => {
     const real = window.requestAnimationFrame.bind(window);
@@ -158,9 +186,12 @@ export function freezeScript(at, step = 1000 / 60) {
     const now = () => n * ${step};
     performance.now = now;
     Date.now = () => epoch + now();
+    // A freeze of 0 never stops: see the note above this function for why a
+    // static page needs that, and what it gives up.
+    const stopAt = ${Number(at)};
     window.requestAnimationFrame = (callback) => real(() => {
       window.__frames = n += 1;
-      if (n >= ${Number(at)}) { window.__frozen = true; return; }
+      if (stopAt > 0 && n >= stopAt) { window.__frozen = true; return; }
       callback(now());
     });
   })();`;
@@ -310,20 +341,36 @@ async function main(argv) {
     await session.send("Page.navigate", { url });
 
     const deadline = Date.now() + 120000;
-    let state = { f: 0, z: false };
+    let state = { f: 0, z: false, ready: false };
+    // ► **QUIESCENCE, WHEN NO FRAME WAS ASKED FOR.** Two consecutive polls with
+    //   the same frame count AND a complete document means the page has stopped
+    //   drawing, which is the only "done" a static page has. Two polls rather
+    //   than one because a single quiet 400ms window is also what a page looks
+    //   like while it waits on a fetch.
+    let quietFor = 0;
+    let lastFrames = -1;
     while (Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, 400));
       const result = await session.send("Runtime.evaluate", {
-        expression: "JSON.stringify({f: window.__frames|0, z: !!window.__frozen})", returnByValue: true
+        expression: "JSON.stringify({f: window.__frames|0, z: !!window.__frozen, ready: document.readyState === 'complete'})",
+        returnByValue: true
       });
       state = JSON.parse(result.result.value);
       if (state.z) break;
+      if (options.freeze === 0) {
+        quietFor = state.f === lastFrames && state.ready ? quietFor + 1 : 0;
+        lastFrames = state.f;
+        if (quietFor >= 2) { state.z = true; state.quiesced = true; break; }
+      }
     }
     if (!state.z) {
       // ► A SHOT OF A PAGE THAT NEVER REACHED THE FRAME IS NOT THE SHOT THAT
       //   WAS ASKED FOR, and writing it anyway is how a moving scene ends up in
       //   a file a reader differences.
-      throw new Error(`Never reached frame ${options.freeze} — stopped at ${state.f}. The page may not animate, or may be far slower than expected.`);
+      throw new Error(options.freeze === 0
+        ? `Never went quiet — stopped at frame ${state.f}. The page is still drawing after 120s.`
+        : `Never reached frame ${options.freeze} — stopped at ${state.f}. The page may not animate, or may be far slower than expected. ` +
+          `A page that draws once and stops is shot with a freeze of 0, which waits for QUIESCENCE instead.`);
     }
     // One settle, so the frame the loop stopped on is the one on the surface.
     await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -349,7 +396,8 @@ async function main(argv) {
     //   measurement; two shots whose flag nobody wrote down are a puzzle, and
     //   this repository has already spent a session on one of those.
     console.log(`${SHOT_DIR_WSL}/${options.name}.png  frame ${state.f}  ` +
-      `${fs.statSync(out).size} bytes  rasteriser ${options.rasteriser}`);
+      `${fs.statSync(out).size} bytes  rasteriser ${options.rasteriser}` +
+      (state.quiesced ? "  (quiesced, not frame-frozen)" : ""));
     if (stageFit) console.log(`  stage: ${stageFit}`);
   } finally {
     session?.close();

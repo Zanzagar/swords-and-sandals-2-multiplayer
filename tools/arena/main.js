@@ -2065,7 +2065,7 @@ function probeCanvasFilter() {
   log(`filter probe: ${SAMPLES} fills took ${plain.toFixed(2)}ms plain and ` +
     `${filtered.toFixed(2)}ms filtered (${(filtered / Math.max(plain, 0.001)).toFixed(1)}x).`);
   // ► **AND WHETHER THAT NUMBER MEANS ANYTHING, REPORTED BESIDE IT.**
-  //   `tools/shot.sh` drives Chrome with `--virtual-time-budget`, under which
+  //   `tools/shot.sh` drove Chrome with `--virtual-time-budget` (RETIRED 2026-09-16), under which
   //   `performance.now()` is VIRTUAL: it advances when the page yields and not
   //   while script runs, so every synchronous measurement in a screenshot comes
   //   back 0.00ms however much work was done. The clock is printed raw so a
@@ -3992,7 +3992,7 @@ if (ENCHANT_DEMO) {
     `potency ${fields.secondary_weapon_enchantment_potency}. ` +
     "THE ENGINE PRODUCED NONE OF IT — a screenshot of this is not evidence about a battle.",
   { warn: true });
-  // ► **IT COSTS ~4x A FRAME, AND `tools/shot.sh` CANNOT SHOOT IT — BUT IT DOES
+  // ► **IT COSTS ~4x A FRAME, AND `tools/shot.sh` COULD NOT SHOOT IT — BUT IT DOES
   //   NOT HANG, AND THE FIRST VERSION OF THIS COMMENT SAID IT DID.** Measured
   //   2026-09-15 over CDP, and **the flag that matters is `--disable-gpu`**:
   //   under software rasterisation the arena runs at 15.51 fps with the glow
@@ -4004,9 +4004,9 @@ if (ENCHANT_DEMO) {
   //   **The 3.9x is a property of the measuring configuration, not of this
   //   feature.**
   //
-  //   What stalls is `--virtual-time-budget`, which `tools/shot.sh` drives
+  //   What stalls is `--virtual-time-budget`, which `tools/shot.sh` drove
   //   Chrome with and which does not advance while a filtered composite is
-  //   outstanding. **A `FAILED` from `tools/shot.sh` is evidence about the
+  //   outstanding. **A `FAILED` from a virtual-time shot is evidence about the
   //   screenshot mode, not about this page.** `tools/shot-live.sh` shoots it in
   //   real time and freezes at a frame number so two shots can be differenced.
   //
@@ -4019,9 +4019,8 @@ if (ENCHANT_DEMO) {
   //   `drop-shadow` passes themselves — which GPU rasterisation absorbs.
   log("enchant: the glow costs about 1ms a frame per enchanted fighter with GPU rasterisation " +
     "(6.1ms/frame either way at 2 fighters, 11.8 against 6.1 at 6). Under --disable-gpu it is 4x, " +
-    "which is the measuring configuration and not this feature. tools/shot.sh CANNOT shoot this page " +
-    "(its --virtual-time-budget never advances while a filtered composite is outstanding); use " +
-    "tools/shot-live.sh, which shoots in real time and freezes at a frame number.",
+    "which is the measuring configuration and not this feature. Use tools/shot-live.sh, which shoots " +
+    "in real time, freezes at a frame number, and takes a freeze of 0 to wait for a static page to go quiet.",
   { warn: true });
   if (!ENCHANT_DEMO.complete) {
     log("enchant: no potency given, so it is 0 — outside 1..3 the build calls gotoAndStop zero times and " +

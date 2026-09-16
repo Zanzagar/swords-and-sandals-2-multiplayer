@@ -214,27 +214,51 @@ test("the rasteriser is the EIGHTH argument, so every existing caller is unchang
  * THE TWO SHOT TOOLS MUST AGREE ABOUT THE RASTERISER.
  * ------------------------------------------------------------------ */
 
-test("tools/shot.sh offers the SAME two rasterisers and the SAME default as this one", () => {
-  // ► **THIS TEST EXISTS BECAUSE THE TWO TOOLS DISAGREED SILENTLY FOR A
-  //   SESSION.** `shot-live` took the rasteriser as an argument while `shot.sh`
-  //   hardcoded `--disable-gpu`, so two shots taken with the two tools differed
-  //   by 15.9% of the arena frame before anything under test had changed, and
-  //   neither output said which browser it had used. A shell script is not
-  //   importable, so this reads it — which pins the CONTRACT (the two values and
-  //   the default) rather than the behaviour, and says so.
-  const script = fs.readFileSync(new URL("../tools/shot.sh", import.meta.url), "utf8");
-  assert.match(script, /RASTER="\$\{6:-cpu\}"/,
-    "shot.sh's rasteriser default is not cpu, so the two tools no longer shoot the same browser");
-  assert.match(script, /cpu\)\s*GPU_FLAG="--disable-gpu"/,
-    "shot.sh's cpu branch does not pass --disable-gpu");
-  assert.match(script, /gpu\)\s*GPU_FLAG=""/,
-    "shot.sh's gpu branch does not omit the flag");
-  assert.match(script, /Refusing the rasteriser/,
-    "shot.sh does not refuse an unknown rasteriser by name, so a typo selects one silently");
-  // And it must SAY which one it used, for the same reason this tool does.
-  assert.match(script, /rasteriser \$RASTER/,
-    "shot.sh does not print the rasteriser, and it cannot be recovered from the PNG");
-  // The flag it hardcoded is gone: a leftover would put both on the same branch.
-  assert.ok(!/--headless=new --disable-gpu/.test(script),
-    "shot.sh still hardcodes --disable-gpu somewhere, so its gpu argument does nothing");
+test("tools/shot.sh is RETIRED, and this tool covers what it did", () => {
+  // ► **THIS TEST REPLACED ONE THAT PINNED A CONTRACT BETWEEN THE TWO TOOLS.**
+  //   For a session `shot.sh` hardcoded `--disable-gpu` while this one took it as
+  //   an argument, so two shots taken with the two tools differed by 15.9% of the
+  //   arena frame before anything under test had changed. The contract test was
+  //   the right fix for that; retiring the tool is a better one.
+  //
+  //   `shot.sh`'s only remaining justification was pages this driver could not
+  //   shoot — ones that draw once and stop, which never reach a frame number. A
+  //   freeze of 0 waits for QUIESCENCE instead, and the two tools' renders of the
+  //   same static screen are BYTE-IDENTICAL: 76,983 bytes, 0 differing pixels.
+  //   Against that, `shot.sh` leaked a Chrome process per invocation.
+  //
+  //   The assertion is that it stays gone. A reader who finds the name in an
+  //   archived handoff and recreates the file gets a tool with no rasteriser
+  //   argument back, and this says so by failing.
+  assert.ok(!fs.existsSync(new URL("../tools/shot.sh", import.meta.url)),
+    "tools/shot.sh is back. It was retired because shot-live covers it and it leaks a browser per run.");
+});
+
+/* ------------------------------------------------------------------ *
+ * QUIESCENCE — how a page that draws once and stops is shot.
+ * ------------------------------------------------------------------ */
+
+test("a freeze of 0 NEVER stops the page, which is what lets it go quiet", () => {
+  const never = freezeScript(0);
+  const stops = freezeScript(120);
+  assert.match(never, /stopAt > 0/,
+    "a freeze of 0 must not stop the loop, or a static page is shot before its packs land");
+  assert.match(never, /const stopAt = 0;/);
+  assert.match(stops, /const stopAt = 120;/);
+  // ► **AND THE VIRTUAL CLOCK IS STILL THERE.** Quiescence gives up the
+  //   same-frame guarantee, not determinism: a page animating on elapsed time
+  //   must still be a pure function of the frame number, or two quiesced shots
+  //   of an animating page are not comparable either.
+  for (const script of [never, stops]) {
+    assert.match(script, /performance\.now = now/, "the virtual clock is gone");
+    assert.match(script, /Date\.now = \(\) => epoch \+ now\(\)/, "Date.now is no longer driven by the frame");
+  }
+});
+
+test("the freeze is still the SIXTH argument and still defaults to 120", () => {
+  // Quiescence is opt-in by 0. Every existing caller asks for a frame and must
+  // keep getting one — a default of 0 would silently retire the determinism the
+  // arena's two-shot measurements rest on.
+  assert.equal(parseArguments(["h", "n"]).freeze, 120);
+  assert.equal(parseArguments(["h", "n", "", "1", "1", "0"]).freeze, 0);
 });
