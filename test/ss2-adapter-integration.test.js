@@ -2211,7 +2211,15 @@ test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declare
   // ► 40, not 41: this gladiator carries a melee weapon and NO bow, so
   //   `secondary_weapon` is not declared. Absent is not zero, and zero is a
   //   real weapon row — see the three-tier note in `ss2-team-rules.test.js`.
-  assert.equal(projected.length, 40);
+  // ► **41 SINCE 2026-09-16, AND THE REASON IS NOT A DEFAULT.** `psyche_up`
+  //   joined `SS2_RESOURCE_NAMES` with NO `SS2_RESOURCE_DEFAULTS` entry, so
+  //   nothing is filled in — but this gladiator's VANILLA RECORD states the
+  //   field (`src/adapter/vanilla-fields.js` groups it under Conditions, and
+  //   the map's own "Combatant state objects" section lists it there), so the
+  //   bag picks up a value the record really carries. **That is the intended
+  //   shape**: absent means "this record never mentioned a counter", stated
+  //   means "this is what it holds", and neither is invented here.
+  assert.equal(projected.length, 41);
   for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon",
     "weapon_range", "weapon"]) {
     assert.ok(projected.includes(name), `${name} must reach the projection`);

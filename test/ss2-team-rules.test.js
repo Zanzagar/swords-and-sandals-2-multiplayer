@@ -265,6 +265,13 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "normal-attack",
     "poisoned-phase",
     "power-attack",
+    // ► **JOINED 2026-09-16, AND IT IS THE FIRST TOKEN HERE THAT IS NOT ALWAYS
+    //   AN ATTACK.** The phase reads a counter and plays `psyche_up`,
+    //   `psyche_up2` or `psyche_up3` for 1, 2 and >= 3 (`+0x658a`, `+0x65b9`,
+    //   `+0x65ef`); only the third arm reaches `checkattackroll`. It is
+    //   therefore NOT in `ATTACK_BANDS` — membership there means "always
+    //   attacks", and two of its three presses roll nothing at all.
+    "psyche-up",
     "quick-attack",
     "rank-back",
     "rank-front",
@@ -1043,6 +1050,22 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     //   ("re-hashes every battle in existence, including all 23 golden
     //   replays") is broader than what actually happens, and has been for both
     //   of the last two additions.
+    // ► **ADDED 2026-09-16 AND IT MOVED NOTHING, WHICH IS THE POINT.** The
+    //   psyche counter is DELIBERATELY absent from `SS2_RESOURCE_DEFAULTS`, so
+    //   no combatant that does not state it declares the key — the same device
+    //   `weapon_range`, `weapon` and `secondary_weapon` use.
+    //
+    //   ► **AND THIS TEST'S OWN FAILURE MESSAGE IS RIGHT FOR A DEFAULTED NAME
+    //     AND WRONG FOR AN UNDEFAULTED ONE, which the comment above on the
+    //     ranged six gets half right.** It says a fixture "declares its own
+    //     resource bag and is never offered these names". That is NOT the
+    //     mechanism: `ss2Combatant`'s bag loop runs unconditionally and
+    //     `derive: false` does not stop the default fill, so a golden hero
+    //     built through `combatantFromScenarioSide` carries 38 resource keys of
+    //     which 31 come from `SS2_RESOURCE_DEFAULTS`. **A name WITH a default
+    //     moves all 23 golden replay hashes; a name without one moves none.**
+    //     Measured, and the repository already did it once at `86ccb68`.
+    "psyche_up",
     "secondary_weapon",
     "secondary_weapon_enchantment_damage",
     "secondary_weapon_enchantment_potency",
@@ -1105,13 +1128,25 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
   //   this catching a name that is declared and never projected.
   const MELEE_DERIVED = ["weapon_range", "weapon"];
   const RANGED_DERIVED = ["secondary_weapon"];
+  // ► **NEVER DECLARED UNLESS STATED, AND THAT IS THE DESIGN RATHER THAN AN
+  //   OMISSION.** `psyche_up` has no `SS2_RESOURCE_DEFAULTS` entry, so the bag
+  //   loop never fills it and a combatant carries the key only when a caller
+  //   states one. That is what keeps all 23 golden replay hashes still, and it
+  //   is why it belongs in this exclusion list rather than in the expected set.
+  //
+  //   The rule set reads it as `resourceValue(actor, "psyche_up", 1)`: ABSENT
+  //   means a fresh gladiator, which the build spells 1 — both of its resets
+  //   write `= 1` (`nextphase` `+0x35c7`-`+0x35ea`, `damagecharacter`
+  //   `+0x1be4`). What the build holds before the FIRST write is a map silence.
+  const NEVER_DEFAULTED = ["psyche_up"];
 
   // (1) No weapon id at all: everything but what either weapon slot answers for.
   const battle = battleOf({}, {});
   const declared = Object.keys(combatantById(battle, "hero").resources).sort();
   assert.deepEqual(
     declared,
-    [...SS2_RESOURCE_NAMES].filter((name) => !MELEE_DERIVED.includes(name) && !RANGED_DERIVED.includes(name)).sort(),
+    [...SS2_RESOURCE_NAMES].filter((name) => !MELEE_DERIVED.includes(name)
+      && !RANGED_DERIVED.includes(name) && !NEVER_DEFAULTED.includes(name)).sort(),
     "a combatant with no weapon id declares the vocabulary minus what a weapon row derives"
   );
 
@@ -1122,7 +1157,8 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
   const armedHero = combatantById(armed, "hero");
   assert.deepEqual(
     Object.keys(armedHero.resources).sort(),
-    [...SS2_RESOURCE_NAMES].filter((name) => !RANGED_DERIVED.includes(name)).sort(),
+    [...SS2_RESOURCE_NAMES].filter((name) => !RANGED_DERIVED.includes(name)
+      && !NEVER_DEFAULTED.includes(name)).sort(),
     "declaration must match the vocabulary once a weapon row answers for the whole of it"
   );
   assert.ok(!Object.keys(armedHero.resources).includes("secondary_weapon"),

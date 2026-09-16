@@ -323,6 +323,16 @@ export const Ss2ActionType = Object.freeze({
   BOMBARD: "bombard",
   SNIPE: "snipe",
   BASH_ATTACK: "bash-attack",
+  // ► **`psyche_up` IS THE ONE ACTION HERE THAT IS NOT ALWAYS AN ATTACK, AND
+  //   THAT IS WHY IT IS NOT IN `ATTACK_BANDS`.** The phase reads a counter and
+  //   plays `psyche_up`, `psyche_up2` or `psyche_up3` for values 1, 2 and >= 3
+  //   (`+0x658a`, `+0x65b9`, `+0x65ef`); only the third arm reaches
+  //   `checkattackroll`. Presses one and two cost stamina, advance the counter
+  //   and roll NOTHING — so a band entry, which means "always attacks", would
+  //   put two samples on the ordered channel that the build never takes, and
+  //   every peer replaying the same tape would fall out of step from the first
+  //   charge onward. It resolves through its own branch; see `PSYCHE_UP_MODEL`.
+  PSYCHE_UP: "psyche-up",
   SWAP_WEAPONS: "swap-weapons",
   // The four status phases. FOUR types rather than one `status-phase`, because
   // the build's decision IS the specific label — `getphase("frozen")` and
@@ -808,6 +818,14 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // reason `src/adapter/presentation.js` no longer reports a nonexistent
   // `attack23` for direction 23.
   [Ss2ActionType.BASH_ATTACK]: "bash_attack",
+  // ► **THE PHASE IS HANDED NOWHERE AND THE CLIP IS CHOSEN BY THE COUNTER.**
+  //   Every controller frame wires the single label `psyche_up` (`+0x0dec` and
+  //   `+0x127e` on frame 5, `+0x0b8b` and `+0x0f95` on frame 13), so there is
+  //   one phase name. **The animation is NOT derivable from it**: the branch
+  //   picks `psyche_up`, `psyche_up2` or `psyche_up3` from the counter, which
+  //   is why the resolved event carries the clip separately and why
+  //   `attackLabel(30)` in the presentation layer refuses to name one.
+  [Ss2ActionType.PSYCHE_UP]: "psyche_up",
   [Ss2ActionType.SWAP_WEAPONS]: "swap_weapons",
   // Three spellings for one effect, and the map is explicit that they are not
   // interchangeable: the FIELD is `poison`, the DECISION label is `poisoned`,
@@ -2436,6 +2454,23 @@ export const SS2_BACK_ATTACK_BONUS = 0.5;
  *   every fixture that has no weapon — including all 23 promoted goldens.
  */
 export const SS2_RESOURCE_NAMES = Object.freeze([
+  // ► **THE PSYCHE COUNTER, AND IT IS DELIBERATELY ABSENT FROM
+  //   `SS2_RESOURCE_DEFAULTS`** — for the reason `weapon_range` is, plus one of
+  //   its own. A name WITH a default is filled into every combatant that does
+  //   not state it, including every golden's, and **that moves all 23 golden
+  //   replay hashes** (measured; the repository already did this once at
+  //   `86ccb68`, where the armoured golden went `70e605e1` -> `4032d673` and
+  //   the suite stayed green because nothing pinned the shape).
+  //
+  //   The build's own floor is **1, not 0**: both resets write `= 1`
+  //   (`nextphase` `+0x35c7`-`+0x35ea` on any non-`psyche_up` decision,
+  //   `damagecharacter` `+0x1be4` to the defender). So "absent" is read as 1
+  //   here — a fresh gladiator, which is what the build leaves everyone in
+  //   after their first turn of any kind. **What the build holds BEFORE the
+  //   first write is a MAP SILENCE** (`psyche-up-initialisation` in
+  //   `src/adapter/vanilla-fields.js`) and this models the reset value rather
+  //   than inventing an initial one.
+  "psyche_up",
   "ammo_left",
   "armourclass",
   "armourclass_max",
