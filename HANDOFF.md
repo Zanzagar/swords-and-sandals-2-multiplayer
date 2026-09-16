@@ -22,6 +22,57 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **`psyche_up` IS NOT THE OWNER'S AND IS NOT A SPELL TO INVENT — THREE
+  HANDOFFS SAID BOTH.** They recorded that the figure pack's twelve effect
+  groups sit on four clips declared unplayed and concluded that *"making them
+  reachable means deciding what those spells ARE."* **It is a vanilla SS2
+  ACTION** with a `getphase` label, a button on all four controller frames, 31
+  mentions in the battle map and a fully decoded discharge chain; the twelve
+  groups are its ART. `AGENTS.md` says new systems are the agent's to build, and
+  this one does not even need designing.
+  ► **THE DERIVATION IS WRITTEN UP AND CHECKED: `docs/handoffs/PSYCHE-UP-BRIEF.md`**
+    — ten agents, 5 questions and 5 write-nothing verifiers, 10 started, 10
+    returned, 0 dead. **Six premises broke, four of them mine.** Read the brief
+    before writing a line, and treat every fact in it as a hypothesis anyway.
+  ► **AND IT IS A SESSION'S WORK, MEASURED.** The closest precedent is the
+    ranged trio (`7310583`): **2,252 insertions across 10 files**, plus a
+    correction commit the next day. Do not start it in the last hour.
+  ► **`round(strength)` AT `+0x653f` IS THE STAMINA COST, NOT THE DAMAGE, AND I
+    PUBLISHED IT AS DAMAGE.** It is a row of the map's `staminacost`-by-phase
+    table, beside `power_attack -> round(strength*3)` and `rest ->
+    0 - round(stamina * 15)` — **a table whose `rest` row is negative can only be
+    a cost table.** The damage is `ceil(max_damage * 1.5)`, in the attack-roll
+    dispatcher, a different section entirely. Three agents broke it independently.
+  ► **A NAME WITH AN `SS2_RESOURCE_DEFAULTS` ENTRY MOVES EVERY GOLDEN REPLAY
+    HASH — MEASURED 23/23 — AND THIS FILE'S REASSURANCE IS RIGHT FOR THE WRONG
+    REASON.** It says the vocabulary pin's warning is "broader than what
+    happens". The last three additions left goldens alone **because
+    `weapon_range`, `weapon` and `secondary_weapon` are deliberately ABSENT from
+    `SS2_RESOURCE_DEFAULTS`**, which is stated at the field itself. For a name
+    WITH a default the warning is literally accurate, `derive: false` does not
+    stop the default fill, and **the repository already caught this at `86ccb68`
+    — all 23 hashes moved, the armoured golden went `70e605e1` -> `4032d673`,
+    and the suite stayed green because nothing pinned the shape.**
+
+► **EVERY GRIEVOUS BLOW BOUND ITS ACTOR TO `attack30`, AND THERE IS NO SUCH
+  CLIP.** `attackLabel` branched 20/21/22/23 then fell through to
+  `` `attack${direction}` ``; the fighter carries `attack1`..`attack12`, and
+  `animationFor` answers a missing label by falling back rather than by
+  complaining. **It is the same defect the `direction === 23` branch above it was
+  written to fix, one number later, and it survived that fix because the suite
+  pinned 23 and not the CLASS** — so the guard is now the RANGE. And no clip
+  could have been named from the direction anyway: for `psyche_up` the animation
+  is chosen by the COUNTER (`+0x658a`/`+0x65b9`/`+0x65ef`), not the direction.
+  Found by an agent reading for something else entirely.
+
+► **`ss2-rules.js`'s DEFERRAL PARAGRAPH WAS WRONG ABOUT THREE OF ITS FOUR
+  ENTRIES FOR TWO DAYS.** It deferred `bash_attack`, `bombard`/`snipe`,
+  `psyche_up` and `taunt` "each for a stated reason" and ended "None of the four
+  has a single golden" — while `Ss2ActionType` exported the first three and
+  `legalActions` pushed them. **An implementer reading only that header would
+  re-derive work already in the file underneath it.** Corrected at the paragraph;
+  `taunt` is the one entry that has not moved.
+
 ► **THE RASTERISER MOVES 15.9% OF THE ARENA AND NOTHING HAD EVER VARIED IT.**
   `tools/shot-live.mjs` passed `--disable-gpu` as a constant, so **every pixel
   count in this repository was measured under software rasterisation** and no
