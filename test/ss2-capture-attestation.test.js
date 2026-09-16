@@ -405,8 +405,22 @@ test("the live capture path never passes the escape hatch", async () => {
 // The record schema: optional by necessity, strict where it is present
 // ---------------------------------------------------------------------------
 
-test("all three attestations are optional, which is what keeps the committed evidence intact", () => {
-  assert.deepEqual([...SS2_CAPTURE_ATTESTATION_KEYS].sort(), ["launchNonce", "overdraw", "staged"]);
+test("the optional capture keys are optional, which is what keeps the committed evidence intact", () => {
+  // ► **THIS SAID "all three" AND THERE ARE FOUR, WHICH IS THE TEST DOING ITS
+  //   JOB RATHER THAN A TEST THAT NEEDED FIXING.** Adding `traceWindow` to the
+  //   record's optional keys turned it red and made its author say why in the
+  //   same commit, which is exactly what a pinned key set is for.
+  //
+  //   `traceWindow` is present only when a capture used the WIDE recording
+  //   window (`phase`), which closes the trace at `nextphase` instead of at
+  //   `checkattackroll`'s return. **It obeys the same omission rule as the other
+  //   three, and for the same reason**: an observation's digest covers its own
+  //   record, so a field appearing on legacy records would rewrite every digest
+  //   and invalidate the provenance of every golden citing them. And like
+  //   `staged`, its absence is the substantive claim — this trace was taken at
+  //   the boundary the whole archive was taken at.
+  assert.deepEqual([...SS2_CAPTURE_ATTESTATION_KEYS].sort(),
+    ["launchNonce", "overdraw", "staged", "traceWindow"]);
   assert.ok(committedObservations.length > 0, "no committed observations to check");
 
   const legacy = [];
@@ -1259,4 +1273,55 @@ test("the committed evidence promotes untouched under the staging gate", async (
   assert.deepEqual(goldenBody(promotion.golden), goldenBody(golden));
   assert.deepEqual(promotion.golden.provenance, expectedProvenance(candidate, observations, manifest));
   assert.equal(Object.hasOwn(golden.provenance, "staged"), false, "the committed golden is unstaged too");
+});
+
+/* ------------------------------------------------------------------ *
+ * THE RECORDING WINDOW — and the proof that widening it is INERT by default.
+ * ------------------------------------------------------------------ */
+
+const WRAPPER = fileURLToPath(new URL("../tools/runtime-capture/ss2-capture-wrapper.as", import.meta.url));
+
+test("the trace window defaults to `action`, so every archived trace's boundary is unchanged", async () => {
+  // ► **WHY A TEST READS AN ActionScript FILE.** The wrapper runs inside a Flash
+  //   player and no node test can execute it; `validate-vehicle.ps1` is the real
+  //   gate and it needs portable Ruffle, ffdec and a JRE under `.tools`, which
+  //   are installed in the WINDOWS capture vehicle and not here. This pins the
+  //   one property that decides whether an unvalidated edit is dangerous: that
+  //   the new mode is OPT-IN and the default path is untouched.
+  //
+  //   **It pins a contract, not a behaviour, and cannot replace the gate.**
+  const source = await readFile(WRAPPER, "utf8");
+
+  // The flag starts false and only the exact string "phase" turns it on.
+  assert.match(source, /var traceWindowPhase = false;/,
+    "the wide window is not opt-in, so an archived-boundary trace is no longer the default");
+  assert.match(source, /if \(String\(rawTraceWindow\) == "phase"\)/,
+    "the wide window is selected by something other than the exact string `phase`");
+  // An unknown value must be REFUSED rather than fall back, because a typo
+  // silently selecting the narrow window is how a capture comes back missing the
+  // writes it was run to observe.
+  assert.match(source, /trace-window-refused/,
+    "an unknown traceWindow value is not refused by name");
+
+  // The ONLY behavioural difference on the default path: this one guard.
+  assert.match(source, /if \(armed && actionDepth == 0 && !traceWindowPhase\) finishTrace\(\);/,
+    "the checkattackroll close is no longer guarded solely by the opt-in flag");
+
+  // And the end line gains a field ONLY in the new mode, so an ordinary trace
+  // stays byte-comparable with the archive exactly as `staged` does.
+  assert.match(source, /if \(traceWindowPhase\) endLine\.traceWindow = "phase";/,
+    "the end line does not declare a non-default window, so a wide trace could be read as a narrow one");
+  assert.ok(!/endLine\.traceWindow = "action"/.test(source),
+    "the default mode writes a field onto the end line, which breaks byte-comparability with the archive");
+});
+
+test("the launcher offers the same two values and defaults to neither", async () => {
+  // An empty default means "say nothing", which the wrapper reads as the action
+  // window — the same shape every other optional FlashVar here uses.
+  const launcher = await readFile(
+    fileURLToPath(new URL("../tools/runtime-capture/launch-capture.ps1", import.meta.url)), "utf8");
+  assert.match(launcher, /\[ValidateSet\("", "action", "phase"\)\]/,
+    "the launcher does not constrain -TraceWindow, so a typo reaches the wrapper");
+  assert.match(launcher, /\$TraceWindow = ""/, "the launcher's default is not empty");
+  assert.match(launcher, /"-PtraceWindow=\$TraceWindow"/, "the launcher does not pass the parameter through");
 });

@@ -117,6 +117,10 @@ var rawNavigate = _root.navigate;
 //   arenaPolicy       "aggressive" (default) — close and attack every turn
 //   arenaCapture      "never" (default for a levelling run) | "champion" |
 //                     "always"
+//   traceWindow       "action" (default) | "phase" — where the recording window
+//                     CLOSES. See rawTraceWindow below; "action" is what every
+//                     archived trace was taken with and its behaviour is
+//                     byte-identical to before this parameter existed.
 //   timeOfDayCeiling  abort if _global.time_of_day reaches this (default 150;
 //                     the game's special event fires at 200)
 //   sessionLimitSec   abort after this much wall clock (default 900)
@@ -132,6 +136,30 @@ var rawStageVillain = _root.stageVillain;
 var rawStageGold = _root.stageGold;
 var rawShopWeapon = _root.shopWeapon;
 var rawShopArmour = _root.shopArmour;
+// ► **WHERE THE RECORDING WINDOW CLOSES, AND WHY IT IS A PARAMETER RATHER THAN
+//   A CHANGE.** By default `finishTrace` fires on `checkattackroll`'s RETURN,
+//   so the window is exactly that call. That boundary is deliberate — it
+//   matches the single-action fixture scope, and the `nextphase` hook closes
+//   before its stamina and regen accounting for the same reason.
+//
+//   **It also makes some of the build unobservable.** `psyche_up`'s counter is
+//   written at `+0x6738` (the discharge writing itself back to 1) and at
+//   `+0x6761` (the animation callback adding one), and BOTH execute after
+//   `checkattackroll` has returned. `docs/integration/ss2-capture-staging.md`
+//   says "two consecutive presses recorded live decide it"; with this window
+//   they decide nothing, because neither write is inside it.
+//
+//   `traceWindow=phase` defers the close to the `nextphase` boundary, which the
+//   hook below already recognises, so everything the phase does after the roll
+//   lands inside the armed window.
+//
+// ► **THE DEFAULT IS UNCHANGED AND MUST STAY THAT WAY.** All 69 observation
+//   records and every archived manifest were taken with the action window. A
+//   wider trace carries MORE lines by construction, so a run in one mode is not
+//   comparable with a run in the other, and the `end` line says which mode it
+//   was — but only when it is not the default, so every ordinary trace stays
+//   byte-comparable with the archive exactly as the staged fields do.
+var rawTraceWindow = _root.traceWindow;
 var rawTimeOfDayCeiling = _root.timeOfDayCeiling;
 var rawSessionLimitSec = _root.sessionLimitSec;
 var config = {
@@ -2143,6 +2171,18 @@ function parseStageList(raw) {
     }
     return out;
 }
+// Refused BY NAME rather than falling back to the default: a typo silently
+// selecting the narrow window is how a capture comes back missing the very
+// writes it was run to observe, and reads as "the build does not do that".
+var traceWindowPhase = false;
+if (rawTraceWindow != undefined && String(rawTraceWindow).length > 0) {
+    if (String(rawTraceWindow) == "phase") {
+        traceWindowPhase = true;
+    } else if (String(rawTraceWindow) != "action") {
+        trace("{\"t\":\"dbg\",\"at\":\"trace-window-refused\",\"raw\":\"" +
+            String(rawTraceWindow) + "\",\"why\":\"not-action-or-phase\"}");
+    }
+}
 var stageHeroFields = parseStageList(rawStageHero);
 var stageVillainFields = parseStageList(rawStageVillain);
 var stageTicks = 0;
@@ -2288,6 +2328,11 @@ function finishTrace() {
     if (stageHeroFields.length > 0 || stageVillainFields.length > 0) {
         endLine.staged = stagedAtArming;
     }
+    // Same rule as `staged`: present ONLY when it is not the default, so the
+    // field's presence is itself the signal and an ordinary trace stays
+    // byte-comparable with the archive. A wider trace must never be silently
+    // read as a narrow one.
+    if (traceWindowPhase) endLine.traceWindow = "phase";
     emit(endLine);
     finalsDumped = true;
     traceClosed = true;
@@ -2383,7 +2428,10 @@ function hookBattle() {
             var result = original.apply(this, arguments);
             actionDepth--;
             currentHook = previous;
-            if (armed && actionDepth == 0) finishTrace();
+            // In "phase" mode the window stays open past this return, so the
+            // writes the phase makes AFTER the roll are recorded. `nextphase`
+            // closes it instead. See rawTraceWindow.
+            if (armed && actionDepth == 0 && !traceWindowPhase) finishTrace();
             return result;
         };
     });

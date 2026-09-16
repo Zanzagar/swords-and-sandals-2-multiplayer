@@ -121,6 +121,17 @@ param(
     # accepts one. This is how to raise damage: battlevalues DERIVES min_damage
     # from strength and hero.weapon, so staging min_damage writes the output of a
     # formula the game recomputes. Buying changes the input.
+    # WHERE THE RECORDING WINDOW CLOSES. "action" (default) ends the trace on
+    # checkattackroll's RETURN, which is the boundary every archived trace and
+    # all 69 observation records were taken with. "phase" defers the close to
+    # nextphase, so writes the phase makes AFTER the roll are recorded - which is
+    # the only way to observe psyche_up's counter, written at +0x6738 and
+    # +0x6761, both after that return.
+    # A "phase" trace carries MORE lines by construction and is NOT comparable
+    # with an archived one; the trace's end line says so, and ONLY when it is not
+    # the default. See rawTraceWindow in ss2-capture-wrapper.as.
+    [ValidateSet("", "action", "phase")]
+    [string] $TraceWindow = "",
     [int] $StageGold = 0,
     [int] $ShopWeapon = 0,
     [int] $ShopArmour = 0,
@@ -297,6 +308,7 @@ $ruffleArgs = @(
     "-ParenaStagedLevel=$ArenaStagedLevel",
     "-PstageHero=$StageHero",
     "-PstageVillain=$StageVillain",
+    "-PtraceWindow=$TraceWindow",
     "-PstageGold=$StageGold",
     "-PshopWeapon=$ShopWeapon",
     "-PshopArmour=$ShopArmour",

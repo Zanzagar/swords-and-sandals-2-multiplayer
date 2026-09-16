@@ -127,7 +127,7 @@ function allowsMissingAttestations(options) {
 function readEnd(lines, meta, options) {
   const { lineNumber, entry } = lines[lines.length - 1];
   if (entry.t !== "end") fail(lineNumber, "the last line must be an end line.");
-  const allowed = new Set(["t", "installHashVerifiedAfter", "overdraw", "launchNonce", "staged"]);
+  const allowed = new Set(["t", "installHashVerifiedAfter", "overdraw", "launchNonce", "staged", "traceWindow"]);
   for (const key of Object.keys(entry)) {
     if (!allowed.has(key)) fail(lineNumber, `the end line carries an unexpected field ${key}.`);
   }
@@ -177,6 +177,25 @@ function readEnd(lines, meta, options) {
         "divergence: correct the candidate's roll order from the raw trace."
       );
     }
+  }
+  // ► **WHERE THE RECORDING WINDOW CLOSED, AND IT IS PRESENT ONLY WHEN IT WAS
+  //   NOT THE DEFAULT.** The wrapper's window is normally exactly
+  //   `checkattackroll` — armed on entry, closed on return — which is the
+  //   boundary every archived trace and all 69 observation records were taken
+  //   with. `traceWindow: "phase"` defers the close to `nextphase`, so writes
+  //   the phase makes AFTER the roll are recorded; `psyche_up`'s counter, at
+  //   `+0x6738` and `+0x6761`, is the reason it exists.
+  //
+  //   **A wide trace carries MORE lines by construction and is not comparable
+  //   with an archived one.** Refusing an unknown value here rather than
+  //   ignoring it is what stops a future third mode being read as one of these
+  //   two, and `"action"` is refused OUTRIGHT because the wrapper never emits
+  //   it: a record saying "action" would be a claim where every other record
+  //   makes none, and the two would then disagree about identical runs.
+  if (Object.hasOwn(entry, "traceWindow") && entry.traceWindow !== "phase") {
+    fail(lineNumber,
+      `end.traceWindow must be "phase" when present — the default window emits no field at all, ` +
+      `so every trace taken at the archived boundary stays byte-identical. Got ${JSON.stringify(entry.traceWindow)}.`);
   }
   // Minted inside the player from values the launcher does not supply, so a
   // record carries one identity field the operator did not choose. Validated
@@ -620,7 +639,10 @@ export function ingestSs2CaptureTrace(rawText, fixture, options = {}) {
       // convenience: absent means the game produced this scenario unaided.
       ...(Object.hasOwn(end, "overdraw") ? { overdraw: end.overdraw } : {}),
       ...(Object.hasOwn(end, "launchNonce") ? { launchNonce: end.launchNonce } : {}),
-      ...(stagedDeclaration ? { staged: stagedDeclaration.text } : {})
+      ...(stagedDeclaration ? { staged: stagedDeclaration.text } : {}),
+      // Same omission rule and the same reason: absent means the trace was taken
+      // at the archived boundary, which is what every committed record means.
+      ...(Object.hasOwn(end, "traceWindow") ? { traceWindow: end.traceWindow } : {})
     },
     target: { fixtureId: fixture.fixtureId },
     scenario,

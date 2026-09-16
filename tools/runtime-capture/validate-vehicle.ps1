@@ -27,7 +27,18 @@ script the project mandates running most often.
 [CmdletBinding()]
 param(
     [string] $FixturePath = 'test/fixtures/ss2-1v1/candidate-lethal-result.json',
-    [int] $RunSeconds = 12
+    [int] $RunSeconds = 12,
+    # WHERE THE RECORDING WINDOW CLOSES — passed through to the wrapper so the
+    # non-default mode can be exercised here rather than only asserted.
+    #
+    # ► **AN OPT-IN MODE NOBODY HAS RUN IS AN APPROXIMATION NOBODY COUNTS.** The
+    #   `phase` window defers finishTrace from checkattackroll's return to
+    #   nextphase; with "" (the default) this gate behaves exactly as it did
+    #   before the parameter existed, which is what its PASS has always meant.
+    #   A `phase` run is expected to produce MORE trace lines and is NOT
+    #   comparable with the archive — the trace's end line says so.
+    [ValidateSet("", "action", "phase")]
+    [string] $TraceWindow = ""
 )
 
 $ErrorActionPreference = 'Stop'
@@ -226,6 +237,7 @@ $ruffleArgs = @(
     '-PtoolVersion=ss2-capture/0.1.0',
     "-PobservedAt=$((Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'))",
     '-PhashBefore=true', '-PattackerSide=hero', '-Pinjected=true',
+    "-PtraceWindow=$TraceWindow",
     "-Ptape=$tape",
     "$workRelative\ss2-capture-wrapper.swf"
 )

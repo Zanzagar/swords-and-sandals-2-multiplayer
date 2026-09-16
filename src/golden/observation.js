@@ -109,7 +109,18 @@ const CAPTURE_KEYS = Object.freeze([
  *   this scenario. A reviewer has to be able to tell the two apart, so the
  *   field is carried into the record and surfaced by the promotion gate.
  */
-const CAPTURE_OPTIONAL_KEYS = Object.freeze(["launchNonce", "overdraw", "staged"]);
+// ► **`traceWindow` JOINS THESE THREE, AND FOR THE SAME REASON THEY ARE
+//   OPTIONAL.** It is present only when the capture used the WIDE recording
+//   window (`phase`), which closes the trace at `nextphase` rather than at
+//   `checkattackroll`'s return. Every record committed before it existed omits
+//   it and stays byte-identical, which matters because an observation's digest
+//   covers its own record and a field on legacy records would rewrite all of
+//   their digests and invalidate the provenance of every golden citing them.
+//
+//   **Its presence is a substantive claim, like `staged`'s**: this record's
+//   trace saw more of the phase than the archive's do, so its line counts are
+//   not comparable with theirs.
+const CAPTURE_OPTIONAL_KEYS = Object.freeze(["launchNonce", "overdraw", "staged", "traceWindow"]);
 
 export const SS2_CAPTURE_ATTESTATION_KEYS = CAPTURE_OPTIONAL_KEYS;
 const SAMPLE_KEYS = Object.freeze(["callSite", "injected", "label", "max", "min", "source", "value"]);
