@@ -8,8 +8,12 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-15 23:30 — two clip phenomena, one per rasteriser](docs/handoffs/2026-09-15-2330--two-clip-phenomena-one-per-rasteriser.md).**
-Start there. *(It supersedes
+[2026-09-16 01:30 — `psyche_up` was never the owner's](docs/handoffs/2026-09-16-0130--psyche-up-was-never-the-owners.md).**
+Start there, then
+[`docs/handoffs/PSYCHE-UP-BRIEF.md`](docs/handoffs/PSYCHE-UP-BRIEF.md), which is
+ranked first. *(It supersedes
+[2026-09-15 23:30 — two clip phenomena, one per rasteriser](docs/handoffs/2026-09-15-2330--two-clip-phenomena-one-per-rasteriser.md),
+whose findings are in this file above and whose ranked items are carried forward.)* *(It supersedes
 [2026-09-15 21:30 — the rasteriser moves a sixth of the arena](docs/handoffs/2026-09-15-2130--the-rasteriser-moves-a-sixth-of-the-arena.md),
 **whose ranked items 3 and 4 are CLOSED and one of whose claims it corrects** —
 "the probe gives every number identical under both rasterisers" was true only of
