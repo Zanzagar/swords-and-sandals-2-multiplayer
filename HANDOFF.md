@@ -67,6 +67,45 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
   the page before its packs land, 51.6% different with a 407,839-pixel spike at
   delta 178. A test asserts the file stays gone.
 
+► **AN ADVERSARIAL REVIEW SAID "DO NOT SHIP `psyche_up` YET" AND WAS RIGHT
+  THREE TIMES (`8fe5c58`).** Codex `gpt-6-astra`, model pinned on the command
+  line, on the diff that had been committed an hour earlier. **Every finding was
+  re-derived here before anything was touched; all three confirmed, fixed and
+  mutation-checked.**
+  ► **TAKING DAMAGE DID NOT INTERRUPT A CHARGE.** `damagecharacter` resets the
+    DEFENDER's counter at `+0x1be4` and only the actor's half was built, so
+    **the shipped action was strictly stronger than the build's** — three
+    presses of `ceil(max_damage * 1.5)` are expensive only because three
+    UNINTERRUPTED turns are hard to get. **Found twice independently**, by
+    reading the map's own sentence and by the review reproducing it.
+  ► **A LETHAL DISCHARGE BANKED A CHARGE IT CANNOT HAVE.** The `+0x6738`
+    write-back is synchronous; the `+0x6761` increment fires a tick later on
+    `attacker.struck == true` — and `death()` deletes both `onEnterFrame`s
+    (`+0x2035`, `+0x2042`) and `nextphase` itself (`+0x2049`), **so after a kill
+    that tick never comes.** A lethal discharge leaves 1. **This file already
+    applied that rule to the stamina transition**, where nineteen goldens
+    measure it; I applied it to stamina and not to the counter.
+  ► **A STATED ZERO NEEDED FOUR PRESSES AND PLAYED ONE CLIP TWICE.**
+    `tools/arena/roster.js` has authored `psyche_up: 0` since 2026-09-10 and
+    every test started at 1, **so the arena got a different action from the one
+    the tests exercised** — `clips[Math.min(0,3)-1]` is `clips[-1]`, which fell
+    through to `clips[0]`. The counter reads clamped to the floor now:
+    **below-floor is fresh**, since both resets write 1 and nothing the build
+    does leaves anyone under it.
+  ► **AND ONE THE REVIEW DID NOT RAISE: THE AI NEVER PSYCHES UP.**
+    `suggestAction` is keyed on `ATTACK_BANDS` membership, which this action
+    deliberately lacks. **A side effect of a correct decision, not a defect** —
+    recorded at the band decision, because a sweep would otherwise report the
+    feature working over a population of zero, which is the failure this file
+    recorded about the twelve effect groups a day earlier. Teaching the AI to
+    charge is the OWNER'S call.
+  ► **AND "NO GOLDEN MOVED" WAS SAID AS THOUGH A HASH HAD BEEN COMPARED.**
+    **Golden replay hashes are not committed anywhere** — a golden pins
+    `expected` outcomes, not a digest. What is true: **0 of 23 goldens state
+    `psyche_up`**, the expected-outcome replay passes, and all **11** literal
+    `combatStateHash` pins are unchanged. Say which of those three is the
+    evidence.
+
 ► **`psyche_up` IS BUILT (2026-09-16, `b201486`), AND THE TWELVE EFFECT GROUPS
   REACH A GLADIATOR AT LAST.** Three presses: the counter is read at press time
   and advanced on report-back, so 1 plays `psyche_up`, 2 plays `psyche_up2`, and
