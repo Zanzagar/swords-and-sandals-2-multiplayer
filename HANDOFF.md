@@ -26,6 +26,45 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE CAPTURE WINDOW CAN CLOSE AT THE PHASE NOW, AND BOTH WINDOWS PASS THE
+  GATE.** `finishTrace` fires on `checkattackroll`'s RETURN, so the armed window
+  was exactly that call — and `psyche_up`'s counter is written at `+0x6738` and
+  `+0x6761`, **both after that return**. `-TraceWindow phase` defers the close
+  to `nextphase`. **It is OPT-IN and the default path is untouched**: the end
+  line carries `traceWindow` only in the wide mode, exactly as `staged` does, so
+  every archived trace stays byte-comparable; ingest refuses any value but
+  `"phase"`; the observation carries it as a fourth optional capture key under
+  the same omission rule, because a field on legacy records would rewrite every
+  digest and invalidate the provenance of every golden citing them.
+  ► **`validate-vehicle.ps1` PASSES IN BOTH MODES** — wrapper source
+    `19AF3F347355AA47`, round trip matching, every `.sol` hashed identical
+    before and after — **and it caught a defect in the change**: the first
+    `phase` run failed at ingest with "the end line carries an unexpected field
+    traceWindow". The guard was right; ingest had to be taught the field.
+  ► **THE GATE TAKES `-TraceWindow` ITSELF, because an opt-in mode nobody has
+    run is an approximation nobody counts.**
+  ► **AND THE GATE IS RUNNABLE FROM THIS TREE NOW.** It needs `.tools` —
+    portable Ruffle, ffdec and a JRE — which existed only in the Windows capture
+    vehicle at `C:\ss2-capture`, a second checkout carrying uncommitted work.
+    Copied here (202 MB, gitignored) rather than disturbing that checkout or
+    testing the wrapper against its older `src/golden`.
+  ► **`ss2-capture-staging.md` PRESCRIBED A CAPTURE THE WRAPPER COULD NOT
+    TAKE**, and said so in a sentence a reader would have acted on. Corrected at
+    the sentence. **A document that prescribes an impossible capture is worse
+    than one that says nothing: the next reader runs the session and reads the
+    silence as the build's answer.** The session also needs
+    `-WatchFields psyche_up`, which EXTENDS the defaults rather than replacing
+    them.
+
+► **`tools/shot.sh` IS RETIRED RATHER THAN FIXED.** Owner's steer: "only fix it
+  if we need the functionality." We needed the functionality and not that tool —
+  its last justification was pages `shot-live` could not shoot, and **a freeze of
+  0 now waits for QUIESCENCE** instead of a frame number. Measured on the same
+  static screen, the two tools' renders are **byte-identical, 76,983 bytes, 0
+  differing pixels**. Asking for frame 1 instead is not a workaround: it catches
+  the page before its packs land, 51.6% different with a 407,839-pixel spike at
+  delta 178. A test asserts the file stays gone.
+
 ► **`psyche_up` IS NOT THE OWNER'S AND IS NOT A SPELL TO INVENT — THREE
   HANDOFFS SAID BOTH.** They recorded that the figure pack's twelve effect
   groups sit on four clips declared unplayed and concluded that *"making them
