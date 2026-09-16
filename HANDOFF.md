@@ -8,8 +8,12 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-15 21:30 — the rasteriser moves a sixth of the arena](docs/handoffs/2026-09-15-2130--the-rasteriser-moves-a-sixth-of-the-arena.md).**
+[2026-09-15 23:30 — two clip phenomena, one per rasteriser](docs/handoffs/2026-09-15-2330--two-clip-phenomena-one-per-rasteriser.md).**
 Start there. *(It supersedes
+[2026-09-15 21:30 — the rasteriser moves a sixth of the arena](docs/handoffs/2026-09-15-2130--the-rasteriser-moves-a-sixth-of-the-arena.md),
+**whose ranked items 3 and 4 are CLOSED and one of whose claims it corrects** —
+"the probe gives every number identical under both rasterisers" was true only of
+a page with one canvas.)* *(It supersedes
 [2026-09-15 19:00 — the residual was the rectangle, and a warning was wrong](docs/handoffs/2026-09-15-1900--the-residual-was-the-rectangle-and-a-warning-was-wrong.md),
 **whose ranked items 3 and 4 are both CLOSED** — and whose numbers were measured
 over a canvas rectangle that turned out to be wrong, though not wrongly enough to
@@ -34,24 +38,63 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
 ```
 
   ► **SO TWO SHOTS TAKEN UNDER DIFFERENT RASTERISERS ARE NOT COMPARABLE.** Hold
-    it fixed in any differencing measurement, and say which one you used — the
-    output line prints it now, because it cannot be recovered from the PNG.
+    it fixed in any differencing measurement, and say which one you used — both
+    tools print it now, because it cannot be recovered from the PNG.
+  ► **AND `tools/shot.sh` HAS THE SAME ARGUMENT, SIXTH RATHER THAN EIGHTH.** It
+    hardcoded the flag for a session after its sibling stopped, which meant two
+    shots taken with the two tools differed by 15.9% before anything under test
+    changed. **A test reads the shell script and asserts the two tools offer the
+    same two values and the same default** — it cannot import a `.sh`, so it
+    pins the contract and says so. Mutation-checked: change the default and the
+    suite names it.
   ► **AND IT IS A DIFFERENT PHENOMENON FROM THE CLIP RESIDUAL, BY SIGNATURE.**
     15.5% of the movers sit on a strong edge against **99.8%** for the clip, and
     they cover a third of the stage: bitmap resampling and gradient dither, not
     antialiasing.
-  ► **THE FRACTIONAL-CLIP FINDING SURVIVES IT, WHICH IS WHAT THE QUESTION
-    ASKED.** `tools/clip-probe/index.html` shot under both rasterisers gives
-    **every number identical** — 2,548 centre pixels for every fractional
-    rectangle, 0 for every whole one — and the probe's own canvas differences to
-    0 between the two. The residual the snap removed was never an artefact of
-    the measuring configuration.
-  ► **BUT THE ARENA IS NOT CLEAN UNDER `gpu`, AND THAT IS OPEN.** With the
-    snapped rectangle, clipped against `?clip=0` leaves **654 pixels 20px or
-    more inside every clip edge, EVERY ONE AT DELTA 1**, in rows 177..434 — the
-    sky and crowd band, not the fighters. Under `cpu` the same pair is 0.
-    All-delta-1 over a gradient is a DITHER difference, not the antialiasing
-    mechanism that was just closed. Measured and named rather than rounded away.
+  ► ~~**THE FRACTIONAL-CLIP FINDING SURVIVES IT.** The probe shot under both
+    rasterisers gives **every number identical**.~~ **TRUE OF THE PAGE AS IT
+    THEN WAS, AND MISLEADING NOW — CORRECTED THE SAME EVENING.** That page had
+    exactly ONE canvas. **Allocate a second one and `gpu` answers differently**,
+    and the discriminator is already in hand: the run carrying the gradient
+    trials but no offscreen still read 2,548, so it is the ALLOCATION and not
+    the drawing. The finding the sentence was defending does survive — the snap
+    is right under both — but not for the reason it gave.
+
+► **THERE ARE TWO CLIP PHENOMENA AND EACH EXISTS UNDER EXACTLY ONE RASTERISER.**
+  With every control green — three null controls at 0, positive control 18,440 —
+  the probe's centre box (~200px clear of every rectangle) reads:
+
+```text
+    trial                                   cpu          gpu
+    every whole-pixel clip                    0            0
+    FRACTIONAL, cuts nothing              2,548 d6         0
+    FRACTIONAL, cuts the overhang         2,548 d6         0
+    the arena's own FRACTIONAL rect       2,548 d6         0
+    the arena's SNAPPED rect                  0            0
+    every fractional variant in the sweep 2,548 d6         0
+    GRADIENT + snapped clip                   0            3 d1
+    BITMAP + a WHOLE-pixel clip               0           50 d1
+    BITMAP + the arena's SNAPPED rect         0           49 d1
+```
+
+  ► **THE FRACTIONAL-RECTANGLE EFFECT PERTURBS PATH ANTIALIASING AND IS
+    CPU-ONLY.** It is what `stageClipRectFor`'s snap removes.
+  ► **A CLIP OVER A RESAMPLED BITMAP PERTURBS THE SAMPLER AT DELTA 1 AND IS
+    GPU-ONLY — and it does not care whether the rectangle is whole.** That is
+    the arena's 654-pixel band: rows 177..434 are the sky and the crowd, which
+    are raster. **No choice of rectangle fixes it**, so it is not a defect in
+    the clip and it is not open in the way it was written up as being.
+  ► **THE SNAP IS STILL RIGHT AND IS BETTER ARGUED NOW**: it removes 644
+    interior movers under `cpu` and costs nothing under `gpu`, where whole and
+    fractional both read 0.
+  ► **A LAZILY-CREATED RESOURCE IS A REGIME CHANGE WITH A TIMESTAMP.** Adding
+    the bitmap trials took the probe's NULL CONTROL from 0 to **8,196 at delta
+    45**, because the offscreen canvas was first allocated AFTER three baselines
+    had been captured, so every trial was compared against a baseline from the
+    other regime. **The page printed "THE CONTROLS FAILED, so every row above is
+    noise" rather than a number** — the third defect its own controls have
+    caught and the first about its own instrument. One discarded shot of every
+    draw path, before the first baseline, fixes it.
 
 ► **THE ARENA REPORTS ITS OWN RECTANGLE NOW, AS A VALUE.** `stageFitReportFor`
   in `src/render/arena-backdrop.js` returns the canvas, the CSS rect, the ratio,
