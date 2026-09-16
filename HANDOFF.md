@@ -8,10 +8,12 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-16 01:30 — `psyche_up` was never the owner's](docs/handoffs/2026-09-16-0130--psyche-up-was-never-the-owners.md).**
-Start there, then
-[`docs/handoffs/PSYCHE-UP-BRIEF.md`](docs/handoffs/PSYCHE-UP-BRIEF.md), which is
-ranked first. *(It supersedes
+[2026-09-16 05:00 — `psyche_up` is built](docs/handoffs/2026-09-16-0500--psyche-up-is-built.md).**
+Start there. *(It supersedes
+[2026-09-16 01:30 — `psyche_up` was never the owner's](docs/handoffs/2026-09-16-0130--psyche-up-was-never-the-owners.md),
+whose ranked item 1 is CLOSED;
+[`docs/handoffs/PSYCHE-UP-BRIEF.md`](docs/handoffs/PSYCHE-UP-BRIEF.md) is now
+HISTORY and says so at its own head.)* *(It supersedes
 [2026-09-15 23:30 — two clip phenomena, one per rasteriser](docs/handoffs/2026-09-15-2330--two-clip-phenomena-one-per-rasteriser.md),
 whose findings are in this file above and whose ranked items are carried forward.)* *(It supersedes
 [2026-09-15 21:30 — the rasteriser moves a sixth of the arena](docs/handoffs/2026-09-15-2130--the-rasteriser-moves-a-sixth-of-the-arena.md),
@@ -65,8 +67,46 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
   the page before its packs land, 51.6% different with a 407,839-pixel spike at
   delta 178. A test asserts the file stays gone.
 
-► **`psyche_up` IS NOT THE OWNER'S AND IS NOT A SPELL TO INVENT — THREE
-  HANDOFFS SAID BOTH.** They recorded that the figure pack's twelve effect
+► **`psyche_up` IS BUILT (2026-09-16, `b201486`), AND THE TWELVE EFFECT GROUPS
+  REACH A GLADIATOR AT LAST.** Three presses: the counter is read at press time
+  and advanced on report-back, so 1 plays `psyche_up`, 2 plays `psyche_up2`, and
+  3 plays `psyche_up3` AND fires a range-gated grievous.
+  ► **THE DISCHARGE NEEDED NO ARITHMETIC.** `directionProfile`'s
+    `direction === 30` arm already resolved it — `ceil(max_damage * 1.5)`
+    falling back to `character_level * 10`, critical forced to 20 — **which also
+    closes the brief's first named hole: the map's unexpanded "level-based
+    fallback" IS expanded**, in the module the goldens replay against.
+  ► **IT IS NOT AN `ATTACK_BAND`, AND THAT IS THE LOAD-BEARING DECISION.**
+    Membership means "always attacks"; two of three presses draw NOTHING, so a
+    band entry would put samples on the ordered channel the build never takes
+    and desynchronise every peer replaying the same tape. Pinned by a test that
+    counts the journal across a charge, with an ordinary attack as the control.
+  ► **THE RESET LIVES IN `phaseTransitionEffects`, BECAUSE THAT IS THIS
+    ENGINE'S `nextphase`.** The build writes `psyche_up = 1` on any decision
+    that is not `psyche_up` (`+0x35c7`-`+0x35ea`), and every completed phase
+    pays and regenerates through that one function — so the rule has one copy
+    rather than eight, and the branch that forgot would have banked a charge.
+  ► **OUT OF RANGE IT DECIDES NOTHING — no roll, no damage, no death** — unlike
+    every melee attack, which resolves from any distance. The gate runs before
+    the first draw, the event says `outOfRange` and carries both numbers, and
+    the charge is KEPT so closing and pressing again spends it.
+  ► **THE COUNTER LANDS ON 2 AND THAT IS A STATIC CANDIDATE, MARKED.** The
+    map's own gloss on it is wrong by one press — at 2 the selector picks
+    `psyche_up2`, so the readings differ as a CADENCE (3 then 2 per discharge,
+    against 3 every time). Settling it needs two consecutive discharges under
+    `-TraceWindow phase`.
+  ► **SIX PINNED LISTS TURNED RED AND EVERY ONE WAS RIGHT TO**, including the
+    test written to go red when this was built: *"THE FOUR CLIPS THAT CARRY
+    EVERY EFFECT GROUP ARE UNREACHABLE — say it, do not discover it"*. Measured
+    from the pack, **10 of the 12 groups are reachable now**; the 2 on the
+    `psyche_charging*` continuations are not, because this engine dispatches one
+    animation per action and never a sequence.
+  ► **AND NOTHING MOVED**: suite 1931, fail 0, every golden, fixture, replay and
+    observation test included. The counter is a resource with NO default, which
+    is what bought that.
+
+► ~~**`psyche_up` IS NOT THE OWNER'S AND IS NOT A SPELL TO INVENT — THREE
+  HANDOFFS SAID BOTH.**~~ **BUILT, see above.** They recorded that the figure pack's twelve effect
   groups sit on four clips declared unplayed and concluded that *"making them
   reachable means deciding what those spells ARE."* **It is a vanilla SS2
   ACTION** with a `getphase` label, a button on all four controller frames, 31

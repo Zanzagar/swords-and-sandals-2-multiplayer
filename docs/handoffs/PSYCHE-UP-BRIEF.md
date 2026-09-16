@@ -1,5 +1,33 @@
 # Brief — `psyche_up`, for the next session
 
+► **CLOSED 2026-09-16. `psyche_up` IS BUILT.** Commit `b201486`. The verb
+  resolves, `legalActions` offers it on every controller frame, the three clips
+  play, and ten of the twelve figure-pack effect groups reach a real gladiator.
+
+  **This file is now HISTORY. Read it to check a claim about how `psyche_up` got
+  here; do not read it to learn what `psyche_up` IS.** That lives in the code:
+  `Ss2ActionType.PSYCHE_UP`, `SS2_PSYCHE_UP`, `PSYCHE_UP_DISCHARGE`, the
+  `psyche` family in `clip-labels.js`, and `test/ss2-psyche-up.test.js`, which
+  executes every branch of it.
+
+  **THE FIRST NAMED HOLE WAS NOT A HOLE.** This brief listed the map's
+  unexpanded "level-based fallback" first among six things that could change the
+  implementation. It is expanded, in `directionProfile`'s `direction === 30`
+  arm — `character_level * 10` when `ceil(max_damage * 1.5) <= 1` — in the
+  byte-derived module the goldens replay against. **The whole discharge needed
+  no arithmetic at all**; what was missing was the action around it.
+
+  **AND THE STRUCTURAL WARNING WAS THE RIGHT ONE.** The verifier that broke the
+  "same shape as ranged" framing on `ATTACK_BANDS` membership was correct, and
+  it is the decision the build turns on: two of three presses draw nothing, so a
+  band entry would have desynchronised every peer from the first charge.
+
+  **Still open and unchanged**: where the counter lands after a discharge. The
+  map's static reading (2) ships and is marked; settling it needs two
+  consecutive discharges captured under `-TraceWindow phase`, which exists now.
+
+---
+
 **This is not a handoff.** It is a derivation, checked by ten agents (5 questions,
 5 write-nothing verifiers, 10 started / 10 returned / 0 dead) on 2026-09-15, of
 the last vanilla ACTION that is neither built nor genuinely blocked. Read it
