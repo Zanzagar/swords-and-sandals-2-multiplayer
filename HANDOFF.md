@@ -8,11 +8,66 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-15 19:00 — the residual was the rectangle, and a warning was wrong](docs/handoffs/2026-09-15-1900--the-residual-was-the-rectangle-and-a-warning-was-wrong.md).**
+[2026-09-15 21:30 — the rasteriser moves a sixth of the arena](docs/handoffs/2026-09-15-2130--the-rasteriser-moves-a-sixth-of-the-arena.md).**
 Start there. *(It supersedes
+[2026-09-15 19:00 — the residual was the rectangle, and a warning was wrong](docs/handoffs/2026-09-15-1900--the-residual-was-the-rectangle-and-a-warning-was-wrong.md),
+**whose ranked items 3 and 4 are both CLOSED** — and whose numbers were measured
+over a canvas rectangle that turned out to be wrong, though not wrongly enough to
+move them.)* *(It supersedes
 [2026-09-15 15:35 — a synthetic SWF is an oracle, and two glows were doubled](docs/handoffs/2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md),
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
+
+► **THE RASTERISER MOVES 15.9% OF THE ARENA AND NOTHING HAD EVER VARIED IT.**
+  `tools/shot-live.mjs` passed `--disable-gpu` as a constant, so **every pixel
+  count in this repository was measured under software rasterisation** and no
+  shot recorded which. It is the EIGHTH argument now — `cpu` (the default and
+  the old behaviour) or `gpu`, refused by name if it is neither — and
+  `chromeFlagsFor` is exported so the suite reaches it. Same URL, same frame,
+  same window, varying only the flag:
+
+```text
+    arena, whole page      152,530 px differ (15.9%)   max delta 105
+      inside the canvas    133,568 (20.3%), bbox = exactly the stage
+      the sidebar alone     16,607
+    each rasteriser against itself     0 px, byte-identical
+```
+
+  ► **SO TWO SHOTS TAKEN UNDER DIFFERENT RASTERISERS ARE NOT COMPARABLE.** Hold
+    it fixed in any differencing measurement, and say which one you used — the
+    output line prints it now, because it cannot be recovered from the PNG.
+  ► **AND IT IS A DIFFERENT PHENOMENON FROM THE CLIP RESIDUAL, BY SIGNATURE.**
+    15.5% of the movers sit on a strong edge against **99.8%** for the clip, and
+    they cover a third of the stage: bitmap resampling and gradient dither, not
+    antialiasing.
+  ► **THE FRACTIONAL-CLIP FINDING SURVIVES IT, WHICH IS WHAT THE QUESTION
+    ASKED.** `tools/clip-probe/index.html` shot under both rasterisers gives
+    **every number identical** — 2,548 centre pixels for every fractional
+    rectangle, 0 for every whole one — and the probe's own canvas differences to
+    0 between the two. The residual the snap removed was never an artefact of
+    the measuring configuration.
+  ► **BUT THE ARENA IS NOT CLEAN UNDER `gpu`, AND THAT IS OPEN.** With the
+    snapped rectangle, clipped against `?clip=0` leaves **654 pixels 20px or
+    more inside every clip edge, EVERY ONE AT DELTA 1**, in rows 177..434 — the
+    sky and crowd band, not the fighters. Under `cpu` the same pair is 0.
+    All-delta-1 over a gradient is a DITHER difference, not the antialiasing
+    mechanism that was just closed. Measured and named rather than rounded away.
+
+► **THE ARENA REPORTS ITS OWN RECTANGLE NOW, AS A VALUE.** `stageFitReportFor`
+  in `src/render/arena-backdrop.js` returns the canvas, the CSS rect, the ratio,
+  the stage in DEVICE and PAGE pixels and all four letterbox bars — **calling
+  `stageFitFor` and `stageClipRectFor` rather than re-typing them**, which is
+  what its test asserts. `render` hangs it on `window.__stageFit` every frame and
+  `tools/shot-live.mjs` prints it beside every shot, so a screenshot now carries
+  the rectangle a reader needs to interpret it.
+  ► **IT CORRECTED ITS AUTHOR ON ITS FIRST RUN.** The canvas is **870x800**, not
+    the 870x688 derived from the letterbox bars, and it starts at page y 43 and
+    not 98. **Two errors that nearly cancelled** — the derived stage top came out
+    156.5 against a true 158 — which is the accident the function exists to
+    stop. Every "inside the stage" figure before this was computed over a
+    rectangle nobody had asked the page for.
+  ► **IT IS DELIBERATELY NOT A LOG LINE**, for the reason below: the panel is
+    below the fold at every window size this work has been shot at.
 
 ► **THE 392-PIXEL CLIP RESIDUAL IS CLOSED, AND IT WAS THE RECTANGLE'S OWN
   FRACTIONAL EDGES.** `stageFitFor` halves and multiplies by a float, so
