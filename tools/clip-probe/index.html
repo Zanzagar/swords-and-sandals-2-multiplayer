@@ -157,8 +157,79 @@ function drawOverhang() {
   }
 }
 
+/**
+ * ► **A GRADIENT BACKDROP, BECAUSE THE ONE RESIDUAL THE SNAP DID NOT REMOVE IS
+ *   ON ONE.** Under `gpu`, the arena's snapped clip still moves 654 pixels
+ *   against `?clip=0` — **every one of them at delta 1**, in rows 177..434,
+ *   which is the sky and the crowd and not the fighters. Under `cpu` the same
+ *   pair is 0. All-delta-1 over a smooth ramp is a DITHER difference rather
+ *   than the antialiasing mechanism this page already closed, and nothing on
+ *   this page could show it because nothing on it was a ramp.
+ *
+ * ► **AND THE QUESTION IS "A CLIP AT ALL", NOT "A FRACTIONAL ONE".** The arena's
+ *   rectangle is whole now, so the pair that still moves is clipped against NOT
+ *   CLIPPED. The rows that answer it are therefore the WHOLE-pixel ones, which
+ *   read 0 for every other kind of content — so a non-zero there is the finding.
+ *
+ * Drawn inside the clip, first, exactly as the sky is: it is the backdrop of the
+ * clipped frame and not the page behind it.
+ */
+function drawGradient() {
+  const ramp = ctx.createLinearGradient(0, 0, 0, H);
+  ramp.addColorStop(0, "#2d2dfd");
+  ramp.addColorStop(0.5, "#5fbefe");
+  ramp.addColorStop(1, "#000030");
+  ctx.fillStyle = ramp;
+  ctx.fillRect(0, 0, W, H);
+}
+
+/**
+ * ► **A RESAMPLED BITMAP, WHICH IS THE OTHER RASTER THING IN THE ARENA'S BAND.**
+ *   The gradient rows above came back CENTRE 0 under both rasterisers, so the
+ *   654 all-delta-1 pixels the snapped clip still moves under `gpu` are not
+ *   gradient dither. What else lives in arena rows 177..434 is BITMAPS — the sky
+ *   and the crowd are raster, scaled to the stage, and `drawImage` at a
+ *   non-integer scale resamples.
+ *
+ * ► **THE IMAGE IS BUILT HERE, FROM THIS PAGE'S OWN ARITHMETIC.** No SS2 asset
+ *   and no file: a 64x64 offscreen filled by a formula, then drawn at a
+ *   deliberately non-integer scale so the sampler has something to decide. Built
+ *   ONCE and cached, because a source image rebuilt per trial would be a second
+ *   variable and this page exists to have exactly one.
+ */
+let bitmapSource = null;
+function bitmapOnce() {
+  if (bitmapSource) return bitmapSource;
+  const off = document.createElement("canvas");
+  off.width = 64; off.height = 64;
+  const octx = off.getContext("2d");
+  const image = octx.createImageData(64, 64);
+  for (let y = 0; y < 64; y += 1) {
+    for (let x = 0; x < 64; x += 1) {
+      const at = (y * 64 + x) * 4;
+      // A checker over a ramp: hard edges for the sampler to blur and a smooth
+      // field for it to dither, in one source.
+      const checker = ((x >> 3) + (y >> 3)) % 2 ? 40 : 0;
+      image.data[at] = (x * 4) % 256;
+      image.data[at + 1] = (y * 4 + checker) % 256;
+      image.data[at + 2] = (x * 2 + y * 2 + checker) % 256;
+      image.data[at + 3] = 255;
+    }
+  }
+  octx.putImageData(image, 0, 0);
+  bitmapSource = off;
+  return off;
+}
+
+function drawBitmap() {
+  const source = bitmapOnce();
+  // Non-integer destination size AND a non-integer origin: the arena's layers
+  // land wherever the stage scale puts them, which is almost never a whole pixel.
+  ctx.drawImage(source, 0, 0, 64, 64, 0.37, 0.61, W * 1.0003, H * 1.0007);
+}
+
 /** One trial: background unclipped, then the chosen content under `clipRect`. */
-function shot(clipRect, { overhang }) {
+function shot(clipRect, { overhang, gradient, bitmap }) {
   prepare();
   ctx.save();
   if (clipRect) {
@@ -167,6 +238,8 @@ function shot(clipRect, { overhang }) {
     ctx.clip();
   }
   try {
+    if (gradient) drawGradient();
+    if (bitmap) drawBitmap();
     if (overhang) drawOverhang();
     drawCentre();
   } finally { ctx.restore(); }
@@ -283,6 +356,13 @@ const TRIALS = [
   { name: "FRACTIONAL clip inset 20.37px, cuts the overhang", clip: INSET(20.37), overhang: true, expect: "CENTRE is the question" },
   { name: `THE ARENA'S OWN RECTANGLE as stageClipRectFor returns it${isWhole(arenaRect) ? " (whole here)" : ""}`, clip: arenaRect, overhang: true, expect: "CENTRE is the question" },
   { name: "THE CANDIDATE FIX — the same rectangle snapped to whole pixels", clip: snappedRect, overhang: true, expect: "CENTRE 0 if snapping is the fix" },
+  { name: "GRADIENT null control — no clip, drawn twice", clip: null, overhang: true, gradient: true, expect: "0" },
+  { name: "GRADIENT + WHOLE clip inset 20px, cuts the overhang", clip: INSET(20), overhang: true, gradient: true, expect: "CENTRE 0 under cpu; the gpu question" },
+  { name: "GRADIENT + the arena's SNAPPED rectangle", clip: snappedRect, overhang: true, gradient: true, expect: "CENTRE 0 under cpu; the gpu question" },
+  { name: "GRADIENT + the arena's FRACTIONAL rectangle", clip: arenaRect, overhang: true, gradient: true, expect: "fractional, so it moves under both" },
+  { name: "BITMAP null control — no clip, drawn twice", clip: null, overhang: true, bitmap: true, expect: "0" },
+  { name: "BITMAP + WHOLE clip inset 20px, cuts the overhang", clip: INSET(20), overhang: true, bitmap: true, expect: "CENTRE 0 under cpu; the gpu question" },
+  { name: "BITMAP + the arena's SNAPPED rectangle", clip: snappedRect, overhang: true, bitmap: true, expect: "CENTRE 0 under cpu; the gpu question" },
   // ► **THE POSITIVE CONTROL IS DERIVED FROM THE CONTENT, NOT FROM A FIXED INSET —
   //   AND IT FAILED TWICE BEFORE IT WAS.** `INSET(120)` cuts the wheel in half on a
   //   300x300 canvas and misses it entirely on the arena's 870x688, where it reported
@@ -291,20 +371,44 @@ const TRIALS = [
   { name: "positive control — a clip through the middle of the content", clip: { x: Math.round(W / 2) - 60, y: Math.round(H / 2) - 60, width: 120, height: 120 }, overhang: false, expect: "MANY, or this page cannot measure" }
 ];
 
+// ► **WARM EVERY DRAW PATH BEFORE THE FIRST BASELINE, AND THIS PAGE'S OWN NULL
+//   CONTROL IS WHY.** Adding the bitmap trials took the null control — two draws
+//   of identical content — from 0 to **8,196 differing pixels at delta 45**, and
+//   the gradient control to 280,022. The cause is not the clip and not the
+//   content: `bitmapOnce()` creates a SECOND canvas element, and it first ran
+//   after three baselines had already been captured. Everything drawn before
+//   that allocation rasterises differently from everything drawn after it, so
+//   every trial was being compared against a baseline from the other regime.
+//   One discarded shot of everything, first, and the regime is the same for all
+//   of them.
+//   ► **THE PAGE REPORTED IT RATHER THAN A NUMBER** — "THE CONTROLS FAILED, so
+//     every row above is noise" — which is the third defect its own controls
+//     have caught, and the first that was about the INSTRUMENT rather than the
+//     experiment.
+shot(null, { overhang: true, gradient: true, bitmap: true });
+
 const basePlain = shot(null, { overhang: false });
 const baseOverhang = shot(null, { overhang: true });
+const baseGradient = shot(null, { overhang: true, gradient: true });
+const baseBitmap = shot(null, { overhang: true, bitmap: true });
+const baselineFor = (trial) => trial.bitmap ? baseBitmap
+  : trial.gradient ? baseGradient : trial.overhang ? baseOverhang : basePlain;
 const rows = TRIALS.map((trial) => ({
   trial,
-  result: compare(trial.overhang ? baseOverhang : basePlain, shot(trial.clip, trial), CENTRE)
+  result: compare(baselineFor(trial), shot(trial.clip, trial), CENTRE)
 }));
 // Leave the canvas showing the content unclipped rather than whatever the last trial
 // drew, so a screenshot of this page shows what was being measured.
 shot(null, { overhang: true });
 
 const nullControl = rows[0].result;
-const nullOverhang = rows[6].result;
+const nullOverhang = rows.find((row) => row.trial.name === "null control WITH overhang — no clip, twice").result;
+const nullGradient = rows.find((row) => row.trial.name.startsWith("GRADIENT null control")).result;
+const nullBitmap = rows.find((row) => row.trial.name.startsWith("BITMAP null control")).result;
 const positive = rows[rows.length - 1].result;
-const centreTrials = rows.filter((row) => row.trial.name.startsWith("THE ARENA") || row.trial.name.startsWith("FRACTIONAL"));
+const centreTrials = rows.filter((row) => row.trial.name.startsWith("THE ARENA")
+  || row.trial.name.startsWith("FRACTIONAL") || row.trial.name.startsWith("GRADIENT")
+  || row.trial.name.startsWith("BITMAP"));
 const html = [];
 html.push(`<table><tr><th>trial</th><th>differing px</th><th>max Δ</th>` +
   `<th>on a strong edge</th><th>CENTRE px</th><th>centre max Δ</th><th>expected</th></tr>`);
@@ -320,7 +424,8 @@ for (const { trial, result } of rows) {
     `<td>${trial.expect}</td></tr>`);
 }
 html.push(`</table>`);
-const controlsGood = nullControl.differing === 0 && nullOverhang.differing === 0 && positive.differing > 2000;
+const controlsGood = nullControl.differing === 0 && nullOverhang.differing === 0
+  && nullGradient.differing === 0 && nullBitmap.differing === 0 && positive.differing > 2000;
 const centreMoved = centreTrials.some((row) => row.result.centreDiff > 0);
 html.push(`<div class="note">canvas ${W}x${H} — stage fit scale ${arenaFit.scale.toFixed(6)}; ` +
   `arena rect ${arenaRect.x.toFixed(3)}, ${arenaRect.y.toFixed(3)}, ${arenaRect.width.toFixed(3)} x ${arenaRect.height.toFixed(3)} ` +
@@ -331,7 +436,8 @@ html.push(`<div class="note">edge share of the whole image: ` +
 html.push(`<div class="note"><strong>${
   !controlsGood
     ? "THE CONTROLS FAILED, so every row above is noise: null " +
-      `${nullControl.differing}/${nullOverhang.differing}, positive ${positive.differing}.`
+      `${nullControl.differing}/${nullOverhang.differing}/${nullGradient.differing}/${nullBitmap.differing}, ` +
+      `positive ${positive.differing}.`
     : centreMoved
       ? "A CLIP DOES CHANGE PIXELS 100px INSIDE ITSELF: " +
         centreTrials.filter((row) => row.result.centreDiff > 0).map((row) => row.trial.name).join("; ") +
