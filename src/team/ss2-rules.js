@@ -2346,6 +2346,55 @@ const ATTACK_BANDS = Object.freeze({
   [Ss2ActionType.BASH_ATTACK]: Object.freeze({ direction: 23, strengthFactor: 2 })
 });
 
+/**
+ * `psyche_up`, WHICH IS NOT A BAND AND MUST NOT BECOME ONE.
+ *
+ * ► **MEMBERSHIP OF `ATTACK_BANDS` MEANS "ALWAYS ATTACKS", AND TWO OF THIS
+ *   ACTION'S THREE PRESSES ROLL NOTHING.** The phase reads the counter and
+ *   plays `psyche_up`, `psyche_up2` or `psyche_up3` for 1, 2 and >= 3
+ *   (`+0x658a`, `+0x65b9`, `+0x65ef`); only the third arm reaches
+ *   `checkattackroll`. A band entry would put two samples on the ordered
+ *   channel that the build never takes, and every peer replaying the same tape
+ *   would fall one entry out of step from the first charge onward — the same
+ *   defect the ranged block above warns about, from the other direction.
+ *
+ * ► **THE DISCHARGE IS BAND-SHAPED ALL THE SAME**, because once the counter
+ *   says fire it is an ordinary fixed-direction attack: direction 30, no draw.
+ *   It is handed to the attack path only on the press that discharges.
+ *
+ * `strengthFactor` is 1 — `staminacost = round(strength)` at `+0x653f`. **That
+ * is the COST and not the damage**, which is the trap this row exists to
+ * label: it sits in the map's `staminacost`-by-phase table beside
+ * `power_attack round(strength * 3)` and `rest 0 - round(stamina * 15)`, and a
+ * table whose `rest` row is negative can only be a cost table. The damage is
+ * `ceil(max_damage * 1.5)` with a `character_level * 10` floor, and it already
+ * lives in `directionProfile`'s `direction === 30` arm.
+ */
+const PSYCHE_UP_DISCHARGE = Object.freeze({ direction: 30, strengthFactor: 1 });
+
+/**
+ * How the counter behaves, all in one place because three of these four
+ * numbers are easy to get one out.
+ */
+export const SS2_PSYCHE_UP = Object.freeze({
+  /** `psyche_up`, `psyche_up2`, `psyche_up3` for 1, 2 and >= 3. */
+  clips: Object.freeze(["psyche_up", "psyche_up2", "psyche_up3"]),
+  /** The value at which the press fires the range-gated grievous. */
+  dischargeAt: 3,
+  /**
+   * ► **THE FLOOR IS 1 AND NOT 0.** Both resets write `= 1` — `nextphase`
+   *   `+0x35c7`-`+0x35ea` on any decision that is not `psyche_up`, and
+   *   `damagecharacter` `+0x1be4` to the defender. So a gladiator who has taken
+   *   any other turn is at 1, which is what "fresh" means here. What the build
+   *   holds before the FIRST write is a map silence
+   *   (`psyche-up-initialisation`), and this models the reset rather than
+   *   inventing an initial value.
+   */
+  floor: 1,
+  /** `defender._x -/+ round(weapon_range + 50)`, `+0x6658`-`+0x6699`. */
+  rangeBonus: 50
+});
+
 /** The three melee verbs, which are the ONLY ones `closerange_warrior` wires. */
 const MELEE_ATTACKS = Object.freeze([
   Ss2ActionType.QUICK_ATTACK,
@@ -3529,7 +3578,8 @@ function statusEffects(attackerBefore, attackerAfter, defenderBefore, defenderAf
  */
 function phaseTransitionEffects(
   actor,
-  { staminaCost, branchGain = 0, branchHeal = 0, fromStaminaleft = null, fromHealth = null }
+  { staminaCost, branchGain = 0, branchHeal = 0, fromStaminaleft = null, fromHealth = null,
+    resetsPsyche = true }
 ) {
   const declared = declaredResourceNames(actor);
   const stamina = actor.stats.stamina;
@@ -3566,6 +3616,33 @@ function phaseTransitionEffects(
   if (healed > 0) {
     effects.push({ kind: EffectKind.HEAL, targetId: actor.id, amount: healed });
   }
+  // ► **`nextphase` RESETS THE PSYCHE COUNTER ON EVERY DECISION THAT IS NOT
+  //   `psyche_up`, AND THIS IS THE FUNCTION THAT IS `nextphase`.** The build
+  //   writes `game_attacker.psyche_up = 1` at `+0x35c7`-`+0x35ea` whenever
+  //   `phase_decision != "psyche_up"`, so a charge cannot be banked across an
+  //   attack, a walk or a rest: break the chain and you start again.
+  //
+  //   **It belongs here rather than at each call site** because here IS the
+  //   build's own boundary — every completed phase pays its stamina and
+  //   regenerates through this function, which is exactly the set of decisions
+  //   `nextphase` sees. Writing it into each branch instead would be eight
+  //   copies of one rule, and the branch that forgot would bank a charge for
+  //   free.
+  //
+  //   The write is to 1 and not 0: see `SS2_PSYCHE_UP.floor`. It is emitted
+  //   ONLY when the value would actually change, so an ordinary battle between
+  //   gladiators who never psyche carries no extra effect at all — which is
+  //   what keeps this off every existing hash.
+  if (resetsPsyche && declared.has("psyche_up")
+    && resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor) !== SS2_PSYCHE_UP.floor) {
+    effects.push({
+      kind: EffectKind.RESOURCE,
+      targetId: actor.id,
+      resource: "psyche_up",
+      to: SS2_PSYCHE_UP.floor
+    });
+  }
+
   return { effects, staminaGained, healed };
 }
 
@@ -4451,6 +4528,41 @@ export function createSs2TeamRules({
         actions.push({ type: Ss2ActionType.POWER_ATTACK, targetId: foe.id });
       }
 
+      // ► **`psyche_up` IS ON EVERY CONTROLLER FRAME, WHICH IS WHY IT IS
+      //   OFFERED OUTSIDE THE MELEE/ARCHER SPLIT ABOVE.** The map's button
+      //   table wires it on all eight rows — both facings of
+      //   `longrange_warrior`, `closerange_warrior`, `longrange_archer` and
+      //   `closerange_archer` (`:223-230`) — unlike every attack verb, each of
+      //   which belongs to one kind of frame.
+      //
+      // ► **AND IT IS OFFERED OUT OF REACH TOO, DELIBERATELY.** The charge
+      //   presses have no range test at all — they are an animation and a
+      //   counter — and the discharging press resolves its OWN gate and
+      //   decides nothing when it fails. Requiring reach here would hide the
+      //   verb from a gladiator who is entitled to start charging while he
+      //   closes, which is the whole shape of the action.
+      //
+      // ► **THE GATES ARE THE COUNTER'S DECLARATION AND `herolevel`.** The
+      //   build hides the BUTTON below `herolevel` 7 on the warrior frames and
+      //   3 on the archer ones (map `:247` and the frame table). The map is
+      //   also explicit that the phase machine never consults the controller
+      //   frame, so a driver calling `getphase("psyche_up")` reaches the phase
+      //   whatever the level — **the level gates the OFFER, not the phase**,
+      //   and `legalActions` is the offer.
+      //
+      //   The declaration gate is not cosmetic: `psyche_up` has no
+      //   `SS2_RESOURCE_DEFAULTS` entry, so a combatant that never stated the
+      //   counter cannot carry one, and offering a verb whose whole effect is a
+      //   number it cannot hold would be a button that does nothing.
+      if (declaredResourceNames(view.actor).has("psyche_up")) {
+        const psycheGate = ss2InBowMode(view.actor) ? 3 : 7;
+        if (resourceValue(view.actor, "herolevel", 0) >= psycheGate) {
+          for (const foe of view.foes) {
+            actions.push({ type: Ss2ActionType.PSYCHE_UP, targetId: foe.id });
+          }
+        }
+      }
+
       if (positioned) {
         // Which walk buttons the frame wires, from the map's own table
         // (battle map, "Buttons wired per controller frame", `:223-230`).
@@ -4958,13 +5070,134 @@ export function createSs2TeamRules({
         };
       }
 
-      const band = ATTACK_BANDS[request.type];
+      // ► **THE TWO PRESSES THAT ARE NOT AN ATTACK, RESOLVED BEFORE THE BAND
+      //   LOOKUP BECAUSE THEY NEVER REACH IT.**
+      //
+      //   The counter is READ at press time and advanced when the animation
+      //   reports back, so a fresh gladiator at 1 plays `psyche_up` and becomes
+      //   2, at 2 plays `psyche_up2` and becomes 3, and at 3 plays `psyche_up3`
+      //   AND fires. Presses one and two draw nothing at all: no direction, no
+      //   chance, no critical. They cost stamina like any completed phase and
+      //   they move one number.
+      let psycheCounter = null;
+      if (request.type === Ss2ActionType.PSYCHE_UP) {
+        psycheCounter = resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor);
+        const clip = SS2_PSYCHE_UP.clips[
+          Math.min(psycheCounter, SS2_PSYCHE_UP.dischargeAt) - 1
+        ] ?? SS2_PSYCHE_UP.clips[0];
+        if (psycheCounter < SS2_PSYCHE_UP.dischargeAt) {
+          const transition = phaseTransitionEffects(actor, {
+            staminaCost: Math.round(actor.stats.strength * PSYCHE_UP_DISCHARGE.strengthFactor),
+            // `nextphase` resets only when `phase_decision != "psyche_up"`, and
+            // this IS that decision — so the counter this branch just advanced
+            // must survive its own phase transition.
+            resetsPsyche: false
+          });
+          const effects = [...transition.effects];
+          // Guarded on declaration like every other resource write here: the
+          // resolver refuses an undeclared name mid-list and leaves the earlier
+          // effects applied, which is a partial action with no rollback.
+          // `legalActions` only offers this verb to a combatant that declares
+          // the counter, so the guard is belt to that brace.
+          if (declaredResourceNames(actor).has("psyche_up")) {
+            effects.push({
+              kind: EffectKind.RESOURCE,
+              targetId: actor.id,
+              resource: "psyche_up",
+              to: psycheCounter + 1
+            });
+          }
+          return {
+            effects: [...effects, ...crowd],
+            events: [{
+              type: Ss2ActionType.PSYCHE_UP,
+              actorId: actor.id,
+              targetId: actor.id,
+              // ► **THE CLIP IS ON THE EVENT BECAUSE NOTHING DOWNSTREAM CAN
+              //   DERIVE IT.** The phase label is one word for all three
+              //   presses and the direction is one number for the discharge and
+              //   `cast_whirlwind` alike, so a presentation layer handed either
+              //   would have to guess. See `attackLabel`, which refuses to.
+              clip,
+              counter: psycheCounter,
+              counterAfter: psycheCounter + 1,
+              discharged: false,
+              vanillaLabel: VANILLA_PHASE_LABEL[Ss2ActionType.PSYCHE_UP],
+              staminaGained: transition.staminaGained,
+              healed: transition.healed
+            }]
+          };
+        }
+      }
+
+      const band = ATTACK_BANDS[request.type]
+        // The discharging press, and ONLY that press, is band-shaped. See
+        // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
+        ?? (request.type === Ss2ActionType.PSYCHE_UP ? PSYCHE_UP_DISCHARGE : undefined);
       if (!band) {
         throw new TeamRuleSetError(`Rule set ${ruleSetId} was asked to resolve unknown action ${request.type}.`);
       }
       const target = request.target;
       if (!target) {
         throw new TeamRuleSetError(`${request.type} needs a target; ${String(request.targetId)} is not a combatant.`);
+      }
+
+      // ► **OUT OF RANGE, THE DISCHARGE DECIDES NOTHING AT ALL — NO ROLL, NO
+      //   DAMAGE, NO DEATH — AND THAT IS UNLIKE EVERY MELEE ATTACK.**
+      //
+      //   `power_attack`, `normal_attack` and `quick_attack` draw a direction
+      //   and call `checkattackroll()` with no distance test whatever
+      //   (`power_attack` runs straight from `+0x607c` to the call at
+      //   `+0x6146`), so a melee blow issued from across the arena still
+      //   resolves and misses. Only `psyche_up` and `cast_whirlwind` gate on
+      //   range, comparing `attacker._x` against
+      //   `defender._x -/+ round(weapon_range + 50)` by facing
+      //   (`+0x6658`-`+0x6699` right, `+0x66d1`-`+0x6712` left).
+      //
+      //   **It must therefore run BEFORE the first draw**, for the reason the
+      //   block below spells out about the record builders: a refusal after a
+      //   draw leaves the battle hashed differently from a peer that never
+      //   attempted it.
+      //
+      // ► **AND THE COUNTER IS LEFT ALONE, WHICH IS UNOBSERVABLE EITHER WAY.**
+      //   The map does not say whether a gated-out press still advances it. It
+      //   does not matter: the counter is already at or past `dischargeAt` and
+      //   every value there selects the same arm, so advancing and not
+      //   advancing produce the same clip and the same next press. **Said here
+      //   rather than left as a silent choice** — if a capture ever shows the
+      //   counter climbing, nothing downstream changes.
+      if (request.type === Ss2ActionType.PSYCHE_UP) {
+        const separation = ss2FightDistance(actor, target);
+        const gate = Math.round(ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus);
+        if (!Number.isFinite(separation) || separation > gate) {
+          const transition = phaseTransitionEffects(actor, {
+            staminaCost: Math.round(actor.stats.strength * PSYCHE_UP_DISCHARGE.strengthFactor),
+            // Still a `psyche_up` decision even though it decided nothing, so
+            // `nextphase` does not reset: a gladiator gated out by range keeps
+            // his charge and can spend it once he has closed.
+            resetsPsyche: false
+          });
+          return {
+            effects: [...transition.effects, ...crowd],
+            events: [{
+              type: Ss2ActionType.PSYCHE_UP,
+              actorId: actor.id,
+              targetId: target.id,
+              clip: SS2_PSYCHE_UP.clips[SS2_PSYCHE_UP.clips.length - 1],
+              counter: psycheCounter,
+              counterAfter: psycheCounter,
+              discharged: false,
+              // The field that makes this distinguishable from a miss. A miss
+              // is a resolved roll the defender blocked; this is no roll at all.
+              outOfRange: true,
+              separation,
+              gate,
+              vanillaLabel: VANILLA_PHASE_LABEL[Ss2ActionType.PSYCHE_UP],
+              staminaGained: transition.staminaGained,
+              healed: transition.healed
+            }]
+          };
+        }
       }
 
       // BOTH RECORDS ARE BUILT BEFORE THE FIRST DRAW, and the order is
@@ -5081,7 +5314,15 @@ export function createSs2TeamRules({
         });
       const transition = eliminated
         ? { effects: [], staminaGained: 0, healed: 0 }
-        : phaseTransitionEffects(actor, { staminaCost });
+        // The discharging `psyche_up` press is exempt for the same reason the
+        // two charging presses are: it IS a `psyche_up` decision, so
+        // `nextphase`'s reset does not fire. Its own write-back is pushed
+        // below, once, rather than left to the ordering of two writes to one
+        // resource inside a single action.
+        : phaseTransitionEffects(actor, {
+          staminaCost,
+          resetsPsyche: request.type !== Ss2ActionType.PSYCHE_UP
+        });
       // ► **THE BACK ATTACK, AND IT IS A SEPARATE EFFECT ON PURPOSE.** The
       //   swing above has already resolved through the build's own
       //   `attack_chances` and damage bands, untouched — this reads the damage
@@ -5205,6 +5446,42 @@ export function createSs2TeamRules({
           scenario,
           outcome
         }));
+      }
+      // ► **THE DISCHARGE WRITES THE COUNTER BACK, AND WHERE IT LANDS IS A
+      //   STATIC CANDIDATE THE MAP COULD NOT SETTLE.**
+      //
+      //   `+0x6738` writes `game_attacker.psyche_up = 1` after the range-gated
+      //   grievous, and `+0x6761` adds one when the animation reports back
+      //   (`attacker.struck == true`). The two are in different ticks of the
+      //   same phase, so statically the counter lands on **2, not 1**.
+      //
+      //   ► **THE MAP'S OWN GLOSS ON THAT IS WRONG BY ONE PRESS AND IS NOT
+      //     FOLLOWED HERE.** It says landing on 2 "would let the next
+      //     `psyche_up` press discharge again". It would not: at 2 the selector
+      //     at `+0x65b9` picks `psyche_up2`. The two readings differ as a
+      //     CADENCE — three presses to the first discharge and **two per
+      //     discharge after it** (lands on 2), against three every time (lands
+      //     on 1). `ss2-capture-staging.md` words it correctly as "shortening
+      //     the *next* chain".
+      //
+      //   **The map's reading is what ships**, because a candidate derives from
+      //   the map. Settling it needs a capture of two consecutive discharges
+      //   with `-TraceWindow phase` — the ordinary window closes on
+      //   `checkattackroll`'s return and BOTH writes happen after it.
+      if (request.type === Ss2ActionType.PSYCHE_UP && declaredResourceNames(actor).has("psyche_up")) {
+        effects.push({
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: "psyche_up",
+          to: SS2_PSYCHE_UP.floor + 1
+        });
+        for (const event of events) {
+          if (event.type !== request.type) continue;
+          event.clip = SS2_PSYCHE_UP.clips[SS2_PSYCHE_UP.clips.length - 1];
+          event.counter = psycheCounter;
+          event.counterAfter = SS2_PSYCHE_UP.floor + 1;
+          event.discharged = true;
+        }
       }
       return { effects: [...effects, ...crowd], events };
     },

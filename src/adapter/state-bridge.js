@@ -179,6 +179,23 @@ export const CANONICAL_RESOURCE_SOURCES = Object.freeze([
   "staminamax",
   // Base stats: the one with no canonical stat slot.
   "charisma",
+  // ► **THE PSYCHE COUNTER, WHICH IS A LIVE POOL LIKE `staminaleft` AND UNLIKE
+  //   `criticalhit`.** Added 2026-09-16 with the `psyche_up` verb.
+  //
+  //   The distinction this list turns on is whether there is anything to mirror
+  //   TO. `criticalhit` is deliberately absent because the build keeps it as a
+  //   bare `SetVariable` on the overlay timeline inside `checkattackroll`
+  //   (`+0x2e7e`, `+0x2eeb`) and NOT as a field on either gladiator, so
+  //   mirroring it would invent a save-schema field the build does not have.
+  //
+  //   `psyche_up` is the opposite case: it is a real member of the persistent
+  //   combat object, which the map lists under "Combatant state objects /
+  //   Conditions" and which the build writes by name in three places —
+  //   `nextphase` `+0x35c7`-`+0x35ea`, `damagecharacter` `+0x1be4`, and the
+  //   discharge's own write-back at `+0x6738`. Leaving it out would report
+  //   every counter advance as an unmapped write against a field that plainly
+  //   exists.
+  "psyche_up",
   // Armour: the per-piece ratings (the piece *ids* are equipment identity, not
   // a numeric pool, and are deliberately left in the vanilla record).
   "boot_defence",

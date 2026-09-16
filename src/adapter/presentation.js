@@ -383,6 +383,34 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
       return Object.freeze({ actor: label(conditionLabel, LabelProvenance.ASSUMED), target: null });
     }
 
+    // ► **`psyche_up` CARRIES ITS OWN CLIP, BECAUSE NOTHING HERE COULD DERIVE
+    //   ONE.** Its phase label is a single word for all three presses and its
+    //   direction is 30 for the discharge and for `cast_whirlwind` alike, so
+    //   both of the things this function normally reads are ambiguous. The
+    //   resolver knows the counter and therefore knows the clip — `psyche_up`,
+    //   `psyche_up2` or `psyche_up3` for 1, 2 and >= 3 (`+0x658a`, `+0x65b9`,
+    //   `+0x65ef`) — and puts it on the event.
+    //
+    //   MAP_NAMED because the build names all three outright: they are frame
+    //   labels on the fighter clip, not strings assembled from a number.
+    //
+    // ► **THE TARGET HALF DEPENDS ON WHETHER THIS PRESS DISCHARGED.** A charge
+    //   is self-targeted and has no victim label at all; a discharge is an
+    //   ordinary grievous blow and the `dispatchedMethod` switch below already
+    //   knows what that looks like, so it is left to fall through.
+    if (event.type === "psyche-up" && typeof event.clip === "string" && event.clip.length > 0) {
+      const actorLabel = label(event.clip, LabelProvenance.MAP_NAMED);
+      if (event.discharged !== true) {
+        return Object.freeze({ actor: actorLabel, target: null });
+      }
+      if (event.hit === false) {
+        return Object.freeze({ actor: actorLabel, target: defendLabel(direction) });
+      }
+      // Map: direction 30 dispatches `defender_hurt("grievous")`; knockback is
+      // frame 1428 — the same target label the grievous case below uses.
+      return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
+    }
+
     if (event.hit === false) {
       // Map, "Attack roll dispatcher": "A miss calls `defender_blocked()`."
       // ► **AND `defender_blocked()` DOES NOT PLAY `Block`.** It plays one of

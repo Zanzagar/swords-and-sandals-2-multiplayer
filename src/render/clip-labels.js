@@ -70,6 +70,24 @@ const FAMILY_LABELS = Object.freeze({
 
   attack: Object.freeze(["attack1", "attack2", "attack3", "attack4", "attack5", "attack6",
     "attack7", "attack8", "attack9", "attack10", "attack11", "attack12"]),
+  // ► **THE PSYCHE FAMILY, BUILT 2026-09-16 — three clips for one phase, chosen
+  //   by a COUNTER rather than by a direction or a facing.** That is unlike
+  //   every other family here: `attack` is picked by a drawn direction and the
+  //   gaits by a facing, but `psyche_up`, `psyche_up2` and `psyche_up3` are
+  //   picked by how many times in a row the gladiator has pressed the button
+  //   (`+0x658a`, `+0x65b9`, `+0x65ef` for 1, 2 and >= 3).
+  //
+  //   So the resolver names the clip on the event and the presentation layer
+  //   passes it through; nothing here indexes into the list. It is a family so
+  //   that all three are DECLARED PLAYABLE, which is what this table is for.
+  //
+  // ► **`psyche_charging` AND `psyche_charging2` ARE DELIBERATELY NOT HERE.**
+  //   They are continuations — `psyche_up` runs 1609-1617 straight into
+  //   `psyche_charging` 1618-1626, and neither charging clip has a `StartSound`
+  //   binding while all three `psyche_up*` do — and this engine dispatches ONE
+  //   animation per action, never a sequence. Listing them would declare
+  //   playable something nothing can reach.
+  psyche: Object.freeze(["psyche_up", "psyche_up2", "psyche_up3"]),
   // ► **`hurt8` WAS MISSING, AND IT WAS MISSING FOR THE `block` REASON.** The
   //   clip carries `hurt1`-`hurt12` and `hurt20`, thirteen animations, and this
   //   list held twelve. The one it dropped is the one the build binds NO SOUND
@@ -211,13 +229,26 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
   unbuiltDefence: Object.freeze(["roll", "fumble1"]),
 
   /**
-   * SPELLS AND PSYCHE. **The engine already carries the RESOURCES —
+   * SPELLS AND PSYCHE. ~~**The engine already carries the RESOURCES —
    * `psyche_up`, `spell_colossus`, `spell_bloodlust` are combatant fields — and
-   * has no verb, no family and no animation binding for any of them.** The art
+   * has no verb, no family and no animation binding for any of them.**~~ The art
    * has been sitting in the clip the whole time.
+   *
+   * ► **THE THREE `psyche_up*` CLIPS LEFT THIS LIST ON 2026-09-16, BECAUSE THE
+   *   VERB WAS BUILT.** `Ss2ActionType.PSYCHE_UP` resolves, `legalActions`
+   *   offers it on every controller frame, and the `psyche` family above
+   *   declares all three playable. **They had been sitting here since this
+   *   table existed, and three handoffs recorded them as blocked on an owner
+   *   decision about "what those spells ARE" — `psyche_up` is not a spell, it
+   *   is a vanilla ACTION the battle map specifies in 31 places.**
+   *
+   *   The spells are genuinely still unbuilt: `cast1`, `cast2`, `colossus`,
+   *   `lightning`, `rejuvinate` and `drink_potion` have no verb and no
+   *   dispatcher, and unlike the psyche counter the build's own selector for
+   *   them has not been read.
    */
   unbuiltSpells: Object.freeze([
-    "psyche_up", "psyche_up2", "psyche_up3", "cast1", "cast2",
+    "cast1", "cast2",
     "colossus", "lightning", "rejuvinate", "drink_potion"
   ]),
 

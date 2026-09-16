@@ -639,10 +639,18 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   //   `defend` clips stopped being declared unbuilt and became a family: the
   //   build's own `defender_blocked()` names which one answers which attack,
   //   so the mapping never needed the capture the old note asked for.
+  //
+  //   **And 73/28 -> 76/25 on 2026-09-16**, when `psyche_up`, `psyche_up2` and
+  //   `psyche_up3` became the `psyche` family. Three handoffs had recorded them
+  //   as blocked on an owner decision about "what those spells ARE";
+  //   `psyche_up` is not a spell but a vanilla ACTION the battle map specifies
+  //   in 31 places, and building the verb is what made the clips reachable.
+  //   The two `psyche_charging*` continuations stay declared unplayed — this
+  //   engine dispatches one animation per action, never a sequence.
   const families = [
     "standing", "rest", "block", "defend",
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
-    "attack", "hurt", "knockback", "taunt", "taunted", "ranged",
+    "attack", "hurt", "knockback", "taunt", "taunted", "ranged", "psyche",
     "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
     "death:unknown"
   ];
@@ -653,8 +661,8 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   const both = [...mapped].filter((label) => declared.has(label));
   assert.deepEqual(both, [], "a label cannot be both played and declared unplayed");
 
-  assert.equal(mapped.size, 73);
-  assert.equal(declared.size, 28);
+  assert.equal(mapped.size, 76);
+  assert.equal(declared.size, 25);
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
   // ► **THE DEFENCE SYSTEM IS BUILT, and this used to assert the opposite.**
@@ -806,22 +814,37 @@ function glowPackOf({
 const paintGlow = (pack, options = {}) =>
   paintExtractedFigure(pack, { family: "standing", label: "Standing", at: 0, height: 1, ...options });
 
-test("THE FOUR CLIPS THAT CARRY EVERY EFFECT GROUP ARE UNREACHABLE — say it, do not discover it", () => {
-  // ► **THIS IS A FINDING, NOT A SETUP STEP.** All 12 group-table entries and
-  //   all 30 grouped placements in `assets/figure/animations.json` sit on
-  //   `psyche_up`, `psyche_up2`, `psyche_charging` and `psyche_charging2`, and
-  //   every one of those four is DECLARED UNPLAYED — the first two in
-  //   `unbuiltSpells`, the last two in `continuations`. So the glow this module
-  //   now carries reaches no gladiator in the arena until a family dispatches a
-  //   psyche clip, and a sweep over the playable families would report the
-  //   feature working over a population of zero.
+test("TEN OF THE TWELVE EFFECT GROUPS ARE REACHABLE NOW; the other two are continuations", () => {
+  // ► **THIS TEST WAS "THE FOUR CLIPS ... ARE UNREACHABLE — say it, do not
+  //   discover it", AND IT DID ITS JOB ON 2026-09-16.** It pinned all four
+  //   carriers as declared-unplayed so that BUILDING the psyche family would
+  //   turn it red and force this paragraph to be rewritten rather than quietly
+  //   outlived. The family was built; it went red; this is the rewrite.
   //
-  //   Pinned so that BUILDING the psyche family turns this red and forces the
-  //   paragraph above to be rewritten rather than quietly outlived — the same
-  //   job the `defend` assertion did until the defence system landed.
+  //   What changed: `Ss2ActionType.PSYCHE_UP` resolves, `legalActions` offers
+  //   it on every controller frame, and `clip-labels.js` carries a `psyche`
+  //   family — so `psyche_up` and `psyche_up2` are now DISPATCHED and the glow
+  //   this module carries reaches a real gladiator.
+  //
+  // ► **THE OTHER TWO ARE STILL UNREACHABLE AND THAT IS A DESIGN, NOT A GAP.**
+  //   `psyche_charging` and `psyche_charging2` are CONTINUATIONS — `psyche_up`
+  //   runs frames 1609-1617 straight into `psyche_charging` 1618-1626, and
+  //   neither charging clip has a `StartSound` binding while all three
+  //   `psyche_up*` do. This engine dispatches ONE animation per action and has
+  //   no concept of a sequence, so declaring them playable would promise
+  //   something nothing can reach.
+  //
+  //   **Measured from the pack rather than asserted: 12 group entries, of which
+  //   10 sit on the two clips now dispatched (1 on `psyche_up`, 9 on
+  //   `psyche_up2`) and 2 on the continuations.**
   const declared = new Set(allUnmappedLabels());
-  for (const label of ["psyche_up", "psyche_up2", "psyche_charging", "psyche_charging2"]) {
-    assert.ok(declared.has(label), `${label} is declared unplayed — see the note above`);
+  for (const label of ["psyche_up", "psyche_up2"]) {
+    assert.equal(declared.has(label), false,
+      `${label} is still declared unplayed, but the psyche family dispatches it`);
+  }
+  for (const label of ["psyche_charging", "psyche_charging2"]) {
+    assert.ok(declared.has(label),
+      `${label} is a continuation and nothing dispatches it, so it must stay declared unplayed`);
   }
   if (!REAL_ANIMATIONS) return;
   // And they really are the only carriers, recomputed from the pack.
@@ -830,7 +853,16 @@ test("THE FOUR CLIPS THAT CARRY EVERY EFFECT GROUP ARE UNREACHABLE — say it, d
     .map(([label]) => label)
     .sort();
   assert.deepEqual(carriers, ["psyche_charging", "psyche_charging2", "psyche_up", "psyche_up2"]);
-  for (const label of carriers) assert.equal(declared.has(label), true);
+  // ► **THE ASSERTION THAT COULD HAVE VARIED.** "The family is built" is
+  //   satisfied by a family that dispatches nothing useful; this counts the
+  //   groups that a dispatched clip actually carries, so a future change that
+  //   keeps the family and loses the art fails here.
+  const groupsOn = (label) => REAL_ANIMATIONS[label].effectGroups.length;
+  const reachable = groupsOn("psyche_up") + groupsOn("psyche_up2");
+  const stranded = groupsOn("psyche_charging") + groupsOn("psyche_charging2");
+  assert.equal(reachable, 10, "the dispatched psyche clips no longer carry ten effect groups");
+  assert.equal(stranded, 2, "the continuations no longer carry two effect groups");
+  assert.equal(reachable + stranded, 12, "the pack's effect-group total moved");
 });
 
 test("a pack with NO effect groups and NO enchantments emits the operations it always did", () => {

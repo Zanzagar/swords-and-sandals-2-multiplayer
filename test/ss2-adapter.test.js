@@ -633,6 +633,14 @@ test("the adapter's resource vocabulary is PINNED: changing it re-hashes every a
     "staminaleft", "staminamax",
     // the one stat that is a resource
     "charisma",
+    // ► **THE PSYCHE COUNTER, ADDED 2026-09-16 WITH THE `psyche_up` VERB.** A
+    //   live pool like `staminaleft`, and unlike `criticalhit` it is a real
+    //   member of the persistent combat object — the map lists it under
+    //   "Combatant state objects / Conditions" and the build writes it by name
+    //   at `nextphase` `+0x35c7`-`+0x35ea`, `damagecharacter` `+0x1be4` and the
+    //   discharge's own `+0x6738`. Leaving it out reported every counter
+    //   advance as an unmapped write against a field that plainly exists.
+    "psyche_up",
     // per-piece armour VALUES — the piece IDS are deliberately absent; see
     // `docs/ss2-adapter-contract.md`, "Still open" item 2
     "boot_defence", "breastplate_defence", "gauntlet_defence", "greaves_defence",
@@ -641,7 +649,8 @@ test("the adapter's resource vocabulary is PINNED: changing it re-hashes every a
     "secondary_weapon_enchantment_potency", "secondary_weapon_enchantment_type",
     "weapon_enchantment_damage", "weapon_enchantment_potency", "weapon_enchantment_type"
   ]);
-  assert.equal(CANONICAL_RESOURCE_SOURCES.length, 20);
+  // 20 until 2026-09-16, when the psyche counter joined with its verb.
+  assert.equal(CANONICAL_RESOURCE_SOURCES.length, 21);
 
   // And the pin is only worth having if it really is the projected bag: a pin
   // over a list nothing projects would be decoration.
@@ -1002,7 +1011,21 @@ test("every vanilla write declares one of four sources, and the field set is fix
   }
   assert.equal(isResourceBackedVanillaField("armourclass"), true);
   assert.equal(isResourceBackedVanillaField("spell_regenerate"), true, "the timed pools the map declines to name");
-  assert.equal(isResourceBackedVanillaField("psyche_up"), false, "a vanilla field is not a resource by being a field");
+  // ► **THIS ASSERTION USED `psyche_up` AS ITS EXAMPLE AND `psyche_up` BECAME A
+  //   RESOURCE ON 2026-09-16.** The RULE it states is unchanged and still
+  //   worth pinning — a field is not a resource by being a field — so it keeps
+  //   the rule and takes a different example. `inventory1` is a member of the
+  //   persistent combat object (the map groups it under "Combatant state
+  //   objects / Inventory") and no rule reads it, which is exactly the shape
+  //   the assertion is about.
+  //
+  //   **What changed about `psyche_up` is that a verb started reading it**, not
+  //   that it grew into a field. It is asserted here from the other side, so a
+  //   revert that dropped it from the vocabulary fails this test too.
+  assert.equal(isResourceBackedVanillaField("inventory1"), false,
+    "a vanilla field is not a resource by being a field");
+  assert.equal(isResourceBackedVanillaField("psyche_up"), true,
+    "the psyche counter IS a declared resource: the psyche_up verb reads and writes it");
 
   // And no scenario produces a write outside it. Four vocabularies, four team
   // sizes, damage / heal / status / resource / facing.

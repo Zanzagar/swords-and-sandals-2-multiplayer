@@ -222,6 +222,20 @@ function familyOf(label, role) {
   if (label === "taunted") return "taunted";
   if (label === "taunt") return "taunt";
   if (label === "bombard" || label === "snipe") return "ranged";
+  // ► **TWO PSYCHE FAMILIES AND NOT ONE, BECAUSE THE THIRD CLIP IS LONGER AND
+  //   IS THE ONE THAT SWINGS.** In the extracted pack `psyche_up` runs frames
+  //   1609-1617 and `psyche_up2` 1627-1635 — nine each — while `psyche_up3` is
+  //   1644-1656, thirteen, and carries its own baked discharge-burst art as a
+  //   seventeenth placement. Folding all three into one schedule would play the
+  //   discharge at the charge's length, which is the kind of averaging this
+  //   table exists to avoid.
+  //
+  //   Matched by exact name, not by a `/^psyche/` pattern, for the reason the
+  //   gait comment above gives: a pattern would also accept `psyche_charging`,
+  //   which is a CONTINUATION this engine never dispatches, and silently giving
+  //   it a recognised schedule is how a guess stops looking like one.
+  if (label === "psyche_up" || label === "psyche_up2") return "psyche";
+  if (label === "psyche_up3") return "psyche:discharge";
   if (/^attack\d+$/.test(label)) return "attack";
   if (/^hurt\d+$/.test(label)) return "hurt";
   // ► **`defendN` IS ITS OWN FAMILY AND NOT `block`.** A miss dispatches
@@ -368,6 +382,44 @@ const FAMILIES = Object.freeze({
     { at: 0.82, pose: { bob: -0.35, legSpread: 0.5, lean: 0.05 } },
     { at: 1, pose: {} }
   ], { travel: true }),
+
+  /**
+   * BUILDING UP: no contact, no advance, and that is the point.
+   *
+   * ► **EVERY MILLISECOND HERE IS AUTHORED and the FRAME COUNT is not.** Nine
+   *   frames is the pack's own length for `psyche_up` (1609-1617) and
+   *   `psyche_up2` (1627-1635). The poses between them are this engine's, like
+   *   every other schedule in this table — the map records frame ranges and
+   *   names no pose inside one.
+   *
+   *   `advance: 0` throughout is a derivation rather than a choice: the build
+   *   gates the discharge on a range test it does not move to satisfy, so a
+   *   gladiator who psyches up stands exactly where he stood.
+   */
+  psyche: () => schedule("psyche", 9, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: -0.5, lean: -0.3, bob: 0.3, legSpread: 0.35 } },
+    { at: 0.62, pose: { armSwing: -0.85, lean: -0.15, bob: 0.55, legSpread: 0.5 } },
+    { at: 0.85, pose: { armSwing: -0.6, lean: 0.05, bob: 0.3, legSpread: 0.3 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * THE THIRD PRESS, which is a grievous blow.
+   *
+   * Thirteen frames, the pack's own length for `psyche_up3` (1644-1656) — the
+   * longest of the three and the only one that reaches `checkattackroll`. It
+   * keeps the charge's wind-up and then commits, so the two read as one
+   * escalating gesture rather than two unrelated animations.
+   */
+  "psyche:discharge": () => schedule("psyche:discharge", 13, [
+    { at: 0, pose: {} },
+    { at: 0.22, pose: { armSwing: -0.9, lean: -0.35, bob: 0.5, legSpread: 0.45 } },
+    { at: 0.45, pose: { armSwing: -1, lean: -0.4, bob: 0.7, legSpread: 0.6 } },
+    { at: 0.62, pose: { armSwing: 1, lean: 0.6, weaponAngle: 0.3, legSpread: 0.7, advance: 0.5 } },
+    { at: 0.8, pose: { armSwing: 0.5, lean: 0.35, legSpread: 0.45, advance: 0.2 } },
+    { at: 1, pose: {} }
+  ]),
 
   taunt: () => schedule("taunt", 10, [
     { at: 0, pose: {} },
