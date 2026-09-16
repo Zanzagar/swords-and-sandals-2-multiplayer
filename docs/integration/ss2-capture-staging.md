@@ -1645,8 +1645,31 @@ What reaching direction 30 now requires, in order of cost:
 Two things a first `psyche_up` session would settle for free. The map records a
 **static candidate** that after a discharge the counter is written back to 1
 and then incremented again in a later tick of the same phase, landing on 2
-rather than 1 and so shortening the *next* chain; two consecutive presses
-recorded live decide it. And it would resolve the tension in item 1: the
+rather than 1 and so shortening the *next* chain; ~~two consecutive presses
+recorded live decide it.~~
+
+> **CORRECTED 2026-09-16, AND IT WAS FALSE OF THE COMMITTED WRAPPER.** Two
+> presses decided nothing, because **neither counter write was inside the
+> recording window.** `finishTrace` fired on `checkattackroll`'s RETURN, and
+> both writes — `+0x6738`, the discharge writing itself back to 1, and
+> `+0x6761`, the animation callback adding one — execute after that return.
+> `makeWatcher` emits a `set` line only `if (armed)`, and `finishTrace` latches
+> `finalsDumped`, so the window could not reopen either.
+>
+> **It is true now, with a flag.** Pass `-TraceWindow phase` to
+> `launch-capture.ps1`, which defers the close to `nextphase` so everything the
+> phase does after the roll is recorded. The trace and the observation both
+> carry `traceWindow: "phase"`, because a wide trace has more lines by
+> construction and must never be read as an archived one. Both windows pass
+> `validate-vehicle.ps1`.
+>
+> **And `psyche_up` is not in the default watch list**, so the session must also
+> pass `-WatchFields psyche_up` — `watchFields` EXTENDS the defaults rather than
+> replacing them, so nothing is lost by doing so.
+>
+> *A document that prescribes a capture the wrapper cannot take is worse than
+> one that says nothing: the next reader runs the session and reads the silence
+> as the build's answer.* And it would resolve the tension in item 1: the
 herolevel test hides the *button*, while the map's byte-verified note says the
 phase machine never consults the controller frame, so a driver calling
 `getphase("psyche_up")` should reach the phase whatever the level. The
