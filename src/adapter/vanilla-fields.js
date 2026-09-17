@@ -307,13 +307,35 @@ const CLIP_RESIDENT_SET = Object.freeze(new Set(CLIP_RESIDENT_FIELDS));
 export const MAP_SILENCE = Object.freeze([
   Object.freeze({
     id: "psyche-up-initialisation",
-    subject: "`psyche_up` initial value",
+    subject: "`psyche_up` initial value BETWEEN battles",
+    /**
+     * ► **NARROWED 2026-09-16, BY THE BYTES, WHICH IS WHAT THIS CATALOGUE'S OWN
+     *   HEADER DEMANDS OF AN ENTRY THAT REACHES FOR A CAPTURE.** It used to
+     *   read: *"never says whether it is initialised before that write, so it
+     *   may be undefined-until-set like the six status flags"*, settled by
+     *   *"a capture that dumps the persistent object before any action"*.
+     *
+     *   **At battle time it is never undefined.** Sprite 2249's frame 1 is
+     *   labelled `initbattle`, and `DoAction@0x6e421b` `+0x0bc9`-`+0x0bf1` runs
+     *   `_root.game.hero.psyche_up = _root.game.villain.psyche_up = 1` — a
+     *   `StoreRegister`/double-`SetMember` chained assignment — in the same
+     *   block that places both fighters at `_x -320 / _y 122`. And it is the
+     *   only such site: `psyche_up` appears in exactly six action blocks in the
+     *   whole SWF (overlay frame 52, the four controller frames, and this one),
+     *   so nothing else can initialise it.
+     *
+     *   What is left is genuinely narrower and much less consequential: what
+     *   the PERSISTENT object holds between battles, which no code path in a
+     *   battle can observe because `initbattle` overwrites it first.
+     */
     silence:
-      "The map lists `psyche_up` under Conditions and records that the spell ingress writes " +
-      "`game_defender.psyche_up = 1` unconditionally, but never says whether it is initialised " +
-      "before that write, so it may be undefined-until-set like the six status flags.",
+      "What the PERSISTENT object holds for `psyche_up` between battles. At battle time it is " +
+      "always 1: `initbattle` (sprite 2249 frame 1, `+0x0bc9`-`+0x0bf1`) writes both fighters' " +
+      "counters before any action, and it is the only initialisation site in the build.",
     adapterBehaviour: "Treated as a numeric field defaulting to 0; NOT normalised as a status flag.",
-    settledBy: "A capture that dumps the persistent object before any action and reports whether `psyche_up` is undefined."
+    settledBy:
+      "A save inspection between battles. NOT a battle capture — `initbattle` overwrites the value " +
+      "before the first frame a capture could read."
   }),
   Object.freeze({
     id: "timed-spell-field-names",

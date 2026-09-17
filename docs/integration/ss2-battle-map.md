@@ -2987,14 +2987,56 @@ played, and a burn hands back after its second flame pass. Frame 1608, which
 ends `snipe`, sets `this.fired = false` instead.
 
 **`psyche_charging` AND `psyche_charging2` ARE ALSO A HELD STANCE, dispatched
-with `gotoAndStop`.** `changeCombatants` poses both fighters from the counter at
-the top of every turn — `+0x281e`
+with `gotoAndStop`.** `changeCombatants` resets both fighters with
+`gotoAndPlay("Standing")` (`+0x27db`, `+0x27ef`) and then poses whichever holds
+a charge — `+0x281e`
 `if (game_attacker.psyche_up == 2) attacker.gotoAndStop("psyche_charging")`,
 `+0x284d` the same at 3 for `psyche_charging2`, and `+0x287c` / `+0x28ab` for
 the defender. A gladiator holding a charge therefore STANDS in the charged pose
 instead of `Standing`, and the counter values line up: after one press it is 2,
 after two it is 3. This is a different mechanism from a run — a persistent pose
 between actions, not one performance within one.
+
+`changeCombatants` runs **about four times a turn, not once**: `+0x317e` at top
+level of the frame-52 script (every entry to `heroactions`), `+0x3638` inside
+`nextphase`'s `battle_action < 3` arm (every phase advance) and `+0x365f` at the
+`battle_action == 3` turn end. `battle_action` is the PHASE selector, not a turn
+counter.
+
+**THE CHARGED POSE IS NOT THE ONLY HELD FIGHTER POSE — it is the only one that
+survives a turn boundary, and the distinction is the interesting part.** 86 of
+the fighter clip's frame scripts end in `this.struck = true; Stop` and only 7
+spans self-loop, so **the figure parks on the terminal frame of nearly every
+action it plays** — every attack, defence, hurt, cast, taunt and rest — until
+the next `changeCombatants`, which `nextphase` gates on `demand_move >= 60`
+enter-frames, about two seconds at 30 fps. The charged pose differs in being
+re-asserted from PERSISTENT STATE rather than being wherever the playhead
+happened to stop. Two consequences worth naming:
+
+- **The same charged state has two held frames.** The `psyche_up` action runs on
+  and stops at 1626, the charging clip's LAST frame; `changeCombatants` then
+  re-asserts 1618, its FIRST. Which one is showing depends on when you look.
+- **A surviving winner loops `celebrate1a` forever.** Overlay frame 65
+  (`combatwon`) runs `hero.gotoAndPlay("celebrate1")` and frame 77 the same on
+  `villain`; `celebrate1` has no `Stop`, runs into `celebrate1a`, which
+  self-loops at 1426, and the overlay then stops. The corpse pose is held
+  forever too, from `whichcharacter.deathsequence` at frame 62/74.
+
+**The non-combat freezes are on a DIFFERENT CLIP.** `villain.gotoAndStop("standing")`
+and `hero.gotoAndStop("Portrait")` target sprite 711 `[hero]` — labels
+`Standing` 1-20, `Portrait` 21, `championpose` 22, `chained` 23-76,
+`chained_lookup` 77-91, `unchained` 92-104, `overlay` 105 — not the arena's
+sprite 1241 `[hero_battle]`. `championpose` is not a fighter-clip label at all.
+
+**And the counter is INITIALISED, which retires a map silence.** Sprite 2249's
+frame 1 is labelled `initbattle`, and `DoAction@0x6e421b` `+0x0bc9`-`+0x0bf1`
+runs `_root.game.hero.psyche_up = _root.game.villain.psyche_up = 1` (a
+`StoreRegister`/double-`SetMember` chained assignment) in the same block that
+places both fighters at `_x -320 / _y 122`. `psyche_up` appears in exactly six
+action blocks in the whole SWF — overlay frame 52, the four controller frames,
+and this one — so **there is no other initialisation site and the value is
+never undefined at battle time.** See `MAP_SILENCE`'s `psyche-up-initialisation`
+entry, now narrowed to the between-battles persistent object alone.
 
 **`knockback_mov` has exactly one dispatch site of its own**, `+0x7c5e` in
 `attacker.onEnterFrame`, immediately after `cast_spell_icon(attacker, 39, 2)` —

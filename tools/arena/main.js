@@ -1089,8 +1089,26 @@ function opSpaceRunsOf(ops) {
  *   other 1.
  * - `filtersScaled: true` — **FLIPPED 2026-09-16, ON THE CONDITION THIS
  *   PARAGRAPH SET ITSELF.** `render` passes `scale: (origin.size ?? 1) *
- *   view.scale` to `paintExtractedFigure`, which is exactly the factor the CTM
- *   carries, so the radii arrive in device pixels.
+ *   view.scale` to `paintExtractedFigure`, and the radii arrive in device
+ *   pixels.
+ *
+ *   ► **THAT PRODUCT IS ONLY HALF THE FACTOR, AND A FIRST VERSION OF THIS LINE
+ *     SAID IT WAS THE WHOLE ONE.** `src/render/extracted-figure.js` multiplies
+ *     it by its own `(UNIT * height) / pack.clipHeight` — arena units per clip
+ *     pixel, which only that module knows — and hands the PRODUCT to
+ *     `canvasFilterFor`. This file supplies canvas-per-arena; the other
+ *     supplies arena-per-clip; neither half is the factor. A reader who checked
+ *     the old sentence literally against `figureOriginMatrix` would have found
+ *     it not to hold.
+ *
+ *   ► **AND IT HOLDS ONLY BECAUSE EVERY GROUP IN THIS PACK IS AT TOP-LEVEL
+ *     DEPTH.** The psyche group's `path` is `[43]`. `extracted-figure.js`
+ *     states that a `path.length > 1` group would be scaled by the wrong factor
+ *     and counts it as `invoice.groupsBelowTopLevel` — **and nothing in this
+ *     file prints that counter**, so a future extraction with a nested group
+ *     would draw its glow at the wrong radius with every visible counter
+ *     reading zero. That is the next hole on this route, and it is narrower
+ *     than the one just closed.
  *
  *   ► **It said `false` until a figure group could be OBSERVED**, and its own
  *     instruction was: *"Flip it in the commit that makes a figure group
@@ -1116,6 +1134,21 @@ function opSpaceRunsOf(ops) {
  *   argument depended on it and still does. So this flip moves an honesty
  *   counter from over-reporting an approximation to reporting none, and it
  *   moves no pixel.
+ *
+ *   ► **"NO PIXEL" IS EXACT FOR THE CANVAS AND NOT FOR THE PAGE.**
+ *     `filterAtStageScale` feeds `lost` and the `groups: approximated —
+ *     ... unscaled N ...` line below, including its `warn` severity. On a frame
+ *     with one charged gladiator that line goes from `unscaled 3` with a
+ *     warning to `unscaled 0` without one. Cosmetic, in the surface panel, and
+ *     the whole point of an honesty counter — but it is a visible change and
+ *     the old wording denied one.
+ *
+ *   ► **AND AT DEFAULT SETTINGS THE FILTER STRING IS NOT WHAT DRAWS.**
+ *     `GLOW_AMPLIFY` defaults on, the psyche group carries an `amplify` ladder,
+ *     and `amplifyGlows` draws instead of `context.filter`. The counter still
+ *     fires, because it tests `run.group.filter` rather than which path drew —
+ *     which is correct for an approximation counter and worth knowing before
+ *     someone reads `unscaled` as "this many filter strings were applied".
  *
  * A function rather than a bare `const` so that the test can LIFT it and assert
  * the values, instead of matching the source text and going green on a comment.

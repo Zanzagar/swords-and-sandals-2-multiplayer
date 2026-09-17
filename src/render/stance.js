@@ -12,7 +12,7 @@
  * ## The build's own answer
  *
  * `changeCombatants` — overlay frame 52, `DoAction@0x240c7f`, the anonymous
- * function at `+0x27a6` — runs once per completed TURN and opens like this:
+ * function at `+0x27a6` — opens like this:
  *
  * ```text
  *   attacker.gotoAndPlay("Standing")                             +0x27db
@@ -33,7 +33,19 @@
  * counter reads 2 after one press and 3 after two, and at 3 the next press
  * discharges. **The stance is the visible form of the resource** — and with the
  * extracted pack it is visibly so, because both charging clips carry the cyan
- * glow effect group, so a charged gladiator stands there glowing.
+ * glow effect group, so a charged gladiator stands there glowing. The two
+ * levels are two DIFFERENT glows, not one at two frames: outer radius 4.2742 at
+ * `scale` 1 for `psyche_charging` against 2.5208 for `psyche_charging2`.
+ *
+ * ► **IT RUNS ABOUT FOUR TIMES A TURN, NOT ONCE — corrected by a verifier.**
+ *   This header said "once per completed TURN". There are three call sites, all
+ *   in the same block: `+0x317e` at TOP LEVEL of the frame script, so every
+ *   time the overlay enters `heroactions`; `+0x3638` inside `nextphase`'s
+ *   `battle_action < 3` arm, so on every phase advance; and `+0x365f` at the
+ *   `battle_action == 3` turn end. `battle_action` is a PHASE selector, not a
+ *   turn counter. Nothing here changes — more re-application only strengthens
+ *   the case for deriving the pose fresh — but the sentence would mislead
+ *   anyone reasoning about when the build re-reads state.
  *
  * ## Why it is not a clip-goto command
  *
@@ -44,17 +56,65 @@
  * `timeline.js`) and its commands are consumed and finished.
  *
  * **It is derived at the draw site instead, from the projection, every frame.**
- * That makes it automatically persistent and automatically correct: the moment
- * the resolver resets the counter — `phaseTransitionEffects` on any other
- * decision, or `damagecharacter`'s defender reset when a blow lands — the next
- * frame draws `Standing` again, with nothing to invalidate and no state of its
- * own to go stale. The build re-applies the stance once a turn for exactly the
- * same reason and gets the same result more laboriously.
+ * The moment the resolver resets the counter — `phaseTransitionEffects` on any
+ * other decision, or `damagecharacter` when a blow lands — the next frame draws
+ * `Standing` again, with nothing to invalidate and no state of its own to go
+ * stale.
+ *
+ * ► **AND THAT APPROXIMATES THE BUILD RATHER THAN REPRODUCING IT.** This header
+ *   claimed the stronger thing and a verifier broke it. **The build parks a
+ *   figure on the LAST FRAME of whatever it just played and does not restore
+ *   the stance when the clip ends** — 86 of the fighter clip's frame scripts
+ *   end in `this.struck = true; Stop` and only 7 spans self-loop — and the pose
+ *   comes back only at the next `changeCombatants`, which `nextphase` gates on
+ *   `demand_move >= 60` enter-frames, about two seconds at 30 fps. This engine
+ *   deletes the expired timeline at `durationMs` and draws the idle on the very
+ *   next frame, so **it returns to the glowing stance sooner than the build
+ *   does, by the remainder of the phase.**
+ *
+ *   **The same gap is much bigger than the stance**, and is the honest thing to
+ *   take from it: action-end hold applies to EVERY action this engine plays,
+ *   not only to charged ones, and this engine has no concept of it. The charge
+ *   is merely the case where the difference is visible as a glow arriving
+ *   early. Named in the handoff as its own piece of work.
+ *
+ * ► **AND THE BUILD HAS TWO HELD FRAMES PER CHARGE LEVEL, NOT ONE.** The
+ *   `psyche_up` ACTION runs 1609-1617 straight on into `psyche_charging` and
+ *   stops at **1626**, its last frame (see `clip-sequences.js`); the next
+ *   `changeCombatants` then re-asserts `gotoAndStop("psyche_charging")` =
+ *   **1618**, its first. So the same charged state is drawn two different ways
+ *   depending on when you look, and this module draws the second. It is the one
+ *   that persists, and the one a resting gladiator is in for all but the first
+ *   moment after his own charge.
  *
  * ► **AND IT MOVES NO HASH, which is the reason it may read combat state at
- *   all.** This module is downstream of `toTeamWireState` and imported by
- *   nothing the resolver or `src/golden/` touches. It reads a resource; it
- *   writes nothing anywhere.
+ *   all** — but the load-bearing fact is stronger than "this module is
+ *   downstream", which is what this line used to say. **All 21 files in
+ *   `src/render/` import only `./` siblings: it is a zero-edge cut**, and
+ *   nothing under `src/team/`, `src/golden/`, `src/adapter/` or `src/campaign/`
+ *   imports anything from it. That survives arbitrary future edits here, and it
+ *   would stop holding the first time ANY file in this directory adds a `../`
+ *   import — which is the thing to watch, rather than this module's own
+ *   imports.
+ *
+ * ## Two places this engine goes past the build, deliberately
+ *
+ * ► **BYSTANDERS GET THE STANCE.** `changeCombatants` poses `attacker` and
+ *   `defender`, because the build has exactly two gladiators. This poses every
+ *   combatant from its own counter, so in a 2v2 all four are posed including
+ *   the pair that is neither. That is an EXTRAPOLATION, not a measurement, and
+ *   it is the same generalisation the whole team seam makes.
+ *
+ * ► **A SPENT CHARGE STILL GLOWS, AND THAT RESTS ON AN UNSETTLED CANDIDATE.** A
+ *   non-lethal discharge leaves the counter at 2, so a gladiator who has just
+ *   FIRED stands in `psyche_charging`. That is faithful to the build as the map
+ *   reads it — `+0x6738` writes 1 and `+0x6761` adds one a tick later — but
+ *   **where the counter lands after a discharge is a STATIC CANDIDATE awaiting
+ *   a `-TraceWindow phase` capture**, recorded at `test/ss2-psyche-up.test.js`.
+ *   If that capture ever says 1, this stance drops to `Standing` after a
+ *   discharge instead. **So the pose is a visual discriminator for an open
+ *   measurement question** — which is a reason to want the capture, not a
+ *   reason to hedge the code.
  */
 
 import { clipLabelsFor } from "./clip-labels.js";
@@ -124,7 +184,16 @@ export function stanceLabelFor(combatant) {
  * @returns {{label: string, timeline: object, at: number}}
  */
 export function idleFrameFor(combatant, { now = 0 } = {}) {
-  const stance = stanceLabelFor(combatant);
+  // ► **A CORPSE HAS NO IDLE, AND THIS GUARD IS BELT-AND-BRACES.** The shell's
+  //   draw loop branches on `!combatant.alive` to the death pose BEFORE it asks
+  //   for an idle, so today this is unreachable — a verifier established that
+  //   by feeding a hand-forged dead-and-charged combatant straight in and
+  //   getting `psyche_charging` back. **One call site is not a contract.** A
+  //   second caller that forgot the death branch would leave a glowing corpse
+  //   braced for a blow it will never throw, which is a wrong picture with no
+  //   error; and this module claims to own the WHOLE idle decision, so the
+  //   dead are part of it.
+  const stance = combatant?.alive === false ? null : stanceLabelFor(combatant);
   if (stance !== null) {
     const timeline = timelineFor(stance, { role: "actor" });
     if (!timeline.recognised) {
@@ -140,13 +209,20 @@ export function idleFrameFor(combatant, { now = 0 } = {}) {
     return Object.freeze({ label: stance, timeline, at: 0 });
   }
   const timeline = timelineFor("Standing", { role: "actor" });
-  const elapsed = Number.isFinite(now) ? now : 0;
+  // The looping idle's own phase.
+  //
+  // ► **NON-FINITE AND NEGATIVE ARE BOTH NORMALISED, and this used to handle
+  //   only the first.** A verifier measured `now = -500` giving `at = -0.347`,
+  //   because `%` in JavaScript keeps the sign of the dividend — while the
+  //   comment here advertised that a bad `now` was normalised. `poseAt` clamps
+  //   a negative `at` to 0, so nothing drew wrongly; what was wrong was the
+  //   promise. Unreachable from the shell, whose `now` is
+  //   `performance.now()` — which is the reason to fix the guard rather than
+  //   trust the caller, since the next caller may not be that one.
+  const elapsed = Number.isFinite(now) && now > 0 ? now : 0;
   return Object.freeze({
     label: "Standing",
     timeline,
-    // The looping idle's own phase. Modulo of a non-finite `now` is NaN, which
-    // `poseAt` clamps to 0 — but a surface that passed one would then breathe
-    // in place forever with nothing saying why, so it is normalised here.
     at: (elapsed / timeline.durationMs) % 1
   });
 }

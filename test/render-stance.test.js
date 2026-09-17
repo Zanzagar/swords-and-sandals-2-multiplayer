@@ -37,6 +37,7 @@ import {
   stanceFamiliesCover,
   stanceLabelFor
 } from "../src/render/stance.js";
+import { SS2_PSYCHE_UP } from "../src/team/ss2-rules.js";
 import { poseAt, timelineFor } from "../src/render/timeline.js";
 
 function readRealPack(relative) {
@@ -121,6 +122,33 @@ test("`now` IS AN ARGUMENT, so the idle's phase is reachable rather than wall-cl
   assert.equal(idleFrameFor(charged(1)).at, 0);
   assert.equal(idleFrameFor(charged(1), { now: Number.NaN }).at, 0);
   assert.equal(idleFrameFor(charged(1), { now: Number.POSITIVE_INFINITY }).at, 0);
+  // ► **AND A NEGATIVE `now`, which this guard used to let straight through.**
+  //   `%` keeps the sign of the dividend, so `now = -500` gave `at = -0.347`
+  //   while the docstring promised normalisation. `poseAt` clamps it, so
+  //   nothing drew wrongly — the promise was what was broken. Found by a
+  //   verifier; unreachable from `performance.now()`, which is the reason to
+  //   fix the guard rather than to trust the caller.
+  assert.equal(idleFrameFor(charged(1), { now: -500 }).at, 0);
+  assert.equal(idleFrameFor(charged(1), { now: Number.NEGATIVE_INFINITY }).at, 0);
+});
+
+test("A CORPSE HAS NO STANCE, even one that died holding a charge", () => {
+  // ► **THE SHELL GUARDS THIS AND THAT WAS THE WHOLE DEFENCE.** `render` takes
+  //   the `!combatant.alive` branch to the death pose before it ever asks for
+  //   an idle, so a verifier had to hand-forge a dead-and-charged combatant to
+  //   expose it — and got `psyche_charging` back. One call site is not a
+  //   contract, and a glowing corpse braced for a blow is a wrong picture with
+  //   no error.
+  const deadAndCharged = { id: "hero", alive: false, resources: { [STANCE_RESOURCE]: { value: 3 } } };
+  assert.equal(stanceLabelFor(deadAndCharged), "psyche_charging2", "the counter is still readable");
+  assert.equal(idleFrameFor(deadAndCharged, { now: 0 }).label, "Standing",
+    "but the dead hold no stance");
+  // Absent `alive` is NOT dead: most of this module's callers pass a projection
+  // that always carries it, but a fixture that omits it must still pose.
+  assert.equal(idleFrameFor({ resources: { [STANCE_RESOURCE]: { value: 3 } } }, { now: 0 }).label,
+    "psyche_charging2");
+  assert.equal(idleFrameFor({ alive: true, resources: { [STANCE_RESOURCE]: { value: 3 } } }, { now: 0 }).label,
+    "psyche_charging2");
 });
 
 test("the held pose is CONSTANT, so nothing can make it drift by moving `at`", () => {
@@ -160,6 +188,41 @@ test("every stance label resolves through its own family, or the pack is ignored
     assert.equal(timelineFor(label).recognised, true);
   }
   assert.deepEqual(allStanceLabels(), ["psyche_charging", "psyche_charging2"]);
+});
+
+test("THE STANCE KEYS ARE COUPLED TO THE COUNTER, or the two drift in silence", () => {
+  // ► **NOTHING TIED THESE TWO HALVES TOGETHER AND A VERIFIER SAID SO.** The
+  //   stance table keys on 2 and 3; `SS2_PSYCHE_UP` owns the floor (1) and the
+  //   discharge point (3). Raise the floor to 2, or `dischargeAt` to 4, and
+  //   `STANCE_CLIPS` goes stale — posing an uncharged gladiator, or posing
+  //   nobody — **with all of this file's other tests still green**, because it
+  //   imported nothing from the rule set and `test/ss2-psyche-up.test.js`
+  //   imports no stance function. This is the edge that was missing.
+  //
+  //   The charged states are exactly the values strictly above the floor and at
+  //   most the discharge point: with floor 1 and dischargeAt 3, that is {2, 3}.
+  const chargedValues = [];
+  for (let value = SS2_PSYCHE_UP.floor + 1; value <= SS2_PSYCHE_UP.dischargeAt; value += 1) {
+    chargedValues.push(value);
+  }
+  assert.deepEqual([...STANCE_CLIPS.keys()], chargedValues,
+    "the stance table must key on exactly the counter's charged states");
+  // And the floor itself is never a stance, which is the other half of the same
+  // fact: a gladiator who has taken any other turn sits at the floor.
+  assert.equal(stanceLabelFor(charged(SS2_PSYCHE_UP.floor)), null);
+  assert.ok(stanceLabelFor(charged(SS2_PSYCHE_UP.dischargeAt)) !== null,
+    "a fully charged gladiator must be posed");
+});
+
+test("THE UNCHARGED SET IS {0, 1}, because the arena's own roster authors 0", () => {
+  // ► **`tools/arena/roster.js` STATES `psyche_up: 0`**, below the build's
+  //   floor of 1, and the rule set reconciles it with `Math.max(floor, stated)`
+  //   at press time rather than at authoring time — so an arena gladiator
+  //   really does hold 0 until his first press, and that press takes him
+  //   straight to 2. This module's header argued only about 1.
+  for (const value of [0, 1]) {
+    assert.equal(stanceLabelFor(charged(value)), null, `${value} is not a charge`);
+  }
 });
 
 test("A STANCE IS SILENT, and the build's own bindings are not what makes it so", () => {
@@ -254,20 +317,30 @@ test("THE GLOW RADIUS FOLLOWS THE SCALE, which is the test `filtersScaled` waite
   //   that reads two `figureEffectGroupsFor` results at two scales and asserts
   //   the radius moved."* This is that test, and the stance is what made it
   //   possible: the glow is now on a RESTING gladiator, every frame.
-  const radiiAt = (scale) => {
-    const [group] = figureEffectGroupsFor(REAL_PACK, {
-      family: "stance:psyche", label: "psyche_charging", at: 0, height: 1, scale
-    });
+  //
+  // ► **AND THE FAMILY IS WHAT SELECTS THE CLIP HERE, NOT THE LABEL** — a
+  //   verifier measured that `animationFor(pack, {family: "stance:psyche",
+  //   label: X})` resolves to `psyche_charging` for EVERY `X` it tried,
+  //   including `"Standing"`, because the family holds one clip and wins. So
+  //   passing the label proves nothing, and this test varies the FAMILY to show
+  //   the two levels really are two different glows.
+  const radiiAt = (family, scale) => {
+    const [group] = figureEffectGroupsFor(REAL_PACK, { family, at: 0, height: 1, scale });
     return [...group.filter.matchAll(/drop-shadow\(0px 0px ([\d.]+)px/g)].map((match) => Number(match[1]));
   };
-  const one = radiiAt(1);
+  // The two charge levels carry DIFFERENT radii, so a renderer that collapsed
+  // them into one clip would be visibly wrong rather than merely imprecise.
+  assert.notDeepEqual(radiiAt("stance:psyche", 1), radiiAt("stance:psyche2", 1));
+  assert.equal(radiiAt("stance:psyche", 1)[1].toFixed(4), "4.2742", "the first charge's outer glow");
+  assert.equal(radiiAt("stance:psyche2", 1)[1].toFixed(4), "2.5208", "the deeper charge's is tighter");
+  const one = radiiAt("stance:psyche", 1);
   assert.equal(one.length, 2, "the psych-up glow is two drop-shadows, inner and outer");
   // ► **LINEAR IN THE SCALE, WHICH IS WHAT "ARRIVES IN DEVICE PIXELS" MEANS.**
   //   The shell passes `(origin.size ?? 1) * view.scale`, exactly the factor its
   //   CTM carries, so a radius that tracks the argument is a radius already in
   //   the space the canvas draws in.
   for (const scale of [2, 4, 0.5]) {
-    const scaled = radiiAt(scale);
+    const scaled = radiiAt("stance:psyche", scale);
     scaled.forEach((radius, index) => {
       assert.ok(Math.abs(radius - one[index] * scale) < 1e-3,
         `radius ${index} at scale ${scale}: expected ${one[index] * scale}, got ${radius}`);
@@ -276,5 +349,5 @@ test("THE GLOW RADIUS FOLLOWS THE SCALE, which is the test `filtersScaled` waite
   // The assertion that could have varied: a radius that IGNORED the argument
   // would pass a "two scales differ" check written carelessly, so this pins
   // that they differ BY THE FACTOR.
-  assert.notEqual(radiiAt(2)[1], one[1]);
+  assert.notEqual(radiiAt("stance:psyche", 2)[1], one[1]);
 });

@@ -198,7 +198,11 @@ and the path is unreachable from Linux anyway.
 - A capture-bearing tree, holding at least one probe session directory under
   the gitignored `captures/` archive: **all tests pass, 0 skipped.** (The
   directory merely existing is not enough — it is committed, holding a manifest
-  and a README — so a tree with `captures/` and 1 skipped is CORRECT.)
+  and a README — so a tree with `captures/` and 1 skipped is CORRECT. **Nor is
+  a SESSION directory enough: it must hold an observation `.jsonl`.** This tree
+  has `captures/psyche-probe-1` and still skips 1, because that session aborted
+  before a battle and left only a `.rufflelog`. Measured 2026-09-16, after the
+  line above read as though any session directory sufficed.)
 - A working tree with `assets/` but no probe session: **1 skipped**, the
   raw-trace archive existence check. EXPECTED, not a defect.
 - **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS 9 — measured 2026-09-15,
