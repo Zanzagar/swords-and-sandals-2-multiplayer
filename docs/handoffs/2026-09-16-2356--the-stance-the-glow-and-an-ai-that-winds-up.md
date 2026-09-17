@@ -14,7 +14,8 @@ commits:      `080538a..HEAD` — `b1be7b2` (the charged stance), `ce38286` (six
               **Re-measure with `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
               the exit code are the gate. **1991 / fail 0 / skipped 1, exit 0**,
-              measured against the tree this commit leaves behind. Against 1960
+              measured against the tree the LAST commit of this session leaves
+              behind — the derivation commits changed documentation only. Against 1960
               at the start of this stretch. (It said 1984, then 1986, each time
               measured a commit too early. That is three handoffs running, so
               the fix is procedural and not a better number: write the line
