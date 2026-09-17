@@ -71,9 +71,11 @@ finding re-derived here before anything was touched.**
   of nearly every action until the next `changeCombatants`. The defensible claim
   is *the only held stance that SURVIVES A TURN BOUNDARY*.
 
-► **"REPRODUCES THE BUILD RATHER THAN APPROXIMATING IT" — REFUTED, and this is
-  the one that matters.** The build does not restore the stance when a clip
-  ends; this engine snaps to the idle at `durationMs`. See ranked item 1.
+► **"REPRODUCES THE BUILD RATHER THAN APPROXIMATING IT" — REFUTED, but by much
+  less than the verifier and I both thought.** The build does not restore the
+  stance at the instant a clip ends — it waits one enter-frame for the `struck`
+  poll. **Not the ~2 s that reached ranked item 1**; see the retraction there.
+  It remains an approximation, of about one frame.
 
 ► **`changeCombatants` RUNS ~4x A TURN, NOT ONCE** (`+0x317e`, `+0x3638`,
   `+0x365f`). `battle_action` is a phase selector, not a turn counter.
@@ -105,6 +107,11 @@ finding re-derived here before anything was touched.**
   discharge's range gate and its damage roll, and the AI spent its turns aiming
   at a foe across the arena. A Codex review found it; I had looked straight at
   the per-foe option list and reasoned past it.
+- **AND I RELAYED A VERIFIER'S NUMBER INTO A RANKED ITEM WITHOUT RE-DERIVING
+  IT.** "The build holds the last frame for ~2 s" was a conflation of the
+  `demand_move` stall watchdog with the normal `struck` poll; the real hold is
+  one enter-frame. It made item 1 of this handoff a phantom. **The rule I broke
+  is the one I put in the verifiers' own briefs.**
 - **I deleted the same dead guard twice.** Removed it on a mutation check,
   distrusted the check because my tests were all 1v1 melee, restored it on the
   review's recommendation — and only then measured: 0 of 60 attackable foes are
@@ -113,13 +120,33 @@ finding re-derived here before anything was touched.**
 
 ## Highest-value work, ranked
 
-1. **ACTION-END HOLD, and it is bigger than anything this session built.** The
-   build freezes a figure on the LAST frame of whatever it just played until the
-   next `changeCombatants`, which `nextphase` gates on `demand_move >= 60`
-   enter-frames (~2 s at 30 fps). This engine deletes the expired timeline at
-   `durationMs` and drops to the idle on the next frame. **That affects EVERY
-   action, not just charged ones** — the stance is only where it is visible, as
-   a glow arriving early. This engine has no concept of a held end-frame.
+1. ~~**ACTION-END HOLD, and it is bigger than anything this session built.** The
+   build freezes a figure on the LAST frame until the next `changeCombatants`,
+   which `nextphase` gates on `demand_move >= 60` enter-frames (~2 s at 30
+   fps).~~ **WRONG, AND IT WAS WRONG THE MOMENT I WROTE IT — RE-DERIVED
+   2026-09-17 AND THE ITEM IS ESSENTIALLY CLOSED.** I took the ~2 s from a
+   verifier and did not re-derive it, which is the one rule I put in their own
+   briefs.
+
+   **The build's hold is ONE ENTER-FRAME, about 33 ms.** The chain: a clip's
+   last frame runs `this.struck = true; stop()`; the fighter's `onEnterFrame`
+   polls `attacker.struck != null` (`+0x5025`), and on the very next frame
+   clears it and calls `nextphase()` (`+0x5121`-`+0x513d`), which calls
+   `changeCombatants` and re-poses. **`demand_move` is a STALL WATCHDOG, not
+   the normal path**: `>= 60` fires only when the attacker has also landed
+   (`_y >= grounded`) and no bullet is in flight, and `>= 200` is the harder
+   backstop — both exist for animations that never report at all.
+
+   So the engine dropping to the idle at `durationMs` is within a frame of what
+   the build does, and there is no meaningful gap. **What survives is
+   cosmetic**, and was already recorded: the build RESTARTS the `Standing` loop
+   from frame 2 at every `changeCombatants` (`gotoAndPlay`, not `gotoAndStop`),
+   while this engine's idle phase free-runs off `performance.now()`.
+
+   **The real lesson is the one about me**: the previous handoff's own hard
+   rules already said a mutation check only proves what the tests reach, and
+   AGENTS.md says never relay a number you have not re-derived. I relayed one
+   into a ranked item and it displaced the genuine next piece of work for a day.
 
 2. **A VICTORY IDLE.** A surviving winner loops `celebrate1a` FOREVER in the
    build (overlay frame 65/77 -> `celebrate1` -> self-loop at 1426, overlay then

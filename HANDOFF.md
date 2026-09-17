@@ -80,10 +80,21 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     self-loop, so the figure parks on the terminal frame of nearly every action
     until the next `changeCombatants`. The true claim is **the only held stance
     that SURVIVES A TURN BOUNDARY**.
-  ► **"REPRODUCES THE BUILD RATHER THAN APPROXIMATING IT" IS FALSE, and it is
-    now ranked item 1.** The build does not restore the stance when a clip ends;
-    this engine snaps to the idle at `durationMs`, so it glows EARLIER than the
-    build. **Action-end hold affects every action this engine plays.**
+  ► **"REPRODUCES THE BUILD RATHER THAN APPROXIMATING IT" IS FALSE — BUT BY ONE
+    FRAME, NOT BY TWO SECONDS, AND I GOT THAT WRONG IN THE HANDOFF.** The
+    verifier said the build holds a figure's last frame until `changeCombatants`
+    and that `nextphase` gates that on `demand_move >= 60` enter-frames. I
+    relayed it into a ranked item without re-deriving it. **Re-derived
+    2026-09-17: the hold is ONE ENTER-FRAME, about 33 ms.** A clip's last frame
+    runs `this.struck = true; stop()`; the fighter's `onEnterFrame` polls
+    `attacker.struck != null` (`+0x5025`) and on the next frame clears it and
+    calls `nextphase()` (`+0x5121`-`+0x513d`). **`demand_move` is a STALL
+    WATCHDOG** — `>= 60` also requires `_y >= grounded` and no bullet in
+    flight, `>= 200` is the backstop — for animations that never report.
+    **So there is no meaningful action-end gap**; what survives is that the
+    build restarts the `Standing` loop at every `changeCombatants` while this
+    engine's idle phase free-runs. **Never relay a number you have not
+    re-derived — it displaced the genuine next item for a day.**
   ► **`changeCombatants` RUNS ~4x A TURN, NOT ONCE** — `+0x317e` (top level,
     every `heroactions` entry), `+0x3638` (every phase advance), `+0x365f` (turn
     end). `battle_action` is a phase selector.
