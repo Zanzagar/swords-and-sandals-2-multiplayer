@@ -78,6 +78,8 @@ export * from "./painter.js";
 export * from "./timeline.js";
 export * from "./sound.js";
 export * from "./clip-labels.js";
+export * from "./clip-sequences.js";
+export * from "./stance.js";
 export * from "./extracted-figure.js";
 export * from "./projectile.js";
 export * from "./props.js";

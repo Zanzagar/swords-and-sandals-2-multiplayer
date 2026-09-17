@@ -128,8 +128,20 @@ test("the run-member list is DERIVED from the runs, so the two cannot drift", ()
   assert.ok(clipLabelsFor("hurt").includes("hurt9"), "hurt9 is a family label AND a run member");
   assert.ok(clipLabelsFor("knockback").includes("knockback_mov"));
   const unplayable = new Set(allUnmappedLabels());
-  assert.ok(unplayable.has("psyche_charging"), "the stance is the build's; this engine dispatches no label for it");
   assert.equal(unplayable.has("hurt9"), false);
+  // ► ~~the stance is the build's; this engine dispatches no label for it~~
+  //   **BUILT the same day, and this line is why the list is derived.** The
+  //   charging clips are `stance:psyche` and `stance:psyche2` now, so they are
+  //   PLAYED families as well as run members — the second of the two labels
+  //   this list holds that `clip-labels.js` also names, and the reason the two
+  //   questions had to be separated in the first place.
+  assert.equal(unplayable.has("psyche_charging"), false, "the stance family plays it");
+  assert.ok(clipLabelsFor("stance:psyche").includes("psyche_charging"));
+  assert.ok(clipLabelsFor("stance:psyche2").includes("psyche_charging2"));
+  // **Only two of the six are named by nothing at all**, which is what the
+  // `continuations` bucket was always reaching for.
+  assert.deepEqual([...allUnmappedLabels()].filter((label) => CONTINUATION_LABELS.includes(label)).sort(),
+    ["celebrate1a", "flame_repeat"]);
 });
 
 /* ------------------------------------------------------------------ *

@@ -24,6 +24,7 @@
 
 import { clipLabelsFor } from "./clip-labels.js";
 import { clipSequenceFor } from "./clip-sequences.js";
+import { isStanceFamily } from "./stance.js";
 
 export class SoundError extends Error {
   constructor(message) {
@@ -67,6 +68,16 @@ export function soundLabelsFor(family) {
   // A looping idle is deliberately silent: a sound on a loop never stops. That
   // is a policy about SOUND and so it lives here, not in the shared vocabulary.
   if (family === "standing") return [];
+  // ► **AND SO IS A HELD STANCE, FOR THE SAME REASON AND A SECOND ONE.** A
+  //   charged gladiator rests in `psyche_charging` for as long as the charge
+  //   lasts, which is the `standing` argument exactly; and the sound of psyching
+  //   up has ALREADY PLAYED, on the `psyche_up` action that set the counter.
+  //   Sounding the stance would replay it every time the figure came to rest.
+  //
+  //   Both charging clips carry no `StartSound` anyway, so this changes nothing
+  //   on the shipped build — which is the point of writing it down rather than
+  //   relying on it. It would change the day someone bound one.
+  if (isStanceFamily(family)) return [];
   return clipLabelsFor(family);
 }
 

@@ -2197,20 +2197,24 @@ test("the hoisted origin transform is the OLD per-operation one, exactly", () =>
 });
 
 test("the figure's route divides no twips, and filtersScaled is a COUNTER rather than a picture", () => {
-  assert.deepEqual(FIGURE.figureRouteFor(), { translationDivisor: 1, filtersScaled: false });
+  // ► **`filtersScaled` FLIPPED TO `true` ON 2026-09-16, on the condition its
+  //   own comment set.** It was `false` because nothing in this repository
+  //   could observe a figure filter string, so `true` would have been an
+  //   assertion no test could go red on. The charged stance made one
+  //   observable — a gladiator holding a psych-up charge rests in
+  //   `psyche_charging`, which carries the cyan glow — and the radius was then
+  //   measured at three scales and is linear. See `test/render-stance.test.js`.
+  assert.deepEqual(FIGURE.figureRouteFor(), { translationDivisor: 1, filtersScaled: true });
 
-  // ► **WHAT `filtersScaled` ACTUALLY DOES, MEASURED — BECAUSE THE CHOICE IS
-  //   ONLY DEFENSIBLE IF THIS IS TRUE.** The route's flag is read in exactly one
-  //   place, `groupPaint.filterAtStageScale += ...`, so `false` while the radii
-  //   ARE scaled over-reports an approximation and `true` while they are NOT
-  //   under-reports one. Neither changes a pixel: the same buffer, the same
-  //   region, the same filter string, the same composite. That asymmetry — loud
-  //   and harmless versus quiet and harmless — is why the conservative value is
-  //   the right interim one while the shell hands the painter a `scale` no test
-  //   can yet watch being used.
+  // ► **WHAT `filtersScaled` ACTUALLY DOES, MEASURED — BECAUSE THE FLIP IS ONLY
+  //   SAFE IF THIS IS TRUE.** The route's flag is read in exactly one place,
+  //   `groupPaint.filterAtStageScale += ...`, so it moves an honesty counter and
+  //   nothing else. Neither value changes a pixel: the same buffer, the same
+  //   region, the same filter string, the same composite.
   //
   //   If this ever goes red, `filtersScaled` has grown teeth and the comment on
-  //   `figureRouteFor` is wrong about the cost of getting it backwards.
+  //   `figureRouteFor` is wrong about the cost of getting it backwards — which
+  //   would matter more now that the flag is no longer the conservative one.
   const group = groupRecord({ id: 0, filter: "drop-shadow(0px 0px 10px #000066)" });
   const ops = [{ kind: "path", d: "M0 0L40 0L40 40L0 40Z", matrix: [1, 0, 0, 1, 200, 200], strokeWidth: 0, group }];
   const shots = {};
@@ -2261,8 +2265,15 @@ test("a real weapon glow is composited AT THE WEAPON, which the identity transfo
     regions[label] = { x: args[4], y: args[5], width: args[6], height: args[7] };
     assert.equal(harness.groupPaint.buffers, 1);
     assert.equal(harness.groupPaint.bufferedOps, weapon.length, "every weapon operation went into the buffer");
-    assert.equal(harness.groupPaint.filterAtStageScale, weapon.length,
-      "and the route says out loud that the radius is not in device pixels");
+    // ► **THIS ASSERTED `weapon.length` UNTIL 2026-09-16**, because
+    //   `figureRouteFor()` said `filtersScaled: false` — "the radius is not in
+    //   device pixels", counted out loud. It says `true` now, on the condition
+    //   its own comment set: the charged stance made a figure group observable
+    //   and the radius was measured linear in `scale` at three values. So the
+    //   honest count is ZERO approximations, and a regression to the old flag
+    //   turns this red rather than quietly re-admitting one.
+    assert.equal(harness.groupPaint.filterAtStageScale, 0,
+      "the shell hands the painter its own scale, so no figure radius is approximated");
   }
 
   // Where the weapon actually IS on the canvas, worked out here with plain

@@ -238,6 +238,14 @@ function familyOf(label, role) {
   //   it a recognised schedule is how a guess stops looking like one.
   if (label === "psyche_up" || label === "psyche_up2") return "psyche";
   if (label === "psyche_up3") return "psyche:discharge";
+  // ► **THE HELD STANCE, AND IT IS THE ONLY IDLE HERE THAT IS NOT `Standing`.**
+  //   `changeCombatants` poses a charged gladiator with `gotoAndStop`, so these
+  //   two labels name a FRAME the figure rests on between actions rather than
+  //   an animation it performs. Matched by exact name for the reason the
+  //   `psyche` pair above is: a `/^psyche/` pattern would have swallowed them
+  //   into the performance family, which is where they do not belong.
+  if (label === "psyche_charging") return "stance:psyche";
+  if (label === "psyche_charging2") return "stance:psyche2";
   if (/^attack\d+$/.test(label)) return "attack";
   if (/^hurt\d+$/.test(label)) return "hurt";
   // ► **`defendN` IS ITS OWN FAMILY AND NOT `block`.** A miss dispatches
@@ -422,6 +430,37 @@ const FAMILIES = Object.freeze({
     { at: 0.8, pose: { armSwing: 0.5, lean: 0.35, legSpread: 0.45, advance: 0.2 } },
     { at: 1, pose: {} }
   ]),
+
+  /**
+   * THE CHARGED STANCE — a gladiator holding a psych-up charge, between
+   * actions.
+   *
+   * ► **IT IS A HELD FRAME AND THE SCHEDULE SAYS SO IN THREE WAYS**: one
+   *   keyframe, so every `at` interpolates to the same pose; `loop: true`, so
+   *   nothing treats it as a performance that ends and hands back; and
+   *   `src/render/stance.js` holds `at` at 0 so the extracted rig shows
+   *   `psyche_charging`'s FIRST frame, which is where `gotoAndStop` leaves the
+   *   playhead. Any one of the three alone would let the stance drift into
+   *   looking like an animation.
+   *
+   * ► **THE DURATION IS NOT A DURATION.** A held pose has none; the build holds
+   *   it until the counter changes. One beat is the smallest value that keeps
+   *   `poseAt`'s arithmetic and the shell's `% durationMs` from dividing by
+   *   zero, and nothing reads it as a length.
+   *
+   * ► **AND THE AUTHORED POSE IS THE ONLY PART OF THIS A CLONE WITH NO PACK
+   *   SEES.** With the extraction present the build's own frame is drawn and
+   *   these numbers never show. The read wanted is BRACED — weight down and
+   *   forward, arms drawn in, not the neutral stand.
+   */
+  "stance:psyche": () => schedule("stance:psyche", 1, [
+    { at: 0, pose: { bob: -0.12, lean: 0.18, legSpread: 0.3, armSwing: -0.35 } }
+  ], { loop: true }),
+
+  /** The deeper charge: lower, wider, wound further in. */
+  "stance:psyche2": () => schedule("stance:psyche2", 1, [
+    { at: 0, pose: { bob: -0.22, lean: 0.3, legSpread: 0.5, armSwing: -0.6, weaponAngle: -0.12 } }
+  ], { loop: true }),
 
   taunt: () => schedule("taunt", 10, [
     { at: 0, pose: {} },

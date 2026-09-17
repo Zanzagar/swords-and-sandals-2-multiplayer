@@ -655,12 +655,20 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   //   `knockback`, which has no terminating action of its own. So this engine
   //   had been drawing the second half of a knockback and never the first.
   //
-  //   The four `continuations` stay declared unplayed and the word now means
-  //   UNDISPATCHED: `clip-sequences.js` plays all four, as the tail of a run.
+  //   ~~The four `continuations` stay declared unplayed and the word now means
+  //   UNDISPATCHED: `clip-sequences.js` plays all four, as the tail of a run.~~
+  //   **AND 77/24 -> 79/22 LATER THE SAME DAY, over the two `psyche_charging*`
+  //   clips, which are not undispatched either.** `changeCombatants` names both
+  //   with `gotoAndStop` — `+0x281e` and `+0x284d` for the attacker, `+0x287c`
+  //   and `+0x28ab` for the defender — to hold a charged gladiator in the
+  //   charged pose instead of `Standing`. They are the `stance:psyche*`
+  //   families now. **Two labels are left in `continuations`, and they are the
+  //   only two of the six run members that nothing anywhere names.**
   const families = [
     "standing", "rest", "block", "defend",
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
     "attack", "hurt", "knockback", "taunt", "taunted", "ranged", "psyche",
+    "stance:psyche", "stance:psyche2",
     "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
     "death:unknown"
   ];
@@ -671,8 +679,8 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   const both = [...mapped].filter((label) => declared.has(label));
   assert.deepEqual(both, [], "a label cannot be both played and declared unplayed");
 
-  assert.equal(mapped.size, 77);
-  assert.equal(declared.size, 24);
+  assert.equal(mapped.size, 79);
+  assert.equal(declared.size, 22);
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
   // ► **THE ENTRY IS FIRST IN ITS FAMILY, and the order is what `animationFor`
@@ -861,10 +869,11 @@ test("ALL TWELVE EFFECT GROUPS REACH A GLADIATOR NOW, and two of them only via a
   //   sound fires on the continuation. Silence never said where the playhead
   //   stops. `tools/clip-sequences.mjs` reads that from the frame actions.
   //
-  //   **So all twelve groups reach a gladiator**, and the two that used to be
-  //   stranded are reached the way the build reaches them — by running on,
-  //   never by being dispatched, which is why both labels are still declared
-  //   undispatched below.
+  //   **So all twelve groups reach a gladiator** — the two that used to be
+  //   stranded by running on, and, since the stance landed hours later, by
+  //   being HELD as well: a gladiator carrying a charge stands in
+  //   `psyche_charging` and glows while he does it. That second route is why
+  //   both labels stopped being declared undispatched.
   //
   //   **Measured from the pack rather than asserted: 12 group entries, 10 on
   //   the two clips dispatched directly (1 on `psyche_up`, 9 on `psyche_up2`)
@@ -874,9 +883,14 @@ test("ALL TWELVE EFFECT GROUPS REACH A GLADIATOR NOW, and two of them only via a
     assert.equal(declared.has(label), false,
       `${label} is still declared unplayed, but the psyche family dispatches it`);
   }
+  // ► ~~`psyche_charging*` must stay declared unplayed, because nothing
+  //   dispatches them.~~ **REFUTED BY A VERIFIER, THEN BUILT.**
+  //   `changeCombatants` dispatches both with `gotoAndStop` to hold a charged
+  //   gladiator's resting pose, so they are the `stance:psyche*` families and
+  //   this assertion is now its own inverse.
   for (const label of ["psyche_charging", "psyche_charging2"]) {
-    assert.ok(declared.has(label),
-      `${label} is a continuation and nothing dispatches it, so it must stay declared unplayed`);
+    assert.equal(declared.has(label), false,
+      `${label} is the charged stance now, so it must not be declared unplayed`);
   }
   if (!REAL_ANIMATIONS) return;
   // And they really are the only carriers, recomputed from the pack.

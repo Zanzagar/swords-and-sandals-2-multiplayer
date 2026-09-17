@@ -70,6 +70,7 @@ import {
   viewportFor,
   rosterOrderOf,
   poseAt,
+  idleFrameFor,
   timelineFor,
   timelinesForStep,
   bindingsFrom,
@@ -1086,36 +1087,41 @@ function opSpaceRunsOf(ops) {
  *   straight to `context.transform` with no twips divisor, so the box has to be
  *   measured the same way. `paintArenaLayer` is the 20; `paintProp` is the
  *   other 1.
- * - `filtersScaled: false` — **and this is a CLAIM ABOUT ANOTHER MODULE, so it
- *   is the conservative one, and it is deliberately BEHIND the call site.**
- *   `render` now passes `scale: (origin.size ?? 1) * view.scale` to
- *   `paintExtractedFigure`, which is exactly the factor the CTM carries — so
- *   the radii SHOULD arrive in device pixels and this should be `true`.
+ * - `filtersScaled: true` — **FLIPPED 2026-09-16, ON THE CONDITION THIS
+ *   PARAGRAPH SET ITSELF.** `render` passes `scale: (origin.size ?? 1) *
+ *   view.scale` to `paintExtractedFigure`, which is exactly the factor the CTM
+ *   carries, so the radii arrive in device pixels.
  *
- *   It is not, yet, because nothing can watch it be used. Measured on this tree
- *   2026-09-15: `figureEffectGroupsFor` returns ZERO group records for every
- *   psyche label at every `at`, so there is no figure filter string in this
- *   repository to read at two scales and compare, and `filtersScaled: true`
- *   would be an assertion no test could go red on.
+ *   ► **It said `false` until a figure group could be OBSERVED**, and its own
+ *     instruction was: *"Flip it in the commit that makes a figure group
+ *     observable, beside a test that reads two `figureEffectGroupsFor` results
+ *     at two scales and asserts the radius moved."* The charged stance is that
+ *     commit. A gladiator holding a psych-up charge rests in `psyche_charging`,
+ *     which carries the cyan glow, so `figureEffectGroupsFor` returns a record
+ *     with a real filter string on an ordinary idle frame — the first figure
+ *     group in this repository that anything draws. Measured there: the radius
+ *     is 4.2742px at `scale` 1, 8.5483px at 2 and 17.0967px at 4, exactly
+ *     linear, and that test is in `test/render-stance.test.js`.
  *
- * ► **AND THE COST OF BEING WRONG EITHER WAY IS ONE COUNTER, WHICH IS WHY THIS
- *   IS SAFE TO LEAVE CONSERVATIVE.** `paintGroupRuns` reads the flag in exactly
- *   one place — `groupPaint.filterAtStageScale += run.to - run.from` — and
- *   nowhere else. The buffer, the region, the bleed and the composite are
- *   identical whichever way it is set; `test/render-arena-shell.test.js`
- *   asserts that, because the argument depends on it. So `false` over-reports
- *   an approximation and `true` under-reports one, and over-reporting is the
- *   half this file's history says to take.
+ *   ► **The old reason for `false` was sound and is spent**, and it is worth
+ *     keeping the shape of it: the claim was about ANOTHER module, nothing
+ *     could watch it be used, and `true` would have been an assertion no test
+ *     could go red on. What changed is not the claim but the observability.
  *
- *   **Flip it in the commit that makes a figure group observable**, beside a
- *   test that reads two `figureEffectGroupsFor` results at two scales and
- *   asserts the radius moved.
+ * ► **AND THE COST OF BEING WRONG EITHER WAY IS ONE COUNTER.**
+ *   `paintGroupRuns` reads the flag in exactly one place —
+ *   `groupPaint.filterAtStageScale += run.to - run.from` — and nowhere else.
+ *   The buffer, the region, the bleed and the composite are identical whichever
+ *   way it is set; `test/render-arena-shell.test.js` asserts that, because the
+ *   argument depended on it and still does. So this flip moves an honesty
+ *   counter from over-reporting an approximation to reporting none, and it
+ *   moves no pixel.
  *
  * A function rather than a bare `const` so that the test can LIFT it and assert
  * the values, instead of matching the source text and going green on a comment.
  */
 function figureRouteFor() {
-  return { translationDivisor: 1, filtersScaled: false };
+  return { translationDivisor: 1, filtersScaled: true };
 }
 
 /**
@@ -3295,8 +3301,16 @@ function renderStage(view, fit, now) {
       drawnAt = 1;
       pose = poseAt(drawnTimeline, 1);
     } else {
-      drawnTimeline = timelineFor("Standing", { role: "actor" });
-      drawnAt = (now / drawnTimeline.durationMs) % 1;
+      // ► **THE IDLE IS NOT ALWAYS `Standing`, and this used to assume it was.**
+      //   A gladiator holding a psych-up charge stands in the charged pose —
+      //   `changeCombatants` overrides its own `Standing` reset with
+      //   `gotoAndStop("psyche_charging")` at counter 2 and `psyche_charging2`
+      //   at 3. The branch and the clock both live in `src/render/stance.js`
+      //   now, so the whole decision is somewhere the suite can call it; this
+      //   site asks one question and draws the answer.
+      const idle = idleFrameFor(combatant, { now });
+      drawnTimeline = idle.timeline;
+      drawnAt = idle.at;
       pose = poseAt(drawnTimeline, drawnAt);
     }
 
@@ -3365,13 +3379,14 @@ function renderStage(view, fit, now) {
       //   would have on an unzoomed 640x420 stage, which on this canvas is
       //   between two and four times too narrow.
       //
-      // ► **AND `figureRouteFor()` STILL SAYS `filtersScaled: false`, WHICH IS
-      //   DELIBERATE AND IS THE THING TO CLOSE NEXT.** Measured on this tree
-      //   2026-09-15: `figureEffectGroupsFor` returns ZERO group records for
-      //   every psyche label at every `at`, so nothing in this repository can
-      //   observe a figure filter string yet and "the radius is now in device
-      //   pixels" is a claim no test could go red on. Flipping the route is one
-      //   line, and it belongs in the commit that makes that test possible.
+      // ► ~~AND `figureRouteFor()` STILL SAYS `filtersScaled: false` ... nothing
+      //   in this repository can observe a figure filter string yet.~~
+      //   **CLOSED 2026-09-16 BY THE CHARGED STANCE.** A gladiator holding a
+      //   charge rests in `psyche_charging`, which carries the cyan glow, so a
+      //   figure group with a real filter string is now drawn on an ordinary
+      //   idle frame. The radius was measured at three scales and is linear,
+      //   `figureRouteFor()` says `filtersScaled: true`, and
+      //   `test/render-stance.test.js` is the test that could not exist.
       scale: (origin.size ?? 1) * view.scale
     };
     const extracted = hasExtractedArt(figurePack)

@@ -104,6 +104,44 @@ const FAMILY_LABELS = Object.freeze({
   //     not belong in a family or in `clip-sequences.js`; it is its own piece
   //     of work and the handoff ranks it.
   psyche: Object.freeze(["psyche_up", "psyche_up2", "psyche_up3"]),
+
+  /**
+   * THE CHARGED STANCE — the only families here that are an IDLE rather than an
+   * action, and the only ones nothing dispatches by name.
+   *
+   * ► **A GLADIATOR HOLDING A CHARGE DOES NOT STAND IN `Standing`.**
+   *   `changeCombatants` resets both fighters with `gotoAndPlay("Standing")`
+   *   and then overrides whichever of them holds a charge:
+   *
+   *   ```text
+   *     attacker.gotoAndPlay("Standing")                             +0x27db
+   *     defender.gotoAndPlay("Standing")                             +0x27ef
+   *     if (game_attacker.psyche_up == 2)
+   *         attacker.gotoAndStop("psyche_charging")                  +0x281e
+   *     if (game_attacker.psyche_up == 3)
+   *         attacker.gotoAndStop("psyche_charging2")                 +0x284d
+   *     if (game_defender.psyche_up == 2)
+   *         defender.gotoAndStop("psyche_charging")                  +0x287c
+   *     if (game_defender.psyche_up == 3)
+   *         defender.gotoAndStop("psyche_charging2")                 +0x28ab
+   *   ```
+   *
+   *   `gotoAndStop`, so it is ONE HELD FRAME and not a performance — which is
+   *   why these are separate families from `psyche` above and why
+   *   `src/render/stance.js` holds them at `at` 0 rather than running a clock.
+   *
+   * ► **TWO FAMILIES AND NOT ONE, for the reason `psyche:discharge` is its own
+   *   family**: the two poses are different frames and should not read alike.
+   *   A pack-less clone gets an authored pose per level, and a deeper charge
+   *   reads deeper.
+   *
+   * ► **AND THIS IS WHERE THE TWO CONTINUATIONS STOPPED BEING UNDISPATCHED.**
+   *   They were in `UNMAPPED_CLIP_LABELS.continuations` on the grounds that
+   *   nothing named them; `changeCombatants` names both, four times, and had
+   *   done since the build shipped.
+   */
+  "stance:psyche": Object.freeze(["psyche_charging"]),
+  "stance:psyche2": Object.freeze(["psyche_charging2"]),
   // ► **`hurt8` WAS MISSING, AND IT WAS MISSING FOR THE `block` REASON.** The
   //   clip carries `hurt1`-`hurt12` and `hurt20`, thirteen animations, and this
   //   list held twelve. The one it dropped is the one the build binds NO SOUND
@@ -249,8 +287,16 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    *   `hurt8`, `knockback` and `celebrate1`, which ARE entry points, are silent
    *   too, because their sound fires on the continuation. Silence says nothing
    *   about where the playhead stops. The frame actions say it outright.
+   *
+   * ► **`psyche_charging` AND `psyche_charging2` LEFT THIS LIST, because the
+   *   claim that put them here turned out to be false in BOTH directions.**
+   *   They are run members, which this list was right about; they are also
+   *   DISPATCHED, by `changeCombatants`'s four `gotoAndStop` calls, which it
+   *   was not. They are the `stance:psyche*` families above now. **Two labels
+   *   remain, and they are the only two of the six run members that nothing
+   *   anywhere names** — which is what this bucket was always trying to say.
    */
-  continuations: Object.freeze(["celebrate1a", "flame_repeat", "psyche_charging", "psyche_charging2"]),
+  continuations: Object.freeze(["celebrate1a", "flame_repeat"]),
 
   /**
    * ► ~~**THE BUILD HAS A DEFENCE SYSTEM THIS ENGINE HAS NOT BUILT.**~~

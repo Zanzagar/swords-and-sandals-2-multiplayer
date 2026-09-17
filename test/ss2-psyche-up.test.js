@@ -413,18 +413,26 @@ test("all three clips are PLAYED, and both continuations are deliberately not", 
   assert.equal(new Set(lengths).size, 3, "three clips, three lengths, or one schedule is doing all three");
   assert.ok(timelineFor("psyche_up").durationMs > timelineFor("psyche_up3").durationMs,
     "a charge runs on into psyche_charging, so it outlasts the discharge");
-  // The continuations are matched by exact name, never by a /^psyche/ pattern.
-  // ► **AND `recognised: false` IS STILL RIGHT, FOR A NARROWER REASON THAN THE
-  //   ONE THIS LINE USED TO GIVE.** It said "nothing dispatches a
-  //   continuation". **The BUILD does** — `changeCombatants` calls
-  //   `gotoAndStop("psyche_charging")` on whichever fighter holds a counter of
-  //   2, and `psyche_charging2` at 3, for both attacker and defender
-  //   (`+0x281e`, `+0x284d`, `+0x287c`, `+0x28ab`). That is a held STANCE and
-  //   not a schedule, and THIS engine has no stance: no command it emits ever
-  //   carries the label, so a timeline for it would still be a promise nothing
-  //   here redeems. The stance is named in the handoff as its own work.
-  assert.equal(timelineFor("psyche_charging").recognised, false,
-    "this engine never dispatches the label, so a schedule for it would promise what nothing reaches");
+  // The continuations are matched by exact name, never by a /^psyche/ pattern —
+  // and that matters MORE now, not less: they resolve to their own families and
+  // a `/^psyche/` rule would fold the stance into the performance.
+  //
+  // ► ~~`recognised: false` — nothing dispatches a continuation, so a schedule
+  //   would promise what cannot be reached.~~ **BOTH HALVES WERE WRONG AND
+  //   EACH WAS CORRECTED BY A DIFFERENT THING.** A verifier broke the premise
+  //   (`changeCombatants` dispatches both with `gotoAndStop`, `+0x281e`,
+  //   `+0x284d`, `+0x287c`, `+0x28ab`), and then the stance was built on it, so
+  //   this engine reaches the label too. The schedule promises a HELD FRAME
+  //   now, and `src/render/stance.js` redeems it every frame a charged
+  //   gladiator is at rest.
+  assert.equal(timelineFor("psyche_charging").family, "stance:psyche");
+  assert.equal(timelineFor("psyche_charging2").family, "stance:psyche2");
+  assert.equal(timelineFor("psyche_charging").recognised, true,
+    "the charged stance holds this label, so it must have a schedule of its own");
+  // ► **AND IT MUST NOT BE THE PERFORMANCE FAMILY.** A stance is one held
+  //   frame; folding it into `psyche` would give a resting gladiator the
+  //   charge's nine-frame animation on a loop.
+  assert.notEqual(timelineFor("psyche_charging").family, timelineFor("psyche_up").family);
 });
 
 test("A CHARGE RUNS ON INTO ITS CONTINUATION, and the glow's pulse is what proves it", () => {
