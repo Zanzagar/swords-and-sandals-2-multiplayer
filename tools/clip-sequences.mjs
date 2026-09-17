@@ -152,7 +152,21 @@ export function terminatorsIn(block) {
         else if (type === 3) { stack.push(OTHER); }
         else if (type === 4) { stack.push(OTHER); at += 1; }
         else if (type === 5) { stack.push(Boolean(block[at])); at += 1; }
-        else if (type === 6) { stack.push(block.readDoubleLE(at)); at += 8; }
+        // ► **A PUSHED DOUBLE IS NOT AN ORDINARY LITTLE-ENDIAN DOUBLE.**
+        //   ActionPush type 6 stores its two 32-bit words SWAPPED, so a bare
+        //   `readDoubleLE` turns an argument count of 1 into 5e-324-ish noise:
+        //   `CallMethod` then consumes zero arguments and reports a perfectly
+        //   ordinary `this.gotoAndPlay("Standing")` as `goto:computed`.
+        //   `tools/inspect-swf.mjs` has always reordered them; this did not,
+        //   and an adversarial review of `67dfc01` reproduced it. The fighter
+        //   clip happens to push its argument counts as type 7 int32, so the
+        //   seven runs were right anyway — which is exactly how a decoder bug
+        //   survives a green table.
+        else if (type === 6) {
+          const reordered = Buffer.concat([block.subarray(at + 4, at + 8), block.subarray(at, at + 4)]);
+          stack.push(reordered.readDoubleLE(0));
+          at += 8;
+        }
         else if (type === 7) { stack.push(block.readInt32LE(at)); at += 4; }
         else if (type === 8) { stack.push(pool[block[at]]); at += 1; }
         else if (type === 9) { stack.push(pool[block.readUInt16LE(at)]); at += 2; }

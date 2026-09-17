@@ -407,6 +407,47 @@ test("the hand-derived repeat SAYS it is hand-derived, at the field", () => {
   assert.equal(clipSequenceFor("burning").filter((label) => label === "flame_repeat").length, 2);
 });
 
+test("A DOUBLE ARGUMENT COUNT DECODES, because a pushed double has its words SWAPPED", () => {
+  // ► **AN ADVERSARIAL CODEX REVIEW OF `67dfc01` REPRODUCED THIS AND NOTHING
+  //   COVERED IT.** ActionPush type 6 stores the two 32-bit words of its double
+  //   the wrong way round; a bare `readDoubleLE` turns an argument count of 1
+  //   into a denormal, `CallMethod` consumes zero arguments, and a perfectly
+  //   ordinary `this.gotoAndPlay("Standing")` comes back as `goto:computed`.
+  //
+  //   **The seven runs were right anyway**, because the fighter clip pushes its
+  //   argument counts as type 7 int32 — which is how a decoder bug survives a
+  //   table that reproduces. The regression is the point, not the table.
+  const pool = (...strings) => {
+    const body = Buffer.concat(strings.map((text) => Buffer.from(`${text}\0`, "utf8")));
+    const head = Buffer.alloc(5);
+    head.writeUInt8(0x88, 0);
+    head.writeUInt16LE(body.length + 2, 1);
+    head.writeUInt16LE(strings.length, 3);
+    return Buffer.concat([head, body]);
+  };
+  const push = (...operands) => {
+    const body = Buffer.concat(operands);
+    const head = Buffer.alloc(3);
+    head.writeUInt8(0x96, 0);
+    head.writeUInt16LE(body.length, 1);
+    return Buffer.concat([head, body]);
+  };
+  const constant = (index) => Buffer.from([0x08, index]);
+  const double = (value) => {
+    const plain = Buffer.alloc(8);
+    plain.writeDoubleLE(value, 0);
+    // Written the way the format stores it: high word first.
+    return Buffer.concat([Buffer.from([0x06]), plain.subarray(4, 8), plain.subarray(0, 4)]);
+  };
+  const block = Buffer.concat([
+    pool("Standing", "this", "gotoAndPlay"),
+    push(constant(0), double(1), constant(1)), Buffer.from([0x1c]),
+    push(constant(2)), Buffer.from([0x52])
+  ]);
+  assert.deepEqual(terminatorsIn(block), [{ kind: "goto", target: "Standing" }],
+    "an argc pushed as a double must still be read as 1, or the target is lost");
+});
+
 test("`Stop` and `GotoLabel` are terminators, and the plain opcodes still decode", () => {
   assert.deepEqual(terminatorsIn(Buffer.from([0x07])), [{ kind: "stop" }]);
   const gotoLabel = Buffer.concat([

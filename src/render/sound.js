@@ -23,6 +23,7 @@
  */
 
 import { clipLabelsFor } from "./clip-labels.js";
+import { clipSequenceFor } from "./clip-sequences.js";
 
 export class SoundError extends Error {
   constructor(message) {
@@ -129,9 +130,36 @@ export function chooseSound(bindings, family, sequence, label = null) {
       const index = Number.isFinite(sequence) ? Math.abs(Math.trunc(sequence)) % bound.length : 0;
       return bound[index];
     }
-    // A label the build binds NO sound to is SILENT, and that is an answer.
-    // Falling through to the family bucket here would lend `hurt8` a noise
-    // from `hurt1` — the precise conflation `clip-labels.js` exists to stop.
+    // ► **AN UNBOUND ENTRY IS NOT SILENT IF ITS RUN CARRIES A SOUND, and this
+    //   engine said it was for three days.** The rule below is still right and
+    //   is untouched: falling through to the FAMILY bucket would lend `hurt8` a
+    //   noise from `hurt1`, which is the conflation `clip-labels.js` exists to
+    //   stop. But a run's continuation is not a family sibling — the build
+    //   PLAYS it, in the same performance, and its `StartSound` fires. Direction
+    //   8 dispatches `hurt8`, which carries no binding, runs on into `hurt9` at
+    //   frame 1266 and sounds `1183.mp3`. **So "the build's direction-8 hurt is
+    //   silent" was false**, and this file had written it down twice.
+    //
+    //   Found by an adversarial Codex review of `67dfc01`, which caught it as a
+    //   REGRESSION it had just introduced — adding `knockback` to its own
+    //   family turned a knockback silent, because the entry has no binding and
+    //   `knockback_mov` at frame 1440 has `1104.mp3`. Re-derived here: the same
+    //   hole was already open on `hurt8` and nobody had heard it.
+    //
+    // ► **WHAT THIS DOES NOT DO IS TIME IT.** The build starts the sound 17
+    //   frames into a 34-frame hurt and 7 into a 19-frame knockback; this
+    //   returns ONE file for the action and the shell plays it at the start.
+    //   The vocabulary has nowhere to put an offset, and inventing one is a
+    //   change to the command stream rather than to this policy.
+    for (const member of clipSequenceFor(own).slice(1)) {
+      const carried = bindings?.[member];
+      if (Array.isArray(carried) && carried.length > 0) {
+        const index = Number.isFinite(sequence) ? Math.abs(Math.trunc(sequence)) % carried.length : 0;
+        return carried[index];
+      }
+    }
+    // Nothing in the whole run binds a sound. NOW it is silent, and that is an
+    // answer: `Block` and `BlockForward` are exactly this.
     return null;
   }
   // Every file the build could play for this animation, in label order, so the

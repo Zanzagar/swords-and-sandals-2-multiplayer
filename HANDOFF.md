@@ -8,8 +8,12 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-16 05:00 — `psyche_up` is built](docs/handoffs/2026-09-16-0500--psyche-up-is-built.md).**
+[2026-09-16 22:28 — the build plays seven runs](docs/handoffs/2026-09-16-2228--the-build-plays-seven-runs.md).**
 Start there. *(It supersedes
+[2026-09-16 05:00 — `psyche_up` is built](docs/handoffs/2026-09-16-0500--psyche-up-is-built.md),
+**whose ranked item 3 is CLOSED and whose framing of it was wrong** — the two
+`psyche_charging*` continuations were not stranded by a design decision, they
+were stranded by an unchecked premise about the BUILD.)* *(It supersedes
 [2026-09-16 01:30 — `psyche_up` was never the owner's](docs/handoffs/2026-09-16-0130--psyche-up-was-never-the-owners.md),
 whose ranked item 1 is CLOSED;
 [`docs/handoffs/PSYCHE-UP-BRIEF.md`](docs/handoffs/PSYCHE-UP-BRIEF.md) is now
@@ -27,6 +31,80 @@ move them.)* *(It supersedes
 [2026-09-15 15:35 — a synthetic SWF is an oracle, and two glows were doubled](docs/handoffs/2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md),
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
+
+► **THE BUILD PLAYS SEVEN RUNS AND THIS ENGINE WAS CUTTING FIVE OF THEM IN
+  HALF (`67dfc01`).** The 05:00 handoff ranked "animation sequences" third, as
+  art completeness. **It was a correctness gap in five dispatched animations**,
+  and the premise underneath it — *"this engine dispatches one animation per
+  action and never a sequence"*, in three handoffs and four source files — was
+  true of the ENGINE and had never been checked against the BUILD. In AVM1 a
+  `gotoAndPlay("x")` runs FORWARD until an action stops it, and seven of export
+  1241's 101 labels carry no terminating action inside their own span:
+
+```text
+    initialize   1..1        -> 32    GotoLabel Standing      Standing
+    Hurt8        1250..1265  -> 1283  Stop                    Hurt9
+    celebrate1   1400..1408  -> 1426  GotoLabel celebrate1a   celebrate1a
+    knockback    1428..1433  -> 1446  Stop                    knockback_mov
+    psyche_up    1609..1617  -> 1626  Stop, struck = true     psyche_charging
+    psyche_up2   1627..1635  -> 1643  Stop, struck = true     psyche_charging2
+    burning      1947..1948  -> 1963  gotoAndPlay Standing    flame_repeat x2
+```
+
+  So direction 8 plays 34 frames where direction 9 plays 18, a knockback 19 and
+  not 13, a first charge 18 and a second 17 — and **`burning` plays 32 frames
+  where this engine played 2**, 6% of the build, invisible to every test
+  because the pack's `burning` entry really is two poses long.
+  ► **THE DISCRIMINATOR THIS FILE HAD BEEN USING WAS WRONG.** "No `StartSound`
+    binding" is true of 21 of the 101 labels and of only four continuations;
+    `hurt8`, `knockback` and `celebrate1` are silent ENTRY points whose sound
+    fires on the continuation (`hurt9` -> 1183.mp3 at 1266, `knockback_mov` ->
+    1104.mp3 at 1440). **That also answers a puzzle this file recorded twice:
+    `hurt8` is not "the one silent hurt", it is half a performance.**
+    Contiguity was no better — 1609-1656 is one unbroken run of five labels.
+  ► **`supersededBySibling: ["knockback"]` WAS BACKWARDS.** `damagecharacter`
+    dispatches `"knockback"` (`+0x1b4f`, `+0x1bc0`) and the 13-frame
+    `knockback_mov` is its continuation, so this engine had been drawing the
+    second half of a knockback and never the first.
+  ► **`src/render/clip-sequences.js` IS THE TABLE AND `tools/clip-sequences.mjs`
+    RE-DERIVES IT** from the oracle, read-only. Mutation-checked four ways:
+    drop the effect rebase -> 3 fail, never sequence -> 6, drop the beats -> 2,
+    count a child-clip `gotoAndPlay` as a terminator -> 1.
+
+► **AND `psyche_charging*` ARE A HELD STANCE THE ENGINE HAS NOT BUILT — the
+  highest-value thing this session found and did not do.** `changeCombatants`
+  poses BOTH fighters from the counter at the top of every turn:
+  `if (game_attacker.psyche_up == 2) attacker.gotoAndStop("psyche_charging")`
+  at `+0x281e`, the same at 3 for `psyche_charging2` (`+0x284d`), and both
+  again for the defender (`+0x287c`, `+0x28ab`). **A gladiator holding a charge
+  STANDS in the charged pose instead of `Standing`** — the visible form of the
+  resource, and the counter values line up exactly (2 after one press, 3 after
+  two). A stance is a persistent pose BETWEEN actions and a run is one
+  performance WITHIN one, so it is its own piece of work; it is ranked in the
+  handoff and deliberately not attempted in `67dfc01`.
+
+► **A SIX-VERIFIER WAVE BROKE TWO OF MY CLAIMS AND ONE OF THEM WAS THE SAFETY
+  ARGUMENT.** Write-nothing, one named claim each, against a scratchpad copy of
+  the oracle; 6 briefs, 6 returned, 0 dead.
+  ► **"Clip labels are strictly downstream of `toTeamWireState`" IS FALSE.**
+    The resolver puts `vanillaLabel` and `clip` ON events, `toTeamWireState`
+    clones `battle.events` wholesale, and **19 of 23 goldens and 61 of 69
+    observations state `combatwon`/`combat_won` as expected values**. Renaming
+    a resolver-side label moves committed hashes — measured by the verifier at
+    3 of 5 literal pins. The conclusion for `67dfc01` survives for a different
+    reason: the diff is `src/render/` and `src/golden/*` imports neither
+    `src/render` nor `src/adapter`. **Right answer, wrong reason, and the wrong
+    reason would have licensed a resolver-side rename.**
+  ► **MY BRIEF SAID EIGHT RUN-ONS AND THERE ARE SEVEN** — `flame_repeat`'s
+    frame 1963 is a TOTAL if/else and both arms jump. The committed tool
+    already said seven; only the brief was wrong, which is the wave working.
+  ► **"Nothing dispatches `knockback_mov`" was too strong** — one site,
+    `+0x7c5e`, behind `cast_spell_icon(attacker, 39, 2)`, a spell path with no
+    verb here. Said while correcting a claim that was also too strong.
+  ► **`burning`'s `frames: 32` IS THE ONE NUMBER THE TOOL DOES NOT PROVE.** The
+    repeat count of 2 is read by hand from `burncycle = 1` against `>= 2`; it
+    carries `derivedBy: "hand"` at the field now and the tool prints
+    `[REPEATS]` on any run whose counter it cannot evaluate.
 
 ► **THE CAPTURE WINDOW CAN CLOSE AT THE PHASE NOW, AND BOTH WINDOWS PASS THE
   GATE.** `finishTrace` fires on `checkattackroll`'s RETURN, so the armed window
@@ -138,8 +216,11 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     test written to go red when this was built: *"THE FOUR CLIPS THAT CARRY
     EVERY EFFECT GROUP ARE UNREACHABLE — say it, do not discover it"*. Measured
     from the pack, **10 of the 12 groups are reachable now**; the 2 on the
-    `psyche_charging*` continuations are not, because this engine dispatches one
-    animation per action and never a sequence.
+    ~~`psyche_charging*` continuations are not, because this engine dispatches
+    one animation per action and never a sequence.~~ **ALL TWELVE REACH A
+    GLADIATOR SINCE `67dfc01`, and this clause is the premise that entry
+    broke** — the engine having no sequence was true, the BUILD having none was
+    never checked and is false. See the top of this file.
   ► **AND NOTHING MOVED**: suite 1931, fail 0, every golden, fixture, replay and
     observation test included. The counter is a resource with NO default, which
     is what bought that.
@@ -601,6 +682,12 @@ wrong**; that file is kept only as the record of how.)*
   reaches the compositor today is the weapon enchantment.** Pinned by a test, so
   building the psyche family turns the suite red rather than quietly outliving
   the paragraph.
+  ► **CLOSED IN TWO STEPS AND THE PIN WORKED BOTH TIMES.** `b201486` built the
+    psyche family and took it to 10 of 12; `67dfc01` found that the build RUNS
+    `psyche_up` on into `psyche_charging` and took it to 12 of 12. **The second
+    step is the one this paragraph could not have predicted**: it assumed the
+    only route to a continuation was a family dispatching it, and the route
+    that existed was the playhead never stopping.
 
 ► **THE GLOW COVERS THE WHOLE WEAPON LIMB, AND MY OWN BRIEF SAID OTHERWISE.** I
   wrote that the filter "encloses the attached blade and not the `weapon` limb's

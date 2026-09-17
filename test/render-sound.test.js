@@ -168,3 +168,33 @@ test("bindingsFrom survives a real manifest shape", () => {
   assert.equal(chooseSound(bindings, "movement:walk", 0), "33-step.mp3");
   assert.equal(chooseSound(bindings, "attack", 0), "190-swing.mp3");
 });
+
+test("AN UNBOUND ENTRY SOUNDS AS ITS RUN, because the build plays the run", () => {
+  // ► **A CODEX REVIEW OF `67dfc01` CAUGHT THIS AS A REGRESSION IT HAD JUST
+  //   INTRODUCED, AND RE-DERIVING IT FOUND THE SAME HOLE ALREADY OPEN.**
+  //   Putting `knockback` at the head of its own family — correctly; the build
+  //   dispatches it — made `chooseSound`'s exact-label branch find no binding
+  //   and answer `null`, turning an audible reaction silent. But `hurt8` had
+  //   been answering `null` for the same reason since the day it joined the
+  //   hurt family, and nobody had heard it either.
+  //
+  //   **Neither clip is silent in the build.** `gotoAndPlay("hurt8")` runs on
+  //   to the `Stop` at 1283 and `hurt9`'s `StartSound` fires at frame 1266;
+  //   `gotoAndPlay("knockback")` runs to 1446 and `knockback_mov`'s fires at
+  //   1440. `src/render/clip-sequences.js` is what makes that knowable here.
+  const bindings = { hurt9: ["1183.mp3"], knockback_mov: ["1104.mp3"], hurt1: ["1175.mp3"] };
+  assert.equal(chooseSound(bindings, "hurt", 0, "hurt8"), "1183.mp3",
+    "a direction-8 hurt sounds as the clip it runs on into");
+  assert.equal(chooseSound(bindings, "knockback", 0, "knockback"), "1104.mp3");
+
+  // ► **AND THE RULE IT MUST NOT BECOME IS A FAMILY FALLBACK.** `hurt8` may
+  //   take `hurt9`'s sound because the build PLAYS `hurt9` in that performance;
+  //   it may never take `hurt1`'s, and the family holds thirteen labels one of
+  //   which is bound here. This is the assertion that separates the two.
+  assert.equal(chooseSound({ hurt1: ["1175.mp3"] }, "hurt", 0, "hurt8"), null,
+    "an unbound run must stay silent rather than borrow from a family sibling");
+
+  // A run whose members bind nothing is still silent, which is the `Block` case
+  // and must not have been broken by making the entry look further.
+  assert.equal(chooseSound({ hurt1: ["1175.mp3"] }, "block", 0, "block"), null);
+});
