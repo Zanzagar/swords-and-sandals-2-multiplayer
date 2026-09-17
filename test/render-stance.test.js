@@ -417,3 +417,33 @@ test("it LOOPS, and the whole run is drawn rather than just the entry clip", () 
   assert.equal(animation.poses.length, 27);
   assert.deepEqual([...animation.playsSequence], ["celebrate1", "celebrate1a"]);
 });
+
+test("the winner test is STRICT, so a draw and a mistyped id both fall back to `Standing`", () => {
+  // ► **MEASURED RATHER THAN ARGUED**, because each of these is a way a caller
+  //   could get a celebration it did not mean — and the shell passes
+  //   `host.battle.result?.winnerTeamId`, which is null for a draw and for a
+  //   bout still running.
+  const one = (combatant, options) => idleFrameFor(combatant, options).label;
+  const red = { id: "h", teamId: "red", alive: true, resources: {} };
+
+  assert.equal(one(red, { now: 0, winnerTeamId: null }), "Standing", "a draw, or a bout still running");
+  assert.equal(one({ id: "h", alive: true, resources: {} }, { now: 0, winnerTeamId: "red" }), "Standing",
+    "a combatant with no teamId cannot be on the winning side");
+  assert.equal(one(null, { now: 0, winnerTeamId: "red" }), "Standing");
+
+  // Numeric team ids work, and are NOT coerced across types — the projection is
+  // consistent about its own types, and a loose `==` here would celebrate for a
+  // caller that had mixed them up.
+  assert.equal(one({ id: "h", teamId: 1, alive: true, resources: {} }, { now: 0, winnerTeamId: 1 }),
+    CELEBRATION_LABEL);
+  assert.equal(one({ id: "h", teamId: 1, alive: true, resources: {} }, { now: 0, winnerTeamId: "1" }),
+    "Standing");
+
+  // ► **AND `alive` IS TESTED FOR `=== false`, NOT FOR TRUTHINESS, which is the
+  //   same rule the charged stance uses and is deliberate.** A fixture that
+  //   omits `alive` is not a corpse, and every golden combatant is such a
+  //   fixture; requiring `alive === true` would silently stop them celebrating.
+  assert.equal(one({ id: "h", teamId: "red", resources: {} }, { now: 0, winnerTeamId: "red" }),
+    CELEBRATION_LABEL, "absent `alive` is not dead");
+  assert.equal(one({ ...red, alive: false }, { now: 0, winnerTeamId: "red" }), "Standing");
+});

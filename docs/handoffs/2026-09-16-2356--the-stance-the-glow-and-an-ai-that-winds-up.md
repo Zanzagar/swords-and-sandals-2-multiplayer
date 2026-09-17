@@ -1,29 +1,35 @@
 ---
 handoff:      2026-09-16-2356--the-stance-the-glow-and-an-ai-that-winds-up
-written:      2026-09-16 23:56 -0400
+written:      2026-09-16 23:56 -0400, extended 2026-09-17 00:40 (the ranked
+              item 1 retraction and the victory celebration, same session)
 sessionId:    cbee9926-159f-4edb-abcb-8d75f213b5de
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
 commits:      `080538a..HEAD` — `b1be7b2` (the charged stance), `ce38286` (six
               verifiers' corrections), `1775a4c` (the AI trait), `e0a3400` (the
-              Codex finding and this handoff). **Re-measure with
-              `git log --oneline`.**
+              Codex finding), `85be7a2` (the ranked-item-1 retraction),
+              `d093bff` (the victory celebration), plus this line's own.
+              **Re-measure with `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
-              the exit code are the gate. **1986 / fail 0 / skipped 1, exit 0**,
-              measured after `e0a3400`, against 1960 at the start of this
-              stretch. (This line said 1984 for one commit, measured before the
-              index row landed — the same slip the previous handoff recorded,
-              which is twice now and is why the instruction is first.)
+              the exit code are the gate. **MEASURED AFTER THE LAST COMMIT OF
+              THIS SESSION — see the commit that sets it.** Against 1960 at the
+              start of this stretch. (It said 1984, then 1986, each time
+              measured a commit too early. That is three handoffs running, so
+              the fix is procedural and not a better number: write the line
+              LAST, from a run against the tree you are about to leave.)
 agentRuns:    `wf_b86d8124-b42` — 6 write-nothing verifiers, one named claim
-              each. 6 briefs, 6 returned, 0 dead, **2 REFUTED**. Plus three
+              each. 6 briefs, 6 returned, 0 dead, **2 REFUTED**. Plus FOUR
               pinned Codex adversarial reviews (`gpt-6-astra`): one
-              needs-attention with 2 findings (both fixed), one approve, and
-              one HIGH finding on `1775a4c` — the charging AI aimed at the wrong
-              foe — confirmed, fixed and mutation-checked in `e0a3400`.
+              needs-attention with 2 findings (both fixed), one HIGH finding on
+              `1775a4c` — the charging AI aimed at the wrong foe — fixed in
+              `e0a3400`, and two approve (the stance, and the celebration in
+              `d093bff`).
 supersedes:   2026-09-16-2228--the-build-plays-seven-runs.md
-next:         **RANKED BELOW. Item 1 is a fidelity gap that affects EVERY
-              action, not just the ones this session touched.**
+next:         **RANKED BELOW. Items 1 and 2 are CLOSED — 1 by RETRACTION after
+              re-derivation, 2 by being BUILT. Items 3, 4 and 5 are the
+              owner's; the first thing an agent can pick up unaided is `taunt`
+              at 6.**
 ---
 # Handoff — the stance, the glow, and an AI that winds up
 
@@ -148,11 +154,17 @@ finding re-derived here before anything was touched.**
    AGENTS.md says never relay a number you have not re-derived. I relayed one
    into a ranked item and it displaced the genuine next piece of work for a day.
 
-2. **A VICTORY IDLE.** A surviving winner loops `celebrate1a` FOREVER in the
-   build (overlay frame 65/77 -> `celebrate1` -> self-loop at 1426, overlay then
-   stops). Nothing here models it, so a won match draws the breathing
-   `Standing`. `clip-sequences.js` already records the run; it has not reached
-   the draw site.
+2. ~~**A VICTORY IDLE.**~~ **BUILT 2026-09-17 (`d093bff`).** A surviving winner
+   on the winning team draws `celebrate1`, which runs on into `celebrate1a` and
+   loops — re-derived from the oracle: overlay frame 65 inside `combatwon`
+   (62-73) and frame 77 inside `combatlost` (74-84), with `GoToLabel
+   ("celebrate1a"); Play` at 1426. **The celebration outranks the charged
+   stance**, because a finished bout has nothing left to spend a charge on, and
+   the dead do not celebrate. One stated approximation: the build cycles only
+   the 18-frame body and this loops all 27, so the winner re-plays his opening
+   flourish once a cycle — closing that needs a loop-start offset, which needs
+   the renderer to hold when the bout ended, which is the statelessness that
+   makes the idle need nothing invalidated.
 
 3. **RE-SHOOT THE PROBES UNDER ADOBE'S PLAYER IF YOU EVER HAVE ONE — the
    owner's, untouched.**

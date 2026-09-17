@@ -34,6 +34,27 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **A WINNER CELEBRATES NOW, AND HE DOES IT UNTIL SOMETHING MOVES HIM
+  (`d093bff`).** A won match drew the breathing `Standing`; the build does not.
+  Overlay frame 65 (inside `combatwon`, 62-73) runs
+  `hero.gotoAndPlay("celebrate1")` and frame 77 (inside `combatlost`, 74-84)
+  the same on `villain`; `celebrate1` has no `Stop`, runs on into `celebrate1a`,
+  and 1426 is `GoToLabel("celebrate1a"); Play`. `clip-sequences.js` already had
+  the run, so this needed only a dispatcher — a `celebrate` family, a looping
+  27-beat schedule, and an arm in `idleFrameFor`.
+  ► **THE CELEBRATION OUTRANKS THE CHARGED STANCE**, because a gladiator can win
+    while still holding a charge and a finished bout has nothing to spend it on.
+    The control is the same combatant on the LOSING side, who keeps the pose and
+    the glow. **The dead do not celebrate**, which a 3v3 makes reachable.
+  ► **ONE STATED APPROXIMATION**: the build cycles only `celebrate1a`'s 18
+    frames and this loops all 27, so the winner re-plays his opening flourish
+    once a cycle. A loop-start offset would need the renderer to hold when the
+    bout ended, and that statelessness is what makes the idle need nothing
+    invalidated.
+  ► **Census 79/22 -> 80/21.** `celebrate1a` stays declared undispatched — the
+    `continuations` bucket is down to it and `flame_repeat`, the only two of the
+    six run members nothing in the build names.
+
 ► **A GLADIATOR HOLDING A CHARGE STANDS CHARGED, AND GLOWS WHILE HE WAITS
   (`b1be7b2`).** `changeCombatants` resets both fighters to `Standing` and then
   overrides whichever holds a charge — `gotoAndStop("psyche_charging")` at
