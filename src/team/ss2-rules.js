@@ -5898,25 +5898,43 @@ export function createSs2TeamRules({
       //   and a band entry would put samples on the ordered channel the build
       //   never takes and desynchronise every peer replaying the same tape.
       //   This arm reaches the same ranking by a different door.
-      // ► **NO RANGE CHECK HERE, AND THAT IS A DELETION RATHER THAN AN
-      //   OMISSION.** A first version guarded this on
-      //   `ss2PsycheDischargeInRange(actor, engaged)`, reasoning that a press
-      //   out of range decides nothing and keeps the charge, so a gladiator
-      //   who could not reach anybody would wind up forever instead of
-      //   closing. **Measured: adding it changed the charge count by zero**
-      //   (1,494 of 4,830 actions either way), and a mutation check then
-      //   showed removing it broke no test. It is unreachable: the
-      //   `!attackOnOffer` arm above RETURNS a step whenever nothing is in
-      //   reach, so by the time the ranking runs an attack is always on offer
-      //   and `engaged` is always a foe that some attack verb can hit.
+      // ► **THE OPTION MUST NAME `engaged`, AND TAKING THE FIRST ONE WAS A REAL
+      //   DEFECT — found by an adversarial Codex review of `1775a4c` and
+      //   reproduced here before anything was touched.** `psyche_up` looks
+      //   self-targeted, and a first version reasoned from that: "the target
+      //   does not matter". **It matters twice.** The resolver reads
+      //   `request.target` for the discharge's RANGE GATE and builds the
+      //   defender record for its DAMAGE ROLL from it. `legalActions` emits one
+      //   option per foe, so `find` by type alone takes whichever foe happens
+      //   to be first.
       //
-      //   **Recognised by the VOCABULARY rather than by re-deriving the
-      //   geometry**, which is the same argument the walk arms above make
-      //   twice — and the reason a second distance test here would have been a
-      //   second chance to be wrong rather than a safety net. The gate that
-      //   matters is the resolver's, which still runs on every press.
+      //   Reproduced: one hero at x 0 with a full charge, `far` at 500 and
+      //   `near` at 90 — two consecutive turns chose `psyche_up` against `far`
+      //   while `near` stood in melee reach. In a longer bout that STARVES the
+      //   gladiator: an out-of-range press decides nothing and keeps the
+      //   charge, so it can repeat forever.
+      //
+      // ► **AND THERE IS NO RANGE CHECK HERE, AFTER I ADDED ONE, DELETED IT,
+      //   RESTORED IT ON THE REVIEW'S RECOMMENDATION, AND THEN MEASURED.**
+      //   The review's advice was to rank a discharge only when the target
+      //   passes `ss2PsycheDischargeInRange`. **Measured over 60 decisions
+      //   where both an attack and a psyche were on offer, archers included: 0
+      //   attackable foes were outside the discharge gate.** It cannot be
+      //   otherwise — the gate is `round(ss2Reach + 50)` and `ss2Reach` is the
+      //   same reach the attack verbs are offered on, including the BOW's when
+      //   one is drawn, so anything an attack can hit a discharge can reach.
+      //
+      //   So with the target matched to `engaged`, the gate is unreachable by
+      //   construction. **Recognised by the VOCABULARY rather than by
+      //   re-deriving the geometry** — the argument the walk arms above make
+      //   twice, and the reason a second distance test here is a second chance
+      //   to be wrong rather than a safety net. The gate that matters is the
+      //   resolver's, and it runs on every press regardless.
       const psycheOption = aiCharges
-        ? options.find((option) => option.type === Ss2ActionType.PSYCHE_UP)
+        // Self-targeted when nothing is in reach, one per foe once something
+        // is; both shapes are accepted and only `engaged` is taken.
+        ? options.find((option) => option.type === Ss2ActionType.PSYCHE_UP
+          && (option.targetId === engaged.id || option.targetId === actor.id))
         : undefined;
       if (psycheOption) {
         const counter = Math.max(SS2_PSYCHE_UP.floor, resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor));
@@ -6030,7 +6048,9 @@ export function createSs2TeamRules({
         //   `expected` has no entry otherwise, and an unpriced verb must not be
         //   reachable by a `undefined > undefined` comparison.
         const option = type === Ss2ActionType.PSYCHE_UP
-          ? (expected[type] === undefined ? null : psycheOption)
+          // `psycheOption` is already matched to `engaged` above, and is
+          // undefined when the discharge could not reach it.
+          ? (expected[type] === undefined ? null : psycheOption ?? null)
           : options.find((entry) => entry.type === type && entry.targetId === engaged.id);
         if (!option) continue;
         if (best === null || expected[type] > expected[best.type]) best = option;

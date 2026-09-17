@@ -34,7 +34,7 @@ import test from "node:test";
 import {
   applyAction, createTeamBattle, currentCombatant, legalActions, rngJournal, suggestAction, toTeamWireState
 } from "../src/team/index.js";
-import { SS2_PSYCHE_UP, Ss2ActionType, createSs2TeamRules, ss2Combatant } from "../src/team/ss2-rules.js";
+import { SS2_PSYCHE_UP, Ss2ActionType, createSs2TeamRules, ss2Combatant, ss2Reach } from "../src/team/ss2-rules.js";
 import { stanceLabelFor } from "../src/render/stance.js";
 
 /**
@@ -277,4 +277,89 @@ test("THE CHARGED STANCE NOW HAS A POPULATION, which is why this arm exists", ()
     }
   }
   assert.ok(chargedStates > 0, "an AI bout must now draw a gladiator in the charged stance");
+});
+
+/* ------------------------------------------------------------------ *
+ * THE DEFECT A CODEX REVIEW FOUND IN THE FIRST CUT
+ * ------------------------------------------------------------------ */
+
+/** A duel with two foes, staged at fixed positions that nobody is allowed to walk away from. */
+function staged({ heroX, foes, counter = SS2_PSYCHE_UP.dischargeAt, hero = {} }) {
+  const battle = createTeamBattle({
+    rules: createSs2TeamRules({ aiCharges: true }), seed: 5,
+    teams: [
+      { id: "red", combatants: [{ id: "hero", ...gladiator({ psyche_up: counter, ...hero }) }] },
+      { id: "blue", combatants: foes.map(({ id }) => ({ id, ...gladiator({ psyche_up: SS2_PSYCHE_UP.floor }) })) }
+    ]
+  });
+  const at = (id) => battle.teams.flatMap((team) => team.combatants).find((c) => c.id === id);
+  const place = () => {
+    at("hero").x = heroX;
+    at("hero").resources.psyche_up = { value: counter, min: 0, max: null };
+    for (const { id, x } of foes) at(id).x = x;
+  };
+  place();
+  for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {
+    const who = currentCombatant(battle);
+    const legal = legalActions(battle);
+    applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
+    place();
+  }
+  assert.equal(currentCombatant(battle)?.id, "hero", "the staging must leave it the hero's turn");
+  return battle;
+}
+
+test("IT CHARGES AT THE FOE IT IS FIGHTING, not at whichever option came first", () => {
+  // ► **FOUND BY AN ADVERSARIAL CODEX REVIEW OF `1775a4c`, AND IT IS THE THING
+  //   I LOOKED AT AND WAVED AWAY.** I saw `legalActions` emit one `psyche-up`
+  //   per foe, decided the action was self-targeted so the target could not
+  //   matter, and took the first one. **It matters twice**: the resolver reads
+  //   `request.target` for the discharge's RANGE GATE and builds the defender
+  //   record for its DAMAGE ROLL from it.
+  //
+  //   An out-of-range press decides nothing and KEEPS the charge, so a
+  //   gladiator aimed at the wrong foe can repeat it forever while a reachable
+  //   one stands in front of him. That is starvation, not a missed optimum.
+  const battle = staged({ heroX: 0, foes: [{ id: "afar", x: 600 }, { id: "bnear", x: 40 }] });
+  const options = legalActions(battle);
+  // The ORDER is what the defect fed on, so the test asserts the trap is set.
+  assert.equal(options.find((o) => o.type === Ss2ActionType.PSYCHE_UP).targetId, "afar",
+    "the first psyche option must name the DISTANT foe, or this test proves nothing");
+  assert.ok(options.some((o) => o.type === Ss2ActionType.NORMAL_ATTACK && o.targetId === "bnear"),
+    "and the near foe must be attackable");
+
+  const chosen = suggestAction(battle);
+  assert.equal(chosen.type, Ss2ActionType.PSYCHE_UP, "a ready charge is still the best swing");
+  assert.equal(chosen.targetId, "bnear", "but it must be aimed at the foe it is actually fighting");
+});
+
+test("ANYTHING AN ATTACK CAN HIT, A DISCHARGE CAN REACH — so there is no gate here", () => {
+  // ► **I ADDED A RANGE GATE, DELETED IT, RESTORED IT ON A REVIEW'S
+  //   RECOMMENDATION, AND THEN MEASURED.** The first deletion was a mutation
+  //   check (nothing failed without it) and I distrusted it, because every test
+  //   I had was 1v1 melee and an ARCHER looked like the case that would break
+  //   it. It does not: `ss2Reach` returns the BOW's range in bow mode, and the
+  //   discharge's gate is that same reach plus 50, so a foe a bombard can hit
+  //   is inside it by construction.
+  //
+  //   Measured over 60 decisions where both an attack and a psyche were on
+  //   offer, on a demo side whose slot 2 carries a bow: **0 attackable foes
+  //   outside the gate.** This test is that measurement, in miniature.
+  const battle = staged({ heroX: 0, foes: [{ id: "afar", x: 600 }, { id: "bnear", x: 40 }] });
+  const actor = currentCombatant(battle);
+  const gate = Math.round(ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus);
+  const foes = battle.teams.flatMap((team) => team.combatants).filter((c) => c.id !== actor.id);
+  const attackable = new Set(legalActions(battle)
+    .filter((o) => ATTACK_VERBS.includes(o.type)).map((o) => o.targetId));
+  assert.ok(attackable.size > 0, "something must be attackable or this measures nothing");
+  for (const foe of foes) {
+    if (!attackable.has(foe.id)) continue;
+    assert.ok(Math.abs(actor.x - foe.x) <= gate,
+      `${foe.id} is attackable at ${Math.abs(actor.x - foe.x)} but outside the discharge gate ${gate}`);
+  }
+  // And the foe that is NOT attackable is the one outside it, which is the
+  // control: the two sets really do differ here.
+  const far = foes.find((c) => c.id === "afar");
+  assert.equal(attackable.has("afar"), false);
+  assert.ok(Math.abs(actor.x - far.x) > gate, "the distant foe must be outside the gate");
 });

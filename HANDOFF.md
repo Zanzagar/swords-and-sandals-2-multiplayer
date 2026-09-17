@@ -8,8 +8,10 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-16 22:28 — the build plays seven runs](docs/handoffs/2026-09-16-2228--the-build-plays-seven-runs.md).**
+[2026-09-16 23:56 — the stance, the glow, and an AI that winds up](docs/handoffs/2026-09-16-2356--the-stance-the-glow-and-an-ai-that-winds-up.md).**
 Start there. *(It supersedes
+[2026-09-16 22:28 — the build plays seven runs](docs/handoffs/2026-09-16-2228--the-build-plays-seven-runs.md),
+**whose ranked item 1 is CLOSED and two of whose claims it corrects.**)* *(It supersedes
 [2026-09-16 05:00 — `psyche_up` is built](docs/handoffs/2026-09-16-0500--psyche-up-is-built.md),
 **whose ranked item 3 is CLOSED and whose framing of it was wrong** — the two
 `psyche_charging*` continuations were not stranded by a design decision, they
@@ -31,6 +33,75 @@ move them.)* *(It supersedes
 [2026-09-15 15:35 — a synthetic SWF is an oracle, and two glows were doubled](docs/handoffs/2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md),
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
+
+► **A GLADIATOR HOLDING A CHARGE STANDS CHARGED, AND GLOWS WHILE HE WAITS
+  (`b1be7b2`).** `changeCombatants` resets both fighters to `Standing` and then
+  overrides whichever holds a charge — `gotoAndStop("psyche_charging")` at
+  counter 2, `psyche_charging2` at 3, four sites (`+0x281e`, `+0x284d`,
+  `+0x287c`, `+0x28ab`). `src/render/stance.js` owns the whole idle decision;
+  the shell had `timelineFor("Standing")` and a clock inline, so **"which pose
+  does a gladiator rest in" was a decision the suite could not reach and nobody
+  had asked.**
+  ► **IT IS DERIVED AT THE DRAW SITE, NOT PUSHED DOWN THE PRESENTATION
+    STREAM.** A `clip-goto` is consumed and finished; a stance must survive
+    every action in between. Per-frame derivation makes it automatically
+    persistent — the moment the counter resets, the next frame draws `Standing`.
+  ► **AND THE FIRST FIGURE EFFECT GROUP ANYTHING HERE DRAWS.** Both charging
+    clips carry the cyan glow, so a resting charged gladiator glows — which
+    closed a condition `figureRouteFor()` had set for itself and could not meet:
+    `filtersScaled` is `true` now, radii measured linear at 4.2742 / 8.5483 /
+    17.0967 px for scales 1 / 2 / 4. The two levels are two DIFFERENT glows
+    (4.2742 against 2.5208), so collapsing them would be visibly wrong.
+  ► **THE LABEL CENSUS MOVED 77/24 -> 79/22** and `continuations` is down to
+    `celebrate1a` and `flame_repeat`, the only two run members nothing names.
+
+► **THE AI WINDS UP NOW, BEHIND `aiCharges`, AND THE ARITHMETIC SAYS IT SHOULD
+  NOT (`1775a4c`).** Owner's call against a measurement: the verb was chosen **0
+  times in 6,000 AI actions**, so the action, its clips, the stance and the glow
+  had a live population of zero outside human play. **But the criterion the
+  decision was taken on is refuted by the numbers** — damage per actor turn over
+  40 seeded bouts: quick 17.82, normal 15.26, **charge 11.53**, power 11.44; and
+  over five stat-lines the charge won exactly one. **So the flag buys a
+  CHARACTER, not an optimisation, and says so.** An unwounded gladiator winds
+  up; a wounded one fights, because taking a blow resets the charge.
+  ► **OFF BY DEFAULT AND IN THE RULE-SET ID WHEN ON**, the same argument
+    `crowdPatience` and `rankStride` are in the id for: the hash carries only
+    the id, so two peers on different AI policies would agree on every hash and
+    then diverge at the first charge. No pinned hash, golden or census moves.
+  ► **40 seeded 3v3 bouts: 0 charges off, 2,433 on (30.6%, 974 discharges),
+    40/40 resolving either way, bouts 8% longer. Every charge came from the two
+    BOW slots** — warriors gate `psyche_up` at `herolevel >= 7` and archers at
+    `>= 3`, and the demo gladiator is level 4, so on the shipped roster this is
+    an archer behaviour whether or not anyone intended it.
+
+► **SIX VERIFIERS ON THE STANCE, TWO REFUTED ME (`ce38286`).**
+  ► **"THE CHARGED POSE IS THE ONLY HELD FIGHTER STANCE IN COMBAT" IS FALSE.**
+    86 of the fighter clip's frame scripts end in `Stop` and only 7 spans
+    self-loop, so the figure parks on the terminal frame of nearly every action
+    until the next `changeCombatants`. The true claim is **the only held stance
+    that SURVIVES A TURN BOUNDARY**.
+  ► **"REPRODUCES THE BUILD RATHER THAN APPROXIMATING IT" IS FALSE, and it is
+    now ranked item 1.** The build does not restore the stance when a clip ends;
+    this engine snaps to the idle at `durationMs`, so it glows EARLIER than the
+    build. **Action-end hold affects every action this engine plays.**
+  ► **`changeCombatants` RUNS ~4x A TURN, NOT ONCE** — `+0x317e` (top level,
+    every `heroactions` entry), `+0x3638` (every phase advance), `+0x365f` (turn
+    end). `battle_action` is a phase selector.
+  ► **TWO REAL DEFECTS**: `idleFrameFor` had no `alive` guard, and a negative
+    finite `now` leaked a negative phase while the docstring promised otherwise.
+  ► **AND A MAP SILENCE IS RETIRED BY THE BYTES.** Sprite 2249 frame 1 is
+    labelled `initbattle` and `+0x0bc9`-`+0x0bf1` runs
+    `_root.game.hero.psyche_up = _root.game.villain.psyche_up = 1`; `psyche_up`
+    appears in exactly six action blocks in the whole SWF, so there is no other
+    initialisation site. **At battle time the counter is never undefined.**
+    `psyche-up-initialisation` is narrowed to the between-battles save, and its
+    `settledBy` now says a battle capture CANNOT answer it.
+
+► **AND A CODEX REVIEW CAUGHT THE `knockback` CORRECTION MAKING KNOCKBACKS
+  SILENT (`8bc27c0`)** — re-deriving it found the same hole already open on
+  `hurt8` since 2026-09-14. **Neither clip is silent in the build**: the sound
+  fires on the continuation (`hurt9` at 1266, `knockback_mov` at 1440). Sound
+  follows the RUN now and still may not borrow from a family sibling.
 
 ► **THE BUILD PLAYS SEVEN RUNS AND THIS ENGINE WAS CUTTING FIVE OF THEM IN
   HALF (`67dfc01`).** The 05:00 handoff ranked "animation sequences" third, as
