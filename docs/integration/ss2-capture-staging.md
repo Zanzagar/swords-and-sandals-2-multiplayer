@@ -1648,6 +1648,37 @@ and then incremented again in a later tick of the same phase, landing on 2
 rather than 1 and so shortening the *next* chain; ~~two consecutive presses
 recorded live decide it.~~
 
+> ► **AND A FIRST ATTEMPT AT THAT CAPTURE FAILED ON THE ROUTE, NOT THE WINDOW
+> (2026-09-17, session `psyche-probe-1`).** Recorded here because the next
+> reader will otherwise spend the same hour:
+>
+> - **THE PRISONER ROUTE NEEDS A LEVEL-1 HERO AND THIS MACHINE'S SAVE NO LONGER
+>   HAS ONE.** `stepNavigator` walks title -> new_or_continue -> slot-list ->
+>   hero-loaded -> daybreak and then waits for root frame **220**; frame 113
+>   routes only a level-1 hero to the dungeon, so a levelled gladiator lands in
+>   town square instead and the navigator sits at frame **158** until the
+>   180-second timeout. The log says `{"at":"navdiag","waitingAt":158}` eight
+>   times and nothing else. **No battle is reached, so nothing about
+>   `psyche_up` is observed.**
+> - **THE ARENA ROUTE FITS THE GLADIATOR AND CANNOT DRIVE THE VERB.**
+>   `run-arena.ps1` routes an existing levelled hero into duels, which is
+>   exactly what is needed — but it drives its fights from `-ArenaPolicy`, not
+>   from an autopilot step list, and deliberately forwards no `-Autopilot`.
+>   **Making it psyche is capture-infrastructure design, not a flag**: either a
+>   new arena fight policy that charges, or a step-list override the policy
+>   yields to.
+> - **WHAT IS READY**: `run-capture.ps1` forwards `-TraceWindow` now, the
+>   wrapper accepts `phase`, and **all four controller tables already declare
+>   `psyche_up`**, so the verb is drivable the moment a route reaches a battle.
+> - **STILL UNSETTLED, AND IT WAS THE CHEAP HALF**: whether
+>   `getphase("psyche_up")` reaches the phase below the herolevel gate. The
+>   wrapper's controller table does NOT model that gate, so it will issue the
+>   label to a level-1 hero — the experiment is sound, it just needs a route
+>   that arrives.
+> - The save was snapshotted before the run and **restored after it**
+>   (`pre-psyche-probe-1`, 3 files verified identical both ways), so this cost
+>   the licensed state nothing.
+
 > **CORRECTED 2026-09-16, AND IT WAS FALSE OF THE COMMITTED WRAPPER.** Two
 > presses decided nothing, because **neither counter write was inside the
 > recording window.** `finishTrace` fired on `checkattackroll`'s RETURN, and

@@ -39,7 +39,18 @@ param(
     # reaches town square, which flushes the SharedObject.
     [int] $LingerSec = 0,
     # See launch-capture.ps1 - extra watch fields, added to the default list.
-    [string] $WatchFields = ""
+    [string] $WatchFields = "",
+    # WHERE THE RECORDING WINDOW CLOSES. "" leaves the wrapper's default
+    # ("action"), which closes on checkattackroll's return and is the boundary
+    # every archived trace was taken at. "phase" defers the close to nextphase,
+    # which is the only way to record writes the phase makes AFTER the roll -
+    # psyche_up's counter, at +0x6738 and +0x6761, is why it exists.
+    #
+    # A "phase" trace carries MORE lines by construction and is NOT comparable
+    # with an archived one; its end line says so. See rawTraceWindow in
+    # ss2-capture-wrapper.as.
+    [ValidateSet("", "action", "phase")]
+    [string] $TraceWindow = ""
 )
 
 $ErrorActionPreference = 'Stop'
@@ -175,6 +186,8 @@ if ($SkipPipeline) { $launcherArgs += '-SkipPipeline' }
 # scripts now agree, and -WatchFields was the one string forward that did not.
 if ($FrameRate -gt 0) { $launcherArgs += @('-FrameRate', "$FrameRate") }
 if ($WatchFields) { $launcherArgs += @('-WatchFields', "`"$WatchFields`"") }
+# Quoted, because it is a [string] - the rule this file states above.
+if ($TraceWindow) { $launcherArgs += @('-TraceWindow', "`"$TraceWindow`"") }
 if ($SaveDirectory) { $launcherArgs += @('-SaveDirectory', "`"$SaveDirectory`"") }
 $launch = Start-Process -FilePath 'powershell' -PassThru -WindowStyle Hidden `
     -RedirectStandardOutput $launchOut -RedirectStandardError "$launchOut.err" `
