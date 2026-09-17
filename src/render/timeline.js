@@ -49,6 +49,8 @@
  *   does, this constant is the thing it settles.
  */
 
+import { sequenceBeatsFor } from "./clip-sequences.js";
+
 export class TimelineError extends Error {
   constructor(message, options = {}) {
     super(message, options);
@@ -514,7 +516,20 @@ export function timelineFor(label, { role = "actor" } = {}) {
     });
   }
   const build = FAMILIES[family] ?? FAMILIES.unknown;
-  return Object.freeze({ ...build(), label, recognised: family !== "unknown" });
+  const built = build();
+  // ► **A SEQUENCED LABEL NEEDS LONGER, AND THE ALTERNATIVE IS NOT "UNCHANGED"
+  //   BUT "TWICE AS FAST".** The family's duration was authored for the clip
+  //   that carries the label's name; `clip-sequences.js` has the build running
+  //   on past it, so the surface has up to twice the poses to show in the same
+  //   slot. Six labels carry their own authored beat count there — see that
+  //   module's header for the rule they were chosen under, and note that they
+  //   are AUTHORED exactly like the numbers above, which is why the provenance
+  //   below is untouched.
+  const sequencedBeats = sequenceBeatsFor(label);
+  const timed = sequencedBeats === null
+    ? built
+    : { ...built, durationMs: sequencedBeats * BEAT_MS };
+  return Object.freeze({ ...timed, label, recognised: family !== "unknown" });
 }
 
 /**

@@ -81,12 +81,28 @@ const FAMILY_LABELS = Object.freeze({
   //   passes it through; nothing here indexes into the list. It is a family so
   //   that all three are DECLARED PLAYABLE, which is what this table is for.
   //
-  // ► **`psyche_charging` AND `psyche_charging2` ARE DELIBERATELY NOT HERE.**
-  //   They are continuations — `psyche_up` runs 1609-1617 straight into
-  //   `psyche_charging` 1618-1626, and neither charging clip has a `StartSound`
-  //   binding while all three `psyche_up*` do — and this engine dispatches ONE
-  //   animation per action, never a sequence. Listing them would declare
-  //   playable something nothing can reach.
+  // ► **`psyche_charging` AND `psyche_charging2` ARE STILL NOT HERE, AND THE
+  //   REASON CHANGED ON 2026-09-16.** It used to be "this engine dispatches ONE
+  //   animation per action, never a sequence", which was true of the engine and
+  //   false of the build: `psyche_up` runs 1609-1617 straight on to the `Stop`
+  //   at 1626, so the build plays `psyche_charging` as the second half of the
+  //   same performance. `src/render/clip-sequences.js` carries that now and
+  //   this engine plays both.
+  //
+  //   They stay out of the family because a family lists labels an ATTACK
+  //   SELECTOR may choose, and nothing in the phase machine chooses these.
+  //
+  //   ► **THEY ARE DISPATCHED, THOUGH — WITH `gotoAndStop`, AS A HELD STANCE,
+  //     AND THAT IS A FEATURE THIS ENGINE HAS NOT BUILT.** `changeCombatants`
+  //     poses BOTH fighters at the top of every turn from the counter:
+  //     `if (game_attacker.psyche_up == 2) attacker.gotoAndStop("psyche_charging")`
+  //     at `+0x281e`, the same at 3 for `psyche_charging2` (`+0x284d`), and
+  //     both again for the defender (`+0x287c`, `+0x28ab`). So a gladiator
+  //     holding a charge STANDS in the charged pose rather than in `Standing`,
+  //     for as long as the charge lasts. **A stance is a persistent pose
+  //     BETWEEN actions and a run is one performance WITHIN one**, so it does
+  //     not belong in a family or in `clip-sequences.js`; it is its own piece
+  //     of work and the handoff ranks it.
   psyche: Object.freeze(["psyche_up", "psyche_up2", "psyche_up3"]),
   // ► **`hurt8` WAS MISSING, AND IT WAS MISSING FOR THE `block` REASON.** The
   //   clip carries `hurt1`-`hurt12` and `hurt20`, thirteen animations, and this
@@ -110,7 +126,29 @@ const FAMILY_LABELS = Object.freeze({
   //   happens at a different time.
   defend: Object.freeze(["defend1", "defend2", "defend3", "defend4", "defend5", "defend6",
     "defend7", "defend8", "defend9", "defend10", "defend11", "defend12", "defend20"]),
-  knockback: Object.freeze(["knockback_mov", "shove"]),
+  // ► **`knockback` IS THE ENTRY AND IT WAS MISSING FROM ITS OWN FAMILY, so
+  //   this engine played the second half of a knockback and never the first.**
+  //   `damagecharacter` calls `gotoAndPlay("knockback")` at two sites, both
+  //   gated on the force magnitude exceeding 80 (`+0x1b4f` positive, `+0x1bc0`
+  //   negative) — and the string is `"knockback"` at both. It runs off its own
+  //   end into `knockback_mov` (1428-1433 into 1434-1446, one `Stop` at the end
+  //   of the pair), which `clip-sequences.js` now carries.
+  //
+  //   ► ~~**Nothing anywhere in the build dispatches `knockback_mov`.**~~
+  //     **REFUTED BY A VERIFIER AND RE-DERIVED HERE: there is exactly one
+  //     site**, `defender.gotoAndPlay("knockback_mov")` at `+0x7c5e`, inside
+  //     `attacker.onEnterFrame` and immediately after
+  //     `cast_spell_icon(attacker, 39, 2)` — a SPELL this engine has no verb
+  //     for. One site is not none, and "nothing dispatches it" was a stronger
+  //     claim than the evidence, made while correcting a claim that was
+  //     stronger than ITS evidence. It stays second in the list either way:
+  //     the ordinary blow dispatches the entry.
+  //
+  //   The old entry listed `knockback_mov` first and this file declared
+  //   `knockback` "superseded by a sibling". That had it exactly backwards: the
+  //   sibling is the continuation. `knockback_mov` and `shove` stay in the
+  //   list, behind the entry, as the fallback an incomplete pack gets.
+  knockback: Object.freeze(["knockback", "knockback_mov", "shove"]),
   taunt: Object.freeze(["taunt"]),
   taunted: Object.freeze(["taunted"]),
   ranged: Object.freeze(["bombard", "snipe"]),
@@ -194,8 +232,23 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
   structural: Object.freeze(["initialize", "portrait"]),
 
   /**
-   * CONTINUATIONS of an animation that already started, including its sound.
-   * Playing one on its own would restart a performance mid-way.
+   * CONTINUATIONS — reached only by running INTO them, never dispatched.
+   *
+   * ► **"UNPLAYED" WAS THE WRONG WORD AND IT COST THE ENGINE FIVE
+   *   PERFORMANCES.** These four are played, by the build and now by this
+   *   engine: `src/render/clip-sequences.js` reads the fighter clip's own frame
+   *   actions and finds that `psyche_up` runs to the `Stop` at 1626 and
+   *   `psyche_up2` to the one at 1643, so both charging clips play as the
+   *   second half of their entry's run. What is true of all four is that
+   *   NOTHING DISPATCHES THEM: no `gotoAndPlay` in the build names them, so no
+   *   family may offer one as a label. That is why they are still here.
+   *
+   * ► **AND THE DISCRIMINATOR THIS LIST WAS BUILT ON WAS WRONG.** It was "no
+   *   `StartSound` binding". Measured against the extracted manifest: 21 of the
+   *   101 labels carry no binding and only these four are continuations — while
+   *   `hurt8`, `knockback` and `celebrate1`, which ARE entry points, are silent
+   *   too, because their sound fires on the continuation. Silence says nothing
+   *   about where the playhead stops. The frame actions say it outright.
    */
   continuations: Object.freeze(["celebrate1a", "flame_repeat", "psyche_charging", "psyche_charging2"]),
 
@@ -262,11 +315,20 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
   ]),
 
   /**
-   * NAMED BY A FAMILY THROUGH A SIBLING. `knockback` the LABEL is a separate
-   * 6-frame clip from `knockback_mov` and `shove`, which are what the
-   * `knockback` family actually plays. Listed so the count reconciles.
+   * ► ~~**NAMED BY A FAMILY THROUGH A SIBLING.** `knockback` the LABEL is a
+   *   separate 6-frame clip from `knockback_mov` and `shove`, which are what
+   *   the `knockback` family actually plays.~~ **WRONG, AND BACKWARDS —
+   *   RETRACTED 2026-09-16 FROM THE BUILD'S OWN BYTES.** `damagecharacter`
+   *   dispatches `"knockback"` and nothing dispatches `knockback_mov`; the
+   *   6-frame clip is the ENTRY and the 13-frame one is its continuation. The
+   *   entry is in the `knockback` family above now, so this bucket is empty.
+   *
+   *   **It is kept, empty, rather than deleted**, because the reconciliation
+   *   this table exists for should show that the category was considered and
+   *   came to nothing — and because "a label a family reaches through a
+   *   sibling" is a real situation that a later label may land in.
    */
-  supersededBySibling: Object.freeze(["knockback"]),
+  supersededBySibling: Object.freeze([]),
 
   /** Unclassified, and honestly so. */
   unknown: Object.freeze(["little_fat_kid"])

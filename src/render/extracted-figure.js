@@ -122,6 +122,7 @@
  */
 
 import { clipLabelsFor, directionalLabel } from "./clip-labels.js";
+import { clipSequenceFor } from "./clip-sequences.js";
 import {
   applyColourTransform,
   applyColourTransformAlpha,
@@ -206,7 +207,13 @@ export function figurePackFrom(shapes, animations, enchantments = null) {
     // Per-animation drawability, computed on first use. A `Map` rather than a
     // field on the animation, because the pack is frozen and the JSON is the
     // player's, not ours to annotate.
-    drawable: new Map()
+    drawable: new Map(),
+    // Per-label SEQUENCED animations, built on first use for the same reason
+    // and cached for a much harder one: `isDrawable` keys its cache on the
+    // animation OBJECT, so synthesising a fresh concatenation per frame would
+    // miss that cache on every frame of every bout and re-walk thirteen
+    // placements per pose. Built once, then it is an ordinary animation.
+    sequenced: new Map()
   });
 }
 
@@ -280,6 +287,78 @@ function isDrawable(pack, animation) {
 }
 
 /**
+ * ONE ANIMATION OUT OF THE RUN THE BUILD ACTUALLY PLAYS, or null.
+ *
+ * Six of the fighter clip's labels run on past the clip that carries their
+ * name — `psyche_up` into `psyche_charging`, `hurt8` into `hurt9`, `knockback`
+ * into `knockback_mov`, `burning` around `flame_repeat` twice — because their
+ * span carries no terminating action. `clip-sequences.js` reads that from the
+ * build's own frame actions; this glues the members' poses into one animation
+ * so every consumer downstream stays unchanged.
+ *
+ * ► **THE GROUP INDICES MUST BE REBASED AND THAT IS THE WHOLE DIFFICULTY.** A
+ *   placement's `effects` holds indices into ITS OWN animation's
+ *   `effectGroups`, so concatenating two tables without shifting the second
+ *   animation's indices would give `psyche_charging`'s glow whichever of
+ *   `psyche_up2`'s nine pulse frames sat at the same index — a wrong picture
+ *   that draws perfectly happily. The placements are copied rather than
+ *   mutated: the JSON is the player's.
+ *
+ * Returns null when a member is missing or undrawable, so a partial pack falls
+ * back to the entry clip alone rather than to nothing.
+ */
+function sequencedAnimation(pack, name) {
+  if (pack.sequenced.has(name)) return pack.sequenced.get(name);
+  const members = clipSequenceFor(name);
+  let built = null;
+  if (members.length > 1) {
+    const parts = members.map((member) => pack.animations[member]);
+    if (parts.every((animation) => isDrawable(pack, animation))) {
+      const poses = [];
+      const limbs = [];
+      const effectGroups = [];
+      for (const part of parts) {
+        const offset = effectGroups.length;
+        if (Array.isArray(part.effectGroups)) effectGroups.push(...part.effectGroups);
+        part.poses.forEach((pose, index) => {
+          poses.push(pose.map((placement) => (
+            Array.isArray(placement.effects) && placement.effects.length > 0 && offset > 0
+              ? { ...placement, effects: placement.effects.map((id) => id + offset) }
+              : placement
+          )));
+          // Pushed even when undefined, so a member with no limb table does not
+          // shift every later pose's limbs by its own length.
+          limbs.push(part.limbs?.[index]);
+        });
+      }
+      const first = parts[0];
+      const last = parts[parts.length - 1];
+      built = Object.freeze({
+        label: first.label,
+        firstFrame: first.firstFrame,
+        lastFrame: last.lastFrame,
+        effectGroups,
+        poses,
+        limbs,
+        // The union, because a continuation may reach further than its entry —
+        // the psych-up orb travels to x -121 over `psyche_charging2`, well
+        // outside `psyche_up2`'s own box.
+        bounds: parts.reduce((box, part) => (part.bounds ? {
+          xMin: Math.min(box.xMin, part.bounds.xMin), xMax: Math.max(box.xMax, part.bounds.xMax),
+          yMin: Math.min(box.yMin, part.bounds.yMin), yMax: Math.max(box.yMax, part.bounds.yMax)
+        } : box), { xMin: Infinity, xMax: -Infinity, yMin: Infinity, yMax: -Infinity }),
+        // Not decoration: a consumer looking at a 34-pose `hurt8` needs to be
+        // able to tell that the build plays it that way rather than that the
+        // extractor produced something odd.
+        playsSequence: Object.freeze([...members])
+      });
+    }
+  }
+  pack.sequenced.set(name, built);
+  return built;
+}
+
+/**
  * The animation a family should play, and the label it resolved through.
  *
  * Returns null when the pack holds nothing DRAWABLE for this family — which is
@@ -313,7 +392,10 @@ export function animationFor(pack, { family, label = null, facing = "right" } = 
   }
   for (const name of candidates) {
     const animation = pack.animations[name];
-    if (isDrawable(pack, animation)) return { label: name, animation };
+    if (!isDrawable(pack, animation)) continue;
+    // The LABEL stays the entry's, because that is what the resolver chose and
+    // what the sound bindings are keyed on. Only the poses grow.
+    return { label: name, animation: sequencedAnimation(pack, name) ?? animation };
   }
   return null;
 }

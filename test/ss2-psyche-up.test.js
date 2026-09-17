@@ -27,6 +27,7 @@
  *   writes happen after it.
  */
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { EffectKind } from "../src/team/rule-set.js";
@@ -51,7 +52,26 @@ import {
 } from "../src/team/ss2-rules.js";
 import { LabelProvenance, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 import { clipLabelsFor } from "../src/render/clip-labels.js";
+import { clipSequenceFor } from "../src/render/clip-sequences.js";
+import { animationFor, figurePackFrom } from "../src/render/extracted-figure.js";
 import { timelineFor } from "../src/render/index.js";
+
+/**
+ * The extracted pack, or null on a machine that has not run the extractor.
+ *
+ * Gated rather than required, like every other pack-bearing test here: a fresh
+ * clone has no `assets/` at all and must still run the suite green.
+ */
+const REAL_PACK = (() => {
+  try {
+    const read = (name) => JSON.parse(
+      readFileSync(new URL(`../assets/figure/${name}.json`, import.meta.url), "utf8")
+    );
+    return figurePackFrom(read("shapes"), read("animations"));
+  } catch {
+    return null;
+  }
+})();
 
 /** Level 9, so the warrior frame's `herolevel >= 7` gate is open. */
 const gladiator = (overrides = {}) => ({
@@ -379,15 +399,75 @@ test("all three clips are PLAYED, and both continuations are deliberately not", 
   for (const label of family) {
     assert.equal(timelineFor(label).recognised, true, `${label} must have a timeline or it freezes mid-bout`);
   }
-  // ► **THE DISCHARGE IS LONGER THAN THE CHARGE, from the pack's own frame
-  //   ranges**: `psyche_up` 1609-1617 and `psyche_up2` 1627-1635 are nine
-  //   frames each, `psyche_up3` 1644-1656 is thirteen. One schedule for all
-  //   three would play the discharge at the charge's length.
-  assert.ok(timelineFor("psyche_up3").durationMs > timelineFor("psyche_up").durationMs,
-    "the discharge must not play at the charge's length");
+  // ► ~~**THE DISCHARGE IS LONGER THAN THE CHARGE**, from the pack's own frame
+  //   ranges: `psyche_up` and `psyche_up2` are nine frames each, `psyche_up3`
+  //   thirteen.~~ **THE COMPARISON WAS RIGHT AND THE FRAME COUNTS WERE HALF THE
+  //   RUN — CORRECTED 2026-09-16 FROM THE BUILD'S FRAME ACTIONS.** Entering at
+  //   `psyche_up` plays to the `Stop` at 1626, so a first charge is 18 frames
+  //   and a second 17, against the discharge's 13. **The CHARGE is the longer
+  //   one**, and it should be: it is a wind-up that goes nowhere.
+  //
+  //   What this test is actually for survives the flip intact — one schedule
+  //   for all three would give them one length, and these are three lengths.
+  const lengths = family.map((label) => timelineFor(label).durationMs);
+  assert.equal(new Set(lengths).size, 3, "three clips, three lengths, or one schedule is doing all three");
+  assert.ok(timelineFor("psyche_up").durationMs > timelineFor("psyche_up3").durationMs,
+    "a charge runs on into psyche_charging, so it outlasts the discharge");
   // The continuations are matched by exact name, never by a /^psyche/ pattern.
+  // ► **AND `recognised: false` IS STILL RIGHT, FOR A NARROWER REASON THAN THE
+  //   ONE THIS LINE USED TO GIVE.** It said "nothing dispatches a
+  //   continuation". **The BUILD does** — `changeCombatants` calls
+  //   `gotoAndStop("psyche_charging")` on whichever fighter holds a counter of
+  //   2, and `psyche_charging2` at 3, for both attacker and defender
+  //   (`+0x281e`, `+0x284d`, `+0x287c`, `+0x28ab`). That is a held STANCE and
+  //   not a schedule, and THIS engine has no stance: no command it emits ever
+  //   carries the label, so a timeline for it would still be a promise nothing
+  //   here redeems. The stance is named in the handoff as its own work.
   assert.equal(timelineFor("psyche_charging").recognised, false,
-    "nothing dispatches a continuation, so giving it a schedule would promise what cannot be reached");
+    "this engine never dispatches the label, so a schedule for it would promise what nothing reaches");
+});
+
+test("A CHARGE RUNS ON INTO ITS CONTINUATION, and the glow's pulse is what proves it", () => {
+  // ► **THIS IS THE DEFECT THE `psyche_up` BUILD SHIPPED WITH, and three
+  //   handoffs recorded it as a design.** They said the two `psyche_charging*`
+  //   clips "reach nobody" because "this engine dispatches one animation per
+  //   action and has no concept of a sequence". The first half is true of the
+  //   engine; the second was never true of the BUILD. Export 1241 carries no
+  //   terminating action between 1609 and 1625, so `gotoAndPlay("psyche_up")`
+  //   runs to the `Stop` at 1626 and plays `psyche_charging` as the second half
+  //   of one performance. `tools/clip-sequences.mjs` re-derives it.
+  assert.deepEqual([...clipSequenceFor("psyche_up")], ["psyche_up", "psyche_charging"]);
+  assert.deepEqual([...clipSequenceFor("psyche_up2")], ["psyche_up2", "psyche_charging2"]);
+  // ► **AND THE DISCHARGE HAS NONE**, which is the control: if the table simply
+  //   paired everything up, this would have one too.
+  assert.deepEqual([...clipSequenceFor("psyche_up3")], ["psyche_up3"]);
+
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THE PULSE COMPLETES, AND TRUNCATION IS VISIBLE IN ONE NUMBER.** The
+  //   pack's only tween is the outer cyan glow over `psyche_up2`: `strength`
+  //   falls 2.699 -> 0.977 across its nine frames and climbs back to exactly
+  //   2.699 on `psyche_charging2`'s first. Cutting at the label boundary
+  //   stopped it mid-climb at 2.270 and snapped the glow back.
+  const { animation } = animationFor(REAL_PACK, { family: "psyche", label: "psyche_up2" });
+  assert.equal(animation.poses.length, 17, "nine frames of charge and eight of continuation");
+  const cyanAt = (index) => {
+    const placement = animation.poses[index].find((one) => one.effects?.length > 0);
+    const group = animation.effectGroups[placement.effects[0]];
+    return group.filters.find((filter) => filter.colour.green === 255);
+  };
+  assert.equal(Math.round(cyanAt(0).strength * 1000), 2699);
+  assert.equal(Math.round(cyanAt(5).strength * 1000), 977, "the trough is in the entry clip");
+  assert.equal(Math.round(cyanAt(8).strength * 1000), 2270, "where the old truncation left it");
+  assert.equal(Math.round(cyanAt(9).strength * 1000), 2699, "and the continuation closes the loop");
+  // ► **THE INDEX HAD TO BE REBASED OR THIS WOULD READ 2,699 BY ACCIDENT.** A
+  //   placement's `effects` indexes its OWN animation's table; `psyche_up2`'s
+  //   entry 0 is also blur 22 / strength 2.699. Pinning the BLUR as well is
+  //   what makes the two distinguishable: 22 at the start, 13 at the end.
+  assert.equal(cyanAt(0).blurX, 22);
+  assert.equal(cyanAt(9).blurX, 13, "an unrebased index would give 22 here and look right");
 });
 
 /* ------------------------------------------------------------------ *

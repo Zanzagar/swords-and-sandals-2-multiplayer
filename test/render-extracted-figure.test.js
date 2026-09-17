@@ -645,8 +645,18 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   //   as blocked on an owner decision about "what those spells ARE";
   //   `psyche_up` is not a spell but a vanilla ACTION the battle map specifies
   //   in 31 places, and building the verb is what made the clips reachable.
-  //   The two `psyche_charging*` continuations stay declared unplayed — this
-  //   engine dispatches one animation per action, never a sequence.
+  //
+  //   **And 76/25 -> 77/24 later the same day, over `knockback`.** This file
+  //   had it in `supersededBySibling`: "`knockback` the LABEL is a separate
+  //   6-frame clip from `knockback_mov` and `shove`, which are what the family
+  //   actually plays." **Backwards.** `damagecharacter` calls
+  //   `gotoAndPlay("knockback")` at `+0x1b4f` and `+0x1bc0` and NOTHING
+  //   dispatches `knockback_mov` — it is reached only by running off the end of
+  //   `knockback`, which has no terminating action of its own. So this engine
+  //   had been drawing the second half of a knockback and never the first.
+  //
+  //   The four `continuations` stay declared unplayed and the word now means
+  //   UNDISPATCHED: `clip-sequences.js` plays all four, as the tail of a run.
   const families = [
     "standing", "rest", "block", "defend",
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
@@ -661,9 +671,18 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   const both = [...mapped].filter((label) => declared.has(label));
   assert.deepEqual(both, [], "a label cannot be both played and declared unplayed");
 
-  assert.equal(mapped.size, 76);
-  assert.equal(declared.size, 25);
+  assert.equal(mapped.size, 77);
+  assert.equal(declared.size, 24);
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
+
+  // ► **THE ENTRY IS FIRST IN ITS FAMILY, and the order is what `animationFor`
+  //   falls through.** `knockback` ahead of `knockback_mov` is the whole
+  //   correction: put the continuation first and the engine draws the tail of
+  //   the performance and calls it the performance.
+  assert.equal(clipLabelsFor("knockback")[0], "knockback",
+    "the build dispatches `knockback`; `knockback_mov` is what it runs on into");
+  assert.deepEqual([...UNMAPPED_CLIP_LABELS.supersededBySibling], [],
+    "the one entry in this bucket was there backwards and is retracted");
 
   // ► **THE DEFENCE SYSTEM IS BUILT, and this used to assert the opposite.**
   //   All thirteen `defend` clips are now PLAYED — `defender_blocked()` picks
@@ -814,7 +833,7 @@ function glowPackOf({
 const paintGlow = (pack, options = {}) =>
   paintExtractedFigure(pack, { family: "standing", label: "Standing", at: 0, height: 1, ...options });
 
-test("TEN OF THE TWELVE EFFECT GROUPS ARE REACHABLE NOW; the other two are continuations", () => {
+test("ALL TWELVE EFFECT GROUPS REACH A GLADIATOR NOW, and two of them only via a run", () => {
   // ► **THIS TEST WAS "THE FOUR CLIPS ... ARE UNREACHABLE — say it, do not
   //   discover it", AND IT DID ITS JOB ON 2026-09-16.** It pinned all four
   //   carriers as declared-unplayed so that BUILDING the psyche family would
@@ -826,17 +845,30 @@ test("TEN OF THE TWELVE EFFECT GROUPS ARE REACHABLE NOW; the other two are conti
   //   family — so `psyche_up` and `psyche_up2` are now DISPATCHED and the glow
   //   this module carries reaches a real gladiator.
   //
-  // ► **THE OTHER TWO ARE STILL UNREACHABLE AND THAT IS A DESIGN, NOT A GAP.**
-  //   `psyche_charging` and `psyche_charging2` are CONTINUATIONS — `psyche_up`
-  //   runs frames 1609-1617 straight into `psyche_charging` 1618-1626, and
-  //   neither charging clip has a `StartSound` binding while all three
-  //   `psyche_up*` do. This engine dispatches ONE animation per action and has
-  //   no concept of a sequence, so declaring them playable would promise
-  //   something nothing can reach.
+  // ► ~~**THE OTHER TWO ARE STILL UNREACHABLE AND THAT IS A DESIGN, NOT A GAP.**
+  //   This engine dispatches ONE animation per action and has no concept of a
+  //   sequence.~~ **HALF RIGHT, AND THE WRONG HALF WAS LOAD-BEARING —
+  //   CORRECTED LATER THE SAME DAY.** The engine having no sequence was true;
+  //   the BUILD having none was never checked, and it is false. Export 1241
+  //   carries no terminating action between 1609 and 1625, so
+  //   `gotoAndPlay("psyche_up")` runs to the `Stop` at 1626 and plays
+  //   `psyche_charging` as the second half of one performance.
   //
-  //   **Measured from the pack rather than asserted: 12 group entries, of which
-  //   10 sit on the two clips now dispatched (1 on `psyche_up`, 9 on
-  //   `psyche_up2`) and 2 on the continuations.**
+  //   **The evidence this paragraph offered was the wrong evidence too.** "No
+  //   `StartSound` binding" is true of 21 of the 101 labels and of only four
+  //   continuations; `block`, `standing` and `taunted` are silent and continue
+  //   nothing, while `hurt8` and `knockback` are silent ENTRY points whose
+  //   sound fires on the continuation. Silence never said where the playhead
+  //   stops. `tools/clip-sequences.mjs` reads that from the frame actions.
+  //
+  //   **So all twelve groups reach a gladiator**, and the two that used to be
+  //   stranded are reached the way the build reaches them — by running on,
+  //   never by being dispatched, which is why both labels are still declared
+  //   undispatched below.
+  //
+  //   **Measured from the pack rather than asserted: 12 group entries, 10 on
+  //   the two clips dispatched directly (1 on `psyche_up`, 9 on `psyche_up2`)
+  //   and 2 on the continuations that their runs now carry.**
   const declared = new Set(allUnmappedLabels());
   for (const label of ["psyche_up", "psyche_up2"]) {
     assert.equal(declared.has(label), false,
@@ -858,11 +890,32 @@ test("TEN OF THE TWELVE EFFECT GROUPS ARE REACHABLE NOW; the other two are conti
   //   groups that a dispatched clip actually carries, so a future change that
   //   keeps the family and loses the art fails here.
   const groupsOn = (label) => REAL_ANIMATIONS[label].effectGroups.length;
-  const reachable = groupsOn("psyche_up") + groupsOn("psyche_up2");
-  const stranded = groupsOn("psyche_charging") + groupsOn("psyche_charging2");
-  assert.equal(reachable, 10, "the dispatched psyche clips no longer carry ten effect groups");
-  assert.equal(stranded, 2, "the continuations no longer carry two effect groups");
-  assert.equal(reachable + stranded, 12, "the pack's effect-group total moved");
+  const dispatched = groupsOn("psyche_up") + groupsOn("psyche_up2");
+  const viaRun = groupsOn("psyche_charging") + groupsOn("psyche_charging2");
+  assert.equal(dispatched, 10, "the dispatched psyche clips no longer carry ten effect groups");
+  assert.equal(viaRun, 2, "the continuations no longer carry two effect groups");
+  assert.equal(dispatched + viaRun, 12, "the pack's effect-group total moved");
+
+  // ► **AND THE COUNT THAT COULD NOT HAVE VARIED BEFORE: what the ENGINE
+  //   reaches, not what the JSON holds.** Every assertion above reads
+  //   `animations.json` directly, so all of them stayed green on the day the
+  //   engine was cutting two of these clips off — the test measured the art and
+  //   not the reach. This walks the two run entries the way the renderer does.
+  const pack = REAL_SHAPES ? figurePackFrom(REAL_SHAPES, REAL_ANIMATIONS) : null;
+  if (!pack) return;
+  const reached = new Set();
+  for (const label of ["psyche_up", "psyche_up2", "psyche_up3"]) {
+    const { animation } = animationFor(pack, { family: "psyche", label });
+    for (const pose of animation.poses) {
+      for (const placement of pose) {
+        for (const id of placement.effects ?? []) reached.add(JSON.stringify(animation.effectGroups[id]));
+      }
+    }
+  }
+  // 12 table entries, 10 of them DISTINCT records — the pack repeats the
+  // blur-22 entry across `psyche_up`, `psyche_charging` and `psyche_up2`, which
+  // `tools/extract-figure.mjs` records in its own invoice as 12 vs 10.
+  assert.equal(reached.size, 10, "every distinct effect record in the pack is drawn on some frame");
 });
 
 test("a pack with NO effect groups and NO enchantments emits the operations it always did", () => {

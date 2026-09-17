@@ -2937,6 +2937,70 @@ defence directions 1–12 (395–553), `Defend20` (572), death variants
 (2072–2126), and spell transformations (2147–2200). Animation labels are UI
 effects, not authoritative state transitions.
 
+**A LABEL IS NOT A CLIP: SEVEN OF THE 101 RUN ON PAST THEIR OWN SPAN (derived
+2026-09-16 from the frame actions, reproducible with
+`tools/clip-sequences.mjs`).** In AVM1 a `gotoAndPlay("x")` runs FORWARD from
+`x`'s frame until an action stops it or jumps away. The paragraph above lists
+the labels; it does not say where playback stops, and for seven of them it
+stops later than the next label:
+
+| entry | span | runs to | ending | runs on into |
+| --- | --- | --- | --- | --- |
+| `initialize` | 1 | 32 | `GotoLabel Standing` | `Standing` (then endless) |
+| `Hurt8` | 1250–1265 | 1283 | `Stop` | `Hurt9` |
+| `celebrate1` | 1400–1408 | 1426 | `GotoLabel celebrate1a` | `celebrate1a` (then endless) |
+| `knockback` | 1428–1433 | 1446 | `Stop` | `knockback_mov` |
+| `psyche_up` | 1609–1617 | 1626 | `Stop`, `struck = true` | `psyche_charging` |
+| `psyche_up2` | 1627–1635 | 1643 | `Stop`, `struck = true` | `psyche_charging2` |
+| `burning` | 1947–1948 | 1963 | `gotoAndPlay("Standing")`, `struck = true` | `flame_repeat` ×2 |
+
+So `defender_hurt` with `attack_direction` 8 plays **34 frames** where direction
+9 plays 18; `damagecharacter`'s knockback plays **19** and not the 13 of
+`knockback_mov` alone; a first psych-up charge is **18 frames** and a second
+**17**. The burn is a counted cycle: frame 1947 sets `this.burncycle = 1` and
+frame 1963 — **the only conditional in the whole 2222-frame clip** — reads
+`if (burncycle >= 2) { struck = true; gotoAndPlay("Standing") } else
+{ burncycle++; gotoAndPlay("flame_repeat") }`, so the body runs twice, 2 + 15 +
+15 frames. The repeat count of 2 is read by hand from those two sites; the tool
+flags the run as looping and does not evaluate the counter.
+
+Three things make this easy to get wrong, and each cost a wrong table:
+
+- **A self-loop terminates the run.** `Standing`, `StepBack`, `StepForward`,
+  `BlockForward`, `RunBack`, `RunForward` and `celebrate1a` end with
+  `GotoLabel(<self>) | Play`. Counting those as run-ons joins `Standing` to
+  three gaits and a charge.
+- **The receiver decides.** Almost every animation frame opens by driving the
+  face — `head.eyes.gotoAndPlay("blink")` on 1609 and 1627,
+  `head.eyes.gotoAndPlay("Angry")` and `head.mouth.gotoAndPlay("Scared")` on
+  1644. Same opcode, same method name, a child clip. A decoder that does not
+  resolve the receiver ends every label's run at its own first frame.
+- **`Hurt8` may be an authoring slip rather than a design.** Every one of the
+  thirteen hurt labels is preceded by a `Stop` on the immediately preceding
+  frame except `Hurt9`. The other six run-ons are entry-stub-plus-body pairs.
+  The build plays 34 frames for direction 8 either way.
+
+`this.struck = true` is written at 1626, 1643, 1656 and 1963 — the END of a run
+rather than the end of the named clip — so the `attacker.struck` report-back
+the psyche counter waits on (`+0x6761`) fires after `psyche_charging` has
+played, and a burn hands back after its second flame pass. Frame 1608, which
+ends `snipe`, sets `this.fired = false` instead.
+
+**`psyche_charging` AND `psyche_charging2` ARE ALSO A HELD STANCE, dispatched
+with `gotoAndStop`.** `changeCombatants` poses both fighters from the counter at
+the top of every turn — `+0x281e`
+`if (game_attacker.psyche_up == 2) attacker.gotoAndStop("psyche_charging")`,
+`+0x284d` the same at 3 for `psyche_charging2`, and `+0x287c` / `+0x28ab` for
+the defender. A gladiator holding a charge therefore STANDS in the charged pose
+instead of `Standing`, and the counter values line up: after one press it is 2,
+after two it is 3. This is a different mechanism from a run — a persistent pose
+between actions, not one performance within one.
+
+**`knockback_mov` has exactly one dispatch site of its own**, `+0x7c5e` in
+`attacker.onEnterFrame`, immediately after `cast_spell_icon(attacker, 39, 2)` —
+a spell path. `damagecharacter`'s two sites (`+0x1b4f`, `+0x1bc0`) name
+`"knockback"`.
+
 The panel and timeline are hard-coded for two sides. The 2v2/3v3 adapter needs
 a slot layout and per-combatant widgets; it cannot safely clone variables named
 only hero/villain and expect the original callbacks to target the right unit.
