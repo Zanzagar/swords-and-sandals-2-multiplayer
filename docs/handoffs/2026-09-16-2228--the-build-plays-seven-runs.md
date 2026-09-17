@@ -6,7 +6,7 @@ branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
 commits:      `4d2ee1b..HEAD` — `67dfc01` (the seven runs), `8bc27c0` (the two
-              Codex findings and this handoff), `db46bf2`-ish (the index row),
+              Codex findings and this handoff), `70d0181` (the index row), `877198f` (the suite line),
               plus this line's own. **Re-measure with `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
               the exit code are the gate. Measured AFTER the last commit of this
