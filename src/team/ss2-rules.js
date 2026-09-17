@@ -75,7 +75,15 @@
  *     `taunt_effect == 1` sets `attack_direction = 20` and calls
  *     `checkattackroll`, while `2` runs a charisma-scaled knockback or sets
  *     `game_defender.taunted1 = true` (`+0x6ad9`) and never reaches the
- *     dispatcher at all.
+ *     dispatcher at all. **The discriminator between those two arms, which the
+ *     map left open until 2026-09-17, is the DEFENDER'S WEAPON MODE**:
+ *     `equipped_weapon == 1` (`+0x69a7`) is melee and takes a `charisma * 25`
+ *     shove; anything else is the bow and is made to flee. **And both clips
+ *     fire BEFORE the roll** — `taunt` on the actor, `taunted` on the target —
+ *     so a FAILED taunt still animates both. Fully derived in the battle map
+ *     under "The taunt phase, in full"; what is left to build is the two
+ *     pre-samples, the two effect arms, and a `taunted1` flee consumption that
+ *     `SS2_STATUS_PHASE_FOR_FLAG` does not yet carry.
  *
  * ## What reaches the arithmetic, and how
  *
@@ -2406,9 +2414,20 @@ export const SS2_PSYCHE_UP = Object.freeze({
   /** The value at which the press fires the range-gated grievous. */
   dischargeAt: 3,
   /**
-   * ► **THE FLOOR IS 1 AND NOT 0.** Both resets write `= 1` — `nextphase`
-   *   `+0x35c7`-`+0x35ea` on any decision that is not `psyche_up`, and
-   *   `damagecharacter` `+0x1be4` to the defender. So a gladiator who has taken
+   * ► **THE FLOOR IS 1 AND NOT 0.** ~~Both resets write `= 1`~~ **ALL EIGHT DO —
+   *   the census is complete as of 2026-09-17, and this engine and the battle
+   *   map between them had THREE of them.** `nextphase` `+0x35c7`-`+0x35ea` on
+   *   any decision that is not `psyche_up`, `damagecharacter` `+0x1be4` to the
+   *   defender and `+0x16b5`/`+0x16c2` to both on a grievous, `+0x6738` the
+   *   discharge's own write-back — **plus three nothing here recorded**:
+   *   `+0x148e` (`magic_damage_character`, the defender), `+0x6ac8` (a landed
+   *   `taunt` against a bow-mode defender) and `+0x7a6a` (`cast_whirlwind`'s
+   *   write-back, which has NO matching increment, so a whirlwind caster is
+   *   left at 1 where a discharger is left at 2). **None of the three is live**
+   *   — this engine has no magic-damage, taunt or whirlwind verb — and each
+   *   goes live the day one is built. See the battle map's write census.
+   *
+   *   So a gladiator who has taken
    *   any other turn is at 1, which is what "fresh" means here. What the build
    *   holds before the FIRST write is a map silence
    *   (`psyche-up-initialisation`), and this models the reset rather than
