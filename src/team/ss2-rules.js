@@ -2411,6 +2411,27 @@ export const SS2_PSYCHE_UP = Object.freeze({
   rangeBonus: 50
 });
 
+/**
+ * Is a discharge in range of this target?
+ *
+ * ► **ONE EXPRESSION, TWO CALLERS, BECAUSE A SECOND COPY IS A SECOND CHANCE TO
+ *   BE WRONG.** The resolver gates the discharge on it — out of range it
+ *   decides nothing, keeps the charge and says `outOfRange` — and
+ *   `suggestAction` needs the same answer to avoid building a charge it cannot
+ *   spend. `suggestAction`'s own comments make this argument twice about the
+ *   walk arms ("a second distance computation here would be a second chance to
+ *   be wrong"); this is the same rule applied to the same file.
+ *
+ * The gate is `round(reach + 50)`, which is 50 units MORE generous than melee
+ * reach — so anything a melee verb can hit, a discharge can reach. Measured
+ * over 231 in-reach cases: 0 out-of-range presses.
+ */
+function ss2PsycheDischargeInRange(actor, target) {
+  const separation = ss2FightDistance(actor, target);
+  if (!Number.isFinite(separation)) return false;
+  return separation <= Math.round(ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus);
+}
+
 /** The three melee verbs, which are the ONLY ones `closerange_warrior` wires. */
 const MELEE_ATTACKS = Object.freeze([
   Ss2ActionType.QUICK_ATTACK,
@@ -3987,6 +4008,54 @@ export function createSs2TeamRules({
   observer = null,
   fixtureReplay = false,
   /**
+   * Whether an AI opponent will spend turns building a psych-up charge.
+   *
+   * ► **OFF BY DEFAULT, AND THAT IS A MEASUREMENT RATHER THAN A HEDGE.**
+   *   Damage dealt per actor turn over 40 seeded bouts, an even level-9 pair:
+   *   quick 17.82, normal 15.26, **charge-and-discharge 11.53**, power 11.44.
+   *   Swept over five stat-lines the charge won exactly one — a heavy weapon,
+   *   at ratio 1.09 — and lost the rest at 0.59 to 0.73 of the best attack.
+   *   **Charging is a losing move on damage per turn**, so an AI that maximised
+   *   damage would never do it, and an arm that made it do it anyway would be
+   *   dressing a preference up as arithmetic.
+   *
+   *   It is therefore a CHARACTER TRAIT and not an optimisation: an opponent
+   *   who winds up for a grievous blow is more interesting to fight and
+   *   slightly worse at fighting. Owner's call, 2026-09-16, taken against the
+   *   measurement that the verb was chosen **0 times in 6,000 AI actions** and
+   *   that `psyche_up`, its two clips, the charged stance and its glow
+   *   therefore had a live population of zero outside human play.
+   *
+   * ► **IT IS IN THE RULE-SET ID WHEN ON**, exactly as `crowdPatience` and
+   *   `rankStride` are, because `toTeamWireState` carries only the id into the
+   *   hash — two peers running different settings would agree on every hash and
+   *   then diverge at the first charge. Off by default means every pinned hash,
+   *   every golden and every census keeps the id it was taken against.
+   *
+   * ► **WHAT IT ACTUALLY DOES, measured over 40 seeded 3v3 bouts on the demo
+   *   roster, so it can be tuned against a number rather than an impression:**
+   *
+   *   ```text
+   *     aiCharges   actions/bout   charges   share   discharges   bouts resolved
+   *     false             183.9          0    0.0%            0           40/40
+   *     true              198.7       2433   30.6%          974           40/40
+   *   ```
+   *
+   *   **Every charge came from the two bow slots and none from the other
+   *   four**, which is the build's own level gate showing through: the warrior
+   *   controller frames wire `psyche_up` at `herolevel >= 7` and the archer
+   *   frames at `>= 3`, and the demo gladiator is level 4. So on the shipped
+   *   roster this trait is an ARCHER behaviour whether or not anyone intended
+   *   that, and a warrior demo would show nothing at all.
+   *
+   *   30.6% is high — those two gladiators wind up on most of their turns,
+   *   because an archer at range is rarely wounded and the gate below is full
+   *   health. Bouts run 8% longer and all 40 still resolve. **Stated rather
+   *   than tuned**: the number is the owner's to move, and moving it means
+   *   changing the gate below, not this comment.
+   */
+  aiCharges = false,
+  /**
    * Turns of grace before the crowd turns on the fighters. Defaults to
    * `SS2_CROWD.patience`; `Infinity` disables the toll outright.
    *
@@ -4114,7 +4183,12 @@ export function createSs2TeamRules({
   // different engine from the shipped one and its id has to say so.
   const strideSuffix = rankStride === SS2_ARENA.rankStride ? "" : `-rank-${rankStride}`;
   const backSuffix = backAttackBonus === SS2_BACK_ATTACK_BONUS ? "" : `-back-${backAttackBonus}`;
-  const ruleSetId = `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}`;
+  // Same rule again, and for the same reason: an AI that charges makes
+  // different decisions from one that does not, so two peers running different
+  // settings would agree on every hash and then diverge at the first charge.
+  const chargeSuffix = aiCharges ? "-charges" : "";
+  const ruleSetId =
+    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}`;
 
   return defineTeamRuleSet({
     // The mode is in the id because `toTeamWireState` carries only id,
@@ -5234,7 +5308,7 @@ export function createSs2TeamRules({
       if (request.type === Ss2ActionType.PSYCHE_UP) {
         const separation = ss2FightDistance(actor, target);
         const gate = Math.round(ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus);
-        if (!Number.isFinite(separation) || separation > gate) {
+        if (!ss2PsycheDischargeInRange(actor, target)) {
           const transition = phaseTransitionEffects(actor, {
             staminaCost: Math.round(actor.stats.strength * PSYCHE_UP_DISCHARGE.strengthFactor),
             // Still a `psyche_up` decision even though it decided nothing, so
@@ -5810,6 +5884,124 @@ export function createSs2TeamRules({
         [Ss2ActionType.SNIPE]: (chances.snipe / 100) * attacker.min_damage,
         [Ss2ActionType.BASH_ATTACK]: (chances.bash / 100) * Math.ceil(attacker.min_damage / 2)
       };
+
+      // ► **THE AI CHARGES NOW, AND IT DOES IT IN TWO DIFFERENT SITUATIONS FOR
+      //   TWO DIFFERENT REASONS.** Owner's decision, 2026-09-16, taken against
+      //   a measurement rather than an argument: over 20 AI-vs-AI bouts and
+      //   6,000 actions the verb was chosen **0 times**, so `psyche_up`, its
+      //   two clips of art, the charged stance and the glow all had a live
+      //   population of zero outside human play — the same failure this file
+      //   recorded about the twelve figure-pack effect groups.
+      //
+      //   **It is NOT an `ATTACK_BANDS` entry and must never become one.**
+      //   Membership means "always attacks"; two of three presses draw nothing,
+      //   and a band entry would put samples on the ordered channel the build
+      //   never takes and desynchronise every peer replaying the same tape.
+      //   This arm reaches the same ranking by a different door.
+      // ► **NO RANGE CHECK HERE, AND THAT IS A DELETION RATHER THAN AN
+      //   OMISSION.** A first version guarded this on
+      //   `ss2PsycheDischargeInRange(actor, engaged)`, reasoning that a press
+      //   out of range decides nothing and keeps the charge, so a gladiator
+      //   who could not reach anybody would wind up forever instead of
+      //   closing. **Measured: adding it changed the charge count by zero**
+      //   (1,494 of 4,830 actions either way), and a mutation check then
+      //   showed removing it broke no test. It is unreachable: the
+      //   `!attackOnOffer` arm above RETURNS a step whenever nothing is in
+      //   reach, so by the time the ranking runs an attack is always on offer
+      //   and `engaged` is always a foe that some attack verb can hit.
+      //
+      //   **Recognised by the VOCABULARY rather than by re-deriving the
+      //   geometry**, which is the same argument the walk arms above make
+      //   twice — and the reason a second distance test here would have been a
+      //   second chance to be wrong rather than a safety net. The gate that
+      //   matters is the resolver's, which still runs on every press.
+      const psycheOption = aiCharges
+        ? options.find((option) => option.type === Ss2ActionType.PSYCHE_UP)
+        : undefined;
+      if (psycheOption) {
+        const counter = Math.max(SS2_PSYCHE_UP.floor, resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor));
+        // The discharge's own numbers, from the dispatcher rather than from
+        // here: `direction === 30` is `chances.normal` against
+        // `ceil(max_damage * 1.5)`, with a `character_level * 10` floor.
+        let grievous = Math.ceil(attacker.max_damage * 1.5);
+        if (grievous <= 1) grievous = attacker.character_level * 10;
+
+        if (counter >= SS2_PSYCHE_UP.dischargeAt) {
+          // ► **A READY CHARGE IS THE BEST SWING ON THE TABLE, and that is
+          //   arithmetic rather than a preference.** The discharge rolls at
+          //   `chances.normal` for `1.5 * max_damage`, so it beats
+          //   `normal_attack` by exactly half again at the same chance, and it
+          //   strictly dominates `power_attack`, which rolls `max_damage` at
+          //   the WORSE `chances.power`. It joins the table and wins on merit.
+          //
+          //   **And not firing it forfeits it**: `phaseTransitionEffects`
+          //   resets the counter on every decision that is not `psyche_up`, so
+          //   a charged gladiator who swings instead loses three turns' work.
+          //   Measured here, not assumed — counter 3 -> 1 after any attack,
+          //   rest or walk.
+          expected[Ss2ActionType.PSYCHE_UP] = (chances.normal / 100) * grievous;
+        } else {
+          // ► **BUILDING A CHARGE IS PRICED PER PRESS, WHICH IS THE HONEST
+          //   COMPARISON AND THE ONE THAT USUALLY SAYS NO.** A charge from
+          //   `counter` costs `dischargeAt - counter + 1` turns and buys one
+          //   grievous, so its value per turn is the discharge's expected
+          //   damage divided by the presses it takes. Against the same table
+          //   the ordinary verbs are ranked in, that loses for a light weapon
+          //   and wins for a heavy one — which is the measured shape (five
+          //   stat-lines, the charge won one) and a good one for a game: the
+          //   gladiator with the huge slow blade is the one who winds up.
+          //
+          //   **The presses are counted from where the counter IS**, so a
+          //   gladiator who has already begun is likelier to continue than to
+          //   have begun — which is correct, because every other action
+          //   forfeits the charge outright (measured: counter 3 -> 1 after any
+          //   attack, rest or walk).
+          const presses = SS2_PSYCHE_UP.dischargeAt - counter + 1;
+          // ► **AND IT MUST BE AFFORDABLE AND SURVIVABLE, or the turns are
+          //   thrown away.** Every landed blow resets the DEFENDER's counter
+          //   (`damagecharacter`), so charging under a foe who can reach you is
+          //   usually wasted. The incoming proxy is deliberately crude and
+          //   cannot throw: the foe's own declared `max_damage`, 0 for a
+          //   combatant that declares none, in which case the test passes.
+          const incoming = resourceValue(engaged, "max_damage", 0) * presses;
+          const survivesTheWindUp = actor.health > incoming;
+          const affordable = resourceValue(actor, "staminaleft", 0)
+            > Math.round(actor.stats.strength * PSYCHE_UP_DISCHARGE.strengthFactor) * presses;
+          if (survivesTheWindUp && affordable) {
+            expected[Ss2ActionType.PSYCHE_UP] = (chances.normal / 100) * grievous / presses;
+          }
+          // ► **AND THE TRAIT OVERRIDES THE ARITHMETIC, WHICH IS THE WHOLE
+          //   POINT OF THE FLAG AND HAS TO BE SAID PLAINLY.** Measured on the
+          //   demo roster: a charge is worth 4.33 damage a turn against 7.92
+          //   for the best ordinary swing, so the comparison above declines
+          //   every time and an AI ruled by it would never charge — which is
+          //   the state this flag exists to leave. **The owner's decision was
+          //   to teach the AI to charge; the arithmetic says charging is worse;
+          //   both are true.** So `aiCharges` buys a CHARACTER, not an
+          //   optimisation: an opponent who winds up is more interesting to
+          //   fight and slightly worse at fighting.
+          //
+          //   **AN UNWOUNDED GLADIATOR WINDS UP; A WOUNDED ONE FIGHTS.** Full
+          //   health is the gate rather than an invented fraction, and it is
+          //   the right shape rather than a convenient one: taking a blow
+          //   RESETS the charge (`damagecharacter`), so the moment a gladiator
+          //   is wounded is exactly the moment a wind-up stops being likely to
+          //   pay. It also means a charge follows a rest, which is when a
+          //   gladiator has the turns to spare.
+          if (survivesTheWindUp && affordable && actor.health >= actor.maxHealth) {
+            expected[Ss2ActionType.PSYCHE_UP] = Number.MAX_SAFE_INTEGER - 1;
+          }
+          // ► **AND A FINISHER OVERRIDES THE AVERAGE.** `1.5 * max_damage` can
+          //   end a gladiator no ordinary swing can reach, and a kill is worth
+          //   more than the damage that delivers it — which is the one thing a
+          //   damage-per-turn table cannot express.
+          const bestOrdinaryMax = Math.max(attacker.max_damage, attacker.min_damage);
+          if (survivesTheWindUp && affordable
+            && grievous >= engaged.health && bestOrdinaryMax < engaged.health) {
+            expected[Ss2ActionType.PSYCHE_UP] = Number.MAX_SAFE_INTEGER;
+          }
+        }
+      }
       // Ties break toward the heavier attack, deterministically. The archer's
       // verbs join the list rather than forming a second one, because a
       // gladiator is never offered both sets — the controller frame it is on
@@ -5817,6 +6009,12 @@ export function createSs2TeamRules({
       // ahead of `snipe` for the same reason `power` is ahead of `quick`: it is
       // the heavier of the two.
       const preference = [
+        // FIRST, so a tie goes to the charge. There is one tie that matters and
+        // it is not hypothetical: a discharge whose expected value happens to
+        // equal `power_attack`'s should be taken, because it also LEAVES a
+        // partial charge behind (the counter lands on 2, one press from the
+        // next discharge) while the swing resets it to the floor.
+        Ss2ActionType.PSYCHE_UP,
         Ss2ActionType.POWER_ATTACK,
         Ss2ActionType.NORMAL_ATTACK,
         Ss2ActionType.QUICK_ATTACK,
@@ -5826,7 +6024,14 @@ export function createSs2TeamRules({
       ];
       let best = null;
       for (const type of preference) {
-        const option = options.find((entry) => entry.type === type && entry.targetId === engaged.id);
+        // ► **`psyche_up` IS SELF-TARGETED AND THE OTHERS ARE NOT**, so the
+        //   `targetId === engaged.id` filter would drop it every time. It is
+        //   matched on type alone, and only when the arm above priced it —
+        //   `expected` has no entry otherwise, and an unpriced verb must not be
+        //   reachable by a `undefined > undefined` comparison.
+        const option = type === Ss2ActionType.PSYCHE_UP
+          ? (expected[type] === undefined ? null : psycheOption)
+          : options.find((entry) => entry.type === type && entry.targetId === engaged.id);
         if (!option) continue;
         if (best === null || expected[type] > expected[best.type]) best = option;
       }
