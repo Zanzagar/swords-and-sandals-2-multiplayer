@@ -52,22 +52,30 @@
  *   happened on 2026-09-15, and three agents aimed at different questions each
  *   broke this paragraph independently.
  *
- * ► **WHAT IS GENUINELY DEFERRED IS TWO, AND ONE OF THE TWO REASONS IS ALSO
- *   HALF WRONG.**
- *   - `psyche_up` — ~~needs a three-turn counter and a position model~~. **The
- *     POSITION MODEL LANDED 2026-09-11** (`567eb41`, "Gladiators stand
- *     somewhere, and must walk to reach each other"): `ss2Reach`,
- *     `ss2FightDistance`, `ss2WalkDestination`, `ss2ArcherMinimumRange`,
- *     `ss2ShotBlocked` and `ss2FacingEffects` are all exported and the ranged
- *     trio already gates on them. **Only the three-turn counter is missing**,
- *     and a per-combatant NUMBER is a resource — the same channel `ammo_left`
- *     and `criticalhit` used on 2026-09-13. See `SS2_RESOURCE_NAMES`, and read
- *     `weapon_range`'s note on why a name may be deliberately ABSENT from
- *     `SS2_RESOURCE_DEFAULTS` before adding one: a defaulted name moves every
- *     golden replay hash and an undefaulted one does not.
+ * ► ~~**WHAT IS GENUINELY DEFERRED IS TWO.**~~ **ONE. AND THIS PARAGRAPH WENT
+ *   STALE AGAIN — THE SECOND TIME, IN THE PARAGRAPH WHOSE WHOLE SUBJECT IS
+ *   GOING STALE.** It was rewritten on 2026-09-15 to say two were left;
+ *   `psyche_up` shipped on 2026-09-16 (`b201486`) and this line was not
+ *   touched. **A header that documents its own staleness and then repeats it is
+ *   worth less than one that says nothing**, because it teaches a reader to
+ *   trust it.
+ *   - ~~`psyche_up` — needs a three-turn counter and a position model.~~
+ *     **BUILT 2026-09-16.** `Ss2ActionType.PSYCHE_UP` resolves, `legalActions`
+ *     offers it on every controller frame, the counter is a resource with no
+ *     default (which is what kept all 23 golden replay hashes still), and the
+ *     charged stance and its glow reach the screen.
  *   - `taunt` — the candidate implements only the post-`checkattackroll` arm,
  *     so it would consume the wrong number of samples. **This one is still
- *     true**; it is the only entry in this paragraph that has not moved.
+ *     true**, and it is now the ONLY entry in this paragraph that has not
+ *     moved. The map has the missing half in full: `diceroll =
+ *     randomBetween(1, 100)` at `+0x6921`, succeeding on
+ *     `diceroll < game_attacker.taunt_percentage` (`+0x694b`, a DIRECT
+ *     comparison and not the dispatcher's `100 - chance` form), then
+ *     `taunt_effect = randomBetween(1, 2)` at `+0x6952` — of which only
+ *     `taunt_effect == 1` sets `attack_direction = 20` and calls
+ *     `checkattackroll`, while `2` runs a charisma-scaled knockback or sets
+ *     `game_defender.taunted1 = true` (`+0x6ad9`) and never reaches the
+ *     dispatcher at all.
  *
  * ## What reaches the arithmetic, and how
  *

@@ -1752,6 +1752,78 @@ tape-injected, because the direction is assigned *before* the branch's own
 and `checkattackroll` is where the capture window opens. No tape slot can reach
 the direction. It is recorded, never dictated.
 
+**THE `psyche_up` COUNTER'S COMPLETE WRITE CENSUS (derived 2026-09-17; this
+document and the engine between them had three of the eight).** Every write in
+the battle overlay's frame-52 block sets the counter to 1; the only increment is
+`+0x6761`. Enumerated rather than accumulated, because three sessions have each
+added one site and none of them asked how many there were:
+
+| site | function | whose counter | fires when |
+| --- | --- | --- | --- |
+| `+0x148e` | `magic_damage_character` | defender | any magic damage lands (the write sits directly after `hitpoints -= damage`) |
+| `+0x16b5` | `damagecharacter`, grievous arm | defender | a grievous blow lands |
+| `+0x16c2` | `damagecharacter`, grievous arm | attacker | a grievous blow lands |
+| `+0x1be4` | `damagecharacter`, knockback arm | defender | a landed blow with force |
+| `+0x35e0` | `nextphase` | actor | any decision that is not `psyche_up` |
+| `+0x6738` | `psyche_up` discharge | attacker | the discharge writes back |
+| `+0x6ac8` | `taunt`, `taunt_effect == 2` against a bow-mode defender | defender | a landed taunt |
+| `+0x7a6a` | `cast_whirlwind` write-back | attacker | after its own `checkattackroll` |
+
+Three of those are recorded nowhere else: `+0x148e`, `+0x6ac8` and `+0x7a6a`.
+**None of the three changes shipped behaviour**, because this engine has no
+magic-damage, taunt or whirlwind verb — but each becomes live the moment one is
+built, and `cast_whirlwind`'s `+0x7a6a` has NO matching increment, so a
+whirlwind caster is left at 1 where a psych-up discharger is left at 2.
+
+### The taunt phase, in full (byte-derived 2026-09-17)
+
+The reason `taunt` has stayed deferred is that the candidate implements only the
+post-`checkattackroll` arm. Here is the half it is missing, from
+`sprite:862[overlay]/frame:52/DoAction@0x240c7f`:
+
+```text
+  attacker.gotoAndPlay("taunt")                                    +0x6905
+  defender.gotoAndPlay("taunted")                                  +0x690c
+  diceroll = randomBetween(1, 100)                                 +0x6921
+  if (diceroll < game_attacker.taunt_percentage) {                 +0x694b
+      taunt_effect = randomBetween(1, 2)                           +0x6952
+      if (taunt_effect == 1) {                                     +0x6972
+          attack_direction = 20; checkattackroll()                 +0x6981, +0x698c
+      } else if (game_defender.equipped_weapon == 1) {             +0x69a7
+          // a MELEE defender is shoved
+          force = +/- game_attacker.charisma * 25                  +0x69d4 / +0x6a3a
+          clamp |force| to at least 20                             +0x69f2 / +0x6a62
+          if (|force| > 100) defender.gotoAndPlay("knockback")     +0x6a21 / +0x6a91
+          knockback(defender, force)                               +0x6ab1
+      } else {
+          // a BOW-mode defender is made to flee
+          game_defender.psyche_up = 1                              +0x6ac8
+          game_defender.taunted1 = true                            +0x6ad9
+      }
+  }
+```
+
+Four things a builder needs that the prose did not say:
+
+- **BOTH CLIPS FIRE BEFORE THE ROLL.** `taunt` on the actor and `taunted` on the
+  target play unconditionally, so a FAILED taunt still animates both.
+- **THE COMPARISON IS DIRECT** — `diceroll < taunt_percentage` — and not the
+  dispatcher's `100 - chance` form. Getting that backwards inverts the whole
+  action.
+- **`taunt_effect == 2` SPLITS ON THE DEFENDER'S WEAPON MODE**, which is the
+  discriminator this document previously left as "a charisma-scaled knockback
+  or sets `taunted1`". `equipped_weapon == 1` is melee and gets the shove;
+  anything else is the bow and gets the flee.
+- **THE DISPLACEMENT IS UNCONDITIONAL AND THE ANIMATION IS NOT.**
+  `knockback(defender, force)` is called whenever the shove arm is entered;
+  `defender.gotoAndPlay("knockback")` only when `|force| > 100`. That is the
+  same shape `damagecharacter` has, where the fighter is always displaced and
+  only the clip is gated.
+
+So the sample budget is **one draw always, a second only on success, and the
+dispatcher's own draws only on `taunt_effect == 1`** — which is exactly what a
+candidate implementing only the dispatcher would get wrong.
+
 ### Direction 20 is the taunt path (byte-verified; runtime-resolved 2026-08-31)
 
 Direction 20 has exactly one producer in the assignment table above, and the
