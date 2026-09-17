@@ -5,11 +5,15 @@ sessionId:    cbee9926-159f-4edb-abcb-8d75f213b5de
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
-commits:      `4d2ee1b..HEAD` — `67dfc01` (the seven runs) plus this line's own.
-              **Re-measure.**
+commits:      `4d2ee1b..HEAD` — `67dfc01` (the seven runs), `8bc27c0` (the two
+              Codex findings and this handoff), `db46bf2`-ish (the index row),
+              plus this line's own. **Re-measure with `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
-              the exit code are the gate; the total was 1958 here against 1936
-              at the start of the session.
+              the exit code are the gate. Measured AFTER the last commit of this
+              session: 1960 / fail 0 / skipped 1, exit 0, against 1936 at the
+              start. (This line first said 1958, which was measured one commit
+              too early — the index row and its test had not landed. The
+              instruction above is the one that catches that, and it caught it.)
 agentRuns:    `wf_a8359d3e-dbc` — 6 write-nothing verifiers, one named claim
               each. 6 briefs, 6 returned, 0 dead. Two of the six REFUTED.
               Plus one pinned Codex adversarial review (`gpt-6-astra`) on
