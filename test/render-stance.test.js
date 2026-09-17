@@ -28,6 +28,7 @@ import { clipLabelsFor } from "../src/render/clip-labels.js";
 import { animationFor, figureEffectGroupsFor, figurePackFrom } from "../src/render/extracted-figure.js";
 import { chooseSound, soundLabelsFor } from "../src/render/sound.js";
 import {
+  CELEBRATION_LABEL,
   STANCE_CLIPS,
   STANCE_RESOURCE,
   StanceError,
@@ -350,4 +351,69 @@ test("THE GLOW RADIUS FOLLOWS THE SCALE, which is the test `filtersScaled` waite
   // would pass a "two scales differ" check written carelessly, so this pins
   // that they differ BY THE FACTOR.
   assert.notEqual(radiiAt("stance:psyche", 2)[1], one[1]);
+});
+
+/* ------------------------------------------------------------------ *
+ * THE VICTORY CELEBRATION
+ * ------------------------------------------------------------------ */
+
+test("A SURVIVING WINNER CELEBRATES, and does not go back to breathing", () => {
+  // ► **THE BUILD'S OWN ANSWER, at two overlay frames.** Frame 65, inside the
+  //   `combatwon` span (62-73), runs
+  //   `_root.arena.gladiators.hero.gotoAndPlay("celebrate1")`; frame 77, inside
+  //   `combatlost` (74-84), runs the same on `villain`. `celebrate1` carries no
+  //   `Stop`, runs on into `celebrate1a`, and frame 1426 is
+  //   `GoToLabel("celebrate1a"); Play` — so the winner celebrates until
+  //   something moves him, and in a finished bout nothing does.
+  const of = (o, options) => idleFrameFor({ id: "h", teamId: "red", alive: true, resources: {}, ...o }, options);
+  assert.equal(of({}, { now: 0, winnerTeamId: "red" }).label, CELEBRATION_LABEL);
+  assert.equal(of({}, { now: 0, winnerTeamId: "blue" }).label, "Standing", "the loser does not");
+  assert.equal(of({}, { now: 0 }).label, "Standing", "and nor does anyone while the bout runs");
+  assert.equal(of({}, { now: 0, winnerTeamId: null }).label, "Standing");
+});
+
+test("THE DEAD DO NOT CELEBRATE, even on the winning side", () => {
+  // A 3v3 can be won with casualties. The shell draws the death pose for the
+  // dead before it asks for an idle, and this is the same belt-and-braces the
+  // charged stance carries — one call site is not a contract.
+  const fallen = { id: "h", teamId: "red", alive: false, resources: {} };
+  assert.equal(idleFrameFor(fallen, { now: 0, winnerTeamId: "red" }).label, "Standing");
+});
+
+test("THE CELEBRATION OUTRANKS THE CHARGE, because a finished bout has nothing to spend it on", () => {
+  // ► **ORDER IS THE WHOLE ASSERTION.** A gladiator can win while still
+  //   holding a charge; both idles would claim him, and the celebration is the
+  //   later fact. The control is the same combatant on the losing side, who
+  //   keeps the charged pose.
+  const charged = { id: "h", teamId: "red", alive: true, resources: { [STANCE_RESOURCE]: { value: 3 } } };
+  assert.equal(idleFrameFor(charged, { now: 0, winnerTeamId: "red" }).label, CELEBRATION_LABEL);
+  assert.equal(idleFrameFor(charged, { now: 0, winnerTeamId: "blue" }).label, "psyche_charging2");
+  assert.equal(idleFrameFor(charged, { now: 0 }).label, "psyche_charging2");
+});
+
+test("it LOOPS, and the whole run is drawn rather than just the entry clip", () => {
+  const { timeline, at } = idleFrameFor(
+    { id: "h", teamId: "red", alive: true, resources: {} }, { now: 0, winnerTeamId: "red" }
+  );
+  assert.equal(timeline.loop, true, "a victory idle must not end and hand back");
+  assert.equal(at, 0);
+  // 27 beats: the build's 9-frame `celebrate1` plus `celebrate1a`'s 18.
+  assert.equal(timeline.durationMs, 27 * 120);
+  // And it breathes on the caller's clock, unlike the held stance.
+  assert.notEqual(idleFrameFor(
+    { id: "h", teamId: "red", alive: true, resources: {} },
+    { now: timeline.durationMs / 2, winnerTeamId: "red" }
+  ).at, 0);
+
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  // ► **27 POSES, NOT 9.** `celebrate1` runs on into `celebrate1a`, so a winner
+  //   who drew only the entry clip would flourish for a third of a second and
+  //   then snap back to the start.
+  const { label, animation } = animationFor(REAL_PACK, { family: "celebrate", label: CELEBRATION_LABEL });
+  assert.equal(label, CELEBRATION_LABEL);
+  assert.equal(animation.poses.length, 27);
+  assert.deepEqual([...animation.playsSequence], ["celebrate1", "celebrate1a"]);
 });

@@ -668,7 +668,7 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
     "standing", "rest", "block", "defend",
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
     "attack", "hurt", "knockback", "taunt", "taunted", "ranged", "psyche",
-    "stance:psyche", "stance:psyche2",
+    "stance:psyche", "stance:psyche2", "celebrate",
     "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
     "death:unknown"
   ];
@@ -679,8 +679,12 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   const both = [...mapped].filter((label) => declared.has(label));
   assert.deepEqual(both, [], "a label cannot be both played and declared unplayed");
 
-  assert.equal(mapped.size, 79);
-  assert.equal(declared.size, 22);
+  // **79/22 -> 80/21 on 2026-09-17**, when the victory celebration was built:
+  // overlay frames 65 and 77 dispatch `celebrate1`, so it stopped being an
+  // `unbuiltOutcome`. `celebrate1a` stays declared — it is reached by running
+  // on, exactly as the charging clips were before the stance.
+  assert.equal(mapped.size, 80);
+  assert.equal(declared.size, 21);
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
   // ► **THE ENTRY IS FIRST IN ITS FAMILY, and the order is what `animationFor`

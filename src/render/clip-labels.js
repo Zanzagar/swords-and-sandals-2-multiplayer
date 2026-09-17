@@ -142,6 +142,26 @@ const FAMILY_LABELS = Object.freeze({
    */
   "stance:psyche": Object.freeze(["psyche_charging"]),
   "stance:psyche2": Object.freeze(["psyche_charging2"]),
+
+  /**
+   * THE VICTORY CELEBRATION — the second idle this engine has, and the second
+   * one that is not `Standing`.
+   *
+   * ► **A SURVIVING WINNER DOES NOT GO BACK TO BREATHING.** Overlay frame 65,
+   *   inside the `combatwon` span (62-73), runs
+   *   `_root.arena.gladiators.hero.gotoAndPlay("celebrate1")`; frame 77, inside
+   *   `combatlost` (74-84), runs the same on `villain`. `celebrate1` carries no
+   *   `Stop`, runs on into `celebrate1a`, and frame 1426 is
+   *   `GoToLabel("celebrate1a"); Play` — **so the winner celebrates until
+   *   something else moves him, and in a finished bout nothing does.**
+   *
+   * ► **ONLY `celebrate1` IS DISPATCHED**, so only `celebrate1` is here.
+   *   `celebrate1a` is reached by running on, exactly as `psyche_charging` was
+   *   before the stance gave it a dispatcher — `clip-sequences.js` carries the
+   *   run and `animationFor` concatenates it. It stays in `continuations`
+   *   because nothing in the build names it.
+   */
+  celebrate: Object.freeze(["celebrate1"]),
   // ► **`hurt8` WAS MISSING, AND IT WAS MISSING FOR THE `block` REASON.** The
   //   clip carries `hurt1`-`hurt12` and `hurt20`, thirteen animations, and this
   //   list held twelve. The one it dropped is the one the build binds NO SOUND
@@ -357,7 +377,7 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    */
   unbuiltOutcome: Object.freeze([
     "wincrowd1", "wincrowd2", "wincrowd3", "wincrowd4", "wincrowd5", "wincrowd6",
-    "yield1", "yield2", "celebrate1"
+    "yield1", "yield2"
   ]),
 
   /**

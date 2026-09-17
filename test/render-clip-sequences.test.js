@@ -177,14 +177,25 @@ test("EXACTLY FIVE SCHEDULES GOT LONGER and every other label's is untouched", (
   assert.equal(timelineFor("frozen").durationMs, 960);
 });
 
-test("`celebrate1` is in the table and has NO duration, because nothing dispatches it", () => {
-  // The table's job is to say what the build does. The victory celebration is
-  // not built (`UNMAPPED_CLIP_LABELS.unbuiltOutcome`), so no schedule asks —
-  // and a beat count invented for it would be a number nobody had measured
-  // sitting in a table of numbers that were.
+test("`celebrate1` carries no `beats`, and the reason changed when it was built", () => {
+  // ► ~~The victory celebration is not built, so no schedule asks.~~ **BUILT
+  //   2026-09-17**: a surviving winner plays it and it loops forever, so
+  //   `timelineFor` does ask now.
+  //
+  //   **The entry still carries no `beats`, for a different reason, and the
+  //   difference is worth having.** The five psyche/hurt/knockback/burning
+  //   entries need one because their FAMILY was sized to the entry clip and the
+  //   run is longer. The `celebrate` family was authored knowing the run — 27
+  //   beats, the build's 9 + 18 — so there is nothing left to scale, and a
+  //   `beats` here would be a second place to state one length.
   assert.equal(isSequencedLabel("celebrate1"), true);
   assert.equal(sequenceBeatsFor("celebrate1"), null);
-  assert.equal(timelineFor("celebrate1").recognised, false);
+  assert.equal(timelineFor("celebrate1").recognised, true, "the winner's idle must have a schedule");
+  assert.equal(timelineFor("celebrate1").family, "celebrate");
+  assert.equal(timelineFor("celebrate1").loop, true, "and it loops until something moves the figure");
+  // The family's own duration already covers the whole run, which is what makes
+  // the absent `beats` correct rather than an oversight.
+  assert.equal(timelineFor("celebrate1").durationMs, CLIP_SEQUENCES.celebrate1.frames * 120);
   assert.equal(sequenceBeatsFor("attack3"), null, "and an unsequenced label answers the same way");
 });
 

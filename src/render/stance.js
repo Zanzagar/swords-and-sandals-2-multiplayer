@@ -131,6 +131,15 @@ export class StanceError extends Error {
 export const STANCE_RESOURCE = "psyche_up";
 
 /**
+ * What a surviving winner plays, forever.
+ *
+ * Only `celebrate1` is dispatched — the build names it at overlay frames 65 and
+ * 77 — and `clip-sequences.js` runs it on into `celebrate1a`, which self-loops.
+ * So one label here, and the renderer gets all 27 poses.
+ */
+export const CELEBRATION_LABEL = "celebrate1";
+
+/**
  * COUNTER VALUE -> the label the build holds, straight off the four sites.
  *
  * A map rather than a pair of `if`s because the build's own shape is a lookup:
@@ -183,7 +192,29 @@ export function stanceLabelFor(combatant) {
  * @param {{now?: number}} options the frame's timestamp, in milliseconds
  * @returns {{label: string, timeline: object, at: number}}
  */
-export function idleFrameFor(combatant, { now = 0 } = {}) {
+export function idleFrameFor(combatant, { now = 0, winnerTeamId = null } = {}) {
+  // ► **A SURVIVING WINNER CELEBRATES, AND DOES NOT GO BACK TO BREATHING.**
+  //   Overlay frame 65, inside `combatwon` (62-73), runs
+  //   `hero.gotoAndPlay("celebrate1")`; frame 77, inside `combatlost` (74-84),
+  //   runs the same on `villain`. `celebrate1` has no `Stop`, runs on into
+  //   `celebrate1a`, and frame 1426 is `GoToLabel("celebrate1a"); Play` — so it
+  //   loops until something moves the figure, and in a finished bout nothing
+  //   does.
+  //
+  //   Ranked ABOVE the charge because it answers a later question: a bout that
+  //   is over is over, and a winner still holding a charge has nothing left to
+  //   spend it on. The dead are excluded by the guard below, which is the same
+  //   order the build has — the loser's death plays from `deathsequence` at
+  //   overlay frame 62/74 and is held forever.
+  if (winnerTeamId != null && combatant?.teamId === winnerTeamId && combatant?.alive !== false) {
+    const timeline = timelineFor(CELEBRATION_LABEL, { role: "actor" });
+    const elapsed = Number.isFinite(now) && now > 0 ? now : 0;
+    return Object.freeze({
+      label: CELEBRATION_LABEL,
+      timeline,
+      at: (elapsed / timeline.durationMs) % 1
+    });
+  }
   // ► **A CORPSE HAS NO IDLE, AND THIS GUARD IS BELT-AND-BRACES.** The shell's
   //   draw loop branches on `!combatant.alive` to the death pose BEFORE it asks
   //   for an idle, so today this is unreachable — a verifier established that

@@ -3341,7 +3341,7 @@ function renderStage(view, fit, now) {
       //   at 3. The branch and the clock both live in `src/render/stance.js`
       //   now, so the whole decision is somewhere the suite can call it; this
       //   site asks one question and draws the answer.
-      const idle = idleFrameFor(combatant, { now });
+      const idle = idleFrameFor(combatant, { now, winnerTeamId: host.battle.result?.winnerTeamId ?? null });
       drawnTimeline = idle.timeline;
       drawnAt = idle.at;
       pose = poseAt(drawnTimeline, drawnAt);

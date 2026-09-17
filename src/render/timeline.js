@@ -246,6 +246,10 @@ function familyOf(label, role) {
   //   into the performance family, which is where they do not belong.
   if (label === "psyche_charging") return "stance:psyche";
   if (label === "psyche_charging2") return "stance:psyche2";
+  // The victory celebration, which is an IDLE and not a performance: the build
+  // loops it until something else moves the figure, and in a finished bout
+  // nothing does. Matched by exact name like the two above.
+  if (label === "celebrate1") return "celebrate";
   if (/^attack\d+$/.test(label)) return "attack";
   if (/^hurt\d+$/.test(label)) return "hurt";
   // ► **`defendN` IS ITS OWN FAMILY AND NOT `block`.** A miss dispatches
@@ -460,6 +464,35 @@ const FAMILIES = Object.freeze({
   /** The deeper charge: lower, wider, wound further in. */
   "stance:psyche2": () => schedule("stance:psyche2", 1, [
     { at: 0, pose: { bob: -0.22, lean: 0.3, legSpread: 0.5, armSwing: -0.6, weaponAngle: -0.12 } }
+  ], { loop: true }),
+
+  /**
+   * THE VICTORY CELEBRATION, and the one schedule here that is meant to run
+   * forever.
+   *
+   * ► **27 BEATS, WHICH IS THE BUILD'S OWN RUN**: `celebrate1` is 9 frames
+   *   (1400-1408) and runs on into `celebrate1a`'s 18 (1409-1426), and
+   *   `clip-sequences.js` gives the renderer all 27 poses. One beat a frame,
+   *   because the `psyche` family set that precedent for a clip whose length
+   *   the pack states.
+   *
+   * ► **THE BUILD LOOPS ONLY THE TAIL AND THIS LOOPS THE WHOLE RUN, which is a
+   *   stated approximation rather than an oversight.** Frame 1426 is
+   *   `GoToLabel("celebrate1a"); Play`, so vanilla plays the 9-frame entry ONCE
+   *   and then cycles the 18-frame body. Reproducing that needs a loop-start
+   *   offset, and a loop-start offset needs to know when the celebration BEGAN
+   *   — which this module deliberately does not know, because `idleFrameFor`
+   *   is stateless and takes only the frame's clock. **The cost is that the
+   *   winner re-plays his opening flourish once a cycle**; the benefit is that
+   *   no part of the renderer has to hold when a bout ended.
+   */
+  celebrate: () => schedule("celebrate", 27, [
+    { at: 0, pose: {} },
+    { at: 0.18, pose: { armSwing: 0.9, bob: 0.45, lean: -0.2 } },
+    { at: 0.36, pose: { armSwing: 0.5, bob: 0.1, legSpread: 0.5 } },
+    { at: 0.58, pose: { armSwing: 1, bob: 0.55, lean: -0.15, legSpread: 0.3 } },
+    { at: 0.8, pose: { armSwing: 0.6, bob: 0.2, legSpread: 0.45 } },
+    { at: 1, pose: {} }
   ], { loop: true }),
 
   taunt: () => schedule("taunt", 10, [
