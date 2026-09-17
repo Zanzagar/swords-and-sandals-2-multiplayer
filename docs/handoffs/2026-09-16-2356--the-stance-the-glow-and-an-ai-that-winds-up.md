@@ -6,17 +6,18 @@ branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
               `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
 commits:      `080538a..HEAD` — `b1be7b2` (the charged stance), `ce38286` (six
-              verifiers' corrections), `1775a4c` (the AI trait), plus this
-              line's own. **Re-measure with `git log --oneline`.**
+              verifiers' corrections), `1775a4c` (the AI trait), `e0a3400` (the
+              Codex finding and this handoff). **Re-measure with
+              `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
               the exit code are the gate. 1984 / fail 0 / skipped 1 before this
               handoff commit, against 1960 at the start of this stretch.
 agentRuns:    `wf_b86d8124-b42` — 6 write-nothing verifiers, one named claim
               each. 6 briefs, 6 returned, 0 dead, **2 REFUTED**. Plus three
               pinned Codex adversarial reviews (`gpt-6-astra`): one
-              needs-attention with 2 findings (both fixed), one approve, one
-              outstanding at the time of writing — **check it before trusting
-              `1775a4c`.**
+              needs-attention with 2 findings (both fixed), one approve, and
+              one HIGH finding on `1775a4c` — the charging AI aimed at the wrong
+              foe — confirmed, fixed and mutation-checked in `e0a3400`.
 supersedes:   2026-09-16-2228--the-build-plays-seven-runs.md
 next:         **RANKED BELOW. Item 1 is a fidelity gap that affects EVERY
               action, not just the ones this session touched.**
@@ -97,6 +98,15 @@ finding re-derived here before anything was touched.**
   21, the same as quick-attack's damage. The real roster has `stamina: 5` and
   25/25 resolve. **Check your fixture before you report the engine.**
 - **A guessed commit hash**, and a suite line measured one commit too early.
+- **I decided a self-targeted action's target could not matter.** It sets the
+  discharge's range gate and its damage roll, and the AI spent its turns aiming
+  at a foe across the arena. A Codex review found it; I had looked straight at
+  the per-foe option list and reasoned past it.
+- **I deleted the same dead guard twice.** Removed it on a mutation check,
+  distrusted the check because my tests were all 1v1 melee, restored it on the
+  review's recommendation — and only then measured: 0 of 60 attackable foes are
+  outside the discharge gate, archers included. **A review recommendation is a
+  claim to verify, not an instruction.**
 
 ## Highest-value work, ranked
 
@@ -143,7 +153,15 @@ finding re-derived here before anything was touched.**
   whole game look like a stalemate.
 - **A GUARD NO TEST CAN REACH, CARRYING A JUSTIFICATION MEASUREMENT
   CONTRADICTS, IS WORSE THAN NO GUARD.** Mutation-check a new guard; if nothing
-  fails, ask whether it is reachable at all.
+  fails, ask whether it is reachable at all — and then MEASURE, because **a
+  mutation check only proves what the tests reach.**
+- **A CODEX FINDING IS A CLAIM TO VERIFY AND SO IS ITS RECOMMENDATION.** The
+  finding here was real and high-severity; the recommendation attached to it put
+  back a guard that measurement then removed again. AGENTS.md says findings are
+  claims; the advice is too.
+- **STAGE A POSITION TEST AND THEN STOP EVERYONE WALKING.** My first repro of
+  the wrong-target defect failed because the hero walked to the distant foe,
+  making the wrong answer the right one.
 - **A DECISION AND THE ARITHMETIC BEHIND IT CAN BOTH BE HONOURED WHEN THEY
   DISAGREE** — say which is which. The owner asked for a charging AI; charging
   is worse; the flag buys a character and says so.
