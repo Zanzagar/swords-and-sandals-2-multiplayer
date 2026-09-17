@@ -34,6 +34,46 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE `psyche_up` COUNTER HAS EIGHT RESET SITES AND THIS PROJECT HAD THREE
+  (`34636ff`, `2a0e3da`).** Three sessions each added one without asking how
+  many there were. Every write in the battle overlay sets 1; the only increment
+  is `+0x6761`. The unrecorded three: **`+0x148e`** (`magic_damage_character`,
+  the defender — the write sits directly after `hitpoints -= damage`),
+  **`+0x6ac8`** (a landed `taunt` against a bow-mode defender) and **`+0x7a6a`**
+  (`cast_whirlwind`'s write-back, which has **NO matching increment**, so a
+  whirlwind caster is left at 1 where a psych-up discharger is left at 2).
+  **None is live** — this engine has no magic-damage, taunt or whirlwind verb —
+  and each goes live the day one is built. Named at `SS2_PSYCHE_UP.floor`, which
+  is where a reader stands when they need to know what writes the counter.
+
+► **`taunt` IS NO LONGER BLOCKED ON A DERIVATION — IT IS SPECIFIED, AND IT IS
+  THE NEXT THING TO BUILD.** Its deferral reason was exact and is still true
+  (the candidate implements only the post-`checkattackroll` arm, so it would
+  consume the wrong number of samples), but the missing half is now written out
+  in the battle map under "The taunt phase, in full". Four things in it were not
+  in the prose:
+  ► **BOTH CLIPS FIRE BEFORE THE ROLL** — `taunt` on the actor, `taunted` on the
+    target — so a FAILED taunt still animates both.
+  ► **THE COMPARISON IS DIRECT**, `diceroll < taunt_percentage` (`+0x694b`), and
+    not the dispatcher's `100 - chance` form. Backwards inverts the action.
+  ► **`taunt_effect == 2` SPLITS ON THE DEFENDER'S WEAPON MODE** (`+0x69a7`) —
+    the discriminator the map had left as "a knockback or sets `taunted1`".
+    Melee takes a `charisma * 25` shove; bow-mode is made to flee.
+  ► **THE DISPLACEMENT IS UNCONDITIONAL AND THE ANIMATION IS GATED** on
+    `|force| > 100`, the same shape `damagecharacter` has.
+  ► **AND WHAT IS ALREADY BUILT MUST NOT BE RE-DERIVED**: the candidate computes
+    `chances.taunt` as `bounded(roundedChance(charismaRatio, 0.4))` — the bytes
+    at `+0x052b` exactly — and direction 20's damage profile. What is LEFT is
+    the two pre-samples, the two effect arms, and a `taunted1` flee consumption
+    that `SS2_STATUS_PHASE_FOR_FLAG` does not yet carry.
+
+► **AND THE DEFERRAL HEADER WENT STALE A SECOND TIME, IN THE PARAGRAPH WHOSE
+  SUBJECT IS GOING STALE.** It was rewritten on 2026-09-15 to say two actions
+  were genuinely deferred; `psyche_up` shipped on 2026-09-16 and the line was
+  not touched. **A header that documents its own staleness and then repeats it
+  is worth less than one that says nothing**, because it teaches a reader to
+  trust it.
+
 ► **A WINNER CELEBRATES NOW, AND HE DOES IT UNTIL SOMETHING MOVES HIM
   (`d093bff`).** A won match drew the breathing `Standing`; the build does not.
   Overlay frame 65 (inside `combatwon`, 62-73) runs

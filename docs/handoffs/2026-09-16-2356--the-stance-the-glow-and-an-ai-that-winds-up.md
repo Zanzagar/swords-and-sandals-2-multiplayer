@@ -1,7 +1,8 @@
 ---
 handoff:      2026-09-16-2356--the-stance-the-glow-and-an-ai-that-winds-up
 written:      2026-09-16 23:56 -0400, extended 2026-09-17 00:40 (the ranked
-              item 1 retraction and the victory celebration, same session)
+              item 1 retraction and the victory celebration) and 01:20 (the
+              taunt derivation and the psyche write census), same session
 sessionId:    cbee9926-159f-4edb-abcb-8d75f213b5de
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
@@ -28,8 +29,8 @@ agentRuns:    `wf_b86d8124-b42` — 6 write-nothing verifiers, one named claim
 supersedes:   2026-09-16-2228--the-build-plays-seven-runs.md
 next:         **RANKED BELOW. Items 1 and 2 are CLOSED — 1 by RETRACTION after
               re-derivation, 2 by being BUILT. Items 3, 4 and 5 are the
-              owner's; the first thing an agent can pick up unaided is `taunt`
-              at 6.**
+              owner's; **the first thing an agent can pick up unaided is
+              `taunt` at 6, and it is now SPECIFIED rather than deferred.**
 ---
 # Handoff — the stance, the glow, and an AI that winds up
 
@@ -180,10 +181,45 @@ finding re-derived here before anything was touched.**
    most of their turns, because an archer at range is rarely wounded and the
    gate is full health. Stated rather than tuned; the number is the owner's.
 
-6. **`taunt` IS THE LAST DEFERRED VANILLA ACTION**, reason unchanged: the
-   candidate implements only the post-`checkattackroll` arm.
+6. ~~**`taunt` IS THE LAST DEFERRED VANILLA ACTION**, reason unchanged.~~
+   **STILL THE LAST ONE, BUT NO LONGER BLOCKED ON A DERIVATION — IT IS FULLY
+   SPECIFIED NOW (`34636ff`, `2a0e3da`), AND IT IS THE FIRST THING TO PICK UP.**
+   The deferral reason was exact and is still true: the candidate implements
+   only the post-`checkattackroll` arm. **The missing half is written out in the
+   battle map under "The taunt phase, in full"**, byte by byte, and four things
+   in it were not in the prose:
+   - **Both clips fire BEFORE the roll** — `taunt` on the actor, `taunted` on
+     the target — so a FAILED taunt still animates both.
+   - **The comparison is DIRECT**, `diceroll < taunt_percentage` (`+0x694b`),
+     not the dispatcher's `100 - chance` form. Backwards inverts the action.
+   - **`taunt_effect == 2` splits on the DEFENDER'S WEAPON MODE** (`+0x69a7`),
+     which is the discriminator the map had left open: `equipped_weapon == 1`
+     is melee and takes a `charisma * 25` shove, anything else is the bow and is
+     made to flee.
+   - **The displacement is unconditional; the ANIMATION is gated** on
+     `|force| > 100`, the same shape `damagecharacter` has.
 
-7. **DECIDE WHICH RASTERISER THIS PROJECT MEASURES IN.** Every committed number
+   **What is already built and must not be re-derived**: the candidate computes
+   `chances.taunt` as `bounded(roundedChance(charismaRatio, 0.4))` — the bytes
+   at `+0x052b` exactly — and direction 20's damage profile
+   (`round(charisma * 4) - defender.charisma`, floored by a 1-3 roll,
+   `critical: 21`). `SS2_TAUNT_FLAGS` and the flag-clearing in `defenderEffects`
+   exist too.
+
+   **What is left**: the two pre-samples in order, the two effect arms, and the
+   `taunted1` FLEE consumption — `SS2_STATUS_PHASE_FOR_FLAG` carries the four
+   conditions and not the taunt flags, so a taunted gladiator does not yet run.
+   The map's decision table row 3 has the flee: `taunted1 == true` -> facing
+   right `getphase("runleft")`, facing left `getphase("runright")`.
+
+7. **THE `psyche_up` WRITE CENSUS IS COMPLETE AND THREE OF EIGHT SITES WERE
+   UNRECORDED** (`34636ff`). Nothing is live — no magic-damage, taunt or
+   whirlwind verb exists here — but `+0x7a6a` is worth knowing before anyone
+   builds `cast_whirlwind`: it writes the counter back with **no matching
+   increment**, so a whirlwind caster is left at 1 where a psych-up discharger
+   is left at 2.
+
+8. **DECIDE WHICH RASTERISER THIS PROJECT MEASURES IN.** Every committed number
    is `cpu`; the gap is 15.9% of the frame.
 
 ## Hard rules
