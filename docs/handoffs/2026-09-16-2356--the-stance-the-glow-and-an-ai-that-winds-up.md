@@ -10,8 +10,11 @@ commits:      `080538a..HEAD` — `b1be7b2` (the charged stance), `ce38286` (six
               Codex finding and this handoff). **Re-measure with
               `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
-              the exit code are the gate. 1984 / fail 0 / skipped 1 before this
-              handoff commit, against 1960 at the start of this stretch.
+              the exit code are the gate. **1986 / fail 0 / skipped 1, exit 0**,
+              measured after `e0a3400`, against 1960 at the start of this
+              stretch. (This line said 1984 for one commit, measured before the
+              index row landed — the same slip the previous handoff recorded,
+              which is twice now and is why the instruction is first.)
 agentRuns:    `wf_b86d8124-b42` — 6 write-nothing verifiers, one named claim
               each. 6 briefs, 6 returned, 0 dead, **2 REFUTED**. Plus three
               pinned Codex adversarial reviews (`gpt-6-astra`): one
