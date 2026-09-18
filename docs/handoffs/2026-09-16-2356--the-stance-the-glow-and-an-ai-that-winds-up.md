@@ -2,8 +2,10 @@
 handoff:      2026-09-16-2356--the-stance-the-glow-and-an-ai-that-winds-up
 written:      2026-09-16 23:56 -0400, extended 2026-09-17 00:40 (the ranked
               item 1 retraction and the victory celebration), 01:20 (the taunt
-              derivation and the psyche write census) and 02:30 (taunt built,
-              and a Codex review's three findings), same session
+              derivation and the psyche write census), 02:30 (taunt built,
+              and a Codex review's three findings), 03:40 (the taunted flee and
+              the run's displacement) and 04:40 (a second Codex review: three
+              real, one rejected on the bytes), same session
 sessionId:    cbee9926-159f-4edb-abcb-8d75f213b5de
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
@@ -221,6 +223,54 @@ finding re-derived here before anything was touched.**
 8. **DECIDE WHICH RASTERISER THIS PROJECT MEASURES IN.** Every committed number
    is `cpu`; the gap is 15.9% of the frame.
 
+## EXTENSION, 2026-09-17 04:40 — the flee, and the review that was right three times and wrong once
+
+**The taunted flee is built (`cbaf406`) and then corrected.** Row 3 of frame 1's
+forced chain was the last vanilla action left; `ss2RunDisplacement` is
+`movement_speed * 40` (no boot bonus) eased down to a stop gap of **10**, run as
+the build's do/while rather than as `40 * ms - 10`, which is **+1 low at 23 of
+the 57 reachable speeds**.
+
+**A Codex review of `cbaf406` returned four findings. Three were real.**
+
+1. **The flee left the facing stale.** `changeCombatants` recomputes both
+   facings at every phase advance (`+0x28bf`-`+0x2ae3`) and a flee is one. It
+   emits `facingAfter` now.
+2. **One flee spent one `taunted1` token.** Tokens are source-qualified; the
+   build's flag is a boolean. Two taunters left a survivor that forced a second
+   flee.
+3. **A forced swap consumed nothing and a forced rest four of five flags.** Rows
+   1-7 are statements, and row 3 writes `taunted1 = false` before its
+   `getphase`, so a row-1 swap or a row-2 rest spends a pending flee.
+   `SS2_CHAIN_CLEAR_FLAGS` is the list, and `forcedStatusFlag` ranks off the
+   same one.
+
+**The fourth is REJECTED, on the bytes.** *"Extract the body-clamping logic and
+use it on the flee."* Both run arms DO carry a body test (`+0x3fbd`, `+0x4146`)
+and it is not the walk's clip — live `_x` every frame, abort rather than
+shorten, the ATTACKER's `physical_size` rather than the defender's — and **it is
+guarded on the facing, which the flee inverts**. Row 3 sends
+`gladiator_dir == "right"` to `runleft`, whose guard wants `"left"`. The abort
+cannot fire on a flee. Two tests pin it: the flee crossing a body, and a walk
+stopping short in the same geometry.
+
+**Bonus, retracted at the constant:** `SS2_ARENA.clamp` carried a caveat saying
+`[-2100, 2100]` existed in the map's prose with no byte offset. Both literals
+are pushed eight times (`+0x31c2` … `+0x325b`). **The absence was the decoder's,
+not the build's** — the tool that produced the four `If` offsets printed opcodes
+without operands.
+
+### What this cost, and the shape of it
+
+Three of the four defects are the SAME defect: **a rule was already written down
+in this file's own code, and the new branch did not call it.**
+`statusConsumptionEffects` carries the multiple-token lesson in a comment; the
+rest branch had modelled chain consumption since 2026-09-02; `facingAfter` was
+three screens up. A fourth thing made it easy — the comment above `facingAfter`
+said *"exactly two verbs move anybody: a walk and a rank change"*, **a census
+that was true when written and read as a licence once it was false.** It states
+the rule now, not the count.
+
 ## Hard rules
 
 - **COMMIT BEFORE LAUNCHING A WAVE, NOT DURING ONE.** A commit does not
@@ -235,7 +285,12 @@ finding re-derived here before anything was touched.**
 - **A CODEX FINDING IS A CLAIM TO VERIFY AND SO IS ITS RECOMMENDATION.** The
   finding here was real and high-severity; the recommendation attached to it put
   back a guard that measurement then removed again. AGENTS.md says findings are
-  claims; the advice is too.
+  claims; the advice is too. **Measured again 2026-09-17 on the flee review: the
+  OBSERVATION can be right while the RECOMMENDATION diverges the engine from the
+  oracle** — "the flee bypasses body collision" is true, and so does the build.
+- **A COUNT IN A COMMENT GOES STALE SILENTLY; A RULE DOES NOT.** *"Exactly two
+  verbs move anybody"* was true when written, false the day the flee shipped,
+  and in between it read as a licence not to thread the new branch.
 - **STAGE A POSITION TEST AND THEN STOP EVERYONE WALKING.** My first repro of
   the wrong-target defect failed because the hero walked to the distant foe,
   making the wrong answer the right one.

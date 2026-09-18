@@ -768,7 +768,25 @@ These are sequential statements, not an if/else chain, and each one clears its
 own flag *before* calling `getphase`. Combined with the `turnphase` gate this
 means a lower-priority condition can have its flag consumed by a call that does
 nothing — for example a forced rest at zero stamina clears and discards a
-pending `burning` phase in the same pass. Note also that the field is `poison`
+pending `burning` phase in the same pass.
+
+**Row 3 is one of them, and that is easy to miss because it is the only row
+whose clear sits inside a nested `if`.** Re-read in full off overlay frame 1 on
+2026-09-17:
+
+```text
+if (hero.taunted1 == true || hero.taunted2 == true) {
+  if (gladiators.hero.gladiator_dir == "right") { hero.taunted1 = false; getphase("runleft")  }
+  if (gladiators.hero.gladiator_dir == "left")  { hero.taunted1 = false; getphase("runright") }
+}
+```
+
+The write is inside the facing arm and before the call, exactly as rows 4-7
+place theirs. So **a forced swap (row 1) or a forced rest (row 2) spends a
+pending flee as surely as it spends a pending burn** — the gladiator is charged
+for a run he never makes. `src/team/ss2-rules.js` models this as
+`SS2_CHAIN_CLEAR_FLAGS`, which is also the list `forcedStatusFlag` ranks, since
+in the build they are the same statements. Note also that the field is `poison`
 while the phase label is `poisoned`.
 
 The taunted-run rule is mirrored, not shared. The hero runs **against** its
@@ -1458,7 +1476,40 @@ Three consequences worth stating separately, because each was got wrong once:
    *(This entry said a charge "clips to" that threshold; the quantity and the
    offset were right and the structure word was wrong. The two readings diverge
    the moment the defender moves mid-charge.)*
-3. **A jump may be determined after all, and this entry said it is not.** It adds
+3. **A RUN ABORTS WHERE A WALK CLIPS, and the flee can reach neither.** Derived
+   2026-09-17, and it belongs beside item 2 rather than inside it because it is
+   a THIRD structure. Both run arms carry a body test, and it is not the walk's:
+
+   ```text
+   runleft  +0x3fbd  if (attacker.gladiator_dir == "left"
+                         && attacker._x < defender._x + attacker.physical_size)
+                       { attacker.destination = null; nextphase() }
+   runright +0x4146  if (attacker.gladiator_dir == "right"
+                         && attacker._x > defender._x - attacker.physical_size)
+                       { attacker.destination = null; nextphase() }
+   ```
+
+   Three differences from the walk's clip, every one of them load-bearing: it
+   tests the LIVE `_x` every frame rather than the destination once; it ends the
+   phase outright rather than shortening it; and it measures against the
+   ATTACKER's `physical_size` where the walk measures against
+   `game_defender.physical_size`. The `&&` is AVM1's short-circuit form
+   (`Equals2`/`Duplicate`/`Not`/`If`, joining at the shared `Not` before the
+   branch), so the facing test is evaluated first and the body test is not
+   evaluated at all when it fails.
+
+   ► **AND THE TAUNTED FLEE INVERTS THE GUARD, so a fleeing gladiator runs
+     THROUGH the man who taunted him.** Frame 1 row 3 sends
+     `gladiator_dir == "right"` to `runleft` and `== "left"` to `runright`
+     (re-read off overlay frame 1 on 2026-09-17), so the arm that runs is always
+     the arm whose guard is false. Nothing in the run arm bounds a flee; only
+     `nextphase` step 1's `[-2100, 2100]` does. An external review of `cbaf406`
+     called the engine's missing collision check a bug, which it would have been
+     had the guard read the other way — `test/ss2-taunt.test.js` now pins the
+     crossing, and the walk in the same geometry beside it, so that "adding the
+     clamp" fails loudly rather than looking like a tidy-up.
+
+4. **A jump may be determined after all, and this entry said it is not.** It adds
    to `_x` every frame of the `Superjump` clip instead of setting a destination
    (`+0x487c`, with `_y += attacker.leap` at `+0x4913`). An investigating agent
    reports the add runs `(2L + 1)` times, with `L` the clamped `|leap|` in
@@ -2611,7 +2662,14 @@ enchantment-damage field, then clear or advance.
 `nextphase` is an anonymous function stored in overlay frame 52. Its verified
 mutation order is:
 
-1. Clamp the active x position to `[-2100, 2100]`.
+1. Clamp the active x position to `[-2100, 2100]`. **Byte-verified 2026-09-17:
+   the literals are pushed at `+0x31c2`/`+0x31d7` and `+0x31ee`/`+0x3203` for
+   `game_attacker._x`, and `+0x321a`/`+0x322f` and `+0x3246`/`+0x325b` for
+   `game_defender._x`.** `src/team/ss2-rules.js` carried a caveat saying this
+   bound existed in this document's PROSE only; it did not — the decoder that
+   produced the four `If` offsets printed opcodes without their operands. Since
+   it lives in `nextphase` it bounds every gait, and it is the ONLY thing that
+   bounds a taunted flee.
 2. Run `check_spells` for attacker, then defender.
 3. Apply `staminaleft -= staminacost`.
 4. Add `1 + round(stamina / 3)` stamina and `1 + ceil(stamina / 2)` hitpoints,

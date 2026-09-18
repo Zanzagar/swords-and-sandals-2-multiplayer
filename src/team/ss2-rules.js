@@ -1048,7 +1048,11 @@ function hasStatusFlag(status, flag) {
  *   gladiator RUNS.
  */
 function forcedStatusFlag(actor) {
-  for (const flag of [SS2_TAUNT.flag, ...SS2_DEATH_CLEAR_FLAGS]) {
+  // The SAME list, in the SAME order, that `SS2_CHAIN_CLEAR_FLAGS` clears —
+  // because in the build they are the same statements. Reading the rank off one
+  // list and the consumption off another is how the rest branch and the swap
+  // branch drifted apart in the first place.
+  for (const flag of SS2_CHAIN_CLEAR_FLAGS) {
     if (hasStatusFlag(actor.status ?? [], flag)) return flag;
   }
   return null;
@@ -1179,11 +1183,27 @@ export const SS2_ARENA = Object.freeze({
    */
   allyStride: 130,
   /**
-   * Map, `nextphase` step 1. **Read the caveat before citing this.** The map
-   * states the bound in PROSE with no byte offset anywhere in the repository,
-   * while the only line carrying offsets for the clamp — the four `_x` `If`s
-   * at `+0x31cc`, `+0x31f8`, `+0x3224`, `+0x3250` — states no literals at all.
-   * It is the build's number as far as this repository knows and no further.
+   * Map, `nextphase` step 1. **BYTE-VERIFIED 2026-09-17, and the caveat that
+   * used to stand here is retracted.** It read: "the map states the bound in
+   * PROSE with no byte offset anywhere in the repository, while the only line
+   * carrying offsets for the clamp — the four `_x` `If`s at `+0x31cc`,
+   * `+0x31f8`, `+0x3224`, `+0x3250` — states no literals at all. It is the
+   * build's number as far as this repository knows and no further."
+   *
+   * The literals were always there; the decoder that produced those four
+   * offsets printed opcodes without their operands, so the absence was the
+   * TOOL's. Sprite 862 frame 52 carries all eight pushes, four per fighter:
+   *
+   * ```text
+   *   +0x31c2 Push -2100   Less2     +0x31d7 game_attacker._x = -2100
+   *   +0x31ee Push  2100   Greater   +0x3203 game_attacker._x =  2100
+   *   +0x321a Push -2100   Less2     +0x322f game_defender._x = -2100
+   *   +0x3246 Push  2100   Greater   +0x325b game_defender._x =  2100
+   * ```
+   *
+   * It runs in `nextphase`, so it bounds EVERY gait — and it is the only thing
+   * that bounds the taunted flee, whose own arm clamps nothing (see the
+   * `TAUNTED_PHASE` branch).
    */
   clamp: Object.freeze({ min: -2100, max: 2100 }),
   /**
@@ -2868,6 +2888,39 @@ export const SS2_DEATH_CLEAR_FLAGS = Object.freeze([
 export const SS2_TAUNT_FLAGS = Object.freeze(["taunted1", "taunted2"]);
 
 export const SS2_STATUS_FLAGS = Object.freeze([...SS2_DEATH_CLEAR_FLAGS, ...SS2_TAUNT_FLAGS]);
+
+/**
+ * WHAT FRAME 1'S FORCED CHAIN CLEARS ON ITS WAY PAST — one flag more than
+ * `SS2_DEATH_CLEAR_FLAGS`, and the extra one is `taunted1`.
+ *
+ * ► **ROW 3 IS A STATEMENT, NOT A BRANCH, SO IT CLEARS WHETHER OR NOT IT
+ *   PLAYS.** Re-read off overlay frame 1 (sprite 862) on 2026-09-17, in full:
+ *
+ *   ```text
+ *     if (hero.taunted1 == true || hero.taunted2 == true) {
+ *       if (gladiators.hero.gladiator_dir == "right") { hero.taunted1 = false; getphase("runleft")  }
+ *       if (gladiators.hero.gladiator_dir == "left")  { hero.taunted1 = false; getphase("runright") }
+ *     }
+ *   ```
+ *
+ *   The write is INSIDE the facing arm and BEFORE the call, exactly as rows
+ *   4-7 clear theirs before theirs. So when row 1 (`swap_weapons`) or row 2
+ *   (`rest`) has already taken the turn, row 3 still spends the flag on a
+ *   `getphase` that the `turnphase` gate has already turned into a no-op — and
+ *   the gladiator is charged a forced flee he never runs.
+ *
+ * ► **THAT MAKES THIS LIST THE ONE THE FORCED PATHS TAKE, and the reason the
+ *   rest branch alone used to take `SS2_DEATH_CLEAR_FLAGS`.** The swap branch
+ *   took nothing at all, so a forced swap left ALL FIVE pending. Both found by
+ *   a Codex review of `cbaf406`, 2026-09-17, which is also where the
+ *   multiple-source token bug below came from.
+ *
+ * `taunted2` is deliberately absent: the entry condition tests it and neither
+ * arm clears it. That asymmetry is the build's, it is latent here because
+ * nothing in this build ever sets `taunted2` true, and copying it is cheaper
+ * than explaining every time why the engine is tidier than the game.
+ */
+export const SS2_CHAIN_CLEAR_FLAGS = Object.freeze([SS2_TAUNT.flag, ...SS2_DEATH_CLEAR_FLAGS]);
 
 /**
  * `gladiator_dir` as a status token. Resources are finite numbers, so a string
@@ -5318,12 +5371,19 @@ export function createSs2TeamRules({
       //   way they were standing one action ago. The two movement branches
       //   below pass their own destination; everything else cannot move
       //   anybody and passes the actor unchanged.
-      // ► **ONLY THE TWO MOVEMENT BRANCHES CARRY IT, and that is equivalence
-      //   rather than economy.** Facing is a function of `x` alone
-      //   (`ss2FacingEffects`), and in this engine exactly two verbs move
-      //   anybody: a walk and a rank change. An attack, a rest and a status
-      //   phase cannot change a facing, so recomputing on them emits an effect
-      //   that is always a no-op.
+      // ► **ONLY THE MOVEMENT BRANCHES CARRY IT, and that is equivalence rather
+      //   than economy.** Facing is a function of `x` alone
+      //   (`ss2FacingEffects`), so an attack and a rest cannot change one and
+      //   recomputing on them emits an effect that is always a no-op.
+      //
+      //   **CORRECTED 2026-09-17: this said "exactly two verbs move anybody: a
+      //   walk and a rank change", and it was true when written and false by
+      //   the time the taunted flee shipped.** There are THREE — the flee moves
+      //   a gladiator further than either — and the sentence read as a licence
+      //   to leave the new branch out rather than as the census it was. A count
+      //   in a comment goes stale silently; the rule does not. The rule is that
+      //   **every branch that writes an `x` recomputes the facing from the `x`
+      //   it wrote**, and `git grep "EffectKind.POSITION"` is how you check it.
       //
       //   It is not merely wasteful. The first version threaded it through
       //   every return the way the crowd's toll is threaded, and it appended a
@@ -5364,6 +5424,38 @@ export function createSs2TeamRules({
       //
       // ► **AND IT TAKES NO SAMPLE.** A forced phase is not a choice and the
       //   build draws nothing here, so a tape replays across it unchanged.
+      //
+      // ► **IT DOES NOT STOP FOR A BODY, AND THAT IS DERIVED RATHER THAN
+      //   OMITTED.** A Codex review of `cbaf406` called this a missing
+      //   collision check. It is not: the run's body rule EXISTS and is
+      //   unreachable from here. Read off sprite 862 frame 52, 2026-09-17, with
+      //   the walk beside it so the four differences are visible at once:
+      //
+      //   ```text
+      //     walkleft  +0x3b1f  destination = _x - add_percentage(boot, ms * 16)
+      //                        if (destination < defender._x + game_defender.physical_size
+      //                            && attacker.gladiator_dir == "left")
+      //                          destination = defender._x + game_defender.physical_size
+      //                        arrive when !(_x > destination + 20)
+      //
+      //     runleft   +0x3ee3  destination = _x - ms * 40          (no boot bonus)
+      //                        if (attacker.gladiator_dir == "left"
+      //                            && attacker._x < defender._x + attacker.physical_size)
+      //                          { destination = null; nextphase() }
+      //                        arrive when !(_x > destination + 10)
+      //   ```
+      //
+      //   So the walk CLAMPS its destination before it sets off, against the
+      //   DEFENDER's `physical_size`; the run ABORTS the tween mid-flight,
+      //   against the ATTACKER's own. `runright` mirrors it exactly
+      //   (`+0x406c`, guard `== "right"`, `+0x417e`).
+      //
+      //   **Both are guarded on the facing, and the flee inverts the facing.**
+      //   Frame 1 row 3 sends `gladiator_dir == "right"` to `runleft` and
+      //   `== "left"` to `runright`, so the arm that runs is always the arm
+      //   whose guard is false. The abort cannot fire on a taunted flee in this
+      //   build. A fleeing gladiator runs THROUGH the man who taunted him, and
+      //   only `nextphase`'s arena bound stops him.
       if (request.type === Ss2ActionType.TAUNTED_PHASE) {
         const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
         // Away from the facing: looking right means running left.
@@ -5384,12 +5476,16 @@ export function createSs2TeamRules({
         // The flag is spent by being obeyed. `+0x0ddb`/`+0x0e2d` clear it in
         // both arms of the hero path — and clear ONLY `taunted1`, which is the
         // build's own asymmetry and is why `taunted2` has no phase here.
-        effects.push({
-          kind: EffectKind.STATUS,
-          targetId: actor.id,
-          status: statusTokenFor(actor.status ?? [], SS2_TAUNT.flag) ?? SS2_TAUNT.flag,
-          active: false
-        });
+        //
+        // ► **EVERY `taunted1` TOKEN, not the first.** This read
+        //   `statusTokenFor(...) ?? SS2_TAUNT.flag` and cleared exactly one.
+        //   Tokens are source-qualified (`taunted1:from=c`), so two opponents
+        //   taunting the same gladiator leave two of them, and the survivor
+        //   forced a SECOND flee for what the build stores as one boolean.
+        //   `statusConsumptionEffects` learned this same lesson on the burning
+        //   flags and carries the comment; this call site did not reuse it.
+        //   Found by a Codex review of `cbaf406`, 2026-09-17.
+        effects.push(...statusConsumptionEffects(actor, [SS2_TAUNT.flag]));
         // ► **AND EVERY CONDITION THE CHAIN WALKED PAST IS CLEARED TOO, which is
         //   the surprising half of the build's behaviour.** Rows 4-7 are
         //   SEQUENTIAL STATEMENTS, not an else-chain: each clears its own flag
@@ -5398,7 +5494,21 @@ export function createSs2TeamRules({
         //   loses the burn — the same rule a forced rest already applies here.
         effects.push(...statusConsumptionEffects(actor));
         return {
-          effects: [...effects, ...crowd],
+          effects: [
+            ...effects,
+            ...crowd,
+            // ► **THE FLEE IS THE THIRD MOVER, and the block above `facingAfter`
+            //   used to say there were two.** `changeCombatants` recomputes
+            //   BOTH facings from `hero._x` vs `villain._x` every phase advance
+            //   (`+0x28bf`-`+0x2ae3`, writing `gladiator_dir` and flipping
+            //   `_xscale` to match), and a flee is a phase advance like any
+            //   other. Running past the man who taunted you turns you round to
+            //   face him again — which matters, because a back attack is worth
+            //   50% more and the NEXT flee reads the same field to pick its
+            //   direction. Omitted until a Codex review of `cbaf406` reproduced
+            //   the stale facing, 2026-09-17.
+            ...(to === null ? [] : facingAfter({ ...actor, x: to }))
+          ],
           events: [{
             type: Ss2ActionType.TAUNTED_PHASE,
             actorId: actor.id,
@@ -5444,8 +5554,18 @@ export function createSs2TeamRules({
         // pending condition without playing it. Emitted here rather than only
         // on the zero-stamina path because the chain does not know why rest
         // was chosen — and a voluntary rest reaches frame 1 the same way.
+        //
+        // ► **AND `taunted1` IS ONE OF THEM.** This took
+        //   `SS2_DEATH_CLEAR_FLAGS` and so left a pending flee alive: the build
+        //   charges the gladiator the forced rest AND then clears the flag at
+        //   row 3, where this engine went on to make him run a turn later. See
+        //   `SS2_CHAIN_CLEAR_FLAGS`.
         return {
-          effects: [...transition.effects, ...statusConsumptionEffects(actor), ...crowd],
+          effects: [
+            ...transition.effects,
+            ...statusConsumptionEffects(actor, SS2_CHAIN_CLEAR_FLAGS),
+            ...crowd
+          ],
           events: [{
             type: Ss2ActionType.REST,
             actorId: actor.id,
@@ -5508,7 +5628,19 @@ export function createSs2TeamRules({
           });
         }
         return {
-          effects: [...effects, ...crowd],
+          effects: [
+            ...effects,
+            // ► **ROW 1 WALKS THE CHAIN TOO, and this branch used to consume
+            //   NOTHING.** `swap_weapons` is the first forced row, so an archer
+            //   out of arrows takes the turn and rows 3-7 then spend `taunted1`
+            //   and all four conditions on `getphase` calls the `turnphase`
+            //   gate has already silenced. The rest branch below has modelled
+            //   that since 2026-09-02; the swap branch never did, so a forced
+            //   swap left all five pending and every one of them fired a turn
+            //   late. Found by a Codex review of `cbaf406`, 2026-09-17.
+            ...statusConsumptionEffects(actor, SS2_CHAIN_CLEAR_FLAGS),
+            ...crowd
+          ],
           events: [{
             type: Ss2ActionType.SWAP_WEAPONS,
             actorId: actor.id,

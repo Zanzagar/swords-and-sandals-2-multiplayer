@@ -31,8 +31,9 @@ import {
   applyAction, combatantById, createTeamBattle, currentCombatant, legalActions, rngJournal, toTeamWireState
 } from "../src/team/index.js";
 import {
-  SS2_ARENA, SS2_FACING_LEFT, SS2_TAUNT, Ss2ActionType, createSs2TeamRules,
-  ss2Combatant, ss2MovementSpeed, ss2RunDisplacement, ss2WalkDisplacement
+  SS2_ARENA, SS2_CHAIN_CLEAR_FLAGS, SS2_FACING_LEFT, SS2_STATUS_SOURCE_SEPARATOR, SS2_TAUNT,
+  Ss2ActionType, createSs2TeamRules, ss2Combatant, ss2MovementSpeed, ss2RunDisplacement,
+  ss2WalkDisplacement
 } from "../src/team/ss2-rules.js";
 import { LabelProvenance, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 
@@ -549,4 +550,209 @@ test("`taunted2` FORCES NOTHING, because the build never sets it", () => {
   }
   assert.ok(legalActions(battle).length > 1,
     "a gladiator carrying only `taunted2` keeps its ordinary turn");
+});
+
+
+/* ------------------------------------------------------------------ */
+/* The four a Codex review of `cbaf406` reproduced, 2026-09-17          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Put `who` on the clock with `prep` applied, in a battle whose combatants are
+ * placed by `place`. The prep is re-applied after every filler turn, because a
+ * filler turn is a turn and the engine is entitled to write over it.
+ */
+function onTheClock({ who = "villain", teams, place = () => {}, prep = () => {}, seed = 5 }) {
+  const battle = createTeamBattle({ rules: createSs2TeamRules(), seed, teams });
+  const set = () => {
+    place(battle);
+    prep(combatantById(battle, who));
+  };
+  set();
+  for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== who; guard += 1) {
+    const actor = currentCombatant(battle);
+    const legal = legalActions(battle);
+    applyAction(battle, {
+      actorId: actor.id,
+      ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0])
+    });
+    set();
+  }
+  assert.equal(currentCombatant(battle)?.id, who, "the rig must hand the turn to the right gladiator");
+  return battle;
+}
+
+const duellists = (extra = {}) => [
+  { id: "red", combatants: [{ id: "hero", ...gladiator() }] },
+  { id: "blue", combatants: [{ id: "villain", ...gladiator(extra) }] }
+];
+
+test("A FLEE RUNS THROUGH A BODY, and the walk beside it is why that is derived and not forgotten", () => {
+  // ► **THE RUN HAS A BODY RULE AND THE FLEE CANNOT REACH IT.** Read off sprite
+  //   862 frame 52 on 2026-09-17, both gaits at once:
+  //
+  //     walkleft `+0x3b1f`  destination = _x - add_percentage(boot, ms * 16)
+  //                         if (destination < defender._x + game_defender.physical_size
+  //                             && attacker.gladiator_dir == "left")
+  //                           destination = defender._x + game_defender.physical_size
+  //     runleft  `+0x3ee3`  destination = _x - ms * 40
+  //                         if (attacker.gladiator_dir == "left"
+  //                             && attacker._x < defender._x + attacker.physical_size)
+  //                           { destination = null; nextphase() }
+  //
+  //   The walk CLAMPS before it sets off; the run ABORTS mid-tween. Both are
+  //   guarded on the facing — and frame 1 row 3 sends `gladiator_dir == "right"`
+  //   to `runleft`, so the arm a flee runs is always the arm whose guard is
+  //   false. A Codex review called the missing clamp a collision bug; it is the
+  //   build's own geometry, and this test is here so that "add the clamp" fails
+  //   loudly instead of looking like a tidy-up.
+  const battle = onTheClock({
+    who: "hero",
+    teams: [
+      { id: "red", combatants: [{ id: "hero", ...gladiator() }, { id: "ally", ...gladiator() }] },
+      { id: "blue", combatants: [{ id: "villain", ...gladiator() }] }
+    ],
+    place: (b) => {
+      Object.assign(combatantById(b, "hero"), { x: 0, y: SS2_ARENA.frontY });
+      Object.assign(combatantById(b, "ally"), { x: -800, y: SS2_ARENA.frontY });
+      Object.assign(combatantById(b, "villain"), { x: 250, y: SS2_ARENA.frontY });
+    },
+    prep: (actor) => { actor.status = [SS2_TAUNT.flag]; }
+  });
+
+  const from = combatantById(battle, "hero").x;
+  const ally = combatantById(battle, "ally").x;
+  applyAction(battle, { actorId: "hero", ...legalActions(battle)[0] });
+  const to = combatantById(battle, "hero").x;
+
+  assert.ok(ally < from && to < ally, `the ally at ${ally} must lie between ${from} and ${to}`);
+  // Nothing but `nextphase`'s arena bound shortened it.
+  const displacement = ss2RunDisplacement(ss2MovementSpeed(combatantById(battle, "hero")));
+  assert.equal(to, Math.max(SS2_ARENA.clamp.min, from - displacement));
+});
+
+test("A WALK IN THE SAME GEOMETRY STOPS SHORT, which is the contrast that makes the flee a finding", () => {
+  // Same bodies, same ground, the other gait. If this ever agrees with the test
+  // above, one of the two clamps has been copied onto the other.
+  const battle = onTheClock({
+    who: "hero",
+    teams: [
+      { id: "red", combatants: [{ id: "hero", ...gladiator() }, { id: "ally", ...gladiator() }] },
+      { id: "blue", combatants: [{ id: "villain", ...gladiator() }] }
+    ],
+    place: (b) => {
+      Object.assign(combatantById(b, "hero"), { x: 0, y: SS2_ARENA.frontY });
+      Object.assign(combatantById(b, "ally"), { x: -800, y: SS2_ARENA.frontY });
+      Object.assign(combatantById(b, "villain"), { x: 250, y: SS2_ARENA.frontY });
+    }
+  });
+
+  const from = combatantById(battle, "hero").x;
+  const ally = combatantById(battle, "ally").x;
+  const walk = legalActions(battle).find((o) => o.type === Ss2ActionType.WALK_LEFT);
+  assert.ok(walk, "the walk must be on offer");
+  applyAction(battle, { actorId: "hero", ...walk });
+  const to = combatantById(battle, "hero").x;
+
+  const unblocked = from - ss2WalkDisplacement(ss2MovementSpeed(combatantById(battle, "hero")));
+  assert.ok(unblocked < ally, "the geometry must be one where an unblocked walk WOULD cross");
+  assert.ok(to > ally, `a walk stops short of the body at ${ally}, and landed at ${to}`);
+});
+
+test("THE FLEE TURNS HIM ROUND, because `changeCombatants` runs on every phase advance", () => {
+  // ► `+0x28bf`-`+0x2ae3` recomputes BOTH facings from `hero._x` vs
+  //   `villain._x` and flips `_xscale` to match, and a flee is a phase advance
+  //   like any other. The geometry here changes the nearest foe WITHOUT
+  //   crossing anybody, so only the facing rule can produce the flip.
+  const battle = onTheClock({
+    who: "hero",
+    teams: [
+      { id: "red", combatants: [{ id: "hero", ...gladiator() }] },
+      {
+        id: "blue",
+        combatants: [{ id: "near", ...gladiator() }, { id: "far", ...gladiator() }]
+      }
+    ],
+    place: (b) => {
+      Object.assign(combatantById(b, "hero"), { x: 2000, y: SS2_ARENA.frontY });
+      Object.assign(combatantById(b, "near"), { x: 2100, y: SS2_ARENA.frontY });
+      Object.assign(combatantById(b, "far"), { x: -500, y: SS2_ARENA.frontY });
+    },
+    prep: (actor) => { actor.status = [SS2_TAUNT.flag]; }
+  });
+
+  assert.equal((combatantById(battle, "hero").status ?? []).includes(SS2_FACING_LEFT), false,
+    "he starts facing the near foe on his right");
+  applyAction(battle, { actorId: "hero", ...legalActions(battle)[0] });
+
+  const hero = combatantById(battle, "hero");
+  assert.ok(hero.x > combatantById(battle, "far").x, "and he did not cross the far foe");
+  assert.equal((hero.status ?? []).includes(SS2_FACING_LEFT), true,
+    "running past the near foe leaves the far one nearest, so he turns to face it");
+});
+
+test("ONE FLEE SPENDS EVERY `taunted1`, however many gladiators shouted", () => {
+  // Status tokens are source-qualified, the build's flag is one boolean. Two
+  // opponents taunting the same gladiator used to leave a survivor that forced a
+  // SECOND flee. `statusConsumptionEffects` carries this lesson for the burning
+  // flags; the flee's own clear did not reuse it.
+  const battle = onTheClock({
+    teams: duellists(),
+    prep: (actor) => {
+      actor.status = [
+        `${SS2_TAUNT.flag}${SS2_STATUS_SOURCE_SEPARATOR}hero`,
+        `${SS2_TAUNT.flag}${SS2_STATUS_SOURCE_SEPARATOR}ghost`
+      ];
+    }
+  });
+
+  assert.deepEqual(legalActions(battle).map((o) => o.type), [Ss2ActionType.TAUNTED_PHASE]);
+  applyAction(battle, { actorId: "villain", ...legalActions(battle)[0] });
+
+  assert.equal((combatantById(battle, "villain").status ?? [])
+    .some((token) => token.startsWith(SS2_TAUNT.flag)), false, "both tokens are spent by one flee");
+  assert.ok(legalActions(battle).length > 1, "and he is not forced to run a second time");
+});
+
+test("A FORCED REST SPENDS THE FLEE IT NEVER RAN, and so does a forced swap", () => {
+  // ► **ROWS 1-7 ARE STATEMENTS.** Row 3 writes `taunted1 = false` INSIDE the
+  //   facing arm and BEFORE its `getphase`, so when row 1 or row 2 has already
+  //   taken the turn the flag is still spent on a call the `turnphase` gate has
+  //   silenced. The rest branch modelled that for the four conditions and not
+  //   for `taunted1`; the swap branch modelled it for nothing at all.
+  const carried = [SS2_TAUNT.flag, "burning"];
+
+  const resting = onTheClock({
+    teams: duellists(),
+    prep: (actor) => {
+      actor.resources.staminaleft.value = 0;
+      actor.status = [...carried];
+    }
+  });
+  assert.deepEqual(legalActions(resting).map((o) => o.type), [Ss2ActionType.REST],
+    "row 2 outranks row 3, which is the build's order");
+  applyAction(resting, { actorId: "villain", ...legalActions(resting)[0] });
+  assert.deepEqual([...(combatantById(resting, "villain").status ?? [])], [],
+    "the rest takes the turn and the chain still spends the flee and the burn");
+
+  const swapping = onTheClock({
+    teams: duellists({ secondary_weapon: 61, equipped_weapon: 2 }),
+    prep: (actor) => {
+      actor.resources.ammo_left.value = 0;
+      actor.status = [...carried];
+    }
+  });
+  assert.deepEqual(legalActions(swapping).map((o) => o.type), [Ss2ActionType.SWAP_WEAPONS],
+    "row 1 outranks both");
+  applyAction(swapping, { actorId: "villain", ...legalActions(swapping)[0] });
+  assert.deepEqual([...(combatantById(swapping, "villain").status ?? [])], [],
+    "and an empty quiver spends the whole chain the same way");
+});
+
+test("THE CHAIN'S CLEAR LIST IS THE CHAIN'S RANK LIST, and `taunted2` is in neither", () => {
+  // One list, read twice, because in the build they are the same statements.
+  // `taunted2` is deliberately absent: row 3 tests it and neither arm clears it.
+  assert.deepEqual([...SS2_CHAIN_CLEAR_FLAGS],
+    [SS2_TAUNT.flag, "frozen", "burning", "poison", "life_stolen"]);
+  assert.equal(SS2_CHAIN_CLEAR_FLAGS.includes("taunted2"), false);
 });

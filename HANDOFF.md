@@ -34,6 +34,58 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE TAUNTED FLEE IS BUILT (`cbaf406`), AND THE RUN IS NOT A BIG WALK.**
+  Row 3 of frame 1's forced chain is the only forced phase that is not a
+  condition, and it was the last vanilla action left unresolved. `runleft` sets
+  `destination = _x - movement_speed * 40` with **no boot bonus** and a stop gap
+  of **10** where a walk takes 16, the bonus and 20 — and the movement table's
+  closed form `40 * ms - 10` is **+1 low at 23 of the 57 reachable speeds**,
+  because the easing tween is a do/while and not an expression.
+  `ss2RunDisplacement` runs the loop.
+  ► **A FLEEING GLADIATOR RUNS THROUGH THE MAN WHO TAUNTED HIM, and that is
+    DERIVED.** Both run arms carry a body test (`+0x3fbd`, `+0x4146`) and it is
+    not the walk's clip: it reads the LIVE `_x` every frame, it ENDS the phase
+    rather than shortening it, and it measures the ATTACKER's `physical_size`
+    where the walk measures the DEFENDER's. **It is guarded on the facing, and
+    the flee inverts the facing** — row 3 sends `gladiator_dir == "right"` to
+    `runleft`, whose guard wants `"left"` — so the arm that runs is always the
+    arm whose guard is false. Only `nextphase` step 1's `[-2100, 2100]` bounds
+    a flee. A Codex review called the engine's missing clamp a collision bug;
+    two tests now pin the crossing AND the walk that stops short in the same
+    geometry, so adding the clamp fails loudly.
+  ► **AND `[-2100, 2100]` IS BYTE-VERIFIED NOW.** `ss2-rules.js` carried a
+    caveat saying the bound lived in the map's PROSE only and no offset carried
+    a literal. Both literals are pushed eight times over, at `+0x31c2`,
+    `+0x31d7`, `+0x31ee`, `+0x3203`, `+0x321a`, `+0x322f`, `+0x3246`, `+0x325b`.
+    **The absence was the DECODER's** — the tool that produced those four `If`
+    offsets printed opcodes without their operands — and the caveat is
+    retracted at the constant.
+
+► **A SECOND CODEX REVIEW RETURNED FOUR ON THE FLEE. THREE WERE REAL AND THE
+  FOURTH WOULD HAVE MADE THE ENGINE WRONG.** Fixed:
+  ► **THE FLEE LEFT THE FACING STALE.** `changeCombatants` recomputes BOTH
+    facings from `hero._x` vs `villain._x` at every phase advance
+    (`+0x28bf`-`+0x2ae3`), and a flee is a phase advance. The comment above
+    `facingAfter` said *"exactly two verbs move anybody: a walk and a rank
+    change"* — **a census in a comment, true when written and false the day the
+    flee shipped, which read as a licence to leave the new branch out.** It
+    names the RULE now (every branch that writes an `x` recomputes the facing
+    from the `x` it wrote) and the grep that checks it.
+  ► **ONE FLEE SPENT ONE `taunted1` TOKEN.** Tokens are source-qualified, the
+    build's flag is one boolean, so two taunters left a survivor that forced a
+    SECOND flee. `statusConsumptionEffects` already carried this exact lesson
+    for the burning flags; the flee's own clear did not call it.
+  ► **AND A FORCED SWAP CONSUMED NOTHING AT ALL, a forced rest four of five.**
+    Rows 1-7 are STATEMENTS: row 3 writes `taunted1 = false` inside the facing
+    arm and BEFORE its `getphase`, so a row-1 swap or a row-2 rest spends a
+    pending flee exactly as it spends a pending burn. `SS2_CHAIN_CLEAR_FLAGS` is
+    that list, and `forcedStatusFlag` now ranks off the same one, because in the
+    build they are the same statements.
+  ► **THE FOURTH — "extract the body-clamping logic and use it on the flee" —
+    IS REJECTED ON THE BYTES**, above. A review finding is a claim to verify,
+    and this one's OBSERVATION was right while its RECOMMENDATION would have
+    diverged the engine from the oracle.
+
 ► **THE LAST DEFERRED VANILLA ACTION RESOLVES (`8ede824`, `d5dabeb`), AND ITS
   DEFERRAL REASON WAS RIGHT TO THE END.** `taunt` stayed unbuilt for a month
   because the candidate implements direction 20's profile and NOTHING BEFORE
@@ -67,9 +119,12 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     charisma 30, stamina 12 ends at **165**, not 177. **`rest` cannot show this
     and that is why it went unnoticed**: its cost is negative, so it never
     spends and there is no second stage.
-  ► **AND THE `taunted1` FLEE IS STILL UNBUILT**, which the review is right to
+  ► ~~**AND THE `taunted1` FLEE IS STILL UNBUILT**, which the review is right to
     call incomplete rather than documented. Ranked, with the one derivation it
-    is blocked on.
+    is blocked on.~~ **BUILT 2026-09-17 (`cbaf406`), and corrected again the
+    same day — see the flee entry at the head of this file.** The derivation it
+    was blocked on was the run's displacement, which is `movement_speed * 40`
+    less the stop gap of 10, run as a loop rather than a closed form.
 
 ► **THE `psyche_up` COUNTER HAS EIGHT RESET SITES AND THIS PROJECT HAD THREE
   (`34636ff`, `2a0e3da`).** Three sessions each added one without asking how
