@@ -34,6 +34,43 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE LAST DEFERRED VANILLA ACTION RESOLVES (`8ede824`, `d5dabeb`), AND ITS
+  DEFERRAL REASON WAS RIGHT TO THE END.** `taunt` stayed unbuilt for a month
+  because the candidate implements direction 20's profile and NOTHING BEFORE
+  IT — so resolving it through the ordinary attack path would take the
+  dispatcher's samples on every press, where the build takes them on one outcome
+  in four. **Measured: 1 sample on a failed roll, 2 on effect 2, and the
+  dispatcher's only on effect 1.** Every vanilla action the controllers wire now
+  resolves, and `ss2-rules.js`'s deferral list is empty.
+  ► **FOUR THINGS THE MAP'S PROSE DID NOT SAY**, all derived this session: both
+    clips fire BEFORE the roll (so a FAILED taunt still animates); the
+    comparison is DIRECT and not `100 - chance`; **effect 2 splits on the
+    DEFENDER'S WEAPON MODE** (`+0x69a7` — the discriminator left open as "a
+    knockback OR sets `taunted1`"); and the displacement is unconditional while
+    the ANIMATION is gated at `|force| > 100`.
+  ► **A TAUNT IS PRICED LIKE A REST, WHICH IS WHY THEY SHARE A BUTTON.** Cost
+    `round(charisma * 2)`, gain `+= stamina`, heal `3 + ceil(stamina)` — the
+    same three writes `rest` makes. Routing it through the shared band path
+    would have repriced it on STRENGTH and dropped the recovery.
+
+► **AND A CODEX REVIEW SAID DO NOT SHIP IT, WITH THREE HIGH FINDINGS. TWO ARE
+  FIXED; THE THIRD IS ACCEPTED AND NAMED.**
+  ► **THE SHOVE REPORTED A FORCE AND MOVED NOBODY** — force 750 with the
+    defender still at x 250. **I had found this myself an hour earlier and filed
+    it as a pre-existing convention**, because `damagecharacter`'s knockback
+    displaces nobody either. That was true and was the wrong conclusion: **a
+    convention that makes a NEW outcome inert is not a defence.** It emits a
+    `POSITION` effect now.
+  ► **THE RECOVERY WAS APPLIED AT THE WRONG BOUNDARY.** `check_stats`
+    (`+0x68d3`) clamps BEFORE the roll (`+0x6921`), so the recovery survives a
+    lethal strike and the gain clamps before the cost is spent — 220/220,
+    charisma 30, stamina 12 ends at **165**, not 177. **`rest` cannot show this
+    and that is why it went unnoticed**: its cost is negative, so it never
+    spends and there is no second stage.
+  ► **AND THE `taunted1` FLEE IS STILL UNBUILT**, which the review is right to
+    call incomplete rather than documented. Ranked, with the one derivation it
+    is blocked on.
+
 ► **THE `psyche_up` COUNTER HAS EIGHT RESET SITES AND THIS PROJECT HAD THREE
   (`34636ff`, `2a0e3da`).** Three sessions each added one without asking how
   many there were. Every write in the battle overlay sets 1; the only increment

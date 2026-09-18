@@ -1,8 +1,9 @@
 ---
 handoff:      2026-09-16-2356--the-stance-the-glow-and-an-ai-that-winds-up
 written:      2026-09-16 23:56 -0400, extended 2026-09-17 00:40 (the ranked
-              item 1 retraction and the victory celebration) and 01:20 (the
-              taunt derivation and the psyche write census), same session
+              item 1 retraction and the victory celebration), 01:20 (the taunt
+              derivation and the psyche write census) and 02:30 (taunt built,
+              and a Codex review's three findings), same session
 sessionId:    cbee9926-159f-4edb-abcb-8d75f213b5de
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
@@ -13,9 +14,9 @@ commits:      `080538a..HEAD` — `b1be7b2` (the charged stance), `ce38286` (six
               `d093bff` (the victory celebration), plus this line's own.
               **Re-measure with `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
-              the exit code are the gate. **1991 / fail 0 / skipped 1, exit 0**,
+              the exit code are the gate. **2003 / fail 0 / skipped 1, exit 0**,
               measured against the tree the LAST commit of this session leaves
-              behind — the derivation commits changed documentation only. Against 1960
+              behind, which is what the instruction above means. Against 1960
               at the start of this stretch. (It said 1984, then 1986, each time
               measured a commit too early. That is three handoffs running, so
               the fix is procedural and not a better number: write the line
@@ -30,8 +31,8 @@ agentRuns:    `wf_b86d8124-b42` — 6 write-nothing verifiers, one named claim
 supersedes:   2026-09-16-2228--the-build-plays-seven-runs.md
 next:         **RANKED BELOW. Items 1 and 2 are CLOSED — 1 by RETRACTION after
               re-derivation, 2 by being BUILT. Items 3, 4 and 5 are the
-              owner's; **the first thing an agent can pick up unaided is
-              `taunt` at 6, and it is now SPECIFIED rather than deferred.**
+              owner's. **`taunt` is BUILT; the first thing to pick up is the
+              `taunted1` flee at 6, blocked on ONE named derivation.**
 ---
 # Handoff — the stance, the glow, and an AI that winds up
 
@@ -182,43 +183,40 @@ finding re-derived here before anything was touched.**
    most of their turns, because an archer at range is rarely wounded and the
    gate is full health. Stated rather than tuned; the number is the owner's.
 
-6. ~~**`taunt` IS THE LAST DEFERRED VANILLA ACTION**, reason unchanged.~~
-   **STILL THE LAST ONE, BUT NO LONGER BLOCKED ON A DERIVATION — IT IS FULLY
-   SPECIFIED NOW (`34636ff`, `2a0e3da`), AND IT IS THE FIRST THING TO PICK UP.**
-   The deferral reason was exact and is still true: the candidate implements
-   only the post-`checkattackroll` arm. **The missing half is written out in the
-   battle map under "The taunt phase, in full"**, byte by byte, and four things
-   in it were not in the prose:
-   - **Both clips fire BEFORE the roll** — `taunt` on the actor, `taunted` on
-     the target — so a FAILED taunt still animates both.
-   - **The comparison is DIRECT**, `diceroll < taunt_percentage` (`+0x694b`),
-     not the dispatcher's `100 - chance` form. Backwards inverts the action.
-   - **`taunt_effect == 2` splits on the DEFENDER'S WEAPON MODE** (`+0x69a7`),
-     which is the discriminator the map had left open: `equipped_weapon == 1`
-     is melee and takes a `charisma * 25` shove, anything else is the bow and is
-     made to flee.
-   - **The displacement is unconditional; the ANIMATION is gated** on
-     `|force| > 100`, the same shape `damagecharacter` has.
+6. ~~**`taunt` IS THE LAST DEFERRED VANILLA ACTION.**~~ **BUILT 2026-09-17
+   (`8ede824`, `d5dabeb`), AND ITS DEFERRAL REASON WAS RIGHT TO THE END.** The
+   candidate implements direction 20's profile and nothing before it, which is
+   why the build takes the two pre-draws itself. Measured budget: **1 sample on
+   a failed roll, 2 on effect 2, and the dispatcher's only on effect 1.**
+   Every vanilla action the controllers wire now resolves, and the deferral
+   paragraph in `ss2-rules.js` is empty — kept for its history, which is that it
+   went stale twice while readers were about to re-derive work already beneath
+   it.
 
-   **What is already built and must not be re-derived**: the candidate computes
-   `chances.taunt` as `bounded(roundedChance(charismaRatio, 0.4))` — the bytes
-   at `+0x052b` exactly — and direction 20's damage profile
-   (`round(charisma * 4) - defender.charisma`, floored by a 1-3 roll,
-   `critical: 21`). `SS2_TAUNT_FLAGS` and the flag-clearing in `defenderEffects`
-   exist too.
+   **WHAT IS LEFT OF IT, and it is the first thing to pick up:** the `taunted1`
+   flee. A landed taunt against a bow-mode defender sets the flag faithfully and
+   **nothing reads it**, so that one outcome in four is partial — it breaks a
+   psych-up charge (`+0x6ac8`) and no more. A Codex review called that out and
+   is right. The build drives a taunted gladiator into
+   `getphase("runleft")`/`("runright")` by FACING, a movement phase at the run's
+   step factor.
 
-   **What is left**: the two pre-samples in order, the two effect arms, and the
-   `taunted1` FLEE consumption — `SS2_STATUS_PHASE_FOR_FLAG` carries the four
-   conditions and not the taunt flags, so a taunted gladiator does not yet run.
-   The map's decision table row 3 has the flee: `taunted1 == true` -> facing
-   right `getphase("runleft")`, facing left `getphase("runright")`.
+   **The blocker is one derivation, named precisely**: `ss2WalkDestination`
+   hardcodes `ss2WalkDisplacement`, which is `movement_speed * 16` in the
+   build's exact operation order — and its own docstring records that collapsing
+   that arithmetic shipped a +1 divergence for a commit. **Generalising it to 40
+   would assert the run shares the walk's easing and boot pipeline, which nobody
+   has read out of `+0x40d8`/`+0x3f4f`.** Derive that first; the rest is an
+   afternoon.
 
-7. **THE `psyche_up` WRITE CENSUS IS COMPLETE AND THREE OF EIGHT SITES WERE
-   UNRECORDED** (`34636ff`). Nothing is live — no magic-damage, taunt or
-   whirlwind verb exists here — but `+0x7a6a` is worth knowing before anyone
-   builds `cast_whirlwind`: it writes the counter back with **no matching
-   increment**, so a whirlwind caster is left at 1 where a psych-up discharger
-   is left at 2.
+7. **KNOCKBACKS DISPLACE NOBODY, on the one path left.**
+   `damagecharacter`'s knockback has travelled as an event field since it was
+   built and nothing in `src/adapter/` or the shell reads it, so a knocked-back
+   gladiator plays the clip and stands still. The taunt's shove was the same
+   until `d5dabeb` and is now a real `POSITION` effect. **Closing the last one
+   moves positions, which are projected and hashed** — so it re-datums pinned
+   hashes and any golden carrying one, and is its own decision with its own
+   evidence rather than a rider on a verb.
 
 8. **DECIDE WHICH RASTERISER THIS PROJECT MEASURES IN.** Every committed number
    is `cpu`; the gap is 15.9% of the frame.
