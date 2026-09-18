@@ -47,6 +47,7 @@ import {
   ss2WalkDestination,
   ss2FacingEffects,
   ss2IsBackAttack,
+  ss2SameLane,
   SS2_BACK_ATTACK_BONUS,
   ss2TeamRules,
   SS2_ARENA,
@@ -2156,4 +2157,117 @@ test("AND SO DOES A TAUNT'S SHOVE, on the path that had the rule written beside 
       `seed ${seed}: shoved ${before} -> ${landed.x}, nearer the ally at ${outer.x}, so he turns`);
   }
   assert.ok(checked, "the sweep must land one shove that changes which foe is nearest");
+});
+
+/* ------------------------------------------------------------------ */
+/* The lane rule                                                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **AUTHORED, AND THE OWNER'S — 2026-09-18.** Reported off a live 3v3 in the
+ *   browser arena: *"AI are able to attack each other in different lanes: this
+ *   shouldn't be allowed. You can attack from front or behind but not at
+ *   different y even if you are 'close'."*
+ *
+ *   Vanilla has ONE rank, so no byte settles this
+ *   (`MAP_SILENCE.multi-slot-arena-geometry`). What the build DOES settle is
+ *   that `getfightdistance` is Euclidean over `(_x, _y)` — and this engine
+ *   borrowed it for depth, which is right for a distance and was wrong for a
+ *   reach.
+ */
+
+test("MELEE NEEDS THE SAME LANE, and 57% of swings in a 3v3 used not to", () => {
+  // Two foes at the SAME x, one in the actor's rank and one behind it. Euclidean
+  // reach cannot tell them apart: the far one is 97 units away and every melee
+  // weapon in the game reaches further than that.
+  const battle = bout(2, 1);
+  const actor = combatantById(battle, actorId(battle));
+  const foes = battle.teams.flatMap((team) => team.combatants)
+    .filter((one) => one.teamId !== actor.teamId);
+  const [sameLane, otherLane] = foes;
+  assert.ok(sameLane && otherLane, "the rig must give two foes");
+  sameLane.x = actor.x + 40;
+  sameLane.y = actor.y;
+  otherLane.x = actor.x + 40;
+  otherLane.y = actor.y + SS2_ARENA.rankStride;
+
+  assert.ok(ss2FightDistance(actor, otherLane) < ss2Reach(actor),
+    "the far-lane foe must be inside Euclidean reach, or this test proves nothing");
+
+  const melee = [Ss2ActionType.QUICK_ATTACK, Ss2ActionType.NORMAL_ATTACK, Ss2ActionType.POWER_ATTACK];
+  const offered = legalActions(battle, actor.id).filter((option) => melee.includes(option.type));
+  assert.ok(offered.length > 0, "the same-lane foe must still be attackable");
+  assert.deepEqual([...new Set(offered.map((option) => option.targetId))], [sameLane.id],
+    "and the foe one rank back must not be, however close he is");
+});
+
+test("THE LANE RULE IS A NO-OP WITH NO RANKS, structurally rather than by a flag", () => {
+  // `ss2SameLane` returns true whenever either `y` is not finite, and
+  // `startingY` returns null unless `rankStride` is non-zero. So every 1v1,
+  // every `rankStride: 0` arena and every promoted golden is untouched — which
+  // is why three of the four seeded hash pins did not move.
+  assert.equal(ss2SameLane({ y: null }, { y: 200 }), true);
+  assert.equal(ss2SameLane({ y: 200 }, { y: null }), true);
+  assert.equal(ss2SameLane({ y: 200 }, { y: 200 }), true);
+  assert.equal(ss2SameLane({ y: 200 }, { y: 103 }), false);
+
+  const flat = createTeamBattle({
+    seed: 1,
+    rules: createSs2TeamRules({ rankStride: 0 }),
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator(), { id: "hero", name: "Hero" })] },
+      {
+        id: "blue",
+        combatants: [
+          ss2Combatant(gladiator(), { id: "near", name: "Near" }),
+          ss2Combatant(gladiator(), { id: "far", name: "Far" })
+        ]
+      }
+    ]
+  });
+  for (const one of flat.teams.flatMap((team) => team.combatants)) {
+    assert.equal(one.y, null, "a rankStride of 0 models no depth at all");
+  }
+  const hero = combatantById(flat, "hero");
+  for (const foe of ["near", "far"]) combatantById(flat, foe).x = hero.x + 40;
+  const targets = new Set(legalActions(flat, "hero")
+    .filter((option) => option.type === Ss2ActionType.QUICK_ATTACK)
+    .map((option) => option.targetId));
+  assert.deepEqual([...targets].sort(), ["far", "near"],
+    "with no ranks every foe in reach is attackable, exactly as before the rule");
+});
+
+test("A BOW STILL CROSSES LANES, and that is a decision rather than an oversight", () => {
+  // The rule is about SWINGING. A bow exists to reach somebody you cannot walk
+  // to, and the flat shot already has its own lane rule in `ss2ShotBlocked`,
+  // derived from the build's ballistic rather than authored. Extending the
+  // melee rule to ranged would be a second authored rule stacked on a derived
+  // one — so it is not extended, and this pins that.
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      {
+        id: "red",
+        combatants: [ss2Combatant(
+          gladiator({ secondary_weapon: 61, equipped_weapon: 2, secondary_weapon_range: 900 }),
+          { id: "archer", name: "Archer" }
+        )]
+      },
+      {
+        id: "blue",
+        combatants: [
+          ss2Combatant(gladiator(), { id: "ahead", name: "Ahead" }),
+          ss2Combatant(gladiator(), { id: "behind", name: "Behind" })
+        ]
+      }
+    ]
+  });
+  const archer = combatantById(battle, "archer");
+  const behind = combatantById(battle, "behind");
+  assert.notEqual(behind.y, archer.y, "the second foe must be in another rank");
+  const shots = legalActions(battle, "archer")
+    .filter((option) => option.type === Ss2ActionType.BOMBARD)
+    .map((option) => option.targetId);
+  assert.ok(shots.includes("behind"), "a lob must still reach a foe in another lane");
 });

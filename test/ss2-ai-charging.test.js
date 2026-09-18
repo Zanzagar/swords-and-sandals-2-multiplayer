@@ -296,7 +296,16 @@ function staged({ heroX, foes, counter = SS2_PSYCHE_UP.dischargeAt, hero = {} })
   const place = () => {
     at("hero").x = heroX;
     at("hero").resources.psyche_up = { value: counter, min: 0, max: null };
-    for (const { id, x } of foes) at(id).x = x;
+    // ► **EVERY FOE IN THE HERO'S OWN LANE, and it has to be said out loud
+    //   since 2026-09-18.** `startingY` puts ally slot 1 one rank back, and
+    //   melee now requires the same `y` (`ss2SameLane`) — so without this the
+    //   second foe here is unattackable and this file's claim about WHICH foe
+    //   the AI charges at could never be staged. These tests are about the
+    //   x-geometry of a charge; depth is somebody else's subject.
+    for (const { id, x } of foes) {
+      at(id).x = x;
+      at(id).y = at("hero").y;
+    }
   };
   place();
   for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {

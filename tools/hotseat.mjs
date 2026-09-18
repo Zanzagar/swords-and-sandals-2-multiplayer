@@ -50,6 +50,7 @@ import {
 } from "../src/team/index.js";
 import { advanceCircuit, circuitLength, CircuitSide } from "../src/campaign/index.js";
 import {
+  createSs2TeamRules,
   SS2_FACING_LEFT,
   ss2Combatant,
   ss2StatusFlagOf,
@@ -102,7 +103,22 @@ const RULE_SETS = Object.freeze({
 
 function parseArgs(argv) {
   const options = {
-    seed: 1, hp: 60, armour: 0, rules: "ss2", enchant: null, teams: null, names: null, approach: false
+    seed: 1, hp: 60, armour: 0, rules: "ss2", enchant: null, teams: null, names: null, approach: false,
+    /**
+     * ► **WHETHER THE ARENA HAS DEPTH, and it became a real choice on
+     *   2026-09-18 rather than a detail.** Melee now requires the same lane
+     *   (`ss2SameLane`, owner's rule), and `startingY` opens ally slot 1 one
+     *   rank back — so a 2v2 with ranks on is TWO PARALLEL DUELS in which
+     *   teammates can never reach each other's foe. That is a legitimate arena
+     *   and it is the default; `--flat` is the other one, the documented
+     *   one-dimensional engine where everybody shares a lane and a team fight
+     *   is a four-way melee.
+     *
+     * Exposed because the tool could not previously say which it meant, and a
+     * person choosing "attack" from a menu cannot tell why the foe across the
+     * arena is missing from it.
+     */
+    flat: false
   };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
@@ -121,6 +137,7 @@ function parseArgs(argv) {
     else if (flag === "--rules") options.rules = next();
     else if (flag === "--names") options.names = next().split(",").map((part) => part.trim());
     else if (flag === "--approach") options.approach = true;
+    else if (flag === "--flat") options.flat = true;
     else if (flag === "--help" || flag === "-h") options.help = true;
     else throw new Error(`Unknown flag ${flag}. Try --help.`);
   }
@@ -222,6 +239,9 @@ Hot-seat: two humans, one keyboard, one fight.
   --armour <n>   give both fighters a breastplate and helmet of this grade
                  (default 0, no armour). SS2 subtracts damage from armour
                  first and carries only the overflow into health.
+  --flat         one lane: no ranks, so every fighter can reach every foe.
+                 With ranks (the default) melee needs the same lane, and
+                 allies open one rank apart, so a 2v2 is two parallel duels.
   --teams NvM    fighters a side, 1-3 each (default 1v1). Every seat is a
                  HUMAN at this keyboard; the resolver's turn order decides who
                  acts, and an attack names its target, so a 2v2 asks you which
@@ -517,7 +537,9 @@ async function main() {
     return;
   }
 
-  const rules = RULE_SETS[options.rules];
+  const rules = options.rules === "ss2" && options.flat
+    ? createSs2TeamRules({ rankStride: 0 })
+    : RULE_SETS[options.rules];
   const buildFighter = options.rules === "ss2"
     ? (id, name) => buildSs2Fighter(id, name, options.hp, options.armour, options.enchant, options.approach)
     : (id, name) => buildPlaceholderFighter(id, name, options.hp);

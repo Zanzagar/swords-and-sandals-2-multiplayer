@@ -118,6 +118,7 @@
  */
 
 import { clipLabelsFor } from "./clip-labels.js";
+import { CLIP_SEQUENCES } from "./clip-sequences.js";
 import { timelineFor } from "./timeline.js";
 
 export class StanceError extends Error {
@@ -192,7 +193,7 @@ export function stanceLabelFor(combatant) {
  * @param {{now?: number}} options the frame's timestamp, in milliseconds
  * @returns {{label: string, timeline: object, at: number}}
  */
-export function idleFrameFor(combatant, { now = 0, winnerTeamId = null } = {}) {
+export function idleFrameFor(combatant, { now = 0, winnerTeamId = null, celebratingSince = null } = {}) {
   // ► **A SURVIVING WINNER CELEBRATES, AND DOES NOT GO BACK TO BREATHING.**
   //   Overlay frame 65, inside `combatwon` (62-73), runs
   //   `hero.gotoAndPlay("celebrate1")`; frame 77, inside `combatlost` (74-84),
@@ -206,13 +207,52 @@ export function idleFrameFor(combatant, { now = 0, winnerTeamId = null } = {}) {
   //   spend it on. The dead are excluded by the guard below, which is the same
   //   order the build has — the loser's death plays from `deathsequence` at
   //   overlay frame 62/74 and is held forever.
+  //
+  // ► **AND THE ENTRY PLAYS ONCE, WHICH IT DID NOT UNTIL 2026-09-18.** Frame
+  //   1426 is `GoToLabel("celebrate1a"); Play` — the loop target is the
+  //   CONTINUATION, not the run — so vanilla plays the 9-frame flourish once
+  //   and then cycles the 18-frame body forever. This looped all 27, and
+  //   `timeline.js` recorded that as a stated approximation whose cost was "the
+  //   winner re-plays his opening flourish once a cycle".
+  //
+  //   **The owner watched a bout end and reported it as a bug**: *"The guy keeps
+  //   victory emoting at the end too."* A stated approximation is still a wrong
+  //   picture, and "we wrote it down" is not the same as "it is acceptable".
+  //
+  //   The reason given for not fixing it was that a loop-start offset needs to
+  //   know when the celebration BEGAN, and this module is stateless. That is
+  //   true and is why the caller supplies it: `celebratingSince` is a clock
+  //   reading, not held state, and **omitting it keeps the old whole-run loop**
+  //   so no existing caller changes behaviour. The split point is DERIVED —
+  //   `entryFrames / frames` off `CLIP_SEQUENCES`, 9 of 27 — rather than an
+  //   authored 0.333.
   if (winnerTeamId != null && combatant?.teamId === winnerTeamId && combatant?.alive !== false) {
     const timeline = timelineFor(CELEBRATION_LABEL, { role: "actor" });
     const elapsed = Number.isFinite(now) && now > 0 ? now : 0;
+    if (!Number.isFinite(celebratingSince)) {
+      return Object.freeze({
+        label: CELEBRATION_LABEL,
+        timeline,
+        at: (elapsed / timeline.durationMs) % 1
+      });
+    }
+    // `CLIP_SEQUENCES` and not `clipSequenceFor`: the helper hands back the
+    // `plays` LIST, and the split point is on the record beside it.
+    const run = CLIP_SEQUENCES[CELEBRATION_LABEL];
+    // Guarded rather than assumed: a run with no entry count, or one whose
+    // entry is the whole thing, has no tail to cycle and falls back to the run.
+    const entry = run && Number.isFinite(run.entryFrames) && Number.isFinite(run.frames)
+      && run.entryFrames > 0 && run.entryFrames < run.frames
+      ? run.entryFrames / run.frames
+      : null;
+    const since = Math.max(0, elapsed - Math.max(0, celebratingSince));
+    const phase = since / timeline.durationMs;
     return Object.freeze({
       label: CELEBRATION_LABEL,
       timeline,
-      at: (elapsed / timeline.durationMs) % 1
+      at: entry === null
+        ? phase % 1
+        : (phase < entry ? phase : entry + ((phase - entry) % (1 - entry)))
     });
   }
   // ► **A CORPSE HAS NO IDLE, AND THIS GUARD IS BELT-AND-BRACES.** The shell's

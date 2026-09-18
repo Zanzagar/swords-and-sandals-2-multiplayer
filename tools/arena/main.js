@@ -3149,7 +3149,20 @@ function layerScaleOf(linkage) {
   return 1;
 }
 
+/**
+ * The clock reading at which the current bout was settled, or `null` while one
+ * is still being fought. Stamped in `render` because that is where the result
+ * first becomes visible every frame; see the `celebratingSince` note at its
+ * one reader.
+ */
+let celebrationStartedAt = null;
+
 function render(now = performance.now()) {
+  if (host?.battle?.result) {
+    if (celebrationStartedAt === null) celebrationStartedAt = now;
+  } else {
+    celebrationStartedAt = null;
+  }
   // ► **THE INVARIANT, RE-ASSERTED ONCE A FRAME.** `paintGroupRuns` rebinds
   //   `context` to an offscreen while it composites a group and restores it in
   //   a `finally`; this is the belt to that braces, so a throw anywhere in a
@@ -3341,7 +3354,18 @@ function renderStage(view, fit, now) {
       //   at 3. The branch and the clock both live in `src/render/stance.js`
       //   now, so the whole decision is somewhere the suite can call it; this
       //   site asks one question and draws the answer.
-      const idle = idleFrameFor(combatant, { now, winnerTeamId: host.battle.result?.winnerTeamId ?? null });
+      const idle = idleFrameFor(combatant, {
+        now,
+        winnerTeamId: host.battle.result?.winnerTeamId ?? null,
+        // ► **WHEN THE BOUT ENDED, so the winner's opening flourish plays ONCE.**
+        //   Frame 1426 loops `celebrate1a`, not the run, so vanilla cycles only
+        //   the 18-frame body. `idleFrameFor` needs a start to reproduce that
+        //   and is deliberately stateless, so the SHELL holds the stamp — it is
+        //   one clock reading, taken where the bout's end is already visible,
+        //   and it is cleared when a new bout starts. Reported by the owner
+        //   watching a bout end: "the guy keeps victory emoting".
+        celebratingSince: celebrationStartedAt
+      });
       drawnTimeline = idle.timeline;
       drawnAt = idle.at;
       pose = poseAt(drawnTimeline, drawnAt);

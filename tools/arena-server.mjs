@@ -45,6 +45,22 @@ const REPO_ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const FORBIDDEN_PREFIXES = Object.freeze(["captures", "local-mod-work", ".git", "node_modules"]);
 const FORBIDDEN_EXTENSIONS = Object.freeze([".swf", ".sol", ".exe", ".dll"]);
 
+/**
+ * ► **EVERY EXTENSION UNDER `assets/` MUST BE HERE, AND `.mp3` WAS NOT —
+ *   reported by the owner as "all effects aren't working", 2026-09-18.**
+ *
+ * The fall-through below is `application/octet-stream`, which browsers will
+ * happily sniff for an image and will NOT decode for an `<audio>` element. So
+ * every extracted sound 200'd, the whole decision layer in `src/render/sound.js`
+ * returned the right file for the right label, `bindingsFrom` built all 80
+ * buckets — **and the arena was silent**, because the one layer with no test
+ * and no assertion was a seven-line lookup table in a dev server.
+ *
+ * The suite could not have caught it: `src/render/sound.js` is pure and under
+ * test, and this file is `tools/`. What it cost was a whole feature, invisibly.
+ * `assets/` today is mp3, json, jpg, png — run
+ * `find assets -type f | sed 's/.*\.//' | sort -u` before adding an extractor.
+ */
 const CONTENT_TYPES = Object.freeze({
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -52,7 +68,17 @@ const CONTENT_TYPES = Object.freeze({
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
-  ".map": "application/json; charset=utf-8"
+  ".map": "application/json; charset=utf-8",
+  ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
+  ".ogg": "audio/ogg",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".md": "text/markdown; charset=utf-8",
+  ".txt": "text/plain; charset=utf-8"
 });
 
 function parsePort(argv) {

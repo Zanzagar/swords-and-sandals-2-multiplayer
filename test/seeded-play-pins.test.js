@@ -375,6 +375,35 @@ function driveFirst(battle, limit) {
  *   both fighters and a fixture has none.
  */
 /**
+ * ► **ONE OF FOUR MOVED ON 2026-09-18, AND IT IS THE ONLY ONE THAT HAS RANKS
+ *   TO BE IN: MELEE NOW REQUIRES THE SAME LANE.**
+ *
+ *     2ef865ca -> fbb98fd2   (settled 3v3)
+ *     f11e6bc9   unchanged   (six actions in, 1v1)
+ *     a6cbd6a8   unchanged   (settled 1v1)
+ *     3e770611   unchanged   (vanilla-separation opening, 1v1)
+ *
+ *   Owner's rule, reported off a live 3v3 in the browser arena: *"AI are able
+ *   to attack each other in different lanes: this shouldn't be allowed."*
+ *   Reach was Euclidean because `getfightdistance` is, so a foe one rank back
+ *   at the same x sat 97 units away and every melee weapon could reach him.
+ *   Measured before the rule: **4,440 of 7,845 melee swings across 25 seeded
+ *   3v3 bouts — 57% — were cross-rank.** After it: **0 cross-lane offers in
+ *   35,523**, with all 25 bouts still settling.
+ *
+ *   **Only the 3v3 can see it, and that is the evidence rather than luck this
+ *   time.** The three 1v1 pins have one foe apiece standing in the same rank,
+ *   so no lane test can change an option list they were ever going to get.
+ *   `ss2SameLane` returns `true` whenever either `y` is not finite, so a rule
+ *   set with `rankStride: 0` — and every golden, which has no position at all —
+ *   is untouched by construction.
+ *
+ *   **What it costs is worth stating**: with allies opening one rank apart, a
+ *   3v3 becomes three parallel duels and nobody can gang up. That is a
+ *   consequence of the LAYOUT, not of the rule, and it is the owner's to
+ *   settle — see the handoff.
+ */
+/**
  * ► **THREE OF FOUR MOVED ON 2026-09-17, AND THE ONE THAT DID NOT IS THE
  *   EVIDENCE: FACING IS NOW DERIVED AT CONSTRUCTION, as `changeCombatants`
  *   derives it before the first turn.**
@@ -546,7 +575,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "2ef865ca", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "fbb98fd2", WHY_IT_MOVED);
 });
 
 /**

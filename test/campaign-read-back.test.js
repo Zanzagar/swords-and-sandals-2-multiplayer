@@ -33,7 +33,8 @@ import {
   pendingResultEvent
 } from "../src/team/index.js";
 import {
-  SS2_STATUS_FLAGS, ss2Combatant, ss2StatusFlagOf, ss2StatusToken, ss2TeamRules, Ss2ActionType
+  createSs2TeamRules, SS2_STATUS_FLAGS, ss2Combatant, ss2StatusFlagOf, ss2StatusToken, ss2TeamRules,
+  Ss2ActionType
 } from "../src/team/ss2-rules.js";
 import { buildCampaignRecord, CampaignRecordError, rosterFromCampaignRecord } from "../src/campaign/index.js";
 
@@ -235,6 +236,23 @@ test("includeFallen DOES carry a casualty whose team still has somebody standing
  * Measured: 65 of 80 seeds leave a team mixed, every one of them with the
  * slot-0 fighter dead and a survivor behind. It procs nothing.
  */
+/**
+ * ► **ONE LANE, DELIBERATELY — `rankStride: 0`, the documented
+ *   one-dimensional engine.** Added 2026-09-18 with the lane rule
+ *   (`ss2SameLane`): melee now needs the same `y`, and `startingY` puts ally
+ *   slot 1 a rank back, so a default 2v2 is TWO PARALLEL DUELS that can never
+ *   touch each other.
+ *
+ *   Every experiment in this file needs the opposite. The `afflicted` shape's
+ *   own comment spells out why: *"the bearer has to act BEFORE the enemy that
+ *   procs it and a TEAMMATE has to land the killing blow AFTER"* — a
+ *   cross-team, cross-fighter sequence that depth makes impossible. The
+ *   `costly` shape needs one side to lose a fighter but not the fight, which
+ *   two independent duels also cannot produce.
+ *
+ *   These are CAMPAIGN read-back tests and depth is not their subject, so they
+ *   take the arena that has none rather than staging `y` by hand.
+ */
 function settledTeamBout(seed, shape = "afflicted") {
   const blueprints = shape === "costly" ? [
     ss2Combatant(gladiator({ speed: 12, vitality: 0, herolevel: 1 }), { id: "red-1", name: "Red 1", controller: "local" }),
@@ -270,7 +288,7 @@ function settledTeamBout(seed, shape = "afflicted") {
   ];
   const battle = createTeamBattle({
     seed,
-    rules: ss2TeamRules,
+    rules: createSs2TeamRules({ rankStride: 0 }),
     teams: [
       { id: "red", name: "Red", combatants: [blueprints[0], blueprints[1]] },
       { id: "blue", name: "Blue", combatants: [blueprints[2], blueprints[3]] }

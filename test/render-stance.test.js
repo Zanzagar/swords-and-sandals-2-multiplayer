@@ -25,6 +25,7 @@ import { fileURLToPath as toPath } from "node:url";
 import test from "node:test";
 
 import { clipLabelsFor } from "../src/render/clip-labels.js";
+import { CLIP_SEQUENCES } from "../src/render/clip-sequences.js";
 import { animationFor, figureEffectGroupsFor, figurePackFrom } from "../src/render/extracted-figure.js";
 import { chooseSound, soundLabelsFor } from "../src/render/sound.js";
 import {
@@ -446,4 +447,53 @@ test("the winner test is STRICT, so a draw and a mistyped id both fall back to `
   assert.equal(one({ id: "h", teamId: "red", resources: {} }, { now: 0, winnerTeamId: "red" }),
     CELEBRATION_LABEL, "absent `alive` is not dead");
   assert.equal(one({ ...red, alive: false }, { now: 0, winnerTeamId: "red" }), "Standing");
+});
+
+/* ------------------------------------------------------------------ */
+/* The celebration loops its TAIL, not its entry                       */
+/* ------------------------------------------------------------------ */
+
+test("THE VICTORY FLOURISH PLAYS ONCE, and the owner reported the version that did not", () => {
+  // ► **FRAME 1426 IS `GoToLabel("celebrate1a"); Play`, so the loop target is
+  //   the CONTINUATION.** Vanilla plays the 9-frame `celebrate1` entry once and
+  //   then cycles `celebrate1a`'s 18 forever. This engine looped all 27, which
+  //   `timeline.js` recorded as a stated approximation — *"the winner re-plays
+  //   his opening flourish once a cycle"* — until the owner watched a bout end
+  //   and reported it: **"the guy keeps victory emoting at the end too."**
+  //
+  //   A stated approximation is still a wrong picture. The split point is
+  //   DERIVED from `CLIP_SEQUENCES` (`entryFrames / frames`, 9 of 27) rather
+  //   than authored as 0.333.
+  const winner = { id: "w", teamId: "red", alive: true };
+  const run = CLIP_SEQUENCES[CELEBRATION_LABEL];
+  const entry = run.entryFrames / run.frames;
+  const duration = idleFrameFor(winner, { now: 0, winnerTeamId: "red" }).timeline.durationMs;
+  const at = (cycles) => idleFrameFor(winner, {
+    now: 1000 + duration * cycles, winnerTeamId: "red", celebratingSince: 1000
+  }).at;
+
+  // The first pass plays the whole run, entry included.
+  assert.equal(at(0), 0);
+  assert.ok(Math.abs(at(entry / 2) - entry / 2) < 1e-9, "the entry plays at its own pace");
+  assert.ok(at(0.9) > entry, "and the body follows it");
+
+  // Every pass after the first starts at the continuation and never returns to
+  // the flourish.
+  for (const cycles of [1, 1.2, 2, 3.7, 12.5]) {
+    assert.ok(at(cycles) >= entry - 1e-9,
+      `cycle ${cycles} must land in the tail, not back in the entry (got ${at(cycles)})`);
+    assert.ok(at(cycles) < 1);
+  }
+  assert.ok(Math.abs(at(1) - entry) < 1e-9, "the second pass starts exactly at the continuation");
+});
+
+test("WITHOUT A START TIME IT LOOPS THE WHOLE RUN, so no existing caller changed behaviour", () => {
+  // `idleFrameFor` is stateless by design and the start is the CALLER's to
+  // supply. Omitting it keeps the pre-2026-09-18 answer exactly, which is what
+  // makes the fix additive rather than a silent change to every reader.
+  const winner = { id: "w", teamId: "red", alive: true };
+  const duration = idleFrameFor(winner, { now: 0, winnerTeamId: "red" }).timeline.durationMs;
+  const free = idleFrameFor(winner, { now: duration * 1.25, winnerTeamId: "red" });
+  assert.ok(Math.abs(free.at - 0.25) < 1e-9, "a free-running clock still wraps at the whole run");
+  assert.equal(free.label, CELEBRATION_LABEL);
 });

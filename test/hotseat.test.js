@@ -205,9 +205,23 @@ test("a 2v2 runs to a winner, and every seat is a separate human turn", async ()
   // playable, and no person had ever taken a turn in one. `--teams` is the
   // whole change; the loop, the scoreboard and target selection already worked
   // for N combatants and are asserted here rather than assumed.
+  // ► **`--flat`, AND THE FLAG EXISTS BECAUSE OF THIS TEST — 2026-09-18.**
+  //   Melee now needs the same lane (`ss2SameLane`, the owner's rule) and
+  //   `startingY` opens ally slot 1 one rank back, so a 2v2 WITH RANKS is two
+  //   parallel duels. This test drives the menu by feeding "1" forever, and
+  //   once a duel ends its winner has no foe in reach — option 1 stops being an
+  //   attack and becomes a walk, so a blind "1" walks for the rest of time and
+  //   the bout never settles. Raising the feed does not fix that; it is not a
+  //   budget problem.
+  //
+  //   The test's own claim is that a team fight is PLAYABLE and that every seat
+  //   takes its own turn, which is about the loop and not about depth. `--flat`
+  //   is the documented one-dimensional arena, so it states the arena it means
+  //   instead of depending on one. Depth's own consequences are measured in
+  //   `test/ss2-position.test.js`.
   const { code, stdout, stderr } = await runHotseat(
-    ["--teams", "2v2", "--hp", "40", "--seed", "3"],
-    "1\n".repeat(120)
+    ["--teams", "2v2", "--flat", "--hp", "40", "--seed", "3"],
+    "1\n".repeat(400)
   );
   assert.equal(code, 0, `runner exited ${code}\n${stderr}`);
   assert.match(stdout, /WINNER: /, "a team fight must still settle");
@@ -222,7 +236,10 @@ test("with two foes standing, an attack must NAME which one it hits", async () =
   // At 1v1 the target is implicit and a menu of three verbs is enough. At 2v2
   // the same three verbs appear per foe, because targeting is a real choice the
   // resolver has always supported and no interface had ever offered.
-  const { stdout } = await runHotseat(["--teams", "2v2", "--hp", "40", "--seed", "3"], "1\n");
+  // `--flat` so both foes are reachable: with ranks on, melee needs the same
+  // lane and each fighter can only ever name ONE foe, which would make this
+  // test assert the opposite of what it is for.
+  const { stdout } = await runHotseat(["--teams", "2v2", "--flat", "--hp", "40", "--seed", "3"], "1\n");
   assert.match(stdout, /quick-attack -> Red 1/);
   assert.match(stdout, /quick-attack -> Red 2/);
   assert.match(stdout, /power-attack -> Red 2/);
@@ -232,7 +249,8 @@ test("a 3v3 is playable, and 4 a side is refused rather than quietly allowed", a
   // Three a side is what the six-slot measurement covered: 2v2 and 3v3 reach
   // the rendered arena with no new or altered licensed asset. A fourth is not
   // blocked by the engine — it is UNPROVEN — so the tool refuses it by name.
-  const ok = await runHotseat(["--teams", "3v3", "--hp", "30", "--seed", "5"], "1\n".repeat(200));
+  // `--flat` for the reason the 2v2 above gives, and the same blind feed.
+  const ok = await runHotseat(["--teams", "3v3", "--flat", "--hp", "30", "--seed", "5"], "1\n".repeat(700));
   assert.equal(ok.code, 0, ok.stderr);
   assert.match(ok.stdout, /WINNER: /);
   assert.ok(ok.stdout.includes("Blue 3"), "the third seat a side must exist");

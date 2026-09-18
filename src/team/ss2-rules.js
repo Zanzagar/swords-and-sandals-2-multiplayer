@@ -2201,6 +2201,39 @@ function ss2BodyBlocks(actor, foe) {
  * body-block for its archers is the thing that makes where you stand a
  * decision rather than a number.
  */
+/**
+ * ► **WHETHER TWO GLADIATORS STAND IN THE SAME LANE, and therefore whether one
+ *   may SWING at the other.** Owner's rule, 2026-09-18, reported off a live 3v3
+ *   in the browser arena: *"AI are able to attack each other in different lanes:
+ *   this shouldn't be allowed. You can attack from front or behind but not at
+ *   different y even if you are 'close'."*
+ *
+ * ► **AUTHORED, AND IT HAS TO BE — `MAP_SILENCE.multi-slot-arena-geometry`.**
+ *   Vanilla has ONE rank, so no byte in the build has an opinion about reaching
+ *   across two. What the build does settle is that `getfightdistance` is
+ *   Euclidean over `(_x, _y)`, and this engine borrowed that for depth — which
+ *   is correct for a DISTANCE and turned out to be wrong for a REACH. Measured
+ *   before the rule landed: over 25 seeded 3v3 bouts, **4,440 of 7,845 melee
+ *   attacks — 57% — were swung across ranks**, because a foe one rank back at
+ *   the same x is 97 units away and every melee reach is longer than that.
+ *
+ * ► **IT IS A NO-OP WHENEVER THE SECOND AXIS IS OFF, structurally rather than
+ *   by a flag.** `startingY` returns `null` unless `rankStride` is non-zero, so
+ *   in a one-dimensional arena — every 1v1, every golden, every pinned hash —
+ *   neither `y` is finite and this returns `true` for every pair. The rule can
+ *   only bite in a battle that has ranks to be in.
+ *
+ * ► **AND IT IS DELIBERATELY NOT APPLIED TO THE TWO SHOTS.** A bow exists to
+ *   reach somebody you cannot walk to, and the flat shot already has its own
+ *   lane rule in `ss2ShotBlocked` — derived from the BUILD's ballistic, not
+ *   authored — while a bombard is lobbed and clears everything. Extending this
+ *   to ranged would be a second authored rule on top of a derived one.
+ */
+export function ss2SameLane(actor, target) {
+  if (!Number.isFinite(actor?.y) || !Number.isFinite(target?.y)) return true;
+  return actor.y === target.y;
+}
+
 export function ss2ShotBlocked(actor, target, bodies) {
   if (!Number.isFinite(actor?.x) || !Number.isFinite(target?.x)) return false;
   // Structural off-switch: with no depth on either end there is no geometry to
@@ -5143,7 +5176,9 @@ export function createSs2TeamRules({
             // Bash has no reach test of its own in the build: the controller
             // IS the gate, and it was chosen on the nearest foe. So bash
             // reaches exactly as far as the frame does.
-            if (distance < ss2ArcherMinimumRange(view.actor)) {
+            // Bash is a MELEE verb wearing an archer's controller frame, so it
+            // takes the lane rule with the other three. See `ss2SameLane`.
+            if (distance < ss2ArcherMinimumRange(view.actor) && ss2SameLane(view.actor, foe)) {
               anyInReach = true;
               actions.push({ type: Ss2ActionType.BASH_ATTACK, targetId: foe.id });
             }
@@ -5167,6 +5202,14 @@ export function createSs2TeamRules({
         }
         const inReach = distance === null || distance < reach;
         if (!inReach) continue;
+        // ► **AND HE HAS TO BE IN THE SAME LANE.** Reach is Euclidean because
+        //   `getfightdistance` is, and that made a foe one rank back at the
+        //   same x reachable by every melee weapon in the game. See
+        //   `ss2SameLane` for the measurement and for why this is authored.
+        //   **`anyInReach` is deliberately NOT set here**: a gladiator whose
+        //   only foes are in other lanes is not "in reach", and saying he is
+        //   would hide the approach verbs he needs to fix it.
+        if (!ss2SameLane(view.actor, foe)) continue;
         anyInReach = true;
         actions.push({ type: Ss2ActionType.QUICK_ATTACK, targetId: foe.id });
         actions.push({ type: Ss2ActionType.NORMAL_ATTACK, targetId: foe.id });
