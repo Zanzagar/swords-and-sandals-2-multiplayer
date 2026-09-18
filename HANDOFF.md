@@ -111,6 +111,65 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
   no floor, animation unconditional**). So the displacement gaps were never one:
   the other two are verbs this engine does not have at all.
 
+► **AN AUDIT OF TWELVE AGENTS BROKE FOUR NUMBERS THIS FILE PUBLISHES, AND ONE
+  OF THEM IS THE FEATURE MEASUREMENT FOR `aiCharges` (2026-09-18).**
+  ► **`aiCharges` IS INERT ON THE ARENA PATH.** The line below saying "40
+    seeded 3v3 bouts: 0 charges off, 2,433 on (30.6%)" does not reproduce at
+    HEAD or at `1775a4c`, the commit that shipped it. Re-measured through
+    `createVanillaBattleHost` as the shell builds it: **1,653 actions, psyche-up
+    chosen ZERO times with the flag on, byte-identical to off.** The published
+    table came from feeding `demoSide(...).members` straight to
+    `createTeamBattle` — the harness `tools/engagement-census.mjs` names as a
+    past mistake. **A measurement taken off the path nobody plays is not a
+    measurement of the feature.** The cause is the `herolevel` gate: the demo
+    gladiator is level 4 against a melee gate of 7.
+  ► **`rankStride` DEFAULTS TO 97 AND THE SECOND AXIS IS ON.** Two docstrings
+    in the rule set said 0 was the default; this file said both things 59 lines
+    apart. Corrected at all three.
+  ► **"BOUTS SETTLE ON COMBAT, NOT THE CROWD" WAS MEASURED ON THE ONE ROSTER
+    BUILT TO AVOID THE CROWD.** `tools/arena/roster.js` says in its own header
+    that it is tuned so a demo bout "lasts a few interesting turns and no
+    further". The repo's committed sweep: **279 of 648 build pairings (43%) do
+    not end without the crowd.**
+  ► **AND "17 OF 42 VERBS" IS THE WRONG DENOMINATOR.** 42 counts `staminacost`
+    ASSIGNMENT SITES; those rows carry **48 distinct phase labels**, because
+    four sites cover several verbs each. Against labels it is 20 of 48. Three
+    auditors flagged it independently.
+
+► **THE OWNER'S RANGED REPORT WAS REAL AND THE AI WAS INNOCENT.** *"Is AI
+  attacking its own teammate with ranged?"* — no: 2,064 AI actions over 25
+  seeded 3v3 bouts, 250 of them shots, **0 ally-targeted**, because ranged
+  options are built from `view.foes`. **But 85 of 120 arrows ENDED inside a
+  living teammate's body**, at the same depth, painted over them.
+  ► **TWO CORRECT RULES LANDING ON ONE NUMBER.** `ss2WalkDestination` parks a
+    gladiator against a body at `target.x ∓ physical_size`; the arrow's
+    stop-short ends the flight at `target.x ∓ physical_size`. The same point by
+    construction, and the walk clamp is what puts the front-liner there.
+  ► **THE ARC WAS NOT THE CAUSE, and the claim about it is wrong anyway.**
+    `ss2-rules.js` says a bombard flies `>= 1.055` figure heights "everywhere a
+    body could stand". The true global minimum is **0.789** on the claim's own
+    terms and **0.636** with the adapter's real `targetSize`, both at the LAUNCH
+    end. Over an interposed body the lob really does clear (1.04-1.34). It
+    STOPS there, at 0.64-0.99 — chest to head height.
+  ► **SO THE FIX IS THE ENDPOINT.** `stopShortFor` in the adapter drops the
+    stop-short to 0 — the build's own literal `bullet._x > defender._x` — when
+    it would land inside somebody else. 85 of 120 became 0 of 120, and the
+    September clipping fix is kept everywhere it helps.
+
+► **THE PSYCH-UP DISCHARGE HAD BEEN DRAWING A STICK FIGURE FOR TWO DAYS.**
+  `familyOf` split `psyche_up3` into `psyche:discharge` on 2026-09-16 and
+  `FAMILY_LABELS` was never told, so the only press that swings asked for a
+  family with an EMPTY clip vocabulary: no extracted art, no face, no sound —
+  **and `recognised: true`, so nothing logged a notice.** `stance.js` already
+  had this exact guard for its own families; it is symmetric now
+  (`test/render-clip-labels-cover.test.js`).
+
+► **AND THE CANVAS HAD NEVER BEEN SIZED.** `<canvas id="arena">` with no width
+  or height is **300x150**, and this shell only ever READ those fields. No
+  resize handler, no `devicePixelRatio`, in 4,000 lines. Every pixel number this
+  project has published was taken through an unrecorded bilinear upscale. It is
+  sized to its stage in device pixels now.
+
 ► **THE TAUNTED FLEE IS BUILT (`cbaf406`), AND THE RUN IS NOT A BIG WALK.**
   Row 3 of frame 1's forced chain is the only forced phase that is not a
   condition, and it was the last vanilla action left unresolved. `runleft` sets

@@ -4551,8 +4551,33 @@ export function createSs2TeamRules({
    *   then diverge at the first charge. Off by default means every pinned hash,
    *   every golden and every census keeps the id it was taken against.
    *
-   * ► **WHAT IT ACTUALLY DOES, measured over 40 seeded 3v3 bouts on the demo
-   *   roster, so it can be tuned against a number rather than an impression:**
+   * ► ~~**WHAT IT ACTUALLY DOES, measured over 40 seeded 3v3 bouts on the demo
+   *   roster**~~ **THE TABLE BELOW DOES NOT REPRODUCE, AND THE FLAG IS INERT
+   *   WHERE ANYBODY CAN SEE IT — corrected 2026-09-18 by an audit and
+   *   re-measured here.**
+   *
+   *   Driven through `createVanillaBattleHost` exactly as `tools/arena/main.js`
+   *   builds it, 20 seeded 3v3 bouts on the demo roster: **1,653 actions and
+   *   `psyche-up` chosen ZERO times with the flag ON, byte-identical to the
+   *   flag OFF**, 20/20 bouts resolved either way. The same holds at `1775a4c`,
+   *   the commit that shipped the flag.
+   *
+   *   **The cause is the gate two paragraphs down, not the wind-up policy.**
+   *   `legalActions` offers `psyche_up` only at `herolevel >= 7` in melee mode
+   *   and `>= 3` in bow mode, and every demo gladiator is level 4 — so on the
+   *   shipped roster the verb is never OFFERED to a warrior at all, and the
+   *   preference arm never runs. The flag buys a character trait that the demo
+   *   roster cannot express.
+   *
+   *   **How the wrong table was made, because it is the repeatable part:** it
+   *   was taken by feeding `demoSide(...).members` straight to
+   *   `createTeamBattle` rather than through the arena's host —
+   *   a harness `tools/engagement-census.mjs` explicitly names as a past
+   *   mistake — which gives a different roster, 182 actions a bout against the
+   *   arena path's 83, and 38.4% charges against 0.0%. **A measurement taken
+   *   off the path nobody plays is not a measurement of the feature.**
+   *
+   *   The superseded table, kept because the retraction is the useful part:
    *
    *   ```text
    *     aiCharges   actions/bout   charges   share   discharges   bouts resolved
@@ -4595,8 +4620,14 @@ export function createSs2TeamRules({
   crowdPatience = SS2_CROWD.patience,
   /**
    * How far apart consecutive RANKS stand on the second axis, in arena units.
-   * **`0` is the off switch and is the default**, and it is off STRUCTURALLY
-   * rather than by tuning: at 0 every gladiator gets the same `y`, so `ydist`
+   * ► **`0` IS THE OFF SWITCH AND IS **NOT** THE DEFAULT — corrected
+   *   2026-09-18 by an audit, which found this sentence and its twin at
+   *   `startingY` both saying so while the parameter below defaults to
+   *   `SS2_ARENA.rankStride`, which is 97.** `HANDOFF.md` carried both readings
+   *   59 lines apart. **The second axis is ON by default**, and everything the
+   *   paragraph says about 0 is true OF 0 and has to be asked for.
+   *
+   * At 0 it is off STRUCTURALLY rather than by tuning: at 0 every gladiator gets the same `y`, so `ydist`
    * is 0 for every pair, `ss2FightDistance` reduces exactly to the rounded
    * x-separation, and the engine is the one-dimensional engine. There is no
    * second code path to keep in step.
@@ -4824,8 +4855,10 @@ export function createSs2TeamRules({
      * **`null` unless `rankStride` is non-zero, and that is the off switch.**
      * A rule set that returns `null` here models no depth, `combatant.y` stays
      * `null`, `ss2FightDistance` reads it as 0 and the engine is exactly the
-     * one-dimensional engine. Off is the DEFAULT and it is structural: there
-     * is no second code path that has to be kept in step with the first.
+     * one-dimensional engine. **Off is NOT the default — corrected 2026-09-18**;
+     * `rankStride` defaults to `SS2_ARENA.rankStride` (97) and a caller opts
+     * OUT with `createSs2TeamRules({ rankStride: 0 })`. What is true is that
+     * off is STRUCTURAL: there is no second code path to keep in step.
      *
      * `fixtureReplay` returns `null` for the same reason `startingPosition`
      * does, and the reason is worth repeating rather than cross-referencing,

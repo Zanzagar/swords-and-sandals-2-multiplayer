@@ -104,6 +104,29 @@ const FAMILY_LABELS = Object.freeze({
   //     not belong in a family or in `clip-sequences.js`; it is its own piece
   //     of work and the handoff ranks it.
   psyche: Object.freeze(["psyche_up", "psyche_up2", "psyche_up3"]),
+  /**
+   * ► **THE DISCHARGE'S OWN FAMILY, AND IT HAD NO ENTRY HERE FOR TWO DAYS —
+   *   found by an audit, 2026-09-18.**
+   *
+   * `timeline.js`'s `familyOf` splits `psyche_up3` into `psyche:discharge`
+   * because that clip is thirteen frames against the other two's nine and is
+   * the one that SWINGS. The split landed; this table was never told. So the
+   * third press — the only psych-up press that does anything — asked for a
+   * family with an EMPTY clip vocabulary, drew nothing from the extracted rig,
+   * lost its face, made no sound, **and reported `recognised: true`**, so
+   * nothing logged a notice. A fully dressed gladiator reverted to authored
+   * stick-figure art at the exact moment of his biggest blow.
+   *
+   * Its art (13 poses, up to 17 placements) and its sound (`1197.mp3`) both
+   * existed the whole time and were reachable through `psyche` above.
+   *
+   * **`stance.js` already had the guard that would have caught this** —
+   * `stanceFamiliesCover`, whose comment says a family that does not list its
+   * own label "silently falls back to authored art on a machine that has the
+   * pack — a wrong picture with no error". That is exactly what happened, to a
+   * family it did not cover. The symmetric check is now in `timeline.js`.
+   */
+  "psyche:discharge": Object.freeze(["psyche_up3"]),
 
   /**
    * THE CHARGED STANCE — the only families here that are an IDLE rather than an

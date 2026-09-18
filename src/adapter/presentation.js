@@ -737,6 +737,60 @@ function resourceValueOf(combatant, name) {
   return Number.isFinite(value) ? value : null;
 }
 
+/**
+ * HOW FAR SHORT OF THE TARGET'S CENTRE THE ARROW STOPS — `physical_size`
+ * normally, and ZERO when stopping there would park it inside somebody else.
+ *
+ * ► **THE OWNER WATCHED A 3v3 AND ASKED WHETHER THE AI WAS SHOOTING ITS OWN
+ *   TEAMMATE. IT WAS NOT, AND THE PICTURE SAID IT WAS — 2026-09-18.**
+ *   Measured on the arena's own host and roster: **85 of 120 shots ended at a
+ *   coordinate inside a living teammate's body, at the same depth, painted over
+ *   them.** The resolver is innocent — 2,064 AI actions over 25 seeded 3v3
+ *   bouts, 0 ally-targeted, because ranged options are built from `view.foes`
+ *   and cannot name an ally.
+ *
+ * ► **IT IS TWO CORRECT RULES LANDING ON ONE NUMBER, which is why neither side
+ *   looked wrong on its own.** `ss2WalkDestination` parks a gladiator against a
+ *   body at `target.x ∓ physical_size`. The stop-short — added after the owner
+ *   reported an arrow clipping into the model — ends the flight at
+ *   `target.x ∓ physical_size`. **The same point, by construction rather than
+ *   by luck**, and the front-liner of the shooter's own side is the gladiator
+ *   the walk clamp puts there.
+ *
+ * ► **THE ARC WAS NOT THE PROBLEM, and the claim that it was needs correcting
+ *   too.** `ss2-rules.js` says a bombard flies `>= 1.055` figure heights
+ *   "everywhere a body could stand". Re-derived off `src/render/projectile.js`:
+ *   the true global minimum is **0.789** on the claim's own terms and **0.636**
+ *   once this file's real `targetSize` is passed, both at the LAUNCH end. Over
+ *   an interposed body the lob really does clear — 1.04 to 1.34 figure heights.
+ *   What it does is **STOP** there: the terminal frame sits at 0.64-0.99 figure
+ *   heights, which is chest to head height, on the ally's own x.
+ *
+ * ► **SO THE FIX IS THE ENDPOINT, NOT THE ARC AND NOT THE LEGALITY.** When the
+ *   stop-short would land inside another living body, fall back to `0` — which
+ *   is the BUILD's own literal behaviour, `bullet._x > defender._x` at
+ *   `+0x6cb4`, an arrow that crosses the target's centre and is removed on the
+ *   same tick. The cosmetic approximation is kept exactly where it improves the
+ *   picture and dropped exactly where it makes it worse.
+ */
+function stopShortFor(shooter, target, combatants) {
+  const size = ss2PhysicalSize(target);
+  if (!Number.isFinite(size) || size <= 0) return 0;
+  if (!Number.isFinite(shooter?.x) || !Number.isFinite(target?.x)) return size;
+  const direction = target.x >= shooter.x ? 1 : -1;
+  const terminal = target.x - direction * size;
+  for (const other of combatants.values()) {
+    if (!other || other === shooter || other === target) continue;
+    if (other.alive === false) continue;
+    if (!Number.isFinite(other.x)) continue;
+    // Depth first: a body in another rank is not in the way of anything, and
+    // `null` on either end means this rule set models no depth at all.
+    if (Number.isFinite(other.y) && Number.isFinite(target.y) && other.y !== target.y) continue;
+    if (Math.abs(other.x - terminal) <= ss2PhysicalSize(other)) return 0;
+  }
+  return size;
+}
+
 function projectileFor(wire, combatants, event) {
   const projectile = PROJECTILE_DIRECTIONS.get(Number(event.attackDirection));
   if (!projectile) return null;
@@ -775,7 +829,7 @@ function projectileFor(wire, combatants, event) {
      * the walk clamp uses to stop a gladiator against a body, and two copies of
      * it could disagree.
      */
-    targetSize: ss2PhysicalSize(target),
+    targetSize: stopShortFor(shooter, target, combatants),
     // ► **`y` IS ARENA DEPTH AND IS CARRIED EVEN WHEN NULL**, the same rule the
     //   combatant projection follows for `x` and `y`: present on every command
     //   so two surfaces commit to one shape, and `null` meaning "this rule set
