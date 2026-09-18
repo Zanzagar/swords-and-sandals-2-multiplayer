@@ -278,6 +278,14 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "rest",
     "snipe",
     "swap-weapons",
+    // ► **JOINED 2026-09-17, AND IT IS THE SECOND TOKEN HERE THAT IS NOT ALWAYS
+    //   AN ATTACK — for a sharper reason than `psyche-up`'s.** The phase draws
+    //   `diceroll = randomBetween(1, 100)` (`+0x6921`) and reaches
+    //   `checkattackroll` only when that beats `taunt_percentage` AND a second
+    //   draw comes up 1 (`+0x6952`), so **three outcomes in four take no
+    //   dispatcher samples at all**. Not in `ATTACK_BANDS`, for the same reason
+    //   `psyche-up` is not.
+    "taunt",
     "walk-left",
     "walk-right"
   ]);

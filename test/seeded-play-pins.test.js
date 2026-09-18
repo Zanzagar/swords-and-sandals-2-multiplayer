@@ -480,7 +480,17 @@ test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact
   assert.equal(taken, 6, "the drive must have applied six actions");
   assert.equal(battle.result, null, "an approach does not settle in six actions");
 
-  assert.equal(combatStateHash(battle), "73b6a92d", WHY_IT_MOVED);
+  // ► **RE-PINNED 2026-09-17 WHEN `taunt` BECAME LEGAL, AND THE PROJECTION DID
+  //   NOT MOVE.** `driveByTurn` picks `options[turnNumber % options.length]`,
+  //   so a longer option list changes WHICH actions it drives — this opening is
+  //   a longrange frame at full stamina, which is exactly where the build wires
+  //   the taunt button. Checked: the construction-time pin and the other two
+  //   post-action pins are untouched, and a FIXED action sequence hashes the
+  //   same before and after, so two peers driving identical actions still
+  //   agree. What they would disagree about is the OPTION LIST, which is true
+  //   of every verb this engine has added and is why a new one is a version
+  //   boundary rather than a patch.
+  assert.equal(combatStateHash(battle), "7d5ee7be", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {

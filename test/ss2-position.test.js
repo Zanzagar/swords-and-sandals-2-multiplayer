@@ -966,10 +966,20 @@ test("in range the build offers the retreat and NEVER the advance, and out of ra
     ]
   });
   // The hero stands left of its foe, so `walk-left` is the retreat.
+  //
+  // ► **AND `closerange_warrior` IS THE ONE FRAME WITH NO TAUNT**, which is the
+  //   most distinctive consequence of the taunt gate landing 2026-09-17: three
+  //   of the four controllers wire the button and this is the fourth (map
+  //   §"Buttons wired per controller frame" — frame 13 wires none in either
+  //   facing). An implementation that gated taunt on "in reach" rather than on
+  //   the FRAME would show up right here.
   assert.deepEqual(typesOf(engaged), ["quick-attack", "normal-attack", "power-attack", "walk-left", "rest"]);
 
   const apart = bout(1);
-  assert.deepEqual(typesOf(apart), ["walk-left", "walk-right", "rest"], "long range wires both walks and no verb");
+  // `longrange_warrior` at full stamina wires the taunt into the slot it shares
+  // with rest — `staminaleft / staminamax * 100 >= 50` (`+0x0c0a`/`+0x10a2`).
+  assert.deepEqual(typesOf(apart), ["walk-left", "walk-right", "taunt", "rest"],
+    "long range wires both walks and, above half stamina, the taunt");
 });
 
 test("the two walks are ordered LEFT then RIGHT, which is the build's slot order and not away-then-toward", () => {

@@ -411,6 +411,27 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
       return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
     }
 
+    // ► **A TAUNT PLAYS BOTH CLIPS AND PLAYS THEM WHATEVER IT ROLLED.** The
+    //   build fires `attacker.gotoAndPlay("taunt")` at `+0x6905` and
+    //   `defender.gotoAndPlay("taunted")` at `+0x690c` BEFORE the roll, so a
+    //   taunt that fails outright still animates both — which is the whole
+    //   reason it reads as a taunt rather than as a fumble.
+    //
+    //   Only `taunt_effect == 1` reaches the dispatcher; that arm falls through
+    //   to the attack cases below and keeps the `taunted` target label from
+    //   here, because the build never replaces it.
+    if (event.type === "taunt") {
+      const actorLabel = label("taunt", LabelProvenance.MAP_NAMED);
+      // The knockback clip is the build's own, and only above its force gate —
+      // `defender.gotoAndPlay("knockback")` at `+0x6a21`/`+0x6a91` against the
+      // UNCONDITIONAL displacement at `+0x6ab1`. The resolver reports which,
+      // because the threshold is not recoverable from the two endpoints.
+      if (event.knockbackAnimation === true) {
+        return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
+      }
+      return Object.freeze({ actor: actorLabel, target: label("taunted", LabelProvenance.MAP_NAMED) });
+    }
+
     if (event.hit === false) {
       // Map, "Attack roll dispatcher": "A miss calls `defender_blocked()`."
       // ► **AND `defender_blocked()` DOES NOT PLAY `Block`.** It plays one of

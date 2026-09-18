@@ -426,6 +426,10 @@ test("longrange_archer wires two shots and BOTH walks; closerange_archer wires a
     [
       Ss2ActionType.BOMBARD, Ss2ActionType.SNIPE,
       Ss2ActionType.WALK_LEFT, Ss2ActionType.WALK_RIGHT,
+      // Frame 20 shares one slot between taunt and rest on
+      // `staminaleft / staminamax * 100 >= 50` (`+0x0c15`/`+0x110a`), and this
+      // bowman is at full stamina.
+      Ss2ActionType.TAUNT,
       Ss2ActionType.SWAP_WEAPONS, Ss2ActionType.REST
     ],
     "500 apart is beyond the floor of 186, so this is longrange_archer"
@@ -443,10 +447,31 @@ test("longrange_archer wires two shots and BOTH walks; closerange_archer wires a
       Ss2ActionType.BASH_ATTACK,
       // The retreat only: red stands left of blue, so backing off is LEFT.
       Ss2ActionType.WALK_LEFT,
+      // `closerange_archer` wires the taunt too; the case below is the one
+      // that shows it is NOT gated on stamina the way frames 5 and 20 are.
+      Ss2ActionType.TAUNT,
       Ss2ActionType.SWAP_WEAPONS, Ss2ActionType.REST
     ],
     "inside the floor an archer bashes and backs away; it cannot shoot and cannot advance"
   );
+
+  // ► **AND `closerange_archer` HAS NO STAMINA TEST AT ALL, which is the ONE
+  //   frame that differs and the only case that can show it.** The map records
+  //   it explicitly — frame 28 "always wires `taunt`" — where frames 5 and 20
+  //   share the slot with `rest` on `staminaleft / staminamax * 100 >= 50` and
+  //   frame 13 wires none. **Both fixtures above are at full stamina, so they
+  //   cannot tell the two rules apart**; this one is at a tenth, where a gate
+  //   written as ">= 50% everywhere" would drop the taunt and this frame keeps
+  //   it.
+  const tired = staged({
+    red: [{ fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -50, y: 200 }],
+    blue: [{ fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 50, y: 200 }]
+  });
+  const archer = combatantById(tired, "red-1");
+  const max = archer.resources.staminamax.value ?? archer.resources.staminamax;
+  archer.resources.staminaleft = { value: Math.floor(max * 0.1), min: 0, max: null };
+  assert.ok(typesOf(tired, "red-1").includes(Ss2ActionType.TAUNT),
+    "the close archer frame wires the taunt at ANY stamina, unlike frames 5 and 20");
 });
 
 test("the controller is chosen ONCE by the nearest foe, not per foe — which is the whole counterplay", () => {

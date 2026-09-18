@@ -349,6 +349,21 @@ export const Ss2ActionType = Object.freeze({
   //   every peer replaying the same tape would fall out of step from the first
   //   charge onward. It resolves through its own branch; see `PSYCHE_UP_MODEL`.
   PSYCHE_UP: "psyche-up",
+  // ► **`taunt` IS THE SECOND ACTION HERE THAT IS NOT ALWAYS AN ATTACK, AND IT
+  //   IS NOT IN `ATTACK_BANDS` FOR THE SAME REASON `psyche_up` IS NOT.** The
+  //   phase draws `diceroll = randomBetween(1, 100)` (`+0x6921`) and reaches
+  //   `checkattackroll` only when that beats `taunt_percentage` AND a second
+  //   draw, `taunt_effect = randomBetween(1, 2)` (`+0x6952`), comes up 1. So
+  //   three of four outcomes take NO dispatcher samples at all, and a band
+  //   entry — which means "always attacks" — would put them on the ordered
+  //   channel the build never takes.
+  //
+  //   **This is exactly why it stayed deferred**: the candidate implements the
+  //   post-`checkattackroll` arm and nothing before it, so resolving a taunt
+  //   through the ordinary attack path would consume the wrong number of
+  //   samples on three outcomes in four. It resolves through its own branch;
+  //   see `SS2_TAUNT`.
+  TAUNT: "taunt",
   SWAP_WEAPONS: "swap-weapons",
   // The four status phases. FOUR types rather than one `status-phase`, because
   // the build's decision IS the specific label — `getphase("frozen")` and
@@ -842,6 +857,12 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   //   is why the resolved event carries the clip separately and why
   //   `attackLabel(30)` in the presentation layer refuses to name one.
   [Ss2ActionType.PSYCHE_UP]: "psyche_up",
+  // ► **THE PHASE LABEL IS `taunt` AND THE TARGET'S CLIP IS `taunted`**, which
+  //   are two different names for one decision — the build plays both from the
+  //   same branch and BEFORE the roll (`+0x6905` the actor, `+0x690c` the
+  //   target), so a FAILED taunt still animates. The target's label is the
+  //   presentation layer's, not a phase.
+  [Ss2ActionType.TAUNT]: "taunt",
   [Ss2ActionType.SWAP_WEAPONS]: "swap_weapons",
   // Three spellings for one effect, and the map is explicit that they are not
   // interchangeable: the FIELD is `poison`, the DECISION label is `poisoned`,
@@ -2402,7 +2423,38 @@ const ATTACK_BANDS = Object.freeze({
  *   prices three turns of no damage against one blow of
  *   `ceil(max_damage * 1.5)`, and the answer changes how every bout reads.
  */
+/** `attack_direction = 20` (`+0x6981`), the taunt's own dispatcher direction. */
+const SS2_TAUNT_DIRECTION = 20;
+
 const PSYCHE_UP_DISCHARGE = Object.freeze({ direction: 30, strengthFactor: 1 });
+
+/**
+ * The band profile for a taunt that reaches `checkattackroll` — `taunt_effect
+ * == 1`, and only that.
+ *
+ * ► **IT CARRIES ITS OWN TRANSITION BECAUSE A TAUNT IS PRICED LIKE A REST AND
+ *   NOT LIKE A SWING.** Every other band pays `round(strength * factor)` and
+ *   gains nothing; the taunt branch spends `round(charisma * 2)` (`+0x67bb`),
+ *   gains `+= stamina` (`+0x6894`) and heals `3 + ceil(stamina)` (`+0x684c`),
+ *   all three on the same `attacker.struck == null` guard the rest branch uses.
+ *   Routing it through the shared strength formula would have repriced the
+ *   action and dropped the recovery entirely — which is why `strengthFactor` is
+ *   absent here rather than set to something plausible.
+ */
+const TAUNT_STRIKE = Object.freeze({
+  direction: SS2_TAUNT_DIRECTION,
+  // ► **`charisma` IS A RESOURCE AND NOT A STAT**, which is the whole reason
+  //   `actor.stats` is not enough here: `roster.normaliseCombatant` rebuilds
+  //   `stats` as seven fixed generic keys — strength, agility, attack, defense,
+  //   vitality, stamina, magicka — and every SS2-specific value travels in the
+  //   numeric resource bag instead. `stamina` happens to be in both; `charisma`
+  //   is only in the bag.
+  transitionFor: (actor) => ({
+    staminaCost: Math.round(resourceValue(actor, "charisma", 0) * 2),
+    branchGain: actor.stats.stamina,
+    branchHeal: 3 + Math.ceil(actor.stats.stamina)
+  })
+});
 
 /**
  * How the counter behaves, all in one place because three of these four
@@ -2436,6 +2488,92 @@ export const SS2_PSYCHE_UP = Object.freeze({
   floor: 1,
   /** `defender._x -/+ round(weapon_range + 50)`, `+0x6658`-`+0x6699`. */
   rangeBonus: 50
+});
+
+/**
+ * THE TAUNT PHASE, and every number in it is the build's.
+ *
+ * ► **IT IS SHAPED LIKE `rest`, WHICH IS WHY THEY SHARE A BUTTON.** Both
+ *   restore stamina and health on the same `attacker.struck == null` guard:
+ *   `rest` spends `0 - round(stamina * 15)` and taunt spends
+ *   `round(charisma * 2)` (`+0x67bb`), both gain `+= stamina` (`+0x521d`,
+ *   `+0x6894`) and both heal `3 + ceil(stamina)` (`+0x51d5`, `+0x684c`).
+ *   **A taunt is the aggressive rest**: you recover, and the opponent pays for
+ *   it. The controller makes the same point by wiring them into ONE slot,
+ *   split at half stamina — above it you can afford the flourish, below it you
+ *   just breathe.
+ *
+ * ► **AND `+0x684c` IS THE OFFSET THIS DOCUMENT HAS ALREADY BEEN BURNED BY.**
+ *   `ss2-rules.js` once asserted it was the SOLE site for `3 + ceil(stamina)`,
+ *   overruling the map's prose, and a test was written to pin the wrong number;
+ *   two verifiers broke it. It is real and it is the TAUNT branch's own — the
+ *   rest branch's is `+0x51d5` — and both were read directly here rather than
+ *   taken from the writers table that started the error.
+ */
+export const SS2_TAUNT = Object.freeze({
+  /**
+   * `diceroll < game_attacker.taunt_percentage` (`+0x694b`).
+   *
+   * ► **A DIRECT COMPARISON, AND NOT THE DISPATCHER'S `100 - chance` FORM.**
+   *   The map flags this at the site because the two are easy to conflate and
+   *   getting it backwards inverts the whole action: a charismatic gladiator
+   *   would fail where a dull one succeeded.
+   */
+  rollMax: 100,
+  /** `taunt_effect = randomBetween(1, 2)` (`+0x6952`); only 1 reaches the dispatcher. */
+  effectMax: 2,
+  /** `taunt_effect == 1` sets `attack_direction = 20` and calls `checkattackroll`. */
+  strikeEffect: 1,
+  /** The direction the strike arm dispatches, whose profile the candidate already owns. */
+  direction: 20,
+  /** `staminacost = round(charisma * 2)` (`+0x67bb`). */
+  charismaCostFactor: 2,
+  /** `hitpoints += 3 + ceil(stamina)` (`+0x684c`), and `staminaleft += stamina` (`+0x6894`). */
+  branchHealBase: 3,
+  /**
+   * `force = +/- game_attacker.charisma * 25`, clamped to at least 20 away from
+   * zero (`+0x69d4`-`+0x6a7b`).
+   */
+  forceFactor: 25,
+  minimumForce: 20,
+  /**
+   * The knockback ANIMATION plays only above this; the DISPLACEMENT is
+   * unconditional (`+0x6a21`/`+0x6a91` against the unconditional
+   * `knockback(defender, force)` at `+0x6ab1`). Same shape as
+   * `damagecharacter`, where the fighter always moves and only the clip is
+   * gated.
+   */
+  knockbackAnimationForce: 100,
+  /**
+   * Half stamina: at or above it the controller wires `taunt`, below it `rest`
+   * (`+0x0c0a`/`+0x10a2` on frame 5, `+0x0c15`/`+0x110a` on frame 20).
+   * **`closerange_archer` has no stamina test at all and always wires it**, and
+   * `closerange_warrior` wires no taunt in either facing.
+   */
+  staminaPercent: 50,
+  /** The flag a losing taunt sets on the target (`+0x6ad9`). */
+  flag: "taunted1",
+  /**
+   * ► **THE CONSEQUENCE THAT IS NOT BUILT, AND SAYING SO IS THE POINT.** A
+   *   taunt that rolls effect 2 against a bow-mode defender sets `taunted1`,
+   *   and this engine sets it faithfully — the flag is already in
+   *   `SS2_TAUNT_FLAGS` and `defenderEffects` already clears it. **Nothing
+   *   reads it.** The build's decision table row 3 drives a taunted gladiator
+   *   into `getphase("runleft")` facing right and `getphase("runright")` facing
+   *   left (`+0x0d68`-`+0x0e35`) — it RUNS AWAY from the way it is facing.
+   *
+   *   That is a MOVEMENT phase at the run's own step factor
+   *   (`SS2_MOVEMENT_STEP_FACTOR.run`, 40 against a walk's 16), which means
+   *   `ss2WalkDestination` needs a step parameter it does not have. **A
+   *   separate increment on purpose**: widening a function twenty tests cover,
+   *   to finish a fourth arm of an action whose other three are complete, is
+   *   the kind of scope creep that lands both half-done.
+   *
+   *   **So a taunted gladiator carries a status that does nothing yet.** The
+   *   state is right and the consequence is missing, which is the honest half
+   *   to ship — and it is stated here rather than discovered.
+   */
+  fleePhase: Object.freeze({ right: "runleft", left: "runright" })
 });
 
 /**
@@ -4708,6 +4846,14 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **WHICH CONTROLLER FRAME THE GLADIATOR IS ON, computed ONCE because
+      //   two arms below need it and a second copy is a second chance to be
+      //   wrong** — the argument the walk arm makes about `anyInReach` and
+      //   `suggestAction` makes twice about distance. For a warrior "in reach"
+      //   and "on the close frame" are the same condition; **for an archer they
+      //   are opposites**, which is why this is not simply `anyInReach`.
+      const onCloseFrame = bowDrawn ? archerClosedOn : anyInReach;
+
       if (positioned) {
         // Which walk buttons the frame wires, from the map's own table
         // (battle map, "Buttons wired per controller frame", `:223-230`).
@@ -4742,7 +4888,6 @@ export function createSs2TeamRules({
         const nearest = nearestFoe(view);
         const towardIsRight = nearest ? nearest.x > view.actor.x : true;
         const away = towardIsRight ? Ss2ActionType.WALK_LEFT : Ss2ActionType.WALK_RIGHT;
-        const onCloseFrame = bowDrawn ? archerClosedOn : anyInReach;
         const offered = onCloseFrame
           ? [away]
           : [Ss2ActionType.WALK_LEFT, Ss2ActionType.WALK_RIGHT];
@@ -4755,6 +4900,42 @@ export function createSs2TeamRules({
         //   relationship to the opponent — which it cannot do, because the
         //   slots are wired once per frame and the opponent moves.
         for (const type of offered) actions.push({ type, targetId: actorId });
+      }
+
+      // ► **THE TAUNT, AND WHICH CONTROLLER WIRES IT IS THE WHOLE GATE.**
+      //   Three of the four frames offer it and they do not agree on when
+      //   (map §"Buttons wired per controller frame"):
+      //
+      //   - `longrange_warrior` (frame 5) and `longrange_archer` (frame 20)
+      //     share ONE slot between `taunt` and `rest`, split on
+      //     `staminaleft / staminamax * 100 >= 50` — `+0x0c0a`/`+0x10a2` and
+      //     `+0x0c15`/`+0x110a`, one site per facing. **At or above half the
+      //     taunt button exists and the rest button does not.**
+      //   - `closerange_archer` (frame 28) has NO stamina test and always
+      //     wires it.
+      //   - `closerange_warrior` (frame 13) wires no taunt in either facing.
+      //
+      //   **Recognised through `onCloseFrame`, which this function already
+      //   computed for the walks**, rather than by a second distance test — the
+      //   argument the walk arm above makes and `suggestAction` makes twice.
+      //   A warrior on the close frame is the one case with no taunt at all.
+      //
+      // ► **AND `rest` IS STILL OFFERED UNCONDITIONALLY BELOW, WHICH IS A
+      //   DIVERGENCE THIS ARM DOES NOT INTRODUCE AND DOES NOT FIX.** The build
+      //   wires `rest` only on the two longrange frames and only BELOW half
+      //   stamina; here it is always legal. So above half on a longrange frame
+      //   this engine offers both where the build offers one. Changing that
+      //   moves every bout's option list and the AI's forced-rest gate, so it
+      //   is its own decision and is recorded rather than taken.
+      if (!(onCloseFrame && !bowDrawn)) {
+        const staminaMax = resourceValue(view.actor, "staminamax", 0);
+        const staminaLeft = resourceValue(view.actor, "staminaleft", 0);
+        const rested = staminaMax > 0
+          ? (staminaLeft / staminaMax) * 100 >= SS2_TAUNT.staminaPercent
+          : false;
+        if ((bowDrawn && onCloseFrame) || rested) {
+          for (const foe of view.foes) actions.push({ type: Ss2ActionType.TAUNT, targetId: foe.id });
+        }
       }
 
       // ► **THE RANK VERBS, and they are what make the geometry a CHOICE.**
@@ -5225,6 +5406,16 @@ export function createSs2TeamRules({
       //   chance, no critical. They cost stamina like any completed phase and
       //   they move one number.
       let psycheCounter = null;
+      /**
+       * What the taunt's two pre-dispatcher draws came to, kept so the strike
+       * arm's event can carry them.
+       *
+       * Three of the four taunt outcomes return from the branch below with
+       * their own event; the fourth falls through to the shared dispatcher,
+       * which builds an ordinary attack event. Without this it would be the
+       * only taunt in the game that does not say what it rolled.
+       */
+      let tauntRoll = null;
       if (request.type === Ss2ActionType.PSYCHE_UP) {
         // ► **CLAMPED TO THE FLOOR, BECAUSE A RECORD MAY STATE 0 AND THE BUILD
         //   CANNOT HOLD 0 AFTER ANY TURN.** Both of the build's resets write 1
@@ -5299,7 +5490,10 @@ export function createSs2TeamRules({
       const band = ATTACK_BANDS[request.type]
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
-        ?? (request.type === Ss2ActionType.PSYCHE_UP ? PSYCHE_UP_DISCHARGE : undefined);
+        ?? (request.type === Ss2ActionType.PSYCHE_UP ? PSYCHE_UP_DISCHARGE : undefined)
+        // Only a taunt that ROLLED into the dispatcher reaches here; the branch
+        // above returns for the other three outcomes in four.
+        ?? (request.type === Ss2ActionType.TAUNT ? TAUNT_STRIKE : undefined);
       if (!band) {
         throw new TeamRuleSetError(`Rule set ${ruleSetId} was asked to resolve unknown action ${request.type}.`);
       }
@@ -5307,6 +5501,124 @@ export function createSs2TeamRules({
       if (!target) {
         throw new TeamRuleSetError(`${request.type} needs a target; ${String(request.targetId)} is not a combatant.`);
       }
+
+      // ► **THE TAUNT'S TWO PRE-DISPATCHER DRAWS, AND THEY ARE THE WHOLE REASON
+      //   THIS ACTION STAYED DEFERRED.** The candidate implements direction
+      //   20's profile and nothing before it, so resolving a taunt through the
+      //   ordinary attack path would take the dispatcher's samples on every
+      //   press — where the build takes them on ONE OUTCOME IN FOUR. The order
+      //   and the count are the contract every peer replaying the same tape
+      //   depends on:
+      //
+      //   ```text
+      //     diceroll = randomBetween(1, 100)                      +0x6921
+      //     if (diceroll < game_attacker.taunt_percentage) {      +0x694b
+      //         taunt_effect = randomBetween(1, 2)                +0x6952
+      //         if (taunt_effect == 1) { direction = 20; checkattackroll() }
+      //         else if (game_defender.equipped_weapon == 1) { shove }
+      //         else { defender.taunted1 = true; defender.psyche_up = 1 }
+      //     }
+      //   ```
+      //
+      //   **The comparison is DIRECT** — `diceroll < taunt_percentage` — and
+      //   not the dispatcher's `100 - chance` form, which the map flags at the
+      //   site because getting it backwards inverts the action: a charismatic
+      //   gladiator would fail where a dull one succeeded.
+      //
+      // ► **AND BOTH CLIPS PLAY BEFORE THE ROLL** (`+0x6905` the actor,
+      //   `+0x690c` the target), so a FAILED taunt still animates both. The
+      //   event therefore always carries the pair, and `landed` says whether
+      //   anything came of it.
+      if (request.type === Ss2ActionType.TAUNT) {
+        const tauntTransition = phaseTransitionEffects(actor, TAUNT_STRIKE.transitionFor(actor));
+        const chance = calculateSs2AttackChances(
+          vanillaRecordOf(actor, "attacker"),
+          vanillaRecordOf(target, "defender")
+        ).taunt;
+        const roll = rolls.randomBetween("taunt-roll", 1, SS2_TAUNT.rollMax);
+        const shared = {
+          type: Ss2ActionType.TAUNT,
+          actorId: actor.id,
+          targetId: target.id,
+          vanillaLabel: VANILLA_PHASE_LABEL[Ss2ActionType.TAUNT],
+          roll,
+          chance,
+          staminaGained: tauntTransition.staminaGained,
+          healed: tauntTransition.healed
+        };
+        if (!(roll < chance)) {
+          // A failed taunt takes ONE sample and reaches no dispatcher. It still
+          // pays, still recovers, and still plays both clips.
+          return {
+            effects: [...tauntTransition.effects, ...crowd],
+            events: [{ ...shared, landed: false, effect: null }]
+          };
+        }
+        const effect = rolls.randomBetween("taunt-effect-roll", 1, SS2_TAUNT.effectMax);
+        tauntRoll = { roll, chance, effect };
+        if (effect !== SS2_TAUNT.strikeEffect) {
+          // ► **EFFECT 2 SPLITS ON THE DEFENDER'S WEAPON MODE (`+0x69a7`)**,
+          //   which is the discriminator the map left open for a year as "a
+          //   charisma-scaled knockback OR sets `taunted1`". A melee defender
+          //   is shoved; a bow-mode one is made to flee.
+          const effects = [...tauntTransition.effects];
+          if (resourceValue(target, "equipped_weapon", 1) === 1) {
+            // ► **THE DISPLACEMENT IS UNCONDITIONAL AND THE ANIMATION IS
+            //   GATED.** `knockback(defender, force)` is called whenever this
+            //   arm is entered (`+0x6ab1`); `defender.gotoAndPlay("knockback")`
+            //   only above `|force| > 100`. The same shape `damagecharacter`
+            //   has, where the fighter always moves and only the clip is gated.
+            const magnitude = Math.max(
+              SS2_TAUNT.minimumForce,
+              resourceValue(actor, "charisma", 0) * SS2_TAUNT.forceFactor
+            );
+            // ► **THE SIGN IS THE ACTOR'S FACING**, which this engine carries
+            //   as the status token `facing-left` (absent means right) because
+            //   a resource bag holds only finite numbers. The build reads
+            //   `attacker.gladiator_dir == "right"` at `+0x69c8` and negates
+            //   for the other arm.
+            const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
+            const force = facingLeft ? 0 - magnitude : magnitude;
+            return {
+              effects: [...effects, ...crowd],
+              events: [{
+                ...shared,
+                landed: true,
+                effect,
+                force,
+                // The presentation layer needs to know whether the build would
+                // have played the clip, and it cannot re-derive the threshold.
+                knockbackAnimation: Math.abs(force) > SS2_TAUNT.knockbackAnimationForce
+              }]
+            };
+          }
+          // The bow-mode arm: the target is made to flee, and its psych-up
+          // charge is broken on the way (`+0x6ac8`, one of the eight writes in
+          // the census at `SS2_PSYCHE_UP.floor`).
+          if (declaredResourceNames(target).has("psyche_up")) {
+            effects.push({
+              kind: EffectKind.RESOURCE,
+              targetId: target.id,
+              resource: "psyche_up",
+              to: SS2_PSYCHE_UP.floor
+            });
+          }
+          effects.push({
+            kind: EffectKind.STATUS,
+            targetId: target.id,
+            status: ss2StatusToken(SS2_TAUNT.flag, actor.id),
+            active: true
+          });
+          return {
+            effects: [...effects, ...crowd],
+            events: [{ ...shared, landed: true, effect, flag: SS2_TAUNT.flag }]
+          };
+        }
+        // `taunt_effect == 1` falls through to the dispatcher with direction
+        // 20 and `TAUNT_STRIKE`'s own transition. The two samples above are
+        // already on the tape, in the build's order.
+      }
+
 
       // ► **OUT OF RANGE, THE DISCHARGE DECIDES NOTHING AT ALL — NO ROLL, NO
       //   DAMAGE, NO DEATH — AND THAT IS UNLIKE EVERY MELEE ATTACK.**
@@ -5486,7 +5798,10 @@ export function createSs2TeamRules({
         // below, once, rather than left to the ordering of two writes to one
         // resource inside a single action.
         : phaseTransitionEffects(actor, {
-          staminaCost,
+          // A band that prices itself wins, and exactly one does. See
+          // `TAUNT_STRIKE`: a taunt recovers like a rest, so the strength
+          // formula above is not merely the wrong number but the wrong shape.
+          ...(band.transitionFor ? band.transitionFor(actor) : { staminaCost }),
           resetsPsyche: request.type !== Ss2ActionType.PSYCHE_UP
         });
       // ► **THE BACK ATTACK, AND IT IS A SEPARATE EFFECT ON PURPOSE.** The
@@ -5665,6 +5980,18 @@ export function createSs2TeamRules({
           event.counter = psycheCounter;
           event.counterAfter = landed;
           event.discharged = true;
+        }
+      }
+      // The strike arm's event is the dispatcher's, so the taunt's own two
+      // draws are merged back onto it here — the same shape the psyche
+      // discharge uses directly above.
+      if (tauntRoll !== null) {
+        for (const event of events) {
+          if (event.type !== request.type) continue;
+          event.roll = tauntRoll.roll;
+          event.chance = tauntRoll.chance;
+          event.effect = tauntRoll.effect;
+          event.landed = true;
         }
       }
       return { effects: [...effects, ...crowd], events };
