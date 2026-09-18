@@ -328,3 +328,73 @@ test("BOTH CLIPS PLAY, AND THEY PLAY WHATEVER IT ROLLED", () => {
   // And below it, the taunted clip — the displacement happened either way.
   assert.equal(bound({ landed: true, effect: 2, force: 20, knockbackAnimation: false }).target.label, "taunted");
 });
+
+test("THE SHOVE MOVES HIM, and a Codex review is why", () => {
+  // ► **THE FIRST CUT REPORTED A FORCE AND DISPLACED NOBODY.** Reproduced by
+  //   the review at seed 5, charisma 30: force 750, `knockbackAnimation` true,
+  //   defender still at x 250. **A successful outcome that cannot change the
+  //   distance cannot change what either gladiator may do next**, which makes
+  //   it indistinguishable from a failed one.
+  //
+  //   The build's `knockback(defender, force)` at `+0x6ab1` is UNCONDITIONAL —
+  //   the `|force| > 100` gate above it is the ANIMATION's — so the shove now
+  //   emits a POSITION effect, clamped to the arena the way `nextphase` step 1
+  //   clamps every `_x`.
+  //
+  //   **`damagecharacter`'s own knockback still displaces nobody here**: it has
+  //   travelled as an event field since it was built and nothing reads it. That
+  //   is now the only gap of its kind left, and it is not this action's to
+  //   close — positions are in `combatStateHash`, so moving them re-datums
+  //   every pinned hash and every golden that carries one.
+  for (let seed = 1; seed <= 80; seed += 1) {
+    const battle = duel({ seed, hero: { charisma: 30 }, villain: { charisma: 1 } });
+    const before = combatantById(battle, "villain").x;
+    let event;
+    try {
+      ({ event } = taunt(battle));
+    } catch {
+      continue;
+    }
+    if (!(event.landed && event.effect === 2 && Number.isFinite(event.force))) continue;
+    const after = combatantById(battle, "villain").x;
+    assert.notEqual(after, before, "a shove must MOVE the defender");
+    assert.equal(after, before + event.force, "by exactly the force, inside the arena");
+    assert.equal(event.from, before, "and the event reports both endpoints");
+    assert.equal(event.to, after);
+    return;
+  }
+  assert.fail("the shove arm was not reachable in 80 seeds");
+});
+
+test("A LETHAL TAUNT STILL RECOVERS, because the build recovers BEFORE it rolls", () => {
+  // ► **THE ORDERING A CODEX REVIEW CAUGHT, AND THE BYTES SETTLE IT.**
+  //   `hitpoints += 3 + ceil(stamina)` at `+0x684c`, `staminaleft += stamina`
+  //   at `+0x6894` and `check_stats` at `+0x68d3` all run BEFORE the `diceroll`
+  //   at `+0x6921` and the `checkattackroll` at `+0x698c`. The first cut folded
+  //   the recovery into the band path's transition, which is dropped entirely
+  //   when the blow eliminates — so a taunt that killed healed nobody.
+  const battle = duel({ seed: 3, hero: { charisma: 30, stamina: 12 }, villain: { charisma: 1, vitality: 1 } });
+  const hero = combatantById(battle, "hero");
+  hero.health = Math.max(1, hero.maxHealth - 40);
+  const healthBefore = hero.health;
+  const { event } = taunt(battle);
+  assert.ok(event.healed > 0, "the recovery is reported whatever the roll did");
+  assert.ok(combatantById(battle, "hero").health > healthBefore,
+    "and it reaches the gladiator even when the taunt goes on to kill");
+});
+
+test("THE GAIN CLAMPS BEFORE THE COST IS SPENT, which is two stages and not one", () => {
+  // ► **MEASURED: 220/220, charisma 30, stamina 12 ends at 165.** The build
+  //   adds the branch's `+= stamina`, clamps with `check_stats` (`+0x68d3`),
+  //   and only later charges `nextphase`. Bundling both into one
+  //   `phaseTransitionEffects` call banks the overflow and gives 177.
+  //
+  //   **`rest` cannot show this and that is why it went unnoticed**: its cost
+  //   is NEGATIVE, so it never spends and there is no second stage to clamp
+  //   before. A taunt gains 12 and spends 60.
+  const battle = duel({ seed: 3, hero: { charisma: 30, stamina: 12 } });
+  const staminaOf = () => toTeamWireState(battle).teams[0].combatants[0].resources.staminaleft.value;
+  assert.equal(staminaOf(), 220, "the taunter opens at full stamina");
+  taunt(battle);
+  assert.equal(staminaOf(), 165, "220 clamped at 220, then -60 +1 +round(12/3)");
+});

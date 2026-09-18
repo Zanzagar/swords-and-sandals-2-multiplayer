@@ -64,10 +64,20 @@
  *     offers it on every controller frame, the counter is a resource with no
  *     default (which is what kept all 23 golden replay hashes still), and the
  *     charged stance and its glow reach the screen.
- *   - `taunt` — the candidate implements only the post-`checkattackroll` arm,
- *     so it would consume the wrong number of samples. **This one is still
- *     true**, and it is now the ONLY entry in this paragraph that has not
- *     moved. The map has the missing half in full: `diceroll =
+ *   - ~~`taunt` — the candidate implements only the post-`checkattackroll` arm,
+ *     so it would consume the wrong number of samples.~~ **BUILT 2026-09-17,
+ *     AND THE REASON WAS RIGHT TO THE END** — it is why the build took the two
+ *     pre-draws itself rather than letting the dispatcher take them:
+ *     one sample on a failed roll, two on effect 2, and the dispatcher's only
+ *     on effect 1. See `SS2_TAUNT` and `test/ss2-taunt.test.js`.
+ *
+ * ► **SO THE LIST IS EMPTY, AND THIS PARAGRAPH HAS OUTLIVED ITS SUBJECT.**
+ *   Every vanilla action the controllers wire now resolves. It is kept — with
+ *   its history intact — because the history is the useful part: it went stale
+ *   for three of its four entries, then for one of its two, and each time the
+ *   staleness was found by somebody about to re-derive work already in the file
+ *   underneath it. **A reader arriving here should take the warning and not the
+ *   list.** The map has taunt's derivation in full: `diceroll =
  *     randomBetween(1, 100)` at `+0x6921`, succeeding on
  *     `diceroll < game_attacker.taunt_percentage` (`+0x694b`, a DIRECT
  *     comparison and not the dispatcher's `100 - chance` form), then
@@ -2441,6 +2451,52 @@ const PSYCHE_UP_DISCHARGE = Object.freeze({ direction: 30, strengthFactor: 1 });
  *   action and dropped the recovery entirely — which is why `strengthFactor` is
  *   absent here rather than set to something plausible.
  */
+/**
+ * The taunt branch's OWN recovery, applied and clamped BEFORE anything else —
+ * which is the build's order and was not this engine's until a Codex review of
+ * `8ede824` reproduced the difference.
+ *
+ * ► **THE ORDER IS LOAD-BEARING AND THE BYTES SETTLE IT.** `staminacost` is set
+ *   at `+0x67bb`, `hitpoints += 3 + ceil(stamina)` at `+0x684c`,
+ *   `staminaleft += stamina` at `+0x6894`, and then **`check_stats` clamps at
+ *   `+0x68d3` — all of it BEFORE the `diceroll` at `+0x6921` and the
+ *   `checkattackroll` at `+0x698c`.** Two consequences the first cut got wrong:
+ *
+ *   - **the recovery survives a lethal strike**, because it has already
+ *     happened by the time the blow is rolled; and
+ *   - **the gain clamps before the cost is spent**, so a full-stamina taunter
+ *     does not bank the overflow. Measured: 220/220, charisma 30, stamina 12
+ *     ends at **165**, not the 177 a single bundled transition gives.
+ *
+ * ► **AND IT IS THE TAUNT THAT EXPOSED IT, NOT A NEW DEFECT.**
+ *   `phaseTransitionEffects` has always bundled a branch's gain with
+ *   `nextphase`'s into one clamp, and `rest` — the only other action shaped
+ *   this way — cannot show the difference because its cost is NEGATIVE: it
+ *   never spends, so there is no second stage to clamp before. A taunt gains 12
+ *   and spends 60, which is the first time the two stages are distinguishable.
+ */
+function tauntRecovery(actor) {
+  const stamina = actor.stats.stamina;
+  const declared = declaredResourceNames(actor);
+  const staminaMax = resourceValue(actor, "staminamax", 0);
+  const before = resourceValue(actor, "staminaleft", 0);
+  // `check_stats` at `+0x68d3` is the clamp, and it runs here rather than after
+  // the cost.
+  const staminaleft = clamp(before + stamina, 0, staminaMax);
+  const healed = Math.min(
+    SS2_TAUNT.branchHealBase + Math.ceil(stamina),
+    Math.max(0, actor.maxHealth - actor.health)
+  );
+  const effects = [];
+  if (declared.has("staminaleft") && staminaleft !== before) {
+    effects.push({
+      kind: EffectKind.RESOURCE, targetId: actor.id, resource: "staminaleft", to: staminaleft
+    });
+  }
+  if (healed > 0) effects.push({ kind: EffectKind.HEAL, targetId: actor.id, amount: healed });
+  return { effects, staminaleft, healed, health: Math.min(actor.maxHealth, actor.health + healed) };
+}
+
 const TAUNT_STRIKE = Object.freeze({
   direction: SS2_TAUNT_DIRECTION,
   // ► **`charisma` IS A RESOURCE AND NOT A STAT**, which is the whole reason
@@ -2449,10 +2505,15 @@ const TAUNT_STRIKE = Object.freeze({
   //   vitality, stamina, magicka — and every SS2-specific value travels in the
   //   numeric resource bag instead. `stamina` happens to be in both; `charisma`
   //   is only in the bag.
-  transitionFor: (actor) => ({
+  // ► **THE RECOVERY IS NOT HERE, AND THAT IS THE FIX.** It is applied by
+  //   `tauntRecovery` before the roll, as the build does, and this hands
+  //   `nextphase` the POST-recovery state to compute its own stage from. A
+  //   bundled `branchGain`/`branchHeal` here would clamp once instead of twice
+  //   and let a full-stamina taunter bank the overflow.
+  transitionFor: (actor, recovered) => ({
     staminaCost: Math.round(resourceValue(actor, "charisma", 0) * 2),
-    branchGain: actor.stats.stamina,
-    branchHeal: 3 + Math.ceil(actor.stats.stamina)
+    fromStaminaleft: recovered ? recovered.staminaleft : null,
+    fromHealth: recovered ? recovered.health : null
   })
 });
 
@@ -2542,6 +2603,18 @@ export const SS2_TAUNT = Object.freeze({
    * `knockback(defender, force)` at `+0x6ab1`). Same shape as
    * `damagecharacter`, where the fighter always moves and only the clip is
    * gated.
+   *
+   * ► **AND THIS ENGINE DISPLACES NOBODY, ON EITHER PATH — a pre-existing gap
+   *   this action joins rather than introduces.** `damagecharacter`'s knockback
+   *   already travels as an EVENT FIELD (`knockback: {...}` on the resolved
+   *   attack) and emits no `EffectKind.POSITION`; nothing in `src/adapter/` or
+   *   the shell reads it. So a knocked-back gladiator plays the clip and stays
+   *   exactly where he was, and the taunt's shove does the same.
+   *
+   *   **Reported rather than fixed on purpose**: emitting positions for
+   *   knockbacks moves gladiators, and position is in `combatStateHash`, so it
+   *   would re-datum every pinned hash and every golden that carries one. That
+   *   is its own decision with its own evidence, not a rider on a new verb.
    */
   knockbackAnimationForce: 100,
   /**
@@ -5416,6 +5489,8 @@ export function createSs2TeamRules({
        * only taunt in the game that does not say what it rolled.
        */
       let tauntRoll = null;
+      /** The taunt branch's own pre-roll recovery, so the strike arm can emit it too. */
+      let tauntRecovered = null;
       if (request.type === Ss2ActionType.PSYCHE_UP) {
         // ► **CLAMPED TO THE FLOOR, BECAUSE A RECORD MAY STATE 0 AND THE BUILD
         //   CANNOT HOLD 0 AFTER ANY TURN.** Both of the build's resets write 1
@@ -5530,7 +5605,14 @@ export function createSs2TeamRules({
       //   event therefore always carries the pair, and `landed` says whether
       //   anything came of it.
       if (request.type === Ss2ActionType.TAUNT) {
-        const tauntTransition = phaseTransitionEffects(actor, TAUNT_STRIKE.transitionFor(actor));
+        // The branch's own recovery, applied and CLAMPED first — the build's
+        // order (`+0x684c`, `+0x6894`, `check_stats` at `+0x68d3`), all before
+        // the roll at `+0x6921`.
+        tauntRecovered = tauntRecovery(actor);
+        const tauntTransition = phaseTransitionEffects(
+          actor,
+          TAUNT_STRIKE.transitionFor(actor, tauntRecovered)
+        );
         const chance = calculateSs2AttackChances(
           vanillaRecordOf(actor, "attacker"),
           vanillaRecordOf(target, "defender")
@@ -5543,14 +5625,16 @@ export function createSs2TeamRules({
           vanillaLabel: VANILLA_PHASE_LABEL[Ss2ActionType.TAUNT],
           roll,
           chance,
+          // BOTH stages: the branch's own and `nextphase`'s, which is what a
+          // reader means by "what did this taunt restore".
           staminaGained: tauntTransition.staminaGained,
-          healed: tauntTransition.healed
+          healed: tauntRecovered.healed + tauntTransition.healed
         };
         if (!(roll < chance)) {
           // A failed taunt takes ONE sample and reaches no dispatcher. It still
           // pays, still recovers, and still plays both clips.
           return {
-            effects: [...tauntTransition.effects, ...crowd],
+            effects: [...tauntRecovered.effects, ...tauntTransition.effects, ...crowd],
             events: [{ ...shared, landed: false, effect: null }]
           };
         }
@@ -5561,7 +5645,7 @@ export function createSs2TeamRules({
           //   which is the discriminator the map left open for a year as "a
           //   charisma-scaled knockback OR sets `taunted1`". A melee defender
           //   is shoved; a bow-mode one is made to flee.
-          const effects = [...tauntTransition.effects];
+          const effects = [...tauntRecovered.effects, ...tauntTransition.effects];
           if (resourceValue(target, "equipped_weapon", 1) === 1) {
             // ► **THE DISPLACEMENT IS UNCONDITIONAL AND THE ANIMATION IS
             //   GATED.** `knockback(defender, force)` is called whenever this
@@ -5579,6 +5663,26 @@ export function createSs2TeamRules({
             //   for the other arm.
             const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
             const force = facingLeft ? 0 - magnitude : magnitude;
+            // ► **AND THE SHOVE MOVES HIM, which the first cut did not do.**
+            //   `knockback(defender, force)` at `+0x6ab1` tweens the defender's
+            //   `_x` by the force, UNCONDITIONALLY — the `|force| > 100` gate
+            //   above it is the ANIMATION's, not the displacement's. A Codex
+            //   review reproduced a shove reporting force 750 while the
+            //   defender stood exactly where he was, which makes a successful
+            //   outcome inert: it cannot change distance, and therefore cannot
+            //   change what either gladiator may do next.
+            //
+            //   **Clamped to the arena the same way a walk is**, because
+            //   `nextphase` step 1 bounds every `_x` and a shove is not exempt.
+            //   `damagecharacter`'s own knockback still displaces nobody here —
+            //   it has travelled as an event field since it was built — and
+            //   that gap is now the only one left of its kind.
+            const shoved = Number.isFinite(target.x)
+              ? clamp(target.x + force, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max)
+              : null;
+            if (shoved !== null && shoved !== target.x) {
+              effects.push({ kind: EffectKind.POSITION, targetId: target.id, to: shoved });
+            }
             return {
               effects: [...effects, ...crowd],
               events: [{
@@ -5586,6 +5690,8 @@ export function createSs2TeamRules({
                 landed: true,
                 effect,
                 force,
+                from: Number.isFinite(target.x) ? target.x : null,
+                to: shoved,
                 // The presentation layer needs to know whether the build would
                 // have played the clip, and it cannot re-derive the threshold.
                 knockbackAnimation: Math.abs(force) > SS2_TAUNT.knockbackAnimationForce
@@ -5985,6 +6091,21 @@ export function createSs2TeamRules({
       // The strike arm's event is the dispatcher's, so the taunt's own two
       // draws are merged back onto it here — the same shape the psyche
       // discharge uses directly above.
+      if (tauntRecovered !== null) {
+        // ► **THE RECOVERY SURVIVES A LETHAL STRIKE**, because the build has
+        //   already applied it by the time the blow is rolled. The band path
+        //   above drops its own transition when `eliminated`; this one is not
+        //   its to drop.
+        effects.unshift(...tauntRecovered.effects);
+        // And the EVENT has to say so too. The band path reports `healed: 0`
+        // on an elimination because its own transition never ran — which is
+        // right for its half and wrong for this one, so the branch's own
+        // recovery is added rather than replacing it.
+        for (const event of events) {
+          if (event.type !== request.type) continue;
+          event.healed = (Number.isFinite(event.healed) ? event.healed : 0) + tauntRecovered.healed;
+        }
+      }
       if (tauntRoll !== null) {
         for (const event of events) {
           if (event.type !== request.type) continue;

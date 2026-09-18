@@ -490,7 +490,13 @@ test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact
   //   agree. What they would disagree about is the OPTION LIST, which is true
   //   of every verb this engine has added and is why a new one is a version
   //   boundary rather than a patch.
-  assert.equal(combatStateHash(battle), "7d5ee7be", WHY_IT_MOVED);
+  //   **AND IT MOVED A SECOND TIME, HOURS LATER, FOR A DIFFERENT AND STRONGER
+  //   REASON**: a Codex review found the taunt's shove reporting a force and
+  //   displacing nobody, so it emits a `POSITION` effect now — and positions
+  //   ARE in the projection. This one is not a harness artefact: two peers
+  //   driving identical actions really would disagree, which is exactly what
+  //   this pin exists to catch and why the shove was worth fixing.
+  assert.equal(combatStateHash(battle), "3e770611", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
