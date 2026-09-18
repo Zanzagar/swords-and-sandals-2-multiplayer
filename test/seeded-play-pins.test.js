@@ -375,6 +375,45 @@ function driveFirst(battle, limit) {
  *   both fighters and a fixture has none.
  */
 /**
+ * ► **THREE OF FOUR MOVED ON 2026-09-17, AND THE ONE THAT DID NOT IS THE
+ *   EVIDENCE: FACING IS NOW DERIVED AT CONSTRUCTION, as `changeCombatants`
+ *   derives it before the first turn.**
+ *
+ *     f2e862f9 -> f11e6bc9   (six actions in)
+ *     f45930aa -> a6cbd6a8   (settled 1v1)
+ *     3e770611   unchanged   (vanilla-separation opening)
+ *     e54cebb5 -> 2ef865ca   (settled 3v3)
+ *
+ *   **This closes a live defect, not a tidiness one.** `ss2FacingEffects` was
+ *   reached from ONE place, the movement branches, so a gladiator who had not
+ *   yet walked carried no facing — and `ss2IsBackAttack` reads a missing
+ *   `facing-left` as "faces right". Measured before the fix: **40 of 40
+ *   opening ranged attacks were scored as back attacks and paid a 50% damage
+ *   bonus they had not earned.** Melee hid it, because at the vanilla
+ *   separation of 500 nothing melee is in reach until somebody walks, and a
+ *   walk fixed the facing on the way.
+ *
+ *   **Why the vanilla-separation pin is the one that did NOT move**: it stages
+ *   its pair at the construction geometry and takes an OPENING action, and the
+ *   very first thing its driver does is close the distance — so the facing it
+ *   ends the pin with was already the derived one. The three that moved all
+ *   carry the villain's `facing-left` from a state where nobody had walked yet.
+ *   That split is the same shape as the 2026-09-12 entry below, read the other
+ *   way round.
+ *
+ *   **The knockback displacement landed in the same commit and moved NOTHING**
+ *   — measured by removing the facing hook and re-running, which reproduced
+ *   all four old values. Every driver here picks attack directions 1-4 and the
+ *   build's knockback gate needs 5-12 or 30 (`+0x1a72`-`+0x1aa5`), so the
+ *   branch is unreachable from these pins. **That is luck, not coverage**: it
+ *   is worth saying because "no pin moved" was about to be read as "the pins
+ *   cover it", and re-staging any of these on power attacks would move them.
+ *
+ *   **No golden moved, for the sixth time**, and structurally cannot: a
+ *   fixture models no position, so it has nothing to derive a facing from and
+ *   nothing to be knocked back from.
+ */
+/**
  * ► **ALL FOUR MOVED AGAIN ON 2026-09-13, FOR A PROJECTION CHANGE: the ranged
  *   vocabulary put SIX NEW RESOURCES on every combatant.**
  *
@@ -427,7 +466,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "f2e862f9", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "f11e6bc9", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -439,7 +478,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "f45930aa", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "a6cbd6a8", WHY_IT_MOVED);
 });
 
 /**
@@ -507,7 +546,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "e54cebb5", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "2ef865ca", WHY_IT_MOVED);
 });
 
 /**

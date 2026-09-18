@@ -340,14 +340,22 @@ test("THE SHOVE MOVES HIM, and a Codex review is why", () => {
   //
   //   The build's `knockback(defender, force)` at `+0x6ab1` is UNCONDITIONAL —
   //   the `|force| > 100` gate above it is the ANIMATION's — so the shove now
-  //   emits a POSITION effect, clamped to the arena the way `nextphase` step 1
-  //   clamps every `_x`.
+  //   emits a POSITION effect, clamped to the arena. **The clamp's citation was
+  //   wrong until 2026-09-17** ("the way `nextphase` step 1 clamps every `_x`"):
+  //   `nextphase` clamps the DATA objects and is dead code; the live clamp is
+  //   in `attacker.onEnterFrame`. Same number, different function — see
+  //   `SS2_ARENA.clamp`.
   //
-  //   **`damagecharacter`'s own knockback still displaces nobody here**: it has
-  //   travelled as an event field since it was built and nothing reads it. That
-  //   is now the only gap of its kind left, and it is not this action's to
-  //   close — positions are in `combatStateHash`, so moving them re-datums
-  //   every pinned hash and every golden that carries one.
+  //   ► ~~**`damagecharacter`'s own knockback still displaces nobody here** ...
+  //     it is not this action's to close — positions are in `combatStateHash`,
+  //     so moving them re-datums every pinned hash and every golden that
+  //     carries one.~~ **CLOSED 2026-09-17, AND THE REASON GIVEN FOR NOT
+  //     CLOSING IT WAS FALSE.** No golden carries a position or a hash and none
+  //     structurally can (`startingPosition` returns `null` under
+  //     `fixtureReplay`), and the displacement moved zero pinned hashes —
+  //     measured by removing it and re-running, because every seeded pin swings
+  //     directions 1-4 and the build's knockback gate needs 5-12 or 30.
+  //     The sentence stood in three places and deferred the work twice.
   for (let seed = 1; seed <= 80; seed += 1) {
     const battle = duel({ seed, hero: { charisma: 30 }, villain: { charisma: 1 } });
     const before = combatantById(battle, "villain").x;

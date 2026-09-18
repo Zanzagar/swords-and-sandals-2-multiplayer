@@ -1201,9 +1201,35 @@ export const SS2_ARENA = Object.freeze({
    *   +0x3246 Push  2100   Greater   +0x325b game_defender._x =  2100
    * ```
    *
-   * It runs in `nextphase`, so it bounds EVERY gait — and it is the only thing
-   * that bounds the taunted flee, whose own arm clamps nothing (see the
-   * `TAUNTED_PHASE` branch).
+   * ► **AND THE SENTENCE THAT USED TO END THIS BLOCK WAS WRONG — RETRACTED
+   *   2026-09-17, THE SAME DAY IT WAS WRITTEN.** It read: *"It runs in
+   *   `nextphase`, so it bounds EVERY gait — and it is the only thing that
+   *   bounds the taunted flee, whose own arm clamps nothing."*
+   *
+   *   **`nextphase` clamps `game_attacker._x` and `game_defender._x`, and
+   *   those are `_root.game.hero` / `_root.game.villain` — plain `new
+   *   Object()`s.** The gladiators that move are the CLIPS, `attacker` and
+   *   `defender` (`_root.arena.gladiators.*`), bound four lines apart from the
+   *   data objects at `+0x2b64`/`+0x2b7b` against `+0x2b92`/`+0x2ba3`. Across
+   *   the whole SWF those four comparisons are the ONLY reads of
+   *   `game_*._x` and those four writes the only writes, against 50 reads of
+   *   `attacker._x` and 32 of `defender._x`. **The block is dead code.**
+   *
+   * ► **THE NUMBER SURVIVES, IN A DIFFERENT FUNCTION.** A near-identical clamp
+   *   sits in `attacker.onEnterFrame` (the anonymous function at `+0x36ae`),
+   *   acting on the clips: `attacker._x` at `+0x38fd` / `+0x3988`,
+   *   `defender._x` at `+0x3a13` / `+0x3a3f`. THAT is what bounds a walk, a
+   *   run, a flee and a knockback, and hitting it also nulls `destination` and
+   *   calls `nextphase()` — so touching the wall ENDS the phase. Every use of
+   *   this constant in this engine is therefore still right; only the citation
+   *   was.
+   *
+   * ► **HOW THE ERROR WAS MADE, because it is a repeatable one.** The previous
+   *   caveat here said the bound existed in the map's prose with no byte
+   *   offset, and it was retracted for a good reason — the old decoder printed
+   *   opcodes without operands, so the literals looked absent. Finding them
+   *   proved THE LITERALS. It did not prove the EFFECT, and the receiver was
+   *   never checked. A read-only wave of twelve agents checked it, 2026-09-17.
    */
   clamp: Object.freeze({ min: -2100, max: 2100 }),
   /**
@@ -2326,40 +2352,51 @@ export function ss2WalkDestination(actor, foes, direction) {
  * `gladiator_dir` is why it has to be.
  */
 export function ss2FacingEffects(sideA, sideB) {
-  const effects = [];
+  return [...facingEffectsAgainst(sideA, sideB), ...facingEffectsAgainst(sideB, sideA)];
+}
+
+/**
+ * ONE side's facings, derived against one opposition — the half of
+ * `ss2FacingEffects` that used to be an inner closure called twice.
+ *
+ * Split out 2026-09-17 because the OPENING derivation needs it: with more than
+ * two teams the pairwise form would face a combatant against one opposing team
+ * rather than against every foe it has, and the bug that forced this split was
+ * exactly a facing derived against the wrong set. `ss2FacingEffects` is
+ * unchanged — it is these two calls — so a mutation check on the pair still
+ * covers every caller that had one before.
+ */
+function facingEffectsAgainst(crowd, opposition) {
   const positioned = (combatant) => combatant && combatant.alive !== false && Number.isFinite(combatant.x);
-  const consider = (crowd, opposition) => {
-    for (const combatant of crowd) {
-      if (!positioned(combatant)) continue;
-      let nearest = null;
-      let best = Infinity;
-      for (const foe of opposition) {
-        if (!positioned(foe)) continue;
-        const gap = Math.abs(foe.x - combatant.x);
-        // Ties break by id, for the same reason `nearestFoe` does: two foes
-        // equidistant must not make the facing depend on array order.
-        if (gap < best || (gap === best && nearest && foe.id < nearest.id)) {
-          nearest = foe;
-          best = gap;
-        }
+  const effects = [];
+  for (const combatant of crowd) {
+    if (!positioned(combatant)) continue;
+    let nearest = null;
+    let best = Infinity;
+    for (const foe of opposition) {
+      if (!positioned(foe)) continue;
+      const gap = Math.abs(foe.x - combatant.x);
+      // Ties break by id, for the same reason `nearestFoe` does: two foes
+      // equidistant must not make the facing depend on array order.
+      if (gap < best || (gap === best && nearest && foe.id < nearest.id)) {
+        nearest = foe;
+        best = gap;
       }
-      if (!nearest) continue;
-      // The build's two STRICT tests. An exact tie runs neither arm, so the
-      // facing it already has survives — reproduced, not smoothed.
-      if (nearest.x === combatant.x) continue;
-      const facesLeft = nearest.x < combatant.x;
-      const carries = (combatant.status ?? []).includes(SS2_FACING_LEFT);
-      if (facesLeft === carries) continue;
-      effects.push({
-        kind: EffectKind.STATUS,
-        targetId: combatant.id,
-        status: SS2_FACING_LEFT,
-        active: facesLeft
-      });
     }
-  };
-  consider(sideA, sideB);
-  consider(sideB, sideA);
+    if (!nearest) continue;
+    // The build's two STRICT tests. An exact tie runs neither arm, so the
+    // facing it already has survives — reproduced, not smoothed.
+    if (nearest.x === combatant.x) continue;
+    const facesLeft = nearest.x < combatant.x;
+    const carries = (combatant.status ?? []).includes(SS2_FACING_LEFT);
+    if (facesLeft === carries) continue;
+    effects.push({
+      kind: EffectKind.STATUS,
+      targetId: combatant.id,
+      status: SS2_FACING_LEFT,
+      active: facesLeft
+    });
+  }
   return effects;
 }
 
@@ -2755,22 +2792,44 @@ export const SS2_TAUNT = Object.freeze({
   minimumForce: 20,
   /**
    * The knockback ANIMATION plays only above this; the DISPLACEMENT is
-   * unconditional (`+0x6a21`/`+0x6a91` against the unconditional
-   * `knockback(defender, force)` at `+0x6ab1`). Same shape as
-   * `damagecharacter`, where the fighter always moves and only the clip is
-   * gated.
+   * unconditional within this arm (`+0x6a21`/`+0x6a91` against the
+   * unconditional `knockback(defender, force)` at `+0x6ab1`).
    *
-   * ► **AND THIS ENGINE DISPLACES NOBODY, ON EITHER PATH — a pre-existing gap
-   *   this action joins rather than introduces.** `damagecharacter`'s knockback
-   *   already travels as an EVENT FIELD (`knockback: {...}` on the resolved
-   *   attack) and emits no `EffectKind.POSITION`; nothing in `src/adapter/` or
-   *   the shell reads it. So a knocked-back gladiator plays the clip and stays
-   *   exactly where he was, and the taunt's shove does the same.
+   * ► **"SAME SHAPE AS `damagecharacter`, WHERE THE FIGHTER ALWAYS MOVES" WAS
+   *   WRONG — CORRECTED 2026-09-17.** `damagecharacter`'s displacement is
+   *   gated TWICE before it can be reached: by the direction band
+   *   (`>= 5 && <= 12 || == 30`, `+0x1a72`-`+0x1aa5`, everything else jumping
+   *   to `+0x1be4`) and then by `randosmash > 3 || direction == 30`
+   *   (`+0x1ac8`-`+0x1ae4`). About one eligible blow in four displaces.
+   *   "Unconditional" is true only WITH RESPECT TO THE ANIMATION GATE, which
+   *   is a different sentence, and `ss2-attack-candidate.js:568-580` had it
+   *   right all along — it was this prose that was wrong.
    *
-   *   **Reported rather than fixed on purpose**: emitting positions for
-   *   knockbacks moves gladiators, and position is in `combatStateHash`, so it
-   *   would re-datum every pinned hash and every golden that carries one. That
-   *   is its own decision with its own evidence, not a rider on a new verb.
+   * ► **THE TWO THRESHOLDS ARE GENUINELY DIFFERENT, which is worth saying
+   *   because it looks like a typo.** This arm's is 100 (`+0x6a12`/`+0x6a82`);
+   *   `damagecharacter`'s is 80 (`+0x1b40`/`+0x1bb1`); `shove`'s is 100
+   *   (`+0x5ed9`/`+0x5f9a`); and `cast_gale` plays it unconditionally
+   *   (`+0x7b78`) on a flat force of ±1000 with no floor. Four call sites,
+   *   four shapes.
+   *
+   * ► ~~**AND THIS ENGINE DISPLACES NOBODY, ON EITHER PATH.** ... **Reported
+   *   rather than fixed on purpose**: emitting positions for knockbacks moves
+   *   gladiators, and position is in `combatStateHash`, so it would re-datum
+   *   every pinned hash and every golden that carries one.~~ **BOTH HALVES ARE
+   *   CLOSED, AND THE SECOND WAS FALSE — 2026-09-17.**
+   *
+   *   `damagecharacter`'s knockback emits a `POSITION` effect now, so the gap
+   *   is gone. The stated COST was never real: **no golden carries a position
+   *   or a hash and none structurally can** — `startingPosition` returns `null`
+   *   under `fixtureReplay`, so the finite-`x` guard suppresses it for every
+   *   promoted fixture — and the displacement moved **zero** of the pinned
+   *   hashes, measured by removing it and re-running. Every seeded pin's driver
+   *   swings directions 1-4, which the band gate excludes.
+   *
+   *   **That sentence was written in three places and deferred an afternoon's
+   *   work across two sessions.** It is the reason to be suspicious of a cost
+   *   nobody has measured: "every golden that carries one" quantified over an
+   *   empty set, and a handoff then dropped the hedge and called it a DECISION.
    */
   knockbackAnimationForce: 100,
   /**
@@ -4678,6 +4737,47 @@ export function createSs2TeamRules({
      * position, so it has none, and `legalActions` falls back to the
      * position-blind vocabulary for exactly the callers that ask for it.
      */
+    /**
+     * ► **THE FACINGS EVERY GLADIATOR STARTS WITH, AND THIS ENGINE HAD NONE.
+     *   Measured 2026-09-17: 40 of 40 opening ranged attacks were scored as
+     *   BACK ATTACKS and paid a 50% damage bonus they had not earned.**
+     *
+     * `ss2FacingEffects` existed and was correct; it was reached from exactly
+     * one place, the movement branches, so a gladiator who had not yet MOVED
+     * carried no facing at all. A missing `facing-left` is not neutral —
+     * `ss2IsBackAttack` reads its absence as "faces right", so the villain,
+     * who starts at positive x with the whole hero side to his left, was
+     * modelled as looking away from the fight for as long as he stood still.
+     * At 500 apart melee is out of reach and the first thing anybody can do is
+     * shoot, which is why this never showed up in a melee bout.
+     *
+     * **The build derives it here too, and that is what makes this a fix
+     * rather than an addition.** `changeCombatants` sets BOTH facings from
+     * `hero._x` vs `villain._x` at every phase advance (`+0x28f3`-`+0x2ae3`),
+     * and it runs once before the first turn — `initbattle` leaves the pair
+     * placed and the first pass poses them. An engine that derives facing only
+     * when somebody walks is reproducing one of its call sites and not the
+     * rule.
+     *
+     * ► **IT IS PER TEAM AGAINST EVERY FOE, not pairwise.** With three ranks a
+     *   side, facing each team against one opposing team would answer the
+     *   wrong question; `facingEffectsAgainst` is the one-directional half
+     *   that lets this ask it properly.
+     *
+     * ► **AND IT CANNOT TOUCH A GOLDEN, structurally.** `startingPosition`
+     *   returns `null` under `fixtureReplay`, so a promoted fixture has no
+     *   `x`, and `facingEffectsAgainst` skips every combatant that has none.
+     *   The same structural gate the facing derivation already relied on — see
+     *   `ss2FacingEffects`.
+     */
+    openingEffects(combatants) {
+      const teamIds = [...new Set(combatants.map((combatant) => combatant.teamId))];
+      return teamIds.flatMap((teamId) => facingEffectsAgainst(
+        combatants.filter((combatant) => combatant.teamId === teamId),
+        combatants.filter((combatant) => combatant.teamId !== teamId)
+      ));
+    },
+
     startingPosition({ teamIndex, slotIndex }) {
       if (fixtureReplay) return null;
       const side = teamIndex === 0 ? -1 : 1;
@@ -5402,6 +5502,30 @@ export function createSs2TeamRules({
         );
       };
 
+      /**
+       * ► **THE MIRROR, FOR A MOVE THIS ACTOR INFLICTED ON SOMEBODY ELSE — and
+       *   the rule above had no way to express one.** `facingAfter` substitutes
+       *   the ACTOR into its own side, which is right for a walk and useless
+       *   for a shove: a knockback writes the TARGET's `x`, and the gladiator
+       *   whose facing that can change is the target and whoever is nearest to
+       *   where he landed.
+       *
+       *   The shove shipped in `d5dabeb` without this and so BROKE the rule
+       *   stated three screens up — "every branch that writes an `x` recomputes
+       *   the facing from the `x` it wrote" — in the same commit that wrote the
+       *   rule down. An independent review found it, 2026-09-17. A stated rule
+       *   with an exception nobody noticed is worse than no rule, because the
+       *   `git grep` it prescribes reports the violation as a pass.
+       */
+      const facingAfterTargetMove = (movedTarget) => {
+        const mine = request.allies ?? [];
+        const theirs = (request.foes ?? []).map((foe) => (foe.id === movedTarget.id ? movedTarget : foe));
+        return ss2FacingEffects(
+          mine.some((ally) => ally.id === actor.id) ? mine : [actor, ...mine],
+          theirs.some((foe) => foe.id === movedTarget.id) ? theirs : [movedTarget, ...theirs]
+        );
+      };
+
 
       const statusFlag = SS2_FLAG_FOR_STATUS_PHASE[request.type];
       if (statusFlag) {
@@ -5455,7 +5579,10 @@ export function createSs2TeamRules({
       //   `== "left"` to `runright`, so the arm that runs is always the arm
       //   whose guard is false. The abort cannot fire on a taunted flee in this
       //   build. A fleeing gladiator runs THROUGH the man who taunted him, and
-      //   only `nextphase`'s arena bound stops him.
+      //   only the arena bound stops him — **which lives in
+      //   `attacker.onEnterFrame` (`+0x38fd`, `+0x3988`) and NOT in
+      //   `nextphase`, as this line said until 2026-09-17.** The bound is real;
+      //   the function named for it was not. See `SS2_ARENA.clamp`.
       if (request.type === Ss2ActionType.TAUNTED_PHASE) {
         const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
         // Away from the facing: looking right means running left.
@@ -6005,16 +6132,24 @@ export function createSs2TeamRules({
             //   outcome inert: it cannot change distance, and therefore cannot
             //   change what either gladiator may do next.
             //
-            //   **Clamped to the arena the same way a walk is**, because
-            //   `nextphase` step 1 bounds every `_x` and a shove is not exempt.
-            //   `damagecharacter`'s own knockback still displaces nobody here —
-            //   it has travelled as an event field since it was built — and
-            //   that gap is now the only one left of its kind.
+            //   **Clamped to the arena, and the CITATION for that was wrong
+            //   until 2026-09-17.** This said "`nextphase` step 1 bounds every
+            //   `_x`". It does not: `nextphase` clamps `game_attacker._x` and
+            //   `game_defender._x`, which live on `_root.game.hero`/`.villain`
+            //   — plain `new Object()`s that nothing else in the SWF reads or
+            //   writes `._x` on. That block is DEAD. The clamp that really
+            //   bounds a gladiator is a near-identical copy inside
+            //   `attacker.onEnterFrame` (`+0x38fd`, `+0x3988`, `+0x3a13`,
+            //   `+0x3a3f`), acting on the CLIPS — and `knockback()` itself
+            //   bounds nothing at all, so the clip clamp is the whole of it.
+            //   **The value survives and the reasoning did not**; see
+            //   `SS2_ARENA.clamp`.
             const shoved = Number.isFinite(target.x)
               ? clamp(target.x + force, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max)
               : null;
             if (shoved !== null && shoved !== target.x) {
               effects.push({ kind: EffectKind.POSITION, targetId: target.id, to: shoved });
+              effects.push(...facingAfterTargetMove({ ...target, x: shoved }));
             }
             return {
               effects: [...effects, ...crowd],
@@ -6316,6 +6451,56 @@ export function createSs2TeamRules({
       ];
 
       const { calculation, mutation } = outcome;
+
+      // ► **AND `damagecharacter`'s KNOCKBACK MOVES HIM, which is the last
+      //   displacement gap on a verb this engine models.** The force has been
+      //   computed correctly since the candidate was written
+      //   (`ss2-attack-candidate.js:568-580`, every clause byte-matched) and
+      //   travelled as an EVENT FIELD that nothing read, so a knocked-back
+      //   gladiator played the clip and stood exactly where he was.
+      //
+      // ► **IT WAS DEFERRED FOR A COST THAT DOES NOT EXIST, and saying so is
+      //   the point.** Three places in this repository — the docblock at
+      //   `SS2_TAUNT.knockbackAnimationForce`, a comment in
+      //   `test/ss2-taunt.test.js`, and a handoff's `next:` field calling it
+      //   "a DECISION and not an afternoon" — said closing it would "re-datum
+      //   every pinned hash and every golden that carries one". **Measured
+      //   2026-09-17: no golden carries a position or a hash, and structurally
+      //   cannot** — `startingPosition` returns `null` under `fixtureReplay`,
+      //   so the `Number.isFinite(target.x)` guard below suppresses this for
+      //   every promoted fixture. The set the sentence quantified over was
+      //   empty, and an afternoon's work was deferred across two sessions on
+      //   the strength of it.
+      //
+      // ► **THE PINS THAT SURVIVE THIS SURVIVE BY LUCK, NOT BY COVERAGE.**
+      //   Every seeded pin's driver picks attack directions 1-4, and the
+      //   build's knockback gate needs 5-12 or 30 (`+0x1a72`-`+0x1aa5`), so
+      //   they cannot reach this branch. Re-stage one on power attacks and it
+      //   moves. "No pin moved" is not "the pins cover it".
+      //
+      // ► **NOT EVERY BLOW, and the prose here used to say otherwise.** The
+      //   displacement is gated TWICE — by the band, and by
+      //   `randosmash > 3 || direction == 30` (`+0x1ac8`-`+0x1ae4`) — so about
+      //   one eligible blow in four displaces. It is unconditional only with
+      //   respect to the `|force| > 80` ANIMATION gate, which is a different
+      //   sentence. `mutation.knockback.force` is `null` on the arm that drew
+      //   and lost, which is why the finite test below is the gate.
+      //
+      //   The sign is the DEFENDER's facing (`+0x1ae9`), not the actor's — the
+      //   opposite of the taunt's shove, which signs on the attacker's — and
+      //   it arrives already signed on `mutation.knockback.force`.
+      if (Number.isFinite(mutation.knockback?.force) && Number.isFinite(target.x)) {
+        const struckTo = clamp(
+          target.x + mutation.knockback.force,
+          SS2_ARENA.clamp.min,
+          SS2_ARENA.clamp.max
+        );
+        if (struckTo !== target.x) {
+          effects.push({ kind: EffectKind.POSITION, targetId: target.id, to: struckTo });
+          effects.push(...facingAfterTargetMove({ ...target, x: struckTo }));
+        }
+      }
+
       const events = [{
         type: request.type,
         actorId: actor.id,

@@ -65,7 +65,17 @@ export const VANILLA_FRONT_X = Object.freeze({ [HERO_SIDE]: -250, [VILLAIN_SIDE]
 export const ARENA_Y = 200;
 /** Map, "Battle entry" step 5: hero faces right, villain faces left. */
 export const SIDE_FACING = Object.freeze({ [HERO_SIDE]: "right", [VILLAIN_SIDE]: "left" });
-/** Map, `nextphase` step 1: the active x position is clamped to [-2100, 2100]. */
+/**
+ * The arena's x bound, `[-2100, 2100]`.
+ *
+ * **CITATION CORRECTED 2026-09-17.** This said "Map, `nextphase` step 1". That
+ * block exists and is DEAD: it clamps `game_attacker._x`/`game_defender._x` on
+ * `_root.game.hero`/`.villain`, which are plain `new Object()`s that nothing in
+ * the SWF reads or writes `._x` on. The live clamp is in `attacker.onEnterFrame`
+ * (sprite 862 frame 52, `+0x38fd`/`+0x3988` for `attacker._x`,
+ * `+0x3a13`/`+0x3a3f` for `defender._x`) and acts on the display CLIPS. Same
+ * numbers, different function — and this constant's USE below is unaffected.
+ */
 export const ARENA_X_CLAMP = Object.freeze({ min: -2100, max: 2100 });
 /** Map, "Battle result": overlay controller labels and the arena timeline labels. */
 export const RESULT_LABELS = Object.freeze({

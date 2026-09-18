@@ -1841,3 +1841,319 @@ test("a walk is refused for a combatant whose rule set gave it no position, by n
     (error) => error instanceof TeamRuleSetError && /models no geometry/.test(error.message)
   );
 });
+
+/* ------------------------------------------------------------------ */
+/* Facing at construction, and the knockback that needed it            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * WHY THESE ARE HERE RATHER THAN IN THE TAUNT OR ATTACK FILES. Both are about
+ * where a gladiator stands and which way he is looking, which is this file's
+ * subject; and both came out of the same defect, which is that this engine had
+ * one call site for a facing rule the build applies everywhere.
+ */
+
+test("A GLADIATOR IS FACING SOMEBODY BEFORE HE MOVES, and forty opening shots say why it matters", () => {
+  // ► **`changeCombatants` derives BOTH facings from `hero._x` vs `villain._x`
+  //   at every phase advance (`+0x28f3`-`+0x2ae3`), and it runs once before the
+  //   first turn.** This engine derived facing ONLY in its movement branches,
+  //   so a gladiator who had not yet walked carried none — and a missing
+  //   `facing-left` is not neutral, because `ss2IsBackAttack` reads its absence
+  //   as "faces right".
+  // ► **NEITHER SIDE STATES A `gladiator_dir` HERE, and that is the whole
+  //   test.** The file's own `bout()` helper states one per side, so this
+  //   assertion passed against a STATED facing while the derivation was absent
+  //   — a mutation check caught it doing exactly that. Build the pair bare, and
+  //   the only thing that can put a token on anybody is `openingEffects`.
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator(), { id: "red-1", name: "Red" })] },
+      { id: "blue", combatants: [ss2Combatant(gladiator(), { id: "blue-1", name: "Blue" })] }
+    ]
+  });
+  const red = combatantById(battle, "red-1");
+  const blue = combatantById(battle, "blue-1");
+  assert.ok(red.x < blue.x, "red opens on the left, which is the geometry this rests on");
+  assert.equal((red.status ?? []).includes("facing-left"), false, "red faces the villain on his right");
+  assert.equal((blue.status ?? []).includes("facing-left"), true, "and blue faces the hero on his left");
+  assert.equal(ss2IsBackAttack(red, blue), false, "so a shot from the front is not a back attack");
+  assert.equal(ss2IsBackAttack(blue, red), false, "and neither is the reply");
+});
+
+test("A KNOCKBACK RE-FACES WHOEVER IT MOVED, which the rule demanded and the shove did not do", () => {
+  // ► **THE RULE, stated at `facingAfter` and broken by the commit that wrote
+  //   it**: every branch that writes an `x` recomputes the facing from the `x`
+  //   it wrote. `facingAfter` substitutes the ACTOR, so it cannot express a
+  //   move inflicted on somebody else — and both the taunt's shove and the
+  //   physical knockback write the TARGET's `x`. An independent review found
+  //   the violation, 2026-09-17; `facingAfterTargetMove` is the mirror.
+  //
+  //   Two red gladiators either side of one blue, because a 1v1 CANNOT show
+  //   this: a knockback always drives the defender AWAY from the man who hit
+  //   him, so with only one foe his facing can never change. Put a second red
+  //   further out and a hard enough blow carries him nearer to THAT one, which
+  //   is when he has to turn round.
+  let checked = false;
+  for (let seed = 1; seed <= 200 && !checked; seed += 1) {
+    const battle = createTeamBattle({
+      seed,
+      rules: ss2TeamRules,
+      teams: [
+        {
+          id: "red",
+          combatants: [
+            ss2Combatant(gladiator({ strength: 50, weapon_min_damage: 1, weapon_max_damage: 2 }),
+              { id: "hitter", name: "Hitter" }),
+            ss2Combatant(gladiator(), { id: "outer", name: "Outer" })
+          ]
+        },
+        { id: "blue", combatants: [ss2Combatant(gladiator({ vitality: 90 }), { id: "victim", name: "Victim" })] }
+      ]
+    });
+    const hitter = combatantById(battle, "hitter");
+    const outer = combatantById(battle, "outer");
+    const victim = combatantById(battle, "victim");
+    hitter.x = 0;
+    outer.x = 660;
+    victim.x = 40;
+    for (const one of [hitter, outer, victim]) one.status = [];
+    victim.status = ["facing-left"];
+    battle.turnCursor = battle.initiative.indexOf("hitter");
+
+    const power = legalActions(battle, "hitter")
+      .find((option) => option.type === Ss2ActionType.POWER_ATTACK && option.targetId === "victim");
+    if (!power) continue;
+    applyAction(battle, { actorId: "hitter", ...power });
+    const event = battle.events.filter((one) => one.knockback !== undefined).pop();
+    if (!Number.isFinite(event?.knockback?.force)) continue;
+
+    const landed = combatantById(battle, "victim");
+    if (!landed.alive) continue;
+    if (Math.abs(landed.x - outer.x) >= Math.abs(landed.x - hitter.x)) continue;
+    checked = true;
+    assert.ok(event.knockback.force > 0,
+      "a defender facing LEFT takes the positive force, away from the man on his left");
+    assert.equal((landed.status ?? []).includes("facing-left"), false,
+      `seed ${seed}: shoved to ${landed.x}, nearer the ally at ${outer.x}, he must turn to face THAT one`);
+  }
+  assert.ok(checked, "the sweep must land one knockback that changes which foe is nearest");
+});
+
+test("AN OPENING SHOT IS NOT A BACK ATTACK, which it was forty times out of forty", () => {
+  // The measurement that found it. At the vanilla separation of 500 nothing
+  // melee is in reach, so the first thing anybody CAN do is shoot — which is
+  // exactly the case a facing derived on movement alone never covered. Before
+  // `openingEffects` this loop counted 40; the bonus is 50% of the blow.
+  let shots = 0;
+  let scoredAsBack = 0;
+  for (let seed = 1; seed <= 40; seed += 1) {
+    const battle = createTeamBattle({
+      seed,
+      rules: ss2TeamRules,
+      teams: [
+        {
+          id: "red",
+          combatants: [ss2Combatant(
+            gladiator({ secondary_weapon: 61, equipped_weapon: 2, secondary_weapon_range: 900 }),
+            { id: "hero", name: "Hero", controller: "local" }
+          )]
+        },
+        {
+          id: "blue",
+          combatants: [ss2Combatant(gladiator(), { id: "villain", name: "Villain", controller: "local" })]
+        }
+      ]
+    });
+    const who = currentCombatant(battle);
+    const shot = legalActions(battle).find((option) => option.type === Ss2ActionType.SNIPE)
+      ?? legalActions(battle).find((option) => option.type === Ss2ActionType.BOMBARD);
+    if (!shot) continue;
+    applyAction(battle, { actorId: who.id, ...shot });
+    const event = battle.events.filter((one) => one.backAttack !== undefined).pop();
+    shots += 1;
+    if (event?.backAttack) scoredAsBack += 1;
+  }
+  assert.ok(shots >= 40, `the sweep must actually reach the opening shot; took ${shots}`);
+  assert.equal(scoredAsBack, 0, "not one opening shot may be scored from behind");
+  assert.ok(SS2_BACK_ATTACK_BONUS > 0, "and the bonus is real, which is what made this worth finding");
+});
+
+test("A FIXTURE CANNOT BE FACED, because it has nothing to be faced FROM", () => {
+  // The structural firewall, and it is the same one `startingPosition` relies
+  // on: `fixtureReplay` returns `null` for the position, so every promoted
+  // golden reaches `facingEffectsAgainst` with no `x` and is skipped. It has to
+  // be structural rather than a flag, because `gladiator_dir` signs the
+  // knockback force and picks the debris direction inside the golden pipeline.
+  const rules = createSs2TeamRules({ fixtureReplay: true });
+  const battle = createTeamBattle({
+    seed: 1,
+    rules,
+    teams: [
+      { id: "red", combatants: [ss2Combatant(gladiator(), { id: "hero", name: "Hero" })] },
+      { id: "blue", combatants: [ss2Combatant(gladiator(), { id: "villain", name: "Villain" })] }
+    ]
+  });
+  assert.equal(combatantById(battle, "hero").x, null);
+  assert.deepEqual([...(combatantById(battle, "villain").status ?? [])], [],
+    "a fixture's villain carries no derived facing at all");
+});
+
+test("THE OPENING HOOK TAKES STATUS AND NOTHING ELSE, by name", () => {
+  // A POSITION here would fight `startingPosition` for the same field with no
+  // way to tell which won. The refusal is the resolver's, so every rule set
+  // gets it, and it names the kind it was handed.
+  const rules = {
+    ...ss2TeamRules,
+    id: "opening-effects-probe",
+    openingEffects: () => [{ kind: EffectKind.POSITION, targetId: "hero", to: 0 }]
+  };
+  assert.throws(
+    () => createTeamBattle({
+      seed: 1,
+      rules,
+      teams: [
+        { id: "red", combatants: [ss2Combatant(gladiator(), { id: "hero", name: "Hero" })] },
+        { id: "blue", combatants: [ss2Combatant(gladiator(), { id: "villain", name: "Villain" })] }
+      ]
+    }),
+    (error) => /openingEffects\(\)/.test(error.message) && /STATUS effects only/.test(error.message),
+    "the refusal must name the hook and the kind it accepts"
+  );
+});
+
+test("A PHYSICAL KNOCKBACK MOVES THE DEFENDER, and it took a wave to find out the cost was imaginary", () => {
+  // ► **`damagecharacter` calls `knockback(defender, force)` (`+0x1bd6`), and
+  //   `knockback` tweens the clip's `_x` to `_x + force` with no bound of its
+  //   own (`+0x1dd3`).** The force has been computed correctly here since the
+  //   candidate was written; it travelled as an event field nothing read.
+  //
+  //   The band is 5-12 or 30 and the draw is `randosmash > 3`, so most blows do
+  //   NOT displace — this sweeps power attacks (9-12) until one does.
+  let moved = 0;
+  let checkedStill = 0;
+  for (let seed = 1; seed <= 120 && moved < 3; seed += 1) {
+    const battle = bout(1, seed, { speed: 5 });
+    const who = currentCombatant(battle);
+    const actor = combatantById(battle, who.id);
+    const target = battle.teams.flatMap((team) => team.combatants)
+      .find((one) => one.teamId !== actor.teamId);
+    // Stand them in contact so the swing is legal without a walk.
+    target.x = actor.x + 40;
+    const power = legalActions(battle).find((option) => option.type === Ss2ActionType.POWER_ATTACK);
+    if (!power) continue;
+    const before = target.x;
+    applyAction(battle, { actorId: who.id, ...power });
+    const event = battle.events.filter((one) => one.knockback !== undefined).pop();
+    if (!event?.knockback) continue;
+    const after = combatantById(battle, target.id).x;
+    if (Number.isFinite(event.knockback.force)) {
+      moved += 1;
+      assert.equal(after, Math.max(SS2_ARENA.clamp.min, Math.min(SS2_ARENA.clamp.max, before + event.knockback.force)),
+        `seed ${seed}: the defender lands at x + force, clamped by the arena`);
+      assert.ok(after !== before, `seed ${seed}: a finite force must actually move him`);
+    } else {
+      checkedStill += 1;
+      assert.equal(after, before, `seed ${seed}: the arm that drew and lost moves nobody`);
+    }
+  }
+  assert.ok(moved >= 3, `the sweep must reach three displacing blows; reached ${moved}`);
+  assert.ok(checkedStill > 0, "and at least one blow that rolled the knockback and lost");
+});
+
+test("A QUICK ATTACK KNOCKS NOBODY BACK, because directions 1-4 are outside the build's gate", () => {
+  // `attack_direction >= 5 && <= 12 || == 30` (`+0x1a72`-`+0x1aa5`). A quick
+  // attack draws 1-4 and never enters the block at all — which is also why
+  // every seeded hash pin in this repository was blind to the displacement.
+  let swings = 0;
+  for (let seed = 1; seed <= 40; seed += 1) {
+    const battle = bout(1, seed, { speed: 5 });
+    const who = currentCombatant(battle);
+    const actor = combatantById(battle, who.id);
+    const target = battle.teams.flatMap((team) => team.combatants)
+      .find((one) => one.teamId !== actor.teamId);
+    target.x = actor.x + 40;
+    const quick = legalActions(battle).find((option) => option.type === Ss2ActionType.QUICK_ATTACK);
+    if (!quick) continue;
+    const before = target.x;
+    applyAction(battle, { actorId: who.id, ...quick });
+    swings += 1;
+    const event = battle.events.filter((one) => one.knockback !== undefined).pop();
+    assert.equal(event.knockback, null, `seed ${seed}: a quick attack has no knockback block`);
+    assert.equal(combatantById(battle, target.id).x, before, `seed ${seed}: and so moves nobody`);
+  }
+  assert.ok(swings >= 20, `the sweep must actually swing; took ${swings}`);
+});
+
+test("THE PAIRWISE FACING RULE IS THE ONE-DIRECTIONAL RULE, TWICE — which is what lets the opening ask it per team", () => {
+  // `ss2FacingEffects(a, b)` is now literally `against(a, b)` then
+  // `against(b, a)`. Pinned because the split was made to let `openingEffects`
+  // face each team against EVERY foe rather than against one opposing team, and
+  // a divergence between the two forms would put a 3v3's facings somewhere the
+  // 1v1 tests could never see.
+  const left = { id: "a", x: -100, status: [] };
+  const middle = { id: "b", x: 0, status: [] };
+  const right = { id: "c", x: 100, status: [] };
+  const pairwise = ss2FacingEffects([left, middle], [right]);
+  assert.deepEqual(pairwise.map((effect) => [effect.targetId, effect.active]),
+    [["c", true]], "only c turns: a and b already face right");
+  const mirrored = ss2FacingEffects([right], [left, middle]);
+  assert.deepEqual(mirrored.map((effect) => [effect.targetId, effect.active]),
+    [["c", true]], "and the answer does not depend on which side is named first");
+});
+
+test("AND SO DOES A TAUNT'S SHOVE, on the path that had the rule written beside it", () => {
+  // The same rule on the other displacing verb. It needs its own case because
+  // the two arms are separate returns: dropping `facingAfterTargetMove` from
+  // the shove alone left the whole suite green, which is how the violation
+  // survived `d5dabeb` in the first place.
+  //
+  // Bow-drawn at close range, because that is the one combination that wires a
+  // taunt on a close frame — a melee warrior there has no taunt button at all.
+  let checked = false;
+  for (let seed = 1; seed <= 300 && !checked; seed += 1) {
+    const battle = createTeamBattle({
+      seed,
+      rules: ss2TeamRules,
+      teams: [
+        {
+          id: "red",
+          combatants: [
+            ss2Combatant(
+              gladiator({
+                charisma: 30, vitality: 90,
+                secondary_weapon: 61, equipped_weapon: 2, secondary_weapon_range: 900
+              }),
+              { id: "hitter", name: "Hitter" }
+            ),
+            ss2Combatant(gladiator({ vitality: 90 }), { id: "outer", name: "Outer" })
+          ]
+        },
+        { id: "blue", combatants: [ss2Combatant(gladiator({ vitality: 90 }), { id: "victim", name: "Victim" })] }
+      ]
+    });
+    const hitter = combatantById(battle, "hitter");
+    const outer = combatantById(battle, "outer");
+    const victim = combatantById(battle, "victim");
+    hitter.x = 0;
+    outer.x = 1400;
+    victim.x = 40;
+    for (const one of [hitter, outer, victim]) one.status = [];
+    victim.status = ["facing-left"];
+    battle.turnCursor = battle.initiative.indexOf("hitter");
+
+    const taunt = legalActions(battle, "hitter")
+      .find((option) => option.type === Ss2ActionType.TAUNT && option.targetId === "victim");
+    if (!taunt) continue;
+    const before = victim.x;
+    applyAction(battle, { actorId: "hitter", ...taunt });
+    const landed = combatantById(battle, "victim");
+    if (landed.x === before) continue;
+    if (Math.abs(landed.x - outer.x) >= Math.abs(landed.x - hitter.x)) continue;
+    checked = true;
+    assert.equal((landed.status ?? []).includes("facing-left"), false,
+      `seed ${seed}: shoved ${before} -> ${landed.x}, nearer the ally at ${outer.x}, so he turns`);
+  }
+  assert.ok(checked, "the sweep must land one shove that changes which foe is nearest");
+});

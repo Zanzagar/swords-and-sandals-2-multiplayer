@@ -5,7 +5,9 @@ written:      2026-09-16 23:56 -0400, extended 2026-09-17 00:40 (the ranked
               derivation and the psyche write census), 02:30 (taunt built,
               and a Codex review's three findings), 03:40 (the taunted flee and
               the run's displacement) and 04:40 (a second Codex review: three
-              real, one rejected on the bytes), same session
+              real, one rejected on the bytes) and 08:00 (a twelve-agent wave:
+              the facing nobody had, and a cost that was never real), same
+              session
 sessionId:    cbee9926-159f-4edb-abcb-8d75f213b5de
 branch:       arena/champion-capture. **Measure the push count yourself, AFTER
               your own handoff commit:**
@@ -16,10 +18,11 @@ commits:      `080538a..HEAD` — `b1be7b2` (the charged stance), `ce38286` (six
               `d093bff` (the victory celebration), `8ede824` + `d5dabeb`
               (`taunt`), `dd49a4e` (the flee ranked), `cbaf406` (the flee built
               and the run derived), `bba6fd0` (the second Codex review: three
-              fixed, one rejected), plus this line's own.
+              fixed, one rejected), `d836413` (item 6 closed), plus the wave's
+              own commit and this line's.
               **Re-measure with `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
-              the exit code are the gate. **2014 / fail 0 / skipped 1, exit 0**,
+              the exit code are the gate. **2023 / fail 0 / skipped 1, exit 0**,
               measured against the tree the LAST commit of this session leaves
               behind, which is what the instruction above means. Against 1960
               at the start of this stretch. (It said 1984, then 1986, then 2003,
@@ -39,15 +42,24 @@ agentRuns:    `wf_b86d8124-b42` — 6 write-nothing verifiers, one named claim
               `bba6fd0`, and one REJECTED on the bytes**, whose recommendation
               would have diverged the engine from the oracle. Six pinned Codex
               reviews this session; two of the twelve findings did not survive
-              re-derivation.
+              re-derivation. **Plus `wf_721cdd3a-f17`** — 6 questions + 6
+              adversarial refuters, **12 started, 12 returned, 0 dead, 2 of 6
+              headline claims REFUTED**, ~1.7M subagent tokens over 35 minutes.
+              It found the facing defect, the false blocker and three wrong byte
+              citations in the map.
 supersedes:   2026-09-16-2228--the-build-plays-seven-runs.md
-next:         **RANKED BELOW. Items 1, 2 and 6 are all CLOSED — 1 by RETRACTION
-              after re-derivation, 2 and 6 by being BUILT. Items 3, 4 and 5 are
-              the owner's. **Every vanilla action the controllers wire now
-              resolves, and the flee closed the last one. The first thing to
-              pick up is item 7, the knockback displacement — which is a
-              DECISION and not an afternoon, because it re-datums pinned
-              hashes.**
+next:         **RANKED BELOW. Items 1, 2, 6 and 7 are all CLOSED — 1 by
+              RETRACTION after re-derivation, the rest by being BUILT. Items 3,
+              4 and 5 are the owner's. **Every vanilla action the controllers
+              wire now resolves and every displacement gap on a modelled verb is
+              closed. ~~The first thing to pick up is item 7 ... a DECISION and
+              not an afternoon, because it re-datums pinned hashes.~~ **That was
+              false and it cost two sessions; see item 7.** The first thing to
+              pick up now is `shove` — a real SS2 player verb wired to `optionC`
+              on two controller frames, chosen by the villain AI, with a stamina
+              cost (`round(strength * 1.5)`, `+0x5dd3`) and a displacement
+              (`strength * 12` boosted by `gauntlet`, `+0x5e53`) already in the
+              bytes, and NO representation here at all.**
 ---
 # Handoff — the stance, the glow, and an AI that winds up
 
@@ -233,14 +245,27 @@ finding re-derived here before anything was touched.**
    rule** — the run has one, it is an ABORT rather than the walk's CLIP, and the
    flee's inverted facing makes it unreachable. See the 04:40 extension.
 
-7. **KNOCKBACKS DISPLACE NOBODY, on the one path left.**
-   `damagecharacter`'s knockback has travelled as an event field since it was
-   built and nothing in `src/adapter/` or the shell reads it, so a knocked-back
-   gladiator plays the clip and stands still. The taunt's shove was the same
-   until `d5dabeb` and is now a real `POSITION` effect. **Closing the last one
-   moves positions, which are projected and hashed** — so it re-datums pinned
-   hashes and any golden carrying one, and is its own decision with its own
-   evidence rather than a rider on a verb.
+7. ~~**KNOCKBACKS DISPLACE NOBODY, on the one path left.** ... **Closing the
+   last one moves positions, which are projected and hashed** — so it re-datums
+   pinned hashes and any golden carrying one, and is its own decision with its
+   own evidence rather than a rider on a verb.~~ **BUILT 2026-09-17, AND THE
+   STATED COST WAS FALSE. ITEM CLOSED.**
+
+   No golden carries a position or a hash and none structurally can —
+   `startingPosition` returns `null` under `fixtureReplay` — and the
+   displacement moved **zero** pinned hashes, measured. **An afternoon's work
+   was deferred across two sessions on a cost nobody had measured**, and this
+   line's own `next:` field dropped the word "any" and called it a DECISION.
+
+   Two things it did turn up that this item did not know about:
+   - **The count was wrong.** `knockback()` has FOUR call sites, not two:
+     `damagecharacter`, `taunt`, **`shove`** and **`cast_gale`**. The last two
+     are player verbs this engine does not model at all, so "the one path left"
+     was only ever true of verbs already built.
+   - **It could not be built correctly until the facing was**, because
+     `damagecharacter` signs the force on the DEFENDER's facing — and this
+     engine had no facing on anybody who had not yet walked. See the living
+     head.
 
 8. **DECIDE WHICH RASTERISER THIS PROJECT MEASURES IN.** Every committed number
    is `cpu`; the gap is 15.9% of the frame.
@@ -293,6 +318,42 @@ said *"exactly two verbs move anybody: a walk and a rank change"*, **a census
 that was true when written and read as a licence once it was false.** It states
 the rule now, not the count.
 
+## EXTENSION, 2026-09-17 08:00 — the facing nobody had, and a cost that was never real
+
+**A twelve-agent read-only wave (6 questions + 6 adversarial refuters, 12
+started, 12 returned, 0 dead) was aimed at ranked item 7 and broke a commit made
+four hours earlier.**
+
+Three things came out of it, in descending order of how much they matter.
+
+1. **A gladiator who had not moved was facing nobody, and 40 of 40 opening
+   ranged attacks were scored as back attacks at +50% damage.** `ss2FacingEffects`
+   was correct and had ONE call site — the movement branches — so an unmoved
+   gladiator carried no `facing-left`, and `ss2IsBackAttack` reads a missing
+   token as "faces right". Melee could not show it: at 500 apart nothing melee
+   is in reach until somebody walks, and walking fixed the facing. Fixed with an
+   `openingEffects` hook, which is where the build derives it too.
+2. **`damagecharacter`'s knockback now displaces, and the reason it had not was
+   false.** "It re-datums every pinned hash and every golden that carries one"
+   was written in three places. No golden carries a position or a hash and none
+   can; the displacement moves zero pins. The sentence quantified over an empty
+   set and a handoff then dropped the hedge.
+3. **The arena clamp is cited to dead code, and I wrote that citation the same
+   day.** `nextphase`'s ±2100 block acts on `_root.game.hero`/`.villain`, which
+   are `new Object()`s. The live clamp is in `attacker.onEnterFrame`. The value
+   survives; every use of `SS2_ARENA.clamp` here is still right.
+
+### What the wave cost and what it was worth
+
+12 agents, ~1.7M subagent tokens, 646 tool calls, 35 minutes wall clock. Two of
+the six headline claims were REFUTED by their own refuters and both refutations
+were substantive corrections rather than rejections. It found one live
+correctness defect, one false blocker that had cost two sessions, three wrong
+byte citations in the map, and a fourth in a constant's docstring. **It is the
+clearest case yet for the rule that a wave is for breaking a claim about the
+bytes that no test pins and no diff review reaches** — every one of these had
+been read by a Codex review and by me, and survived both.
+
 ## Hard rules
 
 - **COMMIT BEFORE LAUNCHING A WAVE, NOT DURING ONE.** A commit does not
@@ -313,6 +374,18 @@ the rule now, not the count.
 - **A COUNT IN A COMMENT GOES STALE SILENTLY; A RULE DOES NOT.** *"Exactly two
   verbs move anybody"* was true when written, false the day the flee shipped,
   and in between it read as a licence not to thread the new branch.
+- **A RETRACTION IS A NEW CLAIM AND NEEDS ITS OWN EVIDENCE.** The ±2100 caveat
+  was retracted for a good reason — the decoder had hidden the operands — and
+  the replacement asserted an EFFECT that finding the operands did not prove.
+  **Finding the literal proves the literal. Check the receiver.**
+- **DO NOT DEFER WORK FOR A COST YOU HAVE NOT MEASURED.** "It re-datums every
+  pinned hash and every golden that carries one" was written once with a hedge,
+  copied twice without one, and cost two sessions. Measuring it took one scratch
+  copy and one suite run.
+- **A MUTATION CHECK THAT FAILS ONE TEST WHERE YOU EXPECTED TWO IS A FINDING.**
+  Removing the facing hook failed one of the two facing tests — the other was
+  asserting a STATED `gladiator_dir` from the file's own helper, not the derived
+  one. It was rewritten to state no facing at all.
 - **STAGE A POSITION TEST AND THEN STOP EVERYONE WALKING.** My first repro of
   the wrong-target defect failed because the hero walked to the distant foe,
   making the wrong answer the right one.

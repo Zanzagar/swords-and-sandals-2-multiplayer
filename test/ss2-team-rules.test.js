@@ -112,7 +112,9 @@ function gladiator(overrides = {}) {
  *   `test/ss2-position.test.js`, which states its positions explicitly.
  */
 function battleOf(heroFields, villainFields, options = {}) {
-  const { rules = ss2TeamRules, seed = 1, rngTape = null, heroX = -30, villainX = 30 } = options;
+  const { rules = ss2TeamRules, seed = 1, rngTape = null } = options;
+  const heroX = options.heroX ?? -30;
+  const villainX = options.villainX ?? 30;
   return createTeamBattle({
     seed,
     rngTape,
@@ -788,7 +790,7 @@ test("the spend and the regeneration are combined before ONE clamp, as the build
  * application of them, preserve what the arithmetic decided. The build has
  * never been observed doing any of this with armour on.
  */
-function bothPaths({ heroFields, villainFields, type, seed }) {
+function bothPaths({ heroFields, villainFields, type, seed, heroX, villainX }) {
   const heroVanilla = ss2BattleValues(gladiator(heroFields));
   const villainVanilla = ss2BattleValues(gladiator({ speed: 0, gladiator_dir: "left", ...villainFields }));
   // Unsaturated, so a dropped write is visible. Measured: with the defender at
@@ -817,7 +819,11 @@ function bothPaths({ heroFields, villainFields, type, seed }) {
   const outcome = resolveSs2PhysicalAttackCandidate(scenario, probe);
   const tape = strip(probeChannel.journal);
 
-  const battle = battleOf(heroFields, villainFields, { rngTape: tape });
+  // The positions matter now: facing is DERIVED at construction from where the
+  // pair stands (`openingEffects`), so a scenario that states a
+  // `gladiator_dir` has to stand somewhere that produces it, or the two paths
+  // disagree about the defender's facing and the tape desyncs.
+  const battle = battleOf(heroFields, villainFields, { rngTape: tape, heroX, villainX });
   combatantById(battle, "villain").resources.staminaleft.value = villainVanilla.staminaleft;
   applyAction(battle, { actorId: "hero", type, targetId: "villain" });
   return { battle, scenario, outcome, tape, attackDirection };
@@ -955,13 +961,28 @@ test("facing changes the armour-debris draw's shape, so it is tape-load-bearing"
   // `gladiator_dir == "right"` draws `randomNumber(x, 20)`, `"left"` draws
   // `randomNumber(x, 30)`. Replaying a right-facing tape against a left-facing
   // defender must therefore be REFUSED at the cursor, not silently absorbed.
+  //
+  // ► **THE RIGHT-FACING CASE IS STAGED BY POSITION NOW, and it used to be
+  //   staged by stating `gladiator_dir: "right"` on a villain standing to the
+  //   hero's RIGHT — a state the build cannot be in.** `changeCombatants`
+  //   derives both facings from `hero._x` vs `villain._x` and there is no
+  //   assignment anywhere that can leave a gladiator looking away from his only
+  //   foe. This engine derived facing only when somebody WALKED, so the stated
+  //   value survived construction and nothing noticed; `openingEffects` now
+  //   derives it up front (measured: it was scoring 40 of 40 opening ranged
+  //   attacks as back attacks), and the staging has to become reachable.
+  //   Swapping the two x's is the whole change — the claim is untouched.
   let checked = false;
   for (let seed = 1; seed <= 200 && !checked; seed += 1) {
     const right = bothPaths({
       heroFields: { strength: 6, attack: 7, defence: 3 },
       villainFields: { gladiator_dir: "right", helmet: 3, shoulderguard: 3, breastplate: 3, vitality: 8, attack: 2, defence: 6 },
       type: Ss2ActionType.NORMAL_ATTACK,
-      seed
+      seed,
+      // The villain stands on the LEFT here, so the facing he is given is the
+      // facing the arena would give him.
+      heroX: 30,
+      villainX: -30
     });
     if (!right.outcome.mutation.armourRemovals.some((removal) => removal.removed)) continue;
     checked = true;
@@ -1291,7 +1312,16 @@ test("a canonical SS2 battle hashes to a pinned value — one tripwire for the w
       { id: "blue", combatants: [ss2Combatant(minimal, { id: "villain", name: "Villain" })] }
     ]
   });
-  assert.equal(combatStateHash(battle), "3698d1e3", [
+  // `3698d1e3` -> `29fc00d7` on 2026-09-17, and this pin is the cleanest
+  // possible statement of why: NO ACTION IS APPLIED HERE, so the only thing
+  // that can have moved it is construction itself. `openingEffects` derives
+  // both facings from the starting positions the way `changeCombatants` does,
+  // and the villain — who stands at +250 with the hero at -250 — now begins
+  // the battle carrying `facing-left` instead of nothing. See
+  // `test/seeded-play-pins.test.js` for the defect that forced it: a missing
+  // facing token reads as "faces right", so 40 of 40 opening ranged attacks
+  // were scored as back attacks.
+  assert.equal(combatStateHash(battle), "29fc00d7", [
     "The SS2 wire projection changed. That is not necessarily wrong — but it",
     "means every peer running the previous build now disagrees with this one",
     "about identical battles, and every stored completion token minted before",

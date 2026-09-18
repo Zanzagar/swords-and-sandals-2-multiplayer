@@ -2228,15 +2228,87 @@ taunt path.
 
 Physical knockback force is signed
 `damage + game_attacker.strength * 6` and forced to a minimum magnitude of
-20 — where `damage` is the timeline-aliased register read AFTER the
-armour-overflow rewrite (byte-verified 2026-08-30: the force reads
-`this.damage` at `+0x1afd`/`+0x1b60`, the same storage rewritten to the
-overflow remainder at `+0x1848`), so an armour-overflowing hit knocks back
-with the overflow remainder, not the selected damage.
+20 — where `damage` is read AFTER the armour-overflow rewrite, so an
+armour-overflowing hit knocks back with the overflow remainder, not the
+selected damage.
+
+**Three offsets and one mechanism word in that sentence were wrong; corrected
+2026-09-17 and the FORMULA is untouched.** It read "the timeline-aliased
+register read ... the force reads `this.damage` at `+0x1afd`/`+0x1b60`, the same
+storage rewritten to the overflow remainder at `+0x1848`".
+
+- `+0x1b60` **is not an instruction.** The raw bytes there are `99 02 00 6c 00`
+  — a five-byte `Jump` occupying `+0x1b5f..+0x1b63` — so `+0x1b60` is its length
+  field. The negative-branch statement starts at `+0x1b64` and its
+  `GetMember "damage"` is at `+0x1b76`.
+- **It is not a REGISTER read.** The byte at `+0x1b06` is `4e` = `GetMember`, on
+  register 1 — and register 1 holds `this` (the function's flags set
+  `preloadThis`), not a damage value. The aliasing is real and comes from `this`
+  being the sprite-862 timeline with no `DefineLocal "damage"` anywhere in
+  `+0x157d..+0x1dd3`; it does not come from register storage. Anyone re-deriving
+  this from the words "register read" would look for a `StoreRegister` that is
+  not there. The alias is firmer than the old wording claimed, too:
+  `damagecharacter` has exactly one call site in the file (`+0x211e`, a bare
+  `CallFunction` from `defender_hurt`), so `this` cannot vary.
+- `+0x1848` **is the READ, not the rewrite** — `1c` = `GetVariable`, fetching the
+  old damage. The statement spans `+0x1841..+0x1852` and the WRITE is
+  `1d` = `SetVariable` at `+0x1852`.
 A defender facing left receives the positive force; other mapped facing values
 receive the negative force.
 A magnitude above 80 selects the knockback animation, but the unbounded force is
 still passed to `knockback`; 80 is not a force clamp.
+
+### `knockback(whichcharacter, force)`, decoded — and its four call sites
+
+**Decoded in full 2026-09-17**, having been cited for a month as a black box.
+`DefineFunction2` at `+0x1dd3`, parameters in registers 2 and 3, body 155 bytes:
+
+```text
+this.crowd_action  = 1                                            +0x1e0a
+this.phasecomplete = true                                         +0x1e14
+defender_smashed   = true                                         +0x1e1c
+knock_defender = new mx.transitions.Tween(                        +0x1e74 NewMethod, 7 args
+    whichcharacter, "_x", mx.transitions.easing.Regular.easeOut,
+    whichcharacter._x, whichcharacter._x + force, 1, true)
+knock_defender.onMotionFinished = function () {                   +0x1e81
+    knock_defender = null; defender_smashed = false }              +0x1e89, +0x1e90
+```
+
+So **the displacement is exactly `_x + force`**, eased over one real second, and
+there is **no clamp, no arena edge and no body check anywhere inside the
+function** — the 155 bytes contain no comparison, no branch and no reference to
+the other gladiator. What bounds it is the clip clamp in `attacker.onEnterFrame`
+(see `nextphase` step 1 above for why it is not `nextphase`).
+
+Two side effects this engine models nowhere, recorded rather than built:
+`phasecomplete` and `crowd_action`, written on the function's `this`. And
+`knock_defender` is declared with `DefineLocal` (`+0x1e75`), which is why the
+`onEnterFrame` clamp's guard on it never closes.
+
+**Four call sites in the whole SWF, and they are not four variations on one
+shape:**
+
+| Site | Phase | Force | Floor | Animation gate | Sign from |
+| --- | --- | --- | --- | --- | --- |
+| `+0x1bd6` | `damagecharacter` | `damage + strength * 6` | 20 | `\|force\| > 80` `+0x1b40` | **defender**`.gladiator_dir == "left"` `+0x1ae9` |
+| `+0x5fc9` | `shove` | `strength * 12`, boosted by `gauntlet` `+0x5e6b`–`+0x5e98` | 20 | `\|force\| > 100` `+0x5ed9` | attacker `+0x5e41` |
+| `+0x6ab1` | `taunt` | `charisma * 25` | 20 | `\|force\| > 100` `+0x6a12` | attacker `+0x69c8` |
+| `+0x7b98` | `cast_gale` | **flat ±1000** `+0x7b5d`/`+0x7b6d` | **none** | **unconditional** `+0x7b78` | attacker |
+
+`damagecharacter` is the only one that signs on the DEFENDER's facing, and
+`cast_gale` is the only one with no floor and no animation gate — so a
+"knockback force model" generalised from any single site is wrong for at least
+one other. The 80/100 split is real and is not a transcription error.
+
+**And `damagecharacter`'s animation is unobservable.** `defender_hurt` computes
+`animstate` (`+0x2086`, rewritten at `+0x20c1`, set to `"knockback"` for
+direction 30 at `+0x20ec`), calls `damagecharacter` at `+0x211e`, and then calls
+`defender.gotoAndPlay(animstate)` at `+0x2120`–`+0x2136` — the same clip, the
+same frame. So the `gotoAndPlay("knockback")` at `+0x1b4f`/`+0x1bc0` is
+overwritten by `"hurt5"`..`"hurt12"` before a frame is drawn, and at direction 30
+`animstate` is `"knockback"` regardless of the force. The 80 threshold is a
+byte-exact condition on an effect nothing can see; nothing may build a
+presentation on it.
 
 `damagecharacter`:
 
@@ -2662,14 +2734,44 @@ enchantment-damage field, then clear or advance.
 `nextphase` is an anonymous function stored in overlay frame 52. Its verified
 mutation order is:
 
-1. Clamp the active x position to `[-2100, 2100]`. **Byte-verified 2026-09-17:
-   the literals are pushed at `+0x31c2`/`+0x31d7` and `+0x31ee`/`+0x3203` for
-   `game_attacker._x`, and `+0x321a`/`+0x322f` and `+0x3246`/`+0x325b` for
-   `game_defender._x`.** `src/team/ss2-rules.js` carried a caveat saying this
-   bound existed in this document's PROSE only; it did not — the decoder that
-   produced the four `If` offsets printed opcodes without their operands. Since
-   it lives in `nextphase` it bounds every gait, and it is the ONLY thing that
-   bounds a taunted flee.
+1. Clamp `game_attacker._x` and `game_defender._x` to `[-2100, 2100]`. The
+   literals are pushed at `+0x31c2`/`+0x31d7` and `+0x31ee`/`+0x3203` for
+   `game_attacker`, and `+0x321a`/`+0x322f` and `+0x3246`/`+0x325b` for
+   `game_defender`. **THIS STEP IS DEAD CODE, and the sentence that used to
+   stand here — "since it lives in `nextphase` it bounds every gait, and it is
+   the ONLY thing that bounds a taunted flee" — is retracted, 2026-09-17, the
+   same day it was written.**
+
+   `game_attacker` / `game_defender` are `_root.game.villain` / `_root.game.hero`
+   and the swap (`+0x2b92`, `+0x2ba3`, `+0x2c08`, `+0x2c19`); the gladiators that
+   MOVE are the clips `attacker` / `defender` = `_root.arena.gladiators.hero` /
+   `.villain` (`+0x2b64`, `+0x2b7b`, `+0x2bda`, `+0x2bf1`). `_root.game.hero` and
+   `_root.game.villain` are plain `new Object()`s (`root/frame:35`
+   `DoAction@0x3ffdcf` `+0x07fc`/`+0x0814`, and again on the load path at
+   `root/frame:84`), never placed on the display list and never given an `_x` by
+   anything. Across the whole file those four comparisons are the ONLY reads of
+   `game_*._x` and those four assignments the only writes — against 50 reads of
+   `attacker._x` and 32 of `defender._x`. The property is self-sealingly
+   undefined, both comparisons are false, and nothing would read the result if
+   they fired.
+
+   **The live clamp is a near-identical copy in `attacker.onEnterFrame`** (the
+   anonymous function at `+0x36ae`), acting on the clips: `attacker._x` at
+   `+0x38fd` / `+0x3988`, `defender._x` at `+0x3a13` / `+0x3a3f`. That is what
+   bounds a walk, a run, a taunted flee and a knockback. It also nulls
+   `destination` and calls `nextphase()` in the attacker arm, so **touching the
+   arena wall ENDS the phase** — a consequence the dead copy could never have
+   had. It is guarded on `knock_defender == null || undefined` at `+0x38ce`, and
+   that guard is always open, because `knockback` declares `knock_defender` with
+   **DefineLocal** (`+0x1e75`): the timeline variable the handler reads is never
+   assigned, so the suspension the author evidently intended never happens.
+
+   **How the error was made**, because it is a repeatable one: an earlier caveat
+   said the bound lived in this document's prose with no byte offset, and it was
+   retracted for a good reason — the decoder in use printed opcodes without
+   their operands, so the literals looked absent. Finding them proved THE
+   LITERALS. It did not prove the EFFECT, and nobody checked the receiver. A
+   read-only wave of twelve agents checked it the next day.
 2. Run `check_spells` for attacker, then defender.
 3. Apply `staminaleft -= staminacost`.
 4. Add `1 + round(stamina / 3)` stamina and `1 + ceil(stamina / 2)` hitpoints,

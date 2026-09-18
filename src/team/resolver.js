@@ -172,6 +172,40 @@ export function createTeamBattle({
     configurable: true,
     get: () => rng.cursor
   });
+  /**
+   * ► **THE STATE A BATTLE IS IN BEFORE ANYBODY ACTS, which a per-combatant
+   *   hook cannot express.** `startingPosition` and `startingY` are asked one
+   *   combatant at a time, while the roster is still being built, so neither
+   *   can see the other side. Anything derived from where EVERYONE ended up
+   *   standing has to be asked once, afterwards — and facing is exactly that.
+   *
+   * Added 2026-09-17, after measuring that `ss2TeamRules` derived facing only
+   * in its movement branches: a gladiator who had not yet walked carried none,
+   * and the absence read as "faces right", so 40 of 40 opening ranged attacks
+   * scored as back attacks. The hook is OPTIONAL and every rule set that
+   * declares none is untouched.
+   *
+   * **STATUS only, and the narrowness is the point.** A POSITION here would
+   * fight `startingPosition` for the same field with no way to tell which won,
+   * and a DAMAGE or RESOURCE would make construction a turn. If a rule set
+   * ever needs one of those at construction it should say so and get its own
+   * hook, rather than this one quietly widening.
+   */
+  const opening = typeof rules.openingEffects === "function"
+    ? rules.openingEffects(allCombatants(battle))
+    : [];
+  if (!Array.isArray(opening)) {
+    throw new BattleError(`Rule set ${rules.id} returned a non-array from openingEffects().`);
+  }
+  for (const effect of opening) {
+    if (effect?.kind !== EffectKind.STATUS) {
+      throw new BattleError(
+        `Rule set ${rules.id} returned a ${String(effect?.kind)} effect from openingEffects(), ` +
+        "which accepts STATUS effects only."
+      );
+    }
+  }
+  if (opening.length) applyEffects(battle, opening);
   return battle;
 }
 

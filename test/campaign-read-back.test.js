@@ -32,7 +32,9 @@ import {
   legalActions,
   pendingResultEvent
 } from "../src/team/index.js";
-import { ss2Combatant, ss2TeamRules, Ss2ActionType, ss2StatusToken } from "../src/team/ss2-rules.js";
+import {
+  SS2_STATUS_FLAGS, ss2Combatant, ss2StatusFlagOf, ss2StatusToken, ss2TeamRules, Ss2ActionType
+} from "../src/team/ss2-rules.js";
 import { buildCampaignRecord, CampaignRecordError, rosterFromCampaignRecord } from "../src/campaign/index.js";
 
 function gladiator(overrides = {}) {
@@ -310,6 +312,16 @@ test("no 1v1 in this sweep leaves a survivor afflicted, and the reason it holds 
   //   `test/ss2-team-rules.test.js`, and this sweep passes again — but the
   //   lesson is that "cannot" was a claim about every reachable state and this
   //   test only ever visited forty of them. It asserts what it visits.
+  //
+  // ► **AND IT USED TO ASSERT `statuses == []`, WHICH IS A STRONGER CLAIM THAN
+  //   ITS OWN NAME MAKES — narrowed 2026-09-17.** `facing-left` is a status
+  //   token and is not an affliction: `circuit.js`'s `faceForSide` exists
+  //   precisely because read-back copies it verbatim and the next bout has to
+  //   re-face the survivor. The empty-list form held only while facing was
+  //   derived on movement alone; deriving it at construction made a survivor
+  //   standing on the right carry it out of the bout, which is correct and
+  //   which the campaign layer already handles. The claim this test is FOR is
+  //   about conditions, so it is about conditions now.
   for (let seed = 1; seed <= 40; seed += 1) {
     const bout = settledBout({
       seed,
@@ -318,9 +330,12 @@ test("no 1v1 in this sweep leaves a survivor afflicted, and the reason it holds 
     });
     for (const outcome of bout.record.outcomes) {
       if (!outcome.survived) continue;
+      const afflictions = outcome.statuses.filter(
+        (token) => SS2_STATUS_FLAGS.includes(ss2StatusFlagOf(token))
+      );
       assert.deepEqual(
-        outcome.statuses, [],
-        `seed ${seed}: ${outcome.combatantId} survived carrying ${outcome.statuses.join(",")}, ` +
+        afflictions, [],
+        `seed ${seed}: ${outcome.combatantId} survived carrying ${afflictions.join(",")}, ` +
         "which the status phase should have consumed on its own turn"
       );
     }

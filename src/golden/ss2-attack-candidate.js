@@ -574,6 +574,18 @@ export function resolveSs2PhysicalAttackCandidate(scenario, rolls) {
       // knocks back with the overflow remainder, not the selected damage.
       const magnitude = Math.max(20, vanillaDamageRegister + attacker.strength * 6);
       const force = defender.gladiator_dir === "left" ? magnitude : -magnitude;
+      // ► **`animation` IS A BYTE-EXACT CONDITION FOR A CLIP THAT NEVER
+      //   PLAYS — derived 2026-09-17, recorded rather than removed.** The
+      //   threshold 80 is real (`+0x1b40`/`+0x1bb1`) and so is the
+      //   `gotoAndPlay("knockback")` it gates (`+0x1b4f`/`+0x1bc0`). But
+      //   `defender_hurt` calls `damagecharacter` at `+0x211e` and then calls
+      //   `defender.gotoAndPlay(animstate)` at `+0x2120`-`+0x2136` on the same
+      //   clip in the same frame, so the knockback clip is overwritten by
+      //   `"hurt5"`..`"hurt12"` immediately — and at direction 30 `animstate`
+      //   is `"knockback"` anyway. **Nothing may build a presentation on this
+      //   field**; it is kept because it is what the bytes say, and deleting a
+      //   derived condition because its effect is invisible is how a
+      //   measurement becomes an opinion.
       knockback = { roll: knockbackRoll, force, animation: Math.abs(force) > 80 };
     } else {
       knockback = { roll: knockbackRoll, force: null, animation: false };

@@ -34,6 +34,83 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **A GLADIATOR WHO HAD NOT MOVED WAS FACING NOBODY, AND 40 OF 40 OPENING
+  RANGED ATTACKS WERE SCORED AS BACK ATTACKS (`bba6fd0`..HEAD).** This is the
+  largest live defect found this month and nothing was looking for it.
+  `ss2FacingEffects` was correct and was reached from ONE place — the movement
+  branches — so a gladiator who had not yet walked carried no `facing-left`
+  token at all, and `ss2IsBackAttack` reads a MISSING token as "faces right".
+  The villain starts at +250 with the hero at -250, so he was modelled as
+  looking away from the fight for as long as he stood still, and every opening
+  shot took the 50% back-attack bonus. **Melee hid it**: at the vanilla
+  separation of 500 nothing melee is in reach until somebody walks, and a walk
+  fixed the facing on the way past.
+  ► **THE BUILD DERIVES IT AT CONSTRUCTION TOO, which is what makes this a fix
+    and not an addition.** `changeCombatants` sets BOTH facings from `hero._x`
+    vs `villain._x` (`+0x28f3`-`+0x2ae3`) and runs once before the first turn.
+    The new `openingEffects` hook on the rule set is asked once, after the
+    roster exists — `startingPosition` is asked one combatant at a time and
+    cannot see the other side. **STATUS effects only**, refused by name
+    otherwise, so it can never fight `startingPosition` for the same field.
+  ► **THREE OF THE FOUR SEEDED PINS MOVED AND THE FOURTH IS THE EVIDENCE.**
+    `f2e862f9`→`f11e6bc9`, `f45930aa`→`a6cbd6a8`, `e54cebb5`→`2ef865ca`, and
+    the canonical projection pin `3698d1e3`→`29fc00d7` — which applies NO
+    action, so construction is the only thing that can have moved it.
+    `3e770611` is unchanged because its driver closes the distance first, so
+    its facing was already the derived one. **No golden moved and none can**: a
+    fixture has no `x` to derive a facing from.
+
+► **AND `damagecharacter`'s KNOCKBACK DISPLACES SOMEBODY NOW — THE LAST GAP OF
+  ITS KIND ON A MODELLED VERB — AFTER BEING DEFERRED TWICE FOR A COST THAT DOES
+  NOT EXIST.** Three places in this repository said closing it "re-datums every
+  pinned hash and every golden that carries one", and a handoff's `next:` field
+  dropped the hedge and called it "a DECISION and not an afternoon".
+  **Measured: no golden carries a position or a hash and none structurally can**
+  (`startingPosition` returns `null` under `fixtureReplay`), **and the
+  displacement moves ZERO pinned hashes** — verified by removing the facing hook
+  and re-running, which reproduced all four old values. Every seeded pin's
+  driver swings directions 1-4 and the build's gate needs 5-12 or 30, so the
+  branch is unreachable from them. **That is luck, not coverage**, and the pin
+  block says so.
+  ► **IT IS NOT EVERY BLOW, and this file said it was.** Two gates, not one:
+    the band (`+0x1a72`-`+0x1aa5`) and `randosmash > 3 || direction == 30`
+    (`+0x1ac8`-`+0x1ae4`). About one eligible blow in four. "Unconditional" was
+    only ever true with respect to the ANIMATION gate.
+  ► **AND THE SIGN IS THE DEFENDER's FACING (`+0x1ae9`), the opposite of the
+    taunt's shove** — which is exactly why the facing defect above had to be
+    fixed first, and how it was found.
+
+► **THE ARENA CLAMP THIS ENGINE APPLIES EVERYWHERE IS CITED TO A BLOCK OF DEAD
+  CODE, AND I WROTE THAT CITATION YESTERDAY.** `bba6fd0` retracted a correct
+  caveat and replaced it with "BYTE-VERIFIED 2026-09-17 ... it runs in
+  `nextphase`, so it bounds EVERY gait — and it is the only thing that bounds
+  the taunted flee." The eight ±2100 pushes are real. **What they act on is
+  `game_attacker._x` / `game_defender._x` — `_root.game.hero` / `.villain`,
+  plain `new Object()`s** — while the gladiators that move are the CLIPS. Across
+  the whole SWF those four comparisons are the only reads of `game_*._x`, against
+  50 reads of `attacker._x`.
+  ► **THE VALUE SURVIVES IN A DIFFERENT FUNCTION.** `attacker.onEnterFrame`
+    carries a near-identical clamp on the clips (`+0x38fd`, `+0x3988`,
+    `+0x3a13`, `+0x3a3f`), and hitting it also nulls `destination` and calls
+    `nextphase()` — **touching the wall ENDS the phase**, which the dead copy
+    could never have done. Every use of `SS2_ARENA.clamp` here is still right.
+  ► **THE LESSON, and it is not "check harder".** The retraction was made for a
+    good reason — the old decoder printed opcodes without operands, so the
+    literals genuinely looked absent. **Finding the literals proved the
+    literals. It did not prove the effect, and nobody checked the receiver.**
+    A retraction is a new claim and needs its own evidence.
+
+► **AND `knockback(whichcharacter, force)` IS DECODED AT LAST**, having been
+  cited for a month as a black box: `new mx.transitions.Tween(clip, "_x",
+  Regular.easeOut, _x, _x + force, 1, true)` — exactly `_x + force`, over one
+  real second, with **no clamp, no arena edge and no body check** in its 155
+  bytes. **Four call sites, and they are not four variations on one shape**:
+  `damagecharacter` (`+0x1bd6`, sign from the DEFENDER, animation at 80),
+  `shove` (`+0x5fc9`, `strength * 12` boosted by gauntlet — **an unmodelled
+  player verb**), `taunt` (`+0x6ab1`), and `cast_gale` (`+0x7b98`, **flat ±1000,
+  no floor, animation unconditional**). So the displacement gaps were never one:
+  the other two are verbs this engine does not have at all.
+
 ► **THE TAUNTED FLEE IS BUILT (`cbaf406`), AND THE RUN IS NOT A BIG WALK.**
   Row 3 of frame 1's forced chain is the only forced phase that is not a
   condition, and it was the last vanilla action left unresolved. `runleft` sets
