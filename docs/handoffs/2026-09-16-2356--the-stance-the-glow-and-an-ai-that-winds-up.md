@@ -13,28 +13,41 @@ branch:       arena/champion-capture. **Measure the push count yourself, AFTER
 commits:      `080538a..HEAD` — `b1be7b2` (the charged stance), `ce38286` (six
               verifiers' corrections), `1775a4c` (the AI trait), `e0a3400` (the
               Codex finding), `85be7a2` (the ranked-item-1 retraction),
-              `d093bff` (the victory celebration), plus this line's own.
+              `d093bff` (the victory celebration), `8ede824` + `d5dabeb`
+              (`taunt`), `dd49a4e` (the flee ranked), `cbaf406` (the flee built
+              and the run derived), `bba6fd0` (the second Codex review: three
+              fixed, one rejected), plus this line's own.
               **Re-measure with `git log --oneline`.**
 suite:        **Re-measure BY EXIT CODE after your own commit.** `fail == 0` and
-              the exit code are the gate. **2003 / fail 0 / skipped 1, exit 0**,
+              the exit code are the gate. **2014 / fail 0 / skipped 1, exit 0**,
               measured against the tree the LAST commit of this session leaves
               behind, which is what the instruction above means. Against 1960
-              at the start of this stretch. (It said 1984, then 1986, each time
-              measured a commit too early. That is three handoffs running, so
-              the fix is procedural and not a better number: write the line
-              LAST, from a run against the tree you are about to leave.)
+              at the start of this stretch. (It said 1984, then 1986, then 2003,
+              each time measured a commit too early. That is four handoffs
+              running, so the fix is procedural and not a better number: write
+              the line LAST, from a run against the tree you are about to
+              leave.)
 agentRuns:    `wf_b86d8124-b42` — 6 write-nothing verifiers, one named claim
               each. 6 briefs, 6 returned, 0 dead, **2 REFUTED**. Plus FOUR
               pinned Codex adversarial reviews (`gpt-6-astra`): one
               needs-attention with 2 findings (both fixed), one HIGH finding on
               `1775a4c` — the charging AI aimed at the wrong foe — fixed in
               `e0a3400`, and two approve (the stance, and the celebration in
-              `d093bff`).
+              `d093bff`). Then two more: one needs-attention with THREE HIGH on
+              the taunt (all three real, fixed in `d5dabeb`) and one
+              needs-attention with FOUR on the flee — **three real, fixed in
+              `bba6fd0`, and one REJECTED on the bytes**, whose recommendation
+              would have diverged the engine from the oracle. Six pinned Codex
+              reviews this session; two of the twelve findings did not survive
+              re-derivation.
 supersedes:   2026-09-16-2228--the-build-plays-seven-runs.md
-next:         **RANKED BELOW. Items 1 and 2 are CLOSED — 1 by RETRACTION after
-              re-derivation, 2 by being BUILT. Items 3, 4 and 5 are the
-              owner's. **`taunt` is BUILT; the first thing to pick up is the
-              `taunted1` flee at 6, blocked on ONE named derivation.**
+next:         **RANKED BELOW. Items 1, 2 and 6 are all CLOSED — 1 by RETRACTION
+              after re-derivation, 2 and 6 by being BUILT. Items 3, 4 and 5 are
+              the owner's. **Every vanilla action the controllers wire now
+              resolves, and the flee closed the last one. The first thing to
+              pick up is item 7, the knockback displacement — which is a
+              DECISION and not an afternoon, because it re-datums pinned
+              hashes.**
 ---
 # Handoff — the stance, the glow, and an AI that winds up
 
@@ -195,7 +208,8 @@ finding re-derived here before anything was touched.**
    went stale twice while readers were about to re-derive work already beneath
    it.
 
-   **WHAT IS LEFT OF IT, and it is the first thing to pick up:** the `taunted1`
+   ~~**WHAT IS LEFT OF IT, and it is the first thing to pick up:**~~ **BUILT —**
+   the `taunted1`
    flee. A landed taunt against a bow-mode defender sets the flag faithfully and
    **nothing reads it**, so that one outcome in four is partial — it breaks a
    psych-up charge (`+0x6ac8`) and no more. A Codex review called that out and
@@ -203,13 +217,21 @@ finding re-derived here before anything was touched.**
    `getphase("runleft")`/`("runright")` by FACING, a movement phase at the run's
    step factor.
 
-   **The blocker is one derivation, named precisely**: `ss2WalkDestination`
+   ~~**The blocker is one derivation, named precisely**: `ss2WalkDestination`
    hardcodes `ss2WalkDisplacement`, which is `movement_speed * 16` in the
    build's exact operation order — and its own docstring records that collapsing
    that arithmetic shipped a +1 divergence for a commit. **Generalising it to 40
    would assert the run shares the walk's easing and boot pipeline, which nobody
    has read out of `+0x40d8`/`+0x3f4f`.** Derive that first; the rest is an
-   afternoon.
+   afternoon.~~ **DERIVED AND BUILT 2026-09-17 (`cbaf406`, corrected in
+   `bba6fd0`). THE ITEM IS CLOSED.** The run shares the walk's EASING (`/ 8`,
+   `ceil`, do/while) and NOT its boot pipeline: `+0x3f4f`/`+0x40d8` set
+   `destination = _x -/+ movement_speed * 40` with no `add_percentage` anywhere
+   in either arm, and the stop gap is 10 rather than 20. `ss2RunDisplacement`
+   runs the loop, because `40 * ms - 10` is **+1 low at 23 of the 57 reachable
+   speeds**. **And the question the item did not think to ask was the body
+   rule** — the run has one, it is an ABORT rather than the walk's CLIP, and the
+   flee's inverted facing makes it unreachable. See the 04:40 extension.
 
 7. **KNOCKBACKS DISPLACE NOBODY, on the one path left.**
    `damagecharacter`'s knockback has travelled as an event field since it was
