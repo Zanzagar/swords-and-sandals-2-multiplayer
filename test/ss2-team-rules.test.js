@@ -286,6 +286,11 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //   dispatcher samples at all**. Not in `ATTACK_BANDS`, for the same reason
     //   `psyche-up` is not.
     "taunt",
+    // The forced phase a TAUNTED gladiator is driven into — row 3 of the
+    // build's chain, which OUTRANKS all four conditions. Map-derived: facing
+    // right is `getphase("runleft")` and facing left `getphase("runright")`
+    // (`+0x0d68`-`+0x0e35`), so it carries a real label.
+    "taunted-phase",
     "walk-left",
     "walk-right"
   ]);
@@ -1446,13 +1451,21 @@ test("status effects come out in death()'s own order: attacker's four, defender'
   //   an attacker carrying a condition CANNOT attack — `legalActions` offers it
   //   exactly one option, its own status phase — so the old setup now throws
   //   "Illegal action" and the attacker's four are unreachable through the
-  //   resolver. The taunt flags do NOT force a phase (the build's taunted row
-  //   is modelled nowhere yet), so they still reach both sides and the
-  //   field-then-SIDE interleave is still pinned here.
+  //   resolver. ~~The taunt flags do NOT force a phase (the build's taunted row
+  //   is modelled nowhere yet), so they still reach both sides.~~
+  //
+  // ► **NARROWED AGAIN 2026-09-17, THE SAME WAY AND FOR THE SAME REASON.** The
+  //   build's taunted row IS modelled now — it is row 3 of the forced chain and
+  //   it OUTRANKS all four conditions — so an ATTACKER carrying `taunted1`
+  //   cannot attack either. **`taunted2` is the one flag left that forces
+  //   nothing**, because the build tests it in that row and assigns it `true`
+  //   nowhere, so the actor side is staged on it alone. The victim keeps both:
+  //   it is not the one taking a turn, and the field-then-SIDE interleave this
+  //   test exists for is still pinned across all six.
   let cleared = null;
   for (let seed = 1; seed <= 60 && cleared === null; seed += 1) {
     const battle = battleOf({ strength: 30 }, { vitality: 0, herolevel: 1 }, { seed });
-    combatantById(battle, "hero").status = ["taunted1", "taunted2"];
+    combatantById(battle, "hero").status = ["taunted2"];
     combatantById(battle, "villain").status =
       ["frozen", "burning", "poison", "life_stolen", "taunted1", "taunted2"];
     applyAction(battle, { actorId: "hero", type: Ss2ActionType.POWER_ATTACK, targetId: "villain" });
@@ -1464,7 +1477,9 @@ test("status effects come out in death()'s own order: attacker's four, defender'
   assert.ok(cleared, "the sweep must land a killing blow, so death() runs and clears the flags");
   assert.deepEqual(cleared, [
     "villain:frozen", "villain:burning", "villain:poison", "villain:life_stolen",
-    "hero:taunted1", "villain:taunted1",
+    // The hero carries no `taunted1` to clear now — it could not have attacked
+    // if it did — so only the victim's appears.
+    "villain:taunted1",
     "hero:taunted2", "villain:taunted2"
   ]);
 });
@@ -1816,7 +1831,11 @@ test("a LETHAL tick clears the victim's taunts too, not only its conditions", ()
   const battle = statusBattle({
     heroFields: { vitality: 0, herolevel: 1 },
     villainFields: { weapon_max_damage: 300, weapon_enchantment_potency: 3 },
-    status: [ss2StatusToken("burning", "villain"), "taunted1", "taunted2"]
+    // ► **`taunted1` IS NOT STAGED HERE ANY MORE**, because from 2026-09-17 it
+    //   FORCES THE FLEE and outranks burning (row 3 against row 5), so a hero
+    //   carrying both would run instead of ticking and this test would measure
+    //   the wrong phase. `taunted2` forces nothing and still proves the clear.
+    status: [ss2StatusToken("burning", "villain"), "taunted2"]
   });
   applyAction(battle, onlyAction(battle));
   assert.equal(combatantById(battle, "hero").alive, false);

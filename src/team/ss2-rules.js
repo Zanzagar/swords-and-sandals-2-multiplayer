@@ -374,6 +374,17 @@ export const Ss2ActionType = Object.freeze({
   //   samples on three outcomes in four. It resolves through its own branch;
   //   see `SS2_TAUNT`.
   TAUNT: "taunt",
+  /**
+   * The phase a TAUNTED gladiator is forced into: it runs away.
+   *
+   * A type of its own rather than a flag the caller interprets, for the reason
+   * the four condition phases are four types — the build's decision IS the
+   * label, and `getphase("runleft")` is a different decision from
+   * `getphase("runright")`. Which of the two it becomes is the FACING, and
+   * `VANILLA_PHASE_LABEL` cannot hold both, so the resolved event carries the
+   * one this actor took.
+   */
+  TAUNTED_PHASE: "taunted-phase",
   SWAP_WEAPONS: "swap-weapons",
   // The four status phases. FOUR types rather than one `status-phase`, because
   // the build's decision IS the specific label — `getphase("frozen")` and
@@ -873,6 +884,15 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   //   target), so a FAILED taunt still animates. The target's label is the
   //   presentation layer's, not a phase.
   [Ss2ActionType.TAUNT]: "taunt",
+  // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
+  //   of the decision table is `taunted1 == true` -> facing right
+  //   `getphase("runleft")`, facing left `getphase("runright")`
+  //   (`+0x0d68`-`+0x0e35`) — a gladiator runs AWAY from the way it faces. The
+  //   resolved event carries the one actually taken; this is what a consumer
+  //   with no facing to read gets, and it is the right-facing case because that
+  //   is the build's own default (`facing-left` is the token that must be
+  //   present).
+  [Ss2ActionType.TAUNTED_PHASE]: "runleft",
   [Ss2ActionType.SWAP_WEAPONS]: "swap_weapons",
   // Three spellings for one effect, and the map is explicit that they are not
   // interchangeable: the FIELD is `poison`, the DECISION label is `poisoned`,
@@ -921,12 +941,47 @@ export const SS2_STATUS_PHASE_FOR_FLAG = Object.freeze({
   frozen: Ss2ActionType.FROZEN_PHASE,
   burning: Ss2ActionType.BURNING_PHASE,
   poison: Ss2ActionType.POISONED_PHASE,
-  life_stolen: Ss2ActionType.LIFE_STOLEN_PHASE
+  life_stolen: Ss2ActionType.LIFE_STOLEN_PHASE,
+  // ► **`taunted1` JOINED 2026-09-17 AND IT IS NOT A CONDITION.** The other
+  //   four are damage-over-time flags whose phase hurts their bearer; this one
+  //   makes him RUN, and it is row 3 of the build's own decision table rather
+  //   than a status arm. It is here because the mechanism is identical — a flag
+  //   the actor carries takes his turn away — and duplicating that machinery
+  //   for one flag would be the second copy this file keeps warning about.
+  //
+  //   **`taunted2` is deliberately absent.** The build tests it in the
+  //   decision table but **assigns it `true` NOWHERE**, so a phase for it would
+  //   be a promise nothing can redeem; `SS2_TAUNT_FLAGS` keeps both because the
+  //   CLEARING is real for both.
+  taunted1: Ss2ActionType.TAUNTED_PHASE
 });
 
+/**
+ * The inverse, and it is DELIBERATELY NARROWER than the forward map.
+ *
+ * ► **`taunted-phase` IS NOT IN IT, BECAUSE IT IS NOT A CONDITION TICK.** This
+ *   map is what `resolveAction` dispatches to `resolveStatusPhase` — a handler
+ *   that applies damage-over-time to its bearer. The flee is a MOVEMENT phase
+ *   that happens to be forced by a flag, and routing it through the condition
+ *   handler gave a gladiator who ran nowhere and kept the flag.
+ *
+ *   The forward map keeps it, because `forcedStatusFlag` and `legalActions`
+ *   genuinely do treat it as "a flag that takes your turn away" — which is the
+ *   half the two share. What they do NOT share is how it resolves.
+ */
 const SS2_FLAG_FOR_STATUS_PHASE = Object.freeze(
-  Object.fromEntries(Object.entries(SS2_STATUS_PHASE_FOR_FLAG).map(([flag, type]) => [type, flag]))
+  Object.fromEntries(
+    Object.entries(SS2_STATUS_PHASE_FOR_FLAG)
+      .filter(([, type]) => type !== Ss2ActionType.TAUNTED_PHASE)
+      .map(([flag, type]) => [type, flag])
+  )
 );
+
+/**
+ * Every phase a flag can force, INCLUDING the flee — which is what
+ * `suggestAction` means by "a forced phase is not a choice".
+ */
+const SS2_FORCED_PHASES = Object.freeze(new Set(Object.values(SS2_STATUS_PHASE_FOR_FLAG)));
 
 /**
  * How a status remembers WHO inflicted it: `"burning:from=villain"`.
@@ -982,8 +1037,18 @@ function hasStatusFlag(status, flag) {
  * than an `else if` chain, so every set flag is CONSUMED — but only the first
  * reaches `getphase` while `turnphase == 1`, and the rest are silent no-ops.
  */
+/**
+ * Which forced phase the build's own chain hands this gladiator, or null.
+ *
+ * ► **THE ORDER IS THE TABLE'S AND `taunted1` OUTRANKS ALL FOUR CONDITIONS.**
+ *   Frame 1 runs rows 1-7 as SEQUENTIAL STATEMENTS (map §"Turn gating, forced
+ *   phases"): swap_weapons, rest, **the taunted flee at row 3**, then frozen,
+ *   burning, poison, life_stolen. Rows 1 and 2 are handled ahead of this
+ *   function by `legalActions`; this is rows 3-7, and a taunted-and-burning
+ *   gladiator RUNS.
+ */
 function forcedStatusFlag(actor) {
-  for (const flag of SS2_DEATH_CLEAR_FLAGS) {
+  for (const flag of [SS2_TAUNT.flag, ...SS2_DEATH_CLEAR_FLAGS]) {
     if (hasStatusFlag(actor.status ?? [], flag)) return flag;
   }
   return null;
@@ -1746,11 +1811,74 @@ export function ss2WalkDisplacement(movementSpeed, { boot = 0 } = {}) {
   // `ss2MovementSpeed` (the floor of 4 makes the smallest real step 64) but this
   // function is exported and takes any non-negative number, and the comment here
   // used to assert the opposite AS THE BUILD'S BEHAVIOUR.
+  return step - easedRemainder(step, SS2_WALK_STOP_GAP);
+}
+
+/**
+ * THE EASING TWEEN BOTH GAITS RUN, and the gap it gives up on at.
+ *
+ * `attacker.onEnterFrame` closes the distance to `attacker.destination` by
+ * `ceil(gap / 8)` a frame and stops when the gap is small enough — the walk at
+ * 20 (`+0x3e97`), the run at **10** (`+0x4038` runleft, `+0x41c1` runright).
+ * The divisor is 8 in both (`+0x3e7b` walk, `+0x3fa1` run).
+ *
+ * ► **IT IS A do/while BECAUSE THE BUILD MOVES BEFORE IT CHECKS**, which
+ *   `ss2WalkDisplacement`'s own comment records: a step at or under the stop gap
+ *   still moves the gladiator once, where a `while` would return 0.
+ *
+ * @returns the gap REMAINING when the tween gives up, which is at most
+ *   `stopGap` and is frequently less — see `ss2RunDisplacement` for why that
+ *   "frequently" is not a rounding detail.
+ */
+function easedRemainder(step, stopGap) {
   let gap = step;
   do {
     gap -= Math.ceil(gap / SS2_WALK_EASING_DIVISOR);
-  } while (gap > SS2_WALK_STOP_GAP);
-  return step - gap;
+  } while (gap > stopGap);
+  return gap;
+}
+
+/** The run's own destination tolerance: `+0x4038` runleft, `+0x41c1` runright. */
+const SS2_RUN_STOP_GAP = 10;
+
+/**
+ * WHAT A RUN ACTUALLY COVERS — the flee's displacement, and it is NOT the walk's
+ * with a bigger number.
+ *
+ * ```text
+ *   destination = _x -/+ movement_speed * 40     +0x3f69 runleft, +0x40f2 runright
+ * ```
+ *
+ * ► **THREE THINGS DIFFER FROM THE WALK AND EACH ONE IS A WAY TO GET THIS
+ *   WRONG.** The table below `ss2WalkDisplacement` names the first two and this
+ *   function exists because of the third:
+ *
+ *   1. **No boot bonus.** The run's destination is a RAW product — there is no
+ *      `get_percentage`/`add_percentage` round trip at `+0x3f69` or `+0x40f2`.
+ *      Only the walk takes a boot bonus and only the jump a shinguard one.
+ *   2. **The stop gap is 10, not 20.** Reading `SS2_WALK_STOP_GAP` as universal
+ *      puts every run 10 out.
+ *   3. **AND THE CLOSED FORM IS WRONG AT 23 OF THE 57 REACHABLE SPEEDS.** That
+ *      table concludes "a run's realised step is therefore
+ *      `40 * movement_speed - 10`". **Measured over `movement_speed` 4..60: it
+ *      is +1 low at 23 of them** — 5, 10, 13, 15, 17, 20, 22, 25, 26, 29, 30,
+ *      33, 34, 38, 39, 43, 44, 49, 50, 51, 56, 57, 58 — because the tween exits
+ *      when the gap is at or under 10 and lands on **9** at those inputs, not
+ *      on 10.
+ *
+ *      **This is the same mistake the walk's own docstring records**, one
+ *      function along: collapsing the build's loop into algebra gives a
+ *      different function that differs by one at reachable inputs. The loop is
+ *      the build; the closed form is a description of it.
+ */
+export function ss2RunDisplacement(movementSpeed) {
+  if (!Number.isFinite(movementSpeed) || movementSpeed < 0) {
+    throw new TeamRuleSetError(
+      `ss2RunDisplacement: movementSpeed must be a finite non-negative number, got ${movementSpeed}.`
+    );
+  }
+  const step = movementSpeed * SS2_MOVEMENT_STEP_FACTOR.run;
+  return step - easedRemainder(step, SS2_RUN_STOP_GAP);
 }
 
 /**
@@ -1785,9 +1913,17 @@ export function ss2WalkDisplacement(movementSpeed, { boot = 0 } = {}) {
  *   intermediate variable at all.
  * - **THE STOP TOLERANCE IS PER PHASE, and this table implied it was not.** A
  *   walk stops within 20, a run within **10** (`+0x4038` runleft, `+0x41c1`
- *   runright), and a charge has no destination tolerance at all. A run's
- *   realised step is therefore `40 * movement_speed - 10`; reading
- *   `SS2_WALK_STOP_GAP` as universal puts it 10 out.
+ *   runright), and a charge has no destination tolerance at all. ~~A run's
+ *   realised step is therefore `40 * movement_speed - 10`~~ — **WRONG AT 23 OF
+ *   THE 57 REACHABLE SPEEDS, corrected 2026-09-17 when the flee needed the
+ *   number.** The tween exits when the gap is AT OR UNDER 10 and lands on 9 at
+ *   `movement_speed` 5, 10, 13, 15, 17, 20, 22, 25, 26, 29, 30, 33, 34, 38, 39,
+ *   43, 44, 49, 50, 51, 56, 57 and 58, so the closed form is +1 low at every one
+ *   of them. **`ss2RunDisplacement` runs the loop instead** — which is the same
+ *   correction `ss2WalkDisplacement` records one function above, made by the
+ *   same move: collapsing the build's loop into algebra gives a different
+ *   function. The "reading `SS2_WALK_STOP_GAP` as universal puts it 10 out"
+ *   warning was right and did not go far enough.
  * - **A charge's threshold is an ADVANCE GATE, not a destination clamp**, and
  *   this table said "clamp". Bytes: `+0x4293`..`+0x42cc` is
  *   `if (!(attacker._x > round(defender._x - game_attacker.weapon_range))) { _x
@@ -5213,6 +5349,71 @@ export function createSs2TeamRules({
         return crowd.length ? { ...phase, effects: [...phase.effects, ...crowd] } : phase;
       }
 
+      // ► **THE FLEE, WHICH IS ROW 3 OF THE BUILD'S DECISION TABLE AND THE ONE
+      //   FORCED PHASE THAT IS NOT A CONDITION.** `taunted1 == true` sends a
+      //   gladiator to `getphase("runleft")` facing right and
+      //   `getphase("runright")` facing left (`+0x0d68`-`+0x0e35`): he runs AWAY
+      //   from the way he is facing, and the flag is cleared on the way through
+      //   (`+0x0ddb`, `+0x0e2d`).
+      //
+      // ► **IT COVERS `ss2RunDisplacement`, NOT A WALK'S.** The run sets
+      //   `destination = _x -/+ movement_speed * 40` with NO boot bonus and a
+      //   destination tolerance of 10 rather than the walk's 20 — three
+      //   differences, and the third is that the closed form in the movement
+      //   table is +1 low at 23 of the 57 reachable speeds.
+      //
+      // ► **AND IT TAKES NO SAMPLE.** A forced phase is not a choice and the
+      //   build draws nothing here, so a tape replays across it unchanged.
+      if (request.type === Ss2ActionType.TAUNTED_PHASE) {
+        const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
+        // Away from the facing: looking right means running left.
+        const direction = facingLeft ? 1 : -1;
+        const travelled = ss2RunDisplacement(ss2MovementSpeed(actor));
+        const transition = phaseTransitionEffects(actor, {
+          // The run branch's own cost, from the staminacost table:
+          // `round(movement_speed / 2)`, the same as a walk's — the build
+          // charges the gait and not the distance.
+          staminaCost: Math.round(ss2MovementSpeed(actor) / 2)
+        });
+        const effects = [...transition.effects];
+        let to = null;
+        if (Number.isFinite(actor.x)) {
+          to = clamp(actor.x + direction * travelled, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+          if (to !== actor.x) effects.push({ kind: EffectKind.POSITION, targetId: actor.id, to });
+        }
+        // The flag is spent by being obeyed. `+0x0ddb`/`+0x0e2d` clear it in
+        // both arms of the hero path — and clear ONLY `taunted1`, which is the
+        // build's own asymmetry and is why `taunted2` has no phase here.
+        effects.push({
+          kind: EffectKind.STATUS,
+          targetId: actor.id,
+          status: statusTokenFor(actor.status ?? [], SS2_TAUNT.flag) ?? SS2_TAUNT.flag,
+          active: false
+        });
+        // ► **AND EVERY CONDITION THE CHAIN WALKED PAST IS CLEARED TOO, which is
+        //   the surprising half of the build's behaviour.** Rows 4-7 are
+        //   SEQUENTIAL STATEMENTS, not an else-chain: each clears its own flag
+        //   BEFORE calling `getphase`, and those calls are silent no-ops once
+        //   row 3 has taken the turn. So a taunted, burning gladiator runs AND
+        //   loses the burn — the same rule a forced rest already applies here.
+        effects.push(...statusConsumptionEffects(actor));
+        return {
+          effects: [...effects, ...crowd],
+          events: [{
+            type: Ss2ActionType.TAUNTED_PHASE,
+            actorId: actor.id,
+            targetId: actor.id,
+            from: Number.isFinite(actor.x) ? actor.x : null,
+            to,
+            // The facing's own label, which `VANILLA_PHASE_LABEL` cannot hold
+            // for both arms.
+            vanillaLabel: facingLeft ? SS2_TAUNT.fleePhase.left : SS2_TAUNT.fleePhase.right,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
+          }]
+        };
+      }
+
       if (request.type === Ss2ActionType.REST) {
         // `staminacost = 0 - round(stamina * 15)` at `+0x5163` — negative, so
         // `nextphase`'s subtraction is a gain — plus the branch's own
@@ -6148,7 +6349,7 @@ export function createSs2TeamRules({
       // that carries a condition and declares no `min_damage` would throw here
       // instead of taking the one option it was handed. Returned before any
       // record is built.
-      const forced = options.find((option) => SS2_FLAG_FOR_STATUS_PHASE[option.type]);
+      const forced = options.find((option) => SS2_FORCED_PHASES.has(option.type));
       if (forced) return forced;
 
       // ► **A FORCED SWAP IS NOT A CHOICE EITHER, and it is returned beside the

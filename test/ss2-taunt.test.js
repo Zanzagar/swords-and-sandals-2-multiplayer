@@ -31,7 +31,8 @@ import {
   applyAction, combatantById, createTeamBattle, currentCombatant, legalActions, rngJournal, toTeamWireState
 } from "../src/team/index.js";
 import {
-  SS2_FACING_LEFT, SS2_TAUNT, Ss2ActionType, createSs2TeamRules, ss2Combatant
+  SS2_ARENA, SS2_FACING_LEFT, SS2_TAUNT, Ss2ActionType, createSs2TeamRules,
+  ss2Combatant, ss2MovementSpeed, ss2RunDisplacement, ss2WalkDisplacement
 } from "../src/team/ss2-rules.js";
 import { LabelProvenance, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 
@@ -397,4 +398,155 @@ test("THE GAIN CLAMPS BEFORE THE COST IS SPENT, which is two stages and not one"
   assert.equal(staminaOf(), 220, "the taunter opens at full stamina");
   taunt(battle);
   assert.equal(staminaOf(), 165, "220 clamped at 220, then -60 +1 +round(12/3)");
+});
+
+/* ------------------------------------------------------------------ *
+ * THE FLEE — row 3 of the build's forced chain
+ * ------------------------------------------------------------------ */
+
+test("A RUN IS NOT A BIG WALK, and all three differences are ways to get it wrong", () => {
+  // ► **THE DERIVATION THAT UNBLOCKED THIS, and the reason it was worth doing
+  //   rather than generalising `ss2WalkDisplacement` by a factor.**
+  //
+  //   1. **No boot bonus.** `destination = _x -/+ movement_speed * 40` is a RAW
+  //      product at `+0x3f69`/`+0x40f2` — no `get_percentage`/`add_percentage`
+  //      round trip. Only the walk takes a boot bonus.
+  //   2. **The stop gap is 10, not 20** (`+0x4038`, `+0x41c1`).
+  //   3. **And the closed form in the movement table is +1 LOW at 23 of the 57
+  //      reachable speeds**, because the tween exits when the gap is at or
+  //      under 10 and lands on 9 at those inputs.
+  //
+  //   The easing itself IS shared: `ceil(gap / 8)` in both (`+0x3e7b` walk,
+  //   `+0x3fa1` run).
+  assert.equal(ss2WalkDisplacement(12), 172, "the walk is unchanged — the control");
+  assert.equal(ss2RunDisplacement(12), 470);
+
+  // A run is NOT the walk scaled by 40/16, which is what a factor would give.
+  assert.notEqual(ss2RunDisplacement(12), ss2WalkDisplacement(12) * (40 / 16));
+  // Nor is it the boot-bearing walk formula at 40.
+  assert.notEqual(ss2RunDisplacement(12, { boot: 5 }), ss2RunDisplacement(12) + 1);
+
+  // ► **THE 23 INPUTS WHERE THE CLOSED FORM IS WRONG**, spelled out so a future
+  //   reader who "simplifies" this back to `40 * ms - 10` fails here by name.
+  const wrong = [];
+  for (let ms = 4; ms <= 60; ms += 1) {
+    if (ss2RunDisplacement(ms) !== ms * 40 - 10) wrong.push(ms);
+  }
+  assert.deepEqual(wrong,
+    [5, 10, 13, 15, 17, 20, 22, 25, 26, 29, 30, 33, 34, 38, 39, 43, 44, 49, 50, 51, 56, 57, 58]);
+  assert.equal(ss2RunDisplacement(20), 791, "and 790 is the closed form's answer");
+
+  // Refused rather than defaulted, like its sibling: a negative or non-finite
+  // speed is a caller bug, and silently returning 0 would make a fleeing
+  // gladiator stand still for a reason nothing names.
+  assert.throws(() => ss2RunDisplacement(-1), /movementSpeed must be a finite non-negative number/);
+  assert.throws(() => ss2RunDisplacement(Number.NaN), /movementSpeed must be a finite non-negative number/);
+});
+
+test("A TAUNTED GLADIATOR RUNS, AND IT IS THE ONLY THING HE MAY DO", () => {
+  // ► **ROW 3 OF THE BUILD'S FORCED CHAIN** (`+0x0d68`-`+0x0e35`): `taunted1`
+  //   sends him to `getphase("runleft")` facing right and `("runright")` facing
+  //   left — AWAY from the way he is looking — and the flag is cleared on the
+  //   way through (`+0x0ddb`, `+0x0e2d`).
+  for (let seed = 1; seed <= 80; seed += 1) {
+    const battle = duel({
+      seed,
+      hero: { charisma: 30 },
+      villain: { charisma: 1, secondary_weapon: 61, equipped_weapon: 2 }
+    });
+    let event;
+    try {
+      ({ event } = taunt(battle));
+    } catch {
+      continue;
+    }
+    if (event.flag !== SS2_TAUNT.flag) continue;
+
+    // The turn is TAKEN, not merely influenced: one option, and it is the flee.
+    assert.deepEqual(legalActions(battle).map((o) => o.type), [Ss2ActionType.TAUNTED_PHASE],
+      "a taunted gladiator is offered the flee and nothing else");
+
+    const before = combatantById(battle, "villain").x;
+    const who = currentCombatant(battle);
+    applyAction(battle, { actorId: who.id, ...legalActions(battle)[0] });
+    const fled = battle.events.filter((e) => e.type === Ss2ActionType.TAUNTED_PHASE).pop();
+
+    assert.ok(fled, "the flee must resolve");
+    assert.match(fled.vanillaLabel, /^run(left|right)$/, "and carry the FACING's own label");
+    assert.equal(fled.from, before);
+    const after = combatantById(battle, "villain").x;
+    assert.equal(fled.to, after, "the event and the battle agree about where he went");
+    assert.notEqual(after, before, "and he actually moved");
+
+    // The distance is the run's, clamped by the arena the way `nextphase` step 1
+    // clamps every `_x`.
+    const expected = ss2RunDisplacement(ss2MovementSpeed(combatantById(battle, "villain")));
+    const direction = after > before ? 1 : -1;
+    assert.equal(after, Math.max(SS2_ARENA.clamp.min,
+      Math.min(SS2_ARENA.clamp.max, before + direction * expected)));
+
+    // The flag is spent by being obeyed, so the next turn is ordinary again.
+    assert.equal((combatantById(battle, "villain").status ?? [])
+      .some((token) => token.startsWith(SS2_TAUNT.flag)), false, "the flag is cleared");
+    assert.ok(legalActions(battle).length > 1, "and the gladiator has his choices back");
+    return;
+  }
+  assert.fail("the flee arm was not reachable in 80 seeds");
+});
+
+test("THE FLEE OUTRANKS EVERY CONDITION, and clears the ones it walked past", () => {
+  // ► **ROW 3 BEATS ROWS 4-7, and they are SEQUENTIAL STATEMENTS rather than an
+  //   else-chain** — each clears its own flag BEFORE calling `getphase`, and
+  //   those calls are silent no-ops once row 3 has taken the turn. So a taunted,
+  //   burning gladiator RUNS and loses the burn.
+  const battle = duel({ seed: 7 });
+  const villain = combatantById(battle, "villain");
+  villain.status = ["taunted1", "burning"];
+  for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "villain"; guard += 1) {
+    const who = currentCombatant(battle);
+    const legal = legalActions(battle);
+    applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
+    villain.status = ["taunted1", "burning"];
+  }
+  assert.equal(currentCombatant(battle)?.id, "villain");
+  assert.deepEqual(legalActions(battle).map((o) => o.type), [Ss2ActionType.TAUNTED_PHASE],
+    "the flee wins over the burn");
+  applyAction(battle, { actorId: "villain", ...legalActions(battle)[0] });
+  assert.deepEqual([...(combatantById(battle, "villain").status ?? [])], [],
+    "and the burn is cleared without ever playing");
+});
+
+test("THE FLEE TAKES NO SAMPLE, because a forced phase is not a choice", () => {
+  // A tape replays across it unchanged. The build draws nothing in row 3.
+  const battle = duel({ seed: 7 });
+  const villain = combatantById(battle, "villain");
+  villain.status = ["taunted1"];
+  for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "villain"; guard += 1) {
+    const who = currentCombatant(battle);
+    const legal = legalActions(battle);
+    applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
+    villain.status = ["taunted1"];
+  }
+  const before = rngJournal(battle).length;
+  applyAction(battle, { actorId: "villain", ...legalActions(battle)[0] });
+  assert.equal(rngJournal(battle).length, before, "a flee draws nothing at all");
+});
+
+test("`taunted2` FORCES NOTHING, because the build never sets it", () => {
+  // ► **THE ASYMMETRY IS THE BUILD'S.** Row 3 tests `taunted1 == true` OR
+  //   `taunted2 == true`, but `taunted2` is assigned `true` at no site in the
+  //   build — and the hero path clears only `taunted1` in both its arms. A
+  //   phase for it would be a promise nothing can redeem, so it has none, while
+  //   `SS2_TAUNT_FLAGS` keeps both because the CLEARING is real for both.
+  const battle = duel({ seed: 7 });
+  const villain = combatantById(battle, "villain");
+  villain.status = ["taunted2"];
+  for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "villain"; guard += 1) {
+    const who = currentCombatant(battle);
+    const legal = legalActions(battle);
+    applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
+    villain.status = ["taunted2"];
+  }
+  assert.ok(legalActions(battle).length > 1,
+    "a gladiator carrying only `taunted2` keeps its ordinary turn");
 });
