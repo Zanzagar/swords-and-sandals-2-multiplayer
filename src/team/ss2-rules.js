@@ -374,6 +374,7 @@ export const Ss2ActionType = Object.freeze({
   //   samples on three outcomes in four. It resolves through its own branch;
   //   see `SS2_TAUNT`.
   TAUNT: "taunt",
+  SHOVE: "shove",
   /**
    * The phase a TAUNTED gladiator is forced into: it runs away.
    *
@@ -884,6 +885,7 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   //   target), so a FAILED taunt still animates. The target's label is the
   //   presentation layer's, not a phase.
   [Ss2ActionType.TAUNT]: "taunt",
+  [Ss2ActionType.SHOVE]: "shove",
   // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
   //   of the decision table is `taunted1 == true` -> facing right
   //   `getphase("runleft")`, facing left `getphase("runright")`
@@ -3206,6 +3208,100 @@ export const SS2_PSYCHE_UP = Object.freeze({
 export const SS2_RANK_JOIN_SURPLUS = 0;
 
 const SS2_TAUNT_FLOOR_DAMAGE_MEAN = 2;
+
+/**
+ * `shove` — A REAL SS2 PLAYER VERB THAT THIS ENGINE HAD NO REPRESENTATION OF,
+ * built 2026-09-19 and derived here rather than in the map, which carried only
+ * the force row and the stamina row.
+ *
+ * ## THE WHOLE PHASE, read out of the oracle (sha256 `77CB545C…`, the block at
+ * ## `sprite:862[overlay]/frame:52`, 38,146 bytes)
+ *
+ * ```text
+ *   game_attacker.staminacost = round(strength * 1.5)             +0x5dd3
+ *   if (attacker.shove != true) {                                 +0x5e00
+ *     attacker.shove = true                                       +0x5e19
+ *     attacker.gotoAndPlay("shove")                               +0x5e27
+ *     if (attacker.gladiator_dir == "right") {                    +0x5e3b
+ *       force = game_attacker.strength * 12                       +0x5e53
+ *       force_bonus = get_percentage(100 + gauntlet * 2, 100)     +0x5e6b
+ *       force = add_percentage(force, force_bonus)                +0x5e99
+ *       if (force < 20) force = 20                                +0x5eb3
+ *       if (force > 100) defender.gotoAndPlay("knockback")        +0x5ed3
+ *     } else {                                                    +0x5f01
+ *       ... the same, then force = 0 - force                      +0x5f61
+ *       if (force > -20) force = -20                              +0x5f74
+ *       if (force < -100) defender.gotoAndPlay("knockback")       +0x5f94
+ *     }
+ *     knockback(defender, force)                                  +0x5fc9
+ *   }
+ *   if (attacker.struck == true) {                                +0x5fd5
+ *     attacker.struck = null; attacker.shove = null; nextphase()  +0x5fed
+ *   }
+ * ```
+ *
+ * ► **IT TAKES NO SAMPLE AND DEALS NO DAMAGE, AND THAT IS THE HEADLINE.**
+ *   Counted over the whole phase `+0x5dcd`…`+0x6007`: **zero `randomBetween`,
+ *   zero `Math.random`, zero `checkattackroll`, zero `hitpoints`.** So unlike
+ *   `taunt` — which stayed deferred for a month precisely because a candidate
+ *   would have taken the dispatcher's samples on every press where the build
+ *   takes them on one outcome in four — **a shove has no tape hazard at all.**
+ *   It is a pure displacement that costs stamina.
+ *
+ * ► **THE GAUNTLET BOOSTS IT, AND THE ARGUMENT ORDER IS WHAT DECIDES THAT.**
+ *   `get_percentage(a, b) = (a / b) * 100` and `add_percentage(a, b) =
+ *   ceil(a * b / 100)`, with `a` in register 2 and `b` in register 1 — read
+ *   from the `DefineFunction2` headers at `+0x106a` and `+0x109b`, because
+ *   reading the bodies alone inverses both. **Which of the two pushed values is
+ *   `a` was settled against a site this repository had already derived and had
+ *   checked with six verifiers**: the walk's `walk_bonus` at `+0x3ba3` is
+ *   byte-for-byte this same shape (`Push name, 100, 100, <stat> * 2, Add2`)
+ *   and resolves to `get_percentage(100 + 2 * boot, 100)` = `100 + 2 * boot`.
+ *   So the LAST-pushed value is `a`, and here that gives
+ *   `force_bonus = 100 + 2 * gauntlet` — a gauntlet makes the shove stronger,
+ *   which is also what the map's force table says in words.
+ *   **Had it been the other way the gauntlet would have WEAKENED it**, which is
+ *   why this is derived against a known site rather than reasoned about.
+ *
+ * ► **THE FLOOR IS APPLIED AFTER THE BOOST**, not before — `+0x5eb3` follows
+ *   `+0x5e99` — so a feeble gladiator with a good gauntlet still floors at 20.
+ *
+ * ► **AND THERE IS NO RANGE GATE IN THE PHASE.** The gate is the CONTROLLER:
+ *   the map's button table (`:225`-`:230`) wires `shove` on
+ *   `closerange_warrior` and `closerange_archer`, both facings, and on neither
+ *   long-range frame. Same shape as the three melee attacks.
+ */
+export const SS2_SHOVE = Object.freeze({
+  /** `force = strength * 12` (`+0x5e53`, `+0x5f01`). */
+  strengthFactor: 12,
+  /** `staminacost = round(strength * 1.5)` (`+0x5dd3`). */
+  staminaCostFactor: 1.5,
+  /** `force_bonus = 100 + gauntlet * 2` (`+0x5e6b`, `+0x5f19`). */
+  gauntletFactor: 2,
+  /** `if (|force| < 20) force = ±20` (`+0x5eb3`, `+0x5f74`). */
+  minimumForce: 20,
+  /** `defender.gotoAndPlay("knockback")` only above this (`+0x5ed3`, `+0x5f94`). */
+  knockbackAnimationForce: 100
+});
+
+/**
+ * The signed displacement a shove applies to its target, in arena units.
+ *
+ * Sign is the ATTACKER's facing (`+0x5e3b`), which is the taunt's rule and the
+ * OPPOSITE of `damagecharacter`'s — that one signs on the DEFENDER (`+0x1ae9`).
+ * Three of the four `knockback` call sites disagree about this, so it is read
+ * per site rather than generalised.
+ */
+export function ss2ShoveForce(actor) {
+  const strength = actor?.stats?.strength ?? 0;
+  const gauntlet = resourceValue(actor, "gauntlet", 0);
+  const raw = strength * SS2_SHOVE.strengthFactor;
+  // `add_percentage(force, 100 + 2 * gauntlet)` = `ceil(force * bonus / 100)`.
+  const boosted = Math.ceil((raw * (100 + gauntlet * SS2_SHOVE.gauntletFactor)) / 100);
+  const magnitude = Math.max(SS2_SHOVE.minimumForce, boosted);
+  const facingLeft = (actor?.status ?? []).includes(SS2_FACING_LEFT);
+  return facingLeft ? 0 - magnitude : magnitude;
+}
 
 export const SS2_TAUNT = Object.freeze({
   /**
@@ -5895,6 +5991,40 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **THE SHOVE, AND ITS GATE IS THE MIRROR IMAGE OF THE TAUNT'S.**
+      //   The map's button table (`:225`-`:230`) wires `shove` on BOTH
+      //   close-range frames — `closerange_warrior` and `closerange_archer`, in
+      //   both facings — and on NEITHER long-range frame. The taunt is wired on
+      //   the two long-range frames and not on `closerange_warrior`. So one is
+      //   what you do when you cannot reach him and the other is what you do
+      //   when you can, and they are never both a warrior's only option.
+      //
+      //   **Recognised through `onCloseFrame`**, which this function already
+      //   computed for the walks and the taunt, rather than by a second
+      //   distance test — the argument every arm here makes.
+      //
+      // ► **NO STAMINA GATE, unlike the taunt.** Neither close frame tests
+      //   stamina before wiring the button, and the phase itself has no gate
+      //   either: `staminacost` is assigned at `+0x5dd3` and `nextphase`
+      //   subtracts it afterwards, floored at zero by `check_stats`. Inventing
+      //   an affordability test here would be a playability affordance wearing
+      //   measured clothes — the rule `legalActions` states for the melee
+      //   verbs, applied to this one.
+      //
+      // ► **AND IT NEEDS A POSITION, WHICH THE MELEE VERBS DO NOT — caught by
+      //   `test/ss2-position.test.js` refusing it.** A rule set that models no
+      //   position offers the three melee verbs anyway, because an attack
+      //   RESOLVES from any distance and the build has no distance test in the
+      //   phase. **A shove's entire outcome is the displacement**, so offering
+      //   one to an unpositioned combatant is offering a button that spends
+      //   stamina and does nothing. That is precisely the finding an
+      //   adversarial review made against the taunt's first cut — *"a
+      //   convention that makes a NEW outcome inert is not a defence"* — and it
+      //   applies here before anybody can ship it.
+      if (onCloseFrame && positioned) {
+        for (const foe of view.foes) actions.push({ type: Ss2ActionType.SHOVE, targetId: foe.id });
+      }
+
       // ► **THE RANK VERBS, and they are what make the geometry a CHOICE.**
       //
       //   Offered whenever the rule set models depth and there is a rank that
@@ -6615,6 +6745,60 @@ export function createSs2TeamRules({
             }]
           };
         }
+      }
+
+      // ► **THE SHOVE RETURNS BEFORE THE BAND TABLE, BECAUSE IT IS NOT AN
+      //   ATTACK AT ALL.** The phase `+0x5dcd`…`+0x6007` contains zero
+      //   `randomBetween`, zero `checkattackroll` and zero `hitpoints`: it
+      //   costs stamina, plays two clips and moves a body. Routing it through
+      //   the dispatcher would take samples the build never takes and put every
+      //   peer replaying the same tape out of step from the first press — the
+      //   exact hazard that kept `taunt` deferred for a month, avoided here by
+      //   not entering the path rather than by unwinding it afterwards.
+      if (request.type === Ss2ActionType.SHOVE) {
+        const pushed = request.target;
+        if (!pushed) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a target; ${String(request.targetId)} is not a combatant.`
+          );
+        }
+        const force = ss2ShoveForce(actor);
+        const staminaCost = Math.round(actor.stats.strength * SS2_SHOVE.staminaCostFactor);
+        const transition = phaseTransitionEffects(actor, { staminaCost });
+        const effects = [...transition.effects];
+        // `knockback(defender, force)` is `_x + force` with no clamp, no arena
+        // edge and no body check in its own 155 bytes (`+0x1e75`); the bound
+        // that really applies is the clip clamp inside `attacker.onEnterFrame`.
+        // See `SS2_ARENA.clamp`.
+        const to = Number.isFinite(pushed.x)
+          ? clamp(pushed.x + force, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max)
+          : null;
+        if (to !== null && to !== pushed.x) {
+          effects.push({ kind: EffectKind.POSITION, targetId: pushed.id, to });
+          effects.push(...facingAfterTargetMove({ ...pushed, x: to }));
+        }
+        return {
+          effects: [...effects, ...crowd],
+          events: [{
+            type: Ss2ActionType.SHOVE,
+            actorId: actor.id,
+            targetId: pushed.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[Ss2ActionType.SHOVE],
+            force,
+            from: Number.isFinite(pushed.x) ? pushed.x : null,
+            to,
+            // The presentation layer cannot re-derive the threshold, and the
+            // build gates only the CLIP on it — the displacement above is
+            // unconditional.
+            knockbackAnimation: Math.abs(force) > SS2_SHOVE.knockbackAnimationForce,
+            // `nextphase`'s two halves, reported the way every other phase
+            // reports them. The COST is the `staminacost` assigned at `+0x5dd3`
+            // and spent afterwards; the GAIN is `nextphase`'s own regeneration,
+            // which runs for a shove exactly as it runs for a walk.
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained
+          }]
+        };
       }
 
       const band = ATTACK_BANDS[request.type]

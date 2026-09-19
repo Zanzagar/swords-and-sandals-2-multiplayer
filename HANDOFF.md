@@ -44,6 +44,54 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **`shove` IS BUILT (2026-09-19), AND IT TAKES NO SAMPLE AT ALL.** Ranked
+  item 6, closed. A real SS2 player verb this engine had no representation of.
+  **The map carried two rows about it and not the phase**, so the phase was
+  derived from the oracle for this commit — block
+  `sprite:862[overlay]/frame:52`, `+0x5dcd`…`+0x6007`:
+
+```text
+    staminacost = round(strength * 1.5)                      +0x5dd3
+    attacker.gotoAndPlay("shove")                            +0x5e27
+    force = strength * 12                                    +0x5e53
+    force_bonus = get_percentage(100 + gauntlet * 2, 100)    +0x5e6b
+    force = add_percentage(force, force_bonus)               +0x5e99
+    if (|force| < 20) force = ±20                            +0x5eb3 / +0x5f74
+    if (|force| > 100) defender.gotoAndPlay("knockback")     +0x5ed3 / +0x5f94
+    knockback(defender, force)   — UNCONDITIONAL             +0x5fc9
+```
+
+  ► **ZERO `randomBetween`, ZERO `checkattackroll`, ZERO `hitpoints` over the
+    whole phase.** `taunt` stayed deferred for a MONTH because a partial
+    candidate would take the dispatcher's samples on every press where the build
+    takes them on one in four. **A shove has no tape hazard**, so it returns
+    before the band table rather than being unwound inside it, and it shipped in
+    an afternoon. It is a pure displacement that costs stamina.
+  ► **THE GAUNTLET BOOSTS IT, AND THE ARGUMENT ORDER IS WHAT DECIDED THAT.**
+    `get_percentage(a, b) = (a/b)*100`, `a` in register 2. Which of the two
+    pushed values is `a` was settled against the WALK's `walk_bonus` at
+    `+0x3ba3` — a byte-for-byte identical call shape this repository had already
+    derived and checked with six verifiers — giving
+    `force_bonus = 100 + 2 * gauntlet`. **Read the other way a gauntlet would
+    have WEAKENED the shove.** The floor is applied AFTER the boost.
+  ► **AND A PIN AIMED ELSEWHERE CAUGHT A REAL DESIGN ERROR, for the third time
+    this week.** `test/ss2-position.test.js` refused the first cut because a
+    position-blind rule set was being offered a shove. It was right: an attack
+    RESOLVES from any distance, but **a shove's entire outcome is the
+    displacement**, so offering one with no positions is a button that spends
+    stamina and does nothing — the exact finding an adversarial review made
+    against the taunt's first cut. Gated on `positioned` now.
+  ► **THE AI NEVER CHOOSES IT, STATED RATHER THAN DISCOVERED.** It has no
+    damage term, so it cannot join the expected-damage table; and
+    `ss2TauntValue` already scores the taunt's shove arm at ZERO for a melee
+    actor by an argument that applies here exactly — pushing a melee opponent
+    out of reach costs the pusher its own reach too. **It is a HUMAN verb.**
+    Pinned at 0 of 100+ AI actions, because `psyche_up` taught what happens when
+    a verb ships with a live population of zero and nobody says so.
+  ► **Six vocabulary pins moved and every one was explained before it was
+    updated**; the only difference in each was `'shove'` appearing where the
+    map's button table says it should.
+
 ► **THE ARCHIVE MANIFEST ATTESTS THE WHOLE ARCHIVE NOW, AFTER ATTESTING 19% OF
   IT FOR EIGHTEEN DAYS (2026-09-19).** Ranked item 5, closed. It was recorded on
   2026-09-01 at 1,588 files; the archive is **8,325 files / 58,492,555 bytes**,

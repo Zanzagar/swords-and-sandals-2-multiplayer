@@ -450,6 +450,9 @@ test("longrange_archer wires two shots and BOTH walks; closerange_archer wires a
       // `closerange_archer` wires the taunt too; the case below is the one
       // that shows it is NOT gated on stamina the way frames 5 and 20 are.
       Ss2ActionType.TAUNT,
+      // And it wires `shove` (map `:229`-`:230`), which is why an archer that
+      // has been closed on has something to do about it besides backing away.
+      Ss2ActionType.SHOVE,
       Ss2ActionType.SWAP_WEAPONS, Ss2ActionType.REST
     ],
     "inside the floor an archer bashes and backs away; it cannot shoot and cannot advance"

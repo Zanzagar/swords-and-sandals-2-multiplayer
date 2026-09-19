@@ -278,6 +278,7 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "rank-back",
     "rank-front",
     "rest",
+    "shove",
     "snipe",
     "swap-weapons",
     // ► **JOINED 2026-09-17, AND IT IS THE SECOND TOKEN HERE THAT IS NOT ALWAYS
@@ -603,13 +604,26 @@ test("there is NO affordability gate: the build never refuses an attack for lack
   //   toward-walk is correctly absent here while the three melee verbs are not.
   //   The point of the test is unchanged: at 1 stamina against a swing costing
   //   far more, nothing is withheld.
-  assert.deepEqual(options, ["quick-attack", "normal-attack", "power-attack", "walk-left", "rest"]);
+  // ► **`shove` JOINED THIS LIST 2026-09-19 AND IT STRENGTHENS THE TEST.** It
+  //   is wired on `closerange_warrior` in both facings (map `:225`-`:226`), so
+  //   it belongs exactly where the three melee verbs are — and its own phase
+  //   has no stamina gate either: `staminacost` is assigned at `+0x5dd3` and
+  //   `nextphase` subtracts it afterwards. At 1 stamina against a shove costing
+  //   `round(strength * 1.5)`, nothing is withheld, which is this test's point
+  //   with one more verb behind it.
+  assert.deepEqual(
+    options,
+    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "rest"]
+  );
 });
 
-test("every living foe gets all three melee verbs, and rest targets the actor", () => {
+test("every living foe gets all three melee verbs AND a shove, and rest targets the actor", () => {
   const battle = battleOf({}, {});
   const options = legalActions(battle);
-  assert.equal(options.filter((option) => option.targetId === "villain").length, 3);
+  // Three melee verbs plus `shove`, which `closerange_warrior` wires beside
+  // them in both facings (map `:225`-`:226`). Counted per FOE rather than in
+  // total, so a verb offered once for a three-foe battle still fails here.
+  assert.equal(options.filter((option) => option.targetId === "villain").length, 4);
   assert.deepEqual(options.at(-1), { type: Ss2ActionType.REST, targetId: "hero" });
 });
 

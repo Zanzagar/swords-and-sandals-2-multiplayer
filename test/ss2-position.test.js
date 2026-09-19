@@ -974,7 +974,13 @@ test("in range the build offers the retreat and NEVER the advance, and out of ra
   //   §"Buttons wired per controller frame" — frame 13 wires none in either
   //   facing). An implementation that gated taunt on "in reach" rather than on
   //   the FRAME would show up right here.
-  assert.deepEqual(typesOf(engaged), ["quick-attack", "normal-attack", "power-attack", "walk-left", "rest"]);
+  // `shove` joined 2026-09-19: `closerange_warrior` wires it in both facings
+  // (map `:225`-`:226`), which is the same frame that wires the three melee
+  // verbs and the retreat-walk this line already pins.
+  assert.deepEqual(
+    typesOf(engaged),
+    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "rest"]
+  );
 
   const apart = bout(1);
   // `longrange_warrior` at full stamina wires the taunt into the slot it shares
