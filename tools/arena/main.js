@@ -63,6 +63,7 @@ import {
   mergeFaceOps,
   canvasBackingFor,
   rankStrideFrom,
+  settlementReadiness,
   selectRules,
   retireVoices,
   figureProvenance,
@@ -767,9 +768,22 @@ function drainFinishedAnimations(now) {
  * reached matches the one resolved state implies — a surface that reported the
  * wrong one is a desync, and it is refused rather than settled.
  */
+/**
+ * ► **THE GATE MOVED TO `settlementReadiness` ON 2026-09-19.** It was five
+ *   terms of boolean inside a function the suite cannot reach, whose failure
+ *   mode is a page that looks alive, keeps painting and silently never
+ *   acknowledges. What is left here is the state it reads and the call it
+ *   makes.
+ */
 function settleIfReady() {
-  if (settled || !host.battle.result || pendingTokens.length > 0 || playing.size > 0) return;
-  if (!scene.completionToken) return;
+  const readiness = settlementReadiness({
+    alreadySettled: settled,
+    hasResult: Boolean(host.battle.result),
+    pendingTokens: pendingTokens.length,
+    playingCount: playing.size,
+    completionToken: scene.completionToken
+  });
+  if (!readiness.ready) return;
 
   const deaths = host.awaitingDeathAnimations();
   try {

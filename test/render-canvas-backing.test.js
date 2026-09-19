@@ -34,7 +34,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { canvasBackingFor } from "../src/render/arena-shell.js";
+import { canvasBackingFor, settlementReadiness } from "../src/render/arena-shell.js";
 
 test("A LAID-OUT STAGE IS SIZED IN DEVICE PIXELS, which is the whole point of the function", () => {
   // ► **THE REGRESSION THIS FILE EXISTS FOR.** 300x150 is what a canvas with no
@@ -124,4 +124,55 @@ test("IT IS A DECISION AND TOUCHES NOTHING — no DOM, no window, no canvas", ()
   assert.equal(typeof globalThis.document, "undefined");
   assert.equal(typeof globalThis.window, "undefined");
   assert.doesNotThrow(() => canvasBackingFor({ rectWidth: 640, rectHeight: 480, devicePixelRatio: 1 }));
+});
+
+/* ------------------------------------------------------------------ *
+ * settlementReadiness — the second decision lifted out of the DOM set
+ * ------------------------------------------------------------------ */
+
+test("A BOUT SETTLES ONLY WHEN ALL FIVE TERMS ARE MET, and the order is not arbitrary", () => {
+  const ready = {
+    alreadySettled: false, hasResult: true, pendingTokens: 0, playingCount: 0, completionToken: "t"
+  };
+  assert.deepEqual(settlementReadiness(ready), { ready: true, waitingOn: null });
+
+  // ► **`alreadySettled` IS ASKED FIRST ON PURPOSE.**
+  //   `acknowledgeResultAnimations` is not idempotent and the shell latches
+  //   `settled` precisely so a second call cannot happen. If that term were
+  //   asked last, a settled bout with a fresh token would acknowledge twice.
+  assert.deepEqual(
+    settlementReadiness({ ...ready, alreadySettled: true }),
+    { ready: false, waitingOn: "already-settled" }
+  );
+});
+
+test("IT NAMES THE FIRST UNMET TERM, because they are not independent", () => {
+  // No result means the queues are irrelevant; reporting four reasons would
+  // read as four problems when there is one.
+  const blocked = {
+    alreadySettled: false, hasResult: false, pendingTokens: 4, playingCount: 2, completionToken: null
+  };
+  assert.equal(settlementReadiness(blocked).waitingOn, "result");
+
+  assert.equal(
+    settlementReadiness({ ...blocked, hasResult: true }).waitingOn,
+    "action-animations:4",
+    "and it carries the COUNT, so the log panel can show progress rather than a boolean"
+  );
+  assert.equal(
+    settlementReadiness({ ...blocked, hasResult: true, pendingTokens: 0 }).waitingOn,
+    "figures-playing:2"
+  );
+  assert.equal(
+    settlementReadiness({ ...blocked, hasResult: true, pendingTokens: 0, playingCount: 0 }).waitingOn,
+    "completion-token"
+  );
+});
+
+test("AN EMPTY CALL IS NOT READY, so a caller that forgets a field cannot settle by accident", () => {
+  // ► **THE DEFAULTS LEAN THE SAFE WAY.** Acknowledging a bout that has not
+  //   finished is worse than failing to acknowledge one that has: the second is
+  //   a page that sits there, the first writes an outcome that never happened.
+  assert.deepEqual(settlementReadiness(), { ready: false, waitingOn: "result" });
+  assert.deepEqual(settlementReadiness({}), { ready: false, waitingOn: "result" });
 });

@@ -318,3 +318,51 @@ export function canvasBackingFor({
   const height = Math.max(1, Math.round(cssHeight * ratio));
   return { width, height, ratio, changed: width !== backingWidth || height !== backingHeight };
 }
+
+/**
+ * Whether a finished bout may be acknowledged yet, and what it is waiting on.
+ *
+ * ## Why this is here
+ *
+ * ► **THE FAILURE MODE IS A BOUT THAT NEVER SETTLES, AND IT IS INVISIBLE TO
+ *   EVERY TEST.** The shell's gate was a five-term boolean inside
+ *   `settleIfReady`, a function that reads module-scope mutable state and calls
+ *   `host.acknowledgeResultAnimations` — so it sits in the set of ~27 shell
+ *   functions the suite cannot reach, and a wrong term in it produces a page
+ *   that looks alive, keeps painting, and silently never acknowledges. That is
+ *   the same shape as the four defects the owner found by WATCHING in
+ *   September: nothing throws, nothing logs, the picture is just wrong.
+ *
+ * ► **AND IT RETURNS WHAT IT IS WAITING ON, NOT JUST A BOOLEAN.** The shell has
+ *   already given up one defect of exactly this kind — autoplay rejections
+ *   caught and discarded, so a spectated bout ran silent with no explanation
+ *   anywhere. A gate that can say "still four animation tokens outstanding" is
+ *   a gate somebody can debug from the log panel; one that returns `false` is
+ *   not. The caller decides whether to print it.
+ *
+ * ## The terms, in the order they are asked
+ *
+ * `alreadySettled` first, because acknowledging twice is the one outcome that
+ * is worse than never acknowledging: `acknowledgeResultAnimations` is not
+ * idempotent and the shell latches `settled` precisely so a second call cannot
+ * happen. Then the battle's own result, then the two animation queues, then the
+ * completion token the scene has to have folded.
+ *
+ * **`waitingOn` names the FIRST unmet term rather than all of them**, because
+ * they are not independent: no result means the queues are irrelevant, and a
+ * list of four reasons reads as four problems when there is one.
+ */
+export function settlementReadiness({
+  alreadySettled = false,
+  hasResult = false,
+  pendingTokens = 0,
+  playingCount = 0,
+  completionToken = null
+} = {}) {
+  if (alreadySettled) return { ready: false, waitingOn: "already-settled" };
+  if (!hasResult) return { ready: false, waitingOn: "result" };
+  if (pendingTokens > 0) return { ready: false, waitingOn: `action-animations:${pendingTokens}` };
+  if (playingCount > 0) return { ready: false, waitingOn: `figures-playing:${playingCount}` };
+  if (!completionToken) return { ready: false, waitingOn: "completion-token" };
+  return { ready: true, waitingOn: null };
+}

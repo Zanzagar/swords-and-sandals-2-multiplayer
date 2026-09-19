@@ -44,6 +44,27 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **A SECOND SHELL DECISION IS OUT OF THE DOM SET: `settlementReadiness`
+  (2026-09-19).** The gate was five terms of boolean inside `settleIfReady`,
+  which reads module-scope mutable state and calls the host — so a wrong term
+  produced a page that looks alive, keeps painting and **silently never
+  acknowledges**, which is the same shape as the four defects the owner found
+  by watching. It returns **what it is waiting on**, not just a boolean, because
+  this shell has already given up one defect of exactly that kind (autoplay
+  rejections caught and discarded, so a spectated bout ran silent with no
+  explanation anywhere). `alreadySettled` is asked FIRST because
+  `acknowledgeResultAnimations` is not idempotent, and the defaults lean toward
+  NOT settling — acknowledging a bout that has not finished writes an outcome
+  that never happened, which is worse than a page that sits there. 3 tests, 6
+  mutations each red.
+  ► **AND `viewport`/`stepCamera` NEEDED NOTHING, which is the other half of
+    the correction.** Both are already thin dispatchers over `src/render/` —
+    `cameraFor`, `cameraStep`, `stageProjectorFor`, `stageFitFor`, `viewportFor`
+    — and `viewport`'s own docstring says so. **The shell is in better shape
+    than "4,110 lines and not one is executed by a test" implied**, and the
+    remaining work is picking off the DOM-bound functions that still hold
+    numbers rather than a sweep.
+
 ► **`shove` IS BUILT (2026-09-19), AND IT TAKES NO SAMPLE AT ALL.** Ranked
   item 6, closed. A real SS2 player verb this engine had no representation of.
   **The map carried two rows about it and not the phase**, so the phase was
