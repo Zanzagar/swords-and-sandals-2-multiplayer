@@ -244,3 +244,77 @@ export function rosterOrderOf(ids, placementOf) {
     return leftAt.slotIndex - rightAt.slotIndex;
   });
 }
+
+/**
+ * The backing-store size a canvas should carry, in DEVICE PIXELS.
+ *
+ * ## Why this is here and not in the shell
+ *
+ * ► **THIS ARITHMETIC RAN FOR THE WHOLE LIFE OF THE PROJECT WITH NOTHING
+ *   BEHIND IT, AND THE DEFECT IT HID COST EVERY PUBLISHED PIXEL NUMBER.**
+ *   `<canvas id="arena">` with no `width` or `height` attribute is **300x150**,
+ *   and `tools/arena/main.js` only ever READ those fields — no resize handler,
+ *   no `devicePixelRatio`, in four thousand lines. Every measurement this
+ *   repository published before 2026-09-18 was taken through an unrecorded
+ *   bilinear upscale from a 300x150 buffer.
+ *
+ *   The sizing was added that day and lived in `sizeCanvasToStage`, which reads
+ *   `window.devicePixelRatio` and `canvas.getBoundingClientRect()` and WRITES
+ *   `canvas.width`. **So it is in the set of shell functions the suite cannot
+ *   reach**, next to the set that carried the defect in the first place. The
+ *   DECISION is pure; only the two reads and the two writes are not.
+ *
+ * ► **AND THE CLAIM THAT MOTIVATED THIS WAS WRONG, WHICH IS WORTH MORE THAN
+ *   THE FIX.** The handoffs of 2026-09-18 and 2026-09-19 both say the shell is
+ *   *"4,110 lines and not one is executed by a test"*. Measured 2026-09-19:
+ *   **13 of its 70 top-level functions ARE executed**, by
+ *   `liftFromShell` in `test/render-arena-shell.test.js`, which cuts a function
+ *   out of the source and `new Function`s it — real calls, real assertions. And
+ *   this module has existed since 2026-09-12 for exactly this purpose. What is
+ *   genuinely unreachable is the ~28 functions that touch `document`, `window`,
+ *   a canvas context or `Audio` — `sizeCanvasToStage` among them. **"No test
+ *   executes it" was the wrong diagnosis of a real problem**, and it was
+ *   repeated for two days because nobody grepped the test file.
+ *
+ * ## What it decides
+ *
+ * `rect` is the canvas's CSS box. A stage that has not been laid out yet
+ * reports 0, and the answer then is the size it already has rather than
+ * collapsing the arena to nothing for a frame — so the CURRENT backing store is
+ * an input, not just a comparison.
+ *
+ * `changed` is the caller's cue to assign. **Assigning either dimension CLEARS
+ * the canvas and resets the whole 2d state**, so a caller that assigned every
+ * frame would wipe the arena every frame; that is why this reports a change
+ * rather than the caller diffing it afterwards.
+ *
+ * ► **THE AREA IS NOT CAPPED, AND THAT IS STATED RATHER THAN FIXED.** Browsers
+ *   refuse a canvas past a maximum area and the failure is a BLANK canvas, not
+ *   an exception. At the sizes this arena runs (a ~1280x720 stage at ratio 1-2
+ *   gives at most 2560x1440, 3.7M device pixels) nothing is near any published
+ *   limit, so a cap would be a guard against a hazard this machine cannot
+ *   demonstrate. **Do not add one without measuring a stage that needs it** —
+ *   the rule this repository keeps relearning is not to defer work for an
+ *   unmeasured cost, and inventing work for an unmeasured hazard is the same
+ *   error facing the other way.
+ */
+export function canvasBackingFor({
+  rectWidth,
+  rectHeight,
+  devicePixelRatio,
+  currentWidth,
+  currentHeight
+} = {}) {
+  // `window.devicePixelRatio` is 0 in some headless contexts and `undefined`
+  // wherever there is no window; both mean "one device pixel per CSS pixel"
+  // rather than "zero-sized canvas", which is what the shell's own `|| 1` said
+  // and is preserved exactly.
+  const ratio = Number.isFinite(devicePixelRatio) && devicePixelRatio > 0 ? devicePixelRatio : 1;
+  const backingWidth = Number.isFinite(currentWidth) ? currentWidth : 0;
+  const backingHeight = Number.isFinite(currentHeight) ? currentHeight : 0;
+  const cssWidth = Number.isFinite(rectWidth) && rectWidth > 0 ? rectWidth : backingWidth / ratio;
+  const cssHeight = Number.isFinite(rectHeight) && rectHeight > 0 ? rectHeight : backingHeight / ratio;
+  const width = Math.max(1, Math.round(cssWidth * ratio));
+  const height = Math.max(1, Math.round(cssHeight * ratio));
+  return { width, height, ratio, changed: width !== backingWidth || height !== backingHeight };
+}

@@ -61,6 +61,7 @@ import {
   facePackFrom,
   faceOpsFor,
   mergeFaceOps,
+  canvasBackingFor,
   rankStrideFrom,
   selectRules,
   retireVoices,
@@ -829,20 +830,29 @@ let context = surface;
  * and the click mapper at the bottom of this file already divides by
  * `rect.width` — so it keeps working without being told.
  */
+/**
+ * ► **THE ARITHMETIC MOVED TO `canvasBackingFor` ON 2026-09-19, AND WHAT IS
+ *   LEFT HERE IS THE FOUR DOM ACCESSES IT NEEDS.** Two reads
+ *   (`devicePixelRatio`, the CSS box) and two writes (`canvas.width/height`).
+ *   The decision between them ran with nothing behind it for the whole life of
+ *   this project, in the same function that had no sizing at all until
+ *   2026-09-18 and so published every pixel number through a 300x150 buffer.
+ *
+ *   **Assigning either dimension CLEARS the canvas and resets the 2d state**,
+ *   which is why the decision reports `changed` and this applies it only then.
+ */
 function sizeCanvasToStage() {
-  const ratio = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
-  // A stage that has not been laid out yet reports 0; keep the last good size
-  // rather than collapsing the arena to nothing for one frame.
-  const cssWidth = rect.width > 0 ? rect.width : canvas.width / ratio;
-  const cssHeight = rect.height > 0 ? rect.height : canvas.height / ratio;
-  const wanted = Math.max(1, Math.round(cssWidth * ratio));
-  const tall = Math.max(1, Math.round(cssHeight * ratio));
-  if (canvas.width === wanted && canvas.height === tall) return false;
-  // Assigning either dimension CLEARS the canvas and resets the 2d state, which
-  // is why this is guarded on an actual change rather than run every frame.
-  canvas.width = wanted;
-  canvas.height = tall;
+  const wanted = canvasBackingFor({
+    rectWidth: rect.width,
+    rectHeight: rect.height,
+    devicePixelRatio: window.devicePixelRatio,
+    currentWidth: canvas.width,
+    currentHeight: canvas.height
+  });
+  if (!wanted.changed) return false;
+  canvas.width = wanted.width;
+  canvas.height = wanted.height;
   return true;
 }
 

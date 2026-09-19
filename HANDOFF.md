@@ -44,6 +44,61 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **"THE SHELL IS 4,110 LINES AND NOT ONE IS EXECUTED BY A TEST" IS FALSE, AND
+  I PUBLISHED IT MYSELF THIS MORNING (2026-09-19).** It is ranked item 2 of the
+  2026-09-18 handoff and ranked item 2 of mine, which repeated it verbatim
+  without grepping the test file. **Measured: 13 of the shell's 70 top-level
+  functions ARE executed by the suite**, through `liftFromShell` in
+  `test/render-arena-shell.test.js` — it cuts a function out of the source and
+  `new Function`s it, with real calls and real assertions
+  (`groupRunsOf`, `pathBoxOf`, `composedMatrix`, `boxThrough`, `filterBleedOf`,
+  `runBoxOf`, `bufferRegionOf`, `opSpaceRunsOf`, `figureOriginMatrix`,
+  `figureRouteFor`, `figureEffectCensusOf`, `enchantmentCensusOf`,
+  `enchantDemoFrom`). **And `src/render/arena-shell.js` has existed since
+  2026-09-12 to hold exactly these decisions**, carrying eight of them.
+  ► **THE REAL PROBLEM IS NARROWER AND THE FIX IS DIFFERENT.** What the suite
+    cannot reach is the **~28 functions that touch `document`, `window`, a
+    canvas context or `Audio`**, because `liftFromShell` evaluates a body with
+    no DOM around it. So "make the file importable" was never the fix; **taking
+    the DECISION out of the DOM access** is, which is what
+    `src/render/arena-shell.js` was built for and what it now gets more of.
+  ► **`canvasBackingFor` IS THE FIRST ONE MOVED, and it is the right one to
+    start with**: `sizeCanvasToStage` is the function whose ABSENCE cost this
+    project every pixel number it published before 2026-09-18, and whose
+    arithmetic has run since with nothing behind it. Four values in, a size and
+    a `changed` flag out; the shell keeps two reads and two writes. **`changed`
+    is the contract, because assigning either dimension CLEARS the canvas and
+    resets the whole 2d state** — a caller that assigned every frame would wipe
+    the arena every frame. 7 tests by real import, 7 mutations each red.
+  ► **AND THE UNCAPPED AREA IS STATED RATHER THAN FIXED.** Browsers refuse a
+    canvas past a maximum area and the failure is a BLANK canvas, not an
+    exception — but this arena's stage at ratio 1-2 reaches at most about 3.7M
+    device pixels, nowhere near any published limit. **Inventing work for an
+    unmeasured hazard is the same error as deferring work for an unmeasured
+    cost, facing the other way.**
+
+► **THE NONCE RECOVERY IS RUN, REPRODUCES, AND THE APPLY IS STILL THE OWNER'S
+  (2026-09-19).** `tools/recover-launch-nonces.mjs --archive /mnt/c/ss2-capture/captures`
+  — verified read-only first (no `writeFile`, no `mkdir`, no `rm` anywhere in
+  it, and `--archive` is required so it has no "no arguments means do the full
+  job" hazard). Archive reachable, 8,325 files. **Run twice, byte-identical**,
+  which is the only assurance the tool itself says is on offer:
+
+```text
+    distinct tokens across recovered + already-committed .... 51
+    no shared token — every recovery is distinct
+    waiver today ........................................... 58
+    waiver if every recovery landed ........................ 18
+    goldens needing re-promotion ........................... 20 of 23
+```
+
+  **It is NOT applied and must not be applied casually.** The tool has no
+  `--apply` by design, `campaign.mjs ingest-round` refuses to overwrite
+  committed evidence, and that guard is correct: this rewrites 40 observation
+  digests and re-promotes 20 of 23 goldens. **Ranked item 4 is therefore
+  HALF-CLOSED** — the measurement is done and reproducible; the corpus
+  operation is a decision, not a fix.
+
 ► **THE AI JOINS ITS ALLY'S FIGHT BY DEFAULT NOW — OWNER'S DECISION,
   2026-09-19, TAKEN ON THE SWEEP BELOW.** `SS2_RANK_JOIN_SURPLUS` is 0.
   **The id is unchanged** (`ss2-map-derived-tournament`), because a suffix names
