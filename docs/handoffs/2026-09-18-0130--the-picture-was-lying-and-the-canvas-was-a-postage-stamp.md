@@ -117,11 +117,35 @@ these areas.** It is 230 KB and it is worth it. The four that matter most:
 
 ## Highest-value work, ranked
 
-1. **TEACH THE AI TO PLAY THE GAME IT IS IN.** Twelve of nineteen verbs are
-   never taken. Start with `taunt`, which is absent from the preference table
-   and measurably beats the shipped policy; then the two melee bands it never
-   picks. **Every hour spent on rules buys nothing a player can see until this
-   moves**, and it is also the cheapest lever on the art.
+1. **TEACH THE AI TO PLAY THE GAME IT IS IN — BUT THE MELEE HALF IS A ROSTER
+   PROBLEM AND THE OTHER HALF IS NOT. Re-measured 2026-09-18 01:50, after the
+   ranked list above was first written, and the distinction is the whole item.**
+
+   ► **DO NOT REWRITE THE BAND RANKING. IT WORKS.** Swept 560 stat combinations
+     (strength 1-20 × attack 1-20 × defence 1-19, staged in melee reach): the AI
+     chose **quick 400, normal 139, power 21**. It picks all three whenever the
+     stats make one of them best. The "100% quick-attack" census is true of the
+     SHIPPED ROSTER only — `tools/arena/roster.js`'s demo gladiator has a damage
+     pair and to-hit chances that make quick strictly best on every turn. **The
+     monoculture is a property of the demo roster, not of the policy**, and an
+     agent that starts here will spend a day rewriting a ranking that is right.
+     Tune the roster, or accept it and say so.
+
+   ► **WHAT IS GENUINELY MISSING IS THE NON-DAMAGE VERBS, and each has its own
+     cause.** `taunt` is absent from the preference table ENTIRELY, and cannot
+     simply be added to it: the table ranks expected damage, and a taunt's value
+     is the knockback (mean 150 units, landing 18.3% of the time) plus the flee
+     it can cause. **Ranking it needs the AI to value something other than
+     damage, which is a design decision and not a tuning one** — and it is worth
+     making, because "taunt whenever legal, otherwise the shipped AI" wins 257 of
+     400 3v3 bouts against the shipped AI, about 4σ. `psyche-up` is gated out by
+     `herolevel` (demo is 4, the melee gate is 7), `snipe` loses to `bombard` on
+     every offer, and `rest` fires only below 10 stamina.
+
+   **It is still ranked first**, because it is the cheapest lever on the art —
+   the rig can reach ~62 of the clip's 101 animations and the shipped game draws
+   19 — but the first hour belongs to the roster and the design question, not to
+   the ranking.
 2. **DECIDE THE TEAM LAYOUT — owner's call, and it is now blocking.** With lanes
    enforced and `startingY` opening ally slot 1 one rank back, a 2v2 is two
    parallel duels and a 3v3 is three. Nobody can gang up. Either allies start in
