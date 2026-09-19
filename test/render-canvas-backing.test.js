@@ -34,7 +34,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { canvasBackingFor, settlementReadiness } from "../src/render/arena-shell.js";
+import {
+  SS2_GROUP_PAINT_APPROXIMATIONS, canvasBackingFor, groupPaintReadout, settlementReadiness
+} from "../src/render/arena-shell.js";
 
 test("A LAID-OUT STAGE IS SIZED IN DEVICE PIXELS, which is the whole point of the function", () => {
   // ► **THE REGRESSION THIS FILE EXISTS FOR.** 300x150 is what a canvas with no
@@ -175,4 +177,63 @@ test("AN EMPTY CALL IS NOT READY, so a caller that forgets a field cannot settle
   //   a page that sits there, the first writes an outcome that never happened.
   assert.deepEqual(settlementReadiness(), { ready: false, waitingOn: "result" });
   assert.deepEqual(settlementReadiness({}), { ready: false, waitingOn: "result" });
+});
+
+/* ------------------------------------------------------------------ *
+ * groupPaintReadout — the panel's claim that nothing was approximated
+ * ------------------------------------------------------------------ */
+
+const census = (fields = {}) => ({ groups: 5, ...fields });
+
+test("ALL SIX APPROXIMATION TERMS COUNT, and a dropped one hides the warning", () => {
+  // ► **THE ASSERTION THAT MATTERS, and the reason this function was chosen
+  //   over the arithmetic-heavy ones.** The panel prints each term AND a
+  //   warning keyed on the sum. A term dropped from the sum makes the warning
+  //   disappear while the number is still printed beside it — a readout that
+  //   contradicts itself, which is worse than either failure alone.
+  for (const key of SS2_GROUP_PAINT_APPROXIMATIONS) {
+    const at = groupPaintReadout(census({ [key]: 1 }));
+    assert.equal(at.approximated, 1, `${key} must count toward the tally`);
+    assert.equal(at.anyApproximated, true, `${key} must raise the warning`);
+  }
+  assert.equal(SS2_GROUP_PAINT_APPROXIMATIONS.length, 6, "six ways a group can be drawn wrong");
+  assert.equal(groupPaintReadout(census()).approximated, 0, "and a clean frame tallies zero");
+});
+
+test("A MISSING OR NON-NUMERIC COUNTER IS ZERO, not NaN", () => {
+  // A NaN sum compares false against `> 0`, so a renderer that stopped
+  // reporting a counter would silently stop warning. `Number(...) || 0` is the
+  // difference between "no approximations" and "we lost count".
+  const at = groupPaintReadout({ groups: 3, groupsSplit: undefined, boxUnknown: "2" });
+  assert.equal(at.approximated, 2);
+  assert.equal(at.anyApproximated, true);
+});
+
+test("THE GATE IS A HIGH-WATER MARK, and asking cannot advance the cap", () => {
+  // Nothing drawn, or nothing NEW drawn, says nothing — and hands the state
+  // back unchanged, so a caller polling every frame cannot burn the three
+  // reports without the census ever growing.
+  assert.equal(groupPaintReadout(census({ groups: 0 })).report, false);
+
+  const quiet = groupPaintReadout(census({ groups: 4 }), { seenHigh: 4, reportsMade: 1 });
+  assert.equal(quiet.report, false);
+  assert.deepEqual([quiet.seenHigh, quiet.reportsMade], [4, 1], "state is handed back untouched");
+
+  const grown = groupPaintReadout(census({ groups: 9 }), { seenHigh: 4, reportsMade: 1 });
+  assert.equal(grown.report, true);
+  assert.deepEqual([grown.seenHigh, grown.reportsMade], [9, 2]);
+});
+
+test("IT STOPS AFTER THREE GROWTHS, because a trail builds up one puff at a time", () => {
+  // An arrow attaches its groups over several frames, so the census grows on
+  // every one of them and an ungated panel would print the same three lines
+  // for the length of the flight.
+  let state = { seenHigh: 0, reportsMade: 0 };
+  const reported = [];
+  for (const groups of [1, 2, 3, 4, 5]) {
+    const at = groupPaintReadout(census({ groups }), state);
+    state = { seenHigh: at.seenHigh, reportsMade: at.reportsMade };
+    reported.push(at.report);
+  }
+  assert.deepEqual(reported, [true, true, true, false, false]);
 });

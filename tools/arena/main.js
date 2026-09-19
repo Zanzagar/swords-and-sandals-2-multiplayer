@@ -62,6 +62,7 @@ import {
   faceOpsFor,
   mergeFaceOps,
   canvasBackingFor,
+  groupPaintReadout,
   rankStrideFrom,
   settlementReadiness,
   selectRules,
@@ -3008,17 +3009,21 @@ function reportFigureGroups() {
   { warn: lost > 0 });
 }
 
+/**
+ * ► **THE GATE AND THE SIX-TERM TALLY MOVED TO `groupPaintReadout` ON
+ *   2026-09-19.** What is left here is the log formatting.
+ */
 function reportGroupPaint() {
-  if (groupPaint.groups === 0 || groupPaint.groups <= groupPaintHigh) return;
-  groupPaintHigh = groupPaint.groups;
+  const readout = groupPaintReadout(groupPaint, { seenHigh: groupPaintHigh, reportsMade: groupPaintReports });
+  groupPaintHigh = readout.seenHigh;
   // ► **CAPPED AT THREE, BECAUSE A TRAIL BUILDS UP ONE PUFF AT A TIME.** An
   //   arrow attaches its six `bullet_trail` groups over six frames, so every
   //   one of those frames is a new high water mark — six reports of three
   //   lines each, into a 40-line panel, and the load-time invoice scrolls off
   //   the top. Three is the busiest frame this page reaches in practice and
   //   the cap is stated rather than left as an accident of the ramp.
-  groupPaintReports += 1;
-  if (groupPaintReports > 3) return;
+  groupPaintReports = readout.reportsMade;
+  if (!readout.report) return;
   log(`groups: ${groupPaint.groups} group(s) over ${groupPaint.groupedOps}/${groupPaint.ops} ops, ` +
     `${groupPaint.buffers} buffered (${groupPaint.bufferedOps} ops).`);
   log(`groups: ${groupPaint.inert} matrix-only (already folded), ${groupPaint.offscreen} off-canvas, ` +
@@ -3030,9 +3035,9 @@ function reportGroupPaint() {
   //   first while the second was false.
   log(`groups: ${groupPaint.glowAmplifiedGroups} group(s) drew an AMPLIFIED glow ` +
     `(${groupPaint.glowsAmplified} step(s)) — what \`ctx.filter\` cannot express.`);
-  const lost = groupPaint.groupsSplit + groupPaint.groupsNested
-    + groupPaint.groupsBlendRefused + groupPaint.boxUnknown
-    + groupPaint.filterAtStageScale + groupPaint.notComposited;
+  // The six-term sum is `groupPaintReadout`'s. Dropping a term here would
+  // hide the warning while the panel still printed the number.
+  const lost = readout.approximated;
   log(`groups: approximated — split ${groupPaint.groupsSplit}, nested ${groupPaint.groupsNested}, ` +
     `blend refused ${groupPaint.groupsBlendRefused}, unmeasurable ${groupPaint.boxUnknown}, ` +
     `unscaled ${groupPaint.filterAtStageScale}, not composited ${groupPaint.notComposited} ` +

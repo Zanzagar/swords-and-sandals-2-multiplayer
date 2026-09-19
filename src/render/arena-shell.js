@@ -366,3 +366,63 @@ export function settlementReadiness({
   if (!completionToken) return { ready: false, waitingOn: "completion-token" };
   return { ready: true, waitingOn: null };
 }
+
+/**
+ * The six counters that mean "the renderer did not do what the build does", and
+ * whether a fresh census is worth reporting at all.
+ *
+ * ## Why this one and not the arithmetic-heavy ones
+ *
+ * ► **ARITHMETIC DENSITY IS NOT DEFECT RISK, and picking by it would have sent
+ *   me to the wrong function.** Measured 2026-09-19 over `tools/arena/main.js`:
+ *   22 of its top-level functions touch `document`, `window`, a canvas context
+ *   or `Audio`, and the densest by far is `drawArenaBowl` — 57 arithmetic
+ *   expressions in 69 lines. **A wrong bowl is the most visible thing on the
+ *   screen**, so its failure mode is "somebody notices immediately". This one
+ *   has four expressions and its failure mode is a PANEL THAT CONFIDENTLY
+ *   REPORTS NOTHING WAS APPROXIMATED WHEN SOMETHING WAS — the hazard this whole
+ *   repository is organised against, and one the provenance panel has already
+ *   produced once (it claimed the figures were authored while the extracted rig
+ *   was being drawn over the sentence saying so).
+ *
+ * ## What it decides
+ *
+ * **`approximated` is the sum of the six ways a group can be drawn wrong**, and
+ * it is a sum rather than a flag because the panel prints each term: split,
+ * nested, blend refused, unmeasurable box, filter left at stage scale, and not
+ * composited. **A term dropped from this sum makes the warning disappear while
+ * the panel still prints the number**, which is worse than either alone.
+ *
+ * **`report` is a high-water-mark gate.** A census that has not grown says
+ * nothing new, so the panel is quiet; and it stops after `maxReports` growths
+ * because a bout that keeps finding new groups would otherwise fill the log with
+ * the same three lines. The caller threads `seenHigh` and `reportsMade` back in,
+ * so the state stays in the shell and the rule stays here.
+ */
+export const SS2_GROUP_PAINT_APPROXIMATIONS = Object.freeze([
+  "groupsSplit",
+  "groupsNested",
+  "groupsBlendRefused",
+  "boxUnknown",
+  "filterAtStageScale",
+  "notComposited"
+]);
+
+export function groupPaintReadout(census, { seenHigh = 0, reportsMade = 0, maxReports = 3 } = {}) {
+  const groups = census?.groups ?? 0;
+  const approximated = SS2_GROUP_PAINT_APPROXIMATIONS
+    .reduce((total, key) => total + (Number(census?.[key]) || 0), 0);
+  // Nothing drawn, or nothing new drawn: the panel stays quiet and the state is
+  // handed back unchanged, so a caller cannot advance the cap by asking.
+  if (groups === 0 || groups <= seenHigh) {
+    return { report: false, seenHigh, reportsMade, approximated, anyApproximated: approximated > 0 };
+  }
+  const grown = reportsMade + 1;
+  return {
+    report: grown <= maxReports,
+    seenHigh: groups,
+    reportsMade: grown,
+    approximated,
+    anyApproximated: approximated > 0
+  };
+}

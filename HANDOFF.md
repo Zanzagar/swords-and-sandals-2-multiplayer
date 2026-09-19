@@ -49,6 +49,29 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **A THIRD SHELL DECISION IS OUT, AND PICKING IT TAUGHT THE SELECTION RULE
+  (2026-09-19).** `groupPaintReadout`. **The DOM-bound set is 22 functions, not
+  the ~28 I published earlier today** — counted properly this time — and 10 of
+  them carry no arithmetic at all.
+  ► **ARITHMETIC DENSITY IS NOT DEFECT RISK, and choosing by it sends you to
+    the wrong function.** The densest is `drawArenaBowl`: 57 arithmetic
+    expressions in 69 lines. **A wrong bowl is the most visible thing on the
+    screen**, so somebody notices immediately. `groupPaintReadout` has four
+    expressions and its failure mode is **a panel that confidently reports
+    nothing was approximated when something was** — the hazard this repository
+    is organised against, and one the provenance panel has already produced
+    once. **Pick by whether the failure is INVISIBLE, not by operator count.**
+  ► **THE SIX-TERM SUM IS THE THING PINNED.** Split, nested, blend-refused,
+    unmeasurable box, filter-at-stage-scale, not-composited. The panel prints
+    each term AND a warning keyed on their sum, so **a term dropped from the sum
+    makes the warning vanish while the number is still printed beside it** — a
+    readout that contradicts itself. Each of the six is pinned separately, and
+    a `Number(...) || 0` guard stops a missing counter turning the sum into NaN,
+    which compares false and would silently stop warning.
+  ► **AND `viewport`, `stepCamera` AND `arenaScreenAvailable` ALL NEEDED
+    NOTHING** — thin dispatchers and a memoiser over `src/render/`. Three
+    checked, three already done.
+
 ► **A SECOND SHELL DECISION IS OUT OF THE DOM SET: `settlementReadiness`
   (2026-09-19).** The gate was five terms of boolean inside `settleIfReady`,
   which reads module-scope mutable state and calls the host — so a wrong term
