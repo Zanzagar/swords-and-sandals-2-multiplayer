@@ -81,7 +81,8 @@ import test from "node:test";
 
 import { combatantById, createTeamBattle, legalActions, suggestAction } from "../src/team/index.js";
 import {
-  SS2_ARENA, Ss2ActionType, createSs2TeamRules, ss2Combatant, ss2RankToJoin, ss2TeamRules
+  SS2_ARENA, SS2_RANK_JOIN_SURPLUS, Ss2ActionType, createSs2TeamRules, ss2Combatant, ss2RankToJoin,
+  ss2TeamRules
 } from "../src/team/ss2-rules.js";
 
 const gladiator = (overrides = {}) => ({
@@ -156,35 +157,105 @@ function brawl(rankJoinSurplus, { keeper = true } = {}) {
 }
 
 /* ------------------------------------------------------------------ *
- * THE DEFAULT IS OFF, BY CONSTRUCTION
+ * THE DEFAULT, AND THE OFF SWITCH THAT IS NO LONGER IT
  * ------------------------------------------------------------------ */
 
-test("THE SHIPPED RULE SET NEVER JOINS, and the arm is off before it reads anything", () => {
-  // ► **THE ASSERTION THAT COULD HAVE VARIED, and it caught a real error.** The
-  //   first cut of this parameter defaulted to 0 and said in its own docstring
-  //   that nothing moved at the default. Measured on the arena's own path: 25
-  //   seeded 3v3 bouts went from 2,234 decisions to 2,307, `rank-front` from 14
-  //   to 28 and `rank-back` from 29 to 51. **At 0 the arm still fires from a
-  //   rank holding an ally and one foe, and it aims at the rank where an ALLY is
-  //   fighting where the old arm aimed at the NEAREST FOE's rank** — two
-  //   different moves, both reachable.
-  //
-  //   `Infinity` is the off switch and `ss2RankToJoin` returns `null` for it
-  //   before reading the view, so the default is a no-op by construction rather
-  //   than by argument.
+test("THE SHIPPED RULE SET JOINS, at `SS2_RANK_JOIN_SURPLUS` — owner's call 2026-09-19", () => {
+  // ► **THIS ASSERTION WAS THE OPPOSITE ONE FOR ONE COMMIT, and the flip is the
+  //   decision rather than a fix.** The dial shipped OFF while it was only a
+  //   sweep; the owner took the decision on the numbers and 0 became the
+  //   default. Kept as one test rather than rewritten into silence, because
+  //   "the shipped AI joins" is exactly the fact a reader needs and exactly the
+  //   one that changed.
+  assert.equal(SS2_RANK_JOIN_SURPLUS, 0);
+  assert.equal(createSs2TeamRules().rulesDescriptor?.id ?? createSs2TeamRules().id, ss2TeamRules.id);
+  assert.equal(
+    suggestAction(brawl(undefined, { keeper: false }), "hero").type,
+    Ss2ActionType.RANK_FRONT,
+    "at the shipped default a gladiator with a clear rank walks into its ally's fight"
+  );
+});
+
+test("AND THE SHIPPED DEFAULT CARRIES NO SUFFIX, which is what keeps every pinned hash", () => {
+  // ► **A SUFFIX NAMES WHAT DIFFERS FROM THE SHIPPED DEFAULT**, the rule
+  //   `crowdPatience`, `rankStride` and `backAttackBonus` all follow. The
+  //   default moved on 2026-09-19 and the suffix rule moved with it, so an
+  //   ordinary battle keeps the id every literal `combatStateHash` pin was
+  //   taken against.
+  assert.equal(ss2TeamRules.id, "ss2-map-derived-tournament");
+  assert.equal(createSs2TeamRules().id, "ss2-map-derived-tournament");
+  assert.equal(createSs2TeamRules({ rankJoinSurplus: SS2_RANK_JOIN_SURPLUS }).id, "ss2-map-derived-tournament");
+});
+
+test("`Infinity` STILL SWITCHES THE ARM OFF, which is how a pre-2026-09-19 measurement is reproduced", () => {
+  // ► **THE OFF SWITCH IS NOT DEAD JUST BECAUSE IT IS NOT THE DEFAULT.** Every
+  //   census and engagement number in this repository dated 2026-09-18 or
+  //   earlier was taken with this arm inert. `ss2RankToJoin` returns `null` for
+  //   a non-finite surplus before reading the view, so the old engine is one
+  //   parameter away and a reader chasing an old number can get it back.
   const view = { actor: { id: "hero", y: BACK, x: 0 }, allies: [], foes: [] };
   assert.equal(ss2RankToJoin(view, Infinity, SS2_ARENA.rankStride), null);
 
-  const battle = brawl(undefined);
-  assert.doesNotMatch(suggestAction(battle, "hero").type, /^rank-/, "the shipped AI holds its rank");
-  assert.equal(ss2TeamRules.id, "ss2-map-derived-tournament");
-  assert.equal(createSs2TeamRules().id, "ss2-map-derived-tournament");
+  // ► **STAGED WITH `keeper` PRESENT, AND THE FIRST VERSION WAS NOT.** With a
+  //   clear rank BOTH arms produce `rank-front` — the old `!ownRankHasFoe` arm
+  //   aiming at the nearest foe's rank and the join arm aiming at the ally's —
+  //   so that staging cannot tell the off switch from the on one. A foe in the
+  //   actor's own rank blocks the old arm outright, so what happens next is the
+  //   join arm and nothing else.
+  assert.equal(
+    suggestAction(brawl(-1), "hero").type,
+    Ss2ActionType.RANK_FRONT,
+    "the control: with the arm on, this staging joins"
+  );
+  assert.doesNotMatch(
+    suggestAction(brawl(Infinity), "hero").type,
+    /^rank-/,
+    "and with it off the gladiator does what it did before this existed"
+  );
+  assert.equal(createSs2TeamRules({ rankJoinSurplus: Infinity }).id, "ss2-map-derived-tournament-join-none");
 });
 
-test("a finite value names itself in the id, and the spelling reads", () => {
-  assert.equal(createSs2TeamRules({ rankJoinSurplus: 0 }).id, "ss2-map-derived-tournament-join-hold-0");
+test("`-Infinity` DOES WHAT ITS OWN ID SAYS, and for one commit it did the opposite", () => {
+  // ► **FOUND BY A MUTATION THAT SURVIVED**, which is the mutation check
+  //   earning its keep rather than rubber-stamping. The guard read
+  //   `!Number.isFinite(rankJoinSurplus)`, so `-Infinity` took the OFF path —
+  //   while `joinSuffix` spelled it `-join-always`. **A rule-set id that says
+  //   the opposite of the behaviour is worse than no id**: it is the one string
+  //   two peers compare before they trust each other.
+  //
+  //   `< Infinity` settles all three cases in one comparison: `NaN` false (off),
+  //   `+Infinity` false (off), `-Infinity` true (always).
+  assert.equal(createSs2TeamRules({ rankJoinSurplus: -Infinity }).id, "ss2-map-derived-tournament-join-always");
+  assert.equal(
+    suggestAction(brawl(-Infinity), "hero").type,
+    Ss2ActionType.RANK_FRONT,
+    "an id that says `always` must join where `-1` joins"
+  );
+
+  // ► **AND `NaN` IS OFF, ON A VIEW THAT WOULD OTHERWISE JOIN.** A second
+  //   mutation survived here: an EMPTY view returns `null` whatever the surplus
+  //   is, so asserting against one cannot tell a working guard from a deleted
+  //   one. Every comparison against `NaN` is false, so without the guard `NaN`
+  //   sails through the surplus gate and joins. The view below is the live
+  //   `brawl` one, and the control above it is the whole point.
+  const battle = brawl(-1);
+  const view = {
+    actor: combatantById(battle, "hero"),
+    allies: [combatantById(battle, "mate")],
+    foes: [combatantById(battle, "boss"), combatantById(battle, "keeper")]
+  };
+  assert.equal(
+    ss2RankToJoin(view, -1, SS2_ARENA.rankStride),
+    Ss2ActionType.RANK_FRONT,
+    "the control: this view joins at a real surplus"
+  );
+  assert.equal(ss2RankToJoin(view, Number.NaN, SS2_ARENA.rankStride), null, "and NaN is off");
+});
+
+test("a value that is not the default names itself in the id, and the spelling reads", () => {
   assert.equal(createSs2TeamRules({ rankJoinSurplus: -1 }).id, "ss2-map-derived-tournament-join-down-1");
   assert.equal(createSs2TeamRules({ rankJoinSurplus: -2 }).id, "ss2-map-derived-tournament-join-down-2");
+  assert.equal(createSs2TeamRules({ rankJoinSurplus: 1 }).id, "ss2-map-derived-tournament-join-hold-1");
 });
 
 /* ------------------------------------------------------------------ *

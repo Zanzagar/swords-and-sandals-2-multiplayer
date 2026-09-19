@@ -44,6 +44,44 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE AI JOINS ITS ALLY'S FIGHT BY DEFAULT NOW — OWNER'S DECISION,
+  2026-09-19, TAKEN ON THE SWEEP BELOW.** `SS2_RANK_JOIN_SURPLUS` is 0.
+  **The id is unchanged** (`ss2-map-derived-tournament`), because a suffix names
+  what differs from the SHIPPED DEFAULT and the default moved with it — so an
+  ordinary battle keeps the id every literal `combatStateHash` pin was taken
+  against, and `-join-none` is how the pre-decision engine is asked for.
+  **Suite 2059 / fail 0 / skipped 1, exit 0, with nothing but the new tests
+  moving**, which is the evidence that the AI policy is not hashed or pinned
+  anywhere in this repository.
+  ► **WHAT IT BOUGHT, on the same 24 seeds as the measurement that motivated
+    it**, through `tools/engagement-census.mjs`:
+
+```text
+                                  before        after
+      crossings                   20.0%         25.9%
+      turns with 2+ fights           30           196
+      most fights at once             2             2
+      actions a bout                 83            93
+      settled                     24/24         24/24
+```
+
+  ► **AND THE 2-ON-1 RATE NEEDS 300 BOUTS, NOT 24 — measured, after two of my
+    own harnesses appeared to disagree.** They did not: at matched sample size
+    both give **1,465** ganged turns exactly. The RATE is what moves with the
+    sample — 3.1% at 24 bouts, 3.9% at 100, **5.3% at 300** — so **every
+    2-on-1 figure in this file taken at 24 bouts is a low-sample estimate**,
+    including the 3.0% that closed the layout question. That conclusion
+    survives regardless, because its other arm is 0 of 2,851 and structurally
+    impossible; the NUMBER is soft and the COMPARISON is not.
+  ► **A MUTATION THAT SURVIVED FOUND AN ID THAT LIED.** The guard read
+    `!Number.isFinite(rankJoinSurplus)`, sending `-Infinity` down the OFF path
+    while `joinSuffix` spelled it `-join-always`. **A rule-set id that says the
+    opposite of the behaviour is worse than no id** — it is the one string two
+    peers compare before they trust each other. `< Infinity` settles all three
+    cases in one comparison. **A second mutation survived on an EMPTY view**,
+    which returns `null` whatever the surplus is and so cannot tell a working
+    guard from a deleted one; the `NaN` pin runs on the live view now.
+
 ► **THE RANK-JOINING DIAL IS SWEPT, AND THE SETTING THAT HELPS IS NOT THE ONE
   THAT WINS (2026-09-19).** `rankJoinSurplus` is the question ranked item 2
   should have asked, now that the layout half of it is closed. **OFF BY DEFAULT

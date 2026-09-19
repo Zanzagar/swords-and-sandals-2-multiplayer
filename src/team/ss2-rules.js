@@ -2833,8 +2833,8 @@ export function ss2ApproachValue(actor, target, best) {
  *   at all. So the layout is settled and what is actually open is how WILLING a
  *   gladiator should be to leave its own fight and join somebody else's.
  *
- * ► **`rankJoinSurplus` IS THAT WILLINGNESS, AND TODAY'S BEHAVIOUR IS A POINT
- *   ON IT RATHER THAN A SEPARATE CASE.** The gate that stood here was
+ * ► **`rankJoinSurplus` IS THAT WILLINGNESS, AND THE GATE THIS REPLACED IS A
+ *   POINT ON IT RATHER THAN A SEPARATE CASE.** What stood here was
  *   `!ownRankHasFoe` — leave only when your own rank is empty of foes. Written
  *   as a surplus over the rank you would be leaving behind:
  *
@@ -2864,17 +2864,29 @@ export function ss2ApproachValue(actor, target, best) {
 export function ss2RankToJoin(view, rankJoinSurplus, rankStride) {
   const actor = view.actor;
   if (!Number.isFinite(actor.y)) return null;
-  // > **`Infinity` IS THE OFF SWITCH AND IS THE SHIPPED DEFAULT, so this arm
-  //   cannot move a shipped bout by construction rather than by argument.**
-  //   The first cut defaulted it to 0 and claimed in its own docstring that
-  //   "nothing moves at the default" -- **measured, and it was false**: 25
-  //   seeded 3v3 bouts went from 2,234 decisions to 2,307, `rank-front` from
-  //   14 to 28 and `rank-back` from 29 to 51. At 0 this arm still fires when
-  //   the actor's rank holds an ally and one foe, and it aims at the rank where
-  //   an ALLY is fighting where the old arm aimed at the NEAREST foe's rank --
-  //   two different moves, both reachable. **A default that has to be argued to
-  //   be a no-op is not a no-op**; one the function returns `null` for is.
-  if (!Number.isFinite(rankJoinSurplus)) return null;
+  // ► **`Infinity` IS THE OFF SWITCH. IT IS NO LONGER THE DEFAULT, AND THE
+  //   HISTORY IS WORTH THE THREE LINES.** This shipped OFF on 2026-09-19
+  //   because a sweep is not a decision; the owner took the decision the same
+  //   day and the default is 0. **What the off switch is still for** is
+  //   reproducing a measurement taken before that — every census and
+  //   engagement number in this repository dated 2026-09-18 or earlier was
+  //   taken with this arm inert, and `rankJoinSurplus: Infinity` is how you get
+  //   that engine back.
+  //
+  //   The value ALSO records a real error: the first cut defaulted to 0 while
+  //   claiming in its own docstring that nothing moved. Measured, 25 seeded 3v3
+  //   bouts went 2,234 decisions to 2,307 and rank changes 43 to 79. The claim
+  //   was wrong, the number was real, and **a default that has to be argued to
+  //   be a no-op is not one** — which is why the change of default below is
+  //   stated as a behaviour change rather than slipped in as a tuning.
+  //   ► **AND IT CANNOT BE `!Number.isFinite`, WHICH IS WHAT IT WAS UNTIL A
+  //     MUTATION SURVIVED.** That test sent `-Infinity` down the OFF path while
+  //     the rule-set id spelled it `-join-always`: **an id that said the
+  //     opposite of the behaviour.** `< Infinity` gets all three cases right in
+  //     one comparison — `NaN` is false so it is off, `+Infinity` is false so it
+  //     is off, and `-Infinity` is true so it joins whenever an ally is engaged,
+  //     which is what its own id claims.
+  if (!(rankJoinSurplus < Infinity)) return null;
   // ► **THE STRIDE IS THE RULE SET'S AND NOT `SS2_ARENA.rankStride`.** A rule
   //   set built with a different stride puts its ranks somewhere else, and an
   //   adjacency test against the module constant would silently find no
@@ -3145,6 +3157,54 @@ export const SS2_PSYCHE_UP = Object.freeze({
  *   would read as the build's own number and it is not one — the build has no
  *   mean, it has a uniform draw over 1, 2, 3.
  */
+/**
+ * How willing an AI gladiator is, by default, to leave its own fight and join an
+ * ally's. **AUTHORED, TUNED AGAINST A SWEEP, AND THE OWNER'S CALL.**
+ *
+ * ► **0 MEANS "JOIN, BUT NEVER DESERT ANYBODY".** `ss2RankToJoin` may leave a
+ *   rank when `alliesInMyRank (not counting me) - foesInMyRank >= this`, so at 0
+ *   a gladiator with a foe in its own rank stays and fights it. What it gains is
+ *   a reason to walk INTO an ally's fight rather than toward whichever enemy
+ *   happens to be nearest.
+ *
+ * ► **THE SWEEP THAT SET IT, 300 seeded 3v3 bouts an arm on the demo roster,
+ *   through the arena's own host.** Head-to-head numbers are given for BOTH
+ *   arms, because a one-armed A/B is an A — the failure that broke the
+ *   2026-09-18 taunt claim:
+ *
+ *   ```text
+ *     vs shipped        as team 0        as team 1        alternating
+ *       surplus  0      155-145 51.7%    136-164 45.3%    130-170 43.3%  -2.3σ
+ *       surplus -1      166-133 55.5%    148-150 49.7%    150-149 50.2%  +0.1σ
+ *
+ *     a bout looks like   turns  settled   2-on-1 turns   rank changes
+ *       off                  97  300/300    804 (2.7%)             500
+ *       surplus  0           92  300/300   1465 (5.3%)             847
+ *       surplus -1          137  297/300    754 (1.8%)            1113
+ *   ```
+ *
+ * ► **IT IS NOT THE SETTING THAT WINS, AND THAT IS DELIBERATE.** 0 costs about
+ *   2.3σ of win rate against the old policy while DOUBLING the share of turns
+ *   somebody is fighting two enemies (2.7% → 5.3%) and making bouts SHORTER
+ *   (97 → 92 turns), with all 300 still settling. **Same trade as `aiCharges`:
+ *   an opponent more interesting to fight and slightly worse at fighting**, and
+ *   the win rate is the wrong number for PvP anyway, where both sides have it.
+ *   Owner's decision, 2026-09-19, taken on the sweep above.
+ *
+ * ► **AND -1 IS WORSE THAN DOING NOTHING AT THE THING IT IS FOR**, which is why
+ *   the dial stops here rather than going further: it HALVES the 2-on-1 rate
+ *   against `off` while tripling rank changes, runs bouts 41% longer and stops
+ *   3 of 300 settling. Everybody breaks off constantly and nobody stands still
+ *   long enough for a second attacker to arrive — **churn, not focus.**
+ *
+ * ► **THE DIAL HAS THREE SETTINGS ON THIS ROSTER, NOT A CURVE.** -1, -2 and -99
+ *   are byte-identical in both tables above: with one gladiator a side in a rank
+ *   the surplus only ever reaches -1, so nothing below it can bind. **Re-run the
+ *   sweep if the roster ever puts two gladiators in one rank**, because that is
+ *   the condition under which the lower settings start to mean anything.
+ */
+export const SS2_RANK_JOIN_SURPLUS = 0;
+
 const SS2_TAUNT_FLOOR_DAMAGE_MEAN = 2;
 
 export const SS2_TAUNT = Object.freeze({
@@ -4993,30 +5053,42 @@ export function createSs2TeamRules({
    *   shipped ranks and on **0 of 2,851 turns in one lane**. The layout is
    *   settled; the willingness is not.
    *
-   * ► **`Infinity` IS THE SHIPPED DEFAULT AND MEANS THE ARM IS OFF**, so a
-   *   shipped bout is untouched BY CONSTRUCTION — `ss2RankToJoin` returns
-   *   `null` for it before reading anything. **The first cut defaulted this to
-   *   0 and said in its own docstring that nothing moved; measured, 25 seeded
-   *   3v3 bouts went 2,234 decisions to 2,307 and rank changes 43 to 79.** A
-   *   default that has to be argued to be a no-op is not one.
+   * ► **IT DEFAULTS TO `SS2_RANK_JOIN_SURPLUS`, WHICH IS 0 — OWNER'S DECISION,
+   *   2026-09-19, TAKEN ON THE SWEEP PRINTED AT THAT CONSTANT.** The full
+   *   table lives there rather than here, because the number is the constant's
+   *   and this parameter is only the way to override it.
    *
-   *   A FINITE value switches the arm on: `ss2RankToJoin` may leave when
-   *   `alliesInMyRank (not counting me) - foesInMyRank >= rankJoinSurplus`.
-   *   `0` joins only from a rank it is not deserting anybody in; `-1` will
-   *   leave one foe behind to make a 2-on-1 elsewhere; `-2` will leave two; a
-   *   large negative joins whenever an ally is engaged next door.
+   *   `ss2RankToJoin` may leave a rank when
+   *   `alliesInMyRank (not counting me) - foesInMyRank >= rankJoinSurplus`, so
+   *   **0 joins but never deserts**: a gladiator with a foe in its own rank
+   *   stays and fights it. `-1` will leave one foe behind to make a 2-on-1
+   *   elsewhere and is measurably WORSE at causing 2-on-1s than doing nothing;
+   *   `Infinity` switches the arm off, which is how a measurement taken before
+   *   2026-09-19 is reproduced.
    *
-   * ► **IT IS IN THE RULE-SET ID WHENEVER IT IS FINITE**, the same rule
-   *   `crowdPatience`, `rankStride` and `backAttackBonus` follow: the hash
-   *   carries only the id, so two peers on different willingnesses would agree
-   *   on every hash and then diverge the first time one of them broke off.
+   * ► **THIS IS A BEHAVIOUR CHANGE AT THE DEFAULT AND IS STATED AS ONE.** It
+   *   shipped OFF for one commit and was turned on by the owner in the next;
+   *   the id is unchanged either way, because a suffix names what differs from
+   *   the SHIPPED DEFAULT and the shipped default moved with it. **So the id is
+   *   NOT the thing that tells two peers apart here — the code version is.**
+   *   That is true of every AI change this project has made (targeting
+   *   2026-09-12, the bow 2026-09-13, charges 2026-09-16, the flank 2026-09-17,
+   *   the taunt 2026-09-19) and it is worth saying once, at the change that
+   *   moved a default rather than adding a flag.
    *
-   * ► **WHAT IT BUYS, SWEPT RATHER THAN ARGUED — see the handoff of
-   *   2026-09-19 for the table.** It is left at 0 because the numbers alone do
-   *   not settle it: this is how the arena LOOKS, and the repository's own hard
-   *   rule is that the owner watching a bout is the instrument for that.
+   * ► **IT IS IN THE RULE-SET ID WHENEVER IT DIFFERS FROM THE DEFAULT**, the
+   *   same rule `crowdPatience`, `rankStride` and `backAttackBonus` follow: the
+   *   hash carries only the id, so two peers on different willingnesses would
+   *   agree on every hash and then diverge the first time one of them broke
+   *   off.
+   *
+   * ► **NO PINNED HASH OR GOLDEN MOVES, AND THAT WAS MEASURED RATHER THAN
+   *   ARGUED.** The AI policy is not hashed anywhere here —
+   *   `test/seeded-play-pins.test.js` drives explicit actions and every golden
+   *   replays stated ones — so a policy change cannot move a pin. The suite is
+   *   the evidence: it stayed at fail 0 across this change.
    */
-  rankJoinSurplus = Infinity,
+  rankJoinSurplus = SS2_RANK_JOIN_SURPLUS,
   aiTaunts = true,
   aiCharges = false,
   /**
@@ -5165,9 +5237,15 @@ export function createSs2TeamRules({
   const tauntSuffix = aiTaunts ? "" : "-no-taunt";
   // Same rule again. `-join-none` rather than `-join-Infinity` because an id is
   // read by people and `Infinity` in a hash input reads like a bug.
-  const joinSuffix = !Number.isFinite(rankJoinSurplus)
+  // Same rule as every suffix above: it names what differs from the SHIPPED
+  // DEFAULT, and that default moved to 0 on 2026-09-19. So an ordinary battle
+  // carries no suffix, a rule set with the arm switched OFF says `-join-none`,
+  // and a more willing one says how willing.
+  const joinSuffix = rankJoinSurplus === SS2_RANK_JOIN_SURPLUS
     ? ""
-    : `-join-${rankJoinSurplus < 0 ? `down-${-rankJoinSurplus}` : `hold-${rankJoinSurplus}`}`;
+    : !Number.isFinite(rankJoinSurplus)
+      ? (rankJoinSurplus > 0 ? "-join-none" : "-join-always")
+      : `-join-${rankJoinSurplus < 0 ? `down-${-rankJoinSurplus}` : `hold-${rankJoinSurplus}`}`;
   const ruleSetId =
     `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}`;
 
@@ -7383,10 +7461,11 @@ export function createSs2TeamRules({
         //   below because it is the more specific question: that one asks
         //   "where IS the fight", this one asks "should I leave mine for
         //   somebody else's". At the shipped `rankJoinSurplus` of 0 it can
-        //   never fire while a foe stands in the actor's own rank, so the two
-        //   do not overlap and the shipped behaviour is unchanged. See
-        //   `ss2RankToJoin` for the measurement that made this the open
-        //   question and the layout a closed one.
+        //   never fire while a foe stands in the actor's own rank, so a
+        //   gladiator still finishes the fight it is in; what it gains is a
+        //   reason to walk INTO one rather than toward the nearest enemy. See
+        //   `ss2RankToJoin` for the sweep that set the value and
+        //   `SS2_RANK_JOIN_SURPLUS` for what it costs.
         if (positionedInDepth) {
           const join = ss2RankToJoin(view, rankJoinSurplus, rankStride);
           if (join) {
