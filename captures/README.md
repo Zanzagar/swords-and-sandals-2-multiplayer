@@ -33,12 +33,39 @@ find . -type f -printf "%P\n" | LC_ALL=C sort | tr '\n' '\0' | xargs -0 sha256su
   > <repo>/captures/ARCHIVE-MANIFEST.sha256
 ```
 
-Recorded 2026-09-01: **1,588 files, 18,194,754 bytes.** Regenerate it whenever a
-session adds traces, or the manifest silently describes a smaller archive than
-the one on disk — the same staleness this project has been bitten by elsewhere.
+Recorded 2026-09-19: **8,325 files, 58,492,555 bytes** — the WHOLE archive.
+
+► **IT ATTESTED 19% OF THE ARCHIVE FOR EIGHTEEN DAYS, AND THAT IS EXACTLY THE
+  STALENESS THE PARAGRAPH BELOW WARNS ABOUT.** Recorded 2026-09-01 at **1,588
+  files, 18,194,754 bytes**, which was the archive then; sessions added traces
+  and nobody regenerated it, so by 2026-09-19 it covered 1,588 of 8,325 files.
+  **A copy could have dropped 81% of the archive and verified clean**, which is
+  the one thing this file exists to make impossible. Re-measured and regenerated
+  that day.
+
+► **THE OLD ATTESTATION WAS NOT LOST, AND THAT WAS CHECKED RATHER THAN
+  ASSUMED.** Before the replacement the committed manifest was verified against
+  the archive and passed silently — all 1,588 files matched — and the new
+  manifest is a strict SUPERSET: every one of those 1,588 lines appears in it
+  verbatim, confirmed with `comm -23` over both sorted. So the regeneration
+  added 6,737 files and altered nothing. **Do this check whenever you
+  regenerate**, because the failure mode of a bad regeneration is a manifest
+  that looks larger and attests something else:
+
+```bash
+cd /mnt/c/ss2-capture/captures
+sha256sum -c --quiet <repo>/captures/ARCHIVE-MANIFEST.sha256   # old one still good?
+# ... regenerate to a scratch file, then:
+comm -23 <(LC_ALL=C sort <repo>/captures/ARCHIVE-MANIFEST.sha256) \
+         <(LC_ALL=C sort <scratch>/ARCHIVE-MANIFEST.new) | wc -l   # must be 0
+```
+
+Regenerate it whenever a session adds traces, or the manifest silently describes
+a smaller archive than the one on disk — the same staleness this project has
+been bitten by elsewhere, and was bitten by here.
 
 **Read what it does and does not prove.** It is an integrity check on bytes as
-they were on 2026-09-01: it detects corruption, truncation, and partial or
+they were on 2026-09-19: it detects corruption, truncation, and partial or
 failed copies, and it makes a restored backup verifiable rather than merely
 present. **It is NOT a provenance claim.** It says nothing about when a trace
 was captured, whether two traces came from independent sessions, or whether a

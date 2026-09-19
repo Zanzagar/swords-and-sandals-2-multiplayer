@@ -44,6 +44,24 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE ARCHIVE MANIFEST ATTESTS THE WHOLE ARCHIVE NOW, AFTER ATTESTING 19% OF
+  IT FOR EIGHTEEN DAYS (2026-09-19).** Ranked item 5, closed. It was recorded on
+  2026-09-01 at 1,588 files; the archive is **8,325 files / 58,492,555 bytes**,
+  so **a copy could have dropped 81% of it and verified clean** — the one thing
+  the file exists to make impossible.
+  ► **THE OLD ATTESTATION WAS CHECKED BEFORE IT WAS REPLACED, AND PRESERVED.**
+    The committed manifest was verified against the archive first and passed
+    silently (1,588 of 1,588); the new one is a strict SUPERSET — every old line
+    appears in it verbatim, `comm -23` over both sorted returns **0**. The
+    regeneration added 6,737 files and altered nothing, and the new manifest
+    round-trips (`sha256sum -c --quiet`, 0 mismatches, exit 0). **That check is
+    now written into `captures/README.md`**, because the failure mode of a bad
+    regeneration is a manifest that looks larger and attests something else.
+  ► **THE `D:` MIRROR IS STILL AT 1,588 AND IS NOW 19% OF THE ARCHIVE.** The
+    living head said it held "all" of it, which was true when written; the
+    correction is AT that sentence rather than only here. Re-taking the mirror
+    is unclaimed. **Check `D:` from Windows, never from `/mnt/d`.**
+
 ► **"THE SHELL IS 4,110 LINES AND NOT ONE IS EXECUTED BY A TEST" IS FALSE, AND
   I PUBLISHED IT MYSELF THIS MORNING (2026-09-19).** It is ranked item 2 of the
   2026-09-18 handoff and ranked item 2 of mine, which repeated it verbatim
@@ -3356,6 +3374,16 @@ universal.
     bullet below is right that only ONE copy was REACHABLE, and it invites the
     stronger reading that only one EXISTS. It did not. **State reachability and
     existence separately; an unplugged drive is a latency, not a loss.**
+
+    ► **AND THE WORD "ALL" IN THE NEXT SENTENCE EXPIRED WITHOUT ANYBODY
+      TOUCHING IT — corrected 2026-09-19.** It was true of the archive on
+      2026-09-01. Sessions added traces and nobody regenerated the manifest or
+      the mirror, so by 2026-09-19 the archive held **8,325 files / 58,492,555
+      bytes** and that backup holds 1,588 of them — **19%.** The manifest is
+      regenerated and now attests the whole archive; **the `D:` MIRROR IS NOT,
+      and re-taking it is unclaimed work.** Check it from Windows, never from
+      `/mnt/d`. **A count is a claim with a date on it**, and "all" is the word
+      that hides the date.
 
     **Current state, 2026-09-01 evening, verified rather than asserted:**
     `D:\ss2-backups\captures-2026-09-01` now holds all **1,588 files /
