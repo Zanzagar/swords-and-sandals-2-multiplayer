@@ -8,8 +8,14 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-18 01:30 — the picture was lying, and the canvas was a postage stamp](docs/handoffs/2026-09-18-0130--the-picture-was-lying-and-the-canvas-was-a-postage-stamp.md).**
+[2026-09-19 04:00 — the taunt was never ranked](docs/handoffs/2026-09-19-0400--the-taunt-was-never-ranked.md).**
 Start there. *(It supersedes
+[2026-09-18 01:30 — the picture was lying, and the canvas was a postage stamp](docs/handoffs/2026-09-18-0130--the-picture-was-lying-and-the-canvas-was-a-postage-stamp.md),
+**whose ranked item 1 is DONE, whose ranked item 2 is CLOSED RATHER THAN
+ANSWERED because the premise it was posed on is refuted, and two of whose
+published numbers do not survive their own controls** — the "257 of 400, ~4σ"
+taunt head-to-head is one arm of two, and "nobody can gang up" is backwards.)*
+*(That one supersedes
 [2026-09-16 23:56 — the stance, the glow, and an AI that winds up](docs/handoffs/2026-09-16-2356--the-stance-the-glow-and-an-ai-that-winds-up.md),
 **whose ranked items 1, 2, 6 and 7 are all CLOSED and four of whose published
 numbers it retracts** — `aiCharges`'s measurement table, `rankStride`'s default,
