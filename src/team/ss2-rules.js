@@ -2574,6 +2574,243 @@ export function ss2FlankingWalk(view, target, options) {
   return options.find((option) => option.type === towardType) ?? null;
 }
 
+/**
+ * Expected damage, in hitpoints, for each attacking verb `actor` could aim at
+ * `target` — the table `chooseAiAction` ranks on, lifted out of it so that the
+ * APPROACH arm can read the same numbers the swing arm does.
+ *
+ * ► **IT IS LIFTED OUT BECAUSE THE AI HAD TWO ANSWERS TO ONE QUESTION AND ONLY
+ *   REACHED ONE OF THEM.** Until 2026-09-18 the table was a local inside
+ *   `chooseAiAction`, built AFTER the `!attackOnOffer` branch had already
+ *   returned a walk — so on every turn where nothing was in reach the AI had no
+ *   valuation of anything at all, and the only idea it had was "step toward the
+ *   enemy". Measured on the demo roster over 25 seeded 3v3 bouts: **`taunt` was
+ *   legal on 914 of 2,064 decisions and on 664 of those (72.6%) NO attack was
+ *   legal**, so the branch that returns a walk decided nearly three quarters of
+ *   the taunt's own offers before any ranking existed. `taunt` was not ranked
+ *   last; it was never ranked.
+ *
+ * ► **NOTHING HERE DRAWS A SAMPLE, which is what makes calling it twice free.**
+ *   `chooseAiAction` is handed a view and an option list and no `rolls`;
+ *   `calculateSs2AttackChances` is pure arithmetic over the two records. A
+ *   second call cannot move the ordered channel, so the approach arm may price
+ *   a swing it will not take without putting a peer out of step.
+ *
+ * The rows are the dispatcher's own damage terms, unchanged from where they
+ * stood: 21 rolls `randomBetween(min, max)` so its expected damage is the mean,
+ * 22 is flat `min_damage`, 23 is `ceil(min_damage / 2)`.
+ *
+ * **`attacker.min_damage` is already the ACTIVE pair** — a drawn bow put the
+ * secondary numbers on the record in `vanillaRecordOf` — so this weighs a shot
+ * with the bow's damage and never the sword's.
+ */
+function ss2SwingValues(actor, target) {
+  const attacker = vanillaRecordOf(actor, "attacker");
+  const defender = vanillaRecordOf(target, "defender");
+  const chances = calculateSs2AttackChances(attacker, defender);
+  const expected = {
+    [Ss2ActionType.QUICK_ATTACK]: (chances.quick / 100) * attacker.min_damage,
+    [Ss2ActionType.NORMAL_ATTACK]:
+      (chances.normal / 100) * ((attacker.min_damage + attacker.max_damage) / 2),
+    [Ss2ActionType.POWER_ATTACK]: (chances.power / 100) * attacker.max_damage,
+    [Ss2ActionType.BOMBARD]:
+      (chances.bombard / 100) * ((attacker.min_damage + attacker.max_damage) / 2),
+    [Ss2ActionType.SNIPE]: (chances.snipe / 100) * attacker.min_damage,
+    [Ss2ActionType.BASH_ATTACK]: (chances.bash / 100) * Math.ceil(attacker.min_damage / 2)
+  };
+  return { attacker, defender, chances, expected };
+}
+
+/**
+ * Whether `actor` may be priced as an attacker at all.
+ *
+ * ► **THE GUARD EXISTS BECAUSE `vanillaRecordOf(..., "attacker")` THROWS, AND
+ *   THE WALK ARM IS REACHED BY GLADIATORS THAT HAVE NOT DECLARED A DAMAGE
+ *   PAIR.** `chooseAiAction`'s forced-phase and forced-swap arms both say so in
+ *   their own comments: a gladiator still walking toward the fight should not
+ *   have to declare a damage pair to take a step. Pricing a taunt needs the
+ *   attacker record, so the taunt arm is SKIPPED for such a gladiator rather
+ *   than being allowed to throw — it falls through to the walk it would have
+ *   taken before this existed.
+ *
+ * ► **IT TESTS THE SAME THING THE ASSERTION TESTS, AND THE FIRST VERSION DID
+ *   NOT.** That one asked `declaredResourceNames(actor).has(name)` — key
+ *   PRESENCE — while `assertDeclaredResources` asks
+ *   `Number.isFinite(declaredResourceValue(...))`. A blueprint carrying
+ *   `resources: { min_damage: null }` passes a presence test and throws at the
+ *   record, so the guard has to ask the question the thrower asks. **A guard
+ *   that is weaker than the check it stands in front of is not a guard**, and
+ *   this one is one line from the function it guards.
+ */
+function ss2CanBePriced(actor) {
+  return SS2_ATTACKER_REQUIRED_RESOURCES
+    .every((name) => Number.isFinite(declaredResourceValue(actor, name)));
+}
+
+/**
+ * What a taunt is worth to `actor` against `target`, IN HITPOINTS.
+ *
+ * ► **THIS IS THE DESIGN DECISION THE 2026-09-18 HANDOFF NAMED AND DID NOT
+ *   TAKE, AND IT IS ONE SENTENCE: price every action as a HITPOINT SWING
+ *   rather than as damage dealt.** A hitpoint the actor keeps is worth a
+ *   hitpoint it takes off the other side, and a turn it takes AWAY from the
+ *   other side is worth what that side would have done with it. The three
+ *   terms below are exactly that sentence, and the attack rows in
+ *   `ss2SwingValues` are unchanged by it because for a swing the other two
+ *   terms are zero. **The band ranking is not touched, which is the point:** a
+ *   560-combination sweep on 2026-09-18 established that the ranking picks all
+ *   three melee verbs whenever the stats make one of them best, and nothing
+ *   here may move that.
+ *
+ * The terms, and which of them is measured and which is invented:
+ *
+ * 1. **THE RECOVERY, CERTAIN, AND IT IS THE LARGEST TERM ON THE DEMO ROSTER.**
+ *    A taunt heals `3 + ceil(stamina)` and gains `stamina` stamina BEFORE the
+ *    roll (`+0x684c`, `+0x6894`, clamped at `+0x68d3`), so it is paid whether
+ *    the taunt lands or not. Read from `SS2_TAUNT.branchHealBase` and capped at
+ *    the missing health, which is `tauntRecovery`'s own formula — the same
+ *    arithmetic, not a second copy of the number.
+ * 2. **THE STRIKE ARM**, `taunt_effect == 1`, one outcome in two of a landed
+ *    taunt: `directionProfile`'s direction-20 term,
+ *    `round(charisma * 4) - defender.charisma`, floored at a 1-3 roll whose
+ *    mean is 2. Raw damage, exactly as every row in `ss2SwingValues` is raw —
+ *    the comparison is between terms of the same kind, not between mitigated
+ *    outcomes.
+ * 3. **THE DENIAL ARM**, `taunt_effect == 2`, the other outcome in two, and
+ *    **this is the only invented number here.** A bow-mode target is made to
+ *    FLEE and loses its next turn outright; a melee target is SHOVED
+ *    `max(20, charisma * 25)` units and has to walk back. The proxy for "one
+ *    turn of the target" is the target's own declared `max_damage` — crude,
+ *    deliberately, and it is the SAME proxy `chooseAiAction`'s wind-up arm
+ *    already uses for incoming damage, for the same reason: it cannot throw,
+ *    and a combatant that declares none scores 0.
+ *
+ *    ► **AND THE SHOVE IS ONLY WORTH SOMETHING TO A TAUNTER THAT DOES NOT NEED
+ *      TO CLOSE.** Pushing a melee opponent 150 units out of reach costs the
+ *      pusher its own reach too, so both sides spend the same walk getting back
+ *      — net zero. An archer loses nothing by it, because its reach is the
+ *      bow's. So the shove scores the proxy in bow mode and **0** in melee,
+ *      which is the conservative arm rather than the flattering one.
+ *
+ * ► **MEASURED, so the terms can be checked against a bout rather than argued
+ *   about.** 3,069 taunts over 80 seeded 3v3 bouts on the demo roster: mean
+ *   chance 40.0%, landed 39.2%, effect 1 on 599 and effect 2 on 604 of them —
+ *   **50/50 as `randomBetween(1, 2)` says** — mean heal 2.43 hp, mean shove
+ *   |force| 150, and **flees: 1**, because effect 2 only makes a target flee
+ *   when the TARGET is in bow mode and the demo roster's archers rarely are
+ *   when taunted. The denial term is therefore nearly all shove on this roster.
+ */
+export function ss2TauntValue(actor, target, chances) {
+  if (!actor || !target) return 0;
+  // (1) The recovery, certain. `tauntRecovery`'s own two lines.
+  const healed = Math.min(
+    SS2_TAUNT.branchHealBase + Math.ceil(actor.stats.stamina),
+    Math.max(0, actor.maxHealth - actor.health)
+  );
+
+  const landing = (chances?.taunt ?? 0) / 100;
+  // Each landed taunt splits evenly over `randomBetween(1, effectMax)`.
+  const perEffect = landing / SS2_TAUNT.effectMax;
+
+  // (2) The strike arm — `directionProfile`, `direction === 20`.
+  //
+  // ► **IT ROLLS `chances.taunt` A SECOND TIME AND THE FIRST VERSION OF THIS
+  //   FUNCTION FORGOT IT.** `taunt_effect == 1` does not deal damage; it sets
+  //   `direction = 20` and calls `checkattackroll()`, and `directionProfile`'s
+  //   direction-20 arm hands that dispatcher `chance: chances.taunt` — the SAME
+  //   chance the taunt already passed. So a strike is `landing` twice over, not
+  //   once, and the omission overstated the arm by 2.5x at the demo roster's
+  //   40%. **Caught by checking the model against a bout rather than against
+  //   itself**: 3,069 taunts produced 599 effect-1 events (19.5%, which is
+  //   `landing / 2` exactly) whose mean delivered damage was 3.76 against a raw
+  //   term of 18 — a ratio no single 40% roll can explain.
+  const charisma = resourceValue(actor, "charisma", 0);
+  const targetCharisma = resourceValue(target, "charisma", 0);
+  const raw = Math.round(charisma * 4) - targetCharisma;
+  // Below 1 the build rolls `randomBetween(1, 3)`; its mean is 2.
+  const strike = (raw < 1 ? SS2_TAUNT_FLOOR_DAMAGE_MEAN : raw) * landing;
+
+  // (3) The denial arm, and **only the FLEE scores in it.**
+  //
+  // ► **A SHOVE DENIES A TURN OF WALKING; A FLEE DENIES A TURN OF FIGHTING,
+  //   AND THE FIRST VERSION PRICED THEM THE SAME.** It scored the full
+  //   turn-proxy whenever EITHER side was in bow mode, on the argument that an
+  //   archer loses nothing by pushing a melee opponent away. The argument is
+  //   true and the conclusion does not follow: a melee opponent 500 units from
+  //   an archer was not going to hit it this turn either way, so the 150-unit
+  //   shove costs that opponent one step of an approach, not one attack.
+  //   Pricing a step at a whole swing is what made the archer taunt a foe it
+  //   could shoot — caught by `test/ss2-ranged.test.js`'s snipe/bombard
+  //   crossover pin, which is a test written about something else entirely and
+  //   is the second time today a pin aimed elsewhere has broken a claim here.
+  //
+  //   The flee is different in kind and not in degree: `taunted1` forces row 3
+  //   of the chain, so the target's NEXT TURN is spent running and is not
+  //   available for anything. That is a whole turn and is scored as one.
+  //
+  // The proxy for "one turn of the target" is the target's own declared
+  // `max_damage` — crude, deliberately, and the SAME proxy the wind-up arm in
+  // `chooseAiAction` already uses for incoming damage, for the same reason: it
+  // cannot throw, and a combatant that declares none scores 0.
+  //
+  // ► **AND THE FLEE ARM NEEDS THE TARGET IN BOW MODE, which is rare and is
+  //   the measurement to keep**: 1 flee in 3,069 taunts over 80 seeded 3v3
+  //   bouts on the demo roster, because effect 2 splits on the DEFENDER'S
+  //   weapon mode (`+0x69a7`) and a demo archer is usually holding its sword
+  //   when anybody is close enough to taunt it. So on the shipped roster this
+  //   term is very nearly always zero, and the taunt is carried by the
+  //   recovery.
+  const denial = ss2InBowMode(target) ? resourceValue(target, "max_damage", 0) : 0;
+
+  return healed + perEffect * strike + perEffect * denial;
+}
+
+/**
+ * What CLOSING THE DISTANCE is worth, in hitpoints — the thing a taunt at range
+ * is actually competing with.
+ *
+ * ► **IT IS THE SWING ITSELF, UNDISCOUNTED, AND THE FIRST VERSION DISCOUNTED IT
+ *   BY THE WALKS IT TAKES TO ARRIVE. That version is recorded here because the
+ *   way it failed is the useful part.** It returned `best / (walks + 1)` — a
+ *   walk pays nothing on the turn it is taken, so amortise the swing over the
+ *   walks that buy it. Measured on the demo roster, 25 seeded 3v3 bouts through
+ *   the arena's own host: **the taunt went to 1,332 of 1,633 offers (81.6%) and
+ *   bouts ran 84% longer** (2,064 decisions to 3,801). One monoculture replaced
+ *   with another.
+ *
+ *   **The error was not the size of the discount, it was the shape.** Amortising
+ *   is right for something you do once and then stop. A gladiator one step from
+ *   reach scores the approach at `best / 2`, and a taunt that beats half a swing
+ *   beats it again next turn and every turn after — **so it never takes the
+ *   step, and the swing it was amortising against never arrives.** The discount
+ *   assumed the arrival it was preventing.
+ *
+ *   Fixing it by choosing a horizon — `best * (H - walks) / H` — works and was
+ *   rejected: `H` is an invented number, the outcome is extremely sensitive to
+ *   it (the repository's own honest bout-length sweep gives a median of 50 turns
+ *   across a whole bout, which is about 8 per gladiator in a 3v3, and 50 against
+ *   8 is the difference between the walks mattering and not), and nothing in the
+ *   build offers one. **A dial that decides the answer and cannot be derived is
+ *   worse than no dial.**
+ *
+ * ► **SO THE RULE IS THE PLAIN ONE: a gladiator walks toward a fight unless a
+ *   taunt is worth more than the swing it is walking toward.** That has no
+ *   constant in it at all, and it gives the behaviour the game wants for a
+ *   reason rather than by tuning: a healthy gladiator closes, because its heal
+ *   term is zero and a swing beats a taunt; a WOUNDED one at range backs off and
+ *   taunts, because the recovery is the largest term in `ss2TauntValue` and the
+ *   shove keeps the fight where it can pay for it. An archer taunts more than a
+ *   warrior, because its denial term is real and a warrior's is zero.
+ *
+ * The `walks` count is gone with the discount, and with it the one thing here
+ * that was an approximation: it ignored the body clamp and the target moving.
+ */
+export function ss2ApproachValue(actor, target, best) {
+  if (!(best > 0)) return 0;
+  if (ss2FightDistance(actor, target) === null) return 0;
+  return best;
+}
+
 function ss2RankDestination(actorY, direction, rankStride) {
   if (!Number.isFinite(actorY) || rankStride <= 0) return null;
   const to = actorY + direction * rankStride;
@@ -2797,6 +3034,19 @@ export const SS2_PSYCHE_UP = Object.freeze({
  *   rest branch's is `+0x51d5` — and both were read directly here rather than
  *   taken from the writers table that started the error.
  */
+/**
+ * The mean of `randomBetween(1, 3)`, the floor a direction-20 strike rolls when
+ * `round(charisma * 4) - defender.charisma` comes out below 1
+ * (`directionProfile`, `direction === 20`).
+ *
+ * ► **IT IS HERE AS A NAMED CONSTANT RATHER THAN A `2` IN `ss2TauntValue`
+ *   BECAUSE IT IS A MEAN AND NOT A DRAW.** The AI prices an outcome it has not
+ *   rolled; the resolver rolls it. Writing the mean inline in the valuation
+ *   would read as the build's own number and it is not one — the build has no
+ *   mean, it has a uniform draw over 1, 2, 3.
+ */
+const SS2_TAUNT_FLOOR_DAMAGE_MEAN = 2;
+
 export const SS2_TAUNT = Object.freeze({
   /**
    * `diceroll < game_attacker.taunt_percentage` (`+0x694b`).
@@ -4598,6 +4848,41 @@ export function createSs2TeamRules({
    *   than tuned**: the number is the owner's to move, and moving it means
    *   changing the gate below, not this comment.
    */
+  /**
+   * Whether an AI opponent will TAUNT at range instead of walking.
+   *
+   * ► **ON BY DEFAULT, AND THAT IS THE OPPOSITE CALL FROM `aiCharges` ABOVE
+   *   FOR A STATED REASON.** `aiCharges` is off because the arithmetic says
+   *   charging LOSES — it buys a character trait at a cost in damage per turn,
+   *   so it has to be asked for. This one is on because the arithmetic says
+   *   taunting at range WINS: it replaces a walk, and a walk is worth zero
+   *   hitpoints on the turn it is taken. An AI that maximises its own stated
+   *   criterion takes it, so leaving it off would be the dressed-up preference,
+   *   not the other way round.
+   *
+   * ► **IT IS IN THE RULE-SET ID WHEN OFF**, which is the same rule
+   *   `crowdPatience`, `rankStride` and `backAttackBonus` follow and the
+   *   OPPOSITE spelling from `aiCharges`: the suffix names what differs from
+   *   the SHIPPED DEFAULT, and the shipped default here is on. So an ordinary
+   *   battle keeps the id every pinned hash was taken against, and a rule set
+   *   with the taunt policy switched off says so.
+   *
+   * ► **NO PINNED HASH MOVES EITHER WAY, and that was measured before it was
+   *   relied on.** `grep -n 'suggestAction\|chooseAiAction' test/seeded-play-pins.test.js`
+   *   returns nothing: the seeded pins drive explicit actions, and every golden
+   *   replays a fixture whose actions are stated. **The AI policy is not hashed
+   *   anywhere in this repository** — which is why four previous AI changes
+   *   (targeting 2026-09-12, the bow 2026-09-13, charges 2026-09-16, the flank
+   *   2026-09-17) all shipped without an id change. The id names CONFIGURATION,
+   *   not code version.
+   *
+   * ► **WHAT IT DOES, measured on the demo roster through the arena's own host
+   *   path — `createVanillaBattleHost` + `demoSide`, which is the path
+   *   `tools/arena/main.js` builds and therefore the path somebody plays.**
+   *   See the handoff of 2026-09-18 for the numbers and for the two published
+   *   claims this work broke.
+   */
+  aiTaunts = true,
   aiCharges = false,
   /**
    * Turns of grace before the crowd turns on the fighters. Defaults to
@@ -4737,8 +5022,14 @@ export function createSs2TeamRules({
   // different decisions from one that does not, so two peers running different
   // settings would agree on every hash and then diverge at the first charge.
   const chargeSuffix = aiCharges ? "-charges" : "";
+  // Same rule once more, spelled from the other side: this one's shipped
+  // default is ON, so the suffix appears when it is OFF. An AI that will not
+  // taunt makes different decisions from one that will, and two peers running
+  // different settings would agree on every hash and then diverge the first
+  // time one of them taunted instead of walking.
+  const tauntSuffix = aiTaunts ? "" : "-no-taunt";
   const ruleSetId =
-    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}`;
+    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}`;
 
   return defineTeamRuleSet({
     // The mode is in the id because `toTeamWireState` carries only id,
@@ -4752,12 +5043,22 @@ export function createSs2TeamRules({
       buildSha256: SS2_BUILD_SHA256,
       mapSourceRefs: SS2_MAP_SOURCE_REFS,
       goldenFixtureIds: SS2_GOLDEN_FIXTURE_IDS,
+      // ► **512 CHARACTERS, AND THIS NOTE NOW RUNS TO ABOUT 470 OF THEM.**
+      //   `src/campaign/record.js`'s `MAX_NOTE_LENGTH` rejects a longer one at
+      //   `assertRuleSetProvenance`, and the refusal says only "must be a
+      //   human-readable note" — it names neither the cap nor the length. A
+      //   2026-09-19 edit adding one clause took it to 536 and turned 24
+      //   campaign tests red with that message; the suite caught it, and the
+      //   message did not explain it. **Count before you add a clause**:
+      //   `node -e "import('./src/team/ss2-rules.js').then(m =>
+      //   console.log(m.ss2TeamRules.provenance.note.length))"`.
       note:
         "SS2's own attack arithmetic, read out of the licensed build's bytecode and replayed against " +
         "23 promoted goldens for attack directions 1-12. NOT runtime-verified: no capture has observed " +
         "this module driving a fight, and the stamina economy, action legality and AI policy it adds " +
-        "around the ingress have no runtime backing at all. The AI's choice among the three melee " +
-        "verbs is invented; only its stamina gates are byte-decoded."
+        "around the ingress have no runtime backing at all. The AI's melee choice is invented, as is " +
+        "the valuation that decides when it taunts rather than closing (ss2TauntValue); only its " +
+        "stamina gates are byte-decoded."
     },
     actionTypes: Object.values(Ss2ActionType),
     fightMode,
@@ -6888,6 +7189,50 @@ export function createSs2TeamRules({
         //   The move: while I am in a DIFFERENT rank from the target, keep
         //   walking until I am past it, and only then let the rank arm below
         //   bring me in — arriving behind.
+        // ► **TAUNT INSTEAD OF TRUDGING, WHICH IS THE ONLY THING THE BUILD'S
+        //   OWN CONTROLLER FRAMES LET A GLADIATOR DO AT RANGE AND THE ONE
+        //   THING THIS AI NEVER DID.** `taunt` is wired on `longrange_warrior`
+        //   and `longrange_archer` and on NEITHER close-range frame for a
+        //   warrior — it is a LONG-RANGE verb, the build's answer to "I cannot
+        //   reach him yet". Reaching this point means nothing is in reach, so
+        //   this is exactly where the build offers it.
+        //
+        //   ► **AND IT IS WHY THE VERB WAS AT ZERO, which is NOT the reason
+        //     this repository published on 2026-09-18.** That reading was
+        //     *"`taunt` is absent from the preference table entirely"*, which
+        //     is true and is the smaller half. Measured here over 25 seeded 3v3
+        //     bouts on the demo roster: **taunt was legal on 914 of 2,064
+        //     decisions, and on 664 of them (72.6%) no attack was legal at
+        //     all** — so on nearly three quarters of its own offers the block
+        //     this arm sits in had already returned a walk before any table was
+        //     built. **The taunt was not ranked last. It was never ranked.**
+        //     Adding a row to the preference table alone would have reached
+        //     27.4% of the opportunity and reported the verb as fixed.
+        //
+        //   ► **THE COMPARISON IS AGAINST CLOSING, NOT AGAINST SWINGING**, and
+        //     that is what stops it from being a taunt-bot. `ss2ApproachValue`
+        //     amortises the best swing over the walks it takes to arrive, so
+        //     one step out the approach is worth half a swing and wins, and far
+        //     out it is worth a fraction of one and loses. A head-to-head of
+        //     "taunt whenever legal" against this AI is NOT evidence for
+        //     taunting always — see the handoff of 2026-09-18 and the
+        //     measurement that broke it.
+        //
+        //   **Skipped rather than thrown for a gladiator with no damage pair**,
+        //   the same courtesy the forced-phase and forced-swap arms above
+        //   extend: pricing needs the attacker record, and a gladiator still
+        //   walking toward the fight should not have to declare one to step.
+        if (aiTaunts && nearest && ss2CanBePriced(actor)) {
+          const tauntHere = options.find((option) =>
+            option.type === Ss2ActionType.TAUNT && option.targetId === nearest.id);
+          if (tauntHere) {
+            const ranged = ss2SwingValues(actor, nearest);
+            const bestSwing = Math.max(...Object.values(ranged.expected));
+            const worth = ss2TauntValue(actor, nearest, ranged.chances);
+            if (worth > ss2ApproachValue(actor, nearest, bestSwing)) return tauntHere;
+          }
+        }
+
         const flank = positionedInDepth && nearest && Number.isFinite(nearest.y)
           ? ss2FlankingWalk(view, nearest, options)
           : null;
@@ -6932,27 +7277,9 @@ export function createSs2TeamRules({
       );
       const engaged = foes.find((foe) => reachable.has(foe.id)) ?? target;
 
-      const attacker = vanillaRecordOf(actor, "attacker");
-      const defender = vanillaRecordOf(engaged, "defender");
-      const chances = calculateSs2AttackChances(attacker, defender);
-      // Each verb's chance times its own damage term, straight off the
-      // dispatcher table (map §"Chance calculation" and the direction table):
-      // 21 rolls `randomBetween(min, max)` so its expected damage is the mean,
-      // 22 is flat `min_damage`, 23 is `ceil(min_damage / 2)`.
-      //
-      // **`attacker.min_damage` here is already the ACTIVE pair** — a drawn bow
-      // put the secondary numbers on the record in `vanillaRecordOf`, so this
-      // weighs a shot with the bow's damage and never the sword's.
-      const expected = {
-        [Ss2ActionType.QUICK_ATTACK]: (chances.quick / 100) * attacker.min_damage,
-        [Ss2ActionType.NORMAL_ATTACK]:
-          (chances.normal / 100) * ((attacker.min_damage + attacker.max_damage) / 2),
-        [Ss2ActionType.POWER_ATTACK]: (chances.power / 100) * attacker.max_damage,
-        [Ss2ActionType.BOMBARD]:
-          (chances.bombard / 100) * ((attacker.min_damage + attacker.max_damage) / 2),
-        [Ss2ActionType.SNIPE]: (chances.snipe / 100) * attacker.min_damage,
-        [Ss2ActionType.BASH_ATTACK]: (chances.bash / 100) * Math.ceil(attacker.min_damage / 2)
-      };
+      // The table this AI ranks on, now in `ss2SwingValues` so the approach arm
+      // above reads the same numbers this one does rather than a second copy.
+      const { attacker, chances, expected } = ss2SwingValues(actor, engaged);
 
       // ► **THE AI CHARGES NOW, AND IT DOES IT IN TWO DIFFERENT SITUATIONS FOR
       //   TWO DIFFERENT REASONS.** Owner's decision, 2026-09-16, taken against
@@ -7089,6 +7416,24 @@ export function createSs2TeamRules({
           }
         }
       }
+      // ► **AND THE TAUNT JOINS THE TABLE, for the 27.4% of its offers where an
+      //   attack is on offer too.** On the demo roster those turns are the
+      //   archer's: `legalActions` wires the taunt on `closerange_archer` with
+      //   no stamina test at all, so a bow-mode gladiator in reach is offered
+      //   both. Priced in the same hitpoints as every other row rather than in
+      //   damage alone — see `ss2TauntValue` for why that is the whole design
+      //   decision — and it loses to a real swing whenever the swing is worth
+      //   more, which on this roster is most of the time.
+      // Matched to `engaged` for the same reason `psycheOption` is, and it was
+      // the same live defect there: `legalActions` emits one taunt per foe, so
+      // `find` by type alone takes whichever foe happens to be first in the
+      // list and would price a taunt at one gladiator while aiming it at
+      // another.
+      const tauntOption = options.find((option) =>
+        option.type === Ss2ActionType.TAUNT && option.targetId === engaged.id);
+      if (aiTaunts && tauntOption) {
+        expected[Ss2ActionType.TAUNT] = ss2TauntValue(actor, engaged, chances);
+      }
       // Ties break toward the heavier attack, deterministically. The archer's
       // verbs join the list rather than forming a second one, because a
       // gladiator is never offered both sets — the controller frame it is on
@@ -7107,7 +7452,11 @@ export function createSs2TeamRules({
         Ss2ActionType.QUICK_ATTACK,
         Ss2ActionType.BOMBARD,
         Ss2ActionType.SNIPE,
-        Ss2ActionType.BASH_ATTACK
+        Ss2ActionType.BASH_ATTACK,
+        // LAST, so a tie goes to a swing. A taunt that happens to price equal
+        // to a bash should lose to it: the bash is certain to be an attack,
+        // while three taunts in four do nothing but the recovery.
+        Ss2ActionType.TAUNT
       ];
       let best = null;
       for (const type of preference) {
@@ -7116,6 +7465,11 @@ export function createSs2TeamRules({
         //   matched on type alone, and only when the arm above priced it —
         //   `expected` has no entry otherwise, and an unpriced verb must not be
         //   reachable by a `undefined > undefined` comparison.
+        // An unpriced verb must not be reachable by an `undefined > undefined`
+        // comparison, which is the trap the `psyche_up` arm below names. The
+        // taunt is priced only when `aiTaunts` is on and an option named
+        // `engaged`, so it is dropped the same way.
+        if (type === Ss2ActionType.TAUNT && expected[type] === undefined) continue;
         const option = type === Ss2ActionType.PSYCHE_UP
           // `psycheOption` is already matched to `engaged` above, and is
           // undefined when the discharge could not reach it.

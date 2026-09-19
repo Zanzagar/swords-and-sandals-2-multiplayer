@@ -38,6 +38,106 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE AI TAUNTS AT RANGE NOW, AND THE TWO CLAIMS THAT RANKED THE WORK BOTH
+  BROKE UNDER THEIR OWN CONTROLS (2026-09-19).** Ranked items 1 and 2 of the
+  2026-09-18 handoff are both addressed and both were posed on a premise that
+  does not survive being measured. **Read this before either of them.**
+
+  ► **"TAUNT WHENEVER LEGAL BEATS THE SHIPPED AI, 257 OF 400, ~4σ" IS ONE ARM
+    OF A TWO-ARM EXPERIMENT, AND IT IS THE BLUE ARM.** Re-derived over the same
+    400 seeds through `createVanillaBattleHost` + `demoSide`:
+
+```text
+      taunting policy on   wins    share     against a 200-200 control
+        blue                257    64.3%       <- the published number, exactly
+        red                 189    47.6%          the same policy, LOSING
+        alternating         226    56.6%  (2.65σ, not 4)
+```
+
+    **The AI-vs-AI control the claim never had is 200-200 over those seeds.**
+    The gap between the two arms (47.6% against 64.3%) is four times the effect
+    the claim reports. The effect is real and is worth about 2.6σ alternating;
+    it is not worth 4σ and it is not side-independent. **An A/B with one arm is
+    an A.**
+
+  ► **AND "NOBODY CAN GANG UP" IS BACKWARDS — THE LANES ARE WHAT MAKE A 2-ON-1
+    POSSIBLE AT ALL.** Ranked item 2 called the team layout blocking on the
+    ground that with lanes enforced "a 3v3 is three parallel duels; nobody can
+    gang up", and offered one lane as the remedy. Measured over 24 seeded 3v3
+    bouts, counting turns on which a gladiator is inside 2+ enemies' MELEE reach
+    **with `ss2SameLane` applied exactly as the offer applies it**:
+
+```text
+      rankStride 97 (shipped)    59 of 1,983 turns   3.0%   in 14 of 24 bouts
+      rankStride 0  (one lane)    0 of 2,851 turns   0.0%   in  0 of 24 bouts
+```
+
+    **One lane is the arrangement in which ganging up is impossible**, and for a
+    reason the census already recorded: a walk may never cross a foe, so two
+    allies approaching one target queue on the same side of it. 0 crossings and
+    1 simultaneous fight, every bout. The shipped lanes give 20.0% crossings and
+    2 simultaneous fights. **The remedy the item proposed is the disease it
+    describes**, so the fork is closed rather than answered: keep the lanes.
+    What is genuinely open is how willing a gladiator should be to change rank
+    to join a fight — it does so on ~1% of its offers — and that is a dial, not
+    a layout.
+
+    ► **AND THE FIRST VERSION OF THIS MEASUREMENT SAID 69.4%**, because it used
+      Euclidean reach without the lane gate — measuring the layer below the one
+      the question is about, which is the error the same handoff's own hard
+      rules name twice.
+
+  ► **`taunt` WAS NOT RANKED LAST, IT WAS NEVER RANKED.** The published
+    diagnosis — *"absent from the preference table ENTIRELY"* — is true and is
+    about a quarter of it. 25 seeded 3v3 bouts, the arena's own path: taunt
+    legal on 914 of 2,064 decisions, and **on 664 of them (72.6%) no attack was
+    legal at all**, so `chooseAiAction`'s `!attackOnOffer` branch returned a
+    walk before any table was built. **The taunt is a LONG-RANGE verb** — the
+    build wires it on `longrange_warrior` and `longrange_archer` and on neither
+    close-range warrior frame — and the only other answer this AI had at range
+    was "take a step". Adding the table row alone would have reached 250 of 914
+    opportunities and reported the verb fixed.
+
+  ► **THE DESIGN DECISION, TAKEN: price every action as a HITPOINT SWING rather
+    than as damage dealt.** `ss2TauntValue` is the recovery (certain, capped at
+    missing health, the largest term), plus the direction-20 strike, plus one
+    turn of the target's `max_damage` when the taunt can force a FLEE. The
+    attack rows are untouched, because for a swing the other two terms are zero
+    — so the 560-combination band sweep still holds and a wounded warrior in
+    melee reach still swings. **`aiTaunts` ships ON and names itself in the id
+    when OFF** (`-no-taunt`), the opposite spelling from `aiCharges` and for a
+    stated reason: charging LOSES on the arithmetic and has to be asked for,
+    while taunting at range replaces a walk that is worth nothing.
+    **New policy against old, sides alternating: 288-112, 72.0%, 8.8σ — and it
+    wins on BOTH arms** (73.5% as red, 68.5% as blue), which is exactly the
+    property the published claim lacked.
+
+  ► **TWO THINGS I GOT WRONG AND THE MEASUREMENT CAUGHT, both recorded at the
+    code:**
+    ► **I AMORTISED THE APPROACH OVER THE WALKS IT TAKES** — `best / (walks +
+      1)` — and built a taunt-bot: 81.6% of offers taken, bouts 84% longer.
+      The discount assumed the arrival it was preventing. The rule is the plain
+      one now: walk unless the taunt beats the swing you are walking toward.
+    ► **I FORGOT THAT EFFECT 1 ROLLS THE CHANCE A SECOND TIME.** It sets
+      `direction = 20` and calls `checkattackroll()`, which `directionProfile`
+      hands `chance: chances.taunt` again — so the strike arm is quadratic in
+      the chance, and a single discount overstated it 2.5x at 40%. Caught by
+      checking the model against a bout: 3,069 taunts gave 599 effect-1 events
+      whose mean damage no single 40% roll explains.
+    ► **AND A THIRD, CAUGHT BY A PIN AIMED SOMEWHERE ELSE.** I priced a SHOVE
+      like a FLEE, and `test/ss2-ranged.test.js`'s snipe/bombard crossover went
+      red: the archer was taunting a foe it could shoot. A shove denies a turn
+      of WALKING; a flee denies a turn of FIGHTING.
+
+  ► **AND THE DEMO ROSTER GAINS A DUELLIST, because a correct policy with nobody
+    to express it is the `aiCharges` failure again.** Before the roster changed:
+    taunt offered 926 times over 25 bouts, **taken 5**. Slot 3 carries
+    `charisma: 16` now — chosen against a sweep printed at the line, and
+    charisma is grepped to drive the taunt and nothing else — which gives about
+    five taunts a bout, 61 of 69 of them that slot's, for 7% longer bouts and
+    25/25 still settling. **Three gladiators who fight differently**, which is
+    the shape the melee monoculture finding asked for and did not get.
+
 ► **A GLADIATOR WHO HAD NOT MOVED WAS FACING NOBODY, AND 40 OF 40 OPENING
   RANGED ATTACKS WERE SCORED AS BACK ATTACKS (`bba6fd0`..HEAD).** This is the
   largest live defect found this month and nothing was looking for it.

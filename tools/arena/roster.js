@@ -202,8 +202,50 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
       //   primary weapon above was changed for on 2026-09-10 for the same
       //   reason.
       const archer = index === 1;
+      // ► **SLOT 3 IS THE DUELLIST, ADDED 2026-09-18, AND IT EXISTS BECAUSE A
+      //   CORRECT POLICY WITH NOBODY TO EXPRESS IT IS THE `aiCharges` FAILURE
+      //   AGAIN.**
+      //
+      //   `chooseAiAction` prices a taunt in hitpoints now and takes it when it
+      //   beats the swing the gladiator is walking toward (`ss2TauntValue`).
+      //   Measured on this roster BEFORE this line existed, 25 seeded 3v3 bouts
+      //   through `createVanillaBattleHost`: **taunt offered 926 times, taken
+      //   5.** The policy was right and the roster could not express it —
+      //   exactly what the 2026-09-18 audit found about the melee band ranking,
+      //   in the same file, for the same reason.
+      //
+      //   **`charisma` is the only stat that drives a taunt and it drives
+      //   nothing else.** Grepped, not assumed: across `ss2-rules.js` and
+      //   `ss2-attack-candidate.js` it appears in the chance
+      //   (`(attacker.charisma + 9) / (defender.charisma + 9)`), the
+      //   direction-20 strike (`round(charisma * 4) - defender.charisma`), the
+      //   taunt's own stamina cost (`round(charisma * 2)`) and the shove force
+      //   (`charisma * 25`). Nothing else reads it, so this raises a taunt and
+      //   moves no other number — unlike `strength`, which would move
+      //   `physical_size` and therefore reach, scale and the walk clamp.
+      //
+      //   **16 is chosen against a sweep, not picked.** Slot-3 charisma over
+      //   12 seeded 3v3 bouts, everything else the roster's own:
+      //
+      //   ```text
+      //      charisma   taunts taken / offered   from slot 3   bout length
+      //          6              1 / 444                 0           82
+      //         10             21 / 462                20           84
+      //         12             20 / 470                19           87
+      //         14             20 / 467                19           86
+      //         16             69 / 433                61           88
+      //         20             55 / 400                49           75
+      //   ```
+      //
+      //   12/12 bouts settle at every value. 16 is the first that makes the
+      //   verb a CHARACTER — about five taunts a bout, 61 of 69 of them this
+      //   slot's — for 7% longer bouts. **It is the roster's number and not the
+      //   engine's**: every other slot keeps charisma 6 and never taunts, which
+      //   is the point. Three gladiators who fight differently.
+      const duellist = index === 2;
       const vanilla = demoGladiator({
         character_name: name,
+        ...(duellist ? { charisma: 16 } : {}),
         // A little spread so initiative is not a coin flip and the slots are
         // visibly different fighters.
         speed: 6 + (side === "red" ? 1 : 0) - index,
