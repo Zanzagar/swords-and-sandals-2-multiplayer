@@ -2811,6 +2811,106 @@ export function ss2ApproachValue(actor, target, best) {
   return best;
 }
 
+/**
+ * Which rank this gladiator should leave its own to JOIN, or `null`.
+ *
+ * ► **THIS IS THE DIAL THE 2026-09-18 HANDOFF'S RANKED ITEM 2 SHOULD HAVE
+ *   ASKED FOR, and the layout question it DID ask was posed on a premise that
+ *   is backwards.** That item called the team layout blocking because "with
+ *   lanes enforced nobody can gang up", and offered one lane as the remedy.
+ *   Measured 2026-09-19, counting turns on which a gladiator is inside 2+
+ *   enemies' melee reach **with `ss2SameLane` applied exactly as the offer
+ *   applies it**, over 24 seeded 3v3 bouts:
+ *
+ *   ```text
+ *     rankStride 97 (shipped)    59 of 1,983 turns   3.0%   in 14 of 24 bouts
+ *     rankStride 0  (one lane)    0 of 2,851 turns   0.0%   in  0 of 24 bouts
+ *   ```
+ *
+ *   **One lane is the arrangement in which ganging up is IMPOSSIBLE** — a walk
+ *   may never cross a foe, so two allies approaching one target queue on the
+ *   same side of it. The lanes are the only thing that makes a 2-on-1 reachable
+ *   at all. So the layout is settled and what is actually open is how WILLING a
+ *   gladiator should be to leave its own fight and join somebody else's.
+ *
+ * ► **`rankJoinSurplus` IS THAT WILLINGNESS, AND TODAY'S BEHAVIOUR IS A POINT
+ *   ON IT RATHER THAN A SEPARATE CASE.** The gate that stood here was
+ *   `!ownRankHasFoe` — leave only when your own rank is empty of foes. Written
+ *   as a surplus over the rank you would be leaving behind:
+ *
+ *   ```text
+ *     surplusAfterLeaving = alliesInMyRank (NOT counting me) - foesInMyRank
+ *   ```
+ *
+ *   a gladiator may leave when `surplusAfterLeaving >= rankJoinSurplus`. In a
+ *   3v3 each rank holds one gladiator a side, so `alliesInMyRank` is 0 and the
+ *   surplus is `-foesInMyRank`. **At 0 that is exactly the old gate** (leave
+ *   only with no foe in your rank); at `-1` a gladiator will break off a duel
+ *   to make a 2-on-1 somewhere else; at `-2` it will leave two.
+ *
+ * ► **AND IT CANNOT CAUSE THE 2026-09-12 PILE-UP, which is the property that
+ *   has to survive.** That collapse came from "move toward the NEAREST foe's
+ *   rank", which fires at the OPENING when nothing is engaged and folds all six
+ *   into one rank — the tell being that strides 97 and 150 then returned
+ *   identical censuses. **This arm requires an ally to be ALREADY ENGAGED in
+ *   the target rank**, which is false for every gladiator on turn one, so the
+ *   opening is untouched however permissive the dial is. It is the same
+ *   protection `ss2FlankingWalk` relies on, for the same reason.
+ *
+ * Joining is offered only to an ADJACENT rank, because a rank change is one
+ * occupancy step (`ss2RankDestination`); a gladiator two ranks away arrives by
+ * taking this arm twice, and re-asks the question at each step.
+ */
+export function ss2RankToJoin(view, rankJoinSurplus, rankStride) {
+  const actor = view.actor;
+  if (!Number.isFinite(actor.y)) return null;
+  // > **`Infinity` IS THE OFF SWITCH AND IS THE SHIPPED DEFAULT, so this arm
+  //   cannot move a shipped bout by construction rather than by argument.**
+  //   The first cut defaulted it to 0 and claimed in its own docstring that
+  //   "nothing moves at the default" -- **measured, and it was false**: 25
+  //   seeded 3v3 bouts went from 2,234 decisions to 2,307, `rank-front` from
+  //   14 to 28 and `rank-back` from 29 to 51. At 0 this arm still fires when
+  //   the actor's rank holds an ally and one foe, and it aims at the rank where
+  //   an ALLY is fighting where the old arm aimed at the NEAREST foe's rank --
+  //   two different moves, both reachable. **A default that has to be argued to
+  //   be a no-op is not a no-op**; one the function returns `null` for is.
+  if (!Number.isFinite(rankJoinSurplus)) return null;
+  // ► **THE STRIDE IS THE RULE SET'S AND NOT `SS2_ARENA.rankStride`.** A rule
+  //   set built with a different stride puts its ranks somewhere else, and an
+  //   adjacency test against the module constant would silently find no
+  //   neighbour and disable this arm — the exact shape of the 2026-09-12 defect
+  //   where `tools/engagement-census.mjs` compared against 0 instead of the
+  //   shipped value and reported the default engine under the wrong heading.
+  if (!(rankStride > 0)) return null;
+
+  const living = (list) => list.filter((one) => one.alive !== false && Number.isFinite(one.y));
+  const foes = living(view.foes);
+  const allies = living(view.allies).filter((one) => one.id !== actor.id);
+
+  // May I leave? The rank I would leave behind, counted without me.
+  const foesHere = foes.filter((foe) => foe.y === actor.y).length;
+  const alliesHere = allies.filter((ally) => ally.y === actor.y).length;
+  if (alliesHere - foesHere < rankJoinSurplus) return null;
+
+  // Where would I go? A rank ONE step away holding an ally who is already in a
+  // fight — "already engaged" is what keeps the opening untouched.
+  let best = null;
+  for (const ally of allies) {
+    // An ally in MY rank is not a rank to join; the adjacency test below would
+    // reject it anyway (distance 0), and skipping it plainly is clearer than
+    // relying on that.
+    if (ally.y === actor.y) continue;
+    if (Math.abs(ally.y - actor.y) !== rankStride) continue;
+    const engaged = foes.some((foe) =>
+      foe.y === ally.y && ss2FightDistance(ally, foe) < Math.max(ss2Reach(ally), ss2Reach(foe)));
+    if (!engaged) continue;
+    // Nearest such ally, ties broken by id so two peers agree.
+    if (best === null || ally.y > best.y || (ally.y === best.y && ally.id < best.id)) best = ally;
+  }
+  if (!best) return null;
+  return best.y > actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK;
+}
+
 function ss2RankDestination(actorY, direction, rankStride) {
   if (!Number.isFinite(actorY) || rankStride <= 0) return null;
   const to = actorY + direction * rankStride;
@@ -4882,6 +4982,41 @@ export function createSs2TeamRules({
    *   See the handoff of 2026-09-18 for the numbers and for the two published
    *   claims this work broke.
    */
+  /**
+   * How willing an AI gladiator is to LEAVE ITS OWN FIGHT and join an ally's.
+   *
+   * ► **THE OWNER'S DIAL, and it is the question ranked item 2 of the
+   *   2026-09-18 handoff should have asked.** That item asked about the LAYOUT
+   *   — one lane against ranks — on the ground that "with lanes enforced nobody
+   *   can gang up". Measured 2026-09-19 with the lane gate applied exactly as
+   *   the attack offer applies it, a 2-on-1 happens on 3.0% of turns with the
+   *   shipped ranks and on **0 of 2,851 turns in one lane**. The layout is
+   *   settled; the willingness is not.
+   *
+   * ► **`Infinity` IS THE SHIPPED DEFAULT AND MEANS THE ARM IS OFF**, so a
+   *   shipped bout is untouched BY CONSTRUCTION — `ss2RankToJoin` returns
+   *   `null` for it before reading anything. **The first cut defaulted this to
+   *   0 and said in its own docstring that nothing moved; measured, 25 seeded
+   *   3v3 bouts went 2,234 decisions to 2,307 and rank changes 43 to 79.** A
+   *   default that has to be argued to be a no-op is not one.
+   *
+   *   A FINITE value switches the arm on: `ss2RankToJoin` may leave when
+   *   `alliesInMyRank (not counting me) - foesInMyRank >= rankJoinSurplus`.
+   *   `0` joins only from a rank it is not deserting anybody in; `-1` will
+   *   leave one foe behind to make a 2-on-1 elsewhere; `-2` will leave two; a
+   *   large negative joins whenever an ally is engaged next door.
+   *
+   * ► **IT IS IN THE RULE-SET ID WHENEVER IT IS FINITE**, the same rule
+   *   `crowdPatience`, `rankStride` and `backAttackBonus` follow: the hash
+   *   carries only the id, so two peers on different willingnesses would agree
+   *   on every hash and then diverge the first time one of them broke off.
+   *
+   * ► **WHAT IT BUYS, SWEPT RATHER THAN ARGUED — see the handoff of
+   *   2026-09-19 for the table.** It is left at 0 because the numbers alone do
+   *   not settle it: this is how the arena LOOKS, and the repository's own hard
+   *   rule is that the owner watching a bout is the instrument for that.
+   */
+  rankJoinSurplus = Infinity,
   aiTaunts = true,
   aiCharges = false,
   /**
@@ -5028,8 +5163,13 @@ export function createSs2TeamRules({
   // different settings would agree on every hash and then diverge the first
   // time one of them taunted instead of walking.
   const tauntSuffix = aiTaunts ? "" : "-no-taunt";
+  // Same rule again. `-join-none` rather than `-join-Infinity` because an id is
+  // read by people and `Infinity` in a hash input reads like a bug.
+  const joinSuffix = !Number.isFinite(rankJoinSurplus)
+    ? ""
+    : `-join-${rankJoinSurplus < 0 ? `down-${-rankJoinSurplus}` : `hold-${rankJoinSurplus}`}`;
   const ruleSetId =
-    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}`;
+    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}`;
 
   return defineTeamRuleSet({
     // The mode is in the id because `toTeamWireState` carries only id,
@@ -7237,6 +7377,23 @@ export function createSs2TeamRules({
           ? ss2FlankingWalk(view, nearest, options)
           : null;
         if (flank) return flank;
+
+        // ► **JOIN A FIGHT AN ALLY IS ALREADY IN, when the dial says this
+        //   gladiator may leave what it is doing.** Ahead of the empty-rank arm
+        //   below because it is the more specific question: that one asks
+        //   "where IS the fight", this one asks "should I leave mine for
+        //   somebody else's". At the shipped `rankJoinSurplus` of 0 it can
+        //   never fire while a foe stands in the actor's own rank, so the two
+        //   do not overlap and the shipped behaviour is unchanged. See
+        //   `ss2RankToJoin` for the measurement that made this the open
+        //   question and the layout a closed one.
+        if (positionedInDepth) {
+          const join = ss2RankToJoin(view, rankJoinSurplus, rankStride);
+          if (join) {
+            const step = options.find((option) => option.type === join);
+            if (step) return step;
+          }
+        }
 
         if (positionedInDepth && !ownRankHasFoe && nearest && Number.isFinite(nearest.y)) {
           const towardRank = nearest.y > view.actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK;

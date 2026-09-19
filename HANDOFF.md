@@ -44,6 +44,64 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE RANK-JOINING DIAL IS SWEPT, AND THE SETTING THAT HELPS IS NOT THE ONE
+  THAT WINS (2026-09-19).** `rankJoinSurplus` is the question ranked item 2
+  should have asked, now that the layout half of it is closed. **OFF BY DEFAULT
+  AND THAT IS PROVABLE, NOT ARGUED**: `ss2RankToJoin` returns `null` for
+  `Infinity` before reading the view, and the arena census reproduces 2,234
+  decisions exactly. 300 seeded 3v3 bouts an arm:
+
+```text
+    HEAD-TO-HEAD vs shipped       as team 0        as team 1        alternating
+      surplus  0                  155-145 51.7%    136-164 45.3%    130-170 43.3%  -2.3σ
+      surplus -1                  166-133 55.5%    148-150 49.7%    150-149 50.2%  +0.1σ
+      surplus -99                 166-133 55.5%    148-150 49.7%    150-149 50.2%  +0.1σ
+
+    WHAT A BOUT LOOKS LIKE        turns   settled    2-on-1 turns   rank changes
+      off (shipped)                  97   300/300     804 (2.7%)             500
+      surplus  0                     92   300/300    1465 (5.3%)             847
+      surplus -1                    137   297/300     754 (1.8%)            1113
+      surplus -99                   137   297/300     754 (1.8%)            1113
+```
+
+  ► **`0` IS THE SETTING THAT BUYS THE THING THE OWNER ASKED FOR**: it
+    DOUBLES the 2-on-1 rate (2.7% → 5.3%), makes bouts SHORTER (97 → 92), and
+    all 300 still settle — for about 2.3σ of win rate. **Same shape of trade as
+    `aiCharges`**: an opponent more interesting to fight and slightly worse at
+    fighting. And the win rate is the wrong number for PvP anyway, where both
+    sides have it and it is symmetric.
+  ► **`-1` IS WORSE THAN DOING NOTHING AT THE VERY THING IT IS FOR.** It
+    HALVES the 2-on-1 rate against off (1.8% against 2.7%) while tripling rank
+    changes, runs bouts 41% longer and stops 3 of 300 settling. **Everybody
+    breaks off constantly and nobody stands still long enough for a second
+    attacker to arrive — churn, not focus.** Counter-intuitive, measured, and
+    the reason a dial needed a sweep rather than a guess.
+  ► **`-1`, `-2` AND `-99` ARE ONE POLICY ON THIS ROSTER**, byte-identical in
+    both tables: with one gladiator a side in a rank the surplus only reaches
+    -1, so nothing below it can bind. **Three settings, not a curve** — off, 0,
+    and "any negative" — and the sweep is reported that way rather than as a
+    smooth trend it is not.
+  ► **AND THE FIRST CUT DEFAULTED TO 0 AND CLAIMED IN ITS OWN DOCSTRING THAT
+    NOTHING MOVED.** Measured: 2,234 decisions → 2,307, rank changes 43 → 79,
+    because at 0 the arm still fires from a rank holding an ally and one foe and
+    it aims at the rank where an ALLY is fighting where the old arm aimed at the
+    NEAREST FOE's rank. **A default that has to be argued to be a no-op is not
+    one.**
+  ► **THE ANTI-PILE-UP GUARD IS THE PROPERTY THAT SURVIVES EVERY VALUE**: the
+    join requires an ally ALREADY ENGAGED in the target rank, which is false for
+    everybody on turn one, so the 2026-09-12 opening collapse cannot return
+    however permissive the dial is. Pinned at `-99`, the most permissive setting
+    there is.
+  ► **`ss2FlankingWalk` RUNS FIRST AND IS A PRELUDE, NOT A COMPETITOR** — it
+    walks you past the target so the rank change arrives BEHIND. The first
+    version of the test file staged the actor on the near side and every
+    behavioural assertion returned `walk-right`: **a test that stages past the
+    arm it means to exercise reports the wrong function green.**
+
+  **STILL AT `Infinity` (off), because the numbers do not settle it.** This is
+  how the arena LOOKS, and this file's own hard rule is that the owner watching
+  a bout is the instrument for that. `0` is the recommendation.
+
 ► **THE AI TAUNTS AT RANGE NOW, AND THE TWO CLAIMS THAT RANKED THE WORK BOTH
   BROKE UNDER THEIR OWN CONTROLS (2026-09-19).** Ranked items 1 and 2 of the
   2026-09-18 handoff are both addressed and both were posed on a premise that
