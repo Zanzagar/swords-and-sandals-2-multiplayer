@@ -8,8 +8,13 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-19 04:00 — the taunt was never ranked](docs/handoffs/2026-09-19-0400--the-taunt-was-never-ranked.md).**
+[2026-09-19 15:00 — four ranked items, and three premises that did not survive](docs/handoffs/2026-09-19-1500--four-ranked-items-and-three-broken-premises.md).**
 Start there. *(It supersedes
+[2026-09-19 04:00 — the taunt was never ranked](docs/handoffs/2026-09-19-0400--the-taunt-was-never-ranked.md),
+**whose ranked items 1, 5 and 6 are CLOSED, whose item 4 is HALF-CLOSED, and
+whose ranked item 2 was posed on a claim that is FALSE** — the shell's 4,110
+lines are not untested; 13 of its 70 functions are executed by the suite.)*
+*(That one supersedes
 [2026-09-18 01:30 — the picture was lying, and the canvas was a postage stamp](docs/handoffs/2026-09-18-0130--the-picture-was-lying-and-the-canvas-was-a-postage-stamp.md),
 **whose ranked item 1 is DONE, whose ranked item 2 is CLOSED RATHER THAN
 ANSWERED because the premise it was posed on is refuted, and two of whose
