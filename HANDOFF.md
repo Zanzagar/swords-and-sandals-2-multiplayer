@@ -8,8 +8,12 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-19 15:00 — four ranked items, and three premises that did not survive](docs/handoffs/2026-09-19-1500--four-ranked-items-and-three-broken-premises.md).**
+[2026-09-19 21:30 — four defects, a campaign, and a blocker that moved](docs/handoffs/2026-09-19-2130--four-defects-a-campaign-and-a-blocker-that-moved.md).**
 Start there. *(It supersedes
+[2026-09-19 15:00 — four ranked items, and three premises that did not survive](docs/handoffs/2026-09-19-1500--four-ranked-items-and-three-broken-premises.md),
+**whose ranked items 2, 4 and 6 are CLOSED, whose item 5 is answered NO, and
+four of whose shipped commits carried defects a Codex review then found.**)*
+*(That one supersedes
 [2026-09-19 04:00 — the taunt was never ranked](docs/handoffs/2026-09-19-0400--the-taunt-was-never-ranked.md),
 **whose ranked items 1, 5 and 6 are CLOSED, whose item 4 is HALF-CLOSED, and
 whose ranked item 2 was posed on a claim that is FALSE** — the shell's 4,110
