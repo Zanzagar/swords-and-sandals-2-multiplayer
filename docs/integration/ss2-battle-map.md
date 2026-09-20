@@ -2793,9 +2793,36 @@ six slots. `use_item(which_item)` is at `DoAction@0x23e7cf`, `+0x0369`:
   inventory, in the same initialisation block. Assuming one convention across
   both is the trap this derivation exists to close.
 
-► **SO CONSUMPTION IS: SET THE SLOT TO 1.** `cast_gale` is no longer blocked on
-  a derivation. `magic_damage_character` (`+0x148e`) sat behind the same unread
-  column and is unblocked by the same reading.
+► **SO CONSUMPTION IS: SET THE SLOT TO 1.** `magic_damage_character`
+  (`+0x148e`) sat behind the same unread column and is unblocked by the same
+  reading.
+
+► **AND `cast_gale` IS STILL NOT BUILDABLE, FOR A DIFFERENT AND BETTER-FOUNDED
+  REASON — measured 2026-09-19.** The derivation is complete; the ENGINE is not
+  ready for it. **`inventory1`–`inventory6` are not declared resources**: they
+  are absent from `SS2_RESOURCE_NAMES`, so they do not reach the resolver at
+  all, and a verb gated on carrying item 38 has nothing to read.
+
+  Adding them is a SCHEMA change, and `SS2_RESOURCE_NAMES`'s own comment prices
+  it: a name given a default **is filled into every combatant that does not
+  state it, including every golden's, and that moves all 23 golden replay
+  hashes** — measured, and done once before at `86ccb68`. Six names without
+  defaults is the `psyche_up` shape and is the safer road, but it still touches
+  `CANONICAL_RESOURCE_SOURCES`, the adapter's write-back and the campaign
+  record, and every golden has to be re-checked afterwards rather than assumed.
+
+  **That is its own session with the goldens in front of it**, not the tail of
+  another one. The blocker has moved from "a byte nobody has read" to "a schema
+  decision with a measured blast radius", which is progress of the kind worth
+  writing down.
+
+► **AND THE DEMO ROSTER DECLARES ITS SIX SLOTS AS `0`, WHICH IS NOT THE EMPTY
+  VALUE.** `tools/arena/roster.js` states `inventory1: 0` through
+  `inventory6: 0`; the build's empty marker is **1**. It is inert today because
+  nothing reads the field — **which is exactly the hazard that roster's own
+  header records four times over** ("a stated field is harmless right up until
+  something reads it"). Fix it in the same session that declares the resources,
+  not before: changing it now would state a value nothing validates.
 
 `cast_spell_icon(which_avatar, spell_number)` attaches export 120
 (`cast_spell_image`) to `arena.combat_panel`, positions it at the hero or villain

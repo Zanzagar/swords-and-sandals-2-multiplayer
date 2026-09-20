@@ -49,6 +49,35 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **`use_item` IS DERIVED, AND `cast_gale`'S BLOCKER MOVED RATHER THAN CLEARED
+  (2026-09-19).** **1 is the EMPTY marker for an inventory slot**, confirmed by
+  three independent sites: `use_item` refuses `which_item == 1` (`+0x03cc`), it
+  writes 1 to the slot it consumed (`+0x0409`), and a character-init block
+  writes 1 to all six slots at once beside `shield = 0` (`+0x330a`). **The
+  empty marker DIFFERS BY COLUMN** — 0 for equipment, 1 for inventory, in the
+  same block — which is the trap that made this worth deferring over.
+  So consumption is: set the slot to 1, and `magic_damage_character` (`+0x148e`)
+  is unblocked by the same reading.
+  ► **BUT `cast_gale` IS STILL NOT BUILDABLE, AND THE NEW BLOCKER IS BIGGER AND
+    BETTER MEASURED.** `inventory1`–`inventory6` **are not declared resources**
+    — absent from `SS2_RESOURCE_NAMES`, so they never reach the resolver and a
+    verb gated on carrying item 38 has nothing to read. Adding them is a SCHEMA
+    change whose price that constant's own comment states: a name WITH a default
+    is filled into every combatant that does not state it, **including every
+    golden's, and that moves all 23 golden replay hashes** — measured, and done
+    once before at `86ccb68`. Six names without defaults is the `psyche_up`
+    shape and is safer, but still touches `CANONICAL_RESOURCE_SOURCES`, the
+    adapter write-back and the campaign record.
+  ► **NOT STARTED DELIBERATELY: this session was at 75% of its context.**
+    Beginning a multi-file schema change with the goldens downstream of it, with
+    no room to finish it or to run the Codex review it would need, is how the
+    defects two entries up got shipped. **It is its own session, with the
+    goldens in front of it.**
+  ► **AND THE DEMO ROSTER DECLARES ITS SIX SLOTS AS 0, WHICH IS NOT EMPTY.**
+    Inert today because nothing reads the field — the exact hazard that roster's
+    header already records four times. Fix it in the session that declares the
+    resources, not before.
+
 ► **A CODEX REVIEW CAME BACK `needs-attention` ON 13 UNREVIEWED COMMITS, AND
   ALL FOUR FINDINGS WERE REAL (2026-09-19).** I ran Codex once today, on the
   taunt diff, and then shipped **13 more commits / 1,666 lines of code** — the
