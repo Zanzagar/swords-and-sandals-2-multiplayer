@@ -49,6 +49,48 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE CAMPAIGN LAYER HAS A HOST, AND A CAMPAIGN SURVIVES THE PROCESS
+  (2026-09-19).** The September audit's *"nothing a person can run persists a
+  campaign anywhere"* is closed. Re-measured first: **3,174 lines, 69 exports,
+  70 passing tests, ONE non-test consumer, ZERO `writeFile` calls.**
+  ► **THE DESIGN WAS NEVER THE GAP.** `CampaignStore` has always taken an
+    INJECTED backend — `read`, `write`, `remove`, `keys`, optional `flush` — and
+    shipped two implementations: a `Map` and fields on a live vanilla save
+    object. **Neither survives a process.** `src/campaign/file-backend.js` is
+    the third, and `tools/arena-campaign.mjs` is the runnable host.
+  ► **THE STATE IS THE RECORDS, WITH NO SUMMARY TO DRIFT FROM THEM.** A
+    campaign IS its sequence of battle records; the roster for the next bout is
+    rebuilt by `rosterFromCampaignRecord`. **`file-backend.js` is deliberately
+    NOT re-exported from `src/campaign/index.js`** — it imports `node:fs` and
+    the rest of the layer runs in a browser, so a barrel export would put a node
+    builtin on the page's import graph.
+  ► **TWO DECISIONS THAT ARE NOT OBVIOUS**: a key is not a filename (`:` is
+    illegal on Windows, and `~` is the one separator the key grammar cannot
+    produce, so the mapping is INJECTIVE rather than merely readable); and a
+    write is atomic via temp-plus-rename, because the store distinguishes
+    CORRUPT from MISSING and a killed process would otherwise manufacture the
+    first.
+  ► **THREE DEFECTS IN MY OWN HOST, NONE REACHABLE BY UNIT TEST**, all found by
+    running it the way a person does:
+    1. **THE RESUME PRINTED ITS MESSAGE WITHOUT DOING ANYTHING.** It logged
+       "resuming after …" and then fought from the opening roster, so every
+       bout started with six fresh gladiators. **A log line is not a
+       behaviour.**
+    2. **CHALLENGERS REUSED THE DEAD GLADIATORS' IDS**, so a refilled `red-1`
+       was indistinguishable from the `red-1` that had just died. Ids are
+       `<side>-c<bout>-<n>` now and **rebuildable from the id alone**, which is
+       what makes "the state is the records" true ACROSS processes.
+    3. **BLUEPRINTS WERE READ OFF `teams[].combatants`, WHICH A RECORD DOES NOT
+       HAVE** — `teams` carry SLOTS and the ids live on `outcomes`. The store
+       caught it rather than absorbing it, refusing by name.
+  ► **AND A DRAWN BOUT CONCLUDES A CIRCUIT, which the first cut threw on.**
+    Both sides eliminated is a legitimate outcome and exiting 1 would make it
+    indistinguishable from a broken store. Reached on the second bout of the
+    first campaign this tool ever ran.
+  ► **Pinned by a SUBPROCESS test** — three runs of the real tool, asserting the
+    third starts from what the second left — plus 7 mutations of the backend,
+    each red.
+
 ► **A THIRD SHELL DECISION IS OUT, AND PICKING IT TAUGHT THE SELECTION RULE
   (2026-09-19).** `groupPaintReadout`. **The DOM-bound set is 22 functions, not
   the ~28 I published earlier today** — counted properly this time — and 10 of
