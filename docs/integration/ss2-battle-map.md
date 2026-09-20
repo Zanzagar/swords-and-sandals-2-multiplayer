@@ -2717,6 +2717,60 @@ Observed inventory ID mappings include:
 | 36–42 | ghost strike, whirlwind, gale, command, swift sandals, bloodlust, colossus |
 | 43–49 | `rejuvinate` (vanilla spelling), weaken armour, boundless energy, regenerate, adulation, teleport, death from above |
 
+### The `cast_gale` phase, in full (derived 2026-09-19)
+
+Read out of the oracle at `sprite:862[overlay]/frame:52/DoAction@0x240c7f`, the
+same 38,146-byte block the melee phases live in. The map carried two rows about
+this phase — the stamina cost at `:1357` and the force at `:2296` — and not the
+phase; this is the rest of it.
+
+```text
+  phase_decision == "cast_gale"                              +0x7aaa
+    game_attacker.staminacost = round(game_attacker.magicka)  +0x7ad0
+    if (attacker.shove != true) {                             +0x7af1
+      cast_spell_icon(attacker, 38)                           +0x7b0a
+      attacker.shove = true                                   +0x7b22
+      attacker.gotoAndPlay("Cast1")                           +0x7b30
+      if (attacker.gladiator_dir == "right") force = 1000     +0x7b5d
+      else                                   force = -1000    +0x7b6d
+      defender.gotoAndPlay("knockback")   — UNCONDITIONAL      +0x7b78
+      knockback(defender, force)                              +0x7b98
+    }
+    if (attacker.struck == true) {                            +0x7ba4
+      attacker.struck = null
+      attacker.shove  = null
+      nextphase()                                             +0x7bd6
+    }
+```
+
+**Four things that were not in the prose:**
+
+- **IT TAKES NO SAMPLE AND DEALS NO DAMAGE.** Counted over `+0x7aaa`…`+0x7be5`:
+  zero `randomBetween`, zero `checkattackroll`, zero `hitpoints`. Like `shove`
+  and unlike `taunt`, it is a pure displacement and has no tape hazard.
+- **THE COST IS `round(magicka)`, THE STAT** — not strength, and not a spell
+  price. It is the only phase in the block whose `staminacost` reads `magicka`.
+- **IT REUSES `attacker.shove` AS ITS IN-PROGRESS LATCH** (`+0x7af1`, `+0x7b22`,
+  `+0x7bcf`), the same field the `shove` phase uses. So `shove` is not that
+  verb's own flag but the state machine's generic "this displacement phase has
+  started" bit, and two displacement phases can never be in flight at once.
+- **THE ICON NUMBER IS THE INVENTORY ID.** `cast_spell_icon(attacker, 38)` and
+  the inventory table above both give gale 38, which is what ties the phase to
+  the item that offers it.
+
+**WHAT IS STILL NOT DERIVED, AND WHY THIS VERB IS NOT BUILT.** Spells are
+INVENTORY ITEMS: `villain_cast_spells` searches `inventory1`–`inventory6` and
+calls `use_item`, so the gate on casting a gale is carrying id 38 in one of six
+slots. **What `use_item` does to the slot is only half read.** Its body
+(`DoAction@0x23e7cf`, `+0x0369`) sets `spell_selected = true`, walks `i` from 1
+to 6, and on a match writes **`villain["inventory" + i] = 1`** (`+0x0409`–
+`+0x041a`) — **1, not 0** — and 1 is itself an id in the item columns. Until
+that column's meaning is established, a built `cast_gale` would either consume
+nothing (an unlimited ±1000 knockback, which is worse than not having the verb)
+or consume it wrongly. **Deferred deliberately**, the way `taunt` was deferred
+for a month over its two pre-dispatcher draws — a deferral that was right to the
+end.
+
 `cast_spell_icon(which_avatar, spell_number)` attaches export 120
 (`cast_spell_image`) to `arena.combat_panel`, positions it at the hero or villain
 side, selects the inventory icon frame, hides its battle button, and displays

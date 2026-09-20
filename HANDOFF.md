@@ -49,6 +49,27 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **`cast_gale` IS FULLY DERIVED AND DELIBERATELY NOT BUILT (2026-09-19).**
+  The phase is written out in the battle map under "The `cast_gale` phase, in
+  full". **Zero `randomBetween`, zero `checkattackroll`, zero `hitpoints`** over
+  `+0x7aaa`…`+0x7be5`; cost is **`round(magicka)`, the STAT**; force is flat
+  ±1000 with no floor; the knockback animation is **unconditional**, the only
+  one of the four `knockback` sites that is.
+  ► **IT REUSES `attacker.shove` AS ITS LATCH**, so `shove` is not that verb's
+    own flag but the state machine's generic "a displacement phase has started"
+    bit — two displacement phases can never overlap.
+  ► **THE BLOCKER IS `use_item`, AND IT IS NAMED RATHER THAN GUESSED.** Spells
+    are INVENTORY ITEMS (gale is id 38, the same number as its icon call), so
+    the gate is carrying it in one of six slots. `use_item`'s body
+    (`DoAction@0x23e7cf`, `+0x0369`) writes **`inventory<i> = 1`** — **1, not
+    0** — and 1 is itself an id in the item columns. **Until that column's
+    meaning is established, a built gale either consumes nothing (an unlimited
+    ±1000 knockback, worse than not having the verb) or consumes it wrongly.**
+    Deferred the way `taunt` was, for a reason that was right to the end.
+  ► **THE DERIVATION IS THE DELIVERABLE HERE**, and it is worth more than a
+    guessed verb: `magic_damage_character` (`+0x148e`) sits behind the same
+    unread column, so settling `use_item` unblocks both.
+
 ► **THE CAMPAIGN LAYER HAS A HOST, AND A CAMPAIGN SURVIVES THE PROCESS
   (2026-09-19).** The September audit's *"nothing a person can run persists a
   campaign anywhere"* is closed. Re-measured first: **3,174 lines, 69 exports,
