@@ -8,8 +8,15 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-19 21:30 — four defects, a campaign, and a blocker that moved](docs/handoffs/2026-09-19-2130--four-defects-a-campaign-and-a-blocker-that-moved.md).**
+[2026-09-20 02:00 — the six slots are declared, and three of yesterday's sentences were wrong](docs/handoffs/2026-09-20-0200--the-slots-are-declared-and-three-sentences-were-wrong.md).**
 Start there. *(It supersedes
+[2026-09-19 21:30 — four defects, a campaign, and a blocker that moved](docs/handoffs/2026-09-19-2130--four-defects-a-campaign-and-a-blocker-that-moved.md),
+**whose ranked item 1 is DONE and whose ranked item 5 is now BETTER-BLOCKED than
+it was: `cast_gale`'s gate is five conditions, not the one that file names, and
+one of them is an arena field this engine has no home for. Two of that file's
+priced costs — `CANONICAL_RESOURCE_SOURCES` and the campaign record — turned out
+not to exist.**)*
+*(That one supersedes
 [2026-09-19 15:00 — four ranked items, and three premises that did not survive](docs/handoffs/2026-09-19-1500--four-ranked-items-and-three-broken-premises.md),
 **whose ranked items 2, 4 and 6 are CLOSED, whose item 5 is answered NO, and
 four of whose shipped commits carried defects a Codex review then found.**)*
