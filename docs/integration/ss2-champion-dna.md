@@ -223,7 +223,21 @@ exactly filling indices 0–49. Applying the table above field by field:
 | 8 | `breastplate` | 1 | 33 | `weapon_enchantment_type` | 4 |
 | 9 | `helmet` | **102** | 34 | `inventory1` | 6 |
 | 10 | `greaves` | 2 | 35 | `inventory2` | 1 |
-| 11 | `shinguard` | 4 | 36–39 | `inventory3`…`6` | 0 |
+| 11 | `shinguard` | 4 | 36–39 | `inventory3`…`6` | 0 |[^inv]
+
+[^inv]: **THIS ROW USES BOTH EMPTY MARKERS AND IT IS NOT A DECODE ERROR** (checked
+    2026-09-19, wave `wf_1ee83aec-a10`, VERIFIED). `inventory2` is `1` and
+    `inventory3`–`6` are `0`, in one hand-typed literal. Both read as nothing:
+    `_root.inventory0` and `_root.inventory1` are the same five-element row,
+    byte-identical after the name operand (`0x3FF6C8` and `0x3FF6E9` share a
+    25-byte tail). **But only `1` is the marker the CODE uses** — fourteen
+    emptiness tests in the build, every one `== 1`, and every literal write to a
+    slot is `1`, with zero writes of `0`. `0` reaches a slot only through an
+    authored or saved DNA string, which is what these literals are: across the
+    champion set, seventeen rows spell empty `0`, two spell it `1`, and this one
+    mixes them. See the battle map, §"How a spell is offered and consumed".
+    Note also that `inventory_maxslots` (index 40) gates nothing in combat:
+    `use_item` and `check_inventory` both loop a hard `i = 1..6`.
 | 12 | `boot` | 1 | 40 | `inventory_maxslots` | 1 |
 | 13 | `weapon` | 24 | 41 | `battleswon` | 0 |
 | 14 | `shield` | 0 | 42 | `days_in_arena` | 1 |

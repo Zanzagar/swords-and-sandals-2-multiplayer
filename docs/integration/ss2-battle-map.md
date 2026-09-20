@@ -2760,8 +2760,16 @@ phase; this is the rest of it.
 
 **HOW A SPELL IS OFFERED AND CONSUMED — `use_item`, derived 2026-09-19.** Spells
 are INVENTORY ITEMS: `villain_cast_spells` searches `inventory1`–`inventory6`
-and calls `use_item`, so the gate on casting a gale is carrying id 38 in one of
-six slots. `use_item(which_item)` is at `DoAction@0x23e7cf`, `+0x0369`:
+and calls `use_item`. ~~"so the gate on casting a gale is carrying id 38 in one
+of six slots"~~ — **WRONG BY FOUR CONDITIONS, and withdrawn the same day it was
+written.** See §"The gale gate is five conditions, not one" below: carrying the
+id is one term of five. The correction came from a question-diverse wave
+(`wf_1ee83aec-a10`, VERIFIED, 4 questions + 5 verifiers, 9 started 9 returned)
+whose verifier re-derived the chain from raw bytes rather than from the tool's
+printed targets. **The paragraph was published, then checked, and the check is
+what found it** — which is the order this file keeps having to learn.
+
+`use_item(which_item)` is at `DoAction@0x23e7cf`, `+0x0369`:
 
 ```text
   use_item(which_item):
@@ -2785,44 +2793,179 @@ six slots. `use_item(which_item)` is at `DoAction@0x23e7cf`, `+0x0369`:
      An id that cannot be used is not an item.
   2. **`use_item` WRITES 1 to the slot it just consumed** (`+0x0409`). Using
      something empties its slot.
-  3. **A character-initialisation block writes 1 to EVERY inventory slot at
+  3. ~~**A character-initialisation block writes 1 to EVERY inventory slot at
      once** (`+0x330a`–, `inventory1` through `inventory6`), beside
-     `shield = 0`. A fresh gladiator carries nothing.
+     `shield = 0`. A fresh gladiator carries nothing.~~ **WRONG IN EVERY CLAUSE
+     BUT THE OFFSET — corrected 2026-09-19 by the same wave, with the branch
+     arithmetic done three ways.** `+0x330a` is in `randomise_gladiator`
+     (`root/frame:35/DoAction@0x40198e`, block base `0x401994` = 4200852):
+     - **It is not a character-initialisation block. It is OPPONENT
+       generation.** The whole equipment/inventory/maxslots body sits inside
+       `if (whichcharacter != _root.game.hero)` (`+0x27e8`, `If` delta 3615 →
+       `+0x360C`, taken when EQUAL). The player's own gladiator never reaches
+       these writes; his slots come from `characterDNA[34..39]` via
+       `initcharacter` `+0x0904`. So "a fresh gladiator carries nothing" is true
+       of every generated opponent and **false for the player**.
+     - **It is not "beside `shield = 0`".** `shield = 0` is the last statement
+       of the `if (herolevel == 1)` arm, and that `if`'s branch TARGET is
+       `+0x330a` itself (`+0x328e`, delta 119, target 4213918; 4213918 − 4200852
+       = 13066 = `0x330A`). The equipment zeroes are inside a conditional arm;
+       the six `= 1` writes are its join. Adjacent in address order, different
+       basic blocks, different conditions.
 
-  **And the empty marker DIFFERS BY COLUMN** — `0` for equipment, `1` for
-  inventory, in the same initialisation block. Assuming one convention across
-  both is the trap this derivation exists to close.
+  ~~**And the empty marker DIFFERS BY COLUMN** — `0` for equipment, `1` for
+  inventory, in the same initialisation block.~~ **The conclusion survives; its
+  stated evidence does not, and the framing was wrong twice over.** There is no
+  "same initialisation block" (above), and `0` is not equipment convention
+  leaking in — it is inventory's OWN second nothing-row.
+
+  ► **THE REAL SHAPE, MEASURED OVER THE WHOLE 7.5 MB ORACLE (wave
+    `wf_1ee83aec-a10`, VERIFIED; the verifier re-derived it from raw bytes with
+    a python reader, not from the tool's printed targets):**
+
+    - **`1` IS THE MARKER THE CODE WRITES AND TESTS FOR.** Fourteen emptiness
+      tests, **every one `Equals2` against `1`, and not one against `0`** —
+      `sprite:492[inventory_overlay]/frame:1` `+0x02af`/`+0x02fe`/`+0x034d`/
+      `+0x039c`/`+0x03eb`/`+0x043a` for slots 1–6, and the two charsheets
+      (`sprite:1332[charsheet]/frame:14` `+0x029c`…, `sprite:2218/frame:4`
+      `+0x01b5`…) for slots 3–6 only. **Every literal write to a slot is 1** —
+      `randomise_gladiator` `+0x330a`–`+0x334b`, `use_item` `+0x0409`, and the
+      hero's own six consume handlers at `sprite:862[overlay]/frame:1`
+      (`+0x0626`, `+0x0695`, `+0x0704`, `+0x0773`, `+0x07e2`, `+0x0851`).
+      **Zero writes of `0` anywhere.** The grep's positive control is the same
+      windows finding `"breastplate", 0` and `"shield", 0`, so an
+      `"inventoryN", 0` would have been caught.
+    - **`0` IS A DEFINED NOTHING ROW, WHICH IS WHY AUTHORED DATA GETS AWAY WITH
+      IT.** `_root.inventory0` and `_root.inventory1` are the same five-element
+      row, **byte-identical after the name operand**: file offsets `0x3FF6C8`
+      and `0x3FF6E9` share a 25-byte tail, differing only in `09 70 01`
+      (const16 368) versus `08 25` (const8 37). Both resolve through
+      `_root["inventory" + slotValue]` to the same display row.
+    - **SO 0 AND 1 ARE THE SAME ROW AND NOT THE SAME VALUE.** Three display
+      sites diverge: the charsheets blank a slot only on `== 1`, so a `0` slot
+      renders a "nothing" line where a `1` slot renders blank; and
+      `inventory_buttonN.gotoAndStop(hero.inventoryN)` passes the raw value as a
+      1-indexed FRAME number, where `0` is out of range.
+    - **`0` CAN ONLY ENTER A SLOT THROUGH AN AUTHORED OR SAVED DNA STRING**, and
+      that is exactly where it does: of the champion literals in `unleash_hell`,
+      seventeen spell an empty slot `0`, two spell it `1`, and one row mixes
+      both. `constructDNA`/`constructvillainDNA` serialise the raw value with no
+      substitution, so the DNA the ENGINE emits for an empty slot is `1`.
+      **This is why `docs/integration/ss2-champion-dna.md`'s rank-1 decode
+      (`inventory2` 1, `inventory3`–`6` 0) is not a contradiction** — it is one
+      hand-typed row using both conventions.
+
+  ► **A FOURTH AND FIFTH SITE THIS SECTION NEVER CITED.** `check_inventory` is
+    undocumented here and is the function the offer ladder actually calls; and
+    `is_that_virtuous` holds the build's only `> 0` emptiness test
+    (`inventory3..6 > 0` → `inventory_maxslots = 2`), a **third** predicate that
+    would read the engine's own empty marker `1` as occupied. It is DEAD in the
+    installed build: its sole caller is gated on `fizMode != "fizzle"` and
+    `root/frame:1/DoAction@0x5b66c` `+0x0026` writes `"fizzle"` unconditionally,
+    the only write among sixteen `fizMode` references.
+
+  ► **`inventory_maxslots` GATES NOTHING IN COMBAT.** Both `use_item` (`+0x0390`)
+    and `check_inventory` (`+0x02f8`) loop a hard `i = 1..6`. Its only read-gate
+    anywhere is hero button `_visible` in `sprite:492`. **An engine that made a
+    verb respect `maxslots` would be modelling behaviour the build does not
+    have.**
 
 ► **SO CONSUMPTION IS: SET THE SLOT TO 1.** `magic_damage_character`
   (`+0x148e`) sat behind the same unread column and is unblocked by the same
   reading.
 
-► **AND `cast_gale` IS STILL NOT BUILDABLE, FOR A DIFFERENT AND BETTER-FOUNDED
-  REASON — measured 2026-09-19.** The derivation is complete; the ENGINE is not
-  ready for it. **`inventory1`–`inventory6` are not declared resources**: they
-  are absent from `SS2_RESOURCE_NAMES`, so they do not reach the resolver at
-  all, and a verb gated on carrying item 38 has nothing to read.
+► **THE SIX SLOTS ARE DECLARED RESOURCES SINCE 2026-09-19, AND NO GOLDEN
+  MOVED.** They were absent from `SS2_RESOURCE_NAMES`, so they did not reach the
+  resolver at all. They are in it now, with **no `SS2_RESOURCE_DEFAULTS`
+  entry** — the `psyche_up` shape, so only a record that STATES a slot declares
+  the key. The 23 golden replay hashes were taken before and after and **all 23
+  are byte-identical**; the suite is 2098 / fail 0 / skipped 1 either side.
 
-  Adding them is a SCHEMA change, and `SS2_RESOURCE_NAMES`'s own comment prices
-  it: a name given a default **is filled into every combatant that does not
-  state it, including every golden's, and that moves all 23 golden replay
-  hashes** — measured, and done once before at `86ccb68`. Six names without
-  defaults is the `psyche_up` shape and is the safer road, but it still touches
-  `CANONICAL_RESOURCE_SOURCES`, the adapter's write-back and the campaign
-  record, and every golden has to be re-checked afterwards rather than assumed.
+  Two of that decision's costs turned out not to exist, and saying so is
+  cheaper than the next session re-costing them:
+  - **`CANONICAL_RESOURCE_SOURCES` is untouched, deliberately.** Nothing writes
+    a slot yet, and `emitResource` returns early for a resource that does not
+    MOVE, so mirroring would be a write-allowlist entry with no driver. It goes
+    in with the verb, which is where `psyche_up`'s went (`b201486`, not the
+    vocabulary commit `a89601c`).
+  - **The campaign record needs nothing.** `restoredResources` is returned by
+    `advanceCircuit`, never persisted, and the vanilla field-name screen already
+    refuses `inventory1`–`inventory6` because `VANILLA_FIELD_GROUPS` has
+    carried them all along.
 
-  **That is its own session with the goldens in front of it**, not the tail of
-  another one. The blocker has moved from "a byte nobody has read" to "a schema
-  decision with a measured blast radius", which is progress of the kind worth
-  writing down.
+  **The demo roster's six slots went `0` → `1` in the same commit**, because 1
+  is what the code writes and what all fourteen emptiness tests look for. It was
+  inert for exactly as long as nothing read the field — the fifth time
+  `tools/arena/roster.js` has taught that a stated field is harmless right up
+  until something reads it.
 
-► **AND THE DEMO ROSTER DECLARES ITS SIX SLOTS AS `0`, WHICH IS NOT THE EMPTY
-  VALUE.** `tools/arena/roster.js` states `inventory1: 0` through
-  `inventory6: 0`; the build's empty marker is **1**. It is inert today because
-  nothing reads the field — **which is exactly the hazard that roster's own
-  header records four times over** ("a stated field is harmless right up until
-  something reads it"). Fix it in the same session that declares the resources,
-  not before: changing it now would state a value nothing validates.
+### The gale gate is five conditions, not one (derived 2026-09-19)
+
+Read out of `villain_cast_spells` (`sprite:862[overlay]/frame:52/DoAction@0x23e7cf`,
+block base `0x23e7d5` = 2353109). **Carrying id 38 is one term of five**, and
+the sentence this section opened with named only that one.
+
+1. **A single top-of-function roll**, `+0x056f`: `randomBetween(1, 100) > 10`,
+   and the failing branch targets the function End at `+0x105f` — so a failed
+   roll does NOT fall through to a melee decision from here, it leaves the
+   function having chosen nothing. Inclusive 1–100, so 90% proceed. **It is
+   rolled ONCE, before every per-item check, not per item.**
+2. **Twenty-three preceding arms must all fail.** The ladder is 28 arms in a
+   STRICT else-if chain — each arm's failing `If` targets the next arm's first
+   instruction, and all 27 bodies `Jump` to `+0x105f` — in FIXED source order,
+   not rolled: `randomBetween` appears exactly once in the whole function and
+   there is no shuffle. Gale is **arm 24 of 28**.
+3. `check_inventory(38) == true` (`+0x0e2e`).
+4. `_root.arena.fightdistance < 400` (`+0x0e4c`–`+0x0e62`).
+5. `villain.armourclass < villain.armourclass_max / 2` (`+0x0e6b`–`+0x0e9c`).
+
+The three `Duplicate; Not; If` sites resolve to the next test rather than past
+the body, which is what proves 3–5 are one left-associated conjunction and not
+three statements.
+
+**A consequence worth stating: a villain carrying both 41 and 38 can never cast
+gale.** Arm 22 (id 41) has `fightdistance < 400` as its only extra condition,
+which strictly dominates gale's `fightdistance < 400 && armourclass <
+armourclass_max / 2`.
+
+**What an engine must read per combatant to decide gale:** the six inventory
+slots, `armourclass` and `armourclass_max` for gale's own term, plus `hitpoints`/
+`hitpointsmax` (arms 1–6), `staminaleft`/`staminamax` (arms 12–13) and
+`equipped_weapon` (arms 20–21) for the arms that pre-empt it. **NOT** `magicka`
+and **NOT** `inventory_maxslots` — zero references to either fall inside this
+block. Magicka enters only at execution, as `staminacost = round(magicka)`
+(`DoAction@0x240c7f` `+0x7ad0`), spent unconditionally at `+0x32a7` with **no
+affordability check anywhere**: a villain at zero stamina still casts and goes
+negative. An engine must not invent one.
+
+`_root.arena.fightdistance` is an ARENA field, not a combatant field, and this
+repository has no combatant-level home for it — **which is what `cast_gale` is
+blocked on now that the resource declaration has landed.** The blocker has moved
+twice: from "a byte nobody has read", to "a schema decision with a measured
+blast radius", to "four conditions the offer gate has that the engine cannot
+express yet".
+
+`check_inventory(which_item)` — `DefineFunction2` at `+0x02a7`, body `+0x02cd`,
+and undocumented here until 2026-09-19 — is what the ladder actually calls:
+
+```text
+  check_inventory(which_item):
+    if (spell_selected == true) return false;               +0x02cd
+    for (i = 1; !(i > 6); i++)                              +0x02f8
+      if (inventory_array[i] == which_item                  +0x0319
+          && which_item != 1):                              +0x0334
+        item_used = Number(which_item)                      +0x0346
+        return true                                         +0x034f
+    // falls off the end -> returns undefined
+```
+
+It sets the global `item_used`, which is why the call at each arm reads
+`use_item(item_used)` and looks argument-free. **Both it and `use_item` are
+hardcoded to `_root.game.villain`** — all 28 call sites of each are inside
+`villain_cast_spells`. The hero's inventory is consumed by a separate handler
+(`sprite:862[overlay]/frame:1`, `+0x0601`–`+0x0630` and five more) which neither
+rolls, nor tests `!= 1`, nor applies any extra condition. **The offer gate
+differs by side, and only the villain's is a decision at all.**
 
 `cast_spell_icon(which_avatar, spell_number)` attaches export 120
 (`cast_spell_image`) to `arena.combat_panel`, positions it at the hero or villain
