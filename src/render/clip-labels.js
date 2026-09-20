@@ -384,10 +384,30 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    *   decision about "what those spells ARE" — `psyche_up` is not a spell, it
    *   is a vanilla ACTION the battle map specifies in 31 places.**
    *
-   *   The spells are genuinely still unbuilt: `cast1`, `cast2`, `colossus`,
+   *   ~~The spells are genuinely still unbuilt: `cast1`, `cast2`, `colossus`,
    *   `lightning`, `rejuvinate` and `drink_potion` have no verb and no
    *   dispatcher, and unlike the psyche counter the build's own selector for
-   *   them has not been read.
+   *   them has not been read.~~
+   *
+   * ► **TWO OF THE SIX NOW HAVE A VERB AND STILL HAVE NO DISPATCHER, AND THEY
+   *   STAY ON THIS LIST FOR EXACTLY THAT REASON (2026-09-20).** The bolt verbs
+   *   `Ss2ActionType.CAST_LIGHTNING_BOLT` / `CAST_FRIGHTNING_BOLT` resolve, and
+   *   their event carries `casterClip: "Cast2"` and `victimClip: "lightning"` —
+   *   read out of the build at `+0x8515` and `+0x858f`. **So the selector HAS
+   *   been read; what is missing is the family.**
+   *
+   *   Moving them out of this bucket without one is the `psyche:discharge`
+   *   mistake exactly: that split landed, this table was never told, and the
+   *   third psych-up press asked for a family with an EMPTY clip vocabulary,
+   *   drew nothing, lost its face, made no sound **and reported
+   *   `recognised: true`**. A label listed as unbuilt draws authored art and
+   *   says so; a label promoted to a family that does not exist draws nothing
+   *   and lies about it. **They leave this list when `CLIP_FAMILIES` gains an
+   *   entry, not when the verb ships.**
+   *
+   *   `cast1` is a different case again and is NOT what the bolts play: it is
+   *   `cast_gale`'s and the fireball family's clip (`+0x7b30`, `+0x90f4`), and
+   *   neither has a verb.
    */
   unbuiltSpells: Object.freeze([
     "cast1", "cast2",

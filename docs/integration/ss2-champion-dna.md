@@ -236,8 +236,17 @@ exactly filling indices 0–49. Applying the table above field by field:
     authored or saved DNA string, which is what these literals are: across the
     champion set, seventeen rows spell empty `0`, two spell it `1`, and this one
     mixes them. See the battle map, §"How a spell is offered and consumed".
-    Note also that `inventory_maxslots` (index 40) gates nothing in combat:
-    `use_item` and `check_inventory` both loop a hard `i = 1..6`.
+    ~~Note also that `inventory_maxslots` (index 40) gates nothing in combat:
+    `use_item` and `check_inventory` both loop a hard `i = 1..6`.~~ **HALF
+    RIGHT, corrected 2026-09-20.** The two CONSUMPTION loops really are a hard
+    `i = 1..6`. But the field gates the hero's in-battle inventory BUTTONS —
+    `sprite:492[inventory_overlay]/frame:1` `+0x024f` hides
+    `inventory_buttonI` whenever `i > inventory_maxslots`, in a top-level
+    unguarded loop, on a panel the battle overlay attaches — and it bounds
+    `randomise_gladiator`'s spell fill (`+0x3925`). **This row is the reason it
+    matters**: this champion carries `inventory_maxslots` 1 at `herolevel` 5,
+    so five of its six slots are unreachable in a battle whatever they hold.
+    See the battle map, §"How a spell is offered and consumed".
 | 12 | `boot` | 1 | 40 | `inventory_maxslots` | 1 |
 | 13 | `weapon` | 24 | 41 | `battleswon` | 0 |
 | 14 | `shield` | 0 | 42 | `days_in_arena` | 1 |

@@ -61,7 +61,7 @@
     "calculation": {
       "spellId": 32,
       "spell": "dire-fireball",
-      "damageMethod": null,
+      "damageMethod": "burning",
       "fightMode": "misc",
       "rolledDamage": 400,
       "incomingDamage": 400,

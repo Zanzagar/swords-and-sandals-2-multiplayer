@@ -1032,6 +1032,29 @@ that was closed two commits ago.
    know *which* piece was destroyed and not merely that armour fell, will need
    `CANONICAL_RESOURCE_SOURCES` to grow.
 
+   ► **THE INVENTORY HALF OF THAT LINE WAS TESTED ON 2026-09-20 AND HELD.** The
+   first verb that CONSUMES an inventory slot shipped that day — the two bolt
+   spells in `src/team/ss2-rules.js` — and the 2026-09-19 handoff had priced
+   the consumption as requiring `inventory1`-`inventory6` to join
+   `CANONICAL_RESOURCE_SOURCES` ("the moment a verb consumes an item it must go
+   in"). **It must not, and this entry said so before the question was asked.**
+   Two independent reasons, either sufficient:
+
+   - **It re-hashes every adapter-built battle.** That constant IS the supplied
+     path's projected bag and `combatStateHash` covers the projection, so
+     growing it moves the hash for every peer — and the owner's 2026-09-07
+     decision was to pin the shape rather than carry a version id, so an old
+     peer cannot tell "different code" from state divergence.
+   - **`canonicalResourcesFrom` materialises an absent field to 0, and 0 is not
+     the empty marker.** Every adapter-built gladiator would declare six slots
+     holding **item 0** rather than six empty ones. The build's empty marker is
+     **1**; `0` is a real item-table row. This is the demo roster's own hazard,
+     which that file has recorded five times.
+
+   So a slot write is REPORTED as unmapped-with-reason, exactly as a destroyed
+   `gauntlet` already is, and the reason string already points here. **That is
+   the designed behaviour, not a gap the verb exposed.**
+
    ► **THE FUTURE IS HERE, MEASURED 2026-09-07, and the shortfall is wider than
    the piece ids.** `CANONICAL_RESOURCE_SOURCES` names **20** resources;
    `SS2_RESOURCE_NAMES` (`src/team/ss2-rules.js`) names **32**, and **14** of

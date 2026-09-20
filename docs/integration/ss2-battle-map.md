@@ -2504,14 +2504,42 @@ already calculated `damage` argument, applies armour then hitpoint overflow,
 updates stamina, clamps state, and follows the same phase/death boundary. Full
 direct-damage observations are:
 
-| Spell/effect | Damage ingress |
-| --- | --- |
-| fireball | inclusive `randomBetween(80, 160)`, effect label `burning` |
-| hell fireball | inclusive `randomBetween(150, 450)` |
-| dire fireball | inclusive `randomBetween(300, 600)` |
-| lightning bolt | inclusive `randomBetween(100, 200)`, effect label `lightning` |
-| `frightning_bolt` | inclusive `randomBetween(200, 400)` |
-| molten death / death from above | inclusive 10–20 boulders, each entering magic damage with 40 |
+► **THIS TABLE HAD THE WRONG SHAPE UNTIL 2026-09-20, AND THE SHAPE IS WHAT
+  PRODUCED A THREE-WEEK ERROR IN THE CODE.** It carried one row per SPELL, as
+  though each had its own `magic_damage_character` call. It does not. **There
+  are three spell call sites for eleven spells**, one per ARM, and the
+  arguments that are not the damage — `damage_method` and `bonus_frame` — are
+  pushed ONCE for the whole family, before the per-spell arms converge. A
+  row-per-spell table structurally cannot record that, so three rows below
+  looked as though the build recorded no label for them, and
+  `SS2_DIRECT_DAMAGE_SPELLS` faithfully wrote down `damageMethod: null` three
+  times. **It is grouped by arm now.**
+
+| Arm | Members | `damage_method` | `bonus_frame` | Damage |
+| --- | --- | --- | ---: | --- |
+| fireball, `+0x8f59`–`+0x94ff`, ingress `+0x91c1` | fireball (30) | `burning` | 4 | inclusive `randomBetween(80, 160)` `+0x9012` |
+| | hell fireball (31) | `burning` | 4 | inclusive `randomBetween(150, 450)` `+0x9062` |
+| | dire fireball (32) | `burning` | 4 | inclusive `randomBetween(300, 600)` `+0x90b2` |
+| bolts, `+0x83f5`–`+0x862e`, ingress `+0x85af` | lightning bolt (34) | `lightning` | 8 | inclusive `randomBetween(100, 200)` `+0x8492` |
+| | `frightning_bolt` (35) | `lightning` | 8 | inclusive `randomBetween(200, 400)` `+0x84e2` |
+| molten death, `+0x862f`–`+0x895c`, ingress `+0x88e5` | death from above (49) | `burning` | 4 | a FIXED 40 per boulder, `+0x88c1`; `randomBetween(10, 20)` boulders `+0x86a5` |
+
+**So a frightning bolt plays the `lightning` hurt clip, and a dire fireball the
+`burning` one, because they share their arm's single call.** `damage_method` is
+`defenderClip.gotoAndPlay`'s argument and `bonus_frame` selects the floating
+splat; neither moves a number. **They are not cosmetic anyway**: the capture
+wrapper emits the build's real `arguments[4]`, `src/golden/observation.js`
+derives a `magic-damage` event's `method` from the candidate's own value and
+deep-compares `/events`, so a wrong label diverges loudly against a live
+capture — and `candidate-spell-lethal-slain`, which carried one of the three
+nulls, is an active staged capture target.
+
+*(And the repository already held this measurement.
+`tools/runtime-capture/ss2-capture-wrapper.as` has named these literals at these
+offsets — "burning" (fireball **group** `+0x91c1`, death-from-above boulders
+`+0x88e5`), "lightning" (bolt **group** `+0x85af`) — since `7601888`, five hours
+after `8c3fc0a` wrote the nulls. It even says group. Nobody propagated it. This
+was an internal contradiction for three weeks, not an unread byte.)*
 
 The boulder total is therefore 400–800 only if every scheduled impact resolves.
 All of these enter the armour-to-hitpoint overflow path; the same
@@ -2864,11 +2892,79 @@ what found it** — which is the order this file keeps having to learn.
     `root/frame:1/DoAction@0x5b66c` `+0x0026` writes `"fizzle"` unconditionally,
     the only write among sixteen `fizMode` references.
 
-  ► **`inventory_maxslots` GATES NOTHING IN COMBAT.** Both `use_item` (`+0x0390`)
-    and `check_inventory` (`+0x02f8`) loop a hard `i = 1..6`. Its only read-gate
-    anywhere is hero button `_visible` in `sprite:492`. **An engine that made a
-    verb respect `maxslots` would be modelling behaviour the build does not
-    have.**
+  ► ~~**`inventory_maxslots` GATES NOTHING IN COMBAT.** Both `use_item`
+    (`+0x0390`) and `check_inventory` (`+0x02f8`) loop a hard `i = 1..6`. Its
+    only read-gate anywhere is hero button `_visible` in `sprite:492`. **An
+    engine that made a verb respect `maxslots` would be modelling behaviour the
+    build does not have.**~~ **TWO OF THOSE THREE SENTENCES ARE WRONG, AND THE
+    LAST ONE IS BACKWARDS — corrected 2026-09-20, one day after it was written,
+    by a verifier that read `sprite:492` end to end and swept all 21 references
+    to the field.**
+
+    - **The VERB half survives, and it is the only half that does.**
+      `use_item` `+0x0390` really is a hard `i = 1..6` with no `maxslots` read.
+      So *nothing the villain's consumption does* respects the field.
+    - **"Its only read-gate anywhere" is FALSE.** There is a second live one:
+      `randomise_gladiator` `+0x3914`–`+0x3968` runs
+      `while (!(i > inventory_maxslots)) { spell_choice = random(spells_array.length);
+      character["inventory" + i] = spells_array[spell_choice]; i++ }`. **The field
+      decides how many of a generated opponent's six slots receive a random
+      spell.** An engine ignoring it generates the wrong opponents. *(Whether
+      that loop is inside `randomise_gladiator`'s
+      `if (whichcharacter != _root.game.hero)` guard is NOT settled — the
+      verifier had no window over `+0x27e8` and declined to relay this file's
+      own delta arithmetic as re-derived. Dump `+0x27e0`–`+0x3980` before
+      relying on it either way.)*
+    - **"An engine that made a verb respect `maxslots` would be modelling
+      behaviour the build does not have" is backwards FOR THE OFFER.** A button
+      the build refuses to draw is behaviour the build has, in combat. See the
+      hero's own gate below.
+
+  ► **THE HERO'S IN-BATTLE OFFER GATE IS TWO CONDITIONS PER SLOT (derived
+    2026-09-20).** `sprite:492[inventory_overlay]/frame:1/DoAction@0x50e4f`, the
+    panel the battle overlay attaches at `sprite:862[overlay]/frame:1` `+0x02fe`
+    and whose six buttons that same block wires with `onRollOver`, `onRollOut`
+    and `onRelease`:
+
+    ```text
+      // ungated prelude
+      inventory_buttonI.gotoAndStop(_root.game.hero.inventoryI)   +0x011a..+0x0215
+      // gate 1 — top-level, unguarded
+      for (i = 1; !(i > 6); i++)                                  +0x0216
+        if (i > _root.game.hero.inventory_maxslots)               +0x024f
+          inventory_buttonI._visible = false                      +0x026c
+      // gate 2 — six separate two-term tests
+      if (_global.battle_started == true                          +0x0289
+          && _root.game.hero.inventoryI == 1)                     +0x02af
+        inventory_buttonI._visible = false                        +0x02ca
+    ```
+
+    The block is 270 instructions, `+0x0000`–`+0x045d`, and **the first branch
+    instruction in it is at `+0x0232`** — after the loop's init — so nothing
+    encloses the loop. There is no `_visible = true` anywhere in it. Final
+    visibility is `i <= maxslots AND NOT(battle_started AND inventoryI == 1)`.
+
+    - **`> ` and not `>=`, and the loop is inclusive 1..6.**
+    - **THE GATE FAILS OPEN when `inventory_maxslots` is undefined.** `Greater`
+      is ECMA abstract relational comparison, so `i > undefined` is `i > NaN`,
+      false for every `i`, and nothing is hidden.
+    - **The `onRelease` dispatcher has NO gate of its own** — no `maxslots`
+      test, no `!= 1` test, only the `inv_struck` one-press-per-turn latch. So
+      `_visible` is the whole of the gate, and it rests on an invisible AVM1
+      MovieClip not being clickable. That is Flash/Ruffle runtime semantics
+      rather than something these bytes state; **it is the one link in this
+      chain nobody here has measured.**
+    - **There is NO default of 6.** `initcharacter` takes the value from
+      `characterDNA[40]` (`+0x098e`) and then walks a band chain: 2/3/4/5/6 at
+      `herolevel >= 6/15/20/30/40` (`+0x0aa5`, `+0x0aca`, `+0x0aef`, `+0x0b14`,
+      `+0x0b39`); `randomise_gladiator` writes the same chain with a `< 6 -> 1`
+      arm (`+0x336f`–`+0x34a5`). **Six needs level 40**, and this repository's
+      own decoded rank-1 champion carries 1 at `herolevel` 5. Across levels
+      6–14 the hero's `maxslots` is 2 and **the build hides buttons 3, 4, 5 and
+      6 during a battle**.
+    - **The loop reads `_root.game.hero` hard-coded**, so this panel says
+      nothing about the villain's offer — consistent with "the offer gate
+      differs by side".
 
 ► **SO CONSUMPTION IS: SET THE SLOT TO 1.** `magic_damage_character`
   (`+0x148e`) sat behind the same unread column and is unblocked by the same
@@ -2899,6 +2995,120 @@ what found it** — which is the order this file keeps having to learn.
   `tools/arena/roster.js` has taught that a stated field is harmless right up
   until something reads it.
 
+### The two bolt phases, in full (derived 2026-09-20)
+
+Read out of `sprite:862[overlay]/frame:52/DoAction@0x240c7f`, the same
+38,146-byte block every other phase lives in. **Block base = `0x240C85` = the
+tag offset `0x240c7f` + 6** (the long-form `RECORDHEADER`), so an absolute
+`target` minus 2362501 is a relative `+0x` offset. *(Derive this per block. It
+does NOT hold for `sprite:862[overlay]/frame:1/DoAction@0x2378cc`, where four
+independent branches imply a base 506 bytes BEFORE the printed tag offset.)*
+
+The arm is `+0x83f5`–`+0x862e`, 138 instructions, six `If`s and **zero
+`Jump`s**:
+
+```text
+  phase_decision == "cast_lightning_bolt"                         +0x83fb
+    || phase_decision == "cast_frightning_bolt"                   +0x840f
+    register:3.crowd_action = 5                                   +0x841c
+    game_attacker.staminacost = Math.round(game_attacker.magicka)  +0x842f
+    if (attacker.struck == null) {                                +0x8456
+      if (phase_decision == "cast_lightning_bolt") {              +0x846d
+        cast_spell_icon(attacker, 34)                             +0x8485
+        lightning_damage = randomBetween(100, 200)                +0x8492
+        lightning_frame  = 1                                      +0x84ab
+      }
+      if (phase_decision == "cast_frightning_bolt") {             +0x84bd
+        cast_spell_icon(attacker, 35)                             +0x84d5
+        lightning_damage = randomBetween(200, 400)                +0x84e2
+        lightning_frame  = 2                                      +0x84fb
+      }
+      attacker.struck = false                                     +0x850d
+      attacker.gotoAndPlay("Cast2")                               +0x8515
+      bolt = arena.gladiators.attachMovie("lightning_bolt_combat",
+               "lightning_bolt_combat", getNextHighestDepth(),
+               { _x: defender._x, _y: 50 })                       +0x852a
+      magic_damage_character(defender, attacker, game_defender,
+               game_attacker, "lightning", 8, lightning_damage)   +0x85af
+      bolt.gotoAndStop(lightning_frame)                           +0x85c2
+    }
+    if (defender.struck == true) {                                +0x85db
+      bolt.removeMovieClip()                                      +0x85ed
+      attacker.struck = null                                      +0x860b
+      defender.struck = null                                      +0x8618
+      nextphase()                                                 +0x861f
+    }
+```
+
+**Seven things that were not in the prose:**
+
+- **ONE SAMPLE PER CAST, AND IT IS THE DAMAGE.** Two `randomBetween` sites in
+  mutually exclusive arms, so exactly one fires. Zero `checkattackroll`, zero
+  `RandomNumber`, zero direction draws over all 138 instructions. **A bolt
+  cannot miss and cannot crit**, and no caster stat reaches the number.
+- **THE COST IS `round(magicka)`, THE STAT** — the same shape `cast_gale` has,
+  and **there is no affordability check anywhere**. The item table prices a
+  lightning bolt at 15; the phase does not read that number.
+- **THE TWO INNER TESTS ARE SEQUENTIAL `if`s, NOT AN ELSE-IF.** The
+  `cast_lightning_bolt` body ends at `+0x84b6` with no `Jump` and falls into
+  `+0x84b7`, which re-reads `phase_decision` and re-tests it.
+- **THE `nextphase` GATE READS `defender.struck`, NOT `attacker.struck`**
+  (`+0x85db`), unlike `cast_gale` (`+0x7ba4`) and the melee phases — **and
+  nothing in the arm ever writes `defender.struck = true`.** The arm's only
+  writes to it are `= null`. It is a two-party handshake whose other half is
+  outside the arm, so a port that models this as one atomic turn must supply
+  that write or the phase deadlocks. `cast_death_from_above` carries the
+  identical gate at `+0x8903`–`+0x8916`, so this is not unique to the bolts.
+- **`bolt`, `lightning_damage` and `lightning_frame` ARE TIMELINE-SCOPE**
+  (`SetVariable` at `+0x8587`, `+0x84aa`/`+0x84fa`, `+0x84b6`/`+0x8506`), and
+  they have to be: `bolt.removeMovieClip()` runs on a LATER frame than the one
+  that created the clip.
+- **THE ARM HAS NO `Jump`, so after `nextphase()` execution FALLS THROUGH into
+  the `cast_death_from_above` test and every later arm in the same frame**, each
+  re-reading `phase_decision`. If `nextphase()` reassigns it to a label tested
+  later in the chain, a second phase body runs on the same frame. The arm before
+  this one does the same thing.
+- **NO `fightdistance` READ OF ANY KIND**, and the clip is attached at the
+  DEFENDER's own `_x`. The item table calls a lightning bolt "close-ranged";
+  the bytes impose no range at all.
+
+### The fireball family and molten death, and why neither is a turn (2026-09-20)
+
+Derived beside the bolts and recorded because the DIFFERENCE is the finding.
+
+- **`cast_fireball` / `cast_hell_fireball` / `cast_dire_fireball`,
+  `+0x8f59`–`+0x94ff`, ingress `+0x91c1`.** One sample per cast, exactly like a
+  bolt — the three `randomBetween` sites are mutually exclusive arms of one
+  three-way `||`. What differs is that the damage is applied from a per-frame
+  handler after a ballistic flight: `bullet.Xvelocity` 50/70/90
+  (`+0x940f`/`+0x9435`/`+0x945b`), `gravity` 2 (`+0x9360`), `bulletlife` 1
+  (`+0x933a`), `onEnterFrame` (`+0x946e`).
+  ► **AND ITS FRAME TEST IS AN IDEMPOTENCE GUARD, NOT AN IMPACT TRIGGER.**
+    `+0x9194 Not; +0x9195 Not; +0x9196 If` is a DOUBLED `Not`, so the gate reads
+    `if (bullet._currentframe != 4)`: the block applies damage once, then
+    `gotoAndStop(4)` parks the clip so every later frame skips it. Reading it as
+    "damage fires when the bullet reaches frame 4" inverts the mechanism and
+    would build a fireball that damages on every frame but one. *(This document
+    nearly recorded the inverted version; an adversarial verifier broke it
+    before it was written down.)*
+- **`cast_death_from_above`, `+0x862f`–`+0x895c`, ingress `+0x88e5`.**
+  `randomBetween(10, 20)` boulders (`+0x86a5`), then a loop
+  (`+0x86f9`–`+0x88fe`) that for EACH boulder draws four more samples —
+  `randomBetween(-300, 300)` for `_x` (`+0x878b`), `(-800, -600)` for `_y`
+  (`+0x87a9`), `(50, 150)` for `yspeed` (`+0x87c8`), `(50, 100)` for the scale
+  (`+0x87f1`) — and gives it its own `onEnterFrame` (`+0x882f`) that calls
+  `magic_damage_character(..., "burning", 4, 40)`. **41 to 81 samples per cast**,
+  and the 40 is a literal, not a roll.
+  ► **A COPY-PASTE LEFTOVER WORTH KNOWING BEFORE ANYONE "FIXES" IT.** The
+    molten-death teardown calls `bolt.removeMovieClip()` at `+0x892b` on the
+    same timeline-scope `bolt` the LIGHTNING arm creates. That arm only ever
+    creates clips named `boulder`. So a molten death removes whatever bolt clip
+    the last lightning cast left behind.
+
+**So only the bolts are expressible as a discrete turn**, and that is the whole
+reason `src/team/ss2-rules.js` builds those two and not the other nine spells
+that reach this ingress.
+
 ### The gale gate is five conditions, not one (derived 2026-09-19)
 
 Read out of `villain_cast_spells` (`sprite:862[overlay]/frame:52/DoAction@0x23e7cf`,
@@ -2927,6 +3137,80 @@ three statements.
 gale.** Arm 22 (id 41) has `fightdistance < 400` as its only extra condition,
 which strictly dominates gale's `fightdistance < 400 && armourclass <
 armourclass_max / 2`.
+
+#### The whole ladder, and the SEVEN arms that fire on possession alone (2026-09-20)
+
+Re-derived instruction by instruction by an adversarial verifier: 28 arm heads,
+28 distinct ids, 28 `villaindecisionA` writes, 27 `Jump`s all sharing one target
+(`+0x105f`, the function end), and **all 82 branch instructions self-consistent
+with `target == next_instruction + delta`**, none landing inside another arm.
+
+| # | id | decision | extra conditions |
+| ---: | ---: | --- | ---: |
+| 1 | 43 | `cast_rejuvinate` | `hitpoints < hitpointsmax / 1.5` |
+| 2 | 5 | `drink_potion` | `hitpoints < hitpointsmax / 2` |
+| 3 | 46 | `cast_regenerate` | 1 |
+| 4 | 4 | `drink_potion` | 1 |
+| 5 | 3 | `drink_potion` | 1 |
+| 6 | 2 | `drink_potion` | 1 |
+| **7** | **49** | **`cast_death_from_above`** | **NONE** |
+| 8 | 42 | `cast_colossus` | 1 |
+| 9 | 33 | `cast_little_fat_kid` | 1 |
+| 10 | 9 | `drink_potion` | 1 |
+| 11 | 8 | `drink_potion` | 1 |
+| 12 | 7 | `drink_potion` | 1 |
+| 13 | 6 | `drink_potion` | 1 |
+| **14** | **32** | **`cast_dire_fireball`** | **NONE** |
+| **15** | **35** | **`cast_frightning_bolt`** | **NONE** |
+| **16** | **31** | **`cast_hell_fireball`** | **NONE** |
+| **17** | **34** | **`cast_lightning_bolt`** | **NONE** |
+| **18** | **30** | **`cast_fireball`** | **NONE** |
+| 19 | 44 | `cast_weaken_armour` | 1 |
+| 20 | 37 | `cast_whirlwind` | 2 |
+| 21 | 36 | `cast_ghost_strike` | 2 |
+| 22 | 41 | `cast_bloodlust` | `fightdistance < 400` |
+| **23** | **45** | **`cast_boundless_energy`** | **NONE** |
+| 24 | 38 | `cast_gale` | 2 |
+| 25 | 39 | `cast_command` | 1 |
+| 26 | 48 | `cast_teleport` | 2 |
+| 27 | 40 | `cast_swiftsandals` | 1 |
+| 28 | 47 | `cast_adulation` | 1 |
+
+► **AN ARM WITH NO EXTRA CONDITION IS AN ABSORBING SINK, and there are SEVEN of
+  them, not six.** ~~The direct-damage arms are the unconditional set.~~ **Arm
+  23, id 45 `cast_boundless_energy`, has the identical single-test shape and
+  sits IMMEDIATELY BEFORE GALE** — so a villain carrying 45 can never cast gale,
+  command, teleport, swift sandals or adulation, whatever else is true. That is
+  a sharper reason than the one this section gave for gale being hard to reach,
+  and it was missed by the reading that produced the id-41 note above.
+
+► **NO ARM STRICTLY DOMINATES ANOTHER and there is no dead arm** — all 28 ids
+  are distinct and each arm's first conjunct is possession of its own id. What
+  the seven do is PRE-EMPT: holding id 49 makes arms 8–28 unreachable, so a
+  villain with molten death casts nothing else from this function ever. Within
+  the direct-damage set the priority on simultaneous possession is strictly
+  **49 > 32 > 35 > 31 > 34 > 30**.
+
+► **AND THE SIX DIRECT-DAMAGE ARMS ARE NOT CONTIGUOUS.** Arm 7 is separated
+  from arms 14–18 by six unrelated arms.
+
+► **`use_item` IS NOT PASSED THE MATCHED ID.** Every one of the 28 bodies calls
+  `use_item(item_used)` — the global `check_inventory` set — and `item_used` is
+  read 28 times in this function and **written zero times**. The only two
+  variables it writes are `inventory_array` (once, `+0x056e`) and
+  `villaindecisionA`. An engine that passes the arm's own literal id is
+  modelling a data path the build does not have.
+
+► **`inventory_array` is `new Array(1, inventory1 … inventory6)`** (`+0x055e`,
+  7 args), the leading literal making it 1-indexed with `[0] = 1` as inert
+  padding. It is rebuilt on EVERY call, before the roll, whatever the roll does.
+
+► **THE LADDER HAS A THIRD `If` IDIOM the two-case rule does not cover.**
+  `Equals2; Not; Not; If` appears at `+0x0cf3`/`+0x0cf4` (whirlwind) and
+  `+0x0d73`/`+0x0d74` (ghost strike) — that is a source-level `!=` plus the
+  ladder's own inversion, and it is still ONE test. The `Duplicate` count is
+  always *conjuncts − 1*, so gale's three conjuncts show as TWO `Duplicate`
+  sites and one plain `Not; If`, not three.
 
 **What an engine must read per combatant to decide gale:** the six inventory
 slots, `armourclass` and `armourclass_max` for gale's own term, plus `hitpoints`/
