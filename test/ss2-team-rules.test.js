@@ -262,6 +262,23 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "bash-attack",
     "bombard",
     "burning-phase",
+    // ► **THE FIRST SPELL TOKENS, JOINED 2026-09-20, AND THEY ARE
+    //   MAP-DERIVED WITH A LABEL EACH** — `getphase("cast_frightning_bolt")`
+    //   and `getphase("cast_lightning_bolt")`, both written by
+    //   `villain_cast_spells` (`+0x0b6f`, `+0x0be5`) and both consumed by one
+    //   arm of the phase state machine at `+0x83fb`-`+0x862e`.
+    //
+    //   **TWO TOKENS FOR ONE ARM, on purpose.** They share the arm, the
+    //   `magic_damage_character` call site, the caster clip and the victim
+    //   clip; they differ in inventory id (34 / 35), damage range and bolt
+    //   frame. A single token would need `VANILLA_PHASE_LABEL` to map one name
+    //   to two `getphase` labels, which is the round trip that table exists to
+    //   keep — the same argument the four status phases make.
+    //
+    //   The build's own misspelling of "frightening" is kept. A corrected one
+    //   is a name that matches nothing in the oracle.
+    "cast-frightning-bolt",
+    "cast-lightning-bolt",
     "frozen-phase",
     "life-stolen-phase",
     "normal-attack",

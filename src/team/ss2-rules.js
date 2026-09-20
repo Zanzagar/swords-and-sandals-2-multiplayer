@@ -375,6 +375,30 @@ export const Ss2ActionType = Object.freeze({
   //   see `SS2_TAUNT`.
   TAUNT: "taunt",
   SHOVE: "shove",
+  // ► **THE TWO BOLTS — THE FIRST SPELL VERBS IN THIS ENGINE, AND THE ONLY TWO
+  //   OF THE BUILD'S TWENTY THAT A DISCRETE TURN CAN EXPRESS.** Derived
+  //   2026-09-20 from `sprite:862[overlay]/frame:52/DoAction@0x240c7f`
+  //   `+0x83fb`-`+0x862e`; see `SS2_BOLT_SPELLS` for the phase statement by
+  //   statement.
+  //
+  //   **TWO TYPES RATHER THAN ONE, for the reason the four status phases are
+  //   four types**: the build's decision IS the label, and
+  //   `getphase("cast_lightning_bolt")` is a different decision from
+  //   `getphase("cast_frightning_bolt")`. They share one arm and one
+  //   `magic_damage_character` call site, but they select different inventory
+  //   ids (34 and 35), different damage ranges and different bolt frames, and
+  //   `VANILLA_PHASE_LABEL` cannot hold both under one token.
+  //
+  //   **NOT IN `ATTACK_BANDS`, and for a sharper reason than `psyche_up`'s.**
+  //   A band entry means "draw a direction, then call `checkattackroll`". The
+  //   bolt arm contains **no `checkattackroll`, no direction draw and no hit
+  //   roll at all** — its single `randomBetween` is the DAMAGE, handed straight
+  //   to `magic_damage_character`, which the map states has no direction chain.
+  //   A bolt cannot miss. Routing it through the dispatcher would take samples
+  //   the build never takes and put every peer replaying the same tape out of
+  //   step from the first cast.
+  CAST_LIGHTNING_BOLT: "cast-lightning-bolt",
+  CAST_FRIGHTNING_BOLT: "cast-frightning-bolt",
   /**
    * The phase a TAUNTED gladiator is forced into: it runs away.
    *
@@ -886,6 +910,22 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   //   presentation layer's, not a phase.
   [Ss2ActionType.TAUNT]: "taunt",
   [Ss2ActionType.SHOVE]: "shove",
+  // ► **THE PHASE LABELS ARE THE DECISION'S AND THE CASTER'S CLIP IS `Cast2`**,
+  //   which is a third name again — `attacker.gotoAndPlay("Cast2")` at
+  //   `+0x8515`, shared by both bolts, and NOT derivable from either label.
+  //   The VICTIM's clip is a fourth: `magic_damage_character`'s `damage_method`
+  //   argument, which for both bolts is `"lightning"` (`+0x858f`), reaching
+  //   `defenderClip.gotoAndPlay(damage_method)` at the ingress's step 1. So one
+  //   decision names four clips' worth of nothing, and the resolved event
+  //   carries the caster clip and the victim clip separately for the same
+  //   reason `psyche_up` carries its clip separately.
+  [Ss2ActionType.CAST_LIGHTNING_BOLT]: "cast_lightning_bolt",
+  // The build's own spelling, missing the `f` of "frightening" — `frightning`,
+  // in the phase label, in the decision the AI writes (`+0x0b6f`) and in the
+  // item row. It is kept verbatim here for the reason `rejuvinate` is kept
+  // everywhere else in this repository: a corrected spelling is a name that
+  // matches nothing in the build.
+  [Ss2ActionType.CAST_FRIGHTNING_BOLT]: "cast_frightning_bolt",
   // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
   //   of the decision table is `taunted1 == true` -> facing right
   //   `getphase("runleft")`, facing left `getphase("runright")`
@@ -3303,6 +3343,226 @@ export function ss2ShoveForce(actor) {
   return facingLeft ? 0 - magnitude : magnitude;
 }
 
+/* ------------------------------------------------------------------ */
+/* The inventory: six slots, and `1` is the EMPTY one                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The six slot field names, in the build's own 1-based order.
+ *
+ * A frozen list rather than a loop bound, because two different things in the
+ * build iterate these and they iterate them differently: `use_item` (`+0x0390`)
+ * and `check_inventory` (`+0x02f8`) both hard-loop `i = 1..6` and consult
+ * nothing else, while the HERO's panel (`sprite:492[inventory_overlay]/frame:1`
+ * `+0x0216`-`+0x027e`) walks the same six and hides the buttons above
+ * `inventory_maxslots`. The count 6 is the build's in both, and the gate is not.
+ */
+export const SS2_INVENTORY_SLOTS = Object.freeze([
+  "inventory1", "inventory2", "inventory3", "inventory4", "inventory5", "inventory6"
+]);
+
+/**
+ * The value a slot holds when it holds NOTHING, and it is **1, not 0**.
+ *
+ * Measured across the whole 7.5 MB oracle on 2026-09-19 and unchanged here:
+ * fourteen emptiness tests, every one `Equals2` against `1`; every literal
+ * write to a slot is 1 (`randomise_gladiator` `+0x330a`-`+0x334b`, `use_item`
+ * `+0x0409`, the hero's six consume handlers at `sprite:862[overlay]/frame:1`
+ * `+0x0626`-`+0x0851`); zero writes of `0` anywhere. `use_item` additionally
+ * REFUSES `which_item == 1` (`+0x03cc`) and `check_inventory` carries the same
+ * `!= 1` conjunct (`+0x0334`) — an id that cannot be used is not an item.
+ *
+ * `0` is a real "nothing" row in the authored item table and seventeen of the
+ * nineteen champion DNA literals use it, which is why a reader who assumes 0
+ * gets this backwards. **The table agrees and the code does not**, and this
+ * engine spells empty the way the CODE does.
+ */
+export const SS2_INVENTORY_EMPTY = 1;
+
+/**
+ * The first slot holding `itemId`, as a slot field name — or `null`.
+ *
+ * `check_inventory`'s own search order: ascending from slot 1, first match
+ * wins, and the loop does not stop at `inventory_maxslots` (`+0x02f8`). A slot
+ * the combatant never DECLARED is not searched, which is the difference
+ * between "carries nothing" and "never mentioned an inventory": the six names
+ * have no `SS2_RESOURCE_DEFAULTS` entry, so an undeclared slot has no value to
+ * compare rather than a defaulted one.
+ *
+ * **`itemId` 1 never matches**, whatever a slot holds, because both of the
+ * build's searches exclude it by name. Passing 1 here is asking to use the
+ * empty marker as an item.
+ */
+export function ss2InventorySlotHolding(actor, itemId) {
+  if (itemId === SS2_INVENTORY_EMPTY) return null;
+  const declared = declaredResourceNames(actor);
+  for (const slot of SS2_INVENTORY_SLOTS) {
+    if (!declared.has(slot)) continue;
+    if (resourceValue(actor, slot, SS2_INVENTORY_EMPTY) === itemId) return slot;
+  }
+  return null;
+}
+
+/* ------------------------------------------------------------------ */
+/* The bolt phase: the one spell shape a discrete turn can express      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_lightning_bolt` / `cast_frightning_bolt`, byte-derived 2026-09-20 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` `+0x83f5`-`+0x862e`.
+ *
+ * ```text
+ *   phase_decision == "cast_lightning_bolt"                        +0x83fb
+ *     || phase_decision == "cast_frightning_bolt"                  +0x840f
+ *     register:3.crowd_action = 5                                  +0x841c
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x842f
+ *     if (attacker.struck == null) {                               +0x8456
+ *       if (phase_decision == "cast_lightning_bolt") {             +0x846d
+ *         cast_spell_icon(attacker, 34)                            +0x8485
+ *         lightning_damage = randomBetween(100, 200)               +0x8492
+ *         lightning_frame  = 1                                     +0x84ab
+ *       }
+ *       if (phase_decision == "cast_frightning_bolt") {            +0x84bd
+ *         cast_spell_icon(attacker, 35)                            +0x84d5
+ *         lightning_damage = randomBetween(200, 400)               +0x84e2
+ *         lightning_frame  = 2                                     +0x84fb
+ *       }
+ *       attacker.struck = false                                    +0x850d
+ *       attacker.gotoAndPlay("Cast2")                              +0x8515
+ *       bolt = arena.gladiators.attachMovie("lightning_bolt_combat",
+ *                ..., { _x: defender._x, _y: 50 })                 +0x852a
+ *       magic_damage_character(defender, attacker, game_defender,
+ *                game_attacker, "lightning", 8, lightning_damage)  +0x85af
+ *       bolt.gotoAndStop(lightning_frame)                          +0x85c2
+ *     }
+ *     if (defender.struck == true) {                               +0x85db
+ *       bolt.removeMovieClip(); attacker.struck = null;
+ *       defender.struck = null; nextphase()                        +0x861f
+ *     }
+ * ```
+ *
+ * ► **ONE SAMPLE PER CAST, AND IT IS THE DAMAGE.** The arm has TWO
+ *   `randomBetween` sites (`+0x8492`, `+0x84e2`) in mutually exclusive arms, so
+ *   exactly one fires. Zero `checkattackroll`, zero `RandomNumber`, zero
+ *   direction draws across all 138 instructions of `+0x83f5`-`+0x862e`. **A
+ *   bolt cannot miss**, cannot crit, and reads no `attack_chances` entry —
+ *   which is why it is not in `ATTACK_BANDS` and why
+ *   `SS2_ATTACKER_REQUIRED_RESOURCES` does not apply to it:
+ *   `magic_damage_character` binds `attacker`/`game_attacker` to register 0 and
+ *   reads neither, so **no caster stat can influence the number** except
+ *   through the roll's own fixed range.
+ *
+ *   *(The ingress's own zero-RNG is the MAP's byte-verification, not this
+ *   arm's — §"Spell ingress `magic_damage_character`", whose call inventory is
+ *   the UI attaches, `Math.ceil`, `check_flipping`, `get_percentage`,
+ *   `add_percentage`, `check_stats` and the two `death` sites. An adversarial
+ *   verifier was right to refuse to take "the PHASE takes one sample" from a
+ *   dump that does not cover `+0x1313`-`+0x157c`. The arm takes one; the
+ *   ingress takes none, on the map's authority.)*
+ *
+ * ► **SAMPLE COUNT IS NOT WHAT SEPARATES A BOLT FROM A FIREBALL.** The
+ *   fireball family takes one sample per cast too. What separates them is
+ *   TIMING: a bolt's damage is applied in the same straight-line run as
+ *   `gotoAndPlay("Cast2")`, and a fireball's waits for a `bullet` with
+ *   `Xvelocity` 50/70/90, `gravity` 2 and an `onEnterFrame`. See
+ *   `test/ss2-bolt.test.js` for the three-arm comparison, including the
+ *   doubled-`Not` gate that makes the fireball's frame test an idempotence
+ *   guard rather than an impact trigger.
+ *
+ * ► **THE COST IS `round(magicka)`, THE STAT, AND THERE IS NO AFFORDABILITY
+ *   CHECK ANYWHERE.** Same as `cast_gale`'s. The cost is assigned here and
+ *   spent unconditionally by `nextphase` at `+0x32a7`; a caster at zero stamina
+ *   still casts and `check_stats` clamps the floor to 0 afterwards. **Do not
+ *   invent a gate the build does not have** — `legalActions` therefore offers a
+ *   bolt at any stamina above the forced-rest floor, exactly as the build's
+ *   button is live at any stamina above it.
+ *
+ * ► **THE TWO INNER TESTS ARE SEQUENTIAL `if`s, NOT AN ELSE-IF**, and the
+ *   second re-reads `phase_decision` (`+0x84bd`) rather than falling through.
+ *   With `phase_decision` a single value only one can fire, so this is fidelity
+ *   rather than a reachable branch — but it is the same shape the four status
+ *   arms have, and this file has already been wrong once about what sequential
+ *   `if`s mean.
+ *
+ * ► **THE `nextphase` GATE READS `defender.struck`, NOT `attacker.struck`** —
+ *   `+0x85db`, against `cast_gale`'s `attacker.struck` at `+0x7ba4` and the
+ *   melee phases' the same. The phase advances when the VICTIM's hurt
+ *   animation reports back, not when the caster's cast finishes, and **nothing
+ *   in the arm ever writes `defender.struck = true`** — the arm's only writes
+ *   to it are `= null` at `+0x8618`. It is a two-party handshake whose other
+ *   half is outside the arm. This engine has no animation report-back channel,
+ *   so every phase here completes within the action; the difference is recorded
+ *   because `src/adapter/action-gate.js` is the thing that would consume it,
+ *   and a gate built on the caster's clip would hold a bolt open for ever.
+ *
+ *   **It is not unique to the bolts, which the first draft of this paragraph
+ *   implied.** `cast_death_from_above` carries the identical gate at
+ *   `+0x8903`-`+0x8916`. The contrast that survives is with `cast_gale` and the
+ *   melee phases, not with "every other phase".
+ *
+ * ► **THREE OF THE ARM'S FOUR VARIABLES ARE TIMELINE-SCOPE, NOT LOCALS.**
+ *   `bolt` (`+0x8587`), `lightning_damage` (`+0x84aa`/`+0x84fa`) and
+ *   `lightning_frame` (`+0x84b6`/`+0x8506`) are all `SetVariable`, and they have
+ *   to be: `bolt.removeMovieClip()` at `+0x85fd` runs on a LATER frame than the
+ *   one that created the clip. A port that scopes them to the phase body breaks
+ *   the teardown silently.
+ *
+ * ► **THE ARM CONTAINS ZERO `Jump`s, so after `nextphase()` execution FALLS
+ *   THROUGH into the `cast_death_from_above` test and every later arm in the
+ *   same frame**, each re-reading `phase_decision` with `GetVariable`. If
+ *   `nextphase()` reassigns `phase_decision` to a label tested later in the
+ *   chain, a second phase body runs on the same frame. This engine resolves one
+ *   action per call and so cannot express it; it is recorded because a
+ *   frame-accurate port must decide what it does about it.
+ */
+export const SS2_BOLT_SPELLS = Object.freeze({
+  [Ss2ActionType.CAST_LIGHTNING_BOLT]: Object.freeze({
+    /** The inventory id `cast_spell_icon(attacker, 34)` names, `+0x8485`. */
+    itemId: 34,
+    /** `randomBetween(100, 200)`, `+0x8492`. Inclusive, per the map's RNG surface. */
+    damageLow: 100,
+    damageHigh: 200,
+    /** `bolt.gotoAndStop(1)` — presentation only. */
+    boltFrame: 1,
+    /** The tape label; `src/golden/ss2-spell-candidate.js` owns the canonical one. */
+    rollLabel: "lightning-bolt-damage-roll"
+  }),
+  [Ss2ActionType.CAST_FRIGHTNING_BOLT]: Object.freeze({
+    itemId: 35,
+    damageLow: 200,
+    damageHigh: 400,
+    boltFrame: 2,
+    rollLabel: "frightning-bolt-damage-roll"
+  })
+});
+
+/**
+ * What both bolts share, because they share one arm and one call site.
+ *
+ * `damageMethod` and `bonusFrame` are the ingress's fifth and sixth arguments,
+ * pushed once at `+0x858f` for BOTH labels — so a frightning bolt plays the
+ * `lightning` hurt clip and the frame-8 splat exactly as a lightning bolt does.
+ * Neither moves a number: `damage_method` is `defenderClip.gotoAndPlay`'s
+ * argument and `bonus_frame` selects the floating splat.
+ */
+export const SS2_BOLT_INGRESS = Object.freeze({
+  damageMethod: "lightning",
+  bonusFrame: 8,
+  /** `attacker.gotoAndPlay("Cast2")`, `+0x8515` — the CASTER's clip, shared. */
+  casterClip: "Cast2",
+  /**
+   * `register:3.crowd_action = 5`, `+0x841c`. Presentation cue; not modelled.
+   *
+   * **`register:3` is glossed as the attacker clip and that gloss is NOT
+   * byte-verified here** — no `StoreRegister {"register":3}` appears in any
+   * dump this derivation used. The neighbouring arms write the same member with
+   * 2 (`+0x7bf9`), 5 (`+0x7dca`), 15 (`+0x7ffe`), 10 (`+0x821c`) and 20
+   * (`+0x8642`, death from above), which is consistent with a per-phase crowd
+   * cue on one clip; it is not proof of which clip.
+   */
+  crowdAction: 5
+});
+
 export const SS2_TAUNT = Object.freeze({
   /**
    * `diceroll < game_attacker.taunt_percentage` (`+0x694b`).
@@ -4583,7 +4843,7 @@ export function ss2IsBackAttack(attacker, defender) {
   return facesLeft === (attacker.x > defender.x);
 }
 
-function defenderEffects(before, after, target) {
+function defenderEffects(before, after, target, { psycheReset = "on-damage" } = {}) {
   const declared = declaredResourceNames(target);
   const effects = [];
   const writeResourceEffect = (name) => {
@@ -4624,7 +4884,26 @@ function defenderEffects(before, after, target) {
   //   Emitted only on a LANDED blow (a miss is a zero-damage effect, see above)
   //   and only when the value would actually change, so an ordinary battle
   //   between gladiators who never psyche carries no extra effect at all.
-  if (declared.has("psyche_up") && after.hitpoints < before.hitpoints
+  //
+  // ► **BUT THE TWO INGRESSES DISAGREE, AND THIS FUNCTION SPOKE FOR ONLY ONE OF
+  //   THEM UNTIL 2026-09-20.** `damagecharacter`'s reset at `+0x1be4` sits
+  //   inside the hit branch, so the physical path resets on a LANDED blow —
+  //   that is `"on-damage"` and it is this function's default because the
+  //   attack path is what it was written for. `magic_damage_character`'s reset
+  //   at `+0x148e` is **step 4, an unconditional join**: the write sits after
+  //   the hitpoint subtraction but outside every branch, so a spell or
+  //   enchantment tick that armour absorbs ENTIRELY still clears the victim's
+  //   charge.
+  //
+  //   `resolveStatusPhase`'s own docstring has named that write "the
+  //   unconditional `psyche_up = 1`" since it was written, and the code it
+  //   documents did not deliver it: a fully-absorbed enchantment tick left the
+  //   victim's charge standing. Found while deriving the bolt phase, which goes
+  //   through the same ingress. **`"always"` is the magic ingress's rule and
+  //   `"on-damage"` is the physical one; neither is a default the other can
+  //   borrow.**
+  const psycheChanged = psycheReset === "always" || after.hitpoints < before.hitpoints;
+  if (declared.has("psyche_up") && psycheChanged
     && resourceValue(target, "psyche_up", SS2_PSYCHE_UP.floor) !== SS2_PSYCHE_UP.floor) {
     effects.push({
       kind: EffectKind.RESOURCE,
@@ -4930,7 +5209,11 @@ function resolveStatusPhase(request, flag, fightMode, observer) {
   }
 
   const effects = [
-    ...defenderEffects(victimBefore, victimAfter, actor),
+    // `"always"`: this tick goes through `magic_damage_character`, whose
+    // `psyche_up = 1` is an unconditional join (map step 4, `+0x148e`). A tick
+    // that armour absorbs entirely still clears the victim's charge, and this
+    // call passed the physical path's `"on-damage"` rule until 2026-09-20.
+    ...defenderEffects(victimBefore, victimAfter, actor, { psycheReset: "always" }),
     // A lethal tick runs `death()`, which clears all SIX flags on the victim,
     // not just the four conditions the forced chain consumes. Clearing only the
     // conditions left a corpse still carrying `taunted1`/`taunted2` — the
@@ -5040,7 +5323,14 @@ export const SS2_MAP_SOURCE_REFS = Object.freeze([
   "overlay:862/frame:52/DoAction@0x240c7f/quick_attack@+0x635c",
   "overlay:862/frame:1/turn-gating@+0x0d2e",
   "root:35/DoAction@0x3fa9dc/battlevalues@+0x3062",
-  "sprite:862/frame:52/DoAction@0x23f835/villainChooseAction@+0x03e8"
+  "sprite:862/frame:52/DoAction@0x23f835/villainChooseAction@+0x03e8",
+  // The bolt phase and the gate that offers it, added 2026-09-20 with the two
+  // `cast_*_bolt` verbs. Three refs rather than one, because the phase, the
+  // villain's offer ladder and the hero's button panel are three different
+  // functions in three different blocks and each is load-bearing on its own.
+  "overlay:862/frame:52/DoAction@0x240c7f/cast_lightning_bolt@+0x83f5",
+  "overlay:862/frame:52/DoAction@0x23e7cf/villain_cast_spells@+0x04e4",
+  "sprite:492/frame:1/DoAction@0x50e4f/inventory_overlay@+0x0216"
 ]);
 
 const FIGHT_MODES = Object.freeze(["tournament", "duel", "misc"]);
@@ -5986,6 +6276,83 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **THE BOLTS ARE OFFERED OUTSIDE THE CONTROLLER-FRAME SPLIT ENTIRELY,
+      //   AND THAT IS STRONGER THAN `psyche_up`'S CASE ABOVE.** `psyche_up` is
+      //   on every controller frame; a spell is on NO controller frame. The
+      //   eight `optionA`-`optionH` slots the map's button table enumerates
+      //   contain no inventory entry at all — the spell buttons live on a
+      //   separate overlay, `sprite:492[inventory_overlay]`, attached by the
+      //   battle overlay itself (`sprite:862[overlay]/frame:1` `+0x02fe`),
+      //   which is why no facing, no weapon mode and no `herolevel` reaches
+      //   this offer.
+      //
+      // ► **THE BUILD'S OWN OFFER GATE, and it is TWO conditions per slot, not
+      //   one** (`sprite:492[inventory_overlay]/frame:1/DoAction@0x50e4f`,
+      //   derived 2026-09-20 and confirmed by an adversarial verifier that read
+      //   the block end to end, 270 instructions, `+0x0000`-`+0x045d`):
+      //
+      //   ```text
+      //     for (i = 1; !(i > 6); i++)                                 +0x0216
+      //       if (i > _root.game.hero.inventory_maxslots)              +0x024f
+      //         inventory_buttonI._visible = false                     +0x026c
+      //     // then, separately, six times over:
+      //     if (_global.battle_started == true                         +0x0289
+      //         && _root.game.hero.inventoryI == 1)                    +0x02af
+      //       inventory_buttonI._visible = false                       +0x02ca
+      //   ```
+      //
+      //   The first branch instruction in the whole block is at `+0x0232`,
+      //   AFTER the loop's init, so nothing encloses the loop: it is top-level
+      //   and unguarded. There is no `_visible = true` anywhere in the block.
+      //
+      //   **ONLY THE SECOND IS REPRODUCED HERE, and the omission is named
+      //   rather than hidden.** `inventory_maxslots` is not a declared resource
+      //   in this engine — it is absent from `SS2_RESOURCE_NAMES` and from
+      //   `VANILLA_FIELD_GROUPS` — so declaring it is a schema change with its
+      //   own decision, and the handoff ranks it. What this offer does instead
+      //   is the build's second gate exactly: **a slot holding the empty marker
+      //   offers nothing**, and a slot the combatant never declared is not a
+      //   slot.
+      //
+      //   ► **THE NARROWING IS ONE-WAY — this engine offers a bolt the build
+      //     would have hidden, never the reverse — AND IT IS THE COMMON CASE,
+      //     NOT A CORNER ONE.** ~~At the default `inventory_maxslots` of 6 the
+      //     two coincide.~~ **THERE IS NO DEFAULT OF 6, and that sentence was
+      //     false the hour it was written — caught by an adversarial verifier
+      //     the same session, 2026-09-20.** `initcharacter` writes the value
+      //     from `characterDNA[40]` (`+0x098e`) and then walks a band chain:
+      //     **2 / 3 / 4 / 5 / 6 at `herolevel >= 6 / 15 / 20 / 30 / 40**
+      //     (`+0x0aa5`, `+0x0aca`, `+0x0aef`, `+0x0b14`, `+0x0b39`);
+      //     `randomise_gladiator` writes the same chain with a **`< 6` -> 1**
+      //     arm at the bottom (`+0x336f`-`+0x34a5`). **Six needs level 40**,
+      //     and the repository's own decoded rank-1 champion carries 1 at
+      //     `herolevel` 5. Across levels 6-14 the hero's `maxslots` is 2 and
+      //     the build hides buttons 3, 4, 5 and 6 in battle, so a bolt carried
+      //     in slot 3 by a level-10 gladiator is offered here and is
+      //     unreachable there.
+      //
+      //   ► **AND THE BUILD'S GATE FAILS OPEN WHEN THE FIELD IS ABSENT**, which
+      //     is the one thing that makes this omission defensible rather than
+      //     merely convenient. `Greater` is ECMA abstract relational comparison,
+      //     so `i > undefined` is `i > NaN` — false for every `i`, and nothing
+      //     is hidden. A record that never states `inventory_maxslots` gets all
+      //     six slots in the BUILD too. This engine's combatants never state
+      //     it, so for exactly those records the two agree.
+      //
+      // ► **PER FOE, LIKE EVERY OTHER TARGETED VERB.** The build is 1v1 and its
+      //   phase reads a single bound `defender`; above 1v1 the caster picks,
+      //   and the alternative — offering one bolt at "the" enemy — is the
+      //   cross-lane defect this file has now recorded three times. There is NO
+      //   range test, deliberately: the arm contains no `fightdistance` read
+      //   and `lightning_bolt_combat` is attached at the defender's own `_x`
+      //   (`+0x852a`), so a bolt reaches across the arena. The item table's own
+      //   description calls it close-ranged; **the bytes do not**, and the bytes
+      //   are the oracle.
+      for (const [type, spell] of Object.entries(SS2_BOLT_SPELLS)) {
+        if (ss2InventorySlotHolding(view.actor, spell.itemId) === null) continue;
+        for (const foe of view.foes) actions.push({ type, targetId: foe.id });
+      }
+
       // ► **WHICH CONTROLLER FRAME THE GLADIATOR IS ON, computed ONCE because
       //   two arms below need it and a second copy is a second chance to be
       //   wrong** — the argument the walk arm makes about `anyInReach` and
@@ -6903,6 +7270,156 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **THE BOLT. One sample, no roll, no direction, and it cannot miss.**
+      //
+      //   It returns before `ATTACK_BANDS` for the reason `shove` and the
+      //   taunt's three non-dispatching outcomes do: the arm takes exactly one
+      //   `randomBetween` and it is the DAMAGE, handed straight to
+      //   `magic_damage_character`. Entering the dispatcher would draw an
+      //   attack direction the build never draws and put every peer replaying
+      //   the same tape out of step from the first cast. See `SS2_BOLT_SPELLS`
+      //   for the phase, statement by statement.
+      if (SS2_BOLT_SPELLS[request.type]) {
+        const spell = SS2_BOLT_SPELLS[request.type];
+        const victim = request.target;
+        if (!victim) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a target; ${String(request.targetId)} is not a combatant.`
+          );
+        }
+
+        // ► **THE SLOT IS RE-FOUND AT RESOLVE, NOT CARRIED FROM THE OFFER.**
+        //   `legalActions` and `resolveAction` are separate calls and a caller
+        //   may reach the second without the first — the resolver's own
+        //   legality gate covers `applyAction`, but `resolveAction` is a public
+        //   rule-set method. Consuming a slot that does not hold the spell
+        //   would be worse than any error message.
+        const slot = ss2InventorySlotHolding(actor, spell.itemId);
+        if (slot === null) {
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+            `item ${spell.itemId}. The build's own gate is possession — check_inventory(${spell.itemId}) for ` +
+            "the villain, a visible inventory button for the hero — and this engine reproduces it."
+          );
+        }
+
+        // THE ONE SAMPLE. Taken here rather than inside the ingress because
+        // `magic_damage_character` contains no RNG call at all: the map is
+        // explicit that spell damage is rolled in the CALLERS, and the roll
+        // label is the candidate module's so a fixture and a live battle put
+        // the same name on the same draw.
+        const damage = rolls.randomBetween(spell.rollLabel, spell.damageLow, spell.damageHigh);
+
+        // The ingress's roles are NOT crossed here, unlike a status phase. The
+        // three spell call sites match the byte-verified signature exactly
+        // (`+0x85af` pushes defender last, so it is argument one); only the
+        // EIGHT enchantment sites invert. The victim therefore sits on the
+        // scenario's DEFENDER side, which `attackerSide: "villain"` makes
+        // `hero`.
+        const victimRecord = vanillaRecordOf(victim, "defender");
+        const victimBefore = { ...victimRecord };
+        // The caster's record is present because the ingress clears death
+        // state across BOTH sides. Nothing else reads it: the callee binds
+        // `attacker`/`game_attacker` to register 0 and touches neither, so no
+        // caster stat can influence any number this produces.
+        //
+        // **SNAPSHOT IT BEFORE THE CALL.** `clearDeathState` mutates both sides
+        // in place, so a `{...record}` taken afterwards is the AFTER state and
+        // the diff against it is empty — which would silently drop the caster's
+        // own condition clears on a lethal cast.
+        const casterRecord = vanillaRecordOf(actor, "defender");
+        const casterBefore = { ...casterRecord };
+        const scenario = {
+          attackerSide: "villain",
+          hero: victimRecord,
+          villain: casterRecord,
+          fightMode,
+          result: null
+        };
+        const outcome = applySs2MagicDamageCandidate(scenario, damage, {
+          spellId: spell.itemId,
+          spell: VANILLA_PHASE_LABEL[request.type],
+          damageMethod: SS2_BOLT_INGRESS.damageMethod,
+          rolledDamage: damage
+        });
+
+        // The same refusal the status phase and the attack path carry, for the
+        // same reason: a first-blood result ends the bout in the arithmetic and
+        // not in the battle, because `battleStanding` decides on `alive` alone.
+        if (outcome.resultEvent && outcome.resultEvent.reason === "first-blood") {
+          throw new TeamRuleSetError(
+            `Rule set ${ruleSetId} produced a first-blood result from ${VANILLA_PHASE_LABEL[request.type]}, ` +
+            "which the team resolver cannot represent: it decides elimination on health > 0 and knows nothing " +
+            "of hitpoints < hitpointsmax. Use fightMode \"tournament\" for play."
+          );
+        }
+
+        const victimAfter = scenario.hero;
+        const victimEliminated = victimAfter.hitpoints <= 0;
+
+        // **CONSUMPTION IS: SET THE SLOT TO 1.** `use_item` `+0x0409` writes
+        // `game.villain["inventory" + i] = 1`, and the hero's own six handlers
+        // write the same (`+0x0626`-`+0x0851`). Emitted unconditionally, on a
+        // lethal cast too: the build consumes the item when the phase BEGINS,
+        // long before `death()` could delete `nextphase`.
+        const consumption = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }];
+
+        // `death()` deletes `nextphase` before the transition fires, so a
+        // lethal cast costs the caster nothing and regenerates nothing — the
+        // rule nineteen goldens measure on the attack path. The COST is still
+        // `round(magicka)` and is still unaffordable-proof: `nextphase` spends
+        // it unconditionally and `phaseTransitionEffects` clamps the floor at
+        // 0 exactly as `check_stats` does.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const transition = victimEliminated
+          ? { effects: [], staminaGained: 0, healed: 0 }
+          : phaseTransitionEffects(actor, { staminaCost });
+
+        const effects = [
+          ...consumption,
+          // `"always"` for the reason the status phase uses it: the same
+          // ingress, the same unconditional join. An armour-absorbed bolt still
+          // interrupts the victim's charge.
+          ...defenderEffects(victimBefore, victimAfter, victim, { psycheReset: "always" }),
+          // A lethal cast runs `death()`, which clears all six flags on BOTH
+          // gladiators in its own measured order. Emitted from the ingress's
+          // own before/after rather than assumed.
+          ...statusEffects(casterBefore, scenario.villain, victimBefore, victimAfter, actor, victim),
+          ...transition.effects,
+          ...crowd
+        ];
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: victim.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // Four names for one decision, and none of them is derivable from
+            // another. See `VANILLA_PHASE_LABEL`'s entry.
+            casterClip: SS2_BOLT_INGRESS.casterClip,
+            victimClip: SS2_BOLT_INGRESS.damageMethod,
+            bonusFrame: SS2_BOLT_INGRESS.bonusFrame,
+            boltFrame: spell.boltFrame,
+            spellId: spell.itemId,
+            consumedSlot: slot,
+            rolledDamage: damage,
+            damage: outcome.mutation.appliedDamage,
+            armourDamage: outcome.mutation.armourDamage,
+            hitpointDamage: outcome.mutation.hitpointDamage,
+            staminaBonus: outcome.mutation.staminaBonus,
+            staminaSpent: victimEliminated ? 0 : staminaCost,
+            staminaGained: transition.staminaGained
+          }]
+        };
+      }
+
       const band = ATTACK_BANDS[request.type]
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
@@ -7595,7 +8112,29 @@ export function createSs2TeamRules({
       //   and into the fight it is built to avoid. **Closed by the vocabulary,
       //   not by a second geometry check** — which is the same mechanism the
       //   comment below relies on and the reason it holds.
-      const attackOnOffer = options.some((option) => ATTACK_BANDS[option.type]);
+      // ► **A BOLT COUNTS AS AN ATTACK HERE, AND LEAVING IT OUT WAS A REAL
+      //   DEFECT — found by a Codex adversarial review of this diff, 2026-09-20,
+      //   and reproduced before it was believed.** `ATTACK_BANDS` deliberately
+      //   does not hold the bolts (a band entry means "draw a direction, then
+      //   roll"), so an AI caster read as having nothing on offer: **seed 3,
+      //   `inventory1: 35`, a 170-HP unarmoured foe whose death a 200-400 bolt
+      //   guarantees — `suggestAction` chose `quick-attack` at distance 120 and
+      //   `walk-right` at distance 1960.** The capability was legal and
+      //   unreachable.
+      //
+      //   **It is not a neutral omission the way `shove`'s is.** The build's
+      //   villain genuinely casts: `villain_cast_spells` IS the villain AI, and
+      //   for these two arms it casts on possession alone — a single 90% roll
+      //   at the top of the function and then a fixed-order ladder in which
+      //   both bolts are unconditional. An SS2-derived AI that never casts
+      //   departs from the build rather than merely declining to model it.
+      //
+      //   Recognised by the VOCABULARY, like every other arm here: a bolt on
+      //   offer means the caster has something to do from where it stands, so
+      //   it must not walk. The bolt arm has NO distance test in the build
+      //   either, so this needs no geometry.
+      const boltOnOffer = options.some((option) => SS2_BOLT_SPELLS[option.type]);
+      const attackOnOffer = options.some((option) => ATTACK_BANDS[option.type]) || boltOnOffer;
       if (!attackOnOffer) {
         const nearest = nearestFoe(view);
 
@@ -7799,9 +8338,49 @@ export function createSs2TeamRules({
       );
       const engaged = foes.find((foe) => reachable.has(foe.id)) ?? target;
 
+      // ► **A PURE CASTER NEVER REACHES THE SWING TABLE, and it must not: the
+      //   table builds the ATTACKER record, which demands `min_damage` and
+      //   `max_damage`.** A bolt reads neither — `magic_damage_character` binds
+      //   `attacker`/`game_attacker` to register 0 — so a gladiator that
+      //   carries a spell and declares no damage pair is entitled to cast, and
+      //   pricing it would throw instead. Same guard the forced-phase, forced-
+      //   swap and walk arms above carry, for the same reason.
+      //
+      //   It is above `ss2SwingValues` rather than inside the ranking because
+      //   the ranking cannot run at all for such a gladiator.
+      const boltOptions = Object.keys(SS2_BOLT_SPELLS)
+        .map((type) => options.find((option) => option.type === type && option.targetId === engaged.id))
+        .filter(Boolean);
+      if (boltOptions.length > 0 && !ss2CanBePriced(actor)) {
+        // Heaviest first, which is also the build's own ladder order: id 35 is
+        // arm 15 and id 34 is arm 17, so a villain holding both casts the
+        // frightning bolt and never the lightning one.
+        return boltOptions.sort((a, b) =>
+          SS2_BOLT_SPELLS[b.type].damageHigh - SS2_BOLT_SPELLS[a.type].damageHigh)[0];
+      }
+
       // The table this AI ranks on, now in `ss2SwingValues` so the approach arm
       // above reads the same numbers this one does rather than a second copy.
       const { attacker, chances, expected } = ss2SwingValues(actor, engaged);
+
+      // ► **A BOLT IS PRICED AT ITS MEAN WITH NO CHANCE MULTIPLIER, BECAUSE IT
+      //   CANNOT MISS.** Every other row here is `(chance / 100) * damage`; the
+      //   bolt arm contains no `checkattackroll`, no direction draw and no hit
+      //   roll at all, so its expected damage IS the mean of its range. That is
+      //   the same arithmetic the other rows do, with the certainty term equal
+      //   to 1 — not a thumb on the scale.
+      //
+      //   **It is not automatically the best move, and that is deliberate.** A
+      //   lightning bolt means 150 and a frightning bolt 300; a gladiator whose
+      //   `power_attack` prices above that keeps its bolt. The build does not
+      //   make that comparison — its ladder casts on possession alone — but the
+      //   build also has no valuation at all, so there is nothing here to
+      //   contradict: this engine ranks where the build sequences, exactly as
+      //   it already does for every other verb.
+      for (const option of boltOptions) {
+        const spell = SS2_BOLT_SPELLS[option.type];
+        expected[option.type] = (spell.damageLow + spell.damageHigh) / 2;
+      }
 
       // ► **THE AI CHARGES NOW, AND IT DOES IT IN TWO DIFFERENT SITUATIONS FOR
       //   TWO DIFFERENT REASONS.** Owner's decision, 2026-09-16, taken against
@@ -7848,7 +8427,36 @@ export function createSs2TeamRules({
       //   twice, and the reason a second distance test here is a second chance
       //   to be wrong rather than a safety net. The gate that matters is the
       //   resolver's, and it runs on every press regardless.
-      const psycheOption = aiCharges
+      //
+      // ► ~~**THE CONSTRUCTION HOLDS.**~~ **IT DID, AND THE BOLTS ENDED IT ON
+      //   2026-09-20 — IN THIS SAME DIFF, and found by the SECOND Codex
+      //   adversarial review of it.** The whole argument above rests on one
+      //   thing: reaching this line meant `attackOnOffer`, and `attackOnOffer`
+      //   meant a verb from `ATTACK_BANDS` was offered, and every one of those
+      //   is offered on `ss2Reach` — which the discharge gate then beats by 50.
+      //   **The bolt arm has no range test at all**, so adding `boltOnOffer` to
+      //   `attackOnOffer` let a caster reach this ranking from anywhere on the
+      //   sands, and `engaged` falls back to the WEAKEST foe rather than a
+      //   reachable one.
+      //
+      //   Reproduced before anything was touched: `aiCharges`, seed 3,
+      //   `inventory1: 34`, counter 3, strength/attack 60, weapon 24,
+      //   `herolevel` 10, separation **1960**. The AI chose `psyche_up`; it
+      //   resolved `outOfRange: true`, `discharged: false`, **spent 57 stamina
+      //   and kept the counter at 3** — so it can repeat for ever, which is the
+      //   exact starvation the paragraph above describes for a DIFFERENT cause.
+      //   Without the bolt the same gladiator walks.
+      //
+      //   **So the explicit test is back, and this time it is load-bearing
+      //   rather than a safety net.** The measurement that retired it (60
+      //   decisions, 0 attackable foes outside the gate) was true of a
+      //   vocabulary that no longer exists: it surveyed `ATTACK_BANDS`, and a
+      //   bolt is not in `ATTACK_BANDS` for reasons that have nothing to do
+      //   with range. **A guard justified by a construction has to be revisited
+      //   the day the construction changes**, and the note that retires one
+      //   should name what it depends on — this one did, which is the only
+      //   reason the dependency was findable.
+      const psycheOption = aiCharges && ss2PsycheDischargeInRange(actor, engaged)
         // Self-targeted when nothing is in reach, one per foe once something
         // is; both shapes are accepted and only `engaged` is taken.
         ? options.find((option) => option.type === Ss2ActionType.PSYCHE_UP
@@ -7969,6 +8577,20 @@ export function createSs2TeamRules({
         // partial charge behind (the counter lands on 2, one press from the
         // next discharge) while the swing resets it to the floor.
         Ss2ActionType.PSYCHE_UP,
+        // ► **THE BOLTS SIT BELOW THE CHARGE AND ABOVE EVERY SWING, and both
+        //   halves of that are a tie-break argument rather than a preference.**
+        //   Below the discharge: a charge that ties a bolt should be spent,
+        //   because it leaves a partial charge behind while the bolt is gone
+        //   for good. Above the swings: a bolt that ties a swing is CERTAIN
+        //   where the swing is a roll, so the same expected value is worth
+        //   more.
+        //
+        //   Frightning ahead of lightning for the reason power is ahead of
+        //   quick — it is the heavier — **and that happens to be the build's
+        //   own order too**: id 35 is ladder arm 15 and id 34 is arm 17, so a
+        //   villain holding both can never cast the lightning bolt.
+        Ss2ActionType.CAST_FRIGHTNING_BOLT,
+        Ss2ActionType.CAST_LIGHTNING_BOLT,
         Ss2ActionType.POWER_ATTACK,
         Ss2ActionType.NORMAL_ATTACK,
         Ss2ActionType.QUICK_ATTACK,
@@ -7992,6 +8614,10 @@ export function createSs2TeamRules({
         // taunt is priced only when `aiTaunts` is on and an option named
         // `engaged`, so it is dropped the same way.
         if (type === Ss2ActionType.TAUNT && expected[type] === undefined) continue;
+        // Same trap, same guard: a bolt is priced only when one was offered
+        // against `engaged`, so an unoffered bolt must not be reachable by an
+        // `undefined > undefined` comparison.
+        if (SS2_BOLT_SPELLS[type] && expected[type] === undefined) continue;
         const option = type === Ss2ActionType.PSYCHE_UP
           // `psycheOption` is already matched to `engaged` above, and is
           // undefined when the discharge could not reach it.
