@@ -2219,9 +2219,16 @@ test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declare
   //   bag picks up a value the record really carries. **That is the intended
   //   shape**: absent means "this record never mentioned a counter", stated
   //   means "this is what it holds", and neither is invented here.
-  assert.equal(projected.length, 41);
+  // ► **47 SINCE 2026-09-19, FOR EXACTLY THE `psyche_up` REASON ONE BLOCK UP.**
+  //   `inventory1`-`inventory6` joined `SS2_RESOURCE_NAMES` with no defaults,
+  //   and `vanillaGladiator()` above STATES all six — so the bag picks up six
+  //   values the record really carries, and this count moves by six while the
+  //   23 golden replay hashes do not move at all (measured before and after).
+  //   **This is the only count in the suite that the declaration moved**, which
+  //   is the tell that it is a stated-field change and not a default fill.
+  assert.equal(projected.length, 47);
   for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon",
-    "weapon_range", "weapon"]) {
+    "weapon_range", "weapon", "inventory1", "inventory6"]) {
     assert.ok(projected.includes(name), `${name} must reach the projection`);
   }
   // And the number it carries is the BUILD's, not the `[5]` multiplier this

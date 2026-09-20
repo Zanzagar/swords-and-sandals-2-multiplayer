@@ -148,8 +148,30 @@ export function demoGladiator(overrides = {}) {
     magicka_percentage: 0,
     psyche_up: 0,
 
-    inventory1: 0, inventory2: 0, inventory3: 0,
-    inventory4: 0, inventory5: 0, inventory6: 0,
+    // ► **WAS `0` UNTIL 2026-09-19, AND `0` IS NOT WHAT THE BUILD WRITES FOR AN
+    //   EMPTY SLOT.** The build's empty marker is **1**: measured across the
+    //   whole oracle, there are fourteen emptiness tests and every one is
+    //   `== 1`, every literal write to a slot is 1
+    //   (`randomise_gladiator` `+0x330a`-`+0x334b`, `use_item` `+0x0409`, the
+    //   hero's own six consume handlers), and there are **zero** writes of 0.
+    //   A 0 can only reach a slot through an authored DNA string, which is
+    //   where the champion literals put theirs.
+    //
+    //   It was inert for exactly as long as nothing read the field, and
+    //   `inventory1`-`inventory6` became declared resources in the same commit
+    //   as this line — **the fifth time this roster has taught that a stated
+    //   field is harmless right up until something reads it.** The four before
+    //   it are recorded above: `weapon: 3` against the shop gate,
+    //   `weapon_range: 1` as a multiplier, the stated id no code derived from,
+    //   and `equipped_weapon: 3`.
+    //
+    //   `psyche_up: 0` above is NOT the same case and must not be "fixed" to
+    //   match: it is below the build's floor of 1 DELIBERATELY, the rule set
+    //   reconciles it with `Math.max(floor, stated)` at press time, and two
+    //   tests pin it by this file's name (`test/ss2-psyche-up.test.js`,
+    //   `test/render-stance.test.js`). Nothing pins these six.
+    inventory1: 1, inventory2: 1, inventory3: 1,
+    inventory4: 1, inventory5: 1, inventory6: 1,
     spell_colossus: 0, spell_bloodlust: 0,
     ...overrides
   };

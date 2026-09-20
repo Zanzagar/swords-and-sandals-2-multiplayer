@@ -1014,16 +1014,31 @@ test("every vanilla write declares one of four sources, and the field set is fix
   // ► **THIS ASSERTION USED `psyche_up` AS ITS EXAMPLE AND `psyche_up` BECAME A
   //   RESOURCE ON 2026-09-16.** The RULE it states is unchanged and still
   //   worth pinning — a field is not a resource by being a field — so it keeps
-  //   the rule and takes a different example. `inventory1` is a member of the
-  //   persistent combat object (the map groups it under "Combatant state
-  //   objects / Inventory") and no rule reads it, which is exactly the shape
-  //   the assertion is about.
+  //   the rule and takes a different example.
   //
   //   **What changed about `psyche_up` is that a verb started reading it**, not
   //   that it grew into a field. It is asserted here from the other side, so a
   //   revert that dropped it from the vocabulary fails this test too.
-  assert.equal(isResourceBackedVanillaField("inventory1"), false,
+  //
+  //   ► **AND THE REPLACEMENT EXAMPLE WAS `inventory1`, WHICH BECAME A DECLARED
+  //     RESOURCE ON 2026-09-19 — three days after it was chosen for not being
+  //     one.** It still satisfies the assertion, because
+  //     `isResourceBackedVanillaField` reads `CANONICAL_RESOURCE_SOURCES` and
+  //     the six slots deliberately stayed out of it until a verb writes one.
+  //     But it stopped ILLUSTRATING the rule the moment `SS2_RESOURCE_NAMES`
+  //     claimed the name, and an example that passes for a reason other than
+  //     the one it is printed to show is the failure this comment already
+  //     records once. `physical_size` is the honest example: a member of the
+  //     persistent combat object (the map groups it under "Derived combat"),
+  //     read by `src/adapter/presentation.js` for the clip scale, and named by
+  //     no resource vocabulary anywhere.
+  //
+  //     **Pick an example that is a field and NOTHING else, or it will be
+  //     promoted out from under the assertion again.**
+  assert.equal(isResourceBackedVanillaField("physical_size"), false,
     "a vanilla field is not a resource by being a field");
+  assert.equal(isResourceBackedVanillaField("inventory1"), false,
+    "a DECLARED SS2 resource is still not adapter-writable until CANONICAL_RESOURCE_SOURCES names it");
   assert.equal(isResourceBackedVanillaField("psyche_up"), true,
     "the psyche counter IS a declared resource: the psyche_up verb reads and writes it");
 

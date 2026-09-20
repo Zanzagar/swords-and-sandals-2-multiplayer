@@ -1078,7 +1078,21 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     "gauntlet", "gauntlet_defence",
     "greaves", "greaves_defence",
     "helmet", "helmet_defence",
-    "herolevel", "max_damage", "maximum_ammo", "min_damage",
+    "herolevel",
+    // ► **ADDED 2026-09-19, AND LIKE `psyche_up` IT MOVED NOTHING.** The six
+    //   slots have no `SS2_RESOURCE_DEFAULTS` entry, so only a record that
+    //   STATES one declares the key. Re-measured rather than assumed: the 23
+    //   golden replay hashes were taken before and after and all 23 are
+    //   unchanged. What DID move is the supplied-gladiator projection count in
+    //   `test/ss2-adapter-integration.test.js`, whose fixture states all six.
+    //
+    //   They are here because spells are inventory items — `villain_cast_spells`
+    //   scans the six slots and calls `use_item` — so every spell verb was
+    //   blocked on a number that could not reach the resolver. The empty marker
+    //   is **1**, not 0: fourteen emptiness tests in the build, every one
+    //   `== 1`, and every literal write to a slot is 1.
+    "inventory1", "inventory2", "inventory3", "inventory4", "inventory5", "inventory6",
+    "max_damage", "maximum_ammo", "min_damage",
     // ► **ADDED 2026-09-14 WITH `weapon` BELOW, DELIBERATELY, SO A GLADIATOR
     //   CAN HOLD HIS WEAPON.** These two are APPEARANCE selectors and no rule
     //   reads either: the damage bands, the ranges and the enchantments are all
@@ -1186,7 +1200,19 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
   //   means a fresh gladiator, which the build spells 1 — both of its resets
   //   write `= 1` (`nextphase` `+0x35c7`-`+0x35ea`, `damagecharacter`
   //   `+0x1be4`). What the build holds before the FIRST write is a map silence.
-  const NEVER_DEFAULTED = ["psyche_up"];
+  //
+  //   ► **THE SIX INVENTORY SLOTS JOINED IT 2026-09-19, FOR THE SAME REASON AND
+  //     WITH ONE OF THEIR OWN.** No default keeps the goldens still, as above.
+  //     The reason of their own is that there is no defensible default to give
+  //     them: the build's empty marker is 1, but "this record states nothing
+  //     about an inventory" and "this gladiator carries six empty slots" are
+  //     different facts, and filling the first with the second would invent
+  //     six slots for every combatant in the corpus. A caller that means
+  //     "carries nothing" says so — `tools/arena/roster.js` does.
+  const NEVER_DEFAULTED = [
+    "psyche_up",
+    "inventory1", "inventory2", "inventory3", "inventory4", "inventory5", "inventory6"
+  ];
 
   // (1) No weapon id at all: everything but what either weapon slot answers for.
   const battle = battleOf({}, {});

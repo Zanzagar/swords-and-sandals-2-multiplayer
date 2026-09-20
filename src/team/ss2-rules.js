@@ -3619,6 +3619,53 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   "criticalhit",
   "equipped_weapon",
   "herolevel",
+  // ► **THE SIX INVENTORY SLOTS, DECLARED 2026-09-19, AND THEY ARE THE
+  //   `psyche_up` SHAPE: NO `SS2_RESOURCE_DEFAULTS` ENTRY.** A name WITH a
+  //   default is filled into every combatant that does not state it — INCLUDING
+  //   every golden's, because `ss2Combatant`'s bag loop runs unconditionally and
+  //   `derive: false` does not stop it — and that moves all 23 golden replay
+  //   hashes. Measured here before and after: 23 goldens, 23 unchanged hashes.
+  //
+  //   **NOTHING READS THEM YET, AND THAT IS THE WHOLE POINT OF DECLARING THEM
+  //   FIRST.** Spells are inventory items: `villain_cast_spells` scans the six
+  //   slots and calls `use_item`, so every remaining spell verb — `cast_gale`,
+  //   `magic_damage_character` — is gated on a number that could not reach the
+  //   resolver at all while these names were outside this list. The vocabulary
+  //   is the half that can be landed and reviewed on its own, exactly as
+  //   `psyche_up`'s was at `a89601c` before the verb arrived at `b201486`.
+  //
+  //   ► **ABSENT MEANS "THIS RECORD NEVER MENTIONED AN INVENTORY", NOT "EMPTY",
+  //     AND THE DIFFERENCE IS LOAD-BEARING.** The build's empty marker is **1**,
+  //     and a reader who assumes 0 gets it backwards. Measured across the whole
+  //     7.5 MB oracle 2026-09-19 (wave `wf_1ee83aec-a10`, verified):
+  //     **fourteen emptiness tests, every one `== 1`, and not one `== 0`**
+  //     (`sprite:492[inventory_overlay]/frame:1` `+0x02af`… for slots 1-6, and
+  //     the two charsheets for slots 3-6); **every literal write to a slot is 1**
+  //     (`randomise_gladiator` `+0x330a`-`+0x334b`, `use_item` `+0x0409`, the
+  //     hero's own six consume handlers at `sprite:862[overlay]/frame:1`
+  //     `+0x0626`…); **zero writes of 0 anywhere**. So a gladiator carrying
+  //     nothing declares six ones, not six zeroes, and a gladiator whose record
+  //     is silent declares no key at all.
+  //
+  //   ► **0 IS STILL A "NOTHING" ROW, WHICH IS WHY THE CHAMPION DNA IS NOT A
+  //     CONTRADICTION.** `_root.inventory0` and `_root.inventory1` are the same
+  //     five-element row, BYTE-IDENTICAL after the name operand (file offsets
+  //     `0x3FF6C8` and `0x3FF6E9` share a 25-byte tail). Seventeen of the
+  //     nineteen authored champion literals spell an empty slot `0`; the code
+  //     never does. **The table agrees; the code does not**, and three display
+  //     sites really do behave differently for 0 than for 1 — so this engine
+  //     spells empty the way the CODE does.
+  //
+  //   Deliberately NOT added to `CANONICAL_RESOURCE_SOURCES`: nothing writes a
+  //   slot yet, and `emitResource` is silent about a resource that never moves,
+  //   so mirroring would be an allowlist entry with no driver. It goes in with
+  //   the verb, which is where `psyche_up`'s went.
+  "inventory1",
+  "inventory2",
+  "inventory3",
+  "inventory4",
+  "inventory5",
+  "inventory6",
   "max_damage",
   "maximum_ammo",
   "min_damage",
