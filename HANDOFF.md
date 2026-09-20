@@ -8,8 +8,16 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-20 02:00 — the six slots are declared, and three of yesterday's sentences were wrong](docs/handoffs/2026-09-20-0200--the-slots-are-declared-and-three-sentences-were-wrong.md).**
+[2026-09-20 21:30 — the bolts are built, and a `null` was a scheduled divergence](docs/handoffs/2026-09-20-2130--the-bolts-are-built-and-a-null-was-a-scheduled-divergence.md).**
 Start there. *(It supersedes
+[2026-09-20 02:00 — the six slots are declared, and three of yesterday's sentences were wrong](docs/handoffs/2026-09-20-0200--the-slots-are-declared-and-three-sentences-were-wrong.md),
+**whose ranked item 2 is DONE, whose ranked item 4 is answered NO — and the
+answer was already written in `docs/ss2-adapter-contract.md` before that file
+asked the question — and whose ranked item 3 is WORSE-BLOCKED: a seventh
+unconditional ladder arm (id 45) sits immediately before gale and pre-empts it.
+That file's `inventory_maxslots` paragraph is also retracted in two of its three
+sentences.**)*
+*(That one supersedes
 [2026-09-19 21:30 — four defects, a campaign, and a blocker that moved](docs/handoffs/2026-09-19-2130--four-defects-a-campaign-and-a-blocker-that-moved.md),
 **whose ranked item 1 is DONE and whose ranked item 5 is now BETTER-BLOCKED than
 it was: `cast_gale`'s gate is five conditions, not the one that file names, and
@@ -59,6 +67,33 @@ move them.)* *(It supersedes
 [2026-09-15 15:35 — a synthetic SWF is an oracle, and two glows were doubled](docs/handoffs/2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md),
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
+
+► **THE FIRST SPELL VERBS ARE BUILT, AND A `null` IN THE CANDIDATE TABLE WAS A
+  SCHEDULED FALSE DIVERGENCE (2026-09-20).** `cast_lightning_bolt` and
+  `cast_frightning_bolt` resolve: offered on possession of inventory id 34 or
+  35, ONE `randomBetween` for the damage, `round(magicka)` stamina with **no
+  affordability check anywhere**, the slot consumed by setting it to **1**.
+  ► **`damage_method` IS A PROPERTY OF THE ARM, NOT OF THE SPELL**, and
+    `SS2_DIRECT_DAMAGE_SPELLS` carried `damageMethod: null` for ids 31, 32 and
+    35 for three weeks because the map's table had one row per SPELL. There are
+    **three spell call sites for eleven spells**; the fifth and sixth arguments
+    are pushed once per arm. **The shape produced the error**, and the table is
+    grouped by arm now.
+  ► **THE MEASUREMENT WAS ALREADY IN THE TREE.**
+    `tools/runtime-capture/ss2-capture-wrapper.as` has named these literals at
+    these offsets since `7601888`, five hours after `8c3fc0a` wrote the nulls,
+    and it even says **group**. An internal contradiction, not an unread byte.
+  ► **ONLY THE BOLTS ARE A TURN.** The fireball family lands its damage from a
+    per-frame handler after a ballistic flight, and molten death spawns 10-20
+    boulders each with its own `onEnterFrame` (41-81 samples per cast).
+    **Sample count is NOT the discriminator** — a fireball takes one sample too.
+    Timing is.
+  ► **THREE CODEX PASSES: `needs-attention`, `needs-attention`, `approve`.** The
+    first found that the AI never cast; **the second found the defect my fix for
+    the first had introduced** — `boltOnOffer` invalidated the construction the
+    psyche range check had been retired against, and a charged caster at
+    separation 1960 burned 57 stamina a turn for ever. Both reproduced before
+    anything was touched.
 
 ► **`use_item` IS DERIVED, AND `cast_gale`'S BLOCKER MOVED RATHER THAN CLEARED
   (2026-09-19).** **1 is the EMPTY marker for an inventory slot**, confirmed by
