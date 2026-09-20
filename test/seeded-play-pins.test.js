@@ -469,11 +469,34 @@ function driveFirst(battle, limit) {
  *     change did on 2026-09-12, four blocks above. All four moving together is
  *     the signature of a key-set change.
  *
- *   **No golden moved, for the sixth time, and the reason is the same one that
- *   has held every time**: a promoted golden states none of these six names, so
- *   it declares none of the keys. `ss2Combatant` fills the bag from
+ *   **No golden moved, for the sixth time** — ~~"and the reason is the same one
+ *   that has held every time: a promoted golden states none of these six names,
+ *   so it declares none of the keys. `ss2Combatant` fills the bag from
  *   `SS2_RESOURCE_DEFAULTS` only for records it DERIVES, and every golden is
- *   built with `derive: false`.
+ *   built with `derive: false`."~~ **THAT REASON IS FALSE, and it was false the
+ *   day it was written. Corrected 2026-09-19, measured, not argued.**
+ *
+ *   `ss2Combatant`'s bag loop (`src/team/ss2-rules.js`) is NOT gated on
+ *   `derive`: it runs over every name in `SS2_RESOURCE_NAMES` and falls back to
+ *   `SS2_RESOURCE_DEFAULTS[key]` whatever the flag says. Driven over all 23
+ *   goldens x 2 sides through the replay test's own `derive: false` builder, a
+ *   golden hero's bag is 38 keys **of which 31 are names the golden record does
+ *   not state and each equals its default exactly** — `ammo_left` 0,
+ *   `criticalhit` 0, all three `secondary_weapon_*` and the rest. Every one of
+ *   the ranged six reached every golden.
+ *
+ *   **The goldens were spared because these six hashes were never PINNED, not
+ *   because the keys were never added.** Nothing in the suite compares a golden
+ *   replay against a stored hash — the replay test compares two replays of the
+ *   same code — which is exactly how `86ccb68` moved the armoured golden from
+ *   `70e605e1` to `4032d673` with the suite staying green.
+ *
+ *   **The protection that IS real is a name having NO `SS2_RESOURCE_DEFAULTS`
+ *   entry**, which is why `psyche_up`, `weapon_range`, the two weapon ids and
+ *   the six inventory slots left the corpus alone and these six did not.
+ *   `test/ss2-team-rules.test.js` has carried the correct version since
+ *   2026-09-16; this file never got the correction, so two artefacts disagreed
+ *   and only one of them was right.
  */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
