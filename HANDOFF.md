@@ -49,6 +49,41 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **RAISING THE ROSTER'S `herolevel` WOULD DO NOTHING, AND THE PUBLISHED CAUSE
+  FOR `aiCharges` BEING INERT IS ONE GATE OF TWO (2026-09-19).** The
+  2026-09-18 handoff and this file both said *"the cause is the `herolevel`
+  gate: the demo gladiator is level 4 against a melee gate of 7"*, and both my
+  own 04:00 and 15:00 handoffs repeated it as ranked work — *"a roster reaching
+  level 7 lights the first with no code change"*. **Measured: it does not.**
+
+```text
+    herolevel   psyche_up offered   charges taken (aiCharges ON)
+        4              600                 0
+        6              600                 0
+        7            4,753                 0     <- 2,654 of them to WARRIORS
+        9            5,145                 0
+       12            5,145                 0
+```
+
+  ► **THE LEVEL GATE IS REAL AND SITS AT EXACTLY 7** — at 4 and 6 the only
+    offers go to the two archers, and at 7 the warriors get 2,654 of them. So
+    that half of the claim holds.
+  ► **IT IS JUST NOT THE BINDING GATE.** That is `survivesTheWindUp` in
+    `chooseAiAction`: `actor.health > engaged.max_damage * presses`. The demo
+    roster is 46 max health against a foe whose `max_damage` is 17, so
+    **`46 > 51` is false on every turn, forever** — and the level gate opening
+    changes nothing behind it. **Two gates in series, and the published cause
+    named the one that is not binding.**
+  ► **WHAT DOES LIGHT IT IS MAX HEALTH, AND IT IS A CLIFF WITH A PRICE**:
+    46 → 0 charges, 60 → 2,914 charges and bouts 79 → 153 turns, 120 → 4,251
+    and 270 turns. **Nearly double the bout length**, which is consistent
+    rather than surprising: this file's own table already says charging LOSES
+    on damage per turn, so a roster that charges is a roster that takes longer
+    to finish.
+  ► **SO THE RANKED ITEM IS ANSWERED "NO" RATHER THAN DONE**, and the
+    correction is AT the `aiCharges` docstring rather than only here. A roster
+    change that opens a gate nothing is waiting behind is not a fix.
+
 ► **`cast_gale` IS FULLY DERIVED AND DELIBERATELY NOT BUILT (2026-09-19).**
   The phase is written out in the battle map under "The `cast_gale` phase, in
   full". **Zero `randomBetween`, zero `checkattackroll`, zero `hitpoints`** over

@@ -5068,12 +5068,42 @@ export function createSs2TeamRules({
    *   flag OFF**, 20/20 bouts resolved either way. The same holds at `1775a4c`,
    *   the commit that shipped the flag.
    *
-   *   **The cause is the gate two paragraphs down, not the wind-up policy.**
+   *   ~~**The cause is the gate two paragraphs down, not the wind-up policy.**
    *   `legalActions` offers `psyche_up` only at `herolevel >= 7` in melee mode
-   *   and `>= 3` in bow mode, and every demo gladiator is level 4 — so on the
-   *   shipped roster the verb is never OFFERED to a warrior at all, and the
-   *   preference arm never runs. The flag buys a character trait that the demo
-   *   roster cannot express.
+   *   and `>= 3` in bow mode, and every demo gladiator is level 4.~~
+   *   **THAT IS ONE GATE OF TWO, AND IT IS NOT THE BINDING ONE — measured
+   *   2026-09-19.** The level gate is real and sits at exactly 7: over 60
+   *   seeded 3v3 bouts, `psyche_up` is offered 600 times at level 4 or 6 (the
+   *   two archers only, 0 to a warrior) and 4,753 times at level 7, of which
+   *   **2,654 go to warriors**. **And the charging AI still takes it ZERO
+   *   times**, at levels 7, 9 and 12 alike, with `aiCharges` on:
+   *
+   *   ```text
+   *     herolevel   offers   charges taken   (aiCharges: true)
+   *         4          600         0
+   *         6          600         0
+   *         7        4,753         0
+   *         9        5,145         0
+   *        12        5,145         0
+   *   ```
+   *
+   *   **THE BINDING GATE IS `survivesTheWindUp` IN THIS FILE**, not
+   *   `legalActions`. It asks `actor.health > engaged.max_damage * presses`,
+   *   and the demo roster is 46 max health against a foe whose `max_damage` is
+   *   17: `46 > 51` is false, on every turn, forever. Raising the roster's
+   *   stated `hitpointsmax` is what lights the verb, and it is a cliff:
+   *
+   *   ```text
+   *     hitpointsmax   offers   charges   turns/bout
+   *         46          3,076        0         79
+   *         60          6,071    2,914        153
+   *        120         10,711    4,251        270
+   *   ```
+   *
+   *   **So raising `herolevel` alone is a change that does nothing**, and the
+   *   change that works nearly doubles bout length — which is consistent, since
+   *   the table above already says charging LOSES on damage per turn. Recorded
+   *   rather than done.
    *
    *   **How the wrong table was made, because it is the repeatable part:** it
    *   was taken by feeding `demoSide(...).members` straight to
