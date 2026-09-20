@@ -49,6 +49,48 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **A CODEX REVIEW CAME BACK `needs-attention` ON 13 UNREVIEWED COMMITS, AND
+  ALL FOUR FINDINGS WERE REAL (2026-09-19).** I ran Codex once today, on the
+  taunt diff, and then shipped **13 more commits / 1,666 lines of code** — the
+  campaign host, the file backend, `shove`, the rank dial, three shell
+  extractions — without running it again. AGENTS.md names save/persistence as
+  exactly the case for it. **Every finding was re-derived here before anything
+  was touched; all four confirmed and fixed.**
+  ► **THE CLI FOUGHT GLADIATORS THAT WERE NOT THE DEMO ROSTER'S.** It passed
+    `demoSide().members` straight to `createTeamBattle` — the browser host's
+    shape, carrying no canonical `stats`, `loadout` or `maxHealth`. Reproduced:
+    **`red-1` entered as strength 5 / agility 5 / attack 5 with 140 max health**
+    against the roster's 9 / 7 / 8 and 46. **Every campaign bout run before this
+    fix persisted a record describing the wrong fighters.** This repository
+    already names that exact shape as a past mistake in
+    `tools/engagement-census.mjs`'s header and in the `aiCharges` docstring.
+    **Third time.**
+  ► **`shove` WAS OFFERED PER FRAME, NOT PER FOE — THE CROSS-LANE DEFECT,
+    REINTRODUCED.** `onCloseFrame` means "SOMEBODY is in reach", so one nearby
+    enemy unlocked a shove against every enemy on the field. Reproduced: an
+    actor at (0, 200) with a foe at (50, 200) and another at (500, 6) could
+    shove the far one to x 438, while `quick-attack` correctly offered only the
+    near one. **That is the defect the owner found by watching on 2026-09-18**
+    (4,440 of 7,845 melee swings cross-rank), in a new verb three weeks later.
+    It shares the melee verbs' own target set now, so the two cannot disagree.
+  ► **THE CAMPAIGN COULD SILENTLY ROLL BACK.** An unreadable record got
+    `recordedAt` of `""`, which sorts BEFORE every real timestamp — so it landed
+    at the front, `history.at(-1)` picked a valid but OLDER bout, and the guard
+    that should have refused read only the last entry. And `readRecord`
+    quarantines by default, so the next run would see an empty directory and
+    start over. **Any** unreadable record refuses the run now.
+  ► **TWO WRITERS SHARED ONE `.writing` FILE.** The fixed suffix was justified
+    "because this backend is single-process by contract" — and nothing enforced
+    that contract. **A contract nothing checks is a comment.** The name carries
+    the pid now; it is protection, not mutual exclusion, and says so.
+  ► **AND MY FIX FOR THE SHOVE BROKE THE ARCHER**, caught by the suite one run
+    later: `closerange_archer` wires a shove too (map `:229`-`:230`), and the
+    reachable set was only being filled on the melee branch.
+  ► **THE LESSON IS THE CADENCE, NOT THE FINDINGS.** Four defects, three of
+    them high, in code that was committed, pushed and reported as done — and
+    the review that found them costs one command. **Run it per diff that
+    matters, not per session.**
+
 ► **RAISING THE ROSTER'S `herolevel` WOULD DO NOTHING, AND THE PUBLISHED CAUSE
   FOR `aiCharges` BEING INERT IS ONE GATE OF TWO (2026-09-19).** The
   2026-09-18 handoff and this file both said *"the cause is the `herolevel`

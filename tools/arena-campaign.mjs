@@ -116,12 +116,51 @@ function recordsInOrder(store) {
     }
     records.push({ id, status: read.status, record: read.record });
   }
+  // ► **AN UNREADABLE RECORD SORTS LAST, NOT FIRST — and the first cut had it
+  //   backwards, which is a SILENT ROLLBACK.** A corrupt record got
+  //   `recordedAt` of `""`, which sorts before every real timestamp, so it
+  //   landed at the FRONT and `history.at(-1)` picked a valid but OLDER bout.
+  //   The guard that was supposed to refuse read only the last entry, so it
+  //   never saw the damage: **the campaign would quietly continue from an
+  //   earlier roster.** Found by an adversarial review.
+  const stamp = (entry) => (entry.status === ReadStatus.OK ? entry.record?.recordedAt ?? "" : "\uffff");
   records.sort((left, right) => {
-    const a = left.record?.recordedAt ?? "";
-    const b = right.record?.recordedAt ?? "";
+    const a = stamp(left);
+    const b = stamp(right);
     return a < b ? -1 : a > b ? 1 : (left.id < right.id ? -1 : 1);
   });
   return records;
+}
+
+/**
+ * A `demoSide` member, converted into the canonical combatant
+ * `createTeamBattle` takes.
+ *
+ * ► **PASSING `demoSide().members` STRAIGHT IN IS THE MISTAKE THIS REPOSITORY
+ *   ALREADY NAMES AS A PAST ERROR, AND THIS FILE MADE IT AGAIN.** A member is
+ *   the BROWSER host's shape — `{ id, controller, vanilla, resources, clip }` —
+ *   and carries no canonical `stats`, `loadout`, `maxHealth` or `health`.
+ *   `createTeamBattle` substitutes its own defaults for all of them, silently.
+ *
+ *   Found by an adversarial review and reproduced here before anything was
+ *   touched: **`red-1` entered as strength 5, agility 5, attack 5 with 140 max
+ *   health**, against the roster's stated 9 / 7 / 8 and 46. So every bout this
+ *   tool ran before 2026-09-19 fought gladiators that were not the demo
+ *   roster's, and persisted records describing them. `tools/engagement-census.mjs`
+ *   warns about exactly this shape in its own header, and the `aiCharges`
+ *   docstring records a published measurement that was wrong for the same
+ *   reason. **Third time.**
+ *
+ *   `derive: false` because the roster states its own damage pair and pools —
+ *   the same argument `demoSide` makes internally.
+ */
+function canonicalMember(member) {
+  return ss2Combatant(member.vanilla, {
+    id: member.id,
+    name: member.vanilla?.character_name ?? member.id,
+    controller: member.controller ?? "ai",
+    derive: false
+  });
 }
 
 /**
@@ -135,7 +174,7 @@ function openingTeams(perSide) {
   const build = { ss2Combatant, ss2BattleValues };
   return ["red", "blue"].map((side) => {
     const built = demoSide(side, perSide, build);
-    return { id: built.id, name: built.name, combatants: built.members };
+    return { id: built.id, name: built.name, combatants: built.members.map(canonicalMember) };
   });
 }
 
@@ -169,8 +208,9 @@ function blueprintFor(id, perSide) {
   const built = demoSide(side, perSide, { ss2Combatant, ss2BattleValues });
   const template = built.members[Number(slot) - 1];
   if (!template) return null;
-  // The id is the identity; everything else is the slot's template.
-  return { ...template, id, vanilla: { ...template.vanilla, character_name: id } };
+  // The id is the identity; everything else is the slot's template. Canonical,
+  // for the reason `canonicalMember` gives at length.
+  return canonicalMember({ ...template, id, vanilla: { ...template.vanilla, character_name: id } });
 }
 
 /** The blueprints a record names, and only those. */
@@ -196,7 +236,7 @@ function challengerSide(side, perSide, bout) {
   const built = demoSide(side, perSide, { ss2Combatant, ss2BattleValues });
   return built.members.map((member, index) => {
     const id = `${side}-c${bout}-${index + 1}`;
-    return { ...member, id, vanilla: { ...member.vanilla, character_name: id } };
+    return canonicalMember({ ...member, id, vanilla: { ...member.vanilla, character_name: id } });
   });
 }
 
@@ -238,14 +278,24 @@ function fight(options) {
   //   `advanceCircuit` already returns the carried roster, so continuing means
   //   replaying the last advance rather than storing a second copy of its
   //   answer. A corrupt tail is refused loudly rather than started over.
+  // ► **ANY UNREADABLE RECORD REFUSES THE WHOLE RUN, not just the newest one.**
+  //   Checking only the tail was the other half of the rollback above: a
+  //   corrupt bout in the MIDDLE of a circuit is a campaign whose history has a
+  //   hole in it, and continuing past it writes a record whose lineage is
+  //   unverifiable. `readRecord` also quarantines by default, so a silent
+  //   continue would move the damaged record out of the way and the NEXT run
+  //   would see an empty directory and start over from the opening roster.
+  const damaged = history.filter((entry) => entry.status !== ReadStatus.OK);
+  if (damaged.length > 0) {
+    throw new Error(
+      `${damaged.length} record(s) do not read: ` +
+      damaged.map((entry) => `${entry.id} (${entry.status})`).join(", ") +
+      ". Refusing to continue over a campaign with a hole in it; move them aside deliberately."
+    );
+  }
+
   if (history.length > 0) {
     const last = history.at(-1);
-    if (last.status !== ReadStatus.OK) {
-      throw new Error(
-        `The most recent record (${last.id}) reads as ${last.status}; refusing to continue over it. ` +
-        "Move it aside deliberately if that is what you mean."
-      );
-    }
     // ► **THIS REBUILD IS THE RESUME, AND THE FIRST CUT PRINTED THE MESSAGE
     //   WITHOUT DOING IT.** It logged "resuming after ..." and then fought from
     //   the opening roster, so every bout started with six fresh gladiators and

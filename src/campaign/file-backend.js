@@ -120,10 +120,23 @@ export function createFileBackend({ directory, fs } = {}) {
       }
       const target = pathFor(key);
       // Same directory, so the rename cannot cross a device boundary and stays
-      // atomic. The suffix is fixed rather than random because this backend is
-      // single-process by contract and a predictable name is one a human can
-      // find and delete after a crash.
-      const temporary = `${target}.writing`;
+      // atomic.
+      //
+      // ► **THE SUFFIX CARRIES THE PROCESS ID, AND THE FIRST CUT USED A FIXED
+      //   NAME "because this backend is single-process by contract".** An
+      //   adversarial review pointed out that nothing ENFORCES that contract:
+      //   two runs against the same directory shared one `.writing` path, so
+      //   they could truncate or rename each other's temporary file, and a
+      //   writer still holding the inode could go on modifying a file another
+      //   writer had already renamed into place. **A contract nothing checks is
+      //   a comment.** Unique per process, and still `.writing` so `keys()`
+      //   ignores it and a human can still find it after a crash.
+      //
+      //   **This is protection, not mutual exclusion.** Two processes advancing
+      //   the SAME campaign still produce competing histories, because the
+      //   conflict is in the circuit rather than in the bytes;
+      //   `tools/arena-campaign.mjs` says so where it resumes.
+      const temporary = `${target}.${processId()}.writing`;
       io.writeFileSync(temporary, text, "utf8");
       io.renameSync(temporary, target);
     },
@@ -153,6 +166,8 @@ export function createFileBackend({ directory, fs } = {}) {
     }
   };
 }
+
+const processId = () => globalThis.process?.pid ?? "0";
 
 let cachedFs = null;
 function defaultFs() {

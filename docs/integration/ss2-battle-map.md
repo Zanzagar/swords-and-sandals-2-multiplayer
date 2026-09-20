@@ -2758,18 +2758,44 @@ phase; this is the rest of it.
   the inventory table above both give gale 38, which is what ties the phase to
   the item that offers it.
 
-**WHAT IS STILL NOT DERIVED, AND WHY THIS VERB IS NOT BUILT.** Spells are
-INVENTORY ITEMS: `villain_cast_spells` searches `inventory1`–`inventory6` and
-calls `use_item`, so the gate on casting a gale is carrying id 38 in one of six
-slots. **What `use_item` does to the slot is only half read.** Its body
-(`DoAction@0x23e7cf`, `+0x0369`) sets `spell_selected = true`, walks `i` from 1
-to 6, and on a match writes **`villain["inventory" + i] = 1`** (`+0x0409`–
-`+0x041a`) — **1, not 0** — and 1 is itself an id in the item columns. Until
-that column's meaning is established, a built `cast_gale` would either consume
-nothing (an unlimited ±1000 knockback, which is worse than not having the verb)
-or consume it wrongly. **Deferred deliberately**, the way `taunt` was deferred
-for a month over its two pre-dispatcher draws — a deferral that was right to the
-end.
+**HOW A SPELL IS OFFERED AND CONSUMED — `use_item`, derived 2026-09-19.** Spells
+are INVENTORY ITEMS: `villain_cast_spells` searches `inventory1`–`inventory6`
+and calls `use_item`, so the gate on casting a gale is carrying id 38 in one of
+six slots. `use_item(which_item)` is at `DoAction@0x23e7cf`, `+0x0369`:
+
+```text
+  use_item(which_item):
+    spell_selected = true                                   +0x0388
+    for (i = 1; i <= 6; i++):                               +0x0390
+      if (inventory_array[i] == which_item):                +0x03b1
+        if (which_item != 1):                               +0x03cc
+          game.villain.inventory_action = which_item        +0x03de
+          item_used = null                                  +0x03f4
+          game.villain["inventory" + i] = 1                 +0x0409
+          inventory_array = [0, inventory1 .. inventory6]   +0x041b
+          spell_selected = false                            +0x04aa
+```
+
+► **1 IS THE EMPTY MARKER FOR AN INVENTORY SLOT, AND THREE INDEPENDENT SITES
+  SAY SO.** This mattered enough to defer the verb over, because 1 is a
+  perfectly good id in the EQUIPMENT columns and reading it as one here would
+  have made a consumed spell look like a different spell:
+
+  1. **`use_item` REFUSES `which_item == 1`** (`+0x03cc` skips the whole body).
+     An id that cannot be used is not an item.
+  2. **`use_item` WRITES 1 to the slot it just consumed** (`+0x0409`). Using
+     something empties its slot.
+  3. **A character-initialisation block writes 1 to EVERY inventory slot at
+     once** (`+0x330a`–, `inventory1` through `inventory6`), beside
+     `shield = 0`. A fresh gladiator carries nothing.
+
+  **And the empty marker DIFFERS BY COLUMN** — `0` for equipment, `1` for
+  inventory, in the same initialisation block. Assuming one convention across
+  both is the trap this derivation exists to close.
+
+► **SO CONSUMPTION IS: SET THE SLOT TO 1.** `cast_gale` is no longer blocked on
+  a derivation. `magic_damage_character` (`+0x148e`) sat behind the same unread
+  column and is unblocked by the same reading.
 
 `cast_spell_icon(which_avatar, spell_number)` attaches export 120
 (`cast_spell_image`) to `arena.combat_panel`, positions it at the hero or villain

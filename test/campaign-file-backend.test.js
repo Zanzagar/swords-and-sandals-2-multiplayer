@@ -27,7 +27,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -43,6 +43,8 @@ import {
   ReadStatus, WriteStatus, buildCampaignRecord, createCampaignStore
 } from "../src/campaign/index.js";
 import { createFileBackend, fileNameForKey, keyForFileName } from "../src/campaign/file-backend.js";
+import { ss2BattleValues, ss2Combatant } from "../src/team/ss2-rules.js";
+import { demoSide } from "../tools/arena/roster.js";
 
 /** A fresh directory per test, removed afterwards. */
 function scratch(t) {
@@ -304,4 +306,93 @@ test("THE HOST REFUSES TO WRITE SOMEWHERE NOBODY ASKED FOR", () => {
   );
   assert.equal(result.status, 1);
   assert.match(result.stderr, /--dir <directory> is required/);
+});
+
+/* ------------------------------------------------------------------ *
+ * WHAT AN ADVERSARIAL REVIEW FOUND, 2026-09-19
+ * ------------------------------------------------------------------ */
+
+test("THE CLI FIGHTS THE ROSTER IT ADVERTISES, not createTeamBattle's defaults", (t) => {
+  // ► **THE WORST OF THE FOUR, AND IT IS A MISTAKE THIS REPOSITORY ALREADY
+  //   NAMES AS A PAST ERROR.** `demoSide().members` is the BROWSER host's shape
+  //   and carries no canonical `stats`, `loadout` or `maxHealth`; passing it
+  //   straight to `createTeamBattle` makes it substitute defaults, silently.
+  //   Reproduced before the fix: red-1 entered as strength 5 / agility 5 /
+  //   attack 5 with **140** max health against the roster's 9 / 7 / 8 and 46.
+  //   **Every bout this tool ran fought gladiators that were not the demo
+  //   roster's, and persisted records describing them.**
+  //
+  //   Asserted against the ROSTER rather than a literal, so tuning the demo
+  //   moves both together and this test keeps meaning the same thing.
+  const directory = scratch(t);
+  const result = spawnSync(
+    process.execPath,
+    [fileURLToPath(new URL("../tools/arena-campaign.mjs", import.meta.url)), "fight", "--dir", directory],
+    { encoding: "utf8" }
+  );
+  assert.equal(result.status, 0, result.stderr);
+
+  const file = readdirSync(directory).find((name) => name.endsWith(".json"));
+  const record = JSON.parse(readFileSync(join(directory, file), "utf8"));
+  const red1 = record.outcomes.find((outcome) => outcome.combatantId === "red-1");
+  assert.ok(red1, "the record must name the roster's own first slot");
+  assert.equal(
+    red1.maxHealth,
+    demoSide("red", 3, { ss2Combatant, ss2BattleValues }).members[0].vanilla.hitpointsmax,
+    "the persisted gladiator must be the one the roster states, not a 140-health default"
+  );
+});
+
+test("A CORRUPT RECORD REFUSES THE RUN, rather than rolling the campaign back", (t) => {
+  // ► **THE SILENT ROLLBACK.** An unreadable record was given an empty
+  //   `recordedAt`, which sorts BEFORE every real timestamp — so it landed at
+  //   the front, `history.at(-1)` picked a valid but OLDER bout, and the guard
+  //   that should have refused only ever read the last entry. The campaign
+  //   would quietly continue from an earlier roster. And `readRecord`
+  //   quarantines by default, so the run after that would see an empty
+  //   directory and start over from the opening roster.
+  const directory = scratch(t);
+  const run = () => spawnSync(
+    process.execPath,
+    [fileURLToPath(new URL("../tools/arena-campaign.mjs", import.meta.url)), "fight", "--dir", directory],
+    { encoding: "utf8" }
+  );
+  assert.equal(run().status, 0);
+  assert.equal(run().status, 0, "two clean bouts first");
+
+  // Damage the OLDER of the two, which is the case the tail-only check missed.
+  const files = readdirSync(directory).filter((name) => name.endsWith(".json")).sort();
+  writeFileSync(join(directory, files[0]), "{ this is not json");
+
+  const refused = run();
+  assert.equal(refused.status, 1, "a campaign with a hole in it must not be continued");
+  assert.match(refused.stderr, /do not read/);
+  assert.match(refused.stderr, /hole in it/);
+});
+
+test("TWO WRITERS DO NOT SHARE ONE TEMPORARY FILE", (t) => {
+  // ► **A CONTRACT NOTHING CHECKS IS A COMMENT.** The first cut used a fixed
+  //   `.writing` suffix "because this backend is single-process by contract" —
+  //   but nothing enforced that, so two runs against one directory could
+  //   truncate or rename each other's temp file. The name carries the pid now.
+  //
+  //   **This is protection, not mutual exclusion**: two processes advancing the
+  //   same campaign still produce competing histories, because that conflict is
+  //   in the circuit rather than in the bytes.
+  const directory = scratch(t);
+  const paths = [];
+  const backend = createFileBackend({
+    directory,
+    fs: {
+      mkdirSync() {}, renameSync() {}, readFileSync() { return ""; },
+      readdirSync() { return []; }, rmSync() {},
+      writeFileSync(path) { paths.push(path); }
+    }
+  });
+  backend.write(KEY, "{}");
+  assert.match(paths[0], /\.writing$/);
+  assert.ok(
+    paths[0].includes(String(process.pid)),
+    `the temp name must be unique per process; got ${paths[0]}`
+  );
 });

@@ -5815,6 +5815,8 @@ export function createSs2TeamRules({
         && nearestDistance < ss2ArcherMinimumRange(view.actor);
 
       let anyInReach = !positioned;
+      /** Foes actually inside melee reach AND in this lane; see the shove. */
+      const shovable = [];
       for (const foe of view.foes) {
         const distance = ss2FightDistance(view.actor, foe);
         if (bowDrawn) {
@@ -5858,6 +5860,10 @@ export function createSs2TeamRules({
             // takes the lane rule with the other three. See `ss2SameLane`.
             if (distance < ss2ArcherMinimumRange(view.actor) && ss2SameLane(view.actor, foe)) {
               anyInReach = true;
+              // `closerange_archer` wires a shove beside the bash (map `:229`-
+              // `:230`), so this foe is one it may name. Recorded HERE rather
+              // than re-derived below, for the reason the shove block gives.
+              shovable.push(foe.id);
               actions.push({ type: Ss2ActionType.BASH_ATTACK, targetId: foe.id });
             }
             continue;
@@ -5889,6 +5895,10 @@ export function createSs2TeamRules({
         //   would hide the approach verbs he needs to fix it.
         if (!ss2SameLane(view.actor, foe)) continue;
         anyInReach = true;
+        // ► **THE SET A SHOVE MAY NAME, RECORDED WHERE IT IS ESTABLISHED.** See
+        //   the shove's own block below for what offering it per-FRAME instead
+        //   of per-FOE cost.
+        shovable.push(foe.id);
         actions.push({ type: Ss2ActionType.QUICK_ATTACK, targetId: foe.id });
         actions.push({ type: Ss2ActionType.NORMAL_ATTACK, targetId: foe.id });
         actions.push({ type: Ss2ActionType.POWER_ATTACK, targetId: foe.id });
@@ -6051,8 +6061,23 @@ export function createSs2TeamRules({
       //   adversarial review made against the taunt's first cut — *"a
       //   convention that makes a NEW outcome inert is not a defence"* — and it
       //   applies here before anybody can ship it.
+      // ► **PER FOE, NOT PER FRAME — AND THE FIRST CUT WAS PER FRAME, WHICH IS
+      //   THE CROSS-LANE DEFECT THE OWNER FOUND BY WATCHING ON 2026-09-18,
+      //   REINTRODUCED.** `onCloseFrame` means "SOMEBODY is in reach", so
+      //   looping `view.foes` under it offered a shove against every enemy on
+      //   the field the moment one of them was close. Reproduced by an
+      //   adversarial review and re-derived here: an actor at (0, 200) with a
+      //   foe at (50, 200) and another at (500, 6) was offered a shove against
+      //   BOTH, and shoving the far one displaced it to x 438 — while
+      //   `quick-attack` correctly offered only the near one.
+      //
+      //   `shovable` is the set the melee verbs themselves were offered
+      //   against, so the two cannot disagree about who is in reach or which
+      //   lane they are in. **A second distance test here would be a second
+      //   chance to be wrong** — the argument every arm in this function makes,
+      //   and the one this block failed to make.
       if (onCloseFrame && positioned) {
-        for (const foe of view.foes) actions.push({ type: Ss2ActionType.SHOVE, targetId: foe.id });
+        for (const targetId of shovable) actions.push({ type: Ss2ActionType.SHOVE, targetId });
       }
 
       // ► **THE RANK VERBS, and they are what make the geometry a CHOICE.**

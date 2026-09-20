@@ -292,3 +292,40 @@ test("THE AI NEVER CHOOSES IT, and that is a decision rather than an omission", 
   assert.ok(actions > 100, `only ${actions} actions; the sweep must exercise the AI`);
   assert.equal(shoves, 0, "the AI must not choose a verb with no damage term");
 });
+
+test("IT IS OFFERED PER FOE, NOT PER FRAME — the cross-lane defect, reintroduced and caught", () => {
+  // ► **THE FIRST CUT LOOPED `view.foes` UNDER `onCloseFrame`**, which means
+  //   "SOMEBODY is in reach" — so one nearby enemy unlocked a shove against
+  //   every enemy on the field, in any lane, at any distance. **That is the
+  //   defect the owner found by watching on 2026-09-18** (4,440 of 7,845 melee
+  //   swings were cross-rank), reintroduced in a new verb three weeks later and
+  //   caught by an adversarial review rather than by me.
+  //
+  //   The fix shares the melee verbs' own target set, so the two cannot
+  //   disagree about who is in reach or which lane they are in.
+  const battle = createTeamBattle({
+    seed: 3, rules: ss2TeamRules,
+    teams: [
+      { id: "red", name: "red", combatants: [ss2Combatant(fields(), { id: "hero", name: "hero", controller: "local" })] },
+      {
+        id: "blue",
+        name: "blue",
+        combatants: [
+          ss2Combatant(fields({ gladiator_dir: "left" }), { id: "near", name: "near", controller: "local" }),
+          ss2Combatant(fields({ gladiator_dir: "left" }), { id: "far", name: "far", controller: "local" })
+        ]
+      }
+    ]
+  });
+  Object.assign(combatantById(battle, "hero"), { x: 0, y: 200 });
+  Object.assign(combatantById(battle, "near"), { x: 50, y: 200 });
+  // Far AND in another lane: either alone should be disqualifying.
+  Object.assign(combatantById(battle, "far"), { x: 500, y: 6 });
+
+  const options = legalActions(battle, "hero");
+  const shoved = options.filter((option) => option.type === Ss2ActionType.SHOVE).map((o) => o.targetId);
+  const swung = options.filter((option) => option.type === Ss2ActionType.QUICK_ATTACK).map((o) => o.targetId);
+
+  assert.deepEqual(swung, ["near"], "the staging must put exactly one foe in melee reach");
+  assert.deepEqual(shoved, ["near"], "and a shove may name exactly the foes a swing may name");
+});
