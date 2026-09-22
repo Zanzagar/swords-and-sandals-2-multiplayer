@@ -411,6 +411,35 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
       return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
     }
 
+    // ► **A SPELL NAMES BOTH CLIPS ITSELF, AND UNTIL 2026-09-22 THIS TABLE
+    //   IGNORED THEM.** The two bolt verbs shipped on 2026-09-20 with
+    //   `casterClip` and `victimClip` on their event and no case here, so a
+    //   bolt fell through to the ATTACK branch below: `attackLabel(NaN)` put
+    //   the caster in `Standing` — stamped MAP_NAMED, a provenance it had not
+    //   earned — and the victim in an assumed `hurt5`. **That is the exact
+    //   failure the head of this function records for rests and condition
+    //   phases**, measured at 4,326 actions in 2026-09-10's sweep, reintroduced
+    //   by a new verb twelve days later.
+    //
+    //   Both clips are the build's own strings: the caster's is
+    //   `attacker.gotoAndPlay("Cast2")` at `+0x8515`, and the victim's is
+    //   `magic_damage_character`'s `damage_method` argument — the literal
+    //   `"lightning"` pushed at `+0x858f` and played at the ingress's step 1 by
+    //   `defenderClip.gotoAndPlay(damage_method)`. So both are MAP_NAMED.
+    //
+    //   **Detected by the event carrying both fields, not by its type**, which
+    //   is how the condition and movement cases above work and for the same
+    //   reason: the resolver is the thing that knows which clips a spell
+    //   plays, and the next spell verb (`cast_gale` plays `Cast1` and
+    //   `knockback`) will carry its own rather than needing a new case here.
+    if (typeof event.casterClip === "string" && event.casterClip.length > 0
+      && typeof event.victimClip === "string" && event.victimClip.length > 0) {
+      return Object.freeze({
+        actor: label(event.casterClip, LabelProvenance.MAP_NAMED),
+        target: label(event.victimClip, LabelProvenance.MAP_NAMED)
+      });
+    }
+
     // ► **A TAUNT PLAYS BOTH CLIPS AND PLAYS THEM WHATEVER IT ROLLED.** The
     //   build fires `attacker.gotoAndPlay("taunt")` at `+0x6905` and
     //   `defender.gotoAndPlay("taunted")` at `+0x690c` BEFORE the roll, so a

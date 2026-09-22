@@ -668,7 +668,7 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
     "standing", "rest", "block", "defend",
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
     "attack", "hurt", "knockback", "taunt", "taunted", "ranged", "psyche",
-    "stance:psyche", "stance:psyche2", "celebrate",
+    "stance:psyche", "stance:psyche2", "celebrate", "cast", "magic:lightning",
     "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
     "death:unknown"
   ];
@@ -683,8 +683,12 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   // overlay frames 65 and 77 dispatch `celebrate1`, so it stopped being an
   // `unbuiltOutcome`. `celebrate1a` stays declared — it is reached by running
   // on, exactly as the charging clips were before the stance.
-  assert.equal(mapped.size, 80);
-  assert.equal(declared.size, 21);
+  // **80/21 -> 82/19 on 2026-09-22**, when the bolt verbs got their family:
+  // `Cast2` (`+0x8515`) and `lightning` (`damage_method`, `+0x858f`) are
+  // dispatched by a verb this engine resolves. `cast1` stays declared; no verb
+  // dispatches it.
+  assert.equal(mapped.size, 82);
+  assert.equal(declared.size, 19);
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
   // ► **THE ENTRY IS FIRST IN ITS FAMILY, and the order is what `animationFor`

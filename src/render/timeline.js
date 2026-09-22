@@ -224,6 +224,22 @@ function familyOf(label, role) {
   if (label === "taunted") return "taunted";
   if (label === "taunt") return "taunt";
   if (label === "bombard" || label === "snipe") return "ranged";
+  // ► **THE SPELL CLIPS, matched by the BUILD'S exact strings.** `Cast2` is
+  //   `attacker.gotoAndPlay("Cast2")` at `+0x8515`, capitalised as the build
+  //   writes it; `lightning` is `magic_damage_character`'s `damage_method`,
+  //   played on the victim by `defenderClip.gotoAndPlay(damage_method)`. Added
+  //   2026-09-22, after the bolt verbs had shipped two days earlier with both
+  //   labels falling to `unknown` here.
+  //
+  //   `cast1` is deliberately NOT matched: it is `cast_gale`'s and the
+  //   fireball family's clip, and neither has a verb, so nothing dispatches it.
+  //   `lightning` is its own family rather than a `condition:*` one because it
+  //   is not a condition — no flag carries it. The four condition clips ARE
+  //   the same mechanism, though: a status tick and a spell both reach the
+  //   victim's clip through `damage_method`, and a fireball will play
+  //   `burning` through the family that already exists for it.
+  if (label === "Cast2") return "cast";
+  if (label === "lightning") return "magic:lightning";
   // ► **TWO PSYCHE FAMILIES AND NOT ONE, BECAUSE THE THIRD CLIP IS LONGER AND
   //   IS THE ONE THAT SWINGS.** In the extracted pack `psyche_up` runs frames
   //   1609-1617 and `psyche_up2` 1627-1635 — nine each — while `psyche_up3` is
@@ -499,6 +515,31 @@ const FAMILIES = Object.freeze({
     { at: 0, pose: {} },
     { at: 0.3, pose: { armSwing: 0.8, bob: 0.4, lean: -0.3 } },
     { at: 0.6, pose: { armSwing: 0.5, bob: 0.15, legSpread: 0.5 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * THE CAST AND THE BOLT'S ANSWER — added 2026-09-22.
+   *
+   * The DURATIONS are the build's frame counts at 30 fps, rounded to the beat,
+   * because neither family was authored at a pace (`clip-sequences.js`'s rule):
+   * `Cast2` is frames 2126-2146 and `lightning` 1989-2003, and both end in a
+   * `Stop` inside their own span. **The POSES are authored**, like every other
+   * pose in this file, and the extracted rig overrides them wherever the
+   * player has extracted the pack.
+   */
+  cast: () => schedule("cast", 6, [
+    { at: 0, pose: {} },
+    { at: 0.35, pose: { armSwing: -0.9, lean: -0.3, bob: 0.25 } },
+    { at: 0.6, pose: { armSwing: 0.8, lean: 0.35, bob: 0.1 } },
+    { at: 1, pose: {} }
+  ]),
+
+  "magic:lightning": () => schedule("magic:lightning", 4, [
+    { at: 0, pose: {} },
+    { at: 0.25, pose: { recoil: 0.6, lean: -0.35, bob: 0.3, armSwing: 0.6 } },
+    { at: 0.5, pose: { recoil: 0.3, lean: 0.2, bob: -0.2, armSwing: -0.5 } },
+    { at: 0.75, pose: { recoil: 0.45, lean: -0.25, bob: 0.2, armSwing: 0.4 } },
     { at: 1, pose: {} }
   ]),
 

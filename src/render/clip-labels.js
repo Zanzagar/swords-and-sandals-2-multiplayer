@@ -232,6 +232,14 @@ const FAMILY_LABELS = Object.freeze({
   knockback: Object.freeze(["knockback", "knockback_mov", "shove"]),
   taunt: Object.freeze(["taunt"]),
   taunted: Object.freeze(["taunted"]),
+  // ► **THE BOLTS' TWO CLIPS, LEFT `unbuiltSpells` ON 2026-09-22 — two days
+  //   AFTER the verbs shipped, and on purpose.** The verbs carried the right
+  //   labels on their event from the first commit; what they lacked was a
+  //   family, and promoting a label without one is the `psyche:discharge`
+  //   defect exactly. They moved together: family here, `familyOf` in
+  //   `timeline.js`, and the binding in `SS2_STATIC_MAP_BINDINGS`.
+  cast: Object.freeze(["cast2"]),
+  "magic:lightning": Object.freeze(["lightning"]),
   ranged: Object.freeze(["bombard", "snipe"]),
 
   // Per-flag in the build, so per-flag here: a burning gladiator and a frozen
@@ -389,8 +397,13 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    *   dispatcher, and unlike the psyche counter the build's own selector for
    *   them has not been read.~~
    *
-   * ► **TWO OF THE SIX NOW HAVE A VERB AND STILL HAVE NO DISPATCHER, AND THEY
-   *   STAY ON THIS LIST FOR EXACTLY THAT REASON (2026-09-20).** The bolt verbs
+   * ► ~~**TWO OF THE SIX NOW HAVE A VERB AND STILL HAVE NO DISPATCHER, AND THEY
+   *   STAY ON THIS LIST FOR EXACTLY THAT REASON (2026-09-20).**~~ **THEY LEFT
+   *   ON 2026-09-22, when the family arrived** — `cast` and `magic:lightning`
+   *   above, `familyOf` in `timeline.js`, and the binding in
+   *   `SS2_STATIC_MAP_BINDINGS`, all in one commit. The paragraph below is the
+   *   reasoning that kept them here until then, and it is kept because the
+   *   reasoning was right: a verb is not a family. The bolt verbs
    *   `Ss2ActionType.CAST_LIGHTNING_BOLT` / `CAST_FRIGHTNING_BOLT` resolve, and
    *   their event carries `casterClip: "Cast2"` and `victimClip: "lightning"` —
    *   read out of the build at `+0x8515` and `+0x858f`. **So the selector HAS
@@ -402,16 +415,20 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    *   drew nothing, lost its face, made no sound **and reported
    *   `recognised: true`**. A label listed as unbuilt draws authored art and
    *   says so; a label promoted to a family that does not exist draws nothing
-   *   and lies about it. **They leave this list when `CLIP_FAMILIES` gains an
-   *   entry, not when the verb ships.**
+   *   and lies about it. **They leave this list when `FAMILY_LABELS` gains an
+   *   entry, not when the verb ships.** *(This line and the 2026-09-20 handoff
+   *   called the table `CLIP_FAMILIES`. No such name exists in this repository;
+   *   it is `FAMILY_LABELS`, the constant at the head of this file.)*
    *
    *   `cast1` is a different case again and is NOT what the bolts play: it is
    *   `cast_gale`'s and the fireball family's clip (`+0x7b30`, `+0x90f4`), and
    *   neither has a verb.
    */
   unbuiltSpells: Object.freeze([
-    "cast1", "cast2",
-    "colossus", "lightning", "rejuvinate", "drink_potion"
+    // `cast2` and `lightning` left on 2026-09-22; see the `cast` and
+    // `magic:lightning` families above.
+    "cast1",
+    "colossus", "rejuvinate", "drink_potion"
   ]),
 
   /**

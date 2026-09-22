@@ -82,6 +82,12 @@ import {
   Ss2ActionType, createSs2TeamRules, ss2Combatant, ss2InventorySlotHolding, ss2TeamRules
 } from "../src/team/ss2-rules.js";
 import { SS2_DIRECT_DAMAGE_SPELLS } from "../src/golden/ss2-spell-candidate.js";
+import {
+  buildArenaLayout, CommandKind, LabelProvenance, presentResolvedEvents, SS2_STATIC_MAP_BINDINGS
+} from "../src/adapter/index.js";
+import { toTeamWireState } from "../src/team/index.js";
+import { timelineFor } from "../src/render/timeline.js";
+import { allUnmappedLabels, clipLabelsFor } from "../src/render/clip-labels.js";
 
 const fields = (o = {}) => ({
   strength: 9, speed: 20, attack: 8, defence: 5, vitality: 6, stamina: 6,
@@ -558,6 +564,97 @@ test("a CHARGED caster out of discharge range casts instead of burning the charg
   Object.assign(combatantById(near, "hero"), { x: 0, y: 200 });
   Object.assign(combatantById(near, "foe"), { x: 120, y: 200 });
   assert.equal(suggestAction(near, "hero").type, Ss2ActionType.PSYCHE_UP);
+});
+
+/* ------------------------------------------------------------------ *
+ * The presentation                                                    *
+ *                                                                     *
+ * ► **THE BOLTS SHIPPED ON 2026-09-20 AND REACHED THE SCREEN WRONG.**  *
+ *   With no case of their own in `SS2_STATIC_MAP_BINDINGS`, a bolt     *
+ *   fell through to the ATTACK branch: `attackLabel(NaN)` put the      *
+ *   caster in `Standing` — labelled MAP_NAMED, a provenance it had not *
+ *   earned — and the victim in a generic `hurt5`. That is the exact    *
+ *   failure `presentation.js` already records for rests and condition *
+ *   phases, measured at 4,326 actions in a 2026-09-10 sweep. The       *
+ *   resolver had put the right clips on the event the whole time.     *
+ * ------------------------------------------------------------------ */
+
+/** Resolve one bolt through the real resolver, then present the log. */
+function presentedBolt(type, inventory) {
+  const battle = staged({ hero: { inventory1: inventory }, foe: TOUGH });
+  applyAction(battle, { actorId: "hero", type, targetId: "foe" });
+  const wire = toTeamWireState(battle);
+  const { commands } = presentResolvedEvents(wire, {
+    layout: buildArenaLayout(wire),
+    bindings: SS2_STATIC_MAP_BINDINGS
+  });
+  return commands;
+}
+
+test("a presented bolt plays Cast2 on the caster and lightning on the victim", () => {
+  // `attacker.gotoAndPlay("Cast2")` at `+0x8515`, and the victim's clip is the
+  // ingress's `damage_method`, the literal "lightning" pushed at `+0x858f` and
+  // played by `defenderClip.gotoAndPlay(damage_method)`. Both are the build's
+  // own strings, so both are MAP_NAMED.
+  for (const [type, inventory] of [
+    [Ss2ActionType.CAST_LIGHTNING_BOLT, 34],
+    [Ss2ActionType.CAST_FRIGHTNING_BOLT, 35]
+  ]) {
+    const commands = presentedBolt(type, inventory);
+    const clips = commands.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+    assert.deepEqual(
+      clips.map(({ combatantId, role, label, labelProvenance }) => ({ combatantId, role, label, labelProvenance })),
+      [
+        { combatantId: "hero", role: "actor", label: "Cast2", labelProvenance: LabelProvenance.MAP_NAMED },
+        { combatantId: "foe", role: "target", label: "lightning", labelProvenance: LabelProvenance.MAP_NAMED }
+      ],
+      `${type}: one clip per gladiator, the build's own`
+    );
+    assert.deepEqual(
+      commands.filter((command) => command.kind === CommandKind.UNMAPPED),
+      [],
+      `${type}: nothing about a bolt is left unbound`
+    );
+  }
+});
+
+test("both bolt clips resolve to a family that can DRAW them", () => {
+  // `recognised: true` means `familyOf` named the label; it does not mean
+  // anything can draw it. The `psyche:discharge` defect was a recognised
+  // family with an empty clip vocabulary — it drew nothing, lost its face,
+  // made no sound and reported `recognised: true` — so this asserts both.
+  const caster = timelineFor("Cast2", { role: "actor" });
+  assert.equal(caster.recognised, true, "Cast2 must not fall to the `unknown` schedule");
+  assert.ok(clipLabelsFor(caster.family).includes("cast2"),
+    `family ${caster.family} must be able to draw the build's own cast2`);
+
+  const victim = timelineFor("lightning", { role: "target" });
+  assert.equal(victim.recognised, true, "lightning must not fall to the `unknown` schedule");
+  assert.ok(clipLabelsFor(victim.family).includes("lightning"),
+    `family ${victim.family} must be able to draw the build's own lightning`);
+});
+
+test("the two clips are PLAYED now, so they leave the declared-unplayed list", () => {
+  // A label is played or it is not; the coverage test in
+  // `render-extracted-figure.test.js` refuses one that is both.
+  const unplayed = new Set(allUnmappedLabels());
+  assert.equal(unplayed.has("cast2"), false);
+  assert.equal(unplayed.has("lightning"), false);
+  // `cast1` is NOT the bolts' clip — it is `cast_gale`'s and the fireball
+  // family's (`+0x7b30`, `+0x90f4`), and neither has a verb.
+  assert.equal(unplayed.has("cast1"), true, "cast1 stays unplayed until a verb dispatches it");
+});
+
+test("each clip plays for the build's own length at 30 fps", () => {
+  // Measured with `tools/clip-sequences.mjs` on the oracle: `Cast2` is frames
+  // 2126-2146 and `lightning` 1989-2003, and BOTH end in a `Stop` inside their
+  // own span, so neither runs on and neither needs a `CLIP_SEQUENCES` entry.
+  // Neither family was authored at a pace, so `clip-sequences.js`'s rule
+  // applies: take the build's 30 fps and round to the 120 ms beat.
+  //   Cast2      21 frames = 700 ms -> 6 beats = 720 ms
+  //   lightning  15 frames = 500 ms -> 4 beats = 480 ms
+  assert.equal(timelineFor("Cast2", { role: "actor" }).durationMs, 720);
+  assert.equal(timelineFor("lightning", { role: "target" }).durationMs, 480);
 });
 
 /* ------------------------------------------------------------------ *
