@@ -1516,9 +1516,14 @@ test("a first-blood outcome is REFUSED, not silently dropped", () => {
 /* ------------------------------------------------------------------ */
 
 test("the AI rests at or below the ONE stamina gate the bytes actually decode", () => {
-  // `villainChooseAction` `+0x03e8` gates the whole action-choice block on
-  // `staminaleft > 10`, unconditionally. That is the only villain stamina gate
-  // this rule set applies.
+  // ~~`villainChooseAction` `+0x03e8` gates the whole action-choice block on
+  // `staminaleft > 10`, unconditionally.~~ **Corrected 2026-09-22: it gates the
+  // IN-RANGE block only** (it sits inside the in-range test at `+0x03d5`), and
+  // the spell ladder that runs after it can replace the rest. This battle
+  // stands at 60, inside melee reach, and carries nothing on the ladder, so the
+  // AI still rests here; `test/ss2-ai-tired-rest.test.js` pins the order and the
+  // out-of-range case. That is the only villain stamina gate this rule set
+  // applies.
   //
   // A `< 40%` rest gate stood here and has been removed. The map places that
   // test on ONE `choices` band arm, and a verifier reading the bytes found the

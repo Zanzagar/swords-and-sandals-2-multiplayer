@@ -204,8 +204,13 @@
  *    `fightMode: "tournament"`, so 22 of the 23 goldens are `misc` and one is
  *    not. The mode play uses now has exactly one runtime-verified fixture
  *    behind it, which is one, not coverage.
- * 2. **The AI policy is invented, apart from one gate.** Only
- *    `villainChooseAction`'s unconditional `staminaleft > 10` is byte-decoded.
+ * 2. **The AI policy is invented, apart from ~~one gate~~ the spell ladder and
+ *    one gate.** ~~Only `villainChooseAction`'s unconditional `staminaleft > 10`
+ *    is byte-decoded.~~ **Corrected 2026-09-22: that gate is NOT unconditional**
+ *    — it sits inside the villain's in-range test (`+0x03d5`), and the
+ *    `villain_cast_spells()` ladder runs after it and can replace its rest
+ *    (see `chooseAiAction`). The ladder arms this engine holds are byte-derived
+ *    too, and have been since they were built.
  *    Target choice and the choice among the three verbs are this module's own.
  *
  * 3. **`weapon_min_damage` / `weapon_max_damage` are unmodelled — but NOT
@@ -1796,8 +1801,17 @@ export function ss2ActiveDamagePair(actor) {
  *
  * **The two sides of the build do not share this gate**, and neither half is
  * this one: `villainChooseAction` tests
- * `equipped_weapon == 2 && fightdistance < 200` (`+0x0356`-`+0x03d5`), a
- * hand-written 200 with no minimum at all. This engine applies the HERO's gate
+ * ~~`equipped_weapon == 2 && fightdistance < 200` (`+0x0356`-`+0x03d5`), a
+ * hand-written 200 with no minimum at all~~
+ * **`equipped_weapon == 2 && !(fightdistance < 200)`** (`+0x0397`-`+0x03d3`) —
+ * **corrected 2026-09-22 from the bytes: the POLARITY was wrong here, and in
+ * every handoff that quoted it.** `+0x03d2 Less2; +0x03d3 Not` precedes the
+ * join at `+0x03d4`, so the villain's bow arm is in range at 200 OR MORE: the
+ * same shape as this gate, a FLOOR with no maximum, with a hand-written 200 in
+ * place of `100 + physical_size`. The same function's swap test confirms it
+ * from the other side: `(equipped_weapon == 2 && fightdistance < 200) ||
+ * (equipped_weapon == 1 && !(fightdistance < 200))` swaps (`+0x0f57`-`+0x0fdd`),
+ * so a bow too close is put away. This engine applies the HERO's gate
  * to everybody, exactly as it already applies the hero's warrior gate to
  * everybody, because the hero's rule is the player's rule.
  */
@@ -3092,6 +3106,27 @@ const ATTACK_BANDS = Object.freeze({
   [Ss2ActionType.SNIPE]: Object.freeze({ direction: 22, strengthFactor: 3, ranged: true }),
   [Ss2ActionType.BASH_ATTACK]: Object.freeze({ direction: 23, strengthFactor: 2 })
 });
+
+/**
+ * The verbs whose OFFER means "in range" by the villain's own test — the verbs
+ * its in-range bands write (`DoAction@0x23f835` `+0x03fd`-`+0x08b1`):
+ * `quick_attack`, `normal_attack`, `power_attack` at `equipped_weapon == 1`,
+ * and the snipes and bombards at `equipped_weapon == 2`.
+ *
+ * ► **`bash_attack` IS DELIBERATELY NOT HERE, and that is the one place this
+ *   set departs from `ATTACK_BANDS`.** A drawn bow is offered the bash only on
+ *   `closerange_archer`, the frame for a foe inside the floor — which is the
+ *   build's `equipped_weapon == 2 && fightdistance < 200`, the OUT-of-range
+ *   arm (`+0x03d5` -> `+0x08c3`). Read by `chooseAiAction`'s tired rest and by
+ *   nothing else; see the approximations named there.
+ */
+const SS2_AI_IN_RANGE_VERBS = Object.freeze(new Set([
+  Ss2ActionType.QUICK_ATTACK,
+  Ss2ActionType.NORMAL_ATTACK,
+  Ss2ActionType.POWER_ATTACK,
+  Ss2ActionType.BOMBARD,
+  Ss2ActionType.SNIPE
+]));
 
 /**
  * `psyche_up`, WHICH IS NOT A BAND AND MUST NOT BECOME ONE.
@@ -7273,10 +7308,14 @@ export function createSs2TeamRules({
       //     hero's controller entirely** — `sprite:862/frame:52/DoAction@0x23f835`
       //     `+0x0356`..`+0x03d5`:
       //         (villain.equipped_weapon == 1 && fightdistance < villain.weapon_range)
-      //      || (villain.equipped_weapon == 2 && fightdistance < 200)
+      //      || (villain.equipped_weapon == 2 && ~~fightdistance < 200~~ !(fightdistance < 200))
       //     Two short-circuit `&&`s joined by an `||`, with a HAND-WRITTEN 200
       //     for the drawn-bow case. So in vanilla the two sides do not share a
       //     gate, and the villain's depends on `equipped_weapon`.
+      //     **The bow arm's polarity is corrected 2026-09-22** (`+0x03d3 Not`
+      //     precedes the `+0x03d4` join): it is a FLOOR of 200, the same shape
+      //     as the hero's `100 + physical_size`, not a ceiling. See
+      //     `ss2ArcherMinimumRange`.
       //
       //   This rule set applies the HERO's gate — BOTH arms of it — to every
       //   combatant. That is a narrowing, stated here rather than discovered
@@ -10040,11 +10079,27 @@ export function createSs2TeamRules({
     },
 
     /**
-     * Deterministic AI. ONE of its decisions is the build's; the rest is not.
+     * Deterministic AI. ~~ONE of its decisions is the build's; the rest is not.~~
      *
-     * MAP-DERIVED, and it is the only part that is: `villainChooseAction`
+     * ~~MAP-DERIVED, and it is the only part that is: `villainChooseAction`
      * `+0x03e8` gates the entire action-choice block on `staminaleft > 10`,
-     * unconditionally. Below that, this AI rests.
+     * unconditionally. Below that, this AI rests.~~
+     *
+     * **CORRECTED 2026-09-22, and both halves of that sentence were wrong.**
+     * The gate is NOT unconditional and does NOT gate the entire block: it sits
+     * INSIDE the in-range test (`+0x03d5`, whose failure jumps to the
+     * out-of-range bands at `+0x08c3`), so only a villain IN RANGE at 10 or
+     * less is sent to `rest` (`+0x08b6`). And the rest is not the villain's
+     * last word: the function's unconditional last statement is
+     * `villain_cast_spells()` (`+0x1432`; 122 branches, none backward, none
+     * past it), which never reads the decision and can replace it. So the
+     * MAP-DERIVED part is now: the ladder arms this engine holds (potions,
+     * regenerate, the five damage spells, weaken, boundless energy, the gale,
+     * the teleport), consulted BEFORE the tired rest, and the tired rest
+     * applied only in range. Map §"The spell ladder runs LAST, and overrides
+     * the rest and the status phases" and the `villainChooseAction` `+0x03e8`
+     * row of the `staminacost` table. Everything below the ladder is still
+     * this module's own.
      *
      * INVENTED: everything else — which foe, and which of quick / normal /
      * power. The map decodes only three of the hundred `choices` bands and
@@ -10069,6 +10124,18 @@ export function createSs2TeamRules({
       // that carries a condition and declares no `min_damage` would throw here
       // instead of taking the one option it was handed. Returned before any
       // record is built.
+      //
+      // ► **STILL FIRST, AND THAT IS A LEGALITY QUESTION RATHER THAN AN AI ONE
+      //   (2026-09-22).** In the build the ladder runs AFTER the four status
+      //   blocks (`+0x133a`-`+0x1431`) and can replace a status too: a frozen,
+      //   burning, poisoned or life-stolen villain holding a qualifying item
+      //   CASTS, and the status phase is lost, its flag already cleared (map
+      //   §"The spell ladder runs LAST, and overrides the rest and the status
+      //   phases"). Here `legalActions` forces the status phase for every
+      //   combatant, so it is the only option this AI is handed; reproducing the
+      //   villain's override means changing that offer, which is the owner's
+      //   decision and is recorded in the handoff, not taken here. The tired
+      //   rest below WAS reordered — that one is an AI fix.
       const forced = options.find((option) => SS2_FORCED_PHASES.has(option.type));
       if (forced) return forced;
 
@@ -10079,9 +10146,24 @@ export function createSs2TeamRules({
       //   declared, throwing instead of taking the only move it has.
       if (options.length === 1 && options[0].type === Ss2ActionType.SWAP_WEAPONS) return options[0];
 
+      // ► **AND NEITHER IS A FORCED REST.** At `staminaleft <= 0` `legalActions`
+      //   hands over exactly one option, `rest` (overlay frame 1 `+0x0d2e`).
+      //   ~~The tired gate below caught this case on its way past~~ — it did
+      //   until 2026-09-22, when the tired rest moved below the ladder and
+      //   learned to read the range; an out-of-range gladiator at zero would
+      //   otherwise fall through to the swing table and throw for want of a
+      //   damage pair, for the reason the two arms above give.
+      if (options.length === 1 && options[0].type === Ss2ActionType.REST) return options[0];
+
       const restOption = options.find((option) => option.type === Ss2ActionType.REST);
       const actor = view.actor;
-      if (restOption && resourceValue(actor, "staminaleft", 0) <= 10) return restOption;
+      // ~~`if (restOption && resourceValue(actor, "staminaleft", 0) <= 10) return restOption;`~~
+      // **MOVED 2026-09-22, and narrowed.** This line returned the rest before
+      // any ladder arm was read, for every gladiator in or out of range. The
+      // build does neither: the `staminaleft > 10` gate (`+0x03e8`) is inside
+      // the in-range test, and `villain_cast_spells()` runs after it and can
+      // replace the rest. The tired rest is now the last arm before the swing
+      // table, below every ladder block — see "THE TIRED REST" there.
 
       // ► **LADDER ARM 3, `cast_regenerate`, AND IT SITS AMONG THE POTIONS.**
       //   `check_inventory(46) && villain.hitpoints < villain.hitpointsmax / 2`
@@ -10099,9 +10181,12 @@ export function createSs2TeamRules({
       //
       // ► **OMITTED, AND NAMED, AS FOR THE POTIONS:** the single
       //   `randomBetween(1, 100) > 10` at `+0x056f` (this AI takes no samples,
-      //   so it casts on every turn the gate is open rather than nine in ten),
+      //   so it casts on every turn the gate is open rather than nine in ten)~~,
       //   and the forced rest above, which sits in front of the ladder here —
-      //   the open question the potion block records.
+      //   the open question the potion block records~~. **The question is
+      //   settled and the rest no longer sits in front (2026-09-22)**: the
+      //   ladder replaces a tired villain's rest, so this block now runs at any
+      //   stamina above the zero-stamina floor.
       const regenerateOption = options.find((option) => option.type === Ss2ActionType.CAST_REGENERATE);
       if (regenerateOption && actor.health < actor.maxHealth / 2) {
         const pools = ss2PoolsOf(actor);
@@ -10144,7 +10229,7 @@ export function createSs2TeamRules({
       //     `cast_little_fat_kid`; arm 3 has had a verb since 2026-09-22 and is
       //     tested in the block just above), which pre-empt some potions in the build and
       //     nothing here — the stance the gale block takes for arms 1-23;
-      //   - **AND IT SITS BEHIND THE FORCED REST ABOVE, WHICH IS AN OPEN
+      //   - ~~**AND IT SITS BEHIND THE FORCED REST ABOVE, WHICH IS AN OPEN
       //     QUESTION, NOT A DERIVATION.** `staminaleft > 10` (`+0x03e8`) gates
       //     `villainChooseAction`'s action-choice block, and the map records
       //     that the function "ends by calling `villain_cast_spells()`" without
@@ -10152,7 +10237,15 @@ export function createSs2TeamRules({
       //     villain at 10 stamina or less drinks a stamina vial (always below
       //     half, since the build derives `staminamax = 100 + stamina * 10`)
       //     where this AI rests. The gale and the bolts sit behind the same
-      //     gate and carry the same question.
+      //     gate and carry the same question.~~
+      //     **SETTLED 2026-09-22: IT IS NOT INSIDE, AND THE REST NOW SITS
+      //     BEHIND THIS BLOCK.** The call is the decision function's
+      //     unconditional last statement (`+0x1432`), and the `> 10` gate is
+      //     itself inside the in-range test (`+0x03d5`). So a tired villain in
+      //     range drinks the vial, exactly as the paragraph above predicted
+      //     for that case; the gale, the bolts and every other ladder arm
+      //     below replace the rest the same way (map §"The spell ladder runs
+      //     LAST"; `test/ss2-ai-tired-rest.test.js`).
       //
       // ► **INVENTED: THE RULE IS APPLIED TO EVERY AI SEAT.** The ladder reads
       //   `_root.game.villain` hard-coded; this engine has one AI for everyone,
@@ -10609,9 +10702,18 @@ export function createSs2TeamRules({
         if (nearest) {
           const towardType = nearest.x > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
           const stride = options.find((option) => option.type === towardType);
-          // Stamina still outranks it: the forced-rest gate above already
+          // ~~Stamina still outranks it: the forced-rest gate above already
           // returned at <= 10, so reaching here means the walk is affordable
-          // in the only sense the build has — it does not refuse to spend.
+          // in the only sense the build has — it does not refuse to spend.~~
+          // **CORRECTED 2026-09-22: a gladiator at 10 or less DOES reach here
+          // now, and walks, because the build's out-of-range villain does.**
+          // The `staminaleft > 10` gate sits inside the in-range test
+          // (`+0x03d5`), so it never sends an out-of-range villain to rest;
+          // the out-of-range bands' own rests are `choices`-drawn and
+          // percentage-gated, which this AI does not reproduce. The one floor
+          // left is the zero-stamina rest `legalActions` forces, which the
+          // build's villain has too (`staminaleft > 0` at `+0x1173`, reached on
+          // every path) — and a walk is still never refused for its cost.
           if (stride) return stride;
         }
       }
@@ -10655,6 +10757,72 @@ export function createSs2TeamRules({
       const boltOptions = SS2_DAMAGE_SPELL_LADDER
         .map((type) => options.find((option) => option.type === type && option.targetId === engaged.id))
         .filter(Boolean);
+
+      // ► **THE TIRED REST, WHERE THE BUILD HAS IT: IN RANGE ONLY, AND BELOW
+      //   THE LADDER (2026-09-22).** The villain's decision function
+      //   (`DoAction@0x23f835`, base `0x23f83b`):
+      //
+      //     if ((equipped_weapon == 1 && fightdistance < weapon_range)      +0x034f-+0x038f
+      //      || (equipped_weapon == 2 && !(fightdistance < 200))) {       +0x0397-+0x03d3
+      //       if (staminaleft > 10) { ...in-range bands... }               +0x03e8
+      //       else villaindecisionA = "rest"                               +0x08b6
+      //     } else { ...out-of-range bands... }                            +0x08c3
+      //     ...
+      //     villain_cast_spells()                                          +0x1432
+      //
+      //   So IN RANGE at 10 or less the villain rests and the ladder may then
+      //   replace the rest; OUT of range this gate never rests it, and the AI
+      //   does what it does untired. Every ladder block this engine holds has
+      //   already had its turn above — regenerate (arm 3) and the potions (2,
+      //   4-6, 10-13) at the top, weaken (19), boundless energy (23), the gale
+      //   (24) and the teleport (26) behind `!boltOnOffer` — so what is left of
+      //   the ladder here is arms 14-18: a damage spell on possession, the
+      //   LADDER's first, which is what `boltOptions[0]` is. A tired villain
+      //   does not SWING in the build, so the spell is not priced against the
+      //   swings the way it is below: the ladder casts it, or the villain rests.
+      //
+      // ► **WHY HERE, BELOW THE WALK BLOCK, AND WHICH HALF OF THE TEST THAT
+      //   LEAVES LOAD-BEARING.** Every in-range verb is an attack verb, so an
+      //   in-range gladiator has `attackOnOffer` and never enters the walk
+      //   block; an out-of-range one with no attack on offer leaves it by a
+      //   step and never gets here. So the range test below decides only the
+      //   cases where an attack IS on offer out of range — the bash frame, or a
+      //   damage spell from across the sands — and a mutation that drops it is
+      //   caught by the bash case alone (`test/ss2-ai-tired-rest.test.js`).
+      //
+      // ► **"IN RANGE" IS READ FROM THE VOCABULARY, and it is an
+      //   APPROXIMATION of the build's test, named:**
+      //   - in range means `legalActions` offered a melee swing or a shot
+      //     (`SS2_AI_IN_RANGE_VERBS`), i.e. this turn is `closerange_warrior`
+      //     or `longrange_archer`. A drawn bow closed on is offered only
+      //     `bash_attack` (`closerange_archer`), which is the build's
+      //     `equipped_weapon == 2 && fightdistance < 200` — out of range;
+      //   - the melee half is the build's own number (`ss2Reach` is
+      //     `weapon_range`, strict `<`), but measured per foe and gated on the
+      //     LANE (`ss2SameLane`), where the build has one opponent and one
+      //     axis. A foe in reach but in another rank is out of range here;
+      //   - the bow half is the HERO's floor, `100 + physical_size`
+      //     (`ss2ArcherMinimumRange`), not the villain's hand-written 200 —
+      //     the gate `legalActions` applies to everybody. Both are FLOORS and
+      //     they agree at `physical_size` 100; below it this engine calls an
+      //     archer in range up to `100 - physical_size` units closer than the
+      //     build would, above it out of range up to `physical_size - 100`
+      //     units farther (strength 9 on the demo roster: 186 against 200);
+      //   - a gladiator with no position is offered every verb, so it is IN
+      //     range, exactly as before this change.
+      //
+      // ► **WHAT IS OMITTED, NAMED:** the ladder's 90% roll (`+0x056f`), as
+      //   everywhere here; and the build's other writes between the rest and
+      //   the ladder, which can also replace it — the 20% `random_swap`
+      //   (`+0x0ed7`), the 10% `psyche_up_chance` rest-or-charge (`+0x0fe5`),
+      //   the 90% continuation of a charge already begun (`psyche_up > 1`,
+      //   `+0x1070`), and the taunted runs (`+0x11ea`-`+0x1339`). The first
+      //   three are drawn; the last is `legalActions`'s to force.
+      if (restOption && resourceValue(actor, "staminaleft", 0) <= 10
+        && options.some((option) => SS2_AI_IN_RANGE_VERBS.has(option.type))) {
+        return boltOptions[0] ?? restOption;
+      }
+
       if (boltOptions.length > 0 && !ss2CanBePriced(actor)) {
         // ~~Heaviest first, which is also the build's own ladder order~~ —
         // **true for the two bolts and false the day the fireballs arrived**:

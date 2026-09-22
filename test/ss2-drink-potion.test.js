@@ -597,14 +597,26 @@ test("a health potion PRE-EMPTS the teleport, whose health condition is the same
   assert.equal(suggestAction(battle, "hero").type, Ss2ActionType.CAST_TELEPORT);
 });
 
-test("the forced rest still outranks a stamina vial at 10 stamina or less", () => {
-  // `villainChooseAction`'s `staminaleft > 10` gate (`+0x03e8`) is this AI's
-  // first decision, as it is for the bolts and the gale. WHETHER the build's
-  // `villain_cast_spells()` call sits inside that gate is not in any dump this
-  // derivation read; see the open question at the site.
+// ~~"the forced rest still outranks a stamina vial at 10 stamina or less"~~ —
+// **THE ORDER THIS TEST PINNED WAS THE WRONG ONE, and it was pinned as an open
+// question rather than a derivation, which is why it could be settled.** Its
+// comment read: *"WHETHER the build's `villain_cast_spells()` call sits inside
+// that gate is not in any dump this derivation read"*. **It does not — settled
+// 2026-09-22** (map §"The spell ladder runs LAST"): the call is the villain
+// decision function's unconditional last statement (`+0x1432`; 122 branches,
+// none past it), and the `staminaleft > 10` gate (`+0x03e8`) sits INSIDE the
+// in-range test (`+0x03d5`). So a tired villain in range rests and the ladder
+// then replaces the rest; arm 12's `staminaleft < staminamax / 2` is always
+// true at 10 or less. The test used to assert REST at 10; it now asserts the
+// drink, on both sides of the gate. `test/ss2-ai-tired-rest.test.js` pins the
+// rest of the order.
+test("a stamina vial REPLACES the tired rest, because the ladder runs after it", () => {
   const battle = aiDrinker({ inventory: { inventory1: 7 }, staminaleft: 10 });
-  assert.equal(suggestAction(battle, "hero").type, Ss2ActionType.REST);
+  assert.deepEqual(suggestAction(battle, "hero"), { type: DRINK, targetId: "hero", itemId: 7 });
   assert.equal(suggestAction(aiDrinker({ inventory: { inventory1: 7 }, staminaleft: 11 }), "hero").itemId, 7);
+  // The control: the same gladiator without the vial rests at 10, so the drink
+  // above is the ladder replacing a rest and not a gate that never fired.
+  assert.equal(suggestAction(aiDrinker({ staminaleft: 10 }), "hero").type, Ss2ActionType.REST);
 });
 
 test("the AI takes no sample to decide, so the build's 90% roll is not reproduced", () => {
