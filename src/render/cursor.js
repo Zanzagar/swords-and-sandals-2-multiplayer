@@ -78,7 +78,8 @@ export function timelinesForStep(commands) {
       stepped.set(command.combatantId, {
         from: command.from,
         to: command.to,
-        ...(command.pushed === true ? { pushed: true } : {})
+        ...(command.pushed === true ? { pushed: true } : {}),
+        ...(command.teleported === true ? { teleported: true } : {})
       });
     }
     // ► **THE SECOND AXIS NEEDS ITS OWN SLOT, and the first version of the
@@ -125,7 +126,12 @@ export function timelinesForStep(commands) {
     //   knockback clip. Added 2026-09-22 with `displacementOf` in
     //   `presentation.js`.
     const step = stepped.get(command.combatantId) ?? null;
-    const motion = timeline.travel || step?.pushed === true ? step : null;
+    // ► **AND A TELEPORT IS PAIRED WITH THE CASTER'S OWN CLIP**, which does not
+    //   travel either (added 2026-09-22 with `cast_teleport`). Paired so the
+    //   figure can be HELD at `from` while `Cast2` plays: left unpaired, the
+    //   painter draws the scene's resting x — already the destination — and
+    //   the caster blinks away before it has cast. See `figureXAt`.
+    const motion = timeline.travel || step?.pushed === true || step?.teleported === true ? step : null;
     started.set(command.combatantId, {
       timeline,
       token: command.actionToken ?? null,

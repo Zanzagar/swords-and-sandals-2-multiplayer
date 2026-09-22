@@ -802,6 +802,18 @@ export function figureXAt({ restingX, facing, pose, timeline = null, motion = nu
   if (!pose || !Number.isFinite(pose.advance)) {
     throw new TimelineError("figureXAt needs a pose from poseAt().");
   }
+  // ► **A TELEPORT IS A STEP FUNCTION, NOT A CURVE** (added 2026-09-22 with
+  //   `cast_teleport`). The build writes `attacker._x = randomBetween(-2000,
+  //   2000)` only once the caster's `Cast2` has reported (`+0x7646`-`+0x767b`),
+  //   so the figure plays the whole clip where it stood and is at the
+  //   destination when the clip ends — `from` for every `at < 1`, `to` at 1.
+  //   Tested first, so no schedule can turn it into a slide. The lunge is
+  //   kept, around the HELD x: the figure is playing an ordinary clip in
+  //   place, and only its resting point differs from the scene's.
+  if (motion && motion.teleported === true && Number.isFinite(motion.from) && Number.isFinite(motion.to)) {
+    const held = at >= 1 ? motion.to : motion.from;
+    return held + pose.advance * ADVANCE_UNITS * (facing === "left" ? -1 : 1);
+  }
   // A travelling gait, or a PUSH riding whatever the victim plays. The build's
   // `knockback()` tweens over its own second, independent of the clip; riding
   // the victim's timeline instead is this engine's one approximation of it.

@@ -315,7 +315,10 @@ export function applyCommands(scene, commands) {
             actionToken: command.actionToken ?? null,
             // A push rides the victim's clip whatever it is; a walk rides only
             // a travelling gait. Carried so a surface need not re-derive it.
-            ...(command.pushed === true ? { pushed: true } : {})
+            ...(command.pushed === true ? { pushed: true } : {}),
+            // A teleport is held at `from` and put at `to` when its clip ends;
+            // carried for the same reason.
+            ...(command.teleported === true ? { teleported: true } : {})
           })
         });
         break;

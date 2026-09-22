@@ -284,6 +284,10 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //   samples, so it is not in `ATTACK_BANDS` for the reason `shove` is not.
     "cast-gale",
     "cast-lightning-bolt",
+    // ► **JOINED 2026-09-22 — the teleport, `getphase("cast_teleport")`,
+    //   written by ladder arm 26 (`+0x0f91`) and consumed at
+    //   `+0x7541`-`+0x76ad`.** Self-targeted, one sample (the destination).
+    "cast-teleport",
     "frozen-phase",
     "life-stolen-phase",
     "normal-attack",

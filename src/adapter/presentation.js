@@ -393,6 +393,24 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
     }
     if (event.type === "taunt") return tauntLabels(event);
 
+    // ► **A SELF-CAST SPELL NAMES ONE CLIP, AND IT IS BOUND BEFORE THE MOVEMENT
+    //   BRANCH BELOW because the first one carries the CASTER's own move.**
+    //   `cast_teleport` (added 2026-09-22) plays `attacker.gotoAndPlay("Cast2")`
+    //   at `+0x7620` and nothing on anybody else, and its event carries
+    //   `from`/`to` because the move IS the actor's. Without this case it
+    //   reached the movement branch and came out as the caster playing an
+    //   ASSUMED `cast_teleport` — no clip at all, so the `unknown` schedule —
+    //   measured before this case existed.
+    //
+    //   **Detected by a `casterClip` with NO `victimClip`**, the field rule the
+    //   two-clip spell case below follows, so the next self-cast verb carries
+    //   its own clip rather than needing a case here. MAP_NAMED because the
+    //   string is the build's.
+    if (typeof event.casterClip === "string" && event.casterClip.length > 0
+      && !(typeof event.victimClip === "string" && event.victimClip.length > 0)) {
+      return Object.freeze({ actor: label(event.casterClip, LabelProvenance.MAP_NAMED), target: null });
+    }
+
     if (Number.isFinite(event.from) && Number.isFinite(event.to)) {
       const phase = typeof event.vanillaLabel === "string" && event.vanillaLabel.length > 0
         ? event.vanillaLabel
@@ -971,6 +989,15 @@ function projectileFor(wire, combatants, event) {
  *     TYPE because those two events' own fields cannot say so, the same way
  *     `rest` and `swap-weapons` are matched above;
  *   - anything else with `from`/`to` is the actor's own move.
+ *
+ * ► **AND ONE OF THE ACTOR'S OWN MOVES IS NOT TRAVELLED AT ALL** (added
+ *   2026-09-22 with `cast_teleport`). The teleport's `from`/`to` are the
+ *   caster's, correctly, and read as a walk they slid the caster across the
+ *   arena on `Cast2`. In the build the figure plays `Cast2` where it stood and
+ *   `attacker._x` is written only when that clip reports (`+0x7646`-`+0x767b`).
+ *   So the move is flagged `teleported`, matched on the TYPE for the reason the
+ *   shove and the taunt are: nothing else in the event's own fields separates
+ *   a blink from a step.
  */
 function displacementOf(event) {
   if (Number.isFinite(event.targetFrom) && Number.isFinite(event.targetTo)) {
@@ -979,6 +1006,9 @@ function displacementOf(event) {
   if (!Number.isFinite(event.from) || !Number.isFinite(event.to)) return null;
   if (event.type === "shove" || event.type === "taunt") {
     return { combatantId: event.targetId, from: event.from, to: event.to, pushed: true };
+  }
+  if (event.type === "cast-teleport") {
+    return { combatantId: event.actorId, from: event.from, to: event.to, pushed: false, teleported: true };
   }
   return { combatantId: event.actorId, from: event.from, to: event.to, pushed: false };
 }
@@ -1003,7 +1033,11 @@ function movementFor(layout, event) {
     // A PUSH rides whatever clip its victim plays, where a walk rides only a
     // travelling gait — see `timelinesForStep` and `figureXAt`. Present only
     // on a push, so every existing move-clip is byte-for-byte what it was.
-    ...(displacement.pushed ? { pushed: true } : {})
+    ...(displacement.pushed ? { pushed: true } : {}),
+    // A TELEPORT is held at `from` for the whole of the caster's clip and put
+    // at `to` when it ends — see `figureXAt`. Present only on a teleport, for
+    // the reason `pushed` is present only on a push.
+    ...(displacement.teleported ? { teleported: true } : {})
   });
 }
 

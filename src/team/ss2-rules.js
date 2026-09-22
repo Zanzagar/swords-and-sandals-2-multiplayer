@@ -404,6 +404,12 @@ export const Ss2ActionType = Object.freeze({
   //   displacement like `shove`, taking ZERO samples, so it is not in
   //   `ATTACK_BANDS` for the reason `shove` is not.
   CAST_GALE: "cast-gale",
+  // ► **THE TELEPORT — THE FOURTH SPELL VERB AND THE FIRST THAT MOVES ITS
+  //   CASTER.** `+0x7541`-`+0x76ad` of the same block; see `SS2_TELEPORT`. ONE
+  //   sample, and it is the DESTINATION, not an attack roll — so it is not in
+  //   `ATTACK_BANDS`, for the bolts' reason. SELF-TARGETED like `rest`: the arm
+  //   never reads `defender` or `game_defender`.
+  CAST_TELEPORT: "cast-teleport",
   /**
    * The phase a TAUNTED gladiator is forced into: it runs away.
    *
@@ -936,6 +942,10 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // (`+0x7b30`), not `Cast2`, and the victim's is `knockback` (`+0x7b78`) —
   // carried on the event for the reason the bolts carry theirs.
   [Ss2ActionType.CAST_GALE]: "cast_gale",
+  // `phase_decision == "cast_teleport"` at `+0x7547`, and the decision ladder
+  // arm 26 writes at `+0x0f91`. The caster's clip is `Cast2` (`+0x7620`), the
+  // bolts' — carried on the event; there is no victim clip at all.
+  [Ss2ActionType.CAST_TELEPORT]: "cast_teleport",
   // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
   //   of the decision table is `taunted1 == true` -> facing right
   //   `getphase("runleft")`, facing left `getphase("runright")`
@@ -3698,6 +3708,105 @@ export const SS2_GALE = Object.freeze({
    * read by `chooseAiAction` and by nothing else. Strict.
    */
   aiFightDistanceBelow: 400
+});
+
+/* ------------------------------------------------------------------ */
+/* The teleport phase: a spell that moves its caster and nobody else   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_teleport`, byte-derived 2026-09-22 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base `0x240c85`),
+ * `+0x7541`-`+0x76ad`:
+ *
+ * ```text
+ *   phase_decision == "cast_teleport"                              +0x7541
+ *     register:3.crowd_action = 3                                  +0x7554
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x7561
+ *     if (attacker.struck == null) {                               +0x7588
+ *       cast_spell_icon(attacker, 48)                              +0x759f
+ *       arena.gladiators.attachMovie("circlets", "circlets",
+ *         getNextHighestDepth(), { _x: attacker._x, _y: 200 })     +0x75b7-+0x7610
+ *       attacker.struck = false                                    +0x7612
+ *       attacker.gotoAndPlay("Cast2")                              +0x7620
+ *     }
+ *     combatscale()                                                +0x7635
+ *     if (attacker.struck == true) {                               +0x7646
+ *       attacker._x = randomBetween(-2000, 2000)                   +0x765e-+0x767b
+ *       attacker.gotoAndPlay("Cast2")                              +0x767c
+ *       attacker.struck = null                                     +0x7691
+ *       nextphase()                                                +0x769e
+ *     }
+ * ```
+ *
+ * ► **ONE SAMPLE, AND IT IS WHERE THE CASTER LANDS.** The only
+ *   `randomBetween` in the arm is at `+0x7664`, inside the completion gate —
+ *   the `struck == true` test runs in the same tick as the entry block, after
+ *   `struck = false`, so it can never fire on the entry tick, and the build
+ *   takes exactly one draw per completed cast. Push order `"_x", 2000, -2000,
+ *   2`: the argument pushed last before the count is the first, so the call is
+ *   `randomBetween(-2000, 2000)`, inclusive at both ends (the map's RNG
+ *   surface). **The result is STORED by `SetMember`, not added** — the
+ *   destination is absolute, whatever `_x` was.
+ *
+ * ► **NO `_y` WRITE, NO FACING WRITE, NO CLAMP, AND NO `defender`.** The arm
+ *   references `attacker` and `game_attacker` only. Facing is re-derived by
+ *   `changeCombatants` at the phase advance, as for every move; the bound that
+ *   applies is the clip clamp in `attacker.onEnterFrame` (`SS2_ARENA.clamp`,
+ *   ±2100), which is WIDER than the draw on both sides and so cannot bind.
+ *
+ * ► **THE COST IS `round(magicka)`, THE STAT, WITH NO AFFORDABILITY CHECK**,
+ *   the bolts' and the gale's shape exactly.
+ *
+ * ► **TWO PRESENTATION CUES, NEITHER MODELLED, BOTH NAMED.** `circlets` is
+ *   attached at the caster's STARTING `_x` and `_y = 200`; this repository has
+ *   not extracted that prop, and the arena painter draws every
+ *   `attach-effect` as a lightning bolt, so no command is emitted for it.
+ *   `combatscale()` — the build's live camera — is called EVERY tick of this
+ *   arm (`+0x7635`, outside both gates); `gladiators.onEnterFrame` calls it
+ *   too, but only while `_global.phasecomplete != false` (map `+0x0e98`). So
+ *   the build's camera keeps following the fight through a teleport whatever
+ *   that flag says. *(Whether any OTHER phase arm calls it was not checked:
+ *   the dumps this derivation read are reference windows, not the whole
+ *   block.)* This engine's viewport is its own.
+ *
+ * ► **THE SECOND `Cast2` IS NEVER SEEN.** It runs in the completion tick and
+ *   `nextphase()` follows it in the same straight-line run; `nextphase`'s
+ *   `battle_action < 3` arm calls `changeCombatants` (`+0x3638`, and the
+ *   `battle_action == 3` turn end has its own call at `+0x365f`), which
+ *   `gotoAndPlay("Standing")`s both fighters (`+0x27db`, `+0x27ef`) before the
+ *   frame is drawn. *(Those offsets are the battle map's, and this derivation
+ *   did not re-read them — nor whether `Cast2`'s first frame carries a script
+ *   that the replaced `gotoAndPlay` would still queue.)* So on screen the
+ *   caster plays ONE `Cast2` where it stood and reappears at the destination
+ *   when that clip reports — which is the rule `figureXAt` draws.
+ *
+ * ► **THE ARM HAS NO `Jump`**, like the bolts': after `nextphase()` execution
+ *   falls through into the `cast_adulation` test at `+0x76ae` and every later
+ *   arm. Not expressible here, recorded for a frame-accurate port.
+ *
+ * ► **THE OFFER IS POSSESSION.** `fightdistance < 250` and
+ *   `hitpoints < hitpointsmax / 2` are ladder arm 26 of `villain_cast_spells`
+ *   (`+0x0f1c`-`+0x0fab`), the villain AI's DECISION; the hero's inventory
+ *   button tests only `inv_struck`. See `legalActions` and `chooseAiAction`.
+ */
+export const SS2_TELEPORT = Object.freeze({
+  /** `cast_spell_icon(attacker, 48)` `+0x759f`, `check_inventory(48)` `+0x0f1c`. */
+  itemId: 48,
+  /** `randomBetween(-2000, 2000)`, `+0x7664`. Inclusive, per the map's RNG surface. */
+  destinationLow: -2000,
+  destinationHigh: 2000,
+  /** The tape label. INVENTED, in the shape of every other label here. */
+  rollLabel: "teleport-destination-roll",
+  /** `attacker.gotoAndPlay("Cast2")`, `+0x7620` (and `+0x767c`, never drawn). */
+  casterClip: "Cast2",
+  /** `register:3.crowd_action = 3`, `+0x7554`. Presentation cue; not modelled. */
+  crowdAction: 3,
+  /**
+   * The VILLAIN's distance gate, `fightdistance < 250` (`+0x0f48`, `Less2`),
+   * read by `chooseAiAction` and by nothing else. Strict.
+   */
+  aiFightDistanceBelow: 250
 });
 
 export const SS2_TAUNT = Object.freeze({
@@ -6560,6 +6669,21 @@ export function createSs2TeamRules({
         for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_GALE, targetId: foe.id });
       }
 
+      // ► **THE TELEPORT IS OFFERED ON POSSESSION ALONE, on the bolts' and the
+      //   gale's button and under the same two gates** (the empty marker and the
+      //   `inventory_maxslots` window, both inside `ss2InventorySlotHolding`).
+      //   `fightdistance < 250` and `hitpoints < hitpointsmax / 2` are ladder
+      //   arm 26, the villain's DECISION, read by `chooseAiAction`; the phase
+      //   itself (`+0x7541`-`+0x76ad`) reads neither.
+      //
+      //   **ONCE, AIMED AT THE CASTER, and not per foe** — the `rest` shape.
+      //   The arm never reads `defender` or `game_defender`, so a per-foe offer
+      //   would be N spellings of one action, and the resolver's legality check
+      //   matches on `targetId`.
+      if (ss2InventorySlotHolding(view.actor, SS2_TELEPORT.itemId) !== null) {
+        actions.push({ type: Ss2ActionType.CAST_TELEPORT, targetId: actorId });
+      }
+
       // ► **WHICH CONTROLLER FRAME THE GLADIATOR IS ON, computed ONCE because
       //   two arms below need it and a second copy is a second chance to be
       //   wrong** — the argument the walk arm makes about `anyInReach` and
@@ -7736,6 +7860,115 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **THE TELEPORT. One sample, zero damage, and the body it moves is the
+      //   CASTER's.** It returns before `ATTACK_BANDS` for the bolts' reason:
+      //   the arm's one `randomBetween` is the destination, and entering the
+      //   dispatcher would draw a direction the build never draws. See
+      //   `SS2_TELEPORT` for the phase, statement by statement.
+      if (request.type === Ss2ActionType.CAST_TELEPORT) {
+        // Re-found at resolve, through the same window as the offer, for the
+        // reason the bolt branch gives.
+        const slot = ss2InventorySlotHolding(actor, SS2_TELEPORT.itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, SS2_TELEPORT.itemId, { ignoreMaxslots: true });
+          if (beyond !== null) {
+            throw new TeamRuleSetError(
+              `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${SS2_TELEPORT.itemId} is in ` +
+              `${beyond}, outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}. The build's ` +
+              "hero panel hides that button (sprite:492[inventory_overlay] +0x024f), and this engine offers and " +
+              "consumes through the same window."
+            );
+          }
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+            `item ${SS2_TELEPORT.itemId}. The build's own gate is possession — ` +
+            `check_inventory(${SS2_TELEPORT.itemId}) for the villain, a visible inventory button for the hero — ` +
+            "and this engine reproduces it."
+          );
+        }
+
+        // THE ONE SAMPLE, taken whether or not this rule set models a position:
+        // the build draws on every completed cast, so a peer replaying the tape
+        // must consume it either way.
+        const drawn = rolls.randomBetween(
+          SS2_TELEPORT.rollLabel, SS2_TELEPORT.destinationLow, SS2_TELEPORT.destinationHigh
+        );
+
+        // ► **ABSOLUTE, and the arena clamp is applied although it cannot
+        //   bind.** The arm stores the draw with no clamp of its own; the clip
+        //   clamp in `attacker.onEnterFrame` then acts on `attacker._x` every
+        //   frame, so the build's composed rule IS `clamp(draw)` — and ±2100
+        //   contains ±2000, so it is the draw for every value it can return.
+        //   Applied rather than skipped so that every branch here that writes
+        //   an `x` writes a bounded one, which is the rule the shove, the gale
+        //   and the flee already keep. No mutation of it can go red.
+        //
+        // ► **INVENTED FOR THE N-BODY ARENA, NAMED HERE — three decisions the
+        //   1v1 build never had to make:**
+        //   - **the caster may land ON or INSIDE any gladiator, friend or foe,
+        //     and is never re-rolled.** The arm checks nothing; a re-roll would
+        //     be a second sample the build never takes. Two bodies on one `x`
+        //     are handled downstream: `test/ss2-teleport.test.js` pins that
+        //     both fighters' offers, walks and a swing resolve.
+        //   - **the rank (`y`) is left alone.** The arm writes no `_y`, and this
+        //     engine's `y` is depth, which vanilla does not have.
+        //   - **no body-blocking check**, because this is not a walk: the walk
+        //     clamp against `physical_size` is a property of travelling through
+        //     space, and a teleport does not.
+        const positioned = Number.isFinite(actor.x);
+        const to = positioned ? clamp(drawn, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max) : null;
+
+        // No damage, so no death: `nextphase` always runs, and the cost is spent
+        // unconditionally, exactly as the gale's is.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const transition = phaseTransitionEffects(actor, { staminaCost });
+
+        // The build's order, as for the gale: the slot is consumed when the
+        // phase begins, the body moves at the completion gate, and `nextphase`
+        // settles the stamina last.
+        const effects = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }];
+        if (to !== null && to !== actor.x) {
+          effects.push({ kind: EffectKind.POSITION, targetId: actor.id, to });
+          // EVERYBODY's facing, from the ACTOR's new x — `facingAfter`, not the
+          // gale's `facingAfterTargetMove`, because the body that moved is the
+          // actor's own. `changeCombatants` runs at the phase advance, after
+          // the write.
+          effects.push(...facingAfter({ ...actor, x: to }));
+        }
+        effects.push(...transition.effects, ...crowd);
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: actor.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // The CASTER's clip only. There is no `victimClip`, and that absence
+            // is the data: the arm plays nothing on anybody else, and
+            // `SS2_STATIC_MAP_BINDINGS` binds a lone `casterClip` as a
+            // self-cast.
+            casterClip: SS2_TELEPORT.casterClip,
+            spellId: SS2_TELEPORT.itemId,
+            consumedSlot: slot,
+            rolledX: drawn,
+            // `from`/`to` ARE the actor's own move here, which is what
+            // `src/adapter/presentation.js` reads them as — the convention the
+            // gale had to step around with `targetFrom`/`targetTo`. What makes
+            // it a teleport rather than a walk on screen is `displacementOf`.
+            from: positioned ? actor.x : null,
+            to,
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained
+          }]
+        };
+      }
+
       const band = ATTACK_BANDS[request.type]
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
@@ -8506,6 +8739,54 @@ export function createSs2TeamRules({
           // is what a guard justified by someone else's construction costs
           // when the construction changes. No mutation of it can go red.
           if (range !== null && range < SS2_GALE.aiFightDistanceBelow && armourBelowHalf) return galeOption;
+        }
+      }
+
+      // ► **THE TELEPORT IS THE BUILD'S OWN RULE TOO, for the gale's reason: it
+      //   deals no damage, so it has no row in the pricing table below.** Ladder
+      //   arm 26 of `villain_cast_spells` (`+0x0f1c`-`+0x0fab`):
+      //
+      //     check_inventory(48)                                     +0x0f1c
+      //     && _root.arena.fightdistance < 250                      +0x0f3a-+0x0f50
+      //     && villain.hitpoints < villain.hitpointsmax / 2         +0x0f59-+0x0f8a
+      //
+      //   Both comparisons strict, and the half UNROUNDED (`Push 2; Divide;
+      //   Less2`). `hitpoints`/`hitpointsmax` are `health`/`maxHealth` here, the
+      //   mapping `vanillaRecordOf` makes. Returned before the walk and the
+      //   swing, because `villain_cast_spells` replaces the decision.
+      //   **`attackOnOffer` is NOT widened**, for the reason the gale gives.
+      //
+      // ► **THE LADDER'S PRE-EMPTION, AS FAR AS IT REACHES THIS ENGINE.** Arms
+      //   1-25 must all fail first. Of those, the ones with verbs here are the
+      //   two bolts (arms 15, 17 — possession alone, so a caster offered one
+      //   never reaches arm 26) and the gale (arm 24 — whose open gate has
+      //   already returned above; a caster whose gale gate is SHUT falls through
+      //   to here, as the ladder does). **SEVEN arms before 26 fire on
+      //   possession alone** (ids 49, 32, 35, 31, 34, 30, 45 — map §"The whole
+      //   ladder"); five have no verb here. **The potion arms (2, 4-6, 10-13)
+      //   also precede this one and are NOT wired here** — arm 2 (id 5) tests
+      //   the SAME `hitpoints < hitpointsmax / 2`, so once `drink_potion` has a
+      //   verb this test must grow to let it pre-empt. So must it for
+      //   `rejuvinate` (arm 1, `hitpoints < hitpointsmax / 1.5`, implied by
+      //   this gate) and bloodlust (arm 22, `fightdistance < 400`, implied too).
+      //
+      // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
+      //   > 10` at `+0x056f`. This AI takes no samples, so it teleports on every
+      //   turn the gate is open rather than on nine in ten.
+      //
+      // ► **INVENTED: WHICH FOE THE DISTANCE IS MEASURED TO.** The build has one
+      //   `defender`. Above 1v1 this reads the NEAREST foe — the one a
+      //   teleport escapes, and the one the gale's gate reads. At 1v1 it is the
+      //   build's `fightdistance` exactly.
+      if (!boltOnOffer) {
+        const teleportOption = options.find((option) => option.type === Ss2ActionType.CAST_TELEPORT);
+        const threat = teleportOption ? nearestFoe(view) : null;
+        if (threat) {
+          const range = ss2FightDistance(actor, threat);
+          const belowHalfHealth = actor.health < actor.maxHealth / 2;
+          // `range` cannot be null here — `nearestFoe` skips a foe whose
+          // distance is null — and is guarded for the reason the gale's is.
+          if (range !== null && range < SS2_TELEPORT.aiFightDistanceBelow && belowHalfHealth) return teleportOption;
         }
       }
 
