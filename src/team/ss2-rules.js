@@ -3389,15 +3389,37 @@ export const SS2_INVENTORY_EMPTY = 1;
  * have no `SS2_RESOURCE_DEFAULTS` entry, so an undeclared slot has no value to
  * compare rather than a defaulted one.
  *
+ * ► ~~the loop does not stop at `inventory_maxslots`~~ — **still true of
+ *   `check_inventory`, and since 2026-09-22 NO LONGER TRUE OF THIS FUNCTION BY
+ *   DEFAULT.** It now also applies the HERO panel's window
+ *   (`sprite:492[inventory_overlay]/frame:1` `+0x0216`-`+0x027e`): the slot at
+ *   1-based position `i` is searched only if the combatant does not declare
+ *   `inventory_maxslots`, or `!(i > inventory_maxslots)` — the build's own
+ *   `Greater; Not` (`+0x0255`), so `0` searches nothing and `2.5` searches
+ *   slots 1 and 2. Undeclared fails OPEN, as the build's `i > undefined` does.
+ *
+ *   **Default-on because it is ONE rule for every spell.** The panel hides a
+ *   BUTTON, whatever the slot holds, so the window belongs to the slot search
+ *   and not to any one verb; every offer and every consumption that finds its
+ *   slot here gets the same answer, and a verb cannot be offered from a slot
+ *   another verb's offer would refuse. `{ ignoreMaxslots: true }` is
+ *   `check_inventory`'s unbounded search — the VILLAIN's, which never reads
+ *   the field — and exists so a refusal can name the slot it refused.
+ *
  * **`itemId` 1 never matches**, whatever a slot holds, because both of the
  * build's searches exclude it by name. Passing 1 here is asking to use the
  * empty marker as an item.
  */
-export function ss2InventorySlotHolding(actor, itemId) {
+export function ss2InventorySlotHolding(actor, itemId, { ignoreMaxslots = false } = {}) {
   if (itemId === SS2_INVENTORY_EMPTY) return null;
   const declared = declaredResourceNames(actor);
-  for (const slot of SS2_INVENTORY_SLOTS) {
+  const windowed = !ignoreMaxslots && declared.has("inventory_maxslots");
+  // Not `window`: this module also runs in the browser arena, where that name
+  // is the global object.
+  const slotWindow = windowed ? resourceValue(actor, "inventory_maxslots") : null;
+  for (const [index, slot] of SS2_INVENTORY_SLOTS.entries()) {
     if (!declared.has(slot)) continue;
+    if (windowed && index + 1 > slotWindow) continue;
     if (resourceValue(actor, slot, SS2_INVENTORY_EMPTY) === itemId) return slot;
   }
   return null;
@@ -3926,6 +3948,29 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   "inventory4",
   "inventory5",
   "inventory6",
+  // ► **THE HERO PANEL'S SLOT WINDOW, DECLARED 2026-09-22, AND IT IS THE
+  //   `psyche_up` SHAPE AGAIN: NO `SS2_RESOURCE_DEFAULTS` ENTRY.** Measured
+  //   before and after: 23 goldens, 23 unchanged hashes.
+  //
+  //   `ss2InventorySlotHolding` reads it — the one place in the build that
+  //   gates a slot on it in battle is `sprite:492[inventory_overlay]/frame:1`
+  //   `+0x0216`-`+0x027e`, which hides `inventory_buttonI` when
+  //   `i > _root.game.hero.inventory_maxslots` (`+0x024f`, `Greater`).
+  //
+  //   ► **NOT DERIVED FROM `herolevel`, AND THAT IS DELIBERATE.** The build
+  //     computes it OUTSIDE battle — `initcharacter` from `characterDNA[40]`
+  //     (`+0x098e`) and then a band chain 2/3/4/5/6 at `herolevel >=
+  //     6/15/20/30/40` (`+0x0aa5`-`+0x0b39`); `randomise_gladiator` with its
+  //     own `< 6 -> 1` arm (`+0x336f`-`+0x34a5`). Reproducing either chain in
+  //     `ss2BattleValues` or `ss2Combatant` would put a value on EVERY
+  //     combatant, which is a default by another name and moves every hash.
+  //     **Declared only when a record states it.** Absent reads as the build's
+  //     own `undefined`, which fails OPEN (`i > NaN` is false), so an
+  //     undeclared gladiator keeps all six slots in both.
+  //
+  //   Deliberately NOT in `CANONICAL_RESOURCE_SOURCES`: nothing in battle
+  //   writes it, so there is nothing to mirror.
+  "inventory_maxslots",
   "max_damage",
   "maximum_ammo",
   "min_damage",
@@ -6305,18 +6350,29 @@ export function createSs2TeamRules({
       //   AFTER the loop's init, so nothing encloses the loop: it is top-level
       //   and unguarded. There is no `_visible = true` anywhere in the block.
       //
-      //   **ONLY THE SECOND IS REPRODUCED HERE, and the omission is named
+      //   ~~**ONLY THE SECOND IS REPRODUCED HERE, and the omission is named
       //   rather than hidden.** `inventory_maxslots` is not a declared resource
       //   in this engine — it is absent from `SS2_RESOURCE_NAMES` and from
       //   `VANILLA_FIELD_GROUPS` — so declaring it is a schema change with its
-      //   own decision, and the handoff ranks it. What this offer does instead
-      //   is the build's second gate exactly: **a slot holding the empty marker
-      //   offers nothing**, and a slot the combatant never declared is not a
-      //   slot.
+      //   own decision, and the handoff ranks it.~~ **BOTH ARE REPRODUCED SINCE
+      //   2026-09-22**, and both live in `ss2InventorySlotHolding`, which this
+      //   loop calls:
       //
-      //   ► **THE NARROWING IS ONE-WAY — this engine offers a bolt the build
+      //   - **Gate 2, as before: a slot holding the empty marker offers
+      //     nothing**, and a slot the combatant never declared is not a slot.
+      //   - **Gate 1, new: a slot above the window offers nothing.**
+      //     `inventory_maxslots` is now a declared resource with NO default
+      //     (the `psyche_up` shape, so no golden moved), and the slot at 1-based
+      //     position `i` is searched only if the combatant does not declare it
+      //     or `!(i > inventory_maxslots)` — the build's own `Greater; Not`.
+      //     A bolt carried in slot 3 at `maxslots` 2 is no longer offered.
+      //
+      //   ► ~~**THE NARROWING IS ONE-WAY — this engine offers a bolt the build
       //     would have hidden, never the reverse — AND IT IS THE COMMON CASE,
-      //     NOT A CORNER ONE.** ~~At the default `inventory_maxslots` of 6 the
+      //     NOT A CORNER ONE.**~~ **CLOSED for every record that STATES the
+      //     field, and still open for every record that does not** — which is
+      //     every record in the repository today, because nothing here derives
+      //     it. ~~At the default `inventory_maxslots` of 6 the
       //     two coincide.~~ **THERE IS NO DEFAULT OF 6, and that sentence was
       //     false the hour it was written — caught by an adversarial verifier
       //     the same session, 2026-09-20.** `initcharacter` writes the value
@@ -6327,17 +6383,37 @@ export function createSs2TeamRules({
       //     arm at the bottom (`+0x336f`-`+0x34a5`). **Six needs level 40**,
       //     and the repository's own decoded rank-1 champion carries 1 at
       //     `herolevel` 5. Across levels 6-14 the hero's `maxslots` is 2 and
-      //     the build hides buttons 3, 4, 5 and 6 in battle, so a bolt carried
-      //     in slot 3 by a level-10 gladiator is offered here and is
-      //     unreachable there.
+      //     the build hides buttons 3, 4, 5 and 6 in battle. **The chain is
+      //     deliberately NOT reproduced in `ss2BattleValues`/`ss2Combatant`**:
+      //     it runs outside battle, and deriving it would put a value on every
+      //     combatant — a default by another name, moving every hash. So a
+      //     level-10 gladiator whose record is SILENT about the field is still
+      //     offered a bolt from slot 3 here and not there; one whose record
+      //     says `inventory_maxslots: 2` is refused in both.
       //
       //   ► **AND THE BUILD'S GATE FAILS OPEN WHEN THE FIELD IS ABSENT**, which
-      //     is the one thing that makes this omission defensible rather than
+      //     is what makes "declared only when stated" faithful rather than
       //     merely convenient. `Greater` is ECMA abstract relational comparison,
-      //     so `i > undefined` is `i > NaN` — false for every `i`, and nothing
+      //     and the movie is `FWS v11` — from SWF 7 on `undefined` converts to
+      //     `NaN`, not 0 — so `i > undefined` is false for every `i` and nothing
       //     is hidden. A record that never states `inventory_maxslots` gets all
-      //     six slots in the BUILD too. This engine's combatants never state
-      //     it, so for exactly those records the two agree.
+      //     six slots in the BUILD too, and here.
+      //
+      //   ► **TWO THINGS THIS GATE IS NOT, SAID AT THE GATE.**
+      //     - **It is the HERO's, and this offer is side-blind.** The panel
+      //       reads `_root.game.hero` hard-coded; the villain's `use_item`
+      //       (`DoAction@0x23e7cf` `+0x0390`) loops a hard `!(i > 6)` and never
+      //       reads the field. So a VILLAIN that declares `maxslots` 2 and
+      //       carries a bolt in slot 3 casts it in the build and is refused
+      //       here — narrower than the build, and the price of one offer for
+      //       every seat. No record in the repository states the field, so no
+      //       current battle can reach the difference.
+      //     - **It rests on one unmeasured link.** The build's gate is
+      //       `_visible = false`; the `onRelease` dispatcher at
+      //       `sprite:862[overlay]/frame:1` has no gate of its own. That an
+      //       invisible AVM1 clip cannot be clicked is Flash/Ruffle runtime
+      //       semantics, not something these bytes state, and no capture here
+      //       has measured it.
       //
       // ► **PER FOE, LIKE EVERY OTHER TARGETED VERB.** The build is 1v1 and its
       //   phase reads a single bound `defender`; above 1v1 the caster picks,
@@ -6348,6 +6424,7 @@ export function createSs2TeamRules({
       //   (`+0x852a`), so a bolt reaches across the arena. The item table's own
       //   description calls it close-ranged; **the bytes do not**, and the bytes
       //   are the oracle.
+      // Both gates are inside `ss2InventorySlotHolding`, default-on.
       for (const [type, spell] of Object.entries(SS2_BOLT_SPELLS)) {
         if (ss2InventorySlotHolding(view.actor, spell.itemId) === null) continue;
         for (const foe of view.foes) actions.push({ type, targetId: foe.id });
@@ -7294,8 +7371,33 @@ export function createSs2TeamRules({
         //   legality gate covers `applyAction`, but `resolveAction` is a public
         //   rule-set method. Consuming a slot that does not hold the spell
         //   would be worse than any error message.
+        //
+        // ► **AND THE RE-FIND APPLIES THE SAME `inventory_maxslots` WINDOW AS
+        //   THE OFFER (decided 2026-09-22), because otherwise a direct call
+        //   consumes a slot the offer refused.** The build splits this by side
+        //   — the hero consumes through a button the window hides, the villain
+        //   through `use_item`, which never reads the field — and this engine
+        //   is side-blind, so offer and resolve must be ONE rule or the public
+        //   method is a hole in the other one.
+        //
+        //   **It moves no legal cast, and that is provable, not hoped.** The
+        //   search is ascending first-match, so if ANY slot inside the window
+        //   holds the item, the FIRST slot holding it is inside the window too:
+        //   for every action the offer accepts, the windowed and unbounded
+        //   searches return the same slot. The window changes the resolve only
+        //   where the offer already said no. Pinned exhaustively in
+        //   `test/ss2-inventory-maxslots.test.js`.
         const slot = ss2InventorySlotHolding(actor, spell.itemId);
         if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, spell.itemId, { ignoreMaxslots: true });
+          if (beyond !== null) {
+            throw new TeamRuleSetError(
+              `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${spell.itemId} is in ${beyond}, ` +
+              `outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}. The build's hero panel ` +
+              "hides that button (sprite:492[inventory_overlay] +0x024f), and this engine offers and consumes " +
+              "through the same window."
+            );
+          }
           throw new TeamRuleSetError(
             `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
             `item ${spell.itemId}. The build's own gate is possession — check_inventory(${spell.itemId}) for ` +

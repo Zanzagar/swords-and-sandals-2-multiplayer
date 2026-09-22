@@ -60,9 +60,13 @@
  * **The HERO's gate is a different function and a shorter one** — two
  * conditions on a button, not five on a decision: `i <= inventory_maxslots`,
  * and `inventoryI != 1` once the battle has started
- * (`sprite:492[inventory_overlay]/frame:1`). `legalActions` reproduces the
+ * (`sprite:492[inventory_overlay]/frame:1`). ~~`legalActions` reproduces the
  * second and names the first as unreproduced, because `inventory_maxslots` is
- * not a declared resource here.
+ * not a declared resource here.~~ **Both are reproduced since 2026-09-22**:
+ * `inventory_maxslots` is declared (no default, not derived), the window lives
+ * in `ss2InventorySlotHolding`, and it is pinned in
+ * `test/ss2-inventory-maxslots.test.js`. Every test in THIS file states no
+ * `maxslots`, so the window fails open and nothing here moved.
  *
  * ## WHAT IS INVENTED, SAID OUT LOUD
  *

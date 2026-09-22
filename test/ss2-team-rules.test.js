@@ -1109,6 +1109,12 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     //   is **1**, not 0: fourteen emptiness tests in the build, every one
     //   `== 1`, and every literal write to a slot is 1.
     "inventory1", "inventory2", "inventory3", "inventory4", "inventory5", "inventory6",
+    // ► **ADDED 2026-09-22, THE SAME SHAPE, AND IT MOVED NOTHING EITHER.** The
+    //   hero panel's slot window (`sprite:492[inventory_overlay]/frame:1`
+    //   `+0x024f`): no `SS2_RESOURCE_DEFAULTS` entry and NOT derived from
+    //   `herolevel`, so only a record that states it declares it. 23 golden
+    //   replay hashes taken before and after, all 23 unchanged.
+    "inventory_maxslots",
     "max_damage", "maximum_ammo", "min_damage",
     // ► **ADDED 2026-09-14 WITH `weapon` BELOW, DELIBERATELY, SO A GLADIATOR
     //   CAN HOLD HIS WEAPON.** These two are APPEARANCE selectors and no rule
@@ -1228,7 +1234,9 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
   //     "carries nothing" says so — `tools/arena/roster.js` does.
   const NEVER_DEFAULTED = [
     "psyche_up",
-    "inventory1", "inventory2", "inventory3", "inventory4", "inventory5", "inventory6"
+    "inventory1", "inventory2", "inventory3", "inventory4", "inventory5", "inventory6",
+    // 2026-09-22: no default and no derivation, so never declared unless stated.
+    "inventory_maxslots"
   ];
 
   // (1) No weapon id at all: everything but what either weapon slot answers for.

@@ -197,14 +197,32 @@ export const VANILLA_FIELD_GROUPS = Object.freeze({
     ["psyche_up", "taunted1", "taunted2", "burning", "frozen", "poison", "life_stolen"],
     "Timed `spell_*` fields belong to this group; the map names none of them individually."
   ),
-  inventory: group("battle-map: Combatant state objects / Inventory", [
-    "inventory1",
-    "inventory2",
-    "inventory3",
-    "inventory4",
-    "inventory5",
-    "inventory6"
-  ])
+  inventory: group(
+    "battle-map: Combatant state objects / Inventory",
+    [
+      "inventory1",
+      "inventory2",
+      "inventory3",
+      "inventory4",
+      "inventory5",
+      "inventory6",
+      // ► **ADDED 2026-09-22, AND THE MAP'S TABLE ROW DOES NOT LIST IT.** That
+      //   row (`Inventory | inventory1 through inventory6`) is the "Observed
+      //   data fields" table, and no capture in this repository has observed
+      //   the field. Its evidence is BYTE-derived, at the map's §"Spell and
+      //   vanilla AI surface" → "THE HERO'S IN-BATTLE OFFER GATE": it is a
+      //   member of the persistent object (`initcharacter` writes it from
+      //   `characterDNA[40]` at `+0x098e`; `constructDNA` serialises it at
+      //   `+0x206d`) and the hero's inventory panel reads it as
+      //   `_root.game.hero.inventory_maxslots` (`sprite:492[inventory_overlay]
+      //   /frame:1` `+0x024f`). The group's `notes` say so, so `citationFor`
+      //   does not overclaim.
+      "inventory_maxslots"
+    ],
+    "inventory_maxslots is not in the map's observed-fields row: it is byte-derived at §Spell and vanilla AI " +
+      "surface (the hero's in-battle offer gate, sprite:492[inventory_overlay]/frame:1 +0x024f; " +
+      "initcharacter +0x098e), and no capture has observed it."
+  )
 });
 
 /**
