@@ -312,7 +312,10 @@ export function applyCommands(scene, commands) {
             from: command.from,
             to: command.to,
             sequence: command.sequence,
-            actionToken: command.actionToken ?? null
+            actionToken: command.actionToken ?? null,
+            // A push rides the victim's clip whatever it is; a walk rides only
+            // a travelling gait. Carried so a surface need not re-derive it.
+            ...(command.pushed === true ? { pushed: true } : {})
           })
         });
         break;

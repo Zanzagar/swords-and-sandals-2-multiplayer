@@ -221,6 +221,12 @@ function familyOf(label, role) {
   if (MOVEMENT_GAITS.has(label)) return `movement:${MOVEMENT_GAITS.get(label)}`;
   if (label === "Block") return "block";
   if (label === "knockback") return "knockback";
+  // ► **THE SHOVER'S OWN CLIP, and it had no family until 2026-09-22.**
+  //   `attacker.gotoAndPlay("shove")` at `+0x5e27`; frames 1447-1481, ending in
+  //   `this.struck = true; Stop` — which only the ACTING clips do. Until a
+  //   shove was found moving the wrong gladiator, its actor label came out of
+  //   the movement branch and nobody noticed it drew the `unknown` schedule.
+  if (label === "shove") return "shove";
   if (label === "taunted") return "taunted";
   if (label === "taunt") return "taunt";
   if (label === "bombard" || label === "snipe") return "ranged";
@@ -231,14 +237,19 @@ function familyOf(label, role) {
   //   2026-09-22, after the bolt verbs had shipped two days earlier with both
   //   labels falling to `unknown` here.
   //
-  //   `cast1` is deliberately NOT matched: it is `cast_gale`'s and the
-  //   fireball family's clip, and neither has a verb, so nothing dispatches it.
+  //   ~~`cast1` is deliberately NOT matched: it is `cast_gale`'s and the
+  //   fireball family's clip, and neither has a verb, so nothing dispatches it.~~
+  //   **`Cast1` IS MATCHED NOW, because `cast_gale` dispatches it** —
+  //   `attacker.gotoAndPlay("Cast1")` at `+0x7b30`, capitalised as the build
+  //   writes it. Same family as `Cast2`: 23 frames against 21, the same six
+  //   beats at 30 fps.
   //   `lightning` is its own family rather than a `condition:*` one because it
   //   is not a condition — no flag carries it. The four condition clips ARE
   //   the same mechanism, though: a status tick and a spell both reach the
   //   victim's clip through `damage_method`, and a fireball will play
   //   `burning` through the family that already exists for it.
   if (label === "Cast2") return "cast";
+  if (label === "Cast1") return "cast";
   if (label === "lightning") return "magic:lightning";
   // ► **TWO PSYCHE FAMILIES AND NOT ONE, BECAUSE THE THIRD CLIP IS LONGER AND
   //   IS THE ONE THAT SWINGS.** In the extracted pack `psyche_up` runs frames
@@ -511,6 +522,18 @@ const FAMILIES = Object.freeze({
     { at: 1, pose: {} }
   ], { loop: true }),
 
+  /**
+   * The push — 35 frames at the build's 30 fps is 1,167 ms, ten beats. The
+   * POSES are authored, like every other pose here, and the extracted rig's own
+   * `shove` clip overrides them.
+   */
+  shove: () => schedule("shove", 10, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { lean: -0.2, armSwing: -0.4 } },
+    { at: 0.55, pose: { lean: 0.5, armSwing: 0.9, legSpread: 0.5, advance: 0.6 } },
+    { at: 1, pose: {} }
+  ]),
+
   taunt: () => schedule("taunt", 10, [
     { at: 0, pose: {} },
     { at: 0.3, pose: { armSwing: 0.8, bob: 0.4, lean: -0.3 } },
@@ -524,7 +547,9 @@ const FAMILIES = Object.freeze({
    * The DURATIONS are the build's frame counts at 30 fps, rounded to the beat,
    * because neither family was authored at a pace (`clip-sequences.js`'s rule):
    * `Cast2` is frames 2126-2146 and `lightning` 1989-2003, and both end in a
-   * `Stop` inside their own span. **The POSES are authored**, like every other
+   * `Stop` inside their own span. `Cast1` (the gale's, 2103-2125, 23 frames =
+   * 767 ms = 6.39 beats) rounds to the same six, so it shares this schedule
+   * rather than needing its own. **The POSES are authored**, like every other
    * pose in this file, and the extracted rig overrides them wherever the
    * player has extracted the pack.
    */
@@ -777,7 +802,10 @@ export function figureXAt({ restingX, facing, pose, timeline = null, motion = nu
   if (!pose || !Number.isFinite(pose.advance)) {
     throw new TimelineError("figureXAt needs a pose from poseAt().");
   }
-  if (timeline?.travel && motion) return travelAt(motion, at);
+  // A travelling gait, or a PUSH riding whatever the victim plays. The build's
+  // `knockback()` tweens over its own second, independent of the clip; riding
+  // the victim's timeline instead is this engine's one approximation of it.
+  if (motion && (timeline?.travel || motion.pushed === true)) return travelAt(motion, at);
   return restingX + pose.advance * ADVANCE_UNITS * (facing === "left" ? -1 : 1);
 }
 

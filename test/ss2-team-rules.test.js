@@ -278,6 +278,11 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //   The build's own misspelling of "frightening" is kept. A corrected one
     //   is a name that matches nothing in the oracle.
     "cast-frightning-bolt",
+    // ► **JOINED 2026-09-22 — the gale, `getphase("cast_gale")`, written by
+    //   ladder arm 24 (`+0x0ea3`) and consumed at `+0x7aaa`-`+0x7be5`.** The
+    //   first token here that is a spell and deals no damage; it takes zero
+    //   samples, so it is not in `ATTACK_BANDS` for the reason `shove` is not.
+    "cast-gale",
     "cast-lightning-bolt",
     "frozen-phase",
     "life-stolen-phase",

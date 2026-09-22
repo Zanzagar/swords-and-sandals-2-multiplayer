@@ -645,8 +645,12 @@ test("the two clips are PLAYED now, so they leave the declared-unplayed list", (
   assert.equal(unplayed.has("cast2"), false);
   assert.equal(unplayed.has("lightning"), false);
   // `cast1` is NOT the bolts' clip — it is `cast_gale`'s and the fireball
-  // family's (`+0x7b30`, `+0x90f4`), and neither has a verb.
-  assert.equal(unplayed.has("cast1"), true, "cast1 stays unplayed until a verb dispatches it");
+  // family's (`+0x7b30`, `+0x90f4`). ~~Neither has a verb.~~ **It left this
+  // list on 2026-09-22 because `cast_gale` got one** and dispatches it; the
+  // pin that says so is in `test/ss2-gale.test.js`. What stays true here is
+  // that the BOLTS still play `Cast2` and not `Cast1`.
+  assert.equal(unplayed.has("cast1"), false, "cast1 left when the gale verb began dispatching it");
+  assert.equal(SS2_BOLT_INGRESS.casterClip, "Cast2", "the bolts' own caster clip is unchanged");
 });
 
 test("each clip plays for the build's own length at 30 fps", () => {

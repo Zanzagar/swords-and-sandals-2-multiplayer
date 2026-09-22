@@ -232,13 +232,28 @@ const FAMILY_LABELS = Object.freeze({
   knockback: Object.freeze(["knockback", "knockback_mov", "shove"]),
   taunt: Object.freeze(["taunt"]),
   taunted: Object.freeze(["taunted"]),
+  // The SHOVER's clip (frames 1447-1481, `+0x5e27`). It also sits at the end of
+  // `knockback` above as a fallback an incomplete pack gets — which is a victim
+  // borrowing the pusher's art, and is left as it was rather than silently
+  // changed under a bout that already draws it.
+  shove: Object.freeze(["shove"]),
   // ► **THE BOLTS' TWO CLIPS, LEFT `unbuiltSpells` ON 2026-09-22 — two days
   //   AFTER the verbs shipped, and on purpose.** The verbs carried the right
   //   labels on their event from the first commit; what they lacked was a
   //   family, and promoting a label without one is the `psyche:discharge`
   //   defect exactly. They moved together: family here, `familyOf` in
   //   `timeline.js`, and the binding in `SS2_STATIC_MAP_BINDINGS`.
-  cast: Object.freeze(["cast2"]),
+  //
+  // ► **`cast1` JOINED THE SAME FAMILY WHEN `cast_gale` WAS BUILT (2026-09-22)**
+  //   — `attacker.gotoAndPlay("Cast1")` at `+0x7b30`. One family for both
+  //   because both are a caster's gesture and share one schedule: `Cast1` is
+  //   frames 2103-2125 (23) and `Cast2` 2126-2146 (21), both ending in their
+  //   own `stop`, and both round to the same six 120 ms beats at 30 fps.
+  //   **`cast2` stays FIRST**, so a caller with no label of its own gets the
+  //   bolts' clip exactly as before; the engine's own label wins by membership
+  //   in `animationFor` and `chooseSound`, so `Cast1` draws and sounds as
+  //   itself.
+  cast: Object.freeze(["cast2", "cast1"]),
   "magic:lightning": Object.freeze(["lightning"]),
   ranged: Object.freeze(["bombard", "snipe"]),
 
@@ -420,14 +435,17 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    *   called the table `CLIP_FAMILIES`. No such name exists in this repository;
    *   it is `FAMILY_LABELS`, the constant at the head of this file.)*
    *
-   *   `cast1` is a different case again and is NOT what the bolts play: it is
+   *   ~~`cast1` is a different case again and is NOT what the bolts play: it is
    *   `cast_gale`'s and the fireball family's clip (`+0x7b30`, `+0x90f4`), and
-   *   neither has a verb.
+   *   neither has a verb.~~ **`cast1` LEFT TOO, LATER ON 2026-09-22, when
+   *   `cast_gale` got its verb** — family, `familyOf` and the event's
+   *   `casterClip` in one change, the order this paragraph prescribes. The
+   *   fireballs still have no verb; they play the same clip and will need
+   *   nothing here when they get one.
    */
   unbuiltSpells: Object.freeze([
     // `cast2` and `lightning` left on 2026-09-22; see the `cast` and
-    // `magic:lightning` families above.
-    "cast1",
+    // `magic:lightning` families above. `cast1` left the same day with the gale.
     "colossus", "rejuvinate", "drink_potion"
   ]),
 

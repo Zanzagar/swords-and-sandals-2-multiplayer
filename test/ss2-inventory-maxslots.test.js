@@ -272,3 +272,18 @@ test("ignoreMaxslots is check_inventory's own search, and the empty marker still
   assert.equal(ss2InventorySlotHolding(hero, SS2_INVENTORY_EMPTY, { ignoreMaxslots: true }), null);
   assert.equal(ss2InventorySlotHolding(hero, SS2_INVENTORY_EMPTY), null);
 });
+
+test("the window gates GALE too, because both spells find their slot through the same search", () => {
+  // `cast_gale` and this window were built in parallel, in two worktrees, and
+  // merged on 2026-09-22. Neither implementer could test the other's change,
+  // and the property that makes the merge safe is structural: gale's offer and
+  // resolve both call `ss2InventorySlotHolding`, where the window lives. This
+  // pins it, so a later refactor that gives gale its own slot search cannot
+  // quietly drop the window for one spell and keep it for the other.
+  const galeIn = (position, extra = {}) => ({ [SS2_INVENTORY_SLOTS[position - 1]]: 38, ...extra });
+  assert.equal(offered(staged({ hero: galeIn(3) }), Ss2ActionType.CAST_GALE), true, "undeclared: slot 3 is reachable");
+  assert.equal(offered(staged({ hero: galeIn(3, { [MAXSLOTS]: 2 }) }), Ss2ActionType.CAST_GALE), false,
+    "maxslots 2: the button for slot 3 is hidden, so gale is not offered");
+  assert.equal(offered(staged({ hero: galeIn(2, { [MAXSLOTS]: 2 }) }), Ss2ActionType.CAST_GALE), true,
+    "and slot 2 is inside the window");
+});

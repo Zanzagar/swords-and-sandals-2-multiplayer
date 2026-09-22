@@ -74,7 +74,13 @@ export function timelinesForStep(commands) {
   const stepped = new Map();
   const depthStepped = new Map();
   for (const command of batch) {
-    if (command.kind === "move-clip") stepped.set(command.combatantId, { from: command.from, to: command.to });
+    if (command.kind === "move-clip") {
+      stepped.set(command.combatantId, {
+        from: command.from,
+        to: command.to,
+        ...(command.pushed === true ? { pushed: true } : {})
+      });
+    }
     // ► **THE SECOND AXIS NEEDS ITS OWN SLOT, and the first version of the
     //   lane-change tween failed because it did not have one.** The obvious
     //   fix — "start a timeline from the depth move" — yields an entry whose
@@ -111,7 +117,15 @@ export function timelinesForStep(commands) {
   for (const command of batch) {
     if (command.kind !== "clip-goto") continue;
     const timeline = timelineFor(command.label, { role: command.role });
-    const motion = timeline.travel ? (stepped.get(command.combatantId) ?? null) : null;
+    // ► **A PUSH IS PAIRED WITH WHATEVER THE VICTIM PLAYS**, where a walk is
+    //   paired only with a travelling gait. The rule below exists so a figure
+    //   that moved AND flinched in one batch is not dragged across the arena on
+    //   `hurt3` — and a pushed victim's move is not its own gait at all, it is
+    //   `knockback(defender, force)` tweening `_x` while the victim plays its
+    //   knockback clip. Added 2026-09-22 with `displacementOf` in
+    //   `presentation.js`.
+    const step = stepped.get(command.combatantId) ?? null;
+    const motion = timeline.travel || step?.pushed === true ? step : null;
     started.set(command.combatantId, {
       timeline,
       token: command.actionToken ?? null,

@@ -374,6 +374,25 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
       return Object.freeze({ actor: null, target: null });
     }
 
+    // ► **A SHOVE AND A TAUNT ARE BOUND BEFORE THE MOVEMENT BRANCH BELOW,
+    //   because their `from`/`to` are the VICTIM's and that branch reads them
+    //   as the actor's walk.** Until 2026-09-22 a shove reached it and came out
+    //   as the shover playing an ASSUMED `shove` walk, and a displacing taunt
+    //   came out as the taunter walking. See `displacementOf`.
+    //
+    //   `shove` is the build's own clip — `attacker.gotoAndPlay("shove")` at
+    //   `+0x5e27`, a label on the fighter clip (frames 1447-1481) — so it is
+    //   MAP_NAMED. The victim plays `knockback` only above the force gate
+    //   (`+0x5ed3`, `+0x5f94`); the displacement is unconditional and the
+    //   resolver reports which, as `knockbackAnimation`.
+    if (event.type === "shove") {
+      return Object.freeze({
+        actor: label("shove", LabelProvenance.MAP_NAMED),
+        target: event.knockbackAnimation === true ? label("knockback", LabelProvenance.MAP_NAMED) : null
+      });
+    }
+    if (event.type === "taunt") return tauntLabels(event);
+
     if (Number.isFinite(event.from) && Number.isFinite(event.to)) {
       const phase = typeof event.vanillaLabel === "string" && event.vanillaLabel.length > 0
         ? event.vanillaLabel
@@ -466,17 +485,8 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
     //   Only `taunt_effect == 1` reaches the dispatcher; that arm falls through
     //   to the attack cases below and keeps the `taunted` target label from
     //   here, because the build never replaces it.
-    if (event.type === "taunt") {
-      const actorLabel = label("taunt", LabelProvenance.MAP_NAMED);
-      // The knockback clip is the build's own, and only above its force gate —
-      // `defender.gotoAndPlay("knockback")` at `+0x6a21`/`+0x6a91` against the
-      // UNCONDITIONAL displacement at `+0x6ab1`. The resolver reports which,
-      // because the threshold is not recoverable from the two endpoints.
-      if (event.knockbackAnimation === true) {
-        return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
-      }
-      return Object.freeze({ actor: actorLabel, target: label("taunted", LabelProvenance.MAP_NAMED) });
-    }
+    // (The taunt's own case moved above the movement branch on 2026-09-22 and
+    // lives in `tauntLabels`; see the shove case there.)
 
     if (event.hit === false) {
       // Map, "Attack roll dispatcher": "A miss calls `defender_blocked()`."
@@ -508,6 +518,26 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
     return label(howDied, LabelProvenance.ASSUMED);
   }
 });
+
+/**
+ * A TAUNT PLAYS BOTH CLIPS AND PLAYS THEM WHATEVER IT ROLLED. The build fires
+ * `attacker.gotoAndPlay("taunt")` at `+0x6905` and
+ * `defender.gotoAndPlay("taunted")` at `+0x690c` BEFORE the roll, so a taunt
+ * that fails outright still animates both — which is the whole reason it reads
+ * as a taunt rather than as a fumble.
+ *
+ * The knockback clip is the build's own, and only above its force gate —
+ * `defender.gotoAndPlay("knockback")` at `+0x6a21`/`+0x6a91` against the
+ * UNCONDITIONAL displacement at `+0x6ab1`. The resolver reports which, because
+ * the threshold is not recoverable from the two endpoints.
+ */
+function tauntLabels(event) {
+  const actorLabel = label("taunt", LabelProvenance.MAP_NAMED);
+  if (event.knockbackAnimation === true) {
+    return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
+  }
+  return Object.freeze({ actor: actorLabel, target: label("taunted", LabelProvenance.MAP_NAMED) });
+}
 
 function attackLabel(direction) {
   // Map: "attack directions 1-12 (190-360)". The frame range is recorded; the
@@ -921,22 +951,59 @@ function projectileFor(wire, combatants, event) {
   });
 }
 
-function movementFor(layout, event) {
+/**
+ * WHOSE move an event describes — the actor's own, or its VICTIM's.
+ *
+ * ► **ADDED 2026-09-22, AFTER A SHOVE WAS FOUND MOVING THE SHOVER.** Every
+ *   movement event puts its endpoints in `from`/`to`, and this file read them
+ *   as the ACTOR's — right for a walk, a charge, a taunted flee. But `shove`
+ *   and a displacing `taunt` put the TARGET's displacement in those same two
+ *   fields, so the screen walked the pusher into the victim's spot and left the
+ *   victim standing; `cast_gale` uses `targetFrom`/`targetTo` and moved nobody.
+ *   Live since `shove` shipped on 2026-09-19; found by the `cast_gale`
+ *   implementer measuring a shove, and independently by a Codex review of gale.
+ *
+ *   **The events are inside `combatStateHash`**, so their fields are not
+ *   renamed; this is the one place that decides whose move they are:
+ *
+ *   - `targetFrom`/`targetTo` — the gale's own spelling — are the target's;
+ *   - `from`/`to` on a `shove` or a `taunt` are the target's, matched on the
+ *     TYPE because those two events' own fields cannot say so, the same way
+ *     `rest` and `swap-weapons` are matched above;
+ *   - anything else with `from`/`to` is the actor's own move.
+ */
+function displacementOf(event) {
+  if (Number.isFinite(event.targetFrom) && Number.isFinite(event.targetTo)) {
+    return { combatantId: event.targetId, from: event.targetFrom, to: event.targetTo, pushed: true };
+  }
   if (!Number.isFinite(event.from) || !Number.isFinite(event.to)) return null;
+  if (event.type === "shove" || event.type === "taunt") {
+    return { combatantId: event.targetId, from: event.from, to: event.to, pushed: true };
+  }
+  return { combatantId: event.actorId, from: event.from, to: event.to, pushed: false };
+}
+
+function movementFor(layout, event) {
+  const displacement = displacementOf(event);
+  if (displacement === null) return null;
   // Resolved HERE rather than by the caller, and that is not tidiness. This is
   // called before the binding is known, and `layout.placementFor` THROWS on a
   // combatant with no slot — so hoisting the lookup to the call site turned an
   // unbound event naming an unknown actor from an `unmapped` record into a
   // `SlotLayoutError`. Caught by reading the diff; pinned by
   // `an event with no binding is reported as unmapped instead of guessed`.
-  const placement = layout.placementFor(event.actorId);
+  const placement = layout.placementFor(displacement.combatantId);
   return Object.freeze({
     kind: CommandKind.MOVE_CLIP,
     sequence: event.sequence,
     combatantId: placement.combatantId,
     instancePath: placement.instancePath,
-    from: event.from,
-    to: event.to
+    from: displacement.from,
+    to: displacement.to,
+    // A PUSH rides whatever clip its victim plays, where a walk rides only a
+    // travelling gait — see `timelinesForStep` and `figureXAt`. Present only
+    // on a push, so every existing move-clip is byte-for-byte what it was.
+    ...(displacement.pushed ? { pushed: true } : {})
   });
 }
 

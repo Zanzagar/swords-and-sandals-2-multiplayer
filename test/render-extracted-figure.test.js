@@ -685,10 +685,12 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   // on, exactly as the charging clips were before the stance.
   // **80/21 -> 82/19 on 2026-09-22**, when the bolt verbs got their family:
   // `Cast2` (`+0x8515`) and `lightning` (`damage_method`, `+0x858f`) are
-  // dispatched by a verb this engine resolves. `cast1` stays declared; no verb
-  // dispatches it.
-  assert.equal(mapped.size, 82);
-  assert.equal(declared.size, 19);
+  // dispatched by a verb this engine resolves. ~~`cast1` stays declared; no verb
+  // dispatches it.~~ **82/19 -> 83/18 later the same day**, when `cast_gale`
+  // was built: it dispatches `Cast1` (`+0x7b30`), which joined the `cast`
+  // family behind `cast2`.
+  assert.equal(mapped.size, 83);
+  assert.equal(declared.size, 18);
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
   // ► **THE ENTRY IS FIRST IN ITS FAMILY, and the order is what `animationFor`

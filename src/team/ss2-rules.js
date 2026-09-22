@@ -399,6 +399,11 @@ export const Ss2ActionType = Object.freeze({
   //   step from the first cast.
   CAST_LIGHTNING_BOLT: "cast-lightning-bolt",
   CAST_FRIGHTNING_BOLT: "cast-frightning-bolt",
+  // ► **THE GALE — THE THIRD SPELL VERB AND THE FIRST THAT DEALS NO DAMAGE.**
+  //   `+0x7aaa`-`+0x7be5` of the same block; see `SS2_GALE`. A pure
+  //   displacement like `shove`, taking ZERO samples, so it is not in
+  //   `ATTACK_BANDS` for the reason `shove` is not.
+  CAST_GALE: "cast-gale",
   /**
    * The phase a TAUNTED gladiator is forced into: it runs away.
    *
@@ -926,6 +931,11 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // everywhere else in this repository: a corrected spelling is a name that
   // matches nothing in the build.
   [Ss2ActionType.CAST_FRIGHTNING_BOLT]: "cast_frightning_bolt",
+  // `phase_decision == "cast_gale"` at `+0x7ab0`, and the decision the villain
+  // ladder writes at arm 24 (`+0x0ea3`). The CASTER's clip is `Cast1`
+  // (`+0x7b30`), not `Cast2`, and the victim's is `knockback` (`+0x7b78`) —
+  // carried on the event for the reason the bolts carry theirs.
+  [Ss2ActionType.CAST_GALE]: "cast_gale",
   // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
   //   of the decision table is `taunted1 == true` -> facing right
   //   `getphase("runleft")`, facing left `getphase("runright")`
@@ -3583,6 +3593,92 @@ export const SS2_BOLT_INGRESS = Object.freeze({
    * cue on one clip; it is not proof of which clip.
    */
   crowdAction: 5
+});
+
+/* ------------------------------------------------------------------ */
+/* The gale phase: a spell that moves a body and hurts nobody           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_gale`, byte-derived 2026-09-19 and re-read 2026-09-22 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base `0x240c85`),
+ * `+0x7aaa`-`+0x7be5`:
+ *
+ * ```text
+ *   phase_decision == "cast_gale"                                  +0x7aaa
+ *     register:3.crowd_action = 2                                  +0x7abd
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x7ad0
+ *     if (attacker.shove != true) {                                +0x7af1
+ *       cast_spell_icon(attacker, 38)                              +0x7b0a
+ *       attacker.shove = true                                      +0x7b22
+ *       attacker.gotoAndPlay("Cast1")                              +0x7b30
+ *       if (attacker.gladiator_dir == "right") force = 1000        +0x7b45, +0x7b5d
+ *       else                                   force = -1000       +0x7b6d
+ *       defender.gotoAndPlay("knockback")                          +0x7b78
+ *       knockback(defender, force)                                 +0x7b8c-+0x7ba2
+ *     }
+ *     if (attacker.struck == true) {                               +0x7ba4
+ *       attacker.struck = null; attacker.shove = null; nextphase() +0x7bd6
+ *     }
+ * ```
+ *
+ * ► **ZERO SAMPLES AND ZERO DAMAGE.** No `randomBetween`, `RandomNumber`,
+ *   `checkattackroll` or `hitpoints` anywhere in the arm, and
+ *   `knockback(whichcharacter, force)` (`+0x1dd3`, 155 bytes) is one
+ *   `mx.transitions.Tween` of `_x` from `_x` to `_x + force` over one second
+ *   with no comparison in it. So it returns before `ATTACK_BANDS`, as `shove`
+ *   does, and for the same tape reason.
+ *
+ * ► **THE SIGN IS THE CASTER'S FACING**, the shove's and the taunt's rule and
+ *   the opposite of `damagecharacter`'s. `Equals2; Not; If` at `+0x7b56`-`+0x7b58`
+ *   jumps to the `-1000` store at `+0x7b6d` whenever the facing is NOT
+ *   `"right"`; this engine's facing is two-valued (`SS2_FACING_LEFT` or its
+ *   absence), so the build's "anything else" arm and its left arm coincide.
+ *
+ * ► **FLAT ±1000 WITH NO FLOOR AND NO ANIMATION GATE** — the only one of the
+ *   four `knockback` sites with either property (map §"`knockback(whichcharacter,
+ *   force)`, decoded"). The `knockback` clip at `+0x7b78` sits after the
+ *   if/else join (`+0x7b68` jumps to it) and inside no force test, so it plays
+ *   on every cast, including one the wall swallows whole.
+ *
+ * ► **THE BOUND IS THE CLIP CLAMP, NOT `knockback`**, exactly as for `shove`;
+ *   see `SS2_ARENA.clamp`.
+ *
+ * ► **IT REUSES `attacker.shove` AS ITS LATCH** (`+0x7af1`, `+0x7b22`,
+ *   `+0x7bcf`) and completes on the CASTER's `struck` (`+0x7ba4`), unlike the
+ *   bolts' `defender.struck`. Neither is modelled: this engine completes every
+ *   phase within the action, and `src/adapter/action-gate.js` would be the
+ *   consumer of the difference.
+ *
+ * ► **THE COST IS `round(magicka)`, THE STAT, WITH NO AFFORDABILITY CHECK**,
+ *   the bolts' shape exactly. The item row prices gale at 4
+ *   (`root/frame:35` `+0x4f42`); the phase does not read that number.
+ *
+ * ► **THE OFFER IS POSSESSION, AND `fightdistance` IS NOT PART OF IT.** The
+ *   five-condition gate — a 90% roll (`+0x056f`), 23 preceding ladder arms,
+ *   `check_inventory(38)` (`+0x0e2e`), `_root.arena.fightdistance < 400`
+ *   (`+0x0e4c`-`+0x0e62`) and `villain.armourclass < villain.armourclass_max / 2`
+ *   (`+0x0e6b`-`+0x0e9c`) — is `villain_cast_spells`, the villain AI's
+ *   DECISION, which `villainChooseAction` calls last to replace its own. The
+ *   hero's inventory button (`sprite:862[overlay]/frame:1`, `+0x05ca`-`+0x0638`
+ *   for slot 1 and five more) tests only `inv_struck != true`. So
+ *   `legalActions` offers on possession and `chooseAiAction` reads the
+ *   villain's conditions; see both.
+ */
+export const SS2_GALE = Object.freeze({
+  /** `cast_spell_icon(attacker, 38)` `+0x7b0a`, `check_inventory(38)` `+0x0e2e`, row `inventory38`. */
+  itemId: 38,
+  /** `Push "force", 1000` `+0x7b5d` / `Push "force", -1000` `+0x7b6d`. The magnitude. */
+  force: 1000,
+  /** `attacker.gotoAndPlay("Cast1")`, `+0x7b30`. */
+  casterClip: "Cast1",
+  /** `defender.gotoAndPlay("knockback")`, `+0x7b78` — unconditional. */
+  victimClip: "knockback",
+  /**
+   * The VILLAIN's distance gate, `fightdistance < 400` (`+0x0e5a`, `Less2`),
+   * read by `chooseAiAction` and by nothing else. Strict.
+   */
+  aiFightDistanceBelow: 400
 });
 
 export const SS2_TAUNT = Object.freeze({
@@ -6430,6 +6526,21 @@ export function createSs2TeamRules({
         for (const foe of view.foes) actions.push({ type, targetId: foe.id });
       }
 
+      // ► **THE GALE IS OFFERED ON POSSESSION ALONE, ON THE SAME BUTTON AND
+      //   UNDER THE SAME TWO-GATE OVERLAY AS THE BOLTS ABOVE** — so everything
+      //   that block says about `inventory_maxslots` applies here unchanged,
+      //   including that this engine does not yet reproduce it.
+      //
+      //   **`fightdistance` IS NOT AN OFFER GATE, and treating it as one is what
+      //   kept this verb unbuilt.** Its `< 400` test is ladder arm 24 of
+      //   `villain_cast_spells`, the villain AI's decision; the hero's click
+      //   handler reads only `inv_struck`, and the phase itself
+      //   (`+0x7aaa`-`+0x7be5`) reads no distance at all. `chooseAiAction` reads
+      //   the villain's conditions; this is the button.
+      if (ss2InventorySlotHolding(view.actor, SS2_GALE.itemId) !== null) {
+        for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_GALE, targetId: foe.id });
+      }
+
       // ► **WHICH CONTROLLER FRAME THE GLADIATOR IS ON, computed ONCE because
       //   two arms below need it and a second copy is a second chance to be
       //   wrong** — the argument the walk arm makes about `anyInReach` and
@@ -7522,6 +7633,90 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **THE GALE. Zero samples, zero damage, one body moved.** It returns
+      //   before `ATTACK_BANDS` for the shove's reason: the arm draws nothing,
+      //   so entering the dispatcher would take samples the build never takes.
+      //   See `SS2_GALE` for the phase, statement by statement.
+      if (request.type === Ss2ActionType.CAST_GALE) {
+        const victim = request.target;
+        if (!victim) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a target; ${String(request.targetId)} is not a combatant.`
+          );
+        }
+        // Re-found at resolve rather than carried from the offer, for the
+        // reason the bolt branch gives.
+        const slot = ss2InventorySlotHolding(actor, SS2_GALE.itemId);
+        if (slot === null) {
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+            `item ${SS2_GALE.itemId}. The build's own gate is possession — check_inventory(${SS2_GALE.itemId}) ` +
+            "for the villain, a visible inventory button for the hero — and this engine reproduces it."
+          );
+        }
+
+        // `gladiator_dir == "right"` -> +1000, else -1000 (`+0x7b45`-`+0x7b6d`).
+        const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
+        const force = facingLeft ? 0 - SS2_GALE.force : SS2_GALE.force;
+        // `knockback(defender, force)` bounds nothing; the clip clamp does. See
+        // `SS2_ARENA.clamp` and the shove branch above.
+        const to = Number.isFinite(victim.x)
+          ? clamp(victim.x + force, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max)
+          : null;
+
+        // No damage, so no death: `nextphase` always runs, and the cost is spent
+        // unconditionally exactly as the bolt's is.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const transition = phaseTransitionEffects(actor, { staminaCost });
+
+        // In the build's own order: the slot is consumed before the phase runs
+        // (the hero's click handler, or `use_item` for the villain), the body
+        // moves mid-phase, and `nextphase` settles the stamina at the end.
+        const effects = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }];
+        if (to !== null && to !== victim.x) {
+          effects.push({ kind: EffectKind.POSITION, targetId: victim.id, to });
+          effects.push(...facingAfterTargetMove({ ...victim, x: to }));
+        }
+        effects.push(...transition.effects, ...crowd);
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: victim.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // Both clips are the build's strings and neither is derivable from
+            // the label; `SS2_STATIC_MAP_BINDINGS` binds any event carrying the
+            // pair, so no presentation case is needed.
+            casterClip: SS2_GALE.casterClip,
+            victimClip: SS2_GALE.victimClip,
+            spellId: SS2_GALE.itemId,
+            consumedSlot: slot,
+            force,
+            // ► **`targetFrom`/`targetTo`, NOT `from`/`to`, AND THE NAME IS THE
+            //   FIX.** `src/adapter/presentation.js` reads an event's `from`/`to`
+            //   as the ACTOR's own move — a movement binding for the actor and a
+            //   `move-clip` for the actor — and that check runs BEFORE the
+            //   `casterClip`/`victimClip` case. The shove and the taunt put
+            //   their TARGET's displacement in `from`/`to`, and a presented
+            //   shove sends the SHOVER to the victim's coordinates with an
+            //   assumed `shove` clip and no `knockback` (measured 2026-09-22).
+            //   The victim's own on-screen move is a presentation gap for every
+            //   displacement verb and is not closed here.
+            targetFrom: Number.isFinite(victim.x) ? victim.x : null,
+            targetTo: to,
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained
+          }]
+        };
+      }
+
       const band = ATTACK_BANDS[request.type]
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
@@ -8237,6 +8432,64 @@ export function createSs2TeamRules({
       //   either, so this needs no geometry.
       const boltOnOffer = options.some((option) => SS2_BOLT_SPELLS[option.type]);
       const attackOnOffer = options.some((option) => ATTACK_BANDS[option.type]) || boltOnOffer;
+
+      // ► **THE GALE IS THE BUILD'S OWN RULE, NOT A PRICE, because it deals no
+      //   damage and so has no row in the table below.** Ladder arm 24 of
+      //   `villain_cast_spells` (`+0x0e2e`-`+0x0ebd`) casts when three things
+      //   hold, and they are the three read here:
+      //
+      //     check_inventory(38)                                     +0x0e2e
+      //     && _root.arena.fightdistance < 400                      +0x0e4c-+0x0e62
+      //     && villain.armourclass < villain.armourclass_max / 2    +0x0e6b-+0x0e9c
+      //
+      //   `fightdistance` is the build's pair distance, which `ss2FightDistance`
+      //   already is. An unarmoured gladiator never passes the third (`0 < 0`),
+      //   which is the build's answer and is kept.
+      //
+      // ► **RETURNED BEFORE THE WALK AND THE SWING, because the build does
+      //   that too.** `villainChooseAction` ENDS by calling
+      //   `villain_cast_spells()`, which REPLACES the decision it had already
+      //   made (map `:2606`, `:2735`). So a gale whose gate is open beats a swing
+      //   in reach and a step out of it alike. **`attackOnOffer` is deliberately
+      //   NOT widened**: the psyche range gate below depends on it meaning "a
+      //   verb offered on `ss2Reach`", and the bolts already broke that once.
+      //
+      // ► **THE LADDER'S PRE-EMPTION, AS FAR AS IT REACHES THIS ENGINE.** Arms
+      //   1-23 must all fail first. Of those, only the two bolts have verbs here
+      //   (arms 15 and 17), and both fire on possession alone — so a caster
+      //   offered a bolt never reaches the gale, even on a turn this engine's
+      //   pricing then spends on a swing instead. The other 21 arms (potions,
+      //   `rejuvinate`, the fireballs, boundless energy, ...) have no verb and so
+      //   cannot pre-empt anything; when they are built, this test must grow.
+      //
+      // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
+      //   > 10` at `+0x056f`. This AI takes no samples, so it casts on every
+      //   turn the gate is open rather than on nine in ten, and a failed roll's
+      //   fall-through to the melee decision is not reproduced.
+      //
+      // ► **INVENTED: WHICH FOE.** The build has one `defender`. Above 1v1 this
+      //   gales the NEAREST foe, which is the one the distance gate is about and
+      //   the one facing already points at — so the push carries it away from
+      //   the caster. At 1v1 it is the build's defender exactly.
+      if (!boltOnOffer) {
+        const galed = nearestFoe(view);
+        const galeOption = galed
+          ? options.find((option) => option.type === Ss2ActionType.CAST_GALE && option.targetId === galed.id)
+          : undefined;
+        if (galeOption) {
+          const range = ss2FightDistance(actor, galed);
+          const armourBelowHalf = resourceValue(actor, "armourclass", 0)
+            < resourceValue(actor, "armourclass_max", 0) / 2;
+          // `range` is null when either side models no position, and
+          // `null < 400` is TRUE in JS. **Unreachable today** — `nearestFoe`
+          // already skips a foe whose distance is null — and kept because that
+          // is a construction in another function, and the psyche gate below
+          // is what a guard justified by someone else's construction costs
+          // when the construction changes. No mutation of it can go red.
+          if (range !== null && range < SS2_GALE.aiFightDistanceBelow && armourBelowHalf) return galeOption;
+        }
+      }
+
       if (!attackOnOffer) {
         const nearest = nearestFoe(view);
 
