@@ -4100,9 +4100,12 @@ function renderControls() {
     ...host.legalActions().map((action) => {
       const button = document.createElement("button");
       const target = action.targetId ? byId.get(action.targetId) : null;
+      // `drink-potion` is one token for eight items, so without the id two
+      // different potions would be two identical buttons.
+      const item = Number.isInteger(action.itemId) ? ` #${action.itemId}` : "";
       button.textContent = target && action.targetId !== actorId
-        ? `${action.type} → ${target.name}`
-        : action.type;
+        ? `${action.type}${item} → ${target.name}`
+        : `${action.type}${item}`;
       button.disabled = !ready.ready;
       button.addEventListener("click", () => {
         try {

@@ -385,7 +385,9 @@ function describeOption(battle, option) {
   const target = combatantById(battle, option.targetId);
   const targetName = target?.name ?? option.targetId;
   const spell = option.spellKind ? ` (${option.spellKind})` : "";
-  return `${option.type}${spell} -> ${targetName}`;
+  // `drink-potion` is one token for eight items; the id is what tells them apart.
+  const item = Number.isInteger(option.itemId) ? ` (item ${option.itemId})` : "";
+  return `${option.type}${spell}${item} -> ${targetName}`;
 }
 
 /* ------------------------------------------------------------------ */

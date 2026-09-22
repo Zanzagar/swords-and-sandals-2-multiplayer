@@ -240,6 +240,13 @@ const FAMILY_LABELS = Object.freeze({
   // borrowing the pusher's art, and is left as it was rather than silently
   // changed under a bout that already draws it.
   shove: Object.freeze(["shove"]),
+  // ► **THE DRINKER'S CLIP, LEFT `unbuiltSpells` ON 2026-09-22 WITH ITS VERB**
+  //   — family here, `familyOf` in `timeline.js` and the actor-only binding in
+  //   `SS2_STATIC_MAP_BINDINGS`, in one change, the order `unbuiltSpells`
+  //   prescribes. `attacker.gotoAndPlay("drink_potion")` at `+0x57c6`, frames
+  //   1887-1910. It is not a spell and never was: it is the potion phase, and
+  //   the build names the phase and the clip alike.
+  drink: Object.freeze(["drink_potion"]),
   // ► **THE BOLTS' TWO CLIPS, LEFT `unbuiltSpells` ON 2026-09-22 — two days
   //   AFTER the verbs shipped, and on purpose.** The verbs carried the right
   //   labels on their event from the first commit; what they lacked was a
@@ -448,8 +455,9 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    */
   unbuiltSpells: Object.freeze([
     // `cast2` and `lightning` left on 2026-09-22; see the `cast` and
-    // `magic:lightning` families above. `cast1` left the same day with the gale.
-    "colossus", "rejuvinate", "drink_potion"
+    // `magic:lightning` families above. `cast1` left the same day with the gale,
+    // and `drink_potion` later still with its own verb — see the `drink` family.
+    "colossus", "rejuvinate"
   ]),
 
   /**

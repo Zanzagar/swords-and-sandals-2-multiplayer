@@ -668,7 +668,7 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
     "standing", "rest", "block", "defend",
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
     "attack", "hurt", "knockback", "taunt", "taunted", "ranged", "psyche",
-    "stance:psyche", "stance:psyche2", "celebrate", "cast", "magic:lightning",
+    "stance:psyche", "stance:psyche2", "celebrate", "cast", "magic:lightning", "drink",
     "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
     "death:unknown"
   ];
@@ -688,9 +688,11 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   // dispatched by a verb this engine resolves. ~~`cast1` stays declared; no verb
   // dispatches it.~~ **82/19 -> 83/18 later the same day**, when `cast_gale`
   // was built: it dispatches `Cast1` (`+0x7b30`), which joined the `cast`
-  // family behind `cast2`.
-  assert.equal(mapped.size, 83);
-  assert.equal(declared.size, 18);
+  // family behind `cast2`. **83/18 -> 84/17 later still**, when `drink_potion`
+  // got its verb: the potion phase dispatches it (`+0x57c6`) and it is the
+  // `drink` family now.
+  assert.equal(mapped.size, 84);
+  assert.equal(declared.size, 17);
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
   // ► **THE ENTRY IS FIRST IN ITS FAMILY, and the order is what `animationFor`

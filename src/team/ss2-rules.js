@@ -410,6 +410,17 @@ export const Ss2ActionType = Object.freeze({
   //   `ATTACK_BANDS`, for the bolts' reason. SELF-TARGETED like `rest`: the arm
   //   never reads `defender` or `game_defender`.
   CAST_TELEPORT: "cast-teleport",
+  // ► **THE POTIONS — ONE TOKEN FOR EIGHT ITEMS, AND THAT IS THE BUILD'S
+  //   SHAPE, NOT A SHORTCUT.** Unlike the two bolts, which are two
+  //   `getphase` labels, the build has ONE label, `drink_potion`, for
+  //   inventory ids 2-9: `villain_cast_spells` writes the same
+  //   `villaindecisionA = "drink_potion"` at eight arms, and the phase
+  //   (`+0x576d`-`+0x5dad`) selects the potion from
+  //   `game_attacker.inventory_action`. So the action carries the id as
+  //   `itemId`, which the resolver compares and passes through for exactly
+  //   this reason; see `SS2_POTIONS`. Zero samples, so not in
+  //   `ATTACK_BANDS`, for the reason `shove` and `cast_gale` are not.
+  DRINK_POTION: "drink-potion",
   /**
    * The phase a TAUNTED gladiator is forced into: it runs away.
    *
@@ -946,6 +957,12 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // arm 26 writes at `+0x0f91`. The caster's clip is `Cast2` (`+0x7620`), the
   // bolts' — carried on the event; there is no victim clip at all.
   [Ss2ActionType.CAST_TELEPORT]: "cast_teleport",
+  // `phase_decision == "drink_potion"` at `+0x5773`, the decision all eight
+  // potion arms of the villain ladder write (`+0x0662`, `+0x074c`, `+0x07c1`,
+  // `+0x0836`, `+0x099a`, `+0x0a0f`, `+0x0a84`, `+0x0af9`), and — unusually —
+  // ALSO the drinker's clip: `attacker.gotoAndPlay("drink_potion")` at
+  // `+0x57c6`. One name for the phase and the animation, which no spell has.
+  [Ss2ActionType.DRINK_POTION]: "drink_potion",
   // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
   //   of the decision table is `taunted1 == true` -> facing right
   //   `getphase("runleft")`, facing left `getphase("runright")`
@@ -3809,6 +3826,208 @@ export const SS2_TELEPORT = Object.freeze({
   aiFightDistanceBelow: 250
 });
 
+/* ------------------------------------------------------------------ */
+/* The potion phase: eight items, one label, and no roll at all         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `drink_potion`, byte-derived 2026-09-22 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base `0x240c85`),
+ * `+0x576d`-`+0x5dad`:
+ *
+ * ```text
+ *   phase_decision == "drink_potion"                                   +0x5773
+ *     register:3.crowd_action = -3                                     +0x577f
+ *     game_attacker.staminacost = 0                                    +0x578c
+ *     if (attacker.struck == null) {                                   +0x57a1
+ *       attacker.struck = false                                        +0x57b8
+ *       attacker.gotoAndPlay("drink_potion")                           +0x57c6
+ *       attacker.potions.gotoAndPlay(game_attacker.inventory_action - 1) +0x57da
+ *       if (inventory_action == 2) bonus = round(hitpointsmax * 0.25)  +0x5807
+ *       if (inventory_action == 3) bonus = round(hitpointsmax * 0.5)   +0x58b7
+ *       if (inventory_action == 4) bonus = round(hitpointsmax * 0.75)  +0x5967
+ *       if (inventory_action == 5) bonus = hitpointsmax                +0x5a17
+ *       if (inventory_action == 6) bonus = round(staminamax * 0.5)     +0x5aa9
+ *       if (inventory_action == 7) bonus = round(staminamax)           +0x5b59
+ *       if (inventory_action == 8) bonus = round(armourclass * 0.5)    +0x5bfc
+ *       if (inventory_action == 9) bonus = round(armourclass_max)      +0x5cac
+ *         ...each followed by `pool += bonus`, then
+ *         bonus_icon = attacker.attachMovie("bonus_icon", "bonus_icon", 25001)
+ *         bonus_icon.damage_splat.gotoAndStop(1 | 2 | 3)
+ *         bonus_icon.bonus = "+ " + bonus
+ *       check_flipping(bonus_icon, attacker)                           +0x5d4f
+ *       check_stats(game_attacker)                                     +0x5d67
+ *     }
+ *     if (attacker.struck == true) { attacker.struck = null; nextphase() } +0x5d79
+ * ```
+ *
+ * ► **ZERO SAMPLES.** No `randomBetween`, `RandomNumber` or `checkattackroll`
+ *   anywhere in the arm — counted over its instructions `+0x576d`-`+0x5dad`,
+ *   whose only calls are `Math.round` (seven times: every arm but id 5),
+ *   `attachMovie`/`gotoAndStop`/`gotoAndPlay`, `check_flipping`, `check_stats`
+ *   and `nextphase` — so it returns before `ATTACK_BANDS` as `shove` and
+ *   `cast_gale` do. `check_stats` is a pure clamp (read in full);
+ *   **`check_flipping`'s own body was not in the dumps this was derived
+ *   from**, and rests on the map's call inventory for the spell ingress,
+ *   which lists it among calls it states are RNG-free.
+ *
+ * ► **EIGHT INDEPENDENT `if`s, NOT AN ELSE-CHAIN**, each re-reading
+ *   `inventory_action` with `GetMember`. The value does not change inside the
+ *   arm, so exactly one fires; it is the bolt arm's shape again.
+ *
+ * ► **ID 8 READS THE CURRENT ARMOUR AND ID 5 IS NOT ROUNDED.** `+0x5c1f`
+ *   pushes `armourclass`, not `armourclass_max`, so half of nothing is
+ *   nothing and an unarmoured gladiator's oil does nothing; `+0x5a32` pushes
+ *   `hitpointsmax` straight into `bonus` with no `Multiply` and no
+ *   `Math.round`. Ids 7 and 9 ARE rounded but not multiplied. `multiplier:
+ *   null` and `rounded` below say exactly which of the two operations each
+ *   arm has.
+ *
+ * ► **THE BONUS IS WRITTEN UNCLAMPED AND THEN `check_stats` CLAMPS ALL THREE
+ *   POOLS** (`+0x110a`-`+0x11ff`: `staminaleft` to `[0, staminamax]`,
+ *   `hitpoints` to `[0, hitpointsmax]`, `armourclass` to
+ *   `[0, armourclass_max]`), all before `nextphase` — so an overflowing drink
+ *   is capped before the transition regenerates, and `bonus_icon` shows the
+ *   UNCLAMPED number. See `ss2PotionOutcome`.
+ *
+ * ► **THE COST IS 0, AND THE TRANSITION IS AN ORDINARY ONE.** `staminacost =
+ *   0` at `+0x578c`, then `nextphase`, so the drinker gets the normal
+ *   regeneration and heal on top — computed from the POST-drink pools.
+ *
+ * ► **THE DRINKER'S OWN CLIP ENDS THE PHASE.** The gate is `attacker.struck`
+ *   (`+0x5d79`), and the fighter clip's `drink_potion` label is frames
+ *   1887-1910, whose last frame writes `this.struck = true; Stop`
+ *   (`hero_battle/frame:1910/DoAction@0x3a0711`) — the gale's shape, not the
+ *   bolt's. This engine completes every phase within the action;
+ *   `src/adapter/action-gate.js` is what would consume the difference.
+ *
+ * ► **THE POTION IS SPENT BEFORE IT IS DRUNK, BY WHOEVER CHOSE IT.** The
+ *   hero's click handler writes `inventory_action = inventoryN; inventoryN = 1`
+ *   (`sprite:862[overlay]/frame:1` `+0x0601`/`+0x0626` for slot 1, five more
+ *   the same); the villain's `use_item` writes `inventory_action` and empties
+ *   the FIRST slot holding the id (`DoAction@0x23e7cf` `+0x03ec`/`+0x0409`).
+ *
+ * ► **NOT MODELLED, AND NAMED: `crowd_action = -3`** (a crowd cue; the
+ *   `register:3` gloss is the same unverified one `SS2_BOLT_INGRESS` names),
+ *   **the `potions` sub-clip frame** and **the `bonus_icon` splat** — both
+ *   carried on the event (`potionFrame`, `bonusFrame`) and drawn by nothing
+ *   yet, because the presentation vocabulary has no command for a sub-clip or
+ *   a floating number. `check_flipping` is the splat's mirror and goes with it.
+ */
+export const SS2_POTIONS = Object.freeze({
+  // `damage_splat.gotoAndStop(1)` for the four health arms (`+0x5888` …).
+  2: Object.freeze({ stat: "hitpoints", of: "hitpointsmax", multiplier: 0.25, rounded: true, bonusFrame: 1 }),
+  3: Object.freeze({ stat: "hitpoints", of: "hitpointsmax", multiplier: 0.5, rounded: true, bonusFrame: 1 }),
+  4: Object.freeze({ stat: "hitpoints", of: "hitpointsmax", multiplier: 0.75, rounded: true, bonusFrame: 1 }),
+  5: Object.freeze({ stat: "hitpoints", of: "hitpointsmax", multiplier: null, rounded: false, bonusFrame: 1 }),
+  // `gotoAndStop(2)` for the two stamina arms (`+0x5b2a`, `+0x5bcd`).
+  6: Object.freeze({ stat: "staminaleft", of: "staminamax", multiplier: 0.5, rounded: true, bonusFrame: 2 }),
+  7: Object.freeze({ stat: "staminaleft", of: "staminamax", multiplier: null, rounded: true, bonusFrame: 2 }),
+  // `gotoAndStop(3)` for the two armour arms (`+0x5c7d`, `+0x5d20`).
+  8: Object.freeze({ stat: "armourclass", of: "armourclass", multiplier: 0.5, rounded: true, bonusFrame: 3 }),
+  9: Object.freeze({ stat: "armourclass", of: "armourclass_max", multiplier: null, rounded: true, bonusFrame: 3 })
+});
+
+/**
+ * Which ceiling `check_stats` clamps each pool to — the pairing in
+ * `+0x110a`-`+0x11ff`, and the same pairing the villain ladder's `< max / 2`
+ * tests use.
+ */
+const SS2_POOL_CEILING = Object.freeze({
+  hitpoints: "hitpointsmax",
+  staminaleft: "staminamax",
+  armourclass: "armourclass_max"
+});
+
+/**
+ * The villain ladder's POTION arms, in the build's own order, which is the
+ * order the AI tries them.
+ *
+ * `villain_cast_spells` (`sprite:862[overlay]/frame:52/DoAction@0x23e7cf`,
+ * block base `0x23e7d5`) tests each as `check_inventory(id) &&
+ * villain.<pool> < villain.<ceiling> / 2` — `Push 2; Divide; Less2`, STRICT:
+ *
+ * ```text
+ *   arm  2  id 5  hitpoints   < hitpointsmax    / 2   +0x060c-+0x065b
+ *   arm  4  id 4  hitpoints   < hitpointsmax    / 2   +0x06f6-+0x0745
+ *   arm  5  id 3  hitpoints   < hitpointsmax    / 2   +0x076b-+0x07ba
+ *   arm  6  id 2  hitpoints   < hitpointsmax    / 2   +0x07e0-+0x082f
+ *   arm 10  id 9  armourclass < armourclass_max / 2   +0x0944-+0x0993
+ *   arm 11  id 8  armourclass < armourclass_max / 2   +0x09b9-+0x0a08
+ *   arm 12  id 7  staminaleft < staminamax      / 2   +0x0a2e-+0x0a7d
+ *   arm 13  id 6  staminaleft < staminamax      / 2   +0x0aa3-+0x0af2
+ * ```
+ *
+ * Biggest first within each pool, and health before armour before stamina.
+ * **Every one precedes the bolts (arms 15, 17) and the gale (24)**, so a
+ * villain that qualifies for a potion drinks rather than casting.
+ *
+ * ► **THE ARMS BETWEEN THEM HAVE NO VERB HERE AND SO PRE-EMPT NOTHING** —
+ *   the stance `chooseAiAction` already takes for the gale. Arm 1 (id 43
+ *   `cast_rejuvinate`, `hitpoints < hitpointsmax / 1.5`), arm 3 (46
+ *   `cast_regenerate`, `< / 2`), arm 7 (49 `cast_death_from_above`, NO extra
+ *   condition — an absorbing sink that makes arms 8-28 unreachable), arms 8
+ *   and 9 (42 `cast_colossus` at `fightdistance < 300`, 33
+ *   `cast_little_fat_kid` at `< 500`). **A villain holding 49 never drinks an
+ *   armour or stamina potion in the build**, and does here; when any of those
+ *   verbs is built, this list must learn them.
+ */
+export const SS2_POTION_LADDER = Object.freeze([
+  Object.freeze({ arm: 2, itemId: 5 }),
+  Object.freeze({ arm: 4, itemId: 4 }),
+  Object.freeze({ arm: 5, itemId: 3 }),
+  Object.freeze({ arm: 6, itemId: 2 }),
+  Object.freeze({ arm: 10, itemId: 9 }),
+  Object.freeze({ arm: 11, itemId: 8 }),
+  Object.freeze({ arm: 12, itemId: 7 }),
+  Object.freeze({ arm: 13, itemId: 6 })
+]);
+
+/**
+ * The six numbers the potion arm and `check_stats` read, off a view.
+ *
+ * `hitpoints`/`hitpointsmax` are the resolver's own `health`/`maxHealth` — the
+ * vanilla pair `CANONICAL_HEALTH_SOURCES` maps them to. `armourclass_max`
+ * falls back to `armourclass` exactly as `vanillaRecordOf` does, so the
+ * ingress and the potion cannot disagree about an armour ceiling.
+ */
+function ss2PoolsOf(view) {
+  const armourclass = resourceValue(view, "armourclass", 0);
+  return {
+    hitpoints: view.health,
+    hitpointsmax: view.maxHealth,
+    staminaleft: resourceValue(view, "staminaleft", 0),
+    staminamax: resourceValue(view, "staminamax", 0),
+    armourclass,
+    armourclass_max: resourceValue(view, "armourclass_max", armourclass)
+  };
+}
+
+/**
+ * One drink, as the arm computes it and `check_stats` settles it — before
+ * `nextphase`, which the caller runs from what this returns.
+ *
+ * Returns the UNCLAMPED `bonus` (what `bonus_icon` shows), the pools before,
+ * and the pools after the write and the clamp. **All three are clamped**, not
+ * only the one the potion names, because `check_stats` is one function with
+ * three clamps and no argument that selects between them.
+ */
+export function ss2PotionOutcome(itemId, pools) {
+  const potion = SS2_POTIONS[itemId];
+  if (!potion) {
+    throw new TeamRuleSetError(`${String(itemId)} is not a potion; the drink_potion arm reads ids 2-9.`);
+  }
+  const base = pools[potion.of];
+  const raw = potion.multiplier === null ? base : base * potion.multiplier;
+  const bonus = potion.rounded ? Math.round(raw) : raw;
+  const written = { ...pools, [potion.stat]: pools[potion.stat] + bonus };
+  const after = { ...written };
+  for (const [pool, ceiling] of Object.entries(SS2_POOL_CEILING)) {
+    after[pool] = clamp(written[pool], 0, written[ceiling]);
+  }
+  return { potion, bonus, before: pools, after };
+}
+
 export const SS2_TAUNT = Object.freeze({
   /**
    * `diceroll < game_attacker.taunt_percentage` (`+0x694b`).
@@ -6657,7 +6876,10 @@ export function createSs2TeamRules({
       // ► **THE GALE IS OFFERED ON POSSESSION ALONE, ON THE SAME BUTTON AND
       //   UNDER THE SAME TWO-GATE OVERLAY AS THE BOLTS ABOVE** — so everything
       //   that block says about `inventory_maxslots` applies here unchanged,
-      //   including that this engine does not yet reproduce it.
+      //   ~~including that this engine does not yet reproduce it~~ **including
+      //   that this engine reproduces it since 2026-09-22, inside
+      //   `ss2InventorySlotHolding`** (corrected by the `drink_potion`
+      //   implementer, who found the clause stale beside its own offer).
       //
       //   **`fightdistance` IS NOT AN OFFER GATE, and treating it as one is what
       //   kept this verb unbuilt.** Its `< 400` test is ladder arm 24 of
@@ -6682,6 +6904,34 @@ export function createSs2TeamRules({
       //   matches on `targetId`.
       if (ss2InventorySlotHolding(view.actor, SS2_TELEPORT.itemId) !== null) {
         actions.push({ type: Ss2ActionType.CAST_TELEPORT, targetId: actorId });
+      }
+
+      // ► **THE POTIONS: ONE OFFER PER DISTINCT ID HELD, SELF-TARGETED, ON THE
+      //   SAME BUTTON AND UNDER THE SAME TWO GATES AS THE SPELLS ABOVE.** The
+      //   hero's six inventory buttons carry no verb of their own — the click
+      //   handler writes `inventory_action = inventoryN` and the item row names
+      //   the phase — so a potion is found through `ss2InventorySlotHolding`
+      //   exactly as a bolt is, `inventory_maxslots` window included.
+      //
+      //   **One option per ID, not per slot.** Two slots holding id 3 are the
+      //   same drink; which one empties is the resolver's (`use_item`'s first
+      //   match), and offering two identical options would make the choice
+      //   look like it meant something.
+      //
+      //   **`targetId` is the drinker**, the convention `rest`, the walks, the
+      //   swap and the status phases already use, so the resolver's legality
+      //   check refuses a drink aimed at anybody else. **`itemId` is the
+      //   potion**, because `drink_potion` is one label for eight items; the
+      //   resolver compares it and hands it to `resolveAction`.
+      //
+      //   **OFFERED WHATEVER THE POOL HOLDS, INCLUDING FULL.** The hero's
+      //   button tests only `inv_struck != true` and the phase tests nothing
+      //   before it writes, so a potion drunk at full health is legal in the
+      //   build and is wasted by `check_stats`. The `< max / 2` tests are the
+      //   villain's DECISION, which `chooseAiAction` reads.
+      for (const itemId of Object.keys(SS2_POTIONS).map(Number)) {
+        if (ss2InventorySlotHolding(view.actor, itemId) === null) continue;
+        actions.push({ type: Ss2ActionType.DRINK_POTION, targetId: actorId, itemId });
       }
 
       // ► **WHICH CONTROLLER FRAME THE GLADIATOR IS ON, computed ONCE because
@@ -7969,6 +8219,130 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **THE DRINK. Zero samples, one pool, and the order is the whole
+      //   difficulty.** See `SS2_POTIONS` for the phase statement by statement.
+      if (request.type === Ss2ActionType.DRINK_POTION) {
+        // `itemId` is the build's `inventory_action`. Validated here as well as
+        // by the resolver's legality check, because `resolveAction` is a
+        // public rule-set method a caller can reach without an offer — the
+        // reason the bolt branch re-finds its slot.
+        if (!Number.isInteger(request.itemId) || !Object.hasOwn(SS2_POTIONS, request.itemId)) {
+          throw new TeamRuleSetError(
+            `${request.type} needs an itemId; ${String(request.itemId)} is not a potion. ` +
+            "The drink_potion arm reads inventory_action 2-9 (+0x5807-+0x5cc2)."
+          );
+        }
+        // Self-targeted, as it is offered. A drink aimed at somebody else would
+        // still be drunk by the ACTOR — the arm writes only `game_attacker` —
+        // so a mismatched target is a malformed request rather than a choice.
+        if (request.targetId != null && request.targetId !== actor.id) {
+          throw new TeamRuleSetError(
+            `${request.type} is drunk by the drinker; ${String(request.targetId)} is not ${actor.id}.`
+          );
+        }
+        const itemId = request.itemId;
+        const slot = ss2InventorySlotHolding(actor, itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, itemId, { ignoreMaxslots: true });
+          throw new TeamRuleSetError(
+            beyond !== null
+              ? `${actor.id} cannot drink item ${itemId}: it is in ${beyond}, outside inventory_maxslots ` +
+                `${resourceValue(actor, "inventory_maxslots")}, and this engine offers and consumes through ` +
+                "the same window."
+              : `${actor.id} cannot drink item ${itemId}: no declared inventory slot holds item ${itemId}. ` +
+                "The build's own gate is possession — check_inventory for the villain, a visible inventory " +
+                "button for the hero — and this engine reproduces it."
+          );
+        }
+
+        // THE WRITE AND `check_stats`, before anything else — see
+        // `ss2PotionOutcome`.
+        const { potion, bonus, before, after } = ss2PotionOutcome(itemId, ss2PoolsOf(actor));
+
+        // ► **CONSUMPTION FIRST, IN THE BUILD'S ORDER.** Both of the build's
+        //   choosers empty the slot BEFORE the phase runs: the hero's click
+        //   handler, and `use_item` for the villain. The slot is the FIRST
+        //   holding the id (`ss2InventorySlotHolding`), which is `use_item`'s
+        //   rule exactly; the hero's click empties whichever button was
+        //   pressed, and with two identical potions the two differ only in
+        //   WHICH slot reads 1 afterwards.
+        const effects = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }];
+
+        // The pools `check_stats` settled, one write per pool that moved.
+        // Health is the resolver's own field and moves by HEAL/DAMAGE; the
+        // other two are declared resources and move by absolute writes,
+        // guarded on declaration like every write in this file (the resolver
+        // refuses an undeclared name mid-list, with no rollback).
+        const healthDelta = after.hitpoints - before.hitpoints;
+        if (healthDelta > 0) effects.push({ kind: EffectKind.HEAL, targetId: actor.id, amount: healthDelta });
+        if (healthDelta < 0) effects.push({ kind: EffectKind.DAMAGE, targetId: actor.id, amount: 0 - healthDelta });
+        const declared = declaredResourceNames(actor);
+        for (const pool of ["staminaleft", "armourclass"]) {
+          if (declared.has(pool) && after[pool] !== before[pool]) {
+            effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: pool, to: after[pool] });
+          }
+        }
+
+        // ► **`nextphase` RUNS FROM THE POST-DRINK POOLS, AND THAT IS THE
+        //   ORDER THIS BRANCH EXISTS TO GET RIGHT.** The build writes the bonus,
+        //   clamps it (`check_stats` `+0x5d67`) and only then transitions, so
+        //   the regeneration and heal start from the drunk values. Handing
+        //   `phaseTransitionEffects` the frozen view instead would do two wrong
+        //   things: the stamina write — ABSOLUTE — would be computed from the
+        //   pre-drink value and land AFTER the vial's, erasing it; and the heal
+        //   would be priced against headroom the potion had already filled.
+        //   `fromStaminaleft`/`fromHealth` are the status phase's hooks for
+        //   exactly this, and a separate clamp here rather than `branchGain`
+        //   keeps the drink's own number and `nextphase`'s apart in the event.
+        //
+        //   `staminacost = 0` (`+0x578c`), so the drink is free and the
+        //   drinker still regenerates — and, as for every decision that is not
+        //   `psyche_up`, `nextphase` resets the charge.
+        const transition = phaseTransitionEffects(actor, {
+          staminaCost: 0,
+          fromStaminaleft: after.staminaleft,
+          fromHealth: after.hitpoints
+        });
+        effects.push(...transition.effects, ...crowd);
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: actor.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // `attacker.gotoAndPlay("drink_potion")` at `+0x57c6`, on the
+            // drinker, and NOTHING on anybody else — so `victimClip` is null
+            // rather than absent, and `SS2_STATIC_MAP_BINDINGS` binds the actor
+            // alone. The field names are the spells', because that is the pair
+            // the binding reads.
+            casterClip: VANILLA_PHASE_LABEL[request.type],
+            victimClip: null,
+            itemId,
+            consumedSlot: slot,
+            stat: potion.stat,
+            // UNCLAMPED, as `bonus_icon.bonus = "+ " + bonus` shows it.
+            bonus,
+            // Around the write and `check_stats`, before `nextphase`.
+            statBefore: before[potion.stat],
+            statAfter: after[potion.stat],
+            // Presentation extras nothing draws yet: `damage_splat`'s frame and
+            // `attacker.potions.gotoAndPlay(inventory_action - 1)` (`+0x57da`).
+            bonusFrame: potion.bonusFrame,
+            potionFrame: itemId - 1,
+            staminaSpent: 0,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
+          }]
+        };
+      }
+
       const band = ATTACK_BANDS[request.type]
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
@@ -8627,6 +9001,59 @@ export function createSs2TeamRules({
       const actor = view.actor;
       if (restOption && resourceValue(actor, "staminaleft", 0) <= 10) return restOption;
 
+      // ► **THE POTIONS ARE THE BUILD'S OWN RULE, AND THEY COME FIRST OF
+      //   EVERYTHING `villain_cast_spells` DECIDES.** Ladder arms 2, 4-6 and
+      //   10-13 each drink when the id is carried AND the pool it restores is
+      //   strictly below half its ceiling — see `SS2_POTION_LADDER` for the
+      //   offsets and the order (health 5>4>3>2, armour 9>8, stamina 7>6).
+      //   Every one precedes the bolt arms (15, 17) and the gale (24), so this
+      //   returns BEFORE the gale block and before the bolts are priced: a
+      //   villain that qualifies for a potion drinks rather than casting.
+      //
+      // ► **RETURNED BEFORE THE WALK AND THE SWING TOO**, for the gale's reason:
+      //   `villainChooseAction` ends by calling `villain_cast_spells()`, which
+      //   REPLACES the decision it had already made. **`attackOnOffer` is
+      //   deliberately NOT widened** — a drink is not a verb offered on
+      //   `ss2Reach`, and the psyche range gate below depends on that
+      //   predicate meaning exactly that. The bolts broke it once.
+      //
+      // ► **RECOGNISED BY THE VOCABULARY**, like every other arm here: the
+      //   option list already applied possession and the slot window, so this
+      //   reads only the pools.
+      //
+      // ► **WHAT IS OMITTED, NAMED:**
+      //   - the build's single `randomBetween(1, 100) > 10` at `+0x056f`. This
+      //     AI takes no samples, so it drinks on every turn a condition holds
+      //     rather than on nine in ten, and a failed roll's fall-through to the
+      //     melee decision is not reproduced;
+      //   - the arms with no verb here (1 `cast_rejuvinate`, 3
+      //     `cast_regenerate`, 7 `cast_death_from_above`, 8 `cast_colossus`, 9
+      //     `cast_little_fat_kid`), which pre-empt some potions in the build and
+      //     nothing here — the stance the gale block takes for arms 1-23;
+      //   - **AND IT SITS BEHIND THE FORCED REST ABOVE, WHICH IS AN OPEN
+      //     QUESTION, NOT A DERIVATION.** `staminaleft > 10` (`+0x03e8`) gates
+      //     `villainChooseAction`'s action-choice block, and the map records
+      //     that the function "ends by calling `villain_cast_spells()`" without
+      //     saying whether that call is inside the gated block. If it is not, a
+      //     villain at 10 stamina or less drinks a stamina vial (always below
+      //     half, since the build derives `staminamax = 100 + stamina * 10`)
+      //     where this AI rests. The gale and the bolts sit behind the same
+      //     gate and carry the same question.
+      //
+      // ► **INVENTED: THE RULE IS APPLIED TO EVERY AI SEAT.** The ladder reads
+      //   `_root.game.villain` hard-coded; this engine has one AI for everyone,
+      //   as it does for the gale.
+      const drinkOptions = options.filter((option) => option.type === Ss2ActionType.DRINK_POTION);
+      if (drinkOptions.length > 0) {
+        const pools = ss2PoolsOf(actor);
+        for (const { itemId } of SS2_POTION_LADDER) {
+          const option = drinkOptions.find((entry) => entry.itemId === itemId);
+          if (!option) continue;
+          const { stat } = SS2_POTIONS[itemId];
+          if (pools[stat] < pools[SS2_POOL_CEILING[stat]] / 2) return option;
+        }
+      }
+
       const foes = [...view.foes].sort(byHealthThenId);
       const target = foes[0];
       if (!target) return restOption ?? options[0];
@@ -8710,9 +9137,16 @@ export function createSs2TeamRules({
       //   1-23 must all fail first. Of those, only the two bolts have verbs here
       //   (arms 15 and 17), and both fire on possession alone — so a caster
       //   offered a bolt never reaches the gale, even on a turn this engine's
-      //   pricing then spends on a swing instead. The other 21 arms (potions,
+      //   pricing then spends on a swing instead. ~~The other 21 arms (potions,
       //   `rejuvinate`, the fireballs, boundless energy, ...) have no verb and so
-      //   cannot pre-empt anything; when they are built, this test must grow.
+      //   cannot pre-empt anything; when they are built, this test must grow.~~
+      //   **THE EIGHT POTION ARMS (2, 4-6, 10-13) HAVE A VERB SINCE 2026-09-22
+      //   AND PRE-EMPT THIS BLOCK FROM ABOVE IT** — the drink rule returns
+      //   before this line, so a caster that qualifies for a potion never gets
+      //   here (`test/ss2-drink-potion.test.js`, "armour oil PRE-EMPTS the
+      //   gale"). The other 13 (`rejuvinate`, the fireballs, boundless energy,
+      //   ...) still have no verb and so cannot pre-empt anything; when they
+      //   are built, this test must grow.
       //
       // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
       //   > 10` at `+0x056f`. This AI takes no samples, so it casts on every
@@ -8763,12 +9197,16 @@ export function createSs2TeamRules({
       //   already returned above; a caster whose gale gate is SHUT falls through
       //   to here, as the ladder does). **SEVEN arms before 26 fire on
       //   possession alone** (ids 49, 32, 35, 31, 34, 30, 45 — map §"The whole
-      //   ladder"); five have no verb here. **The potion arms (2, 4-6, 10-13)
+      //   ladder"); five have no verb here. ~~**The potion arms (2, 4-6, 10-13)
       //   also precede this one and are NOT wired here** — arm 2 (id 5) tests
       //   the SAME `hitpoints < hitpointsmax / 2`, so once `drink_potion` has a
-      //   verb this test must grow to let it pre-empt. So must it for
-      //   `rejuvinate` (arm 1, `hitpoints < hitpointsmax / 1.5`, implied by
-      //   this gate) and bloodlust (arm 22, `fightdistance < 400`, implied too).
+      //   verb this test must grow to let it pre-empt.~~ **The potion arms
+      //   (2, 4-6, 10-13) PRE-EMPT IT FROM ABOVE since the same day**: the
+      //   drink rule returns before the gale block, so a caster that qualifies
+      //   for a potion never reaches this line (merged 2026-09-22; the two verbs
+      //   were built in parallel). This test must still grow for `rejuvinate`
+      //   (arm 1, `hitpoints < hitpointsmax / 1.5`, implied by this gate) and
+      //   bloodlust (arm 22, `fightdistance < 400`, implied too).
       //
       // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
       //   > 10` at `+0x056f`. This AI takes no samples, so it teleports on every

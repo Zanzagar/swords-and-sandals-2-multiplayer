@@ -1299,6 +1299,43 @@ test("the resolver rejects malformed rule-set output", () => {
   );
 });
 
+test("an action's itemId is part of its identity: compared for legality, carried to the rule set", () => {
+  // Added 2026-09-22 with SS2's `drink-potion`, where one label serves eight
+  // items. Before it the resolver compared type/targetId/spellKind only and
+  // built the request from the same three, so an `itemId` was silently
+  // dropped: an option for item 2 licensed a submission naming item 5.
+  const seen = [];
+  const rules = defineTeamRuleSet({
+    id: "test-item-id",
+    verification: RuleSetVerification.PLACEHOLDER,
+    provenance: { kind: "test-double", runtimeVerified: false, note: "Test double." },
+    actionTypes: ["use", "poke"],
+    maximumHealth: () => 20,
+    legalActions: (view, actorId) => [
+      { type: "use", targetId: actorId, itemId: 2 },
+      { type: "use", targetId: actorId, itemId: 6 },
+      ...view.foes.map((foe) => ({ type: "poke", targetId: foe.id }))
+    ],
+    resolveAction(request) {
+      seen.push(request.itemId);
+      return { effects: [], events: [{ type: request.type, actorId: request.actorId }] };
+    },
+    chooseAiAction: (view, actorId, options) => options[0]
+  });
+  const start = () => createTeamBattle({
+    rules,
+    teams: [{ id: "red", combatants: [brute("r1", 40)] }, { id: "blue", combatants: [brute("b1", 20)] }]
+  });
+
+  assert.throws(() => applyAction(start(), { actorId: "r1", type: "use", targetId: "r1", itemId: 5 }),
+    /Illegal action/);
+  assert.throws(() => applyAction(start(), { actorId: "r1", type: "use", targetId: "r1" }), /Illegal action/);
+  // An option that carries none still matches a submission that carries none.
+  applyAction(start(), { actorId: "r1", type: "poke", targetId: "b1" });
+  applyAction(start(), { actorId: "r1", type: "use", targetId: "r1", itemId: 6 });
+  assert.deepEqual(seen, [null, 6]);
+});
+
 test("createTeamBattle refuses anything that is not a rule set", () => {
   const teams = [{ id: "red", combatants: [brute("r1", 40)] }, { id: "blue", combatants: [brute("b1", 20)] }];
   assert.throws(() => createTeamBattle({ teams, rules: {} }), TeamRuleSetError);

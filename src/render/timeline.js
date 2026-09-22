@@ -227,6 +227,11 @@ function familyOf(label, role) {
   //   shove was found moving the wrong gladiator, its actor label came out of
   //   the movement branch and nobody noticed it drew the `unknown` schedule.
   if (label === "shove") return "shove";
+  // ► **THE DRINKER'S CLIP, added 2026-09-22 with the verb.**
+  //   `attacker.gotoAndPlay("drink_potion")` at `+0x57c6`; frames 1887-1910,
+  //   ending in `this.struck = true; Stop`. Matched by the build's exact
+  //   string, which is also the phase label — the one clip here that is.
+  if (label === "drink_potion") return "drink";
   if (label === "taunted") return "taunted";
   if (label === "taunt") return "taunt";
   if (label === "bombard" || label === "snipe") return "ranged";
@@ -531,6 +536,20 @@ const FAMILIES = Object.freeze({
     { at: 0, pose: {} },
     { at: 0.3, pose: { lean: -0.2, armSwing: -0.4 } },
     { at: 0.55, pose: { lean: 0.5, armSwing: 0.9, legSpread: 0.5, advance: 0.6 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The drink — 24 frames (1887-1910) at the build's 30 fps is 800 ms, 6.67
+   * beats, and the nearest beat is SEVEN = 840 ms: the rule that made
+   * `shove`'s 35 frames ten beats and `Cast2`'s 21 six. The POSES are
+   * authored — head back, arm up — and the extracted rig's own `drink_potion`
+   * clip overrides them.
+   */
+  drink: () => schedule("drink", 7, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: -0.7, lean: -0.25, bob: 0.1 } },
+    { at: 0.65, pose: { armSwing: -0.9, lean: -0.4, bob: 0.2 } },
     { at: 1, pose: {} }
   ]),
 

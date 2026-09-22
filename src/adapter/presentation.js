@@ -406,6 +406,14 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
     //   two-clip spell case below follows, so the next self-cast verb carries
     //   its own clip rather than needing a case here. MAP_NAMED because the
     //   string is the build's.
+    //
+    //   `drink_potion` (the same day, in a parallel worktree) needed the same
+    //   rule and wrote its own copy BELOW the two-clip case; merged here as one.
+    //   Before either, the drinker played `Standing` stamped MAP_NAMED. The
+    //   build plays `attacker.gotoAndPlay("drink_potion")` (`+0x57c6`) and
+    //   nothing on anybody else, so the resolver says `victimClip: null` and
+    //   this returns `target: null` — an answer ("nothing plays there"), not an
+    //   `unmapped`.
     if (typeof event.casterClip === "string" && event.casterClip.length > 0
       && !(typeof event.victimClip === "string" && event.victimClip.length > 0)) {
       return Object.freeze({ actor: label(event.casterClip, LabelProvenance.MAP_NAMED), target: null });
@@ -493,7 +501,6 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
         target: label(event.victimClip, LabelProvenance.MAP_NAMED)
       });
     }
-
     // ► **A TAUNT PLAYS BOTH CLIPS AND PLAYS THEM WHATEVER IT ROLLED.** The
     //   build fires `attacker.gotoAndPlay("taunt")` at `+0x6905` and
     //   `defender.gotoAndPlay("taunted")` at `+0x690c` BEFORE the roll, so a

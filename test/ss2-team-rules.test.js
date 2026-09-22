@@ -288,6 +288,11 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //   written by ladder arm 26 (`+0x0f91`) and consumed at
     //   `+0x7541`-`+0x76ad`.** Self-targeted, one sample (the destination).
     "cast-teleport",
+    // ► **JOINED 2026-09-22 — the potions, `getphase("drink_potion")`, ONE
+    //   token for inventory ids 2-9** because the build has one label for all
+    //   eight (`+0x5773`) and selects the potion from `inventory_action`. The
+    //   action carries the id as `itemId`; see `SS2_POTIONS`.
+    "drink-potion",
     "frozen-phase",
     "life-stolen-phase",
     "normal-attack",

@@ -319,11 +319,27 @@ export function legalActions(battle, actorId = currentCombatant(battle)?.id) {
   return options;
 }
 
+/**
+ * An action's identity is `type`, `targetId`, `spellKind` and `itemId`, and a
+ * submitted action is legal only if an offered option matches ALL FOUR.
+ *
+ * ► **`itemId` JOINED 2026-09-22, WITH THE SS2 `drink-potion` VERB**, because
+ *   one build label (`drink_potion`) serves eight inventory items and the
+ *   label alone cannot say which. Before it, the resolver compared three
+ *   fields and built the rule set's request from the same three, so an
+ *   action's `itemId` was DROPPED on the way in: an option for item 2 would
+ *   have licensed a submission naming item 5, and the rule set would never
+ *   have seen either number. It is opaque here, exactly as `spellKind` is — a
+ *   rule set's own discriminator, compared and passed through, never read.
+ *   Absent on both sides compares equal (`null === null`), so every rule set
+ *   that never offers one is unaffected.
+ */
 function actionIsLegal(battle, action) {
   return legalActions(battle, action.actorId).some((option) =>
     option.type === action.type &&
     option.targetId === action.targetId &&
-    (option.spellKind ?? null) === (action.spellKind ?? null)
+    (option.spellKind ?? null) === (action.spellKind ?? null) &&
+    (option.itemId ?? null) === (action.itemId ?? null)
   );
 }
 
@@ -478,6 +494,9 @@ export function applyAction(battle, action) {
     type: action.type,
     targetId: action.targetId,
     spellKind: action.spellKind ?? null,
+    // See `actionIsLegal`: compared there, carried here, read by nobody but
+    // the rule set that offered it.
+    itemId: action.itemId ?? null,
     target: combatantView(target)
   });
   const rolls = battle.rng.withContext({
