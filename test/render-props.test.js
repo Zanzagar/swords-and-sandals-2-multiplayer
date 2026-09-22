@@ -1141,9 +1141,15 @@ test("what the real pack's colour transforms COULD have varied over, counted", (
       for (const key of Object.keys(total)) total[key] += invoice[key];
     }
   }
-  assert.equal(total.placements, 3345);
+  // ► **EVERY COUNT BELOW MOVED ON 2026-09-22, BY EXACTLY WHAT ONE PROP ADDS.**
+  //   `lightning_bolt_combat` joined the pack: 3 placements (its frame 1 is the
+  //   flickering child, frame 2 adds shape 11), 20 operations, and 2 group
+  //   instances — one GLOW on the child per frame, 9 operations each; shape 11
+  //   sits outside it. Measured by walking the old and the regenerated pack
+  //   with this module's own invoice; nothing else in the pack moved.
+  assert.equal(total.placements, 3348);
   assert.equal(total.tintedPlacements, 2330, "70% of them — this pack is mostly TINTED, unlike the screens one");
-  assert.equal(total.ops, 8682);
+  assert.equal(total.ops, 8702);
   assert.equal(total.tintedOps, 7246);
 
   // ► **BOTH APPROXIMATION COUNTS ARE DEAD ON THIS PACK, and the denominators
@@ -1615,7 +1621,7 @@ test("the sky's group filters are a BLUR and two GLOWS the painter still has to 
   }
 });
 
-test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 745 group instances cover ONE operation", () => {
+test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 747 group instances cover ONE operation", () => {
   // ► **THE QUESTION PREMISE 4 OF THE BRIEF ASKS, ANSWERED FROM THE PACK.** A
   //   group over exactly one drawable IS its own composite, so for those 486
   //   per-leaf and per-group coincide EXACTLY. The 259 that do not are the
@@ -1639,8 +1645,15 @@ test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 745 group instances cover ONE 
       }
     }
   }
-  assert.equal(instances, 745, "group instances across every frame of every prop");
-  assert.deepEqual(spread, { 1: 486, 4: 7, 12: 102, 23: 61, 56: 89 },
+  // ► **EVERY COUNT BELOW MOVED ON 2026-09-22, BY EXACTLY WHAT ONE PROP ADDS.**
+  //   `lightning_bolt_combat` joined the pack: 3 placements (its frame 1 is the
+  //   flickering child, frame 2 adds shape 11), 20 operations, and 2 group
+  //   instances — one GLOW on the child per frame, 9 operations each; shape 11
+  //   sits outside it. Measured by walking the old and the regenerated pack
+  //   with this module's own invoice; nothing else in the pack moved.
+  assert.equal(instances, 747, "group instances across every frame of every prop");
+  // The bolt's two glows are the `9` bucket, the only new one.
+  assert.deepEqual(spread, { 1: 486, 4: 7, 9: 2, 12: 102, 23: 61, 56: 89 },
     "and the LARGEST covers 56 operations — this pack is not the screens pack's 1,523");
   assert.equal(spread[1], 486, "so 65% of them are cases where per-leaf would have been exactly right");
   assert.equal(matrixOverMany, 0,
@@ -1667,28 +1680,36 @@ test("what the real pack's GROUP EFFECTS could have varied over, counted with de
     }
   }
   // Populations first, so nothing below is a bare number.
-  assert.equal(total.placements, 3345);
-  assert.equal(total.groupedPlacements, 3209, "96% of them sit inside an effect group");
-  assert.equal(total.ops, 8682);
-  assert.equal(total.groupedOps, 8125);
-  assert.equal(total.effectGroups, 745, "group INSTANCES — 363 distinct groups, reached across 302 frames");
+  // ► **EVERY COUNT BELOW MOVED ON 2026-09-22, BY EXACTLY WHAT ONE PROP ADDS.**
+  //   `lightning_bolt_combat` joined the pack: 3 placements (its frame 1 is the
+  //   flickering child, frame 2 adds shape 11), 20 operations, and 2 group
+  //   instances — one GLOW on the child per frame, 9 operations each; shape 11
+  //   sits outside it. Measured by walking the old and the regenerated pack
+  //   with this module's own invoice; nothing else in the pack moved.
+  assert.equal(total.placements, 3348);
+  assert.equal(total.groupedPlacements, 3211, "96% of them sit inside an effect group");
+  assert.equal(total.ops, 8702);
+  assert.equal(total.groupedOps, 8143);
+  assert.equal(total.effectGroups, 747, "group INSTANCES — 365 distinct groups, over the 304 frames walked, 209 of which carry one " +
+    "(this read \"reached across 302 frames\" before 2026-09-22; 302 was the frames WALKED, and " +
+    "only 207 of them carried a group)");
 
-  // `canvasFilterFor`'s four verdicts, summed. 515 applied is 130 blurs and
-  // 385 glow/shadow instances; 348 deferred is the colour matrices this module
+  // `canvasFilterFor`'s four verdicts, summed. 517 applied is 130 blurs and
+  // 387 glow/shadow instances (385 before the bolt's two); 348 deferred is the colour matrices this module
   // folds; 250 no-ops are Blur(0,0) and zero-strength glows.
-  assert.equal(total.groupFilters, 1113);
+  assert.equal(total.groupFilters, 1115);
   assert.equal(total.groupFiltersApplied + total.groupFiltersDeferred
     + total.groupFiltersNoOp + total.groupFiltersRefused, total.groupFilters,
     "the four buckets partition the total exactly — a fifth outcome would show up here");
-  assert.equal(total.groupFiltersApplied, 515);
+  assert.equal(total.groupFiltersApplied, 517);
   assert.equal(total.groupFiltersDeferred, 348);
   assert.equal(total.groupFiltersNoOp, 250);
   assert.equal(total.groupFiltersRefused, 0,
-    "**zero out of 1,113** — this build's props use no bevel and no inner glow, so the refusal arm is DEAD here");
+    "**zero out of 1,115** — this build's props use no bevel and no inner glow, so the refusal arm is DEAD here");
 
   // What is still not drawn: operations under a blur or glow, waiting on a
   // painter that composites to a buffer.
-  assert.equal(total.groupFilterOps, 5810, "out of 8,125 grouped operations");
+  assert.equal(total.groupFilterOps, 5828, "out of 8,143 grouped operations");
 
   // The fold itself. The four below partition `groupMatrixOps` exactly.
   assert.equal(total.groupMatrixOps, 1690);

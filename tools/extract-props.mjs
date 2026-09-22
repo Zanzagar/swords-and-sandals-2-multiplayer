@@ -202,6 +202,31 @@ export const PROP_EXPORTS = Object.freeze([
   },
   {
     /**
+     * ► **THE BOLT A CAST ATTACHES AT THE VICTIM — added 2026-09-22, two days
+     *   after the verbs that attach it.** The bolt phase runs
+     *   `bolt = arena.gladiators.attachMovie("lightning_bolt_combat", ...,
+     *   {_x: defender._x, _y: 50})` at `+0x852a`, then
+     *   `bolt.gotoAndStop(lightning_frame)` at `+0x85c2`, and removes it when
+     *   the victim's hurt clip reports back (`+0x85ed`).
+     *
+     *   Measured on the oracle: character 12, **two frames** — frame 1 is the
+     *   child alone and carries `stop()`; frame 2 moves the child and ADDS
+     *   shape 11 at depth 4 — so the frame IS the spell. The child, sprite 10,
+     *   is **twelve frames of flicker with no `Stop`**: shapes 6, 7, 8 three
+     *   frames each, then 9. It loops while the bolt is up, which is why it is
+     *   a `clock` and not a `nested` lookup.
+     */
+    linkage: "lightning_bolt_combat",
+    indexedBy: "frame: 1 is cast_lightning_bolt, 2 is cast_frightning_bolt (`bolt.gotoAndStop(lightning_frame)`, `+0x85c2`)",
+    clock: {
+      character: 10,
+      indexedBy: "the bolt's AGE in frames; sprite 10 has no Stop and loops its twelve frames while the bolt is attached",
+      reader: "src/render/props.js — boltOpsFor, the flicker"
+    },
+    reader: "src/render/props.js — boltOpsFor, the bolt a cast attaches at the victim's x"
+  },
+  {
+    /**
      * ► **THE ARENA'S EDGES, and they are the only scenery the build attaches.**
      *   Root frame 221 puts one `rockMC` at each end of the ground:
      *
@@ -1053,9 +1078,15 @@ export function extractProps(buffer) {
     // things the pack does not hold, which is the opposite mistake.
     const refusedOwn = { filterLists: [], blendModes: [] };
     let underGroup = 0;
-    for (let index = 0; index < frameCount; index += 1) {
-      const displayList = resolved.frames[index];
-      if (!displayList) { frames.push([]); continue; }
+    // ► **ONE FRAME'S PLACEMENTS, AS A CLOSURE, so a CLOCK child can be walked
+    //   with exactly the code that walks the prop's own frames.** Factored out
+    //   2026-09-22 for `lightning_bolt_combat`; before that this body sat inline
+    //   in the loop below. `where` names the frame in every failure message and
+    //   `spriteFrames` is `flattenFrame`'s own option for stopping a nested
+    //   sprite somewhere other than frame 1. Every invoice below is fed from
+    //   here either way, so a clock frame's effects are counted as the emitted
+    //   placements they are.
+    const placementsFor = (displayList, where, spriteFrames = null) => {
       let drawables;
       try {
         // ► **CLIP PATHS ARE ASKED FOR HERE AND NOWHERE ELSE.** The sky's night
@@ -1065,11 +1096,12 @@ export function extractProps(buffer) {
         //   that the figure and wardrobe extractions, which are pinned by tests
         //   and by a preview the owner has looked at, do not silently gain
         //   geometry they never had.
-        drawables = flattenFrame(buffer, characters, displayList, { cache, resolveMasks: true });
+        drawables = flattenFrame(buffer, characters, displayList, {
+          cache, resolveMasks: true, ...(spriteFrames ? { spriteFrames } : {})
+        });
       } catch (error) {
-        failures.push({ linkage: key, id, message: `frame ${index + 1}: ${String(error.message).slice(0, 90)}` });
-        frames.push([]);
-        continue;
+        failures.push({ linkage: key, id, message: `${where}: ${String(error.message).slice(0, 90)}` });
+        return [];
       }
       // THE MASKS ON THIS FRAME, by their own path — so a masked placement can
       // name its cutter without depth alone having to be unique across nesting.
@@ -1091,7 +1123,7 @@ export function extractProps(buffer) {
             const lost = refusedEffectsOf(drawable, refusedOwn, notCarried);
             failures.push({
               linkage: key, id,
-              message: `frame ${index + 1} carries ${drawable.unsupported} (character ${drawable.characterId})${lost}`
+              message: `${where} carries ${drawable.unsupported} (character ${drawable.characterId})${lost}`
             });
           }
           continue;
@@ -1110,7 +1142,7 @@ export function extractProps(buffer) {
           const lost = refusedEffectsOf(drawable, refusedOwn, notCarried);
           failures.push({
             linkage: key, id,
-            message: `frame ${index + 1} carries ${drawable.unsupported} (character ${drawable.characterId})${lost}`
+            message: `${where} carries ${drawable.unsupported} (character ${drawable.characterId})${lost}`
           });
           continue;
         }
@@ -1152,7 +1184,12 @@ export function extractProps(buffer) {
           ...(inherited ? { inheritedEffects: inherited } : {})
         });
       }
-      frames.push(placements);
+      return placements;
+    };
+    for (let index = 0; index < frameCount; index += 1) {
+      const displayList = resolved.frames[index];
+      if (!displayList) { frames.push([]); continue; }
+      frames.push(placementsFor(displayList, `frame ${index + 1}`));
     }
 
     // ► **THE DISTINCT-CONTENT TALLY IS THE POINT OF THE REPORT, not a
@@ -1163,6 +1200,41 @@ export function extractProps(buffer) {
     const nestedLookup = declared.nested
       ? nestedLookupFor(buffer, characters, resolved, frameCount, declared.nested, cache, notCarried)
       : null;
+    // ► **A CLOCK CHILD, WALKED FRAME BY FRAME — added 2026-09-22.** Where
+    //   `nestedLookup` measures a child whose frame is an INDEX into one shape,
+    //   this is a child whose frame is TIME: it has no `Stop`, so in the build
+    //   it loops for as long as its parent is attached, and freezing it on
+    //   frame 1 draws a still picture of an animation. Emitted as every parent
+    //   frame at every child frame, re-flattened through `placementsFor` so a
+    //   clock frame is built — and invoiced — by exactly the code that builds
+    //   the prop's own frames. Nothing here assembles a frame by hand.
+    let clock = null;
+    if (declared.clock) {
+      const child = characters.get(declared.clock.character);
+      if (!child || child.kind !== "sprite") {
+        refuse(notCarried, "clockCharacterMissing");
+      } else {
+        const framesByParent = [];
+        for (let index = 0; index < frameCount; index += 1) {
+          const displayList = resolved.frames[index];
+          const ages = [];
+          for (let age = 1; age <= child.frames; age += 1) {
+            ages.push(displayList
+              ? placementsFor(displayList, `frame ${index + 1} at clock frame ${age}`,
+                { [declared.clock.character]: age })
+              : []);
+          }
+          framesByParent.push(ages);
+        }
+        clock = {
+          character: declared.clock.character,
+          indexedBy: declared.clock.indexedBy,
+          reader: declared.clock.reader,
+          frameCount: child.frames,
+          framesByParent
+        };
+      }
+    }
     props[key] = {
       linkage: key,
       character: id,
@@ -1182,6 +1254,10 @@ export function extractProps(buffer) {
       //   props; it goes looking exactly where `PROP_EXPORTS` says the build
       //   indexes a child, and a refusal is in `notCarried` under its own name.
       ...(nestedLookup ? { nestedLookup } : {}),
+      // Present only where `PROP_EXPORTS` declares a clock, for the reason
+      // `nestedLookup` beside it is: an always-present `clock: null` would
+      // claim this tool went looking on every prop.
+      ...(clock ? { clock } : {}),
       effects: effectSummaryFor(groups, ownFilterLists, ownBlendModes, underGroup, notCarried, refusedOwn),
       frames
     };

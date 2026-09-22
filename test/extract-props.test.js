@@ -364,8 +364,21 @@ function propsBuild() {
     defineSprite(1816, 1, [place2({ depth: 1, characterId: 900 }), showFrame()]),
     defineSprite(1531, 1, [place2({ depth: 1, characterId: 900 }), showFrame()]),
     defineSprite(646, 1, [place2({ depth: 1, characterId: 900 }), showFrame()]),
+    // `lightning_bolt_combat`: a two-frame bolt over a looping child, under the
+    // oracle's own character ids (12 and 10) because the entry declares them.
+    defineSprite(10, 2, [
+      place2({ depth: 1, characterId: 900 }), showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 902 }), showFrame()
+    ]),
+    defineSprite(12, 2, [
+      place2({ depth: 1, characterId: 10 }), showFrame(),
+      place2({ depth: 4, characterId: 903 }), showFrame()
+    ]),
 
-    exportAssets([[910, "bullet"], [912, "bullet_trail"], [915, "blood"], [916, "sparks"], [35, "rockMC"]])
+    exportAssets([
+      [910, "bullet"], [912, "bullet_trail"], [915, "blood"], [916, "sparks"], [35, "rockMC"],
+      [12, "lightning_bolt_combat"]
+    ])
   ]);
 }
 
@@ -378,8 +391,9 @@ test("the synthetic build resolves every declared prop, or the rest of this file
   // ► An anchor, not a formality. Every assertion below indexes `PACK.props`
   //   by name, and a missing prop would make each of them throw on `undefined`
   //   with a message about a property rather than about a build that did not
-  //   parse. Twelve entries in `PROP_EXPORTS`, twelve props, no failures.
-  assert.equal(PROP_EXPORTS.length, 12);
+  //   parse. Thirteen entries in `PROP_EXPORTS`, thirteen props, no failures.
+  //   **12 -> 13 on 2026-09-22**, when `lightning_bolt_combat` joined.
+  assert.equal(PROP_EXPORTS.length, 13);
   assert.deepEqual(PACK.failures, [], "the synthetic build must parse clean");
   assert.equal(Object.keys(PACK.props).length, PROP_EXPORTS.length);
 });
@@ -822,6 +836,69 @@ test("A NESTED CLIP'S LOOKUP IS MEASURED BY RE-FLATTENING, or refused by name", 
   assert.equal(trail.nested.indexedBy, "secondary_weapon - 60", "and THAT is where the weapon index belongs");
 });
 
+test("A NESTED CLIP THAT IS A CLOCK IS EMITTED FRAME BY FRAME, or refused by name", () => {
+  // ► **THE BOLT, AND THE SHAPE OF IT IS NOT `bullet_trail`'S.** Measured on
+  //   the oracle 2026-09-22: `lightning_bolt_combat` (character 12) has TWO
+  //   frames — `bolt.gotoAndStop(lightning_frame)` picks 1 for a lightning bolt
+  //   and 2 for a frightning one (`+0x85c2`) — and frame 2 ADDS a shape at
+  //   depth 4 over the same child. The child, sprite 10, is twelve frames of
+  //   flicker with no `Stop`, so it LOOPS for as long as the bolt is attached.
+  //
+  //   `nestedLookup` cannot hold that and is right to refuse it: it needs one
+  //   shape that moves, and the frightning bolt has two. And freezing the child
+  //   on frame 1, which `flattenFrame` does, draws a bolt that never flickers.
+  //   So a CLOCK child is emitted as every parent frame at every child frame,
+  //   by re-flattening with `spriteFrames` — the same option `nestedLookup`
+  //   measures with — and nothing is inferred.
+  const build = ({ withChild = true } = {}) => swfFile([
+    solidShape(900, [0xff, 0, 0, 0xff]),
+    solidShape(902, [0, 0xff, 0, 0xff]),
+    solidShape(903, [0, 0, 0xff, 0xff]),
+    solidShape(904, [0xff, 0xff, 0, 0xff]),
+    // The child: three drawings on three frames, the way sprite 10 flickers
+    // through shapes 6, 7 and 8. No Stop anywhere, so it is a clock.
+    ...(withChild ? [defineSprite(10, 3, [
+      place2({ depth: 1, characterId: 900 }), showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 902 }), showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 903 }), showFrame()
+    ])] : [solidShape(10, [0, 0, 0, 0xff])]),
+    // The bolt: frame 1 is the child alone, frame 2 adds a shape over it.
+    defineSprite(12, 2, [
+      place2({ depth: 1, characterId: 10 }), showFrame(),
+      place2({ depth: 4, characterId: 904 }), showFrame()
+    ]),
+    exportAssets([[12, "lightning_bolt_combat"]])
+  ]);
+
+  const prop = extractProps(build()).props.lightning_bolt_combat;
+  const shapesOf = (placements) => placements.map((placement) => placement.shape);
+
+  // The prop's own frames are UNCHANGED — child on frame 1 — so every reader
+  // that already indexes `frames` keeps working.
+  assert.equal(prop.frameCount, 2);
+  assert.deepEqual(prop.frames.map(shapesOf), [[900], [900, 904]]);
+
+  // And the clock is its own key, frame by age, for BOTH parent frames.
+  assert.equal(prop.clock.character, 10);
+  assert.equal(prop.clock.frameCount, 3);
+  assert.deepEqual(prop.clock.framesByParent.map((ages) => ages.map(shapesOf)), [
+    [[900], [902], [903]],
+    [[900, 904], [902, 904], [903, 904]]
+  ], "every parent frame at every child frame, re-flattened rather than assembled");
+
+  // ► **IT REFUSES RATHER THAN GUESSES.** A declared clock whose character is
+  //   not a sprite has no frames to walk.
+  const missing = extractProps(build({ withChild: false })).props.lightning_bolt_combat;
+  assert.equal(Object.hasOwn(missing, "clock"), false, "refused, and therefore absent");
+  assert.equal(missing.effects.notCarried.clockCharacterMissing, 1, "and counted by name");
+
+  // ► **AND THE DECLARATION NAMES THE BUILD'S OWN CHILD.** Sprite 10 is what
+  //   character 12 places at depth 1 on the oracle; a clock pointed anywhere
+  //   else would walk the wrong timeline and report success.
+  const entry = PROP_EXPORTS.find((candidate) => candidate.linkage === "lightning_bolt_combat");
+  assert.equal(entry.clock.character, 10);
+});
+
 test("THE MANIFEST'S PER-ENTRY INVOICE IS THE ONLY ONE A HUMAN READS, and it was deletable", () => {
   // ► **MEASURED BY A VERIFIER: removing `effects: prop.effects` from the
   //   written manifest left all fifteen tests in this file green.** `main()`
@@ -859,6 +936,28 @@ test("THE MANIFEST'S PER-ENTRY INVOICE IS THE ONLY ONE A HUMAN READS, and it was
   assert.equal(manifest.shapeCount, Object.keys(PACK.shapes).length);
   assert.deepEqual(manifest.approximated, PACK.approximated);
   assert.equal(manifest.sha256.length, 64, "the oracle's fingerprint travels with the pack");
+});
+
+test("THE INSTALLED PACK holds every prop `PROP_EXPORTS` declares, or it predates the extractor", (t) => {
+  // ► **WHY THIS EXISTS: A STALE PACK FAILS THIRTEEN OTHER TESTS WITH BARE
+  //   NUMBERS.** `test/render-props.test.js` and `test/render-arena-shell.test.js`
+  //   pin measured counts over the REAL pack — 3,348 placements, 747 group
+  //   instances, 297 paths — and on 2026-09-22 every one of them moved because
+  //   `lightning_bolt_combat` joined. A machine that extracted before that date
+  //   reads `3345 !== 3348` thirteen times and nothing says why. This test says
+  //   why, by name, beside them.
+  const tool = path.join(REPO_ROOT, "tools", "extract-props.mjs");
+  assert.ok(fs.existsSync(tool), `${tool} is not there, so REPO_ROOT is wrong`);
+  const dataAt = path.join(REPO_ROOT, "assets", "props", "props.json");
+  if (!fs.existsSync(dataAt)) {
+    t.diagnostic("no extracted props pack on this machine — nothing to be stale");
+    return;
+  }
+  const held = new Set(Object.keys(JSON.parse(fs.readFileSync(dataAt, "utf8")).props));
+  const missing = PROP_EXPORTS.map((entry) => entry.linkage ?? entry.name).filter((key) => !held.has(key));
+  assert.deepEqual(missing, [],
+    "the extracted pack predates `PROP_EXPORTS`, so every count test over the real pack is measuring an " +
+    "older extraction. Re-run `node tools/extract-props.mjs <your swords_sandals2_download.swf>`.");
 });
 
 test("THE INSTALLED PACK, when there is one: its manifest agrees with its own data, on BOTH branches", (t) => {
@@ -935,6 +1034,16 @@ test("THE INSTALLED PACK, when there is one: its manifest agrees with its own da
     groups += (prop.effectGroups ?? []).length;
     droppedFilters += prop.effects?.own?.dropped?.filters ?? 0;
     for (const frame of prop.frames) for (const placement of frame) if (placement.inheritedEffects) under += 1;
+    // ► **AND EVERY CLOCK FRAME, because those are placements the pack holds
+    //   too.** Added 2026-09-22 with `lightning_bolt_combat`: its 24 clock
+    //   frames sit under the bolt's own group and the invoice counts them
+    //   (3235), while a walk over `frames` alone found 3211. The invoice was
+    //   right and this walk was the one that had stopped visiting all of the
+    //   data. "Recomputed from the pack's own placements" has to mean ALL of
+    //   them, or it is a second copy of the invoice's scope and not a check.
+    for (const ages of prop.clock?.framesByParent ?? []) {
+      for (const frame of ages) for (const placement of frame) if (placement.inheritedEffects) under += 1;
+    }
   }
   assert.equal(manifest.effects.groups, groups, "manifest group count against the pack's own groups");
   assert.equal(manifest.effects.placementsUnderAGroup, under);

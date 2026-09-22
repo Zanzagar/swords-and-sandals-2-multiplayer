@@ -618,7 +618,10 @@ test("the scale the backdrop is read at moves the FILTER STRING and nothing else
       }
     }
   }
-  assert.equal(frames, 302, "every frame of every linkage in the pack");
+  // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
+  //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
+  //   before, every assertion in this file passes unchanged.
+  assert.equal(frames, 304, "every frame of every linkage in the pack");
   // ► **BOTH SIDES PINNED, BECAUSE EITHER ONE ALONE IS SATISFIED BY A BUG.**
   //   If the scale were ignored, `moved` would be 0 and every blur would draw
   //   at 1/`fit.scale` of its width; if the buckets were NOT scale-invariant,
@@ -634,9 +637,10 @@ test("the scale the backdrop is read at moves the FILTER STRING and nothing else
   //   the glow's blur has ramped to nothing while its strength has not. Zero
   //   times any scale is zero, so those eight are scale-invariant for a real
   //   reason and not because the option was ignored.
-  assert.equal(moved, 456, "the filter strings that move with the stage scale");
+  // The bolt's two glows carry pixel lengths, so they move with the stage too.
+  assert.equal(moved, 458, "the filter strings that move with the stage scale");
   assert.equal(same, 289, "and the ones with nothing in them to move");
-  assert.equal(moved + same, 745, "which is every group instance in the pack");
+  assert.equal(moved + same, 747, "which is every group instance in the pack");
   const flat = [];
   for (let frame = 100; frame <= 105; frame += 1) {
     for (const op of propOpsFor(REAL_PROPS, { linkage: "sky", frame, scale: 9 }) ?? []) {
@@ -837,9 +841,12 @@ test("the shell's invoice is the UPSTREAM one, summed over the pack the same way
     }
   }
 
-  assert.equal(placements, 3345, "every placement in the pack");
+  // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
+  //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
+  //   before, every assertion in this file passes unchanged.
+  assert.equal(placements, 3348, "every placement in the pack");
   assert.equal(tinted, 2330, "70% of them tinted, which is the sky sweeping through dusk");
-  assert.equal(ops, 8682, "and the operations they expand to");
+  assert.equal(ops, 8702, "and the operations they expand to");
 
   assert.equal(invoice.placements, placements, "the roll-up sees every placement the walk does");
   assert.equal(invoice.tintedPlacements, tinted, "and agrees which of them carry a transform");
@@ -1129,10 +1136,13 @@ test("the REAL pack's groups: the sky's are contiguous, and the moon is ONE buff
       inert += tally.inert;
     }
   }
-  assert.equal(instances, 745, "every group instance the pack reaches, frame by frame");
+  // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
+  //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
+  //   before, every assertion in this file passes unchanged.
+  assert.equal(instances, 747, "every group instance the pack reaches, frame by frame");
   assert.equal(split, 0, "no group's operations are interrupted by another group's");
   assert.equal(nested, 0, "and no chain is deeper than one");
-  assert.equal(buffered, 471, "the instances that need an offscreen — 464 filtered plus 7 blended");
+  assert.equal(buffered, 473, "the instances that need an offscreen — 466 filtered plus 7 blended");
   assert.equal(inert, 274, "and the colour-matrix-only ones that do not");
   assert.equal(buffered + inert, instances, "which partitions the roster exactly");
 
@@ -1172,7 +1182,7 @@ test("the REAL pack's groups: the sky's are contiguous, and the moon is ONE buff
   assert.equal(puff.runs[0].group.blendModeRefused, null);
 });
 
-test("per-leaf and per-group COINCIDE for 286 of the pack's 745 groups, and it is still not taken", () => {
+test("per-leaf and per-group COINCIDE for 286 of the pack's 747 groups, and it is still not taken", () => {
   if (!REAL_PROPS) {
     assertRealPackPathIsDerivable();
     assert.equal(REAL_PROPS, null, "no extraction on this machine");
@@ -1211,8 +1221,12 @@ test("per-leaf and per-group COINCIDE for 286 of the pack's 745 groups, and it i
   }
   assert.equal(single, 286, "single-operation filtered groups, where the two pictures coincide");
   assert.equal(singleClipped, 0, "and not one of them is clipped, which is what makes them coincide");
-  assert.equal(multi, 178, "the filtered groups where they do NOT coincide");
-  assert.equal(single + multi, 464, "and together they are every filtered instance");
+  // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
+  //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
+  //   before, every assertion in this file passes unchanged.
+  // The bolt's two glows each cover nine operations, so both land here.
+  assert.equal(multi, 180, "the filtered groups where they do NOT coincide");
+  assert.equal(single + multi, 466, "and together they are every filtered instance");
 
   // ► **AND THE CASE THAT BREAKS THE SHORTCUT EVEN WITHOUT THE HYPOTHESIS.**
   //   Canvas applies `ctx.filter` to the source and clips the RESULT, so a
@@ -1231,7 +1245,7 @@ test("per-leaf and per-group COINCIDE for 286 of the pack's 745 groups, and it i
   assert.equal(clipped, 4312, "of which this many carry a clip a per-leaf filter would cut");
 });
 
-test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 23 shapes inside it", () => {
+test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 27 shapes inside it", () => {
   if (!REAL_PROPS) {
     assertRealPackPathIsDerivable();
     assert.equal(REAL_PROPS, null, "no extraction on this machine");
@@ -1250,7 +1264,10 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
       if (!COMPOSITOR.pathBoxOf(path.d)) unreadable += 1;
     }
   }
-  assert.equal(paths, 258, "every path in every shape the pack holds");
+  // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
+  //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
+  //   before, every assertion in this file passes unchanged.
+  assert.equal(paths, 297, "every path in every shape the pack holds");
   assert.equal(unreadable, 0, "and the pair scan reads all of them");
 
   // ► **THE CROSS-CHECK IS THE EXTRACTOR'S OWN `bounds`, WRITTEN BY A DIFFERENT
@@ -1291,9 +1308,11 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
       bounds.xMax - bareBox.maxX, bounds.yMax - bareBox.maxY);
     if (bareShort > 0.001 && short <= 0.001) savedByThePad += 1;
   }
-  assert.equal(shapes, 56, "every shape the pack holds declares bounds");
+  // The bolt's five: shapes 6, 7, 8, 9 (the flicker) and 11 (the frightning bolt's addition).
+  assert.equal(shapes, 61, "every shape the pack holds declares bounds");
   assert.equal(shortOfItsOwnBounds, 0, "and runBoxOf's box contains every one of them");
-  assert.equal(savedByThePad, 23, "23 of which only because the stroke width is added");
+  // 23 -> 27 on 2026-09-22: four of the bolt's five new shapes are STROKED lines, and the old 56 are unchanged.
+  assert.equal(savedByThePad, 27, "27 of which only because the stroke width is added");
 
   // And the pad is read off the OPERATION, so a wider stroke moves the box.
   const stroked = [{ d: "M0 0L10 0L10 10L0 10Z", matrix: identity, strokeWidth: 6 }];
@@ -1330,7 +1349,10 @@ test("filterBleedOf bounds the reach of every filter string the pack produces", 
       }
     }
   }
-  assert.equal(strings.size, 211, "the distinct filter strings this pack asks for");
+  // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
+  //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
+  //   before, every assertion in this file passes unchanged.
+  assert.equal(strings.size, 213, "the distinct filter strings this pack asks for");
   let tightest = Infinity;
   for (const filter of strings) {
     const lengths = filter.match(/[-+]?[0-9]*[.]?[0-9]+px/g) ?? [];
