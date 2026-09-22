@@ -3293,6 +3293,53 @@ applications, the first on the cast phase itself**; a recast resets, never
 stacks. Colossus and little fat kid start at 16, not 20 (`+0x7fed`, `+0x820b`,
 the latter on the DEFENDER).
 
+**The four stat spells, command and adulation** (derived 2026-09-22 by one
+deriver each from byte dumps of their arms; **NOT YET RE-DERIVED BY A
+VERIFIER** except where a line says so — treat as leads with offsets).
+- **`cast_colossus` (item 42, `+0x7fda`-`+0x81f7`)**: counter 16 on the
+  caster's clip, crowd 15, cost `round(magicka)`; once: `oldscale = _yscale`,
+  `newscale = 450`, `strength = backup_strength * 3`, `attack = backup_attack *
+  2`. **Its growth is a BUILD BUG**: each tick ASSIGNS `_yscale = ceil((newscale
+  − _yscale) / 2)` (`+0x80e7`-`+0x8123`, no `Add2`), which converges to 150, so
+  the finish test (`_yscale >= newscale`) never passes and the phase ends only
+  through the `demand_move` watchdog (~58 ticks); the fighter is left at 150%,
+  not 450%, and drifts ~2 px a tick toward its facing (`+0x813f`-`+0x8191`).
+- **`cast_little_fat_kid` (item 33, `+0x81f8`-`+0x83f4`)**: a DEBUFF written on
+  the DEFENDER: counter 16 on the victim's clip, `strength = round(backup /
+  2)`, `attack = round(backup / 2)`, scale toward 50; it completes on its first
+  tick.
+- **`cast_swiftsandals` (item 40, `+0x895d`-`+0x8a5f`)**: counter 20; once
+  `speed = 10 + backup_speed * 2` — not a doubling. **`cast_bloodlust` (item 41,
+  `+0x8a60`-`+0x8baa`)**: counter 20; once `strength = 10 + round(backup_strength
+  * 1.5)` and `defence = round(backup_defence * 0.5)` — it HALVES defence, and
+  the item text's "reduces your agility" names a field the arm never touches.
+- **All four restore at expiry from the pre-battle `backup_*`** (written only by
+  `backup_char`, at initbattle), in `check_spells`' `== 0` test, which runs
+  OUTSIDE its `> 0` block (`+0x256b` → `+0x25c6`, `+0x2651` → `+0x26ac`): **a
+  counter entering at 0 restores**, so this engine's 0-as-inactive convention
+  is unsafe for these four (-1 is the build's inert value). Strength is ONE
+  slot: the last writer wins and ANY expiry resets it, cancelling another
+  spell still running. `battlevalues` recomputes reach (`physical_size`) and
+  damage from strength every phase; `attack_chances` reads defence live.
+- **With the per-round re-skin, the hero gains nothing from colossus or swift
+  sandals** (its stats are rewritten from DNA before its next decision), and a
+  villain's little fat kid on the hero is erased before the hero acts; the
+  villain keeps its buffs. The engine has no mutable-stat effect kind, so all
+  four wait on the owner's decision about the re-skin.
+- **`cast_command` (item 39, `+0x7be6`-`+0x7db6`)**: no draw; latched on
+  `attacker.shove`, it plays `knockback_mov` on the defender and PULLS it 40 px
+  a tick toward the caster's facing side until `defender._x <= attacker._x +
+  game_defender.physical_size` (mirror for left), at least one step — so a
+  target already close ends BEHIND the caster. Villain arm 25: `check_inventory
+  (39) && fightdistance > 300`. (Being verified as this is written.)
+- **`cast_adulation` (item 47, `+0x76ae`-`+0x777b`)**: no draw, no defender
+  reference; plays `wincrowd1`; its whole effect is `crowd_action = 50`.
+  **`crowd_action` is NOT a presentation cue**, as this repository's code
+  comments call it: `nextphase` adds it into `crowd_interest`, clamped 1..100
+  (`+0x3541`-`+0x35a3`), and `crowd_interest` scales the victory purse. This
+  engine models neither; its `SS2_CROWD` toll is authored and unrelated.
+  Villain arm 28: `check_inventory(47) && fightdistance > 300`.
+
 **The spell ladder runs LAST, and overrides the rest and the status phases**
 (verified 2026-09-22; the main session's reading, re-derived by a write-nothing
 verifier: HOLDS, with the stamina-gate premise corrected in the `staminacost`
