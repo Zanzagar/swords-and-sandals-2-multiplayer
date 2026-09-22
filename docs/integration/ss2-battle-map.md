@@ -1260,7 +1260,7 @@ the same claim. Stated separately:
 | overlay frame 5 `DoAction@0x238de2` | `+0x0c0a`, `+0x10a2` | `staminaleft / staminamax * 100 >= 50` wires `taunt` into the shared `longrange_warrior` slot and below it `rest`, one site per facing (§Buttons wired per controller frame) |
 | overlay frame 20 `DoAction@0x23b16b` | `+0x0c15`, `+0x110a` | the same test on `longrange_archer` |
 | `villain_cast_spells` | `+0x0a5a`, `+0x0acf` | `villain.staminaleft < villain.staminamax / 2` rewrites the decision to `drink_potion` and calls `use_item` |
-| `villainChooseAction` | `+0x03e8` | `staminaleft > 10` gates the **entire** action-choice block (the false arm jumps 1,209 bytes past it) |
+| `villainChooseAction` | `+0x03e8` | `staminaleft > 10` gates ~~the **entire** action-choice block~~ **the IN-RANGE action-choice block only** (the false arm jumps 1,209 bytes past it, to the `rest` write at `+0x08b6`) — *corrected 2026-09-22 by a write-nothing verifier: the gate sits inside the in-range test at `+0x03d5`, whose failure jumps to `+0x08c3`, so an out-of-range villain at 10 stamina or less is never sent to rest by it; and the function's LAST statement, `villain_cast_spells()` at `+0x1432`, is unconditional and can replace the rest (§"The spell ladder runs LAST")* |
 | `villainChooseAction` | `+0x0b33`, `+0x0e22` | `staminaleft / staminamax * 100 < 40` picks `rest`, at or above it `taunt` |
 | `villainChooseAction` | `+0x0b9f`, `+0x0e8e` | `staminaleft / staminamax * 100 < 30` picks `rest`, at or above it **`wincrowd`** |
 
@@ -3292,6 +3292,33 @@ strict alternation the bearer gains on its own phases at 19, 17, …, 1: **ten
 applications, the first on the cast phase itself**; a recast resets, never
 stacks. Colossus and little fat kid start at 16, not 20 (`+0x7fed`, `+0x820b`,
 the latter on the DEFENDER).
+
+**The spell ladder runs LAST, and overrides the rest and the status phases**
+(verified 2026-09-22; the main session's reading, re-derived by a write-nothing
+verifier: HOLDS, with the stamina-gate premise corrected in the `staminacost`
+table above). The villain's decision function (the anonymous function in
+`sprite:862[overlay]/frame:52/DoAction@0x23f835`, base `0x23f83b`) has 122
+branches, none backward, none past `+0x1432`, and no `Return`; its last
+statement is `villain_cast_spells()` (`+0x1432`-`+0x1441`), unconditional.
+It runs AFTER the four status blocks (`+0x133a`-`+0x1431`: each `if
+(villain.<flag> == true) { <flag> = false; villaindecisionA = "<status>" }`,
+last write winning) and after every rest, taunt, walk, swap and psyche
+decision. `villain_cast_spells` never reads `villaindecisionA` or any status
+flag; `spell_selected` is false whenever it starts. `villainChooseAction` is
+called from `changeCombatants` only when `villaindecisionA == null`
+(`+0x2bb4`), and `phase_decision = villaindecisionA` when `battle_action == 2`
+(`+0x3ac0`). So, about 90% of the time (the ladder's own roll):
+- **a tired villain in range still drinks a stamina vial or casts** (bolts on
+  possession, gale on its gate, ...) instead of resting;
+- **a frozen, burning, poisoned or life-stolen villain holding a qualifying
+  item CASTS**, and the status phase is LOST, not delayed — its flag was
+  already cleared.
+This engine's `chooseAiAction` does the opposite: the forced status phase
+first, then the rest at `staminaleft <= 10`, then the ladder emulation. The
+statuses are a legality question too (the engine forces the status phase for
+every combatant; the build forces it for the hero through `getphase` and lets
+the villain's ladder override it), so reproducing it is an owner's decision
+recorded in the handoff; the tired-villain order is an AI fix.
 
 **The per-round re-skin gives the HERO's removed armour back, and not the
 armour class** (derived and verified 2026-09-22; one deriver, one write-nothing
