@@ -104,6 +104,10 @@ import { fileURLToPath } from "node:url";
 
 import { parseShape, shapeToPaths } from "./swf-shapes.mjs";
 import { indexCharacters, resolveTimeline, flattenFrame } from "./swf-display-list.mjs";
+// The morph parser `extract-figure.mjs` and `extract-screens.mjs` already bake
+// with. Imported rather than copied: a morph read two ways is two chances to
+// pair the edge streams differently.
+import { parseMorphShape, morphShapeAt, morphToPaths, ratioOf } from "./swf-morph-shapes.mjs";
 // THE READER, IMPORTED SO THE INVOICE IS THE READER'S OWN VERDICT. What this
 // pack can say about a filter is exactly what `canvasFilterFor` does with it —
 // applied, deferred to `applyColourMatrix`, measured no-op, or refused by name.
@@ -558,8 +562,10 @@ function ownEffectsOf(drawable, notCarried) {
  *
  * ► **THIS IS THE DEFECT THAT ATE THIS FILE'S HEADLINE, so it is worth saying
  *   plainly.** The placement loop skips two kinds of drawable — one that is
- *   `unsupported` (a `DefineEditText`, a button, a morph) and a mask that could
- *   not be resolved. Both skips reported the KIND into `failures` and said
+ *   `unsupported` (a `DefineEditText`, a button; ~~a morph~~ — a morph is
+ *   BAKED since 2026-09-22 and skipped only when it will not parse or sits
+ *   under a mask this tool cannot resolve, see `bakeMorph`) and a mask that
+ *   could not be resolved. Both skips reported the KIND into `failures` and said
  *   nothing about effects, which was survivable right up until somebody counted
  *   own filters across the build, got `0`, and published it. The build has
  *   exactly two own-filtered placements and they are exactly two of these
@@ -1056,6 +1062,98 @@ export function extractProps(buffer) {
   const failures = [];
   const cache = new Map();
 
+  /**
+   * A MORPH, BAKED AT THE RATIO ITS PLACEMENT CARRIES — added 2026-09-22 for
+   * the fireball's explosion, and the convention is `extract-figure.mjs`'s.
+   *
+   * ► **WHAT THIS REPLACED WAS A SKIP.** A morph came out of `flattenFrame` as
+   *   `unsupported: "morph"` and went down the same `continue` as a text
+   *   field, into `failures`. REPORTED by the main session from its own
+   *   extraction of the oracle, and not re-measured by this change, which was
+   *   written where the install cannot be read: `fireball_combat` frame 4's
+   *   explosion child, sprite 27, places a morph on its frames 1-18
+   *   (characters 19-22) and MOVES it — a `PlaceObject2` with no character,
+   *   carrying the ratio — so every one of those ages extracted as an empty
+   *   frame and `fireballOpsFor` returned null for them.
+   *
+   * ► **THE KEY IS `"<id>@<raw ratio>"` AND THE ENTRY IS FIGURE'S, FIELD FOR
+   *   FIELD** — `{bounds, morph, ratio, approximated, approximatedByKind,
+   *   paths}` — so a baked morph is an ordinary entry in `shapes` and
+   *   `propOpsFor` draws it with no second code path: it looks a placement's
+   *   shape up by key, and a string key is a key. The RAW 0..65535 ratio rather
+   *   than `extract-screens.mjs`'s normalised-and-rounded one, because the raw
+   *   key is exact: rounding `ratio / 65535` to three places puts every raw
+   *   ratio in a 65.5-wide bucket into one entry, baked at whichever came first.
+   *
+   * ► **NO RATIO IS RATIO 0, the start shape.** `PlaceFlagHasRatio` is
+   *   optional, and a placement that never set one shows the morph's start —
+   *   which is what `extract-figure.mjs` and `extract-screens.mjs` both bake.
+   *   A MOVE that omits the ratio keeps the instance's last one: that is
+   *   `resolveTimeline`'s field-by-field rule, the same one the matrix follows,
+   *   so by the time a drawable reaches here `ratio` is already the one in
+   *   force on that frame.
+   *
+   * ► **REFUSED, BY NAME, IN TWO CASES, and both keep the old skip's invoice.**
+   *   A definition that will not parse (reported once per character, and once
+   *   per placement it cost); and a morph under a mask this tool cannot turn
+   *   into a clip. The second exists because `flattenFrame` marks a SHAPE under
+   *   an unresolvable mask `unsupported: "masked"`, but a morph comes back
+   *   `"morph"` either way — so carrying every morph would have lifted that
+   *   refusal in silence and drawn the morph unclipped, larger than the build.
+   *
+   * @returns {{key: string|null, refused: string|null}}
+   */
+  const morphDefinitions = new Map();
+  const morphShapes = new Map();
+  const bakeMorph = (drawable, masks) => {
+    if (drawable.maskPath && !masks.has(drawable.maskPath.join("/"))) {
+      return { key: null, refused: "morph under a mask this tool cannot resolve" };
+    }
+    // ► **AND UNDER A MASK ON AN ENCLOSING SPRITE, WHICH THIS TOOL NEVER
+    //   CLIPS** (added 2026-09-22 after a Codex adversarial review reproduced
+    //   it: a morph inside a masked sprite came back with no `maskPath` and
+    //   was baked whole). `flattenFrame` now stamps `ancestorMaskPath`; the
+    //   old blanket refusal covered this case by accident, so lifting it for
+    //   morphs must not lift it here.
+    if (drawable.ancestorMaskPath) {
+      return { key: null, refused: "morph inside a masked sprite this tool cannot clip" };
+    }
+    const ratio = Number.isFinite(drawable.ratio) ? drawable.ratio : 0;
+    const morphKey = `${drawable.characterId}@${ratio}`;
+    if (morphShapes.has(morphKey)) return { key: morphKey, refused: null };
+    let definition = morphDefinitions.get(drawable.characterId);
+    if (definition === undefined) {
+      const character = characters.get(drawable.characterId);
+      try {
+        definition = parseMorphShape(buffer, character.bodyStart, character.bodyEnd, character.tagCode);
+      } catch (error) {
+        definition = null;
+        failures.push({
+          linkage: `morph ${drawable.characterId}`, id: drawable.characterId,
+          message: String(error.message).slice(0, 120)
+        });
+      }
+      morphDefinitions.set(drawable.characterId, definition);
+    }
+    if (!definition) return { key: null, refused: "morph whose definition would not parse" };
+    const frame = morphShapeAt(definition, ratioOf(ratio));
+    const paths = morphToPaths(frame);
+    morphShapes.set(morphKey, {
+      bounds: {
+        xMin: px(frame.bounds.xMin), xMax: px(frame.bounds.xMax),
+        yMin: px(frame.bounds.yMin), yMax: px(frame.bounds.yMax)
+      },
+      morph: drawable.characterId,
+      ratio,
+      // The invoice every shape in this pack carries, on the morphs too: "all
+      // of them or none", and `test/extraction-honesty.test.js` fails by name
+      // on a pack that invoices some.
+      ...pathApproximations(paths),
+      paths
+    });
+    return { key: morphKey, refused: null };
+  };
+
   for (const declared of PROP_EXPORTS) {
     // ► **BY NAME WHERE THE BUILD EXPORTS ONE, BY CHARACTER ID WHERE IT DOES
     //   NOT.** Every wardrobe piece and every prop above is in `ExportAssets`;
@@ -1164,11 +1262,24 @@ export function extractProps(buffer) {
         //   edit-text children, each with its own glow) left no trace anywhere
         //   — not in `notCarried`, not in the invoice, not in this message —
         //   and the pack-wide `0 own filters` was a measurement of this line.
-        if (drawable.unsupported) {
+        //
+        // ► **A MORPH IS NO LONGER ONE OF THEM.** It is baked at its own ratio
+        //   and continues below as an ordinary placement whose `shape` is a
+        //   `"<id>@<ratio>"` key, so its colour, clip and effects are carried by
+        //   the SAME literal as a shape's — `extract-figure.mjs` learned what two
+        //   literals cost. Only a refused morph takes this skip, and names why.
+        let shapeKey = drawable.characterId;
+        let refusal = drawable.unsupported;
+        if (drawable.unsupported === "morph") {
+          const baked = bakeMorph(drawable, masks);
+          shapeKey = baked.key;
+          refusal = baked.refused;
+        }
+        if (refusal) {
           const lost = refusedEffectsOf(drawable, refusedOwn, notCarried);
           failures.push({
             linkage: key, id,
-            message: `${where} carries ${drawable.unsupported} (character ${drawable.characterId})${lost}`
+            message: `${where} carries ${refusal} (character ${drawable.characterId})${lost}`
           });
           continue;
         }
@@ -1183,14 +1294,16 @@ export function extractProps(buffer) {
           if (cutter.hasFilters) refuse(notCarried, "clipFilters");
           if (cutter.blendMode !== undefined && cutter.blendMode !== null) refuse(notCarried, "clipBlendMode");
         }
-        shapeIds.add(drawable.characterId);
+        // A baked morph's entry is already in `morphShapes`; only a character
+        // id goes on the list the shape parser walks.
+        if (typeof shapeKey === "number") shapeIds.add(shapeKey);
         const own = ownEffectsOf(drawable, notCarried);
         if (own.filters) ownFilterLists.push(own.filters);
         if (own.blendMode !== undefined) ownBlendModes.push(own.blendMode);
         const inherited = inheritedEffectsFor(drawable, groups, groupIndex, notCarried);
         if (inherited) underGroup += 1;
         placements.push({
-          shape: drawable.characterId,
+          shape: shapeKey,
           matrix: roundMatrix(drawable.matrix),
           ...(drawable.colourTransform ? { colour: drawable.colourTransform } : {}),
           // The clip travels WITH the thing it clips rather than as a sibling,
@@ -1311,6 +1424,14 @@ export function extractProps(buffer) {
       failures.push({ linkage: `shape ${id}`, id, message: String(error.message).slice(0, 120) });
     }
   }
+  // ► **THE BAKED MORPHS JOIN AFTER THE CHARACTER IDS, sorted by id then
+  //   ratio.** JSON keeps an object's integer-like keys first and in order
+  //   whatever is inserted, so a pack with no morph writes exactly the shapes
+  //   object it wrote before this existed; the sort makes the morph half as
+  //   independent of walk order as the numeric half already was.
+  const morphOrder = [...morphShapes].sort(([, left], [, right]) =>
+    left.morph - right.morph || left.ratio - right.ratio);
+  for (const [morphKey, entry] of morphOrder) shapes[morphKey] = entry;
 
   return {
     props, shapes, failures,
@@ -1351,6 +1472,11 @@ export function manifestFor({ source, sha256, props, shapes, failures, approxima
       effects: prop.effects
     }])),
     shapeCount: Object.keys(shapes).length,
+    // ► **HOW MANY OF THOSE ARE A MORPH BAKED AT ONE RATIO**, counted off the
+    //   shapes themselves rather than carried beside them, for the reason
+    //   `tallyEffects` is summed from what was written. Always present, a zero
+    //   included: 0 and absent are different facts about a pack.
+    morphCount: Object.values(shapes).filter((shape) => shape.morph !== undefined).length,
     // Printed AND stored, because a count that only exists in memory is the
     // same silence the `failures` list was built to break.
     approximated,
@@ -1404,8 +1530,10 @@ function main(argv) {
     }
   }
   const approxParts = Object.entries(approximated.byKind).map(([kind, count]) => `${count} ${kind}`);
+  const morphs = Object.values(shapes).filter((shape) => shape.morph !== undefined).length;
   lines.push(
-    `  ${Object.keys(shapes).length} shapes, ${approximated.paths} paths, ${failures.length} failures, ` +
+    `  ${Object.keys(shapes).length} shapes (${morphs} a morph baked at one ratio), ${approximated.paths} paths, ` +
+    `${failures.length} failures, ` +
     `${approximated.total} approximated${approxParts.length ? ` (${approxParts.join(", ")})` : ""}`
   );
   const named = (counts) => Object.entries(counts).map(([kind, count]) => `${count} ${kind}`).join(", ") || "none";

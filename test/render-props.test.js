@@ -1231,9 +1231,11 @@ test("what the real pack's colour transforms COULD have varied over, counted", (
   //   **And again the same day by `fireball_combat`**: 3 placements and 28
   //   operations, and NO group (its explosion frames 1-18 are morph shapes
   //   the extractor refuses). Same walk.
-  assert.equal(total.placements, 3351);
+  //   **And once more when extract-props began baking morphs**: +1
+  //   placement and +10 operations, still no group.
+  assert.equal(total.placements, 3352);
   assert.equal(total.tintedPlacements, 2330, "70% of them — this pack is mostly TINTED, unlike the screens one");
-  assert.equal(total.ops, 8730);
+  assert.equal(total.ops, 8740);
   assert.equal(total.tintedOps, 7246);
 
   // ► **BOTH APPROXIMATION COUNTS ARE DEAD ON THIS PACK, and the denominators
@@ -1773,9 +1775,11 @@ test("what the real pack's GROUP EFFECTS could have varied over, counted with de
   //   **And again the same day by `fireball_combat`**: 3 placements and 28
   //   operations, and NO group (its explosion frames 1-18 are morph shapes
   //   the extractor refuses). Same walk.
-  assert.equal(total.placements, 3351);
+  //   **And once more when extract-props began baking morphs**: +1
+  //   placement and +10 operations, still no group.
+  assert.equal(total.placements, 3352);
   assert.equal(total.groupedPlacements, 3211, "96% of them sit inside an effect group");
-  assert.equal(total.ops, 8730);
+  assert.equal(total.ops, 8740);
   assert.equal(total.groupedOps, 8143);
   assert.equal(total.effectGroups, 747, "group INSTANCES — 365 distinct groups, over the 308 frames walked (304 before `fireball_combat`), 209 of which carry one " +
     "(this read \"reached across 302 frames\" before 2026-09-22; 302 was the frames WALKED, and " +

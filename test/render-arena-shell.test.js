@@ -624,6 +624,8 @@ test("the scale the backdrop is read at moves the FILTER STRING and nothing else
   //   **And again the same day by `fireball_combat`** (4 frames, 3 placements, 28 ops, 7 shapes / 61 paths,
   //   NO effect groups; its explosion frames 1-18 are morph shapes the extractor refuses, so only the flight
   //   frame and the last four explosion frames carry geometry). Measured by the same walk.
+  //   **And once more when extract-props began baking morphs** (+1 placement, +10 ops, +18 shapes /
+  //   +233 paths: the explosion's first 18 frames, which the line above says were refused).
   assert.equal(frames, 308, "every frame of every linkage in the pack");
   // ► **BOTH SIDES PINNED, BECAUSE EITHER ONE ALONE IS SATISFIED BY A BUG.**
   //   If the scale were ignored, `moved` would be 0 and every blur would draw
@@ -850,9 +852,11 @@ test("the shell's invoice is the UPSTREAM one, summed over the pack the same way
   //   **And again the same day by `fireball_combat`** (4 frames, 3 placements, 28 ops, 7 shapes / 61 paths,
   //   NO effect groups; its explosion frames 1-18 are morph shapes the extractor refuses, so only the flight
   //   frame and the last four explosion frames carry geometry). Measured by the same walk.
-  assert.equal(placements, 3351, "every placement in the pack");
+  //   **And once more when extract-props began baking morphs** (+1 placement, +10 ops, +18 shapes /
+  //   +233 paths: the explosion's first 18 frames, which the line above says were refused).
+  assert.equal(placements, 3352, "every placement in the pack");
   assert.equal(tinted, 2330, "70% of them tinted, which is the sky sweeping through dusk");
-  assert.equal(ops, 8730, "and the operations they expand to");
+  assert.equal(ops, 8740, "and the operations they expand to");
 
   assert.equal(invoice.placements, placements, "the roll-up sees every placement the walk does");
   assert.equal(invoice.tintedPlacements, tinted, "and agrees which of them carry a transform");
@@ -1278,7 +1282,9 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
   //   **And again the same day by `fireball_combat`** (4 frames, 3 placements, 28 ops, 7 shapes / 61 paths,
   //   NO effect groups; its explosion frames 1-18 are morph shapes the extractor refuses, so only the flight
   //   frame and the last four explosion frames carry geometry). Measured by the same walk.
-  assert.equal(paths, 358, "every path in every shape the pack holds");
+  //   **And once more when extract-props began baking morphs** (+1 placement, +10 ops, +18 shapes /
+  //   +233 paths: the explosion's first 18 frames, which the line above says were refused).
+  assert.equal(paths, 591, "every path in every shape the pack holds");
   assert.equal(unreadable, 0, "and the pair scan reads all of them");
 
   // ► **THE CROSS-CHECK IS THE EXTRACTOR'S OWN `bounds`, WRITTEN BY A DIFFERENT
@@ -1298,6 +1304,7 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
   const identity = [1, 0, 0, 1, 0, 0];
   let shapes = 0;
   let shortOfItsOwnBounds = 0;
+  let looserMidMorph = 0;
   let savedByThePad = 0;
   for (const shape of Object.values(REAL_PROPS.shapes)) {
     const bounds = shape.bounds;
@@ -1310,6 +1317,19 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
     assert.ok(box, "every shape in the pack measures");
     const short = Math.max(box.minX - bounds.xMin, box.minY - bounds.yMin,
       bounds.xMax - box.maxX, bounds.yMax - box.maxY);
+    // ► **A MORPH BAKED BETWEEN ITS ENDS HAS NO EXACT BOUNDS TO BE MEASURED
+    //   AGAINST** (added 2026-09-22, when extract-props began carrying morphs).
+    //   Its `bounds` are the declared start and end bounds INTERPOLATED, as
+    //   extract-figure does, and the box of an interpolated shape is not the
+    //   interpolation of the two boxes — measured on this pack, those bounds
+    //   run LOOSER than the geometry mid-morph, up to ~13 px on character 20.
+    //   Loose bounds are harmless (runBoxOf sizes buffers from the geometry),
+    //   so they are counted apart; a morph at ratio 0 or 65535 carries its
+    //   declared StartBounds/EndBounds exactly and stays in the oracle.
+    if (shape.morph !== undefined && shape.ratio !== 0 && shape.ratio !== 65535) {
+      if (short > 0.001) looserMidMorph += 1;
+      continue;
+    }
     if (short > 0.001) shortOfItsOwnBounds += 1;
     // What the pad is worth on THIS shape: the unpadded box would have been
     // short, and the padded one is not.
@@ -1320,8 +1340,17 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
     if (bareShort > 0.001 && short <= 0.001) savedByThePad += 1;
   }
   // The bolt's five: shapes 6, 7, 8, 9 (the flicker) and 11 (the frightning bolt's addition).
-  assert.equal(shapes, 68, "every shape the pack holds declares bounds");
+  // 68 -> 86 on 2026-09-22 when extract-props began baking morphs: the fireball
+  // explosion's 18 (characters 19-22 at the ratios sprite 27 places them).
+  assert.equal(shapes, 86, "every shape the pack holds declares bounds");
   assert.equal(shortOfItsOwnBounds, 0, "and runBoxOf's box contains every one of them");
+  // 18 baked morphs, four at ratio 0 (in the oracle above) and FOURTEEN between
+  // their ends, every one of which has interpolated bounds looser than its
+  // geometry. Pinned so a change in how morph bounds are baked is seen rather
+  // than absorbed. (It does NOT check the other direction — geometry reaching
+  // past its bounds — which the compositor would not care about either, since
+  // it sizes buffers from the geometry.)
+  assert.equal(looserMidMorph, 14, "every mid-morph shape's interpolated bounds run looser than its geometry");
   // 23 -> 27 on 2026-09-22: four of the bolt's five new shapes are STROKED lines, and the old 56 are unchanged.
   // 27 -> 30 the same day, when `fireball_combat` joined: three of its seven new shapes are stroked.
   assert.equal(savedByThePad, 30, "30 of which only because the stroke width is added");

@@ -1286,7 +1286,7 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
     return cache.get(key);
   };
 
-  const visit = (entries, parentMatrix, parentColour, parentPath, depth, visiting, parentEffects) => {
+  const visit = (entries, parentMatrix, parentColour, parentPath, depth, visiting, parentEffects, ancestorMask = null) => {
     if (depth > maxDepth) {
       throw new DisplayListError(`Sprite nesting exceeded ${maxDepth} levels at path ${parentPath.join("/")}.`);
     }
@@ -1405,7 +1405,19 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
           continue;
         }
         visiting.add(character.id);
-        visit(inner, matrix, colourTransform, path, depth + 1, visiting, descend);
+        // ► **A MASK ON THIS SPRITE CUTS EVERYTHING INSIDE IT, and this
+        //   recursion used to forget it** (found 2026-09-22 by a Codex
+        //   adversarial review of extract-props' morph support): `maskedBy` is
+        //   computed per display list, so a child of a masked sprite came back
+        //   with `mask === undefined` and no word of the cut. The nearest
+        //   enclosing mask is now handed down and stamped on the leaf as
+        //   `ancestorMaskPath` — present ONLY when there is one, so no existing
+        //   caller's output changes. Callers that cannot clip across a sprite
+        //   boundary must refuse what it covers; `tools/extract-props.mjs` does
+        //   for morphs. SHAPES under an ancestor mask are still returned drawable
+        //   (the pre-existing behaviour, recorded in that day's handoff).
+        const enclosing = mask === undefined ? ancestorMask : [...parentPath, mask];
+        visit(inner, matrix, colourTransform, path, depth + 1, visiting, descend, enclosing);
         visiting.delete(character.id);
         continue;
       }
@@ -1419,7 +1431,12 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
               throw new DisplayListError(`Button ${character.id} contains itself at path ${path.join("/")}.`);
             }
             visiting.add(character.id);
-            visit(inner, matrix, colourTransform, path, depth + 1, visiting, descend);
+            // The same hand-down as the sprite branch's, for the same reason: a
+            // mask on the button, or above it, cuts what its state draws
+            // (found by the Codex re-review of the 2026-09-22 fix, which had
+            // covered sprites and not buttons).
+            const enclosingButton = mask === undefined ? ancestorMask : [...parentPath, mask];
+            visit(inner, matrix, colourTransform, path, depth + 1, visiting, descend, enclosingButton);
             visiting.delete(character.id);
             continue;
           }
@@ -1461,6 +1478,7 @@ export function flattenFrame(buffer, characters, displayList, options = {}) {
         // without re-deriving which level it was on. Depth alone is ambiguous
         // across nesting; this is not.
         maskPath: mask === undefined ? null : [...parentPath, mask],
+        ...(ancestorMask ? { ancestorMaskPath: ancestorMask } : {}),
         ...effects
       });
     }

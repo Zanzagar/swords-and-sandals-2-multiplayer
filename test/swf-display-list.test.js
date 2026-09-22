@@ -1384,6 +1384,34 @@ test("resolveButtons draws the UP state, and it is OFF by default so no pinned e
   );
 });
 
+test("a mask on an ENCLOSING sprite or button reaches the leaf as `ancestorMaskPath`, and only then", () => {
+  // ► **FOUND BY CODEX ADVERSARIAL REVIEWS, 2026-09-22.** `maskedBy` is per
+  //   display list, so a leaf one sprite (or one button) below a mask came
+  //   back with no word of the cut. The nearest enclosing mask is now handed
+  //   down both recursions, and stamped ONLY when present, so a flatten with
+  //   no ancestor mask is exactly what it was.
+  const buffer = swf([
+    defineShape(1), defineShape(2),
+    defineSprite(90, 1, [tag(TAG.PLACE_OBJECT2, place2({ depth: 1, characterId: 1, matrix: {} })), showFrame()]),
+    defineButton2(91, [{ characterId: 90, depth: 1, matrix: {}, up: true }]),
+    defineSprite(92, 1, [
+      tag(TAG.PLACE_OBJECT2, place2({ depth: 1, characterId: 2, matrix: {}, clipDepth: 3 })),
+      tag(TAG.PLACE_OBJECT2, place2({ depth: 2, characterId: 90, matrix: {} })),
+      tag(TAG.PLACE_OBJECT2, place2({ depth: 3, characterId: 91, matrix: {} })),
+      tag(TAG.PLACE_OBJECT2, place2({ depth: 4, characterId: 90, matrix: {} })),
+      showFrame()
+    ])
+  ]);
+  const { characters } = indexCharacters(buffer);
+  const { frames } = resolveTimeline(buffer, characters.get(92));
+  const leaves = flattenFrame(buffer, characters, frames[0], { resolveButtons: true })
+    .filter((drawable) => drawable.characterId === 1);
+  const byPath = new Map(leaves.map((leaf) => [leaf.path.join("/"), leaf]));
+  assert.deepEqual(byPath.get("2/1").ancestorMaskPath, [1], "a sprite under the mask hands it down");
+  assert.deepEqual(byPath.get("3/1/1").ancestorMaskPath, [1], "and so does a button, through its state's sprite");
+  assert.equal("ancestorMaskPath" in byPath.get("4/1"), false, "an unmasked sprite's leaf carries no such key at all");
+});
+
 test("a button state with NO records is REPORTED, never returned as an empty flatten", () => {
   // ► Measured on the shipped build: **32 of its 158 buttons are hit-test only
   //   — one shape, no up, no over, no down.** A flatten that drew nothing for

@@ -72,6 +72,10 @@ import { PROP_EXPORTS, extractProps, tallyEffects, manifestFor } from "../tools/
 // invoice against the renderer itself rather than against a second copy of its
 // opinions — which is the arrangement that makes the invoice worth reading.
 import { canvasFilterFor } from "../src/render/filters.js";
+// The READER of the pack, imported for one reason: a baked morph is only worth
+// carrying if the renderer draws it with no second code path, and the only way
+// to show that is to hand the extractor's own output to the renderer.
+import { fireballOpsFor, propOpsFor, propPackFrom } from "../src/render/props.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
@@ -231,19 +235,101 @@ function gradientShape(id) {
   return swfTag(32, writer);
 }
 
-/** A `PlaceObject2` body, field by field in the specification's order. */
-function place2({ depth, characterId, matrix, name }) {
+/**
+ * A `PlaceObject2` body, field by field in the specification's order.
+ *
+ * `move` sets `PlaceFlagMove` and `ratio` sets `PlaceFlagHasRatio`, whose UI16
+ * sits AFTER the colour transform and BEFORE the name — the order a morph's
+ * interpolation reaches the wire in. Both absent writes exactly the bytes this
+ * helper wrote before they existed, so every older fixture is unchanged.
+ */
+function place2({ depth, characterId, matrix, name, move = false, ratio }) {
   const writer = new Swf();
   let flags = 0;
+  if (move) flags |= 0x01;
   if (characterId !== undefined) flags |= 0x02;
   if (matrix) flags |= 0x04;
+  if (ratio !== undefined) flags |= 0x10;
   if (name !== undefined) flags |= 0x20;
   writer.u8(flags).u16(depth);
   if (characterId !== undefined) writer.u16(characterId);
   if (matrix) writer.matrix(matrix);
+  if (ratio !== undefined) writer.u16(ratio);
   if (name !== undefined) writer.string(name);
   return swfTag(26, writer);
 }
+
+/**
+ * ONE MORPH EDGE STREAM: a move to `(x, y)`, fill style 1 on the left, then one
+ * straight edge per delta. 12-bit fields, so a 1,000-twip square fits.
+ *
+ * Its own writer rather than `squareEdges` above, because that one is 10-bit
+ * and starts at the origin, and a morph whose two ends start at the same point
+ * could not tell a translated end from an untranslated one.
+ */
+function morphEdges(x, y, deltas) {
+  const writer = new Swf();
+  writer.ub(1, 4).ub(0, 4);
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(12, 5).sb(x, 12).sb(y, 12);
+  writer.ub(1, 1);
+  for (const [dx, dy] of deltas) writer.bit(1).bit(1).ub(12 - 2, 4).bit(1).sb(dx, 12).sb(dy, 12);
+  writer.bit(0).ub(0, 5);
+  return writer.buffer();
+}
+const squareDeltas = (size) => [[size, 0], [0, size], [-size, 0], [0, -size]];
+
+/**
+ * A `DefineMorphShape` (tag 46 — per `tools/swf-morph-shapes.mjs`'s own census,
+ * the only morph tag the shipped build has) of a SQUARE THAT GROWS AND MOVES
+ * AND CHANGES COLOUR:
+ *
+ * ```text
+ *   start  a 200-twip square at (0, 0)      solid #cc0000
+ *   end    a 1000-twip square at (100, 100) solid #0000cc
+ * ```
+ *
+ * Every expected coordinate in the tests below is lerped BY HAND from those
+ * numbers, never read back from `morphShapeAt`. The header's offset to
+ * `EndEdges` is MEASURED from the bytes written, so a wrong style array fails
+ * the parser's own offset check instead of drawing something plausible.
+ * `endDeltas` lets a test write an end stream that does not pair.
+ */
+function defineMorph(id, { endDeltas = squareDeltas(1000) } = {}) {
+  const startStream = morphEdges(0, 0, squareDeltas(200));
+  const endStream = morphEdges(100, 100, endDeltas);
+  const styles = new Swf();
+  styles.u8(1).u8(0x00)
+    .rgba({ red: 0xcc, green: 0, blue: 0, alpha: 0xff })
+    .rgba({ red: 0, green: 0, blue: 0xcc, alpha: 0xff });
+  styles.u8(0);
+  const styleBytes = styles.buffer();
+  const writer = new Swf();
+  writer.u16(id).rect(0, 200, 0, 200).rect(100, 1100, 100, 1100);
+  writer.u32(styleBytes.length + startStream.length);
+  writer.raw(styleBytes).raw(startStream).raw(endStream);
+  return swfTag(46, writer);
+}
+
+/**
+ * THE SAME SQUARE AT THREE RATIOS, derived by hand: a corner at ratio `t` is
+ * `start + t * (end - start)` in twips, then divided by 20.
+ *
+ * ```text
+ *   ratio      t     top-left (twips)   bottom-right (twips)   colour
+ *   0          0     (0, 0)             (200, 200)              #cc0000
+ *   13107      0.2   (20, 20)           (380, 380)              #a30029  (204*0.8=163.2, 204*0.2=40.8)
+ *   65535      1     (100, 100)         (1100, 1100)            #0000cc
+ * ```
+ *
+ * 13107 is 65535 / 5 EXACTLY, which is why it is the intermediate ratio: `t`
+ * comes out a round 0.2 and every corner a whole number of twips.
+ */
+const MORPH_AT = Object.freeze({
+  0: { d: "M0 0L10 0L10 10L0 10L0 0Z", fill: "#cc0000", bounds: { xMin: 0, xMax: 10, yMin: 0, yMax: 10 } },
+  13107: { d: "M1 1L19 1L19 19L1 19L1 1Z", fill: "#a30029", bounds: { xMin: 1, xMax: 19, yMin: 1, yMax: 19 } },
+  65535: { d: "M5 5L55 5L55 55L5 55L5 5Z", fill: "#0000cc", bounds: { xMin: 5, xMax: 55, yMin: 5, yMax: 55 } }
+});
 
 /**
  * A `PlaceObject3` body, in the SPECIFICATION's order and not the flag order:
@@ -911,6 +997,251 @@ test("A NESTED CLIP THAT IS A CLOCK IS EMITTED FRAME BY FRAME, or refused by nam
   //   else would walk the wrong timeline and report success.
   const entry = PROP_EXPORTS.find((candidate) => candidate.linkage === "lightning_bolt_combat");
   assert.equal(entry.clock.character, 10);
+});
+
+/* ─────────────────────────────  morph shapes  ────────────────────────────── */
+
+/** A frame's shape keys, which is how a morph's ratio reaches a reader. */
+const shapeKeysOf = (placements) => placements.map((placement) => placement.shape);
+/** One prop's own failure lines, out of a focused build's whole list. */
+const failuresOf = (pack, linkage) => pack.failures.filter((failure) => failure.linkage === linkage);
+/**
+ * Every failure a focused build should NOT have: anything but the declared
+ * exports it deliberately leaves out. A shape parser handed a morph key, or a
+ * morph that would not parse, lands here under a linkage no prop has.
+ */
+const unexpectedFailures = (pack) => pack.failures.filter((failure) =>
+  !/^(no export of that name in this build|is a nothing, not a sprite)$/.test(failure.message));
+
+test("A MORPH IS CARRIED AT EACH PLACEMENT'S OWN RATIO — placed once, then MOVED", () => {
+  // ► **THE FIREBALL'S EXPLOSION IS THIS SHAPE, AND THIS TOOL USED TO DROP
+  //   IT.** Reported by the main session 2026-09-22 from its extraction of the
+  //   oracle (not re-derived here — nothing in this file reads the install):
+  //   sprite 27's frames 1-18 place a morph (characters 19-22) and then MOVE
+  //   it — a `PlaceObject2` with no character — carrying the RATIO that picks
+  //   the in-between. Every one of those was `unsupported: "morph"`, skipped,
+  //   and listed in `failures`, so `fireballOpsFor` had nothing to draw.
+  //
+  //   The fixture has the same shape: frame 1 places the morph with NO ratio
+  //   flag (which is ratio 0, the start shape), frames 2 and 3 move it with a
+  //   ratio — the END first, then the in-between, so the order the pack meets
+  //   them in is not the order it writes them in — and frame 4 moves it with a
+  //   MATRIX and no ratio, which must KEEP 13107, because a move sets only the
+  //   fields it carries.
+  const pack = extractProps(swfFile([
+    defineMorph(960),
+    defineSprite(174, 4, [
+      place2({ depth: 1, characterId: 960 }), showFrame(),
+      place2({ depth: 1, move: true, ratio: 65535 }), showFrame(),
+      place2({ depth: 1, move: true, ratio: 13107 }), showFrame(),
+      place2({ depth: 1, move: true, matrix: { tx: 40 } }), showFrame()
+    ]),
+    exportAssets([[174, "blood"]])
+  ]));
+  const prop = pack.props.blood;
+
+  // Scoped to this prop: a focused build lacks the other declared exports, and
+  // each of those is its own "no export of that name" line by design.
+  assert.deepEqual(failuresOf(pack, "blood"), [], "a morph is carried, so nothing is refused");
+  assert.deepEqual(unexpectedFailures(pack), [], "and nothing else in the build failed on its account");
+  assert.deepEqual(prop.frames.map(shapeKeysOf), [["960@0"], ["960@65535"], ["960@13107"], ["960@13107"]],
+    "keyed `<id>@<raw ratio>`, the convention `tools/extract-figure.mjs` bakes its morphs under");
+  assert.deepEqual(prop.frames[3][0].matrix, [1, 0, 0, 1, 40, 0], "and the move's own matrix is carried");
+
+  // ► **THE GEOMETRY AT EACH RATIO, AGAINST NUMBERS LERPED BY HAND** — see
+  //   `MORPH_AT` for the arithmetic. A ratio read off the wrong placement, or
+  //   one normalised twice, lands on a different corner.
+  for (const ratio of [0, 13107, 65535]) {
+    const shape = pack.shapes[`960@${ratio}`];
+    assert.ok(shape, `ratio ${ratio} is baked`);
+    assert.equal(shape.paths.length, 1, "one fill, one path");
+    assert.equal(shape.paths[0].d, MORPH_AT[ratio].d, `ratio ${ratio}: the corners`);
+    assert.equal(shape.paths[0].fill, MORPH_AT[ratio].fill, `ratio ${ratio}: the colour lerps with the edges`);
+    assert.deepEqual(shape.bounds, MORPH_AT[ratio].bounds, `ratio ${ratio}: the bounds`);
+    // The fields `extract-figure.mjs` writes on a baked morph, and the
+    // per-entry invoice every shape in THIS pack carries — all or none.
+    assert.equal(shape.morph, 960);
+    assert.equal(shape.ratio, ratio, "the RAW 0..65535 ratio, as the placement carried it");
+    assert.equal(shape.approximated, 0);
+    assert.deepEqual(shape.approximatedByKind, {});
+  }
+  assert.deepEqual(Object.keys(pack.shapes), ["960@0", "960@13107", "960@65535"],
+    "three ratios, three entries — the fourth frame reuses the third's — in RATIO order, not the order met");
+
+  // ► **AND THE RENDERER DRAWS IT WITH NO SECOND CODE PATH.** `propOpsFor`
+  //   looks a placement's shape up by key, and a string key is a key.
+  const ops = propOpsFor(propPackFrom(pack), { linkage: "blood", frame: 3 });
+  assert.equal(ops.length, 1);
+  assert.equal(ops[0].d, MORPH_AT[13107].d);
+  assert.equal(ops[0].fill, MORPH_AT[13107].fill);
+
+  // And the published manifest counts them, from the shapes it was handed.
+  const manifest = manifestFor({
+    source: "synthetic.swf", sha256: "0".repeat(64), props: pack.props, shapes: pack.shapes,
+    failures: pack.failures, approximated: pack.approximated, effects: pack.effects
+  });
+  assert.equal(manifest.morphCount, 3);
+  assert.equal(manifest.shapeCount, 3);
+});
+
+test("A CLOCK CHILD THAT MOVES A MORPH is carried at every age, which is the fireball's explosion", () => {
+  // ► **THE REAL CASE, UNDER THE ORACLE'S OWN IDS.** `fireball_combat` is
+  //   character 28; frame 4 places the explosion, sprite 27, which the entry
+  //   declares as its `clock`. Here sprite 27 places a morph and moves it
+  //   through two ratios, as the main session reports the build's does
+  //   through eighteen frames.
+  const pack = extractProps(swfFile([
+    solidShape(900, [0xff, 0, 0, 0xff]),
+    defineMorph(961),
+    defineSprite(27, 3, [
+      place2({ depth: 1, characterId: 961 }), showFrame(),
+      place2({ depth: 1, move: true, ratio: 13107 }), showFrame(),
+      place2({ depth: 1, move: true, ratio: 65535 }), showFrame()
+    ]),
+    defineSprite(28, 4, [
+      place2({ depth: 1, characterId: 900 }), showFrame(),
+      showFrame(),
+      showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 27 }), showFrame()
+    ]),
+    exportAssets([[28, "fireball_combat"]])
+  ]));
+  const prop = pack.props.fireball_combat;
+
+  assert.deepEqual(failuresOf(pack, "fireball_combat"), [], "not one clock frame refuses its morph");
+  assert.deepEqual(unexpectedFailures(pack), []);
+  // The prop's OWN frame 4 is the child frozen on its frame 1 — ratio 0.
+  assert.deepEqual(prop.frames.map(shapeKeysOf), [[900], [900], [900], ["961@0"]]);
+  // And the clock walks the child's ratios, age by age.
+  assert.deepEqual(prop.clock.framesByParent[3].map(shapeKeysOf), [["961@0"], ["961@13107"], ["961@65535"]],
+    "each age at the ratio the child's own timeline has reached by then");
+  assert.deepEqual(prop.clock.framesByParent[0].map(shapeKeysOf), [[900], [900], [900]],
+    "the flight does not place the child, so its ages are the flight");
+  assert.equal(pack.shapes["961@13107"].paths[0].d, MORPH_AT[13107].d);
+  assert.equal(pack.shapes["961@65535"].paths[0].d, MORPH_AT[65535].d);
+  assert.equal(prop.effects.own.dropped.placements, 0);
+
+  // ► **AND `fireballOpsFor` DRAWS EVERY AGE**, where on the oracle it
+  //   returned null for ages 0-17 and the painter fell back to an authored ring.
+  const view = propPackFrom(pack);
+  assert.deepEqual([0, 1, 2].map((age) => fireballOpsFor(view, 4, age)?.[0]?.d),
+    [MORPH_AT[0].d, MORPH_AT[13107].d, MORPH_AT[65535].d]);
+});
+
+test("A MORPH UNDER A MASK is clipped when the mask is a shape and REFUSED BY NAME when it is not", () => {
+  // ► **A MORPH DRAWN UNCLIPPED UNDER A MASK DRAWS MORE THAN THE BUILD DOES.**
+  //   `flattenFrame` marks a masked SHAPE `unsupported: "masked"` when its
+  //   cutter cannot be turned into a clip path; a morph comes back
+  //   `unsupported: "morph"` either way, so carrying every morph would have
+  //   quietly lifted that refusal. A shape mask is a clip this pack can carry;
+  //   a SPRITE mask is not, and the morph under it stays out.
+  const pack = extractProps(swfFile([
+    solidShape(900, [0xff, 0, 0, 0xff]),
+    solidShape(902, [0, 0xff, 0, 0xff]),
+    defineMorph(960),
+    defineSprite(918, 1, [place2({ depth: 1, characterId: 900 }), showFrame()]),
+    defineSprite(174, 1, [
+      place3({ depth: 1, characterId: 902, clipDepth: 2 }),
+      place2({ depth: 2, characterId: 960 }),
+      place3({ depth: 3, characterId: 918, clipDepth: 4 }),
+      place2({ depth: 4, characterId: 960, ratio: 65535 }),
+      showFrame()
+    ]),
+    exportAssets([[174, "blood"]])
+  ]));
+  const [placement, ...rest] = pack.props.blood.frames[0];
+  assert.equal(rest.length, 0, "only the shape-masked morph is emitted");
+  assert.equal(placement.shape, "960@0");
+  assert.equal(placement.clip?.shape, 902, "and it carries its cutter");
+  assert.equal(pack.shapes["960@65535"], undefined, "the refused one is not baked either");
+  const named = pack.failures.map((failure) => failure.message);
+  assert.ok(named.some((message) => /carries morph under a mask this tool cannot resolve \(character 960\)/.test(message)),
+    `the refusal names the morph and why, got ${JSON.stringify(named)}`);
+});
+
+test("A MORPH INSIDE A MASKED SPRITE is refused, because this tool never clips across a sprite boundary", () => {
+  // ► **FOUND BY A CODEX ADVERSARIAL REVIEW, 2026-09-22, and reproduced here
+  //   first.** `flattenFrame` computed `maskedBy` per display list, so a morph
+  //   one sprite BELOW a mask came back with no `maskPath` at all and was baked
+  //   whole — drawn larger than the build draws it. The old blanket refusal of
+  //   every morph had hidden this; lifting it for morphs must not lift it here.
+  //   `flattenFrame` now stamps `ancestorMaskPath` on such a leaf, and the
+  //   extractor refuses the morph by name.
+  const pack = extractProps(swfFile([
+    solidShape(900, [0xff, 0, 0, 0xff]),
+    solidShape(902, [0, 0xff, 0, 0xff]),
+    defineMorph(960),
+    defineSprite(919, 1, [place2({ depth: 1, characterId: 960 }), showFrame()]),
+    defineSprite(174, 1, [
+      place3({ depth: 1, characterId: 902, clipDepth: 2 }),
+      place2({ depth: 2, characterId: 919 }),
+      place2({ depth: 3, characterId: 900 }),
+      showFrame()
+    ]),
+    exportAssets([[174, "blood"]])
+  ]));
+  assert.equal(pack.shapes["960@0"], undefined, "the morph under the enclosing mask is not baked");
+  const shapes = pack.props.blood.frames[0].map((placement) => placement.shape);
+  assert.ok(!shapes.includes("960@0"), `and not placed, got ${JSON.stringify(shapes)}`);
+  assert.ok(shapes.includes(900), "while the unmasked shape beside it still is");
+  const named = pack.failures.map((failure) => failure.message);
+  assert.ok(named.some((message) => /morph inside a masked sprite this tool cannot clip \(character 960\)/.test(message)),
+    `the refusal names the morph and why, got ${JSON.stringify(named)}`);
+});
+
+test("A MORPH WHOSE DEFINITION WILL NOT PARSE is refused by name, once as a parse and once as a drop", () => {
+  // Four start edges against three end edges: the specification pairs them
+  // one for one, so `parseMorphShape` refuses it, and this tool must say so
+  // rather than emit a placement pointing at a shape the pack does not hold.
+  const pack = extractProps(swfFile([
+    defineMorph(962, { endDeltas: [[1000, 0], [0, 1000], [-1000, -1000]] }),
+    defineSprite(174, 1, [place2({ depth: 1, characterId: 962 }), showFrame()]),
+    exportAssets([[174, "blood"]])
+  ]));
+  assert.deepEqual(pack.props.blood.frames, [[]], "nothing is emitted for it");
+  assert.equal(Object.keys(pack.shapes).length, 0);
+  assert.ok(pack.failures.some((failure) => failure.linkage === "morph 962" && /3 end edges/.test(failure.message)),
+    `the parse failure, by character, got ${JSON.stringify(pack.failures)}`);
+  assert.ok(pack.failures.some((failure) => /frame 1 carries morph whose definition would not parse \(character 962\)/
+    .test(failure.message)), "and the placement it cost, by frame");
+});
+
+test("a pack with NO morph is untouched: every key is a character id and every shape is a number", () => {
+  // ► **THE PACK EVERY OTHER TEST IN THIS FILE READS HAS NO MORPH, so the
+  //   morph branch must not have run over it.** Checked by what the branch
+  //   would leave behind: a `<id>@<ratio>` key in `shapes`, a string `shape` on
+  //   a placement, a `morphCount` above zero. Byte-identity against the
+  //   extractor BEFORE this branch existed was measured once, outside the
+  //   suite, 2026-09-22: HEAD `0ec8102`'s `extractProps` and this one over
+  //   `propsBuild()` write a byte-identical `{props, shapes}`, and manifests
+  //   that differ by exactly one line, the new `"morphCount": 0`.
+  assert.deepEqual(Object.keys(PACK.shapes).filter((key) => !/^\d+$/.test(key)), []);
+  for (const prop of Object.values(PACK.props)) {
+    const all = [...prop.frames, ...(prop.clock?.framesByParent ?? []).flat()];
+    for (const frame of all) {
+      for (const placement of frame) assert.equal(typeof placement.shape, "number", prop.linkage);
+    }
+  }
+  const manifest = manifestFor({
+    source: "synthetic.swf", sha256: "0".repeat(64), props: PACK.props, shapes: PACK.shapes,
+    failures: PACK.failures, approximated: PACK.approximated, effects: PACK.effects
+  });
+  assert.equal(manifest.morphCount, 0, "stated as a zero, not absent");
+
+  // ► **AND A MORPH BESIDE A PROP DOES NOT MOVE THAT PROP.** The same arrow,
+  //   extracted from a build with a morph-bearing `blood` and from one without.
+  const arrow = [solidShape(900, [0xff, 0, 0, 0xff]),
+    defineSprite(910, 2, [place2({ depth: 1, characterId: 900 }), showFrame(),
+      place2({ depth: 1, move: true, matrix: { tx: 40 } }), showFrame()])];
+  const alone = extractProps(swfFile([...arrow, exportAssets([[910, "bullet"]])]));
+  const beside = extractProps(swfFile([
+    ...arrow, defineMorph(960),
+    defineSprite(174, 1, [place2({ depth: 1, characterId: 960, ratio: 13107 }), showFrame()]),
+    exportAssets([[910, "bullet"], [174, "blood"]])
+  ]));
+  assert.deepEqual(beside.props.bullet, alone.props.bullet);
+  assert.deepEqual(beside.shapes[900], alone.shapes[900]);
+  assert.deepEqual(Object.keys(beside.shapes), ["900", "960@13107"], "the morph joins AFTER the character ids");
 });
 
 test("THE MANIFEST'S PER-ENTRY INVOICE IS THE ONLY ONE A HUMAN READS, and it was deletable", () => {
