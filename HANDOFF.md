@@ -8,8 +8,15 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-20 21:30 — the bolts are built, and a `null` was a scheduled divergence](docs/handoffs/2026-09-20-2130--the-bolts-are-built-and-a-null-was-a-scheduled-divergence.md).**
+[2026-09-22 18:21 — nine verbs are built, and the build plays favourites](docs/handoffs/2026-09-22-1821--nine-verbs-built-and-the-build-plays-favourites.md).**
 Start there. *(It supersedes
+[2026-09-20 21:30 — the bolts are built, and a `null` was a scheduled divergence](docs/handoffs/2026-09-20-2130--the-bolts-are-built-and-a-null-was-a-scheduled-divergence.md),
+**whose ranked items 2, 3, 4 and 5 are ALL CLOSED — item 4's premise ("`cast_gale`
+is blocked on `fightdistance`") was wrong: the five-condition gate is the
+VILLAIN's decision and the hero's offer is possession — and whose items 1 and 6
+are unchanged. NOTHING FROM THE 2026-09-22 SESSION IS PUSHED: github.com was
+unreachable all session.**)*
+*(That one supersedes
 [2026-09-20 02:00 — the six slots are declared, and three of yesterday's sentences were wrong](docs/handoffs/2026-09-20-0200--the-slots-are-declared-and-three-sentences-were-wrong.md),
 **whose ranked item 2 is DONE, whose ranked item 4 is answered NO — and the
 answer was already written in `docs/ss2-adapter-contract.md` before that file
