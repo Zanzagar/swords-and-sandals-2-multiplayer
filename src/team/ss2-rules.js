@@ -3518,14 +3518,33 @@ export function ss2InventorySlotHolding(actor, itemId, { ignoreMaxslots = false 
  *
  * ► **THE `nextphase` GATE READS `defender.struck`, NOT `attacker.struck`** —
  *   `+0x85db`, against `cast_gale`'s `attacker.struck` at `+0x7ba4` and the
- *   melee phases' the same. The phase advances when the VICTIM's hurt
- *   animation reports back, not when the caster's cast finishes, and **nothing
- *   in the arm ever writes `defender.struck = true`** — the arm's only writes
- *   to it are `= null` at `+0x8618`. It is a two-party handshake whose other
- *   half is outside the arm. This engine has no animation report-back channel,
- *   so every phase here completes within the action; the difference is recorded
- *   because `src/adapter/action-gate.js` is the thing that would consume it,
- *   and a gate built on the caster's clip would hold a bolt open for ever.
+ *   melee phases' the same. ~~The phase advances when the VICTIM's hurt
+ *   animation reports back~~ **The phase advances when the victim's `lightning`
+ *   clip reaches frame 2003** (`hero_battle/frame:2003/DoAction@0x3a55b9`,
+ *   `this.struck = true; Stop`) — not a hurt clip: **no Hurt, Defend, Death,
+ *   Yield or knockback run writes `struck` at all**, and the fighter clip
+ *   writes it at 38 frames, every one an ACTING clip's last. Corrected
+ *   2026-09-22 by a derivation over all 177 `"struck"` references, checked by
+ *   two write-nothing verifiers. **Nothing in the arm writes `defender.struck =
+ *   true`** — its only writes to it are `= null` at `+0x8618`; the other half
+ *   of the handshake is that frame. This engine has no animation report-back
+ *   channel, so every phase here completes within the action; the difference is
+ *   recorded because `src/adapter/action-gate.js` is the thing that would
+ *   consume it. ~~and a gate built on the caster's clip would hold a bolt open
+ *   for ever~~ **A gate on the caster's clip would close too — `Cast2` ends at
+ *   frame 2146 with the same write, 20 frame advances against `lightning`'s 14,
+ *   so 6 frames (0.2 s) after the victim's.** The first draft of this
+ *   paragraph said "for ever", and a verifier refuted it from the same bytes.
+ *
+ *   ► **AND ON A DEFEAT THE BOLT IS NEVER REMOVED.** `death()` deletes both
+ *     fighters' `onEnterFrame` handlers and `nextphase`, and this arm lives in
+ *     the attacker's, so the gate runs exactly once — in the cast's own first
+ *     tick, while `defender.struck` is still null — and never again; the arm's
+ *     only `bolt.removeMovieClip()` (`+0x85fd`) never runs. A defeat is
+ *     `hitpoints <= 0`, or, outside a tournament, ANY hitpoint damage (the
+ *     `yield` path). The winner is released instead by overlay frames 64/76,
+ *     which wait on the WINNER's `struck` — `Cast2`'s frame 2146 when the caster
+ *     wins.
  *
  *   **It is not unique to the bolts, which the first draft of this paragraph
  *   implied.** `cast_death_from_above` carries the identical gate at

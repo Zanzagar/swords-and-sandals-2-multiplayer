@@ -32,15 +32,19 @@
  *   the one authored step here and is named at `liftFor`.
  * - **WHICH: the frame the resolver chose**, 1 for a lightning bolt and 2 for a
  *   frightning one (`SS2_BOLT_SPELLS[...].boltFrame`), carried on the command.
- * - **HOW LONG: until the victim's clip ends — and half of that is an
- *   ASSUMPTION, named here.** The removal is gated on `defender.struck`
- *   (`+0x85db`), and nothing inside the bolt arm ever writes it `true`: the
- *   other half of the handshake is outside the arm. This engine takes it to be
- *   the end of the victim's clip, which is what `src/adapter/action-gate.js`
- *   already assumes for every phase; **which fighter-clip frame actually sets
- *   it has not been read** (it is a ranked derivation). The duration is the
- *   victim TIMELINE's, read rather than restated, so the bolt and the figure
- *   end together — see `effectLifetimeMs`.
+ * - **HOW LONG: until the victim's `lightning` clip ends — VERIFIED
+ *   2026-09-22.** ~~half of that is an ASSUMPTION~~: the removal is gated on
+ *   `defender.struck` (`+0x85db`), nothing in the bolt arm writes it `true`,
+ *   and the fighter clip's own frame 2003 — the last frame of the `lightning`
+ *   run (1989-2003) — does: `this.struck = true; Stop` at `@0x3a55b9`. The
+ *   duration is the victim TIMELINE's, read rather than restated, so the bolt
+ *   and the figure end together — see `effectLifetimeMs`.
+ * - **ON A DEFEAT THE BUILD NEVER REMOVES IT, and this engine does.** `death()`
+ *   deletes the phase handler before the gate can see frame 2003, so the arm's
+ *   only `removeMovieClip()` never runs and the bolt stays on screen until the
+ *   arena itself goes. `effectLifetimeMs` ends it with the victim's death clip
+ *   instead: SHORTER than the build, and the one place this file knowingly
+ *   draws less than the build draws.
  *
  * And one fact about the CLIP: its child, sprite 10, has no `Stop` and loops
  * twelve frames of flicker for as long as the bolt is up. `ageFrames` is that
@@ -146,11 +150,11 @@ export function spellEffectDrawAt(
  *   actually playing. The bolt and the figure it strikes end together by
  *   construction rather than by two readings happening to agree.
  *
- *   *(What the BUILD does with a bolt over a dying victim is not settled here.
- *   `death()` ends the phase machine's work before `nextphase` can run, so the
- *   bolt may well stay up until the arena is torn down. Binding it to the
- *   victim's final animation is the longest this engine can honestly show
- *   without claiming more than the bytes have been read to say.)*
+ *   *(What the BUILD does with a bolt over a dying victim is now read, and it is
+ *   longer than this: `death()` deletes the phase handler, the arm's only
+ *   `removeMovieClip()` (`+0x85fd`) never runs, and the bolt stays up until the
+ *   arena is torn down. Binding it to the victim's death clip is a deliberate
+ *   narrowing — this engine has no "until the arena goes" to bind it to.)*
  *
  * @param {object} record   one `scene.effects` entry
  * @param {Map} started     `timelinesForStep(commands).started` for the SAME batch
