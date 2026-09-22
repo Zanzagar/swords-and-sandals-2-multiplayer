@@ -1002,7 +1002,7 @@ Observed data fields include:
 | Armour | `breastplate`, `helmet`, `shinguard`, `greaves`, `shoulderguard`, `gauntlet`, `boot`, `shield` and per-piece `_defence` fields |
 | Derived combat | `physical_size`, `min_damage`, `max_damage`, `secondary_min_damage`, `secondary_max_damage`, `movement_speed`, `attack_type`, `attack_speed`, `weapon_enchantment_damage`, `secondary_weapon_enchantment_damage` |
 | Chance cache | `power_percentage`, `normal_percentage`, `quick_percentage`, `bash_percentage`, `taunt_percentage`, `bombard_percentage`, `snipe_percentage`, `magicka_percentage` |
-| Conditions | `psyche_up`, `taunted1`, `taunted2`, `burning`, `frozen`, `poison`, `life_stolen`, and timed `spell_*` fields |
+| Conditions | `psyche_up`, `taunted1`, `taunted2`, `burning`, `frozen`, `poison`, `life_stolen`, ~~and timed `spell_*` fields~~ — **the timed `spell_*` counters are NOT on this object** (corrected 2026-09-22): `check_spells` keeps every one on the fighter CLIP (r1, `which_avatar`), so a read of `_root.game.<side>.spell_*` sees nothing (§"Five more phases") |
 | Inventory | `inventory1` through `inventory6`; and `inventory_maxslots` — **BYTE-DERIVED, NOT OBSERVED** (added 2026-09-22): read at `sprite:492[inventory_overlay]/frame:1` `+0x024f` and written by `initcharacter` `+0x098e`, it has never been observed by a capture and no committed observation record carries it, so it does not belong under this table's heading on the same footing as the rest |
 
 `battlevalues(whichcharacter)` is `DefineFunction2` at `+0x3062` of root frame
@@ -1544,8 +1544,11 @@ Three consequences worth stating separately, because each was got wrong once:
 `nextphase` `+0x32a1`–`+0x3304` is two consecutive statements on
 `game_attacker.staminaleft` — the cost subtraction and the regeneration — with
 **no `game_defender` counterpart anywhere in the function**. The only defender
-touch in that neighbourhood is `check_spells(defender, game_defender)` at
-`+0x3289`. The hitpoint regeneration immediately after (`+0x3305`–`+0x3346`,
+touch in that neighbourhood is ~~`check_spells(defender, game_defender)`~~
+`check_spells(game_defender, defender)` at `+0x3289` *(argument order corrected
+2026-09-22: the last value pushed is the first argument, and `check_spells`'s
+header binds the clip to r1, where every counter lives — see §"Five more
+phases")*. The hitpoint regeneration immediately after (`+0x3305`–`+0x3346`,
 `+= 1 + ceil(stamina / 2)`) is attacker-only for the same reason.
 
 Neither statement is inside a branch. The enclosing function begins at `+0x3193`;
@@ -3176,6 +3179,146 @@ The arm is `+0x83f5`–`+0x862e`, 138 instructions, six `If`s and **zero
 - **NO `fightdistance` READ OF ANY KIND**, and the clip is attached at the
   DEFENDER's own `_x`. The item table calls a lightning bolt "close-ranged";
   the bytes impose no range at all.
+
+### Five more phases, in full, and the timed buffs `nextphase` applies (derived and verified 2026-09-22)
+
+Every arm below is in `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block
+base `0x240c85`), each was derived by one agent from byte dumps of the oracle
+and re-derived by a SEPARATE write-nothing verifier aimed at one claim. What a
+verifier broke is said where it broke. Villain-ladder offsets are
+`villain_cast_spells` (`DoAction@0x23e7cf`, base `0x23e7d5`).
+
+**`drink_potion`, `+0x576d`–`+0x5dad` — one label for ids 2–9; the id rides in
+`game_attacker.inventory_action`.** HOLDS. Every tick `crowd_action = -3`
+(`+0x577f`) and `staminacost = 0` (`+0x578c`); once, inside `struck == null`
+(`+0x57a1`): `gotoAndPlay("drink_potion")`, `potions.gotoAndPlay(inventory_action
+- 1)`, then EIGHT INDEPENDENT ifs (no `Jump` in the arm), each `game_attacker.<f>
+= <f> + bonus`:
+
+| id | test | `bonus` | field | splat |
+| --- | --- | --- | --- | --- |
+| 2 | `+0x5813` | `round(hitpointsmax * 0.25)` | `hitpoints` | 1 |
+| 3 | `+0x58c3` | `round(hitpointsmax * 0.5)` | `hitpoints` | 1 |
+| 4 | `+0x5973` | `round(hitpointsmax * 0.75)` | `hitpoints` | 1 |
+| 5 | `+0x5a23` | `hitpointsmax`, unrounded | `hitpoints` | 1 |
+| 6 | `+0x5ab5` | `round(staminamax * 0.5)` | `staminaleft` | 2 |
+| 7 | `+0x5b65` | `round(staminamax)` | `staminaleft` | 2 |
+| 8 | `+0x5c08` | `round(armourclass * 0.5)` — the CURRENT value | `armourclass` | 3 |
+| 9 | `+0x5cb8` | `round(armourclass_max)` | `armourclass` | 3 |
+
+then `check_flipping(bonus_icon, attacker)` and `check_stats(game_attacker)`
+(`+0x5d67`), which caps then floors `staminaleft`, `hitpoints` and `armourclass`
+to `[0, max]`. The "+ N" icon shows the UNCLAMPED bonus. No draw, no slot write,
+no defender reference. The phase ends on the drinker's own `struck == true`
+(`+0x5d79`), written by the fighter clip's frame 1910, the last of
+`drink_potion` 1887–1910. The potion is spent before the effect on both sides:
+the hero's click empties the slot, the villain's `use_item` empties it at the
+decision.
+
+**`cast_teleport`, `+0x7541`–`+0x76ad`.** The arm HOLDS; the AI framing BROKE.
+Entry (`struck == null`): `cast_spell_icon(attacker, 48)`, `circlets` attached
+at the STARTING `_x` with `_y` 200, `Cast2`. Completion (`struck == true`, so
+never on the entry tick): `attacker._x = randomBetween(-2000, 2000)` — EXACTLY
+ONE draw, absolute, unclamped, no `_y` or facing write — then a second `Cast2`
+and `nextphase()`. No `defender` reference anywhere. The villain's arm 26 guard
+is `check_inventory(48) && fightdistance < 250 && hitpoints < hitpointsmax / 2`
+(`+0x0f1c`–`+0x0f8c`, both strict) — **but that is the arm's LOCAL guard, not
+"when the villain teleports"**: the ladder's `randomBetween(1, 100) > 10`
+(`+0x056f`) comes first, and 25 earlier arms pre-empt it, two on possession
+alone (49 death from above, 45 boundless energy).
+
+**`cast_weaken_armour`, `+0x777c`–`+0x78d9`.** HOLDS. Once, inside
+`struck == null`: `cast_spell_icon(attacker, 44)`, `Cast1`, then THREE rounds of
+`attack_direction = 1 + RandomNumber(9)` (`+0x7815`/`+0x7845`/`+0x7875` — the
+one-byte opcode, so directions 1–9 only) and `remove_armour(game_defender,
+defender, attack_direction)`. Directions 1–9 fall in exactly one group each —
+{1,5,8,9} `randomBetween(1, 2)` over helmet, shoulderguard; {2,4,6}
+`randomBetween(1, 3)` over breastplate, gauntlet, greaves; {3,7}
+`randomBetween(1, 3)` over shinguard, boot, shield — and the selector is drawn
+BEFORE the piece test, so an unarmoured victim still costs it. No clip on the
+victim; no damage; ends on the caster's own `struck`. Villain arm 19:
+`check_inventory(44) && fightdistance < 300` (`+0x0c3f`–`+0x0c75`), no armour
+test on either side.
+
+**`destroy_armour` is three draws per CALL, and a paired piece makes two calls.**
+HOLDS, and it convicts shipped code. `remove_armour` calls it twice,
+unconditionally, for shoulderguard, gauntlet, greaves, shinguard and boot (one
+per side; `+0x0500`/`+0x056e`, `+0x07a2`/`+0x0810`, `+0x08f1`/`+0x095f`,
+`+0x0a8d`/`+0x0afb`, `+0x0bdc`/`+0x0c4a`) and once for helmet (`+0x03c5`),
+breastplate (`+0x06c1`) and shield (`+0x0d2b`). Each call draws, at call time,
+the horizontal speed (facing "right" `-30 + RandomNumber(20)`, "left"
+`10 + RandomNumber(30)`, otherwise `randomBetween(-30, 60)`), then
+`-40 + RandomNumber(20)`, then `-5 + RandomNumber(5)`; its per-frame closure
+draws nothing. **`removeArmourCandidate` takes one triple per removed piece, so
+it was three draws short for every paired piece.** No golden can move: debris
+feeds presentation only, and for right/left facing the draws are opcodes the
+pipeline cannot capture. Two build quirks: the second gauntlet's debris is
+named `"shoulderguard"` (`+0x07de`), and the left boot's uses the
+`"shinguard" + boot` linkage (`+0x0baa`).
+
+**`cast_rejuvinate`, `+0x8d69`–`+0x8f58`.** The arm HOLDS. No draw, no timed
+counter. Once, inside `struck == null`: `cast_spell_icon(attacker, 43)`,
+`gotoAndPlay("Rejuvinate")` (capital R; the clip's label is lowercase
+`rejuvinate`, 2169–2199), `hitpoints = hitpointsmax` (`+0x8e02`), `staminaleft
+= staminamax` (`+0x8e17`), `armourclass = armourclass_max` (`+0x8e2c`), then
+nine piece restores — **`shoulderguard = whichcharacter.backup_shoulderguard`,
+read through `GetVariable "whichcharacter"` (`+0x8e50`)**, and gauntlet,
+breastplate, helmet, greaves, shinguard, boot, weapon and shield from
+`game_attacker.backup_<piece>` — then `updatecharacter(game_attacker,
+attacker)`, which only attaches art. `armourclass_max` is read, never written,
+so a caster who lost pieces refills only to the LOWERED maximum; `_defence`
+fields are untouched.
+- **`whichcharacter` is never assigned anywhere in the build** (main session,
+  static search of every push of the string: four sites, all `GetVariable`
+  reads — this one and three in `combatCamera`). So the rejuvenated
+  `shoulderguard` is `undefined`, which `remove_armour`'s `piece == 0` test
+  (`Equals2`) treats as EQUIPPED. A runtime read of `game_attacker.shoulderguard`
+  after a cast would confirm it.
+- `backup_char` runs for the hero AND the villain at `sprite:2249/frame:1`
+  (`+0x010a`, `+0x012e`; one deriver, not yet verified).
+- Villain arm 1: `check_inventory(43) && hitpoints < hitpointsmax / 1.5`.
+
+**The timed buffs live on the CLIP and tick for both fighters on every phase.**
+HOLDS, by two verifiers and the function headers read from the bytes:
+`check_spells` binds `which_character` → r2 and `which_avatar` → r1 (flags
+`0x2a`), its counters are all on r1, and `nextphase` calls
+`check_spells(game_attacker, attacker)` then `check_spells(game_defender,
+defender)` (`+0x3271`, `+0x3289`). For `spell_regenerate` and
+`spell_boundless_energy` it only decrements while `> 0`, with no expiry. Each
+cast arm writes `attacker.spell_X = 20` on EVERY tick, outside its `struck`
+gate (`+0x8bbe`, `+0x8c9d`), so the completion pass that calls `nextphase()`
+leaves it at 20, which `nextphase` decrements to 19 before its effect test. In
+strict alternation the bearer gains on its own phases at 19, 17, …, 1: **ten
+applications, the first on the cast phase itself**; a recast resets, never
+stacks. Colossus and little fat kid start at 16, not 20 (`+0x7fed`, `+0x820b`,
+the latter on the DEFENDER).
+
+**`nextphase`, in the order that matters** (`+0x319e`–`+0x36a1`; one deriver,
+with the stamina and buff steps re-derived by both verifiers):
+
+| step | offsets | statement |
+| --- | --- | --- |
+| 1 | `+0x31b6`–`+0x3265` | clamp `game_attacker._x`, `game_defender._x` to ±2100 — the STAT objects |
+| 2 | `+0x3266` | `demand_move = 1` |
+| 3 | `+0x3271`, `+0x3289` | `check_spells` for attacker, then defender |
+| 4 | `+0x32a1` | `staminaleft -= staminacost` |
+| 5 | `+0x32c3` | `staminaleft += 1 + round(stamina / 3)` |
+| 6 | `+0x3305` | `hitpoints += 1 + ceil(stamina / 2)` |
+| 7 | `+0x3347` | `check_stats(game_attacker)` — the floor |
+| 8 | `+0x33bd`–`+0x3475` | if `attacker.spell_regenerate > 0`: `hitpoints += round(hitpointsmax / 4)`, `check_stats` |
+| 9 | `+0x3476`–`+0x3540` | if `attacker.spell_boundless_energy > 0`: `staminaleft += round(staminamax / 4)`, `check_stats` ×2 |
+| 10 | `+0x3541`–`+0x35b4` | `crowd_interest += crowd_action`, clamped 1..100; `crowd_action = 0` |
+| 11 | `+0x35c7` | `if (phase_decision != "psyche_up") psyche_up = 1` |
+| 12 | `+0x35eb`, `+0x35ff` | `battlevalues` for attacker, then defender |
+| 13 | `+0x3613`–`+0x36a1` | the `battle_action` cycle and `changeCombatants` |
+
+**Boundless energy's gain comes AFTER the floor**, so it cannot be folded into
+one clamp: staminaleft 5, cost 30, stamina 6, max 160 ends at 40 in the build
+and at 18 under a single clamp. Regenerate's terms are all non-negative, so a
+single clamp happens to agree. The boundless icon shows `round(stamina / 4)`
+(`+0x34d1`), not the `round(staminamax / 4)` it adds. `add_stats_icon`, called
+between these steps, is a `DefineFunction` with an EMPTY body (`+0x23bf`,
+codeSize 0).
 
 ### The fireball family and molten death, and why ~~neither is~~ only molten death is not a turn (2026-09-20; corrected 2026-09-22)
 
