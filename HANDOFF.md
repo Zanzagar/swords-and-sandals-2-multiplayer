@@ -8,8 +8,13 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-22 18:21 — nine verbs are built, and the build plays favourites](docs/handoffs/2026-09-22-1821--nine-verbs-built-and-the-build-plays-favourites.md).**
+[2026-09-22 19:34 — every spell but rejuvenate is resolved or mapped, and the build plays favourites](docs/handoffs/2026-09-22-1934--every-spell-but-rejuvenate-and-the-build-plays-favourites.md).**
 Start there. *(It supersedes
+[2026-09-22 18:21 — nine verbs are built, and the build plays favourites](docs/handoffs/2026-09-22-1821--nine-verbs-built-and-the-build-plays-favourites.md),
+**the same session's mid-session checkpoint: the session carried on and built
+command, death from above, whirlwind and ghost strike, and fixed the psyche
+gate and the bonus-kill rule after it.**)*
+*(That one supersedes
 [2026-09-20 21:30 — the bolts are built, and a `null` was a scheduled divergence](docs/handoffs/2026-09-20-2130--the-bolts-are-built-and-a-null-was-a-scheduled-divergence.md),
 **whose ranked items 2, 3, 4 and 5 are ALL CLOSED — item 4's premise ("`cast_gale`
 is blocked on `fightdistance`") was wrong: the five-condition gate is the
