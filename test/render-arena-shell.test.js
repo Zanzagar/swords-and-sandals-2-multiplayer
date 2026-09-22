@@ -621,7 +621,10 @@ test("the scale the backdrop is read at moves the FILTER STRING and nothing else
   // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
   //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
   //   before, every assertion in this file passes unchanged.
-  assert.equal(frames, 304, "every frame of every linkage in the pack");
+  //   **And again the same day by `fireball_combat`** (4 frames, 3 placements, 28 ops, 7 shapes / 61 paths,
+  //   NO effect groups; its explosion frames 1-18 are morph shapes the extractor refuses, so only the flight
+  //   frame and the last four explosion frames carry geometry). Measured by the same walk.
+  assert.equal(frames, 308, "every frame of every linkage in the pack");
   // ► **BOTH SIDES PINNED, BECAUSE EITHER ONE ALONE IS SATISFIED BY A BUG.**
   //   If the scale were ignored, `moved` would be 0 and every blur would draw
   //   at 1/`fit.scale` of its width; if the buckets were NOT scale-invariant,
@@ -844,9 +847,12 @@ test("the shell's invoice is the UPSTREAM one, summed over the pack the same way
   // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
   //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
   //   before, every assertion in this file passes unchanged.
-  assert.equal(placements, 3348, "every placement in the pack");
+  //   **And again the same day by `fireball_combat`** (4 frames, 3 placements, 28 ops, 7 shapes / 61 paths,
+  //   NO effect groups; its explosion frames 1-18 are morph shapes the extractor refuses, so only the flight
+  //   frame and the last four explosion frames carry geometry). Measured by the same walk.
+  assert.equal(placements, 3351, "every placement in the pack");
   assert.equal(tinted, 2330, "70% of them tinted, which is the sky sweeping through dusk");
-  assert.equal(ops, 8702, "and the operations they expand to");
+  assert.equal(ops, 8730, "and the operations they expand to");
 
   assert.equal(invoice.placements, placements, "the roll-up sees every placement the walk does");
   assert.equal(invoice.tintedPlacements, tinted, "and agrees which of them carry a transform");
@@ -1139,6 +1145,7 @@ test("the REAL pack's groups: the sky's are contiguous, and the moon is ONE buff
   // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
   //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
   //   before, every assertion in this file passes unchanged.
+  //   `fireball_combat`, which joined the same day, adds no effect group, so this count did not move.
   assert.equal(instances, 747, "every group instance the pack reaches, frame by frame");
   assert.equal(split, 0, "no group's operations are interrupted by another group's");
   assert.equal(nested, 0, "and no chain is deeper than one");
@@ -1224,6 +1231,7 @@ test("per-leaf and per-group COINCIDE for 286 of the pack's 747 groups, and it i
   // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
   //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
   //   before, every assertion in this file passes unchanged.
+  //   `fireball_combat`, which joined the same day, adds no effect group, so this count did not move.
   // The bolt's two glows each cover nine operations, so both land here.
   assert.equal(multi, 180, "the filtered groups where they do NOT coincide");
   assert.equal(single + multi, 466, "and together they are every filtered instance");
@@ -1267,7 +1275,10 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
   // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
   //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
   //   before, every assertion in this file passes unchanged.
-  assert.equal(paths, 297, "every path in every shape the pack holds");
+  //   **And again the same day by `fireball_combat`** (4 frames, 3 placements, 28 ops, 7 shapes / 61 paths,
+  //   NO effect groups; its explosion frames 1-18 are morph shapes the extractor refuses, so only the flight
+  //   frame and the last four explosion frames carry geometry). Measured by the same walk.
+  assert.equal(paths, 358, "every path in every shape the pack holds");
   assert.equal(unreadable, 0, "and the pair scan reads all of them");
 
   // ► **THE CROSS-CHECK IS THE EXTRACTOR'S OWN `bounds`, WRITTEN BY A DIFFERENT
@@ -1309,10 +1320,11 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
     if (bareShort > 0.001 && short <= 0.001) savedByThePad += 1;
   }
   // The bolt's five: shapes 6, 7, 8, 9 (the flicker) and 11 (the frightning bolt's addition).
-  assert.equal(shapes, 61, "every shape the pack holds declares bounds");
+  assert.equal(shapes, 68, "every shape the pack holds declares bounds");
   assert.equal(shortOfItsOwnBounds, 0, "and runBoxOf's box contains every one of them");
   // 23 -> 27 on 2026-09-22: four of the bolt's five new shapes are STROKED lines, and the old 56 are unchanged.
-  assert.equal(savedByThePad, 27, "27 of which only because the stroke width is added");
+  // 27 -> 30 the same day, when `fireball_combat` joined: three of its seven new shapes are stroked.
+  assert.equal(savedByThePad, 30, "30 of which only because the stroke width is added");
 
   // And the pad is read off the OPERATION, so a wider stroke moves the box.
   const stroked = [{ d: "M0 0L10 0L10 10L0 10Z", matrix: identity, strokeWidth: 6 }];
@@ -1352,6 +1364,7 @@ test("filterBleedOf bounds the reach of every filter string the pack produces", 
   // ► **MOVED 2026-09-22 BY EXACTLY ONE PROP**: `lightning_bolt_combat` joined the pack (2 frames,
   //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
   //   before, every assertion in this file passes unchanged.
+  //   `fireball_combat`, which joined the same day, adds no effect group, so this count did not move.
   assert.equal(strings.size, 213, "the distinct filter strings this pack asks for");
   let tightest = Infinity;
   for (const filter of strings) {

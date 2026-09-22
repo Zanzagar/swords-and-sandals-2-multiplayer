@@ -227,6 +227,32 @@ export const PROP_EXPORTS = Object.freeze([
   },
   {
     /**
+     * ► **THE FIREBALL A CAST LAUNCHES — added 2026-09-22 with the three
+     *   fireball verbs.** The arm runs `bullet = arena.gladiators.attachMovie(
+     *   "fireball_combat", "fireball_combat45000", 45000)` (`+0x9231`-`+0x9262`),
+     *   then `bullet.gotondStop(fireball_frame)` (`+0x9276`) — a TYPO in the
+     *   build, a method that does not exist — and on impact
+     *   `bullet.gotoAndStop(4)` (`+0x91cd`).
+     *
+     *   Measured on the oracle (main session, read-only): character 28, **four
+     *   frames**. Frame 1 runs `stop()` and places sprite 14 (one static
+     *   shape), so ALL THREE spells fly showing frame 1; frames 2 and 3 (sprites
+     *   16, 18) are never shown; frame 4 runs `stop()` and places sprite 27, a
+     *   **23-frame explosion with no `Stop` of its own until its last frame,
+     *   which runs `_parent.removeMovieClip()`** — so it is a `clock`, the
+     *   explosion's AGE, and not a nested lookup.
+     */
+    linkage: "fireball_combat",
+    indexedBy: "frame: 1 in flight for every spell (the build's `gotondStop` typo never applies `fireball_frame`), 4 from impact (`bullet.gotoAndStop(4)`, `+0x91cd`)",
+    clock: {
+      character: 27,
+      indexedBy: "the explosion's AGE in frames on parent frame 4; sprite 27's last frame removes the fireball",
+      reader: "src/render/props.js — fireballOpsFor, the explosion"
+    },
+    reader: "src/render/props.js — fireballOpsFor, the fireball in flight"
+  },
+  {
+    /**
      * ► **THE ARENA'S EDGES, and they are the only scenery the build attaches.**
      *   Root frame 221 puts one `rockMC` at each end of the ground:
      *

@@ -374,10 +374,23 @@ function propsBuild() {
       place2({ depth: 1, characterId: 10 }), showFrame(),
       place2({ depth: 4, characterId: 903 }), showFrame()
     ]),
+    // `fireball_combat` (added 2026-09-22): four frames, the explosion child on
+    // frame 4 under the oracle's own ids (28 and 27), because the entry
+    // declares 27 as its clock.
+    defineSprite(27, 2, [
+      place2({ depth: 1, characterId: 902 }), showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 903 }), showFrame()
+    ]),
+    defineSprite(28, 4, [
+      place2({ depth: 1, characterId: 900 }), showFrame(),
+      showFrame(),
+      showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 27 }), showFrame()
+    ]),
 
     exportAssets([
       [910, "bullet"], [912, "bullet_trail"], [915, "blood"], [916, "sparks"], [35, "rockMC"],
-      [12, "lightning_bolt_combat"]
+      [12, "lightning_bolt_combat"], [28, "fireball_combat"]
     ])
   ]);
 }
@@ -391,9 +404,10 @@ test("the synthetic build resolves every declared prop, or the rest of this file
   // ► An anchor, not a formality. Every assertion below indexes `PACK.props`
   //   by name, and a missing prop would make each of them throw on `undefined`
   //   with a message about a property rather than about a build that did not
-  //   parse. Thirteen entries in `PROP_EXPORTS`, thirteen props, no failures.
-  //   **12 -> 13 on 2026-09-22**, when `lightning_bolt_combat` joined.
-  assert.equal(PROP_EXPORTS.length, 13);
+  //   parse. ~~Thirteen~~ Fourteen entries in `PROP_EXPORTS`, fourteen props,
+  //   no failures. **12 -> 13 on 2026-09-22**, when `lightning_bolt_combat`
+  //   joined, **and 13 -> 14 the same day**, when `fireball_combat` did.
+  assert.equal(PROP_EXPORTS.length, 14);
   assert.deepEqual(PACK.failures, [], "the synthetic build must parse clean");
   assert.equal(Object.keys(PACK.props).length, PROP_EXPORTS.length);
 });
