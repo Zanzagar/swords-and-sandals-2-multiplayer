@@ -3293,6 +3293,44 @@ applications, the first on the cast phase itself**; a recast resets, never
 stacks. Colossus and little fat kid start at 16, not 20 (`+0x7fed`, `+0x820b`,
 the latter on the DEFENDER).
 
+**The per-round re-skin gives the HERO's removed armour back, and not the
+armour class** (derived and verified 2026-09-22; one deriver, one write-nothing
+verifier, the main session's header decode; HOLDS for the hero, one clause
+broken for the villain). Overlay frame 1 (`initialise`, frames 1-4,
+`DoAction@0x236941`) runs `_root.skincharacter(_root.game.hero, this.hero)`
+unconditionally at `+0x0a2e`-`+0x0a5c`, then `turnphase = 1` (`+0x0a8f`), the
+only place `turnphase` becomes 1, which `getphase` requires. `nextphase` (flags
+`0x169`: `this` in r1, `_root` r2, `_global` r3, read from the header bytes)
+ends a round with `register:1.gotoAndPlay("initialise")` (`+0x3692`) once
+`battle_action` reaches 3, i.e. after the hero's action and the villain's.
+`skincharacter` calls `initcharacter(hero, avatar, hero.charDNA)`, which writes
+every DNA field back onto `_root.game.hero` — the ten equipment ids from
+indices 6-14 and 45, and also strength, defence, herolevel, the inventory
+slots and `equipped_weapon`. `charDNA` was built at initbattle
+(`backup_char(hero)` → `constructDNA()`); `remove_armour` never rebuilds it;
+only the hero's inventory and swap click handlers do (after the re-skin, so
+they carry the restored piece forward).
+- `battlevalues`, at the end of EVERY `nextphase` for both fighters,
+  recomputes each `<piece>_defence` from the piece id UNGATED, but writes
+  `armourclass_max`, `armourclass` (and refills hitpoints, stamina, ammo)
+  only inside `if (_global.battle_started != true)` (`+0x3a90`-`+0x3aa0`).
+- So for the hero, with helmet h worth d and armour A of max M: a removal
+  leaves helmet 0 and armour `max(A−d, 0)` / `max(M−d, 0)`; the next re-skin
+  gives back helmet h, and `battlevalues` its defence d, while the armour stays
+  at A−d / M−d; a second removal of the same helmet takes d AGAIN. The arena
+  figure is not redrawn by the re-skin (it redraws the overlay's portrait), so
+  the fighter stays visibly bare while the data says otherwise.
+- The villain is never re-skinned here, so its removed pieces stay removed —
+  **except through its own `cast_rejuvinate`**, which restores its pieces from
+  `backup_*` (the verifier broke the claim's "stays removed" on that).
+- **This engine zeroes a removed piece for the rest of the battle, for both
+  sides.** No golden removes a piece, so nothing measured moves; it is a
+  fidelity divergence for the hero, and the same re-skin also reverts any
+  mid-battle stat change on the hero (colossus, bloodlust, swift sandals) at
+  the round's end. Unverified at runtime: that `this` in `nextphase` is the
+  overlay, and that `battle_started` is true mid-battle (both are implied by
+  every capture in which hitpoints stay down between turns).
+
 **`nextphase`, in the order that matters** (`+0x319e`–`+0x36a1`; one deriver,
 with the stamina and buff steps re-derived by both verifiers):
 
