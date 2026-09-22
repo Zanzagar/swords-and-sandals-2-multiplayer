@@ -26,6 +26,7 @@ import {
   emptyScene,
   arrowOpsFor,
   arrowTrailOpsFor,
+  boltOpsFor,
   hasExtractedProps,
   propEffectGroupsFor,
   propEffectsUnreachable,
@@ -224,6 +225,86 @@ test("THE TRAIL'S INDEX IS THE PUFF'S AGE, AND READING IT AS THE WEAPON DREW NO 
   assert.equal(arrowTrailOpsFor(null, 0), null, "no pack is no puff, not a throw");
   assert.equal(arrowTrailOpsFor(pack, undefined)[0].fillOpacity, TRAIL_FADE[0], "an unstated age is the NEWEST puff");
   assert.equal(arrowTrailOpsFor(pack, -3)[0].fillOpacity, TRAIL_FADE[0], "and so is a nonsensical one");
+});
+
+test("THE BOLT IS INDEXED BY THE SPELL AND BY ITS AGE, and the age LOOPS", () => {
+  // ► **TWO QUANTITIES, AND THEY ARE DIFFERENT KINDS.** `lightning_bolt_combat`
+  //   (character 12) is two frames — 1 for `cast_lightning_bolt`, 2 for
+  //   `cast_frightning_bolt`, which adds shape 11 over the same child — and its
+  //   child, sprite 10, is a twelve-frame flicker with no `Stop`. So the SPELL
+  //   is a 1-based frame and the AGE is a zero-based clock that wraps, and the
+  //   pack carries the clock as `clock.framesByParent` rather than in `frames`
+  //   (`tools/extract-props.mjs`, the `clock` declaration).
+  const at = (shape) => ({ shape, matrix: [1, 0, 0, 1, 0, 0] });
+  const pack = propPackFrom({
+    props: {
+      lightning_bolt_combat: {
+        frames: [[at(6)], [at(6), at(11)]],
+        clock: {
+          character: 10,
+          frameCount: 3,
+          framesByParent: [
+            [[at(6)], [at(7)], [at(8)]],
+            [[at(6), at(11)], [at(7), at(11)], [at(8), at(11)]]
+          ]
+        }
+      }
+    },
+    shapes: {
+      6: { bounds: {}, paths: [{ d: "M0 0L1 1", fill: "#600" }] },
+      7: { bounds: {}, paths: [{ d: "M0 0L1 1", fill: "#700" }] },
+      8: { bounds: {}, paths: [{ d: "M0 0L1 1", fill: "#800" }] },
+      11: { bounds: {}, paths: [{ d: "M0 0L1 1", fill: "#b00" }] }
+    }
+  });
+  const fills = (ops) => ops.map((op) => op.fill);
+
+  assert.deepEqual(fills(boltOpsFor(pack, 1, 0)), ["#600"], "a lightning bolt, newly attached");
+  assert.deepEqual(fills(boltOpsFor(pack, 1, 1)), ["#700"], "one frame old is the child's SECOND frame");
+  assert.deepEqual(fills(boltOpsFor(pack, 1, 2)), ["#800"]);
+  assert.deepEqual(fills(boltOpsFor(pack, 1, 3)), ["#600"], "and the child has no Stop, so it WRAPS");
+  assert.deepEqual(fills(boltOpsFor(pack, 2, 1)), ["#700", "#b00"], "a frightning bolt carries shape 11 too");
+
+  // A pack extracted before the clock existed still draws the bolt, frozen on
+  // the child's first frame — which is what `frames` has always held.
+  const frozen = propPackFrom({
+    props: { lightning_bolt_combat: { frames: [[at(6)], [at(6), at(11)]] } },
+    shapes: pack.shapes
+  });
+  assert.deepEqual(fills(boltOpsFor(frozen, 2, 5)), ["#600", "#b00"], "no clock: the frozen frame, not nothing");
+
+  // Totality, like every other reader here.
+  assert.equal(boltOpsFor(null, 1, 0), null, "no pack is no bolt, not a throw");
+  assert.deepEqual(fills(boltOpsFor(pack, 9, 0)), ["#600", "#b00"], "past the last spell clamps, as gotoAndStop does");
+  assert.deepEqual(fills(boltOpsFor(pack, 1, -4)), ["#600"], "a nonsensical age is the newest bolt");
+});
+
+test("THE BOLT'S GLOW IS BUILT AT THE SCALE IT IS DRAWN AT, which no other arena prop needed", () => {
+  // ► **EVERY OTHER PROP ON THIS ROUTE CARRIES NO FILTER**, which is why
+  //   `tools/arena/main.js`'s `paintProp` could draw with `filtersScaled: false`
+  //   and admit it. The bolt's child carries a GLOW, and a canvas filter is in
+  //   DEVICE pixels — the transform does not scale it — so a glow built at
+  //   scale 1 and drawn at a zoomed-out camera would be too wide. `boltOpsFor`
+  //   therefore takes the draw's own scale and hands it to `propOpsFor`.
+  const glow = {
+    type: "glow", filterId: 2, colour: { red: 0, green: 153, blue: 255, alpha: 255 },
+    blurX: 4, blurY: 4, strength: 1, inner: false, knockout: false, compositeSource: true, passes: 1
+  };
+  const at = (shape) => ({ shape, matrix: [1, 0, 0, 1, 0, 0], inheritedEffects: [0] });
+  const pack = propPackFrom({
+    props: {
+      lightning_bolt_combat: {
+        effectGroups: [{ path: [1], character: 10, filters: [glow] }],
+        frames: [[at(6)]],
+        clock: { character: 10, frameCount: 1, framesByParent: [[[at(6)]]] }
+      }
+    },
+    shapes: { 6: { bounds: {}, paths: [{ d: "M0 0L1 1", fill: "#600" }] } }
+  });
+  const filterAt = (scale) => boltOpsFor(pack, 1, 0, { scale })[0].group.filter;
+  assert.ok(filterAt(1), "the glow reaches the operation as a group filter");
+  assert.notEqual(filterAt(2), filterAt(1), "and its string moves with the scale it is built at");
+  assert.equal(boltOpsFor(pack, 1, 0)[0].group.filter, filterAt(1), "an unstated scale is 1, as propOpsFor's is");
 });
 
 test("THE ARROW AND THE TRAIL ARE INDEXED BY DIFFERENT QUANTITIES, and swapping them is silent", () => {

@@ -71,6 +71,7 @@ const HANDLED = Object.freeze([
   "move-clip",
   "move-clip-depth",
   "fire-projectile",
+  "attach-effect",
   "bind-globals",
   "clip-goto",
   "panel-refresh",
@@ -150,6 +151,7 @@ export function emptyScene() {
      *   should not have to change the first time something fires twice.
      */
     projectiles: Object.freeze([]),
+    effects: Object.freeze([]),
     unmapped: Object.freeze([]),
     /** The highest resolver sequence any command in this scene carried. */
     sequence: 0
@@ -224,6 +226,9 @@ export function applyCommands(scene, commands) {
   // NOT seeded from `scene.projectiles`: an arrow belongs to the action that
   // loosed it. See `emptyScene`.
   const projectiles = [];
+  // Batch-local for the reason `projectiles` is: a spell's clip belongs to the
+  // action that attached it, and the next batch does not inherit it.
+  const effects = [];
   const unmapped = [...scene.unmapped];
   let globals = scene.globals;
   let overlayLabel = scene.overlayLabel;
@@ -310,6 +315,24 @@ export function applyCommands(scene, commands) {
             actionToken: command.actionToken ?? null
           })
         });
+        break;
+      }
+
+      case "attach-effect": {
+        // ► **IT TOUCHES NO ACTOR**, like an arrow: the build attaches the bolt
+        //   to `arena.gladiators`, not to a fighter. Carried through unchanged;
+        //   where it is drawn and for how long is `spell-effect.js`'s.
+        effects.push(Object.freeze({
+          casterId: command.casterId,
+          targetId: command.targetId,
+          effect: command.effect,
+          frame: command.frame,
+          x: command.x,
+          y: command.y,
+          endsWithClip: command.endsWithClip ?? null,
+          sequence: command.sequence,
+          actionToken: command.actionToken ?? null
+        }));
         break;
       }
 
@@ -453,6 +476,7 @@ export function applyCommands(scene, commands) {
     arenaLabel,
     completionToken,
     projectiles: Object.freeze(projectiles),
+    effects: Object.freeze(effects),
     unmapped: Object.freeze(unmapped),
     sequence
   });

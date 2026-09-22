@@ -161,6 +161,23 @@ export const CommandKind = Object.freeze({
    *   merely missing an arrow.
    */
   FIRE_PROJECTILE: "fire-projectile",
+  /**
+   * A spell attaches its own clip at its victim — added 2026-09-22 for the
+   * bolt, whose phase runs `arena.gladiators.attachMovie("lightning_bolt_combat",
+   * ..., {_x: defender._x, _y: 50})` at `+0x852a` and removes it when the
+   * victim's hurt clip reports back (`+0x85ed`).
+   *
+   * ► **ITS OWN KIND, for the reason `fire-projectile` is.** The clip belongs
+   *   to `arena.gladiators`, not to either fighter, so folding it into an actor
+   *   would give a gladiator something it does not have. And it is NOT a
+   *   projectile: it does not travel, and it ends when a CLIP ends rather than
+   *   when a flight does — so it names that clip (`endsWithClip`) instead of
+   *   carrying endpoints.
+   *
+   * ► **COSMETIC, like the arrow.** The damage was resolved before this command
+   *   existed; nothing here can change a number.
+   */
+  ATTACH_EFFECT: "attach-effect",
   MOVE_CLIP_DEPTH: "move-clip-depth",
   BIND_GLOBALS: "bind-globals",
   CLIP_GOTO: "clip-goto",
@@ -820,6 +837,36 @@ function stopShortFor(shooter, target, combatants) {
   return size;
 }
 
+/**
+ * The clip a spell attaches at its victim, or null.
+ *
+ * Detected by the event carrying `boltFrame`, which only the bolt branch in
+ * `src/team/ss2-rules.js` sets — the same rule the spell binding above
+ * follows: the resolver knows which clip a spell plays, and this layer reads
+ * the fields rather than parsing the type.
+ *
+ * `endsWithClip` is the VICTIM's clip, the one whose report-back removes the
+ * bolt, handed in from the binding that chose it so the two cannot disagree.
+ */
+function spellEffectFor(combatants, event, victimClip) {
+  if (!Number.isInteger(event.boltFrame)) return null;
+  const target = combatants.get(event.targetId);
+  if (!Number.isFinite(target?.x)) return null;
+  return Object.freeze({
+    kind: CommandKind.ATTACH_EFFECT,
+    sequence: event.sequence,
+    casterId: event.actorId,
+    targetId: event.targetId,
+    // The build's own linkage name — the export `tools/extract-props.mjs`
+    // takes as `lightning_bolt_combat`.
+    effect: "lightning_bolt_combat",
+    frame: event.boltFrame,
+    x: target.x,
+    y: Number.isFinite(target.y) ? target.y : null,
+    endsWithClip: victimClip ?? null
+  });
+}
+
 function projectileFor(wire, combatants, event) {
   const projectile = PROJECTILE_DIRECTIONS.get(Number(event.attackDirection));
   if (!projectile) return null;
@@ -1124,6 +1171,11 @@ export function presentResolvedEvents(wire, {
     // is as far as this vocabulary can carry it.
     const projectile = projectileFor(wire, combatants, event);
     if (projectile) commands.push(projectile);
+    // AFTER the caster's clip and BEFORE the victim's, which is the build's own
+    // order: `gotoAndPlay("Cast2")` at `+0x8515`, the `attachMovie` at
+    // `+0x852a`, then the ingress that plays the victim's clip at `+0x85af`.
+    const spellEffect = spellEffectFor(combatants, event, chosen.target?.label);
+    if (spellEffect) commands.push(spellEffect);
     if (chosen.target && targetPlacement) {
       commands.push(clipGoto(event.sequence, targetPlacement, chosen.target, "target"));
     } else if (chosen.target && selfTargeted) {

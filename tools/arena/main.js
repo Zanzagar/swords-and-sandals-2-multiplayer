@@ -88,6 +88,9 @@ import {
   propInvoiceFor,
   arrowOpsFor,
   arrowTrailOpsFor,
+  boltOpsFor,
+  effectLifetimeMs,
+  spellEffectDrawAt,
   arenaSceneryFor,
   arenaScreenLayersFor,
   splitArenaScreen,
@@ -206,6 +209,16 @@ let pendingTokens = [];
  *   phase-completion guard, `+0x3829`).
  */
 let inFlight = [];
+/**
+ * Spell clips attached at their victims — the bolt, today — each with its own
+ * clock and its own lifetime.
+ *
+ * Like `inFlight` and unlike `scene.effects`, which is replaced whole on the
+ * next fold. The lifetime is `spellEffectDrawAt`'s, which reads it off the
+ * victim's own timeline: the build removes the bolt when that clip reports back
+ * (`+0x85ed`), so the two end together and neither holds the gate on its own.
+ */
+let attached = [];
 let settled = false;
 
 const el = (id) => document.getElementById(id);
@@ -678,6 +691,18 @@ function beginStep(step) {
     });
   }
 
+  // The spell clips this batch attached, each on its own clock. Read off the
+  // SCENE for the reason the arrows are: the scene has already folded them.
+  for (const record of scene.effects ?? []) {
+    attached.push({
+      record,
+      startedAt: performance.now(),
+      // The victim's LAST clip in this batch — on a kill, its death — from the
+      // same `started` map that is about to pose it. See `effectLifetimeMs`.
+      lifetimeMs: effectLifetimeMs(record, started)
+    });
+  }
+
   // The clock is stamped BEFORE the entries reach `playing`, not after: an
   // entry with no `startedAt` reads as infinitely overdue to `animationCursor`.
   // Stamped here rather than inside `timelinesForStep` so a frame that arrives
@@ -741,6 +766,9 @@ function drainFinishedAnimations(now) {
   // drawn, in one place, so the two can never disagree about whether it is
   // still there.
   inFlight = inFlight.filter((shot) => now - shot.startedAt < shot.durationMs);
+  // A bolt is removed when its victim's clip ends, by the same comparison the
+  // painter uses, so a bolt being drawn and a bolt still attached are one fact.
+  attached = attached.filter((entry) => now - entry.startedAt < entry.lifetimeMs);
   // A drop lives 25 of the build's frames and is REMOVED rather than fading
   // (`+0x046a`). Pruned by the same comparison that decides whether to draw it.
   drops = drops.filter((spray) => (now - spray.startedAt) / PROJECTILE_FRAME_MS <= SS2_DROP.lifeFrames);
@@ -3596,6 +3624,9 @@ function renderStage(view, fit, now) {
   }
 
   drawProjectiles(view, now);
+  // Above the figures: the build attaches the bolt with `getNextHighestDepth()`
+  // on `arena.gladiators`, over both fighters.
+  drawSpellEffects(view, now);
   drawDrops(view, now);
 
   // ► **THE RAIN, THE UI BAR AND THE BORDER GO ON TOP, and the build's own
@@ -3743,7 +3774,7 @@ function paintPropOperation(operation) {
   context.restore();
 }
 
-function paintProp(ops, view, { x, y, lift, size, rotation }) {
+function paintProp(ops, view, { x, y, lift, size, rotation, filtersScaled = false }) {
   context.save();
   context.globalAlpha = 1;
   context.translate(view.toX(x), view.toY(y, lift));
@@ -3766,8 +3797,62 @@ function paintProp(ops, view, { x, y, lift, size, rotation }) {
   //   `groupPaint.filterAtStageScale` is 0 — and it is counted precisely so
   //   that a pack where it stops being 0 says so instead of drawing every blur
   //   at the wrong width.
-  paintGroupRuns(ops, { translationDivisor: 1, filtersScaled: false }, paintPropOperation);
+  // ► **EXCEPT THE BOLT, which passes `filtersScaled: true` and means it**:
+  //   `boltOpsFor` builds its glow at `size * view.scale`, the same `k` this
+  //   function draws at. Every other caller keeps the default and the admission.
+  paintGroupRuns(ops, { translationDivisor: 1, filtersScaled }, paintPropOperation);
   context.restore();
+}
+
+/** The painter's own scale and rank rules, handed to `spellEffectDrawAt`. */
+function effectDrawDeps() {
+  return { frontY: ARENA_FRONT_Y, rankStride, figureScaleFor, rankOfDepth };
+}
+
+/**
+ * THE BOLT, drawn. Every decision — where, how big, how old, whether it is
+ * still attached — is `spellEffectDrawAt`'s and `boltOpsFor`'s, under the
+ * suite; this is canvas calls.
+ */
+function drawSpellEffects(view, now) {
+  for (const entry of attached) {
+    const drawn = spellEffectDrawAt(entry.record, now - entry.startedAt, effectDrawDeps(), {
+      lifetimeMs: entry.lifetimeMs
+    });
+    if (drawn.done) continue;
+    // ► **THE GLOW IS BUILT AT THE DRAW'S OWN SCALE**, the one arena prop that
+    //   needs it: the bolt's child carries a glow, and a canvas filter is in
+    //   device pixels. `paintProp` is told so, rather than admitting otherwise.
+    const scale = drawn.size * view.scale;
+    const ops = boltOpsFor(propPack, entry.record.frame, drawn.ageFrames, { scale });
+    if (ops) {
+      paintProp(ops, view, {
+        x: drawn.x, y: drawn.y, lift: drawn.lift, size: drawn.size, rotation: drawn.rotation, filtersScaled: true
+      });
+      continue;
+    }
+    // The authored bolt for a machine with no extracted pack — a jagged stroke
+    // from the bolt's origin down to the victim, flickering on the same clock.
+    // It says it is authored by being plainly a line.
+    const top = view.toY(drawn.y, drawn.lift);
+    const bottom = view.toY(drawn.y, 0);
+    const x = view.toX(drawn.x);
+    const jag = Math.max(3, view.scale * 8 * drawn.size) * (drawn.ageFrames % 2 === 0 ? 1 : -1);
+    context.save();
+    context.globalAlpha = 0.9;
+    context.strokeStyle = "#9fd8ff";
+    context.lineWidth = Math.max(1.5, view.scale * 3 * drawn.size);
+    context.beginPath();
+    const steps = 5;
+    for (let step = 0; step <= steps; step += 1) {
+      const y = top + ((bottom - top) * step) / steps;
+      const offset = step === 0 || step === steps ? 0 : (step % 2 === 0 ? jag : -jag);
+      if (step === 0) context.moveTo(x + offset, y);
+      else context.lineTo(x + offset, y);
+    }
+    context.stroke();
+    context.restore();
+  }
 }
 
 function drawProjectiles(view, now) {

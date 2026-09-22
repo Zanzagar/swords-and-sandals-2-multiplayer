@@ -1076,6 +1076,60 @@ export function arrowTrailOpsFor(pack, ageFrames) {
 }
 
 /**
+ * THE BOLT A CAST ATTACHES AT ITS VICTIM, at the spell's frame and at its age.
+ *
+ * `lightning_bolt_combat` (character 12) is two frames and the frame IS the
+ * spell: `bolt.gotoAndStop(lightning_frame)` (`+0x85c2`) picks 1 for a
+ * lightning bolt and 2 for a frightning one, which adds shape 11 over the same
+ * child. The child, sprite 10, is twelve frames of flicker with NO `Stop`, so
+ * it LOOPS for as long as the bolt is attached — a clock, not a lookup, and
+ * `tools/extract-props.mjs` carries it as `clock.framesByParent` precisely
+ * because freezing it on frame 1 would draw a still picture of an animation.
+ *
+ * ► **TWO QUANTITIES OF DIFFERENT KINDS, and the signature keeps them apart the
+ *   way `arrowOpsFor`/`arrowTrailOpsFor` do.** `boltFrame` is 1-based because
+ *   `gotoAndStop` indexes it; `ageFrames` is ZERO-based because it is a
+ *   duration, and it WRAPS because the child has no `Stop`.
+ *
+ * ► **A PACK WITH NO CLOCK STILL DRAWS THE BOLT**, frozen on the child's first
+ *   frame, which is what `frames` has always held. An older extraction loses
+ *   the flicker and keeps the bolt.
+ *
+ * The clock frame is drawn through the SAME walk as every other prop, by
+ * handing `propOpsFor` a view of this prop whose one frame is the clock frame.
+ * Its placements index this prop's own `effectGroups`, so the glow the child
+ * carries survives the substitution unchanged.
+ *
+ * @param {object} pack        from `propPackFrom`
+ * @param {number} boltFrame   1 lightning, 2 frightning — 1-BASED
+ * @param {number} ageFrames   frames since the bolt was attached — ZERO-BASED
+ * @param {object} [options]
+ * @param {number} [options.scale=1] the scale the ops will be DRAWN at, so the
+ *   child's glow is built at that width. **The bolt is the first arena prop
+ *   whose group carries a filter**, and a canvas filter is in device pixels,
+ *   untouched by the transform — see `tools/arena/main.js`'s `paintProp`.
+ */
+export function boltOpsFor(pack, boltFrame, ageFrames, { scale = 1 } = {}) {
+  const linkage = "lightning_bolt_combat";
+  if (!hasExtractedProps(pack)) return null;
+  const prop = pack.props[linkage];
+  if (!prop || !Array.isArray(prop.frames) || prop.frames.length === 0) return null;
+  // Clamped the way `emitPropOps` clamps: `gotoAndStop` past the end leaves the
+  // playhead on the last frame.
+  const frame = Number.isFinite(boltFrame)
+    ? Math.min(prop.frames.length, Math.max(1, Math.trunc(boltFrame)))
+    : 1;
+  const ages = prop.clock?.framesByParent?.[frame - 1];
+  if (!Array.isArray(ages) || ages.length === 0) return propOpsFor(pack, { linkage, frame, scale });
+  const age = Number.isFinite(ageFrames) ? Math.max(0, Math.trunc(ageFrames)) : 0;
+  const view = Object.freeze({
+    props: Object.freeze({ ...pack.props, [linkage]: Object.freeze({ ...prop, frames: [ages[age % ages.length]] }) }),
+    shapes: pack.shapes
+  });
+  return propOpsFor(view, { linkage, frame: 1, scale });
+}
+
+/**
  * THE ARENA'S OWN SCENERY, at the coordinates the build states.
  *
  * ► **ROOT FRAME 221 IS A CONSTRUCTION SCRIPT *AND* A DISPLAY LIST, and this is

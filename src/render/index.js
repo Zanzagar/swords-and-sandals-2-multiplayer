@@ -82,6 +82,7 @@ export * from "./clip-sequences.js";
 export * from "./stance.js";
 export * from "./extracted-figure.js";
 export * from "./projectile.js";
+export * from "./spell-effect.js";
 export * from "./props.js";
 export * from "./arena-backdrop.js";
 export * from "./filters.js";
