@@ -694,6 +694,16 @@ test("a health potion PRE-EMPTS the spell, because arm 2 precedes arm 19", () =>
   assert.equal(suggestAction(battle, "hero").type, WEAKEN);
 });
 
+test("a caster carrying BOUNDLESS ENERGY weakens first, because arm 19 precedes arm 23", () => {
+  // Added by the main session when this verb and the timed buffs, built in
+  // parallel worktrees, were merged on 2026-09-22: arm 23 fires on possession
+  // alone, so only the block ORDER keeps it from winning.
+  const battle = weakenCaster({ extra: { inventory2: 45 } });
+  assert.equal(suggestAction(battle, "hero").type, WEAKEN);
+  combatantById(battle, "hero").resources.inventory1.value = SS2_INVENTORY_EMPTY;
+  assert.equal(suggestAction(battle, "hero").type, Ss2ActionType.CAST_BOUNDLESS_ENERGY);
+});
+
 test("a caster QUALIFYING for the gale weakens instead, because arm 19 precedes arm 24", () => {
   // Armour 60 of 136 is below half and 120 is inside both 300 and 400.
   const battle = weakenCaster({ extra: { inventory2: 38, helmet: 4, breastplate: 6 } });

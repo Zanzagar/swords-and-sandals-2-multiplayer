@@ -262,6 +262,12 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "bash-attack",
     "bombard",
     "burning-phase",
+    // ► **JOINED 2026-09-22 — the two timed self-buffs,
+    //   `getphase("cast_boundless_energy")` here and `("cast_regenerate")`
+    //   below, written by ladder arms 23 and 3 (`+0x0e0f`, `+0x06d7`) and
+    //   consumed at `+0x8c8a` and `+0x8bab`.** Self-targeted, zero samples; the
+    //   gain is `nextphase`'s, on every later phase the bearer acts in.
+    "cast-boundless-energy",
     // ► **THE FIRST SPELL TOKENS, JOINED 2026-09-20, AND THEY ARE
     //   MAP-DERIVED WITH A LABEL EACH** — `getphase("cast_frightning_bolt")`
     //   and `getphase("cast_lightning_bolt")`, both written by
@@ -293,6 +299,7 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "cast-gale",
     "cast-hell-fireball",
     "cast-lightning-bolt",
+    "cast-regenerate",
     // ► **JOINED 2026-09-22 — the teleport, `getphase("cast_teleport")`,
     //   written by ladder arm 26 (`+0x0f91`) and consumed at
     //   `+0x7541`-`+0x76ad`.** Self-targeted, one sample (the destination).
@@ -1189,6 +1196,15 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     "shield", "shield_defence",
     "shinguard", "shinguard_defence",
     "shoulderguard", "shoulderguard_defence",
+    // ► **ADDED 2026-09-22 WITH `cast_boundless_energy`/`cast_regenerate`, THE
+    //   `psyche_up` SHAPE, AND THEY MOVED NOTHING.** No `SS2_RESOURCE_DEFAULTS`
+    //   entry, so only a record that STATES one — or, by this engine's own rule
+    //   in `ss2Combatant`, carries item 45 or 46 — declares the key. No golden
+    //   and no roster gladiator does either: the 23 golden replay hashes were
+    //   taken before and after (`tools/golden-hash-census.mjs`), all 23
+    //   unchanged. The build keeps both on the fighter CLIP (`attacker.spell_X`,
+    //   `+0x8bc4`/`+0x8ca3`).
+    "spell_boundless_energy", "spell_regenerate",
     "staminaleft", "staminamax",
     "weapon",
     "weapon_enchantment_damage",
@@ -1264,7 +1280,10 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
     "psyche_up",
     "inventory1", "inventory2", "inventory3", "inventory4", "inventory5", "inventory6",
     // 2026-09-22: no default and no derivation, so never declared unless stated.
-    "inventory_maxslots"
+    "inventory_maxslots",
+    // 2026-09-22: no default; declared when stated OR when a slot holds 45/46,
+    // and `gladiator()` states neither and carries nothing.
+    "spell_boundless_energy", "spell_regenerate"
   ];
 
   // (1) No weapon id at all: everything but what either weapon slot answers for.

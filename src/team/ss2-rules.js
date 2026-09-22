@@ -439,6 +439,16 @@ export const Ss2ActionType = Object.freeze({
   //   this reason; see `SS2_POTIONS`. Zero samples, so not in
   //   `ATTACK_BANDS`, for the reason `shove` and `cast_gale` are not.
   DRINK_POTION: "drink-potion",
+  // ► **THE TWO TIMED SELF-BUFFS — AND THE FIRST SPELLS WHOSE EFFECT IS NOT IN
+  //   THEIR OWN ARM.** `+0x8bab`-`+0x8c89` (`cast_regenerate`, id 46) and
+  //   `+0x8c8a`-`+0x8d68` (`cast_boundless_energy`, id 45) of the same block;
+  //   see `SS2_TIMED_BUFFS`. Each arm only writes `attacker.spell_X = 20`; the
+  //   gain is applied by `nextphase` on every later phase the bearer acts in,
+  //   which is why `phaseTransitionEffects` is where they are really built.
+  //   ZERO samples, so not in `ATTACK_BANDS`, for the reason `shove` is not.
+  //   Two types for two `getphase` labels, the bolts' reason.
+  CAST_REGENERATE: "cast-regenerate",
+  CAST_BOUNDLESS_ENERGY: "cast-boundless-energy",
   /**
    * The phase a TAUNTED gladiator is forced into: it runs away.
    *
@@ -993,6 +1003,12 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // ALSO the drinker's clip: `attacker.gotoAndPlay("drink_potion")` at
   // `+0x57c6`. One name for the phase and the animation, which no spell has.
   [Ss2ActionType.DRINK_POTION]: "drink_potion",
+  // `phase_decision == "cast_regenerate"` at `+0x8bb1` and
+  // `== "cast_boundless_energy"` at `+0x8c90`, the decisions ladder arms 3 and
+  // 23 write (`+0x06d7`, `+0x0e0f`). Both casters play `Cast2` (`+0x8c40`,
+  // `+0x8d1f`) — carried on the event; there is no victim clip at all.
+  [Ss2ActionType.CAST_REGENERATE]: "cast_regenerate",
+  [Ss2ActionType.CAST_BOUNDLESS_ENERGY]: "cast_boundless_energy",
   // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
   //   of the decision table is `taunted1 == true` -> facing right
   //   `getphase("runleft")`, facing left `getphase("runright")`
@@ -4310,6 +4326,10 @@ const SS2_POOL_CEILING = Object.freeze({
  *   `cast_little_fat_kid` at `< 500`). **A villain holding 49 never drinks an
  *   armour or stamina potion in the build**, and does here; when any of those
  *   verbs is built, this list must learn them.
+ *   **Arm 3 HAS A VERB SINCE 2026-09-22 (`cast_regenerate`)** and is struck
+ *   from that list: `chooseAiAction` tests it just above the drink block, after
+ *   the arm-2 potion read off this table and before arms 4-6. This table is
+ *   still potions only.
  */
 export const SS2_POTION_LADDER = Object.freeze([
   Object.freeze({ arm: 2, itemId: 5 }),
@@ -4366,6 +4386,114 @@ export function ss2PotionOutcome(itemId, pools) {
   }
   return { potion, bonus, before: pools, after };
 }
+
+/* ------------------------------------------------------------------ */
+/* The timed self-buffs: an arm that sets a counter, and `nextphase`    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_regenerate` (id 46) and `cast_boundless_energy` (id 45), byte-derived
+ * 2026-09-22 from `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base
+ * `0x240c85`) and re-derived by two write-nothing verifiers:
+ *
+ * ```text
+ *   phase_decision == "cast_regenerate"                              +0x8bab
+ *     attacker.spell_regenerate = 20                                 +0x8bbe
+ *     register:3.crowd_action = 3                                    +0x8bcf
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka)  +0x8bdc
+ *     if (attacker.struck == null) {                                 +0x8c03
+ *       cast_spell_icon(attacker, 46)                                +0x8c1a
+ *       attacker.struck = false; attacker.gotoAndPlay("Cast2")       +0x8c32-+0x8c54
+ *     }
+ *     if (attacker.struck == true) { attacker.struck = null; nextphase() }  +0x8c55
+ *   (cast_boundless_energy: +0x8c8a-+0x8d68, id 45, spell_boundless_energy)
+ * ```
+ *
+ * ► **THE COUNTER WRITE IS OUTSIDE THE `struck` GATE, ON EVERY TICK, AND ON
+ *   THE FIGHTER CLIP** (`attacker`, not `game_attacker`). So the completion
+ *   pass that calls `nextphase()` leaves it at 20, and `nextphase` decrements
+ *   it to 19 BEFORE its effect test: **the cast phase itself applies**, and in
+ *   strict alternation the bearer gains at 19, 17, …, 1 — ten times. A recast
+ *   writes 20 again: it resets, never stacks.
+ *
+ * ► **NO DRAW, NO STAT WRITE, NO `defender`.** The arm's only calls are
+ *   `Math.round`, `cast_spell_icon`, `gotoAndPlay` and `nextphase`.
+ *
+ * ► **WHAT `nextphase` DOES WITH THE COUNTER** (`+0x319e`-`+0x36a1`; see
+ *   `phaseTransitionEffects`, which IS `nextphase` here):
+ *   - `check_spells(game_attacker, attacker)` then `check_spells(game_defender,
+ *     defender)` (`+0x3271`, `+0x3289`) — for BOTH fighters, every phase. For
+ *     these two counters it only decrements while `> 0` (`+0x272e`-`+0x278f`);
+ *     there is NO expiry block, unlike colossus, little fat kid, swiftsandals
+ *     and bloodlust above them.
+ *   - after `check_stats` (`+0x3347`): `if (attacker.spell_regenerate > 0)`
+ *     `hitpoints += round(hitpointsmax / 4)`, `check_stats` (`+0x33bd`-
+ *     `+0x3475`); then `if (attacker.spell_boundless_energy > 0)`
+ *     `staminaleft += round(staminamax / 4)`, `check_stats` ×2 (`+0x3476`-
+ *     `+0x3540`). The ATTACKER's clip only: a buffed defender ticks and gains
+ *     nothing.
+ *
+ * ► **THE COUNTER IS `undefined` UNTIL THE FIRST CAST.** The whole oracle holds
+ *   exactly four references to each name — the two `check_spells` sites, the
+ *   `nextphase` test and the arm's write — and no initialiser, so a fresh clip
+ *   reads `undefined`, which `> 0` never passes. Absent here and 0 here are
+ *   therefore both the build's "no buff".
+ *
+ * ► **NOT MODELLED, AND NAMED:** `crowd_action = 3` (the crowd cue, as for the
+ *   bolts), `cast_spell_icon`, and the `add_stats_icon` splat — which is a
+ *   `DefineFunction` with an EMPTY body (the map's `+0x23bf`, codeSize 0; the
+ *   function dump this was built from shows a header and no instructions), so
+ *   the build draws nothing either. The boundless splat's number would be
+ *   `round(stamina / 4)` (`+0x34d1`), not the `round(staminamax / 4)` it adds.
+ */
+export const SS2_TIMED_BUFFS = Object.freeze({
+  [Ss2ActionType.CAST_REGENERATE]: Object.freeze({
+    /** `cast_spell_icon(attacker, 46)` `+0x8c1a`; `check_inventory(46)` `+0x0681`. */
+    itemId: 46,
+    /** The clip field `attacker.spell_regenerate` (`+0x8bc4`), read by `nextphase` at `+0x33c3`. */
+    counter: "spell_regenerate",
+    /** `Push "spell_regenerate", 20; SetMember` `+0x8bc4`. */
+    duration: 20,
+    /** `attacker.gotoAndPlay("Cast2")`, `+0x8c40`. */
+    casterClip: "Cast2",
+    /** `register:3.crowd_action = 3`, `+0x8bcf`. Presentation cue; not modelled. */
+    crowdAction: 3,
+    /** `hitpoints += round(hitpointsmax / 4)`, `+0x33dc`-`+0x3417`. */
+    divisor: 4,
+    /** `villain_cast_spells` arm 3, `check_inventory(46) && hitpoints < hitpointsmax / 2` (`+0x0681`-`+0x06f1`). */
+    ladderArm: 3
+  }),
+  [Ss2ActionType.CAST_BOUNDLESS_ENERGY]: Object.freeze({
+    /** `cast_spell_icon(attacker, 45)` `+0x8cf9`; `check_inventory(45)` `+0x0df3`. */
+    itemId: 45,
+    /** The clip field `attacker.spell_boundless_energy` (`+0x8ca3`), read at `+0x347c`. */
+    counter: "spell_boundless_energy",
+    /** `Push "spell_boundless_energy", 20; SetMember` `+0x8ca3`. */
+    duration: 20,
+    /** `attacker.gotoAndPlay("Cast2")`, `+0x8d1f`. */
+    casterClip: "Cast2",
+    /** `register:3.crowd_action = 3`, `+0x8cae`. Presentation cue; not modelled. */
+    crowdAction: 3,
+    /** `staminaleft += round(staminamax / 4)`, `+0x3495`-`+0x34d0`. */
+    divisor: 4,
+    /** `villain_cast_spells` arm 23, `check_inventory(45)` ALONE (`+0x0df3`-`+0x0e29`). */
+    ladderArm: 23
+  })
+});
+
+/**
+ * The timed counters `nextphase` ticks, in `check_spells`' own order
+ * (`spell_regenerate` `+0x272e`, then `spell_boundless_energy` `+0x275f`).
+ *
+ * **Only the two with a verb.** `check_spells` also decrements
+ * `spell_colossus`, `spell_little_fat_kid`, `spell_swiftsandals` and
+ * `spell_bloodlust`, each WITH an expiry block that restores a stat; those join
+ * this list with their verbs, and their expiry with them.
+ */
+const SS2_TIMED_SPELL_COUNTERS = Object.freeze([
+  SS2_TIMED_BUFFS[Ss2ActionType.CAST_REGENERATE].counter,
+  SS2_TIMED_BUFFS[Ss2ActionType.CAST_BOUNDLESS_ENERGY].counter
+]);
 
 export const SS2_TAUNT = Object.freeze({
   /**
@@ -4646,6 +4774,22 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   //   `src/adapter/vanilla-fields.js`) and this models the reset value rather
   //   than inventing an initial one.
   "psyche_up",
+  // ► **THE TWO TIMED-BUFF COUNTERS, DECLARED 2026-09-22 WITH THEIR VERBS,
+  //   AND THEY ARE THE `psyche_up` SHAPE: NO `SS2_RESOURCE_DEFAULTS` ENTRY.** A
+  //   default would be filled into every golden's combatant and move all 23
+  //   replay hashes. See `SS2_TIMED_BUFFS`.
+  //
+  //   **They live on the fighter CLIP in the build, not on the stat object**:
+  //   the arm writes `attacker.spell_X` and `check_spells` decrements its
+  //   `which_avatar` argument (r1; the stat object is r2 and unused for these
+  //   two). The resource bag does not know the difference; the adapter does,
+  //   and it is the adapter's to write them back to the clip.
+  //
+  //   Declared when a record STATES one, and also when a declared inventory
+  //   slot HOLDS the item that writes it — see `ss2Combatant`, where that
+  //   second rule is named as this engine's own.
+  "spell_boundless_energy",
+  "spell_regenerate",
   "ammo_left",
   "armourclass",
   "armourclass_max",
@@ -4972,6 +5116,10 @@ export const SS2_WRITTEN_RESOURCES = Object.freeze([
   // `battlevalues`; here the derived numbers are selected at read time, so the
   // mode flag is the whole of the state change.
   "equipped_weapon",
+  // The two timed-buff counters: the cast arm's 20 and `nextphase`'s tick,
+  // guarded on declaration like every other write here.
+  "spell_boundless_energy",
+  "spell_regenerate",
   "staminaleft",
   ...SS2_ARMOUR_PIECES
 ].sort());
@@ -5332,6 +5480,27 @@ export function ss2Combatant(
   // combatant. Mirror the fallback here so the two agree.
   if (!Number.isFinite(derived.armourclass_max) && Number.isFinite(derived.armourclass)) {
     resources.armourclass_max = derived.armourclass;
+  }
+  // ► **A TIMED-BUFF COUNTER IS DECLARED BY POSSESSION, AT 0 — INVENTED, AND
+  //   FORCED BY THE RESOLVER RATHER THAN BY TASTE.** The build's clip creates
+  //   `attacker.spell_regenerate` on the arm's first write; this resolver
+  //   REFUSES to create a resource mid-battle (`writeResource`, constraint 2 of
+  //   `src/team/resources.js`). So a gladiator carrying id 46 whose record said
+  //   nothing about the counter could never hold what its own cast writes, and
+  //   the button would have to be hidden. Declaring it here, at construction,
+  //   for exactly the gladiators who carry the item, is the one way to keep the
+  //   build's gate — possession — as the offer.
+  //
+  //   **0 is the build's "no buff" and cannot move anything**: the build holds
+  //   `undefined` until the first cast (no initialiser anywhere in the oracle),
+  //   `undefined > 0` and `0 > 0` are both false, and `check_spells` decrements
+  //   only while `> 0`. No golden and no roster gladiator carries 45 or 46, so
+  //   no pinned hash moves; a record that STATES the counter keeps its value.
+  //   Every declared slot counts, the window included — declaring is inert, and
+  //   the villain's `use_item` ignores the window anyway.
+  for (const buff of Object.values(SS2_TIMED_BUFFS)) {
+    if (Object.hasOwn(resources, buff.counter)) continue;
+    if (SS2_INVENTORY_SLOTS.some((slot) => resources[slot] === buff.itemId)) resources[buff.counter] = 0;
   }
   const status = [];
   if ((derived.gladiator_dir ?? "right") === "left") status.push(SS2_FACING_LEFT);
@@ -5794,6 +5963,119 @@ function statusEffects(attackerBefore, attackerAfter, defenderBefore, defenderAf
 }
 
 /**
+ * The request each `resolveAction` is resolving, keyed by its own frozen actor
+ * view — so `phaseTransitionEffects`, which every completed phase already calls
+ * with `request.actor` and nothing else, can reach the rest of the field
+ * without a parameter threaded through every one of its call sites.
+ *
+ * ► **WHY A LOOKUP AND NOT A PARAMETER.** `check_spells` runs for everyone on
+ *   the field at every `nextphase`, so the transition needs the bystanders; the
+ *   alternative is editing every branch that transitions, and the branch that
+ *   forgot would silently skip the tick. Here a branch added tomorrow ticks the
+ *   field by calling the transition it already has to call. **A view the
+ *   registry does not know is REFUSED, not skipped** (see
+ *   `ss2TimedSpellTick`): a branch that hands the transition a COPY of the
+ *   actor is told so, rather than quietly ticking nobody.
+ *
+ * A `WeakMap` over a view `combatantView` builds fresh for every action: no
+ * state survives the action, nothing is shared between two resolutions, and a
+ * re-entrant resolve registers its own key.
+ */
+const SS2_PHASE_REQUESTS = new WeakMap();
+
+/**
+ * ► **THE TEAM-PLAY TICK RULE: WHO BESIDES THE ACTOR A COMPLETED PHASE TICKS.
+ *   The main session's decision (2026-09-22), and THE OWNER'S TO REVISIT.**
+ *
+ *   **Every completed phase ticks every LIVING combatant's timed counters**,
+ *   friend and foe alike, and applies the buffs to the ACTOR alone. In 1v1 this
+ *   is the build exactly — `nextphase` calls `check_spells` for the attacker and
+ *   then the defender (`+0x3271`, `+0x3289`), so both fighters tick on every
+ *   phase — and it is the reading that keeps "20" meaning the same number of
+ *   phases whoever is on the field. The consequence to know about: in a strict
+ *   rotation with nobody dying, a cast APPLIES ten times in 1v1 (at 19, 17, …,
+ *   1) and five in 2v2 (19, 15, 11, 7, 3) — both measured in
+ *   `test/ss2-timed-buffs.test.js` — and, by the same arithmetic, four in 3v3
+ *   (19, 13, 7, 1). A buff is worth less the more gladiators share the field.
+ *
+ *   **Changing the policy is ONE line here.** Ticking only on the bearer's own
+ *   phases is `return [];` — the actor is always ticked by the caller, because
+ *   its tick precedes its own effect test and every policy agrees on it.
+ *
+ *   - **The DEAD are not ticked**: `request.foes`/`request.allies` are the
+ *     living (`actorView`), and nothing reads a dead combatant's counter.
+ *   - **A phase that KILLS ticks nobody**, because this engine skips the whole
+ *     transition on a kill (`death()` deletes `nextphase` in the build, so
+ *     `check_spells` never runs). That is where the tick lives, so it follows.
+ *   - **Order**: foes, then allies, so that in 1v1 the list is the defender and
+ *     the order is the build's `attacker, defender`. Above 1v1 the order is
+ *     unobservable — each write names its own combatant.
+ */
+function ss2TimedSpellBystanders(request) {
+  return [...(request.foes ?? []), ...(request.allies ?? [])].filter((combatant) => combatant.id !== request.actor.id);
+}
+
+/**
+ * `nextphase` step 3: `check_spells` for the actor, then for everyone
+ * `ss2TimedSpellBystanders` names.
+ *
+ * For each declared counter in `SS2_TIMED_SPELL_COUNTERS`: `if (c > 0) c -= 1`,
+ * which is the whole of `check_spells` for these two (`+0x272e`-`+0x278f`,
+ * no expiry). An UNDECLARED counter is the build's `undefined` and is skipped:
+ * `undefined > 0` is false, so the build does nothing to it either.
+ *
+ * @param {object} actor        the frozen view `resolveAction` registered
+ * @param {object|null} armCounters  what the phase ARM left on the actor's clip
+ *   before `nextphase` ran — `{ spell_regenerate: 20 }` for a cast. Read in
+ *   place of the stored value, and ticked like it.
+ * @returns {{ effects: object[], after: object }} `after` is the actor's own
+ *   post-tick counters, which is what the effect tests read.
+ */
+function ss2TimedSpellTick(actor, armCounters) {
+  const request = SS2_PHASE_REQUESTS.get(actor);
+  if (request === undefined) {
+    throw new TeamRuleSetError(
+      `phaseTransitionEffects was handed an actor view for ${String(actor?.id)} that resolveAction did not ` +
+      "register. Pass request.actor itself, not a copy: the transition ticks every combatant's timed spell " +
+      "counters and reads the field from the request that view belongs to."
+    );
+  }
+  const effects = [];
+  const after = {};
+  const declared = declaredResourceNames(actor);
+  for (const counter of SS2_TIMED_SPELL_COUNTERS) {
+    const armed = armCounters?.[counter];
+    if (!declared.has(counter)) {
+      if (armed !== undefined) {
+        throw new TeamRuleSetError(
+          `${actor.id} would set ${counter}, which it does not declare; the resolver creates no resource ` +
+          "mid-battle. ss2Combatant declares it for any gladiator carrying the item that writes it."
+        );
+      }
+      continue;
+    }
+    const stored = resourceValue(actor, counter);
+    const held = armed ?? stored;
+    const ticked = held > 0 ? held - 1 : held;
+    after[counter] = ticked;
+    if (ticked !== stored) {
+      effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: counter, to: ticked });
+    }
+  }
+  for (const bystander of ss2TimedSpellBystanders(request)) {
+    const theirs = declaredResourceNames(bystander);
+    for (const counter of SS2_TIMED_SPELL_COUNTERS) {
+      if (!theirs.has(counter)) continue;
+      const value = resourceValue(bystander, counter);
+      if (value > 0) {
+        effects.push({ kind: EffectKind.RESOURCE, targetId: bystander.id, resource: counter, to: value - 1 });
+      }
+    }
+  }
+  return { effects, after };
+}
+
+/**
  * `nextphase`'s per-transition bookkeeping, attacker-only.
  *
  * `+0x32a1`-`+0x3304` are two consecutive unbranched statements on
@@ -5818,16 +6100,34 @@ function statusEffects(attackerBefore, attackerAfter, defenderBefore, defenderAf
  *   Summed with the `nextphase` term before ONE maxHealth clamp, because the
  *   build's own clamps (`check_stats` at `+0x5266` and `+0x334d`) are both
  *   ceilings and every term here is non-negative.
+ * @param {object|null} armCounters  timed-spell counters the phase ARM wrote on
+ *   the actor's clip before `nextphase` ran (`{ spell_regenerate: 20 }` for
+ *   `cast_regenerate`); see `ss2TimedSpellTick`.
+ *
+ * ► **ONE THING HERE IS NOT ATTACKER-ONLY, AND IT IS THE FIRST THING `nextphase`
+ *   DOES: the timed-spell tick** (step 3, `+0x3271`/`+0x3289`), which reaches
+ *   every living combatant through `ss2TimedSpellBystanders`. The two EFFECTS
+ *   the counters buy (steps 8 and 9) are attacker-only, like everything else.
  */
 function phaseTransitionEffects(
   actor,
   { staminaCost, branchGain = 0, branchHeal = 0, fromStaminaleft = null, fromHealth = null,
-    resetsPsyche = true }
+    resetsPsyche = true, armCounters = null }
 ) {
   const declared = declaredResourceNames(actor);
   const stamina = actor.stats.stamina;
   const effects = [];
   let staminaGained = 0;
+
+  // Step 3, `check_spells` — BEFORE the stamina arithmetic, as the build has
+  // it, so the effect tests at steps 8 and 9 read the post-tick counter and the
+  // cast phase itself (20 -> 19) applies.
+  const timed = ss2TimedSpellTick(actor, armCounters);
+  effects.push(...timed.effects);
+  // Kept for step 9, which adds AFTER the floor rather than inside it.
+  let staminaFloored = null;
+  let staminaBefore = null;
+  let staminaMaximum = null;
 
   // `fromStaminaleft`/`fromHealth` exist for the STATUS PHASE, where the actor
   // is also the thing that just took damage. Everywhere else the actor is the
@@ -5850,6 +6150,9 @@ function phaseTransitionEffects(
         to: after
       });
     }
+    staminaFloored = after;
+    staminaBefore = before;
+    staminaMaximum = maximum;
   }
 
   const healed = Math.min(
@@ -5858,6 +6161,40 @@ function phaseTransitionEffects(
   );
   if (healed > 0) {
     effects.push({ kind: EffectKind.HEAL, targetId: actor.id, amount: healed });
+  }
+
+  // ► **STEPS 8 AND 9: THE TWO TIMED BUFFS, ON THE ACTOR ONLY, EACH AFTER A
+  //   `check_stats` AND EACH FOLLOWED BY ONE** (`+0x33bd`-`+0x3475`,
+  //   `+0x3476`-`+0x3540`). Emitted as their OWN effects, after the ones above,
+  //   so the log carries the build's order and a gladiator with no active buff
+  //   gets exactly the effect list it always did.
+  //
+  //   **Regeneration** is `round(hitpointsmax / 4)` on top of a hitpoint pool
+  //   already capped at step 7. Every term is non-negative, so a single clamp
+  //   would agree — it is kept separate anyway, as the build orders it.
+  //
+  //   **Boundless energy CANNOT be folded into the clamp above, and that is the
+  //   one number here a shortcut would get wrong.** Step 7 floors the stamina
+  //   first, and the `round(staminamax / 4)` lands on the FLOORED value: 5 left,
+  //   cost 30, stamina 6, max 160 is -22, floored to 0, then 40 — where one
+  //   clamp over the sum gives 18.
+  let regenerated = 0;
+  if (timed.after[SS2_TIMED_BUFFS[Ss2ActionType.CAST_REGENERATE].counter] > 0) {
+    const gain = Math.round(actor.maxHealth / SS2_TIMED_BUFFS[Ss2ActionType.CAST_REGENERATE].divisor);
+    regenerated = Math.min(gain, Math.max(0, actor.maxHealth - (health + healed)));
+    if (regenerated > 0) {
+      effects.push({ kind: EffectKind.HEAL, targetId: actor.id, amount: regenerated });
+    }
+  }
+  let boundlessGained = 0;
+  if (timed.after[SS2_TIMED_BUFFS[Ss2ActionType.CAST_BOUNDLESS_ENERGY].counter] > 0 && staminaFloored !== null) {
+    const gain = Math.round(staminaMaximum / SS2_TIMED_BUFFS[Ss2ActionType.CAST_BOUNDLESS_ENERGY].divisor);
+    const boosted = clamp(staminaFloored + gain, 0, staminaMaximum);
+    boundlessGained = boosted - staminaFloored;
+    if (boosted !== staminaFloored) {
+      effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: "staminaleft", to: boosted });
+    }
+    staminaGained = boosted - staminaBefore;
   }
   // ► **`nextphase` RESETS THE PSYCHE COUNTER ON EVERY DECISION THAT IS NOT
   //   `psyche_up`, AND THIS IS THE FUNCTION THAT IS `nextphase`.** The build
@@ -5886,7 +6223,17 @@ function phaseTransitionEffects(
     });
   }
 
-  return { effects, staminaGained, healed };
+  // `healed` and `staminaGained` are everything `nextphase` did, buffs
+  // included; `regenerated`/`boundlessGained` say how much of it was the buffs,
+  // and `timedSpells` is the actor's own post-tick counters.
+  return {
+    effects,
+    staminaGained,
+    healed: healed + regenerated,
+    regenerated,
+    boundlessGained,
+    timedSpells: timed.after
+  };
 }
 
 /**
@@ -7299,6 +7646,25 @@ export function createSs2TeamRules({
         actions.push({ type: Ss2ActionType.DRINK_POTION, targetId: actorId, itemId });
       }
 
+      // ► **THE TWO TIMED BUFFS: ONCE EACH, SELF-TARGETED, ON POSSESSION, on the
+      //   same button and under the same two gates as every spell above.** The
+      //   arms never read `defender`, so a per-foe offer would be N spellings of
+      //   one action — the teleport's shape. `hitpoints < hitpointsmax / 2` is
+      //   ladder arm 3, the villain's DECISION, read by `chooseAiAction`; the
+      //   hero's button tests nothing, so a buff is castable at full health and
+      //   while one is already running (a recast resets it).
+      //
+      //   **AND THE COUNTER MUST BE DECLARED**, for the reason `psyche_up`'s
+      //   offer gives: the resolver will not create a resource mid-battle, so a
+      //   cast whose counter the combatant cannot hold would be a button that
+      //   throws. `ss2Combatant` declares it for every gladiator carrying the
+      //   item, so for anything built there this is possession exactly.
+      for (const [type, buff] of Object.entries(SS2_TIMED_BUFFS)) {
+        if (ss2InventorySlotHolding(view.actor, buff.itemId) === null) continue;
+        if (!declaredResourceNames(view.actor).has(buff.counter)) continue;
+        actions.push({ type, targetId: actorId });
+      }
+
       // ► **WHICH CONTROLLER FRAME THE GLADIATOR IS ON, computed ONCE because
       //   two arms below need it and a second copy is a second chance to be
       //   wrong** — the argument the walk arm makes about `anyInReach` and
@@ -7573,6 +7939,9 @@ export function createSs2TeamRules({
      */
     resolveAction(request, rolls) {
       const actor = request.actor;
+      // So every completed phase's transition can tick the whole field's timed
+      // spell counters; see `SS2_PHASE_REQUESTS`.
+      if (actor !== null && typeof actor === "object") SS2_PHASE_REQUESTS.set(actor, request);
 
       // THE CROWD'S TOLL, AND IT IS PREPENDED HERE ON PURPOSE.
       //
@@ -8973,6 +9342,89 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **THE TIMED BUFFS. Zero samples, no stat of their own, and the whole
+      //   effect is a counter `nextphase` reads.** See `SS2_TIMED_BUFFS` for the
+      //   arm and `phaseTransitionEffects` for what the counter buys; returned
+      //   before `ATTACK_BANDS` for `shove`'s reason.
+      const timedBuff = SS2_TIMED_BUFFS[request.type];
+      if (timedBuff) {
+        // Self-targeted, as offered: the arm writes only the caster's clip.
+        if (request.targetId != null && request.targetId !== actor.id) {
+          throw new TeamRuleSetError(
+            `${request.type} is cast on the caster; ${String(request.targetId)} is not ${actor.id}.`
+          );
+        }
+        // Re-found at resolve, through the same window as the offer, for the
+        // reason the bolt branch gives.
+        const slot = ss2InventorySlotHolding(actor, timedBuff.itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, timedBuff.itemId, { ignoreMaxslots: true });
+          throw new TeamRuleSetError(
+            beyond !== null
+              ? `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${timedBuff.itemId} is in ` +
+                `${beyond}, outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}, and this ` +
+                "engine offers and consumes through the same window."
+              : `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+                `item ${timedBuff.itemId}. The build's own gate is possession — check_inventory for the ` +
+                "villain, a visible inventory button for the hero — and this engine reproduces it."
+          );
+        }
+        // Refused BEFORE any effect exists, because the resolver applies a list
+        // with no rollback and would refuse the counter write half-way through.
+        if (!declaredResourceNames(actor).has(timedBuff.counter)) {
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: it does not declare ` +
+            `${timedBuff.counter}, and the resolver creates no resource mid-battle. ss2Combatant declares it ` +
+            `for any gladiator carrying item ${timedBuff.itemId}.`
+          );
+        }
+
+        // `staminacost = Math.round(game_attacker.magicka)` — the stat, with no
+        // affordability check, the bolts' and the teleport's shape exactly.
+        const staminaCost = Math.round(actor.stats.magicka);
+        // The arm's `attacker.spell_X = 20` is handed to the transition rather
+        // than emitted here: `nextphase` ticks it to 19 before anything reads
+        // it, and one absolute write of the result is the same state as two.
+        const transition = phaseTransitionEffects(actor, {
+          staminaCost,
+          armCounters: { [timedBuff.counter]: timedBuff.duration }
+        });
+
+        // The slot first — both of the build's choosers empty it before the
+        // phase runs — then `nextphase`.
+        const effects = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }, ...transition.effects, ...crowd];
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: actor.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // The CASTER's clip only; no `victimClip`, the teleport's shape, so
+            // `SS2_STATIC_MAP_BINDINGS` binds a lone `casterClip` as a self-cast.
+            casterClip: timedBuff.casterClip,
+            spellId: timedBuff.itemId,
+            consumedSlot: slot,
+            counter: timedBuff.counter,
+            // What the arm wrote, and what `nextphase` left.
+            counterSet: timedBuff.duration,
+            counterAfter: transition.timedSpells[timedBuff.counter],
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed,
+            // How much of the two above the buffs themselves were, on this phase.
+            regenerated: transition.regenerated,
+            boundlessGained: transition.boundlessGained
+          }]
+        };
+      }
+
       const band = ATTACK_BANDS[request.type]
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
@@ -9631,6 +10083,37 @@ export function createSs2TeamRules({
       const actor = view.actor;
       if (restOption && resourceValue(actor, "staminaleft", 0) <= 10) return restOption;
 
+      // ► **LADDER ARM 3, `cast_regenerate`, AND IT SITS AMONG THE POTIONS.**
+      //   `check_inventory(46) && villain.hitpoints < villain.hitpointsmax / 2`
+      //   (`+0x0681`-`+0x06f1`, `Push 2; Divide; Less2` — strict, unrounded):
+      //   after arm 2 (the id-5 potion, the SAME test) and before arms 4-6 (the
+      //   4, 3 and 2 potions, the same test again). So a villain below half who
+      //   carries 5 drinks it, and one who carries only 4, 3 or 2 regenerates
+      //   first. The potion arms that precede arm 3 are taken from
+      //   `SS2_POTION_LADDER` rather than restated; arm 1 (`cast_rejuvinate`)
+      //   has no verb here and pre-empts nothing.
+      //
+      // ► **IT NEVER ASKS WHETHER THE BUFF IS ALREADY RUNNING — nor does the
+      //   build**, so a villain holding two 46s recasts on the next turn it is
+      //   still below half, and resets the counter to 20. Reproduced.
+      //
+      // ► **OMITTED, AND NAMED, AS FOR THE POTIONS:** the single
+      //   `randomBetween(1, 100) > 10` at `+0x056f` (this AI takes no samples,
+      //   so it casts on every turn the gate is open rather than nine in ten),
+      //   and the forced rest above, which sits in front of the ladder here —
+      //   the open question the potion block records.
+      const regenerateOption = options.find((option) => option.type === Ss2ActionType.CAST_REGENERATE);
+      if (regenerateOption && actor.health < actor.maxHealth / 2) {
+        const pools = ss2PoolsOf(actor);
+        for (const { arm, itemId } of SS2_POTION_LADDER) {
+          if (arm > SS2_TIMED_BUFFS[Ss2ActionType.CAST_REGENERATE].ladderArm) break;
+          const drink = options.find((option) => option.type === Ss2ActionType.DRINK_POTION && option.itemId === itemId);
+          const { stat } = SS2_POTIONS[itemId];
+          if (drink && pools[stat] < pools[SS2_POOL_CEILING[stat]] / 2) return drink;
+        }
+        return regenerateOption;
+      }
+
       // ► **THE POTIONS ARE THE BUILD'S OWN RULE, AND THEY COME FIRST OF
       //   EVERYTHING `villain_cast_spells` DECIDES.** Ladder arms 2, 4-6 and
       //   10-13 each drink when the id is carried AND the pool it restores is
@@ -9656,9 +10139,10 @@ export function createSs2TeamRules({
       //     AI takes no samples, so it drinks on every turn a condition holds
       //     rather than on nine in ten, and a failed roll's fall-through to the
       //     melee decision is not reproduced;
-      //   - the arms with no verb here (1 `cast_rejuvinate`, 3
-      //     `cast_regenerate`, 7 `cast_death_from_above`, 8 `cast_colossus`, 9
-      //     `cast_little_fat_kid`), which pre-empt some potions in the build and
+      //   - the arms with no verb here (1 `cast_rejuvinate`, ~~3
+      //     `cast_regenerate`,~~ 7 `cast_death_from_above`, 8 `cast_colossus`, 9
+      //     `cast_little_fat_kid`; arm 3 has had a verb since 2026-09-22 and is
+      //     tested in the block just above), which pre-empt some potions in the build and
       //     nothing here — the stance the gale block takes for arms 1-23;
       //   - **AND IT SITS BEHIND THE FORCED REST ABOVE, WHICH IS AN OPEN
       //     QUESTION, NOT A DERIVATION.** `staminaleft > 10` (`+0x03e8`) gates
@@ -9767,9 +10251,11 @@ export function createSs2TeamRules({
       //   above. The five damage spells (arms 14-18) fire on possession alone,
       //   so a caster offered any of them never reaches arm 19 — even on a turn
       //   this engine's pricing then spends on a swing — which is what
-      //   `!boltOnOffer` says. The rest of 1-18 (`rejuvinate`, `regenerate`,
-      //   death from above, colossus, little fat kid) have no verb here and so
-      //   pre-empt nothing; when they are built, this block must grow. And it
+      //   `!boltOnOffer` says. `regenerate` (arm 3) got its verb the same day
+      //   and returns above (merged from a parallel worktree). The rest of 1-18
+      //   (`rejuvinate`, death from above, colossus, little fat kid) have no
+      //   verb here and so pre-empt nothing; when they are built, this block
+      //   must grow. And it
       //   sits ABOVE the gale (arm 24) and the teleport (arm 26), so a caster
       //   qualifying for either weakens first.
       //
@@ -9791,6 +10277,35 @@ export function createSs2TeamRules({
           // is null — and is guarded for the reason the gale's is.
           if (range !== null && range < SS2_WEAKEN_ARMOUR.aiFightDistanceBelow) return weakenOption;
         }
+      }
+
+      // ► **LADDER ARM 23, `cast_boundless_energy`, ON POSSESSION ALONE** —
+      //   `check_inventory(45)` and nothing else (`+0x0df3`-`+0x0e29`; the only
+      //   test before its `If` is the `Equals2` against `true`). So it fires
+      //   whatever the stamina, and REPLACES a swing in reach or a step out of
+      //   it, for the gale's reason: `villain_cast_spells` replaces the decision.
+      //
+      // ► **WHAT PRE-EMPTS IT, AS FAR AS THIS ENGINE HOLDS IT.** Arms 1-22 must
+      //   fail first. Of those with a verb here: arm 3 (regenerate) and the
+      //   potion arms 2, 4-6 and 10-13 have already returned above; the damage
+      //   spells, arms 14-18, fire on possession alone, so a caster offered one
+      //   never reaches arm 23 — `boltOnOffer`, the gale's own test. **Arm 19,
+      //   `cast_weaken_armour` (`check_inventory(44) && fightdistance < 300`),
+      //   precedes it too, and is tested in the block directly ABOVE this one**
+      //   (the two verbs were built in parallel worktrees and merged in ladder
+      //   order on 2026-09-22). Arms 7-9 and 20-22 (death from above, colossus, little fat
+      //   kid, whirlwind, ghost strike, bloodlust) have none and pre-empt
+      //   nothing here, where the build would.
+      //
+      // ► **AND IT PRE-EMPTS THE GALE (24) AND THE TELEPORT (26)**, which is
+      //   why it sits here, above both.
+      //
+      // ► **IT NEVER ASKS WHETHER THE BUFF IS RUNNING**, as for arm 3: a villain
+      //   holding two 45s casts them on consecutive turns and the second resets
+      //   the counter. The 90% roll at `+0x056f` is omitted, as everywhere here.
+      if (!boltOnOffer) {
+        const boundlessOption = options.find((option) => option.type === Ss2ActionType.CAST_BOUNDLESS_ENERGY);
+        if (boundlessOption) return boundlessOption;
       }
 
       // ► **THE GALE IS THE BUILD'S OWN RULE, NOT A PRICE, because it deals no
@@ -9831,6 +10346,10 @@ export function createSs2TeamRules({
       //   same day (arms 14, 16, 18)**, which `boltOnOffer` now covers, so a
       //   caster offered any of the five damage spells never reaches the gale
       //   (merged from a parallel worktree; the three verbs were built at once).
+      //   **And for boundless energy (arm 23, possession alone) and regenerate
+      //   (arm 3) on 2026-09-22**: both return in blocks ABOVE this one, so a
+      //   caster carrying 45 never reaches the gale, and neither does one below
+      //   half health carrying 46 (`test/ss2-timed-buffs.test.js`).
       //
       // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
       //   > 10` at `+0x056f`. This AI takes no samples, so it casts on every
@@ -9881,7 +10400,13 @@ export function createSs2TeamRules({
       //   already returned above; a caster whose gale gate is SHUT falls through
       //   to here, as the ladder does). **SEVEN arms before 26 fire on
       //   possession alone** (ids 49, 32, 35, 31, 34, 30, 45 — map §"The whole
-      //   ladder"); five have no verb here. ~~**The potion arms (2, 4-6, 10-13)
+      //   ladder"); ~~five have no verb here~~ **ONE has no verb here (49) as of
+      //   2026-09-22 — the fireballs (32, 31, 30) and boundless energy (45)
+      //   gained theirs the same day, and all four shut or pre-empt this block
+      //   from above it. So does ARM 3, `cast_regenerate`, whose test is this
+      //   block's own `hitpoints < hitpointsmax / 2`: a caster carrying 46 below
+      //   half regenerates and never reaches the teleport** (corrected by the
+      //   timed-buff implementer). ~~**The potion arms (2, 4-6, 10-13)
       //   also precede this one and are NOT wired here** — arm 2 (id 5) tests
       //   the SAME `hitpoints < hitpointsmax / 2`, so once `drink_potion` has a
       //   verb this test must grow to let it pre-empt.~~ **The potion arms
