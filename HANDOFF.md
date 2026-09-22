@@ -965,12 +965,20 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     verifier said the build holds a figure's last frame until `changeCombatants`
     and that `nextphase` gates that on `demand_move >= 60` enter-frames. I
     relayed it into a ranked item without re-deriving it. **Re-derived
-    2026-09-17: the hold is ONE ENTER-FRAME, about 33 ms.** A clip's last frame
-    runs `this.struck = true; stop()`; the fighter's `onEnterFrame` polls
-    `attacker.struck != null` (`+0x5025`) and on the next frame clears it and
-    calls `nextphase()` (`+0x5121`-`+0x513d`). **`demand_move` is a STALL
-    WATCHDOG** — `>= 60` also requires `_y >= grounded` and no bullet in
-    flight, `>= 200` is the backstop — for animations that never report.
+    2026-09-17: the hold is ONE ENTER-FRAME, about 33 ms.** ~~A clip's last frame
+    runs `this.struck = true; stop()`~~ **A REPORTING clip's last frame does —
+    37 of the fighter clip's 86 `Stop` run-ends, not all of them** *(corrected
+    2026-09-22 by a write-nothing verifier over every `"struck"` reference in
+    sprite 1241: 38 frames write it, the 38th being 1963, the burn's exit, and
+    no `Hurt`, `Defend`, `Death`, `Yield`, `knockback`, `taunted`, `bombard` or
+    `snipe` run does)*; the fighter's `onEnterFrame` ~~polls
+    `attacker.struck != null` (`+0x5025`)~~ **tests `attacker.struck == true` —
+    in the wincrowd arm at `+0x510f`-`+0x511c`** *(corrected 2026-09-22 by the
+    same verifier: `+0x5025` is that arm's ENTRY guard, whose body runs when
+    `struck == null`)* and on the next frame clears it and calls `nextphase()`
+    (`+0x5121`-`+0x513d`). **`demand_move` is a STALL WATCHDOG** — `>= 60`
+    also requires `_y >= grounded` and no bullet in flight, `>= 200` is the
+    backstop — for animations that never report.
     **So there is no meaningful action-end gap**; what survives is that the
     build restarts the `Standing` loop at every `changeCombatants` while this
     engine's idle phase free-runs. **Never relay a number you have not
@@ -1061,8 +1069,12 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     frame 1963 is a TOTAL if/else and both arms jump. The committed tool
     already said seven; only the brief was wrong, which is the wave working.
   ► **"Nothing dispatches `knockback_mov`" was too strong** — one site,
-    `+0x7c5e`, behind `cast_spell_icon(attacker, 39, 2)`, a spell path with no
-    verb here. Said while correcting a claim that was also too strong.
+    `+0x7c5e`, behind ~~`cast_spell_icon(attacker, 39, 2)`~~
+    **`cast_spell_icon(attacker, 39)`** *(corrected 2026-09-22 by a
+    write-nothing verifier re-reading `+0x7c46`-`+0x7c5c`: the 2 is the
+    argument COUNT pushed for `CallFunction`)*, a spell path — the
+    `cast_command` arm — with no verb here. Said while correcting a claim that
+    was also too strong.
   ► **`burning`'s `frames: 32` IS THE ONE NUMBER THE TOOL DOES NOT PROVE.** The
     repeat count of 2 is read by hand from `burncycle = 1` against `>= 2`; it
     carries `derivedBy: "hand"` at the field now and the tool prints
@@ -1742,10 +1754,17 @@ wrong**; that file is kept only as the record of how.)*
   its current frame. The NaN path is reachable from `characterDNA[33]`.
 
 ► **OPPONENTS CAN BE ENCHANTED — and the primary's level-banded potency ladder
-  is DEAD CODE.** All three banded arms fall into an unconditional
-  `randomBetween(1, 3)` at `0x404999`, so opponent primary potency is uniform at
-  every level while the secondary's is genuinely banded. It costs a second RNG
-  draw, which a replay reproducing the build's stream must make.
+  is ~~DEAD CODE~~ DEAD STORES** *(corrected 2026-09-22: arms 2 and 3 still run
+  and still draw; only their writes are dead)*. All three banded arms fall into
+  an unconditional `randomBetween(1, 3)` at `0x404999`, so opponent primary
+  potency is uniform at every level while the secondary's is genuinely banded.
+  ~~It costs a second RNG draw, which a replay reproducing the build's stream
+  must make.~~ **THE SECOND DRAW HAPPENS ONLY WHEN `herolevel > 10` — corrected
+  2026-09-22 by a write-nothing verifier re-deriving the arms from the bytes.**
+  Arm 1 (`herolevel <= 10`) writes the constant 1 at `0x404912` with no draw;
+  arms 2 and 3 call `randomBetween` before `0x404999` calls it again. A replay
+  that always draws twice drifts for every opponent at level 10 or below. See
+  the battle map's witness 6 and §"Three things the corrected reading exposes".
 
 ► **THERE IS NO BUILD-LEVEL FILTER DENOMINATOR.** 1,894 filter records on 1,507
   placements; a reader can reach 848 — 44.8% — and the two pack numbers are not

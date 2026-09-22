@@ -203,9 +203,14 @@ export function animationCursor(pendingTokens, playing, now, { projectiles = [] 
   // ► **AN ARROW IN THE AIR IS WORK IN PROGRESS, AND THAT IS THE BUILD'S OWN
   //   RULE (added 2026-09-13).** Vanilla will not complete a ranged phase while
   //   the bullet is still flying: `bullet_in_air != true` sits on the
-  //   phase-completion guard (`+0x3829`) beside `attacker.struck` and
-  //   `grounded`. So a long bombard takes a long turn there, and this gate is
-  //   given the same fact.
+  //   phase-completion guard (`+0x3829`) beside ~~`attacker.struck` and~~
+  //   `grounded` **— and `attacker.struck` is NOT on it** *(corrected
+  //   2026-09-22 by a write-nothing verifier sweeping every `"struck"`
+  //   reference in `DoAction@0x240c7f`: the lowest is `+0x3871`, a WRITE,
+  //   `attacker.struck = null`, so nothing in the block reads `struck` before
+  //   `+0x3829`. The `bullet_in_air` and `grounded` terms are NOT re-verified
+  //   by that correction — its dumps start at `+0x3842`)*. So a long bombard
+  //   takes a long turn there, and this gate is given the same fact.
   //
   //   **Deliberately NOT folded into `playing`**, which is keyed by combatant
   //   and is what the painter poses: an arrow is nobody's figure, exactly as

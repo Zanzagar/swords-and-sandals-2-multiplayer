@@ -335,8 +335,21 @@ which is `frame = 3 * (type - 2) + potency + 1`, and 1 below type 2.
      `burning`/`frozen`/`poison`/`life_stolen` and gates the proc on
      `randomBetween(1,100) < weapon_enchantment_potency * 10`.
   6. **`randomise_gladiator`** draws `weapon_enchantment_type =
-     randomBetween(2, 5)` (`0x4048ed`) and `weapon_enchantment_potency` from
-     1..3 banded by `herolevel` (`0x404906`/`0x404962`/`0x404998`).
+     randomBetween(2, 5)` (`0x4048ed`) and ~~`weapon_enchantment_potency` from
+     1..3 banded by `herolevel` (`0x404906`/`0x404962`/`0x404998`).~~
+     **`weapon_enchantment_potency = randomBetween(1, 3)`, UNIFORM AT EVERY
+     LEVEL — corrected 2026-09-22 by a write-nothing verifier re-deriving the
+     region from the bytes (block base `0x401994`).** The three level-banded
+     arms are DEAD STORES: arm 1 (`herolevel <= 10`) writes a constant 1 at
+     `0x404912` (`+0x2f7e`), arm 2 (`10 < herolevel <= 25`) writes
+     `randomBetween(1, 2)` at `0x404962`, arm 3 (`> 25`) `randomBetween(1, 3)`
+     at `0x404998` — and all three join at `+0x3005` (`0x404999`), which
+     UNCONDITIONALLY overwrites the field with `randomBetween(1, 3)`.
+     **`0x404906` was never a write:** it is arm 1's `Push` (`+0x2f72`). The
+     region runs only for a non-hero (`+0x27e8`) with `weapon != 0`
+     (`0x404892`), and only when `enchanted_possibility =
+     randomBetween(herolevel * 10, 500)` exceeds 450 (`+0x2f3b`). The witness
+     still stands for what it is cited for: the TYPE draw is the element.
   7. **Every call site pushes the same pair in the same order** — potency, then
      type, then `argCount` — at all nine `enchant_weapon` sites and all four
      `itemglow` sites, popping to `(…, type, potency)`.
@@ -376,13 +389,22 @@ how the wrong reading was reached.
   `enchanted_possibility = randomBetween(herolevel * 10, 500)` (`0x404897`) and,
   when it exceeds 450, enchants — gated at `0x404892` on `weapon != 0`, so only
   an armed gladiator. Six call sites, five on `game.villain`.
-  ► **AND THE PRIMARY'S LEVEL-BANDED POTENCY LADDER IS DEAD CODE.** All three
+  ► **AND THE PRIMARY'S LEVEL-BANDED POTENCY LADDER IS ~~DEAD CODE~~ DEAD
+    STORES** *(corrected 2026-09-22: the arms are not dead — arms 2 and 3 still
+    RUN and still DRAW; only their writes are dead).* All three
     arms (`0x404912`, `0x404962`, `0x404998`) fall into an UNCONDITIONAL
     `weapon_enchantment_potency = randomBetween(1, 3)` at `0x404999`. So
     opponent PRIMARY potency is uniform 1..3 at every level, while the SECONDARY
-    ladder (joining at `0x404ad1`) is genuinely level-banded. **It also costs a
+    ladder (joining at `0x404ad1`) is genuinely level-banded. ~~**It also costs a
     second RNG draw**, which any replay reproducing the build's stream must
-    make.
+    make.~~ **THE SECOND DRAW HAPPENS ONLY WHEN `herolevel > 10` — corrected
+    2026-09-22 by a write-nothing verifier re-deriving the arms from the
+    bytes.** Arm 1 (`herolevel <= 10`; its `If` at `+0x2f6d` is taken when
+    `> 10`) writes the constant 1 at `0x404912` with NO draw; arms 2 and 3 each
+    call `randomBetween` (`+0x2fcd`, `+0x3003`) before `+0x3005`'s own call at
+    `+0x301d`. So an opponent at level 10 or below draws once here, and a
+    replay that always draws twice drifts the stream for exactly those
+    opponents.
 
 #### And that puts it in tension with the damage path, which is recorded and NOT resolved
 
@@ -981,7 +1003,7 @@ Observed data fields include:
 | Derived combat | `physical_size`, `min_damage`, `max_damage`, `secondary_min_damage`, `secondary_max_damage`, `movement_speed`, `attack_type`, `attack_speed`, `weapon_enchantment_damage`, `secondary_weapon_enchantment_damage` |
 | Chance cache | `power_percentage`, `normal_percentage`, `quick_percentage`, `bash_percentage`, `taunt_percentage`, `bombard_percentage`, `snipe_percentage`, `magicka_percentage` |
 | Conditions | `psyche_up`, `taunted1`, `taunted2`, `burning`, `frozen`, `poison`, `life_stolen`, and timed `spell_*` fields |
-| Inventory | `inventory1` through `inventory6` |
+| Inventory | `inventory1` through `inventory6`; and `inventory_maxslots` — **BYTE-DERIVED, NOT OBSERVED** (added 2026-09-22): read at `sprite:492[inventory_overlay]/frame:1` `+0x024f` and written by `initcharacter` `+0x098e`, it has never been observed by a capture and no committed observation record carries it, so it does not belong under this table's heading on the same footing as the rest |
 
 `battlevalues(whichcharacter)` is `DefineFunction2` at `+0x3062` of root frame
 35 `DoAction@0x3fa9dc`. Register bindings, read off the operands: `register:1`
@@ -2643,7 +2665,7 @@ Each arm, taking `frozen` as the worked example:
 if (phase_decision != "frozen") skip the arm                       // +0x529d
 attacker_clip.crowd_action = 0                                     // +0x52af
 game_attacker.staminacost = 0                                      // +0x52c0  <- no stamina cost
-if (attacker.struck != null) {                                     // +0x52d5
+if (attacker.struck == null) {                                     // +0x52d5  <- was "!= null"; see below
     attacker.struck = false                                        // +0x52ec
     attacker.gotoAndPlay("frozen")                                 // +0x52fa
     if (game_attacker.equipped_weapon == 1)                        // +0x530e
@@ -2653,8 +2675,23 @@ if (attacker.struck != null) {                                     // +0x52d5
         magic_damage_character(<swapped roles>, "frozen", 5,
                                game_defender.secondary_weapon_enchantment_damage)  // +0x536b
 }
-if (attacker.struck != true) { attacker.struck = null; nextphase() } // +0x539c / +0x53b4
+if (attacker.struck == true) { attacker.struck = null; nextphase() } // +0x539c / +0x53b4  <- was "!= true"
 ```
+
+~~`if (attacker.struck != null) {` … `if (attacker.struck != true) {
+attacker.struck = null; nextphase() }`~~ **BOTH TESTS WERE INVERTED, and the
+block above is rewritten rather than annotated because a reader who copies a
+code block does not read the paragraph under it — corrected 2026-09-22 by a
+write-nothing verifier re-reading the arm from the bytes.** The entry body runs
+when `attacker.struck == null`: `+0x52db`–`+0x52e7` is `Push "struck";
+GetMember; Push null; Equals2; Not; If`, and the `If` SKIPS the body when the
+field is not null. The teardown runs when it is `== true`: `+0x53a2`–`+0x53af`
+is the same shape against `true`. **The other three arms have the same
+polarity** — `life_stolen` `+0x540f`/`+0x54d6`, `poisoned` `+0x5543`/`+0x560a`,
+`burning` `+0x5677`/`+0x573e` — which is the latch every other phase in this
+block uses (the bolt arm's `if (attacker.struck == null)` at `+0x8456`): start
+the clip once while the latch is null, set it `false`, and hand the phase back
+once the clip's own frame script has written `true`.
 
 **THE ROLE OPERANDS ARE DELIBERATELY CROSSED, and reading them as a wrong-side
 bug is the trap here.** There are eleven `magic_damage_character` call sites:
@@ -2749,8 +2786,11 @@ Observed inventory ID mappings include:
 
 Read out of the oracle at `sprite:862[overlay]/frame:52/DoAction@0x240c7f`, the
 same 38,146-byte block the melee phases live in. The map carried two rows about
-this phase — the stamina cost at `:1357` and the force at `:2296` — and not the
-phase; this is the rest of it.
+this phase — the stamina cost (§"`staminacost` by phase") and the force
+(§"`knockback(whichcharacter, force)`, decoded") — and not the phase; this is
+the rest of it. *(The two rows were cited as `:1357` and `:2296` until
+2026-09-22, when corrections above them shifted both by 22 lines; cited by
+section now, because line numbers in this file rot.)*
 
 ```text
   phase_decision == "cast_gale"                              +0x7aaa
@@ -2777,7 +2817,15 @@ phase; this is the rest of it.
   zero `randomBetween`, zero `checkattackroll`, zero `hitpoints`. Like `shove`
   and unlike `taunt`, it is a pure displacement and has no tape hazard.
 - **THE COST IS `round(magicka)`, THE STAT** — not strength, and not a spell
-  price. It is the only phase in the block whose `staminacost` reads `magicka`.
+  price. ~~It is the only phase in the block whose `staminacost` reads
+  `magicka`.~~ **EVERY CAST ARM'S `staminacost` READS `magicka` — corrected
+  2026-09-22 by a write-nothing verifier re-reading two other arms from the
+  bytes:** the bolt arm at `+0x842f`–`+0x8437` and the fireball arm at
+  `+0x8fa7`–`+0x8faf` are both `game_attacker.staminacost =
+  Math.round(game_attacker.magicka)`, and this file's own table (§"`staminacost`
+  by phase") already listed every `cast_*` row, `+0x7567` to `+0x8fa7`, at
+  `round(magicka)`. What is particular to gale is the `shove` latch below, not
+  the cost.
 - **IT REUSES `attacker.shove` AS ITS IN-PROGRESS LATCH** (`+0x7af1`, `+0x7b22`,
   `+0x7bcf`), the same field the `shove` phase uses. So `shove` is not that
   verb's own flag but the state machine's generic "this displacement phase has
@@ -2830,7 +2878,15 @@ what found it** — which is the order this file keeps having to learn.
      - **It is not a character-initialisation block. It is OPPONENT
        generation.** The whole equipment/inventory/maxslots body sits inside
        `if (whichcharacter != _root.game.hero)` (`+0x27e8`, `If` delta 3615 →
-       `+0x360C`, taken when EQUAL). The player's own gladiator never reaches
+       `+0x360C`, taken when EQUAL). **And it is the first of THREE identical
+       hero tests (added 2026-09-22, re-derived from the bytes by a
+       write-nothing verifier):** `+0x361f` (`If` delta 841 → `+0x396D`)
+       guards the spell-pool build and the random-spell fill of the inventory
+       slots, and `+0x3980` (delta 27723 → `+0xA5D0`) guards `goldpieces`,
+       `statpoints` and the generated name. Each is the same
+       `whichcharacter == _root.game.hero; Not; Not; If`, taken when EQUAL, so
+       the random spells land outside `+0x27e8`'s body but behind the same
+       test. The player's own gladiator never reaches
        these writes; his slots come from `characterDNA[34..39]` via
        `initcharacter` `+0x0904`. So "a fresh gladiator carries nothing" is true
        of every generated opponent and **false for the player**.
@@ -2907,14 +2963,63 @@ what found it** — which is the order this file keeps having to learn.
     - **"Its only read-gate anywhere" is FALSE.** There is a second live one:
       `randomise_gladiator` `+0x3914`–`+0x3968` runs
       `while (!(i > inventory_maxslots)) { spell_choice = random(spells_array.length);
-      character["inventory" + i] = spells_array[spell_choice]; i++ }`. **The field
+      character["inventory" + i] = spells_array[spell_choice]; i++ }`. ~~**The field
       decides how many of a generated opponent's six slots receive a random
-      spell.** An engine ignoring it generates the wrong opponents. *(Whether
+      spell.**~~ **THE FIELD DECIDES HOW MANY SLOTS RECEIVE A DRAW FROM THE
+      POOL, AND A DRAW CAN BE "EMPTY" — corrected 2026-09-22 by a write-nothing
+      verifier re-deriving the pool from the bytes.** Slots 1..`maxslots` are
+      written from `spells_array`, which ALWAYS holds the empty marker 1 twice
+      (`new Array(1, 1)` at `+0x3624`); below `magicka` 4 the pool is only
+      `[1, 1]`, so every slot the loop fills is written empty. An engine
+      ignoring it generates the wrong opponents. ~~*(Whether
       that loop is inside `randomise_gladiator`'s
       `if (whichcharacter != _root.game.hero)` guard is NOT settled — the
       verifier had no window over `+0x27e8` and declined to relay this file's
       own delta arithmetic as re-derived. Dump `+0x27e0`–`+0x3980` before
-      relying on it either way.)*
+      relying on it either way.)*~~ **SETTLED 2026-09-22, by a write-nothing
+      verifier over a dump of the whole function (`+0x2409`–`+0xa5e0`).** The
+      fill loop (`+0x3914`–`+0x3968`) sits inside a SECOND, identical hero
+      test, `+0x361f` (`If` delta 841 → `+0x396D`, taken when
+      `whichcharacter == _root.game.hero`) — not inside `+0x27e8`'s body,
+      which ends at `+0x360C`. No branch outside `+0x3624`–`+0x3968` targets
+      into it (all 1,046 `If`/`Jump`s in the function checked), and register 3
+      is never written (the only `StoreRegister`s are to r4 and r0). Register 3
+      IS `whichcharacter`: the `DefineFunction2` header has flags `0x16a` and
+      binds `whichcharacter` → r3 and `herolevel` → r4, with `_root` preloaded
+      into r1. **So the object that IS `_root.game.hero` never receives random
+      spells here.** `Equals2` on two objects is identity, so a COPY of the
+      hero passed in would.
+
+      **The pool, as the bytes build it.** Fourteen CUMULATIVE tests on
+      `whichcharacter.magicka` — each `magicka < T; Not; Not; If` skips only
+      its own block — push onto the two empty markers:
+
+      ```text
+        spells_array = new Array(1, 1)                        +0x3624
+        if (magicka >=  4) spells_array.push(2, 6, 48)        +0x3654
+        if (magicka >=  6) spells_array.push(5, 40)           +0x368d
+        if (magicka >=  8) spells_array.push(3, 34, 39, 47)   +0x36c1
+        if (magicka >= 10) spells_array.push(7, 30, 37)       +0x36ff
+        if (magicka >= 12) spells_array.push(9, 44)           +0x3738
+        if (magicka >= 15) spells_array.push(41, 45, 46)      +0x376c
+        if (magicka >= 16) spells_array.push(4, 36)           +0x37a5
+        if (magicka >= 20) spells_array.push(8, 31)           +0x37d9
+        if (magicka >= 24) spells_array.push(5, 35)           +0x380d
+        if (magicka >= 25) spells_array.push(33)              +0x3841
+        if (magicka >= 30) spells_array.push(32)              +0x3870
+        if (magicka >= 40) spells_array.push(43)              +0x389f
+        if (magicka >= 50) spells_array.push(42)              +0x38ce
+        if (magicka >= 60) spells_array.push(49)              +0x38fd
+        for (i = 1; !(i > inventory_maxslots); i++)           +0x3914
+          inventory[i] = spells_array[RandomNumber(length)]   +0x3943
+      ```
+
+      **30 entries at full magicka, ids 1 and 5 twice each, and id 38 (gale)
+      NEVER — so the random-opponent generator never hands anyone gale.** The
+      pool also carries 2–9, the ids the villain ladder below dispatches as
+      `drink_potion`. The fill draws with the one-byte `RandomNumber` opcode
+      (`+0x3943`), not `randomBetween`, and does no de-duplication: one id can
+      fill two slots.
     - **"An engine that made a verb respect `maxslots` would be modelling
       behaviour the build does not have" is backwards FOR THE OFFER.** A button
       the build refuses to draw is behaviour the build has, in combat. See the
@@ -3746,9 +3851,13 @@ Three things make this easy to get wrong, and each cost a wrong table:
   frame except `Hurt9`. The other six run-ons are entry-stub-plus-body pairs.
   The build plays 34 frames for direction 8 either way.
 
-`this.struck = true` is written at 1626, 1643, 1656 and 1963 — the END of a run
-rather than the end of the named clip — so the `attacker.struck` report-back
-the psyche counter waits on (`+0x6761`) fires after `psyche_charging` has
+~~`this.struck = true` is written at 1626, 1643, 1656 and 1963~~ **Of the 38
+frames that write `this.struck = true`, the four that matter here are 1626,
+1643, 1656 and 1963** *(corrected 2026-09-22: the old wording read as the
+complete list, and a write-nothing verifier sweeping every `"struck"` reference
+in sprite 1241 found 38 — 37 closing a `Stop`-ended run, plus 1963)* — the END
+of a run rather than the end of the named clip — so the `attacker.struck`
+report-back the psyche counter waits on (`+0x6761`) fires after `psyche_charging` has
 played, and a burn hands back after its second flame pass. Frame 1608, which
 ends `snipe`, sets `this.fired = false` instead.
 
@@ -3770,14 +3879,25 @@ level of the frame-52 script (every entry to `heroactions`), `+0x3638` inside
 counter.
 
 **THE CHARGED POSE IS NOT THE ONLY HELD FIGHTER POSE — it is the only one that
-survives a turn boundary, and the distinction is the interesting part.** 86 of
-the fighter clip's frame scripts end in `this.struck = true; Stop` and only 7
-spans self-loop, so **the figure parks on the terminal frame of nearly every
-action it plays** — every attack, defence, hurt, cast, taunt and rest — until
-the next `changeCombatants`, which `nextphase` gates on `demand_move >= 60`
-enter-frames, about two seconds at 30 fps. The charged pose differs in being
-re-asserted from PERSISTENT STATE rather than being wherever the playhead
-happened to stop. Two consequences worth naming:
+survives a turn boundary, and the distinction is the interesting part.** ~~86 of
+the fighter clip's frame scripts end in `this.struck = true; Stop`~~ **86
+distinct run-ends in the fighter clip end in `Stop`, and only 37 of them carry
+`this.struck = true`** *(corrected 2026-09-22 by a write-nothing verifier over
+the clip's 101-label run table and every `"struck"` reference in sprite 1241:
+the clip writes `struck` at 38 frames in all, the 38th being 1963, the burn's
+exit, which ends in `gotoAndPlay("Standing")`; NO `Hurt`, `Defend`, `Death`,
+`Yield`, `knockback`, `knockback_mov`, `taunted`, `bombard` or `snipe` run
+writes it)* and only 7 spans self-loop, so **the figure parks on the terminal
+frame of nearly every action it plays** — every attack, defence, hurt, cast,
+taunt and rest — until the next `changeCombatants`, ~~which `nextphase` gates
+on `demand_move >= 60` enter-frames, about two seconds at 30 fps~~ **which
+comes ONE enter-frame after a clip that reports, not two seconds** *(marked
+here 2026-09-22; re-derived 2026-09-17 in `HANDOFF.md`'s living head, the "SIX
+VERIFIERS ON THE STANCE" entry: an arm calls `nextphase()` on its own
+`attacker.struck == true` test — e.g. `+0x510f`, `+0x53a2` — and `demand_move
+>= 60` is a STALL WATCHDOG for animations that never report)*. The charged
+pose differs in being re-asserted from PERSISTENT STATE rather than being
+wherever the playhead happened to stop. Two consequences worth naming:
 
 - **The same charged state has two held frames.** The `psyche_up` action runs on
   and stops at 1626, the charging clip's LAST frame; `changeCombatants` then
@@ -3805,9 +3925,15 @@ never undefined at battle time.** See `MAP_SILENCE`'s `psyche-up-initialisation`
 entry, now narrowed to the between-battles persistent object alone.
 
 **`knockback_mov` has exactly one dispatch site of its own**, `+0x7c5e` in
-`attacker.onEnterFrame`, immediately after `cast_spell_icon(attacker, 39, 2)` —
-a spell path. `damagecharacter`'s two sites (`+0x1b4f`, `+0x1bc0`) name
-`"knockback"`.
+`attacker.onEnterFrame`, immediately after ~~`cast_spell_icon(attacker, 39, 2)`~~
+**`cast_spell_icon(attacker, 39)`** *(corrected 2026-09-22 by a write-nothing
+verifier re-reading `+0x7c46`–`+0x7c5c`: the 2 is the argument COUNT pushed for
+`CallFunction`, not an argument)* — a spell path, the `cast_command` arm.
+`damagecharacter`'s two sites (`+0x1b4f`, `+0x1bc0`) name `"knockback"`, **and
+so does a third that is not `damagecharacter`'s** *(added 2026-09-22)*:
+`defender.gotoAndPlay("knockback")` at `+0x7b78`, unconditional inside the
+`cast_gale` arm (§"The `cast_gale` phase, in full"). Running off the end of
+`knockback` is how all three reach `knockback_mov`.
 
 The panel and timeline are hard-coded for two sides. The 2v2/3v3 adapter needs
 a slot layout and per-combatant widgets; it cannot safely clone variables named

@@ -291,7 +291,7 @@ const CLIP_RESIDENT_SET = Object.freeze(new Set(CLIP_RESIDENT_FIELDS));
  *   (removed 2026-09-10).** `ranged-hurt-label-adjustment` said the map gave
  *   the phrase "adjusted for ranged directions" *"without giving the
  *   adjustment"*. It gives it one sentence later, with byte offsets:
- *   `docs/integration/ss2-battle-map.md:1471-1472` — `"hurt" + attack_direction`
+ *   §"Attack roll dispatcher" in `docs/integration/ss2-battle-map.md` — `"hurt" + attack_direction`
  *   (`+0x2086`), rewritten to `"hurt" + (attack_direction - 20)` for
  *   directions 21–23 (`+0x2093`–`+0x20d6`). The entry had quoted the summary
  *   sentence and stopped reading, `hurtLabel` emitted `hurt21`/`hurt22`/`hurt23`

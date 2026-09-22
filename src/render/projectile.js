@@ -170,9 +170,17 @@ export const PROJECTILE_FRAME_MS = 1000 / 30;
  * ► **THIS IS WHAT HOLDS THE ACTION OPEN, and it is the build's own rule.**
  *   Vanilla will not complete a ranged phase while the arrow is still flying:
  *   `bullet_in_air != true` is one of the conditions on the phase-completion
- *   guard (`+0x3829`), alongside `attacker.struck` and `grounded`. So a long
- *   bombard genuinely takes a long turn there, and the animation gate here is
- *   given the same fact rather than a timeline that has already finished.
+ *   guard (`+0x3829`), alongside ~~`attacker.struck` and~~ `grounded`
+ *   **— and `attacker.struck` is NOT one of them** *(corrected 2026-09-22 by a
+ *   write-nothing verifier sweeping every `"struck"` reference in
+ *   `DoAction@0x240c7f`: the lowest is `+0x3871`, and it is a WRITE,
+ *   `attacker.struck = null`, so nothing in the block reads `struck` before
+ *   `+0x3829`. The `bullet_in_air` and `grounded` terms are NOT re-verified by
+ *   that correction — its dumps start at `+0x3842` — and `HANDOFF.md`'s living
+ *   head calls this guard the `demand_move` stall watchdog rather than the
+ *   completion test)*. So a long bombard genuinely takes a long turn there,
+ *   and the animation gate here is given the same fact rather than a timeline
+ *   that has already finished.
  *
  *   Before this, the arrow was drawn only while the SHOOTER's animation ran and
  *   vanished when it ended — which for a bombard across the arena is most of

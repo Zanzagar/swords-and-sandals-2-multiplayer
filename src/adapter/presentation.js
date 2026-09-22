@@ -636,7 +636,7 @@ function defendLabel(direction) {
 }
 
 function hurtLabel(direction) {
-  // Map, "Attack roll dispatcher" (`docs/integration/ss2-battle-map.md:1471-1473`):
+  // Map, §"Attack roll dispatcher" in `docs/integration/ss2-battle-map.md`:
   // the animation label is `"hurt" + attack_direction` (`+0x2086`), REWRITTEN to
   // `"hurt" + (attack_direction - 20)` for directions 21–23
   // (`+0x2093`–`+0x20d6`), and replaced by `knockback` at direction 30

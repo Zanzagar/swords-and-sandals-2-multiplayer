@@ -1549,7 +1549,7 @@ test("animation labels carry their provenance, and none of them claims verificat
 
   // ► `["hurt21", ASSUMED]` STOOD ON THIS LINE UNTIL 2026-09-10 AND WAS WRONG.
   //   The map rewrites the ranged band: `"hurt" + (attack_direction - 20)` for
-  //   directions 21-23 (`docs/integration/ss2-battle-map.md:1471-1472`,
+  //   directions 21-23 (§"Attack roll dispatcher" in the battle map,
   //   `+0x2093`-`+0x20d6`), so direction 21 plays `hurt1` and the map NAMES it.
   //   The assertion agreed with the code and neither agreed with the map, which
   //   is why the suite was green while the adapter emitted a label the build
@@ -1580,7 +1580,7 @@ test("animation labels carry their provenance, and none of them claims verificat
 });
 
 test("the ranged hurt band is rewritten exactly as the map's byte offsets say", () => {
-  // `docs/integration/ss2-battle-map.md:1471-1472`: the animation label is
+  // §"Attack roll dispatcher" in `docs/integration/ss2-battle-map.md`: the animation label is
   // `"hurt" + attack_direction` (`+0x2086`), rewritten to
   // `"hurt" + (attack_direction - 20)` for directions 21-23
   // (`+0x2093`-`+0x20d6`). The band therefore REUSES the melee hurt clips, and

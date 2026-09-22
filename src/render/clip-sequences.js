@@ -125,9 +125,12 @@
  *   piece of work**, because a stance is a persistent pose between actions and
  *   a run is one performance within one.
  * - **`knockback_mov` is dispatched exactly once**, at `+0x7c5e` in
- *   `attacker.onEnterFrame`, right after `cast_spell_icon(attacker, 39, 2)` —
- *   a SPELL path this engine has no verb for. `damagecharacter`'s own two sites
- *   (`+0x1b4f`, `+0x1bc0`) name `"knockback"`.
+ *   `attacker.onEnterFrame`, right after ~~`cast_spell_icon(attacker, 39, 2)`~~
+ *   **`cast_spell_icon(attacker, 39)`** *(corrected 2026-09-22 by a
+ *   write-nothing verifier re-reading `+0x7c46`-`+0x7c5c`: the 2 is the
+ *   argument COUNT pushed for `CallFunction`)* — a SPELL path, the
+ *   `cast_command` arm, that this engine has no verb for. `damagecharacter`'s
+ *   own two sites (`+0x1b4f`, `+0x1bc0`) name `"knockback"`.
  * - **`hurt9` is dispatched in its own right**, by direction 9.
  *
  * Only `celebrate1a` and `flame_repeat` are reached by running in and nothing
@@ -203,8 +206,15 @@ export const CLIP_SEQUENCES = Object.freeze({
    * THE KNOCKBACK, and the build never plays the clip this engine was playing.
    * `damagecharacter` calls `gotoAndPlay("knockback")` at two sites, both gated
    * on the force magnitude exceeding 80 (`+0x1b4f` for positive force,
-   * `+0x1bc0` for negative). `knockback_mov` is dispatched by nothing; it is
-   * reached only by running off the end of `knockback`.
+   * `+0x1bc0` for negative). **And a THIRD site is not `damagecharacter`'s**
+   * *(added 2026-09-22 by a write-nothing verifier re-reading the `cast_gale`
+   * arm)*: `defender.gotoAndPlay("knockback")` at `+0x7b78`, unconditional
+   * inside the gale's `shove` latch. ~~`knockback_mov` is dispatched by
+   * nothing; it is reached only by running off the end of `knockback`.~~
+   * **WRONG, and this file's own header already said so — corrected
+   * 2026-09-22:** `defender.gotoAndPlay("knockback_mov")` at `+0x7c5e`, in the
+   * `cast_command` arm, dispatches it directly. Running off the end of
+   * `knockback` is how the three `"knockback"` sites above reach it.
    */
   knockback: Object.freeze({
     plays: Object.freeze(["knockback", "knockback_mov"]),

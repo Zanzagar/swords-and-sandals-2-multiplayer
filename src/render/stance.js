@@ -64,19 +64,37 @@
  * ► **AND THAT APPROXIMATES THE BUILD RATHER THAN REPRODUCING IT.** This header
  *   claimed the stronger thing and a verifier broke it. **The build parks a
  *   figure on the LAST FRAME of whatever it just played and does not restore
- *   the stance when the clip ends** — 86 of the fighter clip's frame scripts
- *   end in `this.struck = true; Stop` and only 7 spans self-loop — and the pose
- *   comes back only at the next `changeCombatants`, which `nextphase` gates on
- *   `demand_move >= 60` enter-frames, about two seconds at 30 fps. This engine
+ *   the stance when the clip ends** — ~~86 of the fighter clip's frame scripts
+ *   end in `this.struck = true; Stop`~~ **86 distinct run-ends end in `Stop`,
+ *   and only 37 of them carry `this.struck = true`** *(corrected 2026-09-22 by
+ *   a write-nothing verifier over every `"struck"` reference in sprite 1241:
+ *   38 frames write it, the 38th being 1963, the burn's exit, which ends in
+ *   `gotoAndPlay("Standing")`; no `Hurt`, `Defend`, `Death`, `Yield`,
+ *   `knockback`, `knockback_mov`, `taunted`, `bombard` or `snipe` run does)*
+ *   and only 7 spans self-loop — and the pose comes back only at the next
+ *   `changeCombatants`, ~~which `nextphase` gates on `demand_move >= 60`
+ *   enter-frames, about two seconds at 30 fps~~ **one enter-frame after a clip
+ *   that reports** *(marked 2026-09-22; re-derived 2026-09-17 in `HANDOFF.md`'s
+ *   living head: an arm calls `nextphase()` on its own `attacker.struck ==
+ *   true` test, and `demand_move >= 60` is a stall watchdog)*. This engine
  *   deletes the expired timeline at `durationMs` and draws the idle on the very
- *   next frame, so **it returns to the glowing stance sooner than the build
- *   does, by the remainder of the phase.**
+ *   next frame, so ~~**it returns to the glowing stance sooner than the build
+ *   does, by the remainder of the phase.**~~ **for the clip that REPORTS it
+ *   returns within about one enter-frame of the build** *(corrected 2026-09-22:
+ *   "by the remainder of the phase" measured the gap against the two-second
+ *   hold withdrawn above)*. What is left is narrower: a figure whose clip does
+ *   NOT report — a victim's `Hurt` or `Defend` — parks on its last frame until
+ *   the reporting clip finishes, and an action whose clips never report is held
+ *   by the `demand_move` watchdog.
  *
- *   **The same gap is much bigger than the stance**, and is the honest thing to
- *   take from it: action-end hold applies to EVERY action this engine plays,
- *   not only to charged ones, and this engine has no concept of it. The charge
- *   is merely the case where the difference is visible as a glow arriving
- *   early. Named in the handoff as its own piece of work.
+ *   ~~**The same gap is much bigger than the stance**, and is the honest thing
+ *   to take from it: action-end hold applies to EVERY action this engine
+ *   plays, not only to charged ones, and this engine has no concept of it.~~
+ *   **The hold still applies to every action, not only to charged ones, and
+ *   this engine still has no concept of it — but what it holds is the
+ *   non-reporting figure, not a two-second gap** *(corrected 2026-09-22, same
+ *   reason)*. The charge is merely the case where the difference is visible as
+ *   a glow arriving early. Named in the handoff as its own piece of work.
  *
  * ► **AND THE BUILD HAS TWO HELD FRAMES PER CHARGE LEVEL, NOT ONE.** The
  *   `psyche_up` ACTION runs 1609-1617 straight on into `psyche_charging` and

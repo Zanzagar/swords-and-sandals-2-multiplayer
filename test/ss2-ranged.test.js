@@ -835,7 +835,8 @@ test("the three new directions are CONSTANTS and take no sample off the ordered 
 });
 
 test("snipe is direction 22 with a flat min_damage and NO critical draw; bombard is 21 and rolls both", () => {
-  // Dispatcher table, `docs/integration/ss2-battle-map.md:1528-1529`, and the
+  // Dispatcher table (§"Attack roll dispatcher", rows 21 and 22, in
+  // `docs/integration/ss2-battle-map.md`), and the
   // arms read out opcode by opcode at `+0x2e69` (21) and `+0x2ed6` (22):
   //   21  criticalhit = randomBetween(-20, 20); damage = randomBetween(min, max)
   //   22  criticalhit = 0;                      damage = min_damage

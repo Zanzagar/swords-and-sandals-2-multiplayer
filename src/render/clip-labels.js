@@ -219,8 +219,11 @@ const FAMILY_LABELS = Object.freeze({
   //     **REFUTED BY A VERIFIER AND RE-DERIVED HERE: there is exactly one
   //     site**, `defender.gotoAndPlay("knockback_mov")` at `+0x7c5e`, inside
   //     `attacker.onEnterFrame` and immediately after
-  //     `cast_spell_icon(attacker, 39, 2)` — a SPELL this engine has no verb
-  //     for. One site is not none, and "nothing dispatches it" was a stronger
+  //     ~~`cast_spell_icon(attacker, 39, 2)`~~ `cast_spell_icon(attacker, 39)`
+  //     *(corrected 2026-09-22 by a write-nothing verifier re-reading
+  //     `+0x7c46`-`+0x7c5c`: the 2 is the argument COUNT pushed for
+  //     `CallFunction`)* — the `cast_command` arm, a SPELL this engine has no
+  //     verb for. One site is not none, and "nothing dispatches it" was a stronger
   //     claim than the evidence, made while correcting a claim that was
   //     stronger than ITS evidence. It stays second in the list either way:
   //     the ordinary blow dispatches the entry.

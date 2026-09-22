@@ -503,7 +503,17 @@ Three byte-level facts matter:
 So **the duel opponent is generated, not drawn from a roster.**
 `randomise_gladiator(whichcharacter, whichavatar, herolevel)`
 (root frame 35 `DoAction@0x40198e`, `DefineFunction2` at `+0x23c3`) procedurally
-builds a gladiator at the hero's own level:
+builds a gladiator ~~at the hero's own level~~ **at the hero's level JITTERED BY
+-3..+3** *(corrected 2026-09-22 by a write-nothing verifier re-deriving
+`+0x27ed`–`+0x29d0` from the bytes)*: for a non-hero, `randomchance =
+randomBetween(1, 99)` (`+0x27ed`) picks one of seven arms, each writing
+`whichcharacter.herolevel = game.hero.herolevel` plus an offset
+(`+0x281a`–`+0x29ac`): `< 86` +0, `86`–`91` -1, `92`–`95` +1, `== 96` -2,
+`== 97` +2, `== 98` -3, `== 99` +3. The result is floored at 1 (`+0x29c4`).
+So the member first set from the `herolevel` ARGUMENT (`+0x2484`) is replaced
+for every opponent — the argument survives only in the `statpoints` line
+below, which runs before the jitter — and the matched-suit path below can then
+halve it:
 
 - appearance from four `RandomNumber` opcode draws (`+0x241a`, `+0x242e`,
   `+0x2442`, `+0x2456`);
@@ -517,8 +527,20 @@ builds a gladiator at the hero's own level:
   (`+0x2d3c`, `+0x2d78`, `+0x2dfa`, `+0x2e33`, `+0x2e6f`, `+0x2ea8`, `+0x2ee4`,
   `+0x314c`, `+0x31cc`);
 - armour per piece, plus a matched-suit path: `randomsuit = game.hero.herolevel
-  + RandomNumber(250)` (`+0x31cc`) and, when `randomsuit >= 250`, all eight
-  pieces set to `round(herolevel / 2)` in one statement (`+0x31e5`–`+0x327b`).
+  + RandomNumber(250)` (`+0x31cc`) and, when `randomsuit >= 250`, ~~all eight
+  pieces set to `round(herolevel / 2)` in one statement (`+0x31e5`–`+0x327b`).~~
+  **one chained statement (`+0x31e5`–`+0x327b`) that writes NINE members, and
+  the first is `herolevel` itself — corrected 2026-09-22 by a write-nothing
+  verifier re-reading the `StoreRegister`/`SetMember` chain from the bytes.**
+  Its FIRST `SetMember`, `+0x322f`, is `whichcharacter.herolevel =
+  Math.round(herolevel / 2)`; `shield`, `boot`, `greaves`, `shinguard`,
+  `helmet`, `gauntlet`, `shoulderguard` and `breastplate` then take the same
+  value from register 0. **So a suited opponent leaves `randomise_gladiator` at
+  HALF its level**, and everything after `+0x322f` reads the halved value: the
+  `herolevel == 1` equipment strip (`+0x327c`), the `inventory_maxslots` band
+  chain (`+0x3358`–`+0x34b1`) and the `maximum_ammo` chain (`+0x34b2`–).
+  **The suit's chance is set by the HERO's level**, `game.hero.herolevel` in
+  250 (`randomsuit` above), not by the opponent's.
 
 **Answer to "is the opponent controllable": no, and not even partially.** The
 generator mixes `randomBetween` (interceptable by the wrapper) with the
@@ -1686,7 +1708,7 @@ Two cautions that come with the flag:
 | Staging blocker | Status on the leveled route |
 | --- | --- |
 | `fight_mode == "tournament"` | **Unblocked, and now exercised.** Level-4 gladiator, `current_tournament == 1`, foyer `browse` → tournament button. Field of four, arena 2. Reached in 12 of 15 launches (§12) |
-| Armour on the villain | **Unblocked.** `randomise_gladiator` gives duel and tournament opponents armour and enchanted weapons at the hero's level; the matched-suit path at `+0x31e5` sets all eight pieces to `round(herolevel/2)`. Observed: ladder opponents with `helmet` 4 and `greaves` 2 |
+| Armour on the villain | **Unblocked.** `randomise_gladiator` gives duel and tournament opponents armour and enchanted weapons at the hero's level ~~; the matched-suit path at `+0x31e5` sets all eight pieces to `round(herolevel/2)`~~ **±3 (§"Opponent generation for a duel"); the matched-suit path at `+0x31e5` sets `herolevel` ITSELF and then all eight pieces to `round(herolevel/2)`, so a suited opponent is left at half its level — corrected 2026-09-22, see the suit bullet above**. Observed: ladder opponents with `helmet` 4 and `greaves` 2 |
 | Choosing *which* opponent | **Still blocked for duels** — 42 generated opponents observed, 42 distinct. **Partly relieved in tournaments**: the field is pre-generated and partly inspectable at foyer frame 36 before the first bout, but rank 1 is not under `villain1` and the derived combat fields are `undefined` until a villain has been fought (§3) |
 | A *reproducible* opponent | **Unblocked, once, at rank 1.** "John the Butcher" from `unleash_hell`'s hard-coded DNA — identical across twelve launches, and the only reproducible opponent in the build (§12) |
 | Bow / archer controllers | **Unblocked by a shop trip** — ranged items 61–80, gated on Agility, not level. But the attribute gate is real: a vitality-only gladiator is refused everything, so the shop trip needs attribute staging first (§6) |
