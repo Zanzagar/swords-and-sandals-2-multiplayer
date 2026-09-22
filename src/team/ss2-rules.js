@@ -415,6 +415,15 @@ export const Ss2ActionType = Object.freeze({
   CAST_FIREBALL: "cast-fireball",
   CAST_HELL_FIREBALL: "cast-hell-fireball",
   CAST_DIRE_FIREBALL: "cast-dire-fireball",
+  // ► **MOLTEN DEATH — THE FIRST SPELL VERB THAT HITS MORE THAN ONCE.**
+  //   `+0x862f`-`+0x895c` of the same block; see `SS2_DEATH_FROM_ABOVE`.
+  //   `1 + 4N` samples for N = 10..20 boulders, and not one is an attack roll:
+  //   the count, then four placement draws per boulder, then N identical
+  //   ingress calls with a literal 40. So it is not in `ATTACK_BANDS`, for the
+  //   bolts' reason. Every boulder lands (its closure has no x test), so a
+  //   discrete turn resolves the whole shower at once and leaves the fall to
+  //   the presentation, as it does the fireball's flight.
+  CAST_DEATH_FROM_ABOVE: "cast-death-from-above",
   // ► **THE GALE — THE THIRD SPELL VERB AND THE FIRST THAT DEALS NO DAMAGE.**
   //   `+0x7aaa`-`+0x7be5` of the same block; see `SS2_GALE`. A pure
   //   displacement like `shove`, taking ZERO samples, so it is not in
@@ -993,6 +1002,11 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   [Ss2ActionType.CAST_FIREBALL]: "cast_fireball",
   [Ss2ActionType.CAST_HELL_FIREBALL]: "cast_hell_fireball",
   [Ss2ActionType.CAST_DIRE_FIREBALL]: "cast_dire_fireball",
+  // `phase_decision == "cast_death_from_above"` at `+0x8635`, and the decision
+  // ladder arm 7 writes at `+0x0871`. The CASTER's clip is `Cast2` (`+0x86d8`),
+  // the bolts' and not the fireballs' `Cast1`; the victim's is the ingress's
+  // `damage_method`, `"burning"` (`+0x88c1`), restarted by every boulder.
+  [Ss2ActionType.CAST_DEATH_FROM_ABOVE]: "cast_death_from_above",
   // `phase_decision == "cast_gale"` at `+0x7ab0`, and the decision the villain
   // ladder writes at arm 24 (`+0x0ea3`). The CASTER's clip is `Cast1`
   // (`+0x7b30`), not `Cast2`, and the victim's is `knockback` (`+0x7b78`) —
@@ -3937,6 +3951,195 @@ function ss2DamageSpell(type) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Molten death: N boulders, N ingress calls, and every one lands       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_death_from_above` ("Molten Death", inventory id 49), read 2026-09-22
+ * from `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base
+ * `0x240c85`), `+0x862f`-`+0x895c`:
+ *
+ * ```text
+ *   phase_decision == "cast_death_from_above"                       +0x8635
+ *     register:3.crowd_action = 20                                  +0x8642
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x864f-+0x8675
+ *     if (attacker.struck == null) {                                +0x8676-+0x8688
+ *       cast_spell_icon(attacker, 49)                               +0x868d
+ *       boulder_stones = randomBetween(10, 20)                      +0x86a5
+ *       lightning_frame = 1                                         +0x86be
+ *       attacker.struck = false; attacker.gotoAndPlay("Cast2")      +0x86ca-+0x86ec
+ *       for (i = 1; !(i > boulder_stones); i++) {                   +0x86ed-+0x88fe
+ *         boulder = arena.gladiators.attachMovie("boulder_combat",
+ *             "boulder_combat" + i, depth, {_x: defender._x, _y: -600})  +0x870f-+0x8774
+ *         boulder._x = boulder._x + randomBetween(-300, 300)        +0x878b
+ *         boulder._y = randomBetween(-600, -800)                    +0x87a9
+ *         boulder.yspeed = randomBetween(50, 150)                   +0x87c8
+ *         boulder._xscale = boulder._yscale = randomBetween(50, 100) +0x87f1
+ *         boulder.cacheAsBitmap = true                              +0x8813
+ *         boulder.onEnterFrame = function () {                      +0x882f
+ *           if (!(this._y > 150)) this._y += this.yspeed            +0x883a-+0x8868
+ *           if (this._y > 150 && this.bounced != true) {            +0x8869-+0x8893
+ *             bounced = true; cacheAsBitmap = false; gotoAndStop(4) +0x8898-+0x88c0
+ *             magic_damage_character(defender, attacker, game_defender,
+ *                 game_attacker, "burning", 4, 40)                  +0x88c1-+0x88ef
+ *           }
+ *         }
+ *       }
+ *     }
+ *     if (defender.struck == true) {                                +0x8903-+0x8916
+ *       bolt.removeMovieClip(); attacker.struck = null;
+ *       defender.struck = null; nextphase()                         +0x891b-+0x895c
+ *     }
+ * ```
+ *
+ * ► **`1 + 4N` SAMPLES, ALL AT THE CAST, and not one is an attack roll.** The
+ *   count, then for each boulder in `i` order its x offset, start height,
+ *   speed and scale. No `checkattackroll`, no `RandomNumber`, no direction.
+ *   The four per-boulder draws decide only where and when it lands — the
+ *   presentation's — but they are real draws on this engine's ordered channel,
+ *   in the build's order, or a peer replaying the tape falls out of step.
+ *
+ * ► **EVERY BOULDER LANDS, AND EVERY LANDING IS THE SAME CALL.** The closure
+ *   reads its own `_y`, `yspeed` and `bounced` and nothing else — no `_x`, no
+ *   `hitTest`, no removal — so each boulder falls until `_y` passes 150 and
+ *   then calls the ingress ONCE with the literal 40 (`bounced` is the
+ *   idempotence guard, the fireball's frame-4 test in another spelling). The
+ *   outcome is therefore N sequential ingress calls of 40 on the same two
+ *   records, whatever the placement draws said, and a discrete turn can hold
+ *   it: this resolves the whole shower at once and carries each boulder's
+ *   numbers on the event for a renderer.
+ *
+ * ► **THE START-HEIGHT DRAW HAS ITS BOUNDS REVERSED, AND THE RANGE BELOW IS
+ *   WHAT IT REACHES, NOT WHAT IT SAYS.** `+0x87a9` is `Push "_y", -800, -600,
+ *   2, "randomBetween"`; `CallFunction` pops the first argument off the top,
+ *   so this is `randomBetween(-600, -800)` — every other call in the arm pushes
+ *   its high bound first (`20, 10` `+0x86a5`; `300, -300`; `150, 50`;
+ *   `100, 50`), and the map and the brief this was built from both read it as
+ *   `(-800, -600)`. The build's formula, `floor(Math.random() * (b - a + 1)) +
+ *   a` (map §"RNG surface"), gives `-600 + floor(r * -199)`: -601..-799
+ *   uniformly, and -600 only when `Math.random()` returns exactly 0. This
+ *   channel refuses `max < min`, so the draw is stated low-first as
+ *   `[-799, -601]` — the same 199 values with the same weights. **A tape
+ *   transcribed from a capture that records the call's own `(a, b)` must map
+ *   `(-600, -800)` to this.** It moves only the landing frame, which is
+ *   therefore 6..19, not 6..20.
+ *
+ * ► **"burning" IS THE VICTIM'S CLIP, as for the fireballs.** Every landing
+ *   calls `defenderClip.gotoAndPlay("burning")`, restarting the burn cycle
+ *   (2 + 15 + 15 frame slots, `hero_battle` 1947-1963) and setting no status
+ *   flag. Without a kill the teardown waits on the victim's `struck == true`,
+ *   which the END of that cycle writes (frame 1963, `burncycle >= 2`), and
+ *   every landing restarts it — so the burn cannot release the phase before
+ *   the last boulder lands, all of which land inside frames 6..19.
+ *
+ *   ► **UNRESOLVED, AND NOT BUILT: `defender.struck` MAY ALREADY BE `true`.**
+ *     The gate reads the VICTIM's flag, and nothing between phases resets it —
+ *     every `struck = null` in the overlay block is a phase teardown or the
+ *     watchdog (`+0x3871`). The victim's OWN last clip can write it after its
+ *     own phase tore down: a bolt's caster's `Cast2` reports 6 frames after
+ *     the bolt's teardown (see `SS2_BOLT_SPELLS`). A molten death cast at that
+ *     gladiator next would then tear down on its first tick, or mid-fall,
+ *     before the boulders land — and they land on whoever `defender` is
+ *     after `nextphase`. Whether that happens is a question of cross-phase
+ *     timing no dump read here settles; this engine resolves every boulder
+ *     on the chosen target.
+ *
+ * ► **ON A KILL THE REST OF THE SHOWER STILL LANDS, ON THE DEAD.** The killing
+ *   call runs `death()`, which deletes BOTH FIGHTERS' `onEnterFrame` — the
+ *   caster's holds this arm, so the teardown never runs — and `nextphase`
+ *   (`+0x202f`-`+0x204f`), so the cost is never spent: this engine's existing
+ *   kill rule. It does not touch the boulders' own handlers, so every boulder
+ *   still to land calls the ingress on the same defender and re-enters
+ *   `death()`. On a body at 0 hitpoints and 0 armour that is: no armour, the
+ *   hitpoints to -40 and `check_stats` back to 0, `psyche_up = 1` again, and
+ *   the breastplate stamina join — which does move the dead body's
+ *   `staminaleft`, clamped. Reproduced, and recorded per hit (`afterDeath`);
+ *   none of it can reach a living combatant.
+ *
+ * ► **ONE `defender` FOR THE WHOLE SHOWER.** The closure reads the timeline's
+ *   `defender` when it LANDS, not when it was dropped; this engine holds the
+ *   one chosen target throughout, which is what the build does whenever the
+ *   phase has not advanced — and the burn cannot advance it before the last
+ *   landing (a kill never advances it at all; the unresolved case above is
+ *   the one way it might).
+ *
+ * ► **TWO COPY-PASTE LEFTOVERS, KEPT OUT.** `lightning_frame = 1` (`+0x86be`)
+ *   is the bolt arm's variable, written and never read here; the teardown's
+ *   `bolt.removeMovieClip()` (`+0x892b`) removes whatever lightning bolt the
+ *   last bolt cast left behind. Neither moves a number.
+ */
+export const SS2_DEATH_FROM_ABOVE = Object.freeze({
+  /** `cast_spell_icon(attacker, 49)` `+0x868d`; ladder arm 7, `check_inventory(49)` `+0x0855`. */
+  itemId: 49,
+  /** Arm 7 of `villain_cast_spells`, whose ONLY test is possession. */
+  ladderArm: 7,
+  /**
+   * `boulder_stones = randomBetween(10, 20)`, `+0x86a5`. The tape label is
+   * INVENTED, in the shape of the weaken-armour and debris labels.
+   */
+  boulderCount: Object.freeze({ low: 10, high: 20, rollLabel: "death-from-above-boulder-count" }),
+  /**
+   * The four draws each boulder takes, IN THE BUILD'S ORDER. Boulder `i`'s
+   * tape label is `${boulderRollPrefix}-${i}-${labelSuffix}` (INVENTED), `i`
+   * running 1..N as the build's loop variable does.
+   */
+  boulderRolls: Object.freeze([
+    /** `_x = defender._x + randomBetween(-300, 300)`, `+0x878b`. */
+    Object.freeze({ field: "xOffset", labelSuffix: "x", low: -300, high: 300 }),
+    /** `_y = randomBetween(-600, -800)`, `+0x87a9` — REVERSED in the build; this is what it reaches. */
+    Object.freeze({ field: "y0", labelSuffix: "y", low: -799, high: -601 }),
+    /** `yspeed = randomBetween(50, 150)`, `+0x87c8`. */
+    Object.freeze({ field: "ySpeed", labelSuffix: "yspeed", low: 50, high: 150 }),
+    /** `_xscale = _yscale = randomBetween(50, 100)`, `+0x87f1` — one draw, two writes. */
+    Object.freeze({ field: "scale", labelSuffix: "scale", low: 50, high: 100 })
+  ]),
+  boulderRollPrefix: "death-from-above-boulder",
+  /** The closure's `_y > 150` (`+0x8871`), strict. */
+  groundY: 150,
+  /** `Push 40, 4, "burning"` at `+0x88c1`: a LITERAL, the same for every boulder. */
+  damagePerBoulder: 40,
+  damageMethod: "burning",
+  bonusFrame: 4,
+  /** `attacker.gotoAndPlay("Cast2")`, `+0x86d8` — the bolts' clip, not the fireballs' `Cast1`. */
+  casterClip: "Cast2",
+  /** `register:3.crowd_action = 20`, `+0x8642`. Presentation cue; not modelled. */
+  crowdAction: 20
+});
+
+/** Boulder `index`'s tape label for one of `SS2_DEATH_FROM_ABOVE.boulderRolls`. */
+export function ss2DeathFromAboveRollLabel(index, roll) {
+  return `${SS2_DEATH_FROM_ABOVE.boulderRollPrefix}-${index}-${roll.labelSuffix}`;
+}
+
+/**
+ * The invocation of a boulder's own `onEnterFrame` on which it lands: the
+ * first `k` with `y0 + k * ySpeed > 150`, strict — so a fall that reaches
+ * EXACTLY 150 lands one frame later. Counted from the boulder's first
+ * `onEnterFrame`, which is presentation's business to place relative to the
+ * cast; nothing a peer hashes reads it. A boulder already below the line
+ * lands on its first invocation (unreachable: `y0` is at most -601).
+ */
+export function ss2BoulderLandingFrame(y0, ySpeed) {
+  return Math.max(1, Math.floor((SS2_DEATH_FROM_ABOVE.groundY - y0) / ySpeed) + 1);
+}
+
+/**
+ * The molten-death option `chooseAiAction` takes, or null when none is on
+ * offer: the one aimed at the most wounded foe, by the `byHealthThenId` order
+ * the AI's own `target` uses. INVENTED above 1v1 — the build has one
+ * `defender` — and exactly the build's at 1v1, where there is one option.
+ */
+function ss2DeathFromAboveChoice(view, options) {
+  const offered = options.filter((option) => option.type === Ss2ActionType.CAST_DEATH_FROM_ABOVE);
+  if (offered.length === 0) return null;
+  for (const foe of [...view.foes].sort(byHealthThenId)) {
+    const option = offered.find((entry) => entry.targetId === foe.id);
+    if (option) return option;
+  }
+  return offered[0];
+}
+
+/* ------------------------------------------------------------------ */
 /* The gale phase: a spell that moves a body and hurts nobody           */
 /* ------------------------------------------------------------------ */
 
@@ -4527,6 +4730,11 @@ const SS2_POOL_CEILING = Object.freeze({
  *   from that list: `chooseAiAction` tests it just above the drink block, after
  *   the arm-2 potion read off this table and before arms 4-6. This table is
  *   still potions only.
+ *   **Arm 7 HAS A VERB SINCE 2026-09-22 (`cast_death_from_above`)** and is
+ *   struck too: `chooseAiAction` casts it inside its walk of this table, at
+ *   the first entry past arm 7, so a villain holding 49 drinks a HEALTH potion
+ *   below half (arms 2, 4-6) and never an armour or stamina one (10-13) — the
+ *   build's order (`test/ss2-death-from-above.test.js`).
  */
 export const SS2_POTION_LADDER = Object.freeze([
   Object.freeze({ arm: 2, itemId: 5 }),
@@ -7770,6 +7978,13 @@ export function createSs2TeamRules({
         if (ss2InventorySlotHolding(view.actor, spell.itemId) === null) continue;
         for (const foe of view.foes) actions.push({ type, targetId: foe.id });
       }
+      // ► **MOLTEN DEATH, ON THE SAME BUTTON UNDER THE SAME TWO GATES, PER FOE.**
+      //   No range and no lane test: the arm reads `defender._x` only to place
+      //   the boulders, and each boulder's closure has no x test at all, so
+      //   every foe is reachable from anywhere. See `SS2_DEATH_FROM_ABOVE`.
+      if (ss2InventorySlotHolding(view.actor, SS2_DEATH_FROM_ABOVE.itemId) !== null) {
+        for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_DEATH_FROM_ABOVE, targetId: foe.id });
+      }
 
       // ► **THE GALE IS OFFERED ON POSSESSION ALONE, ON THE SAME BUTTON AND
       //   UNDER THE SAME TWO-GATE OVERLAY AS THE BOLTS ABOVE** — so everything
@@ -9106,6 +9321,183 @@ export function createSs2TeamRules({
             armourDamage: outcome.mutation.armourDamage,
             hitpointDamage: outcome.mutation.hitpointDamage,
             staminaBonus: outcome.mutation.staminaBonus,
+            staminaSpent: victimEliminated ? 0 : staminaCost,
+            staminaGained: transition.staminaGained
+          }]
+        };
+      }
+
+      // ► **MOLTEN DEATH. `1 + 4N` draws, then N ingress calls of a literal 40,
+      //   and every boulder lands** — so it returns before `ATTACK_BANDS` for
+      //   the bolt's reason, and resolves the whole shower now: the fall decides
+      //   only when and where each boulder lands, which is the presentation's.
+      //   A branch of its own beside the fireball's, so neither event moves.
+      //   See `SS2_DEATH_FROM_ABOVE` for the phase, statement by statement.
+      if (request.type === Ss2ActionType.CAST_DEATH_FROM_ABOVE) {
+        const spell = SS2_DEATH_FROM_ABOVE;
+        const victim = request.target;
+        if (!victim) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a target; ${String(request.targetId)} is not a combatant.`
+          );
+        }
+
+        // Re-found at resolve under the offer's own window, for the reason the
+        // bolt branch gives at length — and BEFORE the first draw, so a refused
+        // cast takes nothing off the channel.
+        const slot = ss2InventorySlotHolding(actor, spell.itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, spell.itemId, { ignoreMaxslots: true });
+          if (beyond !== null) {
+            throw new TeamRuleSetError(
+              `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${spell.itemId} is in ${beyond}, ` +
+              `outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}. The build's hero panel ` +
+              "hides that button (sprite:492[inventory_overlay] +0x024f), and this engine offers and consumes " +
+              "through the same window."
+            );
+          }
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+            `item ${spell.itemId}. The build's own gate is possession — check_inventory(${spell.itemId}) for ` +
+            "the villain, a visible inventory button for the hero — and this engine reproduces it."
+          );
+        }
+
+        // THE DRAWS, ALL AT THE CAST, IN THE BUILD'S ORDER: the count
+        // (`+0x86a5`), then boulder by boulder its x offset, start height,
+        // speed and scale (`+0x878b`, `+0x87a9`, `+0x87c8`, `+0x87f1`).
+        const count = rolls.randomBetween(spell.boulderCount.rollLabel, spell.boulderCount.low, spell.boulderCount.high);
+        const boulders = [];
+        for (let index = 1; index <= count; index += 1) {
+          const boulder = { index };
+          for (const roll of spell.boulderRolls) {
+            boulder[roll.field] = rolls.randomBetween(ss2DeathFromAboveRollLabel(index, roll), roll.low, roll.high);
+          }
+          boulder.landingFrame = ss2BoulderLandingFrame(boulder.y0, boulder.ySpeed);
+          boulders.push(boulder);
+        }
+        // The ingress runs in LANDING order. Ties go by boulder index —
+        // INVENTED, and no number depends on it: every call is the same 40
+        // through the same ingress, so only which boulder the presentation
+        // shows as the killing one could change.
+        const landing = [...boulders].sort((a, b) => a.landingFrame - b.landingFrame || a.index - b.index);
+
+        // Roles uncrossed, as for the bolt: `+0x88e5` pushes `defender` last,
+        // so it is argument one. Snapshot BEFORE the calls; `clearDeathState`
+        // mutates both sides.
+        const victimRecord = vanillaRecordOf(victim, "defender");
+        const victimBefore = { ...victimRecord };
+        const casterRecord = vanillaRecordOf(actor, "defender");
+        const casterBefore = { ...casterRecord };
+        const scenario = {
+          attackerSide: "villain",
+          hero: victimRecord,
+          villain: casterRecord,
+          fightMode,
+          result: null
+        };
+
+        // ► **N CALLS OF THE ONE INGRESS ON THE SAME TWO RECORDS**, so armour
+        //   goes first and the overflow rewrite and the exact-equality quirk
+        //   each fire on the hit that meets them, with nothing re-implemented.
+        //
+        // ► **AFTER A KILL THE REST STILL LAND, AND RE-ENTER.** `death()` does
+        //   not delete the boulders' handlers, so each later boulder calls the
+        //   ingress on the same dead defender and re-enters `death()`. The
+        //   ingress refuses a scenario whose result is already set — a guard
+        //   for a fixture, not a rule of the build — so the settled result is
+        //   lifted for each re-entry and put back: the FIRST result stands, and
+        //   a re-entry's duplicate is discarded. On a body at 0 hitpoints and 0
+        //   armour a re-entry moves only `psyche_up` (already 1) and the
+        //   breastplate stamina join, clamped.
+        const hits = [];
+        let killingHit = null;
+        for (const boulder of landing) {
+          const settled = scenario.result;
+          scenario.result = null;
+          const outcome = applySs2MagicDamageCandidate(scenario, spell.damagePerBoulder, {
+            spellId: spell.itemId,
+            spell: VANILLA_PHASE_LABEL[request.type],
+            damageMethod: spell.damageMethod,
+            rolledDamage: spell.damagePerBoulder
+          });
+          // The same refusal the bolt and the fireball carry, for the same
+          // reason — checked on EVERY call, since any one of them can be the
+          // first to reach the hitpoints.
+          if (outcome.resultEvent && outcome.resultEvent.reason === "first-blood") {
+            throw new TeamRuleSetError(
+              `Rule set ${ruleSetId} produced a first-blood result from ${VANILLA_PHASE_LABEL[request.type]}, ` +
+              "which the team resolver cannot represent: it decides elimination on health > 0 and knows nothing " +
+              "of hitpoints < hitpointsmax. Use fightMode \"tournament\" for play."
+            );
+          }
+          if (settled !== null) scenario.result = settled;
+          else if (outcome.resultEvent) killingHit = hits.length + 1;
+          hits.push({
+            boulder: boulder.index,
+            armourDamage: outcome.mutation.armourDamage,
+            hitpointDamage: outcome.mutation.hitpointDamage,
+            staminaBonus: outcome.mutation.staminaBonus,
+            afterDeath: settled !== null
+          });
+        }
+
+        const victimAfter = scenario.hero;
+        const victimEliminated = victimAfter.hitpoints <= 0;
+
+        // Consumed when the phase BEGINS, so on a lethal cast too.
+        const consumption = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }];
+
+        // `round(magicka)` at `+0x8655`, assigned every tick and spent ONCE by
+        // the teardown's `nextphase` (`+0x894d`) — which a kill's `death()`
+        // deletes first, so a lethal shower costs nothing and regenerates
+        // nothing.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const transition = victimEliminated
+          ? { effects: [], staminaGained: 0, healed: 0 }
+          : phaseTransitionEffects(actor, { staminaCost });
+
+        return {
+          effects: [
+            ...consumption,
+            // The NET change over all N calls — resource effects are absolute,
+            // so one write per field carrying the settled value is exact.
+            // `"always"`: every call's `psyche_up = 1` is an unconditional join.
+            ...defenderEffects(victimBefore, victimAfter, victim, { psycheReset: "always" }),
+            ...statusEffects(casterBefore, scenario.villain, victimBefore, victimAfter, actor, victim),
+            ...transition.effects,
+            ...crowd
+          ],
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: victim.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            casterClip: spell.casterClip,
+            victimClip: spell.damageMethod,
+            bonusFrame: spell.bonusFrame,
+            spellId: spell.itemId,
+            consumedSlot: slot,
+            boulderCount: count,
+            damagePerBoulder: spell.damagePerBoulder,
+            // ► **FOR A RENDERER, IN DRAW ORDER**: each boulder's x offset from
+            //   the victim, start height, speed, scale and the invocation of its
+            //   own `onEnterFrame` it lands on. Deliberately NOT `from`/`to`
+            //   (read as the caster's walk) or `xVelocity`/`boltFrame` (a
+            //   fireball, a bolt). The boulder art is not extracted.
+            boulders,
+            // In LANDING order, the order the ingress ran them.
+            hits,
+            killingHit,
+            armourDamage: victimBefore.armourclass - victimAfter.armourclass,
+            hitpointDamage: victimBefore.hitpoints - victimAfter.hitpoints,
+            // The ingress's own per-call numbers, summed, unclamped.
+            staminaBonus: hits.reduce((total, hit) => total + hit.staminaBonus, 0),
             staminaSpent: victimEliminated ? 0 : staminaCost,
             staminaGained: transition.staminaGained
           }]
@@ -10511,9 +10903,10 @@ export function createSs2TeamRules({
       //     rather than on nine in ten, and a failed roll's fall-through to the
       //     melee decision is not reproduced;
       //   - the arms with no verb here (1 `cast_rejuvinate`, ~~3
-      //     `cast_regenerate`,~~ 7 `cast_death_from_above`, 8 `cast_colossus`, 9
+      //     `cast_regenerate`,~~ ~~7 `cast_death_from_above`,~~ 8 `cast_colossus`, 9
       //     `cast_little_fat_kid`; arm 3 has had a verb since 2026-09-22 and is
-      //     tested in the block just above), which pre-empt some potions in the build and
+      //     tested in the block just above, and arm 7 since the same day and is
+      //     tested inside this walk, below), which pre-empt some potions in the build and
       //     nothing here — the stance the gale block takes for arms 1-23;
       //   - ~~**AND IT SITS BEHIND THE FORCED REST ABOVE, WHICH IS AN OPEN
       //     QUESTION, NOT A DERIVATION.** `staminaleft > 10` (`+0x03e8`) gates
@@ -10536,15 +10929,43 @@ export function createSs2TeamRules({
       // ► **INVENTED: THE RULE IS APPLIED TO EVERY AI SEAT.** The ladder reads
       //   `_root.game.villain` hard-coded; this engine has one AI for everyone,
       //   as it does for the gale.
+      //
+      // ► **LADDER ARM 7, `cast_death_from_above`, SITS INSIDE THIS WALK, and
+      //   it is the first damage spell of the six.** `check_inventory(49)` and
+      //   NOTHING else (`+0x0855`-`+0x088b`: `Equals2; Not; If`, no second
+      //   conjunct). So it comes after the health arms (2, 4-6; arm 3 returned
+      //   above) and PRE-EMPTS the armour and stamina arms (10-13), which is
+      //   why it is tested at the first ladder entry past arm 7 rather than in
+      //   a block of its own — and it returns before every block below:
+      //   the damage spells (14-18, which this AI otherwise PRICES), weaken
+      //   (19), boundless energy (23), the gale (24), the teleport (26), the
+      //   walk, the swing and the tired rest. A villain holding 49 casts
+      //   nothing else from `villain_cast_spells` until it is spent.
+      //
+      //   **NOT PRICED, unlike arms 14-18.** The bolts and fireballs are
+      //   ranked against the swings (an invented comparison the build never
+      //   makes, recorded below); arm 7 is cast on possession, as the build
+      //   casts it, because pricing it would let a swing into the gap the
+      //   ladder closes — and it could not reach the potions it must pre-empt.
+      //
+      // ► **INVENTED: WHICH FOE.** The build has one `defender`. Above 1v1 this
+      //   drops the shower on the most wounded foe (`byHealthThenId`, the
+      //   order `target` below is chosen by); it cannot miss and has no range.
+      const moltenDeath = ss2DeathFromAboveChoice(view, options);
       const drinkOptions = options.filter((option) => option.type === Ss2ActionType.DRINK_POTION);
-      if (drinkOptions.length > 0) {
+      if (drinkOptions.length > 0 || moltenDeath) {
         const pools = ss2PoolsOf(actor);
-        for (const { itemId } of SS2_POTION_LADDER) {
+        for (const { arm, itemId } of SS2_POTION_LADDER) {
+          if (moltenDeath && arm > SS2_DEATH_FROM_ABOVE.ladderArm) return moltenDeath;
           const option = drinkOptions.find((entry) => entry.itemId === itemId);
           if (!option) continue;
           const { stat } = SS2_POTIONS[itemId];
           if (pools[stat] < pools[SS2_POOL_CEILING[stat]] / 2) return option;
         }
+        // UNREACHABLE while the table holds an arm past 7 (arms 10-13 return
+        // above), so no mutation of it can go red; kept so that a table
+        // without one still casts rather than falling through to a swing.
+        if (moltenDeath) return moltenDeath;
       }
 
       const foes = [...view.foes].sort(byHealthThenId);
@@ -10631,10 +11052,11 @@ export function createSs2TeamRules({
       //   so a caster offered any of them never reaches arm 19 — even on a turn
       //   this engine's pricing then spends on a swing — which is what
       //   `!boltOnOffer` says. `regenerate` (arm 3) got its verb the same day
-      //   and returns above (merged from a parallel worktree). The rest of 1-18
-      //   (`rejuvinate`, death from above, colossus, little fat kid) have no
-      //   verb here and so pre-empt nothing; when they are built, this block
-      //   must grow. And it
+      //   and returns above (merged from a parallel worktree). **So does molten
+      //   death (arm 7, possession alone), inside the drink walk.** The rest of
+      //   1-18 (`rejuvinate`, ~~death from above,~~ colossus, little fat kid)
+      //   have no verb here and so pre-empt nothing; when they are built, this
+      //   block must grow. And it
       //   sits ABOVE the gale (arm 24) and the teleport (arm 26), so a caster
       //   qualifying for either weakens first.
       //
@@ -10672,9 +11094,11 @@ export function createSs2TeamRules({
       //   `cast_weaken_armour` (`check_inventory(44) && fightdistance < 300`),
       //   precedes it too, and is tested in the block directly ABOVE this one**
       //   (the two verbs were built in parallel worktrees and merged in ladder
-      //   order on 2026-09-22). Arms 7-9 and 20-22 (death from above, colossus, little fat
-      //   kid, whirlwind, ghost strike, bloodlust) have none and pre-empt
-      //   nothing here, where the build would.
+      //   order on 2026-09-22). **Arm 7, molten death, returned above too**
+      //   (possession alone, inside the drink walk). Arms ~~7-9~~ 8-9 and 20-22
+      //   (~~death from above,~~ colossus, little fat kid, whirlwind, ghost
+      //   strike, bloodlust) have none and pre-empt nothing here, where the
+      //   build would.
       //
       // ► **AND IT PRE-EMPTS THE GALE (24) AND THE TELEPORT (26)**, which is
       //   why it sits here, above both.
@@ -10831,7 +11255,9 @@ export function createSs2TeamRules({
       //   from this block's `< 250`, so it can never pre-empt a teleport whose
       //   gate is open.** **SEVEN arms before 26 fire on
       //   possession alone** (ids 49, 32, 35, 31, 34, 30, 45 — map §"The whole
-      //   ladder"); ~~five have no verb here~~ **ONE has no verb here (49) as of
+      //   ladder"); ~~five have no verb here~~ ~~**ONE has no verb here (49)~~
+      //   **NONE, since death from above (49) got its verb later the same day
+      //   (merged from a parallel worktree), as of
       //   2026-09-22 — the fireballs (32, 31, 30) and boundless energy (45)
       //   gained theirs the same day, and all four shut or pre-empt this block
       //   from above it. So does ARM 3, `cast_regenerate`, whose test is this
@@ -11111,8 +11537,8 @@ export function createSs2TeamRules({
       //   So IN RANGE at 10 or less the villain rests and the ladder may then
       //   replace the rest; OUT of range this gate never rests it, and the AI
       //   does what it does untired. Every ladder block this engine holds has
-      //   already had its turn above — regenerate (arm 3) and the potions (2,
-      //   4-6, 10-13) at the top, weaken (19), boundless energy (23), the gale
+      //   already had its turn above — regenerate (arm 3), the potions (2,
+      //   4-6, 10-13) and molten death (7) at the top, weaken (19), boundless energy (23), the gale
       //   (24) and the teleport (26) behind `!boltOnOffer` — so what is left of
       //   the ladder here is arms 14-18: a damage spell on possession, the
       //   LADDER's first, which is what `boltOptions[0]` is. A tired villain

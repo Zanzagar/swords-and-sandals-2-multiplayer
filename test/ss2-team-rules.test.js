@@ -288,6 +288,11 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //
     //   The build's own misspelling of "frightening" is kept. A corrected one
     //   is a name that matches nothing in the oracle.
+    // ► **JOINED 2026-09-22 — molten death, `getphase("cast_death_from_above")`,
+    //   written by ladder arm 7 (`+0x0871`) and consumed at `+0x862f`-`+0x895c`.**
+    //   `1 + 4N` placement draws and N ingress calls of a literal 40, no hit
+    //   roll, so not in `ATTACK_BANDS`.
+    "cast-death-from-above",
     // ► **JOINED 2026-09-22 — the fireball family, THREE TOKENS FOR ONE ARM
     //   for the bolts' reason**: `getphase("cast_dire_fireball")`,
     //   `("cast_fireball")` and `("cast_hell_fireball")` (below), written by

@@ -3432,7 +3432,7 @@ single clamp happens to agree. The boundless icon shows `round(stamina / 4)`
 between these steps, is a `DefineFunction` with an EMPTY body (`+0x23bf`,
 codeSize 0).
 
-### The fireball family and molten death, and why ~~neither is~~ only molten death is not a turn (2026-09-20; corrected 2026-09-22)
+### The fireball family and molten death, and why ~~neither is~~ ~~only molten death is not~~ both are a turn (2026-09-20; corrected twice on 2026-09-22)
 
 Derived beside the bolts and recorded because the DIFFERENCE is the finding.
 
@@ -3484,8 +3484,13 @@ Derived beside the bolts and recorded because the DIFFERENCE is the finding.
 - **`cast_death_from_above`, `+0x862f`–`+0x895c`, ingress `+0x88e5`.**
   `randomBetween(10, 20)` boulders (`+0x86a5`), then a loop
   (`+0x86f9`–`+0x88fe`) that for EACH boulder draws four more samples —
-  `randomBetween(-300, 300)` for `_x` (`+0x878b`), `(-800, -600)` for `_y`
-  (`+0x87a9`), `(50, 150)` for `yspeed` (`+0x87c8`), `(50, 100)` for the scale
+  `randomBetween(-300, 300)` for `_x` (`+0x878b`), ~~`(-800, -600)`~~
+  **`(-600, -800)` — bounds REVERSED, corrected 2026-09-22 by the
+  implementer** — for `_y` (`+0x87a9`: `Push "_y", -800, -600, 2`, and
+  `CallFunction` pops the first argument off the top, where every other call
+  here pushes its high bound first; by §"RNG surface"'s formula that reaches
+  -601..-799, and -600 only at `Math.random() == 0`, so a boulder lands on
+  frame 6..19), `(50, 150)` for `yspeed` (`+0x87c8`), `(50, 100)` for the scale
   (`+0x87f1`) — and gives it its own `onEnterFrame` (`+0x882f`) that calls
   `magic_damage_character(..., "burning", 4, 40)`. **41 to 81 samples per cast**,
   and the 40 is a literal, not a roll.
@@ -3503,9 +3508,16 @@ otherwise.** One draw, no hit roll, damage certain; the flight is cosmetic and
 decides only WHEN the victim's `burning` clip starts. **Built as three verbs the
 same day** (`SS2_FIREBALL_SPELLS` in `src/team/ss2-rules.js`; the flight and the
 victim's reaction waiting for impact are `fireballImpact` in
-`src/render/projectile.js` and `reactionDelaysFor` in `src/render/cursor.js`). Molten death stays out: its
+`src/render/projectile.js` and `reactionDelaysFor` in `src/render/cursor.js`). ~~Molten death stays out: its
 damage comes from each boulder's own `onEnterFrame`, so how many land is a
-question of flight geometry per boulder.
+question of flight geometry per boulder.~~ **MOLTEN DEATH IS A DISCRETE TURN
+TOO — corrected 2026-09-22 and built the same day
+(`SS2_DEATH_FROM_ABOVE`).** The boulder's closure reads only its own `_y`,
+`yspeed` and `bounced` — no `_x`, no `hitTest`, no removal — so EVERY boulder
+lands, and the outcome is N identical ingress calls of 40 whatever the fall
+geometry; the geometry decides only when and where each lands. On a kill the
+rest still land on the dead: `death()` deletes the fighters' `onEnterFrame`
+and `nextphase`, not the boulders'.
 
 ### The gale gate is five conditions, not one (derived 2026-09-19)
 

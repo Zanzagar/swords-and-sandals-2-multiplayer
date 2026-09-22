@@ -54,7 +54,10 @@
  * mechanic, and the bolt is the one that needs nothing invented.~~ **The
  * fireballs are a turn too since 2026-09-22**: their flight is flat and cannot
  * miss, so it cannot change the outcome, and it is presentation — see
- * `test/ss2-fireball.test.js`. Molten death is still unbuilt.
+ * `test/ss2-fireball.test.js`. ~~Molten death is still unbuilt.~~ **Molten
+ * death is a turn too since 2026-09-22**: every boulder lands (its closure has
+ * no x test), so the shower is N identical ingress calls and the fall is
+ * presentation — see `test/ss2-death-from-above.test.js`.
  *
  * ## THE OFFER GATE IS POSSESSION, AND NOTHING ELSE THIS ENGINE CAN SEE
  *
