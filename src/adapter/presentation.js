@@ -1100,6 +1100,18 @@ function displacementOf(event) {
   if (Number.isFinite(event.targetFrom) && Number.isFinite(event.targetTo)) {
     return { combatantId: event.targetId, from: event.targetFrom, to: event.targetTo, pushed: true };
   }
+  // ► **A LETHAL GHOST STRIKE LEAVES ITS CASTER BESIDE THE BODY** (added
+  //   2026-09-22 with `cast_ghost_strike`): the arm restores `attacker_old_x`
+  //   only in the completion tick, which `death()` deletes. Its own field
+  //   names, `casterFrom`/`casterTo`, because `from`/`to` would bind the event
+  //   as a WALK above. Drawn as a teleport — the figure is at `to` when its
+  //   clip ends. **NOT the build's timing, and named:** the build blinks the
+  //   caster beside the victim BEFORE the swing, and this vocabulary has no
+  //   motion that holds a figure away and brings it back, so a strike that does
+  //   not kill shows no blink at all.
+  if (event.type === "cast-ghost-strike" && Number.isFinite(event.casterFrom) && Number.isFinite(event.casterTo)) {
+    return { combatantId: event.actorId, from: event.casterFrom, to: event.casterTo, pushed: false, teleported: true };
+  }
   if (!Number.isFinite(event.from) || !Number.isFinite(event.to)) return null;
   if (event.type === "shove" || event.type === "taunt") {
     return { combatantId: event.targetId, from: event.from, to: event.to, pushed: true };

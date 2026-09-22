@@ -712,6 +712,9 @@ test("it PRE-EMPTS every damage spell, weaken, boundless energy, the gale and th
     [35, Ss2ActionType.CAST_FRIGHTNING_BOLT, {}],
     [30, Ss2ActionType.CAST_FIREBALL, {}],
     [44, Ss2ActionType.CAST_WEAKEN_ARMOUR, {}],
+    // Whirlwind (arm 20) joined when the parallel worktrees were merged on
+    // 2026-09-22; its own gate is fightdistance < 200, which 120 meets.
+    [37, Ss2ActionType.CAST_WHIRLWIND, {}],
     [45, Ss2ActionType.CAST_BOUNDLESS_ENERGY, {}],
     // The gale's own gate: armour below half, the foe inside 400.
     [38, Ss2ActionType.CAST_GALE, { armourclass: 20 }],
@@ -728,6 +731,14 @@ test("it PRE-EMPTS every damage spell, weaken, boundless energy, the gale and th
     hero.resources.inventory2.value = SS2_INVENTORY_EMPTY;
     assert.equal(pick(battle).type, type, `id ${id}: the control, without 49`);
   }
+});
+
+test("it PRE-EMPTS ghost strike too, whose own gate wants the foe beyond 500", () => {
+  // Arm 21, merged the same day. Staged at 600 so ghost strike's gate is open.
+  const battle = aiStaged({ hero: { inventory1: 36, inventory2: 49, ...ARMOURED }, foeX: 600 });
+  assert.equal(pick(battle).type, MOLTEN);
+  heroOf(battle).resources.inventory2.value = SS2_INVENTORY_EMPTY;
+  assert.equal(pick(battle).type, Ss2ActionType.CAST_GHOST_STRIKE, "the control, without 49");
 });
 
 test("it REPLACES the tired rest in range, because the ladder runs after it", () => {

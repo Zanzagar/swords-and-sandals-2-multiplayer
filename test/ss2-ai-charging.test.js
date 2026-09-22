@@ -326,9 +326,12 @@ test("IT CHARGES AT THE FOE IT IS FIGHTING, not at whichever option came first",
   //   `request.target` for the discharge's RANGE GATE and builds the defender
   //   record for its DAMAGE ROLL from it.
   //
-  //   An out-of-range press decides nothing and KEEPS the charge, so a
-  //   gladiator aimed at the wrong foe can repeat it forever while a reachable
-  //   one stands in front of him. That is starvation, not a missed optimum.
+  //   An out-of-range press decides nothing ~~and KEEPS the charge, so a
+  //   gladiator aimed at the wrong foe can repeat it forever~~ **and burns the
+  //   charge to 2 (corrected 2026-09-22 — `+0x6732` runs on every exit of the
+  //   build's gate), so a gladiator aimed at the wrong foe cycles one charge
+  //   and a wasted discharge for ever** while a reachable one stands in front
+  //   of him. That is starvation, not a missed optimum.
   const battle = staged({ heroX: 0, foes: [{ id: "afar", x: 600 }, { id: "bnear", x: 40 }] });
   const options = legalActions(battle);
   // The ORDER is what the defect fed on, so the test asserts the trap is set.

@@ -358,7 +358,8 @@ export const Ss2ActionType = Object.freeze({
   BASH_ATTACK: "bash-attack",
   // ► **`psyche_up` IS THE ONE ACTION HERE THAT IS NOT ALWAYS AN ATTACK, AND
   //   THAT IS WHY IT IS NOT IN `ATTACK_BANDS`.** The phase reads a counter and
-  //   plays `psyche_up`, `psyche_up2` or `psyche_up3` for values 1, 2 and >= 3
+  //   plays `psyche_up`, `psyche_up2` or `psyche_up3` for values 1, 2 and
+  //   ~~>= 3~~ exactly 3 (`Equals2` each time — see `SS2_PSYCHE_UP.clips`)
   //   (`+0x658a`, `+0x65b9`, `+0x65ef`); only the third arm reaches
   //   `checkattackroll`. Presses one and two cost stamina, advance the counter
   //   and roll NOTHING — so a band entry, which means "always attacks", would
@@ -366,6 +367,21 @@ export const Ss2ActionType = Object.freeze({
   //   every peer replaying the same tape would fall out of step from the first
   //   charge onward. It resolves through its own branch; see `PSYCHE_UP_MODEL`.
   PSYCHE_UP: "psyche-up",
+  // ► **THE TWO SPELLS THAT ARE ATTACKS — AND THEY SIT HERE, BESIDE THE
+  //   DISCHARGE, BECAUSE THEY RESOLVE THROUGH THE SAME DISPATCHER IT DOES.**
+  //   Derived 2026-09-22 from `DoAction@0x240c7f` `+0x78da`-`+0x7aa9` and
+  //   `+0x7db7`-`+0x7fd9`; see `SS2_WHIRLWIND` and `SS2_GHOST_STRIKE`.
+  //
+  //   `cast_whirlwind` is the psyche discharge with an item for a charge: the
+  //   same facing-relative range gate, instruction for instruction, and the
+  //   same `attack_direction = 30; checkattackroll()`. `cast_ghost_strike` is
+  //   `power_attack`'s `randomBetween(9, 12)` and `checkattackroll()` with NO
+  //   range test. **Neither is in `ATTACK_BANDS`**: a band means "priced by
+  //   strength, offered on reach, always attacks", and these are priced in
+  //   magicka, offered on possession, and — for the whirlwind — attack only in
+  //   range. They reach the dispatcher through `SS2_ITEM_STRIKES`.
+  CAST_WHIRLWIND: "cast-whirlwind",
+  CAST_GHOST_STRIKE: "cast-ghost-strike",
   // ► **`taunt` IS THE SECOND ACTION HERE THAT IS NOT ALWAYS AN ATTACK, AND IT
   //   IS NOT IN `ATTACK_BANDS` FOR THE SAME REASON `psyche_up` IS NOT.** The
   //   phase draws `diceroll = randomBetween(1, 100)` (`+0x6921`) and reaches
@@ -971,6 +987,14 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   //   is why the resolved event carries the clip separately and why
   //   `attackLabel(30)` in the presentation layer refuses to name one.
   [Ss2ActionType.PSYCHE_UP]: "psyche_up",
+  // `phase_decision == "cast_whirlwind"` at `+0x78e0` and `== "cast_ghost_strike"`
+  // at `+0x7dbd`, the decisions ladder arms 20 and 21 write (`+0x0cfa`,
+  // `+0x0d7a`). The whirlwind's caster plays `psyche_up3` (`+0x7950`) — the
+  // discharge's clip, carried on the event; the ghost strike's plays the
+  // `Attack9`-`Attack12` its direction names (`+0x7ee8`-`+0x7f63`), which the
+  // presentation derives from the direction exactly as for `power_attack`.
+  [Ss2ActionType.CAST_WHIRLWIND]: "cast_whirlwind",
+  [Ss2ActionType.CAST_GHOST_STRIKE]: "cast_ghost_strike",
   // ► **THE PHASE LABEL IS `taunt` AND THE TARGET'S CLIP IS `taunted`**, which
   //   are two different names for one decision — the build plays both from the
   //   same branch and BEFORE the roll (`+0x6905` the actor, `+0x690c` the
@@ -3156,7 +3180,8 @@ const SS2_AI_IN_RANGE_VERBS = Object.freeze(new Set([
  *
  * ► **MEMBERSHIP OF `ATTACK_BANDS` MEANS "ALWAYS ATTACKS", AND TWO OF THIS
  *   ACTION'S THREE PRESSES ROLL NOTHING.** The phase reads the counter and
- *   plays `psyche_up`, `psyche_up2` or `psyche_up3` for 1, 2 and >= 3
+ *   plays `psyche_up`, `psyche_up2` or `psyche_up3` for 1, 2 and ~~>= 3~~
+ *   exactly 3 (`Equals2` each time — see `SS2_PSYCHE_UP.clips`)
  *   (`+0x658a`, `+0x65b9`, `+0x65ef`); only the third arm reaches
  *   `checkattackroll`. A band entry would put two samples on the ordered
  *   channel that the build never takes, and every peer replaying the same tape
@@ -3280,7 +3305,18 @@ const TAUNT_STRIKE = Object.freeze({
  * numbers are easy to get one out.
  */
 export const SS2_PSYCHE_UP = Object.freeze({
-  /** `psyche_up`, `psyche_up2`, `psyche_up3` for 1, 2 and >= 3. */
+  /**
+   * `psyche_up`, `psyche_up2`, `psyche_up3` for 1, 2 and ~~>= 3~~ **exactly 3.**
+   *
+   * ► **CORRECTED 2026-09-22: the third test is `Equals2`, not a `>=`**
+   *   (`Push 3` at `+0x65f5`, `Equals2` at `+0x65fd`, and again at
+   *   `+0x6631`/`+0x6639` for the discharge). So in the build a counter of 4 or
+   *   more matches NO arm: nothing plays, nothing is rolled, and — with no clip
+   *   to report `struck == true` — the phase cannot complete. **No path in the
+   *   build or here produces such a counter** (every write is 1, or 1 + 1), so
+   *   this engine's `Math.min(counter, dischargeAt)` treating it as 3 is a
+   *   reading of an unreachable state, named rather than modelled.
+   */
   clips: Object.freeze(["psyche_up", "psyche_up2", "psyche_up3"]),
   /** The value at which the press fires the range-gated grievous. */
   dischargeAt: 3,
@@ -3297,6 +3333,11 @@ export const SS2_PSYCHE_UP = Object.freeze({
    *   left at 1 where a discharger is left at 2). **None of the three is live**
    *   — this engine has no magic-damage, taunt or whirlwind verb — and each
    *   goes live the day one is built. See the battle map's write census.
+   *   *(Stale since each was built: the taunt's and the bolts' writes are
+   *   live, and `+0x7a6a` went live with `cast_whirlwind` on 2026-09-22 —
+   *   see `SS2_WHIRLWIND`. And a NINTH exit reaches `+0x6738`: a discharge
+   *   press gated out of range, which the same day stopped keeping its
+   *   charge.)*
    *
    *   So a gladiator who has taken
    *   any other turn is at 1, which is what "fresh" means here. What the build
@@ -3305,8 +3346,188 @@ export const SS2_PSYCHE_UP = Object.freeze({
    *   inventing an initial value.
    */
   floor: 1,
-  /** `defender._x -/+ round(weapon_range + 50)`, `+0x6658`-`+0x6699`. */
+  /**
+   * ~~`defender._x -/+ round(weapon_range + 50)`~~ **`round(defender._x -/+
+   * (weapon_range + 50))`**, `+0x6658`-`+0x6699` right and `+0x66d1`-`+0x6712`
+   * left: `Add2` the 50, `Subtract`/`Add2` from `defender._x`, THEN
+   * `Math.round`. Corrected 2026-09-22; see `ss2PsycheDischargeInRange`.
+   */
   rangeBonus: 50
+});
+
+/* ------------------------------------------------------------------ */
+/* The two spells that are attacks: the whirlwind and the ghost strike */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_whirlwind`, byte-derived 2026-09-22 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base `0x240c85`),
+ * `+0x78da`-`+0x7aa9`:
+ *
+ * ```text
+ *   phase_decision == "cast_whirlwind"                              +0x78da
+ *     register:3.crowd_action = 3                                   +0x78ed
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x78fa-+0x7920
+ *     if (attacker.struck == null) {                                +0x7921-+0x7933
+ *       cast_spell_icon(attacker, 37)                               +0x7938
+ *       attacker.gotoAndPlay("psyche_up3")                          +0x7950
+ *       attacker.struck = false                                     +0x7964
+ *       if (attacker.gladiator_dir == "right")                      +0x7972-+0x7985
+ *         if (attacker._x > round(defender._x - (game_attacker.weapon_range + 50)))
+ *           { attack_direction = 30; checkattackroll() }            +0x798a-+0x79ea
+ *       if (attacker.gladiator_dir == "left")                       +0x79eb-+0x79fe
+ *         if (attacker._x < round(defender._x + (game_attacker.weapon_range + 50)))
+ *           { attack_direction = 30; checkattackroll() }            +0x7a03-+0x7a63
+ *       game_attacker.psyche_up = 1                                 +0x7a64-+0x7a74
+ *     }
+ *     if (attacker.struck == true) { attacker.struck = null; nextphase() } +0x7a75-+0x7aa9
+ * ```
+ *
+ * ► **IT IS THE PSYCHE DISCHARGE'S RESOLUTION, NOT A COPY OF IT.** The gate
+ *   is the discharge's to the instruction (`+0x6658`-`+0x6717`), the direction
+ *   is the same constant 30 with no draw, and the call is the same
+ *   `checkattackroll()` — so everything direction 30 does there it does here:
+ *   `ceil(max_damage * 1.5)` with the `character_level * 10` floor, the fixed
+ *   critical 20, a deflection drawn that cannot cancel it, a `grievous` that
+ *   always knocks back (the `randosmash` still drawn), and armour-removal
+ *   requests that match no group. **This engine therefore hands it to the same
+ *   attack path with the discharge's band shape**, and writes none of that
+ *   here; `test/ss2-whirlwind-ghost-strike.test.js` pins the two tapes equal.
+ *
+ * ► **OUT OF RANGE IT IS A LEGAL, WASTED CAST**: both facing tests fail, no
+ *   sample is taken, nobody is struck — and the cost is still `round(magicka)`
+ *   (set before the gate, every tick), the item is still spent (by the chooser,
+ *   before the phase runs) and the charge is still reset (`+0x7a64` is after
+ *   both tests, inside the entry block, on every exit).
+ *
+ * ► **THE WRITE-BACK HAS NO INCREMENT**, unlike the discharge's (`+0x6761`),
+ *   so a whirlwind leaves its caster at 1 where a discharge leaves 2. It runs
+ *   in the cast's own tick, so it survives a kill that `death()` would
+ *   otherwise stop — this engine emits it itself rather than leaving it to
+ *   `nextphase`'s reset, which a kill skips.
+ *
+ * ► **NOT MODELLED, AND NAMED:** `crowd_action = 3`, `cast_spell_icon`, and
+ *   the arm's lack of a `Jump` (it falls through into the `cast_gale` test at
+ *   `+0x7aaa`), as for every spell before it.
+ *
+ * ► **THE OFFER IS POSSESSION.** `fightdistance < 200` and
+ *   `equipped_weapon != 2` are ladder arm 20 of `villain_cast_spells`
+ *   (`DoAction@0x23e7cf` `+0x0c99`-`+0x0cf5`), the villain AI's DECISION; the
+ *   hero's inventory button tests only `inv_struck` (the gale's reading of
+ *   `sprite:862[overlay]/frame:1`, which this derivation did not re-read). See
+ *   `legalActions` and `chooseAiAction`.
+ */
+export const SS2_WHIRLWIND = Object.freeze({
+  /** `cast_spell_icon(attacker, 37)` `+0x7938`, `check_inventory(37)` `+0x0c99`. */
+  itemId: 37,
+  /** `attack_direction = 30`, `+0x79d0` / `+0x7a49` — a constant, no draw. */
+  direction: 30,
+  /** `attacker.gotoAndPlay("psyche_up3")`, `+0x7950`. */
+  casterClip: "psyche_up3",
+  /**
+   * The victim's clip on a hit and on a miss — NOT played by this arm, but by
+   * `checkattackroll`'s two dispatchers for direction 30: `defender_hurt`
+   * sends it to `knockback` (`+0x20dd`-`+0x20ec`), `defender_blocked` to
+   * `defend12` (`+0x21c6`). The discharge's pair, carried on the event
+   * because the direction alone cannot name the caster's clip.
+   */
+  victimClipOnHit: "knockback",
+  victimClipOnMiss: "defend12",
+  /** `register:3.crowd_action = 3`, `+0x78ed`. Presentation cue; not modelled. */
+  crowdAction: 3,
+  /** The VILLAIN's gate, `fightdistance < 200` (`+0x0cc5`, `Less2`). Strict. */
+  aiFightDistanceBelow: 200
+});
+
+/**
+ * `cast_ghost_strike`, byte-derived 2026-09-22 from the same block,
+ * `+0x7db7`-`+0x7fd9`:
+ *
+ * ```text
+ *   phase_decision == "cast_ghost_strike"                           +0x7db7
+ *     register:3.crowd_action = 5                                   +0x7dca
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x7dd7-+0x7dfd
+ *     if (attacker.struck == null) {                                +0x7dfe-+0x7e10
+ *       cast_spell_icon(attacker, 36)                               +0x7e15
+ *       attacker.blendMode = "add"                                  +0x7e2d
+ *       attacker_old_x = attacker._x                                +0x7e3c
+ *       if (attacker.gladiator_dir == "left")                       +0x7e4c-+0x7e5f
+ *         attacker._x = defender._x + game_attacker.physical_size   +0x7e64-+0x7e85
+ *       else
+ *         attacker._x = defender._x - game_attacker.physical_size   +0x7e8b-+0x7eac
+ *       attacker.struck = false                                     +0x7ead
+ *       attack_direction = randomBetween(9, 12)                     +0x7ebb
+ *       Attack9 | Attack10 | Attack11 | Attack12 by the direction   +0x7ed3-+0x7f76
+ *       checkattackroll()                                           +0x7f77
+ *     }
+ *     if (attacker.struck == true) {                                +0x7f87
+ *       attacker._x = attacker_old_x; attacker.blendMode = "normal"
+ *       attacker.struck = null; nextphase()                         +0x7f9f-+0x7fd9
+ *     }
+ * ```
+ *
+ * ► **FROM `struck = false` TO `checkattackroll()` IT IS `power_attack`,
+ *   INSTRUCTION FOR INSTRUCTION** (`+0x607c`-`+0x6146`): the same
+ *   `randomBetween(9, 12)`, the same four clips, the same call — so this
+ *   engine resolves it through the same attack path with the same band draw,
+ *   and the tape is the power attack's (pinned). **What differs is the
+ *   price** — `round(magicka)` for `round(strength * 3)` — **and that there is
+ *   no range test at all**, so it reaches from anywhere on the sands. The
+ *   caster is put beside the victim first, which is why the melee reach the
+ *   power attack is OFFERED on is irrelevant to it.
+ *
+ * ► **THE TELEPORT AND THE RETURN ARE PRESENTATION — EXCEPT AFTER A KILL.**
+ *   The restore is gated on `struck == true`, which fires on a later tick;
+ *   `damagecharacter` calls `death()` inside `checkattackroll`, and `death()`
+ *   deletes `attacker.onEnterFrame` (`+0x2035` — the offset the attack path's
+ *   "killing blow costs nothing" rule already cites, which this derivation did
+ *   not re-read), so after a kill that tick never comes and the caster STAYS
+ *   beside the body. This engine models that position (see the resolver); on
+ *   a strike that does not kill, the caster ends where it began and no
+ *   position is written.
+ *
+ * ► **NOT MODELLED, AND NAMED:** the on-screen blink beside the target and
+ *   back (the presentation vocabulary has no "held away, then restored"
+ *   motion; only the kill's one-way move is presented), `blendMode = "add"`,
+ *   `crowd_action = 5`, `cast_spell_icon`, and the build's per-tick 1-pixel
+ *   separation nudge while the caster stands beside its victim — this engine
+ *   has no form of that nudge anywhere.
+ *
+ * ► **THE OFFER IS POSSESSION.** `fightdistance > 500` and
+ *   `equipped_weapon != 2` are ladder arm 21 (`+0x0d19`-`+0x0d75`), the
+ *   villain AI's DECISION.
+ */
+export const SS2_GHOST_STRIKE = Object.freeze({
+  /** `cast_spell_icon(attacker, 36)` `+0x7e15`, `check_inventory(36)` `+0x0d19`. */
+  itemId: 36,
+  /** `attack_direction = randomBetween(9, 12)`, `+0x7ebb` — `power_attack`'s band. */
+  directionLow: 9,
+  directionHigh: 12,
+  /** `register:3.crowd_action = 5`, `+0x7dca`. Presentation cue; not modelled. */
+  crowdAction: 5,
+  /** The VILLAIN's gate, `fightdistance > 500` (`+0x0d45`, `Greater`). Strict. */
+  aiFightDistanceAbove: 500
+});
+
+/**
+ * The band shape each item strike hands the attack path — the same shape
+ * `PSYCHE_UP_DISCHARGE` and `ATTACK_BANDS` use, so the dispatcher cannot tell
+ * them apart, plus the two things that make them spells: the item they spend
+ * and a cost in `magicka` rather than strength.
+ *
+ * ► **`magickaCost` REPLACES THE SWING'S PRICE ON BOTH PATHS**, play and
+ *   `fixtureReplay` alike: the build's `staminacost = round(magicka)` is the
+ *   bolts' and every other spell's, and the owner's swing repricing
+ *   (`SS2_SWING`) is a decision about SWINGS. No golden casts either.
+ */
+const SS2_ITEM_STRIKES = Object.freeze({
+  [Ss2ActionType.CAST_WHIRLWIND]: Object.freeze({
+    direction: SS2_WHIRLWIND.direction, itemId: SS2_WHIRLWIND.itemId, magickaCost: true
+  }),
+  [Ss2ActionType.CAST_GHOST_STRIKE]: Object.freeze({
+    low: SS2_GHOST_STRIKE.directionLow, high: SS2_GHOST_STRIKE.directionHigh,
+    itemId: SS2_GHOST_STRIKE.itemId, magickaCost: true
+  })
 });
 
 /**
@@ -5014,11 +5235,61 @@ export const SS2_TAUNT = Object.freeze({
  * The gate is `round(reach + 50)`, which is 50 units MORE generous than melee
  * reach — so anything a melee verb can hit, a discharge can reach. Measured
  * over 231 in-reach cases: 0 out-of-range presses.
+ *
+ * ► **THREE CALLERS SINCE 2026-09-22: `cast_whirlwind`'s arm carries the same
+ *   gate instruction for instruction** (`+0x798a`-`+0x7a44` against the
+ *   discharge's `+0x6658`-`+0x6717`), so it calls this rather than a copy.
+ *
+ * ► **CORRECTED 2026-09-22: THE GATE IS STRICT, AND THE ROUND IS ON THE WHOLE
+ *   EXPRESSION.** This was ~~`separation <= Math.round(ss2Reach(actor) + 50)`~~,
+ *   which let a gap of EXACTLY `K = weapon_range + 50` through. The build's two
+ *   tests, one per facing, are
+ *
+ *   ```text
+ *     facing right:  attacker._x > Math.round(defender._x - (weapon_range + 50))   +0x6658-+0x6699
+ *     facing left:   attacker._x < Math.round(defender._x + (weapon_range + 50))   +0x66d1-+0x6712
+ *   ```
+ *
+ *   `Greater` and `Less2`, both strict, so the bound itself is OUT. Found by a
+ *   write-nothing verifier; re-read here from the dump before it was changed.
+ *   It moved no pre-existing test and none of the 23 goldens' census hashes.
+ *
+ *   **Where the round sits only matters off the integers.** A derived
+ *   `weapon_range` is `physical_size + multiplier * 44` with integer
+ *   multipliers, so K is an integer, and the positions this engine produces
+ *   are integers for integer stats (a caller may still state a fractional `x`
+ *   or `weapon_range`). For integers `round(dx - K)` is `dx - K`; for a
+ *   half-integer K it is `dx - K + 0.5`, because `Math.round` rounds a half
+ *   toward +infinity on BOTH sides — so the build's right-facing bound is one
+ *   unit tighter than its left-facing one. Reproduced, and pinned.
+ *
+ * ► **INVENTED ABOVE 1v1: THE TEST IS TWO-SIDED, NOT FACING-RELATIVE.** The
+ *   build evaluates only the expression for the way the caster FACES, so a
+ *   defender BEHIND the caster passes at any distance (`attacker._x >
+ *   round(defender._x - K)` is true for every defender to the left of a
+ *   right-facing caster). A 1v1 pair always faces each other, so the build
+ *   never shows it; team play can. **This requires BOTH expressions**, which in
+ *   1v1 is exactly the build — the far side's is always true for a target in
+ *   front — and above it is the symmetric test this function has always been,
+ *   rather than a discharge that reaches across the arena behind you.
+ *
+ * ► **AND A TARGET IN ANOTHER RANK KEEPS THE DEPTH TERM THIS GATE ALWAYS HAD**
+ *   (INVENTED — the build has no ranks, and its gate reads `_x` alone): the
+ *   Euclidean `ss2FightDistance` must also be under the bound, now strictly.
+ *   On one rank the fight distance is `round(|dx|)`, so this term adds
+ *   nothing there and 1v1 is untouched by it.
  */
 function ss2PsycheDischargeInRange(actor, target) {
+  if (!Number.isFinite(actor?.x) || !Number.isFinite(target?.x)) return false;
+  const bound = ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus;
+  // The build's right-facing expression and its left-facing one, both.
+  if (!(actor.x > Math.round(target.x - bound))) return false;
+  if (!(actor.x < Math.round(target.x + bound))) return false;
+  const ay = Number.isFinite(actor.y) ? actor.y : 0;
+  const by = Number.isFinite(target.y) ? target.y : 0;
+  if (ay === by) return true;
   const separation = ss2FightDistance(actor, target);
-  if (!Number.isFinite(separation)) return false;
-  return separation <= Math.round(ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus);
+  return Number.isFinite(separation) && separation < Math.round(bound);
 }
 
 /** The three melee verbs, which are the ONLY ones `closerange_warrior` wires. */
@@ -7859,6 +8130,29 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **THE TWO ITEM STRIKES, OFFERED ON POSSESSION ALONE, PER FOE, on the
+      //   inventory button and under its two gates** (the empty marker and the
+      //   `inventory_maxslots` window, both inside `ss2InventorySlotHolding` —
+      //   see the bolts' offer below for the button's derivation). Beside the
+      //   psyche offer because they resolve beside the discharge.
+      //
+      //   **NO RANGE TEST ON EITHER, and for two different reasons.** The ghost
+      //   strike's arm has none at all — it moves the caster beside the victim
+      //   first. The whirlwind's arm HAS one, and it is the ARM's, exactly like
+      //   the discharge's: the hero's button reads only `inv_struck` (the
+      //   gale's reading of `sprite:862[overlay]/frame:1`, not re-read for
+      //   these two), so a whirlwind cast out of range is legal and wasted, and the resolver
+      //   says so (`outOfRange`). `fightdistance < 200` / `> 500` and
+      //   `equipped_weapon != 2` are ladder arms 20 and 21, the villain's
+      //   DECISION, read by `chooseAiAction` — so a drawn bow is offered both
+      //   here, as the hero's button offers them.
+      if (ss2InventorySlotHolding(view.actor, SS2_WHIRLWIND.itemId) !== null) {
+        for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_WHIRLWIND, targetId: foe.id });
+      }
+      if (ss2InventorySlotHolding(view.actor, SS2_GHOST_STRIKE.itemId) !== null) {
+        for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_GHOST_STRIKE, targetId: foe.id });
+      }
+
       // ► **THE BOLTS ARE OFFERED OUTSIDE THE CONTROLLER-FRAME SPLIT ENTIRELY,
       //   AND THAT IS STRONGER THAN `psyche_up`'S CASE ABOVE.** `psyche_up` is
       //   on every controller frame; a spell is on NO controller frame. The
@@ -10146,6 +10440,9 @@ export function createSs2TeamRules({
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
         ?? (request.type === Ss2ActionType.PSYCHE_UP ? PSYCHE_UP_DISCHARGE : undefined)
+        // The whirlwind and the ghost strike, which are spells that ARE attacks.
+        // See `SS2_ITEM_STRIKES`.
+        ?? SS2_ITEM_STRIKES[request.type]
         // Only a taunt that ROLLED into the dispatcher reaches here; the branch
         // above returns for the other three outcomes in four.
         ?? (request.type === Ss2ActionType.TAUNT ? TAUNT_STRIKE : undefined);
@@ -10323,21 +10620,37 @@ export function createSs2TeamRules({
       //   `+0x6146`), so a melee blow issued from across the arena still
       //   resolves and misses. Only `psyche_up` and `cast_whirlwind` gate on
       //   range, comparing `attacker._x` against
-      //   `defender._x -/+ round(weapon_range + 50)` by facing
-      //   (`+0x6658`-`+0x6699` right, `+0x66d1`-`+0x6712` left).
+      //   ~~`defender._x -/+ round(weapon_range + 50)`~~
+      //   `round(defender._x -/+ (weapon_range + 50))`, strictly, by facing
+      //   (`+0x6658`-`+0x6699` right, `+0x66d1`-`+0x6712` left). See
+      //   `ss2PsycheDischargeInRange`, corrected 2026-09-22.
       //
       //   **It must therefore run BEFORE the first draw**, for the reason the
       //   block below spells out about the record builders: a refusal after a
       //   draw leaves the battle hashed differently from a peer that never
       //   attempted it.
       //
-      // ► **AND THE COUNTER IS LEFT ALONE, WHICH IS UNOBSERVABLE EITHER WAY.**
-      //   The map does not say whether a gated-out press still advances it. It
-      //   does not matter: the counter is already at or past `dischargeAt` and
-      //   every value there selects the same arm, so advancing and not
-      //   advancing produce the same clip and the same next press. **Said here
-      //   rather than left as a silent choice** — if a capture ever shows the
-      //   counter climbing, nothing downstream changes.
+      // ► ~~**AND THE COUNTER IS LEFT ALONE, WHICH IS UNOBSERVABLE EITHER
+      //   WAY.** The map does not say whether a gated-out press still advances
+      //   it. It does not matter: the counter is already at or past
+      //   `dischargeAt` and every value there selects the same arm, so
+      //   advancing and not advancing produce the same clip and the same next
+      //   press.~~
+      //
+      //   **CORRECTED 2026-09-22: A GATED PRESS SPENDS THE CHARGE AND LANDS ON
+      //   2, and "the same clip and the same next press" was false.** The
+      //   bytes settle what the map did not (a write-nothing verifier, then
+      //   re-read here from the dump of this block): the `== 3` arm
+      //   (`+0x65ef`-`+0x6742`) routes ALL FOUR exits of its gate — pass or
+      //   fail, facing right or left — to `+0x6732`-`+0x6742`,
+      //   `game_attacker.psyche_up = 1`, in the same tick; the completion tick
+      //   adds one at `+0x6761`; and `nextphase`'s reset (`+0x35c7`) is
+      //   skipped because the decision is still `psyche_up`. So a gated press
+      //   leaves **2** — exactly what a non-lethal discharge leaves, and the
+      //   build cannot tell the two apart — and the next press plays
+      //   `psyche_up2` and CHARGES. The old reading kept 3 and let it
+      //   discharge; the counter was never "at or past `dischargeAt`" after
+      //   the press, only before it.
       if (request.type === Ss2ActionType.PSYCHE_UP) {
         const separation = ss2FightDistance(actor, target);
         const gate = Math.round(ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus);
@@ -10345,19 +10658,30 @@ export function createSs2TeamRules({
           const transition = phaseTransitionEffects(actor, {
             staminaCost: Math.round(actor.stats.strength * PSYCHE_UP_DISCHARGE.strengthFactor),
             // Still a `psyche_up` decision even though it decided nothing, so
-            // `nextphase` does not reset: a gladiator gated out by range keeps
-            // his charge and can spend it once he has closed.
+            // `nextphase` does not reset. ~~a gladiator gated out by range
+            // keeps his charge and can spend it once he has closed.~~ **He
+            // does not keep it** — the arm's own write-back does the resetting,
+            // below, and that is what this skipped reset would have duplicated.
             resetsPsyche: false
           });
+          // The arm's write-back (`+0x6738`) and the completion's increment
+          // (`+0x6761`), as ONE absolute write of their result — the shape the
+          // discharge's own write-back takes below. Guarded on declaration for
+          // the reason every resource write here is.
+          const landed = SS2_PSYCHE_UP.floor + 1;
+          const psycheWrite = declaredResourceNames(actor).has("psyche_up")
+            ? [{ kind: EffectKind.RESOURCE, targetId: actor.id, resource: "psyche_up", to: landed }]
+            : [];
           return {
-            effects: [...transition.effects, ...crowd],
+            effects: [...transition.effects, ...psycheWrite, ...crowd],
             events: [{
               type: Ss2ActionType.PSYCHE_UP,
               actorId: actor.id,
               targetId: target.id,
               clip: SS2_PSYCHE_UP.clips[SS2_PSYCHE_UP.clips.length - 1],
               counter: psycheCounter,
-              counterAfter: psycheCounter,
+              // ~~`counterAfter: psycheCounter`~~ — the gated press spends it.
+              counterAfter: landed,
               discharged: false,
               // The field that makes this distinguishable from a miss. A miss
               // is a resolved roll the defender blocked; this is no roll at all.
@@ -10365,6 +10689,81 @@ export function createSs2TeamRules({
               separation,
               gate,
               vanillaLabel: VANILLA_PHASE_LABEL[Ss2ActionType.PSYCHE_UP],
+              staminaGained: transition.staminaGained,
+              healed: transition.healed
+            }]
+          };
+        }
+      }
+
+      // ► **THE ITEM STRIKES' OWN PRE-DRAW WORK: FIND THE ITEM, AND — FOR THE
+      //   WHIRLWIND — ASK THE DISCHARGE'S GATE. Both before the first draw**, for
+      //   the reason the block above gives: a refusal after a draw is a
+      //   desynchronised peer.
+      //
+      //   The slot is re-found at resolve, through the offer's own window, for
+      //   the reason the bolt branch gives. It is consumed whether or not the
+      //   strike lands or even reaches: the build's choosers empty it before the
+      //   phase runs (the hero's click handler, the villain's `use_item`).
+      let itemStrike = null;
+      if (SS2_ITEM_STRIKES[request.type]) {
+        const slot = ss2InventorySlotHolding(actor, band.itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, band.itemId, { ignoreMaxslots: true });
+          throw new TeamRuleSetError(
+            beyond !== null
+              ? `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${band.itemId} is in ` +
+                `${beyond}, outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}, and this ` +
+                "engine offers and consumes through the same window."
+              : `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+                `item ${band.itemId}. The build's own gate is possession — check_inventory(${band.itemId}) for ` +
+                "the villain, a visible inventory button for the hero — and this engine reproduces it."
+          );
+        }
+        itemStrike = {
+          slot,
+          consumption: [{ kind: EffectKind.RESOURCE, targetId: actor.id, resource: slot, to: SS2_INVENTORY_EMPTY }],
+          // `staminacost = Math.round(game_attacker.magicka)`, set before the
+          // gate on every tick (`+0x78fa`, `+0x7dd7`), with no affordability
+          // check — the bolts' shape.
+          staminaCost: Math.round(actor.stats.magicka)
+        };
+
+        // ► **OUT OF RANGE THE WHIRLWIND IS A LEGAL, WASTED CAST.** Both facing
+        //   tests fail (`+0x798a`-`+0x7a44`), so neither `checkattackroll()`
+        //   runs: no sample, no damage. Everything else in the entry block
+        //   still does — the item is gone, `psyche_up3` plays, the write-back to
+        //   1 (`+0x7a64`) is after both tests — and `nextphase` spends the cost.
+        if (request.type === Ss2ActionType.CAST_WHIRLWIND && !ss2PsycheDischargeInRange(actor, target)) {
+          // ► **`resetsPsyche: false` AND THE ARM'S OWN WRITE, rather than the
+          //   reset**, so the write is one and in the arm's place; the two
+          //   write the same 1. See the in-range write below for why the arm's
+          //   write, not `nextphase`'s, is the one to model.
+          const transition = phaseTransitionEffects(actor, {
+            staminaCost: itemStrike.staminaCost, resetsPsyche: false
+          });
+          const psycheWrite = declaredResourceNames(actor).has("psyche_up")
+            && resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor) !== SS2_PSYCHE_UP.floor
+            ? [{ kind: EffectKind.RESOURCE, targetId: actor.id, resource: "psyche_up", to: SS2_PSYCHE_UP.floor }]
+            : [];
+          return {
+            effects: [...itemStrike.consumption, ...psycheWrite, ...transition.effects, ...crowd],
+            events: [{
+              type: request.type,
+              actorId: actor.id,
+              targetId: target.id,
+              vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+              // The caster's clip alone, so `SS2_STATIC_MAP_BINDINGS` binds it
+              // as a self-cast: nothing plays on a victim who was never struck.
+              casterClip: SS2_WHIRLWIND.casterClip,
+              spellId: SS2_WHIRLWIND.itemId,
+              consumedSlot: itemStrike.slot,
+              // The discharge's own field for "no roll at all", which a miss
+              // is not, and the two numbers that decided it.
+              outOfRange: true,
+              separation: ss2FightDistance(actor, target),
+              gate: Math.round(ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus),
+              staminaSpent: itemStrike.staminaCost,
               staminaGained: transition.staminaGained,
               healed: transition.healed
             }]
@@ -10457,6 +10856,24 @@ export function createSs2TeamRules({
       // attacker's stamina must DIFFER from the only measured number the
       // fixture carries for it. It now asserts they are equal.
       const eliminated = scenario.villain.hitpoints <= 0;
+      // ► **THE AUTHORED BACK-ATTACK BONUS, computed HERE so that "did this
+      //   action kill?" can include it** (see the block below the transition
+      //   for what the bonus is). `eliminated` reads the vanilla blow alone,
+      //   which is what the build decides on; `killedAfterBonus` is the answer
+      //   once the authored damage has landed too, and every KILL-DEPENDENT
+      //   rule in this branch — the skipped transition, the stamina reported,
+      //   the discharge's counter, the ghost-striker left beside the body —
+      //   reads it. Found by two Codex adversarial reviews on 2026-09-22: a
+      //   blow finished by the bonus still paid its stamina, healed, ticked its
+      //   buffs and reset its psyche, as if its target had survived. With no
+      //   bonus (every fixture replay, which has no positions) the two agree.
+      const struck = Math.max(0, defenderBefore.hitpoints - scenario.villain.hitpoints);
+      const backAttack = backAttackBonus > 0
+        && struck > 0
+        && ss2IsBackAttack(actor, target);
+      const backAttackDamage = backAttack ? Math.round(struck * backAttackBonus) : 0;
+      const killedAfterBonus = eliminated
+        || (backAttackDamage > 0 && scenario.villain.hitpoints - backAttackDamage <= 0);
       // ► **THIS USED TO BE `round(strength * band.strengthFactor)`, THE
       //   BUILD'S OWN FORMULA, AND IT IS THE ONE PLACE THIS ENGINE KNOWINGLY
       //   LEAVES IT — owner's decision 2026-09-10.** The band factor is still
@@ -10477,14 +10894,18 @@ export function createSs2TeamRules({
       //   divergence is gated exactly where `startingPosition` and the crowd
       //   toll are: a fixture reproduces the build, play gets the repriced
       //   economy, and the seam is one flag rather than three conventions.
-      const staminaCost = fixtureReplay
+      // An item strike is a SPELL's price, `round(magicka)`, on both paths —
+      // see `SS2_ITEM_STRIKES`.
+      const staminaCost = itemStrike !== null
+        ? itemStrike.staminaCost
+        : fixtureReplay
         ? Math.round(actor.stats.strength * band.strengthFactor)
         : ss2SwingCost({
           bandFactor: band.strengthFactor,
           attackSpeed: resourceValue(actor, "attack_speed", SS2_RESOURCE_DEFAULTS.attack_speed),
           strength: actor.stats.strength
         });
-      const transition = eliminated
+      const transition = killedAfterBonus
         ? { effects: [], staminaGained: 0, healed: 0 }
         // The discharging `psyche_up` press is exempt for the same reason the
         // two charging presses are: it IS a `psyche_up` decision, so
@@ -10496,7 +10917,9 @@ export function createSs2TeamRules({
           // `TAUNT_STRIKE`: a taunt recovers like a rest, so the strength
           // formula above is not merely the wrong number but the wrong shape.
           ...(band.transitionFor ? band.transitionFor(actor) : { staminaCost }),
-          resetsPsyche: request.type !== Ss2ActionType.PSYCHE_UP
+          // The whirlwind writes the counter back itself (`+0x7a64`), below,
+          // for the discharge's reason: one write, in the arm's place.
+          resetsPsyche: request.type !== Ss2ActionType.PSYCHE_UP && request.type !== Ss2ActionType.CAST_WHIRLWIND
         });
       // ► **THE BACK ATTACK, AND IT IS A SEPARATE EFFECT ON PURPOSE.** The
       //   swing above has already resolved through the build's own
@@ -10509,11 +10932,9 @@ export function createSs2TeamRules({
       //   It needs a landed blow: a miss emits `amount: 0` (see
       //   `defenderEffects`, which always emits one), and half of nothing is
       //   nothing, so a missed back attack is correctly worth no bonus.
-      const struck = Math.max(0, defenderBefore.hitpoints - scenario.villain.hitpoints);
-      const backAttack = backAttackBonus > 0
-        && struck > 0
-        && ss2IsBackAttack(actor, target);
-      const backAttackDamage = backAttack ? Math.round(struck * backAttackBonus) : 0;
+      // (`struck`, `backAttack`, `backAttackDamage` and `killedAfterBonus` are
+      // computed above, beside `eliminated`, because the phase transition
+      // must know whether the action KILLED once the bonus has landed.)
 
       // ► **THE ATTACKER'S OWN TWO WRITES, AND THEY GO FIRST BECAUSE THE BUILD
       //   MAKES THEM FIRST.**
@@ -10650,7 +11071,7 @@ export function createSs2TeamRules({
         staminaBonus: mutation.staminaBonus,
         statusApplied: mutation.statusApplied,
         knockback: mutation.knockback === null ? null : { ...mutation.knockback },
-        staminaSpent: eliminated ? 0 : staminaCost,
+        staminaSpent: killedAfterBonus ? 0 : staminaCost,
         staminaGained: transition.staminaGained,
         healed: transition.healed
       }];
@@ -10694,8 +11115,12 @@ export function createSs2TeamRules({
       //   with `-TraceWindow phase` — the ordinary window closes on
       //   `checkattackroll`'s return and BOTH writes happen after it.
       //   ► **AND A LETHAL DISCHARGE LEAVES 1, NOT 2, BECAUSE THE CALLBACK
-      //     NEVER RUNS.** The `+0x6738` write-back is SYNCHRONOUS, inside
-      //     `checkattackroll`; the `+0x6761` increment is gated on
+      //     NEVER RUNS.** The `+0x6738` write-back is SYNCHRONOUS, ~~inside
+      //     `checkattackroll`~~ **in the phase arm itself, in the same tick,
+      //     after `checkattackroll()` has returned** (the left-facing call is the
+      //     `CallFunction` at `+0x6730` and its `Pop` at `+0x6731`; the write
+      //     starts at `+0x6732` — corrected 2026-09-22; the conclusion is
+      //     unchanged, the location was wrong); the `+0x6761` increment is gated on
       //     `attacker.struck == true` and fires on a LATER tick. But
       //     `damagecharacter` calls `death()` synchronously in the same call,
       //     and `death()` deletes `attacker.onEnterFrame` (`+0x2035`),
@@ -10711,7 +11136,7 @@ export function createSs2TeamRules({
       //     adversarial review and confirmed against the bytes this file
       //     already cites.
       if (request.type === Ss2ActionType.PSYCHE_UP && declaredResourceNames(actor).has("psyche_up")) {
-        const landed = SS2_PSYCHE_UP.floor + (eliminated ? 0 : 1);
+        const landed = SS2_PSYCHE_UP.floor + (killedAfterBonus ? 0 : 1);
         effects.push({
           kind: EffectKind.RESOURCE,
           targetId: actor.id,
@@ -10724,6 +11149,75 @@ export function createSs2TeamRules({
           event.counter = psycheCounter;
           event.counterAfter = landed;
           event.discharged = true;
+        }
+      }
+      // ► **THE ITEM STRIKES' OWN HALF, merged onto the dispatcher's result the
+      //   way the discharge's is directly above.**
+      if (itemStrike !== null) {
+        // The slot FIRST: the chooser empties it before the phase runs.
+        effects.unshift(...itemStrike.consumption);
+        // ► **THE WHIRLWIND'S WRITE-BACK, `game_attacker.psyche_up = 1` at
+        //   `+0x7a64`, AND IT SURVIVES A KILL.** It is in the entry block after
+        //   both gate tests, in the cast's own tick — so unlike the discharge's
+        //   `+0x6761` increment it does not wait for a callback that `death()`
+        //   deletes, and it has no increment at all: a whirlwind leaves 1 where
+        //   a discharge leaves 2. Emitted here rather than left to `nextphase`'s
+        //   reset because a kill skips the reset and not this.
+        if (request.type === Ss2ActionType.CAST_WHIRLWIND
+          && declaredResourceNames(actor).has("psyche_up")
+          && resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor) !== SS2_PSYCHE_UP.floor) {
+          effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: "psyche_up", to: SS2_PSYCHE_UP.floor });
+        }
+        // ► **THE GHOST STRIKE'S CASTER STAYS BESIDE A BODY IT KILLED.** The
+        //   arm puts it at `defender._x -/+ game_attacker.physical_size` by its
+        //   facing (`+0x7e4c`-`+0x7eac`) and restores `attacker_old_x` only in
+        //   the completion tick (`+0x7f9f`), which `death()` deletes. On a strike
+        //   that does not kill, the blink out and back is presentation and no
+        //   position is written.
+        //
+        //   **INVENTED AT THE EDGES, NAMED:** the arena clamp is applied (the
+        //   rule every `x` this file writes keeps, although after `death()` no
+        //   clip clamp runs in the build), and facing is recomputed from the new
+        //   `x` (the teleport's rule; in the build no phase advance follows a
+        //   kill, and in 1v1 the bout is over).
+        let casterMove = null;
+        if (request.type === Ss2ActionType.CAST_GHOST_STRIKE && killedAfterBonus
+          && Number.isFinite(actor.x) && Number.isFinite(target.x)) {
+          const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
+          const size = ss2PhysicalSize(actor);
+          const to = clamp(facingLeft ? target.x + size : target.x - size, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+          casterMove = { from: actor.x, to };
+          if (to !== actor.x) {
+            effects.push({ kind: EffectKind.POSITION, targetId: actor.id, to });
+            effects.push(...facingAfter({ ...actor, x: to }));
+          }
+        }
+        for (const event of events) {
+          if (event.type !== request.type) continue;
+          event.vanillaLabel = VANILLA_PHASE_LABEL[request.type];
+          event.spellId = band.itemId;
+          event.consumedSlot = itemStrike.slot;
+          if (request.type === Ss2ActionType.CAST_WHIRLWIND) {
+            // ► **BOTH CLIPS ON THE EVENT, because the direction cannot name
+            //   the caster's.** Direction 30 is the discharge's and the
+            //   whirlwind's alike, so `attackLabel(30)` refuses to name a clip;
+            //   the caster plays `psyche_up3` (`+0x7950`) and the victim what
+            //   direction 30's dispatcher sends it to. The discharge carries
+            //   the same pair through its own `clip` field.
+            event.casterClip = SS2_WHIRLWIND.casterClip;
+            event.victimClip = event.hit ? SS2_WHIRLWIND.victimClipOnHit : SS2_WHIRLWIND.victimClipOnMiss;
+            event.outOfRange = false;
+          }
+          // ► **NO `casterClip` ON THE GHOST STRIKE, deliberately**: its caster
+          //   plays the `Attack9`-`Attack12` its direction names, which
+          //   `SS2_STATIC_MAP_BINDINGS` already derives for `power_attack`, and
+          //   the victim the ordinary hurt / defend clip. The kill's move is
+          //   `casterFrom`/`casterTo` — NOT `from`/`to`, which the presentation
+          //   reads as a walk.
+          if (casterMove !== null) {
+            event.casterFrom = casterMove.from;
+            event.casterTo = casterMove.to;
+          }
         }
       }
       // The strike arm's event is the dispatcher's, so the taunt's own two
@@ -11080,6 +11574,46 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **LADDER ARMS 20 AND 21, THE WHIRLWIND AND THE GHOST STRIKE — the
+      //   build's own rules, returned before the pricing table for the gale's
+      //   reason: `villain_cast_spells` replaces the decision.**
+      //
+      //     arm 20  check_inventory(37) && fightdistance < 200
+      //             && villain.equipped_weapon != 2                 +0x0c99-+0x0cf5
+      //     arm 21  check_inventory(36) && fightdistance > 500
+      //             && villain.equipped_weapon != 2                 +0x0d19-+0x0d75
+      //
+      //   Both distance tests strict (`Less2`, `Greater`). `equipped_weapon`
+      //   is `ss2InBowMode`. **The whirlwind arm does NOT ask whether the
+      //   discharge gate will pass** — under 200 with bare hands the gate is
+      //   `reach + 50`, which can be less — so this AI, like the build's
+      //   villain, can spend 37 on a whirlwind that reaches nobody. Kept.
+      //
+      // ► **WHAT PRE-EMPTS THEM, AS FAR AS THIS ENGINE HOLDS IT:** arm 3 and
+      //   the potion arms returned above; the five damage spells (14-18) fire
+      //   on possession, which `!boltOnOffer` says; arm 19, weaken armour, is
+      //   the block directly above. Arms 1 and 7-9 have no verb here and so
+      //   pre-empt nothing. And these two pre-empt arms 22-26 — boundless
+      //   energy (23), the gale (24) and the teleport (26) are all below.
+      //
+      // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
+      //
+      // ► **INVENTED: WHICH FOE.** The NEAREST, the one the distance gate is
+      //   about — the weaken's, the gale's and the teleport's choice. For the
+      //   ghost strike that means every foe is beyond 500 when it fires.
+      if (!boltOnOffer && !ss2InBowMode(actor)) {
+        const strikeFoe = nearestFoe(view);
+        const range = strikeFoe ? ss2FightDistance(actor, strikeFoe) : null;
+        if (range !== null) {
+          const whirlwindOption = options.find((option) =>
+            option.type === Ss2ActionType.CAST_WHIRLWIND && option.targetId === strikeFoe.id);
+          if (whirlwindOption && range < SS2_WHIRLWIND.aiFightDistanceBelow) return whirlwindOption;
+          const ghostOption = options.find((option) =>
+            option.type === Ss2ActionType.CAST_GHOST_STRIKE && option.targetId === strikeFoe.id);
+          if (ghostOption && range > SS2_GHOST_STRIKE.aiFightDistanceAbove) return ghostOption;
+        }
+      }
+
       // ► **LADDER ARM 23, `cast_boundless_energy`, ON POSSESSION ALONE** —
       //   `check_inventory(45)` and nothing else (`+0x0df3`-`+0x0e29`; the only
       //   test before its `If` is the `Equals2` against `true`). So it fires
@@ -11095,10 +11629,11 @@ export function createSs2TeamRules({
       //   precedes it too, and is tested in the block directly ABOVE this one**
       //   (the two verbs were built in parallel worktrees and merged in ladder
       //   order on 2026-09-22). **Arm 7, molten death, returned above too**
-      //   (possession alone, inside the drink walk). Arms ~~7-9~~ 8-9 and 20-22
-      //   (~~death from above,~~ colossus, little fat kid, whirlwind, ghost
-      //   strike, bloodlust) have none and pre-empt nothing here, where the
-      //   build would.
+      //   (possession alone, inside the drink walk). **Arms 20 and 21,
+      //   whirlwind and ghost strike, got verbs the same day and are tested
+      //   above this block** (merged from a parallel worktree). Arms ~~7-9~~
+      //   8-9 and 22 (~~death from above,~~ colossus, little fat kid, bloodlust)
+      //   have none and pre-empt nothing here, where the build would.
       //
       // ► **AND IT PRE-EMPTS THE GALE (24) AND THE TELEPORT (26)**, which is
       //   why it sits here, above both.
@@ -11648,8 +12183,11 @@ export function createSs2TeamRules({
       //   Reproduced: one hero at x 0 with a full charge, `far` at 500 and
       //   `near` at 90 — two consecutive turns chose `psyche_up` against `far`
       //   while `near` stood in melee reach. In a longer bout that STARVES the
-      //   gladiator: an out-of-range press decides nothing and keeps the
-      //   charge, so it can repeat forever.
+      //   gladiator: an out-of-range press decides nothing ~~and keeps the
+      //   charge, so it can repeat forever~~ **and — corrected 2026-09-22 —
+      //   burns the charge down to 2 (`+0x6732` runs on every exit of the
+      //   gate), so it cycles: one charging press (2 -> 3), one wasted discharge,
+      //   again.** Still starvation; the fix below is unchanged by it.
       //
       // ► **AND THERE IS NO RANGE CHECK HERE, AFTER I ADDED ONE, DELETED IT,
       //   RESTORED IT ON THE REVIEW'S RECOMMENDATION, AND THEN MEASURED.**
@@ -11685,6 +12223,10 @@ export function createSs2TeamRules({
       //   resolved `outOfRange: true`, `discharged: false`, **spent 57 stamina
       //   and kept the counter at 3** — so it can repeat for ever, which is the
       //   exact starvation the paragraph above describes for a DIFFERENT cause.
+      //   *(That measurement was of this engine's old reading. Since
+      //   2026-09-22 the gated press lands on 2, as the build's does, so the
+      //   same gladiator would cycle one charge (2 -> 3) and a wasted discharge rather
+      //   than repeat one press; the guard below prevents both.)*
       //   Without the bolt the same gladiator walks.
       //
       //   **So the explicit test is back, and this time it is load-bearing

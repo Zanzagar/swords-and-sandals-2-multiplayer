@@ -307,6 +307,12 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //   first token here that is a spell and deals no damage; it takes zero
     //   samples, so it is not in `ATTACK_BANDS` for the reason `shove` is not.
     "cast-gale",
+    // ► **JOINED 2026-09-22 — the ghost strike, `getphase("cast_ghost_strike")`,
+    //   written by ladder arm 21 (`+0x0d7a`) and consumed at
+    //   `+0x7db7`-`+0x7fd9`.** `power_attack`'s draw and `checkattackroll` from
+    //   any distance, so it resolves through the attack path — but it is not in
+    //   `ATTACK_BANDS`, because it is paid in magicka and an item.
+    "cast-ghost-strike",
     "cast-hell-fireball",
     "cast-lightning-bolt",
     "cast-regenerate",
@@ -319,6 +325,12 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //   `+0x777c`-`+0x78d9`.** Three `1 + RandomNumber(9)` directions, each
     //   handed to `remove_armour`; no hit roll, so not in `ATTACK_BANDS`.
     "cast-weaken-armour",
+    // ► **JOINED 2026-09-22 — the whirlwind, `getphase("cast_whirlwind")`,
+    //   written by ladder arm 20 (`+0x0cfa`) and consumed at
+    //   `+0x78da`-`+0x7aa9`.** The psyche discharge's range gate and direction
+    //   30, paid in magicka and an item; not in `ATTACK_BANDS`, because out of
+    //   range it rolls nothing.
+    "cast-whirlwind",
     // ► **JOINED 2026-09-22 — the potions, `getphase("drink_potion")`, ONE
     //   token for inventory ids 2-9** because the build has one label for all
     //   eight (`+0x5773`) and selects the potion from `inventory_action`. The

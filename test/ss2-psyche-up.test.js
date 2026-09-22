@@ -320,8 +320,118 @@ test("OUT OF RANGE the discharge decides nothing: no roll, no damage, no death",
   assert.equal(combatantById(battle, "villain").health, healthBefore, "nothing may be damaged");
   assert.ok(event.separation > event.gate, "the event carries the two numbers that decided it");
   assert.equal(event.gate, Math.round(ss2Reach(combatantById(battle, "hero")) + SS2_PSYCHE_UP.rangeBonus));
-  // And the charge is KEPT, so closing and pressing again spends it.
-  assert.equal(counterOf(battle, "hero"), 3, "a gated press must not burn the chain");
+  // ~~And the charge is KEPT, so closing and pressing again spends it.~~
+  // ~~`assert.equal(counterOf(battle, "hero"), 3, "a gated press must not burn the chain");`~~
+  //
+  // ► **CORRECTED 2026-09-22: A GATED PRESS SPENDS THE CHARGE, AND LANDS ON 2
+  //   — exactly where a non-lethal discharge lands.** Verified by a
+  //   write-nothing verifier and re-read by the implementer from the dump of
+  //   `DoAction@0x240c7f`: all four exits of the gate (pass or fail, facing
+  //   right or left) fall through to `+0x6732`-`+0x6742`,
+  //   `game_attacker.psyche_up = 1`, in the same tick; the completion tick then
+  //   adds one at `+0x6761`; and `nextphase`'s reset is skipped because the
+  //   decision is still `psyche_up`. **The old assertion was this engine's
+  //   invention asserted as the build's**: nothing in the bytes keeps a charge
+  //   through a gated press, and the rationale that "advancing and not
+  //   advancing produce the same clip and the same next press" was false the
+  //   day it was written — at 2 the next press plays `psyche_up2` and charges.
+  assert.equal(event.counterAfter, SS2_PSYCHE_UP.floor + 1, "the write-back to 1 and the completion's + 1");
+  assert.equal(counterOf(battle, "hero"), SS2_PSYCHE_UP.floor + 1, "a gated press burns the chain down to 2");
+  const next = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  assert.equal(next.clip, "psyche_up2", "so the next press CHARGES, where the old reading had it discharge");
+  assert.equal(next.discharged, false);
+});
+
+/**
+ * The gate at exactly its bound, both facings. `K = weapon_range + 50`; the
+ * build fires facing right only when `attacker._x > round(defender._x - K)`
+ * and facing left only when `attacker._x < round(defender._x + K)`
+ * (`+0x6658`-`+0x6699`, `+0x66d1`-`+0x6712`) — STRICT, so a gap of exactly K
+ * is out. ~~`separation <= round(reach + 50)`~~ accepted it until 2026-09-22.
+ */
+function gateCase({ gap, heroLeft = false, hero = {} }) {
+  const battle = staged({
+    red: [{ id: "hero", fields: gladiator({ psyche_up: 3, ...(heroLeft ? { gladiator_dir: "left" } : {}), ...hero }), x: heroLeft ? gap : 0, y: 0 }],
+    blue: [{ id: "villain", fields: gladiator(heroLeft ? {} : { gladiator_dir: "left" }), x: heroLeft ? 0 : gap, y: 0 }]
+  });
+  // Construction derived facing from the STARTING positions, so it is
+  // re-stated for the ones staged here: the pair faces each other.
+  for (const [id, left] of [["hero", heroLeft], ["villain", !heroLeft]]) {
+    const combatant = combatantById(battle, id);
+    combatant.status = combatant.status.filter((token) => token !== "facing-left");
+    if (left) combatant.status.push("facing-left");
+  }
+  const drawsBefore = rngJournal(battle).length;
+  const event = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  return { event, draws: rngJournal(battle).length - drawsBefore, battle };
+}
+
+test("THE GATE IS STRICT: facing right, a discharge fires at K - 1 and is gated at exactly K", () => {
+  const K = ss2Reach(combatantById(duel(), "hero")) + SS2_PSYCHE_UP.rangeBonus;
+  const inside = gateCase({ gap: K - 1 });
+  assert.equal(inside.event.discharged, true);
+  assert.ok(inside.draws > 0);
+  const onBound = gateCase({ gap: K });
+  assert.equal(onBound.event.outOfRange, true, "0 > round(K - K) is false");
+  assert.equal(onBound.draws, 0);
+});
+
+test("THE GATE IS STRICT: facing left, a discharge fires at K - 1 and is gated at exactly K", () => {
+  const K = ss2Reach(combatantById(duel(), "hero")) + SS2_PSYCHE_UP.rangeBonus;
+  const inside = gateCase({ gap: K - 1, heroLeft: true });
+  assert.equal(inside.event.discharged, true);
+  const onBound = gateCase({ gap: K, heroLeft: true });
+  assert.equal(onBound.event.outOfRange, true, "K < round(0 + K) is false");
+  assert.equal(onBound.draws, 0);
+});
+
+test("THE ROUND IS THE BUILD'S: round(defender._x -/+ K), so a HALF-INTEGER K gates the two facings one apart", () => {
+  // ► **UNREACHABLE THROUGH A DERIVED `weapon_range`**, which is
+  //   `physical_size + multiplier * 44` with integer multipliers — so K is an
+  //   integer for every record this engine derives, and for integer positions
+  //   `round(dx - K)` and `dx - round(K)` agree. A record may STATE a
+  //   fractional `weapon_range`, and then they do not: `Math.round` rounds a
+  //   half toward +infinity, so `round(dx - 170.5)` is `dx - 170` and
+  //   `round(dx + 170.5)` is `dx + 171`. Facing right the last firing gap is
+  //   169; facing left it is 170. `dx - round(K)` would make both 170.
+  const hero = { weapon_range: 120.5 };
+  assert.equal(gateCase({ gap: 169, hero }).event.discharged, true);
+  assert.equal(gateCase({ gap: 170, hero }).event.outOfRange, true, "facing right: 0 > round(170 - 170.5) = -0 is false");
+  assert.equal(gateCase({ gap: 170, hero, heroLeft: true }).event.discharged, true, "facing left: 170 < round(170.5) = 171");
+  assert.equal(gateCase({ gap: 171, hero, heroLeft: true }).event.outOfRange, true);
+});
+
+test("A TARGET IN ANOTHER RANK KEEPS THE DEPTH TERM — INVENTED; the build's gate reads _x alone and has no ranks", () => {
+  // `K - 10` along the arena passes both of the build's expressions; one rank
+  // back, the Euclidean fight distance is past K, and the gate this function
+  // always had (now strict) still refuses it. On one rank the term is inert.
+  const K = ss2Reach(combatantById(duel(), "hero")) + SS2_PSYCHE_UP.rangeBonus;
+  const build = (villainY) => staged({
+    red: [{ id: "hero", fields: gladiator({ psyche_up: 3 }), x: 0, y: 0 }],
+    blue: [{ id: "villain", fields: gladiator(), x: K - 10, y: villainY }]
+  });
+  const sameRank = psycheEvent(take(build(0), "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  assert.equal(sameRank.discharged, true, "on one rank K - 10 is inside");
+  const offRank = psycheEvent(take(build(0 - SS2_ARENA.rankStride), "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  assert.ok(offRank.separation >= K, "one rank back the fight distance is past the bound, or this proves nothing");
+  assert.equal(offRank.outOfRange, true);
+});
+
+test("A TARGET BEHIND THE CASTER IS GATED BY DISTANCE — INVENTED; the build's facing test would pass it at any range", () => {
+  // The caster faces right and the target stands 4000 BEHIND it. The build's
+  // facing-right expression is `attacker._x > round(defender._x - K)`, true
+  // for every defender to the caster's left — only team play reaches that in
+  // the build, because a 1v1 pair always faces each other (a staged record can
+  // state a facing, which is how this reaches it). This engine keeps the
+  // symmetric test instead, so a charge is never spent across the arena.
+  const battle = staged({
+    red: [{ id: "hero", fields: gladiator({ psyche_up: 3 }), x: 0, y: 0 }],
+    blue: [{ id: "villain", fields: gladiator(), x: -4000, y: 0 }]
+  });
+  assert.ok(!combatantById(battle, "hero").status.includes("facing-left"), "the caster must face AWAY from its target");
+  const event = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain"));
+  assert.ok(!combatantById(battle, "hero").status.includes("facing-left"), "and still be facing away when it presses");
+  assert.equal(event.outOfRange, true);
 });
 
 /* ------------------------------------------------------------------ *
@@ -528,8 +638,10 @@ test("a MISS does not interrupt a charge, because no damage was taken", () => {
 
 test("A LETHAL DISCHARGE LEAVES 1, because the callback that adds one never runs", () => {
   // ► **RAISED BY AN ADVERSARIAL REVIEW AND CONFIRMED AGAINST BYTES THIS FILE'S
-  //   MODULE ALREADY CITES.** The `+0x6738` write-back is SYNCHRONOUS inside
-  //   `checkattackroll`; the `+0x6761` increment is gated on
+  //   MODULE ALREADY CITES.** The `+0x6738` write-back is SYNCHRONOUS ~~inside
+  //   `checkattackroll`~~ — in the phase arm, same tick, after
+  //   `checkattackroll()` returns (location corrected 2026-09-22; the
+  //   conclusion stands); the `+0x6761` increment is gated on
   //   `attacker.struck == true` and fires on a LATER tick. `damagecharacter`
   //   calls `death()` in the same synchronous call, and `death()` deletes
   //   `attacker.onEnterFrame` (`+0x2035`), `defender.onEnterFrame` (`+0x2042`)
