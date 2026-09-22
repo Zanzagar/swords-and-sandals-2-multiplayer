@@ -3177,17 +3177,47 @@ The arm is `+0x83f5`–`+0x862e`, 138 instructions, six `If`s and **zero
   DEFENDER's own `_x`. The item table calls a lightning bolt "close-ranged";
   the bytes impose no range at all.
 
-### The fireball family and molten death, and why neither is a turn (2026-09-20)
+### The fireball family and molten death, and why ~~neither is~~ only molten death is not a turn (2026-09-20; corrected 2026-09-22)
 
 Derived beside the bolts and recorded because the DIFFERENCE is the finding.
 
 - **`cast_fireball` / `cast_hell_fireball` / `cast_dire_fireball`,
   `+0x8f59`–`+0x94ff`, ingress `+0x91c1`.** One sample per cast, exactly like a
   bolt — the three `randomBetween` sites are mutually exclusive arms of one
-  three-way `||`. What differs is that the damage is applied from a per-frame
+  three-way `||`. ~~What differs is that the damage is applied from a per-frame
   handler after a ballistic flight: `bullet.Xvelocity` 50/70/90
   (`+0x940f`/`+0x9435`/`+0x945b`), `gravity` 2 (`+0x9360`), `bulletlife` 1
-  (`+0x933a`), `onEnterFrame` (`+0x946e`).
+  (`+0x933a`), `onEnterFrame` (`+0x946e`).~~ **THE FLIGHT IS FLAT AND THE
+  DAMAGE IS APPLIED BY THE PHASE ARM, NOT BY THE BULLET — corrected 2026-09-22
+  by a deriver and a write-nothing verifier over a dump of `+0x68df`–`+0x94ff`,
+  and the main session over the sprite itself.**
+  - The bullet's `onEnterFrame` (`+0x947b`–`+0x94fe`) reads only `flying`,
+    `attacker.gladiator_dir`, `_x` and `Xvelocity` (50/70/90 at
+    `+0x940f`/`+0x9435`/`+0x945b`): `if (flying != false) _x += Xvelocity`
+    facing right, `-=` otherwise. `gravity`, `bulletlife`, `bulletcounter` and
+    `distance_to_enemy` are WRITTEN (`+0x9333`–`+0x93bf`) and never read; there
+    is no `Yvelocity` in the arm. `flying` is only ever set `false`
+    (`+0x91ec`), so in flight it is undefined and the bullet moves.
+  - The IMPACT test is the arm's, run every tick BEFORE the launch code
+    (`+0x9109`–`+0x9196`): `((bullet._x > defender._x && dir == "right") ||
+    (bullet._x < defender._x && dir == "left")) && bullet._currentframe != 4`,
+    then `magic_damage_character(defender, attacker, game_defender,
+    game_attacker, "burning", 4, fireball_damage)` (`+0x919b`–`+0x91cb`),
+    `gotoAndStop(4)`, `flying = false`, `bullet_in_air = false`. **No ground,
+    lifetime or offscreen clause: a fireball cannot miss**, and it tests only
+    the TARGET's x, so in a team fight it passes through bystanders.
+  - **A typo in the build: `bullet.gotondStop(fireball_frame)` (`+0x9276`,
+    constant `"gotondStop"`).** The method does not exist, so `fireball_frame`
+    1/2/3 is never applied. `fireball_combat` is sprite 28, four frames: frame 1
+    runs `stop()`, so ALL THREE spells fly showing frame 1; frames 2 and 3 are
+    never shown; frame 4 runs `stop()` and places sprite 27, a 23-frame
+    explosion whose last frame runs `_parent.removeMovieClip()`. So the damage
+    lands exactly once and the bullet is gone about 23 frames after impact.
+  - Nothing in the arm ends the phase. The only end is the stall watchdog
+    (`+0x37ef`–`+0x38a0`, read by the verifier): `(demand_move >= 60 &&
+    attacker._y >= attacker.grounded && bullet_in_air != true) || demand_move
+    >= 200`. The 200 cap cannot bind inside the ±2100 clamp (at most ~84 ticks
+    of flight at 50 px).
   ► **AND ITS FRAME TEST IS AN IDEMPOTENCE GUARD, NOT AN IMPACT TRIGGER.**
     `+0x9194 Not; +0x9195 Not; +0x9196 If` is a DOUBLED `Not`, so the gate reads
     `if (bullet._currentframe != 4)`: the block applies damage once, then
@@ -3210,9 +3240,14 @@ Derived beside the bolts and recorded because the DIFFERENCE is the finding.
     creates clips named `boulder`. So a molten death removes whatever bolt clip
     the last lightning cast left behind.
 
-**So only the bolts are expressible as a discrete turn**, and that is the whole
+~~**So only the bolts are expressible as a discrete turn**, and that is the whole
 reason `src/team/ss2-rules.js` builds those two and not the other nine spells
-that reach this ingress.
+that reach this ingress.~~ **THE FIREBALL FAMILY IS A DISCRETE TURN TOO —
+corrected 2026-09-22, and the "ballistic" premise above was what made it look
+otherwise.** One draw, no hit roll, damage certain; the flight is cosmetic and
+decides only WHEN the victim's `burning` clip starts. Molten death stays out: its
+damage comes from each boulder's own `onEnterFrame`, so how many land is a
+question of flight geometry per boulder.
 
 ### The gale gate is five conditions, not one (derived 2026-09-19)
 
