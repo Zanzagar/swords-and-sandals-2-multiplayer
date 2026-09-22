@@ -81,6 +81,11 @@ import {
   projectileFlight,
   projectileDrawAt,
   flightDurationMs,
+  fireballFlight,
+  fireballDrawAt,
+  fireballLifetimeMs,
+  fireballOpsFor,
+  reactionDelaysFor,
   propPackFrom,
   hasExtractedProps,
   propFrameCount,
@@ -219,6 +224,16 @@ let inFlight = [];
  * (`+0x85ed`), so the two end together and neither holds the gate on its own.
  */
 let attached = [];
+/**
+ * Fireballs, each on its own clock — the flight AND the explosion after it.
+ *
+ * Not `inFlight`: that list is drawn as ARROWS and pruned at the end of the
+ * flight, and a fireball stays on screen for its explosion after it lands
+ * (`bullet.gotoAndStop(4)`, `+0x91cd`). Only the FLIGHT holds the gate, as the
+ * build's `bullet_in_air` does; the victim's reaction, started at impact,
+ * holds it after that. Every decision is `fireballDrawAt`'s.
+ */
+let fireballs = [];
 let settled = false;
 
 const el = (id) => document.getElementById(id);
@@ -675,6 +690,25 @@ function beginStep(step) {
   // for one fact. `scene.projectiles` is this batch's own and does not carry
   // forward, which is exactly the list wanted here.
   for (const shotRecord of scene.projectiles) {
+    // A FIREBALL is routed out before `projectileFlight`, which refuses it:
+    // it flies the build's own impact test, not the arrow's stop-short. See
+    // `fireballFlight` in `src/render/projectile.js`.
+    if (shotRecord.projectile === "fireball") {
+      const flight = fireballFlight({
+        from: shotRecord.from,
+        to: shotRecord.to,
+        gladiatorDir: shotRecord.gladiatorDir,
+        xVelocity: shotRecord.xVelocity
+      });
+      fireballs.push({
+        flight,
+        token: shotRecord.actionToken,
+        startedAt: performance.now(),
+        flightMs: flightDurationMs(flight),
+        lifetimeMs: fireballLifetimeMs(flight)
+      });
+      continue;
+    }
     const flight = projectileFlight({
       kind: shotRecord.projectile,
       from: shotRecord.from,
@@ -707,8 +741,14 @@ function beginStep(step) {
   // entry with no `startedAt` reads as infinitely overdue to `animationCursor`.
   // Stamped here rather than inside `timelinesForStep` so a frame that arrives
   // late does not make a timeline look overdue before it has drawn once.
-  for (const entry of started.values()) {
-    entry.startedAt = performance.now();
+  //
+  // ► **A FIREBALL'S VICTIM STARTS AT IMPACT**, `reactionDelaysFor`'s answer,
+  //   so its clock is stamped in the FUTURE. `animationCursor` already counts
+  //   an entry that has not begun as running, so the gate stays shut; the two
+  //   pose sites below treat it as absent until it begins.
+  const delays = reactionDelaysFor(step.commands);
+  for (const [combatantId, entry] of started) {
+    entry.startedAt = performance.now() + (delays.get(combatantId) ?? 0);
     // ► **WHICH POSE THROWS BLOOD, from the clip's own call sites.** The table
     //   is keyed by the fighter clip's frame numbers and
     //   `effectsForAnimation` converts them to pose indices once, so the shell
@@ -736,7 +776,13 @@ function beginStep(step) {
   // the speaker were choosing independently within a family — `attack3` on
   // screen against whichever of the attack sounds a counter landed on. See
   // `chooseSound`, which carries the whole story.
-  for (const [, entry] of started) {
+  for (const [combatantId, entry] of started) {
+    // The same delay the clip waits for, so the burn is heard when it is seen.
+    const delay = delays.get(combatantId) ?? 0;
+    if (delay > 0) {
+      setTimeout(() => playFor(entry.timeline.family, step.actionBoundary ?? 0, entry.timeline.label), delay);
+      continue;
+    }
     playFor(entry.timeline.family, step.actionBoundary ?? 0, entry.timeline.label);
   }
 
@@ -769,10 +815,20 @@ function drainFinishedAnimations(now) {
   // A bolt is removed when its victim's clip ends, by the same comparison the
   // painter uses, so a bolt being drawn and a bolt still attached are one fact.
   attached = attached.filter((entry) => now - entry.startedAt < entry.lifetimeMs);
+  // A fireball is removed by its explosion's last frame — `fireballDrawAt`'s
+  // `done`, by the same comparison.
+  fireballs = fireballs.filter((entry) => now - entry.startedAt < entry.lifetimeMs);
   // A drop lives 25 of the build's frames and is REMOVED rather than fading
   // (`+0x046a`). Pruned by the same comparison that decides whether to draw it.
   drops = drops.filter((spray) => (now - spray.startedAt) / PROJECTILE_FRAME_MS <= SS2_DROP.lifeFrames);
-  const cursor = animationCursor(pendingTokens, playing, now, { projectiles: inFlight });
+  // Only a fireball's FLIGHT holds the gate — `bullet_in_air` is cleared at
+  // impact (`+0x91f5`) — and its victim's reaction, started then, holds it on.
+  const cursor = animationCursor(pendingTokens, playing, now, {
+    projectiles: [
+      ...inFlight,
+      ...fireballs.map((entry) => ({ token: entry.token, startedAt: entry.startedAt, durationMs: entry.flightMs }))
+    ]
+  });
   for (const combatantId of cursor.expired) playing.delete(combatantId);
 
   // The surface gave up. That is a different fact from the animation having
@@ -3388,8 +3444,10 @@ function renderStage(view, fit, now) {
     const actor = scene.actors[combatantId];
     if (!actor?.placed || !Number.isFinite(actor.y)) continue;
     // The same clock the draw loop below reads, for the same reason it
-    // computes `at` once: two readings of one clock drift apart.
-    const entry = playing.get(combatantId);
+    // computes `at` once: two readings of one clock drift apart. An entry that
+    // has not BEGUN — a fireball's victim before impact — is not posed yet.
+    const queued = playing.get(combatantId);
+    const entry = queued && queued.startedAt <= now ? queued : undefined;
     const at = entry ? Math.min(1, (now - entry.startedAt) / entry.timeline.durationMs) : 0;
     drawnYById.set(combatantId, figureYAt({
       restingY: actor.y,
@@ -3430,7 +3488,12 @@ function renderStage(view, fit, now) {
     const placement = host.layout.placementFor(combatantId);
     const figure = figureSpecFor(combatant, { side: placement.side });
 
-    const entry = playing.get(combatantId);
+    // ► **A QUEUED ENTRY IS NOT POSED UNTIL IT BEGINS** — a fireball's victim
+    //   before impact (`reactionDelaysFor`). Until then it stands as it was,
+    //   EVEN when the resolver has already killed it: it dies at impact.
+    const queued = playing.get(combatantId);
+    const waiting = Boolean(queued) && queued.startedAt > now;
+    const entry = waiting ? undefined : queued;
     // How far through its own schedule the running timeline is. Computed once:
     // the pose and the travelled x are two readings of the same clock, and
     // computing it twice is how they drift apart.
@@ -3445,6 +3508,10 @@ function renderStage(view, fit, now) {
       drawnTimeline = entry.timeline;
       drawnAt = at;
       pose = poseAt(entry.timeline, at);
+    } else if (waiting && !combatant.alive) {
+      drawnTimeline = timelineFor("Standing", { role: "actor" });
+      drawnAt = 0;
+      pose = poseAt(drawnTimeline, 0);
     } else if (!combatant.alive) {
       drawnTimeline = timelineFor("slain", { role: "defeated" });
       drawnAt = 1;
@@ -3624,6 +3691,8 @@ function renderStage(view, fit, now) {
   }
 
   drawProjectiles(view, now);
+  // At the arrow's depth, 45000 on `arena.gladiators` (`+0x9225`): over every body.
+  drawFireballs(view, now);
   // Above the figures: the build attaches the bolt with `getNextHighestDepth()`
   // on `arena.gladiators`, over both fighters.
   drawSpellEffects(view, now);
@@ -3774,7 +3843,7 @@ function paintPropOperation(operation) {
   context.restore();
 }
 
-function paintProp(ops, view, { x, y, lift, size, rotation, filtersScaled = false }) {
+function paintProp(ops, view, { x, y, lift, size, rotation, filtersScaled = false, mirrored = false }) {
   context.save();
   context.globalAlpha = 1;
   context.translate(view.toX(x), view.toY(y, lift));
@@ -3785,7 +3854,9 @@ function paintProp(ops, view, { x, y, lift, size, rotation, filtersScaled = fals
   //   send a snipe pointing backwards.
   if (rotation) context.rotate(rotation);
   const k = size * view.scale;
-  context.scale(k, -k);
+  // `mirrored` is a negative `_xscale` — the fireball facing left (`+0x92e0`).
+  // Every other caller leaves it false and draws exactly as before.
+  context.scale(mirrored ? -k : k, -k);
   // ► **`filtersScaled: false`, AND THAT IS AN ADMISSION RATHER THAN A
   //   SETTING.** Every array that reaches here comes from `arrowOpsFor`,
   //   `arrowTrailOpsFor`, `arenaSceneryFor` or `drawDrops`, each of which calls
@@ -3851,6 +3922,52 @@ function drawSpellEffects(view, now) {
       else context.lineTo(x + offset, y);
     }
     context.stroke();
+    context.restore();
+  }
+}
+
+/**
+ * THE FIREBALLS, drawn. Where, how big, which frame, how old and whether it is
+ * gone are all `fireballDrawAt`'s, under the suite; this is canvas calls.
+ *
+ * ► **`fireball_combat` IS NOT IN A PACK EXTRACTED BEFORE 2026-09-22**, so
+ *   `fireballOpsFor` answers null and the authored ball below is drawn — the
+ *   same per-prop fallback the arrow has. It says it is authored by being
+ *   plainly a disc and a ring.
+ */
+function drawFireballs(view, now) {
+  for (const entry of fireballs) {
+    const drawn = fireballDrawAt(entry.flight, now - entry.startedAt, {
+      frontY: ARENA_FRONT_Y, rankStride, figureScaleFor, rankOfDepth
+    });
+    if (drawn.done) continue;
+    const ops = fireballOpsFor(propPack, drawn.clipFrame, drawn.ageFrames);
+    if (ops) {
+      paintProp(ops, view, {
+        x: drawn.x, y: drawn.y, lift: drawn.lift, size: drawn.size, rotation: drawn.rotation, mirrored: drawn.mirrored
+      });
+      context.globalAlpha = 1;
+      continue;
+    }
+    const cx = view.toX(drawn.x);
+    const cy = view.toY(drawn.y, drawn.lift);
+    const unit = Math.max(2, view.scale * 10 * drawn.size);
+    context.save();
+    if (drawn.stage === "flight") {
+      context.globalAlpha = 0.95;
+      context.fillStyle = "#ff9a2e";
+      context.beginPath();
+      context.arc(cx, cy, unit, 0, Math.PI * 2);
+      context.fill();
+    } else {
+      const fade = 1 - drawn.ageFrames / Math.max(1, entry.flight.explosionVisibleFrames);
+      context.globalAlpha = Math.max(0, fade);
+      context.strokeStyle = "#ffcf5a";
+      context.lineWidth = Math.max(1.5, unit * 0.4);
+      context.beginPath();
+      context.arc(cx, cy, unit * (1 + drawn.ageFrames * 0.25), 0, Math.PI * 2);
+      context.stroke();
+    }
     context.restore();
   }
 }

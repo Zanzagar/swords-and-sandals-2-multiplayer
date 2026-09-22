@@ -449,9 +449,10 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    *   `cast_gale`'s and the fireball family's clip (`+0x7b30`, `+0x90f4`), and
    *   neither has a verb.~~ **`cast1` LEFT TOO, LATER ON 2026-09-22, when
    *   `cast_gale` got its verb** — family, `familyOf` and the event's
-   *   `casterClip` in one change, the order this paragraph prescribes. The
+   *   `casterClip` in one change, the order this paragraph prescribes. ~~The
    *   fireballs still have no verb; they play the same clip and will need
-   *   nothing here when they get one.
+   *   nothing here when they get one.~~ The fireballs got theirs the same day
+   *   and, as predicted, needed nothing here: they play the same `Cast1`.
    */
   unbuiltSpells: Object.freeze([
     // `cast2` and `lightning` left on 2026-09-22; see the `cast` and

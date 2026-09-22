@@ -33,6 +33,7 @@
  */
 
 import { abandonReasonFor, timelineFor } from "./timeline.js";
+import { fireballFlight, flightDurationMs } from "./projectile.js";
 
 export class CursorError extends Error {
   constructor(message, options = {}) {
@@ -237,4 +238,58 @@ export function animationCursor(pendingTokens, playing, now, { projectiles = [] 
     expired: Object.freeze(expired),
     abandon: abandon ? Object.freeze(abandon) : null
   });
+}
+
+/**
+ * HOW LONG EACH COMBATANT'S REACTION WAITS, for one drained batch — the
+ * victim of a fireball reacts when it LANDS, not when it is cast.
+ *
+ * ► **ADDED 2026-09-22 WITH THE FIREBALLS, AND THE ARROW HAS NO EQUIVALENT.**
+ *   A batch starts every timeline at once: `timelinesForStep` pairs clips with
+ *   motions and names no start time, and the shell stamps one clock on all of
+ *   them. That is right for a bolt, whose ingress runs in the cast's own
+ *   straight-line run (`+0x85af`), and wrong for a fireball, whose ingress runs
+ *   on the frame the bullet is first past the victim (`+0x91c1`) — up to 84
+ *   frames, 2.8 s, later. So the victim's clip was a flinch at an explosion
+ *   that had not happened yet.
+ *
+ *   **Kept OUT of `timelinesForStep`**, as a second question about the same
+ *   batch, so that function's pairing rules and every test pinning its entry
+ *   shape are untouched. A surface starts each entry `delay` ms after its batch
+ *   clock and treats it as absent until then; `animationCursor` already counts
+ *   an entry whose `startedAt` is still ahead of `now` as running, so the gate
+ *   stays shut from the cast to the end of the reaction with no gap.
+ *
+ *   **The arrow is deliberately NOT given this.** Its `checkattackroll` is also
+ *   called from the impact test (`+0x6d29`), so the same argument applies, but
+ *   adopting it would change a shipped presentation that nothing asked to
+ *   change. It is one line here when somebody does.
+ *
+ * ► **EVERY clip the batch starts for the victim waits, the death included**:
+ *   on a killing fireball the victim's last clip is its death, and it dies at
+ *   impact too.
+ *
+ * @param {Iterable<object>} commands one drained batch
+ * @returns {Map<string, number>} combatant id -> delay in ms; absent means 0
+ */
+export function reactionDelaysFor(commands) {
+  if (!commands || typeof commands[Symbol.iterator] !== "function") {
+    throw new CursorError("reactionDelaysFor needs an iterable of presentation commands.");
+  }
+  const delays = new Map();
+  for (const command of commands) {
+    if (command?.kind !== "fire-projectile" || command.projectile !== "fireball") continue;
+    // Total rather than throwing, like the rest of the presentation path: a
+    // shot this function cannot fly delays nothing and plays as a bolt would.
+    if (!Number.isFinite(command.from?.x) || !Number.isFinite(command.to?.x)) continue;
+    if (!Number.isFinite(command.xVelocity) || command.xVelocity <= 0) continue;
+    const flight = fireballFlight({
+      from: command.from,
+      to: command.to,
+      gladiatorDir: command.gladiatorDir,
+      xVelocity: command.xVelocity
+    });
+    delays.set(command.targetId, flightDurationMs(flight));
+  }
+  return delays;
 }

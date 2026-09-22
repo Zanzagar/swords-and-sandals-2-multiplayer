@@ -399,6 +399,15 @@ export const Ss2ActionType = Object.freeze({
   //   step from the first cast.
   CAST_LIGHTNING_BOLT: "cast-lightning-bolt",
   CAST_FRIGHTNING_BOLT: "cast-frightning-bolt",
+  // ► **THE FIREBALL FAMILY — THREE TYPES FOR ONE ARM, for the bolts' reason.**
+  //   `+0x8f59`-`+0x94ff` of the same block; see `SS2_FIREBALL_SPELLS`. One
+  //   sample, no hit roll, so NOT in `ATTACK_BANDS` for the bolts' reason too.
+  //   What differs is TIMING — the damage lands when a flat `bullet` passes
+  //   the victim's x, frames after the cast — and a discrete turn resolves it
+  //   at once and leaves the flight to the presentation.
+  CAST_FIREBALL: "cast-fireball",
+  CAST_HELL_FIREBALL: "cast-hell-fireball",
+  CAST_DIRE_FIREBALL: "cast-dire-fireball",
   // ► **THE GALE — THE THIRD SPELL VERB AND THE FIRST THAT DEALS NO DAMAGE.**
   //   `+0x7aaa`-`+0x7be5` of the same block; see `SS2_GALE`. A pure
   //   displacement like `shove`, taking ZERO samples, so it is not in
@@ -948,6 +957,14 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // everywhere else in this repository: a corrected spelling is a name that
   // matches nothing in the build.
   [Ss2ActionType.CAST_FRIGHTNING_BOLT]: "cast_frightning_bolt",
+  // The three constants the fireball gate compares (`+0x8f5f`, `+0x8f73`,
+  // `+0x8f87`) and the three decisions ladder arms 18, 16 and 14 write
+  // (`+0x0c20`, `+0x0baa`, `+0x0b34`). The CASTER's clip is `Cast1`
+  // (`+0x90f4`), the gale's and not the bolts' `Cast2`, and the victim's is
+  // the ingress's `damage_method`, `"burning"` (`+0x91a2`).
+  [Ss2ActionType.CAST_FIREBALL]: "cast_fireball",
+  [Ss2ActionType.CAST_HELL_FIREBALL]: "cast_hell_fireball",
+  [Ss2ActionType.CAST_DIRE_FIREBALL]: "cast_dire_fireball",
   // `phase_decision == "cast_gale"` at `+0x7ab0`, and the decision the villain
   // ladder writes at arm 24 (`+0x0ea3`). The CASTER's clip is `Cast1`
   // (`+0x7b30`), not `Cast2`, and the victim's is `knockback` (`+0x7b78`) —
@@ -3523,7 +3540,11 @@ export function ss2InventorySlotHolding(actor, itemId, { ignoreMaxslots = false 
  *   fireball family takes one sample per cast too. What separates them is
  *   TIMING: a bolt's damage is applied in the same straight-line run as
  *   `gotoAndPlay("Cast2")`, and a fireball's waits for a `bullet` with
- *   `Xvelocity` 50/70/90, `gravity` 2 and an `onEnterFrame`. See
+ *   `Xvelocity` 50/70/90~~, `gravity` 2~~ and an `onEnterFrame`. **`gravity` 2
+ *   is WRITTEN (`+0x9360`) and never read — the fireball's `onEnterFrame`
+ *   reads only `flying`, `gladiator_dir`, `_x` and `Xvelocity`, so the flight
+ *   is FLAT** (corrected 2026-09-22 when the fireballs were built; see
+ *   `SS2_FIREBALL_SPELLS`). See
  *   `test/ss2-bolt.test.js` for the three-arm comparison, including the
  *   doubled-`Not` gate that makes the fireball's frame test an idempotence
  *   guard rather than an impact trigger.
@@ -3640,6 +3661,207 @@ export const SS2_BOLT_INGRESS = Object.freeze({
    */
   crowdAction: 5
 });
+
+/* ------------------------------------------------------------------ */
+/* The fireball phase: the bolt's arithmetic, delivered by a bullet     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_fireball` / `cast_hell_fireball` / `cast_dire_fireball`, read
+ * 2026-09-22 from `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base
+ * `0x240c85`), `+0x8f59`-`+0x94ff`:
+ *
+ * ```text
+ *   phase_decision == "cast_fireball" || == "cast_hell_fireball"
+ *     || == "cast_dire_fireball"                                   +0x8f59-+0x8f8f
+ *     register:3.crowd_action = 5                                  +0x8f94
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x8fa1-+0x8fc7
+ *     if (attacker.struck == null) {                               +0x8fc8-+0x8fda
+ *       bullet_in_air = true                                       +0x8fdf
+ *       if (label == "cast_fireball")      { cast_spell_icon(attacker, 30)
+ *         fireball_damage = randomBetween(80, 160);  fireball_frame = 1 }  +0x8ffa-+0x9036
+ *       if (label == "cast_hell_fireball") { cast_spell_icon(attacker, 31)
+ *         fireball_damage = randomBetween(150, 450); fireball_frame = 2 }  +0x904a-+0x9086
+ *       if (label == "cast_dire_fireball") { cast_spell_icon(attacker, 32)
+ *         fireball_damage = randomBetween(300, 600); fireball_frame = 3 }  +0x909a-+0x90d6
+ *       attacker.struck = false; attacker.fired = true             +0x90d7-+0x90f3
+ *       attacker.gotoAndPlay("Cast1")                              +0x90f4
+ *     }
+ *     if (((bullet._x > defender._x && attacker.gladiator_dir == "right")
+ *          || (bullet._x < defender._x && attacker.gladiator_dir == "left"))
+ *         && bullet._currentframe != 4) {                          +0x9109-+0x9196
+ *       magic_damage_character(defender, attacker, game_defender,
+ *           game_attacker, "burning", 4, fireball_damage)          +0x91c1
+ *       bullet.gotoAndStop(4); bullet.flying = false;
+ *       bullet_in_air = false                                      +0x91cd-+0x91fc
+ *     }
+ *     if (attacker.fired == true) {                                +0x91fd-+0x9211
+ *       attacker.fired = false; bulletdepth = 45000                +0x9216-+0x9230
+ *       bullet = arena.gladiators.attachMovie("fireball_combat", ...) +0x9231-+0x9262
+ *       bullet.gotondStop(fireball_frame)                          +0x9263-+0x927d
+ *       bullet._x = attacker._x + 30 (right) | - 30 and _xscale = -_xscale (left)
+ *                                                                  +0x927e-+0x92f9
+ *       bullet._y = attacker._y - (attacker._yscale * 1.5 + 5)     +0x92fa-+0x9332
+ *       bulletlife = 1; bulletcounter = 1; gravity = 2; distance_to_enemy = |dx|
+ *                                                                  +0x9333-+0x93f4
+ *       bullet.Xvelocity = 50 | 70 | 90                            +0x940f/+0x9435/+0x945b
+ *       bullet.onEnterFrame = function () {
+ *         if (bullet.flying != false)
+ *           bullet._x += Xvelocity (right) | -= Xvelocity (else)   +0x947b-+0x94fe
+ *       }
+ *     }
+ * ```
+ *
+ * ► **ONE SAMPLE PER CAST, AND IT IS THE DAMAGE — the bolts' shape.** Three
+ *   `randomBetween` sites in mutually exclusive arms; no `checkattackroll`, no
+ *   `RandomNumber`, no direction draw anywhere in `+0x8f59`-`+0x94ff`. It
+ *   **cannot miss**: the impact test has no ground clause (the arrow's
+ *   `bullet._y > 160` has no twin here), no lifetime and no off-screen exit.
+ *
+ * ► **THE TWO FRAME TESTS ARE AN IDEMPOTENCE GUARD, as the map records**:
+ *   `+0x9194 Not; +0x9195 Not` reads `_currentframe != 4`, so the damage lands
+ *   once and `gotoAndStop(4)` parks the clip on its explosion.
+ *
+ * ► **`gotondStop` IS A TYPO IN THE BUILD** (the constant at `+0x9276`), a call
+ *   to a MovieClip method that does not exist. So `fireball_frame` is assigned
+ *   and never applied, and **all three spells fly on `fireball_combat` frame
+ *   1**; frames 2 and 3, the hell and dire art, are never shown. The table
+ *   carries `fireballFrame` as the build ASSIGNS it, for the record; the
+ *   presentation draws frame 1 and says why.
+ *
+ * ► **THE FLIGHT IS FLAT.** The `onEnterFrame` reads `flying`, `gladiator_dir`,
+ *   `_x` and `Xvelocity` and NOTHING else. `gravity`, `bulletlife`,
+ *   `bulletcounter` and `distance_to_enemy` are written and never read — they
+ *   are the arrow arm's setup copied across (compare `+0x6ed7`-`+0x6f98`). The
+ *   `flying != false` test passes while `flying` is undefined, which it is for
+ *   the whole flight: the only write to it is `= false`, at impact (`+0x91ec`;
+ *   the one read is `+0x9482`, and those are the only two `"flying"`
+ *   references in the dumps this was read from — a whole-SWF sweep is the main
+ *   session's, not re-run here). The two `gravity` READS those dumps show
+ *   (`+0x7297`, `+0x7455`) are both inside the ARROW's `onEnterFrame`
+ *   (`DefineFunction2` at `+0x7177`), which a fireball never has.
+ *
+ * ► **THE DIRECTION IS THE CASTER'S FACING, NOT THE TARGET'S SIDE.** Launch,
+ *   flight and impact all read `attacker.gladiator_dir`. A target behind the
+ *   caster is "past" at launch and burns on the first frame after it.
+ *
+ * ► **THE PHASE HAS NO `nextphase` OF ITS OWN.** Nothing in the arm ends it;
+ *   the stall watchdog does (`+0x37ef`-`+0x38a0`: `demand_move >= 60 &&
+ *   attacker._y >= attacker.grounded && bullet_in_air != true`, or
+ *   `demand_move >= 200`). This engine completes every phase within the
+ *   action, so the difference is the presentation's: the flight holds the
+ *   animation gate, as the arrow's does.
+ *
+ * ► **ON A DEFEAT THE COST IS NEVER SPENT, the bolts' rule by the same
+ *   mechanism**: the ingress's `death()` deletes both fighters' `onEnterFrame`
+ *   and `nextphase`, so the watchdog that would have spent `staminacost` never
+ *   runs.
+ *
+ * ► **ONE `bullet` IS SHARED WITH THE ARROW ARM**, timeline-scope like the
+ *   bolt's `bolt`. On the cast's own first frame the impact test runs BEFORE
+ *   the launch, against whatever `bullet` last held; that is a removed clip
+ *   (the arrow removes itself at `+0x6d41`, the explosion's last frame removes
+ *   the fireball) or one parked on frame 4, and both fail the test. Recorded
+ *   because a frame-accurate port must keep that order.
+ */
+export const SS2_FIREBALL_SPELLS = Object.freeze({
+  [Ss2ActionType.CAST_FIREBALL]: Object.freeze({
+    /** `cast_spell_icon(attacker, 30)`, `+0x8ffa`; ladder arm 18, `check_inventory(30)` `+0x0c04`. */
+    itemId: 30,
+    /** `randomBetween(80, 160)`, `+0x9012`. Inclusive, per the map's RNG surface. */
+    damageLow: 80,
+    damageHigh: 160,
+    /** `bullet.Xvelocity = 50`, `+0x940f` — arena units per 30 fps frame. */
+    xVelocity: 50,
+    /** `fireball_frame = 1`, `+0x902b` — ASSIGNED, and never applied (`gotondStop`). */
+    fireballFrame: 1,
+    /** The tape label; `src/golden/ss2-spell-candidate.js` owns the canonical one. */
+    rollLabel: "fireball-damage-roll"
+  }),
+  [Ss2ActionType.CAST_HELL_FIREBALL]: Object.freeze({
+    /** `+0x904a`; ladder arm 16, `+0x0b8e`. */
+    itemId: 31,
+    /** `randomBetween(150, 450)`, `+0x9062`. */
+    damageLow: 150,
+    damageHigh: 450,
+    /** `+0x9435`. */
+    xVelocity: 70,
+    fireballFrame: 2,
+    rollLabel: "hell-fireball-damage-roll"
+  }),
+  [Ss2ActionType.CAST_DIRE_FIREBALL]: Object.freeze({
+    /** `+0x909a`; ladder arm 14, `+0x0b18`. */
+    itemId: 32,
+    /** `randomBetween(300, 600)`, `+0x90b2`. */
+    damageLow: 300,
+    damageHigh: 600,
+    /** `+0x945b`. */
+    xVelocity: 90,
+    fireballFrame: 3,
+    rollLabel: "dire-fireball-damage-roll"
+  })
+});
+
+/**
+ * What all three fireballs share, because they share one arm and one call.
+ *
+ * `"burning"` and `4` are pushed ONCE at `+0x91a2`, after the per-spell arms
+ * converge — the grouping the map's table was re-cut to record on 2026-09-20.
+ *
+ * ► **"burning" HERE IS A CLIP, NOT THE CONDITION.** In
+ *   `magic_damage_character` (`+0x1313`-`+0x157c`, map §"Spell ingress") the
+ *   `damage_method` argument is read at step 1 and nowhere else:
+ *   `defenderClip.gotoAndPlay(damage_method)`, with `bonus_frame` picking the
+ *   floating splat. Steps 2-6 — armour first, the hitpoints gate, `psyche_up =
+ *   1`, the breastplate stamina join, `check_stats` and the defeat gate — are
+ *   identical for `"burning"`/4 and the bolts' `"lightning"`/8, and **no step
+ *   sets the `burning` STATUS FLAG** (`applySs2MagicDamageCandidate` writes no
+ *   status field except `death()`'s clears). A fireball sets nobody alight.
+ */
+export const SS2_FIREBALL_INGRESS = Object.freeze({
+  damageMethod: "burning",
+  bonusFrame: 4,
+  /** `attacker.gotoAndPlay("Cast1")`, `+0x90f4` — the gale's clip, not the bolts'. */
+  casterClip: "Cast1",
+  /** `register:3.crowd_action = 5`, `+0x8f94`. Presentation cue; not modelled. */
+  crowdAction: 5
+});
+
+/**
+ * THE FIVE DIRECT-DAMAGE VERBS IN THE BUILD'S OWN LADDER ORDER — arms 14-18
+ * of `villain_cast_spells` (`DoAction@0x23e7cf`, base `0x23e7d5`):
+ *
+ * ```text
+ *   14  check_inventory(32)  cast_dire_fireball    +0x0b18
+ *   15  check_inventory(35)  cast_frightning_bolt  +0x0b53
+ *   16  check_inventory(31)  cast_hell_fireball    +0x0b8e
+ *   17  check_inventory(34)  cast_lightning_bolt   +0x0bc9
+ *   18  check_inventory(30)  cast_fireball         +0x0c04
+ * ```
+ *
+ * Each is the arm's ONLY test, and each failing `If` lands on the next arm's
+ * first instruction (`+0x0b2f` -> `+0x0b53`, and so on), so on simultaneous
+ * possession the earliest wins and the rest are unreachable.
+ *
+ * ► **THE AI RANKS WHERE THE BUILD SEQUENCES, and this order is what it breaks
+ *   ties with.** Priced at their means the five are 450, 300, 300, 150 and
+ *   120 — monotone along the ladder, with ONE tie (the frightning bolt and the
+ *   hell fireball, both 300) which the ladder settles for 35. So among the
+ *   spells alone the pricing reproduces the ladder exactly; where it departs
+ *   from the build is against a SWING, which the build never compares.
+ */
+export const SS2_DAMAGE_SPELL_LADDER = Object.freeze([
+  Ss2ActionType.CAST_DIRE_FIREBALL,
+  Ss2ActionType.CAST_FRIGHTNING_BOLT,
+  Ss2ActionType.CAST_HELL_FIREBALL,
+  Ss2ActionType.CAST_LIGHTNING_BOLT,
+  Ss2ActionType.CAST_FIREBALL
+]);
+
+/** The bolt or fireball row for an action type, or undefined. The AI prices both alike. */
+function ss2DamageSpell(type) {
+  return SS2_BOLT_SPELLS[type] ?? SS2_FIREBALL_SPELLS[type];
+}
 
 /* ------------------------------------------------------------------ */
 /* The gale phase: a spell that moves a body and hurts nobody           */
@@ -6872,6 +7094,17 @@ export function createSs2TeamRules({
         if (ss2InventorySlotHolding(view.actor, spell.itemId) === null) continue;
         for (const foe of view.foes) actions.push({ type, targetId: foe.id });
       }
+      // ► **THE FIREBALLS, ON THE SAME BUTTON UNDER THE SAME TWO GATES**, and
+      //   per foe for the same reason. **NO RANGE AND NO LANE TEST, and the
+      //   impact test is why**: it compares the bullet's `_x` with the TARGET's
+      //   `_x` along the caster's facing and reads nothing else, so every foe is
+      //   reachable from anywhere and a body standing in the line of flight is
+      //   never consulted — the faithful N-body reading is that a fireball
+      //   passes through bystanders. See `SS2_FIREBALL_SPELLS`.
+      for (const [type, spell] of Object.entries(SS2_FIREBALL_SPELLS)) {
+        if (ss2InventorySlotHolding(view.actor, spell.itemId) === null) continue;
+        for (const foe of view.foes) actions.push({ type, targetId: foe.id });
+      }
 
       // ► **THE GALE IS OFFERED ON POSSESSION ALONE, ON THE SAME BUTTON AND
       //   UNDER THE SAME TWO-GATE OVERLAY AS THE BOLTS ABOVE** — so everything
@@ -8026,6 +8259,143 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **THE FIREBALL. The bolt's arithmetic, one sample and no roll, and it
+      //   cannot miss** — so it returns before `ATTACK_BANDS` for the bolt's
+      //   reason. **What differs is WHEN the damage lands**: at the first frame
+      //   the flat `bullet` is past the victim's x, not in the cast's own
+      //   straight-line run. A discrete turn resolves it now; the flight, and
+      //   the victim's reaction waiting for it, are the presentation's (see
+      //   `fireballImpact` in `src/render/projectile.js`). Nothing a peer
+      //   hashes depends on the flight, because the build's own flight cannot
+      //   change the outcome: no ground, no lifetime, no exit but the impact.
+      //
+      //   A branch of its own beside the bolt's rather than a widened one, so
+      //   the bolt's event stays byte-for-byte what it was. See
+      //   `SS2_FIREBALL_SPELLS` for the phase, statement by statement.
+      if (SS2_FIREBALL_SPELLS[request.type]) {
+        const spell = SS2_FIREBALL_SPELLS[request.type];
+        const victim = request.target;
+        if (!victim) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a target; ${String(request.targetId)} is not a combatant.`
+          );
+        }
+
+        // Re-found at resolve under the offer's own window, for the reason the
+        // bolt branch gives at length.
+        const slot = ss2InventorySlotHolding(actor, spell.itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, spell.itemId, { ignoreMaxslots: true });
+          if (beyond !== null) {
+            throw new TeamRuleSetError(
+              `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${spell.itemId} is in ${beyond}, ` +
+              `outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}. The build's hero panel ` +
+              "hides that button (sprite:492[inventory_overlay] +0x024f), and this engine offers and consumes " +
+              "through the same window."
+            );
+          }
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+            `item ${spell.itemId}. The build's own gate is possession — check_inventory(${spell.itemId}) for ` +
+            "the villain, a visible inventory button for the hero — and this engine reproduces it."
+          );
+        }
+
+        // THE ONE SAMPLE, taken in the caller exactly as the bolt's is: the
+        // ingress holds no RNG, and the label is the candidate module's.
+        const damage = rolls.randomBetween(spell.rollLabel, spell.damageLow, spell.damageHigh);
+
+        // Roles uncrossed, as for the bolt: `+0x91c1` pushes `defender` last,
+        // so it is argument one — the byte-verified signature exactly.
+        const victimRecord = vanillaRecordOf(victim, "defender");
+        const victimBefore = { ...victimRecord };
+        // Snapshot BEFORE the call; `clearDeathState` mutates both sides.
+        const casterRecord = vanillaRecordOf(actor, "defender");
+        const casterBefore = { ...casterRecord };
+        const scenario = {
+          attackerSide: "villain",
+          hero: victimRecord,
+          villain: casterRecord,
+          fightMode,
+          result: null
+        };
+        const outcome = applySs2MagicDamageCandidate(scenario, damage, {
+          spellId: spell.itemId,
+          spell: VANILLA_PHASE_LABEL[request.type],
+          damageMethod: SS2_FIREBALL_INGRESS.damageMethod,
+          rolledDamage: damage
+        });
+
+        if (outcome.resultEvent && outcome.resultEvent.reason === "first-blood") {
+          throw new TeamRuleSetError(
+            `Rule set ${ruleSetId} produced a first-blood result from ${VANILLA_PHASE_LABEL[request.type]}, ` +
+            "which the team resolver cannot represent: it decides elimination on health > 0 and knows nothing " +
+            "of hitpoints < hitpointsmax. Use fightMode \"tournament\" for play."
+          );
+        }
+
+        const victimAfter = scenario.hero;
+        const victimEliminated = victimAfter.hitpoints <= 0;
+
+        // Consumed when the phase BEGINS — the villain's `use_item` and the
+        // hero's button handler both run before `getphase` — so on a lethal
+        // cast too.
+        const consumption = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }];
+
+        // `round(magicka)` at `+0x8fa1`-`+0x8fc7`, spent by the watchdog's
+        // `nextphase` — which a lethal impact's `death()` deletes first.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const transition = victimEliminated
+          ? { effects: [], staminaGained: 0, healed: 0 }
+          : phaseTransitionEffects(actor, { staminaCost });
+
+        // `gladiator_dir` at the cast. The launch side, the flight and the
+        // impact test all read it (`+0x9284`, `+0x949c`, `+0x9131`/`+0x916c`),
+        // and nothing in this action can change it.
+        const gladiatorDir = (actor.status ?? []).includes(SS2_FACING_LEFT) ? "left" : "right";
+
+        return {
+          effects: [
+            ...consumption,
+            // `"always"`: the ingress's `psyche_up = 1` is an unconditional join.
+            ...defenderEffects(victimBefore, victimAfter, victim, { psycheReset: "always" }),
+            ...statusEffects(casterBefore, scenario.villain, victimBefore, victimAfter, actor, victim),
+            ...transition.effects,
+            ...crowd
+          ],
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: victim.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            casterClip: SS2_FIREBALL_INGRESS.casterClip,
+            victimClip: SS2_FIREBALL_INGRESS.damageMethod,
+            bonusFrame: SS2_FIREBALL_INGRESS.bonusFrame,
+            spellId: spell.itemId,
+            consumedSlot: slot,
+            // ► **THE FLIGHT'S TWO INPUTS, AND DELIBERATELY NOT ITS ENDPOINTS.**
+            //   `from`/`to` are read as the ACTOR's own walk by
+            //   `src/adapter/presentation.js` (`displacementOf`), and
+            //   `boltFrame` would attach a lightning bolt, so neither is here.
+            //   The positions are the projection's, read where the arrow's are.
+            xVelocity: spell.xVelocity,
+            gladiatorDir,
+            rolledDamage: damage,
+            damage: outcome.mutation.appliedDamage,
+            armourDamage: outcome.mutation.armourDamage,
+            hitpointDamage: outcome.mutation.hitpointDamage,
+            staminaBonus: outcome.mutation.staminaBonus,
+            staminaSpent: victimEliminated ? 0 : staminaCost,
+            staminaGained: transition.staminaGained
+          }]
+        };
+      }
+
       // ► **THE GALE. Zero samples, zero damage, one body moved.** It returns
       //   before `ATTACK_BANDS` for the shove's reason: the arm draws nothing,
       //   so entering the dispatcher would take samples the build never takes.
@@ -9109,7 +9479,14 @@ export function createSs2TeamRules({
       //   offer means the caster has something to do from where it stands, so
       //   it must not walk. The bolt arm has NO distance test in the build
       //   either, so this needs no geometry.
-      const boltOnOffer = options.some((option) => SS2_BOLT_SPELLS[option.type]);
+      //
+      // ► **AND THE FIREBALLS COUNT, through this same door (2026-09-22).**
+      //   Ladder arms 14, 16 and 18 are as unconditional as the bolts' 15 and
+      //   17, and the fireball arm has no distance test either, so a fireball
+      //   on offer means exactly what a bolt on offer means. The name is kept
+      //   so the psyche and gale comments below that cite it still read true;
+      //   what it now means is "a DAMAGE SPELL is on offer".
+      const boltOnOffer = options.some((option) => ss2DamageSpell(option.type));
       const attackOnOffer = options.some((option) => ATTACK_BANDS[option.type]) || boltOnOffer;
 
       // ► **THE GALE IS THE BUILD'S OWN RULE, NOT A PRICE, because it deals no
@@ -9144,9 +9521,12 @@ export function createSs2TeamRules({
       //   AND PRE-EMPT THIS BLOCK FROM ABOVE IT** — the drink rule returns
       //   before this line, so a caster that qualifies for a potion never gets
       //   here (`test/ss2-drink-potion.test.js`, "armour oil PRE-EMPTS the
-      //   gale"). The other 13 (`rejuvinate`, the fireballs, boundless energy,
-      //   ...) still have no verb and so cannot pre-empt anything; when they
-      //   are built, this test must grow.
+      //   gale"). The other 13 (`rejuvinate`, ~~the fireballs,~~ boundless
+      //   energy, ...) still have no verb and so cannot pre-empt anything; when
+      //   they are built, this test must grow. **It grew for the fireballs the
+      //   same day (arms 14, 16, 18)**, which `boltOnOffer` now covers, so a
+      //   caster offered any of the five damage spells never reaches the gale
+      //   (merged from a parallel worktree; the three verbs were built at once).
       //
       // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
       //   > 10` at `+0x056f`. This AI takes no samples, so it casts on every
@@ -9441,15 +9821,19 @@ export function createSs2TeamRules({
       //
       //   It is above `ss2SwingValues` rather than inside the ranking because
       //   the ranking cannot run at all for such a gladiator.
-      const boltOptions = Object.keys(SS2_BOLT_SPELLS)
+      // In LADDER order — `SS2_DAMAGE_SPELL_LADDER`, arms 14-18 — so the first
+      // entry is the one the build would cast.
+      const boltOptions = SS2_DAMAGE_SPELL_LADDER
         .map((type) => options.find((option) => option.type === type && option.targetId === engaged.id))
         .filter(Boolean);
       if (boltOptions.length > 0 && !ss2CanBePriced(actor)) {
-        // Heaviest first, which is also the build's own ladder order: id 35 is
-        // arm 15 and id 34 is arm 17, so a villain holding both casts the
-        // frightning bolt and never the lightning one.
-        return boltOptions.sort((a, b) =>
-          SS2_BOLT_SPELLS[b.type].damageHigh - SS2_BOLT_SPELLS[a.type].damageHigh)[0];
+        // ~~Heaviest first, which is also the build's own ladder order~~ —
+        // **true for the two bolts and false the day the fireballs arrived**:
+        // by `damageHigh` the hell fireball (450) beats the frightning bolt
+        // (400), and the ladder casts 35 first (arm 15 before arm 16). So the
+        // unpriced caster takes the LADDER's first, which is the build's
+        // answer rather than an argument about ranges.
+        return boltOptions[0];
       }
 
       // The table this AI ranks on, now in `ss2SwingValues` so the approach arm
@@ -9470,8 +9854,10 @@ export function createSs2TeamRules({
       //   build also has no valuation at all, so there is nothing here to
       //   contradict: this engine ranks where the build sequences, exactly as
       //   it already does for every other verb.
+      //   **A fireball is priced the same way** — one sample, no hit roll, and
+      //   the impact test cannot fail — so 120, 300 and 450 for ids 30-32.
       for (const option of boltOptions) {
-        const spell = SS2_BOLT_SPELLS[option.type];
+        const spell = ss2DamageSpell(option.type);
         expected[option.type] = (spell.damageLow + spell.damageHigh) / 2;
       }
 
@@ -9682,8 +10068,17 @@ export function createSs2TeamRules({
         //   quick — it is the heavier — **and that happens to be the build's
         //   own order too**: id 35 is ladder arm 15 and id 34 is arm 17, so a
         //   villain holding both can never cast the lightning bolt.
+        //
+        //   **The fireballs interleave in the ladder's order, arms 14-18**
+        //   (`SS2_DAMAGE_SPELL_LADDER`). It matters at exactly one tie: the
+        //   frightning bolt and the hell fireball both price at 300, and the
+        //   build casts 35 first. Everywhere else the means already agree with
+        //   the ladder, so this order changes nothing but that tie.
+        Ss2ActionType.CAST_DIRE_FIREBALL,
         Ss2ActionType.CAST_FRIGHTNING_BOLT,
+        Ss2ActionType.CAST_HELL_FIREBALL,
         Ss2ActionType.CAST_LIGHTNING_BOLT,
+        Ss2ActionType.CAST_FIREBALL,
         Ss2ActionType.POWER_ATTACK,
         Ss2ActionType.NORMAL_ATTACK,
         Ss2ActionType.QUICK_ATTACK,
@@ -9710,7 +10105,7 @@ export function createSs2TeamRules({
         // Same trap, same guard: a bolt is priced only when one was offered
         // against `engaged`, so an unoffered bolt must not be reachable by an
         // `undefined > undefined` comparison.
-        if (SS2_BOLT_SPELLS[type] && expected[type] === undefined) continue;
+        if (ss2DamageSpell(type) && expected[type] === undefined) continue;
         const option = type === Ss2ActionType.PSYCHE_UP
           // `psycheOption` is already matched to `engaged` above, and is
           // undefined when the discharge could not reach it.

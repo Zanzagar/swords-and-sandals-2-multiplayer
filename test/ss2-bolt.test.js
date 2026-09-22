@@ -33,8 +33,11 @@
  *   ONE sample per cast, same as the bolts: its three `randomBetween` sites
  *   (`+0x9012`, `+0x9062`, `+0x90b2`) are mutually exclusive arms of one
  *   three-way `||`, exactly as the bolts' two are. What separates them is that
- *   a fireball's damage is applied from a per-frame handler after a ballistic
+ *   a fireball's damage is applied from a per-frame handler after a ~~ballistic~~
  *   flight, and a bolt's is applied in the same run as `gotoAndPlay("Cast2")`.
+ *   **The flight is FLAT** (corrected 2026-09-22): `gravity` 2 and
+ *   `bulletlife` 1 in the table above are written and never read — see
+ *   `test/ss2-fireball.test.js`.
  *
  * ► **AND THE FIREBALL'S FRAME TEST IS AN IDEMPOTENCE GUARD, NOT AN IMPACT
  *   TRIGGER.** `+0x9194 Not; +0x9195 Not; If` is a DOUBLED `Not`, so the gate
@@ -44,11 +47,14 @@
  *   mechanism inside out and would build a fireball that damages on every frame
  *   but one.
  *
- * **Only the bolt is a turn.** The other two resolve across frames through
+ * ~~**Only the bolt is a turn.** The other two resolve across frames through
  * machinery this engine does not have — the fireball needs the ballistic model
  * `src/render/projectile.js` reproduces for arrows, and molten death needs a
  * per-boulder physics loop. Building either as an instant would be inventing a
- * mechanic, and the bolt is the one that needs nothing invented.
+ * mechanic, and the bolt is the one that needs nothing invented.~~ **The
+ * fireballs are a turn too since 2026-09-22**: their flight is flat and cannot
+ * miss, so it cannot change the outcome, and it is presentation — see
+ * `test/ss2-fireball.test.js`. Molten death is still unbuilt.
  *
  * ## THE OFFER GATE IS POSSESSION, AND NOTHING ELSE THIS ENGINE CAN SEE
  *

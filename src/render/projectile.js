@@ -493,3 +493,233 @@ export function projectileTrail(flight, frame, { keep = 6 } = {}) {
   }
   return puffs.slice(-keep);
 }
+
+/* ------------------------------------------------------------------ */
+/* The fireball: the arrow's clip depth, the snipe's height, no arc     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * THE FIREBALL'S FLIGHT — read 2026-09-22 from the fireball arm of the same
+ * block, `+0x8f59`-`+0x94ff` (see `SS2_FIREBALL_SPELLS` in
+ * `src/team/ss2-rules.js` for the arm statement by statement).
+ *
+ * ► **A SEPARATE FAMILY FROM `projectileFlight`, NOT A THIRD KIND OF IT**,
+ *   because the two answer different questions. The arrow's flight ends where
+ *   `ceil(distance / Xvelocity)` says, stopped short of the body; the
+ *   fireball's ends at the first frame the build's OWN impact test passes, and
+ *   that test — past the target's `_x` along the CASTER's facing — is the
+ *   whole of the arithmetic. `projectileFlight` still refuses `"fireball"`.
+ *
+ * ► **FLAT.** The `onEnterFrame` (`+0x947b`-`+0x94fe`) reads `flying`,
+ *   `gladiator_dir`, `_x` and `Xvelocity`. `gravity` 2, `bulletlife` 1 and
+ *   `bulletcounter` 1 are written (`+0x9333`-`+0x936b`) and never read — the
+ *   arrow arm's setup, copied — so there is no arc, no tumble and no trail.
+ */
+export const SS2_FIREBALL = Object.freeze({
+  /** `bullet._x = attacker._x + 30` facing right (`+0x92ab`), `- 30` otherwise (`+0x92cf`). */
+  launchOffsetX: 30,
+  /**
+   * `bullet._y = attacker._y - (attacker._yscale * 1.5 + 5)` (`+0x9301`-`+0x9332`)
+   * — the SNIPE's formula term for term (`+0x6ea5`-`+0x6ed6`), so it is the
+   * snipe's height here, in the snipe's figure-height units. See
+   * `SS2_PROJECTILE.snipeLaunchHeightRatio` for why pixels are not ported.
+   */
+  launchHeight: SS2_PROJECTILE.bombardLaunchHeight * SS2_PROJECTILE.snipeLaunchHeightRatio,
+  /**
+   * In flight: frame 1, for ALL THREE spells. `bullet.gotondStop(fireball_frame)`
+   * (`+0x9276`) is a typo naming a method that does not exist.
+   */
+  flightFrame: 1,
+  /** `bullet.gotoAndStop(4)` at impact (`+0x91cd`-`+0x91e3`). */
+  explosionFrame: 4,
+  /**
+   * The explosion child's frame count: `fireball_combat` frame 4 runs `stop()`
+   * and places sprite 27, whose last frame runs `_parent.removeMovieClip()`.
+   * ► **THE MAIN SESSION'S READING OF THE SPRITE, NOT RE-DERIVED HERE** — no
+   *   dump this was built from covers sprites 27 or 28. A frame script runs
+   *   before its frame is drawn, so the removal on the last frame means
+   *   `explosionFrames - 1` frames are SEEN.
+   */
+  explosionFrames: 23
+});
+
+/**
+ * WHEN THE FIREBALL LANDS — the build's impact test, solved.
+ *
+ * The bullet starts `launchOffsetX` ahead of the caster along its facing and
+ * moves `xVelocity` a frame; the test is strict (`Greater` `+0x9122`, `Less2`
+ * `+0x915d`), so it needs `30 + m * V > s`, where `s` is the target's
+ * distance ALONG THE CASTER'S FACING (negative when the target is behind):
+ *
+ * ```text
+ *   k = 0                         if s < 30
+ *   k = floor((s - 30) / V) + 1   otherwise
+ * ```
+ *
+ * ► **THE ±1 FRAME OF POLL ORDER, AND WHICH SIDE THIS TAKES.** The test lives
+ *   in the ATTACKER's per-frame handler and the move in the BULLET's. On the
+ *   cast's own frame the test runs before the launch (so it never sees this
+ *   bullet), and on every later frame the two handlers race:
+ *
+ *   - **bullet first** (TAKEN): on frame t it has moved t times when tested,
+ *     so it lands on frame `max(1, k)` having moved `max(1, k)` times — for
+ *     `k = 0` it takes one step before the first test can see it;
+ *   - attacker first: it lands on frame `k + 1` having moved `k` times.
+ *
+ *   **Bullet first, because it is the NEWEST clip** — on the recollection
+ *   (NOT checked against Ruffle's source in this change) that Ruffle's AVM1
+ *   execution list links a newly attached clip in at its head and walks it
+ *   from the head, so the fireball's `onEnterFrame` would run before the
+ *   fighters' on every frame after the one that attached it. **That is a
+ *   statement about the runtime, not about these bytes, and no capture here
+ *   has measured it; a capture of `bullet._x` at the impact frame settles it.**
+ *   Flipping it is `moves = k`, `impactFrame = k + 1`.
+ *
+ * `moves` and `impactFrame` are equal on the side taken; both are returned so
+ * the two readings stay distinguishable at every call site.
+ */
+export function fireballImpact({ casterX, targetX, gladiatorDir, xVelocity } = {}) {
+  if (!Number.isFinite(casterX) || !Number.isFinite(targetX)) {
+    throw new ProjectileError("A fireball needs a finite x for its caster and its target.");
+  }
+  if (!Number.isFinite(xVelocity) || xVelocity <= 0) {
+    throw new ProjectileError(`A fireball needs a positive Xvelocity; got ${String(xVelocity)}.`);
+  }
+  // This engine's facing is two-valued — `facing-left` or its absence — so the
+  // build's "anything but right" and its left arm coincide, as for the gale.
+  const direction = gladiatorDir === "left" ? -1 : 1;
+  // `+ 0` folds the `-0` a left-facing caster level with its target produces,
+  // which `Object.is` and a strict deep-equal both tell apart from 0.
+  const separation = (targetX - casterX) * direction + 0;
+  const offset = SS2_FIREBALL.launchOffsetX;
+  const k = separation < offset ? 0 : Math.floor((separation - offset) / xVelocity) + 1;
+  const impactFrame = Math.max(1, k);
+  return Object.freeze({ direction, separation, k, moves: impactFrame, impactFrame });
+}
+
+/**
+ * Everything about one fireball that does not change while it flies.
+ *
+ * @param {object} shot
+ * @param {object} shot.from          `{ x, y }` — the caster
+ * @param {object} shot.to            `{ x, y }` — the target
+ * @param {string} shot.gladiatorDir  the CASTER's facing, "left" or "right"
+ * @param {number} shot.xVelocity     `Xvelocity`, 50 / 70 / 90
+ */
+export function fireballFlight({ from, to, gladiatorDir, xVelocity } = {}) {
+  if (!Number.isFinite(from?.x) || !Number.isFinite(to?.x)) {
+    throw new ProjectileError("A fireball needs a finite x on both ends; an unplaced caster has nothing to loose.");
+  }
+  const impact = fireballImpact({ casterX: from.x, targetX: to.x, gladiatorDir, xVelocity });
+  const launchX = from.x + impact.direction * SS2_FIREBALL.launchOffsetX;
+  return Object.freeze({
+    kind: "fireball",
+    direction: impact.direction,
+    xVelocity,
+    separation: impact.separation,
+    k: impact.k,
+    moves: impact.moves,
+    /** The frame it lands on — what holds the action open, via `flightDurationMs`. */
+    flightFrames: impact.impactFrame,
+    explosionVisibleFrames: SS2_FIREBALL.explosionFrames - 1,
+    launch: Object.freeze({
+      x: launchX,
+      // Depth is INVENTED, as for the arrow: the build has none. The caster's
+      // rank at launch, the target's at impact, linear between.
+      y: Number.isFinite(from.y) ? from.y : null,
+      height: SS2_FIREBALL.launchHeight
+    }),
+    impact: Object.freeze({
+      // Where the bullet STOPS — `flying = false` — which is past the victim's
+      // centre by up to one `Xvelocity`, and is where the explosion plays.
+      x: launchX + impact.direction * xVelocity * impact.moves,
+      centreX: to.x,
+      y: Number.isFinite(to.y) ? to.y : null
+    })
+  });
+}
+
+/**
+ * Where the fireball is `frame` build frames after the cast, and what it shows.
+ *
+ * @returns {object} `{ stage, x, y, height, clipFrame, ageFrames }` — `stage` is
+ *   `flight`, `explosion` or `gone`; `clipFrame` is the 1-based frame of
+ *   `fireball_combat`; `ageFrames` the explosion's zero-based age.
+ */
+export function fireballAt(flight, frame) {
+  if (!flight || flight.kind !== "fireball") {
+    throw new ProjectileError("fireballAt needs a flight from fireballFlight().");
+  }
+  const t = Math.max(0, Number.isFinite(frame) ? frame : 0);
+  const { launch, impact } = flight;
+  if (t < flight.flightFrames) {
+    const progress = t / flight.flightFrames;
+    const y = launch.y === null || impact.y === null ? null : launch.y + (impact.y - launch.y) * progress;
+    return Object.freeze({
+      stage: "flight",
+      x: launch.x + flight.direction * flight.xVelocity * t,
+      y,
+      height: launch.height,
+      clipFrame: SS2_FIREBALL.flightFrame,
+      ageFrames: 0
+    });
+  }
+  const age = Math.floor(t - flight.flightFrames);
+  const visible = age < flight.explosionVisibleFrames;
+  return Object.freeze({
+    stage: visible ? "explosion" : "gone",
+    x: impact.x,
+    y: impact.y,
+    // It stops where it was: `flying = false` halts `_x` and nothing ever moved `_y`.
+    height: launch.height,
+    clipFrame: SS2_FIREBALL.explosionFrame,
+    ageFrames: Math.min(age, flight.explosionVisibleFrames - 1)
+  });
+}
+
+/** How long the fireball is on screen: its flight, then its explosion. */
+export function fireballLifetimeMs(flight) {
+  if (!flight || flight.kind !== "fireball") {
+    throw new ProjectileError("fireballLifetimeMs needs a flight from fireballFlight().");
+  }
+  return (flight.flightFrames + flight.explosionVisibleFrames) * PROJECTILE_FRAME_MS;
+}
+
+/**
+ * EVERYTHING A SURFACE NEEDS TO DRAW ONE FIREBALL `elapsedMs` AFTER THE CAST,
+ * the way `projectileDrawAt` is for the arrow — so the shell only paints.
+ *
+ * `done` is decided in MILLISECONDS against `fireballLifetimeMs`, the number a
+ * shell prunes with, so "still drawn" and "still attached" are one comparison.
+ * `mirrored` is `bullet._xscale = 0 - bullet._xscale` (`+0x92e0`), facing left.
+ */
+export function fireballDrawAt(flight, elapsedMs, { frontY, rankStride, figureScaleFor, rankOfDepth } = {}) {
+  if (typeof figureScaleFor !== "function" || typeof rankOfDepth !== "function") {
+    throw new ProjectileError(
+      "fireballDrawAt needs figureScaleFor and rankOfDepth injected; this module does not import the painter."
+    );
+  }
+  const elapsed = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0;
+  const done = elapsed >= fireballLifetimeMs(flight);
+  const lastFrame = flight.flightFrames + flight.explosionVisibleFrames - 1;
+  const point = fireballAt(flight, Math.min(lastFrame, elapsed / PROJECTILE_FRAME_MS));
+  // A null depth draws at the front rank, for `projectileDrawAt`'s reason.
+  const depth = Number.isFinite(point.y) ? point.y : frontY;
+  const size = figureScaleFor({
+    yscale: 100,
+    rank: rankOfDepth(depth, 0, { frontY, rankStride }),
+    slotIndex: 0
+  });
+  return Object.freeze({
+    stage: done ? "gone" : point.stage,
+    x: point.x,
+    y: depth,
+    lift: point.height * ARENA_UNITS_PER_FIGURE_HEIGHT,
+    rotation: 0,
+    size,
+    mirrored: flight.direction < 0,
+    clipFrame: point.clipFrame,
+    ageFrames: point.ageFrames,
+    done
+  });
+}

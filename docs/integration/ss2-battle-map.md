@@ -3388,7 +3388,10 @@ reason `src/team/ss2-rules.js` builds those two and not the other nine spells
 that reach this ingress.~~ **THE FIREBALL FAMILY IS A DISCRETE TURN TOO —
 corrected 2026-09-22, and the "ballistic" premise above was what made it look
 otherwise.** One draw, no hit roll, damage certain; the flight is cosmetic and
-decides only WHEN the victim's `burning` clip starts. Molten death stays out: its
+decides only WHEN the victim's `burning` clip starts. **Built as three verbs the
+same day** (`SS2_FIREBALL_SPELLS` in `src/team/ss2-rules.js`; the flight and the
+victim's reaction waiting for impact are `fireballImpact` in
+`src/render/projectile.js` and `reactionDelaysFor` in `src/render/cursor.js`). Molten death stays out: its
 damage comes from each boulder's own `onEnterFrame`, so how many land is a
 question of flight geometry per boulder.
 

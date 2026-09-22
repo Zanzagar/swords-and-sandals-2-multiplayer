@@ -277,12 +277,21 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //
     //   The build's own misspelling of "frightening" is kept. A corrected one
     //   is a name that matches nothing in the oracle.
+    // ► **JOINED 2026-09-22 — the fireball family, THREE TOKENS FOR ONE ARM
+    //   for the bolts' reason**: `getphase("cast_dire_fireball")`,
+    //   `("cast_fireball")` and `("cast_hell_fireball")` (below), written by
+    //   ladder arms 14, 18 and 16 (`+0x0b34`, `+0x0c20`, `+0x0baa`) and consumed
+    //   by one arm at `+0x8f59`-`+0x94ff`. One sample and no hit roll, so none
+    //   is in `ATTACK_BANDS`.
+    "cast-dire-fireball",
+    "cast-fireball",
     "cast-frightning-bolt",
     // ► **JOINED 2026-09-22 — the gale, `getphase("cast_gale")`, written by
     //   ladder arm 24 (`+0x0ea3`) and consumed at `+0x7aaa`-`+0x7be5`.** The
     //   first token here that is a spell and deals no damage; it takes zero
     //   samples, so it is not in `ATTACK_BANDS` for the reason `shove` is not.
     "cast-gale",
+    "cast-hell-fireball",
     "cast-lightning-bolt",
     // ► **JOINED 2026-09-22 — the teleport, `getphase("cast_teleport")`,
     //   written by ladder arm 26 (`+0x0f91`) and consumed at

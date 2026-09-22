@@ -378,7 +378,13 @@ export function applyCommands(scene, commands) {
           // to hold — and reading it back off the command stream instead would
           // give the shell a second source for a fact the scene already has.
           // `presentResolvedEvents` stamps it onto every command it emits.
-          actionToken: command.actionToken ?? null
+          actionToken: command.actionToken ?? null,
+          // ► **A FIREBALL'S TWO FLIGHT INPUTS, PRESENT ONLY ON A FIREBALL**, so
+          //   an arrow's record is byte-for-byte what it was. The build flies
+          //   it at `Xvelocity` along the CASTER's facing; `fireballFlight` in
+          //   `projectile.js` does the arithmetic.
+          ...(Number.isFinite(command.xVelocity) ? { xVelocity: command.xVelocity } : {}),
+          ...(typeof command.gladiatorDir === "string" ? { gladiatorDir: command.gladiatorDir } : {})
         }));
         break;
       }

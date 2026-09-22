@@ -1130,6 +1130,49 @@ export function boltOpsFor(pack, boltFrame, ageFrames, { scale = 1 } = {}) {
 }
 
 /**
+ * THE FIREBALL, in flight or exploding — `fireball_combat`, or null.
+ *
+ * ► **NOT IN ANY PACK EXTRACTED BEFORE 2026-09-22, and null is the answer for
+ *   that**, so a shell draws its authored fallback exactly as it does for an
+ *   arrow on a machine with no extraction. `tools/extract-props.mjs` must take
+ *   it before this can draw the build's art.
+ *
+ * Two quantities, kept apart the way `boltOpsFor` keeps them:
+ *
+ * - `clipFrame`, 1-BASED as `gotoAndStop` indexes it: **1 in flight for all
+ *   three spells** (`gotondStop` at `+0x9276` never applies `fireball_frame`),
+ *   and **4 from impact** (`bullet.gotoAndStop(4)`, `+0x91cd`);
+ * - `ageFrames`, ZERO-BASED: the explosion child's clock on frame 4. It is
+ *   **CLAMPED, never wrapped** — unlike the bolt's flicker, the explosion's last
+ *   frame runs `_parent.removeMovieClip()`, so it plays once and the whole clip
+ *   goes. The caller stops asking once `fireballDrawAt` says `done`.
+ *
+ * Read through `clock.framesByParent` when the pack carries one for the
+ * explosion's child, as `boltOpsFor` reads the bolt's, and through the frame's
+ * own flattened placements otherwise.
+ */
+export function fireballOpsFor(pack, clipFrame, ageFrames, { scale = 1 } = {}) {
+  const linkage = "fireball_combat";
+  if (!hasExtractedProps(pack)) return null;
+  const prop = pack.props[linkage];
+  if (!prop || !Array.isArray(prop.frames) || prop.frames.length === 0) return null;
+  const frame = Number.isFinite(clipFrame)
+    ? Math.min(prop.frames.length, Math.max(1, Math.trunc(clipFrame)))
+    : 1;
+  const ages = prop.clock?.framesByParent?.[frame - 1];
+  if (!Array.isArray(ages) || ages.length === 0) return propOpsFor(pack, { linkage, frame, scale });
+  const age = Number.isFinite(ageFrames) ? Math.max(0, Math.trunc(ageFrames)) : 0;
+  const view = Object.freeze({
+    props: Object.freeze({
+      ...pack.props,
+      [linkage]: Object.freeze({ ...prop, frames: [ages[Math.min(age, ages.length - 1)]] })
+    }),
+    shapes: pack.shapes
+  });
+  return propOpsFor(view, { linkage, frame: 1, scale });
+}
+
+/**
  * THE ARENA'S OWN SCENERY, at the coordinates the build states.
  *
  * ► **ROOT FRAME 221 IS A CONSTRUCTION SCRIPT *AND* A DISPLAY LIST, and this is

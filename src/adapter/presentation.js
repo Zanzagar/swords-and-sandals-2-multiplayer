@@ -922,6 +922,57 @@ function spellEffectFor(combatants, event, victimClip) {
   });
 }
 
+/**
+ * The frame `fireball_combat` is drawn on in flight, for ALL THREE spells.
+ *
+ * The arm assigns `fireball_frame` 1, 2 or 3 and then calls
+ * `bullet.gotondStop(fireball_frame)` (`+0x9276`) — a typo for `gotoAndStop`,
+ * naming a MovieClip method that does not exist, so the call does nothing and
+ * the clip stays on the frame it was attached on. The hell and dire art on
+ * frames 2 and 3 is never shown by the build, and is not shown here.
+ */
+const FIREBALL_FLIGHT_FRAME = 1;
+
+/**
+ * The `fire-projectile` for a fireball, or null.
+ *
+ * **Detected by `xVelocity`**, which only the fireball branch in
+ * `src/team/ss2-rules.js` sets — the field rule `spellEffectFor` follows for
+ * `boltFrame`, and for the same reason. It rides the ARROW's command kind
+ * because it is the same thing in the build: a clip attached to
+ * `arena.gladiators` at depth 45000 (`+0x9225`, the arrow's `+0x6d81`) that
+ * flies on its own `onEnterFrame` and holds the phase while it does
+ * (`bullet_in_air`, `+0x8fdf`/`+0x91f5`). `projectile: "fireball"` is what a
+ * surface routes on; the flight arithmetic is `fireballFlight`'s in
+ * `src/render/projectile.js`, not this module's.
+ *
+ * `gladiatorDir` is the CASTER's facing at the cast, carried by the resolver,
+ * because the build flies the bullet that way and not toward the target.
+ * `targetSize` is 0: the build's impact point is past the victim's centre and
+ * the fireball, unlike the arrow, is not stopped short of the body.
+ */
+function fireballFor(combatants, event) {
+  if (!Number.isFinite(event.xVelocity)) return null;
+  const caster = combatants.get(event.actorId);
+  const target = combatants.get(event.targetId);
+  if (!Number.isFinite(caster?.x) || !Number.isFinite(target?.x)) return null;
+  return Object.freeze({
+    kind: CommandKind.FIRE_PROJECTILE,
+    sequence: event.sequence,
+    combatantId: event.actorId,
+    targetId: event.targetId,
+    projectile: "fireball",
+    artFrame: FIREBALL_FLIGHT_FRAME,
+    targetSize: 0,
+    from: Object.freeze({ x: caster.x, y: Number.isFinite(caster.y) ? caster.y : null }),
+    to: Object.freeze({ x: target.x, y: Number.isFinite(target.y) ? target.y : null }),
+    // It cannot miss: the impact test has no other exit.
+    hit: true,
+    xVelocity: event.xVelocity,
+    gladiatorDir: event.gladiatorDir === "left" ? "left" : "right"
+  });
+}
+
 function projectileFor(wire, combatants, event) {
   const projectile = PROJECTILE_DIRECTIONS.get(Number(event.attackDirection));
   if (!projectile) return null;
@@ -1279,6 +1330,11 @@ export function presentResolvedEvents(wire, {
     // is as far as this vocabulary can carry it.
     const projectile = projectileFor(wire, combatants, event);
     if (projectile) commands.push(projectile);
+    // The fireball leaves in the same place in the order, and in the build's:
+    // `gotoAndPlay("Cast1")` at `+0x90f4`, the `attachMovie` at `+0x9246` in the
+    // same frame, and the ingress that plays the victim's clip frames later.
+    const fireball = fireballFor(combatants, event);
+    if (fireball) commands.push(fireball);
     // AFTER the caster's clip and BEFORE the victim's, which is the build's own
     // order: `gotoAndPlay("Cast2")` at `+0x8515`, the `attachMovie` at
     // `+0x852a`, then the ingress that plays the victim's clip at `+0x85af`.

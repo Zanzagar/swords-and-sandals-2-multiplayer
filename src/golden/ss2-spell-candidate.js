@@ -46,7 +46,10 @@ const FIGHT_MODES = Object.freeze(new Set(["tournament", "duel", "misc"]));
  * The mapped direct-damage spell callers. The ranges and the inventory ID
  * table are in the battle map under §"Spell ingress `magic_damage_character`"
  * and §"Spell and vanilla AI surface"; the phase arms that carry them are
- * under §"The two bolt phases, in full" and §"The fireball family, in full".
+ * under §"The two bolt phases, in full" and ~~§"The fireball family, in
+ * full"~~ §"The fireball family and molten death" *(the section is titled that
+ * way; the old name cited a heading that never existed — found 2026-09-22 by
+ * the fireball implementer)*.
  *
  * *(The line-number citations this block used to carry — "map lines 384-397",
  * "415-419", "366-371", "348-350" — were stale: an adversarial verifier
