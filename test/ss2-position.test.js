@@ -747,7 +747,7 @@ test("a gladiator that walks PAST its opponent turns round", () => {
 test("a rule set that models no position derives NO facing, which is what keeps 23 goldens still", () => {
   // ► **THE FIREWALL MATTERS MORE HERE THAN ANYWHERE ELSE ON THIS AXIS.**
   //   `gladiator_dir` is load-bearing in the golden pipeline —
-  //   `ss2-attack-candidate.js:214` picks the debris direction from it and
+  //   `ss2-attack-candidate.js`'s `drawDebrisClip` picks the debris direction from it and
   //   `:576` signs the knockback force with it — so a recomputed facing would
   //   silently re-datum measured fixtures.
   //

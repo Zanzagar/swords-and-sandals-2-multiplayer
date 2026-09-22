@@ -320,7 +320,7 @@ function driveFirst(battle, limit) {
  *   **No golden moved**, and here the firewall matters more than usual: a
  *   fixture models no position, so it has nothing to derive a facing FROM and
  *   gets no effect at all. `gladiator_dir` is load-bearing in the golden
- *   pipeline — `ss2-attack-candidate.js:214` picks the debris direction from
+ *   pipeline — `ss2-attack-candidate.js`'s `drawDebrisClip` picks the debris direction from
  *   it and `:576` signs the knockback force with it — so a recomputed facing
  *   would have silently re-datumed measured fixtures.
  */

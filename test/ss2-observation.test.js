@@ -17,6 +17,7 @@ import {
   canonicalJsonStringify,
   computeSs2ObservationDigest,
   deriveExpectedEventsFromSs2Fixture,
+  isCosmeticDebrisSample,
   matchSs2ObservationToFixture,
   projectSs2ObservationForComparison,
   projectSs2ObservationForPairwiseComparison,
@@ -26,7 +27,8 @@ import {
 } from "../src/golden/observation.js";
 import {
   HOOK_FOR_STATIC_REASON,
-  SPELL_HOOK_FOR_STATIC_REASON
+  SPELL_HOOK_FOR_STATIC_REASON,
+  simulateSs2CaptureTrace
 } from "../src/golden/simulate-capture-trace.js";
 import {
   CaptureManifestError,
@@ -48,7 +50,7 @@ import {
 } from "../src/golden/run-1v1-fixture.js";
 import { resolveSs2PhysicalAttackCandidate } from "../src/golden/ss2-attack-candidate.js";
 import { resolveSs2SpellDamageCandidate } from "../src/golden/ss2-spell-candidate.js";
-import { verifyInstallAgainstFingerprint } from "../tools/capture-session.mjs";
+import { verifyInstallAgainstFingerprint, wrapperTapeForFixture } from "../tools/capture-session.mjs";
 
 import { loadSs2Fixtures, loadSs2SpellFixtures } from "./ss2-fixture-files.js";
 
@@ -1390,6 +1392,70 @@ test("a fixture's cosmetic debris is excluded from matching; an observation cann
       }
     })),
     /no live capture can record/
+  );
+});
+
+test("a paired piece's second debris clip is cosmetic, uncapturable and off the tape, exactly like its first", () => {
+  // remove_armour's shoulderguard branch calls destroy_armour TWICE (overlay
+  // frame 52 `DoAction@0x23d7fe` `+0x0500` at Lupperarm, `+0x056e` at
+  // Rupperarm), so its candidate models two debris clips and six opcode draws.
+  // Every consumer of a debris sample has to treat the second clip exactly as
+  // it treats the first; this walks all four of them on the one fixture that
+  // carries a second clip.
+  const fixture = fixturesById.get("candidate-armoured-removal-destroys-shoulderguard");
+  const debris = fixture.samples.filter((sample) => sample.source === "randomNumber");
+  assert.deepEqual(debris.map((sample) => sample.label), [
+    "armour-debris-1-x",
+    "armour-debris-1-y",
+    "armour-debris-1-rotation",
+    "armour-debris-2-x",
+    "armour-debris-2-y",
+    "armour-debris-2-rotation"
+  ]);
+
+  // 1. Cosmetic: the matcher's own predicate recognises every one of them.
+  for (const sample of debris) assert.equal(isCosmeticDebrisSample(sample), true, sample.label);
+
+  // 2. Excluded from comparison. A record carrying none of them — the only kind
+  //    a capture can produce — matches the fixture that models all six; a
+  //    second-clip label outside the cosmetic grammar would stay on the
+  //    fixture's side and this would diverge. The reference simulator, which
+  //    uses the same predicate, emits no roll line for any of them.
+  const observed = observationFromFixture(fixture, {
+    observationId: "obs-paired", sessionId: "session-paired"
+  });
+  assert.ok(observed.samples.every((sample) => sample.source !== "randomNumber"));
+  const comparison = matchSs2ObservationToFixture(fixture, observed);
+  assert.deepEqual(comparison.differences, []);
+  assert.equal(comparison.match, true);
+  const simulatedRolls = simulateSs2CaptureTrace(fixture)
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line))
+    .filter((line) => line.t === "roll");
+  assert.equal(simulatedRolls.some((line) => line.label.startsWith("armour-debris-")), false);
+
+  // 3. Uncapturable: a live record claiming any second-clip draw is refused.
+  for (const sample of debris.slice(3)) {
+    assert.throws(
+      () => validateSs2Observation(observationFromFixture(fixture, {
+        observationId: "obs-paired-debris",
+        sessionId: "session-paired-debris",
+        mutate: (draft) => {
+          draft.samples.push({ ...cloneJson(sample), callSite: CALL_SITE, injected: false });
+        }
+      })),
+      /no live capture can record/,
+      sample.label
+    );
+  }
+
+  // 4. Off the tape: the wrapper is served injectable randomBetween samples only.
+  const tape = wrapperTapeForFixture(fixture);
+  assert.equal(tape.includes("armour-debris"), false);
+  assert.equal(
+    tape.split(",").length,
+    fixture.samples.filter((sample) => sample.source === "randomBetween").length
   );
 });
 

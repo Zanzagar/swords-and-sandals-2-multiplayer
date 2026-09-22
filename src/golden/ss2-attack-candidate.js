@@ -181,8 +181,25 @@ function recordMutation(trace, path, before, after, reason) {
 }
 
 function removeArmourCandidate(defender, direction, rolls, requestIndex, mutationTrace, defenderSide) {
+  // The build's order in each piece branch of `remove_armour` (overlay frame
+  // 52 `DoAction@0x23d7fe`): take the defence out of both pools ONCE, launch
+  // the piece's debris clips — two for a paired piece, left limb then right,
+  // one otherwise (`DEBRIS_CLIPS_PER_PIECE`), three draws apiece — zero the
+  // piece, then the trailing clamp. The helpers are defined at the END of this
+  // module, so the line numbers other files cite below this function stay put.
   const group = armourGroup(direction);
-  if (!group) return { request: requestIndex, selected: null, removed: false };
+  if (!group) {
+    // No group matched: on the physical path, directions 20-23 and 30. The
+    // three group tests' miss branches chain
+    // `+0x02ee` -> `+0x0595` -> `+0x0986`, and `+0x09b6` jumps to `+0x0d4d`:
+    // nothing is drawn, and the trailing clamp still runs. It can only write
+    // here when an armour total arrives negative, which by the battle map's
+    // writer census (§`check_stats` is a pure clamp, and the `armourclass_max`
+    // bullet above it) play should not produce, so a staged value is what
+    // reaches it. Corrected 2026-09-22: this used to return before the clamp.
+    clampRemovalArmour(defender, mutationTrace, defenderSide);
+    return { request: requestIndex, selected: null, removed: false };
+  }
   const selection = rolls.randomBetween(`armour-selection-${requestIndex}`, 1, group.length);
   const [piece, defenceField] = group[selection - 1];
   const equipped = numberField(defender, piece);
@@ -208,40 +225,23 @@ function removeArmourCandidate(defender, direction, rolls, requestIndex, mutatio
       "remove-armour-piece"
     );
   }
+  // One entry per debris clip, in launch order; null when nothing was
+  // destroyed. `armour-debris-N` is the N-th clip, NOT the request index: a
+  // shoulderguard is `armour-selection-1`, then `armour-debris-1-*` and `-2-*`.
+  // Counting per removal suffices: only direction 30 makes two removal
+  // requests and it is in no group, so N is unique on the attack's tape.
+  // (If a second request could ever reach a group, N would have to count on.)
   let debrisRolls = null;
   if (removed) {
-    const prefix = `armour-debris-${requestIndex}`;
-    const horizontal = defender.gladiator_dir === "right"
-      ? { source: "randomNumber", value: rolls.randomNumber(`${prefix}-x`, 20) }
-      : defender.gladiator_dir === "left"
-        ? { source: "randomNumber", value: rolls.randomNumber(`${prefix}-x`, 30) }
-        : { source: "randomBetween", value: rolls.randomBetween(`${prefix}-x`, -30, 60) };
-    debrisRolls = {
-      horizontal,
-      vertical: rolls.randomNumber(`${prefix}-y`, 20),
-      rotation: rolls.randomNumber(`${prefix}-rotation`, 5)
-    };
+    debrisRolls = [];
+    for (let clip = 1; clip <= DEBRIS_CLIPS_PER_PIECE[piece]; clip += 1) {
+      // Clip 1 is attached at the left limb, clip 2 at the right.
+      debrisRolls.push(drawDebrisClip(defender, rolls, clip));
+    }
     defender[piece] = 0;
     recordMutation(mutationTrace, `/${defenderSide}/${piece}`, equipped, 0, "remove-armour-piece");
   }
-  const unclampedArmour = defender.armourclass;
-  defender.armourclass = Math.max(0, defender.armourclass);
-  recordMutation(
-    mutationTrace,
-    `/${defenderSide}/armourclass`,
-    unclampedArmour,
-    defender.armourclass,
-    "remove-armour-clamp"
-  );
-  const unclampedMaximum = defender.armourclass_max;
-  defender.armourclass_max = Math.max(0, defender.armourclass_max);
-  recordMutation(
-    mutationTrace,
-    `/${defenderSide}/armourclass_max`,
-    unclampedMaximum,
-    defender.armourclass_max,
-    "remove-armour-clamp"
-  );
+  clampRemovalArmour(defender, mutationTrace, defenderSide);
   return {
     request: requestIndex,
     selected: piece,
@@ -659,4 +659,108 @@ export function createOneShotResultBridge(callback) {
       return delivered;
     }
   };
+}
+
+/* ------------------------------------------------------------------------ *
+ * `remove_armour`'s debris clips and trailing clamp, used by
+ * `removeArmourCandidate` above. Defined last so that adding them shifted no
+ * line after that function, where other files cite this module by line.
+ * ------------------------------------------------------------------------ */
+
+/**
+ * How many debris clips `remove_armour` launches when it destroys each piece.
+ *
+ * Every piece's branch attaches one `item_to_destroy` clip at a limb and calls
+ * `destroy_armour` on it; a PAIRED piece does that twice, unconditionally, left
+ * limb then right, and `destroy_armour` makes three draws per call. So a paired
+ * piece is six debris draws and a single piece three. The `destroy_armour`
+ * CallFunction offsets (overlay frame 52 `DoAction@0x23d7fe`), with the limb
+ * each clip is attached at:
+ *
+ *   helmet         +0x03c5 head
+ *   shoulderguard  +0x0500 Lupperarm, +0x056e Rupperarm
+ *   breastplate    +0x06c1 torso
+ *   gauntlet       +0x07a2 Llowerarm, +0x0810 Rlowerarm
+ *   greaves        +0x08f1 Lupperleg, +0x095f Rupperleg
+ *   shinguard      +0x0a8d Llowerleg, +0x0afb Rlowerleg
+ *   boot           +0x0bdc Lfoot,     +0x0c4a Rfoot
+ *   shield         +0x0d2b Rlowerarm
+ *
+ * 13 calls in all. The defence is subtracted ONCE per piece, ahead of both
+ * calls (e.g. shoulderguard `+0x0477`-`+0x04a2`), so the clip count moves the
+ * RNG stream and nothing else.
+ *
+ * ► **Corrected 2026-09-22.** This module used to draw ONE triple per removed
+ *   piece, so every paired piece was three draws short. No golden could see it:
+ *   none destroys a piece, and for a right- or left-facing defender the draws
+ *   are RandomNumber opcodes the pipeline neither records nor compares. But the
+ *   team engine resolves every physical attack through this function on its
+ *   own tape, and for any other facing the first draw is a tape-consuming
+ *   `randomBetween`.
+ */
+const DEBRIS_CLIPS_PER_PIECE = Object.freeze({
+  helmet: 1,
+  shoulderguard: 2,
+  breastplate: 1,
+  gauntlet: 2,
+  greaves: 2,
+  shinguard: 2,
+  boot: 2,
+  shield: 1
+});
+
+/**
+ * One `destroy_armour` call: exactly three draws at call time, in this order
+ * (overlay frame 52 `DoAction@0x23d7fe`):
+ *
+ *   +0x0dfb  xspeed = -30 + RandomNumber(20)        facing "right"
+ *   +0x0e28  xspeed =  10 + RandomNumber(30)        facing "left"
+ *   +0x0e30  xspeed = randomBetween(-30, 60)        any other facing
+ *   +0x0e5b  dy = -40 + RandomNumber(20)
+ *   +0x0e6f  rotationspeed = -5 + RandomNumber(5)
+ *
+ * The `onEnterFrame` closure it installs (`+0x0e86`) draws nothing. `clip` is
+ * the clip's 1-based ordinal (see `removeArmourCandidate` for why that is also
+ * its ordinal in the attack), and is the `N` of `armour-debris-N-*` — the
+ * grammar `observation.js`'s cosmetic-debris predicate recognises, so a second
+ * clip is excluded from comparison exactly as the first always was.
+ */
+function drawDebrisClip(defender, rolls, clip) {
+  const prefix = `armour-debris-${clip}`;
+  const horizontal = defender.gladiator_dir === "right"
+    ? { source: "randomNumber", value: rolls.randomNumber(`${prefix}-x`, 20) }
+    : defender.gladiator_dir === "left"
+      ? { source: "randomNumber", value: rolls.randomNumber(`${prefix}-x`, 30) }
+      : { source: "randomBetween", value: rolls.randomBetween(`${prefix}-x`, -30, 60) };
+  return {
+    horizontal,
+    vertical: rolls.randomNumber(`${prefix}-y`, 20),
+    rotation: rolls.randomNumber(`${prefix}-rotation`, 5)
+  };
+}
+
+/**
+ * `remove_armour`'s trailing zero-clamp (`+0x0d4d`-`+0x0da4`): `armourclass`,
+ * then `armourclass_max`, each floored at 0 when below it. Every path through
+ * the function ends here, including a direction that matches no piece group.
+ */
+function clampRemovalArmour(defender, mutationTrace, defenderSide) {
+  const unclampedArmour = defender.armourclass;
+  defender.armourclass = Math.max(0, defender.armourclass);
+  recordMutation(
+    mutationTrace,
+    `/${defenderSide}/armourclass`,
+    unclampedArmour,
+    defender.armourclass,
+    "remove-armour-clamp"
+  );
+  const unclampedMaximum = defender.armourclass_max;
+  defender.armourclass_max = Math.max(0, defender.armourclass_max);
+  recordMutation(
+    mutationTrace,
+    `/${defenderSide}/armourclass_max`,
+    unclampedMaximum,
+    defender.armourclass_max,
+    "remove-armour-clamp"
+  );
 }

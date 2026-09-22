@@ -740,16 +740,18 @@ test("the removal pair destroys a real piece and pins the group's selector order
   // debris rolls follow only because a piece was actually equipped
   // (battle map §RNG surface: destroy_armour consumes exactly three rolls, the
   // first facing-selected; the defender faces left, so it is RandomNumber(30)).
+  // The helmet branch calls destroy_armour ONCE (`+0x03c5`, at the head), so
+  // there is one debris clip and one triple.
   assert.deepEqual(helmetArm.expected.mutation.armourRemovals, [{
     request: 1,
     selected: "helmet",
     removed: true,
     defenceRemoved: 60,
-    debrisRolls: {
+    debrisRolls: [{
       horizontal: { source: "randomNumber", value: 10 },
       vertical: 5,
       rotation: 2
-    }
+    }]
   }]);
   assert.equal(helmetArm.expected.state.villain.helmet, 0);
   assert.equal(helmetArm.expected.state.villain.armourclass_max, 79 - 60);
@@ -760,16 +762,28 @@ test("the removal pair destroys a real piece and pins the group's selector order
 
   // Selection 2 -> shoulderguard. 8 defence gone, 71 left, and the same 22
   // damage stays fully absorbed: hitpoints never move.
+  // The shoulderguard branch calls destroy_armour TWICE, unconditionally — at
+  // `Lupperarm` (`+0x0500`) and then `Rupperarm` (`+0x056e`) — so it launches
+  // two debris clips and draws two triples, left limb first. The defence
+  // still leaves each armour pool once (`+0x0477`-`+0x04a2`, before either
+  // call). The second triple's values are chosen inputs, in range.
   assert.deepEqual(shoulderArm.expected.mutation.armourRemovals, [{
     request: 1,
     selected: "shoulderguard",
     removed: true,
     defenceRemoved: 8,
-    debrisRolls: {
-      horizontal: { source: "randomNumber", value: 10 },
-      vertical: 5,
-      rotation: 2
-    }
+    debrisRolls: [
+      {
+        horizontal: { source: "randomNumber", value: 10 },
+        vertical: 5,
+        rotation: 2
+      },
+      {
+        horizontal: { source: "randomNumber", value: 24 },
+        vertical: 12,
+        rotation: 3
+      }
+    ]
   }]);
   assert.equal(shoulderArm.expected.state.villain.shoulderguard, 0);
   assert.equal(shoulderArm.expected.state.villain.armourclass_max, 79 - 8);
@@ -825,24 +839,38 @@ test("every non-lethal tape is exactly the mapped roll order for a hitting direc
     "knockback-roll",
     "enchantment-potency-roll"
   ];
-  const withRemoval = [
+  // One destroy_armour call is one debris clip and three draws (battle map
+  // §RNG surface). How many calls a removal makes is the PIECE's, not the
+  // attack's: remove_armour calls it once for helmet (`+0x03c5`) and twice,
+  // unconditionally, for shoulderguard (`+0x0500` Lupperarm, then `+0x056e`
+  // Rupperarm). `armour-debris-N` is the N-th clip the attack launches.
+  const clip = (n) => [`armour-debris-${n}-x`, `armour-debris-${n}-y`, `armour-debris-${n}-rotation`];
+  const withRemoval = (clips) => [
     "hit-roll",
     "normal-damage-roll",
     "normal-critical-roll",
     "critical-deflection-roll",
     "armour-removal-roll",
     "armour-selection-1",
-    "armour-debris-1-x",
-    "armour-debris-1-y",
-    "armour-debris-1-rotation",
+    ...Array.from({ length: clips }, (_, index) => clip(index + 1)).flat(),
     "knockback-roll",
     "enchantment-potency-roll"
   ];
+  const expectedLabels = {
+    "candidate-armoured-removal-destroys-helmet": withRemoval(1),
+    "candidate-armoured-removal-destroys-shoulderguard": withRemoval(2)
+  };
+  // Every removal arm is named above: a new `candidate-armoured-removal-*`
+  // fixture must say how many clips its piece launches rather than inherit one.
+  assert.deepEqual(
+    POST_TUTORIAL_FAMILY.filter((id) => id.startsWith("candidate-armoured-removal-")),
+    Object.keys(expectedLabels)
+  );
   for (const id of POST_TUTORIAL_FAMILY) {
     const fixture = byId.get(id);
     assert.deepEqual(
       labels(fixture),
-      id.startsWith("candidate-armoured-removal-") ? withRemoval : base,
+      expectedLabels[id] ?? base,
       id
     );
     // Knockback is gated on 5 <= attack_direction <= 12 or 30 (battle map,
@@ -858,9 +886,16 @@ test("every non-lethal tape is exactly the mapped roll order for a hitting direc
   }
   // Cosmetic RandomNumber debris rolls are excluded from observation matching on
   // both sides, so the count a capture can be held to is the randomBetween one.
+  // The shoulderguard's SECOND clip is excluded exactly like its first: were
+  // its labels outside the cosmetic grammar, that arm would count 11 here.
   assert.deepEqual(
     POST_TUTORIAL_FAMILY.map((id) => observedChannels(byId.get(id)).drawCount),
     [7, 7, 7, 7, 7, 7, 8, 8]
+  );
+  assert.deepEqual(
+    ["candidate-armoured-removal-destroys-helmet", "candidate-armoured-removal-destroys-shoulderguard"]
+      .map((id) => byId.get(id).samples.filter((sample) => isCosmeticDebrisSample(sample)).length),
+    [3, 6]
   );
 });
 

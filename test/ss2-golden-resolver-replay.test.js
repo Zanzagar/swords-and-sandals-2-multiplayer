@@ -76,6 +76,12 @@
  *     (`ss2-rules.js:490`, `:707`, `resolver.js:261`, `roster.js:168`,
  *     `ss2-attack-candidate.js:228`, `:237`, `:575`) — and only ONE of the
  *     three named above is among them.
+ *     ► **2026-09-22: `:228` AND `:237` NO LONGER DELETE GREEN.** They were
+ *       `remove_armour`'s trailing clamps; they now live in
+ *       `clampRemovalArmour` at the end of that file, and deleting either
+ *       fails `test/ss2-golden.test.js` ("remove_armour's zero-clamp runs even
+ *       when the direction selects no piece group"). Measured for those two
+ *       sites only; the other five were not re-measured.
  *   - **This file defends exactly one clamp**, and it is not one of the three:
  *     deleting `src/golden/ss2-attack-candidate.js:339` fails the replay
  *     assertion below. So the honest form of this paragraph's headline is
