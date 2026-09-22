@@ -841,6 +841,44 @@ export function figureXAt({ restingX, facing, pose, timeline = null, motion = nu
 }
 
 /**
+ * WHICH WAY A FIGURE IS DRAWN FACING THIS FRAME — the scene's `facing`, or the
+ * facing it had before a turn whose action is still playing.
+ *
+ * ► **ADDED 2026-09-22 WITH `face-clip`, AND THE TIMING IS THE BUILD'S.** The
+ *   build writes `gladiator_dir` only in `changeCombatants`, which `nextphase`
+ *   runs when a phase completes — so every gladiator an action turns, the actor
+ *   and every bystander alike, turns when the action is OVER. A teleporting
+ *   caster plays the whole of `Cast2` facing the way it stood and turns as it
+ *   reappears (`figureXAt` puts it at `to` on the same frame, because the frame
+ *   loop drains finished timelines before it draws); a walker walks past its
+ *   foe still facing forward and then turns round.
+ *
+ * ► **KEYED ON THE ACTION'S TOKEN, NOT ON THE FIGURE'S OWN CLIP.** A bystander
+ *   turned by somebody else's walk plays nothing, and an actor whose victim is
+ *   still reacting has finished its own clip; both must hold until the ACTION
+ *   has finished, which is exactly when the surface stops listing its token as
+ *   pending. That is this engine's phase advance.
+ *
+ * A turn with no token — a caller that supplied no action boundaries — is
+ * drawn at once: there is nothing to wait for, and waiting on nothing would
+ * hold it for ever.
+ *
+ * @param {string} options.facing the scene actor's `facing`, already the facing AFTER any turn
+ * @param {object} [options.turn] the scene actor's `turn`, or null
+ * @param {Array<number>} [options.pendingTokens] the tokens the surface is still waiting on
+ */
+export function figureFacingAt({ facing, turn = null, pendingTokens = [] }) {
+  if (facing !== "left" && facing !== "right") {
+    throw new TimelineError(`figureFacingAt needs the scene actor's facing, "left" or "right", not ${String(facing)}.`);
+  }
+  if (!Array.isArray(pendingTokens)) {
+    throw new TimelineError("figureFacingAt needs the list of tokens the surface is still waiting on.");
+  }
+  if (!turn || turn.actionToken === null || turn.actionToken === undefined) return facing;
+  return pendingTokens.includes(turn.actionToken) ? turn.from : facing;
+}
+
+/**
  * The surface's own timeout policy, stated as a function so it can be tested
  * and so the reason reaching the gate is never an empty string.
  *

@@ -79,6 +79,7 @@ import { ss2ArrowFrameFor, ss2RangedWeaponFor } from "../team/ss2-weapon-table.j
 import { ss2PhysicalSize } from "../team/ss2-rules.js";
 import { BATTLE_RESULT_PENDING_TYPE } from "../team/settlement.js";
 import { bindingPlanFor, resultLabelsFor } from "./slot-layout.js";
+import { CANONICAL_FACING_LEFT } from "./state-bridge.js";
 import { GLADIATOR_CLIP_ROOT, HERO_SIDE, isPlainVanillaObject } from "./vanilla-fields.js";
 
 export class PresentationError extends Error {
@@ -179,6 +180,44 @@ export const CommandKind = Object.freeze({
    */
   ATTACH_EFFECT: "attach-effect",
   MOVE_CLIP_DEPTH: "move-clip-depth",
+  /**
+   * A gladiator turns round — the resolver's facing changed during the batch.
+   *
+   * ► **ADDED 2026-09-22, BECAUSE NOTHING ELSE IN THIS VOCABULARY COULD SAY
+   *   IT.** `facing` reached a scene from exactly one command, the `place-clip`
+   *   the arena is built with, and the resolver has recomputed facing from
+   *   position on every move since 2026-09-12 (`ss2FacingEffects`). So a
+   *   teleport past a foe, a shove or a gale that carried a victim past
+   *   somebody, and a plain walk past a foe all left the figure drawn the way
+   *   it faced at construction.
+   *
+   * ► **ITS OWN KIND, for the reason `move-clip` is one.** A partial
+   *   `place-clip` overwrites all seven geometry fields and makes the figure
+   *   vanish, and `move-clip` is documented as never touching `facing` —
+   *   vanilla walks backwards without turning round. A turn is a different fact
+   *   from a step, and in the build it happens at a different TIME.
+   *
+   * ► **IT HAPPENS AT THE PHASE ADVANCE, NOT WHEN THE ACTION STARTS.** The
+   *   build's six writes to `gladiator_dir` are two at arena setup and four in
+   *   `changeCombatants` (`+0x28f3`-`+0x2ae3`, cited at `ss2FacingEffects`),
+   *   which `nextphase` calls when a phase completes. So a teleporting caster
+   *   plays the whole of `Cast2` facing the way it stood and turns when it
+   *   reappears, and a bystander turns when the action is over, not when it
+   *   begins. The stream carries no time, so this command is emitted LAST in
+   *   its batch and carries the batch's `actionToken`; the painter holds `from`
+   *   until that token finishes (`figureFacingAt` in `src/render/timeline.js`).
+   *
+   * It carries `from` and `to` for the reason `move-clip` does: every command
+   * here is self-describing, and a surface resuming from `fromSequence` has no
+   * memory to consult.
+   *
+   * **Emitted only when the caller carries in the projection the batch STARTED
+   * from** (`before`). A rule set that models no facing leaves the token off
+   * every status list for the whole bout, so a comparison against what the
+   * construction DREW would turn every villain round on the first action; a
+   * comparison of the resolver against itself cannot.
+   */
+  FACE_CLIP: "face-clip",
   BIND_GLOBALS: "bind-globals",
   CLIP_GOTO: "clip-goto",
   PANEL_REFRESH: "panel-refresh",
@@ -1123,6 +1162,55 @@ function depthMovementFor(layout, event) {
   });
 }
 
+/**
+ * Which way a PROJECTED combatant faces, or null when it has no status list.
+ *
+ * Two-valued, as the resolver carries it: `facing-left` on the status list, or
+ * its absence for right (`ss2-rules.js`, `SS2_FACING_LEFT`, which spells the
+ * same token `CANONICAL_FACING_LEFT` does). It is only ever COMPARED with
+ * itself across a batch — see `facingChangesFor` — so a rule set that models no
+ * facing reads "right" on both ends for everybody and never turns anyone.
+ */
+function projectedFacingOf(combatant) {
+  if (!combatant || !Array.isArray(combatant.status)) return null;
+  return combatant.status.includes(CANONICAL_FACING_LEFT) ? "left" : "right";
+}
+
+/**
+ * The `face-clip` for every placed combatant whose facing differs between the
+ * projection the batch started from and the one it ended at.
+ *
+ * Iterated over the LAYOUT rather than the wire, so a combatant with no slot is
+ * skipped rather than handed to `placementFor`, which throws. In layout order,
+ * so two surfaces fed the same batch see the same stream.
+ *
+ * `sequence` is the batch's highest event sequence: the turn belongs to the
+ * action that ended the batch, because it happens at that action's phase
+ * advance. A batch spanning several actions reports only the NET change — the
+ * intermediate facings are not in either projection, which is the same
+ * position `panel-refresh` is in for health.
+ */
+function facingChangesFor(layout, before, wire, sequence) {
+  if (before === null) return [];
+  const started = combatantIndex(before);
+  const ended = combatantIndex(wire);
+  const changes = [];
+  for (const placement of layout.placements) {
+    const from = projectedFacingOf(started.get(placement.combatantId));
+    const to = projectedFacingOf(ended.get(placement.combatantId));
+    if (from === null || to === null || from === to) continue;
+    changes.push(Object.freeze({
+      kind: CommandKind.FACE_CLIP,
+      sequence,
+      combatantId: placement.combatantId,
+      instancePath: placement.instancePath,
+      from,
+      to
+    }));
+  }
+  return changes;
+}
+
 function clipGoto(sequence, placement, chosen, role) {
   return Object.freeze({
     kind: CommandKind.CLIP_GOTO,
@@ -1186,19 +1274,27 @@ function assertActionBoundaries(actionBoundaries) {
  * @param {object} [options.bindings] the animation binding table
  * @param {number} [options.fromSequence] resume point; only events after it are bound
  * @param {number[]} [options.actionBoundaries] each action's `firstEventSequence`, ascending
+ * @param {object} [options.before] `toTeamWireState(battle)` taken BEFORE the
+ *   batch's actions were applied. Carried in by the caller for the reason the
+ *   boundaries are: it is where a `face-clip` is detected from, and without it
+ *   no facing change is reported — see `CommandKind.FACE_CLIP`.
  * @returns {{ commands: object[], nextSequence: number, actionTokens: number[] }}
  */
 export function presentResolvedEvents(wire, {
   layout,
   bindings = PLACEHOLDER_ANIMATION_BINDINGS,
   fromSequence = 0,
-  actionBoundaries = []
+  actionBoundaries = [],
+  before = null
 } = {}) {
   assertCombatProjection(wire);
   if (!layout || typeof layout.placementFor !== "function") {
     throw new PresentationError("Presentation needs an arena layout from buildArenaLayout().");
   }
   assertActionBoundaries(actionBoundaries);
+  // Refused by shape exactly as `wire` is: a live battle handed in here would
+  // be the same way into mutable state, from the other end of the batch.
+  if (before !== null && before !== undefined) assertCombatProjection(before);
   // The action an event belongs to is the last one that began at or before it.
   // Linear rather than clever: the boundaries ascend and so do the events, but
   // this is called with a whole event log often enough that a scan per event
@@ -1385,6 +1481,12 @@ export function presentResolvedEvents(wire, {
     for (const placement of layout.placements) refresh(placement);
   }
 
+  // LAST, after every clip the batch plays, because that is WHEN it happens:
+  // the build turns its gladiators in `changeCombatants` at the phase advance,
+  // once the action's clips have reported. See `CommandKind.FACE_CLIP`. A batch
+  // that turns nobody adds nothing here, so its stream is exactly what it was.
+  commands.push(...facingChangesFor(layout, before ?? null, wire, nextSequence));
+
   // Stamped here rather than at each push site, because the action a command
   // belongs to is a pure function of the `sequence` it already carries — the
   // last boundary at or before it. So a knockout, its `team-eliminated` and the
@@ -1417,6 +1519,12 @@ export function presentResolvedEvents(wire, {
  * Pass nothing and every command carries `actionToken: null`, because the
  * boundary is not in the wire projection and this module will not guess one —
  * see the header for why `event.sequence` is NOT that boundary.
+ *
+ * `drain(wire, { before })` is how a turn gets in, by the same route: the
+ * projection taken before `applyAction`, which is what a `face-clip` is
+ * detected against. The binder does not remember the last wire it was handed
+ * to stand in for it — that would be combat state held here, and the first
+ * drain would have nothing to compare against.
  */
 export function createPresentationBinder({ layout, bindings = PLACEHOLDER_ANIMATION_BINDINGS } = {}) {
   let cursor = 0;
@@ -1429,7 +1537,7 @@ export function createPresentationBinder({ layout, bindings = PLACEHOLDER_ANIMAT
     get actionBoundaries() {
       return Object.freeze([...actionBoundaries]);
     },
-    drain(wire, { actionBoundary } = {}) {
+    drain(wire, { actionBoundary, before = null } = {}) {
       if (actionBoundary !== undefined && actionBoundary !== null) {
         // Validated against the whole list, so a host that hands the same
         // boundary twice — or an older one — fails here rather than producing
@@ -1437,7 +1545,9 @@ export function createPresentationBinder({ layout, bindings = PLACEHOLDER_ANIMAT
         assertActionBoundaries([...actionBoundaries, actionBoundary]);
         actionBoundaries.push(actionBoundary);
       }
-      const result = presentResolvedEvents(wire, { layout, bindings, fromSequence: cursor, actionBoundaries });
+      const result = presentResolvedEvents(wire, {
+        layout, bindings, fromSequence: cursor, actionBoundaries, before
+      });
       cursor = result.nextSequence;
       return result.commands;
     },

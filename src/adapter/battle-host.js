@@ -511,7 +511,11 @@ class VanillaBattleHost {
       );
     }
     const pipeline = [];
-    const before = projectionsOf(this.wire());
+    // Kept whole as well as projected: the presentation binder detects a TURN
+    // against it (`CommandKind.FACE_CLIP`), which is the one presentation fact
+    // that needs where the batch started as well as where it ended.
+    const beforeWire = this.wire();
+    const before = projectionsOf(beforeWire);
     pipeline.push("toTeamWireState:before");
 
     applyAction(this.#battle, action);
@@ -558,7 +562,7 @@ class VanillaBattleHost {
     // event and would split this one action into as many as four. See
     // `src/adapter/action-gate.js` for the measurement.
     const actionBoundary = lastResolvedAction(this.#battle)?.firstEventSequence ?? null;
-    const commands = this.#binder.drain(wire, { actionBoundary });
+    const commands = this.#binder.drain(wire, { actionBoundary, before: beforeWire });
     pipeline.push("presentResolvedEvents");
 
     // Registering what to wait for. It does NOT report anything: nothing in

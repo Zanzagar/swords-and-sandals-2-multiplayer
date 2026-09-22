@@ -30,6 +30,12 @@
  *     `place-clip` is still constructed at exactly one site. `move-clip` is a
  *     separate kind precisely because folding a partial `place-clip` here
  *     would set `y` to `undefined` and make the figure vanish.
+ *
+ *     **And `face-clip` (2026-09-22) TURNS a clip after the arena is built**,
+ *     for the same reason and with the same discipline: until it existed the
+ *     construction's `facing` was the only one a scene ever held, so every
+ *     turn the resolver made was drawn facing the old way. It carries no time
+ *     either; when the turn is DRAWN is `figureFacingAt`'s in `timeline.js`.
  * - so a scene holds two kinds of field: **bound** ones, which came from a
  *   command and may never be invented here, and **presentational** ones, which
  *   are this module's own and are marked as such.
@@ -70,6 +76,7 @@ const HANDLED = Object.freeze([
   "place-clip",
   "move-clip",
   "move-clip-depth",
+  "face-clip",
   "fire-projectile",
   "attach-effect",
   "bind-globals",
@@ -112,7 +119,18 @@ const EMPTY_ACTOR = Object.freeze({
    * not be handed the other axis's origin. `y` above is already the
    * destination; this is where the step began.
    */
-  depthMotion: null
+  depthMotion: null,
+  /**
+   * The turn this actor is in the middle of, from the last `face-clip`, or
+   * null. `facing` above is already the facing AFTER the turn — the fold is not
+   * a tween, exactly as `x` is already the destination — and this carries the
+   * facing to hold until the action that turned it has finished, which is when
+   * the build turns a gladiator (`changeCombatants`, at the phase advance).
+   * `figureFacingAt` in `timeline.js` makes that decision; a stale `turn`
+   * whose action has finished draws `facing`, which is what a gladiator that
+   * has already turned should do.
+   */
+  turn: null
 });
 
 function frozenActor(actor) {
@@ -407,6 +425,34 @@ export function applyCommands(scene, commands) {
             from: command.fromY,
             to: command.toY,
             sequence: command.sequence
+          })
+        });
+        break;
+      }
+
+      case "face-clip": {
+        const actor = actorFor(actors, command.combatantId);
+        // ONLY `facing` and `turn`, spelled out for the reason `move-clip`'s
+        // fold is: a turn is not a step, and it must not start overwriting a
+        // field `place-clip` owns. **`xscale` is deliberately left alone** —
+        // its sign is the construction's mirror, bound from the build's own
+        // "Battle entry" step 5, and the battle map records no `_xscale` write
+        // in `changeCombatants`, only the four `gladiator_dir` writes. The
+        // painter mirrors on `facing`, not on `xscale`. HOW the build draws a
+        // turned clip is not recorded anywhere in this repository and was not
+        // re-derived here.
+        //
+        // `placed` is deliberately NOT set true, as in `move-clip`: a turn is
+        // recorded for a combatant the stream never placed, and it is still
+        // not drawable.
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          facing: command.to,
+          turn: Object.freeze({
+            from: command.from,
+            to: command.to,
+            sequence: command.sequence,
+            actionToken: command.actionToken ?? null
           })
         });
         break;

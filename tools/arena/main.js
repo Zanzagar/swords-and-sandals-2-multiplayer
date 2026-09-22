@@ -50,6 +50,7 @@ import {
   figureScaleFor,
   figureYAt,
   figureXAt,
+  figureFacingAt,
   paintFigure,
   paintShadow,
   paintExtractedFigure,
@@ -3552,10 +3553,18 @@ function renderStage(view, fit, now) {
         at
       })
       : actor.y;
+    // ► **THE FACING BEING DRAWN, not the one being held.** `actor.facing` is
+    //   already the facing AFTER a turn — the fold is not a tween — and the
+    //   build turns a gladiator at the phase advance, once the action is over.
+    //   `figureFacingAt` holds the old one while the turning action's token is
+    //   still pending. Read ONCE and used for the lunge, the mirror and the
+    //   clip choice alike, so the three cannot disagree about which way a
+    //   figure faces.
+    const facing = figureFacingAt({ facing: actor.facing, turn: actor.turn ?? null, pendingTokens });
     const origin = {
       x: figureXAt({
         restingX: actor.x,
-        facing: actor.facing,
+        facing,
         pose,
         timeline: entry?.timeline ?? null,
         motion: entry?.motion ?? null,
@@ -3566,7 +3575,7 @@ function renderStage(view, fit, now) {
       //   drawing it directly is what made a lane change a single-frame
       //   teleport. `figureYAt` is the mirror of `figureXAt` beside it.
       y: drawnY,
-      facing: actor.facing,
+      facing,
       // And the SIZE follows that same interpolated depth rather than the
       // roster's `slotIndex`, which never changes during a bout. Without this
       // the figure keeps its front-lane size for the whole slide, so nothing
@@ -3591,7 +3600,7 @@ function renderStage(view, fit, now) {
     const figureOptions = {
       family: drawnTimeline.family,
       label: drawnTimeline.label,
-      facing: actor.facing,
+      facing,
       at: drawnAt,
       height: figure.build.height,
       fade: pose.fade,
