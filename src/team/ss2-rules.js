@@ -266,7 +266,9 @@
  * Node builtins only.
  */
 
-import { calculateSs2AttackChances, resolveSs2PhysicalAttackCandidate } from "../golden/ss2-attack-candidate.js";
+import {
+  calculateSs2AttackChances, removeSs2ArmourCandidate, resolveSs2PhysicalAttackCandidate
+} from "../golden/ss2-attack-candidate.js";
 import { applySs2MagicDamageCandidate } from "../golden/ss2-spell-candidate.js";
 import { SS2_BUILD_SHA256 } from "../golden/run-1v1-fixture.js";
 import { byCodeUnit } from "../common/stable-order.js";
@@ -419,6 +421,13 @@ export const Ss2ActionType = Object.freeze({
   //   `ATTACK_BANDS`, for the bolts' reason. SELF-TARGETED like `rest`: the arm
   //   never reads `defender` or `game_defender`.
   CAST_TELEPORT: "cast-teleport",
+  // ► **WEAKEN ARMOUR — THE FIRST SPELL VERB THAT DESTROYS EQUIPMENT.**
+  //   `+0x777c`-`+0x78d9` of the same block; see `SS2_WEAKEN_ARMOUR`. SIX
+  //   samples plus the debris, and not one of them is an attack roll: the arm
+  //   draws `attack_direction` three times and hands each straight to
+  //   `remove_armour`, with no `checkattackroll` anywhere. So it is not in
+  //   `ATTACK_BANDS`, for the bolts' reason.
+  CAST_WEAKEN_ARMOUR: "cast-weaken-armour",
   // ► **THE POTIONS — ONE TOKEN FOR EIGHT ITEMS, AND THAT IS THE BUILD'S
   //   SHAPE, NOT A SHORTCUT.** Unlike the two bolts, which are two
   //   `getphase` labels, the build has ONE label, `drink_potion`, for
@@ -974,6 +983,10 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // arm 26 writes at `+0x0f91`. The caster's clip is `Cast2` (`+0x7620`), the
   // bolts' — carried on the event; there is no victim clip at all.
   [Ss2ActionType.CAST_TELEPORT]: "cast_teleport",
+  // `phase_decision == "cast_weaken_armour"` at `+0x7782`, and the decision
+  // ladder arm 19 writes at `+0x0c7a`. The caster's clip is `Cast1`
+  // (`+0x7800`), the gale's; there is no victim clip at all.
+  [Ss2ActionType.CAST_WEAKEN_ARMOUR]: "cast_weaken_armour",
   // `phase_decision == "drink_potion"` at `+0x5773`, the decision all eight
   // potion arms of the villain ladder write (`+0x0662`, `+0x074c`, `+0x07c1`,
   // `+0x0836`, `+0x099a`, `+0x0a0f`, `+0x0a84`, `+0x0af9`), and — unusually —
@@ -4046,6 +4059,110 @@ export const SS2_TELEPORT = Object.freeze({
    * read by `chooseAiAction` and by nothing else. Strict.
    */
   aiFightDistanceBelow: 250
+});
+
+/* ------------------------------------------------------------------ */
+/* The weaken-armour phase: three removals, no roll to hit, no damage  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_weaken_armour`, byte-derived 2026-09-22 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base `0x240c85`),
+ * `+0x777c`-`+0x78d9`:
+ *
+ * ```text
+ *   phase_decision == "cast_weaken_armour"                         +0x7782
+ *     register:3.crowd_action = 4                                  +0x778f
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x779c-+0x77c2
+ *     if (attacker.struck == null) {                               +0x77c3-+0x77d5
+ *       cast_spell_icon(attacker, 44)                              +0x77da
+ *       attacker.struck = false                                    +0x77f2
+ *       attacker.gotoAndPlay("Cast1")                              +0x7800
+ *       attack_direction = 1 + RandomNumber(9)                     +0x7815-+0x7826
+ *       remove_armour(game_defender, defender, attack_direction)   +0x7827-+0x7844
+ *       attack_direction = 1 + RandomNumber(9)                     +0x7845-+0x7856
+ *       remove_armour(game_defender, defender, attack_direction)   +0x7857-+0x7874
+ *       attack_direction = 1 + RandomNumber(9)                     +0x7875-+0x7886
+ *       remove_armour(game_defender, defender, attack_direction)   +0x7887-+0x78a4
+ *     }
+ *     if (attacker.struck == true) {                               +0x78a5
+ *       attacker.struck = null; nextphase()                        +0x78bd-+0x78d9
+ *     }
+ * ```
+ *
+ * ► **THE DIRECTION IS THE ONE-BYTE `RandomNumber` OPCODE, NOT
+ *   `randomBetween`.** `Push "attack_direction", 1, 9; RandomNumber; Add2`:
+ *   the opcode pops 9 and yields 0..8, and `Add2` adds the 1 pushed beneath
+ *   it, so directions 1-9 only (10-12, and the groups they carry, are
+ *   unreachable from here). **On this engine's tape it is a `randomNumber`
+ *   sample, `min 0, max 8`, and the direction is `1 + value`** — the same
+ *   representation the attack path gives the debris opcode draws in
+ *   `drawDebrisClip`. The capture wrapper replaces only `randomBetween`, so a
+ *   live capture can neither record nor inject these three (battle map
+ *   §"Spell-path reuse of `attack_direction`"); they are still part of this
+ *   engine's own deterministic stream, and a peer replaying a tape must take
+ *   them in order.
+ *
+ * ► **THE REMOVAL IS `remove_armour`, UNCHANGED, AND IT IS THE ATTACK PATH'S
+ *   OWN CODE** — `removeSs2ArmourCandidate` in
+ *   `src/golden/ss2-attack-candidate.js`, which calls the same
+ *   `removeArmourCandidate` `damagecharacter` reaches. Per call: the group by
+ *   direction ({1,5,8,9} helmet/shoulderguard, {2,4,6}
+ *   breastplate/gauntlet/greaves, {3,7} shinguard/boot/shield), the selector
+ *   `randomBetween(1, 2 | 3)` drawn BEFORE the piece test — so an unarmoured
+ *   victim still costs it — then, only if the piece is worn, its `_defence`
+ *   out of `armourclass` and `armourclass_max` once, its debris clips (two for
+ *   a paired piece, one otherwise, three draws each), the id zeroed; and the
+ *   trailing zero-clamp every time. **`<piece>_defence` is never written**, so
+ *   a second pick of a destroyed piece finds the id 0 and does nothing but
+ *   draw its selector.
+ *
+ * ► **NO HIT ROLL, NO DAMAGE, NO CLIP ON THE VICTIM, NO DEATH.** Nothing in
+ *   the arm or in `remove_armour` reads or writes `hitpoints`, calls
+ *   `checkattackroll`, or plays anything on `defender` (`remove_armour`
+ *   attaches debris and re-attaches hair on the avatar's limbs, which is
+ *   presentation). So `nextphase` always runs, and the cost is always spent.
+ *
+ * ► **THE COST IS `round(magicka)`, THE STAT, WITH NO AFFORDABILITY CHECK**,
+ *   the bolts', the gale's and the teleport's shape exactly.
+ *
+ * ► **THE ARM HAS NO `Jump`**, like the teleport's: after `nextphase()` it
+ *   falls through into the `cast_whirlwind` test at `+0x78da`. Not
+ *   expressible here, recorded for a frame-accurate port.
+ *
+ * ► **THE OFFER IS POSSESSION.** `fightdistance < 300` is ladder arm 19 of
+ *   `villain_cast_spells` (`DoAction@0x23e7cf` `+0x0c3f`-`+0x0c94`), the
+ *   villain AI's DECISION, and it tests no armour on either side; the hero's
+ *   inventory button tests only `inv_struck` (the gale's reading of
+ *   `sprite:862[overlay]/frame:1`, which this derivation did not re-read).
+ *   See `legalActions` and `chooseAiAction`.
+ */
+export const SS2_WEAKEN_ARMOUR = Object.freeze({
+  /** `cast_spell_icon(attacker, 44)` `+0x77da`, `check_inventory(44)` `+0x0c3f`. */
+  itemId: 44,
+  /** THREE `attack_direction` / `remove_armour` pairs, `+0x7815`, `+0x7845`, `+0x7875`. */
+  rounds: 3,
+  /** `attack_direction = 1 + RandomNumber(9)`: the `1` pushed under the opcode's argument. */
+  directionBase: 1,
+  /** ...and the `9` the opcode pops, so the draw is 0..8 and the direction 1..9. */
+  directionSpan: 9,
+  /**
+   * The tape label of round N's direction draw is `${directionRollPrefix}-${N}`.
+   * INVENTED, in the shape of `armour-selection-N`, which the same round's
+   * `remove_armour` draws next — and deliberately NOT the attack path's
+   * `attack-direction-roll`, because this draw is a different source over a
+   * different range and never reaches `checkattackroll`.
+   */
+  directionRollPrefix: "weaken-armour-direction",
+  /** `attacker.gotoAndPlay("Cast1")`, `+0x7800`. */
+  casterClip: "Cast1",
+  /** `register:3.crowd_action = 4`, `+0x778f`. Presentation cue; not modelled. */
+  crowdAction: 4,
+  /**
+   * The VILLAIN's distance gate, `fightdistance < 300` (`+0x0c6b`-`+0x0c73`,
+   * `Less2`), read by `chooseAiAction` and by nothing else. Strict.
+   */
+  aiFightDistanceBelow: 300
 });
 
 /* ------------------------------------------------------------------ */
@@ -7139,6 +7256,21 @@ export function createSs2TeamRules({
         actions.push({ type: Ss2ActionType.CAST_TELEPORT, targetId: actorId });
       }
 
+      // ► **WEAKEN ARMOUR IS OFFERED ON POSSESSION ALONE, PER FOE, on the same
+      //   button and under the same two gates** (the empty marker and the
+      //   `inventory_maxslots` window, both inside `ss2InventorySlotHolding`).
+      //   `fightdistance < 300` is ladder arm 19, the villain's DECISION, read
+      //   by `chooseAiAction`; the phase (`+0x777c`-`+0x78d9`) reads no distance.
+      //
+      //   **Offered at an UNARMOURED foe too**, because neither the button,
+      //   the phase nor the ladder reads anybody's armour: the build lets a
+      //   caster spend the item on a victim with nothing to lose, and so does
+      //   this. Per foe for the bolts' reason: the arm reads one bound
+      //   `defender`, and above 1v1 the caster picks.
+      if (ss2InventorySlotHolding(view.actor, SS2_WEAKEN_ARMOUR.itemId) !== null) {
+        for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_WEAKEN_ARMOUR, targetId: foe.id });
+      }
+
       // ► **THE POTIONS: ONE OFFER PER DISTINCT ID HELD, SELF-TARGETED, ON THE
       //   SAME BUTTON AND UNDER THE SAME TWO GATES AS THE SPELLS ABOVE.** The
       //   hero's six inventory buttons carry no verb of their own — the click
@@ -8589,6 +8721,134 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **WEAKEN ARMOUR. Six samples plus the debris, zero damage, and three
+      //   calls to the attack path's own `remove_armour`.** It returns before
+      //   `ATTACK_BANDS` for the bolts' reason: its direction draws are handed
+      //   straight to `remove_armour`, and entering the dispatcher would take a
+      //   hit roll the build never takes. See `SS2_WEAKEN_ARMOUR` for the phase,
+      //   statement by statement.
+      if (request.type === Ss2ActionType.CAST_WEAKEN_ARMOUR) {
+        const victim = request.target;
+        if (!victim) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a target; ${String(request.targetId)} is not a combatant.`
+          );
+        }
+        // Re-found at resolve, through the same window as the offer, for the
+        // reason the bolt branch gives — and before any draw, so a refused
+        // cast leaves the tape where it was.
+        const slot = ss2InventorySlotHolding(actor, SS2_WEAKEN_ARMOUR.itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, SS2_WEAKEN_ARMOUR.itemId, { ignoreMaxslots: true });
+          if (beyond !== null) {
+            throw new TeamRuleSetError(
+              `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${SS2_WEAKEN_ARMOUR.itemId} is ` +
+              `in ${beyond}, outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}. The ` +
+              "build's hero panel hides that button (sprite:492[inventory_overlay] +0x024f), and this engine " +
+              "offers and consumes through the same window."
+            );
+          }
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+            `item ${SS2_WEAKEN_ARMOUR.itemId}. The build's own gate is possession — ` +
+            `check_inventory(${SS2_WEAKEN_ARMOUR.itemId}) for the villain, a visible inventory button for the ` +
+            "hero — and this engine reproduces it."
+          );
+        }
+
+        // The victim's flat vanilla record, mutated in place by all three
+        // removals — the build's `game_defender`, which is what each
+        // `remove_armour` call subtracts from. Its `gladiator_dir` is the
+        // VICTIM's facing, which is what `destroy_armour` reads
+        // (`whichavatar.gladiator_dir`, `+0x0dd6`) to shape each debris draw.
+        const victimRecord = vanillaRecordOf(victim, "defender");
+        const victimBefore = { ...victimRecord };
+        const removals = [];
+        // ► **THE DEBRIS CLIPS ARE NUMBERED ACROSS THE WHOLE CAST**, so
+        //   `armour-debris-N` is the N-th clip this action launches, as it is
+        //   on the attack path — where only one removal can ever reach a group
+        //   and the question never arose. INVENTED as a labelling rule; the
+        //   draws and their order are the build's either way.
+        let nextClip = 1;
+        for (let round = 1; round <= SS2_WEAKEN_ARMOUR.rounds; round += 1) {
+          // `attack_direction = 1 + RandomNumber(9)` — a `randomNumber` sample
+          // on this tape, `min 0, max 8`. See `SS2_WEAKEN_ARMOUR`.
+          const attackDirection = SS2_WEAKEN_ARMOUR.directionBase + rolls.randomNumber(
+            `${SS2_WEAKEN_ARMOUR.directionRollPrefix}-${round}`, SS2_WEAKEN_ARMOUR.directionSpan
+          );
+          const removal = removeSs2ArmourCandidate(victimRecord, attackDirection, rolls, {
+            request: round,
+            firstDebrisClip: nextClip,
+            side: "victim"
+          });
+          nextClip += removal.debrisRolls?.length ?? 0;
+          removals.push({
+            attackDirection,
+            selected: removal.selected,
+            removed: removal.removed,
+            defenceRemoved: removal.defenceRemoved ?? 0,
+            // Presentation data: the three raw draws per clip, in launch order,
+            // or null when nothing fell. Nothing in this engine reads them.
+            debris: removal.debrisRolls ?? null
+          });
+        }
+
+        // No damage, so no death: `nextphase` always runs, and the cost is spent
+        // unconditionally, exactly as the gale's is.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const transition = phaseTransitionEffects(actor, { staminaCost });
+
+        // ► **THE VICTIM'S WRITES, AND NOT `defenderEffects`.** That function
+        //   always emits a DAMAGE effect — "a miss is a zero-damage effect" —
+        //   and nothing here was swung, so a zero there would narrate a miss
+        //   the build never rolled. Resource effects are absolute, so one write
+        //   per field carrying the settled value is exact, in first-touch
+        //   order: `armourclass`, `armourclass_max`, then each destroyed piece
+        //   in the order it fell. An undeclared resource is skipped, as
+        //   `defenderEffects` skips one, rather than refused mid-list.
+        const declared = declaredResourceNames(victim);
+        const destroyed = removals.filter((removal) => removal.removed).map((removal) => removal.selected);
+        const victimWrites = [];
+        for (const name of ["armourclass", "armourclass_max", ...destroyed]) {
+          if (!declared.has(name) || victimBefore[name] === victimRecord[name]) continue;
+          victimWrites.push({ kind: EffectKind.RESOURCE, targetId: victim.id, resource: name, to: victimRecord[name] });
+        }
+
+        // The build's order: the slot is consumed when the phase begins, the
+        // three removals run inside the entry block, and `nextphase` settles
+        // the stamina on the caster's own `struck`.
+        const effects = [
+          { kind: EffectKind.RESOURCE, targetId: actor.id, resource: slot, to: SS2_INVENTORY_EMPTY },
+          ...victimWrites,
+          ...transition.effects,
+          ...crowd
+        ];
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: victim.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // The CASTER's clip only, and the absence of `victimClip` is the
+            // data: the arm plays nothing on the victim, and
+            // `SS2_STATIC_MAP_BINDINGS` binds a lone `casterClip` to the caster
+            // and nothing else, whoever `targetId` names.
+            casterClip: SS2_WEAKEN_ARMOUR.casterClip,
+            spellId: SS2_WEAKEN_ARMOUR.itemId,
+            consumedSlot: slot,
+            removals,
+            // The attack event's two names for the same facts, so a narrator
+            // reads both verbs alike.
+            armourDestroyed: destroyed,
+            armourLost: victimBefore.armourclass - victimRecord.armourclass,
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained
+          }]
+        };
+      }
+
       // ► **THE DRINK. Zero samples, one pool, and the order is the whole
       //   difficulty.** See `SS2_POTIONS` for the phase statement by statement.
       if (request.type === Ss2ActionType.DRINK_POTION) {
@@ -9488,6 +9748,50 @@ export function createSs2TeamRules({
       //   what it now means is "a DAMAGE SPELL is on offer".
       const boltOnOffer = options.some((option) => ss2DamageSpell(option.type));
       const attackOnOffer = options.some((option) => ATTACK_BANDS[option.type]) || boltOnOffer;
+
+      // ► **WEAKEN ARMOUR IS THE BUILD'S OWN RULE, for the gale's reason: it
+      //   deals no damage, so it has no row in the pricing table below.** Ladder
+      //   arm 19 of `villain_cast_spells` (`+0x0c3f`-`+0x0c94`):
+      //
+      //     check_inventory(44)                                     +0x0c3f
+      //     && _root.arena.fightdistance < 300                      +0x0c5d-+0x0c75
+      //
+      //   Strict, and NOTHING ELSE — no armour test on the caster or the
+      //   victim, so this AI spends the item on an unarmoured foe exactly as
+      //   the build's villain does. Returned before the walk and the swing,
+      //   because `villain_cast_spells` replaces the decision; **`attackOnOffer`
+      //   is NOT widened**, for the reason the gale gives.
+      //
+      // ► **THE LADDER'S PRE-EMPTION, AS FAR AS IT REACHES THIS ENGINE.** Arms
+      //   1-18 must all fail first. The potion arms (2, 4-6, 10-13) returned
+      //   above. The five damage spells (arms 14-18) fire on possession alone,
+      //   so a caster offered any of them never reaches arm 19 — even on a turn
+      //   this engine's pricing then spends on a swing — which is what
+      //   `!boltOnOffer` says. The rest of 1-18 (`rejuvinate`, `regenerate`,
+      //   death from above, colossus, little fat kid) have no verb here and so
+      //   pre-empt nothing; when they are built, this block must grow. And it
+      //   sits ABOVE the gale (arm 24) and the teleport (arm 26), so a caster
+      //   qualifying for either weakens first.
+      //
+      // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
+      //   > 10` at `+0x056f`. This AI takes no samples, so it casts on every
+      //   turn the gate is open rather than on nine in ten.
+      //
+      // ► **INVENTED: WHICH FOE.** The build has one `defender`. Above 1v1 this
+      //   weakens the NEAREST foe, the one the distance gate is about — the
+      //   gale's and the teleport's choice. At 1v1 it is the build's defender.
+      if (!boltOnOffer) {
+        const weakened = nearestFoe(view);
+        const weakenOption = weakened
+          ? options.find((option) => option.type === Ss2ActionType.CAST_WEAKEN_ARMOUR && option.targetId === weakened.id)
+          : undefined;
+        if (weakenOption) {
+          const range = ss2FightDistance(actor, weakened);
+          // `range` cannot be null — `nearestFoe` skips a foe whose distance
+          // is null — and is guarded for the reason the gale's is.
+          if (range !== null && range < SS2_WEAKEN_ARMOUR.aiFightDistanceBelow) return weakenOption;
+        }
+      }
 
       // ► **THE GALE IS THE BUILD'S OWN RULE, NOT A PRICE, because it deals no
       //   damage and so has no row in the table below.** Ladder arm 24 of

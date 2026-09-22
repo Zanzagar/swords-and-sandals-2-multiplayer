@@ -297,6 +297,11 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //   written by ladder arm 26 (`+0x0f91`) and consumed at
     //   `+0x7541`-`+0x76ad`.** Self-targeted, one sample (the destination).
     "cast-teleport",
+    // ► **JOINED 2026-09-22 — weaken armour, `getphase("cast_weaken_armour")`,
+    //   written by ladder arm 19 (`+0x0c7a`) and consumed at
+    //   `+0x777c`-`+0x78d9`.** Three `1 + RandomNumber(9)` directions, each
+    //   handed to `remove_armour`; no hit roll, so not in `ATTACK_BANDS`.
+    "cast-weaken-armour",
     // ► **JOINED 2026-09-22 — the potions, `getphase("drink_potion")`, ONE
     //   token for inventory ids 2-9** because the build has one label for all
     //   eight (`+0x5773`) and selects the potion from `inventory_action`. The

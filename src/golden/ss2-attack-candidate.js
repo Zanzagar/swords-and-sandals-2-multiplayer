@@ -180,7 +180,7 @@ function recordMutation(trace, path, before, after, reason) {
   });
 }
 
-function removeArmourCandidate(defender, direction, rolls, requestIndex, mutationTrace, defenderSide) {
+function removeArmourCandidate(defender, direction, rolls, requestIndex, mutationTrace, defenderSide, firstClip = 1) {
   // The build's order in each piece branch of `remove_armour` (overlay frame
   // 52 `DoAction@0x23d7fe`): take the defence out of both pools ONCE, launch
   // the piece's debris clips — two for a paired piece, left limb then right,
@@ -230,12 +230,12 @@ function removeArmourCandidate(defender, direction, rolls, requestIndex, mutatio
   // shoulderguard is `armour-selection-1`, then `armour-debris-1-*` and `-2-*`.
   // Counting per removal suffices: only direction 30 makes two removal
   // requests and it is in no group, so N is unique on the attack's tape.
-  // (If a second request could ever reach a group, N would have to count on.)
+  // (`cast_weaken_armour`'s three DO reach groups; it counts on via `firstClip`.)
   let debrisRolls = null;
   if (removed) {
     debrisRolls = [];
-    for (let clip = 1; clip <= DEBRIS_CLIPS_PER_PIECE[piece]; clip += 1) {
-      // Clip 1 is attached at the left limb, clip 2 at the right.
+    for (let clip = firstClip; clip < firstClip + DEBRIS_CLIPS_PER_PIECE[piece]; clip += 1) {
+      // The first is attached at the left limb, the second at the right.
       debrisRolls.push(drawDebrisClip(defender, rolls, clip));
     }
     defender[piece] = 0;
@@ -720,8 +720,9 @@ const DEBRIS_CLIPS_PER_PIECE = Object.freeze({
  *   +0x0e6f  rotationspeed = -5 + RandomNumber(5)
  *
  * The `onEnterFrame` closure it installs (`+0x0e86`) draws nothing. `clip` is
- * the clip's 1-based ordinal (see `removeArmourCandidate` for why that is also
- * its ordinal in the attack), and is the `N` of `armour-debris-N-*` — the
+ * the clip's 1-based ordinal in the ACTION (see `removeArmourCandidate` for why
+ * that is per removal on the attack path, and `removeSs2ArmourCandidate` for
+ * the one caller whose removals count on), and is the `N` of `armour-debris-N-*` — the
  * grammar `observation.js`'s cosmetic-debris predicate recognises, so a second
  * clip is excluded from comparison exactly as the first always was.
  */
@@ -763,4 +764,50 @@ function clampRemovalArmour(defender, mutationTrace, defenderSide) {
     defender.armourclass_max,
     "remove-armour-clamp"
   );
+}
+
+/**
+ * ONE `remove_armour(whichcharacter, whichavatar, attack_direction)` call, for
+ * a caller that is not the physical attack path.
+ *
+ * The build has exactly five call sites (battle map §"Spell-path reuse of
+ * `attack_direction`"): two in `damagecharacter`, which
+ * `resolveSs2PhysicalAttackCandidate` above reaches through
+ * `removeArmourCandidate`, and three in the `cast_weaken_armour` arm of
+ * `attacker.onEnterFrame` (`DoAction@0x240c7f` `+0x7839`, `+0x7869`,
+ * `+0x7899`). This is the SAME function for the second family — the direction
+ * group, the selector drawn before the piece test, the defence out of both
+ * pools once, the debris clips, the zeroed id and the trailing clamp are all
+ * `removeArmourCandidate`'s — so nothing about the removal is re-derived here.
+ * The CALLER draws the direction, because the build draws it in the cast arm,
+ * not in `remove_armour`.
+ *
+ * `defender` is a flat vanilla record and is MUTATED, as the attack path's is.
+ * `request` is the `N` of `armour-selection-N`; `firstDebrisClip` is the
+ * ordinal of the first debris clip this call may launch, so a caller making
+ * several removals in one action can number its clips across all of them. The
+ * defaults are the attack path's own numbering. `side` names the record in the
+ * returned `mutationTrace` paths, which are diagnostic.
+ *
+ * Returns what `removeArmourCandidate` returns — `request`, `selected`,
+ * `removed`, `defenceRemoved`, `debrisRolls` — plus that trace.
+ */
+export function removeSs2ArmourCandidate(
+  defender,
+  attackDirection,
+  rolls,
+  { request = 1, firstDebrisClip = 1, side = "defender" } = {}
+) {
+  if (!defender || typeof defender !== "object") throw new Ss2CandidateError("defender must be an object.");
+  if (!Number.isInteger(attackDirection)) throw new Ss2CandidateError("attackDirection must be an integer.");
+  if (!Number.isSafeInteger(request) || request < 1) throw new Ss2CandidateError("request must be a positive integer.");
+  if (!Number.isSafeInteger(firstDebrisClip) || firstDebrisClip < 1) {
+    throw new Ss2CandidateError("firstDebrisClip must be a positive integer.");
+  }
+  initialiseCombatant(defender);
+  const mutationTrace = [];
+  const removal = removeArmourCandidate(
+    defender, attackDirection, rolls, request, mutationTrace, side, firstDebrisClip
+  );
+  return { ...removal, mutationTrace };
 }
