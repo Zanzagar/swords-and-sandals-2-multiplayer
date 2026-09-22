@@ -45,7 +45,10 @@ import {
   facingWrite,
   HERO_SIDE,
   initialStatusEffects,
+  isClipResidentField,
+  isKnownVanillaField,
   isResourceBackedVanillaField,
+  isTimedSpellField,
   LabelProvenance,
   loadoutMirrorDifferences,
   MAP_SILENCE,
@@ -61,6 +64,7 @@ import {
   SlotLayoutError,
   SS2_STATIC_MAP_BINDINGS,
   STATUS_FLAG_FIELDS,
+  TIMED_SPELL_COUNTER_FIELDS,
   toCanonicalCombatantSource,
   toVanillaCombatant,
   VANILLA_FIGHTER_DEPTHS,
@@ -132,12 +136,17 @@ const freshVanillaGladiator = (overrides = {}) => ({
   inventory5: 0,
   inventory6: 0,
   psyche_up: 0,
-  spell_colossus: 0,
-  spell_bloodlust: 0,
+  // ► **`spell_colossus: 0` and `spell_bloodlust: 0` STOOD HERE UNTIL
+  //   2026-09-22, AND THE BUILD NEVER PUTS EITHER ON THIS OBJECT.**
+  //   `check_spells(which_character, which_avatar)` binds the CLIP to r1 and
+  //   reads and writes every timed counter there, and every cast arm writes
+  //   `attacker.spell_X` (battle map §"Five more phases"). A persistent object
+  //   "as the map describes one" does not carry them, so the fixture does not
+  //   either; the tests that need a misplaced counter pass one as an override.
   ...overrides
 });
 
-const brute = (id, agility, controller = "local") => ({
+const brute =(id, agility, controller = "local") => ({
   id,
   name: id,
   controller,
@@ -263,6 +272,111 @@ test("the facing write is the only write that targets the fighter clip", () => {
   assert.deepEqual([write.field, write.from, write.to], ["gladiator_dir", "right", "left"]);
 });
 
+/* ------------------------------------------------------------------ */
+/* State bridge: the clip-resident timed spell counters                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **ADDED 2026-09-22, WHEN THE ADAPTER'S MODEL OF THESE COUNTERS WAS FOUND
+ *   TO DESCRIBE AN OBJECT THE BUILD NEVER USES FOR THEM.** Until then every
+ *   /^spell_/ key of `_root.game.<side>` was a "timed spell field" and a
+ *   declared resource could write one there. The build keeps all six on the
+ *   fighter CLIP: `check_spells(which_character, which_avatar)` binds
+ *   `which_avatar` to r1 (header flags `0x2a`) and every counter access in its
+ *   body is `register:1`; `nextphase` passes the clip second
+ *   (`check_spells(game_attacker, attacker)`, `+0x3271`); every cast arm writes
+ *   `attacker.spell_X` (battle map §"Five more phases").
+ */
+test("the six timed counters are named, in check_spells order, and are clip-resident, not persistent-object fields", () => {
+  assert.deepEqual([...TIMED_SPELL_COUNTER_FIELDS], [
+    "spell_colossus",
+    "spell_little_fat_kid",
+    "spell_swiftsandals",
+    "spell_bloodlust",
+    "spell_regenerate",
+    "spell_boundless_energy"
+  ]);
+  for (const name of TIMED_SPELL_COUNTER_FIELDS) {
+    assert.equal(isTimedSpellField(name), true, `${name} is a timed counter`);
+    assert.equal(isClipResidentField(name), true, `${name} lives on the fighter clip`);
+    assert.equal(isKnownVanillaField(name), false, `${name} is not a persistent-object field`);
+    assert.match(citationFor(name), /fighter clip/, `${name} must cite where the build keeps it`);
+  }
+  // The prefix is not the classification. `spell_selected` is a real build
+  // name (a timeline variable `use_item` sets, `+0x0388`) and `spell_haste` is
+  // an invented one; neither is a counter.
+  for (const name of ["spell_selected", "spell_haste"]) {
+    assert.equal(isTimedSpellField(name), false, `${name} is not a timed counter`);
+    assert.equal(isClipResidentField(name), false);
+    assert.equal(citationFor(name), null, `${name} is cited by no battle-map section`);
+  }
+});
+
+test("a supplied clip's timed counters are carried on the clip record and back out, and never reach the combat object", () => {
+  const clip = {
+    gladiator_dir: "left",
+    spell_colossus: -1, // what check_spells leaves after the colossus expiry (`+0x24ba`)
+    spell_regenerate: 12,
+    spell_boundless_energy: 0,
+    _xscale: 100 // a clip property the catalogue does not name is not carried
+  };
+  const record = normaliseVanillaCombatant(freshVanillaGladiator(), { clip });
+  assert.deepEqual({ ...record.clip }, {
+    gladiator_dir: "left",
+    spell_colossus: -1,
+    spell_regenerate: 12,
+    spell_boundless_energy: 0
+  });
+  assert.deepEqual([...record.misplacedClipFields], []);
+  for (const name of TIMED_SPELL_COUNTER_FIELDS) {
+    assert.equal(name in record.fields, false, `${name} must not appear on the combat object`);
+  }
+
+  const split = denormaliseVanillaCombatant(record);
+  assert.deepEqual(split.fighterClip, {
+    gladiator_dir: "left",
+    spell_colossus: -1,
+    spell_regenerate: 12,
+    spell_boundless_energy: 0
+  });
+  for (const name of TIMED_SPELL_COUNTER_FIELDS) assert.equal(name in split.combatObject, false);
+
+  // A sync and an applied write carry them forward untouched.
+  const canonical = { id: "red-1", health: 12, maxHealth: 30, status: [], alive: true };
+  assert.deepEqual({ ...toVanillaCombatant(canonical, record).clip }, { ...record.clip });
+  const layout = buildArenaLayout(toTeamWireState(makeBattle(1, 1)));
+  const turned = applyVanillaWrites(record, [facingWrite("red-1", layout.placementFor("red-1"), record, "right")]);
+  assert.deepEqual({ ...turned.clip }, { ...record.clip, gladiator_dir: "right" });
+});
+
+test("a timed counter found on the persistent object is passed through, reported as misplaced, and never lifted onto the clip", () => {
+  // The facing is lifted because something really does fold it onto the
+  // combat-object record: the 1v1 fixtures carry it in the scenario and the
+  // capture wrapper's `dumpSide` folds the clip's value into `fields`. Nothing
+  // folds a counter, and lifting one would hand the build a value it never
+  // read: on the persistent object the counter does nothing, on the clip it
+  // drives `check_spells` and `nextphase`.
+  const record = normaliseVanillaCombatant(
+    freshVanillaGladiator({ spell_regenerate: 17, spell_colossus: 16 }),
+    { clip: { gladiator_dir: "right" } }
+  );
+  assert.deepEqual([...record.misplacedClipFields], ["spell_regenerate", "spell_colossus"]);
+  assert.deepEqual([...record.unknownFields], [], "a known name on the wrong object is misplaced, not unknown");
+  assert.equal(record.fields.spell_regenerate, 17);
+  assert.equal(record.fields.spell_colossus, 16);
+  assert.deepEqual({ ...record.clip }, { gladiator_dir: "right" }, "never lifted");
+  assert.equal("timedSpellFields" in record, false, "the persistent object has no timed spell fields to list");
+
+  const { combatObject, fighterClip } = denormaliseVanillaCombatant(record);
+  assert.equal(combatObject.spell_regenerate, 17);
+  assert.equal(combatObject.spell_colossus, 16);
+  assert.deepEqual(fighterClip, { gladiator_dir: "right" });
+  // The classification survives a sync and an applied write.
+  const canonical = { id: "red-1", health: 12, maxHealth: 30, status: [], alive: true };
+  assert.deepEqual([...toVanillaCombatant(canonical, record).misplacedClipFields], ["spell_regenerate", "spell_colossus"]);
+  assert.deepEqual([...applyVanillaWrites(record, []).misplacedClipFields], ["spell_regenerate", "spell_colossus"]);
+});
+
 /**
  * ► **THE DRAWING MUST NOT CONTRADICT THE MODEL, and this is the invariant
  *   that keeps it honest on the second axis.**
@@ -310,14 +424,22 @@ test("a rule set that models no depth keeps the authored legibility stagger", ()
 /* State bridge: totality and round trip                               */
 /* ------------------------------------------------------------------ */
 
-test("normalisation is total: unnamed spell_* fields and unknown fields round-trip unchanged", () => {
-  const source = freshVanillaGladiator({ spell_regenerate: 17, some_future_field: "kept" });
+/**
+ * ► **RENAMED AND REWRITTEN 2026-09-22.** It was "unnamed spell_* fields and
+ *   unknown fields round-trip unchanged" and asserted that `spell_regenerate`
+ *   and `spell_colossus` on the persistent object were `timedSpellFields`.
+ *   The build keeps both on the fighter clip (§"Five more phases"), so the
+ *   round trip it pins is unchanged and the classification is not: a counter
+ *   here is MISPLACED, and a `spell_` name the build does not use is UNKNOWN.
+ */
+test("normalisation is total: misplaced counters and unknown fields round-trip unchanged", () => {
+  const source = freshVanillaGladiator({ spell_regenerate: 17, some_future_field: "kept", spell_haste: 3 });
   const record = normaliseVanillaCombatant(source);
-  assert.ok(record.timedSpellFields.includes("spell_regenerate"));
-  assert.ok(record.timedSpellFields.includes("spell_colossus"));
-  assert.deepEqual(record.unknownFields, ["some_future_field"]);
+  assert.deepEqual([...record.misplacedClipFields], ["spell_regenerate"]);
+  assert.deepEqual([...record.unknownFields], ["some_future_field", "spell_haste"]);
   assert.equal(record.fields.spell_regenerate, 17);
   assert.equal(record.fields.some_future_field, "kept");
+  assert.equal(record.fields.spell_haste, 3);
 
   const { combatObject } = denormaliseVanillaCombatant(record);
   for (const [key, value] of Object.entries(source)) {
@@ -1010,7 +1132,14 @@ test("every vanilla write declares one of four sources, and the field set is fix
     assert.equal(isResourceBackedVanillaField(reserved), false, `${reserved} is not a resource's to write`);
   }
   assert.equal(isResourceBackedVanillaField("armourclass"), true);
-  assert.equal(isResourceBackedVanillaField("spell_regenerate"), true, "the timed pools the map declines to name");
+  // ► **THIS WAS `true` UNTIL 2026-09-22, "the timed pools the map declines
+  //   to name".** The map names all six, and the build keeps them on the
+  //   fighter clip, which no declared-resource write reaches. See the write
+  //   path test below for what happens to one instead.
+  for (const name of TIMED_SPELL_COUNTER_FIELDS) {
+    assert.equal(isResourceBackedVanillaField(name), false, `${name} is on the clip, not the combat object a resource writes`);
+  }
+  assert.equal(ALLOWED_WRITE_FIELDS[WriteSource.DECLARED_RESOURCE].some((field) => field.startsWith("spell_")), false);
   // ► **THIS ASSERTION USED `psyche_up` AS ITS EXAMPLE AND `psyche_up` BECAME A
   //   RESOURCE ON 2026-09-16.** The RULE it states is unchanged and still
   //   worth pinning — a field is not a resource by being a field — so it keeps
@@ -1163,6 +1292,82 @@ test("a resource may not borrow a field canonical health or status already owns"
     });
     assert.deepEqual(result.writes, [], `a resource named ${field} must not produce a write`);
     assert.match(result.unmapped[0].reason, /owned by canonical health, canonical status or the clip record/);
+  }
+});
+
+/**
+ * ► **ADDED 2026-09-22. Until then a declared resource named `spell_*` was
+ *   written to `_root.game.<side>`, where the build never reads it** — so a
+ *   staged `game.hero.spell_regenerate` did nothing, and the adapter reported
+ *   it as a successful mirror.
+ *
+ * REFUSED rather than re-aimed at the clip, and the refusal says where the
+ * build keeps the counter. Re-aiming would need a fifth write source, and a
+ * bare counter is not a value the build holds alone: `check_spells`' expiry arm
+ * restores `_xscale`/`_yscale` from the clip's `oldscale` and `strength` /
+ * `attack` from `backup_strength` / `backup_attack` (`+0x2485`–`+0x24b9`), and
+ * the colossus arm sets `oldscale` only on its entry tick (`+0x8084`–`+0x8098`).
+ */
+test("a declared resource naming a timed counter is refused on the combat object, and the refusal says the build keeps it on the clip", () => {
+  const battle = makeBattle(1, 1);
+  const layout = buildArenaLayout(toTeamWireState(battle));
+  for (const field of TIMED_SPELL_COUNTER_FIELDS) {
+    const before = projections(battle).map((combatant) => ({
+      ...combatant,
+      resources: { [field]: { value: 0, min: null, max: null } }
+    }));
+    const after = before.map((combatant) =>
+      combatant.id === "blue-1"
+        ? { ...combatant, resources: { [field]: { value: 20, min: null, max: null } } }
+        : combatant
+    );
+    const result = vanillaWritesForResolvedAction({
+      before,
+      after,
+      effects: [{ kind: "resource", targetId: "blue-1", resource: field, to: 20 }],
+      placements: layout.byCombatantId
+    });
+    assert.deepEqual(result.writes, [], `a resource named ${field} must not produce a combat-object write`);
+    assert.equal(result.unmapped.length, 1);
+    assert.equal(result.unmapped[0].resource, field);
+    assert.match(result.unmapped[0].reason, /fighter clip/);
+    assert.match(result.unmapped[0].reason, /_root\.arena\.gladiators/);
+    assert.doesNotMatch(result.unmapped[0].reason, /Widening the allowlist/,
+      "widening the combat-object allowlist would aim at an object the build does not use for it");
+
+    // A sync neither writes it nor calls it drift: there is nowhere on the
+    // combat object to bring into step.
+    const record = normaliseVanillaCombatant(freshVanillaGladiator());
+    const canonical = { ...after.find((combatant) => combatant.id === "blue-1") };
+    assert.equal(field in toVanillaCombatant(canonical, record).fields, false);
+    assert.equal(mirrorDifferences(record, canonical).some((problem) => problem.startsWith(field)), false);
+
+    // And a write built by hand, whose value IS the resolver's, is still
+    // refused — on either target — with the same message.
+    const handBuilt = {
+      target: WriteTarget.COMBAT_OBJECT,
+      source: WriteSource.DECLARED_RESOURCE,
+      combatantId: "blue-1",
+      side: VILLAIN_SIDE,
+      slotIndex: 0,
+      path: "_root.game.villain",
+      field,
+      from: undefined,
+      to: 20,
+      materialises: true,
+      reason: "resource-effect"
+    };
+    for (const target of [WriteTarget.COMBAT_OBJECT, WriteTarget.FIGHTER_CLIP]) {
+      assert.throws(
+        () => assertWriteProvenance([{ ...handBuilt, target }], after),
+        (error) =>
+          error instanceof AdapterStateError &&
+          new RegExp(`may not write the vanilla field ${field}`).test(error.message) &&
+          /fighter clip/.test(error.message) &&
+          /_root\.arena\.gladiators/.test(error.message),
+        `${field} on the ${target}`
+      );
+    }
   }
 });
 
@@ -2134,7 +2339,10 @@ test("every field the adapter maps cites the battle map, and every silence names
     assert.ok(citationFor(field), `${field} must cite a battle-map section`);
   }
   assert.equal(citationFor("gladiator_dir"), "battle-map: Combatant state objects / clip-resident facing");
-  assert.match(citationFor("spell_regenerate"), /timed spell_\* fields, unnamed/);
+  // ► **WAS `/timed spell_\* fields, unnamed/` UNTIL 2026-09-22** — a
+  //   persistent-object citation for a field the build keeps on the clip.
+  assert.match(citationFor("spell_regenerate"), /Five more phases/);
+  assert.match(citationFor("spell_regenerate"), /fighter clip/);
   assert.equal(citationFor("some_future_field"), null);
   assert.ok(record.unknownFields.length === 0);
 
@@ -2155,6 +2363,14 @@ test("every field the adapter maps cites the battle map, and every silence names
   //   `tools/walk-displacement-derivation.mjs`, so there is no silence left for
   //   the adapter to work around. Nine to eight. The catalogue's own header
   //   carries what that cost.
+  //
+  // ► **AND `timed-spell-field-names` CAME OUT ON 2026-09-22. Eight to seven.**
+  //   It said the map "names none of them"; the map named two from 2026-08-31,
+  //   one day after the entry was written — `attacker.spell_boundless_energy`,
+  //   on the CLIP by the map's own binding list, and the `spell_regenerate`
+  //   test (commit 49dcc7a) — and now names all six. Its
+  //   `adapterBehaviour` described the persistent object, which the build never
+  //   uses for them. The catalogue's header records both halves.
   assert.deepEqual([...MAP_SILENCE.map((entry) => entry.id)].sort(), [
     "crowd-impatience",
     "initiative-order",
@@ -2162,8 +2378,7 @@ test("every field the adapter maps cites the battle map, and every silence names
     "panel-bar-instance-names",
     "psyche-up-initialisation",
     "secondary-weapon-field-names",
-    "swing-cost",
-    "timed-spell-field-names"
+    "swing-cost"
   ]);
   for (const entry of MAP_SILENCE) {
     for (const key of ["id", "subject", "silence", "adapterBehaviour", "settledBy"]) {

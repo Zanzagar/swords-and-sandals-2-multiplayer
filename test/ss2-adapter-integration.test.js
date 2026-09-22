@@ -164,8 +164,10 @@ const vanillaGladiator = (overrides = {}) => ({
   inventory4: 0,
   inventory5: 0,
   inventory6: 0,
-  spell_colossus: 0,
-  spell_bloodlust: 0,
+  // ► **`spell_colossus: 0` and `spell_bloodlust: 0` STOOD HERE UNTIL
+  //   2026-09-22.** The build keeps every timed counter on the fighter CLIP
+  //   (`check_spells` r1, battle map §"Five more phases"), never on this
+  //   object, so the round-trip test now supplies them on the clip record.
   ...overrides
 });
 
@@ -197,7 +199,7 @@ const CONTROLLERS = Object.freeze({
  * invents its armour, stamina, ammunition or inventory, and the host refuses
  * to fabricate a combat object.
  */
-function makeHost(size, { tape = hitTape(40), settlements = null, ...options } = {}) {
+function makeHost(size, { tape = hitTape(40), settlements = null, clip = { gladiator_dir: "right" }, ...options } = {}) {
   const member = (side, index, controller) => {
     const speed = side === "red" ? 30 - index : 4 - index;
     const vanilla = vanillaGladiator({
@@ -206,8 +208,8 @@ function makeHost(size, { tape = hitTape(40), settlements = null, ...options } =
       strength: side === "red" ? 40 : 10,
       attack: side === "red" ? 40 : 8
     });
-    if (controller === null) return { fill: "ai", vanilla, clip: { gladiator_dir: "right" } };
-    return { id: `${side}-${index + 1}`, controller, vanilla, clip: { gladiator_dir: "right" } };
+    if (controller === null) return { fill: "ai", vanilla, clip: { ...clip } };
+    return { id: `${side}-${index + 1}`, controller, vanilla, clip: { ...clip } };
   };
   const team = (side) => ({
     id: side,
@@ -933,7 +935,11 @@ test("presentation output never influences resolved state", () => {
 /* ------------------------------------------------------------------ */
 
 test("a whole battle leaves every field the adapter does not own untouched", () => {
-  const host = makeHost(3);
+  // The clip carries two timed counters in values the build can hold: -1 is
+  // what `check_spells` leaves after a colossus expires (`+0x24ba`), and 0 is
+  // where `spell_regenerate` stops (it only decrements while > 0).
+  const clip = { gladiator_dir: "right", spell_colossus: -1, spell_regenerate: 0 };
+  const host = makeHost(3, { clip });
   const inputs = Object.fromEntries(
     host.layout.placements.map((placement) => [
       placement.combatantId,
@@ -962,7 +968,15 @@ test("a whole battle leaves every field the adapter does not own untouched", () 
     assert.equal(combatObject.staminaleft, 105);
     assert.equal(combatObject.charisma, 7);
     assert.equal(combatObject.inventory1, 0);
-    assert.equal(combatObject.spell_colossus, 0);
+    // ► **WAS `combatObject.spell_colossus === 0` UNTIL 2026-09-22**, which
+    //   pinned a counter on an object the build never keeps one on. The
+    //   counters live on the clip, and a whole battle leaves them there,
+    //   untouched, and puts none on the combat object.
+    const { fighterClip } = after[combatantId];
+    assert.equal(fighterClip.spell_colossus, -1);
+    assert.equal(fighterClip.spell_regenerate, 0);
+    assert.equal("spell_colossus" in combatObject, false);
+    assert.equal("spell_regenerate" in combatObject, false);
   }
 });
 

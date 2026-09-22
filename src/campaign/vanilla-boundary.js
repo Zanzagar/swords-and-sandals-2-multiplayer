@@ -52,8 +52,7 @@
 
 import {
   isClipResidentField,
-  isKnownVanillaField,
-  isTimedSpellField
+  isKnownVanillaField
 } from "../adapter/vanilla-fields.js";
 import { VanillaBoundaryError } from "./errors.js";
 
@@ -116,16 +115,34 @@ const SAVE_CONTAINER_SET = Object.freeze(new Set(VANILLA_SAVE_CONTAINER_FIELDS))
 const CHARACTER_SLOT_PATTERN = /^character\d+$/;
 
 /**
+ * Every `spell_`-prefixed name, refused on shape rather than by catalogue.
+ *
+ * ► **KEPT HERE ON PURPOSE WHEN THE ADAPTER DROPPED IT, 2026-09-22.** This
+ *   screen used to get the prefix from the adapter's `isTimedSpellField`, which
+ *   called every `spell_` name a timed spell field "the map declines to name".
+ *   The map now names all six counters and the adapter classifies exactly those
+ *   (as clip-resident, which `isClipResidentField` below covers). Narrowing
+ *   this screen to the six would be a CAMPAIGN decision taken as a side effect
+ *   of an adapter correction, so it is not taken: the screen still refuses the
+ *   whole prefix. That over-refuses at no cost — every key this layer mints is
+ *   lowerCamelCase — and the build does use `spell_` names that are not
+ *   counters (`spell_selected`, a timeline variable `use_item` sets).
+ */
+const SPELL_NAME_PREFIX = "spell_";
+
+/**
  * True for any name the vanilla surface owns: the battle map's per-combatant
- * catalogue, the unnamed timed `spell_*` fields, the clip-resident facing, the
- * route map's save-container and progression fields, and the numbered
- * character slots.
+ * catalogue, the clip-resident fields (the facing and the six timed spell
+ * counters), any `spell_`-prefixed name, the route map's save-container and
+ * progression fields, and the numbered character slots.
+ * *(Until 2026-09-22 this read "the unnamed timed `spell_*` fields"; the map
+ * names them now, and the prefix is this screen's own conservatism.)*
  */
 export function isVanillaFieldName(name) {
   if (typeof name !== "string" || name.length === 0) return false;
   return (
     isKnownVanillaField(name) ||
-    isTimedSpellField(name) ||
+    name.startsWith(SPELL_NAME_PREFIX) ||
     isClipResidentField(name) ||
     SAVE_CONTAINER_SET.has(name) ||
     CHARACTER_SLOT_PATTERN.test(name)

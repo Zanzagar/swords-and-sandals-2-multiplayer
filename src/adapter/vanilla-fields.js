@@ -192,10 +192,21 @@ export const VANILLA_FIELD_GROUPS = Object.freeze({
     "snipe_percentage",
     "magicka_percentage"
   ]),
+  /**
+   * ► **THIS NOTE SAID THE TIMED `spell_*` FIELDS BELONG TO THIS GROUP, AND
+   *   NONE OF THEM IS ON THIS OBJECT (corrected 2026-09-22).** The old text:
+   *   *"Timed `spell_*` fields belong to this group; the map names none of
+   *   them individually."* Both halves were wrong. The build keeps all six on
+   *   the fighter CLIP (`TIMED_SPELL_COUNTER_FIELDS`, below), and the map
+   *   named two of them from 2026-08-31 — `attacker.spell_boundless_energy`
+   *   and the `spell_regenerate` test in `nextphase` — one day after this
+   *   note was written. It now names all six.
+   */
   conditions: group(
     "battle-map: Combatant state objects / Conditions",
     ["psyche_up", "taunted1", "taunted2", "burning", "frozen", "poison", "life_stolen"],
-    "Timed `spell_*` fields belong to this group; the map names none of them individually."
+    "The timed spell counters are NOT in this group: the build keeps them on the fighter clip " +
+      "(TIMED_SPELL_COUNTER_FIELDS; battle map §Five more phases, check_spells r1)."
   ),
   inventory: group(
     "battle-map: Combatant state objects / Inventory",
@@ -258,18 +269,67 @@ export const DEATH_STATUS_CLEAR_ORDER = Object.freeze([
 ]);
 
 /**
- * Runtime-observed 2026-08-30 (battle map, "Combatant state objects"): the
- * persistent combat objects "do not carry `gladiator_dir` at action time — the
- * facing lives on the fighter clips". It is therefore read from, and written
- * to, `_root.arena.gladiators.<instance>` and never to `_root.game.<side>`.
+ * **The six timed spell counters, in `check_spells`' own order — and they live
+ * on the fighter CLIP, not on the persistent combat object.** Byte-derived and
+ * verified 2026-09-22 (battle map, §"Five more phases, in full, and the timed
+ * buffs `nextphase` applies"; every offset below is in
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f`):
+ *
+ * - `check_spells(which_character, which_avatar)` (header `+0x2403`, flags
+ *   `0x2a`) binds `which_character` to r2 and `which_avatar` to r1, and every
+ *   counter read and write in its body is on `register:1` — `+0x2439`
+ *   (`spell_colossus`) through `+0x277a` (`spell_boundless_energy`). What it
+ *   touches on r2 is the stat restores (`strength = backup_strength`, …).
+ * - `nextphase` calls it as `check_spells(game_attacker, attacker)` (`+0x3271`
+ *   pushes `attacker`, `+0x3277` `game_attacker`, then the call) and again for
+ *   the defender (`+0x3289`), so the clip is the argument that lands in r1.
+ * - every cast arm writes its counter on a clip — `attacker.spell_colossus =
+ *   16` (`+0x7fed`), `defender.spell_little_fat_kid = 16` (`+0x820b`),
+ *   `attacker.spell_swiftsandals = 20` (`+0x8970`), `attacker.spell_bloodlust
+ *   = 20` (`+0x8a73`), `attacker.spell_regenerate = 20` (`+0x8bbe`),
+ *   `attacker.spell_boundless_energy = 20` (`+0x8c9d`);
+ * - `nextphase`'s two effect tests read `attacker.spell_regenerate`
+ *   (`+0x33bd`) and `attacker.spell_boundless_energy` (`+0x3476`).
+ *
+ * `attacker`/`defender` are the clips and `game_attacker`/`game_defender` the
+ * persistent objects (map, "Combatant state objects"). Nothing in the evidence
+ * writes a counter on `_root.game.<side>`, so a counter found there is one the
+ * build never reads.
+ *
+ * ► **UNTIL 2026-09-22 THIS FILE HAD NO LIST, ONLY A PREFIX, AND PUT THE
+ *   PREFIX ON THE WRONG OBJECT.** Any own key of the persistent object matching
+ *   `/^spell_/` was a "timed spell field", cited to the map's Conditions row,
+ *   and `state-bridge.js` let a declared resource write one there. The prefix
+ *   was also too wide on its own terms: `spell_selected` is a build name (a
+ *   timeline variable `use_item` sets, `+0x0388` of `DoAction@0x23e7cf`) and is
+ *   no counter.
  */
-export const CLIP_RESIDENT_FIELDS = Object.freeze(["gladiator_dir"]);
+export const TIMED_SPELL_COUNTER_FIELDS = Object.freeze([
+  "spell_colossus",
+  "spell_little_fat_kid",
+  "spell_swiftsandals",
+  "spell_bloodlust",
+  "spell_regenerate",
+  "spell_boundless_energy"
+]);
+
+/**
+ * Fields the build keeps on the fighter clip (`_root.arena.gladiators.
+ * <instance>`) and not on `_root.game.<side>`. Read from the clip, carried on
+ * the normalised record's `clip`, and never stored on the combat object.
+ *
+ * - `gladiator_dir`: runtime-observed 2026-08-30 (battle map, "Combatant state
+ *   objects"): the persistent combat objects "do not carry `gladiator_dir` at
+ *   action time — the facing lives on the fighter clips". It is the one
+ *   clip-resident field the adapter WRITES (`facingWrite`).
+ * - the six `TIMED_SPELL_COUNTER_FIELDS` — added 2026-09-22, byte-derived, not
+ *   runtime-observed. The adapter reads them and writes none of them.
+ */
+export const CLIP_RESIDENT_FIELDS = Object.freeze(["gladiator_dir", ...TIMED_SPELL_COUNTER_FIELDS]);
 
 /** Map, "Battle entry": the clips are placed facing right (hero) and left (villain). */
 export const FACING_VALUES = Object.freeze(["right", "left"]);
 export const DEFAULT_FACING = "right";
-
-const TIMED_SPELL_PREFIX = "spell_";
 
 const KNOWN_FIELDS = Object.freeze(
   new Set(Object.values(VANILLA_FIELD_GROUPS).flatMap((entry) => entry.fields))
@@ -277,6 +337,7 @@ const KNOWN_FIELDS = Object.freeze(
 
 const STATUS_FLAG_SET = Object.freeze(new Set(STATUS_FLAG_FIELDS));
 const CLIP_RESIDENT_SET = Object.freeze(new Set(CLIP_RESIDENT_FIELDS));
+const TIMED_SPELL_COUNTER_SET = Object.freeze(new Set(TIMED_SPELL_COUNTER_FIELDS));
 
 /* ------------------------------------------------------------------ */
 /* Where the map is silent                                             */
@@ -321,6 +382,30 @@ const CLIP_RESIDENT_SET = Object.freeze(new Set(CLIP_RESIDENT_FIELDS));
  *   cannot answer it first. See `ss2WalkDisplacement` for the derivation and
  *   `tools/walk-displacement-derivation.mjs` for the census that holds it to the
  *   build.
+ *
+ * ► **`timed-spell-field-names` WAS REMOVED 2026-09-22. It shares the
+ *   second failure above and adds a worse one: the capture it asked for was
+ *   aimed at the WRONG OBJECT.** It read, in full:
+ *
+ *   - silence: *"The map says \"timed `spell_*` fields\" and names none of
+ *     them."*
+ *   - adapterBehaviour: *"Any own key matching /^spell_/ is classified as a
+ *     timed spell field and passed through unchanged."*
+ *   - settledBy: *"A capture that enumerates the persistent object's own keys
+ *     after casting each of the six buffs."*
+ *
+ *   The silence went stale ONE DAY after the entry was written (2026-08-30):
+ *   from 2026-08-31 the map's stamina-writer table named
+ *   `attacker.spell_boundless_energy` and its per-turn section the
+ *   `spell_regenerate` test — and `attacker` is a CLIP by the map's own
+ *   binding list. Nobody re-read the entry against that. **And the capture it
+ *   asked for was aimed at the wrong object**: the build keeps all six
+ *   counters on the fighter clip (`check_spells`' r1), so enumerating
+ *   `_root.game.<side>` after six casts would have found none of them, and read
+ *   as "the build has no timed fields" — a measurement confirming nothing,
+ *   presented as evidence. The bytes answered it without a capture, as the
+ *   entry above says they usually do. The six are now named in
+ *   `TIMED_SPELL_COUNTER_FIELDS` and classified clip-resident.
  */
 export const MAP_SILENCE = Object.freeze([
   Object.freeze({
@@ -356,19 +441,14 @@ export const MAP_SILENCE = Object.freeze([
       "before the first frame a capture could read."
   }),
   Object.freeze({
-    id: "timed-spell-field-names",
-    subject: "the timed `spell_*` field names",
-    silence: "The map says \"timed `spell_*` fields\" and names none of them.",
-    adapterBehaviour:
-      "Any own key matching /^spell_/ is classified as a timed spell field and passed through unchanged.",
-    settledBy: "A capture that enumerates the persistent object's own keys after casting each of the six buffs."
-  }),
-  Object.freeze({
     id: "secondary-weapon-field-names",
     subject: "the secondary weapon field names",
     silence: "The map spells out `secondary_weapon` and the two enchantment fields only.",
     adapterBehaviour: "The remaining names are reconstructed by prefixing `secondary_` and are marked as assumed.",
-    settledBy: "The same own-key enumeration capture, on a gladiator carrying a secondary weapon."
+    // "The same" named the removed `timed-spell-field-names` entry's capture
+    // until 2026-09-22; spelled out here so the referent does not dangle.
+    settledBy:
+      "A capture that enumerates the persistent object's own keys, on a gladiator carrying a secondary weapon."
   }),
   Object.freeze({
     id: "panel-bar-instance-names",
@@ -507,8 +587,14 @@ export function isClipResidentField(name) {
   return CLIP_RESIDENT_SET.has(name);
 }
 
+/**
+ * True for the six named timed counters, which are clip-resident. **Was a
+ * `/^spell_/` prefix test until 2026-09-22**, which called every `spell_`
+ * name a timed counter — the build's own `spell_selected` timeline variable
+ * and any invented name included — and put them on the persistent object.
+ */
 export function isTimedSpellField(name) {
-  return typeof name === "string" && name.startsWith(TIMED_SPELL_PREFIX);
+  return TIMED_SPELL_COUNTER_SET.has(name);
 }
 
 export function knownVanillaFields() {
@@ -538,8 +624,15 @@ export function citationFor(name) {
   for (const entry of Object.values(VANILLA_FIELD_GROUPS)) {
     if (entry.fields.includes(name)) return entry.citation;
   }
+  // ► **Was "battle-map: Combatant state objects / Conditions (timed spell_*
+  //   fields, unnamed)" for any `spell_` name until 2026-09-22** — a
+  //   persistent-object row for fields the build keeps on the clip, and a
+  //   citation for invented names too. Checked before the facing, because both
+  //   are clip-resident and only one is the facing.
+  if (isTimedSpellField(name)) {
+    return "battle-map: Spell and vanilla AI surface / Five more phases (timed buffs on the fighter clip, check_spells r1)";
+  }
   if (isClipResidentField(name)) return "battle-map: Combatant state objects / clip-resident facing";
-  if (isTimedSpellField(name)) return "battle-map: Combatant state objects / Conditions (timed spell_* fields, unnamed)";
   return null;
 }
 

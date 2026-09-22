@@ -455,7 +455,7 @@ Three named things in `src/adapter/state-bridge.js` carry it:
 | Name | What it is |
 | --- | --- |
 | `WriteSource` | a closed set of exactly four values — `canonical-health`, `canonical-status`, `declared-resource`, `clip-facing`. Every write must name one. `fieldWrite` refuses a write that names none, because "a write with no declared source is a write with no evidence that the resolver produced its value." |
-| `ALLOWED_WRITE_FIELDS` | which vanilla fields each source may target, **fixed here and independent of any scenario**: `hitpoints` for canonical health, the six status flags for canonical status, `CANONICAL_RESOURCE_SOURCES` for a declared resource (plus the timed `spell_*` pools, via `isResourceBackedVanillaField`), `gladiator_dir` for the clip facing. A parallel table pins each source to one of the two write targets, so a combat-object source cannot aim at a clip or the reverse. |
+| `ALLOWED_WRITE_FIELDS` | which vanilla fields each source may target, **fixed here and independent of any scenario**: `hitpoints` for canonical health, the six status flags for canonical status, `CANONICAL_RESOURCE_SOURCES` for a declared resource ~~(plus the timed `spell_*` pools, via `isResourceBackedVanillaField`)~~ — **and nothing else, corrected 2026-09-22: the build keeps the six timed counters on the fighter clip, which a declared resource never writes, so a counter is reported unmapped with a reason naming the clip** — `gladiator_dir` for the clip facing. A parallel table pins each source to one of the two write targets, so a combat-object source cannot aim at a clip or the reverse. `assertWriteProvenance` checks this shape as well as the value (added 2026-09-22), so a hand-built write gets the same refusal a built one does. |
 | `assertWriteProvenance(writes, after)` | the check. For each write the source names exactly one place in the post-action projection, and `write.to` must be `===` what is there: `projection.health`, `projection.status.includes(field)`, or `projection.resources[field].value`. Not "close to", not "derivable from" — identical. |
 
 That is what a prose rule could never give. `to: before - effect.amount` reads
@@ -567,8 +567,22 @@ fold the clip's facing into the scenario) and reported as `facingSource:
 "combat-object"`. The clip wins when both are present.
 
 **Totality.** Every own key of the source object survives the round trip,
-including the timed `spell_*` fields the map declines to name and any key a
+including ~~the timed `spell_*` fields the map declines to name and~~ any key a
 future build adds. Only the two rules above move anything.
+
+**Clip-resident timed counters (corrected 2026-09-22).** The sentence above
+used to include "the timed `spell_*` fields the map declines to name", meaning
+keys of the persistent object. The map names all six
+(`TIMED_SPELL_COUNTER_FIELDS`) and the build keeps every one on the fighter
+clip — `check_spells` binds the clip to r1 and reads and writes each counter
+there (battle map §"Five more phases"). So they are read from a supplied clip
+onto the clip record and back out through `fighterClip`, and never written. One
+found on the combat object still round-trips untouched, but is reported in
+`misplacedClipFields` (the record's `timedSpellFields` is gone) and is NOT
+lifted onto the clip the way a misplaced facing is: the facing is folded onto
+that record by the 1v1 fixtures and the capture wrapper, nothing folds a
+counter, and on the clip a counter drives `check_spells` and `nextphase` where
+on the persistent object it does nothing.
 
 ### Maximum health: reported, refused, never quietly rewritten
 
@@ -958,6 +972,7 @@ to settle would leave a decided battle that can never pay its campaign.
 | Claim | Status |
 | --- | --- |
 | the undefined-until-set status flags and clip-resident facing | **runtime-observed** 2026-08-30 (battle map, "Combatant state objects") |
+| the six timed spell counters living on the fighter clip, not the persistent object | **byte-derived and verifier-checked** 2026-09-22 (battle map, "Five more phases"); **not runtime-observed** — no committed observation or fixture carries a counter, and the capture wrapper's default watch list reads only persistent-object fields |
 | the 23 promoted goldens in `test/fixtures/ss2-1v1-golden/` | **runtime-verified** — and they verify the ordered rolls, the mutation order, and the result transition, not any adapter mapping. No golden observes anything the adapter does. |
 | field names, groups, clip names, depths, positions, panel instances, overlay/arena result labels, the four binding globals | **static map only** for the fingerprinted build |
 | every clip *label* the adapter dispatches | **static map at best**; the death-variant label names are `assumed`. *(This row also named "the ranged `hurtN` adjustment" as assumed until 2026-09-10. It is not: the map gives the rewrite with byte offsets at `docs/integration/ss2-battle-map.md:1471-1472`, and the adapter emitted the wrong label for three years' worth of directions because a `MAP_SILENCE` entry declared the map silent. See that constant's header.)* |
@@ -965,7 +980,9 @@ to settle would leave a decided battle that can never pay its campaign.
 | multi-slot geometry, ally clip names, ally depths, ally panel widgets | **authored mod surface**; vanilla has no second ally, so no capture can settle it |
 
 `MAP_SILENCE` in `src/adapter/vanilla-fields.js` is the machine-readable
-version of this: **eight** entries, each naming the subject, the silence, what
+version of this: ~~**eight**~~ **seven** entries (2026-09-22: `timed-spell-field-names`
+removed — the map names all six counters, and the entry's capture was aimed at
+the persistent object, which holds none of them), each naming the subject, the silence, what
 the adapter does instead, and the capture that would settle it. A test asserts
 every entry is complete and uniquely identified, and pins the id LIST rather
 than the count.

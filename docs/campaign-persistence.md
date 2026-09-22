@@ -75,7 +75,11 @@ it to a key the store really minted.
    `assertNoVanillaFieldNames()` walks the whole record and refuses it if any
    object key anywhere is a name the vanilla surface uses. The catalogue comes
    from `src/adapter/vanilla-fields.js` (the battle map's per-combatant groups,
-   the unnamed timed `spell_*` fields, the clip-resident facing) plus the
+   ~~the unnamed timed `spell_*` fields, the clip-resident facing~~ the
+   clip-resident fields — the facing and, named since 2026-09-22, the six timed
+   spell counters) plus, kept in the screen itself, every `spell_`-prefixed
+   name (the adapter stopped treating the prefix as a classification that day;
+   the screen keeps refusing it on purpose — see `SPELL_NAME_PREFIX`) plus the
    route map's save-container and progression names
    (`goldpieces`, `battlesfought`, `battleswon`, `battleslost`, `score`,
    `character_xp`, `experiencelast`, `heroDNA`, `characterDNA`,

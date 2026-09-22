@@ -26,15 +26,22 @@
  * record cannot support does not silently override the roster's own default.
  *
  * Totality: `normaliseVanillaCombatant` preserves every own key of its input,
- * including keys the battle map does not name (the unnamed timed `spell_*`
- * fields, and anything a future build adds). Only three things are treated
- * specially, each because the map says so:
+ * including keys the battle map does not name (anything a future build adds).
+ * ~~(the unnamed timed `spell_*` fields, and …)~~ — corrected 2026-09-22: the
+ * map names all six timed counters and the build keeps them on the fighter
+ * clip, not on this object. Only these things are treated specially, each
+ * because the map says so:
  *
  * 1. the six status flags are **undefined until something sets them**, so they
  *    are materialised to `false` and the materialisation is recorded;
  * 2. `gladiator_dir` is **clip-resident**, so it is lifted out of the combat
  *    object into a separate clip record and written back only to the clip;
- * 3. everything else round-trips byte-for-byte.
+ * 3. the six timed spell counters are **clip-resident too** (added 2026-09-22),
+ *    so they are read from the supplied clip onto the clip record. One found
+ *    on the combat object is NOT lifted: it is passed through where it was
+ *    found and reported in `misplacedClipFields`, because nothing folds a
+ *    counter onto that object and the build never reads one there;
+ * 4. everything else round-trips byte-for-byte.
  *
  * Citations are sections of `docs/integration/ss2-battle-map.md`.
  */
@@ -50,14 +57,23 @@ import {
   isPlainVanillaObject,
   isStatusFlagField,
   isTimedSpellField,
-  STATUS_FLAG_FIELDS
+  STATUS_FLAG_FIELDS,
+  TIMED_SPELL_COUNTER_FIELDS
 } from "./vanilla-fields.js";
 
 /**
  * True for a canonical resource name the vanilla build actually has a
  * resource-backed field for: one of the names this module declares in
- * `CANONICAL_RESOURCE_SOURCES`, or one of the timed `spell_*` pools the map
- * declines to enumerate.
+ * `CANONICAL_RESOURCE_SOURCES`, and nothing else.
+ *
+ * ► **IT ALSO ADMITTED "the timed `spell_*` pools the map declines to
+ *   enumerate" UNTIL 2026-09-22, AND WROTE THEM TO AN OBJECT THE BUILD NEVER
+ *   READS THEM FROM.** A declared-resource write lands on `_root.game.<side>`
+ *   (`WRITE_SOURCE_TARGETS`), and the build keeps every timed counter on the
+ *   fighter clip (`TIMED_SPELL_COUNTER_FIELDS`), so a mirrored
+ *   `spell_regenerate` did nothing in the build while the adapter reported it
+ *   as mirrored. A timed counter now falls to the unmapped branch, with a
+ *   reason that says where the build keeps it (`unmappedResourceReason`).
  *
  * Everything else is reported as unmapped — the same discipline `emitStatus`
  * applies to a status with no vanilla flag. A rule set is free to invent a
@@ -69,7 +85,23 @@ import {
  * allowed to forge a health or status write through the resource branch.
  */
 function mirrorsToVanillaField(name) {
-  return CANONICAL_RESOURCE_SOURCES.includes(name) || isTimedSpellField(name);
+  return CANONICAL_RESOURCE_SOURCES.includes(name);
+}
+
+/**
+ * Where the build keeps a timed counter, in the words every refusal of one
+ * uses — so the message that stops a write is also the pointer to the object
+ * a write would have had to reach.
+ */
+function timedCounterPlacement(name) {
+  return (
+    `${String(name)} is a timed spell counter the build keeps on the fighter clip ` +
+    "(_root.arena.gladiators.<instance>, check_spells' r1 which_avatar; battle map §Five more phases), " +
+    "never on the persistent combat object (_root.game.<side>), so a write there would do nothing in the build. " +
+    "No write source reaches the clip for it: a bare counter is not a value the build holds alone, because four " +
+    "of the six restore state from backups at expiry (colossus: the clip's _xscale/_yscale from the oldscale its " +
+    "cast arm sets on entry, and strength/attack from backup_strength/backup_attack)"
+  );
 }
 
 /**
@@ -87,8 +119,16 @@ function mirrorsToVanillaField(name) {
  * outside the adapter's write allowlist, and widening that allowlist is a
  * deliberate decision (see `docs/ss2-adapter-contract.md`, "Still open" item 2
  * on equipment identity) rather than an oversight.
+ *
+ * ► **A FOURTH REASON, added 2026-09-22, for the same failure one level
+ * down.** A timed counter is cited by the battle map, so it would otherwise get
+ * the third reason — and "widening the allowlist" is the wrong fix for it: the
+ * allowlist names fields of the persistent combat object, and the build keeps
+ * the counters on the fighter clip. Checked first, so no counter can be
+ * pointed at the allowlist.
  */
 function unmappedResourceReason(name) {
+  if (isTimedSpellField(name)) return timedCounterPlacement(name);
   if (RESOURCE_RESERVED_FIELDS.has(name)) {
     return "this vanilla field is owned by canonical health, canonical status or the clip record, not by a resource";
   }
@@ -295,9 +335,13 @@ const WRITE_SOURCES = Object.freeze(Object.values(WriteSource));
 /**
  * The vanilla fields each source may write, independent of any scenario.
  *
- * `DECLARED_RESOURCE` additionally admits the timed `spell_*` pools, which the
- * map declines to enumerate by name — `isResourceBackedVanillaField` is the
- * authoritative predicate and this table is its enumerable core.
+ * ~~`DECLARED_RESOURCE` additionally admits the timed `spell_*` pools, which
+ * the map declines to enumerate by name — `isResourceBackedVanillaField` is the
+ * authoritative predicate and this table is its enumerable core.~~ **Corrected
+ * 2026-09-22: this table is now the whole of every source's field set, with no
+ * predicate beside it.** The map names all six timed counters and the build
+ * keeps them on the fighter clip, which the declared-resource source never
+ * writes; `assertWriteShape` refuses one and says where the build keeps it.
  */
 export const ALLOWED_WRITE_FIELDS = Object.freeze({
   [WriteSource.CANONICAL_HEALTH]: Object.freeze([CANONICAL_HEALTH_SOURCES.health]),
@@ -334,10 +378,21 @@ function assertFacing(value, source) {
 
 /**
  * Normalises one vanilla combatant into `{ fields, clip, materialisedFlags,
- * facingSource, timedSpellFields, unknownFields }`.
+ * facingSource, misplacedClipFields, unknownFields }`.
+ *
+ * ► **`timedSpellFields` WAS REPLACED BY `misplacedClipFields` 2026-09-22.**
+ *   It listed the combat object's `/^spell_/` keys as its timed spell fields;
+ *   the build keeps no timed counter on that object (`TIMED_SPELL_COUNTER_FIELDS`),
+ *   so there is nothing of that name to list. What IS worth reporting is a
+ *   clip-resident name found there: passed through untouched, NOT lifted —
+ *   the facing is lifted because the 1v1 fixtures and the capture wrapper's
+ *   `dumpSide` both fold the clip's facing onto that record, and nothing folds
+ *   a counter, so lifting one would hand the build a value it never read. It is
+ *   not `unknownFields` either: the name is known, the object is wrong.
  *
  * @param {object} source the persistent combat object (`_root.game.<side>`)
  * @param {object} [options.clip] the runtime fighter clip, which owns the facing
+ *   and the six timed counters
  */
 export function normaliseVanillaCombatant(source, { clip = null } = {}) {
   if (!isPlainVanillaObject(source)) {
@@ -348,12 +403,12 @@ export function normaliseVanillaCombatant(source, { clip = null } = {}) {
   }
 
   const fields = {};
-  const timedSpellFields = [];
+  const misplacedClipFields = [];
   const unknownFields = [];
   for (const [name, value] of Object.entries(source)) {
-    if (isClipResidentField(name)) continue; // lifted onto the clip record below
+    if (name === "gladiator_dir") continue; // lifted onto the clip record below
     fields[name] = value === undefined ? undefined : clone(value);
-    if (isTimedSpellField(name)) timedSpellFields.push(name);
+    if (isClipResidentField(name)) misplacedClipFields.push(name);
     else if (!isKnownVanillaField(name)) unknownFields.push(name);
   }
 
@@ -383,12 +438,23 @@ export function normaliseVanillaCombatant(source, { clip = null } = {}) {
     facingSource = "combat-object";
   }
 
+  // The timed counters, read from the clip because that is where the build
+  // keeps them. Only those the clip actually carries: a fresh clip has none
+  // (nothing initialises them; `check_spells` tests `> 0`), and writing a
+  // default onto the record would invent clip state.
+  const clipRecord = { gladiator_dir: facing };
+  if (clip) {
+    for (const name of TIMED_SPELL_COUNTER_FIELDS) {
+      if (clip[name] !== undefined) clipRecord[name] = clone(clip[name]);
+    }
+  }
+
   return Object.freeze({
     fields,
-    clip: Object.freeze({ gladiator_dir: facing }),
+    clip: Object.freeze(clipRecord),
     materialisedFlags: Object.freeze(materialisedFlags),
     facingSource,
-    timedSpellFields: Object.freeze(timedSpellFields),
+    misplacedClipFields: Object.freeze(misplacedClipFields),
     unknownFields: Object.freeze(unknownFields)
   });
 }
@@ -396,12 +462,16 @@ export function normaliseVanillaCombatant(source, { clip = null } = {}) {
 /**
  * The inverse of `normaliseVanillaCombatant`'s split: recombines a normalised
  * record into the two objects vanilla actually stores them in.
+ *
+ * `fighterClip` carries every clip-resident field the record holds — the
+ * facing, and since 2026-09-22 any timed counter the supplied clip carried.
+ * It used to be `{ gladiator_dir }` alone, when the facing was the only one.
  */
 export function denormaliseVanillaCombatant(record) {
   assertVanillaRecord(record);
   return Object.freeze({
     combatObject: { ...record.fields },
-    fighterClip: { gladiator_dir: record.clip.gladiator_dir }
+    fighterClip: { ...record.clip }
   });
 }
 
@@ -552,7 +622,9 @@ export function absentResourceSources(fields) {
  *
  * The returned `vanilla` record remains the authoritative carrier for
  * everything neither the canonical shape nor the resource bag has room for
- * (equipment ids, the chance cache, the inventory, the timed spell fields).
+ * (equipment ids, the chance cache, the inventory — and, on its `clip`, the
+ * timed spell counters, which the build keeps on the fighter clip; "the timed
+ * spell fields" in this list meant the combat object's until 2026-09-22).
  * See `docs/ss2-adapter-contract.md` for the canonical-shape gaps left.
  */
 /**
@@ -818,7 +890,7 @@ export function toVanillaCombatant(canonical, record, { maxHealth = false, stats
     clip: Object.freeze({ ...record.clip }),
     materialisedFlags: Object.freeze([]),
     facingSource: record.facingSource,
-    timedSpellFields: record.timedSpellFields,
+    misplacedClipFields: record.misplacedClipFields,
     unknownFields: record.unknownFields
   });
 }
@@ -836,7 +908,10 @@ export function toVanillaCombatant(canonical, record, { maxHealth = false, stats
  *
  * A resource the build has no field for is skipped rather than reported: a
  * rule set may invent a resource, and the adapter will not invent a vanilla
- * field to hold it (the same rule `emitStatus` applies to statuses).
+ * field to hold it (the same rule `emitStatus` applies to statuses). A timed
+ * counter is skipped too (2026-09-22): the build's field for it is on the
+ * fighter clip, which no write reaches, so a difference here could never be
+ * brought into step and would only make `assertMirrorAgrees` refuse a battle.
  */
 export function mirrorDifferences(record, canonical, { includeStats = false } = {}) {
   assertVanillaRecord(record);
@@ -942,6 +1017,41 @@ function indexById(combatants) {
 }
 
 /**
+ * The SHAPE half of the write check: the source is one of the four, the field
+ * is in that source's fixed set, and the target is that source's object.
+ * `fieldWrite` runs it on every write it builds and `assertWriteProvenance` on
+ * every write it is handed, however that write was built.
+ *
+ * ► **Split out of `fieldWrite` 2026-09-22.** `assertWriteProvenance` checked
+ *   only the VALUE, so a hand-built declared-resource write of
+ *   `spell_regenerate` on the combat object — a field the build never reads
+ *   there — passed it whenever the value matched the projection. And the
+ *   refusal `fieldWrite` gave named "a timed spell_* pool" as ALLOWED; it now
+ *   names where the build keeps the counter instead.
+ */
+function assertWriteShape({ source, field, target }) {
+  if (!WRITE_SOURCES.includes(source)) {
+    throw new AdapterStateError(
+      `A vanilla field write must declare one of the ${WRITE_SOURCES.length} write sources ` +
+      `(${WRITE_SOURCES.join(", ")}); the write to ${String(field)} declared ${JSON.stringify(source)}. ` +
+      "A write with no declared source is a write with no evidence that the resolver produced its value."
+    );
+  }
+  if (!ALLOWED_WRITE_FIELDS[source].includes(field)) {
+    throw new AdapterStateError(
+      `The write source ${source} may not write the vanilla field ${String(field)}. ` +
+      `Allowed: ${ALLOWED_WRITE_FIELDS[source].join(", ")}.` +
+      (isTimedSpellField(field) ? ` ${timedCounterPlacement(field)}.` : "")
+    );
+  }
+  if (target !== WRITE_SOURCE_TARGETS[source]) {
+    throw new AdapterStateError(
+      `The write source ${source} writes the ${WRITE_SOURCE_TARGETS[source]}, not the ${String(target)}.`
+    );
+  }
+}
+
+/**
  * Builds one vanilla field write, refusing any that the closed source
  * vocabulary cannot account for.
  *
@@ -951,27 +1061,7 @@ function indexById(combatants) {
  * independently of any scenario.
  */
 function fieldWrite({ combatantId, placement, field, from, to, reason, source, target = WriteTarget.COMBAT_OBJECT }) {
-  if (!WRITE_SOURCES.includes(source)) {
-    throw new AdapterStateError(
-      `A vanilla field write must declare one of the ${WRITE_SOURCES.length} write sources ` +
-      `(${WRITE_SOURCES.join(", ")}); the write to ${String(field)} declared ${JSON.stringify(source)}. ` +
-      "A write with no declared source is a write with no evidence that the resolver produced its value."
-    );
-  }
-  const allowed = source === WriteSource.DECLARED_RESOURCE
-    ? isResourceBackedVanillaField(field)
-    : ALLOWED_WRITE_FIELDS[source].includes(field);
-  if (!allowed) {
-    throw new AdapterStateError(
-      `The write source ${source} may not write the vanilla field ${String(field)}. ` +
-      `Allowed: ${ALLOWED_WRITE_FIELDS[source].join(", ")}${source === WriteSource.DECLARED_RESOURCE ? ", or a timed spell_* pool" : ""}.`
-    );
-  }
-  if (target !== WRITE_SOURCE_TARGETS[source]) {
-    throw new AdapterStateError(
-      `The write source ${source} writes the ${WRITE_SOURCE_TARGETS[source]}, not the ${String(target)}.`
-    );
-  }
+  assertWriteShape({ source, field, target });
   return Object.freeze({
     target,
     source,
@@ -1017,6 +1107,9 @@ function fieldWrite({ combatantId, placement, field, from, to, reason, source, t
 export function assertWriteProvenance(writes, after) {
   const afterById = after instanceof Map ? after : indexById(after);
   for (const write of writes) {
+    // The shape first, so a write that could never be legal is refused for
+    // what it is rather than for a value it happens to match (2026-09-22).
+    assertWriteShape(write);
     const projection = afterById.get(write.combatantId);
     const where = `${String(write.combatantId)}.${String(write.field)}`;
     if (write.source === WriteSource.CLIP_FACING) {
@@ -1319,7 +1412,7 @@ export function applyVanillaWrites(record, writes) {
       (record.materialisedFlags ?? []).filter((flag) => !written.has(flag))
     ),
     facingSource: record.facingSource,
-    timedSpellFields: record.timedSpellFields,
+    misplacedClipFields: record.misplacedClipFields,
     unknownFields: record.unknownFields
   });
 }
