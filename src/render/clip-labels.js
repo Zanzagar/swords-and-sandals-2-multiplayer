@@ -222,8 +222,11 @@ const FAMILY_LABELS = Object.freeze({
   //     ~~`cast_spell_icon(attacker, 39, 2)`~~ `cast_spell_icon(attacker, 39)`
   //     *(corrected 2026-09-22 by a write-nothing verifier re-reading
   //     `+0x7c46`-`+0x7c5c`: the 2 is the argument COUNT pushed for
-  //     `CallFunction`)* — the `cast_command` arm, a SPELL this engine has no
-  //     verb for. One site is not none, and "nothing dispatches it" was a stronger
+  //     `CallFunction`)* — the `cast_command` arm, a SPELL ~~this engine has no
+  //     verb for~~ **this engine resolves since 2026-09-22
+  //     (`Ss2ActionType.CAST_COMMAND`), whose victim plays this label; `familyOf`
+  //     in `timeline.js` maps it to this family**. One site is not none, and
+  //     "nothing dispatches it" was a stronger
   //     claim than the evidence, made while correcting a claim that was
   //     stronger than ITS evidence. It stays second in the list either way:
   //     the ordinary blow dispatches the entry.

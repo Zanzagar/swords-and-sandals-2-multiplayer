@@ -129,7 +129,9 @@
  *   **`cast_spell_icon(attacker, 39)`** *(corrected 2026-09-22 by a
  *   write-nothing verifier re-reading `+0x7c46`-`+0x7c5c`: the 2 is the
  *   argument COUNT pushed for `CallFunction`)* — a SPELL path, the
- *   `cast_command` arm, that this engine has no verb for. `damagecharacter`'s
+ *   `cast_command` arm, that this engine ~~has no verb for~~ **resolves since
+ *   2026-09-22 — dispatched on its own, so it plays its 13 frames and not
+ *   the `knockback` run below**. `damagecharacter`'s
  *   own two sites (`+0x1b4f`, `+0x1bc0`) name `"knockback"`.
  * - **`hurt9` is dispatched in its own right**, by direction 9.
  *

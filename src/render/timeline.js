@@ -221,6 +221,16 @@ function familyOf(label, role) {
   if (MOVEMENT_GAITS.has(label)) return `movement:${MOVEMENT_GAITS.get(label)}`;
   if (label === "Block") return "block";
   if (label === "knockback") return "knockback";
+  // ► **THE PULLED VICTIM'S CLIP, added 2026-09-22 with `cast_command`.**
+  //   `defender.gotoAndPlay("knockback_mov")` at `+0x7c5e` is the one site in
+  //   the build that dispatches the continuation directly: 13 frames
+  //   (1434-1446), one `Stop`, no `struck`. It is already a member of the
+  //   `knockback` family in `clip-labels.js`, so the extracted rig draws it by
+  //   its own name. `clip-sequences.js` records the family's pace as nine beats
+  //   to 13 frames, which is this clip's own length, so the family's duration
+  //   IS that pace and no override is needed. Matched by exact name for the
+  //   gait comment's reason.
+  if (label === "knockback_mov") return "knockback";
   // ► **THE SHOVER'S OWN CLIP, and it had no family until 2026-09-22.**
   //   `attacker.gotoAndPlay("shove")` at `+0x5e27`; frames 1447-1481, ending in
   //   `this.struck = true; Stop` — which only the ACTING clips do. Until a

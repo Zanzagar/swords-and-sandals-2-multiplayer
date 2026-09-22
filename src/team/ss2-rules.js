@@ -420,6 +420,10 @@ export const Ss2ActionType = Object.freeze({
   //   displacement like `shove`, taking ZERO samples, so it is not in
   //   `ATTACK_BANDS` for the reason `shove` is not.
   CAST_GALE: "cast-gale",
+  // ► **THE COMMAND — THE GALE'S OPPOSITE: IT PULLS.** `+0x7be6`-`+0x7db6` of
+  //   the same block; see `SS2_COMMAND`. ZERO samples and zero damage, so it
+  //   is not in `ATTACK_BANDS`, for the reason `shove` and `cast_gale` are not.
+  CAST_COMMAND: "cast-command",
   // ► **THE TELEPORT — THE FOURTH SPELL VERB AND THE FIRST THAT MOVES ITS
   //   CASTER.** `+0x7541`-`+0x76ad` of the same block; see `SS2_TELEPORT`. ONE
   //   sample, and it is the DESTINATION, not an attack roll — so it is not in
@@ -994,6 +998,11 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // (`+0x7b30`), not `Cast2`, and the victim's is `knockback` (`+0x7b78`) —
   // carried on the event for the reason the bolts carry theirs.
   [Ss2ActionType.CAST_GALE]: "cast_gale",
+  // `phase_decision == "cast_command"` at `+0x7bec`, and the decision ladder
+  // arm 25 writes at `+0x0efd`. The CASTER's clip is `Cast2` (`+0x7c81`), the
+  // bolts' and not the gale's, and the victim's is `knockback_mov` (`+0x7c5e`)
+  // — the one site in the build that dispatches that label directly.
+  [Ss2ActionType.CAST_COMMAND]: "cast_command",
   // `phase_decision == "cast_teleport"` at `+0x7547`, and the decision ladder
   // arm 26 writes at `+0x0f91`. The caster's clip is `Cast2` (`+0x7620`), the
   // bolts' — carried on the event; there is no victim clip at all.
@@ -4012,6 +4021,159 @@ export const SS2_GALE = Object.freeze({
    */
   aiFightDistanceBelow: 400
 });
+
+/* ------------------------------------------------------------------ */
+/* The command phase: a spell that pulls a body, forty units a frame   */
+/* ------------------------------------------------------------------ */
+
+/** `demand_move = 1`, `nextphase` step 2 (`+0x3266`). */
+const SS2_DEMAND_MOVE_RESET = 1;
+/** `demand_move >= 60` (`+0x37f5`, `Less2; Not`), the stall watchdog's grounded clause. */
+const SS2_DEMAND_MOVE_TRIP = 60;
+
+/**
+ * `cast_command`, byte-derived 2026-09-22 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base `0x240c85`),
+ * `+0x7be6`-`+0x7db6` — inside `attacker.onEnterFrame` (the function defined
+ * at `+0x36ae`), so the WHOLE arm runs once per frame:
+ *
+ * ```text
+ *   phase_decision == "cast_command"                                +0x7be6
+ *     register:3.crowd_action = 2                                   +0x7bf9
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka) +0x7c06
+ *     if (attacker.shove != true) {                                 +0x7c2d
+ *       cast_spell_icon(attacker, 39)                               +0x7c46
+ *       defender.gotoAndPlay("knockback_mov")                       +0x7c5e
+ *       attacker.shove = true                                       +0x7c73
+ *       attacker.gotoAndPlay("Cast2")                               +0x7c81
+ *     }                                                  // no Jump: falls through
+ *     if (attacker.gladiator_dir == "right") {                      +0x7c96
+ *       defender._x -= 40                                           +0x7cae
+ *       if (!(defender._x > attacker._x + game_defender.physical_size)) +0x7cf1
+ *         { attacker.struck = null; attacker.shove = false; nextphase() }
+ *     } else if (attacker.gladiator_dir == "left") {                +0x7d29
+ *       defender._x += 40                                           +0x7d41
+ *       if (!(defender._x < attacker._x - game_defender.physical_size)) +0x7d84
+ *         { attacker.struck = null; attacker.shove = false; nextphase() }
+ *     }                                                             ..+0x7db6
+ * ```
+ *
+ * ► **ZERO SAMPLES, ZERO DAMAGE, NO `knockback()` CALL, AND NOTHING WRITTEN ON
+ *   `game_defender`.** The only reads of the victim's stat object are its
+ *   `physical_size`. So it returns before `ATTACK_BANDS`, as the gale does.
+ *
+ * ► **THE CLOSED FORM.** With `S` the TARGET's `physical_size` and the caster
+ *   facing right, the target moves `-40` a frame and the phase completes on
+ *   the first frame it is no longer beyond `caster.x + S`:
+ *   `k = max(1, ceil((target.x - caster.x - S) / 40))` frames, landing at
+ *   `target.x - 40k`. Facing left is the mirror. The `max(1, …)` is the
+ *   missing `Jump`: the entry frame moves the body before it tests anything.
+ *
+ * ► **THE TARGET MOVES OPPOSITE TO THE CASTER'S FACING, NOT "TOWARD THE
+ *   CASTER".** The branch reads only `gladiator_dir`. In front, that is a pull;
+ *   BEHIND the caster the first frame's test already passes, so a target
+ *   behind is pushed 40 further AWAY and the phase ends.
+ *
+ * ► **A TARGET INSIDE THE STAND-OFF STAYS IN FRONT.** `S >= 80`
+ *   (`ss2PhysicalSize`), so a target that starts `g <= S` in front moves once,
+ *   to `g - 40` — behind the caster only when `g < 40`. *(The brief this was
+ *   built from said "inside 40 px of the stand-off ends up BEHIND the caster";
+ *   that is false, and a write-nothing verifier broke it independently.)*
+ *
+ * ► **THE STALL WATCHDOG CUTS A LONG PULL, and the cap is derived, not
+ *   chosen.** `nextphase` sets `demand_move = 1` (`+0x3266`); every
+ *   `onEnterFrame` increments it (`+0x37e5`) and tests
+ *   `(demand_move >= 60 && attacker._y >= attacker.grounded && bullet_in_air
+ *   != true) || demand_move >= 200` (`+0x37ef`-`+0x384e`) BEFORE it reaches
+ *   the arm. Frame `f` of the phase sees `1 + f`, so frame 59 calls
+ *   `nextphase()` (`+0x38a0`) before its pull runs: **58 pulls, 2,320 units.**
+ *   Inside the ±2100 clamp a pull can need 103, so the cap binds. The cut
+ *   still runs `nextphase`, so the cost is spent the same.
+ *   - **ASSUMED, NAMED: the 60 clause, not the 200.** A standing caster passes
+ *     `_y >= grounded` (and `grounded` is null outside a jump, which passes
+ *     too); `bullet_in_air` is written true by the shot arms and false at
+ *     impact. A bullet a previous phase never cleared would lift the cap to
+ *     198. This engine has no such state.
+ *   - **NOT MODELLED, NAMED: ONE FRAME MORE after a phase the watchdog
+ *     ended.** The watchdog's `nextphase` runs BEFORE the per-frame
+ *     `phase_decision` refresh (`+0x3a84`), so the NEXT phase's first pull
+ *     runs in the same frame at `demand_move == 1` and gets 59. This engine
+ *     does not carry which way the previous phase ended.
+ *   - **NOT MODELLED, NAMED: THE LATCH LEAK.** The watchdog nulls both
+ *     fighters' `struck` and `grounded` (`+0x385e`-`+0x3891`) but never
+ *     `attacker.shove`, so a cut command leaves the caster's latch set: its
+ *     next shove, gale or command skips its entry block (a gale then never
+ *     calls `knockback` and waits on a `struck` nothing will set).
+ *
+ * ► **NOT MODELLED, NAMED: THE SUB-100 NUDGE.** `attacker.onEnterFrame`'s
+ *   first act (`+0x36b9`-`+0x37c8`) separates hero and villain by 1 each per
+ *   frame while `fightdistance < 100` — see `ss2WalkDisplacement`'s note on
+ *   the same precondition. A pull's last frame or two can fall inside 100,
+ *   which can move the landing by a unit or two and, at an exact multiple,
+ *   the frame count by one. The resolver has no frames; the closed form is
+ *   the arm's own.
+ *
+ * ► **THE BOUND IS THE CLIP CLAMP.** The arm clamps nothing; `defender._x` is
+ *   clamped to ±2100 at the top of the next `onEnterFrame` (`+0x3a07`-
+ *   `+0x3a5e`, no `nextphase` on that side). Only the push-behind case can
+ *   reach a wall. See `SS2_ARENA.clamp`.
+ *
+ * ► **THE COST IS `round(magicka)`, THE STAT, WITH NO AFFORDABILITY CHECK**,
+ *   the gale's and the bolts' shape exactly.
+ *
+ * ► **THE OFFER IS POSSESSION.** `fightdistance > 300` is ladder arm 25 of
+ *   `villain_cast_spells` (`+0x0ec2`-`+0x0f17`), the villain AI's DECISION;
+ *   the arm reads no distance and the hero's inventory button tests only
+ *   `inv_struck`. See `legalActions` and `chooseAiAction`.
+ */
+export const SS2_COMMAND = Object.freeze({
+  /** `cast_spell_icon(attacker, 39)` `+0x7c46`, `check_inventory(39)` `+0x0ec2`. */
+  itemId: 39,
+  /** `Push 40; Subtract` `+0x7cc2` / `Push 40; Add2` `+0x7d55` — units per frame. */
+  pullStep: 40,
+  demandMoveReset: SS2_DEMAND_MOVE_RESET,
+  watchdogTrip: SS2_DEMAND_MOVE_TRIP,
+  /**
+   * The most frames a pull runs before the watchdog ends the phase — DERIVED:
+   * frame `f` sees `demandMoveReset + f` after the increment, the trip lands on
+   * frame `watchdogTrip - demandMoveReset`, and that frame's pull never runs.
+   */
+  pullTickCap: SS2_DEMAND_MOVE_TRIP - SS2_DEMAND_MOVE_RESET - 1,
+  /** `attacker.gotoAndPlay("Cast2")`, `+0x7c81`. */
+  casterClip: "Cast2",
+  /** `defender.gotoAndPlay("knockback_mov")`, `+0x7c5e` — inside the latch, so once. */
+  victimClip: "knockback_mov",
+  /** `register:3.crowd_action = 2`, `+0x7bf9`. Presentation cue; not modelled. */
+  crowdAction: 2,
+  /**
+   * The VILLAIN's distance gate, `fightdistance > 300` (`+0x0eee`, `Greater`),
+   * read by `chooseAiAction` and by nothing else. Strict.
+   */
+  aiFightDistanceAbove: 300
+});
+
+/**
+ * The pull, frame by frame exactly as the arm runs it: move, then test, up to
+ * the watchdog's cap. A loop rather than the closed form so that the
+ * arithmetic is the build's own (repeated `±40` against one comparison) and not
+ * an algebraic rearrangement of it; the closed form is pinned in the tests.
+ *
+ * `facingLeft` is this engine's two-valued facing, so the build's "neither
+ * right nor left" arm — which moves nothing and never completes — cannot occur.
+ */
+function ss2CommandPull({ casterX, targetX, facingLeft, standOff }) {
+  let x = targetX;
+  for (let tick = 1; tick <= SS2_COMMAND.pullTickCap; tick += 1) {
+    if (facingLeft) {
+      x += SS2_COMMAND.pullStep;
+      if (!(x < casterX - standOff)) return { to: x, ticks: tick, cut: false };
+    } else {
+      x -= SS2_COMMAND.pullStep;
+      if (!(x > casterX + standOff)) return { to: x, ticks: tick, cut: false };
+    }
+  }
+  return { to: x, ticks: SS2_COMMAND.pullTickCap, cut: true };
+}
 
 /* ------------------------------------------------------------------ */
 /* The teleport phase: a spell that moves its caster and nobody else   */
@@ -7627,6 +7789,20 @@ export function createSs2TeamRules({
         for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_GALE, targetId: foe.id });
       }
 
+      // ► **THE COMMAND IS OFFERED ON POSSESSION ALONE, PER FOE, on the gale's
+      //   button and under the same two gates** (the empty marker and the
+      //   `inventory_maxslots` window, both inside `ss2InventorySlotHolding`).
+      //   `fightdistance > 300` is ladder arm 25, the villain's DECISION, read
+      //   by `chooseAiAction`; the arm (`+0x7be6`-`+0x7db6`) reads no distance.
+      //
+      //   **Per foe, and at a foe BEHIND the caster too**: the arm reads one
+      //   bound `defender` and moves it against the caster's facing whichever
+      //   side it stands, so above 1v1 the caster picks and the build's answer
+      //   for a target behind — pushed 40 away — is what it gets.
+      if (ss2InventorySlotHolding(view.actor, SS2_COMMAND.itemId) !== null) {
+        for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_COMMAND, targetId: foe.id });
+      }
+
       // ► **THE TELEPORT IS OFFERED ON POSSESSION ALONE, on the bolts' and the
       //   gale's button and under the same two gates** (the empty marker and the
       //   `inventory_maxslots` window, both inside `ss2InventorySlotHolding`).
@@ -9014,6 +9190,116 @@ export function createSs2TeamRules({
             //   displacement verb and is not closed here.
             targetFrom: Number.isFinite(victim.x) ? victim.x : null,
             targetTo: to,
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained
+          }]
+        };
+      }
+
+      // ► **THE COMMAND. Zero samples, zero damage, one body pulled forty units
+      //   a frame.** It returns before `ATTACK_BANDS` for the gale's reason. See
+      //   `SS2_COMMAND` for the phase, statement by statement.
+      if (request.type === Ss2ActionType.CAST_COMMAND) {
+        const victim = request.target;
+        if (!victim) {
+          throw new TeamRuleSetError(
+            `${request.type} needs a target; ${String(request.targetId)} is not a combatant.`
+          );
+        }
+        // Re-found at resolve, through the same window as the offer, for the
+        // reason the bolt branch gives.
+        const slot = ss2InventorySlotHolding(actor, SS2_COMMAND.itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, SS2_COMMAND.itemId, { ignoreMaxslots: true });
+          if (beyond !== null) {
+            throw new TeamRuleSetError(
+              `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${SS2_COMMAND.itemId} is in ` +
+              `${beyond}, outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}. The build's ` +
+              "hero panel hides that button (sprite:492[inventory_overlay] +0x024f), and this engine offers and " +
+              "consumes through the same window."
+            );
+          }
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+            `item ${SS2_COMMAND.itemId}. The build's own gate is possession — ` +
+            `check_inventory(${SS2_COMMAND.itemId}) for the villain, a visible inventory button for the hero — ` +
+            "and this engine reproduces it."
+          );
+        }
+
+        // `game_defender.physical_size` — the TARGET's (`+0x7cea`, `+0x7d7d`).
+        const standOff = ss2PhysicalSize(victim);
+        // `gladiator_dir == "right"` -> `-= 40`, `== "left"` -> `+= 40`
+        // (`+0x7c96`, `+0x7d29`). See `ss2CommandPull`.
+        const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
+        const positioned = Number.isFinite(victim.x) && Number.isFinite(actor.x);
+        const pull = positioned
+          ? ss2CommandPull({ casterX: actor.x, targetX: victim.x, facingLeft, standOff })
+          : null;
+        // ► **CLAMPED ONCE, AT THE END, and that is the build's composition.**
+        //   The arm clamps nothing; the clip clamp at the top of the NEXT
+        //   `onEnterFrame` bounds `defender._x`. Toward the caster the pull
+        //   never leaves the arena, and the one case that can — a target
+        //   behind, pushed away — runs a single frame. See `SS2_ARENA.clamp`.
+        //
+        // ► **INVENTED FOR THE N-BODY ARENA, NAMED HERE — faithful readings of
+        //   an arm that names two bodies:**
+        //   - **the pull passes THROUGH bystanders.** The completion test reads
+        //     only `defender._x` and `attacker._x`, so a body standing in the
+        //     line is never consulted — the fireball's reading, for the
+        //     fireball's reason.
+        //   - **the rank (`y`) is left alone.** The arm writes only `_x`, and
+        //     this engine's `y` is depth, which vanilla does not have; the
+        //     stand-off is measured on `x` alone, as the arm measures it.
+        const to = pull ? clamp(pull.to, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max) : null;
+
+        // No damage, so no death: `nextphase` always runs — from the arm on
+        // completion, or from the stall watchdog on a cut — and both spend the
+        // cost, exactly as the gale's is spent.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const transition = phaseTransitionEffects(actor, { staminaCost });
+
+        // The build's order, as for the gale: the slot is consumed when the
+        // phase begins, the body moves frame by frame, and `nextphase` settles
+        // the stamina at the end.
+        const effects = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }];
+        if (to !== null && to !== victim.x) {
+          effects.push({ kind: EffectKind.POSITION, targetId: victim.id, to });
+          // The TARGET moved, so the gale's `facingAfterTargetMove`: a pull
+          // that carries the target past the caster turns them both, at the
+          // phase advance, as `changeCombatants` would.
+          effects.push(...facingAfterTargetMove({ ...victim, x: to }));
+        }
+        effects.push(...transition.effects, ...crowd);
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: victim.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // Both clips are the build's strings; `SS2_STATIC_MAP_BINDINGS`
+            // binds any event carrying the pair.
+            casterClip: SS2_COMMAND.casterClip,
+            victimClip: SS2_COMMAND.victimClip,
+            spellId: SS2_COMMAND.itemId,
+            consumedSlot: slot,
+            // `targetFrom`/`targetTo`, NOT `from`/`to`, for the gale's reason:
+            // `from`/`to` are read as the ACTOR's own move by the presentation.
+            targetFrom: positioned ? victim.x : null,
+            targetTo: to,
+            standOff,
+            // How many frames the build pulls, and whether the stall watchdog
+            // ended the phase rather than the arm. Presentation data; the
+            // resolver has no frames.
+            pullTicks: pull ? pull.ticks : null,
+            cutByWatchdog: pull ? pull.cut : null,
             staminaSpent: staminaCost,
             staminaGained: transition.staminaGained
           }]
@@ -10472,6 +10758,55 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **THE COMMAND IS THE BUILD'S OWN RULE, for the gale's reason: it
+      //   deals no damage, so it has no row in the pricing table below.** Ladder
+      //   arm 25 of `villain_cast_spells` (`+0x0ec2`-`+0x0f17`):
+      //
+      //     check_inventory(39)                                     +0x0ec2
+      //     && _root.arena.fightdistance > 300                      +0x0ee0-+0x0ef6
+      //
+      //   Strict (`Greater`), and nothing else. Returned before the walk and the
+      //   swing, because `villain_cast_spells` replaces the decision — so a
+      //   villain holding 39 PULLS a distant foe rather than walking to it.
+      //   **`attackOnOffer` is NOT widened**, for the reason the gale gives.
+      //
+      // ► **THE LADDER'S PRE-EMPTION, AS FAR AS IT REACHES THIS ENGINE.** Arms
+      //   1-24 must all fail first. Those with a verb here and a gate that can
+      //   be open beyond 300 return in the blocks above: the potions (2, 4-6,
+      //   10-13), regenerate (3), the five damage spells (14-18, possession
+      //   alone — `!boltOnOffer`), boundless energy (23, possession alone) and
+      //   the gale (24, `< 400`, so the two overlap on 301-399 and the gale
+      //   wins there when its armour test passes). Weaken (19, `< 300`) is
+      //   DISJOINT from this gate on the same distance and never meets it. Arms
+      //   7-9 and 20-22 have no verb here and pre-empt nothing, where the build
+      //   would (22, bloodlust, `fightdistance < 400`, would own 301-399).
+      //
+      // ► **AND IT SITS ABOVE THE TELEPORT (26)**, in ladder order — though the
+      //   teleport's `< 250` is disjoint from `> 300` on the same distance, so
+      //   the order between the two is unobservable.
+      //
+      // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
+      //   > 10` at `+0x056f`. This AI takes no samples, so it commands on every
+      //   turn the gate is open rather than on nine in ten.
+      //
+      // ► **INVENTED: WHICH FOE.** The build has one `defender`. Above 1v1 this
+      //   commands the NEAREST foe, the one the distance gate is measured to —
+      //   the gale's, weaken's and the teleport's choice — so the gate is shut
+      //   while any foe stands inside 300. At 1v1 it is the build's defender.
+      if (!boltOnOffer) {
+        const commanded = nearestFoe(view);
+        const commandOption = commanded
+          ? options.find((option) => option.type === Ss2ActionType.CAST_COMMAND && option.targetId === commanded.id)
+          : undefined;
+        if (commandOption) {
+          const range = ss2FightDistance(actor, commanded);
+          // `range` cannot be null — `nearestFoe` skips a foe whose distance
+          // is null — and is guarded for the reason the gale's is (`null > 300`
+          // is false in JS, so the guard is belt to that brace).
+          if (range !== null && range > SS2_COMMAND.aiFightDistanceAbove) return commandOption;
+        }
+      }
+
       // ► **THE TELEPORT IS THE BUILD'S OWN RULE TOO, for the gale's reason: it
       //   deals no damage, so it has no row in the pricing table below.** Ladder
       //   arm 26 of `villain_cast_spells` (`+0x0f1c`-`+0x0fab`):
@@ -10491,7 +10826,10 @@ export function createSs2TeamRules({
       //   two bolts (arms 15, 17 — possession alone, so a caster offered one
       //   never reaches arm 26) and the gale (arm 24 — whose open gate has
       //   already returned above; a caster whose gale gate is SHUT falls through
-      //   to here, as the ladder does). **SEVEN arms before 26 fire on
+      //   to here, as the ladder does). **Arm 25, the command, has a verb since
+      //   2026-09-22 and returns in the block above; its `> 300` is disjoint
+      //   from this block's `< 250`, so it can never pre-empt a teleport whose
+      //   gate is open.** **SEVEN arms before 26 fire on
       //   possession alone** (ids 49, 32, 35, 31, 34, 30, 45 — map §"The whole
       //   ladder"); ~~five have no verb here~~ **ONE has no verb here (49) as of
       //   2026-09-22 — the fireballs (32, 31, 30) and boundless energy (45)

@@ -268,6 +268,11 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     //   consumed at `+0x8c8a` and `+0x8bab`.** Self-targeted, zero samples; the
     //   gain is `nextphase`'s, on every later phase the bearer acts in.
     "cast-boundless-energy",
+    // ► **JOINED 2026-09-22 — the command, `getphase("cast_command")`,
+    //   written by ladder arm 25 (`+0x0efd`) and consumed at
+    //   `+0x7be6`-`+0x7db6`.** Zero samples: it pulls its target 40 a frame
+    //   against the caster's facing, so it is not in `ATTACK_BANDS`.
+    "cast-command",
     // ► **THE FIRST SPELL TOKENS, JOINED 2026-09-20, AND THEY ARE
     //   MAP-DERIVED WITH A LABEL EACH** — `getphase("cast_frightning_bolt")`
     //   and `getphase("cast_lightning_bolt")`, both written by
