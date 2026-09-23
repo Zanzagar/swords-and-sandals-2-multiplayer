@@ -712,8 +712,11 @@ const REAL_PROPS = readRealProps();
  *   and until 2026-09-14 the only thing standing behind that `!` was
  *   `fs.existsSync` on a path derived from `import.meta.url`. Break the
  *   derivation by one segment and all of them take the early return and the
- *   suite reports **pass, 0 skipped** — no counter moves, and 3,345 / 2,330 /
- *   8,682 / the sky's two hex pins / the whole trail fade evaporate in silence.
+ *   suite reports **pass, 0 skipped** — no counter moves, and ~~3,345~~ 3,356 /
+ *   2,330 / ~~8,682~~ 8,789 / the sky's two hex pins / the whole trail fade
+ *   evaporate in silence. (**Corrected 2026-09-23**: the struck pins were the
+ *   12-prop pack's; the three spell props moved them to what the colour-
+ *   transform count test below asserts now.)
  *   Reproduced by a wave-1 verifier: rewrite `new URL("..")` as
  *   `new URL("../..")` in this file and the run is byte-identical to a green
  *   one.
@@ -736,9 +739,11 @@ function assertRealPackPathIsDerivable() {
  * A pack built to reach what the real one CANNOT, which is the only reason a
  * synthetic fixture earns its place beside a measured one.
  *
- * Measured on `assets/props/props.json` 2026-09-14: **0 of its 3,345
+ * Measured on `assets/props/props.json` 2026-09-14: **0 of its ~~3,345~~ 3,356
  * placements carries a non-zero `alphaOffset`**, and **0 of its 41 bitmap
- * operations sits under a colour transform of any kind**. So the two counts
+ * operations sits under a colour transform of any kind** (re-measured
+ * 2026-09-23 on the 15-prop pack: both zeros stand; 3,345 was the 12-prop
+ * pack's placement total). So the two counts
  * `propInvoiceFor` exists to report are DEAD on real data and a suite that only
  * ran against the pack would pin two zeros that cannot move. This one puts a
  * bitmap under identity multipliers with offsets 17/0/-9 — the only shape of
@@ -1201,7 +1206,7 @@ test("THE ARROW AND THE SCENERY CARRY NO TINT AT ALL, so a sweep over them prove
     if (tinted > 0) tintedBy[linkage] = tinted;
   }
   assert.deepEqual(tintedBy, { bullet_trail: 7, sky: 2320, panel: 3 },
-    "three linkages out of twelve, and `bullet` and `rockMC` are not among them");
+    "three linkages out of ~~twelve~~ fifteen (corrected 2026-09-23: the three spell props joined, none tinted), and `bullet` and `rockMC` are not among them");
 });
 
 test("what the real pack's colour transforms COULD have varied over, counted", () => {
@@ -1268,14 +1273,27 @@ test("what the real pack's colour transforms COULD have varied over, counted", (
  *
  * ► **EVERY CASE HERE IS ONE THE REAL PACK CANNOT REACH, which is the only
  *   reason a synthetic fixture earns its place beside a measured one.**
- *   Measured on `assets/props/props.json` 2026-09-15: all 3,209 of its chains
- *   have length ONE, all 150 of its group matrices have the plain alpha row,
- *   **0 of its 1,690 matrix-covered operations is a bitmap or a `"none"` fill
- *   and 0 carries a stroke**, no placement names a group the pack does not
+ *   Measured on `assets/props/props.json` 2026-09-15: all ~~3,209~~ 3,212 of
+ *   its chains have length ONE, all ~~150~~ 151 of its group matrices have the
+ *   plain alpha row, ~~**0 of its 1,690 matrix-covered operations is a bitmap
+ *   or a `"none"` fill and 0 carries a stroke**~~ **1 of its 1,700
+ *   matrix-covered operations is a `"none"` fill, and that same one carries a
+ *   stroke** (0 is a bitmap), no placement names a group the pack does not
  *   hold, and its one blend mode is canvas-exact. So `nestedGroupPlacements`,
- *   `groupMatrixNotFillExact`, `groupMatrixDroppedOps`, `groupMatrixStrokeOps`,
+ *   `groupMatrixNotFillExact`, ~~`groupMatrixDroppedOps`, `groupMatrixStrokeOps`,~~
  *   `groupsUnresolved` and `groupBlendModesRefused` are ALL dead over there and
  *   this is the only thing that can move any of them.
+ *   **Corrected 2026-09-23 — the spell props joined the pack**: +3 chains in
+ *   all from the bolt (2) and the boulder (1), all one deep; +1 matrix, the
+ *   boulder's, plain row; and shape `19@0` path 9 under it is a stroke-only
+ *   hairline (`fill: "none"`, `#000000`, width 0), so `groupMatrixDroppedOps`
+ *   and `groupMatrixStrokeOps` are each 1 on the real pack and no longer dead
+ *   — pinned in "what the real pack's GROUP EFFECTS could have varied over"
+ *   below. This fixture is still the only thing that reaches the RASTER case
+ *   of the dropped count, the nested chain, the alpha row, the unresolved
+ *   index and the refused blend. Re-derived with the invoice walk over every
+ *   frame of every prop (the struck numbers reproduce exactly without the
+ *   three spell props).
  *
  * ► **THE TWO MATRICES DELIBERATELY DO NOT COMMUTE.** `MIX` sets blue from red
  *   and `HALVE_RED` halves red, so applying them innermost-first and
@@ -1396,12 +1414,13 @@ test("a group's COLOUR MATRIX lands on the fill, the stroke and every gradient s
   const ops = propOpsFor(groupPack(), { linkage: "solid", frame: 1 });
   assert.equal(ops.length, 1);
   assert.equal(ops[0].fill, "#404020", "128 red halved to 64");
-  assert.equal(ops[0].stroke, "#104080", "and the stroke takes the same matrix — the real pack cannot reach this line");
+  assert.equal(ops[0].stroke, "#104080", "and the stroke takes the same matrix — the real pack ~~cannot reach this line~~ reaches this line once since 2026-09-23, on boulder_combat's #000000 stroke of width 0");
 
   // ► **THE STOPS, because `paintGradientFill` builds the ramp from them and
   //   never reads `fill`.** A matrix folded only into `fill` would leave the
-  //   sky's entire backdrop gradient untouched — 993 of the real pack's 1,690
-  //   matrix-covered operations are gradients.
+  //   sky's entire backdrop gradient untouched — 993 of the real pack's ~~1,690~~
+  //   1,700 matrix-covered operations are gradients (corrected 2026-09-23:
+  //   `boulder_combat` added 10, none a gradient).
   const ramp = propOpsFor(groupPack(), { linkage: "ramp", frame: 1 });
   assert.deepEqual(ramp[0].gradient.stops.map((stop) => stop.fill), ["#2d2d2d", "#5fbe5f"],
     "blue := red on both stops");
@@ -1443,7 +1462,7 @@ test("a NESTED chain applies innermost first, links `enclosedBy` outward, and is
 
   const invoice = propInvoiceFor(pack, { linkage: "nested", frame: 1 });
   assert.equal(invoice.nestedGroupPlacements, 1,
-    "a painter needs a STACK of buffers for this one — 0 of the real pack's 3,209 chains is deeper than one");
+    "a painter needs a STACK of buffers for this one — 0 of the real pack's ~~3,209~~ 3,212 chains (corrected 2026-09-23: +2 from the bolt, +1 from the boulder) is deeper than one");
   assert.equal(invoice.groupedPlacements, 1, "the denominator it is read against");
   assert.equal(invoice.effectGroups, 2, "both groups are in the frame's table");
 });
@@ -1556,8 +1575,12 @@ test("what the group fold CANNOT reach, counted against its denominator", () => 
   const pack = groupPack();
   // A raster with `fill: "none"`: there is nothing for the matrix to land on,
   // and that is NOT the same fact as there being no matrix. **0 of the real
-  // pack's 1,690 matrix-covered operations is one of these**, so this fixture
-  // is the only thing that can move the counter.
+  // pack's ~~1,690~~ 1,700 matrix-covered operations is one of these**, ~~so this
+  // fixture is the only thing that can move the counter.~~ **— corrected
+  // 2026-09-23: so this fixture is the only thing that moves the counter with
+  // a RASTER. The real pack now moves it to 1 with a non-raster `"none"` fill,
+  // `boulder_combat`'s stroke-only hairline (shape `19@0` path 9), pinned in
+  // the real-pack group-effects test below.**
   const raster = propOpsFor(pack, { linkage: "raster", frame: 1 });
   assert.equal(raster[0].fill, "none", "untouched, because it could not be touched");
   assert.deepEqual(raster[0].bitmap, { id: 9 }, "and the raster is still named");
@@ -1567,8 +1590,9 @@ test("what the group fold CANNOT reach, counted against its denominator", () => 
   assert.equal(dropped.groupMatrixSolidOps, 0);
 
   // A matrix whose ALPHA ROW is not `(0,0,0,1,0)` paints the group's empty area
-  // too, which nothing drawing per fill can express. All 150 of the real pack's
-  // group matrices have the plain row, so this is dead over there.
+  // too, which nothing drawing per fill can express. All ~~150~~ 151 of the real
+  // pack's group matrices have the plain row (corrected 2026-09-23:
+  // `boulder_combat`'s one joined `sky`'s 150), so this is dead over there.
   const lifted = propInvoiceFor(pack, { linkage: "alphaRow", frame: 1 });
   assert.equal(lifted.groupMatrixNotFillExact, 1, "per-fill is an APPROXIMATION for this one");
   assert.equal(propInvoiceFor(pack, { linkage: "solid", frame: 1 }).groupMatrixNotFillExact, 0,
@@ -1710,8 +1734,8 @@ test("the sky's group filters are a BLUR and two GLOWS the painter still has to 
 test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 748 group instances (747 before boulder_combat, 2026-09-23) cover ONE operation", () => {
   // ► **THE QUESTION PREMISE 4 OF THE BRIEF ASKS, ANSWERED FROM THE PACK.** A
   //   group over exactly one drawable IS its own composite, so for those 486
-  //   per-leaf and per-group coincide EXACTLY. The 259 that do not are the
-  //   moon (56 operations), the stars (23 and 12) and a four-path group — and
+  //   per-leaf and per-group coincide EXACTLY. The ~~259~~ 262 that do not are the
+  //   moon (56 operations), the stars ~~(23 and 12)~~ (12) and a four-path group — and
   //   every one of them carries a GLOW rather than a matrix, so the half this
   //   module folds is the half where the distinction cannot arise.
   //   **~~every one of them~~ — NO LONGER, since 2026-09-23:** `boulder_combat`'s
@@ -1720,6 +1744,16 @@ test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 748 group instances (747 befor
   //   with a matrix. It is still not a hard case: the matrix is folded per
   //   fill, which is exact, and it has no filter string, so `matrixOverMany`
   //   below stays 0.
+  //   **CORRECTED 2026-09-23 — and "every one of them carries a GLOW" was
+  //   false before the boulder too.** By group character, from
+  //   `propEffectGroupsFor`'s records over every frame: the 23-operation bucket
+  //   is character 1699 (61 instances), a colourMatrix and NOTHING else — not
+  //   the stars, which are 1702, the 12-operation bucket (102); the four-path
+  //   group is the trail's 47 (7 instances), a `lighten` blend mode and no
+  //   filter; and the bolt's 10 (9 operations, 2 instances, glow) joined on
+  //   2026-09-22. 262 = 89 + 102 + 61 + 7 + 2 + 1; 62 of them carry a matrix.
+  //   The conclusion holds for the reason the boulder's paragraph gives, not
+  //   this one's: `matrixOverMany` is 0.
   assertRealPackPathIsDerivable();
   if (!REAL_PROPS) {
     assert.equal(REAL_PROPS, null, "no extraction on this machine");
@@ -1803,9 +1837,15 @@ test("what the real pack's GROUP EFFECTS could have varied over, counted with de
     "this read \"reached across 302 frames\" before 2026-09-22; 302 was the frames WALKED, and " +
     "only 207 of them carried a group)");
 
-  // `canvasFilterFor`'s four verdicts, summed. 517 applied is 130 blurs and
-  // 387 glow/shadow instances (385 before the bolt's two); ~~348~~ 349 deferred is the colour matrices this module
-  // folds (+1 on 2026-09-23: `boulder_combat`'s one colourMatrix); 250 no-ops are Blur(0,0) and zero-strength glows.
+  // `canvasFilterFor`'s four verdicts, summed. 517 applied is ~~130 blurs and
+  // 387 glow/shadow instances (385 before the bolt's two)~~ **286 blurs and 231
+  // glows (229 before the bolt's two)**; ~~348~~ 349 deferred is the colour matrices this module
+  // folds (+1 on 2026-09-23: `boulder_combat`'s one colourMatrix); 250 no-ops are ~~Blur(0,0) and zero-strength glows~~
+  // **89 zero-radius blurs, 48 zero-strength glows and 113 IDENTITY colour matrices**.
+  // (Corrected 2026-09-23, and wrong before the spell props too: re-derived by
+  // calling `canvasFilterFor` on each distinct group each frame reaches — the
+  // invoice's own unit, which reproduces 517 / 349 / 250 — and tallying its
+  // `applied`/`noOps` records by `type`.)
   assert.equal(total.groupFilters, 1116, "+1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack, with one colourMatrix filter instance");
   assert.equal(total.groupFiltersApplied + total.groupFiltersDeferred
     + total.groupFiltersNoOp + total.groupFiltersRefused, total.groupFilters,
@@ -1845,8 +1885,8 @@ test("what the real pack's GROUP EFFECTS could have varied over, counted with de
   assert.equal(total.groupMatrixDroppedOps, 1, "1 of 1,700 (0 of 1,690 before 2026-09-23): boulder_combat (sprite 33 + its explosion child 27) joined the pack, and path 9 of shape 19@0 under its colourMatrix is a stroke-only hairline with no fill for the matrix to land on");
   assert.equal(total.groupMatrixStrokeOps, 1, "1 of 1,700 (0 of 1,690 before 2026-09-23): the same hairline, whose stroke takes the matrix instead");
   assert.equal(total.groupMatrixNotFillExact, 0, "0 of 1,700: all 151 group matrices have the plain alpha row (1,690 and 150 before boulder_combat's one colourMatrix, 2026-09-23)");
-  assert.equal(total.nestedGroupPlacements, 0, "0 of 3,209: every chain is one deep, so no painter needs a stack");
-  assert.equal(total.groupsUnresolved, 0, "0 of 3,209: every index resolves");
+  assert.equal(total.nestedGroupPlacements, 0, "0 of ~~3,209~~ 3,212 (corrected 2026-09-23: the grouped placements above): every chain is one deep, so no painter needs a stack");
+  assert.equal(total.groupsUnresolved, 0, "0 of ~~3,209~~ 3,212 (corrected 2026-09-23): every index resolves");
   assert.equal(total.groupBlendModesRefused, 0, "0 of 7: the one blend mode here is canvas-exact");
   assert.equal(total.groupBlendModes, 7, "`bullet_trail`'s `lighten`, once per each of its seven frames");
 });

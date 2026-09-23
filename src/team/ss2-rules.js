@@ -4282,13 +4282,20 @@ export const SS2_WHIRLWIND = Object.freeze({
  *   the wrong one (audit WG-1). In 1v1 they cannot. See the resolver's
  *   `ghostLanding`.
  *
- * ► **NOT MODELLED, AND NAMED:** the on-screen blink beside the target and
+ * ► **NOT MODELLED, AND NAMED:** ~~the on-screen blink beside the target and
  *   back (the presentation vocabulary has no "held away, then restored"
- *   motion; only the kill's one-way move is presented), `blendMode = "add"`,
+ *   motion; only the kill's one-way move is presented),~~ `blendMode = "add"`,
  *   ~~`crowd_action = 5`,~~ `cast_spell_icon`, and the build's per-tick 1-pixel
  *   separation nudge while the caster stands beside its victim — this engine
  *   has no form of that nudge anywhere. **`crowd_action = 5` IS MODELLED since
  *   2026-09-22**: a ghost strike that does not kill adds 5 to `crowd_interest`.
+ *   **THE BLINK IS DRAWN since 41ced7b (2026-09-23; corrected here the same
+ *   day)** — as presentation, still not engine state: `displacementOf` in
+ *   `src/adapter/presentation.js` emits one move-clip whose `blink` is the
+ *   landing beside the victim and whose `to` is where the caster rests (back
+ *   where it began, or by the body after a kill), and `figureXAt` in
+ *   `src/render/timeline.js` holds the figure at `blink` for the clip and at
+ *   `to` after it. Pinned by `test/render-drawn-matches-engine.test.js`.
  *
  * ► **THE OFFER IS POSSESSION.** `fightdistance > 500` and
  *   `equipped_weapon != 2` are ladder arm 21 (`+0x0d19`-`+0x0d75`), the
@@ -5030,7 +5037,9 @@ function ss2DamageSpell(type) {
  *       attacker.struck = false; attacker.gotoAndPlay("Cast2")      +0x86ca-+0x86ec
  *       for (i = 1; !(i > boulder_stones); i++) {                   +0x86ed-+0x88fe
  *         boulder = arena.gladiators.attachMovie("boulder_combat",
- *             "boulder_combat" + i, depth, {_x: defender._x, _y: -600})  +0x870f-+0x8774
+ *             "boulder_combat" + i, ~~depth~~
+ *             arena.gladiators.getNextHighestDepth(),               +0x8730-+0x874c
+ *             {_x: defender._x, _y: -600})                          +0x870f-+0x8774
  *         boulder._x = boulder._x + randomBetween(-300, 300)        +0x878b
  *         boulder._y = randomBetween(-600, -800)                    +0x87a9
  *         boulder.yspeed = randomBetween(50, 150)                   +0x87c8
@@ -5051,6 +5060,18 @@ function ss2DamageSpell(type) {
  *       defender.struck = null; nextphase()                         +0x891b-+0x895c
  *     }
  * ```
+ *
+ * ► **CORRECTED 2026-09-23: THE DEPTH IS `getNextHighestDepth()`, NOT A
+ *   `depth` VARIABLE.** The listing read `depth` until 2690559 settled what
+ *   the third argument is. `+0x8730`-`+0x874c` push zero arguments and
+ *   `arena.gladiators` and call `getNextHighestDepth` on it; `+0x874d`-`+0x8757`
+ *   build the name `"boulder_combat" + i`; `+0x8758`-`+0x8773` call
+ *   `attachMovie` with four arguments. Re-read from the session's action dump
+ *   of this block (not the install); `bouldersFor` in
+ *   `src/adapter/presentation.js` records the same reading. So each boulder
+ *   gets a fresh depth and a unique name and none replaces another — all N are
+ *   on screen at once, which is what "every boulder lands" below needs and
+ *   why presentation emits one `attach-effect` per boulder.
  *
  * ► **`1 + 4N` SAMPLES, ALL AT THE CAST, and not one is an attack roll.** The
  *   count, then for each boulder in `i` order its x offset, start height,
@@ -12111,7 +12132,11 @@ export function createSs2TeamRules({
             //   the victim, start height, speed, scale and the invocation of its
             //   own `onEnterFrame` it lands on. Deliberately NOT `from`/`to`
             //   (read as the caster's walk) or `xVelocity`/`boltFrame` (a
-            //   fireball, a bolt). The boulder art is not extracted.
+            //   fireball, a bolt). ~~The boulder art is not extracted.~~ It IS,
+            //   since 2690559 (corrected 2026-09-23): `tools/extract-props.mjs`
+            //   exports `boulder_combat` (sprite 33), and `bouldersFor` in
+            //   `src/adapter/presentation.js` turns each entry here into one
+            //   `attach-effect`.
             boulders,
             // In LANDING order, the order the ingress ran them.
             hits,

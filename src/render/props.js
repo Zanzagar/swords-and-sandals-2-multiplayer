@@ -45,12 +45,22 @@
  * the renderer's own opinion and not a second one:
  *
  * ```text
- *   3,345 placements    2,330 under a NON-IDENTITY transform   (1,015 identity)
- *   8,682 operations    7,246 under one
+ *   ~~3,345~~ 3,356 placements    2,330 under a NON-IDENTITY transform   (~~1,015~~ 1,026 identity)
+ *   ~~8,682~~ 8,789 operations    7,246 under one
  *   7,215 of those 7,246 are the SKY — ~~its day/night colouring IS this
  *         transform, swept across 200 frames, and not a ColorMatrix~~
  *       0 of the 7,246 land on a fill the arithmetic cannot express
  * ```
+ *
+ * ► **CORRECTED 2026-09-23: THE STRUCK TOTALS ARE THE 12-PROP PACK'S.** The
+ *   three spell props joined it after this was measured — `lightning_bolt_combat`
+ *   (3 placements, 20 operations) and `fireball_combat` (4, 38) on 2026-09-22,
+ *   `boulder_combat` (4, 49) on 2026-09-23 — and NONE of their placements is
+ *   tinted, so every tinted count above stands. Re-derived by summing
+ *   `propInvoiceFor` over every frame of every prop (the walk
+ *   `test/render-props.test.js` pins at 3356 / 2330 / 8789 / 7246 / sky 7215);
+ *   the same walk with those three props left out gives 3,345 / 8,682 / 1,015
+ *   exactly.
  *
  * ► **THAT STRUCK LINE WAS WRONG, AND IT IS THE WHOLE REASON FOR THE SECTION
  *   BELOW.** The transform is real and is applied; it is not what makes the sky
@@ -68,7 +78,8 @@
  *   SCREENS PACK AND OF WHAT THE BRIEF FOR THIS WORK ASSUMED.** 70% of them,
  *   because the sky alone is 3,202 placements sweeping a gradient through dusk.
  *   `colourTransformFrom` still collapses the identity to `null` — it has to,
- *   or "does this placement carry a tint" answers yes for all 3,345 — but the
+ *   or "does this placement carry a tint" answers yes for all ~~3,345~~ 3,356
+ *   (**corrected 2026-09-23**, the total re-derived above) — but the
  *   *reason* to normalise here is not that the pack is mostly identity. It is
  *   not.
  *
@@ -109,11 +120,20 @@
  * before that, and again with no count saying so.
  *
  * ```text
- *   3,345 placements    3,209 inside an effect group      (136 inside none)
- *     363 groups        362 on `sky`, 1 on `bullet_trail`
- *     570 filter records on them: 212 glow, 208 blur, 150 colourMatrix
+ *   ~~3,345~~ 3,356 placements    ~~3,209~~ 3,212 inside an effect group      (~~136~~ 144 inside none)
+ *     ~~363~~ 366 groups        362 on `sky`, 1 on `bullet_trail`, 2 on `lightning_bolt_combat`, 1 on `boulder_combat`
+ *     ~~570~~ 573 filter records on them: ~~212~~ 214 glow, 208 blur, ~~150~~ 151 colourMatrix
  *       1 blend mode: `bullet_trail`'s `lighten`
  * ```
+ *
+ * ► **CORRECTED 2026-09-23: THE STRUCK NUMBERS ARE THE 12-PROP PACK'S.** The
+ *   bolt added 2 grouped placements (one GLOW group on each of its 2 frames;
+ *   shape 11 sits outside) and the boulder 1 (frame 4, under one colourMatrix
+ *   group); the fireball's 4 placements sit in none. Re-derived by walking each
+ *   prop's `effectGroups` (distinct groups, and each filter record's `type`)
+ *   and summing the invoice's `groupedPlacements` — pinned at 3212 in
+ *   `test/render-props.test.js`; the same walk without the three spell props
+ *   gives every struck number exactly.
  *
  * ► **A FILTER ON A GROUP IS A FILTER OF THE COMPOSITE, so this module folds
  *   exactly one of the three kinds and REFUSES to fold the other two.** Flash
@@ -126,9 +146,11 @@
  *     `colourMatrixIsFillExact`'s docstring in `filters.js`: a matrix is
  *     affine, alpha-over is a convex combination, so `M(blend(a,b))` equals
  *     `blend(M(a),M(b))` — with the one exception of a matrix whose alpha row
- *     is not `(0,0,0,1,0)`, which paints the group's empty area too. **All 150
- *     of this pack's group matrices have the plain alpha row** (`mExact` 150 of
- *     150, measured by walking `effectGroups` and calling that predicate), so
+ *     is not `(0,0,0,1,0)`, which paints the group's empty area too. **All ~~150~~
+ *     151 of this pack's group matrices have the plain alpha row** (`mExact`
+ *     ~~150 of 150~~ 151 of 151 — **corrected 2026-09-23**: `boulder_combat`'s
+ *     one colourMatrix joined the 150 on `sky`; re-measured the same way, by
+ *     walking `effectGroups` and calling that predicate), so
  *     the fold is exact for every one of them — and `groupMatrixNotFillExact`
  *     counts the case anyway, because that is a fact about THIS BUILD and not
  *     about the format.
@@ -139,16 +161,31 @@
  *     the same record as `composite`.
  *
  * ► **AND THIS PACK IS NOT THE CATASTROPHE THE SCREENS PACK IS — MEASURED, NOT
- *   ASSUMED.** Per FRAME (which is the unit a painter draws), **486 of the 745
- *   group instances cover exactly ONE operation**, and the largest covers 56.
+ *   ASSUMED.** Per FRAME (which is the unit a painter draws), **486 of the ~~745~~
+ *   748 group instances cover exactly ONE operation**, and the largest covers 56.
  *   A group over one drawable IS its own composite, so for those 486 per-leaf
  *   and per-group coincide EXACTLY and a painter that simply set `ctx.filter`
- *   around the single path would be right. The 259 that do not coincide are
+ *   around the single path would be right. ~~The 259 that do not coincide are
  *   `sky`'s moon (56 ops), its stars (23) and its cloud bank (12) — and they
  *   are exactly the groups carrying glows rather than matrices, so the half
- *   this module folds is the half where the distinction does not arise.
- *   Reproduce by counting ops under each `inheritedEffects` index per frame;
- *   the distribution is `{1:486, 4:7, 12:102, 23:61, 56:89}`.
+ *   this module folds is the half where the distinction does not arise.~~
+ *   **CORRECTED 2026-09-23 — the count was the 12-prop pack's, and the naming
+ *   was wrong even on that pack.** The ~~259~~ 262 that do not coincide are,
+ *   by group character (names as the frame-200 test gives them): the moon 1728
+ *   (56 ops, 89 instances, glow and blur), the stars 1702 (12 ops, 102, glow),
+ *   character 1699 (23 ops, 61 — a colourMatrix and NOTHING else), the trail's
+ *   47 (4 ops, 7 — the `lighten` blend mode, no filter), and since the spell
+ *   props the bolt's 10 (9 ops, 2, glow) and the boulder's 27 (10 ops, 1, a
+ *   colourMatrix). So they are NOT all glows: 62 of them carry a matrix. The
+ *   conclusion stands on a different ground — a matrix folds EXACTLY per fill
+ *   whatever it covers (`colourMatrixIsFillExact`), and no group over several
+ *   operations carries a matrix AND a blur or glow (`matrixOverMany` is 0 in
+ *   `test/render-props.test.js`) — so the half this module folds is still the
+ *   half where the distinction does not arise.
+ *   Reproduce by counting ops under each `inheritedEffects` index per frame
+ *   (`propEffectGroupsFor`'s `ops`, the test's walk); the distribution is
+ *   ~~`{1:486, 4:7, 12:102, 23:61, 56:89}`~~ `{1:486, 4:7, 9:2, 10:1, 12:102,
+ *   23:61, 56:89}` — the struck one is exactly the 12-prop pack's.
  *
  * ► **THE GRADIENT FOLD IS THE ONE APPROXIMATION IN IT, AND IT IS LARGE.** A
  *   matrix folded into the stops is exact only while no stop SATURATES: canvas
@@ -162,7 +199,11 @@
  *   worse answer**: it is the sky's entire day/night cycle.
  *
  * ► **THE GROUP'S OWN MATRIX IS NOT IN THE PACK** — `tools/extract-props.mjs`
- *   counts 362 of them in `notCarried.effectGroupMatrix` — so a blur radius
+ *   counts ~~362 of them~~ them in `notCarried.effectGroupMatrix` (**corrected
+ *   2026-09-23**: 362 is `sky`'s own count; the manifest's per-prop
+ *   `effects.notCarried.effectGroupMatrix` now sums to 366 — `sky` 362,
+ *   `lightning_bolt_combat` 2, `bullet_trail` 1, `boulder_combat` 1, one per
+ *   distinct group) — so a blur radius
  *   here is in the group's own space and a painter must scale it by the STAGE
  *   scale. That is what `canvasFilterFor`'s `scale` option is for, and
  *   `propEffectGroupsFor` takes it and passes it straight through.
@@ -273,8 +314,11 @@ export function propFrameCount(pack, linkage) {
  *   cost: a zero with no denominator does not say whether the counter is quiet
  *   or DEAD, and both of these are dead on the real pack. Measured 2026-09-14
  *   on `assets/props/props.json`: **41 bitmap path operations, 0 of them under
- *   a colour transform of any kind**, and **0 of the 3,345 placements carries a
- *   non-zero `alphaOffset` at all**. So `bitmapColourTransformDropped` and
+ *   a colour transform of any kind**, and **0 of the ~~3,345~~ 3,356 placements
+ *   carries a non-zero `alphaOffset` at all** (**re-measured 2026-09-23** on the
+ *   15-prop pack: still 41 bitmap operations, all on `crowd` and none tinted,
+ *   and still no non-zero `alphaOffset`; 3,345 was the 12-prop pack's total).
+ *   So `bitmapColourTransformDropped` and
  *   `gradientAlphaOffsetApproximated` cannot fire on this build's props, and
  *   `bitmapOps`/`gradientOps`/`tintedOps` beside them are what says so out loud
  *   instead of letting two zeros read as "nothing was lost". The synthetic
@@ -308,8 +352,11 @@ function emptyInvoice() {
     groupedPlacements: 0,
     groupedOps: 0,
     // A chain deeper than one needs a STACK of buffers, not one buffer. Every
-    // one of this pack's 3,209 chains has length 1 and every group path has
-    // length 1, so this is 0 on the real pack and the synthetic pack in
+    // one of this pack's ~~3,209~~ 3,212 chains has length 1 and every group
+    // path (all 366) has length 1 — **corrected 2026-09-23**: the bolt added 2
+    // chains and the boulder 1, all one deep; re-measured by walking every
+    // placement's `inheritedEffects` and every `effectGroups[].path` — so this
+    // is 0 on the real pack and the synthetic pack in
     // `test/render-props.test.js` is the only thing that can move it.
     nestedGroupPlacements: 0,
     // A group index a placement names and the prop does not hold, counted ONCE
@@ -338,14 +385,22 @@ function emptyInvoice() {
     groupFilterOps: 0,
 
     // What the colour-matrix fold reached. `groupMatrixOps` is the denominator
-    // and the four below it partition it exactly.
+    // and ~~the four below it partition it exactly~~ **the first THREE below it
+    // partition it exactly — solid, gradient, dropped — and `groupMatrixStrokeOps`
+    // OVERLAPS them** (corrected 2026-09-23): a stroke is folded beside the
+    // fill, so one operation can count as dropped AND stroked. The four summed
+    // to the whole only while the stroke count was 0; on the real pack now
+    // 706 + 993 + 1 = 1,700 and the 1 stroke is that same dropped hairline
+    // (`boulder_combat`, shape `19@0` path 9). The test asserts the three.
     groupMatrixOps: 0,
     groupMatrixSolidOps: 0,
     groupMatrixGradientOps: 0,
     groupMatrixDroppedOps: 0,
     groupMatrixStrokeOps: 0,
     // Dead on this build and kept for the reason the two above it are: **all
-    // 150 group matrices here have the plain alpha row**, so per-fill is exact
+    // ~~150~~ 151 group matrices here have the plain alpha row** (corrected
+    // 2026-09-23: `boulder_combat`'s one joined `sky`'s 150; re-measured with
+    // `colourMatrixIsFillExact` over every `effectGroups` filter), so per-fill is exact
     // for every one and this cannot fire. A matrix that painted the group's
     // empty area would, and nothing but the synthetic pack can show it.
     groupMatrixNotFillExact: 0,
@@ -428,7 +483,8 @@ function transformGradient(gradient, colour, invoice) {
 /**
  * The chain of colour matrices for a placement inside NO group — one shared
  * frozen empty array rather than a fresh `[]` per placement, because this pack
- * walks 3,345 of them per full sweep.
+ * walks ~~3,345~~ 3,356 of them per full sweep (corrected 2026-09-23: the
+ * invoice's `placements` summed over every frame of the 15-prop pack).
  */
 const EMPTY_MATRICES = Object.freeze([]);
 
@@ -601,8 +657,11 @@ function emitPropOps(pack, { linkage, frame = 1, scale = 1 } = {}, invoice, coll
     //   `colourTransformFrom` allocates and freezes an eight-number array, a
     //   shape is many paths sharing one transform, and the two appliers take
     //   that array straight through without re-normalising. Measured on the
-    //   real pack: 3,345 conversions here against the 34,728 that handing
-    //   `placement.colour` to each of the four call sites would do.
+    //   real pack: ~~3,345~~ 3,356 conversions here against the ~~34,728~~
+    //   35,156 that handing `placement.colour` to each of the four call sites
+    //   would do (corrected 2026-09-23 on the 15-prop pack: 3,356 placements,
+    //   and 8,789 operations x 4 — the struck pair is 8,682 x 4, the 12-prop
+    //   pack's).
     //
     // ► **BEFORE the shape lookup, so `tintedPlacements` counts the same
     //   population `placements` does.** A placement naming a shape the pack
@@ -733,7 +792,9 @@ function emitPropOps(pack, { linkage, frame = 1, scale = 1 } = {}, invoice, coll
           //   `paintGradientFill` in `tools/arena/main.js` builds from each
           //   stop's own colour and never consults `fill`, so a matrix folded
           //   only into `fill` would leave the sky's whole backdrop untouched —
-          //   993 of this pack's 1,690 matrix-covered operations are gradients.
+          //   993 of this pack's ~~1,690~~ 1,700 matrix-covered operations are
+          //   gradients (corrected 2026-09-23: `boulder_combat` added 10, none
+          //   a gradient; the invoice's `groupMatrixOps` summed over the pack).
           //   The flat fallback is folded as well, for a surface with no
           //   gradient support.
           invoice.groupMatrixGradientOps += 1;
@@ -751,19 +812,30 @@ function emitPropOps(pack, { linkage, frame = 1, scale = 1 } = {}, invoice, coll
             // ► **NO FILL FOR THE MATRIX TO LAND ON, WHICH IS NOT THE SAME AS
             //   NO MATRIX.** A bitmap-only path or a `"none"` fill: the group's
             //   colour matrix is simply lost for that operation, exactly as the
-            //   RGB half of the colour transform is lost on a raster. **0 of
+            //   RGB half of the colour transform is lost on a raster. ~~**0 of
             //   this pack's 1,690 matrix-covered operations is one**, so the
             //   synthetic pack in the test file is the only thing that can move
-            //   this — a zero here with no denominator beside it would say
+            //   this~~ **— corrected 2026-09-23: 1 of the 1,700 is, since
+            //   `boulder_combat` joined the pack.** Shape `19@0` path 9 under its
+            //   colourMatrix is `fill: "none"` with a `#000000` stroke of width
+            //   0 — a stroke-only hairline, so nothing visible is lost. The
+            //   synthetic pack is still the only thing that reaches the RASTER
+            //   case. A zero here with no denominator beside it would say
             //   nothing at all.
             invoice.groupMatrixDroppedOps += 1;
           }
         }
         const foldedStroke = foldColourMatrices(stroke, strokeOpacity, matrices);
         if (foldedStroke.applied) {
-          // Dead on the real pack for the same reason the colour transform's
+          // ~~Dead on the real pack for the same reason the colour transform's
           // stroke line is: **0 of its 1,690 matrix-covered operations carries
-          // a stroke at all.** `tintPack` is what stands under this line.
+          // a stroke at all.** `tintPack` is what stands under this line.~~
+          // **Corrected 2026-09-23: LIVE on the real pack, once** — 1 of its
+          // 1,700 matrix-covered operations carries a stroke, the boulder's
+          // hairline above (the same operation `groupMatrixDroppedOps` counts).
+          // And the synthetic fixture under this line was never `tintPack`,
+          // which holds no effect group: it is `groupPack`'s `solid`
+          // (`#204080` -> `#104080`) in `test/render-props.test.js`.
           invoice.groupMatrixStrokeOps += 1;
           stroke = foldedStroke.fill;
           strokeOpacity = foldedStroke.fillOpacity;
@@ -1047,9 +1119,16 @@ export function arrowOpsFor(pack, artFrame) {
  * ► **WHAT THIS CANNOT HAND YOU IS THE OTHER FOUR ARROWS.** The pack flattens
  *   the nested `bullet` child at ITS frame 1, so all seven of `bullet_trail`'s
  *   frames place ONE shape — the same shape `bullet` frame 1 places, which is
- *   bow 61's. A puff behind bow 65's arrow therefore draws bow 61's. Carrying
+ *   bow 61's. A puff behind bow 65's arrow therefore draws bow 61's. ~~Carrying
  *   that lookup is `tools/extract-props.mjs`'s to do and not this module's to
- *   invent: there is nothing in the pack for this function to read.
+ *   invent: there is nothing in the pack for this function to read.~~
+ *   **Corrected 2026-09-23: the pack DOES carry the lookup, and has since the
+ *   commit that wrote this sentence (b9ccdff)** — `bullet_trail.nestedLookup`,
+ *   `{ instance: "bullet", character: 47, replaces: 42 }` with a 50-entry
+ *   `shapeByFrame` over shapes 42-46, indexed by `secondary_weapon - 60`
+ *   (read off `assets/props/props.json`). What is missing is a READER: nothing
+ *   in `src/` reads `nestedLookup` (`grep -rn nestedLookup src` finds only
+ *   comments), so every puff still places shape 42 — `bullet` frame 1's.
  *
  * ► ~~**NOR THE `lighten` COMPOSITE.** Every one of sprite 48's seven
  *   placements sets blend mode 5, and `emitPropOps` emits `matrix`, `clip`,
@@ -1134,8 +1213,11 @@ export function boltOpsFor(pack, boltFrame, ageFrames, { scale = 1 } = {}) {
  *
  * ► **NOT IN ANY PACK EXTRACTED BEFORE 2026-09-22, and null is the answer for
  *   that**, so a shell draws its authored fallback exactly as it does for an
- *   arrow on a machine with no extraction. `tools/extract-props.mjs` must take
- *   it before this can draw the build's art.
+ *   arrow on a machine with no extraction. ~~`tools/extract-props.mjs` must take
+ *   it before this can draw the build's art.~~ **Corrected 2026-09-23: it
+ *   does — `PROP_EXPORTS` has declared `fireball_combat` since 2c53945
+ *   (2026-09-22), and the real pack holds it (4 frames, with a `clock`)**, so
+ *   only a pack extracted before that commit gets null here.
  *
  * Two quantities, kept apart the way `boltOpsFor` keeps them:
  *
@@ -1226,7 +1308,15 @@ export function boulderOpsFor(pack, clipFrame, ageFrames = 0, { scale = 1 } = {}
  * else. So the ONLY thing that can end a landing is a CHILD placed on frame 4 —
  * and whether it does (`_parent.removeMovieClip()` on its last frame, as the
  * fireball's explosion does), holds (`Stop`), or loops is in that child's
- * actions, which the extractor does not read. Set this from that reading.
+ * actions, which the extractor does not read. ~~Set this from that reading.~~
+ * **Corrected 2026-09-23: that reading is DONE — the paragraph above — and it
+ * sets nothing.** Re-checked for this correction: the pack's
+ * `boulder_combat.clockDiscovery.byFrame[3]` is `[27]` and its frame-4 clock
+ * has 23 frames, so `boulderLandedFramesFor` gives 22; the session's action
+ * dump holds exactly one action block for sprite 27,
+ * `sprite:27/frame:23/DoAction@0xb819`, which is `_parent.removeMovieClip()`,
+ * and sprite 33's two blocks (`@0xcb53` frame 1, `@0xcb6d` frame 4) are each
+ * a bare `Stop`.
  */
 export const BOULDER_LANDED_FRAMES = null;
 
@@ -1240,11 +1330,15 @@ export const BOULDER_LANDED_FRAMES = null;
  * - **A still frame 4 — no animated sprite found there: `Infinity`.** Nothing
  *   the build is known to run can remove it, so it stays as long as the arena.
  * - **An animated landing: ONE PASS of its clock, less the last frame —
- *   INTERIM, AND A PRECEDENT RATHER THAN A READING.** `fireball_combat` has
+ *   ~~INTERIM, AND A PRECEDENT RATHER THAN A READING.~~** `fireball_combat` has
  *   the same layout (four frames, a `Stop` on 1 and 4, an animated child on 4)
  *   and its child removes its parent on its LAST frame, whose script runs
  *   before that frame is drawn — so `SS2_FIREBALL` shows `explosionFrames - 1`.
- *   Whether the boulder's child does the same is unread.
+ *   ~~Whether the boulder's child does the same is unread.~~ **Corrected
+ *   2026-09-23: READ, and it does — the boulder's frame-4 child IS the
+ *   fireball's explosion, character 27, so on the real pack this arm is the
+ *   build's answer (22), not an interim one.** See `BOULDER_LANDED_FRAMES` for
+ *   the reading. It is still only a precedent for some OTHER build's child.
  */
 export function boulderLandedFramesFor(pack) {
   if (!hasExtractedProps(pack)) return 0;

@@ -1102,8 +1102,13 @@ function fireballFor(combatants, event) {
  *   rather than when the spell is cast. See `reactionDelaysFor`.
  *
  * `endsWithClip` is null: a boulder is not removed by any clip's report. The
- * arm never removes it at all; how long a landed rock stays is the renderer's
- * stated choice.
+ * arm never removes it at all; ~~how long a landed rock stays is the renderer's
+ * stated choice.~~ **Corrected 2026-09-23: how long a landed rock stays is the
+ * BUILD's answer, read off the pack** — the landing child on `boulder_combat`'s
+ * frame 4 is character 27, whose only frame script is `_parent.removeMovieClip()`
+ * on its frame 23, and the renderer asks `boulderLandedFramesFor` in
+ * `src/render/props.js` (22 on the real pack; 0 for the authored rock). See
+ * `BOULDER_LANDED_FRAMES` there for the reading.
  */
 function bouldersFor(combatants, event) {
   if (!Array.isArray(event.boulders)) return [];
