@@ -76,7 +76,7 @@
 
 import { EliminationEvent } from "../team/elimination.js";
 import { ss2ArrowFrameFor, ss2RangedWeaponFor } from "../team/ss2-weapon-table.js";
-import { ss2PhysicalSize } from "../team/ss2-rules.js";
+import { SS2_ARENA, ss2PhysicalSize } from "../team/ss2-rules.js";
 import { BATTLE_RESULT_PENDING_TYPE } from "../team/settlement.js";
 import { bindingPlanFor, resultLabelsFor } from "./slot-layout.js";
 import { CANONICAL_FACING_LEFT } from "./state-bridge.js";
@@ -1096,21 +1096,48 @@ function projectileFor(wire, combatants, event) {
  *   shove and the taunt are: nothing else in the event's own fields separates
  *   a blink from a step.
  */
-function displacementOf(event) {
+function displacementOf(event, { before = null, after = null } = {}) {
   if (Number.isFinite(event.targetFrom) && Number.isFinite(event.targetTo)) {
     return { combatantId: event.targetId, from: event.targetFrom, to: event.targetTo, pushed: true };
   }
-  // ► **A LETHAL GHOST STRIKE LEAVES ITS CASTER BESIDE THE BODY** (added
-  //   2026-09-22 with `cast_ghost_strike`): the arm restores `attacker_old_x`
-  //   only in the completion tick, which `death()` deletes. Its own field
-  //   names, `casterFrom`/`casterTo`, because `from`/`to` would bind the event
-  //   as a WALK above. Drawn as a teleport — the figure is at `to` when its
-  //   clip ends. **NOT the build's timing, and named:** the build blinks the
-  //   caster beside the victim BEFORE the swing, and this vocabulary has no
-  //   motion that holds a figure away and brings it back, so a strike that does
-  //   not kill shows no blink at all.
-  if (event.type === "cast-ghost-strike" && Number.isFinite(event.casterFrom) && Number.isFinite(event.casterTo)) {
-    return { combatantId: event.actorId, from: event.casterFrom, to: event.casterTo, pushed: false, teleported: true };
+  // ► **A GHOST STRIKE BLINKS ITS CASTER BESIDE THE VICTIM FOR THE SWING**
+  //   (2026-09-23). The build writes `attacker_old_x = _x` (`+0x7e3c`), puts
+  //   the caster at `defender._x ± physical_size` (`+0x7e64`-`+0x7eac`), THEN
+  //   swings and rolls (`+0x7f77`), and restores `attacker_old_x` on the
+  //   completion tick (`+0x7f9f`) — which `death()` deletes, so after a KILL the
+  //   caster stays beside the body. The move-clip says both halves: `blink` is
+  //   where the figure stands while its clip plays, `to` where it rests after.
+  //
+  //   **This was a one-way teleport drawn AFTER the swing, and only on a kill,
+  //   until 2026-09-23.** A strike that did not kill emitted nothing, and the
+  //   AI only casts it beyond 500 (`fightdistance > 500`, ladder arm 21), so
+  //   every ghost strike was drawn as a power blow at nobody from across the
+  //   sands — the owner's "hitting each other not in melee range" on the tricks
+  //   kit (`out-of-range-hits` F3, `spell-animations` F4, both CONFIRMED; the
+  //   refuter found the kill's teleport ALSO swung from across the arena).
+  //
+  //   The lethal landing is the resolver's own (`casterFrom`/`casterTo`, its own
+  //   field names because `from`/`to` would bind the event as a WALK below).
+  //   Otherwise it is the build's expression on the `before` projection — the
+  //   same `ghostLanding` arithmetic the resolver judges the back attack from,
+  //   the caster's facing choosing the side — clamped where the build's clip
+  //   clamp puts the drawn figure. **No `before`, no blink**: the victim may have
+  //   been knocked back since, so the ending projection cannot say where it
+  //   stood.
+  if (event.type === "cast-ghost-strike") {
+    if (Number.isFinite(event.casterFrom) && Number.isFinite(event.casterTo)) {
+      return { combatantId: event.actorId, from: event.casterFrom, to: event.casterTo, pushed: false, blink: event.casterTo };
+    }
+    const blink = ghostLandingOf(before, event);
+    if (blink === null) return null;
+    const rest = after?.get(event.actorId)?.x;
+    return {
+      combatantId: event.actorId,
+      from: blink.from,
+      to: Number.isFinite(rest) ? rest : blink.from,
+      pushed: false,
+      blink: blink.landing
+    };
   }
   if (!Number.isFinite(event.from) || !Number.isFinite(event.to)) return null;
   if (event.type === "shove" || event.type === "taunt") {
@@ -1122,8 +1149,24 @@ function displacementOf(event) {
   return { combatantId: event.actorId, from: event.from, to: event.to, pushed: false };
 }
 
-function movementFor(layout, event) {
-  const displacement = displacementOf(event);
+/**
+ * Where a ghost strike's caster stands for its swing, from the projection the
+ * batch STARTED at: `defender._x - physical_size` facing right, `+` facing left
+ * (`+0x7e4c`-`+0x7eac`), clamped to the arena. Null when either end is not on
+ * that projection.
+ */
+function ghostLandingOf(before, event) {
+  const caster = before?.get(event.actorId);
+  const target = before?.get(event.targetId);
+  if (!Number.isFinite(caster?.x) || !Number.isFinite(target?.x)) return null;
+  const size = ss2PhysicalSize(caster);
+  const raw = projectedFacingOf(caster) === "left" ? target.x + size : target.x - size;
+  const landing = Math.min(SS2_ARENA.clamp.max, Math.max(SS2_ARENA.clamp.min, raw));
+  return { from: caster.x, landing };
+}
+
+function movementFor(layout, event, projections = {}) {
+  const displacement = displacementOf(event, projections);
   if (displacement === null) return null;
   // Resolved HERE rather than by the caller, and that is not tidiness. This is
   // called before the binding is known, and `layout.placementFor` THROWS on a
@@ -1146,7 +1189,10 @@ function movementFor(layout, event) {
     // A TELEPORT is held at `from` for the whole of the caster's clip and put
     // at `to` when it ends — see `figureXAt`. Present only on a teleport, for
     // the reason `pushed` is present only on a push.
-    ...(displacement.teleported ? { teleported: true } : {})
+    ...(displacement.teleported ? { teleported: true } : {}),
+    // A BLINK stands the figure at this x for the whole of its clip and rests
+    // it at `to` when the clip ends — the ghost strike's. Present only on one.
+    ...(Number.isFinite(displacement.blink) ? { blink: displacement.blink } : {})
   });
 }
 
@@ -1219,6 +1265,80 @@ function facingChangesFor(layout, before, wire, sequence) {
       from,
       to
     }));
+  }
+  return changes;
+}
+
+/**
+ * A pushed `move-clip` (and a `move-clip-depth`) for every placed combatant
+ * whose projected position changed across the batch WITHOUT the batch's own
+ * moves carrying it there. Totality for POSITION, as `facingChangesFor` is for
+ * facing.
+ *
+ * ► **ADDED 2026-09-23, BECAUSE A KNOCKBACK WAS NEVER PRESENTED.** The
+ *   resolver's `damagecharacter` knockback moves its victim with a POSITION
+ *   effect and records only `knockback: {roll, force, animation}` on the event
+ *   — no endpoints — so `displacementOf` had nothing to read and the victim was
+ *   drawn where it had stood until its own next step: normal and power blows
+ *   (directions 5-12), the whirlwind and the ghost strike alike. Found by the
+ *   `engine-vs-screen` and `out-of-range-hits` investigators, both CONFIRMED by
+ *   write-nothing refuters; re-measured at bf53d81 over 24 seeds of 3v3: tricks
+ *   kit 91 knockbacks and buffs kit 31, NONE presented, and a figure drawn up
+ *   to 191 units from its engine x (buffs; 133 with tricks). **The events are inside
+ *   `combatStateHash`**, so the fix is here, and it is general rather than one
+ *   more event case: whatever moved a figure, the batch now says so.
+ *
+ *   "Carried there" is decided the way the scene fold decides it: a batch's
+ *   LAST `move-clip` for a combatant is where the scene will rest it
+ *   (`scene.js`, the move-clip case), and with none it rests where the batch
+ *   found it. Only a disagreement with the ENDING projection is emitted, so a
+ *   batch whose own moves already put everyone where the resolver did adds
+ *   nothing, and its stream is exactly what it was.
+ *
+ *   `pushed`, because that is what an unannounced move IS in this engine: the
+ *   victim is carried while it plays whatever it plays (`timelinesForStep`
+ *   pairs a push with any clip), the build's `knockback(defender, force)`.
+ *
+ * `sequence` is the batch's highest, for the reason `facingChangesFor` gives.
+ */
+function positionChangesFor(layout, before, wire, earlier, sequence) {
+  if (before === null) return [];
+  const started = combatantIndex(before);
+  const ended = combatantIndex(wire);
+  const restingX = new Map();
+  const restingY = new Map();
+  for (const command of earlier) {
+    if (command.kind === CommandKind.MOVE_CLIP) restingX.set(command.combatantId, command.to);
+    if (command.kind === CommandKind.MOVE_CLIP_DEPTH) restingY.set(command.combatantId, command.toY);
+  }
+  const changes = [];
+  for (const placement of layout.placements) {
+    const from = started.get(placement.combatantId);
+    const to = ended.get(placement.combatantId);
+    if (!from || !to) continue;
+    const x = restingX.has(placement.combatantId) ? restingX.get(placement.combatantId) : from.x;
+    if (Number.isFinite(x) && Number.isFinite(to.x) && x !== to.x) {
+      changes.push(Object.freeze({
+        kind: CommandKind.MOVE_CLIP,
+        sequence,
+        combatantId: placement.combatantId,
+        instancePath: placement.instancePath,
+        from: x,
+        to: to.x,
+        pushed: true
+      }));
+    }
+    const y = restingY.has(placement.combatantId) ? restingY.get(placement.combatantId) : from.y;
+    if (Number.isFinite(y) && Number.isFinite(to.y) && y !== to.y) {
+      changes.push(Object.freeze({
+        kind: CommandKind.MOVE_CLIP_DEPTH,
+        sequence,
+        combatantId: placement.combatantId,
+        instancePath: placement.instancePath,
+        fromY: y,
+        toY: to.y
+      }));
+    }
   }
   return changes;
 }
@@ -1320,6 +1440,9 @@ export function presentResolvedEvents(wire, {
     return token;
   };
   const combatants = combatantIndex(wire);
+  // The two ends of the batch, for a move whose endpoints the event does not
+  // carry — the ghost strike's blink. See `displacementOf`.
+  const projections = { before: before ? combatantIndex(before) : null, after: combatants };
   const commands = [];
   let nextSequence = fromSequence;
 
@@ -1383,7 +1506,7 @@ export function presentResolvedEvents(wire, {
     }
 
     const chosen = bindings.action(event);
-    const movement = movementFor(layout, event);
+    const movement = movementFor(layout, event, projections);
     // A rank change. Detected and emitted independently of the binding, for
     // the reason `movementFor` gives: where the figure ends up is the
     // resolver's own reported fact, and a scene that drew a figure where the
@@ -1492,6 +1615,11 @@ export function presentResolvedEvents(wire, {
     refresh(actorPlacement);
     for (const placement of layout.placements) refresh(placement);
   }
+
+  // Every position the batch's own moves did not account for — a knockback,
+  // above all. After the clips, so the pairing reads the batch whole; see
+  // `positionChangesFor`. A batch that moved nobody unannounced adds nothing.
+  commands.push(...positionChangesFor(layout, before ?? null, wire, commands, nextSequence));
 
   // LAST, after every clip the batch plays, because that is WHEN it happens:
   // the build turns its gladiators in `changeCombatants` at the phase advance,

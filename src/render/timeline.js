@@ -188,8 +188,16 @@ function schedule(family, beats, keyframes, { loop = false, travel = false, dept
      *
      * A separate flag rather than a wider `travel`, for the reason the command
      * kinds are separate: a schedule that travels in x must never be handed a
-     * depth motion, and a lane change must never slide the figure sideways.
+     * depth motion~~, and a lane change must never slide the figure sideways~~.
      * No schedule sets both, and nothing yet needs one that does.
+     *
+     * ► **CORRECTED 2026-09-23: a lane change DOES slide sideways when its own
+     *   batch moved the figure in x** — joining an occupied lane shifts x as
+     *   well (`engine-vs-screen` F5), and that x step now rides the sidestep so
+     *   the two axes move together instead of x jumping on the first frame.
+     *   What still holds is the reason the flags are separate: a sidestep with
+     *   no x step in its batch has no `motion` and never moves sideways. See
+     *   `figureXAt` and `timelinesForStep`.
      */
     depthTravel,
     keyframes: Object.freeze(keyframes.map((frame) => Object.freeze({ at: frame.at, pose: pose(frame.pose) }))),
@@ -902,7 +910,10 @@ export const ADVANCE_UNITS = 74;
  * @param {object} options.pose from `poseAt`
  * @param {object} [options.timeline] the running schedule, or null when idle
  * @param {object} [options.motion] the scene actor's `motion`, or null
- * @param {number} [options.at] 0..1 through the schedule
+ * @param {number} [options.at] 0..1 through the schedule; NEGATIVE for a clip
+ *   that has not begun (a reaction queued behind a delay, or a frame whose
+ *   clock predates the stamp), which puts every motion at its `from` — where
+ *   the batch found the figure. Added 2026-09-23; see the shell's `placedAt`.
  */
 /**
  * WHERE A FIGURE IS DRAWN ON THE SECOND AXIS, part-way through a lane change.
@@ -936,6 +947,19 @@ export function figureXAt({ restingX, facing, pose, timeline = null, motion = nu
   if (!pose || !Number.isFinite(pose.advance)) {
     throw new TimelineError("figureXAt needs a pose from poseAt().");
   }
+  const lunge = pose.advance * ADVANCE_UNITS * (facing === "left" ? -1 : 1);
+  // ► **A BLINK IS HELD AWAY FOR THE CLIP AND RESTED AT `to` AFTER** (added
+  //   2026-09-23 with the ghost strike's). The build puts the caster at
+  //   `defender._x ± physical_size` BEFORE its swing (`+0x7e64`-`+0x7eac`) and
+  //   restores `attacker_old_x` on the completion tick (`+0x7f9f`), or leaves it
+  //   beside the body after a kill — so `blink` for the whole clip, `to` once it
+  //   ends, and `from` before it has begun (`at < 0`: a clip queued behind a
+  //   delay has not started, so nothing has blinked yet). The lunge is kept, as
+  //   the teleport keeps it: the figure swings an ordinary clip where it stands.
+  if (motion && Number.isFinite(motion.blink) && Number.isFinite(motion.from) && Number.isFinite(motion.to)) {
+    const held = at < 0 ? motion.from : at >= 1 ? motion.to : motion.blink;
+    return held + lunge;
+  }
   // ► **A TELEPORT IS A STEP FUNCTION, NOT A CURVE** (added 2026-09-22 with
   //   `cast_teleport`). The build writes `attacker._x = randomBetween(-2000,
   //   2000)` only once the caster's `Cast2` has reported (`+0x7646`-`+0x767b`),
@@ -946,13 +970,19 @@ export function figureXAt({ restingX, facing, pose, timeline = null, motion = nu
   //   place, and only its resting point differs from the scene's.
   if (motion && motion.teleported === true && Number.isFinite(motion.from) && Number.isFinite(motion.to)) {
     const held = at >= 1 ? motion.to : motion.from;
-    return held + pose.advance * ADVANCE_UNITS * (facing === "left" ? -1 : 1);
+    return held + lunge;
   }
   // A travelling gait, or a PUSH riding whatever the victim plays. The build's
   // `knockback()` tweens over its own second, independent of the clip; riding
   // the victim's timeline instead is this engine's one approximation of it.
-  if (motion && (timeline?.travel || motion.pushed === true)) return travelAt(motion, at);
-  return restingX + pose.advance * ADVANCE_UNITS * (facing === "left" ? -1 : 1);
+  //
+  // ► **AND A LANE CHANGE'S x STEP rides its sidestep** (added 2026-09-23):
+  //   joining an occupied lane moves the figure sideways as well as in depth,
+  //   and the two now slide together — see `timelinesForStep`. `depthTravel`
+  //   still never slides a figure sideways on its own: with no x step in the
+  //   batch there is no `motion`, and the figure stays at `restingX`.
+  if (motion && (timeline?.travel || timeline?.depthTravel || motion.pushed === true)) return travelAt(motion, at);
+  return restingX + lunge;
 }
 
 /**

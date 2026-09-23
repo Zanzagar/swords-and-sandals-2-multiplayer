@@ -654,7 +654,7 @@ test("the timeout policy names itself, and waits before it gives up", () => {
  */
 test("a depth move starts its own schedule and carries its own motion", () => {
   const commands = [
-    { kind: "move-clip-depth", sequence: 1, combatantId: "red-1", instancePath: "p", fromY: 200, toY: 103 }
+    { kind: "move-clip-depth", sequence: 1, combatantId: "red-1", instancePath: "p", fromY: 200, toY: 103, actionToken: 5 }
   ];
   const { started, notices } = timelinesForStep(commands);
 
@@ -665,7 +665,12 @@ test("a depth move starts its own schedule and carries its own motion", () => {
   assert.equal(entry.timeline.travel, false, "and must never travel on the first, or it slides sideways");
   assert.deepEqual(entry.depthMotion, { from: 200, to: 103 });
   assert.equal(entry.motion, null, "there is no x motion, and that is not a defect");
-  assert.equal(entry.token, null, "a lane change is not gated on an animation to report back");
+  // ► **THIS PINNED `token: null` UNTIL 2026-09-23**, under the message "a lane
+  //   change is not gated on an animation to report back" — and ungated, the
+  //   next blow went in one frame into the 1,200 ms slide and snapped the
+  //   figure a lane (`engine-vs-screen` F2). The slide carries its action's
+  //   token now; see test/render-drawn-matches-engine.test.js.
+  assert.equal(entry.token, 5, "the slide holds the gate under its own action's token");
 
   // The false complaint the one-line fix produced.
   assert.deepEqual(notices, [], "a lane change must not be reported as a gait missing its move-clip");

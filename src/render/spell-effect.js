@@ -145,6 +145,9 @@ export function spellEffectDrawAt(
  *   also carries the victim's death clip, and `timelinesForStep` keeps the last
  *   clip per combatant — `slain`, 1,200 ms against `lightning`'s 480 — so a
  *   bolt bound to `lightning` vanished 720 ms before its victim finished dying.
+ *   *(Corrected 2026-09-23: `timelinesForStep` no longer keeps only the last
+ *   clip — it queues the death BEHIND the reaction as `then`, so both play,
+ *   and this sums the chain.)*
  *
  *   So this asks `timelinesForStep`'s own `started` map what the victim is
  *   actually playing. The bolt and the figure it strikes end together by
@@ -161,7 +164,16 @@ export function spellEffectDrawAt(
  */
 export function effectLifetimeMs(record, started) {
   const entry = started instanceof Map ? started.get(record?.targetId) : null;
-  const played = entry?.timeline?.durationMs;
-  if (Number.isFinite(played) && played > 0) return played;
+  // ► **THE WHOLE CHAIN, since 2026-09-23**: a lethal cast queues the victim's
+  //   death BEHIND its reaction (`then`, see `timelinesForStep`) instead of
+  //   replacing it, so "the victim's clips" are the reaction and the death in
+  //   turn, and the bolt stays up across both — as it stayed up across the
+  //   death alone before.
+  let played = 0;
+  for (let link = entry; link; link = link.then) {
+    const duration = link.timeline?.durationMs;
+    if (Number.isFinite(duration) && duration > 0) played += duration;
+  }
+  if (played > 0) return played;
   return timelineFor(record?.endsWithClip ?? null, { role: "target" }).durationMs;
 }

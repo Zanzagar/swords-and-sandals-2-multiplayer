@@ -80,7 +80,8 @@ export function timelinesForStep(commands) {
         from: command.from,
         to: command.to,
         ...(command.pushed === true ? { pushed: true } : {}),
-        ...(command.teleported === true ? { teleported: true } : {})
+        ...(command.teleported === true ? { teleported: true } : {}),
+        ...(Number.isFinite(command.blink) ? { blink: command.blink } : {})
       });
     }
     // ► **THE SECOND AXIS NEEDS ITS OWN SLOT, and the first version of the
@@ -89,7 +90,10 @@ export function timelinesForStep(commands) {
     //   `motion` is null, so the figure still teleports AND the travel notice
     //   below fires a false complaint about a missing `move-clip`.
     if (command.kind === "move-clip-depth") {
-      depthStepped.set(command.combatantId, { from: command.fromY, to: command.toY });
+      depthStepped.set(command.combatantId, {
+        depthMotion: { from: command.fromY, to: command.toY },
+        actionToken: command.actionToken ?? null
+      });
     }
   }
 
@@ -104,14 +108,26 @@ export function timelinesForStep(commands) {
   //   CLIP and the wrong one for MOTION — the figure still has to get there.
   //
   //   So the authored `movement:sidestep` schedule is started here, from the
-  //   command itself, and it carries no `token`: a lane change is not gated on
-  //   an animation the surface has to report back, because there is no
-  //   animation to report.
-  for (const [combatantId, depthMotion] of depthStepped) {
+  //   command itself.
+  //
+  // ► **IT CARRIES ITS ACTION'S TOKEN, and until 2026-09-23 it carried none.**
+  //   The reasoning was "there is no animation to report" — but a token is how
+  //   the GATE knows the action is still on screen, not a promise that a clip
+  //   will report. Tokenless, the slide finished nothing and held nothing, so
+  //   the gate reopened one frame into a 1,200 ms slide: the next blow went in
+  //   17 ms later, replaced the sidestep, and the figure snapped a whole lane
+  //   in one frame (`engine-vs-screen` F2, confirmed by its refuter: 9 slides
+  //   cut in 16 default bouts). The command's own `actionToken` is the one
+  //   every other timeline of the action carries.
+  //
+  // ► **AND IT CARRIES THE BATCH'S x STEP**, so joining an occupied lane slides
+  //   sideways on the same 1,200 ms as the depth change instead of jumping to
+  //   the destination x on the first frame (`engine-vs-screen` F5).
+  for (const [combatantId, { depthMotion, actionToken }] of depthStepped) {
     started.set(combatantId, {
       timeline: timelineFor("sidestep", { role: "actor" }),
-      token: null,
-      motion: null,
+      token: actionToken,
+      motion: stepped.get(combatantId) ?? null,
       depthMotion
     });
   }
@@ -119,6 +135,41 @@ export function timelinesForStep(commands) {
   for (const command of batch) {
     if (command.kind !== "clip-goto") continue;
     const timeline = timelineFor(command.label, { role: command.role });
+    // ► **A DEATH QUEUES BEHIND WHAT ITS BATCH STARTED** (added 2026-09-23).
+    //   Until then the last clip-goto won, so a lethal blow or spell dropped its
+    //   victim's reaction — hurt, burning, lightning, taunted, knockback — and
+    //   only the death played (`engine-vs-screen` F4, measured on every lethal
+    //   action of every kit). The death is the reaction's `then`, under the
+    //   same action token, so the gate stays shut across both and
+    //   `animationCursor` hands the painter the death when the reaction ends.
+    //
+    //   **AUTHORED, and named:** for a single-hit kill the build dispatches the
+    //   reaction and the death within one frame (`defender_hurt` calls
+    //   `damagecharacter` at `+0x211e`, then `gotoAndPlay(animstate)` at
+    //   `+0x2120`), so this shows a reaction the build does not hold on screen.
+    //   It is here so a kill reads as a blow landing and then a fall. No number
+    //   and no hash moves.
+    //
+    //   Behind a lane change's sidestep too: a figure that steps back a rank
+    //   and is defeated in the same action (the crowd ending a bout) slid and
+    //   then died, where the death used to replace the slide and jump it a
+    //   lane in one frame. Everything in `started` was started by THIS batch.
+    //
+    //   Only a death queues; any other second clip for the same figure still
+    //   replaces the first, exactly as before.
+    if (command.role === "defeated" && started.has(command.combatantId)) {
+      let tail = started.get(command.combatantId);
+      while (tail.then) tail = tail.then;
+      tail.then = { timeline, token: command.actionToken ?? null, motion: null, depthMotion: null };
+      if (!timeline.recognised) {
+        notices.push({
+          combatantId: command.combatantId,
+          label: command.label,
+          reason: `no timeline for "${command.label}" (${command.labelProvenance}) — playing a fallback`
+        });
+      }
+      continue;
+    }
     // ► **A PUSH IS PAIRED WITH WHATEVER THE VICTIM PLAYS**, where a walk is
     //   paired only with a travelling gait. The rule below exists so a figure
     //   that moved AND flinched in one batch is not dragged across the arena on
@@ -132,14 +183,19 @@ export function timelinesForStep(commands) {
     //   figure can be HELD at `from` while `Cast2` plays: left unpaired, the
     //   painter draws the scene's resting x — already the destination — and
     //   the caster blinks away before it has cast. See `figureXAt`.
-    const motion = timeline.travel || step?.pushed === true || step?.teleported === true ? step : null;
+    // ► **AND A BLINK IS PAIRED WITH THE CASTER'S SWING** (added 2026-09-23
+    //   with the ghost strike's): the figure stands beside its victim for the
+    //   whole of `attack9`-`attack12`, which does not travel either.
+    const motion = timeline.travel || step?.pushed === true || step?.teleported === true || Number.isFinite(step?.blink)
+      ? step
+      : null;
     started.set(command.combatantId, {
       timeline,
       token: command.actionToken ?? null,
       motion,
       // A clip-goto never carries depth motion, but the entry shape is one
       // shape: a consumer must not have to ask which kind of entry it has.
-      depthMotion: depthStepped.get(command.combatantId) ?? null
+      depthMotion: depthStepped.get(command.combatantId)?.depthMotion ?? null
     });
     if (!timeline.recognised) {
       notices.push({
@@ -167,10 +223,15 @@ export function timelinesForStep(commands) {
  * @param {object} [options]
  * @param {Iterable<{token: number|null, startedAt: number, durationMs: number}>}
  *   [options.projectiles] arrows still in the air
- * @returns {{finished: number[], expired: string[], abandon: {token: number, reason: string}|null}}
+ * @returns {{finished: number[], expired: string[],
+ *   advanced: Array<{combatantId: string, entry: object}>, abandon: {token: number, reason: string}|null}}
  *   `expired` names the combatants whose timelines have run out, so the caller
- *   can stop posing them; `abandon` is at most one token, because giving up is
- *   a decision and doing several at once hides which one ran out.
+ *   can stop posing them; `advanced` hands over the queued link (`then`) a
+ *   combatant is now playing, with its own `startedAt`, to replace its entry
+ *   — a caller that ignores it keeps the finished link on its last pose until
+ *   the chain ends, and is never stalled; `abandon` is at most one token,
+ *   because giving up is a decision and doing several at once hides which one
+ *   ran out.
  */
 export function animationCursor(pendingTokens, playing, now, { projectiles = [] } = {}) {
   if (!Array.isArray(pendingTokens)) {
@@ -185,11 +246,26 @@ export function animationCursor(pendingTokens, playing, now, { projectiles = [] 
 
   const running = new Set();
   const expired = [];
+  const advanced = [];
   let abandon = null;
   let worstOverrun = -Infinity;
 
-  for (const [combatantId, entry] of playing.entries()) {
-    const elapsed = now - entry.startedAt;
+  for (const [combatantId, queued] of playing.entries()) {
+    // ► **A QUEUED `then` PLAYS WHEN ITS PREDECESSOR ENDS** (added 2026-09-23
+    //   with the death queued behind a lethal blow's reaction; see
+    //   `timelinesForStep`). Walked here rather than when the frame noticed, so
+    //   a late frame lands in the right link and each link starts exactly where
+    //   the last one ended. The caller is handed the link now playing in
+    //   `advanced`, to pose and to sound, and the chain is only EXPIRED — and
+    //   its token only finished — when its last link has played.
+    let entry = queued;
+    let startedAt = queued.startedAt;
+    while (entry.then && now - startedAt >= entry.timeline.durationMs) {
+      startedAt += entry.timeline.durationMs;
+      entry = entry.then;
+    }
+    if (entry !== queued) advanced.push(Object.freeze({ combatantId, entry: { ...entry, startedAt } }));
+    const elapsed = now - startedAt;
     if (elapsed < entry.timeline.durationMs) {
       if (entry.token !== null && entry.token !== undefined) running.add(entry.token);
       continue;
@@ -236,6 +312,7 @@ export function animationCursor(pendingTokens, playing, now, { projectiles = [] 
   return Object.freeze({
     finished: Object.freeze(finished),
     expired: Object.freeze(expired),
+    advanced: Object.freeze(advanced),
     abandon: abandon ? Object.freeze(abandon) : null
   });
 }

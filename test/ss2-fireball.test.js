@@ -615,7 +615,11 @@ test("a KILLING fireball delays the victim's death too, because the death is at 
   const { commands, battle } = presented(DIRE, 32, { foe: {}, foeX: 440 });
   assert.equal(combatantById(battle, "foe").alive, false);
   const { started } = timelinesForStep(commands);
-  assert.equal(started.get("foe").timeline.family.startsWith("death:"), true, "the LAST clip is the death");
+  // Since 2026-09-23 the victim's death is QUEUED behind its reaction rather
+  // than replacing it (test/render-drawn-matches-engine.test.js): the delay is
+  // on the head of that chain, so it burns at impact and dies after.
+  assert.equal(started.get("foe").timeline.label, "burning", "the reaction plays first");
+  assert.equal(started.get("foe").then.timeline.family.startsWith("death:"), true, "and the death is queued behind it");
   assert.equal(reactionDelaysFor(commands).get("foe"), 6 * PROJECTILE_FRAME_MS);
 });
 

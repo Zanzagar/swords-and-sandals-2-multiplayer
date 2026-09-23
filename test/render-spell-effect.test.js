@@ -168,7 +168,7 @@ test("the arithmetic refuses to guess its painter's scale", () => {
   assert.throws(() => spellEffectDrawAt(record(), 0, { frontY: 200 }), /figureScaleFor/);
 });
 
-test("the bolt lives as long as its victim's LAST clip in the batch — which on a kill is the death", () => {
+test("the bolt lives as long as its victim's clips in the batch — which on a kill are the reaction AND the death", () => {
   // ► **FOUND BY A CODEX ADVERSARIAL REVIEW, 2026-09-22, and reproduced first.**
   //   The first cut read the lifetime off `endsWithClip` — `lightning`, 480 ms —
   //   while a lethal cast emits `lightning` AND then the victim's death clip,
@@ -185,8 +185,14 @@ test("the bolt lives as long as its victim's LAST clip in the batch — which on
   assert.equal(combatantById(lethal.battle, "foe").alive, false, "a 170-HP victim cannot survive 200-400");
   const { started } = timelinesForStep(lethal.commands);
   const [record] = applyCommands(emptyScene(), lethal.commands).effects;
-  assert.equal(started.get("foe").timeline.label, "slain", "the victim's last clip is its death");
-  assert.equal(effectLifetimeMs(record, started), started.get("foe").timeline.durationMs);
+  // ► **SINCE 2026-09-23 THE VICTIM PLAYS BOTH** — `lightning`, then its death
+  //   queued behind it as `then` (test/render-drawn-matches-engine.test.js).
+  //   This used to pin that the death REPLACED the reaction. The bolt still
+  //   ends with the figure it strikes: after the reaction AND the death.
+  const entry = started.get("foe");
+  assert.equal(entry.timeline.label, "lightning", "the victim's reaction plays first");
+  assert.equal(entry.then.timeline.label, "slain", "and its death after it");
+  assert.equal(effectLifetimeMs(record, started), entry.timeline.durationMs + entry.then.timeline.durationMs);
   assert.ok(effectLifetimeMs(record, started) > timelineFor("lightning", { role: "target" }).durationMs,
     "longer than the hurt clip alone, which is the whole defect");
 

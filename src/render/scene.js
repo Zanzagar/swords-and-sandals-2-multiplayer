@@ -336,7 +336,10 @@ export function applyCommands(scene, commands) {
             ...(command.pushed === true ? { pushed: true } : {}),
             // A teleport is held at `from` and put at `to` when its clip ends;
             // carried for the same reason.
-            ...(command.teleported === true ? { teleported: true } : {})
+            ...(command.teleported === true ? { teleported: true } : {}),
+            // A blink stands the figure at `blink` for its clip and rests it at
+            // `to` after — the ghost strike's (2026-09-23). Same reason.
+            ...(Number.isFinite(command.blink) ? { blink: command.blink } : {})
           })
         });
         break;

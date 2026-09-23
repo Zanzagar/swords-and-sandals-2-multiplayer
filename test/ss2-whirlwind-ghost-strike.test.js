@@ -767,12 +767,24 @@ test("a presented ghost strike is presented exactly as the power attack with the
     assert.deepEqual(b.clips, a.clips, "Attack9..Attack12 on the caster, the ordinary hurt / defend clip on the victim");
     assert.equal(b.clips[0].label, `attack${event.attackDirection}`);
     assert.deepEqual(b.commands.filter((command) => command.kind === CommandKind.UNMAPPED), []);
+    // Presented WITHOUT the batch's `before` projection, so there is no landing
+    // to blink to and nothing is moved. The host always hands `before` in, and
+    // then the caster blinks beside its victim for the swing — pinned in
+    // test/render-drawn-matches-engine.test.js (2026-09-23; this message used
+    // to say a strike that does not kill shows no move at all).
     assert.deepEqual(b.commands.filter((command) => command.kind === CommandKind.MOVE_CLIP), [],
-      "a strike that does not kill ends where it began, so nothing is moved");
+      "with no `before` projection a strike that does not kill moves nobody");
   }
 });
 
-test("a presented LETHAL ghost strike moves the caster to the body as a teleport, not a slide", () => {
+test("a presented LETHAL ghost strike moves the caster to the body as a BLINK before the swing, not a slide", () => {
+  // ► **THIS PINNED `teleported: true` UNTIL 2026-09-23, AND THAT WAS THE
+  //   WRONG TIMING.** A teleport is held at `from` for the whole clip, so the
+  //   killer swung its power blow from across the arena and only then appeared
+  //   beside the body. The build blinks it beside the victim BEFORE the swing
+  //   (`+0x7e64`-`+0x7eac`, then `checkattackroll()` at `+0x7f77`) — found by the
+  //   refuter of `spell-animations` F4. `blink` holds it at the landing for the
+  //   whole clip; see test/render-drawn-matches-engine.test.js.
   const battle = staged({ gap: 1200, hero: { inventory1: 36, attack: 100, strength: 60 }, foe: { vitality: 1 } });
   combatantById(battle, "foe").health = 1;
   act(battle, GHOST);
@@ -781,8 +793,10 @@ test("a presented LETHAL ghost strike moves the caster to the body as a teleport
   assert.equal(moves.length, 1);
   assert.equal(moves[0].combatantId, "hero");
   assert.equal(moves[0].from, 0);
-  assert.equal(moves[0].to, 1200 - ss2PhysicalSize(combatantById(battle, "hero")));
-  assert.equal(moves[0].teleported, true);
+  const landing = 1200 - ss2PhysicalSize(combatantById(battle, "hero"));
+  assert.equal(moves[0].to, landing);
+  assert.equal(moves[0].blink, landing, "beside the body for the whole swing");
+  assert.equal(moves[0].teleported, undefined, "not held across the arena until the clip ends");
   assert.deepEqual(commands.filter((command) => command.kind === CommandKind.UNMAPPED), []);
 });
 

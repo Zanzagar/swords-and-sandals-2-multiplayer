@@ -681,6 +681,33 @@ function playFor(family, sequence, label = null) {
   }
 }
 
+/**
+ * What the draw loop needs beside a timeline entry it is about to pose: the
+ * blood its clip throws. Called when an entry STARTS — at `beginStep`, and when
+ * a queued `then` takes over in `drainFinishedAnimations`.
+ */
+function prepareEntry(entry) {
+  // ► **WHICH POSE THROWS BLOOD, from the clip's own call sites.** The table
+  //   is keyed by the fighter clip's frame numbers and
+  //   `effectsForAnimation` converts them to pose indices once, so the shell
+  //   compares a pose it already has rather than re-deriving a frame.
+  //
+  //   A pack that has not been extracted yields an empty list, which is the
+  //   same fallback everything else here has: no blood, still a bout.
+  const animation = figurePack?.animations?.[entry.timeline.label?.toLowerCase?.()];
+  entry.effects = clipEffects && animation ? effectsForAnimation(clipEffects, animation) : [];
+  // The POSE COUNT comes from the extracted animation, not from the timeline:
+  // a timeline's `durationMs` is this engine's own schedule and its pose
+  // count is the build's. Kept beside the effects so the draw loop compares
+  // two numbers from the same source.
+  // `poses` is the ARRAY of poses, not a count — `animation.poses.length` is
+  // the number. Reading it as a count gave `at * [object Array]` = NaN, so
+  // every comparison was false and nothing ever fired.
+  entry.effectPoses = Array.isArray(animation?.poses) ? animation.poses.length : 0;
+  entry.firedEffects = new Set();
+  return entry;
+}
+
 function beginStep(step) {
   scene = applyCommands(scene, step.commands);
 
@@ -741,8 +768,9 @@ function beginStep(step) {
     attached.push({
       record,
       startedAt: performance.now(),
-      // The victim's LAST clip in this batch — on a kill, its death — from the
-      // same `started` map that is about to pose it. See `effectLifetimeMs`.
+      // The victim's clips in this batch — on a kill, its reaction and then
+      // its death, queued behind it — from the same `started` map that is
+      // about to pose it. See `effectLifetimeMs`.
       lifetimeMs: effectLifetimeMs(record, started)
     });
   }
@@ -759,24 +787,7 @@ function beginStep(step) {
   const delays = reactionDelaysFor(step.commands);
   for (const [combatantId, entry] of started) {
     entry.startedAt = performance.now() + (delays.get(combatantId) ?? 0);
-    // ► **WHICH POSE THROWS BLOOD, from the clip's own call sites.** The table
-    //   is keyed by the fighter clip's frame numbers and
-    //   `effectsForAnimation` converts them to pose indices once, so the shell
-    //   compares a pose it already has rather than re-deriving a frame.
-    //
-    //   A pack that has not been extracted yields an empty list, which is the
-    //   same fallback everything else here has: no blood, still a bout.
-    const animation = figurePack?.animations?.[entry.timeline.label?.toLowerCase?.()];
-    entry.effects = clipEffects && animation ? effectsForAnimation(clipEffects, animation) : [];
-    // The POSE COUNT comes from the extracted animation, not from the timeline:
-    // a timeline's `durationMs` is this engine's own schedule and its pose
-    // count is the build's. Kept beside the effects so the draw loop compares
-    // two numbers from the same source.
-    // `poses` is the ARRAY of poses, not a count — `animation.poses.length` is
-    // the number. Reading it as a count gave `at * [object Array]` = NaN, so
-    // every comparison was false and nothing ever fired.
-    entry.effectPoses = Array.isArray(animation?.poses) ? animation.poses.length : 0;
-    entry.firedEffects = new Set();
+    prepareEntry(entry);
   }
   for (const [combatantId, entry] of started) playing.set(combatantId, entry);
 
@@ -839,6 +850,15 @@ function drainFinishedAnimations(now) {
       ...fireballs.map((entry) => ({ token: entry.token, startedAt: entry.startedAt, durationMs: entry.flightMs }))
     ]
   });
+  // ► **A QUEUED CLIP TAKES OVER WHEN ITS PREDECESSOR ENDS** — a victim's
+  //   death, queued behind the reaction its killing blow started (2026-09-23;
+  //   `timelinesForStep`). The cursor stamps where it starts; this shell poses
+  //   it and sounds it, as `beginStep` does for a clip a batch starts. Before
+  //   `expired`, so a late frame that ran past the whole chain still ends it.
+  for (const { combatantId, entry } of cursor.advanced) {
+    playing.set(combatantId, prepareEntry(entry));
+    playFor(entry.timeline.family, entry.token ?? 0, entry.timeline.label);
+  }
   for (const combatantId of cursor.expired) playing.delete(combatantId);
 
   // The surface gave up. That is a different fact from the animation having
@@ -3459,15 +3479,15 @@ function renderStage(view, fit, now) {
     if (!actor?.placed || !Number.isFinite(actor.y)) continue;
     // The same clock the draw loop below reads, for the same reason it
     // computes `at` once: two readings of one clock drift apart. An entry that
-    // has not BEGUN — a fireball's victim before impact — is not posed yet.
+    // has not BEGUN is read at its NEGATIVE `at` — where the batch found the
+    // figure — for the reason given at `placedAt` below.
     const queued = playing.get(combatantId);
-    const entry = queued && queued.startedAt <= now ? queued : undefined;
-    const at = entry ? Math.min(1, (now - entry.startedAt) / entry.timeline.durationMs) : 0;
+    const placedAt = queued ? Math.min(1, (now - queued.startedAt) / queued.timeline.durationMs) : 0;
     drawnYById.set(combatantId, figureYAt({
       restingY: actor.y,
-      timeline: entry?.timeline ?? null,
-      depthMotion: entry?.depthMotion ?? null,
-      at
+      timeline: queued?.timeline ?? null,
+      depthMotion: queued?.depthMotion ?? null,
+      at: placedAt
     }));
   }
   const paintOrder = [...scene.drawOrder].sort((left, right) => {
@@ -3512,6 +3532,18 @@ function renderStage(view, fit, now) {
     // the pose and the travelled x are two readings of the same clock, and
     // computing it twice is how they drift apart.
     const at = entry ? Math.min(1, (now - entry.startedAt) / entry.timeline.durationMs) : 0;
+    // ► **WHERE THE FIGURE STANDS reads the queued entry EVEN BEFORE IT BEGINS**
+    //   (2026-09-23), at its negative `at`: not begun means where the batch
+    //   found the figure — a move's `from`, a lane change's `fromY`. Reading no
+    //   entry at all drew the scene's resting x and y, which the fold has
+    //   already set to the DESTINATION, and that is not only a fireball's victim:
+    //   `beginStep` stamps `performance.now()`, later than this frame's rAF
+    //   `now` when a spectated step begins inside `frame(now)`, so a walk, a
+    //   push or a lane change painted one frame at its destination and then
+    //   jumped back to slide there (found by the `engine-vs-screen` F2 refuter;
+    //   re-measured with a 4 ms skew over 8 default bouts: 451 one-frame x
+    //   jumps and 46 y jumps before, 0 and 0 after). The POSE still waits.
+    const placedAt = queued ? Math.min(1, (now - queued.startedAt) / queued.timeline.durationMs) : 0;
     // The timeline AND how far through it, kept together: the extracted rig
     // needs both to pick a clip and a pose, and re-deriving either at the draw
     // site is how the drawn figure and the drawn position drift apart.
@@ -3561,9 +3593,9 @@ function renderStage(view, fit, now) {
     const drawnY = Number.isFinite(actor.y)
       ? figureYAt({
         restingY: actor.y,
-        timeline: entry?.timeline ?? null,
-        depthMotion: entry?.depthMotion ?? null,
-        at
+        timeline: queued?.timeline ?? null,
+        depthMotion: queued?.depthMotion ?? null,
+        at: placedAt
       })
       : actor.y;
     // ► **THE FACING BEING DRAWN, not the one being held.** `actor.facing` is
@@ -3579,9 +3611,9 @@ function renderStage(view, fit, now) {
         restingX: actor.x,
         facing,
         pose,
-        timeline: entry?.timeline ?? null,
-        motion: entry?.motion ?? null,
-        at
+        timeline: queued?.timeline ?? null,
+        motion: queued?.motion ?? null,
+        at: placedAt
       }),
       // ► **THE INTERPOLATED DEPTH, not the destination.** `actor.y` is already
       //   where the lane change ENDS — the scene's fold is not a tween — so
