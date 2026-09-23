@@ -80,6 +80,42 @@ move them.)* *(It supersedes
 **whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
 and probe warning are both WITHDRAWN** — see the two entries below.)*
 
+► **THE OWNER DECIDED EVERY OPEN "REPRODUCE THE BUILD'S QUIRK?" QUESTION
+  (2026-09-22, session `c62c201f`, asked in chat with costed options; each
+  answer below is binding and is ALSO recorded at its code site).** The
+  2026-09-22-1934 handoff's ranked item 1 (five decisions, a-f) is CLOSED, and
+  three more that the session's derivations raised were decided the same night.
+  The rule that falls out of all nine: **reproduce the build where every
+  combatant is treated alike; where the build treats hero and villain
+  differently, the hero's rule is the player's rule and applies to everyone;
+  where the build's behaviour is an artefact of frame timing, don't reproduce
+  it.**
+  - **(a) The hero's per-round re-skin: NOT reproduced.** Removed armour stays
+    removed and stat buffs last their timer, for everyone.
+  - **(b) The villain's ladder overriding its status phases: NOT reproduced**
+    (status phases forced for everyone). The same holds for the zero-stamina
+    forced rest, which the build applies to the hero only.
+  - **(c) Timed buffs in team play: the BEARER'S-TURN rule, 1v1-exact** — a
+    bearer ticks on its own completed phase and on the first phase anyone else
+    completes after it; ten applications at any team size. Built `611094d`
+    (invented resource `timed_spell_tick_owed`).
+  - **(d) Rejuvenate restores the shoulderguard from its own backup** (the
+    build reads a free variable and gets `undefined`). Built `8ff985d`.
+  - **(e) The weaken-armour AI spends its item on an unarmoured foe, as the
+    build does: KEPT.**
+  - **(f) `crowd_interest` IS MODELLED, one crowd per battle across all sides**,
+    starting at the sum of every combatant's level (exactly the build in 1v1),
+    fed by every completed phase, clamped 1..100, scaling the purse of every
+    member of the winning side; wincrowd uses the ACTOR's own charisma (the
+    build always reads the hero's). In progress at this writing.
+  - **The arena-wall phase cuts: NOT reproduced** — knockback spillover past
+    ±2100, the nudge-into-wall stunlock, the command pull-through. Recorded at
+    `SS2_ARENA.clamp` (`77e3f7b`).
+  - **The villain's stale decision distance: NOT reproduced.** The build's
+    villain decides from positions before the hero's last move completed (and
+    its melee then lands at any range); this engine's AI reads current
+    positions.
+
 ► **THE FIRST SPELL VERBS ARE BUILT, AND A `null` IN THE CANDIDATE TABLE WAS A
   SCHEDULED FALSE DIVERGENCE (2026-09-20).** `cast_lightning_bolt` and
   `cast_frightning_bolt` resolve: offered on possession of inventory id 34 or
