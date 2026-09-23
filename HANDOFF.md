@@ -2311,10 +2311,16 @@ landed tonight.
   `MAP_SILENCE.multi-slot-arena-geometry`.
 ► **THE LAST OPEN DECISION IS CLOSED: `BATTLE_STATE_VERSION` IS DERIVED**, owner
   2026-09-13 — derive rather than bump, because bumping fixes the instance and
-  deriving removes the failure mode. `fnv1a` over the sorted
-  `COMBATANT_PROJECTION_FIELDS`, **1 -> 573176825**, an IDENTITY not an
+  deriving removes the failure mode. ~~`fnv1a` over the sorted
+  `COMBATANT_PROJECTION_FIELDS`~~, **1 -> 573176825**, an IDENTITY not an
   ordering, with a test asserting the declared list is what the projection
-  actually returns. **Eleven pinned hashes moved, all accounted for by name; NO
+  actually returns. **CORRECTED 2026-09-23: it hashes the TOP-LEVEL keys too
+  now** (owner's decision), `TEAM_WIRE_STATE_KEYS` beside the combatant
+  fields, **573176825 -> 2858363730** — the combatant-only version could not
+  see `battleResources` (`cefaf83`) or the two tape fields. Every
+  `combatStateHash` pin and all 23 golden replay hashes moved once; no golden
+  value or file did. The why is at `BATTLE_STATE_VERSION` in
+  `src/team/resolver.js`. **Eleven pinned hashes moved, all accounted for by name; NO
   GOLDEN MOVED.** Two stings: `src/engine.js` projected `battle.version` so the
   number leaked into the frozen compatibility façade (it carries
   `LEGACY_WIRE_VERSION = 1` now), and **90 tests failed on ONE schema line**

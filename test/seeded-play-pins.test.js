@@ -343,11 +343,16 @@ function driveFirst(battle, limit) {
  *
  *   `BATTLE_STATE_VERSION` stopped being a hand-written `1` and became a hash
  *   of `COMBATANT_PROJECTION_FIELDS`. The projection's FIELDS did not change —
- *   only the version travelling inside it did, from 1 to 573176825. **That is
+ *   only the version travelling inside it did, from 1 to 573176825. ~~**That is
  *   the last time these pins will move for a version reason**, because the
  *   number is now a function of the shape rather than of somebody remembering
- *   to bump it. It is an IDENTITY, not an ordering: nothing may read the larger
- *   number as newer.
+ *   to bump it.~~ **WRONG: THEY MOVED FOR A VERSION REASON AGAIN ON
+ *   2026-09-23** (the block above the pins). The sentence held only for the
+ *   shape the version could see, which was the combatant fields; a top-level
+ *   key could change the format without moving it, and did twice. And any
+ *   change to what the version is DERIVED FROM moves every pin once, by
+ *   construction. It is an IDENTITY, not an ordering: nothing may read the
+ *   larger number as newer.
  *
  *   Owner's decision, 2026-09-13, after four sessions of deferring it: derive
  *   the version rather than bump it. Bumping fixes the instance; deriving
@@ -524,10 +529,36 @@ function driveFirst(battle, limit) {
  *   `cast_adulation` move no hash on their own. **`BATTLE_STATE_VERSION` did
  *   not change**, because it hashes `COMBATANT_PROJECTION_FIELDS` and this key
  *   is top-level — see the note at the projection in `src/team/resolver.js`.
+ *   *(True that day. The gap it describes is closed the next day — the block
+ *   below.)*
  *
  *   **Every golden replay hash moved too (23 of 23)**, accepted by the owner
  *   in advance; no golden VALUE did, and no golden file was touched. See the
  *   census in `tools/golden-hash-census.mjs`.
+ */
+/**
+ * ► **ALL FOUR MOVED ON 2026-09-23, FOR ONE REASON: `BATTLE_STATE_VERSION`
+ *   NOW SEES THE TOP-LEVEL KEYS.** Owner's decision, closing the gap the
+ *   block above names.
+ *
+ *     5536913e -> db7d2519   (six actions in)
+ *     a5911fbf -> d0a25c96   (settled 1v1)
+ *     cd892f14 -> 65475f8d   (vanilla-separation)
+ *     563397f1 -> 1d0cbe18   (settled 3v3)
+ *
+ *   The version is derived from `TEAM_WIRE_STATE_KEYS` as well as
+ *   `COMBATANT_PROJECTION_FIELDS` now, so it moved `573176825` ->
+ *   `2858363730`; and the version is itself the first field of the state
+ *   `combatStateHash` covers, so every hash moved with it — the walking
+ *   opening included, the signature of a projection change rather than a
+ *   gameplay one. Not one of these battles plays differently.
+ *
+ *   **MEASURED, not argued, that nothing else moved them**: with the version
+ *   put back to the combatant-only derivation by a one-line mutation, all four
+ *   returned to their old literals exactly, and so did the golden census; the
+ *   mutation was undone by its exact inverse. **Every golden replay hash moved
+ *   (23 of 23)** for the same reason; no golden VALUE did and no golden file
+ *   was touched.
  */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
@@ -549,7 +580,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "5536913e", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "db7d2519", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -561,7 +592,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "a5911fbf", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "d0a25c96", WHY_IT_MOVED);
 });
 
 /**
@@ -618,7 +649,7 @@ test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact
   //   ARE in the projection. This one is not a harness artefact: two peers
   //   driving identical actions really would disagree, which is exactly what
   //   this pin exists to catch and why the shove was worth fixing.
-  assert.equal(combatStateHash(battle), "cd892f14", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "65475f8d", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
@@ -629,7 +660,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "563397f1", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "1d0cbe18", WHY_IT_MOVED);
 });
 
 /**

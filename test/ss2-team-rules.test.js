@@ -1516,8 +1516,17 @@ test("a canonical SS2 battle hashes to a pinned value — one tripwire for the w
   // two `herolevel: 1` gladiators, summed (`crowd_bar` `+0x011f`-`+0x0158`).
   // Measured: with the opening made to declare nothing, this literal returned to
   // `29fc00d7` exactly. `BATTLE_STATE_VERSION` did not move (the key is
-  // top-level; see the projection in `src/team/resolver.js`).
-  assert.equal(combatStateHash(battle), "dc45e949", [
+  // top-level; see the projection in `src/team/resolver.js`) — true that day,
+  // and the reason for the next move:
+  //
+  // `dc45e949` -> `49b20cbc` on 2026-09-23, again with NO action applied and
+  // no change to what this battle carries: `BATTLE_STATE_VERSION` now hashes
+  // the TOP-LEVEL keys as well as the combatant fields (owner's decision), so
+  // it moved `573176825` -> `2858363730`, and the version is a field of this
+  // projection. Measured: with the version put back to the combatant-only
+  // derivation by a one-line mutation, this literal returned to `dc45e949`
+  // exactly; the mutation was undone by its exact inverse.
+  assert.equal(combatStateHash(battle), "49b20cbc", [
     "The SS2 wire projection changed. That is not necessarily wrong — but it",
     "means every peer running the previous build now disagrees with this one",
     "about identical battles, and every stored completion token minted before",

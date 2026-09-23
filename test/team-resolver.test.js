@@ -652,6 +652,23 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
  *   run, not against stored constants, and all 13 golden tests stayed green
  *   throughout.
  *
+ * ► **ALL SIX COMBAT HASHES MOVED 2026-09-23 AND ALL SIX LEGACY HASHES DID
+ *   NOT — the 2026-09-13 cause again, one step further.** The owner decided
+ *   `BATTLE_STATE_VERSION` should see the TOP-LEVEL keys too
+ *   (`TEAM_WIRE_STATE_KEYS`), so it moved `573176825` -> `2858363730` and the
+ *   version travelling in the combat projection moved with it:
+ *
+ *     65644544 -> 2fd85ab9    55da0ba5 -> de55766a    38990090 -> d6bc0663
+ *     c789c001 -> eb3cf674    cb72c02b -> 4f69c72a    36fc4dea -> fd9b9941
+ *
+ *   Nothing else about these battles changed: the placeholder rule set
+ *   declares no battle pool and none is on a tape, so their key sets are what
+ *   they were. **Measured, not argued**: with the version put back to the
+ *   combatant-only derivation by a one-line mutation, all six returned to
+ *   their old literals exactly; the mutation was undone by its exact inverse.
+ *   The legacy column is byte-identical because the façade carries its own
+ *   `LEGACY_WIRE_VERSION = 1`, the fix the 2026-09-13 entry above records.
+ *
  * These literals were not hand-written. They were read off a run of the roster
  * at the commit before this change, over the five shapes a single-template team
  * can take: implicit empty slots, `null` and `{ fill: "ai" }` markers, the two
@@ -663,7 +680,7 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
 const UNCHANGED_FILL_BLUEPRINTS = [
   {
     name: "implicit empty slots",
-    combat: "65644544",
+    combat: "2fd85ab9",
     legacy: "ecffd39f",
     blueprint: {
       seed: 3,
@@ -675,7 +692,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "null and object markers",
-    combat: "55da0ba5",
+    combat: "de55766a",
     legacy: "5a573636",
     blueprint: {
       seed: 3,
@@ -687,7 +704,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "string markers",
-    combat: "38990090",
+    combat: "d6bc0663",
     legacy: "b2dfc69d",
     blueprint: {
       seed: 5,
@@ -699,7 +716,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a populated team template",
-    combat: "c789c001",
+    combat: "eb3cf674",
     legacy: "1529c5aa",
     blueprint: {
       seed: 7,
@@ -723,7 +740,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a template carrying an explicit id",
-    combat: "cb72c02b",
+    combat: "4f69c72a",
     legacy: "be79738c",
     blueprint: {
       seed: 11,
@@ -735,7 +752,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a team that supplies no fighters at all",
-    combat: "36fc4dea",
+    combat: "fd9b9941",
     legacy: "8e29b02b",
     blueprint: {
       seed: 13,
@@ -2126,27 +2143,125 @@ test("the declared projection fields are EXACTLY what the wire carries", () => {
   );
 });
 
-test("the version CHANGES when the field set does, which is the whole point", () => {
-  const versionOf = (fields) => Number.parseInt(resolver.fnv1a([...fields].sort().join(",")), 16);
-  const current = versionOf(resolver.COMBATANT_PROJECTION_FIELDS);
-  assert.equal(current, resolver.BATTLE_STATE_VERSION);
+/**
+ * ► **THE TOP-LEVEL KEYS, ADDED TO THE VERSION 2026-09-23 (owner's decision).**
+ *   `battleResources` joined the wire at `cefaf83` and the version could not
+ *   see it, because it hashed the combatant fields only — so a peer with the
+ *   crowd and one without advertised the same version while disagreeing from
+ *   their first hash exchange. The two tape fields went through the same gap
+ *   on 2026-09-02.
+ *
+ * Three of the fifteen keys are CONDITIONAL — `rngMode` and `rngDrawn` in tape
+ * mode only, `battleResources` only when the rule set declares a pool — so no
+ * single battle carries them all. This test therefore builds one battle per
+ * combination and checks both directions: **no battle may carry a key the list
+ * does not name** (the version would not see it), and **the list may name no
+ * key that no battle carries** (a declared conditional key must be reached
+ * here, so declaring one means adding the battle that exercises it).
+ *
+ * ► **A key under a NEW condition is not this test's to catch, and it cannot**:
+ *   measured with a key emitted only after turn 1, which these four battles
+ *   never reach — this test stayed green. `toTeamWireState` refuses an
+ *   undeclared key on every call instead, which failed 9 tests in two files
+ *   against the same mutation. **No test here reaches that refusal, and none
+ *   can**: every key the projection emits is a literal in `resolver.js`, so
+ *   the only way to make it emit an undeclared one is to edit that module. It
+ *   was proved by that mutation (2026-09-23) and undone by its exact inverse.
+ */
+const everyWireMode = () => {
+  const teams = () => [
+    { id: "red", combatants: [{ id: "red-1", name: "Red" }] },
+    { id: "blue", combatants: [{ id: "blue-1", name: "Blue" }] }
+  ];
+  // Invented: a pool of 5 belonging to the battle. Not SS2 behaviour.
+  const pooled = defineTeamRuleSet({
+    ...placeholderTeamRules,
+    id: "test-wire-keys-pool",
+    openingBattleResources: () => ({ tide: 5 })
+  });
+  const tape = () => [unitSample(0.5)];
+  return {
+    seeded: createTeamBattle({ seed: 3, teams: teams() }),
+    tape: createTeamBattle({ seed: 3, rngTape: tape(), teams: teams() }),
+    "seeded + battle pool": createTeamBattle({ seed: 3, rules: pooled, teams: teams() }),
+    "tape + battle pool": createTeamBattle({ seed: 3, rngTape: tape(), rules: pooled, teams: teams() })
+  };
+};
 
+test("the declared top-level keys are EXACTLY what the wire can carry, in every mode that adds one", () => {
+  const declared = new Set(resolver.TEAM_WIRE_STATE_KEYS);
+  const reached = new Set();
+  for (const [mode, battle] of Object.entries(everyWireMode())) {
+    for (const key of Object.keys(toTeamWireState(battle))) {
+      assert.ok(declared.has(key),
+        `${mode}: toTeamWireState carries "${key}", which TEAM_WIRE_STATE_KEYS does not name — ` +
+        "declare it, or BATTLE_STATE_VERSION cannot notice it");
+      reached.add(key);
+    }
+  }
+  assert.deepEqual([...reached].sort(), [...declared].sort(),
+    "every declared key must be carried by some battle here; a new condition needs a new battle above");
+  assert.equal(declared.size, resolver.TEAM_WIRE_STATE_KEYS.length, "no key is declared twice");
+});
+
+/** The version of a format whose two declared lists are these. */
+const versionOf = ({
+  wireStateKeys = resolver.TEAM_WIRE_STATE_KEYS,
+  combatantFields = resolver.COMBATANT_PROJECTION_FIELDS
+} = {}) => resolver.deriveBattleStateVersion({ wireStateKeys, combatantFields });
+
+test("the version is derived from BOTH declared lists", () => {
+  assert.equal(versionOf(), resolver.BATTLE_STATE_VERSION);
+});
+
+test("the version CHANGES when the combatant field set does, which is the whole point", () => {
+  const current = versionOf();
+  const fields = resolver.COMBATANT_PROJECTION_FIELDS;
   // Adding a field — which is what happened four times under a constant 1.
-  assert.notEqual(versionOf([...resolver.COMBATANT_PROJECTION_FIELDS, "facing"]), current);
+  assert.notEqual(versionOf({ combatantFields: [...fields, "facing"] }), current);
   // Removing one.
-  assert.notEqual(versionOf(resolver.COMBATANT_PROJECTION_FIELDS.filter((f) => f !== "y")), current);
+  assert.notEqual(versionOf({ combatantFields: fields.filter((f) => f !== "y") }), current);
   // And RENAMING one, which a hand-written integer would never catch.
+  assert.notEqual(versionOf({ combatantFields: fields.map((f) => (f === "x" ? "posX" : f)) }), current);
+});
+
+test("the version CHANGES when the TOP-LEVEL key set does: a peer with the crowd and one without disagree", () => {
+  const current = versionOf();
+  const keys = resolver.TEAM_WIRE_STATE_KEYS;
+  // THE CASE THIS WAS DECIDED FOR: the format before `cefaf83`, which could
+  // not carry the battle's own pool. Under the combatant-only derivation these
+  // two were ONE version.
+  assert.notEqual(versionOf({ wireStateKeys: keys.filter((k) => k !== "battleResources") }), current,
+    "a build that cannot carry battleResources must not advertise this build's version");
+  // And the format before 2026-09-02, which could not carry the tape fields.
   assert.notEqual(
-    versionOf(resolver.COMBATANT_PROJECTION_FIELDS.map((f) => (f === "x" ? "posX" : f))),
+    versionOf({ wireStateKeys: keys.filter((k) => k !== "rngMode" && k !== "rngDrawn") }),
     current
+  );
+  // Adding a top-level key, and renaming one.
+  assert.notEqual(versionOf({ wireStateKeys: [...keys, "weather"] }), current);
+  assert.notEqual(versionOf({ wireStateKeys: keys.map((k) => (k === "events" ? "log" : k)) }), current);
+});
+
+test("a name MOVING between the combatant and the top level is a format change", () => {
+  // The two lists are hashed as two scopes, not one merged list, so `x` on
+  // every combatant and `x` on the battle are different formats.
+  assert.notEqual(
+    versionOf({ combatantFields: resolver.COMBATANT_PROJECTION_FIELDS.filter((f) => f !== "x"),
+      wireStateKeys: [...resolver.TEAM_WIRE_STATE_KEYS, "x"] }),
+    versionOf()
   );
 });
 
-test("REORDERING the field list is not a format change, because the sort comes first", () => {
-  const versionOf = (fields) => Number.parseInt(resolver.fnv1a([...fields].sort().join(",")), 16);
-  const shuffled = [...resolver.COMBATANT_PROJECTION_FIELDS].reverse();
-  assert.equal(versionOf(shuffled), resolver.BATTLE_STATE_VERSION,
-    "a peer must not be invalidated by somebody tidying the literal");
+test("REORDERING either list is not a format change, because the sort comes first", () => {
+  assert.equal(
+    versionOf({
+      wireStateKeys: [...resolver.TEAM_WIRE_STATE_KEYS].reverse(),
+      combatantFields: [...resolver.COMBATANT_PROJECTION_FIELDS].reverse()
+    }),
+    resolver.BATTLE_STATE_VERSION,
+    "a peer must not be invalidated by somebody tidying either literal"
+  );
 });
 
 test("the version reaches the battle, and it is an IDENTITY rather than an ordering", () => {
@@ -2166,4 +2281,39 @@ test("the version reaches the battle, and it is an IDENTITY rather than an order
   assert.equal(typeof resolver.BATTLE_STATE_VERSION, "number");
   assert.ok(Number.isInteger(resolver.BATTLE_STATE_VERSION));
   assert.ok(resolver.BATTLE_STATE_VERSION > 0);
+});
+
+/**
+ * ► **THE FORMAT'S VERSION, NOT THE BATTLE'S** — decided with the top-level
+ *   keys, 2026-09-23. A battle with no battle pool, one with a pool, and a tape
+ *   battle carry three different key sets and ONE version, because the
+ *   conditional keys are declared unconditionally. A per-battle version would
+ *   fail here, and would let two builds that differ only in a key neither
+ *   battle used share a number.
+ */
+test("the version is the FORMAT'S, not the battle's: every mode advertises the same one", () => {
+  for (const [mode, battle] of Object.entries(everyWireMode())) {
+    assert.equal(battle.version, resolver.BATTLE_STATE_VERSION, `${mode}: battle.version`);
+    assert.equal(toTeamWireState(battle).version, resolver.BATTLE_STATE_VERSION, `${mode}: on the wire`);
+  }
+});
+
+/**
+ * ► **THE VERSION'S OWN PIN, so a list edit is a conscious one.** Derived, so
+ *   it cannot fail to change when a declared list does; pinned, so the change
+ *   is read, named and explained rather than discovered as a wall of moved
+ *   hashes elsewhere. Every `combatStateHash` pin moves with it, because the
+ *   version is a field of the state that hash covers.
+ *
+ *     1          hand-written, until 2026-09-13
+ *     573176825  2026-09-13  fnv1a over the sorted COMBATANT_PROJECTION_FIELDS
+ *     2858363730 2026-09-23  both lists, as two scopes: the top-level keys
+ *                            joined, so `battleResources` (cefaf83) and the two
+ *                            tape fields (2026-09-02) are seen at last
+ *
+ * Opaque: nothing may read the larger number as newer.
+ */
+test("the version is pinned, and says why each time it moves", () => {
+  assert.equal(resolver.BATTLE_STATE_VERSION, 2858363730,
+    "a declared list changed: re-derive, re-pin, add the line above, and move every combatStateHash pin with it");
 });

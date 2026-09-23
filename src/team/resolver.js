@@ -59,7 +59,8 @@ import {
 export { BattleError };
 
 /**
- * THE FIELDS TWO PEERS EXCHANGE, and the thing the version is computed FROM.
+ * THE FIELDS TWO PEERS EXCHANGE PER COMBATANT, and one of the two lists the
+ * version is computed FROM (the other is `TEAM_WIRE_STATE_KEYS`, below).
  *
  * Kept beside `combatantProjection` as a declared list rather than read out of
  * it at load time: a probe object would have to be constructed and kept
@@ -71,6 +72,33 @@ export { BattleError };
 export const COMBATANT_PROJECTION_FIELDS = Object.freeze([
   "alive", "aiFilled", "health", "id", "loadout", "maxHealth", "name",
   "resources", "seatId", "slotIndex", "stats", "status", "teamId", "x", "y"
+]);
+
+/**
+ * EVERY TOP-LEVEL KEY `toTeamWireState` CAN CARRY — the other thing the
+ * version is computed from, added 2026-09-23 (owner's decision).
+ *
+ * **Every key the FORMAT can carry, not the keys one battle happens to.**
+ * Three are conditional — `rngMode` and `rngDrawn` in tape mode only,
+ * `battleResources` only when the rule set declares a pool — and all three
+ * are named here unconditionally, so every battle of one build advertises one
+ * version whatever its rule set or RNG mode. See `BATTLE_STATE_VERSION` for
+ * why the version is the format's rather than the battle's.
+ *
+ * In emission order, for the reader; the version sorts before hashing, so the
+ * order carries no meaning. Guarded twice: `toTeamWireState` refuses, on every
+ * call, a key this list does not name (`declaredWireState`), so a key added
+ * under ANY condition fails the first test that projects a battle meeting it;
+ * and `test/team-resolver.test.js` builds a battle in every mode that changes
+ * the key set today and asserts the list is exactly what those battles carry,
+ * so a name nothing emits fails too.
+ */
+export const TEAM_WIRE_STATE_KEYS = Object.freeze([
+  "version", "seed", "rngState", "rngCursor",
+  "rngMode", "rngDrawn", // tape mode only
+  "battleResources", // only when the rule set declares a battle pool
+  "rules", "teams", "initiative", "turnCursor", "turnNumber", "result",
+  "events", "settlement"
 ]);
 
 /**
@@ -91,9 +119,41 @@ export const COMBATANT_PROJECTION_FIELDS = Object.freeze([
  * the two numbers a peer compares are made the same way and neither needs
  * `node:crypto`, which this module cannot have because it runs in a browser.
  *
- * Order-independent: the field list is sorted before hashing, so reordering the
+ * Order-independent: each list is sorted before hashing, so reordering a
  * literal is not a format change and does not invalidate a peer. Adding,
  * removing or RENAMING a field is, and does.
+ *
+ * ► **IT HASHES THE TOP-LEVEL KEYS TOO, SINCE 2026-09-23 (owner's decision).**
+ *   Until then it hashed `COMBATANT_PROJECTION_FIELDS` alone, so a key added
+ *   at the TOP of the wire was invisible to it: the two tape fields
+ *   (2026-09-02) and `battleResources` (`cefaf83`, SS2's crowd) each changed
+ *   the format under an unchanged version, and a peer with the crowd and one
+ *   without advertised one version while disagreeing from their first hash
+ *   exchange. It now hashes both declared lists, as two SCOPES — a name that
+ *   moves from the combatant to the battle is a format change too.
+ *   **`573176825` -> `2858363730`**, measured, and every pinned
+ *   `combatStateHash` in the suite moved with it, because the version is
+ *   itself a field of the state that hash covers.
+ *
+ * ► **THE FORMAT'S KEYS, NOT ONE BATTLE'S.** The conditional keys are in
+ *   `TEAM_WIRE_STATE_KEYS` unconditionally, so a battle that carries no
+ *   `battleResources` advertises the same version as one that does. That is
+ *   what makes the number a property of the CODE, which is what an identity
+ *   has to be: it is known before any battle exists, so it can be compared
+ *   before a rule set is chosen, and a sealed record's `stateVersion` names the
+ *   build that wrote it rather than which features its battle used. Whether a
+ *   conditional key is present in a GIVEN battle is already decided by state
+ *   the hash covers (`rules.id`, the RNG mode), so a per-battle version would
+ *   re-encode what the hash already says — and two builds that differ only in
+ *   a key neither battle used would then share a version, the very collision
+ *   this exists to prevent.
+ *
+ * **What it still does not see**, recorded, not decided here: the shapes BELOW
+ * the top level other than a combatant's — a team entry's keys, the `rules`
+ * descriptor's, a slot's, `settlement`'s, and every event's. An event's fields
+ * are the rule set's (`backAttack` joined the attack event on 2026-09-12 under
+ * an unchanged version), so they are not a closed list the resolver could
+ * declare.
  *
  * ► **AN INTEGER, because `provenance.battle.stateVersion` in a sealed
  *   campaign record is contracted to be a positive one** — `fnv1a` returns hex
@@ -105,8 +165,27 @@ export const COMBATANT_PROJECTION_FIELDS = Object.freeze([
  * hand-maintained integer invites and the reason this one is a hash rather than
  * a counter. Two versions are equal or they are not; there is no "later".
  */
-export const BATTLE_STATE_VERSION =
-  Number.parseInt(fnv1a([...COMBATANT_PROJECTION_FIELDS].sort().join(",")), 16);
+export const BATTLE_STATE_VERSION = deriveBattleStateVersion({
+  wireStateKeys: TEAM_WIRE_STATE_KEYS,
+  combatantFields: COMBATANT_PROJECTION_FIELDS
+});
+
+/**
+ * The version of a wire format whose declared lists are these. Exported so a
+ * test can vary one list and see the number move; `BATTLE_STATE_VERSION` is
+ * this over the two lists the resolver actually declares.
+ *
+ * The lists are hashed as two named scopes of one JSON document, each sorted:
+ * unambiguous whatever a name contains, and a name in one scope never equals
+ * the same name in the other.
+ */
+export function deriveBattleStateVersion({ wireStateKeys, combatantFields }) {
+  const shape = JSON.stringify({
+    state: [...wireStateKeys].sort(),
+    combatant: [...combatantFields].sort()
+  });
+  return Number.parseInt(fnv1a(shape), 16);
+}
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -773,9 +852,12 @@ function combatantProjection(combatant) {
  * It deliberately excludes controller identity: a host and a client that
  * disagree about who is driving a seat must still agree on combat state, and
  * reassigning a controller must not look like a desync.
+ *
+ * ► **EVERY TOP-LEVEL KEY IT RETURNS MUST BE IN `TEAM_WIRE_STATE_KEYS`, AND
+ *   THAT IS CHECKED HERE, ON EVERY CALL** — see `declaredWireState`.
  */
 export function toTeamWireState(battle) {
-  return {
+  return declaredWireState({
     version: battle.version,
     seed: battle.seed,
     rngState: battle.rngState,
@@ -803,13 +885,13 @@ export function toTeamWireState(battle) {
     //   Whether it is present is a function of the rule set, whose id is in
     //   this projection, so two peers running one rule set agree on the key.
     //
-    //   ► **`BATTLE_STATE_VERSION` DOES NOT SEE THIS KEY**, because it hashes
-    //     `COMBATANT_PROJECTION_FIELDS` only — the same gap the two tape
-    //     fields went through. A peer on either side of this change still
-    //     disagrees about an SS2 battle from its first hash exchange (the key
-    //     is present at construction), but it advertises the same version
-    //     while doing so. Recorded, not decided here: deriving the version
-    //     from the top-level keys too would move every pin in the suite.
+    //   ► ~~**`BATTLE_STATE_VERSION` DOES NOT SEE THIS KEY**, because it
+    //     hashes `COMBATANT_PROJECTION_FIELDS` only~~ **— IT DOES SINCE
+    //     2026-09-23 (owner's decision).** The version hashes
+    //     `TEAM_WIRE_STATE_KEYS` too, which names this key whether or not a
+    //     given battle carries it, so a build that can emit it and one that
+    //     cannot advertise different versions. It moved every pin in the
+    //     suite, as this note said it would.
     ...(Object.keys(battle.battleResources).length > 0
       ? { battleResources: projectResources(battle.battleResources) }
       : {}),
@@ -831,7 +913,34 @@ export function toTeamWireState(battle) {
     result: battle.result ? clone(battle.result) : null,
     events: clone(battle.events),
     settlement: battle.settlement.toJSON()
-  };
+  });
+}
+
+const DECLARED_WIRE_STATE_KEYS = new Set(TEAM_WIRE_STATE_KEYS);
+
+/**
+ * Refuses a projection carrying a top-level key `TEAM_WIRE_STATE_KEYS` does not
+ * name, because `BATTLE_STATE_VERSION` would not see it.
+ *
+ * ► **WHY AT RUNTIME AND NOT ONLY IN A TEST.** The suite's key-list test builds
+ *   one battle per mode that changes the key set today (tape, a battle pool).
+ *   A key added under a NEW condition — measured with one emitted only after
+ *   turn 1 — passes that test untouched, because none of its battles meets the
+ *   condition. Checked here, the same key fails every test anywhere that
+ *   projects such a battle, which is where its author's own tests will be. It
+ *   costs one pass over fifteen keys, beside a projection that deep-clones the
+ *   whole event log.
+ */
+function declaredWireState(state) {
+  for (const key of Object.keys(state)) {
+    if (!DECLARED_WIRE_STATE_KEYS.has(key)) {
+      throw new BattleError(
+        `toTeamWireState carries "${key}", which TEAM_WIRE_STATE_KEYS does not declare, so ` +
+        "BATTLE_STATE_VERSION cannot see it. Declare it there (see the note on BATTLE_STATE_VERSION)."
+      );
+    }
+  }
+  return state;
 }
 
 /** Seat -> controller projection, kept separate from combat state on purpose. */
