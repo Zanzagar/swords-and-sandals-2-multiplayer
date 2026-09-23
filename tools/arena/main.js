@@ -1155,9 +1155,13 @@ function viewport() {
     // Arena y is 200 at the front rank and DECREASES further back, so a bigger
     // y is nearer the viewer and further down the canvas.
     // ► The `1.7` here is the AUTHORED depth factor and stays with the authored
-    //   bowl. The extracted arena uses 1, because the build's sand is painted
-    //   for the build's own `_y` range and 1.7 puts the back rank in the crowd.
-    //   See `RANK_DEPTH_FACTOR` in `src/render/arena-backdrop.js`.
+    //   bowl, where the ground is a rectangle from the horizon down. The
+    //   extracted arena draws depth behind the front rank at 0.5, and frames a
+    //   team on the visible floor, because the build's crowd wall paints over
+    //   the top of its sand: ~~"uses 1, because the build's sand is painted
+    //   for the build's own `_y` range"~~ was measured against the sand and
+    //   put the back rank in the wall. See `RANK_DEPTH_FACTOR` and
+    //   `SS2_TEAM_FRAMING` in `src/render/arena-backdrop.js`.
     toY: (y, lift) => horizon + (height - horizon) * 0.62 - (ARENA_FRONT_Y - y) * scale * 1.7 - lift * scale
   };
 }

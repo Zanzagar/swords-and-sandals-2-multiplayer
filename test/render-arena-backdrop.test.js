@@ -29,6 +29,7 @@ import {
   RANK_DEPTH_FACTOR,
   SS2_ARENA_ORIGIN,
   SS2_ARENA_SCREEN_LAYERS,
+  SS2_ARENA_WALL_BASE,
   SS2_CAMERA,
   SS2_GROUND_LINE,
   SS2_STAGE,
@@ -134,41 +135,248 @@ test("a fighter at the vanilla front rank lands where the build puts him", () =>
   assert.ok(hero.x > 0 && villain.x < SS2_STAGE.width);
 });
 
-test("depth lifts a figure up the stage and so does height", () => {
+test("a rank back draws HALF a stride up, and a jump still draws a whole one", () => {
+  // ► **THIS TEST PINNED THE OPPOSITE UNTIL 2026-09-23** — that one stride back
+  //   and one stride up land on the same line, "the build's own arithmetic".
+  //   The arithmetic is the build's; the RANKS are not (vanilla stands both
+  //   clips at `_y` 200), and drawing a rank back as a jump's worth of rise is
+  //   what put the back rank in the crowd's wall. See `RANK_DEPTH_FACTOR`.
+  //
+  // Expected values are worked by hand at full zoom on a pair's camera:
+  // 166.75 + 200 = 366.75; y 103 draws at 103 + 97 * 0.5 = 151.5, so 318.25;
+  // a 97-unit jump from the front is 366.75 - 97 = 269.75, unsquashed.
   const camera = { zoomscale: 100, gladiatorsX: 0 };
   const front = arenaToStage(camera, { x: 0, y: 200, lift: 0 });
   const oneRankBack = arenaToStage(camera, { x: 0, y: 200 - SS2_ARENA.rankStride, lift: 0 });
+  const twoRanksBack = arenaToStage(camera, { x: 0, y: 200 - 2 * SS2_ARENA.rankStride, lift: 0 });
   const jumping = arenaToStage(camera, { x: 0, y: 200, lift: 97 });
 
   near(front.y, SS2_GROUND_LINE, "the front rank IS the ground line at full zoom");
-  assert.ok(oneRankBack.y < front.y, "a rank back draws higher up the stage");
-  assert.ok(jumping.y < front.y, "and so does a jump");
-  // At factor 1 a rank back and an equal lift land on the same line, which is
-  // the build's own arithmetic: `_y` is the only vertical axis it has.
-  near(oneRankBack.y, jumping.y, "one stride back and one stride up agree at factor 1");
-  assert.equal(RANK_DEPTH_FACTOR, 1);
+  near(oneRankBack.y, 318.25, "one rank back rises half a stride");
+  near(twoRanksBack.y, 269.75, "two ranks back rise one whole stride");
+  near(jumping.y, 269.75, "a jump is height, not depth, and is not squashed");
+  assert.equal(RANK_DEPTH_FACTOR, 0.5);
 });
 
-test("EVERY rank lands on the painted sand, which is what set the depth factor", () => {
-  // ► The arena clip's ground art spans local y -56.75..256.2, measured off
-  //   char 673 on the oracle. At factor 1.7 the back rank sits at local
-  //   y -129.8 — above the sand, standing in the crowd. This is the assertion
-  //   that would fail if somebody restored the authored factor.
-  const SAND_TOP = -56.75;
-  const SAND_FRONT = 256.2;
-  for (let rank = 0; rank < SS2_ARENA.rankCount; rank += 1) {
-    const arenaY = 200 - rank * SS2_ARENA.rankStride;
-    const localY = arenaY * RANK_DEPTH_FACTOR;
-    assert.ok(localY > SAND_TOP && localY < SAND_FRONT,
-      `rank ${rank} draws at arena-local y ${localY}, off sand that runs ${SAND_TOP}..${SAND_FRONT}`);
+test("nothing at or IN FRONT of the front rank is squashed — the rocks at 210 stay the build's", () => {
+  // The squash is `max(0, 200 - y)`: a figure at 200 and a rock at 210 are
+  // drawn by the build's own expression, 166.75 + y * zoom.
+  const camera = { zoomscale: 50, gladiatorsX: 0 };
+  near(arenaToStage(camera, { x: 0, y: 200, lift: 0 }).y, 266.75, "the front rank at zoom 50");
+  near(arenaToStage(camera, { x: 0, y: 210, lift: 0 }).y, 271.75, "a rock at 210 at zoom 50");
+});
+
+test("EVERY rank stands on the FLOOR, below the foot of the painted wall, in all six arenas", () => {
+  // ► **THIS TEST USED TO CHECK THE RANKS AGAINST THE SAND AND IT PASSED WHILE
+  //   THE BACK RANK STOOD IN THE WALL.** It asserted every rank's arena-local y
+  //   lay inside char 673's rectangle (-56.75..256.2), a premise that was true
+  //   when it was written (1d72c85) and stopped being the picture when 00eac13
+  //   started painting the crowd's wall over the top of that sand. The owner
+  //   saw the result: "the gladiators appear too high ... up into the
+  //   background". Measured over seed 7's 3v3 (132 settled post-action
+  //   frames, 552 living figure-samples): 412 stood at rank 2, 28 of them
+  //   INSIDE arena 1's wall (the frames at zoom 52) and the rest within 19px
+  //   of its foot. Rank 2 enters the wall at any zoom above ~37.
+  //
+  // ► So the line a figure must stay below is the WALL'S FOOT, per arena, and
+  //   it moves with the camera: `crowd._y = -200 + ceil(zoomscale)`. It is
+  //   reached here through `layerPlacementFor`, the same route the painter
+  //   takes, not through the projection under test. Every zoom a camera can
+  //   reach — 5 is the establishing shot, 80 the tightest band.
+  const MARGIN = 5; // stage px, so a foot ON the line is not a pass
+  const crowd = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "crowd");
+  // ► **ALL THREE RANKS ON A PAIR'S CAMERA TOO.** The build's pair only ever
+  //   stands at 200, but this engine's duellist can stand behind it, and the
+  //   first version of this test excused the 1v1 case from ranks 1 and 2 — the
+  //   very positions the squash exists for. Codex's review found the gap.
+  const cases = [
+    { roster: "1v1", ranks: SS2_ARENA.rankCount },
+    { roster: "2v2", ranks: SS2_ARENA.rankCount },
+    { roster: "3v3", ranks: SS2_ARENA.rankCount }
+  ];
+  for (const { roster, ranks } of cases) {
+    const settled = settle(ROSTERS[roster]);
+    for (let zoomscale = SS2_CAMERA.zoomStart; zoomscale <= SS2_CAMERA.bands[0].scale; zoomscale += 1) {
+      const camera = { ...settled, zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) };
+      for (const wall of SS2_ARENA_WALL_BASE) {
+        const floorLine = layerPlacementFor(crowd, camera).y + wall.crowdY;
+        for (let rank = 0; rank < ranks; rank += 1) {
+          const y = SS2_ARENA.frontY - rank * SS2_ARENA.rankStride;
+          const feet = arenaToStage(camera, { x: 0, y, lift: 0 }).y;
+          assert.ok(feet - floorLine >= MARGIN,
+            `${roster} at zoom ${zoomscale}, arena ${wall.arena}: rank ${rank} (y ${y}) has its feet at stage ` +
+            `${feet.toFixed(1)}, ${(floorLine - feet).toFixed(1)}px above the foot of the wall at ${floorLine.toFixed(1)}`);
+        }
+      }
+    }
   }
 });
 
+test("each arena's wall foot is its measured bitmap ROW, carried through the pack's own tile placements", () => {
+  // ► **THE ROW IS MEASURED AND THE CONVERSION IS WHERE THIS PROJECT BLEEDS.**
+  //   A crowd tile's `ty` is in TWIPS, its scale is 0.5 or 1, and its bitmap
+  //   fill runs 20 or 24.41 twips per pixel depending on the bitmap — the same
+  //   units seam that put three rows of the size table out by twenty. So the
+  //   stated `crowdY` is re-derived here from the stated `row` and the pack,
+  //   the LOWEST over every tile carrying that bitmap. The rows themselves
+  //   come from decoding the JPEGs, which node cannot do without a decoder
+  //   this repository does not ship; how they were read is in the docstring.
+  //
+  // A clone with no extraction has no tiles to check the conversion against
+  // and passes on the stated table, which is what every pack-gated test in
+  // this file does rather than skipping.
+  const anchor = path.join(REPO_ROOT, "tools", "extract-props.mjs");
+  assert.ok(fs.existsSync(anchor), `${anchor} is not there, so REPO_ROOT is wrong`);
+  assert.deepEqual(SS2_ARENA_WALL_BASE.map((wall) => wall.arena), [1, 2, 3, 4, 5, 6], "one wall foot per arena");
+  const packPath = path.join(REPO_ROOT, "assets", "props", "props.json");
+  if (!fs.existsSync(packPath)) {
+    assert.equal(fs.existsSync(packPath), false, "no extraction on this machine");
+    return;
+  }
+  const pack = JSON.parse(fs.readFileSync(packPath, "utf8"));
+  for (const wall of SS2_ARENA_WALL_BASE) {
+    const tiles = propOpsForPack(pack, "crowd", wall.arena).filter((op) => op.bitmap?.id === wall.bitmap);
+    assert.ok(tiles.length > 0, `arena ${wall.arena}'s crowd places no bitmap ${wall.bitmap}`);
+    const lowest = Math.max(...tiles.map((op) => {
+      const pixel = op.bitmap.matrix.d / 20; // shape units per bitmap pixel
+      return op.matrix[5] / 20 + op.matrix[3] * (pixel * wall.row + op.bitmap.matrix.ty / 20);
+    }));
+    assert.ok(Math.abs(lowest - wall.crowdY) < 0.01,
+      `arena ${wall.arena}: row ${wall.row} of bitmap ${wall.bitmap} lands at crowd-local ${lowest.toFixed(3)}, ` +
+      `not the stated ${wall.crowdY}`);
+  }
+});
+
+test("A 1v1 AT THE FRONT RANK IS THE BUILD'S OWN PROJECTION, at every zoom its camera settles on", () => {
+  // ► The team framing is authored and a pair never sees it.
+  //   `gladiators._xscale = _yscale = ceil(zoomscale)` about the arena origin
+  //   puts the feet at 166.75 + 200 * z/100 — worked here by hand, per band
+  //   (80, 50, 30, 20, 15), the establishing shot (5) and full zoom. Behind
+  //   the front rank a pair IS squashed, by design; see the next test.
+  const expected = { 5: 176.75, 15: 196.75, 20: 206.75, 30: 226.75, 50: 266.75, 80: 326.75, 100: 366.75 };
+  const settled = settle(ROSTERS["1v1"]);
+  assert.equal(settled.zoomscale, 50, "a vanilla opening settles on the build's 50 band");
+  for (const [zoom, feet] of Object.entries(expected)) {
+    const zoomscale = Number(zoom);
+    const camera = { ...settled, zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) };
+    near(groundLineAt(camera), feet, `a 1v1's feet at zoom ${zoomscale}`);
+    near(arenaToStage(camera, { x: 0, y: 200, lift: 97 }).y, feet - 97 * zoomscale / 100,
+      `a 1v1 jump at zoom ${zoomscale}`);
+  }
+  // And with no sides at all, the one-dimensional callers' shape.
+  const bare = settle([-250, 250]);
+  near(groundLineAt(bare), 266.75, "a bare pair is a pair");
+});
+
+test("A PAIR'S CAMERA IS THE BUILD WHEREVER THE BUILD CAN STAND, and squashes the ranks it never had", () => {
+  // ► **CODEX'S FINDING, 2026-09-23, KEPT AS A TEST WITH THE OPPOSITE VERDICT.**
+  //   The review read "a 1v1 is unchanged" and showed a two-actor camera
+  //   drawing y 103 at zoom 50 at 242.5 where it used to be 218.25, and y 6 at
+  //   218.25 where it used to be 169.75. True — and kept: the build has no rear
+  //   ranks, so those positions are authored in any camera, and unsquashed the
+  //   rear one stands inside arena 1's wall above zoom ~37. What was wrong was
+  //   the claim, which now reads "identical for every position the build can
+  //   reach". This pins both halves of it.
+  const settled = settle(ROSTERS["1v1"]);
+  const at = (zoomscale) => ({ ...settled, zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) });
+
+  // (1) IDENTITY where the build can stand: y >= 200, any lift, any zoom. The
+  //     oracle is the build's display tree — `gladiators` at the arena origin,
+  //     scaled by the zoom — written out, plus hand-worked spot values.
+  for (const zoomscale of [5, 15, 20, 27, 30, 50, 63, 80, 100]) {
+    for (const y of [200, 204.5, 210, 260]) {
+      for (const lift of [-22, 0, 48.5, 97, 230]) {
+        near(arenaToStage(at(zoomscale), { x: 0, y, lift }).y, 166.75 + (y - lift) * zoomscale / 100,
+          `a pair at y ${y}, lift ${lift}, zoom ${zoomscale}`);
+      }
+    }
+  }
+  near(arenaToStage(at(50), { x: 0, y: 200, lift: 97 }).y, 218.25, "a jump at zoom 50");
+  near(arenaToStage(at(50), { x: 0, y: 210, lift: 0 }).y, 271.75, "a rock at zoom 50");
+
+  // (2) THE SQUASH behind the front rank, on the same pair's camera — worked
+  //     by hand at zoom 50: y_eff = y + (200 - y) / 2, stage = 166.75 + y_eff/2.
+  const squashed = [
+    [150, 0, 254.25], // between ranks: y_eff 175
+    [103, 0, 242.5], // rank 1: y_eff 151.5 (Codex: 218.25 unsquashed)
+    [50, 0, 229.25], // between ranks: y_eff 125
+    [6, 0, 218.25], // rank 2: y_eff 103 (Codex: 169.75 unsquashed)
+    [103, 97, 194], // rank 1 jumping: the lift is NOT squashed
+    [6, 48.5, 194] // rank 2, half a jump
+  ];
+  for (const [y, lift, expected] of squashed) {
+    near(arenaToStage(at(50), { x: 0, y, lift }).y, expected, `a pair at y ${y}, lift ${lift}, zoom 50`);
+  }
+
+  // (3) AND THE SQUASH IS WHAT KEEPS A DUELLIST OFF THE WALL: every depth from
+  //     the front rank back to rank 2, every zoom, every arena, feet at least
+  //     5px below the wall's foot — where the unsquashed projection is not.
+  const crowd = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "crowd");
+  const rearmost = SS2_ARENA.frontY - (SS2_ARENA.rankCount - 1) * SS2_ARENA.rankStride;
+  let unsquashedInWall = 0;
+  for (let zoomscale = SS2_CAMERA.zoomStart; zoomscale <= SS2_CAMERA.bands[0].scale; zoomscale += 1) {
+    const camera = at(zoomscale);
+    for (const wall of SS2_ARENA_WALL_BASE) {
+      const floorLine = layerPlacementFor(crowd, camera).y + wall.crowdY;
+      for (let y = rearmost; y <= SS2_ARENA.frontY; y += 1) {
+        const feet = arenaToStage(camera, { x: 0, y, lift: 0 }).y;
+        assert.ok(feet - floorLine >= 5,
+          `a pair's fighter at y ${y}, zoom ${zoomscale}, arena ${wall.arena}: ` +
+          `feet ${feet.toFixed(1)} vs the wall's foot ${floorLine.toFixed(1)}`);
+        if (SS2_ARENA_ORIGIN.y + y * zoomscale / 100 < floorLine) unsquashedInWall += 1;
+      }
+    }
+  }
+  assert.ok(unsquashedInWall > 0, "the unsquashed projection never reaches the wall, so this proves nothing");
+
+  // (4) THE PIVOT IS TEAM-ONLY: the same pair's front line is the build's, and
+  //     a team's at the same zoom is the framing's 313.48, far from it.
+  near(groundLineAt(at(50)), 266.75, "a pair's front line at zoom 50 is the build's");
+  const team = { ...settle(ROSTERS["3v3"]), zoomscale: 50, crowdY: SS2_CAMERA.crowdBaseY + 50 };
+  assert.ok(Math.abs(groundLineAt(team) - 266.75) > 40, `a team's front line at zoom 50 is ${groundLineAt(team)}`);
+});
+
+test("A TEAM CAMERA ZOOMING OUT KEEPS THE FIGHT ON THE FLOOR instead of walking it up to the wall", () => {
+  // ► **THE OWNER'S REPORT, 2026-09-23: "the gladiators appear too high ... not
+  //   on the ground but instead up into the background ... a vertical shift
+  //   will likely do."** The build's pivot is the arena origin, so a group the
+  //   fit pulls back to zoom 27 stood with its front rank a QUARTER of the way
+  //   down the visible floor — the foot of the wall to the top of the UI bar —
+  //   and 180px of empty sand below it.
+  //
+  // So: at every zoom a camera reaches, a team's front rank stands in the LOWER
+  // half of the visible floor. Measured through `layerPlacementFor` and the
+  // panel layer, not through the framing constants.
+  const crowd = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "crowd");
+  const panel = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "panel");
+  const arenaOne = SS2_ARENA_WALL_BASE.find((wall) => wall.arena === 1);
+  for (const roster of ["2v2", "3v3"]) {
+    const settled = settle(ROSTERS[roster]);
+    for (let zoomscale = SS2_CAMERA.zoomStart; zoomscale <= SS2_CAMERA.bands[0].scale; zoomscale += 1) {
+      const camera = { ...settled, zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) };
+      const floorTop = layerPlacementFor(crowd, camera).y + arenaOne.crowdY;
+      const down = (groundLineAt(camera) - floorTop) / (panel.y - floorTop);
+      assert.ok(down > 0.5 && down < 0.75,
+        `${roster} at zoom ${zoomscale}: the front rank stands ${(down * 100).toFixed(0)}% of the way down the visible floor`);
+    }
+  }
+  // ► **AND IT MEETS THE BUILD AT THE TIGHTEST BAND**: at zoom 80 a team's
+  //   front line is within 2px of where the build's own pair stands (326.75),
+  //   so closing to the closest band lands where a vanilla fight would.
+  const tight = { ...settle(ROSTERS["3v3"]), zoomscale: 80, crowdY: SS2_CAMERA.crowdBaseY + 80 };
+  assert.ok(Math.abs(groundLineAt(tight) - 326.75) < 2, `a team at zoom 80 stands at ${groundLineAt(tight)}`);
+});
+
 test("the camera scales x and y together — an arena that zooms on one axis is a squash", () => {
+  // ► **MOVED FROM y 100 TO y 200 ON 2026-09-23**, because y 100 is behind the
+  //   front rank and now carries the authored depth squash (it draws at 150),
+  //   which is not what this test is about. At the front rank the depth term is
+  //   the build's `_y` untouched, so this still asks only "is the zoom on both
+  //   axes, about the arena's own origin?".
   const half = { zoomscale: 50, gladiatorsX: 0 };
-  const at = arenaToStage(half, { x: 250, y: 100, lift: 0 });
+  const at = arenaToStage(half, { x: 250, y: 200, lift: 0 });
   near(at.x, SS2_ARENA_ORIGIN.x + 250 * 0.5, "x halves");
-  near(at.y, SS2_ARENA_ORIGIN.y + 100 * 0.5, "and so does y, about the arena's own origin");
+  near(at.y, SS2_ARENA_ORIGIN.y + 200 * 0.5, "and so does y, about the arena's own origin");
 });
 
 test("ZOOMING OUT WALKS THE FIGHTERS UP THE SAND — the ground line is not fixed", () => {
@@ -1614,17 +1822,25 @@ test("THE PROJECTOR'S HORIZON IS ARENA y=0 IN CANVAS SPACE, not the ground line"
   //
   // ► **DERIVED BY A DIFFERENT ROUTE THAN THE FIELD IT CHECKS, which is what
   //   makes it an assertion rather than a restatement.** `horizon` is built
-  //   from `fit.offsetY + SS2_ARENA_ORIGIN.y * fit.scale`; `toY` composes
-  //   `arenaToStage` with the fit. Asserting one equals the other pins the
-  //   MEANING the field's own docstring claims — "the arena's own origin in
-  //   canvas space" — rather than re-typing its arithmetic.
+  //   from `fit.offsetY + SS2_ARENA_ORIGIN.y * fit.scale`; the expected value
+  //   here comes from `layerPlacementFor` — where the painter puts an ARENA-
+  //   space layer's own y 0 — composed with the fit. That pins the MEANING the
+  //   field's docstring claims, "the arena's own origin in canvas space",
+  //   rather than re-typing its arithmetic.
+  //
+  // ► **THE ROUTE USED TO BE `toY(0, 0)`, AND IT STOPPED BEING THAT ORIGIN ON
+  //   2026-09-23.** A gladiator at depth 0 is behind the front rank, so the
+  //   authored depth squash now draws it at 100, not at the arena's origin. The
+  //   origin did not move; the fighters' depth stopped mapping onto it 1:1.
+  const sand = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "sand");
   for (const size of [{ width: 1280, height: 840 }, { width: 640, height: 420 }, { width: 900, height: 700 }]) {
     for (const zoomscale of [100, 60, 5]) {
       const camera = { zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale), panX: 0 };
       const fit = stageFitFor(size);
       const projector = stageProjectorFor(camera, fit);
-      assert.equal(projector.horizon, projector.toY(0, 0),
-        `horizon and toY(0,0) disagree at ${size.width}x${size.height} zoom ${zoomscale}`);
+      const arenaOriginY = layerPlacementFor(sand, camera).y - sand.y;
+      near(projector.horizon, fit.offsetY + arenaOriginY * fit.scale,
+        `horizon is not the arena's origin at ${size.width}x${size.height} zoom ${zoomscale}`);
       // And it is NOT the ground line, which is the mutant that survived: the
       // two differ by the arena's own depth, so a test that passed for both
       // would be pinning nothing.

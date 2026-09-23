@@ -358,28 +358,106 @@ export const SS2_ARENA_ORIGIN = Object.freeze({ x: 319.95, y: 166.75 });
  *   the ground, it walks the fighters UP the ground toward the horizon. Use
  *   `groundLineAt(camera)`; this constant is the `zoomscale === 100` case and
  *   is exported because it is the number the map and the handoffs quote.
+ *   (That walk is the build's, and a PAIR still takes it. A team camera does
+ *   not — see `SS2_TEAM_FRAMING`, authored.)
  */
 export const SS2_GROUND_LINE = SS2_ARENA_ORIGIN.y + 200;
 
 /**
- * HOW STRONGLY A RANK READS AS DEPTH — **1, because the build's own `_y` IS
- * this axis and the sand is painted for its range.**
+ * HOW MUCH OF A RANK'S DEPTH IS DRAWN AS STAGE HEIGHT — **0.5, AUTHORED, and
+ * only BEHIND the front rank.** `arenaToStage` draws depth `y` at
  *
- * ► **THIS REPLACES AN AUTHORED 1.7 AND THE REASON IS THE ART.**
- *   `tools/arena/main.js`'s `toY` carries an unnamed `* 1.7` on the depth term,
- *   chosen against the authored gradient bowl it draws, where the "ground" is a
- *   rectangle from the horizon down and any factor lands on it. **The build's
- *   sand is not a rectangle.** Measured: the arena clip's ground art (char 673)
- *   spans local y −56.75..256.2, and the three ranks at stride 97 sit at local
- *   y 200, 103 and 6 — all comfortably on it at factor 1. At 1.7 they sit at
- *   200, 35.1 and **−129.8**, which is above the top of the painted sand: the
- *   back rank would stand in the crowd.
+ * ```text
+ *   y_eff = y + max(0, 200 − y) × (1 − RANK_DEPTH_FACTOR)
+ * ```
  *
- *   So the factor is not a taste that survived the art change. `1.7` remains in
- *   the authored-bowl path in the shell, where it is still correct and where a
- *   clone with no extraction still runs.
+ * so the three ranks at stride 97 (y 200, 103, 6) draw at 200, 151.5 and 103,
+ * and **every position the build can reach — `y >= 200`, any zoom, any lift:
+ * both vanilla fighters, the rocks at 210 — is drawn exactly where the build
+ * draws it.**
+ *
+ * ► **BEHIND THE FRONT RANK IT APPLIES IN EVERY CAMERA, A PAIR'S INCLUDED, BY
+ *   DESIGN.** The build has no rear ranks, so any fighter behind 200 is an
+ *   authored position whatever the roster size, and the reason for the squash
+ *   — the crowd's wall — does not care how many fighters the camera frames: a
+ *   duellist at rank 2 on a pair's camera stood in arena 1's wall above zoom
+ *   ~37 exactly as a 3v3's did. Only `SS2_TEAM_FRAMING` is team-only.
+ *
+ * ► **THIS SAID 1, "BECAUSE THE SAND IS PAINTED FOR ITS RANGE", AND THE CHECK
+ *   BEHIND THAT WAS MADE AGAINST ART THAT IS NOT THE FLOOR.** It was measured
+ *   (1d72c85) against char 673, the sand rectangle, which spans arena-local
+ *   y −56.75..256.2 and holds all three ranks at factor 1. The same day,
+ *   00eac13 began drawing the crowd's JPEG wall, which paints over the top of
+ *   that sand — so the floor a figure is SEEN on starts at the wall's foot
+ *   (`SS2_ARENA_WALL_BASE`), and at factor 1 the back rank stood inside arena
+ *   1's wall at every zoom above ~37 and inside arena 5's above 9. The owner
+ *   saw it: *"the gladiators appear too high ... up into the background"*.
+ *   Nothing failed, because the test checked the sand.
+ *
+ * ► **THE RANKS ARE THIS ENGINE'S, NOT THE BUILD'S, SO THIS IS OURS TO CHOOSE.**
+ *   Vanilla stands both clips at `_y` 200 and spends `_y` on the jump arc. At
+ *   factor 1 a rank back drew as a rise of a whole stride — the same picture as
+ *   a 97-unit jump. Halved, it reads as depth.
+ *
+ * ► **WHY 0.5 AND NOT MORE.** With the team framing (`SS2_TEAM_FRAMING`), the
+ *   back rank's clearance above the foot of the wall is smallest in arena 5 at
+ *   zoom 80, the tightest band: 0.56 puts its feet ON the line, and 0.5 leaves
+ *   9.3px. Pinned for every arena at every zoom a camera reaches.
+ *
+ * `1.7` remains in the authored-bowl path in the shell, where the "ground" is
+ * a rectangle from the horizon down and any factor lands on it.
  */
-export const RANK_DEPTH_FACTOR = 1;
+export const RANK_DEPTH_FACTOR = 0.5;
+
+/**
+ * The front rank's depth, `SS2_ARENA.frontY` — restated rather than imported,
+ * because this file imports nothing and the build fixes the number: both
+ * vanilla fighters are constructed at `_y` 200 (root frame 221 `+0x06b9` /
+ * `+0x0792`).
+ */
+const FRONT_RANK_Y = 200;
+
+/**
+ * WHERE EACH ARENA'S PAINTED WALL ENDS AND ITS FLOOR BEGINS — the line a
+ * gladiator's feet have to stay below, in the CROWD clip's own units.
+ *
+ * ► **THE SAND IS NOT THE FLOOR, BECAUSE THE CROWD PAINTS OVER IT.** Char 673
+ *   (`sand`) spans arena-local y −56.75..256.2, but char 2112 (`crowd`) sits
+ *   above it in the arena clip and its tiles reach crowd-local 172..230,
+ *   depending on the arena: the stands, the wall and a strip of painted floor,
+ *   opaque wherever the wall is. So the floor a figure can be SEEN standing on
+ *   starts where each crowd bitmap's wall ends, not where the sand rectangle
+ *   starts.
+ *
+ * ► **MEASURED, AND HOW.** `row` is the first row of the bitmap below the
+ *   wall's bottom edge: the row-mean colour of the decoded JPEG (with its alpha
+ *   plane where it has one) jumps there, and a crop of each bitmap confirms it
+ *   by eye. `crowdY` converts that row through the tile placements
+ *   `assets/props/props.json` carries for the arena's frame of `crowd` —
+ *   `ty / 20` (twips) plus the tile's own scale (0.5; 1 for arena 6's dais)
+ *   times the fill's `bitmap.matrix.d / 20` shape units per pixel — and keeps
+ *   the LOWEST over every tile, because a figure can stand in front of any of
+ *   them. The test re-derives `crowdY` from `row` and the pack whenever there
+ *   is one.
+ *
+ * ► **THE THRONE'S RECTANGLE IS NOT ITS FOOT.** Arena 6's dais is a 235x164
+ *   bitmap whose bottom 38 rows are transparent, so reading its rectangle
+ *   rather than its alpha plane puts that arena's floor 38 units too low.
+ *
+ * ► **THE STAGE LINE MOVES WITH THE CAMERA**, because `crowd._y = −200 +
+ *   ceil(zoomscale)`: on stage it is `166.75 − 200 + ceil(zoomscale) +
+ *   crowdY`. **Arena 5's is the lowest by 22 units**, and arena 6's is set by
+ *   the throne dais (bitmap 2107) drawn over the middle of its wall rather than
+ *   by the wall itself, which ends at crowd-local 93.04 (bitmap 717, row 244).
+ */
+export const SS2_ARENA_WALL_BASE = Object.freeze([
+  Object.freeze({ arena: 1, bitmap: 1773, row: 437, crowdY: 165.45 }),
+  Object.freeze({ arena: 2, bitmap: 2099, row: 270, crowdY: 162.96 }),
+  Object.freeze({ arena: 3, bitmap: 2101, row: 298, crowdY: 157.04 }),
+  Object.freeze({ arena: 4, bitmap: 2103, row: 334, crowdY: 169.61 }),
+  Object.freeze({ arena: 5, bitmap: 2105, row: 404, crowdY: 191.83 }),
+  Object.freeze({ arena: 6, bitmap: 2107, row: 126, crowdY: 134 })
+]);
 
 /**
  * Twips per stage pixel — the SWF format's own constant, applied to the `tx`
@@ -506,7 +584,11 @@ export const SS2_ARENA_SCREEN_LAYERS = Object.freeze([
     space: "arena", behindFighters: true, x: -323.95, y: -56.75, scale: 1,
     // `sand.gotoAndStop(current_arena)` (`+0x0d0f`) — SIX grounds, not one.
     frameFrom: "arena",
-    note: "the ground, arena-local y -56.75..256.2 — the range that set RANK_DEPTH_FACTOR"
+    // ► **THIS NOTE USED TO CALL THAT RANGE "the range that set
+    //   RANK_DEPTH_FACTOR", AND IT WAS THE WRONG ART TO SET IT BY.** The crowd
+    //   (order 4) paints its wall over the top of this sand, so the floor a
+    //   figure is SEEN standing on begins at `SS2_ARENA_WALL_BASE`, not at -56.75.
+    note: "the ground, arena-local y -56.75..256.2 — the crowd's wall paints over its top; the visible floor starts at SS2_ARENA_WALL_BASE"
   }),
   Object.freeze({
     // ► **THE ONE THING ON THIS SCREEN THE CAMERA MOVES BESIDES THE FIGHTERS.**
@@ -628,6 +710,76 @@ export const SS2_CAMERA = Object.freeze({
    */
   zoomMinimum: 15
 });
+
+/**
+ * WHERE A TEAM FIGHT STANDS ON THE STAGE — **AUTHORED, because the build never
+ * shows one.** A camera framing more than two placed actors (`camera.team`)
+ * keeps the front rank's feet `frontFraction` of the way down the VISIBLE
+ * FLOOR — from the foot of arena 1's wall to the top of the UI bar — at every
+ * zoom, and scales everything else about that line:
+ *
+ * ```text
+ *   floor(z) = 166.75 + (−200 + ceil z) + 165.45     = 132.2 + z
+ *   front(z) = floor(z) + 0.6 × (401 − floor(z))     = 293.48 + 0.4 z
+ *   stage y  = front(z) + (y_eff − 200 − lift) × z/100
+ * ```
+ *
+ * ► **WHY IT EXISTS: THE BUILD'S PIVOT WALKS A ZOOMED-OUT GROUP INTO THE WALL.**
+ *   `combatscale` scales `gladiators` about the arena origin, stage y 166.75,
+ *   so the front rank stands at `166.75 + 2z` — and the crowd's wall comes
+ *   down only at `+z`. For a pair at the build's bands that is the build's own
+ *   picture. A 3v3 is pulled back to fit — seed 7's with kits settled between
+ *   zoom 18 and 52 — which shrinks the group up toward the wall and leaves
+ *   130..200px of empty sand beneath it: at zoom 27 the front rank stood a
+ *   quarter of the way down the visible floor. Here it stands at 60% at every
+ *   zoom.
+ *
+ * ► **AND IT MEETS THE BUILD AT THE TIGHTEST BAND.** At zoom 80 the team's
+ *   front line is 325.48, 1.27px above where the build's own pair stands
+ *   (326.75) — so a team fight that closes to the build's closest band stands
+ *   where a vanilla fight would. Below 80 the two part company, and that is the
+ *   point.
+ *
+ * ► **ONE ARENA'S FLOOR FOR ALL SIX, AND THAT IS CHECKED RATHER THAN HOPED.**
+ *   The band is measured from arena 1's wall foot, the default dressing. The
+ *   other five sit between 31.45 units higher (arena 6) and 26.38 lower (arena
+ *   5) — `SS2_ARENA_WALL_BASE` — and
+ *   with `RANK_DEPTH_FACTOR` 0.5 every rank clears every arena's wall at every
+ *   zoom from 5 to 80 — least in arena 5 at zoom 80, by 9.3px. A per-arena band
+ *   would need the dressing inside the projection and buys nothing the test
+ *   does not already guarantee.
+ *
+ * ► **A 1v1 NEVER READS THIS.** `team` is false for two placed actors, and
+ *   `arenaToStage` then pivots about the arena origin exactly as the build
+ *   does. (The depth squash is a separate thing and is NOT team-only — see
+ *   `RANK_DEPTH_FACTOR`.)
+ */
+export const SS2_TEAM_FRAMING = Object.freeze({
+  /** Whose wall foot the visible floor is measured from: the default dressing. */
+  floorArena: 1,
+  /** How far down the visible floor the front rank's feet stand. */
+  frontFraction: 0.6
+});
+
+/** The stage y a TEAM camera stands its front rank on — see `SS2_TEAM_FRAMING`. */
+function teamFrontLineAt(zoomscale) {
+  const wall = SS2_ARENA_WALL_BASE.find((entry) => entry.arena === SS2_TEAM_FRAMING.floorArena);
+  // The bottom of the visible floor is the top of the UI bar, which the build
+  // paints over the fighters (`fiz_info_panel`, depth 438, stage y 401).
+  const floorBottom = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "panel").y;
+  // `crowd._y = -200 + ceil(zoomscale)`, exactly as `cameraStep` writes it.
+  const floorTop = SS2_ARENA_ORIGIN.y + SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) + wall.crowdY;
+  return floorTop + SS2_TEAM_FRAMING.frontFraction * (floorBottom - floorTop);
+}
+
+/**
+ * Whether a set of placed actors is a TEAM fight — more than the two
+ * gladiators vanilla ever places. It chooses the projection's framing only;
+ * the camera's own arithmetic is the build's for every roster size.
+ */
+function isTeamFight(input) {
+  return actorsFrom(input).length > 2;
+}
 
 /**
  * Every placed actor as `{x, side}`, from either shape a caller may hand in.
@@ -846,7 +998,8 @@ export function cameraFor(xs) {
     zoomscale: SS2_CAMERA.zoomStart,
     maxscale: targetZoomFor(midwaypoint, xs),
     gladiatorsX: 0,
-    crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(SS2_CAMERA.zoomStart)
+    crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(SS2_CAMERA.zoomStart),
+    team: isTeamFight(xs)
   });
 }
 
@@ -894,7 +1047,8 @@ export function cameraStep(camera, xs) {
     zoomscale,
     maxscale,
     gladiatorsX,
-    crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale)
+    crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale),
+    team: isTeamFight(xs)
   });
 }
 
@@ -907,8 +1061,36 @@ export function cameraStep(camera, xs) {
  *
  * ```text
  *   stage x = originX + gladiatorsX + arenaX * zoom/100
- *   stage y = originY + (arenaY * RANK_DEPTH_FACTOR - lift) * zoom/100
+ *   stage y = originY + (y_eff - lift) * zoom/100                  a pair
+ *   stage y = teamFront(zoom) + (y_eff - 200 - lift) * zoom/100     a team
+ *   y_eff   = y + max(0, 200 - y) * (1 - RANK_DEPTH_FACTOR)
  * ```
+ *
+ * ► **IDENTICAL TO THE BUILD FOR EVERY POSITION THE BUILD CAN REACH** — any
+ *   `y >= 200`, at any zoom and any lift, on a camera that is not `team`
+ *   (two placed actors, no camera, or a camera object that does not say
+ *   `team`). That is the build's own pair, and every rock: `y_eff` is `y`
+ *   there and the first `stage y` line is the expression this function has
+ *   always evaluated. The camera's own arithmetic (bands, ease, pan, crowd) is
+ *   the build's for every roster.
+ *
+ * ► **AND IT IS NOT IDENTICAL BEHIND THE FRONT RANK, IN ANY CAMERA, BY
+ *   DESIGN.** The build has no rear ranks, so a fighter at `y` 103 or 6 is
+ *   authored whichever camera frames him — and the squash is what keeps him
+ *   off the crowd's wall. **A pair's camera is not exempt:** without it, a
+ *   duellist at rank 2 stands inside arena 1's wall above zoom ~37, which is
+ *   the owner's bug in a 1v1. (Codex's review, 2026-09-23, read the first
+ *   version of this note — "for a pair this is the build, expression for
+ *   expression" — as a promise the code broke, and it was right about the
+ *   words: y 103 at zoom 50 moved from 218.25 to 242.5. The words were
+ *   wrong, not the squash.) In a duel the only rank change the rules offer is
+ *   the one that CLOSES on the opponent (the `RANK_BACK`/`RANK_FRONT` offer in
+ *   `src/team/ss2-rules.js`), so a 1v1 that opens with both at 200 has no rank
+ *   move to make; one that opens split does, and is squashed.
+ *
+ * ► **ONLY THE FRAMING IS TEAM-ONLY.** The second `stage y` line — the pivot
+ *   of `SS2_TEAM_FRAMING` — is taken only when `camera.team === true`. See it
+ *   and `RANK_DEPTH_FACTOR`, both authored.
  *
  * ► **THE ZOOM IS ON BOTH TERMS BECAUSE IT IS ON THE CLIP.** The build sets
  *   `gladiators._xscale = _yscale`, so a zoom-out does not merely narrow the
@@ -927,15 +1109,26 @@ export function cameraStep(camera, xs) {
 export function arenaToStage(camera, { x = 0, y = 200, lift = 0 } = {}) {
   const zoom = (camera?.zoomscale ?? 100) / 100;
   const pan = camera?.gladiatorsX ?? 0;
+  // Only depth BEHIND the front rank is squashed. A non-number is passed
+  // through untouched, so it coerces exactly as it always has.
+  const depth = Number.isFinite(y) && y < FRONT_RANK_Y
+    ? y + (FRONT_RANK_Y - y) * (1 - RANK_DEPTH_FACTOR)
+    : y;
   return {
     x: SS2_ARENA_ORIGIN.x + pan + x * zoom,
-    y: SS2_ARENA_ORIGIN.y + (y * RANK_DEPTH_FACTOR - lift) * zoom
+    y: camera?.team === true
+      ? teamFrontLineAt(camera.zoomscale ?? 100) + (depth - FRONT_RANK_Y - lift) * zoom
+      : SS2_ARENA_ORIGIN.y + (depth - lift) * zoom
   };
 }
 
 /**
  * Where a gladiator's feet rest at this camera — `arenaToStage` at the front
  * rank, named because it is the number every other layer is judged against.
+ *
+ * For a pair it is the build's `166.75 + 200 × zoom/100`; for a team camera it is
+ * the authored front line of `SS2_TEAM_FRAMING`, which does not climb toward
+ * the wall as the camera pulls back.
  */
 export function groundLineAt(camera) {
   return arenaToStage(camera, { x: 0, y: 200, lift: 0 }).y;
