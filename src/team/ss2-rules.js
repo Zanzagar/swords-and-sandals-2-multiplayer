@@ -285,7 +285,9 @@ import { resourceValue } from "./resources.js";
 import {
   SS2_PSYCHE_DISCHARGE_CROWD,
   ss2CrowdActionOf,
+  ss2CrowdInterestOf,
   ss2CrowdOpening,
+  ss2CrowdStep,
   ss2CrowdStepEffects,
   ss2StrikeCrowdAction,
   ss2WincrowdCrowdAction
@@ -3206,6 +3208,378 @@ export function ss2ApproachValue(actor, target, best) {
   if (!(best > 0)) return 0;
   if (ss2FightDistance(actor, target) === null) return 0;
   return best;
+}
+
+/**
+ * ► **THE AI VALUES THE PURSE — OWNER'S DECISION 2026-09-23 (HANDOFF.md living
+ *   head): "The AI weighs the crowd's purse gain against the turn it spends, so
+ *   it plays to the crowd when it is safely out of range and ahead. No build
+ *   roll is invented; it is authored AI behaviour, tunable, measured over
+ *   seeded bouts."** Rejected: a 5% band emulating the build's villain (a new
+ *   AI random sample), and never.
+ *
+ * EVERY NUMBER HERE IS AUTHORED. What is the build's is only what the numbers
+ * are applied to: the crowd delta (`round(charisma / 2)`, `+0x4fdb`), the
+ * 1..100 clamp (`nextphase` `+0x3541`-`+0x35a3`) and the purse the crowd
+ * scales, `round(share * (100 + crowd_interest) / 100)` (`sprite:2249/frame:88`
+ * `+0x078c`), whose derivative is what makes a crowd point worth ONE HUNDREDTH
+ * OF A BASE PURSE to every member of the winning side.
+ *
+ * THE VALUATION, in the AI's own hitpoints (`ss2CrowdPleaserValue`):
+ *
+ * ```text
+ *   worth = purseInSwings * bestSwing * (gain / 100) * share
+ *     gain   = ss2CrowdStep(crowd, delta) - crowd    the crowd points it actually adds,
+ *                                                    clamped at the ceiling of 100
+ *     share  = the actor side's share of the living hitpoints (ss2SideHitpointShare),
+ *              standing in for the chance the purse is paid at all
+ * ```
+ *
+ * and it is weighed against the turn it spends — `ss2ApproachValue`, the price
+ * the ledger already puts on a turn out of reach (the swing the gladiator is
+ * walking toward), and the taunt when one is on offer. So against the approach
+ * alone the swing cancels, and at `purseInSwings` 100 the rule reads: **play to
+ * the crowd when `gain * share > 1`** — the crowd points it adds, weighted by
+ * how much of the fight's hitpoints the side holds, must exceed one.
+ *
+ * The risk of spending the turn is not priced: `ss2SafelyOutOfRange` requires
+ * it to be nil, including foes MOVING the actor, one shove or a chain of them,
+ * into a later foe's reach (`ss2FoesCanExpose`). And no foe may be able to walk past the poser
+ * (`ss2NoFoeWalksPast`). The other gates are in `chooseAiAction`.
+ *
+ * ► **TUNED AGAINST AN UNCONTAMINATED MEASUREMENT, per the lesson in
+ *   `SS2_CROWD.patience`'s docstring.** The trajectories were driven by the
+ *   OLD policy (`aiPlaysToCrowd: false` — measured action-for-action identical
+ *   to 951047e's AI over 288 demo bouts; only the id differs), and at
+ *   every decision an oracle copy of this arm (coefficients set to always
+ *   fire, every other gate as shipped) said whether the arm would be reached
+ *   with its other gates open. The demo roster through
+ *   `createVanillaBattleHost` + `demoSide`, 48 seeds a size; side went on to
+ *   win from a decision at that share:
+ *
+ *   ```text
+ *     share of living hitpoints    2v2 won        3v3 won
+ *     0.50 - 0.55                   7/12   58%     50/72    69%
+ *     0.55 - 0.60                  37/43   86%     89/103   86%
+ *     0.60 and above              292/293 99.7%   108/109  99.1%
+ *   ```
+ *
+ *   **So 0.6 is where "ahead" already meant "wins" under the policy this one
+ *   replaces** — measured without it. Every such decision in 1v1 (144) sat at
+ *   exactly 0.5, the opening approach, so no 1v1 bout on this roster changes.
+ *
+ * ► **WHAT IT DOES, measured with it ON — 96 seeds a size, same path**;
+ *   crossings are `tools/engagement-census.mjs`'s, counted per turn:
+ *
+ *   ```text
+ *              crowd-pleasers  actions/bout (mean, median, p95, max)  crossings  final crowd  red-blue
+ *     1v1 off        0           21.9  21   28   31                     0        1.0 always     46-50
+ *     1v1 on         0           identical, bout for bout                0        1.0 always     46-50
+ *     2v2 off        0           54.4  55   65   70                    34        1.0 always     44-52
+ *     2v2 on      7.9/bout       58.5  59   80   91  (+7.5%)           34        mean 13.6      43-53
+ *     3v3 off        0           89.1  89  108  130                24.5%        1.0 always     48-48
+ *     3v3 on      5.8/bout       95.3  96  115  130  (+7.0%)       24.0%        mean 18.2      48-48
+ *   ```
+ *
+ *   Win rate between otherwise-equal sides, ONE side given the policy on the
+ *   same 96 seeds: red 44 -> 45 (2v2) and 48 -> 46 (3v3); blue 52 -> 54 and
+ *   48 -> 46. **No side measurably wins or loses by playing to the crowd.**
+ *   What it buys is the purse: **with the old policy the crowd ended every
+ *   bout at its floor of 1** — the AI's favourite swing, `quick_attack`,
+ *   writes -1 on every phase (`+0x6304`), so the multiplier was 1.01x always.
+ *   Every bout settled; the longest ran 33 rounds against
+ *   `SS2_CROWD.patience` 200.
+ *
+ * ► **THE FIRST CUT HAD NEITHER `ss2FoesCanExpose` NOR `ss2NoFoeWalksPast`, and
+ *   what it did is the reason the second exists** (two Codex reviews found the
+ *   first's holes). Without the crossing gate, same 96 seeds: 2v2 16.8
+ *   crowd-pleasers a bout, +31% length (p95 65 -> 106), **crossings 34 ->
+ *   1,220 turns**; 3v3 +11%. On the first cut, 1,209 of the 1,615 2v2
+ *   crowd-pleasers came in a 2-on-1 with nobody engaged: the survivor walked
+ *   the whole gap alone — its next action a walk 658 times, a swing 369, a
+ *   taunt 0 — and, a rank over, walked straight past a winner standing still.
+ *   The owner saw fighters in the wrong place on screen the same day. The
+ *   crossing gate was chosen from four, same seeds, same definition (2v2
+ *   crossings / crowd-pleasers a bout; 3v3 crossings):
+ *
+ *   ```text
+ *     no gate                                   1,220 / 16.8    25.9%
+ *     not BETWEEN a foe and its target          (48 seeds: no change in 2v2 at all)
+ *     every foe ENGAGED by a partner               34 /  3.2    23.2%
+ *     every foe in the poser's LANE                34 /  7.9    24.3%  (3v3: 1.7 a bout)
+ *     no foe coming for it from another rank       34 /  7.9    24.0%  (3v3: 5.8 a bout)  <- shipped
+ *   ```
+ *
+ *   The shipped one removes every crossing posing created and keeps the most
+ *   crowd play of those that do. Measured with `tools/engagement-census.mjs`
+ *   at its defaults (24 seeds): 2v2 crossings 0 -> 0, actions 1,317 -> 1,419;
+ *   3v3 crossings 552 -> 612 of 2,192 -> 2,338 turns (25.2% -> 26.2%, within
+ *   a point of the 96-seed 24.5% -> 24.0% above). Idle rests stay 0.
+ *
+ * ► **NOT MODELLED, NAMED: THE CROWD TAKES IT BACK.** The purse reads
+ *   `crowd_interest` when the bout is WON, and every later quick attack
+ *   subtracts one, down to the floor. This values the gain on the step it is
+ *   bought, not the part that survives to the win. Measured: 40 of 96 2v2
+ *   bouts and 35 of 96 3v3 bouts with the policy on still end at 1.
+ */
+export const SS2_AI_CROWD = Object.freeze({
+  /**
+   * What the actor's OWN whole base purse — the crowd from 0 to 100, which
+   * doubles it — is worth, counted in the actor's own best swings. AUTHORED:
+   * the exchange rate between gold and hitpoints is a preference, and nothing
+   * in the build or the battle state can derive it (`character_xp`, the purse's
+   * base, is not a battle resource at all).
+   *
+   * **100 makes a crowd point, one hundredth of a purse, worth one swing at
+   * full confidence** — the legible rule above. What it decides on a roster is
+   * WHO bothers: a crowd delta of 3 (charisma 5-6) clears it from share 0.34, a
+   * delta of 2 (charisma 3-4) from 0.5, and a delta of 1 (charisma 1-2) never,
+   * so `aheadShare` is the binding gate for everyone else. Measured on the
+   * first cut (before the displacement and crossing gates), 48 seeds a size:
+   * 75 / 100 / 150 gave 797 / 812 / 817 crowd-pleasers in 2v2
+   * and 331 / 333 / 341 in 3v3, the same win totals — the difference is near the
+   * ceiling, where this also decides how close to 100 the crowd is pushed; 50
+   * left the charisma-6 gladiators playing only above a share of 0.67 (1.8 a
+   * 2v2 bout).
+   */
+  purseInSwings: 100,
+  /**
+   * "AHEAD": the actor's side holds at least this share of every living
+   * combatant's hitpoints (`ss2SideHitpointShare`). AUTHORED, and set on the
+   * uncontaminated table above: at 0.6 and over, the side already won 99.7%
+   * (2v2) and 99.1% (3v3) of the time under the old policy. Two equal sides
+   * are at exactly 0.5, so the opening approach never qualifies. Measured with
+   * the policy on (the first cut, swept at `purseInSwings` 75, 48 seeds a
+   * size): 0.55 flipped
+   * 11 of 48 3v3 winners (26-22 -> 33-15) — posing while barely ahead lets the
+   * other side back in; 0.67 cut crowd play to 1.8 a 2v2 bout and 3.7 a 3v3
+   * one.
+   */
+  aheadShare: 0.6
+});
+
+/**
+ * The item ids whose verb can DAMAGE a foe at any distance the melee reach does
+ * not cover — the bolts, the fireballs, molten death, the ghost strike and the
+ * whirlwind. A foe carrying one is a threat wherever it stands (conservative
+ * for the whirlwind, whose own gate is a reach). Read lazily: the constants are
+ * declared further down this file.
+ */
+function ss2StrikeItemIds() {
+  return [
+    ...Object.values(SS2_BOLT_SPELLS).map((spell) => spell.itemId),
+    ...Object.values(SS2_FIREBALL_SPELLS).map((spell) => spell.itemId),
+    SS2_DEATH_FROM_ABOVE.itemId,
+    SS2_GHOST_STRIKE.itemId,
+    SS2_WHIRLWIND.itemId
+  ];
+}
+
+/**
+ * Can `foe` strike `actor` on its next turn, from where both stand NOW?
+ *
+ * One turn is one action here, so a foe out of its own reach spends its turn
+ * getting into it and cannot swing in the same breath; this asks only what the
+ * foe could be OFFERED against the actor this round, read the way the offer
+ * reads it:
+ * - no position on either side: YES — the position-blind vocabulary offers
+ *   every attack against every foe;
+ * - a drawn bow: YES — shots from its floor outward, the bash inside it;
+ * - carrying a strike spell (`ss2StrikeItemIds`): YES;
+ * - a ready psyche charge: the discharge gate, `ss2PsycheDischargeInRange`;
+ * - otherwise the melee offer exactly: `distance < ss2Reach(foe)` in the same
+ *   lane (`ss2SameLane`).
+ *
+ * ► **NOT COUNTED, NAMED:** the taunt's strike arm (effect 1, `landing / 2`
+ *   of the chance twice over) — it is offered at ANY range on the long-range
+ *   frames, so counting it would make nobody safe from anybody. ~~and the
+ *   displacing verbs (shove, gale, command), which move the actor rather than
+ *   hurt it, so a command can pull it into a second foe's reach inside one
+ *   round.~~ **The displacing verbs ARE counted since 2026-09-23 — see
+ *   `ss2FoesCanExpose`.** That sentence named the hole and left it open, and a
+ *   Codex review reproduced it: pose, be commanded to 440, be struck by a
+ *   second foe at 480 before the next turn.
+ */
+function ss2FoeCanStrike(foe, actor) {
+  const distance = ss2FightDistance(foe, actor);
+  if (distance === null) return true;
+  if (ss2InBowMode(foe)) return true;
+  if (ss2StrikeItemIds().some((itemId) => ss2InventorySlotHolding(foe, itemId) !== null)) return true;
+  const counter = resourceValue(foe, "psyche_up", SS2_PSYCHE_UP.floor);
+  if (counter >= SS2_PSYCHE_UP.dischargeAt && ss2PsycheDischargeInRange(foe, actor)) return true;
+  return distance < ss2Reach(foe) && ss2SameLane(foe, actor);
+}
+
+/**
+ * Can the foes MOVE `actor` this round to where a foe still to act can strike
+ * it before its next turn? Some foes spend their turns moving the actor, a
+ * later one swings.
+ *
+ * ► **TWO HOLES, BOTH FOUND BY CODEX ADVERSARIAL REVIEWS OF THIS ARM
+ *   (2026-09-23) AND BOTH REPRODUCED BEFORE THEY WERE FIXED.**
+ *   1. ONE displacement: hero posing at 0, a command caster at 500, a second
+ *      foe at 480 — command pulled the hero to 440 and the second foe took
+ *      `quick_attack`.
+ *   2. A CHAIN of them, which the first fix evaluated one at a time from the
+ *      actor's ORIGINAL position (and named the omission rather than closing
+ *      it): seed 8, one lane, hero at 0, foes at 600, 800 and -400 — two
+ *      legal effect-2 taunts moved the hero to -150 and then -300, and the
+ *      third foe struck it. Each shove alone was safe.
+ *
+ * WHO ACTS BEFORE THE ACTOR'S NEXT TURN: every living foe, once. Initiative
+ * is fixed at construction and cycled (`ss2InitiativeOrder`, the resolver's
+ * `advanceTurn`), but a rule set's view carries no order, so EVERY ORDER is
+ * tried — which comes to: any sequence of DISTINCT foes, each shoving the
+ * actor from where the last one left it, followed by a strike from a foe not
+ * yet used. At most `foes - 1` shoves, since somebody must be left to swing;
+ * three foes are 6 one-shove and 24 two-shove chains.
+ *
+ * - **COMMAND (39) and GALE (38): CONSERVATIVE — carrying one is enough**
+ *   whenever a second foe is alive. Both are offered on possession at any
+ *   distance (`SS2_COMMAND`, `SS2_GALE`); the command lands the actor at the
+ *   caster's stand-off and the gale throws it 1000 units in the caster's
+ *   facing, so neither is chained: either already refuses.
+ * - **THE TAUNT'S SHOVE: EVALUATED, CHAINED.** Effect 2 knocks a melee target
+ *   `charisma * 25`, at least 20 (`SS2_TAUNT.forceFactor`, `+0x69d4`), signed
+ *   by the TAUNTER's facing — and facing is re-derived from positions before
+ *   the taunter acts, so BOTH directions are tried at every link, each landing
+ *   clamped to the arena (`SS2_ARENA.clamp`). Counting every taunt-capable foe
+ *   instead would make nobody safe: the taunt is offered at any range on the
+ *   long-range frames.
+ * - **A SHOVE** is offered only inside the shover's reach, where
+ *   `ss2FoeCanStrike` has already called it a threat.
+ *
+ * ► **WHAT THE CHAIN COST, MEASURED: NOTHING ON THE DEMO ROSTER.** 288 bouts
+ *   (96 seeds at each size) are action-for-action identical with the chained
+ *   search and with the one-shove check it replaced — no demo gladiator has
+ *   ever posed in a state only a chain exposes. The cost is conservatism
+ *   where it bites: both push directions at every link can refuse a pose a
+ *   foe's actual facing would have allowed (pinned in the tests).
+ *
+ * ► **NOT MODELLED, NAMED:** the actor's own ALLIES moving a foe toward it
+ *   (a knockback, a shove, a gale, a command of theirs) before that foe acts;
+ *   and a landing the build's arena-wall phase cut would have stopped short —
+ *   this engine clamps and lets it stand.
+ */
+function ss2FoesCanExpose(actor, foes) {
+  if (foes.length < 2) return false;
+  const carriesDisplacement = (foe) =>
+    [SS2_COMMAND.itemId, SS2_GALE.itemId].some((itemId) => ss2InventorySlotHolding(foe, itemId) !== null);
+  if (foes.some(carriesDisplacement)) return true;
+  if (!Number.isFinite(actor.x)) return true;
+  const pushOf = (foe) => Math.max(
+    SS2_TAUNT.minimumForce,
+    Math.abs(resourceValue(foe, "charisma", 0) * SS2_TAUNT.forceFactor)
+  );
+  // Depth-first over (who has shoved, where the actor stands). A state already
+  // searched is not searched again: which foes are left and where the actor is
+  // decide everything after it.
+  const searched = new Set();
+  const exposed = (x, used) => {
+    for (const shover of foes) {
+      if (used.has(shover.id)) continue;
+      // A shove needs somebody left to act after it. A PRUNING bound only: a
+      // chain that used every foe would find nobody left to strike, so
+      // dropping this line changes no answer (mutation-checked: it survives).
+      if (used.size + 1 >= foes.length) continue;
+      const next = new Set(used).add(shover.id);
+      for (const sign of [-1, 1]) {
+        const landing = clamp(x + sign * pushOf(shover), SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+        const key = `${[...next].sort(byCodeUnit).join(",")}@${landing}`;
+        if (searched.has(key)) continue;
+        searched.add(key);
+        const landed = { ...actor, x: landing };
+        if (foes.some((foe) => !next.has(foe.id) && ss2FoeCanStrike(foe, landed))) return true;
+        if (exposed(landing, next)) return true;
+      }
+    }
+    return false;
+  };
+  return exposed(actor.x, new Set());
+}
+
+/**
+ * "SAFELY OUT OF RANGE" — no living foe can strike the actor before its next
+ * turn: not from where it stands (`ss2FoeCanStrike`), and not after other
+ * foes have moved it there, one shove or a chain of them (`ss2FoesCanExpose`).
+ * A concrete, testable predicate: the risk of spending a turn out of range is
+ * not PRICED, it is required to be nil.
+ */
+export function ss2SafelyOutOfRange(view) {
+  if (!view?.actor || view.foes.length === 0) return false;
+  if (view.foes.some((foe) => ss2FoeCanStrike(foe, view.actor))) return false;
+  return !ss2FoesCanExpose(view.actor, view.foes);
+}
+
+/**
+ * "NO FOE WALKS PAST": false when a living foe is COMING FOR THE ACTOR (the
+ * actor is that foe's nearest enemy, read the way `nearestFoe` reads it from
+ * the foe's side — `ss2FightDistance`, ties by id) from ANOTHER RANK.
+ *
+ * ► **WHY: THE OWNER SAW IT ON SCREEN.** Across ranks no body blocks a walk
+ *   (`ss2BodyBlocks` gates on `|dy| < physical_size`), so a foe heading for a
+ *   gladiator standing still in the next rank walks straight past it, and the
+ *   arena shows a fighter strolling through the enemy line. Measured on the
+ *   demo roster, 96 seeds: 2v2 crossings (`tools/engagement-census.mjs`'s
+ *   definition) were 34 turns with the old AI and **1,220 with crowd play
+ *   ungated; with this gate, 34**. Weighed against three other gates, each
+ *   with 2v2 crossings back at 34 or doing nothing — see `SS2_AI_CROWD`.
+ *
+ * A foe in the actor's OWN rank is stopped by the actor's body and fights it;
+ * a foe coming for somebody else is not walking at the actor. With the second
+ * axis off (`rankStride` 0) every pair shares a lane and this never refuses.
+ */
+export function ss2NoFoeWalksPast(view) {
+  const actor = view.actor;
+  const mine = view.allies.some((ally) => ally.id === actor.id) ? view.allies : [actor, ...view.allies];
+  return view.foes.every((foe) => {
+    let nearest = null;
+    let best = Infinity;
+    for (const enemy of mine) {
+      const distance = ss2FightDistance(foe, enemy);
+      if (distance === null) continue;
+      if (distance < best || (distance === best && nearest && enemy.id < nearest.id)) {
+        nearest = enemy;
+        best = distance;
+      }
+    }
+    return nearest?.id !== actor.id || ss2SameLane(foe, actor);
+  });
+}
+
+/**
+ * The actor side's share of EVERY LIVING COMBATANT'S HITPOINTS, 0..1 — the
+ * "ahead" measure and the confidence the purse is paid. Living only, so a
+ * fallen member counts 0 on its side; `view.allies` includes the actor, and
+ * the actor is added if a caller's view does not.
+ */
+export function ss2SideHitpointShare(view) {
+  const allies = view.allies.some((ally) => ally.id === view.actor.id)
+    ? view.allies
+    : [view.actor, ...view.allies];
+  const ours = allies.reduce((sum, ally) => sum + Math.max(0, ally.health), 0);
+  const theirs = view.foes.reduce((sum, foe) => sum + Math.max(0, foe.health), 0);
+  const total = ours + theirs;
+  return total > 0 ? ours / total : 0;
+}
+
+/**
+ * What a crowd-pleaser moving the crowd by `crowdAction` is worth to the actor,
+ * IN HITPOINTS — see `SS2_AI_CROWD` for the formula and what is authored in
+ * it. 0 when the battle declares no crowd, and 0 when the clamp leaves nothing
+ * to gain (a crowd already at 100).
+ *
+ * @param {object} view the actor's view (`battleResources`, `actor`, `allies`, `foes`)
+ * @param {number} crowdAction the crowd delta the verb adds
+ * @param {number} bestSwing the actor's best expected swing, in hitpoints
+ * @param {typeof SS2_AI_CROWD} [coefficients]
+ */
+export function ss2CrowdPleaserValue(view, crowdAction, bestSwing, coefficients = SS2_AI_CROWD) {
+  const crowd = ss2CrowdInterestOf(view);
+  if (crowd === null || !(bestSwing > 0)) return 0;
+  const gain = ss2CrowdStep(crowd, crowdAction) - crowd;
+  if (!(gain > 0)) return 0;
+  return coefficients.purseInSwings * bestSwing * (gain / 100) * ss2SideHitpointShare(view);
 }
 
 /**
@@ -9004,7 +9378,20 @@ export function createSs2TeamRules({
    * 59.4% of turns, cost three actions, and went 7-17 because it bought
    * nothing.
    */
-  backAttackBonus = SS2_BACK_ATTACK_BONUS
+  backAttackBonus = SS2_BACK_ATTACK_BONUS,
+  /**
+   * Whether an AI gladiator plays to the crowd (`wincrowd`) when it is SAFELY
+   * OUT OF RANGE and AHEAD and the purse gain beats the turn. See
+   * `SS2_AI_CROWD` for the valuation and its authored coefficients.
+   *
+   * ► **ON BY DEFAULT: THE OWNER CHOSE THE BEHAVIOUR (2026-09-23), so the tuned
+   *   policy is what ships.** It is in the rule-set id when OFF (`-no-crowd-play`),
+   *   the `aiTaunts` spelling: the suffix names what differs from the shipped
+   *   default. At the default the id is unchanged, so — as for every AI change
+   *   before it — the CODE VERSION, not the id, tells a peer running this
+   *   policy from one running the last.
+   */
+  aiPlaysToCrowd = true
 } = {}) {
   if (!FIGHT_MODES.includes(fightMode)) {
     throw new TeamRuleSetError(`fightMode must be one of: ${FIGHT_MODES.join(", ")}.`);
@@ -9075,8 +9462,11 @@ export function createSs2TeamRules({
     : !Number.isFinite(rankJoinSurplus)
       ? (rankJoinSurplus > 0 ? "-join-none" : "-join-always")
       : `-join-${rankJoinSurplus < 0 ? `down-${-rankJoinSurplus}` : `hold-${rankJoinSurplus}`}`;
+  // Same rule as the taunt's, and the same spelling: shipped ON, so the suffix
+  // appears when it is OFF.
+  const crowdPlaySuffix = aiPlaysToCrowd ? "" : "-no-crowd-play";
   const ruleSetId =
-    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}`;
+    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}${crowdPlaySuffix}`;
 
   return defineTeamRuleSet({
     // The mode is in the id because `toTeamWireState` carries only id,
@@ -9103,8 +9493,8 @@ export function createSs2TeamRules({
         "SS2's own attack arithmetic, read out of the licensed build's bytecode and replayed against " +
         "23 promoted goldens for attack directions 1-12. NOT runtime-verified: no capture has observed " +
         "this module driving a fight, and the stamina economy, action legality and AI policy it adds " +
-        "around the ingress have no runtime backing at all. The AI's melee choice is invented, as is " +
-        "the valuation that decides when it taunts rather than closing (ss2TauntValue); only its " +
+        "around the ingress have no runtime backing at all. The AI's melee choice is invented, as are " +
+        "the valuations that decide when it taunts or plays to the crowd rather than closing; only its " +
         "stamina gates are byte-decoded."
     },
     actionTypes: Object.values(Ss2ActionType),
@@ -14091,12 +14481,17 @@ export function createSs2TeamRules({
         if (range !== null && range > SS2_ADULATION.aiFightDistanceAbove) return adulationOption;
       }
 
-      // ► **`wincrowd` IS NEVER CHOSEN HERE, AND NO LINE OF THIS FUNCTION
+      // ► ~~**`wincrowd` IS NEVER CHOSEN HERE, AND NO LINE OF THIS FUNCTION
       //   RETURNS IT — deliberately, and it is the one controller verb this AI
-      //   is offered and does not take (2026-09-23).** Every `return` here, above
-      //   and below, finds its own type, and the fallbacks are `rest` or the
-      //   first option, which `legalActions` never makes `wincrowd` (it is
-      //   appended last but for the swap and the rest).
+      //   is offered and does not take (2026-09-23).**~~ **SUPERSEDED THE SAME
+      //   DAY BY THE OWNER'S DECISION THAT THE AI VALUES THE PURSE: ONE LINE
+      //   RETURNS IT, the crowd arm inside the walk block below**
+      //   (`aiPlaysToCrowd`, `SS2_AI_CROWD`), safely out of range and ahead.
+      //   The paragraphs below are the record of why it was not chosen before
+      //   the purse was priced, and their build citations stand. Every OTHER
+      //   `return` here, above and below, finds its own type, and the
+      //   fallbacks are `rest` or the first option, which `legalActions` never
+      //   makes `wincrowd` (it is appended last but for the swap and the rest).
       //
       //   **The build's villain takes it from a `choices` band** — in the
       //   branch its own range test fails into (`DoAction@0x23f835` `+0x08c3`,
@@ -14120,9 +14515,13 @@ export function createSs2TeamRules({
       //   so it never beats a step, a swing or a rest — and rest dominates it
       //   on the AI's own ledger (a rest gains stamina and heals; a wincrowd
       //   spends 3). Its only value is `crowd_interest`, which scales a purse
-      //   this AI does not weigh. So the fit that takes no invented sample is
-      //   the one built: offered to every seat, chosen by none, and the 5% band
-      //   is NOT reproduced. Pinned by `test/ss2-wincrowd.test.js`.
+      //   ~~this AI does not weigh~~ **this AI weighs since the owner's decision
+      //   of 2026-09-23 — `ss2CrowdPleaserValue`, in the same hitpoints.** ~~So
+      //   the fit that takes no invented sample is the one built: offered to
+      //   every seat, chosen by none, and the 5% band is NOT reproduced.~~ The
+      //   5% band is still NOT reproduced and no sample is taken: the choice is
+      //   the authored valuation's. Pinned by `test/ss2-ai-crowd.test.js`, and
+      //   by `test/ss2-wincrowd.test.js` for the states where it still refuses.
 
       if (!attackOnOffer) {
         const nearest = nearestFoe(view);
@@ -14155,6 +14554,50 @@ export function createSs2TeamRules({
           const range = nearest ? ss2FightDistance(actor, nearest) : null;
           if (swap && range !== null && range >= ss2ArcherMinimumRange(actor)) return swap;
         }
+
+        // ► **PLAY TO THE CROWD WHEN SAFELY OUT OF RANGE AND AHEAD — the
+        //   owner's decision of 2026-09-23, priced on the same ledger as the
+        //   taunt below.** Five gates, each a concrete predicate:
+        //   - out of range: this block is `!attackOnOffer`;
+        //   - SAFE: no foe can strike the actor before its next turn, from
+        //     where it stands or after another foe has moved it
+        //     (`ss2SafelyOutOfRange`) — the risk of the turn is required to be
+        //     nil rather than priced;
+        //   - NOBODY WALKS PAST IT: no foe is coming for it from another rank
+        //     (`ss2NoFoeWalksPast`), which is what put fighters on the wrong
+        //     side of each other on screen;
+        //   - AHEAD: the side holds `SS2_AI_CROWD.aheadShare` of the living
+        //     hitpoints (`ss2SideHitpointShare`);
+        //   - AFFORDABLE: `staminaleft > SS2_WINCROWD.staminaCost`, so the
+        //     spend alone cannot floor it at 0 and cost the next turn to a
+        //     forced rest.
+        //   Then the purse gain (`ss2CrowdPleaserValue`) must beat the turn: the
+        //   approach (`ss2ApproachValue`, the ledger's price of a turn out of
+        //   reach) and the taunt this gladiator would otherwise weigh. **Above
+        //   the taunt so that, when it declines, every arm below runs exactly
+        //   as it did** — which is what makes `aiPlaysToCrowd: false` the old
+        //   AI rather than a neighbour of it.
+        //
+        //   ► **ADULATION IS NOT PRICED HERE**: ladder arm 28 above casts it on
+        //     possession beyond 300, the build's rule, and returns first.
+        if (aiPlaysToCrowd && nearest && ss2CanBePriced(actor)) {
+          const pleaser = options.find((option) => option.type === Ss2ActionType.WINCROWD);
+          if (pleaser
+            && resourceValue(actor, "staminaleft", 0) > SS2_WINCROWD.staminaCost
+            && ss2SafelyOutOfRange(view)
+            && ss2NoFoeWalksPast(view)
+            && ss2SideHitpointShare(view) >= SS2_AI_CROWD.aheadShare) {
+            const ranged = ss2SwingValues(actor, nearest);
+            const bestSwing = Math.max(...Object.values(ranged.expected));
+            const worth = ss2CrowdPleaserValue(view, ss2WincrowdCrowdAction(actor), bestSwing);
+            const tauntRival = aiTaunts && options.some((option) =>
+              option.type === Ss2ActionType.TAUNT && option.targetId === nearest.id)
+              ? ss2TauntValue(actor, nearest, ranged.chances)
+              : 0;
+            if (worth > Math.max(ss2ApproachValue(actor, nearest, bestSwing), tauntRival)) return pleaser;
+          }
+        }
+
         // ► **CHANGE RANK BEFORE WALKING, when the fight is in another rank.**
         //
         //   Ranked BEFORE the walk for a measured reason: with the second axis

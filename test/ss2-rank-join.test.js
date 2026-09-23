@@ -94,7 +94,7 @@ const gladiator = (overrides = {}) => ({
 const FRONT = SS2_ARENA.frontY;
 const BACK = SS2_ARENA.frontY - SS2_ARENA.rankStride;
 
-function staged({ red, blue, seed = 3, rankJoinSurplus }) {
+function staged({ red, blue, seed = 3, rankJoinSurplus, aiPlaysToCrowd }) {
   const place = (prefix, list) => ({
     id: prefix,
     name: prefix,
@@ -108,7 +108,9 @@ function staged({ red, blue, seed = 3, rankJoinSurplus }) {
   });
   const battle = createTeamBattle({
     seed,
-    rules: rankJoinSurplus === undefined ? ss2TeamRules : createSs2TeamRules({ rankJoinSurplus }),
+    rules: rankJoinSurplus === undefined && aiPlaysToCrowd === undefined
+      ? ss2TeamRules
+      : createSs2TeamRules({ rankJoinSurplus, aiPlaysToCrowd }),
     teams: [place("red", red), place("blue", blue)]
   });
   for (const [prefix, list] of [["red", red], ["blue", blue]]) {
@@ -140,9 +142,10 @@ function staged({ red, blue, seed = 3, rankJoinSurplus }) {
  *   behavioural test returned `walk-right`.** Worth keeping: a test that stages
  *   past the arm it means to exercise reports the wrong function green.
  */
-function brawl(rankJoinSurplus, { keeper = true } = {}) {
+function brawl(rankJoinSurplus, { keeper = true, aiPlaysToCrowd } = {}) {
   return staged({
     rankJoinSurplus,
+    aiPlaysToCrowd,
     red: [
       { id: "hero", fields: gladiator(), x: 600, y: BACK },
       { id: "mate", fields: gladiator(), x: -60, y: FRONT }
@@ -169,11 +172,19 @@ test("THE SHIPPED RULE SET JOINS, at `SS2_RANK_JOIN_SURPLUS` — owner's call 20
   //   one that changed.
   assert.equal(SS2_RANK_JOIN_SURPLUS, 0);
   assert.equal(createSs2TeamRules().rulesDescriptor?.id ?? createSs2TeamRules().id, ss2TeamRules.id);
+  // ► **MOVED 2026-09-23 BY `aiPlaysToCrowd`, the owner's decision that the AI
+  //   values the purse — and the dial off is the proof that nothing else moved
+  //   it.** With `keeper` gone red is 2-on-1 with everybody whole: 340 of the
+  //   510 living hitpoints, 0.67, past `SS2_AI_CROWD.aheadShare`; and `hero`,
+  //   in the back rank at 600, is out of every foe's reach. Safely out of range
+  //   and ahead, so the shipped AI now plays to the crowd where it joined —
+  //   `rank-front` before, `wincrowd` after.
   assert.equal(
-    suggestAction(brawl(undefined, { keeper: false }), "hero").type,
+    suggestAction(brawl(undefined, { keeper: false, aiPlaysToCrowd: false }), "hero").type,
     Ss2ActionType.RANK_FRONT,
-    "at the shipped default a gladiator with a clear rank walks into its ally's fight"
+    "at the shipped join default a gladiator with a clear rank walks into its ally's fight"
   );
+  assert.equal(suggestAction(brawl(undefined, { keeper: false }), "hero").type, Ss2ActionType.WINCROWD);
 });
 
 test("AND THE SHIPPED DEFAULT CARRIES NO SUFFIX, which is what keeps every pinned hash", () => {
@@ -284,7 +295,16 @@ test("AT 0 IT HOLDS, because leaving would desert the rank it is standing in", (
 test("AND AT 0 IT DOES JOIN once its own rank is clear", () => {
   // No `keeper`: the surplus after leaving is 0, which meets the gate. One
   // gladiator apart from the test above, and it flips the decision.
-  assert.equal(suggestAction(brawl(0, { keeper: false }), "hero").type, Ss2ActionType.RANK_FRONT);
+  //
+  // ► **THE CROWD ARM IS SWITCHED OFF HERE, because removing `keeper` also puts
+  //   red ahead** (340 of 510 living hitpoints) with `hero` safely out of range,
+  //   where the shipped AI now plays to the crowd — MOVED 2026-09-23, see the
+  //   first test. With it off, this is the join dial and nothing else.
+  assert.equal(
+    suggestAction(brawl(0, { keeper: false, aiPlaysToCrowd: false }), "hero").type,
+    Ss2ActionType.RANK_FRONT
+  );
+  assert.equal(suggestAction(brawl(0, { keeper: false }), "hero").type, Ss2ActionType.WINCROWD);
 });
 
 test("IT JOINS ONLY A RANK WHERE AN ALLY IS ALREADY ENGAGED — the anti-pile-up guard", () => {

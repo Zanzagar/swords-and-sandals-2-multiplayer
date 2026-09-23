@@ -269,17 +269,27 @@ test("a presented wincrowd plays its clip on the actor, MAP_NAMED and drawable, 
 
 /* ------------------------------------------------------------------ *
  * The AI — the build's `choices > 95` band is a draw this AI never    *
- * takes, and wincrowd prices at zero hitpoints                        *
+ * takes; ~~and wincrowd prices at zero hitpoints~~ since 2026-09-23   *
+ * it prices the PURSE, and only safely out of range and ahead         *
+ * (`test/ss2-ai-crowd.test.js`)                                       *
  * ------------------------------------------------------------------ */
 
-test("the AI is offered wincrowd and never takes it: near or far, rested or below 30%, taunting or not", () => {
+test("the AI is offered wincrowd and never takes it BEHIND: near or far, rested or below 30%, taunting or not", () => {
   // The build's villain takes it on `choices = randomBetween(1, 100) > 95` (+0x0b7c, +0x0e6b), or
   // rests below 30% stamina (+0x0bc3, +0x0eb2), in the branch its OWN range test fails into
-  // (+0x08c3). This AI takes no `choices` sample, and its criterion — hitpoints — prices a
-  // phase that deals none, moves nobody and closes nothing at zero.
+  // (+0x08c3). This AI takes no `choices` sample, ~~and its criterion — hitpoints — prices a
+  // phase that deals none, moves nobody and closes nothing at zero.~~
+  //
+  // ► **CORRECTED 2026-09-23: it prices the purse now (`aiPlaysToCrowd`, the owner's decision),
+  //   and plays to the crowd when SAFELY OUT OF RANGE AND AHEAD.** Every state here still
+  //   refuses, for a reason this comment used not to need: the hero is BEHIND — `staged` gives
+  //   the foe vitality 30, 650 max health against the hero's 170, so the hero's side holds 21%
+  //   of the living hitpoints and the ahead gate is shut. The old AI, `aiPlaysToCrowd: false`,
+  //   is swept too: it refuses everywhere, as it always did.
   const noTaunt = createSs2TeamRules({ aiTaunts: false });
+  const oldAi = createSs2TeamRules({ aiPlaysToCrowd: false });
   let offers = 0;
-  for (const rules of [ss2TeamRules, noTaunt]) {
+  for (const rules of [ss2TeamRules, noTaunt, oldAi]) {
     for (const gap of [100, 150, 400, 1200]) {
       for (const fraction of [1, 0.35, 0.25, 0.05]) {
         for (const hero of [{}, { secondary_weapon: 61, equipped_weapon: 2, using_bow: true, ammo_left: 5 }]) {
@@ -293,10 +303,15 @@ test("the AI is offered wincrowd and never takes it: near or far, rested or belo
       }
     }
   }
-  assert.equal(offers, 64, "every one of those states OFFERED it: the test is about the choice, not the gate");
+  assert.equal(offers, 96, "every one of those states OFFERED it: the test is about the choice, not the gate");
 });
 
 test("a whole AI bout at herolevel 5: wincrowd offered on every turn, taken on none", () => {
+  // ► **STILL TRUE SINCE THE AI VALUES THE PURSE (2026-09-23), and not because it prices the
+  //   crowd at zero.** The foe here is far ahead (650 max health against 170) and plays to the
+  //   crowd whenever it is safely out of range — but it never is on its own turn: the hero's
+  //   opening walk closes the whole 500 in one step (to 86, inside both reaches), and the fight
+  //   never opens again. The hero, behind all bout, never qualifies.
   const battle = staged({ controller: "ai", gap: 500 });
   let offers = 0;
   let taken = 0;
