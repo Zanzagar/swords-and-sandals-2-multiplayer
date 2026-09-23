@@ -1634,7 +1634,7 @@ unaffected*):
 | --- | --- | --- |
 | `destroy_armour` `+0x0dfb`, `+0x0e28` | `xspeed`, `-30 + RandomNumber(20)` facing right or `10 + RandomNumber(30)` facing left | exactly one of the two |
 | `destroy_armour` `+0x0e5b`, `+0x0e6f` | `dy = -40 + RandomNumber(20)`, `rotationspeed = -5 + RandomNumber(5)` | both, unconditionally |
-| `attacker.onEnterFrame` `+0x5091` | `attacker.wincrowd_move = 1 + RandomNumber(6)`, only while the member is `undefined` (`+0x5071`) | at most one per battle |
+| `attacker.onEnterFrame` `+0x5091` | `attacker.wincrowd_move = 1 + RandomNumber(6)`, only while the member is ~~`undefined`~~ not a positive number (`!(wm > 0) \|\| wm == undefined`, `+0x5050`/`+0x505d`/`+0x5071`) | ~~at most one per battle~~ **at most one per fighter's CLIP — `wincrowd_move` lives on the gladiator clip instance, so a 1v1 can draw twice** (write-nothing verifier, 2026-09-23) |
 | `attacker.onEnterFrame` `+0x7815`, `+0x7845`, `+0x7875` | `attack_direction = 1 + RandomNumber(9)` on the `cast_weaken_armour` path | three |
 | frame 74 `DoAction@0x24a8ba` `+0x0149`, `+0x039b` | `combatlost` presentation, outside the turn loop | — |
 
