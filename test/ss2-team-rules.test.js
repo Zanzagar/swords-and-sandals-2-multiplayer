@@ -316,6 +316,11 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "cast-hell-fireball",
     "cast-lightning-bolt",
     "cast-regenerate",
+    // ► **JOINED 2026-09-22 — rejuvenate, `getphase("cast_rejuvinate")` (the
+    //   build's spelling), written by ladder arm 1 (`+0x05ed`) and consumed at
+    //   `+0x8d69`-`+0x8f58`.** Self-targeted, zero samples: three pools refilled
+    //   and nine fields restored from `backup_*`.
+    "cast-rejuvinate",
     // ► **JOINED 2026-09-22 — the teleport, `getphase("cast_teleport")`,
     //   written by ladder arm 26 (`+0x0f91`) and consumed at
     //   `+0x7541`-`+0x76ad`.** Self-targeted, one sample (the destination).
@@ -1144,6 +1149,16 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     //   the commit that moved it.
     "ammo_left",
     "armourclass", "armourclass_max",
+    // ► **ADDED 2026-09-22 WITH `cast_rejuvinate`, THE `psyche_up` SHAPE, AND
+    //   THEY MOVED NOTHING.** The nine fields the arm restores from
+    //   (`+0x8e41`-`+0x8f08`), which `backup_char` writes before the fight. No
+    //   `SS2_RESOURCE_DEFAULTS` entry, so only a record that STATES one — or,
+    //   by this engine's rule in `ss2Combatant`, carries item 43 — declares the
+    //   key. No golden and no roster gladiator does either: the 23 golden
+    //   replay hashes were taken before and after (`tools/golden-hash-census.mjs`),
+    //   all 23 unchanged (`test/ss2-rejuvenate.test.js` pins the mechanism).
+    "backup_boot", "backup_breastplate", "backup_gauntlet", "backup_greaves", "backup_helmet",
+    "backup_shield", "backup_shinguard", "backup_shoulderguard", "backup_weapon",
     "boot", "boot_defence",
     "breastplate", "breastplate_defence",
     "character_level", "charisma",
@@ -1318,7 +1333,10 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
     "spell_boundless_energy", "spell_regenerate",
     // 2026-09-22: no default; declared only beside a timed counter, of which
     // `gladiator()` has none.
-    "timed_spell_tick_owed"
+    "timed_spell_tick_owed",
+    // 2026-09-22, the same shape: declared when stated OR when a slot holds 43.
+    "backup_boot", "backup_breastplate", "backup_gauntlet", "backup_greaves", "backup_helmet",
+    "backup_shield", "backup_shinguard", "backup_shoulderguard", "backup_weapon"
   ];
 
   // (1) No weapon id at all: everything but what either weapon slot answers for.

@@ -483,6 +483,11 @@ export const Ss2ActionType = Object.freeze({
   //   Two types for two `getphase` labels, the bolts' reason.
   CAST_REGENERATE: "cast-regenerate",
   CAST_BOUNDLESS_ENERGY: "cast-boundless-energy",
+  // ► **REJUVENATE — THE FULL REFILL, AND THE ONLY VERB THAT GIVES ARMOUR
+  //   BACK.** `+0x8d69`-`+0x8f58` of the same block; see `SS2_REJUVENATE`.
+  //   ZERO samples, so not in `ATTACK_BANDS`, for the reason `shove` is not.
+  //   The build's spelling, `rejuvinate`, for the reason `frightning` is kept.
+  CAST_REJUVINATE: "cast-rejuvinate",
   /**
    * The phase a TAUNTED gladiator is forced into: it runs away.
    *
@@ -1061,6 +1066,10 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // `+0x8d1f`) — carried on the event; there is no victim clip at all.
   [Ss2ActionType.CAST_REGENERATE]: "cast_regenerate",
   [Ss2ActionType.CAST_BOUNDLESS_ENERGY]: "cast_boundless_energy",
+  // `phase_decision == "cast_rejuvinate"` at `+0x8d6f`, the decision ladder
+  // arm 1 writes (`+0x05ed`). The caster plays `Rejuvinate` (`+0x8ded`, capital
+  // R as the build passes it) — carried on the event; there is no victim clip.
+  [Ss2ActionType.CAST_REJUVINATE]: "cast_rejuvinate",
   // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
   //   of the decision table is `taunted1 == true` -> facing right
   //   `getphase("runleft")`, facing left `getphase("runright")`
@@ -4963,6 +4972,10 @@ const SS2_POOL_CEILING = Object.freeze({
  *   the first entry past arm 7, so a villain holding 49 drinks a HEALTH potion
  *   below half (arms 2, 4-6) and never an armour or stamina one (10-13) — the
  *   build's order (`test/ss2-death-from-above.test.js`).
+ *   **Arm 1 HAS A VERB SINCE 2026-09-22 (`cast_rejuvinate`)** and is struck
+ *   too: `chooseAiAction` tests it FIRST, above arm 3 and this table, so a
+ *   villain below `hitpointsmax / 1.5` holding 43 never reaches a health
+ *   potion — below half implies below the line (`test/ss2-rejuvenate.test.js`).
  */
 export const SS2_POTION_LADDER = Object.freeze([
   Object.freeze({ arm: 2, itemId: 5 }),
@@ -5142,6 +5155,128 @@ const SS2_TIMED_SPELL_COUNTERS = Object.freeze([
  * carries no new hashed state, and no golden moves.
  */
 const SS2_TIMED_SPELL_CLOCK = "timed_spell_tick_owed";
+
+/* ------------------------------------------------------------------ */
+/* Rejuvenate: three pools refilled, nine fields restored from backup   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_rejuvinate` (id 43), byte-derived 2026-09-22 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base `0x240c85`),
+ * `+0x8d69`-`+0x8f58`:
+ *
+ * ```text
+ *   phase_decision == "cast_rejuvinate"                              +0x8d69
+ *     register:3.crowd_action = 3                                    +0x8d7c
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka)  +0x8d89
+ *     if (attacker.struck == null) {                                 +0x8db0
+ *       cast_spell_icon(attacker, 43)                                +0x8dc7
+ *       attacker.struck = false                                      +0x8ddf
+ *       attacker.gotoAndPlay("Rejuvinate")                           +0x8ded
+ *       game_attacker.hitpoints   = game_attacker.hitpointsmax       +0x8e02
+ *       game_attacker.staminaleft = game_attacker.staminamax         +0x8e17
+ *       game_attacker.armourclass = game_attacker.armourclass_max    +0x8e2c
+ *       game_attacker.<piece> = <owner>.backup_<piece>, nine times   +0x8e41-+0x8f08
+ *       updatecharacter(game_attacker, attacker)                     +0x8f09
+ *     }
+ *     if (attacker.struck == true) { attacker.struck = null; nextphase() }  +0x8f24-+0x8f58
+ * ```
+ *
+ * ► **NO DRAW, NO TIMED COUNTER, NO `defender`.** The arm's only calls are
+ *   `Math.round`, `cast_spell_icon`, `gotoAndPlay`, `updatecharacter` (which
+ *   attaches art and nothing else) and `nextphase`. So the whole effect is the
+ *   twelve writes, and `nextphase` then charges `round(magicka)` against the
+ *   REFILLED stamina.
+ *
+ * ► **`armourclass_max` IS READ, NEVER WRITTEN.** `remove_armour` takes each
+ *   destroyed piece's `_defence` out of BOTH pools, so a caster who lost pieces
+ *   refills only to the LOWERED maximum — and `battlevalues`, which rebuilds
+ *   the maximum from the eight `_defence` fields, does that only while
+ *   `battle_started != true` (`root/frame:35` `+0x3a90`-`+0x3aa0`), never
+ *   mid-battle. The pieces come back; the armour class they were worth does not.
+ *
+ * ► **THE ARM WRITES NO `_defence` FIELD; ITS `nextphase` DOES.**
+ *   `battlevalues` at the end of every `nextphase` (`+0x35f1`, `+0x3605`)
+ *   recomputes each `<piece>_defence` from the piece id UNGATED
+ *   (`+0x3480`-`+0x3633`), so in the build a restored piece is worth its id
+ *   again and a second removal takes it AGAIN. The resolve branch reprices each
+ *   restored piece through `ss2PieceDefence`, the function `ss2BattleValues`
+ *   itself uses. ~~This engine never writes a `_defence` field at all, so a
+ *   restored piece's is still the construction value, which is what
+ *   `battlevalues` recomputes from the same id.~~ **WRONG, and mine: that holds
+ *   only for a gladiator built BEFORE it lost the piece. One rebuilt after
+ *   (`battleStarted`, or a `derive: false` capture) carries the 0 the build's
+ *   own `nextphase` had priced the empty slot at, and the restored piece was
+ *   worth nothing — reproduced by a Codex review, 2026-09-22.** The shield is
+ *   priced at its MELEE value whatever the bow: see the named choice at the
+ *   repricing.
+ *
+ * ► **`backup_*` IS THE FIGHT-START SNAPSHOT.** Written only by `backup_char`
+ *   (`root/frame:35` `+0x2d80`-`+0x2e69`), whose four call sites are all
+ *   outside battle: `sprite:2249/frame:1` for the hero and the villain before
+ *   the fight (`+0x010a`, `+0x012e`), `sprite:2249/frame:231` after a win,
+ *   `root/button:2283`. This engine declares the nine at construction — see
+ *   `ss2Combatant` — which is the same moment.
+ *
+ * ► **THE SHOULDERGUARD'S BACKUP IS READ THROUGH A FREE VARIABLE IN THE BUILD**
+ *   (`GetVariable "whichcharacter"`, `+0x8e50`), which nothing in the build
+ *   assigns, so the rejuvenated shoulderguard there is `undefined`. **This
+ *   engine restores it from its own backup like the other eight — the owner's
+ *   decision, 2026-09-22.** See the resolve branch.
+ *
+ * ► **NOT MODELLED, AND NAMED:** `crowd_action = 3` (the crowd cue, as for the
+ *   bolts), `cast_spell_icon`, and `updatecharacter`'s art. The arm has no
+ *   `Jump` after `nextphase()` and falls through into the fireball test at
+ *   `+0x8f59`, which compares against a different label and so does nothing.
+ *
+ * ► **THE OFFER IS POSSESSION.** `hitpoints < hitpointsmax / 1.5` is ladder
+ *   arm 1 of `villain_cast_spells`, the villain's DECISION, read by
+ *   `chooseAiAction` and by nothing else.
+ */
+export const SS2_REJUVENATE = Object.freeze({
+  /** `cast_spell_icon(attacker, 43)` `+0x8dc7`; `check_inventory(43)` `+0x0593`. */
+  itemId: 43,
+  /** `attacker.gotoAndPlay("Rejuvinate")`, `+0x8ded` — capital R, as the build passes it. */
+  casterClip: "Rejuvinate",
+  /** `register:3.crowd_action = 3`, `+0x8d7c`. Presentation cue; not modelled. */
+  crowdAction: 3,
+  /**
+   * The nine restores, IN THE ARM'S ORDER — which is not `SS2_ARMOUR_PIECES`'
+   * order, and includes `weapon` (`+0x8edd`), which no verb in this engine
+   * writes, so its restore can never move anything here; it is kept so the list
+   * is the build's rather than a subset of it. `secondary_weapon` is NOT
+   * restored, and is not here.
+   */
+  restores: Object.freeze([
+    Object.freeze({ piece: "shoulderguard", backup: "backup_shoulderguard", offset: "+0x8e41" }),
+    Object.freeze({ piece: "gauntlet", backup: "backup_gauntlet", offset: "+0x8e59" }),
+    Object.freeze({ piece: "breastplate", backup: "backup_breastplate", offset: "+0x8e6f" }),
+    Object.freeze({ piece: "helmet", backup: "backup_helmet", offset: "+0x8e85" }),
+    Object.freeze({ piece: "greaves", backup: "backup_greaves", offset: "+0x8e9b" }),
+    Object.freeze({ piece: "shinguard", backup: "backup_shinguard", offset: "+0x8eb1" }),
+    Object.freeze({ piece: "boot", backup: "backup_boot", offset: "+0x8ec7" }),
+    Object.freeze({ piece: "weapon", backup: "backup_weapon", offset: "+0x8edd" }),
+    Object.freeze({ piece: "shield", backup: "backup_shield", offset: "+0x8ef3" })
+  ]),
+  /** `villain_cast_spells` arm 1, the FIRST arm (`+0x0593`-`+0x0607`). */
+  ladderArm: 1,
+  /**
+   * `villain.hitpoints < villain.hitpointsmax / 1.5` — `Push 1.5` at `+0x05d9`,
+   * `Divide`, `Less2` at `+0x05e6`: STRICT and UNROUNDED.
+   */
+  aiHealthDivisor: 1.5
+});
+
+/**
+ * The restores a caster CANNOT perform: a field it declares whose backup it
+ * does not. Empty for anything `ss2Combatant` built with id 43 in a slot. A
+ * field the caster does not declare at all is not missing — there is nothing
+ * of it to restore, and the resolver could not write it anyway.
+ */
+function ss2RejuvenateMissingBackups(view) {
+  const declared = declaredResourceNames(view);
+  return SS2_REJUVENATE.restores.filter(({ piece, backup }) => declared.has(piece) && !declared.has(backup));
+}
 
 export const SS2_TAUNT = Object.freeze({
   /**
@@ -5488,6 +5623,15 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   //   second rule is named as this engine's own.
   "spell_boundless_energy",
   "spell_regenerate",
+  // ► **THE NINE BACKUPS `cast_rejuvinate` RESTORES FROM, DECLARED 2026-09-22
+  //   WITH ITS VERB, AND THE `psyche_up` SHAPE AGAIN: NO DEFAULT.** A default
+  //   would be filled into every golden's combatant and move all 23 replay
+  //   hashes. `backup_char` writes them before the fight (`root/frame:35`
+  //   `+0x2d80`-`+0x2e69`) and nothing writes them in battle, so here they are
+  //   declared at construction — when a record STATES one, and when a declared
+  //   slot HOLDS id 43; see `ss2Combatant` and `SS2_REJUVENATE`. Read, never
+  //   written, by this rule set.
+  ...SS2_REJUVENATE.restores.map(({ backup }) => backup),
   "ammo_left",
   "armourclass",
   "armourclass_max",
@@ -5838,6 +5982,42 @@ export const SS2_WRITTEN_RESOURCES = Object.freeze([
 /* ------------------------------------------------------------------ */
 
 /**
+ * ONE piece's `<piece>_defence`, by `battlevalues`' own rule
+ * (`root/frame:35` `+0x3480`-`+0x3633`) — the UNGATED block, which runs at the
+ * end of every `nextphase` for both fighters (`+0x35f1`, `+0x3605`):
+ *
+ * ```text
+ *   breastplate_defence = round(breastplate * breastplate_dval)            +0x3480
+ *   helmet_defence = helmet > 25 ? round(herolevel * 0.5 * helmet_dval)    +0x34eb
+ *                                : round(helmet * helmet_dval)             +0x34bf
+ *   shinguard / greaves / shoulderguard / gauntlet / boot: round(id * dval) +0x351f-+0x35e1
+ *   shield_defence = using_bow ? 0 : round(shield * shield_dval)          +0x3623 / +0x35f7
+ * ```
+ *
+ * Lifted out of `ss2BattleValues` (2026-09-22) so that `cast_rejuvinate`, the
+ * one verb that gives a piece its id back, prices it by the SAME function
+ * rather than a second copy of the rule.
+ */
+function ss2PieceDefence(piece, id, { herolevel = 1, usingBow = false } = {}) {
+  const dval = SS2_ARMOUR_DVAL[piece];
+  // `+0x34eb` above id 25, `+0x34bf` at or below it. Both arms assign.
+  if (piece === "helmet") return id > 25 ? Math.round(herolevel * 0.5 * dval) : Math.round(id * dval);
+  // `+0x35f7`, or the flat 0 at `+0x3623` while `using_bow` is true.
+  if (piece === "shield") return usingBow ? 0 : Math.round(id * dval);
+  return Math.round(id * dval);
+}
+
+/**
+ * The order `battlevalues` assigns the eight `_defence` fields in
+ * (`+0x3480` breastplate, `+0x34bf`/`+0x34eb` helmet, `+0x351f` shinguard,
+ * `+0x3546` greaves, `+0x356d` shoulderguard, `+0x3594` gauntlet, `+0x35bb`
+ * boot, `+0x35f7`/`+0x3623` shield) — which is NOT `SS2_ARMOUR_PIECES`' order.
+ */
+const SS2_BATTLEVALUES_DEFENCE_ORDER = Object.freeze([
+  "breastplate", "helmet", "shinguard", "greaves", "shoulderguard", "gauntlet", "boot", "shield"
+]);
+
+/**
  * The licensed build's `battlevalues(whichcharacter)`, root frame 35
  * `DoAction@0x3fa9dc` `+0x3062`, as a pure function.
  *
@@ -5876,17 +6056,7 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
   derived.physical_size = 80 + Math.round(strength / 1.5);
 
   for (const piece of SS2_ARMOUR_PIECES) {
-    const id = number(piece);
-    const dval = SS2_ARMOUR_DVAL[piece];
-    if (piece === "helmet") {
-      // `+0x34eb` above id 25, `+0x34bf` at or below it. Both arms assign.
-      derived.helmet_defence = id > 25 ? Math.round(herolevel * 0.5 * dval) : Math.round(id * dval);
-    } else if (piece === "shield") {
-      // `+0x35f7`, or the flat 0 at `+0x3623` while `using_bow` is true.
-      derived.shield_defence = usingBow ? 0 : Math.round(id * dval);
-    } else {
-      derived[`${piece}_defence`] = Math.round(id * dval);
-    }
+    derived[`${piece}_defence`] = ss2PieceDefence(piece, number(piece), { herolevel, usingBow });
   }
 
   // `weapon_min_damage` / `weapon_max_damage` are OUTPUTS of `battlevalues`,
@@ -6209,6 +6379,28 @@ export function ss2Combatant(
   for (const buff of Object.values(SS2_TIMED_BUFFS)) {
     if (Object.hasOwn(resources, buff.counter)) continue;
     if (SS2_INVENTORY_SLOTS.some((slot) => resources[slot] === buff.itemId)) resources[buff.counter] = 0;
+  }
+  // ► **THE REJUVENATE BACKUPS ARE DECLARED BY POSSESSION TOO, AT THE VALUE OF
+  //   THE FIELD EACH ONE BACKS — for the counters' reason, and at the build's
+  //   own moment.** `backup_char` copies the nine fields onto `backup_*` before
+  //   the fight (`sprite:2249/frame:1` `+0x010a` hero, `+0x012e` villain) and
+  //   nothing writes them in battle, so construction IS the snapshot. Without
+  //   them a caster of id 43 could refill its pools but never get a piece back,
+  //   and the resolver will not create them mid-battle.
+  //
+  //   Only a field the combatant DECLARES gets a backup: the eight armour pieces
+  //   always are (`SS2_RESOURCE_DEFAULTS`), `weapon` only when a record states
+  //   it — absent is not zero, and zero is a real weapon row. A STATED backup
+  //   wins (a capture's `game_*` object carries all nine), and a record rebuilt
+  //   mid-battle with `battleStarted` that states none snapshots what it holds
+  //   NOW, which is later than the build's snapshot — named, not solved: no
+  //   such record carries id 43 today. No golden, no roster gladiator and no
+  //   seeded pin carries 43, so no pinned hash moves.
+  if (SS2_INVENTORY_SLOTS.some((slot) => resources[slot] === SS2_REJUVENATE.itemId)) {
+    for (const { piece, backup } of SS2_REJUVENATE.restores) {
+      if (Object.hasOwn(resources, backup) || !Object.hasOwn(resources, piece)) continue;
+      resources[backup] = resources[piece];
+    }
   }
   // ► **AND THE TICK CLOCK GOES WITH THEM — AFTER every counter is declared,
   //   so a counter declared by any rule above brings it.** At 1: before any
@@ -8522,6 +8714,21 @@ export function createSs2TeamRules({
         actions.push({ type, targetId: actorId });
       }
 
+      // ► **REJUVENATE: ONCE, SELF-TARGETED, ON POSSESSION, on the same button
+      //   and under the same two gates** — the timed buffs' shape, for their
+      //   reason: the arm never reads `defender`. `hitpoints < hitpointsmax /
+      //   1.5` is ladder arm 1, the villain's DECISION, read by
+      //   `chooseAiAction`; the hero's button tests nothing, so it is castable
+      //   at full health with nothing lost, and simply wasted.
+      //
+      //   **AND EVERY DECLARED PIECE'S BACKUP MUST BE DECLARED**, for the
+      //   counters' reason: a restore with nothing to read is a button that
+      //   throws. `ss2Combatant` declares them for every gladiator carrying 43.
+      if (ss2InventorySlotHolding(view.actor, SS2_REJUVENATE.itemId) !== null
+        && ss2RejuvenateMissingBackups(view.actor).length === 0) {
+        actions.push({ type: Ss2ActionType.CAST_REJUVINATE, targetId: actorId });
+      }
+
       // ► **WHICH CONTROLLER FRAME THE GLADIATOR IS ON, computed ONCE because
       //   two arms below need it and a second copy is a second chance to be
       //   wrong** — the argument the walk arm makes about `anyInReach` and
@@ -10569,6 +10776,199 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **REJUVENATE. Zero samples, three pools refilled and nine fields
+      //   restored, all on the caster.** See `SS2_REJUVENATE` for the arm
+      //   statement by statement; returned before `ATTACK_BANDS` for `shove`'s
+      //   reason.
+      if (request.type === Ss2ActionType.CAST_REJUVINATE) {
+        // Self-targeted, as offered: the arm writes only `game_attacker`.
+        if (request.targetId != null && request.targetId !== actor.id) {
+          throw new TeamRuleSetError(
+            `${request.type} is cast on the caster; ${String(request.targetId)} is not ${actor.id}.`
+          );
+        }
+        // Re-found at resolve, through the same window as the offer, for the
+        // reason the bolt branch gives.
+        const slot = ss2InventorySlotHolding(actor, SS2_REJUVENATE.itemId);
+        if (slot === null) {
+          const beyond = ss2InventorySlotHolding(actor, SS2_REJUVENATE.itemId, { ignoreMaxslots: true });
+          throw new TeamRuleSetError(
+            beyond !== null
+              ? `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: item ${SS2_REJUVENATE.itemId} is ` +
+                `in ${beyond}, outside inventory_maxslots ${resourceValue(actor, "inventory_maxslots")}, and ` +
+                "this engine offers and consumes through the same window."
+              : `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no declared inventory slot holds ` +
+                `item ${SS2_REJUVENATE.itemId}. The build's own gate is possession — check_inventory for the ` +
+                "villain, a visible inventory button for the hero — and this engine reproduces it."
+          );
+        }
+        // Refused BEFORE any effect exists, as the timed buffs refuse an
+        // undeclared counter: the resolver applies a list with no rollback.
+        const missing = ss2RejuvenateMissingBackups(actor);
+        if (missing.length > 0) {
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: it declares ` +
+            `${missing.map(({ piece }) => piece).join(", ")} but not ` +
+            `${missing.map(({ backup }) => backup).join(", ")}, so the restore has nothing to read. ` +
+            `ss2Combatant declares the backups for any gladiator carrying item ${SS2_REJUVENATE.itemId}.`
+          );
+        }
+
+        const declared = declaredResourceNames(actor);
+        const pools = ss2PoolsOf(actor);
+        // `staminacost = Math.round(game_attacker.magicka)` (`+0x8d89`), the
+        // stat, with no affordability check — the timed buffs' shape.
+        const staminaCost = Math.round(actor.stats.magicka);
+
+        // The slot first — both of the build's choosers empty it before the
+        // phase runs.
+        const effects = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }];
+
+        // ► **THE THREE POOLS, IN THE ARM'S ORDER** (`+0x8e02`, `+0x8e17`,
+        //   `+0x8e2c`). Health is the resolver's own field and moves by
+        //   HEAL/DAMAGE, as the drink's does; the other two are declared
+        //   resources and move by absolute writes, guarded on declaration.
+        //   `armourclass_max` is only READ: a caster who lost pieces refills to
+        //   the lowered maximum, because `remove_armour` lowered both pools and
+        //   `battlevalues` rebuilds the maximum only before the fight.
+        const healthRestored = actor.maxHealth - actor.health;
+        if (healthRestored > 0) effects.push({ kind: EffectKind.HEAL, targetId: actor.id, amount: healthRestored });
+        if (healthRestored < 0) effects.push({ kind: EffectKind.DAMAGE, targetId: actor.id, amount: 0 - healthRestored });
+        const staminaRestored = pools.staminamax - pools.staminaleft;
+        if (declared.has("staminaleft") && staminaRestored !== 0) {
+          effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: "staminaleft", to: pools.staminamax });
+        }
+        const armourRestored = pools.armourclass_max - pools.armourclass;
+        if (declared.has("armourclass") && armourRestored !== 0) {
+          effects.push({
+            kind: EffectKind.RESOURCE, targetId: actor.id, resource: "armourclass", to: pools.armourclass_max
+          });
+        }
+
+        // ► **THE NINE RESTORES, IN THE ARM'S ORDER** (`+0x8e41`-`+0x8f08`),
+        //   each `<field> = backup_<field>`: the fight-start snapshot, so a
+        //   piece `remove_armour` zeroed comes back and a piece never owned
+        //   stays 0. One write per field that MOVES; a field the caster does not
+        //   declare has nothing to restore (the offer and the check above
+        //   guarantee every declared one has its backup). The arm writes no
+        //   `_defence`; `nextphase`'s `battlevalues` reprices the restored
+        //   pieces, below, after the transition.
+        //
+        // ► **A NAMED, DELIBERATE DIVERGENCE — THE OWNER'S DECISION 2026-09-22.**
+        //   The build's first restore is NOT `game_attacker.backup_shoulderguard`
+        //   but `whichcharacter.backup_shoulderguard`, read through `GetVariable
+        //   "whichcharacter"` at `+0x8e50` — a free variable nothing in the build
+        //   assigns (every push of the string is a `GetVariable` read), so in the
+        //   build the rejuvenated shoulderguard is `undefined`, which
+        //   `remove_armour`'s `piece == 0` test (`+0x045b`-`+0x0472`, `Equals2`)
+        //   then treats as WORN. **This engine restores it from its own backup
+        //   like the other eight — the owner chose that over reproducing the
+        //   build (handoff decision 1d, 2026-09-22).** Reproducing it was not
+        //   free either: `undefined` is a value the resource bag cannot hold
+        //   (it carries finite numbers only), so it would have needed a
+        //   stand-in. No golden carries 43, so no golden can observe it.
+        //   `test/ss2-rejuvenate.test.js` pins the decision by name.
+        const piecesRestored = [];
+        for (const { piece, backup } of SS2_REJUVENATE.restores) {
+          if (!declared.has(piece)) continue;
+          const from = resourceValue(actor, piece);
+          const to = resourceValue(actor, backup);
+          if (from === to) continue;
+          effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: piece, to });
+          piecesRestored.push({ piece, from, to });
+        }
+
+        // ► **`nextphase` RUNS FROM THE REFILLED POOLS**, the drink's order and
+        //   for the drink's reason: the arm writes inside the `struck == null`
+        //   block and `nextphase` runs on the later `struck == true` pass
+        //   (`+0x8f24`-`+0x8f58`), so the cost comes off a FULL stamina bar and
+        //   the heal finds no headroom.
+        const transition = phaseTransitionEffects(actor, {
+          staminaCost,
+          fromStaminaleft: pools.staminamax,
+          fromHealth: actor.maxHealth
+        });
+        effects.push(...transition.effects);
+
+        // ► **AND THEN `battlevalues(game_attacker)` (`+0x35f1`), WHICH GIVES
+        //   EACH RESTORED PIECE THE DEFENCE ITS ID IS WORTH.** The ungated block
+        //   recomputes every `<piece>_defence` from the id (`+0x3480`-`+0x3633`)
+        //   after the psyche reset (`+0x35c7`-`+0x35ea`), so this lands after
+        //   every effect `nextphase` emitted above, in `battlevalues`' own order,
+        //   through the same `ss2PieceDefence` construction uses. The gated
+        //   block that would rebuild `armourclass_max` from them does NOT run
+        //   mid-battle (`+0x3a90`-`+0x3aa0`), so neither pool moves here.
+        //
+        //   ~~**NOT NEEDED**: "this engine's are still the values `battlevalues`
+        //   recomputes from the restored ids".~~ **WRONG, and it was mine —
+        //   reproduced by a Codex review, 2026-09-22.** It holds only when the
+        //   gladiator was BUILT before it lost the piece. One rebuilt afterwards
+        //   — `battleStarted`, or a `derive: false` capture of a build whose own
+        //   `nextphase` had already priced the empty slot at 0 — carries
+        //   `helmet_defence: 0` beside `helmet: 0`, so the restored helmet was
+        //   worth nothing and its next removal took nothing from either pool.
+        //
+        //   Only the RESTORED pieces are repriced: the build reprices all eight
+        //   every phase, but no other id changed on this one, and the only
+        //   reader of a `_defence` (`removeArmourCandidate`) reads it only while
+        //   the piece is worn — so a stale value beside an id of 0 can never be
+        //   read until a restore, which is this line.
+        //
+        // ► **NAMED CHOICE: `usingBow: false`, THE SHIELD'S MELEE VALUE.** The
+        //   build zeroes `shield_defence` while `using_bow` at EVERY `nextphase`;
+        //   this engine never does (`swap_weapons` writes only `equipped_weapon`),
+        //   so here the field always holds the melee value and a bow-drawn
+        //   victim's shield already costs that on removal. Pricing a restored
+        //   shield at 0 at this one site would leave it worth 0 after a swap back
+        //   to melee, where the build rebuilds it; keeping the engine's one
+        //   representation leaves the bow zeroing as `swap_weapons`' divergence,
+        //   in one place.
+        const herolevel = resourceValue(actor, "herolevel", SS2_RESOURCE_DEFAULTS.herolevel);
+        const restoredTo = new Map(piecesRestored.map(({ piece, to }) => [piece, to]));
+        const defenceRepriced = [];
+        for (const piece of SS2_BATTLEVALUES_DEFENCE_ORDER) {
+          const field = `${piece}_defence`;
+          if (!restoredTo.has(piece) || !declared.has(field)) continue;
+          const from = resourceValue(actor, field);
+          const to = ss2PieceDefence(piece, restoredTo.get(piece), { herolevel, usingBow: false });
+          if (from === to) continue;
+          effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: field, to });
+          defenceRepriced.push({ piece, from, to });
+        }
+        effects.push(...crowd);
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: actor.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // The CASTER's clip only; no `victimClip`, the teleport's shape, so
+            // `SS2_STATIC_MAP_BINDINGS` binds a lone `casterClip` as a self-cast.
+            casterClip: SS2_REJUVENATE.casterClip,
+            spellId: SS2_REJUVENATE.itemId,
+            consumedSlot: slot,
+            // What the arm's three writes gave back, before `nextphase`.
+            healthRestored,
+            staminaRestored,
+            armourRestored,
+            // `{ piece, from, to }` per field that moved, in the arm's order.
+            piecesRestored,
+            // `{ piece, from, to }` per `_defence` `battlevalues` repriced, in its order.
+            defenceRepriced,
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
+          }]
+        };
+      }
+
       const band = ATTACK_BANDS[request.type]
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
@@ -11498,6 +11898,26 @@ export function createSs2TeamRules({
       // replace the rest. The tired rest is now the last arm before the swing
       // table, below every ladder block — see "THE TIRED REST" there.
 
+      // ► **LADDER ARM 1, `cast_rejuvinate`, AND IT IS FIRST OF ALL TWENTY-EIGHT.**
+      //   `check_inventory(43) && villain.hitpoints < villain.hitpointsmax / 1.5`
+      //   (`+0x0593`-`+0x0607`: `Push 1.5; Divide; Less2` at `+0x05d9`-`+0x05e6`
+      //   — strict, unrounded). Only the 90% roll (`+0x056f`) stands before it,
+      //   so it PRE-EMPTS EVERY BLOCK BELOW: `hitpoints < hitpointsmax / 2` (arms
+      //   2-6, 26) implies it, and the possession-only arms (7, 14-18, 23) and
+      //   every distance arm come after it. So a caster below the line that
+      //   holds 43 casts it before any health vial, regenerate or molten death,
+      //   in the build and here. Every later block's "what pre-empts it" list
+      //   gains arm 1 by this block's position.
+      //
+      // ► **IT ASKS ONLY ABOUT HEALTH**: no armour, stamina or piece test — a
+      //   caster below the line with every piece still on spends it. Kept.
+      //
+      // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
+      const rejuvenateOption = options.find((option) => option.type === Ss2ActionType.CAST_REJUVINATE);
+      if (rejuvenateOption && actor.health < actor.maxHealth / SS2_REJUVENATE.aiHealthDivisor) {
+        return rejuvenateOption;
+      }
+
       // ► **LADDER ARM 3, `cast_regenerate`, AND IT SITS AMONG THE POTIONS.**
       //   `check_inventory(46) && villain.hitpoints < villain.hitpointsmax / 2`
       //   (`+0x0681`-`+0x06f1`, `Push 2; Divide; Less2` — strict, unrounded):
@@ -11505,8 +11925,9 @@ export function createSs2TeamRules({
       //   4, 3 and 2 potions, the same test again). So a villain below half who
       //   carries 5 drinks it, and one who carries only 4, 3 or 2 regenerates
       //   first. The potion arms that precede arm 3 are taken from
-      //   `SS2_POTION_LADDER` rather than restated; arm 1 (`cast_rejuvinate`)
-      //   has no verb here and pre-empts nothing.
+      //   `SS2_POTION_LADDER` rather than restated; ~~arm 1 (`cast_rejuvinate`)
+      //   has no verb here and pre-empts nothing~~ arm 1 (`cast_rejuvinate`) has
+      //   had a verb since 2026-09-22 and returns in the block above this one.
       //
       // ► **IT NEVER ASKS WHETHER THE BUFF IS ALREADY RUNNING — nor does the
       //   build**, so a villain holding two 46s recasts on the next turn it is
@@ -11557,11 +11978,11 @@ export function createSs2TeamRules({
       //     AI takes no samples, so it drinks on every turn a condition holds
       //     rather than on nine in ten, and a failed roll's fall-through to the
       //     melee decision is not reproduced;
-      //   - the arms with no verb here (1 `cast_rejuvinate`, ~~3
+      //   - the arms with no verb here (~~1 `cast_rejuvinate`,~~ ~~3
       //     `cast_regenerate`,~~ ~~7 `cast_death_from_above`,~~ 8 `cast_colossus`, 9
       //     `cast_little_fat_kid`; arm 3 has had a verb since 2026-09-22 and is
       //     tested in the block just above, and arm 7 since the same day and is
-      //     tested inside this walk, below), which pre-empt some potions in the build and
+      //     tested inside this walk, below; arm 1 too, tested above arm 3), which pre-empt some potions in the build and
       //     nothing here — the stance the gale block takes for arms 1-23;
       //   - ~~**AND IT SITS BEHIND THE FORCED REST ABOVE, WHICH IS AN OPEN
       //     QUESTION, NOT A DERIVATION.** `staminaleft > 10` (`+0x03e8`) gates
@@ -11709,8 +12130,9 @@ export function createSs2TeamRules({
       //   `!boltOnOffer` says. `regenerate` (arm 3) got its verb the same day
       //   and returns above (merged from a parallel worktree). **So does molten
       //   death (arm 7, possession alone), inside the drink walk.** The rest of
-      //   1-18 (`rejuvinate`, ~~death from above,~~ colossus, little fat kid)
-      //   have no verb here and so pre-empt nothing; when they are built, this
+      //   1-18 (~~`rejuvinate`,~~ ~~death from above,~~ colossus, little fat kid)
+      //   have no verb here and so pre-empt nothing (rejuvenate, arm 1, returns
+      //   first of all since 2026-09-22); when they are built, this
       //   block must grow. And it
       //   sits ABOVE the gale (arm 24) and the teleport (arm 26), so a caster
       //   qualifying for either weakens first.
@@ -11753,8 +12175,9 @@ export function createSs2TeamRules({
       // ► **WHAT PRE-EMPTS THEM, AS FAR AS THIS ENGINE HOLDS IT:** arm 3 and
       //   the potion arms returned above; the five damage spells (14-18) fire
       //   on possession, which `!boltOnOffer` says; arm 19, weaken armour, is
-      //   the block directly above. Arms 1 and 7-9 have no verb here and so
-      //   pre-empt nothing. And these two pre-empt arms 22-26 — boundless
+      //   the block directly above. Arms ~~1 and~~ 7-9 have no verb here and so
+      //   pre-empt nothing (arm 1, rejuvenate, returns first of all since
+      //   2026-09-22). And these two pre-empt arms 22-26 — boundless
       //   energy (23), the gale (24) and the teleport (26) are all below.
       //
       // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
@@ -11839,7 +12262,7 @@ export function createSs2TeamRules({
       //   AND PRE-EMPT THIS BLOCK FROM ABOVE IT** — the drink rule returns
       //   before this line, so a caster that qualifies for a potion never gets
       //   here (`test/ss2-drink-potion.test.js`, "armour oil PRE-EMPTS the
-      //   gale"). The other 13 (`rejuvinate`, ~~the fireballs,~~ boundless
+      //   gale"). The other 13 (~~`rejuvinate`,~~ ~~the fireballs,~~ boundless
       //   energy, ...) still have no verb and so cannot pre-empt anything; when
       //   they are built, this test must grow. **It grew for the fireballs the
       //   same day (arms 14, 16, 18)**, which `boltOnOffer` now covers, so a
@@ -11966,9 +12389,11 @@ export function createSs2TeamRules({
       //   (2, 4-6, 10-13) PRE-EMPT IT FROM ABOVE since the same day**: the
       //   drink rule returns before the gale block, so a caster that qualifies
       //   for a potion never reaches this line (merged 2026-09-22; the two verbs
-      //   were built in parallel). This test must still grow for `rejuvinate`
-      //   (arm 1, `hitpoints < hitpointsmax / 1.5`, implied by this gate) and
-      //   bloodlust (arm 22, `fightdistance < 400`, implied too).
+      //   were built in parallel). This test must still grow for ~~`rejuvinate`
+      //   (arm 1, `hitpoints < hitpointsmax / 1.5`, implied by this gate) and~~
+      //   bloodlust (arm 22, `fightdistance < 400`, implied too). **Rejuvenate
+      //   (arm 1, implied by this gate) has a verb since 2026-09-22 and returns
+      //   first of all, so a caster holding 43 never reaches this line.**
       //
       // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
       //   > 10` at `+0x056f`. This AI takes no samples, so it teleports on every
