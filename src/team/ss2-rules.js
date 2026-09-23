@@ -909,22 +909,71 @@ export function ss2WeaponIsRanged(weaponId) {
 }
 
 /**
+ * Refuses a ranged weapon in the PRIMARY slot, however the weapon was acquired.
+ *
+ * Split out of `assertSs2WeaponPurchasable` so a weapon that was never bought
+ * still gets it: `buyweapon` routes ids 61-80 to `secondary_weapon`, none of
+ * the eighteen `unleash_hell` literals carries one at index 13, and a
+ * `weapon_range` in the thousands would make every distance check a tautology
+ * whichever way the weapon arrived.
+ */
+function assertSs2PrimaryNotRanged(source, label) {
+  const weaponId = source?.weapon;
+  if (!ss2WeaponIsRanged(weaponId)) return;
+  throw new TeamRuleSetError(
+    `${label} declares weapon ${weaponId} as its PRIMARY, and ids 61-80 are the ranged band. ` +
+    "`buyweapon` routes a ranged purchase to `secondary_weapon` (ss2-item-tables.md:826-828), so no " +
+    "gladiator in the build can carry one in the primary slot. Declare it as `secondary_weapon`."
+  );
+}
+
+/**
  * Refuses a primary weapon the shop would not have sold this gladiator.
  *
  * Checked only when a `weapon` id is STATED. A combatant that declares its
  * damage pair directly — every promoted golden — states no weapon id and is
  * untouched, which is what keeps the corpus out of this entirely.
+ *
+ * ► **THIS IS THE HERO'S PURCHASE RULE, AND NOT EVERY WEAPON IN THE BUILD WAS
+ *   BOUGHT (2026-09-23, bow-villain audit finding F5).** The build makes this
+ *   comparison in exactly one place, the weapon shop's `onRelease`
+ *   (`+0x0929`), against a snapshot of `_root.game.hero`'s own stat
+ *   (`weaponbuttons`, `sprite:1961` `DoAction@0x6110ce` `+0x05e7`). A tournament
+ *   champion's weapon is a literal in `unleash_hell` (`root/frame:35`
+ *   `DoAction@0x3f8539`), decoded by `initcharacter` with no gate at all — and
+ *   **7 of those 18 literals carry a shop-band weapon their own stats could
+ *   not buy** (`which_boss` 1, 3, 4, 10, 11, 14, 16). Applying this to them
+ *   refused the build's own champions.
+ *
+ *   So `ss2Combatant` takes `weaponFrom`, naming the BUILD ROUTE the weapon
+ *   came by: `"shop"`, the default, runs this whole check; `"unleash_hell"`
+ *   runs only `assertSs2PrimaryNotRanged`. Anything else is refused, so a typo
+ *   is never a way past the gate. A route is added with its own evidence, not
+ *   waved through — `randomise_gladiator` also skips the shop (it draws the
+ *   weapon from `herolevel`, `DoAction@0x40198e` `+0x2dac`-`+0x2ee6`) and is not
+ *   here, because nothing in this repository builds one of its gladiators.
+ *
+ *   WHY AN EXPLICIT STATEMENT, and not the two other readings:
+ *   - **Gating only records that claim campaign provenance** flips the
+ *     default: every caller that says nothing — `tools/arena/roster.js`,
+ *     `tools/crowd-patience-sweep.mjs`, every test blueprint — would silently
+ *     lose the constraint the owner imported for CONSTRUCTED gladiators on
+ *     2026-09-10 (`docs/combat-economy-findings-2026-09-10.md`, D2).
+ *   - **Inferring it** — from the controller, or from a stat total over
+ *     `13 + 4 * herolevel` — invents a distinction the build does not draw. It
+ *     applies no rule by side, only by route: the same shop gates whoever is
+ *     the hero, and the same `initcharacter` decodes every DNA string.
+ *   - **The statement opens nothing that was closed.** This check fires only
+ *     on a stated id, so a record that states the damage columns and no id was
+ *     never gated: weapon 20's `weapon_max_damage` 676 constructs at speed 1
+ *     today (measured). What the gate catches is a record whose weapon id and
+ *     stats CONTRADICT the shop, and a champion's contradict nothing, because
+ *     the shop never saw them.
  */
 export function assertSs2WeaponPurchasable(source, label = "Combatant") {
   const weaponId = source?.weapon;
   if (!Number.isFinite(weaponId)) return;
-  if (ss2WeaponIsRanged(weaponId)) {
-    throw new TeamRuleSetError(
-      `${label} declares weapon ${weaponId} as its PRIMARY, and ids 61-80 are the ranged band. ` +
-      "`buyweapon` routes a ranged purchase to `secondary_weapon` (ss2-item-tables.md:826-828), so no " +
-      "gladiator in the build can carry one in the primary slot. Declare it as `secondary_weapon`."
-    );
-  }
+  assertSs2PrimaryNotRanged(source, label);
   const attribute = ss2WeaponGateAttribute(weaponId);
   if (attribute === null) return;
   const demand = ss2WeaponDemand(weaponId);
@@ -7079,10 +7128,15 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
  *   golden's scenario, or a state dump read off a capture — where re-deriving
  *   would overwrite measured numbers with numbers computed from inputs the
  *   record does not carry.
+ * @param {"shop"|"unleash_hell"} [options.weaponFrom="shop"] the build route
+ *   the stated `weapon` came by. `"shop"` holds it to the shop's purchase
+ *   gate; `"unleash_hell"` is a tournament champion's literal DNA, which was
+ *   never bought and is held only to the ranged-primary refusal. Why this is
+ *   stated rather than inferred: `assertSs2WeaponPurchasable`.
  */
 export function ss2Combatant(
   vanilla,
-  { id, name, controller, battleStarted = false, derive = true, x, y } = {}
+  { id, name, controller, battleStarted = false, derive = true, weaponFrom = "shop", x, y } = {}
 ) {
   // `derive` is a GUARD, not a convention. `ss2BattleValues` overwrites
   // `min_damage`, `max_damage`, `hitpointsmax` and `staminamax`
@@ -7105,7 +7159,21 @@ export function ss2Combatant(
   // still exists — equipment identity is deliberately outside
   // `SS2_RESOURCE_NAMES` and `CANONICAL_RESOURCE_SOURCES`, so by the time a
   // combatant reaches the resolver there is nothing left to gate on.
-  assertSs2WeaponPurchasable(vanilla, id ? `Combatant ${id}` : "Combatant");
+  //
+  // Only a weapon that came through the SHOP is held to the shop's gate; a
+  // champion's literal DNA was never bought (`assertSs2WeaponPurchasable`).
+  const gateLabel = id ? `Combatant ${id}` : "Combatant";
+  if (weaponFrom === "shop") {
+    assertSs2WeaponPurchasable(vanilla, gateLabel);
+  } else if (weaponFrom === "unleash_hell") {
+    assertSs2PrimaryNotRanged(vanilla, gateLabel);
+  } else {
+    throw new TeamRuleSetError(
+      `${gateLabel} states weaponFrom ${JSON.stringify(weaponFrom)}. The routes this engine has traced are ` +
+      '"shop" (the default, held to the purchase gate) and "unleash_hell" (a champion\'s literal DNA). ' +
+      "An unknown route is refused rather than exempted, so a typo is never a way past the gate."
+    );
+  }
 
   // ► **A STATED WEAPON WITH NO REACH IS REFUSED, NOT SILENTLY DISARMED (added
   //   2026-09-12, found by `/codex:adversarial-review`).** `derive: false` says
