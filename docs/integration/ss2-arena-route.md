@@ -586,8 +586,18 @@ This is the body the existing `stepNavigator` already replicates at `navStep 5`.
 `_global.fightselected` is, like `fightstarted`, **never assigned `true`
 anywhere** — it is written `false` only here and read three times in sprite 2224
 frame 1 (`+0x0ee3`, `+0x14d2`, `+0x1557`), so those blocks always run. The first
-of them derives `_global.crowdlevel` and `_global.crowd_interest` from
-`herolevel` with a `RandomNumber(899)` draw at `+0x0f48`; `crowd_interest` is
+of them ~~derives `_global.crowdlevel` and `_global.crowd_interest` from
+`herolevel` with a `RandomNumber(899)` draw at `+0x0f48`~~ **writes
+`_global.crowdlevel = round(herolevel * 0.6) + "," + (100 + random(899))` — the
+`RandomNumber` at `+0x0f48` feeds that STRING — and then, with no draw,
+`_global.crowd_interest = ceil(herolevel / 5)` (`+0x0f5c`–`+0x0f96`), which is
+overwritten before anything reads it: `combat_panel`'s `crowd_bar` handler sets
+`crowd_interest = hero.herolevel + villain.herolevel` (`sprite:751` clip-action
+0, `+0x011f`–`+0x0158`) when the arena attaches the panel** *(corrected
+2026-09-22 by a write-nothing verifier. The writes are byte-verified; that
+clip-action 0 is the panel's LOAD event, and so WHEN it runs, is **inferred**
+from what it does, because the dump prints no clip-event flags. The battle
+map's §"The crowd economy" has every writer and reader)*; `crowd_interest` is
 the multiplier on the win gold (§5).
 
 ## 3. Which `fight_mode` values are reachable, and from where

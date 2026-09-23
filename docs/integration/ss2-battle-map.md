@@ -758,7 +758,10 @@ The `swap_weapons` phase itself is a plain toggle in overlay frame 52
 `game_attacker.equipped_weapon = 2` and `using_bow = true` (`+0x4dbd`,
 `+0x4dce`); otherwise it sets `equipped_weapon = 1` and `using_bow = false`
 (`+0x4eba`, `+0x4ecb`). It sets `staminacost = 1` (`+0x4d35`) and never checks
-that the secondary weapon is a bow. Since root frame 221 forces
+that the secondary weapon is a bow. *(Added 2026-09-22, one deriver, not
+independently verified: each branch then calls `_root.battlevalues(game_attacker)`
+itself — `+0x4ea1`, `+0x4fab` — before the arm's `nextphase()` at `+0x4fb9`;
+see §"`battlevalues`: the unconditional derivations".)* Since root frame 221 forces
 `equipped_weapon = 1` and `using_bow = false` at battle construction, a hero
 always starts on a warrior controller and must spend one turn on
 `swap_weapons` before either archer controller can be selected.
@@ -1094,9 +1097,22 @@ carrying the `round(strength * 1)` scaling, not `round(strength * 2)`. Every
 damage row in the `attack_direction` dispatcher (below) reads
 `min_damage`/`max_damage`, so all of them silently follow the weapon mode.
 Because `swap_weapons` writes only `using_bow` and `equipped_weapon`
-(§Weapon mode and `swap_weapons`) and derives nothing itself, the damage pair
+(§Weapon mode and `swap_weapons`) ~~and derives nothing itself, the damage pair
 does not move at the instant of the swap: it moves at the next `battlevalues`,
-which `nextphase` runs for both combatants at every phase transition.
+which `nextphase` runs for both combatants at every phase transition.~~ **— and
+then DOES derive: its completion block calls `_root.battlevalues(game_attacker)`
+itself, at `+0x4ea1` after drawing the bow (`equipped_weapon = 2`, `using_bow =
+true`, `+0x4dbd`/`+0x4dce`) and at `+0x4fab` after sheathing it (`1`, `false`,
+`+0x4eba`/`+0x4ecb`), before its own `nextphase()` at `+0x4fb9`; so the damage
+pair, and `shield_defence` (0 while `using_bow == true`, test
+`+0x35e2`–`+0x35f2`, write `+0x3623`; else `round(shield * shield_dval)` at
+`+0x35f7`), move in the swap's own completion tick, and `nextphase` then
+recomputes them again.** *(Corrected 2026-09-22 from an implementer's reading
+of the full action dump — ONE DERIVER, NOT INDEPENDENTLY VERIFIED; the offsets
+were re-read in the dump for this edit, and a verifier on another question
+noted the two calls in passing. `battlevalues` is defined in
+`root/frame:35/DoAction@0x3fa9dc`; block `0x240c7f` only calls it — here and in
+`nextphase` at `+0x35f1`/`+0x3605`.)*
 
 **Hazard: the two experience writes are on `_root.game.hero` unconditionally.**
 `L` above is `_root.game.hero.herolevel`, not `whichcharacter.herolevel`, and
@@ -1279,7 +1295,7 @@ the same claim. Stated separately:
   `staminaleft > 10` at `+0x03e8`. Which band arm each belongs to, and whether
   the 30/`wincrowd` block sequentially overwrites the 40/`taunt` one within a
   facing, is NOT settled here — it needs a full decode of `+0x0b00`-`+0x0c00`.
-| `villainChooseAction` | `+0x1173` | after a movement label is written, `staminaleft > 0` failing replaces it with `rest` |
+| `villainChooseAction` | `+0x1173` | after a movement label is written, `staminaleft > 0` failing replaces it with `rest` — *reached on every path (`+0x1165`–`+0x1194`), but NOT forced: the swap, taunted-run and status writes after it and the unconditional `villain_cast_spells()` at `+0x1432` can overwrite it (verified 2026-09-22; the owner's decision (b) in §"The spell ladder runs LAST")* |
 | `check_stats` | `+0x110a`, `+0x112f` | the two clamp tests (§`check_stats` is a pure clamp) |
 | `battlevalues` (root frame 35) | `+0x3b1c` | `staminaleft > 0` failing triggers the refill below — inside the `battle_started` skip, so out of battle only |
 
@@ -1525,7 +1541,11 @@ Three consequences worth stating separately, because each was got wrong once:
      `gladiator_dir == "right"` to `runleft` and `== "left"` to `runright`
      (re-read off overlay frame 1 on 2026-09-17), so the arm that runs is always
      the arm whose guard is false. Nothing in the run arm bounds a flee; only
-     `nextphase` step 1's `[-2100, 2100]` does. An external review of `cbaf406`
+     ~~`nextphase` step 1's `[-2100, 2100]`~~ **the clip clamp in
+     `attacker.onEnterFrame` (`+0x38f1`–`+0x3a06`)** does — *corrected here
+     2026-09-22: step 1 acts on the stat objects and is dead, as its own entry
+     has said since 2026-09-17; a write-nothing verifier re-derived the live
+     clamp, which ENDS the flee's phase when it bites (§"The arena wall")*. An external review of `cbaf406`
      called the engine's missing collision check a bug, which it would have been
      had the guard read the other way — `test/ss2-taunt.test.js` now pins the
      crossing, and the walk in the same geometry beside it, so that "adding the
@@ -1624,6 +1644,19 @@ first is facing-selected — and if `gladiator_dir` matches neither `"right"` no
 which *would* consume a tape slot. Only the `cast_weaken_armour` trio is
 authoritative; the rest is presentation, but the fallback above shows the
 cosmetic path can still perturb tape position.
+
+*(2026-09-22: the opcode also draws OUTSIDE sprite 862, and this table does not
+cover those sites. Four were found this session, all presentation, and the
+list is not claimed to be complete:*
+- *`combat_panel`'s `crowd_bar` handler (`sprite:751`, clip-action 1) draws
+  `1 + RandomNumber(1000)` on every frame while `crowd_interest > 70` (the
+  opcode at `+0x0168`) or `< 20` (at `+0x01c6`) and the hero is above level 1
+  — one deriver, not independently verified; §"The crowd economy".*
+- *Frame 1 of `bonus_icon` (sprite 153, `+0x002e`; attached in fight by
+  `magic_damage_character` at `+0x1313`), of `sparks` (166, `+0x0030`) and of
+  `blood` (174, `+0x0030`) each draw one `RandomNumber` — named by a
+  write-nothing verifier of this map edit and re-read in the full action dump;
+  where `sparks` and `blood` are attached was not re-read.)*
 
 Two `randomBetween` draws on the taunt path also precede `checkattackroll` and
 must be budgeted before its own `diceroll`: `diceroll = randomBetween(1, 100)`
@@ -2289,8 +2322,8 @@ still passed to `knockback`; 80 is not a force clamp.
 `DefineFunction2` at `+0x1dd3`, parameters in registers 2 and 3, body 155 bytes:
 
 ```text
-this.crowd_action  = 1                                            +0x1e0a
-this.phasecomplete = true                                         +0x1e14
+_global.crowd_action  = 1        // was "this."; see below         +0x1e0a
+_global.phasecomplete = true     // was "this."; see below         +0x1e14
 defender_smashed   = true                                         +0x1e1c
 knock_defender = new mx.transitions.Tween(                        +0x1e74 NewMethod, 7 args
     whichcharacter, "_x", mx.transitions.easing.Regular.easeOut,
@@ -2303,10 +2336,21 @@ So **the displacement is exactly `_x + force`**, eased over one real second, and
 there is **no clamp, no arena edge and no body check anywhere inside the
 function** — the 155 bytes contain no comparison, no branch and no reference to
 the other gladiator. What bounds it is the clip clamp in `attacker.onEnterFrame`
-(see `nextphase` step 1 above for why it is not `nextphase`).
+(see `nextphase` step 1 above for why it is not `nextphase`) — **but only while
+its hitter's phase lasts** *(added 2026-09-22; a verifier's corrected version)*:
+the tween runs one REAL second, outliving every hitter phase shorter than 30
+frames. Past that phase, if `x + force` lies beyond ±2100, the victim — now
+`attacker` — has its phase CUT by the attacker clamp: at once if the tween has
+already crossed, otherwise when it crosses, provided the victim's own arm is
+still running; a victim whose arm finishes first is `defender` again and is
+pinned at the wall, uncut. §"The arena wall" has the list of exposed hitters.
 
 Two side effects this engine models nowhere, recorded rather than built:
-`phasecomplete` and `crowd_action`, written on the function's `this`. And
+`phasecomplete` and `crowd_action`, written on ~~the function's `this`~~
+**`_global`** *(corrected 2026-09-22: `knockback`'s header, flags `0x12a`,
+suppresses `this` and preloads `_global` into register 1, which is what both
+writes use — read from the header bytes by the main session, and found
+independently by a write-nothing verifier; §"The crowd economy")*. And
 `knock_defender` is declared with `DefineLocal` (`+0x1e75`), which is why the
 `onEnterFrame` clamp's guard on it never closes.
 
@@ -2338,7 +2382,11 @@ presentation on it.
 `damagecharacter`:
 
 - rounds damage upward;
-- uses different damage-splat/crowd cues for critical, taunt, and grievous;
+- uses different damage-splat/crowd cues for critical, taunt, and grievous —
+  *the "crowd cues" are `_global.crowd_action` writes, 8, 3 and 20, then 2 for
+  normal or grievous (`+0x162e`, `+0x1666`, `+0x168b`, `+0x17c0`), and the 3
+  and the 20 are overwritten on every path before anything reads them
+  (verified 2026-09-22; §"The crowd economy")*;
 - makes every physical damage invocation roll an inclusive 1–100 armour-removal
   chance and call `remove_armour` when the roll is greater than 66; grievous
   also calls it once unconditionally. The removal function only maps directions
@@ -2567,6 +2615,11 @@ after `8c3fc0a` wrote the nulls. It even says group. Nobody propagated it. This
 was an internal contradiction for three weeks, not an unread byte.)*
 
 The boulder total is therefore 400–800 only if every scheduled impact resolves.
+*(2026-09-22: every scheduled impact does resolve — settled with the boulder
+sprite's own frame scripts in §"The fireball family and molten death". The one
+exception is a stale `struck` left by an arena-wall cut, which can put the
+boulders on the caster or schedule none, and which the owner chose not to
+reproduce.)*
 All of these enter the armour-to-hitpoint overflow path; the same
 breastplate-based stamina gain applies to hitpoint-applicable damage.
 
@@ -2666,7 +2719,7 @@ Each arm, taking `frozen` as the worked example:
 
 ```text
 if (phase_decision != "frozen") skip the arm                       // +0x529d
-attacker_clip.crowd_action = 0                                     // +0x52af
+_global.crowd_action = 0                                           // +0x52af  <- was "attacker_clip"; see below
 game_attacker.staminacost = 0                                      // +0x52c0  <- no stamina cost
 if (attacker.struck == null) {                                     // +0x52d5  <- was "!= null"; see below
     attacker.struck = false                                        // +0x52ec
@@ -2695,6 +2748,12 @@ polarity** — `life_stolen` `+0x540f`/`+0x54d6`, `poisoned` `+0x5543`/`+0x560a`
 block uses (the bolt arm's `if (attacker.struck == null)` at `+0x8456`): start
 the clip once while the latch is null, set it `false`, and hand the phase back
 once the clip's own frame script has written `true`.
+
+**And `attacker_clip.crowd_action` named the wrong object — corrected
+2026-09-22 by a write-nothing verifier.** The closure's header (flags `0x169`)
+binds `_global` to register 3, so `+0x52af` is `_global.crowd_action = 0`: the
+per-phase crowd delta `nextphase` folds into `crowd_interest`, zero for every
+status phase (§"The crowd economy").
 
 **THE ROLE OPERANDS ARE DELIBERATELY CROSSED, and reading them as a wrong-side
 bug is the trap here.** There are eleven `magic_damage_character` call sites:
@@ -3224,8 +3283,13 @@ and `nextphase()`. No `defender` reference anywhere. The villain's arm 26 guard
 is `check_inventory(48) && fightdistance < 250 && hitpoints < hitpointsmax / 2`
 (`+0x0f1c`–`+0x0f8c`, both strict) — **but that is the arm's LOCAL guard, not
 "when the villain teleports"**: the ladder's `randomBetween(1, 100) > 10`
-(`+0x056f`) comes first, and 25 earlier arms pre-empt it, two on possession
-alone (49 death from above, 45 boundless energy).
+(`+0x056f`) comes first, and 25 earlier arms pre-empt it, ~~two on possession
+alone (49 death from above, 45 boundless energy)~~ **SEVEN on possession alone —
+49 death from above, the five direct-damage ids 32, 35, 31, 34 and 30, and 45
+boundless energy, arms 7, 14–18 and 23 of §"The whole ladder" below** *(corrected
+2026-09-22: "two" came from a wrong brief premise the 19:34 handoff names; a
+write-nothing verifier re-derived the seven possession-only arms from the
+bytes)*.
 
 **`cast_weaken_armour`, `+0x777c`–`+0x78d9`.** HOLDS. Once, inside
 `struck == null`: `cast_spell_icon(attacker, 44)`, `Cast1`, then THREE rounds of
@@ -3238,7 +3302,8 @@ defender, attack_direction)`. Directions 1–9 fall in exactly one group each �
 BEFORE the piece test, so an unarmoured victim still costs it. No clip on the
 victim; no damage; ends on the caster's own `struck`. Villain arm 19:
 `check_inventory(44) && fightdistance < 300` (`+0x0c3f`–`+0x0c75`), no armour
-test on either side.
+test on either side. **Owner's decision 2026-09-22 (HANDOFF.md living head), (e): kept — this engine's AI,
+like the build's villain, spends the item on an unarmoured foe.**
 
 **`destroy_armour` is three draws per CALL, and a paired piece makes two calls.**
 HOLDS, and it convicts shipped code. `remove_armour` calls it twice,
@@ -3267,15 +3332,39 @@ breastplate, helmet, greaves, shinguard, boot, weapon and shield from
 `game_attacker.backup_<piece>` — then `updatecharacter(game_attacker,
 attacker)`, which only attaches art. `armourclass_max` is read, never written,
 so a caster who lost pieces refills only to the LOWERED maximum; `_defence`
-fields are untouched.
+fields are untouched **by the arm — but not by its phase: the `nextphase` the
+arm calls runs `battlevalues(game_attacker)` (`+0x35eb`), whose UNGATED block
+recomputes every `<piece>_defence` from the piece id (§"The per-round re-skin"
+below; the ungated/gated split re-derived 2026-09-22 by a write-nothing
+verifier), so each restored piece is worth its id again and a second removal
+takes it again, while `armourclass_max`, rebuilt only inside the
+`battle_started != true` block, stays lowered.**
+
+**BUILT 2026-09-22 (`8ff985d`, `SS2_REJUVENATE`).** The engine does both
+halves: the armour class refills to the lowered maximum, and each restored
+piece's `_defence` is re-priced from its id after the transition — added after
+a Codex review reproduced a restored helmet worth 0 on a gladiator built after
+losing it (the commit message names it). `8ff985d` also priced a restored
+shield at its melee value whatever the bow, as a named choice; **`8d6b968`
+retired that choice**: with the bow drawn a shield removal now takes 0, as the
+build prices it (`battlevalues` sets `shield_defence = 0` while `using_bow ==
+true`, root frame 35 `+0x35e2`–`+0x35f2`, `+0x3623`), and sheathing reprices it
+at once. Only the stored field still differs — it keeps the sheathed value
+where the build's reads 0 while the bow is drawn (`8d6b968`'s message).
 - **`whichcharacter` is never assigned anywhere in the build** (main session,
   static search of every push of the string: four sites, all `GetVariable`
   reads — this one and three in `combatCamera`). So the rejuvenated
   `shoulderguard` is `undefined`, which `remove_armour`'s `piece == 0` test
   (`Equals2`) treats as EQUIPPED. A runtime read of `game_attacker.shoulderguard`
-  after a cast would confirm it.
+  after a cast would confirm it. **Owner's decision 2026-09-22 (HANDOFF.md living head), (d): NOT
+  reproduced. The engine restores the shoulderguard from its own
+  `backup_shoulderguard` like the other eight (`8ff985d`), and
+  `test/ss2-rejuvenate.test.js` pins the decision by name.**
 - `backup_char` runs for the hero AND the villain at `sprite:2249/frame:1`
-  (`+0x010a`, `+0x012e`; one deriver, not yet verified).
+  (`+0x010a`, `+0x012e`; ~~one deriver, not yet verified~~ **VERIFIED 2026-09-22:
+  one write-nothing verifier CONFIRMED, a second PARTIAL on a gap in its dumps
+  that the full action dump has since closed** — see the four stat spells below)
+  — and at two more sites, neither mid-battle.
 - Villain arm 1: `check_inventory(43) && hitpoints < hitpointsmax / 1.5`.
 
 **The timed buffs live on the CLIP and tick for both fighters on every phase.**
@@ -3293,51 +3382,280 @@ applications, the first on the cast phase itself**; a recast resets, never
 stacks. Colossus and little fat kid start at 16, not 20 (`+0x7fed`, `+0x820b`,
 the latter on the DEFENDER).
 
+**Above 1v1 the tick is the owner's decision 2026-09-22 (HANDOFF.md living head), (c)**, because the build
+has no team play to copy: a bearer's counters tick on its own completed phase
+and on the first phase anyone else completes after it. That is identical to the
+build in 1v1 and gives ten applications at any team size. Built in `611094d`,
+with an invented resource, `timed_spell_tick_owed`.
+
 **The four stat spells, command and adulation** (derived 2026-09-22 by one
-deriver each from byte dumps of their arms; **NOT YET RE-DERIVED BY A
-VERIFIER** except where a line says so — treat as leads with offsets).
+deriver each from byte dumps of their arms; ~~**NOT YET RE-DERIVED BY A
+VERIFIER** except where a line says so — treat as leads with offsets~~).
+**THE FOUR STAT SPELLS ARE VERIFIED, AND BUILT 2026-09-22.** *(Verified the same
+day by a question wave over byte dumps of the oracle — one question per spell,
+one on `check_spells`' expiry, one on `backup_char` and the re-skin, one on the
+villain's ladder arms; seven questions, each finding that needed one then
+broken or confirmed by its own write-nothing verifier, 33 verifiers started
+and 33 returned, none dead. Unless a line says otherwise, every unstruck
+statement below is a claim a verifier CONFIRMED or a PARTIAL verifier's
+corrected version; what a verifier broke is struck where it stood. Command and
+adulation were not in that pass — see their bullets.)*
 - **`cast_colossus` (item 42, `+0x7fda`-`+0x81f7`)**: counter 16 on the
-  caster's clip, crowd 15, cost `round(magicka)`; once: `oldscale = _yscale`,
+  caster's clip, crowd 15, cost `round(magicka)` — **all three written on EVERY
+  tick, outside the `struck` gate** (`+0x7fed`, `+0x7ffe`, `+0x800b`); once,
+  inside `attacker.struck == null` (`+0x8032`–`+0x8044` → `+0x80e7`):
+  **`cast_spell_icon(attacker, 42)`, `struck = false`,
+  `gotoAndPlay("Colossus")`,** then `oldscale = _yscale` (no `ToNumber`),
   `newscale = 450`, `strength = backup_strength * 3`, `attack = backup_attack *
-  2`. **Its growth is a BUILD BUG**: each tick ASSIGNS `_yscale = ceil((newscale
-  − _yscale) / 2)` (`+0x80e7`-`+0x8123`, no `Add2`), which converges to 150, so
-  the finish test (`_yscale >= newscale`) never passes and the phase ends only
-  through the `demand_move` watchdog (~58 ticks); the fighter is left at 150%,
-  not 450%, and drifts ~2 px a tick toward its facing (`+0x813f`-`+0x8191`).
+  2` (both unrounded). The `Colossus` clip (2147–2168) ends with `this.struck =
+  true`, which this arm never reads. **Its growth is a BUILD BUG** (VERIFIED):
+  each tick ASSIGNS `_yscale = ceil((newscale − _yscale) / 2)`
+  (`+0x80e7`-`+0x8123`, no `Add2`) and then sets `_xscale = _yscale`
+  (`+0x8124`–`+0x8138`), which converges to 150 — the only fixed point, reached
+  from any start between 1 and 450 within 9 ticks and never above 225 — so the
+  finish test (`_yscale >= newscale`, `+0x8192`–`+0x81ae`) never passes **while
+  the once-block has run and `newscale` is 450 (from any start between −448 and
+  1347); when it can pass is the second exit below,** and the phase ends
+  <del>only through the `demand_move` watchdog (~58 ticks)</del> **normally
+  through the `demand_move` watchdog: EXACTLY 58 arm ticks from a fresh tick,
+  59 when the phase starts in the tick a top-of-handler `nextphase` ran (the
+  watchdog at `+0x3892`, or the arena wall at `+0x396c`/`+0x39f7`), 198 or 199
+  when only the `>= 200` clause can fire (a stuck `bullet_in_air`). It has two
+  other exits (corrected 2026-09-22 by a verifier): the arena-wall attacker
+  clamp, when a knockback tween left running by the previous phase carries the
+  caster past ±2100 (fewer ticks, even none — §"The arena wall"); and the arm's
+  own finish (`+0x81b3`–`+0x81f7`, `nextphase` at `+0x81e8`), live only when a
+  caster entering with a non-null `struck` skips the once-block, and then
+  decided by the `newscale` its clip already holds: never set, `_yscale <
+  undefined` fails and the arm completes on tick 1 with no growth and no buff;
+  a stale 50 left by little fat kid completes it on tick 2 from a starting
+  scale of 148 or more (the verifier said 150; re-running its recurrence gives
+  148); a stale 450 from an earlier colossus never passes, and the phase runs to
+  the watchdog.** *(`newscale` is written at exactly two sites in the SWF,
+  `+0x809f` = 450 and `+0x82d3` = 50, and never cleared — re-read in the full
+  action dump for this edit, after a write-nothing verifier of the first draft
+  pointed out the stale-450 case.)* ~~the fighter is left at 150%, not 450%~~
+  **A phase that runs its once-block and ends through the watchdog leaves the
+  fighter at 150 whatever it started at (the other exits can leave it
+  elsewhere): battle entry sets each
+  clip's scale to `80 + round(strength / 1.5)` (root frame 221: the hero's
+  `_xscale` at `+0x0618`–`+0x065c`, verified; its `_yscale` at
+  `+0x065d`–`+0x06a1` and the villain's pair at `+0x06d2`–`+0x077a`, re-read
+  from the full action dump for this edit), so colossus SHRINKS a fighter of
+  strength over 105 — one starting at scale 180 (strength about 150) goes 135,
+  158, 146, 152, 149, 151, 150;** and it drifts <del>~2 px a tick toward its
+  facing (`+0x813f`-`+0x8191`)</del> **exactly 2 px a tick in its
+  `gladiator_dir` (`+0x8139`–`+0x8191`), which after the sign loss below is not
+  always the way it is drawn facing**.
+  - **THE FACING SIGN IS LOST** (verifier: PARTIAL; the corrected version). The
+    build keeps a fighter's facing in the SIGN of its clip's `_xscale`, and
+    `changeCombatants` negates BOTH clips, and only when the HERO's sign does
+    not match the hero's side (`+0x2916`–`+0x29b8`, mirror
+    `+0x2a10`–`+0x2aea`). Colossus writes a positive `_xscale` every tick, and
+    the expiry's `_xscale = oldscale` is positive too. So a caster whose
+    `_xscale` is NEGATIVE when it casts is drawn facing away during the phase
+    and after it. That is the villain while it stands on the right, as it does
+    from battle entry (root frame 221 `+0x0717`–`+0x0735` sets
+    `arena_villain._xscale = 0 - arena_villain._xscale`, re-read for this edit
+    because the verifier's dumps did not reach it), and for a villain caster
+    `changeCombatants` never repairs it, since it tests only the hero's sign. A
+    villain standing on the LEFT is normally positive — with the hero on the
+    right (`hero._x > villain._x`, `Greater` at `+0x2a09`), `changeCombatants`
+    flips both clips while the hero's is positive (`+0x2a6d`–`+0x2ace`) — and
+    then loses nothing. A HERO caster on the right
+    is repaired inside the `nextphase` that ends the phase (`check_spells` at
+    `+0x3271`/`+0x3289` runs before `changeCombatants` at `+0x3638`/`+0x365f`),
+    and that repair turns the villain away; the villain comes right again only
+    if the hero is still on the right at expiry.
+  - **EXPIRY AND RECAST** (PARTIAL; corrected). `check_spells` decrements while
+    `> 0` and, OUTSIDE that block, on `== 0` sets `_yscale = _xscale =
+    oldscale`, `strength = backup_strength`, `attack = backup_attack`, and the
+    counter to -1 (`+0x2439`–`+0x24c6`). The arm leaves 16 when the watchdog
+    ends it and that `nextphase` makes it 15, so the restore lands on the 16th
+    `nextphase` counting that one. Until then the fighter stays at 150 unless a
+    little fat kid lands on it or expires on it — and the watchdog nulls
+    `defender.struck` (`+0x387e`), so the opponent's little fat kid can run on
+    the caster in that very frame and capture `oldscale = 150`. A recast while
+    the counter is positive re-runs the once-block and captures `oldscale =
+    150`: that fighter stays at 150 for good.
+  - **`oldscale` IS ONE CLIP FIELD, SHARED WITH LITTLE FAT KID** (VERIFIED).
+    Colossus writes `attacker.oldscale = _yscale` (`+0x8084`–`+0x8098`), little
+    fat kid `defender.oldscale = ToNumber(_yscale)` (`+0x82b7`–`+0x82cc`), and
+    both expiries restore from it (`+0x2485`, `+0x2513`), so a fighter carrying
+    both is restored to the LATER cast's capture at BOTH expiries: little fat
+    kid then colossus ends the battle at 50, colossus then little fat kid at
+    150. The first expiry also resets strength and attack, cancelling the other
+    spell early. The per-round re-skin writes no scale, so nothing repairs it.
+  - Villain arm 8: `check_inventory(42) && fightdistance < 300`
+    (`+0x0890`–`+0x08e5`; `Push 300` `+0x08bc`, `Less2` `+0x08c4`), strict.
 - **`cast_little_fat_kid` (item 33, `+0x81f8`-`+0x83f4`)**: a DEBUFF written on
   the DEFENDER: counter 16 on the victim's clip, `strength = round(backup /
   2)`, `attack = round(backup / 2)`, scale toward 50; it completes on its first
-  tick.
+  tick. **VERIFIED, with the detail:**
+  - Every tick, before its gate: `defender.spell_little_fat_kid = 16`
+    (`+0x820b`–`+0x821b`), `crowd_action = 10` (`+0x821c`–`+0x8228`), and the
+    CASTER's `staminacost = round(magicka)` (`+0x8229`–`+0x824f`).
+  - **Its once-gate is the DEFENDER's `struck == null`** (`+0x8250`–`+0x8262` →
+    `+0x833d`), the only `== null` test on `defender.struck` in frame 52.
+    Inside, in order: `attacker.gotoAndPlay("Cast2")`,
+    `cast_spell_icon(attacker, 33)`, `defender.struck = false` (`+0x829a`),
+    `defender.gotoAndPlay("little_fat_kid")`, `defender.oldscale =
+    ToNumber(_yscale)`, `newscale = 50` (`+0x82cd`–`+0x82de`), then strength and
+    attack from the VICTIM's `backup_*` (`+0x82df`–`+0x833c`). No draw.
+  - **The shrink has colossus's assign-not-add shape** (`+0x833d`–`+0x8379`), so
+    its first tick writes `ceil((50 − Y) / 2)` — −25 from 100, −50 from 150 —
+    which is 50 or less for any start of −50 or more. The finish test is
+    `Greater` (`+0x838f`–`+0x83ab`), so the same call overwrites that value
+    with `_xscale = _yscale = 50` (`+0x83b0`–`+0x83d7`) before any frame is
+    drawn, sets `defender.struck = null` (`+0x83de`) and calls `nextphase()`
+    (`+0x83e5`): the scale SNAPS to 50 whatever the victim's size, and there is
+    no drift.
+  - **That same-tick `nextphase`** already ticks the victim's counter 16 → 15
+    (`check_spells(game_defender, defender)`, `+0x3289`), recomputes its
+    `physical_size` from the halved strength (`battlevalues`, `+0x35ff`), and
+    `changeCombatants` sends both clips to `Standing` (`+0x27db`, `+0x27ef`),
+    cutting Cast2 (2126–2146) and `little_fat_kid` (2200–2216) before their
+    `this.struck = true` frames. The expiry lands on the 16th `nextphase`
+    counting the cast's own.
+  - With `defender.struck` not null on entry the once-block is skipped, but the
+    counter, crowd, cost, shrink and completion still run, on a stale or
+    undefined `newscale`: nothing is halved.
+  - Villain arm 9: `check_inventory(33) && fightdistance < 500`
+    (`+0x08ea`–`+0x093f`; `Push 500` `+0x0916`, `Less2` `+0x091e`), strict.
 - **`cast_swiftsandals` (item 40, `+0x895d`-`+0x8a5f`)**: counter 20; once
-  `speed = 10 + backup_speed * 2` — not a doubling. **`cast_bloodlust` (item 41,
+  `speed = 10 + backup_speed * 2` — not a doubling. **VERIFIED:** the counter
+  (`+0x8970`–`+0x8980`), `crowd_action = 3` (`+0x8981`) and the cost
+  (`+0x898e`–`+0x89b4`) are written every tick; the speed write, unrounded and
+  from `backup_speed` (so a recast rewrites the same value), is inside `struck
+  == null` (`+0x89c7` → `+0x8a2b`, with `cast_spell_icon(attacker, 40)`,
+  `struck = false`, `Cast2`); completion is a second, sequential gate on
+  `struck == true` (`+0x8a3e` → `+0x8a60`, `nextphase` at `+0x8a50`), i.e.
+  Cast2's last frame, 2146. No draw, no `defender`.
+  - **The speed reaches movement only through `battlevalues`**:
+    `movement_speed = clamp(round(speed * 1.5), 4, 60)` (root frame 35
+    `+0x37d2`–`+0x3844`), recomputed by the completing `nextphase` after its
+    `check_spells` (`+0x35eb`, `+0x35ff`). For the VILLAIN that makes
+    `movement_speed` `min(60, 15 + 3 × backup_speed)`: more than double below
+    20, exactly double at 20, pinned at 60 from 15, NO gain from 40 up — and
+    its movement stamina costs rise with it. **For the HERO the gain is zero at
+    every speed** (a verifier's correction): the per-round re-skin rewrites
+    `speed` from DNA (`initcharacter` `+0x077d`) and runs `battlevalues` before
+    the hero decides again.
+  - The expiry touches `speed` ONLY (`+0x25e1`), plus the `"invert"` blendMode
+    `check_spells` sets on Rfoot, Lfoot, Rlowerleg and Llowerleg while the
+    counter is `> 0`; it lands on the 20th `nextphase` counting the cast's own.
+  - Villain arm 27: `check_inventory(40) && fightdistance > 300`
+    (`+0x0fb0`–`+0x1005`; `Push 300` `+0x0fdc`, `Greater` `+0x0fe4`), strict. A
+    recast needs a second copy, since `use_item` empties the slot.
+- **`cast_bloodlust` (item 41,
   `+0x8a60`-`+0x8baa`)**: counter 20; once `strength = 10 + round(backup_strength
   * 1.5)` and `defence = round(backup_defence * 0.5)` — it HALVES defence, and
   the item text's "reduces your agility" names a field the arm never touches.
-- **All four restore at expiry from the pre-battle `backup_*`** (written only by
-  `backup_char`, at initbattle), in `check_spells`' `== 0` test, which runs
-  OUTSIDE its `> 0` block (`+0x256b` → `+0x25c6`, `+0x2651` → `+0x26ac`): **a
-  counter entering at 0 restores**, so this engine's 0-as-inactive convention
-  is unsafe for these four (-1 is the build's inert value). Strength is ONE
-  slot: the last writer wins and ANY expiry resets it, cancelling another
-  spell still running. `battlevalues` recomputes reach (`physical_size`) and
-  damage from strength every phase; `attack_chances` reads defence live.
+  **VERIFIED:** counter 20 on the CLIP (`+0x8a73`), `crowd_action = 3`
+  (`+0x8a84`) and the cost (`+0x8a91`) every tick; once, inside `struck ==
+  null` (`+0x8aca` → `+0x8b76`): `cast_spell_icon(attacker, 41)`, `struck =
+  false`, `Cast2`, `strength = 10 + Math.round(backup_strength * 1.5)`
+  (`+0x8b0a`–`+0x8b42` — the round wraps only the product), `defence =
+  Math.round(backup_defence * 0.5)` (`+0x8b43`–`+0x8b75`); completion on
+  `struck == true` (`+0x8b76`–`+0x8b89`). Seven `SetMember`s, no draw.
+  - **A TINT QUIRK:** while the counter is `> 0` each `nextphase` sets blendMode
+    `"difference"` on `Rlowerarm` TWICE, `Llowerarm` and `Lupperarm`
+    (`+0x2656`, `+0x2676`, `+0x2666`, `+0x2686`) — `Rupperarm` is never tinted —
+    and the expiry, on the 20th `nextphase`, restores strength and defence
+    (`+0x26c7`, `+0x26d4`) and puts the same THREE clips back to `"normal"`
+    (`+0x26e1`–`+0x2711`, `Rlowerarm` twice again).
+  - `agility` is only ever READ — three times in `randomise_gladiator`
+    (`+0x7f90`, `+0x8294`, `+0x82ba`, for name suffixes) — and written nowhere
+    in the dumps, so it is always undefined. The item text is the item table's,
+    `root/frame:35` `+0x4fa8`.
+  - Villain arm 22: `check_inventory(41) && fightdistance < 400`
+    (`+0x0d99`–`+0x0dee`; `Push 400` `+0x0dc5`, `Less2` `+0x0dcd`), strict. A
+    villain also holding 33 never casts it: arm 9's `< 500` covers all of `< 400`.
+- **All four restore at expiry from the ~~pre-battle `backup_*`~~ fight-start
+  `backup_*`** ~~(written only by `backup_char`, at initbattle)~~ — **`backup_char`
+  (`root/frame:35` `+0x2d80`–) has FOUR call sites, none mid-battle**: the hero
+  and then the villain at `sprite:2249/frame:1` (`+0x010a`, `+0x012e`, before
+  the fight), the hero at `sprite:2249/frame:231` right after `restore_char`
+  (`+0x022a`, after a win), and the hero at `root/button:2283` after the
+  stat-point check (`+0x017c`) *(corrected 2026-09-22 by two write-nothing
+  verifiers, one CONFIRMED and one PARTIAL. They named two limits of their
+  partial dumps, and the full action dump, which holds all 1,049 of the SWF's
+  action blocks, has since closed both, in the claim's favour — re-read for this
+  edit, and by a write-nothing verifier of it: bytes `+0x0000`–`+0x00c0` of the
+  frame-1 block are a ConstantPool and a `tournament_in_progress || herolevel
+  == 1` choice of the `about_fight` text (`If` `+0x00bc`, `If` `+0x00e4`,
+  `Jump` `+0x00f7`), both arms rejoining at `+0x010a`, so nothing skips either
+  call; and the only writes of `backup_strength`, `backup_speed`,
+  `backup_attack` and `backup_defence` anywhere are `backup_char`'s
+  `+0x2d80`–`+0x2da7`, every other reference being a read)*. The
+  restore is in `check_spells`' `== 0` test, which runs OUTSIDE its `> 0` block
+  (`+0x256b` → `+0x25c6`, `+0x2651` → `+0x26ac`, and `+0x244f` → `+0x246a`,
+  `+0x24dd` → `+0x24f8` for colossus and little fat kid — VERIFIED): **a counter
+  entering at 0 restores, and a counter decremented 1 → 0 restores IN THE SAME
+  CALL**, so ~~this engine's~~ a 0-as-inactive convention is unsafe for these
+  four ~~(-1 is the build's inert value)~~. **`undefined` is as inert as -1
+  under both tests** — it is a fresh clip's state; -1 is what an expiry leaves —
+  and in the build no counter ever ENTERS a call at 0: a 1 → 0 decrement
+  restores and writes -1 in the same call. ~~Strength is ONE slot: the last
+  writer wins and ANY expiry resets it, cancelling another spell still
+  running.~~ **Strength is ONE slot and the last writer wins — every spell
+  write is absolute from `backup_strength`, so nothing stacks — but only the
+  colossus, little fat kid and bloodlust expiries reset it (`+0x24a0`,
+  `+0x252e`, `+0x26c7`); swift sandals' touches `speed` only, and regenerate
+  and boundless energy have no expiry block** (corrected 2026-09-22: "ANY
+  expiry" was overbroad). `attack` is shared the same way by colossus and
+  little fat kid (`+0x24ad`, `+0x253b`); `defence` is bloodlust's alone,
+  `speed` swift sandals'. Little fat kid writes the TARGET's slots, so the two
+  collide only on a fighter carrying both — little fat kid cast on a colossus
+  caster, or a shrunk fighter casting colossus; either way the first expiry
+  resets strength and attack under the other (see `oldscale` above).
+  `battlevalues` recomputes reach (`physical_size`) and damage from strength
+  every phase; `attack_chances` reads defence live.
 - **With the per-round re-skin, the hero gains nothing from colossus or swift
   sandals** (its stats are rewritten from DNA before its next decision), and a
   villain's little fat kid on the hero is erased before the hero acts; the
-  villain keeps its buffs. The engine has no mutable-stat effect kind, so all
-  four wait on the owner's decision about the re-skin.
+  villain keeps its buffs. **VERIFIED 2026-09-22, and sharper:** the hero acts
+  first in every round, so a hero-cast colossus, swift sandals or bloodlust
+  never reaches one of the hero's own actions — only the villain's action that
+  round sees it, and for bloodlust that is the halved defence alone, a pure
+  penalty; a villain's little fat kid on the hero is undone straight after the
+  villain's own action. The counter and the look (scale, blendMode) last to
+  expiry, where the stat restore is a no-op for the hero. *(And `constructDNA`
+  takes no argument and serialises only `_root.game.hero`, so
+  `backup_char(villain)` rebuilds the HERO's `charDNA`; the villain's comes from
+  `constructvillainDNA` (`+0x268c`).)* ~~The engine has no mutable-stat effect
+  kind, so all four wait on the owner's decision about the re-skin.~~ **Owner's
+  decision 2026-09-22 (HANDOFF.md living head), (a): the re-skin is NOT
+  reproduced. This engine keeps each
+  stat buff for its timer — and a removed piece removed — for every combatant
+  alike, and the four stat spells were built on that rule (built 2026-09-22).**
 - **`cast_command` (item 39, `+0x7be6`-`+0x7db6`)**: no draw; latched on
   `attacker.shove`, it plays `knockback_mov` on the defender and PULLS it 40 px
   a tick toward the caster's facing side until `defender._x <= attacker._x +
-  game_defender.physical_size` (mirror for left), at least one step — so a
-  target already close ends BEHIND the caster. Villain arm 25: `check_inventory
-  (39) && fightdistance > 300`. (Being verified as this is written.)
+  game_defender.physical_size` (mirror for left), at least one step — ~~so a
+  target already close ends BEHIND the caster~~ **but the stand-off is at least
+  80, so a target inside it and 40 px or more in front moves 40 and stays in
+  front; only one starting LESS THAN 40 px in front ends BEHIND the caster**
+  *(corrected here 2026-09-22: a write-nothing verifier broke "already close"
+  when the verb was built, `3ab0536`, whose message records it, as does the
+  19:34 handoff; the map was not corrected then)*. Villain arm 25:
+  `check_inventory (39) && fightdistance > 300`. ~~(Being verified as this is
+  written.)~~ *(The arm's bytecode was re-derived by a write-nothing verifier
+  and the verb built as `cast_command` in `3ab0536`. What a pull past ±2100
+  does to the target — it is never clamped as `defender`, and its next phase is
+  cut — was verified 2026-09-22: §"The arena wall".)*
 - **`cast_adulation` (item 47, `+0x76ae`-`+0x777b`)**: no draw, no defender
-  reference; plays `wincrowd1`; its whole effect is `crowd_action = 50`.
+  reference; plays `wincrowd1`; its whole effect is `crowd_action = 50`
+  (`+0x76c1`).
   **`crowd_action` is NOT a presentation cue**, as this repository's code
   comments call it: `nextphase` adds it into `crowd_interest`, clamped 1..100
-  (`+0x3541`-`+0x35a3`), and `crowd_interest` scales the victory purse. This
-  engine models neither; its `SS2_CROWD` toll is authored and unrelated.
+  (`+0x3541`-`+0x35a3`), and `crowd_interest` scales the victory purse. ~~This
+  engine models neither~~ **This engine models both since `cefaf83`, by the
+  owner's decision 2026-09-22 (HANDOFF.md living head), (f); `cast_adulation` is
+  BUILT in the same commit (+50, cost `round(magicka)`, no draw, ladder arm 28)**;
+  its `SS2_CROWD` toll is authored and unrelated, and is kept. The mechanism is
+  §"The crowd economy", derived and largely verified the same day; what is not
+  verified there is labelled where it stands.
   Villain arm 28: `check_inventory(47) && fightdistance > 300`.
 
 **The spell ladder runs LAST, and overrides the rest and the status phases**
@@ -3361,11 +3679,32 @@ called from `changeCombatants` only when `villaindecisionA == null`
   item CASTS**, and the status phase is LOST, not delayed — its flag was
   already cleared.
 This engine's `chooseAiAction` does the opposite: the forced status phase
-first, then the rest at `staminaleft <= 10`, then the ladder emulation. The
-statuses are a legality question too (the engine forces the status phase for
-every combatant; the build forces it for the hero through `getphase` and lets
-the villain's ladder override it), so reproducing it is an owner's decision
-recorded in the handoff; the tired-villain order is an AI fix.
+first, ~~then the rest at `staminaleft <= 10`, then the ladder emulation~~
+**then the ladder emulation, with the tired rest after every ladder block
+(since `d5f93be`, which removed the early `staminaleft <= 10` rest; corrected
+at this line 2026-09-22)**. The statuses are a legality question too (the
+engine forces the status phase for every combatant; the build forces it for
+the hero through `getphase` and lets the villain's ladder override it), so
+reproducing it is an owner's decision recorded in the handoff; ~~the
+tired-villain order is an AI fix~~ **the tired-villain order was that AI fix,
+`d5f93be`**.
+
+**Owner's decision 2026-09-22 (HANDOFF.md living head), (b): NOT reproduced.**
+This engine forces the status phases for every combatant — the hero's rule is
+the player's rule — and the same goes for the zero-stamina forced rest, which
+the build applies to the hero only. *(Re-verified the same day by a
+write-nothing verifier: overlay frame 1's forced rest reads
+`_root.game.hero.staminaleft` by name (`+0x0d1c`–`+0x0d48`) and calls
+`getphase`, which writes only the hero's `decisionA`. The villain has a
+zero-stamina rest of its own, `if (!(villain.staminaleft > 0))
+villaindecisionA = "rest"` at `+0x1165`–`+0x1194`, reached on every path — but
+not forced: the swap, taunted-run and status writes after it and the
+unconditional `villain_cast_spells()` at `+0x1432` can overwrite it. So a
+villain at zero stamina holding an item whose ladder arm fires uses it whenever
+the ladder's 90% roll passes, where this engine now rests: the verifiers named
+boundless energy 45, regenerate 46 below half health and the bolts 34 and 35,
+and a stamina vial (7) that it drinks; the other possession-only arms — 49,
+32, 31 and 30 — fire the same way.)*
 
 **The per-round re-skin gives the HERO's removed armour back, and not the
 armour class** (derived and verified 2026-09-22; one deriver, one write-nothing
@@ -3397,11 +3736,22 @@ they carry the restored piece forward).
 - The villain is never re-skinned here, so its removed pieces stay removed —
   **except through its own `cast_rejuvinate`**, which restores its pieces from
   `backup_*` (the verifier broke the claim's "stays removed" on that).
-- **This engine zeroes a removed piece for the rest of the battle, for both
-  sides.** No golden removes a piece, so nothing measured moves; it is a
+  *(Re-verified 2026-09-22 by a second write-nothing verifier: nothing in the
+  overlay or any battle function re-runs `skincharacter` or `initcharacter` on
+  the villain. `initcharacter` does reach the villain, but only through the
+  nine intro and setup `skincharacter` calls — `sprite:721`, five in
+  `sprite:1788/frame:69`, root frame 214 and two in root frame 221.)*
+- ~~**This engine zeroes a removed piece for the rest of the battle, for both
+  sides.**~~ **FALSE since `8ff985d` for a holder of item 43**, whose
+  `cast_rejuvinate` restores every piece from its backup (the shoulderguard
+  too, by the owner's decision (d) above). Otherwise this engine keeps a
+  removed piece removed for both sides — **the owner's decision 2026-09-22 (HANDOFF.md living head), (a):
+  the per-round re-skin is NOT reproduced**, for the hero's armour or its
+  stats. No golden removes a piece, so nothing measured moves; it is a
   fidelity divergence for the hero, and the same re-skin also reverts any
   mid-battle stat change on the hero (colossus, bloodlust, swift sandals) at
-  the round's end. Unverified at runtime: that `this` in `nextphase` is the
+  the round's end — which this engine does not do either: a stat buff lasts
+  its timer, for everyone. Unverified at runtime: that `this` in `nextphase` is the
   overlay, and that `battle_started` is true mid-battle (both are implied by
   every capture in which hitpoints stay down between turns).
 
@@ -3410,7 +3760,7 @@ with the stamina and buff steps re-derived by both verifiers):
 
 | step | offsets | statement |
 | --- | --- | --- |
-| 1 | `+0x31b6`–`+0x3265` | clamp `game_attacker._x`, `game_defender._x` to ±2100 — the STAT objects |
+| 1 | `+0x31b6`–`+0x3265` | clamp `game_attacker._x`, `game_defender._x` to ±2100 — the STAT objects, **so it is DEAD CODE**: they are plain `new Object()`s that nothing gives an `_x`, and these four tests and four writes are the only `_x` accesses on them in the SWF *(said at this row 2026-09-22, re-derived that day by a write-nothing verifier; the live clamp is `attacker.onEnterFrame`'s — §"The arena wall")* |
 | 2 | `+0x3266` | `demand_move = 1` |
 | 3 | `+0x3271`, `+0x3289` | `check_spells` for attacker, then defender |
 | 4 | `+0x32a1` | `staminaleft -= staminacost` |
@@ -3468,11 +3818,30 @@ Derived beside the bolts and recorded because the DIFFERENCE is the finding.
     never shown; frame 4 runs `stop()` and places sprite 27, a 23-frame
     explosion whose last frame runs `_parent.removeMovieClip()`. So the damage
     lands exactly once and the bullet is gone about 23 frames after impact.
+    *(The frame scripts were READ 2026-09-22 — by the main session and again
+    for this edit, not by an independent verifier. A write-nothing verifier
+    (PARTIAL) named the dependency: "cannot miss", "damage lands once" and
+    "flies on frame 1" rest entirely on sprite 28 stopping on frame 1, because
+    the arm never sets the bullet's frame itself, and no dump then covered the
+    sprite. The main session has since read the full action dump, which holds
+    all 1,049 of the SWF's action blocks, and this edit re-read it: sprite 28's
+    ONLY action blocks are `Stop` on frame 1 (`DoAction@0xb860`) and `Stop` on
+    frame 4 (`DoAction@0xb8b4`), and sprite 27's frame 23 (`DoAction@0xb819`) is
+    `_parent.removeMovieClip()`. The dependency holds.)*
   - Nothing in the arm ends the phase. The only end is the stall watchdog
     (`+0x37ef`–`+0x38a0`, read by the verifier): `(demand_move >= 60 &&
     attacker._y >= attacker.grounded && bullet_in_air != true) || demand_move
     >= 200`. The 200 cap cannot bind inside the ±2100 clamp (at most ~84 ticks
-    of flight at 50 px).
+    of flight at 50 px). *(Two refinements from a 2026-09-22 verifier,
+    PARTIAL: a kill — or, outside a tournament, any damage at all, the yield
+    path — ends it instead, through `death()` inside the ingress; and the
+    watchdog's `nextphase` sends the burning victim to `Standing` through
+    `changeCombatants` (`+0x27db`, `+0x27ef`), so a late impact's burn is CUT
+    SHORT and its frame-1963 `struck = true` does not leak into the next phase
+    — the leak was the part of that finding the verifier broke. One gap stays
+    open: if the burn's exit and the teardown fell on the same enter-frame, the
+    queued frame-1963 script might run after the teardown, which depends on
+    AVM1 action-queue order that nothing here settles.)*
   ► **AND ITS FRAME TEST IS AN IDEMPOTENCE GUARD, NOT AN IMPACT TRIGGER.**
     `+0x9194 Not; +0x9195 Not; +0x9196 If` is a DOUBLED `Not`, so the gate reads
     `if (bullet._currentframe != 4)`: the block applies damage once, then
@@ -3519,6 +3888,46 @@ geometry; the geometry decides only when and where each lands. On a kill the
 rest still land on the dead: `death()` deletes the fighters' `onEnterFrame`
 and `nextphase`, not the boulders'.
 
+► **`boulder_combat`'s OWN TIMELINE WAS UNREAD UNTIL 2026-09-22, AND IT IS TWO
+  `stop()`s.** "Every boulder lands" and "1 + 4N draws" had rested on the arm
+  and the closure alone, which a write-nothing verifier (PARTIAL) named as a
+  gap. Sprite 33's only action blocks are `Stop` on frame 1
+  (`DoAction@0xcb53`) and `Stop` on frame 4 (`DoAction@0xcb6d`) — read by the
+  main session from the full action dump and re-read for this edit. So its own
+  frames neither draw nor remove it, and frame 1 holds it still until the
+  closure's `gotoAndStop(4)`. Which child clips sprite 33 places is not in an
+  action dump.
+
+► **CAN `defender.struck` ALREADY BE `true` WHEN A SHOWER STARTS? ANSWERED
+  2026-09-22: not by the route this engine named, and only by one the owner
+  chose not to reproduce.** It matters because the teardown test
+  (`defender.struck == true`, `+0x8903`–`+0x8916`) is reached on the setup
+  tick itself — from `+0x8688` and from the loop exit `+0x870a` — so a stale
+  `true` ends the phase on its first tick, and each boulder's closure then
+  reads the timeline's `defender` when it lands, which after that `nextphase`
+  is the caster.
+  - **The engine's stated route cannot happen** (derive:dfa-struck,
+    CONFIRMED). `SS2_DEATH_FROM_ABOVE` said a bolt caster's Cast2 reports after
+    the bolt's teardown. But that teardown's `nextphase()` (`+0x861f`) always
+    reaches `changeCombatants` (`+0x3638`, or `+0x365f` at the round's end),
+    whose first statements send BOTH fighters to `Standing` (`+0x27db`,
+    `+0x27ef`); the victim's `lightning` report comes after 14 frame advances
+    and Cast2's frame-2146 write would need 20, so it never runs.
+  - **The deriver's blanket "no" was REFUTED.** A third teardown nulls no
+    `struck`: the arena-wall attacker clamp (`+0x396c`, `+0x39f7`). A stale
+    value needs a wall cut after the fighter's own clip has written `true` —
+    the routes are in §"The arena wall" (a command caster pinned at the wall
+    and nudged into it mid-pull; the one invocation in which any clip's last
+    frame has written `true` before its arm's completion test runs; the
+    charge's own `struck = true`).
+  - The caster's side mirrors it (a verifier, PARTIAL): with a non-null
+    `attacker.struck` on entry the whole cast body is skipped
+    (`+0x8676`–`+0x8688` → `+0x8903`) — no icon, no draw, no boulder — yet the
+    cost is still spent, and the phase then ends through the watchdog unless
+    something else sets the victim's flag.
+  - **Owner's decision 2026-09-22 (HANDOFF.md living head): the arena wall's cuts are NOT reproduced**,
+    so this engine's shower — one target, every boulder landing — stands.
+
 ### The gale gate is five conditions, not one (derived 2026-09-19)
 
 Read out of `villain_cast_spells` (`sprite:862[overlay]/frame:52/DoAction@0x23e7cf`,
@@ -3552,8 +3961,13 @@ armourclass_max / 2`.
 
 Re-derived instruction by instruction by an adversarial verifier: 28 arm heads,
 28 distinct ids, 28 `villaindecisionA` writes, 27 `Jump`s all sharing one target
-(`+0x105f`, the function end), and **all 82 branch instructions self-consistent
-with `target == next_instruction + delta`**, none landing inside another arm.
+(`+0x105f`, the function end), and **all ~~82~~ 81 branch instructions
+self-consistent with `target == next_instruction + delta`**, none landing
+inside another arm. *(Corrected 2026-09-22: 54 `If` and 27 `Jump` over the
+body `+0x04e4`–`+0x105e`, counted by a deriver and, independently, by a
+write-nothing verifier of this map edit, both finding every one
+self-consistent; the count, but not the self-consistency, was re-done for this
+edit against the full action dump. Nothing below depended on 82.)*
 
 | # | id | decision | extra conditions |
 | ---: | ---: | --- | ---: |
@@ -3600,16 +4014,31 @@ with `target == next_instruction + delta`**, none landing inside another arm.
   villain with molten death casts nothing else from this function ever. Within
   the direct-damage set the priority on simultaneous possession is strictly
   **49 > 32 > 35 > 31 > 34 > 30**.
+  *(Sharpened 2026-09-22 by a write-nothing verifier. "Strictly dominates" here
+  is by id alone, where the gale note above uses it for co-possession — a
+  clash of terms, not of fact. And under co-possession it is not only the seven
+  that pre-empt: arms 25, 27 and 28 (39, 40, 47) share the one guard
+  `fightdistance > 300`, so holding 39 shuts out swift sandals and adulation
+  until it is spent; arm 9's `< 500` (33) covers all of arm 22's `< 400`, so a
+  villain holding 33 never casts bloodlust; and arm 1's `hp < hpmax / 1.5` (43)
+  is implied by the `hp < hpmax / 2` of arms 2–6. Arm 21 (36, `> 500`) can never
+  pre-empt arm 22.)*
 
 ► **AND THE SIX DIRECT-DAMAGE ARMS ARE NOT CONTIGUOUS.** Arm 7 is separated
   from arms 14–18 by six unrelated arms.
 
-► **`use_item` IS NOT PASSED THE MATCHED ID.** Every one of the 28 bodies calls
-  `use_item(item_used)` — the global `check_inventory` set — and `item_used` is
-  read 28 times in this function and **written zero times**. The only two
-  variables it writes are `inventory_array` (once, `+0x056e`) and
-  `villaindecisionA`. An engine that passes the arm's own literal id is
-  modelling a data path the build does not have.
+► ~~**`use_item` IS NOT PASSED THE MATCHED ID.**~~ **`use_item` IS PASSED THE
+  MATCHED ID — BY VALUE, THROUGH `item_used`; ONLY THE DATA PATH DIFFERS
+  (corrected 2026-09-22 by a write-nothing verifier).** Every one of the 28
+  bodies calls `use_item(item_used)` — the ~~global~~ overlay-timeline variable
+  `check_inventory` set — and `item_used` is read 28 times in this function and
+  **written zero times**. The only two variables it writes are
+  `inventory_array` (once, `+0x056e`) and `villaindecisionA`. An engine that
+  passes the arm's own literal id is modelling a data path the build does not
+  have — **but not a different value**: `check_inventory` sets `item_used =
+  Number(which_item)` (`+0x0346`) immediately before its only `return true`
+  (`+0x034f`), and the firing arm's `use_item(item_used)` follows with no call
+  in between, so the value is the arm's own literal every time an arm fires.
 
 ► **`inventory_array` is `new Array(1, inventory1 … inventory6)`** (`+0x055e`,
   7 args), the leading literal making it 1-indexed with `[0] = 1` as inert
@@ -3630,7 +4059,11 @@ and **NOT** `inventory_maxslots` — zero references to either fall inside this
 block. Magicka enters only at execution, as `staminacost = round(magicka)`
 (`DoAction@0x240c7f` `+0x7ad0`), spent unconditionally at `+0x32a7` with **no
 affordability check anywhere**: a villain at zero stamina still casts and goes
-negative. An engine must not invent one.
+negative. An engine must not invent one. *(Owner's decision 2026-09-22 (HANDOFF.md living head), (b): this
+engine forces the zero-stamina rest on every combatant, as the build forces it
+on the hero only, so a villain at zero stamina rests here. Above zero it still
+casts with no affordability check, as in the build — §"The spell ladder runs
+LAST".)*
 
 `_root.arena.fightdistance` is an ARENA field, not a combatant field, and this
 repository has no combatant-level home for it — **which is what `cast_gale` is
@@ -3671,7 +4104,11 @@ state machine.
 `check_spells(which_character, which_avatar)` decrements timed fields and
 restores backed-up stats/appearance when colossus, little-fat-kid, swift-sandals,
 or bloodlust expires; it also decrements regenerate and boundless-energy
-counters. Those six buff counters are initialized to 20. One-shot frozen,
+counters. ~~Those six buff counters are initialized to 20.~~ **Four of those
+six counters start at 20; colossus and little fat kid start at 16 (`+0x7ff3`,
+`+0x8211`, the latter on the victim's clip)** *(corrected at this line
+2026-09-22; §"The timed buffs live on the CLIP" already said so, and both 16s
+were re-derived that day by write-nothing verifiers)*. One-shot frozen,
 burning, poison, and life-stolen phases use the opposing weapon's active
 enchantment-damage field, then clear or advance.
 
@@ -3710,6 +4147,14 @@ mutation order is:
    **DefineLocal** (`+0x1e75`): the timeline variable the handler reads is never
    assigned, so the suspension the author evidently intended never happens.
 
+   *(Refined 2026-09-22 by write-nothing verifiers — §"The arena wall" has it in
+   full. Only the ATTACKER side ends a phase, and only on the ground (`_y <
+   grounded` skips the `nextphase`); the defender side is a plain clamp. So a
+   knockback is bounded while its hitter's phase lasts, but a tween that
+   outlives that phase and carries its victim past the wall cuts the VICTIM's
+   phase — if it crosses before, or while, the victim's own arm runs; a victim
+   whose arm finishes first is pinned as `defender`, uncut.)*
+
    **How the error was made**, because it is a repeatable one: an earlier caveat
    said the bound lived in this document's prose with no byte offset, and it was
    retracted for a good reason — the decoder in use printed opcodes without
@@ -3728,6 +4173,302 @@ mutation order is:
 The rest decision first sets `staminacost = -round(stamina * 15)` and adds
 `3 + ceil(stamina)` hitpoints plus `stamina` stamina; `nextphase` then applies
 the baseline additions and cost accounting above.
+
+### The arena wall (derived and verified 2026-09-22)
+
+Derived by one agent from the full action dump (all 1,049 of the SWF's action
+blocks) and the function-header table; its first five findings were each
+re-derived by their own write-nothing verifier (5 started, 5 returned, none
+dead: two CONFIRMED, three PARTIAL, the corrections applied below). A sixth,
+about wording in the engine's code comments, had no verifier and is not
+recorded here. The gale, teleport/command and villain-distance questions of the
+same day re-derived several of the same points independently. Offsets are in
+`sprite:862[overlay]/frame:52/DoAction@0x240c7f` (base `0x240c85`) unless
+another block is named.
+
+**TWO CLAMPS, AND ONE OF THEM IS DEAD.** The SWF holds exactly 16 pushes of
+±2100, all in this block, and no string or float form of the number:
+- Eight are `nextphase` step 1 (`+0x31b6`–`+0x3265`), on `game_attacker` /
+  `game_defender` — `_root.game.villain` / `.hero`, plain `new Object()`s
+  (`root/frame:35` `+0x07fc`/`+0x0814`, `root/frame:84` `+0x07a7`/`+0x07c1`;
+  the rebindings to `game.champion` and `game["villain" + n]` are plain Objects
+  too). Those four tests and four writes are the only `_x` accesses on them in
+  the SWF, `undefined < -2100` never holds, and the step is DEAD.
+- Eight are the only live bound on a fighter, inside `attacker.onEnterFrame`
+  (`+0x36ae`; header flags `0x169`: r1 `this`, r2 `_root`, r3 `_global`). No
+  `SetProperty` touches a gladiator, `combatCamera` returns at once
+  (`+0x04a1`), and sprite 2249's clamp at `+0x0e14`–`+0x0e5b` acts on the crowd
+  clip.
+
+**THE HANDLER, EVERY FRAME, IN THIS ORDER, WITH NO `Return`:**
+
+```text
+nudge     +0x36b9–+0x37c8  if (_root.arena.fightdistance < 100)
+                              hero.gladiator_dir == "left" ? { hero._x++; villain._x-- }
+                                                          : { hero._x--; villain._x++ }
+watchdog  +0x37c9–+0x38a1  demand_move++; if ((>= 60 && grounded && !bullet_in_air) || >= 200)
+                              { both struck = null; nextphase() }            // +0x3892
+          +0x38a2–+0x38cd  if (attacker != _root.arena.gladiators.hero) _global.phasecomplete = false
+gate      +0x38ce–+0x38ec  if (knock_defender == null || == undefined)   // never closes
+ attacker +0x38f1–+0x397b    if (attacker._x < -2100) { attacker._x = -2100;
+                               if (!(attacker._y < attacker.grounded)) {
+                                 _y = grounded; grounded = null; destination = null;
+                                 nextphase() } }                             // +0x396c
+          +0x397c–+0x3a06    the same at > 2100                              // +0x39f7
+ defender +0x3a07–+0x3a5e    plain clamps, no nextphase
+          +0x3a5f–+0x3a83  _root.arena.gladiators.overlay_villain.gotoAndStop(2)   // gate open or not
+refresh   +0x3a84–+0x3b1e  phase_decision from battle_action: 1 decisionA, 2 villaindecisionA,
+                              3 decisionB, 4 villaindecisionB, else null (only 1, 2 or null occur)
+arms      +0x3b1f–
+```
+
+*(The `phasecomplete` and `overlay_villain` steps and the 3/4 branches were
+missing from the first draft of this table; a write-nothing verifier of this
+edit named them, and they were re-read in the full action dump. That verifier
+wrote the `phasecomplete` test as `attacker == hero`: the bytes are `Equals2;
+Not; Not; If`, which skips the write when the two are equal, so it runs when
+the attacker is NOT the hero clip.)*
+
+- **The gate never closes**: `knockback` declares `knock_defender` with
+  `DefineLocal` (`+0x1e75`), so the timeline variable it tests is never written.
+- **Only the ATTACKER side ends a phase, and only on the ground.** Its teardown
+  writes `_y`, `grounded` and `destination` and calls `nextphase()` — no
+  `struck`, no `shove`. `grounded` is written only by the jump arms (`+0x4729`,
+  `+0x4a01`), so a standing fighter always takes the `nextphase`; an airborne
+  one is clamped with none.
+- **The handler carries on after that `nextphase`.** At `battle_action` 1 → 2
+  the roles have swapped, and the refresh dispatches the new attacker's arm in
+  the same frame. After a LEFT-wall cut (`+0x396c`) execution falls into the
+  right-wall test (`+0x397c`) on the NEW attacker, so two `nextphase` calls in
+  one frame are possible; after a right-wall cut (`+0x39f7`) the next code is
+  the defender clamp, and the new attacker meets no attacker-side test that
+  frame *(narrowed 2026-09-22 after a write-nothing verifier of this edit; the
+  deriver had it this way, and the wall-1 verifier's "the other wall's test"
+  generalised it)*. At 2 → 3 the `battle_action < 3` branch
+  falls through into the `== 3` test, so `changeCombatants` runs TWICE
+  (`+0x3638`, `+0x365f`) and the two toggles cancel; both handlers are deleted,
+  the refresh yields null and no arm runs *(a verifier's correction: the
+  deriver had the roles swapped on both paths)*.
+
+**THE NUDGE PUSHES A FIGHTER AT THE WALL INTO IT** (CONFIRMED). It runs before
+the clamp and moves each fighter away from the other — toward its own back
+wall — 1 px a frame while `fightdistance < 100`. So a fighter standing at
+exactly ±2100, where every clamp leaves it, within 100 of its foe, is moved to
+±2101 on its first attacker frame, and the clamp ends its phase before its arm
+runs. Staged: villain at +2100 facing left, hero at +2020, `battle_action` 2 —
+the round ends and the villain's chosen action never runs. What happened
+before stays: its ladder consumed the item at choice time (`use_item`), and
+the cut `nextphase` charges whatever `staminacost` its previous phase left
+(`+0x32a1`). *(The wall-4 verifier added an exception — that when the hero's
+phase ends through the watchdog, the villain's arm runs once in that same call
+first. The handler's own order, in the table above, refutes it for a gap under
+100: the nudge (`+0x36b9`) runs BEFORE the watchdog (`+0x37c9`), so the villain
+is already at ±2101 when the watchdog's `nextphase` makes it `attacker`, and
+the attacker clamp cuts it before the refresh. Found by a write-nothing
+verifier of this map edit; the exception is not recorded as a fact.)*
+Reachable at 1v1: a
+wall-pinned villain commands the hero in to a gap under 100 (a hero
+`physical_size` of 99 or less, i.e. strength 29 or less), or the hero walks up
+to a pinned villain whose `physical_size` is under 100. This map did not record
+the nudge before this section.
+
+**THREE ROUTES LEAVE A FIGHTER PAST THE WALL AT A PHASE BOUNDARY, and at each
+the build CUTS the next phase of the fighter involved:**
+
+1. **Knockback spillover** (PARTIAL; the corrected version). `knockback()` is
+   `new mx.transitions.Tween(victim, "_x", Regular.easeOut, x, x + force, 1,
+   true)` (`+0x1e1d`–`+0x1e74`): ONE REAL SECOND on `getTimer`, which nothing
+   stops at a phase change. While the hitter's phase lasts, the defender clamp
+   pins the victim at ±2100. When the hitter's phase ends first and `x + force`
+   lies past the wall, the victim becomes `attacker` with the tween still
+   carrying it: the attacker clamp cuts its phase — before its arm if the tween
+   has already crossed, otherwise when it crosses, if the victim's arm is still
+   running (a victim whose arm finishes first is pinned as `defender`, uncut).
+   The hitters shorter than the tween at 30 fps are the gale (Cast1,
+   2103–2125), the whirlwind and the psyche discharge (psyche_up3, 1644–1656),
+   `normal_attack`'s Attack5–8 and `power_attack`'s and ghost strike's
+   Attack9–11 (241–359), the charge (Chargeattack, 104–117, when the stale
+   timeline `attack_direction` it rolls on opens the knockback gate), and the
+   taunt (1482–1511) at a true 30 fps; the shove (1447–1481) and Attack12
+   (360–394) outlast it. **When the villain is the hitter the round ends with
+   the tween still running and no handler alive**: the hero stands past the
+   wall through the menu, and on its next-round first frame the clamp cuts its
+   chosen action while the villain's arm runs in that same frame. For the gale
+   (±1000) the cut comes before the victim's arm only when it starts past about
+   ±1140–1171 in the push direction (`t(2 − t)` at 22–24 of 30 frames is 929–960
+   of the 1000), and not at all below about 23 fps, when the tween finishes
+   inside the caster's phase. Concrete: seed 1, a strength-20 hero at 1900
+   whirlwinds a strength-20 foe at 2000 (force 194) — this engine clamps the
+   foe to 2100 and the foe then walks to 1993; in the build the foe is at about
+   2124–2139 on its first attacker frame and its phase is cut. *Runtime
+   premises, not bytes: pacing near 30 fps, the Tween beacon's order against
+   the handler (up to two frames), and AVM1's `DefineLocal` scoping.*
+2. **The nudge into the wall**, above.
+3. **The command pull-through** (CONFIRMED). The command's completion
+   `nextphase` (`+0x7d14`, `+0x7da7`) swaps the roles, so a target pulled past
+   the wall is never clamped as `defender`: at `battle_action` 1 it is
+   `attacker` next frame and the attacker clamp cuts its phase; at 2 the round
+   ends with both handlers deleted, the target — the hero — stands past the
+   wall until its next-round first frame, and the clamp cuts its chosen action
+   there. A pull can cross the wall only on its completion frame. Concrete, at
+   1v1: villain at −2090 facing right, hero 10 px in front at −2080,
+   `battle_action` 2, the villain commands — the nudge makes it −2091/−2079, the
+   pull puts the hero at −2119 and completes at once, and the hero's next action
+   is lost.
+
+A walk or run whose last step crosses the wall ends on the attacker clamp at
+exactly ±2100; a teleport cannot cross, its draw being ±2000 (`+0x765e`).
+
+**A CUT LEAVES `struck` STALE** (PARTIAL; the corrected version). The clamp
+teardown nulls no `struck`, so a FIRST-frame cut leaves the fighter's `struck`
+as its previous phase left it (normally null), and a later cut leaves whatever
+its own arm had armed.
+- **Stale `false`.** Thirty arms gate their entry on `attacker.struck == null`
+  and then set it `false`: block `+0x4caf`, swap_weapons `+0x4d40`, wincrowd
+  `+0x501f`, rest `+0x5196`, frozen `+0x52d5`, life_stolen `+0x5409`, poisoned
+  `+0x553d`, burning `+0x5671`, drink_potion `+0x57a1`, power `+0x6065`, normal
+  `+0x61cc`, quick `+0x6337`, bash `+0x649e`, psyche_up `+0x655f`, taunt
+  `+0x682f`, the missiles `+0x6bde`, teleport `+0x7588`, adulation `+0x76f5`,
+  weaken armour `+0x77c3`, whirlwind `+0x7921`, ghost strike `+0x7dfe`,
+  colossus `+0x8032`, the bolts `+0x8450`, death from above `+0x8676`, swift
+  sandals `+0x89b5`, bloodlust `+0x8ab8`, regenerate `+0x8c03`, boundless
+  energy `+0x8ce2`, rejuvenate `+0x8db0`, the fireballs `+0x8fc8`. Cut after
+  that and before its clip's last frame, the fighter's next struck-gated arm
+  skips its entry and idles until the watchdog, about 59 frames — unless a
+  watchdog, bolt, death-from-above or little-fat-kid teardown nulls it as
+  `defender` first, its own shove, gale, command or charge completion nulls it,
+  or the taunt's `taunttimer` — a timeline variable that persists across
+  phases (`+0x67e4`, `GetVariable`/`SetVariable`, not `_global`) — passes 60
+  first.
+- **Stale `true`.** The clamp runs BEFORE the arm dispatch, so for EVERY arm
+  that completes on `attacker.struck == true` there is one invocation in which
+  the clip's last frame has already written `true` and the completion test has
+  not yet run; a cut on that invocation leaves `true`. The charge writes
+  `attacker.struck = true` itself (`+0x4376`, `+0x45e2`) and completes on
+  `charging == false`; command, the bolts and death from above complete on
+  something other than their caster's `struck`; and a shove or gale caster
+  already holding a stale `true` completes in the very invocation it knocks
+  back, so its victim overlaps the whole tween. These routes exist in the
+  bytecode; that play reaches them is not shown.
+- What a stale `true` does to death from above is in §"The fireball family and
+  molten death".
+
+**THE ENGINE, AND THE OWNER'S DECISION.** This engine clamps a position to
+±2100 at once (`SS2_ARENA.clamp`), has no nudge, and lets every actor act.
+**Owner's decision 2026-09-22 (HANDOFF.md living head): the arena wall's cuts — the knockback spillover
+past the wall, the nudge-into-wall stunlock and the command pull-through — are
+NOT reproduced.** So none of the stale-`struck` routes above arises here
+either.
+
+### When the villain decides, and from which distance (derived and verified 2026-09-22)
+
+Derived by one agent from the full action dump; five of its six findings were
+re-derived by their own write-nothing verifiers (5 started, 5 returned, none
+dead: one CONFIRMED, four PARTIAL, the corrections applied below); the sixth,
+the hero's side, had no verifier and is marked where it stands. The teleport
+case was found independently the same day by another question (CONFIRMED).
+Offsets are in `sprite:862[overlay]/frame:52/DoAction@0x240c7f` unless another
+block is named.
+
+**THE VILLAIN DECIDES INSIDE THE HERO'S LAST TICK, ON A DISTANCE MEASURED BEFORE
+IT** (CONFIRMED).
+- `arena.fightdistance` has ONE writer, `getfightdistance`
+  (`sprite:2249/frame:1/DoAction@0x6e421b` `+0x02a9`; `SetVariable` of
+  `round(sqrt(xdist² + ydist²))` at `+0x0427`–`+0x0466`), called from ONE site,
+  the first statement of `gladiators.onEnterFrame` (`+0x0e73`) — once a frame.
+  Elsewhere the SWF reads it 18 times: overlay frame 4 (2), `villain_cast_spells`
+  (11), `villainChooseAction` (4) and the nudge (1).
+- `villainChooseAction` has ONE call site, in `changeCombatants`, when
+  `villaindecisionA == null` (`+0x2bb4`–`+0x2bd3`; the reference at `+0x6b02` is
+  a bare `GetVariable; Pop`). So the chain is: the hero's arm → `nextphase()` →
+  `battle_action < 3` → `changeCombatants()` (`+0x3638`) → the swap →
+  `villainChooseAction()` → `villain_cast_spells()` (called as the last
+  statement of `villainChooseAction`, `DoAction@0x23f835` `+0x1432`) —
+  synchronously, inside the `attacker.onEnterFrame` call that ends the hero's
+  phase, and nothing on it recomputes the distance.
+- **So nothing that call writes is visible to the villain's decision**: not
+  the arm's final move, not the nudge, not the wall clamp, not
+  `changeCombatants`' own `_y` writes (`+0x2aeb`–`+0x2b42`).
+
+**WHAT THE VILLAIN READS AFTER EACH HERO PHASE** (PARTIAL; the corrected
+version):
+
+| Hero phase | What the villain's decision reads |
+| --- | --- |
+| teleport | the gap BEFORE the teleport (`_x` written at `+0x765e`, `nextphase` at `+0x769e`, one run) |
+| ghost strike | the gap beside the villain during the strike, about `max(hero physical_size, ~100 after the nudge)`, **plus any knockback progress** — its hit sets the timeline `attack_direction` to 9–12 (`+0x7ebb`), inside the knockback band, so a hit that rolls the knockback (one in four) is read mid-tween at directions 9–11, while at 12 the 35-frame Attack12 outlasts the one-second tween and the push is read complete — and never the return to `attacker_old_x` (`+0x7f9f`, then `nextphase` `+0x7fca`) |
+| command | the true gap + 40 (the pull comes before the test) |
+| walk | the true gap ∓ 1–3 px, the last `ceil(d / 8)` step, for an ordinary arrival; but when the gap starts below the villain's `physical_size`, the walk's clipped destination lies BEHIND the walker, which steps AWAY by a few px — not bounded by 3 — on the tick it arrives |
+| taunted run | the true gap ∓ 2 |
+| walk or run ending on the wall | a position PAST ±2100 by up to one step, where the fighter now stands at ±2100 |
+| jump | the penultimate tick: one `jump_x_mov` short and airborne by about `\|leap0\|` (8–36), read as a hypotenuse |
+| charge that does not reach | stale by 0 or 1 px |
+| charge whose hit rolls a knockback | can end on the out-of-range branch (`+0x440c`–`+0x444b`; `chargeleft` `+0x467e`–`+0x46b7`) 1–12 ticks after the hit, stale by that tick's step plus the tween |
+| fireball, bolt, death from above, colossus | fresh, apart from a completion-tick nudge of 2 px or less |
+
+The command's +40 crosses no villain gate while the villain's `physical_size`
++ 40 stays under 200 (strength up to 119); but under colossus (strength × 3) a
+villain of base strength 40 or more can read a gap under 200 as 200 or more.
+
+**A KNOCKBACK IS STILL MOVING WHEN THE VILLAIN DECIDES** (PARTIAL; corrected).
+Each `knockback()` is a one-second `Regular.easeOut` tween — `1 − (1 − p)²` of the
+force at elapsed wall-clock time `p` — and the villain decides in the tick its
+hitter's clip ends. At a nominal 30 fps the tween has done: gale (Cast1)
+93–95%; Attack5 and Attack11 81–84%; Attack6 and Attack9 68–72%; Attack7
+64–68%; Attack8 93–95%; Attack10 84–87%; the whirlwind and the psyche discharge
+(psyche_up3, where direction 30 always knocks back) 64–68%; the taunt about
+100%; the shove and Attack12 are finished. A charge gives AT MOST 68–72%, and
+as little as about 7% when the out-of-range branch ends it early (a model, not
+a capture). The fractions come from `getTimer`, so they move with frame pacing,
+and by a tick for the handler order the bytes cannot show.
+
+**AND THE BUILD'S MELEE NEVER CHECKS DISTANCE** (PARTIAL; corrected).
+`power_attack`, `normal_attack` and `quick_attack` call `checkattackroll` once,
+on their first tick (`+0x6146`, `+0x62ad`, `+0x6418`), and neither the arms nor
+`checkattackroll`, `attack_chances`, `defender_hurt` or `damagecharacter` reads
+a position. The villain's in-range test is `(equipped_weapon == 1 && fd <
+weapon_range) || (equipped_weapon == 2 && !(fd < 200))` (`villainChooseAction`,
+`DoAction@0x23f835` `+0x0356`–`+0x03d5`), and the contact attacks its in-range
+branch can pick are exactly those three and `shove` (`+0x044d` quick, `+0x0531`
+normal, `+0x0667` power, `+0x074b` shove; the same branch, `+0x03da`–`+0x08c2`,
+can also pick snipe (`+0x0495`, `+0x04d9`), bombard, taunt, a walk, a jump or
+rest) — never `bash_attack`, which only the hero's buttons send — and the
+shove is not rolled at all: it knocks back (`+0x5fc9`, in `DoAction@0x240c7f`)
+at any distance. So a stale "in range" CAN become a real swing, or a real
+shove, across the arena: later overrides (a swap on the same stale distance,
+the 10% `psyche_up`, the status flags, the ladder called at
+`DoAction@0x23f835` `+0x1432`) can still replace the choice, but none
+re-checks the range.
+
+**CONCRETE DIVERGENCES FROM THIS ENGINE**, whose AI measures the state after the
+hero's action is fully applied (PARTIAL; corrected):
+- A hero at gap 150 teleports to gap 1350. The build's villain reads 150, so
+  melee (for a weapon range in (150, 1350]), whirlwind (< 200), teleport
+  (< 250), weaken armour (< 300) and gale (< 400, armour below half) are open
+  and command (> 300) and ghost strike (> 500) are closed; this engine reads
+  1350 and does the reverse. *(When this was checked, at `7d4338a`, colossus,
+  little fat kid, swift sandals, bloodlust and adulation had no verb here, so
+  the verifier excluded their gates.)*
+- A strength-9 hero (`physical_size` 86) ghost-strikes from gap 600 and loses
+  the knockback roll. The build reads about 100 (the true gap ends near 607), so
+  every sword-hand villain (`equipped_weapon` 1) is in melee range (weapon range
+  124 or more) and whirlwind is open; this engine reads 600. *(A bow-hand
+  villain's in-range test is `fd >= 200` instead, so it is not.)*
+- A hero's Attack7 knocks the villain back 145 from gap 100 (true gap 245). The
+  build reads about 187–199, so whirlwind is open; this engine reads 245.
+
+**THE HERO'S SIDE.** The hero reads `fightdistance` at ONE site, the overlay
+frame-4 close/long selector (`DoAction@0x238bbf`: `fd < weapon_range` at
+`+0x00d8`, `fd < 100 + physical_size` at `+0x013b` with the bow drawn) — that
+much follows from the CONFIRMED census above, which classified all 18 reads.
+*One deriver, not independently verified*: that this read runs at least three
+ticks after the round ends, so it is fresh except while a knockback tween is
+still moving. It rests on `initialise` being overlay frame 1, which the deriver
+inferred and did not verify.
+
+**OWNER'S DECISION 2026-09-22 (HANDOFF.md living head): the villain's stale decision distance is NOT
+reproduced.** This engine's AI reads current positions for every seat — the
+hero's rule is the player's rule.
 
 ## Battle result and reward callbacks
 
@@ -3783,16 +4524,26 @@ if (_root.game.hero.herolevel == 1)                           // test +0x0867..+
 ```
 
 `character_xp` is a `battlevalues` derivation on the *defeated opponent*, not a
-stored field, and `crowd_interest` is derived from `herolevel` at
-`sprite:2224/frame:1` `+0x0f48` with a `RandomNumber(899)` opcode draw. Four
-consequences worth stating.
+stored field, and ~~`crowd_interest` is derived from `herolevel` at
+`sprite:2224/frame:1` `+0x0f48` with a `RandomNumber(899)` opcode draw~~
+**`crowd_interest` starts at `hero.herolevel + villain.herolevel` — set by the
+`combat_panel` load handler, which is an inference, see §"The crowd economy" —
+and then moves only by `nextphase`'s per-phase step; no draw writes it**
+*(corrected 2026-09-22 by a write-nothing verifier re-reading every writer —
+§"The crowd economy" below. The `RandomNumber(899)` at `+0x0f48` feeds `_global.crowdlevel`, a
+string; the `crowd_interest = ceil(herolevel / 5)` that block does write is
+overwritten before anything reads it)*. Four consequences worth stating.
 
 The reward is a function of the **defeated** combatant's damage, enchantments,
 armour and level, not of the winner's — though generated opponents are built at
 the hero's own level, so in ordinary play the two track each other.
 
-Because `crowd_interest` comes from the opcode rather than `randomBetween`,
-**the win gold is neither recordable nor injectable** by a capture wrapper.
+~~Because `crowd_interest` comes from the opcode rather than `randomBetween`,
+**the win gold is neither recordable nor injectable** by a capture wrapper.~~
+**WITHDRAWN 2026-09-22 with its premise**: no opcode draw reaches
+`crowd_interest` (§"The crowd economy"). The purse depends on the two levels
+and on which phases completed and how; whether a capture can reproduce it has
+not been re-assessed.
 
 The level-1 override is a flat set, not an addition, and it is a set of the
 **whole purse**: `+0x08ae` pushes the literal 2500 straight onto
@@ -3840,6 +4591,184 @@ spans — and every offset reproduced.
 Team mode must declare victory only when a team has no living combatants, wait
 for the final defeat animation, and invoke a one-shot result bridge. It must not
 run vanilla win settlement after the first individual knockout.
+
+### The crowd economy (derived and verified 2026-09-22)
+
+Derived by one agent from the full action dump and the function-header table;
+five of its six findings were re-derived by their own write-nothing verifiers
+(5 started, 5 returned, none dead: four CONFIRMED, one PARTIAL, the correction
+applied below). The sixth — that a villain's `wincrowd` raises the HERO's purse
+— had no verifier; the charisma read under it was confirmed by two others. This
+replaces the account of `crowd_interest`'s origin this map carried until
+2026-09-22, which was wrong and is struck at its site above.
+
+**EVERYTHING IS ON `_global`.** `nextphase` (`+0x3193`) and
+`attacker.onEnterFrame` (`+0x36ae`) have header flags `0x169` (r3 = `_global`);
+`magic_damage_character` (`+0x129c`), `knockback` (`+0x1dd3`) and
+`defender_blocked` have `0x12a` (r1 = `_global`); `damagecharacter` (`+0x157d`)
+has `0x129` (r2 = `_global`) — read from the header bytes — and
+`sprite:2224` writes `_global.crowd_action` by name. So every
+`register:3.crowd_action` in this map's arm listings is `_global.crowd_action`,
+and **`crowd_action` is a per-PHASE delta that `nextphase` folds into
+`crowd_interest`, not a per-damage presentation cue.**
+
+**EVERY WRITE.** The name is pushed 44 times in the SWF; a verifier re-counted
+them — 42 writes, the one read at `+0x354d`, and `+0x4fdb`, a write whose value
+is read off the hero. Offsets are in `DoAction@0x240c7f` unless named:
+
+| Site | Value |
+| --- | --- |
+| `magic_damage_character` `+0x13cb` | 2 — every spell ingress |
+| `damagecharacter` `+0x162e` | 8 — critical |
+| `damagecharacter` `+0x1666` | 3 — taunt; DEAD: `+0x1673` then stores `"normal"` into the method register, which reaches `+0x17c0` |
+| `damagecharacter` `+0x168b` | 20 — grievous; DEAD, overwritten at `+0x17c0` |
+| `damagecharacter` `+0x17c0` | 2 — normal or grievous |
+| `knockback` `+0x1dfe` (`SetMember` `+0x1e0a`) | 1 — whenever `knockback()` runs: shove, taunt, gale, and a hit at direction 30, or at 5–12 when `randosmash > 3` |
+| `defender_blocked` `+0x2153` | −2 |
+| `nextphase` `+0x35a4` | 0, after folding it in |
+| `sprite:2224/frame:1` `+0x0f97`–`+0x0fab` | 0, before the fight |
+| charge right / left `+0x4201` / `+0x446d` | 2 |
+| jump right / left `+0x46d9` / `+0x49b1` | −2 |
+| `wincrowd` `+0x4fdb` | `round(_root.game.hero.charisma / 2)` — the HERO's, whoever chose it |
+| `rest` `+0x5150` | −2 |
+| `frozen`, `life_stolen`, `poisoned`, `burning` `+0x52af`, `+0x53e3`, `+0x5517`, `+0x564b` | 0 |
+| `drink_potion` `+0x577f` | −3 |
+| `shove` `+0x5dc0`, `power_attack` `+0x6029` | 2 |
+| `quick_attack` `+0x6304` | −1 |
+| `psyche_up` `+0x6604` | 3 — only at psyche level 3, and only on the first tick |
+| `taunt` `+0x67a8` | −2 |
+| bombard / snipe `+0x6ba2` | −1 |
+| `cast_teleport` `+0x7554` | 3 |
+| `cast_adulation` `+0x76c1` | 50 |
+| `cast_weaken_armour` `+0x778f` | 4 |
+| `cast_whirlwind` `+0x78ed` | 3 |
+| `cast_gale` `+0x7abd`, `cast_command` `+0x7bf9` | 2 |
+| `cast_ghost_strike` `+0x7dca` | 5 |
+| `cast_colossus` `+0x7ffe` | 15 |
+| `cast_little_fat_kid` `+0x821c` | 10 |
+| the bolts `+0x841c` | 5 |
+| `cast_death_from_above` `+0x8642` | 20 |
+| swift sandals, bloodlust, regenerate, boundless energy, rejuvenate `+0x8981`, `+0x8a84`, `+0x8bcf`, `+0x8cae`, `+0x8d7c` | 3 |
+| the fireball family `+0x8f94` | 5 |
+
+No write in `walkleft`/`walkright`, `runleft`/`runright`, `block`,
+`swap_weapons`, `normal_attack` or `bash_attack`, and none in the hero's click
+handlers or `villainChooseAction`. *(Every value above was re-read against the
+dump's 44 pushes for this edit. Which arm each arm-level offset belongs to is
+the deriver's attribution; a verifier re-derived it this session for the
+helpers, `nextphase`, `sprite:2224`, `wincrowd`, `frozen`, `power_attack`,
+`psyche_up`, `taunt`, bombard/snipe, teleport, command, gale, the four stat
+spells, death from above and the fireballs, and not for the other rows.)*
+
+**WHAT `nextphase` ACTUALLY ADDS: THE LAST WRITER WINS** (PARTIAL; the
+corrected version). An arm's top-of-arm write re-runs on every tick, the damage
+path runs on the arm's first tick, and `nextphase` normally runs on a later
+tick, after the clip's last frame. So:
+- **An arm that writes at its top and calls `nextphase` itself adds its own
+  constant**, whatever its hit did: a critical `power_attack` sets 8 on tick 1
+  and the later ticks rewrite 2, so +2; a shove's or gale's `knockback` 1 is
+  overwritten by the arm's 2; a status phase adds 0.
+- **`normal_attack` and `bash_attack` write nothing, so the damage path's value
+  survives**: −2 blocked or missed, 8 critical, 2 a normal hit — and for
+  `normal_attack` (directions 5–8) 1 when its knockback fires, one time in four.
+- **`psyche_up` writes its 3 only at level 3, on its first tick, before its
+  direction-30 roll** (`+0x66a9`/`+0x6722`): a hit ends at +1 (grievous 20 → 2
+  → the knockback that always fires at direction 30 → 1), a block at −2, and
+  only out of range does the +3 survive. Levels 1–2 add 0.
+- **The bombard/snipe arm and the fireball arm never call `nextphase`**: they
+  end through the watchdog at the top of the handler, which adds whatever the
+  previous tick left. Normally that is their constant, −1 or 5; but when the
+  impact tick has `demand_move` of 59 or more, the watchdog fires on the next
+  tick and adds the impact's value instead — bombard +2, +8 or −2, snipe +2 or
+  −2, fireball +2. A plain fireball at more than about 2830 px, a hell fireball
+  at more than about 3950 px, or a bombard flight of about 42 ticks or more can
+  reach that; a dire fireball cannot.
+- **`wincrowd` adds `round(_root.game.hero.charisma / 2)` — the HERO's charisma
+  even when the VILLAIN chose it** (`villainChooseAction` writes `wincrowd` at
+  `+0x0bd3`/`+0x0ec2`, §"The twenty readers"). *(That a villain's wincrowd
+  therefore raises the hero's purse is one deriver's conclusion, not
+  independently verified; the charisma read is verified.)* **Owner's decision
+  2026-09-22 (HANDOFF.md living head), recorded in `cefaf83`: this engine's
+  wincrowd, when built, uses the ACTOR's own charisma.**
+- **The killing phase adds nothing**, because `death()` deletes `nextphase` and
+  both handlers (`Delete` at `+0x203a`, `+0x2047`; `Delete2` at `+0x204e`), so
+  whatever that phase wrote is never folded in. *(Not because the writes come
+  before the defeat gate: `knockback`'s 1 lands AFTER it — `damagecharacter`
+  calls `death()` in `+0x1990`–`+0x1a71` and only then reaches the knockback
+  gate at `+0x1a72` — on a killing hit at direction 30, or at 5–12 when
+  `randosmash > 3`. The first draft gave that wrong reason; a write-nothing
+  verifier of this edit caught it.)*
+
+**`crowd_interest` STARTS AT THE SUM OF THE TWO LEVELS** (CONFIRMED). Not from a
+draw:
+1. `sprite:2224/frame:1` (`arena_intro`, root frame 214,
+   `DoAction@0x66ffb1`): `+0x0ef6`–`+0x0f4c` writes `_global.crowdlevel =
+   round(herolevel * 0.6) + "," + (100 + random(899))` — the `RandomNumber` at
+   `+0x0f48`, into a STRING; the `fightselected` gate at `+0x0ef1` skips only
+   this write. Then, unconditionally, `+0x0f5c`–`+0x0f96` sets
+   `_global.crowd_interest = Math.ceil(_root.game.hero.herolevel / 5)` and
+   `+0x0f97`–`+0x0fab` sets `crowd_action = 0`.
+2. **That `ceil(herolevel / 5)` is DEAD.** The `crowd_bar` instance on
+   `combat_panel` (`sprite:751`, clip-action 0, `+0x011f`–`+0x0158`) sets
+   `_global.crowd_interest = _root.game.hero.herolevel +
+   _root.game.villain.herolevel` (`Add2`), ahead of its own `herolevel > 1`
+   branch (`+0x017b`), so for a level-1 hero too. `combat_panel` is attached in
+   one place, the arena's `sprite:2249/frame:1` `+0x0c09` (root frame 221, after
+   `arena_intro` at 214). *(That clip-action 0 is the LOAD event is inferred
+   from what it does — it builds the array the per-frame handler reads and
+   starts the crowd noise — because the dump prints no event flags.)*
+3. The start is unclamped until the first `nextphase`.
+
+**`nextphase` STEP 10** (CONFIRMED): `crowd_interest += crowd_action`
+(`+0x3541`–`+0x3556`); below 1 it becomes 1 (`+0x3557`–`+0x357b`, then a `Jump`
+to `+0x35a4`), else above 100 it becomes 100 (`+0x3580`–`+0x35a3`); then
+`crowd_action = 0` (`+0x35a4`–`+0x35b4`). It runs on every path, every phase,
+both sides — so the purse sees the level sum plus the deltas of the COMPLETED
+phases, clamped to 1..100 after each.
+
+**THE PURSE** (CONFIRMED; the hero's win only, `sprite:2249/frame:88`):
+
+```text
+villain.character_xp   = Number(villain.character_xp)                        +0x05b1..+0x05de
+_global.crowd_interest = Number(_global.crowd_interest)                      +0x05df..+0x05f4
+hero.goldpieces = hero.goldpieces
+    + Number(Math.round(villain.character_xp * (100 + crowd_interest) / 100))  +0x078c..+0x07ff
+goldwon = round(...) + " gold won. (" + crowd_interest + " % crowd appreciation )"   +0x0800..+0x0866
+if (hero.herolevel == 1) { goldwon = <the emperor's gift text>;                     +0x0867..+0x08b8
+                           hero.goldpieces = 2500 }
+```
+
+So the multiplier is 1.01× to 2.00× once any phase has completed.
+`goldpieces` itself is never converted, so that `Add2` would concatenate were
+it ever a string. At `herolevel` 1 the purse ignores the crowd: the flat SET of
+2500 discards the balance and the reward (above). The level tested is the
+pre-fight one; experience is added at frame 231.
+
+**WHO READS `crowd_interest`**: `nextphase` itself, the frame-88 purse and its
+text, and `crowd_bar`'s clip-action 1, only while `hero.herolevel > 1` — the
+crowd noise, the `crowd: <mood>` label and the bar. Nothing in the AI, psyche,
+experience or the loss frame reads it, and no edit-text field binds it. *That
+handler also draws `1 + RandomNumber(1000)` on every frame while
+`crowd_interest > 70` (the rockyou chance: `Push` at `+0x0159`, `RandomNumber`
+at `+0x0168`) or `< 20` (the boo chance: `+0x01b7`, `+0x01c6`), during fights —
+one of the opcode draws outside the overlay inventory in §"RNG surface" (one
+deriver, not independently verified; the offsets were re-read for this
+edit).*
+
+**THE ENGINE, AND THE OWNER'S DECISION.** When this was derived the engine
+modelled no `crowd_interest` and no purse; its `SS2_CROWD` is an authored,
+battle-wide toll computed from the turn number, unrelated to either, and the
+`crowdAction` fields on its spell descriptors were inert. **Owner's decision
+2026-09-22 (HANDOFF.md living head), (f): `crowd_interest` is modelled — BUILT
+in `cefaf83`:** one crowd per battle across all sides, opening at the sum of
+every combatant's `herolevel` (exactly the build in 1v1), fed by every
+completed phase's `crowd_action` through `nextphase`'s step, clamped to 1..100;
+`cast_adulation` is built in the same commit; the frame-88 purse is modelled
+as a pure function, with a team purse base that is an EQUAL SHARE of the
+losing side's `character_xp` per winner (also the owner's decision, the same
+record). The authored `SS2_CROWD` toll is kept and stays unrelated. *(Engine
+behaviour here is as `cefaf83`'s message states it; this map pass did not
+re-read that code.)*
 
 ## Stat points, the `levelup` panel, and what levelling can change
 
