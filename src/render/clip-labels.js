@@ -328,6 +328,44 @@ const FAMILY_LABELS = Object.freeze({
    * through `magic_damage_character`, and this is a plain `gotoAndPlay`.
    */
   little_fat_kid: Object.freeze(["little_fat_kid"]),
+  /**
+   * ► **PLAYING TO THE CROWD — six clips, and they are an IN-BOUT ACTION's, not
+   *   a bout's end.** They sat in `unbuiltOutcome` as "celebrations" until
+   *   2026-09-22, when the bytes said otherwise (see that bucket). Two
+   *   dispatchers: the `wincrowd` phase plays
+   *   `gotoAndPlay("wincrowd" + attacker.wincrowd_move)`, any of the six
+   *   (`sprite:862[overlay]/frame:52/DoAction@0x240c7f` `+0x50de`-`+0x5107`),
+   *   and `cast_adulation` (item 47) plays `wincrowd1` (`+0x7732`).
+   *
+   * ► **FOUR FAMILIES FOR SIX CLIPS, BECAUSE A FAMILY HAS ONE SCHEDULE.** Every
+   *   clip is played to its own end — each span closes with
+   *   `this.struck = true; Stop` on its last frame — so the length is the
+   *   build's, and at 30 fps rounded to the 120 ms beat the six give four:
+   *
+   *   ```text
+   *     wincrowd1  1657-1686  30 frames   8 beats   wincrowd
+   *     wincrowd3  1722-1750  29          8         wincrowd
+   *     wincrowd6  1859-1886  28          8         wincrowd
+   *     wincrowd2  1687-1721  35         10         wincrowd:2
+   *     wincrowd5  1809-1858  50         14         wincrowd:5
+   *     wincrowd4  1751-1808  58         16         wincrowd:4
+   *   ```
+   *
+   *   The three that round alike SHARE, as `Cast1` joined `Cast2`; the three
+   *   that do not are SPLIT, as `psyche:discharge` was from the charge. One
+   *   family for all six would play `wincrowd4` at twice the build's speed.
+   *   The engine's own label wins by membership in `animationFor` and
+   *   `chooseSound`, so `wincrowd3` draws and sounds as itself.
+   *
+   * ► **`wincrowd4` AND `wincrowd5` EACH BIND TWO SOUNDS** (`1104.mp3` with
+   *   `1206.mp3`, and with `1204.mp3`), and so does `wincrowd6`. The build fires
+   *   both, at their own frames; `chooseSound` plays ONE per action, spread by
+   *   the sequence number — the limit every multi-sound clip here already has.
+   */
+  wincrowd: Object.freeze(["wincrowd1", "wincrowd3", "wincrowd6"]),
+  "wincrowd:2": Object.freeze(["wincrowd2"]),
+  "wincrowd:4": Object.freeze(["wincrowd4"]),
+  "wincrowd:5": Object.freeze(["wincrowd5"]),
   "magic:lightning": Object.freeze(["lightning"]),
   ranged: Object.freeze(["bombard", "snipe"]),
 
@@ -530,10 +568,15 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
   ]),
 
   /**
-   * VICTORY AND SURRENDER. ~~Six crowd-facing celebrations and two yields, none
+   * ~~VICTORY AND~~ SURRENDER. ~~Six crowd-facing celebrations and two yields, none
    * of which this engine can express: a bout ends and nobody gloats.~~
    *
-   * ► **HALF RIGHT — corrected 2026-09-22 from the bytes, and nothing moved.**
+   * ► **HALF RIGHT — corrected 2026-09-22 from the bytes.** ~~, and nothing
+   *   moved.~~ **The six `wincrowd` clips MOVED later the same day**, to the
+   *   `wincrowd` families above, when `cast_adulation` became the first verb
+   *   to dispatch one; **the two yields stay, and this bucket is only the
+   *   bout's outcome now.** The finding, as it was recorded:
+   *
    *   The two YIELDS are outcomes: overlay frames 62 (`combatwon`) and 74
    *   (`combatlost`) play `Yield1`/`Yield2` (`DoAction@0x24a1c5` `+0x057e`,
    *   `+0x05b9`; `DoAction@0x24a8ba` `+0x04d2`, `+0x050d`). **The six
@@ -545,12 +588,16 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    *   `gotoAndPlay("wincrowd" + wincrowd_move)` (`+0x50de`-`+0x5107`); the
    *   villain's AI chooses it (`villaindecisionA = "wincrowd"`,
    *   `DoAction@0x23f835` `+0x0bd3`, `+0x0ec2`). `cast_adulation` (item 47)
-   *   plays `wincrowd1` too (`+0x7732`). Neither verb exists in this engine,
+   *   plays `wincrowd1` too (`+0x7732`). ~~Neither verb exists in this engine,
    *   so all eight stay here; the six leave when the `wincrowd` verb and a
-   *   family for its clips land together.
+   *   family for its clips land together.~~ **`cast_adulation` was built
+   *   first, and one dispatcher is enough to need the family** — the same
+   *   rule `unbuiltSpells` records; a label a verb plays with no family draws
+   *   the `unknown` schedule. The families cover all six at once, because the
+   *   `wincrowd` phase, next to be built, reaches every one of them.
    */
   unbuiltOutcome: Object.freeze([
-    "wincrowd1", "wincrowd2", "wincrowd3", "wincrowd4", "wincrowd5", "wincrowd6",
+    // `wincrowd1`-`wincrowd6` left on 2026-09-22 for the `wincrowd` families.
     "yield1", "yield2"
   ]),
 

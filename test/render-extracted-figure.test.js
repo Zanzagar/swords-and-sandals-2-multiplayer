@@ -669,7 +669,7 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
     "attack", "hurt", "knockback", "taunt", "taunted", "ranged", "psyche",
     "stance:psyche", "stance:psyche2", "celebrate", "cast", "magic:lightning", "drink",
-    "rejuvinate", "colossus", "little_fat_kid",
+    "rejuvinate", "colossus", "little_fat_kid", "wincrowd", "wincrowd:2", "wincrowd:4", "wincrowd:5",
     "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
     "death:unknown"
   ];
@@ -694,11 +694,17 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   // `drink` family now. **84/17 -> 87/14 later still**, when the last three
   // spell clips got families after their verbs: `Rejuvinate` (`+0x8ded`),
   // `Colossus` (`+0x806f`) and the victim's `little_fat_kid` (`+0x82a2`).
-  // That empties `unbuiltSpells` and `unknown` both.
-  assert.equal(mapped.size, 87);
-  assert.equal(declared.size, 14);
+  // That empties `unbuiltSpells` and `unknown` both. **87/14 -> 93/8 later
+  // still**, when `cast_adulation` began dispatching `wincrowd1` (`+0x7732`):
+  // all six `wincrowd` clips got families at once, because the `wincrowd`
+  // phase reaches every one (`+0x50de`). They had been filed as bout-end
+  // celebrations; they are an in-bout action's, and only the two yields are
+  // left in `unbuiltOutcome`.
+  assert.equal(mapped.size, 93);
+  assert.equal(declared.size, 8);
   assert.deepEqual([...UNMAPPED_CLIP_LABELS.unbuiltSpells], [], "every spell clip on the fighter is played");
   assert.deepEqual([...UNMAPPED_CLIP_LABELS.unknown], [], "and no label is left unclassified");
+  assert.deepEqual([...UNMAPPED_CLIP_LABELS.unbuiltOutcome], ["yield1", "yield2"], "only the bout's outcome is unbuilt");
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
   // ► **THE ENTRY IS FIRST IN ITS FAMILY, and the order is what `animationFor`

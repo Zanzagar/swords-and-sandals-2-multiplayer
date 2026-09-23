@@ -27,7 +27,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { clipLabelsFor, allClipLabels } from "../src/render/clip-labels.js";
+import { allClipLabels, allUnmappedLabels, clipLabelsFor, UNMAPPED_CLIP_LABELS } from "../src/render/clip-labels.js";
 import { timelineFor } from "../src/render/timeline.js";
 import * as ss2Rules from "../src/team/ss2-rules.js";
 import { VANILLA_PHASE_LABEL } from "../src/team/ss2-rules.js";
@@ -113,6 +113,47 @@ test("EVERY CLIP A BUILT VERB CARRIES ON ITS EVENT RESOLVES TO A FAMILY THAT CAN
   assert.deepEqual(failing, [],
     "a clip the resolver names must have a family whose vocabulary holds it, or the figure plays the " +
     "`unknown` schedule on a machine with no pack and draws nothing from the rig on one that has it");
+});
+
+test("THE SIX `wincrowd` CLIPS RESOLVE TO FAMILIES THAT CAN DRAW THEM, each for the build's own length", () => {
+  // ► **WHY A DIRECT TEST AS WELL AS THE WALK ABOVE.** `cast_adulation` plays
+  //   `wincrowd1` (`+0x7732`) and the `wincrowd` phase plays
+  //   `"wincrowd" + attacker.wincrowd_move`, any of the six
+  //   (`+0x50de`-`+0x5107`). The walk only sees a clip once a descriptor
+  //   exports it, and the phase assembles its label from a number, so no
+  //   descriptor will ever carry five of the six by name.
+  //
+  // Each clip is played to its own end: frames per the fighter clip, each span
+  // closed by `this.struck = true; Stop` on its own last frame. 30 fps, rounded
+  // to the 120 ms beat — the rule `Cast2`'s 21 -> 6 and `drink_potion`'s 24 -> 7
+  // follow — which gives four schedules for six clips:
+  //   wincrowd1  1657-1686  30 frames  1000 ms  8.33 -> 8  = 960
+  //   wincrowd2  1687-1721  35         1167     9.72 -> 10 = 1200
+  //   wincrowd3  1722-1750  29          967     8.06 -> 8  = 960
+  //   wincrowd4  1751-1808  58         1933    16.11 -> 16 = 1920
+  //   wincrowd5  1809-1858  50         1667    13.89 -> 14 = 1680
+  //   wincrowd6  1859-1886  28          933     7.78 -> 8  = 960
+  const expected = {
+    wincrowd1: 960, wincrowd2: 1200, wincrowd3: 960, wincrowd4: 1920, wincrowd5: 1680, wincrowd6: 960
+  };
+  for (const [label, durationMs] of Object.entries(expected)) {
+    const timeline = timelineFor(label, { role: "actor" });
+    assert.equal(timeline.recognised, true, `${label} must not fall to the \`unknown\` schedule`);
+    assert.ok(clipLabelsFor(timeline.family).includes(label), `${label}'s family ${timeline.family} must draw it`);
+    assert.equal(timeline.durationMs, durationMs, `${label} plays for its own length`);
+  }
+  // One family per SCHEDULE: the three that round alike share one, as `Cast1`
+  // and `Cast2` do; the three that do not each have their own, as the
+  // discharge does against the charge.
+  const familyOf = (label) => timelineFor(label, { role: "actor" }).family;
+  assert.equal(familyOf("wincrowd3"), familyOf("wincrowd1"));
+  assert.equal(familyOf("wincrowd6"), familyOf("wincrowd1"));
+  assert.equal(new Set(Object.keys(expected).map(familyOf)).size, 4);
+
+  const unplayed = new Set(allUnmappedLabels());
+  for (const label of Object.keys(expected)) assert.equal(unplayed.has(label), false, `${label} is played now`);
+  assert.deepEqual([...UNMAPPED_CLIP_LABELS.unbuiltOutcome], ["yield1", "yield2"],
+    "the two yields are the bout's outcome and stay unbuilt");
 });
 
 test("THE DISCHARGE IS THE CASE THIS WAS WRITTEN FOR, named so a regression is legible", () => {

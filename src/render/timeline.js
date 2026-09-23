@@ -107,6 +107,18 @@ const MOVEMENT_GAITS = Object.freeze(new Map([
 ]));
 
 /**
+ * The build's six `wincrowd` clips, each to the family whose schedule is its
+ * own length rounded to the beat (the table is at the families in
+ * `clip-labels.js`). The label is the build's own string: the `wincrowd` phase
+ * builds it as `"wincrowd" + wincrowd_move` and `cast_adulation` pushes
+ * `"wincrowd1"`.
+ */
+const WINCROWD_FAMILIES = Object.freeze(new Map([
+  ["wincrowd1", "wincrowd"], ["wincrowd3", "wincrowd"], ["wincrowd6", "wincrowd"],
+  ["wincrowd2", "wincrowd:2"], ["wincrowd4", "wincrowd:4"], ["wincrowd5", "wincrowd:5"]
+]));
+
+/**
  * A pose is a set of normalised offsets a painter applies to the figure. All
  * zero is a neutral standing gladiator; the ranges are authored.
  */
@@ -280,6 +292,13 @@ function familyOf(label, role) {
   // And the little fat kid's VICTIM clip, played on the defender by name:
   // `defender.gotoAndPlay("little_fat_kid")` at `+0x82a2`.
   if (label === "little_fat_kid") return "little_fat_kid";
+  // ► **PLAYING TO THE CROWD, added 2026-09-22 when `cast_adulation` began
+  //   dispatching `wincrowd1` (`+0x7732`).** The `wincrowd` phase assembles
+  //   `"wincrowd" + wincrowd_move` (`+0x50de`), so all six are reachable and
+  //   all six are matched — by exact name, never by `/^wincrowd\d$/`, for the
+  //   gait comment's reason. Four families because the six lengths round to
+  //   four schedules; `clip-labels.js` has the table.
+  if (WINCROWD_FAMILIES.has(label)) return WINCROWD_FAMILIES.get(label);
   // ► **TWO PSYCHE FAMILIES AND NOT ONE, BECAUSE THE THIRD CLIP IS LONGER AND
   //   IS THE ONE THAT SWINGS.** In the extracted pack `psyche_up` runs frames
   //   1609-1617 and `psyche_up2` 1627-1635 — nine each — while `psyche_up3` is
@@ -649,6 +668,21 @@ const FAMILIES = Object.freeze({
     { at: 1, pose: {} }
   ]),
 
+  /**
+   * Playing to the crowd — four schedules for the six clips, each the build's
+   * own length at 30 fps rounded to the beat: `wincrowd` 8 beats = 960 ms
+   * (`wincrowd1` 30 frames, `wincrowd3` 29, `wincrowd6` 28), `wincrowd:2` 10 =
+   * 1,200 (35), `wincrowd:5` 14 = 1,680 (50), `wincrowd:4` 16 = 1,920 (58).
+   * ONE authored gesture — arms up to the stands, a bounce, back — stretched
+   * over each, because the poses are authored and a pack-less clone has no
+   * six performances to tell apart; the extracted rig draws each clip as
+   * itself.
+   */
+  wincrowd: () => wincrowdSchedule("wincrowd", 8),
+  "wincrowd:2": () => wincrowdSchedule("wincrowd:2", 10),
+  "wincrowd:4": () => wincrowdSchedule("wincrowd:4", 16),
+  "wincrowd:5": () => wincrowdSchedule("wincrowd:5", 14),
+
   "magic:lightning": () => schedule("magic:lightning", 4, [
     { at: 0, pose: {} },
     { at: 0.25, pose: { recoil: 0.6, lean: -0.35, bob: 0.3, armSwing: 0.6 } },
@@ -712,6 +746,17 @@ const FAMILIES = Object.freeze({
     { at: 1, pose: {} }
   ])
 });
+
+/** The one authored crowd-pleasing gesture, at a `wincrowd` family's own length. */
+function wincrowdSchedule(family, beats) {
+  return schedule(family, beats, [
+    { at: 0, pose: {} },
+    { at: 0.25, pose: { armSwing: -0.9, lean: -0.25, bob: 0.3 } },
+    { at: 0.5, pose: { armSwing: -0.6, lean: -0.1, bob: 0.1, legSpread: 0.35 } },
+    { at: 0.75, pose: { armSwing: -1, lean: -0.3, bob: 0.4, legSpread: 0.2 } },
+    { at: 1, pose: {} }
+  ]);
+}
 
 function deathSchedule(variant) {
   const beats = variant === "yield" ? 12 : 10;
