@@ -2760,6 +2760,43 @@ export function ss2WalkDestination(actor, foes, direction) {
  * mutual answer at 1v1, where each one's nearest foe is the other, and is
  * authored mod surface above it (`MAP_SILENCE.multi-slot-arena-geometry`).
  *
+ * ## Which foe is "nearest" above 1v1 — authored, 2026-09-23
+ *
+ * **What these rules exist to keep is the build's invariant: A SWING IS
+ * ALWAYS TOWARD THE MAN SWUNG AT.** In the build that is free — one foe,
+ * re-faced at every phase advance. Here it was broken three ways, and the
+ * owner saw it on screen as *"people hitting each other not in melee range"*:
+ * at `bf53d81`, 48 seeded 3v3 bouts on the plain roster, **223 of 1,976 melee
+ * swings (11%) came from a gladiator facing AWAY from his target**, the lunge
+ * drawn into empty sand while the man behind him took the blow. With the three
+ * legs below, 2 of 2,068 (`test/ss2-facing-lanes.test.js`).
+ *
+ * 1. **HIS OWN LANE FIRST.** The nearest living foe by `|dx|` that
+ *    `ss2SameLane` admits, and only when there is none, the nearest overall.
+ *    A swing may only reach his own rank (the owner's rule of 2026-09-18), so
+ *    a nearer foe one rank back was a foe he faced and could never hit — 190
+ *    of the 223. Still `|dx|` and not the hypotenuse: the build's two tests
+ *    read `_x` alone, and the lane is WHICH foe, not how far. **Every write of
+ *    a `y` must now re-derive too**, which the rank change does.
+ * 2. **IT IS RE-DERIVED WHEN SOMEBODY DIES, not only when somebody moves.**
+ *    `changeCombatants` runs at every phase advance; a death changes the set of
+ *    foes to be nearest to exactly as a walk changes the distances, and the
+ *    killer went on facing the body (26 of the 223). `ss2FacingsAfterKills`.
+ * 3. **A SWING TURNS ITS SWINGER TO HIS TARGET FIRST** — between two foes in
+ *    his own lane he faced one and swung at the other. `ss2SwingTurn`.
+ *
+ * ► **TRIED AND REJECTED, MEASURED: a two-sided tie that KEEPS the facing.**
+ *   Equally near foes either side of him looks like the team form of the
+ *   build's co-located tie, and keeping the facing looked like it would make a
+ *   sandwiched swinger's turn stick. Over 200 seeded 3v3 bouts per kit it did
+ *   not help: 159 backward swings (plain, crowd, buffs) against 143 with ties
+ *   broken by id. The id break happens to agree with the AI, which picks the
+ *   weakest foe with ties by id (`byHealthThenId`). So ties still break by id.
+ *
+ * With one axis (`y` absent) every pair shares the lane; with one foe there is
+ * one lane to prefer and nobody else to die. So every 1v1, golden and pinned
+ * 1-D hash reaches exactly the answer it always did.
+ *
  * ## Why it is a STATUS and not a new field
  *
  * Because it already is one: `SS2_FACING_LEFT` round-trips through the status
@@ -2798,10 +2835,13 @@ function facingEffectsAgainst(crowd, opposition) {
   const effects = [];
   for (const combatant of crowd) {
     if (!positioned(combatant)) continue;
+    const foes = opposition.filter(positioned);
+    // His own lane first; everybody only when nobody shares it. See the
+    // docblock above `ss2FacingEffects`, rule 1.
+    const inLane = foes.filter((foe) => ss2SameLane(combatant, foe));
     let nearest = null;
     let best = Infinity;
-    for (const foe of opposition) {
-      if (!positioned(foe)) continue;
+    for (const foe of inLane.length > 0 ? inLane : foes) {
       const gap = Math.abs(foe.x - combatant.x);
       // Ties break by id, for the same reason `nearestFoe` does: two foes
       // equidistant must not make the facing depend on array order.
@@ -2825,6 +2865,152 @@ function facingEffectsAgainst(crowd, opposition) {
     });
   }
   return effects;
+}
+
+/**
+ * The verbs that SWING at a foe in reach: the three melee attacks, the bash,
+ * and the shove — exactly the set the offer gates on `ss2SameLane`, so exactly
+ * the set whose target the swinger can be standing BESIDE rather than facing.
+ */
+const SS2_SWING_TURNS = Object.freeze(new Set([
+  Ss2ActionType.QUICK_ATTACK,
+  Ss2ActionType.NORMAL_ATTACK,
+  Ss2ActionType.POWER_ATTACK,
+  Ss2ActionType.BASH_ATTACK,
+  Ss2ActionType.SHOVE
+]));
+
+/**
+ * ► **A SWING TURNS ITS SWINGER TO FACE THE MAN SWUNG AT, BEFORE ANYTHING IN
+ *   THE PHASE READS THE FACING. Authored 2026-09-23.** Returns the request the
+ *   phase should resolve — the actor already turned — and the one STATUS effect
+ *   that turns him, or the request untouched and no effect.
+ *
+ * **The build never writes `gladiator_dir` at a swing** — its six writes are
+ * two at setup and four in `changeCombatants` — and it never needs to: with
+ * one foe, re-faced at every phase advance, the swing is always toward him.
+ * Above 1v1 the target is CHOSEN (weakest-first for the AI, anybody in reach
+ * for a player), and the facing rule cannot know the choice. Between two foes
+ * in his own lane a gladiator faced one and swung at the other: the lunge was
+ * drawn into empty sand, and a shove — signed on the SHOVER's facing
+ * (`+0x5e3b`) — drove its victim into and past the shover.
+ *
+ * **Only the swings** (`SS2_SWING_TURNS`). The ranged verbs, the taunt and the
+ * spells keep the facing the rule gave them: several sign or place on the
+ * caster's facing (the gale, the command, the fireball's launch side, the ghost
+ * strike's landing), `test/ss2-whirlwind-ghost-strike.test.js` pins a ghost
+ * strike cast AWAY from its facing, and turning those is a decision about what
+ * those verbs mean, not a repair of this one.
+ *
+ * **1v1 cannot move**: a separated pair always faces each other, so the target
+ * is always the side already faced, and a co-located pair has no side to turn
+ * to (the build's strict tests). A fixture has no `x` and is never turned.
+ */
+function ss2SwingTurn(request) {
+  const unturned = { request, effects: [] };
+  if (!SS2_SWING_TURNS.has(request?.type)) return unturned;
+  const actor = request.actor;
+  const target = request.target;
+  if (!actor || !target || target.id === actor.id) return unturned;
+  if (!Number.isFinite(actor.x) || !Number.isFinite(target.x) || target.x === actor.x) return unturned;
+  const facesLeft = target.x < actor.x;
+  const status = actor.status ?? [];
+  if (status.includes(SS2_FACING_LEFT) === facesLeft) return unturned;
+  // Where `applyEffects` would put the token — appended, or filtered out — so
+  // the turned view is the one the resolver's own fold would produce.
+  const turnedStatus = Object.freeze(facesLeft
+    ? [...status, SS2_FACING_LEFT]
+    : status.filter((token) => token !== SS2_FACING_LEFT));
+  const turned = (view) => Object.freeze({ ...view, status: turnedStatus });
+  return {
+    request: Object.freeze({
+      ...request,
+      actor: turned(actor),
+      // The actor's own entry among his allies too: `facingAfter` and
+      // `facingAfterTargetMove` read the side from `allies`, and a knockback's
+      // re-facing compared against the UNturned status would lose the turn.
+      ...(Array.isArray(request.allies)
+        ? { allies: Object.freeze(request.allies.map((ally) => (ally?.id === actor.id ? turned(ally) : ally))) }
+        : {})
+    }),
+    effects: [{ kind: EffectKind.STATUS, targetId: actor.id, status: SS2_FACING_LEFT, active: facesLeft }]
+  };
+}
+
+/**
+ * Everybody the request can see, after `effects`, folded the way the
+ * resolver's own `applyEffects` folds them: health clamped to `[0, maxHealth]`,
+ * `alive` re-read as `health > 0` after every effect on a combatant, `x`/`y`
+ * from POSITION/LATERAL, the status list from STATUS. Returns the folded views
+ * and whether anybody alive at the start of the phase is dead at the end of it.
+ *
+ * A view with no finite `health` (a hand-built request) keeps the `alive` it
+ * came with, so it can never be read as a death.
+ */
+function ss2FieldAfter(request, effects) {
+  const members = new Map();
+  for (const view of [request.actor, ...(request.allies ?? []), ...(request.foes ?? [])]) {
+    if (!view || members.has(view.id)) continue;
+    members.set(view.id, { ...view, status: [...(view.status ?? [])], aliveBefore: view.alive !== false });
+  }
+  for (const effect of effects) {
+    const member = members.get(effect.targetId);
+    if (!member) continue;
+    if (effect.kind === EffectKind.DAMAGE || effect.kind === EffectKind.HEAL) {
+      if (!Number.isFinite(member.health)) continue;
+      const moved = member.health + (effect.kind === EffectKind.DAMAGE ? -effect.amount : effect.amount);
+      member.health = Math.max(0, Number.isFinite(member.maxHealth) ? Math.min(moved, member.maxHealth) : moved);
+    } else if (effect.kind === EffectKind.POSITION) {
+      member.x = effect.to;
+    } else if (effect.kind === EffectKind.LATERAL) {
+      member.y = effect.to;
+    } else if (effect.kind === EffectKind.STATUS) {
+      const present = member.status.includes(effect.status);
+      if (effect.active === false && present) member.status = member.status.filter((token) => token !== effect.status);
+      else if (effect.active !== false && !present) member.status = [...member.status, effect.status];
+    }
+    if (Number.isFinite(member.health)) member.alive = member.health > 0;
+  }
+  const killed = [...members.values()].some((member) => member.aliveBefore && member.alive === false);
+  return { members: [...members.values()], killed };
+}
+
+/**
+ * ► **A PHASE THAT KILLS RE-FACES EVERY SURVIVOR, as `changeCombatants`
+ *   re-faces at every phase advance. Authored 2026-09-23.** Appends, after
+ *   everything the phase did (the crowd's toll included, because a toll can be
+ *   the death), the facing every LIVING gladiator's rule gives him on the field
+ *   the phase left: its positions, its statuses, and without its dead.
+ *
+ * **Only a phase that kills.** Facing is a function of the positions and of
+ * which foes are alive; the movement branches already re-derive on every `x`
+ * they write, and a phase that moves nobody and kills nobody leaves the rule's
+ * answer where it was — except for a swinger's turn (`ss2SwingTurn`), which a
+ * re-derivation here would take straight back.
+ *
+ * **Never the dead.** `facingEffectsAgainst` skips `alive === false`, so no
+ * facing is written onto a body — the passenger `resolveAction`'s facing
+ * comment warns about, which landed on a killing blow's status list the first
+ * time facing was threaded through every return.
+ *
+ * **1v1 cannot move**: a kill there leaves one side with nobody to face.
+ */
+function ss2FacingsAfterKills(request, outcome, turnEffects) {
+  const effects = turnEffects.length > 0 ? [...turnEffects, ...outcome.effects] : outcome.effects;
+  const field = ss2FieldAfter(request, effects);
+  const settled = field.killed ? ss2FacingsOfField(field.members) : [];
+  if (effects === outcome.effects && settled.length === 0) return outcome;
+  return { ...outcome, effects: [...effects, ...settled] };
+}
+
+/** Every team's facings against every other living combatant — `openingEffects`' shape. */
+function ss2FacingsOfField(members) {
+  const living = members.filter((member) => member.alive !== false);
+  const teamIds = [...new Set(living.map((member) => member.teamId))];
+  return teamIds.flatMap((teamId) => facingEffectsAgainst(
+    living.filter((member) => member.teamId === teamId),
+    living.filter((member) => member.teamId !== teamId)
+  ));
 }
 
 /** The living foe standing closest, or null. Ties break by id, deterministically. */
@@ -6730,11 +6916,18 @@ export const SS2_TAUNT = Object.freeze({
  *   front — and above it is the symmetric test this function has always been,
  *   rather than a discharge that reaches across the arena behind you.
  *
- * ► **AND A TARGET IN ANOTHER RANK KEEPS THE DEPTH TERM THIS GATE ALWAYS HAD**
+ * ► ~~**AND A TARGET IN ANOTHER RANK KEEPS THE DEPTH TERM THIS GATE ALWAYS HAD**
  *   (INVENTED — the build has no ranks, and its gate reads `_x` alone): the
- *   Euclidean `ss2FightDistance` must also be under the bound, now strictly.
- *   On one rank the fight distance is `round(|dx|)`, so this term adds
- *   nothing there and 1v1 is untouched by it.
+ *   Euclidean `ss2FightDistance` must also be under the bound, now strictly.~~
+ *   **A TARGET IN ANOTHER RANK IS OUT OF RANGE, HOWEVER CLOSE — `ss2SameLane`,
+ *   the melee verbs' own rule. Corrected 2026-09-23.** The depth term was
+ *   invented for a DISTANCE and read as a REACH, which is the exact mistake
+ *   the owner's rule of 2026-09-18 ruled out for every other blow: *"You can
+ *   attack from front or behind but not at different y even if you are
+ *   'close'."* It let a whirlwind spun in one rank knock back a foe in the
+ *   next — measured at `bf53d81`, tricks kit, 48 seeded 3v3 bouts: 162 of 278
+ *   whirlwinds resolved across ranks, 108 of them hitting. With one axis every
+ *   pair shares the lane, so 1v1 is untouched.
  */
 function ss2PsycheDischargeInRange(actor, target) {
   if (!Number.isFinite(actor?.x) || !Number.isFinite(target?.x)) return false;
@@ -6742,11 +6935,7 @@ function ss2PsycheDischargeInRange(actor, target) {
   // The build's right-facing expression and its left-facing one, both.
   if (!(actor.x > Math.round(target.x - bound))) return false;
   if (!(actor.x < Math.round(target.x + bound))) return false;
-  const ay = Number.isFinite(actor.y) ? actor.y : 0;
-  const by = Number.isFinite(target.y) ? target.y : 0;
-  if (ay === by) return true;
-  const separation = ss2FightDistance(actor, target);
-  return Number.isFinite(separation) && separation < Math.round(bound);
+  return ss2SameLane(actor, target);
 }
 
 /** The three melee verbs, which are the ONLY ones `closerange_warrior` wires. */
@@ -10725,6 +10914,20 @@ export function createSs2TeamRules({
      * be an identity function with a place to introduce a bug.
      */
     resolveAction(request, rolls) {
+      // ► **THE FACINGS AROUND THE PHASE, 2026-09-23: the swing's turn before
+      //   it, a kill's re-facing after it.** Both are the team extension of one
+      //   build invariant — a swing is always toward the man swung at — and
+      //   both are no-ops at 1v1. See `ss2SwingTurn` and `ss2FacingsAfterKills`.
+      //   Wrapped round the phase rather than threaded through its returns,
+      //   because the re-facing has to see the phase's LAST effect (the crowd's
+      //   toll can be the death) and a count of return paths goes stale.
+      const turn = ss2SwingTurn(request);
+      return ss2FacingsAfterKills(turn.request, resolvePhase(turn.request, rolls), turn.effects);
+
+      // The phase itself: the body this method always had, hoisted as a
+      // declaration so that it is untouched — including its indentation, which
+      // is one level shallow on purpose, to keep the diff to these lines.
+      function resolvePhase(request, rolls) {
       const actor = request.actor;
       // So every completed phase's transition can tick the whole field's timed
       // spell counters; see `SS2_PHASE_REQUESTS`.
@@ -10768,9 +10971,16 @@ export function createSs2TeamRules({
       //   below pass their own destination; everything else cannot move
       //   anybody and passes the actor unchanged.
       // ► **ONLY THE MOVEMENT BRANCHES CARRY IT, and that is equivalence rather
-      //   than economy.** Facing is a function of `x` alone
+      //   than economy.** ~~Facing is a function of `x` alone
       //   (`ss2FacingEffects`), so an attack and a rest cannot change one and
-      //   recomputing on them emits an effect that is always a no-op.
+      //   recomputing on them emits an effect that is always a no-op.~~
+      //   **CORRECTED 2026-09-23: facing is a function of the positions — `x`,
+      //   and since that day the lane (`y`) — AND of which foes are alive.**
+      //   So the branches that write an `x` or a `y` carry it, as below; a
+      //   phase that KILLS is re-faced for everybody round the phase
+      //   (`ss2FacingsAfterKills`), and a swing turns its swinger before it
+      //   (`ss2SwingTurn`). An attack that moves nobody and kills nobody still
+      //   cannot change the rule's answer.
       //
       //   **CORRECTED 2026-09-17: this said "exactly two verbs move anybody: a
       //   walk and a rank change", and it was true when written and false by
@@ -10790,11 +11000,14 @@ export function createSs2TeamRules({
       //   toll has to reach every path and this does not, and copying the
       //   pattern without asking which was which is how a measured sequence
       //   acquires a passenger.
-      const facingAfter = (movedActor) => {
+      // `killedId` (2026-09-23): a foe this phase has just killed, re-faced
+      // as dead — the lethal ghost strike moves its caster beside the body,
+      // and without it the body was turned to face the man who landed there.
+      const facingAfter = (movedActor, killedId = null) => {
         const mine = (request.allies ?? []).map((ally) => (ally.id === actor.id ? movedActor : ally));
         return ss2FacingEffects(
           mine.some((ally) => ally.id === actor.id) ? mine : [movedActor, ...mine],
-          request.foes ?? []
+          (request.foes ?? []).map((foe) => (foe.id === killedId ? { ...foe, alive: false } : foe))
         );
       };
 
@@ -11125,7 +11338,13 @@ export function createSs2TeamRules({
             ...crowd,
             // A rank change can move x when it sidesteps a body, so facing is
             // derived from where it actually landed.
-            ...facingAfter({ ...actor, x: arrivalX })
+            //
+            // ► **AND FROM THE RANK IT LANDED IN — `y: to` joined 2026-09-23,
+            //   when facing started preferring a foe in the gladiator's own
+            //   lane (`ss2FacingEffects`, rule 1).** Until then facing read `x`
+            //   alone and the old `y` was harmless; after it, a gladiator who
+            //   stepped into a new rank was faced from the one he had left.
+            ...facingAfter({ ...actor, x: arrivalX, y: to })
           ],
           events: [{
             type: request.type,
@@ -13556,7 +13775,14 @@ export function createSs2TeamRules({
         );
         if (struckTo !== target.x) {
           effects.push({ kind: EffectKind.POSITION, targetId: target.id, to: struckTo });
-          effects.push(...facingAfterTargetMove({ ...target, x: struckTo }));
+          // ► **DEAD IF THE BLOW KILLED HIM — `alive` joined 2026-09-23.** The
+          //   view is the target as he stood BEFORE the blow, so a lethal
+          //   knockback that carried the body nearer another foe turned the
+          //   body to face him, and faced the living at a corpse
+          //   (`test/ss2-facing-lanes.test.js`; the `out-of-range-hits` F2
+          //   refuter's side note). `facingEffectsAgainst` skips the dead on
+          //   both sides; `ss2FacingsAfterKills` then faces the living.
+          effects.push(...facingAfterTargetMove({ ...target, x: struckTo, alive: !killedAfterBonus }));
         }
       }
 
@@ -13708,7 +13934,7 @@ export function createSs2TeamRules({
           casterMove = { from: actor.x, to };
           if (to !== actor.x) {
             effects.push({ kind: EffectKind.POSITION, targetId: actor.id, to });
-            effects.push(...facingAfter({ ...actor, x: to }));
+            effects.push(...facingAfter({ ...actor, x: to }, target.id));
           }
         }
         for (const event of events) {
@@ -13767,6 +13993,7 @@ export function createSs2TeamRules({
         }
       }
       return { effects: [...effects, ...crowd], events };
+      }
     },
 
     /**
@@ -14187,13 +14414,26 @@ export function createSs2TeamRules({
       // ► **INVENTED: WHICH FOE.** The NEAREST, the one the distance gate is
       //   about — the weaken's, the gale's and the teleport's choice. For the
       //   ghost strike that means every foe is beyond 500 when it fires.
+      //
+      // ► **EXCEPT THE WHIRLWIND, WHICH TAKES THE NEAREST IN ITS OWN RANK —
+      //   2026-09-23, when its gate stopped reaching across ranks
+      //   (`ss2PsycheDischargeInRange`).** The nearest by the hypotenuse is
+      //   often one rank back, whom the spin can never touch: with the gate
+      //   corrected and the choice left alone, 227 of 281 AI whirlwinds over 48
+      //   seeded 3v3 tricks bouts went out of range. At 1v1 the one foe is in
+      //   the one rank, so this is the build's defender; the build's own wasted
+      //   cast between `reach + 50` and 200 is untouched.
       if (!boltOnOffer && !ss2InBowMode(actor)) {
         const strikeFoe = nearestFoe(view);
+        const whirlFoe = nearestFoe({ ...view, foes: view.foes.filter((foe) => ss2SameLane(actor, foe)) });
+        const whirlRange = whirlFoe ? ss2FightDistance(actor, whirlFoe) : null;
+        if (whirlRange !== null) {
+          const whirlwindOption = options.find((option) =>
+            option.type === Ss2ActionType.CAST_WHIRLWIND && option.targetId === whirlFoe.id);
+          if (whirlwindOption && whirlRange < SS2_WHIRLWIND.aiFightDistanceBelow) return whirlwindOption;
+        }
         const range = strikeFoe ? ss2FightDistance(actor, strikeFoe) : null;
         if (range !== null) {
-          const whirlwindOption = options.find((option) =>
-            option.type === Ss2ActionType.CAST_WHIRLWIND && option.targetId === strikeFoe.id);
-          if (whirlwindOption && range < SS2_WHIRLWIND.aiFightDistanceBelow) return whirlwindOption;
           const ghostOption = options.find((option) =>
             option.type === Ss2ActionType.CAST_GHOST_STRIKE && option.targetId === strikeFoe.id);
           if (ghostOption && range > SS2_GHOST_STRIKE.aiFightDistanceAbove) return ghostOption;

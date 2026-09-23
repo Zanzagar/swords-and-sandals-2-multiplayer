@@ -70,13 +70,27 @@ const KIT_BOUTS = Object.freeze({
     ]
   },
   blasts: { actions: 2, result: "elimination", casts: ["cast-death-from-above", "cast-death-from-above"] },
+  // ► **MOVED 2026-09-23, by two engine fixes, each on its own** (measured with
+  //   each reverted by exact inverse; with BOTH reverted this is the old list
+  //   again, and so is every action hash of 384 seeded 2v2/3v3 bouts):
+  //   - facing prefers the gladiator's own rank (a rank change re-faces from
+  //     the new one), turns a swinger to his target, and re-derives after a
+  //     kill (`ss2FacingEffects`, `ss2SwingTurn`, `ss2FacingsAfterKills`) —
+  //     alone, it appends `cast-whirlwind`, `cast-command` to the old 14;
+  //   - the whirlwind's gate no longer reaches across ranks, and the AI whirls
+  //     at the nearest foe in its OWN rank (`ss2PsycheDischargeInRange`) —
+  //     alone, 13 casts, diverging at the second whirlwind: … command, gale,
+  //     gale, ghost, command, teleport, command.
+  //   Was: command, weaken x2, ghost, weaken, whirlwind, command, whirlwind,
+  //   weaken, gale, ghost, gale, ghost, command.
   tricks: {
     actions: 60,
     result: null,
     casts: [
       "cast-command", "cast-weaken-armour", "cast-weaken-armour", "cast-ghost-strike", "cast-weaken-armour",
-      "cast-whirlwind", "cast-command", "cast-whirlwind", "cast-weaken-armour", "cast-gale", "cast-ghost-strike",
-      "cast-gale", "cast-ghost-strike", "cast-command"
+      "cast-whirlwind", "cast-command", "cast-gale", "cast-weaken-armour", "cast-ghost-strike", "cast-whirlwind",
+      "cast-teleport", "cast-ghost-strike", "cast-teleport", "cast-whirlwind", "wincrowd", "cast-gale", "wincrowd",
+      "cast-command", "wincrowd", "wincrowd", "wincrowd"
     ]
   },
   crowd: {

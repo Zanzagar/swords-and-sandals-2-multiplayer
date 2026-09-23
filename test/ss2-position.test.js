@@ -1931,6 +1931,13 @@ test("A KNOCKBACK RE-FACES WHOEVER IT MOVED, which the rule demanded and the sho
     hitter.x = 0;
     outer.x = 660;
     victim.x = 40;
+    // ► **ALL THREE IN ONE RANK, stated since 2026-09-23**, when facing
+    //   started preferring a foe in the gladiator's own lane
+    //   (`ss2FacingEffects`, rule 1). The rig left `y` where construction put
+    //   it, which puts `outer` (slot 1) one rank back — so the victim, knocked
+    //   nearer him by |dx|, now rightly goes on facing the hitter in his own
+    //   rank. The question here is the knockback's re-facing, not the lane.
+    for (const one of [outer, victim]) one.y = hitter.y;
     for (const one of [hitter, outer, victim]) one.status = [];
     victim.status = ["facing-left"];
     battle.turnCursor = battle.initiative.indexOf("hitter");
@@ -2152,6 +2159,8 @@ test("AND SO DOES A TAUNT'S SHOVE, on the path that had the rule written beside 
     hitter.x = 0;
     outer.x = 1400;
     victim.x = 40;
+    // One rank for all three, for the reason the knockback test above gives.
+    for (const one of [outer, victim]) one.y = hitter.y;
     for (const one of [hitter, outer, victim]) one.status = [];
     victim.status = ["facing-left"];
     battle.turnCursor = battle.initiative.indexOf("hitter");

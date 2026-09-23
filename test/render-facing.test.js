@@ -97,9 +97,13 @@ function faceByPosition(battle) {
  * past the pusher needs, and one only teams can produce.
  *
  * hero at 0 faces right, toward `near` at 50; `behind` at -80 faces right,
- * toward the hero. A shove or a gale is signed by the PUSHER's facing
- * (`ss2ShoveForce`, `+0x7b45`), so pushing `behind` carries it rightward,
- * straight past the hero.
+ * toward the hero. A gale is signed by the CASTER's facing (`+0x7b45`), so
+ * blowing `behind` carries it rightward, straight past the hero.
+ *
+ * ~~A shove or a gale~~ **A shove did the same until 2026-09-23** (it signs on
+ * the shover's facing, `ss2ShoveForce`); since then a swing — the shove among
+ * them — turns its swinger to face the man swung at first (`ss2SwingTurn`), so
+ * a shove at `behind` drives him AWAY. See the shove's test below.
  */
 function pastTheAttacker({ hero = {} } = {}) {
   const battle = createTeamBattle({
@@ -225,16 +229,32 @@ test("`before` is refused by shape exactly as the wire is: a live battle is not 
   );
 });
 
-test("a SHOVE that carries its victim past the shover turns the victim, and nobody else", () => {
+test("a SHOVE at the man BEHIND the shover drives him away, not past — and the stream turns nobody", () => {
+  // ~~a SHOVE that carries its victim past the shover turns the victim, and
+  // nobody else~~ — **the premise went on 2026-09-23.** The shove is signed on
+  // the SHOVER's facing, and a shover facing `near` pushed `behind` straight
+  // through himself (-80 -> 31). A swing now turns its swinger to face the man
+  // swung at before anything reads the facing (`ss2SwingTurn`), so `behind`
+  // goes the way a 1v1 shove always sends its victim: away.
+  //
+  // ► **AND THE STREAM IS NET, WHICH THIS PINS AS A KNOWN GAP.** The hero
+  //   turns left to shove, and the shove's re-facing turns him back to `near`,
+  //   the nearer foe once `behind` is gone. A `face-clip` carries only the
+  //   batch's net change, emitted LAST — so nothing here says the shove was
+  //   thrown LEFT. Drawing a swing toward its target is the presentation's to
+  //   add; see `ss2SwingTurn`.
   const battle = pastTheAttacker();
   assert.ok(legalActions(battle, "hero").some((option) => option.type === Ss2ActionType.SHOVE && option.targetId === "behind"));
   const { commands, scene } = actAndPresent(battle, { actorId: "hero", type: Ss2ActionType.SHOVE, targetId: "behind" });
   const event = battle.events.find((entry) => entry.type === Ss2ActionType.SHOVE);
-  assert.ok(event.from < 0 && event.to > 0, `the victim crossed the shover: ${event.from} -> ${event.to}`);
-  assert.deepEqual(turns(commands), [{ combatantId: "behind", from: "right", to: "left" }]);
-  for (const id of ["hero", "near", "behind"]) {
-    assert.equal(scene.actors[id].facing, resolverFacing(battle, id), `${id} is drawn the way the resolver faces it`);
-  }
+  assert.ok(event.force < 0 && event.to < event.from, `the victim was driven away, left: ${event.from} -> ${event.to}`);
+  assert.deepEqual(["hero", "near", "behind"].map((id) => resolverFacing(battle, id)), ["right", "left", "right"],
+    "the resolver ends facing exactly as it began");
+  assert.deepEqual(turns(commands), [], "so the hero's turn and turn back net to nothing, and nobody else turned");
+  assert.deepEqual(battle.lastResolution.effects.filter((effect) => effect.status === SS2_FACING_LEFT)
+    .map((effect) => [effect.targetId, effect.active]), [["hero", true], ["hero", false]],
+    "while the resolver DID turn him to shove, and back once `behind` was gone");
+  assert.equal(scene.actors.hero.facing, "right");
 });
 
 test("a GALE that blows its victim past the caster turns the victim, and nobody else", () => {
