@@ -322,6 +322,11 @@ test("BOTH CLIPS PLAY, AND THEY PLAY WHATEVER IT ROLLED", () => {
 
   const failed = bound({ landed: false });
   assert.equal(failed.actor.label, "taunt");
+  // ► **THIS PINS A NAMED GAP, NOT THE BUILD — found 2026-09-23.** A failed
+  //   roll jumps to `+0x6b0e`, `defender_blocked()`, which replaces `taunted`
+  //   in the same tick with `"defend" + attack_direction` — a direction this
+  //   arm never writes, so whatever the bout's last attack phase left. No event
+  //   carries that, so `taunted` stays; see `tauntLabels`'s NOT MODELLED note.
   assert.equal(failed.target.label, "taunted", "a FAILED taunt still animates its target");
   assert.equal(failed.actor.provenance, LabelProvenance.MAP_NAMED, "the build names both outright");
 
@@ -329,6 +334,57 @@ test("BOTH CLIPS PLAY, AND THEY PLAY WHATEVER IT ROLLED", () => {
   assert.equal(bound({ landed: true, effect: 2, force: 500, knockbackAnimation: true }).target.label, "knockback");
   // And below it, the taunted clip — the displacement happened either way.
   assert.equal(bound({ landed: true, effect: 2, force: 20, knockbackAnimation: false }).target.label, "taunted");
+});
+
+test("A TAUNT STRIKE REPLACES `taunted`: the victim plays `hurt20` when it lands and `defend20` when it is blocked", () => {
+  // ► **THE BUILD REPLACES THE CLIP IN THE SAME FRAME, and this table said it
+  //   never did.** Read off `sprite:862[overlay]/frame:52/DoAction@0x240c7f`
+  //   on 2026-09-23:
+  //
+  //   ```text
+  //     +0x690c  defender.gotoAndPlay("taunted")
+  //     +0x6981  attack_direction = 20          (taunt_effect == 1)
+  //     +0x698c  checkattackroll()
+  //       hit:   +0x30ff defender_hurt("taunt")  -> +0x2086 animstate = "hurt" + 20
+  //              (20 is below the 21-23 rewrite and is not 30), and
+  //              +0x2136 defender.gotoAndPlay(animstate)
+  //       miss:  +0x316d defender_blocked()      -> +0x2160 animstate = "defend" + 20,
+  //              +0x224a defender.gotoAndPlay(animstate)
+  //   ```
+  //
+  //   All of it runs synchronously inside the taunt phase's first tick, so the
+  //   `taunted` clip is superseded before it is ever drawn. Both labels are on
+  //   the fighter clip (`hurt20` and `defend20` are in the `hurt` and `defend`
+  //   families). Real resolved events, not hand-built ones, so the fields the
+  //   table reads are the fields the resolver writes.
+  const found = new Map();
+  for (let seed = 1; seed <= 40 && found.size < 2; seed += 1) {
+    for (const [heroCharisma, foeCharisma] of [[30, 1], [9, 9]]) {
+      const battle = duel({ seed, hero: { charisma: heroCharisma }, villain: { charisma: foeCharisma } });
+      let event;
+      try {
+        ({ event } = taunt(battle));
+      } catch {
+        continue;
+      }
+      if (event.effect !== SS2_TAUNT.strikeEffect) continue;
+      const key = event.hit === true ? "landed" : "blocked";
+      if (!found.has(key)) found.set(key, event);
+    }
+  }
+  const bound = (event) => SS2_STATIC_MAP_BINDINGS.action(event);
+
+  const landed = found.get("landed");
+  assert.ok(landed, "a strike that lands must be reachable");
+  assert.ok(landed.damage > 0, "and it must hurt, or the victim's clip is not the question");
+  assert.equal(bound(landed).actor.label, "taunt", "the taunter still plays its own clip");
+  assert.equal(bound(landed).target.label, "hurt20", "the victim visibly takes the hit");
+  assert.equal(bound(landed).target.provenance, LabelProvenance.MAP_NAMED);
+
+  const blocked = found.get("blocked");
+  assert.ok(blocked, "a strike that is blocked must be reachable");
+  assert.equal(bound(blocked).target.label, "defend20", "a blocked strike is parried, as any blocked blow is");
+  assert.equal(bound(blocked).target.provenance, LabelProvenance.MAP_NAMED);
 });
 
 test("THE SHOVE MOVES HIM, and a Codex review is why", () => {
@@ -570,8 +626,8 @@ test("`taunted2` FORCES NOTHING, because the build never sets it", () => {
  * placed by `place`. The prep is re-applied after every filler turn, because a
  * filler turn is a turn and the engine is entitled to write over it.
  */
-function onTheClock({ who = "villain", teams, place = () => {}, prep = () => {}, seed = 5 }) {
-  const battle = createTeamBattle({ rules: createSs2TeamRules(), seed, teams });
+function onTheClock({ who = "villain", teams, place = () => {}, prep = () => {}, seed = 5, rules = createSs2TeamRules() }) {
+  const battle = createTeamBattle({ rules, seed, teams });
   const set = () => {
     place(battle);
     prep(combatantById(battle, who));
@@ -763,4 +819,84 @@ test("THE CHAIN'S CLEAR LIST IS THE CHAIN'S RANK LIST, and `taunted2` is in neit
   assert.deepEqual([...SS2_CHAIN_CLEAR_FLAGS],
     [SS2_TAUNT.flag, "frozen", "burning", "poison", "life_stolen"]);
   assert.equal(SS2_CHAIN_CLEAR_FLAGS.includes("taunted2"), false);
+});
+
+/* ------------------------------------------------------------------ */
+/* WHO MAY BE TAUNTED — the owner's rule, 2026-09-23                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **A TAUNT MAY NAME ONLY A FOE IN THE TAUNTER'S OWN RANK, AT ANY DISTANCE.**
+ *   AUTHORED — the owner's decision, 2026-09-23 — because the build cannot
+ *   answer it: vanilla has one rank and one opponent
+ *   (`MAP_SILENCE.multi-slot-arena-geometry`). What the build DOES settle is
+ *   that the taunt is the long-range button and that its strike (direction 20,
+ *   `round(charisma * 4) - defender.charisma`) has no range test, so in team
+ *   play a back-rank gladiator could taunt somebody in another rank 800 units
+ *   away and kill him. Measured on the arena's own path before the rule (25
+ *   seeded 3v3 bouts, plain kit, at bf53d81): 26 of 26 damaging taunts crossed
+ *   a rank.
+ *
+ *   It is the melee lane rule (`ss2SameLane`, owner 2026-09-18, *"not at
+ *   different y"*) WITHOUT the reach test: distance still does not matter,
+ *   which is exactly the build in 1v1, where there is one rank.
+ */
+const rankedTrio = () => [
+  { id: "red", combatants: [{ id: "hero", ...gladiator() }] },
+  {
+    id: "blue",
+    combatants: [
+      { id: "rival", ...gladiator({ gladiator_dir: "left" }) },
+      { id: "flanker", ...gladiator({ gladiator_dir: "left" }) }
+    ]
+  }
+];
+
+test("A TAUNT NAMES ONLY A FOE IN THE TAUNTER'S OWN RANK, however far away he stands", () => {
+  const battle = onTheClock({
+    who: "hero",
+    teams: rankedTrio(),
+    place: (b) => {
+      Object.assign(combatantById(b, "hero"), { x: 0, y: SS2_ARENA.frontY });
+      // The rival is in the hero's rank and as far away as the arena allows.
+      Object.assign(combatantById(b, "rival"), { x: SS2_ARENA.clamp.max, y: SS2_ARENA.frontY });
+      // The flanker is one rank back and much nearer: distance must not be what decides.
+      Object.assign(combatantById(b, "flanker"), { x: 300, y: SS2_ARENA.frontY - SS2_ARENA.rankStride });
+    }
+  });
+  const targets = legalActions(battle)
+    .filter((option) => option.type === Ss2ActionType.TAUNT)
+    .map((option) => option.targetId);
+  assert.deepEqual(targets, ["rival"],
+    "the foe in the hero's own rank, at the far wall, and not the nearer one a rank back");
+
+  // And it is a rule, not an AI preference: the resolver refuses the cross-rank
+  // taunt from ANY controller, because `applyAction` accepts only an offer.
+  assert.throws(
+    () => applyAction(battle, { actorId: "hero", type: Ss2ActionType.TAUNT, targetId: "flanker" }),
+    /Illegal action/
+  );
+});
+
+test("WITH NO RANKS EVERY FOE MAY BE TAUNTED, which is every 1v1 and the build", () => {
+  // `ss2SameLane` is true whenever either `y` is not finite, and `startingY`
+  // returns null at `rankStride` 0 — so a one-dimensional arena offers the taunt
+  // against every foe at any distance, exactly as before the rule.
+  const battle = onTheClock({
+    who: "hero",
+    teams: rankedTrio(),
+    rules: createSs2TeamRules({ rankStride: 0 }),
+    place: (b) => {
+      combatantById(b, "hero").x = 0;
+      combatantById(b, "rival").x = SS2_ARENA.clamp.max;
+      combatantById(b, "flanker").x = 300;
+    }
+  });
+  for (const one of battle.teams.flatMap((team) => team.combatants)) {
+    assert.equal(one.y, null, "the rig must model no depth");
+  }
+  const targets = legalActions(battle)
+    .filter((option) => option.type === Ss2ActionType.TAUNT)
+    .map((option) => option.targetId);
+  assert.deepEqual(targets, ["rival", "flanker"]);
 });

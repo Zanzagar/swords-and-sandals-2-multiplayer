@@ -385,3 +385,45 @@ test("a rule set with no depth at all cannot join, and does not throw trying", (
   assert.equal(ss2RankToJoin(view, -99, 0), null, "no stride, no neighbour");
   assert.equal(flat.id, "ss2-map-derived-tournament-rank-0-join-down-99");
 });
+
+/* ------------------------------------------------------------------ *
+ * THE APPROACH: WALK TOWARD THE FIGHT YOU CAN HAVE
+ * ------------------------------------------------------------------ */
+
+/**
+ * ► **TWO GLADIATORS IN NEIGHBOURING RANKS LEAPFROGGED EACH OTHER TO THE WALL
+ *   — found 2026-09-23, when the owner's taunt rule took away the cross-rank
+ *   taunt that had been breaking the chase.** The walk arm stepped toward the
+ *   NEAREST foe by Euclidean distance, in any rank. The rank arm refuses to
+ *   leave a rank that still holds a foe ("fight who is in front of you"). So a
+ *   gladiator whose nearest foe stood one rank over, with a foe of its own far
+ *   along its own rank, walked toward a man it can never swing at (the lane
+ *   rule) and would not change rank to reach him. Across ranks no body blocks a
+ *   walk, a step is longer than the gap, and the two overtook each other every
+ *   turn until both stood against the arena wall. Measured on the arena's own
+ *   host (2690559 plus the taunt rule), tricks kit, 3v3, seeds 1-25: median
+ *   bout 158 actions before the taunt rule and 1,275 after it, 16 of 25 bouts
+ *   with 200+ actions in a row in which nobody lost a hitpoint, and 8,523
+ *   walks into the wall. It was there before the rule, rarely: 152 wall walks
+ *   and one such bout.
+ *
+ *   The walk now steps toward the nearest foe IN ITS OWN RANK whenever it has
+ *   one — the rank arm's own rule, and the facing rule's lane-first order
+ *   (`facingEffectsAgainst`). With no foe in its own rank it steps toward the
+ *   nearest overall, exactly as before; the rank arm has already had the
+ *   chance to take it across.
+ */
+test("THE WALK GOES TOWARD A FOE IN ITS OWN RANK, not toward a nearer one it can never swing at", () => {
+  const battle = staged({
+    red: [{ id: "hero", fields: gladiator(), x: -500, y: FRONT }],
+    blue: [
+      { id: "neighbour", fields: gladiator({ gladiator_dir: "left" }), x: -550, y: BACK },
+      { id: "rival", fields: gladiator({ gladiator_dir: "left" }), x: 500, y: FRONT }
+    ]
+  });
+  const offered = legalActions(battle, "hero").map((option) => option.type);
+  assert.ok(offered.includes(Ss2ActionType.WALK_LEFT) && offered.includes(Ss2ActionType.WALK_RIGHT),
+    "the staging must offer both walks, so the choice is the AI's");
+  assert.equal(suggestAction(battle, "hero").type, Ss2ActionType.WALK_RIGHT,
+    "toward `rival`, in the hero's rank, and away from `neighbour`, a rank back and nearer");
+});

@@ -83,14 +83,40 @@ const KIT_BOUTS = Object.freeze({
   //     gale, ghost, command, teleport, command.
   //   Was: command, weaken x2, ghost, weaken, whirlwind, command, whirlwind,
   //   weaken, gale, ghost, gale, ghost, command.
+  // ► **MOVED AGAIN 2026-09-23 BY THE OWNER'S TAUNT RULE, ON TOP OF THE
+  //   FACING CHANGE ABOVE (main session, at merge):** with both in, the bout
+  //   is 60 actions, no result, and the 13 casts below. With the taunt rule
+  //   reverted, HEAD's committed 22-cast list returns, so the taunt rule is
+  //   the whole of this move. The taunt implementer's note that follows was
+  //   measured on a base WITHOUT the facing change, and its "34 actions, blue
+  //   by elimination" is ~~current~~ superseded by the combination:
+  // ► ~~**MOVED 2026-09-23 BY THE OWNER'S TAUNT RULE, and by nothing else**:~~
+  //   ~~`actions: 60, result: null`~~. A taunt now names only a foe in the
+  //   taunter's own rank. At action 10 the red archer (rank y 103) used to
+  //   taunt blue-1 in rank 200, 66 units away, and did so five times before
+  //   blue-1 changed rank; it now rests on those turns and the bout settles at
+  //   34 actions, blue by elimination. The cast list is unchanged, in order.
+  //   Proven the only cause by reverting the rule — the offer's
+  //   `ss2SameLane` test and `ss2TauntValue`'s, BOTH (either one alone still
+  //   moves this, because the AI prices a cross-rank taunt at 0 through the
+  //   second) — and watching 60/null return with every other change in place.
+  // ► **AND MOVED A THIRD TIME 2026-09-23, BY THE APPROACH FIX THE TAUNT RULE
+  //   EXPOSED** (`chooseAiAction`'s walk arm now steps toward the nearest foe
+  //   in its OWN rank when it has one; see `test/ss2-rank-join.test.js`, "THE
+  //   WALK GOES TOWARD A FOE IN ITS OWN RANK"). ~~60 actions, no result, 13
+  //   casts~~ → **48 actions, red by elimination, the 16 casts below.** The
+  //   first divergence is action 9: blue-1 at (-190, 200) walked LEFT toward
+  //   red-2 one rank back and now walks RIGHT toward red-1 in its own rank.
+  //   With the walk fix reverted by exact inverse, 60/null and the 13 casts
+  //   (command, weaken x2, ghost, weaken, whirlwind, command, gale, weaken,
+  //   ghost, gale, ghost, command) return.
   tricks: {
-    actions: 60,
-    result: null,
+    actions: 48,
+    result: "elimination",
     casts: [
       "cast-command", "cast-weaken-armour", "cast-weaken-armour", "cast-ghost-strike", "cast-weaken-armour",
-      "cast-whirlwind", "cast-command", "cast-gale", "cast-weaken-armour", "cast-ghost-strike", "cast-whirlwind",
-      "cast-teleport", "cast-ghost-strike", "cast-teleport", "cast-whirlwind", "wincrowd", "cast-gale", "wincrowd",
-      "cast-command", "wincrowd", "wincrowd", "wincrowd"
+      "cast-whirlwind", "cast-command", "cast-gale", "cast-weaken-armour", "cast-whirlwind", "cast-gale",
+      "cast-ghost-strike", "cast-command", "cast-whirlwind", "cast-teleport", "cast-ghost-strike"
     ]
   },
   crowd: {

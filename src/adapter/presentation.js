@@ -547,15 +547,27 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
         target: label(event.victimClip, LabelProvenance.MAP_NAMED)
       });
     }
-    // ► **A TAUNT PLAYS BOTH CLIPS AND PLAYS THEM WHATEVER IT ROLLED.** The
+    // ► **A TAUNT PLAYS BOTH CLIPS ~~AND PLAYS THEM WHATEVER IT ROLLED~~** —
+    //   **the victim's is superseded in the same tick by a strike and by a
+    //   failed roll; see `tauntLabels` (2026-09-23).** The
     //   build fires `attacker.gotoAndPlay("taunt")` at `+0x6905` and
     //   `defender.gotoAndPlay("taunted")` at `+0x690c` BEFORE the roll, so a
     //   taunt that fails outright still animates both — which is the whole
     //   reason it reads as a taunt rather than as a fumble.
     //
-    //   Only `taunt_effect == 1` reaches the dispatcher; that arm falls through
-    //   to the attack cases below and keeps the `taunted` target label from
-    //   here, because the build never replaces it.
+    //   Only `taunt_effect == 1` reaches the dispatcher; ~~that arm falls
+    //   through to the attack cases below and keeps the `taunted` target label
+    //   from here, because the build never replaces it.~~ **FALSE, corrected
+    //   2026-09-23: the build DOES replace it, in the same frame.** The
+    //   dispatcher it reaches calls `defender_hurt("taunt")` on a hit
+    //   (`+0x30ff`), which plays `"hurt" + 20` = `hurt20` (`+0x2086`,
+    //   `+0x2136`), and `defender_blocked()` on a miss, which plays `defend20`
+    //   (`+0x2160`, `+0x224a`) — both synchronously after `taunted` at
+    //   `+0x690c`, so `taunted` is never drawn. Nor does a taunt event reach
+    //   the cases below: `event.type === "taunt"` returns `tauntLabels` first.
+    //   A struck victim stood in `taunted` while losing hitpoints — 26 of 26
+    //   damaging taunts on the plain 3v3 arena at bf53d81, 38 of 38 with the
+    //   tricks kit. See `tauntLabels`.
     // (The taunt's own case moved above the movement branch on 2026-09-22 and
     // lives in `tauntLabels`; see the shove case there.)
 
@@ -567,12 +579,11 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
       return Object.freeze({ actor: attackLabel(direction), target: defendLabel(direction) });
     }
     switch (event.dispatchedMethod) {
-      case "taunt":
-        // Map: `taunt`/`taunted` at frames 1482/1512 — the actor taunts, the target is taunted.
-        return Object.freeze({
-          actor: label("taunt", LabelProvenance.MAP_NAMED),
-          target: label("taunted", LabelProvenance.MAP_NAMED)
-        });
+      // ~~case "taunt": `taunt`/`taunted` — the actor taunts, the target is
+      // taunted.~~ **REMOVED 2026-09-23: unreachable and wrong.** Only a taunt
+      // dispatches direction 20, and a taunt event returns `tauntLabels` above;
+      // had it been reached, `defender_hurt("taunt")` plays `hurt20`
+      // (`+0x30ff`, `+0x2086`), which is what `default` below now gives it.
       case "grievous":
         // Map: direction 30 dispatches `defender_hurt("grievous")`; `knockback` is frame 1428.
         return Object.freeze({ actor: attackLabel(direction), target: label("knockback", LabelProvenance.MAP_NAMED) });
@@ -591,8 +602,10 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
 });
 
 /**
- * A TAUNT PLAYS BOTH CLIPS AND PLAYS THEM WHATEVER IT ROLLED. The build fires
- * `attacker.gotoAndPlay("taunt")` at `+0x6905` and
+ * A TAUNT PLAYS BOTH CLIPS ~~AND PLAYS THEM WHATEVER IT ROLLED~~ **— but the
+ * victim's `taunted` is superseded in the same tick by a strike (below, since
+ * 2026-09-23) and, NOT MODELLED, by a failed roll (last paragraph).** The
+ * build fires `attacker.gotoAndPlay("taunt")` at `+0x6905` and
  * `defender.gotoAndPlay("taunted")` at `+0x690c` BEFORE the roll, so a taunt
  * that fails outright still animates both — which is the whole reason it reads
  * as a taunt rather than as a fumble.
@@ -601,9 +614,36 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
  * `defender.gotoAndPlay("knockback")` at `+0x6a21`/`+0x6a91` against the
  * UNCONDITIONAL displacement at `+0x6ab1`. The resolver reports which, because
  * the threshold is not recoverable from the two endpoints.
+ *
+ * ► **THE STRIKE REPLACES `taunted` TOO, and until 2026-09-23 this played
+ *   `taunted` over it.** `taunt_effect == 1` sets `attack_direction = 20`
+ *   (`+0x6981`) and calls `checkattackroll()` (`+0x698c`) in the same tick as
+ *   `+0x690c`: a hit dispatches `defender_hurt("taunt")` (`+0x30ff`), which
+ *   plays `"hurt" + 20` (`+0x2086`, `+0x2136`); a miss dispatches
+ *   `defender_blocked()`, which plays `"defend" + 20` (`+0x2160`, `+0x224a`).
+ *   So the victim of a landed strike plays `hurt20` and the parrier of a
+ *   blocked one `defend20` — `hurtLabel`/`defendLabel` at direction 20, the
+ *   same functions every other dispatched blow uses. Recognised by `hit`
+ *   being a boolean, which only a dispatched strike carries.
+ *
+ * ► **NOT MODELLED, NAMED — the FAILED roll replaces `taunted` as well.**
+ *   `diceroll >= taunt_percentage` jumps to `+0x6b0e`, `defender_blocked()`,
+ *   with `attack_direction` NOT written in this arm (its only write in the
+ *   taunt phase is `+0x6981`), so the victim plays `"defend" + ` whatever
+ *   the last attack phase in the bout wrote there — a timeline variable on
+ *   overlay frame 52, shared by both gladiators. Reproducing that needs the
+ *   bout-global last direction, which no event carries; `taunted` stays here
+ *   and the gap is recorded rather than guessed.
  */
 function tauntLabels(event) {
   const actorLabel = label("taunt", LabelProvenance.MAP_NAMED);
+  if (typeof event.hit === "boolean") {
+    const direction = Number(event.attackDirection);
+    return Object.freeze({
+      actor: actorLabel,
+      target: event.hit ? hurtLabel(direction) : defendLabel(direction)
+    });
+  }
   if (event.knockbackAnimation === true) {
     return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
   }

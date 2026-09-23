@@ -208,6 +208,29 @@ test("a SHOVE is worth nothing and a FLEE is worth a turn, which is not a matter
   );
 });
 
+test("A FOE IN ANOTHER RANK IS WORTH NOTHING TO TAUNT, because he cannot be taunted", () => {
+  // ► **THE OWNER'S RULE, 2026-09-23: a taunt may name only a foe in the
+  //   taunter's own rank, at any distance.** `legalActions` enforces it, and
+  //   every AI arm matches its taunt to an offer by target — but this function
+  //   is exported and prices whatever it is handed, so it answers for itself:
+  //   an action that cannot be taken is worth nothing, including the recovery
+  //   that would otherwise be certain.
+  const battle = duel({ heroHealth: 8 });
+  const actor = combatant(battle, "hero");
+  const sameRank = combatant(battle, "villain");
+  const otherRank = { ...sameRank, y: sameRank.y - SS2_ARENA.rankStride };
+
+  assert.ok(ss2TauntValue(actor, sameRank, { taunt: 40 }) > 0, "the rig must price a legal taunt above zero");
+  assert.equal(ss2TauntValue(actor, otherRank, { taunt: 40 }), 0);
+
+  // And with no ranks modelled there is one lane, so nothing changes.
+  const flatActor = { ...actor, y: null };
+  assert.equal(
+    ss2TauntValue(flatActor, { ...sameRank, y: null }, { taunt: 40 }),
+    ss2TauntValue(actor, sameRank, { taunt: 40 })
+  );
+});
+
 test("the approach is worth the swing UNDISCOUNTED, and the discounted version is why", () => {
   // ► **A REGRESSION PIN ON A DESIGN DECISION, not on arithmetic.** The first
   //   version returned `best / (walks + 1)`. Measured: the taunt went to 81.6%
@@ -389,6 +412,28 @@ test("THE TAUNT IS AIMED AT THE FOE IT WAS PRICED AGAINST, not at whichever is f
   const chosen = suggestAction(battle, "hero");
   assert.equal(chosen.type, Ss2ActionType.TAUNT, "the staging must produce a taunt at all");
   assert.equal(chosen.targetId, "near", "and it must name the foe the approach arm was measuring");
+});
+
+test("AND IT NEVER TAUNTS INTO ANOTHER RANK, which it did whenever that foe was nearest", () => {
+  // ► **THE OWNER'S RULE, 2026-09-23**: a taunt names only a foe in the
+  //   taunter's own rank, at any distance. The staging above with ONE change —
+  //   `near` a rank back — and before the rule the AI taunted him from there,
+  //   because the out-of-range arm prices the taunt against the NEAREST foe by
+  //   Euclidean distance and the offer named every foe. `far`, in the hero's
+  //   own rank, is still on offer; the arm does not retarget to him, because
+  //   it prices a taunt against the swing it is walking toward and that swing
+  //   is `near`'s.
+  const battle = staged({
+    red: [{ id: "hero", fields: gladiator({ charisma: 20 }), x: 0, y: 200, health: 8 }],
+    blue: [
+      { id: "far", fields: gladiator({ gladiator_dir: "left" }), x: 1400, y: 200 },
+      { id: "near", fields: gladiator({ gladiator_dir: "left" }), x: 400, y: 200 - SS2_ARENA.rankStride }
+    ]
+  });
+  const chosen = suggestAction(battle, "hero");
+  assert.ok(chosen, "the AI must choose something");
+  assert.equal(chosen.type === Ss2ActionType.TAUNT && chosen.targetId === "near", false,
+    `a taunt across ranks is not the AI's to take; it chose ${JSON.stringify(chosen)}`);
 });
 
 test("a gladiator that declares no damage pair is SKIPPED, not thrown at", () => {

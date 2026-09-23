@@ -3282,6 +3282,12 @@ function ss2CanBePriced(actor) {
  */
 export function ss2TauntValue(actor, target, chances) {
   if (!actor || !target) return 0;
+  // ► **A FOE IN ANOTHER RANK CANNOT BE TAUNTED, so a taunt at him is worth
+  //   nothing — not even the recovery.** The owner's rule of 2026-09-23: a
+  //   taunt names only a foe in the taunter's own rank, at any distance.
+  //   `legalActions` enforces it and every caller here matches an offer by
+  //   target; this answers for a caller that does not. A no-op without ranks.
+  if (!ss2SameLane(actor, target)) return 0;
   // (1) The recovery, certain. `tauntRecovery`'s own two lines.
   const healed = Math.min(
     SS2_TAUNT.branchHealBase + Math.ceil(actor.stats.stamina),
@@ -10677,6 +10683,23 @@ export function createSs2TeamRules({
       //   this engine offers both where the build offers one. Changing that
       //   moves every bout's option list and the AI's forced-rest gate, so it
       //   is its own decision and is recorded rather than taken.
+      //
+      // ► **AND ONLY AGAINST A FOE IN THE TAUNTER'S OWN RANK, AT ANY DISTANCE
+      //   — AUTHORED, the owner's decision of 2026-09-23.** The build has one
+      //   rank and one opponent, so no byte says whom a taunt may name across
+      //   two (`MAP_SILENCE.multi-slot-arena-geometry`). What the build does
+      //   settle is that the strike arm (direction 20, `round(charisma * 4) -
+      //   defender.charisma`) has no range test, so a back-rank taunter could
+      //   kill somebody in another rank 800 units away. Measured on the
+      //   arena's own path before this line (25 seeded 3v3 bouts, plain kit,
+      //   at bf53d81): **26 of 26 damaging taunts crossed a rank.** The rule is
+      //   `ss2SameLane`, the melee lane rule, WITHOUT the reach test — distance
+      //   still does not matter — so a 1v1, which has one rank, is exactly the
+      //   build, and a one-dimensional arena (`rankStride` 0) offers every foe
+      //   as before. The AI's taunt arms all match an offer by target, so this
+      //   one line is also what keeps the AI in its own rank; `ss2TauntValue`
+      //   refuses a cross-rank target as well, for any caller that prices one
+      //   without asking the offer.
       if (!(onCloseFrame && !bowDrawn)) {
         const staminaMax = resourceValue(view.actor, "staminamax", 0);
         const staminaLeft = resourceValue(view.actor, "staminaleft", 0);
@@ -10684,7 +10707,10 @@ export function createSs2TeamRules({
           ? (staminaLeft / staminaMax) * 100 >= SS2_TAUNT.staminaPercent
           : false;
         if ((bowDrawn && onCloseFrame) || rested) {
-          for (const foe of view.foes) actions.push({ type: Ss2ActionType.TAUNT, targetId: foe.id });
+          for (const foe of view.foes) {
+            if (!ss2SameLane(view.actor, foe)) continue;
+            actions.push({ type: Ss2ActionType.TAUNT, targetId: foe.id });
+          }
         }
       }
 
@@ -14998,8 +15024,24 @@ export function createSs2TeamRules({
           const step = options.find((option) => option.type === towardRank);
           if (step) return step;
         }
-        if (nearest) {
-          const towardType = nearest.x > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
+        // ► **TOWARD A FOE IN ITS OWN RANK WHEN IT HAS ONE, and until
+        //   2026-09-23 toward the nearest in ANY rank.** The arm above will
+        //   not leave a rank that holds a foe, and the lane rule will not let
+        //   it swing into another, so a nearer foe one rank over is a man this
+        //   gladiator can neither reach nor fight. Walking at him anyway made
+        //   two neighbours in adjacent ranks overtake each other every turn —
+        //   no body blocks a walk across ranks and a step is longer than the
+        //   gap — until both stood at the arena wall: 16 of 25 seeded tricks
+        //   3v3 bouts stalled 200+ actions without a hitpoint lost once the
+        //   owner's taunt rule stopped the cross-rank taunts that had been
+        //   breaking the chase. Lane first is the facing rule's order
+        //   (`facingEffectsAgainst`); with no foe in its own rank it is the
+        //   nearest overall, as before. A no-op without ranks and in 1v1.
+        const approached = ownRankHasFoe
+          ? nearestFoe({ ...view, foes: view.foes.filter((foe) => ss2SameLane(view.actor, foe)) }) ?? nearest
+          : nearest;
+        if (approached) {
+          const towardType = approached.x > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
           const stride = options.find((option) => option.type === towardType);
           // ~~Stamina still outranks it: the forced-rest gate above already
           // returned at <= 10, so reaching here means the walk is affordable

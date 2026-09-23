@@ -139,6 +139,14 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     named divergence, not reproduced. And **the AI VALUES THE PURSE**: it plays
     to the crowd (wincrowd, adulation) when an authored valuation of the purse
     gain beats the turn it spends — tunable, measured, no build roll invented.
+  - **ONE MORE, 2026-09-23: A TAUNT MAY NAME ONLY A FOE IN THE TAUNTER'S OWN
+    RANK, at any distance** (the build has one rank, so no byte decides it;
+    measured before the rule, 26 of 26 damaging 3v3 taunts crossed a rank).
+    `legalActions` offers it through `ss2SameLane` and `ss2TauntValue` prices a
+    cross-rank target at 0; exactly the build in 1v1 and with `rankStride` 0.
+    The rule exposed an AI chase to the arena wall (the walk arm stepped at the
+    nearest foe in ANY rank), fixed in the same commit: with a foe in its own
+    rank the AI walks at that one.
 
 ► **THE FIRST SPELL VERBS ARE BUILT, AND A `null` IN THE CANDIDATE TABLE WAS A
   SCHEDULED FALSE DIVERGENCE (2026-09-20).** `cast_lightning_bolt` and
