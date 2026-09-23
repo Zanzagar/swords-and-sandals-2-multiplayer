@@ -58,6 +58,9 @@ const group = (citation, fields, notes = null) =>
 /**
  * Every field group the map's "Observed data fields" table records, in the
  * table's own order. `citation` names the section a reader should check.
+ * **Plus one group the table does not record**, `fightStartBackups` (added
+ * 2026-09-23), byte-derived and cited to the section that derives it — see
+ * its note, and `inventory_maxslots` for the same shape inside a table row.
  */
 export const VANILLA_FIELD_GROUPS = Object.freeze({
   identity: group("battle-map: Combatant state objects / Identity-progression", [
@@ -233,6 +236,59 @@ export const VANILLA_FIELD_GROUPS = Object.freeze({
     "inventory_maxslots is not in the map's observed-fields row: it is byte-derived at §Spell and vanilla AI " +
       "surface (the hero's in-battle offer gate, sprite:492[inventory_overlay]/frame:1 +0x024f; " +
       "initcharacter +0x098e), and no capture has observed it."
+  ),
+  /**
+   * ► **ADDED 2026-09-23, BECAUSE THE ARENA COULD NOT BUILD A REJUVENATE
+   *   HOLDER.** `ss2Combatant` has declared the nine piece backups for a holder
+   *   of id 43 since `8ff985d`, and `createVanillaBattleHost` checks every name
+   *   in a caller-supplied bag against this catalogue — which did not know
+   *   them, so the arena's `?items=buffs` and `?items=crowd` kits died at
+   *   construction with "no battle-map section cites" `backup_shoulderguard`.
+   *   That was false: the map cites all of them. Every test of rejuvenate had
+   *   built its battle with `createTeamBattle` directly, so none went through
+   *   the check. `test/ss2-host-spell-resources.test.js` now does.
+   *
+   * **They are fields of the PERSISTENT object**, like the pieces they back:
+   * the rejuvenate arm reads eight of the nine as `game_attacker.backup_<piece>`
+   * (map §"Five more phases", `cast_rejuvinate`, `+0x8d69`-`+0x8f58`; the
+   * shoulderguard's goes through the free variable `whichcharacter`,
+   * `+0x8e50`, which the owner's decision replaces), and `check_spells`
+   * restores the stat spells' stats from `backup_*` on its `which_character`
+   * argument (r2), which `nextphase` binds to `game_attacker`/`game_defender`.
+   * `backup_char` (`root/frame:35` `+0x2d80`-) writes them, at four call sites
+   * none of which is mid-battle, so in a battle they are READ and never
+   * written — and the adapter writes none of them.
+   *
+   * **All thirteen, not only the nine that reached the bag.** The four stat
+   * backups never travel in a supplied bag — the rule set declares them at the
+   * opening (`rules.openingResources`), and `ss2Combatant` never reads them out
+   * of a record — so they did not trip the check. They are here because the
+   * map cites them in the same section from the same writer (`+0x2d80`-`+0x2da7`,
+   * the only writes of the four anywhere), and a catalogue that answered
+   * "no battle-map section cites" for them would be the false silence this
+   * file's `MAP_SILENCE` header records three times.
+   */
+  fightStartBackups: group(
+    "battle-map: Spell and vanilla AI surface / Five more phases (backup_char's fight-start snapshot: " +
+      "cast_rejuvinate's nine piece restores and the four stat spells' expiry)",
+    [
+      "backup_shoulderguard",
+      "backup_gauntlet",
+      "backup_breastplate",
+      "backup_helmet",
+      "backup_greaves",
+      "backup_shinguard",
+      "backup_boot",
+      "backup_weapon",
+      "backup_shield",
+      "backup_strength",
+      "backup_speed",
+      "backup_attack",
+      "backup_defence"
+    ],
+    "Not in the map's observed-fields row: byte-derived at §Five more phases (cast_rejuvinate +0x8d69-+0x8f58; " +
+      "check_spells' expiry restores; backup_char root/frame:35 +0x2d80-), and no capture has observed them. " +
+      "Read, never written, in battle."
   )
 });
 

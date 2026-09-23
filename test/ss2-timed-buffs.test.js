@@ -227,18 +227,34 @@ test("a combatant that neither carries nor states a counter declares neither key
   );
 });
 
+/**
+ * ► **POSSESSION DECLARES AT THE OPENING, NOT IN `ss2Combatant`'S BAG — moved
+ *   2026-09-23.** These two tests used to read the pair straight off
+ *   `ss2Combatant(...).resources`. That bag is what a caller hands
+ *   `createVanillaBattleHost`, which refuses any name the battle map does not
+ *   cite, and the clock is this engine's invention — so the arena's
+ *   `?items=buffs` kit could not build at all. The pair is now declared by
+ *   `rules.openingResources` (`ss2TimedBuffDeclarations`), and these assert
+ *   the BATTLE's combatant, which is where the resolver reads them. A STATED
+ *   counter, and the clock beside it, are still the record's, so still the bag's.
+ */
+const declaredOn = (battle, id, name) => combatantById(battle, id).resources[name]?.value;
+
 test("a STATED counter is declared at the stated value; POSSESSION declares it at 0; the other stays absent", () => {
   assert.equal(ss2Combatant(fields({ spell_regenerate: 7 })).resources[REGEN_COUNTER], 7);
-  const holder = ss2Combatant(fields({ inventory3: 46 }));
-  assert.equal(holder.resources[REGEN_COUNTER], 0, "carrying id 46 declares spell_regenerate");
-  assert.equal(Object.hasOwn(holder.resources, BOUNDLESS_COUNTER), false, "and nothing for id 45");
-  const both = ss2Combatant(fields({ inventory1: 45, inventory6: 46 }));
-  assert.equal(both.resources[REGEN_COUNTER], 0);
-  assert.equal(both.resources[BOUNDLESS_COUNTER], 0);
+  const holder = staged({ hero: { inventory3: 46 } });
+  assert.equal(declaredOn(holder, "hero", REGEN_COUNTER), 0, "carrying id 46 declares spell_regenerate");
+  assert.equal(declaredOn(holder, "hero", BOUNDLESS_COUNTER), undefined, "and nothing for id 45");
+  assert.equal(declaredOn(holder, "foe", REGEN_COUNTER), undefined, "and nothing on a foe who carries nothing");
+  const both = staged({ hero: { inventory1: 45, inventory6: 46 } });
+  assert.equal(declaredOn(both, "hero", REGEN_COUNTER), 0);
+  assert.equal(declaredOn(both, "hero", BOUNDLESS_COUNTER), 0);
   // A stated value wins over possession.
-  assert.equal(ss2Combatant(fields({ inventory1: 45, spell_boundless_energy: 12 })).resources[BOUNDLESS_COUNTER], 12);
+  assert.equal(declaredOn(staged({ hero: { inventory1: 45, spell_boundless_energy: 12 } }), "hero", BOUNDLESS_COUNTER), 12);
   // The empty marker is not an item.
-  assert.equal(Object.hasOwn(ss2Combatant(fields({ inventory1: SS2_INVENTORY_EMPTY })).resources, REGEN_COUNTER), false);
+  assert.equal(declaredOn(staged({ hero: { inventory1: SS2_INVENTORY_EMPTY } }), "hero", REGEN_COUNTER), undefined);
+  // And possession no longer reaches the BAG, which is the point of the move.
+  assert.equal(Object.hasOwn(ss2Combatant(fields({ inventory3: 46 })).resources, REGEN_COUNTER), false);
 });
 
 test("the TICK CLOCK is declared beside any timed counter, at 1 (owed), and nowhere else — no default, so no golden moves", () => {
@@ -246,25 +262,33 @@ test("the TICK CLOCK is declared beside any timed counter, at 1 (owed), and nowh
   assert.ok(SS2_WRITTEN_RESOURCES.includes(CLOCK));
   assert.equal(Object.hasOwn(SS2_RESOURCE_DEFAULTS, CLOCK), false,
     "a default would be filled into every golden's combatant and move all 23 hashes");
-  // Possession of either item, or a stated counter, declares it — at 1, because
-  // before any phase has completed every bearer counts as owed.
-  assert.equal(ss2Combatant(fields({ inventory2: 46 })).resources[CLOCK], 1);
-  assert.equal(ss2Combatant(fields({ inventory5: 45 })).resources[CLOCK], 1);
+  // Possession of either item declares it at the opening, and a stated counter
+  // in the bag — at 1, because before any phase has completed every bearer
+  // counts as owed.
+  assert.equal(declaredOn(staged({ hero: { inventory2: 46 } }), "hero", CLOCK), 1);
+  assert.equal(declaredOn(staged({ hero: { inventory5: 45 } }), "hero", CLOCK), 1);
   assert.equal(ss2Combatant(fields({ spell_regenerate: 7 })).resources[CLOCK], 1);
   // A stated clock wins, as a stated counter does: a restored bout keeps its place.
   assert.equal(ss2Combatant(fields({ spell_regenerate: 7, [CLOCK]: 0 })).resources[CLOCK], 0);
+  assert.equal(declaredOn(staged({ hero: { inventory1: 46, spell_regenerate: 7, [CLOCK]: 0 } }), "hero", CLOCK), 0,
+    "and the opening does not overwrite it");
   // No counter, no clock — the census's mechanism.
-  assert.equal(Object.hasOwn(ss2Combatant(fields()).resources, CLOCK), false);
-  assert.equal(Object.hasOwn(ss2Combatant(fields({ inventory1: 35 })).resources, CLOCK), false,
-    "a bolt is not a timed spell");
+  assert.equal(declaredOn(staged(), "hero", CLOCK), undefined);
+  assert.equal(declaredOn(staged(), "foe", CLOCK), undefined);
+  assert.equal(declaredOn(staged({ hero: { inventory1: 35 } }), "hero", CLOCK), undefined, "a bolt is not a timed spell");
+  // Possession's clock is not the bag's: that bag is what the host checks against the map.
+  assert.equal(Object.hasOwn(ss2Combatant(fields({ inventory2: 46 })).resources, CLOCK), false);
 });
 
 test("a combatant declaring a timed counter WITHOUT the clock is refused at construction, by name", () => {
-  // Built past `ss2Combatant`'s declaration: without the clock it would never
-  // be owed, so its counter would tick on its own phases only and a 1v1 would
-  // silently stop being the build. Refused before any draw, not mid-bout.
+  // Built past the rule set's own declarations — the counter declared by hand,
+  // with no clock beside it. Without the clock it would never be owed, so its
+  // counter would tick on its own phases only and a 1v1 would silently stop
+  // being the build. Refused before any draw, not mid-bout: the roster runs
+  // this check before the opening could fill the hole.
   const raw = ss2Combatant(fields({ speed: 21, inventory1: 46 }), { id: "hero", name: "hero", controller: "local" });
-  delete raw.resources[CLOCK];
+  raw.resources[REGEN_COUNTER] = 0;
+  assert.equal(Object.hasOwn(raw.resources, CLOCK), false);
   assert.throws(() => createTeamBattle({
     seed: 3,
     rules: ss2TeamRules,
@@ -305,18 +329,14 @@ test("the slot window applies: id 46 in slot 3 is hidden at maxslots 2 and offer
 });
 
 test("a combatant carrying the item but NOT declaring the counter is not offered it", () => {
-  // Built without `ss2Combatant`, so possession did not declare the counter:
-  // the resolver would refuse the write mid-list, so the button must not exist.
-  const raw = ss2Combatant(fields({ inventory1: 46 }), { id: "hero", name: "hero", controller: "local" });
-  delete raw.resources[REGEN_COUNTER];
-  const battle = createTeamBattle({
-    seed: 3,
-    rules: ss2TeamRules,
-    teams: [
-      { id: "red", name: "red", combatants: [{ ...raw, stats: { ...raw.stats, agility: 21 } }] },
-      { id: "blue", name: "blue", combatants: [ss2Combatant(fields(), { id: "foe", name: "foe", controller: "local" })] }
-    ]
-  });
+  // Built past the opening hook's reach — the counter removed after
+  // construction, as `test/ss2-stat-spells.test.js` does for bloodlust. (Until
+  // 2026-09-23 this deleted it from `ss2Combatant`'s bag; possession now
+  // declares it at the opening, which fills that hole.) The resolver would
+  // refuse the write mid-list, so the button must not exist.
+  const battle = staged({ hero: { inventory1: 46 } });
+  assert.equal(offersOf(battle, REGEN).length, 1, "declared, it is offered");
+  delete combatantById(battle, "hero").resources[REGEN_COUNTER];
   assert.deepEqual(offersOf(battle, REGEN), []);
 });
 

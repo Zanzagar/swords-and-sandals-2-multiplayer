@@ -5874,8 +5874,10 @@ function ss2BackupStat(carrier, stat) {
  * Every resource a stat spell will write, declared at the opening on whoever
  * it can land on — `rules.openingResources`.
  *
- * ► **WHY HERE AND NOT IN `ss2Combatant`, where the regenerate counter is
- *   declared by possession.** Little fat kid writes its counter and its
+ * ► **WHY HERE AND NOT IN `ss2Combatant`, where the regenerate counter ~~is~~
+ *   WAS declared by possession** (until 2026-09-23; it is declared at the
+ *   opening now too, by `ss2TimedBuffDeclarations`, for its clock's sake —
+ *   see there). Little fat kid writes its counter and its
  *   halved stats on the VICTIM, who does not carry id 33 — and a blueprint is
  *   built one gladiator at a time, so nothing there knows what a foe carries.
  *   The resolver asks the rule set once, seeing the whole roster; all four
@@ -5896,10 +5898,12 @@ function ss2BackupStat(carrier, stat) {
  * ► **AND THE TICK CLOCK WITH THEM (merged 2026-09-22 with the owner's
  *   bearer's-turn tick rule, built in parallel).** A combatant given a counter
  *   here is a timed-spell BEARER, so it needs `SS2_TIMED_SPELL_CLOCK` beside
- *   the counter, at 1 as `ss2Combatant` declares it; `ss2Combatant` cannot see
- *   these counters, so it is declared HERE. A clock the blueprint already
- *   declared (a regenerate or boundless bearer) is kept, as
- *   `withDeclaredResources` keeps every blueprint's. Without it the bearer
+ *   the counter, at 1 ~~as `ss2Combatant` declares it~~ (owed); `ss2Combatant`
+ *   cannot see these counters, so it is declared HERE. A clock the blueprint
+ *   already declared (~~a regenerate or boundless bearer~~ a record that STATED
+ *   a regenerate or boundless counter, since 2026-09-23 the only clock
+ *   `ss2Combatant` declares) is kept, as `withDeclaredResources` keeps every
+ *   blueprint's. Without it the bearer
  *   would tick on its own phases only: the 1v1 expiry sequences and little fat
  *   kid's `counterAfter` in `test/ss2-stat-spells.test.js` are the guard.
  */
@@ -5921,6 +5925,43 @@ function ss2StatSpellDeclarations(combatants) {
     for (const [resource, declaration] of needed) {
       declarations.push({ targetId: combatant.id, resource, ...declaration });
     }
+  }
+  return declarations;
+}
+
+/**
+ * Regenerate's and boundless energy's counters, and the tick clock beside
+ * them, declared at the opening on whoever CARRIES the item — possession, the
+ * build's own gate — at the counter's "no buff" of 0 and the clock's "owed" of
+ * 1. Any declared slot counts, the window included: declaring is inert, and
+ * the villain's `use_item` ignores the window anyway.
+ *
+ * ► **MOVED HERE FROM `ss2Combatant` 2026-09-23, because a bag that function
+ *   builds is what a caller hands `createVanillaBattleHost`**, and the host
+ *   refuses any name in it the battle map does not cite. The counters are cited
+ *   (the build keeps them on the fighter clip); `timed_spell_tick_owed` is not
+ *   and cannot be — it is this engine's invention. So the pair is declared
+ *   where the stat spells' already were (`ss2StatSpellDeclarations`), which
+ *   the resolver asks once, after the host's check and the roster are done.
+ *   **The counter moved WITH the clock**, not alone, because the roster runs
+ *   `assertConstructionResources` (through `maximumHealth`) before the opening,
+ *   and that refuses a counter it finds without a clock — which is what keeps
+ *   the refusal meaningful for a blueprint built by hand.
+ *
+ * A counter or clock the blueprint already declares — a record that STATED
+ * one — is kept, as `withDeclaredResources` keeps every blueprint's. A
+ * gladiator bearing both a stat spell and one of these gets the clock twice at
+ * the same value; the first wins, and they are equal. **A battle where nobody
+ * carries 45 or 46 declares nothing here**, so no golden moves.
+ */
+function ss2TimedBuffDeclarations(combatants) {
+  const declarations = [];
+  for (const combatant of combatants) {
+    const carried = Object.values(SS2_TIMED_BUFFS)
+      .filter((buff) => ss2InventorySlotHolding(combatant, buff.itemId, { ignoreMaxslots: true }) !== null);
+    if (carried.length === 0) continue;
+    for (const buff of carried) declarations.push({ targetId: combatant.id, resource: buff.counter, value: 0 });
+    declarations.push({ targetId: combatant.id, resource: SS2_TIMED_SPELL_CLOCK, value: 1 });
   }
   return declarations;
 }
@@ -5965,9 +6006,11 @@ function ss2StatSpellChoice(view, options, type) {
  * `SS2_TIMED_SPELL_EXPIRY`; the last two only decrement. **Every counter here
  * inherits the team-play tick schedule and the tick clock** (see
  * `ss2TimedSpellBystanders`): the clock is declared beside the counter — by
- * `ss2Combatant` for regenerate and boundless energy, by the opening
- * (`ss2StatSpellDeclarations`) for the four stat spells — and construction
- * refuses a blueprint counter that arrives without it.
+ * ~~`ss2Combatant` for regenerate and boundless energy~~ the opening for
+ * regenerate and boundless energy too, on possession, since 2026-09-23
+ * (`ss2TimedBuffDeclarations`; `ss2Combatant` pairs one only with a counter a
+ * record STATES), by the opening (`ss2StatSpellDeclarations`) for the four stat
+ * spells — and construction refuses a blueprint counter that arrives without it.
  */
 const SS2_TIMED_SPELL_COUNTERS = Object.freeze([
   ...Object.values(SS2_STAT_SPELLS).map((spell) => spell.counter),
@@ -5980,13 +6023,21 @@ const SS2_TIMED_SPELL_COUNTERS = Object.freeze([
  * paid. **AUTHORED — the build has no such field**, because in 1v1 it never
  * needs one; see `ss2TimedSpellBystanders` for the rule it serves.
  *
- * Declared beside any timed counter and nowhere else — by `ss2Combatant` for
- * regenerate's and boundless energy's, by the opening
- * (`ss2StatSpellDeclarations`) for the four stat spells', whose bearer may not
- * be the carrier — at 1 (before any phase completes, everybody counts as
- * owed), and with NO
+ * Declared beside any timed counter and nowhere else — ~~by `ss2Combatant` for
+ * regenerate's and boundless energy's~~ by the opening for regenerate's and
+ * boundless energy's on possession (`ss2TimedBuffDeclarations`, since
+ * 2026-09-23) and by `ss2Combatant` only beside a counter a record STATES, by
+ * the opening (`ss2StatSpellDeclarations`) for the four stat spells', whose
+ * bearer may not be the carrier — at 1 (before any phase completes, everybody
+ * counts as owed), and with NO
  * `SS2_RESOURCE_DEFAULTS` entry — so a gladiator that bears no timed spell
  * carries no new hashed state, and no golden moves.
+ *
+ * ► **NEVER IN A BAG `createVanillaBattleHost` IS HANDED, where possession is
+ *   concerned (2026-09-23).** The host refuses any supplied name the battle map
+ *   does not cite, and this one cannot be cited; `ss2Combatant` putting it in
+ *   the bag of every holder of 45 or 46 is what stopped the arena's
+ *   `?items=buffs` kit from building. `test/ss2-host-spell-resources.test.js`.
  */
 const SS2_TIMED_SPELL_CLOCK = "timed_spell_tick_owed";
 
@@ -6494,8 +6545,9 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   //   and it is the adapter's to write them back to the clip.
   //
   //   Declared when a record STATES one, and also when a declared inventory
-  //   slot HOLDS the item that writes it — see `ss2Combatant`, where that
-  //   second rule is named as this engine's own.
+  //   slot HOLDS the item that writes it — ~~see `ss2Combatant`~~ at the
+  //   opening since 2026-09-23 (`ss2TimedBuffDeclarations`, which says why it
+  //   left `ss2Combatant`), where that second rule is named as this engine's own.
   "spell_boundless_energy",
   "spell_regenerate",
   // ► **THE NINE BACKUPS `cast_rejuvinate` RESTORES FROM, DECLARED 2026-09-22
@@ -6696,8 +6748,10 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   // ► **THE TICK CLOCK, DECLARED 2026-09-22 WITH THE OWNER'S TEAM-PLAY TICK
   //   RULE, AND IT IS THE `psyche_up` SHAPE: NO `SS2_RESOURCE_DEFAULTS`
   //   ENTRY.** AUTHORED, not a build field: whether a gladiator still owes the
-  //   one bystander tick its own phase earned. `ss2Combatant` declares it
-  //   beside a timed counter and nowhere else, so only a gladiator bearing a
+  //   one bystander tick its own phase earned. ~~`ss2Combatant` declares it~~
+  //   Declared beside a timed counter and nowhere else — by the opening on
+  //   possession, and by `ss2Combatant` only beside a STATED counter (moved
+  //   2026-09-23; see `SS2_TIMED_SPELL_CLOCK`) — so only a gladiator bearing a
   //   timed spell carries it. See `ss2TimedSpellBystanders`.
   SS2_TIMED_SPELL_CLOCK,
   "weapon_enchantment_damage",
@@ -7292,27 +7346,19 @@ export function ss2Combatant(
   if (!Number.isFinite(derived.armourclass_max) && Number.isFinite(derived.armourclass)) {
     resources.armourclass_max = derived.armourclass;
   }
-  // ► **A TIMED-BUFF COUNTER IS DECLARED BY POSSESSION, AT 0 — INVENTED, AND
-  //   FORCED BY THE RESOLVER RATHER THAN BY TASTE.** The build's clip creates
-  //   `attacker.spell_regenerate` on the arm's first write; this resolver
-  //   REFUSES to create a resource mid-battle (`writeResource`, constraint 2 of
-  //   `src/team/resources.js`). So a gladiator carrying id 46 whose record said
-  //   nothing about the counter could never hold what its own cast writes, and
-  //   the button would have to be hidden. Declaring it here, at construction,
-  //   for exactly the gladiators who carry the item, is the one way to keep the
-  //   build's gate — possession — as the offer.
-  //
-  //   **0 is the build's "no buff" and cannot move anything**: the build holds
-  //   `undefined` until the first cast (no initialiser anywhere in the oracle),
-  //   `undefined > 0` and `0 > 0` are both false, and `check_spells` decrements
-  //   only while `> 0`. No golden and no roster gladiator carries 45 or 46, so
-  //   no pinned hash moves; a record that STATES the counter keeps its value.
-  //   Every declared slot counts, the window included — declaring is inert, and
-  //   the villain's `use_item` ignores the window anyway.
-  for (const buff of Object.values(SS2_TIMED_BUFFS)) {
-    if (Object.hasOwn(resources, buff.counter)) continue;
-    if (SS2_INVENTORY_SLOTS.some((slot) => resources[slot] === buff.itemId)) resources[buff.counter] = 0;
-  }
+  // ► **~~A TIMED-BUFF COUNTER IS DECLARED BY POSSESSION, AT 0~~ — HERE UNTIL
+  //   2026-09-23, AND NOW AT THE OPENING (`ss2TimedBuffDeclarations`), WITH ITS
+  //   TICK CLOCK.** The reason for declaring by possession is unchanged: the
+  //   resolver will not create a resource mid-battle, so a holder of 46 whose
+  //   record said nothing about the counter could never hold what its cast
+  //   writes. What moved is WHERE, because this bag is what a caller hands
+  //   `createVanillaBattleHost` — and the clock beside the counter is an
+  //   invented engine field the adapter rightly refuses to carry in a bag it
+  //   checks against the battle map. The counter could not move without the
+  //   clock: construction refuses a counter that arrives without one
+  //   (`assertConstructionResources`, run by `maximumHealth` while the roster is
+  //   built, BEFORE the opening is asked). A record that STATES a counter still
+  //   keeps it, through `SS2_RESOURCE_NAMES` above.
   // ► **THE REJUVENATE BACKUPS ARE DECLARED BY POSSESSION TOO, AT THE VALUE OF
   //   THE FIELD EACH ONE BACKS — for the counters' reason, and at the build's
   //   own moment.** `backup_char` copies the nine fields onto `backup_*` before
@@ -7335,13 +7381,21 @@ export function ss2Combatant(
       resources[backup] = resources[piece];
     }
   }
-  // ► **AND THE TICK CLOCK GOES WITH THEM — AFTER every counter is declared,
-  //   so a counter declared by any rule above brings it.** At 1: before any
-  //   phase has completed, every bearer counts as owed, which is what makes the
-  //   bout's first phase tick the defender in 1v1 exactly as the build's first
-  //   `nextphase` does. A stated clock (a restored bout) is kept. See
-  //   `ss2TimedSpellBystanders`; `assertConstructionResources` refuses a
-  //   counter that arrives without one.
+  // ► **AND THE TICK CLOCK GOES WITH A STATED COUNTER — the only counter this
+  //   function still declares (2026-09-23; possession's pair is the opening's,
+  //   `ss2TimedBuffDeclarations`).** At 1: before any phase has completed,
+  //   every bearer counts as owed, which is what makes the bout's first phase
+  //   tick the defender in 1v1 exactly as the build's first `nextphase` does.
+  //   A stated clock (a restored bout) is kept. See `ss2TimedSpellBystanders`;
+  //   `assertConstructionResources` refuses a counter that arrives without one.
+  //
+  //   ► **NAMED, NOT SOLVED: A RECORD THAT STATES A COUNTER STILL CANNOT BE
+  //     HANDED TO `createVanillaBattleHost` AS A SUPPLIED BAG**, because this
+  //     clock rides with it and the adapter cites only vanilla fields. No
+  //     arena kit and no host caller states one — they are a restored bout's,
+  //     and the build keeps the counters on the clip, not on the record — and
+  //     whether the adapter may carry an engine-invented field is the owner's
+  //     policy, not this function's.
   if (!Object.hasOwn(resources, SS2_TIMED_SPELL_CLOCK)
     && SS2_TIMED_SPELL_COUNTERS.some((counter) => Object.hasOwn(resources, counter))) {
     resources[SS2_TIMED_SPELL_CLOCK] = 1;
@@ -7950,8 +8004,10 @@ const SS2_PHASE_REQUESTS = new WeakMap();
  *     and "the previous ACTOR" is not quite the rule anyway, because a phase
  *     that kills must not count (below), and which phases completed is the
  *     rule set's knowledge, not the resolver's. So the
- *     fact is carried per bearer: `ss2Combatant` declares it at 1 beside any
- *     timed counter (before any phase completes everybody counts as owed, which
+ *     fact is carried per bearer: ~~`ss2Combatant` declares~~ it is declared at
+ *     1 beside any timed counter — by the opening on possession, and by
+ *     `ss2Combatant` only beside a STATED counter, since 2026-09-23 (see
+ *     `SS2_TIMED_SPELL_CLOCK`) — (before any phase completes everybody counts as owed, which
  *     is what makes the bout's first phase tick the defender as the build's
  *     first `nextphase` does), with no default, so **a gladiator bearing no
  *     timed spell carries no new hashed state and no golden moves** (census
@@ -9136,12 +9192,14 @@ export function createSs2TeamRules({
 
     /**
      * The stat spells' counters and `backup_*`, on whoever a stat spell can
-     * land on — `backup_char` before the bout, as far as this engine needs it.
-     * See `ss2StatSpellDeclarations`; empty for every battle in which nobody
-     * carries id 33, 40, 41 or 42.
+     * land on — `backup_char` before the bout, as far as this engine needs it —
+     * and (since 2026-09-23) regenerate's and boundless energy's counters, on
+     * whoever carries them; each with the tick clock beside it.
+     * See `ss2StatSpellDeclarations` and `ss2TimedBuffDeclarations`; empty for
+     * every battle in which nobody carries id 33, 40, 41, 42, 45 or 46.
      */
     openingResources(combatants) {
-      return ss2StatSpellDeclarations(combatants);
+      return [...ss2StatSpellDeclarations(combatants), ...ss2TimedBuffDeclarations(combatants)];
     },
 
     /**
