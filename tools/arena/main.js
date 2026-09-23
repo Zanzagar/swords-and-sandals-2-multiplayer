@@ -123,7 +123,7 @@ import {
   SS2_DROP,
   PROJECTILE_FRAME_MS
 } from "/src/render/index.js";
-import { demoSide } from "/tools/arena/roster.js";
+import { demoItemsFrom, demoSide } from "/tools/arena/roster.js";
 
 /* ------------------------------------------------------------------ */
 /* Setup                                                               */
@@ -182,9 +182,18 @@ const spectate = params.get("spectate") === "1";
  *   is correct only when the request IS the default.
  */
 const rankStride = rankStrideFrom(params, SS2_ARENA.rankStride);
+/**
+ * `?items=` — a kit (`buffs`, `blasts`, `tricks`, `crowd`) or item ids, given
+ * to every fighter on both sides. See `DEMO_ITEM_KITS` in `roster.js`. Empty
+ * slots when absent, which is the roster as it always was.
+ */
+const demoItems = demoItemsFrom(params.get("items"));
 
 const host = createVanillaBattleHost({
-  teams: [demoSide("red", perSide, { ss2Combatant, ss2BattleValues }), demoSide("blue", perSide, { ss2Combatant, ss2BattleValues })],
+  teams: [
+    demoSide("red", perSide, { ss2Combatant, ss2BattleValues, items: demoItems }),
+    demoSide("blue", perSide, { ss2Combatant, ss2BattleValues, items: demoItems })
+  ],
   // The module singleton when the request IS the shipped stride, so the shipped
   // arena is the shipped rule set and not a lookalike built with the defaults.
   rules: selectRules(rankStride, {

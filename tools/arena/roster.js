@@ -190,7 +190,49 @@ const BLUE_NAMES = ["Cidra", "Nym", "Orso"];
  * default them and fight a different gladiator. `derive: false` keeps the
  * stated values instead of letting `battlevalues` recompute them over the top.
  */
-export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
+/**
+ * ITEM KITS FOR THE ARENA, added 2026-09-23 so the spells built that week can
+ * be SEEN: the demo roster carries empty slots (the build's empty marker, 1),
+ * so without a kit no spell or potion is ever offered. Authored groupings, six
+ * ids each (six slots), by what they show off — not a balance statement.
+ * `?items=buffs` in the arena, or ids: `?items=42,41,43`. Every fighter on both
+ * sides gets the same kit, so both the player and the AI can use it.
+ */
+export const DEMO_ITEM_KITS = Object.freeze({
+  // colossus, bloodlust, swift sandals, boundless energy, regenerate, rejuvenate
+  buffs: Object.freeze([42, 41, 40, 45, 46, 43]),
+  // lightning bolt, frightening bolt, fireball, hell fireball, dire fireball, death from above
+  blasts: Object.freeze([34, 35, 30, 31, 32, 49]),
+  // gale, teleport, command, whirlwind, ghost strike, weaken armour
+  tricks: Object.freeze([38, 48, 39, 37, 36, 44]),
+  // adulation, little fat kid, rejuvenate, full-health, full-stamina and full-armour potions
+  crowd: Object.freeze([47, 33, 43, 5, 7, 9])
+});
+
+/**
+ * The `items` parameter as up to six inventory ids: comma-separated kit names
+ * and/or integer ids, in order, the first six kept. Anything else is refused
+ * loudly — a typo that silently gave nobody anything would look like a broken
+ * spell.
+ */
+export function demoItemsFrom(spec) {
+  if (spec == null || spec === "") return [];
+  const ids = [];
+  for (const token of String(spec).split(",").map((part) => part.trim()).filter(Boolean)) {
+    if (Object.hasOwn(DEMO_ITEM_KITS, token)) ids.push(...DEMO_ITEM_KITS[token]);
+    else if (/^\d+$/.test(token) && Number(token) >= 2) ids.push(Number(token));
+    else {
+      throw new Error(
+        `items=${spec}: "${token}" is neither a kit (${Object.keys(DEMO_ITEM_KITS).join(", ")}) nor an item id >= 2 ` +
+        "(1 is the build's EMPTY marker)."
+      );
+    }
+  }
+  return ids.slice(0, 6);
+}
+
+export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = [] }) {
+  const slots = Object.fromEntries(items.slice(0, 6).map((id, index) => [`inventory${index + 1}`, id]));
   const names = side === "red" ? RED_NAMES : BLUE_NAMES;
   const facing = side === "red" ? "right" : "left";
   return {
@@ -269,6 +311,7 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
       //   is the point. Three gladiators who fight differently.
       const duellist = index === 2;
       const vanilla = demoGladiator({
+        ...slots,
         character_name: name,
         ...(duellist ? { charisma: 16 } : {}),
         // A little spread so initiative is not a coin flip and the slots are
