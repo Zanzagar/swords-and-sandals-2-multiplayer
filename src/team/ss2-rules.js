@@ -61,7 +61,10 @@
  *   trust it.
  *   - ~~`psyche_up` — needs a three-turn counter and a position model.~~
  *     **BUILT 2026-09-16.** `Ss2ActionType.PSYCHE_UP` resolves, `legalActions`
- *     offers it on every controller frame, the counter is a resource with no
+ *     offers it ~~on every controller frame~~ **on the two warrior frames
+ *     only, at `herolevel >= 7` — corrected 2026-09-23: both archer frames
+ *     hide the button at every level, so a drawn bow is never offered it**,
+ *     the counter is a resource with no
  *     default (which is what kept all 23 golden replay hashes still), and the
  *     charged stance and its glow reach the screen.
  *   - ~~`taunt` — the candidate implements only the post-`checkattackroll` arm,
@@ -8612,6 +8615,13 @@ export function createSs2TeamRules({
    *   **2,654 go to warriors**. **And the charging AI still takes it ZERO
    *   times**, at levels 7, 9 and 12 alike, with `aiCharges` on:
    *
+   *   *(2026-09-23: the 600 offers at level 4 and 6 were the BOW-MODE offer,
+   *   `ss2InBowMode ? 3 : 7`, which rested on the map's misreading of the
+   *   archer frames — see the offer in `legalActions`. The build never shows
+   *   that button, and the engine no longer offers it, so those rows are 0
+   *   now and the archers' share of every level-7+ row is their SWORD turns
+   *   only. Re-measured below; the table itself is left as it was taken.)*
+   *
    *   ```text
    *     herolevel   offers   charges taken   (aiCharges: true)
    *         4          600         0
@@ -8624,20 +8634,51 @@ export function createSs2TeamRules({
    *   **THE BINDING GATE IS `survivesTheWindUp` IN THIS FILE**, not
    *   `legalActions`. It asks `actor.health > engaged.max_damage * presses`,
    *   and the demo roster is 46 max health against a foe whose `max_damage` is
-   *   17: `46 > 51` is false, on every turn, forever. Raising the roster's
-   *   stated `hitpointsmax` is what lights the verb, and it is a cliff:
+   *   17: `46 > 51` is false, on every turn, forever. ~~Raising the roster's
+   *   stated `hitpointsmax` is what lights the verb, and it is a cliff:~~
+   *   **SUPERSEDED 2026-09-23: the table below was taken while this engine
+   *   offered the verb with a bow drawn (`b201486`, 2026-09-16, until the
+   *   correction), which the build never allows.** It records no
+   *   `herolevel` (commit `3fc4276` does not say; its 3,076 offers at 46 do
+   *   not match the level-4 row's 600, so it may not be the level-4 roster),
+   *   so how many of its charges were bow-mode cannot be recovered from it.
+   *   Re-measured instead, below:
    *
    *   ```text
-   *     hitpointsmax   offers   charges   turns/bout
+   *     hitpointsmax   offers   charges   turns/bout      (2026-09-19, level not recorded)
    *         46          3,076        0         79
    *         60          6,071    2,914        153
    *        120         10,711    4,251        270
    *   ```
    *
-   *   **So raising `herolevel` alone is a change that does nothing**, and the
-   *   change that works nearly doubles bout length — which is consistent, since
-   *   the table above already says charging LOSES on damage per turn. Recorded
-   *   rather than done.
+   *   ~~**So raising `herolevel` alone is a change that does nothing**, and the
+   *   change that works nearly doubles bout length~~ **Re-measured 2026-09-23
+   *   with the bow-mode offer removed: raising EITHER alone does nothing, and
+   *   it takes both.** Same instrument before and after, at `951047e` — 60
+   *   seeded 3v3 bouts through `createVanillaBattleHost` on a copy of
+   *   `demoSide` that spreads `herolevel`/`hitpointsmax` into each record
+   *   before `ss2BattleValues`, guard 600, `aiCharges` on, a charge counted
+   *   as bow-mode when `ss2InBowMode(actor)` held as it chose. **A scratch
+   *   instrument, not committed** — the method is stated so it can be rebuilt.
+   *   It does not reproduce the 2026-09-19 counts above exactly (588 offer
+   *   turns at level 4 against 600; the engine has moved since); the
+   *   before/after pairs are the comparison:
+   *
+   *   ```text
+   *     herolevel  hitpointsmax   charges before -> after   bow-mode charges   turns/bout
+   *         4           46                0 ->     0              0 -> 0          90 ->  90
+   *         4           60            2,073 ->     0          2,073 -> 0         149 -> 102
+   *         4          120            3,227 ->     0          3,227 -> 0         191 -> 144
+   *         7           46                0 ->     0              0 -> 0          90 ->  90
+   *         7           60            3,307 -> 1,586          2,128 -> 0         129 -> 122
+   *         7          120            5,129 -> 2,003          3,377 -> 0         231 -> 180
+   *   ```
+   *
+   *   So on the level-4 demo roster no `hitpointsmax` lights the verb any
+   *   more; at level 7 it still does, for warriors and for an archer holding
+   *   the sword, and bouts still run longer — consistent, since the table
+   *   above already says charging LOSES on damage per turn. Recorded rather
+   *   than done.
    *
    *   **How the wrong table was made, because it is the repeatable part:** it
    *   was taken by feeding `demoSide(...).members` straight to
@@ -8656,11 +8697,15 @@ export function createSs2TeamRules({
    *   ```
    *
    *   **Every charge came from the two bow slots and none from the other
-   *   four**, which is the build's own level gate showing through: the warrior
+   *   four**, which is ~~the build's own level gate showing through: the warrior
    *   controller frames wire `psyche_up` at `herolevel >= 7` and the archer
    *   frames at `>= 3`, and the demo gladiator is level 4. So on the shipped
    *   roster this trait is an ARCHER behaviour whether or not anyone intended
-   *   that, and a warrior demo would show nothing at all.
+   *   that, and a warrior demo would show nothing at all.~~ **this engine's
+   *   misreading of the build showing through, not the build — corrected
+   *   2026-09-23.** The archer frames hide the psyche button at every level;
+   *   only the warrior frames show it, at `herolevel >= 7`. With the offer
+   *   corrected, a level-4 roster charges with nobody, bow or sword.
    *
    *   30.6% is high — those two gladiators wind up on most of their turns,
    *   because an archer at range is rarely wounded and the gate below is full
@@ -9468,12 +9513,17 @@ export function createSs2TeamRules({
         actions.push({ type: Ss2ActionType.POWER_ATTACK, targetId: foe.id });
       }
 
-      // ► **`psyche_up` IS ON EVERY CONTROLLER FRAME, WHICH IS WHY IT IS
-      //   OFFERED OUTSIDE THE MELEE/ARCHER SPLIT ABOVE.** The map's button
-      //   table wires it on all eight rows — both facings of
+      // ► ~~**`psyche_up` IS ON EVERY CONTROLLER FRAME, WHICH IS WHY IT IS
+      //   OFFERED OUTSIDE THE MELEE/ARCHER SPLIT ABOVE.**~~ **ITS `onRelease`
+      //   HANDLER IS ON EVERY CONTROLLER FRAME; ITS BUTTON IS VISIBLE ONLY ON
+      //   THE TWO WARRIOR FRAMES — corrected 2026-09-23.** The map's button
+      //   table wires the handler on all eight rows — both facings of
       //   `longrange_warrior`, `closerange_warrior`, `longrange_archer` and
-      //   `closerange_archer` (`:223-230`) — unlike every attack verb, each of
-      //   which belongs to one kind of frame.
+      //   `closerange_archer` (`:223-230`) — and that is true of the WIRING.
+      //   It is false of what a player can press: both archer frames hide the
+      //   slot unconditionally (see the gate below). It stays outside the
+      //   split above because it has no reach test (next paragraph); the
+      //   bow-mode refusal is below, with the level.
       //
       // ► **AND IT IS OFFERED OUT OF REACH TOO, DELIBERATELY.** The charge
       //   presses have no range test at all — they are an animation and a
@@ -9482,21 +9532,49 @@ export function createSs2TeamRules({
       //   verb from a gladiator who is entitled to start charging while he
       //   closes, which is the whole shape of the action.
       //
-      // ► **THE GATES ARE THE COUNTER'S DECLARATION AND `herolevel`.** The
-      //   build hides the BUTTON below `herolevel` 7 on the warrior frames and
-      //   3 on the archer ones (map `:247` and the frame table). The map is
-      //   also explicit that the phase machine never consults the controller
-      //   frame, so a driver calling `getphase("psyche_up")` reaches the phase
-      //   whatever the level — **the level gates the OFFER, not the phase**,
-      //   and `legalActions` is the offer.
+      // ► **THE GATES ARE THE COUNTER'S DECLARATION, THE WEAPON IN HAND AND
+      //   `herolevel`.** The build hides the BUTTON below `herolevel` 7 on the
+      //   warrior frames ~~and 3 on the archer ones (map `:247` and the frame
+      //   table)~~ **and at EVERY level on the archer ones — corrected
+      //   2026-09-23, re-derived from the action dump.** Each archer facing has
+      //   one `herolevel < 3` test, `If` delta 14, and each hide after it is 14
+      //   bytes, so the test skips ONE hide (Win the Crowd's) and the psyche
+      //   hide after it runs unconditionally: frame 20 (base `0x23b171`) `If
+      //   +0x0938` -> `+0x094b` hides optionH facing right, `If +0x0e2d` ->
+      //   `+0x0e40` hides optionG facing left; frame 28 (base `0x23c4fb`) `If
+      //   +0x0961` -> `+0x0974` (optionH) and `If +0x0d4a` -> `+0x0d5d`
+      //   (optionG). Psyche's slot is optionH facing right and optionG facing
+      //   left on every frame (the `onRelease` handlers). Nothing in the build
+      //   sets an option slot `_visible` again, and frame 4 (`+0x00b9`-`+0x00c7`)
+      //   sends `using_bow == true` to exactly those two frames. **The map's "a
+      //   single test hides both slots" was the misreading; this gate was
+      //   `ss2InBowMode ? 3 : 7` from `b201486` until the correction.**
+      //
+      //   **So the hero's rule is: bow drawn, never; melee, `herolevel >= 7`**
+      //   — and it is the player's rule too, because the villain's own chooser
+      //   agrees: `villainChooseAction` picks `psyche_up` only on
+      //   `randomBetween(1,100) > 90` AND `!(herolevel < 10)` AND
+      //   `equipped_weapon == 1` (`DoAction@0x23f835` `+0x0fe5`-`+0x1069`).
+      //   Neither side of the build ever starts a charge with a bow drawn.
+      //
+      //   **A charge already running cannot survive drawing the bow either**:
+      //   `swap_weapons` (`+0x4d1d`) calls `nextphase` at `+0x4fb9`, and
+      //   `nextphase` writes `game_attacker.psyche_up = 1` whenever
+      //   `phase_decision != "psyche_up"` (`+0x35c7`-`+0x35ea`). This engine's
+      //   swap branch goes through `phaseTransitionEffects` with the default
+      //   `resetsPsyche`, so it agrees; `test/ss2-psyche-up.test.js` pins it.
+      //
+      //   The map is also explicit that the phase machine never consults the
+      //   controller frame, so a driver calling `getphase("psyche_up")` reaches
+      //   the phase whatever the level — **the level gates the OFFER, not the
+      //   phase**, and `legalActions` is the offer.
       //
       //   The declaration gate is not cosmetic: `psyche_up` has no
       //   `SS2_RESOURCE_DEFAULTS` entry, so a combatant that never stated the
       //   counter cannot carry one, and offering a verb whose whole effect is a
       //   number it cannot hold would be a button that does nothing.
-      if (declaredResourceNames(view.actor).has("psyche_up")) {
-        const psycheGate = ss2InBowMode(view.actor) ? 3 : 7;
-        if (resourceValue(view.actor, "herolevel", 0) >= psycheGate) {
+      if (declaredResourceNames(view.actor).has("psyche_up") && !ss2InBowMode(view.actor)) {
+        if (resourceValue(view.actor, "herolevel", 0) >= 7) {
           for (const foe of view.foes) {
             actions.push({ type: Ss2ActionType.PSYCHE_UP, targetId: foe.id });
           }
@@ -14289,6 +14367,9 @@ export function createSs2TeamRules({
       //   otherwise — the gate is `round(ss2Reach + 50)` and `ss2Reach` is the
       //   same reach the attack verbs are offered on, including the BOW's when
       //   one is drawn, so anything an attack can hit a discharge can reach.
+      //   *(2026-09-23: "archers included" no longer describes a live case — a
+      //   drawn bow is never offered `psyche_up` now, see the offer in
+      //   `legalActions` — so every decision reaching this line is melee.)*
       //
       //   So with the target matched to `engaged`, the gate is unreachable by
       //   construction. **Recognised by the VOCABULARY rather than by

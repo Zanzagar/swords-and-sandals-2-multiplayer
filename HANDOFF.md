@@ -256,16 +256,25 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
 
   ► **THE LEVEL GATE IS REAL AND SITS AT EXACTLY 7** — at 4 and 6 the only
     offers go to the two archers, and at 7 the warriors get 2,654 of them. So
-    that half of the claim holds.
+    that half of the claim holds. **(2026-09-23: those archer offers were the
+    bow-mode offer at `herolevel >= 3`, which the build never shows — both
+    archer frames hide the button at every level. Removed; they are 0 now.)**
   ► **IT IS JUST NOT THE BINDING GATE.** That is `survivesTheWindUp` in
     `chooseAiAction`: `actor.health > engaged.max_damage * presses`. The demo
     roster is 46 max health against a foe whose `max_damage` is 17, so
     **`46 > 51` is false on every turn, forever** — and the level gate opening
     changes nothing behind it. **Two gates in series, and the published cause
     named the one that is not binding.**
-  ► **WHAT DOES LIGHT IT IS MAX HEALTH, AND IT IS A CLIFF WITH A PRICE**:
+  ► ~~**WHAT DOES LIGHT IT IS MAX HEALTH, AND IT IS A CLIFF WITH A PRICE**:~~
+    **SUPERSEDED 2026-09-23 — it takes max health AND `herolevel >= 7`**, now
+    that a drawn bow is no longer offered the verb. Those numbers were taken
+    while the bow-mode offer existed, at a level they do not record:
     46 → 0 charges, 60 → 2,914 charges and bouts 79 → 153 turns, 120 → 4,251
-    and 270 turns. **Nearly double the bout length**, which is consistent
+    and 270 turns. Re-measured before/after on one scratch instrument at
+    `951047e` (60 bouts, method at the `aiCharges` docstring): level 4 at max
+    health 60 / 120 goes 2,073 / 3,227 charges → **0 / 0**, every one of them
+    bow-mode; level 7 goes 3,307 / 5,129 → 1,586 / 2,003.
+    **Nearly double the bout length**, which is consistent
     rather than surprising: this file's own table already says charging LOSES
     on damage per turn, so a roster that charges is a roster that takes longer
     to finish.
@@ -1022,9 +1031,13 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     then diverge at the first charge. No pinned hash, golden or census moves.
   ► **40 seeded 3v3 bouts: 0 charges off, 2,433 on (30.6%, 974 discharges),
     40/40 resolving either way, bouts 8% longer. Every charge came from the two
-    BOW slots** — warriors gate `psyche_up` at `herolevel >= 7` and archers at
+    BOW slots** — ~~warriors gate `psyche_up` at `herolevel >= 7` and archers at
     `>= 3`, and the demo gladiator is level 4, so on the shipped roster this is
-    an archer behaviour whether or not anyone intended it.
+    an archer behaviour whether or not anyone intended it.~~ **the archer half
+    of that gate was the map's misreading (corrected 2026-09-23): both archer
+    frames hide the psyche button at EVERY level, so a drawn bow never charges
+    in the build, and no longer does here. Every charge in that (already
+    superseded) table was one the build forbids.**
 
 ► **SIX VERIFIERS ON THE STANCE, TWO REFUTED ME (`ce38286`).**
   ► **"THE CHARGED POSE IS THE ONLY HELD FIGHTER STANCE IN COMBAT" IS FALSE.**

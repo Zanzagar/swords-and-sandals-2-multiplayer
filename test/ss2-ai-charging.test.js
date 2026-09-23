@@ -12,7 +12,12 @@
  * than usual, because almost all of it is this engine's:
  *
  * - **The build's**: that `psyche_up` is wired at `herolevel >= 7` on the
- *   warrior controller frames and `>= 3` on the archer ones; that the discharge
+ *   warrior controller frames and ~~`>= 3` on the archer ones~~ **hidden at
+ *   every level on the archer ones, so never with a bow drawn — corrected
+ *   2026-09-23; the map's "a single test hides both slots" was a misreading
+ *   (frame 20 `+0x094b`/`+0x0e40`, frame 28 `+0x0974`/`+0x0d5d` are
+ *   unconditional hides), and the villain's chooser demands
+ *   `equipped_weapon == 1` too**; that the discharge
  *   rolls at `chances.normal` for `ceil(max_damage * 1.5)`
  *   (`directionProfile`'s `direction === 30` arm); that the range gate is
  *   `round(reach + 50)`; and that every decision which is not `psyche_up`
@@ -345,6 +350,34 @@ test("IT CHARGES AT THE FOE IT IS FIGHTING, not at whichever option came first",
   assert.equal(chosen.targetId, "bnear", "but it must be aimed at the foe it is actually fighting");
 });
 
+test("A DRAWN BOW NEVER WINDS UP, because neither side of the build ever does", () => {
+  // ► **THE BUILD'S TWO SIDES AGREE, re-read from the action dump 2026-09-23.**
+  //   The hero cannot press it: both archer frames (20 and 28) hide the psyche
+  //   slot at every level (frame 20 `+0x094b`/`+0x0e40`, frame 28
+  //   `+0x0974`/`+0x0d5d`). The villain never chooses it: `villainChooseAction`
+  //   takes `psyche_up` only when `equipped_weapon == 1` (`DoAction@0x23f835`
+  //   `+0x1046`-`+0x1056`), after `!(herolevel < 10)` and a roll above 90.
+  //   Until 2026-09-23 this engine offered the verb in bow mode from herolevel
+  //   3, and on the demo roster every charge the AI took was an archer's.
+  //
+  //   Level 12, unwounded, a foe in reach, the counter at the floor: every gate
+  //   the charging arm has is open, so only the offer can say no.
+  const decide = (equippedWeapon, foeX) => picks(staged({
+    heroX: 0,
+    foes: [{ id: "foe", x: foeX }],
+    counter: SS2_PSYCHE_UP.floor,
+    hero: { secondary_weapon: 61, equipped_weapon: equippedWeapon, herolevel: 12, character_level: 12 }
+  }));
+  // The control: the SAME gladiator with the sword drawn, toe to toe, winds up.
+  assert.equal(decide(1, 40), Ss2ActionType.PSYCHE_UP,
+    "with the sword drawn this gladiator must wind up, or the bow cases below prove nothing");
+  // Close range (frame 28) and long range (frame 20), bow drawn.
+  for (const foeX of [40, 500]) {
+    const chosen = decide(2, foeX);
+    assert.notEqual(chosen, Ss2ActionType.PSYCHE_UP, `a drawn bow at ${foeX} must not wind up (chose ${chosen})`);
+  }
+});
+
 test("ANYTHING AN ATTACK CAN HIT, A DISCHARGE CAN REACH — so there is no gate here", () => {
   // ► **I ADDED A RANGE GATE, DELETED IT, RESTORED IT ON A REVIEW'S
   //   RECOMMENDATION, AND THEN MEASURED.** The first deletion was a mutation
@@ -357,6 +390,13 @@ test("ANYTHING AN ATTACK CAN HIT, A DISCHARGE CAN REACH — so there is no gate 
   //   Measured over 60 decisions where both an attack and a psyche were on
   //   offer, on a demo side whose slot 2 carries a bow: **0 attackable foes
   //   outside the gate.** This test is that measurement, in miniature.
+  //
+  //   *(2026-09-23: the ARCHER half of that population no longer exists. A
+  //   drawn bow is never offered `psyche_up` now — the build hides the button
+  //   on both archer frames — so every decision this reasoning covers is a
+  //   melee one, where reach is the weapon's. The conclusion stands on the
+  //   smaller population; the archer was the case it worried about, and that
+  //   case is now closed by the offer rather than by the geometry.)*
   const battle = staged({ heroX: 0, foes: [{ id: "afar", x: 600 }, { id: "bnear", x: 40 }] });
   const actor = currentCombatant(battle);
   const gate = Math.round(ss2Reach(actor) + SS2_PSYCHE_UP.rangeBonus);

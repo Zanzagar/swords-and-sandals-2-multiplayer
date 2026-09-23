@@ -246,9 +246,40 @@ Consequences a capture campaign has to respect:
   all and always wires `taunt`.
 - `wincrowd` is hidden below `herolevel` 3 on every controller. `psyche_up` is
   hidden below `herolevel` 7 on the warrior controllers (frame 5 `+0x0999`,
-  frame 13 `+0x07c0`) but below `herolevel` 3 on the archer controllers, where
+  frame 13 `+0x07c0`) ~~but below `herolevel` 3 on the archer controllers, where
   a single test hides both slots (frame 20 `+0x092e`/`+0x0e23`, frame 28
-  `+0x0957`/`+0x0d40`).
+  `+0x0957`/`+0x0d40`)~~ **and at EVERY `herolevel` on the archer controllers —
+  corrected 2026-09-23, re-derived from the action dump. The single test does
+  NOT hide both slots.** The four offsets above are the `Push 3` operands of
+  one `herolevel < 3` test per facing, `Push 3; Less2; Not; If` with delta 14,
+  and every hide is 14 bytes (`Push opt; GetVariable; Push "_visible", false;
+  SetMember`), so the `If` skips ONE hide — Win the Crowd's — and the psyche
+  hide after it runs unconditionally:
+
+  | Frame | Facing | `If` → target | Skipped (`wincrowd`) | Unconditional (`psyche_up`) |
+  | --- | --- | --- | --- | --- |
+  | 20 (base `0x23b171`) | right | `+0x0938` → `+0x094b` | `optionG` `+0x093d` | `optionH` `+0x094b`–`+0x0958` |
+  | 20 | left | `+0x0e2d` → `+0x0e40` | `optionH` `+0x0e32` | `optionG` `+0x0e40`–`+0x0e4d` |
+  | 28 (base `0x23c4fb`) | right | `+0x0961` → `+0x0974` | `optionG` `+0x0966` | `optionH` `+0x0974`–`+0x0981` |
+  | 28 | left | `+0x0d4a` → `+0x0d5d` | `optionH` `+0x0d4f` | `optionG` `+0x0d5d`–`+0x0d6a` |
+
+  Which slot is psyche is read off the handlers in the table above (frame 20
+  `+0x0df7`/`+0x12ca`, frame 28 `+0x0d14`/`+0x10db`) and the `optiontext`
+  writes (frame 20 `+0x0b7d`/`+0x1064`). The warrior frames make the contrast:
+  each facing has TWO tests, `Push 3` then `Push 7`, each an `If` of delta 14
+  over its own hide (frame 5 `+0x096e` and `+0x09a3` facing right, `+0x0e22`
+  and `+0x0e57` facing left; frame 13 `+0x0795`/`+0x07ca` and
+  `+0x0bc1`/`+0x0bf6`). Nothing in the build sets an option slot `_visible`
+  again. **So the archer rows of the table above are true of the `onRelease`
+  WIRING and false of what a player can press: a hero with a bow drawn never
+  sees Psyche Up.** The archer frames still write its `optiontext` and tooltip
+  onto the hidden slot, which is probably what made the button look present.
+  The villain agrees — `villainChooseAction` picks `psyche_up` only when
+  `equipped_weapon == 1` (`DoAction@0x23f835` `+0x1046`–`+0x1056`) — so
+  neither side of the build ever starts a charge with a bow drawn. **Open, not
+  settled by the action dump:** whether an archer-frame hide persists onto a
+  later warrior turn in the same battle depends on whether the option clips
+  are re-placed each turn, which lives in the placement tags.
 
 ### The ammunition-visibility defect
 
@@ -1767,7 +1798,13 @@ counter and `cast_whirlwind`. Only the first is a player action with a
 `getphase` label — `cast_*` labels are consumed by the phase machine and have
 no callable entry point (§Spell and vanilla AI surface) — so `psyche_up` is the
 only route a capture can drive, and every controller wires it (above:
-`herolevel >= 7` on the warrior frames, `>= 3` on the archer frames).
+`herolevel >= 7` on the warrior frames, ~~`>= 3` on the archer frames~~
+**never visible on the archer frames — corrected 2026-09-23, see §Buttons
+wired per controller frame: the archer `herolevel < 3` test skips only the
+Win the Crowd hide, and the psyche hide after it is unconditional.** So the
+route a player can press is the warrior frames at `herolevel >= 7`, sword
+drawn; the archer rows' handler is reachable only by a driver calling
+`getphase` directly).
 
 The `psyche_up` counter's full lifecycle is: the phase plays
 `psyche_up`, `psyche_up2` or

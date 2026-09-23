@@ -1606,7 +1606,13 @@ wrong. Re-read for this revision in `sprite:862[overlay]`:
 - the gate is a `_visible` test on the slot, not on the phase: frame 13 facing
   right hides `optionG` below `herolevel` 3 (`+0x0785`… `Push 3`) and
   `optionH` — the `psyche_up` slot — below `herolevel` **7**
-  (`+0x07ba`… `Push 7`). Frame 28 uses `Push 3` for the same slots.
+  (`+0x07ba`… `Push 7`). ~~Frame 28 uses `Push 3` for the same slots.~~
+  **Frame 28 uses `Push 3` for ONE slot, not the same slots — corrected
+  2026-09-23.** Its single `herolevel < 3` test per facing (`If +0x0961` →
+  `+0x0974` right, `If +0x0d4a` → `+0x0d5d` left, delta 14) skips only the
+  Win the Crowd hide; the psyche hide after it (`+0x0974` optionH right,
+  `+0x0d5d` optionG left) runs at every level. Frame 20 is the same
+  (`+0x094b`, `+0x0e40`). See map §Buttons wired per controller frame.
 
 Direction 30 is not unreachable. It is a levelled-gladiator unlock.
 
@@ -1617,11 +1623,18 @@ Direction 30 is not unreachable. It is a levelled-gladiator unlock.
 What reaching direction 30 now requires, in order of cost:
 
 1. **A gladiator whose controller wires `psyche_up`.** It is hidden below
-   `herolevel` 7 on the two warrior controllers and below `herolevel` 3 on the
-   two archer controllers (map §Buttons wired per controller frame). Level 7
-   with any weapon, or level 3 with a secondary weapon swapped in, are the two
-   cheapest doors. Whether that gate binds an *autopilot* is a separate
-   question — see below.
+   `herolevel` 7 on the two warrior controllers and ~~below `herolevel` 3~~
+   **at every `herolevel` — corrected 2026-09-23** — on the two archer
+   controllers (map §Buttons wired per controller frame). ~~Level 7 with any
+   weapon, or level 3 with a secondary weapon swapped in, are the two cheapest
+   doors.~~ **Level 7 with the primary weapon drawn is the ONLY door a player
+   can open. "Level 3 with a secondary weapon swapped in" is closed: a drawn
+   bow sends the hero to frames 20 and 28, which hide the button whatever the
+   level, and the swap itself resets the counter through `nextphase`
+   (`+0x4fb9` → `+0x35c7`-`+0x35ea`).** Whether that gate binds an
+   *autopilot* is a separate question — see below; an autopilot that calls
+   `getphase("psyche_up")` on an archer frame would be capturing a press no
+   human can make.
 2. **Range.** `psyche_up` is one of only two phases that gate on distance,
    comparing `attacker._x` against `defender._x -/+ round(weapon_range + 50)`
    by facing. Out of range the phase decides nothing at all: no roll, no

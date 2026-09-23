@@ -57,6 +57,7 @@ import {
   ss2ShotBlocked,
   ss2TeamRules,
   SS2_ARENA,
+  SS2_PSYCHE_UP,
   SS2_RESOURCE_NAMES,
   Ss2ActionType,
   VANILLA_PHASE_LABEL
@@ -416,6 +417,11 @@ test("longrange_archer wires two shots and BOTH walks; closerange_archer wires a
   //   closerange_archer jumpleft, walkleft, shove, jumpright, bash_attack, taunt, wincrowd, psyche_up
   // — so the close frame wires exactly one walk and it is the RETREAT, like
   // `closerange_warrior`, and the long frame wires both.
+  //
+  // `psyche_up` in both rows is the `onRelease` WIRING, and it is not a button
+  // anybody can press: both frames hide that slot at every level (the test
+  // after this one). Neither list below includes it, but for a weaker reason —
+  // `bowman()` declares no counter — so it is pinned there, not here.
   const far = staged({
     red: [{ fields: bowman({ equipped_weapon: 2 }), id: "red-1", x: -250, y: 200 }],
     blue: [{ fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 250, y: 200 }]
@@ -482,6 +488,70 @@ test("longrange_archer wires two shots and BOTH walks; closerange_archer wires a
   archer.resources.staminaleft = { value: Math.floor(max * 0.1), min: 0, max: null };
   assert.ok(typesOf(tired, "red-1").includes(Ss2ActionType.TAUNT),
     "the close archer frame wires the taunt at ANY stamina, unlike frames 5 and 20");
+});
+
+test("A DRAWN BOW IS NEVER OFFERED psyche_up, at ANY herolevel — both archer frames hide the button outright", () => {
+  // ► **THE PIN THE TEST ABOVE COULD NOT BE.** Its two `deepEqual`s exclude
+  //   `psyche-up` only because `bowman()` declares no `psyche_up` counter, so
+  //   they hold under the DECLARATION gate and say nothing about the LEVEL
+  //   gate. This bowman declares the counter, so only the level/frame rule can
+  //   keep the verb off the list.
+  //
+  // ► **THE BYTES (`sprite:862[overlay]`, re-read from the action dump
+  //   2026-09-23).** Each archer frame has ONE `herolevel < 3` test per facing,
+  //   `Push 3; Less2; Not; If` with delta 14, and each hide after it is 14
+  //   bytes (`Push opt; GetVariable; Push "_visible", false; SetMember`). So
+  //   the If skips ONE hide — Win the Crowd's — and the psyche hide after it
+  //   runs unconditionally:
+  //     frame 20 (base `0x23b171`)  right: If `+0x0938` -> `+0x094b`, optionH (psyche) hidden at `+0x094b`
+  //                                 left:  If `+0x0e2d` -> `+0x0e40`, optionG (psyche) hidden at `+0x0e40`
+  //     frame 28 (base `0x23c4fb`)  right: If `+0x0961` -> `+0x0974`, optionH (psyche) hidden at `+0x0974`
+  //                                 left:  If `+0x0d4a` -> `+0x0d5d`, optionG (psyche) hidden at `+0x0d5d`
+  //   Which slot is psyche is read off the onRelease handlers (frame 20
+  //   `+0x0df7`/`+0x12ca`, frame 28 `+0x0d14`/`+0x10db`), and nothing anywhere
+  //   in the build sets an option slot `_visible` again. The warrior frames
+  //   (5 and 13) test `herolevel < 7` separately before their psyche hide, so
+  //   the melee rule really is `>= 7`. Frame 4 sends `using_bow == true` to the
+  //   archer frames (`+0x00b9`-`+0x00c7`).
+  //
+  //   The map used to read this as "a single test hides both slots", i.e. a
+  //   bow-mode gate at `herolevel >= 3`, and this engine offered exactly that
+  //   until 2026-09-23.
+  const psycheBowman = (overrides) => bowman({ psyche_up: SS2_PSYCHE_UP.floor, ...overrides });
+  const offersPsyche = (fields, { redX, blueX }) => {
+    const battle = staged({
+      red: [{ fields, id: "red-1", x: redX, y: 200 }],
+      blue: [{ fields: gladiator({ gladiator_dir: redX < blueX ? "left" : "right" }), id: "blue-1", x: blueX, y: 200 }]
+    });
+    return typesOf(battle, "red-1").includes(Ss2ActionType.PSYCHE_UP);
+  };
+  const geometries = [
+    // 500 apart: beyond the floor of 186, `longrange_archer` (frame 20).
+    { frame: "frame 20, facing right", redX: -250, blueX: 250 },
+    { frame: "frame 20, facing left", redX: 250, blueX: -250 },
+    // 100 apart: inside it, `closerange_archer` (frame 28).
+    { frame: "frame 28, facing right", redX: -50, blueX: 50 },
+    { frame: "frame 28, facing left", redX: 50, blueX: -50 }
+  ];
+  for (const herolevel of [3, 7, 12]) {
+    for (const geometry of geometries) {
+      assert.equal(
+        offersPsyche(psycheBowman({ herolevel, equipped_weapon: 2 }), geometry), false,
+        `a drawn bow at herolevel ${herolevel} (${geometry.frame}) must not be offered psyche_up`
+      );
+    }
+  }
+
+  // ► **THE CONTROL: THE SAME GLADIATOR WITH THE SWORD DRAWN.** It declares the
+  //   same counter, so the assertions above cannot be passing on the
+  //   declaration gate; and the warrior gate is exactly 7.
+  const toeToToe = { redX: -10, blueX: 10 };
+  assert.equal(offersPsyche(psycheBowman({ herolevel: 6, equipped_weapon: 1 }), toeToToe), false,
+    "herolevel 6 is below the warrior gate");
+  for (const herolevel of [7, 12]) {
+    assert.equal(offersPsyche(psycheBowman({ herolevel, equipped_weapon: 1 }), toeToToe), true,
+      `the same gladiator holding the sword at herolevel ${herolevel} IS offered psyche_up`);
+  }
 });
 
 test("the controller is chosen ONCE by the nearest foe, not per foe — which is the whole counterplay", () => {

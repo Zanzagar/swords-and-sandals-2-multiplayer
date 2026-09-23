@@ -284,6 +284,33 @@ test("ANY other decision resets the counter, so a charge cannot be banked", () =
     "resting between charges banked the charge, which the build does not allow");
 });
 
+test("DRAWING THE BOW ENDS A CHARGE, and the bow then offers no way to start another", () => {
+  // ► **THE BUILD'S ANSWER TO "WHAT HAPPENS TO A CHARGE WHEN THE BOW COMES
+  //   OUT", re-read from the action dump 2026-09-23.** `swap_weapons`
+  //   (`sprite:862` frame 52, `+0x4d1d`) calls `nextphase` at `+0x4fb9`, and
+  //   `nextphase` writes `game_attacker.psyche_up = 1` whenever
+  //   `phase_decision != "psyche_up"` (`+0x35c7`-`+0x35ea`) with no return or
+  //   jump before it. A swap is a phase, so a charge cannot survive one — and
+  //   with the bow drawn both archer frames hide the button outright, so no
+  //   new charge can begin until the sword comes back.
+  const battle = duel({ hero: { secondary_weapon: 61, equipped_weapon: 1 } });
+  take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain");
+  assert.equal(counterOf(battle, "hero"), 2, "the charge must have landed before the swap is meaningful");
+
+  take(battle, "hero", Ss2ActionType.SWAP_WEAPONS, "hero");
+  const equipped = combatantById(battle, "hero").resources.equipped_weapon;
+  assert.equal(typeof equipped === "object" ? equipped.value : equipped, 2, "the swap must have drawn the bow");
+  assert.equal(counterOf(battle, "hero"), SS2_PSYCHE_UP.floor,
+    "drawing the bow banked the charge, which the build's nextphase does not allow");
+
+  for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {
+    const other = currentCombatant(battle);
+    applyAction(battle, { actorId: other.id, type: Ss2ActionType.REST, targetId: other.id });
+  }
+  assert.equal(legalActions(battle, "hero").some((option) => option.type === Ss2ActionType.PSYCHE_UP), false,
+    "and with the bow drawn there is no button to start a new charge, at herolevel 9 or any other");
+});
+
 test("a psyche press does NOT reset its own counter, which is the other half of the rule", () => {
   // The reset fires only when the decision is something else. Without this
   // exemption the counter would be written back to 1 by the same phase
