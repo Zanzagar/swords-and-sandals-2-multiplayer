@@ -41,18 +41,25 @@
  *   EVERY ONE OF THEM SILENTLY.** Inside `hero_potion`/`villain_potion` (733),
  *   shape 727 sits at depth 2 with `clipDepth` 5, and depth 3 is the sprite
  *   `blood_health` (729) holding the liquid. `flattenFrame` rebuilds its mask
- *   table per level and never threads an outer mask into a nested sprite, and
+ *   table per level ~~and never threads an outer mask into a nested sprite, and
  *   a masked SPRITE is skipped before `unsupported` is ever set — so the liquid
- *   comes back whole, unclipped, with `maskPath: null` and no failure logged.
- *   The health bar would paint outside its vial and the extractor would call it
- *   a clean read. The same shape holds for the two stamina potions (742/736)
- *   and the two armour gauges (749/743).
+ *   comes back whole, unclipped, with `maskPath: null` and no failure logged.~~
+ *   **Corrected 2026-09-22: since commit 3ba74bc it DOES thread the nearest
+ *   enclosing mask down, and stamps it on the leaf as `ancestorMaskPath`.**
+ *   What has not changed is the rest of that sentence: the liquid still comes
+ *   back `unsupported: null` with `maskPath: null` and no failure logged, so a
+ *   caller reading those two draws it whole, and only a caller that reads the
+ *   new stamp can cut it. The health bar would paint outside its vial and the
+ *   extractor would call it a clean read. The same shape holds for the two
+ *   stamina potions (742/736) and the two armour gauges (749/743).
  *
  *   **This tool therefore flattens with its own walk**, threading a mask down
  *   through nested sprites, and COUNTS the clips it assigns across a sprite
  *   boundary as `clipsAcrossSpriteBoundary` — the exact number `flattenFrame`
- *   loses. `tools/swf-display-list.mjs` is not this file's to change; the count
- *   is the report.
+ *   ~~loses~~ reports only as that stamp (verified on 733 frame 1 after the
+ *   correction: leaf `3/1`, shape 728, `ancestorMaskPath [2]`, `maskPath`
+ *   null, `unsupported` null). `tools/swf-display-list.mjs` is not this file's
+ *   to change; the count is the report.
  *
  * ► **THE ICONS ARE WHERE THIS BUILD KEEPS ITS GLOWS, AND THIS PACK DROPPED
  *   ALL 176 OF THEM.** Every number on the fight is a text field with its own

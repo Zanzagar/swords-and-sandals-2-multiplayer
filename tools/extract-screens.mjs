@@ -943,6 +943,34 @@ function rangeVariance(frames, firstFrame, lastFrame) {
 }
 
 /**
+ * EVERY CUTTER WHOSE RANGE COVERS `path`, at any level above it.
+ *
+ * `cutters` are a flatten's own mask drawables (`isMask`, each with its `path`
+ * and `clipDepth`). A mask at `[...prefix, d]` with clip depth `c` cuts every
+ * depth in `d + 1 .. c` on the timeline `prefix` names — and so everything a
+ * sprite or button at one of those depths draws, however far down.
+ *
+ * ► **READ OFF THE PATHS RATHER THAN OFF `maskPath` AND `ancestorMaskPath`,
+ *   and the stamps are still right about what they say.** `flattenFrame` hands
+ *   down only the NEAREST enclosing mask, and within one timeline keeps the
+ *   FIRST mask covering a depth, so a leaf under two masks is reported under
+ *   one of them. A reader that clipped to that one would draw more than the
+ *   build does; asking the paths names every cutter, so the second can be
+ *   refused instead of dropped. It also needs no stamp from a BUTTON's own
+ *   recursion, which this tool does not use — see the button arm.
+ */
+function cuttersCovering(path, cutters) {
+  return cutters.filter((cutter) => {
+    const level = cutter.path.length - 1;
+    if (path.length <= level) return false;
+    for (let index = 0; index < level; index += 1) {
+      if (path[index] !== cutter.path[index]) return false;
+    }
+    return path[level] > cutter.path[level] && path[level] <= cutter.clipDepth;
+  });
+}
+
+/**
  * Every labelled root frame, as a screen.
  *
  * Returns `{screens, shapes, failures, totals}`. `shapes` is shared across all
@@ -1154,12 +1182,9 @@ export function extractScreens(buffer) {
       continue;
     }
 
-    // THE MASKS ON THIS SCREEN, by their own path, so a masked placement can
-    // name its cutter without depth alone having to be unique across nesting.
-    const masks = new Map();
-    for (const drawable of flattened) {
-      if (drawable.isMask && !drawable.unsupported) masks.set(drawable.path.join("/"), drawable);
-    }
+    // THE MASKS ON THIS SCREEN, every one and at every level, so a leaf can
+    // name the cutter above it by path — see `cuttersCovering`.
+    const cutters = flattened.filter((drawable) => drawable.isMask);
 
     const approximations = {
       nestedSpriteFrame1: 0, buttonUpState: 0, buttonNoUpState: 0,
@@ -1212,13 +1237,42 @@ export function extractScreens(buffer) {
       });
     };
 
-    /** One resolved leaf, with its cutter travelling beside it. */
-    const pushDrawable = (drawable, shapeKey, via) => {
-      const cutter = drawable.maskPath ? masks.get(drawable.maskPath.join("/")) : null;
-      let clip = null;
-      if (cutter && wantShape(cutter.characterId)) {
-        clip = { shape: cutter.characterId, matrix: roundMatrix(cutter.matrix) };
+    /**
+     * THE ONE CLIP A LEAF CAN CARRY, or the reason it cannot be drawn exactly.
+     *
+     * ► **ASKED BEFORE THE LEAF'S OWN SHAPE IS PARSED**, so a refused leaf
+     *   adds nothing to `shapes`. A leaf beside a sprite mask never reaches
+     *   here — `flattenFrame` has already marked it `masked` — but a leaf one
+     *   sprite below that mask comes back drawable, and so does a morph beside
+     *   it, and both used to be drawn whole. They are refused under the same
+     *   kind, because it is the same fact one boundary further down.
+     */
+    const cutFor = (drawable, masksHere) => {
+      const covering = cuttersCovering(drawable.path, masksHere);
+      if (covering.length === 0) return { clip: null };
+      // ► **A LEAF CARRIES ONE CUTTER, AND THE BUILD CUTS BY ALL OF THEM.**
+      //   `src/render/screen.js` resolves exactly one `clip`, and either mask
+      //   alone draws more than the intersection, so this is refused rather
+      //   than drawn to the nearer one. Measured on the oracle 2026-09-22: no
+      //   leaf on any of the 26 screens is under two masks, so this is 0 there
+      //   and exists so that a build with one says so.
+      if (covering.length > 1) {
+        const paths = covering.map((each) => each.path.join("/")).join(", ");
+        return { refused: ["masked-nested", `${covering.length} masks cover it (${paths}); a drawable carries one clip`] };
       }
+      const [cutter] = covering;
+      const where = cutter.path.join("/");
+      if (cutter.unsupported) {
+        return { refused: ["masked", `under the sprite mask at ${where}, which is not one clip path`] };
+      }
+      if (!wantShape(cutter.characterId)) {
+        return { refused: ["masked", `the cutter at ${where} would not parse; see failures`] };
+      }
+      return { clip: { shape: cutter.characterId, matrix: roundMatrix(cutter.matrix) } };
+    };
+
+    /** One resolved leaf, with its cutter travelling beside it. */
+    const pushDrawable = (drawable, shapeKey, via, clip) => {
       if (drawable.colourTransform.alphaMultiplier === 0) approximations.invisibleDrawables += 1;
       const shape = shapes[shapeKey];
       if (shape) {
@@ -1247,22 +1301,29 @@ export function extractScreens(buffer) {
       // A MASK IS A CUTTER, NOT A DRAWING. Painting it would put the stencil on
       // the canvas instead of the thing it cuts, so a resolvable one travels on
       // the placements it clips and is never emitted as one of its own. An
-      // UNRESOLVABLE one — a sprite mask — is reported, because everything
-      // under it is then being exported unclipped.
+      // UNRESOLVABLE one — a sprite mask — is reported, and so is everything
+      // under it, at any depth (`masked`, via `cutFor`): ~~everything under it
+      // is then being exported unclipped~~ was true one sprite down, and for a
+      // morph beside it, until 2026-09-22.
       if (drawable.isMask) {
         if (drawable.unsupported) pushUnresolved(drawable, "mask-sprite", "a sprite mask is not one clip path");
         continue;
       }
-      if (!drawable.unsupported) {
-        if (wantShape(drawable.characterId)) pushDrawable(drawable, drawable.characterId, null);
-        else pushUnresolved(drawable, "shape-parse", "the shape parser refused it; see failures");
-        continue;
-      }
-      if (drawable.unsupported === "morph") {
+      if (!drawable.unsupported || drawable.unsupported === "morph") {
+        const cut = cutFor(drawable, cutters);
+        if (cut.refused) {
+          pushUnresolved(drawable, ...cut.refused);
+          continue;
+        }
+        if (!drawable.unsupported) {
+          if (wantShape(drawable.characterId)) pushDrawable(drawable, drawable.characterId, null, cut.clip);
+          else pushUnresolved(drawable, "shape-parse", "the shape parser refused it; see failures");
+          continue;
+        }
         const key = wantMorph(drawable.characterId, drawable.ratio);
         if (key) {
           approximations.bakedMorphs += 1;
-          pushDrawable(drawable, key, `morph ${drawable.characterId}`);
+          pushDrawable(drawable, key, `morph ${drawable.characterId}`, cut.clip);
         } else {
           pushUnresolved(drawable, "morph-parse", "the morph parser refused it; see failures");
         }
@@ -1388,17 +1449,33 @@ export function extractScreens(buffer) {
           pushUnresolved(drawable, "button-flatten", String(error.message).slice(0, 120));
           continue;
         }
-        for (const leaf of inner) {
-          // The button's own path is prefixed so a leaf can still be traced to
-          // the depth on the screen that put it there.
-          const traced = { ...leaf, path: [...drawable.path, ...leaf.path] };
+        // The button's own path is prefixed so a leaf can still be traced to
+        // the depth on the screen that put it there. (`maskPath` and
+        // `ancestorMaskPath` are NOT re-prefixed and stay relative to this
+        // call; nothing below reads them — clips come from `cuttersCovering`.)
+        const tracedLeaves = inner.map((leaf) => ({ ...leaf, path: [...drawable.path, ...leaf.path] }));
+        // ► **THE SCREEN'S CUTTERS AND THE BUTTON'S OWN, ON ONE SET OF PATHS.**
+        //   This call knows nothing of a mask outside the button, so one AT the
+        //   button's depth or ABOVE it was dropped, and a mask INSIDE it (in a
+        //   sprite an UP record places) was looked up among the screen's
+        //   cutters by a path relative to this call — which could name a
+        //   different cutter on the screen. Traced, both kinds share one space:
+        //   stage matrices, because this call starts from the button's matrix,
+        //   and screen paths, because every leaf is prefixed. Measured on the
+        //   oracle 2026-09-22: no button leaf on the 26 screens is in any of
+        //   the three places, so this moves no number there.
+        const buttonCutters = [...cutters, ...tracedLeaves.filter((leaf) => leaf.isMask)];
+        for (const traced of tracedLeaves) {
           if (traced.isMask) {
             if (traced.unsupported) pushUnresolved(traced, "mask-sprite", "inside a button");
             continue;
           }
           if (!traced.unsupported) {
-            if (wantShape(traced.characterId)) pushDrawable(traced, traced.characterId, `button ${drawable.characterId}`);
-            else pushUnresolved(traced, "shape-parse", "inside a button");
+            const cut = cutFor(traced, buttonCutters);
+            if (cut.refused) pushUnresolved(traced, ...cut.refused);
+            else if (wantShape(traced.characterId)) {
+              pushDrawable(traced, traced.characterId, `button ${drawable.characterId}`, cut.clip);
+            } else pushUnresolved(traced, "shape-parse", "inside a button");
             continue;
           }
           if (traced.unsupported === "text") {

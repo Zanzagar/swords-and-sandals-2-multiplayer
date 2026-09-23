@@ -186,7 +186,12 @@ function swf(tags, { width = 12800, height = 8400 } = {}) {
   return Buffer.concat([header.buffer(), ...tags, tag(TAG.END, Buffer.alloc(0))]);
 }
 
-function place2({ depth, characterId, tx = 0, ty = 0, name, alpha, move = false }) {
+/**
+ * A `PlaceObject2`. `clipDepth` sets `PlaceFlagHasClipDepth` (0x40) and
+ * writes its UI16 AFTER the name, where the specification puts it. Absent, it
+ * writes exactly the bytes this helper wrote before it existed.
+ */
+function place2({ depth, characterId, tx = 0, ty = 0, name, alpha, clipDepth, move = false }) {
   const writer = new Writer();
   let flags = 0;
   if (move) flags |= 0x01;
@@ -194,11 +199,13 @@ function place2({ depth, characterId, tx = 0, ty = 0, name, alpha, move = false 
   flags |= 0x04;
   if (alpha !== undefined) flags |= 0x08;
   if (name !== undefined) flags |= 0x20;
+  if (clipDepth !== undefined) flags |= 0x40;
   writer.u8(flags).u16(depth);
   if (characterId !== undefined) writer.u16(characterId);
   writer.matrix(tx, ty);
   if (alpha !== undefined) writer.colourTransform([1, 1, 1, alpha]);
   if (name !== undefined) writer.string(name);
+  if (clipDepth !== undefined) writer.u16(clipDepth);
   return tag(TAG.PLACE_OBJECT2, writer);
 }
 
@@ -1136,6 +1143,305 @@ test("a filter record with no type is counted as unknown rather than dropped", (
   assert.deepEqual(manifest.filtersByType, { unknown: 1, glow: 1 });
 });
 
+/* ---------------------------------------------------------------- */
+/* MASKS ACROSS A SPRITE (OR BUTTON) BOUNDARY                        */
+/* ---------------------------------------------------------------- */
+
+/** A screen's drawables, keyed by their path joined with "/". */
+function drawablesByPath(screen) {
+  return new Map(screen.drawables.map((drawable) => [drawable.path.join("/"), drawable]));
+}
+
+/**
+ * A `DefineMorphShape` (tag 46) of a square that grows: 200 twips at the
+ * origin, 1000 at (100, 100), one solid fill red to blue. The same fixture
+ * `test/extract-props.test.js` bakes by hand; here only its PLACEMENT matters,
+ * because what is under test is whether a morph is cut, not its geometry. The
+ * offset to `EndEdges` is measured from the bytes written.
+ */
+function defineMorph(id) {
+  const edges = (x, y, size) => {
+    const writer = new Writer();
+    writer.ub(1, 4).ub(0, 4);
+    writer.bit(0).ub(0b00101, 5);
+    writer.ub(12, 5).sb(x, 12).sb(y, 12);
+    writer.ub(1, 1);
+    for (const [dx, dy] of [[size, 0], [0, size], [-size, 0], [0, -size]]) {
+      writer.bit(1).bit(1).ub(12 - 2, 4).bit(1).sb(dx, 12).sb(dy, 12);
+    }
+    writer.bit(0).ub(0, 5);
+    return writer.buffer();
+  };
+  const startStream = edges(0, 0, 200);
+  const endStream = edges(100, 100, 1000);
+  const styles = new Writer().u8(1).u8(0x00).u8(0xcc).u8(0).u8(0).u8(0xff).u8(0).u8(0).u8(0xcc).u8(0xff).u8(0).buffer();
+  const writer = new Writer();
+  writer.u16(id).rect(0, 200, 0, 200).rect(100, 1100, 100, 1100);
+  writer.u32(styles.length + startStream.length);
+  writer.raw(styles).raw(startStream).raw(endStream);
+  return tag(TAG.DEFINE_MORPH_SHAPE, writer);
+}
+
+test("a mask on an ENCLOSING sprite clips the leaf two sprites below it, in the cutter's own stage matrix", () => {
+  // ► **THE SPLASH SCREEN'S SHAPE, UNDER ITS OWN DEPTHS.** Measured on the
+  //   oracle 2026-09-22: root depth 52 is a sprite whose depth 41 is a shape
+  //   mask (character 1515, clipDepth 44), and depth 42 under it is a sprite
+  //   whose sprite holds shape 1516 — so the leaf is `[52, 42, 1, 1]`, two
+  //   sprite boundaries below its cutter. `maskedBy` is per display list, so
+  //   the leaf came back with `maskPath: null`, and `pushDrawable` wrote a
+  //   fixed literal that carried no clip — the strip was drawn whole.
+  //
+  //   Every translation below is distinct, so a cutter composed through the
+  //   wrong parent lands on a different number. By hand, in twips:
+  //     cutter  1000 (root sprite) + 40 (the mask)            = 1040
+  //     leaf    1000 + 300 (depth 42) + 20 (sprite 62) + 3    = 1323
+  //     twin    1000 + 500 (depth 45) + 20 + 3                = 1523
+  //
+  //   And a stranger: root depth 60 holds a sprite whose depth 43 is in 41's
+  //   RANGE but on another timeline, so a range test that forgot the path
+  //   prefix would cut it too.
+  const buffer = swf([
+    defineSquare(7), defineSquare(8),
+    defineSprite(61, 1, [place2({ depth: 1, characterId: 7, tx: 3 }), showFrame()]),
+    defineSprite(62, 1, [place2({ depth: 1, characterId: 61, tx: 20 }), showFrame()]),
+    defineSprite(67, 1, [place2({ depth: 43, characterId: 7 }), showFrame()]),
+    defineSprite(52, 1, [
+      place2({ depth: 41, characterId: 8, tx: 40, clipDepth: 44 }),
+      place2({ depth: 42, characterId: 62, tx: 300 }),
+      place2({ depth: 45, characterId: 62, tx: 500 }),
+      showFrame()
+    ]),
+    frameLabel("splash"),
+    place2({ depth: 52, characterId: 52, tx: 1000 }),
+    place2({ depth: 60, characterId: 67 }),
+    showFrame()
+  ]);
+  const { screens, shapes } = extractScreens(buffer);
+  const screen = screens.splash;
+  const byPath = drawablesByPath(screen);
+
+  const leaf = byPath.get("52/42/1/1");
+  assert.deepEqual(leaf.matrix, [1, 0, 0, 1, 1323, 0]);
+  assert.deepEqual(leaf.clip, { shape: 8, matrix: [1, 0, 0, 1, 1040, 0] },
+    "the cutter two sprites up travels on the leaf, in the same stage space as the leaf's own matrix");
+  const twin = byPath.get("52/45/1/1");
+  assert.deepEqual(twin.matrix, [1, 0, 0, 1, 1523, 0]);
+  assert.equal("clip" in twin, false, "depth 45 is outside 41's range 42..44, so the same sprite there is uncut");
+  assert.equal("clip" in byPath.get("60/43"), false, "and a depth 43 on ANOTHER timeline is not 52/41's to cut");
+  assert.equal(screen.drawables.length, 3, "and the cutter is never a drawing of its own");
+  assert.ok(shapes[8], "the cutter's shape is in the table, because a clip must name one");
+  assert.deepEqual(screen.unresolved, []);
+});
+
+test("a leaf under an enclosing SPRITE mask is refused by name, as a leaf beside that mask already is", () => {
+  // ► **THE SAME RULE ONE SPRITE FURTHER DOWN.** A sprite mask is a whole
+  //   display list and not one clip path, so `flattenFrame` marks a shape on
+  //   the mask's own timeline `unsupported: "masked"` and this tool refuses
+  //   it. A shape one sprite BELOW that mask came back drawable, and was
+  //   drawn whole — more than the build draws, reported as a clean read.
+  const buffer = swf([
+    defineSquare(7), defineSquare(8),
+    defineSprite(70, 1, [place2({ depth: 1, characterId: 8 }), showFrame()]),
+    defineSprite(61, 1, [place2({ depth: 1, characterId: 7 }), showFrame()]),
+    defineSprite(52, 1, [
+      place2({ depth: 41, characterId: 70, clipDepth: 44 }),
+      place2({ depth: 42, characterId: 7 }),
+      place2({ depth: 43, characterId: 61 }),
+      place2({ depth: 45, characterId: 61 }),
+      showFrame()
+    ]),
+    frameLabel("sprite_mask"),
+    place2({ depth: 52, characterId: 52 }),
+    showFrame()
+  ]);
+  const screen = extractScreens(buffer).screens.sprite_mask;
+
+  assert.deepEqual(screen.drawables.map((drawable) => drawable.path.join("/")), ["52/45/1"],
+    "only the leaf outside the mask's range is drawn");
+  const byPath = new Map(screen.unresolved.map((entry) => [entry.path.join("/"), entry]));
+  assert.equal(byPath.get("52/41").kind, "mask-sprite", "the cutter itself, as before");
+  assert.equal(byPath.get("52/42").kind, "masked", "the leaf on the mask's own timeline, as before");
+  const below = byPath.get("52/43/1");
+  assert.ok(below, "and the leaf one sprite down is on the roster, not in the drawables");
+  assert.equal(below.kind, "masked", "under the SAME kind, because it is the same fact");
+  assert.equal(below.character, 7);
+  assert.match(below.detail, /sprite mask at 52\/41/, "naming which cutter it could not carry");
+  assert.equal(screen.counts.unresolvedByKind.masked, 2);
+});
+
+test("a leaf under TWO masks is refused by name, because a drawable carries one clip", () => {
+  // ► **THE BUILD CUTS BY THE INTERSECTION; A DRAWABLE HERE CARRIES ONE
+  //   CUTTER**, and `src/render/screen.js` resolves exactly one. Clipping to
+  //   either mask alone draws more than the build does, so the leaf is refused
+  //   rather than drawn to the nearer one — which is what `flattenFrame`'s
+  //   stamps would have led to, since they name only one mask per leaf. Three
+  //   ways to be under two, all here:
+  //
+  //     52/42/2     its own mask (52/42/1) inside a sprite under 52/41
+  //     52/42/5/1   two sprite boundaries, a mask above each (52/41, 52/42/4)
+  //     4           (a second build) two masks on ONE timeline, 3 nested
+  //                 inside 1's range
+  //
+  //   And two controls, each under exactly one mask, which ARE drawn clipped.
+  const buffer = swf([
+    defineSquare(7), defineSquare(8), defineSquare(9),
+    defineSprite(61, 1, [place2({ depth: 1, characterId: 7 }), showFrame()]),
+    defineSprite(63, 1, [
+      place2({ depth: 1, characterId: 9, clipDepth: 2 }),
+      place2({ depth: 2, characterId: 7 }),
+      place2({ depth: 3, characterId: 7 }),
+      place2({ depth: 4, characterId: 9, clipDepth: 5 }),
+      place2({ depth: 5, characterId: 61 }),
+      showFrame()
+    ]),
+    defineSprite(52, 1, [
+      place2({ depth: 41, characterId: 8, clipDepth: 44 }),
+      place2({ depth: 42, characterId: 63 }),
+      showFrame()
+    ]),
+    frameLabel("nested"),
+    place2({ depth: 52, characterId: 52 }),
+    showFrame()
+  ]);
+  const screen = extractScreens(buffer).screens.nested;
+  const refused = new Map(screen.unresolved.map((entry) => [entry.path.join("/"), entry]));
+  for (const where of ["52/42/2", "52/42/5/1"]) {
+    const entry = refused.get(where);
+    assert.ok(entry, `${where} is on the roster`);
+    assert.equal(entry.kind, "masked-nested");
+    assert.equal(entry.character, 7);
+  }
+  assert.match(refused.get("52/42/2").detail, /2 masks cover it \(52\/41, 52\/42\/1\)/);
+  assert.match(refused.get("52/42/5/1").detail, /2 masks cover it \(52\/41, 52\/42\/4\)/);
+  const drawn = drawablesByPath(screen);
+  assert.equal(drawn.has("52/42/2"), false);
+  assert.equal(drawn.has("52/42/5/1"), false);
+  assert.deepEqual(drawn.get("52/42/3").clip, { shape: 8, matrix: [1, 0, 0, 1, 0, 0] },
+    "depth 3 is outside 52/42/1's range, so only 52/41 cuts it, and it is drawn clipped");
+
+  const oneTimeline = extractScreens(swf([
+    defineSquare(7), defineSquare(8), defineSquare(9),
+    frameLabel("same_level"),
+    place2({ depth: 1, characterId: 8, clipDepth: 10 }),
+    place2({ depth: 2, characterId: 7 }),
+    place2({ depth: 3, characterId: 9, clipDepth: 5 }),
+    place2({ depth: 4, characterId: 7 }),
+    showFrame()
+  ])).screens.same_level;
+  assert.deepEqual(oneTimeline.unresolved.map((entry) => [entry.path.join("/"), entry.kind]), [["4", "masked-nested"]]);
+  assert.match(oneTimeline.unresolved[0].detail, /2 masks cover it \(1, 3\)/);
+  assert.deepEqual(oneTimeline.drawables.map((drawable) => [drawable.path.join("/"), drawable.clip?.shape]), [["2", 8]],
+    "depth 2 is under 1 alone and is drawn cut by it");
+  assert.equal(oneTimeline.counts.unresolvedByKind["masked-nested"], 1);
+});
+
+test("a BUTTON's UP leaves are cut by a mask at the button, above it, or inside its own sprite", () => {
+  // ► **THE BUTTON ARM RE-FLATTENS THE UP RECORDS IN A CALL OF ITS OWN**, with
+  //   no word of any mask outside it, and its leaves' `maskPath` is relative
+  //   to that call — so a mask at or above a button was dropped, and a mask
+  //   inside one was looked up among the SCREEN's cutters by a path that meant
+  //   something else there. Measured on the oracle 2026-09-22: none of the 26
+  //   screens has a leaf in any of these three places, so this is latent.
+  //
+  //   By hand, in twips:
+  //     at      mask 10 at tx 50 covers depth 11, a button at 2000 whose UP
+  //             record sits at 5                  → leaf 11/1 at 2005, cut at 50
+  //     above   sprite 52 at 1000: mask 41 at 40 covers 42, a button at 300
+  //                                               → leaf 52/42/1 at 1305, cut at 1040
+  //     inside  button at 3000, record 8 at 100 places sprite 64, whose mask
+  //             at 7 covers its depth 2           → leaf 9/8/2 at 3100, cut at 3107
+  //
+  //   And the trap for the third: ROOT depth 8 is ALSO a sprite with a mask at
+  //   its depth 1, so the old lookup — the leaf's relative `maskPath` [8, 1]
+  //   against the screen's cutters — found character 8's cutter at 8/1 and
+  //   cut the button's leaf with the wrong shape in the wrong place.
+  const buffer = swf([
+    defineSquare(7), defineSquare(8), defineSquare(9),
+    defineButton2(20, [{ states: 0x01, characterId: 7, depth: 1, tx: 5 }]),
+    defineSprite(64, 1, [
+      place2({ depth: 1, characterId: 9, tx: 7, clipDepth: 2 }),
+      place2({ depth: 2, characterId: 7 }),
+      showFrame()
+    ]),
+    defineButton2(21, [{ states: 0x01, characterId: 64, depth: 8, tx: 100 }]),
+    defineSprite(65, 1, [
+      place2({ depth: 1, characterId: 8, clipDepth: 2 }),
+      place2({ depth: 2, characterId: 7 }),
+      showFrame()
+    ]),
+    defineSprite(52, 1, [
+      place2({ depth: 41, characterId: 8, tx: 40, clipDepth: 44 }),
+      place2({ depth: 42, characterId: 20, tx: 300 }),
+      showFrame()
+    ]),
+    frameLabel("buttons"),
+    place2({ depth: 8, characterId: 65 }),
+    place2({ depth: 9, characterId: 21, tx: 3000 }),
+    place2({ depth: 10, characterId: 8, tx: 50, clipDepth: 11 }),
+    place2({ depth: 11, characterId: 20, tx: 2000 }),
+    place2({ depth: 52, characterId: 52, tx: 1000 }),
+    showFrame()
+  ]);
+  const screen = extractScreens(buffer).screens.buttons;
+  const byPath = drawablesByPath(screen);
+
+  const at = byPath.get("11/1");
+  assert.deepEqual(at.matrix, [1, 0, 0, 1, 2005, 0]);
+  assert.deepEqual(at.clip, { shape: 8, matrix: [1, 0, 0, 1, 50, 0] }, "a mask AT the button cuts its UP state");
+  assert.equal(at.via, "button 20");
+
+  const above = byPath.get("52/42/1");
+  assert.deepEqual(above.matrix, [1, 0, 0, 1, 1305, 0]);
+  assert.deepEqual(above.clip, { shape: 8, matrix: [1, 0, 0, 1, 1040, 0] }, "and so does a mask one sprite ABOVE it");
+
+  const inside = byPath.get("9/8/2");
+  assert.deepEqual(inside.matrix, [1, 0, 0, 1, 3100, 0]);
+  assert.deepEqual(inside.clip, { shape: 9, matrix: [1, 0, 0, 1, 3107, 0] },
+    "a mask INSIDE the button is its own cutter, composed through the button — not the screen's 8/1");
+
+  assert.deepEqual(byPath.get("8/2").clip, { shape: 8, matrix: [1, 0, 0, 1, 0, 0] },
+    "while the screen's own 8/1 still cuts the leaf it really covers");
+  assert.deepEqual(screen.unresolved, []);
+});
+
+test("a MORPH is cut by an enclosing mask, and one under a sprite mask is refused before it is baked", () => {
+  // ► **`flattenFrame` NEVER MARKS A MORPH `masked`** — a morph comes back
+  //   `unsupported: "morph"` whatever cuts it — so this tool bakes it itself
+  //   and must ask about its cutter itself. It used to look the cutter up only
+  //   among SHAPE masks, so a morph beside a sprite mask found nothing and was
+  //   drawn whole. By hand: cutter 1000 + 40 = 1040; morph 1000 + 300 = 1300.
+  const buffer = swf([
+    defineSquare(8),
+    defineMorph(960),
+    defineSprite(70, 1, [place2({ depth: 1, characterId: 8 }), showFrame()]),
+    defineSprite(66, 1, [place2({ depth: 1, characterId: 960 }), showFrame()]),
+    defineSprite(52, 1, [
+      place2({ depth: 1, characterId: 8, tx: 40, clipDepth: 2 }),
+      place2({ depth: 2, characterId: 66, tx: 300 }),
+      place2({ depth: 3, characterId: 70, clipDepth: 4 }),
+      place2({ depth: 4, characterId: 960 }),
+      showFrame()
+    ]),
+    frameLabel("morphs"),
+    place2({ depth: 52, characterId: 52, tx: 1000 }),
+    showFrame()
+  ]);
+  const { screens, shapes } = extractScreens(buffer);
+  const screen = screens.morphs;
+
+  assert.deepEqual(screen.drawables, [{
+    shape: "960@0", path: [52, 2, 1], matrix: [1, 0, 0, 1, 1300, 0],
+    clip: { shape: 8, matrix: [1, 0, 0, 1, 1040, 0] }, via: "morph 960"
+  }], "the morph one sprite below a shape mask is baked and cut");
+  const refused = screen.unresolved.find((entry) => entry.path.join("/") === "52/4");
+  assert.ok(refused, "the morph beside the sprite mask is on the roster");
+  assert.equal(refused.kind, "masked");
+  assert.equal(refused.character, 960);
+  assert.match(refused.detail, /sprite mask at 52\/3/);
+  assert.equal(screen.approximations.bakedMorphs, 1, "and only the drawn one is counted as baked");
+  assert.deepEqual(Object.keys(shapes).sort(), ["8", "960@0"]);
+});
+
 
 /* ---------------------------------------------------------------- */
 /* Against the installed build                                       */
@@ -1306,6 +1612,45 @@ test("every drawable names a shape that exists, and no shape ships an empty path
       }
     }
   }
+});
+
+test("the five leaves under an ENCLOSING mask are cut on the oracle, and no leaf is under two", { skip }, () => {
+  // ► **MEASURED 2026-09-22, AND DRAWN WHOLE UNTIL THEN.** `flattenFrame`
+  //   stamped these five `ancestorMaskPath` (commit 3ba74bc) and this tool's
+  //   fixed drawable literal dropped the stamp, so each was drawn uncut. The
+  //   cutter matrices were composed BY HAND from the raw entries, not read
+  //   back from this tool: root depth 52 is character 1521 at scale 1.49997,
+  //   (1630, 423), whose depth 41 is shape 1515 at identity with clipDepth 44;
+  //   root depth 59 (character 1909, at (-60, -522)) holds 1836 at
+  //   (6836, 4450), whose depth 3 is shape 1831 at identity with clipDepth 10,
+  //   so (6776, 3928).
+  const { screens, shapes } = extractScreens(oracleBuffer());
+  const splashCut = { shape: 1515, matrix: [1.49997, 0, 0, 1.49997, 1630, 423] };
+  const armouryCut = { shape: 1831, matrix: [1, 0, 0, 1, 6776, 3928] };
+  const expected = [
+    ["splash", "52/42/1/1", splashCut], ["new_or_continue", "52/42/1/1", splashCut],
+    ["armoury", "59/1/4/1/1", armouryCut], ["armoury", "59/1/6/1/1", armouryCut], ["armoury", "59/1/8/1/1", armouryCut]
+  ];
+  for (const [name, where, clip] of expected) {
+    const drawable = drawablesByPath(screens[name]).get(where);
+    assert.ok(drawable, `${name} still draws ${where}`);
+    assert.deepEqual(drawable.clip, clip, `${name} ${where}`);
+  }
+  assert.ok(shapes[1515] && shapes[1831], "and both cutters are in the table");
+
+  // 10 leaves were cut before this — shape 1764 twice under its own mask 1763,
+  // beside it on one timeline, on five screens — and the five above make 15.
+  // A number here that moves means a cutter was found or lost somewhere
+  // nobody looked.
+  let clipped = 0;
+  for (const screen of Object.values(screens)) {
+    clipped += screen.drawables.filter((drawable) => drawable.clip).length;
+    assert.equal(screen.counts.unresolvedByKind["masked-nested"], undefined,
+      `${screen.name}: no leaf on this build is under two masks`);
+    assert.equal(screen.counts.unresolvedByKind.masked, undefined,
+      `${screen.name}: nor under a sprite mask it cannot carry`);
+  }
+  assert.equal(clipped, 15);
 });
 
 test("the manifest's tallies are a recount of the data, not a copy of it", { skip }, () => {
