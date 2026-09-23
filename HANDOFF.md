@@ -126,6 +126,14 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     the losing side's `character_xp` per winner (recorded under (f));
     **`BATTLE_STATE_VERSION` covers the top-level wire-state keys** as well as
     the combatant fields — every pinned hash moved once, measured.
+  - **TWO MORE, 2026-09-23:** **the three tournament bosses whose DNA starts
+    them with the bow equipped but `using_bow` unset (The Evil Ninja, Dantus,
+    Sandalphon — `unleash_hell` which_boss 2/4/16) are NORMALISED** — they enter
+    as proper archers, the engine's single bow flag; the build's split state
+    (archer AI with melee numbers until their first swap DRAWS the bow) is a
+    named divergence, not reproduced. And **the AI VALUES THE PURSE**: it plays
+    to the crowd (wincrowd, adulation) when an authored valuation of the purse
+    gain beats the turn it spends — tunable, measured, no build roll invented.
 
 ► **THE FIRST SPELL VERBS ARE BUILT, AND A `null` IN THE CANDIDATE TABLE WAS A
   SCHEDULED FALSE DIVERGENCE (2026-09-20).** `cast_lightning_bolt` and
