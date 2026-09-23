@@ -262,12 +262,21 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "bash-attack",
     "bombard",
     "burning-phase",
+    // ► **JOINED 2026-09-22 — the four STAT spells, `getphase("cast_bloodlust")`
+    //   here and `("cast_colossus")`, `("cast_little_fat_kid")` and
+    //   `("cast_swiftsandals")` below, written by ladder arms 22, 8, 9 and 27
+    //   (`+0x0dd4`, `+0x08cb`, `+0x0925`, `+0x0feb`) and consumed at `+0x8a60`,
+    //   `+0x7fda`, `+0x81f8` and `+0x895d`.** Zero samples; each writes stats
+    //   from `backup_*` through `EffectKind.STAT`, and `check_spells` restores
+    //   them when its counter runs out. See `SS2_STAT_SPELLS`.
+    "cast-bloodlust",
     // ► **JOINED 2026-09-22 — the two timed self-buffs,
     //   `getphase("cast_boundless_energy")` here and `("cast_regenerate")`
     //   below, written by ladder arms 23 and 3 (`+0x0e0f`, `+0x06d7`) and
     //   consumed at `+0x8c8a` and `+0x8bab`.** Self-targeted, zero samples; the
     //   gain is `nextphase`'s, on every later phase the bearer acts in.
     "cast-boundless-energy",
+    "cast-colossus",
     // ► **JOINED 2026-09-22 — the command, `getphase("cast_command")`,
     //   written by ladder arm 25 (`+0x0efd`) and consumed at
     //   `+0x7be6`-`+0x7db6`.** Zero samples: it pulls its target 40 a frame
@@ -315,12 +324,14 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "cast-ghost-strike",
     "cast-hell-fireball",
     "cast-lightning-bolt",
+    "cast-little-fat-kid",
     "cast-regenerate",
     // ► **JOINED 2026-09-22 — rejuvenate, `getphase("cast_rejuvinate")` (the
     //   build's spelling), written by ladder arm 1 (`+0x05ed`) and consumed at
     //   `+0x8d69`-`+0x8f58`.** Self-targeted, zero samples: three pools refilled
     //   and nine fields restored from `backup_*`.
     "cast-rejuvinate",
+    "cast-swiftsandals",
     // ► **JOINED 2026-09-22 — the teleport, `getphase("cast_teleport")`,
     //   written by ladder arm 26 (`+0x0f91`) and consumed at
     //   `+0x7541`-`+0x76ad`.** Self-targeted, one sample (the destination).
@@ -1241,6 +1252,12 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     //   taken before and after (`tools/golden-hash-census.mjs`), all 23
     //   unchanged. The build keeps both on the fighter CLIP (`attacker.spell_X`,
     //   `+0x8bc4`/`+0x8ca3`).
+    //
+    //   ► **THE FOUR STAT-SPELL COUNTERS AND THEIR `backup_*` ARE NOT HERE,
+    //     AND THAT IS THE DESIGN (2026-09-22).** They are never read out of a
+    //     record, so they are not vocabulary `ss2Combatant` declares; the
+    //     opening declares them, from the built stats, on whoever a stat spell
+    //     can land on. See `SS2_RESOURCE_NAMES` and `ss2StatSpellDeclarations`.
     "spell_boundless_energy", "spell_regenerate",
     "staminaleft", "staminamax",
     // ► **ADDED 2026-09-22 WITH THE OWNER'S TEAM-PLAY TICK RULE ("bearer's

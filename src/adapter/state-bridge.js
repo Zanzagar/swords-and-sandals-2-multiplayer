@@ -1333,6 +1333,42 @@ export function vanillaWritesForResolvedAction({
     }));
   };
 
+  /**
+   * ► **A BASE STAT THAT MOVED IN BATTLE IS REPORTED, NEVER WRITTEN — and
+   *   until 2026-09-22 it was neither (found by Codex, reproduced first).**
+   *   `EffectKind.STAT` arrived with SS2's four stat spells, and this function
+   *   had no arm for it and no stat term in its totality pass, so a colossus
+   *   moved canonical `strength` 9 -> 27 with no write and no report.
+   *
+   *   **Written it cannot be, as the contract stands**: `WriteSource` is a
+   *   closed set of four (health, status, declared resource, clip facing) and
+   *   none is a stat, and a supplied gladiator's base stats are licensed
+   *   evidence the adapter writes over only for an AI-filled slot, at
+   *   construction (`toVanillaCombatant`'s `{ stats: true }`). A fifth source
+   *   is a decision, not a fix. **So it is REPORTED, exactly as a destroyed
+   *   armour piece outside the write allowlist is** — the designed behaviour
+   *   the contract names for a resolved value the adapter will not write. The
+   *   vanilla field is named through `CANONICAL_STAT_SOURCES`.
+   */
+  const emitStat = (id, stat) => {
+    const key = `${id}:stat:${stat}`;
+    if (emitted.has(key)) return;
+    const current = afterById.get(id);
+    if (!current) throw new AdapterStateError(`No resolved state for combatant ${String(id)}.`);
+    const previous = beforeById.get(id);
+    if (previous && previous.stats?.[stat] === current.stats?.[stat]) return;
+    emitted.add(key);
+    unmapped.push(Object.freeze({
+      combatantId: id,
+      stat,
+      field: CANONICAL_STAT_SOURCES[stat] ?? null,
+      reason:
+        "a base stat moved in battle, and no WriteSource carries a stat (the four are canonical health, " +
+        "canonical status, declared resource and clip facing), so the resolved value is reported rather than " +
+        "written. Writing it back is a contract decision: see docs/ss2-adapter-contract.md, 'Write provenance'"
+    }));
+  };
+
   // 1. Effect order first, so the write order matches the order the rule set
   //    declared its effects in — the same discipline the 1v1 mutation trace
   //    uses.
@@ -1348,6 +1384,8 @@ export function vanillaWritesForResolvedAction({
       const current = afterById.get(effect.targetId);
       if (!current) throw new AdapterStateError(`No resolved state for combatant ${String(effect.targetId)}.`);
       emitStatus(effect.targetId, effect.status, current.status.includes(effect.status), "status-effect");
+    } else if (effect.kind === EffectKind.STAT) {
+      emitStat(effect.targetId, effect.stat);
     }
   }
 
@@ -1359,6 +1397,9 @@ export function vanillaWritesForResolvedAction({
     // is a stable order two peers both produce.
     for (const resource of Object.keys(current.resources ?? {})) {
       emitResource(id, resource, "resolved-state-diff");
+    }
+    for (const stat of Object.keys(current.stats ?? {})) {
+      emitStat(id, stat);
     }
     const previous = beforeById.get(id);
     const was = new Set(previous?.status ?? []);

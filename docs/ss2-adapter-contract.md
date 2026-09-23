@@ -465,6 +465,18 @@ check walks the produced list rather than trusting how it was built, so a write
 pushed straight onto the array without going through `fieldWrite` is caught too.
 `vanillaWritesForResolvedAction` runs it as its own final step before returning.
 
+**An in-battle base-stat change is REPORTED, not written (2026-09-22).**
+`EffectKind.STAT` (SS2's colossus, little fat kid, swift sandals and bloodlust)
+moves a canonical `stats` value mid-battle. None of the four sources above
+carries a stat, and a supplied gladiator's base stats are licensed evidence the
+adapter writes over only for an AI-filled slot at construction (`{ stats: true }`,
+below), so the resolved value reaches combat state and the hash and is reported
+in `unmapped` as `{ combatantId, stat, field, reason }` — the treatment a
+destroyed armour piece outside the write allowlist gets. Until that date it was
+neither written nor reported (found by a Codex review). **Writing it back would
+be a fifth `WriteSource` and a new policy for licensed base-stat fields; that
+is undecided, not overlooked.**
+
 `clip-facing` is the one source with no canonical counterpart — the facing is
 presentation, not combat state — so it is checked against the closed
 `FACING_VALUES` vocabulary instead.

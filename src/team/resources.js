@@ -206,6 +206,28 @@ export function normaliseResourceBag(source) {
   return bag;
 }
 
+/**
+ * Adds declarations to an already-normalised bag, at CONSTRUCTION, and returns
+ * a new sorted bag. A name the bag already declares is left exactly as it was:
+ * what the blueprint stated is the blueprint's, and a rule set's opening
+ * declaration only fills a hole.
+ *
+ * This is still constraint 2 — every name exists before the first action —
+ * reached from a second place: `rules.openingResources`, which sees the whole
+ * roster where the blueprint of one combatant cannot. Each declaration passes
+ * through `normaliseResourceBag`, so it meets every rule a blueprint's does.
+ *
+ * @param {object} bag  a bag `normaliseResourceBag` produced
+ * @param {object} additions  `{ [name]: number | { value, min, max } }`
+ */
+export function withDeclaredResources(bag, additions) {
+  const fresh = Object.fromEntries(Object.entries(additions ?? {}).filter(([name]) => !Object.hasOwn(bag ?? {}, name)));
+  const merged = { ...(bag ?? {}), ...normaliseResourceBag(fresh) };
+  const sorted = {};
+  for (const name of Object.keys(merged).sort()) sorted[name] = merged[name];
+  return sorted;
+}
+
 /** A mutable deep copy, for the authoritative projection. Key order preserved. */
 export function projectResources(bag) {
   const copy = {};

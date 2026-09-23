@@ -1567,7 +1567,17 @@ test("a placeholder rule set that declares no armour effect still writes only hi
   //   instead would have grown a shape whose consumers silently stop covering
   //   it, which is the defect `src/render/scene.js` spells out about
   //   `move-clip`.
-  assert.deepEqual(Object.values(EffectKind).sort(), ["damage", "heal", "lateral", "position", "resource", "status"]);
+  //
+  // ► **`stat` JOINED THEM 2026-09-22**, for SS2's four stat spells: an
+  //   absolute write of one of a combatant's `stats`, which no kind could
+  //   express. Generic like the rest — the resolver writes a key the stats
+  //   already carry and never learns what strength means. **The adapter does
+  //   not write it** onto the vanilla `strength`/`speed`/`attack`/`defence`
+  //   fields — no `WriteSource` carries a stat — and REPORTS it in `unmapped`
+  //   instead (`test/ss2-stat-spells.test.js`, docs/ss2-adapter-contract.md
+  //   "Write provenance"). ~~it skips kinds it has no arm for~~ — it did, and
+  //   silently, until a Codex review of 2026-09-22.
+  assert.deepEqual(Object.values(EffectKind).sort(), ["damage", "heal", "lateral", "position", "resource", "stat", "status"]);
 
   // The defeated fighter is at 0 hitpoints with all 44 points of armour still
   // standing, and that is right: `classicStyleRules` has no armour rule, and

@@ -483,6 +483,19 @@ export const Ss2ActionType = Object.freeze({
   //   Two types for two `getphase` labels, the bolts' reason.
   CAST_REGENERATE: "cast-regenerate",
   CAST_BOUNDLESS_ENERGY: "cast-boundless-energy",
+  // ► **THE FOUR STAT SPELLS — THE FIRST VERBS THAT CHANGE A STAT.**
+  //   `+0x7fda`-`+0x81f7` (`cast_colossus`, id 42), `+0x81f8`-`+0x83f4`
+  //   (`cast_little_fat_kid`, id 33, which lands on the DEFENDER),
+  //   `+0x895d`-`+0x8a5f` (`cast_swiftsandals`, id 40) and `+0x8a60`-`+0x8baa`
+  //   (`cast_bloodlust`, id 41) of the same block; see `SS2_STAT_SPELLS`. Each
+  //   writes stats from the fight-start `backup_*` once and a counter every
+  //   tick, and `check_spells` restores the stats when the counter runs out.
+  //   ZERO samples, so not in `ATTACK_BANDS`, for the reason `shove` is not.
+  //   Four types for four `getphase` labels, the bolts' reason.
+  CAST_COLOSSUS: "cast-colossus",
+  CAST_LITTLE_FAT_KID: "cast-little-fat-kid",
+  CAST_SWIFTSANDALS: "cast-swiftsandals",
+  CAST_BLOODLUST: "cast-bloodlust",
   // ► **REJUVENATE — THE FULL REFILL, AND THE ONLY VERB THAT GIVES ARMOUR
   //   BACK.** `+0x8d69`-`+0x8f58` of the same block; see `SS2_REJUVENATE`.
   //   ZERO samples, so not in `ATTACK_BANDS`, for the reason `shove` is not.
@@ -1066,6 +1079,14 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // `+0x8d1f`) — carried on the event; there is no victim clip at all.
   [Ss2ActionType.CAST_REGENERATE]: "cast_regenerate",
   [Ss2ActionType.CAST_BOUNDLESS_ENERGY]: "cast_boundless_energy",
+  // `phase_decision == "cast_colossus"` at `+0x7fe0`, `"cast_little_fat_kid"`
+  // at `+0x81fe`, `"cast_swiftsandals"` at `+0x8963` and `"cast_bloodlust"` at
+  // `+0x8a66`: the decisions ladder arms 8, 9, 27 and 22 write (`+0x08cb`,
+  // `+0x0925`, `+0x0feb`, `+0x0dd4`). The clips are on each event.
+  [Ss2ActionType.CAST_COLOSSUS]: "cast_colossus",
+  [Ss2ActionType.CAST_LITTLE_FAT_KID]: "cast_little_fat_kid",
+  [Ss2ActionType.CAST_SWIFTSANDALS]: "cast_swiftsandals",
+  [Ss2ActionType.CAST_BLOODLUST]: "cast_bloodlust",
   // `phase_decision == "cast_rejuvinate"` at `+0x8d6f`, the decision ladder
   // arm 1 writes (`+0x05ed`). The caster plays `Rejuvinate` (`+0x8ded`, capital
   // R as the build passes it) — carried on the event; there is no victim clip.
@@ -1603,6 +1624,55 @@ export function ss2PhysicalSize(actor) {
 }
 
 /**
+ * ► **HOW FAR THE LIVE STRENGTH HAS MOVED THE `battlevalues` OUTPUTS THE BAG
+ *   CARRIES — 0 for every gladiator whose strength no stat spell has touched.**
+ *
+ * `min_damage`, `max_damage`, `weapon_range` and `secondary_weapon_range` are
+ * declared ONCE, from the strength the gladiator was built with. The build
+ * recomputes all four from the LIVE `strength` in every `nextphase`
+ * (`battlevalues(game_attacker)`/`(game_defender)`, `+0x35eb`/`+0x35ff`, after
+ * `check_spells`): `min/max_damage = round(strength * 2) + weapon[…]`
+ * (`+0x3356`, `+0x3386`), `weapon_range = physical_size + weapon[5] * 44`
+ * (`+0x3190`, `+0x32aa`), `physical_size = 80 + round(strength / 1.5)`
+ * (`+0x30f1`). The weapon columns never change in battle, so the live value is
+ * the stored one plus the strength term's movement — which is what these two
+ * return. Reading them at USE time is the build's own timing: a stat spell
+ * writes strength inside its phase, and the recompute lands in the same
+ * phase's `nextphase`, before anything else can read it.
+ *
+ * `backup_strength` is the strength the bag's numbers were computed from; a
+ * gladiator declaring none has had no stat written, so both shifts are 0 and
+ * every golden reads exactly what it always did.
+ */
+function ss2MeleeStrengthShift(actor) {
+  const live = actor?.stats?.strength ?? 0;
+  return Math.round(live * 2) - Math.round(ss2BackupStat(actor, "strength") * 2);
+}
+
+/** The reach half of the shift above: the live `physical_size` less the built one. */
+function ss2ReachStrengthShift(actor) {
+  return ss2PhysicalSize(actor) - (80 + Math.round(ss2BackupStat(actor, "strength") / 1.5));
+}
+
+/**
+ * The AI's crude proxy for ONE TURN of a gladiator: its declared melee
+ * `max_damage`, carried to the live strength by `ss2MeleeStrengthShift` — and
+ * 0 for a gladiator that declares none, which is the fallback both readers
+ * were written around (it cannot throw, and an undeclared pair scores 0).
+ *
+ * ► **IT READ THE FIGHT-START NUMBER UNTIL THE STAT SPELLS, AND CODEX FOUND IT
+ *   (2026-09-22), reproduced before it was fixed.** A foe whose colossus took
+ *   strength 20 to 60 swings for 129 at most, and the wind-up's survival check
+ *   still priced three of its turns at 3 x 49 = 147 against a 190-hitpoint
+ *   gladiator — so it wound up under a foe whose three turns are 387. The
+ *   taunt's flee arm read the same stale number. Both read this now.
+ */
+function ss2MaxDamageProxy(combatant) {
+  const declared = resourceValue(combatant, "max_damage", null);
+  return declared === null ? 0 : declared + ss2MeleeStrengthShift(combatant);
+}
+
+/**
  * The build's range step: one point of a weapon's `[5]` multiplier is 44 arena
  * units (`battlevalues` `+0x31b3`, `Push 44; Multiply`).
  *
@@ -1770,12 +1840,16 @@ export function ss2Reach(actor) {
   //   `battlevalues`'s `weapon_range = secondary_weapon_range` (`+0x343e`).**
   //   The bag keeps the melee reach in `weapon_range` because the bow's is
   //   recoverable and the melee one would not be; see `SS2_RESOURCE_NAMES`.
+  //   Both declared reaches were computed from the strength the gladiator was
+  //   built with; `ss2ReachStrengthShift` carries them to the live one (0
+  //   unless a stat spell has moved it). The fallback below already reads the
+  //   live `physical_size`.
   if (ss2InBowMode(actor)) {
     const bow = resourceValue(actor, "secondary_weapon_range", 0);
-    if (Number.isFinite(bow) && bow > 0) return bow;
+    if (Number.isFinite(bow) && bow > 0) return bow + ss2ReachStrengthShift(actor);
   }
   const declared = resourceValue(actor, "weapon_range", null);
-  if (Number.isFinite(declared) && declared > 0) return declared;
+  if (Number.isFinite(declared) && declared > 0) return declared + ss2ReachStrengthShift(actor);
   return ss2PhysicalSize(actor) + ss2WeaponEntry(0).rangeMultiplier * SS2_WEAPON_RANGE_STEP;
 }
 
@@ -1819,9 +1893,13 @@ export function ss2InBowMode(actor) {
 export function ss2ActiveDamagePair(actor) {
   const strength = actor?.stats?.strength ?? 0;
   if (!ss2InBowMode(actor)) {
+    // The bag's pair is the fight-start `battlevalues`; the build's is the
+    // live strength's. See `ss2MeleeStrengthShift` — 0 unless a stat spell
+    // moved strength. The bow pair below already reads the live stat.
+    const shift = ss2MeleeStrengthShift(actor);
     return {
-      min_damage: resourceValue(actor, "min_damage", 0),
-      max_damage: resourceValue(actor, "max_damage", 0)
+      min_damage: resourceValue(actor, "min_damage", 0) + shift,
+      max_damage: resourceValue(actor, "max_damage", 0) + shift
     };
   }
   return {
@@ -2955,7 +3033,12 @@ export function ss2TauntValue(actor, target, chances) {
   //   when anybody is close enough to taunt it. So on the shipped roster this
   //   term is very nearly always zero, and the taunt is carried by the
   //   recovery.
-  const denial = ss2InBowMode(target) ? resourceValue(target, "max_damage", 0) : 0;
+  //
+  // ► **LIVE SINCE 2026-09-22** — `ss2MaxDamageProxy`: the declared number
+  //   carried to the target's live strength, so a buffed target's turn is
+  //   priced at what it would actually swing for. Still 0 for a target that
+  //   declares none.
+  const denial = ss2InBowMode(target) ? ss2MaxDamageProxy(target) : 0;
 
   return healed + perEffect * strike + perEffect * denial;
 }
@@ -4976,6 +5059,12 @@ const SS2_POOL_CEILING = Object.freeze({
  *   too: `chooseAiAction` tests it FIRST, above arm 3 and this table, so a
  *   villain below `hitpointsmax / 1.5` holding 43 never reaches a health
  *   potion — below half implies below the line (`test/ss2-rejuvenate.test.js`).
+ *   **Arms 8 and 9 HAVE VERBS SINCE 2026-09-22 (`cast_colossus`,
+ *   `cast_little_fat_kid`)** and are struck as well: `chooseAiAction` tests them
+ *   in their own block above its walk of this table, reading the health arms
+ *   (2, 4-6) and molten death (7) that precede them first — so a villain whose
+ *   gate is open drinks no armour or stamina potion either
+ *   (`test/ss2-stat-spells.test.js`).
  */
 export const SS2_POTION_LADDER = Object.freeze([
   Object.freeze({ arm: 2, itemId: 5 }),
@@ -5128,18 +5217,341 @@ export const SS2_TIMED_BUFFS = Object.freeze({
 });
 
 /**
- * The timed counters `nextphase` ticks, in `check_spells`' own order
- * (`spell_regenerate` `+0x272e`, then `spell_boundless_energy` `+0x275f`).
+ * ► **THE FOUR STAT SPELLS**, derived 2026-09-22 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (base `0x240c85`) and each
+ * re-derived by a write-nothing verifier; every clause below was then re-read
+ * off the dumps by the implementer. All four arms have the regenerate shape —
+ * a counter, `crowd_action` and `staminacost = round(magicka)` written on
+ * EVERY tick outside the `struck` gate, a once-block inside it — and write
+ * their stats FROM `backup_*`, never from the current value:
  *
- * **Only the two with a verb.** `check_spells` also decrements
- * `spell_colossus`, `spell_little_fat_kid`, `spell_swiftsandals` and
- * `spell_bloodlust`, each WITH an expiry block that restores a stat; those join
- * this list with their verbs, and their expiry with them. **A counter added
- * here inherits the team-play tick schedule and the tick clock with no other
- * change** (see `ss2TimedSpellBystanders`): `ss2Combatant` declares the clock
- * beside any counter on this list, and construction refuses one without it.
+ * ```text
+ *   cast_colossus (42)      +0x7fda  attacker.spell_colossus = 16           +0x7ff3
+ *                                    crowd_action = 15                      +0x7ffe
+ *     once, attacker.struck == null  (+0x8044):
+ *                                    cast_spell_icon(attacker, 42); "Colossus"
+ *                                    oldscale = _yscale; newscale = 450     +0x8084-+0x80aa
+ *                                    strength = backup_strength * 3         +0x80ab-+0x80c8
+ *                                    attack   = backup_attack * 2           +0x80c9-+0x80e6
+ *     every tick:                    _yscale = ceil((newscale - _yscale) / 2)  +0x80e7 (ASSIGNS)
+ *                                    _xscale = _yscale; _x -/+= 2 by gladiator_dir  +0x8124-+0x8191
+ *                                    finish only when !(_yscale < newscale) +0x8192-+0x81ae
+ *   cast_little_fat_kid (33) +0x81f8 DEFENDER.spell_little_fat_kid = 16     +0x8211
+ *                                    crowd_action = 10                      +0x821c
+ *     once, DEFENDER.struck == null (+0x8262):
+ *                                    attacker "Cast2"; icon 33; defender "little_fat_kid"
+ *                                    game_defender.strength = round(backup_strength / 2)  +0x82df
+ *                                    game_defender.attack   = round(backup_attack / 2)    +0x830e
+ *     then:                          the victim's scale SNAPS to 50 and the arm completes
+ *                                    in the same tick (+0x833d-+0x83f4)
+ *   cast_swiftsandals (40)   +0x895d attacker.spell_swiftsandals = 20       +0x8976
+ *                                    crowd_action = 3                       +0x8981
+ *     once:                          "Cast2"; speed = 10 + backup_speed * 2 +0x8a07-+0x8a2a
+ *   cast_bloodlust (41)      +0x8a60 attacker.spell_bloodlust = 20          +0x8a79
+ *                                    crowd_action = 3                       +0x8a84
+ *     once:                          "Cast2"; strength = 10 + round(backup_strength * 1.5)  +0x8b0a
+ *                                    defence = round(backup_defence * 0.5)  +0x8b43
+ * ```
+ *
+ * **`check_spells` restores exactly what each one wrote**, from the same
+ * `backup_*`, when its counter reaches 0 — colossus and little fat kid
+ * strength and attack (`+0x24a0`, `+0x252e`), swift sandals speed ONLY
+ * (`+0x25e1`), bloodlust strength and defence (`+0x26c7`) — and writes -1.
+ * See `SS2_TIMED_SPELL_COUNTERS` for why -1 matters.
+ *
+ * ► **ONE SLOT PER STAT, LAST WRITER WINS, AND ANY EXPIRY RESETS IT.** The
+ *   writes are absolute from the backup, so a recast resets and never stacks —
+ *   and a colossus that runs out while bloodlust is still running puts
+ *   strength back to the backup, cancelling bloodlust's strength while its
+ *   halved defence carries on. Reproduced: the expiry's writes land after the
+ *   cast's, as the build's `nextphase` orders them.
+ *
+ * ► **THE HERO'S PER-ROUND RE-SKIN IS NOT REPRODUCED — the owner's decision,
+ *   2026-09-22.** In the build, overlay frame 1 re-runs
+ *   `skincharacter(_root.game.hero, …)` every round (`DoAction@0x236941`
+ *   `+0x0a57`), which rewrites the hero's `strength`, `speed`, `attack` and
+ *   `defence` from `charDNA` (`initcharacter` `+0x0766`-`+0x07ab`) before the
+ *   hero's next decision. **So in the build a HERO gains nothing from
+ *   colossus, swift sandals or bloodlust, and a villain's little fat kid on the
+ *   hero is gone before the hero acts; the villain, never re-skinned, keeps
+ *   every buff for its counter's whole run.** This engine gives every
+ *   combatant the villain's rule. The counter and the tint still run their
+ *   course on the hero in the build; only the stats revert.
+ *
+ * ► **`crowd_action` IS RECORDED, NOT MODELLED — the owner's decision,
+ *   2026-09-22 (item 1f).** It is not a presentation cue: `nextphase` adds it
+ *   into `crowd_interest` (`+0x3541`-`+0x35a3`), which scales the victory
+ *   purse. `crowdAction` below is each arm's literal, for the session that
+ *   models it.
+ *
+ * ► **PRESENTATION, NOT ENGINE STATE, AND NOT MODELLED:** the clip scale
+ *   (`oldscale`/`newscale`, one shared slot on the clip; colossus's growth
+ *   converges to 150 from ANY start — a fighter above 150, `strength > 105`,
+ *   SHRINKS — and little fat kid snaps to 50), the positive `_xscale` that
+ *   loses the facing sign, and the `blendMode` tints `check_spells` applies
+ *   while a counter runs (`invert` on the legs, `difference` on three arm
+ *   parts). None of them feeds a number here.
+ *
+ * ► **COLOSSUS'S DRIFT IS POSITION, AND IT IS DEFERRED — named, not missed.**
+ *   Because the growth ASSIGNS (a build bug: no `Add2` at `+0x8123`), the
+ *   finish test never passes and the phase ends only through the `demand_move`
+ *   watchdog (`+0x37c9`-`+0x38a1`): 58 arm ticks from a fresh tick, 59 when the
+ *   previous phase ended earlier in the same tick, 198/199 if only its `>= 200`
+ *   clause can fire — and the arm moves the caster 2 px toward
+ *   `gladiator_dir` on every one (`+0x8139`-`+0x8191`). What stops this being a
+ *   one-line `POSITION` is what the drift meets: the close-range pushback at
+ *   the top of the same handler (`+0x36b9`-`+0x37c8`) moves BOTH clips 1 px
+ *   apart per tick while `arena.fightdistance < 100`, which cancels the drift
+ *   and translates the pair; when `fightdistance` is refreshed within the frame
+ *   is not in the dumps; and which of 58/59 applies depends on how the
+ *   PREVIOUS phase ended, which this engine does not record. A straight
+ *   116 px would walk a caster through a foe standing inside it. So the caster
+ *   does not move here. `driftPerTick` and `watchdogTicks` are carried for
+ *   whoever models it.
+ */
+export const SS2_STAT_SPELLS = Object.freeze({
+  [Ss2ActionType.CAST_COLOSSUS]: Object.freeze({
+    /** `cast_spell_icon(attacker, 42)` `+0x8049`; `check_inventory(42)` `+0x0890`. */
+    itemId: 42,
+    /** `attacker.spell_colossus = 16` `+0x7ff3` — the CASTER's clip. */
+    counter: "spell_colossus",
+    duration: 16,
+    /** Whose stats and counter the arm writes: `game_attacker` / `attacker`. */
+    bearer: "caster",
+    /** `attacker.gotoAndPlay("Colossus")` `+0x806f`, frames 2147-2168. No victim clip. */
+    casterClip: "Colossus",
+    victimClip: null,
+    /** `register:3.crowd_action = 15` `+0x7ffe`. Recorded, not modelled. */
+    crowdAction: 15,
+    /** Engine stat names the arm writes and the expiry restores (`+0x24a0`, `+0x24ad`). */
+    stats: Object.freeze(["strength", "attack"]),
+    /** `strength = backup_strength * 3` `+0x80ab`; `attack = backup_attack * 2` `+0x80c9`. Unrounded. */
+    write: (backup) => ({ strength: backup.strength * 3, attack: backup.attack * 2 }),
+    /** `villain_cast_spells` arm 8: `check_inventory(42) && fightdistance < 300` (`+0x0890`-`+0x08c4`). */
+    ladderArm: 8,
+    aiFightDistanceBelow: 300,
+    /** DEFERRED, see above: `_x -= 2` / `_x += 2` per tick (`+0x8165`, `+0x8188`). */
+    driftPerTick: 2,
+    /** DEFERRED, see above: the watchdog's `demand_move >= 60` from a fresh tick. */
+    watchdogTicks: 58
+  }),
+  [Ss2ActionType.CAST_LITTLE_FAT_KID]: Object.freeze({
+    /** `cast_spell_icon(attacker, 33)` `+0x827c`; `check_inventory(33)` `+0x08ea`. */
+    itemId: 33,
+    /** `defender.spell_little_fat_kid = 16` `+0x8211` — the VICTIM's clip. */
+    counter: "spell_little_fat_kid",
+    duration: 16,
+    /**
+     * `game_defender` / `defender`: a DEBUFF on the foe, read from the foe's
+     * own backups. Its once-gate is `defender.struck == null` (`+0x8250`-
+     * `+0x8262`) — the one once-gate in frame 52 on the defender's flag.
+     */
+    bearer: "victim",
+    /** `attacker.gotoAndPlay("Cast2")` `+0x8267`; `defender.gotoAndPlay("little_fat_kid")` `+0x82a2`. */
+    casterClip: "Cast2",
+    victimClip: "little_fat_kid",
+    /** `register:3.crowd_action = 10` `+0x821c`. Recorded, not modelled. */
+    crowdAction: 10,
+    /** Restored at `+0x252e`, `+0x253b`. */
+    stats: Object.freeze(["strength", "attack"]),
+    /**
+     * `round(backup_strength / 2)` `+0x82df`-`+0x830d`, `round(backup_attack / 2)`
+     * `+0x830e`-`+0x833c`. `Math.round` sends a half UP (7 -> 4), the build's
+     * and JavaScript's alike — never a floor.
+     */
+    write: (backup) => ({ strength: Math.round(backup.strength / 2), attack: Math.round(backup.attack / 2) }),
+    /** `villain_cast_spells` arm 9: `check_inventory(33) && fightdistance < 500` (`+0x08ea`-`+0x091e`). */
+    ladderArm: 9,
+    aiFightDistanceBelow: 500
+  }),
+  [Ss2ActionType.CAST_SWIFTSANDALS]: Object.freeze({
+    /** `cast_spell_icon(attacker, 40)` `+0x89cc`; `check_inventory(40)` `+0x0fb0`. */
+    itemId: 40,
+    /** `attacker.spell_swiftsandals = 20` `+0x8976`. */
+    counter: "spell_swiftsandals",
+    duration: 20,
+    bearer: "caster",
+    /** `attacker.gotoAndPlay("Cast2")` `+0x89f2`. */
+    casterClip: "Cast2",
+    victimClip: null,
+    /** `register:3.crowd_action = 3` `+0x8981`. Recorded, not modelled. */
+    crowdAction: 3,
+    /** SPEED only (`agility` here) — its expiry, `+0x25e1`, touches no strength. */
+    stats: Object.freeze(["agility"]),
+    /**
+     * `speed = 10 + backup_speed * 2` `+0x8a07`-`+0x8a2a`, unrounded — NOT a
+     * doubling, whatever the item's text says. `battlevalues` then makes
+     * `movement_speed = min(60, 15 + 3 * backup_speed)`, so a gladiator whose
+     * base movement is already at the cap (`speed >= 40`) gains nothing.
+     */
+    write: (backup) => ({ agility: 10 + backup.agility * 2 }),
+    /** `villain_cast_spells` arm 27: `check_inventory(40) && fightdistance > 300` (`+0x0fb0`-`+0x0fe4`). */
+    ladderArm: 27,
+    aiFightDistanceAbove: 300
+  }),
+  [Ss2ActionType.CAST_BLOODLUST]: Object.freeze({
+    /** `cast_spell_icon(attacker, 41)` `+0x8acf`; `check_inventory(41)` `+0x0d99`. */
+    itemId: 41,
+    /** `attacker.spell_bloodlust = 20` `+0x8a79`. */
+    counter: "spell_bloodlust",
+    duration: 20,
+    bearer: "caster",
+    /** `attacker.gotoAndPlay("Cast2")` `+0x8af5`. */
+    casterClip: "Cast2",
+    victimClip: null,
+    /** `register:3.crowd_action = 3` `+0x8a84`. Recorded, not modelled. */
+    crowdAction: 3,
+    /** Restored at `+0x26c7`, `+0x26d4`. The item text's "reduces your agility" names a field no code writes. */
+    stats: Object.freeze(["strength", "defense"]),
+    /**
+     * `strength = 10 + round(backup_strength * 1.5)` `+0x8b0a`-`+0x8b42` (the
+     * round wraps only the product) and `defence = round(backup_defence * 0.5)`
+     * `+0x8b43`-`+0x8b75`: it HALVES the caster's defence.
+     */
+    write: (backup) => ({ strength: 10 + Math.round(backup.strength * 1.5), defense: Math.round(backup.defense * 0.5) }),
+    /** `villain_cast_spells` arm 22: `check_inventory(41) && fightdistance < 400` (`+0x0d99`-`+0x0dcd`). */
+    ladderArm: 22,
+    aiFightDistanceBelow: 400
+  })
+});
+
+/**
+ * The build's name for each engine stat's fight-start copy: `backup_char`
+ * (`+0x2d80`-`+0x2da7`) sets `backup_strength = strength`, `backup_speed =
+ * speed`, `backup_attack = attack`, `backup_defence = defence`.
+ *
+ * ► **WHERE `backup_*` COMES FROM IN THIS ENGINE: the stats the combatant was
+ *   BUILT with**, declared as a resource at the opening for exactly the
+ *   combatants a stat spell can land on (`ss2StatSpellDeclarations`). That is
+ *   the build's timing: `backup_char` runs for the hero and the villain before
+ *   the bout (`sprite:2249/frame:1` `+0x010a`, `+0x012e`) and at no point
+ *   during it — its other two callers are post-battle (`frame:231`) and the
+ *   stat-point button.
+ */
+const SS2_STAT_BACKUP = Object.freeze({
+  strength: "backup_strength",
+  agility: "backup_speed",
+  attack: "backup_attack",
+  defense: "backup_defence"
+});
+
+/**
+ * **-1 IS THE BUILD'S OWN "NO BUFF" FOR THE FOUR STAT COUNTERS, AND 0 IS NOT.**
+ * Their `== 0` expiry sits OUTSIDE the `> 0` decrement (`+0x246a`, `+0x24f8`,
+ * `+0x25c6`, `+0x26ac`), so a counter ENTERING a tick at 0 restores its stats
+ * — and every expiry writes -1 (`+0x24ba`, `+0x2548`, `+0x262e`, `+0x2721`).
+ * The build holds `undefined` before the first cast, which both tests pass by;
+ * a resource cannot hold `undefined`, and -1 is the inert value the build
+ * itself writes. Declared with `min: -1` so the bag can hold it.
+ */
+const SS2_STAT_SPELL_INERT = -1;
+
+/** A stat's fight-start value: its declared `backup_*`, or the stat itself when none is declared. */
+function ss2BackupStat(carrier, stat) {
+  return resourceValue(carrier, SS2_STAT_BACKUP[stat], carrier?.stats?.[stat] ?? 0);
+}
+
+/**
+ * Every resource a stat spell will write, declared at the opening on whoever
+ * it can land on — `rules.openingResources`.
+ *
+ * ► **WHY HERE AND NOT IN `ss2Combatant`, where the regenerate counter is
+ *   declared by possession.** Little fat kid writes its counter and its
+ *   halved stats on the VICTIM, who does not carry id 33 — and a blueprint is
+ *   built one gladiator at a time, so nothing there knows what a foe carries.
+ *   The resolver asks the rule set once, seeing the whole roster; all four
+ *   spells are declared here so the rule lives in one place:
+ *
+ *   - **the caster** of colossus (42), swift sandals (40) and bloodlust (41),
+ *     when any declared slot holds the item (the window included — declaring
+ *     is inert, as for regenerate);
+ *   - **every foe** of a gladiator carrying little fat kid (33).
+ *
+ * Each gets the counter at -1 and the `backup_*` of the stats that spell
+ * writes, at the stats it was built with. **A battle where nobody carries one
+ * of the four declares nothing**, so no golden and no existing battle moves.
+ * `ss2Combatant` never declares any of the eight from a record (see
+ * `SS2_RESOURCE_NAMES` for why); a RAW blueprint that declares one keeps its
+ * own declaration, as `withDeclaredResources` keeps every blueprint's.
+ *
+ * ► **AND THE TICK CLOCK WITH THEM (merged 2026-09-22 with the owner's
+ *   bearer's-turn tick rule, built in parallel).** A combatant given a counter
+ *   here is a timed-spell BEARER, so it needs `SS2_TIMED_SPELL_CLOCK` beside
+ *   the counter, at 1 as `ss2Combatant` declares it; `ss2Combatant` cannot see
+ *   these counters, so it is declared HERE. A clock the blueprint already
+ *   declared (a regenerate or boundless bearer) is kept, as
+ *   `withDeclaredResources` keeps every blueprint's. Without it the bearer
+ *   would tick on its own phases only: the 1v1 expiry sequences and little fat
+ *   kid's `counterAfter` in `test/ss2-stat-spells.test.js` are the guard.
+ */
+function ss2StatSpellDeclarations(combatants) {
+  const carries = (combatant, itemId) =>
+    ss2InventorySlotHolding(combatant, itemId, { ignoreMaxslots: true }) !== null;
+  const declarations = [];
+  for (const combatant of combatants) {
+    const needed = new Map();
+    for (const spell of Object.values(SS2_STAT_SPELLS)) {
+      const bears = spell.bearer === "caster"
+        ? carries(combatant, spell.itemId)
+        : combatants.some((other) => other.teamId !== combatant.teamId && carries(other, spell.itemId));
+      if (!bears) continue;
+      needed.set(spell.counter, { value: SS2_STAT_SPELL_INERT, min: SS2_STAT_SPELL_INERT });
+      for (const stat of spell.stats) needed.set(SS2_STAT_BACKUP[stat], { value: combatant.stats[stat] });
+      needed.set(SS2_TIMED_SPELL_CLOCK, { value: 1 });
+    }
+    for (const [resource, declaration] of needed) {
+      declarations.push({ targetId: combatant.id, resource, ...declaration });
+    }
+  }
+  return declarations;
+}
+
+/** The resources a stat spell needs on its bearer before its first write: the counter and the backups. */
+function ss2StatSpellResources(spell) {
+  return [spell.counter, ...spell.stats.map((stat) => SS2_STAT_BACKUP[stat])];
+}
+
+/**
+ * The offered option a stat spell's LADDER ARM would take, or null — the
+ * villain's decision, `check_inventory(id) && fightdistance <op> N`, and
+ * nothing else (see `SS2_STAT_SPELLS` for each arm's offsets).
+ *
+ * Possession is the option list's (it already applied the slot window and the
+ * bearer's declarations). `fightdistance` is measured to the NEAREST foe —
+ * INVENTED above 1v1, where the build has one `defender`; it is the weaken's,
+ * the gale's and the teleport's choice — and little fat kid is aimed at that
+ * same foe. Both tests are strict (`Less2`, `Greater`), and a foe with no
+ * position gives no distance and so no cast, as the gale's guard reads it.
+ */
+function ss2StatSpellChoice(view, options, type) {
+  const spell = SS2_STAT_SPELLS[type];
+  const foe = nearestFoe(view);
+  const range = foe ? ss2FightDistance(view.actor, foe) : null;
+  if (range === null) return null;
+  const open = spell.aiFightDistanceBelow !== undefined
+    ? range < spell.aiFightDistanceBelow
+    : range > spell.aiFightDistanceAbove;
+  if (!open) return null;
+  const targetId = spell.bearer === "victim" ? foe.id : view.actor.id;
+  return options.find((option) => option.type === type && option.targetId === targetId) ?? null;
+}
+
+/**
+ * The timed counters `nextphase` ticks, in `check_spells`' own order:
+ * `spell_colossus` `+0x2439`, `spell_little_fat_kid` `+0x24c7`,
+ * `spell_swiftsandals` `+0x2555`, `spell_bloodlust` `+0x263b`,
+ * `spell_regenerate` `+0x272e`, `spell_boundless_energy` `+0x275f`.
+ *
+ * **All six have a verb since 2026-09-22.** The first four also EXPIRE — see
+ * `SS2_TIMED_SPELL_EXPIRY`; the last two only decrement. **Every counter here
+ * inherits the team-play tick schedule and the tick clock** (see
+ * `ss2TimedSpellBystanders`): the clock is declared beside the counter — by
+ * `ss2Combatant` for regenerate and boundless energy, by the opening
+ * (`ss2StatSpellDeclarations`) for the four stat spells — and construction
+ * refuses a blueprint counter that arrives without it.
  */
 const SS2_TIMED_SPELL_COUNTERS = Object.freeze([
+  ...Object.values(SS2_STAT_SPELLS).map((spell) => spell.counter),
   SS2_TIMED_BUFFS[Ss2ActionType.CAST_REGENERATE].counter,
   SS2_TIMED_BUFFS[Ss2ActionType.CAST_BOUNDLESS_ENERGY].counter
 ]);
@@ -5149,12 +5561,45 @@ const SS2_TIMED_SPELL_COUNTERS = Object.freeze([
  * paid. **AUTHORED — the build has no such field**, because in 1v1 it never
  * needs one; see `ss2TimedSpellBystanders` for the rule it serves.
  *
- * Declared by `ss2Combatant` beside any timed counter and nowhere else, at 1
- * (before any phase completes, everybody counts as owed), and with NO
+ * Declared beside any timed counter and nowhere else — by `ss2Combatant` for
+ * regenerate's and boundless energy's, by the opening
+ * (`ss2StatSpellDeclarations`) for the four stat spells', whose bearer may not
+ * be the carrier — at 1 (before any phase completes, everybody counts as
+ * owed), and with NO
  * `SS2_RESOURCE_DEFAULTS` entry — so a gladiator that bears no timed spell
  * carries no new hashed state, and no golden moves.
  */
 const SS2_TIMED_SPELL_CLOCK = "timed_spell_tick_owed";
+
+/**
+ * Every value this rule set writes to each timed resource, as `[low, high]` —
+ * which its declared bounds must admit, or the resolver's clamp silently turns
+ * the rule into a different one. Checked at construction by
+ * `assertConstructionResources`.
+ *
+ * ► **FOUND BY CODEX 2026-09-22, REPRODUCED BEFORE IT WAS REFUSED.** A raw
+ *   blueprint declaring `spell_bloodlust: 0` gets the shorthand's floor of 0
+ *   (`normaliseResourceBag`), so the expiry's -1 clamped back to 0 and the
+ *   `== 0` restore fired on EVERY tick: a colossus cast wrote strength 27 and
+ *   the same phase put it back to 9, colossus's own counter still at 15. The
+ *   same clamp hid two more, measured: regenerate declared `min: 1` stuck at 1
+ *   and regenerated for ever, and `max: 10` cut the arm's 20 to 10.
+ *
+ * - the four stat counters: -1 (`SS2_STAT_SPELL_INERT`, what every expiry
+ *   writes) up to the arm's 16 or 20;
+ * - regenerate and boundless energy: 0 (their inert value; they only
+ *   decrement while `> 0`) up to the arm's 20;
+ * - the tick clock: 0 (paid) and 1 (owed).
+ *
+ * The opening (`ss2StatSpellDeclarations`) and `ss2Combatant` only ever
+ * declare bounds inside these, so this can refuse only a blueprint built past
+ * them.
+ */
+const SS2_TIMED_RESOURCE_RANGE = Object.freeze({
+  ...Object.fromEntries(Object.values(SS2_STAT_SPELLS).map((spell) => [spell.counter, [SS2_STAT_SPELL_INERT, spell.duration]])),
+  ...Object.fromEntries(Object.values(SS2_TIMED_BUFFS).map((buff) => [buff.counter, [0, buff.duration]])),
+  [SS2_TIMED_SPELL_CLOCK]: [0, 1]
+});
 
 /* ------------------------------------------------------------------ */
 /* Rejuvenate: three pools refilled, nine fields restored from backup   */
@@ -5277,6 +5722,11 @@ function ss2RejuvenateMissingBackups(view) {
   const declared = declaredResourceNames(view);
   return SS2_REJUVENATE.restores.filter(({ piece, backup }) => declared.has(piece) && !declared.has(backup));
 }
+
+/** Counter -> the stats its `== 0` block restores from `backup_*`. Regenerate and boundless have none. */
+const SS2_TIMED_SPELL_EXPIRY = Object.freeze(Object.fromEntries(
+  Object.values(SS2_STAT_SPELLS).map((spell) => [spell.counter, spell.stats])
+));
 
 export const SS2_TAUNT = Object.freeze({
   /**
@@ -5632,6 +6082,22 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   //   slot HOLDS id 43; see `ss2Combatant` and `SS2_REJUVENATE`. Read, never
   //   written, by this rule set.
   ...SS2_REJUVENATE.restores.map(({ backup }) => backup),
+  // ► **NOT HERE, DELIBERATELY: THE FOUR STAT-SPELL COUNTERS
+  //   (`spell_colossus`, `spell_little_fat_kid`, `spell_swiftsandals`,
+  //   `spell_bloodlust`) AND THE FOUR `backup_*` THEY RESTORE FROM (2026-09-22).**
+  //   This list is also what `ss2Combatant` reads OUT OF A RECORD, and neither
+  //   group may come from one:
+  //   - the counters live on the fighter CLIP in the build, never on the
+  //     persistent object a record describes — and `tools/arena/roster.js`
+  //     still states `spell_colossus: 0, spell_bloodlust: 0` there, which,
+  //     declared, would RESTORE on the first tick (`check_spells`' `== 0`);
+  //   - a `backup_*` must equal the stat the bag's `battlevalues` numbers were
+  //     computed from, or `ss2MeleeStrengthShift` counts a buff twice — and a
+  //     record captured mid-buff carries the build's backup beside an already
+  //     buffed strength.
+  //   So all eight are declared in ONE place, `ss2StatSpellDeclarations`, at the
+  //   opening, from the stats the combatant was built with, on whoever a stat
+  //   spell can land on — and on nobody else, so no golden moves.
   "ammo_left",
   "armourclass",
   "armourclass_max",
@@ -5969,6 +6435,12 @@ export const SS2_WRITTEN_RESOURCES = Object.freeze([
   // guarded on declaration like every other write here.
   "spell_boundless_energy",
   "spell_regenerate",
+  // The four stat-spell counters: the arm's 16/20, the tick, and the expiry's
+  // -1. (The stats they buy are written through `EffectKind.STAT`, not here.)
+  "spell_bloodlust",
+  "spell_colossus",
+  "spell_little_fat_kid",
+  "spell_swiftsandals",
   "staminaleft",
   // The tick clock: set by its bearer's own completed phase, cleared by the
   // next one anybody completes. See `ss2TimedSpellBystanders`.
@@ -6482,6 +6954,19 @@ function declaredResourceValue(carrier, name) {
 }
 
 /**
+ * The bounds a resource is (or will be) declared with, off either shape — or
+ * `null` when it is not declared. `null` for a bound means unbounded. Mirrors
+ * `normaliseResourceBag`: a shorthand number, and an object with no `min`,
+ * both get a floor of 0; an absent `max` is none.
+ */
+function declaredResourceBoundsOf(carrier, name) {
+  const entry = carrier?.resources?.[name];
+  if (entry === undefined || entry === null) return null;
+  if (Number.isFinite(entry)) return { min: 0, max: null };
+  return { min: entry.min === undefined ? 0 : entry.min, max: entry.max ?? null };
+}
+
+/**
  * One role's resource requirement, named in the refusal.
  *
  * `role` is not decoration: it is the difference between "this gladiator was
@@ -6519,6 +7004,26 @@ function assertConstructionResources(carrier, where) {
         `combatant with ss2Combatant(), or declare resources: { ${SS2_TIMED_SPELL_CLOCK}: 1 } beside the counter.`
       );
     }
+  }
+  // ► **AND EVERY TIMED RESOURCE MUST BE ABLE TO HOLD WHAT THE RULE SET WRITES
+  //   TO IT (2026-09-22, found by Codex).** The resolver clamps a write to the
+  //   declared bounds without a word, so a counter whose floor sits above the
+  //   expiry's -1 restores on every tick, and one whose ceiling sits below the
+  //   arm's duration runs short. See `SS2_TIMED_RESOURCE_RANGE`.
+  for (const [name, [low, high]] of Object.entries(SS2_TIMED_RESOURCE_RANGE)) {
+    const bounds = declaredResourceBoundsOf(carrier, name);
+    if (bounds === null) continue;
+    if ((bounds.min === null || bounds.min <= low) && (bounds.max === null || bounds.max >= high)) continue;
+    const why = low < 0
+      ? `-1 is what the expiry writes after restoring the stats; clamped to ${bounds.min} the counter sits at ` +
+        "or above check_spells' `== 0`, which restores them again on every tick"
+      : "a floor above the inert value holds the counter live for ever, and a ceiling below the arm's " +
+        "duration cuts the buff short";
+    throw new TeamRuleSetError(
+      `${where} declares ${name} with bounds [${bounds.min ?? "none"}, ${bounds.max ?? "none"}], and this rule ` +
+      `set writes it anywhere from ${low} to ${high}: ${why}. A shorthand number has a floor of 0. Declare ` +
+      `resources: { ${name}: { value: ${low}, min: ${low} } }, or let ss2Combatant() and the opening declare it.`
+    );
   }
   if (declaredResourceValue(carrier, "staminamax") <= 0) {
     // A verifier found the fixpoint: at staminamax <= 0 the forced-rest gate
@@ -6664,6 +7169,15 @@ function vanillaRecordOf(view, role) {
   //   and routing it through a helper that floors at 0 would quietly move a
   //   number for every undeclared defender in the corpus.
   const bowPair = ss2InBowMode(view) ? ss2ActiveDamagePair(view) : null;
+  // ► **THE LIVE STRENGTH'S PAIR, which `battlevalues` recomputes every phase
+  //   (`+0x3356`, `+0x3386`).** 0 for every gladiator no stat spell has
+  //   touched — every golden among them — so the fallback chain below is
+  //   byte-for-byte what it was. See `ss2MeleeStrengthShift`.
+  const meleeShift = bowPair ? 0 : ss2MeleeStrengthShift(view);
+  // `attack`, `defence` and `strength` below are the LIVE stats, which is what
+  // the build reads: `attack_chances(game_attacker, game_defender)` reads
+  // `attack` and `defence` straight off the combat objects (overlay frame 1
+  // `+0x03ef`, `+0x0404`), the very fields the stat spells write.
   const record = {
     attack: view.stats.attack,
     defence: view.stats.defense,
@@ -6676,8 +7190,8 @@ function vanillaRecordOf(view, role) {
     armourclass_max: read("armourclass_max", read("armourclass")),
     staminaleft: read("staminaleft"),
     staminamax: read("staminamax"),
-    min_damage: bowPair ? bowPair.min_damage : read("min_damage", 1),
-    max_damage: bowPair ? bowPair.max_damage : read("max_damage", read("min_damage", 1)),
+    min_damage: bowPair ? bowPair.min_damage : read("min_damage", 1) + meleeShift,
+    max_damage: bowPair ? bowPair.max_damage : read("max_damage", read("min_damage", 1)) + meleeShift,
     character_level: read("character_level", 1),
     equipped_weapon: read("equipped_weapon", 1),
     weapon_enchantment_type: read("weapon_enchantment_type"),
@@ -7001,13 +7515,78 @@ function ss2TimedSpellBystanders(request) {
 }
 
 /**
- * `nextphase` step 3: `check_spells` for the actor, then for the owed bystander
- * `ss2TimedSpellBystanders` names — and then the tick clock's bookkeeping.
+ * `check_spells(which_character, which_avatar)` for ONE combatant
+ * (`+0x2439`-`+0x278f`), counter by counter in the build's order:
  *
- * For each declared counter in `SS2_TIMED_SPELL_COUNTERS`: `if (c > 0) c -= 1`,
- * which is the whole of `check_spells` for these two (`+0x272e`-`+0x278f`,
- * no expiry). An UNDECLARED counter is the build's `undefined` and is skipped:
- * `undefined > 0` is false, so the build does nothing to it either.
+ * ```text
+ *   if (c > 0) c -= 1
+ *   if (c == 0) { stats = backup_*; c = -1 }     the four stat counters only
+ * ```
+ *
+ * ► **THE EXPIRY IS OUTSIDE THE DECREMENT, AND THAT IS THE WHOLE REASON THE
+ *   INERT VALUE IS -1.** A counter decremented 1 -> 0 restores in the SAME
+ *   call, and one that ENTERS at 0 restores too; -1 and the build's
+ *   `undefined` pass by both tests. See `SS2_STAT_SPELL_INERT`.
+ *
+ * ► **IT RUNS WHEREVER THE TICK RUNS**, for the actor and for every bystander
+ *   the tick policy names, so an expiry follows whatever policy
+ *   `ss2TimedSpellBystanders` sets. The restores are `EffectKind.STAT` writes
+ *   from the carrier's own `backup_*`, emitted before the counter's -1 — the
+ *   build's last write — and after anything the phase's arm wrote, so an arm's
+ *   stat write in the same phase is overridden, as `nextphase` overrides it.
+ *
+ * An UNDECLARED counter is the build's `undefined` and is skipped:
+ * `undefined > 0` and `undefined == 0` are both false.
+ *
+ * @param {object} carrier  a frozen view
+ * @param {object|null} armed  counters the phase ARM wrote on this carrier's
+ *   clip before `nextphase` ran, read in place of the stored value
+ * @param {{ tick?: boolean }} [options] `tick: false` lands the arm's writes
+ *   without running `check_spells` — for a carrier the policy does not tick
+ */
+function ss2CheckSpells(carrier, armed, { tick = true } = {}) {
+  const effects = [];
+  const after = {};
+  const declared = declaredResourceNames(carrier);
+  for (const counter of SS2_TIMED_SPELL_COUNTERS) {
+    const written = armed?.[counter];
+    if (!declared.has(counter)) {
+      if (written !== undefined) {
+        throw new TeamRuleSetError(
+          `${carrier.id} would set ${counter}, which it does not declare; the resolver creates no resource ` +
+          "mid-battle. ss2Combatant declares the timed buffs' for any gladiator carrying the item, and the " +
+          "opening declares the stat spells' on whoever they can land on."
+        );
+      }
+      continue;
+    }
+    const stored = resourceValue(carrier, counter);
+    let value = written ?? stored;
+    const restores = SS2_TIMED_SPELL_EXPIRY[counter];
+    let expired = false;
+    if (tick) {
+      if (value > 0) value -= 1;
+      expired = restores !== undefined && value === 0;
+      if (expired) value = SS2_STAT_SPELL_INERT;
+    }
+    if (written === undefined && !tick) continue;
+    after[counter] = value;
+    if (expired) {
+      for (const stat of restores) {
+        effects.push({ kind: EffectKind.STAT, targetId: carrier.id, stat, to: ss2BackupStat(carrier, stat) });
+      }
+    }
+    if (value !== stored) {
+      effects.push({ kind: EffectKind.RESOURCE, targetId: carrier.id, resource: counter, to: value });
+    }
+  }
+  return { effects, after };
+}
+
+/**
+ * `nextphase` step 3: `check_spells` for the actor, then for the owed bystander
+ * `ss2TimedSpellBystanders` names — see `ss2CheckSpells` for what one call
+ * does — and then the tick clock's bookkeeping.
  *
  * The clock (`SS2_TIMED_SPELL_CLOCK`) is written after every tick, and only
  * when it changes: each bystander just paid goes to 0, and the actor, whose
@@ -7017,10 +7596,15 @@ function ss2TimedSpellBystanders(request) {
  * @param {object|null} armCounters  what the phase ARM left on the actor's clip
  *   before `nextphase` ran — `{ spell_regenerate: 20 }` for a cast. Read in
  *   place of the stored value, and ticked like it.
- * @returns {{ effects: object[], after: object }} `after` is the actor's own
- *   post-tick counters, which is what the effect tests read.
+ * @param {object|null} armCountersOn  what the arm left on SOMEBODY ELSE's
+ *   clip, by combatant id — little fat kid's `defender.spell_little_fat_kid =
+ *   16` (`+0x820b`). Ticked if the policy ticks that combatant; written as the
+ *   arm left it if it does not.
+ * @returns {{ effects: object[], after: object, afterOn: object }} `after` is
+ *   the actor's own post-tick counters, which is what the effect tests read;
+ *   `afterOn` the same for every id in `armCountersOn`.
  */
-function ss2TimedSpellTick(actor, armCounters) {
+function ss2TimedSpellTick(actor, armCounters, armCountersOn = null) {
   const request = SS2_PHASE_REQUESTS.get(actor);
   if (request === undefined) {
     throw new TeamRuleSetError(
@@ -7029,38 +7613,29 @@ function ss2TimedSpellTick(actor, armCounters) {
       "counters and reads the field from the request that view belongs to."
     );
   }
-  const effects = [];
-  const after = {};
-  const declared = declaredResourceNames(actor);
-  for (const counter of SS2_TIMED_SPELL_COUNTERS) {
-    const armed = armCounters?.[counter];
-    if (!declared.has(counter)) {
-      if (armed !== undefined) {
-        throw new TeamRuleSetError(
-          `${actor.id} would set ${counter}, which it does not declare; the resolver creates no resource ` +
-          "mid-battle. ss2Combatant declares it for any gladiator carrying the item that writes it."
-        );
-      }
-      continue;
-    }
-    const stored = resourceValue(actor, counter);
-    const held = armed ?? stored;
-    const ticked = held > 0 ? held - 1 : held;
-    after[counter] = ticked;
-    if (ticked !== stored) {
-      effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: counter, to: ticked });
-    }
-  }
+  const own = ss2CheckSpells(actor, armCounters);
+  const effects = [...own.effects];
+  const afterOn = {};
+  // Whoever the policy ticks, each through the same `check_spells` — so the
+  // four stat counters' expiry runs for a bystander exactly as for the actor.
   const paid = ss2TimedSpellBystanders(request);
   for (const bystander of paid) {
-    const theirs = declaredResourceNames(bystander);
-    for (const counter of SS2_TIMED_SPELL_COUNTERS) {
-      if (!theirs.has(counter)) continue;
-      const value = resourceValue(bystander, counter);
-      if (value > 0) {
-        effects.push({ kind: EffectKind.RESOURCE, targetId: bystander.id, resource: counter, to: value - 1 });
-      }
-    }
+    // A counter an arm wrote on this bystander in THIS phase (little fat
+    // kid's victim) is read in place of the frozen view's stale value, the way
+    // `armCounters` is for the actor — or the tick would decrement the old one.
+    const theirs = ss2CheckSpells(bystander, armCountersOn?.[bystander.id] ?? null);
+    effects.push(...theirs.effects);
+    if (armCountersOn?.[bystander.id]) afterOn[bystander.id] = theirs.after;
+  }
+  // An arm's write on somebody the policy does NOT tick this phase still lands,
+  // unticked: the arm's `SetMember` happens whatever `nextphase` then does.
+  for (const [id, armed] of Object.entries(armCountersOn ?? {})) {
+    if (paid.some((bystander) => bystander.id === id)) continue;
+    const carrier = [...(request.foes ?? []), ...(request.allies ?? [])].find((combatant) => combatant.id === id);
+    if (!carrier) throw new TeamRuleSetError(`An arm wrote a timed counter on ${id}, who is not on the field.`);
+    const landed = ss2CheckSpells(carrier, armed, { tick: false });
+    effects.push(...landed.effects);
+    afterOn[id] = landed.after;
   }
   // The clock, after every tick: each owed bystander has just been paid, and
   // the actor — whose phase this is — now owes one to whoever completes the
@@ -7069,10 +7644,10 @@ function ss2TimedSpellTick(actor, armCounters) {
   for (const bystander of paid) {
     effects.push({ kind: EffectKind.RESOURCE, targetId: bystander.id, resource: SS2_TIMED_SPELL_CLOCK, to: 0 });
   }
-  if (declared.has(SS2_TIMED_SPELL_CLOCK) && resourceValue(actor, SS2_TIMED_SPELL_CLOCK) !== 1) {
+  if (declaredResourceNames(actor).has(SS2_TIMED_SPELL_CLOCK) && resourceValue(actor, SS2_TIMED_SPELL_CLOCK) !== 1) {
     effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: SS2_TIMED_SPELL_CLOCK, to: 1 });
   }
-  return { effects, after };
+  return { effects, after: own.after, afterOn };
 }
 
 /**
@@ -7103,17 +7678,20 @@ function ss2TimedSpellTick(actor, armCounters) {
  * @param {object|null} armCounters  timed-spell counters the phase ARM wrote on
  *   the actor's clip before `nextphase` ran (`{ spell_regenerate: 20 }` for
  *   `cast_regenerate`); see `ss2TimedSpellTick`.
+ * @param {object|null} armCountersOn  the same for counters the arm wrote on
+ *   somebody else's clip, by id — `cast_little_fat_kid`'s victim.
  *
  * ► **ONE THING HERE IS NOT ATTACKER-ONLY, AND IT IS THE FIRST THING `nextphase`
  *   DOES: the timed-spell tick** (step 3, `+0x3271`/`+0x3289`), which reaches
  *   the bystander owed a tick through `ss2TimedSpellBystanders` — in 1v1,
- *   always the defender, as in the build. The two EFFECTS
- *   the counters buy (steps 8 and 9) are attacker-only, like everything else.
+ *   always the defender, as in the build — and with it the four stat spells'
+ *   expiry. The two EFFECTS regenerate and boundless buy (steps 8 and 9) are
+ *   attacker-only, like everything else.
  */
 function phaseTransitionEffects(
   actor,
   { staminaCost, branchGain = 0, branchHeal = 0, fromStaminaleft = null, fromHealth = null,
-    resetsPsyche = true, armCounters = null }
+    resetsPsyche = true, armCounters = null, armCountersOn = null }
 ) {
   const declared = declaredResourceNames(actor);
   const stamina = actor.stats.stamina;
@@ -7123,7 +7701,7 @@ function phaseTransitionEffects(
   // Step 3, `check_spells` — BEFORE the stamina arithmetic, as the build has
   // it, so the effect tests at steps 8 and 9 read the post-tick counter and the
   // cast phase itself (20 -> 19) applies.
-  const timed = ss2TimedSpellTick(actor, armCounters);
+  const timed = ss2TimedSpellTick(actor, armCounters, armCountersOn);
   effects.push(...timed.effects);
   // Kept for step 9, which adds AFTER the floor rather than inside it.
   let staminaFloored = null;
@@ -7226,14 +7804,16 @@ function phaseTransitionEffects(
 
   // `healed` and `staminaGained` are everything `nextphase` did, buffs
   // included; `regenerated`/`boundlessGained` say how much of it was the buffs,
-  // and `timedSpells` is the actor's own post-tick counters.
+  // and `timedSpells` is the actor's own post-tick counters (`timedSpellsOn`
+  // the same for whoever `armCountersOn` named).
   return {
     effects,
     staminaGained,
     healed: healed + regenerated,
     regenerated,
     boundlessGained,
-    timedSpells: timed.after
+    timedSpells: timed.after,
+    timedSpellsOn: timed.afterOn
   };
 }
 
@@ -7999,6 +8579,16 @@ export function createSs2TeamRules({
       ));
     },
 
+    /**
+     * The stat spells' counters and `backup_*`, on whoever a stat spell can
+     * land on — `backup_char` before the bout, as far as this engine needs it.
+     * See `ss2StatSpellDeclarations`; empty for every battle in which nobody
+     * carries id 33, 40, 41 or 42.
+     */
+    openingResources(combatants) {
+      return ss2StatSpellDeclarations(combatants);
+    },
+
     startingPosition({ teamIndex, slotIndex }) {
       if (fixtureReplay) return null;
       const side = teamIndex === 0 ? -1 : 1;
@@ -8712,6 +9302,32 @@ export function createSs2TeamRules({
         if (ss2InventorySlotHolding(view.actor, buff.itemId) === null) continue;
         if (!declaredResourceNames(view.actor).has(buff.counter)) continue;
         actions.push({ type, targetId: actorId });
+      }
+
+      // ► **THE FOUR STAT SPELLS, ON THE SAME BUTTON UNDER THE SAME TWO GATES.**
+      //   Colossus, swift sandals and bloodlust write only the caster, so each
+      //   is offered ONCE, aimed at the caster — the teleport's shape. Little
+      //   fat kid writes the DEFENDER (`game_defender.strength`, `+0x82df`), so
+      //   it is offered PER FOE, the bolts' shape: the arm reads one bound
+      //   `defender` and above 1v1 the caster picks. No range and no health
+      //   test: every distance in these four is ladder arms 8, 9, 22 and 27,
+      //   the villain's DECISION, read by `chooseAiAction`.
+      //
+      //   **AND THE BEARER MUST HOLD WHAT THE CAST WRITES** — the counter and
+      //   the `backup_*` it writes from — for the reason the timed buffs give:
+      //   the resolver creates no resource mid-battle, so a cast whose counter
+      //   the bearer cannot hold would be a button that throws.
+      //   `ss2StatSpellDeclarations` declares them at the opening for every
+      //   carrier and every foe of a carrier of 33, so for any battle built
+      //   through `createTeamBattle` this is possession exactly.
+      for (const [type, spell] of Object.entries(SS2_STAT_SPELLS)) {
+        if (ss2InventorySlotHolding(view.actor, spell.itemId) === null) continue;
+        const holds = (bearer) => ss2StatSpellResources(spell).every((name) => declaredResourceNames(bearer).has(name));
+        if (spell.bearer === "caster") {
+          if (holds(view.actor)) actions.push({ type, targetId: actorId });
+        } else {
+          for (const foe of view.foes) if (holds(foe)) actions.push({ type, targetId: foe.id });
+        }
       }
 
       // ► **REJUVENATE: ONCE, SELF-TARGETED, ON POSSESSION, on the same button
@@ -10969,6 +11585,98 @@ export function createSs2TeamRules({
         };
       }
 
+      // ► **THE FOUR STAT SPELLS. Zero samples; the arm writes stats from the
+      //   bearer's `backup_*`, and `check_spells` takes them back when the
+      //   counter runs out.** See `SS2_STAT_SPELLS` for each arm; returned
+      //   before `ATTACK_BANDS` for `shove`'s reason.
+      const statSpell = SS2_STAT_SPELLS[request.type];
+      if (statSpell) {
+        const onVictim = statSpell.bearer === "victim";
+        const bearer = onVictim ? request.target : actor;
+        const label = VANILLA_PHASE_LABEL[request.type];
+        if (onVictim && (!bearer || bearer.teamId === actor.teamId)) {
+          throw new TeamRuleSetError(`${request.type} is cast on a foe; ${String(request.targetId)} is not one.`);
+        }
+        if (!onVictim && request.targetId != null && request.targetId !== actor.id) {
+          throw new TeamRuleSetError(
+            `${request.type} is cast on the caster; ${String(request.targetId)} is not ${actor.id}.`
+          );
+        }
+        // Re-found at resolve, through the same window as the offer, for the
+        // reason the bolt branch gives.
+        const slot = ss2InventorySlotHolding(actor, statSpell.itemId);
+        if (slot === null) {
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${label}: no declared inventory slot inside its window holds item ` +
+            `${statSpell.itemId}. The build's own gate is possession, and this engine reproduces it.`
+          );
+        }
+        // Refused BEFORE any effect exists: the resolver applies a list with no
+        // rollback and would refuse the counter write half-way through.
+        const missing = ss2StatSpellResources(statSpell).filter((name) => !declaredResourceNames(bearer).has(name));
+        if (missing.length > 0) {
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${label} on ${bearer.id}: it does not declare ${missing.join(", ")}, and the ` +
+            "resolver creates no resource mid-battle. The opening declares them on whoever the spell can land on."
+          );
+        }
+
+        // The once-block, from the BEARER's fight-start backups. Emitted
+        // before the transition, whose tick may expire another of the
+        // bearer's counters and put a stat back — the build's order.
+        const backup = Object.fromEntries(statSpell.stats.map((stat) => [stat, ss2BackupStat(bearer, stat)]));
+        const statsSet = statSpell.write(backup);
+        const statEffects = Object.entries(statsSet).map(([stat, to]) => ({
+          kind: EffectKind.STAT, targetId: bearer.id, stat, to
+        }));
+
+        // `staminacost = Math.round(game_attacker.magicka)`, the CASTER's
+        // stat in all four (little fat kid's `+0x8229` included), with no
+        // affordability check. The arm's counter write is handed to the
+        // transition rather than emitted, as regenerate's is.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const armed = { [statSpell.counter]: statSpell.duration };
+        const transition = phaseTransitionEffects(actor, {
+          staminaCost,
+          armCounters: onVictim ? null : armed,
+          armCountersOn: onVictim ? { [bearer.id]: armed } : null
+        });
+        const counterAfter = onVictim
+          ? transition.timedSpellsOn[bearer.id]?.[statSpell.counter]
+          : transition.timedSpells[statSpell.counter];
+
+        const effects = [{
+          kind: EffectKind.RESOURCE,
+          targetId: actor.id,
+          resource: slot,
+          to: SS2_INVENTORY_EMPTY
+        }, ...statEffects, ...transition.effects, ...crowd];
+
+        return {
+          effects,
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: bearer.id,
+            vanillaLabel: label,
+            casterClip: statSpell.casterClip,
+            // Only little fat kid plays anything on anybody else.
+            ...(statSpell.victimClip ? { victimClip: statSpell.victimClip } : {}),
+            spellId: statSpell.itemId,
+            consumedSlot: slot,
+            counter: statSpell.counter,
+            counterSet: statSpell.duration,
+            counterAfter,
+            // What the arm wrote, in this engine's stat names, before
+            // `nextphase` could put any of it back.
+            statsSet,
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
+          }]
+        };
+      }
+
       const band = ATTACK_BANDS[request.type]
         // The discharging press, and ONLY that press, is band-shaped. See
         // `PSYCHE_UP_DISCHARGE` for why the action is not in `ATTACK_BANDS`.
@@ -11953,6 +12661,41 @@ export function createSs2TeamRules({
         return regenerateOption;
       }
 
+      // ► **LADDER ARMS 8 AND 9, COLOSSUS AND LITTLE FAT KID — the build's own
+      //   rules, `check_inventory(42) && fightdistance < 300` (`+0x0890`-
+      //   `+0x08c4`) and `check_inventory(33) && fightdistance < 500`
+      //   (`+0x08ea`-`+0x091e`), strict.** See `ss2StatSpellChoice`.
+      //
+      // ► **THEIR OWN BLOCK, SHAPED LIKE ARM 3's ABOVE**: they precede the
+      //   armour and stamina potions (arms 10-13) and are preceded by the health
+      //   potions (arms 2, 4-6) and molten death (arm 7, possession alone). So
+      //   the health arms that precede are taken from `SS2_POTION_LADDER` here,
+      //   molten death next, and only then the stat spell — and returning here,
+      //   ABOVE the drink walk below, is what puts both ahead of arms 10-13.
+      //   Arm 8 before arm 9: below 300 a villain holding both grows.
+      //
+      // ► **AND THEY SHUT EVERYTHING BELOW THEM THAT THEIR GATES COVER**: arm 9's
+      //   `< 500` covers bloodlust's `< 400` (arm 22) and the teleport's `< 250`
+      //   (arm 26), so a villain holding 33 never reaches either while a foe
+      //   stands inside 500; arm 8's `< 300` does the same to the teleport.
+      //
+      // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
+      {
+        const statSpell = ss2StatSpellChoice(view, options, Ss2ActionType.CAST_COLOSSUS)
+          ?? ss2StatSpellChoice(view, options, Ss2ActionType.CAST_LITTLE_FAT_KID);
+        if (statSpell) {
+          const arm = SS2_STAT_SPELLS[statSpell.type].ladderArm;
+          const pools = ss2PoolsOf(actor);
+          for (const { arm: potionArm, itemId } of SS2_POTION_LADDER) {
+            if (potionArm > arm) break;
+            const drink = options.find((option) => option.type === Ss2ActionType.DRINK_POTION && option.itemId === itemId);
+            const { stat } = SS2_POTIONS[itemId];
+            if (drink && pools[stat] < pools[SS2_POOL_CEILING[stat]] / 2) return drink;
+          }
+          return ss2DeathFromAboveChoice(view, options) ?? statSpell;
+        }
+      }
+
       // ► **THE POTIONS ARE THE BUILD'S OWN RULE, AND THEY COME FIRST OF
       //   EVERYTHING `villain_cast_spells` DECIDES.** Ladder arms 2, 4-6 and
       //   10-13 each drink when the id is carried AND the pool it restores is
@@ -11979,10 +12722,12 @@ export function createSs2TeamRules({
       //     rather than on nine in ten, and a failed roll's fall-through to the
       //     melee decision is not reproduced;
       //   - the arms with no verb here (~~1 `cast_rejuvinate`,~~ ~~3
-      //     `cast_regenerate`,~~ ~~7 `cast_death_from_above`,~~ 8 `cast_colossus`, 9
-      //     `cast_little_fat_kid`; arm 3 has had a verb since 2026-09-22 and is
+      //     `cast_regenerate`,~~ ~~7 `cast_death_from_above`,~~ ~~8 `cast_colossus`, 9
+      //     `cast_little_fat_kid`~~; arm 3 has had a verb since 2026-09-22 and is
       //     tested in the block just above, and arm 7 since the same day and is
-      //     tested inside this walk, below; arm 1 too, tested above arm 3), which pre-empt some potions in the build and
+      //     tested inside this walk, below; arm 1 too, tested above arm 3;
+      //     **arms 8 and 9 too, the same day, in their own block above this
+      //     walk, which is where they pre-empt arms 10-13**), which pre-empt some potions in the build and
       //     nothing here — the stance the gale block takes for arms 1-23;
       //   - ~~**AND IT SITS BEHIND THE FORCED REST ABOVE, WHICH IS AN OPEN
       //     QUESTION, NOT A DERIVATION.** `staminaleft > 10` (`+0x03e8`) gates
@@ -12130,10 +12875,13 @@ export function createSs2TeamRules({
       //   `!boltOnOffer` says. `regenerate` (arm 3) got its verb the same day
       //   and returns above (merged from a parallel worktree). **So does molten
       //   death (arm 7, possession alone), inside the drink walk.** The rest of
-      //   1-18 (~~`rejuvinate`,~~ ~~death from above,~~ colossus, little fat kid)
+      //   1-18 (~~`rejuvinate`,~~ ~~death from above,~~ ~~colossus, little fat kid~~)
       //   have no verb here and so pre-empt nothing (rejuvenate, arm 1, returns
       //   first of all since 2026-09-22); when they are built, this
-      //   block must grow. And it
+      //   block must grow. **Colossus and little fat kid (arms 8, 9) got theirs
+      //   2026-09-22 and return in their own block above the drink walk — and
+      //   both gates cover this one's `< 300`, so a caster holding 42 or 33
+      //   never weakens while a foe stands inside 300.** And it
       //   sits ABOVE the gale (arm 24) and the teleport (arm 26), so a caster
       //   qualifying for either weakens first.
       //
@@ -12175,10 +12923,14 @@ export function createSs2TeamRules({
       // ► **WHAT PRE-EMPTS THEM, AS FAR AS THIS ENGINE HOLDS IT:** arm 3 and
       //   the potion arms returned above; the five damage spells (14-18) fire
       //   on possession, which `!boltOnOffer` says; arm 19, weaken armour, is
-      //   the block directly above. Arms ~~1 and~~ 7-9 have no verb here and so
-      //   pre-empt nothing (arm 1, rejuvenate, returns first of all since
-      //   2026-09-22). And these two pre-empt arms 22-26 — boundless
-      //   energy (23), the gale (24) and the teleport (26) are all below.
+      //   the block directly above. ~~Arms 1 and 7-9 have no verb here and so
+      //   pre-empt nothing.~~ **Arm 1 (rejuvenate) returns first of all since
+      //   2026-09-22; arm 7 (molten death) returns inside the drink walk, and
+      //   arms 8 and 9 (colossus `< 300`, little fat kid `< 500`, 2026-09-22) in
+      //   their own block above it — both gates cover the whirlwind's `< 200`,
+      //   and little fat kid's is disjoint from the ghost strike's `> 500`.**
+      //   And these two pre-empt arms 22-26 — bloodlust (22), boundless energy
+      //   (23), the gale (24) and the teleport (26) are all below.
       //
       // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
       //
@@ -12198,6 +12950,27 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **LADDER ARM 22, BLOODLUST — `check_inventory(41) && fightdistance <
+      //   400` (`+0x0d99`-`+0x0dcd`), strict, and nothing else.** Returned before
+      //   the walk and the swing, because `villain_cast_spells` replaces the
+      //   decision; see `ss2StatSpellChoice`.
+      //
+      // ► **WHAT PRE-EMPTS IT, AS FAR AS THIS ENGINE HOLDS IT — all of arms
+      //   1-21 that have a verb, and they have all returned above:** regenerate
+      //   (3), the potions (2, 4-6, 10-13), molten death (7), colossus and
+      //   little fat kid (8, 9 — and 9's `< 500` covers this whole gate, so a
+      //   villain holding 33 never casts bloodlust), the five damage spells
+      //   (14-18, possession alone: `!boltOnOffer`), weaken (19), whirlwind (20)
+      //   and ghost strike (21, `> 500`, disjoint). Arm 1 (`rejuvinate`) has no
+      //   verb here. **And it pre-empts boundless energy (23)**, which is
+      //   possession alone, so it sits directly above that block.
+      //
+      // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
+      if (!boltOnOffer) {
+        const bloodlust = ss2StatSpellChoice(view, options, Ss2ActionType.CAST_BLOODLUST);
+        if (bloodlust) return bloodlust;
+      }
+
       // ► **LADDER ARM 23, `cast_boundless_energy`, ON POSSESSION ALONE** —
       //   `check_inventory(45)` and nothing else (`+0x0df3`-`+0x0e29`; the only
       //   test before its `If` is the `Equals2` against `true`). So it fires
@@ -12215,9 +12988,11 @@ export function createSs2TeamRules({
       //   order on 2026-09-22). **Arm 7, molten death, returned above too**
       //   (possession alone, inside the drink walk). **Arms 20 and 21,
       //   whirlwind and ghost strike, got verbs the same day and are tested
-      //   above this block** (merged from a parallel worktree). Arms ~~7-9~~
-      //   8-9 and 22 (~~death from above,~~ colossus, little fat kid, bloodlust)
-      //   have none and pre-empt nothing here, where the build would.
+      //   above this block** (merged from a parallel worktree). ~~Arms 8-9 and
+      //   22 (colossus, little fat kid, bloodlust) have none and pre-empt
+      //   nothing here, where the build would.~~ **Arms 8, 9 and 22 got verbs
+      //   2026-09-22 and return above: 8 and 9 above the drink walk, 22 in the
+      //   block directly above this one.**
       //
       // ► **AND IT PRE-EMPTS THE GALE (24) AND THE TELEPORT (26)**, which is
       //   why it sits here, above both.
@@ -12271,7 +13046,11 @@ export function createSs2TeamRules({
       //   **And for boundless energy (arm 23, possession alone) and regenerate
       //   (arm 3) on 2026-09-22**: both return in blocks ABOVE this one, so a
       //   caster carrying 45 never reaches the gale, and neither does one below
-      //   half health carrying 46 (`test/ss2-timed-buffs.test.js`).
+      //   half health carrying 46 (`test/ss2-timed-buffs.test.js`). **And for
+      //   colossus, little fat kid and bloodlust (arms 8, 9, 22) the same day**:
+      //   all three return above, and little fat kid's `< 500` and bloodlust's
+      //   `< 400` cover the gale's whole `< 400`, so a caster holding 33 or 41
+      //   never gales (`test/ss2-stat-spells.test.js`).
       //
       // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
       //   > 10` at `+0x056f`. This AI takes no samples, so it casts on every
@@ -12320,9 +13099,17 @@ export function createSs2TeamRules({
       //   alone — `!boltOnOffer`), boundless energy (23, possession alone) and
       //   the gale (24, `< 400`, so the two overlap on 301-399 and the gale
       //   wins there when its armour test passes). Weaken (19, `< 300`) is
-      //   DISJOINT from this gate on the same distance and never meets it. Arms
+      //   DISJOINT from this gate on the same distance and never meets it. ~~Arms
       //   7-9 and 20-22 have no verb here and pre-empt nothing, where the build
-      //   would (22, bloodlust, `fightdistance < 400`, would own 301-399).
+      //   would (22, bloodlust, `fightdistance < 400`, would own 301-399).~~
+      //   **Corrected 2026-09-22 (the stat spells): arms 7, 20 and 21 already
+      //   had verbs when that was written, and 8, 9 and 22 have them now — all
+      //   return in blocks above.** Of those, the ones whose gate can be open
+      //   beyond 300 pre-empt this one: little fat kid (9, `< 500`, owns
+      //   301-499), bloodlust (22, `< 400`, owns 301-399), ghost strike (21,
+      //   `> 500`) and molten death (7, possession alone). Colossus (8, `< 300`)
+      //   and the whirlwind (20, `< 200`) are disjoint from `> 300`. Arm 1
+      //   (`rejuvinate`, any distance) has no verb here.
       //
       // ► **AND IT SITS ABOVE THE TELEPORT (26)**, in ladder order — though the
       //   teleport's `< 250` is disjoint from `> 300` on the same distance, so
@@ -12390,10 +13177,14 @@ export function createSs2TeamRules({
       //   drink rule returns before the gale block, so a caster that qualifies
       //   for a potion never reaches this line (merged 2026-09-22; the two verbs
       //   were built in parallel). This test must still grow for ~~`rejuvinate`
-      //   (arm 1, `hitpoints < hitpointsmax / 1.5`, implied by this gate) and~~
-      //   bloodlust (arm 22, `fightdistance < 400`, implied too). **Rejuvenate
+      //   (arm 1, `hitpoints < hitpointsmax / 1.5`, implied by this gate) and
+      //   bloodlust (arm 22, `fightdistance < 400`, implied too)~~. **Rejuvenate
       //   (arm 1, implied by this gate) has a verb since 2026-09-22 and returns
-      //   first of all, so a caster holding 43 never reaches this line.**
+      //   first of all, so a caster holding 43 never reaches this line. Bloodlust
+      //   has its verb since the same day and returns above, and so do the two
+      //   this sentence also missed — colossus (arm 8, `< 300`) and little fat
+      //   kid (arm 9, `< 500`), whose gates this one's `< 250` implies too: a
+      //   caster holding 42, 33 or 41 never teleports while it holds them.**
       //
       // ► **WHAT IS OMITTED, NAMED:** the build's single `randomBetween(1, 100)
       //   > 10` at `+0x056f`. This AI takes no samples, so it teleports on every
@@ -12413,6 +13204,29 @@ export function createSs2TeamRules({
           // distance is null — and is guarded for the reason the gale's is.
           if (range !== null && range < SS2_TELEPORT.aiFightDistanceBelow && belowHalfHealth) return teleportOption;
         }
+      }
+
+      // ► **LADDER ARM 27, SWIFT SANDALS — `check_inventory(40) &&
+      //   fightdistance > 300` (`+0x0fb0`-`+0x0fe4`), strict (`Greater`), and
+      //   nothing else.** Returned before the walk, because `villain_cast_spells`
+      //   replaces the decision: a villain holding 40 with its foe beyond 300
+      //   puts the sandals on rather than walking. See `ss2StatSpellChoice`.
+      //
+      // ► **WHAT PRE-EMPTS IT, AS FAR AS THIS ENGINE HOLDS IT — every arm above
+      //   with a verb and a gate that can be open beyond 300, and they have all
+      //   returned above:** the potions and regenerate, molten death (7), little
+      //   fat kid (9, 301-499), the damage spells (14-18: `!boltOnOffer`),
+      //   ghost strike (21, `> 500`), bloodlust (22, 301-399), boundless energy
+      //   (23, possession alone — so a villain holding 45 never gets here), the
+      //   gale (24, 301-399 with its armour test), the command (25, the SAME
+      //   `> 300`: a villain holding 39 always commands first). Colossus (8),
+      //   weaken (19), whirlwind (20) and the teleport (26) are all `< 300` or
+      //   less and never meet it. Arm 28, adulation, sits below and has no verb.
+      //
+      // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
+      if (!boltOnOffer) {
+        const swift = ss2StatSpellChoice(view, options, Ss2ActionType.CAST_SWIFTSANDALS);
+        if (swift) return swift;
       }
 
       if (!attackOnOffer) {
@@ -12874,8 +13688,11 @@ export function createSs2TeamRules({
           //   (`damagecharacter`), so charging under a foe who can reach you is
           //   usually wasted. The incoming proxy is deliberately crude and
           //   cannot throw: the foe's own declared `max_damage`, 0 for a
-          //   combatant that declares none, in which case the test passes.
-          const incoming = resourceValue(engaged, "max_damage", 0) * presses;
+          //   combatant that declares none, in which case the test passes —
+          //   **carried to the foe's LIVE strength since 2026-09-22**
+          //   (`ss2MaxDamageProxy`), or a colossus-buffed foe is priced at its
+          //   fight-start swing and the wind-up walks into three of its turns.
+          const incoming = ss2MaxDamageProxy(engaged) * presses;
           const survivesTheWindUp = actor.health > incoming;
           const affordable = resourceValue(actor, "staminaleft", 0)
             > Math.round(actor.stats.strength * PSYCHE_UP_DISCHARGE.strengthFactor) * presses;

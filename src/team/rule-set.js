@@ -103,7 +103,39 @@ export const EffectKind = Object.freeze({
    * `POSITION` emitter must declare `startingPosition`. The resolver enforces
    * it the same way and with the same message shape.
    */
-  LATERAL: "lateral"
+  LATERAL: "lateral",
+  /**
+   * Set one of a combatant's `stats` to an absolute value, for the rest of the
+   * battle — `{ kind: "stat", targetId, stat, to }`.
+   *
+   * ► **ADDED 2026-09-22, BECAUSE A VERB HAD NO WAY TO CHANGE A STAT AT ALL.**
+   *   `stats` reached a rule set frozen and left every battle as it entered
+   *   it, so a spell whose whole effect is "strength is now three times what
+   *   it was" (SS2's colossus, bloodlust, swift sandals and little fat kid)
+   *   could not be expressed.
+   *
+   * **Absolute, never a delta, for the reason `RESOURCE` writes `to`**: a
+   * replayed log lands on the same value whatever the peer thought the stat
+   * held a moment earlier, and a buff that is RE-cast writes the same number
+   * again instead of stacking.
+   *
+   * **The resolver creates no stat.** `stat` must name a key the combatant's
+   * `stats` already carries (`roster.normaliseCombatant` builds a fixed set),
+   * for the reason a resource must be declared at construction: a field that
+   * exists only on the branch one peer took is a desync with a delay fuse.
+   *
+   * **Nothing is clamped**: a stat has no declared bounds, and the rule set
+   * owns any it has, as it owns the arena bound a `POSITION` carries.
+   *
+   * **Why a kind of its own rather than stats as resources.** Every reader a
+   * rule set already has reads `stats`, so writing the stat IN PLACE keeps
+   * each of them reading the in-battle value with no edit; the value it was
+   * built with, where a rule set needs it, is that rule set's own declared
+   * resource. And a combatant nothing writes keeps a byte-identical
+   * projection — `stats` was always projected and hashed — so the kind costs
+   * no existing battle anything.
+   */
+  STAT: "stat"
 });
 
 const REQUIRED_FUNCTIONS = Object.freeze([
@@ -326,6 +358,17 @@ export function assertActionOutcome(outcome, ruleSetId) {
       if (!Number.isFinite(effect.to)) {
         throw new TeamRuleSetError(
           `Rule set ${ruleSetId} produced a lateral effect without a finite absolute \`to\` value.`
+        );
+      }
+    } else if (effect.kind === EffectKind.STAT) {
+      // Absolute, and unbounded here: see `EffectKind.STAT`. Whether the stat
+      // exists is the resolver's to check, against the combatant it names.
+      if (typeof effect.stat !== "string" || effect.stat.length === 0) {
+        throw new TeamRuleSetError(`Rule set ${ruleSetId} produced a stat effect without a stat name.`);
+      }
+      if (!Number.isFinite(effect.to)) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a stat effect without a finite absolute \`to\` value.`
         );
       }
     } else if (!Number.isFinite(effect.amount) || effect.amount < 0) {

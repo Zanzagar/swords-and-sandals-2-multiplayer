@@ -38,7 +38,7 @@ import { BattleError } from "./errors.js";
 import { placeholderTeamRules } from "./placeholder-rules.js";
 import { buildRoster, initiativeOrder } from "./roster.js";
 import { createOrderedRngChannel } from "./rng.js";
-import { freezeResources, projectResources, writeResource } from "./resources.js";
+import { freezeResources, projectResources, withDeclaredResources, writeResource } from "./resources.js";
 import {
   assertActionOutcome,
   assertTeamRuleSet,
@@ -135,6 +135,7 @@ export function createTeamBattle({
 } = {}) {
   assertTeamRuleSet(rules);
   const roster = buildRoster({ teams, rules });
+  declareOpeningResources(rules, roster.teams.flatMap((team) => team.combatants));
   const rng = createOrderedRngChannel({ seed, tape: rngTape, journal: journalRolls });
   const battle = {
     version: BATTLE_STATE_VERSION,
@@ -207,6 +208,47 @@ export function createTeamBattle({
   }
   if (opening.length) applyEffects(battle, opening);
   return battle;
+}
+
+/**
+ * ► **THE RESOURCES A RULE SET'S VERBS WILL WRITE ON SOMEBODY WHO IS NOT
+ *   CARRYING THE THING THAT WRITES THEM.** Added 2026-09-22 for SS2's little
+ *   fat kid, whose counter and whose stat backups live on the VICTIM — and a
+ *   blueprint builds one combatant at a time, so it cannot know that a foe
+ *   will carry the item.
+ *
+ * `rules.openingResources(views)` is OPTIONAL and is asked ONCE, after every
+ * combatant is built and before anybody acts, with a frozen view of each. It
+ * returns `[{ targetId, resource, value, min?, max? }]`. Each is declared
+ * through `withDeclaredResources`, so it meets every rule a blueprint's
+ * declaration does, and a name the combatant already declares is left as the
+ * blueprint stated it.
+ *
+ * **Declarations only, never a write**, and the narrowness is the point for
+ * the reason `openingEffects` gives: a rule set that needs a pool to MOVE at
+ * construction should say so and get its own hook. A rule set with no hook,
+ * or one returning `[]`, builds exactly the battle it always did — nothing
+ * here touches a bag it adds nothing to.
+ */
+function declareOpeningResources(rules, combatants) {
+  if (typeof rules.openingResources !== "function") return;
+  const declarations = rules.openingResources(combatants.map(combatantView));
+  if (!Array.isArray(declarations)) {
+    throw new BattleError(`Rule set ${rules.id} returned a non-array from openingResources().`);
+  }
+  for (const declaration of declarations) {
+    const target = combatants.find((combatant) => combatant.id === declaration?.targetId);
+    if (!target) {
+      throw new BattleError(
+        `Rule set ${rules.id} declared an opening resource for unknown combatant ${String(declaration?.targetId)}.`
+      );
+    }
+    const { value, min, max } = declaration;
+    const entry = { value };
+    if (min !== undefined) entry.min = min;
+    if (max !== undefined) entry.max = max;
+    target.resources = withDeclaredResources(target.resources, { [declaration.resource]: entry });
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -393,6 +435,17 @@ function applyEffects(battle, effects) {
         );
       }
       target.y = effect.to;
+    } else if (effect.kind === EffectKind.STAT) {
+      // The same division again — the rule set owns any bound — and the same
+      // refusal a resource write makes: a stat the combatant was not built
+      // with is not created here. See `EffectKind.STAT`.
+      if (!Object.hasOwn(target.stats, effect.stat)) {
+        throw new BattleError(
+          `Rule set ${battle.rules.id} wrote stat ${String(effect.stat)} on ${effect.targetId}, which carries ` +
+          `${Object.keys(target.stats).join(", ")}. The resolver creates no stat mid-battle.`
+        );
+      }
+      target.stats[effect.stat] = effect.to;
     } else if (effect.kind === EffectKind.STATUS) {
       const present = target.status.includes(effect.status);
       if (effect.active === false && present) {
