@@ -589,21 +589,69 @@ test("the `_defence` writes land AFTER all of `nextphase`'s own, in `battlevalue
   assert.deepEqual(tail, ["staminaleft=156", "psyche_up=1", "helmet_defence=20", "shoulderguard_defence=8"]);
 });
 
-test("NAMED CHOICE: a shield restored with the bow drawn is worth its MELEE value, this engine's one representation", () => {
-  // The build zeroes `shield_defence` while `using_bow` (+0x35e2-+0x3633) at
-  // EVERY `nextphase`, for both fighters. This engine never does — `swap_weapons`
-  // writes only `equipped_weapon`, and a bow-drawn victim's shield already
-  // costs its melee value on removal, before this verb existed. So the field
-  // here always holds the melee value, and the restore keeps to it: zeroing it
-  // at this one site would leave a shield worth 0 after a swap back to melee,
-  // where the build rebuilds it. The bow zeroing is the swap's divergence.
-  // Arrows in the quiver, or the only offer would be the forced swap back.
-  const battle = resumed({ hero: { backup_shield: 1, secondary_weapon: 61, ammo_left: 5 } });
-  combatantById(battle, "hero").resources.equipped_weapon.value = 2;
-  assert.equal(offersOf(battle).length, 1, "the archer is offered the cast");
+/*
+ * THE SHIELD, UNDER EACH WEAPON MODE. The rest of the build's rule is
+ * `nextphase`'s `battlevalues` (`+0x35f1`), whose shield line reads the MODE:
+ * `using_bow == true ? 0 : round(shield * 12)` (`+0x35e2`-`+0x35f2`, `+0x3623`,
+ * `+0x35f7`). So a shield restored to an archer is worth 0 until it sheathes,
+ * and the sheathing swap reprices it (`+0x4fab`).
+ *
+ * ~~NAMED CHOICE: `usingBow: false`, the shield's melee value, with the bow
+ * zeroing left as `swap_weapons`' divergence.~~ Retired 2026-09-22 with that
+ * divergence: `vanillaRecordOf` now zeroes the shield while `equipped_weapon`
+ * is 2, so the bag holds the SHEATHED rating by design and the restore writes
+ * exactly that. What these pin is what `remove_armour` then takes.
+ *
+ * The foe's weaken: direction 3 (lower group), selector 3 -> the shield;
+ * rounds 2-3 find no shinguard.
+ */
+const SHIELD_TAPE = Object.freeze([
+  direction(1, 3), selection(1, 3, 3), ...debris(1),
+  direction(2, 3), selection(2, 3, 1),
+  direction(3, 3), selection(3, 3, 1)
+]);
+/** A resumed archer, rebuilt mid-fight with the bow in hand: the state `battleStarted` exists to rebuild. */
+const ARCHER = Object.freeze({
+  backup_shield: 1, secondary_weapon: 61, ammo_left: 5, equipped_weapon: 2, using_bow: true
+});
+const weakenHero = (battle) =>
+  applyAction(battle, { actorId: "foe", type: Ss2ActionType.CAST_WEAKEN_ARMOUR, targetId: "hero" });
+const heroArmour = (battle) => [
+  valueOf(battle, "hero", "armourclass"), valueOf(battle, "hero", "armourclass_max"), valueOf(battle, "hero", "shield")
+];
+
+test("a shield restored with the SWORD in hand is worth 12, and its next removal takes 12 from both pools", () => {
+  const battle = resumed({ hero: { backup_shield: 1 }, rngTape: SHIELD_TAPE });
   cast(battle);
   assert.equal(valueOf(battle, "hero", "shield"), 1);
   assert.equal(valueOf(battle, "hero", "shield_defence"), 12, "round(1 * shield_dval 12), +0x35f7");
+  assert.deepEqual(heroArmour(battle), [40, 40, 1]);
+  weakenHero(battle);
+  assert.equal(battle.rng.remainingCount, 0);
+  assert.deepEqual(heroArmour(battle), [28, 28, 0]);
+});
+
+test("a shield restored with the BOW in hand is worth NOTHING while the bow stays drawn (+0x3623)", () => {
+  // Arrows in the quiver, or the only offer would be the forced swap back.
+  const battle = resumed({ hero: { ...ARCHER }, rngTape: SHIELD_TAPE });
+  assert.equal(valueOf(battle, "hero", "equipped_weapon"), 2);
+  assert.equal(offersOf(battle).length, 1, "the archer is offered the cast");
+  cast(battle);
+  assert.equal(valueOf(battle, "hero", "shield"), 1);
+  weakenHero(battle);
+  assert.equal(battle.rng.remainingCount, 0);
+  assert.deepEqual(heroArmour(battle), [40, 40, 0], "the shield falls and neither pool moves");
+});
+
+test("...and once it SHEATHES, the restored shield is worth its 12 again (+0x4fab)", () => {
+  const battle = resumed({ hero: { ...ARCHER }, rngTape: SHIELD_TAPE });
+  cast(battle);
+  applyAction(battle, { actorId: "foe", type: Ss2ActionType.REST, targetId: "foe" });
+  applyAction(battle, { actorId: "hero", type: Ss2ActionType.SWAP_WEAPONS, targetId: "hero" });
+  assert.equal(valueOf(battle, "hero", "equipped_weapon"), 1, "the sword is back in hand");
+  weakenHero(battle);
+  assert.equal(battle.rng.remainingCount, 0);
+  assert.deepEqual(heroArmour(battle), [28, 28, 0]);
 });
 
 /* ------------------------------------------------------------------ *

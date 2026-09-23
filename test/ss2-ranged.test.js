@@ -1030,6 +1030,58 @@ test("the swap costs one stamina and a whole turn, and flips exactly one resourc
   assert.equal(ss2Reach(actor()), actor().resources.weapon_range.value);
 });
 
+test("a blow that knocks the shield off a gladiator HOLDING ITS BOW takes nothing from either pool", () => {
+  // `battlevalues` zeroes `shield_defence` while `using_bow == true`
+  // (`+0x35e2`-`+0x35f2`, `+0x3623`), in the swap arm itself (`+0x4ea1`) and
+  // at every `nextphase`; `remove_armour` subtracts that field (`+0x0ca2`-
+  // `+0x0ccd`); the pools are rebuilt only before the fight (`+0x3a90`). The
+  // weaken-armour file pins the spell's road to `remove_armour`; this is the
+  // ATTACK path's, and the tape is the one the attack draws, label for label:
+  // direction 7 is the lower group, selector 3 is the shield.
+  const tape = [
+    { label: "attack-direction-roll", source: "randomBetween", min: 5, max: 8, value: 7 },
+    { label: "hit-roll", source: "randomBetween", min: 1, max: 100, value: 70 },
+    { label: "normal-damage-roll", source: "randomBetween", min: 21, max: 27, value: 23 },
+    { label: "normal-critical-roll", source: "randomBetween", min: 1, max: 20, value: 20 },
+    { label: "critical-deflection-roll", source: "randomBetween", min: 1, max: 100, value: 29 },
+    { label: "armour-removal-roll", source: "randomBetween", min: 1, max: 100, value: 97 },
+    { label: "armour-selection-1", source: "randomBetween", min: 1, max: 3, value: 3 },
+    { label: "armour-debris-1-x", source: "randomNumber", min: 0, max: 29, value: 10 },
+    { label: "armour-debris-1-y", source: "randomNumber", min: 0, max: 19, value: 14 },
+    { label: "armour-debris-1-rotation", source: "randomNumber", min: 0, max: 4, value: 3 },
+    { label: "knockback-roll", source: "randomBetween", min: 1, max: 4, value: 4 },
+    { label: "enchantment-potency-roll", source: "randomBetween", min: 1, max: 100, value: 34 }
+  ];
+  const fight = (victimTurn) => {
+    const battle = createTeamBattle({
+      seed: 1,
+      rngTape: tape,
+      rules: ss2TeamRules,
+      teams: [
+        { id: "red", name: "red", combatants: [ss2Combatant(gladiator({ attack: 60, charisma: 6, magicka: 7 }), { id: "hero", name: "hero" })] },
+        {
+          id: "blue",
+          name: "blue",
+          combatants: [ss2Combatant(
+            bowman({ speed: 21, gladiator_dir: "left", shield: 1, breastplate: 2, charisma: 6, magicka: 7 }),
+            { id: "foe", name: "foe" }
+          )]
+        }
+      ]
+    });
+    Object.assign(combatantById(battle, "hero"), { x: -60, y: 200 });
+    Object.assign(combatantById(battle, "foe"), { x: 60, y: 200 });
+    assert.equal(currentCombatant(battle).id, "foe", "the victim opens, so its own turn sets the mode");
+    applyAction(battle, { actorId: "foe", type: victimTurn, targetId: "foe" });
+    applyAction(battle, { actorId: "hero", type: Ss2ActionType.NORMAL_ATTACK, targetId: "foe" });
+    assert.equal(battle.rng.remainingCount, 0, "every scripted sample is consumed");
+    const { resources } = combatantById(battle, "foe");
+    return [resources.armourclass.value, resources.armourclass_max.value, resources.shield.value];
+  };
+  assert.deepEqual(fight(Ss2ActionType.SWAP_WEAPONS), [44, 44, 0], "drawn: the shield falls, worth 0");
+  assert.deepEqual(fight(Ss2ActionType.REST), [32, 32, 0], "the control, sword in hand: worth round(1 * 12)");
+});
+
 test("the ranged shots cost round(strength * 3), one shared branch for all four labels", () => {
   // `+0x6bb5`, and the branch `+0x6b53`-`+0x6b9d` is entered by
   // `bombardright`, `bombardleft`, `sniperight` and `snipeleft` alike.

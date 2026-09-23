@@ -477,6 +477,150 @@ test("nothing is damaged and nobody moves: health, stamina, positions and the vi
 });
 
 /* ------------------------------------------------------------------ *
+ * The phase: a shield on the arm of somebody holding a bow            *
+ * ------------------------------------------------------------------ */
+
+/**
+ * WHAT THE BUILD DOES, re-derived 2026-09-22 from `root/frame:35`
+ * `DoAction@0x3fa9dc` (`battlevalues`, `+0x3062`) and overlay frame 52
+ * `DoAction@0x240c7f`:
+ *
+ * ```text
+ *   battlevalues:  if (using_bow == true) shield_defence = 0                  +0x35e2-+0x35f2, +0x3623
+ *                  else shield_defence = round(shield * shield_dval 12)       +0x35f7-+0x361d
+ *   swap_weapons:  equipped_weapon = 2; using_bow = true;  battlevalues()     +0x4dbd, +0x4dce, +0x4ea1
+ *                  equipped_weapon = 1; using_bow = false; battlevalues()     +0x4eba, +0x4ecb, +0x4fab
+ *   nextphase:     battlevalues(game_attacker); battlevalues(game_defender)   +0x35f1, +0x3605 (ungated)
+ *   remove_armour: armourclass -= shield_defence; armourclass_max -= ...      +0x0ca2-+0x0ccd
+ * ```
+ *
+ * and `armourclass_max` is rebuilt from the `_defence` fields only while
+ * `battle_started != true` (`+0x3a90`-`+0x3aa0`). So drawing a bow mid-fight
+ * leaves both pools where they were, and the shield it zeroed then comes off
+ * for NOTHING. Sheathing reprices it at once, in the swap's own call.
+ *
+ * The victim OPENS, so its own turn can draw the bow through the swap verb —
+ * the state is reached, never written into the bag by hand.
+ */
+const SHIELDED = Object.freeze({ shield: 1, breastplate: 2, secondary_weapon: 61 });
+
+/** Round 1: direction 3 (lower group), selector 3 -> the SHIELD. Rounds 2-3 find no shinguard. */
+const SHIELD_TAPE = Object.freeze([
+  direction(1, 3), selection(1, 3, 3), ...debris(1),
+  direction(2, 3), selection(2, 3, 1),
+  direction(3, 3), selection(3, 3, 1)
+]);
+
+function shieldedVictim() {
+  const battle = createTeamBattle({
+    seed: 3,
+    rngTape: SHIELD_TAPE,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", name: "red", combatants: [ss2Combatant(fields({ inventory1: 44 }), { id: "hero", name: "hero", controller: "local" })] },
+      {
+        id: "blue",
+        name: "blue",
+        combatants: [ss2Combatant(fields({ speed: 21, gladiator_dir: "left", ...SHIELDED }), { id: "foe", name: "foe", controller: "local" })]
+      }
+    ]
+  });
+  Object.assign(combatantById(battle, "hero"), { x: -60, y: 200 });
+  Object.assign(combatantById(battle, "foe"), { x: 60, y: 200 });
+  assert.equal(currentCombatant(battle).id, "foe", "the victim must open, so it can draw first");
+  // 12 (shield 1) + 32 (breastplate 2), and the shield's rating on the bag.
+  assert.deepEqual(
+    [armourOf(battle, "foe").armourclass, armourOf(battle, "foe").armourclass_max],
+    [44, 44]
+  );
+  assert.equal(combatantById(battle, "foe").resources.shield_defence.value, 12);
+  return battle;
+}
+
+const swap = (battle, id) => applyAction(battle, { actorId: id, type: Ss2ActionType.SWAP_WEAPONS, targetId: id });
+const rest = (battle, id) => applyAction(battle, { actorId: id, type: Ss2ActionType.REST, targetId: id });
+
+test("a victim HOLDING ITS BOW loses its shield for nothing: `battlevalues` priced it at 0 (+0x3623)", () => {
+  const battle = shieldedVictim();
+  swap(battle, "foe");
+  assert.equal(combatantById(battle, "foe").resources.equipped_weapon.value, 2, "the bow is drawn");
+  const event = cast(battle);
+  assert.equal(battle.rng.remainingCount, 0);
+  assert.deepEqual(armourOf(battle, "foe"), {
+    armourclass: 44, armourclass_max: 44, helmet: 0, shoulderguard: 0, breastplate: 2, shield: 0
+  }, "the shield is gone and neither pool moved");
+  assert.deepEqual(event.removals[0].selected, "shield");
+  assert.equal(event.removals[0].removed, true, "it IS removed — debris and all — it is just worth nothing");
+  assert.equal(event.removals[0].defenceRemoved, 0);
+  assert.equal(event.armourLost, 0);
+});
+
+test("the control: a victim holding its SWORD loses the shield's 12 from both pools (+0x35f7)", () => {
+  // Same victim, same tape, same turn order — the victim rests instead of
+  // drawing. Guards the fix from the other side: a shield that stopped costing
+  // anything at all would pass the test above and fail this one.
+  const battle = shieldedVictim();
+  rest(battle, "foe");
+  assert.equal(combatantById(battle, "foe").resources.equipped_weapon.value, 1);
+  const event = cast(battle);
+  assert.equal(battle.rng.remainingCount, 0);
+  assert.deepEqual(
+    [armourOf(battle, "foe").armourclass, armourOf(battle, "foe").armourclass_max, armourOf(battle, "foe").shield],
+    [32, 32, 0]
+  );
+  assert.equal(event.removals[0].defenceRemoved, 12);
+});
+
+test("drawn and SHEATHED again, the shield is worth its 12: the sheathing swap reprices it (+0x4fab)", () => {
+  const battle = shieldedVictim();
+  swap(battle, "foe");
+  rest(battle, "hero");
+  swap(battle, "foe");
+  assert.equal(combatantById(battle, "foe").resources.equipped_weapon.value, 1, "the sword is back in hand");
+  const event = cast(battle);
+  assert.equal(battle.rng.remainingCount, 0);
+  assert.deepEqual(
+    [armourOf(battle, "foe").armourclass, armourOf(battle, "foe").armourclass_max, armourOf(battle, "foe").shield],
+    [32, 32, 0]
+  );
+  assert.equal(event.removals[0].defenceRemoved, 12);
+});
+
+test("a gladiator REBUILT mid-fight holding its bow keeps the shield's melee rating for when it sheathes", () => {
+  // `ss2Combatant(..., { battleStarted: true })` rebuilds a capture or a
+  // resumed campaign, and a record that says `using_bow: true` derives
+  // `shield_defence` 0 — the build's own number at that moment. Kept in the
+  // bag, it would outlive the bow: the build's sheathing `battlevalues`
+  // gives the shield its 12 back, and a bag that remembered 0 never could.
+  const rebuilt = (overrides = {}) => ss2Combatant(
+    fields({
+      speed: 21, gladiator_dir: "left", ...SHIELDED, equipped_weapon: 2, using_bow: true,
+      armourclass: 44, armourclass_max: 44, hitpoints: 170, staminaleft: 160, ...overrides
+    }),
+    { id: "foe", name: "foe", controller: "local", battleStarted: true }
+  );
+  assert.equal(rebuilt().resources.shield_defence, 12, "the bag holds the SHEATHED rating");
+
+  const battle = createTeamBattle({
+    seed: 3,
+    rngTape: SHIELD_TAPE,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", name: "red", combatants: [ss2Combatant(fields({ inventory1: 44 }), { id: "hero", name: "hero", controller: "local" })] },
+      { id: "blue", name: "blue", combatants: [rebuilt({ ammo_left: 5 })] }
+    ]
+  });
+  Object.assign(combatantById(battle, "hero"), { x: -60, y: 200 });
+  Object.assign(combatantById(battle, "foe"), { x: 60, y: 200 });
+  assert.equal(currentCombatant(battle).id, "foe");
+  swap(battle, "foe");
+  assert.equal(combatantById(battle, "foe").resources.equipped_weapon.value, 1, "sheathed");
+  const event = cast(battle);
+  assert.equal(event.removals[0].defenceRemoved, 12);
+  assert.deepEqual([armourOf(battle, "foe").armourclass, armourOf(battle, "foe").armourclass_max], [32, 32]);
+});
+
+/* ------------------------------------------------------------------ *
  * The phase: cost, consumption, event, refusals                       *
  * ------------------------------------------------------------------ */
 

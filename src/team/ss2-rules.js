@@ -5653,8 +5653,9 @@ const SS2_TIMED_RESOURCE_RANGE = Object.freeze({
  *   (`battleStarted`, or a `derive: false` capture) carries the 0 the build's
  *   own `nextphase` had priced the empty slot at, and the restored piece was
  *   worth nothing — reproduced by a Codex review, 2026-09-22.** The shield is
- *   priced at its MELEE value whatever the bow: see the named choice at the
- *   repricing.
+ *   priced at its SHEATHED value whatever the bow, which is the bag's
+ *   representation: `vanillaRecordOf` zeroes it while the bow is drawn, as
+ *   `battlevalues` does (`+0x3623`). See the note at the repricing.
  *
  * ► **`backup_*` IS THE FIGHT-START SNAPSHOT.** Written only by `backup_char`
  *   (`root/frame:35` `+0x2d80`-`+0x2e69`), whose four call sites are all
@@ -6809,12 +6810,25 @@ export function ss2Combatant(
   //   The fix is at the ROOT rather than in a third guard: derive a SECOND time
   //   with the bow put away, and take the three melee fields from that run. The
   //   bow's own numbers are unaffected (`secondary_weapon_range` and the
-  //   secondary pair are computed outside the block), and everything else —
-  //   including `shield_defence`, which the build really does zero while a bow
-  //   is drawn (`+0x3623`) — keeps the mode the record actually states.
+  //   secondary pair are computed outside the block), and everything else
+  //   keeps the mode the record actually states.
+  //
+  //   ► **~~including `shield_defence`, which the build really does zero while
+  //     a bow is drawn (`+0x3623`)~~ — AND `shield_defence` IS A FOURTH, found
+  //     2026-09-22 with the bow-drawn shield removal.** It is the same shape
+  //     of defect: the build zeroes it in place and rebuilds it on the
+  //     sheathing swap (`+0x4fab`), and a bag that took the 0 kept it after the
+  //     swap back, so the shield came off a swordsman for nothing. The bag
+  //     now holds the SHEATHED rating and `vanillaRecordOf` zeroes it while
+  //     `equipped_weapon` is 2, so the drawn bow still costs the shield its
+  //     value, at the moment `remove_armour` reads it. Only the rating moves:
+  //     the pools are derived from the stated mode exactly as before. A
+  //     `derive: false` record that STATES `shield_defence: 0` beside
+  //     `equipped_weapon: 2` still keeps its 0 after sheathing — named, not
+  //     solved; no golden states `equipped_weapon` at all.
   if (derive && vanilla?.using_bow === true) {
     const sheathed = ss2BattleValues({ ...vanilla, using_bow: false }, { battleStarted });
-    for (const field of ["min_damage", "max_damage", "weapon_range"]) {
+    for (const field of ["min_damage", "max_damage", "weapon_range", "shield_defence"]) {
       if (Number.isFinite(sheathed[field])) derived[field] = sheathed[field];
     }
   }
@@ -7205,6 +7219,28 @@ function vanillaRecordOf(view, role) {
   for (const piece of SS2_ARMOUR_PIECES) {
     record[piece] = read(piece);
     record[`${piece}_defence`] = read(`${piece}_defence`);
+  }
+  // ► **THE OTHER FIELD THAT DEPENDS ON WHICH WEAPON IS IN HAND: THE SHIELD'S
+  //   RATING, WHICH A DRAWN BOW ZEROES.** `battlevalues` gives `shield_defence`
+  //   a flat 0 while `using_bow == true` (`+0x35e2`-`+0x35f2`, `+0x3623`) and
+  //   `round(shield * 12)` otherwise (`+0x35f7`), and the build runs it in the
+  //   swap arm itself (`+0x4ea1` drawing, `+0x4fab` sheathing) and again at
+  //   every `nextphase` (`+0x35f1`, `+0x3605`). `remove_armour` subtracts that
+  //   field from both pools (`+0x0ca2`-`+0x0ccd`), while the pools themselves
+  //   are rebuilt only before the fight (`+0x3a90`-`+0x3aa0`). **So a shield
+  //   knocked off a gladiator holding its bow costs NOTHING**, and until
+  //   2026-09-22 it cost this engine its melee value: 44/44 -> 32/32 where the
+  //   build stays at 44/44 (reproduced by the rejuvenate implementer, then
+  //   pinned in `test/ss2-weaken-armour.test.js`).
+  //
+  //   Selected HERE, at read time, for the damage pair's reason: the swap
+  //   writes one resource, `equipped_weapon`, and the bag keeps the SHEATHED
+  //   value — so swapping back finds the shield's rating intact, which is what
+  //   the build's sheathing `battlevalues` recomputes. This record is the only
+  //   road from the bag to `remove_armour`, the attack path's and the spell's
+  //   alike, and no effect writes a `_defence` back out of it.
+  if (ss2InBowMode(view)) {
+    record.shield_defence = ss2PieceDefence("shield", record.shield, { usingBow: true });
   }
   // Through the token grammar, not `status.has(flag)`: a condition may carry
   // its inflictor (`"burning:from=villain"`), and the vanilla record wants the
@@ -11535,15 +11571,23 @@ export function createSs2TeamRules({
         //   the piece is worn — so a stale value beside an id of 0 can never be
         //   read until a restore, which is this line.
         //
-        // ► **NAMED CHOICE: `usingBow: false`, THE SHIELD'S MELEE VALUE.** The
-        //   build zeroes `shield_defence` while `using_bow` at EVERY `nextphase`;
-        //   this engine never does (`swap_weapons` writes only `equipped_weapon`),
-        //   so here the field always holds the melee value and a bow-drawn
-        //   victim's shield already costs that on removal. Pricing a restored
-        //   shield at 0 at this one site would leave it worth 0 after a swap back
-        //   to melee, where the build rebuilds it; keeping the engine's one
-        //   representation leaves the bow zeroing as `swap_weapons`' divergence,
-        //   in one place.
+        // ► **`usingBow: false` IS THE BAG'S REPRESENTATION, NO LONGER A
+        //   DIVERGENCE (2026-09-22).** ~~NAMED CHOICE: the shield's melee value,
+        //   leaving the bow zeroing as `swap_weapons`' divergence, in one
+        //   place.~~ The build zeroes `shield_defence` while `using_bow`
+        //   (`+0x35e2`-`+0x3633`), at this `nextphase` and in the swap arm, and
+        //   that divergence is closed where it lived: `vanillaRecordOf` hands
+        //   `remove_armour` a 0 while `equipped_weapon` is 2, and the bag keeps
+        //   the SHEATHED rating, for the damage pair's reason. So the restore
+        //   writes the sheathed rating whatever is in hand, and what the build's
+        //   `remove_armour` takes follows: 0 while an archer's bow stays drawn,
+        //   12 once the sheathing swap has repriced it (`+0x4fab`). Pinned in
+        //   `test/ss2-rejuvenate.test.js` under each mode.
+        //
+        //   What remains is the FIELD, not the behaviour: with a bow drawn this
+        //   bag's `shield_defence` (and this event's `defenceRepriced`) reads
+        //   the sheathed 12 where the build's field reads 0, visible on the
+        //   wire. No removal reads the field except through `vanillaRecordOf`.
         const herolevel = resourceValue(actor, "herolevel", SS2_RESOURCE_DEFAULTS.herolevel);
         const restoredTo = new Map(piecesRestored.map(({ piece, to }) => [piece, to]));
         const defenceRepriced = [];
