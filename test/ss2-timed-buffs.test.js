@@ -191,7 +191,7 @@ test("the constants are the build's literals", () => {
   // `gotoAndPlay("Cast2")` `+0x8c40` / `+0x8d1f`.
   assert.equal(regen.casterClip, "Cast2");
   assert.equal(boundless.casterClip, "Cast2");
-  // `crowd_action = 3`, `+0x8bcf` / `+0x8cae` — recorded, not modelled.
+  // `crowd_action = 3`, `+0x8bcf` / `+0x8cae` — ~~recorded, not modelled~~ MODELLED 2026-09-22 (`test/ss2-crowd.test.js`).
   assert.equal(regen.crowdAction, 3);
   assert.equal(boundless.crowdAction, 3);
   // `round(hitpointsmax / 4)` `+0x33f0`-`+0x3415`; `round(staminamax / 4)` `+0x34a9`-`+0x34ce`.

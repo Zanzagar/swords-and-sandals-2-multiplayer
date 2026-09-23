@@ -275,20 +275,31 @@ export function resourceBounds(carrier, name) {
  * Refuses an undeclared name rather than creating one: see constraint 2 in the
  * header. This is the only writer; a rule set never touches live state.
  *
+ * ► **ALSO THE BATTLE'S WRITER (2026-09-22).** The battle's own pool
+ *   (`EffectKind.BATTLE_RESOURCE`) is this same bag one scope up, so it goes
+ *   through this same function with `owner: "the battle"` — one clamp, one
+ *   refusal, not two that can drift apart. `owner` only changes whom the
+ *   refusal names.
+ *
  * @returns {{ resource: string, from: number, to: number, clamped: boolean }}
  */
-export function writeResource(combatant, name, to, { ruleSetId = "a rule set" } = {}) {
+export function writeResource(
+  combatant,
+  name,
+  to,
+  { ruleSetId = "a rule set", owner = `combatant ${combatant.id}` } = {}
+) {
   const entry = combatant.resources?.[name];
   if (entry === undefined) {
     throw new BattleError(
-      `Rule set ${ruleSetId} wrote resource ${String(name)} on combatant ${combatant.id}, ` +
+      `Rule set ${ruleSetId} wrote resource ${String(name)} on ${owner}, ` +
       `which declares ${resourceNames(combatant).length > 0 ? resourceNames(combatant).join(", ") : "no resources"}. ` +
-      "A combatant's resources are declared at construction; the resolver will not create one mid-battle."
+      "Resources are declared at construction; the resolver will not create one mid-battle."
     );
   }
   if (!Number.isFinite(to)) {
     throw new BattleError(
-      `Rule set ${ruleSetId} wrote a non-finite value to resource ${name} on combatant ${combatant.id}.`
+      `Rule set ${ruleSetId} wrote a non-finite value to resource ${name} on ${owner}.`
     );
   }
   const from = entry.value;

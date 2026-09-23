@@ -1577,7 +1577,16 @@ test("a placeholder rule set that declares no armour effect still writes only hi
   //   instead (`test/ss2-stat-spells.test.js`, docs/ss2-adapter-contract.md
   //   "Write provenance"). ~~it skips kinds it has no arm for~~ — it did, and
   //   silently, until a Codex review of 2026-09-22.
-  assert.deepEqual(Object.values(EffectKind).sort(), ["damage", "heal", "lateral", "position", "resource", "stat", "status"]);
+  //
+  // ► **`battle-resource` JOINED THEM 2026-09-22**, for SS2's crowd: an
+  //   absolute write of one of the BATTLE's own declared pools, with no
+  //   `targetId` — `crowd_interest` is one `_global` per bout, not a
+  //   combatant's. Generic like the rest: the rule set names the pool. **The
+  //   adapter does not write it either** — no `WriteSource` carries a pool that
+  //   belongs to no combatant — and REPORTS it in `unmapped` with the stat's
+  //   treatment (`test/ss2-crowd.test.js`).
+  assert.deepEqual(Object.values(EffectKind).sort(),
+    ["battle-resource", "damage", "heal", "lateral", "position", "resource", "stat", "status"]);
 
   // The defeated fighter is at 0 hitpoints with all 44 points of armour still
   // standing, and that is right: `classicStyleRules` has no armour rule, and
@@ -2175,7 +2184,16 @@ test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declare
   // declared-resource write allowlist — so the resolved value reaches combat
   // state and the hash, and does NOT reach the vanilla mirror. It is REPORTED,
   // which is the contract's "Still open" item 2 arriving in practice.
-  const unmapped = host.steps.flatMap((step) => step.unmapped ?? []);
+  // ► **THE CROWD IS REPORTED BESIDE THEM SINCE 2026-09-22, AND SEPARATELY.**
+  //   `crowd_interest` is the battle's own pool, not a combatant's resource, so
+  //   its report carries `battleResource` rather than `resource` and a reason
+  //   of its own; `test/ss2-crowd.test.js` pins it. Split off here so this
+  //   test goes on asking exactly the question it was written for.
+  const reported = host.steps.flatMap((step) => step.unmapped ?? []);
+  const crowdReports = reported.filter((entry) => Object.hasOwn(entry, "battleResource"));
+  assert.ok(crowdReports.length > 0, "a bout of completed phases moves the crowd");
+  assert.ok(crowdReports.every((entry) => entry.battleResource === "crowd_interest"));
+  const unmapped = reported.filter((entry) => !Object.hasOwn(entry, "battleResource"));
   assert.ok(unmapped.length > 0, "this fixture wears armour, so a piece removal must actually occur");
   const pieces = new Set(unmapped.map((entry) => entry.resource));
   for (const resource of pieces) {

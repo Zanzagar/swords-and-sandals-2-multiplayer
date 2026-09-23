@@ -1175,13 +1175,17 @@ export function assertWriteProvenance(writes, after) {
  * @param {object[]} [params.effects] the rule set's declarative effects, in order
  * @param {Map|object} [params.placements] combatant id -> slot placement
  * @param {Map|object} [params.mirrors] combatant id -> normalised vanilla record
+ * @param {object} [params.battleBefore] the wire's `battleResources` before the action, if any
+ * @param {object} [params.battleAfter]  the wire's `battleResources` after it, if any
  */
 export function vanillaWritesForResolvedAction({
   before,
   after,
   effects = [],
   placements = new Map(),
-  mirrors = new Map()
+  mirrors = new Map(),
+  battleBefore = null,
+  battleAfter = null
 } = {}) {
   const beforeById = indexById(before);
   const afterById = indexById(after);
@@ -1369,6 +1373,38 @@ export function vanillaWritesForResolvedAction({
     }));
   };
 
+  /**
+   * ► **A BATTLE'S OWN POOL THAT MOVED IS REPORTED, NEVER WRITTEN — the stat
+   *   rule above, one scope up (2026-09-22).** `EffectKind.BATTLE_RESOURCE`
+   *   arrived with SS2's crowd: `crowd_interest` lives on `_global` in the
+   *   build, one per bout, and on the battle here. **No `WriteSource` carries
+   *   it** — the four are canonical health, canonical status, a combatant's
+   *   declared resource and clip facing, and every one of them names a
+   *   combatant — so the resolved value reaches combat state and the hash and
+   *   is reported, with the vanilla global it would land on. Writing it back
+   *   is a fifth source and an owner's decision, not a fix.
+   */
+  const emitBattleResource = (name) => {
+    const key = `battle:${name}`;
+    if (emitted.has(key)) return;
+    const current = battleAfter?.[name];
+    if (current === undefined) return;
+    const previous = battleBefore?.[name];
+    if (previous !== undefined && previous.value === current.value) return;
+    emitted.add(key);
+    unmapped.push(Object.freeze({
+      battleResource: name,
+      field: name,
+      scope: "_global",
+      from: previous?.value ?? null,
+      to: current.value,
+      reason:
+        "a battle-wide pool moved, and no WriteSource carries one (the four are canonical health, canonical " +
+        "status, a combatant's declared resource and clip facing), so the resolved value is reported rather than " +
+        "written. Writing it back is a contract decision: see docs/ss2-adapter-contract.md, 'Write provenance'"
+    }));
+  };
+
   // 1. Effect order first, so the write order matches the order the rule set
   //    declared its effects in — the same discipline the 1v1 mutation trace
   //    uses.
@@ -1386,6 +1422,8 @@ export function vanillaWritesForResolvedAction({
       emitStatus(effect.targetId, effect.status, current.status.includes(effect.status), "status-effect");
     } else if (effect.kind === EffectKind.STAT) {
       emitStat(effect.targetId, effect.stat);
+    } else if (effect.kind === EffectKind.BATTLE_RESOURCE) {
+      emitBattleResource(effect.resource);
     }
   }
 
@@ -1414,6 +1452,8 @@ export function vanillaWritesForResolvedAction({
       emitStatus(id, status, now.has(status), "resolved-state-diff");
     }
   }
+  // And the battle's own pools, which belong to no combatant above.
+  for (const name of Object.keys(battleAfter ?? {})) emitBattleResource(name);
 
   // 3. The shape check. Every write must be identical to a value the resolved
   //    projection actually holds, at the canonical location its source names.

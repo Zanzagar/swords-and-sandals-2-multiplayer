@@ -262,6 +262,11 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     "bash-attack",
     "bombard",
     "burning-phase",
+    // ► **JOINED 2026-09-22 — adulation, `getphase("cast_adulation")`, written
+    //   by ladder arm 28 (`+0x1045`) and consumed at `+0x76ae`-`+0x777b`.**
+    //   Self-targeted, zero samples: its whole effect is `crowd_action = 50`,
+    //   which `nextphase` adds to the battle's one `crowd_interest`.
+    "cast-adulation",
     // ► **JOINED 2026-09-22 — the four STAT spells, `getphase("cast_bloodlust")`
     //   here and `("cast_colossus")`, `("cast_little_fat_kid")` and
     //   `("cast_swiftsandals")` below, written by ladder arms 22, 8, 9 and 27
@@ -1503,7 +1508,16 @@ test("a canonical SS2 battle hashes to a pinned value — one tripwire for the w
   // `test/seeded-play-pins.test.js` for the defect that forced it: a missing
   // facing token reads as "faces right", so 40 of 40 opening ranged attacks
   // were scored as back attacks.
-  assert.equal(combatStateHash(battle), "29fc00d7", [
+  //
+  // `29fc00d7` -> `dc45e949` on 2026-09-22, again with NO action applied:
+  // construction now declares the build's one `crowd_interest` for the battle
+  // (`openingBattleResources`, owner's decision (f)), so the wire gains
+  // `battleResources: { crowd_interest: { value: 2, min: null, max: null } }` —
+  // two `herolevel: 1` gladiators, summed (`crowd_bar` `+0x011f`-`+0x0158`).
+  // Measured: with the opening made to declare nothing, this literal returned to
+  // `29fc00d7` exactly. `BATTLE_STATE_VERSION` did not move (the key is
+  // top-level; see the projection in `src/team/resolver.js`).
+  assert.equal(combatStateHash(battle), "dc45e949", [
     "The SS2 wire projection changed. That is not necessarily wrong — but it",
     "means every peer running the previous build now disagrees with this one",
     "about identical battles, and every stored completion token minted before",

@@ -278,6 +278,13 @@ import { applySs2MagicDamageCandidate } from "../golden/ss2-spell-candidate.js";
 import { SS2_BUILD_SHA256 } from "../golden/run-1v1-fixture.js";
 import { byCodeUnit } from "../common/stable-order.js";
 import { resourceValue } from "./resources.js";
+import {
+  SS2_PSYCHE_DISCHARGE_CROWD,
+  ss2CrowdActionOf,
+  ss2CrowdOpening,
+  ss2CrowdStepEffects,
+  ss2StrikeCrowdAction
+} from "./ss2-crowd.js";
 import { ss2WeaponDamageRange, ss2WeaponEntry } from "./ss2-weapon-table.js";
 import { defineTeamRuleSet, EffectKind, RuleSetVerification, TeamRuleSetError } from "./rule-set.js";
 
@@ -501,6 +508,11 @@ export const Ss2ActionType = Object.freeze({
   //   ZERO samples, so not in `ATTACK_BANDS`, for the reason `shove` is not.
   //   The build's spelling, `rejuvinate`, for the reason `frightning` is kept.
   CAST_REJUVINATE: "cast-rejuvinate",
+  // ► **ADULATION — THE ONE VERB WHOSE WHOLE EFFECT IS ON THE CROWD.**
+  //   `+0x76ae`-`+0x777b` of the same block; see `SS2_ADULATION`. ZERO samples,
+  //   no `defender`: it writes `crowd_action = 50` and nothing else, so it
+  //   waited on the crowd being modelled (owner's decision (f), 2026-09-22).
+  CAST_ADULATION: "cast-adulation",
   /**
    * The phase a TAUNTED gladiator is forced into: it runs away.
    *
@@ -535,12 +547,22 @@ export const Ss2ActionType = Object.freeze({
  * what the map does and does not record. The short version, because it is the
  * kind of claim this repository has been wrong about twice this week:
  * `crowd_interest` is a GOLD MULTIPLIER read once on the victory frame
- * (`2249/frame:88` `+0x078c`), `crowd_action` is a per-damage presentation
- * cue, and the `taunttimer` watchdog (`+0x67e4`, 60 ticks) abandons a stuck
- * ANIMATION, not a stalled bout. **Vanilla records no bout-level pressure
- * mechanic.** This is a designed answer to a measured defect, wearing the
- * build's vocabulary because the build has a crowd and it is the natural face
- * for it.
+ * (`2249/frame:88` `+0x078c`), ~~`crowd_action` is a per-damage presentation
+ * cue~~ **`crowd_action` is a per-PHASE delta that `nextphase` adds into it
+ * (`+0x3541`-`+0x35b4`) — corrected 2026-09-22, and now MODELLED in
+ * `src/team/ss2-crowd.js`**, and the `taunttimer` watchdog (`+0x67e4`, 60
+ * ticks) abandons a stuck ANIMATION, not a stalled bout. **Vanilla records no
+ * bout-level pressure mechanic.** This is a designed answer to a measured
+ * defect, wearing the build's vocabulary because the build has a crowd and it
+ * is the natural face for it.
+ *
+ * ► **THIS IS NOT THE BUILD'S CROWD, AND THE TWO NOW LIVE SIDE BY SIDE.** The
+ *   build's crowd is `crowd_interest` — one battle-wide pool, opened at the
+ *   sum of the fighters' levels, moved by every completed phase, read only by
+ *   the victory purse; it harms nobody and ends nothing. This is a toll: it
+ *   DAMAGES every actor past `patience` turns so that a bout ends. It reads no
+ *   `crowd_interest`, writes none, and no number in it is the build's. The
+ *   shared word is the only thing they share.
  *
  * THE DEFECT IT ANSWERS, measured 2026-09-10 and written up in
  * `docs/combat-economy-findings-2026-09-10.md`: 4,000 consecutive mutual
@@ -553,8 +575,9 @@ export const Ss2ActionType = Object.freeze({
  * field to the projection, cannot desync separately from the battle, and
  * cannot be gamed by any action — a rising tide has nothing to exploit. The
  * rule set cannot see the event log anyway (`actorView` hands it
- * `turnNumber`, `actor`, `allies`, `foes` and nothing else), so "reset the
- * crowd when somebody bleeds" would have cost new hashed state. That is a
+ * `turnNumber`, `actor`, `allies`, `foes` ~~and nothing else~~ **and, since
+ * 2026-09-22, the battle's own declared pools, `battleResources`**), so "reset
+ * the crowd when somebody bleeds" would have cost new hashed state. That is a
  * deliberate trade and it is the reason this is 12 lines rather than a
  * subsystem.
  *
@@ -1091,6 +1114,11 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   // arm 1 writes (`+0x05ed`). The caster plays `Rejuvinate` (`+0x8ded`, capital
   // R as the build passes it) — carried on the event; there is no victim clip.
   [Ss2ActionType.CAST_REJUVINATE]: "cast_rejuvinate",
+  // `phase_decision == "cast_adulation"` at `+0x76b4`, the decision ladder arm
+  // 28 writes (`+0x1045`). The caster plays `wincrowd1` (`+0x7732`) — the
+  // first of the six crowd-pleasing clips `wincrowd` cycles through — carried
+  // on the event; there is no victim clip.
+  [Ss2ActionType.CAST_ADULATION]: "cast_adulation",
   // ► **THE LABEL IS THE FACING'S AND THIS ENTRY IS ONLY THE FALLBACK.** Row 3
   //   of the decision table is `taunted1 == true` -> facing right
   //   `getphase("runleft")`, facing left `getphase("runright")`
@@ -3410,7 +3438,12 @@ const TAUNT_STRIKE = Object.freeze({
   transitionFor: (actor, recovered) => ({
     staminaCost: Math.round(resourceValue(actor, "charisma", 0) * 2),
     fromStaminaleft: recovered ? recovered.staminaleft : null,
-    fromHealth: recovered ? recovered.health : null
+    fromHealth: recovered ? recovered.health : null,
+    // `crowd_action = -2` (`+0x67a8`) on EVERY tick, after whatever the first
+    // tick's outcome wrote — `defender_blocked`'s -2 on a failed roll
+    // (`+0x6b0e`), `knockback`'s 1 on the shove, `damagecharacter`'s 2 on the
+    // strike — so every taunt that does not kill adds -2, whatever it rolled.
+    crowdAction: ss2CrowdActionOf(VANILLA_PHASE_LABEL[Ss2ActionType.TAUNT])
   })
 });
 
@@ -3520,9 +3553,12 @@ export const SS2_PSYCHE_UP = Object.freeze({
  *   otherwise stop — this engine emits it itself rather than leaving it to
  *   `nextphase`'s reset, which a kill skips.
  *
- * ► **NOT MODELLED, AND NAMED:** `crowd_action = 3`, `cast_spell_icon`, and
+ * ► **NOT MODELLED, AND NAMED:** ~~`crowd_action = 3`,~~ `cast_spell_icon`, and
  *   the arm's lack of a `Jump` (it falls through into the `cast_gale` test at
- *   `+0x7aaa`), as for every spell before it.
+ *   `+0x7aaa`), as for every spell before it. **`crowd_action = 3` IS
+ *   MODELLED since 2026-09-22**: the top write re-runs every tick after the
+ *   first tick's `checkattackroll`, so a whirlwind adds 3 to `crowd_interest`
+ *   whether it hits, misses or is out of range (`src/team/ss2-crowd.js`).
  *
  * ► **THE OFFER IS POSSESSION.** `fightdistance < 200` and
  *   `equipped_weapon != 2` are ladder arm 20 of `villain_cast_spells`
@@ -3547,7 +3583,11 @@ export const SS2_WHIRLWIND = Object.freeze({
    */
   victimClipOnHit: "knockback",
   victimClipOnMiss: "defend12",
-  /** `register:3.crowd_action = 3`, `+0x78ed`. Presentation cue; not modelled. */
+  /**
+   * `register:3.crowd_action = 3`, `+0x78ed` — ~~Presentation cue; not
+   * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+   * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+   */
   crowdAction: 3,
   /** The VILLAIN's gate, `fightdistance < 200` (`+0x0cc5`, `Less2`). Strict. */
   aiFightDistanceBelow: 200
@@ -3610,9 +3650,10 @@ export const SS2_WHIRLWIND = Object.freeze({
  * ► **NOT MODELLED, AND NAMED:** the on-screen blink beside the target and
  *   back (the presentation vocabulary has no "held away, then restored"
  *   motion; only the kill's one-way move is presented), `blendMode = "add"`,
- *   `crowd_action = 5`, `cast_spell_icon`, and the build's per-tick 1-pixel
+ *   ~~`crowd_action = 5`,~~ `cast_spell_icon`, and the build's per-tick 1-pixel
  *   separation nudge while the caster stands beside its victim — this engine
- *   has no form of that nudge anywhere.
+ *   has no form of that nudge anywhere. **`crowd_action = 5` IS MODELLED since
+ *   2026-09-22**: a ghost strike that does not kill adds 5 to `crowd_interest`.
  *
  * ► **THE OFFER IS POSSESSION.** `fightdistance > 500` and
  *   `equipped_weapon != 2` are ladder arm 21 (`+0x0d19`-`+0x0d75`), the
@@ -3624,7 +3665,11 @@ export const SS2_GHOST_STRIKE = Object.freeze({
   /** `attack_direction = randomBetween(9, 12)`, `+0x7ebb` — `power_attack`'s band. */
   directionLow: 9,
   directionHigh: 12,
-  /** `register:3.crowd_action = 5`, `+0x7dca`. Presentation cue; not modelled. */
+  /**
+   * `register:3.crowd_action = 5`, `+0x7dca` — ~~Presentation cue; not
+   * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+   * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+   */
   crowdAction: 5,
   /** The VILLAIN's gate, `fightdistance > 500` (`+0x0d45`, `Greater`). Strict. */
   aiFightDistanceAbove: 500
@@ -3650,6 +3695,31 @@ const SS2_ITEM_STRIKES = Object.freeze({
     itemId: SS2_GHOST_STRIKE.itemId, magickaCost: true
   })
 });
+
+/**
+ * What a blow through the attack path leaves in `crowd_action` for
+ * `nextphase` — see `src/team/ss2-crowd.js`.
+ *
+ * - **An arm with a top write adds its constant**, whatever the blow did: it
+ *   is rewritten on every tick after the first tick's `checkattackroll`.
+ *   `quick_attack` -1 (`+0x6304`), `power_attack` 2 (`+0x6029`), the archery
+ *   arm -1 (`+0x6ba2`), `taunt` -2 (`+0x67a8`), the whirlwind 3 (`+0x78ed`),
+ *   the ghost strike 5 (`+0x7dca`).
+ * - **`normal_attack`, `bash_attack` and the level-3 discharge have none**
+ *   (the discharge's one write, `+0x6604`, precedes `checkattackroll` on the
+ *   same tick), so the damage path's last write stands: `ss2StrikeCrowdAction`.
+ *
+ * Only reached for a blow that did NOT kill — a kill skips the transition.
+ */
+function ss2AttackPathCrowdAction(type, outcome) {
+  if (type === Ss2ActionType.NORMAL_ATTACK || type === Ss2ActionType.BASH_ATTACK
+    || type === Ss2ActionType.PSYCHE_UP) {
+    return ss2StrikeCrowdAction(outcome);
+  }
+  if (type === Ss2ActionType.CAST_WHIRLWIND) return SS2_WHIRLWIND.crowdAction;
+  if (type === Ss2ActionType.CAST_GHOST_STRIKE) return SS2_GHOST_STRIKE.crowdAction;
+  return ss2CrowdActionOf(VANILLA_PHASE_LABEL[type]);
+}
 
 /**
  * THE TAUNT PHASE, and every number in it is the build's.
@@ -4079,14 +4149,20 @@ export const SS2_BOLT_INGRESS = Object.freeze({
   /** `attacker.gotoAndPlay("Cast2")`, `+0x8515` — the CASTER's clip, shared. */
   casterClip: "Cast2",
   /**
-   * `register:3.crowd_action = 5`, `+0x841c`. Presentation cue; not modelled.
+   * `register:3.crowd_action = 5`, `+0x841c` — ~~Presentation cue; not
+   * modelled.~~ **MODELLED 2026-09-22: the bolt phase adds 5 to the battle's
+   * `crowd_interest`** (see `src/team/ss2-crowd.js`). The ingress's own 2
+   * (`magic_damage_character` `+0x13cb`) lands on the first tick and this top
+   * write overwrites it on every later one, so 5 is what `nextphase` adds.
    *
-   * **`register:3` is glossed as the attacker clip and that gloss is NOT
+   * ~~**`register:3` is glossed as the attacker clip and that gloss is NOT
    * byte-verified here** — no `StoreRegister {"register":3}` appears in any
-   * dump this derivation used. The neighbouring arms write the same member with
-   * 2 (`+0x7bf9`), 5 (`+0x7dca`), 15 (`+0x7ffe`), 10 (`+0x821c`) and 20
-   * (`+0x8642`, death from above), which is consistent with a per-phase crowd
-   * cue on one clip; it is not proof of which clip.
+   * dump this derivation used.~~ **`register:3` IS `_global`, byte-verified
+   * 2026-09-22**: `attacker.onEnterFrame` is a `DefineFunction2` with flags
+   * `0x169` preloading `r1 = this`, `r2 = _root`, `r3 = _global`
+   * (`all-function-headers.json`, `+0x36ae`), and `sprite:2224/frame:1` writes
+   * `_global.crowd_action` by name. It is one per-battle crowd, not a cue on a
+   * clip.
    */
   crowdAction: 5
 });
@@ -4252,7 +4328,14 @@ export const SS2_FIREBALL_INGRESS = Object.freeze({
   bonusFrame: 4,
   /** `attacker.gotoAndPlay("Cast1")`, `+0x90f4` — the gale's clip, not the bolts'. */
   casterClip: "Cast1",
-  /** `register:3.crowd_action = 5`, `+0x8f94`. Presentation cue; not modelled. */
+  /**
+   * `register:3.crowd_action = 5`, `+0x8f94` (`register:3` is `_global`) —
+   * ~~Presentation cue; not modelled.~~ **MODELLED 2026-09-22: a fireball
+   * phase adds 5 to `crowd_interest`.** Named, not reproduced: the arm never
+   * calls `nextphase` itself, so an impact on the tick just before the stall
+   * watchdog fires leaves the ingress's 2 (`+0x13cb`) instead — see
+   * `SS2_CROWD_ACTION` in `src/team/ss2-crowd.js`.
+   */
   crowdAction: 5
 });
 
@@ -4453,7 +4536,11 @@ export const SS2_DEATH_FROM_ABOVE = Object.freeze({
   bonusFrame: 4,
   /** `attacker.gotoAndPlay("Cast2")`, `+0x86d8` — the bolts' clip, not the fireballs' `Cast1`. */
   casterClip: "Cast2",
-  /** `register:3.crowd_action = 20`, `+0x8642`. Presentation cue; not modelled. */
+  /**
+   * `register:3.crowd_action = 20`, `+0x8642` — ~~Presentation cue; not
+   * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+   * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+   */
   crowdAction: 20
 });
 
@@ -4704,7 +4791,11 @@ export const SS2_COMMAND = Object.freeze({
   casterClip: "Cast2",
   /** `defender.gotoAndPlay("knockback_mov")`, `+0x7c5e` — inside the latch, so once. */
   victimClip: "knockback_mov",
-  /** `register:3.crowd_action = 2`, `+0x7bf9`. Presentation cue; not modelled. */
+  /**
+   * `register:3.crowd_action = 2`, `+0x7bf9` — ~~Presentation cue; not
+   * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+   * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+   */
   crowdAction: 2,
   /**
    * The VILLAIN's distance gate, `fightdistance > 300` (`+0x0eee`, `Greater`),
@@ -4829,13 +4920,81 @@ export const SS2_TELEPORT = Object.freeze({
   rollLabel: "teleport-destination-roll",
   /** `attacker.gotoAndPlay("Cast2")`, `+0x7620` (and `+0x767c`, never drawn). */
   casterClip: "Cast2",
-  /** `register:3.crowd_action = 3`, `+0x7554`. Presentation cue; not modelled. */
+  /**
+   * `register:3.crowd_action = 3`, `+0x7554` — ~~Presentation cue; not
+   * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+   * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+   */
   crowdAction: 3,
   /**
    * The VILLAIN's distance gate, `fightdistance < 250` (`+0x0f48`, `Less2`),
    * read by `chooseAiAction` and by nothing else. Strict.
    */
   aiFightDistanceBelow: 250
+});
+
+/* ------------------------------------------------------------------ */
+/* The adulation phase: the crowd, and nothing else                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `cast_adulation` (item 47, "Magically charm the crowd"), byte-derived
+ * 2026-09-22 from `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base
+ * `0x240c85`), `+0x76ae`-`+0x777b`, re-read by the implementer off the dump:
+ *
+ * ```text
+ *   phase_decision == "cast_adulation"                               +0x76ae
+ *     register:3.crowd_action = 50            (EVERY tick)            +0x76c1
+ *     game_attacker.staminacost = Math.round(game_attacker.magicka)   +0x76ce
+ *     if (attacker.struck == null) {                                  +0x76f5
+ *       cast_spell_icon(attacker, 47)                                 +0x770c
+ *       attacker.struck = false                                       +0x7724
+ *       attacker.gotoAndPlay("wincrowd1")                             +0x7732
+ *     }
+ *     if (attacker.struck == true) {                                  +0x7747
+ *       attacker.struck = null                                        +0x775f
+ *       nextphase()                                                   +0x776c
+ *     }
+ * ```
+ *
+ * ► **ITS WHOLE EFFECT IS `crowd_action = 50`**, which `nextphase` adds into
+ *   the battle's one `crowd_interest` (`register:3` is `_global`), clamped at
+ *   100 — so from any crowd at or above 50 one cast maxes the purse's
+ *   multiplier. It draws nothing (no `randomBetween`, no `RandomNumber`),
+ *   references neither `defender` nor `game_defender`, and writes no stat,
+ *   pool or position. See `src/team/ss2-crowd.js`.
+ *
+ * ► **THE COST IS `round(magicka)`, THE STAT, WITH NO AFFORDABILITY CHECK**,
+ *   the bolts' and the teleport's shape exactly, and `nextphase` regenerates
+ *   as for any completed phase. The completion test runs in the entry tick
+ *   after `struck = false`, so it cannot fire on the entry tick.
+ *
+ * ► **NOT MODELLED, AND NAMED:** `cast_spell_icon`, and the arm's lack of a
+ *   `Jump` (it falls through into the `cast_weaken_armour` test at `+0x777c`,
+ *   which compares a different label).
+ *
+ * ► **THE OFFER IS POSSESSION.** `fightdistance > 300` is ladder arm 28 of
+ *   `villain_cast_spells` (`DoAction@0x23e7cf`, base `0x23e7d5`,
+ *   `+0x100a`-`+0x1040`), the LAST arm and the villain's DECISION, read by
+ *   `chooseAiAction`:
+ *
+ *   ```text
+ *     check_inventory(47) == true                                   +0x100a-+0x101f
+ *     && _root.arena.fightdistance > 300                            +0x1028-+0x103e
+ *     villaindecisionA = "cast_adulation"; use_item(item_used)      +0x1045-+0x105e
+ *   ```
+ */
+export const SS2_ADULATION = Object.freeze({
+  /** `cast_spell_icon(attacker, 47)` `+0x770c`; `check_inventory(47)` `+0x100a`. */
+  itemId: 47,
+  /** `attacker.gotoAndPlay("wincrowd1")`, `+0x7732`. No victim clip. */
+  casterClip: "wincrowd1",
+  /** `register:3.crowd_action = 50`, `+0x76c1` — `register:3` is `_global`. The verb's whole effect. */
+  crowdAction: 50,
+  /** `villain_cast_spells` arm 28, the last: `check_inventory(47) && fightdistance > 300`. */
+  ladderArm: 28,
+  /** `Push 300; Greater` at `+0x1036`-`+0x103e`. Strict. */
+  aiFightDistanceAbove: 300
 });
 
 /* ------------------------------------------------------------------ */
@@ -4933,7 +5092,11 @@ export const SS2_WEAKEN_ARMOUR = Object.freeze({
   directionRollPrefix: "weaken-armour-direction",
   /** `attacker.gotoAndPlay("Cast1")`, `+0x7800`. */
   casterClip: "Cast1",
-  /** `register:3.crowd_action = 4`, `+0x778f`. Presentation cue; not modelled. */
+  /**
+   * `register:3.crowd_action = 4`, `+0x778f` — ~~Presentation cue; not
+   * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+   * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+   */
   crowdAction: 4,
   /**
    * The VILLAIN's distance gate, `fightdistance < 300` (`+0x0c6b`-`+0x0c73`,
@@ -5023,8 +5186,10 @@ export const SS2_WEAKEN_ARMOUR = Object.freeze({
  *   the same); the villain's `use_item` writes `inventory_action` and empties
  *   the FIRST slot holding the id (`DoAction@0x23e7cf` `+0x03ec`/`+0x0409`).
  *
- * ► **NOT MODELLED, AND NAMED: `crowd_action = -3`** (a crowd cue; the
- *   `register:3` gloss is the same unverified one `SS2_BOLT_INGRESS` names),
+ * ► **NOT MODELLED, AND NAMED:** ~~`crowd_action = -3` (a crowd cue; the
+ *   `register:3` gloss is the same unverified one `SS2_BOLT_INGRESS` names),~~
+ *   **`crowd_action = -3` (`+0x577f`) IS MODELLED since 2026-09-22 — `register:3`
+ *   is `_global`, and a drink costs the battle's crowd 3** (`src/team/ss2-crowd.js`);
  *   **the `potions` sub-clip frame** and **the `bonus_icon` splat** — both
  *   carried on the event (`potionFrame`, `bonusFrame`) and drawn by nothing
  *   yet, because the presentation vocabulary has no command for a sub-clip or
@@ -5215,12 +5380,14 @@ export function ss2PotionOutcome(itemId, pools) {
  *   reads `undefined`, which `> 0` never passes. Absent here and 0 here are
  *   therefore both the build's "no buff".
  *
- * ► **NOT MODELLED, AND NAMED:** `crowd_action = 3` (the crowd cue, as for the
- *   bolts), `cast_spell_icon`, and the `add_stats_icon` splat — which is a
+ * ► **NOT MODELLED, AND NAMED:** ~~`crowd_action = 3` (the crowd cue, as for the
+ *   bolts),~~ `cast_spell_icon`, and the `add_stats_icon` splat — which is a
  *   `DefineFunction` with an EMPTY body (the map's `+0x23bf`, codeSize 0; the
  *   function dump this was built from shows a header and no instructions), so
  *   the build draws nothing either. The boundless splat's number would be
  *   `round(stamina / 4)` (`+0x34d1`), not the `round(staminamax / 4)` it adds.
+ *   **`crowd_action = 3` IS MODELLED since 2026-09-22**: each cast adds 3 to
+ *   the battle's `crowd_interest` (`src/team/ss2-crowd.js`).
  */
 export const SS2_TIMED_BUFFS = Object.freeze({
   [Ss2ActionType.CAST_REGENERATE]: Object.freeze({
@@ -5232,7 +5399,11 @@ export const SS2_TIMED_BUFFS = Object.freeze({
     duration: 20,
     /** `attacker.gotoAndPlay("Cast2")`, `+0x8c40`. */
     casterClip: "Cast2",
-    /** `register:3.crowd_action = 3`, `+0x8bcf`. Presentation cue; not modelled. */
+    /**
+     * `register:3.crowd_action = 3`, `+0x8bcf` — ~~Presentation cue; not
+     * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+     * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+     */
     crowdAction: 3,
     /** `hitpoints += round(hitpointsmax / 4)`, `+0x33dc`-`+0x3417`. */
     divisor: 4,
@@ -5248,7 +5419,11 @@ export const SS2_TIMED_BUFFS = Object.freeze({
     duration: 20,
     /** `attacker.gotoAndPlay("Cast2")`, `+0x8d1f`. */
     casterClip: "Cast2",
-    /** `register:3.crowd_action = 3`, `+0x8cae`. Presentation cue; not modelled. */
+    /**
+     * `register:3.crowd_action = 3`, `+0x8cae` — ~~Presentation cue; not
+     * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+     * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+     */
     crowdAction: 3,
     /** `staminaleft += round(staminamax / 4)`, `+0x3495`-`+0x34d0`. */
     divisor: 4,
@@ -5319,11 +5494,12 @@ export const SS2_TIMED_BUFFS = Object.freeze({
  *   combatant the villain's rule. The counter and the tint still run their
  *   course on the hero in the build; only the stats revert.
  *
- * ► **`crowd_action` IS RECORDED, NOT MODELLED — the owner's decision,
- *   2026-09-22 (item 1f).** It is not a presentation cue: `nextphase` adds it
- *   into `crowd_interest` (`+0x3541`-`+0x35a3`), which scales the victory
- *   purse. `crowdAction` below is each arm's literal, for the session that
- *   models it.
+ * ► ~~**`crowd_action` IS RECORDED, NOT MODELLED — the owner's decision,
+ *   2026-09-22 (item 1f).**~~ **`crowd_action` IS MODELLED — the owner's
+ *   decision (f), taken later the same day.** It is not a presentation cue:
+ *   `nextphase` adds it into `crowd_interest` (`+0x3541`-`+0x35a3`), which
+ *   scales the victory purse. `crowdAction` below is each arm's literal, and
+ *   each branch hands it to `phaseTransitionEffects` (`src/team/ss2-crowd.js`).
  *
  * ► **PRESENTATION, NOT ENGINE STATE, AND NOT MODELLED:** the clip scale
  *   (`oldscale`/`newscale`, one shared slot on the clip; colossus's growth
@@ -5362,7 +5538,11 @@ export const SS2_STAT_SPELLS = Object.freeze({
     /** `attacker.gotoAndPlay("Colossus")` `+0x806f`, frames 2147-2168. No victim clip. */
     casterClip: "Colossus",
     victimClip: null,
-    /** `register:3.crowd_action = 15` `+0x7ffe`. Recorded, not modelled. */
+    /**
+     * `register:3.crowd_action = 15`, `+0x7ffe` — ~~Recorded, not
+     * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+     * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+     */
     crowdAction: 15,
     /** Engine stat names the arm writes and the expiry restores (`+0x24a0`, `+0x24ad`). */
     stats: Object.freeze(["strength", "attack"]),
@@ -5391,7 +5571,11 @@ export const SS2_STAT_SPELLS = Object.freeze({
     /** `attacker.gotoAndPlay("Cast2")` `+0x8267`; `defender.gotoAndPlay("little_fat_kid")` `+0x82a2`. */
     casterClip: "Cast2",
     victimClip: "little_fat_kid",
-    /** `register:3.crowd_action = 10` `+0x821c`. Recorded, not modelled. */
+    /**
+     * `register:3.crowd_action = 10`, `+0x821c` — ~~Recorded, not
+     * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+     * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+     */
     crowdAction: 10,
     /** Restored at `+0x252e`, `+0x253b`. */
     stats: Object.freeze(["strength", "attack"]),
@@ -5415,7 +5599,11 @@ export const SS2_STAT_SPELLS = Object.freeze({
     /** `attacker.gotoAndPlay("Cast2")` `+0x89f2`. */
     casterClip: "Cast2",
     victimClip: null,
-    /** `register:3.crowd_action = 3` `+0x8981`. Recorded, not modelled. */
+    /**
+     * `register:3.crowd_action = 3`, `+0x8981` — ~~Recorded, not
+     * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+     * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+     */
     crowdAction: 3,
     /** SPEED only (`agility` here) — its expiry, `+0x25e1`, touches no strength. */
     stats: Object.freeze(["agility"]),
@@ -5440,7 +5628,11 @@ export const SS2_STAT_SPELLS = Object.freeze({
     /** `attacker.gotoAndPlay("Cast2")` `+0x8af5`. */
     casterClip: "Cast2",
     victimClip: null,
-    /** `register:3.crowd_action = 3` `+0x8a84`. Recorded, not modelled. */
+    /**
+     * `register:3.crowd_action = 3`, `+0x8a84` — ~~Recorded, not
+     * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+     * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+     */
     crowdAction: 3,
     /** Restored at `+0x26c7`, `+0x26d4`. The item text's "reduces your agility" names a field no code writes. */
     stats: Object.freeze(["strength", "defense"]),
@@ -5711,10 +5903,11 @@ const SS2_TIMED_RESOURCE_RANGE = Object.freeze({
  *   engine restores it from its own backup like the other eight — the owner's
  *   decision, 2026-09-22.** See the resolve branch.
  *
- * ► **NOT MODELLED, AND NAMED:** `crowd_action = 3` (the crowd cue, as for the
- *   bolts), `cast_spell_icon`, and `updatecharacter`'s art. The arm has no
+ * ► **NOT MODELLED, AND NAMED:** ~~`crowd_action = 3` (the crowd cue, as for the
+ *   bolts),~~ `cast_spell_icon`, and `updatecharacter`'s art. The arm has no
  *   `Jump` after `nextphase()` and falls through into the fireball test at
  *   `+0x8f59`, which compares against a different label and so does nothing.
+ *   **`crowd_action = 3` IS MODELLED since 2026-09-22** (`src/team/ss2-crowd.js`).
  *
  * ► **THE OFFER IS POSSESSION.** `hitpoints < hitpointsmax / 1.5` is ladder
  *   arm 1 of `villain_cast_spells`, the villain's DECISION, read by
@@ -5725,7 +5918,11 @@ export const SS2_REJUVENATE = Object.freeze({
   itemId: 43,
   /** `attacker.gotoAndPlay("Rejuvinate")`, `+0x8ded` — capital R, as the build passes it. */
   casterClip: "Rejuvinate",
-  /** `register:3.crowd_action = 3`, `+0x8d7c`. Presentation cue; not modelled. */
+  /**
+   * `register:3.crowd_action = 3`, `+0x8d7c` — ~~Presentation cue; not
+   * modelled.~~ **MODELLED 2026-09-22**: `register:3` is `_global`, and `nextphase`
+   * adds this to the battle's one `crowd_interest` (`src/team/ss2-crowd.js`).
+   */
   crowdAction: 3,
   /**
    * The nine restores, IN THE ARM'S ORDER — which is not `SS2_ARMOUR_PIECES`'
@@ -6164,10 +6361,14 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   //
   //   That is a narrowing and it is deliberate. With six gladiators on the
   //   frame "the previous action" names nobody in particular, and the
-  //   alternative — battle-level state — is not something a rule set has:
+  //   alternative — battle-level state — ~~is not something a rule set has:
   //   `actorView` hands over `turnNumber`, `actor`, `allies` and `foes` and
   //   nothing else, so a shared transient would be a resolver-contract change
-  //   carrying its own decision. **At 1v1 against a fighter that never bashes
+  //   carrying its own decision.~~ **IS something a rule set has since
+  //   2026-09-22: `rules.openingBattleResources` declares a battle-wide pool
+  //   and `EffectKind.BATTLE_RESOURCE` writes it (the crowd's seam). So a
+  //   shared `criticalhit` transient is now a RULE-SET decision rather than a
+  //   resolver-contract change — still not taken here.** **At 1v1 against a fighter that never bashes
   //   the two readings coincide**, and no promoted golden resolves direction 23
   //   at all, so no measurement distinguishes them today.
   //
@@ -7535,7 +7736,8 @@ const SS2_PHASE_REQUESTS = new WeakMap();
  *     resource on the bearer, and ONLY on a bearer.** The resolver must stay a
  *     pure function of replayable state, and "who completed the previous
  *     phase" is not in the request: `actorView` hands over `turnNumber`,
- *     `actor`, `allies` and `foes` and nothing else — no initiative, no turn
+ *     `actor`, `allies` and `foes` (and, since 2026-09-22, the battle's own
+ *     declared pools, `battleResources`) and nothing else — no initiative, no turn
  *     cursor, no event log, and no dead (so the rule set cannot even rebuild
  *     `ss2InitiativeOrder`'s interleave, which needs the dead). The resolver
  *     HAS all of that, hashed; exposing it would be a resolver-contract change,
@@ -7757,6 +7959,12 @@ function ss2TimedSpellTick(actor, armCounters, armCountersOn = null) {
  *   `cast_regenerate`); see `ss2TimedSpellTick`.
  * @param {object|null} armCountersOn  the same for counters the arm wrote on
  *   somebody else's clip, by id — `cast_little_fat_kid`'s victim.
+ * @param {number} crowdAction  what the phase left in `_global.crowd_action`
+ *   when `nextphase` read it — the arm's top write where it has one
+ *   (`SS2_CROWD_ACTION`), the damage path's last write where it has none
+ *   (`ss2StrikeCrowdAction`), 0 for an arm that writes nothing. **REQUIRED,
+ *   with no default**: a branch that forgot it would add 0 in silence, and 0
+ *   is a real answer for six arms and the wrong one for thirty.
  *
  * ► **ONE THING HERE IS NOT ATTACKER-ONLY, AND IT IS THE FIRST THING `nextphase`
  *   DOES: the timed-spell tick** (step 3, `+0x3271`/`+0x3289`), which reaches
@@ -7764,12 +7972,25 @@ function ss2TimedSpellTick(actor, armCounters, armCountersOn = null) {
  *   always the defender, as in the build — and with it the four stat spells'
  *   expiry. The two EFFECTS regenerate and boundless buy (steps 8 and 9) are
  *   attacker-only, like everything else.
+ *
+ * ► **AND A SECOND THING BELONGS TO NOBODY: STEP 10, THE CROWD**
+ *   (`+0x3541`-`+0x35b4`, modelled 2026-09-22). `crowd_interest +=
+ *   crowd_action`, clamped 1..100, on the battle's one pool — see
+ *   `src/team/ss2-crowd.js`. It runs wherever this runs, so a phase that KILLS,
+ *   which skips this whole function because `death()` deletes `nextphase`,
+ *   adds nothing, exactly as in the build.
  */
 function phaseTransitionEffects(
   actor,
   { staminaCost, branchGain = 0, branchHeal = 0, fromStaminaleft = null, fromHealth = null,
-    resetsPsyche = true, armCounters = null, armCountersOn = null }
+    resetsPsyche = true, armCounters = null, armCountersOn = null, crowdAction }
 ) {
+  if (!Number.isFinite(crowdAction)) {
+    throw new TeamRuleSetError(
+      `phaseTransitionEffects was called for ${String(actor?.id)} without the phase's crowdAction. Every ` +
+      "completed phase adds what its arm left in crowd_action (nextphase +0x3541); see src/team/ss2-crowd.js."
+    );
+  }
   const declared = declaredResourceNames(actor);
   const stamina = actor.stats.stamina;
   const effects = [];
@@ -7852,6 +8073,12 @@ function phaseTransitionEffects(
     }
     staminaGained = boosted - staminaBefore;
   }
+  // ► **STEP 10, THE CROWD: `crowd_interest += crowd_action`, CLAMPED 1..100,
+  //   THEN `crowd_action = 0`** (`+0x3541`-`+0x35b4`) — after the two buffs
+  //   and before the psyche reset (`+0x35c7`), the build's order. On the
+  //   battle's own pool, read off this phase's request. A battle that declares
+  //   no crowd (`ss2CrowdOpening`) and a step that moves nothing emit nothing.
+  effects.push(...ss2CrowdStepEffects(SS2_PHASE_REQUESTS.get(actor)?.battleResources, crowdAction));
   // ► **`nextphase` RESETS THE PSYCHE COUNTER ON EVERY DECISION THAT IS NOT
   //   `psyche_up`, AND THIS IS THE FUNCTION THAT IS `nextphase`.** The build
   //   writes `game_attacker.psyche_up = 1` at `+0x35c7`-`+0x35ea` whenever
@@ -8012,7 +8239,11 @@ function resolveStatusPhase(request, flag, fightMode, observer) {
     : phaseTransitionEffects(actor, {
       staminaCost: 0,
       fromStaminaleft: victimAfter.staminaleft,
-      fromHealth: victimAfter.hitpoints
+      fromHealth: victimAfter.hitpoints,
+      // The status arm writes `crowd_action = 0` on EVERY tick (`+0x52af`,
+      // `+0x53e3`, `+0x5517`, `+0x564b`), overwriting the tick's own
+      // `magic_damage_character` 2 (`+0x13cb`): a status turn adds nothing.
+      crowdAction: ss2CrowdActionOf(label)
     });
 
   // A LETHAL TICK RUNS `death()`, which clears the condition and taunt flags on
@@ -8664,6 +8895,22 @@ export function createSs2TeamRules({
      */
     openingResources(combatants) {
       return ss2StatSpellDeclarations(combatants);
+    },
+
+    /**
+     * ► **THE CROWD, ONE PER BATTLE, AT THE SUM OF EVERY FIGHTER'S LEVEL** —
+     *   the build's `hero.herolevel + villain.herolevel` (`crowd_bar`
+     *   clip-action:0, `+0x011f`-`+0x0158`) in 1v1, and the owner's rule above
+     *   it (2026-09-22). Every completed phase then adds its delta in
+     *   `phaseTransitionEffects`. See `src/team/ss2-crowd.js`.
+     *
+     * ► **`fixtureReplay` DECLARES IT TOO**, unlike the authored toll: the
+     *   crowd is the build's, so a golden's bout had one. It moves every golden
+     *   replay HASH (the key is new) and no golden VALUE — no fixture asserts
+     *   the crowd, and nothing the crowd feeds reaches the attack arithmetic.
+     */
+    openingBattleResources(combatants) {
+      return ss2CrowdOpening(combatants);
     },
 
     startingPosition({ teamIndex, slotIndex }) {
@@ -9319,6 +9566,16 @@ export function createSs2TeamRules({
         actions.push({ type: Ss2ActionType.CAST_TELEPORT, targetId: actorId });
       }
 
+      // ► **ADULATION IS OFFERED ON POSSESSION ALONE, ONCE, AIMED AT THE
+      //   CASTER** — the teleport's shape and its reason: the arm
+      //   (`+0x76ae`-`+0x777b`) never reads `defender`, and `fightdistance > 300`
+      //   is ladder arm 28, the villain's DECISION, read by `chooseAiAction`.
+      //   The same two gates (the empty marker and the `inventory_maxslots`
+      //   window) inside `ss2InventorySlotHolding`.
+      if (ss2InventorySlotHolding(view.actor, SS2_ADULATION.itemId) !== null) {
+        actions.push({ type: Ss2ActionType.CAST_ADULATION, targetId: actorId });
+      }
+
       // ► **WEAKEN ARMOUR IS OFFERED ON POSSESSION ALONE, PER FOE, on the same
       //   button and under the same two gates** (the empty marker and the
       //   `inventory_maxslots` window, both inside `ss2InventorySlotHolding`).
@@ -9858,7 +10115,10 @@ export function createSs2TeamRules({
           // The run branch's own cost, from the staminacost table:
           // `round(movement_speed / 2)`, the same as a walk's — the build
           // charges the gait and not the distance.
-          staminaCost: Math.round(ss2MovementSpeed(actor) / 2)
+          staminaCost: Math.round(ss2MovementSpeed(actor) / 2),
+          // `runleft` (`+0x3edd`) and `runright` (`+0x4066`) write no
+          // `crowd_action`: a flee adds nothing.
+          crowdAction: 0
         });
         const effects = [...transition.effects];
         let to = null;
@@ -9941,7 +10201,9 @@ export function createSs2TeamRules({
         const transition = phaseTransitionEffects(actor, {
           staminaCost: 0 - Math.round(stamina * 15),
           branchGain: stamina,
-          branchHeal: 3 + Math.ceil(stamina)
+          branchHeal: 3 + Math.ceil(stamina),
+          // `crowd_action = -2`, `+0x5150`: the crowd boos a rest.
+          crowdAction: ss2CrowdActionOf(VANILLA_PHASE_LABEL[Ss2ActionType.REST])
         });
         // A forced rest still walked the whole chain, so it CONSUMED any
         // pending condition without playing it. Emitted here rather than only
@@ -10007,7 +10269,8 @@ export function createSs2TeamRules({
       //   putting the bow away must not outrun the clock either.
       if (request.type === Ss2ActionType.SWAP_WEAPONS) {
         const drawn = ss2InBowMode(actor);
-        const transition = phaseTransitionEffects(actor, { staminaCost: 1 });
+        // `swap_weapons` (`+0x4d1d`) writes no `crowd_action`: it adds nothing.
+        const transition = phaseTransitionEffects(actor, { staminaCost: 1, crowdAction: 0 });
         const effects = [...transition.effects];
         // Guarded on declaration like every other resource write in this file:
         // the resolver refuses an undeclared name mid-list and leaves the
@@ -10070,7 +10333,10 @@ export function createSs2TeamRules({
           );
         }
         const transition = phaseTransitionEffects(actor, {
-          staminaCost: Math.round(ss2MovementSpeed(actor) / 2)
+          staminaCost: Math.round(ss2MovementSpeed(actor) / 2),
+          // AUTHORED like the verb: the build has no sidestep arm, so nothing
+          // writes `crowd_action`, and a walk's 0 is the one on offer.
+          crowdAction: 0
         });
         return {
           effects: [
@@ -10132,7 +10398,10 @@ export function createSs2TeamRules({
         // completed phase, not a free step**, which is the whole reason it can
         // be a real choice against resting.
         const transition = phaseTransitionEffects(actor, {
-          staminaCost: Math.round(ss2MovementSpeed(actor) / 2)
+          staminaCost: Math.round(ss2MovementSpeed(actor) / 2),
+          // `walkleft` (`+0x3b1f`) and `walkright` (`+0x3cfe`) write no
+          // `crowd_action`: a walk adds nothing.
+          crowdAction: 0
         });
         // **THE DISPLACEMENT IS THE BUILD'S AND IS PER-ACTOR.** It was a flat
         // authored 44 until 2026-09-11; `ss2WalkDisplacement` derives it from
@@ -10249,7 +10518,10 @@ export function createSs2TeamRules({
             // `nextphase` resets only when `phase_decision != "psyche_up"`, and
             // this IS that decision — so the counter this branch just advanced
             // must survive its own phase transition.
-            resetsPsyche: false
+            resetsPsyche: false,
+            // A CHARGING press writes no `crowd_action`: the arm's one write
+            // (`+0x6604`) is behind the `== 3` test (`+0x65ff`). It adds nothing.
+            crowdAction: 0
           });
           const effects = [...transition.effects];
           // Guarded on declaration like every other resource write here: the
@@ -10305,7 +10577,12 @@ export function createSs2TeamRules({
         }
         const force = ss2ShoveForce(actor);
         const staminaCost = Math.round(actor.stats.strength * SS2_SHOVE.staminaCostFactor);
-        const transition = phaseTransitionEffects(actor, { staminaCost });
+        // `crowd_action = 2` (`+0x5dc0`) on every tick, after `knockback`'s 1
+        // (`+0x1dfe`) on the first: the shove adds 2.
+        const transition = phaseTransitionEffects(actor, {
+          staminaCost,
+          crowdAction: ss2CrowdActionOf(VANILLA_PHASE_LABEL[Ss2ActionType.SHOVE])
+        });
         const effects = [...transition.effects];
         // `knockback(defender, force)` is `_x + force` with no clamp, no arena
         // edge and no body check in its own 155 bytes (`+0x1e75`); the bound
@@ -10475,7 +10752,7 @@ export function createSs2TeamRules({
         const staminaCost = Math.round(actor.stats.magicka);
         const transition = victimEliminated
           ? { effects: [], staminaGained: 0, healed: 0 }
-          : phaseTransitionEffects(actor, { staminaCost });
+          : phaseTransitionEffects(actor, { staminaCost, crowdAction: SS2_BOLT_INGRESS.crowdAction });
 
         const effects = [
           ...consumption,
@@ -10610,7 +10887,7 @@ export function createSs2TeamRules({
         const staminaCost = Math.round(actor.stats.magicka);
         const transition = victimEliminated
           ? { effects: [], staminaGained: 0, healed: 0 }
-          : phaseTransitionEffects(actor, { staminaCost });
+          : phaseTransitionEffects(actor, { staminaCost, crowdAction: SS2_FIREBALL_INGRESS.crowdAction });
 
         // `gladiator_dir` at the cast. The launch side, the flight and the
         // impact test all read it (`+0x9284`, `+0x949c`, `+0x9131`/`+0x916c`),
@@ -10787,7 +11064,7 @@ export function createSs2TeamRules({
         const staminaCost = Math.round(actor.stats.magicka);
         const transition = victimEliminated
           ? { effects: [], staminaGained: 0, healed: 0 }
-          : phaseTransitionEffects(actor, { staminaCost });
+          : phaseTransitionEffects(actor, { staminaCost, crowdAction: spell.crowdAction });
 
         return {
           effects: [
@@ -10865,7 +11142,12 @@ export function createSs2TeamRules({
         // No damage, so no death: `nextphase` always runs, and the cost is spent
         // unconditionally exactly as the bolt's is.
         const staminaCost = Math.round(actor.stats.magicka);
-        const transition = phaseTransitionEffects(actor, { staminaCost });
+        // `crowd_action = 2` (`+0x7abd`) on every tick, after `knockback`'s 1
+        // (`+0x1dfe`) on the first: the gale adds 2.
+        const transition = phaseTransitionEffects(actor, {
+          staminaCost,
+          crowdAction: ss2CrowdActionOf(VANILLA_PHASE_LABEL[Ss2ActionType.CAST_GALE])
+        });
 
         // In the build's own order: the slot is consumed before the phase runs
         // (the hero's click handler, or `use_item` for the villain), the body
@@ -10979,7 +11261,10 @@ export function createSs2TeamRules({
         // completion, or from the stall watchdog on a cut — and both spend the
         // cost, exactly as the gale's is spent.
         const staminaCost = Math.round(actor.stats.magicka);
-        const transition = phaseTransitionEffects(actor, { staminaCost });
+        // Both ends add the arm's 2 (`+0x7bf9`): the arm writes it every tick
+        // and calls no crowd-writing helper, and a watchdog cut reads the value
+        // the previous tick's arm left.
+        const transition = phaseTransitionEffects(actor, { staminaCost, crowdAction: SS2_COMMAND.crowdAction });
 
         // The build's order, as for the gale: the slot is consumed when the
         // phase begins, the body moves frame by frame, and `nextphase` settles
@@ -11091,7 +11376,7 @@ export function createSs2TeamRules({
         // No damage, so no death: `nextphase` always runs, and the cost is spent
         // unconditionally, exactly as the gale's is.
         const staminaCost = Math.round(actor.stats.magicka);
-        const transition = phaseTransitionEffects(actor, { staminaCost });
+        const transition = phaseTransitionEffects(actor, { staminaCost, crowdAction: SS2_TELEPORT.crowdAction });
 
         // The build's order, as for the gale: the slot is consumed when the
         // phase begins, the body moves at the completion gate, and `nextphase`
@@ -11135,6 +11420,53 @@ export function createSs2TeamRules({
             to,
             staminaSpent: staminaCost,
             staminaGained: transition.staminaGained
+          }]
+        };
+      }
+
+      // ► **ADULATION. Zero samples, zero damage, nobody moves: the crowd takes
+      //   50 and that is the whole of it.** It returns before `ATTACK_BANDS`
+      //   for the teleport's reason — it is not an attack — and it needs no
+      //   target at all. See `SS2_ADULATION` for the phase, statement by
+      //   statement. The +50 itself is `nextphase`'s, so it lives in the
+      //   transition below and a crowdless battle simply adds nothing.
+      if (request.type === Ss2ActionType.CAST_ADULATION) {
+        // Re-found at resolve, through the same window as the offer, for the
+        // reason the bolt branch gives.
+        const slot = ss2InventorySlotHolding(actor, SS2_ADULATION.itemId);
+        if (slot === null) {
+          throw new TeamRuleSetError(
+            `${actor.id} cannot cast ${VANILLA_PHASE_LABEL[request.type]}: no inventory slot inside ` +
+            `inventory_maxslots holds item ${SS2_ADULATION.itemId}. The build's own gate is possession — ` +
+            `check_inventory(${SS2_ADULATION.itemId}) for the villain, a visible inventory button for the hero — ` +
+            "and this engine reproduces it."
+          );
+        }
+        // No damage, so no death: `nextphase` always runs, and spends the cost
+        // unconditionally, as for the teleport.
+        const staminaCost = Math.round(actor.stats.magicka);
+        const transition = phaseTransitionEffects(actor, { staminaCost, crowdAction: SS2_ADULATION.crowdAction });
+        return {
+          effects: [
+            // The slot first — both of the build's choosers empty it before the
+            // phase runs — then `nextphase`.
+            { kind: EffectKind.RESOURCE, targetId: actor.id, resource: slot, to: SS2_INVENTORY_EMPTY },
+            ...transition.effects,
+            ...crowd
+          ],
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: actor.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // The caster's clip alone, so `SS2_STATIC_MAP_BINDINGS` binds it as
+            // a self-cast: the arm plays nothing on anybody else.
+            casterClip: SS2_ADULATION.casterClip,
+            spellId: SS2_ADULATION.itemId,
+            consumedSlot: slot,
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
           }]
         };
       }
@@ -11214,7 +11546,8 @@ export function createSs2TeamRules({
         // No damage, so no death: `nextphase` always runs, and the cost is spent
         // unconditionally, exactly as the gale's is.
         const staminaCost = Math.round(actor.stats.magicka);
-        const transition = phaseTransitionEffects(actor, { staminaCost });
+        // `remove_armour` writes no `crowd_action`: the arm's 4 (`+0x778f`) stands.
+        const transition = phaseTransitionEffects(actor, { staminaCost, crowdAction: SS2_WEAKEN_ARMOUR.crowdAction });
 
         // ► **THE VICTIM'S WRITES, AND NOT `defenderEffects`.** That function
         //   always emits a DAMAGE effect — "a miss is a zero-damage effect" —
@@ -11354,7 +11687,10 @@ export function createSs2TeamRules({
         const transition = phaseTransitionEffects(actor, {
           staminaCost: 0,
           fromStaminaleft: after.staminaleft,
-          fromHealth: after.hitpoints
+          fromHealth: after.hitpoints,
+          // `crowd_action = -3` (`+0x577f`) on every tick: the crowd has no use
+          // for a drink.
+          crowdAction: ss2CrowdActionOf(VANILLA_PHASE_LABEL[Ss2ActionType.DRINK_POTION])
         });
         effects.push(...transition.effects, ...crowd);
 
@@ -11436,7 +11772,8 @@ export function createSs2TeamRules({
         // it, and one absolute write of the result is the same state as two.
         const transition = phaseTransitionEffects(actor, {
           staminaCost,
-          armCounters: { [timedBuff.counter]: timedBuff.duration }
+          armCounters: { [timedBuff.counter]: timedBuff.duration },
+          crowdAction: timedBuff.crowdAction
         });
 
         // The slot first — both of the build's choosers empty it before the
@@ -11589,7 +11926,8 @@ export function createSs2TeamRules({
         const transition = phaseTransitionEffects(actor, {
           staminaCost,
           fromStaminaleft: pools.staminamax,
-          fromHealth: actor.maxHealth
+          fromHealth: actor.maxHealth,
+          crowdAction: SS2_REJUVENATE.crowdAction
         });
         effects.push(...transition.effects);
 
@@ -11729,7 +12067,12 @@ export function createSs2TeamRules({
         const transition = phaseTransitionEffects(actor, {
           staminaCost,
           armCounters: onVictim ? null : armed,
-          armCountersOn: onVictim ? { [bearer.id]: armed } : null
+          armCountersOn: onVictim ? { [bearer.id]: armed } : null,
+          // Each arm writes its own constant every tick and calls no
+          // crowd-writing helper, so it stands — colossus's 15 too, although
+          // its phase ends through the stall watchdog: that `nextphase` reads
+          // what the previous tick's arm left.
+          crowdAction: statSpell.crowdAction
         });
         const counterAfter = onVictim
           ? transition.timedSpellsOn[bearer.id]?.[statSpell.counter]
@@ -11993,7 +12336,11 @@ export function createSs2TeamRules({
             // keeps his charge and can spend it once he has closed.~~ **He
             // does not keep it** — the arm's own write-back does the resetting,
             // below, and that is what this skipped reset would have duplicated.
-            resetsPsyche: false
+            resetsPsyche: false,
+            // The level-3 press's one write, `crowd_action = 3` (`+0x6604`),
+            // with no `checkattackroll` after it to overwrite it: a discharge
+            // gated out of range still pleases the crowd by 3.
+            crowdAction: SS2_PSYCHE_DISCHARGE_CROWD.outOfRange
           });
           // The arm's write-back (`+0x6738`) and the completion's increment
           // (`+0x6761`), as ONE absolute write of their result — the shape the
@@ -12071,7 +12418,9 @@ export function createSs2TeamRules({
           //   write the same 1. See the in-range write below for why the arm's
           //   write, not `nextphase`'s, is the one to model.
           const transition = phaseTransitionEffects(actor, {
-            staminaCost: itemStrike.staminaCost, resetsPsyche: false
+            staminaCost: itemStrike.staminaCost, resetsPsyche: false,
+            // The arm's own 3 (`+0x78ed`), written every tick: in range or not.
+            crowdAction: SS2_WHIRLWIND.crowdAction
           });
           const psycheWrite = declaredResourceNames(actor).has("psyche_up")
             && resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor) !== SS2_PSYCHE_UP.floor
@@ -12277,7 +12626,10 @@ export function createSs2TeamRules({
           ...(band.transitionFor ? band.transitionFor(actor) : { staminaCost }),
           // The whirlwind writes the counter back itself (`+0x7a64`), below,
           // for the discharge's reason: one write, in the arm's place.
-          resetsPsyche: request.type !== Ss2ActionType.PSYCHE_UP && request.type !== Ss2ActionType.CAST_WHIRLWIND
+          resetsPsyche: request.type !== Ss2ActionType.PSYCHE_UP && request.type !== Ss2ActionType.CAST_WHIRLWIND,
+          // The arm's top write where it has one; where it has none (normal,
+          // bash, the level-3 discharge), what this blow's damage path left.
+          crowdAction: ss2AttackPathCrowdAction(request.type, outcome)
         });
       // ► **THE BACK ATTACK, AND IT IS A SEPARATE EFFECT ON PURPOSE.** The
       //   swing above has already resolved through the build's own
@@ -13311,12 +13663,36 @@ export function createSs2TeamRules({
       //   gale (24, 301-399 with its armour test), the command (25, the SAME
       //   `> 300`: a villain holding 39 always commands first). Colossus (8),
       //   weaken (19), whirlwind (20) and the teleport (26) are all `< 300` or
-      //   less and never meet it. Arm 28, adulation, sits below and has no verb.
+      //   less and never meet it. Arm 28, adulation, sits below ~~and has no
+      //   verb~~ — it has one since 2026-09-22, in the block just below.
       //
       // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
       if (!boltOnOffer) {
         const swift = ss2StatSpellChoice(view, options, Ss2ActionType.CAST_SWIFTSANDALS);
         if (swift) return swift;
+      }
+
+      // ► **LADDER ARM 28, ADULATION — THE LAST ARM: `check_inventory(47) &&
+      //   _root.arena.fightdistance > 300` (`DoAction@0x23e7cf` `+0x100a`-
+      //   `+0x1040`), strict (`Greater`), and nothing else.** Returned before
+      //   the walk, because `villain_cast_spells` replaces the decision: a
+      //   villain holding 47 with its foe beyond 300 charms the crowd rather
+      //   than closing. See `SS2_ADULATION`.
+      //
+      // ► **WHAT PRE-EMPTS IT is everything that pre-empts arm 27 above (the
+      //   same `> 300`), and arm 27 itself** — a villain holding 40 puts the
+      //   sandals on first.
+      //
+      // ► **INVENTED: WHICH FOE THE DISTANCE IS MEASURED TO** — the nearest,
+      //   the teleport's and swift sandals' choice. At 1v1 it is the build's
+      //   `fightdistance` exactly.
+      //
+      // ► **OMITTED, NAMED:** the 90% roll at `+0x056f`, as everywhere here.
+      if (!boltOnOffer) {
+        const adulationOption = options.find((option) => option.type === Ss2ActionType.CAST_ADULATION);
+        const foe = adulationOption ? nearestFoe(view) : null;
+        const range = foe ? ss2FightDistance(actor, foe) : null;
+        if (range !== null && range > SS2_ADULATION.aiFightDistanceAbove) return adulationOption;
       }
 
       if (!attackOnOffer) {

@@ -38,7 +38,13 @@ import { BattleError } from "./errors.js";
 import { placeholderTeamRules } from "./placeholder-rules.js";
 import { buildRoster, initiativeOrder } from "./roster.js";
 import { createOrderedRngChannel } from "./rng.js";
-import { freezeResources, projectResources, withDeclaredResources, writeResource } from "./resources.js";
+import {
+  freezeResources,
+  normaliseResourceBag,
+  projectResources,
+  withDeclaredResources,
+  writeResource
+} from "./resources.js";
 import {
   assertActionOutcome,
   assertTeamRuleSet,
@@ -136,6 +142,7 @@ export function createTeamBattle({
   assertTeamRuleSet(rules);
   const roster = buildRoster({ teams, rules });
   declareOpeningResources(rules, roster.teams.flatMap((team) => team.combatants));
+  const battleResources = declareBattleResources(rules, roster.teams.flatMap((team) => team.combatants));
   const rng = createOrderedRngChannel({ seed, tape: rngTape, journal: journalRolls });
   const battle = {
     version: BATTLE_STATE_VERSION,
@@ -144,6 +151,11 @@ export function createTeamBattle({
     rulesDescriptor: describeTeamRuleSet(rules),
     teams: roster.teams,
     controllers: roster.controllers,
+    /**
+     * The battle's OWN resources — see `declareBattleResources`. `{}` for every
+     * rule set that declares none, and then absent from the projection.
+     */
+    battleResources,
     // A rule set MAY own turn order. `ss2TeamRules` does, because SS2 does not
     // sort initiative at all — `changeCombatants` alternates — and the flat
     // agility sort this resolver ships is authored. The fallback keeps every
@@ -251,6 +263,44 @@ function declareOpeningResources(rules, combatants) {
   }
 }
 
+/**
+ * ► **THE BATTLE'S OWN RESOURCES: ONE DECLARED, CLAMPED, HASHED POOL PER NAME
+ *   THAT BELONGS TO NO COMBATANT.** Added 2026-09-22 for SS2's crowd, whose
+ *   `_global.crowd_interest` is one number per bout, fed by every completed
+ *   phase of both fighters and read once to scale the victory purse.
+ *
+ * **Why not a combatant resource.** Copying one crowd onto every gladiator is
+ * N copies of one number and N-1 chances for them to disagree, and there is
+ * no honest answer to "whose crowd is it". The build has one, so this does.
+ *
+ * **Why not a named field.** The resolver must not learn a game's nouns (the
+ * reason `resources.js` exists), so it learns the one concept it already has
+ * — a declared, clamped numeric pool — at a second scope, and the rule set
+ * supplies the name. Every constraint `resources.js` enforces holds here
+ * unchanged, because the declaration goes through `normaliseResourceBag` and
+ * the write through `writeResource`: numbers only, declared at construction,
+ * sorted, written only through an absolute effect (`EffectKind.BATTLE_RESOURCE`).
+ *
+ * `rules.openingBattleResources(views)` is OPTIONAL and is asked ONCE, after
+ * every combatant is built and its opening resources declared, with a frozen
+ * view of each. It returns a bag declaration — the shape a blueprint's
+ * `resources` takes: `{ [name]: number | { value, min, max } }`. A rule set
+ * with no hook, or one returning `{}`, declares none; its battles project no
+ * `battleResources` key at all, so every such battle keeps the projection and
+ * the hash it always had.
+ */
+function declareBattleResources(rules, combatants) {
+  if (typeof rules.openingBattleResources !== "function") return {};
+  const declaration = rules.openingBattleResources(combatants.map(combatantView));
+  if (declaration === null || typeof declaration !== "object" || Array.isArray(declaration)) {
+    throw new BattleError(
+      `Rule set ${rules.id} returned something other than a plain object from openingBattleResources(); ` +
+      "it declares a bag, { [name]: number | { value, min, max } }."
+    );
+  }
+  return normaliseResourceBag(declaration);
+}
+
 /* ------------------------------------------------------------------ */
 /* Queries                                                             */
 /* ------------------------------------------------------------------ */
@@ -339,6 +389,10 @@ function combatantView(combatant) {
 function actorView(battle, actor) {
   return {
     turnNumber: battle.turnNumber,
+    // The battle's own pools, frozen — and projected by `toTeamWireState`
+    // whenever any is declared, so the soundness invariant above holds at this
+    // scope too. `{}` for a rule set that declares none.
+    battleResources: freezeResources(battle.battleResources),
     actor: combatantView(actor),
     allies: Object.freeze(aliveCombatants(battle, actor.teamId).map(combatantView)),
     foes: Object.freeze(
@@ -402,6 +456,15 @@ function addEvent(battle, event) {
  */
 function applyEffects(battle, effects) {
   for (const effect of effects) {
+    if (effect.kind === EffectKind.BATTLE_RESOURCE) {
+      // No combatant: the pool is the battle's. Clamped and refused exactly as
+      // a combatant's resource is, by the same writer.
+      writeResource({ resources: battle.battleResources }, effect.resource, effect.to, {
+        ruleSetId: battle.rules.id,
+        owner: "the battle"
+      });
+      continue;
+    }
     const target = combatantById(battle, effect.targetId);
     if (!target) {
       throw new BattleError(
@@ -732,6 +795,23 @@ export function toTeamWireState(battle) {
     // pinned hash in the suite moves.
     ...(battle.rng.mode === "tape"
       ? { rngMode: "tape", rngDrawn: battle.rng.drawnDigest }
+      : {}),
+    // ► **THE BATTLE'S OWN POOLS, PROJECTED ONLY WHEN ANY IS DECLARED** — the
+    //   tape fields' rule above, for the same reason: every battle whose rule
+    //   set declares none keeps a byte-identical projection, so no pin taken
+    //   under such a rule set moves. Added 2026-09-22 (SS2's `crowd_interest`).
+    //   Whether it is present is a function of the rule set, whose id is in
+    //   this projection, so two peers running one rule set agree on the key.
+    //
+    //   ► **`BATTLE_STATE_VERSION` DOES NOT SEE THIS KEY**, because it hashes
+    //     `COMBATANT_PROJECTION_FIELDS` only — the same gap the two tape
+    //     fields went through. A peer on either side of this change still
+    //     disagrees about an SS2 battle from its first hash exchange (the key
+    //     is present at construction), but it advertises the same version
+    //     while doing so. Recorded, not decided here: deriving the version
+    //     from the top-level keys too would move every pin in the suite.
+    ...(Object.keys(battle.battleResources).length > 0
+      ? { battleResources: projectResources(battle.battleResources) }
       : {}),
     rules: {
       id: battle.rulesDescriptor.id,

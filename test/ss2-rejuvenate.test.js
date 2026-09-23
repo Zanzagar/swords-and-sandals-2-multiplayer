@@ -99,7 +99,7 @@ test("the constants are the build's literals", () => {
   assert.equal(SS2_REJUVENATE.itemId, 43);
   // `gotoAndPlay("Rejuvinate")` `+0x8ded` — capital R, as the build passes it.
   assert.equal(SS2_REJUVENATE.casterClip, "Rejuvinate");
-  // `register:3.crowd_action = 3` `+0x8d7c` — recorded, not modelled.
+  // `register:3.crowd_action = 3` `+0x8d7c` — ~~recorded, not modelled~~ MODELLED 2026-09-22 (`test/ss2-crowd.test.js`).
   assert.equal(SS2_REJUVENATE.crowdAction, 3);
   // Ladder arm 1, `hitpoints < hitpointsmax / 1.5` (`Push 1.5` at `+0x05d9`).
   assert.equal(SS2_REJUVENATE.ladderArm, 1);

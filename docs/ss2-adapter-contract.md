@@ -477,6 +477,20 @@ neither written nor reported (found by a Codex review). **Writing it back would
 be a fifth `WriteSource` and a new policy for licensed base-stat fields; that
 is undecided, not overlooked.**
 
+**The battle's crowd is REPORTED, not written, the same way (2026-09-22).**
+`EffectKind.BATTLE_RESOURCE` moves one of the battle's OWN declared pools — for
+SS2, `crowd_interest`, the build's one `_global` per bout, opened at the sum of
+the fighters' `herolevel` and moved by every completed phase
+(`src/team/ss2-crowd.js`). Every one of the four sources above names a
+combatant and this pool belongs to none, so the resolved value reaches combat
+state and the hash and is reported in `unmapped` as `{ battleResource, field,
+scope: "_global", from, to, reason }`, once per action, by the effect pass or
+the totality pass. `vanillaWritesForResolvedAction` reads the pool from the
+wire's `battleResources` before and after (`battleBefore`/`battleAfter`), which
+`createVanillaBattleHost` passes. **Writing it to `_global.crowd_interest`
+would be a fifth `WriteSource`, and a global rather than a per-combatant
+field; that is the owner's decision, undecided rather than overlooked.**
+
 `clip-facing` is the one source with no canonical counterpart — the facing is
 presentation, not combat state — so it is checked against the closed
 `FACING_VALUES` vocabulary instead.

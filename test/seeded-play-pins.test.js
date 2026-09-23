@@ -498,6 +498,37 @@ function driveFirst(battle, limit) {
  *   2026-09-16; this file never got the correction, so two artefacts disagreed
  *   and only one of them was right.
  */
+/**
+ * ► **ALL FOUR MOVED ON 2026-09-22, FOR ONE REASON: THE BUILD'S CROWD IS
+ *   MODELLED, AND IT IS BATTLE STATE.** Owner's decision (f).
+ *
+ *     f11e6bc9 -> 5536913e   (six actions in)            crowd opens 2, ends 5
+ *     a6cbd6a8 -> a5911fbf   (settled 1v1)               crowd opens 6, ends 1
+ *     3e770611 -> cd892f14   (vanilla-separation)        crowd opens 2, ends 1
+ *     fbb98fd2 -> 563397f1   (settled 3v3)               crowd opens 18, ends 1
+ *
+ *   `toTeamWireState` now carries `battleResources: { crowd_interest }` for
+ *   every SS2 battle — the build's one `_global.crowd_interest`, opening at the
+ *   sum of every fighter's `herolevel` (`crowd_bar` `+0x011f`-`+0x0158`) and
+ *   moved by every completed phase (`nextphase` `+0x3541`-`+0x35b4`). **The
+ *   key is present from construction, so all four moved whatever they did**,
+ *   the walking opening included — the signature of a projection change, as
+ *   the 2026-09-13 block below spells out.
+ *
+ *   **MEASURED, not argued, that nothing ELSE moved them**: with
+ *   `openingBattleResources` made to return `{}` (and so no crowd declared and
+ *   no crowd step emitted), all four returned to their old literals exactly,
+ *   and so did the golden census — then the one-line mutation was reverted by
+ *   its exact inverse. The phase-transition plumbing, the new
+ *   `battle-resource` effect kind, the new `battleResources` view field and
+ *   `cast_adulation` move no hash on their own. **`BATTLE_STATE_VERSION` did
+ *   not change**, because it hashes `COMBATANT_PROJECTION_FIELDS` and this key
+ *   is top-level — see the note at the projection in `src/team/resolver.js`.
+ *
+ *   **Every golden replay hash moved too (23 of 23)**, accepted by the owner
+ *   in advance; no golden VALUE did, and no golden file was touched. See the
+ *   census in `tools/golden-hash-census.mjs`.
+ */
 const WHY_IT_MOVED = [
   "This hash is taken AFTER actions, so unlike the construction-time pin it",
   "covers rngCursor, turnCursor, the event log and every value that is 0/null/[]",
@@ -518,7 +549,7 @@ test("a battle SIX ACTIONS IN hashes to a pinned value", () => {
   assert.ok(battle.events.length > 0, "the event log must be non-empty");
   assert.equal(battle.result, null, "and the battle must NOT be settled — that is the next test");
 
-  assert.equal(combatStateHash(battle), "f11e6bc9", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "5536913e", WHY_IT_MOVED);
 });
 
 test("a SETTLED battle hashes to a pinned value, which is the only pin that covers `result`", () => {
@@ -530,7 +561,7 @@ test("a SETTLED battle hashes to a pinned value, which is the only pin that cove
   assert.equal(battle.result.reason, "elimination");
   assert.ok(battle.events.length > taken, "a settled bout emits more events than actions");
 
-  assert.equal(combatStateHash(battle), "a6cbd6a8", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "a5911fbf", WHY_IT_MOVED);
 });
 
 /**
@@ -587,7 +618,7 @@ test("the VANILLA-SEPARATION opening hashes to a pinned value, which the contact
   //   ARE in the projection. This one is not a harness artefact: two peers
   //   driving identical actions really would disagree, which is exactly what
   //   this pin exists to catch and why the shove was worth fixing.
-  assert.equal(combatStateHash(battle), "3e770611", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "cd892f14", WHY_IT_MOVED);
 });
 
 test("a settled 3v3 hashes to a pinned value, because N-a-side has its own projection", () => {
@@ -598,7 +629,7 @@ test("a settled 3v3 hashes to a pinned value, because N-a-side has its own proje
 
   assert.ok(battle.result, `the 3v3 must have settled: ${taken} actions taken`);
   assert.equal(battle.result.winnerTeamId, "red");
-  assert.equal(combatStateHash(battle), "fbb98fd2", WHY_IT_MOVED);
+  assert.equal(combatStateHash(battle), "563397f1", WHY_IT_MOVED);
 });
 
 /**

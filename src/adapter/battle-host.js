@@ -536,7 +536,11 @@ class VanillaBattleHost {
       after,
       effects,
       placements: this.#layout.byCombatantId,
-      mirrors: this.#mirrors
+      mirrors: this.#mirrors,
+      // The battle's own pools (SS2's `crowd_interest`), reported and never
+      // written — see `vanillaWritesForResolvedAction`.
+      battleBefore: beforeWire.battleResources ?? null,
+      battleAfter: wire.battleResources ?? null
     });
     pipeline.push("vanillaWritesForResolvedAction");
 

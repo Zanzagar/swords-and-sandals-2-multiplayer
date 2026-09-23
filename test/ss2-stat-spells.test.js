@@ -43,7 +43,7 @@
  *   same `ss2TimedSpellTick` as regenerate's, so whatever policy lands there,
  *   they follow it. These tests are 1v1, where every policy agrees with the
  *   build.
- * - **`crowd_action` is recorded, not modelled** (owner, 2026-09-22).
+ * - ~~**`crowd_action` is recorded, not modelled** (owner, 2026-09-22).~~ **MODELLED later the same day, owner's decision (f): each cast adds its arm's constant to the battle's `crowd_interest` (`test/ss2-crowd.test.js`).**
  */
 import assert from "node:assert/strict";
 import test from "node:test";

@@ -530,13 +530,22 @@ export const MAP_SILENCE = Object.freeze([
       "The build has a crowd and NO bout-level pressure mechanic, and the difference matters because the " +
       "vocabulary is so suggestive that it reads like evidence. What the map actually records: " +
       "`crowd_interest` is a GOLD MULTIPLIER read once on the victory frame (`2249/frame:88` `+0x078c`), " +
-      "derived from `herolevel` with a `RandomNumber(899)` draw, and it never touches a fight; " +
-      "`crowd_action` is a per-damage presentation cue (`+0x52af`); `wincrowd` is a player action costing 3 " +
+      "~~derived from `herolevel` with a `RandomNumber(899)` draw~~ **opened at `hero.herolevel + " +
+      "villain.herolevel` by the `crowd_bar` clip handler (`sprite:751` clip-action:0 `+0x011f`-`+0x0158`; " +
+      "the `RandomNumber(899)` at `sprite:2224/frame:1` `+0x0f48` feeds `_global.crowdlevel`, a string " +
+      "nothing reads — corrected 2026-09-22)**, and it never touches a fight's arithmetic; " +
+      "~~`crowd_action` is a per-damage presentation cue (`+0x52af`)~~ **`crowd_action` is a per-PHASE " +
+      "delta on `_global` that `nextphase` adds into `crowd_interest` and clamps to 1..100 " +
+      "(`+0x3541`-`+0x35b4`; `+0x52af` is the frozen arm writing 0) — MODELLED since 2026-09-22 in " +
+      "`src/team/ss2-crowd.js`, owner's decision (f)**; `wincrowd` is a player action costing 3 " +
       "stamina (`+0x5014`), wired on every controller and hidden below `herolevel` 3, whose mechanical " +
-      "effect the map does not record at all; and the `taunttimer` watchdog (`+0x67e4`, 60 ticks) abandons " +
+      "effect ~~the map does not record at all~~ **is `crowd_action = round(_root.game.hero.charisma / 2)` " +
+      "(`+0x4fdb`) — the HERO's charisma even when the villain acts; derived, not yet built**; and the " +
+      "`taunttimer` watchdog (`+0x67e4`, 60 ticks) abandons " +
       "a stuck ANIMATION, not a stalled bout. `nextphase` step 6 says \"update and clamp crowd state\" and " +
       "names the variable only in that summary, so a decode MAY yet find a real pressure term — but none is " +
-      "recorded today. **This entry exists because the main session put a fork to the owner describing the " +
+      "recorded today. **The crowd economy, now decoded in full, is not one either: it scales the victory " +
+      "purse and nothing else reads it.** **This entry exists because the main session put a fork to the owner describing the " +
       "crowd and the taunttimer as vanilla's answer to a stalled fight. They are not, and the owner chose " +
       "on that false premise before it was caught and corrected.**",
     adapterBehaviour:

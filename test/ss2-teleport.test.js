@@ -146,7 +146,7 @@ test("the teleport's constants are the build's literals", () => {
   assert.equal(SS2_TELEPORT.destinationHigh, 2000);
   // `attacker.gotoAndPlay("Cast2")` at `+0x7620` (and again at `+0x767c`).
   assert.equal(SS2_TELEPORT.casterClip, "Cast2");
-  // `register:3.crowd_action = 3` at `+0x7554` — recorded, not modelled.
+  // `register:3.crowd_action = 3` at `+0x7554` — ~~recorded, not modelled~~ MODELLED 2026-09-22 (`test/ss2-crowd.test.js`).
   assert.equal(SS2_TELEPORT.crowdAction, 3);
   // Ladder arm 26: `fightdistance < 250` at `+0x0f48`-`+0x0f50`.
   assert.equal(SS2_TELEPORT.aiFightDistanceBelow, 250);

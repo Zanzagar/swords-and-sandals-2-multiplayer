@@ -135,7 +135,31 @@ export const EffectKind = Object.freeze({
    * projection — `stats` was always projected and hashed — so the kind costs
    * no existing battle anything.
    */
-  STAT: "stat"
+  STAT: "stat",
+  /**
+   * Set one of the BATTLE's own resources to an absolute value —
+   * `{ kind: "battle-resource", resource, to }`, and **no `targetId`**.
+   *
+   * ► **ADDED 2026-09-22, FOR ONE NUMBER THAT BELONGS TO NOBODY.** SS2 keeps
+   *   one `_global.crowd_interest` per bout, fed by every completed phase of
+   *   BOTH fighters and read once to scale the victory purse. A per-combatant
+   *   resource cannot hold it honestly: six copies of one crowd is six chances
+   *   for the copies to disagree, and the build has one.
+   *
+   * **The resolver learns one concept and no noun**: "a declared, clamped
+   * numeric pool the battle owns" — `resources.js`'s pool, at battle scope.
+   * The rule set names it (`rules.openingBattleResources`), exactly as a
+   * blueprint names a combatant's resources, so `crowd_interest` never
+   * appears here.
+   *
+   * **Absolute, never a delta, for the reason `RESOURCE` writes `to`**, and
+   * clamped to the declared bounds the same way. A name the battle did not
+   * declare at construction is refused, not created (constraint 2 of
+   * `resources.js`). **A `targetId` is REFUSED rather than ignored**: carrying
+   * one says the rule set meant a combatant's pool, and silently writing the
+   * battle's instead would be the wrong number in the right place.
+   */
+  BATTLE_RESOURCE: "battle-resource"
 });
 
 const REQUIRED_FUNCTIONS = Object.freeze([
@@ -325,6 +349,25 @@ export function assertActionOutcome(outcome, ruleSetId) {
   for (const effect of effects) {
     if (!isPlainObject(effect) || !Object.values(EffectKind).includes(effect.kind)) {
       throw new TeamRuleSetError(`Rule set ${ruleSetId} produced an effect with an unsupported kind.`);
+    }
+    if (effect.kind === EffectKind.BATTLE_RESOURCE) {
+      // The one kind with no target: the pool is the battle's. Checked before
+      // the target test below, which every other kind still meets.
+      if ("targetId" in effect) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a battle-resource effect carrying a targetId; a battle resource ` +
+          "belongs to no combatant. Use a resource effect for a combatant's pool."
+        );
+      }
+      if (typeof effect.resource !== "string" || effect.resource.length === 0) {
+        throw new TeamRuleSetError(`Rule set ${ruleSetId} produced a battle-resource effect without a resource name.`);
+      }
+      if (!Number.isFinite(effect.to)) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a battle-resource effect without a finite absolute \`to\` value.`
+        );
+      }
+      continue;
     }
     if (typeof effect.targetId !== "string" || effect.targetId.length === 0) {
       throw new TeamRuleSetError(`Rule set ${ruleSetId} produced an effect without a target id.`);

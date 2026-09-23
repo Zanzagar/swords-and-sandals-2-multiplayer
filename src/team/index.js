@@ -8,7 +8,7 @@
  * | `rule-set.js`       | the injection contract and the verified/placeholder gate |
  * | `placeholder-rules.js` | the only formulas in the tree, all placeholder        |
  * | `rng.js`            | the ordered authoritative RNG channel                    |
- * | `resources.js`      | the open, clamped, hashed per-combatant numeric bag      |
+ * | `resources.js`      | the open, clamped, hashed numeric bag, per combatant and (since 2026-09-22) per battle |
  * | `roster.js`         | teams, slots, combatant identity, AI fill                |
  * | `controllers.js`    | seat -> controller identity, independent of combatants   |
  * | `elimination.js`    | knockouts, combatant-defeated, team elimination          |
@@ -20,7 +20,10 @@
  * `src/team/` that imports from `src/golden/`, and making every consumer name
  * that import at its own call site is the honest signal for a dependency the
  * rest of the seam does not have. Import it directly:
- * `import { ss2TeamRules } from "./team/ss2-rules.js"`.
+ * `import { ss2TeamRules } from "./team/ss2-rules.js"`. Its SS2 siblings are not
+ * re-exported either, for the same reason: `ss2-weapon-table.js`, and
+ * `ss2-crowd.js` (the build's `crowd_interest`, its per-phase deltas and the
+ * victory purse, 2026-09-22).
  *
  * Node builtins only; no assets, no game data, no third-party dependencies.
  */
