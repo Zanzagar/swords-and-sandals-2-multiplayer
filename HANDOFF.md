@@ -8,8 +8,13 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-22 19:34 — every spell but rejuvenate is resolved or mapped, and the build plays favourites](docs/handoffs/2026-09-22-1934--every-spell-but-rejuvenate-and-the-build-plays-favourites.md).**
-Start there. *(It supersedes
+[2026-09-23 01:19 — every quirk is decided, and the crowd is built](docs/handoffs/2026-09-23-0119--every-quirk-decided-and-the-crowd-is-built.md)**
+(a MID-SESSION CHECKPOINT of session `c62c201f`; a later handoff of the same
+session, if one exists, supersedes it). Start there. *(It supersedes
+[2026-09-22 19:34 — every spell but rejuvenate is resolved or mapped, and the build plays favourites](docs/handoffs/2026-09-22-1934--every-spell-but-rejuvenate-and-the-build-plays-favourites.md),
+**whose ranked item 1 — the five owner decisions — is CLOSED (all decided, see
+the block below), whose items 3, 4 and 6 are CLOSED, and whose items 2 and 5
+are unchanged.**)* *(That one supersedes
 [2026-09-22 18:21 — nine verbs are built, and the build plays favourites](docs/handoffs/2026-09-22-1821--nine-verbs-built-and-the-build-plays-favourites.md),
 **the same session's mid-session checkpoint: the session carried on and built
 command, death from above, whirlwind and ghost strike, and fixed the psyche
