@@ -46,6 +46,10 @@ export function demoGladiator(overrides = {}) {
     vitality: 5,
     stamina: 5,
     charisma: 6,
+    // Below the floor of 1 that `heroDNA` seeds, and every cast costs
+    // `round(magicka)`, so on this template a spell is FREE. A kit fighter
+    // casts at `DEMO_KIT_MAGICKA` instead (2026-09-23); nothing without a kit
+    // casts at all, so the plain roster keeps its 0.
     magicka: 0,
 
     hitpoints: 46,
@@ -192,32 +196,115 @@ const RED_NAMES = ["Ruk", "Vasso", "Tarn"];
 const BLUE_NAMES = ["Cidra", "Nym", "Orso"];
 
 /**
- * Builds one side's members in the shape the host takes.
- *
- * `resources` is the OPT-IN SS2 resource bag. It is declared here rather than
- * left to default because `ss2TeamRules` refuses to swing for a combatant that
- * has not declared `min_damage`/`max_damage` — it would otherwise silently
- * default them and fight a different gladiator. `derive: false` keeps the
- * stated values instead of letting `battlevalues` recompute them over the top.
- */
-/**
  * ITEM KITS FOR THE ARENA, added 2026-09-23 so the spells built that week can
  * be SEEN: the demo roster carries empty slots (the build's empty marker, 1),
- * so without a kit no spell or potion is ever offered. Authored groupings, six
- * ids each (six slots), by what they show off — not a balance statement.
- * `?items=buffs` in the arena, or ids: `?items=42,41,43`. Every fighter on both
- * sides gets the same kit, so both the player and the AI can use it.
+ * so without a kit no spell or potion is ever offered. Authored groupings,
+ * ~~six ids each (six slots)~~ **up to six ids (six slots; `blasts` has two
+ * and `doom` one since 2026-09-23)**, by what they show off — not a balance
+ * statement. `?items=buffs` in the arena, or ids: `?items=42,41,43`. Every
+ * fighter on both sides gets the same kit, so both the player and the AI can
+ * use it.
+ *
+ * ► **A KIT IS MORE THAN ITS ITEMS (2026-09-23): `demoSide` gives every kit
+ *   fighter a level-4 magicka and — given the bout's seed — an opener that
+ *   alternates by seed parity, and a DAMAGE kit's fighters `battlevalues`'
+ *   own pools as well.** See `DEMO_KIT_MAGICKA`, `DEMO_DAMAGE_SPELL_IDS` and
+ *   `demoSide`. The owner watched `?items=blasts` and saw "guys dying
+ *   immediately after one hit", and a damage kit is where the roster was
+ *   that thin.
+ *
+ * ► **ITEM 49 (death from above) IS `doom`, ON ITS OWN, AND ENDS THE BOUT.**
+ *   It stood in `blasts` until 2026-09-23, and so `blasts` showed NOTHING
+ *   ELSE: the AI casts it on possession, ladder arm 7, ahead of every other
+ *   spell the kit holds (battle map, the ladder table's row
+ *   `| **7** | **49** | **cast_death_from_above** | **NONE** |`, and
+ *   `chooseAiAction`'s potion walk, `arm > SS2_DEATH_FROM_ABOVE.ladderArm`).
+ *   Its 400-800 kills a damage-kit fighter's whole 185-261 pool from
+ *   full, so the side that opens wins without the other acting — on every
+ *   seed. That is the build's ladder, not a defect; watch it for the
+ *   boulders, not for a fight. No other kit may hold 49
+ *   (`test/arena-item-kits.test.js`), and a mixed `?items=` list that names
+ *   it gets exactly this.
+ *
+ * ► **`blasts` IS THE TWO LEVEL-4 DAMAGE SPELLS, lightning bolt (34) and
+ *   fireball (30), because nothing bigger survives a cast at level 4 —
+ *   measured 2026-09-23, main session's call.** The AI prices a damage spell
+ *   at its mean and casts the largest, so with the endgame spells in the kit
+ *   ~~`blasts` IS STILL A ONE-CAST BOUT~~ every fighter opened with the dire
+ *   fireball (300-600), which killed a 185-261 pool from full every time:
+ *   2 and 3 actions at 2v2 and 3v3, 25 of 25 seeds. Only 34 (100-200) and 30
+ *   (80-160) are level-4 spells in the build's own terms: the random-opponent
+ *   generator hands out 34 and 30 from magicka 8 and 10, and 31, 35, 32 from
+ *   20, 24 and 30 (battle map, `randomise_gladiator`'s pool,
+ *   `+0x3654`-`+0x38fd`). With them, 25 of 25 bouts show both spells cast
+ *   and survived.
+ *
+ *   **A mid-tier kit (35 frightning bolt 200-400, 31 hell fireball 150-450)
+ *   was measured and LEFT OUT, because it is not watchable either:** 3.2 and
+ *   5.8 mean actions at 2v2 and 3v3, the first kill from full in 22 of 25
+ *   bouts, both spells survived in 1 of 25 (the frightning bolt killed from
+ *   full 75 times in 102 casts at 3v3). `?items=35,31` still plays it.
  */
 export const DEMO_ITEM_KITS = Object.freeze({
   // colossus, bloodlust, swift sandals, boundless energy, regenerate, rejuvenate
   buffs: Object.freeze([42, 41, 40, 45, 46, 43]),
-  // lightning bolt, frightening bolt, fireball, hell fireball, dire fireball, death from above
-  blasts: Object.freeze([34, 35, 30, 31, 32, 49]),
+  // lightning bolt, fireball — the level-4 damage spells (see above).
+  // ~~frightening bolt, hell fireball, dire fireball, death from above~~ —
+  // 49 moved to `doom`, and 35, 31, 32 dropped, 2026-09-23.
+  blasts: Object.freeze([34, 30]),
   // gale, teleport, command, whirlwind, ghost strike, weaken armour
   tricks: Object.freeze([38, 48, 39, 37, 36, 44]),
   // adulation, little fat kid, rejuvenate, full-health, full-stamina and full-armour potions
-  crowd: Object.freeze([47, 33, 43, 5, 7, 9])
+  crowd: Object.freeze([47, 33, 43, 5, 7, 9]),
+  // death from above, alone: it ENDS THE BOUT (see above)
+  doom: Object.freeze([49])
 });
+
+/**
+ * THE MAGICKA A KIT FIGHTER CASTS WITH, added 2026-09-23. The plain roster's
+ * `magicka: 0` made every spell FREE — `staminacost = round(magicka)` on every
+ * cast arm (battle map, §"`staminacost` by phase", `+0x7567` through
+ * `+0x8fa7`) — so a cast was the one action that cost nothing and nobody could
+ * see it being paid for. At 12 each cast costs 12 stamina, less `nextphase`'s
+ * `1 + round(stamina / 3)` = 3 back.
+ *
+ * **Why 12, and how far that is sourced:**
+ * - A generated level-4 opponent has `statpoints = ceil(4 * 5) - 8 = 12` to
+ *   spread over eight stats all seeded at 1 (`randomise_gladiator` `+0x24a6`,
+ *   `+0x24fe`-`+0x2565`; `docs/integration/ss2-arena-route.md` §"Opponent
+ *   generation for a duel"), so its magicka is at least 1 and — IF the
+ *   distribution loop spends exactly its 12 points, which the docs do not
+ *   transcribe and this was not re-derived — at most 13. 12 is inside that,
+ *   at its top.
+ * - The generator's spell pool (battle map, `+0x3654`-`+0x38fd`) is
+ *   cumulative on magicka, and 12 is the step that adds weaken armour (44)
+ *   and the full-armour potion (9); by 12 it also holds the lightning bolt
+ *   (34), fireball (30), whirlwind (37), command (39), teleport (48),
+ *   adulation (47), swift sandals (40) and potions 2, 3, 5, 6 and 7.
+ *
+ * Magicka decides nothing else in the engine: grep `stats.magicka` in
+ * `src/team/ss2-rules.js` and every read is a `staminaCost`, apart from the
+ * projection back onto the vanilla record. The AI does not price stamina, so
+ * this moves no choice directly — only what a cast costs, and what a tired
+ * caster then does.
+ */
+export const DEMO_KIT_MAGICKA = 12;
+
+/**
+ * The DAMAGE spells, by item id: the bolts (34, 35), the fireballs (30, 31,
+ * 32) and death from above (49). A kit holding any of them is a DAMAGE KIT,
+ * and only a damage kit's fighters take `battlevalues`' pools (`demoSide`).
+ * Named, not written as the range 30-35: 33 is little fat kid, which `crowd`
+ * holds. `test/arena-item-kits.test.js` checks this list against the engine's
+ * own spell tables (`SS2_BOLT_SPELLS`, `SS2_FIREBALL_SPELLS`,
+ * `SS2_DEATH_FROM_ABOVE`).
+ */
+export const DEMO_DAMAGE_SPELL_IDS = Object.freeze([34, 35, 30, 31, 32, 49]);
+
+/** The eight pieces `battlevalues` prices, whose `_defence` a damage-kit fighter takes from it. */
+const DEMO_KIT_PIECES = Object.freeze([
+  "breastplate", "helmet", "shinguard", "greaves", "shoulderguard", "gauntlet", "boot", "shield"
+]);
 
 /**
  * The `items` parameter as up to six inventory ids: comma-separated kit names
@@ -241,10 +328,48 @@ export function demoItemsFrom(spec) {
   return ids.slice(0, 6);
 }
 
-export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = [] }) {
+/**
+ * Builds one side's members in the shape the host takes.
+ *
+ * `resources` is the OPT-IN SS2 resource bag. It is declared here rather than
+ * left to default because `ss2TeamRules` refuses to swing for a combatant that
+ * has not declared `min_damage`/`max_damage` — it would otherwise silently
+ * default them and fight a different gladiator. `derive: false` keeps the
+ * stated values instead of letting `battlevalues` recompute them over the top.
+ * *(This paragraph sat orphaned above `DEMO_ITEM_KITS` from 5322ce4, which put
+ * the kits between it and this function, until the kits learned pools the
+ * same day; moved back to the function it describes.)*
+ *
+ * @param {"red"|"blue"} side
+ * @param {number} size one to three
+ * @param {object} deps
+ * @param {Function} deps.ss2Combatant
+ * @param {Function} deps.ss2BattleValues
+ * @param {number[]} [deps.items] a kit (`demoItemsFrom`). EMPTY is the plain
+ *   roster, byte for byte. NON-EMPTY is a KIT FIGHTER: `DEMO_KIT_MAGICKA` and
+ *   the seed-parity opener below — and, if it holds any of
+ *   `DEMO_DAMAGE_SPELL_IDS`, `battlevalues`' own pools.
+ * @param {number|null} [deps.seed] the bout's seed. Read ONLY for a kit, and
+ *   only for which side opens: on an even seed the +1 speed is blue's. Pass
+ *   the same seed to both sides, as the arena does.
+ */
+export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = [], seed = null }) {
   const slots = Object.fromEntries(items.slice(0, 6).map((id, index) => [`inventory${index + 1}`, id]));
   const names = side === "red" ? RED_NAMES : BLUE_NAMES;
   const facing = side === "red" ? "right" : "left";
+  const kit = items.length > 0;
+  const damageKit = items.some((id) => DEMO_DAMAGE_SPELL_IDS.includes(id));
+  // ► **WHICH SIDE OPENS, AND WHY A KIT BOUT ALTERNATES IT (2026-09-23).** The
+  //   +1 speed below makes red's head the fastest gladiator on the field, and
+  //   `ss2InitiativeOrder` lets that side open. Harmless in a plain bout; in a
+  //   kit bout whose first cast kills (`doom`, and `blasts` while it held the
+  //   endgame spells) it handed RED EVERY SEED — 25 of 25 at 2v2 and 3v3, blue
+  //   taking 0 actions.
+  //   So in a kit bout the +1 is blue's on an even seed. The speeds are the
+  //   same multiset either way (7/6/5 and 6/5/4), so neither side is built
+  //   stronger; only who moves first changes. The plain roster, and a kit
+  //   built with no seed, keep red's.
+  const fastSide = kit && Number.isInteger(seed) && seed % 2 === 0 ? "blue" : "red";
   return {
     id: side,
     name: side === "red" ? "Red" : "Blue",
@@ -314,19 +439,42 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = []
       //         20             55 / 400                49           75
       //   ```
       //
-      //   12/12 bouts settle at every value. 16 is the first that makes the
+      //   12/12 bouts settle at every value. ~~16 is the first that makes the
       //   verb a CHARACTER — about five taunts a bout, 61 of 69 of them this
-      //   slot's — for 7% longer bouts. **It is the roster's number and not the
+      //   slot's — for 7% longer bouts.~~ **It is the roster's number and not the
       //   engine's**: every other slot keeps charisma 6 and never taunts, which
       //   is the point. Three gladiators who fight differently.
+      //
+      //   ► **THE SWEEP ABOVE IS STALE ONCE TAUNTS ARE OWN-RANK ONLY (owner,
+      //     2026-09-23; the offer change is `ss2-rules.js`', landing with or
+      //     before this note).** It was measured while a taunt was offered at
+      //     any range and any rank, so "about five taunts a bout" described an
+      //     offer that no longer exists; the brief that carried the rule
+      //     expected the duellist to taunt rarely in team play after it.
+      //     **Not re-measured here** — the rule was not in this tree. Re-run
+      //     the sweep before trusting 16, or any claim about how often slot 3
+      //     taunts.
+      //
+      //   ► **AND ITS STRIKE CAN KILL A 46-HITPOINT GLADIATOR FROM FULL
+      //     (measured 2026-09-23).** The direction-20 strike is
+      //     `round(16 * 4) - 6` = 58 (`src/golden/ss2-attack-candidate.js`,
+      //     direction 20); once the armour has been stripped to 12 or less
+      //     (58 - 12 = 46), one taunt kills the plain roster's 46 hitpoints
+      //     from full. `tricks` and `crowd` keep those 46 (see "A DAMAGE-KIT
+      //     FIGHTER TAKES ITS POOLS" below), so they keep this: 22 and 5 such
+      //     deaths over 25 seeded 3v3 bouts (and 1 on the plain roster). A
+      //     damage-kit fighter has 140 and cannot die of it from full.
+      //     (Measured before the own-rank rule, like the sweep.)
       const duellist = index === 2;
       const vanilla = demoGladiator({
         ...slots,
         character_name: name,
         ...(duellist ? { charisma: 16 } : {}),
+        ...(kit ? { magicka: DEMO_KIT_MAGICKA } : {}),
         // A little spread so initiative is not a coin flip and the slots are
-        // visibly different fighters.
-        speed: 6 + (side === "red" ? 1 : 0) - index,
+        // visibly different fighters. `fastSide` is red except in an
+        // even-seeded kit bout (above).
+        speed: 6 + (side === fastSide ? 1 : 0) - index,
         strength: 9 - index,
         breastplate: 3 - index,
         helmet: 2 - index,
@@ -345,6 +493,9 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = []
       //   the stated `min_damage`, `max_damage`, `hitpointsmax` and
       //   `staminamax` above are still the roster's own and are not recomputed
       //   — which is the whole reason `derive: false` is passed below.
+      //   **— except a DAMAGE-kit fighter's `hitpointsmax` (and the rest of
+      //   its hitpoint and armour pools), which since 2026-09-23 ARE the
+      //   derivation's; see "A DAMAGE-KIT FIGHTER TAKES ITS POOLS" below.**
       //   Per SLOT, not per template: each member has its own `strength`, so
       //   the reaches are 130 / 129 / 129 and no constant is right for all
       //   three.
@@ -370,6 +521,33 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = []
       //
       //   `maximum_ammo` is tiered on `herolevel`, which is 4 for every member
       //   of this roster, so all five arrows come from the level-under-9 arm.
+      // ► **A DAMAGE-KIT FIGHTER TAKES ITS POOLS FROM THE SAME DERIVATION
+      //   (2026-09-23) — hitpoints and armour, and nothing else.** The stated
+      //   46 hitpoints and 38 armour are this file's invention; `battlevalues`
+      //   gives these same stats and pieces `hitpointsmax = herolevel * 10 +
+      //   vitality * 20` = 140 and, by slot, armour 121 / 71 / 45 (the eight
+      //   `round(id * dval)`; `test/arena-item-kits.test.js` works them by
+      //   hand). An 84-point pool sat under the low end of every damage
+      //   spell's roll, so with a damage spell in the kit the first cast
+      //   killed. Damage, stamina, reach and speed stay the plain roster's, so
+      //   the ONLY differences are the slots, these pools and
+      //   `DEMO_KIT_MAGICKA`.
+      //
+      //   ~~**Kit fighters only**~~ **DAMAGE-KIT FIGHTERS ONLY (main session,
+      //   2026-09-23), a trade the numbers forced.** Given to EVERY kit first,
+      //   and measured over seeds 1-25: `buffs`, `tricks` and `crowd` were
+      //   already watchable on the stated pools (most of their spells cast and
+      //   survived in 25 of 25 bouts) and the pools only made them 2-5x longer
+      //   (mean actions, 3v3: buffs 143 -> 393, tricks 202 -> 997, crowd 217
+      //   -> 446). What that bought them — no death from full health (3v3,
+      //   as the kits now stand: 22 in tricks and 5 in crowd, every one a
+      //   taunt) — they give back: the
+      //   stated 46 is theirs again, as it is the plain roster's, byte for
+      //   byte. The damage kits keep the pools, because at 84 the lightning
+      //   bolt (100-200) killed from full on every cast — `blasts` was 2 and 3
+      //   actions at 2v2 and 3v3, 75 of 75 casts at 3v3 — and at 185-261 the
+      //   fireball never does and the bolt rarely does (see the table in
+      //   `DEMO_ITEM_KITS`).
       const derived = ss2BattleValues(vanilla);
       const priced = {
         ...vanilla,
@@ -382,6 +560,15 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = []
             secondary_weapon_max_damage: derived.secondary_weapon_max_damage,
             maximum_ammo: derived.maximum_ammo,
             ammo_left: derived.ammo_left
+          }
+          : {}),
+        ...(damageKit
+          ? {
+            hitpoints: derived.hitpoints,
+            hitpointsmax: derived.hitpointsmax,
+            armourclass: derived.armourclass,
+            armourclass_max: derived.armourclass_max,
+            ...Object.fromEntries(DEMO_KIT_PIECES.map((piece) => [`${piece}_defence`, derived[`${piece}_defence`]]))
           }
           : {})
       };
@@ -494,19 +681,36 @@ export function arenaRequestFrom(params) {
  *   are cut from it — a second derivation inside `ss2Combatant` could only
  *   ever agree or introduce a disagreement.
  *
- * ► **A SECONDARY SLOT OF 0 IS "NO SECONDARY WEAPON", AND IS NOT STATED.** Both
+ * ► **A SECONDARY SLOT OF 0 IS "NO SECONDARY WEAPON"** ~~**, AND IS NOT
+ *   STATED.**~~ **— AND SINCE 2026-09-23 IT IS STATED, AS THE DNA HAS IT.** Both
  *   of the build's readers test the id: the hero's swap button hides on
  *   `secondary_weapon == 0` (sprite 862 `DoAction@0x2378cc` `+0x0e77`-`+0x0e89`)
  *   and the villain's voluntary swap requires `secondary_weapon != 0`
- *   (`villainChooseAction` `+0x0f14`-`+0x0f27`). This engine instead reads
- *   `secondary_weapon_range > 0` as owning a bow (`legalActions`, the swap
- *   arm), and `ss2BattleValues` prices a STATED 0 as the bare-hands row — so a
- *   champion whose DNA says 0 would be offered a "bow" of fists, with the
- *   archer's controllers. Leaving the id out is what the build's readers mean
- *   by 0. **This is a WORKAROUND, and it can go when the engine fix lands:**
- *   the engine-side reading is being fixed in `src/team/ss2-rules.js` by
- *   another implementer (2026-09-23), and was reported rather than changed
- *   from here.
+ *   (`villainChooseAction` `+0x0f14`-`+0x0f27`). ~~This engine instead reads
+ *   `secondary_weapon_range > 0` as owning a bow … Leaving the id out is what
+ *   the build's readers mean by 0. **This is a WORKAROUND, and it can go when
+ *   the engine fix lands.**~~ **The engine fix landed in 731ef20:**
+ *   `legalActions` now asks `secondary_weapon !== 0` as well as the reach, so
+ *   the workaround that deleted a stated 0 is gone. `ss2BattleValues` still
+ *   prices the 0 as weapon ROW 0 (`+0x32aa`, unguarded, as the build does), so
+ *   the bag carries `secondary_weapon: 0` beside row 0's pair (1-3) and a reach
+ *   of `physical_size + 44`; the id is what says "no bow".
+ *
+ *   ► **AND THE WORKAROUND WAS HIDING A BUILD NUMBER, NOT ONLY THE PHANTOM
+ *     BOW — measured when it went, 2026-09-23.** Deleting the id also
+ *     unpriced the secondary pair, so `secondary_weapon_enchantment_damage =
+ *     ceil(secondary_weapon_max_damage / 3 * potency)` (`+0x3326`) came out 0
+ *     for every 0-secondary champion. Priced from row 0 (max 3) it is the
+ *     DNA's own potency: 1 for `which_boss` 3 and **61 for `which_boss` 12**.
+ *     The enchantment tick reads that field whenever its VICTIM is not
+ *     holding weapon 1 (`resolveStatusPhase`, `victim.equipped_weapon === 1 ?
+ *     "weapon_enchantment_damage" : "secondary_weapon_enchantment_damage"`),
+ *     so which_boss 12's poison now ticks 61 into a gladiator with its bow
+ *     drawn, where it ticked 0. Over every ordered 1v1 pair of the 18
+ *     buildable champions plus six 3v3s, seeds 1-3 (1,011 bouts): **20 bouts'
+ *     actions change, every one of them which_boss 12 against an archer
+ *     (4, 6, 9, 11)**, and 819 bouts' state hashes move (the bag). No test
+ *     pins a champion hash, so no pin moved.
  *
  * ► **A BOW DRAWN FROM THE DNA IS A PROPER ARCHER (owner, 2026-09-23).** Three
  *   of the build's champions carry `equipped_weapon` 2 with `using_bow` never
@@ -571,12 +775,11 @@ export function championSide(side, whichBossList, { ss2Combatant, ss2BattleValue
       let canonical;
       try {
         const record = ss2ChampionFromDna(entry.dna);
-        // TEMPORARY (2026-09-23): a WORKAROUND for the engine reading a stated
-        // secondary weapon 0 as a bow (see this function's header). Another
-        // implementer is fixing that in `src/team/ss2-rules.js`; when the fix
-        // lands this line can go, and the "a secondary slot of 0" test in
-        // `test/arena-champions.test.js` is what says whether it still has to.
-        if (record.secondary_weapon === 0) delete record.secondary_weapon;
+        // ~~TEMPORARY (2026-09-23): a WORKAROUND for the engine reading a stated
+        // secondary weapon 0 as a bow … `if (record.secondary_weapon === 0)
+        // delete record.secondary_weapon;`~~ **REMOVED 2026-09-23: the engine
+        // fix landed (731ef20), so the DNA's 0 enters as stated.** See this
+        // function's header.
         priced = {
           ...ss2BattleValues(record),
           character_name: typeof entry.name === "string" ? entry.name : `which_boss ${whichBoss}`

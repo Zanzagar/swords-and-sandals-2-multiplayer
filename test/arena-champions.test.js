@@ -171,15 +171,39 @@ test("a champion is its DNA priced by battlevalues, entered as the build's own r
   assert.deepEqual(championSide("blue", [0], deps()).members[0].clip, { gladiator_dir: "left" });
 });
 
+/**
+ * ► **THE DNA'S 0 NOW ENTERS AS STATED (2026-09-23).** Until the engine fix
+ *   `731ef20` (`legalActions` asks `secondary_weapon !== 0` as well as the
+ *   reach), `championSide` DELETED a stated 0 so the engine would not read row
+ *   0's reach as a bow. That TEMPORARY workaround is gone; this test is what
+ *   says the engine, not the roster, now keeps the phantom bow off the menu.
+ *   `test/ss2-champion-dna.test.js` and `test/ss2-ranged.test.js` pin the
+ *   engine side.
+ */
 test("a secondary slot of 0 is NO secondary weapon, as both of the build's readers test it", () => {
   // The hero's swap button hides on `secondary_weapon == 0` (sprite 862
   // `+0x0e77`-`+0x0e89`) and the villain's voluntary swap requires
-  // `secondary_weapon != 0` (`+0x0f14`-`+0x0f27`). Priced as stated, weapon
-  // 0 is the bare-hands ROW and would reach 84 + 44 = 128, which the engine
-  // reads as a bow to swap to.
-  const [oaf] = championSide("red", [0], deps()).members;
-  assert.equal(oaf.resources.secondary_weapon_range, 0);
-  assert.equal("secondary_weapon" in oaf.vanilla, false);
+  // `secondary_weapon != 0` (`+0x0f14`-`+0x0f27`).
+  const red = championSide("red", [0], deps());
+  const [oaf] = red.members;
+  assert.equal(oaf.vanilla.secondary_weapon, 0, "the DNA's own id, index 45");
+  assert.equal(oaf.resources.secondary_weapon, 0, "and the engine is told it");
+  // `battlevalues` prices the slot unguarded (`+0x32aa`), so 0 reads weapon
+  // ROW 0 — `[type 2, weight 5, 1-3, range multiplier 1]` — and the reach is
+  // physical_size 84 + 1 * 44 = 128, faithfully. The id, not the reach, says "no bow".
+  assert.equal(oaf.resources.secondary_weapon_range, 128);
+  const host = createVanillaBattleHost({
+    teams: [red, championSide("blue", [5], deps())],
+    rules: ss2TeamRules,
+    bindings: SS2_STATIC_MAP_BINDINGS,
+    seed: 3
+  });
+  // Equal speeds, so blue-1 opens on the id tie-break; let it act, then ask red-1.
+  host.submit({ ...host.suggestAction("blue-1"), actorId: "blue-1" });
+  assert.equal(host.currentCombatantId(), "red-1");
+  const offered = host.legalActions("red-1").map((option) => option.type);
+  assert.ok(offered.length > 0, "red-1 has a turn to take");
+  assert.equal(offered.includes("swap-weapons"), false, `no phantom bow: ${offered.join(", ")}`);
 });
 
 test("a champion whose DNA draws the bow enters as a proper archer (owner, 2026-09-23)", () => {

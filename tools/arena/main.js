@@ -196,8 +196,10 @@ const spectate = params.get("spectate") === "1";
  */
 const rankStride = rankStrideFrom(params, SS2_ARENA.rankStride);
 /*
- * `?items=` — a kit (`buffs`, `blasts`, `tricks`, `crowd`) or item ids, given
- * to every fighter on both sides (`DEMO_ITEM_KITS` in `roster.js`) — is read in
+ * `?items=` — a kit (`buffs`, `blasts`, `tricks`, `crowd`, `doom`) or item ids,
+ * given to every fighter on both sides (`DEMO_ITEM_KITS` in `roster.js`, which
+ * also gives a kit fighter a level-4 magicka, and a damage kit's the build's own
+ * pools) — is read in
  * `arenaTeams()` below, through `arenaRequestFrom`, and NOT here any more.
  * ► It was parsed on this line at module initialisation until 2026-09-23, so a
  *   malformed kit threw before any refusal could reach the page, and beat the
@@ -258,9 +260,11 @@ async function arenaTeams() {
     refuseToStart("The roster request was refused", error.message);
   }
   if (request.kind === "demo") {
+    // `seed` reaches the roster for a KIT bout's opener only (even seeds open
+    // with blue); with no kit `demoSide` never reads it.
     return [
-      demoSide("red", perSide, { ss2Combatant, ss2BattleValues, items: request.items }),
-      demoSide("blue", perSide, { ss2Combatant, ss2BattleValues, items: request.items })
+      demoSide("red", perSide, { ss2Combatant, ss2BattleValues, items: request.items, seed }),
+      demoSide("blue", perSide, { ss2Combatant, ss2BattleValues, items: request.items, seed })
     ];
   }
   let pack = null;
