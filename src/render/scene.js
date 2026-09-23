@@ -358,7 +358,14 @@ export function applyCommands(scene, commands) {
           y: command.y,
           endsWithClip: command.endsWithClip ?? null,
           sequence: command.sequence,
-          actionToken: command.actionToken ?? null
+          actionToken: command.actionToken ?? null,
+          // ► **A BOULDER'S FALL, PRESENT ONLY ON A BOULDER** (added 2026-09-23),
+          //   so a bolt's record is byte-for-byte what it was — the rule the
+          //   fireball's two flight inputs follow below. Where each rock is and
+          //   when it lands is `boulderDrawAt`'s arithmetic, not this fold's.
+          ...(command.fall && typeof command.fall === "object"
+            ? { fall: command.fall, boulder: command.boulder ?? null, lethal: command.lethal === true }
+            : {})
         }));
         break;
       }

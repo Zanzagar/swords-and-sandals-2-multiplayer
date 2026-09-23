@@ -602,10 +602,18 @@ function presented({ foe = TOUGH } = {}) {
   return { battle, ...presentResolvedEvents(wire, { layout, bindings: SS2_STATIC_MAP_BINDINGS }) };
 }
 
-test("a presented shower plays Cast2 on the caster and burning on the victim — nothing unmapped, nothing flies", () => {
-  const { commands } = presented();
+test("a presented shower plays Cast2 on the caster and burning on the victim, and drops its boulders — nothing unmapped", () => {
+  // ► ~~"nothing flies"~~, and this test used to assert that NO effect was
+  //   attached at all ("no bolt"). That pinned the defect the owner watched on
+  //   2026-09-23 — a molten death with not one rock in the sky — as correct.
+  //   The boulders are attached now, one per boulder (`test/render-boulders.test.js`);
+  //   what must still hold is that none of them is a lightning bolt.
+  const { commands, battle } = presented();
+  const event = battle.events.find((entry) => entry.type === MOLTEN);
   assert.deepEqual(commands.filter((command) => command.kind === CommandKind.UNMAPPED), []);
-  assert.equal(commands.filter((command) => command.kind === CommandKind.ATTACH_EFFECT).length, 0, "no bolt");
+  const attached = commands.filter((command) => command.kind === CommandKind.ATTACH_EFFECT);
+  assert.equal(attached.length, event.boulderCount, "one `boulder_combat` per boulder");
+  assert.deepEqual([...new Set(attached.map((command) => command.effect))], ["boulder_combat"], "no bolt");
   assert.equal(commands.filter((command) => command.kind === CommandKind.FIRE_PROJECTILE).length, 0, "no fireball");
   const clips = commands.filter((command) => command.kind === CommandKind.CLIP_GOTO);
   assert.deepEqual(clips.map((command) => `${command.role}:${command.label}`), ["actor:Cast2", "target:burning"]);

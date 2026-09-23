@@ -33,7 +33,7 @@
  */
 
 import { abandonReasonFor, timelineFor } from "./timeline.js";
-import { fireballFlight, flightDurationMs } from "./projectile.js";
+import { fireballFlight, flightDurationMs, PROJECTILE_FRAME_MS } from "./projectile.js";
 
 export class CursorError extends Error {
   constructor(message, options = {}) {
@@ -346,6 +346,26 @@ export function animationCursor(pendingTokens, playing, now, { projectiles = [] 
  *   on a killing fireball the victim's last clip is its death, and it dies at
  *   impact too.
  *
+ * ► **AND A MOLTEN DEATH'S VICTIM WAITS FOR THE ROCKS — added 2026-09-23.**
+ *   Its ingress runs inside each boulder's own `onEnterFrame` on the frame
+ *   that boulder lands (`+0x88e5`), so until then nothing has happened to the
+ *   victim. Before 2026-09-23 the death began at the cast, beside the caster's
+ *   `Cast2`, with not one rock in the sky.
+ *   - **When the batch starts a REACTION for the victim — `burning`, which
+ *     every shower does — the victim waits for the FIRST landing**, where the
+ *     build's burn starts; on a kill its death is queued behind that reaction
+ *     (`timelinesForStep`'s `then`) and follows it.
+ *   - **When its only clip is a death, it waits for the landing of the rock
+ *     that killed it** — the one `presentation.js` marks `lethal`.
+ *   ~~The victim waits for the killing rock and, when none killed, for the
+ *   first~~ — **the first cut, written while a kill's last clip REPLACED the
+ *   reaction.** Once the death was queued behind it (2026-09-23), delaying the
+ *   whole chain to the killing rock started the BURN late, at the kill.
+ *   ► **ONE DELAY, AND THE BUILD HAS MORE.** Every landing restarts the burn
+ *     (`gotoAndPlay("burning")` per ingress), so a survivor burns from the
+ *     first landing to its last plus one cycle; this starts the one timeline
+ *     at the first landing and does not restart it.
+ *
  * @param {Iterable<object>} commands one drained batch
  * @returns {Map<string, number>} combatant id -> delay in ms; absent means 0
  */
@@ -354,7 +374,23 @@ export function reactionDelaysFor(commands) {
     throw new CursorError("reactionDelaysFor needs an iterable of presentation commands.");
   }
   const delays = new Map();
+  // Per victim: the first landing frame, and the lethal one if any rock killed.
+  const showers = new Map();
+  // Who the batch starts a REACTION for — a `target` clip — as opposed to only
+  // a death. See the header: the chain waits for whatever its first link is.
+  const reacting = new Set();
   for (const command of commands) {
+    if (command?.kind === "clip-goto" && command.role === "target") reacting.add(command.combatantId);
+    if (command?.kind === "attach-effect" && command.effect === "boulder_combat") {
+      const frame = command.fall?.landingFrame;
+      // Total, like the fireball below: a rock with no landing delays nothing.
+      if (!Number.isFinite(frame) || frame < 0 || command.targetId == null) continue;
+      const shower = showers.get(command.targetId) ?? { first: Infinity, lethal: null };
+      shower.first = Math.min(shower.first, frame);
+      if (command.lethal === true) shower.lethal = frame;
+      showers.set(command.targetId, shower);
+      continue;
+    }
     if (command?.kind !== "fire-projectile" || command.projectile !== "fireball") continue;
     // Total rather than throwing, like the rest of the presentation path: a
     // shot this function cannot fly delays nothing and plays as a bolt would.
@@ -367,6 +403,10 @@ export function reactionDelaysFor(commands) {
       xVelocity: command.xVelocity
     });
     delays.set(command.targetId, flightDurationMs(flight));
+  }
+  for (const [targetId, shower] of showers) {
+    const landing = reacting.has(targetId) ? shower.first : (shower.lethal ?? shower.first);
+    delays.set(targetId, landing * PROJECTILE_FRAME_MS);
   }
   return delays;
 }

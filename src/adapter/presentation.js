@@ -177,6 +177,13 @@ export const CommandKind = Object.freeze({
    *
    * ► **COSMETIC, like the arrow.** The damage was resolved before this command
    *   existed; nothing here can change a number.
+   *
+   * ► **AND MOLTEN DEATH'S BOULDERS, since 2026-09-23** — one per boulder,
+   *   `effect: "boulder_combat"`, because the build attaches each to
+   *   `arena.gladiators` the same way (`+0x870f`). A boulder DOES move — it
+   *   falls straight down at one x — so it carries its `fall` (the four
+   *   numbers its closure reads) instead of `endsWithClip`, which is null. A
+   *   surface routes on `effect`; see `bouldersFor`.
    */
   ATTACH_EFFECT: "attach-effect",
   MOVE_CLIP_DEPTH: "move-clip-depth",
@@ -1012,6 +1019,88 @@ function fireballFor(combatants, event) {
   });
 }
 
+/**
+ * THE BOULDERS a molten death drops, one `attach-effect` per boulder, or an
+ * empty list.
+ *
+ * ► **ADDED 2026-09-23, AND UNTIL THEN A MOLTEN DEATH DREW NOTHING.** The
+ *   resolver has carried every boulder's numbers on the event since the verb
+ *   was built — `boulders[]`, commented "FOR A RENDERER" — and no command
+ *   presented them, so the caster played `Cast2` and the victim died on the
+ *   same clock with no rock in the sky. The owner watched it as "dying
+ *   immediately after one hit and no spell animations".
+ *
+ * **Detected by the event carrying a `boulders` array**, which only the
+ * molten-death branch of `src/team/ss2-rules.js` sets — the field rule
+ * `spellEffectFor` follows for `boltFrame` and `fireballFor` for `xVelocity`.
+ *
+ * ► **AN `attach-effect` AND NOT A `fire-projectile`, because that is what the
+ *   build does**: `arena.gladiators.attachMovie("boulder_combat", ...)`
+ *   (`+0x870f`) N times, each clip falling on its own `onEnterFrame`
+ *   (`+0x882f`). It does not fly between two bodies — it falls straight down
+ *   at one x — so it has no endpoints to carry; it carries the four numbers
+ *   the closure reads instead, under `fall`, and the renderer does the
+ *   arithmetic (`boulderDrawAt` in `src/render/spell-effect.js`).
+ *
+ * ► **ONE COMMAND PER BOULDER IS RIGHT BECAUSE EVERY BOULDER IS ITS OWN CLIP —
+ *   read, not assumed.** Asked 2026-09-23 and answered by the main session
+ *   from the dump (block `0x240c7f`): the call at `+0x8758`-`+0x8773` is
+ *   `gladiators.attachMovie("boulder_combat", "boulder_combat" + i,
+ *   gladiators.getNextHighestDepth(), {_x: defender._x, _y: -600})`, the depth
+ *   from `getNextHighestDepth()` at `+0x8747`-`+0x874c`. Unique names, unique
+ *   depths: no boulder replaces another, so all N are on screen together and
+ *   the engine's "every boulder lands" (`SS2_DEATH_FROM_ABOVE`) stands.
+ *
+ * - `x` is `defender._x + randomBetween(-300, 300)` (`+0x878b`), in arena
+ *   units, which is the space the gladiators' own `_x` lives in.
+ * - `y` is the victim's DEPTH, the bolt's rule: the build has one rank.
+ * - `fall` is `_y` (`y0`), `yspeed`, `_xscale`/`_yscale` and the invocation
+ *   of its own `onEnterFrame` it lands on, all read off the event.
+ * - `lethal` names the ONE boulder whose ingress killed — the event's
+ *   `killingHit`, which indexes `hits` in LANDING order, mapped back to its
+ *   boulder — so a surface can start the victim's death when that rock lands
+ *   rather than when the spell is cast. See `reactionDelaysFor`.
+ *
+ * `endsWithClip` is null: a boulder is not removed by any clip's report. The
+ * arm never removes it at all; how long a landed rock stays is the renderer's
+ * stated choice.
+ */
+function bouldersFor(combatants, event) {
+  if (!Array.isArray(event.boulders)) return [];
+  const target = combatants.get(event.targetId);
+  if (!Number.isFinite(target?.x)) return [];
+  const killingHit = Number.isInteger(event.killingHit) && Array.isArray(event.hits)
+    ? event.hits[event.killingHit - 1]
+    : null;
+  const killer = Number.isInteger(killingHit?.boulder) ? killingHit.boulder : null;
+  const out = [];
+  for (const boulder of event.boulders) {
+    if (!Number.isFinite(boulder?.xOffset) || !Number.isFinite(boulder?.landingFrame)) continue;
+    out.push(Object.freeze({
+      kind: CommandKind.ATTACH_EFFECT,
+      sequence: event.sequence,
+      casterId: event.actorId,
+      targetId: event.targetId,
+      // The build's own linkage name, sprite 33.
+      effect: "boulder_combat",
+      // `gotoAndStop(4)` on landing; frame 1 (`Stop`, `DoAction@0xcb53`) until then.
+      frame: 1,
+      boulder: boulder.index,
+      x: target.x + boulder.xOffset,
+      y: Number.isFinite(target.y) ? target.y : null,
+      fall: Object.freeze({
+        y0: boulder.y0,
+        ySpeed: boulder.ySpeed,
+        scale: boulder.scale,
+        landingFrame: boulder.landingFrame
+      }),
+      lethal: killer !== null && boulder.index === killer,
+      endsWithClip: null
+    }));
+  }
+  return out;
+}
+
 function projectileFor(wire, combatants, event) {
   const projectile = PROJECTILE_DIRECTIONS.get(Number(event.attackDirection));
   if (!projectile) return null;
@@ -1571,6 +1660,10 @@ export function presentResolvedEvents(wire, {
     // `+0x852a`, then the ingress that plays the victim's clip at `+0x85af`.
     const spellEffect = spellEffectFor(combatants, event, chosen.target?.label);
     if (spellEffect) commands.push(spellEffect);
+    // The boulders take the same place, and it is the build's order too:
+    // `gotoAndPlay("Cast2")` at `+0x86d8`, the loop's `attachMovie` at
+    // `+0x870f`, and the victim's `burning` only when the first one lands.
+    commands.push(...bouldersFor(combatants, event));
     if (chosen.target && targetPlacement) {
       commands.push(clipGoto(event.sequence, targetPlacement, chosen.target, "target"));
     } else if (chosen.target && selfTargeted) {

@@ -133,6 +133,121 @@ export function spellEffectDrawAt(
   });
 }
 
+/* ------------------------------------------------------------------ */
+/* Molten death: the boulders                                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * WHERE ONE BOULDER IS `elapsedMs` AFTER THE CAST, and whether it is still
+ * falling — so the shell only paints.
+ *
+ * The closure, `+0x882f`, runs once a frame from the frame after the attach:
+ *
+ * ```text
+ *   if (!(this._y > 150)) this._y += this.yspeed
+ *   if (this._y > 150 && this.bounced != true) { bounced = true; gotoAndStop(4); ...ingress }
+ * ```
+ *
+ * So after `f` invocations the rock is at `_y = y0 + min(f, landingFrame) *
+ * yspeed` — DISCRETE steps, as the build draws it, and no step after the one
+ * that crossed the line. It therefore rests somewhere in `(150, 150 + yspeed]`,
+ * not on 150.
+ *
+ * ► **LIFT IS `200 - _y`**, for the bolt's reason: `_y` is in
+ *   `arena.gladiators`, where both vanilla fighters stand at 200, and lift is
+ *   arena units above the victim's own line. Above 1v1 it is kept over the
+ *   victim's own rank — the one authored step, as for the bolt.
+ *
+ * `fallMs` is the landing, which is what holds the action (the fireball's
+ * flight rule: the rocks are work in progress until they are down).
+ *
+ * ► **HOW LONG THE LANDING STAYS IS HANDED IN — `landedFrames` — AND IS NEVER
+ *   DECIDED HERE.** ~~A fixed 15 frames of authored rubble~~ was the first cut,
+ *   and a Codex review (2026-09-23) was right that it had no evidence behind
+ *   it. The caller asks `boulderLandedFramesFor(pack)` in `props.js`, which says
+ *   what the pack can: 0 when there is no extracted rock to land (the rock goes
+ *   as it lands), `Infinity` when frame 4 is a still drawing nothing removes,
+ *   and a frame count otherwise. `landedAgeFrames` is the landing's own clock,
+ *   0 on the landing frame.
+ *
+ * @param {object} record   one `scene.effects` entry whose `effect` is `boulder_combat`
+ * @param {number} elapsedMs
+ * @param {object} deps     `frontY`, `rankStride`, `figureScaleFor`, `rankOfDepth`
+ * @param {object} [options]
+ * @param {number} [options.landedFrames=0] frames the landing is shown for; `Infinity` for ever
+ * @returns {{x, y, lift, rotation, size, stage, clipFrame, ageFrames, landedAgeFrames,
+ *   fallMs, lifetimeMs, done}}
+ */
+export function boulderDrawAt(
+  record, elapsedMs, { frontY, rankStride, figureScaleFor, rankOfDepth } = {}, { landedFrames = 0 } = {}
+) {
+  if (typeof figureScaleFor !== "function" || typeof rankOfDepth !== "function") {
+    throw new SpellEffectError(
+      "boulderDrawAt needs figureScaleFor and rankOfDepth injected; this module does not import the painter."
+    );
+  }
+  const fall = record?.fall;
+  if (!fall || !Number.isFinite(fall.y0) || !Number.isFinite(fall.ySpeed) || !Number.isFinite(fall.landingFrame)) {
+    throw new SpellEffectError("boulderDrawAt needs a record carrying its fall: y0, ySpeed and landingFrame.");
+  }
+  const depth = Number.isFinite(record?.y) ? record.y : frontY;
+  const scale = Number.isFinite(fall.scale) ? fall.scale / 100 : 1;
+  const size = figureScaleFor({ yscale: 100, rank: rankOfDepth(depth, 0, { frontY, rankStride }), slotIndex: 0 }) * scale;
+  const elapsed = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0;
+  const frame = Math.floor((elapsed * FRAMES_PER_SECOND) / 1000);
+  const steps = Math.min(frame, fall.landingFrame);
+  const buildY = fall.y0 + steps * fall.ySpeed;
+  const landed = frame >= fall.landingFrame;
+  const fallMs = (fall.landingFrame * 1000) / FRAMES_PER_SECOND;
+  const shown = landedFrames === Infinity || (Number.isFinite(landedFrames) && landedFrames > 0) ? landedFrames : 0;
+  const lifetimeMs = ((fall.landingFrame + shown) * 1000) / FRAMES_PER_SECOND;
+  const done = elapsed >= lifetimeMs;
+  return Object.freeze({
+    x: record.x,
+    y: depth,
+    lift: FIGHTER_Y - buildY,
+    rotation: 0,
+    size,
+    stage: done ? "gone" : landed ? "landed" : "falling",
+    // `Stop` on frame 1 while it falls, `gotoAndStop(4)` from the landing on.
+    clipFrame: landed ? 4 : 1,
+    ageFrames: frame,
+    landedAgeFrames: landed ? frame - fall.landingFrame : 0,
+    fallMs,
+    lifetimeMs,
+    done
+  });
+}
+
+/**
+ * THE AUTHORED ROCK'S OUTLINE, for a shell with no extracted `boulder_combat`
+ * — which is every shell today (`boulderOpsFor` answers null).
+ *
+ * ► **AUTHORED, AND IT SAYS SO BY BEING A PLAIN POLYGON.** Nothing here is the
+ *   build's drawing: sprite 33's shapes are not in any pack. The radius is a
+ *   choice — 34 arena units at `_xscale` 100, so a full-size rock is nearly
+ *   half a gladiator's height and the build's 50..100 draw spans half to all
+ *   of that (24 was tried first and read as pebbles on the headless stage) —
+ *   and the lumps are a fixed nine-point wobble turned by the
+ *   boulder's own index, so ten rocks do not look stamped from one mould and
+ *   the same rock looks the same on every frame.
+ *
+ * Points are in the prop's own space, y-DOWN like every SWF prop, around the
+ * registration point.
+ *
+ * @param {number} index the boulder's own number, 1..N
+ * @returns {Array<[number, number]>}
+ */
+export function boulderOutline(index) {
+  const LUMPS = [1, 0.82, 0.95, 0.78, 1.04, 0.86, 0.97, 0.8, 0.92];
+  const radius = 34;
+  const turn = ((Number.isFinite(index) ? index : 0) * 0.7) % (2 * Math.PI);
+  return LUMPS.map((lump, point) => {
+    const angle = turn + (point / LUMPS.length) * 2 * Math.PI;
+    return [radius * lump * Math.cos(angle), radius * lump * Math.sin(angle)];
+  });
+}
+
 /**
  * How long a spell clip stays attached, given the timelines its batch started.
  *

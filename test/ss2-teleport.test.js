@@ -536,11 +536,14 @@ test("a presented teleport moves the CASTER, as a teleport and not as a walk or 
 
 test("the `circlets` prop is NOT attached: the painter would draw any attached effect as a bolt", () => {
   // `arena.gladiators.attachMovie("circlets", ...)` at `+0x75f2` is real, and
-  // this repository has not extracted the prop. `drawSpellEffects` in
+  // this repository has not extracted the prop. ~~`drawSpellEffects` in
   // `tools/arena/main.js` hands every attached record to `boltOpsFor`, whose
   // linkage is hard-coded to `lightning_bolt_combat`, and falls back to a
   // jagged bolt stroke — so an unknown effect would not be skipped, it would
-  // be drawn as lightning. Left unbuilt and named.
+  // be drawn as lightning.~~ **Since 2026-09-23 `beginStep` routes attached
+  // records by linkage** (the molten-death boulders made a second kind), and
+  // an effect it has no painter for is logged and skipped rather than drawn as
+  // lightning. Still unbuilt and named: nothing draws `circlets`.
   const { commands } = castAndPresent(staged({ hero: { inventory1: 48 }, rngTape: [destinationSample(900)] }));
   assert.deepEqual(commands.filter((command) => command.kind === CommandKind.ATTACH_EFFECT), []);
 });

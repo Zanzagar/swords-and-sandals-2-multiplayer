@@ -95,6 +95,12 @@ import {
   arrowOpsFor,
   arrowTrailOpsFor,
   boltOpsFor,
+  boulderOpsFor,
+  boulderDrawAt,
+  boulderLandedFramesFor,
+  boulderOutline,
+  propOriginMatrix,
+  propPlacementMatrix,
   effectLifetimeMs,
   spellEffectDrawAt,
   arenaSceneryFor,
@@ -354,6 +360,17 @@ let attached = [];
  * holds it after that. Every decision is `fireballDrawAt`'s.
  */
 let fireballs = [];
+/**
+ * Molten death's boulders, each on its own clock — the fall, and the landing
+ * for as long as the pack says the build shows it (`boulderLandedFramesFor`).
+ * Added 2026-09-23; until then a shower drew nothing at all.
+ *
+ * Not `attached`: that list is drawn as the BOLT, and a boulder routed into it
+ * would have been painted as lightning. Only the FALL holds the gate, as a
+ * fireball's flight does — the victim's reaction, started when the killing (or
+ * first) rock lands, holds it after that. Every decision is `boulderDrawAt`'s.
+ */
+let boulders = [];
 let settled = false;
 
 const el = (id) => document.getElementById(id);
@@ -874,7 +891,33 @@ function beginStep(step) {
 
   // The spell clips this batch attached, each on its own clock. Read off the
   // SCENE for the reason the arrows are: the scene has already folded them.
+  //
+  // ► **ROUTED BY THE BUILD'S OWN LINKAGE, and until 2026-09-23 nothing was.**
+  //   Every attached record went to `attached`, which `drawSpellEffects` paints
+  //   as a lightning bolt — so any second kind of effect would have been drawn
+  //   as lightning (`test/ss2-teleport.test.js` names that hazard for the
+  //   teleport's `circlets`). An effect this shell cannot draw is said out loud
+  //   and not drawn as something else.
   for (const record of scene.effects ?? []) {
+    if (record.effect === "boulder_combat" && record.fall) {
+      // How long the landing stays is the PACK's answer, asked once per rock so
+      // the frame that draws it and the prune that removes it read one number.
+      const landedFrames = boulderLandedFramesFor(propPack);
+      const drawn = boulderDrawAt(record, 0, effectDrawDeps(), { landedFrames });
+      boulders.push({
+        record,
+        token: record.actionToken,
+        startedAt: performance.now(),
+        landedFrames,
+        fallMs: drawn.fallMs,
+        lifetimeMs: drawn.lifetimeMs
+      });
+      continue;
+    }
+    if (record.effect !== "lightning_bolt_combat") {
+      log(`no painter for the attached effect "${record.effect}" — not drawn`, { warn: true });
+      continue;
+    }
     attached.push({
       record,
       startedAt: performance.now(),
@@ -949,6 +992,9 @@ function drainFinishedAnimations(now) {
   // A fireball is removed by its explosion's last frame — `fireballDrawAt`'s
   // `done`, by the same comparison.
   fireballs = fireballs.filter((entry) => now - entry.startedAt < entry.lifetimeMs);
+  // A boulder is removed when its landing is over — `boulderDrawAt`'s `done`,
+  // which is never for a still landing nothing in the build removes.
+  boulders = boulders.filter((entry) => now - entry.startedAt < entry.lifetimeMs);
   // A drop lives 25 of the build's frames and is REMOVED rather than fading
   // (`+0x046a`). Pruned by the same comparison that decides whether to draw it.
   drops = drops.filter((spray) => (now - spray.startedAt) / PROJECTILE_FRAME_MS <= SS2_DROP.lifeFrames);
@@ -957,7 +1003,11 @@ function drainFinishedAnimations(now) {
   const cursor = animationCursor(pendingTokens, playing, now, {
     projectiles: [
       ...inFlight,
-      ...fireballs.map((entry) => ({ token: entry.token, startedAt: entry.startedAt, durationMs: entry.flightMs }))
+      ...fireballs.map((entry) => ({ token: entry.token, startedAt: entry.startedAt, durationMs: entry.flightMs })),
+      // A rock still in the air is work in progress, as a fireball in flight
+      // is: without a kill the build's burn cannot release the phase before
+      // the last one lands (`SS2_DEATH_FROM_ABOVE`).
+      ...boulders.map((entry) => ({ token: entry.token, startedAt: entry.startedAt, durationMs: entry.fallMs }))
     ]
   });
   // ► **A QUEUED CLIP TAKES OVER WHEN ITS PREDECESSOR ENDS** — a victim's
@@ -2688,9 +2738,10 @@ function composedMatrix(outer, inner) {
  * A box through a matrix, as the AXIS-ALIGNED hull of its four corners.
  *
  * ► **ALL FOUR CORNERS, because two of them is only right for a matrix with no
- *   rotation and no mirror.** `paintProp` scales by `(k, -k)` — the arena's y
- *   is up and the canvas's is down — and rotates every arrow by its pitch, so
- *   the two-corner version would have been wrong on the first shot fired.
+ *   rotation and no mirror.** The figure scales by `(k, -k)` — the arena's y
+ *   is up and the canvas's is down — and `paintProp` rotates every arrow by
+ *   its pitch and mirrors a left-facing fireball, so the two-corner version
+ *   would have been wrong on the first shot fired.
  */
 function boxThrough(box, matrix) {
   if (!box || !Array.isArray(matrix) || matrix.length < 6) return null;
@@ -2751,10 +2802,12 @@ function filterBleedOf(filter) {
  * them cannot be read.
  *
  * `translationDivisor` is 20 where the painter divides the placement's
- * translation by twips (`paintArenaLayer`) and 1 where it does not
- * (`paintProp`) — **passed in rather than assumed, because the two painters in
- * this file genuinely disagree about it** and a box that disagreed with the
- * draw would cut the layer in half at a plausible-looking angle.
+ * translation by twips ~~(`paintArenaLayer`) and 1 where it does not
+ * (`paintProp`)~~ — **both painters divide since 2026-09-23**; `paintProp`'s
+ * 1 was a defect (see `paintPropOperation`). Still passed in rather than
+ * assumed, because a box that disagreed with the draw would cut the layer in
+ * half at a plausible-looking angle, and a figure route passes 1 for its own
+ * pre-divided matrices.
  */
 function runBoxOf(ops, run, ctm, translationDivisor) {
   let minX = Infinity;
@@ -3860,6 +3913,9 @@ function renderStage(view, fit, now) {
   // Above the figures: the build attaches the bolt with `getNextHighestDepth()`
   // on `arena.gladiators`, over both fighters.
   drawSpellEffects(view, now);
+  // The boulders are attached to `arena.gladiators` too (`+0x870f`), over the
+  // fighters, falling past them.
+  drawBoulders(view, now);
   drawDrops(view, now);
 
   // ► **THE RAIN, THE UI BAR AND THE BORDER GO ON TOP, and the build's own
@@ -3973,22 +4029,32 @@ function drawDrops(view, now) {
  *   passing a lift to `drawOps` would have been silently ignored and drawn
  *   every arrow along the floor.
  *
- * Otherwise identical to `drawOps`'s path branch: translate, scale by the view,
+ * ~~Otherwise identical to `drawOps`'s path branch: translate, scale by the view,
  * flip y (arena y is UP and canvas y is DOWN), then compose the placement's own
- * matrix.
+ * matrix.~~ **NOT the figure's path, and the y-flip that sentence described
+ * was a defect — corrected 2026-09-23.** The figure's paths are pre-flipped
+ * before they meet `drawOps`'s `-k` (`extracted-figure.js`); a prop's never
+ * were, and SWF art is y-down like the canvas. So the flip turned every prop
+ * upside down: the arena's rocks stood on their heads, the fireball's burst
+ * went downwards, and every snipe flew tail first. Both matrices are now
+ * `propOriginMatrix` and `propPlacementMatrix` in `src/render/props.js`, under
+ * the suite (`test/render-prop-placement.test.js`).
  */
 /**
  * ONE operation of a prop, into whatever `context` currently is.
  *
- * ► **IT DOES NOT DIVIDE THE TRANSLATION BY TWIPS AND `paintLayerOperation`
- *   DOES.** That difference predates this section and is left exactly as it
- *   was; what is new is that `runBoxOf` is TOLD which of the two it is
- *   measuring, because a bounding box that disagreed with the draw by a factor
- *   of twenty would put the buffer somewhere the geometry is not and lose the
- *   run without a mark.
+ * ► ~~**IT DOES NOT DIVIDE THE TRANSLATION BY TWIPS AND `paintLayerOperation`
+ *   DOES.**~~ **IT DOES NOW — the difference was a defect, corrected
+ *   2026-09-23.** The pack's translations are twips (`tools/extract-props.mjs`,
+ *   `roundMatrix`: "A consumer must divide by 20"); every prop that reached
+ *   this painter before the spell props happened to carry a zero one, so it
+ *   hid until the lightning bolt was painted some 6,800 pixels below the
+ *   canvas and the fireball's explosion a figure height over its victim.
+ *   `runBoxOf` is told the same divisor, so the box and the draw still agree.
  */
 function paintPropOperation(operation) {
-  const m = operation.matrix;
+  const m = propPlacementMatrix(operation.matrix);
+  if (!m) return;
   context.save();
   context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
   const path = path2dFor(operation.d);
@@ -4010,17 +4076,15 @@ function paintPropOperation(operation) {
 function paintProp(ops, view, { x, y, lift, size, rotation, filtersScaled = false, mirrored = false }) {
   context.save();
   context.globalAlpha = 1;
-  context.translate(view.toX(x), view.toY(y, lift));
-  // ► **NOT NEGATED, and that is the build's convention rather than a slip.**
+  // ► **ONE MATRIX, FROM THE SUITE: translate, rotate, scale — and NO y-flip.**
   //   `bullet._rotation` is degrees CLOCKWISE in screen space, which is what
-  //   `rotationAt` now returns in radians — so it is applied here, in screen
-  //   space, BEFORE the y-flip below. Negating it would mirror the tumble and
-  //   send a snipe pointing backwards.
-  if (rotation) context.rotate(rotation);
-  const k = size * view.scale;
-  // `mirrored` is a negative `_xscale` — the fireball facing left (`+0x92e0`).
-  // Every other caller leaves it false and draws exactly as before.
-  context.scale(mirrored ? -k : k, -k);
+  //   `rotationAt` returns in radians, so it is applied as it comes. ~~It was
+  //   applied "BEFORE the y-flip below"~~ — and the flip is what sent every
+  //   snipe tail first: the arrow's art points UP, and a mirrored up-arrow
+  //   turned 90 degrees clockwise points LEFT. `mirrored` is a negative
+  //   `_xscale` — the fireball facing left (`+0x92e0`). See `propOriginMatrix`.
+  const origin = propOriginMatrix(view, { x, y, lift, size, rotation, mirrored });
+  context.transform(origin[0], origin[1], origin[2], origin[3], origin[4], origin[5]);
   // ► **`filtersScaled: false`, AND THAT IS AN ADMISSION RATHER THAN A
   //   SETTING.** Every array that reaches here comes from `arrowOpsFor`,
   //   `arrowTrailOpsFor`, `arenaSceneryFor` or `drawDrops`, each of which calls
@@ -4035,7 +4099,10 @@ function paintProp(ops, view, { x, y, lift, size, rotation, filtersScaled = fals
   // ► **EXCEPT THE BOLT, which passes `filtersScaled: true` and means it**:
   //   `boltOpsFor` builds its glow at `size * view.scale`, the same `k` this
   //   function draws at. Every other caller keeps the default and the admission.
-  paintGroupRuns(ops, { translationDivisor: 1, filtersScaled }, paintPropOperation);
+  // ► **`translationDivisor` IS 20, as `paintPropOperation` now divides** —
+  //   ~~`1`~~ until 2026-09-23, which also put the bolt's group box thousands
+  //   of pixels off the canvas, so the compositor skipped it as `offscreen`.
+  paintGroupRuns(ops, { translationDivisor: TWIPS_PER_PIXEL, filtersScaled }, paintPropOperation);
   context.restore();
 }
 
@@ -4134,6 +4201,62 @@ function drawFireballs(view, now) {
     }
     context.restore();
   }
+}
+
+/**
+ * MOLTEN DEATH'S BOULDERS, drawn — added 2026-09-23; a shower drew nothing
+ * before. Where each rock is, how big, which clip frame and whether it is gone
+ * are all `boulderDrawAt`'s, under the suite; this is canvas calls.
+ *
+ * ► **THE BUILD'S OWN ROCK WHEN THE PACK HOLDS `boulder_combat`**: frame 1
+ *   while it falls, frame 4 from the landing at the landing's own age, and for
+ *   as long as `boulderLandedFramesFor` says the build shows it — all
+ *   decided in `src/render/`, none of it here.
+ *
+ * ► ~~A molten core, a heat streak, an impact ring and fading rubble~~ were
+ *   drawn here until a Codex review (2026-09-23) pointed out that the build had
+ *   shown none of them. **With no extracted rock, the fallback is a PLAIN
+ *   AUTHORED ROCK** — one flat polygon, `boulderOutline` — drawn only while it
+ *   falls, because the fall is the build's own numbers and the landing art is
+ *   not in hand. It says it is authored by being a plain grey polygon.
+ */
+function drawBoulders(view, now) {
+  for (const entry of boulders) {
+    const drawn = boulderDrawAt(entry.record, now - entry.startedAt, effectDrawDeps(), {
+      landedFrames: entry.landedFrames
+    });
+    if (drawn.done) continue;
+    // The landing's own clock from the landing on; the fall's age before it.
+    const age = drawn.stage === "landed" ? drawn.landedAgeFrames : drawn.ageFrames;
+    const ops = boulderOpsFor(propPack, drawn.clipFrame, age, { scale: drawn.size * view.scale });
+    if (ops) {
+      paintProp(ops, view, {
+        x: drawn.x, y: drawn.y, lift: drawn.lift, size: drawn.size, rotation: drawn.rotation, filtersScaled: true
+      });
+      context.globalAlpha = 1;
+      continue;
+    }
+    // AUTHORED: a plain rock, and only in the air — see the header.
+    if (drawn.stage !== "falling") continue;
+    const k = drawn.size * view.scale;
+    context.save();
+    context.translate(view.toX(drawn.x), view.toY(drawn.y, drawn.lift));
+    context.scale(k, k);
+    context.globalAlpha = 1;
+    context.fillStyle = "#6b625a";
+    context.strokeStyle = "#2b2622";
+    context.lineWidth = 2 / Math.max(k, 0.01);
+    context.beginPath();
+    boulderOutline(entry.record.boulder).forEach(([px, py], index) => {
+      if (index === 0) context.moveTo(px, py);
+      else context.lineTo(px, py);
+    });
+    context.closePath();
+    context.fill();
+    context.stroke();
+    context.restore();
+  }
+  context.globalAlpha = 1;
 }
 
 function drawProjectiles(view, now) {
@@ -4270,9 +4393,16 @@ function drawProjectiles(view, now) {
     context.save();
     context.globalAlpha = 1;
     context.translate(view.toX(drawn.x), view.toY(drawn.y, drawn.lift));
-    // Canvas y is DOWN and the pitch is up-positive, so the rotation is negated
-    // exactly as `drawOps` flips the figure's own y.
-    context.rotate(-drawn.rotation);
+    // ► ~~Canvas y is DOWN and the pitch is up-positive, so the rotation is
+    //   negated exactly as `drawOps` flips the figure's own y.~~ **WRONG SINCE
+    //   `rotationAt` BECAME THE BUILD'S OWN `_rotation` — corrected
+    //   2026-09-23.** The rotation is clockwise-positive on screen and is
+    //   applied to art that points UP (the build's arrow is vertical; ±90 is
+    //   what lays it flat). This shaft is drawn pointing along +x, so it is
+    //   turned a quarter less: a right-facing snipe (`_rotation` 90) points
+    //   right, and a bombard leaves pointing up and tumbles clockwise. Negated,
+    //   the snipe pointed straight up and the bombard tumbled backwards.
+    context.rotate(drawn.rotation - Math.PI / 2);
     const length = Math.max(6, view.scale * 26 * size);
     context.strokeStyle = "#e8e0cc";
     context.lineWidth = Math.max(1, view.scale * 1.6 * size);

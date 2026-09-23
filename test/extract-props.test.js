@@ -473,10 +473,23 @@ function propsBuild() {
       showFrame(),
       removeObject2(1), place2({ depth: 1, characterId: 27 }), showFrame()
     ]),
+    // `boulder_combat` (added 2026-09-23): four frames under the oracle's own
+    // id, 33, with an animated child on frame 4 whose id the entry does NOT
+    // declare — it is discovered, because nobody writing the entry read it.
+    defineSprite(930, 2, [
+      place2({ depth: 1, characterId: 902 }), showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 903 }), showFrame()
+    ]),
+    defineSprite(33, 4, [
+      place2({ depth: 1, characterId: 900 }), showFrame(),
+      showFrame(),
+      showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 930 }), showFrame()
+    ]),
 
     exportAssets([
       [910, "bullet"], [912, "bullet_trail"], [915, "blood"], [916, "sparks"], [35, "rockMC"],
-      [12, "lightning_bolt_combat"], [28, "fireball_combat"]
+      [12, "lightning_bolt_combat"], [28, "fireball_combat"], [33, "boulder_combat"]
     ])
   ]);
 }
@@ -490,10 +503,12 @@ test("the synthetic build resolves every declared prop, or the rest of this file
   // ► An anchor, not a formality. Every assertion below indexes `PACK.props`
   //   by name, and a missing prop would make each of them throw on `undefined`
   //   with a message about a property rather than about a build that did not
-  //   parse. ~~Thirteen~~ Fourteen entries in `PROP_EXPORTS`, fourteen props,
-  //   no failures. **12 -> 13 on 2026-09-22**, when `lightning_bolt_combat`
-  //   joined, **and 13 -> 14 the same day**, when `fireball_combat` did.
-  assert.equal(PROP_EXPORTS.length, 14);
+  //   parse. ~~Thirteen~~ ~~Fourteen~~ Fifteen entries in `PROP_EXPORTS`,
+  //   fifteen props, no failures. **12 -> 13 on 2026-09-22**, when
+  //   `lightning_bolt_combat` joined, **13 -> 14 the same day**, when
+  //   `fireball_combat` did, **and 14 -> 15 on 2026-09-23**, when
+  //   `boulder_combat` did.
+  assert.equal(PROP_EXPORTS.length, 15);
   assert.deepEqual(PACK.failures, [], "the synthetic build must parse clean");
   assert.equal(Object.keys(PACK.props).length, PROP_EXPORTS.length);
 });
@@ -1126,6 +1141,93 @@ test("A CLOCK CHILD THAT MOVES A MORPH is carried at every age, which is the fir
   const view = propPackFrom(pack);
   assert.deepEqual([0, 1, 2].map((age) => fireballOpsFor(view, 4, age)?.[0]?.d),
     [MORPH_AT[0].d, MORPH_AT[13107].d, MORPH_AT[65535].d]);
+});
+
+test("MOLTEN DEATH'S BOULDER: the landing clock is DISCOVERED on frame 4, since nobody declaring it has read it", () => {
+  // ► **ADDED 2026-09-23, after a Codex review found the arena drawing a
+  //   landing it had invented.** `boulder_combat` is sprite 33: four frames, a
+  //   `Stop` on frames 1 and 4 and nothing else in its frame scripts (read by
+  //   the main session). The arm shows frame 1 while the rock falls and
+  //   `gotoAndStop(4)` on the landing (`+0x88c0`). WHAT frame 4 places was not
+  //   read by whoever wrote the entry — the install is off limits to that
+  //   agent — so the entry cannot name a clock character the way the bolt and
+  //   the fireball do. It names the FRAME, and the extractor finds the one
+  //   animated sprite placed there, or refuses by name when there is more than
+  //   one, and says what it found either way.
+  const build = ({ landing = "one" } = {}) => swfFile([
+    solidShape(900, [0xff, 0, 0, 0xff]),
+    solidShape(902, [0, 0xff, 0, 0xff]),
+    solidShape(903, [0, 0, 0xff, 0xff]),
+    solidShape(904, [0xff, 0xff, 0, 0xff]),
+    // Three drawings over three frames: the landing, whatever it turns out to be.
+    defineSprite(931, 3, [
+      place2({ depth: 1, characterId: 902 }), showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 903 }), showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 904 }), showFrame()
+    ]),
+    // A second animated sprite, reached only THROUGH a one-frame wrapper, so
+    // the search has to look inside what frame 4 places, not just at it.
+    defineSprite(932, 2, [
+      place2({ depth: 1, characterId: 904 }), showFrame(),
+      removeObject2(1), place2({ depth: 1, characterId: 902 }), showFrame()
+    ]),
+    defineSprite(933, 1, [place2({ depth: 1, characterId: 932 }), showFrame()]),
+    defineSprite(33, 4, [
+      place2({ depth: 1, characterId: 900 }), showFrame(),
+      showFrame(),
+      showFrame(),
+      removeObject2(1),
+      ...(landing === "one" ? [place2({ depth: 1, characterId: 931 })] : []),
+      ...(landing === "static" ? [place2({ depth: 1, characterId: 902 })] : []),
+      ...(landing === "two" ? [place2({ depth: 1, characterId: 931 }), place2({ depth: 2, characterId: 933 })] : []),
+      showFrame()
+    ]),
+    exportAssets([[33, "boulder_combat"]])
+  ]);
+  const shapesOf = (placements) => placements.map((placement) => placement.shape);
+
+  // ONE animated child on frame 4: it is the clock, walked age by age.
+  const one = extractProps(build());
+  const prop = one.props.boulder_combat;
+  assert.deepEqual(failuresOf(one, "boulder_combat"), []);
+  assert.equal(prop.frameCount, 4);
+  assert.deepEqual(prop.frames.map(shapesOf), [[900], [900], [900], [902]],
+    "frame 1 is the falling rock; frame 4 is the landing child frozen on ITS frame 1");
+  assert.equal(prop.clock.character, 931, "found, not declared");
+  assert.equal(prop.clock.discoveredOn, 4);
+  assert.equal(prop.clock.frameCount, 3);
+  assert.deepEqual(prop.clock.framesByParent[3].map(shapesOf), [[902], [903], [904]],
+    "the landing, age by age");
+  assert.deepEqual(prop.clockDiscovery, { onFrame: 4, byFrame: [[], [], [], [931]] },
+    "and the pack says what it looked at: no animated sprite while the rock falls, one where it lands");
+  // The manifest — the file a person re-extracting actually reads — names it too.
+  const manifest = manifestFor({
+    source: "synthetic.swf", sha256: "0".repeat(64), props: one.props, shapes: one.shapes,
+    failures: one.failures, approximated: one.approximated, effects: one.effects
+  });
+  assert.deepEqual(manifest.props.boulder_combat.clockDiscovery,
+    { onFrame: 4, byFrame: [[], [], [], [931]], character: 931 });
+  assert.equal(Object.hasOwn(manifest.props.lightning_bolt_combat ?? {}, "clockDiscovery"), false);
+
+  // NONE: frame 4 is a still drawing, so there is no clock and nothing refused.
+  const still = extractProps(build({ landing: "static" }));
+  assert.deepEqual(failuresOf(still, "boulder_combat"), []);
+  assert.equal(Object.hasOwn(still.props.boulder_combat, "clock"), false);
+  assert.deepEqual(still.props.boulder_combat.clockDiscovery, { onFrame: 4, byFrame: [[], [], [], []] });
+
+  // TWO: the tool will not pick one. Refused by name, and both ids reported.
+  const two = extractProps(build({ landing: "two" }));
+  assert.equal(Object.hasOwn(two.props.boulder_combat, "clock"), false, "refused, and therefore absent");
+  assert.equal(two.props.boulder_combat.effects.notCarried.clockAmbiguous, 1);
+  assert.deepEqual(two.props.boulder_combat.clockDiscovery.byFrame[3], [931, 932],
+    "including the one inside the wrapper");
+  assert.ok(failuresOf(two, "boulder_combat").some((failure) => /931.*932/.test(failure.message)),
+    "and the failure names both, so whoever reads the build can declare the right one");
+
+  // The entry itself declares the FRAME and no character, and says why.
+  const entry = PROP_EXPORTS.find((candidate) => candidate.linkage === "boulder_combat");
+  assert.equal(entry.clock.discoverOnFrame, 4);
+  assert.equal(Object.hasOwn(entry.clock, "character"), false);
 });
 
 test("A MORPH UNDER A MASK is clipped when the mask is a shape and REFUSED BY NAME when it is not", () => {

@@ -257,6 +257,45 @@ export const PROP_EXPORTS = Object.freeze([
   },
   {
     /**
+     * ► **MOLTEN DEATH'S BOULDER — added 2026-09-23, a day after the verb that
+     *   drops it**, when a Codex review found the arena drawing an INVENTED
+     *   landing because this pack had no rock. The arm runs
+     *   `boulder = arena.gladiators.attachMovie("boulder_combat", ...)` once
+     *   per boulder (`+0x870f`) and, when one lands, `gotoAndStop(4)`
+     *   (`+0x88c0`).
+     *
+     *   Sprite 33, **four frames, a `Stop` on frame 1 (`DoAction@0xcb53`) and
+     *   on frame 4 (`DoAction@0xcb6d`) and nothing else in its frame scripts**
+     *   — the main session's reading of the oracle. So the rock falls showing
+     *   frame 1, frames 2 and 3 are never shown, and frame 4 is the landing.
+     *
+     * ► **THE CLOCK IS DISCOVERED, NOT DECLARED, AND THAT IS AN ADMISSION.**
+     *   The bolt and the fireball name their clock child because somebody read
+     *   which sprite their frame places. Nobody writing this entry read sprite
+     *   33's frame 4 — the install was off limits to that agent — so it names
+     *   the FRAME, and `extractProps` looks for the one animated sprite placed
+     *   there (at any depth of nesting), walks it as the clock if there is
+     *   exactly one, refuses by name if there are several, and writes what it
+     *   found into `clockDiscovery` either way. Once the child is read, naming
+     *   it as `character` here is the better declaration.
+     *
+     * ► **WHAT THIS CANNOT CARRY: HOW LONG THE LANDING LASTS.** That is the
+     *   landing child's own frame scripts — a `Stop`, a loop, or a
+     *   `_parent.removeMovieClip()` like the fireball's explosion — and this
+     *   tool reads display lists, not actions. See `BOULDER_LANDED_FRAMES` in
+     *   `src/render/props.js`.
+     */
+    linkage: "boulder_combat",
+    indexedBy: "frame: 1 while the rock falls (its own Stop), 4 from the landing (`gotoAndStop(4)`, `+0x88c0`); 2 and 3 are never shown",
+    clock: {
+      discoverOnFrame: 4,
+      indexedBy: "the landing's AGE in frames on parent frame 4 — whichever animated sprite frame 4 places; its own scripts, which this tool does not read, decide whether it holds, loops or removes the rock",
+      reader: "src/render/props.js — boulderOpsFor, the landing"
+    },
+    reader: "src/render/props.js — boulderOpsFor, molten death's rock"
+  },
+  {
+    /**
      * ► **THE ARENA'S EDGES, and they are the only scenery the build attaches.**
      *   Root frame 221 puts one `rockMC` at each end of the ground:
      *
@@ -633,6 +672,33 @@ function refusedEffectsOf(drawable, refusedOwn, notCarried) {
  *   every existing reader already indexes. The renderer's join is: take frame
  *   `age`, replace shape `replaces` with `shapeByFrame[index - 1]`.
  */
+/**
+ * EVERY ANIMATED SPRITE ONE FRAME PLACES, at any depth of nesting, as sorted
+ * character ids — the search behind a clock declared by FRAME
+ * (`clock.discoverOnFrame`, `boulder_combat`).
+ *
+ * "Animated" is more than one frame. It looks INSIDE each sprite it meets on
+ * that sprite's frame 1, because that is the frame `flattenFrame` draws a
+ * nested sprite on, so a clock wrapped in a one-frame container is still
+ * found. A sprite already visited is not re-entered, and the depth is capped as
+ * `flattenFrame` caps its own recursion. It reads display lists only: whether
+ * a found sprite loops, holds or removes its parent is in its ACTIONS, which
+ * this tool does not read.
+ */
+function animatedSpritesIn(buffer, characters, displayList, depth = 0, seen = new Set()) {
+  const found = new Set();
+  for (const entry of displayList) {
+    const character = characters.get(entry.characterId);
+    if (!character || character.kind !== "sprite") continue;
+    if (character.frames > 1) found.add(entry.characterId);
+    if (depth >= 8 || seen.has(entry.characterId)) continue;
+    seen.add(entry.characterId);
+    const inner = resolveTimeline(buffer, character, { frames: [1] }).frames[0] ?? [];
+    for (const nested of animatedSpritesIn(buffer, characters, inner, depth + 1, seen)) found.add(nested);
+  }
+  return [...found].sort((left, right) => left - right);
+}
+
 function nestedLookupFor(buffer, characters, resolved, frameCount, declared, cache, notCarried) {
   const child = characters.get(declared.character);
   if (!child || child.kind !== "sprite") {
@@ -1348,8 +1414,35 @@ export function extractProps(buffer) {
     //   clock frame is built — and invoiced — by exactly the code that builds
     //   the prop's own frames. Nothing here assembles a frame by hand.
     let clock = null;
-    if (declared.clock) {
-      const child = characters.get(declared.clock.character);
+    // ► **A CLOCK DECLARED BY FRAME IS FOUND, AND WHAT WAS FOUND IS WRITTEN
+    //   DOWN — added 2026-09-23 for `boulder_combat`.** Every animated sprite
+    //   each parent frame places, at any depth of nesting, per frame, so a
+    //   reader can see what the search saw: the landing's child, and whether the
+    //   FALLING frame carries one too (which would be frozen on its frame 1).
+    let clockDiscovery = null;
+    let clockCharacter = declared.clock?.character;
+    if (declared.clock && clockCharacter === undefined && Number.isInteger(declared.clock.discoverOnFrame)) {
+      const onFrame = declared.clock.discoverOnFrame;
+      const byFrame = [];
+      for (let index = 0; index < frameCount; index += 1) {
+        byFrame.push(animatedSpritesIn(buffer, characters, resolved.frames[index] ?? []));
+      }
+      clockDiscovery = { onFrame, byFrame };
+      const found = byFrame[onFrame - 1] ?? [];
+      if (found.length === 1) {
+        clockCharacter = found[0];
+      } else if (found.length > 1) {
+        refuse(notCarried, "clockAmbiguous");
+        failures.push({
+          linkage: key, id,
+          message: `frame ${onFrame} places ${found.length} animated sprites (${found.join(", ")}); ` +
+            "declare the one that is the clock as `clock.character`"
+        });
+      }
+      // None: that frame is a still drawing, and a still drawing has no clock.
+    }
+    if (declared.clock && clockCharacter !== undefined) {
+      const child = characters.get(clockCharacter);
       if (!child || child.kind !== "sprite") {
         refuse(notCarried, "clockCharacterMissing");
       } else {
@@ -1360,13 +1453,16 @@ export function extractProps(buffer) {
           for (let age = 1; age <= child.frames; age += 1) {
             ages.push(displayList
               ? placementsFor(displayList, `frame ${index + 1} at clock frame ${age}`,
-                { [declared.clock.character]: age })
+                { [clockCharacter]: age })
               : []);
           }
           framesByParent.push(ages);
         }
         clock = {
-          character: declared.clock.character,
+          character: clockCharacter,
+          // Present only on a clock this tool FOUND, so a declared one reads
+          // exactly as it always has.
+          ...(clockDiscovery ? { discoveredOn: clockDiscovery.onFrame } : {}),
           indexedBy: declared.clock.indexedBy,
           reader: declared.clock.reader,
           frameCount: child.frames,
@@ -1397,6 +1493,10 @@ export function extractProps(buffer) {
       // `nestedLookup` beside it is: an always-present `clock: null` would
       // claim this tool went looking on every prop.
       ...(clock ? { clock } : {}),
+      // What a clock declared BY FRAME found, whether or not it became one:
+      // "nothing animated there" and "two things animated there" are both
+      // answers a reader needs, and neither leaves a `clock` behind.
+      ...(clockDiscovery ? { clockDiscovery } : {}),
       effects: effectSummaryFor(groups, ownFilterLists, ownBlendModes, underGroup, notCarried, refusedOwn),
       frames
     };
@@ -1467,6 +1567,11 @@ export function manifestFor({ source, sha256, props, shapes, failures, approxima
       // says: `bullet_trail`'s seven frames are an age and its arrow is a
       // fifty-frame lookup on a child. Absent where nothing was declared.
       ...(prop.nestedLookup ? { nestedLookup: prop.nestedLookup } : {}),
+      // WHAT A CLOCK DECLARED BY FRAME FOUND, and which character it took.
+      // Absent everywhere a clock was declared by character, as before.
+      ...(prop.clockDiscovery ? {
+        clockDiscovery: { ...prop.clockDiscovery, character: prop.clock?.character ?? null }
+      } : {}),
       // THE PER-ENTRY INVOICE. Every prop carries one — including the eight
       // with nothing in it, for the reason `effectGroups` is always present.
       effects: prop.effects
@@ -1526,6 +1631,17 @@ function main(argv) {
         `                 └ ${nested.instance} (char ${nested.character}): ` +
         `${nested.frameCount} frames, ${nested.distinctShapes} distinct shapes over shape ${nested.replaces}  ` +
         `(${nested.indexedBy})`
+      );
+    }
+    // ► **A DISCOVERED CLOCK IS PRINTED WITH WHAT THE SEARCH SAW**, so the
+    //   person re-extracting learns which sprite to read for the landing's
+    //   lifetime without opening the JSON.
+    if (prop.clockDiscovery) {
+      const seen = prop.clockDiscovery.byFrame.map((ids, index) => `f${index + 1}:[${ids.join(",")}]`).join(" ");
+      lines.push(
+        `                 └ clock on frame ${prop.clockDiscovery.onFrame}: ` +
+        `${prop.clock ? `char ${prop.clock.character}, ${prop.clock.frameCount} frames` : "NONE"}  ` +
+        `(animated sprites by frame: ${seen})`
       );
     }
   }

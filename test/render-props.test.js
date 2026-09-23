@@ -1233,9 +1233,9 @@ test("what the real pack's colour transforms COULD have varied over, counted", (
   //   the extractor refuses). Same walk.
   //   **And once more when extract-props began baking morphs**: +1
   //   placement and +10 operations, still no group.
-  assert.equal(total.placements, 3352);
+  assert.equal(total.placements, 3356, "+4 on 2026-09-23: `boulder_combat` joined the pack");
   assert.equal(total.tintedPlacements, 2330, "70% of them — this pack is mostly TINTED, unlike the screens one");
-  assert.equal(total.ops, 8740);
+  assert.equal(total.ops, 8789, "+49 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack — 3 x 13 paths of the rock (shape 32) on frames 1-3, and 10 of the explosion's first frame (shape 19@0) on frame 4; none of them tinted");
   assert.equal(total.tintedOps, 7246);
 
   // ► **BOTH APPROXIMATION COUNTS ARE DEAD ON THIS PACK, and the denominators
@@ -1707,13 +1707,19 @@ test("the sky's group filters are a BLUR and two GLOWS the painter still has to 
   }
 });
 
-test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 747 group instances cover ONE operation", () => {
+test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 748 group instances (747 before boulder_combat, 2026-09-23) cover ONE operation", () => {
   // ► **THE QUESTION PREMISE 4 OF THE BRIEF ASKS, ANSWERED FROM THE PACK.** A
   //   group over exactly one drawable IS its own composite, so for those 486
   //   per-leaf and per-group coincide EXACTLY. The 259 that do not are the
   //   moon (56 operations), the stars (23 and 12) and a four-path group — and
   //   every one of them carries a GLOW rather than a matrix, so the half this
   //   module folds is the half where the distinction cannot arise.
+  //   **~~every one of them~~ — NO LONGER, since 2026-09-23:** `boulder_combat`'s
+  //   one group instance (frame 4, character 27) covers 10 operations and
+  //   carries a colourMatrix and NO glow, so it is a multi-operation group
+  //   with a matrix. It is still not a hard case: the matrix is folded per
+  //   fill, which is exact, and it has no filter string, so `matrixOverMany`
+  //   below stays 0.
   assertRealPackPathIsDerivable();
   if (!REAL_PROPS) {
     assert.equal(REAL_PROPS, null, "no extraction on this machine");
@@ -1737,9 +1743,12 @@ test("HOW BAD PER-LEAF WOULD BE, measured: 486 of 747 group instances cover ONE 
   //   instances — one GLOW on the child per frame, 9 operations each; shape 11
   //   sits outside it. Measured by walking the old and the regenerated pack
   //   with this module's own invoice; nothing else in the pack moved.
-  assert.equal(instances, 747, "group instances across every frame of every prop");
-  // The bolt's two glows are the `9` bucket, the only new one.
-  assert.deepEqual(spread, { 1: 486, 4: 7, 9: 2, 12: 102, 23: 61, 56: 89 },
+  assert.equal(instances, 748, "group instances across every frame of every prop — +1 on 2026-09-23, `boulder_combat`'s inherited colourMatrix group");
+  // The bolt's two glows are the `9` bucket, ~~the only new one~~ the only new one ON 2026-09-22.
+  // `10: 1` is new on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the
+  // pack, and its one group covers the 10 paths of shape 19@0, the explosion's first frame. Control:
+  // the same walk with `boulder_combat` excluded gives the old histogram exactly.
+  assert.deepEqual(spread, { 1: 486, 4: 7, 9: 2, 10: 1, 12: 102, 23: 61, 56: 89 },
     "and the LARGEST covers 56 operations — this pack is not the screens pack's 1,523");
   assert.equal(spread[1], 486, "so 65% of them are cases where per-leaf would have been exactly right");
   assert.equal(matrixOverMany, 0,
@@ -1777,36 +1786,45 @@ test("what the real pack's GROUP EFFECTS could have varied over, counted with de
   //   the extractor refuses). Same walk.
   //   **And once more when extract-props began baking morphs**: +1
   //   placement and +10 operations, still no group.
-  assert.equal(total.placements, 3352);
-  assert.equal(total.groupedPlacements, 3211, "96% of them sit inside an effect group");
-  assert.equal(total.ops, 8740);
-  assert.equal(total.groupedOps, 8143);
-  assert.equal(total.effectGroups, 747, "group INSTANCES — 365 distinct groups, over the 308 frames walked (304 before `fireball_combat`), 209 of which carry one " +
-    "(this read \"reached across 302 frames\" before 2026-09-22; 302 was the frames WALKED, and " +
+  assert.equal(total.placements, 3356, "+4 on 2026-09-23: `boulder_combat` joined the pack");
+  // ► **EVERY COUNT BELOW THAT MOVED ON 2026-09-23 MOVED BY EXACTLY WHAT
+  //   `boulder_combat` (sprite 33 + its explosion child 27) ADDS**: 4 frames,
+  //   4 placements (the rock, shape 32, on frames 1-3; the explosion's first
+  //   frame, shape 19@0, on frame 4), 49 operations, and ONE group instance —
+  //   frame 4's inherited colourMatrix on character 27, over 10 operations,
+  //   with no blur, glow or blend mode. Control: the same walk over the pack
+  //   with `boulder_combat` (and shape 32, which only it references) removed,
+  //   which is deep-equal to the pre-extraction pack, gives every old number.
+  assert.equal(total.groupedPlacements, 3212, "96% of them sit inside an effect group — +1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack, its frame-4 placement under the inherited colourMatrix");
+  assert.equal(total.ops, 8789, "+49 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack");
+  assert.equal(total.groupedOps, 8153, "+10 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack — the 10 paths of shape 19@0 under its group");
+  assert.equal(total.effectGroups, 748, "group INSTANCES — 366 distinct groups, over the 312 frames walked (308 before `boulder_combat` on 2026-09-23, 304 before `fireball_combat`), 210 of which carry one " +
+    "(365 / 209 before `boulder_combat`, whose one group on its frame 4 is the +1 here; " +
+    "this read \"reached across 302 frames\" before 2026-09-22; 302 was the frames WALKED, and " +
     "only 207 of them carried a group)");
 
   // `canvasFilterFor`'s four verdicts, summed. 517 applied is 130 blurs and
-  // 387 glow/shadow instances (385 before the bolt's two); 348 deferred is the colour matrices this module
-  // folds; 250 no-ops are Blur(0,0) and zero-strength glows.
-  assert.equal(total.groupFilters, 1115);
+  // 387 glow/shadow instances (385 before the bolt's two); ~~348~~ 349 deferred is the colour matrices this module
+  // folds (+1 on 2026-09-23: `boulder_combat`'s one colourMatrix); 250 no-ops are Blur(0,0) and zero-strength glows.
+  assert.equal(total.groupFilters, 1116, "+1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack, with one colourMatrix filter instance");
   assert.equal(total.groupFiltersApplied + total.groupFiltersDeferred
     + total.groupFiltersNoOp + total.groupFiltersRefused, total.groupFilters,
     "the four buckets partition the total exactly — a fifth outcome would show up here");
   assert.equal(total.groupFiltersApplied, 517);
-  assert.equal(total.groupFiltersDeferred, 348);
+  assert.equal(total.groupFiltersDeferred, 349, "+1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack, and a colourMatrix is DEFERRED to the fold");
   assert.equal(total.groupFiltersNoOp, 250);
   assert.equal(total.groupFiltersRefused, 0,
-    "**zero out of 1,115** — this build's props use no bevel and no inner glow, so the refusal arm is DEAD here");
+    "**zero out of 1,116** (1,115 before boulder_combat, 2026-09-23) — this build's props use no bevel and no inner glow, so the refusal arm is DEAD here");
 
   // What is still not drawn: operations under a blur or glow, waiting on a
   // painter that composites to a buffer.
-  assert.equal(total.groupFilterOps, 5828, "out of 8,143 grouped operations");
+  assert.equal(total.groupFilterOps, 5828, "out of 8,153 grouped operations (8,143 before boulder_combat, 2026-09-23, whose 10 sit under a colourMatrix and no blur or glow)");
 
   // The fold itself. The four below partition `groupMatrixOps` exactly.
-  assert.equal(total.groupMatrixOps, 1690);
+  assert.equal(total.groupMatrixOps, 1700, "+10 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack — the 10 paths of shape 19@0 under its colourMatrix");
   assert.equal(total.groupMatrixSolidOps + total.groupMatrixGradientOps + total.groupMatrixDroppedOps,
     total.groupMatrixOps, "solid + gradient + dropped is the whole population");
-  assert.equal(total.groupMatrixSolidOps, 697);
+  assert.equal(total.groupMatrixSolidOps, 706, "+9 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack — 9 of shape 19@0's 10 paths are solid fills; the tenth is the stroke-only hairline below");
   assert.equal(total.groupMatrixGradientOps, 993, "and the gradients are the majority, which is the sky's backdrop");
   assert.equal(total.groupMatrixFoldedUnderAFilter, 148, "`cloud_patterns`, whose list really is [blur, colourMatrix]");
 
@@ -1814,9 +1832,19 @@ test("what the real pack's GROUP EFFECTS could have varied over, counted with de
   //   MOVES THEM.** Each is asserted here WITH the denominator it is read
   //   against, because a zero with no denominator cannot say whether a counter
   //   is quiet or cannot fire — six defects old in this repository.
-  assert.equal(total.groupMatrixDroppedOps, 0, "0 of 1,690: every matrix-covered operation has a fill or a ramp");
-  assert.equal(total.groupMatrixStrokeOps, 0, "0 of 1,690: not one of them carries a stroke");
-  assert.equal(total.groupMatrixNotFillExact, 0, "0 of 1,690: all 150 group matrices have the plain alpha row");
+  //   **~~FIVE~~ — TWO OF THEM WENT LIVE ON 2026-09-23, BOTH ON ONE OPERATION.**
+  //   `boulder_combat` (sprite 33 + its explosion child 27) joined the pack and
+  //   puts the explosion's first frame, shape 19@0, under a colourMatrix. That
+  //   shape's path 9 is `fill: "none"`, `stroke: "#000000"`, `strokeWidth: 0`
+  //   — a stroke-only hairline. With no fill for the matrix to land on it counts
+  //   as DROPPED, and the matrix is folded into its stroke instead, so it counts
+  //   in `groupMatrixStrokeOps` too. Nothing visible is lost: the fill is none,
+  //   so there is nothing to recolour there. The same shape under
+  //   `fireball_combat` sits in no group, which is why neither counter moved
+  //   when the fireball joined. Control: 0 and 0 with `boulder_combat` excluded.
+  assert.equal(total.groupMatrixDroppedOps, 1, "1 of 1,700 (0 of 1,690 before 2026-09-23): boulder_combat (sprite 33 + its explosion child 27) joined the pack, and path 9 of shape 19@0 under its colourMatrix is a stroke-only hairline with no fill for the matrix to land on");
+  assert.equal(total.groupMatrixStrokeOps, 1, "1 of 1,700 (0 of 1,690 before 2026-09-23): the same hairline, whose stroke takes the matrix instead");
+  assert.equal(total.groupMatrixNotFillExact, 0, "0 of 1,700: all 151 group matrices have the plain alpha row (1,690 and 150 before boulder_combat's one colourMatrix, 2026-09-23)");
   assert.equal(total.nestedGroupPlacements, 0, "0 of 3,209: every chain is one deep, so no painter needs a stack");
   assert.equal(total.groupsUnresolved, 0, "0 of 3,209: every index resolves");
   assert.equal(total.groupBlendModesRefused, 0, "0 of 7: the one blend mode here is canvas-exact");

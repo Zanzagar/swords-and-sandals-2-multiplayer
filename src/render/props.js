@@ -1152,7 +1152,16 @@ export function boltOpsFor(pack, boltFrame, ageFrames, { scale = 1 } = {}) {
  * own flattened placements otherwise.
  */
 export function fireballOpsFor(pack, clipFrame, ageFrames, { scale = 1 } = {}) {
-  const linkage = "fireball_combat";
+  return clampedClockOpsFor(pack, "fireball_combat", clipFrame, ageFrames, scale);
+}
+
+/**
+ * A prop at a 1-based `clipFrame` and a zero-based clock age that is CLAMPED at
+ * the clock's last frame — the fireball's explosion and the boulder's landing
+ * — or null when the pack does not hold the prop. Lifted out of
+ * `fireballOpsFor` unchanged when the boulder became the second reader.
+ */
+function clampedClockOpsFor(pack, linkage, clipFrame, ageFrames, scale) {
   if (!hasExtractedProps(pack)) return null;
   const prop = pack.props[linkage];
   if (!prop || !Array.isArray(prop.frames) || prop.frames.length === 0) return null;
@@ -1170,6 +1179,138 @@ export function fireballOpsFor(pack, clipFrame, ageFrames, { scale = 1 } = {}) {
     shapes: pack.shapes
   });
   return propOpsFor(view, { linkage, frame: 1, scale });
+}
+
+/**
+ * MOLTEN DEATH'S BOULDER, at a frame of `boulder_combat` and the landing's age
+ * — or null when the pack does not hold it.
+ *
+ * ► **A PACK EXTRACTED BEFORE 2026-09-23 DOES NOT, and null is the answer for
+ *   that**: `tools/extract-props.mjs` took `boulder_combat` (sprite 33) on that
+ *   date, so a pack has it only once the player re-extracts. Until then a shell
+ *   draws its plain AUTHORED rock and no landing at all.
+ *
+ * Two quantities, kept apart the way `fireballOpsFor` keeps them:
+ *
+ * - `clipFrame`, 1-BASED as `gotoAndStop` indexes it: **1 while it falls** (the
+ *   clip's own `Stop`, `DoAction@0xcb53`) and **4 from the landing**
+ *   (`gotoAndStop(4)`, `+0x88c0`, and the `Stop` at `DoAction@0xcb6d`);
+ * - `ageFrames`, ZERO-BASED: the landing clock's age when the extractor found
+ *   an animated sprite on frame 4 (`clock.discoveredOn`), **CLAMPED** at its
+ *   last frame. How long the landing is shown at all is
+ *   `boulderLandedFramesFor`'s question, not this one's.
+ */
+export function boulderOpsFor(pack, clipFrame, ageFrames = 0, { scale = 1 } = {}) {
+  return clampedClockOpsFor(pack, "boulder_combat", clipFrame, ageFrames, scale);
+}
+
+/**
+ * HOW LONG THE BUILD SHOWS A LANDED BOULDER, in frames — ~~**UNREAD**~~ **READ
+ * 2026-09-23 by the main session: 22.** The re-extracted pack's
+ * `clockDiscovery` for `boulder_combat` names the child on frame 4: character
+ * **27** — the fireball's explosion clip — and the dump of every action block
+ * shows sprite 27's only frame script is on its frame 23,
+ * `_parent.removeMovieClip()` (`sprite:27/frame:23/DoAction@0xb819`). A frame
+ * script runs on entering its frame, before that frame is drawn, so a landed
+ * rock shows the explosion's frames 1-22 and is gone on the 23rd — exactly the
+ * "plays once, without its last frame" rule `boulderLandedFramesFor` applies
+ * to an animated landing. **So no override is set: the pack rule IS the build's
+ * answer for the real pack** (pinned against `assets/props/props.json` in
+ * test/render-boulders.test.js), and an override would wrongly give the
+ * authored, pack-less rock a landing it has no art for.
+ *
+ * `null` means "the pack rule stands"; set a number only if a build is found
+ * whose landing child the rule misreads. What IS read (the main session, 2026-09-23,
+ * and `SS2_DEATH_FROM_ABOVE`): the arm never removes a boulder, and sprite 33's
+ * own frame scripts are a `Stop` on frame 1 and a `Stop` on frame 4 and nothing
+ * else. So the ONLY thing that can end a landing is a CHILD placed on frame 4 —
+ * and whether it does (`_parent.removeMovieClip()` on its last frame, as the
+ * fireball's explosion does), holds (`Stop`), or loops is in that child's
+ * actions, which the extractor does not read. Set this from that reading.
+ */
+export const BOULDER_LANDED_FRAMES = null;
+
+/**
+ * How many frames a boulder's landing is shown for, from what the PACK can say
+ * — the number `boulderDrawAt`'s `landedFrames` wants.
+ *
+ * - **No `boulder_combat` in the pack: 0.** The shell's rock is authored, and
+ *   an authored LANDING would be invented; the rock goes as it lands.
+ * - **`BOULDER_LANDED_FRAMES`, once somebody has read it.**
+ * - **A still frame 4 — no animated sprite found there: `Infinity`.** Nothing
+ *   the build is known to run can remove it, so it stays as long as the arena.
+ * - **An animated landing: ONE PASS of its clock, less the last frame —
+ *   INTERIM, AND A PRECEDENT RATHER THAN A READING.** `fireball_combat` has
+ *   the same layout (four frames, a `Stop` on 1 and 4, an animated child on 4)
+ *   and its child removes its parent on its LAST frame, whose script runs
+ *   before that frame is drawn — so `SS2_FIREBALL` shows `explosionFrames - 1`.
+ *   Whether the boulder's child does the same is unread.
+ */
+export function boulderLandedFramesFor(pack) {
+  if (!hasExtractedProps(pack)) return 0;
+  const prop = pack.props.boulder_combat;
+  if (!prop || !Array.isArray(prop.frames) || prop.frames.length === 0) return 0;
+  if (BOULDER_LANDED_FRAMES === Infinity || Number.isFinite(BOULDER_LANDED_FRAMES)) return BOULDER_LANDED_FRAMES;
+  const landing = prop.clock?.framesByParent?.[3];
+  if (Array.isArray(landing) && landing.length > 0) return Math.max(1, landing.length - 1);
+  return Infinity;
+}
+
+/** A prop's placement translations are TWIPS: `tools/extract-props.mjs`, `roundMatrix`. */
+const TWIPS_PER_PIXEL = 20;
+
+/**
+ * ONE OPERATION'S OWN TRANSFORM, in the prop's own pixels — or null.
+ *
+ * ► **THE TRANSLATION IS DIVIDED BY 20, AND THE ARENA'S PROP PAINTER DID NOT
+ *   DO THAT UNTIL 2026-09-23.** `tools/extract-props.mjs` keeps `tx`/`ty` in
+ *   twips — "A consumer must divide by 20" — and `paintLayerOperation` always
+ *   has; `paintPropOperation` passed them through as pixels. Every prop that
+ *   reached it before the spell props had a zero translation, so it hid until
+ *   the lightning bolt (`-1330, -6880` twips) was painted roughly 6,800 pixels
+ *   below the canvas and never seen, and the fireball's explosion (`30, 174`)
+ *   floated a figure height over its victim.
+ *
+ * The four scale/skew terms are unit-free and pass straight through.
+ */
+export function propPlacementMatrix(matrix) {
+  if (!Array.isArray(matrix) || matrix.length < 6) return null;
+  return [matrix[0], matrix[1], matrix[2], matrix[3], matrix[4] / TWIPS_PER_PIXEL, matrix[5] / TWIPS_PER_PIXEL];
+}
+
+/**
+ * WHERE A PROP'S REGISTRATION POINT GOES ON A CANVAS, and how it is scaled,
+ * turned and mirrored — the matrix a painter sets before drawing each
+ * operation through `propPlacementMatrix`.
+ *
+ * `translate(toX(x), toY(y, lift))`, then `rotate(rotation)`, then
+ * `scale(±k, k)` with `k = size * view.scale` — Flash's own order for a clip:
+ * `_xscale`/`_yscale` first, `_rotation` over it, then `_x`/`_y`.
+ *
+ * ► **NO VERTICAL FLIP, AND THE PAINTER HAD ONE UNTIL 2026-09-23.** It scaled
+ *   by `(k, -k)` because "arena y is UP and canvas y is DOWN" — true of an
+ *   arena POINT, which `view.toY` already converts, and false of the ART: a
+ *   prop's paths are the SWF's own, and SWF y is down exactly like the
+ *   canvas's. The figure is pre-flipped before it meets its `-k`
+ *   (`extracted-figure.js`); no prop ever was. So the arena's two rocks stood
+ *   on their heads with their shadows over them, the fireball's burst went
+ *   down, and — the arrow's art points UP and `_rotation` lays it flat — every
+ *   snipe flew tail first.
+ *
+ * `rotation` is radians CLOCKWISE on screen, Flash's `_rotation` convention
+ * (`projectile.js`, `rotationAt`). `mirrored` is a negative `_xscale`.
+ *
+ * @param {object} view  `{ toX, toY, scale }`, the shell's projection
+ * @param {object} at    `{ x, y, lift, size, rotation, mirrored }`
+ * @returns {number[]} `[a, b, c, d, e, f]`, as canvas's `transform()` takes it
+ */
+export function propOriginMatrix(view, { x, y, lift = 0, size = 1, rotation = 0, mirrored = false } = {}) {
+  const k = size * view.scale;
+  const sx = mirrored ? -k : k;
+  const cos = rotation ? Math.cos(rotation) : 1;
+  const sin = rotation ? Math.sin(rotation) : 0;
+  // `+ 0` folds the `-0` an unrotated or mirrored prop would otherwise carry.
+  return [cos * sx + 0, sin * sx + 0, -sin * k + 0, cos * k + 0, view.toX(x), view.toY(y, lift)];
 }
 
 /**

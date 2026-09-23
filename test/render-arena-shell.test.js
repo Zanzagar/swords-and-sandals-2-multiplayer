@@ -626,14 +626,14 @@ test("the scale the backdrop is read at moves the FILTER STRING and nothing else
   //   frame and the last four explosion frames carry geometry). Measured by the same walk.
   //   **And once more when extract-props began baking morphs** (+1 placement, +10 ops, +18 shapes /
   //   +233 paths: the explosion's first 18 frames, which the line above says were refused).
-  assert.equal(frames, 308, "every frame of every linkage in the pack");
+  assert.equal(frames, 312, "every frame of every linkage in the pack" + " — +4 on 2026-09-23 when `boulder_combat` (sprite 33, frames 1/4, with the explosion child 27 on frame 4) joined the pack");
   // ► **BOTH SIDES PINNED, BECAUSE EITHER ONE ALONE IS SATISFIED BY A BUG.**
   //   If the scale were ignored, `moved` would be 0 and every blur would draw
   //   at 1/`fit.scale` of its width; if the buckets were NOT scale-invariant,
   //   the deepEqual above would already have failed.
   //
-  // ► **AND THE 289 THAT DO NOT MOVE ARE TWO POPULATIONS, WHICH IS WORTH MORE
-  //   THAN THE TOTAL WAS.** 281 of them carry no filter string at all — 274
+  // ► **AND THE ~~289~~ 290 THAT DO NOT MOVE ARE TWO POPULATIONS, WHICH IS WORTH MORE
+  //   THAN THE TOTAL WAS.** ~~281~~ 282 of them carry no filter string at all — ~~274~~ 275
   //   colour-matrix-only groups whose matrices `props.js` has already folded
   //   into the fills, plus `bullet_trail`'s 7 blend-mode instances. The other
   //   **8 carry a string whose every length is ZERO**:
@@ -643,9 +643,14 @@ test("the scale the backdrop is read at moves the FILTER STRING and nothing else
   //   times any scale is zero, so those eight are scale-invariant for a real
   //   reason and not because the option was ignored.
   // The bolt's two glows carry pixel lengths, so they move with the stage too.
+  // ► **289 -> 290 and 747 -> 748 on 2026-09-23: `boulder_combat` (sprite 33 + its explosion child 27)
+  //   joined the pack.** Its one group instance (frame 4, character 27) is a colourMatrix and nothing
+  //   else — `filter: null` at scale 1 and at 3.75 — so it lands in the no-string population and
+  //   `moved` does not change. Control: this walk over the pack with `boulder_combat` excluded (which
+  //   is deep-equal to the pre-extraction pack) gives 458 / 289 / 747.
   assert.equal(moved, 458, "the filter strings that move with the stage scale");
-  assert.equal(same, 289, "and the ones with nothing in them to move");
-  assert.equal(moved + same, 747, "which is every group instance in the pack");
+  assert.equal(same, 290, "and the ones with nothing in them to move — +1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack, and its one group is a colourMatrix with no filter string");
+  assert.equal(moved + same, 748, "which is every group instance in the pack — +1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack");
   const flat = [];
   for (let frame = 100; frame <= 105; frame += 1) {
     for (const op of propOpsFor(REAL_PROPS, { linkage: "sky", frame, scale: 9 }) ?? []) {
@@ -854,9 +859,9 @@ test("the shell's invoice is the UPSTREAM one, summed over the pack the same way
   //   frame and the last four explosion frames carry geometry). Measured by the same walk.
   //   **And once more when extract-props began baking morphs** (+1 placement, +10 ops, +18 shapes /
   //   +233 paths: the explosion's first 18 frames, which the line above says were refused).
-  assert.equal(placements, 3352, "every placement in the pack");
+  assert.equal(placements, 3356, "every placement in the pack" + " — +4 on 2026-09-23 when `boulder_combat` (sprite 33, frames 1/4, with the explosion child 27 on frame 4) joined the pack");
   assert.equal(tinted, 2330, "70% of them tinted, which is the sky sweeping through dusk");
-  assert.equal(ops, 8740, "and the operations they expand to");
+  assert.equal(ops, 8789, "and the operations they expand to — +49 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack: 3 x 13 paths of the rock, shape 32, on frames 1-3, plus the 10 paths of shape 19@0, the explosion's first frame, on frame 4");
 
   assert.equal(invoice.placements, placements, "the roll-up sees every placement the walk does");
   assert.equal(invoice.tintedPlacements, tinted, "and agrees which of them carry a transform");
@@ -1150,11 +1155,11 @@ test("the REAL pack's groups: the sky's are contiguous, and the moon is ONE buff
   //   3 placements, 20 ops, 2 glow groups of 9 ops, 5 shapes / 39 paths). Control: on the pack as it was
   //   before, every assertion in this file passes unchanged.
   //   `fireball_combat`, which joined the same day, adds no effect group, so this count did not move.
-  assert.equal(instances, 747, "every group instance the pack reaches, frame by frame");
+  assert.equal(instances, 748, "every group instance the pack reaches, frame by frame" + " — +1 on 2026-09-23 when `boulder_combat` (sprite 33, frames 1/4, with the explosion child 27 on frame 4) joined the pack (its inherited colourMatrix group)");
   assert.equal(split, 0, "no group's operations are interrupted by another group's");
   assert.equal(nested, 0, "and no chain is deeper than one");
   assert.equal(buffered, 473, "the instances that need an offscreen — 466 filtered plus 7 blended");
-  assert.equal(inert, 274, "and the colour-matrix-only ones that do not");
+  assert.equal(inert, 275, "and the colour-matrix-only ones that do not — +1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack, and its one group is a colourMatrix and nothing else");
   assert.equal(buffered + inert, instances, "which partitions the roster exactly");
 
   // ► **THE ONE GROUP THE WHOLE DESIGN IS FOR.** `sky` frame 150 draws the moon
@@ -1193,7 +1198,7 @@ test("the REAL pack's groups: the sky's are contiguous, and the moon is ONE buff
   assert.equal(puff.runs[0].group.blendModeRefused, null);
 });
 
-test("per-leaf and per-group COINCIDE for 286 of the pack's 747 groups, and it is still not taken", () => {
+test("per-leaf and per-group COINCIDE for 286 of the pack's 748 groups (747 before boulder_combat, 2026-09-23), and it is still not taken", () => {
   if (!REAL_PROPS) {
     assertRealPackPathIsDerivable();
     assert.equal(REAL_PROPS, null, "no extraction on this machine");
@@ -1257,7 +1262,7 @@ test("per-leaf and per-group COINCIDE for 286 of the pack's 747 groups, and it i
   assert.equal(clipped, 4312, "of which this many carry a clip a per-leaf filter would cut");
 });
 
-test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 27 shapes inside it", () => {
+test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 31 shapes inside it (27 when this was named, 30 before boulder_combat on 2026-09-23)", () => {
   if (!REAL_PROPS) {
     assertRealPackPathIsDerivable();
     assert.equal(REAL_PROPS, null, "no extraction on this machine");
@@ -1284,7 +1289,7 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
   //   frame and the last four explosion frames carry geometry). Measured by the same walk.
   //   **And once more when extract-props began baking morphs** (+1 placement, +10 ops, +18 shapes /
   //   +233 paths: the explosion's first 18 frames, which the line above says were refused).
-  assert.equal(paths, 591, "every path in every shape the pack holds");
+  assert.equal(paths, 604, "every path in every shape the pack holds" + " — +13 on 2026-09-23 when `boulder_combat` (sprite 33, frames 1/4, with the explosion child 27 on frame 4) joined the pack");
   assert.equal(unreadable, 0, "and the pair scan reads all of them");
 
   // ► **THE CROSS-CHECK IS THE EXTRACTOR'S OWN `bounds`, WRITTEN BY A DIFFERENT
@@ -1342,7 +1347,11 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
   // The bolt's five: shapes 6, 7, 8, 9 (the flicker) and 11 (the frightning bolt's addition).
   // 68 -> 86 on 2026-09-22 when extract-props began baking morphs: the fireball
   // explosion's 18 (characters 19-22 at the ratios sprite 27 places them).
-  assert.equal(shapes, 86, "every shape the pack holds declares bounds");
+  // 86 -> 87 on 2026-09-23 when `boulder_combat` (sprite 33 + its explosion child 27) joined the pack:
+  // the rock, shape 32, is the only shape it adds — the explosion's are already here, from the fireball.
+  // Control: the pack with `boulder_combat` and shape 32 removed is deep-equal to the pre-extraction
+  // pack, and this walk over it gives 86 / 591 paths / 14 / 30.
+  assert.equal(shapes, 87, "every shape the pack holds declares bounds — +1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack, adding the rock, shape 32");
   assert.equal(shortOfItsOwnBounds, 0, "and runBoxOf's box contains every one of them");
   // 18 baked morphs, four at ratio 0 (in the oracle above) and FOURTEEN between
   // their ends, every one of which has interpolated bounds looser than its
@@ -1353,7 +1362,9 @@ test("pathBoxOf reads every path in the pack, and the STROKE PAD is what keeps 2
   assert.equal(looserMidMorph, 14, "every mid-morph shape's interpolated bounds run looser than its geometry");
   // 23 -> 27 on 2026-09-22: four of the bolt's five new shapes are STROKED lines, and the old 56 are unchanged.
   // 27 -> 30 the same day, when `fireball_combat` joined: three of its seven new shapes are stroked.
-  assert.equal(savedByThePad, 30, "30 of which only because the stroke width is added");
+  // 30 -> 31 on 2026-09-23, when `boulder_combat` joined: its one new shape, the rock (32), carries two
+  // 2-wide strokes and is saved by the pad (probed by shape id in a scratch copy of this walk).
+  assert.equal(savedByThePad, 31, "31 of which only because the stroke width is added — +1 on 2026-09-23: boulder_combat (sprite 33 + its explosion child 27) joined the pack, and its rock, shape 32, is stroked");
 
   // And the pad is read off the OPERATION, so a wider stroke moves the box.
   const stroked = [{ d: "M0 0L10 0L10 10L0 10Z", matrix: identity, strokeWidth: 6 }];
