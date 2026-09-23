@@ -74,7 +74,7 @@ import {
   buildArenaLayout, CommandKind, LabelProvenance, presentArenaConstruction, presentResolvedEvents,
   SS2_STATIC_MAP_BINDINGS
 } from "../src/adapter/index.js";
-import { applyCommands, emptyScene, timelineFor } from "../src/render/index.js";
+import { allUnmappedLabels, applyCommands, clipLabelsFor, emptyScene, timelineFor } from "../src/render/index.js";
 import {
   SS2_INVENTORY_EMPTY, SS2_REJUVENATE, SS2_RESOURCE_DEFAULTS, SS2_RESOURCE_NAMES, Ss2ActionType, VANILLA_PHASE_LABEL,
   createSs2TeamRules, ss2Combatant, ss2TeamRules
@@ -743,13 +743,28 @@ test("a presented rejuvenate plays `Rejuvinate` on the caster, MAP_NAMED, and no
   assert.doesNotThrow(() => applyCommands(constructed, commands));
 });
 
-test("KNOWN GAP, NOT BUILT HERE: `Rejuvinate` has no timeline family yet, so it draws the `unknown` schedule", () => {
-  // The clip's label in the build is lowercase `rejuvinate` (frames 2169-2199,
-  // battle map §cast_rejuvinate) and it is still on the declared-unplayed list.
-  // A verb is not a family (`src/render/clip-labels.js`, `unbuiltSpells`): it
-  // leaves that list when `FAMILY_LABELS` and `familyOf` learn it, which this
-  // change does not do. Pinned so the day it is wired, this test says so.
-  assert.equal(timelineFor("Rejuvinate", { role: "actor" }).recognised, false);
+test("`Rejuvinate` resolves to a family that can DRAW it, for the build's own length", () => {
+  // ~~KNOWN GAP, NOT BUILT HERE: `Rejuvinate` has no timeline family yet, so it
+  // draws the `unknown` schedule~~ — this test's title until the family landed,
+  // the same day as the verb. A verb is not a family (`unbuiltSpells` in
+  // `src/render/clip-labels.js`); the pin was written so the day it was wired
+  // this test would say so, and it did.
+  //
+  // ► **TWO SPELLINGS OF ONE LABEL, AND THE EVENT CARRIES THE BUILD'S CALL.**
+  //   The arm passes `"Rejuvinate"` (`+0x8ded`); the fighter clip's `FrameLabel`
+  //   is lowercase `rejuvinate` (frames 2169-2199). AVM1's label lookup ignores
+  //   case, so the build reaches one with the other; `familyOf` matches the
+  //   string the event carries, and the rig and the sound find the clip by the
+  //   lower-cased label, as they find `Cast2` by `cast2`.
+  const timeline = timelineFor("Rejuvinate", { role: "actor" });
+  assert.equal(timeline.recognised, true, "Rejuvinate must not fall to the `unknown` schedule");
+  assert.equal(timeline.family, "rejuvinate");
+  assert.ok(clipLabelsFor(timeline.family).includes("rejuvinate"));
+  // Frames 2169-2199 with the `struck = true; Stop` at 2199: 31 frames at
+  // 30 fps is 1,033 ms = 8.61 beats of 120 ms, and the nearest beat is 9 =
+  // 1,080 ms — the rule `Cast2`'s 21 -> 6 and `drink_potion`'s 24 -> 7 follow.
+  assert.equal(timeline.durationMs, 1080);
+  assert.equal(new Set(allUnmappedLabels()).has("rejuvinate"), false, "played now, so no longer declared unplayed");
 });
 
 /* ------------------------------------------------------------------ *

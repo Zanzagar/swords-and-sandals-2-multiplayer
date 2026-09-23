@@ -496,9 +496,11 @@ test("drink_potion resolves to a family that can DRAW it, for the build's own le
 test("drink_potion is PLAYED now, so it leaves the declared-unplayed list", () => {
   const unplayed = new Set(allUnmappedLabels());
   assert.equal(unplayed.has("drink_potion"), false);
-  // The two spells still without a verb stay.
-  assert.ok(unplayed.has("colossus"));
-  assert.ok(unplayed.has("rejuvinate"));
+  // ~~The two spells still without a verb stay.~~ Both got a verb and then a
+  // family on 2026-09-22 (`test/ss2-rejuvenate.test.js`,
+  // `test/ss2-stat-spells.test.js`), so no spell clip is declared unplayed now.
+  assert.equal(unplayed.has("colossus"), false);
+  assert.equal(unplayed.has("rejuvinate"), false);
 });
 
 /* ------------------------------------------------------------------ *

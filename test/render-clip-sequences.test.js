@@ -33,7 +33,8 @@ import {
   ClipSequenceError,
   clipSequenceFor,
   isSequencedLabel,
-  sequenceBeatsFor
+  sequenceBeatsFor,
+  SHORT_RUNS
 } from "../src/render/clip-sequences.js";
 import { allClipLabels, allUnmappedLabels, clipLabelsFor } from "../src/render/clip-labels.js";
 import { animationFor, figurePackFrom } from "../src/render/extracted-figure.js";
@@ -540,4 +541,58 @@ test("the five dispatched runs really do double the art a gladiator is shown", (
   assert.equal(drawn("hurt", "hurt9"), 18, "the continuation dispatched on its own plays alone");
   assert.equal(drawn("knockback", "knockback"), 19);
   assert.equal(drawn("condition:burning", "burning"), 32, "two frames plus the cycle, twice");
+});
+
+/* ------------------------------------------------------------------ *
+ * THE OTHER DIRECTION: A LABEL THE BUILD STOPS SHORT OF ITS SPAN
+ * ------------------------------------------------------------------ */
+
+/** The victim clip as the extractor cuts it: 23 frames, the last six EMPTY. */
+function fatKidAsExtracted() {
+  const kid = clip("little_fat_kid", { poses: 23, firstFrame: 2200 });
+  kid.poses = kid.poses.map((pose, index) => (index < 17 ? pose : []));
+  return kid;
+}
+
+test("A LABEL THE BUILD STOPS SHORT OF DRAWS ONLY WHAT THE BUILD PLAYS, not the empty frames after its Stop", () => {
+  // ► **THE MIRROR OF A RUN-ON, and the victim VANISHED without it.**
+  //   `little_fat_kid` is the fighter clip's last label, so its span runs to
+  //   the clip's end at 2222 — but the build stops at 2216
+  //   (`struck = true; Stop`), and the six frames after it hold no
+  //   placements at all. Stretched over the schedule whole, the last quarter
+  //   of the performance drew nothing, and an empty pose is still "drawable".
+  const pack = packOf({ little_fat_kid: fatKidAsExtracted() });
+  const chosen = animationFor(pack, { family: "little_fat_kid", label: "little_fat_kid" });
+  assert.equal(chosen.label, "little_fat_kid");
+  assert.equal(chosen.animation.poses.length, 17, "2200-2216, the frames the build plays");
+  assert.equal(chosen.animation.limbs.length, 17, "the limb table must stay index-aligned with the poses");
+  assert.equal(chosen.animation.lastFrame, 2216, "the build's stop, so `face.js`'s frame numbers stay absolute");
+  assert.ok(chosen.animation.poses.every((pose) => pose.length > 0), "no empty pose is left to draw");
+  assert.equal(animationFor(pack, { family: "little_fat_kid", label: "little_fat_kid" }).animation, chosen.animation,
+    "built once, for the drawability cache, as the runs are");
+
+  // A pack that already ends at the stop is left exactly as it is.
+  const exact = clip("little_fat_kid", { poses: 17, firstFrame: 2200 });
+  const fromExact = animationFor(packOf({ little_fat_kid: exact }), { family: "little_fat_kid", label: "little_fat_kid" });
+  assert.equal(fromExact.animation.poses.length, 17);
+});
+
+test("the build's stop falls exactly where the extracted pack's frames go empty", () => {
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  // The cross-check that the table and the pack describe the same frames: the
+  // kept frames end on art, and every frame cut is one the extractor left
+  // empty — so the trim removes nothing the build would have shown.
+  const raw = REAL_ANIMATIONS.little_fat_kid;
+  assert.equal(raw.firstFrame, 2200);
+  assert.equal(raw.lastFrame, 2222, "the extractor cuts at the clip's end, past the build's stop");
+  assert.ok(raw.poses[16].length > 0, "frame 2216, the stop, carries art");
+  assert.ok(raw.poses.slice(17).every((pose) => pose.length === 0), "frames 2217-2222 are empty");
+  const drawn = animationFor(REAL_PACK, { family: "little_fat_kid", label: "little_fat_kid" }).animation;
+  assert.equal(drawn.poses.length, 17);
+  assert.equal(drawn.lastFrame, 2216);
+  assert.equal(drawn.lastFrame, SHORT_RUNS.little_fat_kid.endsAt, "the table's stop and the frames drawn agree");
+  assert.equal(raw.firstFrame, SHORT_RUNS.little_fat_kid.firstFrame);
 });

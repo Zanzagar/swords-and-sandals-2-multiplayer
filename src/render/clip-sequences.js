@@ -303,6 +303,37 @@ export const CLIP_SEQUENCES = Object.freeze({
 });
 
 /**
+ * ENTRY LABEL -> the frames the build plays, where that is FEWER than the pack
+ * holds — the mirror of a run-on, and one label has it.
+ *
+ * ► **`little_fat_kid` IS THE FIGHTER CLIP'S LAST LABEL, so nothing after it
+ *   bounds its span**: the extractor cuts it to the clip's end, 2200-2222, and
+ *   `tools/clip-sequences.mjs` prints it as `2200..end  ends 2216  stop`. The
+ *   build's `this.struck = true; Stop` is at 2216
+ *   (`sprite:1241[hero_battle]/frame:2216/DoAction@0x3b2518`), and frames
+ *   2217-2222 carry NO placements in the extracted pack. Drawn whole, the
+ *   victim vanished for the last six of twenty-three poses — an empty pose is
+ *   still "drawable", so nothing reported it.
+ *
+ * Measured against the pack 2026-09-22: of the 101 labels, this is the only
+ * one whose stop precedes the end of its extracted span; every other one stops
+ * on its own last frame or runs on (the table above).
+ *
+ * `frames` is what `extracted-figure.js` keeps; `endsAt` is the build's stop,
+ * for the cross-check against the pack's own `firstFrame`.
+ */
+export const SHORT_RUNS = Object.freeze({
+  little_fat_kid: Object.freeze({ firstFrame: 2200, endsAt: 2216, frames: 17, ending: "stop" })
+});
+
+/** How many frames the build plays from this label when that is fewer than its span, or null. */
+export function shortRunFramesFor(label) {
+  if (typeof label !== "string") return null;
+  const entry = SHORT_RUNS[label.toLowerCase()];
+  return entry ? entry.frames : null;
+}
+
+/**
  * THE LABELS SOME RUN PLAYS AFTER ITS ENTRY, derived from the table above
  * rather than listed a second time.
  *

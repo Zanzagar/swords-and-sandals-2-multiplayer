@@ -669,6 +669,7 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
     "movement:walk", "movement:run", "movement:charge", "movement:jump", "movement:sidestep",
     "attack", "hurt", "knockback", "taunt", "taunted", "ranged", "psyche",
     "stance:psyche", "stance:psyche2", "celebrate", "cast", "magic:lightning", "drink",
+    "rejuvinate", "colossus", "little_fat_kid",
     "condition:burning", "condition:frozen", "condition:poisoned", "condition:life_stolen",
     "death:unknown"
   ];
@@ -690,9 +691,14 @@ test("EVERY one of the fighter's labels is either played or declared unplayed", 
   // was built: it dispatches `Cast1` (`+0x7b30`), which joined the `cast`
   // family behind `cast2`. **83/18 -> 84/17 later still**, when `drink_potion`
   // got its verb: the potion phase dispatches it (`+0x57c6`) and it is the
-  // `drink` family now.
-  assert.equal(mapped.size, 84);
-  assert.equal(declared.size, 17);
+  // `drink` family now. **84/17 -> 87/14 later still**, when the last three
+  // spell clips got families after their verbs: `Rejuvinate` (`+0x8ded`),
+  // `Colossus` (`+0x806f`) and the victim's `little_fat_kid` (`+0x82a2`).
+  // That empties `unbuiltSpells` and `unknown` both.
+  assert.equal(mapped.size, 87);
+  assert.equal(declared.size, 14);
+  assert.deepEqual([...UNMAPPED_CLIP_LABELS.unbuiltSpells], [], "every spell clip on the fighter is played");
+  assert.deepEqual([...UNMAPPED_CLIP_LABELS.unknown], [], "and no label is left unclassified");
   assert.equal(mapped.size + declared.size, 101, "the fighter clip's own label count");
 
   // ► **THE ENTRY IS FIRST IN ITS FAMILY, and the order is what `animationFor`

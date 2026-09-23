@@ -267,6 +267,67 @@ const FAMILY_LABELS = Object.freeze({
   //   in `animationFor` and `chooseSound`, so `Cast1` draws and sounds as
   //   itself.
   cast: Object.freeze(["cast2", "cast1"]),
+  /**
+   * ► **THE REFILL'S OWN CLIP, LEFT `unbuiltSpells` ON 2026-09-22 — the day the
+   *   verb shipped (8ff985d), in a follow-up change and in the order the list
+   *   prescribes**: family here, `familyOf` in `timeline.js`, and the binding.
+   *   **The binding needed no edit**: since the bolts, `SS2_STATIC_MAP_BINDINGS`
+   *   binds a lone `casterClip` by the FIELD, so `Rejuvinate` arrived MAP_NAMED
+   *   the day the verb did. It was the family that was missing.
+   *
+   * ► **TWO SPELLINGS OF ONE LABEL.** The arm calls
+   *   `attacker.gotoAndPlay("Rejuvinate")` at `+0x8ded`, capital R, while the
+   *   fighter clip's `FrameLabel` is lowercase `rejuvinate` (frames 2169-2199,
+   *   `struck = true; Stop` at 2199). AVM1 label lookup ignores case —
+   *   `clip-sequences.js` records the same thing for `Hurt8` — so the entry
+   *   here is the pack's lower-cased key and `familyOf` matches the capital the
+   *   event carries.
+   *
+   * ► **ITS OWN FAMILY AND NOT `cast`**, for the length: 31 frames is nine
+   *   beats against `cast`'s six. It is not a gesture that shares a schedule,
+   *   which is the test `cast1` passed to join `cast`.
+   */
+  rejuvinate: Object.freeze(["rejuvinate"]),
+  /**
+   * ► **THE COLOSSUS'S OWN CLIP, LEFT `unbuiltSpells` ON 2026-09-22 after its
+   *   verb (d551c57)**, the same way and for the same reason as `rejuvinate`
+   *   above: the event carried `casterClip: "Colossus"` from the verb's first
+   *   commit and the binding passed it through MAP_NAMED; `familyOf` did not
+   *   know it. `attacker.gotoAndPlay("Colossus")` at `+0x806f`, frames
+   *   2147-2168, `struck = true; Stop` at 2168. Silent in the build — no
+   *   `StartSound` — so silent here, derived from the bindings as `block` is.
+   *
+   * ► **ITS OWN FAMILY, THOUGH ITS SIX BEATS ARE `cast`'s.** 22 frames rounds
+   *   to the same six beats as `Cast1` and `Cast2`, which is the test `cast1`
+   *   passed to join `cast`. It is kept apart for the reason the two
+   *   `stance:psyche*` families are: it is a different clip that should not
+   *   READ like the generic cast on a machine without the pack, where the
+   *   authored pose is all there is. The rig draws its own clip either way.
+   *
+   * ► **THE GROWTH IS NOT THIS CLIP.** The caster's swell to 150% is the arm's
+   *   own `_yscale` write every tick (`+0x80e7`), not a frame of this clip, so
+   *   it is not drawn here — see `SS2_STAT_SPELLS` in `ss2-rules.js`.
+   */
+  colossus: Object.freeze(["colossus"]),
+  /**
+   * ► **THE LITTLE FAT KID'S VICTIM CLIP — the one spell clip played on the
+   *   DEFENDER by name, and until 2026-09-22 the one label in the `unknown`
+   *   bucket.** `defender.gotoAndPlay("little_fat_kid")` at `+0x82a2`; the
+   *   caster plays `Cast2` (`+0x8267`), which `cast` already draws. The verb
+   *   (d551c57) carries it as `victimClip` and the binding plays it on the
+   *   target, MAP_NAMED, by the two-clip rule the bolts introduced.
+   *
+   * ► **THE BUILD PLAYS LESS OF IT THAN THE PACK HOLDS.** It is the fighter
+   *   clip's last label, so its span runs to the clip's end at 2222; the
+   *   build's `struck = true; Stop` is at 2216, and frames 2217-2222 are EMPTY
+   *   in the extracted pack. Drawn whole, the victim would vanish for the last
+   *   six of twenty-three poses. `clip-sequences.js` carries the stop
+   *   (`SHORT_RUNS`) and `animationFor` draws the seventeen the build plays.
+   *
+   * Not `magic:` like `lightning`: that one is a `damage_method` delivered
+   * through `magic_damage_character`, and this is a plain `gotoAndPlay`.
+   */
+  little_fat_kid: Object.freeze(["little_fat_kid"]),
   "magic:lightning": Object.freeze(["lightning"]),
   ranged: Object.freeze(["bombard", "snipe"]),
 
@@ -461,12 +522,32 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
     // `cast2` and `lightning` left on 2026-09-22; see the `cast` and
     // `magic:lightning` families above. `cast1` left the same day with the gale,
     // and `drink_potion` later still with its own verb — see the `drink` family.
-    "colossus", "rejuvinate"
+    // `rejuvinate` left with its family the same day, after its verb (8ff985d),
+    // and `colossus` with its own, after its verb (d551c57). **The list is
+    // EMPTY now: every spell clip on the fighter is played.** Kept rather than
+    // deleted, as `supersededBySibling` is, so the reconciliation shows the
+    // category was considered and came to nothing.
   ]),
 
   /**
-   * VICTORY AND SURRENDER. Six crowd-facing celebrations and two yields, none
-   * of which this engine can express: a bout ends and nobody gloats.
+   * VICTORY AND SURRENDER. ~~Six crowd-facing celebrations and two yields, none
+   * of which this engine can express: a bout ends and nobody gloats.~~
+   *
+   * ► **HALF RIGHT — corrected 2026-09-22 from the bytes, and nothing moved.**
+   *   The two YIELDS are outcomes: overlay frames 62 (`combatwon`) and 74
+   *   (`combatlost`) play `Yield1`/`Yield2` (`DoAction@0x24a1c5` `+0x057e`,
+   *   `+0x05b9`; `DoAction@0x24a8ba` `+0x04d2`, `+0x050d`). **The six
+   *   `wincrowd` clips are NOT a bout's end: they are an IN-BOUT ACTION's.**
+   *   The `wincrowd` phase (`sprite:862[overlay]/frame:52/DoAction@0x240c7f`
+   *   `+0x4fcf`) sets `crowd_action = round(hero.charisma / 2)` and
+   *   `staminacost = 3`, seeds `attacker.wincrowd_move` at a random 1-6 while it
+   *   is not positive, steps it by one BEFORE each play and wraps 7 to 1, and plays
+   *   `gotoAndPlay("wincrowd" + wincrowd_move)` (`+0x50de`-`+0x5107`); the
+   *   villain's AI chooses it (`villaindecisionA = "wincrowd"`,
+   *   `DoAction@0x23f835` `+0x0bd3`, `+0x0ec2`). `cast_adulation` (item 47)
+   *   plays `wincrowd1` too (`+0x7732`). Neither verb exists in this engine,
+   *   so all eight stay here; the six leave when the `wincrowd` verb and a
+   *   family for its clips land together.
    */
   unbuiltOutcome: Object.freeze([
     "wincrowd1", "wincrowd2", "wincrowd3", "wincrowd4", "wincrowd5", "wincrowd6",
@@ -489,8 +570,15 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    */
   supersededBySibling: Object.freeze([]),
 
-  /** Unclassified, and honestly so. */
-  unknown: Object.freeze(["little_fat_kid"])
+  /**
+   * Unclassified, and honestly so.
+   *
+   * ► **EMPTY SINCE 2026-09-22.** Its one label, `little_fat_kid`, is the
+   *   little fat kid spell's VICTIM clip (`+0x82a2`) and the family of that
+   *   name above plays it. Kept, empty, for the reason `supersededBySibling`
+   *   is.
+   */
+  unknown: Object.freeze([])
 });
 
 /** Every label named above, flattened. */

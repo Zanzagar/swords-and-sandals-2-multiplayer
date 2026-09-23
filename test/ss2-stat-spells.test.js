@@ -57,7 +57,7 @@ import {
   presentResolvedEvents, SS2_STATIC_MAP_BINDINGS
 } from "../src/adapter/index.js";
 import { demoSide } from "../tools/arena/roster.js";
-import { applyCommands, emptyScene } from "../src/render/index.js";
+import { allUnmappedLabels, applyCommands, clipLabelsFor, emptyScene, timelineFor } from "../src/render/index.js";
 import {
   SS2_INVENTORY_EMPTY, SS2_RESOURCE_DEFAULTS, SS2_RESOURCE_NAMES, SS2_STAT_SPELLS, SS2_WRITTEN_RESOURCES,
   SS2_TAUNT, Ss2ActionType, VANILLA_PHASE_LABEL, createSs2TeamRules, ss2ActiveDamagePair, ss2BattleValues,
@@ -593,6 +593,34 @@ test("each cast presents the build's own clips, MAP_NAMED, moves nobody and leav
     assert.deepEqual(commands.filter((command) => command.kind === CommandKind.MOVE_CLIP), [], `${type}: nobody moves`);
     assert.doesNotThrow(() => applyCommands(constructed, commands));
   }
+});
+
+test("`Colossus` resolves to a family that can DRAW it, for the build's own length", () => {
+  // The verb shipped (d551c57) with the clip bound MAP_NAMED and no family, so
+  // the caster played the `unknown` schedule. `attacker.gotoAndPlay("Colossus")`
+  // at `+0x806f`; the clip is frames 2147-2168 with `struck = true; Stop` at
+  // 2168 — 22 frames at 30 fps is 733 ms = 6.11 beats of 120 ms, and the
+  // nearest beat is 6 = 720 ms, the rounding `Cast2`'s 21 frames get.
+  const timeline = timelineFor("Colossus", { role: "actor" });
+  assert.equal(timeline.recognised, true, "Colossus must not fall to the `unknown` schedule");
+  assert.equal(timeline.family, "colossus");
+  assert.ok(clipLabelsFor(timeline.family).includes("colossus"));
+  assert.equal(timeline.durationMs, 720);
+  assert.equal(new Set(allUnmappedLabels()).has("colossus"), false, "played now, so no longer declared unplayed");
+});
+
+test("the VICTIM's `little_fat_kid` resolves to a family that can DRAW it, for the length the build PLAYS", () => {
+  // `defender.gotoAndPlay("little_fat_kid")` at `+0x82a2`. The label runs to
+  // the end of the fighter clip, but the build stops at 2216
+  // (`struck = true; Stop`), so it PLAYS 2200-2216: 17 frames at 30 fps is
+  // 567 ms = 4.72 beats of 120 ms, and the nearest beat is 5 = 600 ms.
+  const timeline = timelineFor("little_fat_kid", { role: "target" });
+  assert.equal(timeline.recognised, true, "little_fat_kid must not fall to the `unknown` schedule");
+  assert.equal(timeline.family, "little_fat_kid");
+  assert.ok(clipLabelsFor(timeline.family).includes("little_fat_kid"));
+  assert.equal(timeline.durationMs, 600);
+  assert.equal(new Set(allUnmappedLabels()).has("little_fat_kid"), false,
+    "classified and played now, so it leaves the declared-unplayed `unknown` bucket");
 });
 
 /* ------------------------------------------------------------------ *

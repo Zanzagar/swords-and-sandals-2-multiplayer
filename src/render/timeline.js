@@ -266,6 +266,20 @@ function familyOf(label, role) {
   if (label === "Cast2") return "cast";
   if (label === "Cast1") return "cast";
   if (label === "lightning") return "magic:lightning";
+  // ► **THE REFILL'S CLIP, added 2026-09-22 after its verb (8ff985d) shipped
+  //   drawing the `unknown` schedule.** `attacker.gotoAndPlay("Rejuvinate")` at
+  //   `+0x8ded` — capital R, which is the string the event carries — while the
+  //   clip's own `FrameLabel` is lowercase `rejuvinate` (2169-2199). AVM1 finds
+  //   one with the other; this matches the build's CALL, exactly as `Cast2` is
+  //   matched, and the rig and the sound lower-case it to find the clip.
+  if (label === "Rejuvinate") return "rejuvinate";
+  // The colossus's clip, the same day and for the same reason, after its verb
+  // (d551c57): `attacker.gotoAndPlay("Colossus")` at `+0x806f`, frames
+  // 2147-2168 — the call and the `FrameLabel` spelled alike this time.
+  if (label === "Colossus") return "colossus";
+  // And the little fat kid's VICTIM clip, played on the defender by name:
+  // `defender.gotoAndPlay("little_fat_kid")` at `+0x82a2`.
+  if (label === "little_fat_kid") return "little_fat_kid";
   // ► **TWO PSYCHE FAMILIES AND NOT ONE, BECAUSE THE THIRD CLIP IS LONGER AND
   //   IS THE ONE THAT SWINGS.** In the extracted pack `psyche_up` runs frames
   //   1609-1617 and `psyche_up2` 1627-1635 — nine each — while `psyche_up3` is
@@ -586,6 +600,52 @@ const FAMILIES = Object.freeze({
     { at: 0, pose: {} },
     { at: 0.35, pose: { armSwing: -0.9, lean: -0.3, bob: 0.25 } },
     { at: 0.6, pose: { armSwing: 0.8, lean: 0.35, bob: 0.1 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The refill — `rejuvinate`, frames 2169-2199 ending in `struck = true;
+   * Stop`: 31 frames at 30 fps is 1,033 ms, 8.61 beats, and the nearest beat
+   * is NINE = 1,080 ms, the rule `cast` and `drink` follow. The POSES are
+   * authored — arms raised, lifted onto the toes, then settling — and the
+   * extracted rig's own `rejuvinate` clip overrides them. Frame 2169 also
+   * sets the face (`head.eyes` "Large", `head.mouth` "happy"), which
+   * `face.js` reads from the pack's bindings by label; nothing here.
+   */
+  rejuvinate: () => schedule("rejuvinate", 9, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: -0.8, lean: -0.2, bob: 0.35 } },
+    { at: 0.6, pose: { armSwing: -1, lean: -0.3, bob: 0.5, legSpread: 0.3 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The colossus — `Colossus`, frames 2147-2168 ending in `struck = true;
+   * Stop`: 22 frames at 30 fps is 733 ms, 6.11 beats, so SIX = 720 ms, the
+   * same six `Cast2`'s 21 and `Cast1`'s 23 round to. The POSES are authored — a
+   * flex, arms driven down and out, feet planted wide — and the extracted rig's
+   * own `colossus` clip overrides them. The caster's GROWTH is not in this
+   * schedule: it is the arm's `_yscale` write, not a frame of the clip.
+   */
+  colossus: () => schedule("colossus", 6, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: -0.6, lean: -0.15, legSpread: 0.5, bob: -0.2 } },
+    { at: 0.65, pose: { armSwing: 0.4, lean: 0.1, legSpread: 0.8, bob: 0.3 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The little fat kid, on its VICTIM. The clip's span runs to the fighter
+   * clip's end (2222) but the build stops at 2216 (`struck = true; Stop`), so
+   * the length is what it PLAYS: 2200-2216, 17 frames = 567 ms = 4.72 beats,
+   * so FIVE = 600 ms. The POSES are authored — a crouch, drawn in — and the
+   * extracted rig's own clip overrides them. The victim's SHRINK to 50% is the
+   * arm's `_yscale` snap, not a frame of the clip, and is not drawn here.
+   */
+  little_fat_kid: () => schedule("little_fat_kid", 5, [
+    { at: 0, pose: {} },
+    { at: 0.35, pose: { bob: -0.6, lean: -0.2, legSpread: 0.2, armSwing: -0.3 } },
+    { at: 0.7, pose: { bob: -0.45, lean: 0.1, legSpread: 0.3 } },
     { at: 1, pose: {} }
   ]),
 

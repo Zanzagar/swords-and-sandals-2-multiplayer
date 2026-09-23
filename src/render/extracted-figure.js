@@ -122,7 +122,7 @@
  */
 
 import { clipLabelsFor, directionalLabel } from "./clip-labels.js";
-import { clipSequenceFor } from "./clip-sequences.js";
+import { clipSequenceFor, shortRunFramesFor } from "./clip-sequences.js";
 import {
   applyColourTransform,
   applyColourTransformAlpha,
@@ -306,6 +306,9 @@ function isDrawable(pack, animation) {
  *
  * Returns null when a member is missing or undrawable, so a partial pack falls
  * back to the entry clip alone rather than to nothing.
+ *
+ * A label that runs on NOWHERE may still play LESS than its span — see
+ * `shortRunAnimation` below, which answers for it through the same cache.
  */
 function sequencedAnimation(pack, name) {
   if (pack.sequenced.has(name)) return pack.sequenced.get(name);
@@ -353,9 +356,36 @@ function sequencedAnimation(pack, name) {
         playsSequence: Object.freeze([...members])
       });
     }
+  } else {
+    built = shortRunAnimation(pack, name);
   }
   pack.sequenced.set(name, built);
   return built;
+}
+
+/**
+ * THE OTHER DIRECTION: a label whose build `Stop` comes BEFORE the end of the
+ * span the extractor cut, trimmed to the frames the build plays — or null when
+ * the label is not one (`SHORT_RUNS` in `clip-sequences.js`) or the pack
+ * already ends at the stop.
+ *
+ * ► **ONE LABEL, `little_fat_kid`, AND THE VICTIM VANISHED WITHOUT THIS.** Its
+ *   span runs to the clip's end at 2222; the build stops at 2216, and the six
+ *   frames after it are empty. Stretched over the schedule whole, the last
+ *   quarter of the performance drew nothing. Sliced, not rebuilt: `lastFrame`
+ *   moves to the stop so `face.js`'s absolute frame numbers stay true, and the
+ *   bounds are kept because the frames cut hold no art to widen them.
+ */
+function shortRunAnimation(pack, name) {
+  const frames = shortRunFramesFor(name);
+  const animation = pack.animations[name];
+  if (frames === null || !isDrawable(pack, animation) || animation.poses.length <= frames) return null;
+  return Object.freeze({
+    ...animation,
+    lastFrame: Number.isFinite(animation.firstFrame) ? animation.firstFrame + frames - 1 : animation.lastFrame,
+    poses: animation.poses.slice(0, frames),
+    limbs: Array.isArray(animation.limbs) ? animation.limbs.slice(0, frames) : animation.limbs
+  });
 }
 
 /**
