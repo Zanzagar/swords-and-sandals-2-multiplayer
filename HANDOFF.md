@@ -2287,9 +2287,14 @@ landed tonight.
   4** (item tables `:472`/`:482`), so their reach is ~262 and they walked
   straight past it — reproduced, all three melee verbs at 262 units with a bow
   drawn. **And I then made the same mistake one revision later**, refusing
-  `equipped_weapon == 2` outright because root frame 221 starts everyone in
-  melee mode — true, and still keyed on the wrong thing, because a state the
-  build reaches on turn two is one a capture can observe.
+  `equipped_weapon == 2` outright because root frame 221 starts ~~everyone~~
+  in melee mode — ~~true~~ **true of the HERO ONLY (corrected 2026-09-23 by a
+  derivation and a write-nothing refuter: `root/frame:221 DoAction@0x671acd`
+  `+0x056f`-`+0x05a5` writes the hero's `equipped_weapon`/`using_bow` and
+  nothing on the villain; three tournament bosses enter with the bow equipped
+  and `using_bow` unset, normalised by the owner's decision above)**, and
+  still keyed on the wrong thing, because a state the build reaches on turn
+  two is one a capture can observe.
 
 ► **THE SOUND HAD BEEN PICKING ITS OWN CLIP SINCE SOUND LANDED — the SEVENTH
   instance.** `animationFor` has always preferred the engine's own label over
@@ -2778,8 +2783,11 @@ priced on the weapon with strength in the denominator — and **both gated behin
     - **A THIRD reach gate exists and this repository did not hold it** —
       `sprite:862/frame:52/DoAction@0x23f835` `+0x0356`: the VILLAIN's AI gate is
       `(equipped_weapon == 1 && fightdistance < villain.weapon_range) ||
-      (equipped_weapon == 2 && fightdistance < 200)`. **The two sides do not
-      share a gate in vanilla.**
+      (equipped_weapon == 2 && ~~fightdistance < 200~~ !(fightdistance < 200))`
+      — **the bow arm is a MINIMUM, corrected 2026-09-23 here at the site: the
+      bytes are `Push 200; Less2; Not` (`+0x03ca`-`+0x03d3`), as
+      `src/team/ss2-rules.js` already has it.** **The two sides do not share a
+      gate in vanilla.**
     - **`[5]` runs 1, 2, 3, 4 and 100** — 18 ranged rows at 100. The build's
       reach scale is 44 to 4,400, and the sweeps covered 1/2/3 only.
     - **The archive claim is mostly WITHDRAWN.** 3,004 resolve not 3,091; 432 are
