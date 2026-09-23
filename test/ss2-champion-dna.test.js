@@ -36,14 +36,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { combatantById, createTeamBattle } from "../src/team/index.js";
+import {
+  applyAction,
+  chooseAiAction,
+  combatantById,
+  createTeamBattle,
+  currentCombatant,
+  legalActions
+} from "../src/team/index.js";
 import { TeamRuleSetError } from "../src/team/rule-set.js";
 import {
   createSs2TeamRules,
   ss2ActiveDamagePair,
   ss2Combatant,
   ss2InBowMode,
-  ss2Reach
+  ss2Reach,
+  Ss2ActionType
 } from "../src/team/ss2-rules.js";
 
 /** `initcharacter`'s index for each field these tests decode. */
@@ -283,5 +291,89 @@ test("OPEN: a champion with the bow drawn and using_bow unwritten fights as an a
     assert.equal(ss2InBowMode(inBattle), true, `${label}: the engine reads the bow as drawn`);
     assert.deepEqual(ss2ActiveDamagePair(inBattle), bow, `${label}: ENGINE fights with the bow pair (the build: ${melee.min_damage}-${melee.max_damage})`);
     assert.equal(ss2Reach(inBattle), bowRange, `${label}: ENGINE reaches with the bow (the build's weapon_range: ${weaponRange})`);
+  }
+});
+
+/**
+ * Two of the TEN champions whose literal carries 0 at index 45 — which_boss 0,
+ * 1, 3, 5, 7, 8, 10, 12, 13 and 18 (`secondary_weapon`, `initcharacter`
+ * `+0x0a01`). Transcribed from the same `unleash_hell` literals as `CHAMPIONS`,
+ * by the same rule: numeric fields only, keyed by DNA index.
+ *
+ * Expected numbers, from `battlevalues` and weapon row 0 (`[5]` = 1):
+ *   secondary_weapon_range = physical_size + 1 * 44                 +0x32aa
+ * which_boss 1: strength 6  -> physical_size 84 -> 128.
+ * which_boss 3: strength 17 -> physical_size 91 -> 135.
+ */
+const NO_SECOND_WEAPON = Object.freeze([
+  {
+    whichBoss: 1,
+    at: "+0x1904",
+    dna: Object.freeze({
+      6: 1, 7: 1, 8: 1, 9: 102, 10: 2, 11: 4, 12: 1, 13: 24, 14: 0,
+      16: 6, 17: 3, 18: 1, 19: 3, 20: 3, 21: 2, 22: 5, 23: 1, 24: 5,
+      32: 1, 33: 4, 34: 6, 35: 1, 36: 0, 37: 0, 38: 0, 39: 0, 40: 1,
+      45: 0, 46: 0, 47: 0, 48: 5, 49: 1
+    }),
+    pricedReach: 128
+  },
+  {
+    whichBoss: 3,
+    at: "+0x1a0a",
+    dna: Object.freeze({
+      6: 10, 7: 11, 8: 1, 9: 104, 10: 10, 11: 10, 12: 10, 13: 46, 14: 0,
+      16: 17, 17: 3, 18: 9, 19: 2, 20: 7, 21: 3, 22: 9, 23: 17, 24: 10,
+      32: 1, 33: 3, 34: 7, 35: 1, 36: 6, 37: 0, 38: 0, 39: 0, 40: 2,
+      45: 0, 46: 1, 47: 1, 48: 5, 49: 1
+    }),
+    pricedReach: 135
+  }
+]);
+
+/**
+ * ► **A 0 IN THE SECONDARY SLOT IS NO WEAPON, AND IT USED TO BE A BOW.** The
+ *   build's every swap gate asks `secondary_weapon == 0` — the hero's button
+ *   (`sprite:862/frame:1/DoAction@0x2378cc` `+0x0e4a`-`+0x0e89`) and the
+ *   villain's swap roll (`DoAction@0x23f835` `+0x0f14`-`+0x0f27`) — while
+ *   `battlevalues` prices the slot off weapon row 0 regardless, so the champion
+ *   carries a reach. The engine offered the swap on the reach, the AI drew
+ *   row 0 at range, and a mirror bout of either champion below ran to 400
+ *   actions of taunts with no winner (measured 2026-09-23, seed 1).
+ */
+test("a champion whose secondary slot holds 0 is never offered the swap, and a mirror bout of him settles", () => {
+  for (const { whichBoss, at, dna, pricedReach } of NO_SECOND_WEAPON) {
+    const label = `which_boss ${whichBoss} (${at})`;
+    const record = decode(dna);
+    assert.equal(record.secondary_weapon, 0, `${label}: index 45 is 0`);
+    const build = (id) => ss2Combatant(record, { id, name: id, controller: "ai", weaponFrom: "unleash_hell" });
+    const battle = createTeamBattle({
+      seed: 1,
+      rules: createSs2TeamRules(),
+      teams: [
+        { id: "red", name: "red", combatants: [build("red-1")] },
+        { id: "blue", name: "blue", combatants: [build("blue-1")] }
+      ]
+    });
+    // The premise: the slot is priced, so only the id can say "no bow".
+    assert.equal(
+      combatantById(battle, "red-1").resources.secondary_weapon_range.value,
+      pricedReach,
+      `${label}: battlevalues prices row 0 as a reach`
+    );
+
+    let actions = 0;
+    while (!battle.result && actions < 400) {
+      const actor = currentCombatant(battle);
+      assert.ok(
+        !legalActions(battle, actor.id).some((option) => option.type === Ss2ActionType.SWAP_WEAPONS),
+        `${label}: ${actor.id} is offered a swap to a weapon it does not have, at action ${actions}`
+      );
+      applyAction(battle, { actorId: actor.id, ...chooseAiAction(battle) });
+      actions += 1;
+    }
+    assert.notEqual(battle.result, null, `${label}: the mirror bout settles inside 400 actions`);
+    for (const id of ["red-1", "blue-1"]) {
+      assert.equal(combatantById(battle, id).resources.equipped_weapon.value, 1, `${label}: ${id} never drew`);
+    }
   }
 });

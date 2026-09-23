@@ -639,8 +639,10 @@ test("the swap is offered on EVERY frame, and only to a gladiator that owns a bo
   assert.ok(types.includes(Ss2ActionType.SWAP_WEAPONS), "and the swap is still there");
 
   // The build hides its own swap button when there is no secondary weapon
-  // (`+0x0e77`-`+0x0e96`); here the test is a reach above zero, because
-  // equipment identity does not survive into the resolver.
+  // (`+0x0e77`-`+0x0e96`); ~~here the test is a reach above zero, because
+  // equipment identity does not survive into the resolver~~ — **corrected
+  // 2026-09-23**: the id survives (a declared resource since 2026-09-14) and a
+  // stated 0 is priced WITH a reach, so the engine asks both; see the next test.
   const empty = staged({
     red: [{ fields: gladiator(), id: "red-1", x: -30, y: 200 }],
     blue: [{ fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x: 30, y: 200 }]
@@ -649,6 +651,75 @@ test("the swap is offered on EVERY frame, and only to a gladiator that owns a bo
     !typesOf(empty, "red-1").includes(Ss2ActionType.SWAP_WEAPONS),
     "a gladiator with an empty secondary slot is never offered a weapon it does not have"
   );
+});
+
+test("a STATED secondary_weapon 0 is the build's own 'no second weapon': never offered the swap, and the AI never takes it", () => {
+  // ► **THE BUILD ASKS `secondary_weapon == 0` EVERY TIME, AND NEVER ASKS THE
+  //   REACH.** The hero's swap button is hidden on
+  //   `(ammo_left <= 0 && secondary_weapon != 0) || secondary_weapon == 0`
+  //   (`sprite:862/frame:1/DoAction@0x2378cc`, `Equals2` at `+0x0e5c` and
+  //   `+0x0e89`, `_visible = false` at `+0x0e90`); the villain's swap roll needs
+  //   `secondary_weapon != 0` (`DoAction@0x23f835` `+0x0f14`-`+0x0f27`); both
+  //   character sheets print "no ranged weapon" on the same `== 0`.
+  //
+  //   `battlevalues` meanwhile prices the slot UNCONDITIONALLY off
+  //   `_root["weapon" + secondary_weapon]` (`+0x323c`-`+0x3326`), so a 0 reads
+  //   weapon row 0 and comes out with a reach. Every randomised gladiator
+  //   starts at 0 (`randomise_gladiator` `+0x2be9`), and so do ten of the
+  //   eighteen `unleash_hell` literals — so a reach above zero cannot be the
+  //   test for owning a bow.
+  const foe = (x) => ({ fields: gladiator({ gladiator_dir: "left" }), id: "blue-1", x, y: 200 });
+  const far = staged({
+    red: [{ fields: gladiator({ secondary_weapon: 0 }), id: "red-1", x: -250, y: 200 }],
+    blue: [foe(250)]
+  });
+  const bag = combatantById(far, "red-1").resources;
+  // The premise, measured rather than assumed: the slot IS priced. strength 9
+  // -> physical_size 80 + round(9 / 1.5) = 86 (`+0x30f1`); weapon row 0's `[5]`
+  // is 1, so 86 + 1 * 44 = 130 (`+0x32aa`). Reach alone cannot tell.
+  assert.equal(bag.secondary_weapon.value, 0, "the id survives into the bag");
+  assert.equal(bag.secondary_weapon_range.value, 130, "and battlevalues prices row 0 as a reach");
+
+  assert.ok(
+    !typesOf(far, "red-1").includes(Ss2ActionType.SWAP_WEAPONS),
+    "longrange_warrior: no swap to a weapon the slot does not hold"
+  );
+  for (let guard = 0; guard < 4 && currentCombatant(far)?.id !== "red-1"; guard += 1) {
+    const other = currentCombatant(far);
+    applyAction(far, { actorId: other.id, type: Ss2ActionType.REST, targetId: other.id });
+  }
+  assert.equal(currentCombatant(far)?.id, "red-1");
+  assert.notEqual(
+    suggestAction(far, "red-1").type,
+    Ss2ActionType.SWAP_WEAPONS,
+    "nothing is in reach at 500 and it has arrows, which is exactly where the AI draws a real bow"
+  );
+  assert.throws(
+    () => applyAction(far, { actorId: "red-1", type: Ss2ActionType.SWAP_WEAPONS, targetId: "red-1" }),
+    /Illegal action/,
+    "and a submitted swap is refused, not resolved"
+  );
+
+  const near = staged({
+    red: [{ fields: gladiator({ secondary_weapon: 0 }), id: "red-1", x: -30, y: 200 }],
+    blue: [foe(30)]
+  });
+  const nearTypes = typesOf(near, "red-1");
+  assert.ok(nearTypes.includes(Ss2ActionType.QUICK_ATTACK), "this is closerange_warrior");
+  assert.ok(!nearTypes.includes(Ss2ActionType.SWAP_WEAPONS), "closerange_warrior: no swap either");
+
+  // The control: the SAME gladiator with a bow in the slot, at the same spot,
+  // is offered the swap and the AI takes it. The id is the only difference.
+  const armed = staged({
+    red: [{ fields: bowman(), id: "red-1", x: -250, y: 200 }],
+    blue: [foe(250)]
+  });
+  assert.ok(typesOf(armed, "red-1").includes(Ss2ActionType.SWAP_WEAPONS), "a real bow is still offered");
+  for (let guard = 0; guard < 4 && currentCombatant(armed)?.id !== "red-1"; guard += 1) {
+    const other = currentCombatant(armed);
+    applyAction(armed, { actorId: other.id, type: Ss2ActionType.REST, targetId: other.id });
+  }
+  assert.equal(suggestAction(armed, "red-1").type, Ss2ActionType.SWAP_WEAPONS, "and the AI still draws it");
 });
 
 /* ------------------------------------------------------------------ */

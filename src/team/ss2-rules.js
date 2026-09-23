@@ -10672,11 +10672,30 @@ export function createSs2TeamRules({
       //
       //   ► **AND IT IS GATED ON OWNING A BOW, which the build gates the same
       //     way**: the swap button is `_visible = false` when the hero has no
-      //     secondary weapon (`+0x0e77`-`+0x0e96`). The test here is a
+      //     secondary weapon (`+0x0e77`-`+0x0e96`). ~~The test here is a
       //     `secondary_weapon_range` above zero rather than a weapon id,
       //     because equipment identity does not survive into the resolver —
       //     and a zero reach is precisely what `ss2BattleValues` leaves for a
-      //     gladiator whose secondary slot holds nothing.
+      //     gladiator whose secondary slot holds nothing.~~
+      //
+      //     **WRONG FOR A STATED 0, corrected 2026-09-23 from the bytes.** The
+      //     build's "no second weapon" is `secondary_weapon == 0` — the
+      //     button's own test (`Equals2` at `+0x0e5c` and `+0x0e89`), the
+      //     villain's swap roll (`DoAction@0x23f835` `+0x0f14`-`+0x0f27`) and
+      //     both character sheets' "no ranged weapon" line alike. It never
+      //     asks the reach. And `battlevalues` prices the slot unconditionally
+      //     off `_root["weapon" + secondary_weapon]` (`+0x32aa`), so a 0 reads
+      //     weapon row 0 and derives a reach of `physical_size + 44` —
+      //     faithfully, here as there. So "reach above zero" offered a phantom
+      //     bow to every gladiator whose record says 0, which is every
+      //     randomised one (`randomise_gladiator` `+0x2be9`) and ten of the
+      //     eighteen `unleash_hell` literals; the AI drew it at range and
+      //     mirror bouts ran to the cap. **And the id DOES survive now**:
+      //     `secondary_weapon` has been a declared resource since 2026-09-14.
+      //
+      //     So both are asked. A stated 0 is no bow, whatever the reach says;
+      //     a reach of zero is still no bow, for the record that states no id
+      //     at all or states one with `derive: false` and no reach.
       //
       //   **The build never checks that the secondary weapon IS a bow**
       //   (`+0x4d23`, a plain toggle), and neither does this. A gladiator who
@@ -10685,7 +10704,10 @@ export function createSs2TeamRules({
       //   invented — it is unreachable through the shop, since `buyweapon`
       //   routes only the ranged band to the secondary slot
       //   (`assertSs2WeaponPurchasable`).
-      if (resourceValue(view.actor, "secondary_weapon_range", 0) > 0) {
+      if (
+        resourceValue(view.actor, "secondary_weapon", null) !== 0
+        && resourceValue(view.actor, "secondary_weapon_range", 0) > 0
+      ) {
         actions.push({ type: Ss2ActionType.SWAP_WEAPONS, targetId: actorId });
       }
 
