@@ -84,7 +84,9 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
   (2026-09-22, session `c62c201f`, asked in chat with costed options; each
   answer below is binding and is ALSO recorded at its code site).** The
   2026-09-22-1934 handoff's ranked item 1 (five decisions, a-f) is CLOSED, and
-  three more that the session's derivations raised were decided the same night.
+  three more that the session's derivations raised were decided the same night
+  (the arena wall, the villain's decision distance, and how the crowd works in
+  team play — folded into (f) below, so eight bullets carry nine decisions).
   The rule that falls out of all nine: **reproduce the build where every
   combatant is treated alike; where the build treats hero and villain
   differently, the hero's rule is the player's rule and applies to everyone;
@@ -107,7 +109,9 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     starting at the sum of every combatant's level (exactly the build in 1v1),
     fed by every completed phase, clamped 1..100, scaling the purse of every
     member of the winning side; wincrowd uses the ACTOR's own charisma (the
-    build always reads the hero's). In progress at this writing.
+    build always reads the hero's). **Built `cefaf83`** (with `cast_adulation`);
+    the team purse base is the owner's EQUAL SHARE of the losing side's
+    `character_xp` per winner (chosen over the whole pot each, and kill credit).
   - **The arena-wall phase cuts: NOT reproduced** — knockback spillover past
     ±2100, the nudge-into-wall stunlock, the command pull-through. Recorded at
     `SS2_ARENA.clamp` (`77e3f7b`).
