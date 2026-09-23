@@ -21,6 +21,7 @@ a source port draws — the port ships no WAD and reads yours.
 
     node tools/extract-sounds.mjs "<path to your swords_sandals2_download.swf>"
     node tools/extract-figure.mjs "<same path>"          # or no path: it knows the default
+    node tools/extract-champions.mjs "<same path>"       # the tournament bosses, for ?red=&blue= in the arena
 
 The first writes `sound/`: every `DefineSound` in the build, repacked as MP3,
 bound to the animation label it fires under.

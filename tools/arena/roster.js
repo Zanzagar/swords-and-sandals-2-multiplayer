@@ -12,7 +12,17 @@
  * `src/team/ss2-weapon-table.js` omits a withheld name rather than blanking
  * it). Items are addressed by ID only, exactly as they are everywhere else, and
  * the gladiators are called after nothing in particular.
+ *
+ * ► **THE CHAMPIONS AT THE FOOT OF THIS FILE ARE THE EXCEPTION, AND NONE OF
+ *   THEM IS WRITTEN HERE EITHER** (added 2026-09-23). `championSide` builds a
+ *   side from the build's own tournament bosses, but their DNA, names and
+ *   quotes come from the player's OWN install through
+ *   `tools/extract-champions.mjs`, into gitignored `assets/champions/`. This
+ *   file holds the rules for turning an extracted champion into a fighter,
+ *   never a champion.
  */
+
+import { ss2ChampionFromDna } from "../../src/team/ss2-champion-dna.js";
 
 /**
  * A vanilla-shaped gladiator record — the shape `createVanillaBattleHost`
@@ -377,6 +387,219 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = []
       };
       const canonical = ss2Combatant(priced, { id, name, controller: "local", derive: false });
       return { id, controller: "local", vanilla: priced, resources: canonical.resources, clip: { gladiator_dir: facing } };
+    })
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* The build's own champions, from the player's extracted pack          */
+/* ------------------------------------------------------------------ */
+
+/** Where the arena finds the pack, and the one command that makes it. */
+export const CHAMPION_PACK_URL = "/assets/champions/champions.json";
+export const CHAMPION_PACK_COMMAND = "node tools/extract-champions.mjs";
+
+/** Three a side: the arena's rosters and its rank geometry are built for at most three. */
+const CHAMPIONS_PER_SIDE = 3;
+
+/**
+ * `?red=2,4,16&blue=1,3,10` — which `unleash_hell` champion stands in each
+ * slot, by `which_boss`, one to three a side, in slot order. Repeats are
+ * allowed (three of one champion is a fair thing to watch).
+ *
+ * Returns `null` when neither parameter is present, which is today's arena
+ * exactly. Everything else that is not a well-formed request is refused
+ * loudly, naming the parameter at fault, for the reason `demoItemsFrom`
+ * gives: a typo that silently fielded somebody else would look like a
+ * champion playing badly.
+ *
+ * - Both sides must be named: half a champion bout is not a thing to guess.
+ * - `items=` is refused alongside: a kit is the DEMO roster's, and a champion
+ *   carries its own inventory out of its DNA (indices 34-39).
+ * - `teams=` is ignored: each side's size is its list's length.
+ *
+ * Whether a number is a champion at all is the PACK's to say, not this
+ * function's — the extractor finds the branches, and no range is written here.
+ */
+export function championRequestFrom(params) {
+  const has = (name) => Boolean(params) && typeof params.has === "function" && params.has(name);
+  if (!has("red") && !has("blue")) return null;
+  for (const [present, missing] of [["red", "blue"], ["blue", "red"]]) {
+    if (has(present) && !has(missing)) {
+      throw new Error(
+        `${present}= names champions for one side and ${missing}= names none. Name both, e.g. ?red=2,4,16&blue=1,3,10.`
+      );
+    }
+  }
+  if (has("items")) {
+    throw new Error(
+      `items=${params.get("items")} gives the DEMO roster a kit; a champion carries its own inventory from its DNA. ` +
+      "Drop items= to watch champions, or drop red=/blue= to use the kit."
+    );
+  }
+  const side = (name) => {
+    const raw = String(params.get(name) ?? "");
+    if (raw.trim() === "") throw new Error(`${name}= is empty; give one to three which_boss numbers, e.g. ${name}=2,4,16.`);
+    const tokens = raw.split(",").map((token) => token.trim());
+    const refused = tokens.find((token) => !/^\d+$/.test(token));
+    if (refused !== undefined) {
+      throw new Error(
+        `${name}=${raw}: ${JSON.stringify(refused)} is not a which_boss number (a whole number, as unleash_hell tests it).`
+      );
+    }
+    if (tokens.length > CHAMPIONS_PER_SIDE) {
+      throw new Error(`${name}=${raw} names ${tokens.length} champions; a side holds at most ${CHAMPIONS_PER_SIDE}.`);
+    }
+    return tokens.map(Number);
+  };
+  return { red: side("red"), blue: side("blue") };
+}
+
+/**
+ * THE ROSTER THE QUERY STRING ASKS FOR — the arena's one reader of `red=`,
+ * `blue=` and `items=`, in that order.
+ *
+ * ► **CHAMPIONS FIRST, AND THE ORDER IS THE FIX (Codex review, 2026-09-23).**
+ *   The shell used to parse `items=` at module initialisation, before it had
+ *   looked for champions at all, so `?red=1&blue=2&items=typo` died in
+ *   `demoItemsFrom` at the top level and the champion refusal of `items=`
+ *   never ran — the page sat on "loading…" with the reason in the console.
+ *   Reading champions first makes that URL the champion refusal it is, and
+ *   putting both readers behind this one call lets the shell catch EVERY
+ *   refusal, a bad kit on its own included, and show it on the page.
+ *
+ * @returns {{kind: "champions", red: number[], blue: number[]} | {kind: "demo", items: number[]}}
+ */
+export function arenaRequestFrom(params) {
+  const champions = championRequestFrom(params);
+  if (champions !== null) return { kind: "champions", ...champions };
+  const items = params && typeof params.get === "function" ? params.get("items") : null;
+  return { kind: "demo", items: demoItemsFrom(items) };
+}
+
+/**
+ * One side of the build's own champions, in the shape the host takes.
+ *
+ * Each member is its `unleash_hell` branch run through the build's own chain:
+ * `initcharacter` decodes the DNA (`ss2ChampionFromDna`), `battlevalues`
+ * prices it (`ss2BattleValues`), and `ss2Combatant` enters it by the route
+ * the build gave it — `weaponFrom: "unleash_hell"`, because a champion's
+ * weapon was never bought and the shop's stat gate would refuse some of them.
+ *
+ * ► **PRICED ONCE, BUILT WITH `derive: false` — `demoSide`'s convention, for a
+ *   different reason.** `demoSide` passes `derive: false` to keep its AUTHORED
+ *   damage and pools from being recomputed. A champion has nothing authored:
+ *   every number is the build's derivation. So the one `ss2BattleValues` run
+ *   IS the champion, and both the host's vanilla mirror and the resource bag
+ *   are cut from it — a second derivation inside `ss2Combatant` could only
+ *   ever agree or introduce a disagreement.
+ *
+ * ► **A SECONDARY SLOT OF 0 IS "NO SECONDARY WEAPON", AND IS NOT STATED.** Both
+ *   of the build's readers test the id: the hero's swap button hides on
+ *   `secondary_weapon == 0` (sprite 862 `DoAction@0x2378cc` `+0x0e77`-`+0x0e89`)
+ *   and the villain's voluntary swap requires `secondary_weapon != 0`
+ *   (`villainChooseAction` `+0x0f14`-`+0x0f27`). This engine instead reads
+ *   `secondary_weapon_range > 0` as owning a bow (`legalActions`, the swap
+ *   arm), and `ss2BattleValues` prices a STATED 0 as the bare-hands row — so a
+ *   champion whose DNA says 0 would be offered a "bow" of fists, with the
+ *   archer's controllers. Leaving the id out is what the build's readers mean
+ *   by 0. **This is a WORKAROUND, and it can go when the engine fix lands:**
+ *   the engine-side reading is being fixed in `src/team/ss2-rules.js` by
+ *   another implementer (2026-09-23), and was reported rather than changed
+ *   from here.
+ *
+ * ► **A BOW DRAWN FROM THE DNA IS A PROPER ARCHER (owner, 2026-09-23).** Three
+ *   of the build's champions carry `equipped_weapon` 2 with `using_bow` never
+ *   written — a split state the engine does not represent. The owner decided
+ *   they are NORMALISED to the engine's single bow flag, `equipped_weapon`,
+ *   which index 49 already sets; nothing here writes `using_bow`, and
+ *   `test/ss2-champion-dna.test.js` pins the engine's reading.
+ *
+ * FAILS LOUDLY, NAMING THE CHAMPION. A number the pack does not hold, the
+ * branch that copies the hero (it has no DNA of its own), a DNA the extractor
+ * could not split, anything `ss2Combatant` refuses, and — when `admitResource`
+ * is given (the arena passes the adapter's `citationFor`) — any resource the
+ * host would refuse: each is an error that starts with `which_boss N`, because
+ * the host's own refusal names only a slot id.
+ *
+ * @param {"red"|"blue"} side
+ * @param {number[]} whichBossList one to three `which_boss` numbers, slot order
+ * @param {object} deps
+ * @param {Function} deps.ss2Combatant
+ * @param {Function} deps.ss2BattleValues
+ * @param {object} deps.pack the parsed `champions.json`
+ * @param {(name: string) => unknown} [deps.admitResource] truthy for a
+ *   resource name the host accepts
+ */
+export function championSide(side, whichBossList, { ss2Combatant, ss2BattleValues, pack, admitResource = null }) {
+  if (!pack || !Array.isArray(pack.champions)) {
+    throw new Error(
+      `There is no champion pack at ${CHAMPION_PACK_URL}. The champions are the build's own and this repository ships ` +
+      `none of them: run ${CHAMPION_PACK_COMMAND} against your own install to extract them, then reload.`
+    );
+  }
+  if (!Array.isArray(whichBossList) || whichBossList.length === 0) {
+    throw new Error(`${side} needs at least one champion.`);
+  }
+  if (whichBossList.length > CHAMPIONS_PER_SIDE) {
+    throw new Error(`${side} names ${whichBossList.length} champions; a side holds at most ${CHAMPIONS_PER_SIDE}.`);
+  }
+  const facing = side === "red" ? "right" : "left";
+  return {
+    id: side,
+    name: side === "red" ? "Red" : "Blue",
+    members: whichBossList.map((whichBoss, index) => {
+      const id = `${side}-${index + 1}`;
+      const entry = pack.champions.find((candidate) => candidate?.whichBoss === whichBoss);
+      if (!entry) {
+        const held = pack.champions.map((candidate) => candidate?.whichBoss).filter(Number.isInteger);
+        throw new Error(`which_boss ${whichBoss} is not in the pack (it has ${held.join(", ")}).`);
+      }
+      const label = `which_boss ${whichBoss}${typeof entry.name === "string" ? ` (${entry.name})` : ""}`;
+      if (!Array.isArray(entry.dna)) {
+        if (typeof entry.dnaFrom === "string" && entry.dnaFrom !== "literal") {
+          throw new Error(
+            `which_boss ${whichBoss} has no DNA of its own: unleash_hell writes ${entry.dnaFrom} — the hero's — so it ` +
+            "is a mirror of whoever is playing, and a champion bout has no hero to mirror."
+          );
+        }
+        throw new Error(
+          `${label}: its DNA could not be decoded at extraction (see assets/champions/manifest.json, failures).`
+        );
+      }
+      let priced;
+      let canonical;
+      try {
+        const record = ss2ChampionFromDna(entry.dna);
+        // TEMPORARY (2026-09-23): a WORKAROUND for the engine reading a stated
+        // secondary weapon 0 as a bow (see this function's header). Another
+        // implementer is fixing that in `src/team/ss2-rules.js`; when the fix
+        // lands this line can go, and the "a secondary slot of 0" test in
+        // `test/arena-champions.test.js` is what says whether it still has to.
+        if (record.secondary_weapon === 0) delete record.secondary_weapon;
+        priced = {
+          ...ss2BattleValues(record),
+          character_name: typeof entry.name === "string" ? entry.name : `which_boss ${whichBoss}`
+        };
+        canonical = ss2Combatant(priced, {
+          id, name: priced.character_name, controller: "local", derive: false, weaponFrom: "unleash_hell"
+        });
+      } catch (error) {
+        throw new Error(`${label} cannot be built: ${error.message}`);
+      }
+      if (typeof admitResource === "function") {
+        const refused = Object.keys(canonical.resources).filter((name) => !admitResource(name));
+        if (refused.length > 0) {
+          throw new Error(
+            `${label} cannot enter the arena host: its resource bag declares ${refused.join(", ")}, which no ` +
+            "battle-map section cites, and the adapter refuses an uncited resource. The champion builds; the " +
+            "host is what cannot take it yet."
+          );
+        }
+      }
+      return {
+        id, controller: "local", vanilla: priced, resources: canonical.resources, clip: { gladiator_dir: facing }, whichBoss
+      };
     })
   };
 }

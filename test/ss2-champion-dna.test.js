@@ -45,6 +45,7 @@ import {
   legalActions
 } from "../src/team/index.js";
 import { TeamRuleSetError } from "../src/team/rule-set.js";
+import { ss2ChampionFromDna } from "../src/team/ss2-champion-dna.js";
 import {
   createSs2TeamRules,
   ss2ActiveDamagePair,
@@ -54,58 +55,15 @@ import {
   Ss2ActionType
 } from "../src/team/ss2-rules.js";
 
-/** `initcharacter`'s index for each field these tests decode. */
-const DNA_INDEX = Object.freeze({
-  shoulderguard: 6, //                          +0x0680
-  gauntlet: 7, //                               +0x0697
-  breastplate: 8, //                            +0x06ae
-  helmet: 9, //                                 +0x06c5
-  greaves: 10, //                               +0x06dc
-  shinguard: 11, //                             +0x06f3
-  boot: 12, //                                  +0x070a
-  weapon: 13, //                                +0x0721
-  shield: 14, //                                +0x0738
-  strength: 16, //                              +0x0766
-  speed: 17, //                                 +0x077d
-  attack: 18, //                                +0x0794
-  defence: 19, //                               +0x07ab
-  vitality: 20, //                              +0x07c2
-  charisma: 21, //                              +0x07d9
-  stamina: 22, //                               +0x07f0
-  magicka: 23, //                               +0x0807
-  herolevel: 24, //                             +0x081e
-  weapon_enchantment_potency: 32, //            +0x08d6
-  weapon_enchantment_type: 33, //               +0x08ed
-  inventory1: 34, //                            +0x0904
-  inventory2: 35, //                            +0x091b
-  inventory3: 36, //                            +0x0932
-  inventory4: 37, //                            +0x0949
-  inventory5: 38, //                            +0x0960
-  inventory6: 39, //                            +0x0977
-  inventory_maxslots: 40, //                    +0x098e
-  secondary_weapon: 45, //                      +0x0a01
-  secondary_weapon_enchantment_potency: 46, //  +0x0a18
-  secondary_weapon_enchantment_type: 47, //     +0x0a2f
-  maximum_ammo: 48, //                          +0x0a46
-  equipped_weapon: 49 //                        +0x0a5d
-});
-
 /**
- * `initcharacter`'s decode over the transcribed fields: `characterDNA[<n>]`
- * for each field (`+0x05e0` splits the string; every field read here is a
- * `ToNumber`).
- *
- * Every index the decode reads must have been transcribed, so a field dropped
- * from a table below fails here by name rather than reaching `ss2Combatant`
- * as `undefined` and being defaulted.
+ * `initcharacter`'s decode, from the shared module (`src/team/ss2-champion-dna.js`,
+ * moved out of this file 2026-09-23 when the browser arena began building
+ * champions too). It refuses every index that is missing or not a number, by
+ * name, so a field dropped from a table below fails here rather than reaching
+ * `ss2Combatant` as `undefined` and being defaulted. Its index map is held
+ * against the doc's table in `test/ss2-champion-dna-decode.test.js`.
  */
-function decode(dna) {
-  const missing = Object.entries(DNA_INDEX)
-    .filter(([, index]) => !Number.isFinite(dna[index]))
-    .map(([field, index]) => `${field} [${index}]`);
-  assert.deepEqual(missing, [], "every DNA index the decode reads is transcribed");
-  return Object.fromEntries(Object.entries(DNA_INDEX).map(([field, index]) => [field, dna[index]]));
-}
+const decode = ss2ChampionFromDna;
 
 /**
  * The three champions whose literal carries `equipped_weapon` 2 at index 49.
@@ -262,7 +220,15 @@ test("weaponFrom unleash_hell lifts the stat demand only, and a ranged PRIMARY i
 });
 
 /**
- * ► **OPEN, AND THE OWNER'S: a champion enters the arena with
+ * ► **DECIDED BY THE OWNER 2026-09-23 (HANDOFF.md living head): NORMALISED.**
+ *   ~~OPEN, AND THE OWNER'S~~ — these three champions enter as proper archers
+ *   under the engine's single bow flag, `equipped_weapon`, and the build's
+ *   split state below is a named divergence, not reproduced. The expectations
+ *   did not move: they already pinned the engine's reading, which is now the
+ *   decided one. The arena builds its champions the same way
+ *   (`championSide`, `tools/arena/roster.js`).
+ *
+ *   **What the build does: a champion enters the arena with
  *   `equipped_weapon` 2 and `using_bow` never written.** Nothing on the way to
  *   the fight writes the villain's `using_bow` (the only writers in the build
  *   are root frame 221 `+0x059e`, on the HERO, and the swap arm `+0x4dce` /
@@ -278,11 +244,10 @@ test("weaponFrom unleash_hell lifts the stat demand only, and a ranged PRIMARY i
  *     (`ss2InBowMode`), so the same champion fights with the bow pair and bow
  *     reach from turn one, and its first swap sheathes.
  *
- * This test pins TODAY'S ENGINE, not the build. It is here so the decision
- * moves a named test rather than an unexplained number; when the owner
- * decides, the expectations below change with the reason written at them.
+ * This test pins the ENGINE, not the build, and the engine's reading is the
+ * owner's decision: the named divergence lives here, beside its evidence.
  */
-test("OPEN: a champion with the bow drawn and using_bow unwritten fights as an archer here, and not in the build", () => {
+test("NORMALISED (owner, 2026-09-23): a champion with the bow drawn and using_bow unwritten fights as an archer here, and not in the build", () => {
   for (const { whichBoss, dna, melee, weaponRange, bow, bowRange } of CHAMPIONS) {
     const label = `which_boss ${whichBoss}`;
     const champion = ss2Combatant(decode(dna), { id: `boss-${whichBoss}`, controller: "ai", weaponFrom: "unleash_hell" });

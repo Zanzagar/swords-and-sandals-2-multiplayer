@@ -123,7 +123,14 @@ import {
   SS2_DROP,
   PROJECTILE_FRAME_MS
 } from "/src/render/index.js";
-import { demoItemsFrom, demoSide } from "/tools/arena/roster.js";
+import { citationFor } from "/src/adapter/vanilla-fields.js";
+import {
+  CHAMPION_PACK_COMMAND,
+  CHAMPION_PACK_URL,
+  arenaRequestFrom,
+  championSide,
+  demoSide
+} from "/tools/arena/roster.js";
 
 /* ------------------------------------------------------------------ */
 /* Setup                                                               */
@@ -182,29 +189,132 @@ const spectate = params.get("spectate") === "1";
  *   is correct only when the request IS the default.
  */
 const rankStride = rankStrideFrom(params, SS2_ARENA.rankStride);
-/**
+/*
  * `?items=` — a kit (`buffs`, `blasts`, `tricks`, `crowd`) or item ids, given
- * to every fighter on both sides. See `DEMO_ITEM_KITS` in `roster.js`. Empty
- * slots when absent, which is the roster as it always was.
+ * to every fighter on both sides (`DEMO_ITEM_KITS` in `roster.js`) — is read in
+ * `arenaTeams()` below, through `arenaRequestFrom`, and NOT here any more.
+ * ► It was parsed on this line at module initialisation until 2026-09-23, so a
+ *   malformed kit threw before any refusal could reach the page, and beat the
+ *   champion refusal of `items=` to it (Codex review; `test/arena-champions.test.js`).
  */
-const demoItems = demoItemsFrom(params.get("items"));
 
-const host = createVanillaBattleHost({
-  teams: [
-    demoSide("red", perSide, { ss2Combatant, ss2BattleValues, items: demoItems }),
-    demoSide("blue", perSide, { ss2Combatant, ss2BattleValues, items: demoItems })
-  ],
-  // The module singleton when the request IS the shipped stride, so the shipped
-  // arena is the shipped rule set and not a lookalike built with the defaults.
-  rules: selectRules(rankStride, {
-    shippedStride: SS2_ARENA.rankStride,
-    singleton: ss2TeamRules,
-    create: createSs2TeamRules
-  }),
-  bindings: SS2_STATIC_MAP_BINDINGS,
-  seed,
-  awaitAnimations: true
-});
+/**
+ * Says on the PAGE why there is no bout, then stops the module.
+ *
+ * ► **ON THE PAGE, NOT IN THE CONSOLE.** A module that throws at the top level
+ *   leaves "loading…" in the header and the reason in a console the person
+ *   watching never opens — so a missing pack would read as a hung arena. The
+ *   message goes to the header, the controls, the footer and over the stage,
+ *   and only then is the error thrown.
+ *
+ * Uses `document.getElementById` directly: this runs before `el` and `log` are
+ * declared further down, and touching them here is a temporal-dead-zone error
+ * that would replace the message with a worse one.
+ */
+function refuseToStart(title, message) {
+  const byId = (id) => document.getElementById(id);
+  document.title = `${title} — The Arena`;
+  byId("tier").textContent = "NO BOUT";
+  byId("turn-heading").textContent = title;
+  const note = document.createElement("div");
+  note.className = "provenance";
+  note.textContent = message;
+  byId("actions").replaceChildren(note);
+  byId("footer").textContent = message;
+  const banner = document.createElement("div");
+  banner.setAttribute("role", "alert");
+  banner.style.cssText =
+    "position:absolute;left:16px;right:16px;top:16px;z-index:5;padding:12px 14px;border-radius:6px;" +
+    "border:1px solid #c9a227;background:#2a2208;color:#f3e3a8;font-size:14px;line-height:1.5;white-space:pre-wrap";
+  banner.textContent = `${title}\n\n${message}`;
+  byId("stage").append(banner);
+  throw new Error(`${title}: ${message}`);
+}
+
+/**
+ * `?red=2,4,16&blue=1,3,10` — THE BUILD'S OWN CHAMPIONS, by `which_boss`, one
+ * to three a side, instead of the demo roster. Absent, the arena is exactly
+ * what it was.
+ *
+ * The champions come from the player's OWN install: `tools/extract-champions.mjs`
+ * writes them to gitignored `assets/champions/`, and the repository ships none.
+ * Every decision — which champion, how its DNA decodes, how it is priced, what
+ * the host would refuse — is `arenaRequestFrom`/`championSide` in
+ * `roster.js`, under the suite (`test/arena-champions.test.js`). What lives
+ * here is the fetch, and saying so on the page when anything fails —
+ * including a malformed `items=` for the demo roster.
+ */
+async function arenaTeams() {
+  let request;
+  try {
+    request = arenaRequestFrom(params);
+  } catch (error) {
+    refuseToStart("The roster request was refused", error.message);
+  }
+  if (request.kind === "demo") {
+    return [
+      demoSide("red", perSide, { ss2Combatant, ss2BattleValues, items: request.items }),
+      demoSide("blue", perSide, { ss2Combatant, ss2BattleValues, items: request.items })
+    ];
+  }
+  let pack = null;
+  let why = "";
+  try {
+    const response = await fetch(CHAMPION_PACK_URL);
+    if (response.ok) pack = await response.json();
+    else why = `${CHAMPION_PACK_URL} answered ${response.status}.`;
+  } catch (error) {
+    why = `${CHAMPION_PACK_URL} could not be read: ${error.message}.`;
+  }
+  if (!pack) {
+    refuseToStart(
+      "No champion pack",
+      `${why} The champions are the build's own, and this repository ships none of them.\n\n` +
+      `Run   ${CHAMPION_PACK_COMMAND}   (add the path to your own swords_sandals2_download.swf if it is not ` +
+      "the Steam default), then reload this page."
+    );
+  }
+  try {
+    return [
+      championSide("red", request.red, { ss2Combatant, ss2BattleValues, pack, admitResource: citationFor }),
+      championSide("blue", request.blue, { ss2Combatant, ss2BattleValues, pack, admitResource: citationFor })
+    ];
+  } catch (error) {
+    refuseToStart("A champion cannot fight here", error.message);
+  }
+  return null;
+}
+
+const teams = await arenaTeams();
+/** Which champion stands in which slot, for every line that names a slot id. */
+const championsBySlot = new Map(
+  teams.flatMap((team) => team.members)
+    .filter((member) => Number.isInteger(member.whichBoss))
+    .map((member) => [member.id, member.whichBoss])
+);
+const matchLabel = `${teams[0].members.length}v${teams[1].members.length}`;
+
+let host;
+try {
+  host = createVanillaBattleHost({
+    teams,
+    // The module singleton when the request IS the shipped stride, so the shipped
+    // arena is the shipped rule set and not a lookalike built with the defaults.
+    rules: selectRules(rankStride, {
+      shippedStride: SS2_ARENA.rankStride,
+      singleton: ss2TeamRules,
+      create: createSs2TeamRules
+    }),
+    bindings: SS2_STATIC_MAP_BINDINGS,
+    seed,
+    awaitAnimations: true
+  });
+} catch (error) {
+  // The host names a slot ("Combatant red-2"), never a champion; say which is which.
+  if (championsBySlot.size === 0) throw error;
+  const legend = [...championsBySlot].map(([id, whichBoss]) => `${id} is which_boss ${whichBoss}`).join(", ");
+  refuseToStart("The arena host refused a champion", `${error.message}\n\n(${legend}.)`);
+}
 
 let scene = applyCommands(emptyScene(), host.constructArena().commands);
 
@@ -4296,7 +4406,7 @@ function renderControls() {
 function renderProvenance() {
   const rules = host.battle.rulesDescriptor ?? ss2TeamRules;
   el("tier").textContent = `${(rules.verification ?? "unknown").toUpperCase()} — NOT RUNTIME-VERIFIED`;
-  el("seed").textContent = `seed ${seed} · ${perSide}v${perSide} · the same seed and the same choices replay exactly`;
+  el("seed").textContent = `seed ${seed} · ${matchLabel}${championsBySlot.size > 0 ? " champions" : ""} · the same seed and the same choices replay exactly`;
   el("provenance").innerHTML = "";
   // ► **THIS PANEL MUST DESCRIBE WHAT IS ACTUALLY ON SCREEN, and for one commit
   //   it did not.** It said the figures were authored vector art while the
@@ -4317,6 +4427,15 @@ function renderProvenance() {
     ["The animation timing", "is authored. No capture has ever recorded a clip label or a frame duration."],
     ["Slot 0 of each side", "reuses the battle map's own instance names, depths and positions. Everything past it is authored mod surface no capture can settle."]
   ];
+  if (championsBySlot.size > 0) {
+    const slots = [...championsBySlot].map(([id, whichBoss]) => `${id} = ${whichBoss}`).join(", ");
+    lines.unshift(["The champions",
+      `are the BUILD'S OWN tournament bosses, by unleash_hell which_boss (${slots}): each one's DNA, read from ` +
+      "your own install into the gitignored `assets/champions/` and decoded by initcharacter's index map, then " +
+      "priced by the same battlevalues the tests run. None ships in this repository. A DNA secondary slot of 0 " +
+      "is read as no secondary weapon, as the build's swap button and villain AI read it; a bow drawn in the DNA " +
+      "is a proper archer (owner, 2026-09-23)."]);
+  }
   for (const [subject, body] of lines) {
     const node = document.createElement("div");
     node.innerHTML = "";
@@ -4327,7 +4446,8 @@ function renderProvenance() {
   }
   el("footer").textContent =
     "This surface decides no combat: every number shown is copied from resolved state. " +
-    "Reload with ?teams=1|2|3&seed=N to change the bout, or ?spectate=1 to watch one play itself.";
+    "Reload with ?teams=1|2|3&seed=N to change the bout, ?spectate=1 to watch one play itself, or " +
+    "?red=2,4,16&blue=1,3,10&spectate=1 to watch the build's own champions (after `node tools/extract-champions.mjs`).";
 }
 
 /* ------------------------------------------------------------------ */
@@ -4398,7 +4518,10 @@ function frame(now) {
 
 renderProvenance();
 renderControls();
-log(`arena built: ${scene.drawOrder.length} fighters, ${perSide}v${perSide}, seed ${seed}`);
+log(`arena built: ${scene.drawOrder.length} fighters, ${matchLabel}, seed ${seed}`);
+if (championsBySlot.size > 0) {
+  log(`champions (which_boss): ${[...championsBySlot].map(([id, whichBoss]) => `${id} ${whichBoss}`).join(", ")}`);
+}
 if (ENCHANT_DEMO) {
   const fields = ENCHANT_DEMO.fields;
   log(`enchant: DEMO OVERRIDE ?enchant=${ENCHANT_DEMO.text} — every fighter's melee slot is forced to ` +
