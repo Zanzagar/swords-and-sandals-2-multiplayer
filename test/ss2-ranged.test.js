@@ -430,6 +430,10 @@ test("longrange_archer wires two shots and BOTH walks; closerange_archer wires a
       // `staminaleft / staminamax * 100 >= 50` (`+0x0c15`/`+0x110a`), and this
       // bowman is at full stamina.
       Ss2ActionType.TAUNT,
+      // `wincrowd` joined 2026-09-23 — the row above already lists it: frame 20
+      // wires it in both facings (`+0x0dd5`, `+0x12ec`) behind `herolevel < 3`
+      // (`+0x0928`, `+0x0e1d`), and this bowman is level 5.
+      Ss2ActionType.WINCROWD,
       Ss2ActionType.SWAP_WEAPONS, Ss2ActionType.REST
     ],
     "500 apart is beyond the floor of 186, so this is longrange_archer"
@@ -453,6 +457,9 @@ test("longrange_archer wires two shots and BOTH walks; closerange_archer wires a
       // And it wires `shove` (map `:229`-`:230`), which is why an archer that
       // has been closed on has something to do about it besides backing away.
       Ss2ActionType.SHOVE,
+      // `wincrowd` joined 2026-09-23: frame 28 wires it too (`+0x0cf2`,
+      // `+0x10fd`, gated `+0x0951`, `+0x0d3a`).
+      Ss2ActionType.WINCROWD,
       Ss2ActionType.SWAP_WEAPONS, Ss2ActionType.REST
     ],
     "inside the floor an archer bashes and backs away; it cannot shoot and cannot advance"

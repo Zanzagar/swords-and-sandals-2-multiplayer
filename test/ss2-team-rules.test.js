@@ -390,7 +390,12 @@ test("the vocabulary is three melee verbs, two walks, a rest and four status pha
     // (`+0x0d68`-`+0x0e35`), so it carries a real label.
     "taunted-phase",
     "walk-left",
-    "walk-right"
+    "walk-right",
+    // ► **JOINED 2026-09-23 — `wincrowd`, `getphase("wincrowd")`, wired on all
+    //   eight controller-frame branches behind `herolevel >= 3` and consumed at
+    //   `+0x4fc9`-`+0x513d`.** Self-targeted, zero samples on the channel: the
+    //   crowd takes the actor's `round(charisma / 2)`. See `SS2_WINCROWD`.
+    "wincrowd"
   ]);
   for (const type of ss2TeamRules.actionTypes) {
     assert.match(type, /^[a-z0-9][a-z0-9-]{0,63}$/, "actionTypes tokens reject vanilla's underscores");
@@ -706,9 +711,13 @@ test("there is NO affordability gate: the build never refuses an attack for lack
   //   `nextphase` subtracts it afterwards. At 1 stamina against a shove costing
   //   `round(strength * 1.5)`, nothing is withheld, which is this test's point
   //   with one more verb behind it.
+  // ► **`wincrowd` JOINED THIS LIST 2026-09-23, for the shove's reason.** This
+  //   gladiator is `herolevel` 3, the button's own gate (all eight menu
+  //   branches, `herolevel < 3` hides it), and the phase has no stamina test:
+  //   `staminacost = 3` (`+0x5014`) is spent by `nextphase` and floored.
   assert.deepEqual(
     options,
-    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "rest"]
+    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "wincrowd", "rest"]
   );
 });
 

@@ -277,13 +277,15 @@ import {
 import { applySs2MagicDamageCandidate } from "../golden/ss2-spell-candidate.js";
 import { SS2_BUILD_SHA256 } from "../golden/run-1v1-fixture.js";
 import { byCodeUnit } from "../common/stable-order.js";
+import { fnv1a } from "../common/fnv1a.js";
 import { resourceValue } from "./resources.js";
 import {
   SS2_PSYCHE_DISCHARGE_CROWD,
   ss2CrowdActionOf,
   ss2CrowdOpening,
   ss2CrowdStepEffects,
-  ss2StrikeCrowdAction
+  ss2StrikeCrowdAction,
+  ss2WincrowdCrowdAction
 } from "./ss2-crowd.js";
 import { ss2WeaponDamageRange, ss2WeaponEntry } from "./ss2-weapon-table.js";
 import { defineTeamRuleSet, EffectKind, RuleSetVerification, TeamRuleSetError } from "./rule-set.js";
@@ -405,6 +407,14 @@ export const Ss2ActionType = Object.freeze({
   //   see `SS2_TAUNT`.
   TAUNT: "taunt",
   SHOVE: "shove",
+  // ► **`wincrowd` — THE CONTROLLER VERB THAT PLAYS TO THE CROWD, and the
+  //   crowd is its whole effect.** `+0x4fc9`-`+0x513d` of `DoAction@0x240c7f`;
+  //   see `SS2_WINCROWD`. Wired on all four controller frames behind a
+  //   `herolevel >= 3` button gate, self-targeted, ZERO samples on the combat
+  //   channel: its one `RandomNumber(6)` picks which of six clips plays, and
+  //   that is presentation. Not in `ATTACK_BANDS`, for the reason `shove` is
+  //   not. The token IS the build's label — it has no underscore to lose.
+  WINCROWD: "wincrowd",
   // ► **THE TWO BOLTS — THE FIRST SPELL VERBS IN THIS ENGINE, AND THE ONLY TWO
   //   OF THE BUILD'S TWENTY THAT A DISCRETE TURN CAN EXPRESS.** Derived
   //   2026-09-20 from `sprite:862[overlay]/frame:52/DoAction@0x240c7f`
@@ -1043,6 +1053,13 @@ export const VANILLA_PHASE_LABEL = Object.freeze({
   //   presentation layer's, not a phase.
   [Ss2ActionType.TAUNT]: "taunt",
   [Ss2ActionType.SHOVE]: "shove",
+  // `phase_decision == "wincrowd"` at `+0x4fcf`, the label all eight
+  // controller-frame branches pass to `getphase` (`+0x0dca`/`+0x12a0` on frame
+  // 5, `+0x0b69`/`+0x0fb7` on 13, `+0x0dd5`/`+0x12ec` on 20, `+0x0cf2`/`+0x10fd`
+  // on 28) and the villain's `choices > 95` bands write (`+0x0bd3`, `+0x0ec2`).
+  // The CLIP is a different string again, `"wincrowd" + wincrowd_move`
+  // (`+0x50de`), carried on the event; see `SS2_WINCROWD`.
+  [Ss2ActionType.WINCROWD]: "wincrowd",
   // ► **THE PHASE LABELS ARE THE DECISION'S AND THE CASTER'S CLIP IS `Cast2`**,
   //   which is a third name again — `attacker.gotoAndPlay("Cast2")` at
   //   `+0x8515`, shared by both bolts, and NOT derivable from either label.
@@ -4996,6 +5013,123 @@ export const SS2_ADULATION = Object.freeze({
   /** `Push 300; Greater` at `+0x1036`-`+0x103e`. Strict. */
   aiFightDistanceAbove: 300
 });
+
+/* ------------------------------------------------------------------ */
+/* The wincrowd phase: playing to the crowd                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `wincrowd`, byte-derived 2026-09-23 from
+ * `sprite:862[overlay]/frame:52/DoAction@0x240c7f` (block base `0x240c85`),
+ * `+0x4fc9`-`+0x513d`, re-read by the implementer off the dump against an
+ * earlier derivation and its write-nothing verifier:
+ *
+ * ```text
+ *   phase_decision == "wincrowd"                                     +0x4fc9-+0x4fd6
+ *     register:3.crowd_action =
+ *       Math.round(register:2.game.hero.charisma / 2)   (EVERY tick)  +0x4fdb-+0x500d
+ *     game_attacker.staminacost = 3                                  +0x500e-+0x501e
+ *     if (attacker.struck == null) {                                 +0x501f-+0x5031
+ *       attacker.struck = false                                      +0x5036-+0x5043
+ *       if (!(attacker.wincrowd_move > 0)
+ *           || attacker.wincrowd_move == undefined)                  +0x5044-+0x5077
+ *         attacker.wincrowd_move = 1 + RandomNumber(6)               +0x507c-+0x5093
+ *       attacker.wincrowd_move = attacker.wincrowd_move + 1          +0x5094-+0x50b1
+ *       if (attacker.wincrowd_move > 6) attacker.wincrowd_move = 1   +0x50b2-+0x50dd
+ *       animstate = "wincrowd" + attacker.wincrowd_move              +0x50de-+0x50f0
+ *       attacker.gotoAndPlay(animstate)                              +0x50f1-+0x5108
+ *     }
+ *     if (attacker.struck == true) {                                 +0x5109-+0x511c
+ *       attacker.struck = null; nextphase()                          +0x5121-+0x513d
+ *     }
+ * ```
+ *
+ * ► **ITS WHOLE GAME EFFECT IS THE CROWD AND THE STAMINA.** No helper call,
+ *   no `defender`, no `game_defender`, no `randomBetween`, no damage: the top
+ *   write is the crowd delta (`ss2WincrowdCrowdAction`, where the owner's
+ *   divergence below is recorded), `staminacost = 3` is spent by `nextphase`
+ *   (`+0x32a1`, read at `+0x32bb`) with the ordinary regeneration, and the
+ *   psyche counter is reset as for every phase that is not `psyche_up`
+ *   (`+0x35c7`). **It cannot kill**, so `nextphase` always runs.
+ *
+ * ► **THE ONE DRAW IS THE `RandomNumber` OPCODE, AND IT PICKS A CLIP.** It is
+ *   taken only on a fighter clip's FIRST wincrowd (`wincrowd_move` lives on the
+ *   gladiator's clip instance, one counter per fighter), and every later one
+ *   steps the counter by one, 1..6 and round again. So the first clip shown is
+ *   `((r + 1) mod 6) + 1` for the draw `r` in 0..5, and then the six in order.
+ *   This engine takes NO sample for it — see `ss2WincrowdClip` for the rule and
+ *   what it gives up.
+ *
+ * ► **THE OFFER IS THE HERO'S BUTTON, ON ALL FOUR CONTROLLER FRAMES.** Every
+ *   one of the eight menu branches (`sprite:862[overlay]` frames 5, 13, 20 and
+ *   28, one branch per facing) wires `getphase("wincrowd")` on `optionG` or
+ *   `optionH` and hides it with `if (_root.game.hero.herolevel < 3)
+ *   option._visible = false` — `+0x095e`/`+0x0e12`, `+0x0785`/`+0x0bb1`,
+ *   `+0x0928`/`+0x0e1d`, `+0x0951`/`+0x0d3a`. `Less2`, so the button shows AT
+ *   3. **No stamina test and no range test**, on any frame. The villain has no
+ *   level gate — it reaches the phase through its `choices` bands — and this
+ *   engine applies the hero's gate to every seat, the owner's rule of
+ *   2026-09-22 ("the hero's rule is the player's rule").
+ *
+ * ► **NOT MODELLED, NAMED:** the `animstate` `SetVariable` (a display
+ *   variable nothing in the phase machine reads); and the `demand_move`
+ *   watchdog, which fires at 60 ticks and so can end the 58-frame `wincrowd4`
+ *   instead of its own `struck` — the accounting is identical either way, and
+ *   that is not runtime-checked.
+ */
+export const SS2_WINCROWD = Object.freeze({
+  /** Hidden when `herolevel < 3` (`Push 3; Less2`), so offered at 3 and above. */
+  herolevelAtLeast: 3,
+  /** `game_attacker.staminacost = 3`, `+0x5014`. A literal: no stat, no affordability test. */
+  staminaCost: 3,
+  /**
+   * The six clips, IN THE BUILD'S CYCLE ORDER: `"wincrowd" + wincrowd_move`
+   * (`+0x50de`) for `wincrowd_move` 1..6 — six because of `1 + RandomNumber(6)`
+   * (`+0x5082`-`+0x5093`) and the wrap `> 6` -> 1 (`+0x50be`-`+0x50dd`). Listed
+   * rather than assembled so the render coverage walk reaches all six.
+   */
+  clips: Object.freeze(["wincrowd1", "wincrowd2", "wincrowd3", "wincrowd4", "wincrowd5", "wincrowd6"])
+});
+
+/**
+ * WHICH OF THE SIX CLIPS A `wincrowd` PLAYS — chosen WITHOUT A RANDOM NUMBER,
+ * and the choice is AUTHORED presentation. No rule reads it; it travels on the
+ * event, which the battle hash covers, so it must be a pure function of state.
+ *
+ * ► **THE BUILD:** one counter per fighter clip, `wincrowd_move`, drawn ONCE
+ *   by the `RandomNumber(6)` opcode on that clip's first wincrowd
+ *   (`+0x507c`-`+0x5093`) and then stepped by one on every wincrowd, 1..6 and
+ *   round again (`+0x5094`-`+0x50dd`). So each fighter shows the six in order
+ *   from a start of its own, and never the same clip twice running.
+ *
+ * ► **WHY NO SAMPLE:** the only RNG this engine has is the resolver's ordered
+ *   channel, and that channel IS the wire format — a sample taken to pick an
+ *   animation would move every peer's `rngCursor` for a choice no rule reads.
+ *   It is `src/render/clip-effects.js`'s rule for `RandomNumber(n)` WITHOUT a
+ *   random number, applied here: **the SPREAD is the build's (six clips, one
+ *   start per fighter, a step of one), and the SOURCE is state every peer
+ *   already hashes** — the fighter's id and the round number
+ *   (`request.turnNumber`, which advances once per round). (The debris opcode
+ *   draws inside `remove_armour` ARE taken on the channel — that is the golden
+ *   attack path's shared arithmetic, left as it is; a clip pick has no such
+ *   tie.)
+ *
+ * ► **THE RULE:** a start per fighter from `fnv1a(id)`, stepped one clip per
+ *   ROUND. So wincrowds in consecutive rounds step one along the cycle exactly
+ *   as the build's do, and each fighter keeps its own phase.
+ *
+ * ► **WHAT IT GIVES UP, NAMED:** the build steps once per WINCROWD, this once
+ *   per ROUND — so two wincrowds rounds apart step by the gap rather than by
+ *   one, and a wincrowd N rounds after another where N is a multiple of 6
+ *   repeats its clip, which the build never does. And the start is a hash, not
+ *   a uniform draw per battle: a fighter with the same id starts at the same
+ *   clip in every bout.
+ */
+export function ss2WincrowdClip(actorId, turnNumber) {
+  const { clips } = SS2_WINCROWD;
+  const start = Number.parseInt(fnv1a(String(actorId)), 16) % clips.length;
+  return clips[(((start + turnNumber) % clips.length) + clips.length) % clips.length];
+}
 
 /* ------------------------------------------------------------------ */
 /* The weaken-armour phase: three removals, no roll to hit, no damage  */
@@ -9906,6 +10040,29 @@ export function createSs2TeamRules({
         }
       }
 
+      // ► **`wincrowd` IS ON EVERY CONTROLLER FRAME, BEHIND ONE GATE: `herolevel
+      //   >= 3`.** All eight menu branches wire it and hide it below 3 (see
+      //   `SS2_WINCROWD` for the eight offsets) — the `psyche_up` shape, read
+      //   the way that offer reads it, off the ACTOR, so the hero's button is
+      //   every seat's. No stamina, range or facing test anywhere: it is
+      //   offered at any stamina the zero-stamina rest above has not already
+      //   pre-empted, near or far.
+      //
+      //   **ONCE, AIMED AT THE ACTOR** — the arm never reads `defender`, so a
+      //   per-foe offer would be N spellings of one action (the teleport's
+      //   reason).
+      //
+      //   **APPENDED HERE, AFTER EVERY VERB THAT EXISTED BEFORE IT, and the
+      //   position is deliberate rather than tidy.** `legalActions(...)[0]` is
+      //   what several drivers and tests take (`test/seeded-play-pins.test.js`
+      //   `driveFirst`), so a new verb at the head of the list would change
+      //   which action they drive; here it can never be the first option of a
+      //   combatant that has any other. `options[turnNumber % length]` still
+      //   sees a longer list at level 3+, which is true of every verb added.
+      if (resourceValue(view.actor, "herolevel", 0) >= SS2_WINCROWD.herolevelAtLeast) {
+        actions.push({ type: Ss2ActionType.WINCROWD, targetId: actorId });
+      }
+
       // ► **THE SWAP IS NOT A CONTROLLER BUTTON, AND THAT IS WHY IT IS HERE —
       //   after every frame-specific verb, offered on all four frames alike.**
       //
@@ -11464,6 +11621,41 @@ export function createSs2TeamRules({
             casterClip: SS2_ADULATION.casterClip,
             spellId: SS2_ADULATION.itemId,
             consumedSlot: slot,
+            staminaSpent: staminaCost,
+            staminaGained: transition.staminaGained,
+            healed: transition.healed
+          }]
+        };
+      }
+
+      // ► **WINCROWD. Zero samples on this channel, zero damage, nobody moves:
+      //   the crowd takes the actor's `round(charisma / 2)` and the actor pays 3
+      //   stamina.** It returns before `ATTACK_BANDS` for adulation's reason —
+      //   it is not an attack and has no target but the actor. See
+      //   `SS2_WINCROWD` for the arm, statement by statement.
+      //
+      // ► **NO KILLING PATH EXISTS, and that is the arm's, not an omission.**
+      //   Nothing in `+0x4fc9`-`+0x513d` reads or writes `hitpoints` or calls a
+      //   damage helper, so `death()` cannot run and `nextphase` always does:
+      //   the cost, the regeneration, the crowd step and the psyche reset are
+      //   unconditional. (The authored toll below is `SS2_CROWD`'s, appended on
+      //   every path, and is not the arm's.)
+      if (request.type === Ss2ActionType.WINCROWD) {
+        const staminaCost = SS2_WINCROWD.staminaCost;
+        // The ACTOR's charisma — the owner's decision, recorded at
+        // `ss2WincrowdCrowdAction`, where the build's hero-only read is named.
+        const transition = phaseTransitionEffects(actor, { staminaCost, crowdAction: ss2WincrowdCrowdAction(actor) });
+        return {
+          effects: [...transition.effects, ...crowd],
+          events: [{
+            type: request.type,
+            actorId: actor.id,
+            targetId: actor.id,
+            vanillaLabel: VANILLA_PHASE_LABEL[request.type],
+            // The caster's clip alone, so `SS2_STATIC_MAP_BINDINGS` binds it as
+            // a self-cast. The build's opcode draw is NOT taken; the clip comes
+            // from the fighter and the round — see `ss2WincrowdClip`.
+            casterClip: ss2WincrowdClip(actor.id, request.turnNumber),
             staminaSpent: staminaCost,
             staminaGained: transition.staminaGained,
             healed: transition.healed
@@ -13694,6 +13886,39 @@ export function createSs2TeamRules({
         const range = foe ? ss2FightDistance(actor, foe) : null;
         if (range !== null && range > SS2_ADULATION.aiFightDistanceAbove) return adulationOption;
       }
+
+      // ► **`wincrowd` IS NEVER CHOSEN HERE, AND NO LINE OF THIS FUNCTION
+      //   RETURNS IT — deliberately, and it is the one controller verb this AI
+      //   is offered and does not take (2026-09-23).** Every `return` here, above
+      //   and below, finds its own type, and the fallbacks are `rest` or the
+      //   first option, which `legalActions` never makes `wincrowd` (it is
+      //   appended last but for the swap and the rest).
+      //
+      //   **The build's villain takes it from a `choices` band** — in the
+      //   branch its own range test fails into (`DoAction@0x23f835` `+0x08c3`,
+      //   split on `villain._x < hero._x`, one draw per side at `+0x08fe` and
+      //   `+0x0bed`): `choices > 95` -> `wincrowd` (`+0x0bd3`, `+0x0ec2`), or
+      //   `rest` below 30% stamina (`+0x0bc3`, `+0x0eb2`), beside the taunt
+      //   band `85 <= choices <= 95` (`+0x0afd`/`+0x0b15` on the first side).
+      //   **"Out of range" is the VILLAIN's test**: for a drawn bow that branch
+      //   is `fightdistance < 200`, the CLOSED-ON case, not the far one. Twelve
+      //   overrides then run over it before `villain_cast_spells()`
+      //   (`+0x0ed7`-`+0x1432`: the random swap, the psyche roll and its
+      //   continuation, the level-1 walk, the zero-stamina rest, the
+      //   empty-quiver swap, the two taunted runs, the four status flags).
+      //
+      //   **This AI models none of the `choices` bands.** It takes no sample —
+      //   the tired rest above says so of the out-of-range rests, the ladder
+      //   blocks of the 90% roll — and the taunt it DOES take is not the
+      //   85-95 band either: it is priced in hitpoints against the approach
+      //   (`ss2TauntValue`, `aiTaunts`). **Priced the same way, a wincrowd is
+      //   worth zero**: it deals no damage, moves nobody and closes nothing,
+      //   so it never beats a step, a swing or a rest — and rest dominates it
+      //   on the AI's own ledger (a rest gains stamina and heals; a wincrowd
+      //   spends 3). Its only value is `crowd_interest`, which scales a purse
+      //   this AI does not weigh. So the fit that takes no invented sample is
+      //   the one built: offered to every seat, chosen by none, and the 5% band
+      //   is NOT reproduced. Pinned by `test/ss2-wincrowd.test.js`.
 
       if (!attackOnOffer) {
         const nearest = nearestFoe(view);

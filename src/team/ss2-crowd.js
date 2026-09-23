@@ -89,7 +89,9 @@ export const SS2_CROWD_INTEREST = Object.freeze({
  * `normal_attack` and `bash_attack` — the first six add 0, the last two what
  * the damage path left (`ss2StrikeCrowdAction`). `psyche_up` writes only on
  * its level-3 press and only on the first tick, so its damage path wins when
- * it reaches one (`SS2_PSYCHE_DISCHARGE_CROWD`).
+ * it reaches one (`SS2_PSYCHE_DISCHARGE_CROWD`). `wincrowd` HAS a top write
+ * (`+0x4fdb`) but it is not a constant — `round(charisma / 2)` — so it is
+ * `ss2WincrowdCrowdAction`, not a row.
  *
  * **Named edges, NOT reproduced** (both timing-dependent, both need a runtime
  * check): the bombard/snipe arm and the fireball arm never call `nextphase`
@@ -186,6 +188,38 @@ export function ss2StrikeCrowdAction(outcome) {
   if (!calculation.hit) return -2;
   if (Number.isFinite(mutation?.knockback?.force)) return 1;
   return calculation.dispatchedMethod === "critical" ? 8 : 2;
+}
+
+/**
+ * ► **THE `wincrowd` ARM'S TOP WRITE, AND IT IS THE ONE ARM WHOSE DELTA IS
+ *   NOT A CONSTANT** — which is why it has no row in `SS2_CROWD_ACTION` and
+ *   `ss2CrowdActionOf("wincrowd")` throws. `DoAction@0x240c7f` `+0x4fdb`-
+ *   `+0x500d`, on EVERY tick of the arm, so it is what `nextphase` adds:
+ *
+ *   ```text
+ *     register:3.crowd_action =
+ *       Math.round(register:2.game.hero.charisma / 2)     Push 2; Divide +0x4ff3-+0x4ffb
+ *   ```
+ *
+ * ► **OWNER-DECIDED DIVERGENCE (2026-09-22, HANDOFF.md living head, decision
+ *   (f)): THIS READS THE ACTOR'S OWN `charisma`. The build reads the HERO's
+ *   whoever acts** — `register:2` is `_root`, and the chain is `_root.game.hero`
+ *   hard-coded (`+0x4fdb`-`+0x4ff2`), so a villain playing to the crowd is
+ *   paid in the hero's charisma. Here each gladiator is paid in its own; in 1v1
+ *   the two agree whenever the hero acts. Owner's rule behind it: where the
+ *   build treats hero and villain differently, the hero's rule applies to
+ *   everyone — and the hero's rule is "your own charisma".
+ *
+ * `Math.round` sends a half UP, the build's and JavaScript's alike (charisma
+ * 7 adds 4). `charisma` is a resource, not a stat, read with the 0 the taunt
+ * reads it with — `SS2_RESOURCE_DEFAULTS.charisma`, so every gladiator
+ * `ss2Combatant` builds declares it and only a raw blueprint reaches the 0.
+ */
+export const SS2_WINCROWD_CROWD = Object.freeze({ divisor: 2, offset: "+0x4fdb" });
+
+/** The crowd delta a completed `wincrowd` adds: the ACTOR's `round(charisma / 2)`. See above. */
+export function ss2WincrowdCrowdAction(actor) {
+  return Math.round(resourceValue(actor, "charisma", 0) / SS2_WINCROWD_CROWD.divisor);
 }
 
 /**

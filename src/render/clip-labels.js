@@ -594,7 +594,7 @@ export const UNMAPPED_CLIP_LABELS = Object.freeze({
    *   first, and one dispatcher is enough to need the family** — the same
    *   rule `unbuiltSpells` records; a label a verb plays with no family draws
    *   the `unknown` schedule. The families cover all six at once, because the
-   *   `wincrowd` phase, next to be built, reaches every one of them.
+   *   `wincrowd` phase, ~~next to be built~~ built 2026-09-23, reaches every one of them.
    */
   unbuiltOutcome: Object.freeze([
     // `wincrowd1`-`wincrowd6` left on 2026-09-22 for the `wincrowd` families.

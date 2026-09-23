@@ -242,8 +242,11 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues }) {
       //   (`(attacker.charisma + 9) / (defender.charisma + 9)`), the
       //   direction-20 strike (`round(charisma * 4) - defender.charisma`), the
       //   taunt's own stamina cost (`round(charisma * 2)`) and the shove force
-      //   (`charisma * 25`). Nothing else reads it, so this raises a taunt and
-      //   moves no other number — unlike `strength`, which would move
+      //   (`charisma * 25`). ~~Nothing else reads it~~ **— and, since
+      //   2026-09-23, the `wincrowd` verb's crowd delta, `round(charisma / 2)`
+      //   of the actor (a crowd number, not a combat one) —** so this raises a
+      //   taunt and a crowd-pleaser and moves no other combat number — unlike
+      //   `strength`, which would move
       //   `physical_size` and therefore reach, scale and the walk clamp.
       //
       //   **16 is chosen against a sweep, not picked.** Slot-3 charisma over

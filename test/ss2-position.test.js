@@ -897,7 +897,9 @@ test("a rule set that declares no startingPosition models no position, and its c
 
   // And it keeps the position-blind vocabulary exactly: three melee verbs
   // against the foe and a rest, with no walk anywhere.
-  assert.deepEqual(typesOf(battle), ["quick-attack", "normal-attack", "power-attack", "rest"]);
+  // `wincrowd` joined 2026-09-23: it reads no position (a `herolevel >= 3`
+  // button on every controller frame), and this gladiator is level 3.
+  assert.deepEqual(typesOf(battle), ["quick-attack", "normal-attack", "power-attack", "wincrowd", "rest"]);
 
   const projected = toTeamWireState(battle).teams[0].combatants[0];
   assert.equal(projected.x, null, "and the projection carries it, so the hash covers the difference");
@@ -977,15 +979,19 @@ test("in range the build offers the retreat and NEVER the advance, and out of ra
   // `shove` joined 2026-09-19: `closerange_warrior` wires it in both facings
   // (map `:225`-`:226`), which is the same frame that wires the three melee
   // verbs and the retreat-walk this line already pins.
+  // `wincrowd` joined 2026-09-23: frame 13 wires it in both facings too
+  // (`+0x0b69`, `+0x0fb7`), hidden only below `herolevel` 3, and this pair is 3.
   assert.deepEqual(
     typesOf(engaged),
-    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "rest"]
+    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "wincrowd", "rest"]
   );
 
   const apart = bout(1);
   // `longrange_warrior` at full stamina wires the taunt into the slot it shares
   // with rest — `staminaleft / staminamax * 100 >= 50` (`+0x0c0a`/`+0x10a2`).
-  assert.deepEqual(typesOf(apart), ["walk-left", "walk-right", "taunt", "rest"],
+  // `wincrowd` joined 2026-09-23: frame 5 wires it in both facings (`+0x0dca`,
+  // `+0x12a0`) behind `herolevel < 3` (`+0x095e`, `+0x0e12`).
+  assert.deepEqual(typesOf(apart), ["walk-left", "walk-right", "taunt", "wincrowd", "rest"],
     "long range wires both walks and, above half stamina, the taunt");
 });
 
