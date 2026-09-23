@@ -119,6 +119,13 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     villain decides from positions before the hero's last move completed (and
     its melee then lands at any range); this engine's AI reads current
     positions.
+  - **THREE MORE, 2026-09-22/23, from the implementers' questions:**
+    **the adapter WRITES stat changes and the crowd back** to the vanilla
+    mirror (two new provenance-checked write sources; the fight-start stats
+    stay in `backup_*` and the record); **the team purse is an EQUAL SHARE** of
+    the losing side's `character_xp` per winner (recorded under (f));
+    **`BATTLE_STATE_VERSION` covers the top-level wire-state keys** as well as
+    the combatant fields — every pinned hash moved once, measured.
 
 ► **THE FIRST SPELL VERBS ARE BUILT, AND A `null` IN THE CANDIDATE TABLE WAS A
   SCHEDULED FALSE DIVERGENCE (2026-09-20).** `cast_lightning_bolt` and
