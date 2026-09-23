@@ -54,7 +54,7 @@ import {
 } from "../src/team/index.js";
 import {
   buildArenaLayout, CommandKind, createVanillaBattleHost, LabelProvenance, presentArenaConstruction,
-  presentResolvedEvents, SS2_STATIC_MAP_BINDINGS
+  presentResolvedEvents, SS2_STATIC_MAP_BINDINGS, WriteSource, WriteTarget
 } from "../src/adapter/index.js";
 import { demoSide } from "../tools/arena/roster.js";
 import { allUnmappedLabels, applyCommands, clipLabelsFor, emptyScene, timelineFor } from "../src/render/index.js";
@@ -624,57 +624,118 @@ test("the VICTIM's `little_fat_kid` resolves to a family that can DRAW it, for t
 });
 
 /* ------------------------------------------------------------------ *
- * The vanilla mirror (Codex, 2026-09-22): reported, never silent       *
- * ------------------------------------------------------------------ */
+ * The vanilla mirror: WRITTEN BACK (owner, 2026-09-22)                 *
+ * ------------------------------------------------------------------ *
+ *
+ * ~~Reported, never silent (Codex, 2026-09-22)~~ — **the owner decided to
+ * WRITE the stats back**, keeping the provenance mechanism: a stat write names
+ * the `canonical-stat` source and must be `===` the post-action projection's
+ * `stats[stat]`, exactly as a health write must be `=== health`. Until then the
+ * two tests here asserted a REPORT in `unmapped` and no write (Codex found the
+ * cast emitted neither, and the host's agreement check, which compared no
+ * stats, saw no drift); that treatment ended when the decision was built
+ * (2026-09-23).
+ */
 
-/** The arena's own host (`tools/arena/main.js`'s path), red-1 carrying item 42. */
-function colossusHost() {
+/**
+ * The arena's own host (`tools/arena/main.js`'s path), red-1 carrying
+ * `itemId`. Returns the host AND the two combat objects the caller supplied,
+ * because the licensed record's own numbers are what the write-back must leave
+ * alone.
+ */
+function spellHost(itemId) {
   const red = demoSide("red", 1, { ss2Combatant, ss2BattleValues });
+  const blue = demoSide("blue", 1, { ss2Combatant, ss2BattleValues });
   red.members[0] = {
     ...red.members[0],
-    vanilla: { ...red.members[0].vanilla, inventory1: 42 },
-    resources: { ...red.members[0].resources, inventory1: 42 }
+    vanilla: { ...red.members[0].vanilla, inventory1: itemId },
+    resources: { ...red.members[0].resources, inventory1: itemId }
   };
-  return createVanillaBattleHost({
-    teams: [red, demoSide("blue", 1, { ss2Combatant, ss2BattleValues })],
+  const host = createVanillaBattleHost({
+    teams: [red, blue],
     rules: ss2TeamRules,
     bindings: SS2_STATIC_MAP_BINDINGS,
     seed: 3,
     awaitAnimations: false
   });
+  return { host, supplied: { "red-1": red.members[0].vanilla, "blue-1": blue.members[0].vanilla } };
 }
 
-const statReports = (step) => step.unmapped.filter((entry) => Object.hasOwn(entry, "stat"))
-  .map(({ combatantId, stat, field }) => [combatantId, stat, field]);
+/** Every stat write one step made, as `[combatantId, vanilla field, from, to]`. */
+const statWrites = (step) => step.writes.filter((write) => write.source === WriteSource.CANONICAL_STAT)
+  .map(({ combatantId, field, from, to }) => [combatantId, field, from, to]);
+const statReports = (step) => step.unmapped.filter((entry) => Object.hasOwn(entry, "stat"));
 
-test("a stat write through the host is REPORTED unmapped, as the adapter contract prescribes, and writes nothing", () => {
-  // Reproduced before it was fixed (Codex finding 2): the cast emitted no write AND no report for
-  // strength or attack, and the host's agreement check (no stats) saw no drift.
-  const host = colossusHost();
+test("a colossus cast WRITES strength and attack onto the caster's combat object, from the canonical stats", () => {
+  // The demo's red-1 is strength 9, attack 8: `strength = backup_strength * 3`
+  // (`+0x80ab`) is 27 and `attack = backup_attack * 2` (`+0x80c9`) is 16.
+  const { host, supplied } = spellHost(42);
   const step = host.submit({ actorId: "red-1", type: COLOSSUS, targetId: "red-1" });
-  assert.deepEqual(statReports(step), [["red-1", "strength", "strength"], ["red-1", "attack", "attack"]]);
-  for (const entry of step.unmapped.filter((one) => Object.hasOwn(one, "stat"))) {
-    assert.match(entry.reason, /WriteSource/);
+  assert.deepEqual(statWrites(step), [["red-1", "strength", 9, 27], ["red-1", "attack", 8, 16]]);
+  for (const write of step.writes.filter((one) => one.source === WriteSource.CANONICAL_STAT)) {
+    assert.equal(write.target, WriteTarget.COMBAT_OBJECT, "the build writes them on the persistent combat object");
   }
-  assert.deepEqual(step.writes.filter((write) => ["strength", "attack"].includes(write.field)), [],
-    "WriteSource is a closed set of four and none of them is a stat — docs/ss2-adapter-contract.md");
-  assert.equal(host.combatant("red-1").stats.strength, 27);
-  assert.equal(host.mirrorFor("red-1").fields.strength, 9, "the mirror keeps the licensed record's own value");
+  assert.deepEqual(statReports(step), [], "written, so no longer reported");
+  assert.deepEqual([host.mirrorFor("red-1").fields.strength, host.mirrorFor("red-1").fields.attack], [27, 16]);
+  assert.equal(host.vanillaState()["red-1"].combatObject.strength, 27);
+
+  // THE LICENSED EVIDENCE IS UNTOUCHED: only the live mirror moved. The
+  // object the caller supplied still reads its own numbers, and the
+  // fight-start copy the expiry restores from is the rule set's `backup_*`.
+  assert.deepEqual([supplied["red-1"].strength, supplied["red-1"].attack], [9, 8]);
+  const { resources } = host.combatant("red-1");
+  assert.deepEqual([resources.backup_strength.value, resources.backup_attack.value], [9, 8]);
 });
 
-test("the EXPIRY is reported the same way, on the phase it happens in, and nothing else is", () => {
-  const host = colossusHost();
+test("the colossus EXPIRY writes the fight-start values back, on the phase it happens in, and nothing else does", () => {
+  const { host } = spellHost(42);
   host.submit({ actorId: "red-1", type: COLOSSUS, targetId: "red-1" });
-  const reports = [];
+  const writes = [];
   for (let phase = 1; phase < 16; phase += 1) {
     const actorId = currentCombatant(host.battle).id;
     const step = host.submit({ actorId, type: Ss2ActionType.REST, targetId: actorId });
-    reports.push(statReports(step));
+    writes.push(statWrites(step));
+    assert.deepEqual(statReports(step), []);
   }
-  assert.deepEqual(reports.slice(0, 14).flat(), [], "fourteen phases with no stat change report nothing");
-  assert.deepEqual(reports[14], [["red-1", "strength", "strength"], ["red-1", "attack", "attack"]]);
-  assert.equal(host.combatant("red-1").stats.strength, 9, "restored: canonical and mirror agree again");
-  assert.equal(host.mirrorFor("red-1").fields.strength, 9);
+  assert.deepEqual(writes.slice(0, 14).flat(), [], "fourteen phases with no stat change write no stat");
+  assert.deepEqual(writes[14], [["red-1", "strength", 27, 9], ["red-1", "attack", 16, 8]]);
+  assert.equal(host.combatant("red-1").stats.strength, 9);
+  assert.deepEqual([host.mirrorFor("red-1").fields.strength, host.mirrorFor("red-1").fields.attack], [9, 8]);
+});
+
+test("bloodlust writes strength and DEFENCE, and swift sandals writes SPEED — the vanilla names, not the canonical ones", () => {
+  // red-1: strength 9, speed 7, defence 5. Bloodlust: `10 + round(9 * 1.5)`
+  // = 24 (`+0x8b0a`) and `round(5 * 0.5)` = 3 (`+0x8b43`). Swift sandals:
+  // `10 + 7 * 2` = 24 (`+0x8a07`). Canonical `defense`/`agility` land on the
+  // vanilla `defence`/`speed` through `CANONICAL_STAT_SOURCES`, unchanged.
+  const bloodlust = spellHost(41);
+  const lust = bloodlust.host.submit({ actorId: "red-1", type: BLOODLUST, targetId: "red-1" });
+  assert.deepEqual(statWrites(lust), [["red-1", "strength", 9, 24], ["red-1", "defence", 5, 3]]);
+  assert.deepEqual(statReports(lust), []);
+  assert.equal(bloodlust.supplied["red-1"].defence, 5, "the supplied record keeps its own defence");
+
+  const swift = spellHost(40);
+  const sandals = swift.host.submit({ actorId: "red-1", type: SWIFT, targetId: "red-1" });
+  assert.deepEqual(statWrites(sandals), [["red-1", "speed", 7, 24]]);
+  assert.deepEqual(statReports(sandals), []);
+  assert.equal(swift.host.vanillaState()["red-1"].combatObject.speed, 24);
+  assert.equal(swift.host.combatant("red-1").stats.agility, 24);
+});
+
+test("little fat kid writes the VICTIM's strength and attack, and not a field of the caster's", () => {
+  // `game_defender.strength = round(backup_strength / 2)` (`+0x82df`) and
+  // `game_defender.attack = round(backup_attack / 2)` (`+0x830e`): blue-1 is
+  // strength 9, attack 8, so round(4.5) = 5 and 4.
+  const { host, supplied } = spellHost(33);
+  const step = host.submit({ actorId: "red-1", type: FAT_KID, targetId: "blue-1" });
+  assert.deepEqual(statWrites(step), [["blue-1", "strength", 9, 5], ["blue-1", "attack", 8, 4]]);
+  assert.deepEqual(statReports(step), []);
+  assert.deepEqual([host.mirrorFor("blue-1").fields.strength, host.mirrorFor("blue-1").fields.attack], [5, 4]);
+  assert.deepEqual([host.mirrorFor("red-1").fields.strength, host.mirrorFor("red-1").fields.attack], [9, 8],
+    "the caster's own record is not the one the build writes");
+  assert.deepEqual([supplied["blue-1"].strength, supplied["blue-1"].attack], [9, 8], "the victim's supplied record is untouched");
+  const { resources } = host.combatant("blue-1");
+  assert.deepEqual([resources.backup_strength.value, resources.backup_attack.value], [9, 8]);
 });
 
 /* ------------------------------------------------------------------ *

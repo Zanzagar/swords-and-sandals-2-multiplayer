@@ -74,19 +74,24 @@ import { ClipRegistry } from "./clip-registry.js";
 import { createPresentationBinder, PLACEHOLDER_ANIMATION_BINDINGS, presentArenaConstruction } from "./presentation.js";
 import { buildArenaLayout } from "./slot-layout.js";
 import {
+  applyGlobalWrites,
   applyVanillaWrites,
+  assertGlobalMirrorAgrees,
   assertMirrorAgrees,
   canonicalResourcesFrom,
   compareMaximumHealth,
   denormaliseVanillaCombatant,
   facingWrite,
+  GLOBAL_OBJECT_PATH,
   initialStatusEffects,
   loadoutMirrorDifferences,
   mirrorDifferences,
   normaliseVanillaCombatant,
   toCanonicalCombatantSource,
   toVanillaCombatant,
-  vanillaWritesForResolvedAction
+  vanillaGlobalsFrom,
+  vanillaWritesForResolvedAction,
+  WriteTarget
 } from "./state-bridge.js";
 import { isPlainVanillaObject } from "./vanilla-fields.js";
 
@@ -189,6 +194,8 @@ class VanillaBattleHost {
   #awaitAnimations;
   #clips = new ClipRegistry();
   #mirrors = new Map();
+  /** The `_global` fields the battle's own pools mirror to (the crowd). Added 2026-09-23. */
+  #globals = Object.freeze({});
   #steps = [];
   #pipeline = [];
   #diagnostics;
@@ -297,6 +304,15 @@ class VanillaBattleHost {
     this.#binder = createPresentationBinder({ layout: this.#layout, bindings });
     this.#bridge = createResultAcknowledgementBridge(this.#battle, { layout: this.#layout });
 
+    /* 3b. `_global`, brought into step with the battle's opening pools. No
+     *     caller supplies a `_global` — the build opens `crowd_interest`
+     *     itself, from two levels where the resolved battle sums every
+     *     combatant's — so the mirror starts at the resolved value, and is
+     *     reported as a sync so a surface knows to set it. */
+    this.#globals = vanillaGlobalsFrom(wire.battleResources);
+    const globalSyncs = Object.entries(this.#globals)
+      .map(([field, to]) => Object.freeze({ field, path: GLOBAL_OBJECT_PATH, to }));
+
     /* 4. mirrors, brought into step with the canonical state the roster built. */
     const canonicalSyncs = [];
     const maximumHealthReports = [];
@@ -376,7 +392,11 @@ class VanillaBattleHost {
           record = toVanillaCombatant(combatant, record);
           canonicalSyncs.push(Object.freeze({ combatantId: combatant.id, differences: Object.freeze(differences) }));
         }
-        assertMirrorAgrees(record, combatant);
+        // Stats included (2026-09-23), and never synced: the canonical stats
+        // were read from this very record, so a disagreement means something
+        // rewrote a licensed gladiator's base stats, and it is refused here
+        // rather than surfacing as "drift" on the first submitted action.
+        assertMirrorAgrees(record, combatant, { includeStats: true });
         this.#mirrors.set(combatant.id, record);
       }
     }
@@ -397,6 +417,12 @@ class VanillaBattleHost {
       aiFillLoadoutGaps: Object.freeze(aiFillLoadoutGaps),
       /** Where the mirror had to be pulled to canonical state before turn one. */
       canonicalSyncs: Object.freeze(canonicalSyncs),
+      /**
+       * The `_global` fields set before turn one (2026-09-23): the battle's
+       * opening crowd, which every later `declared-battle-resource` write
+       * continues from. Empty for a battle with no such pool.
+       */
+      globalSyncs: Object.freeze(globalSyncs),
       /** Reported, never corrected: `hitpointsmax` is a vanilla formula. */
       maximumHealthReports: Object.freeze(maximumHealthReports),
       /**
@@ -461,6 +487,14 @@ class VanillaBattleHost {
     const record = this.#mirrors.get(combatantId);
     if (!record) throw new BattleHostError(`No vanilla mirror for combatant ${String(combatantId)}.`);
     return record;
+  }
+
+  /**
+   * The `_global` fields the adapter mirrors (the battle's crowd), as a plain
+   * copy. Added 2026-09-23 with the `declared-battle-resource` writes.
+   */
+  vanillaGlobals() {
+    return { ...this.#globals };
   }
 
   /** The two objects vanilla stores each combatant in, per combatant id. */
@@ -537,28 +571,50 @@ class VanillaBattleHost {
       effects,
       placements: this.#layout.byCombatantId,
       mirrors: this.#mirrors,
-      // The battle's own pools (SS2's `crowd_interest`), reported and never
-      // written — see `vanillaWritesForResolvedAction`.
+      // The battle's own pools (SS2's `crowd_interest`): ~~reported and never
+      // written~~ WRITTEN to `_global` since 2026-09-23, the owner's "write
+      // both back" — see `vanillaWritesForResolvedAction`.
       battleBefore: beforeWire.battleResources ?? null,
-      battleAfter: wire.battleResources ?? null
+      battleAfter: wire.battleResources ?? null,
+      globals: this.#globals
     });
     pipeline.push("vanillaWritesForResolvedAction");
 
     const byCombatant = new Map();
+    const globalWrites = [];
     for (const write of writes) {
+      // `_global` belongs to no combatant, so its writes go to their own mirror.
+      if (write.target === WriteTarget.GLOBAL) {
+        globalWrites.push(write);
+        continue;
+      }
       if (!byCombatant.has(write.combatantId)) byCombatant.set(write.combatantId, []);
       byCombatant.get(write.combatantId).push(write);
     }
     for (const [combatantId, combatantWrites] of byCombatant) {
       this.#mirrors.set(combatantId, applyVanillaWrites(this.mirrorFor(combatantId), combatantWrites));
     }
+    this.#globals = applyGlobalWrites(this.#globals, globalWrites);
     pipeline.push("applyVanillaWrites");
 
     // The mirror is a mirror: if it has drifted from resolved state, that is a
     // bug in the host, and it fails here rather than desyncing quietly.
+    //
+    // ► **STATS ARE COMPARED HERE SINCE 2026-09-23.** `includeStats` was left
+    //   at its `false` default while an in-battle stat change was REPORTED and
+    //   never written — comparing would have refused every colossus. Once the
+    //   owner's "write both back" made it a `canonical-stat` write, the default
+    //   would only have hidden the drift Codex found: a stat that moved with
+    //   nothing reaching the mirror. Every mirror agrees on its stats from
+    //   construction on (a supplied gladiator's are read from its own record,
+    //   an AI-filled slot's are rewritten there), so this can only fail on a
+    //   write that was missed.
     for (const [combatantId, record] of this.#mirrors) {
-      assertMirrorAgrees(record, afterById.get(combatantId));
+      assertMirrorAgrees(record, afterById.get(combatantId), { includeStats: true });
     }
+    // And `_global`, compared for every pool the build keeps one for, so a
+    // crowd that moved with no write reaching it is drift here too.
+    assertGlobalMirrorAgrees(this.#globals, wire.battleResources ?? null);
     pipeline.push("assertMirrorAgrees");
 
     // The action boundary the presentation token is built from. It comes off

@@ -12,8 +12,10 @@
  * **That sentence used to be a description; it is now a check.** Two of them,
  * in fact, and they are what make the claim inspectable rather than a promise:
  *
- * - every write declares a `source` from a closed four-value set (`WriteSource`),
- *   and the source fixes which vanilla fields the write may target
+ * - every write declares a `source` from a closed ~~four-value~~ **six-value**
+ *   set (`WriteSource`; stats and the battle's crowd joined 2026-09-23, the
+ *   owner's "write both back"), and the source fixes which vanilla fields the
+ *   write may target
  *   (`ALLOWED_WRITE_FIELDS`) — a set defined here, not per scenario;
  * - `assertWriteProvenance` then requires each write's `to` to be `===` the
  *   value the post-action projection actually holds at the canonical location
@@ -130,7 +132,10 @@ function timedCounterPlacement(name) {
 function unmappedResourceReason(name) {
   if (isTimedSpellField(name)) return timedCounterPlacement(name);
   if (RESOURCE_RESERVED_FIELDS.has(name)) {
-    return "this vanilla field is owned by canonical health, canonical status or the clip record, not by a resource";
+    return (
+      "this vanilla field is owned by canonical health, canonical status, a canonical stat or the clip record, " +
+      "not by a resource"
+    );
   }
   if (citationFor(name)) {
     return (
@@ -170,6 +175,15 @@ export const CANONICAL_STAT_SOURCES = Object.freeze({
   stamina: "stamina",
   magicka: "magicka"
 });
+
+/**
+ * The inverse, vanilla field -> canonical stat, so a `canonical-stat` write
+ * names the one place in the projection its value must be identical to. The
+ * mapping above is one-to-one, so inverting it adds nothing and loses nothing.
+ */
+const STAT_FOR_VANILLA_FIELD = Object.freeze(Object.fromEntries(
+  Object.entries(CANONICAL_STAT_SOURCES).map(([canonical, vanilla]) => [vanilla, canonical])
+));
 
 /**
  * Vanilla base stats with no canonical `stats` slot. `charisma` drives the
@@ -255,6 +269,22 @@ export const CANONICAL_RESOURCE_SOURCES = Object.freeze([
 ]);
 
 /**
+ * The battle's OWN declared pools (`battleResources` on the wire — a rule
+ * set's `EffectKind.BATTLE_RESOURCE` target) that the build keeps on
+ * `_global`, one per bout, verbatim by name. Added 2026-09-23 with the
+ * owner's "write both back".
+ *
+ * `crowd_interest` is the only one: the `crowd_bar` clip-action opens it at
+ * `_global.crowd_interest = hero.herolevel + villain.herolevel`
+ * (`sprite:751` `+0x011f`-`+0x0158`), `nextphase` adds `crowd_action` and
+ * clamps it to 1..100 (`+0x3541`-`+0x35b4`, `r3 = _global`), and the victory
+ * frame reads it (`2249/frame:88` `+0x078c`). A pool this list does not name
+ * is reported rather than given an invented global — the same discipline
+ * `CANONICAL_RESOURCE_SOURCES` applies one scope down.
+ */
+export const CANONICAL_BATTLE_RESOURCE_SOURCES = Object.freeze(["crowd_interest"]);
+
+/**
  * Canonical health maps to the vanilla hitpoint pair and to nothing else.
  *
  * `armourclass` deliberately does NOT map into canonical health: the map's
@@ -291,12 +321,17 @@ export const CANONICAL_FACING_LEFT = "facing-left";
  * may never name one: allowing it would let the resource branch write
  * `hitpoints` with a number canonical health never produced, which is the one
  * thing the write shape exists to make impossible.
+ *
+ * ► **The seven base-stat fields joined 2026-09-23**, when the
+ *   `canonical-stat` source took them: a resource named `strength` is a
+ *   borrower now, not a field outside the allowlist that widening would fix.
  */
 export const RESOURCE_RESERVED_FIELDS = Object.freeze(new Set([
   CANONICAL_HEALTH_SOURCES.health,
   CANONICAL_HEALTH_SOURCES.maxHealth,
   ...STATUS_FLAG_FIELDS,
-  "gladiator_dir"
+  "gladiator_dir",
+  ...Object.values(CANONICAL_STAT_SOURCES)
 ]));
 
 /* ------------------------------------------------------------------ */
@@ -312,12 +347,20 @@ export const RESOURCE_RESERVED_FIELDS = Object.freeze(new Set([
  * write carrying a number the adapter had computed, because nothing checked
  * where the number came from.
  *
- * Now every write must name one of exactly four sources, each of which fixes
- * two things: **which vanilla fields the write may target** (see
+ * Now every write must name one of exactly ~~four~~ **six** sources, each of
+ * which fixes two things: **which vanilla fields the write may target** (see
  * `ALLOWED_WRITE_FIELDS`) and **which canonical value it must carry** (see
  * `assertWriteProvenance`, which requires `write.to` to be `===` the value the
  * post-action projection actually holds there). A computed value has no
  * canonical location to be identical to, so it cannot be expressed.
+ *
+ * ► **FOUR BECAME SIX 2026-09-23, THE OWNER'S "WRITE BOTH BACK" (decided
+ *   2026-09-22).** An in-battle stat change (`EffectKind.STAT`) and the
+ *   battle's own crowd (`EffectKind.BATTLE_RESOURCE`) were REPORTED in
+ *   `unmapped` because no source carried them. Each got a source of its own
+ *   rather than a wider existing one, so each is pinned to its own field set,
+ *   its own write target and its own canonical location — the mechanism is
+ *   unchanged, only the vocabulary grew.
  */
 export const WriteSource = Object.freeze({
   /** `hitpoints`, and only ever the post-action `health` the resolver clamped. */
@@ -327,7 +370,20 @@ export const WriteSource = Object.freeze({
   /** One resource-backed field, and only ever `after.resources[field].value`. */
   DECLARED_RESOURCE: "declared-resource",
   /** `gladiator_dir` on the fighter clip, and only ever a `FACING_VALUES` member. */
-  CLIP_FACING: "clip-facing"
+  CLIP_FACING: "clip-facing",
+  /**
+   * One vanilla base-stat field (`CANONICAL_STAT_SOURCES`' values), and only
+   * ever `after.stats[stat]` for the canonical stat that field maps from.
+   * Added 2026-09-23.
+   */
+  CANONICAL_STAT: "canonical-stat",
+  /**
+   * One `_global` field a battle's own pool mirrors to
+   * (`CANONICAL_BATTLE_RESOURCE_SOURCES`), and only ever
+   * `battleResources[field].value` from the post-action wire. The one source
+   * that names no combatant. Added 2026-09-23.
+   */
+  DECLARED_BATTLE_RESOURCE: "declared-battle-resource"
 });
 
 const WRITE_SOURCES = Object.freeze(Object.values(WriteSource));
@@ -347,15 +403,26 @@ export const ALLOWED_WRITE_FIELDS = Object.freeze({
   [WriteSource.CANONICAL_HEALTH]: Object.freeze([CANONICAL_HEALTH_SOURCES.health]),
   [WriteSource.CANONICAL_STATUS]: STATUS_FLAG_FIELDS,
   [WriteSource.DECLARED_RESOURCE]: CANONICAL_RESOURCE_SOURCES,
-  [WriteSource.CLIP_FACING]: Object.freeze(["gladiator_dir"])
+  [WriteSource.CLIP_FACING]: Object.freeze(["gladiator_dir"]),
+  [WriteSource.CANONICAL_STAT]: Object.freeze(Object.values(CANONICAL_STAT_SOURCES)),
+  [WriteSource.DECLARED_BATTLE_RESOURCE]: CANONICAL_BATTLE_RESOURCE_SOURCES
 });
 
-/** Which of the two vanilla objects each source is allowed to aim at. */
+/**
+ * Which vanilla object each source is allowed to aim at.
+ *
+ * ~~two~~ **Three targets since 2026-09-23**: the persistent combat object,
+ * the fighter clip, and `_global` — the one object that belongs to no
+ * combatant, which the battle's crowd needed. A stat write stays on the
+ * combat object, where the build writes `game_defender.strength` (`+0x82df`).
+ */
 const WRITE_SOURCE_TARGETS = Object.freeze({
   [WriteSource.CANONICAL_HEALTH]: "combat-object",
   [WriteSource.CANONICAL_STATUS]: "combat-object",
   [WriteSource.DECLARED_RESOURCE]: "combat-object",
-  [WriteSource.CLIP_FACING]: "fighter-clip"
+  [WriteSource.CLIP_FACING]: "fighter-clip",
+  [WriteSource.CANONICAL_STAT]: "combat-object",
+  [WriteSource.DECLARED_BATTLE_RESOURCE]: "global"
 });
 
 /** True for a vanilla field a declared resource is allowed to reach. */
@@ -1008,8 +1075,13 @@ export function assertMirrorAgrees(record, canonical, options = {}) {
 
 export const WriteTarget = Object.freeze({
   COMBAT_OBJECT: "combat-object",
-  FIGHTER_CLIP: "fighter-clip"
+  FIGHTER_CLIP: "fighter-clip",
+  /** `_global`, the one object no combatant owns. Added 2026-09-23 for the crowd. */
+  GLOBAL: "global"
 });
+
+/** The path every `WriteTarget.GLOBAL` write carries: the build's own object. */
+export const GLOBAL_OBJECT_PATH = "_global";
 
 function indexById(combatants) {
   if (!Array.isArray(combatants)) throw new AdapterStateError("Combatant projections must be an array.");
@@ -1017,8 +1089,9 @@ function indexById(combatants) {
 }
 
 /**
- * The SHAPE half of the write check: the source is one of the four, the field
- * is in that source's fixed set, and the target is that source's object.
+ * The SHAPE half of the write check: the source is one of the ~~four~~ six,
+ * the field is in that source's fixed set, and the target is that source's
+ * object.
  * `fieldWrite` runs it on every write it builds and `assertWriteProvenance` on
  * every write it is handed, however that write was built.
  *
@@ -1068,9 +1141,11 @@ function fieldWrite({ combatantId, placement, field, from, to, reason, source, t
     combatantId,
     side: placement?.side ?? null,
     slotIndex: placement?.slotIndex ?? null,
-    path: target === WriteTarget.FIGHTER_CLIP
-      ? (placement?.instancePath ?? null)
-      : (placement?.stateObjectPath ?? null),
+    path: target === WriteTarget.GLOBAL
+      ? GLOBAL_OBJECT_PATH
+      : target === WriteTarget.FIGHTER_CLIP
+        ? (placement?.instancePath ?? null)
+        : (placement?.stateObjectPath ?? null),
     field,
     from,
     to,
@@ -1101,15 +1176,45 @@ function fieldWrite({ combatantId, placement, field, from, to, reason, source, t
  * is presentation, not combat state — so it is checked against the closed
  * `FACING_VALUES` vocabulary instead.
  *
+ * `declared-battle-resource` (2026-09-23) is the one source whose canonical
+ * location is not a combatant's: it must name no combatant and be `===` the
+ * post-action wire's `battleResources[field].value`, so a caller checking one
+ * passes those pools as `battleResources`. Without them, such a write is
+ * refused — there is nothing it could be identical to.
+ *
  * @param {object[]} writes
  * @param {object[]|Map} after the post-action combatant projections
+ * @param {object} [options.battleResources] the post-action wire's `battleResources`
  */
-export function assertWriteProvenance(writes, after) {
+export function assertWriteProvenance(writes, after, { battleResources = null } = {}) {
   const afterById = after instanceof Map ? after : indexById(after);
   for (const write of writes) {
     // The shape first, so a write that could never be legal is refused for
     // what it is rather than for a value it happens to match (2026-09-22).
     assertWriteShape(write);
+    if (write.source === WriteSource.DECLARED_BATTLE_RESOURCE) {
+      const where = `${GLOBAL_OBJECT_PATH}.${String(write.field)}`;
+      if (write.combatantId !== null) {
+        throw new AdapterStateError(
+          `The declared-battle-resource write to ${where} names combatant ${String(write.combatantId)}; ` +
+          "a battle's own pool belongs to no combatant."
+        );
+      }
+      const entry = battleResources?.[write.field];
+      if (entry === undefined) {
+        throw new AdapterStateError(
+          `The declared-battle-resource write to ${where} names a pool the resolved battle does not declare.`
+        );
+      }
+      if (write.to !== entry.value) {
+        throw new AdapterStateError(
+          `The ${write.source} write to ${where} carries ${JSON.stringify(write.to)}, but the resolved battle ` +
+          `holds ${JSON.stringify(entry.value)}. A vanilla write must be identical to a value the resolver ` +
+          "produced; a computed one is a second place combat is being decided."
+        );
+      }
+      continue;
+    }
     const projection = afterById.get(write.combatantId);
     const where = `${String(write.combatantId)}.${String(write.field)}`;
     if (write.source === WriteSource.CLIP_FACING) {
@@ -1139,6 +1244,18 @@ export function assertWriteProvenance(writes, after) {
         );
       }
       expected = entry.value;
+    } else if (write.source === WriteSource.CANONICAL_STAT) {
+      // The field names its canonical stat through the one-to-one mapping, and
+      // the value must be that stat's post-action value — never the backup it
+      // was computed from, never the build's formula re-run here.
+      const stat = STAT_FOR_VANILLA_FIELD[write.field];
+      const value = projection.stats?.[stat];
+      if (value === undefined) {
+        throw new AdapterStateError(
+          `The canonical-stat write to ${where} names stat ${String(stat)}, which the resolved projection does not carry.`
+        );
+      }
+      expected = value;
     } else {
       throw new AdapterStateError(`The write to ${where} declares no known write source.`);
     }
@@ -1163,12 +1280,14 @@ export function assertWriteProvenance(writes, after) {
  * reason, but it structurally cannot produce a combat value the resolver did
  * not already decide.
  *
- * Three kinds of field are written: `hitpoints` from canonical health, the six
- * status flags from canonical status, and one vanilla field per canonical
- * **resource** — which is how `armourclass`, `staminaleft`, `ammo_left` and
- * the armour piece ratings are written. An armour-first split arrives as two
- * ordered effects (`resource` then `damage`) and leaves as two ordered writes;
- * the adapter never performs the subtraction that decided them.
+ * ~~Three~~ **Five** kinds of field are written: `hitpoints` from canonical
+ * health, the six status flags from canonical status, one vanilla field per
+ * canonical **resource** — which is how `armourclass`, `staminaleft`,
+ * `ammo_left` and the armour piece ratings are written — and, since
+ * 2026-09-23, a base-stat field per moved canonical **stat** and a `_global`
+ * field per moved **battle pool** (the crowd). An armour-first split arrives
+ * as two ordered effects (`resource` then `damage`) and leaves as two ordered
+ * writes; the adapter never performs the subtraction that decided them.
  *
  * @param {object[]} params.before combatant projections before `applyAction`
  * @param {object[]} params.after  combatant projections after `applyAction`
@@ -1177,6 +1296,7 @@ export function assertWriteProvenance(writes, after) {
  * @param {Map|object} [params.mirrors] combatant id -> normalised vanilla record
  * @param {object} [params.battleBefore] the wire's `battleResources` before the action, if any
  * @param {object} [params.battleAfter]  the wire's `battleResources` after it, if any
+ * @param {object} [params.globals] the `_global` mirror (`vanillaGlobalsFrom`), for each write's `from`
  */
 export function vanillaWritesForResolvedAction({
   before,
@@ -1185,7 +1305,8 @@ export function vanillaWritesForResolvedAction({
   placements = new Map(),
   mirrors = new Map(),
   battleBefore = null,
-  battleAfter = null
+  battleAfter = null,
+  globals = null
 } = {}) {
   const beforeById = indexById(before);
   const afterById = indexById(after);
@@ -1338,23 +1459,29 @@ export function vanillaWritesForResolvedAction({
   };
 
   /**
-   * ► **A BASE STAT THAT MOVED IN BATTLE IS REPORTED, NEVER WRITTEN — and
-   *   until 2026-09-22 it was neither (found by Codex, reproduced first).**
-   *   `EffectKind.STAT` arrived with SS2's four stat spells, and this function
-   *   had no arm for it and no stat term in its totality pass, so a colossus
-   *   moved canonical `strength` 9 -> 27 with no write and no report.
+   * ► ~~**A BASE STAT THAT MOVED IN BATTLE IS REPORTED, NEVER WRITTEN**~~ —
+   *   **WRITTEN since 2026-09-23, the owner's "write both back" (decided
+   *   2026-09-22).** Until 2026-09-22 it was neither written nor reported
+   *   (found by Codex, reproduced first): `EffectKind.STAT` arrived with SS2's
+   *   four stat spells, and this function had no arm for it and no stat term
+   *   in its totality pass, so a colossus moved canonical `strength` 9 -> 27
+   *   with no write and no report. It was then REPORTED, because the four
+   *   sources of the day carried no stat.
    *
-   *   **Written it cannot be, as the contract stands**: `WriteSource` is a
-   *   closed set of four (health, status, declared resource, clip facing) and
-   *   none is a stat, and a supplied gladiator's base stats are licensed
-   *   evidence the adapter writes over only for an AI-filled slot, at
-   *   construction (`toVanillaCombatant`'s `{ stats: true }`). A fifth source
-   *   is a decision, not a fix. **So it is REPORTED, exactly as a destroyed
-   *   armour piece outside the write allowlist is** — the designed behaviour
-   *   the contract names for a resolved value the adapter will not write. The
-   *   vanilla field is named through `CANONICAL_STAT_SOURCES`.
+   *   **It is written through `WriteSource.CANONICAL_STAT`**, onto the vanilla
+   *   field `CANONICAL_STAT_SOURCES` names, with the post-action `stats[stat]`
+   *   and nothing else — `assertWriteProvenance` refuses any other number.
+   *   **The licensed base stats are not what moves**: the caller's supplied
+   *   combat object is copied at normalisation and never written, and the
+   *   fight-start values the build restores from are the rule set's
+   *   `backup_*`, declared at the opening and never moved mid-battle. Only the
+   *   live mirror changes, exactly as the build's own `game_defender.strength`
+   *   does (`+0x82df`).
+   *
+   *   A stat with no vanilla field — a hand-built projection's invention; the
+   *   roster builds only the seven — is still REPORTED rather than guessed at.
    */
-  const emitStat = (id, stat) => {
+  const emitStat = (id, stat, reason) => {
     const key = `${id}:stat:${stat}`;
     if (emitted.has(key)) return;
     const current = afterById.get(id);
@@ -1362,29 +1489,45 @@ export function vanillaWritesForResolvedAction({
     const previous = beforeById.get(id);
     if (previous && previous.stats?.[stat] === current.stats?.[stat]) return;
     emitted.add(key);
-    unmapped.push(Object.freeze({
+    const field = Object.hasOwn(CANONICAL_STAT_SOURCES, stat) ? CANONICAL_STAT_SOURCES[stat] : null;
+    if (field === null) {
+      unmapped.push(Object.freeze({
+        combatantId: id,
+        stat,
+        field: null,
+        reason: "a stat moved in battle that no vanilla base-stat field carries (CANONICAL_STAT_SOURCES names seven)"
+      }));
+      return;
+    }
+    const mirror = mirrorFor(id);
+    writes.push(fieldWrite({
       combatantId: id,
-      stat,
-      field: CANONICAL_STAT_SOURCES[stat] ?? null,
-      reason:
-        "a base stat moved in battle, and no WriteSource carries a stat (the four are canonical health, " +
-        "canonical status, declared resource and clip facing), so the resolved value is reported rather than " +
-        "written. Writing it back is a contract decision: see docs/ss2-adapter-contract.md, 'Write provenance'"
+      placement: placementFor(id),
+      field,
+      from: mirror ? mirror.fields[field] : previous?.stats?.[stat],
+      // The value the resolver wrote, and never `backup * 3` recomputed here.
+      to: current.stats[stat],
+      reason,
+      source: WriteSource.CANONICAL_STAT
     }));
   };
 
   /**
-   * ► **A BATTLE'S OWN POOL THAT MOVED IS REPORTED, NEVER WRITTEN — the stat
-   *   rule above, one scope up (2026-09-22).** `EffectKind.BATTLE_RESOURCE`
-   *   arrived with SS2's crowd: `crowd_interest` lives on `_global` in the
-   *   build, one per bout, and on the battle here. **No `WriteSource` carries
-   *   it** — the four are canonical health, canonical status, a combatant's
-   *   declared resource and clip facing, and every one of them names a
-   *   combatant — so the resolved value reaches combat state and the hash and
-   *   is reported, with the vanilla global it would land on. Writing it back
-   *   is a fifth source and an owner's decision, not a fix.
+   * ► ~~**A BATTLE'S OWN POOL THAT MOVED IS REPORTED, NEVER WRITTEN — the stat
+   *   rule above, one scope up (2026-09-22).**~~ **WRITTEN since 2026-09-23,
+   *   the owner's "write both back" (decided 2026-09-22).**
+   *   `EffectKind.BATTLE_RESOURCE` arrived with SS2's crowd: `crowd_interest`
+   *   lives on `_global` in the build, one per bout, and on the battle here.
+   *   It was REPORTED because every source of the day named a combatant.
+   *
+   *   **It is written through `WriteSource.DECLARED_BATTLE_RESOURCE`**, onto
+   *   `_global` (`WriteTarget.GLOBAL`), with the post-action wire's
+   *   `battleResources[name].value` and nothing else — never `before +
+   *   crowd_action` re-added here, which would skip the resolver's 1..100
+   *   clamp. A pool the build keeps no global for
+   *   (`CANONICAL_BATTLE_RESOURCE_SOURCES`) is still REPORTED.
    */
-  const emitBattleResource = (name) => {
+  const emitBattleResource = (name, reason) => {
     const key = `battle:${name}`;
     if (emitted.has(key)) return;
     const current = battleAfter?.[name];
@@ -1392,16 +1535,28 @@ export function vanillaWritesForResolvedAction({
     const previous = battleBefore?.[name];
     if (previous !== undefined && previous.value === current.value) return;
     emitted.add(key);
-    unmapped.push(Object.freeze({
-      battleResource: name,
+    if (!CANONICAL_BATTLE_RESOURCE_SOURCES.includes(name)) {
+      unmapped.push(Object.freeze({
+        battleResource: name,
+        field: name,
+        scope: GLOBAL_OBJECT_PATH,
+        from: previous?.value ?? null,
+        to: current.value,
+        reason:
+          "a battle-wide pool moved that no vanilla global carries (CANONICAL_BATTLE_RESOURCE_SOURCES names the " +
+          "build's _global pools), so the resolved value is reported rather than given an invented global"
+      }));
+      return;
+    }
+    writes.push(fieldWrite({
+      combatantId: null,
+      placement: null,
       field: name,
-      scope: "_global",
-      from: previous?.value ?? null,
+      from: globals ? globals[name] : previous?.value,
       to: current.value,
-      reason:
-        "a battle-wide pool moved, and no WriteSource carries one (the four are canonical health, canonical " +
-        "status, a combatant's declared resource and clip facing), so the resolved value is reported rather than " +
-        "written. Writing it back is a contract decision: see docs/ss2-adapter-contract.md, 'Write provenance'"
+      reason,
+      source: WriteSource.DECLARED_BATTLE_RESOURCE,
+      target: WriteTarget.GLOBAL
     }));
   };
 
@@ -1421,9 +1576,9 @@ export function vanillaWritesForResolvedAction({
       if (!current) throw new AdapterStateError(`No resolved state for combatant ${String(effect.targetId)}.`);
       emitStatus(effect.targetId, effect.status, current.status.includes(effect.status), "status-effect");
     } else if (effect.kind === EffectKind.STAT) {
-      emitStat(effect.targetId, effect.stat);
+      emitStat(effect.targetId, effect.stat, "stat-effect");
     } else if (effect.kind === EffectKind.BATTLE_RESOURCE) {
-      emitBattleResource(effect.resource);
+      emitBattleResource(effect.resource, "battle-resource-effect");
     }
   }
 
@@ -1437,7 +1592,7 @@ export function vanillaWritesForResolvedAction({
       emitResource(id, resource, "resolved-state-diff");
     }
     for (const stat of Object.keys(current.stats ?? {})) {
-      emitStat(id, stat);
+      emitStat(id, stat, "resolved-state-diff");
     }
     const previous = beforeById.get(id);
     const was = new Set(previous?.status ?? []);
@@ -1453,13 +1608,13 @@ export function vanillaWritesForResolvedAction({
     }
   }
   // And the battle's own pools, which belong to no combatant above.
-  for (const name of Object.keys(battleAfter ?? {})) emitBattleResource(name);
+  for (const name of Object.keys(battleAfter ?? {})) emitBattleResource(name, "resolved-state-diff");
 
   // 3. The shape check. Every write must be identical to a value the resolved
   //    projection actually holds, at the canonical location its source names.
   //    This runs on the produced list, not on the code that produced it, so it
   //    catches a write that never went through `fieldWrite` too.
-  assertWriteProvenance(writes, afterById);
+  assertWriteProvenance(writes, afterById, { battleResources: battleAfter });
 
   return Object.freeze({ writes: Object.freeze(writes), unmapped: Object.freeze(unmapped) });
 }
@@ -1480,6 +1635,14 @@ export function applyVanillaWrites(record, writes) {
   const clip = { ...record.clip };
   const written = new Set();
   for (const write of writes) {
+    if (write.target === WriteTarget.GLOBAL) {
+      // Refused rather than folded in: `crowd_interest` on a gladiator's
+      // combat object is a field the build never reads there (2026-09-23).
+      throw new AdapterStateError(
+        `The write to ${GLOBAL_OBJECT_PATH}.${String(write.field)} targets _global, not a combatant's record; ` +
+        "apply it with applyGlobalWrites."
+      );
+    }
     if (write.target === WriteTarget.FIGHTER_CLIP) clip[write.field] = write.to;
     else {
       fields[write.field] = write.to;
@@ -1496,6 +1659,70 @@ export function applyVanillaWrites(record, writes) {
     misplacedClipFields: record.misplacedClipFields,
     unknownFields: record.unknownFields
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* The `_global` mirror (2026-09-23)                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The `_global` fields a battle's pools mirror to, as the resolved battle
+ * holds them: every `CANONICAL_BATTLE_RESOURCE_SOURCES` name the wire's
+ * `battleResources` declares, at its value, and nothing else. Pure; copies.
+ *
+ * This is how a host brings `_global` into step at construction. The build
+ * opens `crowd_interest` itself from the hero's and villain's `herolevel`
+ * (`crowd_bar` `+0x011f`-`+0x0158`); the resolved battle opens it from EVERY
+ * combatant's (owner's decision (f)), which is the build's own number in 1v1
+ * and is the number every later write continues from.
+ */
+export function vanillaGlobalsFrom(battleResources) {
+  const globals = {};
+  for (const name of CANONICAL_BATTLE_RESOURCE_SOURCES) {
+    const entry = battleResources?.[name];
+    if (entry !== undefined) globals[name] = entry.value;
+  }
+  return Object.freeze(globals);
+}
+
+/** Applies `WriteTarget.GLOBAL` writes to a `_global` mirror. Pure; refuses any other target. */
+export function applyGlobalWrites(globals, writes) {
+  const next = { ...globals };
+  for (const write of writes) {
+    if (write.target !== WriteTarget.GLOBAL) {
+      throw new AdapterStateError(
+        `The write to ${String(write.combatantId)}.${String(write.field)} targets the ${String(write.target)}, not _global.`
+      );
+    }
+    next[write.field] = write.to;
+  }
+  return Object.freeze(next);
+}
+
+/**
+ * Where a `_global` mirror disagrees with the resolved battle's pools, as
+ * human-readable strings; empty means in step. Compares every pool the build
+ * keeps a global for, so an unwritten move is drift, not silence.
+ */
+export function globalMirrorDifferences(globals, battleResources) {
+  const problems = [];
+  for (const name of CANONICAL_BATTLE_RESOURCE_SOURCES) {
+    const entry = battleResources?.[name];
+    if (entry === undefined) continue;
+    if (globals?.[name] !== entry.value) {
+      problems.push(`${GLOBAL_OBJECT_PATH}.${name} ${String(globals?.[name])} != battle resource ${String(entry.value)}`);
+    }
+  }
+  return problems;
+}
+
+/** Fails loudly when the `_global` mirror has drifted from the resolved battle. */
+export function assertGlobalMirrorAgrees(globals, battleResources) {
+  const problems = globalMirrorDifferences(globals, battleResources);
+  if (problems.length > 0) {
+    throw new AdapterStateError(`The vanilla _global mirror has drifted from resolved state: ${problems.join("; ")}.`);
+  }
+  return true;
 }
 
 /** The one write that ever targets the fighter clip rather than the combat object. */

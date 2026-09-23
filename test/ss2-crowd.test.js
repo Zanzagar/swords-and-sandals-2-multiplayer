@@ -40,7 +40,9 @@ import {
   SS2_GHOST_STRIKE, SS2_REJUVENATE, SS2_STAT_SPELLS, SS2_TELEPORT, SS2_TIMED_BUFFS, SS2_WEAKEN_ARMOUR, SS2_WHIRLWIND,
   Ss2ActionType, VANILLA_PHASE_LABEL, ss2BattleValues, ss2Combatant, ss2TeamRules
 } from "../src/team/ss2-rules.js";
-import { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS, vanillaWritesForResolvedAction } from "../src/adapter/index.js";
+import {
+  createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS, vanillaWritesForResolvedAction, WriteSource, WriteTarget
+} from "../src/adapter/index.js";
 import { demoSide } from "../tools/arena/roster.js";
 import {
   SS2_CROWD_ACTION, SS2_CROWD_INTEREST, SS2_EMPERORS_GIFT, ss2CrowdInterestOf, ss2CrowdStep, ss2TeamVictoryPurses,
@@ -508,52 +510,122 @@ test("a settled SS2 bout carries the crowd its purse is paid on", () => {
 });
 
 /* ------------------------------------------------------------------ *
- * The adapter: reported, never written                                 *
- * ------------------------------------------------------------------ */
+ * The adapter: WRITTEN to `_global` (owner, 2026-09-22)                *
+ * ------------------------------------------------------------------ *
+ *
+ * ~~Reported, never written~~ — **the owner decided to WRITE the crowd back**,
+ * keeping the provenance mechanism. The build keeps one `crowd_interest` on
+ * `_global` (`crowd_bar` `+0x011f`-`+0x0158` opens it, `nextphase`
+ * `+0x3541`-`+0x35b4` moves it), so the write names the
+ * `declared-battle-resource` source, aims at the `global` target and must be
+ * `===` the wire's `battleResources.crowd_interest.value`. Until 2026-09-23
+ * these tests asserted a REPORT in `unmapped` and no write.
+ */
 
 const crowdReports = (unmapped) => unmapped.filter((entry) => Object.hasOwn(entry, "battleResource"));
+const crowdWrites = (writes) => writes.filter((write) => write.source === WriteSource.DECLARED_BATTLE_RESOURCE);
 
-test("the arena's own host carries the crowd, and a phase's move is REPORTED unmapped, not written", () => {
-  const host = createVanillaBattleHost({
-    teams: [demoSide("red", 1, { ss2Combatant, ss2BattleValues }), demoSide("blue", 1, { ss2Combatant, ss2BattleValues })],
+/** The arena's own 1v1 (`tools/arena/main.js`'s path). */
+function demoHost({ seed = 3, blue = (member) => member } = {}) {
+  const blueSide = demoSide("blue", 1, { ss2Combatant, ss2BattleValues });
+  blueSide.members[0] = blue(blueSide.members[0]);
+  return createVanillaBattleHost({
+    teams: [demoSide("red", 1, { ss2Combatant, ss2BattleValues }), blueSide],
     rules: ss2TeamRules,
     bindings: SS2_STATIC_MAP_BINDINGS,
-    seed: 3,
+    seed,
     awaitAnimations: false
   });
+}
+
+test("a completed phase WRITES the crowd onto `_global.crowd_interest`, the battle's own pool, and reports nothing", () => {
+  const host = demoHost();
   const levels = host.battle.teams.flatMap((team) => team.combatants)
     .map((combatant) => combatant.resources.herolevel.value);
   const opening = ss2CrowdInterestOf(toTeamWireState(host.battle));
   assert.equal(opening, levels[0] + levels[1], "the demo roster's two levels, summed");
+  assert.deepEqual(host.vanillaGlobals(), { crowd_interest: opening },
+    "brought into step at construction, where the build's `crowd_bar` opens it");
+  assert.deepEqual(host.diagnostics.globalSyncs, [{ field: "crowd_interest", path: "_global", to: opening }],
+    "and reported, so a surface knows to set it");
+
   const actorId = currentCombatant(host.battle).id;
   const step = host.submit({ actorId, type: Ss2ActionType.REST, targetId: actorId });
-  const [report, ...others] = crowdReports(step.unmapped);
-  assert.deepEqual(others, []);
-  assert.deepEqual({ ...report, reason: undefined }, {
-    battleResource: "crowd_interest",
-    field: "crowd_interest",
-    scope: "_global",
-    from: opening,
-    to: Math.max(1, Math.min(100, opening - 2)),
-    reason: undefined
-  });
-  assert.match(report.reason, /WriteSource/);
-  assert.deepEqual(step.writes.filter((write) => write.field === "crowd_interest"), [],
-    "no WriteSource carries a battle's own pool — docs/ss2-adapter-contract.md");
+  const moved = ss2CrowdInterestOf(host.wire());
+  assert.equal(moved, opening - 2, "a rest's `crowd_action` is -2 (`+0x5150`), and 8 - 2 is inside 1..100");
+  assert.deepEqual(
+    crowdWrites(step.writes).map(({ target, path, combatantId, side, slotIndex, field, from, to }) =>
+      ({ target, path, combatantId, side, slotIndex, field, from, to })),
+    [{
+      target: WriteTarget.GLOBAL,
+      path: "_global",
+      combatantId: null,
+      side: null,
+      slotIndex: null,
+      field: "crowd_interest",
+      from: opening,
+      to: moved
+    }]
+  );
+  assert.deepEqual(crowdReports(step.unmapped), [], "written, so no longer reported");
+  assert.deepEqual(host.vanillaGlobals(), { crowd_interest: moved });
 });
 
-test("the report is total and quiet: an unmoved crowd reports nothing, a moved one reports once", () => {
+test("a KILLING phase writes no crowd — `death()` deletes `nextphase` — while the same verb's miss did", () => {
+  // Seed 5, blue-1 staged at 1 hitpoint: red-1's first quick attack misses
+  // (the crowd moves 5 -> 4) and its second kills with the crowd at 3, above
+  // the floor, so an unmoved crowd there is the kill and not the clamp.
+  const host = demoHost({ seed: 5, blue: (member) => ({ ...member, vanilla: { ...member.vanilla, hitpoints: 1 } }) });
+  const steps = [];
+  for (let actions = 0; !host.battle.result && actions < 60; actions += 1) {
+    const actorId = host.currentCombatantId();
+    const before = host.vanillaGlobals().crowd_interest;
+    steps.push({ actorId, before, step: host.submit({ actorId, ...host.suggestAction() }) });
+  }
+  const killing = steps.at(-1);
+  assert.ok(killing.step.result, "the bout ends on the kill");
+  assert.equal(killing.step.action.type, Ss2ActionType.QUICK_ATTACK);
+  assert.ok(killing.before > 1, `the crowd stood at ${killing.before}, above the clamp's floor`);
+  assert.deepEqual(crowdWrites(killing.step.writes), [], "the killing phase adds no delta, so nothing is written");
+  assert.equal(host.vanillaGlobals().crowd_interest, killing.before);
+  assert.equal(ss2CrowdInterestOf(host.wire()), killing.before);
+
+  const sameVerbEarlier = steps.slice(0, -1)
+    .filter(({ actorId, step }) => actorId === "red-1" && step.action.type === Ss2ActionType.QUICK_ATTACK);
+  assert.ok(sameVerbEarlier.length > 0);
+  assert.ok(sameVerbEarlier.every(({ step }) => crowdWrites(step.writes).length === 1),
+    "every earlier completed quick attack of red-1's wrote the crowd");
+});
+
+test("the write is total and quiet: an unmoved crowd writes nothing, a moved one writes once, from the `_global` mirror", () => {
   const battleAfter = { crowd_interest: { value: 8, min: null, max: null } };
   const battleBefore = { crowd_interest: { value: 10, min: null, max: null } };
-  const moved = vanillaWritesForResolvedAction({ before: [], after: [], effects: [], battleBefore, battleAfter });
-  assert.deepEqual(crowdReports(moved.unmapped).map(({ from, to }) => [from, to]), [[10, 8]], "found by the totality pass");
+  const globals = { crowd_interest: 10 };
+  const moved = vanillaWritesForResolvedAction({ before: [], after: [], effects: [], battleBefore, battleAfter, globals });
+  assert.deepEqual(crowdWrites(moved.writes).map(({ from, to, reason }) => [from, to, reason]),
+    [[10, 8, "resolved-state-diff"]], "found by the totality pass");
+  assert.deepEqual(crowdReports(moved.unmapped), []);
   const withEffect = vanillaWritesForResolvedAction({
-    before: [], after: [], battleBefore, battleAfter,
+    before: [], after: [], battleBefore, battleAfter, globals,
     effects: [{ kind: "battle-resource", resource: "crowd_interest", to: 8 }]
   });
-  assert.equal(crowdReports(withEffect.unmapped).length, 1, "the effect pass and the totality pass report it ONCE");
+  assert.deepEqual(crowdWrites(withEffect.writes).map(({ reason }) => reason), ["battle-resource-effect"],
+    "the effect pass and the totality pass write it ONCE, attributed to the effect");
   const still = vanillaWritesForResolvedAction({ before: [], after: [], effects: [], battleBefore, battleAfter: battleBefore });
-  assert.deepEqual(crowdReports(still.unmapped), []);
-  assert.deepEqual(crowdReports(vanillaWritesForResolvedAction({ before: [], after: [] }).unmapped), [],
-    "a battle with no pool of its own reports none");
+  assert.deepEqual(still.writes, []);
+  assert.deepEqual(vanillaWritesForResolvedAction({ before: [], after: [] }).writes, [],
+    "a battle with no pool of its own writes none");
+
+  // A battle pool the build keeps no `_global` for is STILL reported: the
+  // adapter will not invent a global to hold it.
+  const invented = vanillaWritesForResolvedAction({
+    before: [], after: [],
+    battleBefore: { ...battleBefore, momentum: { value: 0, min: null, max: null } },
+    battleAfter: { ...battleAfter, momentum: { value: 3, min: null, max: null } },
+    globals
+  });
+  assert.deepEqual(crowdWrites(invented.writes).map(({ field }) => field), ["crowd_interest"]);
+  assert.deepEqual(crowdReports(invented.unmapped).map(({ battleResource, from, to }) => [battleResource, from, to]),
+    [["momentum", 0, 3]]);
+  assert.match(crowdReports(invented.unmapped)[0].reason, /no vanilla global/);
 });

@@ -454,9 +454,9 @@ Three named things in `src/adapter/state-bridge.js` carry it:
 
 | Name | What it is |
 | --- | --- |
-| `WriteSource` | a closed set of exactly four values — `canonical-health`, `canonical-status`, `declared-resource`, `clip-facing`. Every write must name one. `fieldWrite` refuses a write that names none, because "a write with no declared source is a write with no evidence that the resolver produced its value." |
-| `ALLOWED_WRITE_FIELDS` | which vanilla fields each source may target, **fixed here and independent of any scenario**: `hitpoints` for canonical health, the six status flags for canonical status, `CANONICAL_RESOURCE_SOURCES` for a declared resource ~~(plus the timed `spell_*` pools, via `isResourceBackedVanillaField`)~~ — **and nothing else, corrected 2026-09-22: the build keeps the six timed counters on the fighter clip, which a declared resource never writes, so a counter is reported unmapped with a reason naming the clip** — `gladiator_dir` for the clip facing. A parallel table pins each source to one of the two write targets, so a combat-object source cannot aim at a clip or the reverse. `assertWriteProvenance` checks this shape as well as the value (added 2026-09-22), so a hand-built write gets the same refusal a built one does. |
-| `assertWriteProvenance(writes, after)` | the check. For each write the source names exactly one place in the post-action projection, and `write.to` must be `===` what is there: `projection.health`, `projection.status.includes(field)`, or `projection.resources[field].value`. Not "close to", not "derivable from" — identical. |
+| `WriteSource` | a closed set of exactly ~~four values — `canonical-health`, `canonical-status`, `declared-resource`, `clip-facing`~~ **six values since 2026-09-23 — `canonical-health`, `canonical-status`, `declared-resource`, `clip-facing`, and the owner's "write both back" pair `canonical-stat` and `declared-battle-resource`**. Every write must name one. `fieldWrite` refuses a write that names none, because "a write with no declared source is a write with no evidence that the resolver produced its value." |
+| `ALLOWED_WRITE_FIELDS` | which vanilla fields each source may target, **fixed here and independent of any scenario**: `hitpoints` for canonical health, the six status flags for canonical status, `CANONICAL_RESOURCE_SOURCES` for a declared resource ~~(plus the timed `spell_*` pools, via `isResourceBackedVanillaField`)~~ — **and nothing else, corrected 2026-09-22: the build keeps the six timed counters on the fighter clip, which a declared resource never writes, so a counter is reported unmapped with a reason naming the clip** — `gladiator_dir` for the clip facing, **the seven base-stat fields `CANONICAL_STAT_SOURCES` maps to (`strength`, `speed`, `attack`, `defence`, `vitality`, `stamina`, `magicka` — the vanilla names) for a canonical stat, and `CANONICAL_BATTLE_RESOURCE_SOURCES` (`crowd_interest` alone) for a declared battle resource** (both added 2026-09-23). A parallel table pins each source to one of the ~~two~~ **three** write targets — the combat object (health, status, resources, **stats**), the fighter clip (facing), and **`_global` (`WriteTarget.GLOBAL`, path `_global`; the battle's pools, and nothing else)** — so no source can aim at another's object. `assertWriteProvenance` checks this shape as well as the value (added 2026-09-22), so a hand-built write gets the same refusal a built one does. |
+| `assertWriteProvenance(writes, after, { battleResources })` | the check. For each write the source names exactly one place in the post-action projection, and `write.to` must be `===` what is there: `projection.health`, `projection.status.includes(field)`, `projection.resources[field].value`, **`projection.stats[stat]` for the canonical stat the field maps from, or — for the one source that names no combatant — the post-action wire's `battleResources[field].value`**, which the caller passes as `battleResources` (a battle-resource write naming a combatant, or checked with no pools to compare against, is refused). Not "close to", not "derivable from" — identical. |
 
 That is what a prose rule could never give. `to: before - effect.amount` reads
 plausibly and passes review; a value computed anywhere in the module has no
@@ -465,31 +465,95 @@ check walks the produced list rather than trusting how it was built, so a write
 pushed straight onto the array without going through `fieldWrite` is caught too.
 `vanillaWritesForResolvedAction` runs it as its own final step before returning.
 
-**An in-battle base-stat change is REPORTED, not written (2026-09-22).**
+~~**An in-battle base-stat change is REPORTED, not written (2026-09-22).**~~
+**An in-battle base-stat change is WRITTEN (2026-09-23; the owner decided
+"write both back" on 2026-09-22).**
 `EffectKind.STAT` (SS2's colossus, little fat kid, swift sandals and bloodlust)
-moves a canonical `stats` value mid-battle. None of the four sources above
+moves a canonical `stats` value mid-battle. ~~None of the four sources above
 carries a stat, and a supplied gladiator's base stats are licensed evidence the
 adapter writes over only for an AI-filled slot at construction (`{ stats: true }`,
 below), so the resolved value reaches combat state and the hash and is reported
 in `unmapped` as `{ combatantId, stat, field, reason }` — the treatment a
-destroyed armour piece outside the write allowlist gets. Until that date it was
-neither written nor reported (found by a Codex review). **Writing it back would
-be a fifth `WriteSource` and a new policy for licensed base-stat fields; that
-is undecided, not overlooked.**
+destroyed armour piece outside the write allowlist gets.~~ **It reaches the
+vanilla base-stat field `CANONICAL_STAT_SOURCES` names — `agility` lands on
+`speed`, `defense` on `defence` — through the `canonical-stat` source, onto
+the combat object of whoever the effect targeted (little fat kid writes the
+VICTIM's), with the post-action `stats[stat]` and nothing else; the expiry
+writes the restored value back the same way. A stat no vanilla field carries
+is still reported in `unmapped` as `{ combatantId, stat, field: null, reason }`.**
+Until 2026-09-22 it was neither written nor reported (found by a Codex review),
+and from then until 2026-09-23 it was reported and not written. ~~**Writing it
+back would be a fifth `WriteSource` and a new policy for licensed base-stat
+fields; that is undecided, not overlooked.**~~
 
-**The battle's crowd is REPORTED, not written, the same way (2026-09-22).**
+**The licensed base stats are still not what moves.** The reason for
+reporting rather than writing was that "a supplied gladiator's base stats are
+licensed evidence", and that stays true of everything the write-back touches:
+
+- the caller's supplied combat object is **copied** at normalisation
+  (`normaliseVanillaCombatant`) and never written — every write produces a new
+  mirror record, so the object the caller holds keeps the licensed numbers;
+- the **fight-start values** the build restores from at expiry are the rule
+  set's `backup_*` resources (`backup_strength`, `backup_speed`,
+  `backup_attack`, `backup_defence`), declared at the opening from the stats
+  the combatant was built with and never moved mid-battle — none of them is in
+  `CANONICAL_RESOURCE_SOURCES`, so no write reaches them either;
+- **only the live mirror changes**, exactly as the build's own
+  `game_defender.strength = round(backup_strength / 2)` (`+0x82df`) changes the
+  persistent combat object in battle. The construction-time rule is unchanged:
+  the adapter still writes base stats over a template only for an AI-filled
+  slot (`{ stats: true }`, below).
+
+`test/ss2-stat-spells.test.js` pins all three for colossus and little fat kid.
+
+**The host's agreement check compares stats after every submission
+(2026-09-23).** `mirrorDifferences`' `includeStats` still defaults to `false`,
+but `createVanillaBattleHost` now passes `true` both at construction (for a
+supplied gladiator, whose stats were read from its own record, so a
+disagreement there means licensed stats were rewritten and is refused) and
+after every submitted action. It was left out while stats were reported rather
+than written — comparing then would have refused every colossus — and keeping
+it out would have hidden exactly the drift Codex found: a stat that moved with
+no write reaching the mirror. Pinned in `test/ss2-adapter-integration.test.js`.
+
+~~**The battle's crowd is REPORTED, not written, the same way (2026-09-22).**~~
+**The battle's crowd is WRITTEN to `_global` (2026-09-23; the same decision).**
 `EffectKind.BATTLE_RESOURCE` moves one of the battle's OWN declared pools — for
 SS2, `crowd_interest`, the build's one `_global` per bout, opened at the sum of
 the fighters' `herolevel` and moved by every completed phase
-(`src/team/ss2-crowd.js`). Every one of the four sources above names a
+(`src/team/ss2-crowd.js`). ~~Every one of the four sources above names a
 combatant and this pool belongs to none, so the resolved value reaches combat
 state and the hash and is reported in `unmapped` as `{ battleResource, field,
 scope: "_global", from, to, reason }`, once per action, by the effect pass or
-the totality pass. `vanillaWritesForResolvedAction` reads the pool from the
-wire's `battleResources` before and after (`battleBefore`/`battleAfter`), which
-`createVanillaBattleHost` passes. **Writing it to `_global.crowd_interest`
+the totality pass.~~ **It is written once per action, by the effect pass or the
+totality pass, through the `declared-battle-resource` source: target
+`WriteTarget.GLOBAL`, path `_global`, `combatantId: null`, and `to` `===` the
+post-action wire's `battleResources.crowd_interest.value` — never `before +
+crowd_action` re-added in the adapter, which would skip the resolver's 1..100
+clamp. A killing phase writes nothing, because `death()` deletes `nextphase`
+and the pool does not move. A battle pool the build keeps no global for
+(`CANONICAL_BATTLE_RESOURCE_SOURCES` names only `crowd_interest`) is still
+reported in `unmapped` as `{ battleResource, field, scope: "_global", from, to,
+reason }`.** `vanillaWritesForResolvedAction` reads the pool from the
+wire's `battleResources` before and after (`battleBefore`/`battleAfter`), and
+each write's `from` from the `_global` mirror (`globals`), which
+`createVanillaBattleHost` passes. ~~**Writing it to `_global.crowd_interest`
 would be a fifth `WriteSource`, and a global rather than a per-combatant
-field; that is the owner's decision, undecided rather than overlooked.**
+field; that is the owner's decision, undecided rather than overlooked.**~~
+
+**How `_global` fits the pinning table.** It is a third write target beside
+the combat object and the fighter clip, owned by exactly one source, and it has
+its own mirror on the host rather than a combatant's record: `vanillaGlobals()`
+reads it, `applyGlobalWrites` applies to it, `applyVanillaWrites` **refuses** a
+`_global` write so the crowd can never land on a gladiator's object, and
+`assertGlobalMirrorAgrees` compares it with the battle's pools after every
+submission, so a crowd that moved with no write reaching it is drift. No caller
+supplies a `_global`, so the host brings it into step at construction from the
+battle's opening pools (`vanillaGlobalsFrom`) and reports that as
+`diagnostics.globalSyncs` — the build opens `crowd_interest` itself from the
+hero's and villain's levels (`crowd_bar` `+0x011f`-`+0x0158`), which is the
+resolved opening in 1v1 but not in team play, where the resolved battle sums
+every combatant's.
 
 `clip-facing` is the one source with no canonical counterpart — the facing is
 presentation, not combat state — so it is checked against the closed
@@ -497,7 +561,8 @@ presentation, not combat state — so it is checked against the closed
 
 A declared resource may never name a field another source already owns
 (`RESOURCE_RESERVED_FIELDS`: `hitpoints`, `hitpointsmax`, the six status flags,
-and `gladiator_dir`). Without that, the resource branch could forge a health or
+~~and~~ `gladiator_dir`, **and since 2026-09-23 the seven base-stat fields the
+`canonical-stat` source owns**). Without that, the resource branch could forge a health or
 status write with a number canonical health never produced.
 
 The effect list still supplies only the *ordering* and the *reason*. The adapter
@@ -714,7 +779,8 @@ bag, and `battle-host.js` puts each one on its own slot.
 
 `diagnostics.aiFillResourceGaps` **no longer exists**. The host's frozen
 diagnostics object names `aiFilledSlots`, `aiFillMirrorRewrites`,
-`aiFillLoadoutGaps`, `canonicalSyncs`, `maximumHealthReports` and
+`aiFillLoadoutGaps`, `canonicalSyncs`, **`globalSyncs` (added 2026-09-23)**,
+`maximumHealthReports` and
 `startingStatusEffects`; the old key survives only inside comments that
 describe what it used to do, which is how it went on reading as live.
 

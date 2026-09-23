@@ -16,6 +16,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 
 import {
   acknowledgeResultAnimation,
@@ -38,10 +39,12 @@ import {
   toTeamWireState
 } from "../src/team/index.js";
 
-import { ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
+import { Ss2ActionType, ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
+import { demoSide } from "../tools/arena/roster.js";
 import {
   AcknowledgementError,
   ActionAnimationError,
+  assertWriteProvenance,
   BattleHostError,
   bindingPlanFor,
   CANONICAL_RESOURCE_SOURCES,
@@ -55,6 +58,7 @@ import {
   presentResolvedEvents,
   STATUS_FLAG_FIELDS,
   VILLAIN_SIDE,
+  WriteSource,
   WriteTarget
 } from "../src/adapter/index.js";
 
@@ -1571,20 +1575,23 @@ test("a placeholder rule set that declares no armour effect still writes only hi
   // ► **`stat` JOINED THEM 2026-09-22**, for SS2's four stat spells: an
   //   absolute write of one of a combatant's `stats`, which no kind could
   //   express. Generic like the rest — the resolver writes a key the stats
-  //   already carry and never learns what strength means. **The adapter does
+  //   already carry and never learns what strength means. ~~**The adapter does
   //   not write it** onto the vanilla `strength`/`speed`/`attack`/`defence`
   //   fields — no `WriteSource` carries a stat — and REPORTS it in `unmapped`
-  //   instead (`test/ss2-stat-spells.test.js`, docs/ss2-adapter-contract.md
-  //   "Write provenance"). ~~it skips kinds it has no arm for~~ — it did, and
+  //   instead~~ **The adapter WRITES it since 2026-09-23** (the owner's "write
+  //   both back"), through the `canonical-stat` source
+  //   (`test/ss2-stat-spells.test.js`, docs/ss2-adapter-contract.md "Write
+  //   provenance"). ~~it skips kinds it has no arm for~~ — it did, and
   //   silently, until a Codex review of 2026-09-22.
   //
   // ► **`battle-resource` JOINED THEM 2026-09-22**, for SS2's crowd: an
   //   absolute write of one of the BATTLE's own declared pools, with no
   //   `targetId` — `crowd_interest` is one `_global` per bout, not a
-  //   combatant's. Generic like the rest: the rule set names the pool. **The
+  //   combatant's. Generic like the rest: the rule set names the pool. ~~**The
   //   adapter does not write it either** — no `WriteSource` carries a pool that
   //   belongs to no combatant — and REPORTS it in `unmapped` with the stat's
-  //   treatment (`test/ss2-crowd.test.js`).
+  //   treatment~~ **The adapter WRITES it to `_global` since 2026-09-23**,
+  //   through the `declared-battle-resource` source (`test/ss2-crowd.test.js`).
   assert.deepEqual(Object.values(EffectKind).sort(),
     ["battle-resource", "damage", "heal", "lateral", "position", "resource", "stat", "status"]);
 
@@ -2184,16 +2191,19 @@ test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declare
   // declared-resource write allowlist — so the resolved value reaches combat
   // state and the hash, and does NOT reach the vanilla mirror. It is REPORTED,
   // which is the contract's "Still open" item 2 arriving in practice.
-  // ► **THE CROWD IS REPORTED BESIDE THEM SINCE 2026-09-22, AND SEPARATELY.**
-  //   `crowd_interest` is the battle's own pool, not a combatant's resource, so
-  //   its report carries `battleResource` rather than `resource` and a reason
-  //   of its own; `test/ss2-crowd.test.js` pins it. Split off here so this
-  //   test goes on asking exactly the question it was written for.
+  // ► ~~**THE CROWD IS REPORTED BESIDE THEM SINCE 2026-09-22, AND SEPARATELY.**~~
+  //   **THE CROWD IS WRITTEN SINCE 2026-09-23** (the owner's "write both
+  //   back"): `crowd_interest` is the battle's own pool, so it reaches
+  //   `_global` through the `declared-battle-resource` source and is no longer
+  //   in `unmapped` at all; `test/ss2-crowd.test.js` pins it. Checked here so
+  //   this test goes on asking exactly the question it was written for.
+  const crowdWrites = host.steps.flatMap((step) => step.writes)
+    .filter((write) => write.source === WriteSource.DECLARED_BATTLE_RESOURCE);
+  assert.ok(crowdWrites.length > 0, "a bout of completed phases moves the crowd");
+  assert.ok(crowdWrites.every((write) => write.field === "crowd_interest" && write.target === WriteTarget.GLOBAL));
   const reported = host.steps.flatMap((step) => step.unmapped ?? []);
-  const crowdReports = reported.filter((entry) => Object.hasOwn(entry, "battleResource"));
-  assert.ok(crowdReports.length > 0, "a bout of completed phases moves the crowd");
-  assert.ok(crowdReports.every((entry) => entry.battleResource === "crowd_interest"));
-  const unmapped = reported.filter((entry) => !Object.hasOwn(entry, "battleResource"));
+  assert.equal(reported.some((entry) => Object.hasOwn(entry, "battleResource")), false, "the crowd is no longer reported");
+  const unmapped = reported;
   assert.ok(unmapped.length > 0, "this fixture wears armour, so a piece removal must actually occur");
   const pieces = new Set(unmapped.map((entry) => entry.resource));
   for (const resource of pieces) {
@@ -2329,4 +2339,128 @@ test("the opt-in bag admits only map-cited vanilla fields, and only numbers", ()
   assert.throws(build("not-an-object"), (error) => /plain object/.test(error.message));
   // The guard is the same one `CANONICAL_RESOURCE_SOURCES` itself passes.
   assert.doesNotThrow(build(ss2Bag({ speed: 30 })));
+});
+
+/* ------------------------------------------------------------------ */
+/* Stats and the crowd are WRITTEN BACK (owner, 2026-09-22), and        */
+/* nothing else moved                                                   */
+/* ------------------------------------------------------------------ */
+
+/** The two write sources added 2026-09-23. Everything else must be byte-for-byte what it was. */
+const WRITE_BACK_SOURCES = Object.freeze(["canonical-stat", "declared-battle-resource"]);
+const digestOf = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+const priorWrites = (steps) =>
+  steps.flatMap((step) => step.writes).filter((write) => !WRITE_BACK_SOURCES.includes(write.source));
+const priorUnmapped = (steps) => steps.flatMap((step) => step.unmapped)
+  .filter((entry) => !Object.hasOwn(entry, "stat") && !Object.hasOwn(entry, "battleResource"));
+
+/** The arena's own 1v1 (`tools/arena/main.js`'s path), red-1 carrying `itemId`, arena built. */
+function demoHost(itemId) {
+  const red = demoSide("red", 1, { ss2Combatant, ss2BattleValues });
+  red.members[0] = {
+    ...red.members[0],
+    vanilla: { ...red.members[0].vanilla, inventory1: itemId },
+    resources: { ...red.members[0].resources, inventory1: itemId }
+  };
+  const host = createVanillaBattleHost({
+    teams: [red, demoSide("blue", 1, { ss2Combatant, ss2BattleValues })],
+    rules: ss2TeamRules,
+    seed: 3
+  });
+  host.constructArena();
+  return host;
+}
+
+/** That host, played to a result by the rule set's AI — opening with a colossus when red-1 carries one. */
+function demoBout(itemId) {
+  const host = demoHost(itemId);
+  if (itemId === 42) host.submit({ actorId: "red-1", type: Ss2ActionType.CAST_COLOSSUS, targetId: "red-1" });
+  for (let actions = 0; !host.battle.result && actions < 400; actions += 1) {
+    host.submit({ actorId: host.currentCombatantId(), ...host.suggestAction() });
+  }
+  assert.ok(host.battle.result, "the bout must settle");
+  return host;
+}
+
+test("battles without stat or crowd changes produce exactly the writes they did before the write-back", () => {
+  // THE PINS ARE THE PRE-CHANGE CODE'S OUTPUT, measured 2026-09-23 on e8ccdcf
+  // with this test's own drivers before `src/adapter/` was touched. They are
+  // not derived here and must never be refreshed to make this test pass: a
+  // different digest means a write that is NOT a stat or the crowd changed.
+  //
+  // A placeholder bout moves neither, so its WHOLE write list is pinned.
+  for (const [size, expected] of [[1, "f50482dfa1a86b604eb32dc1038646b5e13f63909e7ac8f77d3cdeae708ad2ca"], [3, "4c7eb1d6d604eca55381945fa0b23505150b8c9b0ca24935ea8f63c486b6c3b0"]]) {
+    const host = makeHost(size);
+    fightToSettlement(host);
+    const writes = host.steps.flatMap((step) => step.writes);
+    assert.equal(digestOf(writes), expected, `${size}v${size}: the whole write list`);
+    assert.deepEqual(host.steps.flatMap((step) => step.unmapped), [], `${size}v${size}: nothing unmapped`);
+    assert.deepEqual([host.vanillaGlobals(), host.diagnostics.globalSyncs], [{}, []], "no battle pool, so no `_global`");
+  }
+
+  // An SS2 bout moves the crowd on every completed phase and a colossus moves
+  // two stats, so there the pin is on everything EXCEPT the two new sources —
+  // and on what is still reported, minus the two kinds that are now written.
+  const supplied = ss2SuppliedHost();
+  supplied.constructArena();
+  for (let actions = 0; !supplied.battle.result && actions < 300; actions += 1) {
+    const actorId = supplied.currentCombatantId();
+    supplied.submit({ actorId, ...supplied.legalActions(actorId)[0] });
+  }
+  assert.ok(supplied.battle.result);
+  assert.equal(digestOf(priorWrites(supplied.steps)), "49dbacb8b26833d40e51b6820c9853f6501604c1a50302b275f394ddcc767e69", "ss2SuppliedHost: every write but a stat or the crowd");
+  assert.equal(digestOf(priorUnmapped(supplied.steps)), "88b28481e2951c74ef07f1deecd1f68643476a22392c4cc2e566af398434eb9a", "ss2SuppliedHost: everything still reported");
+
+  for (const [itemId, writesPin, unmappedPin] of [[0, "edce76a069b5489c197d30e3894724b7964220f94201fce9f1fde022dc3bc186", "43ecebe11b33a89bee87f3c36c06f4adcfa53efdb96b0c4568a52820d2fd15cf"], [42, "2b7d8eba2e0de047ab44af3e650dd0593aa9475f919e6ef59f2288a5e02e9365", "8c5605a33d13d78334191b4065b660f4ac5cf270ae811d3b15a26ff9bb94f791"]]) {
+    const host = demoBout(itemId);
+    assert.equal(digestOf(priorWrites(host.steps)), writesPin, `demo bout, item ${itemId}: writes`);
+    assert.equal(digestOf(priorUnmapped(host.steps)), unmappedPin, `demo bout, item ${itemId}: unmapped`);
+  }
+});
+
+test("the host's agreement check compares STATS after every submission, now that stats are written", () => {
+  // `includeStats` defaulted to false in the per-action check because a stat
+  // was never written: comparing one would have refused every colossus. Now a
+  // stat IS written, and leaving it out would hide exactly the drift Codex
+  // found (a stat moved, nothing reached the mirror, the check saw nothing).
+  // Simulated here by moving a stat where no write can follow it.
+  const host = makeHost(1);
+  const blue = host.battle.teams.find((team) => team.id === "blue").combatants[0];
+  blue.stats.strength = 99;
+  assert.throws(
+    () => host.submit({ actorId: host.currentCombatantId(), type: "melee", targetId: blue.id }),
+    (error) => /has drifted from resolved state/.test(error.message) && /strength 10 != strength 99/.test(error.message)
+  );
+});
+
+test("a hand-built stat or crowd write carrying a COMPUTED value is refused by provenance, and so is a misaimed one", () => {
+  // A real bloodlust through the host: red-1's strength 9 -> 24, and the crowd 8 -> 11.
+  const host = demoHost(41);
+  const step = host.submit({ actorId: "red-1", type: Ss2ActionType.CAST_BLOODLUST, targetId: "red-1" });
+  const wire = host.wire();
+  const after = wire.teams.flatMap((team) => team.combatants);
+  const check = (writes, battleResources = wire.battleResources) => () =>
+    assertWriteProvenance(writes, after, { battleResources });
+  const strength = step.writes.find((write) => write.source === WriteSource.CANONICAL_STAT && write.field === "strength");
+  const crowd = step.writes.find((write) => write.source === WriteSource.DECLARED_BATTLE_RESOURCE);
+  assert.deepEqual([strength.from, strength.to, crowd.from, crowd.to], [9, 24, 8, 11]);
+  assert.doesNotThrow(check(step.writes), "what the host emitted is identical to the projection");
+
+  // The build's formula re-run in the adapter, without the round the rule set
+  // applied: `10 + backup_strength * 1.5` is 23.5, and the projection holds 24.
+  assert.throws(check([{ ...strength, to: 10 + 9 * 1.5 }]),
+    /canonical-stat write to red-1\.strength carries 23\.5, but the resolved projection holds 24/);
+  // The crowd moved AGAIN by the verb's own `crowd_action` (3, `+0x8a84`),
+  // after the resolver already applied it: 14, where the battle holds 11.
+  assert.throws(check([{ ...crowd, to: crowd.to + 3 }]),
+    /declared-battle-resource write to _global\.crowd_interest carries 14, but the resolved battle holds 11/);
+  // Nothing to be identical to: a crowd write checked with no battle pools.
+  assert.throws(check([crowd], null), /names a pool the resolved battle does not declare/);
+
+  // And the shape: each source keeps its own target and its own owner.
+  assert.throws(check([{ ...crowd, target: WriteTarget.COMBAT_OBJECT }]), /writes the global, not the combat-object/);
+  assert.throws(check([{ ...strength, target: WriteTarget.GLOBAL }]), /writes the combat-object, not the global/);
+  assert.throws(check([{ ...crowd, combatantId: "red-1" }]), /belongs to no combatant/);
+  assert.throws(check([{ ...strength, field: "charisma" }]), /may not write the vanilla field charisma/);
+  assert.throws(check([{ ...crowd, field: "crowdlevel" }]), /may not write the vanilla field crowdlevel/);
 });

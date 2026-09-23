@@ -1117,16 +1117,30 @@ test("writes follow effect order and stay total for unattributed differences", (
 /* State bridge: the write shape, checked rather than described        */
 /* ------------------------------------------------------------------ */
 
-test("every vanilla write declares one of four sources, and the field set is fixed independently of any scenario", () => {
+test("every vanilla write declares one of six sources, and the field set is fixed independently of any scenario", () => {
+  // ► **SIX SINCE 2026-09-23, the owner's "write both back"**: a canonical
+  //   stat onto its vanilla base-stat field, and the battle's crowd onto
+  //   `_global`. Both were REPORTED in `unmapped` until then.
+  assert.deepEqual(Object.values(WriteSource).sort(), [
+    "canonical-health", "canonical-stat", "canonical-status", "clip-facing", "declared-battle-resource",
+    "declared-resource"
+  ]);
   assert.deepEqual(Object.keys(ALLOWED_WRITE_FIELDS).sort(), [...Object.values(WriteSource)].sort());
   assert.deepEqual(ALLOWED_WRITE_FIELDS[WriteSource.CANONICAL_HEALTH], ["hitpoints"]);
   assert.deepEqual([...ALLOWED_WRITE_FIELDS[WriteSource.CANONICAL_STATUS]], [...STATUS_FLAG_FIELDS]);
   assert.deepEqual([...ALLOWED_WRITE_FIELDS[WriteSource.DECLARED_RESOURCE]], [...CANONICAL_RESOURCE_SOURCES]);
   assert.deepEqual(ALLOWED_WRITE_FIELDS[WriteSource.CLIP_FACING], ["gladiator_dir"]);
+  // The map's "Base stats" row, by the vanilla names — `speed` and `defence`,
+  // never the canonical `agility` and `defense` — and nothing else: `charisma`
+  // is a declared resource, not a canonical stat.
+  assert.deepEqual([...ALLOWED_WRITE_FIELDS[WriteSource.CANONICAL_STAT]],
+    ["strength", "speed", "attack", "defence", "vitality", "stamina", "magicka"]);
+  assert.deepEqual([...ALLOWED_WRITE_FIELDS[WriteSource.DECLARED_BATTLE_RESOURCE]], ["crowd_interest"]);
 
   // The whole set, named once, in one place, with no battle in sight.
   const allowed = new Set(Object.values(ALLOWED_WRITE_FIELDS).flatMap((fields) => [...fields]));
-  assert.equal(allowed.size, 1 + STATUS_FLAG_FIELDS.length + CANONICAL_RESOURCE_SOURCES.length + 1);
+  assert.equal(allowed.size, 1 + STATUS_FLAG_FIELDS.length + CANONICAL_RESOURCE_SOURCES.length + 1 + 7 + 1,
+    "no field is owned by two sources");
   // Nothing a rule set can name reaches a field another source owns.
   for (const reserved of ["hitpointsmax", "hitpoints", "gladiator_dir", ...STATUS_FLAG_FIELDS]) {
     assert.equal(isResourceBackedVanillaField(reserved), false, `${reserved} is not a resource's to write`);
@@ -1172,17 +1186,20 @@ test("every vanilla write declares one of four sources, and the field set is fix
     "the psyche counter IS a declared resource: the psyche_up verb reads and writes it");
 
   // And no scenario produces a write outside it. Four vocabularies, four team
-  // sizes, damage / heal / status / resource / facing.
+  // sizes, damage / heal / status / resource / facing / stat / battle pool.
   const observed = new Set();
   for (const [redSize, blueSize] of [[1, 1], [2, 2], [3, 3], [1, 3]]) {
     const battle = makeBattle(redSize, blueSize);
     const layout = buildArenaLayout(toTeamWireState(battle));
     const resources = canonicalResourcesFrom(freshVanillaGladiator());
     const before = projections(battle).map((combatant) => ({ ...combatant, resources }));
+    // The "after" state is authored here, as the resolver's stand-in: a stat
+    // at 30 is simply what this projection holds, not a formula.
     const after = before.map((combatant) => ({
       ...combatant,
       health: Math.max(0, combatant.health - 3),
       status: [...combatant.status, "burning", "invented-status"],
+      stats: { ...combatant.stats, strength: 30 },
       resources: { ...resources, armourclass: { value: 1, min: null, max: null }, momentum: { value: 4, min: null, max: null } }
     }));
     const { writes } = vanillaWritesForResolvedAction({
@@ -1193,9 +1210,13 @@ test("every vanilla write declares one of four sources, and the field set is fix
         { kind: "damage", targetId: "blue-1", amount: 3 },
         { kind: "status", targetId: "blue-1", status: "burning", active: true },
         { kind: "status", targetId: "blue-1", status: "invented-status", active: true },
-        { kind: "resource", targetId: "blue-1", resource: "momentum", to: 4 }
+        { kind: "resource", targetId: "blue-1", resource: "momentum", to: 4 },
+        { kind: "stat", targetId: "blue-1", stat: "strength", to: 30 },
+        { kind: "battle-resource", resource: "crowd_interest", to: 12 }
       ],
-      placements: layout.byCombatantId
+      placements: layout.byCombatantId,
+      battleBefore: { crowd_interest: { value: 10, min: null, max: null } },
+      battleAfter: { crowd_interest: { value: 12, min: null, max: null } }
     });
     const all = [
       ...writes,
@@ -1208,7 +1229,7 @@ test("every vanilla write declares one of four sources, and the field set is fix
       observed.add(`${write.source}:${write.field}`);
     }
   }
-  // The scenarios really did exercise all four sources.
+  // The scenarios really did exercise all ~~four~~ six sources.
   assert.deepEqual(
     [...new Set([...observed].map((entry) => entry.split(":")[0]))].sort(),
     [...Object.values(WriteSource)].sort()
@@ -1271,10 +1292,29 @@ test("a write carrying a value the resolver never produced is refused, however i
   );
 });
 
-test("a resource may not borrow a field canonical health or status already owns", () => {
+test("a moved stat no vanilla base-stat field carries is still REPORTED, while a mapped one is written", () => {
+  // The roster builds only the seven stats `CANONICAL_STAT_SOURCES` maps, so
+  // this takes a hand-built projection — the case the report exists for.
   const battle = makeBattle(1, 1);
   const layout = buildArenaLayout(toTeamWireState(battle));
-  for (const field of ["hitpoints", "hitpointsmax", "burning"]) {
+  const before = projections(battle).map((combatant) => ({ ...combatant, stats: { ...combatant.stats, luck: 1 } }));
+  const after = before.map((combatant) =>
+    combatant.id === "blue-1" ? { ...combatant, stats: { ...combatant.stats, luck: 2, agility: 21 } } : combatant);
+  const result = vanillaWritesForResolvedAction({ before, after, placements: layout.byCombatantId });
+  assert.deepEqual(result.writes.map(({ source, field, to }) => [source, field, to]),
+    [[WriteSource.CANONICAL_STAT, "speed", 21]]);
+  assert.deepEqual(result.unmapped.map(({ combatantId, stat, field }) => [combatantId, stat, field]),
+    [["blue-1", "luck", null]]);
+  assert.match(result.unmapped[0].reason, /no vanilla base-stat field carries/);
+});
+
+test("a resource may not borrow a field canonical health, status or a stat already owns", () => {
+  // ► **`strength` JOINED 2026-09-23**: the `canonical-stat` source owns the
+  //   seven base-stat fields now, so a resource of that name is refused as a
+  //   borrower — and NOT told that "widening the allowlist" would fix it.
+  const battle = makeBattle(1, 1);
+  const layout = buildArenaLayout(toTeamWireState(battle));
+  for (const field of ["hitpoints", "hitpointsmax", "burning", "strength", "speed"]) {
     const before = projections(battle).map((combatant) => ({
       ...combatant,
       resources: { [field]: { value: 0, min: null, max: null } }
@@ -1291,7 +1331,8 @@ test("a resource may not borrow a field canonical health or status already owns"
       placements: layout.byCombatantId
     });
     assert.deepEqual(result.writes, [], `a resource named ${field} must not produce a write`);
-    assert.match(result.unmapped[0].reason, /owned by canonical health, canonical status or the clip record/);
+    assert.match(result.unmapped[0].reason, /owned by canonical health, canonical status, a canonical stat or the clip record/);
+    assert.doesNotMatch(result.unmapped[0].reason, /Widening the allowlist/);
   }
 });
 
