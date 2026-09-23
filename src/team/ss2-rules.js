@@ -1431,6 +1431,28 @@ export const SS2_ARENA = Object.freeze({
    *   this constant in this engine is therefore still right; only the citation
    *   was.
    *
+   * ► **WHAT THE WALL DOES, CORRECTED 2026-09-22 (derived from the bytes and
+   *   checked by a write-nothing refuter, `derive:arena-wall`).** "Touching
+   *   the wall ENDS the phase" is true of the ATTACKER side only: past ±2100
+   *   (strict, `+0x38f1`/`+0x397c`) it sets `_x` and, unless airborne, calls
+   *   `nextphase()` (`+0x396c`/`+0x39f7`) BEFORE the arm dispatch
+   *   (`+0x3a84`) — so a fighter that STARTS its phase past the wall loses the
+   *   phase — and it nulls no `struck` on either fighter. The DEFENDER side
+   *   (`+0x3a07`-`+0x3a5e`) is a plain clamp. Both sit behind `knock_defender
+   *   == null` (`+0x38ce`-`+0x38ec`), which never closes, because
+   *   `knockback()` binds it with `DefineLocal` (`+0x1e75`). Three routes put a
+   *   fighter past the wall at its phase start: a knockback tween (one second,
+   *   wall-clock) still running when a hitter phase shorter than 30 frames
+   *   ends — gale, whirlwind, the psyche discharge, most attacks; the sub-100
+   *   nudge (`+0x36b9`), which pushes a fighter already AT the wall into it, so
+   *   a cornered fighter with a foe inside 100 loses every phase; and a command
+   *   that pulls its target through.
+   *
+   *   **OWNER'S DECISION 2026-09-22: NOT REPRODUCED.** This engine clamps to
+   *   ±2100 and lets the fighter act. The knockback route depends on
+   *   Ruffle's frame pacing, so the build is not even consistent with itself
+   *   there; the nudge route is a stunlock. Named divergences, all three.
+   *
    * ► **HOW THE ERROR WAS MADE, because it is a repeatable one.** The previous
    *   caveat here said the bound existed in the map's prose with no byte
    *   offset, and it was retracted for a good reason — the old decoder printed
@@ -4352,7 +4374,16 @@ function ss2DamageSpell(type) {
  *   every landing restarts it — so the burn cannot release the phase before
  *   the last boulder lands, all of which land inside frames 6..19.
  *
- *   ► **UNRESOLVED, AND NOT BUILT: `defender.struck` MAY ALREADY BE `true`.**
+ *   ► ~~**UNRESOLVED, AND NOT BUILT: `defender.struck` MAY ALREADY BE `true`.**~~
+ *     **RESOLVED 2026-09-22, and the paragraph below is kept as the question
+ *     it was.** The route it names cannot happen: the bolt's teardown
+ *     `nextphase` runs `changeCombatants`, which sends BOTH fighters to
+ *     `Standing` in the same straight-line run, before `Cast2` reaches frame
+ *     2146 (`derive:dfa-struck`, refuter CONFIRMED). A stale `struck`
+ *     survives only a WALL-CLAMP cut, which nulls no `struck`
+ *     (`derive:arena-wall`) — and the owner chose not to reproduce the wall
+ *     cuts (`SS2_ARENA.clamp`). So for everything this engine models, every
+ *     boulder lands on the chosen target.
  *     The gate reads the VICTIM's flag, and nothing between phases resets it —
  *     every `struck = null` in the overlay block is a phase teardown or the
  *     watchdog (`+0x3871`). The victim's OWN last clip can write it after its
@@ -4636,10 +4667,17 @@ const SS2_DEMAND_MOVE_TRIP = 60;
  *   the frame count by one. The resolver has no frames; the closed form is
  *   the arm's own.
  *
- * ► **THE BOUND IS THE CLIP CLAMP.** The arm clamps nothing; `defender._x` is
+ * ► **THE BOUND IS THE CLIP CLAMP.** The arm clamps nothing; ~~`defender._x` is
  *   clamped to ±2100 at the top of the next `onEnterFrame` (`+0x3a07`-
- *   `+0x3a5e`, no `nextphase` on that side). Only the push-behind case can
- *   reach a wall. See `SS2_ARENA.clamp`.
+ *   `+0x3a5e`, no `nextphase` on that side)~~ **— WRONG SIDE, corrected
+ *   2026-09-22 (`derive:arena-wall`, refuter CONFIRMED): the command's
+ *   completion `nextphase` swaps the roles, so on the next frame the target is
+ *   `attacker`, and the ATTACKER-side clamp calls `nextphase()` before its arm:
+ *   at `battle_action` 1 the target loses its phase; at 2 nothing clamps until
+ *   the next round's first frame, where the same clamp cuts its chosen action.
+ *   This engine clamps the target and lets it act — the owner's decision
+ *   2026-09-22, see `SS2_ARENA.clamp`.** Only the push-behind case can reach a
+ *   wall.
  *
  * ► **THE COST IS `round(magicka)`, THE STAT, WITH NO AFFORDABILITY CHECK**,
  *   the gale's and the bolts' shape exactly.
@@ -4742,6 +4780,9 @@ function ss2CommandPull({ casterX, targetX, facingLeft, standOff }) {
  *   `changeCombatants` at the phase advance, as for every move; the bound that
  *   applies is the clip clamp in `attacker.onEnterFrame` (`SS2_ARENA.clamp`,
  *   ±2100), which is WIDER than the draw on both sides and so cannot bind.
+ *   *(Mechanism corrected 2026-09-22, `derive:arena-wall`: after the completion
+ *   `nextphase` the caster is `defender`, or no handler runs at all, so only
+ *   the DEFENDER side could act on the landing — and neither binds.)*
  *
  * ► **THE COST IS `round(magicka)`, THE STAT, WITH NO AFFORDABILITY CHECK**,
  *   the bolts' and the gale's shape exactly.
@@ -10916,7 +10957,10 @@ export function createSs2TeamRules({
           : null;
         // ► **CLAMPED ONCE, AT THE END, and that is the build's composition.**
         //   The arm clamps nothing; the clip clamp at the top of the NEXT
-        //   `onEnterFrame` bounds `defender._x`. Toward the caster the pull
+        //   `onEnterFrame` bounds ~~`defender._x`~~ the target — as `attacker`,
+        //   whose clamp in the build also ends the target's phase; NOT
+        //   reproduced, by the owner's decision (`SS2_ARENA.clamp`,
+        //   2026-09-22). Toward the caster the pull
         //   never leaves the arena, and the one case that can — a target
         //   behind, pushed away — runs a single frame. See `SS2_ARENA.clamp`.
         //
@@ -11020,8 +11064,10 @@ export function createSs2TeamRules({
 
         // ► **ABSOLUTE, and the arena clamp is applied although it cannot
         //   bind.** The arm stores the draw with no clamp of its own; the clip
-        //   clamp in `attacker.onEnterFrame` then acts on `attacker._x` every
-        //   frame, so the build's composed rule IS `clamp(draw)` — and ±2100
+        //   clamp in `attacker.onEnterFrame` then ~~acts on `attacker._x` every
+        //   frame~~ acts on the caster as `defender` (the completion `nextphase`
+        //   has swapped the roles; corrected 2026-09-22), so the build's composed
+        //   rule IS `clamp(draw)` — and ±2100
         //   contains ±2000, so it is the draw for every value it can return.
         //   Applied rather than skipped so that every branch here that writes
         //   an `x` writes a bounded one, which is the rule the shove, the gale
