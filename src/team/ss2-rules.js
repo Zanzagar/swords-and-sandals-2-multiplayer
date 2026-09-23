@@ -3486,6 +3486,13 @@ export const SS2_WHIRLWIND = Object.freeze({
  *   a strike that does not kill, the caster ends where it began and no
  *   position is written.
  *
+ * ► **AND THE AUTHORED BACK-ATTACK BONUS IS JUDGED FROM THE TELEPORT**, since
+ *   `checkattackroll()` runs after it (`+0x7f77`): the blow comes from the
+ *   side that keeps the caster facing its victim, not the side it stood on.
+ *   Above 1v1 those can differ, and until 2026-09-22 this engine judged from
+ *   the wrong one (audit WG-1). In 1v1 they cannot. See the resolver's
+ *   `ghostLanding`.
+ *
  * ► **NOT MODELLED, AND NAMED:** the on-screen blink beside the target and
  *   back (the presentation vocabulary has no "held away, then restored"
  *   motion; only the kill's one-way move is presented), `blendMode = "add"`,
@@ -10868,9 +10875,36 @@ export function createSs2TeamRules({
       //   buffs and reset its psyche, as if its target had survived. With no
       //   bonus (every fixture replay, which has no positions) the two agree.
       const struck = Math.max(0, defenderBefore.hitpoints - scenario.villain.hitpoints);
+      // ► **A GHOST STRIKE IS JUDGED FROM WHERE IT STRIKES, NOT FROM WHERE ITS
+      //   CASTER STOOD.** The arm moves the caster to `defender._x +
+      //   game_attacker.physical_size` when `gladiator_dir == "left"` and to
+      //   `defender._x - physical_size` otherwise (`+0x7e4c`-`+0x7eac`), and
+      //   only then calls `checkattackroll()` (`+0x7f77`); the arm writes no
+      //   `_x` or `gladiator_dir` between the two. So the blow comes from the
+      //   side that keeps the caster FACING its victim — the right of it when
+      //   facing left, the left when facing right — whatever side it stood on.
+      //   Judging the authored bonus from the pre-teleport `x` granted +50%, and
+      //   a kill, from a side the caster never strikes from, and the kill move
+      //   below then left the killer on the other side of the body (audit WG-1,
+      //   2026-09-22, confirmed by an independent refuter).
+      //
+      //   1v1 cannot move: a separated pair always faces each other, so the
+      //   landing is on the side the caster already stood on, and a co-located
+      //   pair keeps the facings it had when apart. Pinned in the test file.
+      //
+      //   **UNCLAMPED, deliberately.** The build's clip clamp is at the top of
+      //   `attacker.onEnterFrame` (`+0x38fd`-`+0x3a3f`), before the phase arms,
+      //   so the roll sees the raw landing. Only the kill's RECORDED position
+      //   is clamped (below), and at the arena edge the two can differ.
+      const ghostLanding = request.type === Ss2ActionType.CAST_GHOST_STRIKE
+        && Number.isFinite(actor.x) && Number.isFinite(target.x)
+        ? ((actor.status ?? []).includes(SS2_FACING_LEFT)
+          ? target.x + ss2PhysicalSize(actor)
+          : target.x - ss2PhysicalSize(actor))
+        : null;
       const backAttack = backAttackBonus > 0
         && struck > 0
-        && ss2IsBackAttack(actor, target);
+        && ss2IsBackAttack(ghostLanding === null ? actor : { ...actor, x: ghostLanding }, target);
       const backAttackDamage = backAttack ? Math.round(struck * backAttackBonus) : 0;
       const killedAfterBonus = eliminated
         || (backAttackDamage > 0 && scenario.villain.hitpoints - backAttackDamage <= 0);
@@ -11180,12 +11214,13 @@ export function createSs2TeamRules({
         //   clip clamp runs in the build), and facing is recomputed from the new
         //   `x` (the teleport's rule; in the build no phase advance follows a
         //   kill, and in 1v1 the bout is over).
+        //
+        //   The landing is `ghostLanding`, the SAME number the back-attack bonus
+        //   was judged from, so the side the killer is recorded on is the side
+        //   the bonus was granted from.
         let casterMove = null;
-        if (request.type === Ss2ActionType.CAST_GHOST_STRIKE && killedAfterBonus
-          && Number.isFinite(actor.x) && Number.isFinite(target.x)) {
-          const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
-          const size = ss2PhysicalSize(actor);
-          const to = clamp(facingLeft ? target.x + size : target.x - size, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+        if (killedAfterBonus && ghostLanding !== null) {
+          const to = clamp(ghostLanding, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
           casterMove = { from: actor.x, to };
           if (to !== actor.x) {
             effects.push({ kind: EffectKind.POSITION, targetId: actor.id, to });

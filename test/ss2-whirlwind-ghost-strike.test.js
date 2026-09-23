@@ -62,7 +62,7 @@ import {
 } from "../src/team/index.js";
 import {
   SS2_FACING_LEFT, SS2_GHOST_STRIKE, SS2_INVENTORY_EMPTY, SS2_PSYCHE_UP, SS2_WHIRLWIND, Ss2ActionType, VANILLA_PHASE_LABEL,
-  ss2Combatant, ss2PhysicalSize, ss2Reach, ss2TeamRules
+  ss2Combatant, ss2FacingEffects, ss2IsBackAttack, ss2PhysicalSize, ss2Reach, ss2TeamRules
 } from "../src/team/ss2-rules.js";
 import {
   buildArenaLayout, CommandKind, LabelProvenance, presentResolvedEvents, SS2_STATIC_MAP_BINDINGS
@@ -484,6 +484,239 @@ test("a WHIRLWIND or a SWING the back-attack bonus finishes skips the transition
     }
     assert.ok(found, `no seed in 1..80 landed a back-attack ${type} with a positive base blow`);
   }
+});
+
+/* ------------------------------------------------------------------ *
+ * The ghost strike's back attack is judged from where it STRIKES      *
+ * ------------------------------------------------------------------ */
+
+// ► **THE AUTHORED BACK-ATTACK BONUS (`SS2_BACK_ATTACK_BONUS`) IS JUDGED FROM
+//   THE TELEPORT, NOT FROM WHERE THE CASTER STOOD.** The arm moves the caster
+//   to `defender._x + physical_size` when `gladiator_dir == "left"` and to
+//   `defender._x - physical_size` otherwise (`+0x7e4c`-`+0x7eac`), and only
+//   THEN calls `checkattackroll()` (`+0x7f77`). Found by an audit and an
+//   independent refuter, 2026-09-22 (WG-1): the engine judged the bonus from
+//   the pre-teleport `x`, so above 1v1 it could grant +50% — and a kill — from
+//   a side the caster never strikes from, then record the killer on the other
+//   side of the body.
+
+/**
+ * A 2v2 — red `hero` and `c`, blue `a` and `b` — at the given `x`s, with every
+ * facing stated LITERALLY and then checked against the engine's own rule, so
+ * the staging is a state play can reach and not a hand-built one.
+ */
+function staged2v2({ seed = 3, hero = {}, at, facingLeft }) {
+  const battle = createTeamBattle({
+    seed,
+    rules: ss2TeamRules,
+    teams: [
+      {
+        id: "red",
+        name: "red",
+        combatants: [
+          ss2Combatant(fields({ speed: 21, inventory1: 36, ...hero }), { id: "hero", name: "hero", controller: "local" }),
+          ss2Combatant(fields(), { id: "c", name: "c", controller: "local" })
+        ]
+      },
+      {
+        id: "blue",
+        name: "blue",
+        combatants: [
+          ss2Combatant(fields(), { id: "a", name: "a", controller: "local" }),
+          ss2Combatant(fields(), { id: "b", name: "b", controller: "local" })
+        ]
+      }
+    ]
+  });
+  for (const [id, x] of Object.entries(at)) Object.assign(combatantById(battle, id), { x, y: 200 });
+  for (const id of Object.keys(at)) face(battle, id, facingLeft.includes(id));
+  const side = (ids) => ids.map((id) => combatantById(battle, id));
+  assert.deepEqual(ss2FacingEffects(side(["hero", "c"]), side(["a", "b"])), [],
+    "the staged facings must be exactly what the engine derives from these x's");
+  assert.equal(currentCombatant(battle).id, "hero", "the caster must open for these tests to mean anything");
+  return battle;
+}
+
+/** Every landed ghost strike on `targetId` over seeds 1..`seeds`, with the health it took. */
+function landedStrikes(build, targetId, seeds = 40) {
+  const landed = [];
+  for (let seed = 1; seed <= seeds; seed += 1) {
+    const battle = build(seed);
+    const before = combatantById(battle, targetId).health;
+    const { event } = act(battle, GHOST, targetId);
+    if (event.hit && event.damage > 0) {
+      landed.push({ seed, battle, event, lost: before - combatantById(battle, targetId).health });
+    }
+  }
+  return landed;
+}
+
+test("1v1 IS UNCHANGED: the caster faces its only foe, so the teleport lands on the side it already stood on", () => {
+  // ► **WHY 1v1 CANNOT MOVE.** Facing is derived for BOTH of a pair from the
+  //   pair on every `x` write, so a separated 1v1 pair always faces each
+  //   other. A caster facing right stands left of its foe and the arm lands it
+  //   left of its foe (`defender._x - physical_size`); facing left, right and
+  //   right. A co-located pair keeps the facings it had when separated — each
+  //   other — and is never behind before the teleport nor after it. So the
+  //   verdict is the one the caster's own position already gave.
+  //
+  //   The "foe faces away" rows are HAND-STAGED (as the bonus-kill test above
+  //   stages them); play cannot reach them in 1v1, and they are here because
+  //   they are the only 1v1 rows in which a back attack happens at all.
+  const rows = [
+    { heroLeft: false, gap: 100, foeFacesAway: false, back: false },
+    { heroLeft: true, gap: 100, foeFacesAway: false, back: false },
+    { heroLeft: false, gap: 900, foeFacesAway: false, back: false },
+    { heroLeft: true, gap: 900, foeFacesAway: false, back: false },
+    { heroLeft: false, gap: 0, foeFacesAway: false, back: false },
+    { heroLeft: true, gap: 0, foeFacesAway: false, back: false },
+    { heroLeft: false, gap: 900, foeFacesAway: true, back: true },
+    { heroLeft: true, gap: 900, foeFacesAway: true, back: true }
+  ];
+  for (const { heroLeft, gap, foeFacesAway, back } of rows) {
+    const build = (seed) => {
+      const battle = staged({ seed, heroLeft, gap, hero: { inventory1: 36 } });
+      // The foe faces the caster unless the row turns it away.
+      face(battle, "foe", foeFacesAway ? heroLeft : !heroLeft);
+      return battle;
+    };
+    const landed = landedStrikes(build, "foe", 30);
+    const label = `heroLeft=${heroLeft} gap=${gap} foeFacesAway=${foeFacesAway}`;
+    assert.ok(landed.length >= 3, `${label}: too few landed strikes (${landed.length}) to prove anything`);
+    for (const { seed, event, lost } of landed) {
+      assert.equal(event.backAttack, back, `${label} seed ${seed}`);
+      assert.equal(back ? event.backAttackDamage > 0 : event.backAttackDamage === 0, true, `${label} seed ${seed}`);
+      assert.equal(lost, event.damage + event.backAttackDamage, `${label} seed ${seed}: the bonus is the only extra`);
+    }
+  }
+});
+
+/**
+ * STANDING BEHIND, STRIKING FROM THE FRONT. The caster faces `a` and stands on
+ * the far side of `b`, who faces `c`; the teleport follows the caster's facing
+ * and puts it on `b`'s FACE side. Strength 9, so `physical_size` is
+ * 80 + round(9 / 1.5) = 86. Both of the arm's branches: facing right lands at
+ * 100 - 86 = 14, facing left (the mirror) at -100 + 86 = -14.
+ */
+const BEHIND_BUT_STRIKES_FRONT = Object.freeze([
+  { at: { hero: 500, c: 0, a: 700, b: 100 }, facingLeft: ["a", "b"], strikesFrom: 14 },
+  { at: { hero: -500, c: 0, a: -700, b: -100 }, facingLeft: ["hero", "c"], strikesFrom: -14 }
+]);
+
+test("ABOVE 1v1, a ghost strike from BEHIND its target that lands in FRONT of it earns NO back-attack bonus", () => {
+  for (const { at, facingLeft, strikesFrom } of BEHIND_BUT_STRIKES_FRONT) {
+    const build = (seed) => staged2v2({ seed, at, facingLeft });
+    const probe = build(3);
+    assert.equal(ss2IsBackAttack(combatantById(probe, "hero"), combatantById(probe, "b")), true,
+      "the premise: where the caster STANDS is behind b, so the old rule granted the bonus");
+    assert.equal(ss2PhysicalSize(combatantById(probe, "hero")), 86);
+    assert.equal(ss2IsBackAttack({ x: strikesFrom }, combatantById(probe, "b")), false,
+      "and where the arm puts it is in front");
+    const landed = landedStrikes(build, "b");
+    assert.ok(landed.length >= 3, `too few landed strikes (${landed.length}) to prove anything`);
+    for (const { seed, event, lost } of landed) {
+      assert.equal(event.backAttack, false, `hero@${at.hero} seed ${seed}: struck from ${strikesFrom}, in front of b`);
+      assert.equal(event.backAttackDamage, 0, `hero@${at.hero} seed ${seed}`);
+      assert.equal(lost, event.damage, `hero@${at.hero} seed ${seed}: the vanilla blow and nothing more`);
+    }
+  }
+});
+
+/**
+ * STANDING IN FRONT, STRIKING FROM BEHIND — the mirror. `b` faces the caster;
+ * the caster faces `a`, the same way `b` faces, so the teleport puts it at
+ * `b`'s BACK: facing right at 0 - 86 = -86, facing left at 0 + 86 = 86.
+ */
+const FRONT_BUT_STRIKES_BEHIND = Object.freeze([
+  { at: { hero: 300, c: -1500, a: 400, b: 0 }, facingLeft: ["a"], strikesFrom: -86 },
+  { at: { hero: -300, c: 1500, a: -400, b: 0 }, facingLeft: ["hero", "c", "b"], strikesFrom: 86 }
+]);
+
+test("ABOVE 1v1, a ghost strike from IN FRONT of its target that lands BEHIND it EARNS the back-attack bonus", () => {
+  for (const { at, facingLeft, strikesFrom } of FRONT_BUT_STRIKES_BEHIND) {
+    const build = (seed) => staged2v2({ seed, at, facingLeft });
+    const probe = build(3);
+    assert.equal(ss2IsBackAttack(combatantById(probe, "hero"), combatantById(probe, "b")), false,
+      "the premise: where the caster STANDS is in front of b, so the old rule refused the bonus");
+    assert.equal(ss2IsBackAttack({ x: strikesFrom }, combatantById(probe, "b")), true,
+      "and where the arm puts it is behind");
+    const landed = landedStrikes(build, "b");
+    assert.ok(landed.length >= 3, `too few landed strikes (${landed.length}) to prove anything`);
+    for (const { seed, event, lost } of landed) {
+      assert.equal(event.backAttack, true, `hero@${at.hero} seed ${seed}: struck from ${strikesFrom}, behind b`);
+      assert.ok(event.backAttackDamage > 0, `hero@${at.hero} seed ${seed}`);
+      assert.equal(lost, event.damage + event.backAttackDamage, `hero@${at.hero} seed ${seed}`);
+    }
+  }
+});
+
+/** The first landed strike in `layout` with a positive vanilla blow, rebuilt with `b` at `base + 1` hitpoints. */
+function atBasePlusOne(layout) {
+  const build = (seed) => staged2v2({ seed, at: layout.at, facingLeft: layout.facingLeft });
+  const [first] = landedStrikes(build, "b", 60);
+  assert.ok(first, "no seed in 1..60 landed a ghost strike on b");
+  const battle = build(first.seed);
+  combatantById(battle, "b").health = first.event.damage + 1;
+  return battle;
+}
+
+test("a ghost strike the bonus FINISHES from behind is a kill, and the killer is recorded where it struck from", () => {
+  // 237541b's rules for a bonus kill (no stamina, no heal, no psyche reset, the
+  // caster left beside the body) and WG-2's position — `defender._x -/+
+  // physical_size` by the caster's facing — on the side the bonus came from.
+  for (const layout of FRONT_BUT_STRIKES_BEHIND) {
+    const battle = atBasePlusOne(layout);
+    const stamina = value(battle, "hero", "staminaleft");
+    const health = combatantById(battle, "hero").health;
+    const psyche = value(battle, "hero", "psyche_up");
+    const { event } = act(battle, GHOST, "b");
+    assert.equal(event.backAttack, true);
+    assert.ok(combatantById(battle, "b").health <= 0, "the vanilla blow left 1 hitpoint; the bonus must have killed");
+    assert.equal(combatantById(battle, "hero").x, layout.strikesFrom, "beside the body, BEHIND it, where it struck from");
+    assert.equal(event.casterFrom, layout.at.hero);
+    assert.equal(event.casterTo, layout.strikesFrom);
+    assert.equal(event.staminaSpent, 0);
+    assert.equal(value(battle, "hero", "staminaleft"), stamina, "no stamina paid on a kill");
+    assert.equal(combatantById(battle, "hero").health, health, "and no heal");
+    assert.equal(value(battle, "hero", "psyche_up"), psyche, "and the charge is not reset");
+  }
+});
+
+test("a ghost strike from behind that lands in FRONT, at a health the old bonus would have finished, does not kill", () => {
+  // The audit's own demonstration, turned round: the vanilla blow leaves 1
+  // hitpoint, and there is no bonus to take it. So no kill, the caster is
+  // restored to where it stood (`+0x7f9f`) and nothing is recorded, and the
+  // cast pays round(magicka) like any other.
+  for (const layout of BEHIND_BUT_STRIKES_FRONT) {
+    const battle = atBasePlusOne(layout);
+    const { event } = act(battle, GHOST, "b");
+    assert.equal(event.backAttack, false);
+    assert.equal(combatantById(battle, "b").health, 1, "the vanilla blow and nothing more");
+    assert.equal(combatantById(battle, "hero").x, layout.at.hero, "restored to attacker_old_x");
+    assert.equal(event.casterFrom, undefined);
+    assert.equal(event.casterTo, undefined);
+    assert.equal(event.staminaSpent, 7, "round(magicka 7)");
+  }
+});
+
+test("AT THE WALL the side is judged from the UNCLAMPED landing the roll sees; only the kill's record is clamped", () => {
+  // `b` stands on the left bound, -2100, facing the caster; the caster faces
+  // `a`, so the arm lands it at -2100 - 86 = -2186, behind `b`. The build's clip
+  // clamp runs at the top of `attacker.onEnterFrame` (`+0x38fd`-`+0x3a3f`),
+  // before the phase arms, so `checkattackroll()` sees -2186. Clamped first it
+  // would be -2100, co-located, and no back attack at all.
+  const layout = { at: { hero: -1900, c: 1000, a: -1850, b: -2100 }, facingLeft: ["c", "a"] };
+  const build = (seed) => staged2v2({ seed, ...layout });
+  const landed = landedStrikes(build, "b");
+  assert.ok(landed.length >= 3, `too few landed strikes (${landed.length}) to prove anything`);
+  for (const { seed, event } of landed) {
+    assert.equal(event.backAttack, true, `seed ${seed}: struck from -2186, behind b`);
+  }
+  const battle = atBasePlusOne(layout);
+  const { event } = act(battle, GHOST, "b");
+  assert.ok(combatantById(battle, "b").health <= 0, "the bonus must have killed");
+  assert.equal(event.casterTo, -2100, "the recorded position keeps the arena bound, the named invention");
+  assert.equal(combatantById(battle, "hero").x, -2100);
 });
 
 /* ------------------------------------------------------------------ *
