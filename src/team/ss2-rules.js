@@ -5121,12 +5121,27 @@ export const SS2_TIMED_BUFFS = Object.freeze({
  * **Only the two with a verb.** `check_spells` also decrements
  * `spell_colossus`, `spell_little_fat_kid`, `spell_swiftsandals` and
  * `spell_bloodlust`, each WITH an expiry block that restores a stat; those join
- * this list with their verbs, and their expiry with them.
+ * this list with their verbs, and their expiry with them. **A counter added
+ * here inherits the team-play tick schedule and the tick clock with no other
+ * change** (see `ss2TimedSpellBystanders`): `ss2Combatant` declares the clock
+ * beside any counter on this list, and construction refuses one without it.
  */
 const SS2_TIMED_SPELL_COUNTERS = Object.freeze([
   SS2_TIMED_BUFFS[Ss2ActionType.CAST_REGENERATE].counter,
   SS2_TIMED_BUFFS[Ss2ActionType.CAST_BOUNDLESS_ENERGY].counter
 ]);
+
+/**
+ * The TICK CLOCK: 1 while a gladiator "owes" one bystander tick, 0 once it is
+ * paid. **AUTHORED — the build has no such field**, because in 1v1 it never
+ * needs one; see `ss2TimedSpellBystanders` for the rule it serves.
+ *
+ * Declared by `ss2Combatant` beside any timed counter and nowhere else, at 1
+ * (before any phase completes, everybody counts as owed), and with NO
+ * `SS2_RESOURCE_DEFAULTS` entry — so a gladiator that bears no timed spell
+ * carries no new hashed state, and no golden moves.
+ */
+const SS2_TIMED_SPELL_CLOCK = "timed_spell_tick_owed";
 
 export const SS2_TAUNT = Object.freeze({
   /**
@@ -5639,6 +5654,13 @@ export const SS2_RESOURCE_NAMES = Object.freeze([
   "secondary_weapon_enchantment_type",
   "staminaleft",
   "staminamax",
+  // ► **THE TICK CLOCK, DECLARED 2026-09-22 WITH THE OWNER'S TEAM-PLAY TICK
+  //   RULE, AND IT IS THE `psyche_up` SHAPE: NO `SS2_RESOURCE_DEFAULTS`
+  //   ENTRY.** AUTHORED, not a build field: whether a gladiator still owes the
+  //   one bystander tick its own phase earned. `ss2Combatant` declares it
+  //   beside a timed counter and nowhere else, so only a gladiator bearing a
+  //   timed spell carries it. See `ss2TimedSpellBystanders`.
+  SS2_TIMED_SPELL_CLOCK,
   "weapon_enchantment_damage",
   "weapon_enchantment_potency",
   "weapon_enchantment_type",
@@ -5804,6 +5826,9 @@ export const SS2_WRITTEN_RESOURCES = Object.freeze([
   "spell_boundless_energy",
   "spell_regenerate",
   "staminaleft",
+  // The tick clock: set by its bearer's own completed phase, cleared by the
+  // next one anybody completes. See `ss2TimedSpellBystanders`.
+  SS2_TIMED_SPELL_CLOCK,
   ...SS2_ARMOUR_PIECES
 ].sort());
 
@@ -6185,6 +6210,17 @@ export function ss2Combatant(
     if (Object.hasOwn(resources, buff.counter)) continue;
     if (SS2_INVENTORY_SLOTS.some((slot) => resources[slot] === buff.itemId)) resources[buff.counter] = 0;
   }
+  // ► **AND THE TICK CLOCK GOES WITH THEM — AFTER every counter is declared,
+  //   so a counter declared by any rule above brings it.** At 1: before any
+  //   phase has completed, every bearer counts as owed, which is what makes the
+  //   bout's first phase tick the defender in 1v1 exactly as the build's first
+  //   `nextphase` does. A stated clock (a restored bout) is kept. See
+  //   `ss2TimedSpellBystanders`; `assertConstructionResources` refuses a
+  //   counter that arrives without one.
+  if (!Object.hasOwn(resources, SS2_TIMED_SPELL_CLOCK)
+    && SS2_TIMED_SPELL_COUNTERS.some((counter) => Object.hasOwn(resources, counter))) {
+    resources[SS2_TIMED_SPELL_CLOCK] = 1;
+  }
   const status = [];
   if ((derived.gladiator_dir ?? "right") === "left") status.push(SS2_FACING_LEFT);
   for (const flag of SS2_STATUS_FLAGS) if (derived[flag] === true) status.push(flag);
@@ -6278,6 +6314,20 @@ function assertConstructionResources(carrier, where) {
     SS2_CONSTRUCTION_REQUIRED_RESOURCES,
     "of every combatant, at construction"
   );
+  // ► **A TIMED COUNTER MUST ARRIVE WITH ITS TICK CLOCK (2026-09-22).** Without
+  //   one a gladiator is never owed, so its counter ticks on its own phases only
+  //   and a 1v1 silently stops being the build. `ss2Combatant` always declares
+  //   the pair; this catches a blueprint built past it, before any draw.
+  if (!Number.isFinite(declaredResourceValue(carrier, SS2_TIMED_SPELL_CLOCK))) {
+    const bare = SS2_TIMED_SPELL_COUNTERS.filter((name) => Number.isFinite(declaredResourceValue(carrier, name)));
+    if (bare.length > 0) {
+      throw new TeamRuleSetError(
+        `${where} declares ${bare.join(", ")} but not ${SS2_TIMED_SPELL_CLOCK}, the tick clock that says whether ` +
+        "it is owed a bystander tick. Without it the counter would tick on its own phases only. Build the " +
+        `combatant with ss2Combatant(), or declare resources: { ${SS2_TIMED_SPELL_CLOCK}: 1 } beside the counter.`
+      );
+    }
+  }
   if (declaredResourceValue(carrier, "staminamax") <= 0) {
     // A verifier found the fixpoint: at staminamax <= 0 the forced-rest gate
     // makes `rest` the only legal action, and `rest` then writes nothing —
@@ -6651,8 +6701,9 @@ function statusEffects(attackerBefore, attackerAfter, defenderBefore, defenderAf
  * with `request.actor` and nothing else, can reach the rest of the field
  * without a parameter threaded through every one of its call sites.
  *
- * ► **WHY A LOOKUP AND NOT A PARAMETER.** `check_spells` runs for everyone on
- *   the field at every `nextphase`, so the transition needs the bystanders; the
+ * ► **WHY A LOOKUP AND NOT A PARAMETER.** `check_spells` runs for the defender
+ *   as well as the attacker at every `nextphase`, so the transition needs the
+ *   bystanders (to find the one owed a tick, `ss2TimedSpellBystanders`); the
  *   alternative is editing every branch that transitions, and the branch that
  *   forgot would silently skip the tick. Here a branch added tomorrow ticks the
  *   field by calling the transition it already has to call. **A view the
@@ -6668,44 +6719,107 @@ const SS2_PHASE_REQUESTS = new WeakMap();
 
 /**
  * ► **THE TEAM-PLAY TICK RULE: WHO BESIDES THE ACTOR A COMPLETED PHASE TICKS.
- *   The main session's decision (2026-09-22), and THE OWNER'S TO REVISIT.**
+ *   THE OWNER'S DECISION, 2026-09-22: "bearer's turns, 1v1-exact".** A timed
+ *   buff applies ten times whatever the team size, AND in 1v1 every counter
+ *   value at every phase is the build's.
  *
- *   **Every completed phase ticks every LIVING combatant's timed counters**,
- *   friend and foe alike, and applies the buffs to the ACTOR alone. In 1v1 this
- *   is the build exactly — `nextphase` calls `check_spells` for the attacker and
- *   then the defender (`+0x3271`, `+0x3289`), so both fighters tick on every
- *   phase — and it is the reading that keeps "20" meaning the same number of
- *   phases whoever is on the field. The consequence to know about: in a strict
- *   rotation with nobody dying, a cast APPLIES ten times in 1v1 (at 19, 17, …,
- *   1) and five in 2v2 (19, 15, 11, 7, 3) — both measured in
- *   `test/ss2-timed-buffs.test.js` — and, by the same arithmetic, four in 3v3
- *   (19, 13, 7, 1). A buff is worth less the more gladiators share the field.
+ *   **A bearer's counters tick on the bearer's OWN completed phase and on the
+ *   FIRST phase anybody else completes after it — and on no other.**
+ *   Equivalently: a completed phase ticks its actor and the actor of the most
+ *   recent earlier completed phase, if that is somebody else and still alive.
+ *   The buffs still apply to the ACTOR alone.
  *
- *   **Changing the policy is ONE line here.** Ticking only on the bearer's own
- *   phases is `return [];` — the actor is always ticked by the caller, because
- *   its tick precedes its own effect test and every policy agrees on it.
+ *   - **Why it is the build in 1v1.** `nextphase` calls `check_spells` for the
+ *     attacker and then the defender (`+0x3271`, `+0x3289`), so both fighters
+ *     tick on every phase. In a duel the fighters strictly alternate and a kill
+ *     ends the bout, so the phase after mine is always the foe's: every phase
+ *     ticks both, exactly. Pinned phase by phase against `check_spells` on both
+ *     fighters, casts, recasts and defender-borne counters included, in
+ *     `test/ss2-timed-buffs.test.js` ("1v1 IS THE BUILD").
+ *   - **Why it is ten above 1v1.** A bearer's cycle between two of its own
+ *     phases now costs two ticks whoever else acts, so 20 applies at 19, 17,
+ *     …, 1 in 2v2 and 3v3 as in 1v1.
  *
- *   - **The DEAD are not ticked**: `request.foes`/`request.allies` are the
- *     living (`actorView`), and nothing reads a dead combatant's counter.
- *   - **A phase that KILLS ticks nobody**, because this engine skips the whole
- *     transition on a kill (`death()` deletes `nextphase` in the build, so
- *     `check_spells` never runs). That is where the tick lives, so it follows.
+ *   **HISTORY — THE RULE THIS REPLACED, the main session's of the same day:**
+ *   every completed phase ticked every LIVING combatant. Build-exact in 1v1
+ *   too, but a buff was worth less the more gladiators shared the field: in a
+ *   strict rotation with nobody dying a cast applied ten times in 1v1 (19, 17,
+ *   …, 1), FIVE in 2v2 (19, 15, 11, 7, 3) and FOUR in 3v3 (19, 13, 7, 1). The
+ *   old function was the filter below without its clock test, and there was
+ *   no clock.
+ *
+ *   ► **WHERE "OWES ONE BYSTANDER TICK" LIVES: `SS2_TIMED_SPELL_CLOCK`, a
+ *     resource on the bearer, and ONLY on a bearer.** The resolver must stay a
+ *     pure function of replayable state, and "who completed the previous
+ *     phase" is not in the request: `actorView` hands over `turnNumber`,
+ *     `actor`, `allies` and `foes` and nothing else — no initiative, no turn
+ *     cursor, no event log, and no dead (so the rule set cannot even rebuild
+ *     `ss2InitiativeOrder`'s interleave, which needs the dead). The resolver
+ *     HAS all of that, hashed; exposing it would be a resolver-contract change,
+ *     the same fork the `criticalhit` note in `SS2_RESOURCE_NAMES` records —
+ *     and "the previous ACTOR" is not quite the rule anyway, because a phase
+ *     that kills must not count (below), and which phases completed is the
+ *     rule set's knowledge, not the resolver's. So the
+ *     fact is carried per bearer: `ss2Combatant` declares it at 1 beside any
+ *     timed counter (before any phase completes everybody counts as owed, which
+ *     is what makes the bout's first phase tick the defender as the build's
+ *     first `nextphase` does), with no default, so **a gladiator bearing no
+ *     timed spell carries no new hashed state and no golden moves** (census
+ *     23/23 unchanged). `ss2TimedSpellTick` clears it on every bystander it
+ *     pays and sets it on the actor. At most one living bearer holds a 1 after
+ *     the first completed phase.
+ *
+ *   **THE DEATH RULE: A PHASE THAT KILLS DOES NOT EXIST FOR THE CLOCK.** This
+ *   engine skips the whole transition on a kill (`death()` deletes `nextphase`
+ *   in the build, so `check_spells` never runs), and the tick and the clock
+ *   both live in that transition, so:
+ *   - **the killer's OWN phase** ticks nothing — not its own counters, nobody
+ *     else's — and earns it no owed tick; the gladiator owed before it stays
+ *     owed. Its buff neither ticks nor applies on the phase it killed in.
+ *   - **an owed tick survives a killing phase** — including one whose victim
+ *     was the next actor — and is paid by the next phase anybody COMPLETES.
+ *   - **an owed bearer that dies** takes the tick with it: the dead are never
+ *     ticked (`request.foes`/`request.allies` are the living), and nobody
+ *     inherits the debt.
+ *   Pinned in `test/ss2-timed-buffs.test.js`, one test each.
+ *
+ *   **A BEARER WHO IS NOT THE CASTER** — `cast_little_fat_kid` writes its
+ *   counter on the DEFENDER's clip (`+0x820b`) during the caster's phase —
+ *   **is the bearer here**: the clock is per gladiator, not per counter, so
+ *   its counter ticks on its own phases and on the one after each. In 1v1 the
+ *   defender is always owed at the caster's phase, so the write is ticked in
+ *   the phase that made it, as the build ticks it; pinned with a counter
+ *   staged on the defender just before the attacker's phase. **What that pin
+ *   cannot reach**: the tick reads a bystander's counter off the frozen view,
+ *   so an arm that writes a bystander's counter in the same phase must hand
+ *   that value to `ss2TimedSpellTick` the way `armCounters` does for the
+ *   actor, or the tick decrements the stale one.
+ *
  *   - **Order**: foes, then allies, so that in 1v1 the list is the defender and
  *     the order is the build's `attacker, defender`. Above 1v1 the order is
  *     unobservable — each write names its own combatant.
+ *   - **Generic over `SS2_TIMED_SPELL_COUNTERS`**: a counter added there is
+ *     ticked on exactly this schedule, bystander ticks included, with no change
+ *     here; an expiry step belongs inside the per-counter tick, which runs for
+ *     the actor and for each bystander this returns.
  */
 function ss2TimedSpellBystanders(request) {
-  return [...(request.foes ?? []), ...(request.allies ?? [])].filter((combatant) => combatant.id !== request.actor.id);
+  return [...(request.foes ?? []), ...(request.allies ?? [])].filter((combatant) =>
+    combatant.id !== request.actor.id && resourceValue(combatant, SS2_TIMED_SPELL_CLOCK, 0) > 0);
 }
 
 /**
- * `nextphase` step 3: `check_spells` for the actor, then for everyone
- * `ss2TimedSpellBystanders` names.
+ * `nextphase` step 3: `check_spells` for the actor, then for the owed bystander
+ * `ss2TimedSpellBystanders` names — and then the tick clock's bookkeeping.
  *
  * For each declared counter in `SS2_TIMED_SPELL_COUNTERS`: `if (c > 0) c -= 1`,
  * which is the whole of `check_spells` for these two (`+0x272e`-`+0x278f`,
  * no expiry). An UNDECLARED counter is the build's `undefined` and is skipped:
  * `undefined > 0` is false, so the build does nothing to it either.
+ *
+ * The clock (`SS2_TIMED_SPELL_CLOCK`) is written after every tick, and only
+ * when it changes: each bystander just paid goes to 0, and the actor, whose
+ * phase this is, goes to 1. A gladiator declaring no clock is never written.
  *
  * @param {object} actor        the frozen view `resolveAction` registered
  * @param {object|null} armCounters  what the phase ARM left on the actor's clip
@@ -6719,7 +6833,7 @@ function ss2TimedSpellTick(actor, armCounters) {
   if (request === undefined) {
     throw new TeamRuleSetError(
       `phaseTransitionEffects was handed an actor view for ${String(actor?.id)} that resolveAction did not ` +
-      "register. Pass request.actor itself, not a copy: the transition ticks every combatant's timed spell " +
+      "register. Pass request.actor itself, not a copy: the transition ticks the owed bystander's timed spell " +
       "counters and reads the field from the request that view belongs to."
     );
   }
@@ -6745,7 +6859,8 @@ function ss2TimedSpellTick(actor, armCounters) {
       effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: counter, to: ticked });
     }
   }
-  for (const bystander of ss2TimedSpellBystanders(request)) {
+  const paid = ss2TimedSpellBystanders(request);
+  for (const bystander of paid) {
     const theirs = declaredResourceNames(bystander);
     for (const counter of SS2_TIMED_SPELL_COUNTERS) {
       if (!theirs.has(counter)) continue;
@@ -6754,6 +6869,16 @@ function ss2TimedSpellTick(actor, armCounters) {
         effects.push({ kind: EffectKind.RESOURCE, targetId: bystander.id, resource: counter, to: value - 1 });
       }
     }
+  }
+  // The clock, after every tick: each owed bystander has just been paid, and
+  // the actor — whose phase this is — now owes one to whoever completes the
+  // next phase. Written only when it changes, so a gladiator bearing no timed
+  // spell (and so declaring no clock) is never touched.
+  for (const bystander of paid) {
+    effects.push({ kind: EffectKind.RESOURCE, targetId: bystander.id, resource: SS2_TIMED_SPELL_CLOCK, to: 0 });
+  }
+  if (declared.has(SS2_TIMED_SPELL_CLOCK) && resourceValue(actor, SS2_TIMED_SPELL_CLOCK) !== 1) {
+    effects.push({ kind: EffectKind.RESOURCE, targetId: actor.id, resource: SS2_TIMED_SPELL_CLOCK, to: 1 });
   }
   return { effects, after };
 }
@@ -6789,7 +6914,8 @@ function ss2TimedSpellTick(actor, armCounters) {
  *
  * ► **ONE THING HERE IS NOT ATTACKER-ONLY, AND IT IS THE FIRST THING `nextphase`
  *   DOES: the timed-spell tick** (step 3, `+0x3271`/`+0x3289`), which reaches
- *   every living combatant through `ss2TimedSpellBystanders`. The two EFFECTS
+ *   the bystander owed a tick through `ss2TimedSpellBystanders` — in 1v1,
+ *   always the defender, as in the build. The two EFFECTS
  *   the counters buy (steps 8 and 9) are attacker-only, like everything else.
  */
 function phaseTransitionEffects(

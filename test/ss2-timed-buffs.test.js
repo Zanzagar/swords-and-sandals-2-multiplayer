@@ -33,12 +33,19 @@
  *
  * ## WHAT IS DECIDED HERE, AND WHOSE
  *
- * - **Every completed phase ticks every LIVING combatant's counters** — the
- *   build's rule exactly in 1v1, where it ticks both fighters. The main
- *   session's decision, the owner's to revisit; see `ss2TimedSpellBystanders`.
- * - **A phase that kills ticks nobody**, because this engine skips the whole
- *   transition on a kill (`death()` deletes `nextphase`), and the dead are
- *   never ticked again.
+ * - **The team-play tick — THE OWNER'S DECISION, 2026-09-22, "bearer's turns,
+ *   1v1-exact".** A bearer's counters tick on its OWN completed phase and on
+ *   the first phase anybody else completes after it, and on no other, so a
+ *   cast applies ten times at every team size and 1v1 is the build phase by
+ *   phase. The "owed" fact is the AUTHORED resource `timed_spell_tick_owed`,
+ *   declared only beside a timed counter. See `ss2TimedSpellBystanders`.
+ *   (Until then — the main session's rule of the same day — every completed
+ *   phase ticked every living combatant: ten applications in 1v1, five in 2v2,
+ *   four in 3v3.)
+ * - **A phase that kills does not exist for the clock**: it ticks nobody
+ *   (`death()` deletes `nextphase`), pays no owed tick and earns its actor
+ *   none; an owed tick waits for the next COMPLETED phase, an owed bearer that
+ *   dies takes it with it, and the dead are never ticked again.
  * - **The counters are declared by possession as well as by statement**, so a
  *   gladiator who carries the item can hold the counter it writes.
  */
@@ -63,6 +70,8 @@ const REGEN = Ss2ActionType.CAST_REGENERATE;
 const BOUNDLESS = Ss2ActionType.CAST_BOUNDLESS_ENERGY;
 const REGEN_COUNTER = "spell_regenerate";
 const BOUNDLESS_COUNTER = "spell_boundless_energy";
+/** The engine's own "owes one bystander tick" fact. AUTHORED: the build has no such field. */
+const CLOCK = "timed_spell_tick_owed";
 
 /** 170 hitpoints, 160 stamina, magicka 7 and stamina 6 once derived. */
 const fields = (o = {}) => ({
@@ -122,6 +131,24 @@ function stagedTeams({ hero = {}, ally = {}, foe1 = {}, foe2 = {} } = {}) {
     ]
   });
   assert.equal(currentCombatant(battle).id, "hero");
+  return battle;
+}
+
+/** A 3v3. Speeds fix the order hero, foe1, ally, foe2, ally2, foe3. */
+function stagedTrios(sides = {}) {
+  const make = (id, speed, left) => ss2Combatant(
+    fields({ speed, ...(left ? { gladiator_dir: "left" } : {}), ...(sides[id] ?? {}) }),
+    { id, name: id, controller: "local" }
+  );
+  const battle = createTeamBattle({
+    seed: 3,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", name: "red", combatants: [make("hero", 26, false), make("ally", 24, false), make("ally2", 22, false)] },
+      { id: "blue", name: "blue", combatants: [make("foe1", 25, true), make("foe2", 23, true), make("foe3", 21, true)] }
+    ]
+  });
+  assert.deepEqual(battle.initiative, ["hero", "foe1", "ally", "foe2", "ally2", "foe3"]);
   return battle;
 }
 
@@ -212,6 +239,40 @@ test("a STATED counter is declared at the stated value; POSSESSION declares it a
   assert.equal(ss2Combatant(fields({ inventory1: 45, spell_boundless_energy: 12 })).resources[BOUNDLESS_COUNTER], 12);
   // The empty marker is not an item.
   assert.equal(Object.hasOwn(ss2Combatant(fields({ inventory1: SS2_INVENTORY_EMPTY })).resources, REGEN_COUNTER), false);
+});
+
+test("the TICK CLOCK is declared beside any timed counter, at 1 (owed), and nowhere else — no default, so no golden moves", () => {
+  assert.ok(SS2_RESOURCE_NAMES.includes(CLOCK), "declarable, so a restored record keeps its value");
+  assert.ok(SS2_WRITTEN_RESOURCES.includes(CLOCK));
+  assert.equal(Object.hasOwn(SS2_RESOURCE_DEFAULTS, CLOCK), false,
+    "a default would be filled into every golden's combatant and move all 23 hashes");
+  // Possession of either item, or a stated counter, declares it — at 1, because
+  // before any phase has completed every bearer counts as owed.
+  assert.equal(ss2Combatant(fields({ inventory2: 46 })).resources[CLOCK], 1);
+  assert.equal(ss2Combatant(fields({ inventory5: 45 })).resources[CLOCK], 1);
+  assert.equal(ss2Combatant(fields({ spell_regenerate: 7 })).resources[CLOCK], 1);
+  // A stated clock wins, as a stated counter does: a restored bout keeps its place.
+  assert.equal(ss2Combatant(fields({ spell_regenerate: 7, [CLOCK]: 0 })).resources[CLOCK], 0);
+  // No counter, no clock — the census's mechanism.
+  assert.equal(Object.hasOwn(ss2Combatant(fields()).resources, CLOCK), false);
+  assert.equal(Object.hasOwn(ss2Combatant(fields({ inventory1: 35 })).resources, CLOCK), false,
+    "a bolt is not a timed spell");
+});
+
+test("a combatant declaring a timed counter WITHOUT the clock is refused at construction, by name", () => {
+  // Built past `ss2Combatant`'s declaration: without the clock it would never
+  // be owed, so its counter would tick on its own phases only and a 1v1 would
+  // silently stop being the build. Refused before any draw, not mid-bout.
+  const raw = ss2Combatant(fields({ speed: 21, inventory1: 46 }), { id: "hero", name: "hero", controller: "local" });
+  delete raw.resources[CLOCK];
+  assert.throws(() => createTeamBattle({
+    seed: 3,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", name: "red", combatants: [raw] },
+      { id: "blue", name: "blue", combatants: [ss2Combatant(fields(), { id: "foe", name: "foe", controller: "local" })] }
+    ]
+  }), /hero declares spell_regenerate but not timed_spell_tick_owed/);
 });
 
 /* ------------------------------------------------------------------ *
@@ -460,8 +521,11 @@ test("THE EFFECT APPLIES ONLY TO THE ACTOR: a ticking bystander gains nothing on
   assert.equal(foe.resources.staminaleft.value, 5, "the foe's boundless energy does nothing on the hero's rest");
   assert.equal(foe.health, 50);
   assert.deepEqual(effectsOn(battle, "foe"), [
-    { kind: EffectKind.RESOURCE, targetId: "foe", resource: BOUNDLESS_COUNTER, to: 5 }
-  ], "the tick is the only thing that happens to a bystander");
+    { kind: EffectKind.RESOURCE, targetId: "foe", resource: BOUNDLESS_COUNTER, to: 5 },
+    // Since 2026-09-22 the owed tick is also marked PAID — the engine's own
+    // bookkeeping, not a build write. See `ss2TimedSpellBystanders`.
+    { kind: EffectKind.RESOURCE, targetId: "foe", resource: CLOCK, to: 0 }
+  ], "the tick, and the clock that says it is paid, are the only things that happen to a bystander");
 });
 
 test("on its OWN phase a ticking bearer gains exactly round(staminamax / 4) on top of the ordinary transition", () => {
@@ -504,39 +568,223 @@ test("a STATED counter of 2 applies on the bearer's phase (2 -> 1 > 0)", () => {
 });
 
 /* ------------------------------------------------------------------ *
- * The team rule: every completed phase ticks every LIVING combatant  *
+ * The team rule (owner, 2026-09-22): a bearer ticks on its own       *
+ * completed phase and on the first one anybody completes after it    *
  * ------------------------------------------------------------------ */
 
-test("2v2: ONE phase ticks all four combatants' counters, and applies only to the actor", () => {
+test("2v2: the bout's FIRST completed phase ticks all four (everybody starts owed); every later one ticks its actor and the previous actor only", () => {
   const counters = { spell_regenerate: 5 };
   const battle = stagedTeams({ hero: counters, ally: counters, foe1: counters, foe2: counters });
-  for (const id of ["hero", "ally", "foe1", "foe2"]) combatantById(battle, id).health = 50;
+  const ids = ["hero", "foe1", "ally", "foe2"];
+  const snapshot = () => Object.fromEntries(ids.map((id) => [id, counterOf(battle, id, REGEN_COUNTER)]));
+  const clocks = () => Object.fromEntries(ids.map((id) => [id, counterOf(battle, id, CLOCK)]));
+  for (const id of ids) combatantById(battle, id).health = 50;
+  assert.deepEqual(clocks(), { hero: 1, foe1: 1, ally: 1, foe2: 1 }, "before any phase, everybody is owed");
+
   rest(battle, "hero");
-  for (const id of ["hero", "ally", "foe1", "foe2"]) {
-    assert.equal(counterOf(battle, id, REGEN_COUNTER), 4, `${id} ticks on the hero's phase`);
-  }
+  assert.deepEqual(snapshot(), { hero: 4, foe1: 4, ally: 4, foe2: 4 }, "phase 1 pays every opening debt");
   assert.deepEqual(heals(battle, "hero"), [13, 43], "the actor regenerates");
-  for (const id of ["ally", "foe1", "foe2"]) {
-    assert.equal(combatantById(battle, id).health, 50, `${id} does not`);
-  }
-  // And the next phase — somebody else's — ticks all four again.
-  const next = currentCombatant(battle).id;
-  assert.notEqual(next, "hero");
-  rest(battle, next);
-  for (const id of ["hero", "ally", "foe1", "foe2"]) assert.equal(counterOf(battle, id, REGEN_COUNTER), 3);
+  for (const id of ["ally", "foe1", "foe2"]) assert.equal(combatantById(battle, id).health, 50, `${id} does not`);
+  assert.deepEqual(clocks(), { hero: 1, foe1: 0, ally: 0, foe2: 0 }, "now only the hero is owed");
+
+  rest(battle, "foe1");
+  assert.deepEqual(snapshot(), { hero: 3, foe1: 3, ally: 4, foe2: 4 }, "foe1's own tick and the hero's owed one");
+  assert.deepEqual(clocks(), { hero: 0, foe1: 1, ally: 0, foe2: 0 });
+
+  rest(battle, "ally");
+  assert.deepEqual(snapshot(), { hero: 3, foe1: 2, ally: 3, foe2: 4 });
+
+  rest(battle, "foe2");
+  assert.deepEqual(snapshot(), { hero: 3, foe1: 2, ally: 2, foe2: 3 });
+
+  // A full round later everybody has ticked exactly twice more: once on its
+  // own phase and once on the phase after it.
+  for (const id of ids) rest(battle, id);
+  assert.deepEqual(snapshot(), { hero: 1, foe1: 0, ally: 0, foe2: 1 });
 });
 
-test("2v2: because every phase ticks the field, a cast APPLIES five times (19, 15, 11, 7, 3), not ten", () => {
-  const battle = stagedTeams({ hero: { inventory1: 46 } });
+/**
+ * Plays `phases` completed phases with nobody dying: the hero casts `type` on
+ * phase 0, everyone else rests. Returns the counter after every phase, and the
+ * counter at each hero phase that APPLIED the buff.
+ */
+function playBuff(battle, { type = REGEN, counter = REGEN_COUNTER, phases }) {
   const hero = combatantById(battle, "hero");
+  const counters = [];
   const appliedAt = [];
-  for (let phase = 0; phase < 24; phase += 1) {
+  for (let phase = 0; phase < phases; phase += 1) {
     const actorId = currentCombatant(battle).id;
-    if (actorId === "hero") hero.health = 1;
-    if (phase === 0) cast(battle, REGEN); else rest(battle, actorId);
-    if (actorId === "hero" && heals(battle, "hero").includes(43)) appliedAt.push(counterOf(battle, "hero", REGEN_COUNTER));
+    // Headroom on every hero phase, so an application is always visible. (Not
+    // stamina on the cast phase: at 0 the forced rest would refuse the cast.)
+    if (actorId === "hero") {
+      hero.health = 1;
+      if (phase > 0) hero.resources.staminaleft.value = 0;
+    }
+    if (phase === 0) cast(battle, type); else rest(battle, actorId);
+    counters.push(counterOf(battle, "hero", counter));
+    // Regeneration is its own HEAL of round(170 / 4); boundless energy is a
+    // SECOND staminaleft write, after the floored one (see the floor test).
+    const applied = type === REGEN
+      ? heals(battle, "hero").includes(43)
+      : effectsOn(battle, "hero").filter((effect) => effect.resource === "staminaleft").length === 2;
+    if (actorId === "hero" && applied) appliedAt.push(counterOf(battle, "hero", counter));
   }
-  assert.deepEqual(appliedAt, [19, 15, 11, 7, 3]);
+  return { counters, appliedAt };
+}
+
+test("2v2: a cast APPLIES TEN times (19, 17, …, 1), as in 1v1 — the owner's rule, 2026-09-22", () => {
+  // Order hero, foe1, ally, foe2. Five until 2026-09-22 (19, 15, 11, 7, 3),
+  // when every phase ticked the whole field.
+  for (const [type, counter, itemId] of [[REGEN, REGEN_COUNTER, 46], [BOUNDLESS, BOUNDLESS_COUNTER, 45]]) {
+    const { counters, appliedAt } = playBuff(stagedTeams({ hero: { inventory1: itemId } }), { type, counter, phases: 44 });
+    assert.deepEqual(appliedAt, [19, 17, 15, 13, 11, 9, 7, 5, 3, 1], type);
+    // The bearer ticks on its OWN phase and on the one right after it, and on
+    // no other: the ally's and foe2's phases leave it alone.
+    assert.deepEqual(counters.slice(0, 9), [19, 18, 18, 18, 17, 16, 16, 16, 15], type);
+  }
+});
+
+/* ------------------------------------------------------------------ *
+ * 1v1 IS THE BUILD, phase by phase — a differential against the rule  *
+ * this engine shipped until 2026-09-22 and the build runs              *
+ * ------------------------------------------------------------------ */
+
+/**
+ * THE OLD POLICY, WHICH IN 1v1 IS THE BUILD: `nextphase` runs `check_spells`
+ * for the attacker and then the defender (`+0x3271`, `+0x3289`) on every
+ * completed phase, and for these counters `check_spells` is `if (c > 0) c -= 1`
+ * (`+0x272e`-`+0x278f`) — applied AFTER whatever the phase's arm wrote. The
+ * buff then applies to the ATTACKER when its post-tick counter is `> 0`
+ * (`+0x33bd`, `+0x3476`). Written here from the bytes, not from the engine.
+ */
+function buildPhase(clips, actorId, writes) {
+  for (const { id, counter, value } of writes) clips[id][counter] = value;
+  for (const id of Object.keys(clips)) {
+    for (const counter of Object.keys(clips[id])) if (clips[id][counter] > 0) clips[id][counter] -= 1;
+  }
+  return { regen: clips[actorId][REGEN_COUNTER] > 0, boundless: clips[actorId][BOUNDLESS_COUNTER] > 0 };
+}
+
+/** A 1v1 in which `opener` acts first; both carry two of each item unless told otherwise. */
+function duel({ opener = "hero", hero = {}, foe = {} } = {}) {
+  const kit = { inventory1: 46, inventory2: 46, inventory3: 45, inventory4: 45 };
+  const battle = createTeamBattle({
+    seed: 3,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", name: "red", combatants: [ss2Combatant(fields({ speed: opener === "hero" ? 21 : 19, ...kit, ...hero }), { id: "hero", name: "hero", controller: "local" })] },
+      { id: "blue", name: "blue", combatants: [ss2Combatant(fields({ gladiator_dir: "left", ...kit, ...foe }), { id: "foe", name: "foe", controller: "local" })] }
+    ]
+  });
+  Object.assign(combatantById(battle, "hero"), { x: -60, y: 200 });
+  Object.assign(combatantById(battle, "foe"), { x: 60, y: 200 });
+  assert.equal(currentCombatant(battle).id, opener);
+  return battle;
+}
+
+/**
+ * Plays `script` (phase -> { cast?, writeOnDefender? }) for `phases` phases,
+ * resting otherwise, and asserts after EVERY phase that both fighters' counters
+ * and the actor's two applications equal `buildPhase`'s.
+ *
+ * `writeOnDefender` stands for a cast arm that writes a counter on the OTHER
+ * fighter's clip during the actor's phase — `cast_little_fat_kid`'s
+ * `defender.spell_little_fat_kid = 16` (`+0x820b`) is the build's one such
+ * arm, and it is not built yet. The value lands before `nextphase`, which is
+ * exactly a value staged on the defender just before the phase resolves.
+ */
+function assertDuelIsTheBuild(battle, options) {
+  // Not destructured in the signature: `ss2-assertion-quality.test.js` reads a
+  // helper's body from the first brace after its name.
+  const { phases, script, label } = options;
+  const clips = {};
+  for (const id of ["hero", "foe"]) {
+    clips[id] = {};
+    for (const counter of [REGEN_COUNTER, BOUNDLESS_COUNTER]) clips[id][counter] = counterOf(battle, id, counter);
+  }
+  for (let phase = 0; phase < phases; phase += 1) {
+    const actorId = currentCombatant(battle).id;
+    const defenderId = actorId === "hero" ? "foe" : "hero";
+    const step = script[phase] ?? {};
+    const actor = combatantById(battle, actorId);
+    // Headroom for both applications on every phase, so each is visible.
+    actor.health = 1;
+    actor.resources.staminaleft.value = step.cast ? 100 : 0;
+    const writes = [];
+    if (step.cast) {
+      writes.push({ id: actorId, counter: SS2_TIMED_BUFFS[step.cast].counter, value: SS2_TIMED_BUFFS[step.cast].duration });
+    }
+    if (step.writeOnDefender) {
+      const { counter, value } = step.writeOnDefender;
+      combatantById(battle, defenderId).resources[counter].value = value;
+      writes.push({ id: defenderId, counter, value });
+    }
+    if (step.cast) cast(battle, step.cast, actorId); else rest(battle, actorId);
+    const expected = buildPhase(clips, actorId, writes);
+    for (const id of ["hero", "foe"]) {
+      for (const counter of [REGEN_COUNTER, BOUNDLESS_COUNTER]) {
+        assert.equal(counterOf(battle, id, counter), clips[id][counter],
+          `${label}: ${id}.${counter} after phase ${phase} (${actorId} acting)`);
+      }
+    }
+    const staminaWrites = effectsOn(battle, actorId).filter((effect) => effect.resource === "staminaleft").length;
+    assert.equal(heals(battle, actorId).includes(43), expected.regen, `${label}: regeneration on phase ${phase}`);
+    assert.equal(staminaWrites === 2, expected.boundless, `${label}: boundless energy on phase ${phase}`);
+  }
+}
+
+test("1v1 IS THE BUILD: both fighters' counters after EVERY phase, and every application, equal check_spells on both — regenerate", () => {
+  assertDuelIsTheBuild(duel(), { phases: 50, label: "regen", script: { 0: { cast: REGEN } } });
+  assertDuelIsTheBuild(duel(), { phases: 50, label: "regen, recast at 12", script: { 0: { cast: REGEN }, 12: { cast: REGEN } } });
+  assertDuelIsTheBuild(duel(), { phases: 50, label: "regen, foe casts at 1", script: { 1: { cast: REGEN } } });
+});
+
+test("1v1 IS THE BUILD: … — boundless energy, and both buffs on both fighters at once", () => {
+  assertDuelIsTheBuild(duel(), { phases: 50, label: "boundless", script: { 0: { cast: BOUNDLESS } } });
+  assertDuelIsTheBuild(duel(), {
+    phases: 60,
+    label: "boundless, recast at 10",
+    script: { 0: { cast: BOUNDLESS }, 10: { cast: BOUNDLESS } }
+  });
+  assertDuelIsTheBuild(duel(), {
+    phases: 70,
+    label: "all four casts, interleaved",
+    script: { 0: { cast: REGEN }, 3: { cast: BOUNDLESS }, 6: { cast: BOUNDLESS }, 9: { cast: REGEN }, 14: { cast: REGEN }, 21: { cast: BOUNDLESS } }
+  });
+});
+
+test("1v1 IS THE BUILD for a counter the DEFENDER bears: stated before the bout, and written on it mid-phase by the attacker", () => {
+  // Stated on the defender: the build's first nextphase ticks it, so the
+  // defender must count as owed before anybody has acted.
+  assertDuelIsTheBuild(duel({ foe: { spell_regenerate: 7, spell_boundless_energy: 20 } }), {
+    phases: 30, label: "stated on the defender", script: {}
+  });
+  // The same with the FOE opening, so the owed fighter at phase 0 is the hero.
+  assertDuelIsTheBuild(duel({ opener: "foe", hero: { spell_regenerate: 20, spell_boundless_energy: 9 } }), {
+    phases: 30, label: "stated on the defender, foe opens", script: {}
+  });
+  // Written on the defender during the attacker's phase — the little-fat-kid
+  // shape, whose bearer is not its caster — at the opening phase, mid-bout,
+  // and on top of a counter already running.
+  assertDuelIsTheBuild(duel(), {
+    phases: 50,
+    label: "written on the defender",
+    script: {
+      0: { writeOnDefender: { counter: REGEN_COUNTER, value: 16 } },
+      7: { writeOnDefender: { counter: BOUNDLESS_COUNTER, value: 16 } },
+      8: { cast: REGEN, writeOnDefender: { counter: REGEN_COUNTER, value: 16 } },
+      20: { writeOnDefender: { counter: BOUNDLESS_COUNTER, value: 16 } }
+    }
+  });
+});
+
+test("3v3: a cast APPLIES TEN times too — four until 2026-09-22 (19, 13, 7, 1)", () => {
+  for (const [type, counter, itemId] of [[REGEN, REGEN_COUNTER, 46], [BOUNDLESS, BOUNDLESS_COUNTER, 45]]) {
+    const { counters, appliedAt } = playBuff(stagedTrios({ hero: { inventory1: itemId } }), { type, counter, phases: 66 });
+    assert.deepEqual(appliedAt, [19, 17, 15, 13, 11, 9, 7, 5, 3, 1], type);
+    assert.deepEqual(counters.slice(0, 7), [19, 18, 18, 18, 18, 18, 17], type);
+    assert.equal(counters.at(-1), 0, `${type} has run out`);
+  }
 });
 
 test("A PHASE THAT KILLS TICKS NOBODY, and the dead are never ticked again", () => {
@@ -550,9 +798,79 @@ test("A PHASE THAT KILLS TICKS NOBODY, and the dead are never ticked again", () 
   for (const id of ["hero", "ally", "foe1", "foe2"]) {
     assert.equal(counterOf(battle, id, REGEN_COUNTER), 5, `${id} is not ticked by a killing phase`);
   }
+  // The ally's rest is the bout's first COMPLETED phase, so it pays every
+  // opening debt — the killing phase paid none — and ticks all the living.
   rest(battle);
   for (const id of ["hero", "ally", "foe2"]) assert.equal(counterOf(battle, id, REGEN_COUNTER), 4, `${id} lives`);
   assert.equal(counterOf(battle, "foe1", REGEN_COUNTER), 5, "the dead keep what they had");
+});
+
+/**
+ * THE DEATH RULE, decided 2026-09-22 with the owner's tick rule: **a phase
+ * that kills does not exist for the clock.** It ticks nobody (the build's
+ * `death()` deletes `nextphase`), it pays no owed tick, and it earns its actor
+ * none — so an owed tick waits for the next phase anybody COMPLETES, and a
+ * killer's own buff neither ticks nor applies on the phase it killed in.
+ */
+const killingBolt = (battle, actorId, targetId) =>
+  applyAction(battle, { actorId, type: Ss2ActionType.CAST_FRIGHTNING_BOLT, targetId });
+
+test("an owed tick SURVIVES a killing phase and is paid by the next COMPLETED one; the killer earns none", () => {
+  const counters = { spell_regenerate: 5 };
+  const battle = stagedTeams({ hero: counters, ally: counters, foe1: { ...counters, inventory1: 35 }, foe2: counters });
+  const snapshot = () => Object.fromEntries(["hero", "foe1", "ally", "foe2"].map((id) => [id, counterOf(battle, id, REGEN_COUNTER)]));
+  rest(battle, "hero");
+  assert.deepEqual(snapshot(), { hero: 4, foe1: 4, ally: 4, foe2: 4 });
+  // foe1 — the phase that owed the hero its tick — kills the ally instead.
+  killingBolt(battle, "foe1", "ally");
+  assert.equal(combatantById(battle, "ally").alive, false);
+  assert.deepEqual(snapshot(), { hero: 4, foe1: 4, ally: 4, foe2: 4 }, "the killing phase ticks nobody");
+  assert.equal(counterOf(battle, "hero", CLOCK), 1, "and leaves the hero owed");
+  assert.equal(counterOf(battle, "foe1", CLOCK), 0, "and earns the killer nothing");
+  // foe2 completes the next phase, and pays the HERO, not the killer.
+  assert.equal(currentCombatant(battle).id, "foe2");
+  rest(battle, "foe2");
+  assert.deepEqual(snapshot(), { hero: 3, foe1: 4, ally: 4, foe2: 3 });
+  rest(battle, "hero");
+  assert.deepEqual(snapshot(), { hero: 2, foe1: 4, ally: 4, foe2: 2 });
+  rest(battle, "foe1");
+  assert.deepEqual(snapshot(), { hero: 1, foe1: 3, ally: 4, foe2: 2 }, "the dead ally is never ticked again");
+});
+
+test("a bearer whose OWN phase kills THE NEXT ACTOR neither ticks nor becomes owed; the one owed before it stays owed", () => {
+  const counters = { spell_regenerate: 5 };
+  const battle = stagedTeams({ hero: counters, ally: { ...counters, inventory1: 35 }, foe1: counters, foe2: counters });
+  const snapshot = () => Object.fromEntries(["hero", "foe1", "ally", "foe2"].map((id) => [id, counterOf(battle, id, REGEN_COUNTER)]));
+  rest(battle, "hero");
+  rest(battle, "foe1");
+  assert.deepEqual(snapshot(), { hero: 3, foe1: 3, ally: 4, foe2: 4 });
+  // The ally kills foe2, whose phase was next.
+  killingBolt(battle, "ally", "foe2");
+  assert.equal(combatantById(battle, "foe2").alive, false);
+  assert.deepEqual(snapshot(), { hero: 3, foe1: 3, ally: 4, foe2: 4 });
+  assert.equal(counterOf(battle, "ally", CLOCK), 0);
+  assert.equal(counterOf(battle, "foe1", CLOCK), 1);
+  assert.equal(currentCombatant(battle).id, "hero", "foe2 is dead, so the hero is next");
+  rest(battle, "hero");
+  assert.deepEqual(snapshot(), { hero: 2, foe1: 2, ally: 4, foe2: 4 }, "foe1's debt is paid by the hero's completed phase");
+  rest(battle, "foe1");
+  rest(battle, "ally");
+  assert.deepEqual(snapshot(), { hero: 1, foe1: 0, ally: 3, foe2: 4 },
+    "the killer's cycle skipped both its ticks: one own tick since the bout's first phase");
+});
+
+test("an OWED bearer that dies takes its tick with it: nobody inherits it", () => {
+  const counters = { spell_regenerate: 5 };
+  const battle = stagedTeams({ hero: counters, ally: counters, foe1: { ...counters, inventory1: 35 }, foe2: counters });
+  const snapshot = () => Object.fromEntries(["hero", "foe1", "ally", "foe2"].map((id) => [id, counterOf(battle, id, REGEN_COUNTER)]));
+  rest(battle, "hero");
+  killingBolt(battle, "foe1", "hero");
+  assert.equal(combatantById(battle, "hero").alive, false);
+  rest(battle, "ally");
+  assert.deepEqual(snapshot(), { hero: 4, foe1: 4, ally: 3, foe2: 4 },
+    "the ally's own tick and nothing else: the owed hero is dead, and nobody else was owed");
+  rest(battle, "foe2");
+  assert.deepEqual(snapshot(), { hero: 4, foe1: 4, ally: 2, foe2: 3 });
 });
 
 test("1v1: the bearer killed as a DEFENDER keeps its counter — the killing phase ran no nextphase", () => {

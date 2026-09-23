@@ -1228,6 +1228,16 @@ test("the SS2 resource vocabulary is pinned: changing it moves every peer's hash
     //   `+0x8bc4`/`+0x8ca3`).
     "spell_boundless_energy", "spell_regenerate",
     "staminaleft", "staminamax",
+    // ► **ADDED 2026-09-22 WITH THE OWNER'S TEAM-PLAY TICK RULE ("bearer's
+    //   turns, 1v1-exact"), THE SAME SHAPE, AND IT MOVED NOTHING.** AUTHORED —
+    //   the build has no such field: 1 while a gladiator is owed the one
+    //   bystander tick its own completed phase earned, 0 once the next
+    //   completed phase pays it. No `SS2_RESOURCE_DEFAULTS` entry; `ss2Combatant`
+    //   declares it only beside a timed counter, so a gladiator bearing no timed
+    //   spell carries no new hashed state. 23 golden replay hashes taken before
+    //   and after (`tools/golden-hash-census.mjs`), all 23 unchanged; the six
+    //   seeded-play pins unchanged. See `ss2TimedSpellBystanders`.
+    "timed_spell_tick_owed",
     "weapon",
     "weapon_enchantment_damage",
     "weapon_enchantment_potency",
@@ -1305,7 +1315,10 @@ test("an SS2 combatant declares exactly the vocabulary, and the projection carri
     "inventory_maxslots",
     // 2026-09-22: no default; declared when stated OR when a slot holds 45/46,
     // and `gladiator()` states neither and carries nothing.
-    "spell_boundless_energy", "spell_regenerate"
+    "spell_boundless_energy", "spell_regenerate",
+    // 2026-09-22: no default; declared only beside a timed counter, of which
+    // `gladiator()` has none.
+    "timed_spell_tick_owed"
   ];
 
   // (1) No weapon id at all: everything but what either weapon slot answers for.
