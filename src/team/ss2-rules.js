@@ -3272,7 +3272,11 @@ const SS2_WALK_DIRECTION = Object.freeze({
  *    the closer; the swap is ~~20 draws in 100 against the taunt band's 8.8~~
  *    18 draws in 100 against the taunt band's 7.92 (see the correction above).
  *    `legalActions` offers the swap on every frame to a gladiator with a
- *    second weapon, and a drawn bow always has one.
+ *    second weapon ~~, and a drawn bow always has one~~ **and an arrow left
+ *    (the build's button test, `+0x0e0a`-`+0x0e9d`; night2/engine2
+ *    swap-ammo, 2026-09-24) — and a drawn bow asked about here always has
+ *    both: with no arrow left the forced swap is its whole offer, and
+ *    `chooseAiAction` returns that before it gets this far.**
  *
  * ► **NEVER THE BASH, AND NEVER THE TAUNT, HERE.** The bash is the hero's
  *   button (`closerange_archer` wires it) and the build's villain never picks
@@ -8198,7 +8202,8 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
     //   (2026-09-13; this line was stale until 2026-09-24)** — `BOMBARD`,
     //   `SNIPE`, `SWAP_WEAPONS` — and it does not reach this case either:
     //   `legalActions` offers the swap only when `secondary_weapon` is not 0
-    //   and `secondary_weapon_range` is above 0.
+    //   and `secondary_weapon_range` is above 0 (and, since 2026-09-24,
+    //   `ammo_left` above 0 — the build's button test).
     if (Number.isFinite(derived.secondary_weapon_range)) {
       derived.weapon_range = derived.secondary_weapon_range;
     }
@@ -11450,6 +11455,40 @@ export function createSs2TeamRules({
       //     a reach of zero is still no bow, for the record that states no id
       //     at all or states one with `derive: false` and no reach.
       //
+      //   ► **AND ON AN EMPTY QUIVER, which this offer ignored until
+      //     2026-09-24 (night2/engine2 swap-ammo).** The button's WHOLE test,
+      //     re-derived that day off `DoAction@0x2378cc` (body `0x2378d2`),
+      //     is `(!(ammo_left > 0) && secondary_weapon != 0) ||
+      //     secondary_weapon == 0` -> `_visible = false`: `Greater`/`Not` at
+      //     `+0x0e2e`/`+0x0e2f`, the `&&` short-circuit `+0x0e30`-`+0x0e5d`,
+      //     the `||` short-circuit `+0x0e5e`-`+0x0e89`, the hide
+      //     `+0x0e90`-`+0x0e9d`. It reduces to `!(ammo_left > 0) ||
+      //     secondary_weapon == 0`, and it does NOT read the weapon in hand.
+      //     So a sword in hand with no arrows has no button — no drawing a
+      //     bow with nothing to loose, which the button's own tooltip says
+      //     too (`+0x0f9b`: it works only with ammunition left). The
+      //     drawn bow with no arrows never meets this test: the forced chain
+      //     (`DoAction@0x236941`, earlier in the same frame, `+0x0cce`) has
+      //     already taken the turn, and returned `[swap_weapons]` at the top
+      //     of this function. The villain's own two swaps agree:
+      //     the random swap needs `ammo_left > 0` (`DoAction@0x23f835`
+      //     `+0x0f3e`-`+0x0f52`), and its empty-quiver swap fires only on
+      //     `equipped_weapon == 2` (`+0x11a3`-`+0x11e9`). `ammo_left` is
+      //     never refilled mid-battle (`battlevalues`' refill is inside the
+      //     `battle_started` skip, `+0x3b45`), so a gladiator the forced swap
+      //     has disarmed keeps his sword for the rest of the bout.
+      //
+      //     Measured at `2ba96c3`, before the fix, by the diagnostic tally of
+      //     `test/arena-ring-swap.test.js` "ACCEPTANCE" (1v1-3v3, plain and
+      //     tricks, seeds 1-5, every foe selected): the ring drew this button
+      //     on 862 of 4,647 selections where the build hides it; after, on 0,
+      //     and those 862 are `no-arrows`. The AI never took it: over the
+      //     arena host's demo bouts (1v1-3v3, the six kits, seeds 1-50) and
+      //     champion 1v1s (18 x 18, seeds 1-3), every AI decision and every
+      //     bout trace was identical before and after. Pinned by
+      //     `test/ss2-ranged.test.js` ("NO ARROWS, NO SWAP TO THE BOW") and
+      //     `test/ss2-action-preview.test.js` ("no-arrows").
+      //
       //   **The build never checks that the secondary weapon IS a bow**
       //   (`+0x4d23`, a plain toggle), and neither does this. A gladiator who
       //   swaps to a sword gets the archer controllers and their minimum range
@@ -11460,6 +11499,7 @@ export function createSs2TeamRules({
       if (
         resourceValue(view.actor, "secondary_weapon", null) !== 0
         && resourceValue(view.actor, "secondary_weapon_range", 0) > 0
+        && resourceValue(view.actor, "ammo_left", 0) > 0
       ) {
         actions.push({ type: Ss2ActionType.SWAP_WEAPONS, targetId: actorId });
       }
@@ -16742,6 +16782,7 @@ export function ss2PreviewAction(view, action, {
  * | `slot-empty` | hide | build | an inventory slot holding 1 (or 0, or undeclared) |
  * | `slot-locked` | hide | build | an inventory slot above `inventory_maxslots` |
  * | `no-secondary` | hide | build | the swap with `secondary_weapon` 0 or no reach |
+ * | `no-arrows` | hide | build | the swap with a second weapon and `ammo_left <= 0`, sword in hand |
  * | `no-ranks` | hide | authored | a rank verb in an arena with no second axis |
  * | `unpositioned` | hide | engine | a walk or shove where nothing has a position |
  * | `other-rank` | grey | team | melee, shove, bash, taunt at a foe in another rank |
@@ -16784,6 +16825,7 @@ export const SS2_UNAVAILABLE_REASONS = Object.freeze(Object.fromEntries([
   ["slot-empty", "hide", "build", "This inventory slot holds nothing."],
   ["slot-locked", "hide", "build", "This inventory slot is above the fighter's inventory_maxslots."],
   ["no-secondary", "hide", "build", "No second weapon to swap to."],
+  ["no-arrows", "hide", "build", "No arrows left: the build shows no swap to the bow with nothing to loose."],
   ["no-ranks", "hide", "authored", "This arena has one rank."],
   ["unpositioned", "hide", "engine", "Nobody in this battle has a position."],
   ["other-rank", "grey", "team", "That foe is in another rank; you can only reach your own."],
@@ -17046,11 +17088,17 @@ export function ss2UnavailableActions(view, targetId, legal, { rankStride = SS2_
     }, controllerReason(type));
   });
 
+  // The swap's two hides, split exactly as the build's one test splits them
+  // (overlay frame 1 body `0x2378d2` `+0x0e0a`-`+0x0e9d`): its arrow half is
+  // `!(ammo_left > 0) && secondary_weapon != 0`, so with no second weapon the
+  // reason is `no-secondary` whatever the quiver holds, and `no-arrows` only
+  // beside one. A DRAWN bow with no arrows never gets here — that is the
+  // forced swap above, and the swap is its whole offer.
   push(
     { group: "swap", slot: "swap_inventory", verb: "swap_weapons", type: Ss2ActionType.SWAP_WEAPONS, targetId: actor.id },
-    resourceValue(actor, "secondary_weapon", null) !== 0 && resourceValue(actor, "secondary_weapon_range", 0) > 0
-      ? null
-      : "no-secondary"
+    !(resourceValue(actor, "secondary_weapon", null) !== 0 && resourceValue(actor, "secondary_weapon_range", 0) > 0)
+      ? "no-secondary"
+      : resourceValue(actor, "ammo_left", 0) > 0 ? null : "no-arrows"
   );
 
   // The six inventory buttons, under the panel's two gates and in its order.

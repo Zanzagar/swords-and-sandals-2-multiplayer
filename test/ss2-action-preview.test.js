@@ -566,6 +566,38 @@ test("the build's own hides: level, empty and locked slots, no second weapon —
   for (const verb of ["jumpleft", "jumpright", "chargeright"]) assert.equal(reasonOf(result, verb), "not-built");
 });
 
+test("no-arrows: a sword in hand with an empty quiver has no swap button — the build's hide, not a grey, and not no-secondary", () => {
+  // The build's button test is `(!(ammo_left > 0) && secondary_weapon != 0) ||
+  // secondary_weapon == 0` (overlay frame 1 body 0x2378d2 +0x0e0a-+0x0e9d),
+  // whichever weapon is in hand; see `test/ss2-ranged.test.js` "NO ARROWS, NO
+  // SWAP TO THE BOW" for the bytes. Both stances of the sword: far and near.
+  for (const [label, x] of [["far", 700], ["near", 60]]) {
+    const { battle, log } = staged({
+      at: { hero: [0, FRONT], b1: [x, FRONT] }, hero: archer(), foes: ["b1"], resources: { hero: { ammo_left: 0 } }
+    });
+    const result = checkRing(battle, log, "hero", "b1", `empty quiver ${label}`);
+    assert.equal(result.stance.weapon, "warrior", `${label}: the sword is in hand`);
+    assert.equal(result.forced, null, `${label}: no forced phase — the empty quiver only forces a DRAWN bow`);
+    const swap = entry(result, "swap_weapons");
+    assert.deepEqual([swap.available, swap.reason, swap.display], [false, "no-arrows", "hide"], label);
+  }
+  assert.deepEqual(
+    [SS2_UNAVAILABLE_REASONS["no-arrows"].display, SS2_UNAVAILABLE_REASONS["no-arrows"].rule],
+    ["hide", "build"]
+  );
+
+  // The controls. One arrow: the button is back. No second weapon AND no
+  // arrows: `no-secondary`, the gate the build tests first on that path.
+  const loaded = staged({
+    at: { hero: [0, FRONT], b1: [700, FRONT] }, hero: archer(), foes: ["b1"], resources: { hero: { ammo_left: 1 } }
+  });
+  assert.equal(entry(checkRing(loaded.battle, loaded.log, "hero", "b1", "one arrow"), "swap_weapons").available, true);
+  const bare = staged({
+    at: { hero: [0, FRONT], b1: [700, FRONT] }, hero: { secondary_weapon: 0 }, foes: ["b1"], resources: { hero: { ammo_left: 0 } }
+  });
+  assert.equal(reasonOf(checkRing(bare.battle, bare.log, "hero", "b1", "bare and empty"), "swap_weapons"), "no-secondary");
+});
+
 test("undeclared: a level-9 warrior who never stated the psyche counter", () => {
   const { battle, log } = staged({ at: { hero: [0, FRONT], b1: [700, FRONT] }, foes: ["b1"], hero: { psyche_up: undefined } });
   assert.equal(combatantById(battle, "hero").resources.psyche_up, undefined, "the staging must leave the counter undeclared");
@@ -772,7 +804,7 @@ test("coverage: which verbs were resolved against their preview, and which reaso
   for (const outcome of ["failed", "effect-1", "effect-2"]) {
     assert.ok(verified.get(`${Ss2ActionType.TAUNT}:pools:${outcome}`) > 0, `taunt ${outcome}: its pools were never checked`);
   }
-  for (const code of ["other-rank", "in-reach", "level", "slot-empty", "not-built", "no-secondary", "duel", "no-rank"]) {
+  for (const code of ["other-rank", "in-reach", "level", "slot-empty", "not-built", "no-secondary", "no-arrows", "duel", "no-rank"]) {
     assert.ok(reasonsSeen.get(code) > 0, `${code} never reached`);
   }
 });

@@ -731,6 +731,70 @@ test("a STATED secondary_weapon 0 is the build's own 'no second weapon': never o
   assert.equal(suggestAction(armed, "red-1").type, Ss2ActionType.SWAP_WEAPONS, "and the AI still draws it");
 });
 
+test("NO ARROWS, NO SWAP TO THE BOW: the build hides its swap button on `!(ammo_left > 0)` as well as on no second weapon — and the empty drawn bow is still the forced swap", () => {
+  // ► **THE BUTTON'S WHOLE TEST, re-derived 2026-09-24** with
+  //   `node tools/inspect-swf.mjs "$swf" --references swap_inventory --around 60`,
+  //   `sprite:862[overlay]/frame:1/DoAction@0x2378cc` (body `0x2378d2`):
+  //     +0x0e0a-+0x0e2f  !(hero.ammo_left > 0)              Greater; Not
+  //     +0x0e30-+0x0e5d  && hero.secondary_weapon != 0      Dup; Not; If (short-circuit); Equals2 +0x0e5c; Not
+  //     +0x0e5e-+0x0e89  || hero.secondary_weapon == 0      Dup; If (short-circuit); Equals2 +0x0e89
+  //     +0x0e8a-+0x0e8b  Not; If -> +0x0ea3 (the icon frame) when neither holds
+  //     +0x0e90-+0x0e9d  swap_inventory._visible = false
+  //   i.e. hidden on `!(ammo_left > 0) || secondary_weapon == 0`, WHICHEVER
+  //   weapon is in hand. The drawn bow never reaches it with an empty quiver:
+  //   the forced chain (`DoAction@0x236941`, the same frame, earlier in the
+  //   file) takes the turn first (`+0x0cce`), which is the whole offer.
+  //
+  // The expected column is the build's truth table, written out by hand.
+  const cases = [
+    // [what, fields, ammo_left, expected]
+    ["no second weapon, sword, 0 arrows", gladiator({ secondary_weapon: 0 }), 0, "withheld"],
+    ["no second weapon, sword, 1 arrow", gladiator({ secondary_weapon: 0 }), 1, "withheld"],
+    ["a bow, sword in hand, 0 arrows", bowman(), 0, "withheld"],
+    ["a bow, sword in hand, 1 arrow", bowman(), 1, "offered"],
+    ["a bow, bow drawn, 0 arrows", bowman({ equipped_weapon: 2 }), 0, "forced"],
+    ["a bow, bow drawn, 1 arrow", bowman({ equipped_weapon: 2 }), 1, "offered"]
+  ];
+  // Both controller frames of each stance: 500 apart is beyond the archer
+  // floor and every reach; 60 apart is inside both.
+  for (const [where, redX, blueX] of [["far", -250, 250], ["near", -30, 30]]) {
+    for (const [what, fields, ammo, expected] of cases) {
+      const battle = staged({
+        red: [{ fields, id: "red-1", x: redX, y: 200 }],
+        blue: [{ fields: gladiator({ gladiator_dir: "left", vitality: 40 }), id: "blue-1", x: blueX, y: 200 }]
+      });
+      combatantById(battle, "red-1").resources.ammo_left.value = ammo;
+      const types = typesOf(battle, "red-1");
+      const swaps = types.filter((type) => type === Ss2ActionType.SWAP_WEAPONS).length;
+      const got = swaps === 0 ? "withheld" : types.length === 1 ? "forced" : "offered";
+      assert.equal(got, expected, `${where}, ${what}: ${types.join(", ")}`);
+    }
+  }
+});
+
+test("a SUBMITTED swap to the bow with an empty quiver is refused, not resolved — and the same gladiator with one arrow draws", () => {
+  const stage = (ammo) => {
+    const battle = staged({
+      red: [{ fields: bowman(), id: "red-1", x: -250, y: 200 }],
+      blue: [{ fields: gladiator({ gladiator_dir: "left", vitality: 40 }), id: "blue-1", x: 250, y: 200 }]
+    });
+    combatantById(battle, "red-1").resources.ammo_left.value = ammo;
+    for (let guard = 0; guard < 4 && currentCombatant(battle)?.id !== "red-1"; guard += 1) {
+      restAnywhere(battle, currentCombatant(battle).id);
+    }
+    assert.equal(currentCombatant(battle)?.id, "red-1");
+    return battle;
+  };
+  const swap = { actorId: "red-1", type: Ss2ActionType.SWAP_WEAPONS, targetId: "red-1" };
+  const empty = stage(0);
+  assert.throws(() => applyAction(empty, swap), /Illegal action/);
+  assert.equal(ss2InBowMode(combatantById(empty, "red-1")), false, "and the sword is still in hand");
+
+  const loaded = stage(1);
+  applyAction(loaded, swap);
+  assert.equal(ss2InBowMode(combatantById(loaded, "red-1")), true, "one arrow is enough to draw");
+});
+
 /* ------------------------------------------------------------------ */
 /* Line of sight — the one AUTHORED rule in the feature                 */
 /* ------------------------------------------------------------------ */

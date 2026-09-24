@@ -110,7 +110,11 @@ test("a stance that wires a walk the engine WITHHOLDS shows it nowhere: not in i
   assert.deepEqual(model.moves.map((move) => `${move.move} ${move.place}`),
     ["walk-right beside", "rank-back above-head", "rank-front below-feet"]);
   assert.deepEqual(model.offRing.map((entry) => line(entry.action)), []);
-  assert.deepEqual(model.swap.action, { type: "swap-weapons", targetId: "blue-2", actorId: "blue-2" });
+  // ~~`model.swap.action` is blue-2's swap~~ — **RE-PINNED 2026-09-24 (night2/engine2 swap-ammo)**: blue-2
+  // spent his five arrows and the forced swap put the bow away, so he holds the sword with `ammo_left` 0,
+  // and the build hides its swap button on `!(ammo_left > 0)` (overlay frame 1 body 0x2378d2
+  // +0x0e0a-+0x0e9d). The engine no longer offers it, so the ring has no ninth button here.
+  assert.equal(model.swap, null);
 });
 
 test("with no ring — the engine has no menu to ask — no move is placed, and every offered move is listed", () => {

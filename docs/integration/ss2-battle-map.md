@@ -803,6 +803,47 @@ inventory overlay: `swap_inventory.onRelease` in sprite 862 frame 1
 `_visible = false` when the hero has no secondary weapon (`+0x0e77`–`+0x0e96`),
 and its icon frame is selected by `using_bow` at `+0x0eb5`.
 
+► **THAT WAS HALF THE HIDE: THE BUTTON ALSO HIDES WITH NO ARROWS LEFT, WHICHEVER
+WEAPON IS IN HAND.** Re-derived 2026-09-24 (night2/engine2 swap-ammo, one
+deriver; the S6 implementer and a ring verifier had each read it that day) with
+`node tools/inspect-swf.mjs "<swf>" --references swap_inventory --around 60`.
+The whole test, in `DoAction@0x2378cc` (body `0x2378d2`), is:
+
+```text
++0x0e0a-+0x0e2f  !(hero.ammo_left > 0)          Push _root.game.hero.ammo_left, 0; Greater; Not
++0x0e30-+0x0e5d  && hero.secondary_weapon != 0  Duplicate; Not; If -> +0x0e5e (short-circuit); Pop; Equals2 +0x0e5c; Not
++0x0e5e-+0x0e89  || hero.secondary_weapon == 0  Duplicate; If -> +0x0e8a (short-circuit); Pop; Equals2 +0x0e89
++0x0e8a-+0x0e8b  Not; If -> +0x0ea3 (the icon frame) when neither holds
++0x0e90-+0x0e9d  swap_inventory._visible = false; Jump past the icon
+```
+
+So hidden on `(!(ammo_left > 0) && secondary_weapon != 0) || secondary_weapon == 0`,
+which reduces to `!(ammo_left > 0) || secondary_weapon == 0`. It never reads
+`using_bow`, so the direction is decided elsewhere:
+
+- **Sword in hand, no arrows: no button.** Nothing else in the build can draw
+  the bow for the hero, so he keeps the sword. The button's own tooltip
+  (`+0x0f9b`) says as much: the swap works only with ammunition left.
+- **Bow drawn, no arrows: the FORCED swap, not this button.** Row 1 of the
+  forced chain (§"Turn gating, forced phases", `+0x0cce`) sits in the OTHER
+  overlay frame 1 action, `DoAction@0x236941`, earlier in the file than
+  `0x2378cc`, and its `getphase("swap_weapons")` takes the turn before any
+  button can be pressed.
+- **Arrows left: the button is shown both ways**, the sword offering the bow
+  and the bow the sword (icon frames 10 and 11, `+0x0ec8`/`+0x0ee4`).
+- **The quiver does not refill mid-battle**: `battlevalues`' `ammo_left`
+  refill (`root/frame:35` `+0x3b45`-`+0x3b81`) is inside the `battle_started`
+  skip. A gladiator the forced swap has disarmed keeps his sword to the end.
+
+The villain's own swaps agree: the random swap needs `ammo_left > 0`
+(`DoAction@0x23f835` `+0x0f3e`-`+0x0f52`), and the empty-quiver swap fires only
+on `equipped_weapon == 2` (`+0x11a3`-`+0x11e9`). The enchanting screen
+(`sprite:2023/frame:1/DoAction@0x62135f`, function `swap_weapons`,
+`+0x0fed`-`+0x1066`) carries the same hide test, byte for byte in shape.
+`src/team/ss2-rules.js` `legalActions` offers the swap on exactly this rule
+(plus a reach above 0, its own "no bow"), and `ss2UnavailableActions` names the
+arrow half `no-arrows`.
+
 The `swap_weapons` phase itself is a plain toggle in overlay frame 52
 `DoAction@0x240c7f` (`+0x4d23`): `using_bow != true` sets
 `game_attacker.equipped_weapon = 2` and `using_bow = true` (`+0x4dbd`,
