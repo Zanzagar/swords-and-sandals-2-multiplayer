@@ -84,8 +84,17 @@ engine unavailableActions() ┘                                                 
 - **From the build:** which verbs a stance offers (the eight controller slots per frame; battle map
   "Buttons wired per controller frame"), hit chances, damage, energy costs, the three HUD readings,
   the crowd's ten moods and its 20 / 70 thresholds, and the damage pop-ups (built, 62b9cdd).
+- **From the build, the buttons themselves** (`src/render/action-buttons.js`, 2026-09-24): the icon
+  frame of every verb per facing on the overlay's eight slots, their up/over background, the swap slot
+  and the six-button items-and-spells row (`inventory_buttons` by item or spell id), and where the
+  overlay stands — on the acting fighter, 180 above his feet, scaled to cancel the camera, and at the
+  midpoint with a close-up copy of the hero once the two stand 1,600 or more apart. The art is the
+  player's own icon pack (`node tools/extract-icons.mjs`); the slot positions are relayed until a pack
+  carries `buttons.layout`.
 - **Authored:** the four groups, the target step and reason codes, a row per fighter, rank lanes, the
-  turn-order strip, the keyboard map and the phone layout.
+  turn-order strip, the keyboard map and the phone layout — and, for the buttons, a disabled look (the
+  build hides what it will not offer), the rank ↑/↓ verbs (no build art), and a round fallback button
+  for a clone without a pack.
 
 ## Delivery order
 

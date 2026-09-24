@@ -85,6 +85,11 @@
  *   events (and the rule set's unhashed observer, for the one number the
  *   events do not carry), replaced per fighter by the build's own depths, and
  *   drawn from the player's icon and text packs.
+ * - `action-buttons.js` is the build's own ACTION BUTTONS — which verb and
+ *   which icon frame each of the overlay's eight slots gets per controller and
+ *   facing, where the overlay stands relative to the acting fighter, and one
+ *   button's draw operations (up, over, or an authored disabled) from the
+ *   player's icon pack, with an authored round fallback for a fresh clone.
  */
 
 export * from "./scene.js";
@@ -112,3 +117,4 @@ export * from "./screen-text.js";
 export * from "./clip-effects.js";
 export * from "./arena-shell.js";
 export * from "./popups.js";
+export * from "./action-buttons.js";

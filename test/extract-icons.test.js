@@ -32,6 +32,7 @@ import test from "node:test";
 import fs from "node:fs";
 
 import {
+  BUTTON_OVERLAY,
   ExtractIconsError,
   FACE_CLIPS,
   ICON_CLIPS,
@@ -39,8 +40,10 @@ import {
   ORACLE_SHA256,
   bindExpressions,
   buildManifest,
+  deriveButtonHandlers,
   deriveClipEvents,
   deriveExpressionCalls,
+  deriveOptionWiring,
   deriveTimelineActions,
   extractIcons,
   flattenIconFrame,
@@ -52,10 +55,15 @@ import {
   readRect,
   roundColour,
   roundMatrix,
+  summariseOverlayLayout,
   tallyIconEffects,
   toPlacement
 } from "../tools/extract-icons.mjs";
 import { IDENTITY_MATRIX } from "../tools/swf-display-list.mjs";
+// The READER of the buttons section, imported for the same reason
+// `test/extract-props.test.js` imports the props renderer: the only way to show
+// the extractor's output is drawable is to hand it to the renderer.
+import { actionButtonOpsFor, actionButtonPackFrom } from "../src/render/action-buttons.js";
 
 /* ------------------------------------------------------------------ */
 /* Synthetic SWF fragments — no licensed build needed                  */
@@ -912,6 +920,472 @@ test("a nested clip's declared meaning names the frames the BUILD indexes, and n
   assert.deepEqual(Object.values(NESTED_MEANINGS[151].frames),
     ["HEALTH", "STAMINA", "ARMOUR", "BURNING", "FROZEN", "WRAITH", "POISONED", "LIGHTNING"]);
   assert.equal(NESTED_MEANINGS[161].frames, null, "addstats_icon is never attached, so its child has no reader");
+});
+
+/* ------------------------------------------------------------------ */
+/* 7b. The action buttons — wiring, handlers and layout, synthetically */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A tiny assembler for synthetic action blocks. Each step gets the next
+ * absolute offset (five bytes apart, which is all the derivations care about:
+ * order, and where the facing test's jump lands).
+ */
+function assembleBlock(context, base, steps) {
+  const instructions = [];
+  let offset = base;
+  for (const step of steps.flat(Infinity)) {
+    instructions.push({ offset, ...step });
+    offset += 5;
+  }
+  return { context, kind: "DoAction", offset: base, instructions };
+}
+const constant = (value) => ({ type: "constant", value });
+const integer = (value) => ({ type: "integer", value });
+const push = (...operands) => ({ name: "Push", operand: operands });
+const bare = (name) => ({ name });
+const slotGoto = (slot, frame) => [push(integer(frame), integer(1), constant(slot)), bare("GetVariable"),
+  push(constant("gotoAndStop")), bare("CallMethod"), bare("Pop")];
+const slotHide = (slot, property = "_visible") => [push(constant(slot)), bare("GetVariable"),
+  push(constant(property), { type: "boolean", value: false }), bare("SetMember")];
+const handler = (body) => ({ name: "DefineFunction2", operand: { name: "", parameters: [], body } });
+const slotRelease = (slot, verb) => [push(constant(slot)), bare("GetVariable"), push(constant("onRelease")),
+  handler([push(constant(verb), integer(1), constant("getphase")), bare("CallFunction"), bare("Pop")]), bare("SetMember")];
+const relative = (block, instruction) => `+0x${(instruction.offset - block.offset).toString(16).padStart(4, "0")}`;
+
+/** A controller frame: a prelude, the facing test, a right arm, a jump, a left arm — with the If's target patched. */
+function controllerBlock(frame, right, left) {
+  const test = [push(constant("gladiator_dir")), bare("GetMember"), push(constant("right")), bare("Equals2"), bare("Not"),
+    { name: "If", operand: { delta: 0, target: -1 } }];
+  const block = assembleBlock(`sprite:862/frame:${frame}/DoAction@0x100`, 0x1000,
+    [push(constant("hero")), bare("GetVariable"), test, right, { name: "Jump", operand: { delta: 0, target: -1 } }, left]);
+  const split = block.instructions.findIndex((instruction) => instruction.name === "If");
+  const jump = block.instructions.findIndex((instruction) => instruction.name === "Jump");
+  const end = block.instructions[block.instructions.length - 1].offset + 5;
+  block.instructions[split].operand.target = block.instructions[jump + 1]?.offset ?? end;
+  block.instructions[jump].operand.target = end;
+  return block;
+}
+
+const CONTROLLER_LABELS = [
+  { frame: 1, name: "initialise" }, { frame: 5, name: "longrange_warrior" }, { frame: 13, name: "closerange_warrior" }
+];
+
+test("THE WIRING IS READ PER FACING, and each onRelease takes every frame its slot was sent to", () => {
+  // ► Shaped on overlay frame 5 (body 0x238de8): the stamina test puts TWO
+  //   verbs on one slot, the psyche counter sends one slot to three frames
+  //   before its single handler, and a level test hides a slot. The pairing
+  //   decides none of the guards; it only groups what the bytes say in order.
+  const block = controllerBlock(5,
+    [slotHide("optionG"), slotGoto("optionA", 7), slotGoto("optionH", 26), slotGoto("optionH", 27), slotGoto("optionH", 28),
+      slotGoto("optionC", 18), slotRelease("optionC", "taunt"), slotGoto("optionC", 11), slotRelease("optionC", "rest"),
+      slotRelease("optionA", "jumpleft"), slotRelease("optionH", "psyche_up")],
+    [slotGoto("optionA", 7), slotGoto("optionF", 19), slotRelease("optionF", "taunt"), slotRelease("optionA", "jumpleft")]);
+  const wiring = deriveOptionWiring({ actionBlocks: [block] }, {
+    character: 862, labels: CONTROLLER_LABELS, controllers: ["longrange_warrior"], slots: BUTTON_OVERLAY.slots
+  });
+  const record = wiring.longrange_warrior;
+  assert.equal(record.frame, 5);
+  assert.equal(record.problem, undefined);
+  assert.deepEqual(Object.keys(record.right.slots).sort(), ["optionA", "optionC", "optionH"]);
+  assert.deepEqual(record.right.slots.optionC.map((wire) => [wire.verb, wire.frames]), [["taunt", [18]], ["rest", [11]]],
+    "one slot, two verbs, each with ONLY the frame sent since the slot's previous handler");
+  assert.deepEqual(record.right.slots.optionH[0].frames, [26, 27, 28]);
+  assert.equal(record.right.slots.optionH[0].gotoAt.length, 3);
+  assert.deepEqual(record.left.slots.optionF.map((wire) => [wire.verb, wire.frames]), [["taunt", [19]]],
+    "the left arm is its own: the same verb, a different frame");
+  assert.deepEqual(record.right.hides.map((row) => [row.slot, row.property]), [["optionG", "_visible"]]);
+  assert.deepEqual(record.left.hides, []);
+  // The offsets are relative to the block BODY, as the dumps print them.
+  const facing = block.instructions.find((instruction) => instruction.name === "If");
+  assert.equal(record.facingSplit.test, relative(block, facing));
+  assert.equal(record.facingSplit.leftFrom, `+0x${(facing.operand.target - block.offset).toString(16).padStart(4, "0")}`);
+  assert.equal(record.right.slots.optionA[0].gotoAt[0],
+    relative(block, block.instructions.find((instruction) => instruction.name === "Push" &&
+      instruction.operand[2]?.value === "optionA")));
+});
+
+test("a gotoAndStop on a name that is NOT a slot is kept as a STRAY, and `visible` is recorded as `visible`", () => {
+  // ► `optionHG` is real: overlay frame 13 +0x0923, closerange_warrior facing
+  //   right, the psyche button's third frame. And the ranged controller's
+  //   zero-ammo arm writes `visible`, which hides nothing — folding it into
+  //   `_visible` would record a hide the build never performs.
+  const block = controllerBlock(13,
+    [slotGoto("optionH", 26), slotGoto("optionHG", 28), slotRelease("optionH", "psyche_up"), slotHide("optionD", "visible"), slotGoto("optionB", 6)],
+    []);
+  const record = deriveOptionWiring({ actionBlocks: [block] }, {
+    character: 862, labels: CONTROLLER_LABELS, controllers: ["closerange_warrior"], slots: BUTTON_OVERLAY.slots
+  }).closerange_warrior;
+  assert.deepEqual(record.right.slots.optionH[0].frames, [26], "the stray frame is NOT paired with the real slot");
+  assert.deepEqual(record.right.strays.map((stray) => [stray.target, stray.frame]), [["optionHG", 28]]);
+  assert.deepEqual(record.right.hides.map((row) => [row.slot, row.property]), [["optionD", "visible"]]);
+  assert.deepEqual(record.right.unpaired.map((row) => [row.slot, row.frame]), [["optionB", 6]],
+    "a frame with no handler after it is reported, not dropped");
+});
+
+test("a controller label the overlay does not carry is a PROBLEM on the record, not a missing key", () => {
+  const wiring = deriveOptionWiring({ actionBlocks: [] }, {
+    character: 862, labels: CONTROLLER_LABELS, controllers: ["longrange_archer", "longrange_warrior"], slots: BUTTON_OVERLAY.slots
+  });
+  assert.deepEqual(Object.keys(wiring), ["longrange_archer", "longrange_warrior"]);
+  assert.match(wiring.longrange_archer.problem, /no FrameLabel/);
+  assert.match(wiring.longrange_warrior.problem, /no DoAction/);
+});
+
+test("THE ROLLOVER IS ONE HANDLER SHARED BY EVERY SLOT IT IS CHAINED ONTO, and it names battlebutton's frame", () => {
+  // Shaped on overlay frame 1 (body 0x236947 +0x0aba..+0x0c23): `A.onRollOver
+  // = B.onRollOver = … = function () { this.battlebutton.gotoAndStop(2) }`,
+  // compiled as the pushes, the function, then StoreRegister/SetMember pairs.
+  const rollover = handler([push(integer(2), integer(1), { type: "register", value: 1 }, constant("battlebutton")),
+    bare("GetMember"), push(constant("gotoAndStop")), bare("CallMethod"), bare("Pop")]);
+  const swapRelease = handler([push(integer(1), integer(1), { type: "register", value: 1 }, constant("battlebutton")),
+    bare("GetMember"), push(constant("gotoAndStop")), bare("CallMethod"), bare("Pop"),
+    push(constant("swap_weapons"), integer(1), constant("getphase")), bare("CallFunction"), bare("Pop")]);
+  const block = assembleBlock("sprite:862/frame:1/DoAction@0x200", 0x2000, [
+    push(constant("optiontext"), constant("")), bare("SetMember"),
+    push(constant("optionA")), bare("GetVariable"),
+    push(constant("onRollOver"), constant("optionB")), bare("GetVariable"),
+    push(constant("onRollOver")), rollover,
+    { name: "StoreRegister", operand: { register: 0 } }, bare("SetMember"), push({ type: "register", value: 0 }), bare("SetMember"),
+    slotGoto("swap_inventory", 10), slotHide("swap_inventory"),
+    push(constant("swap_inventory")), bare("GetVariable"), push(constant("onRelease")), swapRelease, bare("SetMember")
+  ]);
+  const found = deriveButtonHandlers({ actionBlocks: [block] }, {
+    character: 862, slots: BUTTON_OVERLAY.slots, swapSlot: BUTTON_OVERLAY.swapSlot
+  });
+  assert.equal(found.handlers.length, 2);
+  assert.deepEqual(found.handlers[0], {
+    event: "onRollOver", slots: ["optionA", "optionB"], battlebutton: 2, verb: null,
+    at: relative(block, block.instructions.find((instruction) => instruction.operand?.body === rollover.operand.body))
+  });
+  assert.deepEqual(found.handlers[1].slots, ["swap_inventory"], "the chain before it is closed; it does not leak in");
+  assert.equal(found.handlers[1].verb, "swap_weapons");
+  assert.equal(found.handlers[1].battlebutton, 1);
+  assert.deepEqual(found.swap.gotos.map((goto) => goto.frame), [10]);
+  assert.deepEqual(found.swap.hides.map((row) => row.property), ["_visible"]);
+});
+
+test("THE LAYOUT IS RUNS PER SLOT, and each controller is read at the frame it RESTS on", () => {
+  // ► A slot that moves after its label's frame would be drawn where it
+  //   stops, not where it starts; the battle map's spans (5–12, 13–19 …) end
+  //   on a bare stop(), which is what `restsAt` finds.
+  const at = (tx, ty, scale = 0.8) => ({ a: scale, b: 0, c: 0, d: scale, tx, ty });
+  const frameOf = (optionA, optionD) => [
+    { depth: 37, characterId: 860, name: "optionD", matrix: optionD },
+    { depth: 77, characterId: 860, name: "optionA", matrix: optionA },
+    { depth: 3, characterId: 12, name: null, matrix: IDENTITY_MATRIX }
+  ];
+  const frames = [];
+  for (let frame = 1; frame <= 12; frame += 1) {
+    frames.push(frame < 4 ? frameOf(IDENTITY_MATRIX, IDENTITY_MATRIX)
+      : frame < 8 ? frameOf(at(-1070, -760), at(1100, -760))
+        : frameOf(at(-1070, -760), at(1200, -760)));
+  }
+  const layout = summariseOverlayLayout({ frames }, {
+    instances: ["optionA", "optionD", "swap_inventory"],
+    labels: [{ frame: 5, name: "longrange_warrior" }], stops: [12, 51], controllers: ["longrange_warrior", "closerange_warrior"]
+  });
+  assert.deepEqual(layout.tracks.optionA.map((run) => [run.from, run.to]), [[1, 3], [4, 12]]);
+  assert.deepEqual(layout.tracks.optionD.map((run) => [run.from, run.to]), [[1, 3], [4, 7], [8, 12]]);
+  assert.equal(layout.tracks.swap_inventory, undefined, "an instance never placed has no track rather than an empty one");
+  assert.equal(layout.controllers.longrange_warrior.restsAt, 12);
+  assert.deepEqual(layout.controllers.longrange_warrior.slots.optionD.matrix, [0.8, 0, 0, 0.8, 1200, -760],
+    "the resting matrix, translations still in TWIPS");
+  assert.deepEqual(layout.controllers.closerange_warrior, { frame: null, restsAt: null, slots: null });
+  assert.deepEqual(Object.keys(layout.frameOne).sort(), ["optionA", "optionD"]);
+});
+
+test("the button declaration names the overlay's eight slots, its four controllers and the items row", () => {
+  assert.equal(BUTTON_OVERLAY.character, 862);
+  assert.equal(BUTTON_OVERLAY.linkage, "overlay");
+  assert.equal(BUTTON_OVERLAY.expectedButton, 860);
+  assert.deepEqual(BUTTON_OVERLAY.slots, ["optionA", "optionB", "optionC", "optionD", "optionE", "optionF", "optionG", "optionH"]);
+  assert.deepEqual(BUTTON_OVERLAY.controllers,
+    ["longrange_warrior", "closerange_warrior", "longrange_archer", "closerange_archer"]);
+  assert.equal(BUTTON_OVERLAY.inventory.character, 492);
+  assert.equal(BUTTON_OVERLAY.inventory.instances.length, 6);
+  // The background's two states, beside 58's, and from the overlay's rollover.
+  assert.deepEqual(NESTED_MEANINGS[826].frames, { 1: "up", 2: "over" });
+  assert.equal(NESTED_MEANINGS[826].parent, 860);
+  assert.equal(ICON_CLIPS.some((clip) => clip.character === 860 || clip.character === 862), false,
+    "the button is NOT a roster clip: adding it there would move the roster's measured totals");
+});
+
+test("the manifest carries the buttons as their OWN block, and a pack without them says null", () => {
+  const empty = { own: { filteredPlacements: 0, filters: 0, filtersByType: {}, blendModePlacements: 0,
+    filtersOnUnsupportedPlacements: 0, unsupportedFilteredPlacements: 0,
+    dropped: { placements: 0, filters: 0, filtersByType: {}, blendModePlacements: 0 } },
+  inherited: { groups: 0, placements: 0, filters: 0, filtersByType: {}, blendModes: 0 },
+  undescended: { clipPlacements: 1, children: [826], filtersInChildEntries: 0, childrenNotExtracted: [] },
+  bevels: { total: 0, inner: 0, onTop: 0, knockout: 0, zeroBlur: 0, own: 0, inherited: 0 },
+  use: { filters: { total: 0, applied: 0, deferred: 0, noOp: 0, refused: 0, approximated: 0, refusedByReason: {}, approximatedByKind: {} },
+    blendModes: { exact: {}, refused: {} } },
+  notCarried: {} };
+  const entry = (character, frames) => ({ character, frames: [], declaredFrames: frames, distinctFrames: frames, emptyFrames: 0,
+    duplicateOf: {}, timeline: { stops: [1], removesSelfAt: null, other: [] }, clipEvents: [], effects: empty,
+    effectGroups: [], clipsAcrossSpriteBoundary: 0 });
+  const arm = (slots) => ({ slots, hides: [], strays: [], unpaired: [] });
+  const buttons = {
+    overlay: { character: 862, linkage: "overlay" }, button: 860,
+    clips: { 860: entry(860, 41) },
+    nested: { 826: { ...entry(826, 2), linkage: null, instances: ["battlebutton"], meaning: NESTED_MEANINGS[826] } },
+    sharedWithRoster: [],
+    layout: { controllers: { closerange_warrior: { frame: 13, restsAt: 19, slots: {} } } },
+    wiring: { closerange_warrior: { frame: 13, facingSplit: { test: "+0x076e", leftFrom: "+0x0b9f" },
+      common: arm({}), right: arm({ optionD: [{ verb: "power_attack", frames: [2], gotoAt: ["+0x0822"], releaseAt: "+0x0af0" }] }),
+      left: arm({ optionA: [{ verb: "power_attack", frames: [13], gotoAt: ["+0x0c09"], releaseAt: "+0x0eb6" }] }) } },
+    handlers: { handlers: [], swap: { gotos: [], hides: [] } }, inventory: null,
+    effects: tallyIconEffects({ clips: { 860: entry(860, 41) } }), clipsAcrossSpriteBoundary: 0
+  };
+  const base = { faces: {}, clips: {}, nested: {}, expressionScript: null, shapes: {}, texts: {},
+    approximations: {}, failures: [], clipsAcrossSpriteBoundary: 0 };
+  const manifest = buildManifest({ ...base, buttons }, { file: "x.swf", sha256: "0" });
+  assert.equal(manifest.buttons.button, 860);
+  assert.equal(manifest.buttons.clips[860].declaredFrames, 41);
+  assert.deepEqual(manifest.buttons.nested[826].instances, ["battlebutton"]);
+  assert.deepEqual(manifest.buttons.controllers.closerange_warrior.right, ["optionD: power_attack@2"]);
+  assert.deepEqual(manifest.buttons.controllers.closerange_warrior.left, ["optionA: power_attack@13"]);
+  assert.equal(manifest.buttons.controllers.closerange_warrior.restsAt, 19);
+  assert.equal(manifest.effects.undescendedClipPlacements, 0, "the roster's invoice does not count the buttons");
+  assert.equal(buildManifest({ ...base, buttons: null }, { file: "x.swf", sha256: "0" }).buttons, null);
+});
+
+/* ------------------------------------------------------------------ */
+/* 7c. The buttons END TO END, on a synthetic build                    */
+/* ------------------------------------------------------------------ */
+
+/** A bit/byte writer for whole synthetic files — the same fields `test/extract-props.test.js` writes. */
+class SwfBytes {
+  constructor() { this.bytes = []; this.current = 0; this.bitCount = 0; }
+  bit(value) {
+    this.current = (this.current << 1) | (value ? 1 : 0);
+    this.bitCount += 1;
+    if (this.bitCount === 8) { this.bytes.push(this.current & 0xff); this.current = 0; this.bitCount = 0; }
+    return this;
+  }
+  ub(value, bits) { for (let index = bits - 1; index >= 0; index -= 1) this.bit((value >>> index) & 1); return this; }
+  sb(value, bits) { return this.ub(value < 0 ? (1 << bits) + value : value, bits); }
+  align() { while (this.bitCount !== 0) this.bit(0); return this; }
+  u8(value) { this.align(); this.bytes.push(value & 0xff); return this; }
+  u16(value) { this.align(); this.bytes.push(value & 0xff, (value >>> 8) & 0xff); return this; }
+  u32(value) { this.align(); for (let shift = 0; shift < 32; shift += 8) this.bytes.push((value >>> shift) & 0xff); return this; }
+  string(value) { this.align(); for (const byte of Buffer.from(value, "utf8")) this.bytes.push(byte); this.bytes.push(0); return this; }
+  raw(bytes) { this.align(); for (const byte of bytes) this.bytes.push(byte); return this; }
+  rect(xMin, xMax, yMin, yMax) {
+    this.align().ub(16, 5).sb(xMin, 16).sb(xMax, 16).sb(yMin, 16).sb(yMax, 16);
+    return this.align();
+  }
+  matrix({ a = 1, d = 1, tx = 0, ty = 0 } = {}) {
+    this.align();
+    const hasScale = a !== 1 || d !== 1;
+    this.bit(hasScale ? 1 : 0);
+    if (hasScale) this.ub(20, 5).sb(Math.round(a * 65536), 20).sb(Math.round(d * 65536), 20);
+    this.bit(0);
+    this.ub(16, 5).sb(tx, 16).sb(ty, 16);
+    return this.align();
+  }
+  buffer() { this.align(); return Buffer.from(this.bytes); }
+}
+function swfTag(code, body) {
+  const bytes = Buffer.isBuffer(body) ? body : body.buffer();
+  const writer = new SwfBytes();
+  if (bytes.length >= 0x3f) writer.u16((code << 6) | 0x3f).u32(bytes.length);
+  else writer.u16((code << 6) | bytes.length);
+  return writer.raw(bytes).buffer();
+}
+function swfFile(tags) {
+  const body = Buffer.concat([...tags, swfTag(0, Buffer.alloc(0))]);
+  const header = new SwfBytes().raw(Buffer.from("FWS", "latin1")).u8(8).u32(0).rect(0, 11000, 0, 8000).u16(24 << 8).u16(1).buffer();
+  const file = Buffer.concat([header, body]);
+  file.writeUInt32LE(file.length, 4);
+  return file;
+}
+/** DefineShape3: one solid square, `size` twips, at the origin. */
+function squareShape(id, [red, green, blue], size = 200) {
+  const writer = new SwfBytes();
+  writer.u16(id).rect(0, size, 0, size);
+  writer.u8(1).u8(0x00).u8(red).u8(green).u8(blue).u8(255);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+  writer.bit(0).ub(0b00101, 5).ub(12, 5).sb(0, 12).sb(0, 12).ub(1, 1);
+  const edge = (dx, dy) => writer.bit(1).bit(1).ub(12 - 2, 4).bit(1).sb(dx, 12).sb(dy, 12);
+  edge(size, 0); edge(0, size); edge(-size, 0); edge(0, -size);
+  writer.bit(0).ub(0, 5);
+  return swfTag(32, writer);
+}
+function placeTag2({ depth, characterId, matrix, name, move = false }) {
+  const writer = new SwfBytes();
+  let flags = 0;
+  if (move) flags |= 0x01;
+  if (characterId !== undefined) flags |= 0x02;
+  if (matrix) flags |= 0x04;
+  if (name !== undefined) flags |= 0x20;
+  writer.u8(flags).u16(depth);
+  if (characterId !== undefined) writer.u16(characterId);
+  if (matrix) writer.matrix(matrix);
+  if (name !== undefined) writer.string(name);
+  return swfTag(26, writer);
+}
+const showFrame2 = () => swfTag(1, Buffer.alloc(0));
+const removeDepth = (depth) => swfTag(28, new SwfBytes().u16(depth));
+const frameLabelTag = (name) => swfTag(43, new SwfBytes().string(name));
+const doActionTag = (bytes) => swfTag(12, Buffer.concat([bytes, Buffer.from([0])]));
+const spriteTag = (id, frames, inner) =>
+  swfTag(39, new SwfBytes().u16(id).u16(frames).raw(Buffer.concat([...inner, swfTag(0, Buffer.alloc(0))])));
+const exportTag = (pairs) => {
+  const writer = new SwfBytes().u16(pairs.length);
+  for (const [id, name] of pairs) writer.u16(id).string(name);
+  return swfTag(56, writer);
+};
+
+/** AVM1, as bytes: just the records the overlay's controllers are made of. */
+const AVM1 = {
+  push(...values) {
+    const body = Buffer.concat(values.map((value) => {
+      if (typeof value === "string") return Buffer.concat([Buffer.from([0]), Buffer.from(`${value}\0`, "utf8")]);
+      if (value && typeof value === "object" && "register" in value) return Buffer.from([4, value.register]);
+      const integer = Buffer.alloc(5);
+      integer[0] = 7;
+      integer.writeInt32LE(value, 1);
+      return integer;
+    }));
+    const head = Buffer.alloc(3);
+    head[0] = 0x96;
+    head.writeUInt16LE(body.length, 1);
+    return Buffer.concat([head, body]);
+  },
+  op: (code) => Buffer.from([code]),
+  branch(code, delta) {
+    const record = Buffer.alloc(5);
+    record[0] = code;
+    record.writeUInt16LE(2, 1);
+    record.writeInt16LE(delta, 3);
+    return record;
+  },
+  /** DefineFunction2, anonymous, no parameters, the body following the record. */
+  function2(body) {
+    const header = new SwfBytes().string("").u16(0).u8(4).u16(0).u16(body.length).buffer();
+    const head = Buffer.alloc(3);
+    head[0] = 0x8e;
+    head.writeUInt16LE(header.length, 1);
+    return Buffer.concat([head, header, body]);
+  }
+};
+const GET_VARIABLE = 0x1c;
+const GET_MEMBER = 0x4e;
+const SET_MEMBER = 0x4f;
+const CALL_METHOD = 0x52;
+const CALL_FUNCTION = 0x3d;
+const POP = 0x17;
+const gotoBytes = (slot, frame) => Buffer.concat([AVM1.push(frame, 1, slot), AVM1.op(GET_VARIABLE),
+  AVM1.push("gotoAndStop"), AVM1.op(CALL_METHOD), AVM1.op(POP)]);
+const releaseBytes = (slot, verb) => Buffer.concat([AVM1.push(slot), AVM1.op(GET_VARIABLE), AVM1.push("onRelease"),
+  AVM1.function2(Buffer.concat([AVM1.push(verb, 1, "getphase"), AVM1.op(CALL_FUNCTION), AVM1.op(POP)])), AVM1.op(SET_MEMBER)]);
+
+/**
+ * THE OVERLAY IN MINIATURE: a two-state background (826), a button (860) whose
+ * frames 2 and 3 carry the art the build's `power_attack` and `normal_attack`
+ * facing right select, and an exported `overlay` (862) that places it at all
+ * eight slots, moves two of them on frame 4, and wires one verb per facing on
+ * a `closerange_warrior` label that rests on frame 6.
+ */
+function buttonBuild() {
+  const right = Buffer.concat([gotoBytes("optionD", 2), releaseBytes("optionD", "power_attack")]);
+  const left = Buffer.concat([gotoBytes("optionA", 3), releaseBytes("optionA", "normal_attack")]);
+  const jump = AVM1.branch(0x99, left.length);
+  const controller = Buffer.concat([
+    AVM1.push("hero"), AVM1.op(GET_VARIABLE),
+    AVM1.push("gladiator_dir"), AVM1.op(GET_MEMBER), AVM1.push("right"), AVM1.op(0x49), AVM1.op(0x12),
+    AVM1.branch(0x9d, right.length + jump.length), right, jump, left
+  ]);
+  const rollover = Buffer.concat([
+    AVM1.push("optionA"), AVM1.op(GET_VARIABLE), AVM1.push("onRollOver"),
+    AVM1.function2(Buffer.concat([AVM1.push(2, 1, { register: 1 }, "battlebutton"), AVM1.op(GET_MEMBER),
+      AVM1.push("gotoAndStop"), AVM1.op(CALL_METHOD), AVM1.op(POP)])),
+    AVM1.op(SET_MEMBER)
+  ]);
+  const slots = [["optionD", 37], ["optionE", 45], ["optionF", 53], ["optionH", 61],
+    ["optionG", 69], ["optionA", 77], ["optionB", 85], ["optionC", 93]];
+  return swfFile([
+    squareShape(900, [0x40, 0x30, 0x20]),
+    squareShape(901, [0xf0, 0xc0, 0x40]),
+    squareShape(902, [0xcc, 0x00, 0x00], 100),
+    squareShape(903, [0x00, 0x00, 0xcc], 100),
+    spriteTag(826, 2, [
+      placeTag2({ depth: 1, characterId: 900 }), doActionTag(Buffer.from([0x07])), showFrame2(),
+      removeDepth(1), placeTag2({ depth: 1, characterId: 901 }), doActionTag(Buffer.from([0x07])), showFrame2()
+    ]),
+    spriteTag(860, 3, [
+      placeTag2({ depth: 1, characterId: 826, name: "battlebutton" }), doActionTag(Buffer.from([0x07])), showFrame2(),
+      placeTag2({ depth: 2, characterId: 902 }), showFrame2(),
+      removeDepth(2), placeTag2({ depth: 2, characterId: 903 }), showFrame2()
+    ]),
+    spriteTag(862, 6, [
+      frameLabelTag("initialise"),
+      ...slots.map(([name, depth]) => placeTag2({ depth, characterId: 860, name })),
+      doActionTag(rollover), showFrame2(),
+      showFrame2(), showFrame2(),
+      placeTag2({ depth: 77, move: true, matrix: { a: 0.8, d: 0.8, tx: -1070, ty: -760 } }),
+      placeTag2({ depth: 37, move: true, matrix: { a: 0.8, d: 0.8, tx: 1100, ty: -760 } }),
+      showFrame2(),
+      frameLabelTag("closerange_warrior"), doActionTag(controller), showFrame2(),
+      doActionTag(Buffer.from([0x07])), showFrame2()
+    ]),
+    exportTag([[862, "overlay"]])
+  ]);
+}
+
+test("THE BUTTONS SECTION, END TO END: the button found through the overlay, its child kept out of the roster", () => {
+  const result = extractIcons(buttonBuild());
+  const buttons = result.buttons;
+  assert.equal(buttons.button, 860, "derived from the eight slots, not typed");
+  assert.equal(buttons.clips[860].declaredFrames, 3);
+  assert.equal(buttons.clips[860].distinctFrames, 3);
+  assert.equal(buttons.clips[860].linkage, null, "860 has no export name, and none is invented");
+  const background = buttons.clips[860].frames[0].filter((placement) => placement.kind === "clip");
+  assert.deepEqual(background.map((placement) => [placement.character, placement.name]), [[826, "battlebutton"]],
+    "the background is a clip placement: flattening it would freeze it on up");
+  assert.deepEqual(buttons.nested[826].instances, ["battlebutton"]);
+  assert.equal(buttons.nested[826].declaredFrames, 2);
+  assert.deepEqual(buttons.nested[826].meaning.frames, { 1: "up", 2: "over" });
+  // ► THE ROSTER NEVER SAW EITHER. Its measured totals stay what they were.
+  assert.deepEqual(Object.keys(result.clips), []);
+  assert.equal(result.nested[826], undefined);
+  assert.equal(tallyIconEffects(result).undescendedClipPlacements, 0);
+  assert.equal(buttons.effects.undescendedClipPlacements, 3, "860's three frames each place its background");
+  assert.deepEqual(buttons.effects.undescendedChildren, [826]);
+  assert.equal(buttons.effects.undescendedChildrenNotExtracted, 0);
+  // …but the geometry is in the ONE shape table a renderer opens.
+  for (const id of [900, 901, 902, 903]) assert.ok(result.shapes[id], `shape ${id}`);
+
+  // The wiring and the layout, from the bytes.
+  const wiring = buttons.wiring.closerange_warrior;
+  assert.equal(wiring.frame, 5);
+  assert.deepEqual(wiring.right.slots.optionD.map((wire) => [wire.verb, wire.frames]), [["power_attack", [2]]]);
+  assert.deepEqual(wiring.left.slots.optionA.map((wire) => [wire.verb, wire.frames]), [["normal_attack", [3]]]);
+  assert.match(buttons.wiring.longrange_warrior.problem, /no FrameLabel/);
+  const rest = buttons.layout.controllers.closerange_warrior;
+  assert.equal(rest.restsAt, 6);
+  assert.deepEqual(rest.slots.optionA.matrix, [0.8, 0, 0, 0.8, -1070, -760]);
+  assert.deepEqual(rest.slots.optionD.matrix, [0.8, 0, 0, 0.8, 1100, -760]);
+  assert.deepEqual(buttons.layout.frameOne.optionA.matrix, [1, 0, 0, 1, 0, 0], "and where it started");
+  assert.deepEqual(buttons.handlers.handlers.map((row) => [row.event, row.slots, row.battlebutton]),
+    [["onRollOver", ["optionA"], 2]]);
+  // Named failures for what the miniature does not carry — never silence.
+  assert.ok(result.failures.some((row) => /inventory_overlay/.test(row.message)));
+
+  // The manifest's own block, and the RENDERER drawing the extractor's output.
+  const manifest = buildManifest(result, { file: "x.swf", sha256: "0" });
+  assert.deepEqual(manifest.buttons.controllers.closerange_warrior.right, ["optionD: power_attack@2"]);
+  const pack = actionButtonPackFrom({ icons: result.clips, nested: result.nested, shapes: result.shapes, texts: result.texts, buttons });
+  const fills = (ops) => ops.map((op) => op.fill);
+  assert.deepEqual(fills(actionButtonOpsFor(pack, "power_attack", { facing: "right" })), ["#403020", "#cc0000"],
+    "up background, then the icon of 860 frame 2");
+  assert.deepEqual(fills(actionButtonOpsFor(pack, "power_attack", { facing: "right", state: "hover" })), ["#f0c040", "#cc0000"],
+    "over background on hover — 826 frame 2");
+  assert.deepEqual(fills(actionButtonOpsFor(pack, "normal_attack", { facing: "right" })), ["#403020", "#0000cc"]);
+  assert.equal(actionButtonOpsFor(pack, "power_attack", { facing: "left" }), null,
+    "frame 13 is past this miniature's three: no art, so the caller draws the fallback");
 });
 
 /* ------------------------------------------------------------------ */

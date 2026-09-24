@@ -346,6 +346,23 @@ export const NESTED_MEANINGS = Object.freeze({
     parent: 116,
     frames: Object.freeze({ 1: "up", 2: "over" }),
     source: "the strip's own button background; hidden outright on the spell path, +0x239a"
+  }),
+  // ► **ADDED 2026-09-24 WITH THE ACTION BUTTONS, and it lives in the
+  //   `buttons` section, never in the roster's `nested`** (see
+  //   `BUTTON_OVERLAY`). Up and over, the same two states as 58 above, chosen
+  //   by the overlay's own rollover handlers: every option slot's `onRollOver`
+  //   is `this.battlebutton.gotoAndStop(2)` and its `onRollOut`
+  //   `this.battlebutton.gotoAndStop(1)` (overlay frame 1, DoAction body
+  //   0x236947, `+0x0b08` and `+0x0c2e`), and 826 holds on each with a bare
+  //   `stop()` (826 frame 1 body 0x233935, frame 2 body 0x233947).
+  //   `deriveButtonHandlers` re-derives the two frames from the bytes on every
+  //   extraction and writes them to the pack beside this declaration.
+  826: Object.freeze({
+    instance: "battlebutton",
+    parent: 860,
+    frames: Object.freeze({ 1: "up", 2: "over" }),
+    source: "overlay frame 1 body 0x236947: onRollOver battlebutton.gotoAndStop(2) +0x0b08, " +
+      "onRollOut battlebutton.gotoAndStop(1) +0x0c2e"
   })
 });
 
@@ -465,6 +482,77 @@ export const ICON_CLIPS = Object.freeze([
     reader: "the hit-point, stamina and armour gauges and the crowd line"
   })
 ]);
+
+/**
+ * THE ACTION BUTTONS AROUND THE FIGHTER — added 2026-09-24.
+ *
+ * ► **THE BUTTON HAS NO EXPORT NAME, SO IT IS REACHED THROUGH THE ONE THAT
+ *   DOES.** The eight option slots `optionA`..`optionH` are instances of one
+ *   UNEXPORTED sprite (860 in the oracle), placed by the exported `overlay`
+ *   (862) on its frame 1 at depths 37..93 — the named-instance table has all
+ *   eight, `sprite:862/frame:1`. `ICON_CLIPS` keys on an export name and would
+ *   have to invent one, so the button is found the way the build finds it: as
+ *   whatever character sits at the overlay's option slots. All eight must be
+ *   ONE character or the extraction fails by name.
+ *
+ * ► **THE ICON IS THE BUTTON'S OWN FRAME, NOT ITS CHILD'S.** Every controller
+ *   frame selects a verb's art with `optionX.gotoAndStop(N)` straight on the
+ *   slot (overlay frame 5, body 0x238de8, `+0x09b6` `optionA.gotoAndStop(7)`,
+ *   one of 84 across the four controllers). The child `battlebutton` (826) is the round
+ *   background, and ITS two frames are up and over (`NESTED_MEANINGS[826]`).
+ *   So, as with `damage_icon`, a frame of the parent must not be flattened
+ *   with the child frozen: the child is a `clip` placement and its own entry.
+ *
+ * ► **A SECTION OF ITS OWN, AND THAT IS DELIBERATE.** The roster's invoice —
+ *   176 filters, 15 entries, 190 undescended placements, six clips across a
+ *   sprite boundary — is pinned by tests against the oracle, and every one of
+ *   those numbers was MEASURED. Adding the button to `clips`/`nested` would
+ *   move them by amounts nobody has measured. The button and its child are
+ *   written under `buttons`, invoiced on their own (`buttons.effects`), and
+ *   the roster's numbers mean exactly what they meant before.
+ *
+ * ► **THE LAYOUT AND THE WIRING ARE WRITTEN FROM THE BYTES, NOT COPIED FROM A
+ *   TABLE.** `summariseOverlayLayout` records where each slot sits on every
+ *   frame of the overlay, and `deriveOptionWiring` records which frame each
+ *   controller sends each slot to and which verb its `onRelease` names. The
+ *   hand-cited table in `src/render/action-buttons.js` is checked against
+ *   both by `test/render-action-buttons.test.js` once a pack exists — two
+ *   independent paths to one answer.
+ */
+export const BUTTON_OVERLAY = Object.freeze({
+  character: 862,
+  linkage: "overlay",
+  /** What the eight slots are expected to hold; the extraction DERIVES it and fails by name on a mismatch. */
+  expectedButton: 860,
+  slots: Object.freeze(["optionA", "optionB", "optionC", "optionD", "optionE", "optionF", "optionG", "optionH"]),
+  /** The ninth button: an instance of `inventory_buttons` (116), which the roster already extracts. */
+  swapSlot: "swap_inventory",
+  /** The overlay's own copy of the hero, shown only when the fighters stand far apart. */
+  heroInstance: "hero",
+  /** The four frame LABELS the selector at overlay frame 4 (body 0x238bc5) `gotoAndPlay`s. */
+  controllers: Object.freeze(["longrange_warrior", "closerange_warrior", "longrange_archer", "closerange_archer"]),
+  /**
+   * ► **THE ITEMS AND SPELLS HAVE A ROW OF THEIR OWN, AND IT IS ATTACHED TO
+   *   THE OVERLAY.** Overlay frame 1 (body 0x2378d2) does
+   *   `this.attachMovie("inventory_overlay", "inventory_overlay", 199999,
+   *   {_x: 0, _y: -80})` (`+0x02fe`/`+0x0319`) and scales it 60 (`+0x0349`):
+   *   six `inventory_buttons` (116) instances, each sent to the item or spell
+   *   id in its slot (sprite 492 frame 1 body 0x50e55, `+0x0132` for slot 1),
+   *   with the same up/over rollover as the option slots (`+0x03bd`,
+   *   `+0x04e3`). Where the six sit inside 492 is recorded from its display
+   *   list, like the option slots.
+   */
+  inventory: Object.freeze({
+    character: 492,
+    linkage: "inventory_overlay",
+    instances: Object.freeze(["inventory_button1", "inventory_button2", "inventory_button3",
+      "inventory_button4", "inventory_button5", "inventory_button6"]),
+    attachedBy: "overlay frame 1 body 0x2378d2: this.attachMovie(\"inventory_overlay\", \"inventory_overlay\", 199999, " +
+      "{_x: 0, _y: -80}) +0x02fe/+0x0319; _xscale = _yscale = 60 +0x0349"
+  }),
+  attachedBy: "root frame 221 body 0x671ad3 +0x04cf: gladiators.attachMovie(\"overlay\", \"overlay\", 40000)",
+  placedBy: "sprite 2249 frame 1 body 0x6e4221: gladiators.onEnterFrame +0x0e68 (x, y and scale every frame)"
+});
 
 /* ------------------------------------------------------------------ */
 /* CLI                                                                 */
@@ -1067,10 +1155,10 @@ function iconEntries(result) {
  *   double-count the moment two parents share a child, which `inventory_buttons`
  *   and `cast_spell_image` nearly do already.
  */
-function crossReferenceChildEffects(result) {
+function crossReferenceChildEffects(result, entries = iconEntries(result), lookup = entries) {
   const byCharacter = new Map();
-  for (const entry of iconEntries(result)) byCharacter.set(entry.character, entry);
-  for (const entry of iconEntries(result)) {
+  for (const entry of lookup) byCharacter.set(entry.character, entry);
+  for (const entry of entries) {
     const undescended = entry.effects?.undescended;
     if (!undescended) continue;
     let filters = 0;
@@ -1734,6 +1822,499 @@ export function bindExpressions(calls, animations, labelsByPart) {
 }
 
 /* ------------------------------------------------------------------ */
+/* The action buttons: wiring, handlers and layout, from the bytes     */
+/* ------------------------------------------------------------------ */
+
+/** An offset relative to its block's BODY, as the action dumps print it. */
+function relativeTo(base, offset) {
+  return `+0x${(offset - base).toString(16).padStart(4, "0")}`;
+}
+
+function isNumberOperand(operand) {
+  return Boolean(operand) && (operand.type === "integer" || operand.type === "double" || operand.type === "float") &&
+    Number.isFinite(operand.value);
+}
+
+function lastOperand(instruction) {
+  const operands = pushOperands(instruction);
+  return operands && operands.length > 0 ? operands[operands.length - 1] : null;
+}
+
+/**
+ * `Push …, N, 1, "<name>"` · `GetVariable` · `Push "gotoAndStop"` · `CallMethod`
+ * starting at `list[index]` — the one spelling every controller frame uses to
+ * pick a slot's art — or null.
+ */
+function namedGotoAt(list, index) {
+  const operands = pushOperands(list[index]);
+  if (!operands || operands.length < 3) return null;
+  const name = operands[operands.length - 1];
+  const argc = operands[operands.length - 2];
+  const frame = operands[operands.length - 3];
+  if (typeof name.value !== "string" || !isNumberOperand(argc) || argc.value !== 1 || !isNumberOperand(frame)) return null;
+  if (list[index + 1]?.name !== "GetVariable") return null;
+  if (lastOperand(list[index + 2])?.value !== "gotoAndStop") return null;
+  if (list[index + 3]?.name !== "CallMethod") return null;
+  return { target: name.value, frame: frame.value };
+}
+
+/**
+ * `Push "<name>"` · `GetVariable` · `Push "_visible"|"visible", <bool>` ·
+ * `SetMember`, or null.
+ *
+ * ► **`visible` IS RECORDED BESIDE `_visible` ON PURPOSE.** The ranged
+ *   controller's zero-ammo arm writes `visible`, which is not a MovieClip
+ *   property and hides nothing (battle map, "The ammunition-visibility
+ *   defect"). Folding the two together would record a hide the build never
+ *   performs; dropping `visible` would lose the defect. The property is named.
+ */
+function namedVisibilityAt(list, index) {
+  const name = lastOperand(list[index]);
+  if (typeof name?.value !== "string") return null;
+  if (list[index + 1]?.name !== "GetVariable") return null;
+  const write = pushOperands(list[index + 2]);
+  if (!write || write.length < 2) return null;
+  const property = write[write.length - 2];
+  const value = write[write.length - 1];
+  if (property?.value !== "_visible" && property?.value !== "visible") return null;
+  if (value?.type !== "boolean") return null;
+  if (list[index + 3]?.name !== "SetMember") return null;
+  return { target: name.value, property: property.value, value: value.value };
+}
+
+/** The `getphase("<label>")` a handler body calls, or null. */
+function getphaseLabelIn(body) {
+  for (const { instruction } of walkInstructions(Array.isArray(body) ? body : [], "")) {
+    const operands = pushOperands(instruction);
+    if (!operands || operands.length < 3) continue;
+    const callee = operands[operands.length - 1];
+    const argc = operands[operands.length - 2];
+    const label = operands[operands.length - 3];
+    if (callee.value === "getphase" && isNumberOperand(argc) && argc.value === 1 && typeof label.value === "string") {
+      return label.value;
+    }
+  }
+  return null;
+}
+
+/** `Push "<name>"` · `GetVariable` · `Push "onRelease"` · `DefineFunction…`, or null. */
+function namedReleaseAt(list, index) {
+  const name = lastOperand(list[index]);
+  if (typeof name?.value !== "string") return null;
+  if (list[index + 1]?.name !== "GetVariable") return null;
+  if (lastOperand(list[index + 2])?.value !== "onRelease") return null;
+  const handler = list[index + 3];
+  if (!handler || (handler.name !== "DefineFunction" && handler.name !== "DefineFunction2")) return null;
+  return { target: name.value, verb: getphaseLabelIn(handler.operand?.body) };
+}
+
+/**
+ * The one test that splits a controller frame by FACING:
+ * `…"gladiator_dir"` · `GetMember` · `Push "right"` · `Equals2` · `Not` · `If`.
+ * What falls through is the facing-right arm; the jump target starts the left.
+ */
+function facingSplitOf(list) {
+  for (let index = 3; index < list.length; index += 1) {
+    if (list[index].name !== "If" || list[index - 1]?.name !== "Not" || list[index - 2]?.name !== "Equals2") continue;
+    if (lastOperand(list[index - 3])?.value !== "right") continue;
+    const readsFacing = list.slice(Math.max(0, index - 8), index - 3)
+      .some((instruction) => (pushOperands(instruction) ?? []).some((operand) => operand.value === "gladiator_dir"));
+    if (!readsFacing || !Number.isFinite(list[index].operand?.target)) continue;
+    return { index, offset: list[index].offset, target: list[index].operand.target };
+  }
+  return null;
+}
+
+/**
+ * WHICH ART AND WHICH VERB EACH CONTROLLER GIVES EACH SLOT, per facing, read
+ * straight off the overlay's controller frames.
+ *
+ * ► **NO CONDITION IS DECOMPILED HERE, AND THAT IS WHY IT CAN BE TRUSTED.** A
+ *   controller's arm is a flat run of `optionX.gotoAndStop(N)`,
+ *   `optionX._visible = false` and `optionX.onRelease = function () {
+ *   getphase("<verb>") }`, some of them under a test (the stamina test that
+ *   swaps taunt for rest, the psyche counter's three frames, the ammo test, the
+ *   level gates). Rather than decide which test guards which line, this pairs
+ *   each `onRelease` with EVERY frame its slot was sent to since that slot's
+ *   previous `onRelease` in the same arm. So `psyche_up` comes back with
+ *   frames `[26, 27, 28]`, the stamina slot comes back TWICE (`taunt` then
+ *   `rest`), and the tests themselves stay in the hand-cited table in
+ *   `src/render/action-buttons.js`, which cites their offsets.
+ *
+ * ► **A `gotoAndStop` ON A NAME THAT IS NOT A SLOT IS KEPT, AS A STRAY.**
+ *   `closerange_warrior` facing right sends frame 28 to `optionHG` (overlay
+ *   frame 13, body 0x23a11c, `+0x0923`), which is no instance at all; the
+ *   psyche button there keeps whatever frame it last had. Dropping unknown
+ *   targets would delete the finding.
+ *
+ * @param {object} analysis  `analyseSwfBuffer(buffer).analysis`
+ * @param {object} options
+ * @param {number} options.character   the overlay's character id
+ * @param {object[]} options.labels    the overlay's `{frame, name}` FrameLabels
+ * @param {string[]} options.controllers  the labels to read
+ * @param {string[]} options.slots     the instance names that ARE slots
+ */
+export function deriveOptionWiring(analysis, { character, labels, controllers, slots }) {
+  const frameOf = new Map((labels ?? []).map((label) => [label.name, label.frame]));
+  const isSlot = new Set(slots);
+  const wiring = {};
+  for (const label of controllers) {
+    const frame = frameOf.get(label);
+    const record = {
+      label, frame: frame ?? null, blocks: [], facingSplit: null,
+      common: newArm(), right: newArm(), left: newArm()
+    };
+    wiring[label] = record;
+    if (frame === undefined) {
+      record.problem = "no FrameLabel of this name on the overlay";
+      continue;
+    }
+    const pattern = new RegExp(`^sprite:${character}/frame:${frame}/DoAction@`);
+    const blocks = (analysis?.actionBlocks ?? []).filter((block) => pattern.test(block.context));
+    if (blocks.length === 0) record.problem = "no DoAction on the label's frame";
+    blocks.forEach((block, blockIndex) => {
+      record.blocks.push({ context: block.context, body: `0x${block.offset.toString(16)}` });
+      const list = block.instructions;
+      const at = (instruction) => relativeTo(block.offset, instruction.offset);
+      const split = facingSplitOf(list);
+      if (split && record.facingSplit === null) {
+        record.facingSplit = { test: relativeTo(block.offset, split.offset), leftFrom: relativeTo(block.offset, split.target) };
+      }
+      const sideOf = (index) => (!split || index <= split.index)
+        ? "common"
+        : (list[index].offset < split.target ? "right" : "left");
+      const tag = (event) => (blocks.length > 1 ? { ...event, block: blockIndex } : event);
+      for (let index = 0; index < list.length; index += 1) {
+        const arm = record[sideOf(index)];
+        const goto = namedGotoAt(list, index);
+        if (goto) {
+          if (isSlot.has(goto.target)) arm.events.push(tag({ kind: "goto", slot: goto.target, frame: goto.frame, at: at(list[index]) }));
+          else arm.strays.push(tag({ target: goto.target, frame: goto.frame, at: at(list[index]) }));
+          continue;
+        }
+        const visibility = namedVisibilityAt(list, index);
+        if (visibility && visibility.value === false) {
+          if (isSlot.has(visibility.target)) {
+            arm.hides.push(tag({ slot: visibility.target, property: visibility.property, at: at(list[index]) }));
+          } else if (/^option/.test(visibility.target)) {
+            arm.strays.push(tag({ target: visibility.target, property: visibility.property, at: at(list[index]) }));
+          }
+          continue;
+        }
+        const release = namedReleaseAt(list, index);
+        if (release) {
+          if (isSlot.has(release.target)) arm.events.push(tag({ kind: "release", slot: release.target, verb: release.verb, at: at(list[index]) }));
+          else arm.strays.push(tag({ target: release.target, verb: release.verb, at: at(list[index]) }));
+        }
+      }
+    });
+    for (const side of ["common", "right", "left"]) pairArm(record[side]);
+  }
+  return wiring;
+}
+
+function newArm() {
+  return { events: [], hides: [], strays: [], slots: {}, unpaired: [] };
+}
+
+/** Each `onRelease` takes every frame its slot was sent to since that slot's last `onRelease`. */
+function pairArm(arm) {
+  const pending = new Map();
+  for (const event of arm.events) {
+    if (event.kind === "goto") {
+      if (!pending.has(event.slot)) pending.set(event.slot, []);
+      pending.get(event.slot).push(event);
+      continue;
+    }
+    const frames = pending.get(event.slot) ?? [];
+    pending.set(event.slot, []);
+    if (!arm.slots[event.slot]) arm.slots[event.slot] = [];
+    arm.slots[event.slot].push({
+      verb: event.verb,
+      frames: frames.map((goto) => goto.frame),
+      gotoAt: frames.map((goto) => goto.at),
+      releaseAt: event.at,
+      ...(event.block === undefined ? {} : { block: event.block })
+    });
+  }
+  for (const [slot, left] of pending) {
+    for (const goto of left) arm.unpaired.push({ slot, frame: goto.frame, at: goto.at });
+  }
+  // The raw event list is what the pairing was computed FROM; the pairing is
+  // what a reader wants. Keeping both doubles the pack for no new fact.
+  delete arm.events;
+}
+
+/**
+ * THE HANDLERS THE OVERLAY HANGS ON ITS SLOTS ONCE, ON FRAME 1 — the rollover
+ * art and the ninth button.
+ *
+ * - Every `onRollOver`/`onRollOut`/`onRelease` function assigned at top level,
+ *   with the slots it is assigned to, the `battlebutton.gotoAndStop(N)` it
+ *   performs and the `getphase` verb it calls. The eight option slots share
+ *   one rollover (`battlebutton` 2) and one rollout (`battlebutton` 1); the
+ *   swap slot has its own three, and its `onRelease` is `swap_weapons`; the
+ *   six `inventory_buttonN` of the items row (`others`) have their own three,
+ *   whose `onRelease` sets `inventory_action` rather than calling `getphase`.
+ * - The swap slot's own art: `swap_inventory.gotoAndStop(10|11)` and its hide.
+ *
+ * Same spirit as `deriveOptionWiring`: the guards are NOT decompiled. The hand
+ * table cites them (`src/render/action-buttons.js`).
+ */
+export function deriveButtonHandlers(analysis, { character, slots, swapSlot, others = [] }) {
+  const targets = new Set([...slots, swapSlot, ...others]);
+  const handlers = [];
+  const swap = { gotos: [], hides: [] };
+  const pattern = new RegExp(`^sprite:${character}/frame:1/DoAction@`);
+  for (const block of (analysis?.actionBlocks ?? []).filter((candidate) => pattern.test(candidate.context))) {
+    const list = block.instructions;
+    const at = (instruction) => relativeTo(block.offset, instruction.offset);
+    let since = 0;
+    for (let index = 0; index < list.length; index += 1) {
+      const instruction = list[index];
+      if (instruction.name === "SetMember" || instruction.name === "Pop") {
+        // A chained `a.onRollOver = b.onRollOver = … = function` compiles to
+        // the function, then `StoreRegister 0` · `SetMember` · `Push register:0`
+        // pairs back up the chain. A statement boundary is a SetMember or Pop
+        // that is NOT followed by one of those register pushes.
+        const next = pushOperands(list[index + 1]);
+        if (!next || !next.some((operand) => operand.type === "register")) since = index + 1;
+      }
+      const goto = namedGotoAt(list, index);
+      if (goto && goto.target === swapSlot) swap.gotos.push({ frame: goto.frame, at: at(instruction) });
+      const visibility = namedVisibilityAt(list, index);
+      if (visibility && visibility.target === swapSlot && visibility.value === false) {
+        swap.hides.push({ property: visibility.property, at: at(instruction) });
+      }
+      if (instruction.name !== "DefineFunction" && instruction.name !== "DefineFunction2") continue;
+      const event = lastOperand(list[index - 1])?.value;
+      if (event !== "onRollOver" && event !== "onRollOut" && event !== "onRelease") continue;
+      const assignedTo = [];
+      for (const earlier of list.slice(since, index)) {
+        for (const operand of pushOperands(earlier) ?? []) {
+          if (typeof operand.value === "string" && targets.has(operand.value) && !assignedTo.includes(operand.value)) {
+            assignedTo.push(operand.value);
+          }
+        }
+      }
+      handlers.push({
+        event,
+        slots: assignedTo,
+        battlebutton: battlebuttonFrameIn(instruction.operand?.body),
+        verb: getphaseLabelIn(instruction.operand?.body),
+        at: at(instruction)
+      });
+      since = index + 1;
+    }
+  }
+  return { handlers, swap };
+}
+
+/** The frame a handler sends `<this>.battlebutton` to, or null. */
+function battlebuttonFrameIn(body) {
+  const list = [...walkInstructions(Array.isArray(body) ? body : [], "")].map((entry) => entry.instruction);
+  for (let index = 0; index < list.length; index += 1) {
+    const operands = pushOperands(list[index]);
+    if (!operands || operands[operands.length - 1]?.value !== "battlebutton") continue;
+    if (list[index + 1]?.name !== "GetMember" || lastOperand(list[index + 2])?.value !== "gotoAndStop") continue;
+    // The argument is the operand before the argument count `1`, whatever sits
+    // between that and the member name (a register holding `this`, here).
+    for (let slot = operands.length - 2; slot >= 1; slot -= 1) {
+      if (isNumberOperand(operands[slot]) && operands[slot].value === 1 && isNumberOperand(operands[slot - 1])) {
+        return operands[slot - 1].value;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * WHERE EVERY SLOT SITS ON EVERY FRAME OF THE OVERLAY, compressed to runs.
+ *
+ * ► **THE RESTING FRAME IS WHAT A PLAYER SEES, NOT THE LABEL FRAME.** Each
+ *   controller label plays through a span and holds on a `stop()` (battle map,
+ *   "Selection and spans": 5–12, 13–19, 20–27, 28–37). A slot that tweened
+ *   inside a span would be drawn at its resting matrix, so each controller
+ *   gets `restsAt` — the first bare `stop()` at or after its label — and the
+ *   slots' matrices THERE. Where the slots do not move, the runs say so.
+ *
+ * Pure over `resolveTimeline`'s output, so a test can hand it display lists.
+ * Matrices are `roundMatrix`'s: translations in TWIPS.
+ */
+export function summariseOverlayLayout(resolved, { instances, labels = [], stops = [], controllers = [] }) {
+  const wanted = new Set(instances);
+  const tracks = {};
+  const frames = Array.isArray(resolved?.frames) ? resolved.frames : [];
+  for (let index = 0; index < frames.length; index += 1) {
+    const list = frames[index];
+    if (!Array.isArray(list)) continue;
+    for (const entry of list) {
+      if (!entry.name || !wanted.has(entry.name)) continue;
+      const matrix = roundMatrix(entry.matrix ?? IDENTITY_MATRIX);
+      const key = JSON.stringify([entry.depth, entry.characterId, matrix]);
+      if (!tracks[entry.name]) tracks[entry.name] = [];
+      const runs = tracks[entry.name];
+      const last = runs[runs.length - 1];
+      if (last && last.key === key && last.to === index) last.to = index + 1;
+      else runs.push({ key, from: index + 1, to: index + 1, depth: entry.depth, character: entry.characterId, matrix });
+    }
+  }
+  for (const runs of Object.values(tracks)) for (const run of runs) delete run.key;
+
+  const at = (frame) => {
+    const out = {};
+    for (const [name, runs] of Object.entries(tracks)) {
+      const run = runs.find((candidate) => candidate.from <= frame && frame <= candidate.to);
+      if (run) out[name] = { depth: run.depth, character: run.character, matrix: run.matrix };
+    }
+    return out;
+  };
+  const sortedStops = [...stops].sort((left, right) => left - right);
+  const frameOf = new Map(labels.map((label) => [label.name, label.frame]));
+  const byController = {};
+  for (const label of controllers) {
+    const frame = frameOf.get(label) ?? null;
+    const restsAt = frame === null ? null : (sortedStops.find((stop) => stop >= frame) ?? null);
+    byController[label] = { frame, restsAt, slots: restsAt === null ? null : at(restsAt) };
+  }
+  return {
+    declaredFrames: frames.length,
+    labels: labels.map((label) => ({ frame: label.frame, name: label.name })),
+    stops: sortedStops,
+    tracks,
+    frameOne: at(1),
+    controllers: byController
+  };
+}
+
+/**
+ * THE BUTTON, ITS CHILDREN, AND WHAT THE OVERLAY DOES WITH THEM — the
+ * `buttons` section of the pack. See `BUTTON_OVERLAY` for why it is a section.
+ *
+ * `take(id, name, into)` is `extractIcons`'s own, handed a sink whose
+ * `clipIds`/`clipNames` are private to this section — so the roster's nested
+ * worklist never sees the button's children — and whose shapes, texts,
+ * failures and approximations are the pack's, because the geometry and the
+ * honesty counts belong to the one file a renderer opens.
+ */
+function extractButtons({ buffer, characters, names, analysis, timelineActions, actionsFor, eventsFor, take, sink, roster }) {
+  const declared = BUTTON_OVERLAY;
+  const section = {
+    overlay: null, button: null, clips: {}, nested: {}, sharedWithRoster: [],
+    layout: null, wiring: null, handlers: null, inventory: null, clipsAcrossSpriteBoundary: 0, effects: null
+  };
+  const overlay = characters.get(declared.character);
+  const actual = names.get(declared.character);
+  if (!overlay || overlay.kind !== "sprite" || actual !== declared.linkage) {
+    sink.failures.push({
+      character: declared.character,
+      message: `expected export ${declared.linkage}, build calls character ${declared.character} ${actual ?? "nothing"}`
+    });
+    section.effects = tallyIconEffects({});
+    return section;
+  }
+
+  const labels = readFrameLabels(buffer, overlay);
+  const resolved = resolveTimeline(buffer, overlay);
+  // Read off the table, never through `actionsFor`: the overlay is not DRAWN
+  // from this pack, so its dozens of script blocks are not unrecognised
+  // actions on anything the pack holds, and tallying them would say otherwise.
+  const stops = timelineActions.get(declared.character)?.stops ?? [];
+  section.overlay = {
+    character: declared.character, linkage: declared.linkage,
+    declaredFrames: overlay.frames, attachedBy: declared.attachedBy, placedBy: declared.placedBy
+  };
+  section.layout = summariseOverlayLayout(resolved, {
+    instances: [...declared.slots, declared.swapSlot, declared.heroInstance],
+    labels, stops, controllers: declared.controllers
+  });
+
+  const frameOne = resolved.frames[0] ?? [];
+  const slotCharacters = declared.slots.map((slot) => frameOne.find((entry) => entry.name === slot)?.characterId ?? null);
+  const distinct = [...new Set(slotCharacters)];
+  if (distinct.length !== 1 || distinct[0] === null) {
+    sink.failures.push({
+      character: declared.character,
+      message: `the overlay's eight option slots on frame 1 hold ${JSON.stringify(slotCharacters)}, not one character`
+    });
+  } else {
+    const id = distinct[0];
+    section.button = id;
+    if (id !== declared.expectedButton) {
+      sink.failures.push({ character: id, message: `the option slots hold character ${id}, expected ${declared.expectedButton}` });
+    }
+    const own = { ...sink, clipIds: new Set(), clipNames: new Map() };
+    const taken = take(id, names.get(id) ?? `character ${id}`, own);
+    if (taken) {
+      section.clips[id] = {
+        character: id,
+        linkage: names.get(id) ?? null,
+        reachedAs: `${declared.linkage}.${declared.slots[0]}..${declared.slots[declared.slots.length - 1]}`,
+        indexedBy: "frame, chosen per verb and facing by the overlay's controller frames (see wiring)",
+        attachedBy: `PlaceObject in ${declared.linkage} (${declared.character}) frame 1, depths ` +
+          declared.slots.map((slot) => frameOne.find((entry) => entry.name === slot)?.depth).join("/"),
+        reader: "the action buttons around the acting fighter",
+        timeline: actionsFor(id),
+        clipEvents: eventsFor(id),
+        ...taken
+      };
+      // The button's own multi-frame children, as entries of THIS section —
+      // unless the roster already holds them, in which case they are named and
+      // not extracted twice.
+      const pending = [...own.clipIds];
+      const seen = new Set([id]);
+      while (pending.length > 0) {
+        const child = pending.shift();
+        if (seen.has(child)) continue;
+        seen.add(child);
+        if (roster.has(child)) {
+          section.sharedWithRoster.push(child);
+          continue;
+        }
+        const childTaken = take(child, names.get(child) ?? `character ${child}`, own);
+        if (!childTaken) continue;
+        section.nested[child] = {
+          character: child,
+          linkage: names.get(child) ?? null,
+          instances: [...(own.clipNames.get(child) ?? [])].sort(),
+          meaning: NESTED_MEANINGS[child] ?? null,
+          timeline: actionsFor(child),
+          clipEvents: eventsFor(child),
+          ...childTaken
+        };
+        for (const next of own.clipIds) if (!seen.has(next)) pending.push(next);
+      }
+    }
+  }
+
+  section.wiring = deriveOptionWiring(analysis, {
+    character: declared.character, labels, controllers: declared.controllers, slots: declared.slots
+  });
+  section.handlers = deriveButtonHandlers(analysis, {
+    character: declared.character, slots: declared.slots, swapSlot: declared.swapSlot,
+    others: declared.inventory.instances
+  });
+  // The items-and-spells row: where its six buttons sit inside 492, frame 1.
+  const inventory = characters.get(declared.inventory.character);
+  if (!inventory || inventory.kind !== "sprite" || names.get(declared.inventory.character) !== declared.inventory.linkage) {
+    sink.failures.push({
+      character: declared.inventory.character,
+      message: `expected export ${declared.inventory.linkage}, build calls character ${declared.inventory.character} ` +
+        `${names.get(declared.inventory.character) ?? "nothing"}`
+    });
+  } else {
+    section.inventory = {
+      character: declared.inventory.character, linkage: declared.inventory.linkage,
+      attachedBy: declared.inventory.attachedBy,
+      layout: summariseOverlayLayout(resolveTimeline(buffer, inventory), { instances: declared.inventory.instances })
+    };
+  }
+  section.clipsAcrossSpriteBoundary = [...Object.values(section.clips), ...Object.values(section.nested)]
+    .reduce((total, entry) => total + entry.clipsAcrossSpriteBoundary, 0);
+  return section;
+}
+
+/* ------------------------------------------------------------------ */
 /* The extraction                                                      */
 /* ------------------------------------------------------------------ */
 
@@ -1775,17 +2356,19 @@ export function extractIcons(buffer) {
   };
   const eventsFor = (id) => clipEvents.get(id) ?? [];
 
-  const take = (id, linkage) => {
+  // `into` is the sink the clip's shapes, texts and children land in — the
+  // pack's own unless the buttons section hands in one with private children.
+  const take = (id, linkage, into = sink) => {
     const character = characters.get(id);
     if (!character) {
-      sink.failures.push({ character: id, message: `no character ${id} in this build (${linkage})` });
+      into.failures.push({ character: id, message: `no character ${id} in this build (${linkage})` });
       return null;
     }
     if (character.kind !== "sprite") {
-      sink.failures.push({ character: id, message: `character ${id} is a ${character.kind}, not a sprite` });
+      into.failures.push({ character: id, message: `character ${id} is a ${character.kind}, not a sprite` });
       return null;
     }
-    return extractClipFrames(buffer, characters, character, cache, sink);
+    return extractClipFrames(buffer, characters, character, cache, into);
   };
 
   /* --- the faces, cut at their own labels ------------------------- */
@@ -1919,6 +2502,14 @@ export function extractIcons(buffer) {
     for (const child of sink.clipIds) if (!done.has(child) && !seen.has(child)) pending.push(child);
   }
 
+  /* --- the action buttons, reached through the overlay -------------- */
+  // AFTER the roster's worklist, so nothing here can join it, and BEFORE the
+  // shape and text tables are built, so the button's geometry lands in them.
+  const buttons = extractButtons({
+    buffer, characters, names, analysis, timelineActions, actionsFor, eventsFor, take, sink,
+    roster: new Set([...Object.values(clips), ...Object.values(nested)].map((entry) => entry.character))
+  });
+
   /* --- the expression script -------------------------------------- */
   const driver = characters.get(EXPRESSION_DRIVER.character);
   let expressionScript = null;
@@ -2013,12 +2604,20 @@ export function extractIcons(buffer) {
     faces, clips, nested, expressionScript, shapes, texts,
     failures: sink.failures,
     approximations: sink.approximations,
-    clipsAcrossSpriteBoundary
+    clipsAcrossSpriteBoundary,
+    buttons
   };
   // AFTER the worklist, because it needs every child's entry to exist. This
   // turns "the filters inside an undescended child are counted elsewhere" from
   // a sentence into a number a reader can check against the child's own row.
   crossReferenceChildEffects(result);
+  // The buttons' own join, against their own entries AND the roster's: a child
+  // the roster already holds (`sharedWithRoster`) is found there rather than
+  // reported missing. Then their own invoice, which the roster's totals do not
+  // include — see `BUTTON_OVERLAY`.
+  const buttonEntries = iconEntries(buttons);
+  crossReferenceChildEffects(result, buttonEntries, [...iconEntries(result), ...buttonEntries]);
+  buttons.effects = tallyIconEffects(buttons);
   return result;
 }
 
@@ -2166,7 +2765,47 @@ export function buildManifest(result, { file, sha256 }) {
      * `unsupported` and no failure. Six of them are `combat_panel`'s gauges.
      */
     clipsAcrossSpriteBoundary: result.clipsAcrossSpriteBoundary,
+    /**
+     * THE ACTION BUTTONS, as their own block with their own invoice. None of
+     * `icons`, `nested` or `effects` above counts them — see `BUTTON_OVERLAY`
+     * — so a reader summing the roster gets the roster, and a reader looking
+     * for the buttons finds every number here, zeroes included.
+     */
+    buttons: buttonsManifest(result.buttons, clipRow),
     failures: result.failures
+  };
+}
+
+/** The manifest's `buttons` block: rows, the wiring in one line per slot, and the invoice. */
+function buttonsManifest(buttons, clipRow) {
+  if (!buttons) return null;
+  const armLine = (arm) => Object.entries(arm?.slots ?? {})
+    .map(([slot, wires]) => `${slot}: ${wires.map((wire) => `${wire.verb}@${wire.frames.join("/") || "none"}`).join(" | ")}`);
+  return {
+    overlay: buttons.overlay,
+    button: buttons.button,
+    clips: Object.fromEntries(Object.entries(buttons.clips).map(([key, clip]) => [key, clipRow(clip)])),
+    nested: Object.fromEntries(Object.entries(buttons.nested).map(([key, clip]) => [key, {
+      ...clipRow(clip), linkage: clip.linkage, instances: clip.instances, meaning: clip.meaning
+    }])),
+    sharedWithRoster: buttons.sharedWithRoster,
+    controllers: Object.fromEntries(Object.entries(buttons.wiring ?? {}).map(([label, record]) => [label, {
+      frame: record.frame,
+      restsAt: buttons.layout?.controllers?.[label]?.restsAt ?? null,
+      facingSplit: record.facingSplit,
+      ...(record.problem ? { problem: record.problem } : {}),
+      right: armLine(record.right),
+      left: armLine(record.left),
+      hides: { right: record.right.hides, left: record.left.hides },
+      // Named, not counted: a `gotoAndStop` on something that is not a slot is
+      // a defect in the build, and the name is the finding.
+      strays: [...record.common.strays, ...record.right.strays, ...record.left.strays],
+      unpaired: [...record.right.unpaired, ...record.left.unpaired]
+    }])),
+    handlers: buttons.handlers,
+    inventory: buttons.inventory,
+    effects: buttons.effects,
+    clipsAcrossSpriteBoundary: buttons.clipsAcrossSpriteBoundary
   };
 }
 
@@ -2263,6 +2902,41 @@ function main(argv) {
   );
   lines.push(`    notCarried: ${tally(effects.notCarried)}`);
 
+  // ► **THE BUTTONS, PRINTED APART**, because their invoice is apart. Every
+  //   line a human needs to check the extraction against the hand table in
+  //   `src/render/action-buttons.js` without opening the JSON.
+  const buttons = result.buttons;
+  if (buttons) {
+    lines.push(`  action buttons (their own section; NOT in the totals above)`);
+    for (const clip of [...Object.values(buttons.clips), ...Object.values(buttons.nested)]) {
+      lines.push(
+        `    char ${String(clip.character).padStart(4)}  ${String(clip.declaredFrames).padStart(3)} frames, ` +
+        `${clip.distinctFrames} distinct${clip.instances ? `  (${clip.instances.join(", ") || "unnamed"})` : ""}`
+      );
+    }
+    if (buttons.sharedWithRoster.length > 0) lines.push(`    children already in the roster: ${buttons.sharedWithRoster.join(", ")}`);
+    for (const [label, record] of Object.entries(buttons.wiring ?? {})) {
+      const rest = buttons.layout?.controllers?.[label]?.restsAt ?? "?";
+      lines.push(`    ${label} (frame ${record.frame ?? "?"}, rests at ${rest})${record.problem ? `  PROBLEM: ${record.problem}` : ""}`);
+      for (const side of ["right", "left"]) {
+        const wires = Object.entries(record[side].slots)
+          .map(([slot, list]) => `${slot.slice(-1)}=${list.map((wire) => `${wire.verb}@${wire.frames.join("/") || "-"}`).join("|")}`);
+        lines.push(`      ${side.padEnd(5)} ${wires.join(" ")}`);
+      }
+      const strays = [...record.common.strays, ...record.right.strays, ...record.left.strays];
+      if (strays.length > 0) lines.push(`      STRAY: ${strays.map((stray) => `${stray.target}${stray.frame !== undefined ? `.gotoAndStop(${stray.frame})` : ""} ${stray.at}`).join(", ")}`);
+    }
+    const hover = (buttons.handlers?.handlers ?? []).map((handler) =>
+      `${handler.event}[${handler.slots.length} slots]${handler.battlebutton === null ? "" : `->battlebutton ${handler.battlebutton}`}${handler.verb ? ` verb ${handler.verb}` : ""}`);
+    lines.push(`    handlers: ${hover.join(", ") || "none found"}`);
+    lines.push(`    swap slot frames: ${(buttons.handlers?.swap.gotos ?? []).map((goto) => `${goto.frame} ${goto.at}`).join(", ") || "none"}`);
+    lines.push(
+      `    effects: ${buttons.effects.ownFilters} own filters, ${buttons.effects.inheritedFilters} on groups, ` +
+      `${buttons.effects.undescendedClipPlacements} undescended clip placements, ` +
+      `${buttons.clipsAcrossSpriteBoundary} clips across a sprite boundary`
+    );
+  }
+
   if (options.report) {
     process.stdout.write(`icons (measured, nothing written)\n${lines.join("\n")}\n`);
     for (const failure of result.failures.slice(0, 25)) {
@@ -2284,7 +2958,8 @@ function main(argv) {
     nested: result.nested,
     expressionScript: result.expressionScript,
     shapes: result.shapes,
-    texts: result.texts
+    texts: result.texts,
+    buttons: result.buttons
   }, null, 1);
   // Never a zero-byte file: an empty asset a renderer draws as nothing is the
   // exact failure mode this tool's manifest exists to make impossible.

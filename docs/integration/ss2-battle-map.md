@@ -281,6 +281,25 @@ Consequences a capture campaign has to respect:
   later warrior turn in the same battle depends on whether the option clips
   are re-placed each turn, which lives in the placement tags.
 
+### The icon each slot shows (2026-09-24)
+
+Every controller frame also picks each slot's ART, with `optionX.gotoAndStop(N)`
+straight on the slot — character 860's own frame, not its `battlebutton` child
+(826, which is the round background: frame 2 on the shared `onRollOver`, 1 on
+`onRollOut`, overlay frame 1 body 0x236947 `+0x0b08`/`+0x0c2e`). A verb that
+points at the foe takes a DIFFERENT frame per facing (`power_attack` 2 right /
+13 left, `taunt` 18/19, `wincrowd` 29/30, `shove` 16/10, `bash_attack` 24/21);
+the absolute moves keep one (`walkleft` 6, `jumpleft` 7, `jumpright` 8,
+`walkright` 9, `rest` 11). The psyche slot takes 26 when `!(psyche_up > 1)`,
+27 when `== 2`, 28 when `>= 3`. The whole table, with the offset of every
+`gotoAndStop` and every handler, is `SS2_BUTTON_WIRING` in
+`src/render/action-buttons.js`; `tools/extract-icons.mjs` re-derives it from
+the build on every extraction (`buttons.wiring` in the icons pack).
+
+**`closerange_warrior` facing right sends the third psyche frame to
+`optionHG`** (frame 13 `+0x0923`), which is no instance: at a counter of 3 that
+slot keeps whatever frame it last showed.
+
 ### The ammunition-visibility defect
 
 On `longrange_archer` the ranged slots are frame-selected when
