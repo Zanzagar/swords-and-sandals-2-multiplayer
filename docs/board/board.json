@@ -1328,9 +1328,26 @@
    "summary": "Hover reasons on greyed buttons from E's reason codes (other rank, out of reach, blocked…).",
    "order": 19,
    "next": "Follow-up run 2026-09-24 (night/ring2)."
+  },
+  {
+   "id": "lanes-discrete-or-continuous-y",
+   "lane": "engine",
+   "column": "needs-design",
+   "order": 81,
+   "title": "Lanes: discrete ranks or continuous y — and which attacks may cross them",
+   "summary": "Raised by the owner 2026-09-24: an out-of-lane melee looks sloppy — prevent it, and is there ANY case to allow it? Whirlwind on people close enough makes sense. x is continuous; should y be too, within reason? Facts: melee, shove, taunt, whirlwind and discharge are already SAME-LANE ONLY in the engine (owner rule 2026-09-18), and the last out-of-reach report (wf_714ed099-08f) was the DRAWING every time, so a sloppy-looking melee needs a repro first. The build is 1-D (fightdistance on x); the three ranks at rankStride 97 are authored.",
+   "gaps": "Options for the grilling round: (a) discrete lanes as now; (b) SOFT LANES — continuous y within a lane band (natural-looking positions), melee needs the same band, area verbs (whirlwind) use a real 2-D radius; (c) free 2-D y — every rule 2-D, 2-D movement controls, balance moves. Recommendation: (b), designed together with jump/charge lane changes.",
+   "next": "A repro (seed + screenshot) of the out-of-lane melee the owner saw; then a grilling round on lanes, whirlwind radius, jump/charge lane changes.",
+   "evidence": "docs/design/battle-ui.md #decided-hud-2026-09-24 item 9; SS2_ARENA / ss2SameLane in src/team/ss2-rules.js; board card team-geometry-ranks-lanes-facing-back-attacks-li.",
+   "ownerDecision": "Discrete lanes, soft lanes or free y; which attacks (if any) may cross a lane.",
+   "updated": "2026-09-24"
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-24",
+   "text": "New design topic: discrete lanes or continuous y, and which attacks may cross a lane (with jump/charge lane changes)."
+  },
   {
    "date": "2026-09-24",
    "text": "The in-battle ring is playable: S2-S7 merged (the core, the build's button art, movement, the swap button, the items row, hover previews) — seen working in a real browser."
