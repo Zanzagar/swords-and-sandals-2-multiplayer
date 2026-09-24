@@ -7,6 +7,14 @@ the latest handoff in `docs/handoffs/` and proceed" — with this file as the st
 it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
+**THE PROJECT BOARD (owner's request, 2026-09-23):
+https://claude.ai/artifact/Mu7AjEwZXcJfZGPzgXKZxb** — a kanban of every
+system, from "needs design" to "done", seeded from a code-checked inventory
+(its 34 doc-vs-code disagreements are one card). Private; the owner shares it.
+**Keep it current:** when work lands, move the card in
+`docs/board/board.json` (and add a `changes` line), then
+`node tools/board/build.mjs <out.html>` and republish `<out.html>` to that URL.
+
 **LATEST:
 [2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md)**
 (the END of session `c62c201f`). Start there. *(It supersedes the same
