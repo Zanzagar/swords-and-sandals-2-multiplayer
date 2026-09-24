@@ -17,13 +17,22 @@ import { fileURLToPath } from "node:url";
 import {
   arrowTrailOpsFor, propEffectsUnreachable, propFrameCount, propInvoiceFor, propOpsFor, propPackFrom
 } from "../src/render/props.js";
-import { arenaScreenLayersFor, stageFitFor, SS2_ARENA_DRESSING } from "../src/render/arena-backdrop.js";
-import { projectileDrawAt, projectileFlight, SS2_PROJECTILE } from "../src/render/projectile.js";
+import {
+  arenaScreenLayersFor, cameraFor, cameraStep, stageFitFor, stageProjectorFor, SS2_ARENA_DRESSING
+} from "../src/render/arena-backdrop.js";
+import {
+  fireballDrawAt, fireballFlight, fireballLifetimeMs, projectileDrawAt, projectileFlight, SS2_PROJECTILE
+} from "../src/render/projectile.js";
 import { applyColourTransform, applyColourTransformAlpha, colourTransformFrom } from "../src/render/filters.js";
 import { figurePackFrom, loadoutFrom, paintExtractedFigure } from "../src/render/extracted-figure.js";
-import { figureSpecFor } from "../src/render/figure.js";
+import { figureScaleFor, figureSpecFor } from "../src/render/figure.js";
 import { poseAt, timelineFor } from "../src/render/timeline.js";
 import { paintFigure, paintShadow } from "../src/render/painter.js";
+import { applyCommands, emptyScene } from "../src/render/scene.js";
+import { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
+import { ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
+import { demoSide } from "../tools/arena/roster.js";
+import { SS2_FIGURE_HALF_WIDTH } from "../src/common/ss2-figure.js";
 import {
   ArenaShellError,
   figureProvenance,
@@ -2071,9 +2080,10 @@ const REAL_ENCHANTMENTS = readRealEnchantments();
 
 /** A standing gladiator's operations, as the shell asks for them. */
 function realFigureOps() {
-  // ► **`height` IS `figure.build.height`, WHICH IS ABOUT 1 — NOT 150.** The
-  //   `?seam=1` probe in the shell passes 150 and is a probe; the draw path
-  //   passes `figure.build.height`, `0.92 + vitality/20 * 0.16`. Writing 150
+  // ► **`height` IS 1 — NOT 150.** The `?seam=1` probe in the shell passes 150
+  //   and is a probe; the draw path passes NO height since 2026-09-23 (the
+  //   build's 1:1 — until then it passed `figure.build.height`, the authored
+  //   vitality multiplier, `0.92 + vitality/20 * 0.16`). Writing 150
   //   here scales every matrix by 150 and puts the whole figure off the canvas,
   //   which is how this test was first written and is worth naming.
   return paintExtractedFigure(REAL_FIGURE.pack, {
@@ -2633,6 +2643,474 @@ test("the authored fallback is drawn with NO figure transform, because it comput
   assert.equal(shadow.x, view.toX(origin.x));
   assert.equal(harness.journal.length, 0, "nothing was composited, because nothing was grouped");
   assert.equal(harness.figureGroupPaint.figures, 0, "and the figure invoice never saw a figure-space run");
+});
+
+/* ------------------------------------------------------------------ */
+/* THE FALLBACK'S SIZE — one geometry for both renderers (2026-09-23)  */
+/* ------------------------------------------------------------------ */
+
+/** The highest point of an AUTHORED figure, in arena units over its feet, before `size`. */
+function authoredCrownOf(ops) {
+  let top = -Infinity;
+  for (const operation of ops) {
+    if (operation.kind === "polygon") for (const [, y] of operation.points) top = Math.max(top, y);
+    if (operation.kind === "circle") top = Math.max(top, operation.y + operation.r);
+  }
+  return top;
+}
+
+/** The same for an EXTRACTED figure's paths. */
+function extractedCrownOf(ops) {
+  let top = -Infinity;
+  for (const op of ops) {
+    const numbers = (op.d.match(/-?\d+(?:\.\d+)?(?:e-?\d+)?/gi) ?? []).map(Number);
+    for (let index = 0; index + 1 < numbers.length; index += 2) {
+      top = Math.max(top, op.matrix[1] * numbers[index] + op.matrix[3] * numbers[index + 1] + op.matrix[5]);
+    }
+  }
+  return top;
+}
+
+const RESTING = () => poseAt(timelineFor("Standing", { role: "actor" }), 0);
+
+test("WITH NO PACK THE AUTHORED GLADIATOR STANDS AT THE BUILD'S HEIGHT, whatever his vitality", () => {
+  // ► **ONE GEOMETRY FOR BOTH RENDERERS.** The arrow, the fireball, the bolt and
+  //   the blood are placed in the build's own arena units — `_yscale * 2 + 30`,
+  //   `_yscale * 1.5 + 5`, `_y` 50, the clip's `-220..-71` — which is the
+  //   right place only on a figure the build's size. The build's gladiator is
+  //   its `standing` clip, 222.65 pixels from sole to crown, drawn 1:1 into
+  //   `arena.gladiators` and scaled by `_yscale` alone. So the authored
+  //   fallback, which a fresh clone draws, stands that tall too: a bare
+  //   strength-9 gladiator (`_yscale` 86) is 222.65 * 0.86 = 191.48 units.
+  //   ~~150 units times a vitality multiplier (0.92-1.08)~~ until 2026-09-23 —
+  //   124-128 units, with a snipe flying at 134 over his head.
+  const size = figureScaleFor({ yscale: 86, rank: 0 });
+  const crownAt = (vitality) => authoredCrownOf(paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {}, stats: { vitality } }, { side: "hero" }), RESTING()
+  )) * size;
+  for (const vitality of [0, 5, 20]) {
+    assert.ok(Math.abs(crownAt(vitality) - 222.65 * 0.86) < 1,
+      `vitality ${vitality}: the crown is ${crownAt(vitality).toFixed(2)}, the build's is ${(222.65 * 0.86).toFixed(2)}`);
+  }
+
+  // And against the extracted rig itself, where this machine has one: the two
+  // renderers put a bare gladiator's crown in the same place at the same size.
+  if (!REAL_FIGURE) return;
+  const extracted = extractedCrownOf(paintExtractedFigure(REAL_FIGURE.pack, {
+    family: "standing", label: "Standing", facing: "right", at: 0
+  })) * size;
+  assert.ok(Math.abs(crownAt(5) - extracted) < 3,
+    `the fallback's crown (${crownAt(5).toFixed(2)}) is the extracted rig's (${extracted.toFixed(2)})`);
+});
+
+test("WITH NO PACK THE ARROW AND THE FIREBALL LEAVE AND LAND ON THE FALLBACK'S BODY, on the arena's own host", () => {
+  // The arena's own host and roster, as `tools/arena/main.js` builds them, and
+  // the flights as its `beginStep` builds them — the shooter's `yscale` from
+  // the scene, the stop-short from the target's `physical_size`.
+  const host = createVanillaBattleHost({
+    teams: [
+      demoSide("red", 1, { ss2Combatant, ss2BattleValues }),
+      demoSide("blue", 1, { ss2Combatant, ss2BattleValues })
+    ],
+    rules: ss2TeamRules, bindings: SS2_STATIC_MAP_BINDINGS, seed: 7, awaitAnimations: true
+  });
+  const scene = applyCommands(emptyScene(), host.constructArena().commands);
+  const byId = new Map(host.wire().teams.flatMap((team) => team.combatants).map((c) => [c.id, c]));
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const bodyOf = (id) => {
+    const actor = scene.actors[id];
+    const combatant = byId.get(id);
+    const figure = figureSpecFor({ ...combatant, resources: {} }, { side: host.layout.placementFor(id).side });
+    const size = figureScaleFor({ yscale: actor.yscale, rank: rankOfDepth(actor.y, combatant.slotIndex, view), slotIndex: combatant.slotIndex });
+    return { actor, crown: authoredCrownOf(paintFigure(figure, RESTING())) * size };
+  };
+  const [shooterId, targetId] = scene.drawOrder;
+  const shooter = bodyOf(shooterId);
+  const target = bodyOf(targetId);
+  assert.ok(shooter.actor.yscale > 0 && target.actor.yscale > 0, "the scene carries both fighters' `yscale`");
+  const inside = (lift, body, what) => assert.ok(lift > 0 && lift < body.crown,
+    `${what}: ${lift.toFixed(1)} must be on a body ${body.crown.toFixed(1)} tall`);
+
+  const from = { x: shooter.actor.x, y: shooter.actor.y };
+  const to = { x: target.actor.x, y: target.actor.y };
+  const shooterYscale = shooter.actor.yscale;
+  const snipe = projectileFlight({ kind: "snipe", from, to, sequence: 0, targetSize: 86, shooterYscale });
+  inside(projectileDrawAt(snipe, 0, view).lift, shooter, "a snipe leaves from the shooter's shoulder");
+  inside(projectileDrawAt(snipe, 1, view).lift, target, "and lands on the target");
+
+  // ► **THE BOMBARD LEAVES JUST OVER THE CROWN, NOT INSIDE THE BODY — the
+  //   build's own geometry.** `_yscale * 2 + 30` is 202 at 86, against a bare
+  //   crown of 191.5: the lob is loosed from above the head, 5.5% of the
+  //   figure over it. It LANDS inside the body at every velocity the build draws.
+  for (let sequence = 0; sequence <= 10; sequence += 1) {
+    const bombard = projectileFlight({ kind: "bombard", from, to, sequence, targetSize: 86, shooterYscale });
+    const launch = projectileDrawAt(bombard, 0, view).lift;
+    assert.ok(launch > shooter.crown && launch - shooter.crown < shooter.crown * 0.1,
+      `a bombard leaves just over the crown (${shooter.crown.toFixed(1)}), at ${launch}`);
+    inside(projectileDrawAt(bombard, 1, view).lift, target, `a bombard at velocity ${bombard.xVelocity} lands on the target`);
+  }
+
+  const fireball = fireballFlight({ from, to, gladiatorDir: "right", xVelocity: 50, casterYscale: shooterYscale });
+  inside(fireballDrawAt(fireball, 0, view).lift, shooter, "a fireball leaves from the caster's shoulder");
+  inside(fireballDrawAt(fireball, fireballLifetimeMs(fireball) - 1, view).lift, target, "and bursts on the target");
+});
+
+test("EVERY DRAWN FLIGHT LEAVES FROM THE SHOOTER'S DRAWN HEAD OR SHOULDER AND ENDS ON THE TARGET'S DRAWN BODY", () => {
+  // ► **FOUND BY A CODEX REVIEW, REPRODUCED BEFORE IT WAS FIXED (2026-09-23).**
+  //   The lift kept the arc's normalised endpoint in the SHOOTER's units and
+  //   ignored the depth scale every body is drawn at: a strength-9 bombard over
+  //   500 units ended 186.46 up against a rank-2 crown of 179.99, and over 3000
+  //   units ended 199.79 against a front-rank crown of 191.48 — 1,620 of 2,916
+  //   flights in this sweep's shape ended off the target, the worst 86.6 units
+  //   over its head. The front-pair test above could not see any of it.
+  //
+  //   Every combination below: three kinds, `_yscale` 80 / 86 / 113 on each end
+  //   (strength 0, 9, 50), ranks 0-2 on each end, the default pair, ±1500 and
+  //   the walls at ±2100, every bombard velocity the build draws (8-18) and all
+  //   three fireball velocities. The bodies are the ones the arena draws: the
+  //   authored figure always, and the extracted rig where this machine has one.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const yOf = (rank) => 200 - 97 * rank;
+  const authoredBare = authoredCrownOf(paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" }), RESTING()
+  ));
+  const extractedBare = REAL_FIGURE ? extractedCrownOf(paintExtractedFigure(REAL_FIGURE.pack, {
+    family: "standing", label: "Standing", facing: "right", at: 0
+  })) : null;
+  const crowns = (yscale, rank) => {
+    const size = figureScaleFor({ yscale, rank: rankOfDepth(yOf(rank), 0, view), slotIndex: 0 });
+    return [authoredBare * size, ...(extractedBare === null ? [] : [extractedBare * size])];
+  };
+  const on = (lift, body, what) => {
+    for (const crown of body) {
+      assert.ok(lift > 0 && lift < crown, `${what}: ${lift.toFixed(1)} must be on a body ${crown.toFixed(1)} tall`);
+    }
+  };
+  const overHead = (lift, body, what) => {
+    for (const crown of body) {
+      assert.ok(lift > crown && lift - crown < crown * 0.1,
+        `${what}: a bombard leaves just over the crown (${crown.toFixed(1)}), not at ${lift.toFixed(1)}`);
+    }
+  };
+
+  let flights = 0;
+  for (const shooterYscale of [80, 86, 113]) for (const targetYscale of [80, 86, 113]) {
+    for (const shooterRank of [0, 1, 2]) for (const targetRank of [0, 1, 2]) {
+      for (const [fromX, toX] of [[-250, 250], [-1500, 1500], [-2100, 2100], [2100, -2100]]) {
+        const from = { x: fromX, y: yOf(shooterRank) };
+        const to = { x: toX, y: yOf(targetRank) };
+        const shooter = crowns(shooterYscale, shooterRank);
+        const target = crowns(targetYscale, targetRank);
+        // The stop-short is the target's `physical_size`, which IS its `_yscale`.
+        const targetSize = targetYscale;
+        const label = `${shooterYscale}@${shooterRank} -> ${targetYscale}@${targetRank}, ${fromX}..${toX}`;
+        const shot = (kind, sequence) => projectileFlight({ kind, from, to, sequence, targetSize, shooterYscale, targetYscale });
+
+        const snipe = shot("snipe", 0);
+        on(projectileDrawAt(snipe, 0, view).lift, shooter, `snipe leaves ${label}`);
+        on(projectileDrawAt(snipe, 1, view).lift, target, `snipe lands ${label}`);
+        for (let sequence = 0; sequence <= 10; sequence += 1) {
+          const bombard = shot("bombard", sequence);
+          overHead(projectileDrawAt(bombard, 0, view).lift, shooter, `bombard ${label}`);
+          on(projectileDrawAt(bombard, 1, view).lift, target, `bombard v${bombard.xVelocity} lands ${label}`);
+          flights += 1;
+        }
+        for (const xVelocity of [50, 70, 90]) {
+          const fireball = fireballFlight({
+            from, to, gladiatorDir: toX > fromX ? "right" : "left", xVelocity, casterYscale: shooterYscale, targetYscale
+          });
+          on(fireballDrawAt(fireball, 0, view).lift, shooter, `fireball leaves ${label}`);
+          on(fireballDrawAt(fireball, fireballLifetimeMs(fireball) - 1, view).lift, target, `fireball v${xVelocity} bursts ${label}`);
+          flights += 1;
+        }
+        flights += 1;
+      }
+    }
+  }
+  assert.equal(flights, 3 * 3 * 3 * 3 * 4 * (1 + 11 + 3), "the sweep ran every combination it names");
+});
+
+test("A DRAWN LOB PASSES OVER EVERY BODY AWAY FROM ITS ENDS, AND LANDS ON ITS TARGET — ON ITS HEAD WHEN SOMEBODY STANDS IN ITS APPROACH", () => {
+  // ► **FOUND BY A CODEX REVIEW, REPRODUCED BEFORE IT WAS FIXED (2026-09-23).**
+  //   The drawn lob's end correction was spread over the whole flight, so from
+  //   x 0 to 4000 it was 159.66 up at x 3828 — under an identical bystander's
+  //   191.48 crown, 172 short of the target. The resolver exempts a bombard from
+  //   line blocking BECAUSE it clears bodies, and the clearance sweep that
+  //   should have caught it measured `projectileAt().height`, a number the
+  //   drawing never used. This measures `projectileDrawAt().lift`, against the
+  //   crowns the two painters actually draw.
+  //
+  //   The criterion is `lobLiftAt`'s, since a fourth Codex finding the same
+  //   day (the round-3 version of this test asserted clearance over EVERY
+  //   footprint, and the construction that met it jumped at footprint edges):
+  //   the lob is `chord + k * bulge`, so it clears every body at least
+  //   `LOB_END_ROOM` (140, derived) from BOTH ends, and a body inside the
+  //   landing's end room RAISES THE LANDING to 95% of the target's crown. The
+  //   graze that leaves over a clamp-adjacent ally is measured and documented
+  //   there, not asserted away here.
+  //   Blockers stand in the TARGET's rank where the walk clamp puts one
+  //   (`physical_size` in front of it), 172 short (Codex's), and mid-field; the
+  //   stop is `stopShortFor`'s rule, restated (pinned against the real
+  //   presentation in `test/ss2-projectile-endpoint.test.js`).
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const yOf = (rank) => 200 - 97 * rank;
+  const authoredBare = authoredCrownOf(paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" }), RESTING()
+  ));
+  const extractedBare = REAL_FIGURE ? extractedCrownOf(paintExtractedFigure(REAL_FIGURE.pack, {
+    family: "standing", label: "Standing", facing: "right", at: 0
+  })) : null;
+  const scaleOf = (yscale, y) => figureScaleFor({ yscale, rank: rankOfDepth(y, 0, view), slotIndex: 0 });
+  const crownsOf = (yscale, y) => [authoredBare, ...(extractedBare === null ? [] : [extractedBare])]
+    .map((crown) => crown * scaleOf(yscale, y));
+  const reachOf = (yscale, y) => SS2_FIGURE_HALF_WIDTH * scaleOf(yscale, y);
+
+  let checked = 0;
+  let overBodies = 0;
+  for (const shooterYscale of [80, 113]) for (const targetYscale of [80, 113]) for (const blockerYscale of [80, 113]) {
+    for (const shooterRank of [0, 1, 2]) for (const targetRank of [0, 1, 2]) {
+      for (const [fromX, toX] of [[-250, 250], [-1500, 1500], [-2100, 2100], [2100, -2100]]) {
+        const direction = toX > fromX ? 1 : -1;
+        const targetY = yOf(targetRank);
+        for (const blockerX of [toX - direction * targetYscale, toX - direction * 172, (fromX + toX) / 2]) {
+          const blocker = { x: blockerX, y: targetY, yscale: blockerYscale };
+          const surface = SS2_FIGURE_HALF_WIDTH * targetYscale / 100;
+          const terminal = toX - direction * surface;
+          const targetSize = Math.abs(blocker.x - terminal) <= SS2_FIGURE_HALF_WIDTH * blockerYscale / 100 ? 0 : surface;
+          const label = `${shooterYscale}@${shooterRank} -> ${targetYscale}@${targetRank} past ${blockerYscale} at ${blockerX}, ${fromX}..${toX}`;
+          for (let sequence = 0; sequence <= 10; sequence += 1) {
+            const flight = projectileFlight({
+              kind: "bombard", from: { x: fromX, y: yOf(shooterRank) }, to: { x: toX, y: targetY },
+              sequence, targetSize, shooterYscale, targetYscale, bodies: [blocker]
+            });
+            // Every drawn point over the blocker's drawn body, two units apart,
+            // at least 140 from both ends — the room the construction promises.
+            const reach = reachOf(blockerYscale, targetY);
+            const landingX = projectileDrawAt(flight, 1, view).x;
+            for (let x = blocker.x - reach; x <= blocker.x + reach; x += 2) {
+              const t = (x - flight.launch.x) / (flight.direction * flight.xVelocity);
+              if (t < 0 || t > flight.flightFrames) continue;
+              if (Math.abs(x - flight.launch.x) < 140 || Math.abs(landingX - x) < 140) continue;
+              const point = projectileDrawAt(flight, t / flight.flightFrames, view);
+              if (Math.abs(point.y - targetY) > 97 / 2) continue;   // passing another rank there
+              if (Math.abs(point.x - blocker.x) > reach) continue;   // stopped short of him
+              for (const crown of crownsOf(blockerYscale, targetY)) {
+                assert.ok(point.lift > crown,
+                  `${label} v${flight.xVelocity}: at x ${point.x.toFixed(1)} the lob is ${point.lift.toFixed(1)}, under a ${crown.toFixed(1)} crown`);
+              }
+              overBodies += 1;
+            }
+            const end = projectileDrawAt(flight, 1, view).lift;
+            // Somebody in the target's rank within 140 of the landing (his
+            // footprint widened 5%, as the construction widens it) raises it.
+            const wide = reach * 1.05;
+            const crowded = direction * (landingX - (blocker.x - direction * wide)) > 0
+              && direction * (landingX - (blocker.x + direction * wide)) < 140;
+            for (const crown of crownsOf(targetYscale, targetY)) {
+              assert.ok(end > 0 && end < crown, `${label} v${flight.xVelocity}: it lands at ${end.toFixed(1)}, on a ${crown.toFixed(1)} body`);
+              if (crowded) {
+                assert.ok(end >= 0.95 * crown - 1e-6, `${label}: somebody in the approach, so it lands on the head, not at ${end.toFixed(1)}`);
+              }
+            }
+            checked += 1;
+          }
+        }
+      }
+    }
+  }
+  assert.equal(checked, 2 * 2 * 2 * 3 * 3 * 4 * 3 * 11, "every flight the sweep names was drawn");
+  assert.ok(overBodies > checked, `and the lob was actually measured over the bodies: ${overBodies} points`);
+});
+
+/* ------------------------------------------------------------------ */
+/* THE LOB IS CONTINUOUS BY CONSTRUCTION — fourth Codex finding        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A drawn lob sampled along x: every `step` units, plus ±0.01 around every
+ * point named in `edges`. Sorted by x, as `{x, lift}` from `projectileDrawAt`.
+ */
+function lobSamples(flight, view, { step = 4, edges = [] } = {}) {
+  const length = Math.abs(flight.impact.x - flight.launch.x);
+  const xs = [];
+  for (let d = 0; d <= length; d += step) xs.push(flight.launch.x + flight.direction * d);
+  xs.push(flight.impact.x);
+  for (const edge of edges) for (const offset of [-0.01, -0.001, 0, 0.001, 0.01]) xs.push(edge + offset);
+  return xs
+    .map((x) => (x - flight.launch.x) / (flight.direction * flight.xVelocity))
+    .filter((t) => t >= 0 && flight.direction * (flight.launch.x + flight.direction * flight.xVelocity * t - flight.impact.x) <= 1e-9)
+    .map((t) => projectileDrawAt(flight, Math.min(1, t / flight.flightFrames), view))
+    .sort((a, b) => a.x - b.x);
+}
+
+/**
+ * THE CONTINUITY BOUND, derived from the UNMODIFIED arc — the same flight with
+ * nobody in the way. Its steepest drawn slope `S0`, times the most the cap lets
+ * `k` raise its bulge (a quarter of the length over its own bulge peak `B0`),
+ * plus one unit per unit for the chord a raised landing tilts. A step larger
+ * than `bound * dx` is a jump: the one Codex found was 60.89 in 0.002.
+ */
+function continuityBound(bare, view) {
+  const samples = lobSamples(bare, view, { step: 1 });
+  let slope = 0;
+  for (let index = 1; index < samples.length; index += 1) {
+    const dx = Math.abs(samples[index].x - samples[index - 1].x);
+    if (dx > 1e-9) slope = Math.max(slope, Math.abs(samples[index].lift - samples[index - 1].lift) / dx);
+  }
+  const first = samples[0];
+  const last = samples[samples.length - 1];
+  const chordAt = (x) => first.lift + ((x - first.x) / (last.x - first.x)) * (last.lift - first.lift);
+  const bulge = Math.max(...samples.map((point) => point.lift - chordAt(point.x)));
+  const length = Math.abs(last.x - first.x);
+  const raise = bulge > 0 ? Math.max(1, (0.25 * length) / bulge) : 1;
+  return raise * slope + 1;
+}
+
+test("CODEX'S FOOTPRINT-EDGE CASE: a bystander at x 86 no longer makes the lob jump 60.89 units at his edge", () => {
+  // ► **REPRODUCED BEFORE IT WAS FIXED (2026-09-23), both directions.** A
+  //   strength-9 archer at x 0 lobbing at a strength-9 target at 1000, a
+  //   strength-50 bystander at 86 in the same rank: 203.28 at x 31.53865, 264.17
+  //   at 31.54065 — the clearance floor switching on at his footprint's edge.
+  //   The lob is now `chord + k * bulge` with one `k` per flight.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  for (const [from, to, bystanderX] of [[0, 1000, 86], [1000, 0, 914]]) {
+    const shot = (bodies) => projectileFlight({
+      kind: "bombard", from: { x: from, y: 200 }, to: { x: to, y: 200 }, sequence: 0,
+      targetSize: SS2_FIGURE_HALF_WIDTH * 0.86, shooterYscale: 86, targetYscale: 86, bodies
+    });
+    const flight = shot([{ x: bystanderX, y: 200, yscale: 113 }]);
+    const direction = flight.direction;
+    const edge = bystanderX - direction * SS2_FIGURE_HALF_WIDTH * 1.13;
+    const at = (x) => projectileDrawAt(flight, (x - flight.launch.x) / (direction * flight.xVelocity) / flight.flightFrames, view);
+    const bound = continuityBound(shot([]), view);
+    const before = at(edge - direction * 0.001);
+    const after = at(edge + direction * 0.001);
+    assert.ok(Math.abs(after.lift - before.lift) <= bound * 0.002 + 1e-9,
+      `${from}->${to}: ${before.lift.toFixed(4)} then ${after.lift.toFixed(4)} across his edge — a step of ${(after.lift - before.lift).toFixed(4)}`);
+    // And over the whole flight, densely.
+    const samples = lobSamples(flight, view, { step: 0.5, edges: [edge, bystanderX + direction * SS2_FIGURE_HALF_WIDTH * 1.13] });
+    for (let index = 1; index < samples.length; index += 1) {
+      const dx = Math.abs(samples[index].x - samples[index - 1].x);
+      assert.ok(Math.abs(samples[index].lift - samples[index - 1].lift) <= bound * dx + 1e-9,
+        `${from}->${to}: a step of ${(samples[index].lift - samples[index - 1].lift).toFixed(3)} at x ${samples[index].x.toFixed(3)}`);
+    }
+    // He stands inside the launch's end room, so passing him is the documented
+    // exception; the lob still lands on the target's shoulder.
+    assert.equal(projectileDrawAt(flight, 1, view).lift, 86 * 1.5 + 5, "on the target's shoulder: nobody in its approach");
+  }
+});
+
+test("THE DRAWN LOB NEVER STEPS, anywhere, in either direction — footprint edges, end rooms, ranks, sizes, velocities, ranges", () => {
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const yOf = (rank) => 200 - 97 * rank;
+  let flights = 0;
+  let steps = 0;
+  for (const [fromX, toX] of [[-250, 250], [250, -250], [-1500, 1500], [1500, -1500], [-2100, 2100], [2100, -2100]]) {
+    const direction = toX > fromX ? 1 : -1;
+    for (const [shooterRank, targetRank] of [[0, 0], [0, 2], [2, 0]]) {
+      for (const blockerYscale of [80, 113]) {
+        const targetY = yOf(targetRank);
+        const surface = SS2_FIGURE_HALF_WIDTH * 0.86;
+        const landingX = toX - direction * surface;
+        const launchX = fromX + direction * 30;
+        const blockers = [
+          toX - direction * 86,                    // parked by the walk clamp
+          toX - direction * 172,                   // Codex's round-3 case
+          (fromX + toX) / 2,                       // mid-field
+          fromX + direction * 86,                  // Codex's round-4 case: in front of the archer
+          landingX - direction * 200               // just outside the landing's end room
+        ];
+        for (const blockerX of blockers) {
+          const bodies = [{ x: blockerX, y: targetY, yscale: blockerYscale }];
+          const reach = SS2_FIGURE_HALF_WIDTH * blockerYscale / 100;
+          const edges = [
+            blockerX - reach, blockerX + reach, blockerX - reach * 1.05, blockerX + reach * 1.05,
+            launchX + direction * 140, landingX - direction * 140
+          ];
+          for (const sequence of [0, 5, 10]) {
+            const shot = (with_) => projectileFlight({
+              kind: "bombard", from: { x: fromX, y: yOf(shooterRank) }, to: { x: toX, y: targetY }, sequence,
+              targetSize: surface, shooterYscale: 86, targetYscale: 86, bodies: with_
+            });
+            const flight = shot(bodies);
+            const bound = continuityBound(shot([]), view);
+            const samples = lobSamples(flight, view, { step: 4, edges });
+            for (let index = 1; index < samples.length; index += 1) {
+              const dx = Math.abs(samples[index].x - samples[index - 1].x);
+              const dy = Math.abs(samples[index].lift - samples[index - 1].lift);
+              assert.ok(dy <= bound * dx + 1e-9,
+                `${fromX}..${toX} ranks ${shooterRank}->${targetRank}, a ${blockerYscale} at ${blockerX}, v${flight.xVelocity}: ` +
+                `a step of ${dy.toFixed(3)} over ${dx.toFixed(4)} at x ${samples[index].x.toFixed(3)} (bound ${bound.toFixed(2)}/unit)`);
+              steps += 1;
+            }
+            flights += 1;
+          }
+        }
+      }
+    }
+  }
+  assert.equal(flights, 6 * 3 * 2 * 5 * 3, "every flight the sweep names was drawn");
+  assert.ok(steps > flights * 100, `and densely: ${steps} steps`);
+});
+
+test("A RAISED LOB STAYS ON THE STAGE WHEREVER ITS UNRAISED ARC DID — the cap, through the stage camera", () => {
+  // ► `LOB_PEAK_PER_LENGTH`: `k` may raise the bulge to a quarter of the
+  //   flight's length. The camera fits the fight's spread into the 640x420
+  //   stage, so its headroom grows with the distance. Blockers placed just
+  //   outside either end room make `k` work hardest (measured up to 3.81 at the
+  //   walls, under a cap of 4.12). The claim is the cap's own: raising the lob
+  //   never lifts its highest point off the top of the stage when the unraised
+  //   arc stayed on it. (The UNRAISED arc of a strength-50 archer already peaks
+  //   above a zoom-80 stage — one launch height over his 256-unit launch — which
+  //   is the normalised arc's, not this construction's.)
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  let checked = 0;
+  for (const [fromX, toX] of [[-250, 250], [-1500, 1500], [-2100, 2100], [2100, -2100]]) {
+    const direction = toX > fromX ? 1 : -1;
+    const landingX = toX - direction * SS2_FIGURE_HALF_WIDTH * 0.86;
+    const launchX = fromX + direction * 30;
+    const wide = SS2_FIGURE_HALF_WIDTH * 1.13 * 1.05;
+    for (const blockerX of [landingX - direction * (141 + wide), launchX + direction * (141 + wide), (fromX + toX) / 2]) {
+      for (const shooterYscale of [80, 113]) for (let sequence = 0; sequence <= 10; sequence += 1) {
+        const shot = (bodies) => projectileFlight({
+          kind: "bombard", from: { x: fromX, y: 200 }, to: { x: toX, y: 200 }, sequence,
+          targetSize: SS2_FIGURE_HALF_WIDTH * 0.86, shooterYscale, targetYscale: 86, bodies
+        });
+        const actors = [{ x: fromX, side: "hero" }, { x: toX, side: "villain" }, { x: blockerX, side: "hero" }];
+        let camera = cameraFor(actors);
+        for (let frame = 0; frame < 60; frame += 1) camera = cameraStep(camera, actors);
+        const stage = stageProjectorFor(camera, stageFitFor({ width: 640, height: 420 }));
+        const top = (flight) => Math.min(...lobSamples(flight, view, { step: 8 }).map((point) => stage.toY(point.y, point.lift)));
+        const raised = top(shot([{ x: blockerX, y: 200, yscale: 113 }]));
+        const unraised = top(shot([]));
+        assert.ok(raised >= 0 || raised >= unraised - 1e-6,
+          `${fromX}..${toX}, a 113 at ${blockerX.toFixed(0)}, archer ${shooterYscale}, sequence ${sequence}: ` +
+          `the raised lob tops out at stage y ${raised.toFixed(1)}, the unraised at ${unraised.toFixed(1)}`);
+        checked += 1;
+      }
+    }
+  }
+  assert.equal(checked, 4 * 3 * 2 * 11);
+});
+
+test("the FITTED view still frames a whole gladiator when its height bound is the one that binds", () => {
+  // ► The fallback bowl (no extracted arena) fits the roster with
+  //   `viewportFor`, whose vertical bound was `height / 250` for a figure "about
+  //   150 arena units tall". At the build's 222.65 that bound put a front-rank
+  //   crown ABOVE the canvas on a wide, short one. The shell's own mapping,
+  //   `viewport()` in `tools/arena/main.js`, stands the front rank's feet at
+  //   `horizon + (height - horizon) * 0.62`.
+  const width = 4000;
+  const height = 600;
+  const fitted = viewportFor({
+    width, height, frontY: 200,
+    actors: [{ x: -250, y: 200, placed: true }, { x: 250, y: 200, placed: true }]
+  });
+  assert.ok(fitted.scale < width / ((250 + 200) * 2), "the width is not what binds on this canvas");
+  const feet = fitted.horizon + (height - fitted.horizon) * 0.62;
+  const crown = feet - 222.65 * fitted.scale;
+  assert.ok(crown > 0, `a size-1 gladiator's crown is on the canvas: y ${crown.toFixed(1)}`);
+  assert.ok(crown > height * 0.1, "with the headroom the old bound gave the old figure");
 });
 
 test("the demo override reaches the painter's own loadout shape, both slots intact", () => {

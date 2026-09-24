@@ -29,6 +29,8 @@ import {
   weaponEnchantmentFor
 } from "../src/render/extracted-figure.js";
 import { SHADOW_RADIUS_PER_SIGMA, canvasFilterFor } from "../src/render/filters.js";
+import { figureScaleFor } from "../src/render/figure.js";
+import { SS2_FIGURE_HEIGHT } from "../src/render/painter.js";
 import { UNMAPPED_CLIP_LABELS, allUnmappedLabels, clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
 import { ATTACHMENTS, attachmentsFor, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
 import nodeFs from "node:fs";
@@ -179,17 +181,77 @@ test("the LAST pose is reachable and the wrap is not", () => {
   assert.equal(poseIndexAt(0, 0.5), 0);
 });
 
+/** The highest point any operation reaches, in the arena units its own matrix maps into. */
+function headTopOf(ops) {
+  let top = -Infinity;
+  for (const op of ops) {
+    const numbers = (op.d.match(/-?\d+(?:\.\d+)?(?:e-?\d+)?/gi) ?? []).map(Number);
+    for (let index = 0; index + 1 < numbers.length; index += 2) {
+      top = Math.max(top, op.matrix[1] * numbers[index] + op.matrix[3] * numbers[index + 1] + op.matrix[5]);
+    }
+  }
+  return top;
+}
+
+test("A STANDING FIGURE IS DRAWN AT THE BUILD'S OWN SIZE: its clip height times `physical_size`, and nothing else", () => {
+  // ► **THE BUILD, root frame 221 (`root/frame:221/DoAction@0x671acd`):**
+  //
+  //     arena_hero    = arena.gladiators.attachMovie("hero_battle", "hero",    301)   +0x051d
+  //     arena_villain = arena.gladiators.attachMovie("hero_battle", "villain", 300)   +0x0546
+  //     arena_hero._xscale = arena_hero._yscale = 80 + round(strength / 1.5)          +0x061e-+0x06a1
+  //
+  //   `hero_battle` is character 1241, the clip `tools/extract-figure.mjs` cuts
+  //   this pack from, and `arena.gladiators` is the object whose units ARE this
+  //   engine's arena units (the fighters stand in it at `_x` ±250, `_y` 200).
+  //   No other scale is written on a fighter before the fight — its own frame
+  //   scripts write none. So ONE CLIP PIXEL IS ONE ARENA UNIT at `_yscale` 100,
+  //   and `physical_size` is the whole of the size. The shell composes that half
+  //   through `figureScaleFor`; this module's half must be exactly 1.
+  //
+  //   ~~150 arena units per standing clip, times a vitality multiplier~~ is what
+  //   this drew until 2026-09-23 — 64.7% of the build's size for the demo
+  //   roster. Both numbers were the AUTHORED figure's (`painter.js`), carried
+  //   over when the extracted rig arrived and never measured against the build.
+  //
+  // Strength 9 is `physical_size` 86: 80 + round(9 / 1.5) = 80 + 6.
+  const size = figureScaleFor({ yscale: 86, rank: 0 });
+
+  // A synthetic clip 100 pixels tall: its head must stand 86 arena units up.
+  const tall = figurePackFrom(SHAPES, {
+    standing: {
+      label: "Standing", firstFrame: 1, lastFrame: 1,
+      bounds: { xMin: 0, xMax: 1, yMin: -100, yMax: 0 },
+      poses: [[{ shape: 1, limb: "torso", depth: [23], matrix: [1, 0, 0, 100, 0, -2000] }]]
+    }
+  });
+  const synthetic = headTopOf(paintExtractedFigure(tall, { family: "standing", label: "Standing", at: 0 })) * size;
+  assert.ok(Math.abs(synthetic - 86) < 1, `a 100-pixel clip at physical_size 86 stands 86 units tall, drawn ${synthetic}`);
+
+  // The real clip: `standing` is 222.65 pixels from the soles to the crown.
+  if (!REAL_SHAPES || !REAL_ANIMATIONS) return;
+  const pack = figurePackFrom(REAL_SHAPES, REAL_ANIMATIONS);
+  assert.equal(pack.clipHeight, 222.65, "the quoted clip height is the pack's own");
+  // And the one place the source names it — the height the AUTHORED fallback
+  // stands at, so both renderers crown in one place — is that same number.
+  assert.equal(SS2_FIGURE_HEIGHT, pack.clipHeight, "`SS2_FIGURE_HEIGHT` is this pack's standing clip");
+  const real = headTopOf(paintExtractedFigure(pack, { family: "standing", label: "Standing", at: 0 })) * size;
+  assert.ok(Math.abs(real - 222.65 * 0.86) < 1,
+    `the build draws this gladiator ${(222.65 * 0.86).toFixed(2)} arena units tall; the arena drew ${real.toFixed(2)}`);
+});
+
 test("clip space becomes arena space: y FLIPS, twips become pixels, feet land on the ground", () => {
-  // The datum: `standing` is 100 clip pixels tall, so a 150-unit gladiator is
-  // scaled by 1.5. Its feet are at clip y 0 and its head at clip y -100.
+  // `standing` is 100 clip pixels tall with its feet at clip y 0 and its head
+  // at clip y -100. One clip pixel is one arena unit — the build's own scale,
+  // see the test above — so the only change of size is the flip.
+  // ~~`150 / 100`: "a 150-unit gladiator is scaled by 1.5"~~ — the authored
+  // figure's height, which this asserted until 2026-09-23 (f was 75).
   const pack = packOf();
   const [op] = paintExtractedFigure(pack, { family: "standing", label: "Standing", at: 0, height: 1 });
   assert.equal(op.kind, "path");
   const [a, b, c, d, e, f] = op.matrix;
 
-  const scale = 150 / 100;
-  assert.equal(a, scale, "x scales by the arena-height ratio");
-  assert.equal(d, -scale, "and y is NEGATED, because arena y runs UP and clip y runs DOWN");
+  assert.equal(a, 1, "x is one arena unit per clip pixel");
+  assert.equal(d, -1, "and y is NEGATED, because arena y runs UP and clip y runs DOWN");
   assert.equal(b, 0);
   assert.equal(c, 0);
 
@@ -197,8 +259,8 @@ test("clip space becomes arena space: y FLIPS, twips become pixels, feet land on
   // this synthetic pack the midline is exactly 0, so it stays 0.
   assert.equal(e, 0);
   // ty -1000 twips is clip y -50, fifty pixels ABOVE the feet, so in arena
-  // units it is +50 * 1.5 UP from the ground.
-  assert.equal(f, 75);
+  // units it is 50 UP from the ground.
+  assert.equal(f, 50);
 });
 
 test("a limb at the ground datum lands at arena y ZERO, not wherever the clip's origin is", () => {
@@ -533,7 +595,9 @@ test("the shield's 50-twip offset moves it, and moves it on the LIMB's axis", ()
   // Both hang off Rlowerarm at [1,0,0,1,200,-1400]; only the shield is offset.
   assert.equal(shield.limb, "Rlowerarm");
   assert.equal(gauntlet.limb, "Rlowerarm");
-  const scale = 150 / 100;
+  // One arena unit per clip pixel (the build's; `150 / 100` until 2026-09-23,
+  // the authored figure's height over this 100-pixel clip).
+  const scale = 1;
   // ► **THIS ASSERTED 2.5 AND THAT WAS THE BUG.** `attachMovie`'s init object
   //   sets `_x`/`_y`, which are ActionScript MovieClip properties in local
   //   PIXELS; the matrices are in TWIPS. Adding them directly was a factor of
@@ -1096,7 +1160,9 @@ test("the filter's SCALE composes the clip-to-arena factor, which only this modu
   };
   const base = radius({});
   assert.ok(base > 0);
-  // The pack is 100 clip pixels tall and UNIT is 150, so height 1 is 1.5.
+  // One arena unit per clip pixel, so height 1 is a clip-to-arena factor of 1.
+  // ~~"The pack is 100 clip pixels tall and UNIT is 150, so height 1 is 1.5"~~
+  // — the authored figure's height, fitted to the clip, until 2026-09-23.
   // `canvasFilterFor` prints at most four decimals, so the comparison is made
   // at the precision the STRING actually carries rather than at float exactness.
   // ► **`SHADOW_RADIUS_PER_SIGMA`, NOT 2 — it halved on 2026-09-15.** This read
@@ -1106,7 +1172,7 @@ test("the filter's SCALE composes the clip-to-arena factor, which only this modu
   //   this test is actually about — that the clip-to-arena factor and the
   //   canvas scale both reach the radius — is untouched, and the three
   //   assertions below it are the ones carrying that.
-  assert.equal(base, Math.round(SHADOW_RADIUS_PER_SIGMA * blurSigmaOf(22) * 1.5 * 10000) / 10000);
+  assert.equal(base, Math.round(SHADOW_RADIUS_PER_SIGMA * blurSigmaOf(22) * 1 * 10000) / 10000);
   // Tolerance 1e-3 and not 1e-9: the string carries four decimals, so doubling
   // a printed radius cannot be exact and asserting that it is would be pinning
   // the formatter rather than the arithmetic.

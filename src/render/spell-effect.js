@@ -26,10 +26,14 @@
  *
  * - **WHERE: the victim's own x, and `_y` 50** in `arena.gladiators`, the
  *   object both fighters are attached to at `_y` 200. The bolt's origin is
- *   therefore **150 arena units above the victim's**, which is exactly one
- *   figure height. The build is 1v1 and its victim always stands at 200; above
- *   1v1 this keeps the 150 and puts it over the victim's own rank, which is
- *   the one authored step here and is named at `liftFor`.
+ *   therefore **150 arena units above the victim's** — about two thirds of the
+ *   way up the build's gladiator (its 222.65-pixel clip at `physical_size`,
+ *   191.5 units at strength 9). ~~"which is exactly one figure height"~~ was
+ *   true only of the AUTHORED 150-unit figure the arena drew until 2026-09-23;
+ *   the 150 itself was always the build's and does not move. The build is 1v1
+ *   and its victim always stands at 200; above 1v1 this keeps the 150 and puts
+ *   it over the victim's own rank, which is the one authored step here and is
+ *   named at `liftFor`.
  * - **WHICH: the frame the resolver chose**, 1 for a lightning bolt and 2 for a
  *   frightning one (`SS2_BOLT_SPELLS[...].boltFrame`), carried on the command.
  * - **HOW LONG: until the victim's `lightning` clip ends — VERIFIED
@@ -65,8 +69,9 @@ const BOLT_ATTACH_Y = 50;
 /**
  * `_y` both vanilla fighters are constructed at in that same object — map,
  * "Battle entry" step 5, and `SS2_ARENA.frontY`. Restated rather than imported,
- * as `projectile.js` restates its figure height: this module does not import
- * the rule set.
+ * as `projectile.js` restates the build's launch formulas (~~"its figure
+ * height"~~, which it no longer holds): this module does not import the rule
+ * set.
  */
 const FIGHTER_Y = 200;
 /** The build's frame rate, which is the child's clock. */
@@ -75,12 +80,17 @@ const FRAMES_PER_SECOND = 30;
 /**
  * The height, in arena units, a spell effect is drawn above its victim.
  *
- * ► **150, AND IT IS ONE FIGURE HEIGHT EXACTLY.** The build's two literals,
- *   `_y` 50 for the bolt and 200 for the fighters, both in `arena.gladiators`.
- * ► **THE ONE AUTHORED STEP IN THIS FILE.** The build is 1v1 and its victim
- *   always stands at 200. Above 1v1 a victim can stand in another rank, and
- *   this keeps the 150 over the victim's OWN depth rather than pinning the bolt
- *   to the front rank's sky, where it would strike nobody.
+ * ► **150, THE BUILD'S TWO LITERALS**, `_y` 50 for the bolt and 200 for the
+ *   fighters, both in `arena.gladiators`. ~~"AND IT IS ONE FIGURE HEIGHT
+ *   EXACTLY"~~ — of the authored figure, not the build's (see the header); the
+ *   number is unaffected, and nothing here reads a figure height.
+ * ► ~~**THE ONE AUTHORED STEP IN THIS FILE.**~~ **ONE OF TWO.** The build is
+ *   1v1 and its victim always stands at 200. Above 1v1 a victim can stand in
+ *   another rank, and this keeps the 150 over the victim's OWN depth rather
+ *   than pinning the bolt to the front rank's sky, where it would strike
+ *   nobody. The second (2026-09-23): `spellEffectDrawAt` and `boulderDrawAt`
+ *   multiply the lift by that rank's depth scale, the scale the victim and the
+ *   art are both drawn at, so the strike still ends at a back-rank victim's feet.
  */
 function liftFor() {
   return FIGHTER_Y - BOLT_ATTACH_Y;
@@ -123,7 +133,12 @@ export function spellEffectDrawAt(
   return Object.freeze({
     x: record?.x,
     y: depth,
-    lift: liftFor(),
+    // ► **AT THE VICTIM'S RANK SCALE, since 2026-09-23** — the scale its art is
+    //   drawn at and its victim is drawn at. ~~`liftFor()` alone~~ ended the
+    //   strike above a back-rank victim's feet. The 150 is the build's; the
+    //   depth scale is ours (the build has one rank), and it is the arrow's
+    //   rule (`drawnLiftAt` in `projectile.js`).
+    lift: liftFor() * size,
     rotation: 0,
     size,
     // Zero-based, like `arrowTrailOpsFor`'s age: a duration, not an index.
@@ -192,7 +207,8 @@ export function boulderDrawAt(
   }
   const depth = Number.isFinite(record?.y) ? record.y : frontY;
   const scale = Number.isFinite(fall.scale) ? fall.scale / 100 : 1;
-  const size = figureScaleFor({ yscale: 100, rank: rankOfDepth(depth, 0, { frontY, rankStride }), slotIndex: 0 }) * scale;
+  const depthScale = figureScaleFor({ yscale: 100, rank: rankOfDepth(depth, 0, { frontY, rankStride }), slotIndex: 0 });
+  const size = depthScale * scale;
   const elapsed = Number.isFinite(elapsedMs) ? Math.max(0, elapsedMs) : 0;
   const frame = Math.floor((elapsed * FRAMES_PER_SECOND) / 1000);
   const steps = Math.min(frame, fall.landingFrame);
@@ -205,7 +221,9 @@ export function boulderDrawAt(
   return Object.freeze({
     x: record.x,
     y: depth,
-    lift: FIGHTER_Y - buildY,
+    // The build's `_y`, at the victim's rank scale — the bolt's rule, above.
+    // NOT times the rock's own `scale`: that sizes its art, not where it is.
+    lift: (FIGHTER_Y - buildY) * depthScale,
     rotation: 0,
     size,
     stage: done ? "gone" : landed ? "landed" : "falling",

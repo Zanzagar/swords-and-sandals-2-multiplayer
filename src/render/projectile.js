@@ -32,12 +32,16 @@
  *
  * **The build's, verbatim**: `gravity` 2; `Yvelocity = ceil(distance /
  * Xvelocity)`; the arc on bombard ONLY; a flat 60 for snipe; the trail every
- * third frame; the `± 30` launch offset; and snipe being loosed LOWER than
- * bombard.
+ * third frame; the `± 30` launch offset; and the launch HEIGHTS, `_yscale * 2 +
+ * 30` and `_yscale * 1.5 + 5` arena units over the shooter's feet (since
+ * 2026-09-23 — see `launchLiftFor`).
  *
  * **Ours, and each says why below**: the bombard velocity's SOURCE (the build
- * draws it; a renderer here may not), and the launch heights in arena units
- * rather than the build's screen pixels.
+ * draws it; a renderer here may not), and the arc's peak, normalised to one
+ * launch height. ~~"the launch heights in arena units rather than the build's
+ * screen pixels"~~ — the build's were arena units all along, and the port of
+ * their RATIO onto the authored 150-unit figure launched every arrow at two
+ * thirds of the build's height.
  *
  * ► **THE SCALE TABLE IS DELIBERATELY NOT PORTED, and that is a finding rather
  *   than an omission.** The build bands `Xvelocity` and the arrow's own
@@ -50,6 +54,8 @@
  *   answering a question nobody asked. The nominal band — `maxscale == 80`,
  *   where the build leaves the scale at 100 — is the one taken.
  */
+
+import { SS2_FIGURE_HALF_WIDTH, SS2_FIGURE_HEIGHT } from "../common/ss2-figure.js";
 
 export class ProjectileError extends Error {
   constructor(message) {
@@ -100,44 +106,329 @@ export const SS2_PROJECTILE = Object.freeze({
   /** `bullet._x = attacker._x ± 30` (`+0x6dff` / `+0x6e23`). */
   launchOffsetX: 30,
   /**
-   * HOW HIGH THE ARROW STARTS, as a fraction of the figure's own height.
+   * HOW HIGH THE ARROW STARTS, in BOMBARD LAUNCH HEIGHTS: 1 is where the
+   * shooter's bombard leaves, and `flight.liftPerHeight` turns it into arena
+   * units (see `launchLiftFor`).
    *
-   * ► **THE BUILD'S NUMBERS ARE SCREEN PIXELS AND ARE NOT PORTED AS NUMBERS —
-   *   the RATIO between them is what survives, and this project has already
-   *   paid once for the other choice.** The shield attach offset was added to
-   *   twips when it was in ActionScript pixels, and the shield drew twenty
-   *   times too close (2026-09-13). The build's launch heights are
-   *   `_yscale * 2 + 30` for a bombard (`+0x6e42`) and `_yscale * 1.5 + 5` for
-   *   a snipe (`+0x6e9e`), which at the nominal `_yscale` of 100 are 230 and
-   *   155 screen pixels above the clip's registration point.
+   * ► ~~**THE BUILD'S NUMBERS ARE SCREEN PIXELS AND ARE NOT PORTED AS NUMBERS
+   *   — the RATIO between them is what survives**~~ — **WRONG, corrected
+   *   2026-09-23: they ARE arena units, and are now ported as numbers.** The
+   *   bullet is attached to `arena.gladiators` (`+0x6da2`), the same object
+   *   both fighters are attached to at `_x` ±250, `_y` 200 — which is where
+   *   this engine's arena units come from — and it is placed relative to the
+   *   shooter's own `_y`. So `_yscale * 2 + 30` for a bombard (`+0x6e42`) and
+   *   `_yscale * 1.5 + 5` for a snipe (`+0x6e9e`) are arena units above the
+   *   shooter's feet: 230 and 155 at `_yscale` 100. The shield lesson (twips
+   *   against pixels, 2026-09-13) was about two spaces that differ; these two
+   *   are one. Porting only the ratio and anchoring it at the AUTHORED
+   *   figure's 150 units is what launched every arrow at two thirds of the
+   *   build's height, below the head of the gladiator actually drawn.
    *
-   *   What is DERIVED and unit-free is that **a snipe is loosed lower**, by
-   *   `155 / 230`. So the bombard is anchored at the figure's own head height
-   *   here and the snipe at that fraction of it, which reproduces the
-   *   relationship the build actually expresses — a lobbed shot leaves high, a
-   *   flat one leaves from the shoulder — without pretending two coordinate
-   *   systems share a unit.
+   * **A snipe is still loosed lower** — `155 / 230` at `_yscale` 100, which is
+   * what these two keep saying for any caller that reads them as a ratio.
    */
   bombardLaunchHeight: 1,
-  snipeLaunchHeightRatio: 155 / 230
+  snipeLaunchHeightRatio: 155 / 230,
+  /** `attacker._yscale * 2 + 30` (`+0x6e42`-`+0x6e76`): a bombard's launch, arena units over the feet. */
+  bombardLaunch: Object.freeze({ perYscale: 2, plus: 30 }),
+  /** `attacker._yscale * 1.5 + 5` (`+0x6e9e`-`+0x6ed6`): a snipe's, and the fireball's (`+0x9301`). */
+  snipeLaunch: Object.freeze({ perYscale: 1.5, plus: 5 }),
+  /**
+   * The `_yscale` taken when a caller states none: the fighter clip's own,
+   * unscaled — the same "absent draws nominal" rule `figureScaleFor` keeps.
+   */
+  nominalYscale: 100
 });
 
 /**
- * The arena height of a gladiator at scale 1, so a height in FIGURE HEIGHTS can
- * be compared with an x in ARENA UNITS.
+ * A launch, in ARENA UNITS above the shooter's feet, for a shooter drawn at
+ * `yscale` — the build's own formula, term for term.
  *
- * Duplicated as a named constant rather than imported, exactly as
- * `src/render/extracted-figure.js` duplicates `painter.js`'s own `UNIT` and for
- * the stated reason: the three answer to the same authored figure, and a silent
- * divergence shows up as the arrow pitching at an angle the gladiator it was
- * loosed from does not agree with.
+ * ► **IT REPLACES `ARENA_UNITS_PER_FIGURE_HEIGHT = 150`** (until 2026-09-23),
+ *   "the arena height of a gladiator at scale 1", duplicated from `painter.js`'s
+ *   AUTHORED figure. The build's gladiator is its 222.65-pixel clip drawn 1:1
+ *   and scaled by `physical_size` (`ARENA_UNITS_PER_CLIP_PIXEL` in
+ *   `extracted-figure.js`), and the build's arrow leaves just over ITS crown:
+ *   at strength 9, 202 units up against a 191.5-unit figure. At 150 it left
+ *   26 units over the 124-unit figure the arena was drawing — and that figure
+ *   was itself two thirds of the build's size.
  *
- * **It exists because mixing the two units is a real defect and the first
- * version of `rotationAt` had it** — normalising the horizontal by `distance`
- * while the vertical was in figure heights put the launch pitch at 76 degrees,
- * near vertical, for a shot that is plainly a lob.
+ * **It exists because mixing units is a real defect and the first version of
+ * `rotationAt` had it** — normalising the horizontal by `distance` while the
+ * vertical was in figure heights put the launch pitch at 76 degrees, near
+ * vertical, for a shot that is plainly a lob. That reason survives the change:
+ * a height is converted to arena units HERE and nowhere else.
  */
-const ARENA_UNITS_PER_FIGURE_HEIGHT = 150;
+export function launchLiftFor(kind, yscale) {
+  // `_yscale` is a percentage and only its magnitude sizes the clip; absent or
+  // zero is the nominal clip, as `figureScaleFor` reads it.
+  const size = yscaleOf(yscale);
+  const { perYscale, plus } = kind === ProjectileKind.BOMBARD ? SS2_PROJECTILE.bombardLaunch : SS2_PROJECTILE.snipeLaunch;
+  return size * perYscale + plus;
+}
+
+/** A flight's arena units per unit of `height`, or the nominal shooter's. */
+function liftPerHeightOf(flight) {
+  return Number.isFinite(flight?.liftPerHeight) && flight.liftPerHeight > 0
+    ? flight.liftPerHeight
+    : launchLiftFor(ProjectileKind.BOMBARD, null);
+}
+
+/**
+ * THE DRAWN LIFT — the flight's own height, put on the two BODIES THE ARENA
+ * DRAWS, at their ranks. Arena units, for a surface's `toY`.
+ *
+ * ► **FOUND BY A CODEX REVIEW AND REPRODUCED BEFORE THIS WAS WRITTEN
+ *   (2026-09-23).** The lift was `height * liftPerHeight` and nothing else: the
+ *   arc's end in the SHOOTER's units, with none of the depth scale every body
+ *   is drawn at. A strength-9 bombard over 500 units ended 186.46 up against a
+ *   rank-2 crown of 179.99; over 3000 units, 199.79 against a front-rank
+ *   crown of 191.48. A resolved hit ended over its victim's head.
+ *
+ * WHICH PART IS WHOSE:
+ *
+ * - **The build's**: the LAUNCH, `_yscale * 2 + 30` or `* 1.5 + 5` in the
+ *   shooter's own units (`launchLiftFor`), and the flight ENDING AT THE
+ *   DEFENDER — its end test (`+0x6c97`-`+0x6d24`) is `bullet._x` passing
+ *   `defender._x` along the shooter's facing, or `bullet._y > 160` (the
+ *   ground), then `checkattackroll` and `removeMovieClip`. **The build checks
+ *   NO height there — it is not a `hitTest`** (a brief for this change said it
+ *   was; the bytes say otherwise). Its arrow meets the defender at whatever
+ *   height the arc has reached.
+ * - **Ours**: WHERE ON THE DEFENDER. The flight ends on the target's own
+ *   shoulder by the build's own shoulder formula, `_yscale * 1.5 + 5` in the
+ *   TARGET's units, which is on the body for every `_yscale` this game reaches
+ *   (0.69-0.70 of its height). A snipe between two gladiators the same size in
+ *   the same rank therefore stays exactly flat, as the build's does. The
+ *   difference from the shooter's own height is spread linearly over the
+ *   flight, so the build's launch is kept and only the end moves.
+ * - ► **FLAT SHOTS ONLY — a snipe and a fireball.** ~~The lob went through here
+ *   too~~ until a second Codex finding the same day: spreading its correction
+ *   over the whole flight pulled it under bystanders' crowns long before the
+ *   target. A lob is drawn by `lobLiftAt`, which says what it keeps instead.
+ * - **Ours, and the build has nothing to be faithful to**: the DEPTH scale.
+ *   Vanilla has one rank. Here each point is drawn at the scale of the rank the
+ *   arrow is passing through — the same `size` its art is drawn at — so it
+ *   leaves at the shooter's drawn head and lands at the target's drawn
+ *   shoulder at their ranks.
+ *
+ * @param {object} flight  from `projectileFlight` or `fireballFlight`
+ * @param {number} height  the point's height, in the flight's own units
+ * @param {number} progress 0 at the launch, 1 at the end
+ * @param {number} size     the depth scale at this point
+ * @param {number} endHeight the flight's own height at its end
+ * @param {number} endSize  the depth scale at the end — the target's rank
+ */
+function drawnLiftAt(flight, height, progress, size, endHeight, endSize) {
+  const perHeight = liftPerHeightOf(flight);
+  const p = Math.min(1, Math.max(0, Number.isFinite(progress) ? progress : 0));
+  return height * perHeight * size + p * (shoulderOf(flight) * endSize - endHeight * perHeight * endSize);
+}
+
+/** The target's shoulder in its own units, before its rank's depth scale. */
+function shoulderOf(flight) {
+  return Number.isFinite(flight?.impact?.lift) ? flight.impact.lift : launchLiftFor(ProjectileKind.SNIPE, null);
+}
+
+/**
+ * How far over a body's crown a drawn lob is required to stay, and how far
+ * either side of its drawn body that requirement reaches: 5% each. Authored —
+ * the build looses a bombard 202 units up over a strength-9 archer's
+ * 191.5-unit crown, 5.5% over his own head, and the drawing keeps about that.
+ */
+const LOB_CROWN_MARGIN = 0.05;
+const LOB_FOOTPRINT_MARGIN = 0.05;
+
+/**
+ * THE CAP ON HOW MUCH A LOB MAY BE RAISED: its bulge may peak at a quarter of
+ * the flight's length, never less than its own. Authored, and the reason is
+ * the STAGE: the camera fits the fight's spread into 640 stage pixels, so the
+ * headroom it shows grows with the distance, and at a quarter of the length a
+ * raised lob's peak stays on the stage from the default pair to the walls —
+ * `test/render-arena-shell.test.js` projects it through the stage camera and
+ * says so. Without a cap a body at the very end of a flight would need an
+ * unbounded raise.
+ */
+const LOB_PEAK_PER_LENGTH = 0.25;
+
+/**
+ * THE ROOM AT EITHER END OF A LOB IN WHICH IT CANNOT PROMISE TO CLEAR A BODY:
+ * 140 arena units. DERIVED, not chosen: near an end the capped bulge rises at
+ * most one unit per unit of x (a parabola peaking at a quarter of the length
+ * leaves at slope 1), and the most it must climb is the tallest blocker's
+ * clearance over the lowest landing — a strength-50 body (`_yscale` 113),
+ * `222.65 * 1.13 * 1.05` = 264.2, over a strength-0 target's shoulder, `80 *
+ * 1.5 + 5` = 125: 139.2. Beyond 140 units from both ends every body this game
+ * can field is cleared; within it, see `lobLiftAt`.
+ */
+const LOB_END_ROOM = 140;
+
+/**
+ * How high on the target a lob lands when a body stands in its approach: 95% of
+ * the target's crown, the top of its head, still on its body. See `lobLiftAt`.
+ */
+const LOB_RAISED_LANDING = 0.95;
+
+/**
+ * THE DRAWN LOB — `chord + k * bulge`, one scalar `k` per flight, so the path
+ * is exactly as smooth as the shooter's own arc. Arena units, for `toY`.
+ *
+ * ► **THREE CODEX FINDINGS ON ONE DAY, EACH REPRODUCED BEFORE IT WAS FIXED
+ *   (2026-09-23).** (1) The lob's end correction was spread over the whole
+ *   flight and pulled it under bystanders' crowns 172 units short of the
+ *   target. (2) The fix for that took the MAX of the arc and a clearance floor
+ *   that existed only directly over a body, so the arrow JUMPED at every
+ *   footprint edge: a strength-50 bystander at x 86 in front of a strength-9
+ *   archer at 0 shooting at 1000 gave 203.28 at x 31.53865 and 264.17 at
+ *   31.54065 — 60.89 units in 0.002. (3) This construction, which cannot jump.
+ *
+ * ## THE CONSTRUCTION
+ *
+ * With `s` the arrow's progress in x, 0 at the launch and 1 at the landing:
+ *
+ * - **the chord** runs straight from the launch to the landing;
+ * - **the bulge** is the SHOOTER's own arc's excess over ITS OWN chord — zero
+ *   at both ends, so the landing is exact whatever `k` is (the arc's excess
+ *   over the launch-to-landing chord would not vanish at the landing);
+ * - **`k`** is the smallest value `>= 1` for which every body in the way, its
+ *   footprint widened by `LOB_FOOTPRINT_MARGIN`, is cleared by
+ *   `LOB_CROWN_MARGIN` — evaluated over the whole footprint outside the end
+ *   rooms — and never more than the cap (`LOB_PEAK_PER_LENGTH`).
+ *
+ * Every term is continuous in `s` and `k` is fixed for the flight, so there is
+ * nothing to jump. With nobody in the way `k` is 1 and the lob is the
+ * shooter's arc bent linearly onto the target's shoulder.
+ *
+ * ## THE ENDS, which no bounded `k` can reach
+ *
+ * Within `LOB_END_ROOM` of either end the bulge is too small for any capped
+ * `k` to clear a tall body, and the two ends are treated differently:
+ *
+ * - **At the landing, THE LANDING RISES.** If a body in the target's rank
+ *   stands within the end room, the lob lands at `LOB_RAISED_LANDING` of the
+ *   target's crown — its head — instead of its shoulder. Chosen over simply
+ *   accepting the overlap because the case is COMMON, not rare: the walk clamp
+ *   parks the shooter's own front-liner `physical_size` in front of the target,
+ *   ~3 units from its drawn front, and a lob landing on the shoulder would come
+ *   down through that ally's back on nearly every team-fight bombard — the
+ *   "shooting its own teammate" picture the owner already reported once
+ *   (`stopShortFor`). Landing on the head keeps it on the target (the build's
+ *   end checks no height at all) and leaves only a graze of the ally's crown in
+ *   the last few units — measured between two strength-9 gladiators with the
+ *   ally at the clamp, the lob's lowest point over him is 187.6 at ±250, 182.9
+ *   at ±1500 and 182.6 at the walls, against his 191.5 crown: 3.9 to 8.9 units
+ *   into the top of his head, where a shoulder landing would go through his back.
+ * - **At the launch, THE OVERLAP IS ACCEPTED.** The launch is the build's own
+ *   formula and is not moved. A body standing within the end room in front of
+ *   the archer — taller than his launch height — is passed through as the lob
+ *   leaves, before it is high enough to clear him.
+ *
+ * WHICH PART IS WHOSE: the LAUNCH (`_yscale * 2 + 30`, the shooter's units)
+ * and the END AT THE DEFENDER (`bullet._x` passing `defender._x`, or `_y >
+ * 160`, `+0x6c97`-`+0x6d24`) are the build's. The arc's normalised peak, the
+ * chord, `k`, the cap, the end rooms and where on the target it lands are
+ * ours: the build has one defender and nobody in the way.
+ */
+function lobLiftAt(flight, point, deps) {
+  const shape = lobShapeFor(flight, deps);
+  return shape.liftAt(shape.progressAt(point.x));
+}
+
+/** Whether a body at depth `a` stands in the rank a point at depth `b` is passing. */
+function sameRank(a, b, halfStride) {
+  return !Number.isFinite(a) || !Number.isFinite(b) || Math.abs(a - b) <= halfStride;
+}
+
+/**
+ * A flight's lob, built ONCE per flight and drawing context and cached: `k`
+ * walks every body's footprint, and a surface asks for the lift every frame.
+ */
+const lobShapes = new WeakMap();
+
+function lobShapeFor(flight, deps) {
+  const { frontY, rankStride, figureScaleFor, rankOfDepth } = deps;
+  const cached = lobShapes.get(flight);
+  if (cached && cached.frontY === frontY && cached.rankStride === rankStride
+    && cached.figureScaleFor === figureScaleFor && cached.rankOfDepth === rankOfDepth) {
+    return cached.shape;
+  }
+  const sizeAt = (at) => figureScaleFor({ yscale: 100, rank: rankOfDepth(at, 0, { frontY, rankStride }), slotIndex: 0 });
+  const halfStride = Number.isFinite(rankStride) && rankStride > 0 ? rankStride / 2 : Infinity;
+  const direction = flight.direction;
+  const x0 = flight.launch.x;
+  const x1 = flight.impact.x;
+  const length = Math.abs(x1 - x0);
+  const y0 = Number.isFinite(flight.launch.y) ? flight.launch.y : frontY;
+  const y1 = Number.isFinite(flight.impact.y) ? flight.impact.y : frontY;
+  const sigma0 = sizeAt(y0);
+  const sigma1 = sizeAt(y1);
+  const perHeight = liftPerHeightOf(flight);
+  // The arc is sampled over the frames the arrow spends MOVING: x reaches the
+  // landing at `length / Xvelocity`, a little before `flightFrames`.
+  const travelFrames = flight.xVelocity > 0 ? length / flight.xVelocity : 0;
+  const heightAt = (s) => projectileAt(flight, s * travelFrames).height;
+  const h0 = heightAt(0);
+  const h1 = heightAt(1);
+  const bulgeAt = (s) => Math.max(0, (heightAt(s) - (h0 + s * (h1 - h0))) * perHeight);
+  const progressAt = (x) => (length > 0 ? Math.min(1, Math.max(0, (direction * (x - x0)) / length)) : 1);
+  const depthAt = (s) => y0 + s * (y1 - y0);
+  const scaleAt = (s) => sigma0 + s * (sigma1 - sigma0);
+  const fromLanding = (x) => -direction * (x - x1);
+  const fromLaunch = (x) => direction * (x - x0);
+
+  // The bodies in the way, with their widened drawn footprints and crowns.
+  const bodies = (flight.bodies ?? []).map((body) => {
+    const scale = (body.yscale / 100) * sizeAt(body.y);
+    return {
+      x: body.x,
+      y: body.y,
+      reach: SS2_FIGURE_HALF_WIDTH * scale * (1 + LOB_FOOTPRINT_MARGIN),
+      clearance: SS2_FIGURE_HEIGHT * scale * (1 + LOB_CROWN_MARGIN)
+    };
+  });
+
+  // The landing: the target's shoulder, raised to its head when somebody in
+  // its rank stands in the end room before it.
+  const crowded = bodies.some((body) => sameRank(body.y, y1, halfStride)
+    && fromLanding(body.x - direction * body.reach) > 0
+    && fromLanding(body.x + direction * body.reach) < LOB_END_ROOM);
+  const targetScale = (flight.impact.yscale ?? SS2_PROJECTILE.nominalYscale) / 100;
+  const landing = crowded
+    ? Math.max(shoulderOf(flight), LOB_RAISED_LANDING * SS2_FIGURE_HEIGHT * targetScale)
+    : shoulderOf(flight);
+  const launch = h0 * perHeight;
+  const chordAt = (s) => launch * sigma0 + s * (landing * sigma1 - launch * sigma0);
+
+  // `k`: the smallest raise that clears every footprint outside the end rooms,
+  // sampled a unit apart and at both edges.
+  const peak = bulgeAt(0.5) * scaleAt(0.5);
+  const cap = peak > 0 ? Math.max(1, (LOB_PEAK_PER_LENGTH * length) / peak) : 1;
+  let k = 1;
+  for (const body of bodies) {
+    const lo = body.x - body.reach;
+    const hi = body.x + body.reach;
+    const xs = [];
+    for (let x = lo; x < hi; x += 1) xs.push(x);
+    xs.push(hi);
+    for (const x of xs) {
+      if (fromLaunch(x) < LOB_END_ROOM || fromLanding(x) < LOB_END_ROOM) continue;
+      const s = progressAt(x);
+      if (!sameRank(body.y, depthAt(s), halfStride)) continue;
+      const room = bulgeAt(s) * scaleAt(s);
+      if (!(room > 0)) continue;
+      k = Math.max(k, (body.clearance - chordAt(s)) / room);
+    }
+  }
+  k = Math.min(k, cap);
+
+  const shape = Object.freeze({
+    k, cap, landing, crowded,
+    progressAt,
+    liftAt: (s) => chordAt(s) + k * bulgeAt(s) * scaleAt(s)
+  });
+  lobShapes.set(flight, { frontY, rankStride, figureScaleFor, rankOfDepth, shape });
+  return shape;
+}
 
 /**
  * The bombard's launch velocity, WITHOUT taking a sample.
@@ -210,9 +501,19 @@ export function bombardVelocityFor(sequence) {
  * @param {number} [shot.sequence]    the presentation stream's counter
  * @param {number} [shot.targetSize]  the target's `physical_size`, so the
  *   flight ends at its body rather than inside it
+ * @param {number} [shot.shooterYscale]  the SHOOTER's `_yscale` — its
+ *   `physical_size`, the place-clip's `yscale` — which the build's launch
+ *   height is written in terms of. Absent is the nominal 100.
+ * @param {number} [shot.targetYscale]  the TARGET's, which says where its
+ *   shoulder is: the drawn flight ends there (`drawnLiftAt`). Absent is 100.
+ * @param {Array<{x, y, yscale}>} [shot.bodies]  every OTHER living gladiator
+ *   standing when the shot is loosed — the bodies a drawn lob must pass over
+ *   (`lobLiftAt`). Absent is an empty arena.
  * @returns {object} frozen flight, or throws if the two ends are not placed
  */
-export function projectileFlight({ kind, from, to, sequence = 0, targetSize = 0 } = {}) {
+export function projectileFlight({
+  kind, from, to, sequence = 0, targetSize = 0, shooterYscale = null, targetYscale = null, bodies = []
+} = {}) {
   if (kind !== ProjectileKind.BOMBARD && kind !== ProjectileKind.SNIPE) {
     throw new ProjectileError(
       `A projectile is a ${ProjectileKind.BOMBARD} or a ${ProjectileKind.SNIPE}; got ${String(kind)}.`
@@ -259,9 +560,13 @@ export function projectileFlight({ kind, from, to, sequence = 0, targetSize = 0 
   //   (`bullet._y > 160`) and a snipe never can.
   const flightFrames = Math.max(1, Math.ceil(distance / xVelocity));
   const yVelocity = flightFrames;
+  // The unit every `height` is in: THIS shooter's bombard launch, in arena
+  // units. A snipe leaves at its own formula's share of it — `155 / 230` at the
+  // nominal `_yscale`, a shade less for a smaller gladiator (`134 / 202` at 86).
+  const liftPerHeight = launchLiftFor(ProjectileKind.BOMBARD, shooterYscale);
   const launchHeight = arc
     ? SS2_PROJECTILE.bombardLaunchHeight
-    : SS2_PROJECTILE.bombardLaunchHeight * SS2_PROJECTILE.snipeLaunchHeightRatio;
+    : launchLiftFor(ProjectileKind.SNIPE, shooterYscale) / liftPerHeight;
   return Object.freeze({
     kind,
     arc,
@@ -271,6 +576,8 @@ export function projectileFlight({ kind, from, to, sequence = 0, targetSize = 0 
     yVelocity,
     gravity: SS2_PROJECTILE.gravity,
     flightFrames,
+    /** Arena units per unit of `height` — this shooter's bombard launch. */
+    liftPerHeight,
     launch: Object.freeze({
       x: launchX,
       // Depth is the SHOOTER's at frame 0 and the target's at the end; see
@@ -283,9 +590,33 @@ export function projectileFlight({ kind, from, to, sequence = 0, targetSize = 0 
       // The SURFACE, not the centre. See `bodyStop` above.
       x: surfaceX,
       centreX: to.x,
-      y: Number.isFinite(to?.y) ? to.y : null
-    })
+      y: Number.isFinite(to?.y) ? to.y : null,
+      // The TARGET's shoulder, `_yscale * 1.5 + 5` in its own units, before its
+      // rank's depth scale: where the DRAWN flight ends. See `drawnLiftAt`.
+      lift: launchLiftFor(ProjectileKind.SNIPE, targetYscale),
+      // Its `_yscale`, which is its `physical_size`: the room the walk clamp
+      // keeps in front of it, and so a lob's default approach (`lobLiftAt`).
+      yscale: yscaleOf(targetYscale)
+    }),
+    bodies: bodiesFrom(bodies)
   });
+}
+
+/** A `_yscale` as a positive percentage, the nominal clip's when none is stated. */
+function yscaleOf(yscale) {
+  const stated = Number(yscale);
+  return Number.isFinite(stated) && stated !== 0 ? Math.abs(stated) : SS2_PROJECTILE.nominalYscale;
+}
+
+/** The other bodies a flight passes, frozen and normalised; malformed ones are dropped. */
+function bodiesFrom(bodies) {
+  return Object.freeze((Array.isArray(bodies) ? bodies : [])
+    .filter((body) => Number.isFinite(body?.x))
+    .map((body) => Object.freeze({
+      x: body.x,
+      y: Number.isFinite(body.y) ? body.y : null,
+      yscale: yscaleOf(body.yscale)
+    })));
 }
 
 /**
@@ -297,7 +628,9 @@ export function projectileFlight({ kind, from, to, sequence = 0, targetSize = 0 
  * `at` of exactly 1 is the END of an action, not a wrap.
  *
  * @returns {object} `{ x, y, height, rotation, progress }`. `y` is arena DEPTH
- *   and is null when neither end models any; `height` is in figure heights.
+ *   and is null when neither end models any; `height` is in BOMBARD LAUNCH
+ *   HEIGHTS (~~figure heights~~ until 2026-09-23), which `flight.liftPerHeight`
+ *   turns into arena units.
  */
 export function projectileAt(flight, frame) {
   if (!flight || !Number.isFinite(flight.flightFrames)) {
@@ -325,11 +658,15 @@ export function projectileAt(flight, frame) {
   // the build's per-frame loop, with the sign flipped because arena height is
   // up-positive and screen y is down-positive.
   //
-  // Written in FIGURE HEIGHTS rather than the build's pixels (see
-  // `bombardLaunchHeight`), so the ballistic term is normalised by the same
-  // `yVelocity` that generated it: the peak is one launch-height above the
-  // launch, whatever the range, which is what keeps a long shot readable
-  // instead of leaving the arena.
+  // Written in BOMBARD LAUNCH HEIGHTS (see `bombardLaunchHeight`), with the
+  // ballistic term normalised by the same `yVelocity` that generated it: the
+  // peak is one launch-height above the launch, whatever the range, which is
+  // what keeps a long shot readable instead of leaving the arena. **That
+  // normalisation is OURS** — the build's rise is `Yvelocity^2 / 4` arena units
+  // at the peak, 841 on a 58-frame shot — and the launch it starts from is the
+  // build's, in the build's units (`launchLiftFor`). ~~"Written in FIGURE
+  // HEIGHTS rather than the build's pixels"~~ until 2026-09-23: the build's
+  // numbers were never pixels, see `SS2_PROJECTILE.bombardLaunchHeight`.
   let height = flight.launch.height;
   if (flight.arc && flight.flightFrames > 0) {
     const rise = t * flight.yVelocity - t * t - t;
@@ -440,16 +777,23 @@ export function projectileDrawAt(flight, at, { frontY, rankStride, figureScaleFo
   //   The front rank is where every figure in such a game already stands, so
   //   the arrow flies level with them.
   const depth = Number.isFinite(point.y) ? point.y : frontY;
-  const size = figureScaleFor({
-    yscale: 100,
-    rank: rankOfDepth(depth, 0, { frontY, rankStride }),
-    slotIndex: 0
-  });
-  const lift = (shotPoint) => shotPoint.height * ARENA_UNITS_PER_FIGURE_HEIGHT;
+  const sizeAt = (at) => figureScaleFor({ yscale: 100, rank: rankOfDepth(at, 0, { frontY, rankStride }), slotIndex: 0 });
+  const size = sizeAt(depth);
+  // ► **ON THE BODIES THE ARENA DRAWS, AT THEIR RANKS** — `drawnLiftAt`, which
+  //   says which half of this is the build's. The end is read once here: every
+  //   point and every puff bends toward the same target shoulder.
+  const end = projectileAt(flight, flight.flightFrames);
+  const endSize = sizeAt(Number.isFinite(end.y) ? end.y : frontY);
+  // A LOB goes over the bodies it passes (`lobLiftAt`); a flat shot is gated on
+  // a clear line by the rules, so it flies straight from shoulder to shoulder.
+  const deps = { frontY, rankStride, figureScaleFor, rankOfDepth };
+  const lift = (shotPoint, pointSize) => (flight.arc
+    ? lobLiftAt(flight, shotPoint, deps)
+    : drawnLiftAt(flight, shotPoint.height, shotPoint.progress, pointSize, end.height, endSize));
   return Object.freeze({
     x: point.x,
     y: depth,
-    lift: lift(point),
+    lift: lift(point, size),
     rotation: point.rotation,
     size,
     trail: Object.freeze(projectileTrail(flight, frame, keep === undefined ? {} : { keep }).map((puff) => {
@@ -457,7 +801,7 @@ export function projectileDrawAt(flight, at, { frontY, rankStride, figureScaleFo
       return Object.freeze({
         x: puff.x,
         y: puffDepth,
-        lift: lift(puff),
+        lift: lift(puff, sizeAt(puffDepth)),
         // ► **THE PUFF'S OWN ROTATION, AND THIS MAPPER DROPPED IT UNTIL
         //   2026-09-15.** `projectileTrail`'s docstring three functions up has
         //   always said a puff is dropped "at the arrow's own position AND
@@ -475,11 +819,7 @@ export function projectileDrawAt(flight, at, { frontY, rankStride, figureScaleFo
         // Each puff at ITS OWN depth's scale, not the arrow's: a trail across
         // lanes tapers, which is the whole reason the depth is interpolated
         // rather than fixed at the launch.
-        size: figureScaleFor({
-          yscale: 100,
-          rank: rankOfDepth(puffDepth, 0, { frontY, rankStride }),
-          slotIndex: 0
-        })
+        size: sizeAt(puffDepth)
       });
     }))
   });
@@ -521,8 +861,11 @@ export const SS2_FIREBALL = Object.freeze({
   /**
    * `bullet._y = attacker._y - (attacker._yscale * 1.5 + 5)` (`+0x9301`-`+0x9332`)
    * — the SNIPE's formula term for term (`+0x6ea5`-`+0x6ed6`), so it is the
-   * snipe's height here, in the snipe's figure-height units. See
-   * `SS2_PROJECTILE.snipeLaunchHeightRatio` for why pixels are not ported.
+   * snipe's height here, in the same bombard-launch units, AT THE NOMINAL
+   * `_yscale` 100. `fireballFlight` works it out for the caster it is given
+   * (`launchLiftFor`); this is the value a caster with no stated size gets.
+   * ~~"See `SS2_PROJECTILE.snipeLaunchHeightRatio` for why pixels are not
+   * ported"~~ — they are arena units and are ported, since 2026-09-23.
    */
   launchHeight: SS2_PROJECTILE.bombardLaunchHeight * SS2_PROJECTILE.snipeLaunchHeightRatio,
   /**
@@ -605,13 +948,17 @@ export function fireballImpact({ casterX, targetX, gladiatorDir, xVelocity } = {
  * @param {object} shot.to            `{ x, y }` — the target
  * @param {string} shot.gladiatorDir  the CASTER's facing, "left" or "right"
  * @param {number} shot.xVelocity     `Xvelocity`, 50 / 70 / 90
+ * @param {number} [shot.casterYscale] the caster's `_yscale` (`physical_size`),
+ *   which its launch height is written in terms of; absent is the nominal 100
  */
-export function fireballFlight({ from, to, gladiatorDir, xVelocity } = {}) {
+export function fireballFlight({ from, to, gladiatorDir, xVelocity, casterYscale = null, targetYscale = null } = {}) {
   if (!Number.isFinite(from?.x) || !Number.isFinite(to?.x)) {
     throw new ProjectileError("A fireball needs a finite x on both ends; an unplaced caster has nothing to loose.");
   }
   const impact = fireballImpact({ casterX: from.x, targetX: to.x, gladiatorDir, xVelocity });
   const launchX = from.x + impact.direction * SS2_FIREBALL.launchOffsetX;
+  // The arrow's unit, for the arrow's reason: one bombard launch of THIS caster.
+  const liftPerHeight = launchLiftFor(ProjectileKind.BOMBARD, casterYscale);
   return Object.freeze({
     kind: "fireball",
     direction: impact.direction,
@@ -622,19 +969,26 @@ export function fireballFlight({ from, to, gladiatorDir, xVelocity } = {}) {
     /** The frame it lands on — what holds the action open, via `flightDurationMs`. */
     flightFrames: impact.impactFrame,
     explosionVisibleFrames: SS2_FIREBALL.explosionFrames - 1,
+    /** Arena units per unit of `height`, as on the arrow's flight. */
+    liftPerHeight,
     launch: Object.freeze({
       x: launchX,
       // Depth is INVENTED, as for the arrow: the build has none. The caster's
       // rank at launch, the target's at impact, linear between.
       y: Number.isFinite(from.y) ? from.y : null,
-      height: SS2_FIREBALL.launchHeight
+      // `_yscale * 1.5 + 5` over THIS caster's feet — the snipe's formula.
+      height: launchLiftFor("fireball", casterYscale) / liftPerHeight
     }),
     impact: Object.freeze({
       // Where the bullet STOPS — `flying = false` — which is past the victim's
       // centre by up to one `Xvelocity`, and is where the explosion plays.
       x: launchX + impact.direction * xVelocity * impact.moves,
       centreX: to.x,
-      y: Number.isFinite(to.y) ? to.y : null
+      y: Number.isFinite(to.y) ? to.y : null,
+      // The TARGET's shoulder, as on the arrow: the drawn flight ends there and
+      // the burst plays there. The build's is the CASTER's shoulder height,
+      // which is the same point between two gladiators alike. See `drawnLiftAt`.
+      lift: launchLiftFor("fireball", targetYscale)
     })
   });
 }
@@ -705,16 +1059,20 @@ export function fireballDrawAt(flight, elapsedMs, { frontY, rankStride, figureSc
   const point = fireballAt(flight, Math.min(lastFrame, elapsed / PROJECTILE_FRAME_MS));
   // A null depth draws at the front rank, for `projectileDrawAt`'s reason.
   const depth = Number.isFinite(point.y) ? point.y : frontY;
-  const size = figureScaleFor({
-    yscale: 100,
-    rank: rankOfDepth(depth, 0, { frontY, rankStride }),
-    slotIndex: 0
-  });
+  const sizeAt = (at) => figureScaleFor({ yscale: 100, rank: rankOfDepth(at, 0, { frontY, rankStride }), slotIndex: 0 });
+  const size = sizeAt(depth);
+  // On the two drawn bodies, as the arrow is (`drawnLiftAt`): the flight is flat
+  // in the build, so its end height IS its launch height, and the burst is the
+  // end.
+  const endY = Number.isFinite(flight.impact.y) ? flight.impact.y : frontY;
+  const progress = point.stage === "flight" && flight.flightFrames > 0
+    ? Math.min(1, Math.max(0, elapsed / PROJECTILE_FRAME_MS) / flight.flightFrames)
+    : 1;
   return Object.freeze({
     stage: done ? "gone" : point.stage,
     x: point.x,
     y: depth,
-    lift: point.height * ARENA_UNITS_PER_FIGURE_HEIGHT,
+    lift: drawnLiftAt(flight, point.height, progress, size, flight.launch.height, sizeAt(endY)),
     rotation: 0,
     size,
     mirrored: flight.direction < 0,

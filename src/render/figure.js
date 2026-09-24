@@ -117,16 +117,24 @@ function pieceFor(combatant, slot) {
  *
  * Authored mapping, saturating in both directions so no stat line can produce a
  * figure that will not fit a slot.
+ *
+ * ► **NO `height`, SINCE 2026-09-23.** ~~`height: 0.92 + clamp01(vitality / 20)
+ *   * 0.16`~~ scaled the whole authored figure — it was a SIZE, not a shape —
+ *   and it also reached the extracted rig, which drew the build's gladiator at
+ *   64.7% of its size. The build sizes a gladiator by `_yscale` =
+ *   `physical_size` (strength) and by nothing else, which the shell applies as
+ *   the origin's `size`; the authored figure now stands at the build's own
+ *   height (`SS2_FIGURE_HEIGHT` in `painter.js`) so the arrow, the fireball
+ *   and the blood land on it. Vitality had no shape role to keep. `bulk` and
+ *   `stance` are widths and do not move the crown, so they stay.
  */
 function buildFor(combatant) {
   const stats = combatant?.stats ?? {};
   const strength = Number.isFinite(stats.strength) ? stats.strength : 5;
-  const vitality = Number.isFinite(stats.vitality) ? stats.vitality : 5;
   const agility = Number.isFinite(stats.agility) ? stats.agility : 5;
   return Object.freeze({
-    // 1.0 is the reference gladiator. The ranges are narrow on purpose: a
-    // silhouette a player can read at a glance beats a faithful stat readout.
-    height: 0.92 + clamp01(vitality / 20) * 0.16,
+    // The ranges are narrow on purpose: a silhouette a player can read at a
+    // glance beats a faithful stat readout.
     bulk: 0.85 + clamp01(strength / 20) * 0.34,
     stance: 0.9 + clamp01(agility / 20) * 0.2
   });

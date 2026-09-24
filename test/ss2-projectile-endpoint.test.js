@@ -28,11 +28,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
+import {
+  buildArenaLayout, CommandKind, createVanillaBattleHost, presentResolvedEvents, SS2_STATIC_MAP_BINDINGS
+} from "../src/adapter/index.js";
 import { projectileFlight } from "../src/render/projectile.js";
 import { combatantById, currentCombatant, suggestAction } from "../src/team/index.js";
 import { ss2BattleValues, ss2Combatant, ss2PhysicalSize, ss2TeamRules } from "../src/team/ss2-rules.js";
 import { demoSide } from "../tools/arena/roster.js";
+import { SS2_FIGURE_HALF_WIDTH } from "../src/common/ss2-figure.js";
 
 /** Drive the arena's own host exactly as `tools/arena/main.js` builds it. */
 function sweepShots(seeds) {
@@ -56,7 +59,12 @@ function sweepShots(seeds) {
       const actorTeam = combatantById(host.battle, who.id).teamId;
       const standing = host.battle.teams.flatMap((team) => team.combatants)
         .filter((one) => one.alive)
-        .map((one) => ({ id: one.id, teamId: one.teamId, x: one.x, y: one.y, size: ss2PhysicalSize(one) }));
+        .map((one) => ({
+          id: one.id, teamId: one.teamId, x: one.x, y: one.y, size: ss2PhysicalSize(one),
+          // How far its DRAWN body reaches either side of `x`: the build's
+          // standing clip at its own size (`src/common/ss2-figure.js`).
+          reach: SS2_FIGURE_HALF_WIDTH * ss2PhysicalSize(one) / 100
+        }));
       const step = host.submit({ actorId: who.id, ...action });
       for (const command of step?.commands ?? []) {
         if (command.kind !== "fire-projectile") continue;
@@ -80,6 +88,11 @@ function sweepShots(seeds) {
 }
 
 test("NO ARROW ENDS INSIDE A LIVING BODY THAT IS NOT ITS TARGET, and 85 of 120 used to", () => {
+  // ► **"INSIDE" IS THE DRAWN BODY, since 2026-09-23** — the build's standing
+  //   clip at the bystander's own size, ~41 units either side at strength 9.
+  //   ~~`<= body.size`~~ judged it by `physical_size` (86), the walk clamp's
+  //   personal space, which was the arena's idea of a body while the gladiator
+  //   was drawn at two thirds of the build's size.
   const shots = sweepShots(12);
   assert.ok(shots.length >= 60, `the sweep must actually loose arrows; loosed ${shots.length}`);
 
@@ -88,10 +101,10 @@ test("NO ARROW ENDS INSIDE A LIVING BODY THAT IS NOT ITS TARGET, and 85 of 120 u
     for (const body of shot.standing) {
       if (body.id === shot.command.combatantId || body.id === shot.command.targetId) continue;
       if (body.y !== shot.command.to.y) continue;
-      if (Math.abs(body.x - shot.endX) <= body.size) {
+      if (Math.abs(body.x - shot.endX) <= body.reach) {
         landedOnSomebodyElse.push(
           `${shot.command.combatantId} -> ${shot.command.targetId} ended at x ${Math.round(shot.endX)} ` +
-          `inside ${body.id} (x ${body.x}, size ${body.size})`
+          `inside ${body.id} (x ${body.x}, reach ${body.reach.toFixed(1)})`
         );
         break;
       }
@@ -109,21 +122,63 @@ test("THE STOP-SHORT IS KEPT WHERE IT HELPS, so the defect it was added for stay
   const kept = shots.filter((shot) => shot.command.targetSize > 0);
   const dropped = shots.filter((shot) => shot.command.targetSize === 0);
   assert.ok(kept.length > 0, "some shots must still stop at the target's surface");
-  assert.ok(dropped.length > 0, "and some must fall back, or this rig proves nothing");
+  // ► **THE SURFACE IS THE TARGET'S DRAWN FRONT, since 2026-09-23**: the
+  //   standing clip's half-width at its own `physical_size`, ~41 at strength 9
+  //   — ~~its `physical_size`, 86~~, which left every arrow ~45 units in front
+  //   of a body drawn at the build's size.
+  for (const shot of kept) {
+    const target = shot.standing.find((one) => one.id === shot.command.targetId);
+    assert.equal(shot.command.targetSize, target.reach, `${shot.command.targetId}: the stop is its drawn front`);
+  }
 
-  // Every dropped one must have had a real reason: a bystander at the point the
-  // stop-short would have chosen.
+  // Every dropped one must have had a real reason: a bystander's drawn body at
+  // the point the stop-short would have chosen. (~~"and some must fall back,
+  // or this rig proves nothing"~~ — on this roster the drawn stop now always
+  // lands in the ~3 units between the front-liner's back and the target's
+  // front, so none does; the fallback is proven on a formation built for it,
+  // in the next test.)
   for (const shot of dropped) {
     const target = shot.standing.find((one) => one.id === shot.command.targetId);
     if (!target) continue;
     const direction = shot.command.to.x >= shot.command.from.x ? 1 : -1;
-    const wouldHaveEnded = target.x - direction * target.size;
+    const wouldHaveEnded = target.x - direction * target.reach;
     const blocker = shot.standing.find((one) =>
       one.id !== shot.command.combatantId
       && one.id !== shot.command.targetId
       && one.y === shot.command.to.y
-      && Math.abs(one.x - wouldHaveEnded) <= one.size);
+      && Math.abs(one.x - wouldHaveEnded) <= one.reach);
     assert.ok(blocker,
       `${shot.command.combatantId} dropped its stop-short with nobody at x ${Math.round(wouldHaveEnded)}`);
   }
+});
+
+test("THE FALLBACK STILL DROPS TO THE BUILD'S CENTRE-X END when the surface is inside somebody else", () => {
+  // Built through the real presentation: an archer, his target, and a
+  // bystander in the target's rank. `presentResolvedEvents` decides.
+  const gladiator = (id, teamId, x, strength, slotIndex = 0) => ({
+    id, name: id, teamId, seatId: id, slotIndex, aiFilled: false, alive: true, health: 40, maxHealth: 40,
+    stats: { strength }, loadout: {}, resources: {}, status: [], x, y: 200
+  });
+  const stopFor = (bystanders) => {
+    const wire = {
+      teams: [
+        { id: "red", combatants: [gladiator("red-1", "red", -300, 9), ...bystanders] },
+        { id: "blue", combatants: [gladiator("blue-1", "blue", 300, 9)] }
+      ],
+      events: [{ sequence: 1, actorId: "red-1", targetId: "blue-1", hit: true, dispatchedMethod: "normal",
+        type: "bombard", attackDirection: 21 }]
+    };
+    const { commands } = presentResolvedEvents(wire, { layout: buildArenaLayout(wire), bindings: SS2_STATIC_MAP_BINDINGS });
+    return commands.find((command) => command.kind === CommandKind.FIRE_PROJECTILE).targetSize;
+  };
+  const surface = SS2_FIGURE_HALF_WIDTH * 86 / 100;
+  assert.equal(stopFor([]), surface, "an open line stops at the target's drawn front, 41.4 short of its centre");
+  // The walk clamp's front-liner, `physical_size` (86) from the target: his
+  // drawn back is at 300 - 86 + 41.4 = 255.4, the stop at 258.6 — just clear.
+  assert.equal(stopFor([gladiator("red-2", "red", 214, 9, 1)]), surface, "a clamp-adjacent front-liner leaves it clear");
+  // A strength-50 front-liner (`physical_size` 113) at the same clamp reaches
+  // 54.5 either side, to 268.5: the stop is inside him, so it drops to 0.
+  assert.equal(stopFor([gladiator("red-2", "red", 214, 50, 1)]), 0, "a bigger front-liner covers the stop: the build's end");
+  // And a body anywhere ELSE is not a reason.
+  assert.equal(stopFor([gladiator("red-2", "red", 0, 50, 1)]), surface, "a body mid-field is no reason to drop it");
 });

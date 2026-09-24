@@ -48,8 +48,10 @@ import { figurePackFrom, paintExtractedFigure } from "../src/render/extracted-fi
 
 /**
  * A figure pack whose numbers make the arena transform an IDENTITY on the
- * pixels: `clipHeight` 150 is exactly `UNIT`, so the scale is 1 at height 1,
- * and `centreX` and `groundY` are 0. Every coordinate asserted below is then
+ * pixels: the scale is the build's one arena unit per clip pixel at height 1
+ * (`clipHeight` 150 no longer matters — it did while the rig was fitted to the
+ * authored 150-unit figure, until 2026-09-23), and `centreX` and `groundY`
+ * are 0. Every coordinate asserted below is then
  * the clip's own, which is what makes a twips/pixels error visible as itself
  * rather than as a number nobody can check by hand.
  */
@@ -438,8 +440,8 @@ test("the eyes' offset is in ACTIONSCRIPT PIXELS while every matrix is in TWIPS"
   // ► **A FACTOR OF TWENTY, AND IT IS VISIBLE IN THESE EXACT NUMBERS.**
   //   `head.eyes._x = -3` / `_y = -14` are MovieClip properties, in pixels;
   //   `[1,0,0,1,-42,0]` is a SWF matrix, in twips. The figure pack here is built
-  //   so the arena transform is an identity on pixels (clipHeight 150 = UNIT,
-  //   centreX 0, groundY 0), so the translation below is the clip's own:
+  //   so the arena transform is an identity on pixels (one arena unit per clip
+  //   pixel, centreX 0, groundY 0), so the translation below is the clip's own:
   //
   //     head limb    ty -2000 twips  = -100 px
   //     eye placement tx  -42 twips  =   -2.1 px

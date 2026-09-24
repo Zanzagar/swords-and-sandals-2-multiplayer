@@ -466,6 +466,31 @@ test("the flight is FLAT, from caster ± 30 at the snipe's height, and stops whe
   assert.ok(left.impact.x < 0, "past the victim, on the far side");
 });
 
+test("it flies at the CASTER's own `_yscale * 1.5 + 5`, in arena units — the build's shoulder, not a fraction of 150", () => {
+  // `bullet._y = attacker._y - (attacker._yscale * 1.5 + 5)` (`+0x9301`-`+0x9332`),
+  // with the bullet attached to `arena.gladiators` — the object the fighters
+  // stand in — so the number is arena units over the caster's feet. A
+  // strength-9 caster (`physical_size` 86) looses it 134 up, before and after
+  // impact alike; with no size stated the clip's own `_yscale` 100 gives 155.
+  // ~~`155 / 230` of a 150-unit figure, 101 units~~ until 2026-09-23.
+  const deps = { frontY: 200, rankStride: 100, figureScaleFor: () => 1, rankOfDepth: () => 0 };
+  const cast = (casterYscale, targetYscale = casterYscale) => fireballFlight({
+    from: { x: 0, y: 200 }, to: { x: 330, y: 200 }, gladiatorDir: "right", xVelocity: 90, casterYscale, targetYscale
+  });
+  assert.equal(fireballDrawAt(cast(86), 0, deps).lift, 134, "86 * 1.5 + 5, in flight");
+  assert.equal(fireballDrawAt(cast(86), fireballLifetimeMs(cast(86)) - 1, deps).lift, 134,
+    "and where it bursts, between two gladiators alike — flat, as the build's is");
+  assert.equal(fireballDrawAt(cast(), 0, deps).lift, 155, "no size stated: `_yscale` 100");
+  // ► **THE BURST IS DRAWN ON THE TARGET'S SHOULDER, since 2026-09-23** — a
+  //   Codex review found drawn flights ending over their victims' heads. The
+  //   build's flat fireball keeps the CASTER's shoulder height, which is the
+  //   same point when the two are alike; a strength-50 victim (`_yscale` 113) of
+  //   a strength-9 caster takes it at 113 * 1.5 + 5. This asserted the caster's
+  //   134 at the burst, with no target size, until then.
+  assert.equal(fireballDrawAt(cast(86, 113), fireballLifetimeMs(cast(86, 113)) - 1, deps).lift, 174.5,
+    "a bigger victim takes it on his own shoulder");
+});
+
 test("after impact the bullet sits on frame 4 for the explosion, then is gone", () => {
   const flight = fireballFlight({ from: { x: 0, y: 200 }, to: { x: 330, y: 200 }, gladiatorDir: "right", xVelocity: 90 });
   assert.equal(flight.flightFrames, 4);

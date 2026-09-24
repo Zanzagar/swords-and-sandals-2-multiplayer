@@ -839,6 +839,23 @@ function prepareEntry(entry) {
   return entry;
 }
 
+/**
+ * Every placed, living gladiator but these two, as `{x, y, yscale}` — the
+ * bodies a drawn lob must pass over. Positions are the scene's (this batch
+ * already folded), life is the wire's.
+ */
+function bodiesBesides(...ids) {
+  const living = combatantsById();
+  const bodies = [];
+  for (const id of scene.drawOrder) {
+    if (ids.includes(id)) continue;
+    const actor = scene.actors[id];
+    if (!actor?.placed || !Number.isFinite(actor.x) || living.get(id)?.alive === false) continue;
+    bodies.push({ x: actor.x, y: actor.y, yscale: actor.yscale });
+  }
+  return bodies;
+}
+
 function beginStep(step) {
   scene = applyCommands(scene, step.commands);
 
@@ -866,7 +883,12 @@ function beginStep(step) {
         from: shotRecord.from,
         to: shotRecord.to,
         gladiatorDir: shotRecord.gladiatorDir,
-        xVelocity: shotRecord.xVelocity
+        xVelocity: shotRecord.xVelocity,
+        // `attacker._yscale * 1.5 + 5`: the build writes the launch height in
+        // terms of the caster's own size, so the caster's size is handed over —
+        // and the target's, whose shoulder the burst is drawn on.
+        casterYscale: scene.actors[shotRecord.combatantId]?.yscale ?? null,
+        targetYscale: scene.actors[shotRecord.targetId]?.yscale ?? null
       });
       fireballs.push({
         flight,
@@ -882,7 +904,18 @@ function beginStep(step) {
       from: shotRecord.from,
       to: shotRecord.to,
       sequence: shotRecord.sequence,
-      targetSize: shotRecord.targetSize
+      targetSize: shotRecord.targetSize,
+      // `attacker._yscale * 2 + 30` / `* 1.5 + 5`: the arrow leaves from THIS
+      // shooter's head or shoulder, which the build writes in terms of its
+      // `_yscale` — the same `yscale` its figure is drawn at. And the drawn
+      // flight ends on the TARGET's shoulder, which its own `yscale` places.
+      shooterYscale: scene.actors[shotRecord.combatantId]?.yscale ?? null,
+      targetYscale: scene.actors[shotRecord.targetId]?.yscale ?? null,
+      // ► **EVERY OTHER LIVING BODY, so a LOB IS DRAWN OVER THEM (2026-09-23).**
+      //   The rules exempt a bombard from line blocking because it clears
+      //   bodies; `lobLiftAt` keeps the drawing true to that, and it can only
+      //   clear the bodies it is told about.
+      bodies: bodiesBesides(shotRecord.combatantId, shotRecord.targetId)
     });
     inFlight.push({
       flight,
@@ -1443,8 +1476,9 @@ function opSpaceRunsOf(ops) {
  *
  *   ► **THAT PRODUCT IS ONLY HALF THE FACTOR, AND A FIRST VERSION OF THIS LINE
  *     SAID IT WAS THE WHOLE ONE.** `src/render/extracted-figure.js` multiplies
- *     it by its own `(UNIT * height) / pack.clipHeight` — arena units per clip
- *     pixel, which only that module knows — and hands the PRODUCT to
+ *     it by its own `clipToArenaScale` — arena units per clip pixel, the
+ *     build's 1:1 since 2026-09-23 (~~`(UNIT * height) / pack.clipHeight`~~,
+ *     the authored figure's height fitted to the clip) — and hands the PRODUCT to
  *     `canvasFilterFor`. This file supplies canvas-per-arena; the other
  *     supplies arena-per-clip; neither half is the factor. A reader who checked
  *     the old sentence literally against `figureOriginMatrix` would have found
@@ -3814,15 +3848,26 @@ function renderStage(view, fit, now) {
       label: drawnTimeline.label,
       facing,
       at: drawnAt,
-      height: figure.build.height,
+      // ► **NO `height`, AND THAT IS THE FIX OF 2026-09-23.** ~~`height:
+      //   figure.build.height`~~ handed the extracted rig — and through these
+      //   same options its face — the AUTHORED figure's vitality multiplier
+      //   (0.92-1.08, `figure.js`'s `buildFor`), on top of a clip already fitted
+      //   to the authored 150-unit height: 64.7% of the build's size for this
+      //   roster. The build draws the clip 1:1 and sizes it with `_yscale` =
+      //   `physical_size` alone (root frame 221, `+0x061e`-`+0x06a1`), which is
+      //   `origin.size` below. `figure.build` (bulk, stance) is the AUTHORED
+      //   fallback's shape only; the fallback stands at the build's height too
+      //   (`SS2_FIGURE_HEIGHT` in `painter.js`), so one geometry serves both.
       fade: pose.fade,
       // ► **CANVAS PIXELS PER ARENA UNIT — the same `k` `figureOriginMatrix`
       //   puts on the context, and the one factor the figure painter cannot
       //   work out for itself.** A group's blur radius is in the fighter clip's
       //   own pixels; `src/render/extracted-figure.js` knows clip-to-arena
-      //   (`pack.clipHeight` and `height`) and this file knows arena-to-canvas
+      //   (`clipToArenaScale`, the build's 1:1 — ~~`pack.clipHeight` and
+      //   `height`~~ until 2026-09-23) and this file knows arena-to-canvas
       //   (`view.scale`, which carries the camera's zoom and the device pixel
-      //   ratio, times `origin.size`, which carries the rank). Neither half is
+      //   ratio, times `origin.size`, which carries `physical_size` and the
+      //   rank). Neither half is
       //   the whole factor. Without this the glow is drawn at the radius it
       //   would have on an unzoomed 640x420 stage, which on this canvas is
       //   between two and four times too narrow.
@@ -3880,11 +3925,13 @@ function renderStage(view, fit, now) {
         // ► **THE DROPS ARE IN THE FIGHTER CLIP'S OWN SPACE, NOT THE ARENA'S**,
         //   because the build attaches them to the clip rather than to the
         //   arena. The clip's origin is the soles of the feet and its head is
-        //   at -220, so a spawn band of -220..-70 is head-to-waist — and
-        //   anchoring those numbers in arena units would spray blood four
-        //   hundred units into the sky. This is the same factor every limb
-        //   matrix already carries.
-        clipScale: (clipToArenaScale(figurePack, figure.build.height) ?? 1) * origin.size,
+        //   at -220, so a spawn band of -220..-70 is head-to-waist. This is the
+        //   same factor every limb matrix already carries — one arena unit per
+        //   clip pixel — times the fighter's own `size`, which is `_yscale` as
+        //   the build scales the clip the drops are children of.
+        //   ~~`clipToArenaScale(figurePack, figure.build.height)`~~ until
+        //   2026-09-23: the authored vitality multiplier, see `figureOptions`.
+        clipScale: (clipToArenaScale(figurePack) ?? 1) * origin.size,
         spray: spawnDrops({
           seed: step.actionBoundary ?? scene.sequence,
           armoured: armour > 0,
@@ -3966,9 +4013,12 @@ function renderStage(view, fit, now) {
  * The blood and the sparks, drawn last with the arrows and for the same reason:
  * the build attaches them at depth 45300, above every body in the arena.
  *
- * Their offsets are ARENA UNITS already — a drop is attached to
- * `arena.gladiators`, the same space the gladiators' own `_x` lives in — so
- * nothing is converted here. See `src/render/clip-effects.js`.
+ * ~~Their offsets are ARENA UNITS already — a drop is attached to
+ * `arena.gladiators`~~ — **corrected 2026-09-23: a drop is attached to the
+ * FIGHTER CLIP** (`bounceitem` calls `attachMovie` on `register:1`, which it
+ * compares against `_root.arena.gladiators.hero`), so its offsets are in the
+ * clip's space and are converted by `spray.clipScale`: one arena unit per clip
+ * pixel times the fighter's own `size`. See `clipToArenaScale`.
  */
 function drawDrops(view, now) {
   for (const spray of drops) {

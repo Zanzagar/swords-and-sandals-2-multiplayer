@@ -149,7 +149,9 @@ test("the lightning bolt strikes its victim: its foot is at the victim's feet, o
     const box = canvasBox(boltOpsFor(REAL_PROPS, frame, 0), origin);
     assert.ok(box.y1 <= feet && box.y1 > feet - 10,
       `frame ${frame}: the bolt ends ${feet - box.y1} units above the feet (7.1 measured), not off the canvas`);
-    assert.ok(box.y0 < UNIT_VIEW.toY(200, 150), `frame ${frame}: and it comes down from above the head`);
+    // The head of the build's gladiator at `_yscale` 100: its 222.65-pixel
+    // `standing` clip, drawn 1:1 (~~150~~, the authored figure, until 2026-09-23).
+    assert.ok(box.y0 < UNIT_VIEW.toY(200, 222.65), `frame ${frame}: and it comes down from above the head`);
     const centre = (box.x0 + box.x1) / 2;
     assert.ok(Math.abs(centre - UNIT_VIEW.toX(250)) < 10, `frame ${frame}: centred on the victim, got ${centre}`);
   }
@@ -159,9 +161,11 @@ test("the fireball's explosion bursts ON its victim's body, not a figure height 
   assertRealPackPathIsDerivable();
   if (!REAL_PROPS) return;
   // The explosion plays where the ball stopped: at the snipe's launch height,
-  // 155/230 of a figure (`SS2_FIREBALL.launchHeight`), about 101 units up.
-  const origin = propOriginMatrix(UNIT_VIEW, { x: 250, y: 200, lift: 150 * (155 / 230), size: 1 });
-  const head = UNIT_VIEW.toY(200, 150);
+  // `_yscale * 1.5 + 5` arena units — 155 at `_yscale` 100 — against the
+  // build's 222.65-unit figure. ~~155/230 of a 150-unit figure, about 101
+  // units up, against a 150-unit head~~ until 2026-09-23.
+  const origin = propOriginMatrix(UNIT_VIEW, { x: 250, y: 200, lift: 155, size: 1 });
+  const head = UNIT_VIEW.toY(200, 222.65);
   const feet = UNIT_VIEW.toY(200, 0);
   for (const age of [0, 9, 15]) {
     const box = canvasBox(fireballOpsFor(REAL_PROPS, 4, age), origin);

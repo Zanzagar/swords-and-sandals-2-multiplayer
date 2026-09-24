@@ -135,9 +135,11 @@ const record = (overrides = {}) => ({
   effect: "lightning_bolt_combat", frame: 1, x: 140, y: 200, endsWithClip: "lightning", ...overrides
 });
 
-test("the bolt stands ONE FIGURE HEIGHT over its victim, at the victim's x", () => {
+test("the bolt stands 150 ARENA UNITS over its victim, at the victim's x", () => {
   // `_y: 50` in `arena.gladiators`, the object both fighters stand in at `_y`
-  // 200: the bolt's origin is 150 arena units above the victim's.
+  // 200: the bolt's origin is 150 arena units above the victim's. ~~"ONE
+  // FIGURE HEIGHT"~~ in this test's name until 2026-09-23 — the authored
+  // figure's; the build's gladiator is 222.65 units at `_yscale` 100.
   const drawn = spellEffectDrawAt(record(), 0, DEPS);
   assert.equal(drawn.x, 140);
   assert.equal(drawn.y, 200);
@@ -148,6 +150,13 @@ test("the bolt stands ONE FIGURE HEIGHT over its victim, at the victim's x", () 
 
 test("it scales with its victim's rank, and a null depth draws at the front", () => {
   assert.equal(spellEffectDrawAt(record({ y: 200 - 97 }), 0, DEPS).size, 0.9);
+  // ► **AND SO DOES ITS LIFT, since 2026-09-23.** The bolt's art was drawn at
+  //   the victim's rank scale and its 150 was not, so over a back-rank victim
+  //   the strike ended above his feet. Authored — the build has one rank — and
+  //   added with the arrow's, after a Codex review found drawn projectiles
+  //   ignoring the depth scale their victims are drawn at.
+  assert.equal(spellEffectDrawAt(record({ y: 200 - 97 }), 0, DEPS).lift, 150 * 0.9);
+  assert.equal(spellEffectDrawAt(record({ y: 200 - 97 * 2 }), 0, DEPS).lift, 150 * 0.8);
   const flat = spellEffectDrawAt(record({ y: null }), 0, DEPS);
   assert.equal(flat.y, SS2_ARENA.frontY);
   assert.equal(flat.size, 1);

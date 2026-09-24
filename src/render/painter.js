@@ -11,6 +11,15 @@
  * derived from the licensed build's art; see `figure.js` for the standing rule.
  * The proportions are authored and are not a claim about how SS2 looks.
  *
+ * ► **EXCEPT ONE NUMBER, AND IT IS A MEASUREMENT, NOT ART: the overall
+ *   height** (`SS2_FIGURE_HEIGHT`, since 2026-09-23). Everything the build
+ *   places relative to a gladiator — the arrow at `_yscale * 2 + 30`, the
+ *   fireball at `_yscale * 1.5 + 5`, the bolt 150 up, the blood at the clip's
+ *   `-220..-71` — is in the build's own arena units, and lands on a figure only
+ *   if the figure is the build's size. So this one stands exactly as tall as
+ *   the extracted rig does, and a clone with no licensed copy sees the arrow
+ *   leave from the same head.
+ *
  * COORDINATES. Operations are emitted in the ARENA's own coordinate space —
  * the one the battle map states and `slot-layout.js` derives: x runs -2100 to
  * 2100 with the vanilla pair at ±250, y is 200 at the front rank and DECREASES
@@ -19,6 +28,8 @@
  * here at all.
  */
 
+import { SS2_FIGURE_HEIGHT } from "../common/ss2-figure.js";
+
 export class PainterError extends Error {
   constructor(message, options = {}) {
     super(message, options);
@@ -26,8 +37,36 @@ export class PainterError extends Error {
   }
 }
 
-/** Reference height of a gladiator in arena units, authored. */
-const UNIT = 150;
+/**
+ * THE BUILD'S GLADIATOR, SOLE TO CROWN, IN ARENA UNITS AT `_yscale` 100 —
+ * 222.65, named with its derivation in `src/common/ss2-figure.js` (moved there
+ * 2026-09-23 so `src/adapter/presentation.js` can read the body's WIDTH beside
+ * it without importing the renderer) and re-exported here, where the authored
+ * figure is sized by it.
+ *
+ * The shell scales both figures by the same `size` (`figureScaleFor`: the
+ * fighter's `_yscale`, then its rank), so at any strength the two renderers
+ * put the crown in one place.
+ */
+export { SS2_FIGURE_HEIGHT };
+
+/** Where the authored head sits and how big it is, in skeleton units `h`. */
+const HEAD_Y = 0.95;
+const HEAD_RADIUS = 0.085;
+
+/**
+ * The skeleton's unit, chosen so a bare head at rest crowns at
+ * `SS2_FIGURE_HEIGHT`: the crown is `HEAD_Y + HEAD_RADIUS` units up.
+ *
+ * ► ~~`const UNIT = 150`, "reference height of a gladiator in arena units,
+ *   authored", times `build.height` (vitality, 0.92-1.08)~~ **until
+ *   2026-09-23**: a bare crown of 142.8-167.7 units at `_yscale` 100, where
+ *   the build's is 222.65. Once the arrow and the fireball were placed at the
+ *   build's own heights, a snipe (134 at strength 9) flew over this figure's
+ *   head (128 tall at that strength) — Codex found it, and it is why the size
+ *   is now the build's and no longer an authored choice.
+ */
+const UNIT = SS2_FIGURE_HEIGHT / (HEAD_Y + HEAD_RADIUS);
 
 function op(kind, fields) {
   return Object.freeze({ kind, ...fields });
@@ -48,8 +87,10 @@ function circle(x, y, r, fill, { stroke = null, alpha = 1 } = {}) {
  * Authored. A pose bends it; armour thickens it; neither invents a joint.
  */
 function skeletonFor(figure, pose) {
-  const { height, bulk, stance } = figure.build;
-  const h = UNIT * height;
+  const { bulk, stance } = figure.build;
+  // The build's height for every gladiator: its size is `_yscale`, which the
+  // shell applies as the origin's `size`. See `UNIT`.
+  const h = UNIT;
   const lean = pose.lean * 0.16;
   const recoil = pose.recoil;
   const bob = pose.bob * 0.06 * h;
@@ -57,7 +98,7 @@ function skeletonFor(figure, pose) {
 
   const hip = { x: lean * h * 0.5 - recoil * h * 0.22, y: h * 0.48 + bob };
   const shoulder = { x: hip.x + lean * h * 0.42 - recoil * h * 0.18, y: h * 0.82 + bob };
-  const head = { x: shoulder.x + lean * h * 0.14 - recoil * h * 0.1, y: h * 0.95 + bob };
+  const head = { x: shoulder.x + lean * h * 0.14 - recoil * h * 0.1, y: h * HEAD_Y + bob };
 
   // The weapon arm swings; the shield arm counterbalances it.
   const swing = pose.armSwing;
@@ -185,7 +226,7 @@ export function paintFigure(figure, pose) {
   }
 
   // Head, then helmet over it.
-  const headRadius = 0.085 * s.h;
+  const headRadius = HEAD_RADIUS * s.h;
   ops.push(circle(s.head.x, s.head.y, headRadius, p.skin, { alpha }));
   const helm = weightOf(figure, "helmet");
   if (helm > 0) {

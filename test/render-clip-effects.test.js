@@ -20,6 +20,7 @@ import test from "node:test";
 import {
   clipToArenaScale,
   figurePackFrom,
+  paintExtractedFigure,
   clipEffectTableFrom,
   dropAt,
   dropRandom,
@@ -214,39 +215,55 @@ test("a drop's numbers are the FIGHTER CLIP's space, and the scale proves itself
   //   `bounceitem` calls `attachMovie` on `register:1` — the fighter clip
   //   itself, which the branch above it compares against
   //   `_root.arena.gladiators.hero`. So every number in the particle system is
-  //   in the clip's own space, and a surface that read them as arena units
-  //   would spray blood four hundred units into the sky. **The first shell
-  //   integration did exactly that.**
+  //   in the clip's own space, and the clip is scaled by the fighter's
+  //   `_yscale` (`physical_size`) and by nothing else — root frame 221 attaches
+  //   it to `arena.gladiators` 1:1. ~~"a surface that read them as arena units
+  //   would spray blood four hundred units into the sky"~~ was true of the
+  //   150-unit figure the arena drew until 2026-09-23, not of the build's.
   //
   //   The proof the conversion is right is an INVARIANT rather than a constant:
   //   the clip's `standing` bounds run y -220.85 to 1.8, so its origin is the
   //   soles of the feet and its head is at -220 — and converting -220 must land
-  //   on the arena height of a figure, which `painter.js` calls 150.
+  //   on the crown of the figure `paintExtractedFigure` draws from the SAME
+  //   pack. The shell multiplies both by the fighter's own `size`, so the two
+  //   stay together at every strength. ~~"which `painter.js` calls 150"~~ — the
+  //   AUTHORED figure's height, which this pinned until 2026-09-23.
   const pack = figurePackFrom(
     { 1: { bounds: { xMin: -40, xMax: 40, yMin: -220.85, yMax: 1.8 }, paths: [{ d: "M0 0L1 1", fill: "#aaa" }] } },
     {
       standing: {
         label: "standing", firstFrame: 1, lastFrame: 1,
         bounds: { xMin: -48.54, xMax: 47.85, yMin: -220.85, yMax: 1.8 },
-        poses: [[{ shape: 1, limb: "torso", depth: [1], matrix: [1, 0, 0, 1, 0, 0] }]]
+        // A torso that spans the whole standing clip, crown to sole.
+        poses: [[{ shape: 1, limb: "torso", depth: [1], matrix: [1, 0, 0, 222.65, 0, -220.85 * 20] }]]
       }
     }
   );
   const scale = clipToArenaScale(pack, 1);
-  assert.ok(scale > 0, "a usable pack has a scale");
+  assert.equal(scale, 1, "one clip pixel is one arena unit at `_yscale` 100, the build's own scale");
 
+  let crown = -Infinity;
+  for (const op of paintExtractedFigure(pack, { family: "standing", label: "standing", at: 0 })) {
+    const numbers = op.d.match(/-?[\d.]+/g).map(Number);
+    for (let index = 0; index + 1 < numbers.length; index += 2) {
+      crown = Math.max(crown, op.matrix[1] * numbers[index] + op.matrix[3] * numbers[index + 1] + op.matrix[5]);
+    }
+  }
   const headInArena = 220 * scale;
   assert.ok(
-    Math.abs(headInArena - 150) < 5,
-    `the clip's head (-220) must land at a figure's arena height of 150, got ${headInArena.toFixed(1)}`
+    Math.abs(headInArena - crown) < 5,
+    `the clip's head (-220) must land at the crown the body is drawn with (${crown.toFixed(1)}), got ${headInArena.toFixed(1)}`
   );
 
   // A taller build scales proportionally — the height is the caller's.
   assert.ok(Math.abs(clipToArenaScale(pack, 2) - scale * 2) < 1e-9);
 
   // ► **AND NO PACK IS NULL, NOT 1.** A player who has not extracted the rig
-  //   draws the authored figure, and silently returning a scale of 1 would put
-  //   a spray in clip units on an arena-unit canvas.
+  //   draws the AUTHORED figure, which keeps its own 150-unit proportions and
+  //   has no clip space at all, so there is nothing for this function to
+  //   convert from; the caller decides what a spray means on that figure.
+  //   (Until 2026-09-23 this said a 1 would put "clip units on an arena-unit
+  //   canvas" — the two are the same unit at `_yscale` 100.)
   assert.equal(clipToArenaScale(null, 1), null);
   assert.equal(clipToArenaScale({}, 1), null);
 });

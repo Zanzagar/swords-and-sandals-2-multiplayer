@@ -333,8 +333,14 @@ test("THE GLOW RADIUS FOLLOWS THE SCALE, which is the test `filtersScaled` waite
   // The two charge levels carry DIFFERENT radii, so a renderer that collapsed
   // them into one clip would be visibly wrong rather than merely imprecise.
   assert.notDeepEqual(radiiAt("stance:psyche", 1), radiiAt("stance:psyche2", 1));
-  assert.equal(radiiAt("stance:psyche", 1)[1].toFixed(4), "4.2742", "the first charge's outer glow");
-  assert.equal(radiiAt("stance:psyche2", 1)[1].toFixed(4), "2.5208", "the deeper charge's is tighter");
+  // ► **AT SCALE 1 THE RADIUS IS THE FILTER'S OWN SIGMA IN CLIP PIXELS**, because
+  //   one clip pixel is one arena unit (`ARENA_UNITS_PER_CLIP_PIXEL`): the outer
+  //   glows are `blurX` 22 and 13 in the pack, and `sqrt((w^2 - 1) / 12)` is
+  //   6.3443 and 3.7417. ~~"4.2742" and "2.5208"~~ until 2026-09-23 — the same
+  //   two numbers times 150 / 222.65, the authored figure's height fitted to the
+  //   clip, which drew the whole gladiator at two thirds of the build's size.
+  assert.equal(radiiAt("stance:psyche", 1)[1].toFixed(4), "6.3443", "the first charge's outer glow");
+  assert.equal(radiiAt("stance:psyche2", 1)[1].toFixed(4), "3.7417", "the deeper charge's is tighter");
   const one = radiiAt("stance:psyche", 1);
   assert.equal(one.length, 2, "the psych-up glow is two drop-shadows, inner and outer");
   // ► **LINEAR IN THE SCALE, WHICH IS WHAT "ARRIVES IN DEVICE PIXELS" MEANS.**

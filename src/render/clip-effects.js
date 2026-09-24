@@ -44,21 +44,23 @@
  * ► **A DROP LIVES EXACTLY 25 FRAMES**, which at the build's 30 fps is 0.83
  *   seconds, and it is removed rather than fading.
  *
- * ## The units are ARENA UNITS already, and that is not a coincidence
+ * ## The units are the FIGHTER CLIP's, which is the arena's times `_yscale`
  *
- * A drop is attached to `arena.gladiators` (`+0x01de`), which is the same
- * display object the two fighters are attached to — so its `_x`/`_y` are in the
- * space the gladiators' own `_x` lives in. **That space is this engine's arena
- * units**: `SS2_ARENA.frontX` is 250 because the build constructs its fighters
- * at `_x = ±250`, out of the same coordinates. So a spawn band of `-220..-71`
- * is 220-odd arena units above the gladiators' line, against a figure 150 units
- * tall — a spray that leaves above head height and rises about two more figure
- * heights before gravity wins.
- *
- * **Nothing is converted, and nothing should be.** The shield attach offset was
- * added to twips when it was in pixels and drew twenty times too close
- * (2026-09-13); this is the opposite case, where the two spaces genuinely are
- * one and a conversion would be the error.
+ * ~~A drop is attached to `arena.gladiators` (`+0x01de`) ... So a spawn band of
+ * `-220..-71` is 220-odd arena units above the gladiators' line, against a
+ * figure 150 units tall ... **Nothing is converted, and nothing should be.**~~
+ * **Corrected 2026-09-23.** `+0x01de` is `register:1.attachMovie("blood", …)`,
+ * and `register:1` is the FIGHTER CLIP — the branch at `+0x0163` compares it
+ * against `_root.arena.gladiators.hero` to pick whose armour to read. So a
+ * drop's `_x`/`_y` are in the clip's own space: the arena's, scaled by that
+ * fighter's `_yscale` (`physical_size`), because root frame 221 attaches the
+ * clip to `arena.gladiators` 1:1 and sizes it with nothing else. The spawn band
+ * `-220..-71` is then crown-to-waist of the gladiator it came out of, at any
+ * strength — the build's figure is its 222.65-pixel `standing` clip, not the
+ * 150 units the arena used to draw. `clipToArenaScale` in
+ * `extracted-figure.js` is the conversion, and `test/render-clip-effects.test.js`
+ * pins it against the body's own crown. The shield lesson (twips against
+ * pixels, 2026-09-13) still stands; it is simply not this case.
  *
  * ## Screen y is DOWN here, and it is not converted
  *

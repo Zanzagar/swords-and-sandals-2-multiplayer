@@ -77,6 +77,7 @@
 import { EliminationEvent } from "../team/elimination.js";
 import { ss2ArrowFrameFor, ss2RangedWeaponFor } from "../team/ss2-weapon-table.js";
 import { SS2_ARENA, ss2PhysicalSize } from "../team/ss2-rules.js";
+import { SS2_FIGURE_HALF_WIDTH } from "../common/ss2-figure.js";
 import { BATTLE_RESULT_PENDING_TYPE } from "../team/settlement.js";
 import { bindingPlanFor, resultLabelsFor } from "./slot-layout.js";
 import { CANONICAL_FACING_LEFT } from "./state-bridge.js";
@@ -959,13 +960,29 @@ function resourceValueOf(combatant, name) {
  *   `+0x6cb4`, an arrow that crosses the target's centre and is removed on the
  *   same tick. The cosmetic approximation is kept exactly where it improves the
  *   picture and dropped exactly where it makes it worse.
+ *
+ * ► **THE SURFACE IS THE DRAWN BODY'S, NOT `physical_size`, since 2026-09-23.**
+ *   ~~`target.x ∓ physical_size`~~ was the walk clamp's personal space (86 at
+ *   strength 9), and once the gladiator was drawn at the build's size it left
+ *   every arrow ~45 units IN FRONT of a body only ~41 units half-wide. The stop
+ *   is now the target's drawn front surface, `SS2_FIGURE_HALF_WIDTH` (the
+ *   `standing` clip's own bounds, `src/common/ss2-figure.js`) at its
+ *   `physical_size`, and "inside another body" is judged against that body's
+ *   drawn half-width the same way. BOTH LESSONS ABOVE STAND: the arrow stops at
+ *   the surface rather than inside the model, and it still drops to the
+ *   build's centre-x end when that surface is inside somebody else. The walk
+ *   clamp parks the shooter's front-liner `physical_size` from the target, so
+ *   between two strength-9 gladiators there are ~3 units between his back and
+ *   the target's front — the stop now lands in that gap, on the target, where
+ *   it used to land on the front-liner.
  */
 function stopShortFor(shooter, target, combatants) {
   const size = ss2PhysicalSize(target);
   if (!Number.isFinite(size) || size <= 0) return 0;
-  if (!Number.isFinite(shooter?.x) || !Number.isFinite(target?.x)) return size;
+  const surface = drawnHalfWidthOf(target);
+  if (!Number.isFinite(shooter?.x) || !Number.isFinite(target?.x)) return surface;
   const direction = target.x >= shooter.x ? 1 : -1;
-  const terminal = target.x - direction * size;
+  const terminal = target.x - direction * surface;
   for (const other of combatants.values()) {
     if (!other || other === shooter || other === target) continue;
     if (other.alive === false) continue;
@@ -973,9 +990,14 @@ function stopShortFor(shooter, target, combatants) {
     // Depth first: a body in another rank is not in the way of anything, and
     // `null` on either end means this rule set models no depth at all.
     if (Number.isFinite(other.y) && Number.isFinite(target.y) && other.y !== target.y) continue;
-    if (Math.abs(other.x - terminal) <= ss2PhysicalSize(other)) return 0;
+    if (Math.abs(other.x - terminal) <= drawnHalfWidthOf(other)) return 0;
   }
-  return size;
+  return surface;
+}
+
+/** How far a gladiator's drawn body reaches either side of its `x`, at its own size. */
+function drawnHalfWidthOf(combatant) {
+  return SS2_FIGURE_HALF_WIDTH * ss2PhysicalSize(combatant) / 100;
 }
 
 /**
@@ -1176,13 +1198,14 @@ function projectileFor(wire, combatants, event) {
     /** 1-based, as `gotoAndStop` indexes it, or null when the bow is unknown. */
     artFrame: ss2ArrowFrameFor(bow),
     /**
-     * The TARGET's `physical_size`, so the flight ends at its body rather than
-     * inside it — the owner watched an arrow clip into the model.
+     * How far short of the TARGET's centre the flight ends: its drawn body's
+     * half-width at its `physical_size`, so the arrow ends at its body rather
+     * than inside it — the owner watched an arrow clip into the model — or 0
+     * when that point is inside somebody else. See `stopShortFor`.
      *
-     * `80 + round(strength / 1.5)` (`battlevalues` `+0x30f1`), taken from the
-     * projection's own stats rather than re-stated here: it is the same number
-     * the walk clamp uses to stop a gladiator against a body, and two copies of
-     * it could disagree.
+     * ~~The target's `physical_size`~~ until 2026-09-23: the walk clamp's
+     * number, which left the arrow ~45 units in front of a body drawn at the
+     * build's size.
      */
     targetSize: stopShortFor(shooter, target, combatants),
     // ► **`y` IS ARENA DEPTH AND IS CARRIED EVEN WHEN NULL**, the same rule the

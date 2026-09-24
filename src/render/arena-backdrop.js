@@ -858,10 +858,20 @@ export function midwaypointFor(input) {
 /**
  * A gladiator's own half-width in arena units, for the fit below.
  *
- * AUTHORED, and it is the same figure `viewportFor` has carried since the
- * arena was first drawn: about 105 units of reach and body either side of where
- * a gladiator stands. It is a margin, not a measurement — being ten units out
- * moves the fit by under two percent.
+ * AUTHORED: about 105 units of reach and body either side of where a gladiator
+ * stands. It is a margin, not a measurement — being ten units out moves the fit
+ * by under two percent.
+ *
+ * ► ~~"it is the same figure `viewportFor` has carried since the arena was
+ *   first drawn"~~ — **not since 2026-09-23**, when the fitted view's margin
+ *   was rescaled with the authored figure to `0.7 * SS2_FIGURE_HEIGHT` (155.9).
+ *   This one was deliberately LEFT, because it frames the build's own rig,
+ *   and measured against that rig it is already right: at `_yscale` 100 the
+ *   rig reaches -118.9 to +120.9 across its walks, attacks, hurts, shots, taunt
+ *   and defend (±44-48 standing; the death clips spread to ±390 and are not
+ *   framed for), so ~104 at the demo roster's `_yscale` 86. A strength-50
+ *   gladiator (`_yscale` 113) reaches ~137, 32 past this margin, and only when
+ *   the fit rather than a zoom band is what binds.
  */
 export const FIGURE_HALF_WIDTH = 105;
 

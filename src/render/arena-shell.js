@@ -29,6 +29,8 @@
  * values and returns values, which is the only reason the suite can reach it.
  */
 
+import { SS2_FIGURE_HEIGHT } from "./painter.js";
+
 export class ArenaShellError extends Error {
   constructor(message) {
     super(message);
@@ -202,6 +204,15 @@ export function rankOfDepth(drawnY, slotIndex, { frontY, rankStride }) {
  * of times looser than the width term, so they never bind and the
  * one-dimensional arena is pixel-identical. That is asserted, not assumed.
  */
+/**
+ * The fitted view's side margin, in figure heights: 105 of the old 150. Authored.
+ * NOT the stage camera's `FIGURE_HALF_WIDTH` any more, which frames the build's
+ * own rig and was left at 105 because that rig measures ~104 at `_yscale` 86.
+ */
+const FITTED_HALF_WIDTH_FIGURES = 105 / 150;
+/** The fitted view's vertical bound, in figure heights: 250 of the old 150. Authored. */
+const FITTED_HEIGHT_FIGURES = 250 / 150;
+
 export function viewportFor({ width, height, actors = [], frontY, minExtent = 250 }) {
   let extent = minExtent;
   let rearY = frontY;
@@ -210,12 +221,18 @@ export function viewportFor({ width, height, actors = [], frontY, minExtent = 25
     if (Number.isFinite(actor.x)) extent = Math.max(extent, Math.abs(actor.x));
     if (Number.isFinite(actor.y)) rearY = Math.min(rearY, actor.y);
   }
-  // A gladiator is about 150 arena units tall and swings about half that wide.
-  const halfWidth = extent + 105;
+  // A gladiator is `SS2_FIGURE_HEIGHT` tall and swings about half that wide.
+  // ► ~~"about 150 arena units tall"~~, with `extent + 105` and `height / 250`
+  //   written for it, until 2026-09-23 — when the authored figure grew to the
+  //   build's 222.65 and a front-rank crown left the top of a wide, short
+  //   canvas. Both numbers are kept as the SAME FRACTIONS of a figure they
+  //   always were — 105 = 0.7 of 150, 250 = 5/3 of it — so the fitted view
+  //   frames the same composition, in the build's units.
+  const halfWidth = extent + SS2_FIGURE_HEIGHT * FITTED_HALF_WIDTH_FIGURES;
   const depthUnits = frontY - rearY;
   const MIN_HORIZON_FRACTION = 0.18;
   const depthScaleCap = (height * (1 - MIN_HORIZON_FRACTION)) * 0.62 / (depthUnits * 1.7 + 30);
-  const scale = Math.min(width / (halfWidth * 2), height / 250, depthScaleCap);
+  const scale = Math.min(width / (halfWidth * 2), height / (SS2_FIGURE_HEIGHT * FITTED_HEIGHT_FIGURES), depthScaleCap);
   const depthSpan = depthUnits * scale * 1.7;
   const FLOOR_MARGIN = scale * 30;
   const horizon = Math.max(

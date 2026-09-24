@@ -37,17 +37,28 @@
  *   and **y UP**, which is the contract `painter.js` already emits under and
  *   the shell already consumes.
  *
- * So every placement is composed with one fixed transform — scale to the
- * arena's idea of a gladiator's height, flip y, and put the feet on the ground
- * — and the result is handed to the shell as a matrix it can apply directly.
- * Composing once here rather than per path is why a pose costs thirteen matrix
- * multiplies and not thirteen hundred.
+ * So every placement is composed with one fixed transform — the build's own
+ * scale, which is one arena unit per clip pixel (`ARENA_UNITS_PER_CLIP_PIXEL`,
+ * with the derivation), flip y, and put the feet on the ground — and the result
+ * is handed to the shell as a matrix it can apply directly. The shell then
+ * applies the fighter's `physical_size` as the origin's `size`, exactly as the
+ * build applies it as `_yscale`. Composing once here rather than per path is
+ * why a pose costs thirteen matrix multiplies and not thirteen hundred.
+ *
+ * ► ~~"scale to the arena's idea of a gladiator's height"~~ **was the defect,
+ *   corrected 2026-09-23.** The arena's idea was the authored figure's 150
+ *   units times a vitality multiplier, and it drew the build's gladiator at
+ *   about two thirds of the build's size. The build has no idea of a height:
+ *   it draws the clip 1:1 and scales it by `physical_size`.
  *
  * ► **THE DATUM IS THE `standing` ANIMATION AND IT MUST BE**, not whichever
- *   animation is playing. Scaling each animation to its own bounds would make
- *   the gladiator SHRINK when he crouches and GROW when he leaps, because a
- *   taller drawing would be squeezed into the same arena height. The reference
- *   is measured once per pack and every animation shares it.
+ *   animation is playing — for the GROUND and the MIDLINE, which is all it is
+ *   the datum for now that the size is the build's. Grounding each animation
+ *   on its own lowest point would make the gladiator hop whenever a clip's
+ *   lowest limb moved. The reference is measured once per pack and every
+ *   animation shares it. (It USED to be the size datum too, which made
+ *   `clipHeight` a divisor; it is still validated, because a pack without a
+ *   standing height has no ground either.)
  *
  * ## THE ENCLOSING GROUPS' FILTERS — carried since 2026-09-15
  *
@@ -142,12 +153,39 @@ export class ExtractedFigureError extends Error {
 const TWIPS_PER_PIXEL = 20;
 
 /**
- * The arena height of a gladiator at `build.height` 1, matching `painter.js`'s
- * own `UNIT`. Duplicated as a NAMED constant rather than imported because the
- * two files answer to the same authored figure and a silent divergence would
- * show up as the extracted rig standing a different height from the drawn one.
+ * ARENA UNITS PER PIXEL OF THE FIGHTER CLIP'S OWN SPACE — the build's, and it
+ * is exactly one.
+ *
+ * Root frame 221 (`root/frame:221/DoAction@0x671acd`) attaches the fighter
+ * straight into the arena and sizes it with one number:
+ *
+ * ```text
+ *   arena_hero    = arena.gladiators.attachMovie("hero_battle", "hero",    301)  +0x051d
+ *   arena_villain = arena.gladiators.attachMovie("hero_battle", "villain", 300)  +0x0546
+ *   arena_hero._xscale = arena_hero._yscale = 80 + round(strength / 1.5)         +0x061e-+0x06a1
+ * ```
+ *
+ * `hero_battle` is character 1241, the clip this pack is cut from; its own
+ * frame scripts write no scale. `arena.gladiators` is the object whose units
+ * ARE this engine's arena units — the fighters stand in it at `_x` ±250, `_y`
+ * 200, and the rocks, the arrow and the bolt are attached to it too. So one
+ * clip pixel is one arena unit at `_yscale` 100, and `physical_size` is the
+ * WHOLE of a gladiator's size. That half is the shell's: `figureScaleFor`
+ * turns the place-clip's `yscale` into the origin's `size`.
+ *
+ * ► ~~`const UNIT = 150` — "the arena height of a gladiator at `build.height`
+ *   1, matching `painter.js`'s own `UNIT`"~~ — **WRONG UNTIL 2026-09-23, AND
+ *   IT DREW EVERY GLADIATOR AT ABOUT TWO THIRDS OF THE BUILD'S SIZE.** 150 is
+ *   the AUTHORED figure's height and `build.height` an AUTHORED multiplier from
+ *   vitality (0.92-1.08), from `painter.js` and `figure.js`, carried over when the
+ *   extracted rig arrived and never measured against the build. Composed with
+ *   the 222.65-pixel `standing` clip that was `150 × 0.96 / 222.65` = 64.7% of
+ *   the build's size for the demo roster (vitality 5), on top of the
+ *   `physical_size` the shell was already applying correctly. The build's own
+ *   arrow gave it away: it leaves at `_yscale × 2 + 30` = 230 units up, about
+ *   the crown of a 222.65-unit clip and 80 units over a 150-unit one.
  */
-const UNIT = 150;
+const ARENA_UNITS_PER_CLIP_PIXEL = 1;
 
 /** The animation every other one is measured against. */
 const REFERENCE_LABEL = "standing";
@@ -188,7 +226,7 @@ export function figurePackFrom(shapes, animations, enchantments = null) {
   }
   const clipHeight = bounds.yMax - bounds.yMin;
   if (!(clipHeight > 0)) {
-    throw new ExtractedFigureError(`The \`${REFERENCE_LABEL}\` animation has no height, so nothing can be scaled to it.`);
+    throw new ExtractedFigureError(`The \`${REFERENCE_LABEL}\` animation has no height, so it gives the figure no ground to stand on.`);
   }
   return Object.freeze({
     shapes,
@@ -229,14 +267,26 @@ export function figurePackFrom(shapes, animations, enchantments = null) {
  *   band the drops spawn in (`-220 + RandomNumber(150)`) and exactly where the
  *   bounce triggers (`_y > 0`, the ground).
  *
- *   A surface that anchored those numbers in ARENA units would spray blood four
- *   hundred units into the sky. This is the same factor `paintExtractedFigure`
- *   already composes into every limb matrix, named once so the two cannot
- *   disagree.
+ *   ~~A surface that anchored those numbers in ARENA units would spray blood
+ *   four hundred units into the sky.~~ **The clip's space and the arena's
+ *   differ by the fighter's `_yscale` and by nothing else** (see
+ *   `ARENA_UNITS_PER_CLIP_PIXEL`), so a drop anchored in clip units and then
+ *   given the figure's own `size` lands where the build puts it. The sentence
+ *   struck through was true only of the 150-unit figure this used to draw.
+ *   This is the same factor `paintExtractedFigure` composes into every limb
+ *   matrix, named once so the two cannot disagree.
+ *
+ * @param {object} pack    from `figurePackFrom`
+ * @param {number} [height] a caller's own multiplier ON TOP OF the build's
+ *   size, default 1. **The arena passes none**: the build's only size input is
+ *   `_yscale`, which reaches the draw as the origin's `size`. It is kept for a
+ *   caller that genuinely wants a figure bigger or smaller than the build draws
+ *   it — never for the authored figure's vitality multiplier, which is what it
+ *   carried until 2026-09-23.
  */
 export function clipToArenaScale(pack, height = 1) {
   if (!hasExtractedArt(pack)) return null;
-  return (UNIT * height) / pack.clipHeight;
+  return ARENA_UNITS_PER_CLIP_PIXEL * height;
 }
 
 /** Whether a pack is usable at all. Cheap, and the shell's fallback test. */
@@ -1165,8 +1215,10 @@ function emitFigureOps(pack, options, invoice, collected = null) {
   if (!Array.isArray(pose)) return [];
 
   // ONE transform for the whole figure: arena units per clip pixel, y flipped,
-  // feet on the ground, centred on the reference animation's own midline.
-  const scale = (UNIT * height) / pack.clipHeight;
+  // feet on the ground, centred on the reference animation's own midline. The
+  // factor is `clipToArenaScale`'s — the build's 1:1 — so the blood, the face
+  // and the limbs are sized by one function.
+  const scale = clipToArenaScale(pack, height);
   const alpha = 1 - (Number.isFinite(fade) ? fade : 0);
   const ops = [];
 
@@ -1176,9 +1228,11 @@ function emitFigureOps(pack, options, invoice, collected = null) {
   //   pack's 12 groups, all of which are at a top-level depth. `scale` above is
   //   arena units per clip pixel, and `canvasScale` is the caller's canvas
   //   pixels per ARENA unit, so their product is what `canvasFilterFor` wants.
-  //   A caller cannot supply the first factor — it depends on `pack.clipHeight`
-  //   and on `height` — so asking for the whole thing would be asking the shell
-  //   to re-derive a number only this file holds.
+  //   The first factor is `clipToArenaScale`'s — the build's 1:1 times the
+  //   caller's `height` — so asking the shell for the whole product would be
+  //   asking it to restate a derivation this file holds. ~~It depends on
+  //   `pack.clipHeight`~~ — it did, while the figure was fitted to an authored
+  //   150-unit height; it has not since 2026-09-23.
   //
   //   **The default of 1 puts the radius in ARENA UNITS, which is the same
   //   space the op's own `matrix` maps into.** That is the invariant worth
@@ -1564,7 +1618,10 @@ function emitFigureOps(pack, options, invoice, collected = null) {
  * @param {object} pack from `figurePackFrom`
  * @param {object} options `{family, label, facing, at, height, fade, wardrobe,
  *   loadout, scale}` — `scale` is canvas pixels per ARENA unit and reaches only
- *   the filter strings; see `emitFigureOps`.
+ *   the filter strings; see `emitFigureOps`. `height` is a multiplier on the
+ *   BUILD's size, default 1, and the arena passes none: see
+ *   `clipToArenaScale`. The operations come out at `_yscale` 100, one arena
+ *   unit per clip pixel; the fighter's `physical_size` is the origin's `size`.
  * @returns {ReadonlyArray<object>} operations in paint order, or `[]`
  */
 export function paintExtractedFigure(pack, options = {}) {

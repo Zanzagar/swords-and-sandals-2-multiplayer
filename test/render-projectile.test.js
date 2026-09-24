@@ -14,10 +14,12 @@
  *   arc on bombard ONLY, the flat 60 for a snipe, snipe loosed LOWER than
  *   bombard, the `± 30` launch offset, a trail puff every third frame.
  * - **Ours, each with its reason in the source**: the bombard velocity's
- *   SOURCE (the build draws it and a renderer here may not), the launch heights
- *   expressed in figure heights rather than the build's screen pixels, and the
- *   DEPTH axis, which vanilla does not have because both its gladiators stand
- *   at `_y = 200`.
+ *   SOURCE (the build draws it and a renderer here may not), the arc's peak
+ *   normalised to one launch height, and the DEPTH axis, which vanilla does
+ *   not have because both its gladiators stand at `_y = 200`. (~~"the launch
+ *   heights expressed in figure heights rather than the build's screen
+ *   pixels"~~ until 2026-09-23: the launch heights are the build's own, in
+ *   arena units, for the shooter's own `_yscale`.)
  *
  * THE ASSERTIONS PROVE, THEY DO NOT STATE: every sweep asserts it found the
  * case it was sweeping for.
@@ -37,11 +39,16 @@ import {
   projectileFlight,
   projectileTrail,
   figureScaleFor,
+  figureSpecFor,
+  paintFigure,
+  poseAt,
   rankOfDepth,
+  timelineFor,
   ProjectileError,
   ProjectileKind,
   SS2_PROJECTILE
 } from "../src/render/index.js";
+import { SS2_FIGURE_HALF_WIDTH } from "../src/common/ss2-figure.js";
 import { CommandKind, SS2_STATIC_MAP_BINDINGS, presentResolvedEvents, buildArenaLayout } from "../src/adapter/index.js";
 
 const shot = (overrides = {}) => projectileFlight({
@@ -176,72 +183,133 @@ test("a BOMBARD clears a standing body and a SNIPE does not — the measurement 
   //   arc changed, the rule over there would quietly stop being true and
   //   nothing would say so.
   //
-  //   A gladiator is exactly 1.0 figure heights tall, which is what
-  //   `bombardLaunchHeight` is anchored to.
-  const BODY_HEIGHT = 1;
-
-  // A blocker can only stand BETWEEN the two, and no nearer either end than one
-  // body — closer than that and they are standing inside somebody. `86` is
-  // `physical_size` at the demo roster's strength 9.
-  const BODY_WIDTH = 86;
-  let worstClearance = Infinity;
-  let sawARange = false;
-  for (const distance of [200, 400, 630, 1000, 2000, 4000]) {
-    const flight = projectileFlight({
-      kind: ProjectileKind.BOMBARD,
-      from: { x: 0, y: 200 },
-      to: { x: distance, y: 200 },
-      sequence: 3
-    });
+  // ► ~~Measured on `projectileAt().height` against "a gladiator 1.0 figure
+  //   heights tall"~~ **until 2026-09-23 — a number the drawing never used.** A
+  //   Codex review found the DRAWN lob 159.66 up under an identical bystander's
+  //   191.48 crown while this test, reading the arc underneath the drawing,
+  //   passed; it could not fail on the defect it existed to catch. It now
+  //   measures `projectileDrawAt().lift` — what the screen shows — over a
+  //   blocker's DRAWN body, against the crown the authored painter draws, for
+  //   a blocker every 25 units between the two and at the walk clamp in front
+  //   of the target, the shooter's size and a much bigger one.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const bareCrown = Math.max(...paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" }),
+    poseAt(timelineFor("Standing", { role: "actor" }), 0)
+  ).flatMap((op) => op.kind === "polygon" ? op.points.map(([, y]) => y) : op.kind === "circle" ? [op.y + op.r] : []));
+  // ► **AWAY FROM THE ENDS, since a fourth Codex finding the same day**: a lob
+  //   is `chord + k * bulge` with one capped `k` per flight (`lobLiftAt`), and
+  //   near either end no capped raise can clear a tall body — so the promise,
+  //   and this measurement, is every point at least `LOB_END_ROOM` (140, derived
+  //   in `projectile.js`) from the launch and from the landing. `endRoom: 0`
+  //   measures the whole body, for the snipe below.
+  const drawnOver = (flight, blocker, { endRoom = 140 } = {}) => {
+    const reach = SS2_FIGURE_HALF_WIDTH * blocker.yscale / 100;
+    const landingX = projectileDrawAt(flight, 1, view).x;
     let lowest = Infinity;
-    // Sub-frame steps: the arrow is only sampled per frame in play, but the
-    // CLAIM is about the continuous curve, and a coarse sweep could step over
-    // the low point.
-    for (let t = 0; t <= flight.flightFrames; t += 0.1) {
-      const point = projectileAt(flight, t);
-      if (point.x < BODY_WIDTH || point.x > distance - BODY_WIDTH) continue;
-      lowest = Math.min(lowest, point.height);
+    let highest = -Infinity;
+    for (let x = blocker.x - reach; x <= blocker.x + reach; x += 1) {
+      const t = (x - flight.launch.x) / (flight.direction * flight.xVelocity);
+      if (t < 0 || t > flight.flightFrames) continue;
+      if (Math.abs(x - flight.launch.x) < endRoom || Math.abs(landingX - x) < endRoom) continue;
+      const point = projectileDrawAt(flight, t / flight.flightFrames, view);
+      if (Math.abs(point.x - blocker.x) > reach) continue;
+      lowest = Math.min(lowest, point.lift);
+      highest = Math.max(highest, point.lift);
     }
-    if (lowest === Infinity) continue;   // too short for anybody to stand in
-    sawARange = true;
-    worstClearance = Math.min(worstClearance, lowest);
-    assert.ok(
-      lowest > BODY_HEIGHT,
-      `bombard over ${distance}: lowest ${lowest.toFixed(3)} must clear a body of ${BODY_HEIGHT}`
-    );
+    return { lowest, highest };
+  };
+  // `stopShortFor`'s rule: the drawn front, or the centre when that is inside the blocker.
+  const stopFor = (targetX, blocker) => {
+    const surface = SS2_FIGURE_HALF_WIDTH * 86 / 100;
+    return Math.abs(blocker.x - (targetX - surface)) <= SS2_FIGURE_HALF_WIDTH * blocker.yscale / 100 ? 0 : surface;
+  };
+
+  let measured = 0;
+  for (const distance of [200, 400, 630, 1000, 2000, 4000]) {
+    for (const blockerYscale of [86, 113]) {
+      const spots = [distance - 86];
+      for (let x = 86; x < distance - 86; x += 25) spots.push(x);
+      for (const bx of spots) {
+        const blocker = { x: bx, y: 200, yscale: blockerYscale };
+        const crown = bareCrown * blockerYscale / 100;
+        for (let sequence = 0; sequence <= 10; sequence += 1) {
+          const bombard = projectileFlight({
+            kind: ProjectileKind.BOMBARD, from: { x: 0, y: 200 }, to: { x: distance, y: 200 }, sequence,
+            targetSize: stopFor(distance, blocker), shooterYscale: 86, targetYscale: 86, bodies: [blocker]
+          });
+          const over = drawnOver(bombard, blocker);
+          if (over.lowest === Infinity) continue;
+          measured += 1;
+          assert.ok(over.lowest > crown,
+            `bombard over ${distance}, v${bombard.xVelocity}: ${over.lowest.toFixed(1)} over a ${blockerYscale} body at ${bx} whose crown is ${crown.toFixed(1)}`);
+        }
+      }
+    }
   }
-  assert.ok(sawARange, "the sweep must contain a range with room for a blocker, or it proves nothing");
-  assert.ok(worstClearance > 1, `worst clearance across every range: ${worstClearance.toFixed(3)}`);
+  assert.ok(measured > 500, `the sweep must actually pass over blockers, or it proves nothing: ${measured}`);
 
   // ► **AND THE SNIPE MUST FAIL THE SAME TEST**, or the two rules are not
-  //   telling the two shots apart and the whole split is decoration.
+  //   telling the two shots apart and the whole split is decoration. Drawn
+  //   straight, shoulder to shoulder, it goes through anybody in the way.
+  const blocker = { x: 315, y: 200, yscale: 86 };
   const snipe = projectileFlight({
-    kind: ProjectileKind.SNIPE,
-    from: { x: 0, y: 200 },
-    to: { x: 630, y: 200 },
-    sequence: 3
+    kind: ProjectileKind.SNIPE, from: { x: 0, y: 200 }, to: { x: 630, y: 200 }, sequence: 3,
+    shooterYscale: 86, targetYscale: 86, bodies: [blocker]
   });
-  const snipeHeight = projectileAt(snipe, snipe.flightFrames / 2).height;
-  assert.ok(
-    snipeHeight < BODY_HEIGHT,
-    `a snipe flies at ${snipeHeight.toFixed(3)} — chest height, and straight through anybody in the way`
-  );
+  const through = drawnOver(snipe, blocker, { endRoom: 0 });
+  assert.ok(through.highest < bareCrown * 0.86,
+    `a snipe flies at ${through.highest.toFixed(1)} — chest height, and straight through anybody in the way`);
 });
 
 test("a snipe is loosed LOWER than a bombard, which is the build's own relationship", () => {
   // `_y = attacker._y - (_yscale * 2 + 30)` for a bombard (`+0x6e42`) against
-  // `_yscale * 1.5 + 5` for a snipe (`+0x6e9e`) — 230 against 155 screen pixels
-  // at the nominal scale.
+  // `_yscale * 1.5 + 5` for a snipe (`+0x6e9e`) — 230 against 155 ARENA UNITS
+  // at the nominal scale (~~screen pixels~~; the bullet is attached to the
+  // object the fighters stand in, see the test below).
   //
-  // ► **THE RATIO IS WHAT IS PORTED, NOT THE PIXELS**, and this project has
-  //   already paid once for the other choice: the shield attach offset was
-  //   added to twips when it was in ActionScript pixels and drew twenty times
-  //   too close (2026-09-13). Two coordinate systems do not share a unit; the
-  //   relationship between two numbers in ONE of them does survive.
+  // ► ~~**THE RATIO IS WHAT IS PORTED, NOT THE PIXELS** ... Two coordinate
+  //   systems do not share a unit~~ — **these two do, corrected 2026-09-23**,
+  //   and the numbers are now ported as numbers. The ratio still holds at the
+  //   nominal `_yscale`, which is what this asserts.
   const bombard = shot();
   const snipe = shot({ kind: ProjectileKind.SNIPE });
   assert.ok(snipe.launch.height < bombard.launch.height, "the flat shot leaves from the shoulder");
   assert.equal(snipe.launch.height / bombard.launch.height, 155 / 230);
+});
+
+test("THE ARROW LEAVES AT THE BUILD'S OWN HEIGHT FOR ITS SHOOTER — just over the crown of the figure the arena draws", () => {
+  // ► **THE BUILD'S LAUNCH HEIGHTS ARE ARENA UNITS, NOT SCREEN PIXELS.** The
+  //   bullet is attached to `arena.gladiators` (`+0x6da2`), the same object
+  //   both fighters stand in, and placed relative to the shooter's own `_y`:
+  //
+  //     bombard   bullet._y = attacker._y - (attacker._yscale * 2 + 30)     +0x6e42-+0x6e76
+  //     snipe     bullet._y = attacker._y - (attacker._yscale * 1.5 + 5)    +0x6e9e-+0x6ed6
+  //
+  //   So a strength-9 shooter (`physical_size` 86) looses a bombard 202 units
+  //   up and a snipe 134, and with no size stated the clip's own `_yscale` 100
+  //   gives 230 and 155.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const liftAt = (kind, shooterYscale) => projectileDrawAt(projectileFlight({
+    kind, from: { x: -300, y: 200 }, to: { x: 300, y: 200 }, sequence: 0, shooterYscale
+  }), 0, view).lift;
+  assert.equal(liftAt(ProjectileKind.BOMBARD, 86), 202, "86 * 2 + 30");
+  assert.equal(liftAt(ProjectileKind.SNIPE, 86), 134, "86 * 1.5 + 5");
+  assert.equal(liftAt(ProjectileKind.BOMBARD), 230, "no size stated: the clip's own `_yscale` 100");
+  assert.equal(liftAt(ProjectileKind.SNIPE), 155);
+
+  // ► **AND THAT IS THE HEAD OF THE FIGURE THE ARENA DRAWS**, which is the
+  //   attachment this asserts: the build draws that shooter's `standing` clip,
+  //   222.65 pixels from sole to crown, at 86%. ~~150 arena units per figure
+  //   height~~ put the bombard 26 units over a 124-unit figure until
+  //   2026-09-23; the build puts it 10.5 over a 191.5-unit one.
+  const crown = 222.65 * 0.86;
+  const bombard = liftAt(ProjectileKind.BOMBARD, 86);
+  assert.ok(bombard > crown && bombard - crown < crown * 0.1,
+    `a bombard leaves just over the crown (${crown.toFixed(1)}), at ${bombard}`);
+  const snipe = liftAt(ProjectileKind.SNIPE, 86);
+  assert.ok(snipe > crown * 0.5 && snipe < crown * 0.8,
+    `a snipe leaves from the shoulder, at ${(snipe / crown).toFixed(2)} of the figure`);
 });
 
 test("the launch is the BOW ARM, thirty units toward the target, whichever way it faces", () => {
@@ -656,17 +724,20 @@ test("a null depth draws at the FRONT RANK, and that decision is not the shell's
 });
 
 test("the lift arrives in ARENA UNITS, so a surface hands it straight to toY", () => {
-  // The flight reports height in FIGURE HEIGHTS — the one unit the build's
-  // screen pixels can honestly be ported into — and the conversion happens
-  // once, here, rather than in every surface that draws one.
+  // The flight reports height in BOMBARD LAUNCH HEIGHTS and the conversion
+  // happens once, here, rather than in every surface that draws one. The unit
+  // is the build's own `_yscale * 2 + 30` — 230 arena units at the nominal
+  // `_yscale` 100, the bullet being attached to the object the fighters stand
+  // in. ~~`height * 150`, "figure heights x the arena height of a figure"~~
+  // until 2026-09-23: the AUTHORED figure's height, and ~101 units for this snipe.
   const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
   const flight = projectileFlight({
     kind: ProjectileKind.SNIPE, from: { x: -300, y: 200 }, to: { x: 300, y: 200 }, sequence: 0
   });
   const drawn = projectileDrawAt(flight, 0.5, view);
   const height = projectileAt(flight, 0.5 * flight.flightFrames).height;
-  assert.equal(drawn.lift, height * 150, "figure heights x the arena height of a figure");
-  assert.ok(drawn.lift > 50, "and it is a real arena distance, not a fraction");
+  assert.equal(drawn.lift, height * 230, "bombard launch heights x the build's bombard launch");
+  assert.equal(drawn.lift, 155, "and a flat snipe is `_yscale * 1.5 + 5` the whole way");
 });
 
 test("projectileDrawAt REFUSES to import the painter, so the injection is not optional", () => {

@@ -280,6 +280,21 @@ test("a rock starts at its own `_y` and falls `yspeed` a frame: lift is 200 minu
   assert.equal(at8.stage, "falling");
 });
 
+test("a rock over a BACK-RANK victim falls in that rank's scale, as the victim is drawn", () => {
+  // The build has one rank; here a victim two ranks back is drawn at that
+  // rank's depth scale (0.8 under these deps), and so is the rock's art. Its
+  // LIFT must be too, or a rock resting on the fighters' line at the front
+  // rests above it at the back. Authored, like every depth here: added
+  // 2026-09-23 with the arrow's, after a Codex review found drawn projectiles
+  // ignoring the depth scale their victims are drawn at.
+  const back = rock({ y: 200 - 97 * 2 });
+  assert.equal(boulderDrawAt(back, 0, DEPS).lift, 900 * 0.8, "900 up at the front, 720 at rank 2");
+  assert.equal(boulderDrawAt(back, 0, DEPS).size, 0.8, "the art at the same scale — the rock's own `_xscale` is 100");
+  const slow = rock({ y: 200 - 97 * 2, fall: { y0: -601, ySpeed: 50, scale: 50, landingFrame: 16 } });
+  assert.ok(Math.abs(boulderDrawAt(slow, 16 * PROJECTILE_FRAME_MS + 1, DEPS, { landedFrames: Infinity }).lift - 0.8) < 1e-9,
+    "and the lift ignores the rock's OWN scale, which sizes its art, not where it is");
+});
+
 test("it LANDS on its landing frame, at the `_y` its last step reached, and stays there", () => {
   // Frame 9: -700 + 900 = 200 > 150 — bounced, `gotoAndStop(4)`, and the move
   // is not taken again. So this rock rests on the fighters' own line.
