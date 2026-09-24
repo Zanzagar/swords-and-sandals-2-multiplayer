@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-23",
- "head": "8b83b5f",
+ "head": "7060ac8",
  "lede": "Every system in the Swords & Sandals II team-arena project and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -643,12 +643,12 @@
   {
    "id": "sound-effects",
    "lane": "presentation",
-   "column": "in-progress",
+   "column": "gaps",
    "order": 47,
    "title": "Sound effects",
-   "summary": "Right sounds and true overlap are done (57 of 82 sounds bound to the fighter clip's labels; one voice per play, 16 at once). TIMING is being fixed now: every fighter sound played at the START of its clip, while the build starts it at its own frame inside the clip (a hurt 17 frames in); the extractor knew that frame and dropped it. Moving playback to Web Audio (no lag, cheap overlap) and adding a volume slider. Arrow victims' sounds now play at impact (this commit's neighbour).",
-   "gaps": "In-clip timing and Web Audio in progress. 25 extracted sounds are never played (crowd, chants, boos, victory stings, coins, music) and need a byte mapping of where the build starts them.",
-   "next": "Merge the timing change, re-extract the sound pack from the player's copy so the frames are in it, then map the ambient and crowd sounds.",
+   "summary": "Built (7060ac8): every fighter sound now plays at the build's own frame inside its clip, following what is drawn (a delayed arrow or fireball victim included); both sounds of a two-sound label play (half of 19 labels' sounds had never played); playback moved to Web Audio (no lag, free overlap, 16 voices) with a volume slider and retrying loads. The sound pack is re-extracted with the frames in it.",
+   "gaps": "Sounds follow the DRAWN schedule, which is slower than the build in places (see 'Animation speed vs the build'). Not yet heard in a browser. clip-sequences.js says hurt9 sounds at frame 1266; the extractor measures 1267 (the label is at 1266).",
+   "next": "Listen to a bout; then the crowd, victory and music sounds (being mapped).",
    "evidence": "src/render/sound.js chooseSound/bindingsFrom; main.js 421-425, 661-812 (primeSoundCache, playFor, VOICES=16, showAudioPrompt); assets/sound/manifest.json has 80 label buckets (counted); test/render-sound.test.js.",
    "ownerDecision": "",
    "updated": "2026-09-23"
@@ -1094,9 +1094,39 @@
    "evidence": "tools/extract-wardrobe.mjs header (updatecharacter's attach table; Color on each limb's bareskin); src/render/extracted-figure.js loadoutFrom ('the engine does not model them yet, so ... the gladiator simply has no hair'); initcharacter reads skincolor, haircolor, hairstyle, facehairstyle, features (all-actions.txt ~62129).",
    "ownerDecision": "",
    "updated": "2026-09-23"
+  },
+  {
+   "id": "animation-speed-vs-the-build",
+   "lane": "presentation",
+   "column": "gaps",
+   "order": 2,
+   "title": "Animation speed vs the build",
+   "summary": "The arena's clip schedules run slower than the build in places: a knockback is drawn over 1560 ms where the build plays it in 633 ms at 30 fps. Sounds and blood follow the drawn schedule, so they inherit the difference.",
+   "gaps": "No measurement of every family's drawn duration against its frame count at 30 fps.",
+   "next": "Measure every clip family's drawn duration against frames / 30 fps, then decide whether clips play at the build's frame rate.",
+   "evidence": "Sound implementer, 2026-09-24 (agents/sound/demo-timing.out); src/render/timeline.js BEAT_MS.",
+   "ownerDecision": "",
+   "updated": "2026-09-24"
+  },
+  {
+   "id": "blood-on-continuation-runs",
+   "lane": "presentation",
+   "column": "gaps",
+   "order": 3,
+   "title": "Blood on continuation runs",
+   "summary": "Blood timing is derived from the un-joined animation, so for a run like hurt8 -> hurt9 or knockback the blood lands about twice as late as drawn, and blood thrown by the continuation clip never fires.",
+   "gaps": "Unfixed.",
+   "next": "Derive blood poses from the joined run, as src/render/sound-timing.js now does for sounds.",
+   "evidence": "tools/arena/main.js prepareEntry; sound implementer's report, 2026-09-24.",
+   "ownerDecision": "",
+   "updated": "2026-09-24"
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-24",
+   "text": "Sounds play at the build's own frame in each animation, both sounds of a two-sound moment play, and a volume slider (7060ac8)."
+  },
   {
    "date": "2026-09-23",
    "text": "Arrow hits now land: the victim's reaction, sound and number wait for the arrow instead of firing at the loose."
