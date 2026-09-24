@@ -14,7 +14,9 @@ import test from "node:test";
 import { applyAction, combatantById, createTeamBattle, legalActions } from "../src/team/resolver.js";
 import { SS2_FACING_LEFT, SS2_STATUS_FLAGS, createSs2TeamRules, ss2Combatant, ss2StatusToken } from "../src/team/ss2-rules.js";
 import { seatControllersFrom } from "../tools/arena/seats.js";
-import { NAME_PLATE_OUTLINE, conditionsFor, crowdMeterFor, namePlateFor, namePlateLayout, teamHudFor, teamStyleFor } from "../tools/arena/team-hud.js";
+import {
+  NAME_PLATE_OUTLINE, conditionsFor, crowdMeterFor, namePlateFor, namePlateLayout, teamHudFor, teamStyleFor, turnOrderFor
+} from "../tools/arena/team-hud.js";
 
 /* ------------------------------------------------------------------ */
 /* H1: the team colours                                                */
@@ -369,4 +371,24 @@ test("H2 (Codex review of H2, pass 3): nor damage the engine may not deal — a 
     const [chip] = conditionsFor([flag]);
     assert.match(chip.title, /none once that fighter has fallen/, `${chip.words}: "${chip.title}"`);
   }
+});
+
+/* ------------------------------------------------------------------ */
+/* H3: the turn-order strip                                            */
+/* ------------------------------------------------------------------ */
+
+test("H3: the strip is the engine's own initiative, in its order, each in his side's colour; whose turn it is marked, the fallen too", () => {
+  // `wireOf`'s initiative is red-1, blue-1, red-2, blue-2 — NOT the panels' order — and red-2 has fallen.
+  const entries = (order) => order.map((entry) => [entry.id, entry.name, entry.colour, entry.initial, entry.current, entry.alive]);
+  assert.deepEqual(entries(turnOrderFor(wireOf({ turnCursor: 1 }))), [
+    ["red-1", "RED-1", "#e0584f", "R", false, true],
+    ["blue-1", "BLUE-1", "#4c8fe0", "B", true, true],
+    ["red-2", "RED-2", "#e0584f", "R", false, false],
+    ["blue-2", "BLUE-2", "#4c8fe0", "B", false, true]
+  ]);
+  assert.deepEqual(turnOrderFor(wireOf({ turnCursor: 3 })).map((entry) => entry.current), [false, false, false, true]);
+  assert.deepEqual(turnOrderFor(wireOf({ turnCursor: 1, result: { winnerTeamId: "blue" } })).map((entry) => entry.current),
+    [false, false, false, false], "nobody's turn once the bout is decided");
+  // The same strip is in the whole HUD model, so the panels and the strip are read from one wire.
+  assert.deepEqual(teamHudFor({ wire: wireOf({ turnCursor: 1 }) }).turnOrder, turnOrderFor(wireOf({ turnCursor: 1 })));
 });

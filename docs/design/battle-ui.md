@@ -611,6 +611,16 @@ and the ring is squeezed onto the stage after it.
 4. **Turn-order strip (Q3c, Q10a):** a thin DOM strip just above the stage — every fighter in
    initiative order, team-coloured, the current one highlighted, the dead struck through. It never
    touches the canvas or the camera.
+   **Built 2026-09-24 (H3):** `turnOrderFor` in `tools/arena/team-hud.js` (also `teamHudFor`'s
+   `turnOrder`), drawn by `renderTurnStrip` into `#turn-strip`, an `<ol>` in the stage's column
+   above `#stage` at a fixed 30 px, redrawn with the side panel on every turn. The order is the
+   ENGINE's — the wire's `initiative` (the battle's own list, `rules.initiativeOrder`:
+   `ss2InitiativeOrder`) — and whose turn it is, `initiative[turnCursor]`; nothing is re-derived.
+   The current fighter is `aria-current="step"`; the fallen are struck through and say "(down)".
+   It never scrolls — a classic scrollbar would eat the fixed height (Codex review of H3) — so on a
+   narrow stage the chips shrink and the names end in an ellipsis, each chip titled with the whole
+   name. `test/arena-team-hud-bouts.test.js` holds it to `host.battle.initiative` after every
+   action.
 5. **Team colours (Q4, Q12):** red team `#e0584f`, blue team `#4c8fe0`; each name plate on the stage
    is tinted with a dark outline PLUS a coloured underline and a team initial (a cue that does not
    rely on colour alone); the panels and the strip use the same colours. The demo fighters' SKIN

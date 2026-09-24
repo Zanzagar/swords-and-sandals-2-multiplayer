@@ -281,8 +281,8 @@ function readingOf(value, max, shown = true) {
 }
 
 /**
- * THE TWO TEAM PANELS (H2; the owner's Q1a, Q2, Q3c) — and, in H3, the turn
- * order — from the host's wire projection.
+ * THE TWO TEAM PANELS (H2; the owner's Q1a, Q2, Q3c), the crowd meter and the
+ * turn-order strip (H3, `turnOrderFor`) — from the host's wire projection.
  *
  * Each row carries the build's THREE READINGS, and where each lives in the
  * engine:
@@ -312,6 +312,7 @@ export function teamHudFor({ wire, seats = null, crowdShown = true }) {
   return Object.freeze({
     actingId,
     crowd: crowdMeterFor(ss2CrowdInterestOf(wire), { shown: crowdShown }),
+    turnOrder: turnOrderFor(wire),
     teams: Object.freeze(teams.map((team) => {
       const style = teamStyleFor(team.id);
       const rows = [...team.combatants]
@@ -353,4 +354,43 @@ function rowOf(combatant, { style, actingId, seats }) {
     armour: readingOf(armourclass, resourceValue(combatant, "armourclass_max", armourclass), armourclass > 0),
     conditions: conditionsFor(combatant.status)
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* H3: the turn-order strip                                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * THE TURN-ORDER STRIP (H3; the owner's Q3c, Q10a): every fighter in the
+ * ENGINE's initiative order, each in his side's colour, the one whose turn it
+ * is marked, the fallen marked too.
+ *
+ * ► **THE ORDER IS THE ENGINE'S, NEVER RE-DERIVED HERE.** `wire.initiative`
+ *   is the battle's own list — `rules.initiativeOrder` at construction
+ *   (`ss2InitiativeOrder`: the build's `changeCombatants` alternates the
+ *   sides, it does not sort) — and `wire.turnCursor` is where the turn loop
+ *   stands in it; `advanceTurn` walks it and skips the fallen. So the strip
+ *   is that list as it stands, and whose turn it is, is
+ *   `initiative[turnCursor]` — nobody's once the bout is decided.
+ *
+ * @param {object} wire `host.wire()`
+ * @returns {{id: string, name: string, teamId: string, colour: string, initial: string, current: boolean, alive: boolean}[]}
+ */
+export function turnOrderFor(wire) {
+  const byId = new Map((wire?.teams ?? []).flatMap((team) => team.combatants.map((combatant) => [combatant.id, { combatant, teamId: team.id }])));
+  const cursor = wire?.result ? -1 : wire?.turnCursor;
+  return Object.freeze((wire?.initiative ?? []).flatMap((id, index) => {
+    const found = byId.get(id);
+    if (!found) return [];
+    const style = teamStyleFor(found.combatant.teamId ?? found.teamId);
+    return [Object.freeze({
+      id,
+      name: found.combatant.name,
+      teamId: style.teamId,
+      colour: style.colour,
+      initial: style.initial,
+      current: index === cursor,
+      alive: found.combatant.alive !== false
+    })];
+  }));
 }

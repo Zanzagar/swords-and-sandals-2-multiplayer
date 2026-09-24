@@ -1,5 +1,5 @@
 /**
- * THE TEAM HUD OVER WHOLE BOUTS (H2, H3 of `docs/design/battle-ui.md`,
+ * THE TEAM HUD OVER WHOLE BOUTS (H2 and H3 of `docs/design/battle-ui.md`,
  * "Team HUD, reach preview and the camera: DECIDED"): real bouts through the
  * arena's own host, seated as `tools/arena/main.js` seats them, with
  * `teamHudFor` read after EVERY action and every row held to the engine's own
@@ -158,4 +158,25 @@ test("H2: the HUD is presentation only — a spectated bout's state-hash sequenc
     playHeld({ perSide, kit, seed, query: "spectate=1" }, (hud, host) => read.push(host.hash()));
     assert.deepEqual(read, bare, `${perSide}v${perSide} ${kit || "plain"} seed ${seed}`);
   }
+});
+
+test("H3: whole bouts — the strip is the engine's initiative after every action: its order, whose turn, who has fallen", () => {
+  let checks = 0;
+  for (const perSide of [1, 2, 3]) {
+    for (const kit of ["", "tricks"]) {
+      for (const seed of [1, 4]) {
+        playHeld({ perSide, kit, seed, query: seed === 1 ? "play=red" : "spectate=1" }, (hud, host) => {
+          const battle = host.battle;
+          const where = `${perSide}v${perSide} ${kit || "plain"} seed ${seed} turn ${battle.turnNumber}`;
+          assert.deepEqual(hud.turnOrder.map((entry) => entry.id), battle.initiative, `${where}: the engine's own order`);
+          const acting = host.currentCombatantId();
+          assert.deepEqual(hud.turnOrder.filter((entry) => entry.current).map((entry) => entry.id), acting === null ? [] : [acting], where);
+          const alive = new Map(battle.teams.flatMap((team) => team.combatants).map((c) => [c.id, c.alive]));
+          for (const entry of hud.turnOrder) assert.equal(entry.alive, alive.get(entry.id), `${where}: ${entry.id}`);
+          checks += 1;
+        });
+      }
+    }
+  }
+  assert.ok(checks > 500, `the sweep is not empty (${checks})`);
 });

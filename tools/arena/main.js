@@ -5643,6 +5643,7 @@ function renderRoster() {
   const hud = teamHudFor({ wire: host.wire(), seats, crowdShown: crowdHeard });
   renderCrowdMeter(hud.crowd);
   el("roster").replaceChildren(...hud.teams.map(teamPanelNode));
+  renderTurnStrip(hud.turnOrder);
 }
 
 /** A small element with a class and, optionally, its text. */
@@ -5738,6 +5739,31 @@ function readingNode(label, reading, kind) {
   meter.append(fill);
   node.append(hudNode("span", "label", label), meter, hudNode("span", "num", reading.shown ? `${reading.value} / ${reading.max}` : "—"));
   return node;
+}
+
+/**
+ * ► **THE TURN-ORDER STRIP (H3 of the HUD track; the owner's Q3c, Q10a)**: a
+ *   thin DOM strip just above the stage — every fighter in the engine's own
+ *   initiative order, in his side's colour, whose turn it is marked (and
+ *   `aria-current`), the fallen struck through. The order and the marks are
+ *   `turnOrderFor`'s (`tools/arena/team-hud.js`); it is redrawn with the side
+ *   panel, on every turn. **It never touches the canvas or the camera**: it
+ *   sits outside `#stage`, at a FIXED height, so the stage is the same size on
+ *   every turn. ~~It scrolled itself to keep the current chip in view~~: it
+ *   never scrolls now — a classic scrollbar would eat the fixed height (Codex
+ *   review of H3, pass 1) — and a narrow stage shrinks the names instead.
+ */
+function renderTurnStrip(order) {
+  const strip = el("turn-strip");
+  strip.replaceChildren(...order.map((entry) => {
+    const item = hudNode("li", `turn-chip${entry.current ? " current" : ""}${entry.alive ? "" : " down"}`);
+    item.style.setProperty("--team", entry.colour);
+    item.title = entry.name;
+    if (entry.current) item.setAttribute("aria-current", "step");
+    item.append(teamInitialNode(entry), hudNode("span", "turn-name", entry.name));
+    if (!entry.alive) item.append(hudNode("span", "visually-hidden", " (down)"));
+    return item;
+  }));
 }
 
 /** The `seatTurnKey` the controls on screen were drawn for; `aiTurnStep` redraws when it goes stale. */

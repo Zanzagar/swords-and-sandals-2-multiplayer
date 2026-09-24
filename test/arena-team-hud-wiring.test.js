@@ -107,3 +107,43 @@ test("H2: the crowd meter is at the top of the side panel, the team panels under
   assert.match(page, /<section class="crowd" id="crowd"[^>]*\bhidden>/, "no meter until the model says there is a crowd");
   assert.match(page, /id="crowd-bar" role="meter"/);
 });
+
+test("H3: the turn-order strip is the model's, drawn with the side panel on every turn, as DOM only — no canvas, no camera", () => {
+  assert.match(functionBody("renderRoster"), /renderTurnStrip\(hud\.turnOrder\);/, "redrawn with the panels, on every turn");
+  const strip = rawBody("renderTurnStrip");
+  assert.match(strip, /const strip = el\("turn-strip"\);\s*strip\.replaceChildren\(\.\.\.order\.map\(\(entry\) => \{/);
+  assert.match(strip, /hudNode\("li", `turn-chip\$\{entry\.current \? " current" : ""\}\$\{entry\.alive \? "" : " down"\}`\)/);
+  assert.match(strip, /item\.style\.setProperty\("--team", entry\.colour\);/);
+  assert.match(strip, /if \(entry\.current\) item\.setAttribute\("aria-current", "step"\);/);
+  assert.match(strip, /item\.append\(teamInitialNode\(entry\), hudNode\("span", "turn-name", entry\.name\)\);/);
+  assert.match(strip, /if \(!entry\.alive\) item\.append\(hudNode\("span", "visually-hidden", " \(down\)"\)\);/, "struck through, and said");
+  // Nothing of the stage: it never draws on the canvas nor moves the camera.
+  assert.doesNotMatch(strip, /\b(context|canvas|camera|cameraFrame|render|scrollIntoView)\b/);
+});
+
+test("H3: the strip stands just above the stage, outside it, at a fixed height, so the stage is the same size every turn", () => {
+  const column = page.slice(page.indexOf('<div class="stage-column">'), page.indexOf("<aside"));
+  const strip = column.indexOf('id="turn-strip"');
+  assert.ok(strip >= 0, "in the stage's own column");
+  assert.ok(strip < column.indexOf('<div id="stage">'), "above the stage, not inside it");
+  assert.match(column, /<ol class="turn-strip" id="turn-strip" aria-label="Turn order"><\/ol>\s*<div id="stage">/);
+  assert.match(page, /\.turn-strip \{[^}]*flex: 0 0 auto;[^}]*height: 30px;/, "a fixed height");
+  assert.match(page, /\.turn-chip\.down \.turn-name \{[^}]*text-decoration: line-through;/, "the fallen struck through");
+});
+
+test("H3 (Codex review of H3, pass 1): the strip never scrolls — a classic scrollbar would eat its fixed 30 px — the names shrink instead", () => {
+  const rule = (selector) => {
+    const found = new RegExp(`\\n\\s*${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\{([^}]*)\\}`).exec(page);
+    assert.ok(found, `index.html has a ${selector} rule`);
+    return found[1];
+  };
+  const strip = rule(".turn-strip");
+  assert.doesNotMatch(strip, /overflow(-x)?: (auto|scroll)/, "no scrollbar inside the fixed height");
+  assert.match(strip, /overflow: hidden;/);
+  assert.match(rule(".turn-chip"), /flex: 0 1 auto;[^]*min-width: 0;/, "a chip may shrink below its name's width");
+  assert.match(rule(".turn-chip .turn-name"), /overflow: hidden;[^]*text-overflow: ellipsis;[^]*white-space: nowrap;/, "and its name ends in an ellipsis");
+  // The whole name is still there to read, and nothing scrolls.
+  const strip2 = rawBody("renderTurnStrip");
+  assert.match(strip2, /item\.title = entry\.name;/);
+  assert.doesNotMatch(strip2, /scroll/);
+});
