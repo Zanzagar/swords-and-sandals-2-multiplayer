@@ -580,13 +580,13 @@
    "lane": "presentation",
    "column": "ready",
    "order": 42,
-   "title": "HUD: hit points, stamina, armour, crowd, potions (combat_panel, sprite 751)",
-   "summary": "combat_panel is extracted (icons.json holds its gauges, masks, crowd_bar/crowd_text and potion instances), and the adapter's slot layout already binds panel widgets for all six slots. Nothing paints it. The player sees only the DOM roster: HP number, HP bar and raw status tokens.",
+   "title": "Team HUD: fighter rows, turn order, crowd meter",
+   "summary": "Designed 2026-09-24: one row per fighter in each team's panel (health, energy, armour, rank, weapon, condition chips; acting / target / hurt / tired / down states), a turn-order strip, and the build's own crowd meter with its ten moods and 20 / 70 thresholds. The build's combat_panel is two-sided only, so the 3v3 layout is authored; the three readings and the moods are the build's.",
    "gaps": "Stamina, armourclass, crowd_interest (a battle resource since cefaf83) and potion counts are invisible, although they drive the rules. The roster shows internal tokens like 'facing-left' to a player. combat_panel is two-sided hero/villain and has no layout for 3v3.",
-   "next": "Build a panel painter from icons.json for slot 0 per side. Widen panel-refresh to stamina, armour and crowd. Filter internal status tokens out of the roster.",
-   "evidence": "tools/extract-icons.mjs 403-422 (751, 'the hit-point, stamina and armour gauges and the crowd line'); assets/icons/icons.json icons has combat_panel; src/adapter/slot-layout.js VANILLA_PANEL_INSTANCES/panelWidgetsFor; presentation.js panelRefresh carries health/maxHealth/alive/status only; main.js renderRoster 4501-4534; the only icons.json consumer is face.js. Headless probe of the demo 1v1: blue shows status ['facing-left'] and each combatant carries 47 resources.",
-   "ownerDecision": "The team HUD layout for up to six fighters: extend vanilla's two-sided panel, per-fighter mini-gauges, or a new design.",
-   "updated": "2026-09-23"
+   "next": "Delivery slice 4 in docs/design/battle-ui.md.",
+   "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa). Build HUD mapped by wave wf_e90ae76e-4af (q4).",
+   "ownerDecision": "",
+   "updated": "2026-09-24"
   },
   {
    "id": "damage-number-pop-ups",
@@ -617,28 +617,28 @@
   {
    "id": "action-menu",
    "lane": "presentation",
-   "column": "gaps",
+   "column": "ready",
    "order": 45,
-   "title": "Action menu",
-   "summary": "One HTML button per host.legalActions(), disabled while the animation gate is shut. Labels are raw engine tokens ('walk-left', 'cast-lightning-bolt -> Nym', 'drink-potion #12', 'wincrowd'), with no cost, odds, stamina or tooltip, no grouping, and no keyboard shortcuts. The build's controller-panel art is not extracted.",
+   "title": "Action dock (four groups, previews, hotkeys)",
+   "summary": "Designed 2026-09-24 to replace today's wall of raw engine buttons (up to 23 in a 3v3 turn): four fixed groups of up to six (Fight, Spells & items, Move, Tactics), each button with a one-line preview (to hit, damage, energy) and a hotkey; unavailable actions keep their slot with a reason; a preview panel with Confirm and Back.",
    "gaps": "Unreadable to a new player. Direction-absolute walk buttons are the build's semantics but confusing on the blue side. There is no confirmation for irreversible spends.",
-   "next": "Map action tokens to display names from the text pack, group melee, ranged, spell and item, and show stamina cost.",
-   "evidence": "main.js renderControls 4536-4588; headless probe of the demo 1v1 at the opening: 'walk-left | walk-right | taunt->blue-1 | wincrowd | rest'.",
-   "ownerDecision": "Vanilla-styled controller panel, or new UI.",
-   "updated": "2026-09-23"
+   "next": "Delivery slice 2: a pure actionMenuModel in src/render, tested against real seeded bouts.",
+   "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa).",
+   "ownerDecision": "",
+   "updated": "2026-09-24"
   },
   {
    "id": "who-can-play-human-hot-seat-spectate-controller-",
    "lane": "multiplayer",
-   "column": "gaps",
+   "column": "ready",
    "order": 46,
    "title": "Who can play: human, hot-seat, spectate, controller seats",
    "summary": "Without ?spectate one person clicks for every fighter on both sides, because every seat is declared controller 'local'. With ?spectate=1 the AI (suggestAction) plays every seat. There is no human-vs-AI mode in the arena or in tools/hotseat.mjs, which is also local-vs-local.",
    "gaps": "Nobody can play against the AI anywhere. There is no seat-assignment UI, no gamepad or keyboard seats, and no pause or speed control in spectate. Remote play is Stage 7, not started.",
-   "next": "Add a per-seat controller parameter or picker (e.g. ?blue=ai) and let spectateStep act only on AI seats. This is small, because suggestAction already exists.",
-   "evidence": "tools/arena/roster.js 616-617 and 829/845 (controller 'local'); main.js spectateStep 4642-4666 (gated on `spectate` only); tools/hotseat.mjs 402/490 (controller 'local'); src/team/controllers.js ControllerKind LOCAL/HOT_SEAT/REMOTE/AI; battle-host.js runAiTurns/isAiControlled exist but the arena does not use them.",
+   "next": "Delivery slice 1 (first): per-seat controllers, e.g. ?red=human&blue=ai, through the existing ControllerRegistry — the first time anyone can play against the AI.",
+   "evidence": "tools/arena/roster.js 616-617 and 829/845 (controller 'local'); main.js spectateStep 4642-4666 (gated on `spectate` only); tools/hotseat.mjs 402/490 (controller 'local'); src/team/controllers.js ControllerKind LOCAL/HOT_SEAT/REMOTE/AI; battle-host.js runAiTurns/isAiControlled exist but the arena does not use them. Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa).",
    "ownerDecision": "The default play mode (1 human vs AI, co-op humans vs AI, full hot-seat) and how seats are assigned.",
-   "updated": "2026-09-23"
+   "updated": "2026-09-24"
   },
   {
    "id": "sound-effects",
@@ -747,15 +747,15 @@
   {
    "id": "mobile-and-phone-layout",
    "lane": "presentation",
-   "column": "needs-design",
+   "column": "ready",
    "order": 55,
    "title": "Mobile and phone layout",
-   "summary": "There is a viewport meta tag and a flex-wrap two-column layout (stage at least 320 px, sidebar at least 280 px), but no media queries or touch-sized controls. The server binds 127.0.0.1 unless --host is given. It has never been shot on a phone.",
+   "summary": "Designed 2026-09-24: HUD as two thin bars over each fighter, the dock as a bottom sheet with four tabs and 56 px targets, tap a fighter to target. Built after the desktop version has been played.",
    "gaps": "The stage and sidebar stack. On a phone the action list sits below the stage, and the sound toggle is a small canvas hit box.",
-   "next": "Shoot the page at 375 px, then design a bottom-sheet action bar.",
-   "evidence": "tools/arena/index.html CSS; tools/arena-server.mjs parseHost (default 127.0.0.1); main.js audio unblock listens for touchstart (724).",
-   "ownerDecision": "Whether phones are a target platform.",
-   "updated": "2026-09-23"
+   "next": "Delivery slice 6.",
+   "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa).",
+   "ownerDecision": "",
+   "updated": "2026-09-24"
   },
   {
    "id": "accessibility",
@@ -1120,9 +1120,39 @@
    "evidence": "tools/arena/main.js prepareEntry; sound implementer's report, 2026-09-24.",
    "ownerDecision": "",
    "updated": "2026-09-24"
+  },
+  {
+   "id": "targeting-across-ranks",
+   "lane": "presentation",
+   "column": "ready",
+   "order": 4,
+   "title": "Targeting across ranks",
+   "summary": "Designed 2026-09-24. Melee, shove and taunt reach only the actor's own rank (one foe: auto-selected, no target step); spells and arrows reach any foe in any rank (numbered gold rings, pick 1–3); self actions skip the step. Unreachable foes stay visible, dimmed, with the reason. A state machine: Idle → Action → (Target) → Ready → Sent, Esc steps back.",
+   "gaps": "Needs the engine's reason codes for withheld actions (slice 5) to say 'why not' everywhere.",
+   "next": "Delivery slice 3: rings, numbers and dimming on the stage canvas from the same action model.",
+   "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa). Real 3v3 offers measured with the tricks kit (seed 3): melee only at the own-rank foe, spells at all three.",
+   "ownerDecision": "",
+   "updated": "2026-09-24"
+  },
+  {
+   "id": "action-previews-and-reasons",
+   "lane": "engine",
+   "column": "ready",
+   "order": 40,
+   "title": "Action previews and 'why not' reasons (engine)",
+   "summary": "Two small, pure additions for the UI, neither hashed nor drawing randomness: previewAction(action) — hit chance, damage band, energy cost, effect — from the functions resolution already uses; and unavailableActions(actor) — the verbs legalActions withheld, with a reason code (other-rank, out-of-reach, body-blocks, in-reach, level, slot-empty, no-ammo, wall).",
+   "gaps": "A test must pin that the preview equals what resolution uses.",
+   "next": "Delivery slice 5.",
+   "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa).",
+   "ownerDecision": "",
+   "updated": "2026-09-24"
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-24",
+   "text": "The team battle UI is designed: a HUD for 3v3, a four-group action dock, and targeting across ranks (the 'Team Battle UI' canvas)."
+  },
   {
    "date": "2026-09-24",
    "text": "Sounds play at the build's own frame in each animation, both sounds of a two-sound moment play, and a volume slider (7060ac8)."
