@@ -205,7 +205,10 @@ RCS-03C3B1A1A-A, requiring one independently meaningful phase anchor at every
 history position. A ninth audit then split the remaining multiplicity row into
 plural-position prevalence and conditional tri-phase prevalence.
 The owner selected RCS-03C3B1A1B1-C: phase-singular and phase-plural history
-positions coexist. RCS-03C3B1A1B2 is the active owner choice under SR-03.
+positions coexist, then selected RCS-03C3B1A1B2-A: every phase-plural
+position is exact-two. A tenth audit split old RCS-03C3B1A2 into prevalence
+and conditional package-width support. RCS-03C3B1A2A is the active owner
+choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19188,7 +19191,7 @@ the phase distinctions remain mechanically real, and coexistence across
 positions is **aggregate**. This is a direction selection. It changes no
 authoritative decision wording and authorizes no implementation.
 
-### RCS-03C3B1A1B2 — tri-phase prevalence among phase-plural positions — active owner choice
+### RCS-03C3B1A1B2 — tri-phase prevalence among phase-plural positions — A selected
 
 Inherited B1-C guarantees a nonempty phase-plural domain as well as at least
 one distinct phase-singular position. For each `p` in `M^{plural}_v`, retain
@@ -19241,6 +19244,117 @@ all-three independent support. Under every answer, `RCS-03C3B1A2` becomes
 next, and `RCS-03C3B1B` later recomputes or records the feasible catalog phase
 support after that topology choice. The authoritative decision record remains
 unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **A, every
+phase-plural position is exact-two.** `T^{tri}_v` is empty. Inherited B1-C now
+requires at least one phase-singular history position and at least one distinct
+phase-plural position, while every plural position has exactly two members in
+`L^{phase}_v(p)`. No history position has three independently isolatable phase
+routes. Exact pair identities remain catalog authoring.
+
+At an exact-two position, each of its two phase-to-predicate links participates
+**directly** and remains mechanically distinct. Their continuity through one
+source role across possibly different histories is **partial**; excluding a
+third independent route is **neutral/protective**; and universal exact-two
+prevalence inside the plural domain is **aggregate**. A later coupled package
+may still materially read the uncounted third phase without creating a third
+independent isolation. This is a direction selection. It changes no
+authoritative decision wording and authorizes no implementation.
+
+> **Tenth prerequisite correction, 2026-09-24:** screening the next registered
+> row proved that old `RCS-03C3B1A2` still compressed two player-material
+> boundaries: how prevalent supplemental irreducibly multi-phase packages are
+> across history positions, and whether the nonempty coupled-package catalog
+> supports two-phase packages, three-phase packages, or both.
+>
+> Hold `T_H={p,q}`, `L^{phase}_v(p)={D,O}`, and
+> `L^{phase}_v(q)={E}` fixed, so B1-C and B2-A hold and catalog phase support is
+> `{D,E,O}`. Give both positions a coupled supplement in both worlds. On one
+> same-context coupled arm, world X2 reaches `000->110` through an
+> inclusion-minimal indispensable `{D,E}` package. World X3 instead requires
+> `000->111` through `{D,E,O}`; its reachable `110->111` comparison supplies
+> only an already-counted `O` isolation, so `p` remains exact-two. Give `q` the
+> same two-phase supplement in both worlds. Coupled-position prevalence and
+> catalog phase union therefore agree, but automatic immediate evaluation can
+> invoke X2 at `110`, while an interruption between `110` and `111` can still
+> deny X3. Package breadth changes readiness, invocation timing, and
+> counterplay; `RCS-03C3B1B` cannot recover it from the shared phase union.
+>
+> The register therefore makes `RCS-03C3B1A2` a non-counting parent for
+> `RCS-03C3B1A2A` (coupled-supplement position prevalence) and conditional
+> `RCS-03C3B1A2B` (two-phase-versus-three-phase package-width support).
+> `RCS-03C3B1B` follows the applicable child. B2-A first reduces `Phi_SR` from
+> 31 to 30; replacing one counted row with two children adds one row and one
+> potential card, producing fifty counted slots and current `Phi_SR = 31`.
+
+> **Scope guard:** exact `{D,E}`, `{D,O}`, and `{E,O}` package identities,
+> operators, package counts, distribution across singular versus exact-two
+> positions, per-position incidence, and quotas remain AUTHOR/SPEC unless new
+> evidence passes the closure index's player-consequence admission test.
+
+> **Agent correction:** the first post-answer screen considered leaving
+> coupled-package width entirely to authoring. The X2/X3 countermodel disproves
+> that classification: unlike an exact pair label, admitting a whole-act
+> three-phase package changes the authoritative readiness cut under already-
+> selected automatic invocation. The missing width boundary is restored before
+> coupled-supplement prevalence is presented.
+
+### RCS-03C3B1A2A — supplemental irreducibly multi-phase position prevalence — active owner choice
+
+Every `p` in `T_H` retains the one or two independently isolatable phases now
+required by A1A-A, B1-C, and B2-A. A **supplemental irreducibly multi-phase H
+package** for `p` is an additional reachable, materially effective,
+C3c.33-valid H-only satisfaction transition whose completed dependency
+analysis identifies an inclusion-minimal set `K` of indispensable changed H
+claims such that:
+
+1. current-state facts read by `p` and every selected input outside H remain
+   fixed;
+2. `K` intersects at least two of semantic phases `{D,E,O}`; and
+3. no legal proper subpackage of `K` is sufficient for that transition in the
+   same context.
+
+“Supplemental” means the same position still has its required single-phase
+isolation elsewhere; the package neither replaces nor automatically adds a
+member to `L^{phase}_v(p)`. A raw transition on which several phases co-vary, a
+shared record or cut, an authored AND label, or an unreachable subpackage is
+not enough. Because invocation is automatic at the first eligible cut, the
+package must be effective in a reachable readiness episode where an earlier
+independent route has not already qualified and settled the position; an
+always-preempted ceremonial branch is not material.
+
+Let
+
+`J^{multi}_v={p in T_H | p has at least one such package}`.
+
+| Choice | Coupled-supplement prevalence | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — no history position has a coupled supplement** | `J^{multi}_v` is empty. Every inclusion-minimal effective H package for every position is confined to one phase, although different positions in one entry may still relate different phases and ordinary cross-phase causation or co-occurrence remains legal. | A gives every local route the clearest timing sentence and denial window. Each independent phase link remains **direct** and its distinction protected, but same-path cross-phase unity is absent here, so the ideal fit is **neutral/protective** rather than direct. It has the lowest tooltip, replay, and proof burden, at the cost of losing Vow-like conditions whose identity is an indivisible relation among stages of one act. | One clean position recognizes only an authoritative successful-block outcome; another independently recognizes declaration or performance. A Relic entry may require both positions, but neither position contains a joint cross-phase package. |
+| **B — every history position has a coupled supplement** | `J^{multi}_v=T_H`. Every phase-singular and every exact-two position retains its independent route or routes and also has at least one materially effective inclusion-minimal package spanning multiple phases. Conditional B1A2B chooses catalog width support. | At each coupled path, distinct phase claims jointly cause one predicate transition, giving a **direct** local continuity-with-difference expression; universal prevalence is still **aggregate**. B makes every remembered source capable of an indivisible Vow or Confluence route, but forces two explanation grammars onto every position. With immediate automatic invocation, authors must manufacture contexts where the coupled route is not preempted by an easier independent route, inviting ornamental branches or systemic complexity taxes. | Every position has an independent route plus a separate context in which only a linked declaration/performance, declaration/outcome, performance/outcome, or whole-act package can qualify it. The exact mapping may differ by position. |
+| **C — coupled-supplement and clean positions coexist** | `J^{multi}_v` is a nonempty proper subset of `T_H`. At least one history position has a materially effective coupled supplement and at least one distinct position is proved clean across its declared reachable domain. The choice does not map coupling to the singular or exact-two class. | **Recommended.** Every singular and exact-two position retains its independent anchor or anchors, while at least one position remains a clean teaching and counterplay anchor and selected Vow/Confluence positions express distinct phases acting as one meaningful cause. The coupled path's fit is **direct**; catalog coexistence is **aggregate**. C gives Souls and Simulacra a signature same-path unity mechanic without making it universal, at the cost of a visible complexity taxonomy, exhaustive negative proof, tooltip/replay load, and a possible clarity or power premium. | Ashen's singular outcome position remains clean. Dreamglass retains independent declaration and outcome routes, `L^{phase}_v={D,O}`, and in a distinct source context also qualifies through an indispensable linked declaration-plus-performance package while both independent branches are false. Dreamglass remains exact-two because no execution-only isolation is admitted. Names and mapping are illustrative. |
+
+**Recommendation: C, coupled-supplement and clean positions coexist.** The
+selected singular/exact-two topology already supplies readable causal anchors.
+Giving a bounded subset an additional joint path creates the strongest local
+Souls and Simulacra expression so far—different stages remain named and
+indispensable while participating in one operative transition—without turning
+every history position into a compound ritual.
+
+A/B/C are mutually exclusive and exhaustive because nonempty `T_H` makes
+`J^{multi}_v` empty, all of `T_H`, or a nonempty proper subset. Positive
+membership requires one reachable, non-preempted, inclusion-minimal package
+witness. Negative membership requires complete reachable-domain dependency
+analysis; incomplete search is unresolved. C requires positive and negative
+witness positions to be distinct. A multi-phase co-variation that can be
+deleted without changing satisfaction is not a coupled package.
+
+This card does not choose whether a valid package spans exactly two phases or
+all three, exact phase identities, package counts, operators, source facts,
+distribution across singular/exact-two positions, roots, atoms, fan-out,
+claims/consumption, reuse, payoff, UI, persistence, release, or implementation.
+Under A, conditional `RCS-03C3B1A2B` is pruned and `RCS-03C3B1B` becomes next.
+Under B or C, B1A2B becomes next and then B1B recomputes feasible catalog phase
+support. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

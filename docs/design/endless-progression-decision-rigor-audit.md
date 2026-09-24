@@ -2780,9 +2780,41 @@ and irreducibly multi-phase effective paths remain separate.
 The existing conditional `RCS-03C3B1A1B2` row is now the sole active card. It
 partitions the nonempty plural domain into three exhaustive cases: every
 plural position is exact-two, every plural position is tri-phase, or the two
-forms coexist. No tenth amendment is needed. The current forty-nine-slot
-register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 9 `DIR-SELECTED`,
-1 `SPEC`, and 1 `EVALUATE` row, so `Phi_SR = 31`.
+forms coexist. No further amendment was needed before presenting that card. At
+that point, the forty-nine-slot register contained 30 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 9 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row,
+so `Phi_SR = 31`.
+
+The owner then selected `RCS-03C3B1A1B2-A`. Every phase-plural position has
+exactly two independently isolatable phases; no history position has all three.
+Because B1-C remains inherited, phase-singular and exact-two positions coexist.
+This selection does not forbid a later irreducible package from materially
+reading an uncounted third phase. Before further screening, selecting B2-A
+reduced `Phi_SR` from 31 to 30.
+
+A tenth prerequisite audit found that old `RCS-03C3B1A2` compressed
+coupled-supplement position prevalence with coupled-package phase width. Hold
+`L(p)={D,O}`, `L(q)={E}`, universal coupled-position prevalence, and catalog
+support `{D,E,O}` fixed. X2 gives `p` an indispensable `{D,E}` arm ready at
+`110`; X3 gives it an indispensable `{D,E,O}` arm ready only at `111`, while
+`110->111` supplies only the already-counted `O` isolation. Give `q` the same
+two-phase arm in both. Immediate automatic invocation means an interruption
+between those cuts is too late in X2 and effective in X3. Phase-union support
+cannot distinguish the worlds.
+
+The register therefore makes `RCS-03C3B1A2` a non-counting parent for
+`RCS-03C3B1A2A` (coupled-supplement position prevalence) and conditional
+`RCS-03C3B1A2B` (package-width support `{2}`, `{3}`, or `{2,3}`). Exact pair
+identity, operators, counts, class mapping, incidence, and quotas remain
+AUTHOR/SPEC. Replacing one counted row with two adds one slot and one potential
+card. The current fifty-slot register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 10 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so
+`Phi_SR = 31`. `RCS-03C3B1A2A` is the sole active card.
+
+**Agent correction:** the initial post-answer screen treated package width as
+authoring. The X2/X3 pair proves a player-material readiness and counterplay
+difference under already-selected automatic invocation, so the missing width
+boundary is restored before coupled-supplement prevalence is presented.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

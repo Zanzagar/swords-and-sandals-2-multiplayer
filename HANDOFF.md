@@ -1,5 +1,66 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-24 exact-two independent phase routes — RCS-03C3B1A1B2-A selected
+
+The owner selected `RCS-03C3B1A1B2-A`: every phase-plural history position has
+exactly two independently isolatable phases, and no history position has all
+three. Inherited B1-C still requires phase-singular and phase-plural positions
+to coexist. Exact phase-pair identities remain catalog authoring. A later
+coupled package may materially read an uncounted third phase without creating a
+third independent route.
+
+At an exact-two position both phase-to-predicate links participate
+**directly**, continuity through one source role across possibly different
+histories is **partial**, excluding a third independent route is
+**neutral/protective**, and universal exact-two prevalence inside the plural
+domain is **aggregate**. The authoritative decision record remains unchanged
+and implementation remains blocked.
+
+A tenth prerequisite audit proved that old `RCS-03C3B1A2` compressed two
+player-material boundaries: prevalence of positions with a supplemental
+irreducibly multi-phase package, and support for package width two, width three,
+or both. Countermodels can hold singular/exact-two topology, coupled-position
+prevalence, and phase union `{D,E,O}` fixed while making one package ready at
+`110` through `{D,E}` or only at `111` through `{D,E,O}`. Under immediate
+automatic invocation, an interruption between those cuts is too late in the
+first world but can deny the second.
+
+Old `RCS-03C3B1A2` is therefore a non-counting parent for
+`RCS-03C3B1A2A` and conditional `RCS-03C3B1A2B`. Exact pair identity,
+operators, package counts, singular/exact-two mapping, incidence, and quotas
+remain AUTHOR/SPEC.
+
+**Agent correction:** the first post-answer screen considered treating package
+width wholly as authoring. The readiness countermodel disproved that
+classification, so the missing product boundary was restored before the next
+choice.
+
+The register now has fifty slots: 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 10
+`DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`; therefore `Phi_SR = 31`. The sole
+active card is `RCS-03C3B1A2A`, coupled-supplement position prevalence. Let
+`J^{multi}_v` contain positions with at least one reachable, materially
+effective C3c.33-valid H-only transition whose inclusion-minimal indispensable
+claim package spans at least two phases. Present only:
+
+- A: `J^{multi}_v` is empty; every effective history package is phase-confined;
+- B: `J^{multi}_v=T_H`; every singular and exact-two position also has a
+  coupled supplement; or
+- C: `J^{multi}_v` is a nonempty proper subset; coupled-supplement and clean
+  positions coexist.
+
+Recommend C. Clean positions preserve timing education and counterplay;
+selected Vow/Confluence positions let distinct phases participate jointly in
+one operative cause, the strongest direct Achintya Bheda Abheda expression in
+this phase route. Universal coupling would force two explanation grammars onto
+every position and often become ornamental because an independent route invokes
+first. No coupling would sacrifice that signature same-path unity.
+
+A positive witness must be reachable, inclusion-minimal, and not already
+preempted by an earlier automatic qualification. Raw co-variation, a shared
+record/cut, or an authored AND label proves nothing. A negative position needs
+complete reachable-domain dependency analysis. Under A, B1A2B is pruned and
+B1B follows; under B or C, B1A2B becomes next.
+
 ## 2026-09-24 mixed Relic phase multiplicity — RCS-03C3B1A1B1-C selected
 
 The owner selected `RCS-03C3B1A1B1-C`: phase-singular and phase-plural
@@ -17,9 +78,9 @@ phase differences remain mechanically real, and catalog-wide coexistence is
 **aggregate**. The authoritative decision record remains unchanged and
 implementation remains blocked.
 
-The forty-nine-slot register now contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7
+At that point the forty-nine-slot register contained 30 `SCREEN`, 1 `OWNER-OPEN`, 7
 `PRUNED`, 9 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so
-`Phi_SR = 31`. The sole active card is `RCS-03C3B1A1B2`, tri-phase prevalence
+`Phi_SR = 31`. The sole active card was `RCS-03C3B1A1B2`, tri-phase prevalence
 inside the inherited nonempty plural-position domain. Define
 `T^{tri}_v={p in M^{plural}_v | |L^{phase}_v(p)|=3}`. Present only:
 
@@ -42,7 +103,12 @@ two position needs two positives plus complete reachable-domain proof that the
 third isolation is absent. B or C necessarily supplies all-three catalog phase
 support; A leaves that union open for later B1B recomputation. Exact phase-pair
 identities remain catalog authoring. Every answer makes `RCS-03C3B1A2` next;
-no charter amendment is required.
+no amendment was required to present B2.
+
+**Corrected continuation:** the owner selected B2-A. A tenth prerequisite
+audit then split old B1A2 into coupled-position prevalence and conditional
+package-width support. The current fifty-slot register has `Phi_SR = 31`;
+present only `RCS-03C3B1A2A`.
 
 ## 2026-09-24 universal Relic phase attribution — RCS-03C3B1A1A-A selected
 
@@ -155,8 +221,9 @@ leaving multi-phase unity to later registered choices.
 
 **Corrected continuation:** the owner selected A1A-A. A ninth audit split the
 remaining multiplicity row into plural-position prevalence and conditional
-tri-phase prevalence. The owner then selected B1-C. The current forty-nine-slot
-register has `Phi_SR = 31`; present only `RCS-03C3B1A1B2`.
+tri-phase prevalence. The owner then selected B1-C and B2-A. A tenth audit
+split old B1A2. The current fifty-slot register has `Phi_SR = 31`; present only
+`RCS-03C3B1A2A`.
 
 ## 2026-09-24 fully coupled H+S evidence excluded — RCS-03C3B0-A selected
 
@@ -202,8 +269,9 @@ old B1A1 into minimum attribution and per-position independent phase
 multiplicity. At that point the forty-eight-slot register still had
 `Phi_SR = 32`;
 the owner then selected A1A-A. A ninth amendment produced the
-forty-nine-slot register; the owner then selected B1-C. Current
-`Phi_SR = 31`; present only `RCS-03C3B1A1B2`.
+forty-nine-slot register; the owner then selected B1-C and B2-A. A tenth audit
+split old B1A2. Current `Phi_SR = 31` across fifty slots; present only
+`RCS-03C3B1A2A`.
 
 ## 2026-09-24 Relic history freshness — RCS-03C3A-A selected
 
@@ -245,8 +313,9 @@ At that sixth-amendment stage the register had forty-five slots: 30 `SCREEN`, 1
 continuation:** the owner selected B0-A, and a seventh audit split old B1A into
 three prerequisite-ordered children. That register had forty-seven slots and
 `Phi_SR = 32`; the owner then selected A0-A and A1A-A. After the ninth
-amendment, the owner selected B1-C. The current forty-nine-slot register has
-`Phi_SR = 31`; present only `RCS-03C3B1A1B2`'s tri-phase-prevalence choice.
+amendment, the owner selected B1-C and B2-A. A tenth audit split old B1A2.
+The current fifty-slot register has `Phi_SR = 31`; present only
+`RCS-03C3B1A2A`'s coupled-supplement-prevalence choice.
 
 ## 2026-09-24 Relic invocation control — RCS-03C2A-A selected
 
@@ -328,9 +397,9 @@ C2 row with two produced interim `Phi_SR = 23`.
 automatic invocation, pruned `RCS-03C2B`, selected `RCS-03C3A-A`, universal
 finite history freshness, and selected `RCS-03C3B0-A`, excluding fully
 inseparable H+S additions, and selected `RCS-03C3B1A0-A`, temporal projection-
-purity. The owner then selected A1A-A and B1-C; after the ninth register
-amendment the sole active card is `RCS-03C3B1A1B2`, and current
-`Phi_SR = 31` across forty-nine slots.
+purity. The owner then selected A1A-A, B1-C, and B2-A; after the tenth register
+amendment the sole active card is `RCS-03C3B1A2A`, and current
+`Phi_SR = 31` across fifty slots.
 
 ## 2026-09-24 Relic evaluation lifetime — RCS-03B1-A selected
 
@@ -365,8 +434,8 @@ seventh split its still-bundled phase prerequisite into three children. The
 owner selected A0-A, and an eighth amendment split minimum phase attribution
 from per-position independent phase multiplicity. The owner selected A1A-A,
 and a ninth amendment split plural prevalence from tri-phase prevalence. The
-owner then selected B1-C. The current forty-nine-slot register has
-`Phi_SR = 31`; present only `RCS-03C3B1A1B2`.
+owner then selected B1-C and B2-A. A tenth audit split old B1A2. The current
+fifty-slot register has `Phi_SR = 31`; present only `RCS-03C3B1A2A`.
 
 ## 2026-09-24 design-first correction — the master index must not flatten the game
 
@@ -445,8 +514,11 @@ attribution and per-position independent phase multiplicity. The owner selected
 `RCS-03C3B1A1A-A`. **Ninth prerequisite correction:** old
 `RCS-03C3B1A1B` becomes a non-counting parent for plural-position prevalence
 and conditional tri-phase prevalence. The owner selected
-`RCS-03C3B1A1B1-C`; the sole active card is now `RCS-03C3B1A1B2`. Do not
-revive C171 as an owner question. Exact Relic tuple
+`RCS-03C3B1A1B1-C` and `RCS-03C3B1A1B2-A`. **Tenth prerequisite
+correction:** old `RCS-03C3B1A2` becomes a non-counting parent for
+coupled-supplement position prevalence and conditional package-width support.
+The sole active card is now `RCS-03C3B1A2A`. Do not revive C171 as an owner
+question. Exact Relic tuple
 and evidence-projection atomicity are derived, not choices.
 
 **Agent correction:** the first internal sixth-amendment draft omitted coupled
@@ -489,15 +561,16 @@ direct Codex progression method lives in `$ss2-progression-design`.
 The active finite scope controller is
 `docs/design/endless-progression-master-closure-index.md`. It fixes twenty
 whole-system closure gates, twelve Soul Relic/Charm exit gates, an explicit
-card-admission/reopening rule, and a nine-times-amended frozen forty-nine-slot
+card-admission/reopening rule, and a ten-times-amended frozen fifty-slot
 remaining Relic register. Two Relic slots are already routed to specification/
 evaluation; `RCS-03A-C`, `RCS-03B1-A`, and `RCS-03C1-A` are direction-selected;
 `RCS-03C2A-A` selects automatic invocation and `RCS-03C3A-A` selects finite
 history freshness; `RCS-03C3B0-A` excludes fully inseparable H+S paths and
 `RCS-03C3B1A0-A` selects temporal projection-purity; `RCS-03C3B1A1A-A`
 selects universal minimum phase attribution, and `RCS-03C3B1A1B1-C` selects
-phase-singular/phase-plural coexistence, while six pending-only descendants and
-conditional `RCS-03C2B` are pruned. Current `Phi_SR = 31`. Each ordinary future
+phase-singular/phase-plural coexistence; `RCS-03C3B1A1B2-A` makes every plural
+position exact-two, while six pending-only descendants and conditional
+`RCS-03C2B` are pruned. Current `Phi_SR = 31`. Each ordinary future
 Relic round must reduce it and may not mint an automatic descendant. The
 original twenty-slot/`Phi_SR = 18` count first became twenty-five/23 when the
 source audit exposed seven atomic boundaries inside two old parent rows. The
@@ -516,8 +589,10 @@ Selecting A0-A reduced that to 31; replacing still-bundled B1A1 with two
 children adds one, producing forty-eight slots and `Phi_SR = 32`. Selecting
 A1A-A reduced that to 31; replacing still-bundled B1A1B with two children adds
 one, producing forty-nine slots and `Phi_SR = 32`; selecting B1-C reduces it
-to 31. Adding another genuinely missed product slot requires an owner-visible
-charter amendment with the new bound.
+to 31. Selecting B2-A reduces it to 30; replacing old B1A2 with two children
+adds one, producing fifty slots and `Phi_SR = 31`. Adding another genuinely
+missed product slot requires an owner-visible charter amendment with the new
+bound.
 
 EP-D02-C3c.171 remains unanswered but is no longer an owner choice. Its own
 scope changes only catalog prevalence/proof burden, not a player action,
@@ -527,16 +602,13 @@ authoring/evaluation possibilities; C170-A is sufficient for the framework's
 existential continuity promise. Its graph descendants are pruned unless later
 evidence passes the index's reopening test.
 
-The owner selected `RCS-03C3B1A1B1-C`, so phase-singular and phase-plural
-history positions coexist. The sole active Relic boundary is now
-`RCS-03C3B1A1B2` under `SR-03`: whether every plural position is exact-two,
-every plural position is tri-phase, or exact-two and tri-phase plural positions
-coexist. These independently isolatable phases are classified relative to one
-candidate source role; different phase views of one transition across roles do
-not multiply independent source identity. Present only A/B/C in that order and
-recommend A for a legible missing route and distinct denial window while
-retaining the selected signature multi-face positions. Supplemental
-irreducible multi-phase paths, catalog support, root identity, child
+The owner selected `RCS-03C3B1A1B1-C` and `RCS-03C3B1A1B2-A`, so
+phase-singular and exact-two positions coexist. The sole active Relic boundary
+is now `RCS-03C3B1A2A` under `SR-03`: whether no position, every history
+position, or a nonempty proper subset admits an additional materially effective
+irreducibly multi-phase H package. Present only A/B/C in that order and
+recommend C for clean teaching anchors plus selected same-path Vow/Confluence
+positions. Coupled-package width, catalog support, root identity, child
 partitioning, fan-out, claims/reuse, exact horizons, actor information, and
 configuration locks remain separate.
 The authoritative decision record is unchanged; implementation remains blocked.
@@ -7853,9 +7925,9 @@ fan-out/reuse boundaries; a sixth split the still-bundled atom row; a seventh
 split its phase prerequisite; and an eighth split minimum phase attribution
 from local independent phase multiplicity. The owner selected A1A-A, and a
 ninth split plural-position prevalence from conditional tri-phase prevalence.
-The owner then selected B1-C. Continue at registered Relic slot
-`RCS-03C3B1A1B2` under `SR-03`. `RCS-03C3B1A2`–`RCS-03C3F`, expanded
-`RCS-08`, cause, and agency follow
+The owner then selected B1-C and B2-A. A tenth amendment split old B1A2.
+Continue at registered Relic slot `RCS-03C3B1A2A` under `SR-03`.
+`RCS-03C3B1A2B`–`RCS-03C3F`, expanded `RCS-08`, cause, and agency follow
 separately.
 
 R11 begins only
