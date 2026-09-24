@@ -172,15 +172,22 @@ import {
   RING_VERB_LABELS,
   ringActionFor,
   ringActionLabel,
+  ringConfirmCommand,
   ringFocusKind,
   ringKeyCommand,
-  ringModelFor
+  ringModelFor,
+  ringPendingFor,
+  ringPendingKept,
+  ringPressCommand,
+  ringSameAction
 } from "/tools/arena/ring.js";
 import {
   fighterBoxFor,
   foeAt,
   ringButtonsAt,
   ringButtonsInside,
+  ringCaptionAt,
+  ringCaptionLines,
   ringItemButtonsAt,
   ringLabelAt,
   ringLabelSizeFor,
@@ -190,6 +197,15 @@ import {
   ringSwapButtonAt
 } from "/tools/arena/ring-layout.js";
 import { ringButtonArt } from "/tools/arena/ring-art.js";
+import {
+  RING_STRIP_IDLE,
+  ringConfirmSettingFrom,
+  ringConfirmSettingSave,
+  ringOddsFor,
+  ringPreviewFor,
+  ringPreviewShown,
+  ringStripPreviewAfter
+} from "/tools/arena/ring-preview.js";
 import {
   ARENA_ASSET_TIMEOUT_MS,
   PackOutcome,
@@ -502,14 +518,17 @@ let boulders = [];
 let settled = false;
 
 /**
- * ► **THE RING (slices S2-S6 of `docs/design/battle-ui.md`, "The in-battle
+ * ► **THE RING (slices S2-S7 of `docs/design/battle-ui.md`, "The in-battle
  *   actions: DECIDED").** On a person's turn the build's eight
  *   buttons stand around the acting fighter, a gold ring marks the selected
  *   foe, one click acts, every walk and rank change on offer has a button and
  *   an arrow key (S4), the weapon swap is the build's ninth button on key 9
  *   when the engine offers it (S6), the build's items row over the ring holds
  *   every spell and potion on offer, on Q-Y (S5), and the strip under the stage carries the
- *   same actions for the keyboard and for screen readers. What sits where, who is
+ *   same actions for the keyboard and for screen readers. A hovered or
+ *   focused button says what it will do in the engine's own preview, the
+ *   strip shows the target's odds, and "confirm every move" (off unless the
+ *   person turns it on) makes a press choose and Confirm or Enter act (S7). What sits where, who is
  *   selected and what a click or key sends are `tools/arena/ring.js`'s, under
  *   the suite; where the buttons are drawn — the build's own placement under
  *   the camera — and what a point hits are `tools/arena/ring-layout.js`'s;
@@ -518,7 +537,9 @@ let settled = false;
  *   This file holds the state they are handed and paints what they return.
  *
  * - `ringView` — the ring for the person's turn on screen: its model, whose
- *   turn and whether the arena is ready for it. Null on every other turn, so
+ *   turn and whether the arena is ready for it, the turn's key (S7: the round
+ *   and whose place in it, which a choice is held against) and the previews
+ *   asked for it so far (`ringPreviewOf`). Null on every other turn, so
  *   spectating and AI seats draw exactly what they drew before.
  * - `ringSelection` — each fighter's last selected foe, which his next turn
  *   keeps while it is valid (the owner's Q4: "it stays selected between
@@ -550,6 +571,25 @@ let ringAnnounced = null;
  * pointer goes anywhere else.
  */
 let ringFocusWanted = null;
+/**
+ * ► **"CONFIRM EVERY MOVE" (slice S7; the owner's decisions 4 and 9).**
+ *   `ringConfirm` is this browser's setting — OFF unless the person turned it
+ *   on (`ringConfirmSettingFrom`: storage that throws or is empty means off).
+ *   While it is on, a press only CHOOSES: `ringPending` is `{turn, action}`,
+ *   the choice waiting for Confirm or Enter, which stands while its turn does
+ *   and a button on screen still sends it (`ringPendingAction`).
+ */
+let ringConfirm = ringConfirmSettingFrom(() => window.localStorage);
+let ringPending = null;
+/**
+ * S7: which strip button has the keyboard focus and which the pointer —
+ * `{focus, hover}`, each an action or null — kept apart (Codex review of S7,
+ * pass 3: ~~one shared "previewed" button~~ lost the focused one's preview
+ * when the pointer left it).
+ */
+let ringStripState = RING_STRIP_IDLE;
+/** S7: the stage caption of the hovered button, asked once per ring and button: `{view, slot, text}`. */
+let ringCaption = null;
 
 const el = (id) => document.getElementById(id);
 const logLines = [];
@@ -4815,7 +4855,9 @@ function paintTargetRing(view, origin) {
  * beside its side's walk slot, and the rank arrows, back above the head and
  * forward below the name — no label, as their glyph is their arrow key. The
  * whole ring is kept on the visible stage (`ringButtonsInside`, S4).
- * `ringButtons` records where, for the click.
+ * `ringButtons` records where, for the click. Last (S7), the choice waiting
+ * for Confirm is ringed in gold, and the button under the pointer says what
+ * it will do beside it (`paintRingCaption`).
  */
 function paintRing(view, fit) {
   ringButtons = [];
@@ -4907,6 +4949,67 @@ function paintRing(view, fit) {
     } finally {
       context.restore();
     }
+  }
+  // S7: the choice waiting for Confirm, and the hovered button's preview —
+  // over everything the ring drew.
+  const pending = ringPendingAction();
+  if (pending) {
+    for (const button of drawn) {
+      if (ringSameAction(ringActionFor(ringView.model, button.slot), pending)) paintRingChoice(button);
+    }
+  }
+  const hovered = ringHover ? drawn.find((button) => button.slot === ringHover) : null;
+  if (hovered) paintRingCaption(hovered, stage);
+}
+
+/** S7, AUTHORED: a gold ring round the button whose action waits for Confirm — the target ring's gold. */
+function paintRingChoice(button) {
+  context.save();
+  try {
+    context.strokeStyle = "#f2c14e";
+    context.lineWidth = Math.max(2, button.r * 0.14);
+    context.beginPath();
+    context.arc(button.x, button.y, button.r * 1.18, 0, Math.PI * 2);
+    context.stroke();
+  } finally {
+    context.restore();
+  }
+}
+
+/**
+ * S7: THE HOVERED BUTTON'S PREVIEW, IN WORDS, BESIDE IT — the build shows its
+ * rollover's `optiontext` on the overlay; where its field stands no pack
+ * says, so it is a caption under the button (`ringCaptionAt`), in the label's
+ * size. Asked of the engine once per ring and button (`ringCaption`).
+ */
+function paintRingCaption(button, stage) {
+  const view = ringView;
+  if (!ringCaption || ringCaption.view !== view || ringCaption.slot !== button.slot) {
+    ringCaption = { view, slot: button.slot, text: ringPreviewTextOf(ringActionFor(view.model, button.slot)) };
+  }
+  const text = ringCaption.text;
+  if (!text) return;
+  const { px, gap } = ringLabelSizeFor(button.r);
+  context.save();
+  try {
+    context.font = `600 ${px}px ui-sans-serif, system-ui, sans-serif`;
+    const pad = Math.round(px * 0.5);
+    const lineHeight = Math.round(px * 1.25);
+    // Wrapped to the stage, so a narrow stage loses none of it (Codex review of S7, pass 2).
+    const lines = ringCaptionLines(text, { maxWidth: stage.width - pad * 2, measure: (line) => context.measureText(line).width });
+    const widest = Math.max(...lines.map((line) => context.measureText(line).width));
+    const box = ringCaptionAt(button, { width: widest + pad * 2, height: lines.length * lineHeight + pad, gap }, stage);
+    context.fillStyle = "rgba(20, 16, 12, 0.9)";
+    context.fillRect(box.x0, box.y0, box.width, box.height);
+    context.strokeStyle = "rgba(242, 193, 78, 0.85)";
+    context.lineWidth = 1;
+    context.strokeRect(box.x0 + 0.5, box.y0 + 0.5, box.width - 1, box.height - 1);
+    context.fillStyle = "#fff6e4";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    lines.forEach((line, index) => context.fillText(line, box.x, box.y0 + pad / 2 + lineHeight * (index + 0.5)));
+  } finally {
+    context.restore();
   }
 }
 
@@ -5612,18 +5715,66 @@ function renderControls() {
   if (ring.menuError !== null) log(`the ring could not ask the engine (${ring.menuError}); the plain list is drawn`, { warn: true });
   if (ring.stance) {
     if (ring.selectedId !== null) ringSelection.set(actorId, ring.selectedId);
-    ringView = { model: ring, actorId, ready: turn.ready, turnNumber: host.battle.turnNumber };
+    ringView = {
+      model: ring,
+      actorId,
+      ready: turn.ready,
+      turnNumber: host.battle.turnNumber,
+      turnKey: `${host.battle.turnNumber}:${host.battle.turnCursor}`,
+      previews: new Map()
+    };
+    // S7: a choice stands only while the ring on screen shows it — one the new
+    // target's ring does not show is DROPPED, so switching back cannot bring
+    // it back (Codex review of S7, pass 1; ~~filtered on each read only~~).
+    ringPending = ringPendingKept(ring, ringPending, { turn: ringView.turnKey });
     renderRingStrip();
     const note = document.createElement("div");
     note.className = "provenance";
     note.textContent = `${byId.get(actorId)?.name ?? actorId}'s actions are on the ring around him and in the strip ` +
       `under the stage: click a button or press 1–8${ring.swap ? " (9 swaps weapons)" : ""}` +
       `${ring.items.some((item) => item.action) ? ", Q–Y your items" : ""}; click a foe or press Tab ` +
-      "to change the target.";
+      "to change the target." +
+      (ringConfirm ? " Confirm every move is on: a press chooses, and Confirm or Enter acts." : "");
     container.replaceChildren(note);
     return;
   }
 
+  // ► **THE PLAIN LIST — a rule set with no menu to ask, or a menu that
+  //   threw.** "Confirm every move" holds here too (Codex review of S7, pass
+  //   4: ~~each button submitted on its click~~ whatever the setting): a click
+  //   is a press (`ringPressCommand`); with the setting on it only chooses —
+  //   the button shown pressed — and the list's own Confirm sends the choice.
+  //   The choice lives as long as this list: any redraw drops it.
+  function sendPlain(action) {
+    const target = action.targetId ? byId.get(action.targetId) : null;
+    // A button drawn for one person's turn is never a way to take another
+    // seat's — the AI's above all — whatever has happened since it was drawn.
+    const current = seatTurnFor(host.battle, seats, { ready: host.readyForNextAction().ready });
+    if (!current || current.ai || current.actorId !== actorId) {
+      log(`not ${byId.get(actorId)?.name ?? actorId}'s turn any more — the controls were stale`, { warn: true });
+      renderControls();
+      return;
+    }
+    try {
+      // Anything a refused submit left in the ledger is not this action's.
+      strikeLedger.take();
+      const step = host.submit({ ...action, actorId });
+      log(`${byId.get(actorId)?.name ?? actorId}: ${action.type}${target ? ` → ${target.name}` : ""}`);
+      beginStep(step);
+      renderControls();
+    } catch (error) {
+      log(error.message, { warn: true });
+    }
+  }
+  let plainChoice = null;
+  const plainButtons = [];
+  const plainConfirm = document.createElement("button");
+  plainConfirm.type = "button";
+  plainConfirm.textContent = "Confirm";
+  plainConfirm.disabled = true;
+  plainConfirm.addEventListener("click", () => {
+    if (plainChoice) sendPlain(plainChoice);
+  });
   container.replaceChildren(
     ...panel.buttons.map(({ action, enabled }) => {
       const button = document.createElement("button");
@@ -5636,27 +5787,19 @@ function renderControls() {
         : `${action.type}${item}`;
       button.disabled = !enabled;
       button.addEventListener("click", () => {
-        // A button drawn for one person's turn is never a way to take another
-        // seat's — the AI's above all — whatever has happened since it was drawn.
-        const current = seatTurnFor(host.battle, seats, { ready: host.readyForNextAction().ready });
-        if (!current || current.ai || current.actorId !== actorId) {
-          log(`not ${byId.get(actorId)?.name ?? actorId}'s turn any more — the controls were stale`, { warn: true });
-          renderControls();
-          return;
-        }
-        try {
-          // Anything a refused submit left in the ledger is not this action's.
-          strikeLedger.take();
-          const step = host.submit({ ...action, actorId });
-          log(`${byId.get(actorId)?.name ?? actorId}: ${action.type}${target ? ` → ${target.name}` : ""}`);
-          beginStep(step);
-          renderControls();
-        } catch (error) {
-          log(error.message, { warn: true });
+        const command = ringPressCommand(action, { confirm: ringConfirm });
+        if (command?.kind === "act") sendPlain(action);
+        else if (command?.kind === "choose") {
+          plainChoice = action;
+          for (const other of plainButtons) other.setAttribute("aria-pressed", String(other === button));
+          plainConfirm.disabled = false;
+          announce(`Chosen: ${button.textContent}. Confirm to act.`);
         }
       });
+      plainButtons.push(button);
       return button;
-    })
+    }),
+    ...(ringConfirm ? [plainConfirm] : [])
   );
 }
 
@@ -5680,16 +5823,20 @@ function announce(text) {
 /**
  * ► **THE STRIP UNDER THE STAGE (the owner's decision 9): the ring's actions
  *   as REAL BUTTONS**, for the keyboard and for screen readers — the target
- *   (one button per foe, the selected one pressed), the ring's filled slots
- *   with their keys, the moves no slot holds with their arrows (S4), and
- *   every action the engine offers that the ring does not show. Rebuilt with
- *   the ring, so it can never disagree with the stage.
+ *   (one button per foe, the selected one pressed) with his odds (S7), the
+ *   ring's filled slots with their keys, the moves no slot holds with their
+ *   arrows (S4), and every action the engine offers that the ring does not
+ *   show. Rebuilt with the ring, so it can never disagree with the stage.
+ *   Above them, the preview line (S7): what the button under the pointer or
+ *   the focus will do, and — with "confirm every move" on — Confirm and Back.
  */
 function renderRingStrip() {
   const strip = el("ring-strip");
   if (!strip) return;
   // Only where a person plays: a spectated bout keeps the whole stage.
   strip.hidden = seats.humans.length === 0;
+  // The strip's buttons are made again below: none of the old ones is hovered or focused any more.
+  ringStripState = RING_STRIP_IDLE;
   const focused = document.activeElement;
   if (focused && focused.tagName === "BUTTON" && strip.contains(focused)) {
     ringFocusWanted = { row: focused.parentElement?.id ?? null, text: focused.textContent };
@@ -5699,6 +5846,8 @@ function renderRingStrip() {
   const itemRow = el("ring-items");
   const offRow = el("ring-off");
   const status = el("ring-status");
+  const descriptions = el("ring-descriptions");
+  descriptions.replaceChildren();
   const view = ringView;
   if (!view) {
     strip.dataset.state = "idle";
@@ -5707,6 +5856,7 @@ function renderRingStrip() {
     itemRow.replaceChildren();
     offRow.replaceChildren();
     status.textContent = ringIdleNote();
+    renderRingPreview();
     return;
   }
   const { model } = view;
@@ -5730,10 +5880,34 @@ function renderRingStrip() {
     button.append(document.createTextNode(ringActionLabel(action, { verb, words, nameOf })));
     // Greyed only while the arena is still drawing the last action.
     button.disabled = !view.ready;
-    button.addEventListener("click", () => actFromRing(action));
+    // One click acts — or, with "confirm every move" on, chooses (S7).
+    button.addEventListener("click", () => pressRing(action, { from: "strip" }));
+    // S7: under the pointer or the focus, the preview line says what it will
+    // do — the two tracked apart, so the pointer leaving gives the line back
+    // to the focused button (Codex review of S7, pass 3).
+    const stripPreview = (type) => () => {
+      ringStripState = ringStripPreviewAfter(ringStripState, { type, action });
+      renderRingPreview();
+    };
+    button.addEventListener("focus", stripPreview("focus"));
+    button.addEventListener("blur", stripPreview("blur"));
+    button.addEventListener("pointerenter", stripPreview("enter"));
+    button.addEventListener("pointerleave", stripPreview("leave"));
+    // Its OWN preview is its accessible description — not the shared line,
+    // which another button under the pointer rewrites.
+    const description = document.createElement("span");
+    description.id = `ring-desc-${descriptions.childElementCount}`;
+    description.textContent = ringPreviewTextOf(action) ?? "";
+    descriptions.append(description);
+    button.setAttribute("aria-describedby", description.id);
     return button;
   };
   strip.dataset.state = view.ready ? "ready" : "waiting";
+  // S7: the selected target's odds — every roll at him on screen, the engine's chance for each.
+  const odds = ringOddsFor(model, ringPreviewOf, { nameOf });
+  const oddsNode = document.createElement("span");
+  oddsNode.className = "ring-odds";
+  oddsNode.textContent = odds.text;
   targetRow.replaceChildren(heading("Target"), ...model.foeIds.map((foeId) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -5741,7 +5915,7 @@ function renderRingStrip() {
     button.setAttribute("aria-pressed", String(foeId === model.selectedId));
     button.addEventListener("click", () => selectRingFoe(foeId));
     return button;
-  }));
+  }), oddsNode);
   const filled = model.slots.filter((slot) => slot.action);
   // The ring row: the eight in key order — a walk in its slot takes its arrow
   // too — then every move no slot holds, with its arrow (S4).
@@ -5773,7 +5947,8 @@ function renderRingStrip() {
     " Keys: 1–8 the ring" + (model.swap ? `, ${model.swap.key} ${model.swap.words.toLowerCase()}` : "") +
     `${items.length > 0 ? `, ${items.map((item) => item.key).join(" ")} your items` : ""}` +
     ", arrows walk (← →) and change rank (↑ back, ↓ forward), Tab / Shift+Tab the target " +
-    "(from the stage), Esc into this list.";
+    "(from the stage), Esc into this list." +
+    (ringConfirm ? " Confirm every move is on: a press chooses; Enter (from the stage) or Confirm acts, Esc takes it back." : "");
   if (ringFocusWanted && view.ready) {
     const enabled = (row) => [...(el(row)?.querySelectorAll("button:not(:disabled)") ?? [])];
     const wanted = ringFocusWanted;
@@ -5790,15 +5965,132 @@ function renderRingStrip() {
     announce(`Your turn: ${nameOf(view.actorId)}. Target ${nameOf(model.selectedId)}${range ? `, ${range}` : ""}. ` +
       `${filled.length + unslotted.length} on the ring${model.swap ? " and the weapon swap" : ""}` +
       `${items.length > 0 ? `, ${items.length} item${items.length === 1 ? "" : "s"} over your head` : ""}` +
-      `${model.offRing.length > 0 ? `, ${model.offRing.length} more listed` : ""}.`);
+      `${model.offRing.length > 0 ? `, ${model.offRing.length} more listed` : ""}. ${odds.text}`);
+  }
+  renderRingPreview();
+}
+
+/**
+ * ► **THE PREVIEW LINE (slice S7; the owner's decision 4, "hovering shows the
+ *   verb and its hit chance").** What the button under the pointer — in the
+ *   strip or on the stage — else the focused strip button will do, in
+ *   `host.previewAction`'s numbers (`ringPreviewTextOf`); with neither, the
+ *   choice waiting for Confirm, else a hint (`ringPreviewShown`). Confirm and Back are
+ *   shown only with the setting on, Confirm live only with a choice standing
+ *   and the arena ready for it. Only this line changes: the strip's buttons —
+ *   and the focus on one — are left alone.
+ */
+function renderRingPreview() {
+  const text = el("ring-preview-text");
+  const go = el("ring-confirm-go");
+  const back = el("ring-confirm-back");
+  const view = ringView;
+  const pending = ringPendingAction();
+  if (go) {
+    go.hidden = !ringConfirm;
+    go.disabled = !(view?.ready && pending);
+  }
+  if (back) {
+    back.hidden = !ringConfirm;
+    back.disabled = !pending;
+  }
+  if (!text) return;
+  if (!view) {
+    text.textContent = "";
+    return;
+  }
+  const { action: shown, chosen } = ringPreviewShown({ strip: ringStripState, stageHover: ringHover ? ringActionFor(view.model, ringHover) : null, pending });
+  const line = shown ? ringPreviewTextOf(shown) : null;
+  text.textContent = line
+    ? `${chosen ? "Chosen — " : ""}${line}`
+    : ringConfirm
+      ? "Choose an action, then Confirm (Enter)."
+      : "Point at or focus an action to see what it will do.";
+}
+
+/** S7: `host.previewAction` for one action of the ring on screen, asked once per ring — pure, so asking moves nothing. */
+function ringPreviewOf(action) {
+  const view = ringView;
+  if (!view || !action) return null;
+  const id = JSON.stringify([action.actorId, action.type, action.targetId, action.itemId ?? null, action.spellKind ?? null]);
+  if (!view.previews.has(id)) view.previews.set(id, host.previewAction(action));
+  return view.previews.get(id);
+}
+
+/** S7: what one action on screen will do, in words — the strip's own for its button, then the engine's numbers. */
+function ringPreviewTextOf(action) {
+  const view = ringView;
+  if (!view) return null;
+  return ringPreviewFor(view.model, action, ringPreviewOf(action), { nameOf: (id) => host.combatant(id)?.name ?? id })?.text ?? null;
+}
+
+/** S7: the choice standing on this turn, as the ring on screen holds it — or null (none, the setting off, or no ring). */
+function ringPendingAction() {
+  const view = ringView;
+  if (!view || !ringConfirm) return null;
+  return ringPendingFor(view.model, ringPending, { turn: view.turnKey });
+}
+
+/**
+ * ► **EVERY PRESS — a click on the stage, a strip button — TAKES THIS ROAD
+ *   (S7).** `ringPressCommand` decides: with "confirm every move" off it
+ *   acts, as the owner's one click does; on, it only chooses.
+ */
+function pressRing(action, { from = "stage" } = {}) {
+  runRingCommand(ringPressCommand(action, { confirm: ringConfirm }), { from });
+}
+
+/**
+ * DOES WHAT A RING COMMAND SAYS — a press's, a key's (`ringKeyCommand`) or the
+ * strip's Confirm's (`ringConfirmCommand`). The ONLY place that sends.
+ */
+function runRingCommand(command, { from = "stage" } = {}) {
+  if (!command) return;
+  if (command.kind === "act") actFromRing(command.action);
+  else if (command.kind === "choose") chooseRingAction(command.action, { from });
+  else if (command.kind === "back") takeBackRingChoice();
+  else if (command.kind === "select") selectRingFoe(command.foeId);
+  else if (command.kind === "focus-strip") el("ring-strip").querySelector("button:not(:disabled)")?.focus();
+  else if (command.kind === "ignore") {
+    // An arrow the ring owns that moves nobody: a held key's repeat says
+    // nothing; a move the engine withholds is said, so the key is not silent.
+    if (command.why === "not-offered") announce(`${ringActionLabel({ type: command.move })} is not on offer now.`);
+    // Enter with nothing chosen (S7).
+    else if (command.why === "nothing-chosen") announce("Nothing is chosen yet: choose an action, then press Enter or Confirm.");
   }
 }
 
 /**
+ * S7: HOLDS A CHOICE for Confirm — the chosen button ringed in gold on the
+ * stage, the preview line saying it, the live region too. Chosen anywhere but
+ * the stage — a strip button (clicked, which on some browsers does not focus
+ * it), or a key pressed while one had the focus — the focus moves to Confirm,
+ * so the next Enter confirms rather than pressing whatever had the focus;
+ * from the stage, Enter already confirms.
+ */
+function chooseRingAction(action, { from = "stage" } = {}) {
+  const view = ringView;
+  if (!view || !action) return;
+  ringPending = { turn: view.turnKey, action };
+  renderRingPreview();
+  announce(`Chosen: ${ringPreviewTextOf(action) ?? ringActionLabel(action)}. Enter or Confirm to act, Esc to take it back.`);
+  if (from === "strip" || ringFocusKind(document.activeElement, { stage: canvas }) !== "stage") el("ring-confirm-go")?.focus();
+}
+
+/** S7: Back, or Esc — the choice is dropped and nothing is sent. */
+function takeBackRingChoice() {
+  ringPending = null;
+  renderRingPreview();
+  announce("Choice taken back.");
+}
+
+/**
  * THE ONE ROUTE FROM THE RING TO THE ENGINE — a click on a button, a key, or
- * a strip button. Whose turn it is is asked AGAIN here, of the engine's seats,
- * so a ring drawn for one turn can never take another, and nothing is sent
- * while the arena is still drawing the last action.
+ * a strip button, reaching it only as an "act" command (`runRingCommand`): a
+ * press with "confirm every move" off, or Confirm / Enter with it on (S7).
+ * Whose turn it is is asked AGAIN here, of the engine's seats, so a ring
+ * drawn for one turn can never take another, and nothing is sent while the
+ * arena is still drawing the last action. Whatever was chosen is spent.
  */
 function actFromRing(action) {
   const view = ringView;
@@ -5811,6 +6103,7 @@ function actFromRing(action) {
     return;
   }
   if (!current.ready) return;
+  ringPending = null;
   try {
     // Anything a refused submit left in the ledger is not this action's.
     strikeLedger.take();
@@ -5847,7 +6140,8 @@ function canvasPointOf(event) {
 
 /**
  * ONE CLICK ACTS (the owner's Q2): on a drawn button it sends that slot's
- * action; on a foe it selects him. The bar's sound toggle keeps its own click.
+ * action — or, with "confirm every move" on, chooses it (S7, `pressRing`);
+ * on a foe it selects him. The bar's sound toggle keeps its own click.
  */
 canvas.addEventListener("click", (event) => {
   if (!ringView) return;
@@ -5857,7 +6151,7 @@ canvas.addEventListener("click", (event) => {
   if (box && point.x >= box.x0 && point.x <= box.x1 && point.y >= box.y0 && point.y <= box.y1) return;
   const slot = ringShown() ? ringSlotAt(ringButtons, point.x, point.y) : null;
   if (slot) {
-    actFromRing(ringActionFor(ringView.model, slot));
+    pressRing(ringActionFor(ringView.model, slot));
     return;
   }
   const foeId = foeAt(fighterBoxes, point.x, point.y, ringView.model.foeIds);
@@ -5868,13 +6162,21 @@ canvas.addEventListener("pointermove", (event) => {
   const point = ringView ? canvasPointOf(event) : null;
   const slot = point && ringShown() ? ringSlotAt(ringButtons, point.x, point.y) : null;
   const foeId = point && !slot ? foeAt(fighterBoxes, point.x, point.y, ringView.model.foeIds) : null;
-  ringHover = slot;
   canvas.style.cursor = slot || foeId ? "pointer" : "";
+  // S7: a new button under the pointer — the strip's preview line follows it
+  // (the stage's caption is painted with the ring).
+  if (slot !== ringHover) {
+    ringHover = slot;
+    renderRingPreview();
+  }
 });
 
 canvas.addEventListener("pointerleave", () => {
-  ringHover = null;
   canvas.style.cursor = "";
+  if (ringHover !== null) {
+    ringHover = null;
+    renderRingPreview();
+  }
 });
 
 for (const type of ["focusin", "pointerdown"]) {
@@ -5905,21 +6207,43 @@ window.addEventListener("keydown", (event) => {
     if (ringKeyCommand(null, pressed)) event.preventDefault();
     return;
   }
-  const command = ringKeyCommand(ringView.model, { ...pressed });
+  // S7: the setting and the choice standing — so a key only chooses while it
+  // is on, Enter confirms and Esc takes the choice back.
+  const command = ringKeyCommand(ringView.model, { ...pressed, confirm: ringConfirm, pending: ringPendingAction() });
   if (!command) return;
   event.preventDefault();
   if (RING_KEY_GLYPHS[event.key]) ringHeldKeys.add(event.key);
-  if (command.kind === "act") actFromRing(command.action);
-  else if (command.kind === "select") selectRingFoe(command.foeId);
-  else if (command.kind === "focus-strip") el("ring-strip").querySelector("button:not(:disabled)")?.focus();
-  else if (command.kind === "ignore") {
-    // An arrow the ring owns that moves nobody: a held key's repeat says
-    // nothing; a move the engine withholds is said, so the key is not silent.
-    if (command.why === "not-offered") announce(`${ringActionLabel({ type: command.move })} is not on offer now.`);
-  }
+  runRingCommand(command);
 });
 window.addEventListener("keyup", (event) => ringHeldKeys.delete(event.key));
 window.addEventListener("blur", () => ringHeldKeys.clear());
+
+/*
+ * S7 — THE STRIP'S CONFIRM AND BACK, and THE SETTING'S TOGGLE. Confirm sends
+ * the choice standing, as the ring on screen holds it (`ringConfirmCommand`);
+ * Back drops it. The toggle is remembered per browser — a save that storage
+ * refuses is logged, and the setting still applies to this visit — and
+ * turning it off drops any choice, as one click acts again.
+ */
+el("ring-confirm-go")?.addEventListener("click", () => {
+  if (ringView) runRingCommand(ringConfirmCommand(ringView.model, ringPendingAction()));
+});
+el("ring-confirm-back")?.addEventListener("click", () => {
+  if (ringPendingAction()) runRingCommand({ kind: "back" });
+});
+const ringConfirmToggle = el("ring-confirm");
+if (ringConfirmToggle) {
+  ringConfirmToggle.checked = ringConfirm;
+  ringConfirmToggle.addEventListener("change", () => {
+    ringConfirm = ringConfirmToggle.checked;
+    if (!ringConfirm) ringPending = null;
+    if (!ringConfirmSettingSave(() => window.localStorage, ringConfirm)) {
+      log("confirm every move: this browser will not remember it (storage is blocked); it applies to this visit.", { warn: true });
+    }
+    log(`confirm every move ${ringConfirm ? "on: a press chooses, and Confirm or Enter acts" : "off: one click acts"}.`);
+    renderControls();
+  });
+}
 
 /**
  * THE RING'S LINE IN THE PROVENANCE PANEL, derived from what is drawn: the
@@ -5939,7 +6263,10 @@ function ringProvenance() {
       "own table (a team camera's in-between zoom takes the band below's size; the close-up past 1,600 apart is not drawn)"
     : "on the acting fighter at an authored size, as this fitted view has no build camera";
   return ["The action ring", `${art}, ${where}. The keys, the labels and the gold target ring are authored; ` +
-    "so is the items row's lift over the step-back arrow, where a tall fighter's arrow would reach it."];
+    "so is the items row's lift over the step-back arrow, where a tall fighter's arrow would reach it. " +
+    "A hovered or focused button's preview — its hit chance, damage and stamina — and the target's odds in the " +
+    "strip are the engine's own numbers (the hit chance is the build's rollover percentage); their words and " +
+    "places are authored, and so is \"confirm every move\", off unless you turn it on."];
 }
 
 function renderProvenance() {

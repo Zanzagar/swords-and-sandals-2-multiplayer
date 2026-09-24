@@ -73,6 +73,16 @@
   .ring-row button[aria-pressed="true"] { border-color: #f2c14e; color: #f2c14e; }
   .ring-row kbd { font: inherit; font-size: 11px; font-weight: 700; color: var(--warn); }
   .ring-status { margin: 0; font-size: 11.5px; color: var(--ink-dim); }
+  /* S7: the preview line — what the hovered or focused button will do — with
+     Confirm and Back while "confirm every move" is on, and the setting itself. */
+  .ring-preview-text { flex: 1 1 18em; min-width: 0; font-size: 12px; }
+  .ring-confirm-toggle {
+    margin-left: auto; display: inline-flex; gap: 5px; align-items: center;
+    font-size: 11.5px; color: var(--ink-dim); cursor: pointer;
+  }
+  .ring-confirm-toggle input { accent-color: var(--warn); margin: 0; }
+  #ring-confirm-go:not(:disabled) { border-color: #f2c14e; color: #f2c14e; }
+  .ring-odds { font-size: 11.5px; color: var(--ink-dim); margin-left: 4px; }
   .visually-hidden {
     position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
@@ -108,6 +118,8 @@
   }
   button:hover:not(:disabled) { background: #383243; }
   button:disabled { opacity: .4; cursor: default; }
+  /* S7: a plain-list action chosen with "confirm every move" on, waiting for its Confirm. */
+  .actions button[aria-pressed="true"] { border-color: #f2c14e; color: #f2c14e; }
   .log { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; color: var(--ink-dim); }
   .log div { padding: 1px 0; }
   .log .warn { color: var(--warn); }
@@ -143,13 +155,21 @@
   </header>
   <main>
     <div class="stage-column">
-      <div id="stage"><canvas id="arena" tabindex="0" aria-label="The arena. On your turn: click a button around your fighter, or a foe to target him. Keys: 1 to 8 press the buttons, 9 swaps weapons when you carry two, Q to Y use your items and spells, the arrow keys walk left and right and step back or forward a rank, Tab and Shift+Tab change the target, Esc moves to the list of actions under the stage."></canvas></div>
+      <div id="stage"><canvas id="arena" tabindex="0" aria-label="The arena. On your turn: click a button around your fighter, or a foe to target him. Keys: 1 to 8 press the buttons, 9 swaps weapons when you carry two, Q to Y use your items and spells, the arrow keys walk left and right and step back or forward a rank, Tab and Shift+Tab change the target, Esc moves to the list of actions under the stage. With Confirm every move on, a key or click only chooses: Enter confirms and Esc takes it back."></canvas></div>
       <section class="ring-strip" id="ring-strip" aria-label="Your actions" data-state="idle" hidden>
+        <div class="ring-row" id="ring-preview" role="group" aria-label="Preview and confirm">
+          <b>Preview</b>
+          <span class="ring-preview-text" id="ring-preview-text"></span>
+          <button type="button" id="ring-confirm-go" aria-keyshortcuts="Enter" hidden disabled><kbd>Enter</kbd> Confirm</button>
+          <button type="button" id="ring-confirm-back" aria-keyshortcuts="Escape" hidden disabled><kbd>Esc</kbd> Back</button>
+          <label class="ring-confirm-toggle"><input type="checkbox" id="ring-confirm"> Confirm every move</label>
+        </div>
         <div class="ring-row" id="ring-target" role="group" aria-label="Target"></div>
         <div class="ring-row" id="ring-slots" role="group" aria-label="The ring"></div>
         <div class="ring-row" id="ring-items" role="group" aria-label="Items and spells"></div>
         <div class="ring-row" id="ring-off" role="group" aria-label="More actions"></div>
         <p class="ring-status" id="ring-status"></p>
+        <div id="ring-descriptions" hidden></div>
       </section>
       <div class="visually-hidden" id="ring-live" aria-live="polite"></div>
     </div>

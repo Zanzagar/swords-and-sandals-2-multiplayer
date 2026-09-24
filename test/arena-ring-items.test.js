@@ -587,7 +587,8 @@ test("the shell draws the row with the ring — from the pack's row layout, off 
   assert.match(paint, /const label = button\.verb === "" \? button\.key : /);
   assert.ok(rawShell.includes('const label = button.verb === "item" ? button.key : '));
   assert.match(paint, /const \{ px, gap \} = ringLabelSizeFor\(button\.r\);/, "the letters are the size the stage fit keeps room for");
-  assert.match(shell, /actFromRing\(ringActionFor\(ringView\.model, slot\)\)/, "one route to the engine, as before");
+  // S7: the click presses through the confirm gate (`pressRing`), ~~`actFromRing` directly~~.
+  assert.match(shell, /pressRing\(ringActionFor\(ringView\.model, slot\)\)/, "one route to the engine, as before");
   assert.equal((shell.match(/host\.submit\(/g) ?? []).length, 3);
 });
 

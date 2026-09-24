@@ -457,6 +457,73 @@ export function ringLabelSizeFor(r) {
   return Object.freeze({ px: Math.max(9, Math.round(r * 0.62)), gap: Math.max(3, r * 0.2) });
 }
 
+/**
+ * ► **WHERE A HOVER'S WORDS STAND ON THE STAGE (slice S7) — AUTHORED.** The
+ *   build writes the hovered button's `optiontext` into the overlay's own text
+ *   field (edit text 861, `variable: "optiontext"`, set by each rollover, e.g.
+ *   overlay frame 1 body 0x2378d2 `+0x03f5`); no pack carries where that field
+ *   stands. So the caption is a tooltip: centred under the hovered button, the
+ *   label's gap below its disc, so it never covers the button it describes;
+ *   over it when there is no room under it on the stage; slid sideways onto
+ *   the stage at its edges; never wider than the stage (its words wrapped by
+ *   `ringCaptionLines`); and kept on the stage when neither fits — only a box
+ *   taller than the whole stage can pass its foot. It is
+ *   drawn only while the pointer is on the button, over everything, so it may
+ *   pass over a neighbour for that long.
+ *
+ * @param {{x: number, y: number, r: number}} button  the hovered button, canvas px
+ * @param {{width: number, height: number, gap: number}} size  the caption's box and its gap
+ * @param {{x: number, y: number, width: number, height: number}} stage  `stageClipRectFor`
+ * @returns {{x0: number, y0: number, width: number, height: number, x: number, y: number}}
+ *   the box, and where to `fillText` centred with a middle baseline
+ */
+export function ringCaptionAt(button, { width: measured, height, gap }, stage) {
+  // Never wider than the stage (Codex review of S7, pass 2): the caller wraps
+  // the words to fit (`ringCaptionLines`), and a box is never drawn past it.
+  const width = Math.min(measured, stage.width);
+  const bottom = stage.y + stage.height;
+  const below = button.y + button.r + gap;
+  const above = button.y - button.r - gap - height;
+  let y0 = below + height <= bottom ? below : above >= stage.y ? above : below;
+  y0 = Math.max(stage.y, Math.min(y0, bottom - height));
+  const x0 = Math.max(stage.x, Math.min(button.x - width / 2, stage.x + stage.width - width));
+  return Object.freeze({ x0, y0, width, height, x: x0 + width / 2, y: y0 + height / 2 });
+}
+
+/**
+ * A CAPTION'S LINES, NONE WIDER THAN `maxWidth` WHERE A BREAK ALLOWS (S7; Codex
+ * review of S7, pass 2: the first build drew one line, which a narrow stage
+ * cut off, losing the cost at its end). Greedy: whole " · "-separated parts
+ * first — the preview's own seams — then, for a part too wide alone, between
+ * its words. A single word wider than `maxWidth` keeps a line to itself.
+ * Every word is kept, in order.
+ *
+ * @param {string} text  the preview's words (`ringPreviewFor`)
+ * @param {{maxWidth: number, measure: (line: string) => number}} options
+ * @returns {string[]}
+ */
+export function ringCaptionLines(text, { maxWidth, measure }) {
+  const lines = [];
+  let line = "";
+  const put = (piece, joiner) => {
+    if (line !== "" && measure(`${line}${joiner}${piece}`) <= maxWidth) line = `${line}${joiner}${piece}`;
+    else {
+      if (line !== "") lines.push(line);
+      line = piece;
+    }
+  };
+  for (const part of String(text ?? "").split(" · ")) {
+    if (measure(part) <= maxWidth) {
+      put(part, " · ");
+      continue;
+    }
+    // Too wide alone: its words, the first on a fresh line unless it joins the last with the part's seam.
+    part.split(" ").forEach((word, index) => put(word, index === 0 ? " · " : " "));
+  }
+  if (line !== "") lines.push(line);
+  return lines;
+}
+
 /** The slot of the drawn button a point is on (rim included), or null. */
 export function ringSlotAt(buttons, x, y) {
   let best = null;

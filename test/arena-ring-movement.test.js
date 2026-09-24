@@ -520,9 +520,14 @@ test("the shell draws the moves with the ring, off the acting fighter's DRAWN he
 test("the keys: an arrow the ring swallows is kept from the page and sends nothing, and one it took stays its own until it is let go", () => {
   const keydown = shell.slice(shell.indexOf("const command = ringKeyCommand(ringView.model, {"));
   assert.match(keydown, /if \(!command\) return;\s*event\.preventDefault\(\);/);
-  assert.match(keydown, /else if \(command\.kind === ""\) \{[^}]*announce\(/, "a withheld move is said, not sent");
+  // S7 moved what the handler does with a command into `runRingCommand` (the one place that sends, so
+  // "confirm every move" gates every route); ~~the handler held these branches itself~~.
+  const run = shell.slice(shell.indexOf("function runRingCommand("));
+  assert.match(run, /else if \(command\.kind === ""\) \{[^}]*announce\(/, "a withheld move is said, not sent");
   const handler = keydown.slice(0, keydown.indexOf("\n});"));
-  assert.equal((handler.match(/actFromRing\(/g) ?? []).length, 1, "only an act acts");
+  assert.equal((handler.match(/actFromRing\(/g) ?? []).length, 0, "the handler sends nothing itself");
+  assert.match(handler, /runRingCommand\(command\);/, "it hands the command on");
+  assert.equal((run.slice(0, run.indexOf("\n}\n")).match(/actFromRing\(/g) ?? []).length, 1, "only an act acts");
   assert.ok(rawShell.includes('else if (command.kind === "ignore") {'));
   assert.match(rawPage, /aria-label="[^"]*arrow keys[^"]*"/i, "the stage's own name tells a screen reader the arrows move");
   // CODEX PASS 1: with no ring on screen, a held arrow's repeats still go to the ring's key rule, which

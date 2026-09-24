@@ -138,7 +138,7 @@ first (ab5feb5, `src/render/action-buttons.js`).
 - **S2** the ring's core: the who-first selection model, eight slots per stance, one-click, Tab, the
   keyboard strip — drawn with the authored fallback buttons (the tracer bullet)
 - **S3** the build's own button art and placement on the ring · **S4** movement (walk slots, rank arrows)
-- **S5** the items row (built, below) · **S6** the weapon swap button (built, below) · **S7** hover previews and the confirm setting
+- **S5** the items row (built, below) · **S6** the weapon swap button (built, below) · **S7** hover previews and the confirm setting (built, below)
 - **S8** AI pacing (speed-up, skip) · **S9** greyed-button reasons (needs E)
 
 ### S2, built 2026-09-24: what it does, and what it decided that the owner did not
@@ -428,6 +428,92 @@ list (`test/arena-ring.test.js`, `test/arena-ring-movement.test.js`, `test/arena
   the bow icon with the sword in hand, the sword after a swap, the swap's hover frame, optionG's label
   under it, and a ring at the left edge — the swap's label, like S2's labels, can run off the stage
   there (582 of 1,982 swap selections, measured with an approximate width).
+
+### S7, built 2026-09-24: hover previews, the target's odds, and "confirm every move"
+
+`ringPreviewFor`, `ringOddsFor` and the setting's storage (`tools/arena/ring-preview.js`, new);
+`ringEntries`, `ringPressCommand`, `ringConfirmCommand`, `ringPendingFor`, `ringPendingKept` and
+Enter/Esc in `ringKeyCommand` (`tools/arena/ring.js`); `ringCaptionAt` and `ringCaptionLines`
+(`tools/arena/ring-layout.js`); wired in
+`tools/arena/main.js` and `tools/arena/index.html`. Tests: `test/arena-ring-preview.test.js` and
+`test/arena-ring-preview-bouts.test.js`; the S2, S4, S5 and S6 shell pins on the click and key routes
+were updated where S7 put a gate in front of `actFromRing`.
+
+- **Every preview is the engine's.** Hovering a button on the stage, or pointing at or focusing one in
+  the strip, shows what `host.previewAction(action)` says for THAT button's action: the hit chance, the
+  damage band before armour, what a potion or rejuvenate restores, and the stamina it costs or gives
+  ("Power attack at Cidra: 40% to hit · 17 damage · costs 10 stamina"; a bolt "cannot miss"; a whirlwind
+  out of range "out of range: wasted"; "from behind" when the back-attack bonus applies; a rest "gains
+  75 stamina"). The words before the colon are the strip's own for the button (the build's item names,
+  S5; the swap's rollover text, S6). Proven over 16 seeded bouts (1v1 and 3v3; plain, `tricks`,
+  `blasts`, `crowd`), every turn, every foe selected: 19,397 hovers found the way the shell finds them
+  (`ringSlotAt` on the drawn button) and 20,325 strip buttons, each preview's numbers read back out of
+  its words by an independent parser and compared with `host.previewAction` — 6,362 with a hit chance,
+  168 that cannot miss, 364 wasted out of range. The Preview row follows the pointer (in the strip, else
+  on the stage), else the focused strip button, else the choice waiting for Confirm — the focus and the
+  pointer tracked apart, so the pointer leaving gives the row back to the focused button
+  (`ringStripPreviewAfter`, `ringPreviewShown`; Codex review of S7, pass 3: the first build kept one
+  shared slot and blanked it). Each strip button carries its OWN preview as its accessible description,
+  not the shared row, which another button under the pointer rewrites (Codex pass 3).
+- **The hit chance is the build's own number, the one its rollover prints** — `"Power (" +
+  hero.power_percentage + " % chance)"` (overlay frame 13, `closerange_warrior`, body 0x23a11c,
+  `+0x096a`), which `ss2PreviewAction` returns as `chance`. It is not quite the odds: the dispatcher hits
+  on `diceroll >= 100 - chance` over 1-100, `chance + 1` in 100, and the taunt's first roll lands on
+  `roll < chance`, `chance - 1` in 100 (`ss2PreviewAction`'s own note). **Owner decision:** keep the
+  build's number (as built), or show the true odds.
+- **Where the words stand (AUTHORED).** The build writes the hovered button's `optiontext` into the
+  overlay's own text field (edit text 861, `variable: "optiontext"`; e.g. the items row's rollover,
+  overlay frame 1 body 0x2378d2, `+0x03f5`); no pack says where that field stands. So on the stage the
+  preview is a caption under the hovered button (over it at the stage's foot, slid onto the stage at its
+  sides — `ringCaptionAt`), in the label's size, while the pointer is on it, never wider than the stage:
+  a caption too long for it wraps at its " · " seams, then between words (`ringCaptionLines`; Codex
+  review of S7, pass 2 — the first build drew one line, which a narrow stage cut off, cost and all). In
+  the strip it is a new first row, "Preview", so its fixed 132 px never scrolls it away.
+- **The selected target's odds (the owner's decision 9).** The strip's Target row ends with every roll
+  at the selected foe on screen and the engine's chance for each — "Odds on Cidra: Power 40% · Normal
+  61% · Quick 80%" — the taunt, the swings, the shots, the bash, a ghost strike, a whirlwind in range;
+  once per action (two places of one spell are one roll). What takes no roll, or cannot miss, is not
+  odds. Proven over the same 16 bouts: in each of 2,710 selections the odds are exactly the OFFER's
+  actions at that foe that roll to hit him (3,181 in all). The turn's announcement ends with them.
+  AUTHORED: the build shows no odds line, only each button's rollover.
+- **"Confirm every move" (the owner's decision 4), OFF by default.** A checkbox at the end of the
+  Preview row, remembered per browser (`localStorage` key `arena.ring.confirm`, "1"/"0"; storage that
+  throws or is empty means off, and a save it refuses is logged while the setting still applies). With it
+  ON, every press — a click on the stage, a strip button, 1-9, Q-Y, the arrows — only CHOOSES: the chosen
+  button is ringed in gold, the Preview row says "Chosen — …", and the live region says it. **Enter** from
+  the stage, or the strip's **Confirm**, sends it; **Esc** (from the stage or a strip button) or **Back**
+  drops it. Chosen anywhere but the stage — a strip button, or a key pressed while one had the focus —
+  the focus moves to Confirm, so the next Enter confirms (found on self-review: a digit pressed with a
+  strip button focused chose, and Enter then pressed that button instead); on a button,
+  Enter stays the browser's and presses that button — but a HELD Enter's repeats are the ring's and do
+  nothing, wherever the focus is, so the press that chose cannot also confirm by being held (Codex review
+  of S7, pass 1: the first build left the repeats to the browser, which would press the Confirm the
+  focus had just moved to). A choice stands while its turn does and the ring on screen shows it — a
+  potion outlasts a change of target; a swing at the old target is DROPPED, and switching back does not
+  bring it back (Codex pass 1: the first build only hid it) — and every send clears it. Proven over 18 `?play=red` bouts (1v1 and 3v3; plain, `tricks`, `crowd`; seeds 1-3):
+  1,758 presses (667 digits, 80 letters, 644 arrows, 353 clicks on drawn buttons, 14 listed), every one
+  only a choice, and the state hash unmoved until Enter (640) or Confirm (632) sent the choice, which was
+  on offer every time; 422 taken back by Esc (and Enter then sent nothing), 277 re-targeted by Tab (213
+  choices kept, 64 dropped).
+- **One road to the engine.** Every press goes through `ringPressCommand` (the shell's `pressRing`),
+  every key through `ringKeyCommand`, Confirm through `ringConfirmCommand`, and only an "act" command
+  reaches `actFromRing` (`runRingCommand`), which still re-asks whose turn it is. The plain list S2 kept
+  for a rule set with no menu (or a menu that throws) honours the setting too: a click there is a press,
+  and with the setting on it only marks the button and the list's own Confirm sends it (Codex review of
+  S7, pass 4, the last pass allowed: the first build let that list submit on one click; fixed and pinned
+  after the pass, NOT re-reviewed).
+- **Asking changes nothing.** `previewAction` is pure: over those 16 bouts the state hash and the record
+  of random draws were the same after every turn's previews and odds as before them, and five spectated
+  bouts take the same hash sequence and the same draws with every preview asked for every fighter
+  against every foe on every turn. The golden census is identical.
+- **Authored, the owner did not decide these:** the preview's words and their order; the caption under
+  the button and the Preview row; the odds in the Target row; the gold ring on a chosen button; Enter only
+  from the stage; Esc and Back; the focus moving to Confirm; a choice outliving a change of target when
+  its button is still there; the hit chance shown as the build's number rather than the true odds.
+- **Not seen:** no agent may open a browser. Screenshot `?play=red` hovering the power attack (the
+  caption under it, the Preview row), `?play=red&teams=3&items=tricks` with the setting on (a spell
+  chosen and ringed, Confirm live), and tab through the strip with a screen reader (the preview as each
+  button's description).
 
 ## Delivery order
 

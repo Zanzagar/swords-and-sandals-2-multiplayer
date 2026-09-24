@@ -378,6 +378,53 @@ export function ringActionFor(model, slotOrKey) {
   return move?.action ?? null;
 }
 
+/**
+ * WHETHER TWO ACTIONS ARE THE SAME ACTION: the fields `host.submit` reads —
+ * who, what, at whom, which item, which spell. A potion's `itemId` tells two
+ * drinks apart; nothing else does.
+ */
+export function ringSameAction(left, right) {
+  if (!left || !right) return false;
+  return left.actorId === right.actorId && left.type === right.type && left.targetId === right.targetId
+    && (left.itemId ?? null) === (right.itemId ?? null) && (left.spellKind ?? null) === (right.spellKind ?? null);
+}
+
+/**
+ * ► **EVERY ACTION ON SCREEN, ONCE PER BUTTON (slice S7)** — in the strip's
+ *   own order: the eight's filled slots in key order, the moves no slot
+ *   holds, the weapon swap, the items row left to right, then the list off
+ *   the ring. Each `{place, key, slot, verb, words, action}`: `place` is
+ *   `slot`, `move`, `swap`, `item` or `off`; `key` the key that presses it
+ *   (null for a listed one); `slot` the name its drawn button carries
+ *   (`ringSlotAt` returns it); `verb` and `words` what the strip labels it
+ *   with. What a hover previews and what "confirm every move" may hold.
+ */
+export function ringEntries(model) {
+  if (!model) return Object.freeze([]);
+  const out = [];
+  for (const slot of model.slots ?? []) {
+    if (slot.action) out.push({ place: "slot", key: slot.key, slot: slot.slot, verb: slot.verb, words: null, action: slot.action });
+  }
+  for (const move of model.moves ?? []) {
+    if (move.place !== "slot") out.push({ place: "move", key: move.key, slot: move.move, verb: move.verb, words: null, action: move.action });
+  }
+  const swap = model.swap ?? null;
+  if (swap) out.push({ place: "swap", key: swap.key, slot: swap.slot, verb: swap.verb, words: swap.words, action: swap.action });
+  for (const item of model.items ?? []) {
+    if (item.action) out.push({ place: "item", key: item.key, slot: item.slot, verb: item.verb, words: item.words, action: item.action });
+  }
+  for (const entry of model.offRing ?? []) {
+    out.push({ place: "off", key: null, slot: null, verb: null, words: null, action: entry.action });
+  }
+  return Object.freeze(out.map((entry) => Object.freeze(entry)));
+}
+
+/** The first entry on screen that sends `action` (`ringSameAction`), or null. */
+export function ringEntryFor(model, action) {
+  if (!action) return null;
+  return ringEntries(model).find((entry) => ringSameAction(entry.action, action)) ?? null;
+}
+
 /** The foe Tab (`step` 1) or Shift+Tab (`step` -1) selects next, wrapping; null with no foe. */
 export function ringNextFoe(model, step = 1) {
   const order = model?.foeIds ?? [];
@@ -419,7 +466,10 @@ export function ringNextFoe(model, step = 1) {
  *   stay `ignore`d: the press moved the person, the turn went to the AI, and
  *   the key must not start scrolling the page halfway through.
  */
-export function ringKeyCommand(model, { key, shiftKey = false, ctrlKey = false, altKey = false, metaKey = false, repeat = false, focus = "stage", held = null } = {}) {
+export function ringKeyCommand(model, {
+  key, shiftKey = false, ctrlKey = false, altKey = false, metaKey = false, repeat = false, focus = "stage", held = null,
+  confirm = false, pending = null
+} = {}) {
   if (focus === "text" || ctrlKey || altKey || metaKey) return null;
   if (!model) {
     // THE RING'S OWN ARROW, STILL HELD, after the turn it moved has gone (to
@@ -434,15 +484,13 @@ export function ringKeyCommand(model, { key, shiftKey = false, ctrlKey = false, 
   }
   if (/^[1-8]$/.test(key ?? "") || key === RING_SWAP_KEY) {
     if (repeat) return null;
-    const action = ringActionFor(model, key);
-    return action ? Object.freeze({ kind: "act", action }) : null;
+    return ringPressCommand(ringActionFor(model, key), { confirm });
   }
   // The items row (S5): a letter, whichever case Shift or Caps Lock gives it.
   const letter = typeof key === "string" && key.length === 1 ? key.toUpperCase() : null;
   if (letter !== null && RING_ITEM_KEYS.includes(letter)) {
     if (repeat) return null;
-    const action = ringActionFor(model, letter);
-    return action ? Object.freeze({ kind: "act", action }) : null;
+    return ringPressCommand(ringActionFor(model, letter), { confirm });
   }
   const move = RING_MOVES.find((candidate) => candidate.key === key);
   if (move) {
@@ -450,9 +498,22 @@ export function ringKeyCommand(model, { key, shiftKey = false, ctrlKey = false, 
     if (repeat) return Object.freeze({ kind: "ignore", why: "repeat", move: move.move });
     const action = ringActionFor(model, move.key);
     return action
-      ? Object.freeze({ kind: "act", action })
+      ? ringPressCommand(action, { confirm })
       : Object.freeze({ kind: "ignore", why: "not-offered", move: move.move });
   }
+  // S7: with "confirm every move" on, Enter from the stage sends the choice
+  // (on a button it presses that button, as the browser does), and Esc takes
+  // the choice back from the stage or a button. A HELD Enter's repeats are
+  // the ring's wherever the focus is, and do nothing (Codex review of S7, pass
+  // 1): Enter on a strip button chooses and moves the focus to Confirm, and its
+  // repeats would press Confirm — so a choice is confirmed only by a fresh press.
+  if (key === "Enter") {
+    if (!confirm) return null;
+    if (repeat) return Object.freeze({ kind: "ignore", why: "repeat" });
+    if (focus !== "stage") return null;
+    return ringConfirmCommand(model, pending) ?? Object.freeze({ kind: "ignore", why: "nothing-chosen" });
+  }
+  if (key === "Escape" && confirm && ringConfirmCommand(model, pending)) return Object.freeze({ kind: "back" });
   if (focus !== "stage") return null;
   if (key === "Tab") {
     if ((model.foeIds?.length ?? 0) < 2) return null;
@@ -460,6 +521,51 @@ export function ringKeyCommand(model, { key, shiftKey = false, ctrlKey = false, 
   }
   if (key === "Escape") return Object.freeze({ kind: "focus-strip" });
   return null;
+}
+
+/**
+ * ► **WHAT ONE PRESS DOES (slice S7; the owner's decisions 2 and 4): "one
+ *   click acts, as in the original", unless the person has turned on
+ *   "confirm every move" — then it only CHOOSES**, and the strip's Confirm or
+ *   Enter acts (`ringConfirmCommand`). Every press takes this road: a click on
+ *   the stage, a strip button, and every key `ringKeyCommand` sends —
+ *   `{kind: "act"|"choose", action}`, or null when there is nothing to press.
+ */
+export function ringPressCommand(action, { confirm = false } = {}) {
+  if (!action) return null;
+  return Object.freeze({ kind: confirm ? "choose" : "act", action });
+}
+
+/**
+ * CONFIRM (S7): the chosen action — as the model on screen holds it, so what
+ * is sent is always an offered option a button shows — or null when the
+ * choice is not on screen any more.
+ */
+export function ringConfirmCommand(model, pending) {
+  const entry = ringEntryFor(model, pending);
+  return entry ? Object.freeze({ kind: "act", action: entry.action }) : null;
+}
+
+/**
+ * THE CHOICE STILL STANDING (S7): `record` is `{turn, action}` as the shell
+ * kept it; it stands while the turn is the same and a button on `model` sends
+ * it — so a potion outlasts a change of target, a swing at the old target
+ * does not, and a new turn starts with nothing chosen. The model's own action,
+ * or null.
+ */
+export function ringPendingFor(model, record, { turn } = {}) {
+  if (!record || record.turn !== turn) return null;
+  return ringEntryFor(model, record.action)?.action ?? null;
+}
+
+/**
+ * WHAT THE SHELL KEEPS OF A CHOICE WHEN THE RING IS BUILT AGAIN (S7; Codex
+ * review of S7, pass 1): the record itself while `ringPendingFor` finds it on
+ * the new ring, else null — so a choice a new target's ring does not show is
+ * DROPPED, and switching back to the first target does not bring it back.
+ */
+export function ringPendingKept(model, record, { turn } = {}) {
+  return ringPendingFor(model, record, { turn }) ? record : null;
 }
 
 /**
