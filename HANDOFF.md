@@ -1,5 +1,48 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-24 Relic history freshness — RCS-03C3A-A selected
+
+The owner selected `RCS-03C3A-A`: every materially H-reading position is
+freshness-bounded. Every materially qualifying occurrence on every effective
+H-reading path, including any permitted coupled H+S addition, has a disclosed
+finite nonterminal player-semantic age horizon. On a sufficiently long legal
+continuation it ages out because that horizon passes. Exact semantic unit and
+value, source-owned clearing, claims, consumption, reuse, payoff, and UI remain
+separate. This preserves deliberate sequence memory without turn-one priming,
+stale-history laundering, or arbitrarily late opaque automatic manifestations.
+
+At invocation, remembered occurrence and current Soul/Relic/Charm relation are
+**direct**; temporal continuity is **partial**; finite expiry is
+**neutral/protective**; universal freshness coverage is **aggregate**. Windows
+must be generous disclosed semantic intervals, never hidden twitch timers. The
+authoritative decision record remains unchanged and implementation remains
+blocked.
+
+The next prerequisite audit found that old `RCS-03C3B` still compressed seven
+independent boundaries: additional coupled H+S path admission; within-H phase
+attribution; phase support; action/transition root identity; build-provenance
+root identity; root/child atom addressability; and conditional semantic child-
+application partitioning. It is now a non-counting parent for
+`RCS-03C3B0`, `RCS-03C3B1A`, `RCS-03C3B1B`, `RCS-03C3B2A`,
+`RCS-03C3B2B`, `RCS-03C3B3`, and `RCS-03C3B4`. Every eventual child atom
+retains its root; same-root siblings can never fill two independent-source
+positions of one relationship result. C3C–C3F/RCS-08 still own fan-out,
+claims, and reuse.
+
+**Agent correction:** the first internal sixth-amendment draft omitted the
+coupled-path and phase-attribution rows while relying on both. Adversarial
+review caught the overcompression before owner presentation; do not revive the
+temporary 43-slot/A–G-next route.
+
+The register now has forty-five slots: 30 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 5 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`, so `Phi_SR = 31`.
+The sole active card is `RCS-03C3B0`, additional coupled H+S evidence
+admission. Present only its A/B/C directions: no positions admit an additional
+inseparable H+S path; every position does; or the two classes coexist.
+Recommend A for local causal legibility. It still permits separate history and
+state positions and ordinary causal relationships; it excludes only material
+paths whose H and S meanings can never be manipulated apart.
+
 ## 2026-09-24 Relic invocation control — RCS-03C2A-A selected
 
 The owner selected `RCS-03C2A-A`: at every legal eligible opportunity,
@@ -27,13 +70,14 @@ manufacturing a vote: every evaluation reads one coherent authoritative
 pre-adjudication revision containing current `S_e` and the within-battle `H_e`
 facts still semantically admissible at the invocation cut. Earlier state is not
 current `S`; torn revisions, readiness latches, and post-cut rereads are
-invalid/specification defects. The sole active card is now `RCS-03C3A`, narrowed
-to the remaining player-material question of occurrence-history freshness:
+invalid/specification defects. At that point the sole active card was
+`RCS-03C3A`, narrowed to the remaining player-material question of occurrence-history freshness:
 universal finite semantic-age horizons, universal open-retention capability,
 or coexistence across every materially H-reading position, including any
 permitted coupled `H`+`S` addition. Recommend A, universal freshness bounds, to
 preserve readable sequence play without turn-one priming or stale-history
-laundering. Present only that A/B/C choice.
+laundering. The owner subsequently selected A; the corrected continuation is
+the first section of this living head.
 
 A fifth prerequisite audit found that the old C3 row also left canonical atom
 identity, same-cut cross-result/tag fan-out across one or multiple coincident
@@ -44,9 +88,10 @@ now a non-counting parent replaced by `RCS-03C3A`–`RCS-03C3F`; existing
 cannot occupy two positions of one relationship result, but C3B still decides
 the semantic atom boundary before exact catalogs are authored.
 
-The register now has thirty-nine slots: 25 `SCREEN`, 1 `OWNER-OPEN`,
+The fifth-amendment register then had thirty-nine slots: 25 `SCREEN`, 1 `OWNER-OPEN`,
 7 `PRUNED`, 4 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`, so
-`Phi_SR = 26`. The authoritative decision record remains byte-identical and
+`Phi_SR = 26`. C3A-A and the sixth amendment now supersede those frontier
+counts. The authoritative decision record remains byte-identical and
 implementation remains blocked.
 
 ## 2026-09-24 Relic evaluation cadence — RCS-03C1-A selected
@@ -75,9 +120,9 @@ thirty-four slots. C1-A reduced `Phi_SR` from 23 to 22, and replacing one open
 C2 row with two produced interim `Phi_SR = 23`.
 
 **Corrected continuation:** the owner subsequently selected `RCS-03C2A-A`,
-automatic invocation, and pruned `RCS-03C2B`. The sole active card is now
-`RCS-03C3A`, occurrence-history semantic freshness; after the fifth register
-amendment current `Phi_SR = 26` across thirty-nine slots.
+automatic invocation, pruned `RCS-03C2B`, and then selected `RCS-03C3A-A`,
+universal finite history freshness. After the sixth register amendment the sole
+active card is `RCS-03C3B0`, and current `Phi_SR = 31` across forty-five slots.
 
 ## 2026-09-24 Relic evaluation lifetime — RCS-03B1-A selected
 
@@ -105,10 +150,11 @@ register now contains thirty-three slots and splits that parent into
 and replacing one C row with three, current `Phi_SR = 23` (`28 - 7 + 2`). The
 owner subsequently selected `RCS-03C1-A`. **Corrected continuation:** a fourth
 audit split the still-bundled invocation row into `RCS-03C2A`–`RCS-03C2B`; the
-owner then selected `RCS-03C2A-A` and pruned `RCS-03C2B`. The sole active card
-is now `RCS-03C3A`; a fifth amendment routes atom and evidence-use boundaries,
-so the current thirty-nine-slot register has `Phi_SR = 26`. Present only C3A's
-A/B/C history-freshness choice.
+owner then selected `RCS-03C2A-A`, pruned `RCS-03C2B`, and selected
+`RCS-03C3A-A`. A fifth amendment routed atom and evidence-use boundaries; the
+sixth split the still-bundled atom row into seven prerequisite-ordered children.
+The current forty-five-slot register has `Phi_SR = 31`; present only
+`RCS-03C3B0`'s A/B/C coupled H+S admission choice.
 
 ## 2026-09-24 design-first correction — the master index must not flatten the game
 
@@ -167,15 +213,24 @@ acquisition. The thrice-amended register replaces it with
 **Fourth prerequisite correction, 2026-09-24:** `RCS-03C2` still combined
 invocation-control source with live-versus-precommitted participant authority,
 so the register replaces it with `RCS-03C2A`–`RCS-03C2B`. The owner selected
-`RCS-03C2A-A`, automatic invocation, which prunes `RCS-03C2B`. The sole active
-owner card is now `RCS-03C3A` under `SR-03`/`SR-04`: occurrence-history
-semantic freshness after coherent same-cut evidence acquisition was derived.
+`RCS-03C2A-A`, automatic invocation, which prunes `RCS-03C2B`. The owner then
+selected `RCS-03C3A-A`, universal finite semantic freshness after coherent
+same-cut evidence acquisition was derived.
 **Fifth prerequisite correction:** the old C3 row becomes a non-counting parent
 for `RCS-03C3A`–`RCS-03C3F`, which separately route freshness, canonical atom
 identity, same-cut cross-result/tag fan-out, claim/consumption, later same-
 tag reuse, and later different-tag same-root reuse. `RCS-08` owns cross-root
-fan-out. Do not revive C171 as an owner question. Exact Relic tuple and
-evidence-projection atomicity are derived, not choices.
+fan-out. **Sixth prerequisite correction:** the atom row is itself a non-
+counting parent for coupled H+S admission, phase attribution/support, separate
+action-root and build-root identity, root/child atom addressability, and
+conditional child partitioning. The sole active card is now `RCS-03C3B0`. Do
+not revive C171 as an owner question. Exact Relic tuple and evidence-projection
+atomicity are derived, not choices.
+
+**Agent correction:** the first internal sixth-amendment draft omitted coupled
+H+S admission and phase attribution while relying on both. Adversarial review
+caught the overcompression before owner presentation; the temporary 43-slot/
+`Phi_SR = 29` route is superseded and must not be restored.
 
 **Agent correction:** the first internal version of that second amendment
 still omitted initiation, participant cancellation, and automatic expiry even
@@ -212,12 +267,12 @@ direct Codex progression method lives in `$ss2-progression-design`.
 The active finite scope controller is
 `docs/design/endless-progression-master-closure-index.md`. It fixes twenty
 whole-system closure gates, twelve Soul Relic/Charm exit gates, an explicit
-card-admission/reopening rule, and a five-times-amended frozen thirty-nine-slot
+card-admission/reopening rule, and a six-times-amended frozen forty-five-slot
 remaining Relic register. Two Relic slots are already routed to specification/
 evaluation; `RCS-03A-C`, `RCS-03B1-A`, and `RCS-03C1-A` are direction-selected;
-`RCS-03C2A-A` now also selects automatic invocation, while six pending-only
-descendants and conditional `RCS-03C2B` are pruned. The fifth C3 split raises
-current `Phi_SR` to 26. Each ordinary future
+`RCS-03C2A-A` selects automatic invocation and `RCS-03C3A-A` selects finite
+history freshness, while six pending-only descendants and conditional
+`RCS-03C2B` are pruned. Current `Phi_SR = 31`. Each ordinary future
 Relic round must reduce it and may not mint an automatic descendant. The
 original twenty-slot/`Phi_SR = 18` count first became twenty-five/23 when the
 source audit exposed seven atomic boundaries inside two old parent rows. The
@@ -228,7 +283,9 @@ rows, raising that pre-B1 potential to 30; B1-A then selected/pruned seven rows,
 yielding 23. C1-A reduced that to 22; replacing one still-bundled C2 row with
 two raised it back to 23; selecting C2A and pruning C2B reduced it to 21 across
 thirty-four slots. Replacing C3 with six atomic children adds five, producing
-thirty-nine slots and `Phi_SR = 26`. Adding another genuinely
+thirty-nine slots and `Phi_SR = 26`; C3A-A reduced it to 25. Replacing the
+still-bundled atom row with seven children adds six, producing forty-five
+slots and `Phi_SR = 31`. Adding another genuinely
 missed product slot requires an owner-visible charter amendment with the new
 bound.
 
@@ -240,17 +297,16 @@ authoring/evaluation possibilities; C170-A is sufficient for the framework's
 existential continuity promise. Its graph descendants are pruned unless later
 evidence passes the index's reopening test.
 
-The sole active Relic boundary is `RCS-03C3A` under `SR-03`/`SR-04`:
-occurrence-history semantic freshness. Same-cut acquisition is derived: every
-automatic cut-atomic evaluation reads coherent current `S_e` and semantically
-admissible `H_e` from one authoritative revision. Recommend A, universal
-freshness-bounded H-reading positions, because it preserves deliberate sequence
-memory while preventing permanent priming, stale-history laundering, and very
-late opaque automatic procs. B permits open retention everywhere; C mixes the
-two timing languages. Exact horizons, consumption/reuse, actor information,
-and configuration locks remain separate. Present only this prerequisite-ready
-admitted A/B/C choice. The authoritative decision record is unchanged;
-implementation remains blocked.
+The sole active Relic boundary is `RCS-03C3B0` under `SR-03`: whether positions
+already required to have one independently attributable H-only or S-only path
+may also carry an additional inseparable H+S material path. C3A-A already gives
+every qualifying H occurrence a finite disclosed semantic horizon. Present
+only A (no coupled supplements), B (every position has one), or C (positions
+with and without them coexist). Recommend A for local causal legibility; it
+still permits separate history/state positions and ordinary causation. Phase
+attribution/support, root identity, child partitioning, fan-out, claims/reuse,
+exact horizons, actor information, and configuration locks remain separate.
+The authoritative decision record is unchanged; implementation remains blocked.
 
 ## 2026-09-15 standalone-game north star — Souls and Simulacra
 
@@ -7557,9 +7613,12 @@ evidence acquisition. The owner selected `RCS-03C1-A`, immediate eligibility.
 A fourth audit split invocation-control source from participant-authorization
 timing. The owner selected `RCS-03C2A-A`, automatic invocation, and conditional
 `RCS-03C2B` is pruned. Coherent same-cut evidence acquisition is derived.
-Continue at registered Relic slot `RCS-03C3A` under `SR-03`/`SR-04` for the
-remaining occurrence-history freshness choice. `RCS-03C3B`–`RCS-03C3F`,
-expanded `RCS-08`, cause, and agency follow separately.
+The owner then selected `RCS-03C3A-A`, finite semantic freshness. A fifth
+amendment routed atom/fan-out/reuse boundaries; a sixth split the still-bundled
+atom row into seven children. Continue at registered Relic slot
+`RCS-03C3B0` under `SR-03` for additional coupled H+S evidence admission.
+`RCS-03C3B1A`–`RCS-03C3F`, expanded `RCS-08`, cause, and agency follow
+separately.
 
 R11 begins only
 after R10 completes and first chooses package proximity for R10.7's selected

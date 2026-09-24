@@ -2607,9 +2607,48 @@ occupying two positions of one result is already derived-illegal under the
 selected cross-source purpose, but the semantic atom boundary can change legal
 play and therefore remains its own screened row before exact per-family
 catalogs become AUTHOR/SPEC. `RCS-03C3` becomes a non-counting parent replaced
-by `RCS-03C3A`–`RCS-03C3F`, with freshness card C3A sole active. The thirty-
-nine-slot register now contains 25 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`,
-4 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so current `Phi_SR = 26`.
+by `RCS-03C3A`–`RCS-03C3F`, with freshness card C3A sole active at that point.
+The fifth-amendment thirty-nine-slot register contained 25 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 4 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so
+its current `Phi_SR` was 26.
+
+The owner then selected `RCS-03C3A-A`. Every materially H-reading position,
+including a coupled H+S addition, now gives every materially qualifying
+occurrence a disclosed finite nonterminal semantic-age horizon. This closes
+open retention without choosing horizon units/values, source-owned clearing,
+claims, or reuse and reduced `Phi_SR` to 25.
+
+A sixth prerequisite audit found that the atom-identity row still compressed
+seven independent player-semantic boundaries. C3c.33/C3c.35 leave additional
+inseparable H+S material paths expressly open. Within independently H-sensitive
+positions, those selections isolate H from S but do not isolate declaration,
+accepted execution/resolution, or authoritative outcome/disposition inside H;
+phase attribution must therefore precede catalog phase support. Pure-action and
+pure-build entries then leave action/transition-root equivalence and build-
+provenance-root equivalence independent. Only after those roots are defined can
+the design choose whether root occurrences, semantic child applications, or
+both are addressable atoms; if children are admitted,
+target/effect/application partitioning is a further boundary that storage
+writes and resolver microsteps cannot answer.
+
+The register therefore makes `RCS-03C3B` a non-counting parent for
+`RCS-03C3B0`, `RCS-03C3B1A`, `RCS-03C3B1B`, `RCS-03C3B2A`,
+`RCS-03C3B2B`, `RCS-03C3B3`, and `RCS-03C3B4`. Every eventual child retains
+its root lineage, and siblings from one root remain one independently accounted
+source for the at-least-two-source rule. C3C–C3F retain their downstream fan-
+out, claim, and reuse scope; RCS-08 retains cross-root/team fan-out alongside
+its stacking/team-budget scope. Replacing one screened row with seven adds six
+counted slots and six potential cards. The current forty-five-slot
+register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 5 `DIR-SELECTED`,
+1 `SPEC`, and 1 `EVALUATE` row, so current `Phi_SR = 31`. `RCS-03C3B0` is the
+sole active card.
+
+**Agent correction:** the first internal sixth-amendment draft omitted both
+the coupled-supplement admission row and the phase-attribution row. It then
+mistakenly treated C3c.32-B as proof that a phase-isolatable history fact
+existed, although an independently H-sensitive predicate may require several
+phase classes together. Adversarial review caught both omissions before owner
+presentation; the register and active card above are the corrected route.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

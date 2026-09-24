@@ -183,12 +183,18 @@ control source with the timing of participant authorization. The amended
 register splits that parent into RCS-03C2A–RCS-03C2B. The owner selected
 RCS-03C2A-A: every eligible opportunity automatically invokes exactly one cut-
 atomic evaluation, so conditional RCS-03C2B is pruned. A prerequisite screen
-then derived one coherent current-cut `H`/`S` acquisition rule and left
-occurrence-history freshness as the sole player-material boundary in
-RCS-03C3A, now the active owner choice under SR-03/SR-04. A fifth prerequisite
-amendment routes same-cut evidence fan-out and later source-use/reuse semantics
-to RCS-03C3B–RCS-03C3F and expands RCS-08's cross-root/team scope rather than
-leaving them implicit.
+then derived one coherent current-cut `H`/`S` acquisition rule. The owner
+selected RCS-03C3A-A: every materially H-reading position is freshness-bounded.
+A fifth prerequisite amendment routed same-cut evidence fan-out and later
+source-use/reuse semantics to RCS-03C3B–RCS-03C3F and expanded RCS-08's cross-
+root/team scope rather than leaving them implicit. A sixth prerequisite audit
+then found that canonical atom identity still compressed additional coupled
+H+S evidence admission, within-H phase attribution, catalog phase support,
+action-root identity, build-provenance identity, root/child atom addressability,
+and conditional child-application partitioning. RCS-03C3B is therefore a non-
+counting parent for RCS-03C3B0, RCS-03C3B1A,
+RCS-03C3B1B, RCS-03C3B2A, RCS-03C3B2B, RCS-03C3B3, and RCS-03C3B4.
+RCS-03C3B0 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -18614,7 +18620,7 @@ implementation.
 > incompatible with the selected at-least-two-independent-source purpose and
 > receives no separate owner card.
 
-### RCS-03C3A — occurrence-history semantic freshness — active owner choice
+### RCS-03C3A — occurrence-history semantic freshness — A selected
 
 The invocation-side acquisition question now has only one legal answer. Under
 RCS-03B1-A, RCS-03C1-A, and RCS-03C2A-A, a readiness episode's opening
@@ -18686,9 +18692,121 @@ or multiple coincident invocations, use-dependent
 claim/consumption, later same-tag or different-tag reuse, cross-root/team
 reuse, recurrence authorization, payoff, UI realization, persistence,
 migration, release, or implementation. Exact source families, atom catalogs,
-and horizon values remain AUTHOR/SPEC/TUNE; RCS-03C3B–RCS-03C3F and RCS-08 own
-the player-material reuse boundaries. This card advances SR-03 and SR-04 by
+and horizon values remain AUTHOR/SPEC/TUNE; RCS-03C3B owns identity boundaries,
+while RCS-03C3C–RCS-03C3F and RCS-08 own use/reuse boundaries. This card
+advances SR-03 and SR-04 by
 closing semantic freshness only; it creates no pending evaluation.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **A, every
+materially H-reading position is freshness-bounded.** Thus
+`U^{open-H}_v` is empty. Every materially qualifying occurrence on every
+effective H-reading path, including H facts inside any permitted coupled
+addition, has a disclosed finite nonterminal player-semantic age horizon. On a
+sufficiently long legal continuation it ages out solely because that horizon
+passes. Encounter termination, source-owned clearing, and later Relic-local
+claims may end admissibility earlier, but none substitutes for the required
+age horizon.
+
+At each automatic invocation the remembered occurrence and the current
+Soul/Relic/Charm relationship participate **directly**; continuity from the
+earlier deed is **partial**; finite expiry is **neutral/protective** because it
+keeps lived memory distinct from permanent hidden configuration; and universal
+freshness coverage is **aggregate**. This prevents turn-one priming,
+stale-history laundering, and arbitrarily late opaque manifestations. It also
+creates real timing, coordination, and presentation costs: exact windows must
+be generous disclosed semantic intervals, never hidden twitch timers. This
+selection does not choose the horizon unit or value, source-owned clearing,
+claim/consumption, reuse, payoff, UI realization, persistence, release, or
+implementation. The authoritative decision record remains unchanged.
+
+> **Sixth prerequisite correction, 2026-09-24:** screening the next atom row
+> proved that `RCS-03C3B` still compressed seven independently variable
+> boundaries: additional coupled H+S evidence admission; within-H phase
+> attribution; catalog phase support; canonical action/transition source-root
+> equivalence; canonical build-provenance root equivalence; whether root
+> occurrences, semantic child applications, or both are addressable as
+> evidence atoms; and, conditionally, the canonical
+> partition of child applications by target/effect/application rather than
+> storage writes or resolver microsteps. Pure-action and pure-build entries
+> make the two root-equivalence questions independent. The register therefore
+> makes RCS-03C3B a non-counting parent and replaces it with RCS-03C3B0,
+> RCS-03C3B1A, RCS-03C3B1B, RCS-03C3B2A, RCS-03C3B2B, RCS-03C3B3, and
+> RCS-03C3B4. B3
+> precedes conditional B4 so a root-only selection can prune detailed child
+> partitioning. Every eventual atom must retain its applicable root lineage;
+> sibling child atoms sharing one root can never satisfy the selected at-least-
+> two-independent-source requirement for one relationship result. Same-cut
+> cross-result/tag fan-out remains C3C; claims, later reuse, and cross-root use
+> remain C3D–C3F/RCS-08. The register grows from thirty-nine to forty-five
+> counted slots. After C3A-A reduced `Phi_SR` from 26 to 25, the six additional
+> screened children raise current `Phi_SR` to 31.
+
+> **Agent correction:** the first internal sixth-amendment draft jumped
+> directly to phase support and silently required declaration, execution, or
+> outcome to be independently isolatable. It also carried forward C3c.33-A's
+> expressly deferred permission for additional coupled H+S material without a
+> registered owner row. C3c.33-A isolates H from S; it proves neither phase
+> isolation inside H nor whether coupled supplements are admitted. The omitted
+> boundaries are player-material and are restored as C3B0 and C3B1A before
+> owner presentation. C3B1B follows them and must recompute which phase-support
+> subsets remain feasible on the selected branch.
+
+### RCS-03C3B0 — additional coupled H+S evidence admission — active owner choice
+
+C3c.33-A requires every counted position in `P+` to have at least one
+independently attributable H-only or S-only path. C3c.35-A then makes every
+position independently single-form: `T_H` and `T_S` are both nonempty and
+`T_D` is empty. Those selections deliberately did **not** decide whether an
+otherwise attributable position may also contain an additional material path
+whose H and S meanings are inseparable. That omitted permission must close
+before within-H phase attribution can be scoped honestly.
+
+For a final effective position `p` in `P+`, an **additional coupled H+S path**
+is a reachable material satisfaction boundary, beyond the independent path
+C3c.33-A already requires, whose predicate reads at least one H fact and one
+current-S fact and for which complete reachable-domain analysis finds no
+one-projection isolation: whenever that path changes `p`'s satisfaction, at
+least one read H fact and one read S fact necessarily change together. A path
+with separately manipulable H and S facts would make the position independently
+dual-sensitive and is already forbidden by C3c.35-A; a label, cached copy, or
+unreachable branch is not coupled material.
+
+Let `C^{add-HS}_v` contain exactly the positions in `P+` with at least one such
+additional coupled path. The set may be empty, all of nonempty `P+`, or a
+nonempty proper subset.
+
+| Choice | Additional coupled-evidence rule | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — no additional coupled H+S paths** | `C^{add-HS}_v` is empty. No position contains an additional material H+S path whose two projections are inseparable in reachable play. Each position retains its one independently attributable form without such a coupled supplement. | **Recommended.** A preserves the selected catalog-wide variety while keeping every local position causally legible. At one position, its source evidence and predicate participate **directly**; H and S remain mechanically distinct rather than only nominally different; excluding an inseparable supplement is **neutral/protective**; and universal exclusion is **aggregate**. It avoids adding a second fused-moment explanation language on top of the already-required freshness rule and the later phase rules. The cost is losing bespoke conditions whose only honest expression is an inseparable “what happened while what is true” package. | One Ashen position may remember `Guard` as H; a distinct position may read `Guarding` as S. No position adds a material `Guard-resolved-and-Guarding-now` path that reachable play can never separate. |
+| **B — every position also has a coupled H+S path** | `C^{add-HS}_v=P+`. In addition to its required independent path, every counted position has at least one reachable material H+S path with no one-projection isolation. | B makes every evidence position support a fused-moment reading as well as its independently explainable form. The whole package can participate **directly**, but the H/S distinction inside that path is **neutral/unsupported** because players can never manipulate one without the other; universal prevalence is **aggregate**. It maximizes authored moment texture but forces two explanation standards into every position and greatly increases ordering, tooltip, and regression burden. | Every position has its ordinary H-only or S-only explanation plus some inseparable semantic `Guard-resolved-and-Guarding-now`-like path whose two meanings cannot be separated in reachable play. |
+| **C — positions with and without coupled supplements coexist** | `C^{add-HS}_v` is a nonempty proper subset of `P+`. At least one position has an additional coupled H+S path and at least one position is proved to have no such path anywhere in its declared reachable domain. | C supports exceptional fused-moment Relics beside positions without a coupled supplement. Each local position inherits A or B's fit; coexistence is only **aggregate**. It offers the richest authored identity, but adds a coupled-versus-clean taxonomy, token-witness risk, premium pressure, and more difficult phase/freshness disclosure. | Ashen has no coupled supplement at one independently history-sensitive position, while a Dreamglass position has both its required independent state path and one genuinely inseparable H+S supplement. Those names are illustrative. |
+
+**Recommendation: A, no additional coupled H+S paths.** The game already keeps
+both sequence-memory and live-state disciplines through distinct positions and
+entries. A protects that variety without letting a locally inseparable package
+pose as two meaningful evidence levers. It does not forbid an entry from
+containing a history-only position beside a state-only position, nor does it
+forbid ordinary causal relationships between earlier events and current state.
+
+A/B/C are mutually exclusive and exhaustive because `C^{add-HS}_v` is empty,
+all of nonempty `P+`, or a nonempty proper subset. A position belongs to the set
+whenever even one reachable material coupled supplement exists; additional
+independent paths do not erase membership. A negative classification requires
+complete reachable-domain analysis. Incomplete analysis is unresolved, not
+evidence for A or C's clean class.
+
+This card does not choose exact H occurrences, S fields, operators, positions,
+entries, source families, exact freshness-horizon unit/value, source-owned
+clearing, the number of coupled paths per qualifying position, phase
+attribution/support, action or build roots, root/child atom addressability,
+child partitioning, same-cut fan-out, claims/consumption, later reuse, cross-
+root/team use, payoff, UI realization, persistence, release, or implementation.
+Under A, later phase attribution can operate over the independently H-sensitive
+domain without a coupled-H bypass; under B or C it must preserve the selected
+additional paths explicitly.
+RCS-03C3B1A–RCS-03C3B4 own the remaining identity boundaries;
+RCS-03C3C–RCS-03C3F and RCS-08 retain their existing downstream scope. The
+authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
