@@ -192,9 +192,13 @@ then found that canonical atom identity still compressed additional coupled
 H+S evidence admission, within-H phase attribution, catalog phase support,
 action-root identity, build-provenance identity, root/child atom addressability,
 and conditional child-application partitioning. RCS-03C3B is therefore a non-
-counting parent for RCS-03C3B0, RCS-03C3B1A,
-RCS-03C3B1B, RCS-03C3B2A, RCS-03C3B2B, RCS-03C3B3, and RCS-03C3B4.
-RCS-03C3B0 is the active owner choice under SR-03.
+counting parent for the registered identity rows. The owner selected
+RCS-03C3B0-A: no position admits an additional fully inseparable H+S path. A
+seventh prerequisite audit then found that the old RCS-03C3B1A row still
+compressed residual opposite-form material participation, minimum phase
+attribution, and additional irreducible multi-phase-H supplements. It is now a
+non-counting parent for RCS-03C3B1A0–RCS-03C3B1A2. RCS-03C3B1A0 is the active
+owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -18739,7 +18743,7 @@ implementation. The authoritative decision record remains unchanged.
 > cross-result/tag fan-out remains C3C; claims, later reuse, and cross-root use
 > remain C3D–C3F/RCS-08. The register grows from thirty-nine to forty-five
 > counted slots. After C3A-A reduced `Phi_SR` from 26 to 25, the six additional
-> screened children raise current `Phi_SR` to 31.
+> screened children raised the then-current `Phi_SR` to 31.
 
 > **Agent correction:** the first internal sixth-amendment draft jumped
 > directly to phase support and silently required declaration, execution, or
@@ -18751,7 +18755,7 @@ implementation. The authoritative decision record remains unchanged.
 > owner presentation. C3B1B follows them and must recompute which phase-support
 > subsets remain feasible on the selected branch.
 
-### RCS-03C3B0 — additional coupled H+S evidence admission — active owner choice
+### RCS-03C3B0 — additional coupled H+S evidence admission — A selected
 
 C3c.33-A requires every counted position in `P+` to have at least one
 independently attributable H-only or S-only path. C3c.35-A then makes every
@@ -18801,11 +18805,126 @@ clearing, the number of coupled paths per qualifying position, phase
 attribution/support, action or build roots, root/child atom addressability,
 child partitioning, same-cut fan-out, claims/consumption, later reuse, cross-
 root/team use, payoff, UI realization, persistence, release, or implementation.
-Under A, later phase attribution can operate over the independently H-sensitive
-domain without a coupled-H bypass; under B or C it must preserve the selected
-additional paths explicitly.
-RCS-03C3B1A–RCS-03C3B4 own the remaining identity boundaries;
+Under A, a residual H+S material path may still have exactly one projection-
+isolation witness: C3c.35-A excludes two, while this card excludes zero.
+Opposite-form evidence may also participate through a minimal package with
+another legal predicate input rather than with the selected temporal form.
+Those residual paths remain a separate boundary rather than being silently
+forbidden here. Under B or C, later phase work must also preserve the selected
+fully coupled paths explicitly.
+`RCS-03C3B1A0`, `RCS-03C3B1A1`, `RCS-03C3B1A2`, `RCS-03C3B1B`, and
+`RCS-03C3B2A`–`RCS-03C3B4` own the remaining identity boundaries;
 RCS-03C3C–RCS-03C3F and RCS-08 retain their existing downstream scope. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **A, no additional
+fully coupled H+S paths.** `C^{add-HS}_v` is empty. Every counted position
+retains its one independently attributable H or S form, and no additional
+reachable material path may require H and current S while admitting neither
+projection-isolation witness. Separate H-only and S-only positions may still
+coexist in one entry, and ordinary causation between an earlier occurrence and
+current state remains legal. The selection does not forbid residual material
+use of a position's opposite temporal form, whether through a one-way H+S
+package with exactly one projection isolation or through a package with another
+legal input. That omission is routed explicitly below rather than folded into
+the owner's answer. No authoritative decision wording changes and no
+implementation is authorized.
+
+> **Seventh prerequisite correction, 2026-09-24:** post-answer screening proved
+> that old `RCS-03C3B1A` still compressed three independent boundaries. First,
+> B0-A and C3c.35-A do not settle whether a position may materially use its
+> opposite temporal form on some other effective path. B0-A removes zero-
+> isolation H+S paths but not a material H+S package with exactly one projection
+> isolation. For example, the reachable rows
+> `(H,S,p)=(0,0,0),(1,0,0),(1,1,1)` for an inclusion-minimal `H AND S`
+> package give an S-isolation but no H-isolation; the position remains in
+> `T_S`, reads H materially in the joint package, and is not B0's fully coupled
+> class. Nor must the residual package span H and S: a `T_H` predicate such as
+> `H OR (S AND X)` may have reachable rows `(H,S,X,p)=(0,0,0,0),
+> (1,0,0,1),(0,1,1,1)` and an independently established minimal `{S,X}` path,
+> where `X` is another legal predicate input and every input outside `{S,X}` is
+> held fixed on that transition, without any material H+S package there. Thus
+> `P^{H-read}_v` is still not necessarily
+> `T_H`, and temporal projection-purity requires excluding **all** material use
+> of the opposite form, not only asymmetric H+S packages. Second, deciding that
+> a history-sensitive position
+> has one declaration-, execution-, or outcome-isolatable path does not decide
+> whether that same position may also have an irreducibly multi-phase H path.
+> A declaration-isolatable path plus a separate declaration-and-outcome-only
+> package proves the two rules vary independently. Catalog phase support cannot
+> distinguish those topologies without conflating support with coupling.
+>
+> The register therefore makes `RCS-03C3B1A` a non-counting parent and replaces
+> its one counted row with `RCS-03C3B1A0` (residual opposite-form material
+> participation),
+> `RCS-03C3B1A1` (minimum phase-attribution topology), and conditional
+> `RCS-03C3B1A2` (additional irreducible multi-phase-H supplements among
+> phase-attributable positions). `RCS-03C3B1B` follows those rows and recomputes
+> feasible phase support. B0-A first reduced `Phi_SR` from 31 to 30; replacing
+> one screened row with three adds two, producing forty-seven counted slots and
+> current `Phi_SR = 32`.
+
+> **Agent correction:** one internal review incorrectly asserted that B0-A made
+> the independently H-sensitive set cover every materially H-reading position.
+> C3A's domain expressly says otherwise, and the reachable asymmetric package
+> above is a counterexample. The first repair draft then classified only H+S
+> packages while claiming projection-purity across every effective path; the
+> `{S,X}` countermodel disproved that stronger claim, so B1A0 now covers every
+> material opposite-form path regardless of its other package members. A
+> separate review also confirmed that minimum phase attribution does not settle
+> supplemental multi-phase admission. All gaps are restored before a choice is
+> presented to the owner.
+
+### RCS-03C3B1A0 — residual opposite-form material participation — active owner choice
+
+C3c.35-A makes every counted position independently single-form: each is in
+exactly one of nonempty `T_H` or `T_S`. B0-A now excludes an additional
+material H+S path with no projection isolation, while C3c.35-A already excludes
+a position with both H and S isolations. Neither selection proves that a `T_H`
+position is materially H-pure or that a `T_S` position is materially S-pure
+across every effective path. The opposite temporal form may participate in an
+H+S package with exactly one isolation, or in a minimal package with some other
+legal predicate input.
+
+For `p` in `T_H`, call H its **selected form** and S its **opposite form**; for
+`p` in `T_S`, reverse those labels. A **residual opposite-form path** is a
+reachable satisfaction transition with an independently established inclusion-
+minimal semantic package that contains at least one material coordinate from
+`p`'s opposite form. The package may also contain selected-form coordinates or
+other legal predicate inputs. A raw read-set, authored label, extensionally
+duplicate fact, cached alias, unreachable branch, or unrelated co-variation is
+not material. Let `O^{opp}_v` contain exactly the positions in nonempty `P+`
+with at least one residual opposite-form path.
+
+| Choice | Opposite-form rule | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — no opposite-form material paths** | `O^{opp}_v` is empty. Together with B0-A and C3c.35-A, every `T_H` position is materially H-pure with respect to the two temporal projections across all effective paths, and every `T_S` position is materially S-pure. Packages may still contain other legal inputs, and entries may still relate distinct positions of both forms. | **Recommended.** At one position, its temporal evidence form and predicate participate **directly** and H/S difference is mechanically real. Their unity remains available through the larger multi-position Relic relationship instead of an unteachable hidden dependency; excluding that dependency is **neutral/protective**, and universal exclusion is **aggregate**. This gives phase analysis and tooltips one truthful temporal clock per position. The cost is losing single-position conditions such as “this current stance counts only when it came from that remembered deed” or “this memory counts only beside that live formation”; authors must express those relationships through distinct positions or another explicit grammar. | One Ashen position may remember recent `Guard`; another may read `Guarding` now. They may coexist in one cross-form entry, but neither position materially requires the other temporal form on any effective path. |
+| **B — every position has an opposite-form material path** | `O^{opp}_v=P+`. Every position retains its required independently isolatable selected form and also has at least one inclusion-minimal package containing material evidence from its opposite form. That package may join both temporal forms or may couple the opposite form to another legal input; B0-A still forbids a zero-isolation H+S package. | The selected form and predicate participate **directly**; the opposite form also participates directly on its qualifying path but is not independently isolatable for that position, so local unity/difference fit is **partial** rather than fully direct; universal prevalence is **aggregate**. B supports provenance-conditioned states and state-conditioned memories everywhere, but forces two temporal languages and a one-way dependency into every source explanation. It increases ordering, replay, UI, counterplay, and regression burden and risks making the opposite form feel like a hidden tax. | A state-sensitive position requires `Guarding` now and a remembered qualifying `Guard`. Players can vary `Guarding` while holding the remembered fact fixed, but no legal comparison isolates that Guard fact for the position. Another position might instead admit its opposite form only through a minimal package with a non-temporal input. |
+| **C — projection-pure and opposite-form positions coexist** | `O^{opp}_v` is a nonempty proper subset of `P+`. At least one position has a reachable material opposite-form path and at least one distinct position is proved temporally projection-pure across its declared reachable domain. | C lets exceptional Relics own provenance-conditioned or state-conditioned source identities while preserving clean teaching anchors. Each local position inherits A or B's fit; coexistence is only **aggregate**. The cost is another hidden taxonomy, exhaustive negative proof, token-witness and clarity-premium risk, and a harder phase-support surface. | Ashen's history position is temporally projection-pure, while Dreamglass has a current-state position whose qualifying state materially uses one remembered deed without gaining an H-isolation. Names are illustrative. |
+
+**Recommendation: A, no opposite-form material paths.** The selected catalog
+already achieves history/state unity through C3c.36-C's cross-form entries and
+keeps their local distinction through separate C3c.35-A positions. A makes that
+architecture truthful at every effective path instead of allowing a position's
+opposite temporal form to matter only where players cannot manipulate it alone.
+
+A/B/C are mutually exclusive and exhaustive because `O^{opp}_v` is empty, all
+of nonempty `P+`, or a nonempty proper subset. Under B0-A and C3c.35-A, any
+residual material package spanning H and S can have neither zero nor two
+projection isolations, so exactly one is its only remaining topology. A package
+coupling the opposite form to other legal inputs need not span both temporal
+projections and still belongs to `O^{opp}_v`. Negative membership requires
+complete reachable-domain and minimal-dependency analysis; incomplete analysis
+is unresolved, not evidence for A or C's pure class.
+
+This card does not choose exact H/S facts, phase identity or support, operators,
+positions, entries, source families, action/build roots, root/child atoms,
+fan-out, claims/consumption, later reuse, payoff, UI, persistence, release, or
+implementation. Under A, materially H-reading positions are exactly `T_H`;
+under B or C, `RCS-03C3B1A1` must retain every additional materially H-reading
+`T_S` position in its phase domain. That next row owns minimum phase
+attribution; conditional `RCS-03C3B1A2` owns additional multi-phase-H
+supplements; B1B and B2A–B4 retain phase-support and root/atom identity. The
 authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

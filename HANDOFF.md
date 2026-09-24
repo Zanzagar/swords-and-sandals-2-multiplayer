@@ -1,5 +1,51 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-24 fully coupled H+S evidence excluded — RCS-03C3B0-A selected
+
+The owner selected `RCS-03C3B0-A`: no counted position may contain an
+additional fully inseparable H+S material path with zero projection-isolation
+witnesses. Every position retains its one independently attributable H or S
+form. Separate history/state positions may coexist in one entry and ordinary
+causation remains legal. The answer does not also prohibit residual material
+use of a position's opposite temporal form, whether through an H+S package with
+exactly one projection isolation or through a package with another legal input.
+That is the next explicit boundary rather than an assumption hidden inside A.
+
+At one position the selected form and predicate participate **directly**; H/S
+difference remains mechanically real; excluding a fully inseparable supplement
+is **neutral/protective**; and universal exclusion is **aggregate**. This keeps
+the two evidence languages locally legible while sacrificing bespoke
+fused-moment clauses whose meanings can never be manipulated apart. The
+authoritative decision record remains unchanged and implementation remains
+blocked.
+
+A seventh prerequisite audit proved that old `RCS-03C3B1A` still compressed
+three independent boundaries: residual opposite-form material participation,
+minimum within-history phase attribution, and additional irreducible multi-
+phase-H supplements among phase-attributable positions. It is now a non-
+counting parent for `RCS-03C3B1A0`, `RCS-03C3B1A1`, and conditional
+`RCS-03C3B1A2`.
+`RCS-03C3B1B` still follows with catalog phase support.
+
+**Agent correction:** one internal review incorrectly assumed B0-A made every
+material H read independently H-sensitive. A reachable H+S package may instead
+have only an S-isolation; C3A expressly included that domain. The first repair
+then classified only H+S packages while claiming purity across every path; an
+opposite-form-plus-other-input package disproved that scope, so B1A0 now covers
+all material opposite-form paths. A separate review proved that one phase-
+isolatable path can coexist with a distinct irreducibly multi-phase path. All
+gaps were restored before owner presentation.
+
+The register now has forty-seven slots: 31 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 6 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`, so `Phi_SR = 32`.
+The sole active card is `RCS-03C3B1A0`, residual opposite-form material
+participation. Present only its A/B/C directions: no positions materially use
+their opposite temporal form; every position does on at least one effective
+path; or projection-pure and opposite-form positions coexist. Recommend A. It
+makes every `T_H` position materially H-pure and every `T_S` position materially
+S-pure with respect to the temporal projections while preserving history/state
+unity through distinct positions in the larger Relic relationship.
+
 ## 2026-09-24 Relic history freshness — RCS-03C3A-A selected
 
 The owner selected `RCS-03C3A-A`: every materially H-reading position is
@@ -34,14 +80,12 @@ coupled-path and phase-attribution rows while relying on both. Adversarial
 review caught the overcompression before owner presentation; do not revive the
 temporary 43-slot/A–G-next route.
 
-The register now has forty-five slots: 30 `SCREEN`, 1 `OWNER-OPEN`, 7
-`PRUNED`, 5 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`, so `Phi_SR = 31`.
-The sole active card is `RCS-03C3B0`, additional coupled H+S evidence
-admission. Present only its A/B/C directions: no positions admit an additional
-inseparable H+S path; every position does; or the two classes coexist.
-Recommend A for local causal legibility. It still permits separate history and
-state positions and ordinary causal relationships; it excludes only material
-paths whose H and S meanings can never be manipulated apart.
+At that sixth-amendment stage the register had forty-five slots: 30 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 5 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`, so
+`Phi_SR = 31`; `RCS-03C3B0` was the sole active card. **Corrected
+continuation:** the owner selected B0-A, and a seventh audit split old B1A into
+three prerequisite-ordered children. The current forty-seven-slot register has
+`Phi_SR = 32`; present only `RCS-03C3B1A0`'s residual opposite-form choice.
 
 ## 2026-09-24 Relic invocation control — RCS-03C2A-A selected
 
@@ -120,9 +164,10 @@ thirty-four slots. C1-A reduced `Phi_SR` from 23 to 22, and replacing one open
 C2 row with two produced interim `Phi_SR = 23`.
 
 **Corrected continuation:** the owner subsequently selected `RCS-03C2A-A`,
-automatic invocation, pruned `RCS-03C2B`, and then selected `RCS-03C3A-A`,
-universal finite history freshness. After the sixth register amendment the sole
-active card is `RCS-03C3B0`, and current `Phi_SR = 31` across forty-five slots.
+automatic invocation, pruned `RCS-03C2B`, selected `RCS-03C3A-A`, universal
+finite history freshness, and selected `RCS-03C3B0-A`, excluding fully
+inseparable H+S additions. After the seventh register amendment the sole active
+card is `RCS-03C3B1A0`, and current `Phi_SR = 32` across forty-seven slots.
 
 ## 2026-09-24 Relic evaluation lifetime — RCS-03B1-A selected
 
@@ -151,10 +196,11 @@ and replacing one C row with three, current `Phi_SR = 23` (`28 - 7 + 2`). The
 owner subsequently selected `RCS-03C1-A`. **Corrected continuation:** a fourth
 audit split the still-bundled invocation row into `RCS-03C2A`–`RCS-03C2B`; the
 owner then selected `RCS-03C2A-A`, pruned `RCS-03C2B`, and selected
-`RCS-03C3A-A`. A fifth amendment routed atom and evidence-use boundaries; the
-sixth split the still-bundled atom row into seven prerequisite-ordered children.
-The current forty-five-slot register has `Phi_SR = 31`; present only
-`RCS-03C3B0`'s A/B/C coupled H+S admission choice.
+`RCS-03C3A-A`, then selected `RCS-03C3B0-A`. A fifth amendment routed atom and
+evidence-use boundaries; the sixth split the still-bundled atom row, and the
+seventh split its still-bundled phase prerequisite into three children. The
+current forty-seven-slot register has `Phi_SR = 32`; present only
+`RCS-03C3B1A0`'s A/B/C residual opposite-form participation choice.
 
 ## 2026-09-24 design-first correction — the master index must not flatten the game
 
@@ -223,9 +269,13 @@ tag reuse, and later different-tag same-root reuse. `RCS-08` owns cross-root
 fan-out. **Sixth prerequisite correction:** the atom row is itself a non-
 counting parent for coupled H+S admission, phase attribution/support, separate
 action-root and build-root identity, root/child atom addressability, and
-conditional child partitioning. The sole active card is now `RCS-03C3B0`. Do
-not revive C171 as an owner question. Exact Relic tuple and evidence-projection
-atomicity are derived, not choices.
+conditional child partitioning. The owner selected `RCS-03C3B0-A`, excluding
+fully inseparable H+S supplements. **Seventh prerequisite correction:** old
+`RCS-03C3B1A` becomes a non-counting parent for residual opposite-form material
+participation, minimum phase attribution, and conditional supplemental multi-phase
+admission. The sole active card is now `RCS-03C3B1A0`. Do not revive C171 as an
+owner question. Exact Relic tuple and evidence-projection atomicity are derived,
+not choices.
 
 **Agent correction:** the first internal sixth-amendment draft omitted coupled
 H+S admission and phase attribution while relying on both. Adversarial review
@@ -267,12 +317,13 @@ direct Codex progression method lives in `$ss2-progression-design`.
 The active finite scope controller is
 `docs/design/endless-progression-master-closure-index.md`. It fixes twenty
 whole-system closure gates, twelve Soul Relic/Charm exit gates, an explicit
-card-admission/reopening rule, and a six-times-amended frozen forty-five-slot
+card-admission/reopening rule, and a seven-times-amended frozen forty-seven-slot
 remaining Relic register. Two Relic slots are already routed to specification/
 evaluation; `RCS-03A-C`, `RCS-03B1-A`, and `RCS-03C1-A` are direction-selected;
 `RCS-03C2A-A` selects automatic invocation and `RCS-03C3A-A` selects finite
-history freshness, while six pending-only descendants and conditional
-`RCS-03C2B` are pruned. Current `Phi_SR = 31`. Each ordinary future
+history freshness; `RCS-03C3B0-A` excludes fully inseparable H+S paths, while
+six pending-only descendants and conditional `RCS-03C2B` are pruned. Current
+`Phi_SR = 32`. Each ordinary future
 Relic round must reduce it and may not mint an automatic descendant. The
 original twenty-slot/`Phi_SR = 18` count first became twenty-five/23 when the
 source audit exposed seven atomic boundaries inside two old parent rows. The
@@ -285,7 +336,9 @@ two raised it back to 23; selecting C2A and pruning C2B reduced it to 21 across
 thirty-four slots. Replacing C3 with six atomic children adds five, producing
 thirty-nine slots and `Phi_SR = 26`; C3A-A reduced it to 25. Replacing the
 still-bundled atom row with seven children adds six, producing forty-five
-slots and `Phi_SR = 31`. Adding another genuinely
+slots and `Phi_SR = 31`; B0-A reduced that to 30. Replacing still-bundled B1A
+with three children adds two, producing forty-seven slots and `Phi_SR = 32`.
+Adding another genuinely
 missed product slot requires an owner-visible charter amendment with the new
 bound.
 
@@ -297,15 +350,16 @@ authoring/evaluation possibilities; C170-A is sufficient for the framework's
 existential continuity promise. Its graph descendants are pruned unless later
 evidence passes the index's reopening test.
 
-The sole active Relic boundary is `RCS-03C3B0` under `SR-03`: whether positions
-already required to have one independently attributable H-only or S-only path
-may also carry an additional inseparable H+S material path. C3A-A already gives
-every qualifying H occurrence a finite disclosed semantic horizon. Present
-only A (no coupled supplements), B (every position has one), or C (positions
-with and without them coexist). Recommend A for local causal legibility; it
-still permits separate history/state positions and ordinary causation. Phase
-attribution/support, root identity, child partitioning, fan-out, claims/reuse,
-exact horizons, actor information, and configuration locks remain separate.
+The sole active Relic boundary is `RCS-03C3B1A0` under `SR-03`: whether a
+position may materially use its opposite temporal form on any effective path.
+That use may occur in an H+S package with exactly one projection isolation or
+in a package with another legal input. Present only A (no opposite-form material
+paths), B (every position has one), or C (projection-pure and opposite-form
+positions coexist). Recommend A for truthful local temporal identity while
+retaining history/state unity through distinct positions in the larger Relic
+relationship. Minimum phase attribution, supplemental multi-phase paths, phase
+support, root identity, child partitioning, fan-out, claims/reuse, exact
+horizons, actor information, and configuration locks remain separate.
 The authoritative decision record is unchanged; implementation remains blocked.
 
 ## 2026-09-15 standalone-game north star — Souls and Simulacra
@@ -7613,12 +7667,13 @@ evidence acquisition. The owner selected `RCS-03C1-A`, immediate eligibility.
 A fourth audit split invocation-control source from participant-authorization
 timing. The owner selected `RCS-03C2A-A`, automatic invocation, and conditional
 `RCS-03C2B` is pruned. Coherent same-cut evidence acquisition is derived.
-The owner then selected `RCS-03C3A-A`, finite semantic freshness. A fifth
-amendment routed atom/fan-out/reuse boundaries; a sixth split the still-bundled
-atom row into seven children. Continue at registered Relic slot
-`RCS-03C3B0` under `SR-03` for additional coupled H+S evidence admission.
-`RCS-03C3B1A`–`RCS-03C3F`, expanded `RCS-08`, cause, and agency follow
-separately.
+The owner then selected `RCS-03C3A-A`, finite semantic freshness, and
+`RCS-03C3B0-A`, excluding fully inseparable H+S paths. A fifth amendment routed
+atom/fan-out/reuse boundaries; a sixth split the still-bundled atom row; a
+seventh split its phase prerequisite into three children. Continue at
+registered Relic slot `RCS-03C3B1A0` under `SR-03` for residual opposite-form
+material participation. `RCS-03C3B1A1`–`RCS-03C3F`, expanded `RCS-08`, cause, and
+agency follow separately.
 
 R11 begins only
 after R10 completes and first chooses package proximity for R10.7's selected

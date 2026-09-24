@@ -2638,10 +2638,10 @@ its root lineage, and siblings from one root remain one independently accounted
 source for the at-least-two-source rule. C3C–C3F retain their downstream fan-
 out, claim, and reuse scope; RCS-08 retains cross-root/team fan-out alongside
 its stacking/team-budget scope. Replacing one screened row with seven adds six
-counted slots and six potential cards. The current forty-five-slot
-register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 5 `DIR-SELECTED`,
-1 `SPEC`, and 1 `EVALUATE` row, so current `Phi_SR = 31`. `RCS-03C3B0` is the
-sole active card.
+counted slots and six potential cards. At that sixth-amendment stage, the
+forty-five-slot register contained 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 5
+`DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so the then-current
+`Phi_SR = 31`. `RCS-03C3B0` was the sole active card.
 
 **Agent correction:** the first internal sixth-amendment draft omitted both
 the coupled-supplement admission row and the phase-attribution row. It then
@@ -2649,6 +2649,45 @@ mistakenly treated C3c.32-B as proof that a phase-isolatable history fact
 existed, although an independently H-sensitive predicate may require several
 phase classes together. Adversarial review caught both omissions before owner
 presentation; the register and active card above are the corrected route.
+
+The owner then selected `RCS-03C3B0-A`. No counted position may contain an
+additional fully inseparable H+S material path with zero projection-isolation
+witnesses. Separate H-only and S-only positions and ordinary causation remain
+legal. The answer does not also prohibit an H+S material package with exactly
+one projection isolation or opposite-form evidence in a minimal package with
+another legal input; selecting B0 reduced `Phi_SR` from 31 to 30.
+
+A seventh prerequisite audit found that the old phase-attribution row still
+compressed three player-semantic boundaries. C3c.35-A and B0-A do not settle
+whether a position may materially use its opposite temporal form on another
+effective path. A minimal H+S dependency package with exactly one isolation
+survives, and the opposite form may instead participate in a minimal package
+with another legal input. Either topology can place a material H read inside a
+`T_S` position or a material S read inside `T_H`, so the phase domain cannot be
+silently limited to independently H-sensitive positions. Separately, one
+phase-isolatable H path does not decide whether the same position may also
+contain another irreducibly multi-phase H path. Catalog phase support cannot
+represent either topology without conflating support with coupling.
+
+The register therefore makes `RCS-03C3B1A` a non-counting parent for
+`RCS-03C3B1A0` (residual opposite-form material participation),
+`RCS-03C3B1A1` (minimum phase attribution), and conditional `RCS-03C3B1A2`
+(additional multi-phase-H supplement admission). `RCS-03C3B1B` remains the
+later phase-support row.
+Replacing one screened row with three adds two slots and two potential cards.
+The current forty-seven-slot register contains 31 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 6 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so current
+`Phi_SR = 32`. `RCS-03C3B1A0` is the sole active card.
+
+**Agent correction:** one internal review incorrectly claimed that B0-A made
+the independently H-sensitive domain cover every material H read. C3A's exact
+domain and a three-row reachable asymmetric package disprove that premise. The
+first repair then restricted B1A0 to H+S packages while claiming global
+projection-purity; an opposite-form-plus-other-input minimal package disproved
+that scope, so the active row now covers every material opposite-form path. A
+separate adversarial review supplied the isolatable-path-plus-coupled-supplement
+countermodel. The seventh amendment records all findings rather than building
+the next card on any hidden assumption.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
