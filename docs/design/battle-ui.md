@@ -611,6 +611,11 @@ and the ring is squeezed onto the stage after it.
    The harness ships the hook, the CI template and `adopt.sh <project>`; this repository adopts it
    first; `docs/adoption-matrix.md` tracks the rest; the harness's ADR 0001 is amended.
 
+9. **Jump and charge are SHOWN GREYED, "Not built yet"** (the owner, 2026-09-24, reversing the ring's
+   decision 7 "stay hidden"): the engine's `not-built` reason (grey) already says so, and S9 draws it.
+   **Their own design pass should consider lane changes** — e.g. a jump or charge that crosses ranks — as
+   well as the build's sideways leap and the mid-charge attack (`Chargeattack`, unmodelled).
+
 ### Slices (tracked on the board)
 
 - **HUD track** (starts now): **H1** team colours on the stage and the roster · **H2** the team panels

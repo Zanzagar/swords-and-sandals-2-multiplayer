@@ -89,10 +89,10 @@
    "title": "Charge and jump verbs (the build has them; the engine has neither)",
    "summary": "The build wires chargeleft/right and jumpleft/right on the warrior and archer controller frames (and Chargeattack on reach). The engine offers neither verb.",
    "gaps": "The jump moves _y, which this engine already spends on rank depth, so a jump needs a third named axis. The jump's total displacement is unverified. The charge's mid-charge attack (Chargeattack) is unmodelled.",
-   "next": "Send a verifier at the jump-total reading, then design the leap axis before wiring anything.",
+   "next": "A design pass (grilling): the leap axis, lane changes, the mid-charge attack; then derive the build's jump distance from the map before wiring.",
    "evidence": "Battle map §Buttons wired per controller frame (docs/integration/ss2-battle-map.md:210-284); ss2-rules.js:2340-2394 (the charge is an advance gate; the jump total is 'ONE agent's reading with no verifier'); SS2_CROWD_ACTION already carries charge +2 and jump -2 (src/team/ss2-crowd.js).",
-   "ownerDecision": "Whether charge and jump belong in the team game at all, given the rank axis.",
-   "updated": "2026-09-23"
+   "ownerDecision": "Decided 2026-09-24: shown greyed \"Not built yet\" on the ring until built (reversing \"stay hidden\"); the design pass should consider lane changes (a jump or charge that crosses ranks).",
+   "updated": "2026-09-24"
   },
   {
    "id": "archer-kit-bombard-snipe-bash-attack-swap-weapon",
