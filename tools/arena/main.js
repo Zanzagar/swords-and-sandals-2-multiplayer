@@ -3933,7 +3933,16 @@ function renderStage(view, fit, now) {
         //   2026-09-23: the authored vitality multiplier, see `figureOptions`.
         clipScale: (clipToArenaScale(figurePack) ?? 1) * origin.size,
         spray: spawnDrops({
-          seed: step.actionBoundary ?? scene.sequence,
+          // ► **`entry.token`, NOT `step.actionBoundary` — FIXED 2026-09-23.** There
+          //   is no `step` in this function (it is `beginStep`'s parameter), so
+          //   this line threw a ReferenceError at the first effect pose of every
+          //   hurt or death clip from f0a3780 (2026-09-13) on: no drop was ever
+          //   spawned, and the frame's remaining draws were skipped. Found by a
+          //   write-nothing inventory agent reading the code; the token is the
+          //   same action boundary (`drain(wire, { actionBoundary })` stamps it
+          //   on every command) and the one `drainFinishedAnimations` seeds the
+          //   entry's sound with. `test/arena-render-stage-scope.test.js`.
+          seed: entry.token ?? scene.sequence,
           armoured: armour > 0,
           frames: propFrameCount(propPack, armour > 0 ? "sparks" : "blood") || 1
         })
