@@ -1,6 +1,6 @@
 {
- "updatedAt": "2026-09-23",
- "head": "56bfe32",
+ "updatedAt": "2026-09-24",
+ "head": "9ed4375",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -622,7 +622,7 @@
    "title": "Actions around the fighter (the game's own button ring)",
    "summary": "Decided by the owner 2026-09-24 in a grilling round: the original's eight-button ring around the acting fighter, adapted for team play — WHO FIRST (a foe is always selected and the ring shows what you can do to him), spatial movement (walk slots; rank arrows above and below), one click acts (optional confirm), hidden where the original hides / greyed with a reason where team rules forbid, the original's weapon-swap button and items row. Built in slices S2-S9.",
    "gaps": "Unreadable to a new player. Direction-absolute walk buttons are the build's semantics but confusing on the blue side. There is no confirmation for irreversible spends.",
-   "next": "S2 — the ring's core (the tracer bullet).",
+   "next": "The ring is being built overnight as slices S2-S9 (night/ring).",
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "ownerDecision": "",
    "updated": "2026-09-24"
@@ -630,12 +630,12 @@
   {
    "id": "who-can-play-human-hot-seat-spectate-controller-",
    "lane": "multiplayer",
-   "column": "in-progress",
+   "column": "done",
    "order": 46,
    "title": "Who can play: human, hot-seat, spectate, controller seats",
-   "summary": "Without ?spectate one person clicks for every fighter on both sides, because every seat is declared controller 'local'. With ?spectate=1 the AI (suggestAction) plays every seat. There is no human-vs-AI mode in the arena or in tools/hotseat.mjs, which is also local-vs-local.",
+   "summary": "Seats built (4fbcc94): ?play=red or ?play=red-1,blue-2 picks the fighters a person controls; the AI plays the rest; spectate declares every seat AI through the same registry.",
    "gaps": "Nobody can play against the AI anywhere. There is no seat-assignment UI, no gamepad or keyboard seats, and no pause or speed control in spectate. Remote play is Stage 7, not started.",
-   "next": "Delivery slice 1 (first): per-seat controllers, e.g. ?red=human&blue=ai, through the existing ControllerRegistry — the first time anyone can play against the AI.",
+   "next": "",
    "evidence": "tools/arena/roster.js 616-617 and 829/845 (controller 'local'); main.js spectateStep 4642-4666 (gated on `spectate` only); tools/hotseat.mjs 402/490 (controller 'local'); src/team/controllers.js ControllerKind LOCAL/HOT_SEAT/REMOTE/AI; battle-host.js runAiTurns/isAiControlled exist but the arena does not use them. Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa).",
    "ownerDecision": "The default play mode (1 human vs AI, co-op humans vs AI, full hot-seat) and how seats are assigned.",
    "updated": "2026-09-24"
@@ -1072,15 +1072,15 @@
   {
    "id": "doc-code-disagreements",
    "lane": "verification",
-   "column": "gaps",
+   "column": "in-progress",
    "order": 80,
    "title": "Docs that contradict the code (34)",
    "summary": "The inventory found 34 places where a document says one thing and the code another. The code wins; each needs correcting at the claim.",
    "gaps": "1. src/team/ss2-rules.js:256-267 (header item 4) says enchantment damage is 'computed and never APPLIED ... this rule set has no such phase'. It has been applied since 86ccb68 (2026-09-07): resolveStatusPhase at ss2-rules.js:9019-9060 reads the inflictor's weapon_enchantment_damage, and test/ss2-team-rules.test.js:1813 asserts it. The pointer at src/golden/ss2-attack-candidate.js:283-287 ('That whole damage path is unmodelled') is stale for the same reason.\n\n2. HANDOFF.md:190-209 (living head, 2026-09-19 block) still says 'cast_gale IS STILL NOT BUILDABLE', that inventory1-6 are undeclared ('NOT STARTED DELIBERATELY'), and that the demo roster declares its slots as 0. The code has since done all of it: a506618 declared inventory1-6 in SS2_RESOURCE_NAMES, ea6dd7a built cast_gale, and tools/arena/roster.js:187-188 declares the slots as 1. The block is not struck through.\n\n3. HANDOFF.md:5413-5415 and 5435-5438 say the maximum_ammo herolevel tier chain and the bow weapon_range override are still dropped from ss2BattleValues ('still HOLDS'). The code does both: ss2-rules.js:7710-7730 (bow override) and 7736 (derived.maximum_ammo = ss2MaximumAmmo). Only character_xp is still missing.\n\n4. ss2-rules.js:2390-2394 says SS2_MOVEMENT_STEP_FACTOR.run is 'read nowhere in src/' and that none of the six run/charge/jump phases is wired. But ss2RunDisplacement (ss2-rules.js:2314-2320) reads it, and resolveAction uses it for the taunted flee (~11172).\n\n5. The ss2SameLane docstring (ss2-rules.js ~2621-2624) calls ss2ShotBlocked 'derived from the BUILD's ballistic, not authored'. ss2ShotBlocked's own docstring (~2561-2563) says 'AUTHORED — owner's decision, 2026-09-13 — and the build CANNOT answer it'. That docstring also sits above ss2SameLane's rather than above the function it describes.\n\n6. src/team/ss2-crowd.js:44-46 says 'How much each member is paid ON is NOT decided'. The same file's ss2TeamVictoryPurses docstring (~345-352) and HANDOFF.md's top block (decision f) record that the owner chose the equal share.\n\n7. docs/integration/ss2-battle-map.md:5234-5250 ('Foundation gaps exposed by the map') says the engine 'deliberately omits SS2-specific state' and 'Do not replace classicStyleRules'. The map-derived src/team/ss2-rules.js now carries that state and is what tools/hotseat.mjs and tools/arena/main.js run. Item 5 of its 'Next checkpoint' list (rendering) is also done.\n\n8. src/engine.js:8-13 says the formulas 'still live in placeholder-rules.js' and will be replaced 'once runtime-verified goldens are promoted'. A map-derived SS2 rule set is already injected by every playable host, though the façade and resolver default (resolver.js createTeamBattle rules = placeholderTeamRules) is still the placeholder.\n\n9. The ss2InitiativeOrder docstring (ss2-rules.js ~1011-1013) says ties are 'broken by team id'. The code (ss2-rules.js:1037-1039) breaks ties by the head combatant's id, explicitly 'rather than by team index'.\n\n10. ss2-rules.js:7727-7728 says 'the resolver has no ranged vocabulary at all', but BOMBARD and SNIPE have existed since 2026-09-13. The file header (ss2-rules.js:7-10) still says '22 promoted goldens'; there are 23.\n\n11. BLOOD: docs/handoffs/2026-09-14-0130--the-arena-is-1to1-and-three-readings-were-mine.md 'WHAT IS BUILT AND PLAYING — Blood and sparks' and the HANDOFF living head ('blood, sparks ... all landed tonight') vs tools/arena/main.js:3936 `seed: step.actionBoundary ?? scene.sequence` inside renderStage, where `step` is unbound (only beginStep's parameter at 859). With the local packs this throws a ReferenceError at the first effect pose of every hurt or death clip, so no drop is ever spawned. Static reading; confirm via the Surface log.\n\n12. CANVAS SIZING: the HANDOFF living head ('AND THE CANVAS HAD NEVER BEEN SIZED ... this shell only ever READ those fields. No resize handler, no devicePixelRatio, in 4,000 lines'), the same claim in main.js's comment at ~1138-1146, and the 2026-09-18-0130 handoff title vs `git show 473ef59f:tools/arena/main.js` lines 372-376, where render() assigned canvas.width/height = parent rect x devicePixelRatio on every frame from the arena's first commit. `git log -S` shows those lines unchanged since, still at main.js:3573-3576.\n\n13. CANVAS CONTRACT: the living head says '`changed` is the contract ... a caller that assigned every frame would wipe the arena every frame' (canvasBackingFor/sizeCanvasToStage) vs render() at main.js:3573-3576, which assigns both dimensions unconditionally every frame after sizeCanvasToStage has run.\n\n14. ART PROVENANCE: README.md 'Every figure is original vector art drawn from code' and roadmap.md Stage 5 'a browser surface drawing original vector art' vs tools/arena/main.js, which draws the player's own extracted rig, wardrobe, faces, backdrop, props and sound whenever assets/ is filled (renderProvenance derives its 'The figures' line from figurePack). Both are true only for a fresh clone.\n\n15. RENDERER EXISTS: roadmap.md Stage 4 row ('the seam is ahead of its consumer — no renderer exists') vs the same file's Stage 5 row and 'a rendered arena' constraint row, and tools/arena/main.js (createVanillaBattleHost with awaitAnimations:true).\n\n16. ATTACH-EFFECT ROUTING: src/team/ss2-rules.js:5549-5552 (written 2026-09-22, feacdcba: 'the arena painter draws every `attach-effect` as a lightning bolt') vs tools/arena/main.js:931-957 (2690559, 2026-09-23), which routes by linkage (boulder_combat, lightning_bolt_combat) and logs any other effect as not drawn.\n\n17. EXTRACTION INSTRUCTIONS: assets/README.md 'Filling it' lists three extractors (sounds, figure, champions) vs tools/arena/main.js, which fetches props.json, clip-effects.json, text.json, icons.json, bitmaps/manifest.json, wardrobe.json and enchantments.json (458, 480, 498, 614-619, 1830, 1838), produced by extract-props, extract-clip-effects, extract-text, extract-icons, extract-bitmaps, extract-wardrobe and extract-enchantments.\n\n18. VOLUME: src/render/sound.js header ('`new Audio()` and a volume slider are the shell's and live in `tools/arena/`') vs tools/arena/main.js, which has only an on/off toggle and no volume control.\n\n19. README.md ('Every figure is original vector art drawn from code') and docs/roadmap.md (stage 5 'a rendered arena' row: 'Original vector art drawn from code') are stale against tools/arena/main.js renderProvenance (:4596-4606: the figure line is derived from figurePack because the extracted rig is drawn) and commits cab600f and 2690559 (the build's own size and rocks from extracted assets).\n\n20. Reward ownership: README.md ('paying a reward is a design decision EP-D04 owns'), docs/ss2-adapter-contract.md (~:1356 'EP-D04 owns it'), src/campaign/to-battle.js:35-37 and circuit.js:21 tie rewards to EP-D04. docs/design/endless-progression-decisions.md defines EP-D04 as rarity and EP-D05 as personal precommitted reward outcomes (:280-297).\n\n21. docs/design/endless-progression-decisions.md on this branch has EP-D01 to D06 all 'pending' and no EP-D07. The pushed design branch (68dd0a3; its decisions.md :52-58) records EP-D01 and EP-D02 as accepted replacements and EP-D07 as accepted, and docs/stage7-transport-findings-2026-09-07.md cites EP-D07 as accepted. README's Endless summary ('four-point Rule Load', tier-50 cap) contradicts the design branch's accepted EP-D02 ('finite 48-Load ceiling').\n\n22. docs/roadmap.md 'campaign rewards — still not started' (no code) versus src/team/ss2-crowd.js ss2VictoryPurse and ss2TeamVictoryPurses: the purse is built map-derived and the owner-decided equal-share team purse is implemented, with no caller.\n\n23. docs/campaign-persistence.md says 'Two backends ship' and the tests are 'filesystem-free'. src/campaign/file-backend.js (a third backend on node:fs) and tools/arena-campaign.mjs exist and are tested (test/campaign-file-backend.test.js). Neither the doc, the roadmap nor README mentions them.\n\n24. docs/campaign-persistence.md 'Tests: test/campaign-persistence.test.js, 68 tests' versus my run of that file: 70 tests.\n\n25. docs/integration/ss2-runtime-capture.md 'What remains' item 2 says the driver 'already handles' the spell ingress by keying on spell_id. tools/runtime-capture/ss2-capture-wrapper.as:2281 says 'spell_id DOES NOT EXIST anywhere in the build', while src/golden/capture-ingest.js:565 requires it. The same section's item 4 says 'closest of the 33' (I measured 37 without a golden) and 'Every golden so far comes from one staged pair', which golden-armoured-deflection-threshold-cleared (tournament, armourclass 79) contradicts.\n\n26. tools/runtime-capture/README.md 'sessions behind all 22 promoted goldens' versus 23 files in test/fixtures/ss2-1v1-golden/.\n\n27. docs/design/endless-mvp-readiness.md section 1 'Playable proof: No per-action animation acknowledgement' versus src/adapter/action-gate.js and the roadmap's stage 4 row (gate built 2026-09-07). README reconciles this (the seam is built, the signal is missing); the readiness doc does not.\n\n28. docs/stage7-transport-findings-2026-09-07.md finding 7 (battle-host.js has ZERO consumers outside src/adapter and test) is now false: tools/arena/main.js:41 and tools/engagement-census.mjs:96 import createVanillaBattleHost. The doc carries no staleness marker.\n\n29. HANDOFF.md living head 'Still open' cites the unguarded NaN site at ss2-capture-wrapper.as:1407; it is now at :1435. The same head's 'Nothing states when a branch should reach main' gives '172 commits ahead'; I measured 496 (it does say to use the command).\n\n30. local-mod-work/README.md ('If a later checkpoint truly requires a derived game binary, stop and obtain explicit approval') versus AGENTS.md ('BUILD THE BEST VERSION... all unblocked'; a modded copy goes in a second install).\n\n31. assets/README.md documents 3 extractors (sounds, figure, champions) versus 11 in tools/extract-*.mjs and 8 populated subdirectories under assets/.\n\n32. README.md 'Run the verification suite' (npm test / node --test) and package.json ('node --test') versus AGENTS.md's instruction to use --test-concurrency=1.\n\n33. .claude/workflows/question-fanout-audit.js whenToUse cites docs/multi-agent-field-rules.md and docs/adr/0001, which do not exist in this repo (only in ~/projects/claude-harness/docs).\n\n34. The design branch's HANDOFF.md (2026-09-20 correction) says docs/overnight-agent-plan.md has no '## THE ARCHIVE LINE'. That is true on that branch; on arena/champion-capture the line exists at :336. This is drift between branches, not an error in either file alone.",
-   "next": "Correct each at the claim, strike-through style, as 213ade7 did for the render docs.",
+   "next": "Overnight docs slice a (and engine slice d for ss2-rules.js comments).",
    "evidence": "Inventory agents, 2026-09-23 (engine, presentation, campaign/infrastructure).",
    "ownerDecision": "",
-   "updated": "2026-09-23"
+   "updated": "2026-09-24"
   },
   {
    "id": "fighter-looks",
@@ -1098,12 +1098,12 @@
   {
    "id": "animation-speed-vs-the-build",
    "lane": "presentation",
-   "column": "gaps",
+   "column": "in-progress",
    "order": 2,
    "title": "Animation speed vs the build",
    "summary": "The arena's clip schedules run slower than the build in places: a knockback is drawn over 1560 ms where the build plays it in 633 ms at 30 fps. Sounds and blood follow the drawn schedule, so they inherit the difference.",
    "gaps": "No measurement of every family's drawn duration against its frame count at 30 fps.",
-   "next": "Measure every clip family's drawn duration against frames / 30 fps, then decide whether clips play at the build's frame rate.",
+   "next": "Overnight timing slice a: measure every clip family against the build's frames and frame rate.",
    "evidence": "Sound implementer, 2026-09-24 (agents/sound/demo-timing.out); src/render/timeline.js BEAT_MS.",
    "ownerDecision": "",
    "updated": "2026-09-24"
@@ -1111,12 +1111,12 @@
   {
    "id": "blood-on-continuation-runs",
    "lane": "presentation",
-   "column": "gaps",
+   "column": "in-progress",
    "order": 3,
    "title": "Blood on continuation runs",
    "summary": "Blood timing is derived from the un-joined animation, so for a run like hurt8 -> hurt9 or knockback the blood lands about twice as late as drawn, and blood thrown by the continuation clip never fires.",
    "gaps": "Unfixed.",
-   "next": "Derive blood poses from the joined run, as src/render/sound-timing.js now does for sounds.",
+   "next": "Overnight timing slice b: blood poses from the joined run.",
    "evidence": "tools/arena/main.js prepareEntry; sound implementer's report, 2026-09-24.",
    "ownerDecision": "",
    "updated": "2026-09-24"
@@ -1137,12 +1137,12 @@
   {
    "id": "action-previews-and-reasons",
    "lane": "engine",
-   "column": "ready",
+   "column": "done",
    "order": 40,
    "title": "Action previews and 'why not' reasons (engine)",
-   "summary": "Two small, pure additions for the UI, neither hashed nor drawing randomness: previewAction(action) — hit chance, damage band, energy cost, effect — from the functions resolution already uses; and unavailableActions(actor) — the verbs legalActions withheld, with a reason code (other-rank, out-of-reach, body-blocks, in-reach, level, slot-empty, no-ammo, wall).",
+   "summary": "Built as slice E (ef48e17) — see that card.",
    "gaps": "A test must pin that the preview equals what resolution uses.",
-   "next": "Delivery slice 5.",
+   "next": "",
    "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa).",
    "ownerDecision": "",
    "updated": "2026-09-24"
@@ -1165,12 +1165,12 @@
    "updated": "2026-09-24",
    "id": "size-changing-spells",
    "lane": "presentation",
-   "column": "in-progress",
+   "column": "done",
    "order": 6,
    "title": "Size-changing spells are drawn (little fat kid, colossus)",
-   "summary": "The owner saw little fat kid not shrink its victim: the engine applies the halved strength and attack, but the drawing never changes a fighter's size after the fight starts. The build snaps the victim to half size (_yscale 50) and restores it 16 turns later; colossus grows the caster toward 150%. Being built from the engine's own spell state, so the drawn body, the arrows and the collisions agree.",
+   "summary": "Built (ad195cd): little fat kid snaps its victim to half size, colossus grows its caster toward 150, both restore to the starting size; every drawn consumer reads the current size.",
    "gaps": "Colossus's 2 px/tick drift stays deferred (a decision).",
-   "next": "Merge after review.",
+   "next": "",
    "evidence": "docs/integration/ss2-battle-map.md ~3410-3560 (cast_little_fat_kid +0x81f8-+0x83f4; colossus; check_spells expiry)."
   },
   {
@@ -1178,12 +1178,12 @@
    "updated": "2026-09-24",
    "id": "taunt-heal-loop",
    "lane": "engine",
-   "column": "needs-design",
+   "column": "in-progress",
    "order": 41,
    "title": "An AI taunt loop that heals as fast as it is hurt",
    "summary": "Tricks kit, 3v3, seed 21: one fighter taunts another 162 times while being hit back; the taunt's recovery cancels the damage, so the bout runs 653 actions. It exists before the facing change too, only shorter. The AI prices the taunt's certain recovery and does not see that it is being out-traded.",
    "gaps": "No rule yet for when the AI should stop taunting.",
-   "next": "Measure how often it happens across kits and seeds; then decide the AI rule (the owner's call if it changes behaviour the build has).",
+   "next": "Overnight engine slice b: measure across kits and seeds, fix in the authored team-AI layer.",
    "evidence": "Facing implementer's 3v3 measurements, 2026-09-24 (agents/face-target/kb3-21-*.txt)."
   },
   {
@@ -1204,11 +1204,11 @@
    "ownerDecision": "",
    "updated": "2026-09-24",
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
-   "gaps": "",
+   "gaps": "Long-range half open: at or above half stamina on a long frame the engine still offers rest beside the taunt, where the build's shared slot shows the taunt alone (the owner's call). Archers closed on across ranks now fall to options[0] (overnight engine slice c).",
    "id": "ring-s1-no-rest-in-reach",
-   "column": "in-progress",
+   "column": "done",
    "title": "S1 · No resting while a foe is in reach",
-   "summary": "The original's close-range layouts have no rest button; the engine offered one. Owner decision Q7: match the original. Changes the AI; measured.",
+   "summary": "Built (b1ac294): rest is withheld on both close-range frames; the zero-stamina forced rest still happens in reach. Measured over 600 bouts: 0 stalls either way, rests in reach 24 -> 0.",
    "order": 10,
    "next": ""
   },
@@ -1217,11 +1217,11 @@
    "ownerDecision": "",
    "updated": "2026-09-24",
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
-   "gaps": "",
+   "gaps": "A resolver defect it found: a taunt landing as a strike computes end-of-turn stamina before the taunt's own recovery, and reports staminaSpent NaN (overnight engine slice a).",
    "id": "ring-e-previews-and-reasons",
-   "column": "in-progress",
+   "column": "done",
    "title": "E · previewAction and unavailableActions (engine)",
-   "summary": "Pure, unhashed: the numbers the ring shows on hover (hit chance, damage, energy — the same resolution uses) and, for the selected target, every verb the stance would show with a reason code where the engine does not offer it.",
+   "summary": "Built (ef48e17): host.previewAction and host.unavailableActions, pure (hash, wire state and RNG journal unchanged after every question); every ring verb is on offer or carries exactly one reason, flagged hide or grey.",
    "order": 11,
    "next": ""
   },
@@ -1232,11 +1232,11 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s2-core",
-   "column": "ready",
+   "column": "in-progress",
    "title": "S2 · The ring's core (tracer bullet)",
    "summary": "The who-first selection model, eight slots per stance, one-click actions, Tab to switch targets, the keyboard strip — drawn with authored fallback buttons. After this a bout can be played with the ring.",
    "order": 12,
-   "next": ""
+   "next": "Overnight run 2026-09-24 (worktree night/ring, S2 -> S3 -> S4 -> S6 -> S5 -> S7 -> S9 -> S8, each Codex-reviewed)."
   },
   {
    "lane": "presentation",
@@ -1245,11 +1245,11 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s3-art",
-   "column": "ready",
+   "column": "in-progress",
    "title": "S3 · The original's button art and placement",
    "summary": "The build's own icons per verb (mapped in ab5feb5) on the ring, placed and scaled as the build places its overlay (hero y - 180, flipoverlay by zoom); hover swaps the background to its over frame.",
    "order": 13,
-   "next": ""
+   "next": "Overnight run 2026-09-24 (worktree night/ring, S2 -> S3 -> S4 -> S6 -> S5 -> S7 -> S9 -> S8, each Codex-reviewed)."
   },
   {
    "lane": "presentation",
@@ -1258,11 +1258,11 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s4-movement",
-   "column": "ready",
+   "column": "in-progress",
    "title": "S4 · Movement: walk slots and rank arrows",
    "summary": "Walk in the original's slots on the side it moves toward; authored step-back arrow above the head and step-forward arrow below the feet.",
    "order": 14,
-   "next": ""
+   "next": "Overnight run 2026-09-24 (worktree night/ring, S2 -> S3 -> S4 -> S6 -> S5 -> S7 -> S9 -> S8, each Codex-reviewed)."
   },
   {
    "lane": "presentation",
@@ -1271,11 +1271,11 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s5-items",
-   "column": "ready",
+   "column": "in-progress",
    "title": "S5 · The items row",
    "summary": "The original's six-slot row above the head: spells and potions with their own icons, acting on the selected foe or on yourself.",
    "order": 15,
-   "next": ""
+   "next": "Overnight run 2026-09-24 (worktree night/ring, S2 -> S3 -> S4 -> S6 -> S5 -> S7 -> S9 -> S8, each Codex-reviewed)."
   },
   {
    "lane": "presentation",
@@ -1284,11 +1284,11 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s6-swap",
-   "column": "ready",
+   "column": "in-progress",
    "title": "S6 · The weapon-swap button",
    "summary": "The original's ninth button (inventory_buttons frames 10/11), hidden without a second weapon.",
    "order": 16,
-   "next": ""
+   "next": "Overnight run 2026-09-24 (worktree night/ring, S2 -> S3 -> S4 -> S6 -> S5 -> S7 -> S9 -> S8, each Codex-reviewed)."
   },
   {
    "lane": "presentation",
@@ -1297,11 +1297,11 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s7-previews-confirm",
-   "column": "ready",
+   "column": "in-progress",
    "title": "S7 · Hover previews and the confirm setting",
    "summary": "Hover shows the verb and its hit chance (from E); an optional 'confirm every move' setting adds Confirm.",
    "order": 17,
-   "next": ""
+   "next": "Overnight run 2026-09-24 (worktree night/ring, S2 -> S3 -> S4 -> S6 -> S5 -> S7 -> S9 -> S8, each Codex-reviewed)."
   },
   {
    "lane": "multiplayer",
@@ -1310,11 +1310,11 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s8-ai-pacing",
-   "column": "ready",
+   "column": "in-progress",
    "title": "S8 · AI pacing: speed up and skip to my turn",
    "summary": "AI turns at normal speed, a hold-to-speed-up key, and a 'skip to my turn' button.",
    "order": 18,
-   "next": ""
+   "next": "Overnight run 2026-09-24 (worktree night/ring, S2 -> S3 -> S4 -> S6 -> S5 -> S7 -> S9 -> S8, each Codex-reviewed)."
   },
   {
    "lane": "presentation",
@@ -1323,14 +1323,34 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s9-reasons",
-   "column": "ready",
+   "column": "in-progress",
    "title": "S9 · Why a button is greyed",
    "summary": "Hover reasons on greyed buttons from E's reason codes (other rank, out of reach, blocked…).",
    "order": 19,
-   "next": ""
+   "next": "Overnight run 2026-09-24 (worktree night/ring, S2 -> S3 -> S4 -> S6 -> S5 -> S7 -> S9 -> S8, each Codex-reviewed)."
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-24",
+   "text": "Overnight run started: the ring S2-S9, the engine's taunt fixes and closed-on archer, the doc/code corrections, and animation timing — four tracks, each slice Codex-reviewed."
+  },
+  {
+   "date": "2026-09-24",
+   "text": "The camera closes in on the survivors after a death in a team bout, and never crops anyone the old camera showed (9ed4375)."
+  },
+  {
+   "date": "2026-09-24",
+   "text": "The engine answers the ring's questions: what an action will do, and why a verb is not on offer (ef48e17)."
+  },
+  {
+   "date": "2026-09-24",
+   "text": "No resting while a foe is in reach, the owner's decision Q7 (b1ac294)."
+  },
+  {
+   "date": "2026-09-24",
+   "text": "The arena waits for your art: no flash of the fallback figures before the real ones load (28d4b3b)."
+  },
   {
    "date": "2026-09-24",
    "text": "The in-battle action ring is decided (a grilling round with the owner) and split into slices S1-S9; S1 and the engine additions are being built."
