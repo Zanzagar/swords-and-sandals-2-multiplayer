@@ -50,8 +50,33 @@
     letter-spacing: .04em;
   }
   main { flex: 1; display: flex; gap: 0; flex-wrap: wrap; align-items: stretch; }
-  #stage { flex: 1 1 620px; min-width: 320px; position: relative; }
+  /* The stage and, under it, the ring's strip (slice S2). The column takes the
+     place the stage had in the row; the stage fills what the strip leaves. */
+  .stage-column { flex: 1 1 620px; min-width: 320px; display: flex; flex-direction: column; }
+  #stage { flex: 1 1 auto; min-height: 0; position: relative; }
   canvas { display: block; width: 100%; height: 100%; }
+  canvas:focus-visible { outline: 2px solid var(--warn); outline-offset: -2px; }
+  /* A FIXED height, so the stage does not change size from one turn to the next. */
+  .ring-strip {
+    flex: 0 0 auto; height: 132px; overflow-y: auto;
+    border-top: 1px solid var(--edge); background: var(--panel);
+    padding: 8px 14px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .ring-strip[hidden] { display: none; }
+  .ring-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .ring-row:empty { display: none; }
+  .ring-row > b {
+    min-width: 4.5em; color: var(--ink-dim); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .ring-row button { padding: 3px 9px; }
+  .ring-row button[aria-pressed="true"] { border-color: #f2c14e; color: #f2c14e; }
+  .ring-row kbd { font: inherit; font-size: 11px; font-weight: 700; color: var(--warn); }
+  .ring-status { margin: 0; font-size: 11.5px; color: var(--ink-dim); }
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
   aside {
     flex: 0 1 330px;
     min-width: 280px;
@@ -117,7 +142,16 @@
     </label>
   </header>
   <main>
-    <div id="stage"><canvas id="arena"></canvas></div>
+    <div class="stage-column">
+      <div id="stage"><canvas id="arena" tabindex="0" aria-label="The arena. On your turn: click a button around your fighter, or a foe to target him. Keys: 1 to 8 press the buttons, Tab and Shift+Tab change the target, Esc moves to the list of actions under the stage."></canvas></div>
+      <section class="ring-strip" id="ring-strip" aria-label="Your actions" data-state="idle" hidden>
+        <div class="ring-row" id="ring-target" role="group" aria-label="Target"></div>
+        <div class="ring-row" id="ring-slots" role="group" aria-label="The ring"></div>
+        <div class="ring-row" id="ring-off" role="group" aria-label="More actions"></div>
+        <p class="ring-status" id="ring-status"></p>
+      </section>
+      <div class="visually-hidden" id="ring-live" aria-live="polite"></div>
+    </div>
     <aside>
       <section>
         <h2>Roster</h2>

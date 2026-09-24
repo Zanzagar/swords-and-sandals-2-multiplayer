@@ -141,6 +141,50 @@ first (ab5feb5, `src/render/action-buttons.js`).
 - **S5** the items row · **S6** the weapon swap button · **S7** hover previews and the confirm setting
 - **S8** AI pacing (speed-up, skip) · **S9** greyed-button reasons (needs E)
 
+### S2, built 2026-09-24: what it does, and what it decided that the owner did not
+
+`tools/arena/ring.js` (the model: who is selected, the stance, the eight slots, the list off the
+ring, what a click or key sends), `tools/arena/ring-layout.js` (where the buttons are drawn, what a
+click hits), wired in `tools/arena/main.js` and `tools/arena/index.html`. Tests:
+`test/arena-ring.test.js`, `test/arena-ring-layout.test.js`, `test/arena-ring-bouts.test.js`,
+`test/arena-ring-wiring.test.js`.
+
+- **The stance is the engine's**, not re-derived: `host.unavailableActions(actor, selectedFoe)`
+  measures it to the selected foe (the build's controller selector, overlay frame 4, in
+  `ss2UnavailableActions`). ~~"the build's own rule as `action-buttons.js` records it"~~ —
+  `action-buttons.js` records the four stances' LAYOUTS, not the rule that picks one. The layouts
+  the engine returns are checked against `action-buttons.js`'s independently transcribed
+  `SS2_BUTTON_WIRING` on every turn of 20 seeded bouts, every foe selected in turn.
+- **A slot shows its verb only when the engine offers the action** (S2; hidden-vs-greyed is S9),
+  and sends the offered option itself. Everything else offered against the selected foe or the
+  actor — rank changes, the swap, spells, potions, a rest beside a taunt — is listed under the stage
+  until S4-S6 give it a place on the ring. An action at ANOTHER foe is reached by selecting him. The
+  suite proves the coverage: over whole bouts, the union over every selection is exactly the offer,
+  and no selection lists an action twice.
+- **Who first** is the owner's Q4, **per fighter** (authored): each fighter keeps his own last
+  target, because one person playing three fighters in three ranks fights three foes. "Nearest" is
+  the engine's fight distance, ties by id, as the engine's own `nearestFoe` breaks them.
+- **Keys (authored):** 1-4 down the ring's left column, 5-8 down its right, computed from the slot
+  positions. Tab / Shift+Tab switch the target left to right across the stage, wrapping — from the
+  stage only (the page or the canvas, which now takes focus), and only with a second foe; inside a
+  button or the volume slider Tab stays the browser's, so nothing traps the focus. Esc moves the
+  focus from the stage into the strip. A held digit acts once; Ctrl/Alt/Meta are the browser's.
+- **The look (authored, S3 replaces it):** `actionButtonFallbackOpsFor`'s round bronze buttons with
+  the key and a short label on the ring's outer side; a gold ellipse on the sand under the selected
+  foe. The ring stands where the build's does, 180 above the actor's feet, at the relayed slot
+  positions, drawn at `RING_STAGE_SCALE` 1.2 stage pixels per overlay pixel — inside the build's own
+  0.9-1.4 (`flipoverlay × maxscale`, computed in the test). No close-up at 1,600 apart: that is S3.
+- **The strip** is a fixed 132 px under the stage (so the stage does not resize between turns),
+  hidden when spectating: the target (one pressed button per foe), the ring's actions with their
+  keys, the rest of the offer, a status line, and a polite live region announcing each person's turn
+  and each change of target. A button that had the keyboard focus when the strip was rebuilt hands
+  it back to the strip on the person's next ready turn (DOM glue, not under the suite).
+- **Unchanged:** an AI seat's turn never builds the ring, and a spectated bout's state-hash sequence
+  is the same with the ring built for every fighter against every foe on every turn (tested). The
+  raw one-button-per-action list survives only as the fallback for a rule set with no menu to ask.
+- **Not seen:** no agent may open a browser, so the page was never looked at. Screenshot
+  `?play=red&teams=3&items=tricks` (and a 1v1) before trusting the layout.
+
 ## Delivery order
 
 1. **Seats**: choose which fighters a human plays, with the rest AI (~~e.g. `?red=human&blue=ai`~~
