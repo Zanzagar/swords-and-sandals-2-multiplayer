@@ -109,7 +109,10 @@ const fields = (o = {}) => ({
 
 // The caster opens, so every `applyAction` below is on its turn.
 // `ss2InitiativeOrder` gives the first action to the side holding the single
-// fastest gladiator, ties broken by team id — and "blue" sorts before "red",
+// fastest gladiator, ties broken ~~by team id — and "blue" sorts before "red"~~
+// by the head COMBATANTS' ids, not the teams' (corrected 2026-09-24: the
+// rule's own docstring said "team id" too, and the code already broke ties on
+// the head's id when `13e2129` wrote this line) — and "foe" sorts before "hero",
 // so equal speeds hand the opening to the WRONG side here. One point of speed
 // is the smallest thing that settles it and it changes nothing else: the bolt
 // reads no agility anywhere.

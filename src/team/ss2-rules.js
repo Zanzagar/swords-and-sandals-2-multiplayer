@@ -4,10 +4,12 @@
  * This is the first rule set in the repository that is not invented. Every
  * number it produces is either read out of the licensed build's bytecode (via
  * `docs/integration/ss2-battle-map.md`, which carries the offsets) or computed
- * by `src/golden/ss2-attack-candidate.js`, the module the 22 promoted goldens
+ * by `src/golden/ss2-attack-candidate.js`, the module the ~~22~~ **23 (since
+ * `2341789`, 2026-09-02; corrected 2026-09-24)** promoted goldens
  * already replay against. Until this file existed the corpus fed nothing: the
  * resolver ran `placeholder-rules.js`, and 22 runtime-verified fixtures sat in
- * `test/fixtures/` with no consumer.
+ * `test/fixtures/` with no consumer. *(That 22 is right: it is the count on
+ * the day this file landed, `831bcdc`, the day before the 23rd.)*
  *
  * ## What tier this is, and why it is not higher
  *
@@ -253,18 +255,29 @@
  *    following the standing "derive from the map" rule concludes it is an
  *    input. Corrected there too.
  *
- * 4. **Enchantment DAMAGE is computed and never APPLIED, on both weapons.**
+ * 4. ~~**Enchantment DAMAGE is computed and never APPLIED, on both weapons.**~~
+ *    **CLOSED — AND THIS ITEM WAS STALE FROM `86ccb68` (2026-09-07) UNTIL
+ *    2026-09-24: the damage IS applied.**
  *    `weapon_enchantment_damage` (`+0x320c`) and
  *    `secondary_weapon_enchantment_damage` (`+0x3326`) are each
  *    `ceil(<max_damage> / 3 * <potency>)`. Both ARE derived below (see
  *    `ss2BattleValues`) and both are in the adapter catalogue
  *    (`src/adapter/vanilla-fields.js`) — an earlier version of this line said
  *    "neither is computed here" and "the catalogue carries only the primary",
- *    which was stale the day `52bc570` landed both. What is still missing is
+ *    which was stale the day `52bc570` landed both. ~~What is still missing is
  *    the APPLICATION: in the build the damage arrives as a status phase that
  *    REPLACES the afflicted combatant's next turn (battle map § "The
  *    enchantment effect is a SKIPPED TURN"), and this rule set has no such
- *    phase — so an enchanted weapon applies a status and deals no magic damage.
+ *    phase — so an enchanted weapon applies a status and deals no magic damage.~~
+ *    **The status phase exists** — `resolveStatusPhase`, dispatched from
+ *    `resolveAction` for `frozen`/`burning`/`poison`/`life_stolen` — and it
+ *    takes the afflicted combatant's turn and puts the INFLICTOR's
+ *    `weapon_enchantment_damage` (or the secondary, on the build's own odd
+ *    selector: the VICTIM's `equipped_weapon`) through
+ *    `applySs2MagicDamageCandidate`. `test/ss2-team-rules.test.js` pins it
+ *    ("a condition takes the turn, applies the INFLICTOR's enchantment damage,
+ *    and draws NO rng"). The paragraph survived that commit, and so this file
+ *    told every reader for seventeen days that enchanted weapons deal no damage.
  *
  *    Do NOT confuse this with the enchantment PROC, which is modelled and is
  *    correct: the proc gate reads the PRIMARY potency for both weapons, and
@@ -320,11 +333,18 @@ export const Ss2ActionType = Object.freeze({
   // the map is explicit about: `closerange_warrior` wires only the AWAY
   // direction, in both facings.
   //
-  // Two of the build's eight movement phases, not all eight. `run*` is
-  // reachable only through the taunted chain, which nothing here sets;
+  // Two of the build's eight movement phases as CHOSEN verbs, not all eight.
+  // `run*` is reachable only through the taunted chain~~, which nothing here
+  // sets~~ — **and this engine has run that chain since 2026-09-17 (stale until
+  // 2026-09-24):** a losing taunt sets `taunted1` (`8ede824`) and the forced
+  // `TAUNTED_PHASE` runs `runleft`/`runright` over `ss2RunDisplacement`
+  // (`cbaf406`). It is a forced phase, not a chosen verb, so its token
+  // (`TAUNTED_PHASE`) sits with the condition phases further down.
   // `charge*` and `jump*` are wired but their displacement is unknown
   // separately from the walk's, and one unmeasured distance is enough. See
   // `ss2WalkDisplacement`, which is `movement_speed * 16` eased to a stop.
+  // *(What the build does say about the charge and the jump is in the table
+  // above `SS2_MOVEMENT_STEP_FACTOR`, added 2026-09-11.)*
   WALK_LEFT: "walk-left",
   WALK_RIGHT: "walk-right",
   // ► **THE SECOND AXIS'S OWN VERBS, AND THEY ARE AUTHORED. The build has no
@@ -1010,7 +1030,11 @@ export function assertSs2WeaponPurchasable(source, label = "Combatant") {
  * settle it (`MAP_SILENCE.initiative-order`):
  *
  * - **Who opens.** The side holding the single fastest gladiator, ties broken
- *   by team id so two peers cannot disagree. Agility therefore still buys
+ *   ~~by team id~~ **by the two sides' HEAD COMBATANTS' ids, code-unit order —
+ *   corrected 2026-09-24; the code has done this since `95a0d15` wrote both,
+ *   and its own comment says "rather than by team index"** — so two peers
+ *   cannot disagree, whichever order the caller listed the teams in. Team ids
+ *   are never read. Agility therefore still buys
  *   something real — the first action of the bout — but it buys a LEAD, never
  *   a free round, which is the whole distinction D3 turns on.
  * - **Order within a side**: agility descending, then id ascending, which is
@@ -1949,12 +1973,19 @@ export function ss2MaximumAmmo(herolevel) {
  *
  * **What is still narrowed, and it is narrower than before rather than wider:**
  * a gladiator that states neither a `weapon` nor a `weapon_range` reaches as
- * far as bare hands, which is the shortest reach the build has. A bow is not
+ * far as bare hands, which is the shortest reach the build has. ~~A bow is not
  * modelled — `using_bow` is forced false at battle construction (map `:111`,
  * root frame 221) and the resolver has no ranged vocabulary — so the
  * `[5] * 44 = 4400` of the eighteen type-4 rows never reaches this function
- * through a battle. `ss2BattleValues` carries the bow override anyway, because
- * dropping it was a named gap.
+ * through a battle.~~ **STALE FROM `7310583` (2026-09-13) UNTIL 2026-09-24:
+ * a bow IS modelled, and the 4400 DOES reach this function through a
+ * battle.** `BOMBARD`, `SNIPE` and `SWAP_WEAPONS` are in the vocabulary, a
+ * bow is drawn as `equipped_weapon == 2` (`ss2InBowMode`), and the first
+ * branch below then returns the bow's `secondary_weapon_range`. Pinned in
+ * `test/ss2-ranged.test.js` (`ss2Reach` at slot 1 and slot 2) and, through a
+ * built battle with a champion that enters with the bow drawn, in
+ * `test/ss2-champion-dna.test.js`. `ss2BattleValues` carries the bow override
+ * anyway, because dropping it was a named gap.
  */
 export function ss2Reach(actor) {
   // ► **A DRAWN BOW REACHES WITH THE BOW, and this is the read-time half of
@@ -2323,8 +2354,13 @@ export function ss2RunDisplacement(movementSpeed) {
 
 /**
  * The other six movement phases, transcribed from the same block so that
- * nobody has to read it twice. **NONE of them is wired into the rule set** —
- * `Ss2ActionType` has two walks and no run, charge or jump — and this table is
+ * nobody has to read it twice. ~~**NONE of them is wired into the rule set** —
+ * `Ss2ActionType` has two walks and no run, charge or jump~~ — **TWO ARE, since
+ * `cbaf406` (2026-09-17; this line was stale until 2026-09-24): `runleft` and
+ * `runright` are the taunted flee** (`TAUNTED_PHASE`, over
+ * `ss2RunDisplacement`). They are forced, never chosen — `Ss2ActionType` still
+ * has two walks and no run, charge or jump VERB — and the charge and the jump
+ * are still not wired into this rule set at all. This table is
  * here because `MAP_SILENCE.movement-displacement` said "nothing states a
  * displacement for the other six phases at all", which was as wrong about the
  * build as the walk entry was.
@@ -2388,11 +2424,17 @@ export function ss2RunDisplacement(movementSpeed) {
  *   fighter mid-leap indistinguishable from one standing a rank back, to every
  *   reach gate at once. The answer is a THIRD named axis, not a shared one.
  *
- * **None of these six is wired into the rule set**, and there is a second reason
+ * ~~**None of these six is wired into the rule set**, and there is a second reason
  * beyond "nothing offers them": `SS2_MOVEMENT_STEP_FACTOR.run` and `.charge` are
  * read nowhere in `src/` — only by the tool — so `node --test` does not guard
- * them. The guard is a tool a human runs on the capture box, the same standing
- * the weapon table has.
+ * them.~~ **HALF OF THIS WENT STALE WITH `cbaf406` (2026-09-17) AND STAYED SO
+ * UNTIL 2026-09-24.** The two runs are wired (the taunted flee, above), and
+ * `.run` IS read in `src/`: `ss2RunDisplacement` multiplies by it, and
+ * `test/ss2-taunt.test.js` pins the result (`ss2RunDisplacement(12) === 470`),
+ * so `node --test` now guards it. **`.charge` is still read nowhere in `src/`,
+ * and neither is `.jump`** — only by the tool — so for those two, and the four
+ * unwired phases they belong to, the guard is a tool a human runs on the
+ * capture box, the same standing the weapon table has.
  */
 export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
   walk: 16,
@@ -2558,6 +2600,52 @@ function ss2BodyBlocks(actor, foe) {
 }
 
 /**
+ * ► **WHETHER TWO GLADIATORS STAND IN THE SAME LANE, and therefore whether one
+ *   may SWING at the other.** Owner's rule, 2026-09-18, reported off a live 3v3
+ *   in the browser arena: *"AI are able to attack each other in different lanes:
+ *   this shouldn't be allowed. You can attack from front or behind but not at
+ *   different y even if you are 'close'."*
+ *
+ * ► **AUTHORED, AND IT HAS TO BE — `MAP_SILENCE.multi-slot-arena-geometry`.**
+ *   Vanilla has ONE rank, so no byte in the build has an opinion about reaching
+ *   across two. What the build does settle is that `getfightdistance` is
+ *   Euclidean over `(_x, _y)`, and this engine borrowed that for depth — which
+ *   is correct for a DISTANCE and turned out to be wrong for a REACH. Measured
+ *   before the rule landed: over 25 seeded 3v3 bouts, **4,440 of 7,845 melee
+ *   attacks — 57% — were swung across ranks**, because a foe one rank back at
+ *   the same x is 97 units away and every melee reach is longer than that.
+ *
+ * ► **IT IS A NO-OP WHENEVER THE SECOND AXIS IS OFF, structurally rather than
+ *   by a flag.** `startingY` returns `null` unless `rankStride` is non-zero, so
+ *   in a one-dimensional arena — every 1v1, every golden, every pinned hash —
+ *   neither `y` is finite and this returns `true` for every pair. The rule can
+ *   only bite in a battle that has ranks to be in.
+ *
+ * ► **AND IT IS DELIBERATELY NOT APPLIED TO THE TWO SHOTS.** A bow exists to
+ *   reach somebody you cannot walk to, and the flat shot already has its own
+ *   lane rule in `ss2ShotBlocked` ~~— derived from the BUILD's ballistic, not
+ *   authored —~~ while a bombard is lobbed and clears everything. ~~Extending
+ *   this to ranged would be a second authored rule on top of a derived one.~~
+ *
+ *   **CORRECTED 2026-09-24 — wrong from the day `ca90b94` wrote it:
+ *   `ss2ShotBlocked` IS AUTHORED** (owner's decision, 2026-09-13), and its own
+ *   docstring says so: vanilla never has a third body, so no byte in the build
+ *   tests for one. What IS measured off the build's ballistic is which shot
+ *   the rule is handed to — a snipe flies flat at chest height and a bombard's
+ *   arc clears heads (the block above `snipeBodies` in `legalActions`). So
+ *   the reason not to extend this to ranged is the first sentence above — a
+ *   bow exists to reach past a lane — and never that the shot's own rule is
+ *   derived. It is not.
+ *
+ *   *(`ss2ShotBlocked`'s docstring also sat ABOVE this one, from `ca90b94`
+ *   until 2026-09-24, so it read as this function's. It is now above its own.)*
+ */
+export function ss2SameLane(actor, target) {
+  if (!Number.isFinite(actor?.y) || !Number.isFinite(target?.y)) return true;
+  return actor.y === target.y;
+}
+
+/**
  * ► **DOES A BODY STAND IN THE WAY OF THE SHOT? AUTHORED — owner's decision,
  *   2026-09-13 — and the build CANNOT answer it.**
  *
@@ -2595,39 +2683,6 @@ function ss2BodyBlocks(actor, foe) {
  * body-block for its archers is the thing that makes where you stand a
  * decision rather than a number.
  */
-/**
- * ► **WHETHER TWO GLADIATORS STAND IN THE SAME LANE, and therefore whether one
- *   may SWING at the other.** Owner's rule, 2026-09-18, reported off a live 3v3
- *   in the browser arena: *"AI are able to attack each other in different lanes:
- *   this shouldn't be allowed. You can attack from front or behind but not at
- *   different y even if you are 'close'."*
- *
- * ► **AUTHORED, AND IT HAS TO BE — `MAP_SILENCE.multi-slot-arena-geometry`.**
- *   Vanilla has ONE rank, so no byte in the build has an opinion about reaching
- *   across two. What the build does settle is that `getfightdistance` is
- *   Euclidean over `(_x, _y)`, and this engine borrowed that for depth — which
- *   is correct for a DISTANCE and turned out to be wrong for a REACH. Measured
- *   before the rule landed: over 25 seeded 3v3 bouts, **4,440 of 7,845 melee
- *   attacks — 57% — were swung across ranks**, because a foe one rank back at
- *   the same x is 97 units away and every melee reach is longer than that.
- *
- * ► **IT IS A NO-OP WHENEVER THE SECOND AXIS IS OFF, structurally rather than
- *   by a flag.** `startingY` returns `null` unless `rankStride` is non-zero, so
- *   in a one-dimensional arena — every 1v1, every golden, every pinned hash —
- *   neither `y` is finite and this returns `true` for every pair. The rule can
- *   only bite in a battle that has ranks to be in.
- *
- * ► **AND IT IS DELIBERATELY NOT APPLIED TO THE TWO SHOTS.** A bow exists to
- *   reach somebody you cannot walk to, and the flat shot already has its own
- *   lane rule in `ss2ShotBlocked` — derived from the BUILD's ballistic, not
- *   authored — while a bombard is lobbed and clears everything. Extending this
- *   to ranged would be a second authored rule on top of a derived one.
- */
-export function ss2SameLane(actor, target) {
-  if (!Number.isFinite(actor?.y) || !Number.isFinite(target?.y)) return true;
-  return actor.y === target.y;
-}
-
 export function ss2ShotBlocked(actor, target, bodies) {
   if (!Number.isFinite(actor?.x) || !Number.isFinite(target?.x)) return false;
   // Structural off-switch: with no depth on either end there is no geometry to
@@ -5673,8 +5728,14 @@ function ss2CommandPull({ casterX, targetX, facingLeft, standOff }) {
  *
  * ► **TWO PRESENTATION CUES, NEITHER MODELLED, BOTH NAMED.** `circlets` is
  *   attached at the caster's STARTING `_x` and `_y = 200`; this repository has
- *   not extracted that prop, and the arena painter draws every
- *   `attach-effect` as a lightning bolt, so no command is emitted for it.
+ *   not extracted that prop, ~~and the arena painter draws every
+ *   `attach-effect` as a lightning bolt,~~ so no command is emitted for it.
+ *   **The struck reason is stale since `2690559` (2026-09-23; corrected
+ *   2026-09-24):** `tools/arena/main.js` now routes each attached record by
+ *   its linkage — `boulder_combat` and `lightning_bolt_combat` have painters —
+ *   and logs any other effect as not drawn rather than drawing it as
+ *   lightning. `test/ss2-teleport.test.js` pins that the teleport still emits
+ *   no `attach-effect`.
  *   `combatscale()` — the build's live camera — is called EVERY tick of this
  *   arm (`+0x7635`, outside both gates); `gladiators.onEnterFrame` calls it
  *   too, but only while `_global.phasecomplete != false` (map `+0x0e98`). So
@@ -7011,24 +7072,36 @@ export const SS2_TAUNT = Object.freeze({
   /** The flag a losing taunt sets on the target (`+0x6ad9`). */
   flag: "taunted1",
   /**
-   * ► **THE CONSEQUENCE THAT IS NOT BUILT, AND SAYING SO IS THE POINT.** A
+   * ► ~~**THE CONSEQUENCE THAT IS NOT BUILT, AND SAYING SO IS THE POINT.**~~
+   *   **BUILT IN `cbaf406` (2026-09-17), thirty-six minutes after this was
+   *   written in `8ede824`; the paragraph below stayed as it was until
+   *   2026-09-24** (`test/ss2-taunt.test.js`, "A TAUNTED GLADIATOR RUNS, AND
+   *   IT IS THE ONLY THING HE MAY DO", pins what it now says). A
    *   taunt that rolls effect 2 against a bow-mode defender sets `taunted1`,
    *   and this engine sets it faithfully — the flag is already in
-   *   `SS2_TAUNT_FLAGS` and `defenderEffects` already clears it. **Nothing
-   *   reads it.** The build's decision table row 3 drives a taunted gladiator
-   *   into `getphase("runleft")` facing right and `getphase("runright")` facing
-   *   left (`+0x0d68`-`+0x0e35`) — it RUNS AWAY from the way it is facing.
+   *   `SS2_TAUNT_FLAGS` and `defenderEffects` already clears it. ~~**Nothing
+   *   reads it.**~~ **`SS2_STATUS_PHASE_FOR_FLAG` reads it**: the flag forces
+   *   `TAUNTED_PHASE`, which `resolveAction` runs over `ss2RunDisplacement`
+   *   and labels with this table's `fleePhase`. The build's decision table
+   *   row 3 drives a taunted gladiator into `getphase("runleft")` facing right
+   *   and `getphase("runright")` facing left (`+0x0d68`-`+0x0e35`) — it RUNS
+   *   AWAY from the way it is facing.
    *
    *   That is a MOVEMENT phase at the run's own step factor
-   *   (`SS2_MOVEMENT_STEP_FACTOR.run`, 40 against a walk's 16), which means
+   *   (`SS2_MOVEMENT_STEP_FACTOR.run`, 40 against a walk's 16)~~, which means
    *   `ss2WalkDestination` needs a step parameter it does not have. **A
    *   separate increment on purpose**: widening a function twenty tests cover,
    *   to finish a fourth arm of an action whose other three are complete, is
-   *   the kind of scope creep that lands both half-done.
+   *   the kind of scope creep that lands both half-done~~. **It did not widen
+   *   the walk: the run got its own function, `ss2RunDisplacement`**, because
+   *   the run differs from the walk in its boot bonus and its stop gap as well
+   *   as its factor.
    *
-   *   **So a taunted gladiator carries a status that does nothing yet.** The
+   *   ~~**So a taunted gladiator carries a status that does nothing yet.** The
    *   state is right and the consequence is missing, which is the honest half
-   *   to ship — and it is stated here rather than discovered.
+   *   to ship — and it is stated here rather than discovered.~~ A taunted
+   *   gladiator loses its next turn to the flee, and the flag is spent by being
+   *   obeyed.
    */
   fleePhase: Object.freeze({ right: "runleft", left: "runright" })
 });
@@ -7828,12 +7901,15 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
   // build's own order, which matters because both read `weapon_max_damage`
   // rather than the strength-scaled `max_damage`.
   //
-  // This is the ARITHMETIC half of enchantment damage. What it does NOT do is
+  // This is the ARITHMETIC half of enchantment damage. ~~What it does NOT do is
   // apply it: in the build the tick lands on the afflicted combatant's next
   // turn and REPLACES that turn (battle map § "The enchantment effect is a
   // SKIPPED TURN"), which the resolver has no channel for and which is an open
-  // decision, not an omission. Computing the field here is free of that: it is
-  // a `battlevalues` output the module was silently dropping.
+  // decision, not an omission.~~ **The other half has existed since `86ccb68`
+  // (2026-09-07), and this comment was stale from that commit until
+  // 2026-09-24:** `resolveStatusPhase` is that turn, and it reads the field
+  // computed here off the INFLICTOR. Computing the field here is still its
+  // own job: it is a `battlevalues` output the module was silently dropping.
   derived.weapon_enchantment_damage =
     Math.ceil(number("weapon_max_damage") / 3 * number("weapon_enchantment_potency"));
   derived.secondary_weapon_enchantment_damage =
@@ -7859,8 +7935,12 @@ export function ss2BattleValues(character, { battleStarted = false } = {}) {
     //   unguarded copy would write `undefined` for a gladiator with no
     //   secondary weapon and this module has no way to represent that: a
     //   resource bag carries finite numbers only. A bow-wielding gladiator with
-    //   no secondary weapon is not reachable through the shop, and the resolver
-    //   has no ranged vocabulary at all.
+    //   no secondary weapon is not reachable through the shop~~, and the resolver
+    //   has no ranged vocabulary at all~~. **It has had one since `7310583`
+    //   (2026-09-13; this line was stale until 2026-09-24)** — `BOMBARD`,
+    //   `SNIPE`, `SWAP_WEAPONS` — and it does not reach this case either:
+    //   `legalActions` offers the swap only when `secondary_weapon` is not 0
+    //   and `secondary_weapon_range` is above 0.
     if (Number.isFinite(derived.secondary_weapon_range)) {
       derived.weapon_range = derived.secondary_weapon_range;
     }

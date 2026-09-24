@@ -283,8 +283,13 @@ function removeArmourCandidate(defender, direction, rolls, requestIndex, mutatio
  * (`secondary_weapon_enchantment_potency` IS used by the build, but for magic
  * DAMAGE, not for this proc: `battlevalues +0x3326` sets
  * `secondary_weapon_enchantment_damage = ceil(secondary_weapon_max_damage / 3 *
- * secondary_weapon_enchantment_potency)`. That whole damage path is unmodelled
- * here — see the gap noted in `src/team/ss2-rules.js`'s header.)
+ * secondary_weapon_enchantment_potency)`. ~~That whole damage path is unmodelled
+ * here — see the gap noted in `src/team/ss2-rules.js`'s header.~~ **Stale from
+ * `86ccb68` (2026-09-07) until 2026-09-24: that damage path is modelled, just
+ * not in this module.** `ss2BattleValues` in `src/team/ss2-rules.js` derives
+ * both fields and `resolveStatusPhase` there applies them, through
+ * `applySs2MagicDamageCandidate` (`src/golden/ss2-spell-candidate.js`); that
+ * header's gap 4 is now marked closed.)
  *
  * ## What WAS wrong: the fallback
  *
