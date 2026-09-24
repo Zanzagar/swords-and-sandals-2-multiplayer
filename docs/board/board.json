@@ -1,7 +1,7 @@
 {
  "updatedAt": "2026-09-23",
  "head": "56bfe32",
- "lede": "Every system in the Swords & Sandals II team-arena project and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
+ "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
    "id": "engine",
@@ -1185,9 +1185,26 @@
    "gaps": "No rule yet for when the AI should stop taunting.",
    "next": "Measure how often it happens across kits and seeds; then decide the AI rule (the owner's call if it changes behaviour the build has).",
    "evidence": "Facing implementer's 3v3 measurements, 2026-09-24 (agents/face-target/kb3-21-*.txt)."
+  },
+  {
+   "id": "name-and-permission",
+   "lane": "platform",
+   "column": "in-progress",
+   "order": 1,
+   "title": "Swords and Sandals II: Souls and Simulacra — name and permission",
+   "summary": "The owner named the mod (2026-09-24): Swords and Sandals II: Souls and Simulacra — this engine plus the progression being designed with Codex, in Swords and Sandals II's skin. Using the brand name and bundling the art both need permission: Oliver Joyce (Whiskeybarrel) and, per the studio's press kit, eGames for the brand. A holding reply from Oliver arrived about 2026-09-21; a full answer is promised within days.",
+   "gaps": "No permission yet. Until it covers them: the name stays internal, and the 'ship no SS2 asset' rule stands (players import from their own copy).",
+   "next": "When Oliver replies: ask for an explicit written grant — which assets, where (public repo, hosted build), attribution, non-commercial — and whether eGames must agree. Then record it, change the rule and the tests, and ship the art as a separate bundle built by the extractors.",
+   "ownerDecision": "Send the follow-up ask once Oliver's full reply arrives.",
+   "evidence": "docs/outreach/2026-09-02-email-to-oliver-joyce.md (Replies); HANDOFF.md living head (the product's name).",
+   "updated": "2026-09-24"
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-24",
+   "text": "The mod has a name: Swords and Sandals II: Souls and Simulacra (working title, pending permission)."
+  },
   {
    "date": "2026-09-24",
    "text": "Fighters turn to face whoever they shoot, taunt or cast at (56bfe32)."

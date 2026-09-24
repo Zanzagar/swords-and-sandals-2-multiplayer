@@ -15,6 +15,18 @@ system, from "needs design" to "done", seeded from a code-checked inventory
 `docs/board/board.json` (and add a `changes` line), then
 `node tools/board/build.mjs <out.html>` and republish `<out.html>` to that URL.
 
+**THE PRODUCT'S NAME (owner, 2026-09-24): "Swords and Sandals II: Souls and
+Simulacra"** — the mod, built on this engine with the progression being
+designed with Codex in the `ss2-progression-design` worktree, wearing Swords
+and Sandals II's skin. It is **conditional on permission**: the brand and the
+art belong to their owners (Oliver Joyce / Whiskeybarrel; the brand rights,
+per the studio's own press kit, to eGames), and a holding reply from Oliver
+has arrived but grants nothing yet (`docs/outreach/2026-09-02-email-to-oliver-joyce.md`,
+"Replies"). **Use the name internally now; put it on anything public (README,
+a hosted build) only once permission covers the name.** Without it, the
+standalone name is **"Souls and Simulacra"** (the design branch's). Until then
+the "ship no SS2 asset" rule stands unchanged.
+
 **LATEST:
 [2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md)**
 (the END of session `c62c201f`). Start there. *(It supersedes the same
