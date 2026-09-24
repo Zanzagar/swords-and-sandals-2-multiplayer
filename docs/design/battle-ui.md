@@ -107,6 +107,8 @@ engine unavailableActions() ┘                                                 
   build hides what it will not offer), the rank ↑/↓ verbs (no build art), and a round fallback button
   for a clone without a pack.
 
+<a id="decided-ring-2026-09-24"></a>
+
 ## The in-battle actions: DECIDED by the owner, 2026-09-24 (a grilling round, 3 rounds, 8 questions)
 
 This supersedes the dock-first design above wherever they differ. The build's own layout was mapped
@@ -561,6 +563,65 @@ were updated where S7 put a gate in front of `actFromRing`.
   caption under it, the Preview row), `?play=red&teams=3&items=tricks` with the setting on (a spell
   chosen and ringed, Confirm live), and tab through the strip with a screen reader (the preview as each
   button's description).
+
+<a id="decided-hud-2026-09-24"></a>
+
+## Team HUD, reach preview and the camera: DECIDED by the owner, 2026-09-24 (a grilling round, 2 rounds, 12 questions)
+
+Asked after the owner played the team demo ("quite excellent") and reported the spell row covering
+the bow's "Bombard" text, the ring cut off at the stage's edges, and "spells and ranged (bombard
+particularly) options to attack multiple enemies … appears to be missing". Facts checked first: the
+engine already offers bombard and every foe-targeted spell against up to 3 foes in 3v3 (mean ~2.6),
+each action with ONE target (no area attack exists, as in the build); the build's own HUD
+(`combat_panel`, sprite 751) shows per side a health vial (hp/max), an ENERGY vial and an armour
+gauge, plus one crowd bar with ten mood words; the camera (`stepFramedCamera`) frames fighters only
+and the ring is squeezed onto the stage after it.
+
+1. **Multiple enemies means TARGET PICKING, not area attacks** (the owner chose picking; area attacks
+   would be a new combat rule the build cannot answer). **Reach preview (Q5a):** hovering or focusing
+   a spell or bombard lights EVERY foe it can reach with a numbered gold ring (1–3, left to right)
+   and dims the rest; the hover text names the target ("Fireball → Nym · click another lit foe to
+   change"); one click still fires at the SELECTED foe (the who-first decision stands).
+2. **Team HUD (Q1a, Q2, Q3c):** the right-hand roster becomes TWO TEAM PANELS, red then blue; each
+   fighter's row shows **health, energy and armour** bars with numbers (the build's three readings;
+   SS2 has no mana — spells are paid from energy; magicka appears only in spell previews), a
+   highlight on the fighter whose turn it is, condition chips in plain words (Burning, Frozen,
+   Poisoned…), and a "you" marker on seats a person controls.
+3. **Crowd meter (Q11):** one shared meter at the top of the side panel, with the build's ten mood
+   words (`crowd: <mood>`, index `ceil(interest / 10)`).
+4. **Turn-order strip (Q3c, Q10a):** a thin DOM strip just above the stage — every fighter in
+   initiative order, team-coloured, the current one highlighted, the dead struck through. It never
+   touches the canvas or the camera.
+5. **Team colours (Q4, Q12):** red team `#e0584f`, blue team `#4c8fe0`; each name plate on the stage
+   is tinted with a dark outline PLUS a coloured underline and a team initial (a cue that does not
+   rely on colour alone); the panels and the strip use the same colours. The demo fighters' SKIN
+   colours are random across both teams, which is why the name cue matters.
+6. **Camera (Q7b):** on a PERSON's turn only, the camera eases to also frame the acting fighter's
+   ring (buttons, items row, rank arrows) with a margin, and every lit target while a reach preview
+   shows; the ring is drawn at a FIXED on-screen size, capped at what the build shows at zoom 80,
+   instead of growing with the survivors' close-up. AI and spectate turns stay byte-identical — the
+   close-up and 1v1 untouched.
+7. **The spell row never covers the bow buttons' words** ("Bombard", "Snipe", the arrow count).
+8. **The grilling gate (Q6a, Q8a, Q9b)** — how the harness enforces this front end rather than
+   invoking it on judgment: every commit carries a trailer, `Decided: <doc#section>` (a recorded
+   grilling decision, like this section) or a class trailer (`Fix:`, `Docs:`, `Chore:`, `Test:`),
+   checked by a `commit-msg` hook and re-checked in CI, so it binds Claude, Codex and humans
+   identically (the harness's own rule: deterministic enforcement lives in git and CI, not agent
+   hooks); and the workflow template refuses to start a feature slice with no `decided` pointer.
+   The harness ships the hook, the CI template and `adopt.sh <project>`; this repository adopts it
+   first; `docs/adoption-matrix.md` tracks the rest; the harness's ADR 0001 is amended.
+
+### Slices (tracked on the board)
+
+- **HUD track** (starts now): **H1** team colours on the stage and the roster · **H2** the team panels
+  with health / energy / armour, the turn highlight, condition chips, the "you" marker, and the crowd
+  meter · **H3** the turn-order strip.
+- **Ring and camera track** (after the running S9 and S8 land — the same files): **R1** the spell row
+  clear of the bow's words · **R2** the reach preview · **C1** the camera frames a person's ring and
+  the lit targets; the ring at a fixed on-screen size.
+- **Gate track:** **G1** the harness: `githooks/commit-msg`, the CI template, `adopt.sh`, git-hygiene
+  rule 14 and the ADR amendment · **G2** this repository adopts it, and the workflow template checks
+  the `decided` pointer.
 
 ## Delivery order
 
