@@ -55,8 +55,9 @@ const identity = (action) => JSON.stringify([action.type, action.targetId, actio
  * offer itself: a swing or a shot on the ring; else a spell at the selected
  * foe from the list; else the walk toward him in its slot, by its arrow key; else the
  * rank change toward his rank, by its arrow key (S4 put both on the ring;
- * ~~the list's rank change~~ until then); else the first filled slot; else
- * the first listed. Returns `{ via, action }`.
+ * ~~the list's rank change~~ until then); else the first filled slot; else,
+ * with nothing listed, the swap by key 9 (S6); else the first listed.
+ * Returns `{ via, action }`.
  */
 function choose(model, selected, actor) {
   const byVerb = (verbs) => verbs.map((verb) => model.slots.find((slot) => slot.verb === verb)).find(Boolean);
@@ -84,12 +85,20 @@ function choose(model, selected, actor) {
   }
   const any = model.slots.find((slot) => slot.action);
   if (any) return press(any);
+  // S6 took the swap off the list and put it on key 9: a turn whose only offer is the forced swap (no
+  // arrows left, bow drawn) has nothing listed, and presses 9. (Never reached in these 20 bouts: the
+  // tally is S4's to the digit, with `swap` 0.)
+  if (model.swap && model.offRing.length === 0) {
+    const command = ringKeyCommand(model, { key: model.swap.key, focus: "stage" });
+    assert.equal(command?.kind, "act", "key 9 presses the swap");
+    return { via: "swap", action: command.action };
+  }
   assert.ok(model.offRing.length > 0, "a person's turn always offers something");
   return { via: "list", action: model.offRing[0].action };
 }
 
 test("?play=red: whole bouts chosen only through the ring — every action sent is on offer, and every bout finishes", (t) => {
-  const tally = { bouts: 0, personTurns: 0, aiTurns: 0, key: 0, arrow: 0, list: 0, tab: 0, shiftTab: 0, attacksByKey: 0 };
+  const tally = { bouts: 0, personTurns: 0, aiTurns: 0, key: 0, arrow: 0, swap: 0, list: 0, tab: 0, shiftTab: 0, attacksByKey: 0 };
   for (const perSide of [1, 3]) {
     for (const kit of ["", "tricks"]) {
       for (const seed of [1, 2, 3, 4, 5]) {

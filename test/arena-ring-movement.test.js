@@ -103,12 +103,14 @@ test("A WALK THE STANCE DOES NOT WIRE — toward a foe inside reach — stands B
 
 test("a stance that wires a walk the engine WITHHOLDS shows it nowhere: not in its slot, not beside, not listed", () => {
   // The same turn: the stance wires walkleft at optionB, and the engine withholds it (the retreat is
-  // to the right). Neither rank arrow is withheld here, so both stand, and the swap is only listed.
+  // to the right). Neither rank arrow is withheld here, so both stand, and nothing is listed: ~~the swap
+  // is only listed~~ — S6 put the swap on the ring's ninth button (`model.swap`).
   const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 2 }), 20, "blue-2"), "red-3");
   assert.equal(model.slots.find((slot) => slot.slot === "optionB").verb, null);
   assert.deepEqual(model.moves.map((move) => `${move.move} ${move.place}`),
     ["walk-right beside", "rank-back above-head", "rank-front below-feet"]);
-  assert.deepEqual(model.offRing.map((entry) => line(entry.action)), ["swap-weapons -> blue-2"]);
+  assert.deepEqual(model.offRing.map((entry) => line(entry.action)), []);
+  assert.deepEqual(model.swap.action, { type: "swap-weapons", targetId: "blue-2", actorId: "blue-2" });
 });
 
 test("with no ring — the engine has no menu to ask — no move is placed, and every offered move is listed", () => {

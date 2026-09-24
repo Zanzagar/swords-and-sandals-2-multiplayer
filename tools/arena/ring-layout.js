@@ -22,6 +22,8 @@ import {
   SS2_BUTTON_WIRING,
   SS2_OPTION_SLOTS,
   SS2_OVERLAY_PLACEMENT,
+  SS2_STRIP,
+  SS2_SWAP_SLOT,
   overlaySlotPosition,
   ss2FlipOverlayFor,
   ss2OverlayPlacement
@@ -146,6 +148,40 @@ export function ringButtonsAt(model, { centerX, centerY, unit, layout = null }) 
     }));
   }
   return Object.freeze(out);
+}
+
+/**
+ * ► **THE WEAPON SWAP (slice S6): the build's ninth button, where the build
+ *   puts it** — `swap_inventory`, depth 101 of the overlay's frame 1, at its
+ *   slot's position (the pack's measured matrix at the frame the stance rests
+ *   on, else the relayed table: (-93.4, 40.4) at 0.6, the ring's lower left,
+ *   outboard of optionG). Its clip is `inventory_buttons` (116), which — unlike
+ *   860, centred on its origin — places its round background at
+ *   `SS2_STRIP.backgroundAt` (18.25, 18.25) of its own pixels, so the disc's
+ *   centre, which is what is clicked, stands that far in from the slot. The
+ *   radius is the ring's own rule, the fallback's 18 at the slot's scale (the
+ *   build's background is 19.25). Empty when the model holds no swap.
+ *
+ * Nothing overlaps: at the relayed positions its nearest neighbour, optionG,
+ * is 29.0 overlay px away against 25.2 of radii.
+ */
+export function ringSwapButtonAt(model, { centerX, centerY, unit, layout = null }) {
+  const swap = model?.swap ?? null;
+  if (!swap) return Object.freeze([]);
+  const restsAt = layout?.controllers?.[model?.stance?.frame]?.restsAt ?? null;
+  const at = overlaySlotPosition(SS2_SWAP_SLOT, { layout, frame: restsAt });
+  if (!at) return Object.freeze([]);
+  return Object.freeze([Object.freeze({
+    key: swap.key,
+    slot: swap.slot,
+    verb: swap.verb,
+    usingBow: swap.usingBow,
+    x: centerX + (at.x + SS2_STRIP.backgroundAt.x * at.scale) * unit,
+    y: centerY + (at.y + SS2_STRIP.backgroundAt.y * at.scale) * unit,
+    r: FALLBACK_BUTTON_RADIUS * at.scale * unit,
+    scale: at.scale * unit,
+    side: at.x < 0 ? "left" : "right"
+  })]);
 }
 
 /**
@@ -277,6 +313,42 @@ export function ringButtonsInside(buttons, stage) {
   const dy = into(Math.min(...buttons.map((b) => b.y - b.r)), Math.max(...buttons.map((b) => b.y + b.r)), stage.y, stage.y + stage.height);
   if (dx === 0 && dy === 0) return buttons;
   return Object.freeze(buttons.map((button) => Object.freeze({ ...button, x: button.x + dx, y: button.y + dy })));
+}
+
+/**
+ * ► **WHERE A BUTTON'S KEY LABEL GOES (S2's labels, made to give way in S6) —
+ *   AUTHORED.** On the ring's outer side, level with the button, as S2 drew
+ *   every label — unless that would run across another drawn button: then
+ *   under the button, centred, and failing that above it. The swap stands
+ *   outboard of optionG, right where optionG's label runs, so with the swap on
+ *   offer optionG's label goes under it; with no swap, nothing moves.
+ *
+ * @param {object} button   a drawn button: `{slot, x, y, r, side}`
+ * @param {object[]} buttons  every button drawn this frame
+ * @param {{width: number, height: number, gap: number}} size  the label's
+ *   measured box and its gap from the button, canvas px
+ * @returns {{x: number, y: number, align: "left"|"right"|"center"}} where to
+ *   `fillText` it, with a middle baseline
+ */
+export function ringLabelAt(button, buttons, { width, height, gap }) {
+  const half = height / 2;
+  const outerX = button.side === "left" ? button.x - button.r - gap : button.x + button.r + gap;
+  const candidates = [
+    { x: outerX, y: button.y, align: button.side === "left" ? "right" : "left" },
+    { x: button.x, y: button.y + button.r + gap + half, align: "center" },
+    { x: button.x, y: button.y - button.r - gap - half, align: "center" }
+  ];
+  const boxOf = ({ x, y, align }) => {
+    const x0 = align === "right" ? x - width : align === "left" ? x : x - width / 2;
+    return { x0, x1: x0 + width, y0: y - half, y1: y + half };
+  };
+  const clear = (box) => (buttons ?? []).every((other) => {
+    if (other === button || other.slot === button.slot) return true;
+    const dx = other.x - Math.min(Math.max(other.x, box.x0), box.x1);
+    const dy = other.y - Math.min(Math.max(other.y, box.y0), box.y1);
+    return Math.hypot(dx, dy) >= other.r;
+  });
+  return Object.freeze(candidates.find((candidate) => clear(boxOf(candidate))) ?? candidates[0]);
 }
 
 /** The slot of the drawn button a point is on (rim included), or null. */

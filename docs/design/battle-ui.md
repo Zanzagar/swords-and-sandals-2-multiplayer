@@ -138,7 +138,7 @@ first (ab5feb5, `src/render/action-buttons.js`).
 - **S2** the ring's core: the who-first selection model, eight slots per stance, one-click, Tab, the
   keyboard strip — drawn with the authored fallback buttons (the tracer bullet)
 - **S3** the build's own button art and placement on the ring · **S4** movement (walk slots, rank arrows)
-- **S5** the items row · **S6** the weapon swap button · **S7** hover previews and the confirm setting
+- **S5** the items row · **S6** the weapon swap button (built, below) · **S7** hover previews and the confirm setting
 - **S8** AI pacing (speed-up, skip) · **S9** greyed-button reasons (needs E)
 
 ### S2, built 2026-09-24: what it does, and what it decided that the owner did not
@@ -300,6 +300,63 @@ out of the list.
   arrows' look (a disc with a chevron, like the authored buttons).
 - **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=3` (the rank arrows on a
   mid-rank fighter; the forward arrow over the front rank's heads) before trusting the look.
+
+### S6, built 2026-09-24: the weapon swap, the build's ninth button
+
+`swap` in the model and key 9 (`tools/arena/ring.js`), `ringSwapButtonAt` and `ringLabelAt`
+(`tools/arena/ring-layout.js`), the swap's frame and disc centre in `src/render/action-buttons.js`,
+wired in `tools/arena/main.js` and `tools/arena/index.html`. Tests: `test/arena-ring-swap.test.js`; the
+frame pins in `test/render-action-buttons.test.js`; S2's and S4's tests updated where the swap left the
+list (`test/arena-ring.test.js`, `test/arena-ring-movement.test.js`, `test/arena-ring-bouts.test.js`).
+
+- **Shown exactly when the engine offers `swap-weapons`, hidden otherwise.** The engine withholds it with
+  no second weapon (`no-secondary`) and under a forced phase (`no-stamina`, `condition`) — every one a
+  "hide" in `SS2_UNAVAILABLE_REASONS`, so hiding is the owner's Q6 as well as S2's rule. Proven over 30
+  seeded bouts (1v1, 2v2, 3v3; plain and `tricks`), every foe selected in turn, under the arena's own
+  settled camera: 1,982 selections with the swap offered, each drawn once, inside the stage, clear of
+  every other button, and sent by its click and by 9; 2,758 without, each drawn, clicked and keyed by
+  nothing, and the engine's reason a hide every time (no-secondary 2,743, no-stamina 9, condition 6).
+  A person's 9 in whole `?play=red` bouts changes the weapon in hand, both ways (78 presses in 10 bouts).
+- **Where the build puts it:** `swap_inventory`, depth 101 of the overlay's frame 1 (over the eight), at
+  its slot — (-93.4, 40.4) at scale 0.6, the ring's lower left, outboard of optionG. Its clip is
+  `inventory_buttons` (116), which — unlike 860, centred on its origin — places its round background at
+  (18.25, 18.25) of its own pixels on all 49 frames (365 twips; measured in the player's pack), so the
+  disc, and the click, stand that far in from the slot (`SS2_STRIP.backgroundAt`, compared with a real
+  pack in the suite). The hit radius is the ring's own rule, 18 at the slot's scale (the build's
+  background is 19.25); its nearest neighbour, optionG, is 29.0 overlay px away against 25.2 of radii.
+- **What it shows is the weapon it swaps TO:** 116 frame 10 — a bow and an arrow — with the sword in
+  hand, frame 11 — a sword — with the bow drawn (overlay frame 1 body 0x2378d2: `using_bow == true`
+  branches to `+0x0ee4`, `gotoAndStop(11)`; the fall-through `+0x0ec8` is `gotoAndStop(10)`). The
+  rollover's own words agree, and the strip uses them: "Switch to ranged weapon" / "Switch to melee
+  weapon" (`+0x0f7f` / `+0x0f5e`). The weapon in hand is the engine's (its bow mode, the stance's
+  `weapon`). ~~`SS2_STRIP.swap`: frame 10 with the bow, 11 without~~ — **inverted from ab5feb5 until
+  S6**; corrected in `src/render/action-buttons.js` and its test, and the real pack's art agrees (frame
+  10 holds the only multi-frame child of the two, a bow and its string).
+- **Authored, the owner did not decide these:**
+  - **Key 9** (the build has no keyboard; 9 follows the eight), from the stage or a strip button, once
+    per press, never while typing or with Ctrl/Alt/Meta. The stage label is "9 Swap".
+  - **A key label gives way (`ringLabelAt`).** Every label still goes on the ring's outer side unless
+    that would run across another drawn button; then under its button, then above. The swap stands
+    exactly where optionG's label ran, so with the swap on offer optionG's label goes under optionG
+    (925 of 925 such selections in the 30 bouts); with no swap nothing moves. Measured with an
+    approximate text width over the same bouts: no label crosses a button.
+  - **The forced swap is a press.** Out of arrows with the bow drawn, the swap is the engine's WHOLE
+    offer (the build's first forced phase); the build does it by itself and hides its button, while
+    here it is the ring's only button (62 selections in the 30 bouts), as every forced action was a
+    list entry in S2.
+- **Owner decision — THE BUILD HIDES THE SWAP AT NO ARROWS LEFT, AND THE ENGINE OFFERS IT.** The
+  button's hide is `(ammo_left <= 0 && secondary_weapon != 0) || secondary_weapon == 0` (`+0x0e0a`..
+  `+0x0e9d`; its tooltip: "Only work if you have any ammunition left"), so the build never lets a
+  gladiator swap to an empty bow. The engine's offer gates only on the second weapon, so with the sword
+  in hand and no arrows it offers the swap — and the ring shows what the engine offers: 1,047 of the
+  1,982 shown selections are that state. The rule set's AI never takes it (0 of 3,280 offers, 120 AI
+  bouts), so only a person can, and the next turn's forced phase swaps him straight back. Withholding
+  it with a hide reason is an ENGINE change in `src/team/ss2-rules.js` (the offer's length moves
+  `options[turnNumber % length]` drivers, so it needs its own census); until then the ring shows it.
+- **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=3` on red-2 (the archer):
+  the bow icon with the sword in hand, the sword after a swap, the swap's hover frame, optionG's label
+  under it, and a ring at the left edge — the swap's label, like S2's labels, can run off the stage
+  there (582 of 1,982 swap selections, measured with an approximate width).
 
 ## Delivery order
 

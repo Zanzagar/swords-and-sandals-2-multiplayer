@@ -426,9 +426,11 @@ test("over whole bouts, with every foe selected in turn: each slot holds what th
             const model = modelOf(host, foeId);
             assert.equal(model.selectedId, foeId);
             // S4: a move no slot holds — a walk beside the ring, a rank arrow — is on the ring too.
+            // S6: and the weapon swap, the ring's ninth button.
             const shown = [
               ...model.slots.filter((slot) => slot.action).map((slot) => slot.action),
               ...model.moves.filter((move) => move.place !== "slot").map((move) => move.action),
+              ...(model.swap ? [model.swap.action] : []),
               ...model.offRing.map((entry) => entry.action)
             ];
             const ids = shown.map(identity);

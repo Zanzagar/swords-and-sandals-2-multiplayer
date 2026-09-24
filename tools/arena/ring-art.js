@@ -42,12 +42,21 @@ import { actionButtonOps } from "../../src/render/action-buttons.js";
  * @param {object|null} [options.textPack]  for the build's own glyphs on the buttons
  * @returns {object[]} frozen, one per button, in its order: the button plus
  *   `state` (`normal`|`hover`), `ops` (in the button's own pixels, `matrix`
- *   translations in twips, as `propOpsFor`'s) and `source` (`build`|`authored`)
+ *   translations in twips, as `propOpsFor`'s), `source` (`build`|`authored`)
+ *   and `centre` — the point of the button's own pixels its disc is centred
+ *   on, which the painter puts on the button's `x`/`y`: 860's and the
+ *   authored disc's are their origin, the swap's clip (116) centres its disc at
+ *   (18.25, 18.25) (S6)
+ *
+ * The weapon swap (S6) draws 116's frame for the weapon it swaps TO — the
+ * button's `usingBow`, the engine's — as `actionButtonOps` picks it.
  */
 export function ringButtonArt(buttons, { pack = null, facing = "right", hoverSlot = null, psyche = 1, ammo = null, textPack = null } = {}) {
   return Object.freeze((buttons ?? []).map((button) => {
     const state = button.slot === hoverSlot ? "hover" : "normal";
-    const { ops, source } = actionButtonOps(pack, button.verb, { state, facing, psyche, ammo, textPack, scale: button.scale });
-    return Object.freeze({ ...button, state, ops, source });
+    const { ops, source, centre } = actionButtonOps(pack, button.verb, {
+      state, facing, psyche, ammo, textPack, scale: button.scale, usingBow: button.usingBow === true
+    });
+    return Object.freeze({ ...button, state, ops, source, centre });
   }));
 }

@@ -438,12 +438,28 @@ export function unselectedButtonFrames(declaredFrames = SS2_ACTION_BUTTON.declar
  * THE SWAP BUTTON AND THE ITEMS ROW, both drawn from `inventory_buttons` (116),
  * which the icon pack already holds.
  *
- * - The swap slot: frame 10 when `using_bow`, 11 otherwise (frame 1 body
- *   0x2378d2, `+0x0ec8`/`+0x0ee4`); hidden when
+ * - The swap slot shows THE WEAPON IT SWAPS TO: frame 11 (a sword) when
+ *   `using_bow == true`, frame 10 (a bow and arrow) otherwise (frame 1 body
+ *   0x2378d2: `using_bow == true` at `+0x0eb5`..`+0x0ec0`, `Not`, `Not`, `If`
+ *   to `+0x0ee4` = `gotoAndStop(11)`; the fall-through `+0x0ec8` =
+ *   `gotoAndStop(10)`). The rollover's words agree: "Switch to melee weapon"
+ *   with the bow drawn (`+0x0f5e`), "Switch to ranged weapon" otherwise
+ *   (`+0x0f7f`). ~~frame 10 when `using_bow`, 11 otherwise~~ — INVERTED from
+ *   ab5feb5 until slice S6 re-read the branch (ring / s6-swap, 2026-09-24),
+ *   and the pack's own art agrees: 116 frame 10 holds a two-frame clip (a bow
+ *   and its string) and a long thin shape (an arrow), frame 11 one shape (a
+ *   sword). Hidden when
  *   `(ammo_left <= 0 && secondary_weapon != 0) || secondary_weapon == 0`
- *   (`+0x0e0a`..`+0x0e9d`); `onRelease` is `getphase("swap_weapons")`
+ *   (`+0x0e0a`..`+0x0e9d`) — the first arm hides it at NO ARROWS LEFT too,
+ *   bow drawn or not, which the engine's swap offer does not do (see
+ *   `docs/design/battle-ui.md`, S6); `onRelease` is `getphase("swap_weapons")`
  *   (`+0x1067`). Both frames place the background under Flash's greyscale
  *   matrix — that is the swap button's normal look, not a disabled one.
+ * - Every frame of 116 places its background, `battlebutton` (58), at
+ *   (18.25, 18.25) of its own pixels — 365 twips each way, measured in the
+ *   player's pack on all 49 frames — so the disc's CENTRE is there, where
+ *   860's is at its origin. `backgroundAt` carries it for a layout with no
+ *   pack; `test/render-action-buttons.test.js` compares it with a real one.
  * - The items row: `inventory_buttonN.gotoAndStop(hero.inventoryN)`, the item
  *   or spell ID as the frame (sprite 492 frame 1 body 0x50e55, `+0x0132`), in
  *   `inventory_overlay`, attached to the overlay at (0, -80), scale 60
@@ -453,7 +469,8 @@ export function unselectedButtonFrames(declaredFrames = SS2_ACTION_BUTTON.declar
 export const SS2_STRIP = Object.freeze({
   character: 116,
   linkage: "inventory_buttons",
-  swap: Object.freeze({ usingBow: 10, melee: 11, at: Object.freeze(["+0x0ec8", "+0x0ee4"]), verb: "swap_weapons" }),
+  swap: Object.freeze({ usingBow: 11, melee: 10, at: Object.freeze(["+0x0ec8", "+0x0ee4"]), verb: "swap_weapons" }),
+  backgroundAt: Object.freeze({ x: 18.25, y: 18.25 }),
   items: Object.freeze({ emptyFrame: 1, row: "inventory_overlay", rowAt: Object.freeze({ x: 0, y: -80, scale: 0.6 }) })
 });
 
@@ -717,6 +734,8 @@ export const SS2_GREYSCALE_MATRIX = Object.freeze([
 const DISABLED_ALPHA = 0.55;
 
 const IDENTITY = Object.freeze([1, 0, 0, 1, 0, 0]);
+/** A disc centred on its clip's origin: 860's and the authored button's. */
+const ORIGIN = Object.freeze({ x: 0, y: 0 });
 
 /** `outer` then `inner`, both `[a, b, c, d, tx, ty]` with tx/ty in TWIPS. */
 function compose(outer, inner) {
@@ -942,6 +961,10 @@ function drawButton(pack, entry, art, options) {
   };
   const items = [];
   flattenEntryFrame(pack, entry, art.frame, ctx, items);
+  // Where this clip centres its disc: its top-level background's translation.
+  const background = (entry.frames[art.frame - 1] ?? []).find((placement) => placement?.name === SS2_ACTION_BUTTON.background.instance);
+  const at = matrixOf(background?.matrix);
+  const centre = at ? Object.freeze({ x: at[4] / 20, y: at[5] / 20 }) : ORIGIN;
 
   // Shapes go through the props painter a RUN at a time, so a text placement
   // keeps its place in the paint order between them.
@@ -967,7 +990,7 @@ function drawButton(pack, entry, art, options) {
     }
   }
   flush();
-  return { ops: ops.length > 0 ? Object.freeze(ops) : null, counts: Object.freeze(counts) };
+  return { ops: ops.length > 0 ? Object.freeze(ops) : null, counts: Object.freeze(counts), centre };
 }
 
 /* ------------------------------------------------------------------ */
@@ -1130,7 +1153,12 @@ function mirrorPath(d) {
 
 /**
  * The build's art when the pack has ALL of it, the authored button otherwise —
- * with the answer's source, so a surface can say which it drew.
+ * with the answer's source, so a surface can say which it drew, and `centre`:
+ * the point of the button's own pixels its disc is centred on. 860 and the
+ * authored disc are centred on their origin; `inventory_buttons` (116, the
+ * swap and the items) puts its background at (18.25, 18.25) — read here off
+ * the drawn frame's own `battlebutton` placement, so a caller can put the
+ * disc, not the clip's corner, where it means the button to be.
  *
  * ► **WHOLE, NOT MERELY NON-EMPTY (S3, Codex review pass 2).** A frame whose
  *   icon or background the pack does not hold — a child clip or a shape
@@ -1144,6 +1172,6 @@ export function actionButtonOps(pack, verb, options = {}) {
   const drawing = buttonDrawingFor(pack, verb, options);
   const whole = drawing?.ops && drawing.counts.missingChildren === 0 && drawing.counts.shapesMissing === 0
     && drawing.counts.unsupported === 0;
-  if (whole) return Object.freeze({ ops: drawing.ops, source: "build" });
-  return Object.freeze({ ops: actionButtonFallbackOpsFor(verb, options), source: "authored" });
+  if (whole) return Object.freeze({ ops: drawing.ops, source: "build", centre: drawing.centre });
+  return Object.freeze({ ops: actionButtonFallbackOpsFor(verb, options), source: "authored", centre: ORIGIN });
 }

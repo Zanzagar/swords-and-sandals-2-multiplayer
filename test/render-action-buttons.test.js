@@ -209,8 +209,14 @@ test("the art for a verb: its facing's own frame, else the other facing's with `
   assert.deepEqual(actionButtonArtFor("power_attack", { facing: "left" }), { clip: "button", frame: 13, wired: true, extrapolated: false });
   assert.deepEqual(actionButtonArtFor("chargeright", { facing: "left" }), { clip: "button", frame: 12, wired: false, extrapolated: true });
   assert.deepEqual(actionButtonArtFor("psyche_up", { psyche: 2 }), { clip: "button", frame: 27, wired: true, extrapolated: false });
-  assert.deepEqual(actionButtonArtFor("swap_weapons", { usingBow: true }), { clip: "strip", frame: 10, wired: true, extrapolated: false });
-  assert.deepEqual(actionButtonArtFor("swap_weapons"), { clip: "strip", frame: 11, wired: true, extrapolated: false });
+  // THE SWAP BUTTON SHOWS THE WEAPON IT SWAPS TO (overlay frame 1 body 0x2378d2): `using_bow == true`
+  // branches to `+0x0ee4`, `gotoAndStop(11)`; anything else falls through to `+0x0ec8`,
+  // `gotoAndStop(10)` — and the rollover's own words agree, "Switch to melee weapon" with the bow drawn
+  // (`+0x0f5e`), "Switch to ranged weapon" otherwise (`+0x0f7f`). ~~10 with the bow, 11 without~~ —
+  // inverted until slice S6 re-read the branch (ring / s6-swap).
+  assert.deepEqual(actionButtonArtFor("swap_weapons", { usingBow: true }), { clip: "strip", frame: 11, wired: true, extrapolated: false });
+  assert.deepEqual(actionButtonArtFor("swap_weapons", { usingBow: false }), { clip: "strip", frame: 10, wired: true, extrapolated: false });
+  assert.deepEqual(actionButtonArtFor("swap_weapons"), { clip: "strip", frame: 10, wired: true, extrapolated: false }, "the melee weapon in hand, as every battle starts");
   assert.deepEqual(actionButtonArtFor("item", { itemId: 34 }), { clip: "strip", frame: 34, wired: true, extrapolated: false });
   assert.equal(actionButtonArtFor("item", { itemId: 1 }), null, "frame 1 is the empty slot the build hides");
   assert.equal(actionButtonArtFor("item"), null);
@@ -337,9 +343,9 @@ test("a placement's colour transform and a clip's own filter reach the ops", () 
   const pack = actionButtonPackFrom(syntheticPack());
   const normal = actionButtonOpsFor(pack, "normal_attack", { facing: "right" });
   assert.equal(normal[1].fillOpacity, 0.5, "frame 3's icon carries an alpha multiplier of 0.5");
-  // 116 frame 10: its background is greyed by its OWN filter — the swap
-  // button's normal look — and the icon beside it is not.
-  const swap = actionButtonOpsFor(pack, "swap_weapons", { usingBow: true });
+  // 116 frame 10 (the melee weapon in hand, so the button offers the bow): its background is
+  // greyed by its OWN filter — the swap button's normal look — and the icon beside it is not.
+  const swap = actionButtonOpsFor(pack, "swap_weapons", { usingBow: false });
   assert.equal(swap[0].fill, applyColourMatrix("#202020", SS2_GREYSCALE_MATRIX, 1).fill);
   assert.ok(swap[0].group, "the background's own filter is a group of what it holds");
   assert.equal(swap[1].group, undefined);
@@ -527,8 +533,19 @@ test("THE REAL PACK, ANY VINTAGE: the strip draws the swap button and every item
   assert.ok(pack && pack.strip, "icons.inventory_buttons is in every pack since the icons extractor");
   for (const usingBow of [true, false]) {
     const ops = actionButtonOpsFor(pack, "swap_weapons", { usingBow });
-    assert.ok(ops && ops.length > 0, `swap frame ${usingBow ? 10 : 11}`);
+    assert.ok(ops && ops.length > 0, `swap frame ${usingBow ? 11 : 10}`);
     assert.ok(ops.some((op) => op.group), "frames 10 and 11 grey their background with the build's own matrix");
+  }
+  // WHICH WEAPON EACH FRAME SHOWS, from the pack's own art rather than the branch that picks it: the
+  // frame drawn with the melee weapon in hand holds the one multi-frame child of the two — a bow and its
+  // string, relaxed and drawn — and the frame drawn with the bow up holds none (a single sword shape).
+  // (Slice S6; the two were swapped in `SS2_STRIP` until then.)
+  assert.equal(actionButtonInvoiceFor(pack, "swap_weapons", { usingBow: false }).childFrameAssumed, 1, "melee in hand: the bow is offered");
+  assert.equal(actionButtonInvoiceFor(pack, "swap_weapons", { usingBow: true }).childFrameAssumed, 0, "bow drawn: the sword is offered");
+  // Every frame of 116 centres its disc where `SS2_STRIP.backgroundAt` says, which a layout with no pack uses.
+  for (const [index, placements] of pack.strip.frames.entries()) {
+    const background = placements.find((placement) => placement.name === SS2_ACTION_BUTTON.background.instance);
+    assert.deepEqual([background.matrix[4] / 20, background.matrix[5] / 20], [SS2_STRIP.backgroundAt.x, SS2_STRIP.backgroundAt.y], `116 frame ${index + 1}`);
   }
   const drawn = [];
   for (let itemId = 2; itemId <= pack.strip.frames.length; itemId += 1) {
