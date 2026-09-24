@@ -50,6 +50,7 @@
  */
 
 import { sequenceBeatsFor } from "./clip-sequences.js";
+import { ss2ColossusYscaleAfter } from "../common/ss2-figure.js";
 
 export class TimelineError extends Error {
   constructor(message, options = {}) {
@@ -652,7 +653,9 @@ const FAMILIES = Object.freeze({
    * same six `Cast2`'s 21 and `Cast1`'s 23 round to. The POSES are authored — a
    * flex, arms driven down and out, feet planted wide — and the extracted rig's
    * own `colossus` clip overrides them. The caster's GROWTH is not in this
-   * schedule: it is the arm's `_yscale` write, not a frame of the clip.
+   * schedule: it is the arm's `_yscale` write, not a frame of the clip — and
+   * since 2026-09-24 it is drawn, tick by tick from this clip's first frame,
+   * by `figureYscaleAt`.
    */
   colossus: () => schedule("colossus", 6, [
     { at: 0, pose: {} },
@@ -667,7 +670,9 @@ const FAMILIES = Object.freeze({
    * the length is what it PLAYS: 2200-2216, 17 frames = 567 ms = 4.72 beats,
    * so FIVE = 600 ms. The POSES are authored — a crouch, drawn in — and the
    * extracted rig's own clip overrides them. The victim's SHRINK to 50% is the
-   * arm's `_yscale` snap, not a frame of the clip, and is not drawn here.
+   * arm's `_yscale` snap, not a frame of the clip, and is not drawn here — it
+   * is drawn by `figureYscaleAt` (since 2026-09-24), from this clip's first
+   * frame, which is the tick the build snaps it.
    */
   little_fat_kid: () => schedule("little_fat_kid", 5, [
     { at: 0, pose: {} },
@@ -1030,6 +1035,71 @@ export function figureFacingAt({ facing, turn = null, pendingTokens = [] }) {
   if (!turn || turn.actionToken === null || turn.actionToken === undefined) return facing;
   if (turn.at === "action-start") return facing;
   return pendingTokens.includes(turn.actionToken) ? turn.from : facing;
+}
+
+/**
+ * One tick of the build's frame clock: its onEnterFrame handlers run at the
+ * movie's 30 fps, and colossus's arm writes the scale once a tick.
+ */
+const SCALE_TICK_MS = 1000 / 30;
+
+/**
+ * HOW BIG A FIGURE IS DRAWN THIS FRAME — its `_yscale` as a percentage: the
+ * scene's `yscale`, or the size it has part-way through a colossus, a little
+ * fat kid or their expiry. Added 2026-09-24, when the owner watched a little
+ * fat kid land and the victim stay his own size.
+ *
+ * ► **THE TIMING IS THE BUILD'S, stage by stage** (`CommandKind.SCALE_CLIP`
+ *   in `src/adapter/presentation.js` works out each one):
+ *
+ *   - **little fat kid SNAPS at the victim's `little_fat_kid` clip.** The arm
+ *     starts that clip and writes 50 in the same tick, before any frame is
+ *     drawn (`+0x82a2`, `+0x83b0`-`+0x83d7`): the old size until the victim's
+ *     clip begins (`elapsedMs < 0`), 50 from its first frame.
+ *   - **colossus GROWS from the caster's `Colossus` clip**, a tick at a time by
+ *     the arm's own recurrence (`ss2ColossusYscaleAfter`): the first frame
+ *     already shows the first tick's value, because the once-block and the
+ *     first write run in one call, and it settles within nine ticks — 300 ms,
+ *     inside the clip. With no clock to read (the caster's own clip is not the
+ *     one running), the growth is over and `to` is drawn.
+ *   - **an expiry is HELD until its action has finished**, because
+ *     `check_spells` runs in `nextphase`: the old size while the token is
+ *     pending, `yscale` after — `figureFacingAt`'s rule for a phase-advance
+ *     turn, and for its reason.
+ *
+ *   One action can carry a cast AND an expiry for one figure — a little fat
+ *   kid on a victim whose own colossus runs out that phase — and then the
+ *   cast is drawn while the action runs and the restore once it is over.
+ *
+ * A change with no token (a caller that supplied no action boundaries) is
+ * drawn at once, as a turn with none is.
+ *
+ * @param {number|null} options.yscale the scene actor's `yscale` — already the size AFTER any change
+ * @param {object} [options.rescale] the scene actor's `rescale`, or null
+ * @param {Array<number>} [options.pendingTokens] the tokens the surface is still waiting on
+ * @param {number|null} [options.elapsedMs] how long THIS figure's clip for the
+ *   rescale's action has been running — negative before it begins, null when
+ *   the running clip is not that action's
+ * @returns {number|null} the `_yscale` to draw, or the scene's own when nothing is changing
+ */
+export function figureYscaleAt({ yscale, rescale = null, pendingTokens = [], elapsedMs = null }) {
+  if (!Array.isArray(pendingTokens)) {
+    throw new TimelineError("figureYscaleAt needs the list of tokens the surface is still waiting on.");
+  }
+  if (!rescale || !Array.isArray(rescale.stages) || rescale.stages.length === 0) return yscale;
+  if (rescale.actionToken === null || rescale.actionToken === undefined) return yscale;
+  if (!pendingTokens.includes(rescale.actionToken)) return yscale;
+  const start = rescale.stages.findLast((stage) => stage.at !== "phase-advance") ?? null;
+  const advance = rescale.stages.find((stage) => stage.at === "phase-advance") ?? null;
+  if (start === null) return advance.from;
+  const clock = Number.isFinite(elapsedMs) ? elapsedMs : null;
+  if (clock !== null && clock < 0) return start.from;
+  if (start.growth && clock !== null) {
+    // Tick 1 is the clip's first frame. The recurrence settles on the
+    // adapter's own `to` (it ran the same arithmetic for the whole phase).
+    return ss2ColossusYscaleAfter(start.from, Math.floor(clock / SCALE_TICK_MS) + 1, start.growth.newscale);
+  }
+  return start.to;
 }
 
 /**

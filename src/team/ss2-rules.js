@@ -6412,7 +6412,12 @@ export const SS2_TIMED_BUFFS = Object.freeze({
  *   SHRINKS — and little fat kid snaps to 50), the positive `_xscale` that
  *   loses the facing sign, and the `blendMode` tints `check_spells` applies
  *   while a counter runs (`invert` on the legs, `difference` on three arm
- *   parts). None of them feeds a number here.
+ *   parts). None of them feeds a number here. **The scale is DRAWN since
+ *   2026-09-24** — worked out from this file's cast events and counters by
+ *   `CommandKind.SCALE_CLIP` in `src/adapter/presentation.js`, which restores
+ *   it at either expiry to the entry size, the way `check_spells` restores
+ *   the stats from `backup_*`, and NOT to the shared `oldscale` (see there for
+ *   why and what it measured). The facing sign and the tints are still not.
  *
  * ► **COLOSSUS'S DRIFT IS POSITION, AND IT IS DEFERRED — named, not missed.**
  *   Because the growth ASSIGNS (a build bug: no `Add2` at `+0x8123`), the

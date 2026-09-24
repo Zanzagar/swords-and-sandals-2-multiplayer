@@ -76,8 +76,10 @@
 
 import { EliminationEvent } from "../team/elimination.js";
 import { ss2ArrowFrameFor, ss2RangedWeaponFor } from "../team/ss2-weapon-table.js";
-import { SS2_ARENA, ss2FacingToAct, ss2PhysicalSize } from "../team/ss2-rules.js";
-import { SS2_FIGURE_HALF_WIDTH } from "../common/ss2-figure.js";
+import { SS2_ARENA, SS2_STAT_SPELLS, Ss2ActionType, ss2FacingToAct, ss2PhysicalSize } from "../team/ss2-rules.js";
+import {
+  SS2_COLOSSUS_NEWSCALE, SS2_FIGURE_HALF_WIDTH, SS2_LITTLE_FAT_KID_YSCALE, ss2ColossusYscaleAfter
+} from "../common/ss2-figure.js";
 import { BATTLE_RESULT_PENDING_TYPE } from "../team/settlement.js";
 import { bindingPlanFor, resultLabelsFor } from "./slot-layout.js";
 import { CANONICAL_FACING_LEFT } from "./state-bridge.js";
@@ -244,6 +246,70 @@ export const CommandKind = Object.freeze({
    *   (`test/render-facing.test.js`, the shove at the man behind).
    */
   FACE_CLIP: "face-clip",
+  /**
+   * A gladiator's clip changes SIZE — its `_yscale`, which the build writes at
+   * battle entry and then only in two spell arms and their expiry.
+   *
+   * ► **ADDED 2026-09-24, BECAUSE THE OWNER WATCHED A LITTLE FAT KID LAND AND
+   *   THE VICTIM STAY HIS OWN SIZE.** The resolver applied both spells' stats
+   *   from the day they were built (d551c57), and `yscale` reached a scene from
+   *   the construction's `place-clip` alone, so a size change was never drawn.
+   *
+   * ► **THE CLIP SCALE IS NOT ENGINE STATE**, and `SS2_STAT_SPELLS` says so:
+   *   nothing in the resolver reads it, and nothing here adds it to the
+   *   projection (which `combatStateHash` covers). It is worked out HERE, from
+   *   what the engine does expose — the cast event (`counter`, `targetId`) and
+   *   the two counters' expiry between the batch's two projections — and it is
+   *   the build's own arithmetic, `src/common/ss2-figure.js`:
+   *
+   *   - **little fat kid** (`counter: "spell_little_fat_kid"`, on its VICTIM):
+   *     `at: "action-start"`, a snap to 50 in the tick the victim's
+   *     `little_fat_kid` clip is started;
+   *   - **colossus** (`counter: "spell_colossus"`, on its CASTER):
+   *     `at: "action-start"`, carrying `growth` — the arm's own per-tick
+   *     recurrence, which `figureYscaleAt` in `src/render/timeline.js` draws
+   *     from the first frame of `Colossus` — and `to`, where it settles (150
+   *     from any start the build can reach);
+   *   - **either counter's expiry**: `at: "phase-advance"`, a restore, which
+   *     the painter holds back until the action that expired it has finished
+   *     — `check_spells` runs in `nextphase`, as `changeCombatants`' turn does
+   *     (`CommandKind.FACE_CLIP`).
+   *
+   *   A change that leaves the size where it was (a colossus recast at 150) is
+   *   not emitted, as a batch that turns nobody emits no `face-clip`.
+   *
+   * ► **THE RESTORE IS TO THE SIZE HE ENTERED AT, NOT TO THE BUILD'S
+   *   `oldscale` — A DIVERGENCE, DECIDED HERE AND NAMED.** In the build both
+   *   spells capture `oldscale` from the scale they find and BOTH expiries
+   *   restore from that one field (map, `cast_colossus`, VERIFIED; re-read off
+   *   the frame-52 dump for this edit: `+0x8084`, `+0x82b7`, `+0x2485`,
+   *   `+0x2513`), so a fighter who carried both ends at the later cast's
+   *   capture, and one recast while resized keeps that size FOR GOOD. **The
+   *   engine restores the stats the same two expiries touch from `backup_*`,
+   *   the fight-start values, never from a capture** (`check_spells`
+   *   `+0x24a0`, `+0x252e`; `SS2_TIMED_SPELL_EXPIRY`): one slot, the last
+   *   writer wins, and ANY expiry resets it to the start. The drawn size
+   *   follows the engine's rule: the scale is one slot the two spells write,
+   *   and any expiry of either resets it to the entry size, exactly when the
+   *   engine resets their strength and attack — so a figure is never drawn
+   *   shrunken once the engine has put him back at full strength and full
+   *   `physical_size`. (Bloodlust writes strength and no scale, in the build
+   *   as here.) Measured before this was decided, over seeds 1-25 of the
+   *   arena's own host: the build's `oldscale` left EVERY front-liner of a
+   *   `?items=crowd` 3v3 (50 of 50) at 50 for the rest of the bout — each is
+   *   shrunk by a second foe's little fat kid while already small — and 7 of
+   *   25 `?items=42,33` 2v2 bouts ended with a gladiator stuck at 150. Neither
+   *   happens in 1v1 with one of each item, where the two rules agree unless
+   *   the two spells overlap on one fighter. Reproducing the build is the
+   *   restore's one line (`scaleRestoresFor`) plus a remembered capture.
+   *
+   * It carries `from` and `to` for the reason `face-clip` does: every command
+   * here is self-describing. Where `from` came from is the binder's memory of
+   * each resized clip (`createPresentationBinder`); a clip no spell has
+   * resized is at the size the build enters a gladiator at, `80 +
+   * round(strength / 1.5)` at his BUILT strength (`builtYscaleOf`).
+   */
+  SCALE_CLIP: "scale-clip",
   BIND_GLOBALS: "bind-globals",
   CLIP_GOTO: "clip-goto",
   PANEL_REFRESH: "panel-refresh",
@@ -1005,11 +1071,24 @@ function resourceValueOf(combatant, name) {
  *   between two strength-9 gladiators there are ~3 units between his back and
  *   the target's front — the stop now lands in that gap, on the target, where
  *   it used to land on the front-liner.
+ *
+ * ► **AND "DRAWN" MEANS THE CLIP'S `_yscale`, NOT `physical_size`, since
+ *   2026-09-24.** The two are the same number at battle entry and part company
+ *   the moment colossus or little fat kid lands: the build snaps the victim's
+ *   clip to 50 and grows the caster's to 150, while `battlevalues` recomputes
+ *   `physical_size` from the new strength (83 and 98 at strength 9). The walk
+ *   clamp and the reach keep `physical_size` — they are the engine's, and the
+ *   build's — but an arrow stops against the body ON SCREEN, so every width
+ *   here is read at `yscaleOf`, the binder's drawn size (`SCALE_CLIP`). A
+ *   gladiator no spell has resized draws at `80 + round(strength / 1.5)` of
+ *   his BUILT strength, which is his live `physical_size` unless a stat spell
+ *   moved it — so bloodlust, which writes strength and no scale, no longer
+ *   moves his stop either.
  */
-function stopShortFor(shooter, target, combatants) {
-  const size = ss2PhysicalSize(target);
+function stopShortFor(shooter, target, combatants, yscaleOf = builtYscaleOf) {
+  const size = yscaleOf(target);
   if (!Number.isFinite(size) || size <= 0) return 0;
-  const surface = drawnHalfWidthOf(target);
+  const surface = drawnHalfWidthOf(target, yscaleOf);
   if (!Number.isFinite(shooter?.x) || !Number.isFinite(target?.x)) return surface;
   const direction = target.x >= shooter.x ? 1 : -1;
   const terminal = target.x - direction * surface;
@@ -1020,14 +1099,165 @@ function stopShortFor(shooter, target, combatants) {
     // Depth first: a body in another rank is not in the way of anything, and
     // `null` on either end means this rule set models no depth at all.
     if (Number.isFinite(other.y) && Number.isFinite(target.y) && other.y !== target.y) continue;
-    if (Math.abs(other.x - terminal) <= drawnHalfWidthOf(other)) return 0;
+    if (Math.abs(other.x - terminal) <= drawnHalfWidthOf(other, yscaleOf)) return 0;
   }
   return surface;
 }
 
-/** How far a gladiator's drawn body reaches either side of its `x`, at its own size. */
-function drawnHalfWidthOf(combatant) {
-  return SS2_FIGURE_HALF_WIDTH * ss2PhysicalSize(combatant) / 100;
+/** How far a gladiator's drawn body reaches either side of its `x`, at its drawn size. */
+function drawnHalfWidthOf(combatant, yscaleOf = builtYscaleOf) {
+  return SS2_FIGURE_HALF_WIDTH * yscaleOf(combatant) / 100;
+}
+
+/* ------------------------------------------------------------------ */
+/* The clip's size: colossus, little fat kid, and their expiry         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The two counters whose `== 0` block in `check_spells` restores the clip's
+ * scale, in the build's own order: `spell_colossus` (`+0x2485`), then
+ * `spell_little_fat_kid` (`+0x2513`). Swift sandals and bloodlust expire too,
+ * and write no scale.
+ */
+const SCALE_COUNTERS = Object.freeze([
+  SS2_STAT_SPELLS[Ss2ActionType.CAST_COLOSSUS].counter,
+  SS2_STAT_SPELLS[Ss2ActionType.CAST_LITTLE_FAT_KID].counter
+]);
+
+/**
+ * The size the build ENTERS a gladiator at — root frame 221's `_xscale =
+ * _yscale = 80 + round(strength / 1.5)` (`+0x061e`-`+0x06a1`) — at the
+ * strength he was BUILT with: his `backup_strength` where a stat spell
+ * declared one (`backup_char` runs before the bout and never during it),
+ * his strength otherwise, which then never changes. The formula is the rule
+ * set's (`ss2PhysicalSize`), called rather than restated.
+ */
+function builtYscaleOf(combatant) {
+  const strength = resourceValueOf(combatant, "backup_strength") ?? combatant?.stats?.strength ?? 0;
+  return ss2PhysicalSize({ stats: { strength } });
+}
+
+/**
+ * The binder's memory of every clip a spell has resized and nothing has reset,
+ * as a mutable working copy: combatant id -> its `_yscale`. A gladiator absent
+ * from it is at the size he entered at, `builtYscaleOf`.
+ */
+function clipScaleState(clipScales) {
+  const state = new Map();
+  const entries = clipScales instanceof Map ? clipScales.entries() : Object.entries(clipScales ?? {});
+  for (const [combatantId, yscale] of entries) {
+    if (Number.isFinite(yscale)) state.set(combatantId, yscale);
+  }
+  return state;
+}
+
+function frozenClipScales(state) {
+  return Object.freeze(Object.fromEntries(state));
+}
+
+/**
+ * The `scale-clip` a stat spell's cast makes, or null: colossus on its caster,
+ * little fat kid on its victim. **Detected by the event's `counter`** — the
+ * build's own clip field, which only the stat spells carry — never by parsing
+ * the type, the rule every case in this file follows; swift sandals and
+ * bloodlust carry a counter too and write no scale, so they return null.
+ *
+ * The resolver runs a stat spell's once-block on every cast, so every cast
+ * resizes — a recast included, and a little fat kid on a colossus, who then
+ * shrinks from 150 as the engine's strength is halved over the tripled value.
+ * Null when the size does not change.
+ */
+function castScaleFor(layout, combatants, scales, event) {
+  const counter = event.counter;
+  if (!SCALE_COUNTERS.includes(counter)) return null;
+  const bearer = combatants.get(event.targetId);
+  const placement = layout.byCombatantId?.get(event.targetId)
+    ?? layout.placements?.find((entry) => entry.combatantId === event.targetId);
+  if (!bearer || !placement) return null;
+  const from = scales.get(bearer.id) ?? builtYscaleOf(bearer);
+  const colossus = counter === SS2_STAT_SPELLS[Ss2ActionType.CAST_COLOSSUS].counter;
+  // Colossus's phase ends through the stall watchdog, and its arm writes the
+  // scale on every one of those ticks: where it settles is the recurrence run
+  // that long (150 from any start between 1 and 450). Little fat kid's first
+  // tick completes it at 50, whatever it started at.
+  const to = colossus
+    ? ss2ColossusYscaleAfter(from, SS2_STAT_SPELLS[Ss2ActionType.CAST_COLOSSUS].watchdogTicks)
+    : SS2_LITTLE_FAT_KID_YSCALE;
+  scales.set(bearer.id, to);
+  if (to === from) return null;
+  return Object.freeze({
+    kind: CommandKind.SCALE_CLIP,
+    sequence: event.sequence,
+    combatantId: bearer.id,
+    instancePath: placement.instancePath,
+    from,
+    to,
+    counter,
+    at: "action-start",
+    // Only on colossus: the arm's `newscale`, which each tick's
+    // `ceil((newscale - _yscale) / 2)` chases. ► **ITS 2 px-A-TICK DRIFT
+    //   (`+0x8139`-`+0x8191`) IS NOT HERE AND IS NOT DRAWN** — it is POSITION,
+    //   engine state, and deferred by decision (`SS2_STAT_SPELLS`). Modelled,
+    //   it would be the resolver's move, reach this stream as a `move-clip`
+    //   riding the `Colossus` clip, and be drawn tick by tick beside the
+    //   growth in `figureXAt`.
+    ...(colossus ? { growth: Object.freeze({ newscale: SS2_COLOSSUS_NEWSCALE }) } : {})
+  });
+}
+
+/**
+ * A `scale-clip` for every colossus or little fat kid counter that EXPIRED in
+ * the batch and changed its bearer's size — a counter at 0 or above on the
+ * projection the batch started from and at the build's -1 on the one it ended
+ * at (`check_spells` writes -1 in the same block as the restore, `+0x24ba`,
+ * `+0x2548`). Each restores the clip to the size he ENTERED at, the way the
+ * engine restores the two stats from `backup_*` — NOT to the build's shared
+ * `oldscale`; see `CommandKind.SCALE_CLIP` for that decision and its
+ * measurement. In `check_spells`' order; the second of two in one phase finds
+ * nothing left to change and is not emitted.
+ *
+ * `sequence` is the batch's highest and the command is marked
+ * `at: "phase-advance"`, because `check_spells` runs in `nextphase`: the
+ * painter holds the old size until the action has finished.
+ *
+ * **Emitted only when the caller carries in the projection the batch STARTED
+ * from** (`before`), for `facingChangesFor`'s reason. Exact for a batch of one
+ * action — how `battle-host` drains; a batch that spanned an expiry AND a
+ * recast of the same counter would see neither end of the expiry.
+ *
+ * A bearer the binder never saw resized (a stream resumed mid-bout) is taken
+ * to be at `builtYscaleOf` already, so nothing is emitted for him.
+ */
+function scaleRestoresFor(layout, before, wire, scales, sequence) {
+  if (before === null) return [];
+  const started = combatantIndex(before);
+  const ended = combatantIndex(wire);
+  const restores = [];
+  for (const placement of layout.placements) {
+    const was = started.get(placement.combatantId);
+    const now = ended.get(placement.combatantId);
+    if (!was || !now) continue;
+    for (const counter of SCALE_COUNTERS) {
+      const from = resourceValueOf(was, counter);
+      const to = resourceValueOf(now, counter);
+      if (!(from !== null && from >= 0 && to !== null && to < 0)) continue;
+      const restored = builtYscaleOf(now);
+      const yscale = scales.get(placement.combatantId) ?? restored;
+      scales.delete(placement.combatantId);
+      if (yscale === restored) continue;
+      restores.push(Object.freeze({
+        kind: CommandKind.SCALE_CLIP,
+        sequence,
+        combatantId: placement.combatantId,
+        instancePath: placement.instancePath,
+        from: yscale,
+        to: restored,
+        counter,
+        at: "phase-advance"
+      }));
+    }
+  }
+  return restores;
 }
 
 /**
@@ -1198,7 +1428,7 @@ function bouldersFor(combatants, event) {
   return out;
 }
 
-function projectileFor(wire, combatants, event) {
+function projectileFor(wire, combatants, event, yscaleOf = builtYscaleOf) {
   const projectile = PROJECTILE_DIRECTIONS.get(Number(event.attackDirection));
   if (!projectile) return null;
   const shooter = combatants.get(event.actorId);
@@ -1235,9 +1465,11 @@ function projectileFor(wire, combatants, event) {
      *
      * ~~The target's `physical_size`~~ until 2026-09-23: the walk clamp's
      * number, which left the arrow ~45 units in front of a body drawn at the
-     * build's size.
+     * build's size. **At its DRAWN size since 2026-09-24** — the clip's
+     * `_yscale`, which a little fat kid halves — so the arrow lands on the
+     * body on screen (`stopShortFor`).
      */
-    targetSize: stopShortFor(shooter, target, combatants),
+    targetSize: stopShortFor(shooter, target, combatants, yscaleOf),
     // ► **`y` IS ARENA DEPTH AND IS CARRIED EVEN WHEN NULL**, the same rule the
     //   combatant projection follows for `x` and `y`: present on every command
     //   so two surfaces commit to one shape, and `null` meaning "this rule set
@@ -1645,15 +1877,22 @@ function assertActionBoundaries(actionBoundaries) {
  * @param {object} [options.before] `toTeamWireState(battle)` taken BEFORE the
  *   batch's actions were applied. Carried in by the caller for the reason the
  *   boundaries are: it is where a `face-clip` is detected from, and without it
- *   no facing change is reported — see `CommandKind.FACE_CLIP`.
- * @returns {{ commands: object[], nextSequence: number, actionTokens: number[] }}
+ *   no facing change is reported — see `CommandKind.FACE_CLIP`. A spell's
+ *   EXPIRY (`scale-clip` at the phase advance) is detected from it too.
+ * @param {object} [options.clipScales] the clips a spell has resized and no
+ *   expiry has reset, `{ [combatantId]: yscale }` (or a Map) — the previous
+ *   batch's returned `clipScales`. PRESENTATION state, never combat state: the
+ *   build keeps `_yscale` on the clip, not on the character, and nothing the
+ *   resolver reads or hashes holds it. The binder threads it.
+ * @returns {{ commands: object[], nextSequence: number, actionTokens: number[], clipScales: object }}
  */
 export function presentResolvedEvents(wire, {
   layout,
   bindings = PLACEHOLDER_ANIMATION_BINDINGS,
   fromSequence = 0,
   actionBoundaries = [],
-  before = null
+  before = null,
+  clipScales = null
 } = {}) {
   assertCombatProjection(wire);
   if (!layout || typeof layout.placementFor !== "function") {
@@ -1676,6 +1915,10 @@ export function presentResolvedEvents(wire, {
     return token;
   };
   const combatants = combatantIndex(wire);
+  // Every clip a spell has resized, and to what — carried in from the last
+  // batch and written as this one's casts and expiries land. See `SCALE_CLIP`.
+  const scales = clipScaleState(clipScales);
+  const yscaleOf = (combatant) => scales.get(combatant?.id) ?? builtYscaleOf(combatant);
   // The two ends of the batch, for a move whose endpoints the event does not
   // carry — the ghost strike's blink. See `displacementOf`.
   const projections = { before: before ? combatantIndex(before) : null, after: combatants };
@@ -1757,6 +2000,10 @@ export function presentResolvedEvents(wire, {
     // resolver's own reported fact, and a scene that drew a figure where the
     // resolver says it is NOT is the same failure as swallowing an `unmapped`.
     const depthMovement = depthMovementFor(layout, event);
+    // A colossus or a little fat kid resizes its bearer, whatever clip the
+    // bindings choose — the size is state, not a label, for `movementFor`'s
+    // reason. Worked out here, pushed after the clips below.
+    const resized = castScaleFor(layout, combatants, scales, event);
     if (!chosen) {
       commands.push(Object.freeze({
         kind: CommandKind.UNMAPPED,
@@ -1783,6 +2030,8 @@ export function presentResolvedEvents(wire, {
       // The figure still moves. See `movementFor`.
       if (movement) commands.push(movement);
       if (depthMovement) commands.push(depthMovement);
+      // And still changes size.
+      if (resized) commands.push(resized);
       continue;
     }
     const actorPlacement = layout.placementFor(event.actorId);
@@ -1814,7 +2063,7 @@ export function presentResolvedEvents(wire, {
     // frame (`+0x6d59`) — and a surface that wants that fidelity has the
     // actor's timeline in hand to take the cue from. Ordering the two commands
     // is as far as this vocabulary can carry it.
-    const projectile = projectileFor(wire, combatants, event);
+    const projectile = projectileFor(wire, combatants, event, yscaleOf);
     if (projectile) commands.push(projectile);
     // The fireball leaves in the same place in the order, and in the build's:
     // `gotoAndPlay("Cast1")` at `+0x90f4`, the `attachMovie` at `+0x9246` in the
@@ -1850,6 +2099,11 @@ export function presentResolvedEvents(wire, {
         })
       }));
     }
+    // A colossus or a little fat kid resizes its bearer's clip, AFTER the clip
+    // it plays, which is the build's order in both arms: `gotoAndPlay` first
+    // (`+0x806f`, `+0x82a2`), then `oldscale` and the scale (`+0x8084`,
+    // `+0x82b7`). See `CommandKind.SCALE_CLIP`.
+    if (resized) commands.push(resized);
     // Totality, the same rule `vanillaWritesForResolvedAction` step 2 applies:
     // every combatant whose panel could be stale is refreshed, not only the
     // ones the event names. An event names one actor and at most one target,
@@ -1880,6 +2134,12 @@ export function presentResolvedEvents(wire, {
   // `positionChangesFor`. A batch that moved nobody unannounced adds nothing.
   commands.push(...positionChangesFor(layout, before ?? null, wire, commands, nextSequence));
 
+  // A colossus or little fat kid that ran out restores its bearer's size — in
+  // `check_spells`, which `nextphase` runs BEFORE `changeCombatants` turns
+  // anybody (`+0x3271`/`+0x3289` against `+0x3638`/`+0x365f`), so before the
+  // turns below. See `scaleRestoresFor`.
+  commands.push(...scaleRestoresFor(layout, before ?? null, wire, scales, nextSequence));
+
   // LAST, after every clip the batch plays, because that is WHEN it happens:
   // the build turns its gladiators in `changeCombatants` at the phase advance,
   // once the action's clips have reported. See `CommandKind.FACE_CLIP`. A batch
@@ -1904,7 +2164,10 @@ export function presentResolvedEvents(wire, {
     nextSequence,
     // The distinct tokens this batch carried, in order, so a gate can register
     // them without rescanning the commands.
-    actionTokens: Object.freeze(tokensSeen)
+    actionTokens: Object.freeze(tokensSeen),
+    // Every clip a spell has resized, as the batch left it — the next batch's
+    // `clipScales`. See `SCALE_CLIP`.
+    clipScales: frozenClipScales(scales)
   });
 }
 
@@ -1926,10 +2189,20 @@ export function presentResolvedEvents(wire, {
  * detected against. The binder does not remember the last wire it was handed
  * to stand in for it — that would be combat state held here, and the first
  * drain would have nothing to compare against.
+ *
+ * ► **WHAT IT DOES REMEMBER, since 2026-09-24: each resized clip's
+ *   `_yscale`** (`clipScales`, see `CommandKind.SCALE_CLIP`). That is the
+ *   build's CLIP field, not the character's, so it is not combat state and is
+ *   not in the projection — and which spell's size is standing depends on the
+ *   ORDER of casts and expiries, which no single projection can say (a little
+ *   fat kid still counting after a colossus's expiry reset him is drawn at his
+ *   entry size, one cast after it at 50). So the binder keeps it, as it keeps
+ *   its cursor, and every `scale-clip` still carries both ends.
  */
 export function createPresentationBinder({ layout, bindings = PLACEHOLDER_ANIMATION_BINDINGS } = {}) {
   let cursor = 0;
   const actionBoundaries = [];
+  let clipScales = null;
   return Object.freeze({
     get sequence() {
       return cursor;
@@ -1947,14 +2220,20 @@ export function createPresentationBinder({ layout, bindings = PLACEHOLDER_ANIMAT
         actionBoundaries.push(actionBoundary);
       }
       const result = presentResolvedEvents(wire, {
-        layout, bindings, fromSequence: cursor, actionBoundaries, before
+        layout, bindings, fromSequence: cursor, actionBoundaries, before, clipScales
       });
       cursor = result.nextSequence;
+      clipScales = result.clipScales;
       return result.commands;
+    },
+    /** Every clip a spell has resized and nothing has reset, `{ [combatantId]: yscale }`. */
+    get clipScales() {
+      return clipScales ?? Object.freeze({});
     },
     reset() {
       cursor = 0;
       actionBoundaries.length = 0;
+      clipScales = null;
     }
   });
 }

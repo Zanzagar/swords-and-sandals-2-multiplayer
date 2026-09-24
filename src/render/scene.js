@@ -36,6 +36,11 @@
  *     construction's `facing` was the only one a scene ever held, so every
  *     turn the resolver made was drawn facing the old way. It carries no time
  *     either; when the turn is DRAWN is `figureFacingAt`'s in `timeline.js`.
+ *
+ *     **And `scale-clip` (2026-09-24) RESIZES one** — colossus, little fat
+ *     kid and their expiry, which until then left every figure at its
+ *     construction size. No time again: when and how fast the size changes is
+ *     `figureYscaleAt`'s.
  * - so a scene holds two kinds of field: **bound** ones, which came from a
  *   command and may never be invented here, and **presentational** ones, which
  *   are this module's own and are marked as such.
@@ -77,6 +82,7 @@ const HANDLED = Object.freeze([
   "move-clip",
   "move-clip-depth",
   "face-clip",
+  "scale-clip",
   "fire-projectile",
   "attach-effect",
   "bind-globals",
@@ -132,7 +138,19 @@ const EMPTY_ACTOR = Object.freeze({
    * actor's turn to the foe he aims at, 2026-09-24) holds nothing: it is drawn
    * from the start of its action.
    */
-  turn: null
+  turn: null,
+  /**
+   * The size change this actor is in the middle of, from the last
+   * `scale-clip`s, or null — colossus, little fat kid, and their expiry
+   * (added 2026-09-24). `yscale` above is already the size AFTER them — the
+   * fold is not a tween, exactly as `x` is already the destination — and this
+   * carries what `figureYscaleAt` in `timeline.js` needs to draw the change
+   * at the build's moment: `{ sequence, actionToken, stages }`, one stage per
+   * `scale-clip` of ONE action, in stream order, each `{ from, to, at }` and a
+   * colossus's `growth`. A stale one whose action has finished draws
+   * `yscale`, as a stale `turn` draws `facing`.
+   */
+  rescale: null
 });
 
 function frozenActor(actor) {
@@ -468,6 +486,50 @@ export function applyCommands(scene, commands) {
             // Only when present, so a phase-advance turn folds exactly as it
             // always has. See `figureFacingAt`.
             ...(command.at === "action-start" ? { at: command.at } : {})
+          })
+        });
+        break;
+      }
+
+      case "scale-clip": {
+        const actor = actorFor(actors, command.combatantId);
+        // ONLY `xscale`, `yscale` and `rescale`, spelled out for the reason
+        // `move-clip`'s fold is. **Copied, never computed**: the command carries
+        // both ends, worked out by the adapter from the engine's cast and expiry
+        // (`CommandKind.SCALE_CLIP`), so this fold holds no `oldscale` and does
+        // no arithmetic.
+        //
+        // ► **`xscale` KEEPS ITS SIGN.** The build writes a POSITIVE `_xscale`
+        //   (`_xscale = _yscale`, `+0x8124`, `+0x837a`, `+0x2485`), which is how
+        //   it loses a villain's mirrored facing for good (map, `cast_colossus`,
+        //   "THE FACING SIGN IS LOST"). That loss is NOT reproduced: the sign
+        //   here is the construction's mirror and the painter faces a figure by
+        //   `facing`, which only `face-clip` moves — the owner's rule for a
+        //   quirk the build applies to one side only (HANDOFF.md, 2026-09-22).
+        //
+        // `placed` is deliberately NOT set true, as in `move-clip`.
+        const signed = Number.isFinite(actor.xscale) && actor.xscale < 0 ? -command.to : command.to;
+        const stage = Object.freeze({
+          from: command.from,
+          to: command.to,
+          at: command.at === "phase-advance" ? "phase-advance" : "action-start",
+          ...(command.growth && typeof command.growth === "object" ? { growth: Object.freeze({ ...command.growth }) } : {})
+        });
+        const token = command.actionToken ?? null;
+        // One action's stages accumulate — a little fat kid on a victim whose
+        // own colossus runs out in the same phase shrinks him at the cast and
+        // restores him at the phase advance — and the next action's replace them.
+        const earlier = actor.rescale && token !== null && actor.rescale.actionToken === token
+          ? actor.rescale.stages
+          : [];
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          xscale: signed,
+          yscale: command.to,
+          rescale: Object.freeze({
+            sequence: command.sequence,
+            actionToken: token,
+            stages: Object.freeze([...earlier, stage])
           })
         });
         break;

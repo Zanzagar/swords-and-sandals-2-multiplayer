@@ -51,6 +51,7 @@ import {
   figureYAt,
   figureXAt,
   figureFacingAt,
+  figureYscaleAt,
   paintFigure,
   paintShadow,
   paintExtractedFigure,
@@ -1143,18 +1144,42 @@ function prepareEntry(entry) {
 }
 
 /**
+ * The `_yscale` a gladiator is DRAWN at, this frame — the scene's, or the size
+ * it has part-way through a colossus, a little fat kid or their expiry
+ * (`figureYscaleAt`, 2026-09-24). Every size read in this file goes through
+ * here, so the figure, its face and blood, the arrows it looses and takes, and
+ * the body a lob clears are one size. `extraPending` are tokens a step has
+ * folded but not yet registered — `beginStep` flies its arrows first.
+ */
+function drawnYscaleOf(combatantId, now = performance.now(), extraPending = []) {
+  const actor = scene.actors[combatantId];
+  if (!actor) return null;
+  const rescale = actor.rescale ?? null;
+  const running = playing.get(combatantId);
+  return figureYscaleAt({
+    yscale: actor.yscale,
+    rescale,
+    pendingTokens: extraPending.length > 0 ? [...pendingTokens, ...extraPending] : pendingTokens,
+    elapsedMs: running && rescale && running.token === rescale.actionToken && Number.isFinite(running.startedAt)
+      ? now - running.startedAt
+      : null
+  });
+}
+
+/**
  * Every placed, living gladiator but these two, as `{x, y, yscale}` — the
  * bodies a drawn lob must pass over. Positions are the scene's (this batch
- * already folded), life is the wire's.
+ * already folded), life is the wire's, and the size is the one each is DRAWN
+ * at while the shot flies (`drawnYscaleOf`).
  */
-function bodiesBesides(...ids) {
+function bodiesBesides(ids, extraPending = []) {
   const living = combatantsById();
   const bodies = [];
   for (const id of scene.drawOrder) {
     if (ids.includes(id)) continue;
     const actor = scene.actors[id];
     if (!actor?.placed || !Number.isFinite(actor.x) || living.get(id)?.alive === false) continue;
-    bodies.push({ x: actor.x, y: actor.y, yscale: actor.yscale });
+    bodies.push({ x: actor.x, y: actor.y, yscale: drawnYscaleOf(id, performance.now(), extraPending) });
   }
   return bodies;
 }
@@ -1190,8 +1215,8 @@ function beginStep(step) {
         // `attacker._yscale * 1.5 + 5`: the build writes the launch height in
         // terms of the caster's own size, so the caster's size is handed over —
         // and the target's, whose shoulder the burst is drawn on.
-        casterYscale: scene.actors[shotRecord.combatantId]?.yscale ?? null,
-        targetYscale: scene.actors[shotRecord.targetId]?.yscale ?? null
+        casterYscale: drawnYscaleOf(shotRecord.combatantId, performance.now(), step.actionTokens),
+        targetYscale: drawnYscaleOf(shotRecord.targetId, performance.now(), step.actionTokens)
       });
       fireballs.push({
         flight,
@@ -1212,13 +1237,15 @@ function beginStep(step) {
       // shooter's head or shoulder, which the build writes in terms of its
       // `_yscale` — the same `yscale` its figure is drawn at. And the drawn
       // flight ends on the TARGET's shoulder, which its own `yscale` places.
-      shooterYscale: scene.actors[shotRecord.combatantId]?.yscale ?? null,
-      targetYscale: scene.actors[shotRecord.targetId]?.yscale ?? null,
+      // Both DRAWN (`drawnYscaleOf`): a spell that runs out as this phase ends
+      // resizes its bearer only once the arrow is home.
+      shooterYscale: drawnYscaleOf(shotRecord.combatantId, performance.now(), step.actionTokens),
+      targetYscale: drawnYscaleOf(shotRecord.targetId, performance.now(), step.actionTokens),
       // ► **EVERY OTHER LIVING BODY, so a LOB IS DRAWN OVER THEM (2026-09-23).**
       //   The rules exempt a bombard from line blocking because it clears
       //   bodies; `lobLiftAt` keeps the drawing true to that, and it can only
       //   clear the bodies it is told about.
-      bodies: bodiesBesides(shotRecord.combatantId, shotRecord.targetId)
+      bodies: bodiesBesides([shotRecord.combatantId, shotRecord.targetId], step.actionTokens)
     });
     inFlight.push({
       flight,
@@ -4220,8 +4247,13 @@ function renderStage(view, fit, now) {
       // the figure keeps its front-lane size for the whole slide, so nothing
       // about the movement says "further away" — leaving a pure vertical
       // translation, which in this game is what a jump looks like.
+      // ► **AND THE SIZE IT IS DRAWN AT THIS FRAME** (2026-09-24): a little
+      //   fat kid's victim at 50 from his clip's first frame, a colossus
+      //   growing tick by tick, an expiry once its action is over —
+      //   `drawnYscaleOf`. The face, the blood and the pop-ups all scale off
+      //   `origin.size`, so they follow.
       size: figureScaleFor({
-        yscale: actor.yscale,
+        yscale: drawnYscaleOf(combatantId, now),
         rank: rankOf(drawnY, combatant.slotIndex),
         slotIndex: combatant.slotIndex
       })
