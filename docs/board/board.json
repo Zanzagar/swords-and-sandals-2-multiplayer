@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-23",
- "head": "787c6b2",
+ "head": "62b9cdd",
  "lede": "Every system in the Swords & Sandals II team-arena project and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -591,12 +591,12 @@
   {
    "id": "damage-number-pop-ups",
    "lane": "presentation",
-   "column": "in-progress",
+   "column": "gaps",
    "order": 43,
    "title": "Damage number pop-ups",
-   "summary": "Being built now. The build has FOUR pop-up families, mapped from its bytecode by an 11-agent checked wave (none dead): the damage number on attack-roll hits (damage_icon: the gross roll before armour, one per fighter), a coloured number for spell and status damage and for potion heals (bonus_icon), the yellow BLOCK callout (defend_icon), and the spell-name banner on the HUD. The first three are being built from the player's own art.",
-   "gaps": "The spell-name banner waits for the HUD. The extractor's record of the splat frames is wrong (frame 2 is used) and is being corrected. 25 of the wave's claims were not verified (the 6-verifier cap) and are re-derived where they are relied on.",
-   "next": "Merge the pop-ups after Codex review, then watch them in the arena.",
+   "summary": "Built (62b9cdd): the build's own damage number on attack-roll hits (the gross roll before armour, with its CRITICAL / GRIEVOUS splats), the spell and status numbers, potion heals as + N, and the yellow BLOCK, over every fighter at any team size, from the player's own art. Codex approved.",
+   "gaps": "An arrow's victim reacts, and shows its number, when the arrow is loosed instead of when it lands (being fixed now). The spell-name banner waits for the HUD. Not yet watched in a browser.",
+   "next": "Land the arrow-impact timing; watch a bout.",
    "evidence": "Wave wf_e90ae76e-4af (5 questions + entry point; 6 verifiers: 2 hold, 4 partly broken, folded in). damage_icon: overlay 862 f52 DoAction body 0x240c85 +0x15ea; bonus_icon: magic_damage_character +0x129c/+0x1313; defend_icon: defender_blocked +0x21ce; cast_spell_image: +0x2251.",
    "ownerDecision": "Reproduce the build's splat exactly, or restyle it.",
    "updated": "2026-09-23"
@@ -1084,6 +1084,10 @@
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-23",
+   "text": "Damage number pop-ups built: numbers, CRITICAL and GRIEVOUS splats, spell and status numbers, heals and BLOCK over every fighter (62b9cdd)."
+  },
   {
    "date": "2026-09-23",
    "text": "Damage number pop-ups started: the build's own pop-up is being mapped from its bytecode."
