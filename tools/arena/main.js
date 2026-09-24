@@ -339,7 +339,8 @@ async function arenaTeams() {
       "No champion pack",
       `${why} The champions are the build's own, and this repository ships none of them.\n\n` +
       `Run   ${CHAMPION_PACK_COMMAND}   (add the path to your own swords_sandals2_download.swf if it is not ` +
-      "the Steam default), then reload this page."
+      "the Steam default), then reload this page.\n\n" +
+      "Or import every pack the arena uses in one go:   node tools/extract-all.mjs"
     );
   }
   try {

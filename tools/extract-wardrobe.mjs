@@ -462,6 +462,8 @@ function main(argv) {
   return 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Compared as paths: `file://${argv[1]}` never matched a path holding a space
+// or any Windows path, and then ran nothing and exited 0 (see extract-figure.mjs).
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   process.exitCode = main(process.argv.slice(2));
 }

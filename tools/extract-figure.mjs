@@ -2206,6 +2206,11 @@ function main(argv) {
   return 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// ► **COMPARED AS PATHS, NOT AS `file://${argv[1]}`.** That string test never
+//   matched a path holding a space (the URL percent-encodes it) or any Windows
+//   path, and a miss ran NOTHING and exited 0: success, to anything that ran
+//   it. (`tools/extract-all.mjs` also checks the files were written, and its
+//   test pins this form for every extractor.) The other extractors' form.
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   process.exitCode = main(process.argv.slice(2));
 }
