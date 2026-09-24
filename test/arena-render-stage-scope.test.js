@@ -44,5 +44,9 @@ test("renderStage reads no `step`: the draw loop has the timeline entry, not beg
 
 test("and the blood spawn is seeded from the entry's action token", () => {
   const body = functionBody(codeOnly(source), "renderStage");
-  assert.match(body, /seed:\s*entry\.token\s*\?\?\s*scene\.sequence/);
+  // ~~`seed: entry.token ?? scene.sequence`~~ until 2026-09-24: still the
+  // token, now told apart per call by `bloodSeedFor` (src/render/blood-timing.js),
+  // because one seed per entry sprayed a run's calls, and a kill's hurt and
+  // death under one token, identically.
+  assert.match(body, /seed:\s*bloodSeedFor\(entry\.token\s*\?\?\s*scene\.sequence,\s*effect\)/);
 });

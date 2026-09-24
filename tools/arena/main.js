@@ -144,6 +144,8 @@ import {
   popupOpsFor,
   popupFallbackOpsFor
 } from "/src/render/index.js";
+// Imported directly, like `crowd-sound.js` below: the blood's plan and clock.
+import { bloodPlanFor, bloodSeedFor, dueBloodEffects } from "/src/render/blood-timing.js";
 import { citationFor } from "/src/adapter/vanilla-fields.js";
 import {
   CHAMPION_PACK_COMMAND,
@@ -1180,28 +1182,25 @@ function settleEntrySounds(combatantId, entry, now) {
 
 /**
  * What the draw loop needs beside a timeline entry it is about to pose: the
- * blood its clip throws. Called when an entry STARTS — at `beginStep`, and when
- * a queued `then` takes over in `drainFinishedAnimations`.
+ * blood its clip throws and the sounds it plays, both still to be resolved.
+ * Called when an entry STARTS — at `beginStep`, and when a queued `then` takes
+ * over in `drainFinishedAnimations`.
  */
 function prepareEntry(entry) {
-  // ► **WHICH POSE THROWS BLOOD, from the clip's own call sites.** The table
-  //   is keyed by the fighter clip's frame numbers and
-  //   `effectsForAnimation` converts them to pose indices once, so the shell
-  //   compares a pose it already has rather than re-deriving a frame.
+  // ► **WHICH POSE THROWS BLOOD is the DRAWN run's, resolved at the entry's
+  //   first draw (2026-09-24; `src/render/blood-timing.js`).** ~~The un-joined
+  //   `figurePack.animations[entry.timeline.label]`, converted here by
+  //   `effectsForAnimation` and compared against its own pose count~~ — which
+  //   drew `hurt8` as the 34-pose run into `hurt9` and bled only from the 16
+  //   poses of `hurt8`, so `hurt9`'s two sprays never fired; and which found
+  //   nothing at all for a death, whose timeline carries the engine's variant
+  //   (`slain`) while the figure draws `death1`. The plan is resolved from the
+  //   painter's own options, at the first draw, where the facing is the one
+  //   the figure is drawn with — the sounds' reason, below.
   //
-  //   A pack that has not been extracted yields an empty list, which is the
-  //   same fallback everything else here has: no blood, still a bout.
-  const animation = figurePack?.animations?.[entry.timeline.label?.toLowerCase?.()];
-  entry.effects = clipEffects && animation ? effectsForAnimation(clipEffects, animation) : [];
-  // The POSE COUNT comes from the extracted animation, not from the timeline:
-  // a timeline's `durationMs` is this engine's own schedule and its pose
-  // count is the build's. Kept beside the effects so the draw loop compares
-  // two numbers from the same source.
-  // `poses` is the ARRAY of poses, not a count — `animation.poses.length` is
-  // the number. Reading it as a count gave `at * [object Array]` = NaN, so
-  // every comparison was false and nothing ever fired.
-  entry.effectPoses = Array.isArray(animation?.poses) ? animation.poses.length : 0;
-  entry.firedEffects = new Set();
+  //   No table or no pack is a plan with no blood: still a bout.
+  entry.bloodPlan = null;
+  entry.bloodFired = 0;
   // The sounds, resolved at the entry's first DRAW, where its facing is the
   // one the figure is drawn with. See `soundEntry`.
   entry.soundPlan = null;
@@ -4522,16 +4521,27 @@ function renderStage(view, fit, now) {
     );
 
     // ► **THE CLIP THROWS ITS OWN BLOOD, at the pose the build throws it.**
-    //   Fired once per pose per timeline — `firedEffects` is the guard — because
-    //   a draw loop visits the same pose many times at 60fps and the build
-    //   spawns on a frame, not on a redraw.
+    //   Fired once per CALL per timeline — `entry.bloodFired` counts them
+    //   (~~`firedEffects`, a set of poses~~ until 2026-09-24) — because a draw
+    //   loop visits the same pose many times at 60fps and the build spawns on a
+    //   frame, not on a redraw.
     //
     //   **Armour strikes SPARKS and flesh BLEEDS** (`bounceitem` `+0x018e`),
     //   and the projection already carries the `armourclass` that decides it.
-    for (const effect of entry?.effects ?? []) {
-      if (drawnAt * (effect.poseCount || entry.effectPoses || 1) < effect.poseIndex) continue;
-      if (entry.firedEffects.has(effect.poseIndex)) continue;
-      entry.firedEffects.add(effect.poseIndex);
+    //
+    // ► **THE PLAN IS THE DRAWN ANIMATION'S, from `figureOptions` itself**
+    //   (2026-09-24): the object the body and the face were just painted with,
+    //   so the run, the clip and the facing are the drawing's by construction.
+    //   `dueBloodEffects` compares `poseIndexAt(poseCount, drawnAt)` — the
+    //   painter's own arithmetic — so a spray starts on the frame the figure
+    //   is showing. ~~`drawnAt * entry.effectPoses`, the UN-JOINED clip's
+    //   count~~ until then; see `prepareEntry`.
+    if (entry && !entry.bloodPlan) entry.bloodPlan = bloodPlanFor(clipEffects, figurePack, figureOptions);
+    const bleeding = entry
+      ? dueBloodEffects(entry.bloodPlan, { at: drawnAt, fired: entry.bloodFired })
+      : { due: [], fired: 0 };
+    if (entry) entry.bloodFired = bleeding.fired;
+    for (const effect of bleeding.due) {
       const armour = combatant.resources?.armourclass?.value ?? 0;
       drops.push({
         startedAt: now,
@@ -4560,7 +4570,11 @@ function renderStage(view, fit, now) {
           //   same action boundary (`drain(wire, { actionBoundary })` stamps it
           //   on every command) and the one `drainFinishedAnimations` seeds the
           //   entry's sound with. `test/arena-render-stage-scope.test.js`.
-          seed: entry.token ?? scene.sequence,
+          // ► **AND TOLD APART PER CALL (2026-09-24; `bloodSeedFor`)**: the
+          //   build draws fresh numbers on every `bounceitem`, and one seed per
+          //   entry made a `hurt8` run's three calls, and a kill's hurt and the
+          //   death under the same token, one spray repeated.
+          seed: bloodSeedFor(entry.token ?? scene.sequence, effect),
           armoured: armour > 0,
           frames: propFrameCount(propPack, armour > 0 ? "sparks" : "blood") || 1
         })
