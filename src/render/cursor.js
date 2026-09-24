@@ -33,7 +33,9 @@
  */
 
 import { abandonReasonFor, timelineFor } from "./timeline.js";
-import { fireballFlight, flightDurationMs, PROJECTILE_FRAME_MS } from "./projectile.js";
+import {
+  fireballFlight, flightDurationMs, projectileFlight, ProjectileKind, PROJECTILE_FRAME_MS
+} from "./projectile.js";
 
 export class CursorError extends Error {
   constructor(message, options = {}) {
@@ -319,9 +321,10 @@ export function animationCursor(pendingTokens, playing, now, { projectiles = [] 
 
 /**
  * HOW LONG EACH COMBATANT'S REACTION WAITS, for one drained batch — the
- * victim of a fireball reacts when it LANDS, not when it is cast.
+ * victim of a fireball or an ARROW reacts when it LANDS, not when it is loosed.
  *
- * ► **ADDED 2026-09-22 WITH THE FIREBALLS, AND THE ARROW HAS NO EQUIVALENT.**
+ * ► **ADDED 2026-09-22 WITH THE FIREBALLS, ~~AND THE ARROW HAS NO EQUIVALENT~~
+ *   — THE ARROW HAS IT SINCE 2026-09-23 (below).**
  *   A batch starts every timeline at once: `timelinesForStep` pairs clips with
  *   motions and names no start time, and the shell stamps one clock on all of
  *   them. That is right for a bolt, whose ingress runs in the cast's own
@@ -337,14 +340,37 @@ export function animationCursor(pendingTokens, playing, now, { projectiles = [] 
  *   an entry whose `startedAt` is still ahead of `now` as running, so the gate
  *   stays shut from the cast to the end of the reaction with no gap.
  *
- *   **The arrow is deliberately NOT given this.** Its `checkattackroll` is also
+ *   ~~**The arrow is deliberately NOT given this.** Its `checkattackroll` is also
  *   called from the impact test (`+0x6d29`), so the same argument applies, but
  *   adopting it would change a shipped presentation that nothing asked to
- *   change. It is one line here when somebody does.
+ *   change. It is one line here when somebody does.~~
+ *
+ * ► **ADOPTED 2026-09-23 (main session's decision), because the fight pop-ups
+ *   made the early reaction VISIBLE**: a number and a flinch, or BLOCK, over a
+ *   victim the arrow had not reached. The claim was re-derived from the
+ *   overlay frame-52 disassembly (body 0x240c85) before this was written. The
+ *   ranged arm's `attacker.struck == null` guard (`+0x6bf0`) jumps to
+ *   `+0x6c97` on every tick after the first, and the first tick falls through
+ *   to it, so the impact test runs EVERY tick of the phase:
+ *   `bullet._y > 160 || (bullet._x > defender._x && attacker.gladiator_dir ==
+ *   "right") || (bullet._x < defender._x && gladiator_dir == "left")`
+ *   (`+0x6c97`..`+0x6d24`). Only when it holds does `checkattackroll()` run
+ *   (`+0x6d29`) — then `bullet_in_air = false` (`+0x6d39`) and the bullet is
+ *   removed (`+0x6d41`). The bullet itself is attached later in the same arm,
+ *   when the shooter's clip sets `fired` (`+0x6d59`..`+0x6dbe`). So the hit
+ *   roll, `defender_hurt`/`defender_blocked`, the victim's clip and its pop-up
+ *   all happen on the frame the arrow ARRIVES, hit and miss alike.
+ *   **The delay is the DRAWN flight's**: `projectileFlight` from the command's
+ *   own `from`, `to`, `sequence` and `targetSize` — the same four inputs
+ *   `tools/arena/main.js` flies the arrow with (its yscales and bodies shape
+ *   the arc, never `flightFrames`) — so the victim reacts on the frame the
+ *   drawn arrow reaches the drawn body (`stopShortFor`). The build's own test
+ *   fires as the bullet passes the defender's CENTRE, `targetSize` further on:
+ *   a few frames the drawing does not show, named rather than reproduced.
  *
  * ► **EVERY clip the batch starts for the victim waits, the death included**:
- *   on a killing fireball the victim's last clip is its death, and it dies at
- *   impact too.
+ *   on a killing fireball or arrow the victim's last clip is its death, and it
+ *   dies at impact too.
  *
  * ► **AND A MOLTEN DEATH'S VICTIM WAITS FOR THE ROCKS — added 2026-09-23.**
  *   Its ingress runs inside each boulder's own `onEnterFrame` on the frame
@@ -391,7 +417,23 @@ export function reactionDelaysFor(commands) {
       showers.set(command.targetId, shower);
       continue;
     }
-    if (command?.kind !== "fire-projectile" || command.projectile !== "fireball") continue;
+    if (command?.kind !== "fire-projectile") continue;
+    // ► **AN ARROW: the drawn flight's own length** (added 2026-09-23; see the
+    //   header). Total like the fireball: an arrow that cannot be flown delays
+    //   nothing, and its victim reacts at the loose as it did before.
+    if (command.projectile === ProjectileKind.BOMBARD || command.projectile === ProjectileKind.SNIPE) {
+      if (!Number.isFinite(command.from?.x) || !Number.isFinite(command.to?.x) || command.targetId == null) continue;
+      const arrow = projectileFlight({
+        kind: command.projectile,
+        from: command.from,
+        to: command.to,
+        sequence: command.sequence,
+        targetSize: command.targetSize
+      });
+      delays.set(command.targetId, flightDurationMs(arrow));
+      continue;
+    }
+    if (command.projectile !== "fireball") continue;
     // Total rather than throwing, like the rest of the presentation path: a
     // shot this function cannot fly delays nothing and plays as a bolt would.
     if (!Number.isFinite(command.from?.x) || !Number.isFinite(command.to?.x)) continue;

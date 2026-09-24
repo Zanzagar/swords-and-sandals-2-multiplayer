@@ -131,7 +131,7 @@
  * reaction clip (`defender_hurt` calls `damagecharacter` at +0x211e, then
  * `gotoAndPlay(animstate)` at +0x2120; `defender_blocked` attaches, then
  * plays `defend`+direction at +0x2239), so a surface starts it WITH that clip —
- * the same delay a fireball's or a boulder's victim waits. Molten death
+ * the same delay a fireball's, an arrow's (`+0x6d29`) or a boulder's victim waits. Molten death
  * attaches one per landing boulder (+0x88e5), each replacing the last. It
  * plays at the movie's 30 fps.
  *

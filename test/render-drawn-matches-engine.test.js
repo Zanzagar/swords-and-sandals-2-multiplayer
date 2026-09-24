@@ -40,8 +40,8 @@ import {
   SS2_STATIC_MAP_BINDINGS
 } from "../src/adapter/index.js";
 import {
-  animationCursor, applyCommands, emptyScene, figureXAt, figureYAt, poseAt, reactionDelaysFor, timelineFor,
-  timelinesForStep
+  animationCursor, applyCommands, emptyScene, figureXAt, figureYAt, flightDurationMs, poseAt, projectileFlight,
+  reactionDelaysFor, timelineFor, timelinesForStep
 } from "../src/render/index.js";
 import { demoItemsFrom, demoSide } from "../tools/arena/roster.js";
 
@@ -337,7 +337,7 @@ test("SWEEP: every ghost strike in real bouts is drawn beside its victim for the
  * `tools/arena/main.js`, calling the same `src/render` decisions. `onStep` sees
  * every batch as it begins, with the timelines it is about to replace.
  */
-function playOnClock({ perSide = 3, seed, kit = null, onStep = () => {}, onFrame = () => {} }) {
+function playOnClock({ perSide = 3, seed, kit = null, onStep = () => {}, onFrame = () => {}, choose = null }) {
   const host = arenaHost({ perSide, seed, items: demoItemsFrom(kit) });
   let scene = applyCommands(emptyScene(), host.constructArena().commands);
   const playing = new Map();
@@ -359,7 +359,10 @@ function playOnClock({ perSide = 3, seed, kit = null, onStep = () => {}, onFrame
     if (host.battle.result && pendingTokens.length === 0) break;
     if (host.battle.result || !host.readyForNextAction().ready || host.legalActions().length === 0) continue;
     const actorId = host.currentCombatantId();
-    const action = host.suggestAction(actorId);
+    // `choose` lets a sweep steer toward a verb the spectator's AI never picks
+    // (a snipe); it is handed the spectator's own choice and the legal options.
+    const suggested = host.suggestAction(actorId);
+    const action = choose ? choose(suggested, host.legalActions(), actions) : suggested;
     const step = host.submit({ ...action, actorId });
     actions += 1;
     scene = applyCommands(scene, step.commands);
@@ -621,4 +624,85 @@ test("a KILLING fireball delays the victim's reaction to impact, then burns, the
     }
   });
   assert.ok(checked >= 1, "a dire fireball kills a demo gladiator");
+});
+
+/* ------------------------------------------------------------------ *
+ * 5. An arrow's victim reacts when the arrow LANDS (+0x6d29)          *
+ * ------------------------------------------------------------------ */
+
+/**
+ * ► **ADOPTED 2026-09-23.** The build calls `checkattackroll()` from the ranged
+ *   arm's impact test (`+0x6d29`), which runs every tick and holds only once
+ *   the bullet is past the defender or on the ground (`+0x6c97`..`+0x6d24`).
+ *   So the victim's hurt or defend clip, the death behind it and its pop-up
+ *   wait for the drawn arrow — the fireball's rule, one kind over.
+ */
+test("SWEEP: an ARROW's victim reacts when the drawn arrow lands — hit, miss and kill — and the gate never opens early", () => {
+  const found = { hit: 0, miss: 0, kill: 0, bombard: 0, snipe: 0 };
+  const problems = [];
+  for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    playOnClock({
+      seed,
+      // The spectator's AI never snipes, so on every other shot this takes the
+      // snipe the build offers beside the bombard.
+      choose: (suggested, options, actions) => {
+        if (suggested.type !== Ss2ActionType.BOMBARD || actions % 2 === 0) return suggested;
+        return options.find((option) => option.type === Ss2ActionType.SNIPE && option.targetId === suggested.targetId) ?? suggested;
+      },
+      onStep: ({ step, started, clock, scene, host, actions }) => {
+        const shot = step.commands.find((command) => command.kind === CommandKind.FIRE_PROJECTILE
+          && (command.projectile === "bombard" || command.projectile === "snipe"));
+        if (!shot) return;
+        const where = `seed ${seed} action ${actions}`;
+        const entry = started.get(shot.targetId);
+        if (!entry) { problems.push(`${where}: the victim plays nothing`); return; }
+        // The flight tools/arena/main.js draws, built the way it builds it.
+        const flight = projectileFlight({
+          kind: shot.projectile, from: shot.from, to: shot.to, sequence: shot.sequence, targetSize: shot.targetSize,
+          shooterYscale: scene.actors[shot.combatantId]?.yscale ?? null,
+          targetYscale: scene.actors[shot.targetId]?.yscale ?? null,
+          bodies: scene.drawOrder.filter((id) => id !== shot.combatantId && id !== shot.targetId)
+            .map((id) => scene.actors[id]).filter((actor) => Number.isFinite(actor?.x))
+            .map((actor) => ({ x: actor.x, y: actor.y, yscale: actor.yscale }))
+        });
+        const landsAt = clock + flightDurationMs(flight);
+        if (entry.startedAt !== landsAt) problems.push(`${where}: reacts at +${entry.startedAt - clock}ms, lands at +${landsAt - clock}ms`);
+        found[shot.projectile] += 1;
+        found[shot.hit ? "hit" : "miss"] += 1;
+        const chain = chainOf(entry);
+        const family = chain[0].timeline.family;
+        if (shot.hit && family !== "hurt" && family !== "knockback") problems.push(`${where}: a hit plays ${family}`);
+        if (!shot.hit && family !== "defend" && family !== "block") problems.push(`${where}: a miss plays ${family}`);
+        if (chain.length > 1) found.kill += 1;
+
+        // Arrows never knock back (directions 21/22 are outside the 5-12/30
+        // gate), so the victim is drawn where the engine has him throughout.
+        if (step.commands.some((command) => command.kind === CommandKind.MOVE_CLIP && command.combatantId === shot.targetId)) {
+          problems.push(`${where}: an arrow moved its victim`);
+        }
+        const engineX = host.wire().teams.flatMap((team) => team.combatants).find((c) => c.id === shot.targetId).x;
+        if (scene.actors[shot.targetId].x !== engineX) problems.push(`${where}: drawn at ${scene.actors[shot.targetId].x}, engine ${engineX}`);
+
+        // THE GATE, on the page's own terms (the arrow is in `projectiles`, as
+        // `drainFinishedAnimations` passes it): shut from the loose to the end
+        // of the victim's chain, with no frame between.
+        const chainEnd = entry.startedAt + chain.reduce((sum, link) => sum + link.timeline.durationMs, 0);
+        const playing = new Map([[shot.targetId, entry]]);
+        const shooter = started.get(shot.combatantId);
+        if (shooter) playing.set(shot.combatantId, shooter);
+        const projectiles = [{ token: entry.token, startedAt: clock, durationMs: flightDurationMs(flight) }];
+        for (let t = clock; t < chainEnd; t += 1000 / 60) {
+          const cursor = animationCursor([entry.token], playing, t, { projectiles });
+          for (const { combatantId, entry: next } of cursor.advanced ?? []) playing.set(combatantId, next);
+          if (cursor.finished.includes(entry.token)) {
+            problems.push(`${where}: the gate opened ${Math.round(chainEnd - t)}ms before the reaction ended`);
+            break;
+          }
+        }
+      }
+    });
+  }
+  assert.ok(found.bombard > 0 && found.snipe > 0 && found.hit > 0 && found.miss > 0 && found.kill > 0,
+    `the bouts must loose both arrows, land and miss, and kill with one: ${JSON.stringify(found)}`);
+  assert.deepEqual(problems, []);
 });

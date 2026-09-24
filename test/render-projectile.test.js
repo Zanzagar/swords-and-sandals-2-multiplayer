@@ -38,6 +38,8 @@ import {
   projectileDrawAt,
   projectileFlight,
   projectileTrail,
+  reactionDelaysFor,
+  PROJECTILE_FRAME_MS,
   figureScaleFor,
   figureSpecFor,
   paintFigure,
@@ -832,4 +834,41 @@ test("a fire-projectile touches no actor, so nothing is drawn twice", () => {
   // position it does not have.
   const scene = applyCommands(emptyScene(), firedFor({ type: "bombard", attackDirection: 21 }));
   assert.deepEqual(Object.keys(scene.actors), [], "an arrow is nobody's figure");
+});
+
+/* ------------------------------------------------------------------ */
+/* The victim waits for the arrow (+0x6d29), 2026-09-23                */
+/* ------------------------------------------------------------------ */
+
+test("an ARROW's victim waits for the DRAWN flight — bombard and snipe, hit and miss alike", () => {
+  // The build rolls the shot when the bullet arrives: the impact test at
+  // +0x6c97..+0x6d24 runs every tick of the ranged arm, and only when it holds
+  // is checkattackroll() called (+0x6d29). So the victim's clip — and its
+  // pop-up — start when the drawn arrow reaches the drawn body.
+  const command = (overrides) => ({
+    kind: CommandKind.FIRE_PROJECTILE, sequence: 7, combatantId: "archer", targetId: "foe",
+    projectile: "bombard", from: { x: -250, y: 200 }, to: { x: 250, y: 200 }, targetSize: 41.4, hit: true,
+    ...overrides
+  });
+  for (const projectile of ["bombard", "snipe"]) {
+    for (const hit of [true, false]) {
+      const fired = command({ projectile, hit });
+      const delay = reactionDelaysFor([fired]).get("foe");
+      // The flight tools/arena/main.js draws: the same four inputs PLUS the
+      // two yscales and the bodies it passes, which shape the arc only.
+      const drawn = projectileFlight({
+        kind: projectile, from: fired.from, to: fired.to, sequence: fired.sequence, targetSize: fired.targetSize,
+        shooterYscale: 120, targetYscale: 70, bodies: [{ x: 0, y: 200, yscale: 150 }]
+      });
+      assert.equal(delay, flightDurationMs(drawn), `${projectile} ${hit ? "hit" : "miss"}: the drawn flight's length`);
+      assert.equal(delay, drawn.flightFrames * PROJECTILE_FRAME_MS);
+      assert.ok(delay > 0);
+    }
+  }
+  // The snipe is flat and fast, the bombard a lob at a sequence-chosen speed.
+  assert.ok(reactionDelaysFor([command({ projectile: "snipe" })]).get("foe")
+    < reactionDelaysFor([command({ projectile: "bombard" })]).get("foe"));
+  // Total: an arrow that cannot be flown delays nothing.
+  assert.equal(reactionDelaysFor([command({ from: { x: null, y: 200 } })]).size, 0);
+  assert.equal(reactionDelaysFor([command({ targetId: null })]).size, 0);
 });

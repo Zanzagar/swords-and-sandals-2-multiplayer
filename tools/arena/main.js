@@ -1008,6 +1008,10 @@ function beginStep(step) {
   //   so its clock is stamped in the FUTURE. `animationCursor` already counts
   //   an entry that has not begun as running, so the gate stays shut; the two
   //   pose sites below treat it as absent until it begins.
+  // ► **AND AN ARROW'S, since 2026-09-23** — the build rolls the shot on the
+  //   frame the bullet arrives (`+0x6d29`), so the hurt or defend clip, the
+  //   death behind it and the pop-up wait for the drawn arrow above, whose
+  //   flight `reactionDelaysFor` measures from the same four inputs.
   const delays = reactionDelaysFor(step.commands);
   for (const [combatantId, entry] of started) {
     entry.startedAt = performance.now() + (delays.get(combatantId) ?? 0);
@@ -1055,7 +1059,7 @@ function beginStep(step) {
  * the ledger the rule set's observer filled during `host.submit`.
  *
  * WHEN: a pop-up starts with its fighter's clip from this batch (a fireball's
- * victim at impact, via `reactionDelaysFor`), a molten-death rock's on its own
+ * or an arrow's victim at impact, via `reactionDelaysFor`), a molten-death rock's on its own
  * landing frame. `maxscale` is the camera's TARGET zoom now, because the build
  * scales the icon once, at attach (+0x16cf).
  */
@@ -3803,9 +3807,9 @@ function renderStage(view, fit, now) {
     const placement = host.layout.placementFor(combatantId);
     const figure = figureSpecFor(combatant, { side: placement.side });
 
-    // ► **A QUEUED ENTRY IS NOT POSED UNTIL IT BEGINS** — a fireball's victim
-    //   before impact (`reactionDelaysFor`). Until then it stands as it was,
-    //   EVEN when the resolver has already killed it: it dies at impact.
+    // ► **A QUEUED ENTRY IS NOT POSED UNTIL IT BEGINS** — a fireball's or an
+    //   arrow's victim before impact (`reactionDelaysFor`). Until then it stands
+    //   as it was, EVEN when the resolver has already killed it: it dies at impact.
     const queued = playing.get(combatantId);
     const waiting = Boolean(queued) && queued.startedAt > now;
     const entry = waiting ? undefined : queued;
