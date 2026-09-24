@@ -48,7 +48,7 @@ import {
   ProjectileKind,
   SS2_PROJECTILE
 } from "../src/render/index.js";
-import { SS2_FIGURE_HALF_WIDTH } from "../src/common/ss2-figure.js";
+import { SS2_FIGURE_HALF_WIDTH, SS2_FIGURE_HEIGHT } from "../src/common/ss2-figure.js";
 import { CommandKind, SS2_STATIC_MAP_BINDINGS, presentResolvedEvents, buildArenaLayout } from "../src/adapter/index.js";
 
 const shot = (overrides = {}) => projectileFlight({
@@ -200,14 +200,20 @@ test("a BOMBARD clears a standing body and a SNIPE does not — the measurement 
   // ► **AWAY FROM THE ENDS, since a fourth Codex finding the same day**: a lob
   //   is `chord + k * bulge` with one capped `k` per flight (`lobLiftAt`), and
   //   near either end no capped raise can clear a tall body — so the promise,
-  //   and this measurement, is every point at least `LOB_END_ROOM` (140, derived
-  //   in `projectile.js`) from the launch and from the landing. `endRoom: 0`
-  //   measures the whole body, for the snipe below.
-  const drawnOver = (flight, blocker, { endRoom = 140 } = {}) => {
+  //   and this measurement, is every point at least the body's OWN end room
+  //   from the launch and from the landing, on a flight at least twice that
+  //   long: `2 * (C - e)` here, every fighter in the front rank, with `C` his
+  //   crown plus 5% and `e` the strength-9 target's 134 shoulder (`endRoomFor`
+  //   in `projectile.js`; ~~`LOB_END_ROOM` 140~~ until Codex pass 5 showed a
+  //   fixed room assumed nobody stronger than 50). `endRoom: 0` measures the
+  //   whole body, for the snipe below.
+  const roomOf = (blocker) => 2 * Math.max(0, SS2_FIGURE_HEIGHT * (blocker.yscale / 100) * 1.05 - (86 * 1.5 + 5));
+  const drawnOver = (flight, blocker, { endRoom = roomOf(blocker) } = {}) => {
     const reach = SS2_FIGURE_HALF_WIDTH * blocker.yscale / 100;
     const landingX = projectileDrawAt(flight, 1, view).x;
     let lowest = Infinity;
     let highest = -Infinity;
+    if (Math.abs(landingX - flight.launch.x) < 2 * endRoom) return { lowest, highest };
     for (let x = blocker.x - reach; x <= blocker.x + reach; x += 1) {
       const t = (x - flight.launch.x) / (flight.direction * flight.xVelocity);
       if (t < 0 || t > flight.flightFrames) continue;

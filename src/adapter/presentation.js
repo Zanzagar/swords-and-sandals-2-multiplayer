@@ -946,13 +946,25 @@ function resourceValueOf(combatant, name) {
  *   the walk clamp puts there.
  *
  * ► **THE ARC WAS NOT THE PROBLEM, and the claim that it was needs correcting
- *   too.** `ss2-rules.js` says a bombard flies `>= 1.055` figure heights
+ *   too.** `ss2-rules.js` says a bombard flies `>= 1.055` ~~figure heights~~
  *   "everywhere a body could stand". Re-derived off `src/render/projectile.js`:
  *   the true global minimum is **0.789** on the claim's own terms and **0.636**
  *   once this file's real `targetSize` is passed, both at the LAUNCH end. Over
- *   an interposed body the lob really does clear — 1.04 to 1.34 figure heights.
- *   What it does is **STOP** there: the terminal frame sits at 0.64-0.99 figure
- *   heights, which is chest to head height, on the ally's own x.
+ *   an interposed body the lob really does clear — 1.04 to 1.34 ~~figure
+ *   heights~~. What it does is **STOP** there: the terminal frame sits at
+ *   0.64-0.99 ~~figure heights~~, which is chest to head height, on the ally's
+ *   own x.
+ *   **UNIT CORRECTED 2026-09-23: every number in this paragraph is in BOMBARD
+ *   LAUNCH HEIGHTS** — `projectile.js`'s `height`, where 1 is the shooter's
+ *   own `_yscale * 2 + 30` (230 arena units at the `_yscale` 100 these were
+ *   measured at), and a gladiator the shooter's size is 0.937-1.048 of one,
+ *   not 1.0. They were taken with the stop-short of their day, `physical_size`
+ *   (86); re-derived that day: 0.636 is sequence 3's, all eleven velocities
+ *   go to 0.429 with that stop, and with the DRAWN stop that replaced it
+ *   (41.45 at strength 9, below) the lowest point between bodies is 1.055 —
+ *   `ss2-rules.js`'s own number. The 0.789, 1.04-1.34 and 0.64-0.99 were not
+ *   re-derived. And they are the ARC's; what the screen draws over a body is
+ *   `lobLiftAt`'s.
  *
  * ► **SO THE FIX IS THE ENDPOINT, NOT THE ARC AND NOT THE LEGALITY.** When the
  *   stop-short would land inside another living body, fall back to `0` — which

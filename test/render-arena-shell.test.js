@@ -32,7 +32,7 @@ import { applyCommands, emptyScene } from "../src/render/scene.js";
 import { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 import { ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
 import { demoSide } from "../tools/arena/roster.js";
-import { SS2_FIGURE_HALF_WIDTH } from "../src/common/ss2-figure.js";
+import { SS2_FIGURE_HALF_WIDTH, SS2_FIGURE_HEIGHT } from "../src/common/ss2-figure.js";
 import {
   ArenaShellError,
   figureProvenance,
@@ -2830,6 +2830,40 @@ test("EVERY DRAWN FLIGHT LEAVES FROM THE SHOOTER'S DRAWN HEAD OR SHOULDER AND EN
   assert.equal(flights, 3 * 3 * 3 * 3 * 4 * (1 + 11 + 3), "the sweep ran every combination it names");
 });
 
+/**
+ * A body's DOCUMENTED end room, restated from `endRoomFor` in
+ * `src/render/projectile.js` — the promise the tests hold the drawing to:
+ * `2 * (C - e) / rho`, with `C` the body's crown at its drawn scale plus 5%,
+ * `e` the lower of the drawn launch and the target's drawn shoulder, and `rho`
+ * the two ends' depth scales, smaller over larger. A flight shorter than twice
+ * it promises that body nothing.
+ */
+function documentedEndRoom(flight, body, { targetYscale, view }) {
+  const sizeAt = (y) => figureScaleFor({ yscale: 100, rank: rankOfDepth(y, 0, view), slotIndex: 0 });
+  const near = sizeAt(Number.isFinite(flight.launch.y) ? flight.launch.y : view.frontY);
+  const far = sizeAt(Number.isFinite(flight.impact.y) ? flight.impact.y : view.frontY);
+  const launch = projectileDrawAt(flight, 0, view).lift;
+  const shoulder = (1.5 * targetYscale + 5) * far;
+  const clearance = SS2_FIGURE_HEIGHT * (body.yscale / 100) * sizeAt(body.y) * 1.05;
+  return (2 * Math.max(0, clearance - Math.min(launch, shoulder))) / (Math.min(near, far) / Math.max(near, far));
+}
+
+/**
+ * Where a body is PROMISED clearance, restated from `lobLiftAt`: at least
+ * `max(his end room, that end's approach)` from each end — the approach being
+ * the shooter's `physical_size` after the launch and the target's before the
+ * landing — on a flight at least twice his room long.
+ */
+function promisedStretch(flight, body, { shooterYscale, targetYscale, view }) {
+  const room = documentedEndRoom(flight, body, { targetYscale, view });
+  return {
+    room,
+    fromLaunch: Math.max(room, shooterYscale),
+    fromLanding: Math.max(room, targetYscale),
+    long: Math.abs(flight.impact.x - flight.launch.x) >= 2 * room
+  };
+}
+
 test("A DRAWN LOB PASSES OVER EVERY BODY AWAY FROM ITS ENDS, AND LANDS ON ITS TARGET — ON ITS HEAD WHEN SOMEBODY STANDS IN ITS APPROACH", () => {
   // ► **FOUND BY A CODEX REVIEW, REPRODUCED BEFORE IT WAS FIXED (2026-09-23).**
   //   The drawn lob's end correction was spread over the whole flight, so from
@@ -2843,11 +2877,12 @@ test("A DRAWN LOB PASSES OVER EVERY BODY AWAY FROM ITS ENDS, AND LANDS ON ITS TA
   //   The criterion is `lobLiftAt`'s, since a fourth Codex finding the same
   //   day (the round-3 version of this test asserted clearance over EVERY
   //   footprint, and the construction that met it jumped at footprint edges):
-  //   the lob is `chord + k * bulge`, so it clears every body at least
-  //   `LOB_END_ROOM` (140, derived) from BOTH ends, and a body inside the
-  //   landing's end room RAISES THE LANDING to 95% of the target's crown. The
-  //   graze that leaves over a clamp-adjacent ally is measured and documented
-  //   there, not asserted away here.
+  //   the lob is `chord + k * bulge`, so it clears every body at least its
+  //   OWN end room from BOTH ends (`documentedEndRoom`; ~~`LOB_END_ROOM` 140~~
+  //   until Codex pass 5 showed that fixed room assumed nobody stronger than
+  //   50), and a body inside the landing's end room RAISES THE LANDING to 95%
+  //   of the target's crown. The graze that leaves over a clamp-adjacent ally
+  //   is measured and documented there, not asserted away here.
   //   Blockers stand in the TARGET's rank where the walk clamp puts one
   //   (`physical_size` in front of it), 172 short (Codex's), and mid-field; the
   //   stop is `stopShortFor`'s rule, restated (pinned against the real
@@ -2884,13 +2919,15 @@ test("A DRAWN LOB PASSES OVER EVERY BODY AWAY FROM ITS ENDS, AND LANDS ON ITS TA
               sequence, targetSize, shooterYscale, targetYscale, bodies: [blocker]
             });
             // Every drawn point over the blocker's drawn body, two units apart,
-            // at least 140 from both ends — the room the construction promises.
+            // at least his end room from both ends — what the construction promises.
             const reach = reachOf(blockerYscale, targetY);
             const landingX = projectileDrawAt(flight, 1, view).x;
+            const promise = promisedStretch(flight, blocker, { shooterYscale, targetYscale, view });
             for (let x = blocker.x - reach; x <= blocker.x + reach; x += 2) {
               const t = (x - flight.launch.x) / (flight.direction * flight.xVelocity);
               if (t < 0 || t > flight.flightFrames) continue;
-              if (Math.abs(x - flight.launch.x) < 140 || Math.abs(landingX - x) < 140) continue;
+              if (!promise.long) continue;
+              if (Math.abs(x - flight.launch.x) < promise.fromLaunch || Math.abs(landingX - x) < promise.fromLanding) continue;
               const point = projectileDrawAt(flight, t / flight.flightFrames, view);
               if (Math.abs(point.y - targetY) > 97 / 2) continue;   // passing another rank there
               if (Math.abs(point.x - blocker.x) > reach) continue;   // stopped short of him
@@ -2901,11 +2938,12 @@ test("A DRAWN LOB PASSES OVER EVERY BODY AWAY FROM ITS ENDS, AND LANDS ON ITS TA
               overBodies += 1;
             }
             const end = projectileDrawAt(flight, 1, view).lift;
-            // Somebody in the target's rank within 140 of the landing (his
-            // footprint widened 5%, as the construction widens it) raises it.
+            // Somebody in the target's rank where he is not promised — his end
+            // room or the target's approach, his footprint widened 5% as the
+            // construction widens it — raises it.
             const wide = reach * 1.05;
             const crowded = direction * (landingX - (blocker.x - direction * wide)) > 0
-              && direction * (landingX - (blocker.x + direction * wide)) < 140;
+              && direction * (landingX - (blocker.x + direction * wide)) < promise.fromLanding;
             for (const crown of crownsOf(targetYscale, targetY)) {
               assert.ok(end > 0 && end < crown, `${label} v${flight.xVelocity}: it lands at ${end.toFixed(1)}, on a ${crown.toFixed(1)} body`);
               if (crowded) {
@@ -3008,7 +3046,11 @@ test("THE DRAWN LOB NEVER STEPS, anywhere, in either direction — footprint edg
   for (const [fromX, toX] of [[-250, 250], [250, -250], [-1500, 1500], [1500, -1500], [-2100, 2100], [2100, -2100]]) {
     const direction = toX > fromX ? 1 : -1;
     for (const [shooterRank, targetRank] of [[0, 0], [0, 2], [2, 0]]) {
-      for (const blockerYscale of [80, 113]) {
+      // Strength 0 and 50, then the reachable giants (Codex pass 5): the
+      // strongest tournament boss (Emperor Antares, strength 60), Codex's
+      // strength-100 body, the build's colossus `_yscale` 150, and the
+      // largest a generated opponent can roll (`_yscale` 242).
+      for (const blockerYscale of [80, 113, 120, 147, 150, 242]) {
         const targetY = yOf(targetRank);
         const surface = SS2_FIGURE_HALF_WIDTH * 0.86;
         const landingX = toX - direction * surface;
@@ -3018,21 +3060,23 @@ test("THE DRAWN LOB NEVER STEPS, anywhere, in either direction — footprint edg
           toX - direction * 172,                   // Codex's round-3 case
           (fromX + toX) / 2,                       // mid-field
           fromX + direction * 86,                  // Codex's round-4 case: in front of the archer
-          landingX - direction * 200               // just outside the landing's end room
+          toX - direction * 250                    // Codex's round-5 case: 250 short of the target
         ];
         for (const blockerX of blockers) {
           const bodies = [{ x: blockerX, y: targetY, yscale: blockerYscale }];
           const reach = SS2_FIGURE_HALF_WIDTH * blockerYscale / 100;
-          const edges = [
-            blockerX - reach, blockerX + reach, blockerX - reach * 1.05, blockerX + reach * 1.05,
-            launchX + direction * 140, landingX - direction * 140
-          ];
           for (const sequence of [0, 5, 10]) {
             const shot = (with_) => projectileFlight({
               kind: "bombard", from: { x: fromX, y: yOf(shooterRank) }, to: { x: toX, y: targetY }, sequence,
               targetSize: surface, shooterYscale: 86, targetYscale: 86, bodies: with_
             });
             const flight = shot(bodies);
+            const room = documentedEndRoom(flight, bodies[0], { targetYscale: 86, view });
+            const edges = [
+              blockerX - reach, blockerX + reach, blockerX - reach * 1.05, blockerX + reach * 1.05,
+              launchX + direction * room, landingX - direction * room,
+              launchX + direction * 86, landingX - direction * 86   // the two approaches
+            ];
             const bound = continuityBound(shot([]), view);
             const samples = lobSamples(flight, view, { step: 4, edges });
             for (let index = 1; index < samples.length; index += 1) {
@@ -3049,48 +3093,311 @@ test("THE DRAWN LOB NEVER STEPS, anywhere, in either direction — footprint edg
       }
     }
   }
-  assert.equal(flights, 6 * 3 * 2 * 5 * 3, "every flight the sweep names was drawn");
+  assert.equal(flights, 6 * 3 * 6 * 5 * 3, "every flight the sweep names was drawn");
   assert.ok(steps > flights * 100, `and densely: ${steps} steps`);
+});
+
+test("CODEX PASS 5: A STRENGTH-100 GIANT 158.55 BEFORE THE LANDING IS HANDLED ON PURPOSE, NOT CLAMPED AWAY", () => {
+  // ► **REPRODUCED BEFORE IT WAS FIXED (2026-09-23).** A strength-9 pair, x 0
+  //   to 1000, a `_yscale` 147 body (strength 100 — nothing caps strength that
+  //   high, see `endRoomFor`) at 750 in the target's rank: at x 800, 158.55
+  //   units before the landing and so outside the old fixed 140-unit room, the
+  //   lob was drawn 316.82 against his 327.30 crown, `k` silently clamped.
+  //
+  //   Now his OWN end room is 419.4 (`2 * (343.66 - 134) / 1`), he stands
+  //   inside it, and the construction does what it documents, out loud: no
+  //   promise is made over him; he asks for more than the stage's budget and
+  //   the lob is RAISED OVER HIM AS FAR AS THE BUDGET GOES — its bulge peaks at
+  //   a quarter of the flight's length — and passes through the rest of him
+  //   (still 10.48 under his crown at x 800: accepted, and said); the landing
+  //   RISES to the target's head; the path stays continuous. The same giant
+  //   standing mid-flight is cleared.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const shot = (bodies) => projectileFlight({
+    kind: "bombard", from: { x: 0, y: 200 }, to: { x: 1000, y: 200 }, sequence: 0,
+    targetSize: 41.4477, shooterYscale: 86, targetYscale: 86, bodies
+  });
+  const giant = { x: 750, y: 200, yscale: 147 };
+  const flight = shot([giant]);
+  const room = documentedEndRoom(flight, giant, { targetYscale: 86, view });
+  assert.ok(Math.abs(room - 419.4) < 0.1, `his end room is 419.4, not the old 140: ${room.toFixed(2)}`);
+  const landingX = projectileDrawAt(flight, 1, view).x;
+  const farEdge = giant.x + SS2_FIGURE_HALF_WIDTH * 1.47 * 1.05;
+  assert.ok(landingX - farEdge < room, "and he stands inside it, before the landing");
+
+  const targetCrown = authoredCrownOf(paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" }), RESTING()
+  )) * 0.86;
+  const landed = projectileDrawAt(flight, 1, view).lift;
+  assert.ok(landed >= 0.95 * targetCrown - 1e-6 && landed < targetCrown,
+    `somebody in the approach: it lands on the target's head (${landed.toFixed(1)} of a ${targetCrown.toFixed(1)} crown)`);
+
+  // The budget, spent: the lob's bulge over its own chord peaks at a quarter of
+  // the flight's length — measured off the drawing, not read off the shape.
+  const drawn = lobSamples(flight, view, { step: 1 });
+  const first = drawn[0];
+  const last = drawn[drawn.length - 1];
+  const length = Math.abs(last.x - first.x);
+  const chordAt = (x) => first.lift + ((x - first.x) / (last.x - first.x)) * (last.lift - first.lift);
+  const bulge = Math.max(...drawn.map((point) => point.lift - chordAt(point.x)));
+  assert.ok(Math.abs(bulge - length / 4) < 0.5,
+    `raised over him as far as the budget goes: a bulge of ${bulge.toFixed(2)} against the budget's ${(length / 4).toFixed(2)}`);
+  const over = projectileDrawAt(flight, (800 - flight.launch.x) / flight.xVelocity / flight.flightFrames, view).lift;
+  assert.ok(over < 222.65 * 1.47 && over > 222.65 * 1.47 - 15,
+    `and at x 800 he is still ${(222.65 * 1.47 - over).toFixed(2)} over it: the documented overlap, not a hidden one`);
+
+  const bound = continuityBound(shot([]), view);
+  const samples = lobSamples(flight, view, { step: 0.5, edges: [giant.x - 72.3, giant.x + 72.3, landingX - room, landingX - 86] });
+  for (let index = 1; index < samples.length; index += 1) {
+    const dx = Math.abs(samples[index].x - samples[index - 1].x);
+    assert.ok(Math.abs(samples[index].lift - samples[index - 1].lift) <= bound * dx + 1e-9,
+      `a step of ${(samples[index].lift - samples[index - 1].lift).toFixed(3)} at x ${samples[index].x.toFixed(2)}`);
+  }
+
+  // The same giant at mid-flight: the lob is 928.6 long, twice his room is
+  // 838.8, so it promises him the stretch 419.4 from both ends — and keeps it.
+  const middle = { x: 500, y: 200, yscale: 147 };
+  const across = shot([middle]);
+  let measured = 0;
+  for (let x = across.launch.x + room; x <= landingX - room; x += 1) {
+    if (Math.abs(x - middle.x) > SS2_FIGURE_HALF_WIDTH * 1.47) continue;
+    const point = projectileDrawAt(across, (x - across.launch.x) / across.xVelocity / across.flightFrames, view);
+    assert.ok(point.lift > 222.65 * 1.47, `mid-flight he is cleared: ${point.lift.toFixed(1)} at x ${point.x.toFixed(1)}`);
+    measured += 1;
+  }
+  assert.ok(measured > 50, `over his promised stretch: ${measured} points`);
+});
+
+/** The lob's drawn lift over arena x, through `projectileDrawAt`. */
+function lobLiftOver(flight, x, view) {
+  return projectileDrawAt(flight, (x - flight.launch.x) / (flight.direction * flight.xVelocity) / flight.flightFrames, view);
+}
+
+test("CODEX PASS 6: A GIANT ENDPOINT NO LONGER DROPS WHAT cab600f CLEARED — the lob over his clamp-parked twin", () => {
+  // ► **REPRODUCED BEFORE IT WAS FIXED (2026-09-23), both directions.** A
+  //   strength-60 archer (`_yscale` 120) at the wall lobs at a `_yscale` 242
+  //   target at the other wall, over a `_yscale` 242 body parked at the
+  //   target's walk clamp. cab600f drew 540.50 at x 1910, over his 538.81
+  //   crown; the per-body rule alone drew 529.07 — the target's approach (his
+  //   242-unit `physical_size`) had grown past cab600f's 140-unit room and
+  //   dropped points cab600f enforced. The lob now takes the stricter of the
+  //   two requirements (`lobShapeFor`, `CAB600F_END_ROOM`).
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const crown = authoredCrownOf(paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" }), RESTING()
+  )) * 2.42;
+  for (const mirror of [1, -1]) {
+    const at = (x) => mirror * (x - 2100);
+    const flight = projectileFlight({
+      kind: "bombard", from: { x: at(0), y: 200 }, to: { x: at(4200), y: 200 }, sequence: 0,
+      targetSize: 116.6319, shooterYscale: 120, targetYscale: 242, bodies: [{ x: at(3958), y: 200, yscale: 242 }]
+    });
+    const lift = lobLiftOver(flight, at(4010), view).lift;
+    assert.ok(lift > crown, `${mirror > 0 ? "forward" : "mirrored"}: ${lift.toFixed(2)} at x ${at(4010)}, over his ${crown.toFixed(2)} crown`);
+    // And every point of him cab600f's own rule covered — at least 140 from both ends.
+    const landingX = projectileDrawAt(flight, 1, view).x;
+    for (let x = at(3958) - SS2_FIGURE_HALF_WIDTH * 2.42; x <= at(3958) + SS2_FIGURE_HALF_WIDTH * 2.42; x += 1) {
+      if (Math.abs(x - flight.launch.x) < 140 || Math.abs(landingX - x) < 140) continue;
+      assert.ok(lobLiftOver(flight, x, view).lift > crown, `${mirror > 0 ? "forward" : "mirrored"}: under his crown at x ${x.toFixed(1)}`);
+    }
+  }
+});
+
+test("MONOTONE AGAINST cab600f: giant endpoints over giant blockers — every sampled point cab600f cleared stays cleared", () => {
+  // ► **A REPRESENTATIVE SUBSET OF A DIFFERENTIAL SWEEP (2026-09-23, Codex pass
+  //   6).** The sweep itself lives in scratch, not here: 40,500 flights — the
+  //   continuity grid, every range and direction, three rank pairings, endpoints
+  //   of `_yscale` 86/120/147/150/242, blockers 80 to 242 at the walk clamp, 172
+  //   and 250 short, mid-field and in front of the archer — drawn by this
+  //   module and by cab600f's frozen `projectile.js`, point by point. Without
+  //   the floor, 726 cells had points cab600f cleared and this did not (worst
+  //   drop 310.5 units); with it, 0, and no sampled point anywhere is lower
+  //   than cab600f drew it. These are cells from that list, each with three of
+  //   the x's cab600f cleared, measured then; the sweep's own numbers are in
+  //   its report, not asserted here.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const cells = [
+    { from: -1500, to: 1500, ranks: [0, 0], target: 147, blocker: 147, bx: 1353, stop: 70.8466, xs: [1358, 1359, 1360] },
+    { from: 1500, to: -1500, ranks: [0, 0], target: 147, blocker: 147, bx: -1353, stop: 70.8466, xs: [-1360, -1359, -1358] },
+    { from: -1500, to: 1500, ranks: [0, 2], target: 242, blocker: 242, bx: 1250, stop: 116.6319, xs: [1270, 1293, 1315] },
+    { from: 1500, to: -1500, ranks: [0, 2], target: 242, blocker: 242, bx: -1250, stop: 116.6319, xs: [-1315, -1292, -1270] },
+    { from: -2100, to: 2100, ranks: [0, 2], target: 147, blocker: 147, bx: 1953, stop: 70.8466, xs: [1931, 1946, 1960] },
+    { from: 2100, to: -2100, ranks: [0, 2], target: 147, blocker: 147, bx: -1953, stop: 70.8466, xs: [-1960, -1945, -1931] },
+    { from: -2100, to: 2100, ranks: [2, 0], target: 242, blocker: 242, bx: 1850, stop: 116.6319, xs: [1868, 1891, 1914] },
+    { from: 2100, to: -2100, ranks: [2, 0], target: 242, blocker: 242, bx: -1850, stop: 116.6319, xs: [-1914, -1891, -1868] }
+  ];
+  const yOf = (rank) => 200 - 97 * rank;
+  const bare = authoredCrownOf(paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" }), RESTING()
+  ));
+  for (const cell of cells) {
+    const targetY = yOf(cell.ranks[1]);
+    const flight = projectileFlight({
+      kind: "bombard", from: { x: cell.from, y: yOf(cell.ranks[0]) }, to: { x: cell.to, y: targetY }, sequence: 0,
+      targetSize: cell.stop, shooterYscale: 86, targetYscale: cell.target,
+      bodies: [{ x: cell.bx, y: targetY, yscale: cell.blocker }]
+    });
+    const crown = bare * figureScaleFor({ yscale: cell.blocker, rank: rankOfDepth(targetY, 0, view), slotIndex: 0 });
+    for (const x of cell.xs) {
+      const lift = lobLiftOver(flight, x, view).lift;
+      assert.ok(lift > crown,
+        `${cell.from}..${cell.to} ranks ${cell.ranks.join("->")}, a ${cell.blocker} at ${cell.bx}: ${lift.toFixed(2)} at x ${x}, under his ${crown.toFixed(2)} crown`);
+    }
+  }
+});
+
+test("A GIANT cab600f PASSED THROUGH IS NOW CLEARED — a strength-100 body 250 before the landing of a ±1500 lob", () => {
+  // cab600f kept the landing on the target's SHOULDER — he stands ~176 from it,
+  // outside its fixed 140 — so against that low chord he asked `k` for more
+  // than the budget (4.43 against 3.62 at velocity 8, by hand) and was cut to
+  // it: the lob went through him by 20.3 units. His own end room (419) raises
+  // the landing to the target's head, which brings what he asks for inside the
+  // budget — measured 24.6 over his crown at the lowest. This test FAILS on
+  // cab600f's drawing.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const crown = authoredCrownOf(paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" }), RESTING()
+  )) * 1.47;
+  for (const [from, to] of [[-1500, 1500], [1500, -1500]]) {
+    for (let sequence = 0; sequence <= 10; sequence += 1) {
+      const shot = (bodies) => projectileFlight({
+        kind: "bombard", from: { x: from, y: 200 }, to: { x: to, y: 200 }, sequence,
+        targetSize: SS2_FIGURE_HALF_WIDTH * 0.86, shooterYscale: 86, targetYscale: 86, bodies
+      });
+      const giantX = shot([]).impact.x - Math.sign(to - from) * 250;
+      const flight = shot([{ x: giantX, y: 200, yscale: 147 }]);
+      for (let x = giantX - SS2_FIGURE_HALF_WIDTH * 1.47; x <= giantX + SS2_FIGURE_HALF_WIDTH * 1.47; x += 1) {
+        const lift = lobLiftOver(flight, x, view).lift;
+        assert.ok(lift > crown, `${from}..${to} v${flight.xVelocity}: ${lift.toFixed(1)} at x ${x.toFixed(1)}, under his ${crown.toFixed(1)} crown`);
+      }
+    }
+  }
+});
+
+test("THE REACHABLE GIANTS ARE CLEARED OUTSIDE THEIR OWN END ROOMS — bosses, colossus, the largest roll", () => {
+  // ► **THE SIZE RANGE, re-derived for Codex pass 5** (see `endRoomFor`):
+  //   `physical_size = 80 + round(strength / 1.5)` has no ceiling in the
+  //   engine, and nothing caps strength in the build — `is_that_virtuous()`'s
+  //   50 is skipped when `fizMode == "fizzle"`. Measured: the tournament
+  //   bosses' own DNA runs to strength 60 (`_yscale` 120, Emperor Antares);
+  //   colossus drives the build's `_yscale` to 150 from any start; a generated
+  //   opponent's points come from the HERO's level (`ceil(herolevel * 5) - 8`,
+  //   `randomise_gladiator` `+0x24a6`, before the level jitter) and are spent
+  //   exactly (`+0x27bc`-`+0x27ce`) over stats seeded at 1, so at the level
+  //   ceiling of 50 the route doc records, strength up to 243 — `_yscale`
+  //   242. Every one of them, placed where the lob has room for him,
+  //   is cleared over every point of him at least his own end room from both
+  //   ends, against the crowns both painters draw.
+  const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
+  const yOf = (rank) => 200 - 97 * rank;
+  const authoredBare = authoredCrownOf(paintFigure(
+    figureSpecFor({ id: "x", name: "X", resources: {} }, { side: "hero" }), RESTING()
+  ));
+  const extractedBare = REAL_FIGURE ? extractedCrownOf(paintExtractedFigure(REAL_FIGURE.pack, {
+    family: "standing", label: "Standing", facing: "right", at: 0
+  })) : null;
+  const scaleOf = (yscale, y) => figureScaleFor({ yscale, rank: rankOfDepth(y, 0, view), slotIndex: 0 });
+  let flights = 0;
+  let measured = 0;
+  for (const [fromX, toX] of [[-1500, 1500], [1500, -1500], [-2100, 2100], [2100, -2100]]) {
+    const direction = toX > fromX ? 1 : -1;
+    for (const [shooterRank, targetRank] of [[0, 0], [0, 2]]) {
+      for (const shooterYscale of [80, 113]) for (const targetYscale of [80, 113]) {
+        for (const giantYscale of [120, 147, 150, 242]) {
+          const targetY = yOf(targetRank);
+          const surface = SS2_FIGURE_HALF_WIDTH * targetYscale / 100;
+          const reach = SS2_FIGURE_HALF_WIDTH * scaleOf(giantYscale, targetY);
+          // Where to stand him: mid-field, and hard against each end room.
+          const probe = projectileFlight({
+            kind: "bombard", from: { x: fromX, y: yOf(shooterRank) }, to: { x: toX, y: targetY }, sequence: 0,
+            targetSize: surface, shooterYscale, targetYscale
+          });
+          const room = documentedEndRoom(probe, { yscale: giantYscale, y: targetY }, { targetYscale, view });
+          const landingX = probe.impact.x;
+          const spots = [(fromX + toX) / 2, probe.launch.x + direction * (room + reach), landingX - direction * (room + reach)];
+          for (const giantX of spots) for (const sequence of [0, 5, 10]) {
+            const giant = { x: giantX, y: targetY, yscale: giantYscale };
+            const flight = projectileFlight({
+              kind: "bombard", from: { x: fromX, y: yOf(shooterRank) }, to: { x: toX, y: targetY }, sequence,
+              targetSize: surface, shooterYscale, targetYscale, bodies: [giant]
+            });
+            const promise = promisedStretch(flight, giant, { shooterYscale, targetYscale, view });
+            flights += 1;
+            if (!promise.long) continue;   // too short to promise him anything
+            for (let x = giantX - reach; x <= giantX + reach; x += 2) {
+              if (Math.abs(x - flight.launch.x) < promise.fromLaunch || Math.abs(landingX - x) < promise.fromLanding) continue;
+              const t = (x - flight.launch.x) / (flight.direction * flight.xVelocity);
+              const point = projectileDrawAt(flight, t / flight.flightFrames, view);
+              if (Math.abs(point.y - targetY) > 97 / 2) continue;   // passing another rank there
+              for (const bare of [authoredBare, ...(extractedBare === null ? [] : [extractedBare])]) {
+                const crown = bare * scaleOf(giantYscale, targetY);
+                assert.ok(point.lift > crown,
+                  `a ${giantYscale} at ${giantX.toFixed(0)}, ${fromX}..${toX}, ${shooterYscale}@${shooterRank} -> ` +
+                  `${targetYscale}@${targetRank}, v${flight.xVelocity}: ${point.lift.toFixed(1)} under his ${crown.toFixed(1)} crown`);
+              }
+              measured += 1;
+            }
+          }
+        }
+      }
+    }
+  }
+  assert.equal(flights, 4 * 2 * 2 * 2 * 4 * 3 * 3, "every flight the sweep names was drawn");
+  assert.ok(measured > 5000, `and the giants were actually measured over: ${measured} points`);
 });
 
 test("A RAISED LOB STAYS ON THE STAGE WHEREVER ITS UNRAISED ARC DID — the cap, through the stage camera", () => {
   // ► `LOB_PEAK_PER_LENGTH`: `k` may raise the bulge to a quarter of the
   //   flight's length. The camera fits the fight's spread into the 640x420
   //   stage, so its headroom grows with the distance. Blockers placed just
-  //   outside either end room make `k` work hardest (measured up to 3.81 at the
-  //   walls, under a cap of 4.12). The claim is the cap's own: raising the lob
-  //   never lifts its highest point off the top of the stage when the unraised
-  //   arc stayed on it. (The UNRAISED arc of a strength-50 archer already peaks
-  //   above a zoom-80 stage — one launch height over his 256-unit launch — which
-  //   is the normalised arc's, not this construction's.)
+  //   outside THEIR OWN end rooms make `k` work hardest — ~~"just outside either
+  //   end room ... up to 3.81 at the walls, under a cap of 4.12"~~, measured
+  //   against the fixed 140-unit room until Codex pass 5; the rooms are sized
+  //   per body now and the giants are in. The claim is the cap's own: raising
+  //   the lob never lifts its highest point off the top of the stage when the
+  //   unraised arc stayed on it. (The UNRAISED arc of a strength-50 archer
+  //   already peaks above a zoom-80 stage — one launch height over his 256-unit
+  //   launch — which is the normalised arc's, not this construction's.)
   const view = { frontY: 200, rankStride: 97, figureScaleFor, rankOfDepth };
   let checked = 0;
   for (const [fromX, toX] of [[-250, 250], [-1500, 1500], [-2100, 2100], [2100, -2100]]) {
     const direction = toX > fromX ? 1 : -1;
-    const landingX = toX - direction * SS2_FIGURE_HALF_WIDTH * 0.86;
-    const launchX = fromX + direction * 30;
-    const wide = SS2_FIGURE_HALF_WIDTH * 1.13 * 1.05;
-    for (const blockerX of [landingX - direction * (141 + wide), launchX + direction * (141 + wide), (fromX + toX) / 2]) {
-      for (const shooterYscale of [80, 113]) for (let sequence = 0; sequence <= 10; sequence += 1) {
-        const shot = (bodies) => projectileFlight({
-          kind: "bombard", from: { x: fromX, y: 200 }, to: { x: toX, y: 200 }, sequence,
-          targetSize: SS2_FIGURE_HALF_WIDTH * 0.86, shooterYscale, targetYscale: 86, bodies
-        });
+    for (const blockerYscale of [113, 147, 242]) for (const shooterYscale of [80, 113]) {
+      const shot = (sequence, bodies) => projectileFlight({
+        kind: "bombard", from: { x: fromX, y: 200 }, to: { x: toX, y: 200 }, sequence,
+        targetSize: SS2_FIGURE_HALF_WIDTH * 0.86, shooterYscale, targetYscale: 86, bodies
+      });
+      const probe = shot(0, []);
+      const room = documentedEndRoom(probe, { yscale: blockerYscale, y: 200 }, { targetYscale: 86, view });
+      const wide = SS2_FIGURE_HALF_WIDTH * (blockerYscale / 100) * 1.05;
+      const spots = [
+        probe.impact.x - direction * (room + wide + 1), probe.launch.x + direction * (room + wide + 1), (fromX + toX) / 2
+      ];
+      for (const blockerX of spots) for (let sequence = 0; sequence <= 10; sequence += 1) {
         const actors = [{ x: fromX, side: "hero" }, { x: toX, side: "villain" }, { x: blockerX, side: "hero" }];
         let camera = cameraFor(actors);
         for (let frame = 0; frame < 60; frame += 1) camera = cameraStep(camera, actors);
         const stage = stageProjectorFor(camera, stageFitFor({ width: 640, height: 420 }));
         const top = (flight) => Math.min(...lobSamples(flight, view, { step: 8 }).map((point) => stage.toY(point.y, point.lift)));
-        const raised = top(shot([{ x: blockerX, y: 200, yscale: 113 }]));
-        const unraised = top(shot([]));
-        assert.ok(raised >= 0 || raised >= unraised - 1e-6,
-          `${fromX}..${toX}, a 113 at ${blockerX.toFixed(0)}, archer ${shooterYscale}, sequence ${sequence}: ` +
-          `the raised lob tops out at stage y ${raised.toFixed(1)}, the unraised at ${unraised.toFixed(1)}`);
+        const raised = top(shot(sequence, [{ x: blockerX, y: 200, yscale: blockerYscale }]));
+        const unraised = top(shot(sequence, []));
+        // ► **ONLY WHERE THE UNRAISED ARC WAS ON THE STAGE — which is what this
+        //   test's name says.** ~~`raised >= 0 || raised >= unraised`~~ until
+        //   Codex pass 5: it also demanded that a lob ALREADY off the top go no
+        //   higher, which a raised LANDING (a body in his own end room, now
+        //   sized per body) legitimately breaks — a strength-50 archer's arc at
+        //   ±250 tops out at stage y -8.6 on its own. That is the normalised
+        //   arc's, reported with the cap, and not this claim.
+        if (unraised >= 0) {
+          assert.ok(raised >= 0,
+            `${fromX}..${toX}, a ${blockerYscale} at ${blockerX.toFixed(0)}, archer ${shooterYscale}, sequence ${sequence}: ` +
+            `the raised lob tops out at stage y ${raised.toFixed(1)}, off the stage, where the unraised was on it at ${unraised.toFixed(1)}`);
+        }
         checked += 1;
       }
     }
   }
-  assert.equal(checked, 4 * 3 * 2 * 11);
+  assert.equal(checked, 4 * 3 * 2 * 3 * 11);
 });
 
 test("the FITTED view still frames a whole gladiator when its height bound is the one that binds", () => {

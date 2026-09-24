@@ -10026,21 +10026,35 @@ export function createSs2TeamRules({
       //   inside a bombard-only test (`+0x72c7`), so a bombard arcs and a snipe
       //   holds one height for its whole flight. Measured off
       //   `src/render/projectile.js`, which reproduces that integration, in
-      //   FIGURE HEIGHTS where a gladiator is exactly 1.0:
+      //   ~~FIGURE HEIGHTS where a gladiator is exactly 1.0~~ **BOMBARD LAUNCH
+      //   HEIGHTS — corrected 2026-09-23: since the gladiator is drawn at the
+      //   build's size, 1 is the SHOOTER's own `_yscale * 2 + 30` (230 arena
+      //   units at `_yscale` 100), and a gladiator the shooter's size is 0.937
+      //   (strength 0) to 1.048 (the largest a generated opponent can roll) of
+      //   one, not 1.0.** Both numbers re-derived that day at `_yscale` 100:
       //
       //   ```text
       //     snipe      0.674 flat, the whole way          chest height
       //     bombard    >= 1.055 everywhere a body could
-      //                stand, across every range from
-      //                200 to 4,000 units                 over their heads
+      //                stand (86 in from either end),
+      //                every range 200 to 4,000, every
+      //                drawn velocity, with no stop-short
+      //                or the drawn one (41.45 at str 9)  over their heads
       //   ```
       //
       //   The bombard's low point is always at the LAUNCH end, because it
       //   leaves at head height and climbs; the only place it drops back below
-      //   is the final approach onto the target, where nobody else can be
-      //   standing. **So a lobbed arrow genuinely passes over a body and a flat
-      //   one genuinely does not**, and the legality rule is that fact rather
-      //   than a rule laid on top of it.
+      //   is the final approach onto the target, ~~where nobody else can be
+      //   standing~~ — **where the walk clamp DOES park somebody: the shooter's
+      //   own front-liner (corrected 2026-09-23).** **So a lobbed arrow
+      //   genuinely passes over a body and a flat one genuinely does not**, and
+      //   the legality rule is that fact rather than a rule laid on top of it.
+      //   ► These are the ARC's heights, underneath the drawing. What the screen
+      //   shows over a body is `lobLiftAt`'s in `projectile.js` (since
+      //   2026-09-23): clearance by construction outside each body's own end
+      //   room, the landing raised onto the target's head when somebody stands
+      //   in its approach, and a giant who asks for more than the stage's budget
+      //   raised over as far as it goes.
       //
       //   `ss2ShotBlocked` needed NO new geometry for this — it is already a
       //   2-D segment test over `(x, depth)` and handles a cross-lane shot

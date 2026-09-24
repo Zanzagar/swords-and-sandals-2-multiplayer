@@ -17,13 +17,24 @@
  * there.
  *
  * WHAT IS *NOT* THE CAUSE, because a plausible wrong answer was available: the
- * arc. `ss2-rules.js` claims a bombard flies `>= 1.055` figure heights
+ * arc. `ss2-rules.js` claims a bombard flies `>= 1.055` ~~figure heights~~
  * "everywhere a body could stand", which is wrong as a global minimum — it is
  * 0.789 on the claim's own terms and 0.636 with the adapter's real
  * `targetSize`, both at the LAUNCH end. But over an interposed body the lob
- * genuinely does clear, at 1.04 to 1.34 figure heights. It does not fly through
- * the ally; it STOPS on him, at 0.64-0.99 figure heights, which is chest to head.
- * So the fix is the endpoint, and the legality rule is untouched.
+ * genuinely does clear, at 1.04 to 1.34 ~~figure heights~~. It does not fly
+ * through the ally; it STOPS on him, at 0.64-0.99 ~~figure heights~~, which is
+ * chest to head. So the fix is the endpoint, and the legality rule is untouched.
+ *
+ * **UNIT CORRECTED 2026-09-23: those numbers are BOMBARD LAUNCH HEIGHTS** —
+ * `projectile.js`'s `height`, 1 being the shooter's own `_yscale * 2 + 30`
+ * (230 arena units at the `_yscale` 100 they were measured at); a gladiator the
+ * shooter's size is 0.937-1.048 of one since he is drawn at the build's size.
+ * They were taken with the old `physical_size` stop-short (86): re-derived that
+ * day, 0.636 is sequence 3's alone (all eleven velocities reach 0.429), and
+ * with the DRAWN stop this file now tests (41.45 at strength 9) the lowest
+ * point between bodies is 1.055, `ss2-rules.js`'s own figure. The 0.789,
+ * 1.04-1.34 and 0.64-0.99 were not re-derived. See `stopShortFor` in
+ * `src/adapter/presentation.js`, which carries the same correction.
  */
 import assert from "node:assert/strict";
 import test from "node:test";

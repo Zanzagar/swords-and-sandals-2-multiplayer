@@ -252,16 +252,55 @@ const LOB_FOOTPRINT_MARGIN = 0.05;
 const LOB_PEAK_PER_LENGTH = 0.25;
 
 /**
- * THE ROOM AT EITHER END OF A LOB IN WHICH IT CANNOT PROMISE TO CLEAR A BODY:
- * 140 arena units. DERIVED, not chosen: near an end the capped bulge rises at
- * most one unit per unit of x (a parabola peaking at a quarter of the length
- * leaves at slope 1), and the most it must climb is the tallest blocker's
- * clearance over the lowest landing — a strength-50 body (`_yscale` 113),
- * `222.65 * 1.13 * 1.05` = 264.2, over a strength-0 target's shoulder, `80 *
- * 1.5 + 5` = 125: 139.2. Beyond 140 units from both ends every body this game
- * can field is cleared; within it, see `lobLiftAt`.
+ * THE ROOM AT EITHER END OF A LOB IN WHICH IT CANNOT PROMISE TO CLEAR ONE BODY:
+ * `2 * (C - e) / rho`, per body — where `C` is that body's drawn clearance (its
+ * crown plus `LOB_CROWN_MARGIN`), `e` the lower end of the chord (the launch or
+ * the shoulder landing, each at its rank's scale) and `rho` the smaller of the
+ * two ends' depth scales over the larger. DERIVED, and it replaces a constant:
+ *
+ * - At distance `d` from the nearer end of a flight `L` long, the bulge raised
+ *   to the cap stands at least `rho * d * (1 - d / L)` over the chord (it is
+ *   `L * s * (1 - s)` at `_yscale` scale, `s = d / L`). That is increasing in
+ *   `d` up to `L / 2`, so from `d = room` on it is at least
+ *   `rho * room * (1 - room / L)`, which is `C - e` when `room = 2(C - e)/rho`
+ *   and the flight is at least `2 * room` long. `C - e` is at least `C` minus
+ *   the chord anywhere, so every point of the body that far from both ends is
+ *   cleared with `k` at or under the cap — **the cap can never bind there, and
+ *   no required clearance is discarded.** A flight shorter than `2 * room`
+ *   promises that body nothing.
+ * - The room grows with the body: 134 units for a strength-9 body over a
+ *   strength-9 target's shoulder, 278 for strength 50 over strength 0, 419
+ *   for Codex's `_yscale` 147, 882 for the largest a generated opponent can
+ *   roll (`_yscale` 242: `randomise_gladiator` gives a non-hero
+ *   `ceil(herolevel * 5) - 8` points from the HERO's level, `+0x24a6`, and
+ *   spends them exactly, `+0x27bc`-`+0x27ce`, over stats seeded at 1 — at the
+ *   level ceiling of 50 that `docs/integration/ss2-arena-route.md` records,
+ *   strength 243), each against a strength-0 target's shoulder.
+ *
+ * ► ~~`LOB_END_ROOM = 140` — "every body this game can field", derived as a
+ *   strength-50 body over a strength-0 shoulder at slope 1~~ **until
+ *   2026-09-23 (Codex pass 5), and MY OWN ERROR twice over.** Strength 50 was
+ *   an ASSUMPTION I never derived: the tournament bosses reach 60 (Emperor
+ *   Antares, `_yscale` 120), `is_that_virtuous()`'s 50-per-stat clamp is never
+ *   called in this build (`constructDNA` `+0x1b7d`-`+0x1b8d` skips it when
+ *   `fizMode == "fizzle"`), and a generated opponent's stat roll has no cap at
+ *   all. And "slope 1" dropped the parabola's `(1 - d/L)`: the promise held
+ *   for strength 50 by 1.14 units at worst (measured, ±375), not by the
+ *   derivation. Codex's `_yscale` 147 body, 158.55 units from the landing, was
+ *   drawn 316.82 against a 327.30 crown with `k` silently clamped.
  */
-const LOB_END_ROOM = 140;
+function endRoomFor(clearance, chordFloor, depthRatio) {
+  return (2 * Math.max(0, clearance - chordFloor)) / depthRatio;
+}
+
+/**
+ * cab600f's fixed end room — WRONG as the promise it shipped as (`endRoomFor`
+ * says why) and KEPT AS A FLOOR (Codex pass 6): `lobShapeFor` enforces
+ * cab600f's own requirement beside the per-body one and takes the stricter, so
+ * the drawing is monotone against the commit that shipped it. Remove it only
+ * with a differential sweep showing nothing cab600f cleared is cleared less.
+ */
+const CAB600F_END_ROOM = 140;
 
 /**
  * How high on the target a lob lands when a body stands in its approach: 95% of
@@ -292,36 +331,58 @@ const LOB_RAISED_LANDING = 0.95;
  *   over the launch-to-landing chord would not vanish at the landing);
  * - **`k`** is the smallest value `>= 1` for which every body in the way, its
  *   footprint widened by `LOB_FOOTPRINT_MARGIN`, is cleared by
- *   `LOB_CROWN_MARGIN` — evaluated over the whole footprint outside the end
- *   rooms — and never more than the cap (`LOB_PEAK_PER_LENGTH`).
+ *   `LOB_CROWN_MARGIN` — evaluated over each footprint outside the two
+ *   APPROACHES — and never more than the stage's budget
+ *   (`LOB_PEAK_PER_LENGTH`), which is spent on purpose (below).
  *
  * Every term is continuous in `s` and `k` is fixed for the flight, so there is
  * nothing to jump. With nobody in the way `k` is 1 and the lob is the
  * shooter's arc bent linearly onto the target's shoulder.
  *
- * ## THE ENDS, which no bounded `k` can reach
+ * ## WHAT IS PROMISED, AND WHAT IS DONE WHERE IT IS NOT
  *
- * Within `LOB_END_ROOM` of either end the bulge is too small for any capped
- * `k` to clear a tall body, and the two ends are treated differently:
+ * **Promised, and tested for every size a fighter can reach:** every point of a
+ * body at least `max(his end room, that end's approach)` from both ends of a
+ * flight at least twice his room long is cleared (`endRoomFor` derives why the
+ * budget always covers it). Everywhere else, DELIBERATELY:
  *
- * - **At the landing, THE LANDING RISES.** If a body in the target's rank
- *   stands within the end room, the lob lands at `LOB_RAISED_LANDING` of the
- *   target's crown — its head — instead of its shoulder. Chosen over simply
- *   accepting the overlap because the case is COMMON, not rare: the walk clamp
- *   parks the shooter's own front-liner `physical_size` in front of the target,
- *   ~3 units from its drawn front, and a lob landing on the shoulder would come
- *   down through that ally's back on nearly every team-fight bombard — the
- *   "shooting its own teammate" picture the owner already reported once
- *   (`stopShortFor`). Landing on the head keeps it on the target (the build's
- *   end checks no height at all) and leaves only a graze of the ally's crown in
- *   the last few units — measured between two strength-9 gladiators with the
- *   ally at the clamp, the lob's lowest point over him is 187.6 at ±250, 182.9
- *   at ±1500 and 182.6 at the walls, against his 191.5 crown: 3.9 to 8.9 units
- *   into the top of his head, where a shoulder landing would go through his back.
- * - **At the launch, THE OVERLAP IS ACCEPTED.** The launch is the build's own
- *   formula and is not moved. A body standing within the end room in front of
- *   the archer — taller than his launch height — is passed through as the lob
- *   leaves, before it is high enough to clear him.
+ * - **THE APPROACHES spend no raise.** The shooter's `physical_size` after the
+ *   launch and the target's before the landing are where the walk clamp parks
+ *   somebody AT them; a lob cannot clear a body a few units from where it
+ *   leaves or lands without going nearly vertical, and pinning `k` at the
+ *   budget for him would send every long bombard over a front-liner to the top
+ *   of the stage for a graze it still could not avoid.
+ * - **AT THE LANDING, THE LANDING RISES.** If a body in the target's rank
+ *   stands where he is not promised — in the approach or inside his own end
+ *   room — the lob lands at `LOB_RAISED_LANDING` of the target's crown — its
+ *   head — instead of its shoulder. Chosen over simply accepting the overlap
+ *   because the case is COMMON, not rare: the walk clamp parks the shooter's
+ *   own front-liner `physical_size` in front of the target, ~3 units from its
+ *   drawn front, and a lob landing on the shoulder would come down through that
+ *   ally's back on nearly every team-fight bombard — the "shooting its own
+ *   teammate" picture the owner already reported once (`stopShortFor`).
+ *   Landing on the head keeps it on the target (the build's end checks no
+ *   height at all) and leaves only a graze of the ally's crown in the last few
+ *   units — measured between two strength-9 gladiators with the ally at the
+ *   clamp, the lob's lowest point over him is 187.6 at ±250, 182.9 at ±1500
+ *   and 182.6 at the walls, against his 191.5 crown: 3.9 to 8.9 units into the
+ *   top of his head, where a shoulder landing would go through his back.
+ * - **A BODY WHO ASKS FOR MORE THAN THE BUDGET IS RAISED OVER AS FAR AS IT GOES,
+ *   AND PASSED THROUGH FOR THE REST.** A giant is the case: Codex's `_yscale`
+ *   147 body 158.55 units before the landing of a strength-9 pair's 1000-unit
+ *   lob asks `k` for more than the budget, gets all of it, and, standing
+ *   inside his own 419-unit end room, raises the landing to the target's head;
+ *   what is left of him over the lob is accepted, and measured in
+ *   `test/render-arena-shell.test.js`, which names the case. `overBudget` on
+ *   the shape says a flight had to choose.
+ * - **AT THE LAUNCH, THE OVERLAP IS ACCEPTED.** The launch is the build's own
+ *   formula and is not moved. A body standing in the launch approach — taller
+ *   than the archer's launch height — is passed through as the lob leaves.
+ * - **Why the budget is not widened where the stage has room:** this module
+ *   never sees the camera — it pans and zooms through the flight in
+ *   `tools/arena/main.js` — and the budget is the one bound the stage test can
+ *   hold it to. A lob that rose higher for a giant would clear him by leaving
+ *   the frame, which trades one wrong picture for another.
  *
  * WHICH PART IS WHOSE: the LAUNCH (`_yscale * 2 + 30`, the shooter's units)
  * and the END AT THE DEFENDER (`bullet._x` passing `defender._x`, or `_y >
@@ -376,34 +437,73 @@ function lobShapeFor(flight, deps) {
   const fromLanding = (x) => -direction * (x - x1);
   const fromLaunch = (x) => direction * (x - x0);
 
-  // The bodies in the way, with their widened drawn footprints and crowns.
+  // The chord's lower end and the depth ratio the end rooms are derived from —
+  // with the SHOULDER landing, the lower of the two, so a raised landing only
+  // ever adds margin.
+  const launch = h0 * perHeight;
+  const chordFloor = Math.min(launch * sigma0, shoulderOf(flight) * sigma1);
+  const depthRatio = Math.min(sigma0, sigma1) / Math.max(sigma0, sigma1);
+
+  // The bodies in the way, with their widened drawn footprints, crowns and
+  // their OWN end rooms, which grow with them (`endRoomFor`).
   const bodies = (flight.bodies ?? []).map((body) => {
     const scale = (body.yscale / 100) * sizeAt(body.y);
+    const clearance = SS2_FIGURE_HEIGHT * scale * (1 + LOB_CROWN_MARGIN);
     return {
       x: body.x,
       y: body.y,
       reach: SS2_FIGURE_HALF_WIDTH * scale * (1 + LOB_FOOTPRINT_MARGIN),
-      clearance: SS2_FIGURE_HEIGHT * scale * (1 + LOB_CROWN_MARGIN)
+      clearance,
+      room: endRoomFor(clearance, chordFloor, depthRatio)
     };
   });
 
-  // The landing: the target's shoulder, raised to its head when somebody in
-  // its rank stands in the end room before it.
-  const crowded = bodies.some((body) => sameRank(body.y, y1, halfStride)
-    && fromLanding(body.x - direction * body.reach) > 0
-    && fromLanding(body.x + direction * body.reach) < LOB_END_ROOM);
-  const targetScale = (flight.impact.yscale ?? SS2_PROJECTILE.nominalYscale) / 100;
-  const landing = crowded
-    ? Math.max(shoulderOf(flight), LOB_RAISED_LANDING * SS2_FIGURE_HEIGHT * targetScale)
-    : shoulderOf(flight);
-  const launch = h0 * perHeight;
-  const chordAt = (s) => launch * sigma0 + s * (landing * sigma1 - launch * sigma0);
+  // THE APPROACHES: the room the walk clamp keeps in front of each end — the
+  // shooter's `physical_size` after the launch, the target's before the
+  // landing. A body there is somebody standing AT the archer or AT the target,
+  // and no raise of the arc is spent on him (see `lobLiftAt`).
+  const launchApproach = flight.launch.yscale ?? SS2_PROJECTILE.nominalYscale;
+  const landingApproach = flight.impact.yscale ?? SS2_PROJECTILE.nominalYscale;
 
-  // `k`: the smallest raise that clears every footprint outside the end rooms,
-  // sampled a unit apart and at both edges.
+  // THE FLOOR — cab600f's own requirement, kept so this construction is
+  // MONOTONE against it (Codex pass 6). cab600f judged a body by one fixed room
+  // of `CAB600F_END_ROOM` at both ends: it raised the landing for a body within
+  // that room of it, and asked `k` to clear every point at least that far from
+  // both ends. The per-body rule below is stricter almost everywhere and looser
+  // in one place: when an END is a giant, his approach (his `physical_size`)
+  // outgrows 140 and drops points cab600f enforced — a strength-60 archer's lob
+  // at a `_yscale` 242 target over the giant parked at his clamp fell from
+  // 540.50 to 529.07 at x 1910, under the blocker's 538.81 crown. So both are
+  // computed and the lob takes the STRICTER of each: the landing rises if
+  // either rule says so, and `k` is the larger of the two requirements.
+  // Pointwise, the chord is never lower than cab600f's and `k` never smaller,
+  // so no point of the drawing is lower than cab600f drew it — and nothing it
+  // cleared is cleared less.
+  const withinOf = (room) => (body) => sameRank(body.y, y1, halfStride)
+    && fromLanding(body.x - direction * body.reach) > 0
+    && fromLanding(body.x + direction * body.reach) < room(body);
+  const crowdedFloor = bodies.some(withinOf(() => CAB600F_END_ROOM));
+
+  // The landing: the target's shoulder, raised to its head when somebody in
+  // its rank stands where the lob cannot promise to clear him — inside his own
+  // end room, or in the target's approach — before it; or where cab600f would
+  // have raised it.
+  const crowded = crowdedFloor || bodies.some(withinOf((body) => Math.max(body.room, landingApproach)));
+  const targetScale = (flight.impact.yscale ?? SS2_PROJECTILE.nominalYscale) / 100;
+  const raised = Math.max(shoulderOf(flight), LOB_RAISED_LANDING * SS2_FIGURE_HEIGHT * targetScale);
+  const landing = crowded ? raised : shoulderOf(flight);
+  const chordAt = (s) => launch * sigma0 + s * (landing * sigma1 - launch * sigma0);
+  const floorLanding = crowdedFloor ? raised : shoulderOf(flight);
+  const floorChordAt = (s) => launch * sigma0 + s * (floorLanding * sigma1 - launch * sigma0);
+
+  // `k`: the raise every body asks for, under both rules, sampled a unit apart
+  // and at both edges of each footprint. The per-body rule asks over every
+  // point outside the two approaches, against this chord; the floor asks over
+  // every point at least `CAB600F_END_ROOM` from both ends, against its own.
   const peak = bulgeAt(0.5) * scaleAt(0.5);
   const cap = peak > 0 ? Math.max(1, (LOB_PEAK_PER_LENGTH * length) / peak) : 1;
-  let k = 1;
+  let asked = 1;
+  let askedFloor = 1;
   for (const body of bodies) {
     const lo = body.x - body.reach;
     const hi = body.x + body.reach;
@@ -411,18 +511,32 @@ function lobShapeFor(flight, deps) {
     for (let x = lo; x < hi; x += 1) xs.push(x);
     xs.push(hi);
     for (const x of xs) {
-      if (fromLaunch(x) < LOB_END_ROOM || fromLanding(x) < LOB_END_ROOM) continue;
       const s = progressAt(x);
       if (!sameRank(body.y, depthAt(s), halfStride)) continue;
       const room = bulgeAt(s) * scaleAt(s);
       if (!(room > 0)) continue;
-      k = Math.max(k, (body.clearance - chordAt(s)) / room);
+      if (fromLaunch(x) >= launchApproach && fromLanding(x) >= landingApproach) {
+        asked = Math.max(asked, (body.clearance - chordAt(s)) / room);
+      }
+      if (fromLaunch(x) >= CAB600F_END_ROOM && fromLanding(x) >= CAB600F_END_ROOM) {
+        askedFloor = Math.max(askedFloor, (body.clearance - floorChordAt(s)) / room);
+      }
     }
   }
-  k = Math.min(k, cap);
+  // ► **THE BUDGET, AND IT IS SPENT ON PURPOSE — Codex pass 5.** ~~`k =
+  //   Math.min(k, cap)`, silently~~: the cap is the stage's budget
+  //   (`LOB_PEAK_PER_LENGTH`), and a body who asks for more than it is RAISED
+  //   OVER AS FAR AS THE BUDGET GOES and passed through for the rest — never
+  //   by leaving the frame. What is PROMISED is narrower and provable: every
+  //   point of a body at least `max(his end room, that end's approach)` from
+  //   both ends asks for no more than the budget (`endRoomFor`), so it is
+  //   cleared. `overBudget` says, on the shape, when a flight had to choose —
+  //   under EITHER rule (Codex pass 6).
+  const overBudget = asked > cap || askedFloor > cap;
+  const k = Math.min(Math.max(asked, askedFloor), cap);
 
   const shape = Object.freeze({
-    k, cap, landing, crowded,
+    k, cap, asked, askedFloor, overBudget, landing, crowded,
     progressAt,
     liftAt: (s) => chordAt(s) + k * bulgeAt(s) * scaleAt(s)
   });
@@ -584,7 +698,10 @@ export function projectileFlight({
       // `projectileAt`. Carried as a pair rather than interpolated here so the
       // flight is a description and the position is a function of time.
       y: Number.isFinite(from?.y) ? from.y : null,
-      height: launchHeight
+      height: launchHeight,
+      // The shooter's `_yscale` — its `physical_size`, the room the walk clamp
+      // keeps in front of it: a lob's launch-end approach (`lobShapeFor`).
+      yscale: yscaleOf(shooterYscale)
     }),
     impact: Object.freeze({
       // The SURFACE, not the centre. See `bodyStop` above.
