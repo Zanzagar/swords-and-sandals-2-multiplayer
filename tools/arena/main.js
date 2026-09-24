@@ -165,6 +165,14 @@ import {
 } from "/tools/arena/seats.js";
 import { createSoundPlayer } from "/tools/arena/sound-player.js";
 import {
+  ARENA_ASSET_TIMEOUT_MS,
+  PackOutcome,
+  assetGateReport,
+  createAssetGate,
+  lateArrivalReport,
+  loadingFrameFor
+} from "/tools/arena/asset-gate.js";
+import {
   SS2_ARENA_SOUNDS,
   arenaSoundFilesFrom,
   arenaSoundSettled,
@@ -534,6 +542,36 @@ const soundPlayer = createSoundPlayer({
 });
 
 /* ------------------------------------------------------------------ */
+/* The asset gate — no stage and no action until the art has settled    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THE OWNER SAW THE AUTHORED FIGURES FLASH BEFORE HIS OWN (2026-09-24):**
+ *   *"the 'old skins' flash for a second before being populated by the real
+ *   swords and sandals 2 skins."* The loop below started at once while every
+ *   pack arrived on its own fetch and filled its variable when it landed, so
+ *   the first frames drew the authored fallback and then swapped — and an AI
+ *   seat could act before any of it was in.
+ *
+ * Every VISUAL pack is now handed to this gate (`assetGate.track`), and what
+ * each one fills is applied only when the gate OPENS (`useArenaPacks`, at the
+ * clock). Until then `render` draws the loading frame, `renderControls` offers
+ * no button and `frame` steps nothing. The rule — settled means loaded, 404'd
+ * or errored; an 8 s timeout; a pack that arrives after the gate is not used
+ * that bout — is `tools/arena/asset-gate.js`, under the suite. Sound is not
+ * gated: it keeps loading in the background, as it always has.
+ */
+let assetGateOpen = false;
+const assetGate = createAssetGate({
+  clock: () => performance.now(),
+  // Said, never used: swapping art mid-bout is the flash this gate exists to stop.
+  onLateArrival: (arrival) => {
+    const line = lateArrivalReport(arrival);
+    log(line.message, { warn: line.warn });
+  }
+});
+
+/* ------------------------------------------------------------------ */
 /* Art — the player's OWN extracted rig, or the authored figure         */
 /* ------------------------------------------------------------------ */
 
@@ -564,11 +602,15 @@ let wardrobe = null;
  * `extract-figure.mjs` but not `extract-props.mjs` should get the build's
  * gladiator firing this shell's authored arrow, not lose both. Same
  * arrangement the wardrobe has for the same reason.
+ *
+ * Fetched here, USED when the asset gate opens (`usePropPack`).
  */
 let propPack = null;
-fetch("/assets/props/props.json")
-  .then((response) => (response.ok ? response.json() : null))
-  .then((data) => {
+assetGate.track("props", fetch("/assets/props/props.json")
+  .then((response) => (response.ok ? response.json() : null)));
+
+function usePropPack(data) {
+  try {
     propPack = propPackFrom(data);
     if (!hasExtractedProps(propPack)) {
       log("no extracted props — drawing an authored arrow. `node tools/extract-props.mjs` to use the build's own.");
@@ -576,9 +618,12 @@ fetch("/assets/props/props.json")
     }
     log(`props: ${propFrameCount(propPack, "bullet")} arrow frame(s) from your own install`);
     reportArenaEffects(propPack);
-    renderProvenance();
-  })
-  .catch(() => { propPack = null; });
+  } catch (error) {
+    // A pack that cannot be read through falls back whole, as it always did.
+    propPack = null;
+    throw error;
+  }
+}
 
 /**
  * The build's own embedded glyph outlines, or null — the UI bar's words.
@@ -588,17 +633,22 @@ fetch("/assets/props/props.json")
  *   and the figures, and for the same reason: this repository ships no SS2
  *   asset, so a 404 here is the supported case and not a failure.
  */
-fetch("/assets/text/text.json")
-  .then((response) => (response.ok ? response.json() : null))
-  .then((data) => {
+assetGate.track("text", fetch("/assets/text/text.json")
+  .then((response) => (response.ok ? response.json() : null)));
+
+function useTextPack(data) {
+  try {
     textPack = textPackFrom(data);
     if (!textPack) {
       log("no extracted text — the UI bar draws no words. `node tools/extract-text.mjs` to add them.");
       return;
     }
     reportUiBar();
-  })
-  .catch(() => { textPack = null; });
+  } catch (error) {
+    textPack = null;
+    throw error;
+  }
+}
 
 /**
  * Which frame of the fighter clip throws blood or sparks, from
@@ -606,10 +656,12 @@ fetch("/assets/text/text.json")
  * the wardrobe is optional on top of the rig.
  */
 let clipEffects = null;
-fetch("/assets/props/clip-effects.json")
-  .then((response) => (response.ok ? response.json() : null))
-  .then((data) => { clipEffects = clipEffectTableFrom(data); })
-  .catch(() => { clipEffects = null; });
+assetGate.track("clipEffects", fetch("/assets/props/clip-effects.json")
+  .then((response) => (response.ok ? response.json() : null)));
+
+function useClipEffects(data) {
+  clipEffects = clipEffectTableFrom(data);
+}
 
 /**
  * Blood and sparks currently in the air, each with its own clock.
@@ -735,22 +787,32 @@ let figureEffects = figureEffectCensusOf(null);
  */
 let enchantments = null;
 
-Promise.all([
+/*
+ * Three packs to the asset gate, where they used to be one `Promise.all`: the
+ * rig (both halves or neither), and the two optional layers over it, each
+ * counted and each able to be late on its own. `useArenaPacks` applies the
+ * wardrobe and the enchantments BEFORE the rig, which is built with them.
+ */
+assetGate.track("figure", Promise.all([
   fetch("/assets/figure/shapes.json").then((response) => (response.ok ? response.json() : null)),
-  fetch("/assets/figure/animations.json").then((response) => (response.ok ? response.json() : null)),
-  // The wardrobe is OPTIONAL on top of the rig: a player who ran the figure
-  // extractor but not the wardrobe one gets a naked gladiator rather than none.
-  fetch("/assets/figure/wardrobe.json").then((response) => (response.ok ? response.json() : null)).catch(() => null),
-  fetch("/assets/figure/enchantments.json").then((response) => (response.ok ? response.json() : null)).catch(() => null)
-])
-  .then(([shapes, animations, dressing, enchantmentPack]) => {
-    wardrobe = dressing;
-    enchantments = enchantmentPack;
-    figureEffects = figureEffectCensusOf(animations);
-    if (!shapes || !animations) {
-      log("no extracted art — drawing the authored figure. `node tools/extract-figure.mjs` to use the build's own.");
-      return;
-    }
+  fetch("/assets/figure/animations.json").then((response) => (response.ok ? response.json() : null))
+]).then(([shapes, animations]) => (shapes && animations ? { shapes, animations } : null)));
+// The wardrobe is OPTIONAL on top of the rig: a player who ran the figure
+// extractor but not the wardrobe one gets a naked gladiator rather than none.
+assetGate.track("wardrobe",
+  fetch("/assets/figure/wardrobe.json").then((response) => (response.ok ? response.json() : null)).catch(() => null));
+assetGate.track("enchantments",
+  fetch("/assets/figure/enchantments.json").then((response) => (response.ok ? response.json() : null)).catch(() => null));
+
+function useFigurePack(rig) {
+  const shapes = rig?.shapes ?? null;
+  const animations = rig?.animations ?? null;
+  figureEffects = figureEffectCensusOf(animations);
+  if (!shapes || !animations) {
+    log("no extracted art — drawing the authored figure. `node tools/extract-figure.mjs` to use the build's own.");
+    return;
+  }
+  try {
     figurePack = figurePackFrom(shapes, animations, enchantments);
     const pieces = wardrobe ? Object.values(wardrobe.pieces ?? {}).reduce((n, slot) => n + Object.keys(slot).length, 0) : 0;
     log(`art: ${Object.keys(shapes).length} shape(s), ${figurePack.labels.length} animation(s)` +
@@ -771,17 +833,15 @@ Promise.all([
         `, ${ladder.framesWithAGlow}/${ladder.frames} art frame(s) glow, ` +
         `${ladder.groups} enclosing group(s), ${ladder.filters} filter(s).`);
     }
-    // The provenance panel is rendered at startup, BEFORE this resolves. Without
-    // this it would go on claiming the figures are authored while the build's
-    // own rig is drawn over the sentence saying so.
-    renderProvenance();
-  })
-  .catch((error) => {
+    // ~~`renderProvenance()` here~~ — the panel that must not go on claiming
+    // authored figures over the build's own is re-rendered ONCE, by
+    // `openArena`, after every pack is applied.
+  } catch (error) {
     // A broken pack falls back rather than taking the arena down with it.
     figurePack = null;
     log(`extracted art unusable, drawing the authored figure (${String(error.message).slice(0, 80)})`);
-    renderProvenance();
-  });
+  }
+}
 
 fetch("/assets/sound/manifest.json")
   .then((response) => (response.ok ? response.json() : null))
@@ -962,8 +1022,13 @@ let arenaSoundFiles = arenaSoundFilesFrom(null);
 let arenaSoundState = createArenaSoundState();
 /** The crowd a spectator hears: the host's, from the moment each action's DRAWING ends. */
 let crowdPresenter = createCrowdPresenter(ss2CrowdInterestOf(host.battle));
-/** The build's `combat_panel` load: the crowd's clock and its roll's frame 0. */
-const boutStartedAt = performance.now();
+/**
+ * The build's `combat_panel` load: the crowd's clock and its roll's frame 0.
+ * ► **STAMPED WHEN THE ASSET GATE OPENS (2026-09-24)**, not at module load: the
+ *   panel loads when the arena APPEARS, and until then the page is showing the
+ *   loading frame. No arena sound is stepped before it (`frame`).
+ */
+let boutStartedAt = null;
 /** Each side's opening levels — the build's `hero.herolevel`, read before any experience. */
 const sideLevels = new Map(host.battle.teams.map((team) => [
   team.id,
@@ -2160,35 +2225,54 @@ const TWIPS_PER_PIXEL = 20;
  *   because compositing them in node would need a JPEG decoder it does not
  *   ship. They are composited HERE, once, with `destination-in` — which is the
  *   one place a canvas is actually the right tool.
+ *
+ * ► **THE PACK IS THE IMAGES, NOT THE MANIFEST (2026-09-24).** The manifest
+ *   used to be the whole wait: each image then arrived on its own and entered
+ *   this cache as it loaded, so even behind a gate on the manifest the walls
+ *   and the crowd would have popped in over a bare vector stand — the same
+ *   flash, one layer down. `loadBitmaps` now settles only when every image has
+ *   loaded or failed, and the finished set is copied in by `useBitmaps` when
+ *   the asset gate opens, or never, if it is late.
  */
 const bitmapCache = new Map();
 
-function loadBitmaps(manifest) {
-  for (const [id, entry] of Object.entries(manifest?.bitmaps ?? {})) {
-    const colour = new Image();
-    colour.src = `/assets/bitmaps/${entry.file}`;
-    if (!entry.alpha) {
-      bitmapCache.set(Number(id), colour);
-      continue;
+/** One image, or null if it will not load: a missing file is a fallback, never a hang. */
+function imageFrom(src) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image), { once: true });
+    image.addEventListener("error", () => resolve(null), { once: true });
+    image.src = src;
+  });
+}
+
+async function loadBitmaps(manifest) {
+  const bitmaps = new Map();
+  let unloadable = 0;
+  await Promise.all(Object.entries(manifest?.bitmaps ?? {}).map(async ([id, entry]) => {
+    // Both halves have to have arrived before the two can be combined.
+    const [colour, alpha] = await Promise.all([
+      imageFrom(`/assets/bitmaps/${entry.file}`),
+      entry.alpha ? imageFrom(`/assets/bitmaps/${entry.alpha}`) : null
+    ]);
+    if (!colour?.naturalWidth || (entry.alpha && !alpha?.naturalWidth)) {
+      unloadable += 1;
+      return;
     }
-    const alpha = new Image();
-    alpha.src = `/assets/bitmaps/${entry.alpha}`;
-    // Both have to have arrived before the two can be combined; whichever
-    // lands second does the work.
-    const combine = () => {
-      if (!colour.complete || !alpha.complete || !colour.naturalWidth || !alpha.naturalWidth) return;
-      const off = document.createElement("canvas");
-      off.width = entry.width;
-      off.height = entry.height;
-      const ctx = off.getContext("2d");
-      ctx.drawImage(colour, 0, 0, entry.width, entry.height);
-      ctx.globalCompositeOperation = "destination-in";
-      ctx.drawImage(alpha, 0, 0, entry.width, entry.height);
-      bitmapCache.set(Number(id), off);
-    };
-    colour.addEventListener("load", combine);
-    alpha.addEventListener("load", combine);
-  }
+    if (!entry.alpha) {
+      bitmaps.set(Number(id), colour);
+      return;
+    }
+    const off = document.createElement("canvas");
+    off.width = entry.width;
+    off.height = entry.height;
+    const ctx = off.getContext("2d");
+    ctx.drawImage(colour, 0, 0, entry.width, entry.height);
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(alpha, 0, 0, entry.width, entry.height);
+    bitmaps.set(Number(id), off);
+  }));
+  return { manifest, bitmaps, unloadable };
 }
 
 /**
@@ -2212,26 +2296,31 @@ const heldFace = new Map();
  */
 let popupPack = null;
 
-fetch("/assets/icons/icons.json")
-  .then((response) => (response.ok ? response.json() : null))
-  .then((data) => {
-    facePack = facePackFrom(data);
-    if (facePack) log("face: eyes and mouth from your own install.");
-    popupPack = popupPackFrom(data);
-    if (popupPack) log("pop-ups: the damage, spell and BLOCK art from your own install.");
-  })
-  .catch(() => { /* no icons extracted; the gladiator keeps his blank head */ });
+assetGate.track("icons", fetch("/assets/icons/icons.json")
+  .then((response) => (response.ok ? response.json() : null)));
 
-fetch("/assets/bitmaps/manifest.json")
+/** No icons extracted (null) leaves the gladiator his blank head and the pop-ups their plain number. */
+function useIconPack(data) {
+  facePack = facePackFrom(data);
+  if (facePack) log("face: eyes and mouth from your own install.");
+  popupPack = popupPackFrom(data);
+  if (popupPack) log("pop-ups: the damage, spell and BLOCK art from your own install.");
+}
+
+assetGate.track("bitmaps", fetch("/assets/bitmaps/manifest.json")
   .then((response) => (response.ok ? response.json() : null))
-  .then((manifest) => {
-    if (!manifest) return;
-    loadBitmaps(manifest);
-    const failures = manifest.failures?.length ?? 0;
-    log(`bitmaps: ${Object.keys(manifest.bitmaps ?? {}).length} from your own install`
-      + (failures ? `, ${failures} undecodable` : ""), { warn: failures > 0 });
-  })
-  .catch(() => { /* no bitmaps extracted; the vector layer still draws */ });
+  .then((manifest) => (manifest ? loadBitmaps(manifest) : null)));
+
+/** No bitmaps extracted (null): the vector layer still draws. */
+function useBitmaps(loaded) {
+  if (!loaded) return;
+  for (const [id, image] of loaded.bitmaps) bitmapCache.set(id, image);
+  const failures = loaded.manifest.failures?.length ?? 0;
+  log(`bitmaps: ${Object.keys(loaded.manifest.bitmaps ?? {}).length} from your own install`
+    + (failures ? `, ${failures} undecodable` : "")
+    + (loaded.unloadable ? `, ${loaded.unloadable} would not load` : ""),
+  { warn: failures > 0 || loaded.unloadable > 0 });
+}
 
 /**
  * A canvas gradient built in the SWF's own canonical gradient space.
@@ -3965,6 +4054,13 @@ function layerScaleOf(linkage) {
 let celebrationStartedAt = null;
 
 function render(now = performance.now()) {
+  // ► **NOTHING OF THE STAGE BEFORE THE ASSET GATE OPENS** — not the authored
+  //   bowl, not a vector gladiator: the loading frame, whoever called (the
+  //   loop, a resize). See `paintLoadingFrame`.
+  if (!assetGateOpen) {
+    paintLoadingFrame(now);
+    return;
+  }
   // Re-asserted every frame for the same reason the drawing surface is: a
   // stage that changes size between frames must not be drawn through the old
   // backing store, and the guard inside makes this free when nothing moved.
@@ -4063,6 +4159,82 @@ function render(now = performance.now()) {
   }
   try {
     renderStage(view, fit, now);
+  } finally {
+    context.restore();
+  }
+}
+
+/**
+ * THE LOADING FRAME: the page's own ground, "Loading your arena…" and a count
+ * of the packs settled, drawn in the PAGE's font — never the game's, because
+ * the text pack may be one of the packs still coming. What it says and how
+ * full the bar is are `loadingFrameFor`'s; the one thing that moves, the bar's
+ * empty track, holds still under `prefers-reduced-motion`. No spinner.
+ */
+const reducedMotionQuery = typeof window.matchMedia === "function"
+  ? window.matchMedia("(prefers-reduced-motion: reduce)")
+  : null;
+let pageLookCache = null;
+
+/** The page's own colours and font, read once from `index.html`'s tokens. */
+function pageLook() {
+  if (pageLookCache) return pageLookCache;
+  const look = {
+    ground: "#17151a", ink: "#e8e4dc", inkDim: "#9a9287", accent: "#d8a13a",
+    font: "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+  };
+  try {
+    const root = getComputedStyle(document.documentElement);
+    const token = (name, otherwise) => root.getPropertyValue(name).trim() || otherwise;
+    look.ground = token("--ground", look.ground);
+    look.ink = token("--ink", look.ink);
+    look.inkDim = token("--ink-dim", look.inkDim);
+    look.accent = token("--warn", look.accent);
+    look.font = getComputedStyle(document.body).fontFamily || look.font;
+  } catch {
+    // No computed style (a headless run): the tokens' own values above.
+  }
+  pageLookCache = look;
+  return look;
+}
+
+function paintLoadingFrame(now) {
+  sizeCanvasToStage();
+  context = surface;
+  const width = canvas.width;
+  const height = canvas.height;
+  const ratio = window.devicePixelRatio || 1;
+  const look = pageLook();
+  const shown = loadingFrameFor(assetGate.progress(), {
+    elapsedMs: now - assetGate.startedAtMs,
+    reducedMotion: Boolean(reducedMotionQuery?.matches)
+  });
+  context.save();
+  try {
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.globalAlpha = 1;
+    context.fillStyle = look.ground;
+    context.fillRect(0, 0, width, height);
+    const titleSize = Math.round(18 * ratio);
+    const countSize = Math.round(13 * ratio);
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = look.ink;
+    context.font = `600 ${titleSize}px ${look.font}`;
+    context.fillText(shown.title, width / 2, height / 2 - titleSize);
+    context.fillStyle = look.inkDim;
+    context.font = `${countSize}px ${look.font}`;
+    context.fillText(shown.count, width / 2, height / 2 + countSize * 0.5);
+    const barWidth = Math.min(width * 0.5, 240 * ratio);
+    const barHeight = Math.max(2, Math.round(3 * ratio));
+    const barX = (width - barWidth) / 2;
+    const barY = height / 2 + countSize * 1.8;
+    context.globalAlpha = shown.trackAlpha;
+    context.fillStyle = look.inkDim;
+    context.fillRect(barX, barY, barWidth, barHeight);
+    context.globalAlpha = 1;
+    context.fillStyle = look.accent;
+    context.fillRect(barX, barY, barWidth * shown.progress, barHeight);
   } finally {
     context.restore();
   }
@@ -5045,6 +5217,18 @@ let shownSeatKey = null;
 function renderControls() {
   renderRoster();
   const container = el("actions");
+  // ► **NO BUTTON BEFORE THE ASSET GATE OPENS.** A person's first action is
+  //   held to the same line as the AI's (`frame`): nobody acts on a stage that
+  //   is not drawn yet. `openArena` redraws this the moment it opens.
+  if (!assetGateOpen) {
+    el("turn-heading").textContent = "Loading your arena…";
+    const note = document.createElement("div");
+    note.className = "provenance";
+    note.textContent = "The bout starts when your extracted art is in — at most " +
+      `${ARENA_ASSET_TIMEOUT_MS / 1000} s, and at once when there is none.`;
+    container.replaceChildren(note);
+    return;
+  }
   const ready = host.readyForNextAction();
   // WHOSE TURN, from the seats (`seatTurnFor`), and the panel for it
   // (`seatControlsFor`): what a person can press is decided there, under the
@@ -5137,10 +5321,11 @@ function renderProvenance() {
   const wardrobePieces = wardrobe
     ? Object.values(wardrobe.pieces ?? {}).reduce((total, slot) => total + Object.keys(slot).length, 0)
     : 0;
-  const figureLine = ["The figures", figureProvenance({
-    hasExtractedArt: hasExtractedArt(figurePack),
-    wardrobePieces
-  })];
+  // Before the asset gate opens NO figure is drawn, of either kind, and the
+  // line says so rather than naming the authored art the loading frame is not.
+  const figureLine = ["The figures", assetGateOpen
+    ? figureProvenance({ hasExtractedArt: hasExtractedArt(figurePack), wardrobePieces })
+    : "are not drawn yet: the stage waits for your extracted packs to settle."];
   const lines = [
     ["The arithmetic", "runs the same SS2 rule set the test suite runs (a fresh instance whose only addition is the " +
       "pop-ups' diagnostic observer) — map-derived from a licensed build, never observed in it."],
@@ -5244,8 +5429,72 @@ function aiTurnStep() {
  */
 let loopErrorLogged = false;
 
+/**
+ * THE PACKS THE GATE OPENED WITH, handed to what turns each into the thing the
+ * painters read — in DEPENDENCY order: the rig is built with the enchantments
+ * and logs the wardrobe, so both go first.
+ *
+ * Only a pack that ANSWERED is applied: loaded, or `null` for a 404, whose
+ * user draws the fallback and says how to extract it. A FAILED or LATE pack is
+ * skipped whole — its variable keeps the fallback it started with — because
+ * "run the extractor" is the wrong advice for either, and `assetGateReport`
+ * names both with the reason. One pack's throw costs that pack, never the rest.
+ */
+const PACK_USERS = Object.freeze([
+  ["wardrobe", (data) => { wardrobe = data; }],
+  ["enchantments", (data) => { enchantments = data; }],
+  ["figure", useFigurePack],
+  ["props", usePropPack],
+  ["clipEffects", useClipEffects],
+  ["text", useTextPack],
+  ["icons", useIconPack],
+  ["bitmaps", useBitmaps]
+]);
+
+function useArenaPacks(opened) {
+  for (const [name, use] of PACK_USERS) {
+    const outcome = opened.outcomes[name];
+    if (outcome !== PackOutcome.LOADED && outcome !== PackOutcome.MISSING) continue;
+    try {
+      use(opened.inUse[name]);
+    } catch (error) {
+      log(`${name}: unusable, its fallback is drawn (${String(error?.message ?? error).slice(0, 80)})`, { warn: true });
+    }
+  }
+}
+
+/**
+ * Asks the gate, once a frame until it opens; on the frame it does, applies
+ * every pack it opened with, says how it opened, starts the bout's clock and
+ * draws the controls. Returns whether the arena is open.
+ *
+ * ► **`window.__assetGate` IS THE GATE AS A VALUE, NOT A LOG LINE**, for the
+ *   reason `window.__stageFit` is one: a headless run or `tools/shot-live.mjs`
+ *   reads it with one evaluate. Its data is left out — only which pack did what.
+ */
+function openArena(now) {
+  const verdict = assetGate.status(now);
+  window.__assetGate = Object.fromEntries(Object.entries(verdict).filter(([key]) => key !== "inUse"));
+  if (!verdict.open) return false;
+  assetGateOpen = true;
+  useArenaPacks(verdict);
+  for (const line of assetGateReport(verdict)) log(line.message, { warn: line.warn });
+  boutStartedAt = now;
+  renderProvenance();
+  renderControls();
+  return true;
+}
+
 function frame(now) {
   try {
+    // ► **THE ASSET GATE, FIRST.** Until every visual pack has settled — or
+    //   the timeout — the loading frame is all that draws, and nothing steps:
+    //   no animation, no arena sound, no AI seat. The frame it opens on goes
+    //   straight on to the bout, drawn with the packs it opened with.
+    if (!assetGateOpen && !openArena(now)) {
+      render(now);
+      return;
+    }
     drainFinishedAnimations(now);
     // After the drain, so a crowd whose action just finished is heard; before
     // an AI seat's turn, so the intro gets its one pre-fight draw.
