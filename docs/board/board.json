@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-23",
- "head": "a44fd37",
+ "head": "daf3888",
  "lede": "Every system in the Swords & Sandals II team-arena project and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -656,15 +656,15 @@
   {
    "id": "music-ambience-crowd-and-ui-sounds",
    "lane": "presentation",
-   "column": "needs-design",
+   "column": "gaps",
    "order": 48,
-   "title": "Music, ambience, crowd and UI sounds",
-   "summary": "Twenty-five extracted sounds are never played: crowd-ambient, gladiator-chant, boo-crowd, rockyou, victory1-3, coins, click and click2, townsquare day and night, rooster, and large unnamed tracks (1778.mp3 at 1.45 MB, 2248, 2242, 1825, 1532 and others). No code maps where the build starts them.",
-   "gaps": "The arena has no music, no crowd bed, no cheers or boos tied to crowd_interest, and no victory or defeat sting.",
-   "next": "Map the StartSound sites outside the fighter clip (root, arena, overlay) as extract-sounds does for labels, then decide the policy.",
+   "title": "Crowd, victory and intro sounds",
+   "summary": "Built (daf3888): the crowd's murmur at the build's own live volume (interest / 2 + 4), its chance cheers above 70 and boos below 20, the win sound, the victory sting by level, and the pre-fight intro — all driven by the engine's modelled crowd and a seeded roll that never touches the battle.",
+   "gaps": "Not heard in a real browser. Every result plays as the winner's win (the loss music waits for play against the AI). Music, town ambience, the level-up chant, coins and clicks belong to screens the arena does not have.",
+   "next": "Listen to a bout; add the loss music when a human can lose.",
    "evidence": "Computed from assets/sound/manifest.json (sounds minus bindings = 25 files); main.js 741 ('The big ambient tracks are NOT bound to a clip label and are not touched').",
    "ownerDecision": "Whether to use the build's music and crowd audio as-is, or commission or author new audio (new art is explicitly allowed).",
-   "updated": "2026-09-23"
+   "updated": "2026-09-24"
   },
   {
    "id": "text-in-the-game-s-font",
@@ -1149,6 +1149,10 @@
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-24",
+   "text": "The crowd is heard: a murmur that follows its interest, chance cheers and boos, the win sound, the victory sting and the intro (daf3888)."
+  },
   {
    "date": "2026-09-24",
    "text": "Fighters wear their own looks: skin, hair, beard and face from their DNA; the bosses look like themselves (a44fd37)."
