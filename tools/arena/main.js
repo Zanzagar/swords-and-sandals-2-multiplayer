@@ -151,6 +151,17 @@ import {
   championSide,
   demoSide
 } from "/tools/arena/roster.js";
+import {
+  resultHeadingFor,
+  seatControllersFrom,
+  seatControlsFor,
+  seatFrameFor,
+  seatOutcomeFor,
+  seatSummaryFor,
+  seatTagFor,
+  seatTurnFor,
+  withSeatControllers
+} from "/tools/arena/seats.js";
 import { createSoundPlayer } from "/tools/arena/sound-player.js";
 import {
   SS2_ARENA_SOUNDS,
@@ -195,8 +206,14 @@ const seed = Number(params.get("seed")) || 7;
  * on the host would submit a whole bout without an animation ever playing —
  * and that is the point: it is the only way to watch the surface actually
  * keep up with the resolver.
+ *
+ * ► **SINCE THE SEATS (2026-09-24) IT IS READ IN `tools/arena/seats.js`, AND
+ *   THE `spectate` FLAG THAT STOOD HERE IS GONE.** `?spectate=1` declares every
+ *   seat AI in the battle's own registry (`seatControllersFrom`), and
+ *   `aiTurnStep` plays any AI seat, spectated or not; the heading and the
+ *   controls' note read the seat mode. A second reader of the parameter here
+ *   could only ever disagree with that one.
  */
-const spectate = params.get("spectate") === "1";
 /**
  * THE SECOND AXIS, and it is here so the owner can answer the question only he
  * can: **how much should standing in the right place matter?**
@@ -327,7 +344,23 @@ async function arenaTeams() {
   return null;
 }
 
-const teams = await arenaTeams();
+/**
+ * THE SEATS (2026-09-24): which fighters the person at this screen plays and
+ * which the AI does — `?play=red`, `?play=red-1,blue-2`, `?spectate=1`, or
+ * nothing for every seat by hand. Decided by `seatControllersFrom` and written
+ * onto each member's `controller` by `withSeatControllers`, which the host
+ * hands to the battle's own `ControllerRegistry`: the engine's
+ * `isAiControlled` is what the turn loop asks, never a flag here. A refusal
+ * (a typo, a slot this bout does not field) is said on the page.
+ */
+const rosterTeams = await arenaTeams();
+let seats;
+try {
+  seats = seatControllersFrom(params, rosterTeams);
+} catch (error) {
+  refuseToStart("The seat request was refused", error.message);
+}
+const teams = withSeatControllers(rosterTeams, seats);
 /** Which champion stands in which slot, for every line that names a slot id. */
 const championsBySlot = new Map(
   teams.flatMap((team) => team.members)
@@ -897,7 +930,9 @@ function primeSoundCache(manifest) {
     for (const sound of entry.sounds) files.add(sound.file);
   }
   // The arena's own: the crowd, the stings, the intro and the win — eight
-  // files, 0.84 MB on the shipped build, the crowd's 14 s loop the largest.
+  // files, 0.84 MB on the shipped build, the crowd's 14 s loop the largest —
+  // and, since the seats, the loss sting 2248 (192,618 bytes in the pack's
+  // manifest; not re-summed with the eight).
   for (const file of Object.values(arenaSoundFiles)) if (file) files.add(file);
   soundPlayer.preload(files, {
     leadInSeconds: leadInSecondsFrom(manifest),
@@ -935,7 +970,7 @@ const sideLevels = new Map(host.battle.teams.map((team) => [
 ]));
 const crowdHeard = crowdHeardFor([...sideLevels.values()].flat());
 let boutUnderway = false;
-/** `{atMs, winnerTeamId, winnerLevel}` once decided: the build's `combat_won`. */
+/** `{atMs, winnerTeamId, winnerLevel, lost}` once decided: the build's `combat_won`, or `combat_lost` when `lost`. */
 let arenaResult = null;
 
 /**
@@ -965,7 +1000,10 @@ function noteArenaSoundStep(step, started) {
   arenaResult = {
     atMs: now + decidingBlowMsFor(step.commands),
     winnerTeamId,
-    winnerLevel: winnerTeamId === null ? null : winningSideLevel(sideLevels.get(winnerTeamId))
+    winnerLevel: winnerTeamId === null ? null : winningSideLevel(sideLevels.get(winnerTeamId)),
+    // The build's `combat_lost` — the crowd stopped at once and 2248 — only
+    // for a person who played the losing side alone (`seatOutcomeFor`).
+    lost: seatOutcomeFor(result, seats) === "lost"
   };
 }
 
@@ -4948,7 +4986,11 @@ function renderRoster() {
       name.textContent = combatant.name;
       const slot = document.createElement("span");
       slot.className = "slot";
-      slot.textContent = `${placement.side} slot ${placement.slotIndex}${placement.vanillaNative ? "" : " · authored"}`;
+      // `you` / `AI` in a `?play=` bout only: with no parameter, and when
+      // spectating, the row reads exactly as it did.
+      const seatTag = seatTagFor(seats, combatantId);
+      slot.textContent = `${placement.side} slot ${placement.slotIndex}${placement.vanillaNative ? "" : " · authored"}` +
+        (seatTag ? ` · ${seatTag}` : "");
       row.append(name, slot);
       const numbers = document.createElement("div");
       numbers.className = "slot";
@@ -4965,13 +5007,24 @@ function renderRoster() {
   );
 }
 
+/** The `seatTurnKey` the controls on screen were drawn for; `aiTurnStep` redraws when it goes stale. */
+let shownSeatKey = null;
+
 function renderControls() {
   renderRoster();
   const container = el("actions");
   const ready = host.readyForNextAction();
+  // WHOSE TURN, from the seats (`seatTurnFor`), and the panel for it
+  // (`seatControlsFor`): what a person can press is decided there, under the
+  // suite. The key is recorded FIRST, so every branch below counts as drawn.
+  const turn = seatTurnFor(host.battle, seats, { ready: ready.ready });
+  const panel = seatControlsFor(turn, turn && !turn.ai ? host.legalActions() : [], seats);
+  shownSeatKey = panel.key;
 
   if (host.battle.result) {
-    el("turn-heading").textContent = settled ? "Settled" : "Decided";
+    // "You won" / "You lost" when a person played one side against the AI;
+    // "Settled" / "Decided", as before, when there is no single "you".
+    el("turn-heading").textContent = resultHeadingFor(host.battle.result, seats, { settled });
     const note = document.createElement("div");
     note.className = "provenance";
     const winner = host.battle.result.winnerTeamId;
@@ -4983,18 +5036,27 @@ function renderControls() {
 
   const actorId = host.currentCombatantId();
   const byId = combatantsById();
+  // "Your turn: Vasso", "Nym (AI) is thinking…", or — with no parameter — the
+  // headings the arena always had.
   // In spectate mode the heading said "waiting for the arena" almost the whole
   // bout, because the spectator takes its turn the instant the gate opens — so
   // the only state a person ever SAW was the waiting one, which read as a
   // stall. It is not: it is the gate doing its job between two automatic turns.
-  el("turn-heading").textContent = spectate
-    ? `Spectating — ${byId.get(actorId)?.name ?? actorId}`
-    : ready.ready
-      ? `${byId.get(actorId)?.name ?? actorId} — choose`
-      : "waiting for the arena";
+  el("turn-heading").textContent = turn?.heading ?? "waiting for the arena";
+
+  // An AI seat's turn offers no buttons (`seatControlsFor`): `aiTurnStep`
+  // takes it once the gate opens, and a click must never take a person's turn
+  // for them or the AI's for it.
+  if (panel.note !== null) {
+    const note = document.createElement("div");
+    note.className = "provenance";
+    note.textContent = panel.note;
+    container.replaceChildren(note);
+    return;
+  }
 
   container.replaceChildren(
-    ...host.legalActions().map((action) => {
+    ...panel.buttons.map(({ action, enabled }) => {
       const button = document.createElement("button");
       const target = action.targetId ? byId.get(action.targetId) : null;
       // `drink-potion` is one token for eight items, so without the id two
@@ -5003,8 +5065,16 @@ function renderControls() {
       button.textContent = target && action.targetId !== actorId
         ? `${action.type}${item} → ${target.name}`
         : `${action.type}${item}`;
-      button.disabled = !ready.ready;
+      button.disabled = !enabled;
       button.addEventListener("click", () => {
+        // A button drawn for one person's turn is never a way to take another
+        // seat's — the AI's above all — whatever has happened since it was drawn.
+        const current = seatTurnFor(host.battle, seats, { ready: host.readyForNextAction().ready });
+        if (!current || current.ai || current.actorId !== actorId) {
+          log(`not ${byId.get(actorId)?.name ?? actorId}'s turn any more — the controls were stale`, { warn: true });
+          renderControls();
+          return;
+        }
         try {
           // Anything a refused submit left in the ledger is not this action's.
           strikeLedger.take();
@@ -5068,19 +5138,38 @@ function renderProvenance() {
   }
   el("footer").textContent =
     "This surface decides no combat: every number shown is copied from resolved state. " +
-    "Reload with ?teams=1|2|3&seed=N to change the bout, ?spectate=1 to watch one play itself, or " +
-    "?red=2,4,16&blue=1,3,10&spectate=1 to watch the build's own champions (after `node tools/extract-champions.mjs`).";
+    "Reload with ?teams=1|2|3&seed=N to change the bout, ?play=red to play red against the AI " +
+    "(or ?play=red-1,red-2 for single fighters — the AI plays every seat you do not name), ?spectate=1 to watch " +
+    "the AI play itself, or ?red=2,4,16&blue=1,3,10&spectate=1 to watch the build's own champions " +
+    "(after `node tools/extract-champions.mjs`; add &play=red instead of &spectate=1 to fight them).";
 }
 
 /* ------------------------------------------------------------------ */
 /* Clock                                                               */
 /* ------------------------------------------------------------------ */
 
-/** In spectate mode, take the turn the moment the arena is ready for it. */
-function spectateStep() {
-  if (!spectate || host.battle.result) return;
-  if (!host.readyForNextAction().ready) return;
-  const actorId = host.currentCombatantId();
+/**
+ * On an AI SEAT'S turn, take it the moment the arena is ready for it.
+ *
+ * ► **WAS `spectateStep` UNTIL THE SEATS (2026-09-24), and played every seat or
+ *   none.** It now plays exactly the seats the battle's own registry calls AI
+ *   (`seatTurnFor` asks `isAiControlled`): all of them under `?spectate=1`,
+ *   the ones a person did not name under `?play=`, none with no parameter. It
+ *   is still the spectator's path — one action, through the gate a person goes
+ *   through, only once the last action has been drawn (`autoplay` is false
+ *   while the gate is shut) — so an AI move never lands mid-animation.
+ *
+ * ► **AND IT REDRAWS STALE CONTROLS FIRST (Codex review, 2026-09-24).** A seat
+ *   handed over mid-bout with the gate open changes whose turn it is with no
+ *   action and no animation to redraw anything; it returned early here and the
+ *   AI's note stayed up over a person's turn for good. `seatFrameFor` compares
+ *   what was drawn with what is true, every frame.
+ */
+function aiTurnStep() {
+  const frame = seatFrameFor(host.battle, seats, { ready: host.readyForNextAction().ready, shownKey: shownSeatKey });
+  if (frame.refresh) renderControls();
+  if (!frame.autoplay) return;
+  const actorId = frame.turn.actorId;
   const options = host.legalActions();
   if (options.length === 0) return;
   // ► **THIS WAS `options[host.battle.turnNumber % options.length]` UNTIL
@@ -5127,9 +5216,9 @@ function frame(now) {
   try {
     drainFinishedAnimations(now);
     // After the drain, so a crowd whose action just finished is heard; before
-    // the spectator's turn, so the intro gets its one pre-fight draw.
+    // an AI seat's turn, so the intro gets its one pre-fight draw.
     stepArenaSounds(now);
-    spectateStep();
+    aiTurnStep();
     settleIfReady();
     render(now);
   } catch (error) {
@@ -5145,6 +5234,7 @@ function frame(now) {
 renderProvenance();
 renderControls();
 log(`arena built: ${scene.drawOrder.length} fighters, ${matchLabel}, seed ${seed}`);
+log(seatSummaryFor(seats, (id) => host.combatant(id)?.name));
 if (championsBySlot.size > 0) {
   log(`champions (which_boss): ${[...championsBySlot].map(([id, whichBoss]) => `${id} ${whichBoss}`).join(", ")}`);
 }

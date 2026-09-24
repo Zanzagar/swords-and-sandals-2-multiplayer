@@ -148,7 +148,7 @@ function arenaHost({ perSide, seed, items = [] }) {
   });
 }
 
-/** The spectator's own choice — `host.suggestAction`, what `spectateStep` calls. */
+/** The spectator's own choice — `host.suggestAction`, what `aiTurnStep` (was `spectateStep`) calls. */
 const spectator = (host, actorId) => host.suggestAction(actorId);
 
 /**
@@ -333,7 +333,7 @@ test("SWEEP: every ghost strike in real bouts is drawn beside its victim for the
 
 /**
  * The page's own frame loop on a fake 60fps clock: drain, then act when the
- * gate opens — `drainFinishedAnimations` and `spectateStep` in
+ * gate opens — `drainFinishedAnimations` and `aiTurnStep` (was `spectateStep`) in
  * `tools/arena/main.js`, calling the same `src/render` decisions. `onStep` sees
  * every batch as it begins, with the timelines it is about to replace.
  */

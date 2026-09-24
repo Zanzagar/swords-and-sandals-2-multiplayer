@@ -90,9 +90,11 @@ test("the gesture resumes the context, and the toggle reaches the player", () =>
 /* The arena's own sounds (2026-09-24): `src/render/crowd-sound.js`    */
 /* ------------------------------------------------------------------ */
 
-test("the arena's own sounds step once a draw — after the drain, before the spectator's turn — through `perform`", () => {
+test("the arena's own sounds step once a draw — after the drain, before an AI seat's turn — through `perform`", () => {
   const frameBody = functionBody(code, "frame");
-  assert.match(frameBody, /drainFinishedAnimations\(now\);\s*stepArenaSounds\(now\);\s*spectateStep\(\);/);
+  // `aiTurnStep` was `spectateStep` until the seats (2026-09-24): the same
+  // place in the frame, now playing any AI seat rather than every seat or none.
+  assert.match(frameBody, /drainFinishedAnimations\(now\);\s*stepArenaSounds\(now\);\s*aiTurnStep\(\);/);
   const step = functionBody(code, "stepArenaSounds");
   assert.match(step, /crowdPresenter = settleCrowdInterest\(crowdPresenter, now - 1000\);/);
   assert.match(step, /arenaSoundStep\(arenaSoundState, \{/);

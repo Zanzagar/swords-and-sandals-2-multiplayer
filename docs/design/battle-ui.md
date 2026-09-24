@@ -89,8 +89,12 @@ engine unavailableActions() ┘                                                 
 
 ## Delivery order
 
-1. **Seats**: choose which fighters a human plays, with the rest AI (e.g. `?red=human&blue=ai`), using
-   the existing ControllerRegistry. This is the first time anyone can play against the AI.
+1. **Seats**: choose which fighters a human plays, with the rest AI (~~e.g. `?red=human&blue=ai`~~
+   **`?play=red`, or `?play=red-1,blue-2` for single fighters** — `red=`/`blue=` already name the
+   tournament champions, and `?red=human` is refused there as "not a which_boss number"), using
+   the existing ControllerRegistry. This is the first time anyone can play against the AI. **Built
+   2026-09-24:** `tools/arena/seats.js`, `test/arena-seats.test.js`; `?spectate=1` now declares every
+   seat AI through the same registry.
 2. **Action dock**: the model and the four groups replace the raw buttons.
 3. **Targeting overlay**: rings, numbers, dimming, and the one-target shortcut.
 4. **Team HUD**: fighter rows, the turn strip and the crowd meter.

@@ -3,8 +3,9 @@
  * and its live volume, the seeded 1-in-1000 cheer and boo, the win sound, the
  * sting and the pre-fight intro. Every number here is the build's, from the
  * sites the module cites — `crowd_bar` clip-actions 0 and 1 on sprite 751,
- * `soundeffects()` on root frame 10, sprite 2249 frames 81/88/222 and sprite
- * 2224 frame 2 — except the team rules, which are AUTHORED and labelled.
+ * `soundeffects()` on root frame 10, sprite 2249 frames 81/88/222 (the win)
+ * and 250/315 (the loss) and sprite 2224 frame 2 — except the team rules,
+ * which are AUTHORED and labelled.
  *
  * What these cannot tell is how the sounds SOUND: the volume sharing on one
  * target clip is AS2's documented model, not a measurement of this build.
@@ -30,6 +31,7 @@ import {
   crowdVolumeFor,
   PROJECTILE_FRAME_MS,
   crowdInterestAt,
+  crowdStopFramesFor,
   decidingBlowMsFor,
   queueCrowdInterest,
   reactionDelaysFor,
@@ -56,7 +58,8 @@ const MANIFEST = Object.freeze({
     { file: "f.mp3", id: 653, exportName: "victory3.wav" },
     { file: "g.mp3", id: 654, exportName: null },
     { file: "h.mp3", id: 2228, exportName: null },
-    { file: "i.mp3", id: 655, exportName: "gladiator-chant.wav" }
+    { file: "i.mp3", id: 655, exportName: "gladiator-chant.wav" },
+    { file: "j.mp3", id: 2248, exportName: null }
   ]
 });
 const FILES = arenaSoundFilesFrom(MANIFEST);
@@ -69,7 +72,7 @@ test("each sound is found in the player's own pack by the build's export name or
   assert.deepEqual({ ...FILES }, {
     ambience: "a.mp3", cheer: "b.mp3", boo: "c.mp3",
     victory1: "d.mp3", victory2: "e.mp3", victory3: "f.mp3",
-    intro: "g.mp3", won: "h.mp3"
+    intro: "g.mp3", won: "h.mp3", lost: "j.mp3"
   });
   assert.equal(Object.values(FILES).includes("i.mp3"), false,
     "the gladiator chant is the LEVEL-UP screen's (root frame 227), not the arena's");
@@ -386,6 +389,39 @@ test("the result: the win sound at combat_won, the crowd stopped 7 frames later,
     "a draw — no path in the build — only sends the crowd home (AUTHORED)");
   assert.deepEqual(resultSoundsFor({ winnerTeamId: "blue", winnerLevel: 1 }, FILES).map((event) => [event.sound, event.atFrames]),
     [["won", 0], ["ambience", 7], ["victory1", 40]]);
+});
+
+test("a person who played only the LOSING side hears combat_lost: the crowd stopped at once, 2248 65 frames later, no win and no victory sting", () => {
+  // The build's loss path: sprite 2249 frame 250 stops `crowd_noise` on the
+  // label itself (+0x0061-+0x007c), and frame 315 carries StartSound 2248.
+  assert.equal(SS2_ARENA_SOUNDS.lost.soundId, 2248);
+  assert.equal(SS2_ARENA_SOUNDS.lost.channel, ArenaSoundChannel.ARENA, "a StartSound on the arena's own timeline");
+  assert.deepEqual([SS2_CROWD_SOUND.lostStopAfterFrames, SS2_CROWD_SOUND.lostStingAfterFrames], [0, 315 - 250]);
+  const lost = { atMs: 11_000, winnerTeamId: "blue", winnerLevel: 4, lost: true };
+  assert.deepEqual(resultSoundsFor(lost, FILES).map((event) => [event.kind, event.sound, event.atFrames]),
+    [["stop", "ambience", 0], ["start", "lost", 65]]);
+  assert.equal(crowdStopFramesFor(lost), 0);
+  const { log } = drive({ toMs: 14_000, stepMs: 1000 / 60, input: { crowdInterest: 90, started: true, result: lost } });
+  assert.equal(starts(log, "won").length, 0, "no win sound for the loser");
+  assert.equal(log.filter((entry) => /^victory/.test(entry.sound ?? "")).length, 0, "and no victory sting");
+  const stop = log.filter((entry) => entry.kind === "stop");
+  assert.equal(stop.length, 1, "stopped once");
+  assert.ok(stop[0].now >= 11_000 && stop[0].now < 11_000 + 17, "on the first draw at or after combat_lost");
+  assert.equal(log.filter((entry) => entry.kind === "loop" && entry.now >= stop[0].now).length, 0, "no loop after the stop");
+  const sting = starts(log, "lost");
+  assert.equal(sting.length, 1);
+  assert.equal(sting[0].file, "j.mp3");
+  assert.ok(sting[0].now >= 11_000 + 65 * CROWD_FRAME_MS && sting[0].now < 11_000 + 65 * CROWD_FRAME_MS + 17, "frame 315");
+
+  // `lost` means nothing without a winner (a draw has no losing hero), and a
+  // result WITHOUT it is the win exactly as before — which is every result the
+  // arena made before seats existed.
+  assert.deepEqual(resultSoundsFor({ winnerTeamId: null, lost: true }, FILES).map((event) => [event.kind, event.atFrames]), [["stop", 7]]);
+  assert.deepEqual(resultSoundsFor({ winnerTeamId: "blue", winnerLevel: 4, lost: false }, FILES).map((event) => [event.sound, event.atFrames]),
+    [["won", 0], ["ambience", 7], ["victory2", 40]]);
+  assert.equal(crowdStopFramesFor({ winnerTeamId: "blue" }), 7);
+  // A pack without 2248 still stops the crowd.
+  assert.deepEqual(resultSoundsFor(lost, { ...FILES, lost: null }).map((event) => event.kind), ["stop"]);
 });
 
 test("a late draw drops a stale sting but never a stop — a crowd left looping is worse than a late stop", () => {

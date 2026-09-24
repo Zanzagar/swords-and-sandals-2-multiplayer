@@ -2,7 +2,8 @@
  * THE ARENA'S OWN SOUNDS — the ones the build plays from CODE and from the
  * arena's own timelines, not from the fighter clip: the crowd's ambience at its
  * live volume, its chance cheers and boos, the win sound and the victory sting,
- * and the pre-fight intro. WHEN and WHICH are decided here; the playing is
+ * the loss sting (a person who played only the losing side, 2026-09-24) and the
+ * pre-fight intro. WHEN and WHICH are decided here; the playing is
  * `tools/arena/sound-player.js`'s `perform`.
  *
  * `sound-timing.js` is the fighter clip's half of the same job. The two do not
@@ -32,7 +33,9 @@
  *                frame 88 gotoAndPlay("combat_delay") +0x09b1/+0x09c7 -> 189, no Stop to 222
  *                frame 222 combat_exp (DoAction@0x6e6347), by _root.game.hero.herolevel:
  *                  <= 2 victory1.start() +0x00d6;  3..5 victory2.start() +0x0149;  > 5 victory3.start() +0x0191
- *   THE LOSS     frame 250 combat_lost +0x0061-+0x007c: crowd_noise.stop()
+ *   THE LOSS     frame 250 combat_lost +0x0061-+0x007c: crowd_noise.stop(), after combat_panel.removeMovieClip()
+ *                frame 315 (no Stop from 250, which ends in Play): StartSound 2248, with fight_over_lost (2247)
+ *                placed at depth 18                                           startsounds.txt
  *   PRE-FIGHT    sprite:2224[arena_intro] frame 1 (DoAction@0x66ffb1): unless
  *                tournament_ranking == 2 (+0x16ca), GotoFrame 1 (+0x17d3), i.e.
  *                frame 2, whose StartSound 654 plays (a 5.41 s sting). The
@@ -46,7 +49,10 @@
  *
  * Frame counts: 81 -> 88 is 7 frames (82-87 carry no action); 88 jumps to 189
  * and 189 -> 222 is 33 more, so the sting starts 40 of the build's 30 fps
- * frames after `combat_won`. Counted from the frames, never measured.
+ * frames after `combat_won`. The loss stops the crowd ON `combat_lost` (250)
+ * and its sting, 2248, starts 65 frames later (315; the arena clip's actions
+ * sit at 249, 250, 315 and 334, and only 249 and 334 are `Stop`). Counted from
+ * the frames, never measured.
  *
  * ► **SOUNDS ON ONE TARGET CLIP SHARE ITS VOLUME AND ITS `stop()`**, which is
  *   AS2's documented `Sound(target)` model, NOT a byte fact and NOT measured in
@@ -107,7 +113,13 @@ export const SS2_ARENA_SOUNDS = Object.freeze({
    * read, so it is played whole — the policy `unhonouredCuesIn` already applies
    * to a fighter cue with an envelope — and the shell says so once.
    */
-  won: Object.freeze({ soundId: 2228, channel: ArenaSoundChannel.ARENA, site: "sprite:2249[arena] frame 81 combat_won", envelope: true })
+  won: Object.freeze({ soundId: 2228, channel: ArenaSoundChannel.ARENA, site: "sprite:2249[arena] frame 81 combat_won", envelope: true }),
+  /**
+   * No export. The loss sting, played only when a person played the LOSING
+   * side alone (`resultSoundsFor`). Its one placement is the arena clip's
+   * frame 315, under `combat_lost`; no envelope.
+   */
+  lost: Object.freeze({ soundId: 2248, channel: ArenaSoundChannel.ARENA, site: "sprite:2249[arena] frame 315, under combat_lost" })
 });
 
 /** The crowd's numbers, each at its site above. */
@@ -125,7 +137,11 @@ export const SS2_CROWD_SOUND = Object.freeze({
   /** combat_won (81) to the frame-88 stop. */
   stopAfterFrames: 7,
   /** combat_won (81) to 88, then combat_delay (189) to combat_exp (222). */
-  stingAfterFrames: 40
+  stingAfterFrames: 40,
+  /** combat_lost (250) stops the crowd on its own frame (`+0x0061`-`+0x007c`). */
+  lostStopAfterFrames: 0,
+  /** combat_lost (250) to the StartSound 2248 at 315. */
+  lostStingAfterFrames: 65
 });
 
 /**
@@ -407,17 +423,48 @@ export function decidingBlowMsFor(commands) {
 /* ------------------------------------------------------------------ */
 
 /**
- * What happens after the result, in the build's frames from `combat_won`.
+ * How many of the build's frames after the result the crowd is stopped: 7 on
+ * the win path (frame 88), 0 on the loss path (`combat_lost` stops it itself).
+ */
+export function crowdStopFramesFor(result) {
+  return lostResult(result) ? SS2_CROWD_SOUND.lostStopAfterFrames : SS2_CROWD_SOUND.stopAfterFrames;
+}
+
+/** A result the person at the screen LOST: `lost: true` on a result that has a winner. */
+function lostResult(result) {
+  return result?.lost === true && result.winnerTeamId !== null && result.winnerTeamId !== undefined;
+}
+
+/**
+ * What happens after the result, in the build's frames from `combat_won` — or
+ * from `combat_lost`, when the person at the screen lost.
  *
- * ► **AUTHORED: EVERY RESULT IS PLAYED AS THE BUILD'S WIN, FOR THE WINNING
- *   SIDE** (the owner's call for team play; in spectate, whichever side wins).
- *   Both sides are played from one seat or watched, so there is no losing
- *   player to hear `combat_lost`'s 2248. A DRAW — which the build has no
- *   path for — gets only the stop: the crowd leaves, and nobody's sting plays.
+ * ► **AUTHORED: A RESULT IS PLAYED AS THE BUILD'S WIN, FOR THE WINNING SIDE**
+ *   (the owner's call for team play; in spectate, whichever side wins) —
+ *   ~~"Both sides are played from one seat or watched, so there is no losing
+ *   player to hear `combat_lost`'s 2248"~~ **UNLESS `result.lost` (2026-09-24,
+ *   the arena's seats):** with `?play=`, a person can play one side against the
+ *   AI, and when that side loses they are the build's losing hero. They hear
+ *   `combat_lost`: the crowd stopped at once and 2248 at frame 315, and no win
+ *   sound and no victory sting. The shell sets `lost` only when every seat a
+ *   person plays is on the losing side (`seatOutcomeFor` in
+ *   `tools/arena/seats.js`); both sides by hand, or watched, is still the win.
+ *   A DRAW — which the build has no path for — gets only the stop: the crowd
+ *   leaves, and nobody's sting plays, whoever was playing.
  */
 export function resultSoundsFor(result, files) {
   const events = [];
   const winner = result?.winnerTeamId !== null && result?.winnerTeamId !== undefined;
+  if (lostResult(result)) {
+    events.push(Object.freeze({ kind: "stop", sound: "ambience", channel: ArenaSoundChannel.CROWD, atFrames: SS2_CROWD_SOUND.lostStopAfterFrames }));
+    if (files?.lost) {
+      events.push(Object.freeze({
+        kind: "start", sound: "lost", channel: SS2_ARENA_SOUNDS.lost.channel, file: files.lost,
+        atFrames: SS2_CROWD_SOUND.lostStingAfterFrames
+      }));
+    }
+    return events;
+  }
   if (winner && files?.won) {
     events.push(Object.freeze({ kind: "start", sound: "won", channel: SS2_ARENA_SOUNDS.won.channel, file: files.won, atFrames: 0 }));
   }
@@ -455,10 +502,11 @@ export function createArenaSoundState() {
  * @param {number|null} [input.crowdInterest]  a constant crowd, when there is no history; null is no crowd
  * @param {boolean} input.crowdHeard   `crowdHeardFor`'s answer
  * @param {boolean} input.started      the first action has been submitted
- * @param {{atMs: number, winnerTeamId: string|null, winnerLevel: number|null}|null} input.result
+ * @param {{atMs: number, winnerTeamId: string|null, winnerLevel: number|null, lost?: boolean}|null} input.result
  *   null until decided; `atMs` is when the deciding blow is drawn landing — the
- *   build's `death()`, whose overlay jump starts `combat_won` — and a draw has
- *   no winner
+ *   build's `death()`, whose overlay jump starts `combat_won` (or
+ *   `combat_lost`: `lost` is true when the person at the screen played only the
+ *   losing side) — and a draw has no winner
  * @param {object} input.files         `arenaSoundFilesFrom`'s answer
  */
 export function arenaSoundStep(state, {
@@ -502,7 +550,7 @@ export function arenaSoundStep(state, {
   const interestAt = crowd ? (t) => crowdInterestAt(crowd, t) : () => crowdInterest;
   const nowInterest = interestAt(now);
   const heard = Boolean(crowdHeard);
-  const stopAtMs = Number.isFinite(result?.atMs) ? result.atMs + SS2_CROWD_SOUND.stopAfterFrames * frameMs : Infinity;
+  const stopAtMs = Number.isFinite(result?.atMs) ? result.atMs + crowdStopFramesFor(result) * frameMs : Infinity;
 
   if (heard && Number.isFinite(nowInterest) && !crowdStopped && now < stopAtMs && files?.ambience) {
     // Volume first, so a loop that starts on this draw starts at it.
