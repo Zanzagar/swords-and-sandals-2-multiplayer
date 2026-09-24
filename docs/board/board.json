@@ -1081,9 +1081,26 @@
    "evidence": "Inventory agents, 2026-09-23 (engine, presentation, campaign/infrastructure).",
    "ownerDecision": "",
    "updated": "2026-09-23"
+  },
+  {
+   "id": "fighter-looks",
+   "lane": "presentation",
+   "column": "in-progress",
+   "order": 1,
+   "title": "Fighter looks: skin, hair, facial hair, features",
+   "summary": "Every fighter, the tournament bosses included, is drawn in the build's untinted grey base art with no hair. The build gives each gladiator a look from his DNA (skincolor, haircolor, hairstyle, facehairstyle, features) and tints each limb's bare skin at runtime. The art is already extracted (40 hairstyles, 24 facial hair, 19 feature sets); the values and the tint are not wired. Being mapped from the bytecode now.",
+   "gaps": "The DNA decoder drops the appearance fields; the renderer's hair/facial-hair/feature slots never receive a value; the skin and hair colour math is not mapped; the demo roster has no looks at all. Found by the owner watching the arena, not by the inventory.",
+   "next": "Map colorhero / initcolour and the DNA layout (wave running), then decode every boss's look and give generated and demo fighters the build's own distribution.",
+   "evidence": "tools/extract-wardrobe.mjs header (updatecharacter's attach table; Color on each limb's bareskin); src/render/extracted-figure.js loadoutFrom ('the engine does not model them yet, so ... the gladiator simply has no hair'); initcharacter reads skincolor, haircolor, hairstyle, facehairstyle, features (all-actions.txt ~62129).",
+   "ownerDecision": "",
+   "updated": "2026-09-23"
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-23",
+   "text": "Fighter looks started: every fighter was drawn grey and bald; the build's skin, hair and face from each gladiator's DNA are being mapped."
+  },
   {
    "date": "2026-09-23",
    "text": "Damage number pop-ups built: numbers, CRITICAL and GRIEVOUS splats, spell and status numbers, heals and BLOCK over every fighter (62b9cdd)."
