@@ -404,8 +404,9 @@ test("it LOOPS, and the whole run is drawn rather than just the entry clip", () 
   );
   assert.equal(timeline.loop, true, "a victory idle must not end and hand back");
   assert.equal(at, 0);
-  // 27 beats: the build's 9-frame `celebrate1` plus `celebrate1a`'s 18.
-  assert.equal(timeline.durationMs, 27 * 120);
+  // ~~27 beats~~ 27 of the build's FRAMES, at its 30 fps since 2026-09-24:
+  // the build's 9-frame `celebrate1` plus `celebrate1a`'s 18, 900 ms a pass.
+  assert.equal(timeline.durationMs, 900);
   // And it breathes on the caller's clock, unlike the held stance.
   assert.notEqual(idleFrameFor(
     { id: "h", teamId: "red", alive: true, resources: {} },

@@ -17,9 +17,11 @@
  *   `hurt8`, at 1446 for `knockback`; `celebrate1a`'s self-loop at 1426;
  *   `flame_repeat`'s two-pass counter at 1963; and `damagecharacter` naming
  *   `"knockback"` at `+0x1b4f` and `+0x1bc0`.
- * - **This engine's**: the six beat counts, which are AUTHORED like every other
- *   duration here, and the decision to rebase effect-group indices rather than
- *   renumber the player's JSON.
+ * - **This engine's**: ~~the six beat counts, which are AUTHORED like every other
+ *   duration here, and~~ the decision to rebase effect-group indices rather than
+ *   renumber the player's JSON. *(Since 2026-09-24 `timelineFor` times a run by
+ *   its `frames` at the build's 30 fps and no longer reads `beats`; the table
+ *   still carries them — see `test/render-build-timing.test.js`.)*
  */
 import assert from "node:assert/strict";
 import nodeFs from "node:fs";
@@ -154,11 +156,17 @@ test("EXACTLY FIVE SCHEDULES GOT LONGER and every other label's is untouched", (
   //   `timelineFor` reaches every animation in the game, and "the psyche clips
   //   are right" would be satisfied by a change that also doubled every attack.
   //   So the control is the other ninety-six labels, by name.
-  const longer = { psyche_up: 2160, psyche_up2: 2040, hurt8: 1200, knockback: 1560, burning: 1080 };
-  const before = { psyche_up: 1080, psyche_up2: 1080, hurt8: 600, knockback: 1080, burning: 840 };
+  //
+  // ► **THE LENGTHS ARE THE BUILD'S SINCE 2026-09-24** — each run's `frames` at
+  //   the build's 30 fps, where they were authored `beats`
+  //   (~~2160, 2040, 1200, 1560, 1080~~); `test/render-build-timing.test.js`
+  //   has why. What this test is FOR is unchanged: the run is longer than its
+  //   entry clip alone, and nothing else moved.
+  const longer = { psyche_up: 600, psyche_up2: 1700 / 3, hurt8: 3400 / 3, knockback: 1900 / 3, burning: 3200 / 3 };
   for (const [label, ms] of Object.entries(longer)) {
-    assert.equal(timelineFor(label).durationMs, ms, `${label} must run for its sequenced length`);
-    assert.ok(ms > before[label], `${label} must be LONGER than the ${before[label]}ms it had`);
+    const entryMs = (CLIP_SEQUENCES[label].entryFrames * 1000) / 30;
+    assert.ok(Math.abs(timelineFor(label).durationMs - ms) < 1e-9, `${label} must run for its sequenced length`);
+    assert.ok(ms > entryMs, `${label} must be LONGER than its ${entryMs.toFixed(0)}ms entry clip alone`);
   }
 
   // Every other label the engine can play, at the duration its family gives it.
@@ -171,7 +179,9 @@ test("EXACTLY FIVE SCHEDULES GOT LONGER and every other label's is untouched", (
 
   // And the sibling clips specifically, because they are the near misses: a
   // rule keyed on a prefix would catch all of these.
-  assert.equal(timelineFor("psyche_up3").durationMs, 1560);
+  // `psyche_up3` DID move, but not by sequencing: its family was one beat a
+  // frame and is the build's 13 frames now (~~1560~~).
+  assert.ok(Math.abs(timelineFor("psyche_up3").durationMs - 1300 / 3) < 1e-9);
   assert.equal(timelineFor("hurt7").durationMs, 600);
   assert.equal(timelineFor("hurt9").durationMs, 600);
   assert.equal(timelineFor("attack3").durationMs, 840);
@@ -195,8 +205,9 @@ test("`celebrate1` carries no `beats`, and the reason changed when it was built"
   assert.equal(timelineFor("celebrate1").family, "celebrate");
   assert.equal(timelineFor("celebrate1").loop, true, "and it loops until something moves the figure");
   // The family's own duration already covers the whole run, which is what makes
-  // the absent `beats` correct rather than an oversight.
-  assert.equal(timelineFor("celebrate1").durationMs, CLIP_SEQUENCES.celebrate1.frames * 120);
+  // the absent `beats` correct rather than an oversight. ~~`frames * 120`~~ —
+  // the run's 27 frames at the build's 30 fps since 2026-09-24, not 27 beats.
+  assert.equal(timelineFor("celebrate1").durationMs, (CLIP_SEQUENCES.celebrate1.frames * 1000) / 30);
   assert.equal(sequenceBeatsFor("attack3"), null, "and an unsequenced label answers the same way");
 });
 

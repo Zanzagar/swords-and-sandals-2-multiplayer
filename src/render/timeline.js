@@ -9,6 +9,14 @@
  * and every pose below is therefore the renderer's invention, and the module
  * says so in each schedule's `provenance`.
  *
+ * ► **EXCEPT WHERE THE BUILD'S OWN FRAMES ARE DRAWN, corrected 2026-09-24.**
+ *   The stream still carries no time, but the extracted rig draws the build's
+ *   frames, and the build plays those at a rate its SWF header states
+ *   (`build-timing.js`). A schedule whose length is a frame count of the
+ *   fighter clip plays it at that rate (`buildSchedule`, and every run
+ *   `clip-sequences.js` records) and says `provenance: "build-frames"`; the
+ *   poses are still this module's. Every other length is still authored.
+ *
  * ► **ONE CLAUSE OF THAT IS NOW FALSE, corrected 2026-09-11 at the sentence.**
  *   `move-clip` moves a clip after the arena is built, so "nothing in the
  *   stream ever moves a clip again" no longer holds. **The claim the paragraph
@@ -49,7 +57,8 @@
  *   does, this constant is the thing it settles.
  */
 
-import { sequenceBeatsFor } from "./clip-sequences.js";
+import { CLIP_SEQUENCES } from "./clip-sequences.js";
+import { BUILD_FRAME_MS, buildFramesMs } from "./build-timing.js";
 import { ss2ColossusYscaleAfter } from "../common/ss2-figure.js";
 
 export class TimelineError extends Error {
@@ -65,8 +74,29 @@ export class TimelineError extends Error {
  */
 export const ANIMATION_TIMEOUT_MS = 4000;
 
-/** The reference beat every authored duration is a multiple of. */
+/**
+ * The reference beat every AUTHORED duration is a multiple of.
+ *
+ * ► **A BEAT IS NOT ONE OF THE BUILD'S FRAMES, and treating it as one is what
+ *   made four clips run 3.6 times the build's length** (found 2026-09-24).
+ *   `psyche`, `psyche:discharge` and `celebrate` were given one beat per pack
+ *   frame — "nine frames is the pack's own length", "27 beats, which is the
+ *   build's own run" — and a beat is 120 ms where the build's frame is 33.3.
+ *   A length the build's frames set is `buildSchedule`'s, in frames; this is
+ *   for lengths this module invents, and only those.
+ */
 const BEAT_MS = 120;
+
+/** A schedule whose length this module invented, in beats. */
+const AUTHORED_TIMING = "authored-timing";
+
+/**
+ * A schedule whose length is the BUILD'S: a frame count read off the fighter
+ * clip, at the oracle's frame rate (`build-timing.js`). Still no capture
+ * settles it — it is the SWF header's nominal rate, not a measured playback —
+ * but nothing in it was invented here.
+ */
+const BUILD_FRAMES = "build-frames";
 
 const DEATH_VARIANTS = Object.freeze(["slain", "yield", "taunt", "arrow", "grievous"]);
 
@@ -171,10 +201,24 @@ function pose(overrides) {
   return Object.freeze({ ...NEUTRAL, ...overrides });
 }
 
-function schedule(family, beats, keyframes, { loop = false, travel = false, depthTravel = false } = {}) {
+/** A schedule whose length this module AUTHORED, in 120 ms beats. */
+function schedule(family, beats, keyframes, options) {
+  return scheduleOf(family, beats * BEAT_MS, AUTHORED_TIMING, keyframes, options);
+}
+
+/**
+ * A schedule whose length is the BUILD'S — `frames` of the fighter clip at the
+ * oracle's frame rate — with poses that are still this module's own. The unit
+ * is in the name so a frame count can never again be passed as beats.
+ */
+function buildSchedule(family, frames, keyframes, options) {
+  return scheduleOf(family, buildFramesMs(frames), BUILD_FRAMES, keyframes, options);
+}
+
+function scheduleOf(family, durationMs, provenance, keyframes, { loop = false, travel = false, depthTravel = false } = {}) {
   return Object.freeze({
     family,
-    durationMs: beats * BEAT_MS,
+    durationMs,
     loop,
     /**
      * True when the figure TRAVELS across this schedule — its x runs from the
@@ -203,8 +247,9 @@ function schedule(family, beats, keyframes, { loop = false, travel = false, dept
     depthTravel,
     keyframes: Object.freeze(keyframes.map((frame) => Object.freeze({ at: frame.at, pose: pose(frame.pose) }))),
     // Not decoration: nothing upstream carries timing, so a surface must be
-    // able to say that what it just played was invented here.
-    provenance: "authored-timing"
+    // able to say that what it just played was invented here — or, for a
+    // `buildSchedule`, that its length is the build's.
+    provenance
   });
 }
 
@@ -247,10 +292,13 @@ function familyOf(label, role) {
   //   the build that dispatches the continuation directly: 13 frames
   //   (1434-1446), one `Stop`, no `struck`. It is already a member of the
   //   `knockback` family in `clip-labels.js`, so the extracted rig draws it by
-  //   its own name. `clip-sequences.js` records the family's pace as nine beats
+  //   its own name. ~~`clip-sequences.js` records the family's pace as nine beats
   //   to 13 frames, which is this clip's own length, so the family's duration
-  //   IS that pace and no override is needed. Matched by exact name for the
-  //   gait comment's reason.
+  //   IS that pace and no override is needed.~~ **The nine beats were never a
+  //   pace (corrected 2026-09-24): they predate the extraction. The family is
+  //   13 of the build's frames now — this clip's own length at the build's
+  //   rate — so the family's duration still needs no override.** Matched by
+  //   exact name for the gait comment's reason.
   if (label === "knockback_mov") return "knockback";
   // ► **THE SHOVER'S OWN CLIP, and it had no family until 2026-09-22.**
   //   `attacker.gotoAndPlay("shove")` at `+0x5e27`; frames 1447-1481, ending in
@@ -484,17 +532,20 @@ const FAMILIES = Object.freeze({
   /**
    * BUILDING UP: no contact, no advance, and that is the point.
    *
-   * ► **EVERY MILLISECOND HERE IS AUTHORED and the FRAME COUNT is not.** Nine
-   *   frames is the pack's own length for `psyche_up` (1609-1617) and
-   *   `psyche_up2` (1627-1635). The poses between them are this engine's, like
-   *   every other schedule in this table — the map records frame ranges and
-   *   names no pose inside one.
+   * ► ~~**EVERY MILLISECOND HERE IS AUTHORED and the FRAME COUNT is not.**~~
+   *   **THE LENGTH IS THE BUILD'S, and until 2026-09-24 it was 3.6 times it**:
+   *   nine frames were written as nine 120 ms BEATS, so the charge drew over
+   *   1,080 ms (2,160 with its continuation) where the build plays 300 (600).
+   *   Nine frames is the pack's own length for `psyche_up` (1609-1617) and
+   *   `psyche_up2` (1627-1635), now at the build's rate. The poses between them
+   *   are this engine's, like every other schedule in this table — the map
+   *   records frame ranges and names no pose inside one.
    *
    *   `advance: 0` throughout is a derivation rather than a choice: the build
    *   gates the discharge on a range test it does not move to satisfy, so a
    *   gladiator who psyches up stands exactly where he stood.
    */
-  psyche: () => schedule("psyche", 9, [
+  psyche: () => buildSchedule("psyche", 9, [
     { at: 0, pose: {} },
     { at: 0.3, pose: { armSwing: -0.5, lean: -0.3, bob: 0.3, legSpread: 0.35 } },
     { at: 0.62, pose: { armSwing: -0.85, lean: -0.15, bob: 0.55, legSpread: 0.5 } },
@@ -508,9 +559,10 @@ const FAMILIES = Object.freeze({
    * Thirteen frames, the pack's own length for `psyche_up3` (1644-1656) — the
    * longest of the three and the only one that reaches `checkattackroll`. It
    * keeps the charge's wind-up and then commits, so the two read as one
-   * escalating gesture rather than two unrelated animations.
+   * escalating gesture rather than two unrelated animations. At the build's
+   * rate since 2026-09-24 (433 ms); ~~thirteen beats~~, 1,560 ms, before.
    */
-  "psyche:discharge": () => schedule("psyche:discharge", 13, [
+  "psyche:discharge": () => buildSchedule("psyche:discharge", 13, [
     { at: 0, pose: {} },
     { at: 0.22, pose: { armSwing: -0.9, lean: -0.35, bob: 0.5, legSpread: 0.45 } },
     { at: 0.45, pose: { armSwing: -1, lean: -0.4, bob: 0.7, legSpread: 0.6 } },
@@ -554,14 +606,18 @@ const FAMILIES = Object.freeze({
    * THE VICTORY CELEBRATION, and the one schedule here that is meant to run
    * forever.
    *
-   * ► **27 BEATS, WHICH IS THE BUILD'S OWN RUN**: `celebrate1` is 9 frames
+   * ► **27 FRAMES, WHICH IS THE BUILD'S OWN RUN**: `celebrate1` is 9 frames
    *   (1400-1408) and runs on into `celebrate1a`'s 18 (1409-1426), and
-   *   `clip-sequences.js` gives the renderer all 27 poses. One beat a frame,
+   *   `clip-sequences.js` gives the renderer all 27 poses. ~~One beat a frame,
    *   because the `psyche` family set that precedent for a clip whose length
-   *   the pack states.
+   *   the pack states.~~ **A beat is not a frame (corrected 2026-09-24): 27
+   *   beats drew the run over 3,240 ms where the build plays it in 900, and
+   *   the precedent was the `psyche` family's own unit error.**
    *
-   * ► **THE BUILD LOOPS ONLY THE TAIL AND THIS LOOPS THE WHOLE RUN, which is a
-   *   stated approximation rather than an oversight.** Frame 1426 is
+   * ► ~~**THE BUILD LOOPS ONLY THE TAIL AND THIS LOOPS THE WHOLE RUN, which is a
+   *   stated approximation rather than an oversight.**~~ *(Superseded
+   *   2026-09-18: `idleFrameFor` in `stance.js` takes `celebratingSince` and
+   *   cycles only the tail; the paragraph below is the reasoning it replaced.)* Frame 1426 is
    *   `GoToLabel("celebrate1a"); Play`, so vanilla plays the 9-frame entry ONCE
    *   and then cycles the 18-frame body. Reproducing that needs a loop-start
    *   offset, and a loop-start offset needs to know when the celebration BEGAN
@@ -570,7 +626,7 @@ const FAMILIES = Object.freeze({
    *   winner re-plays his opening flourish once a cycle**; the benefit is that
    *   no part of the renderer has to hold when a bout ended.
    */
-  celebrate: () => schedule("celebrate", 27, [
+  celebrate: () => buildSchedule("celebrate", 27, [
     { at: 0, pose: {} },
     { at: 0.18, pose: { armSwing: 0.9, bob: 0.45, lean: -0.2 } },
     { at: 0.36, pose: { armSwing: 0.5, bob: 0.1, legSpread: 0.5 } },
@@ -746,7 +802,15 @@ const FAMILIES = Object.freeze({
     { at: 1, pose: {} }
   ]),
 
-  knockback: () => schedule("knockback", 9, [
+  /**
+   * THE KNOCKBACK, at the build's own length since 2026-09-24: `knockback_mov`'s
+   * 13 frames (1434-1446) when it is dispatched on its own, and the 19-frame
+   * run when `knockback` is (`timelineFor`'s sequenced path). ~~Nine beats~~ —
+   * written 2026-09-10 for the authored figure, before the fighter had been
+   * extracted, and later read back as "the pace" of a 13-frame clip, which
+   * drew a knockback at 2.5 times the build's length. The POSES are authored.
+   */
+  knockback: () => buildSchedule("knockback", 13, [
     { at: 0, pose: {} },
     { at: 0.25, pose: { recoil: 1, lean: -0.9, bob: 0.3 } },
     { at: 0.6, pose: { recoil: 0.8, lean: -0.6, bob: -0.4, legSpread: 0.7 } },
@@ -806,14 +870,29 @@ export function timelineFor(label, { role = "actor" } = {}) {
   //   BUT "TWICE AS FAST".** The family's duration was authored for the clip
   //   that carries the label's name; `clip-sequences.js` has the build running
   //   on past it, so the surface has up to twice the poses to show in the same
-  //   slot. Six labels carry their own authored beat count there — see that
+  //   slot. ~~Six labels carry their own authored beat count there — see that
   //   module's header for the rule they were chosen under, and note that they
   //   are AUTHORED exactly like the numbers above, which is why the provenance
-  //   below is untouched.
-  const sequencedBeats = sequenceBeatsFor(label);
-  const timed = sequencedBeats === null
-    ? built
-    : { ...built, durationMs: sequencedBeats * BEAT_MS };
+  //   below is untouched.~~
+  //
+  // ► **AND SINCE 2026-09-24 THE RUN PLAYS AT THE BUILD'S OWN FRAME RATE —
+  //   `frames` of it, each `BUILD_FRAME_MS` — and no longer at an authored beat
+  //   count.** The table's `beats` kept "the pace the family was authored at",
+  //   and measured against the drawing that pace was wrong for four of the five
+  //   it was applied to: `psyche_up` and `psyche_up2` ran at one 120 ms beat per
+  //   FRAME, 3.6 times the build's length; `hurt8` and `knockback` scaled five
+  //   and nine beats that were written on 2026-09-10 (473ef59), three days
+  //   before any frame of the fighter was extracted (ede9350), so no clip length
+  //   was ever in them — a knockback drew 1,560 ms where the build plays 633.
+  //   The fifth, `burning`, was already "the build's own 30 fps" rounded to the
+  //   beat, and moves 13 ms. The run's frame count is the tool-derived half of
+  //   the table (`tools/clip-sequences.mjs`), which is why the provenance says
+  //   whose clock this is.
+  const key = typeof label === "string" ? label.toLowerCase() : "";
+  const runFrames = Object.hasOwn(CLIP_SEQUENCES, key) ? CLIP_SEQUENCES[key].frames : null;
+  const timed = Number.isInteger(runFrames) && runFrames > 0
+    ? { ...built, durationMs: buildFramesMs(runFrames), provenance: BUILD_FRAMES }
+    : built;
   return Object.freeze({ ...timed, label, recognised: family !== "unknown" });
 }
 
@@ -980,6 +1059,8 @@ export function figureXAt({ restingX, facing, pose, timeline = null, motion = nu
   // A travelling gait, or a PUSH riding whatever the victim plays. The build's
   // `knockback()` tweens over its own second, independent of the clip; riding
   // the victim's timeline instead is this engine's one approximation of it.
+  // Since the knockback run plays at the build's rate (2026-09-24) that slide
+  // is 633 ms, 367 short of the build's second — it was 1,560, 560 over.
   //
   // ► **AND A LANE CHANGE'S x STEP rides its sidestep** (added 2026-09-23):
   //   joining an occupied lane moves the figure sideways as well as in depth,
@@ -1039,9 +1120,11 @@ export function figureFacingAt({ facing, turn = null, pendingTokens = [] }) {
 
 /**
  * One tick of the build's frame clock: its onEnterFrame handlers run at the
- * movie's 30 fps, and colossus's arm writes the scale once a tick.
+ * movie's 30 fps, and colossus's arm writes the scale once a tick. The same
+ * clock the build-frame schedules run on (`build-timing.js`), read from one
+ * place since 2026-09-24 rather than stated here a second time.
  */
-const SCALE_TICK_MS = 1000 / 30;
+const SCALE_TICK_MS = BUILD_FRAME_MS;
 
 /**
  * HOW BIG A FIGURE IS DRAWN THIS FRAME — its `_yscale` as a percentage: the

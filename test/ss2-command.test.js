@@ -518,16 +518,20 @@ test("presented end to end: Cast2 on the caster, knockback_mov on the victim, an
   assert.equal(scene.actors.hero.x, constructed.actors.hero.x, "and the caster stays put");
 });
 
-test("knockback_mov resolves to the knockback family, which can draw it, at the family's own pace", () => {
+test("knockback_mov resolves to the knockback family, which can draw it, at its own length", () => {
   const victim = timelineFor("knockback_mov", { role: "target" });
   assert.equal(victim.recognised, true, "not the `unknown` schedule");
   assert.equal(victim.family, "knockback");
   assert.ok(clipLabelsFor(victim.family).includes("knockback_mov"));
   assert.equal(new Set(allUnmappedLabels()).has("knockback_mov"), false);
   // Dispatched on its own it is NOT the 19-frame `knockback` run: 13 frames
-  // (1434-1446), which is the length the family's nine beats were authored at.
-  assert.equal(victim.durationMs, 9 * 120);
-  assert.equal(timelineFor("knockback", { role: "target" }).durationMs, 13 * 120, "the entry's run is unchanged");
+  // (1434-1446), ~~which is the length the family's nine beats were authored
+  // at~~ — the nine beats were written 2026-09-10, before the fighter was
+  // extracted, so they were never that length's pace. Both play the build's
+  // frames at its 30 fps since 2026-09-24 (`test/render-build-timing.test.js`).
+  assert.ok(Math.abs(victim.durationMs - 1300 / 3) < 1e-9, `13 of the build's frames, not ${victim.durationMs} ms`);
+  assert.ok(Math.abs(timelineFor("knockback", { role: "target" }).durationMs - 1900 / 3) < 1e-9,
+    "and the entry's run is its own 19");
 });
 
 test("the victim SLIDES across knockback_mov, from where it stood to where the pull left it", () => {

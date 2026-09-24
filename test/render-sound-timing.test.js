@@ -154,7 +154,9 @@ test("A CUE FIRES EXACTLY WHEN THE DRAWING SHOWS ITS POSE, at every millisecond 
   // that the sound starts on the first draw showing the cue's pose, whatever
   // the frame timing — so it is swept, not sampled.
   const timeline = timelineFor("hurt8", { role: "target" });
-  assert.equal(timeline.durationMs, 1200, "hurt8's authored run: 10 beats of 120 ms");
+  // ~~"hurt8's authored run: 10 beats of 120 ms"~~ — the build's own 34 frames
+  // at its 30 fps since 2026-09-24 (`test/render-build-timing.test.js`).
+  assert.ok(Math.abs(timeline.durationMs - 3400 / 3) < 1e-6, `hurt8's run: 34 of the build's frames, not ${timeline.durationMs} ms`);
   const plan = soundCuesFor({ timing: TIMING }, { family: timeline.family, label: timeline.label });
   let fired = 0;
   let firstFiredAt = null;
@@ -170,8 +172,28 @@ test("A CUE FIRES EXACTLY WHEN THE DRAWING SHOWS ITS POSE, at every millisecond 
     }
     fired = result.fired;
   }
-  // 16/34 of 1200 ms, to the half-millisecond sweep.
-  assert.ok(Math.abs(firstFiredAt - (16 / 34) * 1200) <= 0.5, `fired at ${firstFiredAt} ms`);
+  // ~~16/34 of 1200 ms~~ — frame 1266 is sixteen of the build's frames into
+  // the run, 533.3 ms at 30 fps, which is where the build starts it. To the
+  // half-millisecond sweep.
+  assert.ok(Math.abs(firstFiredAt - 16 * (1000 / 30)) <= 0.5, `fired at ${firstFiredAt} ms`);
+});
+
+test("AND THE KNOCKBACK'S SOUND LANDS WHERE THE BUILD'S DOES: frame 1440, 400 ms into the run — not 1,000", () => {
+  // `knockback_mov` -> `1104.mp3` at frame 1440 (`clip-sequences.js`): twelve
+  // frames after the run's first, 1428. The sound implementer measured it
+  // firing 1,000 ms in while the knockback was drawn over 1,560 ms; drawn at
+  // the build's rate it is the build's 400.
+  const timeline = timelineFor("knockback", { role: "target" });
+  const plan = soundCuesFor({ timing: TIMING }, { family: timeline.family, label: timeline.label });
+  assert.deepEqual(plan.cues.map(({ file, poseIndex }) => [file, poseIndex]), [["1104.mp3", 12]]);
+  let fired = 0;
+  let firstFiredAt = null;
+  for (let elapsed = 0; elapsed <= timeline.durationMs; elapsed += 0.5) {
+    const result = dueSoundCues(plan, { elapsedMs: elapsed, durationMs: timeline.durationMs, fired });
+    if (result.due.length > 0 && firstFiredAt === null) firstFiredAt = elapsed;
+    fired = result.fired;
+  }
+  assert.ok(Math.abs(firstFiredAt - 400) <= 0.5, `the knockback's sound fired ${firstFiredAt} ms in, where the build's is 400`);
 });
 
 test("a clip that has not begun fires nothing — the delayed victim is heard at impact", () => {

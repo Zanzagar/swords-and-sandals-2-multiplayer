@@ -404,7 +404,12 @@ test("every label the SS2 bindings can emit gets a timeline, recognised or not",
     assert.equal(timeline.family, family, `${label} as ${role}`);
     assert.equal(timeline.recognised, recognised, `${label} as ${role} recognised`);
     assert.ok(timeline.durationMs > 0);
-    assert.equal(timeline.provenance, "authored-timing", "no capture settles a frame duration");
+    // ~~Every one `authored-timing`~~: since 2026-09-24 a schedule whose length
+    // is the build's own frames says so (`build-frames`), and
+    // `test/render-build-timing.test.js` pins exactly which. Neither is a
+    // capture: no capture settles a frame duration.
+    assert.equal(timeline.provenance, label === "knockback" ? "build-frames" : "authored-timing",
+      `${label} as ${role}: whose clock it runs on`);
   }
 });
 
