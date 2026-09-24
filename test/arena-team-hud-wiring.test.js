@@ -16,6 +16,7 @@ const code = raw
   .replace(/\/\/[^\n]*/g, " ")
   .replace(/"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`/g, '""');
 
+/** A function's body in `code` (comments out, strings blanked), sliced by its braces. */
 function functionBody(name) {
   const start = code.indexOf(`function ${name}(`);
   assert.ok(start >= 0, `${name} is not defined in tools/arena/main.js`);
@@ -25,6 +26,18 @@ function functionBody(name) {
     else if (code[index] === "}") { depth -= 1; if (depth === 0) return code.slice(start, index + 1); }
   }
   throw new Error(`${name}'s braces do not balance`);
+}
+
+/**
+ * The same function as WRITTEN, for a pin on a template string, whose text `code` blanks: from its
+ * `function` to the closing brace that starts a line (every top-level function in main.js ends so).
+ */
+function rawBody(name) {
+  const start = raw.indexOf(`function ${name}(`);
+  assert.ok(start >= 0, `${name} is not defined in tools/arena/main.js`);
+  const end = raw.indexOf("\n}\n", start);
+  assert.ok(end > start, `${name} has no closing brace at the start of a line`);
+  return raw.slice(start, end + 2);
 }
 
 test("H1: the name plate is stroked in the model's outline, filled in his side's colour, underlined and given its initial", () => {
@@ -49,9 +62,48 @@ test("H1: the name plate is stroked in the model's outline, filled in his side's
   assert.ok(plate.indexOf("context.restore();") > plate.indexOf("context.fillText(plate.initial"), "and restored after it");
 });
 
-test("H1: a roster row takes his side's colour and initial from the same model", () => {
+const page = fs.readFileSync(new URL("../tools/arena/index.html", import.meta.url), "utf8");
+
+test("H2: the side panel is the model's — the crowd meter, then a panel per side with a row per fighter", () => {
   const roster = functionBody("renderRoster");
-  assert.match(roster, /teamStyleFor\(combatant\.teamId\)/);
-  assert.match(roster, /node\.style\.setProperty\("", team\.colour\);/);
-  assert.match(roster, /initial\.textContent = team\.initial;/);
+  assert.match(roster, /const hud = teamHudFor\(\{ wire: host\.wire\(\), seats, crowdShown: crowdHeard \}\);\s*renderCrowdMeter\(hud\.crowd\);\s*el\(""\)\.replaceChildren\(\.\.\.hud\.teams\.map\(teamPanelNode\)\);/);
+  assert.match(raw, /el\("roster"\)\.replaceChildren\(\.\.\.hud\.teams\.map\(teamPanelNode\)\)/);
+  const panel = functionBody("teamPanelNode");
+  assert.match(panel, /panel\.style\.setProperty\("", team\.colour\);/);
+  assert.match(panel, /rows\.append\(\.\.\.team\.rows\.map\(fighterRowNode\)\);/);
+  assert.match(rawBody("teamPanelNode"), /hudNode\("span", "team-standing", `\$\{team\.standing\} of \$\{team\.rows\.length\} standing`\)/);
+  const row = rawBody("fighterRowNode");
+  assert.match(row, /hudNode\("li", `fighter\$\{row\.acting \? " acting" : ""\}\$\{row\.alive \? "" : " down"\}\$\{row\.you \? " you" : ""\}`\)/);
+  assert.match(row, /node\.style\.setProperty\("--team", row\.colour\);/);
+  assert.match(row, /if \(row\.acting\) node\.setAttribute\("aria-current", "true"\);/, "the turn is aria-current, not colour alone");
+  assert.match(row, /if \(row\.acting\) tags\.append\(hudNode\("span", "tag turn", "turn"\)\);/);
+  assert.match(row, /if \(!row\.alive\) tags\.append\(hudNode\("span", "tag down", "down"\)\);/);
+  assert.match(row, /if \(row\.seat\) tags\.append\(hudNode\("span", `seat\$\{row\.you \? " you" : ""\}`, row\.seat\)\);/);
+  assert.match(row, /for \(const condition of row\.conditions\) \{\s*const chip = hudNode\("span", "chip", condition\.words\);\s*chip\.title = condition\.title;/);
+  assert.match(row, /readingNode\("Health", row\.health, "health"\),\s*readingNode\("Energy", row\.energy, "energy"\),\s*readingNode\("Armour", row\.armour, "armour"\)/);
+  const reading = rawBody("readingNode");
+  assert.match(reading, /reading\.shown \? `\$\{reading\.value\} \/ \$\{reading\.max\}` : "—"/);
+  assert.match(reading, /fill\.style\.width = `\$\{reading\.shown \? reading\.percent : 0\}%`;/);
+  const crowd = rawBody("renderCrowdMeter");
+  assert.match(crowd, /el\("crowd"\)\.hidden = !crowd\.shown;\s*if \(!crowd\.shown\) return;/);
+  assert.match(crowd, /\.textContent = crowd\.text;/);
+  assert.match(crowd, /\.style\.width = `\$\{crowd\.percent\}%`;/);
+  assert.match(crowd, /\.style\.left = `\$\{crowd\.booBelow\}%`;/);
+  assert.match(crowd, /\.style\.left = `\$\{crowd\.cheerAbove\}%`;/);
+  // No raw status token reaches the page: the list used to print `status.join(", ")`.
+  assert.equal((code.match(/status\.join\(/g) ?? []).length, 0);
+});
+
+test("H2: the crowd meter is at the top of the side panel, the team panels under it, and the panel's own text under them", () => {
+  const at = (needle) => {
+    const index = page.indexOf(needle);
+    assert.ok(index >= 0, `index.html has ${needle}`);
+    return index;
+  };
+  assert.ok(at("<aside") < at('id="crowd"'));
+  assert.ok(at('id="crowd"') < at('id="roster"'));
+  assert.ok(at('id="roster"') < at('id="turn-heading"'));
+  assert.ok(at('id="roster"') < at("What you are looking at"));
+  assert.match(page, /<section class="crowd" id="crowd"[^>]*\bhidden>/, "no meter until the model says there is a crowd");
+  assert.match(page, /id="crowd-bar" role="meter"/);
 });

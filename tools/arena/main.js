@@ -74,7 +74,6 @@ import {
   perSideFrom,
   rankOfDepth,
   viewportFor,
-  rosterOrderOf,
   poseAt,
   idleFrameFor,
   timelineFor,
@@ -162,7 +161,6 @@ import {
   seatFrameFor,
   seatOutcomeFor,
   seatSummaryFor,
-  seatTagFor,
   seatTurnFor,
   withSeatControllers
 } from "/tools/arena/seats.js";
@@ -198,7 +196,7 @@ import {
   ringSwapButtonAt
 } from "/tools/arena/ring-layout.js";
 import { ringButtonArt } from "/tools/arena/ring-art.js";
-import { namePlateFor, namePlateLayout, teamStyleFor } from "/tools/arena/team-hud.js";
+import { namePlateFor, namePlateLayout, teamHudFor } from "/tools/arena/team-hud.js";
 import {
   RING_STRIP_IDLE,
   ringConfirmSettingFrom,
@@ -5623,66 +5621,123 @@ function drawProjectiles(view, now) {
 /* ------------------------------------------------------------------ */
 
 /**
- * The roster list's own order: by SIDE, then by slot. Stable, and nothing to do
- * with paint order.
+ * ► **THE TEAM PANELS AND THE CROWD METER (H2 of the HUD track,
+ *   `docs/design/battle-ui.md`, "Team HUD, reach preview and the camera:
+ *   DECIDED", items 2 and 3).** The one list of fighters this panel always
+ *   had became two team panels, red then blue: a row per fighter with the
+ *   build's three readings — health, energy and armour, bars and numbers — a
+ *   highlight on whoever's turn it is, his conditions in plain words (never
+ *   the raw status tokens the list printed, `facing-left` among them), "you"
+ *   on a seat a person plays, and the fallen dimmed. Above them, the ONE crowd
+ *   meter, in the build's own words. Every value, word and order is
+ *   `teamHudFor`'s (`tools/arena/team-hud.js`), read from the host's wire
+ *   projection and under the suite; this only makes the DOM.
  *
- * ► **THIS ITERATED `scene.drawOrder` UNTIL 2026-09-12, and that stopped being
- *   harmless the moment draw order became correct.** `withDrawOrder` used to
- *   sort by clip depth, which happened to group the two sides; it now sorts
- *   back-to-front by arena `y`, because that is what painting needs — and the
- *   side panel silently became a back-to-front list with the two teams
- *   interleaved (Tarn, Orso, Vasso, Nym, Cidra, Ruk). A player reads this list;
- *   it should not be ordered by who is painted first. Caught by SCREENSHOTTING
- *   the arena and noticing the panel had changed, which no test was watching.
+ * ~~`rosterOrder()` — `rosterOrderOf(scene.drawOrder, …)`, by side then
+ * slot~~: the panels group by side and order by slot themselves. Its history
+ * (it iterated `scene.drawOrder` until 2026-09-12, and interleaved the teams
+ * once draw order became back-to-front) is why they order by slot and never by
+ * paint order.
  */
-function rosterOrder() {
-  return rosterOrderOf(scene.drawOrder, (id) => host.layout.placementFor(id));
+function renderRoster() {
+  const hud = teamHudFor({ wire: host.wire(), seats, crowdShown: crowdHeard });
+  renderCrowdMeter(hud.crowd);
+  el("roster").replaceChildren(...hud.teams.map(teamPanelNode));
 }
 
-function renderRoster() {
-  const byId = combatantsById();
-  const acting = host.battle.result ? null : host.currentCombatantId();
-  el("roster").replaceChildren(
-    ...rosterOrder().map((combatantId) => {
-      const combatant = byId.get(combatantId);
-      const placement = host.layout.placementFor(combatantId);
-      const node = document.createElement("div");
-      node.className = `fighter${combatantId === acting ? " acting" : ""}${combatant.alive ? "" : " down"}`;
-      // H1: the row takes his side's colour, as his name plate on the stage does.
-      const team = teamStyleFor(combatant.teamId);
-      node.style.setProperty("--team", team.colour);
-      const ratio = combatant.maxHealth > 0 ? combatant.health / combatant.maxHealth : 0;
-      node.innerHTML = "";
-      const row = document.createElement("div");
-      row.className = "row";
-      const name = document.createElement("span");
-      name.className = "name";
-      const initial = document.createElement("span");
-      initial.className = "team-initial";
-      initial.title = `${team.name} team`;
-      initial.textContent = team.initial;
-      name.append(initial, combatant.name);
-      const slot = document.createElement("span");
-      slot.className = "slot";
-      // `you` / `AI` in a `?play=` bout only: with no parameter, and when
-      // spectating, the row reads exactly as it did.
-      const seatTag = seatTagFor(seats, combatantId);
-      slot.textContent = `${placement.side} slot ${placement.slotIndex}${placement.vanillaNative ? "" : " · authored"}` +
-        (seatTag ? ` · ${seatTag}` : "");
-      row.append(name, slot);
-      const numbers = document.createElement("div");
-      numbers.className = "slot";
-      // Copied from resolved state. Nothing here recomputes a combat value.
-      numbers.textContent = `${combatant.health} / ${combatant.maxHealth}${combatant.status.length ? ` · ${combatant.status.join(", ")}` : ""}`;
-      const bar = document.createElement("div");
-      bar.className = ratio < 0.35 ? "bar hurt" : "bar";
-      const fill = document.createElement("i");
-      fill.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`;
-      bar.append(fill);
-      node.append(row, numbers, bar);
-      return node;
-    })
+/** A small element with a class and, optionally, its text. */
+function hudNode(tag, className, text = null) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== null) node.textContent = text;
+  return node;
+}
+
+/** The crowd meter at the top of the side panel: the build's label, the number, the bar and its boo and cheer lines. */
+function renderCrowdMeter(crowd) {
+  el("crowd").hidden = !crowd.shown;
+  if (!crowd.shown) return;
+  el("crowd-text").textContent = crowd.text;
+  el("crowd-value").textContent = String(crowd.value);
+  const bar = el("crowd-bar");
+  bar.setAttribute("aria-valuenow", String(crowd.percent));
+  bar.setAttribute("aria-valuetext", `${crowd.value}: ${crowd.mood}`);
+  bar.dataset.band = crowd.band ?? "";
+  el("crowd-fill").style.width = `${crowd.percent}%`;
+  el("crowd-boo").style.left = `${crowd.booBelow}%`;
+  el("crowd-cheer").style.left = `${crowd.cheerAbove}%`;
+}
+
+/** One side's panel: its colour, its name and how many still stand, and a row per fighter. */
+function teamPanelNode(team) {
+  const panel = hudNode("section", "team-panel");
+  panel.style.setProperty("--team", team.colour);
+  panel.setAttribute("aria-label", `${team.name} team`);
+  const heading = hudNode("h3", "team-heading");
+  heading.append(teamInitialNode(team), `${team.name} team`, hudNode("span", "team-standing", `${team.standing} of ${team.rows.length} standing`));
+  const rows = hudNode("ol", "team-rows");
+  rows.append(...team.rows.map(fighterRowNode));
+  panel.append(heading, rows);
+  return panel;
+}
+
+/** A side's initial on its disc: a cue that is not colour alone. */
+function teamInitialNode(style) {
+  const initial = hudNode("span", "team-initial", style.initial);
+  initial.setAttribute("aria-hidden", "true");
+  return initial;
+}
+
+/** One fighter's row: his name, his tags (turn, down, you or AI), his conditions and his three readings. */
+function fighterRowNode(row) {
+  const node = hudNode("li", `fighter${row.acting ? " acting" : ""}${row.alive ? "" : " down"}${row.you ? " you" : ""}`);
+  node.style.setProperty("--team", row.colour);
+  if (row.acting) node.setAttribute("aria-current", "true");
+  const head = hudNode("div", "row");
+  const name = hudNode("span", "name");
+  name.append(teamInitialNode(row), row.name);
+  const tags = hudNode("span", "tags");
+  if (row.acting) tags.append(hudNode("span", "tag turn", "turn"));
+  if (!row.alive) tags.append(hudNode("span", "tag down", "down"));
+  if (row.seat) tags.append(hudNode("span", `seat${row.you ? " you" : ""}`, row.seat));
+  head.append(name, tags);
+  node.append(head);
+  if (row.conditions.length > 0) {
+    const chips = hudNode("div", "chips");
+    for (const condition of row.conditions) {
+      const chip = hudNode("span", "chip", condition.words);
+      chip.title = condition.title;
+      chips.append(chip);
+    }
+    node.append(chips);
+  }
+  node.append(
+    readingNode("Health", row.health, "health"),
+    readingNode("Energy", row.energy, "energy"),
+    readingNode("Armour", row.armour, "armour")
   );
+  return node;
+}
+
+/**
+ * One of the build's three readings: a label, a bar and `value / max` — or a
+ * dash when there is none to show (the build hides its armour gauge at 0).
+ * The health bar turns at 35%, as the roster's always did.
+ */
+function readingNode(label, reading, kind) {
+  const node = hudNode("div", `reading ${kind}${kind === "health" && reading.shown && reading.percent < 35 ? " hurt" : ""}`);
+  const meter = hudNode("span", "meter");
+  meter.setAttribute("role", "meter");
+  meter.setAttribute("aria-label", label);
+  meter.setAttribute("aria-valuemin", "0");
+  meter.setAttribute("aria-valuemax", "100");
+  meter.setAttribute("aria-valuenow", String(reading.percent));
+  meter.setAttribute("aria-valuetext", reading.shown ? `${reading.value} of ${reading.max}` : "none");
+  const fill = document.createElement("i");
+  fill.style.width = `${reading.shown ? reading.percent : 0}%`;
+  meter.append(fill);
+  node.append(hudNode("span", "label", label), meter, hudNode("span", "num", reading.shown ? `${reading.value} / ${reading.max}` : "—"));
+  return node;
 }
 
 /** The `seatTurnKey` the controls on screen were drawn for; `aiTurnStep` redraws when it goes stale. */

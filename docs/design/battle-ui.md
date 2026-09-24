@@ -589,6 +589,25 @@ and the ring is squeezed onto the stage after it.
    Poisoned…), and a "you" marker on seats a person controls.
 3. **Crowd meter (Q11):** one shared meter at the top of the side panel, with the build's ten mood
    words (`crowd: <mood>`, index `ceil(interest / 10)`).
+   **Built 2026-09-24 (H2, items 2 and 3):** `teamHudFor`, `crowdMeterFor`, `conditionsFor` in
+   `tools/arena/team-hud.js`, drawn by `renderRoster` (`renderCrowdMeter`, `teamPanelNode`,
+   `fighterRowNode`, `readingNode`); `test/arena-team-hud.test.js`,
+   `test/arena-team-hud-bouts.test.js` (whole bouts, every row held to `host.battle` after every
+   action; a spectated bout's hash sequence unchanged by reading it), and the wiring pins. Where
+   each reading lives: health `health`/`maxHealth`; energy `staminaleft`/`staminamax`; armour
+   `armourclass`/`armourclass_max` (the maximum falling back to `armourclass`, as `vanillaRecordOf`
+   does), hidden at 0 as the build's gauge is (`hero_armour` clip-action 0, `+0x0094`-`+0x00bb`);
+   each bar `round(value / max * 100)` as the build's three gauges compute it. The chips are the
+   build's own splat words — Burning, Frozen, Poisoned, and **Wraith** for life stolen
+   (`SPLAT_WORDS[151]` at `STATUS_BONUS_FRAMES`) — and "Taunted", authored; `facing-left` is not a
+   condition and is no longer printed. The ten moods are NOT recorded in the battle map or the text
+   pack (the icons pack has them only as a sorted set); their order was read from the oracle's
+   action dump, `crowd_bar` clip-action 0 `+0x01c7` — `"", bored to tears, bored silly, restless,
+   indifferent, interested, entertained, enthusiastic, wildly entertained, Tranfixed [sic],
+   Fanatical` — and is `CROWD_MOODS`. Authored: above 100 (an opening level sum, before the first
+   phase clamps it) the meter keeps the top mood, where the build's label would read "undefined";
+   the meter is hidden when every fighter is level 1, as the build hides `crowd_bar`
+   (`crowdHeardFor`). The roster's `side slot N · authored` line is gone.
 4. **Turn-order strip (Q3c, Q10a):** a thin DOM strip just above the stage — every fighter in
    initiative order, team-coloured, the current one highlighted, the dead struck through. It never
    touches the canvas or the camera.
