@@ -197,8 +197,11 @@ RCS-03C3B0-A: no position admits an additional fully inseparable H+S path. A
 seventh prerequisite audit then found that the old RCS-03C3B1A row still
 compressed residual opposite-form material participation, minimum phase
 attribution, and additional irreducible multi-phase-H supplements. It is now a
-non-counting parent for RCS-03C3B1A0–RCS-03C3B1A2. RCS-03C3B1A0 is the active
-owner choice under SR-03.
+non-counting parent for RCS-03C3B1A0–RCS-03C3B1A2. The owner selected
+RCS-03C3B1A0-A, making every position temporally projection-pure. An eighth
+audit then split old RCS-03C3B1A1 into minimum phase attribution and
+per-position independent phase multiplicity. RCS-03C3B1A1A is the active owner
+choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -18862,7 +18865,7 @@ implementation is authorized.
 > phase-attributable positions). `RCS-03C3B1B` follows those rows and recomputes
 > feasible phase support. B0-A first reduced `Phi_SR` from 31 to 30; replacing
 > one screened row with three adds two, producing forty-seven counted slots and
-> current `Phi_SR = 32`.
+> the then-current `Phi_SR = 32`.
 
 > **Agent correction:** one internal review incorrectly asserted that B0-A made
 > the independently H-sensitive set cover every materially H-reading position.
@@ -18875,7 +18878,7 @@ implementation is authorized.
 > supplemental multi-phase admission. All gaps are restored before a choice is
 > presented to the owner.
 
-### RCS-03C3B1A0 — residual opposite-form material participation — active owner choice
+### RCS-03C3B1A0 — residual opposite-form material participation — A selected
 
 C3c.35-A makes every counted position independently single-form: each is in
 exactly one of nonempty `T_H` or `T_S`. B0-A now excludes an additional
@@ -18926,6 +18929,137 @@ under B or C, `RCS-03C3B1A1` must retain every additional materially H-reading
 attribution; conditional `RCS-03C3B1A2` owns additional multi-phase-H
 supplements; B1B and B2A–B4 retain phase-support and root/atom identity. The
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **A, no opposite-
+form material paths.** `O^{opp}_v` is empty. Every `T_H` position is materially
+H-pure with respect to the two temporal projections across every effective
+path, and every `T_S` position is materially S-pure. Thus
+`P^{H-read}_v=T_H` and the history-phase domain is nonempty and exact. A
+predicate may still use non-temporal inputs, and one entry may still relate
+distinct history and state positions; no individual position may materially
+require its opposite temporal form.
+
+At one position its temporal evidence form and predicate participate
+**directly**, H/S difference is mechanically real, excluding hidden opposite-
+form dependence is **neutral/protective**, and universal exclusion is
+**aggregate**. History/state unity remains available through the larger multi-
+position Relic relationship. This selection chooses no H fact, phase, operator,
+source family, root/atom identity, payoff, UI, persistence, release, or
+implementation, and it changes no authoritative decision wording.
+
+> **Eighth prerequisite correction, 2026-09-24:** screening minimum phase
+> attribution proved that old `RCS-03C3B1A1` still compressed two independent
+> local topologies. Whether a history position has **any** declaration-,
+> execution-, or outcome-isolatable path does not decide whether one
+> phase-attributable position has exactly one such phase form or independently
+> isolates two or three. Catalog phase support records only the union across
+> positions, while `RCS-03C3B1A2` records irreducibly multi-phase packages;
+> neither captures multiple singleton-phase routes at one position.
+>
+> For example, over `p`'s reachable `(D,E)` valuations `{00,10,01}`, worlds
+> `U: p=D, q=E` and `M: p=D OR E, q=E` can both make every history position
+> phase-attributable, admit no irreducibly multi-phase package,
+> and support catalog phases `{D,E}`. Yet only M lets one position qualify
+> independently through either declaration or execution. The register therefore
+> makes `RCS-03C3B1A1` a non-counting parent for `RCS-03C3B1A1A` (minimum phase
+> attribution) and conditional `RCS-03C3B1A1B` (per-position independent phase
+> multiplicity). `RCS-03C3B1A2` and `RCS-03C3B1B` follow the applicable child.
+> A0-A first reduced `Phi_SR` from 32 to 31; replacing one screened row with two
+> counted children adds one row and one potential card, producing forty-eight
+> counted slots and current `Phi_SR = 32`.
+
+> **Agent correction:** the earlier register treated minimum phase attribution,
+> supplemental irreducible coupling, and catalog support as a complete phase
+> route. The `U`/`M` countermodel disproves that assumption without changing any
+> of those three answers. The omitted per-position multiplicity boundary is
+> restored before the minimum-attribution choice is presented.
+
+### RCS-03C3B1A1A — minimum occurrence-history phase attribution — active owner choice
+
+B1A0-A makes the materially H-reading domain exactly nonempty `T_H`; every
+position in it is temporally H-pure. C3c.33-A still isolates H only from current
+state and other selected inputs. It does not prove that any one semantic phase
+inside H can be manipulated independently of the other phases.
+
+For this card, partition materially read semantic occurrence claims relative to
+one candidate source role into three exhaustive phase projections:
+
+- `D`, **accepted declaration/commitment**: authoritative admission or
+  commitment of a legal source operation before it performs, including a
+  constitutive target, authorization, or payment; these admission claims belong
+  only to `D`, and a source that begins without a separate commitment has no
+  `D` claim;
+- `E`, **execution/performance**: the source operation actually begins,
+  continues, or completes, including performance-local order and trajectory
+  facts and bare ordinary completion, but excluding its adjudicated result and
+  termination disposition or reason; and
+- `O`, **authoritative outcome/disposition**: the adjudicated result or
+  termination disposition/reason, including hit, miss, block, applied effect,
+  interruption, cancellation, failure, or another settled consequence, but
+  excluding `D`'s admission costs and `E`'s bare performance completion.
+
+These are semantic coordinates, not engine cuts, records, packets, fields, or
+atoms. `E` and `O` may become authoritative at the same cut without becoming
+the same claim. One record may carry several **distinct** claims, but a
+multi-meaning record is decomposed semantically and no one claim belongs to
+more than one phase. One root may expose several phase views, and aliases do not
+multiply them. A transition that is an outcome for one source role and an
+activation for another is classified relative to each role without becoming
+two independent sources. Channel ticks are `E` subtypes and interruptions are
+`O`. An order/trajectory relation entirely inside one phase belongs to that
+phase; a cross-phase relation reads each participating phase rather than
+becoming a fourth phase. Current persistence remains `S`, and exact subtype,
+root, and atom catalogs remain later work. A novel material H claim outside
+this exhaustive semantic partition would require an explicit register
+reopening rather than silent relabeling.
+
+For `F` in `{D,E,O}`, let `I^H_F(p)` be true exactly when a **C3c.33-valid
+H-isolation pair** for `p` changes its satisfaction and every differing
+materially read H claim is confined to a nonempty set inside `F`. Thus frozen
+configuration and deterministic initialization agree, every materially read S
+claim and selected input outside H remains fixed, and all materially read H
+claims in the other two phases remain fixed. Unread projections and inputs are
+vacuously fixed; multiple coordinates inside `F` may vary, so this chooses no
+atom boundary. False membership requires complete reachable-domain invariance
+proof. Incomplete analysis is unresolved.
+
+Let
+
+`Q^{phase}_v={p in T_H | I^H_D(p) or I^H_E(p) or I^H_O(p)}`.
+
+A position in `Q^{phase}_v` is **phase-attributable**: at least one effective
+path has a truthful single-phase isolation witness. A position outside it is
+**phase-coupled-only**: `I_H(p)` still holds, but every satisfaction-changing H
+isolation witness valid under C3c.33 necessarily varies material claims from at
+least two phases together.
+
+| Choice | Minimum phase-attribution rule | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — every history position is phase-attributable** | `Q^{phase}_v=T_H`. Every history position has at least one reachable `D`-, `E`-, or `O`-isolation witness. A position may isolate more than one phase, and may separately have an irreducibly multi-phase path; the registered descendants decide those questions. | **Recommended.** At each history position, at least one phase claim and the predicate participate **directly**, and that witnessed phase remains mechanically distinguishable from any other materially read phases within the occurrence/source-operation language. That continuity is **partial**; excluding coupled-only local identities is **neutral/protective**; universal coverage is **aggregate**. A gives every tooltip and replay one honest phase anchor without banning richer supplemental unity. The cost is a real authoring/counterfactual burden and less room for positions whose entire identity is an indivisible mini-story. | Hold the accepted `Guard` commitment and performance facts fixed. One reachable history contains an authoritative successful-block outcome and another does not; only the first satisfies the position. Every other history position has some analogous single-phase witness, not necessarily an outcome witness. |
+| **B — every history position is phase-coupled-only** | `Q^{phase}_v` is empty. Every valid H-isolation for every `T_H` position necessarily varies material claims from at least two phases; complete analysis finds no declaration-only, execution-only, or outcome-only isolation anywhere. Conditional `RCS-03C3B1A1B` and `RCS-03C3B1A2` are pruned. | B makes each history source a compact narrative arc: intent, deed, and/or consequence participate **directly** as a package. But their phase difference is **neutral/unsupported** locally because no one-phase manipulation changes that position's satisfaction while the other read phases remain fixed; universal prevalence is **aggregate**. It maximizes ritual texture at the cost of opaque triggers, weaker counterplay diagnosis, heavier logs/tooltips, and a strong risk that authored phase labels exceed what play can demonstrate. | One position recognizes an accepted `Guard` commitment together with its successful-block disposition, and the complete reachable domain permits its satisfaction to change only when both vary. The joint H package can still be isolated from S and all other inputs; either phase may vary harmlessly alone, but neither can change satisfaction alone. |
+| **C — attributable and coupled-only history positions coexist** | `Q^{phase}_v` is a nonempty proper subset of `T_H`. At least one history position has a single-phase isolation witness and at least one distinct history position is proved phase-coupled-only. This entails at least two history positions. | C supports clear Echoes beside indivisible Vows. Each position inherits A or B's local ideal fit; coexistence is only **aggregate**. It offers the richest authored texture, but creates another hidden taxonomy, a clarity premium for attributable positions, token-witness pressure, and the largest explanation and validation surface. | An Ashen position independently recognizes a successful block outcome, while a Dreamglass position recognizes only an inseparable declaration-plus-disposition package. Names are illustrative. |
+
+**Recommendation: A, every history position is phase-attributable.** The game
+can still express cross-phase unity through separate positions and, if later
+selected, supplemental irreducibly multi-phase paths. A merely requires every
+history position to expose at least one causally legible phase anchor.
+
+A/B/C are mutually exclusive and exhaustive because nonempty `T_H` makes
+`Q^{phase}_v` all of `T_H`, empty, or a nonempty proper subset. Under C, the
+two classes require distinct positions. Phase-attributable membership requires
+one positive reachable witness; coupled-only membership requires exhaustive
+negative proof for all three phase-isolation forms. A raw record layout,
+timestamp, shared cut, or declared phase label proves neither.
+
+This card does not choose which phase or phases a position isolates, whether
+one position isolates several phases, the catalog-wide phase-support subset,
+additional irreducibly multi-phase paths, exact operators, facts, roots, atoms,
+source families, fan-out, claims/consumption, later reuse, payoff, UI,
+persistence, release, or implementation. Under A or C,
+`RCS-03C3B1A1B` next owns per-position independent phase multiplicity and
+`RCS-03C3B1A2` then owns supplemental irreducible multi-phase paths. Under B,
+both are pruned and `RCS-03C3B1B` becomes next. The authoritative decision
+record remains unchanged.
 
 ## Session protocol and evidence
 

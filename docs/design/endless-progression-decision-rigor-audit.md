@@ -2675,9 +2675,10 @@ The register therefore makes `RCS-03C3B1A` a non-counting parent for
 (additional multi-phase-H supplement admission). `RCS-03C3B1B` remains the
 later phase-support row.
 Replacing one screened row with three adds two slots and two potential cards.
-The current forty-seven-slot register contains 31 `SCREEN`, 1 `OWNER-OPEN`, 7
-`PRUNED`, 6 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so current
-`Phi_SR = 32`. `RCS-03C3B1A0` is the sole active card.
+At that seventh-amendment stage the forty-seven-slot register contained 31
+`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 6 `DIR-SELECTED`, 1 `SPEC`, and 1
+`EVALUATE` row, so the then-current `Phi_SR = 32`. `RCS-03C3B1A0` was the sole
+active card.
 
 **Agent correction:** one internal review incorrectly claimed that B0-A made
 the independently H-sensitive domain cover every material H read. C3A's exact
@@ -2688,6 +2689,48 @@ that scope, so the active row now covers every material opposite-form path. A
 separate adversarial review supplied the isolatable-path-plus-coupled-supplement
 countermodel. The seventh amendment records all findings rather than building
 the next card on any hidden assumption.
+
+The owner then selected `RCS-03C3B1A0-A`. No position may materially use its
+opposite temporal form on any effective path. Every `T_H` position is
+temporally H-pure, every `T_S` position is temporally S-pure, and
+`P^{H-read}_v=T_H`. Separate H and S positions may still participate in one
+entry. Selecting A0 reduced `Phi_SR` from 32 to 31.
+
+An eighth prerequisite audit found that old minimum phase attribution still
+compressed two independently variable within-position rules. A history
+position having at least one declaration-, execution-, or outcome-isolatable
+path does not decide whether that position independently isolates one phase or
+several. Catalog phase support records only the union across positions, and the
+supplement row records irreducibly multi-phase packages rather than multiple
+singleton-phase routes.
+
+Over `p`'s reachable `(D,E)` valuations `{00,10,01}`, the countermodel is
+`U: p=D, q=E` versus `M: p=D OR E, q=E`. Both worlds can make every position
+phase-attributable, admit no irreducibly multi-phase package, and support
+catalog phases `{D,E}`. Only M lets one position qualify independently through
+either declaration or execution, changing its local timing and counterplay
+surface.
+
+Throughout this phase route, `D`, `E`, and `O` classify mutually exclusive
+semantic claims relative to one candidate source role rather than cuts,
+records, fields, or atoms. One transition may be an outcome for one role and an
+activation for another without multiplying independent source identity.
+
+The register therefore makes `RCS-03C3B1A1` a non-counting parent for
+`RCS-03C3B1A1A` (minimum phase attribution) and conditional
+`RCS-03C3B1A1B` (per-position independent phase multiplicity). Existing
+`RCS-03C3B1A2` retains additional irreducibly multi-phase-path admission, and
+`RCS-03C3B1B` retains catalog phase support. Replacing one screened row with two
+adds one slot and one potential card. The current forty-eight-slot register
+contains 31 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 7 `DIR-SELECTED`, 1 `SPEC`,
+and 1 `EVALUATE` row, so current `Phi_SR = 32`. `RCS-03C3B1A1A` is the sole
+active card.
+
+**Agent correction:** the prior route incorrectly treated minimum attribution,
+irreducible multi-phase supplementation, and catalog phase union as exhaustive.
+The `U`/`M` pair varies local independent phase multiplicity while holding all
+three fixed. That missing player-material boundary is restored before the next
+card is presented.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
