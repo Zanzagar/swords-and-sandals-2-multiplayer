@@ -5,7 +5,9 @@ the exact send timestamp or the transport used. The text below is the SENT
 version, pasted by the owner, not the 2026-09-02 draft — the draft's research
 paragraph was rewritten by him and the signature block was filled in.
 
-**No reply is recorded.** If one arrives, append it here rather than to a
+~~**No reply is recorded.**~~ **A HOLDING REPLY ARRIVED — reported by the
+owner on 2026-09-24 as received "3 days ago" (about 2026-09-21); see "Replies"
+at the end of this file.** If one arrives, append it here rather than to a
 handoff: a handoff freezes at the end of its session, this file does not.
 
 ## Recipient and route — VERIFIED 2026-09-07, not assumed
@@ -90,3 +92,29 @@ The Pennsylvania State University
 > the owner's to publish, not mine: say the word and the verbatim block goes
 > back in. Nothing evidentiary is lost by their absence — no measurement, no
 > provenance and no claim in the table above depends on them.
+
+## Replies
+
+### About 2026-09-21 — a holding reply from Oliver Joyce
+
+Reported by the owner on 2026-09-24 ("He responded 3 days ago"), who pasted
+the text into the session. **Paraphrased, not quoted: this repository is
+PUBLIC and the reply is his private correspondence** — the same reason the
+owner's own signature block is redacted above. The owner holds the verbatim
+text and may add it.
+
+- He apologises for the slow response and says he will reply properly within
+  the next few days.
+- He calls the project amazing-sounding and impressive so far.
+
+**What it is NOT: permission of any kind.** It answers the email above, which
+promised the project ships none of his art, code or data and that players
+need their own copy. It grants nothing, and it does not address eGames. As of
+2026-09-24 the "ship no SS2 asset" rule in AGENTS.md stands unchanged.
+
+**What the owner wants to ask next (2026-09-24):** whether the project may
+bundle the game's art instead of importing it from each player's copy. That
+needs an explicit, written grant with a scope — which assets, where (a public
+repository, a hosted web version, or both), attribution, non-commercial use —
+and whether eGames, which holds the brand rights per the studio's own press
+kit, must also agree. Record the answer here when it arrives.
