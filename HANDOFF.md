@@ -28,9 +28,12 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-24 11:48 — the night merged, and the HUD is decided](docs/handoffs/2026-09-24-1148--the-night-merged-and-the-hud-is-decided.md)**
-(a MID-SESSION checkpoint of session `e75af16c`, which continues `b64d8f55`
-after its chat was accidentally closed). Start there. *(It supersedes
+[2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md)**
+(the END of session `e75af16c`, which continued `b64d8f55`). Start there.
+*(It supersedes
+[2026-09-24 11:48 — the night merged, and the HUD is decided](docs/handoffs/2026-09-24-1148--the-night-merged-and-the-hud-is-decided.md),
+**whose in-flight items 1-2 are MERGED, item 3 (the gate) is BUILT BUT NOT
+ADOPTED, and item 4 (ring3) is not started.**)* *(That one supersedes
 [2026-09-24 04:53 — the stranded work is merged, and the night is running](docs/handoffs/2026-09-24-0453--the-stranded-work-is-merged-and-the-night-is-running.md),
 **whose overnight run is ALL MERGED.**)* *(That one supersedes
 [2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md),

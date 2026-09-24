@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-24",
- "head": "2ba96c3",
+ "head": "674cf9e",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -578,14 +578,14 @@
   {
    "id": "hud-hit-points-stamina-armour-crowd-potions-comb",
    "lane": "presentation",
-   "column": "ready",
+   "column": "done",
    "order": 42,
    "title": "Team HUD: fighter rows, turn order, crowd meter",
-   "summary": "Designed 2026-09-24: one row per fighter in each team's panel (health, energy, armour, rank, weapon, condition chips; acting / target / hurt / tired / down states), a turn-order strip, and the build's own crowd meter with its ten moods and 20 / 70 thresholds. The build's combat_panel is two-sided only, so the 3v3 layout is authored; the three readings and the moods are the build's.",
+   "summary": "Built (a1f6500, 93b2179, f9a135e): team-coloured name plates with an R/B disc; two team panels (health, energy, armour, turn highlight, condition chips, you/AI); the crowd meter with the build's ten moods; a turn-order strip above the stage. Seen in a real browser.",
    "gaps": "Stamina, armourclass, crowd_interest (a battle resource since cefaf83) and potion counts are invisible, although they drive the rules. The roster shows internal tokens like 'facing-left' to a player. combat_panel is two-sided hero/villain and has no layout for 3v3.",
-   "next": "Delivery slice 4 in docs/design/battle-ui.md.",
+   "next": "",
    "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa). Build HUD mapped by wave wf_e90ae76e-4af (q4).",
-   "ownerDecision": "",
+   "ownerDecision": "\"Wraith\" (the build) or \"Life-drained\"; the build's typo \"Tranfixed\"; chips for timed spells.",
    "updated": "2026-09-24"
   },
   {
@@ -622,7 +622,7 @@
    "title": "Actions around the fighter (the game's own button ring)",
    "summary": "Decided by the owner 2026-09-24 in a grilling round: the original's eight-button ring around the acting fighter, adapted for team play — WHO FIRST (a foe is always selected and the ring shows what you can do to him), spatial movement (walk slots; rank arrows above and below), one click acts (optional confirm), hidden where the original hides / greyed with a reason where team rules forbid, the original's weapon-swap button and items row. Built in slices S2-S9.",
    "gaps": "Unreadable to a new player. Direction-absolute walk buttons are the build's semantics but confusing on the blue side. There is no confirmation for irreversible spends.",
-   "next": "The ring is being built overnight as slices S2-S9 (night/ring).",
+   "next": "The ring3 track: R1 the spell row clear of the bow's words, R2 the reach preview, C1 the camera frames a person's ring at a fixed on-screen size (briefs written).",
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "ownerDecision": "",
    "updated": "2026-09-24"
@@ -1127,9 +1127,9 @@
    "column": "ready",
    "order": 4,
    "title": "Targeting across ranks",
-   "summary": "Designed 2026-09-24. Melee, shove and taunt reach only the actor's own rank (one foe: auto-selected, no target step); spells and arrows reach any foe in any rank (numbered gold rings, pick 1–3); self actions skip the step. Unreachable foes stay visible, dimmed, with the reason. A state machine: Idle → Action → (Target) → Ready → Sent, Esc steps back.",
+   "summary": "Decided 2026-09-24 (#decided-hud-2026-09-24 item 1): target picking, not area attacks — the reach preview: hovering a spell or bombard lights every reachable foe with a numbered gold ring and dims the rest; one click still fires at the selected foe.",
    "gaps": "Needs the engine's reason codes for withheld actions (slice 5) to say 'why not' everywhere.",
-   "next": "Delivery slice 3: rings, numbers and dimming on the stage canvas from the same action model.",
+   "next": "The ring3 track, slice R2 (brief written).",
    "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa). Real 3v3 offers measured with the tricks kit (seed 3): melee only at the own-rank foe, spells at all three.",
    "ownerDecision": "",
    "updated": "2026-09-24"
@@ -1310,24 +1310,24 @@
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
    "gaps": "",
    "id": "ring-s8-ai-pacing",
-   "column": "in-progress",
+   "column": "done",
    "title": "S8 · AI pacing: speed up and skip to my turn",
-   "summary": "AI turns at normal speed, a hold-to-speed-up key, and a 'skip to my turn' button.",
+   "summary": "Built (4b71a5b): Shift draws AI turns at 4x; Skip to my turn at 64x; drawing only, hashes identical.",
    "order": 18,
-   "next": "Follow-up run 2026-09-24 (night/ring2)."
+   "next": ""
   },
   {
    "lane": "presentation",
    "ownerDecision": "",
    "updated": "2026-09-24",
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
-   "gaps": "",
+   "gaps": "Jump/charge are still HIDDEN (RING_HIDDEN_VERBS) — the owner has since decided they show greyed \"Not built yet\".",
    "id": "ring-s9-reasons",
-   "column": "in-progress",
+   "column": "done",
    "title": "S9 · Why a button is greyed",
-   "summary": "Hover reasons on greyed buttons from E's reason codes (other rank, out of reach, blocked…).",
+   "summary": "Built (07fb177): greyed buttons with the engine's reason on hover, focus and in the strip; they never act.",
    "order": 19,
-   "next": "Follow-up run 2026-09-24 (night/ring2)."
+   "next": ""
   },
   {
    "id": "lanes-discrete-or-continuous-y",
@@ -1341,9 +1341,34 @@
    "evidence": "docs/design/battle-ui.md #decided-hud-2026-09-24 item 9; SS2_ARENA / ss2SameLane in src/team/ss2-rules.js; board card team-geometry-ranks-lanes-facing-back-attacks-li. Decision and analysis: docs/design/battle-ui.md #decided-hud-2026-09-24 item 10.",
    "ownerDecision": "Decided 2026-09-24: SOFT LANES is the direction (continuous y inside a lane band; melee same band; area verbs a real 2-D radius; lane changes by walk/jump/charge). Free y deferred — decided later by a data spike with cheese bots.",
    "updated": "2026-09-24"
+  },
+  {
+   "id": "grilling-gate",
+   "lane": "verification",
+   "column": "in-progress",
+   "order": 82,
+   "title": "The grilling gate: every commit carries Decided: or a class trailer",
+   "summary": "The owner's decision (#decided-hud-2026-09-24 item 8): a commit-msg hook and a CI job check every commit for Decided: <doc#anchor> or Fix:/Docs:/Chore:/Test:, binding Claude, Codex and humans alike; rolled out per project by the harness's adopt.sh. No author-date exemption; --no-verify denied; a PR template + a PR-description check.",
+   "gaps": "Built and pushed on night/gate (9c6f6de) and the harness's gate/grilling-trailers (3f49e92), NOT adopted: Codex pass 6 has three open medium findings.",
+   "next": "Fix pass 6, review to approve, then adopt in the order the handoff gives.",
+   "evidence": "docs/design/battle-ui.md #decided-hud-2026-09-24; the two branch commits.",
+   "ownerDecision": "",
+   "updated": "2026-09-24"
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-24",
+   "text": "The team HUD is built: team colours, health / energy / armour panels, the crowd meter and a turn-order strip (a1f6500, 93b2179, f9a135e)."
+  },
+  {
+   "date": "2026-09-24",
+   "text": "The ring says why a button is greyed (07fb177), and AI turns can be sped up or skipped (4b71a5b)."
+  },
+  {
+   "date": "2026-09-24",
+   "text": "The grilling gate is built on its own branches, waiting for review before it is switched on."
+  },
   {
    "date": "2026-09-24",
    "text": "New design topic: discrete lanes or continuous y, and which attacks may cross a lane (with jump/charge lane changes)."
