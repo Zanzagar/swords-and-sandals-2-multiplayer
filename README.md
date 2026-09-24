@@ -137,9 +137,10 @@ Read the work in this order:
 1. [progression diagnosis and transferable principles](docs/design/progression-diagnosis.md);
 2. [Swords & Sandals mod-scene survey](docs/design/swords-and-sandals-mod-scene-survey.md);
 3. [complete Endless progression-system design](docs/design/endless-progression-system.md);
-4. [owner decision packet and guided-session worksheet](docs/design/endless-progression-owner-packet.md);
-5. [authoritative owner decision record](docs/design/endless-progression-decisions.md); and
-6. [MVP implementation-readiness record](docs/design/endless-mvp-readiness.md).
+4. [master progression closure index](docs/design/endless-progression-master-closure-index.md);
+5. [owner decision packet and guided-session worksheet](docs/design/endless-progression-owner-packet.md);
+6. [authoritative owner decision record](docs/design/endless-progression-decisions.md); and
+7. [MVP implementation-readiness record](docs/design/endless-mvp-readiness.md).
 
 ## Evidence vocabulary
 
@@ -174,6 +175,7 @@ The primary technical sources are the
 - [quantitative progression diagnosis](docs/design/progression-diagnosis.md)
 - [mod-scene findings](docs/design/swords-and-sandals-mod-scene-survey.md)
 - [Arena Circuit progression design](docs/design/endless-progression-system.md)
+- [Endless master closure index](docs/design/endless-progression-master-closure-index.md)
 - [Endless owner decision record](docs/design/endless-progression-decisions.md)
 - [Endless MVP readiness record](docs/design/endless-mvp-readiness.md)
 
