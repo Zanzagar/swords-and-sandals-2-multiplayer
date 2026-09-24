@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-23",
- "head": "daf3888",
+ "head": "56bfe32",
  "lede": "Every system in the Swords & Sandals II team-arena project and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -617,20 +617,20 @@
   {
    "id": "action-menu",
    "lane": "presentation",
-   "column": "ready",
+   "column": "in-progress",
    "order": 45,
-   "title": "Action dock (four groups, previews, hotkeys)",
-   "summary": "Designed 2026-09-24 to replace today's wall of raw engine buttons (up to 23 in a 3v3 turn): four fixed groups of up to six (Fight, Spells & items, Move, Tactics), each button with a one-line preview (to hit, damage, energy) and a hotkey; unavailable actions keep their slot with a reason; a preview panel with Confirm and Back.",
+   "title": "Actions around the fighter (the game's own button ring)",
+   "summary": "Revised 2026-09-24 at the owner's question: the original puts eight round icon buttons around the acting gladiator (two columns of four beside his body, overlay 862 frame 4) plus a ninth that swaps in his items. The UI keeps that ring around whichever fighter a human controls; targets light up on the stage; a slim strip under the stage holds the preview and Confirm and carries the same actions for keyboard and phone. In progress: the prerequisites — player seats (play against the AI) and the original's button art with its verb-to-icon mapping.",
    "gaps": "Unreadable to a new player. Direction-absolute walk buttons are the build's semantics but confusing on the blue side. There is no confirmation for irreversible spends.",
-   "next": "Delivery slice 2: a pure actionMenuModel in src/render, tested against real seeded bouts.",
-   "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa).",
+   "next": "Build the ring once seats and the button art land.",
+   "evidence": "Canvas artboard 'Actions around the fighter' (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa); docs/design/battle-ui.md.",
    "ownerDecision": "",
    "updated": "2026-09-24"
   },
   {
    "id": "who-can-play-human-hot-seat-spectate-controller-",
    "lane": "multiplayer",
-   "column": "ready",
+   "column": "in-progress",
    "order": 46,
    "title": "Who can play: human, hot-seat, spectate, controller seats",
    "summary": "Without ?spectate one person clicks for every fighter on both sides, because every seat is declared controller 'local'. With ?spectate=1 the AI (suggestAction) plays every seat. There is no human-vs-AI mode in the arena or in tools/hotseat.mjs, which is also local-vs-local.",
@@ -1146,9 +1146,52 @@
    "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa).",
    "ownerDecision": "",
    "updated": "2026-09-24"
+  },
+  {
+   "ownerDecision": "",
+   "updated": "2026-09-24",
+   "id": "turn-to-face-the-target",
+   "lane": "engine",
+   "column": "done",
+   "order": 5,
+   "title": "Fighters turn to face whoever they shoot, taunt or cast at",
+   "summary": "Built (56bfe32): every move aimed at a foe turns the fighter first, as in the original's 1v1 where the attacker always faces his one opponent — so a gale blows the man behind away (not through the caster), a command pulls him in, a fireball launches at him. Drawn facing the target from the first frame (it used to turn after the move). 1v1 unchanged over 1,100 re-checked bouts.",
+   "gaps": "",
+   "next": "",
+   "evidence": "56bfe32; test/ss2-turn-to-target.test.js; Codex approve."
+  },
+  {
+   "ownerDecision": "",
+   "updated": "2026-09-24",
+   "id": "size-changing-spells",
+   "lane": "presentation",
+   "column": "in-progress",
+   "order": 6,
+   "title": "Size-changing spells are drawn (little fat kid, colossus)",
+   "summary": "The owner saw little fat kid not shrink its victim: the engine applies the halved strength and attack, but the drawing never changes a fighter's size after the fight starts. The build snaps the victim to half size (_yscale 50) and restores it 16 turns later; colossus grows the caster toward 150%. Being built from the engine's own spell state, so the drawn body, the arrows and the collisions agree.",
+   "gaps": "Colossus's 2 px/tick drift stays deferred (a decision).",
+   "next": "Merge after review.",
+   "evidence": "docs/integration/ss2-battle-map.md ~3410-3560 (cast_little_fat_kid +0x81f8-+0x83f4; colossus; check_spells expiry)."
+  },
+  {
+   "ownerDecision": "",
+   "updated": "2026-09-24",
+   "id": "taunt-heal-loop",
+   "lane": "engine",
+   "column": "needs-design",
+   "order": 41,
+   "title": "An AI taunt loop that heals as fast as it is hurt",
+   "summary": "Tricks kit, 3v3, seed 21: one fighter taunts another 162 times while being hit back; the taunt's recovery cancels the damage, so the bout runs 653 actions. It exists before the facing change too, only shorter. The AI prices the taunt's certain recovery and does not see that it is being out-traded.",
+   "gaps": "No rule yet for when the AI should stop taunting.",
+   "next": "Measure how often it happens across kits and seeds; then decide the AI rule (the owner's call if it changes behaviour the build has).",
+   "evidence": "Facing implementer's 3v3 measurements, 2026-09-24 (agents/face-target/kb3-21-*.txt)."
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-24",
+   "text": "Fighters turn to face whoever they shoot, taunt or cast at (56bfe32)."
+  },
   {
    "date": "2026-09-24",
    "text": "The crowd is heard: a murmur that follows its interest, chance cheers and boos, the win sound, the victory sting and the intro (daf3888)."
