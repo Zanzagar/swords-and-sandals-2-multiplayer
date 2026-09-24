@@ -281,8 +281,53 @@ out of the list.
   of them: under the arena's own camera 1,708 of 4,740 rings had a button at least partly off the
   stage's side, a slotted walk wholly off it among them (3v3 plain seed 1, red-3 at x -510: walk-left
   centred at stage x -22.3). `ringButtonsInside` moves the whole set — the eight, a walk beside, the
-  rank arrows — back onto the stage by the least that does it, every button by the same amount, so the
-  ring keeps its shape and nothing overlaps. This changes S3's placement at the stage's edges only.
+  rank arrows — back onto the stage by the least that does it, ~~every button by the same amount~~
+  every button but a walk that move would carry across the fighter (below), so the ring keeps its shape
+  and nothing overlaps. This changes S3's placement at the stage's edges only.
+  - **~~Every button by the same amount~~ broke Q5 at the edges (ring2 "edge", 2026-09-24; AUTHORED).**
+    Whatever stuck out furthest — the swap, outboard of optionG, most often — set the move, and it
+    carried the walk on that side across the fighter it moves: a write-nothing verifier found a
+    walk-left at canvas x 116.2 for a fighter drawn at 53 (3v3 tricks seed 1 turn 9, red-2, 1280x840).
+    Now `ringButtonsInside` takes the fighter's DRAWN centre (`fighterX`, the ring's own `placement.x`);
+    a walk the sideways move carries toward him goes only as far as keeps its whole disc on its side,
+    else — no room for that on the stage — flush with the stage's edge on its side; the rest of the
+    ring moves on past it by the least that clears it. Measured against the two alternatives on the
+    same matrix (below; the arena's camera, 1280x840): clamping each button onto the stage on its own
+    overlapped two buttons in 1,780 of 6,984 rings (optionB and the step-back arrow in 906, optionG
+    and the swap in 655); capping the whole ring's move so no walk crosses left a button off the stage
+    in 962 (optionB in 587, optionC 417, the swap 298).
+  - **Measured** (a scratch matrix in the edge slice's report: the verifier's 39 bouts and policy,
+    every foe selected, two canvases, under the verifier's camera and under `main.js`'s own
+    `stepFramedCamera`; counts per canvas, the same on both): a walk's centre on the wrong side of him
+    where the stage had room for it 62 → 0 (verifier's camera) and 21 → 0 (the arena's); its disc
+    crossing him where there was room for the whole disc 348 → 0 and 230 → 0. Every button on the
+    stage and no two overlapping, before and after.
+  - **Not fixable on the stage, and left so — an owner call:** where the fighter is drawn within one
+    button radius of the stage's edge, or past it, no place on the stage is on his side. Under the
+    arena's camera 346 of 11,291 walk placements (99 with him at the arena wall; 247 not, as far in as
+    |arena x| 1,267; 8 with his centre off the stage). The walk stands flush with the edge there, its
+    centre on the far side of his. The alternative is a walk partly off the stage, still clickable on
+    the part that shows.
+  - **Its key label stays on the stage too (Codex review of this slice, pass 1; reproduced as a
+    failing test, then fixed).** A slotted walk held flush with the edge had its "2 Walk" drawn on the
+    ring's outer side — wholly past the edge (2v2 tricks seed 3, 18 AI submissions in: right-aligned
+    at x -3; S4's rule had drawn it at 11.07, its digit already cut). `ringLabelAt` now takes
+    `{stage, taken}`: a place past the stage's edge is passed over like one across a button, a
+    centred place (under, over) slides sideways onto the stage as the hover's caption does, and a
+    place on a label drawn before it this frame (`taken`, `ringLabelBoxOf`) is passed over too —
+    without that, labels brought onto the stage landed on their neighbours'. With no place on the
+    stage, clear and free, the first clear and free one (past the edge), then the outer side, as
+    before. Measured on the same matrix (arena's camera, 1280x840; label widths approximated, 0.55 em
+    a character over 7, a letter 0.6 em, as node has no canvas): labels past the stage's edge 9,903 →
+    2,935 of 32,232; a slotted walk's 3,713 → 0; labels across a button 0 → 0; labels on labels 0 →
+    0. The 2,935 left have no free place on the stage — a column within a label's width of the edge
+    whose places under and over are taken (3v3 tricks seed 1, 104 AI submissions in, red-2's optionE,
+    in an unmoved ring).
+  - Tests: `test/arena-ring-edge.test.js` (the verifier's case worked by hand, the arena's own case,
+    the labels, and an acceptance sweep under `stepFramedCamera`). Not seen in a browser: screenshot a walk-left
+    at the stage's left edge with the swap on offer (`?play=red&teams=2&items=tricks`, walking a red
+    fighter toward the left wall; the test's own turn is the AI's path, which a person's choices leave)
+    before trusting the look.
 - **Keys (authored):** ← → walk, ↑ steps back a rank (up the stage), ↓ forward — from the stage or a
   strip button, never from a field that types or a control whose own arrows change it (the volume
   slider; `ringFocusKind` now calls it `"adjust"`), never with a modifier. A held arrow moves once, and
@@ -296,8 +341,10 @@ out of the list.
 - **The look (authored):** a move no slot holds carries no label on the stage — its glyph is its arrow
   and its key is that arrow. A walk in its slot keeps S2's "2 Walk".
 - **Owner decisions:** the beside-walk placement; moving the ring onto the stage at its edges (the
-  build does not); whether withheld rank arrows should be greyed now rather than in S9; the rank
-  arrows' look (a disc with a chevron, like the authored buttons).
+  build does not), and — ring2 "edge" — keeping a walk on its side there while the rest moves on, and
+  letting the stage win where the fighter is drawn at its very edge; whether withheld rank arrows
+  should be greyed now rather than in S9; the rank arrows' look (a disc with a chevron, like the
+  authored buttons).
 - **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=3` (the rank arrows on a
   mid-rank fighter; the forward arrow over the front rank's heads) before trusting the look.
 

@@ -190,6 +190,7 @@ import {
   ringCaptionLines,
   ringItemButtonsAt,
   ringLabelAt,
+  ringLabelBoxOf,
   ringLabelSizeFor,
   ringMoveButtonsAt,
   ringPlacementFor,
@@ -4854,7 +4855,8 @@ function paintTargetRing(view, origin) {
  * no slot holds (S4, `ringMoveButtonsAt`): a walk the stance does not wire,
  * beside its side's walk slot, and the rank arrows, back above the head and
  * forward below the name — no label, as their glyph is their arrow key. The
- * whole ring is kept on the visible stage (`ringButtonsInside`, S4).
+ * whole ring is kept on the visible stage (`ringButtonsInside`, S4), a walk
+ * on the side it moves toward even there (ring2 "edge").
  * `ringButtons` records where, for the click. Last (S7), the choice waiting
  * for Confirm is ringed in gold, and the button under the pointer says what
  * it will do beside it (`paintRingCaption`).
@@ -4876,7 +4878,9 @@ function paintRing(view, fit) {
   // (S4): a walk beside the ring, the rank arrows off the acting fighter's
   // drawn head and his name — all kept on the visible stage, the rectangle the
   // frame is clipped to, by moving the whole ring (Codex review of S4, pass 2:
-  // a walk on offer was off the stage).
+  // a walk on offer was off the stage) — except a walk that move would carry
+  // across him: it stays on the side it moves toward, and the rest moves on
+  // past it (ring2 "edge"). `placement.x` is where he was DRAWN this frame.
   const stage = stageClipRectFor(fit);
   const buttons = ringButtonsInside([
     ...ringButtonsAt(ringView.model, {
@@ -4912,7 +4916,7 @@ function paintRing(view, fit) {
       feet: ringOrigins.actor.below,
       bounds: { top: stage.y, bottom: stage.y + stage.height }
     })
-  ], stage);
+  ], stage, { fighterX: placement.x });
   ringButtons = buttons;
   const actor = host.combatant(ringView.actorId);
   const drawn = ringButtonArt(buttons, {
@@ -4923,6 +4927,8 @@ function paintRing(view, fit) {
     ammo: resourceValue(actor, "ammo_left", 0),
     textPack
   });
+  // The boxes of the labels drawn so far this frame, which the next keeps off.
+  const labelled = [];
   for (const button of drawn) {
     paintRingButton(button);
     // A move no slot holds carries no label: its glyph is its arrow, and its
@@ -4937,8 +4943,12 @@ function paintRing(view, fit) {
       context.font = `600 ${px}px ui-sans-serif, system-ui, sans-serif`;
       context.textBaseline = "middle";
       // On the ring's outer side, unless another button is there — the swap
-      // stands where optionG's label ran (S6): then under the button.
-      const at = ringLabelAt(button, drawn, { width: context.measureText(label).width, height: px, gap });
+      // stands where optionG's label ran (S6): then under the button — or the
+      // stage's edge, or a label drawn before it (ring2 "edge", Codex review
+      // pass 1: a walk held flush with the edge lost its label whole).
+      const size = { width: context.measureText(label).width, height: px, gap };
+      const at = ringLabelAt(button, drawn, size, { stage, taken: labelled });
+      labelled.push(ringLabelBoxOf(at, size));
       context.textAlign = at.align;
       context.lineJoin = "round";
       context.lineWidth = Math.max(2, button.r * 0.16);

@@ -464,7 +464,7 @@ function arenaButtons(host, model) {
     ...ringItemButtonsAt(model, { ...at, head: box.y0, bounds }),
     ...ringSwapButtonAt(model, at),
     ...ringMoveButtonsAt(model, { ...at, head: box.y0, feet: below, bounds })
-  ], stage);
+  ], stage, { fighterX: placement.x });
   const lifted = ringItemButtonsAt(model, { ...at, head: box.y0, bounds })[0]?.y !== ringItemButtonsAt(model, at)[0]?.y;
   return { buttons, stage, lifted };
 }

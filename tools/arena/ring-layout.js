@@ -385,27 +385,87 @@ export function ringMoveButtonsAt(model, { centerX, centerY, unit, layout = null
  *   selected, 1,708 of 4,740 rings had a button at least partly off the
  *   stage's side — a slotted walk wholly off it among them, so a move the
  *   engine offered could not be clicked. So the whole set is moved back onto
- *   the stage by the least that does it, on each axis, EVERY button by the
- *   same amount: the ring keeps its shape, nothing overlaps that did not, and
- *   the eight stay around the fighter as nearly as the edge allows. A set
+ *   the stage by the least that does it, on each axis, ~~EVERY button by the
+ *   same amount~~ every button but a walk that move would carry across the
+ *   fighter (below): the ring keeps its shape, nothing overlaps that did not,
+ *   and the eight stay around the fighter as nearly as the edge allows. A set
  *   wider than the stage keeps its left (top) edge on the stage's. A button
  *   with `labelRoom` (a place of the items row, S5, whose letter stands over
  *   it) counts that much more above its disc, so its letter stays on too.
  *
+ * ► **BUT A WALK STAYS ON THE SIDE IT MOVES TOWARD (ring2 "edge"; the owner's
+ *   Q5) — AUTHORED.** Moving EVERY button by the same amount carried a walk
+ *   across the fighter it moves whenever something else stuck out further
+ *   on its side — the swap, outboard of optionG, most often: a write-nothing
+ *   verifier found a walk-left drawn at canvas x 116.2 for a fighter drawn at
+ *   53 (3v3 tricks seed 1 turn 9, red-2, 1280x840). So, given `fighterX` —
+ *   where the fighter is DRAWN, the ring's own centre — a walk the sideways
+ *   move carries TOWARD him (`walkleft` right, `walkright` left) goes only as
+ *   far as keeps its whole disc on its side; where the stage has no room for
+ *   that, it stands flush with the stage's edge on its side, as far toward
+ *   it as the stage allows. The rest of the ring moves on past a walk kept
+ *   there by the least that clears it, so nothing overlaps; a move up or down,
+ *   or one carrying a walk away from him, changes nothing here.
+ *
+ *   **Where the fighter is drawn within one button radius of the edge — or
+ *   past it — no place on the stage is on his side at all,** and the stage
+ *   wins: the walk stands flush with the edge, its centre on the far side of
+ *   his. Measured over the verifier's 39 bouts, every foe selected, under
+ *   the arena's own camera: 346 of 11,291 walk placements, 99 of them with
+ *   the fighter at the arena wall (a scratch matrix, in the edge slice's
+ *   report).
+ *
  * @param {object[]} buttons  from `ringButtonsAt` and `ringMoveButtonsAt`: `{x, y, r, ...}`
  * @param {{x: number, y: number, width: number, height: number}} stage  the visible
  *   stage in canvas pixels (`stageClipRectFor`)
+ * @param {{fighterX?: number|null}} [options]  the acting fighter's drawn centre, canvas x
+ *   (`ringPlacementFor`'s `x`); without it every button moves by the same amount, as S4 did
  * @returns {object[]} the same buttons when all are inside, else frozen copies moved
  */
-export function ringButtonsInside(buttons, stage) {
+export function ringButtonsInside(buttons, stage, { fighterX = null } = {}) {
   if (!Array.isArray(buttons) || buttons.length === 0 || !stage) return buttons;
   const into = (low, high, from, to) => (high - low > to - from ? from - low : Math.max(from - low, Math.min(0, to - high)));
   const dx = into(Math.min(...buttons.map((b) => b.x - b.r)), Math.max(...buttons.map((b) => b.x + b.r)), stage.x, stage.x + stage.width);
   // A place of the items row (S5) keeps its letter's room above it on the stage too.
   const dy = into(Math.min(...buttons.map((b) => b.y - b.r - (b.labelRoom ?? 0))), Math.max(...buttons.map((b) => b.y + b.r)), stage.y, stage.y + stage.height);
   if (dx === 0 && dy === 0) return buttons;
-  return Object.freeze(buttons.map((button) => Object.freeze({ ...button, x: button.x + dx, y: button.y + dy })));
+  // The walks the shift would carry across the fighter, and where each is kept instead.
+  const kept = new Map();
+  if (Number.isFinite(fighterX)) {
+    for (const button of buttons) {
+      const toward = WALK_TOWARD[button.verb];
+      // Only a shift TOWARD the fighter can carry a walk across him.
+      if (!toward || toward * dx >= 0) continue;
+      const moved = button.x + dx;
+      const x = toward < 0
+        ? Math.min(moved, Math.max(stage.x + button.r, fighterX - button.r))
+        : Math.max(moved, Math.min(stage.x + stage.width - button.r, fighterX + button.r));
+      if (x !== moved) kept.set(button, x);
+    }
+  }
+  // Everything else moves on past a kept walk, by the least that clears it.
+  const away = Math.sign(dx);
+  let push = 0;
+  for (const [walk, x] of kept) {
+    for (const other of buttons) {
+      if (kept.has(other)) continue;
+      const reach = walk.r + other.r;
+      const rise = other.y - walk.y;
+      if (Math.abs(rise) >= reach) continue;
+      const clear = Math.sqrt(reach * reach - rise * rise);
+      push = Math.max(push, away * (x - (other.x + dx)) + clear);
+    }
+  }
+  const shift = dx + away * push;
+  return Object.freeze(buttons.map((button) => Object.freeze({
+    ...button,
+    x: kept.has(button) ? kept.get(button) : button.x + shift,
+    y: button.y + dy
+  })));
 }
+
+/** Which way each walk moves the fighter: the side of him its button stands on (the owner's Q5). */
+const WALK_TOWARD = Object.freeze({ walkleft: -1, walkright: 1 });
 
 /**
  * ► **WHERE A BUTTON'S KEY LABEL GOES (S2's labels, made to give way in S6) —
@@ -417,14 +477,30 @@ export function ringButtonsInside(buttons, stage) {
  *   of the items row (`side: "top"`, S5) puts its label above itself, else
  *   under it: its neighbours are 3.6 overlay px away, no room beside.
  *
+ * ► **AND ON THE STAGE, given one (ring2 "edge"; Codex review, pass 1).** A
+ *   ring pushed against the stage's side has its outer column flush with it,
+ *   and its labels there ran off the stage and were clipped — a walk held
+ *   flush on its side (`ringButtonsInside`) lost its "2 Walk" whole. So a
+ *   place past the stage's edge is passed over like one across a button, and
+ *   a centred place (under, above) slides sideways onto the stage, as the
+ *   hover's caption does. A place on a label already drawn this frame
+ *   (`taken`) is passed over too: brought onto the stage, a label could land
+ *   on its neighbour's. With no place on the stage, clear and free, the
+ *   first clear and free one, then the first clear one, then the outer side,
+ *   as before.
+ *
  * @param {object} button   a drawn button: `{slot, x, y, r, side}`
  * @param {object[]} buttons  every button drawn this frame
  * @param {{width: number, height: number, gap: number}} size  the label's
  *   measured box and its gap from the button, canvas px
+ * @param {{stage?: {x: number, y: number, width: number, height: number}|null, taken?: object[]}} [options]
+ *   `stage`, the visible stage (`stageClipRectFor`) — without it no place is
+ *   kept on it; `taken`, the boxes of the labels drawn before this one
+ *   (`ringLabelBoxOf`)
  * @returns {{x: number, y: number, align: "left"|"right"|"center"}} where to
  *   `fillText` it, with a middle baseline
  */
-export function ringLabelAt(button, buttons, { width, height, gap }) {
+export function ringLabelAt(button, buttons, { width, height, gap }, { stage = null, taken = [] } = {}) {
   const half = height / 2;
   const outerX = button.side === "left" ? button.x - button.r - gap : button.x + button.r + gap;
   const below = { x: button.x, y: button.y + button.r + gap + half, align: "center" };
@@ -434,17 +510,44 @@ export function ringLabelAt(button, buttons, { width, height, gap }) {
   const candidates = button.side === "top"
     ? [above, below]
     : [{ x: outerX, y: button.y, align: button.side === "left" ? "right" : "left" }, below, above];
-  const boxOf = ({ x, y, align }) => {
-    const x0 = align === "right" ? x - width : align === "left" ? x : x - width / 2;
-    return { x0, x1: x0 + width, y0: y - half, y1: y + half };
-  };
+  const boxOf = (candidate) => ringLabelBoxOf(candidate, { width, height });
   const clear = (box) => (buttons ?? []).every((other) => {
     if (other === button || other.slot === button.slot) return true;
     const dx = other.x - Math.min(Math.max(other.x, box.x0), box.x1);
     const dy = other.y - Math.min(Math.max(other.y, box.y0), box.y1);
     return Math.hypot(dx, dy) >= other.r;
   });
-  return Object.freeze(candidates.find((candidate) => clear(boxOf(candidate))) ?? candidates[0]);
+  // On a stage (ring2 "edge"), a centred place slides sideways onto it, as the
+  // caption does; a place beside the button cannot — it would cover the button —
+  // so one past the stage's edge is passed over.
+  const placed = stage
+    ? candidates.map((candidate) => (candidate.align === "center"
+      ? { ...candidate, x: Math.max(stage.x + width / 2, Math.min(candidate.x, stage.x + stage.width - width / 2)) }
+      : candidate))
+    : candidates;
+  const EPS = 1e-9;
+  const onStage = (box) => !stage || (box.x0 >= stage.x - EPS && box.x1 <= stage.x + stage.width + EPS
+    && box.y0 >= stage.y - EPS && box.y1 <= stage.y + stage.height + EPS);
+  // A place on a label already drawn this frame is passed over too.
+  const free = (box) => (taken ?? []).every((other) => box.x1 <= other.x0 || other.x1 <= box.x0 || box.y1 <= other.y0 || other.y1 <= box.y0);
+  const fits = (candidate) => clear(boxOf(candidate)) && free(boxOf(candidate));
+  return Object.freeze(placed.find((candidate) => onStage(boxOf(candidate)) && fits(candidate))
+    ?? placed.find(fits)
+    ?? placed.find((candidate) => clear(boxOf(candidate)))
+    ?? placed[0]);
+}
+
+/**
+ * THE BOX A KEY LABEL COVERS, from where `ringLabelAt` put it and its size:
+ * what the page hands the next label as `taken`.
+ *
+ * @param {{x: number, y: number, align: "left"|"right"|"center"}} at
+ * @param {{width: number, height: number}} size
+ * @returns {{x0: number, x1: number, y0: number, y1: number}}
+ */
+export function ringLabelBoxOf({ x, y, align }, { width, height }) {
+  const x0 = align === "right" ? x - width : align === "left" ? x : x - width / 2;
+  return Object.freeze({ x0, x1: x0 + width, y0: y - height / 2, y1: y + height / 2 });
 }
 
 /**

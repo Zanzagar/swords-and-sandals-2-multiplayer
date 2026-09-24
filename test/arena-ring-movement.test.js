@@ -346,7 +346,7 @@ function arenaButtons(host, model) {
   const buttons = ringButtonsInside([
     ...ringButtonsAt(model, at),
     ...ringMoveButtonsAt(model, { ...at, head: box.y0, feet: below, bounds: { top: stage.y, bottom: stage.y + stage.height } })
-  ], stage);
+  ], stage, { fighterX: placement.x });
   return { buttons, stage, camera };
 }
 
@@ -516,7 +516,8 @@ test("the shell draws the moves with the ring, off the acting fighter's DRAWN he
   // CODEX PASS 2: the whole ring, moves included, kept on the visible stage — the rectangle the frame is clipped to.
   assert.match(paint, /const stage = stageClipRectFor\(fit\);/);
   assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\(/, "the eight first, all kept on the stage");
-  assert.match(paint, /\.\.\.ringMoveButtonsAt\([\s\S]*?\}\)\s*\], stage\);/);
+  // ring2 "edge": with the fighter's drawn centre, so a walk the move would carry across him stays on his side.
+  assert.match(paint, /\.\.\.ringMoveButtonsAt\([\s\S]*?\}\)\s*\], stage, \{ fighterX: placement\.x \}\);/);
   assert.match(paint, /ringButtons = buttons;/, "the click is tested against every button drawn, the moves included");
   assert.match(paint, /if \(button\.move\) continue;/, "a move carries no key label on the stage: its arrow is its glyph");
 });

@@ -60,7 +60,7 @@ function drawnButtons(model) {
     ...ringItemButtonsAt(model, { ...at, head: 140, bounds }),
     ...ringSwapButtonAt(model, at),
     ...ringMoveButtonsAt(model, { ...at, head: 140, feet: 330, bounds })
-  ], { x: 0, y: 0, width: 640, height: 420 });
+  ], { x: 0, y: 0, width: 640, height: 420 }, { fighterX: at.centerX });
 }
 
 /**

@@ -236,7 +236,7 @@ function arenaButtons(host, model) {
     ...ringButtonsAt(model, at),
     ...ringSwapButtonAt(model, at),
     ...ringMoveButtonsAt(model, { ...at, head: box.y0, feet: below, bounds: { top: stage.y, bottom: stage.y + stage.height } })
-  ], stage);
+  ], stage, { fighterX: placement.x });
   return { buttons, stage };
 }
 
@@ -463,7 +463,9 @@ test("the shell draws the swap with the ring, kept on the stage with it, clicks 
   assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\([\s\S]*?\}\),\s*\.\.\.ringSwapButtonAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null[^}]*\}\),\s*\.\.\.ringMoveButtonsAt\(/,
     "the swap after the eight (the build's depth 101 is over them) and inside the stage fit");
   assert.match(paint, /ringButtons = buttons;/, "a click is tested against the swap too");
-  assert.match(paint, /ringLabelAt\(button, drawn, \{ width: context\.measureText\(label\)\.width, height: [^,]+, gap \}\)/,
+  // ring2 "edge" (Codex review, pass 1): the size is named first, and the label is handed the stage
+  // and the labels drawn before it.
+  assert.match(paint, /const size = \{ width: context\.measureText\(label\)\.width, height: [^,]+, gap \};\s*const at = ringLabelAt\(button, drawn, size, /,
     "every key label is placed clear of the other buttons, from its measured width");
   const button = functionBody("paintRingButton");
   assert.match(button, /context\.scale\(button\.scale, button\.scale\);\s*context\.translate\(-button\.centre\.x, -button\.centre\.y\);/,
