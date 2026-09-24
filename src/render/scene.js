@@ -128,7 +128,9 @@ const EMPTY_ACTOR = Object.freeze({
    * the build turns a gladiator (`changeCombatants`, at the phase advance).
    * `figureFacingAt` in `timeline.js` makes that decision; a stale `turn`
    * whose action has finished draws `facing`, which is what a gladiator that
-   * has already turned should do.
+   * has already turned should do. A turn carrying `at: "action-start"` (the
+   * actor's turn to the foe he aims at, 2026-09-24) holds nothing: it is drawn
+   * from the start of its action.
    */
   turn: null
 });
@@ -462,7 +464,10 @@ export function applyCommands(scene, commands) {
             from: command.from,
             to: command.to,
             sequence: command.sequence,
-            actionToken: command.actionToken ?? null
+            actionToken: command.actionToken ?? null,
+            // Only when present, so a phase-advance turn folds exactly as it
+            // always has. See `figureFacingAt`.
+            ...(command.at === "action-start" ? { at: command.at } : {})
           })
         });
         break;

@@ -35,6 +35,11 @@
  * moves OPPOSITE to the caster's facing — toward the caster when it stands in
  * front, AWAY from it when it stands behind.
  *
+ * **Since 2026-09-24 the caster turns to face its target before the arm runs**
+ * (`ss2TurnToTarget`), so through `applyAction` the target always stands in
+ * front and is always pulled; only a co-located pair, with no side to turn to,
+ * is still carried past the caster. See the "target BEHIND" and wall tests.
+ *
  * ## TWO SENTENCES OF THE BRIEF THIS FILE WAS WRITTEN AGAINST WERE WRONG
  *
  * - *"A target already inside 40 px of the stand-off ends up BEHIND the
@@ -304,12 +309,30 @@ test("a target LESS THAN 40 in front ends up BEHIND the caster, and both of them
   assert.equal(facesLeft(battle, "hero"), true, "and the caster faces the foe on its left");
 });
 
-test("a target BEHIND the caster is pushed 40 further AWAY — the direction is the caster's facing, not the target's side", () => {
+test("a target BEHIND the caster is PULLED, because the caster turns to face it first — the arm's push-behind is unreachable", () => {
+  // ~~a target BEHIND the caster is pushed 40 further AWAY — the direction is
+  // the caster's facing, not the target's side~~ (`pullTicks` 1, -500 -> -540).
+  //
+  // ► **MOVED 2026-09-24, BY THE TURN TO THE TARGET (`ss2TurnToTarget`), and
+  //   by nothing else.** The arm still signs on the caster's facing
+  //   (`+0x7c96`), and a target behind a caster facing AWAY from it would
+  //   still be pushed 40 further off. But every verb aimed at a foe now turns
+  //   its caster to face that foe before the phase reads the facing, so the
+  //   arm always runs with the target in FRONT: -500 behind a caster at -60 is
+  //   pulled like any 1v1 target, facing left, `k = ceil((440 - 86) / 40)` = 9
+  //   frames of +40, landing at -140. The staging below still hands the caster
+  //   a target behind it (facing is not re-derived after `x` is moved), which
+  //   in 1v1 play cannot happen and in team play is the case the turn exists
+  //   for. Reverted by exact inverse, this test's old numbers return.
   const battle = staged({ hero: { inventory1: 39 }, foeX: -500 });
   const event = cast(battle);
-  assert.equal(event.pullTicks, 1);
-  assert.equal(event.targetTo, -540);
-  assert.equal(combatantById(battle, "foe").x, -540);
+  assert.deepEqual(closedForm({ casterX: -60, targetX: -500, facing: "left", standOff: 86 }), { ticks: 9, to: -140, cut: false });
+  assert.equal(event.pullTicks, 9);
+  assert.equal(event.targetTo, -140);
+  assert.equal(combatantById(battle, "foe").x, -140);
+  assert.equal(facesLeft(battle, "hero"), true, "the caster turned to face the man it commanded, and still does");
+  assert.deepEqual(battle.lastResolution.effects[0], { kind: "status", targetId: "hero", status: SS2_FACING_LEFT, active: true },
+    "the turn is the phase's FIRST effect: it happens before the arm reads the facing");
 });
 
 test("facing LEFT is the mirror: +40 a frame, completing once the target is no longer left of caster - S", () => {
@@ -325,9 +348,13 @@ test("facing LEFT is the mirror: +40 a frame, completing once the target is no l
   const exact = stagedLeft({ victimX: 164 - 80 });
   assert.equal(cast(exact, "caster", "victim").targetTo, 164);
 
-  // And behind a left-facing caster is to its RIGHT: pushed 40 further right.
+  // ~~And behind a left-facing caster is to its RIGHT: pushed 40 further
+  // right.~~ (600 -> 640.) **MOVED 2026-09-24 by the turn to the target**: the
+  // caster turns RIGHT to face it first, so it is pulled — the mirror of the
+  // test above, need 600 - 250 - 86 = 264, seven frames of -40, landing at 320.
   const behind = stagedLeft({ victimX: 600 });
-  assert.equal(cast(behind, "caster", "victim").targetTo, 640);
+  assert.equal(cast(behind, "caster", "victim").targetTo, 320);
+  assert.equal(facesLeft(behind, "caster"), false);
 });
 
 test("the stand-off is the TARGET's `physical_size` (`game_defender`), not the caster's", () => {
@@ -368,12 +395,24 @@ test("the cap's boundary: need 2,320 completes on frame 58, need 2,321 is cut on
   assert.equal(short.targetTo, -913, "the watchdog stops it one unit outside the stand-off");
 });
 
-test("the push behind the caster is CLAMPED at the arena wall, and a target already on it does not move", () => {
-  const near = staged({ hero: { inventory1: 39 }, heroX: -2000, foeX: -2080 });
-  assert.equal(cast(near).targetTo, SS2_ARENA.clamp.min);
+test("the push past the caster is CLAMPED at the arena wall, and a target already on it does not move", () => {
+  // ~~the push behind the caster is CLAMPED at the arena wall~~ — staged with
+  // the target BEHIND the caster (-2000 and -2080, then -2000 and the wall).
+  //
+  // ► **RESTAGED 2026-09-24, BECAUSE THE TURN TO THE TARGET (`ss2TurnToTarget`)
+  //   MADE THE PUSH-BEHIND UNREACHABLE.** A caster now turns to face the man it
+  //   commands, so a target behind is pulled toward it and never nears a wall.
+  //   The one push left is a CO-LOCATED pair: no side to turn to (the build's
+  //   strict tests), so the caster keeps its facing and the entry frame's -40
+  //   carries the target past it — at the wall, into the clamp. That is the
+  //   only way this `clamp` can still bind.
+  const near = staged({ hero: { inventory1: 39 }, heroX: -2080, foeX: -2080 });
+  assert.equal(cast(near).targetTo, SS2_ARENA.clamp.min, "-2080 - 40 = -2120, clamped");
   assert.equal(combatantById(near, "foe").x, SS2_ARENA.clamp.min);
+  assert.equal(near.lastResolution.effects[0].kind, "resource",
+    "a co-located caster is not turned first: the slot's consumption is still the phase's first effect");
 
-  const pinned = staged({ hero: { inventory1: 39 }, heroX: -2000, foeX: SS2_ARENA.clamp.min });
+  const pinned = staged({ hero: { inventory1: 39 }, heroX: SS2_ARENA.clamp.min, foeX: SS2_ARENA.clamp.min });
   const still = cast(pinned);
   assert.equal(still.targetTo, SS2_ARENA.clamp.min);
   assert.equal(combatantById(pinned, "foe").x, SS2_ARENA.clamp.min);

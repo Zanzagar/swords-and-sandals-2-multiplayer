@@ -24,7 +24,12 @@
  * - the painter holds the old facing until the turning action's token has
  *   finished, which is the build's phase advance: a teleporting caster plays
  *   `Cast2` facing the way it stood and turns as it reappears, and a bystander
- *   turns when the action ends rather than when it begins.
+ *   turns when the action ends rather than when it begins;
+ * - **and one turn is drawn at the START of its action (2026-09-24)**: the
+ *   actor's turn to the foe he swings, shoots, taunts or casts at, which the
+ *   resolver makes before the phase (`ss2TurnToTarget`). It is a `face-clip`
+ *   with `at: "action-start"`, before the actor's clip, drawn at once — so the
+ *   verb is drawn facing its target, which is what the owner asked to see.
  */
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -43,7 +48,7 @@ import {
   ADVANCE_UNITS, animationCursor, applyCommands, emptyScene, figureFacingAt, figureXAt, poseAt, TimelineError,
   timelinesForStep
 } from "../src/render/index.js";
-import { demoSide } from "../tools/arena/roster.js";
+import { demoItemsFrom, demoSide } from "../tools/arena/roster.js";
 
 const fields = (o = {}) => ({
   strength: 9, speed: 20, attack: 8, defence: 5, vitality: 6, stamina: 6,
@@ -97,13 +102,16 @@ function faceByPosition(battle) {
  * past the pusher needs, and one only teams can produce.
  *
  * hero at 0 faces right, toward `near` at 50; `behind` at -80 faces right,
- * toward the hero. A gale is signed by the CASTER's facing (`+0x7b45`), so
- * blowing `behind` carries it rightward, straight past the hero.
+ * toward the hero. ~~A gale is signed by the CASTER's facing (`+0x7b45`), so
+ * blowing `behind` carries it rightward, straight past the hero.~~
  *
  * ~~A shove or a gale~~ **A shove did the same until 2026-09-23** (it signs on
  * the shover's facing, `ss2ShoveForce`); since then a swing — the shove among
- * them — turns its swinger to face the man swung at first (`ss2SwingTurn`), so
- * a shove at `behind` drives him AWAY. See the shove's test below.
+ * them — turns its swinger to face the man swung at first, so a shove at
+ * `behind` drives him AWAY. **And a gale since 2026-09-24**, when the turn
+ * (`ss2TurnToTarget`) was widened to every verb aimed at a foe. So this layout
+ * is now the case "a verb aimed at the man behind": the actor turns to it at
+ * the start of his action. See the shove's, the gale's and the bolt's tests.
  */
 function pastTheAttacker({ hero = {} } = {}) {
   const battle = createTeamBattle({
@@ -156,7 +164,7 @@ function actAndPresent(battle, action, { withBefore = true } = {}) {
 
 const turns = (commands) => commands
   .filter((command) => command.kind === CommandKind.FACE_CLIP)
-  .map(({ combatantId, from, to }) => ({ combatantId, from, to }));
+  .map(({ combatantId, from, to, at }) => ({ combatantId, from, to, ...(at ? { at } : {}) }));
 
 const teleportPast = () => staged({ hero: { inventory1: 48 }, rngTape: [destinationSample(500)] });
 const TELEPORT_SELF = { actorId: "hero", type: Ss2ActionType.CAST_TELEPORT, targetId: "hero" };
@@ -229,43 +237,131 @@ test("`before` is refused by shape exactly as the wire is: a live battle is not 
   );
 });
 
-test("a SHOVE at the man BEHIND the shover drives him away, not past — and the stream turns nobody", () => {
+test("a SHOVE at the man BEHIND the shover drives him away, not past — and the stream draws the shover turning to shove", () => {
   // ~~a SHOVE that carries its victim past the shover turns the victim, and
   // nobody else~~ — **the premise went on 2026-09-23.** The shove is signed on
   // the SHOVER's facing, and a shover facing `near` pushed `behind` straight
   // through himself (-80 -> 31). A swing now turns its swinger to face the man
-  // swung at before anything reads the facing (`ss2SwingTurn`), so `behind`
+  // swung at before anything reads the facing (`ss2TurnToTarget`), so `behind`
   // goes the way a 1v1 shove always sends its victim: away.
   //
-  // ► **AND THE STREAM IS NET, WHICH THIS PINS AS A KNOWN GAP.** The hero
-  //   turns left to shove, and the shove's re-facing turns him back to `near`,
-  //   the nearer foe once `behind` is gone. A `face-clip` carries only the
-  //   batch's net change, emitted LAST — so nothing here says the shove was
-  //   thrown LEFT. Drawing a swing toward its target is the presentation's to
-  //   add; see `ss2SwingTurn`.
+  // ► ~~**AND THE STREAM IS NET, WHICH THIS PINS AS A KNOWN GAP.** ... so
+  //   nothing here says the shove was thrown LEFT.~~ **CLOSED 2026-09-24**:
+  //   ~~`turns(commands)` is `[]`~~. The presentation now draws the turn the
+  //   resolver made BEFORE the phase at the START of the action
+  //   (`at: "action-start"`, ahead of the shover's clip), and measures the
+  //   phase-advance turn from the facing he shoved with — so the stream says
+  //   both: left to shove, right again once `behind` is gone.
   const battle = pastTheAttacker();
   assert.ok(legalActions(battle, "hero").some((option) => option.type === Ss2ActionType.SHOVE && option.targetId === "behind"));
-  const { commands, scene } = actAndPresent(battle, { actorId: "hero", type: Ss2ActionType.SHOVE, targetId: "behind" });
+  const { commands, scene, token } = actAndPresent(battle, { actorId: "hero", type: Ss2ActionType.SHOVE, targetId: "behind" });
   const event = battle.events.find((entry) => entry.type === Ss2ActionType.SHOVE);
   assert.ok(event.force < 0 && event.to < event.from, `the victim was driven away, left: ${event.from} -> ${event.to}`);
   assert.deepEqual(["hero", "near", "behind"].map((id) => resolverFacing(battle, id)), ["right", "left", "right"],
     "the resolver ends facing exactly as it began");
-  assert.deepEqual(turns(commands), [], "so the hero's turn and turn back net to nothing, and nobody else turned");
+  assert.deepEqual(turns(commands), [
+    { combatantId: "hero", from: "right", to: "left", at: "action-start" },
+    { combatantId: "hero", from: "left", to: "right" }
+  ], "the shover turns to shove, then back at the phase advance; nobody else turns");
   assert.deepEqual(battle.lastResolution.effects.filter((effect) => effect.status === SS2_FACING_LEFT)
     .map((effect) => [effect.targetId, effect.active]), [["hero", true], ["hero", false]],
-    "while the resolver DID turn him to shove, and back once `behind` was gone");
+    "exactly the two turns the resolver made");
   assert.equal(scene.actors.hero.facing, "right");
+  const hero = scene.actors.hero;
+  assert.equal(figureFacingAt({ facing: hero.facing, turn: hero.turn, pendingTokens: [token] }), "left",
+    "drawn LEFT, toward the man he shoves, for as long as the shove plays");
+  assert.equal(figureFacingAt({ facing: hero.facing, turn: hero.turn, pendingTokens: [] }), "right",
+    "and facing `near` again once it is over");
 });
 
-test("a GALE that blows its victim past the caster turns the victim, and nobody else", () => {
+test("a GALE at the man BEHIND the caster blows him AWAY: the caster turns to cast, and back as the phase advances", () => {
+  // ~~a GALE that blows its victim past the caster turns the victim, and
+  // nobody else~~ (`behind` -80 -> 920, `turns` = behind right -> left).
+  //
+  // ► **MOVED 2026-09-24 BY THE TURN TO THE TARGET, TWICE OVER.** The
+  //   resolver now turns the caster to face `behind` before the gale reads his
+  //   facing (`ss2TurnToTarget`; the gale signs on it, `+0x7b45`), so `behind`
+  //   is blown -1000, away, and never crosses him: nobody but the caster turns.
+  //   And the presentation draws that turn at the START of the action
+  //   (`at: "action-start"`), then the phase-advance turn back to `near`.
   const battle = pastTheAttacker({ hero: { inventory1: 38 } });
-  const { commands, scene } = actAndPresent(battle, { actorId: "hero", type: Ss2ActionType.CAST_GALE, targetId: "behind" });
+  const { commands, scene, token } = actAndPresent(battle, { actorId: "hero", type: Ss2ActionType.CAST_GALE, targetId: "behind" });
   const event = battle.events.find((entry) => entry.type === Ss2ActionType.CAST_GALE);
-  assert.ok(event.targetFrom < 0 && event.targetTo > 0, `the victim crossed the caster: ${event.targetFrom} -> ${event.targetTo}`);
-  assert.deepEqual(turns(commands), [{ combatantId: "behind", from: "right", to: "left" }]);
-  for (const id of ["hero", "near", "behind"]) {
+  assert.deepEqual([event.force, event.targetFrom, event.targetTo], [-1000, -80, -1080], "blown AWAY from the caster");
+  assert.deepEqual(turns(commands), [
+    { combatantId: "hero", from: "right", to: "left", at: "action-start" },
+    { combatantId: "hero", from: "left", to: "right" }
+  ]);
+  // `behind` is left out of this loop, and only because of the STAGING: the
+  // construction draws each side its own way (blue facing left), while
+  // `pastTheAttacker` re-faces `behind` right after construction. The old
+  // version of this test checked it only because the gale happened to turn it
+  // back to the construction's facing; nothing turns it now, which is right.
+  for (const id of ["hero", "near"]) {
     assert.equal(scene.actors[id].facing, resolverFacing(battle, id), `${id} is drawn the way the resolver faces it`);
   }
+  const hero = scene.actors.hero;
+  assert.equal(figureFacingAt({ facing: hero.facing, turn: hero.turn, pendingTokens: [token] }), "left",
+    "the caster casts FACING the man he gales");
+  assert.equal(figureFacingAt({ facing: hero.facing, turn: hero.turn, pendingTokens: [] }), "right",
+    "and faces `near` again once the gale is over");
+});
+
+/* ------------------------------------------------------------------ *
+ * The turn to the target, drawn at the start of the action            *
+ * ------------------------------------------------------------------ */
+
+test("A VERB AIMED AT THE MAN BEHIND IS DRAWN FACING HIM FROM ITS FIRST FRAME: an action-start face-clip, before the actor's clip", () => {
+  // A lightning bolt moves nobody and kills nobody here, so the turn is the
+  // resolver's only facing change and it persists: ONE face-clip, and it is
+  // the action-start one — not held back to the old facing while `Cast2`
+  // plays, which is what the owner saw ("flip the model ... facing the way of
+  // the target they are attacking", 2026-09-24).
+  const battle = pastTheAttacker({ hero: { inventory1: 34 } });
+  const { commands, scene, token } = actAndPresent(battle, { actorId: "hero", type: Ss2ActionType.CAST_LIGHTNING_BOLT, targetId: "behind" });
+  assert.ok(combatantById(battle, "behind").alive, "the bolt must not kill, or the kill's re-facing is in the picture too");
+  assert.equal(resolverFacing(battle, "hero"), "left", "the resolver turned the caster and left him turned");
+  assert.deepEqual(turns(commands), [{ combatantId: "hero", from: "right", to: "left", at: "action-start" }]);
+  const turnAt = commands.findIndex((command) => command.kind === CommandKind.FACE_CLIP);
+  const clipAt = commands.findIndex((command) => command.kind === CommandKind.CLIP_GOTO && command.combatantId === "hero");
+  assert.ok(turnAt !== -1 && clipAt !== -1 && turnAt < clipAt, "the turn comes BEFORE the caster's own clip");
+  assert.equal(commands[turnAt].actionToken, token, "under the action it belongs to");
+  const hero = scene.actors.hero;
+  assert.deepEqual({ ...hero.turn }, { from: "right", to: "left", sequence: commands[turnAt].sequence, actionToken: token, at: "action-start" });
+  assert.equal(figureFacingAt({ facing: hero.facing, turn: hero.turn, pendingTokens: [token] }), "left",
+    "drawn facing its target WHILE the action plays");
+  assert.equal(figureFacingAt({ facing: hero.facing, turn: hero.turn, pendingTokens: [] }), "left", "and after");
+});
+
+test("a verb at the foe the actor ALREADY faces adds no face-clip: the stream is what it always was", () => {
+  const battle = pastTheAttacker({ hero: { inventory1: 34 } });
+  const { commands } = actAndPresent(battle, { actorId: "hero", type: Ss2ActionType.CAST_LIGHTNING_BOLT, targetId: "near" });
+  assert.deepEqual(turns(commands), []);
+});
+
+test("figureFacingAt draws an action-start turn at once, and still holds a phase-advance one", () => {
+  const turn = { from: "right", to: "left", sequence: 4, actionToken: 3 };
+  assert.equal(figureFacingAt({ facing: "left", turn: { ...turn, at: "action-start" }, pendingTokens: [3] }), "left",
+    "the turn to the target is drawn from the first frame of its action");
+  assert.equal(figureFacingAt({ facing: "left", turn, pendingTokens: [3] }), "right", "a phase-advance turn is still held");
+});
+
+test("a GHOST STRIKE at the man behind blinks its caster to ITS OWN side of him, where the resolver lands it", () => {
+  // The resolver's `ghostLanding` reads the facing AFTER the turn to the
+  // target, so a caster at 0 turned left to `behind` at -80 lands at
+  // -80 + 86 = 6. `ghostLandingOf` read the projected facing alone until
+  // 2026-09-24 and drew the blink on the far side, at -80 - 86 = -166.
+  const battle = pastTheAttacker({ hero: { inventory1: 36 } });
+  const size = ss2PhysicalSize(combatantById(battle, "hero"));
+  const { commands } = actAndPresent(battle, { actorId: "hero", type: Ss2ActionType.CAST_GHOST_STRIKE, targetId: "behind" });
+  const event = battle.events.find((entry) => entry.type === Ss2ActionType.CAST_GHOST_STRIKE);
+  const blink = commands.find((command) => command.kind === CommandKind.MOVE_CLIP && command.combatantId === "hero");
+  const landing = -80 + size;
+  assert.ok(blink, "the caster blinks");
+  assert.equal(blink.blink, event.casterTo ?? landing, "beside `behind`, on the caster's own side");
+  assert.equal(blink.blink, landing);
+  assert.deepEqual(turns(commands)[0], { combatantId: "hero", from: "right", to: "left", at: "action-start" },
+    "and it turned to face him before it went");
 });
 
 test("a rule set that models no facing turns nobody, over a whole bout, although its villains are drawn facing left", () => {
@@ -424,10 +520,23 @@ test("a bystander holds its turn until the ACTION ends, not until its own clip d
 test("over real arena bouts the scene is drawn the way the resolver faces every gladiator, after every action", () => {
   let turnsSeen = 0;
   let walkTurns = 0;
+  let startTurns = 0;
   let steps = 0;
-  for (const [perSide, seed] of [[1, 7], [2, 7], [3, 11], [1, 3], [2, 5], [3, 9]]) {
+  // ► **AND THE TRICKS KIT OVER THE SAME SIX (2026-09-24)**: the plain roster
+  //   plays no action-start turn at all in these bouts (measured: 0 in 312
+  //   actions), so the ordering and chaining rules below for the actor's turn
+  //   to his target would be checked against nothing. With the kit's gales,
+  //   ghost strikes and bows the same six bouts play 11 of them.
+  for (const [perSide, seed, kit] of [
+    [1, 7], [2, 7], [3, 11], [1, 3], [2, 5], [3, 9],
+    [1, 7, "tricks"], [2, 7, "tricks"], [3, 11, "tricks"], [1, 3, "tricks"], [2, 5, "tricks"], [3, 9, "tricks"]
+  ]) {
+    const extra = kit ? { items: demoItemsFrom(kit), seed } : {};
     const host = createVanillaBattleHost({
-      teams: [demoSide("red", perSide, { ss2Combatant, ss2BattleValues }), demoSide("blue", perSide, { ss2Combatant, ss2BattleValues })],
+      teams: [
+        demoSide("red", perSide, { ss2Combatant, ss2BattleValues, ...extra }),
+        demoSide("blue", perSide, { ss2Combatant, ss2BattleValues, ...extra })
+      ],
       rules: ss2TeamRules,
       bindings: SS2_STATIC_MAP_BINDINGS,
       seed
@@ -448,15 +557,28 @@ test("over real arena bouts the scene is drawn the way the resolver faces every 
       const step = host.submit({ ...chosen, actorId });
       steps += 1;
       scene = applyCommands(scene, step.commands);
-      const first = step.commands.findIndex((command) => command.kind === CommandKind.FACE_CLIP);
+      // Phase-advance turns come LAST; an action-start turn (the actor's turn
+      // to his target, 2026-09-24) comes before the actor's own clip.
+      const phaseTurn = (command) => command.kind === CommandKind.FACE_CLIP && command.at !== "action-start";
+      const first = step.commands.findIndex(phaseTurn);
       if (first !== -1) {
-        assert.ok(step.commands.slice(first).every((command) => command.kind === CommandKind.FACE_CLIP), "turns come last");
+        assert.ok(step.commands.slice(first).every(phaseTurn), "phase-advance turns come last");
       }
+      // Each turn starts from the facing the one before it left — within the
+      // action, and from the last action for the first turn of each gladiator.
+      const drawn = new Map(previous);
       for (const command of step.commands.filter((entry) => entry.kind === CommandKind.FACE_CLIP)) {
         turnsSeen += 1;
         if (/^walk-/.test(chosen.type)) walkTurns += 1;
-        assert.equal(command.from, previous.get(command.combatantId), "a turn starts from the facing the last action left");
+        if (command.at === "action-start") {
+          startTurns += 1;
+          assert.equal(command.combatantId, actorId, "only the actor turns at the start of his action");
+          const clipAt = step.commands.findIndex((entry) => entry.kind === CommandKind.CLIP_GOTO && entry.combatantId === actorId);
+          assert.ok(clipAt === -1 || step.commands.indexOf(command) < clipAt, "and before his own clip");
+        }
+        assert.equal(command.from, drawn.get(command.combatantId), "a turn starts from the facing the last turn left");
         assert.equal(command.actionToken, step.actionBoundary, "under the action that turned it");
+        drawn.set(command.combatantId, command.to);
       }
       for (const id of ids) {
         assert.equal(scene.actors[id].facing, facingOf(id),
@@ -474,4 +596,5 @@ test("over real arena bouts the scene is drawn the way the resolver faces every 
   // and at least one is the plainest case of all — a walk past a foe.
   assert.ok(turnsSeen > 0, "the sweep saw no turn at all, so it proves nothing");
   assert.ok(walkTurns > 0, "and none of them came from a walk");
+  assert.ok(startTurns > 0, "and none of them was an actor turning to his target at the start of his action");
 });

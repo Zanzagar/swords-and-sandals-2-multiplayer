@@ -444,21 +444,47 @@ test("A TARGET IN ANOTHER RANK KEEPS THE DEPTH TERM — INVENTED; the build's ga
   assert.equal(offRank.outOfRange, true);
 });
 
-test("A TARGET BEHIND THE CASTER IS GATED BY DISTANCE — INVENTED; the build's facing test would pass it at any range", () => {
+test("A TARGET BEHIND THE CASTER IS GATED BY DISTANCE — the caster turns to face it, so the build's own expression refuses it", () => {
   // The caster faces right and the target stands 4000 BEHIND it. The build's
   // facing-right expression is `attacker._x > round(defender._x - K)`, true
   // for every defender to the caster's left — only team play reaches that in
   // the build, because a 1v1 pair always faces each other (a staged record can
   // state a facing, which is how this reaches it). This engine keeps the
   // symmetric test instead, so a charge is never spent across the arena.
+  //
+  // ► **MOVED 2026-09-24 BY THE TURN TO THE TARGET (`ss2TurnToTarget`)**:
+  //   ~~"and still be facing away when it presses"~~. The discharging press
+  //   now turns its caster to face the foe it is aimed at before the gate runs,
+  //   so the gate sees the target IN FRONT and the build's own facing-left
+  //   expression, `0 < round(-4000 + K)`, refuses it — the symmetric test is
+  //   no longer the only thing between a charge and the far side of the arena.
+  //   Still out of range, which is what this test was always for.
   const battle = staged({
     red: [{ id: "hero", fields: gladiator({ psyche_up: 3 }), x: 0, y: 0 }],
     blue: [{ id: "villain", fields: gladiator(), x: -4000, y: 0 }]
   });
   assert.ok(!combatantById(battle, "hero").status.includes("facing-left"), "the caster must face AWAY from its target");
-  const event = psycheEvent(take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain"));
-  assert.ok(!combatantById(battle, "hero").status.includes("facing-left"), "and still be facing away when it presses");
+  const resolution = take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain");
+  const event = psycheEvent(resolution);
+  assert.deepEqual(resolution.effects[0], { kind: "status", targetId: "hero", status: "facing-left", active: true },
+    "the discharge turned its caster to its target FIRST, before the gate read anything");
   assert.equal(event.outOfRange, true);
+});
+
+test("ONLY THE DISCHARGE TURNS: the two charging presses read no foe and no facing, and name the caster", () => {
+  // `+0x658a` and `+0x65b9` play a clip and advance a counter; nothing in them
+  // reads `defender` or `gladiator_dir`. So a charge aimed at a foe behind the
+  // caster leaves him facing the way he was (`ss2FacingToAct`).
+  for (const counter of [1, 2]) {
+    const battle = staged({
+      red: [{ id: "hero", fields: gladiator({ psyche_up: counter }), x: 0, y: 0 }],
+      blue: [{ id: "villain", fields: gladiator(), x: -4000, y: 0 }]
+    });
+    const resolution = take(battle, "hero", Ss2ActionType.PSYCHE_UP, "villain");
+    assert.equal(psycheEvent(resolution).discharged, false, `press ${counter} charges`);
+    assert.equal(resolution.effects.some((effect) => effect.status === "facing-left"), false, `press ${counter} turns nobody`);
+    assert.ok(!combatantById(battle, "hero").status.includes("facing-left"), `press ${counter}: still facing right`);
+  }
 });
 
 /* ------------------------------------------------------------------ *

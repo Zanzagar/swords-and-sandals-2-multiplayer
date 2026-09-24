@@ -499,6 +499,19 @@ test("a WHIRLWIND or a SWING the back-attack bonus finishes skips the transition
 //   the pre-teleport `x`, so above 1v1 it could grant +50% — and a kill — from
 //   a side the caster never strikes from, then record the killer on the other
 //   side of the body.
+//
+// ► **AND SINCE 2026-09-24 THE CASTER TURNS TO FACE ITS VICTIM BEFORE THE ARM
+//   READS ITS FACING** (`ss2TurnToTarget`), so the teleport lands it on ITS OWN
+//   side of the victim for every separated pair: where it strikes from and
+//   where it stood are now the same side. The two WG-1 layouts that pinned them
+//   APART — "behind but strikes front", "front but strikes behind" — each
+//   staged a caster facing AWAY from its victim, which the resolver no longer
+//   lets a ghost strike keep; they are restated below as "behind strikes
+//   behind" and "front strikes front", each reverted by exact inverse to the
+//   old verdict. **The one geometry left where the landing and the standing
+//   `x` still disagree is a CO-LOCATED pair**: no side to turn to, so the
+//   caster keeps its facing, and a caster level with its victim is never
+//   behind it while the landing can be. The wall test below pins exactly that.
 
 /**
  * A 2v2 — red `hero` and `c`, blue `a` and `b` — at the given `x`s, with every
@@ -592,60 +605,78 @@ test("1v1 IS UNCHANGED: the caster faces its only foe, so the teleport lands on 
 });
 
 /**
- * STANDING BEHIND, STRIKING FROM THE FRONT. The caster faces `a` and stands on
- * the far side of `b`, who faces `c`; the teleport follows the caster's facing
- * and puts it on `b`'s FACE side. Strength 9, so `physical_size` is
- * 80 + round(9 / 1.5) = 86. Both of the arm's branches: facing right lands at
- * 100 - 86 = 14, facing left (the mirror) at -100 + 86 = -14.
+ * STANDING BEHIND, STRIKING FROM BEHIND. The caster faces `a` and stands on
+ * the far side of `b`, who faces `c`. Strength 9, so `physical_size` is
+ * 80 + round(9 / 1.5) = 86.
+ *
+ * ~~BEHIND_BUT_STRIKES_FRONT: the teleport follows the caster's facing and
+ * puts it on `b`'s FACE side — facing right at 100 - 86 = 14, facing left (the
+ * mirror) at -100 + 86 = -14.~~ **Restated 2026-09-24**: the caster turns to
+ * face `b` first (`ss2TurnToTarget`), so the arm runs its OTHER branch and
+ * lands it on its own side of `b` — at 100 + 86 = 186, and -186 in the mirror
+ * — which is `b`'s back. Reverted by exact inverse, 14 / -14 and "no bonus"
+ * return.
  */
-const BEHIND_BUT_STRIKES_FRONT = Object.freeze([
-  { at: { hero: 500, c: 0, a: 700, b: 100 }, facingLeft: ["a", "b"], strikesFrom: 14 },
-  { at: { hero: -500, c: 0, a: -700, b: -100 }, facingLeft: ["hero", "c"], strikesFrom: -14 }
+const BEHIND_STRIKES_BEHIND = Object.freeze([
+  { at: { hero: 500, c: 0, a: 700, b: 100 }, facingLeft: ["a", "b"], strikesFrom: 186 },
+  { at: { hero: -500, c: 0, a: -700, b: -100 }, facingLeft: ["hero", "c"], strikesFrom: -186 }
 ]);
 
-test("ABOVE 1v1, a ghost strike from BEHIND its target that lands in FRONT of it earns NO back-attack bonus", () => {
-  for (const { at, facingLeft, strikesFrom } of BEHIND_BUT_STRIKES_FRONT) {
+test("ABOVE 1v1, a ghost strike from BEHIND its target turns to it, lands BEHIND it, and EARNS the back-attack bonus", () => {
+  // ~~a ghost strike from BEHIND its target that lands in FRONT of it earns NO
+  // back-attack bonus~~ — a caster facing away from its victim no longer keeps
+  // that facing into the arm. See the note above `staged2v2`.
+  for (const { at, facingLeft, strikesFrom } of BEHIND_STRIKES_BEHIND) {
     const build = (seed) => staged2v2({ seed, at, facingLeft });
     const probe = build(3);
     assert.equal(ss2IsBackAttack(combatantById(probe, "hero"), combatantById(probe, "b")), true,
-      "the premise: where the caster STANDS is behind b, so the old rule granted the bonus");
+      "the premise: where the caster STANDS is behind b");
     assert.equal(ss2PhysicalSize(combatantById(probe, "hero")), 86);
+    assert.equal(ss2IsBackAttack({ x: strikesFrom }, combatantById(probe, "b")), true,
+      "and where the arm puts it, once turned to b, is behind b too");
+    const landed = landedStrikes(build, "b");
+    assert.ok(landed.length >= 3, `too few landed strikes (${landed.length}) to prove anything`);
+    for (const { seed, battle, event, lost } of landed) {
+      assert.deepEqual(battle.lastResolution.effects[0],
+        { kind: "status", targetId: "hero", status: SS2_FACING_LEFT, active: at.hero > at.b },
+        `hero@${at.hero} seed ${seed}: the caster turned to b FIRST, before the arm read its facing`);
+      assert.equal(event.backAttack, true, `hero@${at.hero} seed ${seed}: struck from ${strikesFrom}, behind b`);
+      assert.ok(event.backAttackDamage > 0, `hero@${at.hero} seed ${seed}`);
+      assert.equal(lost, event.damage + event.backAttackDamage, `hero@${at.hero} seed ${seed}`);
+    }
+  }
+});
+
+/**
+ * STANDING IN FRONT, STRIKING FROM THE FRONT — the mirror. `b` faces the
+ * caster; the caster faces `a`, the same way `b` faces.
+ *
+ * ~~FRONT_BUT_STRIKES_BEHIND: the teleport puts it at `b`'s BACK — facing
+ * right at 0 - 86 = -86, facing left at 0 + 86 = 86.~~ **Restated 2026-09-24**:
+ * turned to `b` first, the caster lands on its own side, at 86 and -86 — `b`'s
+ * face. Reverted by exact inverse, -86 / 86 and the bonus return.
+ */
+const FRONT_STRIKES_FRONT = Object.freeze([
+  { at: { hero: 300, c: -1500, a: 400, b: 0 }, facingLeft: ["a"], strikesFrom: 86 },
+  { at: { hero: -300, c: 1500, a: -400, b: 0 }, facingLeft: ["hero", "c", "b"], strikesFrom: -86 }
+]);
+
+test("ABOVE 1v1, a ghost strike from IN FRONT of its target turns to it, lands in FRONT, and earns NO back-attack bonus", () => {
+  // ~~a ghost strike from IN FRONT of its target that lands BEHIND it EARNS
+  // the back-attack bonus~~ — see `FRONT_STRIKES_FRONT`.
+  for (const { at, facingLeft, strikesFrom } of FRONT_STRIKES_FRONT) {
+    const build = (seed) => staged2v2({ seed, at, facingLeft });
+    const probe = build(3);
+    assert.equal(ss2IsBackAttack(combatantById(probe, "hero"), combatantById(probe, "b")), false,
+      "the premise: where the caster STANDS is in front of b");
     assert.equal(ss2IsBackAttack({ x: strikesFrom }, combatantById(probe, "b")), false,
-      "and where the arm puts it is in front");
+      "and where the arm puts it, once turned to b, is in front of b too");
     const landed = landedStrikes(build, "b");
     assert.ok(landed.length >= 3, `too few landed strikes (${landed.length}) to prove anything`);
     for (const { seed, event, lost } of landed) {
       assert.equal(event.backAttack, false, `hero@${at.hero} seed ${seed}: struck from ${strikesFrom}, in front of b`);
       assert.equal(event.backAttackDamage, 0, `hero@${at.hero} seed ${seed}`);
       assert.equal(lost, event.damage, `hero@${at.hero} seed ${seed}: the vanilla blow and nothing more`);
-    }
-  }
-});
-
-/**
- * STANDING IN FRONT, STRIKING FROM BEHIND — the mirror. `b` faces the caster;
- * the caster faces `a`, the same way `b` faces, so the teleport puts it at
- * `b`'s BACK: facing right at 0 - 86 = -86, facing left at 0 + 86 = 86.
- */
-const FRONT_BUT_STRIKES_BEHIND = Object.freeze([
-  { at: { hero: 300, c: -1500, a: 400, b: 0 }, facingLeft: ["a"], strikesFrom: -86 },
-  { at: { hero: -300, c: 1500, a: -400, b: 0 }, facingLeft: ["hero", "c", "b"], strikesFrom: 86 }
-]);
-
-test("ABOVE 1v1, a ghost strike from IN FRONT of its target that lands BEHIND it EARNS the back-attack bonus", () => {
-  for (const { at, facingLeft, strikesFrom } of FRONT_BUT_STRIKES_BEHIND) {
-    const build = (seed) => staged2v2({ seed, at, facingLeft });
-    const probe = build(3);
-    assert.equal(ss2IsBackAttack(combatantById(probe, "hero"), combatantById(probe, "b")), false,
-      "the premise: where the caster STANDS is in front of b, so the old rule refused the bonus");
-    assert.equal(ss2IsBackAttack({ x: strikesFrom }, combatantById(probe, "b")), true,
-      "and where the arm puts it is behind");
-    const landed = landedStrikes(build, "b");
-    assert.ok(landed.length >= 3, `too few landed strikes (${landed.length}) to prove anything`);
-    for (const { seed, event, lost } of landed) {
-      assert.equal(event.backAttack, true, `hero@${at.hero} seed ${seed}: struck from ${strikesFrom}, behind b`);
-      assert.ok(event.backAttackDamage > 0, `hero@${at.hero} seed ${seed}`);
-      assert.equal(lost, event.damage + event.backAttackDamage, `hero@${at.hero} seed ${seed}`);
     }
   }
 });
@@ -664,7 +695,9 @@ test("a ghost strike the bonus FINISHES from behind is a kill, and the killer is
   // 237541b's rules for a bonus kill (no stamina, no heal, no psyche reset, the
   // caster left beside the body) and WG-2's position — `defender._x -/+
   // physical_size` by the caster's facing — on the side the bonus came from.
-  for (const layout of FRONT_BUT_STRIKES_BEHIND) {
+  // ~~`FRONT_BUT_STRIKES_BEHIND`~~ `BEHIND_STRIKES_BEHIND` since 2026-09-24:
+  // the bonus now comes only from a caster standing behind its victim.
+  for (const layout of BEHIND_STRIKES_BEHIND) {
     const battle = atBasePlusOne(layout);
     const stamina = value(battle, "hero", "staminaleft");
     const health = combatantById(battle, "hero").health;
@@ -682,12 +715,15 @@ test("a ghost strike the bonus FINISHES from behind is a kill, and the killer is
   }
 });
 
-test("a ghost strike from behind that lands in FRONT, at a health the old bonus would have finished, does not kill", () => {
+test("a ghost strike that lands in FRONT, at a health a bonus would have finished, does not kill", () => {
   // The audit's own demonstration, turned round: the vanilla blow leaves 1
   // hitpoint, and there is no bonus to take it. So no kill, the caster is
   // restored to where it stood (`+0x7f9f`) and nothing is recorded, and the
   // cast pays round(magicka) like any other.
-  for (const layout of BEHIND_BUT_STRIKES_FRONT) {
+  // ~~from behind that lands in FRONT, `BEHIND_BUT_STRIKES_FRONT`~~ — a caster
+  // behind its victim now lands behind it (2026-09-24), so the no-bonus case is
+  // `FRONT_STRIKES_FRONT`.
+  for (const layout of FRONT_STRIKES_FRONT) {
     const battle = atBasePlusOne(layout);
     const { event } = act(battle, GHOST, "b");
     assert.equal(event.backAttack, false);
@@ -700,12 +736,20 @@ test("a ghost strike from behind that lands in FRONT, at a health the old bonus 
 });
 
 test("AT THE WALL the side is judged from the UNCLAMPED landing the roll sees; only the kill's record is clamped", () => {
-  // `b` stands on the left bound, -2100, facing the caster; the caster faces
-  // `a`, so the arm lands it at -2100 - 86 = -2186, behind `b`. The build's clip
+  // `b` stands on the left bound, -2100, facing right; the caster faces right
+  // too, so the arm lands it at -2100 - 86 = -2186, behind `b`. The build's clip
   // clamp runs at the top of `attacker.onEnterFrame` (`+0x38fd`-`+0x3a3f`),
   // before the phase arms, so `checkattackroll()` sees -2186. Clamped first it
   // would be -2100, co-located, and no back attack at all.
-  const layout = { at: { hero: -1900, c: 1000, a: -1850, b: -2100 }, facingLeft: ["c", "a"] };
+  //
+  // ► **RESTAGED 2026-09-24 AS A CO-LOCATED PAIR.** ~~The caster stood at
+  //   -1900 facing `a` (-1850), with `b` behind it~~ — it now turns to face
+  //   `b` first (`ss2TurnToTarget`) and lands at -2014, on its own side, in
+  //   front. A caster level with its victim has no side to turn to, keeps its
+  //   facing, and is the one geometry where a landing can still fall past the
+  //   wall on the victim's far side. Both are staged facing right, which the
+  //   facing rule leaves alone for a co-located pair (`staged2v2` checks it).
+  const layout = { at: { hero: -2100, c: 1000, a: -1850, b: -2100 }, facingLeft: ["c", "a"] };
   const build = (seed) => staged2v2({ seed, ...layout });
   const landed = landedStrikes(build, "b");
   assert.ok(landed.length >= 3, `too few landed strikes (${landed.length}) to prove anything`);

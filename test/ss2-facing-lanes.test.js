@@ -311,16 +311,24 @@ test("NOR DOES A KILLING GHOST STRIKE turn the body its caster lands beside", ()
   // The same passenger on the other branch that re-faces after a lethal blow:
   // the ghost strike's kill moves the CASTER beside the body (`+0x7e4c`), and
   // the caster's re-facing (`facingAfter`) counted the body as a living foe —
-  // turning it round to face the man who had just landed behind it. The
-  // layout is `FRONT_BUT_STRIKES_BEHIND`'s first row in
-  // `test/ss2-whirlwind-ghost-strike.test.js`: the hero faces `a` and lands at
-  // 0 - 86 = -86, behind `b`, who faces him.
+  // turning it round to face the man who had just landed behind it.
+  //
+  // ► **RESTAGED 2026-09-24, BECAUSE THE TURN TO THE TARGET MOVED THE
+  //   LANDING.** ~~The layout is `FRONT_BUT_STRIKES_BEHIND`'s first row in
+  //   `test/ss2-whirlwind-ghost-strike.test.js`: the hero faces `a` and lands
+  //   at 0 - 86 = -86, behind `b`, who faces him.~~ The caster now turns to
+  //   face `b` before the arm reads its facing (`ss2TurnToTarget`), so it lands
+  //   on ITS OWN side of `b`, never the far side; with that layout it landed at
+  //   86, in front of a `b` already facing it, and the defect had nothing to
+  //   turn. So `b` now faces AWAY — toward `c`, 100 off on its left — and the
+  //   caster lands at 0 + 86 = 86, behind `b` and NEARER to it than `c` is: a
+  //   `b` counted as living would turn right to face its killer.
   let found = false;
   for (let seed = 1; seed <= 60 && !found; seed += 1) {
     const battle = staged({
       seed,
-      at: { hero: [300, FRONT], c: [-1500, FRONT], a: [400, FRONT], b: [0, FRONT] },
-      facingLeft: ["a"],
+      at: { hero: [300, FRONT], c: [-100, FRONT], a: [400, FRONT], b: [0, FRONT] },
+      facingLeft: ["a", "b"],
       hero: { inventory1: 36 },
       allies: ["c"],
       foes: ["a", "b"]
@@ -330,13 +338,13 @@ test("NOR DOES A KILLING GHOST STRIKE turn the body its caster lands beside", ()
     const [event] = battle.lastResolution.events.filter((entry) => entry.type === Ss2ActionType.CAST_GHOST_STRIKE);
     if (combatantById(battle, "b").alive || event.casterTo === undefined) continue;
     found = true;
-    assert.equal(event.casterTo, -86, "the premise: the caster landed behind the body");
+    assert.equal(event.casterTo, 86, "the premise: the caster landed behind the body, nearer it than c");
     assert.equal(
       battle.lastResolution.effects.some((effect) => effect.targetId === "b" && effect.status === SS2_FACING_LEFT),
       false,
       `seed ${seed}: the body is not turned to face its killer`
     );
-    assert.equal(facesLeft(battle, "b"), false, `seed ${seed}: it keeps the facing it died with`);
+    assert.equal(facesLeft(battle, "b"), true, `seed ${seed}: it keeps the facing it died with`);
     assert.equal(facesLeft(battle, "hero"), false, `seed ${seed}: and the killer faces a, the foe left alive`);
   }
   assert.ok(found, "the sweep must land one killing ghost strike that moves its caster");

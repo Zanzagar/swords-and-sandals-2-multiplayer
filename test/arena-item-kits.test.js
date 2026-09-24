@@ -363,7 +363,8 @@ const KIT_BOUTS = Object.freeze({
   //   again, and so is every action hash of 384 seeded 2v2/3v3 bouts):
   //   - facing prefers the gladiator's own rank (a rank change re-faces from
   //     the new one), turns a swinger to his target, and re-derives after a
-  //     kill (`ss2FacingEffects`, `ss2SwingTurn`, `ss2FacingsAfterKills`) —
+  //     kill (`ss2FacingEffects`, `ss2SwingTurn` — since 2026-09-24
+  //     `ss2TurnToTarget` — and `ss2FacingsAfterKills`) —
   //     alone, it appends `cast-whirlwind`, `cast-command` to the old 14;
   //   - the whirlwind's gate no longer reaches across ranks, and the AI whirls
   //     at the nearest foe in its OWN rank (`ss2PsycheDischargeInRange`) —
@@ -402,13 +403,29 @@ const KIT_BOUTS = Object.freeze({
   //   (main session, measured at merge on 2690559 + taunt + kits): the kits
   //   patch's own re-pin (22 casts, diverging at the 14th) was measured
   //   without the taunt rule, and the combination is exactly this list.
+  // ► **MOVED A FOURTH TIME 2026-09-24, BY THE TURN TO THE TARGET
+  //   (`ss2TurnToTarget`: every verb aimed at a foe turns its actor to face
+  //   that foe before the phase reads the facing), and by nothing else.**
+  //   ~~48 actions, red by elimination~~ → **60 actions, no result** (the bout
+  //   runs on and blue wins by elimination at action 112). The first
+  //   divergence is action 9: red-1 at (310, 200), facing blue-1 in its own
+  //   rank on its LEFT, gales blue-2 at (380, 103) — the nearest foe overall,
+  //   the one the AI's gale arm picks — which stands on its RIGHT. The gale
+  //   signs on the caster's facing (`+0x7b45`), so it used to blow blue-2
+  //   -1000, through red-1 to -620; red-1 now turns right first and blows it
+  //   +1000, away, to 1380. Every cast before it is the same; the ninth becomes
+  //   `cast-command`. Measured with the widening reverted by exact inverse
+  //   (`SS2_TURNS_TO_TARGET` back to the five swings): 48/elimination and the
+  //   old 16 casts return. Was: command, weaken x2, ghost, weaken, whirlwind,
+  //   command, gale, weaken, whirlwind, gale, ghost, command, whirlwind,
+  //   teleport, ghost.
   tricks: {
-    actions: 48,
-    result: "elimination",
+    actions: 60,
+    result: null,
     casts: [
       "cast-command", "cast-weaken-armour", "cast-weaken-armour", "cast-ghost-strike", "cast-weaken-armour",
-      "cast-whirlwind", "cast-command", "cast-gale", "cast-weaken-armour", "cast-whirlwind", "cast-gale",
-      "cast-ghost-strike", "cast-command", "cast-whirlwind", "cast-teleport", "cast-ghost-strike"
+      "cast-whirlwind", "cast-command", "cast-gale", "cast-command", "cast-ghost-strike", "cast-gale",
+      "cast-ghost-strike", "cast-command", "cast-teleport", "cast-teleport", "cast-ghost-strike"
     ]
   },
   crowd: {

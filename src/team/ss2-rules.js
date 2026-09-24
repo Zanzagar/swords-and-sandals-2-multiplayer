@@ -2783,7 +2783,8 @@ export function ss2WalkDestination(actor, foes, direction) {
  *    foes to be nearest to exactly as a walk changes the distances, and the
  *    killer went on facing the body (26 of the 223). `ss2FacingsAfterKills`.
  * 3. **A SWING TURNS ITS SWINGER TO HIS TARGET FIRST** — between two foes in
- *    his own lane he faced one and swung at the other. `ss2SwingTurn`.
+ *    his own lane he faced one and swung at the other. `ss2TurnToTarget`,
+ *    which since 2026-09-24 turns every verb aimed at a foe, not only a swing.
  *
  * ► **TRIED AND REJECTED, MEASURED: a two-sided tie that KEEPS the facing.**
  *   Equally near foes either side of him looks like the team form of the
@@ -2868,52 +2869,161 @@ function facingEffectsAgainst(crowd, opposition) {
 }
 
 /**
- * The verbs that SWING at a foe in reach: the three melee attacks, the bash,
- * and the shove — exactly the set the offer gates on `ss2SameLane`, so exactly
- * the set whose target the swinger can be standing BESIDE rather than facing.
+ * ► **EVERY VERB THAT NAMES A FOE AS ITS TARGET — and so every verb whose actor
+ *   turns to face that foe before the phase (`ss2TurnToTarget`).** Re-derived
+ *   2026-09-24 from `legalActions`, which offers each of these PER FOE and
+ *   every other verb aimed at the actor himself:
+ *
+ * - **the swings** — the three melee attacks, the bash and the shove, exactly
+ *   the set the offer gates on `ss2SameLane` (turning since 2026-09-23);
+ * - **the shots** — `bombard` and `snipe`;
+ * - **the taunt**;
+ * - **the psyche-up DISCHARGE** — only the press that strikes; see
+ *   `ss2FacingToAct` for why the two charging presses do not turn;
+ * - **every spell cast at a foe** — the two bolts, the three fireballs, molten
+ *   death, the gale, the command, weaken armour, the whirlwind, the ghost
+ *   strike and little fat kid (the one stat spell that lands on the defender).
+ *
+ * **NOT HERE, because each is aimed at the actor** (its offer's `targetId` is
+ * the actor's own id, so there is no foe to face): rest, the walks, the rank
+ * changes, the swap, the teleport, adulation, win the crowd, the potions, the
+ * two timed buffs, colossus, swift sandals, bloodlust, rejuvenate, the taunted
+ * flee and the four status phases. No verb in this engine is aimed at an ALLY.
+ *
+ * **A new verb offered per foe belongs here.** A verb left out keeps the
+ * facing the rule gave its actor, which is the facing of the NEAREST foe in his
+ * lane and not the one he chose — the defect `ss2TurnToTarget` exists to close.
  */
-const SS2_SWING_TURNS = Object.freeze(new Set([
+const SS2_TURNS_TO_TARGET = Object.freeze(new Set([
   Ss2ActionType.QUICK_ATTACK,
   Ss2ActionType.NORMAL_ATTACK,
   Ss2ActionType.POWER_ATTACK,
   Ss2ActionType.BASH_ATTACK,
-  Ss2ActionType.SHOVE
+  Ss2ActionType.SHOVE,
+  Ss2ActionType.BOMBARD,
+  Ss2ActionType.SNIPE,
+  Ss2ActionType.TAUNT,
+  Ss2ActionType.PSYCHE_UP,
+  Ss2ActionType.CAST_WHIRLWIND,
+  Ss2ActionType.CAST_GHOST_STRIKE,
+  Ss2ActionType.CAST_LIGHTNING_BOLT,
+  Ss2ActionType.CAST_FRIGHTNING_BOLT,
+  Ss2ActionType.CAST_FIREBALL,
+  Ss2ActionType.CAST_HELL_FIREBALL,
+  Ss2ActionType.CAST_DIRE_FIREBALL,
+  Ss2ActionType.CAST_DEATH_FROM_ABOVE,
+  Ss2ActionType.CAST_GALE,
+  Ss2ActionType.CAST_COMMAND,
+  Ss2ActionType.CAST_WEAKEN_ARMOUR,
+  Ss2ActionType.CAST_LITTLE_FAT_KID
 ]));
 
 /**
- * ► **A SWING TURNS ITS SWINGER TO FACE THE MAN SWUNG AT, BEFORE ANYTHING IN
- *   THE PHASE READS THE FACING. Authored 2026-09-23.** Returns the request the
- *   phase should resolve — the actor already turned — and the one STATUS effect
- *   that turns him, or the request untouched and no effect.
+ * The psyche-up counter a press reads: the declared `psyche_up`, floored at
+ * `SS2_PSYCHE_UP.floor` because a record may state 0 and the build cannot hold
+ * 0 after any turn (see the resolver's psyche branch, which reads it here).
+ */
+function ss2PsycheCounter(actor) {
+  return Math.max(SS2_PSYCHE_UP.floor, resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor));
+}
+
+/**
+ * **Which way `actor` must face to act on `target` with `type`** — `"left"` or
+ * `"right"` — or `null` when the verb decides nothing about his facing.
  *
- * **The build never writes `gladiator_dir` at a swing** — its six writes are
- * two at setup and four in `changeCombatants` — and it never needs to: with
- * one foe, re-faced at every phase advance, the swing is always toward him.
- * Above 1v1 the target is CHOSEN (weakest-first for the AI, anybody in reach
- * for a player), and the facing rule cannot know the choice. Between two foes
- * in his own lane a gladiator faced one and swung at the other: the lunge was
- * drawn into empty sand, and a shove — signed on the SHOVER's facing
+ * The one statement of the turn-to-target rule, read by the resolver
+ * (`ss2TurnToTarget`) and by the presentation (`src/adapter/presentation.js`,
+ * which draws the turn at the START of the action because this happens before
+ * the phase). Two copies of it would be two chances to disagree about which
+ * way a gladiator swung.
+ *
+ * `null` when:
+ * - the verb is not in `SS2_TURNS_TO_TARGET`, or it is aimed at the actor;
+ * - it is a psyche-up press that only CHARGES. Presses one and two read no
+ *   `defender`, no facing and no distance — they play a clip and advance a
+ *   counter (`+0x658a`, `+0x65b9`) — and their event names the actor, not the
+ *   foe, so a turn there would be one the presentation cannot place. The
+ *   discharging press strikes the foe it names, and turns;
+ * - either end has no `x` (a fixture, or a rule set with no geometry);
+ * - the two stand on the same `x`: a co-located pair has no side to face, and
+ *   the build's own strict tests (`changeCombatants`) leave its facing alone.
+ */
+export function ss2FacingToAct(type, actor, target) {
+  if (!SS2_TURNS_TO_TARGET.has(type)) return null;
+  if (!actor || !target || target.id === actor.id) return null;
+  if (type === Ss2ActionType.PSYCHE_UP && ss2PsycheCounter(actor) < SS2_PSYCHE_UP.dischargeAt) return null;
+  if (!Number.isFinite(actor.x) || !Number.isFinite(target.x) || target.x === actor.x) return null;
+  return target.x < actor.x ? "left" : "right";
+}
+
+/**
+ * ► **A VERB AIMED AT A FOE TURNS ITS ACTOR TO FACE THAT FOE, BEFORE ANYTHING
+ *   IN THE PHASE READS THE FACING.** Authored 2026-09-23 for the swings;
+ *   **widened 2026-09-24 to every verb that names a foe** (`SS2_TURNS_TO_TARGET`)
+ *   at the owner's ask — *"If ranged/shouting/spell/etc is it possible to flip
+ *   the model of the gladiator so they are facing the way of the target they
+ *   are attacking?"* Returns the request the phase should resolve — the actor
+ *   already turned — and the one STATUS effect that turns him, or the request
+ *   untouched and no effect.
+ *
+ * **The build never writes `gladiator_dir` at a swing or a cast** — its six
+ * writes are two at setup and four in `changeCombatants` — and it never needs
+ * to: with one foe, re-faced at every phase advance, every verb is always
+ * toward him. Above 1v1 the target is CHOSEN (weakest-first for the AI, anybody
+ * in reach for a player), and the facing rule cannot know the choice. Between
+ * two foes in his own lane a gladiator faced one and swung at the other: the
+ * lunge was drawn into empty sand, and a shove — signed on the SHOVER's facing
  * (`+0x5e3b`) — drove its victim into and past the shover.
  *
- * **Only the swings** (`SS2_SWING_TURNS`). The ranged verbs, the taunt and the
- * spells keep the facing the rule gave them: several sign or place on the
- * caster's facing (the gale, the command, the fireball's launch side, the ghost
- * strike's landing), `test/ss2-whirlwind-ghost-strike.test.js` pins a ghost
- * strike cast AWAY from its facing, and turning those is a decision about what
- * those verbs mean, not a repair of this one.
+ * ► ~~**Only the swings** (`SS2_SWING_TURNS`). The ranged verbs, the taunt and
+ *   the spells keep the facing the rule gave them: several sign or place on
+ *   the caster's facing (the gale, the command, the fireball's launch side, the
+ *   ghost strike's landing), `test/ss2-whirlwind-ghost-strike.test.js` pins a
+ *   ghost strike cast AWAY from its facing, and turning those is a decision
+ *   about what those verbs mean, not a repair of this one.~~
+ *
+ *   **DECIDED 2026-09-24: every verb aimed at a foe turns, IN THE ENGINE and
+ *   not only in the drawing.** The reasons those verbs were left alone are the
+ *   reasons they have to turn here: each signs or places on the caster's facing
+ *   because in the build's 1v1 that facing IS toward the target, so each one's
+ *   meaning is "toward/away from the man I cast at". A drawing-only flip would
+ *   make the picture lie — a gale drawn facing its target while it blows him
+ *   through the caster. What turning first changes, verb by verb:
+ *   - **the gale** (`+0x7b45`) — a foe behind was blown ±1000 TOWARD and past
+ *     the caster; now he is blown away, as every 1v1 gale blows its victim;
+ *   - **the command** (`+0x7c96`) — a foe behind was pushed ONE frame, 40
+ *     units, further away and the phase ended (`SS2_COMMAND`'s "target behind"
+ *     case); now he is PULLED to the stand-off like every 1v1 target, up to the
+ *     watchdog's 58 frames. More than a direction: the distance, the frame
+ *     count and `cutByWatchdog` all follow;
+ *   - **the taunt's effect-2 shove** (`+0x69c8`) — away from the taunter, not
+ *     through him;
+ *   - **the ghost strike's landing** (`+0x7e4c`-`+0x7eac`) — beside its victim
+ *     on the CASTER's side, never on the far side. So the authored back-attack
+ *     bonus, judged from the landing (audit WG-1), is now judged from the same
+ *     side the caster stood on, for every separated pair: a strike from behind
+ *     the victim earns it and one from in front does not. Only a co-located
+ *     caster — no side to turn to — can still land on the other side;
+ *   - **the fireball's launch side** (`gladiatorDir` on its event) — the
+ *     drawn flight now leaves toward its victim, which it always reached
+ *     anyway: the resolver lands the damage at once;
+ *   - the shots, bolts, molten death, weaken armour, little fat kid, the
+ *     whirlwind and the discharge read no facing of the CASTER's, so for them
+ *     only the facing itself changes — and with it, since a turn persists until
+ *     a move or a kill re-faces him, which of his sides a later blow lands on.
+ *     The whirlwind's and the discharge's range gate is two-sided here
+ *     (`ss2PsycheDischargeInRange`), so it reads no facing at all.
  *
  * **1v1 cannot move**: a separated pair always faces each other, so the target
  * is always the side already faced, and a co-located pair has no side to turn
  * to (the build's strict tests). A fixture has no `x` and is never turned.
  */
-function ss2SwingTurn(request) {
+function ss2TurnToTarget(request) {
   const unturned = { request, effects: [] };
-  if (!SS2_SWING_TURNS.has(request?.type)) return unturned;
+  const facing = ss2FacingToAct(request?.type, request?.actor, request?.target);
+  if (facing === null) return unturned;
   const actor = request.actor;
-  const target = request.target;
-  if (!actor || !target || target.id === actor.id) return unturned;
-  if (!Number.isFinite(actor.x) || !Number.isFinite(target.x) || target.x === actor.x) return unturned;
-  const facesLeft = target.x < actor.x;
+  const facesLeft = facing === "left";
   const status = actor.status ?? [];
   if (status.includes(SS2_FACING_LEFT) === facesLeft) return unturned;
   // Where `applyEffects` would put the token — appended, or filtered out — so
@@ -2985,8 +3095,8 @@ function ss2FieldAfter(request, effects) {
  * **Only a phase that kills.** Facing is a function of the positions and of
  * which foes are alive; the movement branches already re-derive on every `x`
  * they write, and a phase that moves nobody and kills nobody leaves the rule's
- * answer where it was — except for a swinger's turn (`ss2SwingTurn`), which a
- * re-derivation here would take straight back.
+ * answer where it was — except for the turn to the target (`ss2TurnToTarget`),
+ * which a re-derivation here would take straight back.
  *
  * **Never the dead.** `facingEffectsAgainst` skips `alive === false`, so no
  * facing is written onto a body — the passenger `resolveAction`'s facing
@@ -4292,7 +4402,10 @@ export const SS2_WHIRLWIND = Object.freeze({
  *   side that keeps the caster facing its victim, not the side it stood on.
  *   Above 1v1 those can differ, and until 2026-09-22 this engine judged from
  *   the wrong one (audit WG-1). In 1v1 they cannot. See the resolver's
- *   `ghostLanding`.
+ *   `ghostLanding`. **Since 2026-09-24 they cannot above 1v1 either, for any
+ *   separated pair**: the caster turns to face its victim before the arm reads
+ *   its facing (`ss2TurnToTarget`), so it lands on its own side. Only a
+ *   CO-LOCATED caster, with no side to turn to, can still land on the far one.
  *
  * ► **NOT MODELLED, AND NAMED:** ~~the on-screen blink beside the target and
  *   back (the presentation vocabulary has no "held away, then restored"
@@ -5382,6 +5495,11 @@ const SS2_DEMAND_MOVE_TRIP = 60;
  *   CASTER".** The branch reads only `gladiator_dir`. In front, that is a pull;
  *   BEHIND the caster the first frame's test already passes, so a target
  *   behind is pushed 40 further AWAY and the phase ends.
+ *   **Unreachable through the resolver since 2026-09-24**: the caster turns to
+ *   face the foe it commands before the arm runs (`ss2TurnToTarget`), so the
+ *   target is always in front and always pulled — the build's 1v1, where the
+ *   caster always faces its one foe. Only a CO-LOCATED pair, which has no
+ *   side to turn to, still takes the entry frame's 40 past the caster.
  *
  * ► **A TARGET INSIDE THE STAND-OFF STAYS IN FRONT.** `S >= 80`
  *   (`ss2PhysicalSize`), so a target that starts `g <= S` in front moves once,
@@ -5432,7 +5550,9 @@ const SS2_DEMAND_MOVE_TRIP = 60;
  *   the next round's first frame, where the same clamp cuts its chosen action.
  *   This engine clamps the target and lets it act — the owner's decision
  *   2026-09-22, see `SS2_ARENA.clamp`.** Only the push-behind case can reach a
- *   wall.
+ *   wall — ~~a target behind~~ **since 2026-09-24 only a CO-LOCATED target,
+ *   because the caster turns to face any other before the arm runs**
+ *   (`ss2TurnToTarget`).
  *
  * ► **THE COST IS `round(magicka)`, THE STAT, WITH NO AFFORDABILITY CHECK**,
  *   the gale's and the bolts' shape exactly.
@@ -6954,6 +7074,11 @@ export const SS2_TAUNT = Object.freeze({
  *   1v1 is exactly the build — the far side's is always true for a target in
  *   front — and above it is the symmetric test this function has always been,
  *   rather than a discharge that reaches across the arena behind you.
+ *   **Since 2026-09-24 the two readings agree above 1v1 too**: the discharge
+ *   and the whirlwind turn their caster to face the foe they are aimed at
+ *   before the phase (`ss2TurnToTarget`), so the target is in front whenever a
+ *   separated pair reaches this gate, and the far side's expression is
+ *   belt and braces for a caller that hands in a caster facing away.
  *
  * ► ~~**AND A TARGET IN ANOTHER RANK KEEPS THE DEPTH TERM THIS GATE ALWAYS HAD**
  *   (INVENTED — the build has no ranks, and its gate reads `_x` alone): the
@@ -10515,8 +10640,11 @@ export function createSs2TeamRules({
       //
       //   **Per foe, and at a foe BEHIND the caster too**: the arm reads one
       //   bound `defender` and moves it against the caster's facing whichever
-      //   side it stands, so above 1v1 the caster picks and the build's answer
-      //   for a target behind — pushed 40 away — is what it gets.
+      //   side it stands, so above 1v1 the caster picks ~~and the build's
+      //   answer for a target behind — pushed 40 away — is what it gets~~.
+      //   **Since 2026-09-24 the caster turns to face the foe it picks before
+      //   the arm runs (`ss2TurnToTarget`), so a foe behind is PULLED**, as
+      //   every 1v1 target is.
       if (ss2InventorySlotHolding(view.actor, SS2_COMMAND.itemId) !== null) {
         for (const foe of view.foes) actions.push({ type: Ss2ActionType.CAST_COMMAND, targetId: foe.id });
       }
@@ -10987,14 +11115,16 @@ export function createSs2TeamRules({
      * be an identity function with a place to introduce a bug.
      */
     resolveAction(request, rolls) {
-      // ► **THE FACINGS AROUND THE PHASE, 2026-09-23: the swing's turn before
-      //   it, a kill's re-facing after it.** Both are the team extension of one
-      //   build invariant — a swing is always toward the man swung at — and
-      //   both are no-ops at 1v1. See `ss2SwingTurn` and `ss2FacingsAfterKills`.
-      //   Wrapped round the phase rather than threaded through its returns,
-      //   because the re-facing has to see the phase's LAST effect (the crowd's
-      //   toll can be the death) and a count of return paths goes stale.
-      const turn = ss2SwingTurn(request);
+      // ► **THE FACINGS AROUND THE PHASE, 2026-09-23: the turn to the target
+      //   before it, a kill's re-facing after it.** Both are the team extension
+      //   of one build invariant — a verb is always toward the man it is aimed
+      //   at (a swing since 2026-09-23, every verb aimed at a foe since
+      //   2026-09-24) — and both are no-ops at 1v1. See `ss2TurnToTarget` and
+      //   `ss2FacingsAfterKills`. Wrapped round the phase rather than threaded
+      //   through its returns, because the re-facing has to see the phase's
+      //   LAST effect (the crowd's toll can be the death) and a count of return
+      //   paths goes stale.
+      const turn = ss2TurnToTarget(request);
       return ss2FacingsAfterKills(turn.request, resolvePhase(turn.request, rolls), turn.effects);
 
       // The phase itself: the body this method always had, hoisted as a
@@ -11051,9 +11181,9 @@ export function createSs2TeamRules({
       //   and since that day the lane (`y`) — AND of which foes are alive.**
       //   So the branches that write an `x` or a `y` carry it, as below; a
       //   phase that KILLS is re-faced for everybody round the phase
-      //   (`ss2FacingsAfterKills`), and a swing turns its swinger before it
-      //   (`ss2SwingTurn`). An attack that moves nobody and kills nobody still
-      //   cannot change the rule's answer.
+      //   (`ss2FacingsAfterKills`), and a verb aimed at a foe turns its actor
+      //   before it (`ss2TurnToTarget`). An attack that moves nobody and kills
+      //   nobody still cannot change the rule's answer.
       //
       //   **CORRECTED 2026-09-17: this said "exactly two verbs move anybody: a
       //   walk and a rank change", and it was true when written and false by
@@ -11570,10 +11700,9 @@ export function createSs2TeamRules({
         //   **Reading below-floor as fresh is the reconciliation**, and it is
         //   the map's own semantics rather than a convenience: anything under 1
         //   is a state the build leaves nobody in.
-        psycheCounter = Math.max(
-          SS2_PSYCHE_UP.floor,
-          resourceValue(actor, "psyche_up", SS2_PSYCHE_UP.floor)
-        );
+        // One expression with the turn rule's (`ss2FacingToAct`), which asks
+        // the same question — will this press discharge? — before the phase.
+        psycheCounter = ss2PsycheCounter(actor);
         const clip = SS2_PSYCHE_UP.clips[
           Math.min(psycheCounter, SS2_PSYCHE_UP.dischargeAt) - 1
         ] ?? SS2_PSYCHE_UP.clips[0];
@@ -11956,7 +12085,9 @@ export function createSs2TeamRules({
 
         // `gladiator_dir` at the cast. The launch side, the flight and the
         // impact test all read it (`+0x9284`, `+0x949c`, `+0x9131`/`+0x916c`),
-        // and nothing in this action can change it.
+        // and nothing in this action can change it — it is read AFTER the turn
+        // to the target (`ss2TurnToTarget`, 2026-09-24), so a fireball at a foe
+        // behind the caster leaves toward him.
         const gladiatorDir = (actor.status ?? []).includes(SS2_FACING_LEFT) ? "left" : "right";
 
         return {
@@ -12200,6 +12331,9 @@ export function createSs2TeamRules({
         }
 
         // `gladiator_dir == "right"` -> +1000, else -1000 (`+0x7b45`-`+0x7b6d`).
+        // The facing AFTER the turn to the target (`ss2TurnToTarget`,
+        // 2026-09-24), so the victim is blown AWAY from the caster whichever
+        // side he stood on — the build's 1v1 meaning.
         const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
         const force = facingLeft ? 0 - SS2_GALE.force : SS2_GALE.force;
         // `knockback(defender, force)` bounds nothing; the clip clamp does. See
@@ -12312,8 +12446,11 @@ export function createSs2TeamRules({
         //   whose clamp in the build also ends the target's phase; NOT
         //   reproduced, by the owner's decision (`SS2_ARENA.clamp`,
         //   2026-09-22). Toward the caster the pull
-        //   never leaves the arena, and the one case that can — a target
-        //   behind, pushed away — runs a single frame. See `SS2_ARENA.clamp`.
+        //   never leaves the arena, and the one case that can — ~~a target
+        //   behind, pushed away~~ **a CO-LOCATED target carried 40 past the
+        //   caster, the only push left once the caster turns to face its target
+        //   (`ss2TurnToTarget`, 2026-09-24)** — runs a single frame. See
+        //   `SS2_ARENA.clamp`.
         //
         // ► **INVENTED FOR THE N-BODY ARENA, NAMED HERE — faithful readings of
         //   an arm that names two bodies:**
@@ -13315,7 +13452,9 @@ export function createSs2TeamRules({
             //   as the status token `facing-left` (absent means right) because
             //   a resource bag holds only finite numbers. The build reads
             //   `attacker.gladiator_dir == "right"` at `+0x69c8` and negates
-            //   for the other arm.
+            //   for the other arm. Read AFTER the turn to the target
+            //   (`ss2TurnToTarget`, 2026-09-24), so the shove is away from the
+            //   taunter, never back through him.
             const facingLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
             const force = facingLeft ? 0 - magnitude : magnitude;
             // ► **AND THE SHOVE MOVES HIM, which the first cut did not do.**
@@ -13668,6 +13807,11 @@ export function createSs2TeamRules({
       //   1v1 cannot move: a separated pair always faces each other, so the
       //   landing is on the side the caster already stood on, and a co-located
       //   pair keeps the facings it had when apart. Pinned in the test file.
+      //
+      //   **And since 2026-09-24 neither can a separated pair above 1v1**:
+      //   `actor` here is already turned to face `target` (`ss2TurnToTarget`),
+      //   so the landing is on the side the caster stood on, and "whatever
+      //   side it stood on" above now describes only a co-located caster.
       //
       //   **UNCLAMPED, deliberately.** The build's clip clamp is at the top of
       //   `attacker.onEnterFrame` (`+0x38fd`-`+0x3a3f`), before the phase arms,

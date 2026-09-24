@@ -1008,6 +1008,14 @@ export function figureXAt({ restingX, facing, pose, timeline = null, motion = nu
  * drawn at once: there is nothing to wait for, and waiting on nothing would
  * hold it for ever.
  *
+ * ► **AND A TURN AT THE START OF ITS ACTION IS DRAWN AT ONCE TOO — added
+ *   2026-09-24.** The resolver turns an actor to face the foe he aims a swing,
+ *   a shot, a taunt or a spell at BEFORE the phase (`ss2TurnToTarget`), so the
+ *   presentation marks that one turn `at: "action-start"` and it is not held:
+ *   the verb is drawn facing its target from its first frame. Holding it would
+ *   draw the caster casting away from his victim and turning round afterwards
+ *   — the picture the owner asked to have fixed.
+ *
  * @param {string} options.facing the scene actor's `facing`, already the facing AFTER any turn
  * @param {object} [options.turn] the scene actor's `turn`, or null
  * @param {Array<number>} [options.pendingTokens] the tokens the surface is still waiting on
@@ -1020,6 +1028,7 @@ export function figureFacingAt({ facing, turn = null, pendingTokens = [] }) {
     throw new TimelineError("figureFacingAt needs the list of tokens the surface is still waiting on.");
   }
   if (!turn || turn.actionToken === null || turn.actionToken === undefined) return facing;
+  if (turn.at === "action-start") return facing;
   return pendingTokens.includes(turn.actionToken) ? turn.from : facing;
 }
 

@@ -76,7 +76,7 @@
 
 import { EliminationEvent } from "../team/elimination.js";
 import { ss2ArrowFrameFor, ss2RangedWeaponFor } from "../team/ss2-weapon-table.js";
-import { SS2_ARENA, ss2PhysicalSize } from "../team/ss2-rules.js";
+import { SS2_ARENA, ss2FacingToAct, ss2PhysicalSize } from "../team/ss2-rules.js";
 import { SS2_FIGURE_HALF_WIDTH } from "../common/ss2-figure.js";
 import { BATTLE_RESULT_PENDING_TYPE } from "../team/settlement.js";
 import { bindingPlanFor, resultLabelsFor } from "./slot-layout.js";
@@ -224,6 +224,24 @@ export const CommandKind = Object.freeze({
    * every status list for the whole bout, so a comparison against what the
    * construction DREW would turn every villain round on the first action; a
    * comparison of the resolver against itself cannot.
+   *
+   * ► **AND ONE TURN HAPPENS AT THE START OF THE ACTION, NOT AT ITS PHASE
+   *   ADVANCE: the actor's turn to the foe he aims at. Added 2026-09-24.** The
+   *   resolver turns a gladiator to face the foe a swing, a shot, a taunt or a
+   *   spell is aimed at BEFORE the phase reads his facing
+   *   (`ss2FacingToAct`/`ss2TurnToTarget` in `src/team/ss2-rules.js`) — so the
+   *   verb is thrown, loosed or cast FACING its target, which is what the owner
+   *   asked to see (2026-09-24). That turn is a `face-clip` carrying
+   *   `at: "action-start"`, emitted BEFORE the actor's own clip, and
+   *   `figureFacingAt` draws it at once instead of holding it. The
+   *   phase-advance turn at the end of the batch is then measured FROM the
+   *   facing the actor acted with, so a caster who turns to gale a man behind
+   *   him and is re-faced to the man in front once the gale has blown is drawn
+   *   turning twice — once to cast, once as the phase advances — where the
+   *   batch's net change is none. **Until 2026-09-24 this command carried only
+   *   the NET change**, which is why a swing's turn (resolved since
+   *   2026-09-23) was drawn after the swing or not at all
+   *   (`test/render-facing.test.js`, the shove at the man behind).
    */
   FACE_CLIP: "face-clip",
   BIND_GLOBALS: "bind-globals",
@@ -1323,13 +1341,21 @@ function displacementOf(event, { before = null, after = null } = {}) {
  * batch STARTED at: `defender._x - physical_size` facing right, `+` facing left
  * (`+0x7e4c`-`+0x7eac`), clamped to the arena. Null when either end is not on
  * that projection.
+ *
+ * **The facing is the one the caster STRIKES with** — turned to its victim
+ * first (`ss2FacingToAct`, 2026-09-24), exactly as the resolver's own
+ * `ghostLanding` reads it — and the projected facing only for a co-located pair,
+ * which has no side to turn to. Reading the projected facing alone put the
+ * blink on the far side of a victim behind the caster, where the resolver no
+ * longer lands it.
  */
 function ghostLandingOf(before, event) {
   const caster = before?.get(event.actorId);
   const target = before?.get(event.targetId);
   if (!Number.isFinite(caster?.x) || !Number.isFinite(target?.x)) return null;
   const size = ss2PhysicalSize(caster);
-  const raw = projectedFacingOf(caster) === "left" ? target.x + size : target.x - size;
+  const facing = ss2FacingToAct(event.type, caster, target) ?? projectedFacingOf(caster);
+  const raw = facing === "left" ? target.x + size : target.x - size;
   const landing = Math.min(SS2_ARENA.clamp.max, Math.max(SS2_ARENA.clamp.min, raw));
   return { from: caster.x, landing };
 }
@@ -1404,6 +1430,42 @@ function projectedFacingOf(combatant) {
 }
 
 /**
+ * The actor's turn to the foe his verb is aimed at, as a `face-clip` drawn at
+ * the START of the action (`at: "action-start"`), or null when he already faces
+ * that way or the verb decides nothing about his facing.
+ *
+ * **The rule is the resolver's, called, not restated**: `ss2FacingToAct` is the
+ * one statement of it, and `ss2TurnToTarget` resolves the phase with the actor
+ * turned exactly this way. It reads the projection the batch STARTED from, as
+ * `ghostLandingOf` does, so it is exact for a batch of one action — how
+ * `battle-host` drains — and `presentResolvedEvents` asks it only for the
+ * batch's first action; a later action in a batch reports its turn in the net
+ * phase-advance change alone.
+ *
+ * A combatant with no status list (a rule set that models no facing) is never
+ * turned, for the reason `facingChangesFor` gives.
+ */
+function actionStartTurnFor(layout, before, event, drawnFacing) {
+  if (before === null) return null;
+  const actor = before.get(event.actorId);
+  const target = before.get(event.targetId);
+  const from = drawnFacing.get(event.actorId) ?? projectedFacingOf(actor);
+  if (from === null) return null;
+  const to = ss2FacingToAct(event.type, actor, target);
+  if (to === null || to === from) return null;
+  const placement = layout.placementFor(event.actorId);
+  return Object.freeze({
+    kind: CommandKind.FACE_CLIP,
+    sequence: event.sequence,
+    combatantId: event.actorId,
+    instancePath: placement.instancePath,
+    from,
+    to,
+    at: "action-start"
+  });
+}
+
+/**
  * The `face-clip` for every placed combatant whose facing differs between the
  * projection the batch started from and the one it ended at.
  *
@@ -1416,14 +1478,19 @@ function projectedFacingOf(combatant) {
  * advance. A batch spanning several actions reports only the NET change — the
  * intermediate facings are not in either projection, which is the same
  * position `panel-refresh` is in for health.
+ *
+ * `actedFacing` holds, per combatant, the facing an `action-start` turn left
+ * him with (`actionStartTurnFor`): his phase-advance turn is measured from
+ * THAT, not from where the batch started, or a turn the stream had already
+ * drawn would be drawn a second time and held back to the old facing.
  */
-function facingChangesFor(layout, before, wire, sequence) {
+function facingChangesFor(layout, before, wire, sequence, actedFacing = new Map()) {
   if (before === null) return [];
   const started = combatantIndex(before);
   const ended = combatantIndex(wire);
   const changes = [];
   for (const placement of layout.placements) {
-    const from = projectedFacingOf(started.get(placement.combatantId));
+    const from = actedFacing.get(placement.combatantId) ?? projectedFacingOf(started.get(placement.combatantId));
     const to = projectedFacingOf(ended.get(placement.combatantId));
     if (from === null || to === null || from === to) continue;
     changes.push(Object.freeze({
@@ -1614,10 +1681,19 @@ export function presentResolvedEvents(wire, {
   const projections = { before: before ? combatantIndex(before) : null, after: combatants };
   const commands = [];
   let nextSequence = fromSequence;
+  // The facing each actor's `action-start` turn left him with, so the
+  // phase-advance turn is measured from it. See `actionStartTurnFor`.
+  const actedFacing = new Map();
+  // The action the batch's first event belongs to: the only one `before` is
+  // exact for. `undefined` until an event is seen; `null` when the caller
+  // supplied no boundaries, which reads every event as that first action — the
+  // single-action batch every host here drains.
+  let firstActionToken;
 
   for (const event of wire.events ?? []) {
     if (!Number.isFinite(event.sequence) || event.sequence <= fromSequence) continue;
     nextSequence = Math.max(nextSequence, event.sequence);
+    if (firstActionToken === undefined) firstActionToken = tokenFor(event.sequence);
 
     if (event.type === EliminationEvent.COMBATANT_DEFEATED) {
       // A knockout plays a death animation and nothing else. No overlay label,
@@ -1721,6 +1797,16 @@ export function presentResolvedEvents(wire, {
     // is going before it starts the timeline that carries it there.
     if (movement) commands.push(movement);
     if (depthMovement) commands.push(depthMovement);
+    // The actor's turn to the foe he aims at, BEFORE his clip: the resolver
+    // turned him before the phase read his facing, so the verb is drawn facing
+    // its target. See `actionStartTurnFor` and `CommandKind.FACE_CLIP`.
+    if (tokenFor(event.sequence) === firstActionToken) {
+      const startTurn = actionStartTurnFor(layout, projections.before, event, actedFacing);
+      if (startTurn) {
+        commands.push(startTurn);
+        actedFacing.set(event.actorId, startTurn.to);
+      }
+    }
     if (chosen.actor) commands.push(clipGoto(event.sequence, actorPlacement, chosen.actor, "actor"));
     // AFTER the actor's clip, because the bow has to be drawn before the arrow
     // leaves it. The build is stricter still — it will not attach the `bullet`
@@ -1798,7 +1884,9 @@ export function presentResolvedEvents(wire, {
   // the build turns its gladiators in `changeCombatants` at the phase advance,
   // once the action's clips have reported. See `CommandKind.FACE_CLIP`. A batch
   // that turns nobody adds nothing here, so its stream is exactly what it was.
-  commands.push(...facingChangesFor(layout, before ?? null, wire, nextSequence));
+  // An actor already turned at the START of his action (`actionStartTurnFor`)
+  // is measured from the facing he acted with.
+  commands.push(...facingChangesFor(layout, before ?? null, wire, nextSequence, actedFacing));
 
   // Stamped here rather than at each push site, because the action a command
   // belongs to is a pure function of the `sequence` it already carries — the
