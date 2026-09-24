@@ -596,6 +596,17 @@ and the ring is squeezed onto the stage after it.
    is tinted with a dark outline PLUS a coloured underline and a team initial (a cue that does not
    rely on colour alone); the panels and the strip use the same colours. The demo fighters' SKIN
    colours are random across both teams, which is why the name cue matters.
+   **Built 2026-09-24 (H1):** `tools/arena/team-hud.js` (`teamStyleFor`, `namePlateFor`,
+   `namePlateLayout`), drawn by `renderStage`'s name plate and `renderRoster`;
+   `test/arena-team-hud.test.js`, `test/arena-team-hud-wiring.test.js`. The plate is the name in
+   the side's colour stroked in `#0b0a0d`, a coloured underline over the same outline, and the
+   side's initial (R, B) on a disc to the left; nothing reaches under the ring's `below` line.
+   Contrast, WCAG 2.1: on the sand the colours alone reach only 1.4–3.4 : 1 (the build's sand shape
+   667 `#602d18`; the authored bowl `#4a3a2b`–`#836b4b`), so the OUTLINE carries them — red 5.34,
+   blue 5.94 against it — so a LIVING plate is drawn opaque (the light plate's 0.85 let the sand
+   through the outline and the outline through the fill: red 4.39 : 1, Codex review of H1); a
+   fallen fighter's still fades to 0.4. On the side panel's `--panel` red is 4.44 (under AA), so a
+   roster row is drawn on `--ground`: red 4.90, blue 5.45.
 6. **Camera (Q7b):** on a PERSON's turn only, the camera eases to also frame the acting fighter's
    ring (buttons, items row, rank arrows) with a margin, and every lit target while a reach preview
    shows; the ring is drawn at a FIXED on-screen size, capped at what the build shows at zoom 80,

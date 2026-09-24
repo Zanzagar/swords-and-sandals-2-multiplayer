@@ -198,6 +198,7 @@ import {
   ringSwapButtonAt
 } from "/tools/arena/ring-layout.js";
 import { ringButtonArt } from "/tools/arena/ring-art.js";
+import { namePlateFor, namePlateLayout, teamStyleFor } from "/tools/arena/team-hud.js";
 import {
   RING_STRIP_IDLE,
   ringConfirmSettingFrom,
@@ -4730,14 +4731,46 @@ function renderStage(view, fit, now) {
     //   `actor.x` is where the gladiator RESTS; `origin` is where he is being
     //   drawn this frame, and the two are the same only when nothing is moving.
     //   Both values were already in scope eleven lines apart.
-    context.globalAlpha = combatant.alive ? 0.85 : 0.4;
-    context.fillStyle = "#e8e4dc";
+    //
+    // ► **IN HIS SIDE'S COLOUR, OUTLINED, UNDERLINED AND WITH HIS SIDE'S
+    //   INITIAL (H1, the owner's Q4 and Q12, 2026-09-24)**: the demo fighters'
+    //   skins are random across both teams, so the plate says whose side he is
+    //   on — and says it with a letter too, not colour alone. The colours, the
+    //   outline and where each part goes are `tools/arena/team-hud.js`'s
+    //   (`namePlateFor`, `namePlateLayout`), under the suite; nothing it draws
+    //   reaches under `nameY + namePx * 0.5`, the ring's `below` just after.
+    const plate = namePlateFor(combatant);
+    const nameX = view.toX(origin.x);
     const nameY = view.toY(origin.y, -22);
     const namePx = Math.max(10, view.scale * 15);
-    context.font = `${namePx}px ui-sans-serif, system-ui, sans-serif`;
+    context.save();
+    context.globalAlpha = plate.alpha;
+    context.font = `600 ${namePx}px ui-sans-serif, system-ui, sans-serif`;
     context.textAlign = "center";
+    context.textBaseline = "alphabetic";
+    context.lineJoin = "round";
+    const plateShape = namePlateLayout({ x: nameX, baseline: nameY, px: namePx, nameWidth: context.measureText(combatant.name).width });
+    context.strokeStyle = plate.outline;
+    context.lineWidth = plateShape.outlineWidth;
+    context.strokeText(combatant.name, nameX, nameY);
+    context.fillStyle = plate.fill;
     context.fillText(combatant.name, view.toX(origin.x), nameY);
-    context.globalAlpha = 1;
+    const { line, lineOutline, disc } = plateShape;
+    context.fillStyle = plate.outline;
+    context.fillRect(lineOutline.x, lineOutline.y, lineOutline.width, lineOutline.height);
+    context.fillStyle = plate.underline;
+    context.fillRect(line.x, line.y, line.width, line.height);
+    context.beginPath();
+    context.arc(disc.x, disc.y, disc.r, 0, Math.PI * 2);
+    context.fillStyle = plate.fill;
+    context.fill();
+    context.lineWidth = disc.outlineWidth;
+    context.stroke();
+    context.fillStyle = plate.outline;
+    context.font = `800 ${disc.letterPx}px ui-sans-serif, system-ui, sans-serif`;
+    context.textBaseline = "middle";
+    context.fillText(plate.initial, disc.x, disc.y);
+    context.restore();
 
     // Where he was drawn, for a click on him and — for the acting fighter and
     // the selected foe, the build's hero and villain — for the ring's placement.
@@ -5615,13 +5648,20 @@ function renderRoster() {
       const placement = host.layout.placementFor(combatantId);
       const node = document.createElement("div");
       node.className = `fighter${combatantId === acting ? " acting" : ""}${combatant.alive ? "" : " down"}`;
+      // H1: the row takes his side's colour, as his name plate on the stage does.
+      const team = teamStyleFor(combatant.teamId);
+      node.style.setProperty("--team", team.colour);
       const ratio = combatant.maxHealth > 0 ? combatant.health / combatant.maxHealth : 0;
       node.innerHTML = "";
       const row = document.createElement("div");
       row.className = "row";
       const name = document.createElement("span");
       name.className = "name";
-      name.textContent = combatant.name;
+      const initial = document.createElement("span");
+      initial.className = "team-initial";
+      initial.title = `${team.name} team`;
+      initial.textContent = team.initial;
+      name.append(initial, combatant.name);
       const slot = document.createElement("span");
       slot.className = "slot";
       // `you` / `AI` in a `?play=` bout only: with no parameter, and when
