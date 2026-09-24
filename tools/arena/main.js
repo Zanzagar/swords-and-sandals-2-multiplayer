@@ -123,8 +123,8 @@ import {
   fieldOpsFor,
   colourTransformFrom,
   canvasFilterFor,
-  cameraFor,
-  cameraStep,
+  stepFramedCamera,
+  actorSpanFor,
   stageFitFor,
   stageClipRectFor,
   stageFitReportFor,
@@ -1733,15 +1733,20 @@ const ENCHANT_DEMO = enchantDemoFrom(params);
  *
  * Module state because it is a TWEEN: the zoom eases toward its target by a
  * fifth a frame and the pan by a sixteenth, so each frame needs the last one.
- * It is re-seeded settled whenever the roster changes size, so a new bout opens
- * framed rather than easing in from the previous bout's last position.
+ * ~~"It is re-seeded settled whenever the roster changes size"~~ — it was
+ * re-seeded at the build's OPENING shot (zoom 5, rushing in), never settled,
+ * and keyed on a COUNT. Since 2026-09-24 it frames only the fighters still in
+ * the fight, so that count falls with every death; the re-seed is keyed on the
+ * roster's identity instead, and a death eases the camera. In a team bout it
+ * then closes in on the survivors — AUTHORED, the owner's request, never a 1v1.
+ * `stepFramedCamera` and `SS2_CLOSE_UP`.
  */
 let camera = null;
-let cameraSeededFor = null;
+let cameraFrame = null;
 
 /**
- * Every placed actor as `{x, side}` — what the camera has to frame, and which
- * of them are fighting each other.
+ * Every placed actor — what the camera may frame, which of them are fighting
+ * each other, and which are still in the fight.
  *
  * ► **THE SIDE IS LOAD-BEARING AND USED TO BE DROPPED HERE.** Without it the
  *   camera cannot tell the distance between two OPPONENTS from the width of the
@@ -1749,23 +1754,37 @@ let cameraSeededFor = null;
  *   to a zoom of 30. Measured: the 3v3 then used 58% of the stage, LESS than
  *   the 2v2's 76%, with gladiators 45px tall instead of 75px. The owner saw it
  *   on the first screenshot. See `midwaypointFor`.
+ * ► **`alive` IS THE WIRE'S AND `drawing` IS `playing`'s** — a fallen fighter
+ *   stays framed while any clip of his is queued or running, so the camera does
+ *   not pull away mid-fall. WHO is framed is `framedActors`, under the suite.
+ * ► **THE DEPTH, THE SIZE AND THE SPAN are the survivors' close-up's**
+ *   (`SS2_CLOSE_UP`): it fits each fighter's crown and swing on the stage, and
+ *   `actorSpanFor` widens him to everywhere his running clip draws him.
  */
 function placedActors() {
+  const living = combatantsById();
   return scene.drawOrder
     .map((combatantId) => ({ id: combatantId, actor: scene.actors[combatantId] }))
     .filter(({ actor }) => actor && actor.placed !== false && Number.isFinite(actor.x))
-    .map(({ id, actor }) => ({ x: actor.x, side: host.layout.placementFor(id)?.side ?? null }));
+    .map(({ id, actor }) => {
+      const placement = host.layout.placementFor(id);
+      return {
+        id,
+        x: actor.x,
+        y: actor.y,
+        yscale: actor.yscale,
+        ...actorSpanFor(actor, playing.get(id) ?? null),
+        side: placement?.side ?? null,
+        teamId: placement?.teamId ?? null,
+        alive: living.get(id)?.alive !== false,
+        drawing: playing.has(id)
+      };
+    });
 }
 
 function stepCamera() {
-  const xs = placedActors();
-  const signature = xs.length;
-  if (!camera || cameraSeededFor !== signature) {
-    camera = cameraFor(xs);
-    cameraSeededFor = signature;
-    return;
-  }
-  camera = cameraStep(camera, xs);
+  cameraFrame = stepFramedCamera(cameraFrame, placedActors(), { result: host?.battle?.result ?? null });
+  camera = cameraFrame.camera;
 }
 
 /**

@@ -753,12 +753,29 @@ export const SS2_CAMERA = Object.freeze({
  *   `arenaToStage` then pivots about the arena origin exactly as the build
  *   does. (The depth squash is a separate thing and is NOT team-only — see
  *   `RANK_DEPTH_FACTOR`.)
+ *
+ * ► **AND A TEAM FIGHT CAN BECOME A PAIR MID-BOUT, SO THE FRAMING HANDS OVER
+ *   RATHER THAN SWITCHING** (2026-09-24, AUTHORED like the rest of this). The
+ *   camera frames only the fighters still standing (`framedActors`), so a 3v3
+ *   whittled to one a side stops being `team` on the frame the fourth fall
+ *   finishes. Switched outright, that frame moves the front line from the
+ *   framing's `293.48 + 0.4z` to the build's `166.75 + 2z` — 46.73px at zoom
+ *   50 and 78.73 at 30, the whole fight jumping up the sand. So the camera
+ *   carries a `teamWeight` that eases between the two lines by `1/handoverEase`
+ *   of the gap a frame — the zoom's own fifth, so the lift reads as the same
+ *   camera move as the zoom it arrives with — and snaps inside `handoverSnap`.
+ *   At zoom 80, where the two lines are 1.27px apart, the hand-over is
+ *   invisible; elsewhere it is a glide.
  */
 export const SS2_TEAM_FRAMING = Object.freeze({
   /** Whose wall foot the visible floor is measured from: the default dressing. */
   floorArena: 1,
   /** How far down the visible floor the front rank's feet stand. */
-  frontFraction: 0.6
+  frontFraction: 0.6,
+  /** The team/pair hand-over eases by this fraction of the gap a frame: the zoom's `zoomEase`. */
+  handoverEase: SS2_CAMERA.zoomEase,
+  /** Inside this much of its target the hand-over snaps: under 1.2px at any zoom 5..80. */
+  handoverSnap: 0.01
 });
 
 /** The stage y a TEAM camera stands its front rank on — see `SS2_TEAM_FRAMING`. */
@@ -773,12 +790,34 @@ function teamFrontLineAt(zoomscale) {
 }
 
 /**
- * Whether a set of placed actors is a TEAM fight — more than the two
+ * Whether a set of FRAMED actors is a TEAM fight — more than the two
  * gladiators vanilla ever places. It chooses the projection's framing only;
  * the camera's own arithmetic is the build's for every roster size.
  */
 function isTeamFight(input) {
   return actorsFrom(input).length > 2;
+}
+
+/**
+ * How far a camera stands on the TEAM framing, 0 (the build's pair) to 1.
+ *
+ * A camera that carries no `teamWeight` — every camera written before the
+ * hand-over existed, and every literal a test builds — reads its `team` flag
+ * exactly as `arenaToStage` always has.
+ */
+function teamWeightOf(camera) {
+  if (Number.isFinite(camera?.teamWeight)) return Math.min(1, Math.max(0, camera.teamWeight));
+  return camera?.team === true ? 1 : 0;
+}
+
+/**
+ * One frame of the team/pair hand-over — see `SS2_TEAM_FRAMING`. AUTHORED:
+ * the build never frames a team, so it never hands one over.
+ */
+export function easeTeamWeight(weight, target) {
+  if (!Number.isFinite(weight)) return target;
+  const next = weight + (target - weight) / SS2_TEAM_FRAMING.handoverEase;
+  return Math.abs(target - next) < SS2_TEAM_FRAMING.handoverSnap ? target : next;
 }
 
 /**
@@ -1009,7 +1048,9 @@ export function cameraFor(xs) {
     maxscale: targetZoomFor(midwaypoint, xs),
     gladiatorsX: 0,
     crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(SS2_CAMERA.zoomStart),
-    team: isTeamFight(xs)
+    team: isTeamFight(xs),
+    // A new bout opens ON its framing, never easing into it.
+    teamWeight: isTeamFight(xs) ? 1 : 0
   });
 }
 
@@ -1038,10 +1079,16 @@ export function targetZoomFor(midwaypoint, input) {
  * costs nothing and inventing a "corrected" order would be a change nobody
  * asked for.
  *
+ * ► **`targetFor` REPLACES ONLY THE TARGET**, and only for the authored team
+ *   close-up (`stepFramedCamera`). It is handed this frame's pan, so a target
+ *   can respect where the camera actually is; the order, the ease, the snap
+ *   and the crowd stay the build's. Absent, this is `combatscale` unchanged.
+ *
  * @param {object}   camera  the previous frame's camera, from `cameraFor`
  * @param {number[]} xs      arena x of every placed actor
+ * @param {{targetFor?: function({midwaypoint:number, focusX:number, gladiatorsX:number}): number}} [options]
  */
-export function cameraStep(camera, xs) {
+export function cameraStep(camera, xs, { targetFor = null } = {}) {
   const midwaypoint = midwaypointFor(xs);
   const focusX = focusXFor(xs);
   const zoom = camera.zoomscale;
@@ -1049,7 +1096,9 @@ export function cameraStep(camera, xs) {
   // the focus scaled by the zoom the gladiators layer is CURRENTLY at.
   const focusStageX = SS2_ARENA_ORIGIN.x + camera.gladiatorsX + focusX * (zoom / 100);
   const gladiatorsX = panStep(camera.gladiatorsX, focusStageX);
-  const maxscale = targetZoomFor(midwaypoint, xs);
+  const maxscale = typeof targetFor === "function"
+    ? targetFor({ midwaypoint, focusX, gladiatorsX })
+    : targetZoomFor(midwaypoint, xs);
   const zoomscale = easeZoom(zoom, maxscale);
   return Object.freeze({
     midwaypoint,
@@ -1058,7 +1107,496 @@ export function cameraStep(camera, xs) {
     maxscale,
     gladiatorsX,
     crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale),
-    team: isTeamFight(xs)
+    team: isTeamFight(xs),
+    // `team` is where the framing is GOING; `teamWeight` is where it is. They
+    // differ only for the few frames after a team is whittled to a pair.
+    teamWeight: easeTeamWeight(teamWeightOf(camera), isTeamFight(xs) ? 1 : 0)
+  });
+}
+
+/**
+ * WHO THE CAMERA FRAMES — **AUTHORED for team play; a vanilla pair never reads
+ * it.** Owner, 2026-09-24: *"If a fighter dies, the arena cam can zoom in on
+ * the remaining fighters."*
+ *
+ * The build is 1v1 and a death there ENDS the bout, so `combatscale` never had
+ * a fallen gladiator to leave out: `getfightdistance` measures `hero` to
+ * `villain`, always. A team bout goes on past its first death, and until this
+ * rule the camera went on framing every body as a combatant. For a roster of
+ * MORE than two the camera frames:
+ *
+ * 1. **Every fighter still standing.**
+ * 2. **Plus every fallen fighter whose clips are still being DRAWN** — the
+ *    reaction to the killing blow and the death queued behind it
+ *    (`timelinesForStep`), or a victim still waiting on the arrow or fireball
+ *    that kills it. `drawing` is the shell's `playing.has(id)`, and an entry
+ *    leaves `playing` on the frame `animationCursor` expires its last link —
+ *    the frame the body comes to rest. So the camera never moves off a fall
+ *    that is still being drawn; it moves once the body is at rest.
+ * 3. **Once the bout has a result, only its WINNERS are framed** among the
+ *    living, while they celebrate. Every result is an elimination today
+ *    (`battleStanding`), so rule 1 already leaves each loser out; the filter
+ *    states the intent rather than leaning on that. **One winner is framed
+ *    alone**: the focus is his own x, the projection is the pair's, and the
+ *    close-up below takes him to at most 100.
+ * 4. **Nobody left to frame** — a draw, once its last fall is drawn — frames
+ *    the whole roster, bodies included, rather than handing the camera an empty
+ *    set, which it would read as a close-up on arena x 0.
+ *
+ * A roster of TWO or fewer is the build's and comes back whole, bodies
+ * included, so a 1v1 is `combatscale` through its death and its celebration
+ * exactly as before.
+ *
+ * Who is framed moves the camera by its own rules — the focus moves and the
+ * pan follows by its sixteenth, and a team whittled to one a side hands its
+ * framing over to the pair's by `SS2_TEAM_FRAMING`'s ease. HOW CLOSE it goes
+ * once somebody has fallen is `SS2_CLOSE_UP`'s, below: framing the living
+ * alone was measured to never close in at all.
+ *
+ * @param {Array<{x:number, side?:*, teamId?:*, alive?:boolean, drawing?:boolean}>} roster
+ *   every PLACED actor, living or fallen
+ * @param {{result?: {winnerTeamId?: *}|null}} [options]  the bout's result, once it has one
+ */
+export function framedActors(roster, { result = null } = {}) {
+  const placed = placedIn(roster);
+  if (placed.length <= 2) return placed;
+  const winner = result?.winnerTeamId ?? null;
+  const framed = placed.filter((actor) => {
+    if (actor?.alive === false) return actor.drawing === true;
+    return winner === null || actor?.teamId === winner;
+  });
+  return framed.length > 0 ? framed : placed;
+}
+
+/** Every roster entry with a position — a bare number, or an object with a finite `x`. */
+function placedIn(roster) {
+  return [...(roster ?? [])].filter((entry) => Number.isFinite(entry) || Number.isFinite(entry?.x));
+}
+
+/** The roster's identity: its placed ids, SORTED, so a lane change is not a new roster. */
+function rosterKeyOf(roster) {
+  return JSON.stringify([...(roster ?? [])].map((entry, index) => String(entry?.id ?? `#${index}`)).sort());
+}
+
+/**
+ * THE SURVIVORS' CLOSE-UP — **AUTHORED, at the owner's request (2026-09-24):
+ * *"If a fighter dies, the arena cam can zoom in on the remaining fighters."***
+ * The build has no such shot: its 1v1 ends at the first death, and its
+ * tightest band is 80. None of this is `combatscale`, and a 1v1 never reads it.
+ *
+ * ► **WHY IT EXISTS: FRAMING THE LIVING ALONE NEVER CLOSED IN.** Measured
+ *   2026-09-24 over 20 default spectated bouts (3v3 seeds 1-12, 2v2 seeds 1-8,
+ *   101,167 frames at 60fps): `framedActors` with the build's own band and fit
+ *   was tighter than the old camera in 0 frames and LOOSER in 3,197. The first
+ *   to fall are front-rankers standing inside the living formation, so leaving
+ *   them out narrows nothing; and a body within reach of a living enemy had
+ *   been holding the band at 80, so without it two archers 760 apart fell to
+ *   the band's 50.
+ *
+ * ► **THE RULE, in a team bout (more than two placed) once a fall has
+ *   finished being drawn:**
+ *   1. **A death never lowers the zoom target.** The floor is the OLD camera's
+ *      target — the build's band and fit over every placed actor, bodies
+ *      included — which a death cannot move, because a body stays placed
+ *      where it fell. So the target is at least what it was just before each
+ *      death, and at least what the old camera wanted on every frame after.
+ *   2. **Above the floor, the tightest zoom — capped at `zoomCap` — at which
+ *      every FRAMED fighter fits the visible stage in every pose he can
+ *      strike** (`closeUpZoomFor`). ~~max(band, fit)~~ collapses to this: a
+ *      band tighter than the fit would crop somebody, and a band looser than
+ *      it is beaten by it.
+ *   3. **One winner alone gets the same close-up**, at most 100.
+ *   4. **When the floor beats what fits, the frame is the OLD camera's** — its
+ *      pan and its framing, not only its zoom (`heldByFloor`). "What fits" is
+ *      the settled fit AND the fit at the pan this camera actually has, so the
+ *      camera follows the survivors only once it can hold them at the floor.
+ *      Keeping the old zoom but panning to the survivors moved a crop from one
+ *      fighter onto another: Codex's review, 2026-09-24, four front-rankers at
+ *      -420, -100, 150 and 220, `_yscale` 86, the one at 220 falls — the floor
+ *      held 75 over a fit of 56, the pan went from 55.05 to 81.30, and the
+ *      survivor at 150's measured reach went from 615.92 to 642.17, past the
+ *      stage's 639. No pan fits those three at 75 (their measured extent is
+ *      684px), so a clamped pan is not an option; the old pan is the only one
+ *      that leaves nobody worse off than the camera did before this rule.
+ *      ► **"THE OLD PAN" MEANS THE OLD CAMERA, CARRIED ALONGSIDE.** The first
+ *        fix stepped the old RULE from this camera's own state instead, and the
+ *        build's dead zone kept the two pans up to 40px apart for good — inside
+ *        300..340 the pan does not move — which a randomised sweep measured as
+ *        crops 60+ frames after a switch. `stepFramedCamera` now steps 2c075df's
+ *        camera beside this one every frame, and a held frame is that camera.
+ *      ► **SWITCHING IS A BLEND, NOT A CUT**, eased by the zoom's fifth. Stage x
+ *        is linear in the pan and the zoom, so a blended frame crops nobody more
+ *        than the worse of its two ends — it is the one place the rule can crop
+ *        more than the old camera, for the length of the blend. Measured, not
+ *        guessed: cutting instead roughly halves those frames, and is a jump.
+ *   5. **Never looser than the old camera is right now** — its zoom, not only
+ *      its target: this camera must not settle on its own target while the old
+ *      one is still easing down from above it.
+ *   6. **The zoom DRAWN fits, not only the target** (Codex's review, pass 3,
+ *      2026-09-24). The target is fitted but the zoom only EASES to it, so a
+ *      fit that falls faster than a fifth a frame left the drawn zoom cropping
+ *      with nothing held: the centre pair of a tight 3v3 at ±65, close-up 96,
+ *      and the one at +65 walks out to 190 — what fits at the pan fell to 73,
+ *      the zoom went 91, 88, 85 ..., and his measured swing reached 714.21
+ *      against the old camera's 638.23 for seven frames. So every frame the
+ *      drawn zoom is brought inside what fits at the pan it HAS and no looser
+ *      than the old camera (`closeUpZoomRangeAt`), and where no zoom is both,
+ *      the frame is held. **The cost is a cut:** a fit that falls at once — a
+ *      walk's span is taken whole from its first frame — takes the zoom with
+ *      it in one frame (96 to 73 there), where the ease took seven.
+ *      ► **WHAT FITS AT A PAN IS A RANGE, NOT A CEILING.** Once the pan has put
+ *        arena x 0 off the stage — a lone winner out on a flank — zooming out
+ *        slides a swing TOWARD that origin and so off the edge, and the fit has
+ *        a floor too. Found the same day by a targeted search, not by the
+ *        sweep: the default 3v3's flank at -510 walking in to -260 was cropped
+ *        145px while the ceiling-only fit called 100 safe.
+ *      ► **THE CHECK FEEDS NOTHING BACK.** This camera's own ease and pan run
+ *        unchecked; only what is drawn is brought inside. Fed back, the floor
+ *        dragged the zoom up, the pan chased a focus that moves with the zoom,
+ *        the floor rose again, and the hold caught it 38 times in four seconds.
+ *   The target moves; the zoom still eases to it by the build's fifth.
+ *
+ * ► **"FITS" IS MEASURED, NOT GUESSED** — against the player's own rig
+ *   (`assets/figure/`, READ-ONLY), across all 88 non-death clips of the pack's
+ *   101, every pose, and the 72 loadout+look combinations of the demo rosters
+ *   of those 20 bouts (and six 1v1 seeds), at `_yscale` 100:
+ *   - `reach` **200**: the widest pose either side of the feet is 199.1 units
+ *     (`wincrowd5`, a crowd celebration; `hurt11` 197, `attack8` 176).
+ *   - `crown` **367**: the highest point above the feet is 366.8 (`wincrowd2`).
+ *   - `lunge` **74**: `timeline.js`'s `ADVANCE_UNITS`, the most a pose's
+ *     `advance` moves the drawn figure on top of the rig's own clip.
+ *   Each is scaled by the fighter's `|_yscale| / 100` and not by the rank's
+ *   perspective (which only shrinks him), so the margin is a ceiling.
+ *   - **The name plate** is drawn `namePlateDrop` (22) units BELOW the feet
+ *     (`tools/arena/main.js`, `view.toY(origin.y, -22)`) at
+ *     `max(10, 15 * zoom/100)` px, centred; its descent is allowed for below.
+ *     Horizontally the swing margin covers it — 172 units at the demo roster's
+ *     `_yscale` 86 is a name of about 38 characters at 0.6 em a character, and
+ *     the demo names are 5.
+ *   - **The DEATH clips are NOT fitted**, and that is a decision: `death2`
+ *     flings the body 619.7 units behind the feet (`death3` 483), which no
+ *     zoom of 50 or tighter holds anywhere but mid-stage, and the build frames
+ *     none of it either. A dying fighter is framed by where he stands.
+ *   - **Nor is an arrow's arc**, also a decision: framing a lob would pull
+ *     the camera out and back on every shot. The arrow outlives the zoom by
+ *     at most its flight, and its landing is inside the fighters' own frame.
+ *
+ * ► **THE VISIBLE STAGE, measured by painting only the border (char 646) and
+ *   the UI bar (char 1531) and scanning out from (320, 200):** the border
+ *   covers row 0 and column 639 and nothing else; the bar's plate covers from
+ *   row 398 (it hangs 2.55px above its own y of 401). So x 0..639, y 1..398.
+ *   At the cap a front-rank pair's feet are at 366.75 — 34.25px above the
+ *   bar's y and 31.25 above the plate — and its name plate's baseline at
+ *   388.75, 9px of room below it at a 15px font.
+ *
+ * ► **PAST 90 THE CROWD'S TOP EDGE COMES ONTO THE STAGE in arenas 1, 5 and 6**
+ *   (measured: the crowd layer's top at zoom 80/90/100 is -8.3/1.7/11.7 in
+ *   arena 1), because `crowd._y = -200 + ceil(zoom)` keeps lowering it, and up
+ *   to ~12px of sky shows above the stands. **Not treated as a defect:** arenas
+ *   2, 3 and 4 already show sky above their crowd at the build's own zooms —
+ *   from 37, 60 and 69 — so it is a picture the build draws, not one it hides.
+ *
+ * ► **THE FLOOR CAN HOLD A CROP, AND THAT IS THE ORDER OF THE RULES.** Where
+ *   the old camera crops a fighter — a walk stepping past the edge, a pair of
+ *   winners celebrating at 80 — rule 1 keeps the frame there. ~~"every one of
+ *   the 433 is a frame the old camera also crops ... The close-up itself never
+ *   crops"~~ **was true only of what that measurement could see, and Codex's
+ *   review broke it (2026-09-24).** It checked the DRAWN pose in the 20 demo
+ *   bouts, whose formations are symmetric and whose fighters were rarely in
+ *   their widest pose at the wrong moment; the rule promises the measured
+ *   swing, and an asymmetric fall broke that promise with no drawn pose to
+ *   show it. So the sweep is now two:
+ *   - **the 20 demo bouts, drawn pose, frame by frame** (101,167 frames at
+ *     60fps): 461 frames with a framed fighter off the stage with either
+ *     camera and none that the old one does not also crop; tighter in 13,172,
+ *     looser in 0, at most 100. The six 1v1 seeds: identical in every frame.
+ *   - **2,000 random layouts on each of two seeds** (4.0M frames: asymmetric
+ *     positions, sizes 70..130, all three ranks, falls, walks, a result),
+ *     measured swing, per fighter per frame against 2c075df's own module:
+ *     looser in 0 frames; a new crop in 240 and 161 frames (129 and 90 by the
+ *     reach alone, Codex's geometry), ~~"every one a blend or a close-up easing
+ *     down after a walk"~~ — **the second kind was rule 6's defect, not an
+ *     allowance** — the worst 40px; against 1,897 and 418 before the fix.
+ *     The old camera crops somebody's measured swing in ~80% of those frames.
+ *     **With rule 6, re-measured on the same seeds:** looser in 0; a new crop
+ *     in 127 and 83 frames (67 and 60 by the reach alone), EVERY ONE inside a
+ *     blend into a hold, the worst 6.86 and 21.36px; and none at all while no
+ *     switch is under way, where there had been 96 and 62 (the walker's whole
+ *     span, as the camera is handed it: 199 and 206, the worst 118.68px, now
+ *     0). The price, on the same frames: one-frame zoom drops over 10 went
+ *     from 7 and 6 to 30 and 26, the largest from 15.6 to 38 and 24. The 20
+ *     demo bouts and the six 1v1 seeds are frame-for-frame unchanged by it.
+ *
+ * ► **AND THE CAMERA HAS TO GET THERE WITHOUT CROPPING ON THE WAY.** The fit is
+ *   taken twice: once for wherever the pan settles inside the build's dead zone
+ *   (300..340), and once for THIS frame's pan, which lags the focus by a
+ *   sixteenth a frame. The smaller wins, so the zoom only rises as fast as the
+ *   pan brings the fighters in. A fighter's x is widened to every place he is
+ *   drawn during his current clip — the walk's `from` and `to`, a blink's
+ *   `blink` — and his depth to both ends of a lane change (`actorSpanFor`),
+ *   because the scene holds the DESTINATION and the figure is drawn on the way.
+ */
+export const SS2_CLOSE_UP = Object.freeze({
+  /** The owner's cap: 100, past the build's own tightest band of 80. */
+  zoomCap: 100,
+  /** Widest non-death pose either side of the feet at `_yscale` 100: measured 199.1. */
+  reach: 200,
+  /** Highest non-death pose above the feet at `_yscale` 100: measured 366.8. */
+  crown: 367,
+  /** `ADVANCE_UNITS` in `timeline.js`: the most a lunge moves the drawn figure. */
+  lunge: 74,
+  /** The name plate's baseline, in arena units below the feet (`main.js`). */
+  namePlateDrop: 22,
+  /** The name plate's font: `max(10, 15 * zoom / 100)` px; its descent as a fraction of it. */
+  namePlateFont: Object.freeze({ units: 15, minimumPx: 10, descent: 0.3 }),
+  /** What the border and the UI bar leave visible, in stage px. Measured; see above. */
+  visible: Object.freeze({ left: 0, right: 639, top: 1, bottom: 398 })
+});
+
+/**
+ * Where a fighter is drawn during his current clip, as a span: his resting x
+ * and y widened by the running entry's travel (`from`/`to`), blink and lane
+ * change. The scene holds the DESTINATION of every move from the moment it is
+ * folded, so without this a camera frames a walker where he is going while he
+ * is drawn where he was.
+ *
+ * @param {{x:number, y?:number}} actor  the scene actor
+ * @param {object|null} entry  his `playing` entry, if any
+ */
+export function actorSpanFor(actor, entry = null) {
+  const xs = [actor?.x, entry?.motion?.from, entry?.motion?.to, entry?.motion?.blink].filter(Number.isFinite);
+  const ys = [actor?.y, entry?.depthMotion?.from, entry?.depthMotion?.to].filter(Number.isFinite);
+  return Object.freeze({
+    xMin: xs.length ? Math.min(...xs) : null,
+    xMax: xs.length ? Math.max(...xs) : null,
+    yMin: ys.length ? Math.min(...ys) : null,
+    yMax: ys.length ? Math.max(...ys) : null
+  });
+}
+
+/** A framed actor's geometry for the close-up: its span, its depth span and its scale. */
+function closeUpGeometryOf(entry) {
+  const x = Number.isFinite(entry) ? entry : entry.x;
+  const y = Number.isFinite(entry?.y) ? entry.y : FRONT_RANK_Y;
+  const stated = Math.abs(Number(entry?.yscale));
+  return {
+    xMin: Math.min(x, Number.isFinite(entry?.xMin) ? entry.xMin : x),
+    xMax: Math.max(x, Number.isFinite(entry?.xMax) ? entry.xMax : x),
+    yMin: Math.min(y, Number.isFinite(entry?.yMin) ? entry.yMin : y),
+    yMax: Math.max(y, Number.isFinite(entry?.yMax) ? entry.yMax : y),
+    size: Number.isFinite(stated) && stated > 0 ? stated / 100 : 1
+  };
+}
+
+/** Whether every framed fighter's crown and name plate fit, at this zoom and every framing weight. */
+function fitsVerticallyAt(geometry, zoomscale, teamWeights) {
+  const { visible, crown, namePlateDrop, namePlateFont } = SS2_CLOSE_UP;
+  const descent = namePlateFont.descent * Math.max(namePlateFont.minimumPx, namePlateFont.units * zoomscale / 100);
+  for (const teamWeight of teamWeights) {
+    const camera = { zoomscale, teamWeight };
+    for (const actor of geometry) {
+      if (arenaToStage(camera, { x: 0, y: actor.yMin, lift: crown * actor.size }).y < visible.top) return false;
+      if (arenaToStage(camera, { x: 0, y: actor.yMax, lift: -namePlateDrop }).y + descent > visible.bottom) return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * The tightest zoom, at most `SS2_CLOSE_UP.zoomCap`, at which every framed
+ * fighter fits the visible stage in every non-death pose — see `SS2_CLOSE_UP`.
+ *
+ * With `gladiatorsX` it is the fit at THAT pan; without, the fit for any pan
+ * that puts the focus inside the build's dead zone, which is where the pan
+ * settles. `teamWeights` are the framings to check the crowns against — the
+ * camera's current weight and its target, which bound the whole hand-over,
+ * because a stage y is linear in the weight.
+ *
+ * Never below the build's `zoomMinimum`; an integer, as the build's zoom is.
+ *
+ * ► **AT A PAN IT IS A CEILING, NOT A GUARANTEE** — the most the zoom may rise
+ *   to while the pan brings the fighters in, which is what the close-up's
+ *   TARGET needs. Every zoom under it fits only while arena x 0 is drawn on
+ *   the stage; where the pan has put it off, zooming out can crop too, and
+ *   what the DRAWN camera is checked against is `closeUpZoomRangeAt`.
+ */
+export function closeUpZoomFor(framed, { gladiatorsX = null, teamWeights = [0, 1] } = {}) {
+  const geometry = placedIn(framed).map(closeUpGeometryOf);
+  const { visible, reach, lunge, zoomCap } = SS2_CLOSE_UP;
+  if (geometry.length === 0) return zoomCap;
+  const focusX = focusXFor(placedIn(framed));
+  let zoom = zoomCap;
+  for (const actor of geometry) {
+    const margin = reach * actor.size + lunge;
+    const lo = actor.xMin - margin;
+    const hi = actor.xMax + margin;
+    if (gladiatorsX === null) {
+      // The focus may rest anywhere in 300..340: fit each side from its far edge.
+      if (hi > focusX) zoom = Math.min(zoom, (100 * (visible.right - SS2_CAMERA.deadZoneRight)) / (hi - focusX));
+      if (lo < focusX) zoom = Math.min(zoom, (100 * (SS2_CAMERA.deadZoneLeft - visible.left)) / (focusX - lo));
+    } else {
+      const origin = SS2_ARENA_ORIGIN.x + gladiatorsX;
+      if (hi > 0) zoom = Math.min(zoom, (100 * (visible.right - origin)) / hi);
+      if (lo < 0) zoom = Math.min(zoom, (100 * (origin - visible.left)) / -lo);
+    }
+  }
+  zoom = Math.floor(zoom);
+  while (zoom > SS2_CAMERA.zoomMinimum && !fitsVerticallyAt(geometry, zoom, teamWeights)) zoom -= 1;
+  return Math.max(SS2_CAMERA.zoomMinimum, zoom);
+}
+
+/**
+ * EVERY zoom at which each framed fighter fits the visible stage AT THIS PAN,
+ * as the integer range `{min, max}` (`max` at most `zoomCap`), or `null` when
+ * there is none.
+ *
+ * ► **A RANGE, NOT A CEILING, because the pan can put arena x 0 off the
+ *   stage.** A stage x is `origin + x·z/100`, so zooming out slides every
+ *   point TOWARD the origin. While the origin is on the stage that only ever
+ *   helps, and the fit is a ceiling. But a close-up on a lone winner at -510
+ *   pans the origin to ~810: then a swing whose right end is still left of
+ *   arena 0 is pulled OFF the right edge by zooming out, and the only fits are
+ *   zooms at least some `min`. The first version kept the ceilings alone and
+ *   called 100 safe there while the zoom eased down past 145px of crop (found
+ *   2026-09-24, after Codex's pass 3). The crowns and name plates stay
+ *   ceilings: their pivot, 166.75 or the team's front line, is on the stage.
+ */
+export function closeUpZoomRangeAt(framed, { gladiatorsX, teamWeights = [0, 1] }) {
+  const geometry = placedIn(framed).map(closeUpGeometryOf);
+  const { visible, reach, lunge, zoomCap } = SS2_CLOSE_UP;
+  const origin = SS2_ARENA_ORIGIN.x + gladiatorsX;
+  let lowest = 0;
+  let highest = zoomCap;
+  // Each edge is `slope * z <= room`: a ceiling when the slope is positive, a
+  // floor when it is negative (dividing by it turns the inequality round).
+  const bound = (slope, room) => {
+    if (slope > 0) highest = Math.min(highest, room / slope);
+    else if (slope < 0) lowest = Math.max(lowest, room / slope);
+    else if (room < 0) highest = -Infinity;
+  };
+  for (const actor of geometry) {
+    const margin = reach * actor.size + lunge;
+    bound((actor.xMax + margin) / 100, visible.right - origin); // the right end on or left of the edge
+    bound(-(actor.xMin - margin) / 100, origin - visible.left); // the left end on or right of it
+  }
+  const min = Math.ceil(lowest);
+  let max = Math.floor(highest);
+  while (max >= min && !fitsVerticallyAt(geometry, max, teamWeights)) max -= 1;
+  return max >= min ? Object.freeze({ min, max }) : null;
+}
+
+/**
+ * Whether the close-up is on: a TEAM roster, and at least one fall already
+ * finished being drawn. Before that the camera is the build's over everybody.
+ */
+function closeUpActive(placed) {
+  return placed.length > 2 && placed.some((actor) => actor?.alive === false && actor.drawing !== true);
+}
+
+/**
+ * One frame of the arena's camera from the whole roster: `framedActors`, then
+ * the build's camera over whoever it frames — and, in a team bout once a fall
+ * has finished, the survivors' close-up (`SS2_CLOSE_UP`) as its target.
+ *
+ * ► **A DEATH EASES THE CAMERA; IT NEVER RE-SEEDS IT.** `cameraFor` is the
+ *   build's opening shot — zoom 5, rushing in — and it is taken only when the
+ *   ROSTER changes: a new bout, or a different set of placed fighters. The
+ *   shell used to key it on how many actors the camera was handed, which was
+ *   harmless while that was the roster's count and would have replayed the
+ *   opening shot on every death the moment it was not.
+ *
+ * @param {{camera: object, rosterKey: string}|null} previous  the last frame's result, or null
+ * @param {Array<object>} roster  every PLACED actor — see `framedActors` and `actorSpanFor`
+ * @param {{result?: object|null}} [options]  the bout's result, once it has one
+ * @returns {{camera: object, own: object, old: object, hold: number, rosterKey: string, framed: object[],
+ *   closeUp: boolean, heldByFloor: boolean}}  `camera` is what to draw; `own`, `old` and `hold` are
+ *   the two tweens and the blend between them, carried to the next frame. `own` is the close-up's
+ *   tween BEFORE rule 6 brings its zoom inside what fits, so it can differ from an unheld `camera`.
+ */
+export function stepFramedCamera(previous, roster, { result = null } = {}) {
+  const rosterKey = rosterKeyOf(roster);
+  const placed = placedIn(roster);
+  const framed = framedActors(roster, { result });
+  const fresh = !previous?.camera || previous.rosterKey !== rosterKey;
+  // THE OLD CAMERA, stepped beside this one every frame: 2c075df's, exactly —
+  // the build's camera over every placed actor, bodies included. It is what a
+  // held frame IS, and what "never looser" and "never cropped more" are
+  // measured against.
+  const old = fresh || !previous.old ? cameraFor(placed) : cameraStep(previous.old, placed);
+  const done = (camera, own, hold, closeUp, heldByFloor) => Object.freeze({
+    camera, own, old, hold, rosterKey, framed: Object.freeze(framed), closeUp, heldByFloor
+  });
+  if (fresh) {
+    const camera = cameraFor(framed);
+    return done(camera, camera, 0, false, false);
+  }
+  const ownBefore = previous.own ?? previous.camera;
+  if (!closeUpActive(placed)) {
+    const own = cameraStep(ownBefore, framed);
+    return done(own, own, 0, false, false);
+  }
+  // (1) The floor: the old camera's own target, bodies included.
+  const floor = targetZoomFor(midwaypointFor(placed), placed);
+  // (2) The close-up, checked against both ends of any framing hand-over.
+  const teamWeights = [teamWeightOf(ownBefore), isTeamFight(framed) ? 1 : 0];
+  const settled = closeUpZoomFor(framed, { teamWeights });
+  // No `max(floor, …)` here: when the frame is not held, what fits at this pan
+  // is at least the floor by the definition of `held` below, and when it is
+  // held this camera is not the one drawn — the clamp keeps it from lagging.
+  let own = cameraStep(ownBefore, framed, {
+    targetFor: ({ gladiatorsX }) => Math.min(settled, closeUpZoomFor(framed, { gladiatorsX, teamWeights }))
+  });
+  // Never looser than the old camera is RIGHT NOW — its zoom, not only its target.
+  if (own.zoomscale < old.zoomscale) {
+    own = Object.freeze({ ...own, zoomscale: old.zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(old.zoomscale) });
+  }
+  // (3) THE ZOOM DRAWN, not only the target (rule 6). Every zoom that fits at
+  //     the pan this camera has NOW, after this frame's pan step, and that is
+  //     no looser than the old camera: the drawn zoom is this camera's own,
+  //     brought inside that. `own` itself is carried on UNCHANGED, so its
+  //     ease and its pan run exactly as they did — the check is on what is
+  //     drawn and feeds nothing back.
+  const here = closeUpZoomRangeAt(framed, { gladiatorsX: own.gladiatorsX, teamWeights });
+  const lowest = here === null ? Infinity : Math.max(old.zoomscale, here.min);
+  const fits = here !== null && lowest <= here.max;
+  const drawn = fits ? withZoom(own, Math.min(here.max, Math.max(lowest, own.zoomscale))) : own;
+  // (4) HELD: no zoom here keeps both promises, or the floor beats what fits —
+  //     settled, or at this pan. Then the frame is the OLD camera's: its pan
+  //     and framing as well as its zoom (see `SS2_CLOSE_UP`, rule 4).
+  const held = !fits || floor > Math.min(settled, here.max);
+  // Entering the rule the two cameras are one camera — nobody has fallen out of
+  // the frame until now — so the hold starts where it is going. After that it
+  // eases, by the zoom's fifth, so neither switch is a jump.
+  const wasEngaged = previous.closeUp === true || previous.heldByFloor === true;
+  const hold = wasEngaged ? easeTeamWeight(previous.hold ?? 0, held ? 1 : 0) : (held ? 1 : 0);
+  const camera = hold === 0 ? drawn : hold === 1 ? old : blendCameras(drawn, old, hold);
+  return done(camera, own, hold, !held, held);
+}
+
+/** The same camera at another zoom, with the crowd the build hangs from it. */
+function withZoom(camera, zoomscale) {
+  if (zoomscale === camera.zoomscale) return camera;
+  return Object.freeze({ ...camera, zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) });
+}
+
+/**
+ * A camera `weight` of the way from `from` to `to`. Stage x is linear in the
+ * pan and the zoom, so every edge a blend draws lies between where the two
+ * cameras draw it — a blended frame crops nobody more than the worse of them.
+ */
+function blendCameras(from, to, weight) {
+  const lerp = (a, b) => a + (b - a) * weight;
+  const zoomscale = lerp(from.zoomscale, to.zoomscale);
+  const nearer = weight < 0.5 ? from : to;
+  return Object.freeze({
+    midwaypoint: nearer.midwaypoint,
+    focusX: lerp(from.focusX, to.focusX),
+    zoomscale,
+    maxscale: nearer.maxscale,
+    gladiatorsX: lerp(from.gladiatorsX, to.gladiatorsX),
+    crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale),
+    team: nearer.team,
+    teamWeight: lerp(teamWeightOf(from), teamWeightOf(to))
   });
 }
 
@@ -1100,7 +1638,11 @@ export function cameraStep(camera, xs) {
  *
  * ► **ONLY THE FRAMING IS TEAM-ONLY.** The second `stage y` line — the pivot
  *   of `SS2_TEAM_FRAMING` — is taken only when `camera.team === true`. See it
- *   and `RANK_DEPTH_FACTOR`, both authored.
+ *   and `RANK_DEPTH_FACTOR`, both authored. **A camera that carries a
+ *   `teamWeight` strictly between 0 and 1 is mid-hand-over** — a team just
+ *   whittled to a pair — and draws the straight blend of the two lines; at 0
+ *   and 1 it draws the pair's and the team's expressions exactly, not a blend
+ *   of them.
  *
  * ► **THE ZOOM IS ON BOTH TERMS BECAUSE IT IS ON THE CLIP.** The build sets
  *   `gladiators._xscale = _yscale`, so a zoom-out does not merely narrow the
@@ -1124,11 +1666,12 @@ export function arenaToStage(camera, { x = 0, y = 200, lift = 0 } = {}) {
   const depth = Number.isFinite(y) && y < FRONT_RANK_Y
     ? y + (FRONT_RANK_Y - y) * (1 - RANK_DEPTH_FACTOR)
     : y;
+  const weight = teamWeightOf(camera);
+  const pairY = () => SS2_ARENA_ORIGIN.y + (depth - lift) * zoom;
+  const teamY = () => teamFrontLineAt(camera.zoomscale ?? 100) + (depth - FRONT_RANK_Y - lift) * zoom;
   return {
     x: SS2_ARENA_ORIGIN.x + pan + x * zoom,
-    y: camera?.team === true
-      ? teamFrontLineAt(camera.zoomscale ?? 100) + (depth - FRONT_RANK_Y - lift) * zoom
-      : SS2_ARENA_ORIGIN.y + (depth - lift) * zoom
+    y: weight === 0 ? pairY() : weight === 1 ? teamY() : pairY() + weight * (teamY() - pairY())
   };
 }
 
