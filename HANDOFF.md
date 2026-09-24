@@ -8,9 +8,12 @@ it points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **LATEST:
-[2026-09-23 01:19 — every quirk is decided, and the crowd is built](docs/handoffs/2026-09-23-0119--every-quirk-decided-and-the-crowd-is-built.md)**
-(a MID-SESSION CHECKPOINT of session `c62c201f`; a later handoff of the same
-session, if one exists, supersedes it). Start there. *(It supersedes
+[2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md)**
+(the END of session `c62c201f`). Start there. *(It supersedes the same
+session's mid-session checkpoint
+[2026-09-23 01:19 — every quirk is decided, and the crowd is built](docs/handoffs/2026-09-23-0119--every-quirk-decided-and-the-crowd-is-built.md),
+**whose "In flight" items 1-3 are ALL MERGED (2efddc9, a62e67a, bf53d81) and
+whose "Open, not started" list is carried forward.**)* *(That one supersedes
 [2026-09-22 19:34 — every spell but rejuvenate is resolved or mapped, and the build plays favourites](docs/handoffs/2026-09-22-1934--every-spell-but-rejuvenate-and-the-build-plays-favourites.md),
 **whose ranked item 1 — the five owner decisions — is CLOSED (all decided, see
 the block below), whose items 3, 4 and 6 are CLOSED, and whose items 2 and 5
