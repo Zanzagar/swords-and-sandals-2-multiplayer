@@ -165,33 +165,33 @@ function resolveAndCheck(battle, log, action, preview, label, apply = (a) => app
     assert.deepEqual(struck, [], `${label}: previewed no damage, resolution damaged someone`);
   }
 
-  // THE ENERGY: the phase's staminacost, where the event reports it; otherwise
-  // re-derived from the pools with `nextphase`'s own regeneration.
-  if (Number.isFinite(event.staminaSpent)) {
+  // THE ENERGY: the phase's staminacost, where the event reports it; and the
+  // pools, re-derived with `nextphase`'s own regeneration, wherever it does
+  // not — and for the TAUNT always, because its branch recovers before
+  // `nextphase` spends, so a right cost charged off the wrong pool is a defect
+  // the cost alone cannot show. That is the one this check found on the
+  // strike arm, 2026-09-24, and it is fixed: the exception that stood here
+  // for it is gone.
+  const spentReported = Number.isFinite(event.staminaSpent);
+  if (spentReported) {
     assert.equal(event.staminaSpent, killedTarget ? 0 : preview.energy, `${label}: stamina spent`);
     tally(verified, `${type}:energy`);
-  } else if (!killedTarget && actorAfter.alive && Number.isFinite(actorBefore.staminaleft) && actorBefore.boundless <= 1) {
+  }
+  if ((!spentReported || type === Ss2ActionType.TAUNT)
+    && !killedTarget && actorAfter.alive && Number.isFinite(actorBefore.staminaleft) && actorBefore.boundless <= 1) {
     let before = actorBefore.staminaleft;
     let gain = 0;
     if (type === Ss2ActionType.REST) gain = actorBefore.stamina;
-    // The taunt's own recovery (`+= stamina`, clamped) comes first — on a
-    // failed taunt and on effect 2. ► **NOT on the strike arm (effect 1), and
-    // that is a RESOLVER DEFECT found here, 2026-09-24, not fixed (this slice
-    // may not move combat state):** the band path calls
-    // `band.transitionFor(actor)` WITHOUT the recovery, so `nextphase` runs
-    // from the pre-recovery pool and its absolute write erases the gain. The
-    // charge itself — `round(charisma * 2)`, which is what the preview shows —
-    // is the same on every arm; only the pool it comes off differs. The same
-    // arm's event reports `staminaSpent: NaN` (`ss2SwingCost` with no band
-    // factor), which is why this reads the pools. When the defect is fixed,
-    // delete the `strikeArm` exception and this check goes on passing.
-    const strikeArm = type === Ss2ActionType.TAUNT && event.landed === true && event.effect === 1;
-    if (type === Ss2ActionType.TAUNT && !strikeArm) before = clamp(before + actorBefore.stamina, 0, actorBefore.staminamax);
+    // The taunt's own recovery (`+= stamina`, clamped by `check_stats` at
+    // `+0x68d3`) comes first, BEFORE the roll — so on every outcome alike:
+    // failed, effect 2, and the strike (effect 1).
+    if (type === Ss2ActionType.TAUNT) before = clamp(before + actorBefore.stamina, 0, actorBefore.staminamax);
     const expected = clamp(
       before - preview.energy + gain + 1 + Math.round(actorBefore.stamina / 3), 0, actorBefore.staminamax
     );
     assert.equal(actorAfter.staminaleft, expected, `${label}: stamina after, from the previewed cost ${preview.energy}`);
-    tally(verified, `${type}:energy`);
+    if (!spentReported) tally(verified, `${type}:energy`);
+    if (type === Ss2ActionType.TAUNT) tally(verified, `${type}:pools:${event.landed ? `effect-${event.effect}` : "failed"}`);
   }
 
   // WHERE A MOVED BODY LANDS.
@@ -765,6 +765,12 @@ test("coverage: which verbs were resolved against their preview, and which reaso
     Ss2ActionType.BOMBARD, Ss2ActionType.SNIPE, Ss2ActionType.CAST_LIGHTNING_BOLT, Ss2ActionType.CAST_FIREBALL]) {
     assert.ok(verified.get(`${type}:damage`) > 0, `${type}: no selected damage was checked against the band`);
     assert.ok(verified.get(`${type}:energy`) > 0, `${type}: no energy was checked`);
+  }
+  // The taunt's pools, on every outcome — the strike arm above all, which is
+  // where the recovery was once lost. A check that never met a strike would
+  // pass over nobody.
+  for (const outcome of ["failed", "effect-1", "effect-2"]) {
+    assert.ok(verified.get(`${Ss2ActionType.TAUNT}:pools:${outcome}`) > 0, `taunt ${outcome}: its pools were never checked`);
   }
   for (const code of ["other-rank", "in-reach", "level", "slot-empty", "not-built", "no-secondary", "duel", "no-rank"]) {
     assert.ok(reasonsSeen.get(code) > 0, `${code} never reached`);

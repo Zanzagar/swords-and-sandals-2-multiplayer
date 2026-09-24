@@ -52,14 +52,19 @@ function duel({ seed = 2, hero = {}, villain = {} } = {}) {
   });
 }
 
-/** Give the hero the turn, then taunt, and hand back the event and the draws. */
-function taunt(battle) {
+/**
+ * Give the hero the turn, then taunt, and hand back the event and the draws.
+ * `prepare(hero)` runs once the cursor is on him and before the offer is read,
+ * so a test can set the pools the taunt starts from.
+ */
+function taunt(battle, prepare = () => {}) {
   for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {
     const who = currentCombatant(battle);
     const legal = legalActions(battle);
     applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
   }
   assert.equal(currentCombatant(battle)?.id, "hero", "the turn cursor must have reached the hero");
+  prepare(combatantById(battle, "hero"));
   const option = legalActions(battle).find((o) => o.type === Ss2ActionType.TAUNT);
   assert.ok(option, "the taunt must be on offer or the test measures nothing");
   const before = rngJournal(battle).length;
@@ -463,6 +468,71 @@ test("THE GAIN CLAMPS BEFORE THE COST IS SPENT, which is two stages and not one"
   assert.equal(staminaOf(), 220, "the taunter opens at full stamina");
   taunt(battle);
   assert.equal(staminaOf(), 165, "220 clamped at 220, then -60 +1 +round(12/3)");
+});
+
+test("THE ROLL DECIDES WHAT HAPPENS TO THE FOE, NEVER THE TAUNTER'S OWN LEDGER — the strike arm included", () => {
+  // ► **EVERYTHING THE TAUNTER IS OWED OR OWES IS SETTLED ON ONE SIDE OF THE
+  //   ROLL** (battle map § "The `taunt` branch restores inline" and § "The
+  //   taunt phase, in full"): the cost `round(charisma * 2)` is SET at
+  //   `+0x67bb`, and the heal `3 + ceil(stamina)` at `+0x684c`,
+  //   `staminaleft += stamina` at `+0x6894` and `check_stats` at `+0x68d3`
+  //   all run BEFORE `diceroll` at `+0x6921`; `nextphase` then SPENDS the cost
+  //   and regenerates (`+0x32a7`, `+0x32c9`) whenever the phase completes. So
+  //   a taunt that fails, shoves or strikes leaves the taunter in the same
+  //   place, and only a KILL differs (it deletes `nextphase`).
+  //
+  //   **Found wrong on the strike arm 2026-09-24**: `taunt_effect == 1` ran
+  //   `nextphase` off the PRE-recovery pool, so its absolute write erased the
+  //   `+= stamina` (found by `test/ss2-action-preview.test.js`: demo roster,
+  //   plain 3v3, seed 3, turn 11, 96 -> 67 where this order gives 72),
+  //   reported `staminaSpent: NaN`, and priced `nextphase`'s heal against the
+  //   pre-recovery deficit.
+  //
+  //   The numbers, by hand from those offsets: charisma 9, stamina 12, 150 of
+  //   220 and 10 hitpoints short. Recovery: 150 + 12 = 162 (under the 220
+  //   ceiling), heal min(3 + 12, 10) = 10. `nextphase`: 162 - 18 + (1 + 4) =
+  //   149, heal min(1 + 6, 0) = 0.
+  const outcomes = new Map();
+  for (let seed = 1; seed <= 60 && outcomes.size < 3; seed += 1) {
+    const battle = duel({ seed });
+    let maxHealth;
+    const { event } = taunt(battle, (hero) => {
+      hero.resources.staminaleft.value = 150;
+      maxHealth = hero.maxHealth;
+      hero.health = maxHealth - 10;
+    });
+    const key = event.landed ? `effect ${event.effect}` : "failed";
+    if (outcomes.has(key)) continue;
+    const hero = combatantById(battle, "hero");
+    outcomes.set(key, { event, staminaleft: hero.resources.staminaleft.value, health: hero.health, maxHealth });
+  }
+  assert.deepEqual([...outcomes.keys()].sort(), ["effect 1", "effect 2", "failed"],
+    "all three non-lethal outcomes must be reached, or the comparison is over fewer arms than it claims");
+  for (const [key, outcome] of outcomes) {
+    assert.equal(outcome.staminaleft, 149, `${key}: recover to 162 first, then pay 18 and regenerate 5`);
+    assert.equal(outcome.health, outcome.maxHealth, `${key}: the recovery fills the 10-point deficit`);
+    assert.equal(outcome.event.healed, 10, `${key}: and the event reports what was restored, not what was offered`);
+  }
+  assert.equal(outcomes.get("effect 1").event.staminaSpent, 18,
+    "the strike spends the taunt's own `round(charisma * 2)`, never a swing's price");
+});
+
+test("A LETHAL STRIKE KEEPS THE RECOVERY AND PAYS NOTHING, because `death()` deletes `nextphase`", () => {
+  // The recovery is spent before the roll (`+0x6894`, `+0x68d3`), and the cost
+  // is only ever charged by `nextphase` (`+0x32a7`), which a kill never
+  // reaches. Charisma 30 against a vitality-1 foe with charisma 1: the strike
+  // is `round(30 * 4) - 1 = 119` against 110 hitpoints. From 150 of 220 the
+  // pool ends at 150 + 12 = 162, and nothing is spent.
+  for (let seed = 1; seed <= 40; seed += 1) {
+    const battle = duel({ seed, hero: { charisma: 30 }, villain: { charisma: 1, vitality: 1 } });
+    const { event } = taunt(battle, (hero) => { hero.resources.staminaleft.value = 150; });
+    if (!(event.landed && event.effect === SS2_TAUNT.strikeEffect)) continue;
+    assert.equal(combatantById(battle, "villain").alive, false, "the strike must kill, or this is the other test");
+    assert.equal(combatantById(battle, "hero").resources.staminaleft.value, 162, "the recovery, and no nextphase");
+    assert.equal(event.staminaSpent, 0, "a kill skips the phase that charges the cost");
+    return;
+  }
+  assert.fail("a lethal strike was not reachable in 40 seeds");
 });
 
 /* ------------------------------------------------------------------ *

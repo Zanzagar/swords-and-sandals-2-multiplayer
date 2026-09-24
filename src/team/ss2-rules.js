@@ -4192,6 +4192,11 @@ const TAUNT_STRIKE = Object.freeze({
   //   `nextphase` the POST-recovery state to compute its own stage from. A
   //   bundled `branchGain`/`branchHeal` here would clamp once instead of twice
   //   and let a full-stamina taunter bank the overflow.
+  // ► **`recovered` IS REQUIRED WHEREVER A TAUNT RESOLVES — `null` ONLY
+  //   PRICES.** With `null`, `nextphase` runs off the frozen PRE-recovery
+  //   view, which is exactly how the strike arm lost the `+= stamina` until
+  //   2026-09-24 (see the band path's `priced`). `ss2PreviewAction` passes
+  //   `null` because it reads `staminaCost` and nothing else.
   transitionFor: (actor, recovered) => ({
     staminaCost: Math.round(resourceValue(actor, "charisma", 0) * 2),
     fromStaminaleft: recovered ? recovered.staminaleft : null,
@@ -13897,8 +13902,28 @@ export function createSs2TeamRules({
       //   economy, and the seam is one flag rather than three conventions.
       // An item strike is a SPELL's price, `round(magicka)`, on both paths —
       // see `SS2_ITEM_STRIKES`.
+      //
+      // ► **A BAND THAT PRICES ITSELF — `TAUNT_STRIKE`, AND ONLY THAT — IS
+      //   PRICED HERE TOO, AND IS HANDED THE BRANCH'S RECOVERY.** Both halves
+      //   were wrong until 2026-09-24 and one test found both: this read
+      //   `band.strengthFactor`, which the taunt does not have, so the strike
+      //   arm reported `staminaSpent: NaN` (on both paths — `round(charisma *
+      //   2)` at `+0x67bb` is the build's own price, so `fixtureReplay` has no
+      //   other number to keep); and the transition below was built with
+      //   `band.transitionFor(actor)`, WITHOUT `tauntRecovered`, so `nextphase`
+      //   ran off the PRE-recovery pools. Its absolute `staminaleft` write then
+      //   erased the branch's `+= stamina` (`+0x6894`), and its heal was capped
+      //   against a deficit the branch had already filled. The build's order
+      //   is recovery and clamp first (`+0x684c`, `+0x6894`, `+0x68d3`), the
+      //   roll after (`+0x6921`), `nextphase` last — the order the failed and
+      //   effect-2 arms above already used. Measured before the fix on the
+      //   demo roster (plain 3v3, seed 3, turn 11, charisma 16, stamina 5):
+      //   96 -> 67 where that order gives 72.
+      const priced = band.transitionFor ? band.transitionFor(actor, tauntRecovered) : null;
       const staminaCost = itemStrike !== null
         ? itemStrike.staminaCost
+        : priced !== null
+        ? priced.staminaCost
         : fixtureReplay
         ? Math.round(actor.stats.strength * band.strengthFactor)
         : ss2SwingCost({
@@ -13917,7 +13942,7 @@ export function createSs2TeamRules({
           // A band that prices itself wins, and exactly one does. See
           // `TAUNT_STRIKE`: a taunt recovers like a rest, so the strength
           // formula above is not merely the wrong number but the wrong shape.
-          ...(band.transitionFor ? band.transitionFor(actor) : { staminaCost }),
+          ...(priced ?? { staminaCost }),
           // The whirlwind writes the counter back itself (`+0x7a64`), below,
           // for the discharge's reason: one write, in the arm's place.
           resetsPsyche: request.type !== Ss2ActionType.PSYCHE_UP && request.type !== Ss2ActionType.CAST_WHIRLWIND,
