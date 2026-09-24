@@ -18,9 +18,10 @@
  * that was eliminated. That is the whole mechanic.
  *
  * **Nothing here heals, revives, pays, levels or re-equips anybody.** Each of
- * those is a progression decision belonging to the design track, where EP-D04
- * is pending and EP-A03 (the maintenance/repair model) has not even been
- * drafted. A circuit that quietly restored the survivors would be a balance
+ * those is a progression decision belonging to the design track, where ~~EP-D04~~
+ * EP-D05 (personal precommitted reward outcomes; **corrected 2026-09-24** —
+ * EP-D04 is rarity) is pending and EP-A03 (the maintenance/repair model) has
+ * not even been drafted. A circuit that quietly restored the survivors would be a balance
  * choice wearing the costume of a data structure — the phrase `to-battle.js`
  * uses about itself, for the same reason.
  *

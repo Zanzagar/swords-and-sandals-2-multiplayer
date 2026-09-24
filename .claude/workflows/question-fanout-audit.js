@@ -8,6 +8,15 @@ export const meta = {
   ],
 }
 
+// ► CORRECTED 2026-09-24 (a comment only; `whenToUse` above is unchanged): the
+//   two paths `whenToUse` cites, docs/multi-agent-field-rules.md and
+//   docs/adr/0001, are NOT in this repository. They are in the claude-harness
+//   repository — docs/multi-agent-field-rules.md and
+//   docs/adr/0001-verification-precedence.md there — as the comment above
+//   MAX_QUESTIONS already says. The same holds for the "(docs/adr/0001)" in
+//   the two cap messages below. A reader of this repo will not find them
+//   under docs/.
+
 // args: {
 //   topic: string,                     // what this run is about (goes in every prompt)
 //   questions: string[],               // DISTINCT aims — different entry points, methods, angles.

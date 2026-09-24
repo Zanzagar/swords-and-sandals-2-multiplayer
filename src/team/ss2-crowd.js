@@ -41,8 +41,12 @@
  *   `hero.herolevel + villain.herolevel` exactly.
  * - Every completed phase of ANYONE adds its effective delta and is clamped
  *   1..100 — in 1v1 exactly the build's `nextphase`.
- * - It scales the purse of every member of the winning side. **How much each
- *   member is paid ON is NOT decided** — see `ss2TeamVictoryPurses`.
+ * - It scales the purse of every member of the winning side. ~~**How much each
+ *   member is paid ON is NOT decided**~~ **Corrected 2026-09-24: it IS decided,
+ *   and was by the time this line was committed (`cefaf83`) — the owner chose
+ *   the EQUAL SHARE of the losing side's `character_xp` per winner (HANDOFF.md
+ *   living head, decision (f)).** See `ss2TeamVictoryPurses`, whose docstring
+ *   records the choice and the alternatives it was weighed against.
  *
  * ## `SS2_CROWD` is something else
  *

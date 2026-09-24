@@ -19,7 +19,7 @@ read-only. This is not yet a finished playable mod.
 | --- | --- |
 | Shared team resolver | Implemented and tested for one to three combatants per team. 1v1, 2v2, and 3v3 use the same resolver. |
 | Vanilla parity | Partial and expanding. **23** promoted runtime goldens exist and **replay through the shared resolver** under `src/team/ss2-rules.js`, a `map-derived` rule set carrying SS2's own attack arithmetic. No RUNTIME-VERIFIED rule set exists: map-derived declares `runtimeVerified: false`. The goldens cover attack directions 1–12; **22 of the 23 carry zero armour and `fightMode: "misc"`, and the 23rd does not** — `golden-armoured-deflection-threshold-cleared` stages a villain at `armourclass 79` in `fightMode: "tournament"` and measures absorption 79 → 57. Enchantment coverage is still zero. *(Re-derived 2026-09-07; this cell said 22 and "zero armour" until then.)* |
-| SS2 adapter and campaign layer | Asset-free state bridge, slot layout, presentation commands, acknowledgement bridge, per-action animation gate, and additive campaign-record schema have landed. **Roster read-back landed 2026-09-07** (`rosterFromCampaignRecord` / `advanceCircuit`, with `node tools/hotseat.mjs --circuit <n>` as its consumer) and is struck from this list. **A rendered arena landed 2026-09-10** (`src/render/` + `tools/arena/`) and is the presentation stream's first consumer outside its own tests; it draws original vector art and ships no SS2 asset. Rewards and licensed-build integration remain incomplete. |
+| SS2 adapter and campaign layer | Asset-free state bridge, slot layout, presentation commands, acknowledgement bridge, per-action animation gate, and additive campaign-record schema have landed. **Roster read-back landed 2026-09-07** (`rosterFromCampaignRecord` / `advanceCircuit`, with `node tools/hotseat.mjs --circuit <n>` as its consumer) and is struck from this list. **A rendered arena landed 2026-09-10** (`src/render/` + `tools/arena/`) and is the presentation stream's first consumer outside its own tests; it ~~draws original vector art and~~ ships no SS2 asset, and draws its figures as original vector art only when no usable extracted figure pack is present — with the player's own extracted packs there, it draws the build's own art (corrected 2026-09-24; see "What works today"). Rewards and licensed-build integration remain incomplete. |
 | Endless progression | Quantitatively diagnosed and specified in a research-backed design; owner decisions and readiness blockers remain open. No Endless rule set or progression implementation exists yet. |
 | Online multiplayer | Deterministic foundations exist; lobby, transport, authentication, reconnect, and desync recovery are planned. |
 
@@ -48,7 +48,14 @@ The detailed and frequently changing delivery state lives in the
   record. It has no path that overwrites vanilla save fields. It **reads a
   record back into a playable roster** — `rosterFromCampaignRecord` plus the
   bout's blueprints, chained by `advanceCircuit` — and still awards no
-  progression: paying a reward is a design decision EP-D04 owns.
+  progression: paying a reward is a design decision ~~EP-D04 owns~~ that
+  EP-D05 (personal precommitted reward outcomes) owns — EP-D04 is rarity;
+  corrected 2026-09-24. The build's own victory purse is implemented,
+  map-derived, in `src/team/ss2-crowd.js` (`ss2VictoryPurse`, and the
+  owner-decided equal-share `ss2TeamVictoryPurses`), and nothing calls it yet.
+  A campaign also survives the process: `src/campaign/file-backend.js` stores
+  it in a directory, and `node tools/arena-campaign.mjs fight --dir <directory>`
+  runs and resumes one.
 
 - [`src/team/ss2-rules.js`](src/team/ss2-rules.js) runs SS2's own attack
   arithmetic inside that resolver, and `node tools/hotseat.mjs` plays it: two
@@ -60,7 +67,16 @@ The detailed and frequently changing delivery state lives in the
   <http://127.0.0.1:8123/> — a browser arena that fights through the same
   resolver and the same adapter the tests run, imported directly as ES modules
   with no bundler and no build step. Add `?teams=3&spectate=1` to watch a 3v3
-  play itself. **Every figure is original vector art drawn from code**; this
+  play itself. ~~**Every figure is original vector art drawn from code**~~
+  **Corrected 2026-09-24: the figures are original vector art drawn from code
+  whenever no usable extracted figure pack is present — as in a fresh clone,
+  whose `assets/` is empty.** Fill that gitignored directory from your own
+  licensed install (the `tools/extract-*.mjs` extractors; `assets/README.md`)
+  and the arena draws the build's own rig once `assets/figure/shapes.json` and
+  `animations.json` both load, and uses each other pack — wardrobe, props,
+  icons, sound and the rest — independently when it is there; a missing or
+  unusable pack falls back on its own, and the page's provenance panel says
+  which figures it drew. Either way this
   repository ships no SS2 artwork, audio or bytes, and
   `test/no-shipped-assets.test.js` enforces that rather than leaving it to
   care. It is also the first host anywhere here to make the per-action
@@ -93,6 +109,20 @@ Both paths may use the same team resolver, controller model, settlement gate,
 and deterministic protocol. They do not share an evidence claim.
 
 ## Proposed Endless direction — design only
+
+> **Stale against the design branch (noted 2026-09-24).** This section, and
+> `docs/design/` on this branch, carry the 2026-08-31 proposal with all six
+> decisions `pending` and no EP-D07. The owner has since decided on the design
+> branch `design/endless-progression-owner-packet` (open PR #3; re-read at its
+> tip `f8df632`): **EP-D01 and EP-D02 are accepted REPLACEMENTS** — ordinary
+> vertical power ends at a versioned campaign ceiling, then a finite
+> behaviour-led veteran edge (not the tier-50 cap below), and personal Rule
+> Capacity grows through championship milestones to a finite 48-Load ceiling
+> (not the four-point Rule Load below) — and **EP-D07 is accepted**
+> (mode-neutral persistent gladiators; human-controlled allied seats in the
+> first playable version). EP-D03 to EP-D06 are still pending there. Read that
+> branch's `docs/design/endless-progression-decisions.md` for the current
+> record; the bullets below are the August proposal.
 
 The current design proposes:
 
@@ -191,6 +221,14 @@ is unavailable, run the package test entry directly:
 ```powershell
 node --test
 ```
+
+On a machine short of memory — the project's own, with several agents running
+— add `--test-concurrency=1` (`node --test --test-concurrency=1`, which is what
+`AGENTS.md` prescribes there): parallel test processes intermittently fail to
+spawn with `spawn UNKNOWN`, which is not a code failure. `AGENTS.md` ("Running
+the tests") also lists how many tests a fresh clone, a tree with `assets/` and
+a capture-bearing tree each expect to SKIP; a skip count outside those is a
+finding.
 
 ## Licensed-build and contributor boundary
 

@@ -9,6 +9,11 @@ axes, an adversarial risk auditor and a completeness critic — 13 agents,
 that said so outranks everything the five designers produced.** That is
 recorded first, because it is the finding.
 
+*(A dated record of 2026-09-07. Two of its statements about the engine have
+since gone stale — "nothing draws" the presentation commands, and finding 7's
+consumer count — and are marked where they stand, 2026-09-24. Nothing else
+here was re-audited by that marking.)*
+
 ## THE FRAMING WAS WRONG, TWICE, AND IT WAS MINE
 
 I briefed the panel that host-authoritative transport is "the last unstarted
@@ -17,7 +22,8 @@ progression decision." Both halves are false.
 
 1. **It is not the last.** `docs/roadmap.md`'s own not-started column still
    names the RENDERED ARENA — six-slot geometry is derived and emitted as
-   inert JSON presentation commands, and *nothing draws them* — and CAPTURE
+   inert JSON presentation commands, and *nothing draws them* *(stale since
+   2026-09-10, marked 2026-09-24: `tools/arena/` draws them, `473ef59`)* — and CAPTURE
    BREADTH: 37 of the 60 committed candidates have no golden, and the spell
    family has never been captured. Neither is a balance decision.
 2. **Stage 7 is itself partly OWNER-OWNED.** EP-D07 was accepted by the owner
@@ -116,6 +122,17 @@ directory is **4,052 lines** (not the 2,192 reported). Of its nine modules,
 each have ZERO. Four of the five designs proposed `VanillaBattleHost` as their
 engine port. **The critic's shape was right and its number was wrong, which is
 this project's most common finding about its own agents' output.**
+
+► **STALE SINCE 2026-09-10 (marked 2026-09-24; true when measured).**
+  `createVanillaBattleHost` now has two consumers outside `src/adapter/` and
+  `test/`: `tools/arena/main.js` (the browser arena, `473ef59`, 2026-09-10)
+  and `tools/engagement-census.mjs` (`58366d8`, 2026-09-12), both importing it
+  through `src/adapter/index.js`, and `battle-host.js` drives
+  `state-bridge.js`, `slot-layout.js` and `presentation.js` itself. The arena
+  also imports `citationFor` from `vanilla-fields.js`. So "reached almost
+  entirely by tests" no longer holds; re-measure with
+  `grep -rn "src/adapter" tools src --include=*.js --include=*.mjs` rather than
+  reading this section's counts.
 
 ## The judges disagreed, and the disagreement is informative
 

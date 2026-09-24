@@ -5252,7 +5252,25 @@ tree until an explicit deployment step is approved.
 
 ## Foundation gaps exposed by the map
 
-The current deterministic engine deliberately omits SS2-specific state. Before
+~~The current deterministic engine deliberately omits SS2-specific state.~~
+**Corrected 2026-09-24: this section describes the engine as it stood in late
+August, and its opening sentence is no longer true.** The team seam now carries
+a canonical, projected and hashed resource bag (`src/team/resources.js`), and
+the map-derived rule set `src/team/ss2-rules.js` (`ss2TeamRules`,
+`verification: "map-derived"`) declares SS2's own state into it —
+`SS2_RESOURCE_NAMES` includes the armour pieces, `maximum_ammo`, the weapon
+ids and `inventory1`–`inventory6`, among others. It is the rule set
+`tools/hotseat.mjs` runs by default (`--rules ss2`, since `831bcdc`) and
+`tools/arena/main.js` runs (through `selectRules`, since `473ef59`). The list
+below is kept as the August checklist; each item now has a home in code —
+the status phase (`resolveStatusPhase` in `ss2-rules.js`, `86ccb68`), the
+per-action animation gate (`src/adapter/action-gate.js`), the ordered RNG
+channel and its journal (`src/team/rng.js`; `rngJournal` in
+`src/team/resolver.js`), the one-shot result
+bridge (`src/team/settlement.js`, `src/adapter/acknowledgement.js`) and the
+rule set's identity (`describeTeamRuleSet`, `src/team/rule-set.js`) — but
+whether each is COMPLETE enough to claim 1v1 parity was not re-audited by this
+correction, and no rule set is runtime-verified. Before
 claiming 1v1 parity, the adapter/rules layer needs:
 
 - equipment identity and every armour piece, ammunition, stamina, magicka, and
@@ -5265,7 +5283,11 @@ claiming 1v1 parity, the adapter/rules layer needs:
 
 Do not replace `classicStyleRules` with partially reconstructed formulas. Keep
 it explicitly provisional until a golden harness compares vanilla 1v1 and the
-adapter with controlled samples.
+adapter with controlled samples. **(2026-09-24: followed as written —
+`classicStyleRules` was NOT replaced and is still the placeholder default of
+`createBattle` in `src/engine.js`; the reconstructed formulas arrived as a
+SECOND rule set injected through `src/team/rule-set.js`, which is what the
+playable hosts run.)**
 
 ## Golden-harness checkpoint
 
@@ -5309,7 +5331,12 @@ is specified in [the runtime-capture workflow](ss2-runtime-capture.md).
    preserving the generic 1–3 combatant engine.
 5. Render two static ally slots using a `clipByCombatantId` registry, then move
    through 2v2 AI to 2v2 and 3v3 cooperative campaign support as tracked in the
-   [roadmap](../roadmap.md).
+   [roadmap](../roadmap.md). **(Overtaken, 2026-09-24: the registry is built —
+   `ClipRegistry` in `src/adapter/clip-registry.js`, used by
+   `src/adapter/battle-host.js` — and a browser arena, `tools/arena/`
+   (`473ef59`, 2026-09-10), draws one to three a side, AI included, through
+   that host. The multi-slot surface in the LICENSED build is still unrendered,
+   and co-op campaign support is tracked in the roadmap.)**
 
 ## Reproduce the read-only inventory
 

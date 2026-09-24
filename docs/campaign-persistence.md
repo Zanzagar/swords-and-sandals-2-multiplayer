@@ -266,9 +266,26 @@ Synchronous and string-valued because the AVM1 SharedObject surface is both, and
 because the write is driven from the campaign-settlement callback: an async
 store would make settlement async, which the once-only latch in
 `src/team/settlement.js` is not built for. A host that needs async buffers
-behind this interface. Two backends ship: `createMemoryBackend()` (the tests run
-entirely on it, so no filesystem is needed) and `createNamespacedBackend()`
-described above.
+behind this interface. ~~Two backends ship~~ **Three backends ship (corrected
+2026-09-24; the third since `6c3a1bf`, 2026-09-19):** `createMemoryBackend()`
+(`test/campaign-persistence.test.js` runs its stores on it), `createNamespacedBackend()`
+described above, and `createFileBackend({ directory })` in
+`src/campaign/file-backend.js`, which keeps one file per key in a directory on
+`node:fs` — the backend the one runnable persistent host uses today. (The
+namespaced backend is as durable as the container it is given: its intended
+host is a `SharedObject` this project owns, flushed as described below, and no
+code in the repository runs it on one yet.) It is deliberately NOT
+re-exported from `src/campaign/index.js`; import it by path. It has no static
+`node:fs` import: `createFileBackend` fetches `node:fs` lazily, through
+`process.getBuiltinModule`, only when it is called without an injected `{ fs }`,
+so importing the module (and its key/filename helpers) works anywhere, while
+constructing the default backend outside Node throws and asks for `{ fs }`.
+*(Re-derived 2026-09-24, after a review of this correction caught it repeating
+the module's own header, which says the file imports `node:fs`; it never has,
+since its first commit `6c3a1bf`.)*
+`tools/arena-campaign.mjs` (`fight`, `list`, `show`, each with a required
+`--dir`) is the runnable host built on it, and `test/campaign-file-backend.test.js`
+pins both, the tool through a subprocess.
 
 ### Committing, and admitting when a commit was refused
 
@@ -476,7 +493,13 @@ correct response to one is to fix the caller. It propagates.
 
 ## Tests
 
-`test/campaign-persistence.test.js`, 68 tests, filesystem-free. They cover the
+`test/campaign-persistence.test.js`, ~~68~~ 70 tests (**re-counted 2026-09-24**
+by running the file; count them with `node --test test/campaign-persistence.test.js`
+rather than trusting this number), filesystem-free in the sense that every store
+runs on the memory backend — one test reads the `src/campaign/*.js` sources to
+check their imports. `test/campaign-file-backend.test.js` (14 tests on
+2026-09-24) covers the file backend and `tools/arena-campaign.mjs` and does use
+the filesystem, in temporary directories. The first file's tests cover the
 schema and its round trip, the AI-fill/AI-controller distinction, the
 seat/combatant split, the provenance gate in both directions (with the build
 hash pinned by **value**, not by shape — a shape check passes for `"0".repeat(64)`),

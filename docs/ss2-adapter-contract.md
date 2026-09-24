@@ -1355,7 +1355,13 @@ What is still missing before a playable mod:
   blueprints back into the next bout's teams, `advanceCircuit`
   (`src/campaign/circuit.js`) chains bouts with the survivors carried, and
   `node tools/hotseat.mjs --circuit <n>` is a playable consumer of both. Nothing
-  pays a reward; that half stands, and EP-D04 owns it. Struck rather than
+  pays a reward; that half stands, and ~~EP-D04~~ EP-D05 owns it. ► **Corrected
+  2026-09-24: EP-D04 is RARITY ("rarity changes behaviour complexity, not
+  chassis budget"); personal precommitted reward outcomes are EP-D05, pending,
+  in `docs/design/endless-progression-decisions.md`.** And "nothing pays" is
+  now narrower than "nothing exists": the build's own victory purse is
+  implemented, map-derived, in `src/team/ss2-crowd.js` (`ss2VictoryPurse`,
+  `ss2TeamVictoryPurses`, `cefaf83`), and nothing calls it. Struck rather than
   deleted, because this bulleted list is cited by number elsewhere;
 - **the launcher route** into the Collection's mods folder.
 

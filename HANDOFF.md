@@ -218,25 +218,39 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
   same block — which is the trap that made this worth deferring over.
   So consumption is: set the slot to 1, and `magic_damage_character` (`+0x148e`)
   is unblocked by the same reading.
-  ► **BUT `cast_gale` IS STILL NOT BUILDABLE, AND THE NEW BLOCKER IS BIGGER AND
+  ► ~~**BUT `cast_gale` IS STILL NOT BUILDABLE, AND THE NEW BLOCKER IS BIGGER AND
     BETTER MEASURED.** `inventory1`–`inventory6` **are not declared resources**
     — absent from `SS2_RESOURCE_NAMES`, so they never reach the resolver and a
-    verb gated on carrying item 38 has nothing to read. Adding them is a SCHEMA
+    verb gated on carrying item 38 has nothing to read.~~ **CORRECTED 2026-09-24
+    — ALL THREE BULLETS OF THIS ENTRY ARE DONE, AND NONE WAS STRUCK UNTIL NOW.**
+    `inventory1`–`inventory6` **are declared** (`a506618`, 2026-09-20: in
+    `SS2_RESOURCE_NAMES` in `src/team/ss2-rules.js`, with NO
+    `SS2_RESOURCE_DEFAULTS` entry) and **`cast_gale` is built** (`ea6dd7a`,
+    2026-09-22). Adding them is a SCHEMA
     change whose price that constant's own comment states: a name WITH a default
     is filled into every combatant that does not state it, **including every
     golden's, and that moves all 23 golden replay hashes** — measured, and done
     once before at `86ccb68`. Six names without defaults is the `psyche_up`
-    shape and is safer, but still touches `CANONICAL_RESOURCE_SOURCES`, the
-    adapter write-back and the campaign record.
-  ► **NOT STARTED DELIBERATELY: this session was at 75% of its context.**
+    shape and is safer, ~~but still touches `CANONICAL_RESOURCE_SOURCES`, the
+    adapter write-back and the campaign record.~~ **and it is the shape
+    `a506618` took: all 23 golden hashes held byte-identical, and two of the
+    three costs priced here did not exist** — `CANONICAL_RESOURCE_SOURCES` was
+    left untouched deliberately (nothing wrote a slot yet) and the campaign
+    record needed nothing (that commit's message says why).
+  ► ~~**NOT STARTED DELIBERATELY: this session was at 75% of its context.**~~
+    **DONE, in its own session (`a506618`), as this bullet asked.**
     Beginning a multi-file schema change with the goldens downstream of it, with
     no room to finish it or to run the Codex review it would need, is how the
     defects two entries up got shipped. **It is its own session, with the
     goldens in front of it.**
-  ► **AND THE DEMO ROSTER DECLARES ITS SIX SLOTS AS 0, WHICH IS NOT EMPTY.**
-    Inert today because nothing reads the field — the exact hazard that roster's
+  ► ~~**AND THE DEMO ROSTER DECLARES ITS SIX SLOTS AS 0, WHICH IS NOT EMPTY.**~~
+    **FIXED in the same commit (`a506618`): `tools/arena/roster.js` declares
+    all six slots as 1**, the build's empty marker (`inventory1: 1` …
+    `inventory6: 1` in the gladiator factory).
+    ~~Inert today because nothing reads the field — the exact hazard that roster's
     header already records four times. Fix it in the session that declares the
-    resources, not before.
+    resources, not before.~~ The roster's header now records it as the FIFTH
+    instance of that hazard, beside those six lines.
 
 ► **A CODEX REVIEW CAME BACK `needs-attention` ON 13 UNREVIEWED COMMITS, AND
   ALL FOUR FINDINGS WERE REAL (2026-09-19).** I ran Codex once today, on the
@@ -324,7 +338,10 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     correction is AT the `aiCharges` docstring rather than only here. A roster
     change that opens a gate nothing is waiting behind is not a fix.
 
-► **`cast_gale` IS FULLY DERIVED AND DELIBERATELY NOT BUILT (2026-09-19).**
+► **`cast_gale` IS FULLY DERIVED AND ~~DELIBERATELY NOT BUILT~~ (2026-09-19).**
+  **CORRECTED 2026-09-24: BUILT since `ea6dd7a` (2026-09-22)**, after
+  `a506618` settled the slot column and declared `inventory1`–`inventory6`;
+  the "blocker" bullet below is history, kept for its derivation.
   The phase is written out in the battle map under "The `cast_gale` phase, in
   full". **Zero `randomBetween`, zero `checkattackroll`, zero `hitpoints`** over
   `+0x7aaa`…`+0x7be5`; cost is **`round(magicka)`, the STAT**; force is flat
@@ -357,9 +374,14 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
   ► **THE STATE IS THE RECORDS, WITH NO SUMMARY TO DRIFT FROM THEM.** A
     campaign IS its sequence of battle records; the roster for the next bout is
     rebuilt by `rosterFromCampaignRecord`. **`file-backend.js` is deliberately
-    NOT re-exported from `src/campaign/index.js`** — it imports `node:fs` and
+    NOT re-exported from `src/campaign/index.js`** — ~~it imports `node:fs` and
     the rest of the layer runs in a browser, so a barrel export would put a node
-    builtin on the page's import graph.
+    builtin on the page's import graph.~~ **CORRECTED 2026-09-24: it has NO
+    static `node:fs` import, and never had** (checked at `6c3a1bf`, its first
+    commit): `createFileBackend` fetches `node:fs` lazily through
+    `process.getBuiltinModule` only when called without an injected `{ fs }`, so
+    the module imports anywhere and only CONSTRUCTING the default backend needs
+    Node. The module's own header repeats the wrong reason.
   ► **TWO DECISIONS THAT ARE NOT OBVIOUS**: a key is not a filename (`:` is
     illegal on Windows, and `~` is the one separator the key grammar cannot
     produce, so the mapping is INJECTIVE rather than merely readable); and a
@@ -516,13 +538,25 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     the DECISION out of the DOM access** is, which is what
     `src/render/arena-shell.js` was built for and what it now gets more of.
   ► **`canvasBackingFor` IS THE FIRST ONE MOVED, and it is the right one to
-    start with**: `sizeCanvasToStage` is the function whose ABSENCE cost this
-    project every pixel number it published before 2026-09-18, and whose
+    start with**: `sizeCanvasToStage` is the function whose ~~ABSENCE cost this
+    project every pixel number it published before 2026-09-18~~ absence was
+    blamed for that (**refuted 2026-09-24, see "AND THE CANVAS HAD NEVER BEEN
+    SIZED" below**), and whose
     arithmetic has run since with nothing behind it. Four values in, a size and
     a `changed` flag out; the shell keeps two reads and two writes. **`changed`
     is the contract, because assigning either dimension CLEARS the canvas and
     resets the whole 2d state** — a caller that assigned every frame would wipe
     the arena every frame. 7 tests by real import, 7 mutations each red.
+    ► **CORRECTED 2026-09-24: THE ARENA DOES NOT KEEP THAT CONTRACT.**
+      `render()` in `tools/arena/main.js` calls `sizeCanvasToStage()` and then
+      assigns `canvas.width` / `canvas.height` itself, UNCONDITIONALLY, every
+      frame (`Math.floor(parent rect × devicePixelRatio)`) — lines it has
+      carried since the arena's first commit, `473ef59`. So the arena is that
+      caller, and the wipe is harmless only because `render()` then clears and
+      redraws the whole frame. The two sites also measure different boxes (the
+      canvas's own rect, ROUNDED, against its parent's, FLOORED), so at a
+      fractional device-pixel size they disagree by a pixel. Read off the code,
+      not watched in a browser; the fix is `main.js`'s, not this file's.
   ► **AND THE UNCAPPED AREA IS STATED RATHER THAN FIXED.** Browsers refuse a
     canvas past a maximum area and the failure is a BLANK canvas, not an
     exception — but this arena's stage at ratio 1-2 reaches at most about 3.7M
@@ -879,10 +913,26 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
   (`test/render-clip-labels-cover.test.js`).
 
 ► **AND THE CANVAS HAD NEVER BEEN SIZED.** `<canvas id="arena">` with no width
-  or height is **300x150**, and this shell only ever READ those fields. No
+  or height is **300x150**, ~~and this shell only ever READ those fields. No
   resize handler, no `devicePixelRatio`, in 4,000 lines. Every pixel number this
-  project has published was taken through an unrecorded bilinear upscale. It is
+  project has published was taken through an unrecorded bilinear upscale.~~ It is
   sized to its stage in device pixels now.
+  ► **CORRECTED 2026-09-24: WRONG THE DAY IT WAS WRITTEN — THE SHELL HAD SIZED
+    ITS CANVAS SINCE ITS FIRST COMMIT.** `git show 473ef59:tools/arena/main.js`
+    (2026-09-10, the arena's first commit), `render()`: `const ratio =
+    window.devicePixelRatio || 1; canvas.width = Math.max(1,
+    Math.floor(rect.width * ratio));` and the same for the height, from the
+    parent's rect, on every frame (`frame()` → `render(now)` →
+    `requestAnimationFrame`), plus `window.addEventListener("resize", () =>
+    render())`. `git log -S` on that assignment finds only `473ef59`, and it was
+    still there in `553084d`, the commit that wrote this entry and added
+    `sizeCanvasToStage` (today it is in `render()` still). So there WAS a resize
+    handler and a `devicePixelRatio`, and the "unrecorded bilinear upscale"
+    conclusion has no support in the code. Read off the code, not re-measured
+    in a browser: whatever the 2026-09-18 audit saw as 300x150 was not a shell
+    that never assigned the fields. The same claim sits in `main.js`'s comment
+    above `sizeCanvasToStage`, in `src/render/arena-shell.js` above
+    `canvasBackingFor`, and in the frozen 2026-09-18-0130 handoff's title.
 
 ► **THE TAUNTED FLEE IS BUILT (`cbaf406`), AND THE RUN IS NOT A BIG WALK.**
   Row 3 of frame 1's forced chain is the only forced phase that is not a
@@ -2277,8 +2327,17 @@ getting there cost a full retraction of that session's own central conclusion.**
 WRONG in three of five rows:)*
 [2026-09-14 01:30 — the arena is 1:1, and three readings were mine](docs/handoffs/2026-09-14-0130--the-arena-is-1to1-and-three-readings-were-mine.md).**
 **The arena is measured down to its ground line and nothing draws
-it yet**; blood, sparks, the arena's edges and the enchantment selector all
-landed tonight.
+it yet**; ~~blood, sparks,~~ the arena's edges and the enchantment selector all
+landed tonight. **CORRECTED 2026-09-24: BLOOD AND SPARKS DID NOT DRAW until
+`787c6b2` (2026-09-23).** From `f0a3780` (2026-09-13) the spray was seeded
+with `step.actionBoundary` inside `renderStage`, where no `step` exists, so with
+an extracted pack the line threw a ReferenceError at the first effect pose of
+every hurt or death clip: no drop was ever spawned and the rest of that frame's
+draws were skipped (`frame()` logged it once and carried on). `787c6b2` seeds it
+from the timeline entry's `token` (`test/arena-render-stage-scope.test.js`);
+its own message says it was not yet watched in a browser. The frozen
+2026-09-14-0130 handoff's "Blood and sparks" section says otherwise and stays
+as written.
 
 *(The brief it supersedes, whose ranked items 4, 5 and 6 are closed:)*
 [2026-09-13 21:30 — ranged is built and the guard had a hole](docs/handoffs/2026-09-13-2130--ranged-is-built-and-the-guard-had-a-hole.md).**
@@ -3622,8 +3681,13 @@ harness ADR 0001) and that ultracode stays ON at the owner's instruction.
       real shape, not a shortcut:** `outcomes` carry survival, health,
       maxHealth and statuses and carry NO stats, loadout or resources, so a
       record alone cannot rebuild a gladiator. **Rewards are still not built,
-      deliberately** — paying one is a progression decision and EP-D04 is
-      pending.
+      deliberately** — paying one is a progression decision and ~~EP-D04~~
+      EP-D05 is pending. **(Corrected 2026-09-24: EP-D04 is RARITY; the
+      reward-outcome decision is EP-D05 — personal precommitted outcomes —
+      in `docs/design/endless-progression-decisions.md`, pending on this branch
+      and on the design branch. And the BUILD's own victory purse is now built,
+      map-derived, with no caller: `ss2VictoryPurse` / `ss2TeamVictoryPurses`
+      in `src/team/ss2-crowd.js`, `cefaf83`.)**
     - **Conditions and bout boundaries: state this as a SWEEP, not a law.** A
       condition takes its bearer's very next turn, so a gladiator does not land
       a killing blow while carrying one, and if the bearer dies `death()`
@@ -5442,8 +5506,9 @@ the one fact that would settle it.
   are taken as caller-supplied inputs here, so a gladiator's damage pair cannot
   be produced from a character record alone; and `weapon_enchantment_damage`
   (`+0x320c`) is dropped entirely, so an enchanted weapon applies a status and
-  deals no magic damage. Also dropped: `maximum_ammo`'s herolevel tier chain,
-  `character_xp`, and `weapon_range`'s bow override.
+  deals no magic damage. Also dropped: ~~`maximum_ammo`'s herolevel tier chain,~~
+  `character_xp`~~, and `weapon_range`'s bow override~~. **(Struck 2026-09-24:
+  only `character_xp` is still dropped — see the correction two bullets down.)**
 - **A fight can run forever.** `phaseTransitionEffects` heals the acting
   combatant every non-lethal action, so any pair whose per-action self-heal
   exceeds expected incoming damage never dies (measured at 30,000 actions).
@@ -5463,10 +5528,19 @@ the one fact that would settle it.
   ► **BOTH NAMED HALVES ARE NOW FALSE.** `ss2BattleValues` derives the damage pair
     from a `weapon` id (an explicit pair still wins) and derives
     `weapon_enchantment_damage`; a call with `weapon: 5` alone returns
-    `min_damage 27 / max_damage 69`. ► **But do NOT sweep away the REST of this
+    `min_damage 27 / max_damage 69`. ► ~~**But do NOT sweep away the REST of this
     bullet's "also dropped" list, which still HOLDS**: no `maximum_ammo` herolevel
     tier chain (only the `ammo_left` fallback), no `character_xp`, no bow
-    `weapon_range` override. The offsets themselves are unchallenged.
+    `weapon_range` override.~~ **CORRECTED 2026-09-24: TWO OF THOSE THREE ARE
+    BUILT, and only `character_xp` still holds.** The bow `weapon_range`
+    override (`+0x343e`) is in `ss2BattleValues` since `6926069` (2026-09-11):
+    with `using_bow` it copies `secondary_weapon_range` onto `weapon_range`
+    (weapon 1 / secondary 40 at strength 30 gives 144 without the bow, 232 with
+    it). The `maximum_ammo` herolevel tier chain (`+0x3634`-`+0x378d`) is
+    `ss2MaximumAmmo`, assigned unconditionally by `ss2BattleValues` since
+    `7310583` (2026-09-13). `ss2BattleValues` still derives no `character_xp`
+    (a stated one is only copied through with the rest of the record).
+    The offsets themselves are unchallenged.
 
 
 ### Found 2026-09-02 (overnight): what a CAPPED verification wave established
@@ -7150,9 +7224,12 @@ with no PR, so every promoted golden, the capture pipeline and the whole
 WSL as of 2026-08-31, so opening one is newly cheap — **but that is a decision
 for the owner, not a cleanup an agent should perform.**
 ► **STALE, AND IT CONTRADICTS THE "98 COMMITS" FIGURE a few dozen lines above in
-  this same document.** Measured 2026-09-07: 172 commits ahead. "With no PR"
+  this same document.** ~~Measured 2026-09-07: 172 commits ahead.~~ "With no PR"
   still HOLDS — the open PR is for a different branch. Use
-  `git rev-list --count main..HEAD`, not a number.
+  `git rev-list --count main..HEAD`, not a number. **(Re-measured 2026-09-24 at
+  `ef48e17`: 521 ahead, 0 behind, `main` an ancestor — which is why the number
+  above is struck and the command is the instruction. `gh pr list` the same
+  day: one open PR, #3, from `design/endless-progression-owner-packet`.)**
 
 
 ### Still open, with the evidence below the archive line
@@ -7199,9 +7276,19 @@ the analysis that established it is below the line. **Correct these HERE.**
   **This is the third open item in this list to decay the same way; an open
   list is a claim, and it needs re-deriving before it is actioned.** The
   frozen copy at ~line 2745 is wrong too and stays there as history.
-- **One `isNum` site survives at `ss2-capture-wrapper.as:1407`**, with a
+- **One `isNum` site survives at ~~`ss2-capture-wrapper.as:1407`~~
+  `ss2-capture-wrapper.as:1435`**, with a
   demonstrably NaN operand. Fail-closed, so diagnosability rather than
   corruption — but the claim that the guard is used everywhere is false.
+  ► **LINE NUMBERS MOVED (re-derived 2026-09-24 at `ef48e17`): the site is now
+    `:1435`, still unguarded and still `arenaAbort("final-victory-arm")`, and
+    the twelve lines below now read 653 (the definition), 662, 763, 783, 905,
+    979, 1324, 1524, 1625, 2057, 2093, 2157** — still twelve lines carrying the
+    definition or a call; 904, 1521 and 1623 only mention `isNum` in comments,
+    as the note further down this item says. Every number below is the
+    2026-09-01 file's. Find the
+    site with `grep -n 'currentTournament >= 19 && ranking <= 2'
+    tools/runtime-capture/ss2-capture-wrapper.as`, not by line.
   ► **THE WORDING IS BACKWARDS AND SENDS A READER TO THE WRONG THING.
     Corrected 2026-09-01 (evening), re-derived directly from the file.** Line
     1407 contains **NO `isNum` call**. It reads

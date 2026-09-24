@@ -1088,22 +1088,43 @@ rough order of cost:
    quick-band observations from as many independent sessions.
 2. **The spell ingress, which has never had a capture session.** Eight
    `candidate-spell-*` fixtures exist and no observation targets any of them.
-   The driver already handles the ingress — `actionIdentityFor` keys a spell
-   scenario on `spell_id` — but the eight members are not mutually exclusive
+   ~~The driver already handles the ingress — `actionIdentityFor` keys a spell
+   scenario on `spell_id` —~~ **Corrected 2026-09-24: the driver can SELECT a
+   spell scenario, but no spell trace can be ingested.** `actionIdentityFor`
+   (`tools/runtime-capture/campaign.mjs`) keys a spell scenario on the
+   CANDIDATE's `scenario.spellId`; ingest (`src/golden/capture-ingest.js`,
+   the `spellId` branch) then refuses any spell trace that never recorded a
+   `spell_id` variable — and `spell_id` DOES NOT EXIST anywhere in the build,
+   so the wrapper's two reads of it can never fire
+   (`tools/runtime-capture/ss2-capture-wrapper.as`, the "WITHDRAWN CLAIM,
+   byte-verified 2026-08-30" comment, which names `cast_spell_icon`'s second
+   argument as the only place the id exists at runtime). Arming there is a
+   change to the wrapper's arming path that has not been made. And
+   the eight members are not mutually exclusive
    by that key (five share spell id 30), so they are one-at-a-time captures
    rather than a campaign family.
 3. **Single-direction actions.** Bash (23), bombard (21), snipe (22), taunt
    (20) and grievous (30) are one fixture each rather than a family.
    Bash/bombard/snipe need the bow weapon mode, so they need a gladiator that
    owns a bow — a staging problem, not a tooling one.
-4. **Richer scenarios.** Every golden so far comes from one staged pair (the
+4. **Richer scenarios.** ~~Every golden so far comes from one staged pair~~
+   **Twenty-two of the 23 goldens come from one staged pair** (the
    tutorial prisoner against a level-1 gladiator with no armour) — the probe
    arms included, which vary an injected roll value rather than the staging.
-   Armour, status flags, and non-lethal outcomes are all still candidate-only,
+   **Corrected 2026-09-24: the 23rd does not** —
+   `golden-armoured-deflection-threshold-cleared` (`2341789`, 2026-09-02) is a
+   `fightMode: "tournament"` capture against a villain at `armourclass 79`,
+   from `obs-onx1405-a1` and `obs-onx1521-a1`. So armour is no longer
+   candidate-only for that one scenario, and neither are non-lethal outcomes:
+   four goldens carry `expected.resultEvent: null` (the three
+   `probe-*-rollneeded-miss` arms and the armoured one). Status flags are
+   still candidate-only, and the other armour-first and equality-quirk
+   fixtures are the ones most worth confirming live. ~~Armour, status flags, and non-lethal outcomes are all still candidate-only,
    and the armour-first and equality-quirk fixtures are the ones most worth
-   confirming live. `candidate-duel-firstblood-normal-kill` is the closest of
-   the 33: it has one matching observation and needs one more independent
-   session.
+   confirming live.~~ `candidate-duel-firstblood-normal-kill` is the closest of
+   the ~~33~~ **37** (re-counted 2026-09-24: 60 candidates in
+   `test/fixtures/ss2-1v1/`, 23 with a `golden-*` counterpart): it has one
+   matching observation and needs one more independent session.
 5. **Out of scope by design.** Range taunts and other opcode-rolled paths
    make no `randomBetween` calls, so no wrapper can inject or record them.
 

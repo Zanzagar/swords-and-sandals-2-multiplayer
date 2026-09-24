@@ -34,7 +34,9 @@
  *
  * **Nothing here revives, heals, rewards, levels or re-equips anybody.** Every
  * one of those is a progression decision, and the accepted EP decisions are on
- * the design track with EP-D04 still pending. A seam that quietly healed the
+ * the design track with ~~EP-D04~~ EP-D05 still pending. (**Corrected
+ * 2026-09-24:** EP-D04 is rarity; the reward-outcome decision is EP-D05, in
+ * `docs/design/endless-progression-decisions.md`.) A seam that quietly healed the
  * survivors would be a balance choice wearing the costume of a data structure.
  *
  * The dead are NAMED, not silently dropped and not silently revived
