@@ -67,6 +67,22 @@ that: HEAD contains the much older short documents, while the worktree contains
 the accumulated design work. No EOL normalization was performed, and no file
 was reverted on that mistaken premise.
 
+## 2026-09-24 Git-hygiene checkpoint
+
+The owner correctly flagged that this branch had accumulated nineteen days of
+uncommitted progression work. The history is now durable locally: `05ec077`
+tightens the repo-local progression skill to one validated atomic local commit
+per changed owner round; `ede5ad1` is an honestly labeled catch-up checkpoint
+for the already-accumulated design record; and `bf12e53` merges main's mailmap
+fix without rebasing pushed history. Do not recreate fake historical commit
+granularity. Resume small per-choice commits from here.
+
+The branch is current with `github/main`, PR #3 already exists, and the local
+branch is ahead of its remote. Nothing has been pushed in this session: this
+project requires explicit owner approval before every push. Claude settings do
+not enforce Codex or a human shell; shared policy lives in `AGENTS.md`, while
+the direct Codex progression method lives in `$ss2-progression-design`.
+
 ## 2026-09-24 master progression closure index
 
 The active finite scope controller is
