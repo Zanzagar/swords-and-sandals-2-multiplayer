@@ -170,14 +170,18 @@ import {
   RING_VERB_LABELS,
   ringActionFor,
   ringActionLabel,
+  ringClickCommand,
   ringConfirmCommand,
+  ringEntries,
   ringFocusKind,
+  ringGreyFor,
   ringKeyCommand,
   ringModelFor,
   ringPendingFor,
   ringPendingKept,
   ringPressCommand,
-  ringSameAction
+  ringSameAction,
+  ringShownFor
 } from "/tools/arena/ring.js";
 import {
   fighterBoxFor,
@@ -201,9 +205,11 @@ import {
   RING_STRIP_IDLE,
   ringConfirmSettingFrom,
   ringConfirmSettingSave,
+  ringGreyLabelFor,
   ringOddsFor,
   ringPreviewFor,
   ringPreviewShown,
+  ringShownText,
   ringStripPreviewAfter
 } from "/tools/arena/ring-preview.js";
 import {
@@ -4877,8 +4883,10 @@ function paintTargetRing(view, origin) {
  * the build's own art from the player's icons pack, the background on its
  * over frame under the pointer (`ringButtonArt`); without the pack, S2's
  * authored round buttons. Each has its key and a short label on the ring's
- * outer side, or under the button where another stands (`ringLabelAt`). Only
- * the slots the engine offers are drawn (S2). The weapon swap, when offered,
+ * outer side, or under the button where another stands (`ringLabelAt`). The
+ * slots the engine offers are drawn (S2), and — S9 — those the team rules
+ * forbid, dimmed, with no key label (`ringButtonArt`'s disabled look; the
+ * pointer on one says why). The weapon swap, when offered,
  * is the build's own ninth button at its own place (S6, `ringSwapButtonAt`),
  * showing the weapon it swaps to; the items row (S5, `ringItemButtonsAt`) is
  * the build's own over the ring, lifted over the step-back arrow where that
@@ -4965,6 +4973,12 @@ function paintRing(view, fit) {
     // A move no slot holds carries no label: its glyph is its arrow, and its
     // key is that arrow (the strip says both).
     if (button.move) continue;
+    // S9, AUTHORED: a GREYED button carries none either — its key only says
+    // why, which the pointer on it and the strip say too — and it is drawn
+    // BEFORE a label is placed, so no label lands on it. Measured: labelled,
+    // a greyed swing's label had no free place beside a walk (2v2 tricks
+    // seed 2, 14 AI submissions in, blue-2's optionB) and ran across it.
+    if (button.reason) continue;
     // A place of the items row (S5) is labelled with its letter alone, above
     // it; the build's own name for its item is the strip's.
     const label = button.verb === "item" ? button.key : `${button.key} ${RING_VERB_LABELS[button.verb]?.short ?? button.verb}`;
@@ -5026,7 +5040,8 @@ function paintRingChoice(button) {
 function paintRingCaption(button, stage) {
   const view = ringView;
   if (!ringCaption || ringCaption.view !== view || ringCaption.slot !== button.slot) {
-    ringCaption = { view, slot: button.slot, text: ringPreviewTextOf(ringActionFor(view.model, button.slot)) };
+    // S9: a greyed button's caption is why it is greyed.
+    ringCaption = { view, slot: button.slot, text: ringShownTextOf(ringShownFor(view.model, button.slot)) };
   }
   const text = ringCaption.text;
   if (!text) return;
@@ -5957,7 +5972,9 @@ function announce(text) {
  *   (one button per foe, the selected one pressed) with his odds (S7), the
  *   ring's filled slots with their keys, the moves no slot holds with their
  *   arrows (S4), and every action the engine offers that the ring does not
- *   show. Rebuilt with the ring, so it can never disagree with the stage.
+ *   show — and, S9, every GREYED button in its place, aria-disabled, its
+ *   reason its description. Rebuilt with the ring, so it can never disagree
+ *   with the stage.
  *   Above them, the preview line (S7): what the button under the pointer or
  *   the focus will do, and — with "confirm every move" on — Confirm and Back.
  */
@@ -6033,6 +6050,40 @@ function renderRingStrip() {
     button.setAttribute("aria-describedby", description.id);
     return button;
   };
+  // S9: A GREYED BUTTON — one the team rules forbid this turn — listed in its
+  // place like the rest: its words and keys, and why not as its description.
+  // AUTHORED: `aria-disabled`, NOT `disabled`, so the keyboard still reaches
+  // it and a screen reader says it is unavailable and why; a press on it —
+  // a click, Enter, Space — takes the ring's own road (`ringClickCommand`),
+  // which sends nothing and says why.
+  const greyButton = (entry, { keys = [] } = {}) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    for (const key of keys) {
+      const hint = document.createElement("kbd");
+      hint.textContent = RING_KEY_GLYPHS[key] ?? key;
+      button.append(hint, document.createTextNode(" "));
+    }
+    if (keys.length > 0) button.setAttribute("aria-keyshortcuts", keys.join(" "));
+    button.append(document.createTextNode(ringGreyLabelFor(entry, { nameOf })));
+    button.setAttribute("aria-disabled", "true");
+    button.addEventListener("click", () => runRingCommand(ringClickCommand(model, entry.slot, { confirm: ringConfirm }), { from: "strip" }));
+    // Under the pointer or the focus, the preview line says why (S7's two tracks).
+    const stripPreview = (type) => () => {
+      ringStripState = ringStripPreviewAfter(ringStripState, { type, action: entry });
+      renderRingPreview();
+    };
+    button.addEventListener("focus", stripPreview("focus"));
+    button.addEventListener("blur", stripPreview("blur"));
+    button.addEventListener("pointerenter", stripPreview("enter"));
+    button.addEventListener("pointerleave", stripPreview("leave"));
+    const description = document.createElement("span");
+    description.id = `ring-desc-${descriptions.childElementCount}`;
+    description.textContent = ringShownTextOf(entry) ?? "";
+    descriptions.append(description);
+    button.setAttribute("aria-describedby", description.id);
+    return button;
+  };
   strip.dataset.state = view.ready ? "ready" : "waiting";
   // S7: the selected target's odds — every roll at him on screen, the engine's chance for each.
   const odds = ringOddsFor(model, ringPreviewOf, { nameOf });
@@ -6049,14 +6100,18 @@ function renderRingStrip() {
   }), oddsNode);
   const filled = model.slots.filter((slot) => slot.action);
   // The ring row: the eight in key order — a walk in its slot takes its arrow
-  // too — then every move no slot holds, with its arrow (S4).
+  // too — then every move no slot holds, with its arrow (S4); each greyed one
+  // (S9) in its place, as the stage draws it.
   const unslotted = model.moves.filter((move) => move.place !== "slot");
+  const greyed = ringEntries(model, { greyed: true }).filter((entry) => entry.reason);
+  const slotKeys = (slot) => [slot.key, model.moves.find((move) => move.slot === slot.slot)?.key].filter(Boolean);
   slotRow.replaceChildren(heading("Ring"),
-    ...filled.map((slot) => actionButton(slot.action, {
-      verb: slot.verb,
-      keys: [slot.key, model.moves.find((move) => move.slot === slot.slot)?.key].filter(Boolean)
-    })),
-    ...unslotted.map((move) => actionButton(move.action, { verb: move.verb, keys: [move.key] })));
+    ...model.slots.filter((slot) => slot.action || slot.reason).map((slot) => slot.action
+      ? actionButton(slot.action, { verb: slot.verb, keys: slotKeys(slot) })
+      : greyButton(ringGreyFor(model, slot.slot), { keys: slotKeys(slot) })),
+    ...unslotted.map((move) => move.action
+      ? actionButton(move.action, { verb: move.verb, keys: [move.key] })
+      : greyButton(ringGreyFor(model, move.move), { keys: [move.key] })));
   // The weapon swap (S6), last in the ring row as it is the ring's ninth, in
   // the build's own words for what it does this turn.
   if (model.swap) {
@@ -6066,9 +6121,11 @@ function renderRingStrip() {
   // for its item and aimed where the engine aims it: the selected foe, or the
   // fighter himself.
   const items = model.items.filter((item) => item.action);
-  itemRow.replaceChildren(...(items.length > 0
-    ? [heading("Items"), ...items.map((item) => actionButton(item.action, { words: item.words, keys: [item.key] }))]
-    : []));
+  // S9: a greyed item keeps its place in the row, as on the stage.
+  const itemButtons = model.items.filter((item) => item.action || item.reason).map((item) => item.action
+    ? actionButton(item.action, { words: item.words, keys: [item.key] })
+    : greyButton(ringGreyFor(model, item.slot), { keys: [item.key] }));
+  itemRow.replaceChildren(...(itemButtons.length > 0 ? [heading("Items"), ...itemButtons] : []));
   offRow.replaceChildren(...(model.offRing.length > 0
     ? [heading("Also"), ...model.offRing.map((entry) => actionButton(entry.action))]
     : []));
@@ -6081,9 +6138,12 @@ function renderRingStrip() {
     "(from the stage), Esc into this list." +
     (ringConfirm ? " Confirm every move is on: a press chooses; Enter (from the stage) or Confirm acts, Esc takes it back." : "");
   if (ringFocusWanted && view.ready) {
-    const enabled = (row) => [...(el(row)?.querySelectorAll("button:not(:disabled)") ?? [])];
+    // S9: the focus goes back to the button it was on, a greyed one too (the
+    // keyboard reaches it, to hear why); a fallback is always one that acts.
+    const reachable = (row) => [...(el(row)?.querySelectorAll("button:not(:disabled)") ?? [])];
+    const enabled = (row) => [...(el(row)?.querySelectorAll('button:not(:disabled):not([aria-disabled="true"])') ?? [])];
     const wanted = ringFocusWanted;
-    const next = enabled(wanted.row).find((button) => button.textContent === wanted.text)
+    const next = reachable(wanted.row).find((button) => button.textContent === wanted.text)
       ?? enabled("ring-slots")[0] ?? enabled("ring-items")[0] ?? enabled("ring-target")[0] ?? enabled("ring-off")[0];
     if (next) {
       next.focus();
@@ -6094,8 +6154,9 @@ function renderRingStrip() {
   if (view.ready && ringAnnounced !== turnKey) {
     ringAnnounced = turnKey;
     announce(`Your turn: ${nameOf(view.actorId)}. Target ${nameOf(model.selectedId)}${range ? `, ${range}` : ""}. ` +
-      `${filled.length + unslotted.length} on the ring${model.swap ? " and the weapon swap" : ""}` +
+      `${filled.length + unslotted.filter((move) => move.action).length} on the ring${model.swap ? " and the weapon swap" : ""}` +
       `${items.length > 0 ? `, ${items.length} item${items.length === 1 ? "" : "s"} over your head` : ""}` +
+      `${greyed.length > 0 ? `, ${greyed.length} greyed` : ""}` +
       `${model.offRing.length > 0 ? `, ${model.offRing.length} more listed` : ""}. ${odds.text}`);
   }
   renderRingPreview();
@@ -6130,8 +6191,10 @@ function renderRingPreview() {
     text.textContent = "";
     return;
   }
-  const { action: shown, chosen } = ringPreviewShown({ strip: ringStripState, stageHover: ringHover ? ringActionFor(view.model, ringHover) : null, pending });
-  const line = shown ? ringPreviewTextOf(shown) : null;
+  // S9: what is shown may be a GREYED button (on the stage or in the strip),
+  // whose line is why it is greyed.
+  const { action: shown, chosen } = ringPreviewShown({ strip: ringStripState, stageHover: ringHover ? ringShownFor(view.model, ringHover) : null, pending });
+  const line = shown ? ringShownTextOf(shown) : null;
   text.textContent = line
     ? `${chosen ? "Chosen — " : ""}${line}`
     : ringConfirm
@@ -6153,6 +6216,14 @@ function ringPreviewTextOf(action) {
   const view = ringView;
   if (!view) return null;
   return ringPreviewFor(view.model, action, ringPreviewOf(action), { nameOf: (id) => host.combatant(id)?.name ?? id })?.text ?? null;
+}
+
+/**
+ * S9: THE WORDS FOR WHAT THE POINTER OR THE FOCUS IS ON — a greyed button's
+ * reason in the engine's words, or an action's S7 preview (`ringShownText`).
+ */
+function ringShownTextOf(shown) {
+  return ringShownText(shown, ringPreviewTextOf, { nameOf: (id) => host.combatant(id)?.name ?? id });
 }
 
 /** S7: the choice standing on this turn, as the ring on screen holds it — or null (none, the setting off, or no ring). */
@@ -6186,6 +6257,8 @@ function runRingCommand(command, { from = "stage" } = {}) {
     // An arrow the ring owns that moves nobody: a held key's repeat says
     // nothing; a move the engine withholds is said, so the key is not silent.
     if (command.why === "not-offered") announce(`${ringActionLabel({ type: command.move })} is not on offer now.`);
+    // S9: a GREYED button, pressed by a click, a key or its strip button: why.
+    else if (command.why === "greyed") announce(ringShownTextOf(command.entry));
     // Enter with nothing chosen (S7).
     else if (command.why === "nothing-chosen") announce("Nothing is chosen yet: choose an action, then press Enter or Confirm.");
   }
@@ -6271,8 +6344,10 @@ function canvasPointOf(event) {
 
 /**
  * ONE CLICK ACTS (the owner's Q2): on a drawn button it sends that slot's
- * action — or, with "confirm every move" on, chooses it (S7, `pressRing`);
- * on a foe it selects him. The bar's sound toggle keeps its own click.
+ * action — or, with "confirm every move" on, chooses it (S7) — and on a
+ * GREYED one it says why and sends nothing (S9): `ringClickCommand`, the road
+ * a key takes, run where every command runs. On a foe it selects him. The
+ * bar's sound toggle keeps its own click.
  */
 canvas.addEventListener("click", (event) => {
   if (!ringView) return;
@@ -6282,7 +6357,7 @@ canvas.addEventListener("click", (event) => {
   if (box && point.x >= box.x0 && point.x <= box.x1 && point.y >= box.y0 && point.y <= box.y1) return;
   const slot = ringShown() ? ringSlotAt(ringButtons, point.x, point.y) : null;
   if (slot) {
-    pressRing(ringActionFor(ringView.model, slot));
+    runRingCommand(ringClickCommand(ringView.model, slot, { confirm: ringConfirm }));
     return;
   }
   const foeId = foeAt(fighterBoxes, point.x, point.y, ringView.model.foeIds);
@@ -6293,7 +6368,8 @@ canvas.addEventListener("pointermove", (event) => {
   const point = ringView ? canvasPointOf(event) : null;
   const slot = point && ringShown() ? ringSlotAt(ringButtons, point.x, point.y) : null;
   const foeId = point && !slot ? foeAt(fighterBoxes, point.x, point.y, ringView.model.foeIds) : null;
-  canvas.style.cursor = slot || foeId ? "pointer" : "";
+  // S9: a greyed button is pointed at (its caption says why) but not pressable.
+  canvas.style.cursor = slot ? (ringGreyFor(ringView.model, slot) ? "not-allowed" : "pointer") : foeId ? "pointer" : "";
   // S7: a new button under the pointer — the strip's preview line follows it
   // (the stage's caption is painted with the ring).
   if (slot !== ringHover) {
@@ -6397,7 +6473,9 @@ function ringProvenance() {
     "so is the items row's lift over the step-back arrow, where a tall fighter's arrow would reach it. " +
     "A hovered or focused button's preview — its hit chance, damage and stamina — and the target's odds in the " +
     "strip are the engine's own numbers (the hit chance is the build's rollover percentage); their words and " +
-    "places are authored, and so is \"confirm every move\", off unless you turn it on."];
+    "places are authored, and so is \"confirm every move\", off unless you turn it on. " +
+    "A dimmed button is one the team rules forbid this turn: the engine's reason, in its own words, shows when you " +
+    "point at it or focus it; the dimmed look and the words' places are authored (the build hides, never greys)."];
 }
 
 function renderProvenance() {

@@ -141,7 +141,7 @@ first (ab5feb5, `src/render/action-buttons.js`).
   keyboard strip — drawn with the authored fallback buttons (the tracer bullet)
 - **S3** the build's own button art and placement on the ring · **S4** movement (walk slots, rank arrows)
 - **S5** the items row (built, below) · **S6** the weapon swap button (built, below) · **S7** hover previews and the confirm setting (built, below)
-- **S8** AI pacing (speed-up, skip) · **S9** greyed-button reasons (needs E)
+- **S8** AI pacing (speed-up, skip) · **S9** greyed-button reasons (needs E; built, below)
 
 ### S2, built 2026-09-24: what it does, and what it decided that the owner did not
 
@@ -158,7 +158,9 @@ click hits), wired in `tools/arena/main.js` and `tools/arena/index.html`. Tests:
   the engine returns are checked against `action-buttons.js`'s independently transcribed
   `SS2_BUTTON_WIRING` on every turn of 20 seeded bouts, every foe selected in turn.
 - **A slot shows its verb only when the engine offers the action** (S2; hidden-vs-greyed is S9),
-  and sends the offered option itself. Everything else offered against the selected foe or the
+  and sends the offered option itself. **S9 (below):** ~~only when the engine offers the action~~ — a
+  slot the engine withholds for a TEAM rule shows its verb too, greyed, sends nothing and says why; one
+  it withholds for a reason the build hides is still empty. A slot still SENDS only what is offered. Everything else offered against the selected foe or the
   actor — rank changes, the swap, spells, potions, a rest beside a taunt — is listed under the stage
   until S4-S6 give it a place on the ring. An action at ANOTHER foe is reached by selecting him. The
   suite proves the coverage: over whole bouts, the union over every selection is exactly the offer,
@@ -249,9 +251,11 @@ S2's `test/arena-ring.test.js` and `test/arena-ring-bouts.test.js` were updated 
 out of the list.
 
 - **Every walk and rank change the engine offers is on the ring, whatever foe is selected, and none it
-  withholds is drawn, clicked or keyed.** A move is on the ring only when `legalActions` holds it (as a
-  slot is, S2); hidden-vs-greyed is S9's — the rank reasons `duel`, `no-rank` and `rank-full` are
-  "grey" in `SS2_UNAVAILABLE_REASONS`, so S9 will show those arrows greyed where they stand. Proven
+  withholds is ~~drawn,~~ clicked or keyed** to any effect. ~~A move is on the ring only when
+  `legalActions` holds it~~ — **S9 (below) draws one withheld for a team rule, greyed, where it stands
+  (the rank reasons `duel`, `no-rank`, `rank-full`, a slotted walk's `in-reach`), and its click and its
+  arrow only say why; one withheld for a hide is not drawn.** A move still ACTS only when
+  `legalActions` holds it (as a slot does, S2). Proven
   over 30 seeded bouts (1v1, 2v2, 3v3; plain and `tricks`), every foe selected in turn, under the
   arena's own settled camera (a team camera in 4,379 of the 4,740 selections): each offered move drawn
   exactly once, wholly on the stage, and sent by its click and its arrow; each withheld one on no
@@ -263,7 +267,7 @@ out of the list.
   fighter (AUTHORED).** The close frames wire only the retreat, but the team engine offers the walk
   toward a foe in reach when he is in another rank, or when there is a foe on each side (the retreat is
   from the nearest). That slot holds a swing, which the engine may offer too (33 selections in 75
-  bouts measured) and S9 will grey where it does not, so the walk cannot take it. It stands one pitch
+  bouts measured) and S9 greys where it does not (built, below), so the walk cannot take it. It stands one pitch
   (31.5 overlay px, the ring's tightest) in from optionB or optionE, at the same height, in the build's
   walk icon — 203 of 16,407 offered walk-selections (1.2%) in those 75 bouts. Rejected: the jump slot (Q8
   keeps it for jumps, and the close warrior frame has no free slot on the walk's side); outboard of the
@@ -344,9 +348,9 @@ out of the list.
   and its key is that arrow. A walk in its slot keeps S2's "2 Walk".
 - **Owner decisions:** the beside-walk placement; moving the ring onto the stage at its edges (the
   build does not), and — ring2 "edge" — keeping a walk on its side there while the rest moves on, and
-  letting the stage win where the fighter is drawn at its very edge; whether withheld rank arrows
-  should be greyed now rather than in S9; the rank arrows' look (a disc with a chevron, like the
-  authored buttons).
+  letting the stage win where the fighter is drawn at its very edge; ~~whether withheld rank arrows
+  should be greyed now rather than in S9~~ (S9 greys them); the rank arrows' look (a disc with a chevron,
+  like the authored buttons).
 - **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=3` (the rank arrows on a
   mid-rank fighter; the forward arrow over the front rank's heads) before trusting the look.
 
@@ -495,10 +499,13 @@ were updated where S7 put a gate in front of `actFromRing`.
   out of range "out of range: wasted"; "from behind" when the back-attack bonus applies; a rest "gains
   75 stamina"). The words before the colon are the strip's own for the button (the build's item names,
   S5; the swap's rollover text, S6). Proven over 16 seeded bouts (1v1 and 3v3; plain, `tricks`,
-  `blasts`, `crowd`), every turn, every foe selected: 19,397 hovers found the way the shell finds them
-  (`ringSlotAt` on the drawn button) and 20,325 strip buttons, each preview's numbers read back out of
-  its words by an independent parser and compared with `host.previewAction` — 6,362 with a hit chance,
-  168 that cannot miss, 364 wasted out of range. The Preview row follows the pointer (in the strip, else
+  `blasts`, `crowd`), every turn, every foe selected: ~~19,397~~ **20,902** hovers found the way the
+  shell finds them (`ringSlotAt` on the drawn button) and ~~20,325~~ **21,903** strip buttons, each
+  preview's numbers read back out of its words by an independent parser and compared with
+  `host.previewAction` — ~~6,362~~ **6,724** with a hit chance, 168 that cannot miss, ~~364~~ **482**
+  wasted out of range. **(Corrected by the S9 implementer: the struck figures are not what this test
+  prints at 2ba96c3, where S7 was committed — re-run there, and on the ring2 "edge" tree, both print
+  the bold ones. S9 adds 5,290 hovers on GREYED buttons, each showing its reason, not a preview.)** The Preview row follows the pointer (in the strip, else
   on the stage), else the focused strip button, else the choice waiting for Confirm — the focus and the
   pointer tracked apart, so the pointer leaving gives the row back to the focused button
   (`ringStripPreviewAfter`, `ringPreviewShown`; Codex review of S7, pass 3: the first build kept one
@@ -540,11 +547,15 @@ were updated where S7 put a gate in front of `actFromRing`.
   focus had just moved to). A choice stands while its turn does and the ring on screen shows it — a
   potion outlasts a change of target; a swing at the old target is DROPPED, and switching back does not
   bring it back (Codex pass 1: the first build only hid it) — and every send clears it. Proven over 18 `?play=red` bouts (1v1 and 3v3; plain, `tricks`, `crowd`; seeds 1-3):
-  1,758 presses (667 digits, 80 letters, 644 arrows, 353 clicks on drawn buttons, 14 listed), every one
-  only a choice, and the state hash unmoved until Enter (640) or Confirm (632) sent the choice, which was
-  on offer every time; 422 taken back by Esc (and Enter then sent nothing), 277 re-targeted by Tab (213
-  choices kept, 64 dropped).
-- **One road to the engine.** Every press goes through `ringPressCommand` (the shell's `pressRing`),
+  ~~1,758 presses (667 digits, 80 letters, 644 arrows, 353 clicks on drawn buttons, 14 listed)~~ **1,525
+  presses (591 digits, 80 letters, 538 arrows, 309 clicks on drawn buttons, 7 listed — re-run at 2ba96c3
+  by the S9 implementer; the struck figures are not what the committed test prints, and neither are the
+  struck ones below)**, every one only a choice, and the state hash unmoved until Enter (~~640~~ **555**)
+  or Confirm (~~632~~ **547**) sent the choice, which was on offer every time; ~~422~~ **366** taken
+  back by Esc (and Enter then sent nothing), ~~277 re-targeted by Tab (213
+  choices kept, 64 dropped)~~ **235 re-targeted by Tab (178 choices kept, 57 dropped)**.
+- **One road to the engine.** Every press goes through `ringPressCommand` (the shell's `pressRing`;
+  since S9 a click on the stage through `ringClickCommand`, which wraps it and answers a greyed button),
   every key through `ringKeyCommand`, Confirm through `ringConfirmCommand`, and only an "act" command
   reaches `actFromRing` (`runRingCommand`), which still re-asks whose turn it is. The plain list S2 kept
   for a rule set with no menu (or a menu that throws) honours the setting too: a click there is a press,
@@ -563,6 +574,89 @@ were updated where S7 put a gate in front of `actFromRing`.
   caption under it, the Preview row), `?play=red&teams=3&items=tricks` with the setting on (a spell
   chosen and ringed, Confirm live), and tab through the strip with a screen reader (the preview as each
   button's description).
+
+### S9, built 2026-09-24: why a button is greyed
+
+`ringGreyReasonOf`, `RING_HIDDEN_VERBS`, each slot's, move's and place's `reason` and `withheld`,
+`ringEntries(model, {greyed: true})`, `ringGreyFor`, `ringClickCommand` and `ringShownFor`
+(`tools/arena/ring.js`); `ringGreyTextFor`, `ringGreyLabelFor` and `ringShownText`
+(`tools/arena/ring-preview.js`); the reason carried to each drawn button (`tools/arena/ring-layout.js`)
+and the disabled look (`tools/arena/ring-art.js`); wired in `tools/arena/main.js` and
+`tools/arena/index.html`. Tests: `test/arena-ring-reasons.test.js` (new); the S2-S7 tests updated where
+a withheld button used to be nowhere (`test/arena-ring-movement.test.js`, `-preview-bouts`, `-art`,
+`-edge`, `-items`, `-bouts`, `arena-ring.test.js`) and where S9 rewrote a shell line they pin (`-wiring`,
+`-swap`, `-preview`).
+
+- **Which, from the engine, never re-derived here.** `host.unavailableActions(actor, selectedFoe)` gives
+  every button of the ring one reason code when it is not on offer, and `SS2_UNAVAILABLE_REASONS` its
+  flag: a **hide** code (the build hides the button: stance, level, an empty or locked slot, no second
+  weapon, a forced phase) draws nothing; a **grey** code draws the button where it stands, dimmed, and
+  it can never act. The owner's Q6 names the team rules (other rank, out of reach, blocked); the bouts
+  reach all but one of them — `other-rank`, `in-reach`, `body-blocks`, `duel`, `no-rank` — and
+  `rank-full`, the offer's own gate that no bout reaches (the engine's docblock), is staged.
+- **Jump and charge stay HIDDEN whatever the engine flags them** (the owner's Q8): the engine flags them
+  `not-built`, a grey code, and on the long warrior frames they are three of the eight slots on every
+  turn (`RING_HIDDEN_VERBS`).
+- **AUTHORED, the owner did not decide these:**
+  - **The engine's own grey codes are greyed as it flags them**, with its words: `not-built` on an item
+    the engine has no verb for (`?items=10` puts `inventory_buttons` frame 10, the swap's bow, in a slot:
+    "Item #10 — not now: Not built yet."), `undeclared` and `not-offered` (neither reached in the bouts;
+    staged). Q6 says only "the team rules".
+  - **The look:** the build has no disabled button (it hides); a greyed button is its own build art through
+    the build's greyscale at 0.55 alpha (`SS2_GREYSCALE_MATRIX`, the grey of `inventory_buttons` frames 10
+    and 11), or the authored disabled disc without a pack, and never takes the rollover background. The
+    stage's cursor over it is `not-allowed`.
+  - **No key label on the stage for a greyed button.** Its key only says why, and the pointer and the strip
+    say that too. Measured: labelled, a greyed swing's label had no free place beside a walk the stance
+    does not wire and ran across it (2v2 tricks seed 2, 14 AI submissions in, blue-2's optionB). It is
+    still drawn before any label is placed, so no label crosses it — which moves one: the S4 edge case's
+    held walk (2v2 tricks seed 3, 18 in) now has the greyed taunt under it, and its "2 Walk" goes over it.
+  - **The words:** the strip's own name for the button — the verb, the build's name for an item, the foe
+    it would be aimed at — then " — not now: " and the engine's `says` for the code ("Taunt at Cidra —
+    not now: That foe is in another rank; you can only reach your own."). The `says` sentences are the E
+    slice's, not the build's (the build has none). They are the caption under the hovered button, the
+    Preview row while the pointer or the focus is on it, the strip button's accessible description, and
+    what the live region says when it is pressed.
+  - **The strip lists every greyed button in its place** — the ring row's slots in key order, then the
+    moves, the items row — as a real button with `aria-disabled="true"`, NOT `disabled`, so the keyboard
+    still reaches it and a screen reader says it is unavailable and why; dimmed and dashed. The turn's
+    announcement counts them ("…, 3 greyed").
+- **It can never act.** A click on it, its digit, letter or arrow, its strip button (a click, Enter or
+  Space) — every route is `{kind: "ignore", why: "greyed"}` (`ringClickCommand`, `ringKeyCommand`), with
+  or without "confirm every move": it is never chosen, never Confirmed, never in the odds. What a greyed
+  button WOULD send (`withheld`) is kept for its words only.
+- **The weapon swap is never greyed:** every code the engine gives it is a hide (`no-secondary`, a forced
+  phase; and, from 39da762, `no-arrows`), so it stays hidden as S6 built it. A grey code on it would hide
+  it too; none exists.
+- **Proven** (`test/arena-ring-reasons.test.js`):
+  - every code in the table on one button (the step-forward arrow, re-stamped with each of the 19): each
+    of the 9 grey codes drawn once, greyed, its words under the pointer, its click saying why, listed
+    once; each of the 10 hide codes drawn, listed and pointed at nowhere, its arrow `not-offered`;
+  - over 24 seeded bouts (1v1, 2v2, 3v3; plain, `tricks`, `buffs`, `10`; seeds 1-2), every turn, every
+    foe selected (3,206 selections, 32,368 withheld entries): every entry with a grey code drawn exactly
+    once where it stands, with the engine's reason, dimmed even under the pointer, hit by the pointer at
+    its centre, saying the engine's words, sending nothing when clicked and listed once — `no-rank` 1,550,
+    `other-rank` 1,171, `in-reach` 1,021, `duel` 939, `not-built` (the item) 637, `body-blocks` 155; every
+    hide entry, and every jump and charge, drawn and listed nowhere (`slot-empty` 13,975, jump 5,092,
+    `level` 2,779, charge 1,935, `no-secondary` 1,830, `no-ammo` 776 and more);
+  - staged turns with their literals: the taunt greyed `other-rank` at the 2v2 opening, the walk toward a
+    foe and the taunt greyed `in-reach` and the step forward `no-rank` eight turns in, a 1v1's rank arrows
+    greyed `duel`, the item greyed `not-built`, and the forced swap (no arrows, bow drawn) hiding every
+    move.
+- **What it moved in the earlier slices** (measured under the arena's camera over the edge slice's 24
+  bouts, 3,877 selections, a scratch script in the S9 report): 3,136 rings now carry a greyed button
+  (5,777 in all), none off the stage and none overlapping another. They join the stage fit, so in 28 rings
+  an acting button stands elsewhere than it did; and the edge slice's push — the rest of the ring moved on
+  past a held walk by the least that clears it — is reached for the first time (3 rings; 0 without S9),
+  leaving the two discs exactly tangent. The S4 and S7 acceptances now count greyed moves (4,413 of 5,692
+  withheld) and greyed hovers (5,290), and assert the push's tangency to rounding.
+- **Owner decisions:** grey the engine's own codes, or hide them; no key label on a greyed button; the
+  words' form; `aria-disabled` over `disabled` in the strip; the tangent discs the edge push leaves
+  (a gap would be the ring's own, 2.7 overlay px).
+- **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=2` with a foe in the other rank
+  selected (the taunt and the swings greyed, their captions), `?play=red` (a 1v1's rank arrows greyed
+  `duel`), `?play=red&items=10` (the greyed item), and tab through the strip with a screen reader (a
+  greyed button announced unavailable, with its reason).
 
 <a id="decided-hud-2026-09-24"></a>
 

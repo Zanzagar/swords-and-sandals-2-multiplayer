@@ -381,6 +381,7 @@ test("OVER WHOLE BOUTS, every button the ring draws for whoever is due is the bu
   const pack = actionButtonPackFrom(iconsPack());
   const seen = new Set();
   let drawn = 0;
+  let greyed = 0;
   // 2v2 joined 1v1 and 3v3 on 2026-09-24: since 7c9cabb a closed-on archer
   // backs away or puts the bow away instead of standing on the close-range
   // bow frame, and in 1v1/3v3 over these seeds nobody reached that frame
@@ -398,14 +399,25 @@ test("OVER WHOLE BOUTS, every button the ring draws for whoever is due is the bu
             legal: host.legalActions(),
             menuFor: (targetId) => host.unavailableActions(actorId, targetId)
           });
-          const buttons = ringButtonArt(ringButtonsAt(model, { centerX: 0, centerY: 0, unit: 1 }), { pack, facing: model.stance.facing });
-          for (const button of buttons) {
+          const placed = ringButtonsAt(model, { centerX: 0, centerY: 0, unit: 1 });
+          const buttons = ringButtonArt(placed, { pack, facing: model.stance.facing });
+          // S9: a GREYED button is drawn too, DISABLED — through the build's greyscale, which folds the icon's
+          // fill this reads the frame from — so its frame is read off the same button drawn without its
+          // reason (the state picks no frame). ~~Every drawn button's fill names its frame~~ before S9.
+          const bare = ringButtonArt(placed.map(({ reason, ...button }) => button), { pack, facing: model.stance.facing });
+          buttons.forEach((button, index) => {
+            const where = `${perSide}v${perSide} ${kit || "plain"} seed ${seed} turn ${taken}: ${model.stance.frame} ${model.stance.facing} ${button.slot} ${button.verb}`;
             const wanted = expectedFrame(model.stance.frame, model.stance.facing, button.slot, button.verb);
-            assert.deepEqual(drawnFrame(button), { background: "up", frame: wanted },
-              `${perSide}v${perSide} ${kit || "plain"} seed ${seed} turn ${taken}: ${model.stance.frame} ${model.stance.facing} ${button.slot} ${button.verb}`);
+            if (button.reason) {
+              assert.deepEqual([button.state, button.source], ["disabled", "build"], `${where}: greyed`);
+              assert.deepEqual(drawnFrame(bare[index]), { background: "up", frame: wanted }, where);
+              greyed += 1;
+            } else {
+              assert.deepEqual(drawnFrame(button), { background: "up", frame: wanted }, where);
+            }
             seen.add(`${model.stance.frame} ${model.stance.facing} ${button.verb}`);
             drawn += 1;
-          }
+          });
           host.submit({ ...host.suggestAction(actorId), actorId });
         }
         assert.ok(host.battle.result, `${perSide}v${perSide} ${kit || "plain"} seed ${seed} finished`);
@@ -419,6 +431,7 @@ test("OVER WHOLE BOUTS, every button the ring draws for whoever is due is the bu
     assert.ok([...seen].some((entry) => entry.endsWith(` ${needed}`)), `${needed} was never drawn: ${[...seen].sort().join("; ")}`);
   }
   assert.ok(drawn > 1000, `${drawn} buttons drawn`);
+  assert.ok(greyed > 0 && greyed < drawn, `${greyed} of ${drawn} drawn greyed`);
 });
 
 /* ------------------------------------------------------------------ */

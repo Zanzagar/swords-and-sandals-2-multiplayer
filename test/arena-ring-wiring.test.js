@@ -68,9 +68,10 @@ test("a click, a key and a strip button all act through actFromRing, which re-as
   assert.match(act, /if \(!current\.ready\) return;/, "nothing is sent while the arena is still drawing");
   assert.equal((code.match(/host\.submit\(/g) ?? []).length, 3, "the raw buttons, the AI seat, and the ring — no fourth route");
   assert.match(code, /ringSlotAt\(ringButtons, point\.x, point\.y\)/);
-  // S7: a click presses through the confirm gate (`pressRing` -> `runRingCommand` -> `actFromRing` on
-  // an "act"), ~~`actFromRing` directly~~; `test/arena-ring-preview.test.js` pins the gate.
-  assert.match(code, /pressRing\(ringActionFor\(ringView\.model, slot\)\)/);
+  // S7: a click presses through the confirm gate (`runRingCommand` -> `actFromRing` on an "act"),
+  // ~~`actFromRing` directly~~; `test/arena-ring-preview.test.js` pins the gate. S9: the click's command is
+  // `ringClickCommand`'s — the key's road, which greys a greyed button — ~~`pressRing(ringActionFor(...))`~~.
+  assert.match(code, /runRingCommand\(ringClickCommand\(ringView\.model, slot, \{ confirm: ringConfirm \}\)\)/);
   assert.match(code, /foeAt\(fighterBoxes, point\.x, point\.y, ringView\.model\.foeIds\)/);
   assert.match(code, /const command = ringKeyCommand\(ringView\.model, \{/);
   assert.match(code, /if \(command\.kind === ""\) actFromRing\(command\.action\);/);

@@ -94,6 +94,41 @@ export function ringPreviewFor(model, action, preview, { nameOf = (id) => id } =
 }
 
 /**
+ * ► **WHAT A GREYED BUTTON SAYS (slice S9; the owner's Q6, "GREYED with a
+ *   hover reason").** Its name in the strip's own words — the verb, the
+ *   build's name for an item, and the foe it would be aimed at — then "not
+ *   now:" and the ENGINE's words for its reason (`SS2_UNAVAILABLE_REASONS`
+ *   `says`). The hover caption on the stage, the preview line, the strip
+ *   button's accessible description and the live region all say this.
+ *
+ * @param {object|null} entry  a greyed entry (`ringGreyFor`, or
+ *   `ringEntries(model, {greyed: true})`): `{verb, words, withheld, reason}`
+ * @param {{nameOf?: (id: string) => string}} [options]
+ * @returns {string|null}
+ */
+export function ringGreyTextFor(entry, { nameOf = (id) => id } = {}) {
+  if (!entry?.reason) return null;
+  return `${ringGreyLabelFor(entry, { nameOf })} — not now: ${entry.reason.words}`;
+}
+
+/**
+ * THE WORDS FOR WHATEVER A CAPTION OR THE PREVIEW LINE SHOWS (S9): `shown` is
+ * a greyed entry (`ringShownFor`, `ringGreyFor`) — its reason
+ * (`ringGreyTextFor`) — or an action — `previewTextOf(action)`, the caller's
+ * S7 preview in words — or null.
+ */
+export function ringShownText(shown, previewTextOf, { nameOf = (id) => id } = {}) {
+  if (!shown) return null;
+  if (shown.reason) return ringGreyTextFor(shown, { nameOf });
+  return (typeof previewTextOf === "function" ? previewTextOf(shown) : null) ?? null;
+}
+
+/** A greyed button's name, as the strip labels it: `ringActionLabel` of what it would send. */
+export function ringGreyLabelFor(entry, { nameOf = (id) => id } = {}) {
+  return ringActionLabel(entry?.withheld ?? {}, { verb: entry?.verb ?? null, words: entry?.words ?? null, nameOf });
+}
+
+/**
  * ► **THE SELECTED TARGET'S ODDS (the owner's decision 9: the strip "shows
  *   the selected target's odds").** Every action on screen aimed at the
  *   selected foe that rolls to hit him — a swing, a shot, the bash, the

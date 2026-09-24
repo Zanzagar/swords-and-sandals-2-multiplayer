@@ -62,7 +62,8 @@ const identity = (action) => JSON.stringify([action.type, action.targetId, actio
  * Returns `{ via, action }`.
  */
 function choose(model, selected, actor) {
-  const byVerb = (verbs) => verbs.map((verb) => model.slots.find((slot) => slot.verb === verb)).find(Boolean);
+  // S9: a greyed slot shows its verb and sends nothing — the policy takes only what acts.
+  const byVerb = (verbs) => verbs.map((verb) => model.slots.find((slot) => slot.verb === verb && slot.action)).find(Boolean);
   const press = (slot) => {
     const command = ringKeyCommand(model, { key: slot.key, focus: "stage" });
     assert.equal(command?.kind, "act", `key ${slot.key} presses ${slot.verb}`);
@@ -83,7 +84,7 @@ function choose(model, selected, actor) {
   };
   // The walk toward him IN ITS SLOT, as before S4 (a walk beside the ring is one the stance does
   // not wire — toward a foe already in reach — and this policy does not take it).
-  const toward = model.moves.find((move) => move.move === (model.stance?.facing === "left" ? "walk-left" : "walk-right") && move.place === "slot");
+  const toward = model.moves.find((move) => move.move === (model.stance?.facing === "left" ? "walk-left" : "walk-right") && move.place === "slot" && move.action);
   if (toward) return arrow(toward.key);
   if (Number.isFinite(selected?.y) && Number.isFinite(actor?.y) && selected.y !== actor.y) {
     const rank = arrow(selected.y > actor.y ? "ArrowDown" : "ArrowUp");

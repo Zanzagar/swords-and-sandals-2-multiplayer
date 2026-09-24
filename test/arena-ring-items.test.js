@@ -144,7 +144,9 @@ test("an EMPTY slot is an empty place — nothing drawn, keyed or sent — and t
   ]);
   assert.deepEqual(model.items.map((item) => item.key), ["Q", "W", "E", "R", "T", "Y"]);
   for (const empty of model.items.filter((item) => !["E", "R"].includes(item.key))) {
-    assert.deepEqual({ ...empty, key: null, slot: null, inventory: null }, { key: null, slot: null, inventory: null, itemId: null, verb: null, words: null, action: null });
+    // S9 added `reason` and `withheld` to every place: an empty one is HIDDEN (`slot-empty`), never greyed.
+    assert.deepEqual({ ...empty, key: null, slot: null, inventory: null },
+      { key: null, slot: null, inventory: null, itemId: null, verb: null, words: null, action: null, reason: null, withheld: null });
   }
   assert.deepEqual(model.items.map((item) => item.inventory), ["inventory5", "inventory4", "inventory1", "inventory2", "inventory3", "inventory6"]);
 });
@@ -587,8 +589,9 @@ test("the shell draws the row with the ring — from the pack's row layout, off 
   assert.match(paint, /const label = button\.verb === "" \? button\.key : /);
   assert.ok(rawShell.includes('const label = button.verb === "item" ? button.key : '));
   assert.match(paint, /const \{ px, gap \} = ringLabelSizeFor\(button\.r\);/, "the letters are the size the stage fit keeps room for");
-  // S7: the click presses through the confirm gate (`pressRing`), ~~`actFromRing` directly~~.
-  assert.match(shell, /pressRing\(ringActionFor\(ringView\.model, slot\)\)/, "one route to the engine, as before");
+  // S7: the click presses through the confirm gate, ~~`actFromRing` directly~~; S9: by the key's own
+  // command (`ringClickCommand`), ~~`pressRing(ringActionFor(ringView.model, slot))`~~.
+  assert.match(shell, /runRingCommand\(ringClickCommand\(ringView\.model, slot, \{ confirm: ringConfirm \}\)\)/, "one route to the engine, as before");
   assert.equal((shell.match(/host\.submit\(/g) ?? []).length, 3);
 });
 
@@ -596,7 +599,10 @@ test("the strip carries the row: an Items row of real buttons with their letters
   const strip = functionBody("renderRingStrip");
   assert.match(strip, /const itemRow = el\(""\);/);
   assert.ok(rawShell.includes('const itemRow = el("ring-items");'));
-  assert.match(strip, /itemRow\.replaceChildren\(\.\.\.\(items\.length > 0\s*\? \[heading\(""\), \.\.\.items\.map\(\(item\) => actionButton\(item\.action, \{ words: item\.words, keys: \[item\.key\] \}\)\)\]\s*: \[\]\)\);/);
+  // S9: the row lists a greyed item in its place too (`test/arena-ring-reasons.test.js` pins that half);
+  // ~~`items.map((item) => actionButton(...))` straight into the row~~.
+  assert.match(strip, /\? actionButton\(item\.action, \{ words: item\.words, keys: \[item\.key\] \}\)/);
+  assert.match(strip, /itemRow\.replaceChildren\(\.\.\.\(itemButtons\.length > 0 \? \[heading\(""\), \.\.\.itemButtons\] : \[\]\)\);/);
   assert.match(strip, /const items = model\.items\.filter\(\(item\) => item\.action\);/);
   assert.ok(rawShell.includes('${items.length > 0 ? `, ${items.map((item) => item.key).join(" ")} your items` : ""}'), "the status line names the letters on offer");
   assert.ok(rawShell.includes('${items.length > 0 ? `, ${items.length} item${items.length === 1 ? "" : "s"} over your head` : ""}'), "the announcement counts them");

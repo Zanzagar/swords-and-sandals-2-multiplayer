@@ -120,8 +120,8 @@ const FIGHTER_HEIGHT = 220;
 const FIGHTER_HALF_WIDTH = 55;
 
 /**
- * THE BUTTONS TO DRAW, in key order: one per FILLED slot (S2 shows only what
- * the engine offers), at `(centerX, centerY)` plus the slot's offset times
+ * THE BUTTONS TO DRAW, in key order: one per slot that acts (S2) or is GREYED
+ * (S9: carrying its `reason`, which dims it and says why), at `(centerX, centerY)` plus the slot's offset times
  * `unit`, with the authored fallback's radius at the slot's own scale (the
  * build's round background, 826, is 18.5 px to the fallback's 18).
  * `side` is the ring column the button stands in, for where its label goes.
@@ -145,7 +145,8 @@ export function ringButtonsAt(model, { centerX, centerY, unit, layout = null }) 
       y: centerY + at.y * unit,
       r: FALLBACK_BUTTON_RADIUS * at.scale * unit,
       scale: at.scale * unit,
-      side: at.x < 0 ? "left" : "right"
+      side: at.x < 0 ? "left" : "right",
+      ...greyOf(slot)
     }));
   }
   return Object.freeze(out);
@@ -195,7 +196,8 @@ export function ringSwapButtonAt(model, { centerX, centerY, unit, layout = null 
  *   else `SS2_STRIP.items.slots`. Each is a 116, so — as for the swap — its
  *   disc, and its click, stand at `SS2_STRIP.backgroundAt` (18.25, 18.25) of
  *   its own pixels; the radius is the ring's rule, the fallback's 18 at the
- *   row's scale. Only the places the model fills are drawn.
+ *   row's scale. Only the places the model fills are drawn — and, S9, those
+ *   holding an item the engine greys, carrying their `reason`.
  *
  * ► **ABOVE THE STEP-BACK ARROW (the owner's layout, as this slice's brief
  *   relays it: "moved up to clear it").** The row keeps the build's place
@@ -220,7 +222,8 @@ export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null
   const row = SS2_STRIP.items.rowAt;
   const out = [];
   for (const item of model?.items ?? []) {
-    if (!item.action) continue;
+    // S9: a greyed item keeps its place, dimmed.
+    if (!item.action && !item.reason) continue;
     const at = overlaySlotPosition(item.slot, { layout: rowLayout, frame: SS2_STRIP.items.restsAt })
       ?? SS2_STRIP.items.slots[item.slot];
     if (!at) continue;
@@ -239,7 +242,8 @@ export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null
       side: "top",
       // Its letter stands over it (`ringLabelAt`): the room `ringButtonsInside`
       // keeps on the stage above its disc.
-      labelRoom: label.gap + label.px
+      labelRoom: label.gap + label.px,
+      ...greyOf(item)
     }));
   }
   if (out.length === 0) return Object.freeze(out);
@@ -371,10 +375,20 @@ export function ringMoveButtonsAt(model, { centerX, centerY, unit, layout = null
       y,
       r: FALLBACK_BUTTON_RADIUS * scale * unit,
       scale: scale * unit,
-      side
+      side,
+      ...greyOf(move)
     }));
   }
   return Object.freeze(out);
+}
+
+/**
+ * S9: A GREYED BUTTON CARRIES ITS REASON — `{code, words}`, the model's —
+ * so the art dims it (`ringButtonArt`) and the page says why; an acting one
+ * carries none, and stands as it did before S9.
+ */
+function greyOf(entry) {
+  return entry?.reason && !entry.action ? { reason: entry.reason } : {};
 }
 
 /**

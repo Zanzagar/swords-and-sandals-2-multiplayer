@@ -387,7 +387,10 @@ test("WIRING: every press goes through the confirm gate, and only runRingCommand
   assert.match(functionBody("runRingCommand"), /if \(command\.kind === ""\) actFromRing\(command\.action\);/);
   // A click on the stage, a strip button: pressRing, which asks ringPressCommand with the setting.
   assert.match(functionBody("pressRing"), /ringPressCommand\(action, \{ confirm: ringConfirm \}\)/);
-  assert.match(code, /pressRing\(ringActionFor\(ringView\.model, slot\)\)/, "the canvas click");
+  // S9: the canvas click is the key's own command, run here (`ringClickCommand`: a press, or a greyed
+  // button's "why"); ~~`pressRing(ringActionFor(ringView.model, slot))`~~.
+  assert.match(code, /runRingCommand\(ringClickCommand\(ringView\.model, slot, \{ confirm: ringConfirm \}\)\)/, "the canvas click");
+  assert.match(functionBody("pressRing"), /runRingCommand\(ringPressCommand\(action, \{ confirm: ringConfirm \}\), \{ from \}\);/);
   assert.match(functionBody("renderRingStrip"), /addEventListener\("", \(\) => pressRing\(action, \{ from: "" \}\)\)/, "a strip button");
   // A key: ringKeyCommand is told the setting and the standing choice, and its command is run.
   assert.match(code, /const command = ringKeyCommand\(ringView\.model, \{ \.\.\.pressed, confirm: ringConfirm, pending: ringPendingAction\(\) \}\);/);
@@ -559,7 +562,9 @@ test("CODEX PASS 3: the shell keeps focus and pointer apart, and every strip but
   }
   assert.match(strip, /ringStripState = ringStripPreviewAfter\(ringStripState, \{ type, action \}\);/);
   assert.match(strip, /ringStripState = RING_STRIP_IDLE;/, "a rebuild forgets the old buttons");
-  assert.match(functionBody("renderRingPreview"), /ringPreviewShown\(\{ strip: ringStripState, stageHover: ringHover \? ringActionFor\(view\.model, ringHover\) : null, pending \}\)/);
+  // S9: the stage's hover is what the button stands for — its action, or a greyed button's entry
+  // (`ringShownFor`); ~~`ringActionFor(view.model, ringHover)`~~.
+  assert.match(functionBody("renderRingPreview"), /ringPreviewShown\(\{ strip: ringStripState, stageHover: ringHover \? ringShownFor\(view\.model, ringHover\) : null, pending \}\)/);
   // Each button's description is its own preview, not the shared line another button's hover rewrites.
   assert.ok(!raw.includes('setAttribute("aria-describedby", "ring-preview-text")'));
   assert.match(strip, /description\.textContent = ringPreviewTextOf\(action\) \?\? "";/);

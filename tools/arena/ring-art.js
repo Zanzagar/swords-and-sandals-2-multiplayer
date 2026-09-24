@@ -41,7 +41,7 @@ import { actionButtonOps } from "../../src/render/action-buttons.js";
  * @param {number|null} [options.ammo]  the actor's `ammo_left`, for the bow frames' count
  * @param {object|null} [options.textPack]  for the build's own glyphs on the buttons
  * @returns {object[]} frozen, one per button, in its order: the button plus
- *   `state` (`normal`|`hover`), `ops` (in the button's own pixels, `matrix`
+ *   `state` (`normal`|`hover`, or `disabled` for a greyed one, S9), `ops` (in the button's own pixels, `matrix`
  *   translations in twips, as `propOpsFor`'s), `source` (`build`|`authored`)
  *   and `centre` — the point of the button's own pixels its disc is centred
  *   on, which the painter puts on the button's `x`/`y`: 860's and the
@@ -57,7 +57,10 @@ import { actionButtonOps } from "../../src/render/action-buttons.js";
  */
 export function ringButtonArt(buttons, { pack = null, facing = "right", hoverSlot = null, psyche = 1, ammo = null, textPack = null } = {}) {
   return Object.freeze((buttons ?? []).map((button) => {
-    const state = button.slot === hoverSlot ? "hover" : "normal";
+    // S9: a greyed button is drawn DISABLED — the build's own greyscale over
+    // its art at reduced alpha, or the authored disabled disc — and never
+    // takes the rollover, which says "press me".
+    const state = button.reason ? "disabled" : button.slot === hoverSlot ? "hover" : "normal";
     const { ops, source, centre } = actionButtonOps(pack, button.verb, {
       state, facing, psyche, ammo, textPack, scale: button.scale, usingBow: button.usingBow === true,
       itemId: Number.isInteger(button.itemId) ? button.itemId : null
