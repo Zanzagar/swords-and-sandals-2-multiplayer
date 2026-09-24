@@ -2567,11 +2567,18 @@ contingent evidence acquisition. C133/C141/C155 keep those axes independent, so
 a third owner-visible amendment replaces that parent with
 `RCS-03C1`–`RCS-03C3`, producing thirty-three total slots. Splitting one counted
 row into three adds two while the B1 answer selects/prunes seven; current
-`Phi_SR = 28 - 7 + 2 = 23`. Tuple atomicity is derived: one evaluation cannot
-read its Relic identity/version, mutable coordinate, Soul resonance, and Charm
-presence from torn authoritative revisions. Additional slots may appear only
-through another explicit owner-visible charter amendment, not automatic
-frontier recursion.
+`Phi_SR = 28 - 7 + 2 = 23`. The owner then selected `RCS-03C1-A`, making every
+readiness episode immediately evaluation-eligible and reducing `Phi_SR` to 22.
+The next audit found that `RCS-03C2` still combined invocation-control source
+with live-versus-precommitted participant-authorization timing. A fourth owner-
+visible amendment replaces that parent with `RCS-03C2A`–`RCS-03C2B`, producing
+thirty-four total slots and returning current `Phi_SR` to 23. Exact actor,
+consent/veto, communication, and information remain routed to `RCS-02`, while
+precommitment lock/rebinding horizon remains `RCS-13`; they were not duplicated
+as new rows. Tuple atomicity is derived: one evaluation cannot read its Relic
+identity/version, mutable coordinate, Soul resonance, and Charm presence from
+torn authoritative revisions. Additional slots may appear only through another
+explicit owner-visible charter amendment, not automatic frontier recursion.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
