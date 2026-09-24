@@ -152,6 +152,23 @@ import {
   demoSide
 } from "/tools/arena/roster.js";
 import { createSoundPlayer } from "/tools/arena/sound-player.js";
+import {
+  SS2_ARENA_SOUNDS,
+  arenaSoundFilesFrom,
+  arenaSoundSettled,
+  arenaSoundStep,
+  createArenaSoundState,
+  createCrowdPresenter,
+  crowdHeardFor,
+  decidingBlowMsFor,
+  queueCrowdInterest,
+  settleCrowdInterest,
+  soundSecondsFrom,
+  stepEndsAtMs,
+  winningSideLevel
+} from "/src/render/crowd-sound.js";
+import { ss2CrowdInterestOf } from "/src/team/ss2-crowd.js";
+import { resourceValue } from "/src/team/resources.js";
 
 /* ------------------------------------------------------------------ */
 /* Setup                                                               */
@@ -741,8 +758,10 @@ fetch("/assets/sound/manifest.json")
     }
     soundBindings = bindingsFrom(manifest);
     soundTiming = soundTimingFrom(manifest);
+    arenaSoundFiles = arenaSoundFilesFrom(manifest);
     const buckets = Object.keys(soundBindings).length;
     log(`sound: ${manifest.count} file(s) from ${manifest.source?.sha256?.slice(0, 12) ?? "an unknown build"}, ${buckets} animation bucket(s), via ${soundPlayer.route}`);
+    reportArenaSounds();
     // ► **AN OLD PACK IS SAID ONCE, AND STILL PLAYS.** A manifest written before
     //   `extract-sounds.mjs` kept each sound's frame has `bindings` and no
     //   `cues`; every sound then starts with its clip, as it always did.
@@ -822,7 +841,16 @@ function unblockAudio() {
   //   it reports once running is logged once: the number nobody had measured
   //   for the element path it replaced.
   soundPlayer.unlock().then((running) => {
-    if (!running || audioLatencyLogged) return;
+    if (!running) return;
+    // ► **CLEARED AGAIN ONCE IT REALLY RUNS (2026-09-24).** The crowd's loop is
+    //   asked for on EVERY draw, so a draw between this gesture and the resume
+    //   finds the context still suspended and raises the banner again — which
+    //   then stayed up over a crowd that was audibly playing.
+    if (audioBlocked) {
+      audioBlocked = false;
+      hideAudioPrompt();
+    }
+    if (audioLatencyLogged) return;
     const latency = soundPlayer.latency();
     if (!latency) return;
     audioLatencyLogged = true;
@@ -868,11 +896,124 @@ function primeSoundCache(manifest) {
   for (const entry of Object.values(soundTiming?.labels ?? {})) {
     for (const sound of entry.sounds) files.add(sound.file);
   }
-  soundPlayer.preload(files, { leadInSeconds: leadInSecondsFrom(manifest) }).then(({ requested, ready, trimmed }) => {
+  // The arena's own: the crowd, the stings, the intro and the win — eight
+  // files, 0.84 MB on the shipped build, the crowd's 14 s loop the largest.
+  for (const file of Object.values(arenaSoundFiles)) if (file) files.add(file);
+  soundPlayer.preload(files, {
+    leadInSeconds: leadInSecondsFrom(manifest),
+    lengthSeconds: soundSecondsFrom(manifest)
+  }).then(({ requested, ready, trimmed }) => {
     const verb = soundPlayer.route === "webaudio" ? "decoded" : "preloaded";
     const lead = trimmed > 0 ? `, ${trimmed} with the build's MP3 lead-in skipped` : "";
     log(`sound: ${ready} of ${requested} clip(s) ${verb} from your own install${lead}.`);
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* The arena's own sounds — the crowd, the intro and the result         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **THE SOUNDS THE BUILD PLAYS FROM CODE, NOT FROM THE FIGHTER CLIP
+ *   (2026-09-24).** The crowd's ambience at its live volume, its chance cheers
+ *   and boos, the win sound, the victory sting and the pre-fight intro. Which,
+ *   when, how loud and whose level are all `arenaSoundStep` and its neighbours
+ *   in `src/render/crowd-sound.js`, under the suite, with the authored team
+ *   rules labelled there. What lives here is the clock, the host's numbers and
+ *   the hand-off to the player's `perform`.
+ */
+let arenaSoundFiles = arenaSoundFilesFrom(null);
+let arenaSoundState = createArenaSoundState();
+/** The crowd a spectator hears: the host's, from the moment each action's DRAWING ends. */
+let crowdPresenter = createCrowdPresenter(ss2CrowdInterestOf(host.battle));
+/** The build's `combat_panel` load: the crowd's clock and its roll's frame 0. */
+const boutStartedAt = performance.now();
+/** Each side's opening levels — the build's `hero.herolevel`, read before any experience. */
+const sideLevels = new Map(host.battle.teams.map((team) => [
+  team.id,
+  team.combatants.map((combatant) => resourceValue(combatant, "herolevel", Number.NaN))
+]));
+const crowdHeard = crowdHeardFor([...sideLevels.values()].flat());
+let boutUnderway = false;
+/** `{atMs, winnerTeamId, winnerLevel}` once decided: the build's `combat_won`. */
+let arenaResult = null;
+
+/**
+ * A submitted step as the arena's sounds see it: the crowd it leaves, heard
+ * from the moment its drawing ENDS (its latest clip chain or projectile, as
+ * the gate counts them), and the result it may decide — which lands when the
+ * deciding blow is DRAWN landing (`decidingBlowMsFor`: a lethal rock, an
+ * arrow's or a fireball's impact), as `death()` does in the build.
+ */
+function noteArenaSoundStep(step, started) {
+  boutUnderway = true;
+  const now = performance.now();
+  const tokens = new Set(step.actionTokens);
+  const endsAt = stepEndsAtMs({
+    entries: started.values(),
+    projectiles: [
+      ...inFlight.filter((shot) => tokens.has(shot.token)),
+      ...fireballs.filter((entry) => tokens.has(entry.token)).map((entry) => ({ startedAt: entry.startedAt, durationMs: entry.flightMs })),
+      ...boulders.filter((entry) => tokens.has(entry.token)).map((entry) => ({ startedAt: entry.startedAt, durationMs: entry.fallMs }))
+    ],
+    fallbackMs: now
+  });
+  crowdPresenter = queueCrowdInterest(crowdPresenter, ss2CrowdInterestOf(host.battle), endsAt);
+  const result = host.battle.result;
+  if (!result || arenaResult) return;
+  const winnerTeamId = result.winnerTeamId ?? null;
+  arenaResult = {
+    atMs: now + decidingBlowMsFor(step.commands),
+    winnerTeamId,
+    winnerLevel: winnerTeamId === null ? null : winningSideLevel(sideLevels.get(winnerTeamId))
+  };
+}
+
+/**
+ * One draw of the arena's own sounds: decided in `crowd-sound.js`, played by
+ * the player. Its own `try`, because it runs FIRST in `frame`: a throw here
+ * must cost the crowd, never the drawing and the turn after it.
+ */
+let arenaSoundErrorLogged = false;
+function stepArenaSounds(now) {
+  try {
+    // Only frames inside the stale window are judged again; older changes fold.
+    crowdPresenter = settleCrowdInterest(crowdPresenter, now - 1000);
+    const { state, actions } = arenaSoundStep(arenaSoundState, {
+      nowMs: now,
+      boutStartMs: boutStartedAt,
+      seed,
+      crowd: crowdPresenter,
+      crowdHeard,
+      started: boutUnderway,
+      result: arenaResult,
+      files: arenaSoundFiles
+    });
+    arenaSoundState = state;
+    for (const action of actions) {
+      // A `"pending"` element play answers later, and the intro waits for it.
+      const late = (outcome) => { arenaSoundState = arenaSoundSettled(arenaSoundState, action, outcome); };
+      arenaSoundState = arenaSoundSettled(arenaSoundState, action, soundPlayer.perform(action, late));
+    }
+  } catch (error) {
+    if (arenaSoundErrorLogged) return;
+    arenaSoundErrorLogged = true;
+    log(`arena sounds stopped on an error, the bout goes on: ${String(error?.message ?? error).slice(0, 160)}`, { warn: true });
+  }
+}
+
+/** Said once, when the pack lands: what the arena's own sounds found, and what this bout will hear. */
+function reportArenaSounds() {
+  const found = Object.entries(arenaSoundFiles).filter(([, file]) => file).map(([key]) => key);
+  const missing = Object.keys(arenaSoundFiles).filter((key) => !arenaSoundFiles[key]);
+  log(`arena sounds: ${found.length} of ${found.length + missing.length} in your pack` +
+    (missing.length > 0 ? ` (missing: ${missing.join(", ")})` : "") +
+    (crowdHeard
+      ? "; the crowd is heard — its volume follows the crowd, with a seeded 1-in-1000 cheer above 70 and boo below 20."
+      : "; the crowd is SILENT this bout, as the build's is when the hero is level 1: no fighter is above level 1."));
+  if (arenaSoundFiles.won && SS2_ARENA_SOUNDS.won.envelope) {
+    log("arena sounds: the win sound carries a volume envelope no dump has read; it plays whole.", { warn: true });
+  }
 }
 
 /**
@@ -1116,6 +1257,11 @@ function beginStep(step) {
   // The fight pop-ups, each starting WITH its fighter's reaction clip — the
   // build attaches it in the same action (`defender_hurt` +0x211e/+0x2120).
   spawnPopups(step, started, delays);
+
+  // The crowd this step leaves, and the result it may decide, for the arena's
+  // own sounds — played from the draw loop, never here (`stepArenaSounds`).
+  // After the projectiles and the clips are stamped: it reads when they end.
+  noteArenaSoundStep(step, started);
 
   // ► **NO SOUND IS PLAYED HERE ANY MORE (2026-09-23).** A sound per animation
   //   that started used to fire at this line, keyed on the family AND the
@@ -4980,6 +5126,9 @@ let loopErrorLogged = false;
 function frame(now) {
   try {
     drainFinishedAnimations(now);
+    // After the drain, so a crowd whose action just finished is heard; before
+    // the spectator's turn, so the intro gets its one pre-fight draw.
+    stepArenaSounds(now);
     spectateStep();
     settleIfReady();
     render(now);

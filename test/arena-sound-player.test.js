@@ -14,6 +14,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { SOUND_VOICES, createSoundPlayer } from "../tools/arena/sound-player.js";
+import { arenaSoundFilesFrom, arenaSoundSettled, arenaSoundStep, createArenaSoundState } from "../src/render/crowd-sound.js";
 
 /** A decoded buffer: `silentFrames` of silence, then sound, at 1000 Hz. */
 function fakeBuffer({ silentFrames = 0, length = 1000, sampleRate = 1000 } = {}) {
@@ -422,4 +423,197 @@ test("a file that ARRIVES and will not decode is not retried on a timer either",
   assert.equal((await player.preload(["bad.mp3"])).ready, 0);
   assert.deepEqual(timers.pending, [], "the same bytes will not decode next time");
   assert.equal(calls.length, 1);
+});
+
+/* ------------------------------------------------------------------ */
+/* Channels: the build's `Sound(target)` clips (2026-09-24)            */
+/* ------------------------------------------------------------------ */
+
+test("a CHANNEL is its own gain under the master: its voices share it, and the master still applies", async () => {
+  const { player, context } = webAudioPlayer();
+  await player.preload(["crowd.mp3", "cheer.mp3", "sting.mp3"]);
+  await player.unlock();
+  const crowd = player.channel("crowdsounds");
+  assert.equal(player.channel("crowdsounds"), crowd, "one channel per name, kept");
+  const [masterGain, crowdGain] = context.gains;
+  assert.equal(crowdGain.target, masterGain, "the channel's gain feeds the master");
+  assert.equal(crowd.setVolume(0.4), 0.4);
+  assert.equal(crowdGain.gain.value, 0.4);
+  assert.equal(crowd.start("cheer.mp3"), "played");
+  assert.equal(context.sources[0].target, crowdGain, "a cheer on the crowd's clip plays at the crowd's volume");
+  assert.equal(player.channel("sounds").start("sting.mp3"), "played");
+  assert.equal(context.sources[1].target, context.gains[2], "a sting on `sounds` does not");
+  assert.equal(context.gains[2].gain.value, 1, "which nothing ever sets a volume on");
+  assert.equal(crowd.setVolume(3), 1);
+  assert.equal(crowd.setVolume(-1), 0);
+});
+
+test("a LOOP runs from the skipped lead-in to the sound's own end — never the whole buffer from 0 — and loop() is idempotent", async () => {
+  const { player, context } = webAudioPlayer({ shapes: { "crowd.mp3": { silentFrames: 100 } } });
+  await player.preload(["crowd.mp3", "bare.mp3"], { leadInSeconds: { "crowd.mp3": 0.2 }, lengthSeconds: { "crowd.mp3": 0.5 } });
+  await player.unlock();
+  const crowd = player.channel("crowdsounds");
+  assert.equal(crowd.loop("crowd.mp3"), "played");
+  assert.equal(crowd.loop("crowd.mp3"), "looping", "asked every draw, started once");
+  assert.equal(context.sources.length, 1);
+  const [source] = context.sources;
+  assert.equal(source.loop, true);
+  assert.equal(source.loopStart, 0.1, "the 100 silent frames the start skips");
+  assert.equal(source.loopEnd, 0.6, "lead-in + the pack's sampleCount / rate, not the MP3's trailing padding");
+  assert.equal(source.started.offset, 0.1);
+  assert.equal(crowd.isLooping("crowd.mp3"), true);
+  crowd.loop("bare.mp3");
+  assert.equal(context.sources[1].loopEnd, 1, "no length in the pack: the buffer's end, never 0 (which loops from 0)");
+});
+
+test("stop() is AS2's no-argument stop on a targeted Sound: everything on THAT clip — the loop and a cheer — and nothing else", async () => {
+  const { player, context } = webAudioPlayer();
+  await player.preload(["crowd.mp3", "cheer.mp3", "sting.mp3", "step.mp3"]);
+  await player.unlock();
+  const crowd = player.channel("crowdsounds");
+  crowd.loop("crowd.mp3");
+  crowd.start("cheer.mp3");
+  player.channel("sounds").start("sting.mp3");
+  player.play(cue("step.mp3"));
+  crowd.stop();
+  assert.deepEqual(context.sources.map((source) => source.stopped), [true, true, false, false]);
+  assert.equal(crowd.liveVoices, 0);
+  assert.equal(crowd.loop("crowd.mp3"), "played", "and the next ask starts it afresh");
+});
+
+test("the toggle silences the channels too, and the loop comes back when asked once it is on again", async () => {
+  const { player, context } = webAudioPlayer();
+  await player.preload(["crowd.mp3"]);
+  await player.unlock();
+  const crowd = player.channel("crowdsounds");
+  crowd.loop("crowd.mp3");
+  player.setEnabled(false);
+  assert.equal(context.sources[0].stopped, true);
+  assert.equal(crowd.loop("crowd.mp3"), "off", "not while it is off");
+  player.setEnabled(true);
+  assert.equal(crowd.loop("crowd.mp3"), "played");
+  assert.equal(context.sources.length, 2);
+});
+
+test("sixteen footsteps never evict the crowd's loop: a channel's voices are kept apart from the clip voices", async () => {
+  const { player, context } = webAudioPlayer({ player: { voiceLimit: 2 } });
+  await player.preload(["crowd.mp3", "step.mp3", "cheer.mp3"]);
+  await player.unlock();
+  const crowd = player.channel("crowdsounds");
+  crowd.loop("crowd.mp3");
+  for (let index = 0; index < 5; index += 1) player.play(cue("step.mp3"));
+  assert.equal(context.sources[0].stopped, false);
+  for (let index = 0; index < 5; index += 1) crowd.start("cheer.mp3");
+  assert.equal(context.sources[0].stopped, false, "nor do the channel's own one-shots: a loop is never retired");
+  assert.equal(crowd.isLooping("crowd.mp3"), true);
+});
+
+test("a blocked context refuses a channel too; a loop not yet decoded is loaded quietly, a one-shot is a said drop", async () => {
+  const { player, context, blocked, notReady } = webAudioPlayer();
+  const crowd = player.channel("crowdsounds");
+  assert.equal(crowd.loop("crowd.mp3"), "blocked");
+  assert.equal(blocked.length, 1);
+  await player.unlock();
+  assert.equal(crowd.loop("crowd.mp3"), "not-ready");
+  assert.deepEqual(notReady, [], "the loop is asked again next draw and starts when ready");
+  assert.equal(crowd.start("cheer.mp3"), "not-ready");
+  assert.deepEqual(notReady, ["cheer.mp3"]);
+  await settle();
+  assert.equal(crowd.loop("crowd.mp3"), "played");
+  assert.equal(context.sources.length, 1);
+});
+
+test("perform runs each of the director's actions on its channel and says what happened", async () => {
+  const { player, context } = webAudioPlayer();
+  await player.preload(["crowd.mp3", "cheer.mp3"]);
+  await player.unlock();
+  assert.equal(player.perform({ kind: "volume", channel: "crowdsounds", gain: 0.16 }), "set");
+  assert.equal(player.perform({ kind: "loop", channel: "crowdsounds", file: "crowd.mp3" }), "played");
+  assert.equal(player.perform({ kind: "loop", channel: "crowdsounds", file: "crowd.mp3" }), "looping");
+  assert.equal(player.perform({ kind: "start", channel: "crowdsounds", file: "cheer.mp3" }), "played");
+  assert.equal(player.channel("crowdsounds").volume, 0.16);
+  assert.equal(player.perform({ kind: "stop", channel: "crowdsounds" }), "stopped");
+  assert.ok(context.sources.every((source) => source.stopped));
+  assert.equal(player.perform({ kind: "dance" }), "skipped");
+  assert.equal(player.perform(null), "skipped");
+  assert.equal(createSoundPlayer({}).perform({ kind: "start", channel: "sounds", file: "x.mp3" }), "silent");
+});
+
+test("THE FALLBACK: a channel's element plays at the master times the channel, loops natively, and follows both", async () => {
+  const made = [];
+  const element = (url) => {
+    const node = {
+      url, volume: 1, ended: false, paused: false, loop: false,
+      load() {},
+      cloneNode() { const copy = element(url); made.push(copy); return copy; },
+      play() { node.paused = false; return Promise.resolve(); },
+      pause() { node.paused = true; }
+    };
+    return node;
+  };
+  const player = createSoundPlayer({ createAudio: element });
+  await player.preload(["crowd.mp3"]);
+  player.setVolume(0.5);
+  const crowd = player.channel("crowdsounds");
+  crowd.setVolume(0.4);
+  assert.equal(crowd.loop("crowd.mp3"), "pending", "an element's play is a promise: not played until it says so");
+  assert.equal(crowd.loop("crowd.mp3"), "looping");
+  assert.equal(made.length, 1);
+  assert.equal(made[0].loop, true);
+  assert.equal(made[0].volume, 0.2);
+  crowd.setVolume(0.2);
+  assert.equal(made[0].volume, 0.1, "the channel moves its live voices");
+  player.setVolume(1);
+  assert.equal(made[0].volume, 0.2, "and so does the master");
+});
+
+test("A REJECTED FALLBACK PLAY DOES NOT USE UP THE INTRO: pending, refused, retried once, played — no duplicate start", async () => {
+  // Codex (gpt-6-astra): the element path answered "played" before its promise
+  // settled, so an autoplay rejection left the intro counted and never heard.
+  const made = [];
+  let refuse = 1;
+  const element = (url) => {
+    const node = {
+      url, volume: 1, ended: false, paused: true, loop: false,
+      load() {},
+      cloneNode() { const copy = element(url); made.push(copy); return copy; },
+      play() {
+        node.paused = false;
+        if (refuse > 0) {
+          refuse -= 1;
+          node.paused = true;
+          return Promise.reject(new Error("NotAllowedError"));
+        }
+        return Promise.resolve();
+      },
+      pause() { node.paused = true; }
+    };
+    return node;
+  };
+  const blocked = [];
+  const player = createSoundPlayer({ createAudio: element, onBlocked: () => blocked.push(true) });
+  const files = arenaSoundFilesFrom({ sounds: [{ file: "654.mp3", id: 654 }] });
+  let state = createArenaSoundState();
+  // `stepArenaSounds` in tools/arena/main.js, exactly: settle now, and again on the late answer.
+  const draw = (now) => {
+    const step = arenaSoundStep(state, { nowMs: now, boutStartMs: 0, seed: 7, files, started: false });
+    state = step.state;
+    for (const action of step.actions) {
+      const late = (outcome) => { state = arenaSoundSettled(state, action, outcome); };
+      state = arenaSoundSettled(state, action, player.perform(action, late));
+    }
+  };
+  draw(0);
+  draw(16);
+  assert.equal(made.length, 1, "no second start while the first is pending");
+  assert.equal(state.intro, "pending");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(blocked.length, 1, "the banner, as before");
+  assert.equal(state.intro, "waiting", "refused: retryable, not played");
+  draw(33);
+  await new Promise((resolve) => setImmediate(resolve));
+  draw(50);
+  assert.equal(made.length, 2, "one retry, and only one");
+  assert.equal(state.intro, "played");
+  assert.equal(made[1].paused, false, "and it is sounding");
 });

@@ -85,3 +85,58 @@ test("the gesture resumes the context, and the toggle reaches the player", () =>
   assert.match(unblock, /soundPlayer\.unlock\(\)/);
   assert.match(code, /soundEnabled = !soundEnabled;\s*soundPlayer\.setEnabled\(soundEnabled\);/);
 });
+
+/* ------------------------------------------------------------------ */
+/* The arena's own sounds (2026-09-24): `src/render/crowd-sound.js`    */
+/* ------------------------------------------------------------------ */
+
+test("the arena's own sounds step once a draw — after the drain, before the spectator's turn — through `perform`", () => {
+  const frameBody = functionBody(code, "frame");
+  assert.match(frameBody, /drainFinishedAnimations\(now\);\s*stepArenaSounds\(now\);\s*spectateStep\(\);/);
+  const step = functionBody(code, "stepArenaSounds");
+  assert.match(step, /crowdPresenter = settleCrowdInterest\(crowdPresenter, now - 1000\);/);
+  assert.match(step, /arenaSoundStep\(arenaSoundState, \{/);
+  assert.match(step, /seed,/, "the bout seed feeds the crowd's roll");
+  assert.match(step, /crowd: crowdPresenter,/, "the whole history: each frame judged at its own time");
+  // Settled now, and again on a pending play's late answer.
+  assert.match(step, /const late = \(outcome\) => \{ arenaSoundState = arenaSoundSettled\(arenaSoundState, action, outcome\); \};/);
+  assert.match(step, /arenaSoundSettled\(arenaSoundState, action, soundPlayer\.perform\(action, late\)\)/);
+  assert.match(step, /catch \(error\)/, "a sound defect costs the crowd, never the frame");
+  // Still the one clip-cue play in the file.
+  assert.equal((code.match(/soundPlayer\.play\(/g) ?? []).length, 1);
+});
+
+test("a step hands its crowd and its result to the arena's sounds, and plays nothing itself", () => {
+  const begin = functionBody(code, "beginStep");
+  // After the clips are stamped and the projectiles pushed: it reads when they end.
+  assert.ok(begin.indexOf("noteArenaSoundStep(") > begin.lastIndexOf("boulders.push("));
+  assert.ok(begin.indexOf("noteArenaSoundStep(") > begin.lastIndexOf("entry.startedAt = "));
+  assert.match(begin, /noteArenaSoundStep\(step, started\);/);
+  assert.equal((begin.match(/soundPlayer\.perform\(/g) ?? []).length, 0);
+  const note = functionBody(code, "noteArenaSoundStep");
+  assert.match(note, /queueCrowdInterest\(crowdPresenter, ss2CrowdInterestOf\(host\.battle\), endsAt\)/,
+    "the host's crowd, heard from the moment the step's drawing ends");
+  assert.match(note, /stepEndsAtMs\(\{/);
+  assert.match(note, /atMs: now \+ decidingBlowMsFor\(step\.commands\)/, "the result at the LETHAL impact, not the first reaction");
+  assert.equal((note.match(/reactionDelaysFor|delays\./g) ?? []).length, 0);
+  assert.match(note, /winningSideLevel\(sideLevels\.get\(winnerTeamId\)\)/);
+});
+
+test("the arena's sound files are preloaded with the rest, each loop with its own length", () => {
+  const prime = functionBody(code, "primeSoundCache");
+  assert.match(prime, /for \(const file of Object\.values\(arenaSoundFiles\)\) if \(file\) files\.add\(file\);/);
+  assert.match(prime, /lengthSeconds: soundSecondsFrom\(manifest\)/);
+});
+
+test("nothing in the crowd's chance is Math.random — the stream is the bout seed's", () => {
+  const module = codeOnly(fs.readFileSync(new URL("../src/render/crowd-sound.js", import.meta.url), "utf8"));
+  assert.equal((module.match(/Math\.random/g) ?? []).length, 0);
+  for (const name of ["stepArenaSounds", "noteArenaSoundStep"]) {
+    assert.equal((functionBody(code, name).match(/Math\.random/g) ?? []).length, 0, name);
+  }
+});
+
+test("the banner a crowd's loop can raise between the gesture and the resume is cleared once sound really runs", () => {
+  const unblock = functionBody(code, "unblockAudio");
+  assert.match(unblock, /if \(!running\) return;\s*if \(audioBlocked\) \{\s*audioBlocked = false;\s*hideAudioPrompt\(\);\s*\}/);
+});

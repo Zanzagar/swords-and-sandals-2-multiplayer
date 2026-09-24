@@ -30,6 +30,10 @@
  * - `sound-timing.js` fires each of a clip's sounds at the DRAWN pose the
  *   build's `StartSound` sits on, with the drawing's own pose arithmetic, so a
  *   sound follows everything that delays or cuts short the figure.
+ * - `crowd-sound.js` is the other half: the sounds the build plays from CODE
+ *   and from the arena's own timelines — the crowd's ambience at its live
+ *   volume, its seeded chance cheers and boos, the win sound, the sting and the
+ *   pre-fight intro — as actions for the player, one draw at a time.
  * - `arena-shell.js` holds the decisions the browser shell was making where no
  *   test could reach them. `tools/arena/main.js` cannot be imported by node at
  *   all, and it has given up five live defects in one day; what was logic
@@ -90,6 +94,7 @@ export * from "./painter.js";
 export * from "./timeline.js";
 export * from "./sound.js";
 export * from "./sound-timing.js";
+export * from "./crowd-sound.js";
 export * from "./clip-labels.js";
 export * from "./clip-sequences.js";
 export * from "./stance.js";
