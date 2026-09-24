@@ -752,6 +752,56 @@ export function applyActionWithOutcome(battle, action) {
 }
 
 /* ------------------------------------------------------------------ */
+/* What an interface asks before it acts                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * What ONE legal action would do — its hit chance, damage, energy and kind —
+ * asked of the rule set's optional `previewAction(view, action)` hook, over the
+ * same frozen view `legalActions` hands it. Added 2026-09-24 for the battle UI
+ * (`docs/design/battle-ui.md`, "Engine additions").
+ *
+ * **Pure, and that is the contract.** It reads the battle and writes nothing:
+ * no effect, no event, no RNG draw, so `combatStateHash` and the RNG cursor are
+ * the same after it as before. `null` when the rule set has no such hook, when
+ * the battle is over or the actor is down, and for an action that is not on
+ * offer — a preview of an illegal action would be a number resolution never
+ * produces.
+ */
+export function previewAction(battle, action) {
+  if (typeof battle.rules.previewAction !== "function") return null;
+  const actor = combatantById(battle, action?.actorId);
+  if (!actor?.alive || battle.result) return null;
+  if (!actionIsLegal(battle, action)) return null;
+  return battle.rules.previewAction(
+    Object.freeze(actorView(battle, actor)),
+    Object.freeze({
+      actorId: actor.id,
+      type: action.type,
+      targetId: action.targetId,
+      spellKind: action.spellKind ?? null,
+      itemId: action.itemId ?? null
+    })
+  );
+}
+
+/**
+ * For the SELECTED foe, every verb the rule set's own menu would show the
+ * actor, and a reason on each one `legalActions` does not offer — asked of the
+ * optional `unavailableActions(view, actorId, targetId, legal)` hook, which is
+ * handed this actor's `legalActions` so it always reads the engine's own offer.
+ * Pure, like `previewAction`; `null` when the rule set has no such hook, the
+ * battle is over or the actor is down.
+ */
+export function unavailableActions(battle, actorId = currentCombatant(battle)?.id, targetId = null) {
+  if (typeof battle.rules.unavailableActions !== "function") return null;
+  const actor = combatantById(battle, actorId);
+  if (!actor?.alive || battle.result) return null;
+  const legal = legalActions(battle, actor.id);
+  return battle.rules.unavailableActions(Object.freeze(actorView(battle, actor)), actor.id, targetId, legal);
+}
+
+/* ------------------------------------------------------------------ */
 /* AI                                                                  */
 /* ------------------------------------------------------------------ */
 

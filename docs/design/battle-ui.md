@@ -70,9 +70,20 @@ engine unavailableActions() ┘                                                 
     (`ss2ActiveDamagePair` and the band rule: quick = min, normal = min–max, power = max), energy
     (`ss2SwingCost`, `round(magicka)` for casts, `round(strength × 1.5)` for shove), and the effect
     kind.
-  - `unavailableActions(actor)`: the verbs `legalActions` withheld, with a reason code (`other-rank`,
-    `out-of-reach`, `body-blocks`, `in-reach` for taunt, `level`, `slot-empty`, `no-ammo`, `wall`).
+  - ~~`unavailableActions(actor)`: the verbs `legalActions` withheld, with a reason code (`other-rank`,
+    `out-of-reach`, `body-blocks`, `in-reach` for taunt, `level`, `slot-empty`, `no-ammo`, `wall`).~~
+    **`unavailableActions(actor, target)`** — who-first: the build's ring for the stance measured to
+    the SELECTED foe, every verb on it, and one reason on each the engine does not offer. The codes,
+    re-derived from the offer, are in `SS2_UNAVAILABLE_REASONS` with their hide/grey split;
+    `out-of-reach` and `wall` are not offer gates (a far foe puts the ring on the long frame, which
+    has no melee buttons; a walk into the wall is offered and goes nowhere), and `in-reach` covers
+    every long-range verb a close TURN withholds, not only the taunt.
   - A test pins that the preview equals what resolution uses.
+  - **Built 2026-09-24:** `ss2PreviewAction`/`ss2UnavailableActions` in `src/team/ss2-rules.js`,
+    `previewAction`/`unavailableActions` in `src/team/resolver.js` and on the host;
+    `test/ss2-action-preview.test.js`. The damage band comes from the attacker record resolution
+    builds (`vanillaRecordOf`), not `ss2ActiveDamagePair` alone, and no spell shows a `magicka`
+    chance: none can miss.
 - **Targeting state machine**: Idle → Action chosen → (Choosing target) → Ready → Sent. Esc steps back
   one state. The existing per-action animation gate keeps the dock read-only while the arena plays
   the last action.

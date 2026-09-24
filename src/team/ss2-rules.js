@@ -15785,9 +15785,805 @@ export function createSs2TeamRules({
       //   away", as the swap arm above puts it — would be a new AI rule, and is
       //   left for the owner rather than slipped in here.
       return best ?? restOption ?? options[0];
+    },
+
+    /**
+     * What the UI shows for ONE legal action — see `ss2PreviewAction`.
+     * Optional hook, no contract bump (the `initiativeOrder` precedent): the
+     * resolver's `previewAction` answers `null` for a rule set without it.
+     * Pure: no draw, no effect, nothing hashed.
+     */
+    previewAction(view, action) {
+      return ss2PreviewAction(view, action, { fixtureReplay, backAttackBonus, crowdPatience, rankStride });
+    },
+
+    /**
+     * The build's ring for the actor's stance against the SELECTED foe, every
+     * verb on it, and a reason code on each the engine does not offer — see
+     * `ss2UnavailableActions`. Optional hook, pure, like `previewAction`.
+     * `legal` is what `legalActions` offered this actor; the resolver passes
+     * it so the ring is always read against the engine's own offer.
+     */
+    unavailableActions(view, actorId, targetId, legal) {
+      return ss2UnavailableActions(view, targetId, legal ?? this.legalActions(view, actorId), { rankStride });
     }
   });
 }
 
 /** The default SS2 rule set: tournament mode, the only defeat gate this seam represents. */
 export const ss2TeamRules = createSs2TeamRules();
+
+/* ------------------------------------------------------------------ */
+/* The UI's two questions: what an action will do, and why a verb is   */
+/* not on offer (2026-09-24, `docs/design/battle-ui.md` slice E)        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * What a previewed action does, in one word, for the button's icon and colour.
+ *
+ * `strike` damages a foe (every swing, shot, the taunt, the discharge and the
+ * damage spells); `push`/`pull` move a foe away/toward (shove, gale / command);
+ * `heal` refills the actor (rest, a potion, rejuvenate); `buff` improves the
+ * actor for a while (the timed buffs, colossus, swift sandals, bloodlust);
+ * `debuff` worsens a foe without damaging him (weaken armour, little fat kid);
+ * `move` moves the actor (walks, rank changes, teleport, the taunted flee);
+ * `self` is everything else the actor does to himself (wincrowd, adulation,
+ * the swap, a charging psyche press, a condition's turn).
+ *
+ * ► **`debuff` IS AN EIGHTH KIND, added to the seven the brief listed** — weaken
+ *   armour and little fat kid write a FOE and damage nobody, and none of
+ *   strike/push/pull/heal/buff/move/self says that.
+ */
+export const SS2_EFFECT_KIND = Object.freeze({
+  STRIKE: "strike",
+  PUSH: "push",
+  PULL: "pull",
+  HEAL: "heal",
+  BUFF: "buff",
+  DEBUFF: "debuff",
+  MOVE: "move",
+  SELF: "self"
+});
+
+/**
+ * The `attack_chances` band a dispatcher direction reads — `directionProfile`
+ * in `src/golden/ss2-attack-candidate.js`, its `chance` term only: 1-4 quick,
+ * 5-8 normal, 9-12 power, 20 taunt, 21 bombard, 22 snipe, 23 bash, and 30 (the
+ * psyche discharge and the whirlwind) `normal`.
+ *
+ * ► **`magicka` IS NOT HERE, AND NO VERB IN THIS ENGINE READS IT.**
+ *   `calculateSs2AttackChances` computes `magicka` (the build's
+ *   `magicka_percentage`), but every spell resolved here cannot miss — the
+ *   bolts, fireballs and molten death take a damage roll and no hit roll, and
+ *   the rest take no roll at all — so a "magicka hit chance" on a spell button
+ *   would be a number resolution never compares against.
+ */
+function ss2BandChance(direction, chances) {
+  if (direction >= 1 && direction <= 4) return chances.quick;
+  if ((direction >= 5 && direction <= 8) || direction === 30) return chances.normal;
+  if (direction >= 9 && direction <= 12) return chances.power;
+  if (direction === 20) return chances.taunt;
+  if (direction === 21) return chances.bombard;
+  if (direction === 22) return chances.snipe;
+  if (direction === 23) return chances.bash;
+  return null;
+}
+
+/**
+ * The damage a direction SELECTS, lowest and highest, before armour —
+ * `directionProfile`'s damage term, then `selectedDamage = Math.ceil(...)`, in
+ * `src/golden/ss2-attack-candidate.js`. The band rule: quick = `min_damage`,
+ * normal and bombard = `min_damage`-`max_damage`, power = `max_damage`, snipe
+ * = `min_damage`, bash = `ceil(min_damage / 2)`, taunt = `round(charisma * 4) -
+ * defender.charisma` (1-3 when that is below 1), 30 = `ceil(max_damage * 1.5)`
+ * (`character_level * 10` when that is 1 or less).
+ *
+ * Not re-derived from the bytes here: it is the candidate's arithmetic,
+ * restated for a range instead of a roll, and `test/ss2-action-preview.test.js`
+ * checks it against the `selectedDamage` resolution actually took.
+ */
+function ss2BandDamage(direction, attacker, defender) {
+  let low;
+  let high;
+  if (direction >= 1 && direction <= 4) [low, high] = [attacker.min_damage, attacker.min_damage];
+  else if ((direction >= 5 && direction <= 8) || direction === 21) [low, high] = [attacker.min_damage, attacker.max_damage];
+  else if (direction >= 9 && direction <= 12) [low, high] = [attacker.max_damage, attacker.max_damage];
+  else if (direction === 20) {
+    const damage = Math.round(attacker.charisma * 4) - defender.charisma;
+    [low, high] = damage < 1 ? [1, 3] : [damage, damage];
+  } else if (direction === 22) [low, high] = [attacker.min_damage, attacker.min_damage];
+  else if (direction === 23) [low, high] = [Math.ceil(attacker.min_damage / 2), Math.ceil(attacker.min_damage / 2)];
+  else if (direction === 30) {
+    let damage = Math.ceil(attacker.max_damage * 1.5);
+    if (damage <= 1) damage = attacker.character_level * 10;
+    [low, high] = [damage, damage];
+  } else return null;
+  return Object.freeze({ min: Math.ceil(low), max: Math.ceil(high) });
+}
+
+/**
+ * The request `applyAction` would hand `resolveAction` for this action — the
+ * resolver's own shape (`src/team/resolver.js` `applyAction`), built from the
+ * view the rule set was handed, so a preview reads exactly the combatants the
+ * phase would.
+ */
+function ss2PreviewRequest(view, action) {
+  const everyone = [view.actor, ...(view.allies ?? []), ...(view.foes ?? [])];
+  return Object.freeze({
+    ...view,
+    actorId: view.actor.id,
+    teamId: view.actor.teamId,
+    type: action.type,
+    targetId: action.targetId,
+    spellKind: action.spellKind ?? null,
+    itemId: action.itemId ?? null,
+    target: everyone.find((combatant) => combatant?.id === action.targetId) ?? null
+  });
+}
+
+/**
+ * A condition's tick, as `resolveStatusPhase` computes it: the inflictor's
+ * enchantment damage, chosen by the VICTIM's weapon mode (the build's odd
+ * selector, reproduced there). `null` when resolution would refuse the tick
+ * (two living combatants share the inflictor's stringified id).
+ */
+function ss2StatusTickDamage(request, flag) {
+  const actor = request.actor;
+  const sourceId = ss2StatusSourceOf(statusTokenFor(actor.status ?? [], flag) ?? flag);
+  const candidates = sourceId === null
+    ? []
+    : [...(request.foes ?? []), ...(request.allies ?? [])].filter((combatant) => String(combatant.id) === sourceId);
+  if (candidates.length > 1) return null;
+  const inflictor = candidates[0] ?? null;
+  if (inflictor === null) return 0;
+  return resourceValue(
+    inflictor,
+    resourceValue(actor, "equipped_weapon", 1) === 1 ? "weapon_enchantment_damage" : "secondary_weapon_enchantment_damage",
+    0
+  );
+}
+
+/**
+ * ► **WHAT ONE LEGAL ACTION WILL DO, AS THE BUTTON SHOWS IT: its hit chance,
+ *   the damage it selects, the stamina it charges, and what kind of thing it
+ *   is.** Pure — it draws nothing, writes nothing and is hashed nowhere — and
+ *   every number is the one `resolveAction` uses, branch by branch; the test
+ *   (`test/ss2-action-preview.test.js`) resolves every previewed action of real
+ *   seeded bouts and checks each.
+ *
+ * The fields:
+ * - `chance` — the build's `attack_chances` percentage the roll is compared
+ *   against (`rollNeeded = 100 - chance`), or `null` when the action takes no
+ *   hit roll. `certain: true` marks a damage spell, which cannot miss. It is
+ *   the build's own number, the one its rollover shows, and not quite the odds:
+ *   the dispatcher hits on `diceroll >= 100 - chance` over 1-100, which is
+ *   `chance + 1` in 100, and the taunt's first roll lands on `roll < chance`,
+ *   `chance - 1` in 100.
+ * - `damage` — `{ min, max }` the ingress selects BEFORE armour (a hit can be
+ *   absorbed by armour, and a killing blow is cut to the hitpoints left), or
+ *   `null`. For a condition's turn it is what the actor himself takes.
+ * - `energy` — the phase's `staminacost`, which `nextphase` subtracts before
+ *   its regeneration (`1 + round(stamina / 3)`) is added back. NEGATIVE for
+ *   `rest`, whose cost is `0 - round(stamina * 15)`. A killing blow is not
+ *   charged at all (`death()` deletes `nextphase`); the preview cannot know it
+ *   will kill, so it states the charge.
+ * - `kind` — `SS2_EFFECT_KIND`.
+ * - `crowdToll` — what the crowd's patience takes off the ACTOR's health this
+ *   turn, whatever he does (`ss2CrowdDamage`; 0 until the patience runs out).
+ * - `backAttack` — the blow would land from behind the target, so the authored
+ *   bonus (`backAttackBonus` of the damage that reaches hitpoints) is added if
+ *   it lands. Judged after the turn to the target and, for a ghost strike, from
+ *   where it lands — resolution's own rule.
+ * - `outOfRange` — a discharge or whirlwind the range gate will waste: it
+ *   costs, and decides nothing.
+ * - `destination` — where a move, a push or a pull leaves the body it moves,
+ *   when that is decided now (`{ x }`, `{ x, y }` for a rank change).
+ * - `restores` — what a potion or rejuvenate gives back, before `nextphase`.
+ *
+ * `null` for an action this rule set does not resolve, and for a targeted
+ * action with no target in the view.
+ */
+export function ss2PreviewAction(view, action, {
+  fixtureReplay = false,
+  backAttackBonus = SS2_BACK_ATTACK_BONUS,
+  crowdPatience = SS2_CROWD.patience,
+  rankStride = SS2_ARENA.rankStride
+} = {}) {
+  if (!view?.actor || typeof action?.type !== "string") return null;
+  // The facing the phase will read: every verb aimed at a foe turns first.
+  const request = ss2TurnToTarget(ss2PreviewRequest(view, action)).request;
+  const actor = request.actor;
+  const target = request.target;
+  const type = action.type;
+  const kinds = SS2_EFFECT_KIND;
+  const range = (min, max) => Object.freeze({ min, max });
+  const shaped = (kind, fields = {}) => Object.freeze({
+    type,
+    targetId: action.targetId ?? null,
+    ...(action.itemId != null ? { itemId: action.itemId } : {}),
+    kind,
+    chance: null,
+    damage: null,
+    energy: 0,
+    crowdToll: fixtureReplay ? 0 : ss2CrowdDamage(request.turnNumber, crowdPatience),
+    ...fields
+  });
+  const castCost = () => Math.round(actor.stats.magicka);
+  const gaitCost = () => Math.round(ss2MovementSpeed(actor) / 2);
+  const facesLeft = (actor.status ?? []).includes(SS2_FACING_LEFT);
+  const bounded = (x) => clamp(x, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+  const bodies = [
+    ...(request.foes ?? []),
+    ...(request.allies ?? []).filter((ally) => ally.id !== actor.id)
+  ];
+
+  // A condition's turn: no stamina, the tick on the actor.
+  const statusFlag = SS2_FLAG_FOR_STATUS_PHASE[type];
+  if (statusFlag) {
+    const tick = ss2StatusTickDamage(request, statusFlag);
+    return shaped(kinds.SELF, { damage: tick === null ? null : range(tick, tick), condition: statusFlag });
+  }
+  if (type === Ss2ActionType.TAUNTED_PHASE) {
+    const to = Number.isFinite(actor.x)
+      ? bounded(actor.x + (facesLeft ? 1 : -1) * ss2RunDisplacement(ss2MovementSpeed(actor)))
+      : null;
+    return shaped(kinds.MOVE, { energy: gaitCost(), destination: to === null ? null : { x: to } });
+  }
+  if (type === Ss2ActionType.REST) {
+    return shaped(kinds.HEAL, { energy: 0 - Math.round(actor.stats.stamina * 15) });
+  }
+  if (type === Ss2ActionType.SWAP_WEAPONS) return shaped(kinds.SELF, { energy: 1 });
+
+  const rankDirection = SS2_RANK_DIRECTION[type];
+  if (rankDirection) {
+    const toY = ss2RankDestination(actor.y, rankDirection, rankStride);
+    const toX = toY === null ? null : ss2RankArrivalX(actor.x, bodies, toY);
+    return shaped(kinds.MOVE, {
+      energy: gaitCost(),
+      destination: toY === null || toX === null ? null : { x: toX, y: toY }
+    });
+  }
+  const walkDirection = SS2_WALK_DIRECTION[type];
+  if (walkDirection) {
+    return shaped(kinds.MOVE, {
+      energy: gaitCost(),
+      destination: Number.isFinite(actor.x) ? { x: ss2WalkDestination(actor, bodies, walkDirection) } : null
+    });
+  }
+
+  if (type === Ss2ActionType.PSYCHE_UP) {
+    const counter = ss2PsycheCounter(actor);
+    const pressCost = Math.round(actor.stats.strength * PSYCHE_UP_DISCHARGE.strengthFactor);
+    if (counter < SS2_PSYCHE_UP.dischargeAt) {
+      return shaped(kinds.SELF, { energy: pressCost, charge: Object.freeze({ counter, counterAfter: counter + 1 }) });
+    }
+    if (!ss2PsycheDischargeInRange(actor, target)) {
+      return shaped(kinds.STRIKE, { energy: pressCost, outOfRange: true });
+    }
+    // In range: the band path below, with the discharge's own profile.
+  }
+
+  if (type === Ss2ActionType.SHOVE) {
+    if (!target) return null;
+    const force = ss2ShoveForce(actor);
+    return shaped(kinds.PUSH, {
+      energy: Math.round(actor.stats.strength * SS2_SHOVE.staminaCostFactor),
+      force,
+      destination: Number.isFinite(target.x) ? { x: bounded(target.x + force) } : null
+    });
+  }
+
+  const castDamage = SS2_BOLT_SPELLS[type] ?? SS2_FIREBALL_SPELLS[type];
+  if (castDamage) {
+    return shaped(kinds.STRIKE, { damage: range(castDamage.damageLow, castDamage.damageHigh), certain: true, energy: castCost() });
+  }
+  if (type === Ss2ActionType.CAST_DEATH_FROM_ABOVE) {
+    const { boulderCount, damagePerBoulder } = SS2_DEATH_FROM_ABOVE;
+    return shaped(kinds.STRIKE, {
+      damage: range(boulderCount.low * damagePerBoulder, boulderCount.high * damagePerBoulder),
+      certain: true,
+      energy: castCost()
+    });
+  }
+  if (type === Ss2ActionType.CAST_GALE) {
+    if (!target) return null;
+    const force = facesLeft ? 0 - SS2_GALE.force : SS2_GALE.force;
+    return shaped(kinds.PUSH, {
+      energy: castCost(),
+      force,
+      destination: Number.isFinite(target.x) ? { x: bounded(target.x + force) } : null
+    });
+  }
+  if (type === Ss2ActionType.CAST_COMMAND) {
+    if (!target) return null;
+    const positioned = Number.isFinite(target.x) && Number.isFinite(actor.x);
+    const pull = positioned
+      ? ss2CommandPull({ casterX: actor.x, targetX: target.x, facingLeft: facesLeft, standOff: ss2PhysicalSize(target) })
+      : null;
+    return shaped(kinds.PULL, { energy: castCost(), destination: pull ? { x: bounded(pull.to) } : null });
+  }
+  if (type === Ss2ActionType.CAST_TELEPORT) {
+    return shaped(kinds.MOVE, {
+      energy: castCost(),
+      // Drawn at the cast (one sample), so only its bounds are known now.
+      destinationRange: Number.isFinite(actor.x)
+        ? range(bounded(SS2_TELEPORT.destinationLow), bounded(SS2_TELEPORT.destinationHigh))
+        : null
+    });
+  }
+  if (type === Ss2ActionType.CAST_ADULATION) return shaped(kinds.SELF, { energy: castCost() });
+  if (type === Ss2ActionType.WINCROWD) return shaped(kinds.SELF, { energy: SS2_WINCROWD.staminaCost });
+  if (type === Ss2ActionType.CAST_WEAKEN_ARMOUR) return shaped(kinds.DEBUFF, { energy: castCost() });
+  if (type === Ss2ActionType.DRINK_POTION) {
+    if (!Object.hasOwn(SS2_POTIONS, action.itemId)) return null;
+    const { potion, bonus, before, after } = ss2PotionOutcome(action.itemId, ss2PoolsOf(actor));
+    return shaped(kinds.HEAL, {
+      energy: 0,
+      restores: Object.freeze({ pool: potion.stat, bonus, amount: after[potion.stat] - before[potion.stat] })
+    });
+  }
+  if (SS2_TIMED_BUFFS[type]) return shaped(kinds.BUFF, { energy: castCost() });
+  if (type === Ss2ActionType.CAST_REJUVINATE) {
+    const pools = ss2PoolsOf(actor);
+    return shaped(kinds.HEAL, {
+      energy: castCost(),
+      restores: Object.freeze({
+        hitpoints: actor.maxHealth - actor.health,
+        staminaleft: pools.staminamax - pools.staminaleft,
+        armourclass: pools.armourclass_max - pools.armourclass
+      })
+    });
+  }
+  const statSpell = SS2_STAT_SPELLS[type];
+  if (statSpell) return shaped(statSpell.bearer === "victim" ? kinds.DEBUFF : kinds.BUFF, { energy: castCost() });
+
+  // The attack path: the swings, the shots, the bash, the taunt, the in-range
+  // discharge, the whirlwind and the ghost strike — `ATTACK_BANDS` and the
+  // three profiles resolution falls back to, in its own order.
+  const band = ATTACK_BANDS[type]
+    ?? (type === Ss2ActionType.PSYCHE_UP ? PSYCHE_UP_DISCHARGE : undefined)
+    ?? SS2_ITEM_STRIKES[type]
+    ?? (type === Ss2ActionType.TAUNT ? TAUNT_STRIKE : undefined);
+  if (!band || !target) return null;
+  if (type === Ss2ActionType.CAST_WHIRLWIND && !ss2PsycheDischargeInRange(actor, target)) {
+    return shaped(kinds.STRIKE, { energy: castCost(), outOfRange: true });
+  }
+  const attacker = vanillaRecordOf(actor, "attacker");
+  const defender = vanillaRecordOf(target, "defender");
+  const chances = calculateSs2AttackChances(attacker, defender);
+  // Every direction a band can draw shares one profile, so its lowest stands for all.
+  const direction = Number.isFinite(band.direction) ? band.direction : band.low;
+  const energy = band.transitionFor
+    ? band.transitionFor(actor, null).staminaCost
+    : band.magickaCost
+      ? castCost()
+      : fixtureReplay
+        ? Math.round(actor.stats.strength * band.strengthFactor)
+        : ss2SwingCost({
+          bandFactor: band.strengthFactor,
+          attackSpeed: resourceValue(actor, "attack_speed", SS2_RESOURCE_DEFAULTS.attack_speed),
+          strength: actor.stats.strength
+        });
+  const ghostLanding = type === Ss2ActionType.CAST_GHOST_STRIKE && Number.isFinite(actor.x) && Number.isFinite(target.x)
+    ? (facesLeft ? target.x + ss2PhysicalSize(actor) : target.x - ss2PhysicalSize(actor))
+    : null;
+  const backAttack = backAttackBonus > 0
+    && ss2IsBackAttack(ghostLanding === null ? actor : { ...actor, x: ghostLanding }, target);
+  return shaped(kinds.STRIKE, {
+    chance: ss2BandChance(direction, chances),
+    damage: ss2BandDamage(direction, attacker, defender),
+    energy,
+    backAttack,
+    backAttackBonus: backAttack ? backAttackBonus : 0,
+    // The taunt's other landed outcome, which does no damage: a melee
+    // defender is shoved, a bow-mode one made to flee (`+0x69a7`).
+    ...(type === Ss2ActionType.TAUNT
+      ? { otherwise: resourceValue(target, "equipped_weapon", 1) === 1 ? kinds.PUSH : "flee" }
+      : {})
+  });
+}
+
+/**
+ * ► **EVERY REASON A VERB ON THE RING CAN BE UNAVAILABLE, AND WHETHER THE UI
+ *   HIDES IT OR GREYS IT** — the owner's decision Q6(c), 2026-09-24: hide
+ *   where the original hides; grey, with the reason, where a team rule (or
+ *   this engine) forbids what the build would offer.
+ *
+ * Each code is re-derived from `legalActions` (the offer), not from a list:
+ *
+ * | code | display | whose rule | the offer's gate |
+ * | --- | --- | --- | --- |
+ * | `no-ammo` | hide | build | the forced swap: bow drawn, `ammo_left <= 0` — the only offer |
+ * | `no-stamina` | hide | build | the forced rest: `staminaleft <= 0` — the only offer |
+ * | `condition` | hide | build | a condition's turn (`forcedStatusFlag`) — the only offer |
+ * | `level` | hide | build | wincrowd below `herolevel` 3, psyche up below 7 |
+ * | `bow-drawn` | hide | build | psyche up on either archer frame, at any level |
+ * | `slot-empty` | hide | build | an inventory slot holding 1 (or 0, or undeclared) |
+ * | `slot-locked` | hide | build | an inventory slot above `inventory_maxslots` |
+ * | `no-secondary` | hide | build | the swap with `secondary_weapon` 0 or no reach |
+ * | `no-ranks` | hide | authored | a rank verb in an arena with no second axis |
+ * | `unpositioned` | hide | engine | a walk or shove where nothing has a position |
+ * | `other-rank` | grey | team | melee, shove, bash, taunt at a foe in another rank |
+ * | `in-reach` | grey | team | a long-range verb while the TURN is on a close frame |
+ * | `body-blocks` | grey | team | a snipe whose line a body stands in |
+ * | `duel` | grey | team | two left alive: only the closing rank change |
+ * | `no-rank` | grey | team | no rank that way |
+ * | `rank-full` | grey | team | no free ground in that rank |
+ * | `not-built` | grey | engine | jump, charge, an item no verb here resolves |
+ * | `undeclared` | grey | engine | the fighter lacks the counter or backups the verb writes |
+ * | `not-offered` | grey | engine | withheld, and nothing above explains it — a gap |
+ *
+ * ► **`in-reach` IS WIDER THAN "THE TAUNT ONLY OUT OF REACH".** The engine
+ *   chooses ONE controller frame per turn — the nearest foe decides an
+ *   archer's, any foe in reach in his own rank a warrior's (the owner's design,
+ *   in `legalActions`) — while the ring is measured to the SELECTED foe. So
+ *   with a far foe selected and another one close, the ring is the long frame
+ *   and the turn is the close one: the taunt, both shots and the walk toward
+ *   the nearest foe are all withheld for the same reason.
+ *
+ * ► **`out-of-reach` AND `wall` ARE NOT HERE, because no offer gate is either.**
+ *   Measured to the selected foe, a foe out of reach puts the ring on the long
+ *   frame, which wires no melee verb at all — the build HIDES it, by stance.
+ *   And a walk into the arena wall is offered: it goes nowhere and still costs
+ *   (`ss2WalkDestination`), so the preview's `destination` equals where he
+ *   stands. The nearest thing to a wall is the rank edge, `no-rank`.
+ *
+ * `not-offered` is a derivation gap, never a rule: the tests assert it never
+ * appears in the seeded bouts. `rank-full` is the offer's own gate and no bout
+ * reaches it: the outermost arrival spot `ss2RankArrivalX` tries beside a
+ * rank's bodies is always clear unless their `physical_size` extents cover the
+ * arena's whole 4,200 units, which five bodies cannot.
+ */
+export const SS2_UNAVAILABLE_REASONS = Object.freeze(Object.fromEntries([
+  ["no-ammo", "hide", "build", "Out of arrows with the bow drawn: the build puts the bow away before anyone can act."],
+  ["no-stamina", "hide", "build", "No stamina left: the build rests before anyone can act."],
+  ["condition", "hide", "build", "A condition takes this turn before anyone can act."],
+  ["level", "hide", "build", "The build shows this only from a higher level (Win the Crowd 3, Psyche Up 7)."],
+  ["bow-drawn", "hide", "build", "The archer controls never show Psyche Up."],
+  ["slot-empty", "hide", "build", "This inventory slot holds nothing."],
+  ["slot-locked", "hide", "build", "This inventory slot is above the fighter's inventory_maxslots."],
+  ["no-secondary", "hide", "build", "No second weapon to swap to."],
+  ["no-ranks", "hide", "authored", "This arena has one rank."],
+  ["unpositioned", "hide", "engine", "Nobody in this battle has a position."],
+  ["other-rank", "grey", "team", "That foe is in another rank; you can only reach your own."],
+  ["in-reach", "grey", "team", "A foe is within reach, so this turn is fought at close range."],
+  ["body-blocks", "grey", "team", "Someone stands in the line of a flat shot; lob it instead."],
+  ["duel", "grey", "team", "Two left standing: you may only close the gap."],
+  ["no-rank", "grey", "team", "There is no rank that way."],
+  ["rank-full", "grey", "team", "There is no free ground in that rank."],
+  ["not-built", "grey", "engine", "Not built yet."],
+  ["undeclared", "grey", "engine", "This fighter cannot hold what this writes."],
+  ["not-offered", "grey", "engine", "Not on offer."]
+].map(([code, display, rule, says]) => [code, Object.freeze({ code, display, rule, says })])));
+
+/** The eight controller slots, in the build's names; see `SS2_RING_WIRING`. */
+const SS2_RING_SLOTS = Object.freeze([
+  "optionA", "optionB", "optionC", "optionD", "optionE", "optionF", "optionG", "optionH"
+]);
+
+/**
+ * THE BUTTONS EACH CONTROLLER FRAME WIRES, per facing, `optionA`-`optionH` —
+ * the battle map's table (`docs/integration/ss2-battle-map.md`, "Buttons wired
+ * per controller frame", overlay frames 5, 13, 20 and 28), transcribed label
+ * for label. `taunt|rest` is the one shared slot, split on
+ * `staminaleft / staminamax * 100 >= 50` (taunt at or above).
+ */
+const SS2_RING_WIRING = Object.freeze({
+  longrange_warrior: Object.freeze({
+    right: Object.freeze(["jumpleft", "walkleft", "taunt|rest", "jumpright", "walkright", "chargeright", "wincrowd", "psyche_up"]),
+    left: Object.freeze(["jumpleft", "walkleft", "chargeleft", "jumpright", "walkright", "taunt|rest", "psyche_up", "wincrowd"])
+  }),
+  closerange_warrior: Object.freeze({
+    right: Object.freeze(["jumpleft", "walkleft", "shove", "power_attack", "normal_attack", "quick_attack", "wincrowd", "psyche_up"]),
+    left: Object.freeze(["power_attack", "normal_attack", "quick_attack", "jumpright", "walkright", "shove", "psyche_up", "wincrowd"])
+  }),
+  longrange_archer: Object.freeze({
+    right: Object.freeze(["jumpleft", "walkleft", "taunt|rest", "bombardright", "walkright", "sniperight", "wincrowd", "psyche_up"]),
+    left: Object.freeze(["bombardleft", "walkleft", "snipeleft", "jumpright", "walkright", "taunt|rest", "psyche_up", "wincrowd"])
+  }),
+  closerange_archer: Object.freeze({
+    right: Object.freeze(["jumpleft", "walkleft", "shove", "jumpright", "bash_attack", "taunt", "wincrowd", "psyche_up"]),
+    left: Object.freeze(["jumpleft", "bash_attack", "taunt", "jumpright", "walkright", "shove", "psyche_up", "wincrowd"])
+  })
+});
+
+/** A ring label's engine verb; `null` for the four the engine does not build. */
+const SS2_RING_VERB_TYPE = Object.freeze({
+  jumpleft: null,
+  jumpright: null,
+  chargeleft: null,
+  chargeright: null,
+  walkleft: Ss2ActionType.WALK_LEFT,
+  walkright: Ss2ActionType.WALK_RIGHT,
+  taunt: Ss2ActionType.TAUNT,
+  rest: Ss2ActionType.REST,
+  wincrowd: Ss2ActionType.WINCROWD,
+  psyche_up: Ss2ActionType.PSYCHE_UP,
+  shove: Ss2ActionType.SHOVE,
+  power_attack: Ss2ActionType.POWER_ATTACK,
+  normal_attack: Ss2ActionType.NORMAL_ATTACK,
+  quick_attack: Ss2ActionType.QUICK_ATTACK,
+  bash_attack: Ss2ActionType.BASH_ATTACK,
+  bombardleft: Ss2ActionType.BOMBARD,
+  bombardright: Ss2ActionType.BOMBARD,
+  snipeleft: Ss2ActionType.SNIPE,
+  sniperight: Ss2ActionType.SNIPE
+});
+
+/** The ring's verbs that name the selected FOE; every other one names the actor. */
+const SS2_RING_AIMED = Object.freeze(new Set([
+  Ss2ActionType.TAUNT,
+  Ss2ActionType.PSYCHE_UP,
+  Ss2ActionType.SHOVE,
+  Ss2ActionType.POWER_ATTACK,
+  Ss2ActionType.NORMAL_ATTACK,
+  Ss2ActionType.QUICK_ATTACK,
+  Ss2ActionType.BASH_ATTACK,
+  Ss2ActionType.BOMBARD,
+  Ss2ActionType.SNIPE
+]));
+
+/**
+ * What an inventory item does when its button is pressed: the verb, and
+ * whether it is offered per foe (`aimed`) or once at the caster — each exactly
+ * as `legalActions` offers it. Built from the spell tables, never typed.
+ */
+const SS2_INVENTORY_VERBS = (() => {
+  const verbs = new Map();
+  const add = (itemId, type, aimed) => verbs.set(itemId, Object.freeze({ type, aimed }));
+  for (const itemId of Object.keys(SS2_POTIONS).map(Number)) add(itemId, Ss2ActionType.DRINK_POTION, false);
+  for (const [type, spell] of Object.entries(SS2_BOLT_SPELLS)) add(spell.itemId, type, true);
+  for (const [type, spell] of Object.entries(SS2_FIREBALL_SPELLS)) add(spell.itemId, type, true);
+  add(SS2_DEATH_FROM_ABOVE.itemId, Ss2ActionType.CAST_DEATH_FROM_ABOVE, true);
+  add(SS2_WHIRLWIND.itemId, Ss2ActionType.CAST_WHIRLWIND, true);
+  add(SS2_GHOST_STRIKE.itemId, Ss2ActionType.CAST_GHOST_STRIKE, true);
+  add(SS2_GALE.itemId, Ss2ActionType.CAST_GALE, true);
+  add(SS2_COMMAND.itemId, Ss2ActionType.CAST_COMMAND, true);
+  add(SS2_WEAKEN_ARMOUR.itemId, Ss2ActionType.CAST_WEAKEN_ARMOUR, true);
+  add(SS2_TELEPORT.itemId, Ss2ActionType.CAST_TELEPORT, false);
+  add(SS2_ADULATION.itemId, Ss2ActionType.CAST_ADULATION, false);
+  for (const [type, buff] of Object.entries(SS2_TIMED_BUFFS)) add(buff.itemId, type, false);
+  for (const [type, spell] of Object.entries(SS2_STAT_SPELLS)) add(spell.itemId, type, spell.bearer === "victim");
+  add(SS2_REJUVENATE.itemId, Ss2ActionType.CAST_REJUVINATE, false);
+  return verbs;
+})();
+
+/**
+ * ► **THE BUILD'S RING FOR THE ACTOR'S STANCE AGAINST THE SELECTED FOE, EVERY
+ *   VERB ON IT, AND WHY EACH ONE THE ENGINE DOES NOT OFFER IS NOT OFFERED.**
+ *   Who-first: a foe is always selected, and the buttons show what the actor
+ *   can do to HIM. Pure, like `ss2PreviewAction`.
+ *
+ * **The stance** is the build's controller selector (overlay frame 4,
+ * `+0x00b9`-`+0x017f`) with the selected foe as "the opponent": warrior or
+ * archer by the weapon in hand, close when `fightdistance` to him is under
+ * `weapon_range` (a warrior) or under `100 + physical_size` (an archer) —
+ * STRICT `<`, both. The lane is NOT part of it: the lane is a team rule, and a
+ * team rule greys (`other-rank`) where the build's selector would show the
+ * button. The ring faces the selected foe, as the fighter will when he acts
+ * (`ss2TurnToTarget`).
+ *
+ * **The ring** is that frame's eight controller slots (`SS2_RING_WIRING`), the
+ * swap slot, the six inventory buttons, and the two authored rank verbs.
+ *
+ * **Each entry** is `available` when `legal` holds its action for this target
+ * (the foe for an aimed verb, the actor for the rest); otherwise it carries
+ * exactly one `reason` from `SS2_UNAVAILABLE_REASONS` and that code's
+ * `display`. The reasons are re-derived from the offer's gates, in the offer's
+ * own order; `legal` decides availability, so the ring is always read against
+ * whatever the engine offers.
+ *
+ * ► **ONE REASON IS INFERRED, NOT DERIVED: `rest`'s.** Its offer was
+ *   unconditional at `937795b` and is being changed concurrently (close
+ *   range). If `legal` withholds it while the turn is on a close frame, the
+ *   reason is `in-reach`; otherwise a withheld rest is `not-offered` until its
+ *   gate is written down here.
+ *
+ * `offRing` lists what `legal` offers against this foe or the actor that no
+ * ring entry shows — a status phase, a forced rest on a close frame, the rest
+ * the engine offers beside a taunt, a walk the engine's frame allows and the
+ * selected foe's does not — so a UI can place every legal action.
+ */
+export function ss2UnavailableActions(view, targetId, legal, { rankStride = SS2_ARENA.rankStride } = {}) {
+  const actor = view.actor;
+  const foe = view.foes.find((candidate) => candidate.id === targetId);
+  if (!foe) {
+    throw new TeamRuleSetError(`${String(targetId)} is not a living foe of ${actor.id}; the ring is measured to one.`);
+  }
+  const offers = Array.isArray(legal) ? legal : [];
+  const offered = (type, aimedAt, itemId = null) => offers.some((option) =>
+    option.type === type && option.targetId === aimedAt && (option.itemId ?? null) === itemId);
+
+  // THE TURN, as `legalActions` computes it — one frame for the whole turn.
+  const positioned = Number.isFinite(actor.x);
+  const bowDrawn = ss2InBowMode(actor);
+  const reach = ss2Reach(actor);
+  const floor = ss2ArcherMinimumRange(actor);
+  const nearest = nearestFoe(view);
+  const nearestDistance = nearest ? ss2FightDistance(actor, nearest) : null;
+  const archerClosedOn = bowDrawn && nearestDistance !== null && nearestDistance < floor;
+  const warriorEngaged = !positioned || view.foes.some((candidate) => {
+    const distance = ss2FightDistance(actor, candidate);
+    return (distance === null || distance < reach) && ss2SameLane(actor, candidate);
+  });
+  const onCloseFrame = bowDrawn ? archerClosedOn : warriorEngaged;
+  const retreat = (nearest ? nearest.x > actor.x : true) ? Ss2ActionType.WALK_LEFT : Ss2ActionType.WALK_RIGHT;
+
+  // THE STANCE, measured to the selected foe.
+  const distance = ss2FightDistance(actor, foe);
+  const close = bowDrawn ? distance !== null && distance < floor : distance === null || distance < reach;
+  const frame = `${close ? "closerange" : "longrange"}_${bowDrawn ? "archer" : "warrior"}`;
+  const facing = positioned && Number.isFinite(foe.x) && foe.x !== actor.x
+    ? (foe.x < actor.x ? "left" : "right")
+    : ((actor.status ?? []).includes(SS2_FACING_LEFT) ? "left" : "right");
+  const staminaMax = resourceValue(actor, "staminamax", 0);
+  const rested = staminaMax > 0
+    ? (resourceValue(actor, "staminaleft", 0) / staminaMax) * 100 >= SS2_TAUNT.staminaPercent
+    : false;
+
+  // THE FORCED CHAIN, in the offer's order: it is the whole offer when it fires.
+  const forcedFlag = forcedStatusFlag(actor);
+  const forced = bowDrawn && resourceValue(actor, "ammo_left", 0) <= 0
+    ? { type: Ss2ActionType.SWAP_WEAPONS, reason: "no-ammo" }
+    : resourceValue(actor, "staminaleft", 0) <= 0
+      ? { type: Ss2ActionType.REST, reason: "no-stamina" }
+      : forcedFlag
+        ? { type: SS2_STATUS_PHASE_FOR_FLAG[forcedFlag], reason: "condition", condition: forcedFlag }
+        : null;
+
+  const herolevel = resourceValue(actor, "herolevel", 0);
+  const declared = declaredResourceNames(actor);
+  const snipeBodies = [...view.foes, ...view.allies.filter((ally) => ally.id !== actor.id)];
+
+  /** The offer's gates for one controller verb, in its order; `null` = offered. */
+  const controllerReason = (type) => {
+    switch (type) {
+      case null: return "not-built";
+      case Ss2ActionType.WALK_LEFT:
+      case Ss2ActionType.WALK_RIGHT:
+        if (!positioned) return "unpositioned";
+        return onCloseFrame && type !== retreat ? "in-reach" : null;
+      case Ss2ActionType.REST:
+        // Inferred, not derived — see the docblock.
+        if (offered(Ss2ActionType.REST, actor.id)) return null;
+        return onCloseFrame ? "in-reach" : "not-offered";
+      case Ss2ActionType.TAUNT:
+        if (onCloseFrame && !bowDrawn) return "in-reach";
+        // `(bowDrawn && onCloseFrame) || rested` holds for every taunt the
+        // ring shows: the long frames show it only when rested, and a close
+        // archer stance means somebody is inside the floor.
+        return ss2SameLane(actor, foe) ? null : "other-rank";
+      case Ss2ActionType.WINCROWD:
+        return herolevel >= SS2_WINCROWD.herolevelAtLeast ? null : "level";
+      case Ss2ActionType.PSYCHE_UP:
+        // One conjunction and one level test in the offer; the build's two
+        // hides go first, because below them the button does not exist.
+        if (bowDrawn) return "bow-drawn";
+        if (herolevel < 7) return "level";
+        return declared.has("psyche_up") ? null : "undeclared";
+      case Ss2ActionType.SHOVE:
+        if (!positioned) return "unpositioned";
+        return ss2SameLane(actor, foe) ? null : "other-rank";
+      case Ss2ActionType.QUICK_ATTACK:
+      case Ss2ActionType.NORMAL_ATTACK:
+      case Ss2ActionType.POWER_ATTACK:
+      case Ss2ActionType.BASH_ATTACK:
+        return distance === null || ss2SameLane(actor, foe) ? null : "other-rank";
+      case Ss2ActionType.BOMBARD:
+        return archerClosedOn ? "in-reach" : null;
+      case Ss2ActionType.SNIPE:
+        if (archerClosedOn) return "in-reach";
+        return ss2ShotBlocked(actor, foe, snipeBodies) ? "body-blocks" : null;
+      default:
+        return "not-offered";
+    }
+  };
+
+  const entries = [];
+  const push = (entry, derived) => {
+    const aimedAt = entry.type === null ? null : entry.targetId;
+    const available = entry.type !== null && offered(entry.type, aimedAt, entry.offerItemId ?? null);
+    const reason = available ? null : (forced ? forced.reason : (derived ?? "not-offered"));
+    const { offerItemId, ...shown } = entry;
+    entries.push(Object.freeze({
+      ...shown,
+      available,
+      reason,
+      display: available ? "shown" : SS2_UNAVAILABLE_REASONS[reason].display
+    }));
+  };
+
+  SS2_RING_WIRING[frame][facing].forEach((label, index) => {
+    const verb = label === "taunt|rest" ? (rested ? "taunt" : "rest") : label;
+    const type = SS2_RING_VERB_TYPE[verb];
+    push({
+      group: "controller",
+      slot: SS2_RING_SLOTS[index],
+      verb,
+      type,
+      targetId: type === null ? null : (SS2_RING_AIMED.has(type) ? foe.id : actor.id)
+    }, controllerReason(type));
+  });
+
+  push(
+    { group: "swap", slot: "swap_inventory", verb: "swap_weapons", type: Ss2ActionType.SWAP_WEAPONS, targetId: actor.id },
+    resourceValue(actor, "secondary_weapon", null) !== 0 && resourceValue(actor, "secondary_weapon_range", 0) > 0
+      ? null
+      : "no-secondary"
+  );
+
+  // The six inventory buttons, under the panel's two gates and in its order.
+  const windowed = declared.has("inventory_maxslots");
+  const slotWindow = windowed ? resourceValue(actor, "inventory_maxslots") : null;
+  SS2_INVENTORY_SLOTS.forEach((slot, index) => {
+    const held = declared.has(slot) ? resourceValue(actor, slot, SS2_INVENTORY_EMPTY) : SS2_INVENTORY_EMPTY;
+    const base = { group: "inventory", slot, verb: slot, itemId: held };
+    if (!declared.has(slot)) return push({ ...base, type: null, targetId: null }, "slot-empty");
+    if (windowed && index + 1 > slotWindow) return push({ ...base, type: null, targetId: null }, "slot-locked");
+    // 1 is the build's empty marker; 0 is the item table's own "nothing" row
+    // (the champions' DNA carries it), which no verb reads — shown as empty.
+    if (held === SS2_INVENTORY_EMPTY || held === 0) return push({ ...base, type: null, targetId: null }, "slot-empty");
+    const verb = SS2_INVENTORY_VERBS.get(held);
+    if (!verb) return push({ ...base, type: null, targetId: null }, "not-built");
+    const entry = {
+      ...base,
+      type: verb.type,
+      targetId: verb.aimed ? foe.id : actor.id,
+      offerItemId: verb.type === Ss2ActionType.DRINK_POTION ? held : null
+    };
+    let derived = null;
+    const timed = SS2_TIMED_BUFFS[verb.type];
+    const statSpell = SS2_STAT_SPELLS[verb.type];
+    if (timed && !declared.has(timed.counter)) derived = "undeclared";
+    if (statSpell) {
+      const bearer = statSpell.bearer === "caster" ? actor : foe;
+      if (!ss2StatSpellResources(statSpell).every((name) => declaredResourceNames(bearer).has(name))) derived = "undeclared";
+    }
+    if (verb.type === Ss2ActionType.CAST_REJUVINATE && ss2RejuvenateMissingBackups(actor).length > 0) derived = "undeclared";
+    return push(entry, derived);
+  });
+
+  // The two authored rank verbs, under the offer's four gates in its order.
+  const duel = view.allies.length + view.foes.length === 2;
+  const lone = duel ? view.foes[0] : null;
+  const closing = lone && Number.isFinite(lone.y) && lone.y !== actor.y
+    ? (lone.y > actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK)
+    : null;
+  for (const type of [Ss2ActionType.RANK_BACK, Ss2ActionType.RANK_FRONT]) {
+    let derived = null;
+    if (!Number.isFinite(actor.y)) derived = "no-ranks";
+    else if (duel && type !== closing) derived = "duel";
+    else {
+      const to = ss2RankDestination(actor.y, SS2_RANK_DIRECTION[type], rankStride);
+      if (to === null) derived = "no-rank";
+      else if (ss2RankArrivalX(actor.x, snipeBodies, to) === null) derived = "rank-full";
+    }
+    push({ group: "rank", slot: null, verb: type, type, targetId: actor.id }, derived);
+  }
+
+  const shown = entries.filter((entry) => entry.available);
+  const offRing = offers.filter((option) =>
+    (option.targetId === foe.id || option.targetId === actor.id)
+    && !shown.some((entry) => entry.type === option.type && entry.targetId === option.targetId
+      && (entry.type !== Ss2ActionType.DRINK_POTION || entry.itemId === option.itemId)));
+
+  return Object.freeze({
+    actorId: actor.id,
+    targetId: foe.id,
+    stance: Object.freeze({
+      frame,
+      weapon: bowDrawn ? "archer" : "warrior",
+      range: close ? "close" : "long",
+      facing,
+      distance,
+      // The frame the ENGINE is on this turn, which `in-reach` reads.
+      turnFrame: `${onCloseFrame ? "closerange" : "longrange"}_${bowDrawn ? "archer" : "warrior"}`
+    }),
+    forced: forced
+      ? Object.freeze({ type: forced.type, targetId: actor.id, reason: forced.reason, ...(forced.condition ? { condition: forced.condition } : {}) })
+      : null,
+    ring: Object.freeze(entries),
+    unavailable: Object.freeze(entries.filter((entry) => !entry.available)),
+    offRing: Object.freeze(offRing.map((option) => Object.freeze({ ...option })))
+  });
+}

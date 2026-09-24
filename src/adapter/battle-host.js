@@ -65,7 +65,9 @@ import {
   lastResolvedAction,
   legalActions,
   placeholderTeamRules,
-  toTeamWireState
+  previewAction,
+  toTeamWireState,
+  unavailableActions
 } from "../team/index.js";
 
 import { createActionAnimationGate } from "./action-gate.js";
@@ -481,6 +483,26 @@ class VanillaBattleHost {
 
   legalActions(actorId = this.currentCombatantId()) {
     return legalActions(this.#battle, actorId);
+  }
+
+  /**
+   * What one legal action would do — hit chance, damage band, energy, effect
+   * kind — for a button's label and hover. `actorId` defaults to whoever is
+   * due. Pure: nothing hashed moves and no roll is drawn. `null` for an action
+   * not on offer. See `previewAction` in `src/team/resolver.js`.
+   */
+  previewAction(action) {
+    return previewAction(this.#battle, { actorId: this.currentCombatantId(), ...action });
+  }
+
+  /**
+   * The rule set's menu for `actorId` against the SELECTED foe `targetId`:
+   * every verb it would show, and why each one not on offer is not (hidden or
+   * greyed). Pure, like `previewAction`. See `unavailableActions` in
+   * `src/team/resolver.js`.
+   */
+  unavailableActions(actorId = this.currentCombatantId(), targetId = null) {
+    return unavailableActions(this.#battle, actorId, targetId);
   }
 
   mirrorFor(combatantId) {
