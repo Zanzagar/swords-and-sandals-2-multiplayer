@@ -28,9 +28,11 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-24 04:53 — the stranded work is merged, and the night is running](docs/handoffs/2026-09-24-0453--the-stranded-work-is-merged-and-the-night-is-running.md)**
-(a MID-SESSION checkpoint of session `b64d8f55`, written while the overnight
-run wf_b7145bd6-967 builds in four worktrees). Start there. *(It supersedes
+[2026-09-24 11:48 — the night merged, and the HUD is decided](docs/handoffs/2026-09-24-1148--the-night-merged-and-the-hud-is-decided.md)**
+(a MID-SESSION checkpoint of session `e75af16c`, which continues `b64d8f55`
+after its chat was accidentally closed). Start there. *(It supersedes
+[2026-09-24 04:53 — the stranded work is merged, and the night is running](docs/handoffs/2026-09-24-0453--the-stranded-work-is-merged-and-the-night-is-running.md),
+**whose overnight run is ALL MERGED.**)* *(That one supersedes
 [2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md),
 **whose session `c62c201f` ran on after it, then ran out of context with five
 implementers finished-unmerged and no handoff — all five are now merged
