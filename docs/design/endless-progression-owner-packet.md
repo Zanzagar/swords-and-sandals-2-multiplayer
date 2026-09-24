@@ -207,8 +207,9 @@ plural-position prevalence and conditional tri-phase prevalence.
 The owner selected RCS-03C3B1A1B1-C: phase-singular and phase-plural history
 positions coexist, then selected RCS-03C3B1A1B2-A: every phase-plural
 position is exact-two. A tenth audit split old RCS-03C3B1A2 into prevalence
-and conditional package-width support. RCS-03C3B1A2A is the active owner
-choice under SR-03.
+and conditional package-width support. The owner selected RCS-03C3B1A2A-C:
+coupled-supplement and clean history positions coexist. RCS-03C3B1A2B is the
+active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19285,7 +19286,7 @@ authoritative decision wording and authorizes no implementation.
 > `RCS-03C3B1A2B` (two-phase-versus-three-phase package-width support).
 > `RCS-03C3B1B` follows the applicable child. B2-A first reduces `Phi_SR` from
 > 31 to 30; replacing one counted row with two children adds one row and one
-> potential card, producing fifty counted slots and current `Phi_SR = 31`.
+> potential card, producing fifty counted slots and then-current `Phi_SR = 31`.
 
 > **Scope guard:** exact `{D,E}`, `{D,O}`, and `{E,O}` package identities,
 > operators, package counts, distribution across singular versus exact-two
@@ -19299,7 +19300,7 @@ authoritative decision wording and authorizes no implementation.
 > selected automatic invocation. The missing width boundary is restored before
 > coupled-supplement prevalence is presented.
 
-### RCS-03C3B1A2A — supplemental irreducibly multi-phase position prevalence — active owner choice
+### RCS-03C3B1A2A — supplemental irreducibly multi-phase position prevalence — C selected
 
 Every `p` in `T_H` retains the one or two independently isolatable phases now
 required by A1A-A, B1-C, and B2-A. A **supplemental irreducibly multi-phase H
@@ -19355,6 +19356,77 @@ claims/consumption, reuse, payoff, UI, persistence, release, or implementation.
 Under A, conditional `RCS-03C3B1A2B` is pruned and `RCS-03C3B1B` becomes next.
 Under B or C, B1A2B becomes next and then B1B recomputes feasible catalog phase
 support. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **C,
+coupled-supplement and clean history positions coexist.** `J^{multi}_v` is a
+nonempty proper subset of `T_H`. At least one history position has a reachable,
+materially effective, non-preempted inclusion-minimal H package spanning
+multiple phases, while at least one distinct history position is proved clean
+across its declared reachable domain. Every position retains its one or two
+independently isolatable phase anchors. Coupling is not mapped to the singular
+or exact-two class.
+
+Within each admitted coupled package, indispensable claims from distinct
+phases and the position's transition participate **directly** while their
+semantic differences remain mechanically legible. The retained independent
+anchor or anchors protect distinction outside that package; clean positions
+remain **neutral/protective** anchors, and catalog coexistence is
+**aggregate**. This is a direction selection. It changes no authoritative
+decision wording and authorizes no implementation.
+
+Selecting C reduces `Phi_SR` from 31 to 30 and activates the already-counted
+conditional width row. `RCS-03C3B1A2B` is the sole active owner choice.
+
+### RCS-03C3B1A2B — coupled-package semantic phase-width support — active owner choice
+
+For every admitted supplemental coupled package `K` at any
+`p in J^{multi}_v`, with phase claims still classified relative to the same
+one candidate source role inherited from A1A, define
+
+`ph(K)={F in {D,E,O} | K contains an indispensable claim classified in F}`
+
+and `w(K)=|ph(K)|`. Width counts semantic phases represented by indispensable
+claims, not claim count, record fields, engine cuts, source aliases, or the
+number of events. A three-phase record whose `O` claim can be removed without
+changing satisfaction is at most width two. The prior definition guarantees
+`w(K)` is either 2 or 3. Let
+
+`W^{multi}_v={w(K) | K is an admitted supplemental coupled package}`.
+
+Selected A2A-C guarantees `W^{multi}_v` is a nonempty subset of `{2,3}`.
+
+| Choice | Required catalog width support | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — only two-phase coupled packages** | `W^{multi}_v={2}`. Every admitted coupled package has indispensable claims in exactly two phases. Exact pairs `{D,E}`, `{D,O}`, and `{E,O}` remain catalog authoring; beyond requiring at least one width-two witness, the choice prescribes none individually. | A gives each coupled route one focused relation and permits earlier readable readiness cuts when its selected phases become authoritative at different times. Distinct phase claims jointly cause one transition, so local continuity-with-difference is **direct**; universal width-two support is **aggregate**. It permits `{E,O}` packages for source roles without a separate declaration and can offer clear denial patterns, but forbids all three phases of one candidate source role from ever forming one irreducible route. | A Vow position has a context where an accepted Guard commitment and its performance are jointly indispensable. The package becomes ready when performance is authoritative; the later block outcome is immaterial to that route. Independent anchors remain available in other contexts. |
+| **B — only all-three-phase coupled packages** | `W^{multi}_v={3}`. Every admitted coupled package contains indispensable `D`, `E`, and `O` claims. No two-phase coupled package is materially effective anywhere, although independent one-phase routes remain required. | B makes every coupled route a complete-act ritual: intent, deed, and consequence remain distinct yet jointly cause one transition, a **direct** local fit. Universal whole-act support is **aggregate**. It gives the fullest single-package narrative unity, but every coupled route waits for its latest required phase, excludes source roles without a separate `D` claim, and can be the most interruption-sensitive while carrying the greatest tooltip, replay, and authoring burden. | A Confluence position qualifies only when an accepted challenge, its performed strike, and the authoritative hit disposition all occur in one legal history; removing any phase defeats the package. Elsewhere the same position still has one or two independent phase anchors, and no execution-only witness is implied. |
+| **C — two-phase and all-three-phase packages coexist** | `W^{multi}_v={2,3}`. The catalog contains at least one admitted width-two package and at least one admitted width-three package. They may occur at the same or different coupled positions; this choice sets no prevalence or mapping. | **Recommended.** Focused Vows provide readable relational tactics, while three-phase Confluences support the narratively fullest direct expression of distinct phases of one candidate source role acting as one cause. Each package's fit is **direct** and width coexistence is **aggregate**; width three is not doctrinally superior. C gives Souls and Simulacra the broadest meaningful ritual vocabulary, but creates a two-tier explanation and balance surface; width three must not become an automatic rarity or power upgrade over width two. | One Dreamglass route may require declaration plus outcome, becoming ready only when that outcome settles. A separate Confluence route may require declaration, performance, and outcome together. At least one clean position still exists by A2A-C. The two packages need not share a position or Relic. |
+
+**Recommendation: C, support both width two and width three.** The selected
+clean/coupled coexistence already ensures compound routes are not universal.
+Within the bounded coupled subset, supporting focused
+two-phase Vows and three-phase Confluences permits meaningfully different
+timing and denial patterns when their authoritative cuts differ, and preserves
+a real semantic difference even when execution and outcome share a cut. The
+recommendation is conditional on later balance and UI treating width as route
+shape, not as a strict power ladder.
+
+A/B/C are mutually exclusive and exhaustive because nonempty
+`W^{multi}_v` is exactly `{2}`, `{3}`, or `{2,3}`. A package witnesses a width
+only when every counted phase contributes at least one indispensable claim to
+the same reachable, materially effective, non-preempted transition. A and B
+also require complete effective-package analysis excluding the other width. C
+requires two distinct package witnesses, but not distinct positions, entries,
+or Relics. Raw co-variation, record breadth, an authored whole-act label, or a
+redundant third-phase claim does not establish width three.
+
+This card does not choose exact width-two phase pairs, package operators,
+claim/event count inside one phase, package counts, co-location of widths at
+one position, distribution across singular/exact-two positions, prevalence,
+quotas, source facts, roots, atoms, fan-out, claims/consumption, reuse, payoff,
+UI, persistence, release, or implementation. Under B or C, all-three material
+phase support is derived for later `RCS-03C3B1B`; under A, B1B recomputes the
+remaining feasible catalog phase-support alternatives. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 

@@ -2807,14 +2807,37 @@ The register therefore makes `RCS-03C3B1A2` a non-counting parent for
 `RCS-03C3B1A2B` (package-width support `{2}`, `{3}`, or `{2,3}`). Exact pair
 identity, operators, counts, class mapping, incidence, and quotas remain
 AUTHOR/SPEC. Replacing one counted row with two adds one slot and one potential
-card. The current fifty-slot register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7
-`PRUNED`, 10 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so
-`Phi_SR = 31`. `RCS-03C3B1A2A` is the sole active card.
+card. At that point the fifty-slot register contained 30 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 10 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row,
+so `Phi_SR = 31`. `RCS-03C3B1A2A` was the sole active card.
 
 **Agent correction:** the initial post-answer screen treated package width as
 authoring. The X2/X3 pair proves a player-material readiness and counterplay
 difference under already-selected automatic invocation, so the missing width
 boundary is restored before coupled-supplement prevalence is presented.
+
+The owner then selected `RCS-03C3B1A2A-C`. Coupled-supplement and clean
+history positions coexist: `J^{multi}_v` is a nonempty proper subset of
+`T_H`. At least one position has a reachable, materially effective,
+non-preempted inclusion-minimal H package spanning multiple phases, at least
+one distinct position is clean across its declared reachable domain, and every
+position retains its one or two independent phase anchors. Coupling is not
+mapped to singular or exact-two positions.
+
+The width screen defines `w(K)` as the number of `{D,E,O}` phases containing
+an indispensable claim in one admitted package. Claim count, fields, cuts,
+aliases, redundant co-variation, and labels do not increase width. Every
+coupled package has width 2 or 3; because A2A-C guarantees at least one, the
+catalog support set is a nonempty subset of `{2,3}` and is therefore exactly
+`{2}`, `{3}`, or `{2,3}`. These alternatives change readiness and
+interruption counterplay, as the recorded `110`/`111` countermodel proves.
+Exact pairs, operators, counts, local co-location, singular/exact-two mapping,
+incidence, prevalence, and quotas remain AUTHOR/SPEC under the anti-recursion
+rule. No eleventh register amendment is required.
+
+The current fifty-slot register contains 29 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 11 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so
+`Phi_SR = 30`. `RCS-03C3B1A2B` is the sole active card.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
