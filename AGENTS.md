@@ -70,9 +70,9 @@ there never reaches the next reader.
   actor-specific: a branch's `.claude/settings.json` mediates Claude Code only;
   Codex permissions and a human shell are separate. Never claim one tool's
   settings enforce another actor.
-  **This project TIGHTENS rule 7 (push feature branches freely) to ASK BEFORE
-  EVERY PUSH**, because the fixtures derive from a licensed game and what
-  leaves this machine is the owner's call. `main` is denied outright.
+  **Follow rule 7 as written:** push feature branches freely and often; no
+  per-push owner approval is required. This does not relax rules 8, 9, or 12:
+  never push `main`, never make a forbidden force-push, and only a human merges.
 
 ## If you are a subagent
 

@@ -77,11 +77,13 @@ for the already-accumulated design record; and `bf12e53` merges main's mailmap
 fix without rebasing pushed history. Do not recreate fake historical commit
 granularity. Resume small per-choice commits from here.
 
-The branch is current with `github/main`, PR #3 already exists, and the local
-branch is ahead of its remote. Nothing has been pushed in this session: this
-project requires explicit owner approval before every push. Claude settings do
-not enforce Codex or a human shell; shared policy lives in `AGENTS.md`, while
-the direct Codex progression method lives in `$ss2-progression-design`.
+The branch is current with `github/main`, and PR #3 already exists. **Owner
+correction, 2026-09-24:** the project-specific per-push approval tightening is
+removed. Follow harness rule 7 as written: push feature branches freely and
+often without per-push owner approval. This does not authorize pushing `main`,
+a force-push forbidden by rule 9, or an agent merge. Claude settings do not
+enforce Codex or a human shell; shared policy lives in `AGENTS.md`, while the
+direct Codex progression method lives in `$ss2-progression-design`.
 
 ## 2026-09-24 master progression closure index
 
