@@ -100,3 +100,16 @@ test("every name the shell imports is exported by the module it names — the ri
     }
   }
 });
+
+test("a rebuilt ring clears the stage's hit-test set, so a click before the next paint hits no button of the OLD ring", () => {
+  // Found by the follow-up run's write-nothing verifier (2026-09-24, wf_4a7d3b65-6c7): `ringButtons` is set
+  // only in `paintRing`, but Tab (`selectRingFoe` -> `renderControls`) replaces `ringView.model` at once — so
+  // a click between a target change and the next paint hit-tested the PREVIOUS frame's discs against the NEW
+  // model, and a click on a disc greyed in the new model could send its action. Mutation that breaks this
+  // test: delete `ringButtons = [];` from `renderControls`.
+  const controls = functionBody("renderControls");
+  const reset = controls.indexOf("ringView = null;");
+  assert.ok(reset >= 0, "renderControls resets the ring view");
+  assert.match(controls.slice(reset, reset + 200), /^ringView = null;\s*ringButtons = \[\];/,
+    "the hit-test set is cleared together with the ring view");
+});

@@ -5828,6 +5828,7 @@ function renderControls() {
   // THE RING is made again below on a person's turn only; every other branch
   // leaves none on the stage or in the strip.
   ringView = null;
+  ringButtons = []; // a click before the next paint must not hit the OLD ring (verifier, 2026-09-24)
   renderRingStrip();
   const container = el("actions");
   // ► **NO BUTTON BEFORE THE ASSET GATE OPENS.** A person's first action is
