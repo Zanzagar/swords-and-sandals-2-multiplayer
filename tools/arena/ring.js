@@ -1,17 +1,40 @@
 /**
- * THE RING'S MODEL — slice S2 of `docs/design/battle-ui.md` ("The in-battle
- * actions: DECIDED"): on a person's turn, which foe is selected, which of the
- * build's four stances the ring shows, which verb sits in which of the eight
- * slots, what the engine offers that no slot shows, and the exact action a
- * click or a key sends.
+ * THE RING'S MODEL — slices S2 and S4 of `docs/design/battle-ui.md` ("The
+ * in-battle actions: DECIDED"): on a person's turn, which foe is selected,
+ * which of the build's four stances the ring shows, which verb sits in which
+ * of the eight slots, where each walk and rank change the engine offers
+ * stands (S4), what the engine offers that the ring does not show, and the
+ * exact action a click, a digit or an arrow key sends.
  *
  * Pure. It reads what it is handed — the fighters, the engine's offer and the
  * engine's own menu for the selected foe — and decides only how to ARRANGE
  * them: "the engine decides what is possible; the interface only arranges it".
  */
 
-import { SS2_OPTION_SLOTS, SS2_OVERLAY_SLOTS } from "../../src/render/action-buttons.js";
+import { SS2_OPTION_SLOTS, SS2_OVERLAY_SLOTS, actionButtonVerbFor } from "../../src/render/action-buttons.js";
 import { ss2FightDistance, ss2SameLane } from "../../src/team/ss2-rules.js";
+
+/**
+ * ► **THE FOUR MOVES AND THEIR ARROW KEYS (slice S4; the owner's Q5 and
+ *   decision 9, "arrows move").** The walks go the way their arrow points; a
+ *   rank BACK is up the stage (arena y falls going back) and FORWARD is down
+ *   it, so Up steps back and Down steps forward — the same way the rank
+ *   arrows stand, above the head and below the feet. AUTHORED: the build has
+ *   no keyboard and no ranks.
+ *
+ * `place` is where the move stands when no slot of the stance holds it: a
+ * walk BESIDE the build's walk slot on its side (see `ringModelFor`), a rank
+ * change above the head or below the feet.
+ */
+export const RING_MOVES = Object.freeze([
+  Object.freeze({ move: "walk-left", key: "ArrowLeft", glyph: "←", place: "beside" }),
+  Object.freeze({ move: "walk-right", key: "ArrowRight", glyph: "→", place: "beside" }),
+  Object.freeze({ move: "rank-back", key: "ArrowUp", glyph: "↑", place: "above-head" }),
+  Object.freeze({ move: "rank-front", key: "ArrowDown", glyph: "↓", place: "below-feet" })
+]);
+
+/** How the strip writes a move's key: the arrow itself, not its DOM name. */
+export const RING_KEY_GLYPHS = Object.freeze(Object.fromEntries(RING_MOVES.map((move) => [move.key, move.glyph])));
 
 /**
  * WHICH KEY PRESSES WHICH SLOT: 1-4 down the ring's LEFT column, 5-8 down its
@@ -86,8 +109,14 @@ function stageOrder(foes) {
  *     in `ss2UnavailableActions`); null when there is no menu to ask;
  *   - `slots` — eight, in KEY order (`RING_KEY_ORDER`), each `{key, slot,
  *     verb, action}`; `verb`/`action` null unless the offer holds it;
+ *   - `moves` (S4) — every walk and rank change the offer holds, in
+ *     `RING_MOVES` order, each `{move, key, verb, place, slot, action}`:
+ *     `place` is `slot` (a walk the stance wires, `slot` naming it and
+ *     `action` the slot's own), `beside` (a walk it does not), `above-head`
+ *     or `below-feet`; empty when there is no ring (no stance). A move the
+ *     offer does not hold is not here;
  *   - `offRing` — `{action}` for every offered action at the selected foe or
- *     at no foe that no slot holds, in the offer's order;
+ *     at no foe that no slot or move holds, in the offer's order;
  *   - `menuError` — why the menu could not be asked, or null.
  *   Every `action` is an offered option plus `actorId`: what `host.submit` takes.
  */
@@ -132,13 +161,38 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
     });
   });
 
+  // THE MOVES (S4): every walk and rank change the engine offers the actor,
+  // on the ring whenever there is a ring. A walk the stance wires stays in its
+  // slot, and is the same action as that slot's; one the stance does not wire
+  // stands beside its side's walk slot. A move the engine withholds is not
+  // here at all, so nothing can press it.
+  const moved = new Set();
+  const moves = menu
+    ? RING_MOVES.flatMap((move) => {
+      const option = offer.find((candidate) => candidate.type === move.move && candidate.targetId === actorId
+        && (candidate.itemId ?? null) === null);
+      if (!option) return [];
+      moved.add(option);
+      const inSlot = slots.find((slot) => slot.action?.type === move.move);
+      return [Object.freeze({
+        move: move.move,
+        key: move.key,
+        verb: inSlot ? inSlot.verb : actionButtonVerbFor(move.move),
+        place: inSlot ? "slot" : move.place,
+        slot: inSlot ? inSlot.slot : null,
+        action: inSlot ? inSlot.action : Object.freeze({ ...option, actorId })
+      })];
+    })
+    : [];
+
   // OFF THE RING: whatever the engine offers against the selected foe or
-  // anyone who is not a foe (the actor, today) that no slot holds, in the
-  // offer's own order. An action at ANOTHER foe is that foe's: selecting him
-  // puts it on his ring or in his list, so every offered action is reachable
-  // and none is listed twice.
+  // anyone who is not a foe (the actor, today) that no slot or move holds, in
+  // the offer's own order. An action at ANOTHER foe is that foe's: selecting
+  // him puts it on his ring or in his list, so every offered action is
+  // reachable and none is listed twice.
   const foeIds = new Set(foes.map((foe) => foe.id));
   const slotted = new Set([...bySlot.values()].map((held) => held.option));
+  for (const option of moved) slotted.add(option);
   const offRing = offer
     .filter((option) => !slotted.has(option) && (option.targetId === selected.id || !foeIds.has(option.targetId)))
     .map((option) => Object.freeze({ action: Object.freeze({ ...option, actorId }) }));
@@ -152,20 +206,24 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
       ? Object.freeze({ frame: menu.stance.frame, range: menu.stance.range, weapon: menu.stance.weapon, facing: menu.stance.facing })
       : null,
     slots: Object.freeze(slots),
+    moves: Object.freeze(moves),
     offRing: Object.freeze(offRing),
     menuError
   });
 }
 
 /**
- * THE EXACT ACTION ONE SLOT SENDS — named by its key (`"1"`-`"8"`) or by the
- * build's slot name (`"optionD"`) — or null for an empty slot or no slot.
- * It is the engine's own offered option with the actor added, which is what
- * `host.submit` takes.
+ * THE EXACT ACTION ONE SLOT OR MOVE SENDS — named by its key (`"1"`-`"8"`,
+ * `"ArrowUp"`), by the build's slot name (`"optionD"`) or by the move's name
+ * (`"rank-back"`, what a move's drawn button is called) — or null for an
+ * empty slot, a withheld move or no such thing. It is the engine's own
+ * offered option with the actor added, which is what `host.submit` takes.
  */
 export function ringActionFor(model, slotOrKey) {
   const slot = model?.slots?.find((candidate) => candidate.key === slotOrKey || candidate.slot === slotOrKey);
-  return slot?.action ?? null;
+  if (slot) return slot.action ?? null;
+  const move = model?.moves?.find((candidate) => candidate.key === slotOrKey || candidate.move === slotOrKey);
+  return move?.action ?? null;
 }
 
 /** The foe Tab (`step` 1) or Shift+Tab (`step` -1) selects next, wrapping; null with no foe. */
@@ -183,8 +241,8 @@ export function ringNextFoe(model, step = 1) {
  * the ring's, and the browser keeps it).
  *
  * `focus` is where the keyboard focus is: `"stage"` (nothing, the page or the
- * stage's canvas), `"control"` (a button, the volume slider) or `"text"` (a
- * field that types).
+ * stage's canvas), `"control"` (a button), `"adjust"` (a control whose own
+ * arrow keys change it: the volume slider) or `"text"` (a field that types).
  *
  * - `1`-`8` press the slots, from the stage or a control; never while typing,
  *   never with Ctrl/Alt/Meta (the browser's), and never on a held key's
@@ -194,13 +252,45 @@ export function ringNextFoe(model, step = 1) {
  *   the strip's buttons are reachable and nothing traps the focus.
  * - Esc, from the stage, moves the focus into the strip — the way into its
  *   list by keyboard, since Tab on the stage is taken.
+ * - The arrows (S4) send their move (`RING_MOVES`) from the stage or a
+ *   control, never from a field that types or a control whose own arrows
+ *   adjust it (`"adjust"`: a slider, a radio button), never with a modifier.
+ *   Where they would move nobody — a held key's repeat, or a move the engine
+ *   withholds — they return `{kind: "ignore", why, move}`: the key is still
+ *   the ring's, so the page does not scroll under the fight, and nothing is
+ *   sent.
+ * - With NO ring (`model` null: not a person's turn) nothing is the ring's
+ *   but the repeats of an arrow it took that is still down — `held`, the
+ *   keys the shell saw the ring take and has not yet seen let go — which
+ *   stay `ignore`d: the press moved the person, the turn went to the AI, and
+ *   the key must not start scrolling the page halfway through.
  */
-export function ringKeyCommand(model, { key, shiftKey = false, ctrlKey = false, altKey = false, metaKey = false, repeat = false, focus = "stage" } = {}) {
-  if (!model || focus === "text" || ctrlKey || altKey || metaKey) return null;
+export function ringKeyCommand(model, { key, shiftKey = false, ctrlKey = false, altKey = false, metaKey = false, repeat = false, focus = "stage", held = null } = {}) {
+  if (focus === "text" || ctrlKey || altKey || metaKey) return null;
+  if (!model) {
+    // THE RING'S OWN ARROW, STILL HELD, after the turn it moved has gone (to
+    // the AI, or the bout's end): its repeats stay swallowed, so the page does
+    // not scroll under the animation (Codex review, S4 pass 1). Nothing else
+    // with no ring on screen is the ring's.
+    const heldMove = RING_MOVES.find((candidate) => candidate.key === key);
+    if (heldMove && repeat && focus !== "adjust" && !shiftKey && held?.has?.(key)) {
+      return Object.freeze({ kind: "ignore", why: "repeat", move: heldMove.move });
+    }
+    return null;
+  }
   if (/^[1-8]$/.test(key ?? "")) {
     if (repeat) return null;
     const action = ringActionFor(model, key);
     return action ? Object.freeze({ kind: "act", action }) : null;
+  }
+  const move = RING_MOVES.find((candidate) => candidate.key === key);
+  if (move) {
+    if (focus === "adjust" || shiftKey) return null;
+    if (repeat) return Object.freeze({ kind: "ignore", why: "repeat", move: move.move });
+    const action = ringActionFor(model, move.key);
+    return action
+      ? Object.freeze({ kind: "act", action })
+      : Object.freeze({ kind: "ignore", why: "not-offered", move: move.move });
   }
   if (focus !== "stage") return null;
   if (key === "Tab") {
@@ -260,13 +350,18 @@ export function ringActionLabel(action, { verb = null, nameOf = (id) => id } = {
 
 /** Input types a digit or a Tab does not type into. */
 const NON_TYPING_INPUTS = new Set(["range", "checkbox", "radio", "button", "submit", "reset", "color", "image", "file"]);
+/** Of those, the ones whose own arrow keys change their value: a slider steps, a radio group moves. */
+const ARROW_INPUTS = new Set(["range", "radio"]);
 
 /**
  * WHERE THE KEYBOARD FOCUS IS, as `ringKeyCommand` reads it, from a focused
  * element (duck-typed: `tagName`, `type`, `isContentEditable`): `"stage"` for
  * nothing, the page or `stage` itself; `"text"` for anything that types or
  * takes letters (a text input, a textarea, a select, an editable element);
- * `"control"` for every other focusable thing (a button, the volume slider).
+ * `"adjust"` for an input whose own arrow keys change it (a slider, a radio
+ * button — S4, so the ring's arrows leave it alone; ~~a slider was
+ * `"control"`~~ in S2); `"control"` for every other focusable thing (a
+ * button, a checkbox).
  */
 export function ringFocusKind(element, { stage = null } = {}) {
   if (!element || element === stage) return "stage";
@@ -274,6 +369,8 @@ export function ringFocusKind(element, { stage = null } = {}) {
   if (tag === "BODY" || tag === "HTML") return "stage";
   if (element.isContentEditable) return "text";
   if (tag === "TEXTAREA" || tag === "SELECT") return "text";
-  if (tag === "INPUT" && !NON_TYPING_INPUTS.has(String(element.type ?? "text").toLowerCase())) return "text";
+  const type = String(element.type ?? "text").toLowerCase();
+  if (tag === "INPUT" && !NON_TYPING_INPUTS.has(type)) return "text";
+  if (tag === "INPUT" && ARROW_INPUTS.has(type)) return "adjust";
   return "control";
 }

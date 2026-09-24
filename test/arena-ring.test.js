@@ -197,12 +197,13 @@ test("off the ring: every action the engine offers against the selected foe or t
   const host = demoHost({ perSide: 3, seed: 3 });
   const model = modelOf(host);
   // The 3v3 opening offers red-1 walk-left, walk-right, a taunt at blue-1, rank-back, wincrowd and
-  // rest. The long frame holds the two walks, the taunt (he is rested) and wincrowd; the rank verb
-  // has no slot until S4, and the rest shares the taunt's slot and loses it above half stamina.
+  // rest. The long frame holds the two walks, the taunt (he is rested) and wincrowd; the rest shares
+  // the taunt's slot and loses it above half stamina. ~~the rank verb has no slot until S4~~ — S4
+  // put the rank change on the ring, above his head (`model.moves`, test/arena-ring-movement.test.js).
   assert.deepEqual(slotLines(model).filter((text) => !text.endsWith(" -")),
     ["2 optionB walkleft", "3 optionC taunt", "4 optionG wincrowd", "6 optionE walkright"]);
-  assert.deepEqual(model.offRing.map((entry) => line(entry.action)), ["rank-back -> red-1", "rest -> red-1"]);
-  assert.deepEqual(model.offRing[1].action, { type: "rest", targetId: "red-1", actorId: "red-1" });
+  assert.deepEqual(model.offRing.map((entry) => line(entry.action)), ["rest -> red-1"]);
+  assert.deepEqual(model.offRing[0].action, { type: "rest", targetId: "red-1", actorId: "red-1" });
 });
 
 test("an action aimed at ANOTHER foe is left for that foe's selection, never listed against this one", () => {
@@ -301,7 +302,7 @@ test("Tab and Shift+Tab switch the target from the stage; inside a control Tab m
   assert.equal(ringKeyCommand(model, { key: "Escape", focus: "control" }), null);
 });
 
-test("where the focus is, for the keys: the page and the stage are the stage; a button or a slider a control; a field that types is text", () => {
+test("where the focus is, for the keys: the page and the stage are the stage; a button a control; a slider adjusts; a field that types is text", () => {
   const stage = { tagName: "CANVAS" };
   const at = (element) => ringFocusKind(element, { stage });
   assert.equal(at(null), "stage");
@@ -310,7 +311,8 @@ test("where the focus is, for the keys: the page and the stage are the stage; a 
   assert.equal(at(stage), "stage");
   assert.equal(at({ tagName: "CANVAS" }), "control", "only THE stage's canvas is the stage");
   assert.equal(at({ tagName: "BUTTON" }), "control");
-  assert.equal(at({ tagName: "INPUT", type: "range" }), "control");
+  // ~~"control"~~ since S4: a slider's own arrow keys change it, so the ring's arrows leave it alone.
+  assert.equal(at({ tagName: "INPUT", type: "range" }), "adjust");
   assert.equal(at({ tagName: "INPUT", type: "text" }), "text");
   assert.equal(at({ tagName: "INPUT", type: "search" }), "text");
   assert.equal(at({ tagName: "TEXTAREA" }), "text");
@@ -423,7 +425,12 @@ test("over whole bouts, with every foe selected in turn: each slot holds what th
           for (const foeId of first.foeIds) {
             const model = modelOf(host, foeId);
             assert.equal(model.selectedId, foeId);
-            const shown = [...model.slots.filter((slot) => slot.action).map((slot) => slot.action), ...model.offRing.map((entry) => entry.action)];
+            // S4: a move no slot holds — a walk beside the ring, a rank arrow — is on the ring too.
+            const shown = [
+              ...model.slots.filter((slot) => slot.action).map((slot) => slot.action),
+              ...model.moves.filter((move) => move.place !== "slot").map((move) => move.action),
+              ...model.offRing.map((entry) => entry.action)
+            ];
             const ids = shown.map(identity);
             assert.equal(new Set(ids).size, ids.length, `${actorId} vs ${foeId}: an action listed twice`);
             for (const action of shown) {

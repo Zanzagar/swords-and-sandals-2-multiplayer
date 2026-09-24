@@ -1,8 +1,9 @@
 /**
  * THE RING'S ACCEPTANCE (slice S2 of `docs/design/battle-ui.md`): whole bouts
  * played the way the arena seats them under `?play=red`, every red turn chosen
- * ONLY through the ring model — a key on a slot, Tab / Shift+Tab to switch the
- * target, or an entry in the off-ring list — by one fixed policy, and every
+ * ONLY through the ring model — a key on a slot, an arrow key on a move (S4),
+ * Tab / Shift+Tab to switch the target, or an entry in the off-ring list — by
+ * one fixed policy, and every
  * blue turn by the rule set's own AI, as `aiTurnStep` takes it.
  *
  * What is pinned:
@@ -52,9 +53,10 @@ const identity = (action) => JSON.stringify([action.type, action.targetId, actio
 /**
  * THE FIXED POLICY — one choice from what the model shows, never from the
  * offer itself: a swing or a shot on the ring; else a spell at the selected
- * foe from the list; else the ring's walk toward him; else the list's rank
- * change toward his rank; else the first filled slot; else the first listed.
- * Returns `{ via, action }`.
+ * foe from the list; else the walk toward him in its slot, by its arrow key; else the
+ * rank change toward his rank, by its arrow key (S4 put both on the ring;
+ * ~~the list's rank change~~ until then); else the first filled slot; else
+ * the first listed. Returns `{ via, action }`.
  */
 function choose(model, selected, actor) {
   const byVerb = (verbs) => verbs.map((verb) => model.slots.find((slot) => slot.verb === verb)).find(Boolean);
@@ -68,11 +70,17 @@ function choose(model, selected, actor) {
   if (attack) return press(attack);
   const spell = listed((action) => action.type.startsWith("cast-") && action.targetId === model.selectedId);
   if (spell) return { via: "list", action: spell.action };
-  const toward = byVerb([model.stance?.facing === "left" ? "walkleft" : "walkright"]);
-  if (toward) return press(toward);
+  const arrow = (key) => {
+    const command = ringKeyCommand(model, { key, focus: "stage" });
+    return command?.kind === "act" ? { via: "arrow", action: command.action } : null;
+  };
+  // The walk toward him IN ITS SLOT, as before S4 (a walk beside the ring is one the stance does
+  // not wire — toward a foe already in reach — and this policy does not take it).
+  const toward = model.moves.find((move) => move.move === (model.stance?.facing === "left" ? "walk-left" : "walk-right") && move.place === "slot");
+  if (toward) return arrow(toward.key);
   if (Number.isFinite(selected?.y) && Number.isFinite(actor?.y) && selected.y !== actor.y) {
-    const rank = listed((action) => action.type === (selected.y > actor.y ? "rank-front" : "rank-back"));
-    if (rank) return { via: "list", action: rank.action };
+    const rank = arrow(selected.y > actor.y ? "ArrowDown" : "ArrowUp");
+    if (rank) return rank;
   }
   const any = model.slots.find((slot) => slot.action);
   if (any) return press(any);
@@ -81,7 +89,7 @@ function choose(model, selected, actor) {
 }
 
 test("?play=red: whole bouts chosen only through the ring — every action sent is on offer, and every bout finishes", (t) => {
-  const tally = { bouts: 0, personTurns: 0, aiTurns: 0, key: 0, list: 0, tab: 0, shiftTab: 0, attacksByKey: 0 };
+  const tally = { bouts: 0, personTurns: 0, aiTurns: 0, key: 0, arrow: 0, list: 0, tab: 0, shiftTab: 0, attacksByKey: 0 };
   for (const perSide of [1, 3]) {
     for (const kit of ["", "tricks"]) {
       for (const seed of [1, 2, 3, 4, 5]) {
@@ -128,7 +136,7 @@ test("?play=red: whole bouts chosen only through the ring — every action sent 
   }
   assert.equal(tally.bouts, 20);
   // The policy really plays through the ring: it swings by key, lists, and switches targets both ways.
-  assert.ok(tally.attacksByKey > 0 && tally.list > 0 && tally.tab > 0 && tally.shiftTab > 0, JSON.stringify(tally));
+  assert.ok(tally.attacksByKey > 0 && tally.arrow > 0 && tally.list > 0 && tally.tab > 0 && tally.shiftTab > 0, JSON.stringify(tally));
   t.diagnostic(JSON.stringify(tally));
 });
 

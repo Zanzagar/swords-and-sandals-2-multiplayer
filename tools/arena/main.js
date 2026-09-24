@@ -168,6 +168,7 @@ import {
 } from "/tools/arena/seats.js";
 import { createSoundPlayer } from "/tools/arena/sound-player.js";
 import {
+  RING_KEY_GLYPHS,
   RING_VERB_LABELS,
   ringActionFor,
   ringActionLabel,
@@ -175,7 +176,7 @@ import {
   ringKeyCommand,
   ringModelFor
 } from "/tools/arena/ring.js";
-import { fighterBoxFor, foeAt, ringButtonsAt, ringPlacementFor, ringSlotAt } from "/tools/arena/ring-layout.js";
+import { fighterBoxFor, foeAt, ringButtonsAt, ringButtonsInside, ringMoveButtonsAt, ringPlacementFor, ringSlotAt } from "/tools/arena/ring-layout.js";
 import { ringButtonArt } from "/tools/arena/ring-art.js";
 import {
   ARENA_ASSET_TIMEOUT_MS,
@@ -489,10 +490,11 @@ let boulders = [];
 let settled = false;
 
 /**
- * ► **THE RING (slices S2 and S3 of `docs/design/battle-ui.md`, "The
+ * ► **THE RING (slices S2, S3 and S4 of `docs/design/battle-ui.md`, "The
  *   in-battle actions: DECIDED").** On a person's turn the build's eight
  *   buttons stand around the acting fighter, a gold ring marks the selected
- *   foe, one click acts, and the strip under the stage carries the same
+ *   foe, one click acts, every walk and rank change on offer has a button and
+ *   an arrow key (S4), and the strip under the stage carries the same
  *   actions for the keyboard and for screen readers. What sits where, who is
  *   selected and what a click or key sends are `tools/arena/ring.js`'s, under
  *   the suite; where the buttons are drawn — the build's own placement under
@@ -511,7 +513,9 @@ let settled = false;
  * - `ringButtons`, `fighterBoxes` — where the last frame DREW the buttons and
  *   the fighters, in canvas pixels, so a click is tested against what the
  *   person actually saw; `ringOrigins` — where it drew the acting fighter and
- *   the selected foe, in arena units, which is what the ring is placed from.
+ *   the selected foe, in arena units, which is what the ring is placed from,
+ *   plus the acting fighter's drawn head and the bottom of his name, in
+ *   canvas pixels, which the rank arrows stand off (S4).
  * - `ringButtonPack` — the build's buttons from the icons pack
  *   (`actionButtonPackFrom`), or null: the authored buttons are drawn.
  */
@@ -4673,18 +4677,21 @@ function renderStage(view, fit, now) {
     //   Both values were already in scope eleven lines apart.
     context.globalAlpha = combatant.alive ? 0.85 : 0.4;
     context.fillStyle = "#e8e4dc";
-    context.font = `${Math.max(10, view.scale * 15)}px ui-sans-serif, system-ui, sans-serif`;
+    const nameY = view.toY(origin.y, -22);
+    const namePx = Math.max(10, view.scale * 15);
+    context.font = `${namePx}px ui-sans-serif, system-ui, sans-serif`;
     context.textAlign = "center";
-    context.fillText(combatant.name, view.toX(origin.x), view.toY(origin.y, -22));
+    context.fillText(combatant.name, view.toX(origin.x), nameY);
     context.globalAlpha = 1;
 
     // Where he was drawn, for a click on him and — for the acting fighter and
     // the selected foe, the build's hero and villain — for the ring's placement.
-    drawnBoxes.push({
-      id: combatantId,
-      ...fighterBoxFor({ footX: view.toX(origin.x), footY: view.toY(origin.y, 0), pxPerUnit: view.scale, size: origin.size ?? 1 })
-    });
-    if (combatantId === ringView?.actorId) ringOrigins.actor = { x: origin.x, y: origin.y };
+    const box = fighterBoxFor({ footX: view.toX(origin.x), footY: view.toY(origin.y, 0), pxPerUnit: view.scale, size: origin.size ?? 1 });
+    drawnBoxes.push({ id: combatantId, ...box });
+    // The acting fighter's head and the bottom of his name (half its size
+    // under the baseline covers a descender at any baseline), which the rank
+    // arrows stand off (S4).
+    if (combatantId === ringView?.actorId) ringOrigins.actor = { x: origin.x, y: origin.y, head: box.y0, below: nameY + namePx * 0.5 };
     if (combatantId === ringView?.model.selectedId) ringOrigins.foe = { x: origin.x, y: origin.y };
   }
   fighterBoxes = drawnBoxes;
@@ -4747,7 +4754,7 @@ function renderStage(view, fit, now) {
 }
 
 /* ------------------------------------------------------------------ */
-/* The ring on the stage (S2, S3)                                      */
+/* The ring on the stage (S2, S3, S4)                                  */
 /* ------------------------------------------------------------------ */
 
 /** Whether the ring is on the stage: a person's turn, and the arena ready for it. */
@@ -4784,8 +4791,12 @@ function paintTargetRing(view, origin) {
  * the build's own art from the player's icons pack, the background on its
  * over frame under the pointer (`ringButtonArt`); without the pack, S2's
  * authored round buttons. Each has its key and a short label on the ring's
- * outer side. Only the slots the engine offers are drawn (S2). `ringButtons`
- * records where, for the click.
+ * outer side. Only the slots the engine offers are drawn (S2). Then the moves
+ * no slot holds (S4, `ringMoveButtonsAt`): a walk the stance does not wire,
+ * beside its side's walk slot, and the rank arrows, back above the head and
+ * forward below the name — no label, as their glyph is their arrow key. The
+ * whole ring is kept on the visible stage (`ringButtonsInside`, S4).
+ * `ringButtons` records where, for the click.
  */
 function paintRing(view, fit) {
   ringButtons = [];
@@ -4799,12 +4810,28 @@ function paintRing(view, fit) {
     view,
     fit
   });
-  const buttons = ringButtonsAt(ringView.model, {
-    centerX: placement.x,
-    centerY: placement.y,
-    unit: placement.unit,
-    layout: ringButtonPack?.layout ?? null
-  });
+  // The eight, then the moves no slot holds (S4): a walk beside the ring, the
+  // rank arrows off the acting fighter's drawn head and his name — all kept
+  // on the visible stage, the rectangle the frame is clipped to, by moving the
+  // whole ring (Codex review of S4, pass 2: a walk on offer was off the stage).
+  const stage = stageClipRectFor(fit);
+  const buttons = ringButtonsInside([
+    ...ringButtonsAt(ringView.model, {
+      centerX: placement.x,
+      centerY: placement.y,
+      unit: placement.unit,
+      layout: ringButtonPack?.layout ?? null
+    }),
+    ...ringMoveButtonsAt(ringView.model, {
+      centerX: placement.x,
+      centerY: placement.y,
+      unit: placement.unit,
+      layout: ringButtonPack?.layout ?? null,
+      head: ringOrigins.actor.head,
+      feet: ringOrigins.actor.below,
+      bounds: { top: stage.y, bottom: stage.y + stage.height }
+    })
+  ], stage);
   ringButtons = buttons;
   const actor = host.combatant(ringView.actorId);
   const drawn = ringButtonArt(buttons, {
@@ -4817,6 +4844,9 @@ function paintRing(view, fit) {
   });
   for (const button of drawn) {
     paintRingButton(button);
+    // A move no slot holds carries no label: its glyph is its arrow, and its
+    // key is that arrow (the strip says both).
+    if (button.move) continue;
     const label = `${button.key} ${RING_VERB_LABELS[button.verb]?.short ?? button.verb}`;
     const gap = Math.max(3, button.r * 0.2);
     context.save();
@@ -5582,7 +5612,7 @@ function renderControls() {
 }
 
 /* ------------------------------------------------------------------ */
-/* The ring: the strip, acting, selecting (S2)                         */
+/* The ring: the strip, acting, selecting (S2, S4)                     */
 /* ------------------------------------------------------------------ */
 
 /** What the strip says when no person's ring is up. */
@@ -5602,8 +5632,9 @@ function announce(text) {
  * ► **THE STRIP UNDER THE STAGE (the owner's decision 9): the ring's actions
  *   as REAL BUTTONS**, for the keyboard and for screen readers — the target
  *   (one button per foe, the selected one pressed), the ring's filled slots
- *   with their keys, and every action the engine offers that no slot shows.
- *   Rebuilt with the ring, so it can never disagree with the stage.
+ *   with their keys, the moves no slot holds with their arrows (S4), and
+ *   every action the engine offers that the ring does not show. Rebuilt with
+ *   the ring, so it can never disagree with the stage.
  */
 function renderRingStrip() {
   const strip = el("ring-strip");
@@ -5634,14 +5665,16 @@ function renderRingStrip() {
     node.textContent = text;
     return node;
   };
-  const actionButton = (action, { verb = null, key = null } = {}) => {
+  const actionButton = (action, { verb = null, keys = [] } = {}) => {
     const button = document.createElement("button");
     button.type = "button";
-    if (key) {
-      const hint = document.createElement("kbd");
-      hint.textContent = key;
-      button.append(hint, document.createTextNode(" "));
-      button.setAttribute("aria-keyshortcuts", key);
+    if (keys.length > 0) {
+      for (const key of keys) {
+        const hint = document.createElement("kbd");
+        hint.textContent = RING_KEY_GLYPHS[key] ?? key;
+        button.append(hint, document.createTextNode(" "));
+      }
+      button.setAttribute("aria-keyshortcuts", keys.join(" "));
     }
     button.append(document.createTextNode(ringActionLabel(action, { verb, nameOf })));
     // Greyed only while the arena is still drawing the last action.
@@ -5659,14 +5692,23 @@ function renderRingStrip() {
     return button;
   }));
   const filled = model.slots.filter((slot) => slot.action);
-  slotRow.replaceChildren(heading("Ring"), ...filled.map((slot) => actionButton(slot.action, { verb: slot.verb, key: slot.key })));
+  // The ring row: the eight in key order — a walk in its slot takes its arrow
+  // too — then every move no slot holds, with its arrow (S4).
+  const unslotted = model.moves.filter((move) => move.place !== "slot");
+  slotRow.replaceChildren(heading("Ring"),
+    ...filled.map((slot) => actionButton(slot.action, {
+      verb: slot.verb,
+      keys: [slot.key, model.moves.find((move) => move.slot === slot.slot)?.key].filter(Boolean)
+    })),
+    ...unslotted.map((move) => actionButton(move.action, { verb: move.verb, keys: [move.key] })));
   offRow.replaceChildren(...(model.offRing.length > 0
     ? [heading("Also"), ...model.offRing.map((entry) => actionButton(entry.action))]
     : []));
   const range = model.stance ? `${model.stance.range} range` : "";
   status.textContent = `${nameOf(view.actorId)} against ${nameOf(model.selectedId)}${range ? `, ${range}` : ""}` +
     (view.ready ? "." : " — wait for the arena.") +
-    " Keys: 1–8 the ring, Tab / Shift+Tab the target (from the stage), Esc into this list.";
+    " Keys: 1–8 the ring, arrows walk (← →) and change rank (↑ back, ↓ forward), Tab / Shift+Tab the target " +
+    "(from the stage), Esc into this list.";
   if (ringFocusWanted && view.ready) {
     const enabled = (row) => [...(el(row)?.querySelectorAll("button:not(:disabled)") ?? [])];
     const wanted = ringFocusWanted;
@@ -5681,7 +5723,7 @@ function renderRingStrip() {
   if (view.ready && ringAnnounced !== turnKey) {
     ringAnnounced = turnKey;
     announce(`Your turn: ${nameOf(view.actorId)}. Target ${nameOf(model.selectedId)}${range ? `, ${range}` : ""}. ` +
-      `${filled.length} on the ring${model.offRing.length > 0 ? `, ${model.offRing.length} more listed` : ""}.`);
+      `${filled.length + unslotted.length} on the ring${model.offRing.length > 0 ? `, ${model.offRing.length} more listed` : ""}.`);
   }
 }
 
@@ -5774,24 +5816,43 @@ for (const type of ["focusin", "pointerdown"]) {
   }, { capture: true });
 }
 
+/**
+ * The arrows the ring took that are still down (S4): their repeats stay the
+ * ring's until the key is let go, even once the turn they moved has gone.
+ */
+const ringHeldKeys = new Set();
+
 /** The ring's keys — `ringKeyCommand` decides; this only reads the event and does it. */
 window.addEventListener("keydown", (event) => {
-  if (!ringView) return;
-  const command = ringKeyCommand(ringView.model, {
+  const pressed = {
     key: event.key,
     shiftKey: event.shiftKey,
     ctrlKey: event.ctrlKey,
     altKey: event.altKey,
     metaKey: event.metaKey,
     repeat: event.repeat,
-    focus: ringFocusKind(document.activeElement, { stage: canvas })
-  });
+    focus: ringFocusKind(document.activeElement, { stage: canvas }),
+    held: ringHeldKeys
+  };
+  if (!ringView) {
+    if (ringKeyCommand(null, pressed)) event.preventDefault();
+    return;
+  }
+  const command = ringKeyCommand(ringView.model, { ...pressed });
   if (!command) return;
   event.preventDefault();
+  if (RING_KEY_GLYPHS[event.key]) ringHeldKeys.add(event.key);
   if (command.kind === "act") actFromRing(command.action);
   else if (command.kind === "select") selectRingFoe(command.foeId);
   else if (command.kind === "focus-strip") el("ring-strip").querySelector("button:not(:disabled)")?.focus();
+  else if (command.kind === "ignore") {
+    // An arrow the ring owns that moves nobody: a held key's repeat says
+    // nothing; a move the engine withholds is said, so the key is not silent.
+    if (command.why === "not-offered") announce(`${ringActionLabel({ type: command.move })} is not on offer now.`);
+  }
 });
+window.addEventListener("keyup", (event) => ringHeldKeys.delete(event.key));
+window.addEventListener("blur", () => ringHeldKeys.clear());
 
 /**
  * THE RING'S LINE IN THE PROVENANCE PANEL, derived from what is drawn: the

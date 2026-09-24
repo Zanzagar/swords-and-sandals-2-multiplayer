@@ -239,6 +239,68 @@ buttons in `src/render/action-buttons.js`, wired in `tools/arena/main.js`. Tests
   frames), `?play=red&teams=3&items=tricks` (team zooms, the archer frames, the bow words and ammo) and
   hover a button before trusting the look.
 
+### S4, built 2026-09-24: movement on the ring
+
+`moves` in the model (`tools/arena/ring.js`), `ringMoveButtonsAt` (`tools/arena/ring-layout.js`), the
+arrow keys in `ringKeyCommand`, wired in `tools/arena/main.js`. Tests: `test/arena-ring-movement.test.js`;
+S2's `test/arena-ring.test.js` and `test/arena-ring-bouts.test.js` were updated where S4 moved an action
+out of the list.
+
+- **Every walk and rank change the engine offers is on the ring, whatever foe is selected, and none it
+  withholds is drawn, clicked or keyed.** A move is on the ring only when `legalActions` holds it (as a
+  slot is, S2); hidden-vs-greyed is S9's — the rank reasons `duel`, `no-rank` and `rank-full` are
+  "grey" in `SS2_UNAVAILABLE_REASONS`, so S9 will show those arrows greyed where they stand. Proven
+  over 30 seeded bouts (1v1, 2v2, 3v3; plain and `tricks`), every foe selected in turn, under the
+  arena's own settled camera (a team camera in 4,379 of the 4,740 selections): each offered move drawn
+  exactly once, wholly on the stage, and sent by its click and its arrow; each withheld one on no
+  button, sent by nothing, and its arrow swallowed; no two buttons overlapping.
+- **Walks stay in the build's own slots** — `walkleft` at optionB, left of the fighter, and `walkright`
+  at optionE, right of him, in every stance that wires them (`SS2_BUTTON_WIRING`; a test pins it), with
+  the build's own icons, their digits (S2) and now their arrows.
+- **A walk the stance does NOT wire stands BESIDE its side's walk slot, one pitch in toward the
+  fighter (AUTHORED).** The close frames wire only the retreat, but the team engine offers the walk
+  toward a foe in reach when he is in another rank, or when there is a foe on each side (the retreat is
+  from the nearest). That slot holds a swing, which the engine may offer too (33 selections in 75
+  bouts measured) and S9 will grey where it does not, so the walk cannot take it. It stands one pitch
+  (31.5 overlay px, the ring's tightest) in from optionB or optionE, at the same height, in the build's
+  walk icon — 203 of 16,407 offered walk-selections (1.2%) in those 75 bouts. Rejected: the jump slot (Q8
+  keeps it for jumps, and the close warrior frame has no free slot on the walk's side); outboard of the
+  column (under the S2 labels).
+- **The rank arrows (the owner's): step BACK above the head, step FORWARD below the feet** — on the
+  fighter's own line, off his DRAWN head and the bottom of his name, standing off them by the gap the
+  ring leaves between two buttons, at the ring's button size, kept on the canvas. They follow the body,
+  not the ring, because the ring keeps one size on screen while the fighter shrinks as the camera pulls
+  back (the feet are 30-112 overlay px below the ring's centre across the build's zoom table). The
+  authored chevrons (`actionButtonFallbackOpsFor`'s `rank_back`/`rank_front`; the build has no rank art).
+  Measured under the arena's own settled camera over 30 bouts, every foe selected: the forward arrow's
+  lowest edge 353.96 stage px (the UI bar's origin is 401), the back arrow's highest 70.36.
+  ~~350.6 and 70.4~~ — my first measurement fed the camera bare x values instead of the `{x, side}`
+  the arena feeds it, which is a different camera; corrected by the S4 implementer.
+- **The whole ring is kept on the stage (AUTHORED; Codex review pass 2).** The build puts its overlay
+  on the hero whatever the camera shows, and a team camera frames the fighters, not the ring around one
+  of them: under the arena's own camera 1,708 of 4,740 rings had a button at least partly off the
+  stage's side, a slotted walk wholly off it among them (3v3 plain seed 1, red-3 at x -510: walk-left
+  centred at stage x -22.3). `ringButtonsInside` moves the whole set — the eight, a walk beside, the
+  rank arrows — back onto the stage by the least that does it, every button by the same amount, so the
+  ring keeps its shape and nothing overlaps. This changes S3's placement at the stage's edges only.
+- **Keys (authored):** ← → walk, ↑ steps back a rank (up the stage), ↓ forward — from the stage or a
+  strip button, never from a field that types or a control whose own arrows change it (the volume
+  slider; `ringFocusKind` now calls it `"adjust"`), never with a modifier. A held arrow moves once, and
+  its repeats stay the ring's until it is let go — also after the turn it moved has passed to the AI,
+  where the first build let them scroll the page (Codex review pass 1; reproduced as a failing test,
+  then fixed). An arrow whose move is withheld does nothing, is kept from the page (which would
+  otherwise scroll under the fight) and is said in the live region ("Step forward a rank is not on
+  offer now.").
+- **The strip:** the ring row lists the eight, then the moves no slot holds, each with its arrow; a walk
+  in its slot shows its digit and its arrow. The moves no longer appear under "Also".
+- **The look (authored):** a move no slot holds carries no label on the stage — its glyph is its arrow
+  and its key is that arrow. A walk in its slot keeps S2's "2 Walk".
+- **Owner decisions:** the beside-walk placement; moving the ring onto the stage at its edges (the
+  build does not); whether withheld rank arrows should be greyed now rather than in S9; the rank
+  arrows' look (a disc with a chevron, like the authored buttons).
+- **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=3` (the rank arrows on a
+  mid-rank fighter; the forward arrow over the front rank's heads) before trusting the look.
+
 ## Delivery order
 
 1. **Seats**: choose which fighters a human plays, with the rest AI (~~e.g. `?red=human&blue=ai`~~
