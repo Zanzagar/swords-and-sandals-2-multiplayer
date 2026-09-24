@@ -72,7 +72,9 @@
  *   (**Dated 2026-09-24: 3,436 is the 12-PROP pack's flatten** — its 3,345
  *   emitted placements, these 2, and the sky's 89 masks, one on each of frames
  *   112-200, which sum to it exactly. It is not re-counted here: masks are not
- *   written into the pack, and this correction did not run the flatten. Since
+ *   emitted as placements (each rides as a `clip` on the placement it cuts:
+ *   89 clip records, one per sky frame 112-200), and this correction did not
+ *   run the flatten. Since
  *   2026-09-22 a morph also comes back `unsupported` and is BAKED rather than
  *   refused — 38 placements in `fireball_combat` and `boulder_combat` — so read
  *   "2 unsupported" as "2 refused". The refused are still exactly these two:
@@ -313,9 +315,10 @@ export const PROP_EXPORTS = Object.freeze([
      *   `clockDiscovery.byFrame` as `[[], [], [], [27]]`: frames 1-3 place no
      *   animated sprite and frame 4 places exactly one, character 27 — the same
      *   23-frame sprite `fireball_combat`'s clock walks. The length was read
-     *   from the actions on 2026-09-23 and is recorded at
-     *   `BOULDER_LANDED_FRAMES` (22 frames); that reading is cited, not
-     *   re-derived here. The entry still names the FRAME: declaring
+     *   from the actions on 2026-09-23 and is recorded in the docstring of
+     *   `BOULDER_LANDED_FRAMES`, which stays `null` because
+     *   `boulderLandedFramesFor` already derives 22 from the pack's 23-frame
+     *   clock; that action reading is cited, not re-derived here. The entry still names the FRAME: declaring
      *   `character: 27` would drop `clockDiscovery` from the pack, which is a
      *   change to the extraction and not to this comment.
      */

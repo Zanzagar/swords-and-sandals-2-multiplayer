@@ -5261,8 +5261,11 @@ the map-derived rule set `src/team/ss2-rules.js` (`ss2TeamRules`,
 `SS2_RESOURCE_NAMES` includes the armour pieces, `maximum_ammo`, the weapon
 ids and `inventory1`–`inventory6`, among others. It is the rule set
 `tools/hotseat.mjs` runs by default (`--rules ss2`, since `831bcdc`) and
-`tools/arena/main.js` runs (through `selectRules`, since `473ef59`). The list
-below is kept as the August checklist; each item now has a home in code —
+`tools/arena/main.js` runs (since `473ef59`; through `selectRules` since
+`741ae66`, which since `62b9cdd` hands it a fresh `createSs2TeamRules`
+instance carrying the fight pop-ups' observer — the same id, descriptor and
+stride as the `ss2TeamRules` singleton). The list below is kept as the August
+checklist; each item now has a home in code —
 the status phase (`resolveStatusPhase` in `ss2-rules.js`, `86ccb68`), the
 per-action animation gate (`src/adapter/action-gate.js`), the ordered RNG
 channel and its journal (`src/team/rng.js`; `rngJournal` in

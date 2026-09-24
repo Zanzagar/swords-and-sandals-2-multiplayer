@@ -249,8 +249,8 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     `inventory6: 1` in the gladiator factory).
     ~~Inert today because nothing reads the field — the exact hazard that roster's
     header already records four times. Fix it in the session that declares the
-    resources, not before.~~ The roster's header now records it as the FIFTH
-    instance of that hazard, beside those six lines.
+    resources, not before.~~ The comment beside those six lines in the roster
+    now records it as the FIFTH instance of that hazard.
 
 ► **A CODEX REVIEW CAME BACK `needs-attention` ON 13 UNREVIEWED COMMITS, AND
   ALL FOUR FINDINGS WERE REAL (2026-09-19).** I ran Codex once today, on the
@@ -550,7 +550,8 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     ► **CORRECTED 2026-09-24: THE ARENA DOES NOT KEEP THAT CONTRACT.**
       `render()` in `tools/arena/main.js` calls `sizeCanvasToStage()` and then
       assigns `canvas.width` / `canvas.height` itself, UNCONDITIONALLY, every
-      frame (`Math.floor(parent rect × devicePixelRatio)`) — lines it has
+      frame once the asset gate is open (`Math.floor(parent rect ×
+      devicePixelRatio)`) — lines it has
       carried since the arena's first commit, `473ef59`. So the arena is that
       caller, and the wipe is harmless only because `render()` then clears and
       redraws the whole frame. The two sites also measure different boxes (the
@@ -2336,7 +2337,8 @@ WRONG in three of five rows:)*
 it yet**; ~~blood, sparks,~~ the arena's edges and the enchantment selector all
 landed tonight. **CORRECTED 2026-09-24: BLOOD AND SPARKS DID NOT DRAW until
 `787c6b2` (2026-09-23).** From `f0a3780` (2026-09-13) the spray was seeded
-with `step.actionBoundary` inside `renderStage`, where no `step` exists, so with
+with `step.actionBoundary` inside `render()` (moved into `renderStage` at
+`3b851c3`), where no `step` exists, so with
 an extracted pack the line threw a ReferenceError at the first effect pose of
 every hurt or death clip: no drop was ever spawned and the rest of that frame's
 draws were skipped (`frame()` logged it once and carried on). `787c6b2` seeds it

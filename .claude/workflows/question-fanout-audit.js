@@ -13,7 +13,7 @@ export const meta = {
 //   docs/adr/0001, are NOT in this repository. They are in the claude-harness
 //   repository — docs/multi-agent-field-rules.md and
 //   docs/adr/0001-verification-precedence.md there — as the comment above
-//   MAX_QUESTIONS already says. The same holds for the "(docs/adr/0001)" in
+//   MAX_QUESTIONS already says for the ADR. The same holds for the "(docs/adr/0001)" in
 //   the two cap messages below. A reader of this repo will not find them
 //   under docs/.
 
