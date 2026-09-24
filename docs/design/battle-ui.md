@@ -616,6 +616,16 @@ and the ring is squeezed onto the stage after it.
    **Their own design pass should consider lane changes** — e.g. a jump or charge that crosses ranks — as
    well as the build's sideways leap and the mid-charge attack (`Chargeattack`, unmodelled).
 
+10. **Lanes: SOFT LANES is the direction** (the owner, 2026-09-24, after weighing free 2-D y): positions
+    continuous in y WITHIN a lane's band (natural-looking), melee needs the same band (out-of-lane melee
+    stays forbidden, as the engine already rules), area verbs such as whirlwind use a real 2-D radius, and
+    lanes change by walk, jump or charge. **Free y is deferred, to be decided by DATA, "perhaps far
+    later":** a spike with free y behind a flag and scripted cheese bots (a kiter, a corner-turtler, a
+    wall-builder) against the AI in lanes / soft lanes / free y, compared on bout length, walking share,
+    stall rate and exploit win rate. The analysis: free y opens flanking, area-effect spacing, formations
+    and escape routes, but in a turn-based side-on game it invites kiting, tape-measure micro, turtling and
+    AI exploitation, reads poorly in depth, and costs a spatial AI.
+
 ### Slices (tracked on the board)
 
 - **HUD track** (starts now): **H1** team colours on the stage and the roster · **H2** the team panels
