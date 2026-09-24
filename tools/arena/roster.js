@@ -451,9 +451,48 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = []
       //     any range and any rank, so "about five taunts a bout" described an
       //     offer that no longer exists; the brief that carried the rule
       //     expected the duellist to taunt rarely in team play after it.
-      //     **Not re-measured here** — the rule was not in this tree. Re-run
+      //     ~~**Not re-measured here** — the rule was not in this tree. Re-run
       //     the sweep before trusting 16, or any claim about how often slot 3
-      //     taunts.
+      //     taunts.~~
+      //
+      //   ► **RE-MEASURED 2026-09-23, AND 16 NO LONGER MAKES SLOT 3 A
+      //     CHARACTER IN TEAM PLAY — NOR DOES ANY CHARISMA.** Same sweep (slot
+      //     3 on BOTH sides, seeds 1-12, the arena's own host), on the tree
+      //     that prices a taunt at the foe in the taunter's own rank
+      //     (`nearestTauntableFoe` in `ss2-rules.js`):
+      //
+      //     ```text
+      //        charisma   taunts taken / offered   from slot 3   bout length
+      //            6              2 / 422                 0           90
+      //           10              2 / 412                 0           88
+      //           12              2 / 403                 0           89
+      //           14              4 / 418                 2           90
+      //           16              5 / 407                 3           90
+      //           20              4 / 415                 2           91
+      //           24              5 / 440                 3           94
+      //     ```
+      //
+      //     (The same script at 2690559, before the rule, gives 68 / 457 and
+      //     61 from slot 3 at charisma 16 and 54 / 449 and 48 at 20 — taken
+      //     and from-slot-3 within one of the old rows — but 10 and 8 at each
+      //     of 10-14, where the old table has 20-21 and 19-20; the engine has
+      //     moved since 2026-09-18.)
+      //     12/12 settle everywhere; 25 seeds give the same shape (0-3 from
+      //     slot 3 at every value).
+      //     **The cause is the ROSTER'S GEOMETRY, not the AI.** Ranks go by
+      //     slot, so the two slot-3s open in the same rank (y 6) and the only
+      //     foe a duellist may taunt is the other duellist. At equal charisma a
+      //     taunt lands 40% of the time and, unwounded, is worth 3.84 hitpoints
+      //     against an approach worth 11.88. On the plain 3v3, seeds 1-25, the
+      //     duellist is offered a taunt on 253 decisions; on 250 the only
+      //     tauntee is the other duellist and it declines all 250. Every one of
+      //     the 122 taunts it took at 2690559 was across a rank, at a
+      //     charisma-6 foe. Give the OTHER side's slot 3 charisma 6 and red's
+      //     duellist taunts it 60 times in those 25 bouts (17 without the
+      //     pricing fix). What to do about it — ranks that do not mirror, a
+      //     duellist on one side, or nothing — is the owner's.
+      //     (Scripts: the 2026-09-23 taunt-pricing agent's scratchpad; not
+      //     committed.)
       //
       //   ► **AND ITS STRIKE CAN KILL A 46-HITPOINT GLADIATOR FROM FULL
       //     (measured 2026-09-23).** The direction-20 strike is
@@ -464,7 +503,9 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = []
       //     FIGHTER TAKES ITS POOLS" below), so they keep this: 22 and 5 such
       //     deaths over 25 seeded 3v3 bouts (and 1 on the plain roster). A
       //     damage-kit fighter has 140 and cannot die of it from full.
-      //     (Measured before the own-rank rule, like the sweep.)
+      //     (Measured before the own-rank rule, like the sweep. **Re-measured
+      //     after it, same 25 seeds: 2 in `tricks`, 0 in `crowd`, 0 plain** —
+      //     both of the 2 by slot 3, on a victim at full health.)
       const duellist = index === 2;
       const vanilla = demoGladiator({
         ...slots,

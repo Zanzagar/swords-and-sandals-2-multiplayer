@@ -330,6 +330,60 @@ test("THE TAUNT IS A RIVAL TOO: a wounded gladiator whose taunt heals more than 
   assert.equal(picks(wounded), WINCROWD);
 });
 
+test("...AND THE RIVAL IS THE TAUNT AT THE FOE IN ITS OWN RANK, not at a nearer one a rank over it may not taunt", () => {
+  // RED before 2026-09-23's fix: the rival was priced at the NEAREST foe, and
+  // a foe a rank over is never offered a taunt (the owner's own-rank rule), so
+  // with the nearest foe in another rank the rival read 0 and the pose won
+  // against a taunt worth more. The wounded hero above, now in the back rank:
+  // `near` is a rank over and nearer, walking at `mate` (200 against ~608, so
+  // it walks past nobody); `rival` is in the hero's rank, far off. Crowd at 98,
+  // so the pose is worth the same 2 points as above and the taunt at `rival`
+  // — heal 33 of the 40 missing — outprices it.
+  const BACK = SS2_ARENA.frontY - SS2_ARENA.rankStride;
+  const battle = createTeamBattle({
+    seed: 3,
+    rules: ss2TeamRules,
+    teams: [
+      {
+        id: "red",
+        combatants: [
+          ss2Combatant(fields({ speed: 30, charisma: 16, stamina: 30 }), { id: "hero", name: "hero", controller: "ai" }),
+          ss2Combatant(fields({ speed: 25 }), { id: "mate", name: "mate", controller: "ai" })
+        ]
+      },
+      {
+        id: "blue",
+        combatants: [
+          ss2Combatant(fields({ speed: 10 }), { id: "near", name: "near", controller: "ai" }),
+          ss2Combatant(fields({ speed: 9 }), { id: "rival", name: "rival", controller: "ai" })
+        ]
+      }
+    ]
+  });
+  for (const [id, x, y] of [["hero", 0, BACK], ["mate", 400, SS2_ARENA.frontY], ["near", 600, SS2_ARENA.frontY], ["rival", 1500, BACK]]) {
+    Object.assign(combatantById(battle, id), { x, y });
+    face(battle, id, id === "near" || id === "rival");
+  }
+  combatantById(battle, "hero").health = 130;
+  combatantById(battle, "near").health = 30;
+  combatantById(battle, "rival").health = 30;
+  battle.battleResources.crowd_interest.value = 98;
+
+  const offered = legalActions(battle, "hero");
+  assert.deepEqual(
+    offered.filter((option) => option.type === Ss2ActionType.TAUNT).map((option) => option.targetId),
+    ["rival"],
+    "the staging must offer the taunt at `rival` alone"
+  );
+  assert.ok(offered.some((option) => option.type === WINCROWD), "and the pose");
+  const chosen = suggestAction(battle, "hero");
+  assert.deepEqual({ type: chosen.type, targetId: chosen.targetId }, { type: Ss2ActionType.TAUNT, targetId: "rival" });
+
+  // With all 8 points to gain the pose outprices that taunt, so the gates did pass.
+  battle.battleResources.crowd_interest.value = 10;
+  assert.equal(picks(battle), WINCROWD);
+});
+
 test("ADULATION STAYS THE LADDER'S: arm 28 casts it on possession beyond 300 before the valuation is read", () => {
   const battle = staged({ hero: { charisma: 16, inventory1: 47 }, foeHealth: 50 });
   assert.equal(picks(battle), Ss2ActionType.CAST_ADULATION);

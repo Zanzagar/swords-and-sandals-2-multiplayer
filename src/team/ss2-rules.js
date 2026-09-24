@@ -3028,6 +3028,18 @@ function nearestFoe(view) {
   return best;
 }
 
+/**
+ * The foe a taunt may name, or null: the nearest living foe IN THE ACTOR'S OWN
+ * LANE — `nearestFoe` over exactly the set `legalActions` offers a taunt at
+ * (`ss2SameLane`, the owner's own-rank rule of 2026-09-23). The walk arm's
+ * lane-first choice and the facing rule's (`facingEffectsAgainst`) are the same
+ * set. With ranks off, or one foe in one rank, every foe passes the filter and
+ * this is `nearestFoe` exactly — same foes, same order, same tie-break.
+ */
+function nearestTauntableFoe(view) {
+  return nearestFoe({ ...view, foes: view.foes.filter((foe) => ss2SameLane(view.actor, foe)) });
+}
+
 /** Which way a walk carries its actor. Left is negative x, as in the build. */
 const SS2_WALK_DIRECTION = Object.freeze({
   [Ss2ActionType.WALK_LEFT]: -1,
@@ -14903,9 +14915,14 @@ export function createSs2TeamRules({
             const ranged = ss2SwingValues(actor, nearest);
             const bestSwing = Math.max(...Object.values(ranged.expected));
             const worth = ss2CrowdPleaserValue(view, ss2WincrowdCrowdAction(actor), bestSwing);
-            const tauntRival = aiTaunts && options.some((option) =>
-              option.type === Ss2ActionType.TAUNT && option.targetId === nearest.id)
-              ? ss2TauntValue(actor, nearest, ranged.chances)
+            // The rival is the taunt the arm below would weigh, priced at the
+            // foe that arm prices it at (`nearestTauntableFoe`) — ~~`nearest`~~
+            // until 2026-09-23, which a rank over is never offered, so the
+            // rival read 0 wherever the nearest foe stood in another rank.
+            const tauntee = aiTaunts ? nearestTauntableFoe(view) : null;
+            const tauntRival = tauntee && options.some((option) =>
+              option.type === Ss2ActionType.TAUNT && option.targetId === tauntee.id)
+              ? ss2TauntValue(actor, tauntee, ss2SwingValues(actor, tauntee).chances)
               : 0;
             if (worth > Math.max(ss2ApproachValue(actor, nearest, bestSwing), tauntRival)) return pleaser;
           }
@@ -15010,14 +15027,40 @@ export function createSs2TeamRules({
         //   the same courtesy the forced-phase and forced-swap arms above
         //   extend: pricing needs the attacker record, and a gladiator still
         //   walking toward the fight should not have to declare one to step.
-        if (aiTaunts && nearest && ss2CanBePriced(actor)) {
+        //
+        // ► **PRICED AT THE NEAREST FOE IN ITS OWN RANK, and until 2026-09-23
+        //   at the nearest in ANY rank — which, once the owner's own-rank rule
+        //   landed the same day, silenced the arm.** A foe a rank over is never
+        //   offered a taunt, so whenever he was the nearest the `find` below
+        //   came back empty and the arm never ran, while a taunt at the man in
+        //   the taunter's own rank stood on offer unpriced. Measured on the
+        //   arena's own host (`demoSide` 3v3, seeds 1-25) at b51ad05: the
+        //   duellist was offered a taunt on 253 decisions, and on 210 the
+        //   nearest foe stood a rank over. The tauntee is the foe the walk
+        //   below steps toward when its rank holds one (`approached`) and the
+        //   one the facing rule turns it to, so the swing priced against is
+        //   the swing it is walking toward, as it always was.
+        //   `nearestTauntableFoe` is `nearestFoe` exactly with ranks off and
+        //   in 1v1 (1,250 seeded bouts, 0 changed).
+        //
+        //   ► **THIS DOES NOT BRING THE DEMO DUELLIST'S TAUNTS BACK, and the
+        //     brief that ordered it expected it to.** 3 taunts before, 3
+        //     after (122 at 2690559, before the own-rank rule, every one
+        //     across a rank). Its only own-rank foe is the OTHER duellist,
+        //     and at equal charisma that taunt prices below the approach —
+        //     see the roster's note in `tools/arena/roster.js`. Where an
+        //     own-rank foe IS worth taunting it is the whole difference: with
+        //     the other side's slot 3 at charisma 6, red's duellist taunts 60
+        //     times over the same 25 bouts, 17 without this.
+        const tauntee = aiTaunts && ss2CanBePriced(actor) ? nearestTauntableFoe(view) : null;
+        if (tauntee) {
           const tauntHere = options.find((option) =>
-            option.type === Ss2ActionType.TAUNT && option.targetId === nearest.id);
+            option.type === Ss2ActionType.TAUNT && option.targetId === tauntee.id);
           if (tauntHere) {
-            const ranged = ss2SwingValues(actor, nearest);
+            const ranged = ss2SwingValues(actor, tauntee);
             const bestSwing = Math.max(...Object.values(ranged.expected));
-            const worth = ss2TauntValue(actor, nearest, ranged.chances);
-            if (worth > ss2ApproachValue(actor, nearest, bestSwing)) return tauntHere;
+            const worth = ss2TauntValue(actor, tauntee, ranged.chances);
+            if (worth > ss2ApproachValue(actor, tauntee, bestSwing)) return tauntHere;
           }
         }
 
@@ -15414,6 +15457,16 @@ export function createSs2TeamRules({
       // `find` by type alone takes whichever foe happens to be first in the
       // list and would price a taunt at one gladiator while aiming it at
       // another.
+      // ► **NOT MOVED TO THE OWN-RANK FOE WITH THE TWO ARMS ABOVE (2026-09-23),
+      //   and named rather than taken.** `engaged` is who this table swings or
+      //   shoots at, so a taunt at him is already one the offer allows. A SHOT
+      //   is lane-free, though, so an archer's `engaged` can stand a rank over,
+      //   and then no taunt row exists even with one on offer at a foe in the
+      //   archer's own rank: 205 decisions on the plain 3v3 (`demoSide`, seeds
+      //   1-25, at b51ad05), all slot 2's. Pricing that one makes the table
+      //   compare a taunt at one foe with a shot at another. Tried in scratch
+      //   on top of this fix: plain 3v3 taunts 8 -> 6, tricks 123 -> 150. The
+      //   owner's call, not this fix's.
       const tauntOption = options.find((option) =>
         option.type === Ss2ActionType.TAUNT && option.targetId === engaged.id);
       if (aiTaunts && tauntOption) {

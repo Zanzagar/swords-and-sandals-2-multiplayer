@@ -420,9 +420,12 @@ test("AND IT NEVER TAUNTS INTO ANOTHER RANK, which it did whenever that foe was 
   //   `near` a rank back — and before the rule the AI taunted him from there,
   //   because the out-of-range arm prices the taunt against the NEAREST foe by
   //   Euclidean distance and the offer named every foe. `far`, in the hero's
-  //   own rank, is still on offer; the arm does not retarget to him, because
+  //   own rank, is still on offer; ~~the arm does not retarget to him, because
   //   it prices a taunt against the swing it is walking toward and that swing
-  //   is `near`'s.
+  //   is `near`'s.~~ **Stale the day it was written: the same commit sent the
+  //   walk toward `far` (the foe in its own rank), so the swing it walks toward
+  //   IS `far`'s, and since 2026-09-23 the arm prices — and here takes — the
+  //   taunt at `far`. See the next test.**
   const battle = staged({
     red: [{ id: "hero", fields: gladiator({ charisma: 20 }), x: 0, y: 200, health: 8 }],
     blue: [
@@ -434,6 +437,71 @@ test("AND IT NEVER TAUNTS INTO ANOTHER RANK, which it did whenever that foe was 
   assert.ok(chosen, "the AI must choose something");
   assert.equal(chosen.type === Ss2ActionType.TAUNT && chosen.targetId === "near", false,
     `a taunt across ranks is not the AI's to take; it chose ${JSON.stringify(chosen)}`);
+});
+
+test("THE TAUNT IS PRICED AT THE FOE IN ITS OWN RANK, even when a nearer one stands a rank over", () => {
+  // ► **RED BEFORE 2026-09-23's FIX, AND THE DEFECT IS THE OWN-RANK RULE'S
+  //   SHADOW.** The out-of-range arm looked for a taunt offer at the NEAREST
+  //   foe overall. Once the owner's rule stopped offering a taunt a rank over,
+  //   a nearest foe in another rank meant no offer matched, the arm never ran,
+  //   and the taunt at the man in the taunter's own rank — on offer the whole
+  //   time — was never priced. On the arena's own host (`demoSide` 3v3, seeds
+  //   1-25) that was 210 of the duellist's 253 taunt offers.
+  //
+  //   A 3v3, so the lanes are the only thing deciding who is nearest: the hero
+  //   holds the front rank with `rival` far off in it; `neighbour` stands a rank
+  //   back and much nearer; the third foe and both allies are in the other
+  //   ranks. Wounded and charismatic, so a taunt at `rival` beats the approach —
+  //   the same numbers as "THE TAUNT IS AIMED AT THE FOE IT WAS PRICED
+  //   AGAINST" above, where the taunt is taken with nobody in the way.
+  const FRONT = SS2_ARENA.frontY;
+  const battle = staged({
+    red: [
+      { id: "hero", fields: gladiator({ charisma: 20 }), x: 0, y: FRONT, health: 8 },
+      { id: "mate", fields: gladiator(), x: -700, y: FRONT - SS2_ARENA.rankStride },
+      { id: "anchor", fields: gladiator(), x: -800, y: FRONT - 2 * SS2_ARENA.rankStride }
+    ],
+    blue: [
+      { id: "rival", fields: gladiator({ gladiator_dir: "left" }), x: 1400, y: FRONT },
+      { id: "neighbour", fields: gladiator({ gladiator_dir: "left" }), x: 300, y: FRONT - SS2_ARENA.rankStride },
+      { id: "third", fields: gladiator({ gladiator_dir: "left" }), x: 1500, y: FRONT - 2 * SS2_ARENA.rankStride }
+    ]
+  });
+
+  // The staging, checked rather than trusted: `neighbour` is the nearest foe by
+  // the AI's own metric (Euclidean, `ss2FightDistance`), nothing is in reach,
+  // and the only taunt on offer names `rival`.
+  const hero = combatant(battle, "hero");
+  const distance = (id) => Math.hypot(combatant(battle, id).x - hero.x, combatant(battle, id).y - hero.y);
+  assert.ok(distance("neighbour") < distance("rival") && distance("neighbour") < distance("third"),
+    "`neighbour` must be the nearest foe");
+  const offered = legalActions(battle, "hero");
+  assert.deepEqual(
+    offered.filter((option) => option.type === Ss2ActionType.TAUNT).map((option) => option.targetId),
+    ["rival"],
+    "a taunt is offered at `rival` alone, the only foe in the hero's rank"
+  );
+  assert.equal(offered.some((option) => option.targetId === "neighbour" && option.type !== Ss2ActionType.TAUNT), false,
+    "and nothing reaches `neighbour`, so this is the out-of-range arm");
+
+  const chosen = suggestAction(battle, "hero");
+  assert.deepEqual({ type: chosen.type, targetId: chosen.targetId }, { type: Ss2ActionType.TAUNT, targetId: "rival" },
+    "the own-rank taunt is priced, beats the approach, and is taken");
+
+  // ► **AND WITH RANKS OFF THE SAME STAGING IS THE OLD ANSWER EXACTLY** —
+  //   one lane, so `neighbour` is offered a taunt, is the nearest, and is the
+  //   one priced; the own-rank filter admits every foe and changes nothing.
+  const flat = staged({
+    red: [{ id: "hero", fields: gladiator({ charisma: 20 }), x: 0, health: 8 }],
+    blue: [
+      { id: "rival", fields: gladiator({ gladiator_dir: "left" }), x: 1400 },
+      { id: "neighbour", fields: gladiator({ gladiator_dir: "left" }), x: 300 }
+    ]
+  });
+  for (const id of ["hero", "rival", "neighbour"]) combatant(flat, id).y = null;
+  const flatChoice = suggestAction(flat, "hero");
+  assert.deepEqual({ type: flatChoice.type, targetId: flatChoice.targetId },
+    { type: Ss2ActionType.TAUNT, targetId: "neighbour" });
 });
 
 test("a gladiator that declares no damage pair is SKIPPED, not thrown at", () => {
@@ -529,6 +597,14 @@ test("THE DEMO ROSTER CAN EXPRESS THE VERB NOW, and could not before", async () 
   //   at the line itself. This asserts the CAPABILITY, not the rate — a rate
   //   pinned here would go red the first time the roster is tuned, which is the
   //   owner's to do.
+  //
+  //   ► **AND IN 3v3 THE RATE IS BACK NEAR ZERO SINCE THE OWN-RANK RULE
+  //     (2026-09-23): 3 taunts from slot 3 over 25 seeded bouts at the
+  //     shipped 16, and 0-3 at every charisma from 6 to 24.** The two
+  //     duellists open in the same rank, so each may taunt
+  //     only the other, and at equal charisma that never beats the approach.
+  //     Measured and explained at the roster's own note; the fix is the
+  //     owner's, and this test still asserts only what it says.
   const { demoSide } = await import("../tools/arena/roster.js");
   const { ss2BattleValues, ss2Combatant: canonical } = await import("../src/team/ss2-rules.js");
   const side = demoSide("red", 3, { ss2Combatant: canonical, ss2BattleValues });
