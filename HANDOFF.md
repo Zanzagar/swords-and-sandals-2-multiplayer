@@ -28,8 +28,13 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md)**
-(the END of session `c62c201f`). Start there. *(It supersedes the same
+[2026-09-24 04:53 — the stranded work is merged, and the night is running](docs/handoffs/2026-09-24-0453--the-stranded-work-is-merged-and-the-night-is-running.md)**
+(a MID-SESSION checkpoint of session `b64d8f55`, written while the overnight
+run wf_b7145bd6-967 builds in four worktrees). Start there. *(It supersedes
+[2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md),
+**whose session `c62c201f` ran on after it, then ran out of context with five
+implementers finished-unmerged and no handoff — all five are now merged
+(28d4b3b, b1ac294, ef48e17, 9ed4375, e89a7d7).**)* *(That one supersedes the same
 session's mid-session checkpoint
 [2026-09-23 01:19 — every quirk is decided, and the crowd is built](docs/handoffs/2026-09-23-0119--every-quirk-decided-and-the-crowd-is-built.md),
 **whose "In flight" items 1-3 are ALL MERGED (2efddc9, a62e67a, bf53d81) and
