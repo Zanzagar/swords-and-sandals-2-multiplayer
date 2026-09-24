@@ -111,6 +111,12 @@
   .ring-confirm-toggle input { accent-color: var(--warn); margin: 0; }
   #ring-confirm-go:not(:disabled) { border-color: #f2c14e; color: #f2c14e; }
   .ring-odds { font-size: 11.5px; color: var(--ink-dim); margin-left: 4px; }
+  /* S8: the AI row — between a person's turns only. The skip is a toggle: pressed, it is gold. */
+  .ring-row[hidden] { display: none; }
+  .ring-pace-hint, .ring-pace-state { font-size: 11.5px; color: var(--ink-dim); }
+  .ring-pace-hint kbd { font: inherit; font-weight: 700; color: var(--warn); }
+  .ring-pace-state { color: var(--ink); }
+  #ring-skip[aria-pressed="true"] { border-color: #f2c14e; color: #f2c14e; }
   .visually-hidden {
     position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
@@ -233,7 +239,7 @@
   <main>
     <div class="stage-column">
       <ol class="turn-strip" id="turn-strip" aria-label="Turn order"></ol>
-      <div id="stage"><canvas id="arena" tabindex="0" aria-label="The arena. On your turn: click a button around your fighter, or a foe to target him. Keys: 1 to 8 press the buttons, 9 swaps weapons when you carry two, Q to Y use your items and spells, the arrow keys walk left and right and step back or forward a rank, Tab and Shift+Tab change the target, Esc moves to the list of actions under the stage. With Confirm every move on, a key or click only chooses: Enter confirms and Esc takes it back. A dimmed button is not on offer now: point at it, or press its key, to hear why."></canvas></div>
+      <div id="stage"><canvas id="arena" tabindex="0" aria-label="The arena. On your turn: click a button around your fighter, or a foe to target him. Keys: 1 to 8 press the buttons, 9 swaps weapons when you carry two, Q to Y use your items and spells, the arrow keys walk left and right and step back or forward a rank, Tab and Shift+Tab change the target, Esc moves to the list of actions under the stage. With Confirm every move on, a key or click only chooses: Enter confirms and Esc takes it back. A dimmed button is not on offer now: point at it, or press its key, to hear why. While the AI plays, hold Shift to speed it up, or press Skip to my turn under the stage."></canvas></div>
       <section class="ring-strip" id="ring-strip" aria-label="Your actions" data-state="idle" hidden>
         <div class="ring-row" id="ring-preview" role="group" aria-label="Preview and confirm">
           <b>Preview</b>
@@ -247,6 +253,12 @@
         <div class="ring-row" id="ring-items" role="group" aria-label="Items and spells"></div>
         <div class="ring-row" id="ring-off" role="group" aria-label="More actions"></div>
         <p class="ring-status" id="ring-status"></p>
+        <div class="ring-row" id="ring-pace" role="group" aria-label="The AI's turns" hidden>
+          <b>AI</b>
+          <button type="button" id="ring-skip" aria-pressed="false" disabled>Skip to my turn</button>
+          <span class="ring-pace-hint">Hold <kbd>Shift</kbd> to draw the AI's turns at 4×.</span>
+          <span class="ring-pace-state" id="ring-pace-state"></span>
+        </div>
         <div id="ring-descriptions" hidden></div>
       </section>
       <div class="visually-hidden" id="ring-live" aria-live="polite"></div>

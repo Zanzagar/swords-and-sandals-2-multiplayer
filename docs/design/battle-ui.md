@@ -129,7 +129,8 @@ first (ab5feb5, `src/render/action-buttons.js`).
 6. **No resting while a foe is in reach** (Q7), matching the original's close-range layouts — an ENGINE
    change, measured for its AI effect in its own commit.
 7. **Jump and charge stay hidden** (Q8) and get their own design pass.
-8. **AI turns** (Q3): normal speed, a hold-to-speed-up key and "skip to my turn".
+8. **AI turns** (Q3): normal speed, a hold-to-speed-up key and "skip to my turn" (built: S8, below —
+   the key is Shift).
 9. **The strip under the stage** carries the same actions for the keyboard (1–8 slots, Tab targets,
    arrows move) and screen readers, shows the selected target's odds, and hosts Confirm when that
    setting is on.
@@ -141,7 +142,7 @@ first (ab5feb5, `src/render/action-buttons.js`).
   keyboard strip — drawn with the authored fallback buttons (the tracer bullet)
 - **S3** the build's own button art and placement on the ring · **S4** movement (walk slots, rank arrows)
 - **S5** the items row (built, below) · **S6** the weapon swap button (built, below) · **S7** hover previews and the confirm setting (built, below)
-- **S8** AI pacing (speed-up, skip) · **S9** greyed-button reasons (needs E; built, below)
+- **S8** AI pacing (speed-up, skip; built, below) · **S9** greyed-button reasons (needs E; built, below)
 
 ### S2, built 2026-09-24: what it does, and what it decided that the owner did not
 
@@ -574,6 +575,123 @@ were updated where S7 put a gate in front of `actFromRing`.
   caption under it, the Preview row), `?play=red&teams=3&items=tricks` with the setting on (a spell
   chosen and ringed, Confirm live), and tab through the strip with a screen reader (the preview as each
   button's description).
+
+### S8, built 2026-09-24: the AI's pace — Shift held, and "skip to my turn"
+
+`ringPaceApplies`, `ringPaceFrame`, `ringPaceNow`, `ringPaceKeyed`, `ringPaceSubmitted`,
+`ringPaceSkipPressed` and `ringPaceView` (`tools/arena/ring-pacing.js`, new); wired in
+`tools/arena/main.js` (`pacedNow`, `arenaNow`, `ringPaceState`, `renderRingPace`) and
+`tools/arena/index.html` (the strip's AI row). Tests: `test/arena-ring-pacing.test.js` (new).
+
+- **Pacing is the arena's CLOCK, and nothing else.** Every animation, arrow, fireball, boulder, bolt,
+  pop-up, blood drop and crowd change is drawn on one clock, and the animation gate opens when the
+  drawing on it is done (`animationCursor`); an AI seat moves only through that gate (`aiTurnStep`). The
+  shell's clock is now `arenaNow()`: the page's own plus an offset that only the pace moves. Running it
+  faster draws the AI's turns faster and changes nothing else — no engine step is skipped, reordered or
+  taken early, and the gate is given the same reports in the same order. "Skip to my turn" is the
+  fastest clock, never a jump: every AI step is still submitted through the gate and drawn at least one
+  frame.
+- **Normal speed by default.** With nothing asked the offset stays 0 and the arena's clock IS the page's
+  clock, to the bit; a bout nobody paces is drawn exactly as before S8.
+- **Shift, held: the AI's turns at 4×** (`RING_PACE_HELD_RATE`). The brief offered Space or Shift;
+  **Shift, because Space presses things**: the strip's buttons and the "confirm every move" box take
+  Space, and the strip hands the focus back to a ring button on the person's next turn
+  (`ringFocusWanted`), so a Space still held when that turn arrived would press it on release — an
+  action sent by accident. Shift alone presses nothing anywhere on the page, and none of the ring's keys
+  reads it alone. Let go, or the window loses the focus, and the pace is the page's again.
+- **"Skip to my turn": a toggle button in the strip** (`aria-pressed`): the AI's turns at 64× the page's
+  pace (`RING_PACE_SKIP_RATE`) — at 60 frames a second, one second of the arena per drawn frame — until
+  the person's next turn: it is spent when a frame begins on his ready turn, ~~and only then~~ **or when
+  he acts, whichever comes first** (Codex review of S8, pass 1: the drain opens his turn in the middle of
+  a frame, and a person who acted before the next frame began never let one see it — the skip stood, and
+  every AI turn after his was drawn at 64×). The AI's turns after his are drawn at their own pace unless
+  it is pressed again. Pressed again before then, it stops. Shift held as well changes nothing: the skip
+  is the faster.
+- **Only an AI seat's drawing is paced.** The person's own action is drawn at his pace whatever is held
+  or pressed (the shell tells the pace whose step it submitted: `beginStep(step, true)` from
+  `aiTurnStep` only), and so is his turn once it is ready — the idle stance, the ring, the pop-ups still
+  landing.
+- **No frame draws more than one second of the arena beyond its own length**
+  (`RING_PACE_MAX_FRAME_MS`). The gate gives up on an animation seen 4 s past its end
+  (`ANIMATION_TIMEOUT_MS`, `abandonReasonFor`), and an end can be overrun only by one frame's advance;
+  capping what the pace ADDS keeps a frame at max(its own length, 1 s)~~, so the pace can never ABANDON an
+  action the page's own pace would have reported~~ — **not enough on its own (Codex review of S8, pass 1):
+  a stall after the pace had drawn ahead still overran by that lead.** The real 1,200 ms sidestep with
+  frames at 0, 200 and 4,700 ms is reported at the page's pace (3,500 past its end) and was ABANDONED
+  with Shift held (the arena at 800, then 5,300: 4,100 past). **So a frame longer than the cap — a
+  stalled or hidden tab — advances the arena by its length less what the pace drew ahead since the step
+  on screen began,** ~~and never backwards~~ **but never by less than a second** (Codex review of S8,
+  pass 2: pass 1's "never below nothing" was a step down at the cap that the clock BETWEEN frames did
+  not follow — it kept the whole lead, so a resize's render during a stall read 4,999 and the frame after
+  it 3,000, and the arena went back from cues fired and blood stamped): the arena then stands where
+  the page's own pace would have it, or a second on from where it was. The clock between frames
+  (`ringPaceNow`) is the same rule at the page's pace, so it is never later than the frame after it nor
+  earlier than the one before, and a step stamped between frames starts its lead from what it was
+  stamped with. A stall can abandon under the pace only what it abandons at the page's own pace from
+  the same wall-clock start. Uncapped, a slow page (96 ms frames) skipping would draw 6.1 s in one frame.
+- **Where:** `?play=` with at least one AI seat (`ringPaceApplies`). `?spectate=1` and every seat by hand
+  are drawn exactly as they were: no row, and Shift does nothing. The AI row is the strip's last, under
+  the status line, and shows only between his turns — including while the AI's last action is still drawn
+  on his turn, and hiding when it is ready without moving anything of his; it names the
+  key ("Hold **Shift** to draw the AI's turns at 4×") and says what the pace is doing ("Shift held: …",
+  "Skipping to your turn…"). The stage's accessible name says it too. Pressing Skip, on or off, is
+  announced in the strip's live region; if Skip still has the focus when his turn comes, the focus goes to
+  the stage, where the ring's keys are — never onto one of his actions in the strip, which the next Enter
+  or Space would press.
+- **Proven** (`test/arena-ring-pacing.test.js`): the clock by worked frames (1× to the bit, 4×, the skip,
+  the cap at 250, 400 and 2,000 ms frames); the skip's life and the key; and **whole bouts on the page's
+  own frame loop through the ENFORCING gate** — the pace stepped first each frame from the turn and the
+  gate as the frame finds them, the drain on the arena's clock (queued links handed on, a timed-out one
+  abandoned), an AI seat through `seatFrameFor` and `suggestAction`, the person through the ring by a
+  fixed policy. Six bouts (1v1, 2v2, 3v3; plain and `tricks`; `play=red`, `play=red-1`, `play=blue`;
+  464 steps, 174 of them the person's), each under six hands — nothing touched, Shift held throughout,
+  Shift flicked and the focus lost, skip whenever offered, skip toggled on and off, skip and Shift — take
+  **the same state-hash sequence, the same steps, the same result and the same gate record (every token
+  reported, none abandoned)**; the person's own actions take the same ~~9,558~~ **9,651** frames under every
+  hand (his click now lands 5 ms after the frame that opened his turn, as a click lands between frames:
+  Codex pass 2); a
+  person's ready turn is never drawn fast and no skip outlives one. The AI's drawing took 18,542 frames
+  with nothing touched, 4,749 with Shift held and 350 skipping (290 AI steps). Two more bouts on a slow
+  page (96 ms frames) and an uneven one (a 250 ms hitch among 16s) give the 62.5 fps page's hashes at
+  every pace, with nothing abandoned. **Added after Codex's pass 1:** a seventh hand presses Skip once
+  (18,159 AI frames: only the AI's turns before his first are skipped), and every run counts frames at
+  the skip's rate with no press since the person's last step (0 in all);
+  two bouts where the person waits three frames on his ready turn before acting, so frames begin on it
+  (the first loop never let one: he acted the moment the drain opened it); and three bouts on a page that
+  stalls 4.6 s after every sixty frames, under six hands — the same hashes and steps, and every one of
+  the 7 to 27 abandons per run (19, 19 and 8 with nothing touched; a paced run meets the stalls at other
+  points of other steps, and can meet more) checked against its clip's own wall-clock start: each is one
+  the stall makes at the page's own pace. **Added after Codex's pass 2:** every frame of every run also
+  reads the clock between frames 1 ms before it, and the clock is never earlier than the frame before
+  nor later than the frame after (0 backwards in all). The golden census is identical.
+- **What it does not pace, measured or read, not changed here:**
+  - **The camera** eases once a DRAWN frame (a fifth of the zoom, a sixteenth of the pan: `render`), not
+    on the arena's clock, so at 4× and while skipping it trails the fighters and catches up on the
+    person's turn. The camera is not this slice's to change; stepping it by the pace is a follow-up.
+  - **Sounds:** a clip's cues fire when the drawn pose reaches them, so at 4× they come four times as
+    often (each still whole, at its own pitch); skipping, a cue more than 200 ms (`SOUND_STALE_MS`)
+    behind the drawing is dropped, so a frame that draws a second of the arena sounds only the cues of
+    its last 200 ms. The crowd's seeded chance of a cheer
+    rolls once per build frame of the arena's clock, so at 4× it rolls four times as often per second.
+  - **One line still reads the page's clock:** `beginStep` settles the sounds of a clip a new step
+    replaces with `performance.now()`, a line `test/arena-sound-wiring.test.js` pins as text. Once the
+    pace has added an offset that settle sees an earlier time than the clip's, and the replaced clip's
+    last cues are not sounded. Only a clip still running at a submit is replaced, and the gate waits for
+    every clip that carries a token: over 27 spectated bouts (1-3 a side; plain, `tricks`, `buffs`; seeds
+    1-3; 1,987 steps, on the page's own drain) no submit replaced a running clip at all (a scratch probe
+    in the S8 report). Changing the line needs that test file.
+- **AUTHORED, the owner did not decide these:** Shift (and why not Space); 4×; the skip's 64× and the 1 s
+  cap; the skip as a toggle, spent at the next person's turn rather than standing for the bout; the
+  person's own action at 1× with Shift held; the row's place, words and look; no pace while spectating.
+- **Owner decisions:** Shift or Space; the two rates; whether Shift should also speed up `?spectate=1`
+  (one line: `ringPaceApplies`); whether the camera should follow the pace; whether skipping should mute
+  the arena's sounds rather than drop them as they fall behind.
+- **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=3` during the AI's turns (the AI
+  row under the stage, "Skipping to your turn…" with the button pressed), hold Shift through a 3v3's AI
+  turns and watch the camera trail, and tab to Skip with a screen reader (the row's name, the toggle's
+  state, the announcement, the focus landing on the stage at your turn). On Windows, holding the RIGHT
+  Shift for eight seconds can raise the Filter Keys prompt where that shortcut is on; the left Shift
+  does not.
 
 ### S9, built 2026-09-24: why a button is greyed
 

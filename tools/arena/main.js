@@ -202,6 +202,17 @@ import {
 import { ringButtonArt } from "/tools/arena/ring-art.js";
 import { namePlateFor, namePlateLayout, teamHudFor } from "/tools/arena/team-hud.js";
 import {
+  RING_PACE_HELD_RATE,
+  RING_PACE_START,
+  ringPaceApplies,
+  ringPaceFrame,
+  ringPaceKeyed,
+  ringPaceNow,
+  ringPaceSkipPressed,
+  ringPaceSubmitted,
+  ringPaceView
+} from "/tools/arena/ring-pacing.js";
+import {
   RING_STRIP_IDLE,
   ringConfirmSettingFrom,
   ringConfirmSettingSave,
@@ -596,6 +607,25 @@ let ringPending = null;
 let ringStripState = RING_STRIP_IDLE;
 /** S7: the stage caption of the hovered button, asked once per ring and button: `{view, slot, text}`. */
 let ringCaption = null;
+/**
+ * ► **THE AI'S PACE (slice S8; the owner's decision 8): THE ARENA'S CLOCK.**
+ *   Every animation, arrow, pop-up and crowd change is drawn — and the gate
+ *   opens — on `arenaNow()`: the page's clock plus an offset the pace adds
+ *   to while an AI seat's action is drawn and the person holds Shift or has
+ *   pressed "skip to my turn", and gives back when the page stalls
+ *   (`tools/arena/ring-pacing.js`). With
+ *   nothing asked the offset is 0 and it IS the page's clock. `ringPaceOn`:
+ *   whether this bout has a pace at all — a person playing against the AI.
+ */
+const ringPaceOn = ringPaceApplies(seats);
+let ringPace = RING_PACE_START;
+/** The strip's AI row as last drawn (`renderRingPace`), so a frame that changes nothing touches no node. */
+let ringPaceDrawn = null;
+
+/** THE ARENA'S CLOCK between frames — a step is stamped with it (`beginStep`). */
+function arenaNow() {
+  return ringPaceNow(ringPace, performance.now());
+}
 
 const el = (id) => document.getElementById(id);
 const logLines = [];
@@ -1171,7 +1201,7 @@ let arenaResult = null;
  */
 function noteArenaSoundStep(step, started) {
   boutUnderway = true;
-  const now = performance.now();
+  const now = arenaNow();
   const tokens = new Set(step.actionTokens);
   const endsAt = stepEndsAtMs({
     entries: started.values(),
@@ -1336,7 +1366,7 @@ function prepareEntry(entry) {
  * the body a lob clears are one size. `extraPending` are tokens a step has
  * folded but not yet registered — `beginStep` flies its arrows first.
  */
-function drawnYscaleOf(combatantId, now = performance.now(), extraPending = []) {
+function drawnYscaleOf(combatantId, now = arenaNow(), extraPending = []) {
   const actor = scene.actors[combatantId];
   if (!actor) return null;
   const rescale = actor.rescale ?? null;
@@ -1364,12 +1394,19 @@ function bodiesBesides(ids, extraPending = []) {
     if (ids.includes(id)) continue;
     const actor = scene.actors[id];
     if (!actor?.placed || !Number.isFinite(actor.x) || living.get(id)?.alive === false) continue;
-    bodies.push({ x: actor.x, y: actor.y, yscale: drawnYscaleOf(id, performance.now(), extraPending) });
+    bodies.push({ x: actor.x, y: actor.y, yscale: drawnYscaleOf(id, arenaNow(), extraPending) });
   }
   return bodies;
 }
 
-function beginStep(step) {
+/**
+ * ► **`byAi` (S8): whether an AI seat took this step** — `aiTurnStep` says so,
+ *   a person's click or key does not. Only an AI seat's drawing is ever paced.
+ *   (A plain argument, not an options object: the suite reads this function's
+ *   body by its first brace.)
+ */
+function beginStep(step, byAi = false) {
+  ringPace = ringPaceSubmitted(ringPace, { ai: byAi, wallMs: performance.now() });
   scene = applyCommands(scene, step.commands);
 
   // THE DECISION IS `timelinesForStep` in `src/render/cursor.js`, under the
@@ -1400,13 +1437,13 @@ function beginStep(step) {
         // `attacker._yscale * 1.5 + 5`: the build writes the launch height in
         // terms of the caster's own size, so the caster's size is handed over —
         // and the target's, whose shoulder the burst is drawn on.
-        casterYscale: drawnYscaleOf(shotRecord.combatantId, performance.now(), step.actionTokens),
-        targetYscale: drawnYscaleOf(shotRecord.targetId, performance.now(), step.actionTokens)
+        casterYscale: drawnYscaleOf(shotRecord.combatantId, arenaNow(), step.actionTokens),
+        targetYscale: drawnYscaleOf(shotRecord.targetId, arenaNow(), step.actionTokens)
       });
       fireballs.push({
         flight,
         token: shotRecord.actionToken,
-        startedAt: performance.now(),
+        startedAt: arenaNow(),
         flightMs: flightDurationMs(flight),
         lifetimeMs: fireballLifetimeMs(flight)
       });
@@ -1424,8 +1461,8 @@ function beginStep(step) {
       // flight ends on the TARGET's shoulder, which its own `yscale` places.
       // Both DRAWN (`drawnYscaleOf`): a spell that runs out as this phase ends
       // resizes its bearer only once the arrow is home.
-      shooterYscale: drawnYscaleOf(shotRecord.combatantId, performance.now(), step.actionTokens),
-      targetYscale: drawnYscaleOf(shotRecord.targetId, performance.now(), step.actionTokens),
+      shooterYscale: drawnYscaleOf(shotRecord.combatantId, arenaNow(), step.actionTokens),
+      targetYscale: drawnYscaleOf(shotRecord.targetId, arenaNow(), step.actionTokens),
       // ► **EVERY OTHER LIVING BODY, so a LOB IS DRAWN OVER THEM (2026-09-23).**
       //   The rules exempt a bombard from line blocking because it clears
       //   bodies; `lobLiftAt` keeps the drawing true to that, and it can only
@@ -1436,7 +1473,7 @@ function beginStep(step) {
       flight,
       artFrame: shotRecord.artFrame,
       token: shotRecord.actionToken,
-      startedAt: performance.now(),
+      startedAt: arenaNow(),
       durationMs: flightDurationMs(flight)
     });
   }
@@ -1459,7 +1496,7 @@ function beginStep(step) {
       boulders.push({
         record,
         token: record.actionToken,
-        startedAt: performance.now(),
+        startedAt: arenaNow(),
         landedFrames,
         fallMs: drawn.fallMs,
         lifetimeMs: drawn.lifetimeMs
@@ -1472,7 +1509,7 @@ function beginStep(step) {
     }
     attached.push({
       record,
-      startedAt: performance.now(),
+      startedAt: arenaNow(),
       // The victim's clips in this batch — on a kill, its reaction and then
       // its death, queued behind it — from the same `started` map that is
       // about to pose it. See `effectLifetimeMs`.
@@ -1495,7 +1532,7 @@ function beginStep(step) {
   //   flight `reactionDelaysFor` measures from the same four inputs.
   const delays = reactionDelaysFor(step.commands);
   for (const [combatantId, entry] of started) {
-    entry.startedAt = performance.now() + (delays.get(combatantId) ?? 0);
+    entry.startedAt = arenaNow() + (delays.get(combatantId) ?? 0);
     prepareEntry(entry);
   }
   for (const [combatantId, entry] of started) {
@@ -1531,7 +1568,7 @@ function beginStep(step) {
   for (const notice of step.commands.filter((command) => command.kind === "unmapped")) {
     log(`unmapped: ${notice.reason}`, { warn: true });
   }
-  render();
+  render(arenaNow());
 }
 
 /**
@@ -1550,7 +1587,7 @@ function spawnPopups(step, started, delays) {
   const boundary = step.actionBoundary;
   if (!Number.isFinite(boundary)) return;
   const events = host.wire().events.filter((event) => event.sequence >= boundary);
-  const now = performance.now();
+  const now = arenaNow();
   for (const popup of popupsForEvents(events, { strikes, seed: boundary })) {
     const clipStart = started.get(popup.combatantId)?.startedAt;
     const startedAt = Number.isFinite(popup.delayFrames)
@@ -4477,8 +4514,10 @@ function renderStage(view, fit, now) {
     //   found the figure — a move's `from`, a lane change's `fromY`. Reading no
     //   entry at all drew the scene's resting x and y, which the fold has
     //   already set to the DESTINATION, and that is not only a fireball's victim:
-    //   `beginStep` stamps `performance.now()`, later than this frame's rAF
-    //   `now` when a spectated step begins inside `frame(now)`, so a walk, a
+    //   `beginStep` stamps ~~`performance.now()`~~ `arenaNow()` (S8: the
+    //   page's clock plus the pace's offset, which this frame's `now` already
+    //   holds), later than this frame's `now` when a spectated step begins
+    //   inside `frame`, so a walk, a
     //   push or a lane change painted one frame at its destination and then
     //   jumped back to slide there (found by the `engine-vs-screen` F2 refuter;
     //   re-measured with a 4 ms skew over 8 default bouts: 451 one-frame x
@@ -5989,6 +6028,9 @@ function renderRingStrip() {
   if (focused && focused.tagName === "BUTTON" && strip.contains(focused)) {
     ringFocusWanted = { row: focused.parentElement?.id ?? null, text: focused.textContent };
   }
+  // S8: the AI row, before the focus is given back below — a skip button on a
+  // person's ready turn is disabled first, so the focus lands on his ring.
+  renderRingPace();
   const targetRow = el("ring-target");
   const slotRow = el("ring-slots");
   const itemRow = el("ring-items");
@@ -6160,6 +6202,48 @@ function renderRingStrip() {
       `${model.offRing.length > 0 ? `, ${model.offRing.length} more listed` : ""}. ${odds.text}`);
   }
   renderRingPreview();
+}
+
+/**
+ * S8: THE PACE'S VIEW OF THE BOUT RIGHT NOW — whether it applies (a person
+ * playing against the AI, with the arena on screen), whose turn it is and
+ * whether the animation gate is open.
+ */
+function ringPaceState() {
+  const ready = host.readyForNextAction().ready;
+  return { applies: ringPaceOn && assetGateOpen, turn: seatTurnFor(host.battle, seats, { ready }), ready };
+}
+
+/**
+ * ► **THE STRIP'S AI ROW (slice S8; the owner's decision 8)**: "Skip to my
+ *   turn" and the key, shown between a person's turns and nowhere else — the
+ *   strip's last row, so its hiding moves nothing of his. The button is a toggle
+ *   (`aria-pressed`), and the words say what the pace is doing
+ *   (`ringPaceView`). Drawn with the strip and after every frame, touching
+ *   the page only when something changed.
+ */
+function renderRingPace() {
+  const row = el("ring-pace");
+  if (!row) return;
+  const view = ringPaceView(ringPace, ringPaceState());
+  const drawn = `${view.offered}|${view.skipping}|${view.state}`;
+  if (drawn === ringPaceDrawn) return;
+  ringPaceDrawn = drawn;
+  const skip = el("ring-skip");
+  // His turn, with the focus still on Skip: the focus goes to the STAGE, where
+  // the ring's keys are — never handed on to one of his actions in the strip,
+  // which the next Enter or Space would press.
+  if (!view.offered && skip && document.activeElement === skip) {
+    if (ringFocusWanted?.row === "ring-pace") ringFocusWanted = null;
+    canvas.focus();
+  }
+  row.hidden = !view.offered;
+  if (skip) {
+    skip.disabled = !view.offered;
+    skip.setAttribute("aria-pressed", String(view.skipping));
+  }
+  const words = el("ring-pace-state");
+  if (words) words.textContent = view.state;
 }
 
 /**
@@ -6426,6 +6510,35 @@ window.addEventListener("keyup", (event) => ringHeldKeys.delete(event.key));
 window.addEventListener("blur", () => ringHeldKeys.clear());
 
 /*
+ * S8 — THE AI'S PACE: Shift held draws an AI seat's turns faster, anywhere on
+ * the page (it presses nothing, and the ring's keys never read it alone);
+ * let go, or the window losing the focus, and they are drawn at the page's
+ * pace again. "Skip to my turn" is a toggle: the AI's turns as fast as a frame
+ * may draw them, until the person's next turn is ready. Both change only the
+ * arena's clock (`pacedNow`), never a step.
+ */
+for (const type of ["keydown", "keyup"]) {
+  window.addEventListener(type, (event) => {
+    ringPace = ringPaceKeyed(ringPace, { type, key: event.key });
+    renderRingPace();
+  });
+}
+window.addEventListener("blur", () => {
+  ringPace = ringPaceKeyed(ringPace, { type: "blur" });
+  renderRingPace();
+});
+el("ring-skip")?.addEventListener("click", () => {
+  const before = ringPace;
+  ringPace = ringPaceSkipPressed(ringPace, ringPaceState());
+  if (ringPace === before) return;
+  announce(ringPace.skipping
+    ? "Skipping to your turn: the AI's turns are drawn as fast as they can be."
+    : "Skipping stopped: the AI's turns at their own pace.");
+  log(`pace: skip to my turn ${ringPace.skipping ? "on" : "off"}.`);
+  renderRingPace();
+});
+
+/*
  * S7 — THE STRIP'S CONFIRM AND BACK, and THE SETTING'S TOGGLE. Confirm sends
  * the choice standing, as the ring on screen holds it (`ringConfirmCommand`);
  * Back drops it. The toggle is remembered per browser — a save that storage
@@ -6475,7 +6588,9 @@ function ringProvenance() {
     "strip are the engine's own numbers (the hit chance is the build's rollover percentage); their words and " +
     "places are authored, and so is \"confirm every move\", off unless you turn it on. " +
     "A dimmed button is one the team rules forbid this turn: the engine's reason, in its own words, shows when you " +
-    "point at it or focus it; the dimmed look and the words' places are authored (the build hides, never greys)."];
+    "point at it or focus it; the dimmed look and the words' places are authored (the build hides, never greys). " +
+    `The AI's pace — Shift held draws its turns at ${RING_PACE_HELD_RATE}×, and Skip to my turn as fast as a frame may — is authored ` +
+    "too, and changes only how fast the arena is drawn: every step, and its order, is the same at any pace."];
 }
 
 function renderProvenance() {
@@ -6578,7 +6693,8 @@ function aiTurnStep() {
     strikeLedger.take();
     const step = host.submit({ ...action, actorId });
     log(`${host.combatant(actorId)?.name ?? actorId}: ${action.type}`);
-    beginStep(step);
+    // An AI seat's step: the only kind the pace may draw faster (S8).
+    beginStep(step, true);
     renderControls();
   } catch (error) {
     log(error.message, { warn: true });
@@ -6657,8 +6773,27 @@ function openArena(now) {
   return true;
 }
 
-function frame(now) {
+/**
+ * THE ARENA'S CLOCK FOR THIS FRAME (S8): the pace stepped once, from whose turn
+ * it is and the animation gate as the frame finds them — before the drain
+ * reads it — and the arena's time returned. The page's `wallNow` itself until
+ * the arena is on screen, and throughout a bout nobody has paced.
+ */
+function pacedNow(wallNow) {
+  const ready = host.readyForNextAction().ready;
+  const step = ringPaceFrame(ringPace, {
+    wallMs: wallNow, applies: ringPaceOn, open: assetGateOpen, turn: seatTurnFor(host.battle, seats, { ready }), ready
+  });
+  ringPace = step.pace;
+  return step.nowMs;
+}
+
+function frame(wallNow) {
   try {
+    // ► **THE ARENA'S CLOCK (S8), before anything reads it**: the page's own
+    //   while nothing asks for a pace — so the gate below, and the crowd's clock
+    //   it starts, see exactly the time they always did.
+    const now = pacedNow(wallNow);
     // ► **THE ASSET GATE, FIRST.** Until every visual pack has settled — or
     //   the timeout — the loading frame is all that draws, and nothing steps:
     //   no animation, no arena sound, no AI seat. The frame it opens on goes
@@ -6674,6 +6809,7 @@ function frame(now) {
     aiTurnStep();
     settleIfReady();
     render(now);
+    renderRingPace();
   } catch (error) {
     if (!loopErrorLogged) {
       loopErrorLogged = true;
@@ -6742,4 +6878,4 @@ if (ENCHANT_DEMO) {
 //   lands at the TOP of the panel where a screenshot catches it.
 if (params.has("filterprobe")) setTimeout(probeCanvasFilter, 2000);
 requestAnimationFrame(frame);
-window.addEventListener("resize", () => render());
+window.addEventListener("resize", () => render(arenaNow()));
