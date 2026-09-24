@@ -138,6 +138,29 @@ export function retireVoices(voices, limit) {
   return { keep: live, evict };
 }
 
+/** The volume slider's starting position: full, the level before it existed. */
+export const DEFAULT_VOLUME = 100;
+
+/**
+ * The master GAIN for the volume slider's position, 0-100.
+ *
+ * Squared rather than linear, because loudness is heard on a log scale: a
+ * linear slider spends its whole top half sounding "about as loud" and does
+ * all its work in the last few millimetres near zero. The square is the usual
+ * cheap stand-in for that curve. 100 is 1.0, which is the level the arena
+ * played at before it had a slider, so the default changes nothing.
+ *
+ * Total: anything not a number is the default, and the range is clamped.
+ */
+export function masterGainFor(sliderValue) {
+  // `Number(null)` and `Number("")` are 0, so they are ruled out by name: a
+  // missing saved setting must not read as "mute".
+  const blank = sliderValue === null || sliderValue === undefined || String(sliderValue).trim() === "";
+  const value = blank ? NaN : Number(sliderValue);
+  const position = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : DEFAULT_VOLUME;
+  return (position / 100) ** 2;
+}
+
 /**
  * The provenance line for the figures, derived from what is actually loaded.
  *

@@ -53,7 +53,12 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { TAG, deriveAnimations, indexCharacters, walkTags } from "./swf-display-list.mjs";
+
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
+
+/** `StartSound`, which `swf-display-list.mjs`'s `TAG` table does not carry. */
+const START_SOUND = 15;
 
 /** SWF sound formats, by the code in the tag's flag nibble. */
 const SOUND_FORMATS = Object.freeze({
@@ -156,13 +161,21 @@ export function readSoundTags(buffer) {
       if (code === 14 && bodyEnd - bodyStart >= 7) {
         const id = buffer.readUInt16LE(bodyStart);
         const flags = buffer[bodyStart + 2];
+        const format = flags >>> 4;
         sounds.push({
           id,
-          format: flags >>> 4,
+          format,
           rate: SOUND_RATES[(flags >>> 2) & 0x3],
           bits: ((flags >>> 1) & 0x1) ? 16 : 8,
           channels: (flags & 0x1) ? 2 : 1,
           sampleCount: buffer.readUInt32LE(bodyStart + 3),
+          // ► **THE TWO BYTES THE REPACK THROWS AWAY ARE A DELAY THE BUILD
+          //   DOES NOT HAVE.** An MP3 `DefineSound` body opens with
+          //   `SeekSamples` (SI16), the samples of encoder delay the player
+          //   skips before the sound is heard. The repack strips the field to
+          //   leave a playable file, so a browser plays that lead-in as
+          //   silence. Kept here so the arena can start past it.
+          seekSamples: format === 2 && bodyEnd - bodyStart >= 9 ? buffer.readInt16LE(bodyStart + 7) : null,
           bodyStart,
           bodyEnd
         });
@@ -230,6 +243,7 @@ const FIGHTER_CLIP_ID = 1241;
 export function deriveSoundBindings(buffer) {
   const labels = [];
   const fired = [];
+  let stopped = 0;
 
   const walk = (start, end, spriteId, depth) => {
     let cursor = start;
@@ -253,7 +267,11 @@ export function deriveSoundBindings(buffer) {
         const read = readCString(buffer, bodyStart, bodyEnd);
         if (read.value) labels.push({ frame, name: read.value });
       } else if (code === 15 && spriteId === FIGHTER_CLIP_ID && bodyEnd - bodyStart >= 2) {
-        fired.push({ frame, soundId: buffer.readUInt16LE(bodyStart) });
+        // ► **A `StartSound` WITH `SyncStop` SET STOPS ITS SOUND; IT DOES NOT
+        //   PLAY IT** (added 2026-09-23). This used to bind every `StartSound`
+        //   as a play. Counted, and left out of the bindings.
+        if (readSoundInfo(buffer, bodyStart + 2, bodyEnd).stop) stopped += 1;
+        else fired.push({ frame, soundId: buffer.readUInt16LE(bodyStart) });
       } else if (code === 39 && depth < 4) {
         walk(bodyStart + 4, bodyEnd, buffer.readUInt16LE(bodyStart), depth + 1);
       }
@@ -284,7 +302,247 @@ export function deriveSoundBindings(buffer) {
     if (!bindings[key].includes(hit.soundId)) bindings[key].push(hit.soundId);
   }
   for (const list of Object.values(bindings)) list.sort((left, right) => left - right);
-  return { bindings, startSoundCount: fired.length, labelCount: labels.length, unlabelled };
+  // `startSoundCount` stays the count of PLAYS, which is what it always meant
+  // to its readers; a stop was never a start.
+  return { bindings, startSoundCount: fired.length, stopSoundCount: stopped, labelCount: labels.length, unlabelled };
+}
+
+/**
+ * A `SOUNDINFO` record: the part of a `StartSound` that says HOW to play it.
+ *
+ * ```text
+ *   flags  UB[2] reserved  UB[1] SyncStop  UB[1] SyncNoMultiple
+ *          UB[1] HasEnvelope  UB[1] HasLoops  UB[1] HasOutPoint  UB[1] HasInPoint
+ *   InPoint    UI32  if HasInPoint
+ *   OutPoint   UI32  if HasOutPoint
+ *   LoopCount  UI16  if HasLoops
+ *   EnvPoints  UI8   if HasEnvelope, then EnvPoints x (Pos44 UI32, Left UI16, Right UI16)
+ * ```
+ *
+ * Only the fields that are SET come back, so a plain "play it once" is `{}`.
+ * `truncated` says the record ran past its tag, which a reader must not take
+ * as a plain play.
+ */
+export function readSoundInfo(buffer, start, end) {
+  if (start >= end) return { truncated: true };
+  const flags = buffer[start];
+  const info = {};
+  if (flags & 0x20) info.stop = true;
+  if (flags & 0x10) info.noMultiple = true;
+  let cursor = start + 1;
+  const take = (bytes, read) => {
+    if (cursor + bytes > end) { info.truncated = true; return null; }
+    const value = read(cursor);
+    cursor += bytes;
+    return value;
+  };
+  if (flags & 0x01) info.inPoint = take(4, (at) => buffer.readUInt32LE(at));
+  if (flags & 0x02) info.outPoint = take(4, (at) => buffer.readUInt32LE(at));
+  if (flags & 0x04) info.loops = take(2, (at) => buffer.readUInt16LE(at));
+  if (flags & 0x08) {
+    const points = take(1, (at) => buffer[at]) ?? 0;
+    const envelope = [];
+    for (let index = 0; index < points && !info.truncated; index += 1) {
+      const point = take(8, (at) => [buffer.readUInt32LE(at), buffer.readUInt16LE(at + 4), buffer.readUInt16LE(at + 6)]);
+      if (point) envelope.push(point);
+    }
+    info.envelope = envelope;
+  }
+  return info;
+}
+
+/**
+ * WHEN EACH SOUND FIRES: every `StartSound` on the fighter clip, as a FRAME
+ * OFFSET into the label it fires under, beside that label's length.
+ *
+ * ► **`deriveSoundBindings` FINDS THE FRAME AND THEN DROPS IT.** It walks every
+ *   `FrameLabel` and `StartSound` in frame order and keeps only "which label".
+ *   So the arena played each sound when the clip STARTED, and the build starts
+ *   it where the frame is. The two frames this repository had already written
+ *   down (`clip-sequences.js`, not re-read from the SWF by this change): `hurt9`
+ *   at 1266 is 16 frames into direction 8's 34-frame run from 1250, and
+ *   `knockback_mov` at 1440 is 12 into the 19-frame knockback from 1428 —
+ *   ~~7~~, as `src/render/sound.js` said, counting from `knockback_mov` (1434)
+ *   and from 1.
+ *
+ * ► **AND A LABEL WITH TWO SOUNDS PLAYS BOTH.** A `StartSound` is a timeline
+ *   tag, so every one the playhead passes fires. In the manifest this tool
+ *   wrote before this change, `startSoundCount` is 99 and the 80 bound labels
+ *   hold 99 entries, deduped per label — so the 19 labels holding two files
+ *   (`stepforward`: `706` and `1088`) hold two SEPARATE tags each, and the
+ *   arena played ONE of the two, picked by sequence number. This keeps every
+ *   one, in frame order, each with its own frame.
+ *
+ * The spans come from `deriveAnimations`, the SAME function `extract-figure`
+ * cuts the pack's poses with, so offset `k` here is pose `k` there by
+ * construction. EVERY label is listed, silent ones included, because a run
+ * like `hurt8` -> `hurt9` needs `hurt8`'s length to place `hurt9`'s sound.
+ *
+ * Returns null when the build has no such clip.
+ */
+export function deriveSoundCues(buffer, { clip = FIGHTER_CLIP_ID } = {}) {
+  const { characters } = indexCharacters(buffer);
+  const sprite = characters.get(clip);
+  if (!sprite || sprite.kind !== "sprite") return null;
+  const animations = deriveAnimations(buffer, sprite);
+
+  const starts = [];
+  let frame = 1;
+  for (const { code, bodyStart, bodyEnd } of walkTags(buffer, sprite.bodyStart, sprite.bodyEnd)) {
+    if (code === TAG.SHOW_FRAME) frame += 1;
+    else if (code === START_SOUND && bodyEnd - bodyStart >= 2) {
+      starts.push({ frame, id: buffer.readUInt16LE(bodyStart), ...readSoundInfo(buffer, bodyStart + 2, bodyEnd) });
+    }
+  }
+
+  const labels = {};
+  let duplicateLabels = 0;
+  let unlabelled = 0;
+  const owners = [];
+  for (const animation of animations) {
+    const key = animation.name.toLowerCase();
+    if (Object.hasOwn(labels, key)) {
+      // Two labels one spelling apart. Kept first-come, as the bindings' own
+      // lookup cannot tell them apart either, and COUNTED so it is not silent.
+      duplicateLabels += 1;
+      continue;
+    }
+    labels[key] = { firstFrame: animation.firstFrame, frames: animation.frameCount, sounds: [] };
+    owners.push({ key, animation });
+  }
+  for (const start of starts) {
+    const owner = owners.find(({ animation }) => start.frame >= animation.firstFrame && start.frame <= animation.lastFrame);
+    if (!owner) { unlabelled += 1; continue; }
+    const { frame: at, ...rest } = start;
+    labels[owner.key].sounds.push({ ...rest, frame: at, offset: at - owner.animation.firstFrame });
+  }
+  return {
+    clip,
+    clipFrames: sprite.frames,
+    // The SWF header's own rate, 8.8 fixed point just before the frame count.
+    frameRate: buffer.readUInt16LE(tagStreamStart(buffer) - 4) / 256,
+    labels,
+    startSounds: starts.length,
+    unlabelled,
+    duplicateLabels
+  };
+}
+
+/**
+ * The manifest `main` writes, and the files beside it, without touching disk.
+ *
+ * Split out of `main` so the WHOLE manifest shape is under the suite against a
+ * synthetic build (`test/extract-sounds.test.js`) — before this, nothing in
+ * `test/` imported this tool at all.
+ */
+export function buildSoundManifest(buffer, { fileName = "unknown.swf" } = {}) {
+  const sha256 = crypto.createHash("sha256").update(buffer).digest("hex");
+  const { sounds, names } = readSoundTags(buffer);
+  const unsupported = sounds.filter((sound) => sound.format !== 2);
+
+  const outputs = [];
+  const written = [];
+  for (const sound of sounds) {
+    if (sound.format !== 2) continue;
+    // An MP3 DefineSound body is: id(2) flags(1) sampleCount(4) seekSamples(2)
+    // then raw MP3 frames. Nine bytes off the front and it is a playable file.
+    const frames = buffer.subarray(sound.bodyStart + 9, sound.bodyEnd);
+    if (frames.length === 0) continue;
+    const name = fileNameFor(sound, names);
+    outputs.push({ name, bytes: frames });
+    written.push({
+      file: name,
+      id: sound.id,
+      exportName: names.get(sound.id) ?? null,
+      rate: sound.rate,
+      bits: sound.bits,
+      channels: sound.channels,
+      sampleCount: sound.sampleCount,
+      seekSamples: sound.seekSamples,
+      bytes: frames.length,
+      approxSeconds: Number((sound.sampleCount / sound.rate).toFixed(2))
+    });
+  }
+
+  written.sort((left, right) => right.bytes - left.bytes);
+  const { bindings, startSoundCount, stopSoundCount, labelCount, unlabelled } = deriveSoundBindings(buffer);
+  const byId = new Map(written.map((entry) => [entry.id, entry.file]));
+  // Bindings are emitted as FILENAMES, so a player never has to re-derive the
+  // id-to-file mapping, and a sound whose format could not be repacked simply
+  // drops out of its bucket rather than becoming a broken reference.
+  const boundFiles = {};
+  for (const [label, ids] of Object.entries(bindings)) {
+    const files = ids.map((id) => byId.get(id)).filter(Boolean);
+    if (files.length > 0) boundFiles[label] = files;
+  }
+
+  const derived = deriveSoundCues(buffer);
+  let cues = null;
+  const census = { timed: 0, stops: 0, noMultiple: 0, loops: 0, inOut: 0, envelopes: 0, truncated: 0, unfiled: 0 };
+  if (derived) {
+    const labels = {};
+    for (const [key, entry] of Object.entries(derived.labels)) {
+      const cued = [];
+      for (const sound of entry.sounds) {
+        const file = byId.get(sound.id);
+        // The same rule as the bindings: a sound that could not be repacked
+        // drops out rather than becoming a reference to nothing.
+        if (!file) { census.unfiled += 1; continue; }
+        const { id, ...rest } = sound;
+        cued.push({ file, id, ...rest });
+        census.timed += 1;
+        if (sound.stop) census.stops += 1;
+        if (sound.noMultiple) census.noMultiple += 1;
+        if (sound.loops !== undefined) census.loops += 1;
+        if (sound.inPoint !== undefined || sound.outPoint !== undefined) census.inOut += 1;
+        if (sound.envelope !== undefined) census.envelopes += 1;
+        if (sound.truncated) census.truncated += 1;
+      }
+      labels[key] = { firstFrame: entry.firstFrame, frames: entry.frames, sounds: cued };
+    }
+    cues = {
+      version: 1,
+      clip: derived.clip,
+      clipFrames: derived.clipFrames,
+      frameRate: derived.frameRate,
+      unlabelled: derived.unlabelled,
+      duplicateLabels: derived.duplicateLabels,
+      labels
+    };
+  }
+
+  const manifest = {
+    // The provenance that makes the extracted audio traceable. Without it,
+    // assets from a modded second install are indistinguishable from the
+    // oracle's — and this project keeps a second install lane precisely so
+    // that modding does not touch the measured one.
+    source: { file: fileName, sha256, bytes: buffer.length },
+    extractedBy: "tools/extract-sounds.mjs",
+    format: "mp3 (SWF DefineSound format 2, repacked — no transcoding)",
+    count: written.length,
+    skipped: unsupported.length,
+    /**
+     * Which animation each sound fires in, derived from the build's own
+     * `StartSound` placement on the fighter clip. See `deriveSoundBindings`.
+     * `unlabelled` is a real bucket, not a leftover: those sounds fire on
+     * frames the battle map names no label for.
+     */
+    bindings: boundFiles,
+    /**
+     * WHEN each of those sounds fires: label -> `{firstFrame, frames,
+     * sounds: [{file, id, frame, offset, ...SOUNDINFO}]}`. Beside `bindings`
+     * rather than replacing it, so every reader of `bindings` is unchanged and
+     * a pack written before this existed is recognisably OLD by its absence.
+     * See `deriveSoundCues`.
+     */
+    cues,
+    startSoundCount,
+    stopSoundCount,
+    frameLabelCount: labelCount,
+    unlabelledSounds: unlabelled,
+    sounds: written
+  };
+  return { manifest, outputs, unsupported, census, soundCount: sounds.length };
 }
 
 /** A filename that is safe, stable and says which symbol it came from. */
@@ -317,19 +575,19 @@ function main(argv) {
 
   // Opened for READING. The installed build is the measurement oracle.
   const buffer = fs.readFileSync(options.file);
-  const sha256 = crypto.createHash("sha256").update(buffer).digest("hex");
-  const { sounds, names } = readSoundTags(buffer);
+  const { manifest, outputs, unsupported, census, soundCount } = buildSoundManifest(buffer, {
+    fileName: path.basename(options.file)
+  });
 
   console.log(`SWF:    ${options.file}`);
-  console.log(`sha256: ${sha256}`);
-  console.log(`sounds: ${sounds.length}\n`);
+  console.log(`sha256: ${manifest.source.sha256}`);
+  console.log(`sounds: ${soundCount}\n`);
 
-  if (sounds.length === 0) {
+  if (soundCount === 0) {
     console.log("No DefineSound tags. Nothing to extract.");
     return 0;
   }
 
-  const unsupported = sounds.filter((sound) => sound.format !== 2);
   if (unsupported.length > 0) {
     const kinds = new Set(unsupported.map((sound) => SOUND_FORMATS[sound.format] ?? `format ${sound.format}`));
     console.log(
@@ -340,69 +598,33 @@ function main(argv) {
   }
 
   fs.mkdirSync(options.out, { recursive: true });
-  const written = [];
-  for (const sound of sounds) {
-    if (sound.format !== 2) continue;
-    // An MP3 DefineSound body is: id(2) flags(1) sampleCount(4) seekSamples(2)
-    // then raw MP3 frames. Nine bytes off the front and it is a playable file.
-    const frames = buffer.subarray(sound.bodyStart + 9, sound.bodyEnd);
-    if (frames.length === 0) continue;
-    const name = fileNameFor(sound, names);
-    fs.writeFileSync(path.join(options.out, name), frames);
-    written.push({
-      file: name,
-      id: sound.id,
-      exportName: names.get(sound.id) ?? null,
-      rate: sound.rate,
-      bits: sound.bits,
-      channels: sound.channels,
-      sampleCount: sound.sampleCount,
-      bytes: frames.length,
-      approxSeconds: Number((sound.sampleCount / sound.rate).toFixed(2))
-    });
-  }
-
-  written.sort((left, right) => right.bytes - left.bytes);
-  const { bindings, startSoundCount, labelCount, unlabelled } = deriveSoundBindings(buffer);
-  const byId = new Map(written.map((entry) => [entry.id, entry.file]));
-  // Bindings are emitted as FILENAMES, so a player never has to re-derive the
-  // id-to-file mapping, and a sound whose format could not be repacked simply
-  // drops out of its bucket rather than becoming a broken reference.
-  const boundFiles = {};
-  for (const [label, ids] of Object.entries(bindings)) {
-    const files = ids.map((id) => byId.get(id)).filter(Boolean);
-    if (files.length > 0) boundFiles[label] = files;
-  }
-
-  const manifest = {
-    // The provenance that makes the extracted audio traceable. Without it,
-    // assets from a modded second install are indistinguishable from the
-    // oracle's — and this project keeps a second install lane precisely so
-    // that modding does not touch the measured one.
-    source: { file: path.basename(options.file), sha256, bytes: buffer.length },
-    extractedBy: "tools/extract-sounds.mjs",
-    format: "mp3 (SWF DefineSound format 2, repacked — no transcoding)",
-    count: written.length,
-    skipped: unsupported.length,
-    /**
-     * Which animation each sound fires in, derived from the build's own
-     * `StartSound` placement on the fighter clip. See `deriveSoundBindings`.
-     * `unlabelled` is a real bucket, not a leftover: those sounds fire on
-     * frames the battle map names no label for.
-     */
-    bindings: boundFiles,
-    startSoundCount,
-    frameLabelCount: labelCount,
-    unlabelledSounds: unlabelled,
-    sounds: written
-  };
+  for (const output of outputs) fs.writeFileSync(path.join(options.out, output.name), output.bytes);
   fs.writeFileSync(path.join(options.out, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 
+  const written = manifest.sounds;
   const totalBytes = written.reduce((sum, entry) => sum + entry.bytes, 0);
   console.log(`wrote ${written.length} file(s) to ${options.out}`);
   console.log(`      ${(totalBytes / 1024 / 1024).toFixed(2)} MB, plus manifest.json\n`);
-  console.log(`bound to ${Object.keys(boundFiles).length} animation labels, from the clip's own FrameLabel tags`);
-  console.log(`  (${labelCount} labels on the fighter clip; ${unlabelled} sound(s) fired before any label)\n`);
+  console.log(`bound to ${Object.keys(manifest.bindings).length} animation labels, from the clip's own FrameLabel tags`);
+  console.log(`  (${manifest.frameLabelCount} labels on the fighter clip; ${manifest.unlabelledSounds} sound(s) fired before any label)`);
+  if (manifest.stopSoundCount > 0) {
+    console.log(`  ${manifest.stopSoundCount} StartSound(s) carry SyncStop: they STOP a sound and are not bound as plays`);
+  }
+  if (manifest.cues) {
+    const cues = manifest.cues;
+    console.log(`\ntimed ${census.timed} StartSound(s) to their frames across ${Object.keys(cues.labels).length} labels ` +
+      `(clip ${cues.clip}, ${cues.clipFrames} frames at ${cues.frameRate} fps)`);
+    // Every SOUNDINFO field is COUNTED, so a build that carries one the arena
+    // does not honour says so at extraction rather than by ear.
+    console.log(`  sync-stop ${census.stops}, no-multiple ${census.noMultiple}, loops ${census.loops}, ` +
+      `in/out points ${census.inOut}, envelopes ${census.envelopes}, truncated ${census.truncated}, ` +
+      `unrepacked ${census.unfiled}, before any label ${cues.unlabelled}, duplicate labels ${cues.duplicateLabels}`);
+  } else {
+    console.log(`\nNO fighter clip ${FIGHTER_CLIP_ID} in this build: no frame timing written; the arena plays at clip start.`);
+  }
+  const seeks = written.filter((entry) => Number.isFinite(entry.seekSamples) && entry.seekSamples > 0);
+  console.log(`  ${seeks.length} of ${written.length} file(s) carry an MP3 SeekSamples lead-in ` +
+    "(the arena skips the silent part of it, up to that count)\n");
   console.log("largest, which are usually music rather than effects:");
   for (const entry of written.slice(0, 5)) {
     console.log(`  ${entry.file.padEnd(34)} ${String(entry.approxSeconds).padStart(7)}s  ${entry.channels === 2 ? "stereo" : "mono  "}  ${(entry.bytes / 1024).toFixed(0).padStart(6)} KB`);

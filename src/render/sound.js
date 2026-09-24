@@ -100,6 +100,13 @@ export function soundBucketFor(family) {
  * The build fires several sounds per animation — 7 distinct in `attack`, 10 in
  * `hurt`, 15 in `death` on the shipped build — and this spreads across them
  * rather than always taking the first, so a bout does not become one noise.
+ *
+ * ► **BUT TWO FILES ON ONE LABEL ARE NOT ALTERNATIVES (2026-09-23).** They are
+ *   two `StartSound` tags, and the build plays both: `stepforward` is `706`
+ *   AND `1088`, `death1` is `1103` AND `1104`. Picking one by sequence number
+ *   plays half of such a clip. `sound-timing.js` plays every tag at its own
+ *   frame when the pack carries `cues`; this pick is the fallback for a pack
+ *   that predates them, and it is kept exactly as it was.
  */
 export function chooseSound(bindings, family, sequence, label = null) {
   const labels = soundLabelsFor(family);
@@ -157,11 +164,15 @@ export function chooseSound(bindings, family, sequence, label = null) {
     //   `knockback_mov` at frame 1440 has `1104.mp3`. Re-derived here: the same
     //   hole was already open on `hurt8` and nobody had heard it.
     //
-    // ► **WHAT THIS DOES NOT DO IS TIME IT.** The build starts the sound 17
-    //   frames into a 34-frame hurt and 7 into a 19-frame knockback; this
-    //   returns ONE file for the action and the shell plays it at the start.
-    //   The vocabulary has nowhere to put an offset, and inventing one is a
-    //   change to the command stream rather than to this policy.
+    // ► **WHAT THIS DOES NOT DO IS TIME IT — `sound-timing.js` DOES, since
+    //   2026-09-23, and this is its FALLBACK.** The build starts the sound 16
+    //   frames into direction 8's 34-frame hurt (`hurt9` at 1266, from 1250)
+    //   and ~~7~~ **12** into the 19-frame knockback (`knockback_mov` at 1440,
+    //   from 1428 — the 7 counted from `knockback_mov`'s own 1434, and from 1).
+    //   The offset never needed the command stream: the extractor had the
+    //   frame all along and dropped it. A pack that carries `cues` is timed by
+    //   the draw loop there; this one file at clip start is what an OLD pack
+    //   still gets.
     for (const member of clipSequenceFor(own).slice(1)) {
       const carried = bindings?.[member];
       if (Array.isArray(carried) && carried.length > 0) {

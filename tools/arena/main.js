@@ -67,7 +67,8 @@ import {
   rankStrideFrom,
   settlementReadiness,
   selectRules,
-  retireVoices,
+  masterGainFor,
+  DEFAULT_VOLUME,
   figureProvenance,
   perSideFrom,
   rankOfDepth,
@@ -78,7 +79,12 @@ import {
   timelineFor,
   timelinesForStep,
   bindingsFrom,
-  chooseSound,
+  soundTimingFrom,
+  soundCuesFor,
+  dueSoundCues,
+  leadInSecondsFrom,
+  unhonouredCuesIn,
+  animationFor,
   projectileFlight,
   projectileDrawAt,
   flightDurationMs,
@@ -145,6 +151,7 @@ import {
   championSide,
   demoSide
 } from "/tools/arena/roster.js";
+import { createSoundPlayer } from "/tools/arena/sound-player.js";
 
 /* ------------------------------------------------------------------ */
 /* Setup                                                               */
@@ -434,13 +441,35 @@ function log(message, { warn = false } = {}) {
  *   fetch is expected to 404 and the arena must stay fully playable when it
  *   does. Run `node tools/extract-sounds.mjs <your swf>` to fill it.
  *
- * WHICH sound plays is decided in `src/render/sound.js`, under the suite. All
- * that lives here is the `Audio` element and the volume, which are the two
- * things a test cannot reach.
+ * WHICH sound plays and WHEN are decided in `src/render/sound.js` and
+ * `src/render/sound-timing.js`, under the suite, and the playing is
+ * `tools/arena/sound-player.js`, which the suite drives with fakes. What lives
+ * here is the wiring: the fetch, the draw loop's clock, and the DOM slider.
  */
 let soundBindings = Object.freeze({});
+/** The build's frame timing for each sound, or null on a pack that predates it. */
+let soundTiming = null;
 let soundEnabled = true;
-const soundCache = new Map();
+/** Sounds fired before they were decoded — dropped rather than played late. Said once. */
+let soundNotReadyLogged = false;
+
+/**
+ * ► **WEB AUDIO WHEN THE BROWSER HAS IT (2026-09-23).** One context, every file
+ *   decoded once, a fresh source node per play: no fetch or decode at the
+ *   moment of the hit, and overlap for free. The `<audio>` clone path it
+ *   replaced is the fallback, kept for a browser with no `AudioContext`.
+ */
+const soundPlayer = createSoundPlayer({
+  AudioContextCtor: window.AudioContext ?? window.webkitAudioContext ?? null,
+  fetchImpl: typeof window.fetch === "function" ? window.fetch.bind(window) : null,
+  createAudio: (url) => new Audio(url),
+  onBlocked: noteAudioBlocked,
+  onNotReady: (file) => {
+    if (soundNotReadyLogged) return;
+    soundNotReadyLogged = true;
+    log(`sound ${file} fired before it was decoded — dropped rather than played late (said once).`, { warn: true });
+  }
+});
 
 /* ------------------------------------------------------------------ */
 /* Art — the player's OWN extracted rig, or the authored figure         */
@@ -700,9 +729,20 @@ fetch("/assets/sound/manifest.json")
       return;
     }
     soundBindings = bindingsFrom(manifest);
-    primeSoundCache();
+    soundTiming = soundTimingFrom(manifest);
     const buckets = Object.keys(soundBindings).length;
-    log(`sound: ${manifest.count} file(s) from ${manifest.source?.sha256?.slice(0, 12) ?? "an unknown build"}, ${buckets} animation bucket(s)`);
+    log(`sound: ${manifest.count} file(s) from ${manifest.source?.sha256?.slice(0, 12) ?? "an unknown build"}, ${buckets} animation bucket(s), via ${soundPlayer.route}`);
+    // ► **AN OLD PACK IS SAID ONCE, AND STILL PLAYS.** A manifest written before
+    //   `extract-sounds.mjs` kept each sound's frame has `bindings` and no
+    //   `cues`; every sound then starts with its clip, as it always did.
+    if (!soundTiming) {
+      log("sound: this pack predates frame timing, so each sound plays when its clip STARTS rather than on the " +
+        "build's own frame — re-run `node tools/extract-sounds.mjs <your swf>` to time them.", { warn: true });
+    } else if (unhonouredCuesIn(soundTiming) > 0) {
+      log(`sound: ${unhonouredCuesIn(soundTiming)} cue(s) carry a loop count, in/out point or envelope this arena ` +
+        "does not honour; each plays once, whole.", { warn: true });
+    }
+    primeSoundCache(manifest);
   })
   .catch(() => {
     // Total on purpose: a stack trace where a footstep should be is a worse
@@ -723,6 +763,21 @@ fetch("/assets/sound/manifest.json")
  */
 let audioBlocked = false;
 let audioBlockLogged = false;
+let audioLatencyLogged = false;
+
+/**
+ * The player's report that the browser is holding sound back: a rejected
+ * `play()` on the element path, a suspended context on Web Audio. Said once in
+ * the log; the banner says what to do.
+ */
+function noteAudioBlocked() {
+  audioBlocked = true;
+  showAudioPrompt();
+  if (!audioBlockLogged) {
+    audioBlockLogged = true;
+    log("your browser is blocking audio until you interact with the page — click the arena once.", { warn: true });
+  }
+}
 
 /**
  * ► **A LOG LINE IS NOT A PROMPT, AND THE OWNER MISSED IT.** The blocked-audio
@@ -751,6 +806,18 @@ function hideAudioPrompt() {
 
 function unblockAudio() {
   hideAudioPrompt();
+  // ► **THE CONTEXT IS RESUMED HERE, INSIDE THE GESTURE**, because that is the
+  //   only place a browser lets a suspended `AudioContext` start. The latency
+  //   it reports once running is logged once: the number nobody had measured
+  //   for the element path it replaced.
+  soundPlayer.unlock().then((running) => {
+    if (!running || audioLatencyLogged) return;
+    const latency = soundPlayer.latency();
+    if (!latency) return;
+    audioLatencyLogged = true;
+    const ms = (seconds) => (seconds === null ? "?" : `${(seconds * 1000).toFixed(1)} ms`);
+    log(`audio: Web Audio running — base latency ${ms(latency.base)}, output latency ${ms(latency.output)}.`);
+  });
   if (!audioBlocked) return;
   audioBlocked = false;
   log("audio unblocked — sound is on from here.");
@@ -774,76 +841,84 @@ for (const type of ["pointerdown", "keydown", "touchstart"]) {
  *   than one of the arena's own JSON files and there is nothing to be clever
  *   about. The big ambient tracks are NOT bound to a clip label and are not
  *   touched.
+ *
+ * ► **ON WEB AUDIO THIS IS A DECODE, NOT A HINT (2026-09-23).** Each file is
+ *   fetched and decoded into a buffer once, here; a play never waits on either.
+ *   The timed cues' files are included, which on the shipped build are the
+ *   bindings' files again — the same `StartSound` tags read twice.
  */
-function primeSoundCache() {
+function primeSoundCache(manifest) {
   const files = new Set();
   for (const bound of Object.values(soundBindings ?? {})) {
     for (const file of Array.isArray(bound) ? bound : [bound]) {
       if (typeof file === "string" && file.length > 0) files.add(file);
     }
   }
-  for (const file of files) {
-    if (soundCache.has(file)) continue;
-    const source = new Audio(`/assets/sound/${encodeURIComponent(file)}`);
-    source.preload = "auto";
-    // `load()` is what actually starts it; `preload` alone is a hint the
-    // browser may ignore for an element that is not in the document.
-    try { source.load(); } catch { /* a browser that refuses still plays later */ }
-    soundCache.set(file, source);
+  for (const entry of Object.values(soundTiming?.labels ?? {})) {
+    for (const sound of entry.sounds) files.add(sound.file);
   }
-  log(`sound: ${files.size} clip(s) preloaded from your own install.`);
+  soundPlayer.preload(files, { leadInSeconds: leadInSecondsFrom(manifest) }).then(({ requested, ready, trimmed }) => {
+    const verb = soundPlayer.route === "webaudio" ? "decoded" : "preloaded";
+    const lead = trimmed > 0 ? `, ${trimmed} with the build's MP3 lead-in skipped` : "";
+    log(`sound: ${ready} of ${requested} clip(s) ${verb} from your own install${lead}.`);
+  });
 }
 
 /**
  * ► **ONE `Audio` ELEMENT PER FILE MEANT ONE SOUND AT A TIME, and the owner
  *   heard exactly that: "sounds get cut off and don't play out."** The cache
  *   held a single element per file and every play did `currentTime = 0` on it.
- *   With six gladiators that is not "restart rather than overlap" — it is the
- *   previous sound being TRUNCATED mid-note, and a walk and a walk in the same
- *   step both land on `706.mp3`, so they cut each other off.
+ *   Every play has had its own voice since, capped at 16 by `retireVoices`;
+ *   both now live in `tools/arena/sound-player.js`, where a test can drive them.
  *
- *   The cached element is now a PRELOAD SOURCE and each play gets its own clone,
- *   so overlapping sounds overlap the way they do in the build. `VOICES` caps
- *   how many can be in flight, because an unbounded clone-per-action is how a
- *   long bout turns into a memory leak with a soundtrack.
+ * ► **A SOUND FIRES WHEN THE DRAWN POSE REACHES ITS FRAME, NOT WHEN ITS CLIP
+ *   STARTS (2026-09-23).** ~~`playFor(family, sequence, label)` at `beginStep`
+ *   and at a queued clip's takeover, with a `setTimeout` for a victim's
+ *   delay~~ — which played every sound at the FIRST frame of its clip, while
+ *   the build starts it where its `StartSound` sits: 16 frames into direction
+ *   8's hurt run, 12 into a knockback. The draw loop now asks
+ *   `dueSoundCues` each frame, with the clock it poses the figure by, exactly
+ *   as the blood beside it does; so a sound waits for a delayed start, fires
+ *   in a continuation at its frame, and never fires for a clip cut short
+ *   before it. `settleEntrySounds` covers the frame a clip ENDS between draws.
  */
-const VOICES = 16;
-const voices = [];
+function soundPlanFor(entry, facing) {
+  const { family, label } = entry.timeline;
+  // The DRAWING's own resolved label when there is a rig: a walk draws
+  // `stepforward` or `stepback` by facing, and the sound must be that clip's.
+  const drawnLabel = hasExtractedArt(figurePack)
+    ? animationFor(figurePack, { family, label, facing })?.label ?? null
+    : null;
+  return soundCuesFor(
+    { bindings: soundBindings, timing: soundTiming },
+    { family, label, facing, sequence: entry.token ?? 0, drawnLabel }
+  );
+}
 
-function playFor(family, sequence, label = null) {
-  if (!soundEnabled) return;
-  const file = chooseSound(soundBindings, family, sequence, label);
-  if (!file) return;
-  let source = soundCache.get(file);
-  if (!source) {
-    source = new Audio(`/assets/sound/${encodeURIComponent(file)}`);
-    source.preload = "auto";
-    soundCache.set(file, source);
-  }
-  // WHICH voices survive is decided in `src/render/arena-shell.js`, under the
-  // suite; stopping them is this shell's job because only it holds an `Audio`.
-  const { keep, evict } = retireVoices(voices, VOICES);
-  voices.length = 0;
-  voices.push(...keep);
-  for (const spent of evict) {
-    try { spent.pause(); } catch { /* already gone */ }
-  }
+/** Play whatever of this entry's cues its clock has reached, once each. */
+function soundEntry(entry, now, facing) {
+  if (!entry?.timeline) return;
+  if (!entry.soundPlan) entry.soundPlan = soundPlanFor(entry, facing);
+  const { due, fired } = dueSoundCues(entry.soundPlan, {
+    elapsedMs: now - entry.startedAt,
+    durationMs: entry.timeline.durationMs,
+    fired: entry.soundsFired ?? 0
+  });
+  entry.soundsFired = fired;
+  for (const cue of due) soundPlayer.play(cue);
+}
 
-  const voice = source.cloneNode();
-  voice.volume = source.volume;
-  voices.push(voice);
-  const played = voice.play();
-  if (played && typeof played.catch === "function") {
-    played.catch(() => {
-      // NotAllowedError until the page is interacted with. Said once.
-      audioBlocked = true;
-      showAudioPrompt();
-      if (!audioBlockLogged) {
-        audioBlockLogged = true;
-        log("your browser is blocking audio until you interact with the page — click the arena once.", { warn: true });
-      }
-    });
-  }
+/**
+ * The cues an entry reached since the last draw, played as it LEAVES
+ * `playing` — expired, handed to its queued successor, or replaced by a new
+ * step. A clip that finished between two frames still sounds its last pose;
+ * one replaced mid-run sounds only what it reached, which is the build's
+ * `gotoAndPlay` cutting a run short. `dueSoundCues` drops anything stale.
+ */
+function settleEntrySounds(combatantId, entry, now) {
+  if (!entry || !Number.isFinite(entry.startedAt) || now < entry.startedAt) return;
+  const actor = scene.actors[combatantId];
+  soundEntry(entry, now, figureFacingAt({ facing: actor?.facing, turn: actor?.turn ?? null, pendingTokens }));
 }
 
 /**
@@ -870,6 +945,10 @@ function prepareEntry(entry) {
   // every comparison was false and nothing ever fired.
   entry.effectPoses = Array.isArray(animation?.poses) ? animation.poses.length : 0;
   entry.firedEffects = new Set();
+  // The sounds, resolved at the entry's first DRAW, where its facing is the
+  // one the figure is drawn with. See `soundEntry`.
+  entry.soundPlan = null;
+  entry.soundsFired = 0;
   return entry;
 }
 
@@ -1017,27 +1096,23 @@ function beginStep(step) {
     entry.startedAt = performance.now() + (delays.get(combatantId) ?? 0);
     prepareEntry(entry);
   }
-  for (const [combatantId, entry] of started) playing.set(combatantId, entry);
+  for (const [combatantId, entry] of started) {
+    // The clip this one replaces sounds what it reached and no more.
+    settleEntrySounds(combatantId, playing.get(combatantId), performance.now());
+    playing.set(combatantId, entry);
+  }
 
   // The fight pop-ups, each starting WITH its fighter's reaction clip — the
   // build attaches it in the same action (`defender_hurt` +0x211e/+0x2120).
   spawnPopups(step, started, delays);
 
-  // A sound per animation that STARTS, keyed on the same family AND THE SAME
-  // LABEL the schedule was chosen by, so the two can never disagree about what
-  // is playing. **The label was missing until 2026-09-13** and the figure and
-  // the speaker were choosing independently within a family — `attack3` on
-  // screen against whichever of the attack sounds a counter landed on. See
-  // `chooseSound`, which carries the whole story.
-  for (const [combatantId, entry] of started) {
-    // The same delay the clip waits for, so the burn is heard when it is seen.
-    const delay = delays.get(combatantId) ?? 0;
-    if (delay > 0) {
-      setTimeout(() => playFor(entry.timeline.family, step.actionBoundary ?? 0, entry.timeline.label), delay);
-      continue;
-    }
-    playFor(entry.timeline.family, step.actionBoundary ?? 0, entry.timeline.label);
-  }
+  // ► **NO SOUND IS PLAYED HERE ANY MORE (2026-09-23).** A sound per animation
+  //   that started used to fire at this line, keyed on the family AND the
+  //   label (missing until 2026-09-13, when `attack3` on screen met whichever
+  //   attack sound a counter landed on — `chooseSound` carries that story),
+  //   with a `setTimeout` for a victim's delay. The draw loop sounds each
+  //   entry now, at the pose the build's `StartSound` sits on; the delay is
+  //   the entry's own future `startedAt`. See `soundEntry`.
 
   for (const token of step.actionTokens) {
     if (!pendingTokens.includes(token)) pendingTokens.push(token);
@@ -1122,13 +1197,22 @@ function drainFinishedAnimations(now) {
   // ► **A QUEUED CLIP TAKES OVER WHEN ITS PREDECESSOR ENDS** — a victim's
   //   death, queued behind the reaction its killing blow started (2026-09-23;
   //   `timelinesForStep`). The cursor stamps where it starts; this shell poses
-  //   it and sounds it, as `beginStep` does for a clip a batch starts. Before
-  //   `expired`, so a late frame that ran past the whole chain still ends it.
+  //   it, as `beginStep` does for a clip a batch starts. Before `expired`, so a
+  //   late frame that ran past the whole chain still ends it.
+  //
+  //   The link that ENDED is settled first, so a sound on its last pose is not
+  //   lost between two draws; the new link sounds from the draw loop, at its
+  //   own poses, like any other entry (`soundEntry`). A link a very late frame
+  //   skipped WHOLE is never in `playing` and is not sounded — its cues would
+  //   be stale by the whole of its length anyway.
   for (const { combatantId, entry } of cursor.advanced) {
+    settleEntrySounds(combatantId, playing.get(combatantId), now);
     playing.set(combatantId, prepareEntry(entry));
-    playFor(entry.timeline.family, entry.token ?? 0, entry.timeline.label);
   }
-  for (const combatantId of cursor.expired) playing.delete(combatantId);
+  for (const combatantId of cursor.expired) {
+    settleEntrySounds(combatantId, playing.get(combatantId), now);
+    playing.delete(combatantId);
+  }
 
   // The surface gave up. That is a different fact from the animation having
   // finished, and the gate records it as such rather than as a report.
@@ -2271,8 +2355,38 @@ canvas.addEventListener("click", (event) => {
   if (x < soundButtonBox.x0 || x > soundButtonBox.x1) return;
   if (y < soundButtonBox.y0 || y > soundButtonBox.y1) return;
   soundEnabled = !soundEnabled;
+  // Off silences what is already sounding too, not only what fires next.
+  soundPlayer.setEnabled(soundEnabled);
   log(`sound ${soundEnabled ? "on" : "off"} — the bar's own toggle.`);
 });
+
+/**
+ * ► **THE MASTER VOLUME, A REAL DOM CONTROL (2026-09-23).** `sound.js` named a
+ *   volume slider as this shell's job from the start and none existed. It
+ *   drives the player's `GainNode` (each voice's `volume` on the element
+ *   fallback) through `masterGainFor`'s curve, and the position is remembered
+ *   per viewer — storage that throws or is empty just means the default.
+ */
+const VOLUME_KEY = "arena.volume";
+const volumeSlider = el("volume");
+const volumeReadout = el("volume-readout");
+
+function applyVolume(position) {
+  soundPlayer.setVolume(masterGainFor(position));
+  if (volumeReadout) volumeReadout.textContent = `${Math.round(Number(position))}%`;
+}
+
+if (volumeSlider) {
+  let saved = null;
+  try { saved = window.localStorage.getItem(VOLUME_KEY); } catch { /* private window: the default */ }
+  const initial = saved !== null && Number.isFinite(Number(saved)) ? Number(saved) : DEFAULT_VOLUME;
+  volumeSlider.value = String(Math.min(100, Math.max(0, initial)));
+  applyVolume(volumeSlider.value);
+  volumeSlider.addEventListener("input", () => {
+    applyVolume(volumeSlider.value);
+    try { window.localStorage.setItem(VOLUME_KEY, volumeSlider.value); } catch { /* not remembered, still applied */ }
+  });
+}
 
 /* ------------------------------------------------------------------ */
 /* What the arena still cannot draw, counted                           */
@@ -4032,6 +4146,12 @@ function renderStage(view, fit, now) {
         })
       });
     }
+
+    // ► **AND ITS OWN SOUNDS, at the pose the build starts each one on**, by
+    //   the same clock this figure was just posed with and the same `facing`
+    //   it was drawn with. A waiting entry is `undefined` here, so a victim
+    //   is heard at its impact and not before (2026-09-23; `soundEntry`).
+    if (entry) soundEntry(entry, now, facing);
 
     // ► **HIS POP-UPS, RIGHT AFTER HIS BODY**, because the build attaches them
     //   to HIS clip (depths 25000/25001/25005): over his own limbs, under any

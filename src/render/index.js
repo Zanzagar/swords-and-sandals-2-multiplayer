@@ -27,6 +27,9 @@
  *   the licensed build's own clip labels. Both extracted assets key on those
  *   labels, so sound and art answer to one vocabulary rather than two that can
  *   drift — which is exactly how a walk came to sound like a leaping attack.
+ * - `sound-timing.js` fires each of a clip's sounds at the DRAWN pose the
+ *   build's `StartSound` sits on, with the drawing's own pose arithmetic, so a
+ *   sound follows everything that delays or cuts short the figure.
  * - `arena-shell.js` holds the decisions the browser shell was making where no
  *   test could reach them. `tools/arena/main.js` cannot be imported by node at
  *   all, and it has given up five live defects in one day; what was logic
@@ -82,6 +85,7 @@ export * from "./cursor.js";
 export * from "./painter.js";
 export * from "./timeline.js";
 export * from "./sound.js";
+export * from "./sound-timing.js";
 export * from "./clip-labels.js";
 export * from "./clip-sequences.js";
 export * from "./stance.js";

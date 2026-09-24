@@ -35,7 +35,9 @@ import { demoSide } from "../tools/arena/roster.js";
 import { SS2_FIGURE_HALF_WIDTH, SS2_FIGURE_HEIGHT } from "../src/common/ss2-figure.js";
 import {
   ArenaShellError,
+  DEFAULT_VOLUME,
   figureProvenance,
+  masterGainFor,
   perSideFrom,
   rankOfDepth,
   rankStrideFrom,
@@ -133,6 +135,20 @@ test("retireVoices is total, because a malformed voice list must not stop the ar
   assert.deepEqual(retireVoices([null, undefined], 4).keep, [], "a null voice counts as finished");
   const live = {};
   assert.deepEqual(retireVoices([live], 0).evict, [live], "a nonsense cap floors at one");
+});
+
+test("the volume slider's curve: full is the old level, half is a quarter, and nothing missing reads as mute", () => {
+  assert.equal(DEFAULT_VOLUME, 100);
+  assert.equal(masterGainFor(100), 1, "the level the arena played at before it had a slider");
+  assert.equal(masterGainFor(0), 0);
+  assert.equal(masterGainFor(50), 0.25, "squared, because loudness is heard on a log scale");
+  assert.equal(masterGainFor("50"), 0.25, "a range input's value is a string");
+  assert.equal(masterGainFor(250), 1);
+  assert.equal(masterGainFor(-5), 0);
+  // A saved setting that is absent or garbage is the DEFAULT, never silence.
+  for (const blank of [null, undefined, "", "  ", "loud", NaN]) {
+    assert.equal(masterGainFor(blank), 1, `${String(blank)} is the default`);
+  }
 });
 
 test("the provenance line is DERIVED, because it claimed authored art over the extracted rig", () => {

@@ -35,6 +35,14 @@
     flex-wrap: wrap;
   }
   header h1 { font-size: 15px; margin: 0; font-weight: 600; letter-spacing: .02em; }
+  /* The master volume: pushed to the header's far end, readable at a glance. */
+  .volume {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--ink-dim); font-size: 12px;
+  }
+  .volume input { width: 120px; accent-color: var(--warn); }
+  .volume output { min-width: 3.5em; color: var(--ink); font-variant-numeric: tabular-nums; }
   .tier {
     color: var(--warn);
     font-weight: 700;
@@ -103,6 +111,10 @@
     <h1>The Arena</h1>
     <span class="tier" id="tier">loading…</span>
     <span class="provenance" id="seed"></span>
+    <label class="volume" for="volume">Volume
+      <input id="volume" type="range" min="0" max="100" step="1" value="100" aria-describedby="volume-readout">
+      <output id="volume-readout" for="volume">100%</output>
+    </label>
   </header>
   <main>
     <div id="stage"><canvas id="arena"></canvas></div>
