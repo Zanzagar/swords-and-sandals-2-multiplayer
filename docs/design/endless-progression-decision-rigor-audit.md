@@ -2580,6 +2580,37 @@ identity/version, mutable coordinate, Soul resonance, and Charm presence from
 torn authoritative revisions. Additional slots may appear only through another
 explicit owner-visible charter amendment, not automatic frontier recursion.
 
+The owner then selected `RCS-03C2A-A`. Every legal eligible opportunity now
+invokes exactly one cut-atomic evaluation automatically; no still-operative
+participant grant, veto, withhold, release, standing instruction, or bundled
+invocation role remains legal. This selects invocation rather than success and
+does not weaken C134 sealing or C135 same-tag recurrence protection.
+`RCS-03C2B` is therefore pruned. Screening `RCS-03C3` then derived one coherent
+pre-adjudication `H_e`/current-`S_e` read at the actual invocation cut: earlier
+state is not current `S`, and a split-revision or later reread is a
+specification defect rather than a product branch. The existing C3 slot retains
+one admitted player-material axis, occurrence-history semantic freshness,
+because freshness-bounded versus open-retained history changes legal setup,
+counterplay, automatic-proc legibility, and stale-history laundering. Its
+domain includes every materially H-reading position, including any permitted
+coupled `H`+`S` addition; limiting it to independently history-only positions
+would leave a stale-history bypass.
+
+A fifth prerequisite audit then found five independently player-material
+source-use boundaries still hidden inside that C3 row: canonical combat-
+evidence atom identity; same-cut fan-out across distinct result/tag
+predicates; the Relic-local claim/consumption trigger and no-result
+disposition; later same-tag reuse after valid break/rearm; and later different-
+tag reuse within one active Relic. Cross-root team amplification remains
+independent and is now explicit in existing `RCS-08`. One canonical atom
+occupying two positions of one result is already derived-illegal under the
+selected cross-source purpose, but the semantic atom boundary can change legal
+play and therefore remains its own screened row before exact per-family
+catalogs become AUTHOR/SPEC. `RCS-03C3` becomes a non-counting parent replaced
+by `RCS-03C3A`–`RCS-03C3F`, with freshness card C3A sole active. The thirty-
+nine-slot register now contains 25 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`,
+4 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so current `Phi_SR = 26`.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

@@ -180,8 +180,15 @@ register splits that parent into RCS-03C1–RCS-03C3. The owner selected
 RCS-03C1-A: every readiness episode is evaluation-eligible at its opening cut.
 A fourth prerequisite audit then found that RCS-03C2 still combined invocation-
 control source with the timing of participant authorization. The amended
-register splits that parent into RCS-03C2A–RCS-03C2B; the next candidate is
-RCS-03C2A, cut-atomic evaluator invocation-control source under SR-04.
+register splits that parent into RCS-03C2A–RCS-03C2B. The owner selected
+RCS-03C2A-A: every eligible opportunity automatically invokes exactly one cut-
+atomic evaluation, so conditional RCS-03C2B is pruned. A prerequisite screen
+then derived one coherent current-cut `H`/`S` acquisition rule and left
+occurrence-history freshness as the sole player-material boundary in
+RCS-03C3A, now the active owner choice under SR-03/SR-04. A fifth prerequisite
+amendment routes same-cut evidence fan-out and later source-use/reuse semantics
+to RCS-03C3B–RCS-03C3F and expands RCS-08's cross-root/team scope rather than
+leaving them implicit.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -18456,7 +18463,7 @@ wording and authorizes no implementation.
 > to thirty-four counted slots. Selecting C1 reduces `Phi_SR` from 23 to 22;
 > replacing one open C2 row with two raises current `Phi_SR` to 23.
 
-### RCS-03C2A — evaluator invocation-control source — active owner choice
+### RCS-03C2A — evaluator invocation-control source — A selected
 
 RCS-03C1-A makes every legal readiness episode cadence-eligible at its opening
 cut `r`. RCS-03C2A asks whether evaluation at that or any other legally
@@ -18555,6 +18562,133 @@ This card deliberately defers:
 If A is selected, RCS-03C2B is pruned and RCS-03C3 is next. If B or C is
 selected, RCS-03C2B is the next prerequisite. None creates a pending evaluation
 or authorizes implementation.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **A, every ready
+opportunity invokes automatically.** Thus `P^{invoke}_v` is empty. At every
+legal evaluation opportunity `e` in `O_v`, including each readiness episode's
+opening cut `r`, the rules invoke exactly one cut-atomic evaluation once its
+authoritative inputs are fixed. No still-operative participant authority may
+separately bank, withhold, veto, grant, or release that invocation. Upstream
+participant actions may create relationship facts or recurrence permission,
+but they are not invocation authority unless their authored semantics carry
+that still-operative role—and no such role is legal under this selection.
+
+This selects invocation, not successful output. The coherent evidence
+projection screened in RCS-03C3 may still produce a provisional candidate or
+no candidate, C134-A still seals a completed candidate, and C135-A still
+prevents repeated same-tag commitment while sufficiency remains continuous.
+At the manifestation cut, distinct Soul, Relic, Charm, and relationship facts
+participate **directly**; deliberate agency across their formation history is
+**partial**; excluding a redundant invoke command is **neutral/protective**;
+and universal automatic control is **aggregate**. The benefit is fluent,
+non-quarterbacked play with no banked-ready exploit. The cost is that a player
+cannot hold a manifestation, and automatic evaluation will feel like an
+opaque proc unless later presentation identifies its causal relationship.
+
+RCS-03C2B is pruned because participant-authorization timing has no object.
+RCS-02 may still decide other actor, information, and communication questions,
+and RCS-13 still owns configuration/evolution locks, but neither may
+reintroduce an invocation command-holder, consent/veto, standing invocation
+instruction, or invocation precommitment without explicitly reopening this
+selection. Complete semantic-role analysis must prove the universal negative:
+a bundled `Kindle & Invoke`, a standing instruction, and default invocation
+with a material participant veto are all participant-contingent and therefore
+incompatible with A. Incomplete analysis is unresolved, not proof of A. This
+direction changes no authoritative decision-record wording and authorizes no
+implementation.
+
+> **Fifth prerequisite correction, 2026-09-24:** screening RCS-03C3 derived
+> coherent same-cut acquisition but exposed six independently variable
+> player-semantic boundaries that the row still compressed: occurrence-history
+> freshness; canonical combat-evidence atom identity; same-cut evidence
+> fan-out across distinct results/tags; the use-dependent claim/consumption
+> trigger and no-result disposition; later same-tag reuse after a valid
+> break/rearm; and later different-tag reuse within the same active Relic.
+> C3c.28 also leaves cross-combatant Relic amplification
+> open, which belongs explicitly in existing team-stacking slot RCS-08. The
+> register therefore makes RCS-03C3 a non-counting parent and replaces it with
+> RCS-03C3A–RCS-03C3F. It grows from thirty-four to thirty-nine counted slots,
+> and current `Phi_SR` rises from 21 to 26. Exact per-family atom catalogs remain
+> AUTHOR/SPEC after C3B selects their semantic boundary. One canonical atom
+> occupying two positions of the same relationship result is already
+> incompatible with the selected at-least-two-independent-source purpose and
+> receives no separate owner card.
+
+### RCS-03C3A — occurrence-history semantic freshness — active owner choice
+
+The invocation-side acquisition question now has only one legal answer. Under
+RCS-03B1-A, RCS-03C1-A, and RCS-03C2A-A, a readiness episode's opening
+opportunity is eligible and invokes one cut-atomic evaluation at its canonical
+cut `e=r`. If the later authored contract supplies another eligible opportunity,
+that distinct opportunity invokes and reads evidence at its own cut `e`; it
+does not reuse the opening sample. That requires a fresh authoritative read;
+it does not decide whether an occurrence atom present in both projections may
+qualify again. C3c.33 defines `S` as current canonical battle state at the
+selected evaluation boundary, C133 uses the facts then
+authoritative, and C141 places the complete read projection immediately before
+adjudication. Each evaluator invocation therefore reads one coherent
+authoritative revision: current `S_e` and the bounded within-battle `H_e` facts
+still semantically admissible at its `e`. An earlier state snapshot is history,
+persistent Relic state, or recurrence control—not current `S`. Split-revision
+`H`/`S`, a readiness latch, or a post-`e` reread is an invalid/specification
+defect, not an owner option.
+
+One player-material question remains: **how old may a qualifying occurrence be
+and still belong to `H_e`?** Let `P^{H-read}_v` contain every final counted
+position whose effective predicate materially reads at least one `H`
+coordinate, whether through its independently history-only form or through an
+additional coupled `H`+`S` boundary still permitted by C3c.33-A/C3c.35-A. The
+set is nonempty because C3c.34-C/C3c.35-A require independently history-only
+positions, but it is deliberately not limited to them.
+
+A position is **open-retention-capable** when at least one materially
+qualifying occurrence on any of its `H`-reading paths has no authored
+nonterminal semantic-age horizon: absent a new occurrence, source-owned
+semantic clearing, encounter termination, or a change to another held-fixed
+input, that occurrence can remain admissible throughout an arbitrarily later
+within-battle invocation. Let `U^{open-H}_v` be the subset of `P^{H-read}_v`
+with that capability. Any Relic-use-dependent claim or consumption state is
+held fixed here and belongs to RCS-03C3D.
+
+A position outside `U^{open-H}_v` is **freshness-bounded**: every materially
+qualifying occurrence on every effective `H`-reading path has a disclosed
+finite player-semantic age horizon and, on a sufficiently long legal
+continuation, ages out before encounter termination solely because that
+horizon passes. The horizon may later be authored in committed actions,
+rounds, phases, or another canonical semantic unit; a hidden wall-clock timer
+is not implied. Classification concerns semantic admissibility at invocation,
+not storage retention. Source-owned clearing follows the source's own rules;
+Relic-use-dependent claims, consumption, and reuse are held fixed and routed
+to RCS-03C3B–RCS-03C3F and RCS-08.
+
+| Choice | Occurrence-history freshness rule | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — every H-reading position is freshness-bounded** | `U^{open-H}_v` is empty. Every counted position gives every materially qualifying occurrence on every effective `H`-reading path a disclosed finite nonterminal age horizon, including `H` facts inside any permitted coupled addition. Exact horizon units and lengths remain later authoring/specification and tuning work. | **Recommended.** A preserves sequence-memory play without letting one opening action become hidden permanent configuration. At invocation, the remembered occurrence and the current Soul/Relic/Charm relationship participate **directly**; continuity from the earlier act is **partial**; expiry is **neutral/protective** because it preserves a real distinction between living memory and a standing build fact; universal prevalence is **aggregate**. It prevents turn-one priming, stale-history laundering, and very late opaque automatic procs, and supports meaningful break/renew/rearm play. The costs are timing and UI pressure, wasted setup after disruption, and coordination burden; windows must be generous semantic intervals, not twitch timers. | Illustratively, Aster's `Guard` remains admissible through the next two allied committed actions. Borel's `Heat` inside that interval can complete Ashen; later `Heat` requires a new `Guard`. The exact two-action value and Ashen assignment are not selected here. |
+| **B — every H-reading position permits open retention** | `U^{open-H}_v=P^{H-read}_v`. Every counted position that materially reads `H` has at least one qualifying occurrence path that can remain admissible with no nonterminal semantic-age expiry. Source-owned semantic clearing, a later-selected Relic-use claim, encounter termination, or another predicate fact may still end its eligibility. | B supports long-form encounter memory and forgiving deliberate setup: a Soul Relic can remember an early deed until a much later relationship completes. That temporal continuity is **partial**, while universal open retention is **aggregate**. The cost is permanent-priming pressure, weaker counterplay, stale-history laundering, and automatic manifestations whose cause may be many turns old; `H` risks behaving like an invisible passive flag rather than lived combat history. | A turn-one `Guard` may remain admissible until encounter end or an independently authored source clear. Much later `Heat` can complete Ashen even though no recent Guard occurred. Relic-use claims and recurrence rules remain separate. |
+| **C — freshness-bounded and open-retained H-reading positions coexist** | `U^{open-H}_v` is a nonempty proper subset of `P^{H-read}_v`. At least one H-reading position permits a materially open-retained occurrence, while at least one other position is proved freshness-bounded across every effective `H` path. | C creates short Echoes beside battle-long Vows and can give Relics strong temporal identities. Each position inherits A or B's local relation; coexistence is only **aggregate**. The cost is another timing language on top of history versus live state and recurrence, plus token-witness, convenience-premium, tooltip, replay, and balance risk. | Ashen might require recent Guard while Dreamglass remembers one qualifying oath for the battle. Those identities are illustrative; C selects only coexistence, not the assignments. |
+
+**Recommendation: A, every H-reading position is freshness-bounded.** Automatic
+same-cut invocation is clearest when the causal occurrence is still recent
+enough for players and opponents to understand why the Relic listened. A keeps
+history distinct from current state while preventing it from collapsing into
+a permanent hidden switch. Exact horizons should be long enough to support
+deliberate team sequencing and accessibility, and must be visible before play.
+
+A/B/C are mutually exclusive and exhaustive because `U^{open-H}_v` is empty,
+all of nonempty `P^{H-read}_v`, or a nonempty proper subset. A position counts
+as open-retention-capable only through a materially qualifying occurrence; a
+cosmetic or unreachable path is insufficient. Failure to find an open path through
+incomplete analysis is unresolved, not evidence for A or C's negative class.
+The options do not choose occurrence source or declaration/resolution/outcome
+phase, exact window unit or length, current-state fields, relationship
+operator, source-owned clearing, same-cut cross-result/tag fan-out across one
+or multiple coincident invocations, use-dependent
+claim/consumption, later same-tag or different-tag reuse, cross-root/team
+reuse, recurrence authorization, payoff, UI realization, persistence,
+migration, release, or implementation. Exact source families, atom catalogs,
+and horizon values remain AUTHOR/SPEC/TUNE; RCS-03C3B–RCS-03C3F and RCS-08 own
+the player-material reuse boundaries. This card advances SR-03 and SR-04 by
+closing semantic freshness only; it creates no pending evaluation.
 
 ## Session protocol and evidence
 
