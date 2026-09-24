@@ -64,8 +64,11 @@ there never reaches the next reader.
 - `validate-vehicle.ps1` must PASS after ANY wrapper edit — but read what it does
   not prove. It caught 0 of the 6 defects found live on this route.
 - **Snapshot before every save-mutating run.** `run-arena.ps1` does it for you.
-- **Git and GitHub: follow `claude-harness/docs/git-hygiene.md`** — thirteen
-  rules on branches, commits, pushing, PRs and merge eligibility. They are
+- **Git and GitHub: follow `claude-harness/docs/git-hygiene.md`** — ~~thirteen~~
+  fourteen rules on branches, commits, pushing, PRs, merge eligibility and,
+  since 2026-09-24, rule 14: the commit trailer (the grilling gate, last line
+  of this file; enforced by `.githooks/` and CI, and `git commit --no-verify`/`-n`
+  are denied in settings). They are
   ENFORCED, not advisory: `.claude/settings.json` carries them as
   `permissions.deny`/`ask`, so they bind Claude, Codex and a human here
   identically.
@@ -230,3 +233,4 @@ derivation FAILS and names itself rather than skipping silently.
   quietly fixing them. Commit messages here name which errors were whose.
 - End a working session by writing a date-stamped brief to `docs/handoffs/`
   carrying its `sessionId`, so the next session starts from one sentence.
+- **Grilling gate:** every commit ends with a `Decided: <path>#<anchor>` trailer (the recorded decision it implements) or a `Fix:`/`Docs:`/`Chore:`/`Test:` trailer saying why; rule 14 of claude-harness `docs/git-hygiene.md`. `.githooks/commit-msg` refuses anything else once a clone has run `git config core.hooksPath .githooks` (once per clone), and `.github/workflows/grill-gate.yml` re-checks every new commit, and a pull request's description, in CI. <!-- grill-gate:pointer -->

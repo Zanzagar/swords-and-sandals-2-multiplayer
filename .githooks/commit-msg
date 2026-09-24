@@ -1,0 +1,9 @@
+#!/bin/sh
+# grill-gate commit-msg hook (claude-harness docs/git-hygiene.md, rule 14).
+#
+# Every commit ends with a trailer block holding `Decided: <path>#<anchor>` (a
+# recorded grilling decision) or a class trailer (Fix:, Docs:, Chore:, Test:).
+# The rule itself lives in check-trailers beside this file, which CI runs too,
+# so the hook and CI cannot disagree. Installed by claude-harness adopt.sh;
+# activated by `git config core.hooksPath .githooks`.
+exec sh "$(dirname "$0")/check-trailers" --message-file "$1"

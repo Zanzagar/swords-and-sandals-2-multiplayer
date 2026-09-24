@@ -1,0 +1,68 @@
+# grill-gate: every NEW commit ends with a `Decided: <path>#<anchor>` trailer or a
+# class trailer (Fix:, Docs:, Chore:, Test:). claude-harness docs/git-hygiene.md,
+# rule 14. The commit-msg hook checks the same rule with the same file
+# (.githooks/check-trailers) at commit time; this re-checks it here, where
+# --no-verify and a missing core.hooksPath cannot reach.
+#
+# On a pull request it also checks the title and description, which a squash
+# merge set to "Pull request title and description" makes the commit message.
+#
+# Installed by claude-harness adopt.sh, which also records the baseline
+# (.githooks/grill-gate.baseline): the only history this job exempts.
+name: grill-gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]   # edited: a fixed description re-runs the check
+  push:
+    branches: ['**']
+
+permissions:
+  contents: read
+
+jobs:
+  trailers:
+    # A push to the default branch is checked too: a squash merge writes a new
+    # commit there. The pull request run already checked that commit's message
+    # (the description), so this is the backstop for a repository whose squash
+    # setting differs, or a merge made outside a pull request.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0              # the ranges need the default branch and the whole history
+          persist-credentials: false  # this job only reads
+      - name: Every new commit carries a Decided or class trailer
+        env:
+          # History from before the gate is exempt ONLY if it is reachable from a
+          # branch tip recorded in .githooks/grill-gate.baseline (adopt.sh writes it
+          # once). No date exempts anything. Untrusted text (the PR title and body)
+          # arrives through env, never through ${{ }} inside the script.
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          # The branch tips adopt.sh recorded: their whole history is pre-gate.
+          set --
+          [ -f .githooks/grill-gate.baseline ] && set -- --baseline .githooks/grill-gate.baseline
+          if [ "$EVENT_NAME" = pull_request ]; then
+            status=0
+            sh .githooks/check-trailers "$@" --pr "$PR_BASE" "$PR_HEAD" || status=1
+            # With squash merges set to "Pull request title and description", the
+            # title and description ARE the squashed commit's message: check them
+            # now, against the merge result, so the squash commit is valid before it lands.
+            msg="${RUNNER_TEMP:-${TMPDIR:-/tmp}}/grill-gate-pr-message"
+            printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" > "$msg"
+            sh .githooks/check-trailers --pr-message "$msg" HEAD || status=1
+            exit $status
+          elif [ "$REF_NAME" = "$DEFAULT_BRANCH" ]; then
+            sh .githooks/check-trailers "$@" --push "$BEFORE" "$AFTER"
+          else
+            sh .githooks/check-trailers "$@" --push "$BEFORE" "$AFTER" "origin/$DEFAULT_BRANCH"
+          fi
