@@ -2721,9 +2721,9 @@ The register therefore makes `RCS-03C3B1A1` a non-counting parent for
 `RCS-03C3B1A1B` (per-position independent phase multiplicity). Existing
 `RCS-03C3B1A2` retains additional irreducibly multi-phase-path admission, and
 `RCS-03C3B1B` retains catalog phase support. Replacing one screened row with two
-adds one slot and one potential card. The current forty-eight-slot register
+adds one slot and one potential card. At that eighth-amendment stage, the forty-eight-slot register
 contains 31 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 7 `DIR-SELECTED`, 1 `SPEC`,
-and 1 `EVALUATE` row, so current `Phi_SR = 32`. `RCS-03C3B1A1A` is the sole
+and 1 `EVALUATE` row, so its `Phi_SR = 32`. `RCS-03C3B1A1A` was the sole
 active card.
 
 **Agent correction:** the prior route incorrectly treated minimum attribution,
@@ -2731,6 +2731,44 @@ irreducible multi-phase supplementation, and catalog phase union as exhaustive.
 The `U`/`M` pair varies local independent phase multiplicity while holding all
 three fixed. That missing player-material boundary is restored before the next
 card is presented.
+
+The owner then selected `RCS-03C3B1A1A-A`. Every history position now has at
+least one C3c.33-valid isolation confined to declaration/commitment,
+execution/performance, or outcome/disposition claims. No history position is
+phase-coupled-only. Which phase supplies the anchor, whether another phase is
+also independently isolatable, and whether a separate irreducibly multi-phase
+path exists remain open. Selecting A1A reduced `Phi_SR` from 32 to 31.
+
+A ninth prerequisite audit found that old independent phase multiplicity still
+compressed two player-material boundaries. Classifying positions as singular
+or plural does not determine whether a plural position independently isolates
+exactly two phases or all three. On reachable `(D,E,O)` valuations
+`{000,100,010,001}`, worlds `X2: p=D OR E, q=E OR O` and
+`X3: p=D OR E OR O, q=E OR O` both make every position plural, support catalog
+phases `{D,E,O}`, and contain no irreducibly multi-phase package. Only X3 gives
+`p` a third independent timing route. Because invocation is automatic at each
+eligible opportunity, that changes readiness timing, counterplay, disclosure,
+and cheapest-route dominance rather than merely proof shape.
+
+The register therefore makes `RCS-03C3B1A1B` a non-counting parent for
+`RCS-03C3B1A1B1` (singleton-versus-plural prevalence) and conditional
+`RCS-03C3B1A1B2` (tri-phase prevalence among plural positions). Existing
+`RCS-03C3B1A2` retains irreducibly multi-phase-path admission, and
+`RCS-03C3B1B` retains catalog phase support. Exact pair identities remain
+catalog authoring rather than another owner card absent a new global
+player-contract requirement.
+
+Replacing one screened row with two adds one slot and one potential card. The
+current forty-nine-slot register contains 31 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 8 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so current
+`Phi_SR = 32`. `RCS-03C3B1A1B1` is the sole active card.
+
+**Agent correction:** the eighth-amendment row was named for local phase
+multiplicity but made only its singleton/plural boundary explicit. The X2/X3
+pair holds minimum attribution, irreducible coupling, and catalog phase support
+fixed while changing `p`'s legal timing surface. The missing tri-phase boundary
+is restored before plural prevalence is presented; exact phase-pair incidence
+is expressly routed to later authoring rather than silently treated as fixed.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

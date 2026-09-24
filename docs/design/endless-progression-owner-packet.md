@@ -200,8 +200,11 @@ attribution, and additional irreducible multi-phase-H supplements. It is now a
 non-counting parent for RCS-03C3B1A0–RCS-03C3B1A2. The owner selected
 RCS-03C3B1A0-A, making every position temporally projection-pure. An eighth
 audit then split old RCS-03C3B1A1 into minimum phase attribution and
-per-position independent phase multiplicity. RCS-03C3B1A1A is the active owner
-choice under SR-03.
+per-position independent phase multiplicity. The owner selected
+RCS-03C3B1A1A-A, requiring one independently meaningful phase anchor at every
+history position. A ninth audit then split the remaining multiplicity row into
+plural-position prevalence and conditional tri-phase prevalence.
+RCS-03C3B1A1B1 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -18966,7 +18969,7 @@ implementation, and it changes no authoritative decision wording.
 > multiplicity). `RCS-03C3B1A2` and `RCS-03C3B1B` follow the applicable child.
 > A0-A first reduced `Phi_SR` from 32 to 31; replacing one screened row with two
 > counted children adds one row and one potential card, producing forty-eight
-> counted slots and current `Phi_SR = 32`.
+> counted slots and the then-current `Phi_SR = 32`.
 
 > **Agent correction:** the earlier register treated minimum phase attribution,
 > supplemental irreducible coupling, and catalog support as a complete phase
@@ -18974,7 +18977,7 @@ implementation, and it changes no authoritative decision wording.
 > of those three answers. The omitted per-position multiplicity boundary is
 > restored before the minimum-attribution choice is presented.
 
-### RCS-03C3B1A1A — minimum occurrence-history phase attribution — active owner choice
+### RCS-03C3B1A1A — minimum occurrence-history phase attribution — A selected
 
 B1A0-A makes the materially H-reading domain exactly nonempty `T_H`; every
 position in it is temporally H-pure. C3c.33-A still isolates H only from current
@@ -19059,6 +19062,114 @@ persistence, release, or implementation. Under A or C,
 `RCS-03C3B1A1B` next owns per-position independent phase multiplicity and
 `RCS-03C3B1A2` then owns supplemental irreducible multi-phase paths. Under B,
 both are pruned and `RCS-03C3B1B` becomes next. The authoritative decision
+record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **A, every history
+position is phase-attributable.** `Q^{phase}_v=T_H`. Every temporally H-pure
+history position has at least one C3c.33-valid isolation pair confined to a
+nonempty set of materially read declaration/commitment, execution/performance,
+or outcome/disposition claims. Which phase supplies the witness may vary by
+position. A position may independently isolate additional phases and may
+separately admit an irreducibly multi-phase path; the registered descendants
+own those questions.
+
+At each history position, at least one phase claim and the predicate
+participate **directly**, the witnessed phase remains mechanically distinct
+from other materially read phases, continuity across the larger source
+operation is **partial**, excluding coupled-only local identity is
+**neutral/protective**, and universal coverage is **aggregate**. This is a
+direction selection. It changes no authoritative decision wording and
+authorizes no implementation.
+
+> **Ninth prerequisite correction, 2026-09-24:** screening local independent
+> phase multiplicity proved that old `RCS-03C3B1A1B` still compressed two
+> player-material topologies. Whether positions with at least two independent
+> singleton-phase routes are absent, universal, or mixed does not decide
+> whether a plural position independently isolates exactly two phases or all
+> three. On reachable `(D,E,O)` valuations `{000,100,010,001}`, worlds
+> `X2: p=D OR E, q=E OR O` and
+> `X3: p=D OR E OR O, q=E OR O` can both make every position plural, support
+> catalog phases `{D,E,O}`, and contain no irreducibly multi-phase package,
+> while only X3 lets `p` qualify independently at all three semantic phases.
+> That changes earliest qualification timing, interruption/cancellation
+> counterplay, tooltip/replay burden, and susceptibility to a cheapest-route
+> collapse; it is not an exact count used only to strengthen a proof.
+>
+> The register therefore makes `RCS-03C3B1A1B` a non-counting parent for
+> `RCS-03C3B1A1B1` (singleton-versus-plural position prevalence) and
+> conditional `RCS-03C3B1A1B2` (exactly-two-versus-all-three prevalence among
+> plural positions). `RCS-03C3B1A2` follows the applicable child, and
+> `RCS-03C3B1B` recomputes catalog phase support afterward. A1A-A first reduces
+> `Phi_SR` from 32 to 31; replacing one screened row with two counted children
+> adds one row and one potential card, producing forty-nine counted slots and
+> current `Phi_SR = 32`.
+
+> **Scope guard:** exact phase-pair identities such as `{D,E}`, `{D,O}`, or
+> `{E,O}` remain catalog authoring after the topology and support choices.
+> Requiring every possible pair, a named pair family, or an exact percentage
+> would need its own player-contract reason under the closure-index admission
+> test; mere incidence or stronger proof does not mint another owner card.
+
+> **Agent correction:** the eighth-amendment register named per-position phase
+> multiplicity but its one row classified only singleton versus plural
+> membership. The X2/X3 countermodel holds minimum attribution, irreducible
+> coupling, and catalog support fixed while changing the number of independent
+> timing routes at `p`. The missing tri-phase boundary is restored before the
+> plural-prevalence choice is presented.
+
+### RCS-03C3B1A1B1 — singleton-versus-plural independent phase topology — active owner choice
+
+A1A-A makes each phase-isolation set nonempty. For every `p` in `T_H`, define
+
+`L^{phase}_v(p)={F in {D,E,O} | I^H_F(p)}`.
+
+`L^{phase}_v(p)` records independently isolatable semantic phases, not fields,
+records, cuts, trigger counts, atoms, receipts, or jointly required packages.
+Each member needs its own C3c.33-valid isolation pair, although the witnesses
+may use different legal baselines and result directions. Several varying
+coordinates inside one phase still contribute one member. A transition that is
+an outcome for one candidate source role and an activation for another does not
+create two members for either role or multiply independent source identity.
+
+Let
+
+`M^{plural}_v={p in T_H | |L^{phase}_v(p)| >= 2}`.
+
+A position outside `M^{plural}_v` is **phase-singular**: A1A-A supplies one
+positive phase witness and complete reachable-domain analysis proves the other
+two phase isolations absent. A position inside it is **phase-plural**: at least
+two distinct phases each have a positive isolation witness. Failure to find a
+second witness in incomplete analysis is unresolved, not proof of singularity.
+
+| Choice | Independent phase-route topology | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — every history position is phase-singular** | `M^{plural}_v` is empty. Every history position independently isolates exactly one of `D`, `E`, or `O`; later catalog support decides which phase types exist across distinct positions. Other phases may still participate in a separately admitted irreducible package under B1A2. | A gives every position one decisive temporal face and the clearest denial window, tooltip, and replay sentence. The witnessed phase and predicate participate **directly**; continuity with the larger source operation is **partial**; excluding alternate singleton routes is **neutral/protective**; and universal singularity is **aggregate**. It avoids earliest-or-cheapest-route dominance, but sacrifices positions that truthfully recognize more than one distinct phase of the same operation. | Hold accepted `Guard` commitment and performance fixed; a successful-block outcome toggles `p_O`. Complete analysis proves no declaration-only or execution-only isolation for `p_O`. A distinct position may instead be declaration- or execution-singular. |
+| **B — every history position is phase-plural** | `M^{plural}_v=T_H`. Every history position independently isolates at least two phases through distinct valid witnesses. A position may isolate exactly two or all three; conditional B1A1B2 decides the required prevalence of those local forms. | Each qualifying phase and the predicate participate **directly**, while one position's continuity across distinct witness histories is **partial**, not same-cut unity; universal plurality is **aggregate**. B maximizes timing flexibility and “one source, several faces,” but taxes every position with multiple explanation and counterplay windows. An early or cheap arm can make later phases ornamental, and no-separate-commitment source roles cannot realize a tri-phase position. | Over reachable one-hot phase valuations, `p=D OR O` has one declaration-only witness and one outcome-only witness. Every other history position has an analogous two- or three-phase set, not necessarily `{D,O}`. This creates one position, not two atoms, receipts, or evaluations. |
+| **C — phase-singular and phase-plural positions coexist** | `M^{plural}_v` is a nonempty proper subset of `T_H`. At least one history position is proved exactly-one and at least one distinct position has at least two independent phase routes. This entails at least two history positions. | **Recommended.** Singular positions teach precise timing and preserve clean counters; selected plural positions become signature two-faced or whole-act Relic expressions. Each local position inherits A or B's fit, while coexistence is **aggregate**, not a stronger direct realization of the ideal. C offers the best gameplay range and expressive ceiling, but creates a visible complexity taxonomy and a clarity/power premium that later balance and UI must control. | Ashen's `p_O` qualifies only through a successful-block outcome. Over Dreamglass's reachable one-hot phase valuations, illustrative `p_{D,O}=D OR O` has valid `000↔100` and `000↔001` isolation pairs, so either an accepted Guard commitment or a successful-block disposition can qualify it independently. Names and operators are illustrative. |
+
+**Recommendation: C, phase-singular and phase-plural positions coexist.** One
+causal face is the best teaching and diagnostic form; selected multi-face
+positions can then carry the distinctive Souls and Simulacra fantasy without
+making every remembered source listen to multiple stages of an act. Multiplicity
+alone earns only a **partial** Achintya Bheda Abheda fit because its witnesses
+may lie on different histories. Real same-boundary cross-phase unity remains
+the separate B1A2 question.
+
+A/B/C are mutually exclusive and exhaustive because `M^{plural}_v` is empty,
+all of nonempty `T_H`, or a nonempty proper subset. A singular position needs
+one positive witness plus complete invariance proofs for the other two phases;
+a plural position needs two positive witnesses; C needs both on distinct
+positions. Raw labels, shared engine cuts, or several claims in one record
+prove none of those cases.
+
+This card does not choose exact phase identities, whether a plural position has
+exactly two or all three independent routes, phase-pair prevalence, catalog
+phase support, additional irreducibly multi-phase paths, predicate operators,
+facts, roots, atoms, fan-out, claims/consumption, reuse, payoff, UI,
+persistence, release, or implementation. Under A, conditional
+`RCS-03C3B1A1B2` is pruned and `RCS-03C3B1A2` becomes next. Under B or C,
+B1A1B2 becomes next; B1A2 follows it. `RCS-03C3B1B` recomputes feasible
+catalog support after those topology choices. The authoritative decision
 record remains unchanged.
 
 ## Session protocol and evidence

@@ -488,8 +488,9 @@ Its current-state and admissible occurrence-history inputs come from one
 coherent authoritative pre-adjudication revision, and every materially
 H-reading position has a finite disclosed semantic freshness horizon. Fully
 inseparable H+S paths and all residual material use of a position's opposite
-temporal form are excluded. Minimum occurrence-history phase attribution is the
-active product choice. Every exact C3c.1–C3c.170 constraint remains
+temporal form are excluded. Every history position now has at least one
+independently meaningful occurrence phase; singleton-versus-plural independent
+phase topology is the active product choice. Every exact C3c.1–C3c.170 constraint remains
 a traceable worksheet input even when this card describes their shared player
 meaning; none is promoted into the authoritative record merely by appearing
 here.
@@ -1351,7 +1352,7 @@ worksheet history. They primarily populate `SR-01` through `SR-05` and parts of
 | `SR-01` | Fantasy, purpose, and topology | One vocabulary/relationship map distinguishes Soul, simulacrum/combatant, Bound Soul, Relic root, input/payoff Charms, sources, and results; each has a unique job and no slot duplicates another system's theme or UI role. | `PARTIAL`: standalone root/customizer and cross-source-weaver directions exist; normative map/replay remains. |
 | `SR-02` | Access, ownership, slots, custody, and loss | A state machine covers disabled/eligible/enabled states, one-root/two-Charm occupancy, personal ownership, duplicates, transfer, destruction/loss, retirement, and every illegal transition for Relics and Charms separately. | `PARTIAL`: personal Relic/Charm access, one root, two Charms, and permanent nontransferable Relics are selected; Charm custody/loss remains open. |
 | `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions exist; total authored examples and exclusions do not. |
-| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, and temporal projection-purity are selected; coherent same-cut evidence acquisition is derived, while phase/root/atom identity, claims/reuse, cause, agency, precedence, and lineage ownership remain open. |
+| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, and universal minimum phase attribution are selected; coherent same-cut evidence acquisition is derived, while phase-route multiplicity, root/atom identity, claims/reuse, cause, agency, precedence, and lineage ownership remain open. |
 | `SR-05` | Relational archetypes and Achintya boundary | Every required archetype maps to an operative player choice or state transition where continuity and distinction are mechanically legible; no mandatory class exists only to satisfy a graph, coverage, or symmetry token. | `PARTIAL`: structural/archetype directions through C170 exist; concrete player-visible proof does not. |
 | `SR-06` | Representative and release catalog | A finite versioned release catalog (or explicit launch minimum plus deferred catalog boundary) supplies source/relationship/payoff definitions, counterexamples, and at least one viable build purpose for every required family. | `OPEN` |
 | `SR-07` | Configuration and evolution horizons | Equip, Charm socketing, reconfiguration, rebinding, learning/evolution, encounter/Circuit locks, preview, and rollback rules name every clean boundary and cannot be shopped through reload or route information. | `OPEN` |
@@ -1587,7 +1588,7 @@ its row with `RCS-03C3B1A1A` (minimum phase attribution) and conditional
 `RCS-03C3B1A2` follows the applicable child, and `RCS-03C3B1B` recomputes phase
 support afterward. Replacing one screened row with two adds one counted slot
 and one potential card, so the register grows from forty-seven to forty-eight
-rows and current `Phi_SR` returns from the post-A0 value 31 to 32.
+rows and the then-current `Phi_SR` returns from the post-A0 value 31 to 32.
 
 **Agent correction.** The prior seven-amendment route silently assumed that
 minimum attribution plus coupled-supplement admission plus catalog union
@@ -1595,9 +1596,48 @@ exhausted within-H phase topology. The `U`/`M` countermodel disproves that
 assumption. The missing local multiplicity row is restored before phase
 attribution is presented.
 
+**Post-answer screen, 2026-09-24.** The owner selected
+`RCS-03C3B1A1A-A`, so every `p` in nonempty `T_H` has at least one
+C3c.33-valid isolation confined to `D`, `E`, or `O`. Thus the phase-isolation
+set of every history position is nonempty. Selecting A1A reduces `Phi_SR` from
+32 to 31 without choosing whether any position independently isolates more
+than one phase.
+
+**Ninth prerequisite correction, 2026-09-24.** Singleton-versus-plural
+position prevalence does not determine whether a plural position has exactly
+two independent phase routes or all three. On reachable `(D,E,O)` valuations
+`{000,100,010,001}`, worlds `X2: p=D OR E, q=E OR O` and
+`X3: p=D OR E OR O, q=E OR O` agree that every position is plural, have no
+irreducibly multi-phase package, and support catalog phases `{D,E,O}`, while
+only X3 gives `p` a third independently manipulable timing route. Immediate
+automatic evaluation makes that difference material to readiness timing,
+interruption/cancellation counterplay, explanation burden, and cheapest-route
+dominance rather than only proof strength.
+
+The register therefore makes `RCS-03C3B1A1B` a non-counting parent and replaces
+its row with `RCS-03C3B1A1B1` (singleton-versus-plural prevalence) and
+conditional `RCS-03C3B1A1B2` (exactly-two-versus-all-three prevalence among
+plural positions). `RCS-03C3B1A2` follows the applicable child, and
+`RCS-03C3B1B` recomputes phase support afterward. Replacing one screened row
+with two adds one counted slot and one potential card, so the register grows
+from forty-eight to forty-nine rows and current `Phi_SR` returns from the
+post-A1A value 31 to 32.
+
+**Scope guard.** Exact `{D,E}`, `{D,O}`, and `{E,O}` pair identities remain
+catalog authoring after topology and support are selected. Pair-incidence
+quotas or exact percentages do not pass the admission test without a separate
+player-contract consequence; new evidence may still satisfy the reopening
+test later.
+
+**Agent correction.** The eighth-amendment route used one row for all local
+phase multiplicity while only its singleton/plural boundary was explicit. The
+X2/X3 countermodel holds minimum attribution, irreducible coupling, and
+catalog support fixed while changing `p`'s legal timing and counterplay. The
+missing tri-phase boundary is restored before plural prevalence is presented.
+
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has forty-eight
+To make that route genuinely finite, the remaining C3c pass has forty-nine
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -1626,10 +1666,11 @@ overcompression.
 | `RCS-03C3A` | Coherent contingent-evidence acquisition and occurrence-history semantic freshness at each actual invocation cut | `DIR-SELECTED`; A gives every materially H-reading path a disclosed finite nonterminal semantic-age horizon under `SR-03`/`SR-04`; exact units and values remain AUTHOR/SPEC/TUNE |
 | `RCS-03C3B0` | Admission of additional fully inseparable H+S material paths inside positions already required to have one independently attributable single-form path | `DIR-SELECTED`; A excludes every additional path with zero H/S projection-isolation witnesses under `SR-03` while leaving other opposite-form material participation separate |
 | `RCS-03C3B1A0` | Admission of residual material paths containing a position's opposite temporal form, whether coupled to its selected form or another legal input | `DIR-SELECTED`; A excludes every opposite-form material path under `SR-03`, making `P^{H-read}_v=T_H` and every position temporally projection-pure |
-| `RCS-03C3B1A1A` | Minimum phase-attribution topology for materially H-reading positions: whether each has a declaration-, execution/performance-, or outcome/disposition-isolatable path or may be phase-coupled-only | `OWNER-OPEN`; follows `RCS-03C3B1A0-A` under `SR-03`; universal attribution, universal coupled-only identity, or coexistence decide whether every history position has a truthful single-phase anchor |
-| `RCS-03C3B1A1B` | Per-position independently isolatable phase multiplicity among phase-attributable history positions | `SCREEN`; follows `RCS-03C3B1A1A` under `SR-03`; conditional on a nonempty phase-attributable domain, otherwise `PRUNED`; zero, universal, or mixed multi-phase-position membership remains distinct from irreducible phase coupling |
-| `RCS-03C3B1A2` | Admission of additional irreducibly multi-phase H paths among positions already possessing a phase-isolatable H path | `SCREEN`; follows `RCS-03C3B1A1A` and applicable `RCS-03C3B1A1B` under `SR-03`; conditional on at least one phase-attributable position, otherwise `PRUNED` |
-| `RCS-03C3B1B` | Material occurrence-history phase support across accepted declaration/commitment, execution/performance, and authoritative outcome/disposition | `SCREEN`; follows `RCS-03C3B1A1A` and applicable `RCS-03C3B1A1B`/`RCS-03C3B1A2` under `SR-03`; feasible support subsets are recomputed rather than assumed |
+| `RCS-03C3B1A1A` | Minimum phase-attribution topology for materially H-reading positions: whether each has a declaration-, execution/performance-, or outcome/disposition-isolatable path or may be phase-coupled-only | `DIR-SELECTED`; A gives every history position at least one truthful single-phase anchor under `SR-03` |
+| `RCS-03C3B1A1B1` | Prevalence of positions with multiple independently isolatable phases: none, every history position, or coexistence with phase-singular positions | `OWNER-OPEN`; follows `RCS-03C3B1A1A-A` under `SR-03`; exact-one, at-least-two, and mixed position topology remains distinct from irreducible phase coupling |
+| `RCS-03C3B1A1B2` | Tri-phase prevalence among positions already possessing at least two independently isolatable phases | `SCREEN`; follows `RCS-03C3B1A1B1` under `SR-03`; conditional on a nonempty plural-position domain, otherwise `PRUNED`; no tri-phase positions, universal tri-phase membership within that domain, or coexistence with exact-two positions |
+| `RCS-03C3B1A2` | Admission of additional irreducibly multi-phase H paths among positions already possessing a phase-isolatable H path | `SCREEN`; follows `RCS-03C3B1A1A` and applicable `RCS-03C3B1A1B1`/`RCS-03C3B1A1B2` under `SR-03`; conditional on at least one phase-attributable position, otherwise `PRUNED` |
+| `RCS-03C3B1B` | Material occurrence-history phase support across accepted declaration/commitment, execution/performance, and authoritative outcome/disposition | `SCREEN`; follows `RCS-03C3B1A1A`, applicable `RCS-03C3B1A1B1`/`RCS-03C3B1A1B2`, and `RCS-03C3B1A2` under `SR-03`; feasible support subsets are recomputed rather than assumed |
 | `RCS-03C3B2A` | Canonical action/transition source-root identity and equivalence across occurrence, order, trajectory, and current-state attribution | `SCREEN`; follows `RCS-03C3B1B` under `SR-03`; multiple action/build views or aliases of one occurrence cannot by themselves multiply roots |
 | `RCS-03C3B2B` | Canonical build-provenance source-root identity and equivalence for pure-build entries | `SCREEN`; follows `RCS-03C3B2A` under `SR-03`; exact family records follow the selected semantic boundary |
 | `RCS-03C3B3` | Root-occurrence versus semantic-child-application atom addressability topology | `SCREEN`; follows `RCS-03C3B2A`/`RCS-03C3B2B` under `SR-03`; every child retains its root and same-root siblings never become independent sources for one result |
@@ -1681,17 +1722,20 @@ still-bundled `RCS-03C3B1A` with three counted children adds two `SCREEN` rows
 while preserving one `OWNER-OPEN` row, so the seventh-amendment register had
 **forty-seven slots** and `Phi_SR = 32`. `RCS-03C3B1A0-A` then selects one row,
 reducing that potential to 31. Replacing still-bundled `RCS-03C3B1A1` with two
-counted children adds one potential row, so the current eighth-amendment
-register has **forty-eight slots** and `Phi_SR = 32`.
+counted children adds one potential row, so the eighth-amendment register had
+**forty-eight slots** and `Phi_SR = 32`. `RCS-03C3B1A1A-A` then selects one
+row, reducing that potential to 31. Replacing still-bundled
+`RCS-03C3B1A1B` with two counted children adds one potential row, so the
+current ninth-amendment register has **forty-nine slots** and `Phi_SR = 32`.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most thirty-two
-owner cards under this eight-times-amended charter and will usually have
+owner cards under this nine-times-amended charter and will usually have
 fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
-`RCS-03C3B1A`, `RCS-03C3B1A1`, and `RCS-04` remain readable parent aliases
-only; they are not additional counted slots.
+`RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, and `RCS-04` remain readable
+parent aliases only; they are not additional counted slots.
 
 `Phi_SR = 0` is necessary but not sufficient for Relic closure: the twelve
 `SR-*` exit tests, proof packet, coherent normative replay, and explicit
@@ -1705,7 +1749,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 48 frozen candidate slots; current `Phi_SR = 32` after `RCS-03C3B1A0-A` and the explicit `RCS-03C3B1A1A`/`RCS-03C3B1A1B` split | At most 32 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 49 frozen candidate slots; current `Phi_SR = 32` after `RCS-03C3B1A1A-A` and the explicit `RCS-03C3B1A1B1`/`RCS-03C3B1A1B2` split | At most 32 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

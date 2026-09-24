@@ -1,5 +1,65 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-24 universal Relic phase attribution — RCS-03C3B1A1A-A selected
+
+The owner selected `RCS-03C3B1A1A-A`: every temporally H-pure history position
+must have at least one C3c.33-valid isolation confined to accepted
+declaration/commitment (`D`), execution/performance (`E`), or authoritative
+outcome/disposition (`O`) claims. No history position may be phase-coupled-only.
+Which phase supplies the anchor, whether another phase is also independently
+isolatable, and whether a separate irreducibly multi-phase path exists remain
+open.
+
+At every history position, one phase claim and the predicate participate
+**directly**; the witnessed phase remains mechanically distinct; continuity
+with the larger source operation is **partial**; excluding coupled-only local
+identity is **neutral/protective**; and universal attribution is **aggregate**.
+The authoritative decision record remains unchanged and implementation remains
+blocked.
+
+A ninth prerequisite audit proved that old `RCS-03C3B1A1B` compressed
+singleton-versus-plural position prevalence with exactly-two-versus-all-three
+prevalence among plural positions. On reachable `(D,E,O)` valuations
+`{000,100,010,001}`, worlds `X2: p=D OR E, q=E OR O` and
+`X3: p=D OR E OR O, q=E OR O` can agree that every position is plural, have no
+irreducibly multi-phase package, and support catalog phases `{D,E,O}`, while
+only X3 lets `p` qualify independently through all three phases. The third
+route changes readiness timing, counterplay, disclosure, and cheapest-route
+dominance.
+
+`RCS-03C3B1A1B` is therefore a non-counting parent for
+`RCS-03C3B1A1B1` and conditional `RCS-03C3B1A1B2`. Exact phase-pair identities
+remain catalog authoring after topology and support are selected; no pair quota
+or incidence question becomes another owner card without a distinct global
+player-contract consequence.
+
+**Agent correction:** the eighth-amendment route named local multiplicity but
+made only its singleton/plural boundary explicit. The X2/X3 countermodel holds
+minimum attribution, irreducible coupling, and catalog support fixed while
+changing one position's legal timing surface. The missing tri-phase boundary
+was restored before presenting the next choice.
+
+The register now has forty-nine slots: 31 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 8 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`, so `Phi_SR = 32`.
+The sole active card is `RCS-03C3B1A1B1`, singleton-versus-plural independent
+phase topology. For each history position, let `L(p)` contain the phases with a
+valid independent isolation witness and let `M` contain positions with
+`|L(p)| >= 2`. A1A-A makes every `L(p)` nonempty.
+
+Present only:
+
+- A: `M` is empty; every history position is phase-singular;
+- B: `M=T_H`; every history position is phase-plural; or
+- C: phase-singular and phase-plural positions coexist.
+
+Recommend C. Singular positions teach precise timing and clean counters;
+selected plural positions provide signature multi-face Relic play without
+making every source listen to multiple stages of an act. Multiplicity alone is
+only a partial Achintya Bheda Abheda realization because its witnesses may lie
+on different histories. Under A, conditional B1A1B2 is pruned; under B or C,
+it next decides exact-two-versus-all-three prevalence. B1A2 remains the later
+same-boundary irreducible multi-phase question.
+
 ## 2026-09-24 temporally pure Relic positions — RCS-03C3B1A0-A selected
 
 The owner selected `RCS-03C3B1A0-A`: no source position may materially use its
@@ -30,9 +90,9 @@ supplemental irreducible coupling, and catalog phase union as exhaustive. The
 countermodel varies local phase multiplicity while preserving all three. The
 missing boundary was restored before presenting the next choice.
 
-The register now has forty-eight slots: 31 `SCREEN`, 1 `OWNER-OPEN`, 7
+At that eighth-amendment stage, the register had forty-eight slots: 31 `SCREEN`, 1 `OWNER-OPEN`, 7
 `PRUNED`, 7 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`, so `Phi_SR = 32`.
-The sole active card is `RCS-03C3B1A1A`, minimum occurrence-history phase
+The sole active card was `RCS-03C3B1A1A`, minimum occurrence-history phase
 attribution. Its semantic phase universe is:
 
 - `D`: accepted declaration or commitment before performance;
@@ -48,6 +108,11 @@ identity. Present only A (every history position has at least one single-phase
 isolation witness), B (all are phase-coupled-only), or C (the classes coexist).
 Recommend A for one truthful causal phase anchor per history position while
 leaving multi-phase unity to later registered choices.
+
+**Corrected continuation:** the owner selected A1A-A. A ninth audit split the
+remaining multiplicity row into plural-position prevalence and conditional
+tri-phase prevalence. The current forty-nine-slot register has
+`Phi_SR = 32`; present only `RCS-03C3B1A1B1`.
 
 ## 2026-09-24 fully coupled H+S evidence excluded — RCS-03C3B0-A selected
 
@@ -90,8 +155,11 @@ At that seventh-amendment stage the register had forty-seven slots: 31
 `EVALUATE`, so `Phi_SR = 32`; `RCS-03C3B1A0` was the sole active card.
 **Corrected continuation:** the owner selected A0-A, and an eighth audit split
 old B1A1 into minimum attribution and per-position independent phase
-multiplicity. The current forty-eight-slot register still has `Phi_SR = 32`;
-present only `RCS-03C3B1A1A`'s minimum phase-attribution choice.
+multiplicity. At that point the forty-eight-slot register still had
+`Phi_SR = 32`;
+the owner then selected A1A-A. A ninth amendment produces the current
+forty-nine-slot register with `Phi_SR = 32`; present only
+`RCS-03C3B1A1B1`.
 
 ## 2026-09-24 Relic history freshness — RCS-03C3A-A selected
 
@@ -132,9 +200,9 @@ At that sixth-amendment stage the register had forty-five slots: 30 `SCREEN`, 1
 `Phi_SR = 31`; `RCS-03C3B0` was the sole active card. **Corrected
 continuation:** the owner selected B0-A, and a seventh audit split old B1A into
 three prerequisite-ordered children. That register had forty-seven slots and
-`Phi_SR = 32`; the owner then selected A0-A. After the eighth amendment, the
-current forty-eight-slot register has `Phi_SR = 32`; present only
-`RCS-03C3B1A1A`'s minimum phase-attribution choice.
+`Phi_SR = 32`; the owner then selected A0-A and A1A-A. After the ninth
+amendment, the current forty-nine-slot register has `Phi_SR = 32`; present only
+`RCS-03C3B1A1B1`'s singleton-versus-plural choice.
 
 ## 2026-09-24 Relic invocation control — RCS-03C2A-A selected
 
@@ -216,8 +284,9 @@ C2 row with two produced interim `Phi_SR = 23`.
 automatic invocation, pruned `RCS-03C2B`, selected `RCS-03C3A-A`, universal
 finite history freshness, and selected `RCS-03C3B0-A`, excluding fully
 inseparable H+S additions, and selected `RCS-03C3B1A0-A`, temporal projection-
-purity. After the eighth register amendment the sole active card is
-`RCS-03C3B1A1A`, and current `Phi_SR = 32` across forty-eight slots.
+purity. The owner then selected A1A-A; after the ninth register amendment the
+sole active card is `RCS-03C3B1A1B1`, and current `Phi_SR = 32` across
+forty-nine slots.
 
 ## 2026-09-24 Relic evaluation lifetime — RCS-03B1-A selected
 
@@ -250,9 +319,10 @@ owner then selected `RCS-03C2A-A`, pruned `RCS-03C2B`, and selected
 evidence-use boundaries; the sixth split the still-bundled atom row, and the
 seventh split its still-bundled phase prerequisite into three children. The
 owner selected A0-A, and an eighth amendment split minimum phase attribution
-from per-position independent phase multiplicity. The current forty-eight-slot
-register has `Phi_SR = 32`; present only `RCS-03C3B1A1A`'s A/B/C minimum
-phase-attribution choice.
+from per-position independent phase multiplicity. The owner selected A1A-A,
+and a ninth amendment split plural prevalence from tri-phase prevalence. The
+current forty-nine-slot register has `Phi_SR = 32`; present only
+`RCS-03C3B1A1B1`.
 
 ## 2026-09-24 design-first correction — the master index must not flatten the game
 
@@ -327,9 +397,12 @@ fully inseparable H+S supplements. **Seventh prerequisite correction:** old
 participation, minimum phase attribution, and conditional supplemental multi-
 phase admission. The owner selected `RCS-03C3B1A0-A`. **Eighth prerequisite
 correction:** old `RCS-03C3B1A1` becomes a non-counting parent for minimum phase
-attribution and per-position independent phase multiplicity. The sole active
-card is now `RCS-03C3B1A1A`. Do not revive C171 as an owner question. Exact
-Relic tuple and evidence-projection atomicity are derived, not choices.
+attribution and per-position independent phase multiplicity. The owner selected
+`RCS-03C3B1A1A-A`. **Ninth prerequisite correction:** old
+`RCS-03C3B1A1B` becomes a non-counting parent for plural-position prevalence
+and conditional tri-phase prevalence. The sole active card is now
+`RCS-03C3B1A1B1`. Do not revive C171 as an owner question. Exact Relic tuple
+and evidence-projection atomicity are derived, not choices.
 
 **Agent correction:** the first internal sixth-amendment draft omitted coupled
 H+S admission and phase attribution while relying on both. Adversarial review
@@ -371,13 +444,14 @@ direct Codex progression method lives in `$ss2-progression-design`.
 The active finite scope controller is
 `docs/design/endless-progression-master-closure-index.md`. It fixes twenty
 whole-system closure gates, twelve Soul Relic/Charm exit gates, an explicit
-card-admission/reopening rule, and an eight-times-amended frozen forty-eight-slot
+card-admission/reopening rule, and a nine-times-amended frozen forty-nine-slot
 remaining Relic register. Two Relic slots are already routed to specification/
 evaluation; `RCS-03A-C`, `RCS-03B1-A`, and `RCS-03C1-A` are direction-selected;
 `RCS-03C2A-A` selects automatic invocation and `RCS-03C3A-A` selects finite
 history freshness; `RCS-03C3B0-A` excludes fully inseparable H+S paths and
-`RCS-03C3B1A0-A` selects temporal projection-purity, while six pending-only
-descendants and conditional `RCS-03C2B` are pruned. Current `Phi_SR = 32`. Each
+`RCS-03C3B1A0-A` selects temporal projection-purity; `RCS-03C3B1A1A-A`
+selects universal minimum phase attribution, while six pending-only descendants
+and conditional `RCS-03C2B` are pruned. Current `Phi_SR = 32`. Each
 ordinary future
 Relic round must reduce it and may not mint an automatic descendant. The
 original twenty-slot/`Phi_SR = 18` count first became twenty-five/23 when the
@@ -394,7 +468,9 @@ still-bundled atom row with seven children adds six, producing forty-five
 slots and `Phi_SR = 31`; B0-A reduced that to 30. Replacing still-bundled B1A
 with three children adds two, producing forty-seven slots and `Phi_SR = 32`.
 Selecting A0-A reduced that to 31; replacing still-bundled B1A1 with two
-children adds one, producing forty-eight slots and `Phi_SR = 32`. Adding another genuinely
+children adds one, producing forty-eight slots and `Phi_SR = 32`. Selecting
+A1A-A reduced that to 31; replacing still-bundled B1A1B with two children adds
+one, producing forty-nine slots and `Phi_SR = 32`. Adding another genuinely
 missed product slot requires an owner-visible charter amendment with the new
 bound.
 
@@ -406,18 +482,17 @@ authoring/evaluation possibilities; C170-A is sufficient for the framework's
 existential continuity promise. Its graph descendants are pruned unless later
 evidence passes the index's reopening test.
 
-The sole active Relic boundary is `RCS-03C3B1A1A` under `SR-03`: whether every
-temporally H-pure history position has at least one independently isolatable
-declaration/commitment, execution/performance, or outcome/disposition path;
-whether none do; or whether attributable and coupled-only positions coexist.
-These mutually exclusive semantic phases are classified relative to one
-candidate source role, and different phase views of one transition across
-roles do not multiply independent source identity.
-Present only A/B/C in that order and recommend A for one truthful causal phase
-anchor per position. Per-position independent phase multiplicity, supplemental
-multi-phase paths, catalog phase support, root identity, child partitioning,
-fan-out, claims/reuse, exact horizons, actor information, and configuration
-locks remain separate.
+The sole active Relic boundary is `RCS-03C3B1A1B1` under `SR-03`: whether every
+temporally H-pure history position is phase-singular, every position has at
+least two independently isolatable phases, or singular and plural positions
+coexist. These phases are classified relative to one candidate source role;
+different phase views of one transition across roles do not multiply
+independent source identity. Present only A/B/C in that order and recommend C
+for clear teaching anchors plus selected signature multi-face positions.
+Conditional exact-two-versus-all-three prevalence, supplemental irreducible
+multi-phase paths, catalog support, root identity, child partitioning, fan-out,
+claims/reuse, exact horizons, actor information, and configuration locks remain
+separate.
 The authoritative decision record is unchanged; implementation remains blocked.
 
 ## 2026-09-15 standalone-game north star — Souls and Simulacra
@@ -7730,9 +7805,11 @@ The owner then selected `RCS-03C3A-A`, finite semantic freshness, and
 `RCS-03C3B1A0-A`, temporal projection-purity. A fifth amendment routed atom/
 fan-out/reuse boundaries; a sixth split the still-bundled atom row; a seventh
 split its phase prerequisite; and an eighth split minimum phase attribution
-from local independent phase multiplicity. Continue at registered Relic slot
-`RCS-03C3B1A1A` under `SR-03`. `RCS-03C3B1A1B`–`RCS-03C3F`, expanded
-`RCS-08`, cause, and agency follow separately.
+from local independent phase multiplicity. The owner selected A1A-A, and a
+ninth split plural-position prevalence from conditional tri-phase prevalence.
+Continue at registered Relic slot `RCS-03C3B1A1B1` under `SR-03`.
+`RCS-03C3B1A1B2`–`RCS-03C3F`, expanded `RCS-08`, cause, and agency follow
+separately.
 
 R11 begins only
 after R10 completes and first chooses package proximity for R10.7's selected
