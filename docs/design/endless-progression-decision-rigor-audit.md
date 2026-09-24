@@ -2758,10 +2758,10 @@ The register therefore makes `RCS-03C3B1A1B` a non-counting parent for
 catalog authoring rather than another owner card absent a new global
 player-contract requirement.
 
-Replacing one screened row with two adds one slot and one potential card. The
-current forty-nine-slot register contains 31 `SCREEN`, 1 `OWNER-OPEN`, 7
-`PRUNED`, 8 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so current
-`Phi_SR = 32`. `RCS-03C3B1A1B1` is the sole active card.
+Replacing one screened row with two adds one slot and one potential card. At
+that pre-answer point the forty-nine-slot register contained 31 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 8 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row,
+so the then-current `Phi_SR = 32`. `RCS-03C3B1A1B1` was the sole active card.
 
 **Agent correction:** the eighth-amendment row was named for local phase
 multiplicity but made only its singleton/plural boundary explicit. The X2/X3
@@ -2769,6 +2769,20 @@ pair holds minimum attribution, irreducible coupling, and catalog phase support
 fixed while changing `p`'s legal timing surface. The missing tri-phase boundary
 is restored before plural prevalence is presented; exact phase-pair incidence
 is expressly routed to later authoring rather than silently treated as fixed.
+
+The owner then selected `RCS-03C3B1A1B1-C`. Phase-singular and phase-plural
+history positions must coexist: `M^{plural}_v` is a nonempty proper subset of
+`T_H`. At least one position therefore has exactly one independently
+isolatable phase and at least one distinct position has two or three. This
+selects only aggregate prevalence; exact phase pairs, tri-phase prevalence,
+and irreducibly multi-phase effective paths remain separate.
+
+The existing conditional `RCS-03C3B1A1B2` row is now the sole active card. It
+partitions the nonempty plural domain into three exhaustive cases: every
+plural position is exact-two, every plural position is tri-phase, or the two
+forms coexist. No tenth amendment is needed. The current forty-nine-slot
+register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 9 `DIR-SELECTED`,
+1 `SPEC`, and 1 `EVALUATE` row, so `Phi_SR = 31`.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

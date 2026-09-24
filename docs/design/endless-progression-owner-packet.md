@@ -204,7 +204,8 @@ per-position independent phase multiplicity. The owner selected
 RCS-03C3B1A1A-A, requiring one independently meaningful phase anchor at every
 history position. A ninth audit then split the remaining multiplicity row into
 plural-position prevalence and conditional tri-phase prevalence.
-RCS-03C3B1A1B1 is the active owner choice under SR-03.
+The owner selected RCS-03C3B1A1B1-C: phase-singular and phase-plural history
+positions coexist. RCS-03C3B1A1B2 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19102,7 +19103,7 @@ authorizes no implementation.
 > `RCS-03C3B1B` recomputes catalog phase support afterward. A1A-A first reduces
 > `Phi_SR` from 32 to 31; replacing one screened row with two counted children
 > adds one row and one potential card, producing forty-nine counted slots and
-> current `Phi_SR = 32`.
+> the then-current `Phi_SR = 32`.
 
 > **Scope guard:** exact phase-pair identities such as `{D,E}`, `{D,O}`, or
 > `{E,O}` remain catalog authoring after the topology and support choices.
@@ -19117,7 +19118,7 @@ authorizes no implementation.
 > timing routes at `p`. The missing tri-phase boundary is restored before the
 > plural-prevalence choice is presented.
 
-### RCS-03C3B1A1B1 — singleton-versus-plural independent phase topology — active owner choice
+### RCS-03C3B1A1B1 — singleton-versus-plural independent phase topology — C selected
 
 A1A-A makes each phase-isolation set nonempty. For every `p` in `T_H`, define
 
@@ -19171,6 +19172,75 @@ persistence, release, or implementation. Under A, conditional
 B1A1B2 becomes next; B1A2 follows it. `RCS-03C3B1B` recomputes feasible
 catalog support after those topology choices. The authoritative decision
 record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **C,
+phase-singular and phase-plural history positions coexist.**
+`M^{plural}_v` is a nonempty proper subset of `T_H`. At least one history
+position has exactly one independently isolatable phase, while at least one
+distinct history position has two or three. This is an aggregate catalog
+topology: it does not require one Relic definition, entry, or result to contain
+both kinds of position.
+
+At a singular position one phase claim and the predicate participate
+**directly**, while a plural position has distinct direct witnesses for each
+of at least two phases. The larger operation supplies **partial** continuity,
+the phase distinctions remain mechanically real, and coexistence across
+positions is **aggregate**. This is a direction selection. It changes no
+authoritative decision wording and authorizes no implementation.
+
+### RCS-03C3B1A1B2 — tri-phase prevalence among phase-plural positions — active owner choice
+
+Inherited B1-C guarantees a nonempty phase-plural domain as well as at least
+one distinct phase-singular position. For each `p` in `M^{plural}_v`, retain
+
+`L^{phase}_v(p)={F in {D,E,O} | I^H_F(p)}`
+
+and define
+
+`T^{tri}_v={p in M^{plural}_v | |L^{phase}_v(p)|=3}`.
+
+Because the phase universe is exactly `{D,E,O}`, every plural position is
+either **exact-two**, with two independently isolatable phases, or
+**tri-phase**, with all three. These are independent alternative routes:
+each counted phase needs its own C3c.33-valid isolation pair. A separate path
+that requires claims from several phases together does not add a member to
+`L^{phase}_v(p)` and remains the later B1A2 question.
+
+| Choice | Topology inside the plural-position domain | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — every phase-plural position is exact-two** | `T^{tri}_v` is empty. Inherited B1-C therefore produces phase-singular positions and distinct exact-two positions, but no position has three independent phase routes. Exact pair identities remain later catalog authoring. A later-admitted coupled path may still materially use the uncounted third phase; “exact-two” constrains `L^{phase}_v(p)`, not every material read. | **Recommended.** Exact-two positions can express one source through two real temporal faces while preserving a missing independent route, a readable denial plan, and meaningful authoring differences among `{D,E}`, `{D,O}`, and `{E,O}`. The two witnesses are **direct**, continuity across their possible histories is **partial**, difference is mechanically legible, and the catalog-wide mix with singular positions is **aggregate**. A forgoes whole-act independent listeners and some resilience when one phase is unavailable. | On reachable one-hot valuations `{000,100,010,001}`, `p_{D,O}=D OR O` has valid `000↔100` and `000↔001` isolation pairs, while changing only `E` never changes `p`. A distinct `p_O` is phase-singular under inherited B1-C. |
+| **B — every phase-plural position is tri-phase** | `T^{tri}_v=M^{plural}_v`. Every plural position independently isolates `D`, `E`, and `O`; exact-two plural positions do not exist. Phase-singular positions still exist because B1-C is inherited. This necessarily supplies all-three catalog phase support. | B makes each multi-face position maximally flexible and resilient: commitment, performance, or result can independently matter. But every plural position becomes a whole-act listener, increasing explanation and counterplay load and inviting the earliest, safest, or cheapest phase to dominate the other two. Three independent witnesses remain only a **partial** ideal fit across histories; cardinality alone does not create same-boundary unity. | `p_{D,E,O}=D OR E OR O` changes under each of `000↔100`, `000↔010`, and `000↔001`. A distinct phase-singular position must still exist, but no plural position stops at two routes. |
+| **C — exact-two and tri-phase plural positions coexist** | `T^{tri}_v` is a nonempty proper subset of `M^{plural}_v`. Inherited B1-C plus this choice requires at least three distinct history positions: one singular, one exact-two, and one tri-phase. The tri-phase witness necessarily supplies all-three catalog phase support. | C offers the widest local vocabulary and highest authoring ceiling. It also creates a three-rung timing taxonomy whose strongest-routed member can overshadow exact-two positions unless payoff, rarity, UI, and counters justify the extra route. Each position inherits A or B's local fit; the three-class coexistence is **aggregate**, not a deeper realization of the ideal. | One catalog can contain singular `p_O`, exact-two `p_{D,O}=D OR O`, and tri-phase `p_{D,E,O}=D OR E OR O`. The predicates are illustrative; the required result is the three distinct route classes. |
+
+**Recommendation: A, every phase-plural position is exact-two.** Inherited
+B1-C already gives the catalog clear single-face teaching anchors and selected
+multi-face Relic positions. Stopping the latter at two makes “one source,
+distinct temporal faces” consequential without letting every multi-face
+position listen independently to the entire act. It fits Souls and
+Simulacra's continuity-with-difference ideal, but only partially: the
+independent witnesses may occur on different histories. B1A2 still owns
+whether one position may additionally express irreducible cross-phase unity on
+the same effective path.
+
+A/B/C are mutually exclusive and exhaustive because `T^{tri}_v`, as a subset
+of nonempty `M^{plural}_v`, is either empty, all of `M^{plural}_v`, or a
+nonempty proper subset. A tri-phase position needs three positive isolation
+witnesses. An exact-two position needs two positive witnesses plus complete
+reachable-domain proof that the third isolation is absent. A requires that
+absence proof for every plural position; B requires three positive witnesses
+for every plural position; C requires distinct exact-two and tri-phase
+positions. Under C, inherited B1-C separately requires a distinct singular
+position. Raw phase labels, fields, records, shared engine cuts, or multiple
+claims in one record prove none of these cases.
+
+This card does not choose exact phase-pair identities or quotas, predicate
+operators or facts, a supplemental irreducibly multi-phase path, roots, atoms,
+fan-out, claims/consumption, reuse, payoff, UI, persistence, release, or
+implementation. Under A, catalog phase support remains open; B or C derives
+all-three independent support. Under every answer, `RCS-03C3B1A2` becomes
+next, and `RCS-03C3B1B` later recomputes or records the feasible catalog phase
+support after that topology choice. The authoritative decision record remains
+unchanged.
 
 ## Session protocol and evidence
 
