@@ -96,6 +96,40 @@ engine unavailableActions() ┘                                                 
   build hides what it will not offer), the rank ↑/↓ verbs (no build art), and a round fallback button
   for a clone without a pack.
 
+## The in-battle actions: DECIDED by the owner, 2026-09-24 (a grilling round, 3 rounds, 8 questions)
+
+This supersedes the dock-first design above wherever they differ. The build's own layout was mapped
+first (ab5feb5, `src/render/action-buttons.js`).
+
+1. **The ring is the original's**, adapted for team play: its eight buttons around the acting fighter
+   with the build's slot assignments and icons per stance (close/long range × warrior/archer), the
+   build's ninth button (weapon swap) and its six-slot items row above the head for spells and potions.
+2. **WHO FIRST** (Q4): a foe is always selected (gold ring); it stays selected between turns while valid,
+   else the nearest foe in your own rank. Click another foe or Tab to switch. The ring's stance, hit
+   chances and availability follow the SELECTED foe.
+3. **Movement is spatial** (Q5): walk left/right in the original's slots on the side they move toward;
+   authored rank arrows — step back above the head, step forward below the feet.
+4. **One click acts** (Q2), as in the original; hovering shows the verb and its hit chance; an optional
+   "confirm every move" setting adds Confirm.
+5. **Unavailable buttons** (Q6): HIDDEN where the original hides them (stance, level); GREYED with a
+   hover reason where the team rules forbid them (other rank, out of reach, blocked).
+6. **No resting while a foe is in reach** (Q7), matching the original's close-range layouts — an ENGINE
+   change, measured for its AI effect in its own commit.
+7. **Jump and charge stay hidden** (Q8) and get their own design pass.
+8. **AI turns** (Q3): normal speed, a hold-to-speed-up key and "skip to my turn".
+9. **The strip under the stage** carries the same actions for the keyboard (1–8 slots, Tab targets,
+   arrows move) and screen readers, shows the selected target's odds, and hosts Confirm when that
+   setting is on.
+
+### Slices (vertical, each playable; tracked on the board)
+
+- **S1** no rest in reach (engine) · **E** `previewAction` + `unavailableActions` (engine)
+- **S2** the ring's core: the who-first selection model, eight slots per stance, one-click, Tab, the
+  keyboard strip — drawn with the authored fallback buttons (the tracer bullet)
+- **S3** the build's own button art and placement on the ring · **S4** movement (walk slots, rank arrows)
+- **S5** the items row · **S6** the weapon swap button · **S7** hover previews and the confirm setting
+- **S8** AI pacing (speed-up, skip) · **S9** greyed-button reasons (needs E)
+
 ## Delivery order
 
 1. **Seats**: choose which fighters a human plays, with the rest AI (~~e.g. `?red=human&blue=ai`~~
