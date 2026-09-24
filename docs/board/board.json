@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-23",
- "head": "62b9cdd",
+ "head": "8b83b5f",
  "lede": "Every system in the Swords & Sandals II team-arena project and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -595,8 +595,8 @@
    "order": 43,
    "title": "Damage number pop-ups",
    "summary": "Built (62b9cdd): the build's own damage number on attack-roll hits (the gross roll before armour, with its CRITICAL / GRIEVOUS splats), the spell and status numbers, potion heals as + N, and the yellow BLOCK, over every fighter at any team size, from the player's own art. Codex approved.",
-   "gaps": "An arrow's victim reacts, and shows its number, when the arrow is loosed instead of when it lands (being fixed now). The spell-name banner waits for the HUD. Not yet watched in a browser.",
-   "next": "Land the arrow-impact timing; watch a bout.",
+   "gaps": "The spell-name banner waits for the HUD. Not yet watched in a browser.",
+   "next": "Watch a bout; build the spell-name banner with the HUD.",
    "evidence": "Wave wf_e90ae76e-4af (5 questions + entry point; 6 verifiers: 2 hold, 4 partly broken, folded in). damage_icon: overlay 862 f52 DoAction body 0x240c85 +0x15ea; bonus_icon: magic_damage_character +0x129c/+0x1313; defend_icon: defender_blocked +0x21ce; cast_spell_image: +0x2251.",
    "ownerDecision": "Reproduce the build's splat exactly, or restyle it.",
    "updated": "2026-09-23"
@@ -643,12 +643,12 @@
   {
    "id": "sound-effects",
    "lane": "presentation",
-   "column": "done",
+   "column": "in-progress",
    "order": 47,
    "title": "Sound effects",
-   "summary": "57 of the 82 extracted sounds are bound to fighter-clip labels and played on the clip's own label, deterministically by sequence. They are preloaded, capped at 16 overlapping voices, a banner explains blocked autoplay, and the UI bar toggles sound on and off. A fresh clone is silent without error.",
-   "gaps": "No volume control, despite sound.js's header naming 'a volume slider' as the shell's. The sound starts at clip start rather than the build's in-clip frame. Spell-prop flights carry no sound of their own.",
-   "next": "Add a volume slider and an in-clip offset.",
+   "summary": "Right sounds and true overlap are done (57 of 82 sounds bound to the fighter clip's labels; one voice per play, 16 at once). TIMING is being fixed now: every fighter sound played at the START of its clip, while the build starts it at its own frame inside the clip (a hurt 17 frames in); the extractor knew that frame and dropped it. Moving playback to Web Audio (no lag, cheap overlap) and adding a volume slider. Arrow victims' sounds now play at impact (this commit's neighbour).",
+   "gaps": "In-clip timing and Web Audio in progress. 25 extracted sounds are never played (crowd, chants, boos, victory stings, coins, music) and need a byte mapping of where the build starts them.",
+   "next": "Merge the timing change, re-extract the sound pack from the player's copy so the frames are in it, then map the ambient and crowd sounds.",
    "evidence": "src/render/sound.js chooseSound/bindingsFrom; main.js 421-425, 661-812 (primeSoundCache, playFor, VOICES=16, showAudioPrompt); assets/sound/manifest.json has 80 label buckets (counted); test/render-sound.test.js.",
    "ownerDecision": "",
    "updated": "2026-09-23"
@@ -1097,6 +1097,10 @@
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-23",
+   "text": "Arrow hits now land: the victim's reaction, sound and number wait for the arrow instead of firing at the loose."
+  },
   {
    "date": "2026-09-23",
    "text": "Fighter looks started: every fighter was drawn grey and bald; the build's skin, hair and face from each gladiator's DNA are being mapped."
