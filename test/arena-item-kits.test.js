@@ -419,13 +419,40 @@ const KIT_BOUTS = Object.freeze({
   //   old 16 casts return. Was: command, weaken x2, ghost, weaken, whirlwind,
   //   command, gale, weaken, whirlwind, gale, ghost, command, whirlwind,
   //   teleport, ghost.
+  // ► **MOVED A FIFTH TIME 2026-09-24, BY THE CLOSED-ON BOW'S BAND
+  //   (`ss2ClosedOnBowMove`, night/engine e-verifier-fix), and by nothing
+  //   else.** Still 60 actions, no result. The first divergence is action 25
+  //   (0-based; the 26th): red-2 at (-8, 103), bow drawn, full health, with
+  //   blue-1 closed on in its lane at (-182, 103). The taunt it took here was
+  //   a floating-point win over the bash (1.4400000000000002 against 1.44);
+  //   the same night's tolerance fix (`SS2_AI_PRICE_TOLERANCE`) made it the
+  //   bash, which the build's villain never picks (its bow under 200 is out of
+  //   range and draws a movement band, `DoAction@0x23f835` `+0x08c3`). It now
+  //   walks right, away from blue-1, to a shot. The first 13 casts are
+  //   unchanged; measured on three trees with the same script, the tail after
+  //   them is ~~teleport, teleport, ghost strike~~ on `ef48e17` plus the
+  //   strike-arm stamina fix, teleport, weaken armour with the taunt-heal fix
+  //   added (a re-pin that was measured and never applied), and whirlwind,
+  //   teleport, ghost strike, wincrowd, wincrowd with this.
+  // ► **MOVED A SIXTH TIME THE SAME NIGHT, BY THE CHASER (night/engine
+  //   f-chaser: the walk away must reach a shot the nearest foe's own walk
+  //   does not take back), and by nothing else.** Still 60 actions, no
+  //   result. The first divergence is now action 14 (0-based): red-2 at
+  //   (-380, 103), bow drawn, blue-1 a rank over at (-430, 200), both speed 6
+  //   (a walk of 124). The walk right lands 199 from blue-1, outside the floor
+  //   of 186, but blue-1's walk after it lands 108 away, inside it again — so
+  //   red-2 puts the bow away where it walked right. The first 10 casts are
+  //   unchanged; ~~gale, ghost strike, command, whirlwind, teleport, ghost
+  //   strike, wincrowd, wincrowd~~ is the tail it replaces.
   tricks: {
     actions: 60,
     result: null,
     casts: [
       "cast-command", "cast-weaken-armour", "cast-weaken-armour", "cast-ghost-strike", "cast-weaken-armour",
-      "cast-whirlwind", "cast-command", "cast-gale", "cast-command", "cast-ghost-strike", "cast-gale",
-      "cast-ghost-strike", "cast-command", "cast-teleport", "cast-teleport", "cast-ghost-strike"
+      "cast-whirlwind", "cast-command", "cast-gale", "cast-command", "cast-ghost-strike",
+      "cast-whirlwind", "cast-teleport", "cast-gale", "cast-ghost-strike", "cast-ghost-strike", "cast-command",
+      "wincrowd", "cast-teleport", "cast-weaken-armour", "wincrowd", "cast-whirlwind", "wincrowd", "wincrowd",
+      "wincrowd", "cast-gale", "wincrowd"
     ]
   },
   crowd: {

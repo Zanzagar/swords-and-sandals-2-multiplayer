@@ -1345,6 +1345,10 @@ the same claim. Stated separately:
   `staminaleft > 10` at `+0x03e8`. Which band arm each belongs to, and whether
   the 30/`wincrowd` block sequentially overwrites the 40/`taunt` one within a
   facing, is NOT settled here — it needs a full decode of `+0x0b00`-`+0x0c00`.
+  *(2026-09-24, one deriver, NOT independently verified: decoded in
+  §"The out-of-range bands and the random swap" — the 40/`taunt` test is band
+  85–95 and the 30/`wincrowd` test band 96–100 of the out-of-range branch, in
+  both facings. The ranges are disjoint, so neither overwrites the other.)*
 | `villainChooseAction` | `+0x1173` | after a movement label is written, `staminaleft > 0` failing replaces it with `rest` — *reached on every path (`+0x1165`–`+0x1194`), but NOT forced: the swap, taunted-run and status writes after it and the unconditional `villain_cast_spells()` at `+0x1432` can overwrite it (verified 2026-09-22; the owner's decision (b) in §"The spell ladder runs LAST")* |
 | `check_stats` | `+0x110a`, `+0x112f` | the two clamp tests (§`check_stats` is a pure clamp) |
 | `battlevalues` (root frame 35) | `+0x3b1c` | `staminaleft > 0` failing triggers the refill below — inside the `battle_started` skip, so out of battle only |
@@ -2899,6 +2903,110 @@ Observed inventory ID mappings include:
 | 30–35 | fireball, hell fireball, dire fireball, little fat kid, lightning bolt, `frightning_bolt` (vanilla spelling) |
 | 36–42 | ghost strike, whirlwind, gale, command, swift sandals, bloodlust, colossus |
 | 43–49 | `rejuvinate` (vanilla spelling), weaken armour, boundless energy, regenerate, adulation, teleport, death from above |
+
+### The out-of-range bands and the random swap (derived 2026-09-24)
+
+*One deriver, NOT independently verified* — read with `node
+tools/inspect-swf.mjs <swf> --search villaindecisionA --max-actions 200000`,
+block `sprite:862[overlay]/frame:52/DoAction@0x23f835` (base `0x23f83b`),
+offsets relative to the base. Derived for the engine's closed-on archer
+(`chooseAiAction`, "A DRAWN BOW CLOSED ON WITH NOTHING TO BASH BACKS AWAY";
+rewritten the same night as `ss2ClosedOnBowMove`); no golden, observation or
+fixture rests on it.
+
+*(2026-09-24, a SECOND reader, same night — night/engine e-verifier-fix,
+against the install whose sha256 is `77cb545c…`, the corpus oracle. Re-read
+from the bytes, not from this text: the range test `+0x0356`–`+0x03d5`,
+whose `If` at `+0x03d5` targets 2359550 = `0x2400fe`, base `+0x08c3`, the
+out-of-range branch; the seven bands of BOTH facings for a bow — thresholds
+50, 70, 75, 80, 85, the `> 95` split, and each label below; and the random
+swap `+0x0ed7`–`+0x0fe4`, an `&&` chain of `random_swap > 80`,
+`secondary_weapon != 0` and `ammo_left > 0` followed by the `||` of the two
+weapon/distance clauses, writing `swap_weapons` at `+0x0fdd`. All agree with
+the text. The overrides from `+0x0fe5` on were NOT re-read ~~.~~ — **and the
+first of them was wrong: the psyche roll `+0x0fe5`–`+0x106f`, corrected
+below after a third reader (engine-3) and re-read from the bytes again the
+same night.** The engine now leans on the swap as well as the walk: see
+`ss2ClosedOnBowMove`.)*
+
+**Out of range** is the villain's own test failing (`+0x0356`–`+0x03d5`):
+`(equipped_weapon == 1 && fd < weapon_range) || (equipped_weapon == 2 &&
+!(fd < 200))`. So for a drawn bow it is `fd < 200` — the CLOSED-ON case — and
+for a sword it is `fd >= weapon_range`. The branch (`+0x08c3`) splits on
+`villain._x < hero._x` (`+0x08f7`) and draws `choices = randomBetween(1, 100)`
+once, in whichever arm runs (`+0x08fe` villain left of the hero, `+0x0bed`
+villain right of it). The bands are sequential `if`s over disjoint ranges, so
+exactly one writes `villaindecisionA`; each movement band then tests
+`equipped_weapon == 1`:
+
+| `choices` | `equipped_weapon == 1` | otherwise (the bow) | villain left / right of the hero |
+| --- | --- | --- | --- |
+| 1–49 | walk TOWARD | walk AWAY | `+0x094e`/`+0x095b`, `+0x0c3d`/`+0x0c4a` |
+| 50–69 | jump TOWARD | jump AWAY | `+0x09b3`/`+0x09c0`, `+0x0ca2`/`+0x0caf` |
+| 70–74 | charge TOWARD | jump AWAY | `+0x0a18`/`+0x0a25`, `+0x0d07`/`+0x0d14` |
+| 75–79 | walk AWAY | walk TOWARD | `+0x0a7d`/`+0x0a8a`, `+0x0d6c`/`+0x0d79` |
+| 80–84 | jump AWAY | jump TOWARD | `+0x0ae2`/`+0x0aef`, `+0x0dd1`/`+0x0dde` |
+| 85–95 | `taunt` at `staminaleft / staminamax * 100 >= 40`, else `rest` | same | `+0x0b67`/`+0x0b74`, `+0x0e56`/`+0x0e63` |
+| 96–100 | `wincrowd` at `>= 30`, else `rest` | same | `+0x0bd3`/`+0x0be0`, `+0x0ec2`/`+0x0ecf` |
+
+(TOWARD and AWAY read the label against the split: with the villain left of
+the hero, `walkright` is toward.) So a sword out of range closes on 74 draws in
+100, and **a bow closed on retreats on 74 in 100, 49 of them by the walk**.
+This answers the question left open under §"The twenty readers" (in §"Stamina:
+every reader, every writer…") about `+0x0b33`/`+0x0b9f`: the 40/`taunt` and 30/`wincrowd` tests belong to the two
+disjoint bands 85–95 and 96–100, so neither overwrites the other.
+
+**The overrides after the bands**, in order, each a plain assignment that the
+next can overwrite (the ladder last):
+
+- `+0x0ed7`–`+0x0fe4`, **the random swap**: `random_swap = randomBetween(1,
+  100)`; if `random_swap > 80 && secondary_weapon != 0 && ammo_left > 0` and
+  `(equipped_weapon == 2 && fd < 200) || (equipped_weapon == 1 && !(fd <
+  200))`, then `swap_weapons`. One turn in five a closed-on bow is put away and
+  a sword at 200 or more is swapped for the bow. The 200 is hand-written here
+  too, not `weapon_range`.
+- `+0x0fe5`–`+0x106f`: ~~`psyche_up_chance = randomBetween(1, 100) > 90 &&
+  herolevel >= 10` writes `psyche_up` for a sword and `rest` for a bow.~~
+  **CORRECTED THE SAME NIGHT (a write-nothing verifier, engine-3; re-read from
+  the bytes by night/engine f-chaser):** `if (psyche_up_chance > 90) { if
+  (villain.herolevel >= 10 && equipped_weapon == 1) psyche_up; else rest; }`.
+  The `> 90` test's `If` at `+0x100d` skips to `+0x1070`; the `&&` at
+  `+0x1026`–`+0x1056` falls to `+0x1068`, `rest`, when EITHER half fails. So
+  on a roll above 90 a sword below level 10 RESTS too, and a bow rests at
+  every level — not "out below level 10" — and the rest overwrites the swap
+  above it.
+- `+0x1070`–`+0x10e5`: a charge already begun (`psyche_up > 1`) continues on
+  `> 10` of a fresh draw, else the counter is reset to 1.
+- `+0x10e6`–`+0x1164`: at `hero.herolevel == 1` the villain walks the way it
+  faces.
+- `+0x1165`–`+0x1194`: `staminaleft > 0` failing writes `rest`.
+- `+0x1195`–`+0x11e9`: `ammo_left <= 0 && equipped_weapon == 2` writes
+  `swap_weapons`.
+- `+0x11ea`–`+0x1339`: the taunted runs; `+0x133a`–`+0x1431`: the four
+  statuses; `+0x1432`: `villain_cast_spells()`.
+
+No arm of the function writes `bash_attack`.
+
+**Per turn, for a closed-on bow** ~~(a second weapon and an arrow left, below
+herolevel 10 so the psyche roll is out, stamina above the 40% and 30% rest
+tests): the swap takes 20 draws in 100 whatever band was drawn, and each
+band keeps its share of the other 80 — walk AWAY 39.2, jump AWAY 20, SWAP
+20, taunt 8.8, walk TOWARD 4, jump TOWARD 4, wincrowd 4.~~ **— corrected the
+same night, with the psyche roll above: the premise "below herolevel 10 the
+psyche roll is out" was false.** A second weapon and an arrow left, stamina
+at 40% or more, hero level not 1: the psyche roll rests on 10 draws in 100
+whatever came before; of the other 90 the swap takes one in five, 18; the
+bands share the remaining 72 — walk AWAY 35.28, jump AWAY 18, taunt 7.92,
+walk TOWARD 3.6, jump TOWARD 3.6, wincrowd 3.6. With the rest 10 and the
+swap 18 that sums to 100. Arithmetic on the bands above, not a measurement.
+
+**AND EVERY VILLAIN BELOW LEVEL 10 RESTS ON 10% OF ITS TURNS, whatever its
+weapon** — the same `else rest` — before the overrides from `+0x1070` on
+(the charge continuation, the level-1 walk, the zero-stamina rest, the empty
+quiver, the taunted runs, the statuses, the ladder), which can still
+overwrite it. At level 10
+and above a SWORD's roll above 90 is `psyche_up` instead. Recorded here, not
+modelled: no engine arm reproduces it.
 
 ### The `cast_gale` phase, in full (derived 2026-09-19)
 
@@ -4492,7 +4600,9 @@ rest) — never `bash_attack`, which only the hero's buttons send — and the
 shove is not rolled at all: it knocks back (`+0x5fc9`, in `DoAction@0x240c7f`)
 at any distance. So a stale "in range" CAN become a real swing, or a real
 shove, across the arena: later overrides (a swap on the same stale distance,
-the 10% `psyche_up`, the status flags, the ladder called at
+the 10% `psyche_up` *(a psyche_up only for a sword at level 10 or more; on
+the same roll every other villain RESTS — see "The out-of-range bands and the
+random swap", corrected 2026-09-24)*, the status flags, the ladder called at
 `DoAction@0x23f835` `+0x1432`) can still replace the choice, but none
 re-checks the range.
 

@@ -44,7 +44,10 @@
  * - **THIS ENGINE'S, and invented**: the whole valuation. That a hitpoint kept
  *   is worth a hitpoint taken, that a forced flee is worth one turn of the
  *   target's `max_damage`, that a shove is worth nothing, and that a gladiator
- *   walks unless a taunt beats the swing it is walking toward.
+ *   walks unless a taunt beats the swing it is walking toward. Since
+ *   2026-09-24 also: that the recovery first pays for the blows the foes can
+ *   return before the taunter's next turn (`ss2ReturnBlows`), and that a taunt
+ *   has to beat a swing by more than rounding to beat it.
  *   `chooseAiAction`'s own provenance note already says the AI's choice among
  *   the melee verbs is invented; this is more of the same and is labelled the
  *   same way.
@@ -253,6 +256,41 @@ test("the approach is worth the swing UNDISCOUNTED, and the discounted version i
   );
 });
 
+test("THE RECOVERY IS WORTH ONLY WHAT THE RETURN BLOWS DO NOT TAKE BACK", () => {
+  // ► **THE TAUNT-HEAL LOOP (2026-09-24).** The recovery was meant to limit
+  //   itself: it is capped at the missing health, so a wounded taunter tops up
+  //   and a healthy one fights. That holds only if the taunter's health RISES.
+  //   With a foe in reach hitting back as hard as the taunt heals, the missing
+  //   health never closes, the term never decays, and the taunt beats the
+  //   swing on every turn of the bout: 23 taunts in a row at the same foe on
+  //   the arena's own host (tricks 3v3, seed 21).
+  //
+  //   The fourth argument is the hitpoints the taunter's foes are expected to
+  //   take off it before its next turn. Only the recovery pays for them. The
+  //   strike and flee arms land on the FOE and keep their value.
+  //
+  //   Worked by hand: stamina 6 gives a recovery of `3 + ceil(6)` = 9, and
+  //   at 10 of 170 hitpoints all 9 can be restored.
+  const battle = duel({ heroHealth: 10 });
+  const actor = combatant(battle, "hero");
+  const target = combatant(battle, "villain");
+  const chances = { taunt: 40 };
+  const open = ss2TauntValue(actor, target, chances);
+  const near = (a, b) => Math.abs(a - b) < 1e-9;
+
+  assert.equal(ss2TauntValue(actor, target, chances, 0), open, "no return blows: the old price exactly");
+  assert.ok(near(open - ss2TauntValue(actor, target, chances, 4), 4),
+    "4 hitpoints coming back take 4 off the recovery");
+  assert.ok(near(open - ss2TauntValue(actor, target, chances, 9), 9),
+    "out-traded exactly: the whole recovery is taken back");
+  assert.ok(near(open - ss2TauntValue(actor, target, chances, 50), 9),
+    "and more coming back still costs only the recovery, never the strike arm");
+
+  // A healthy taunter restores nothing, so the return blows have nothing to take.
+  const healthy = combatant(duel(), "hero");
+  assert.equal(ss2TauntValue(healthy, target, chances, 50), ss2TauntValue(healthy, target, chances));
+});
+
 /* ------------------------------------------------------------------ *
  * WHAT THE AI ACTUALLY DOES WITH IT
  * ------------------------------------------------------------------ */
@@ -310,15 +348,26 @@ test("AND THE TABLE ARM IS REACHED TOO — an archer taunts an archer rather tha
   //   one is only shoved, which `ss2TauntValue` scores at zero. Same actor,
   //   same range, same charisma, opposite decisions: the flee term is doing all
   //   of the work and nothing else is.
-  const archerDuel = (targetHoldsBow) => staged({
+  //
+  // ► **RESTAGED 2026-09-24, BECAUSE THE FIRST STAGING DID NOT TEST THAT
+  //   CLAIM.** It staged the hero WOUNDED (8 of 170) against a villain with
+  //   weapon 1, whose flee term is worth 0.2 x 27 = 5.4. That is not enough to
+  //   beat the shot on its own. The taunt won only because the recovery (9)
+  //   was added to it. Once the recovery pays for the return blows
+  //   (`ss2ReturnBlows`), the archer target, who can shoot back, takes the
+  //   recovery away, and the same staging shoots both targets. Now the hero is
+  //   at FULL health, so the recovery is zero against both targets, and the
+  //   target carries weapon 5 (max 67), so its turn is worth enough that the
+  //   flee alone decides. That case is checked at the end of this test.
+  const archerDuel = (targetHoldsBow, { health, weapon = 5 } = {}) => staged({
     red: [{
-      id: "hero", x: -150, y: 200, health: 8,
+      id: "hero", x: -150, y: 200, health,
       fields: gladiator({ secondary_weapon: 61, equipped_weapon: 2 })
     }],
     blue: [{
       id: "villain", x: 150, y: 200,
       fields: gladiator({
-        gladiator_dir: "left", secondary_weapon: 61,
+        gladiator_dir: "left", secondary_weapon: 61, weapon,
         ...(targetHoldsBow ? { equipped_weapon: 2 } : {})
       })
     }]
@@ -341,6 +390,327 @@ test("AND THE TABLE ARM IS REACHED TOO — an archer taunts an archer rather tha
     Ss2ActionType.BOMBARD,
     "against a swordsman the same taunt is only a shove, and the shot wins"
   );
+
+  // The first staging, kept as the record of what changed. Wounded, against a
+  // weapon-1 archer who can shoot back, the recovery used to carry the taunt.
+  // The shot now takes the recovery back, so the hero shoots both targets.
+  const first = (targetHoldsBow) => archerDuel(targetHoldsBow, { health: 8, weapon: 1 });
+  assert.ok(legalActions(first(true), "villain").some((option) => option.type === Ss2ActionType.BOMBARD
+    || option.type === Ss2ActionType.SNIPE), "the archer target can shoot back");
+  assert.equal(suggestAction(first(true), "hero").type, Ss2ActionType.BOMBARD);
+  assert.equal(suggestAction(first(false), "hero").type, Ss2ActionType.BOMBARD);
+});
+
+/* ------------------------------------------------------------------ *
+ * THE TAUNT-HEAL LOOP — a recovery the foes take straight back
+ * ------------------------------------------------------------------ */
+
+/**
+ * An archer with its bow drawn, 8 hitpoints of 170, `distance` from a
+ * swordsman in its own rank. Inside the archer's floor (`100 + physical_size`,
+ * 186 at strength 9), so the close-range archer frame offers the bash and the
+ * taunt and no shot. At 100 the swordsman (reach 130) can hit the archer; at
+ * 150 he cannot. Nothing else differs between the two stagings.
+ */
+const closedOnArcher = (distance, seed = 3) => staged({
+  seed,
+  red: [{
+    id: "hero", x: -distance / 2, y: 200, health: 8,
+    fields: gladiator({ secondary_weapon: 61, equipped_weapon: 2 })
+  }],
+  blue: [{ id: "villain", x: distance / 2, y: 200, fields: gladiator({ gladiator_dir: "left" }) }]
+});
+
+test("AN ARCHER CLOSED ON BY A SWORDSMAN ~~BASHES WHEN HE CAN HIT IT, AND TAUNTS WHEN HE CANNOT~~ NEITHER BASHES NOR TAUNTS, at either distance", () => {
+  // ► **THE LOOP ON THE ARENA'S OWN HOST (tricks 3v3, seeds 21 and 25).** A
+  //   drawn bow closed on is offered the bash and the taunt. The bash is priced
+  //   at 1.44 and the taunt's recovery at 8, so the taunt won every turn. The
+  //   swordsman then hit back for 12 and the bout never moved. The recovery
+  //   is now reduced by the blows coming back~~, so the bash wins while the
+  //   swordsman can reach the archer~~.
+  //
+  // ► **RESTATED THE SAME NIGHT (night/engine e-verifier-fix): THIS STAGING
+  //   NO LONGER REACHES THE VALUATION AT ALL.** The return blows turned this
+  //   archer's taunt into a BASH, and the build's villain never picks the bash:
+  //   its bow with `fightdistance < 200` is out of range and draws a movement
+  //   band (`DoAction@0x23f835` `+0x08c3`). A write-nothing verifier measured
+  //   the bash moving onto the arena's champion mode (77 champion 1v1 bouts
+  //   first changed at a closed-on archer's taunt -> bash). A closed-on bow now
+  //   answers with the band before the swing table (`ss2ClosedOnBowMove`):
+  //   ~~here the walk away, which reaches a shot at both distances~~ — here
+  //   the SWAP (night/engine f-chaser, the same night): the walk away reaches
+  //   a shot, but the villain is as fast as the archer (speed 20, a walk of
+  //   461 each), and his own walk after it lands him back inside the floor, so
+  //   the bow is put away. Either way, neither the bash nor the taunt. What the
+  //   return blows do to a taunt is pinned where the valuation is still read —
+  //   the valuation itself above, "THE TABLE ARM IS REACHED TOO" (an archer at
+  //   RANGE), the three readings below, and the longer blade further down.
+  for (const distance of [100, 150]) {
+    const offered = legalActions(closedOnArcher(distance), "hero").map((option) => option.type);
+    assert.ok(offered.includes(Ss2ActionType.BASH_ATTACK) && offered.includes(Ss2ActionType.TAUNT),
+      `at ${distance} the staging must offer the bash and the taunt`);
+    assert.equal(offered.includes(Ss2ActionType.BOMBARD) || offered.includes(Ss2ActionType.SNIPE), false,
+      `and no shot at ${distance}, or this is the long-range frame`);
+  }
+  const striking = legalActions(closedOnArcher(100), "villain").map((option) => option.type);
+  assert.ok(striking.includes(Ss2ActionType.QUICK_ATTACK), "at 100 the swordsman can hit the archer");
+  const reaching = legalActions(closedOnArcher(150), "villain").map((option) => option.type);
+  assert.equal(reaching.includes(Ss2ActionType.QUICK_ATTACK), false, "and at 150 he cannot");
+
+  // ~~BASH at 100, "hit back harder than the taunt heals, the archer fights";
+  // TAUNT at 150, "out of the swordsman's reach, the recovery is kept"~~ —
+  // neither is the band's verb.
+  // ~~WALK_LEFT at both~~ (f-chaser).
+  assert.equal(suggestAction(closedOnArcher(100), "hero").type, Ss2ActionType.SWAP_WEAPONS,
+    "in the swordsman's reach, the archer puts the bow away: he would follow any walk");
+  assert.equal(suggestAction(closedOnArcher(150), "hero").type, Ss2ActionType.SWAP_WEAPONS,
+    "and out of it, the same");
+});
+
+test("THE RETURN BLOWS ARE THE FOES' BEST SWINGS AT THE TAUNTER, and only at the taunter", () => {
+  // Three readings of `ss2ReturnBlows`, each against the staging that would
+  // change the decision if it were read the other way.
+  //
+  // (1) A blow at an ALLY is not a blow at the taunter. The villain has the
+  //     taunter's mate in reach, and the taunter itself 500 away. The recovery
+  //     is untouched, so the wounded duellist taunts, as in "A HEALTHY
+  //     GLADIATOR CLOSES AND A WOUNDED ONE TAUNTS".
+  const guarded = staged({
+    red: [
+      { id: "hero", x: -250, y: 200, health: 8, fields: gladiator({ charisma: 16 }) },
+      { id: "mate", x: 200, y: 200, fields: gladiator() }
+    ],
+    blue: [{ id: "villain", x: 250, y: 200, fields: gladiator({ gladiator_dir: "left" }) }]
+  });
+  const threat = legalActions(guarded, "villain").filter((option) => option.type === Ss2ActionType.QUICK_ATTACK);
+  assert.deepEqual(threat.map((option) => option.targetId), ["mate"], "the villain can swing at the mate alone");
+  assert.equal(suggestAction(guarded, "hero").type, Ss2ActionType.TAUNT);
+
+  // (2) The foe's BEST offered swing, not its weakest. ~~At stamina 12 the
+  //     recovery is `3 + 12` = 15. The swordsman's quick attack prices above
+  //     that (0.8 x 21 = 16.8) and his power attack below it. Charged the best,
+  //     the recovery is gone and the archer bashes.~~ **Restaged 2026-09-24
+  //     (night/engine e-verifier-fix)**: that staging was a closed-on archer,
+  //     which now answers with the build's band before any taunt is priced
+  //     (`ss2ClosedOnBowMove`), so it no longer read the blows. The same
+  //     question is asked where it is still read — the out-of-range arm, a
+  //     swordsman out of his own reach and inside a longer blade's (the last
+  //     staging in this file's loop section). Stamina 28 and charisma 16:
+  //     charged the villain's best offered swing, the taunt loses to the
+  //     approach and he closes; charged the weakest, it would have won
+  //     (measured, `MUT_BLOWS=min` in the e-verifier-fix scratch probe).
+  const hardy = staged({
+    red: [{ id: "hero", x: -75, y: 200, health: 8, fields: gladiator({ stamina: 28, charisma: 16 }) }],
+    blue: [{ id: "villain", x: 75, y: 200, fields: gladiator({ gladiator_dir: "left", weapon: 5 }) }]
+  });
+  assert.equal(legalActions(hardy, "hero").some((option) => option.type === Ss2ActionType.QUICK_ATTACK), false,
+    "the hero is out of his own reach");
+  assert.ok(legalActions(hardy, "villain").some((option) => option.type === Ss2ActionType.QUICK_ATTACK
+    && option.targetId === "hero"), "and inside the villain's");
+  assert.equal(suggestAction(hardy, "hero").type, Ss2ActionType.WALK_RIGHT);
+
+  // (3) A foe that declares no damage pair cannot be priced and adds nothing,
+  //     rather than throwing. It is a plain blueprint, the only kind that can
+  //     omit the pair (see "a gladiator that declares no damage pair is
+  //     SKIPPED" below). It is in reach and offered the swings.
+  //     **Restaged 2026-09-24 like (2)**: the hero was a closed-on archer and
+  //     is now a charismatic swordsman out of his own reach, so the taunt is
+  //     priced and the blows are read; the villain declares a `weapon_range`
+  //     of 300 so that he still reaches the hero from 200.
+  const plainVillain = {
+    id: "villain", name: "villain", controller: "local", maxHealth: 170,
+    stats: { strength: 9, agility: 20, attack: 8, defense: 5, vitality: 6, stamina: 6, magicka: 0 },
+    resources: { staminaleft: 120, staminamax: 140, charisma: 6, herolevel: 5, character_level: 5, weapon_range: 300 }
+  };
+  const unpriced = createTeamBattle({
+    seed: 3,
+    rules: createSs2TeamRules({ rankStride: SS2_ARENA.rankStride }),
+    teams: [
+      { id: "red", name: "red", combatants: [ss2Combatant(gladiator({ charisma: 16 }), { id: "hero", name: "hero", controller: "local" })] },
+      { id: "blue", name: "blue", combatants: [plainVillain] }
+    ]
+  });
+  Object.assign(combatant(unpriced, "hero"), { x: -100, y: 200, health: 8 });
+  Object.assign(combatant(unpriced, "villain"), { x: 100, y: 200 });
+  assert.equal(legalActions(unpriced, "hero").some((option) => option.type === Ss2ActionType.QUICK_ATTACK), false,
+    "the hero is out of his own reach, so the out-of-range arm prices his taunt");
+  assert.ok(legalActions(unpriced, "villain").some((option) => option.type === Ss2ActionType.QUICK_ATTACK
+    && option.targetId === "hero"), "the unpriced villain is offered a swing at the hero");
+  assert.doesNotThrow(() => suggestAction(unpriced, "hero"));
+  assert.equal(suggestAction(unpriced, "hero").type, Ss2ActionType.TAUNT, "and adds no return blow");
+});
+
+/**
+ * The longest run of taunts one gladiator aimed at one foe on consecutive
+ * turns of its own. A turn that is not a taunt at the same foe ends the run.
+ */
+function longestTauntRun(decisions) {
+  const running = new Map();
+  let longest = 0;
+  for (const { actorId, type, targetId } of decisions) {
+    const previous = running.get(actorId);
+    const length = type === Ss2ActionType.TAUNT
+      ? (previous?.targetId === targetId ? previous.length + 1 : 1)
+      : 0;
+    running.set(actorId, { targetId, length });
+    longest = Math.max(longest, length);
+  }
+  return longest;
+}
+
+test("THE 1v1 LOOP: a closed-on archer, both seats AI, no longer taunts under the blade to the end", () => {
+  // ► **THE LOOP EXISTS IN A 1v1, WHICH IS WHY THIS FIX REACHES ONE.** The
+  //   staging above played out with both seats on the AI. Before the fix, on
+  //   seeds 1-5, the archer taunted 21 to 52 times in a row and the bouts ran
+  //   44 to 422 actions. The swordsman hit back for about 17 a turn against a
+  //   recovery of 9, so the archer lost anyway. It just never struck a blow.
+  //   **The build's villain would not do this**: its taunt is a `choices`
+  //   draw (`randomBetween(1, 100)`), `85 ... 95` in the out-of-position
+  //   chain a closed-on bow falls into (`fightdistance < 200`), about 11 turns
+  //   in 100, and never a valuation (map, "The taunt phase, in full"; the
+  //   villain's range test at `DoAction@0x23f835` `+0x0356`-`+0x03d5`). Ten in a
+  //   row by chance is about 1 in 4 x 10^9. The demo roster's own 1v1 bouts
+  //   have no archer, and all 150 of them (six kits, seeds 1-25) are
+  //   action-for-action identical before and after.
+  for (const seed of [1, 2, 3, 4, 5]) {
+    const battle = closedOnArcher(100, seed);
+    combatant(battle, "hero").health = combatant(battle, "hero").maxHealth;
+    const decisions = [];
+    for (let turn = 0; turn < 400 && !battle.result; turn += 1) {
+      const actorId = currentCombatant(battle).id;
+      const action = suggestAction(battle, actorId);
+      decisions.push({ actorId, ...action });
+      applyAction(battle, { actorId, ...action });
+    }
+    assert.ok(battle.result, `seed ${seed}: the bout must end inside 400 actions`);
+    assert.ok(longestTauntRun(decisions) < 10, `seed ${seed}: a run of ${longestTauntRun(decisions)} taunts`);
+  }
+});
+
+test("THE LOOP ON THE ARENA'S OWN HOST IS GONE: tricks 3v3, seeds 21 and 25", async () => {
+  // ► **THE MEASUREMENT THIS FIX WAS BUILT AGAINST**, taken at `ef48e17` plus
+  //   the strike-arm stamina fix. Seed 21: a closed-on archer taunted the
+  //   swordsman in front of it 23 times in a row, 58 taunts in 326 actions.
+  //   Seed 25: a lone archer, 95 taunts in 607 actions, the longest run 12.
+  //   After the fix the longest run is 2 on seed 21 and 0 on seed 25, and the
+  //   bouts are 215 and 223 actions. The table for every kit is in the
+  //   night/engine b-taunt-heal-loop report. This pins only that neither bout
+  //   loops, not the bout itself.
+  //
+  // ► **THE RUN LENGTH ALONE DOES NOT SEE THE LOOP, so the hit-back taunts
+  //   are counted too.** A hit-back taunt is one taken by a gladiator whose
+  //   health fell since its own previous turn, and which healed it. Fix only
+  //   the rounding tie below and keep the full recovery: the longest run on
+  //   these two seeds falls to 7, but the loop is still there. The taunter
+  //   bashes whenever it tops up to full, so the runs break, and it is 21
+  //   hit-back taunts on seed 21. Before: 32 and 77. After: 0 and 0.
+  //   Ten is the brief's own threshold for a run.
+  const { demoSide, demoItemsFrom } = await import("../tools/arena/roster.js");
+  const { ss2BattleValues } = await import("../src/team/ss2-rules.js");
+  const { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } = await import("../src/adapter/index.js");
+  const items = demoItemsFrom("tricks");
+  for (const seed of [21, 25]) {
+    const host = createVanillaBattleHost({
+      teams: [
+        demoSide("red", 3, { ss2Combatant, ss2BattleValues, items, seed }),
+        demoSide("blue", 3, { ss2Combatant, ss2BattleValues, items, seed })
+      ],
+      rules: ss2TeamRules,
+      bindings: SS2_STATIC_MAP_BINDINGS,
+      seed
+    });
+    host.constructArena();
+    const decisions = [];
+    const healthAfterOwnTurn = new Map();
+    let hitBack = 0;
+    for (let actions = 0; actions < 1000 && !host.battle.result; actions += 1) {
+      const actorId = host.currentCombatantId();
+      const suggestion = host.suggestAction();
+      decisions.push({ actorId, ...suggestion });
+      const before = combatantById(host.battle, actorId).health;
+      host.submit({ actorId, ...suggestion });
+      const after = combatantById(host.battle, actorId).health;
+      if (suggestion.type === Ss2ActionType.TAUNT && before < (healthAfterOwnTurn.get(actorId) ?? before)
+        && after > before) hitBack += 1;
+      healthAfterOwnTurn.set(actorId, after);
+    }
+    assert.ok(host.battle.result, `seed ${seed}: the bout must end inside 1000 actions`);
+    assert.ok(longestTauntRun(decisions) < 10, `seed ${seed}: a run of ${longestTauntRun(decisions)} taunts`);
+    assert.ok(hitBack < 10, `seed ${seed}: ${hitBack} taunts healed a wound taken since the taunter's last turn`);
+  }
+});
+
+test("A TAUNT THAT ONLY TIES THE BASH ~~LOSES TO IT~~ — AND THE CLOSED-ON ARCHER NOW TAKES NEITHER: ~~it walks away~~ it puts the bow away", async () => {
+  // ► **THE DEMO ROSTER'S ARCHER SITS EXACTLY ON THE TIE, AND THE ROUNDING
+  //   BROKE IT THE WRONG WAY.** Demo slot 2 (bow drawn) against demo slot 1:
+  //   the bash is 24% of `ceil(12 / 2)`, which is 1.44, and the taunt's strike
+  //   arm is `(24 - 6) x 0.4 x 0.4 / 2`, which is also 1.44. The preference
+  //   list says a tie goes to the swing (TAUNT is last), but
+  //   `0.2 * (18 * 0.4)` evaluates to 1.4400000000000002. So an archer with
+  //   nothing to recover taunted anyway. Once the return blows took the
+  //   recovery away, that rounding kept the loop alive on seed 21.
+  //
+  // ► **RESTATED THE SAME NIGHT (night/engine e-verifier-fix).** The tie
+  //   went to the BASH (`SS2_AI_PRICE_TOLERANCE`), which the build's villain
+  //   never picks; a closed-on bow now answers with the build's band before
+  //   the swing table (`ss2ClosedOnBowMove`), so this archer ~~walks away — a
+  //   walk of 108 from a gap of 100 lands outside its floor of 186~~ **puts
+  //   the bow away (night/engine f-chaser)**: its walk of 124 from a gap of
+  //   100 lands outside its floor, but the swordsman's own walk of 124 after
+  //   it lands him back inside, so the walk reaches no shot that lasts. The bash
+  //   is the only verb that can tie a taunt this way, and it is offered only
+  //   on the close frame, so this tie no longer reaches the table at all; see
+  //   the tolerance's own docstring for what is left of it.
+  const { demoSide } = await import("../tools/arena/roster.js");
+  const { ss2BattleValues } = await import("../src/team/ss2-rules.js");
+  const deps = { ss2Combatant, ss2BattleValues };
+  const archer = { ...demoSide("red", 3, deps).members[1].vanilla, equipped_weapon: 2, using_bow: true };
+  const swordsman = demoSide("blue", 3, deps).members[0].vanilla;
+  const side = (id, record) => ({
+    id, name: id, combatants: [ss2Combatant(record, { id: `${id}-1`, name: id, controller: "local", derive: false })]
+  });
+  const battle = createTeamBattle({
+    seed: 3,
+    rules: createSs2TeamRules({ rankStride: SS2_ARENA.rankStride }),
+    teams: [side("red", archer), side("blue", swordsman)]
+  });
+  Object.assign(combatant(battle, "red-1"), { x: -50, y: 200 });
+  Object.assign(combatant(battle, "blue-1"), { x: 50, y: 200 });
+
+  const hero = combatant(battle, "red-1");
+  assert.equal(hero.health, hero.maxHealth, "full health, so there is nothing to recover");
+  const offered = legalActions(battle, "red-1").map((option) => option.type);
+  assert.ok(offered.includes(Ss2ActionType.BASH_ATTACK) && offered.includes(Ss2ActionType.TAUNT),
+    "the close-range archer frame offers the bash and the taunt");
+  // ~~BASH_ATTACK~~ ~~WALK_LEFT~~
+  assert.equal(suggestAction(battle, "red-1").type, Ss2ActionType.SWAP_WEAPONS);
+});
+
+test("A SWORDSMAN OUT OF HIS OWN REACH BUT INSIDE A LONGER BLADE'S CLOSES, rather than taunting under it", () => {
+  // ► **THE SAME LOOP ON THE OTHER ARM.** Here the taunter is out of his own
+  //   reach, so no attack is on offer and the out-of-range arm weighs the taunt
+  //   against the approach. The foe's weapon 5 (range multiplier 2, reach 174)
+  //   reaches the taunter's weapon 1 (reach 130) from 150. The taunter heals
+  //   and is hit, and heals and is hit. Charisma 16 at 8 hitpoints is the
+  //   frontier "A HEALTHY GLADIATOR CLOSES AND A WOUNDED ONE TAUNTS" sits on,
+  //   so the recovery is what decides.
+  const longBlade = (distance) => staged({
+    red: [{ id: "hero", x: -distance / 2, y: 200, health: 8, fields: gladiator({ charisma: 16 }) }],
+    blue: [{ id: "villain", x: distance / 2, y: 200, fields: gladiator({ gladiator_dir: "left", weapon: 5 }) }]
+  });
+  for (const distance of [150, 200]) {
+    const offered = legalActions(longBlade(distance), "hero").map((option) => option.type);
+    assert.ok(offered.includes(Ss2ActionType.TAUNT), `at ${distance} a taunt is on offer`);
+    assert.equal(offered.some((type) => type === Ss2ActionType.QUICK_ATTACK), false,
+      `and no swing at ${distance}: this is the out-of-range arm`);
+  }
+  assert.ok(legalActions(longBlade(150), "villain").some((option) => option.type === Ss2ActionType.QUICK_ATTACK),
+    "at 150 the long blade reaches the taunter");
+  assert.equal(legalActions(longBlade(200), "villain").some((option) => option.type === Ss2ActionType.QUICK_ATTACK),
+    false, "and at 200 it does not");
+
+  assert.match(suggestAction(longBlade(150), "hero").type, /^walk-/, "under the blade, he closes");
+  assert.equal(suggestAction(longBlade(200), "hero").type, Ss2ActionType.TAUNT, "beyond it, he taunts as before");
 });
 
 /* ------------------------------------------------------------------ *

@@ -3212,6 +3212,117 @@ const SS2_WALK_DIRECTION = Object.freeze({
 });
 
 /**
+ * ► **WHAT A DRAWN BOW CLOSED ON DOES: THE BUILD'S OUT-OF-RANGE BANDS, TAKEN
+ *   WITHOUT THEIR SAMPLE, FOR EVERY CLOSED-ON BOW, THE BASH ON OFFER OR NOT
+ *   (2026-09-24, night/engine e-verifier-fix).** Returns the walk away, or
+ *   the swap, or null when `view.actor` is not a drawn bow on
+ *   `closerange_archer` (its nearest foe inside `ss2ArcherMinimumRange`, the
+ *   same test `legalActions` picks the frame with). `chooseAiAction` reads it
+ *   after every ladder arm and before the swing table, and not at all while a
+ *   damage spell is on offer (the table ranks those).
+ *
+ * **The build.** `villainChooseAction` (`DoAction@0x23f835`) calls a bow with
+ * `fightdistance < 200` OUT of range (`+0x0356`-`+0x03d5`), so a closed-on bow
+ * draws `choices` in the out-of-range branch (`+0x08c3`). Its bands for a bow:
+ * 1-49 walk AWAY, 50-74 jump AWAY, 75-79 walk TOWARD, 80-84 jump TOWARD, 85-95
+ * taunt (or rest), 96-100 wincrowd (or rest). Then the random swap overrides
+ * whatever was drawn, one turn in five: `random_swap = randomBetween(1, 100)`
+ * above 80, a second weapon, an arrow left, and a bow under 200 — `swap_weapons`
+ * (`+0x0ed7`-`+0x0fe4`). ~~So per turn: walk away 39.2, jump away 20, SWAP 20,
+ * taunt 8.8, walk toward 4, jump toward 4, wincrowd 4 (each band times the 80
+ * the swap leaves).~~ **WRONG, CORRECTED THE SAME NIGHT by a write-nothing
+ * verifier (engine-3) and re-read here from the bytes: the psyche roll after
+ * the swap (`+0x0fe5`-`+0x106f`) is `if (psyche_up_chance > 90) { if
+ * (herolevel >= 10 && equipped_weapon == 1) psyche_up; else rest; }` — so a
+ * BOW rests on a roll above 90 at every level, and that rest overwrites the
+ * swap.** Per turn, then (a second weapon, an arrow left, stamina at 40% or
+ * more, hero level not 1): rest 10, swap 18 (0.9 x 0.2), walk away 35.28
+ * (49 x 0.72), jump away 18, taunt 7.92, walk toward 3.6, jump toward 3.6,
+ * wincrowd 3.6. No close frame offers the rest (grill Q7), and the order of
+ * the rest is unchanged: walk away, then the swap (tied with the jump the
+ * engine lacks), then the taunt. **No arm of the function writes
+ * `bash_attack`.** Map, "The out-of-range bands and the random swap" — the
+ * bands of both facings, the range test and the swap re-read from the bytes
+ * 2026-09-24 by a second reader, the psyche roll by a third.
+ *
+ * **What this takes, in the order of those odds, as every ladder arm here takes
+ * its modal verb without the roll:**
+ *
+ * 1. **The walk away from the nearest foe — IF IT REACHES A SHOT**: landed
+ *    where `ss2WalkDestination` puts it, over the bodies the resolver hands it,
+ *    every foe must stand outside the floor, ~~so the archer could shoot next
+ *    turn if nobody moved~~ **and the nearest foe's own walk after it —
+ *    clamped the way the resolver would clamp it — must leave him outside the
+ *    floor too (night/engine f-chaser, the same night).** Without that second
+ *    test an equally fast closer followed every walk and the archer walked
+ *    again, to the wall: a write-nothing verifier (engine-4) measured plain
+ *    2v2 at stride 0, seeds 1-200, going from 0 to 58 bouts with 40 or more
+ *    actions without a wound (seed 24: 10 -> 57), and seeds 201-1000 from 0
+ *    to 162 of 800. The engine has no jump, so the walk is the retreat
+ *    there is. A walk that reaches no shot is not a retreat here. That covers
+ *    three cases the villain would walk anyway (its band reads no wall and no
+ *    body): into the wall; a few units toward the closer, off a body behind it;
+ *    **and across ranks, a walk that leaves the closer inside the floor —
+ *    which was a ping-pong** (tricks 2v2 seed 67: a flanker a rank over passed
+ *    the archer, the archer walked back the other way, 215 actions without a
+ *    wound). A closer in another rank cannot swing at the archer at all (the
+ *    lane rule), so a walk that does not get the shot back buys nothing.
+ * 2. **Otherwise the swap — the bow put away**, the likeliest verb left that
+ *    changes the fight. The walk and jump bands all go nowhere or back toward
+ *    the closer; the swap is ~~20 draws in 100 against the taunt band's 8.8~~
+ *    18 draws in 100 against the taunt band's 7.92 (see the correction above).
+ *    `legalActions` offers the swap on every frame to a gladiator with a
+ *    second weapon, and a drawn bow always has one.
+ *
+ * ► **NEVER THE BASH, AND NEVER THE TAUNT, HERE.** The bash is the hero's
+ *   button (`closerange_archer` wires it) and the build's villain never picks
+ *   it. Before this, a closed-on bow in its closer's lane went to the swing
+ *   table, where the taunt-heal fix of the same night (the return blows and
+ *   `SS2_AI_PRICE_TOLERANCE`) turned its taunt into a bash: measured by a
+ *   write-nothing verifier on the arena's champion mode, 151 of 972 champion
+ *   1v1 bouts changed, 77 of them first at a closed-on archer switching taunt
+ *   to bash. And the taunt the table used to take instead was the taunt-heal
+ *   loop itself. A taunt at a foe in the archer's own rank is still weighed
+ *   against the turn by the out-of-range taunt arm, which runs first on a
+ *   frame with nothing to bash.
+ *
+ * AUTHORED, like the ladder's other modal choices: the reach-a-shot test, the
+ * one step of the nearest foe it looks ahead, and the order are this engine's
+ * reading of the bands, not a byte. The look-ahead is ONE foe and ONE walk:
+ * it does not ask what the others do, nor whether the nearest would rather
+ * swing, shoot or cast.
+ */
+function ss2ClosedOnBowMove(view, options) {
+  const actor = view.actor;
+  if (!ss2InBowMode(actor)) return null;
+  const nearest = nearestFoe(view);
+  if (!nearest) return null;
+  const floor = ss2ArcherMinimumRange(actor);
+  const distance = ss2FightDistance(actor, nearest);
+  if (distance === null || !(distance < floor)) return null;
+  const awayType = nearest.x > actor.x ? Ss2ActionType.WALK_LEFT : Ss2ActionType.WALK_RIGHT;
+  const retreat = options.find((option) => option.type === awayType);
+  if (retreat) {
+    const bodies = [...view.foes, ...view.allies.filter((ally) => ally.id !== actor.id)];
+    const landed = { ...actor, x: ss2WalkDestination(actor, bodies, SS2_WALK_DIRECTION[awayType]) };
+    if (view.foes.every((foe) => !(ss2FightDistance(landed, foe) < floor))) {
+      // The nearest foe's own walk after it, clamped as the resolver would
+      // clamp it: against HIS foes (the archer, where it landed, and its
+      // allies) and his other allies.
+      const hisBodies = [
+        landed,
+        ...view.allies.filter((ally) => ally.id !== actor.id),
+        ...view.foes.filter((foe) => foe.id !== nearest.id)
+      ];
+      const toward = landed.x > nearest.x ? 1 : -1;
+      const chaser = { ...nearest, x: ss2WalkDestination(nearest, hisBodies, toward) };
+      if (!(ss2FightDistance(landed, chaser) < floor)) return retreat;
+    }
+  }
+  return options.find((option) => option.type === Ss2ActionType.SWAP_WEAPONS) ?? null;
+}
+
+/**
  * Where a rank change lands, or `null` when there is no rank that way.
  *
  * A rank is a DISCRETE position — `frontY - rankStride * k` for `k` in
@@ -3405,6 +3516,45 @@ function ss2CanBePriced(actor) {
 }
 
 /**
+ * ► **HOW MUCH A TAUNT MUST BEAT ITS RIVAL BY: MORE THAN ROUNDING
+ *   (2026-09-24).** Every price a taunt is compared with is a rational number
+ *   with a small denominator. Chances are whole percents
+ *   (`calculateSs2AttackChances`), and damage pairs, the recovery and the turn
+ *   proxy are whole hitpoints. A normal swing averages two of them, a charge
+ *   divides by at most three presses, and the strike arm rolls one chance
+ *   twice and splits two ways. So two DIFFERENT prices differ by at least
+ *   1/60000. Floating point does not keep equal prices equal:
+ *   `0.2 * (18 * 0.4)` is 1.4400000000000002 and `0.24 * 6` is 1.44. Those
+ *   are the demo archer's taunt and bash, and they are the same price. The
+ *   preference list sends a tie to the swing, but that rounding sent it to the
+ *   taunt instead. So a taunt must beat its rival by more than this constant.
+ *   It is float hygiene and not a dial: any value between about 1e-12 and
+ *   1/60000 makes the same decisions.
+ *
+ *   Applied at the two places a taunt meets a swing: the swing table (where
+ *   the demo archer's tie is, pinned by `test/ss2-ai-taunt.test.js`) and the
+ *   out-of-range arm's comparison with the approach. **No test pins the
+ *   second one, and none could be found:** a sweep of 2,880 staged duels found
+ *   no rounding tie on that arm, and 300 arena bouts (six kits, 1v1 and 3v3,
+ *   seeds 1-25) are identical with and without it. It is kept there so both
+ *   arms settle a tie the same way.
+ *
+ * ► **AND SINCE THE SAME NIGHT THE TABLE'S TIE IS UNREACHABLE TOO — named,
+ *   not deleted (night/engine e-verifier-fix).** The tie this was written for
+ *   was a CLOSED-ON archer's taunt against its bash, and a closed-on bow now
+ *   answers with the build's band before the swing table
+ *   (`ss2ClosedOnBowMove`) — which is also why: the tie went to the bash, and
+ *   the build's villain never picks the bash. The bash is offered only on the
+ *   close frame, so it never meets a taunt in the table now; the taunt row
+ *   left is an archer's AT RANGE, against its shots. Measured: with the
+ *   table's margin set to 0, the focused AI, ranged and kit tests stay green,
+ *   and 4,572 arena bouts (six kits, 1v1 to 3v3, seeds 1-200, plus every
+ *   champion pair on seeds 1-3) are identical. Both uses are kept, so that a
+ *   tie anywhere goes to the swing, as the preference list's order says.
+ */
+const SS2_AI_PRICE_TOLERANCE = 1e-9;
+
+/**
  * What a taunt is worth to `actor` against `target`, IN HITPOINTS.
  *
  * ► **THIS IS THE DESIGN DECISION THE 2026-09-18 HANDOFF NAMED AND DID NOT
@@ -3456,8 +3606,56 @@ function ss2CanBePriced(actor) {
  *   |force| 150, and **flees: 1**, because effect 2 only makes a target flee
  *   when the TARGET is in bow mode and the demo roster's archers rarely are
  *   when taunted. The denial term is therefore nearly all shove on this roster.
+ *
+ * ► **THE RETURN BLOWS: THE RECOVERY PAYS FOR THEM FIRST (2026-09-24), and
+ *   the loop this closes is why.** `returnBlows` is the hitpoints the
+ *   taunter's foes are expected to take off it before its next turn
+ *   (`ss2ReturnBlows`). The recovery counts only what is left of it after
+ *   them, never less than zero. The strike and flee arms land on the FOE and
+ *   are not touched. A caller that passes nothing gets the old price.
+ *
+ *   The recovery was meant to limit itself, because it is capped at the
+ *   missing health. A wounded taunter tops up, and a healthy one's recovery
+ *   is worth nothing, so it fights. That holds only if the taunter's health
+ *   actually RISES. Suppose a foe in reach hits back at least as hard as the
+ *   taunt heals. Then the missing health never closes and the term never
+ *   decays. The taunt beats the swing on every turn, the foe's blows are
+ *   healed as fast as they land, and the fight stops moving. Measured on the
+ *   arena's own host at `ef48e17` plus the strike-arm stamina fix (tricks
+ *   3v3, seeds 1-25): 5 runs of 10+ taunts at the same foe, in 3 bouts, the
+ *   longest 23, and 145 taunts that healed a wound taken since the taunter's
+ *   own last turn. Seed 25 ran 607 actions. In all three bouts the taunter
+ *   was an archer with its bow drawn, closed on by a swordsman. The
+ *   close-range archer frame offers the bash (1.44) and the taunt (a recovery
+ *   of 8 plus 1.44), and the swordsman's quick attack returns 9.6 a turn. (On
+ *   seed 19 the archer was at FULL health, so the recovery was zero and the
+ *   rounding tie alone kept it taunting. See `SS2_AI_PRICE_TOLERANCE`.)
+ *
+ *   With the return blows charged, "out-traded" has a price in the build's
+ *   own numbers. The recovery is `3 + ceil(stamina)` (`+0x684c`), capped at
+ *   the missing health (`+0x68d3`). The blows are the foes' offered swings at
+ *   the build's own `attack_chances`. When the blows are at least the
+ *   recovery, the taunt is priced on its strike and flee arms alone. On the
+ *   demo roster those lose ~~to the bash (a tie; see `SS2_AI_PRICE_TOLERANCE`)
+ *   and~~ to the approach. When no foe can reach the taunter, nothing changes:
+ *   a wounded gladiator at range still taunts. *(Struck the same night: the
+ *   closed-on archer this paragraph describes no longer reaches the
+ *   valuation. It answers with the build's band first — the walk away to a
+ *   shot, or the bow put away (`ss2ClosedOnBowMove`) — because the bash the
+ *   return blows made it pick is a verb the build's villain never picks. The
+ *   return blows still price every taunt that IS weighed: an archer at range,
+ *   and the out-of-range arm's.)*
+ *
+ *   **Authored, not the build's.** The build's villain has no valuation to
+ *   correct. Its taunt is a `choices` draw, 85-95 in the out-of-position chain
+ *   (map, "The taunt phase, in full"), so it never taunts 10 turns running
+ *   except by a roughly 1 in 4 x 10^9 chance. The same staged 1v1 (an archer
+ *   closed on by a swordsman, both seats AI) looped here before this change:
+ *   runs of 21-52 over seeds 1-5. That is why the rule is not confined to
+ *   team bouts. The demo roster's own 150 1v1 bouts (no archer in slot 1) are
+ *   identical before and after.
  */
-export function ss2TauntValue(actor, target, chances) {
+export function ss2TauntValue(actor, target, chances, returnBlows = 0) {
   if (!actor || !target) return 0;
   // ► **A FOE IN ANOTHER RANK CANNOT BE TAUNTED, so a taunt at him is worth
   //   nothing — not even the recovery.** The owner's rule of 2026-09-23: a
@@ -3466,10 +3664,13 @@ export function ss2TauntValue(actor, target, chances) {
   //   target; this answers for a caller that does not. A no-op without ranks.
   if (!ss2SameLane(actor, target)) return 0;
   // (1) The recovery, certain. `tauntRecovery`'s own two lines.
-  const healed = Math.min(
+  const restored = Math.min(
     SS2_TAUNT.branchHealBase + Math.ceil(actor.stats.stamina),
     Math.max(0, actor.maxHealth - actor.health)
   );
+  // Only the part the return blows do not take back before the taunter's next
+  // turn counts. See the docstring's "THE RETURN BLOWS" paragraph.
+  const healed = Math.max(0, restored - Math.max(0, returnBlows));
 
   const landing = (chances?.taunt ?? 0) / 100;
   // Each landed taunt splits evenly over `randomBetween(1, effectMax)`.
@@ -3534,6 +3735,60 @@ export function ss2TauntValue(actor, target, chances) {
 }
 
 /**
+ * THE RETURN BLOWS: the hitpoints `view.actor`'s foes are expected to take off
+ * it before its next turn. `ss2TauntValue` subtracts them from the recovery.
+ * AUTHORED AI arithmetic over the build's own quantities, like the rest of the
+ * valuation:
+ *
+ * - **WHO**: every living foe. Each one acts once before the actor's next turn
+ *   (see `ss2FoesCanExpose`).
+ * - **WHAT**: the swings and shots (`ATTACK_BANDS`) that `offerFor` (the rule
+ *   set's own `legalActions`) offers the foe against the actor NOW. The foe's
+ *   view is the actor's view with the sides swapped, which is what
+ *   `actorView` builds for the foe, because a battle is exactly two teams
+ *   (`roster.js` refuses any other count). The offer is read rather than re-derived
+ *   from reach, lane and bow floor, because a second copy of the geometry is
+ *   a second chance to be wrong.
+ * - **HOW MUCH**: the foe's best expected swing among those offers, from the
+ *   same table the AI ranks its own swings on (`ss2SwingValues`: the build's
+ *   `attack_chances` times the damage pair). This is the foe's BEST blow, and
+ *   it counts even when the foe might swing at somebody else. That is the
+ *   conservative direction: it stops the taunt rather than feeding the loop.
+ *
+ * ► **NOT COUNTED, NAMED:** the spells (bolts, fireballs, the ghost strike,
+ *   the whirlwind), the psyche discharge and the taunt's own strike arm.
+ *   None of them is in `ATTACK_BANDS`, and the loop this fixes is made of
+ *   swings. Also not counted: the taunt's effect 2 keeping the tauntee's blow
+ *   off. A flee is already priced in the flee term, and a shove is priced at
+ *   zero on purpose (see `ss2TauntValue`), so discounting the blow for either
+ *   would count the same denied turn twice.
+ *
+ * A foe that declares no damage pair (`ss2CanBePriced`) cannot be priced, and
+ * adds nothing.
+ */
+function ss2ReturnBlows(view, offerFor) {
+  const actor = view.actor;
+  const mine = view.allies.some((ally) => ally.id === actor.id) ? view.allies : [actor, ...view.allies];
+  let total = 0;
+  for (const foe of view.foes) {
+    if (!ss2CanBePriced(foe)) continue;
+    const foeView = {
+      turnNumber: view.turnNumber,
+      battleResources: view.battleResources,
+      actor: foe,
+      allies: view.foes,
+      foes: mine
+    };
+    const blows = offerFor(foeView, foe.id)
+      .filter((option) => ATTACK_BANDS[option.type] && option.targetId === actor.id);
+    if (blows.length === 0) continue;
+    const { expected } = ss2SwingValues(foe, actor);
+    total += Math.max(...blows.map((option) => expected[option.type]));
+  }
+  return total;
+}
+
+/**
  * What CLOSING THE DISTANCE is worth, in hitpoints — the thing a taunt at range
  * is actually competing with.
  *
@@ -3569,6 +3824,9 @@ export function ss2TauntValue(actor, target, chances) {
  *   taunts, because the recovery is the largest term in `ss2TauntValue` and the
  *   shove keeps the fight where it can pay for it. An archer taunts more than a
  *   warrior, because its denial term is real and a warrior's is zero.
+ *   *(2026-09-24: "at range" has to mean out of every foe's reach. A wounded
+ *   gladiator that a longer blade can still reach loses its recovery to that
+ *   foe's return blows, and closes. See `ss2TauntValue`, "THE RETURN BLOWS".)*
  *
  * The `walks` count is gone with the discount, and with it the one thing here
  * that was an approximation: it ignored the body clamp and the target moving.
@@ -9911,7 +10169,10 @@ export function createSs2TeamRules({
   const ruleSetId =
     `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}${crowdPlaySuffix}`;
 
-  return defineTeamRuleSet({
+  // Named rather than returned directly so `chooseAiAction` can read the
+  // rule set's own offer for a FOE (`ss2ReturnBlows`) without leaning on
+  // `this`.
+  const ruleSet = defineTeamRuleSet({
     // The mode is in the id because `toTeamWireState` carries only id,
     // contractVersion, verification and runtimeVerified into the hash. Two
     // peers running different defeat gates would otherwise hash identically.
@@ -14447,6 +14708,17 @@ export function createSs2TeamRules({
 
       const restOption = options.find((option) => option.type === Ss2ActionType.REST);
       const actor = view.actor;
+      // The return blows every taunt priced below is charged against
+      // (`ss2ReturnBlows`). They are the same for every taunt this decision,
+      // so they are read once. They matter only when the recovery could
+      // restore something, so a gladiator at full health skips the foes'
+      // offers entirely.
+      let returnBlowsRead = null;
+      const returnBlows = () => {
+        if (!(actor.health < actor.maxHealth)) return 0;
+        returnBlowsRead ??= ss2ReturnBlows(view, ruleSet.legalActions);
+        return returnBlowsRead;
+      };
       // ~~`if (restOption && resourceValue(actor, "staminaleft", 0) <= 10) return restOption;`~~
       // **MOVED 2026-09-22, and narrowed.** This line returned the rest before
       // any ladder arm was read, for every gladiator in or out of range. The
@@ -15140,7 +15412,11 @@ export function createSs2TeamRules({
       //   continuation, the level-1 walk, the zero-stamina rest, the
       //   empty-quiver swap, the two taunted runs, the four status flags).
       //
-      //   **This AI models none of the `choices` bands.** It takes no sample —
+      //   **This AI models none of the `choices` bands** ~~.~~ — **but one,
+      //   since 2026-09-24 (stale from that night's closed-on archer until
+      //   corrected the same night): the closed-on bow's, taken without its
+      //   sample as its modal verbs, the walk away or the swap
+      //   (`ss2ClosedOnBowMove`).** It takes no sample —
       //   the tired rest above says so of the out-of-range rests, the ladder
       //   blocks of the 90% roll — and the taunt it DOES take is not the
       //   85-95 band either: it is priced in hitpoints against the approach
@@ -15156,6 +15432,19 @@ export function createSs2TeamRules({
       //   5% band is still NOT reproduced and no sample is taken: the choice is
       //   the authored valuation's. Pinned by `test/ss2-ai-crowd.test.js`, and
       //   by `test/ss2-wincrowd.test.js` for the states where it still refuses.
+
+      // ► **A DRAWN BOW CLOSED ON: THE BUILD'S OUT-OF-RANGE BANDS, THE BASH ON
+      //   OFFER OR NOT (2026-09-24)** — `ss2ClosedOnBowMove`: the walk away if
+      //   it reaches a shot, else the bow put away. Read after every ladder arm
+      //   above (the build's `villain_cast_spells()` overwrites the band) and
+      //   before the swing table, which a closed-on bow in its closer's lane
+      //   used to reach and bash from — a verb the build's villain never picks.
+      //   Not read while a damage spell is on offer: the table ranks those.
+      //   With nothing to bash, the arms of the block below that weigh
+      //   something (the crowd, the taunt) or change the fight (the flank, the
+      //   join, the rank step) still answer first, as they did.
+      const closedOnBow = boltOnOffer ? null : ss2ClosedOnBowMove(view, options);
+      if (attackOnOffer && closedOnBow) return closedOnBow;
 
       if (!attackOnOffer) {
         const nearest = nearestFoe(view);
@@ -15174,15 +15463,39 @@ export function createSs2TeamRules({
         //   block is behind `!attackOnOffer` — so an archer is never caught
         //   mid-swap by somebody it could have hit.
         //
-        //   ► **AND THERE IS NO SWAP BACK, which is the build's own answer and
-        //     not an omission.** `closerange_archer` wires no swap button; the
-        //     only route is the inventory overlay. An archer that gets closed
-        //     on therefore bashes and backs away rather than drawing a sword,
-        //     which is what gives closing on an archer its value. It is also
-        //     what keeps this arm from oscillating: with a swap in only one
+        //   ► **AND THERE IS NO SWAP BACK, which is ~~the build's own answer and
+        //     not an omission~~ THIS AI'S CHOICE, NOT THE BUILD'S — corrected
+        //     2026-09-24 from the bytes.** `closerange_archer` wires no swap
+        //     button; the only route is the inventory overlay ~~. An archer
+        //     that gets closed on therefore bashes and backs away rather than
+        //     drawing a sword~~ — which `legalActions` offers on every frame,
+        //     so a player CAN put the bow away when closed on. **And the
+        //     build's villain does, one turn in five:** `random_swap =
+        //     randomBetween(1, 100) > 80`, a second weapon and an arrow left,
+        //     then `(equipped_weapon == 2 && fightdistance < 200) ||
+        //     (equipped_weapon == 1 && !(fightdistance < 200))` writes
+        //     `swap_weapons` (`DoAction@0x23f835` `+0x0ed7`-`+0x0fe4`) — a
+        //     closed-on bow put away, a sword at range swapped for the bow.
+        //     This AI takes the second half — this arm, without the roll and at
+        //     the hero's floor (`ss2ArcherMinimumRange`) rather than the
+        //     villain's 200 — ~~and not the first, deliberately: refusing it is
+        //     what gives closing on an archer its value,
+        //     and it keeps this arm from oscillating — with a swap in only one
         //     direction, a gladiator cannot flip modes as the distance moves.
-        //     Running out of arrows still swaps it back — that one is forced,
-        //     in `legalActions`.
+        //     A closed-on archer bashes when it can and otherwise backs away
+        //     ("A DRAWN BOW CLOSED ON WITH NOTHING TO BASH BACKS AWAY", below).~~
+        //     **and, since 2026-09-24 (night/engine e-verifier-fix), the first
+        //     half too, but only where the band's likelier verb cannot be
+        //     had:** `ss2ClosedOnBowMove` walks a closed-on bow away when that
+        //     walk reaches a shot and puts the bow away only when it does not —
+        //     at the wall, between two foes, or across ranks from a closer the
+        //     walk would leave inside the floor. Closing on an archer still
+        //     costs it: it walks off its shot or spends a turn on the swap, and
+        //     never bashes. The two swaps cannot flip each other on one
+        //     distance: this one needs nothing in reach and the nearest foe at
+        //     the floor or beyond, that one the nearest foe inside the floor.
+        //     Running out of arrows still swaps
+        //     it back — that one is forced, in `legalActions`.
         if (!ss2InBowMode(actor) && resourceValue(actor, "ammo_left", 0) > 0) {
           const swap = options.find((option) => option.type === Ss2ActionType.SWAP_WEAPONS);
           const range = nearest ? ss2FightDistance(actor, nearest) : null;
@@ -15228,10 +15541,18 @@ export function createSs2TeamRules({
             // foe that arm prices it at (`nearestTauntableFoe`) — ~~`nearest`~~
             // until 2026-09-23, which a rank over is never offered, so the
             // rival read 0 wherever the nearest foe stood in another rank.
+            // Charged the return blows as the arm below charges them
+            // (2026-09-24). Behind `ss2SafelyOutOfRange` they are always 0,
+            // because any foe offered a swing or a shot at the actor is one
+            // `ss2FoeCanStrike` already counts as a threat, and that shuts
+            // this arm. Measured: 597 rivals priced over the 300 arena bouts
+            // (six kits, 1v1 and 3v3, seeds 1-25), every one with 0 return
+            // blows. They are passed anyway, so the rival stays "the taunt
+            // the arm below would weigh" if the gates move.
             const tauntee = aiTaunts ? nearestTauntableFoe(view) : null;
             const tauntRival = tauntee && options.some((option) =>
               option.type === Ss2ActionType.TAUNT && option.targetId === tauntee.id)
-              ? ss2TauntValue(actor, tauntee, ss2SwingValues(actor, tauntee).chances)
+              ? ss2TauntValue(actor, tauntee, ss2SwingValues(actor, tauntee).chances, returnBlows())
               : 0;
             if (worth > Math.max(ss2ApproachValue(actor, nearest, bestSwing), tauntRival)) return pleaser;
           }
@@ -15368,8 +15689,9 @@ export function createSs2TeamRules({
           if (tauntHere) {
             const ranged = ss2SwingValues(actor, tauntee);
             const bestSwing = Math.max(...Object.values(ranged.expected));
-            const worth = ss2TauntValue(actor, tauntee, ranged.chances);
-            if (worth > ss2ApproachValue(actor, tauntee, bestSwing)) return tauntHere;
+            const worth = ss2TauntValue(actor, tauntee, ranged.chances, returnBlows());
+            // More than rounding, as in the swing table (`SS2_AI_PRICE_TOLERANCE`).
+            if (worth > ss2ApproachValue(actor, tauntee, bestSwing) + SS2_AI_PRICE_TOLERANCE) return tauntHere;
           }
         }
 
@@ -15401,6 +15723,81 @@ export function createSs2TeamRules({
           const step = options.find((option) => option.type === towardRank);
           if (step) return step;
         }
+
+        // ► **A DRAWN BOW CLOSED ON WITH NOTHING TO BASH ~~BACKS AWAY~~ TAKES THE
+        //   BUILD'S OWN BAND, WITHOUT ITS SAMPLE (2026-09-24): the walk away
+        //   if it reaches a shot, else the bow put away** — `closedOnBow`,
+        //   read above the block from `ss2ClosedOnBowMove`, which carries the
+        //   bands, the swap and their offsets. Reaching here with the bow drawn
+        //   means the archer is on `closerange_archer` (its nearest foe inside
+        //   the floor) and the bash is not on offer, because the foe on top of
+        //   it stands in another rank (`ss2SameLane`). **Before this arm the
+        //   decision fell into the swing table with nothing to rank**, and out
+        //   of it by accident: to `options[0]` (the retreat on the plain
+        //   roster; in the tricks kit whichever spell leads the list, a
+        //   teleport the ladder's gate had just refused among them), or, when
+        //   the weakest foe stood in the archer's own rank, to a taunt at him
+        //   that the table took as its only row, compared with nothing.
+        //
+        //   ► **CHANGED THE SAME NIGHT (night/engine e-verifier-fix), after a
+        //     write-nothing verifier measured this arm on the arena's DEFAULT
+        //     size, 2v2, which its own report had not.** Three changes, each
+        //     reproduced before it was made:
+        //     (a) ~~A retreat had to CARRY the archer away~~ — **it has to
+        //         REACH A SHOT**: every foe outside the floor where the walk
+        //         lands, **and still outside after the nearest foe's own walk
+        //         toward it** (added the same night, f-chaser: an equally fast
+        //         closer otherwise chased the archer to the wall). A walk that only carried it was a ping-pong across
+        //         ranks: tricks 2v2 seed 67, a flanker a rank over passed the
+        //         archer after every walk, the archer walked back, and the bout
+        //         ran 215 actions without a wound (a stall; 0 before this arm).
+        //         A closer in another rank cannot swing at the archer at all, so
+        //         a walk that leaves him inside the floor buys nothing.
+        //     (b) ~~**Otherwise the archer is cornered and TAUNTS the foe the
+        //         taunt arm above priced**~~ — **it puts the bow away** (the
+        //         random swap, `+0x0ed7`-`+0x0fe4`, ~~20 draws in 100 against the
+        //         taunt band's 8.8~~ 18 against 7.92 — corrected, see
+        //         `ss2ClosedOnBowMove` — once the walks go nowhere). The taunt was
+        //         taken unconditionally, after the taunt arm above had priced it
+        //         and declined: tricks 2v2 seed 140, blue-2 pinned at x 2100
+        //         taunted a foe about 3,400 units off 18 times at full health,
+        //         and runs of ten came back into a cell the taunt-heal fix had
+        //         emptied. A taunt the valuation prices above the turn is still
+        //         taken, by the taunt arm, which comes first.
+        //     (c) **The same move now answers a closed-on bow WITH a bash on
+        //         offer, above the swing table** — see the read of
+        //         `closedOnBow` above the block. ~~A BASH ON OFFER IS STILL
+        //         PRICED, in the table below~~: that is where the taunt-heal
+        //         fix turned the closed-on archer's taunt into a bash, which the
+        //         build's villain never picks.
+        //
+        //   ► **WHERE IT SITS: below every arm that weighs something (the crowd,
+        //     the taunt) or changes the fight (the flank, the join, the rank
+        //     step), and ABOVE the toward-walk — moved there after the Codex
+        //     review's second pass, reproduced before it was moved.** For a
+        //     closed-on bow the toward-walk can only return THIS walk (when the
+        //     foe in its own rank stands beyond it on the away side), and it
+        //     returned it without the check: an ally at its back left the
+        //     archer walking from 0 to 6 and then from 6 to 6, a taunt on
+        //     offer. The flank arm cannot: it walks toward the foe on top of
+        //     the archer, which this frame never wires.
+        //   ► **THE BOW-MODE GATE IS WHAT KEEPS A WARRIOR OUT** (inside
+        //     `ss2ClosedOnBowMove`): a warrior with no attack is on
+        //     `longrange_warrior`, which wires both walks, and must fall
+        //     through to the toward-walk below. **"Any walk" in place of the
+        //     walk away cannot go red, named**: `closerange_archer` wires only
+        //     the away walk, so it is the same option. The DIRECTION can: turned
+        //     round, no such walk is offered and the archer swaps instead.
+        //   ► **THE WALL AND THE BODY BEHIND** (Codex, pass 1): at the arena
+        //     wall the walk is still offered, still costs its stamina, and the
+        //     clamp leaves the archer where it stood; with a body inside its
+        //     `physical_size` behind it, the build's clamp (`+0x3de6`) can even
+        //     land it a few units TOWARD the closer. Neither reaches a shot, so
+        //     neither is taken — the reach-a-shot test contains the old carry
+        //     test. The build's villain walks into the wall (its walk band reads
+        //     no wall): AN ENGINE CHOICE, as is the swap in its place.
+        if (closedOnBow) return closedOnBow;
+
         // ► **TOWARD A FOE IN ITS OWN RANK WHEN IT HAS ONE, and until
         //   2026-09-23 toward the nearest in ANY rank.** The arm above will
         //   not leave a rank that holds a foe, and the lane rule will not let
@@ -15803,7 +16200,7 @@ export function createSs2TeamRules({
       const tauntOption = options.find((option) =>
         option.type === Ss2ActionType.TAUNT && option.targetId === engaged.id);
       if (aiTaunts && tauntOption) {
-        expected[Ss2ActionType.TAUNT] = ss2TauntValue(actor, engaged, chances);
+        expected[Ss2ActionType.TAUNT] = ss2TauntValue(actor, engaged, chances, returnBlows());
       }
       // Ties break toward the heavier attack, deterministically. The archer's
       // verbs join the list rather than forming a second one, because a
@@ -15850,6 +16247,14 @@ export function createSs2TeamRules({
         // LAST, so a tie goes to a swing. A taunt that happens to price equal
         // to a bash should lose to it: the bash is certain to be an attack,
         // while three taunts in four do nothing but the recovery.
+        // **Until 2026-09-24 floating point could break that tie the wrong
+        // way.** The demo archer's taunt and bash are both 1.44, and the taunt
+        // computed to 1.4400000000000002. See `SS2_AI_PRICE_TOLERANCE`.
+        // **And since the same night a closed-on bow does not reach this table
+        // at all** (`ss2ClosedOnBowMove`, read above the `!attackOnOffer`
+        // block), so the bash — offered only on the close frame — never meets
+        // a taunt here now. The taunt row is the archer AT RANGE's, against
+        // its shots.
         Ss2ActionType.TAUNT
       ];
       let best = null;
@@ -15874,7 +16279,10 @@ export function createSs2TeamRules({
           ? (expected[type] === undefined ? null : psycheOption ?? null)
           : options.find((entry) => entry.type === type && entry.targetId === engaged.id);
         if (!option) continue;
-        if (best === null || expected[type] > expected[best.type]) best = option;
+        // A taunt must beat the swing by more than rounding, so that a tie goes
+        // to the swing, as the list's order says (`SS2_AI_PRICE_TOLERANCE`).
+        const margin = type === Ss2ActionType.TAUNT ? SS2_AI_PRICE_TOLERANCE : 0;
+        if (best === null || expected[type] > expected[best.type] + margin) best = option;
       }
       // ► **`restOption` IS `undefined` ON EITHER CLOSE FRAME SINCE 2026-09-24**
       //   (the owner's decision: no rest while a foe is in reach), so where
@@ -15885,10 +16293,37 @@ export function createSs2TeamRules({
       //   lane: 6 decisions that rested before, re-asked with the rest struck
       //   out, took the retreat walk twice on the plain roster and, in the
       //   tricks kit, whichever spell leads the list (gale 1, teleport 2, ghost
-      //   strike 1). **Not a choice this AI makes on purpose.** Taking the
+      //   strike 1). **Not a choice this AI makes on purpose.** ~~Taking the
       //   retreat explicitly — "an archer that gets closed on bashes and backs
       //   away", as the swap arm above puts it — would be a new AI rule, and is
-      //   left for the owner rather than slipped in here.
+      //   left for the owner rather than slipped in here.~~
+      //   **TAKEN EXPLICITLY SINCE 2026-09-24, and derived rather than
+      //   invented**: an arm of the `!attackOnOffer` block, just above its
+      //   toward-walk, backs a drawn bow with nothing to bash away from the foe
+      //   on top of it (or, cornered, taunts) — the build's
+      //   villain's own out-of-range band for a bow (`DoAction@0x23f835`
+      //   `+0x08c3`-`+0x0ed6`, 74 draws in 100 a retreat), without its sample.
+      //   See "A DRAWN BOW CLOSED ON WITH NOTHING TO BASH BACKS AWAY" there.
+      //   *(Rewritten the same night: the arm now reads `ss2ClosedOnBowMove`,
+      //   which also answers a closed-on bow WITH a bash on offer, above this
+      //   table, and whose cornered answer is the swap, not the taunt.)*
+      //   Re-measured on the tree it landed on (`ef48e17` plus the two taunt
+      //   fixes of the same night), the fallback was 5 decisions: four retreat
+      //   walks (plain 2, tricks 2) and one teleport cast at full health.
+      //   That arm ALSO took the same case out of the table's TAUNT row, which
+      //   was otherwise its only row: 11 decisions on the tricks 3v3 (seeds
+      //   1-25) where the weakest foe stood in the archer's own rank and the
+      //   taunt at him was taken compared with nothing.
+      //
+      //   **So this fallback is not reached on the arena's host any more** —
+      //   0 decisions over six kits × 1v1 and 3v3 × seeds 1-25, measured with
+      //   a hook on this line (night/engine c-closed-on-archer report);
+      //   re-measured after the closed-on bow's move was rewritten the same
+      //   night (e-verifier-fix): 0 of the table's returns over 4,572 arena
+      //   bouts (six kits, 1v1 to 3v3, seeds 1-200, and every champion pair on
+      //   seeds 1-3), with the same hook. It is
+      //   kept, not deleted, because an unreachable fallback that returns a
+      //   LEGAL action is a safer last line than a throw.
       return best ?? restOption ?? options[0];
     },
 
@@ -15913,6 +16348,7 @@ export function createSs2TeamRules({
       return ss2UnavailableActions(view, targetId, legal ?? this.legalActions(view, actorId), { rankStride });
     }
   });
+  return ruleSet;
 }
 
 /** The default SS2 rule set: tournament mode, the only defeat gate this seam represents. */
