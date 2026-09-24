@@ -33,6 +33,7 @@ import {
   CLIP_SEQUENCES,
   CONTINUATION_LABELS,
   ClipSequenceError,
+  clipPassesFor,
   clipSequenceFor,
   isSequencedLabel,
   sequenceBeatsFor,
@@ -112,6 +113,31 @@ test("SIX ENTRIES AND EACH ONE IS A RUN, with the build's own stop beside it", (
   assert.deepEqual([...clipSequenceFor("burning")], ["burning", "flame_repeat", "flame_repeat"]);
 });
 
+test("A FRAME WHOSE OWN SCRIPT JUMPS IS NEVER SHOWN: each pass that ends on 1963 or 1426 stops one frame short", () => {
+  // ► **ADDED 2026-09-24 AFTER AN ADVERSARIAL VERIFIER BROKE `frames: 32`.**
+  //   AVM1 runs a frame's actions before the frame is rendered, and a goto in
+  //   them moves the playhead at once, so the tick that ENTERS a jump frame
+  //   renders the jump's target in its place. Two runs end on a jump (the
+  //   battle map's run table): `burning`'s 1963 — both arms of its if/else
+  //   jump, back to `flame_repeat` and then to `Standing` — and `celebrate1`'s
+  //   1426, `GoToLabel("celebrate1a"); Play`. The other four end on a `Stop`,
+  //   which renders its own frame and holds it.
+  const passes = (label) => clipPassesFor(label).map((pass) => [pass.label, pass.lastFrameShown]);
+  assert.deepEqual(passes("burning"), [["burning", true], ["flame_repeat", false], ["flame_repeat", false]],
+    "1963 ends BOTH flame passes, and the entry runs on into 1949 rather than jumping");
+  assert.deepEqual(passes("celebrate1"), [["celebrate1", true], ["celebrate1a", false]]);
+  for (const label of ["hurt8", "knockback", "psyche_up", "psyche_up2"]) {
+    assert.ok(clipPassesFor(label).every((pass) => pass.lastFrameShown), `${label} ends on a Stop and shows it`);
+  }
+  // One answer shape for every label, like `clipSequenceFor`.
+  assert.deepEqual(passes("Hurt8"), [["hurt8", true], ["hurt9", true]]);
+  assert.deepEqual(passes("attack3"), [["attack3", true]]);
+  assert.deepEqual(clipPassesFor(""), []);
+  assert.deepEqual(clipPassesFor(null), []);
+  assert.deepEqual(clipPassesFor("burning").map((pass) => pass.label), [...clipSequenceFor("burning")],
+    "the passes are the run's own members, in its order");
+});
+
 test("the run-member list is DERIVED from the runs, so the two cannot drift", () => {
   assert.deepEqual([...CONTINUATION_LABELS],
     ["celebrate1a", "flame_repeat", "hurt9", "knockback_mov", "psyche_charging", "psyche_charging2"]);
@@ -162,7 +188,9 @@ test("EXACTLY FIVE SCHEDULES GOT LONGER and every other label's is untouched", (
   //   (~~2160, 2040, 1200, 1560, 1080~~); `test/render-build-timing.test.js`
   //   has why. What this test is FOR is unchanged: the run is longer than its
   //   entry clip alone, and nothing else moved.
-  const longer = { psyche_up: 600, psyche_up2: 1700 / 3, hurt8: 3400 / 3, knockback: 1900 / 3, burning: 3200 / 3 };
+  // `burning` is the 30 frames it SHOWS (~~3200 / 3~~, its 32 frame slots,
+  // until 2026-09-24 — `clipPassesFor`).
+  const longer = { psyche_up: 600, psyche_up2: 1700 / 3, hurt8: 3400 / 3, knockback: 1900 / 3, burning: 1000 };
   for (const [label, ms] of Object.entries(longer)) {
     const entryMs = (CLIP_SEQUENCES[label].entryFrames * 1000) / 30;
     assert.ok(Math.abs(timelineFor(label).durationMs - ms) < 1e-9, `${label} must run for its sequenced length`);
@@ -238,6 +266,30 @@ test("a run's poses are CONCATENATED and the entry keeps its own name", () => {
   assert.equal(chosen.animation.poses.length, 18);
   assert.equal(chosen.animation.limbs.length, 18, "the limb table must stay index-aligned with the poses");
   assert.deepEqual([...chosen.animation.playsSequence], ["psyche_up", "psyche_charging"]);
+});
+
+test("A RUN THAT ENDS ON A JUMP DRAWS EACH PASS ONE POSE SHORT: the jump frame's own art is never shown", () => {
+  // `burning` plays `burning` -> `flame_repeat` -> `flame_repeat` and ends on
+  // a jump (`clipPassesFor`). Frames here are this pack's own: burning 200-201,
+  // flame_repeat 202-204, so 204 stands for the build's 1963 — reached twice,
+  // rendered never.
+  const burning = clip("burning", { poses: 2, firstFrame: 200 });
+  const flame = clip("flame_repeat", { poses: 3, firstFrame: 202 });
+  const { animation } = animationFor(packOf({ burning, flame_repeat: flame }), { family: "condition:burning", label: "burning" });
+  assert.equal(animation.poses.length, 6, "2 + 2 + 2, not the 2 + 3 + 3 frame slots");
+  // The limb table is pushed by reference, so identity says which frame each
+  // drawn pose is — without going through the join's own arithmetic.
+  assert.deepEqual(animation.limbs.map((limb) => [...burning.limbs, ...flame.limbs].indexOf(limb)),
+    [0, 1, 2, 3, 2, 3], "burning 200, 201, then 202-203 twice, and 204 not at all");
+  assert.deepEqual(animation.poses[4], animation.poses[2], "the second pass is the same frames as the first");
+  assert.deepEqual([...animation.playsSequence], ["burning", "flame_repeat", "flame_repeat"]);
+
+  // And a run that ends on a `Stop` is drawn to its last frame: `hurt8`.
+  const stopped = animationFor(packOf({
+    hurt8: clip("hurt8", { poses: 2, firstFrame: 100 }),
+    hurt9: clip("hurt9", { poses: 3, firstFrame: 102 })
+  }), { family: "hurt", label: "hurt8" });
+  assert.equal(stopped.animation.poses.length, 5);
 });
 
 test("THE EFFECT INDICES ARE REBASED, and an unrebased one would draw plausibly", () => {
@@ -437,8 +489,10 @@ test("the hand-derived repeat SAYS it is hand-derived, at the field", () => {
   const handDerived = Object.entries(CLIP_SEQUENCES).filter(([, run]) => run.repeats);
   assert.deepEqual(handDerived.map(([entry]) => entry), ["burning"]);
   assert.deepEqual({ ...handDerived[0][1].repeats }, { label: "flame_repeat", passes: 2, derivedBy: "hand" });
-  // And the count is the one the frame total depends on: 2 + 15 * 2 = 32.
-  assert.equal(CLIP_SEQUENCES.burning.frames, 32);
+  // And the count is the one the frame total depends on: ~~2 + 15 * 2 = 32~~
+  // 2 + 14 * 2 = 30 since 2026-09-24 — each pass reaches 1963 and jumps before
+  // it renders (`clipPassesFor`), which is the rule, not a second hand count.
+  assert.equal(CLIP_SEQUENCES.burning.frames, 30);
   assert.equal(clipSequenceFor("burning").filter((label) => label === "flame_repeat").length, 2);
 });
 
@@ -504,7 +558,8 @@ test("every run's members are REAL labels and CONTIGUOUS in the build's frames",
     let expectedFirst = null;
     let poses = 0;
     const seen = new Set();
-    for (const member of run.plays) {
+    const shows = clipPassesFor(entry);
+    for (const [passIndex, member] of run.plays.entries()) {
       const animation = REAL_ANIMATIONS[member];
       assert.ok(animation, `${entry}'s run names ${member}, which the pack does not hold`);
       // A repeated member replays the SAME frames, so contiguity is checked on
@@ -517,10 +572,12 @@ test("every run's members are REAL labels and CONTIGUOUS in the build's frames",
         expectedFirst = animation.lastFrame + 1;
         seen.add(member);
       }
-      poses += animation.poses.length;
+      // ~~`poses += animation.poses.length`~~ — the frames SHOWN since
+      // 2026-09-24: a pass ending on a jump frame never renders it.
+      poses += animation.poses.length - (shows[passIndex].lastFrameShown ? 0 : 1);
     }
     assert.equal(run.entryFrames, REAL_ANIMATIONS[entry].poses.length, `${entry}'s entryFrames`);
-    assert.equal(run.frames, poses, `${entry}'s frame count must be its members' poses`);
+    assert.equal(run.frames, poses, `${entry}'s frame count must be the frames its passes show`);
   }
 });
 
@@ -551,7 +608,24 @@ test("the five dispatched runs really do double the art a gladiator is shown", (
   assert.equal(drawn("hurt", "hurt8"), 34);
   assert.equal(drawn("hurt", "hurt9"), 18, "the continuation dispatched on its own plays alone");
   assert.equal(drawn("knockback", "knockback"), 19);
-  assert.equal(drawn("condition:burning", "burning"), 32, "two frames plus the cycle, twice");
+  // ~~32, "two frames plus the cycle, twice"~~ — 2 + 15 + 15 is the frame
+  // SLOTS the playhead passes; 1963 jumps before it renders, twice (2026-09-24).
+  assert.equal(drawn("condition:burning", "burning"), 30, "two frames plus the cycle's 14 shown frames, twice");
+  assert.equal(drawn("celebrate", "celebrate1"), 26, "celebrate1's 9 and celebrate1a's 17: 1426 jumps before it renders");
+
+  // ► **THE JUMP FRAMES THEMSELVES ARE NEVER DRAWN**, checked by limb-table
+  //   identity (the join pushes each member's limb table by reference) rather
+  //   than by counting — and each is a real closing keyframe, so the count
+  //   alone would not show which frame went.
+  const limbsOf = (family, label) => animationFor(REAL_PACK, { family, label }).animation.limbs;
+  const flame = REAL_PACK.animations.flame_repeat;
+  const body = REAL_PACK.animations.celebrate1a;
+  assert.equal(flame.firstFrame + flame.limbs.length - 1, 1963);
+  assert.equal(body.firstFrame + body.limbs.length - 1, 1426);
+  assert.equal(limbsOf("condition:burning", "burning").includes(flame.limbs.at(-1)), false, "1963 is never drawn");
+  assert.equal(limbsOf("celebrate", "celebrate1").includes(body.limbs.at(-1)), false, "1426 is never drawn");
+  assert.equal(limbsOf("condition:burning", "burning").filter((limb) => limb === flame.limbs.at(-2)).length, 2,
+    "and 1962, the frame before the jump, is drawn once a pass");
 });
 
 /* ------------------------------------------------------------------ *

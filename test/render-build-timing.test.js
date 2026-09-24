@@ -84,12 +84,14 @@ test("THE ONE-BEAT-A-FRAME CLIPS play their frames at 33.3 ms each, not at 120",
   // Each was 3.6 times the build's length — exactly 120 / 33.3, the signature
   // of a beat standing in for a frame. Frame counts are the build's:
   // `psyche_up` 1609-1626 (18, the run), `psyche_up2` 1627-1643 (17),
-  // `psyche_up3` 1644-1656 (13), `celebrate1` 1400-1426 (27, one pass).
+  // `psyche_up3` 1644-1656 (13), `celebrate1` 1400-1425 (26 shown, one pass —
+  // ~~1400-1426 (27)~~ until 2026-09-24: 1426 is `GoToLabel("celebrate1a")`,
+  // which jumps before the frame renders; `clipPassesFor`).
   const cases = [
     ["psyche_up", "actor", 600],
     ["psyche_up2", "actor", 1700 / 3],
     ["psyche_up3", "actor", 1300 / 3],
-    ["celebrate1", "actor", 900]
+    ["celebrate1", "actor", 2600 / 3]
   ];
   for (const [label, role, ms] of cases) {
     const timeline = timelineFor(label, { role });
@@ -100,9 +102,13 @@ test("THE ONE-BEAT-A-FRAME CLIPS play their frames at 33.3 ms each, not at 120",
 
 test("the other two runs the build's frame actions extend play at its rate too", () => {
   // `hurt8` 1250-1265 runs on into `hurt9` to the stop at 1283 (34 frames);
-  // `burning` is 2 + 15 + 15 frame slots, `flame_repeat` twice (32).
+  // `burning` passes 2 + 15 + 15 frame SLOTS, `flame_repeat` twice, but its
+  // last slot is 1963, whose script jumps before the frame renders — so the
+  // build SHOWS 2 + 14 + 14 = 30 frames, one second. ~~32 frames, 1,066.7 ms~~
+  // until 2026-09-24, when an adversarial verifier broke it: the slot count
+  // drew the burn 67 ms long and 1963's art twice (`clipPassesFor`).
   near(timelineFor("hurt8", { role: "target" }).durationMs, 3400 / 3, "hurt8 -> hurt9");
-  near(timelineFor("burning", { role: "actor" }).durationMs, 3200 / 3, "burning, flame_repeat twice");
+  near(timelineFor("burning", { role: "actor" }).durationMs, 1000, "burning, flame_repeat's 14 shown frames twice");
 });
 
 /**
@@ -112,8 +118,10 @@ test("the other two runs the build's frame actions extend play at its rate too",
  * by a change that also sped up every attack.
  */
 const ON_THE_BUILDS_CLOCK = Object.freeze({
-  knockback: 19, knockback_mov: 13, hurt8: 34, burning: 32,
-  psyche_up: 18, psyche_up2: 17, psyche_up3: 13, celebrate1: 27
+  // `burning` and `celebrate1` are the frames SHOWN (~~32~~, ~~27~~ until
+  // 2026-09-24 — the slots, counting the jump frame each pass never renders).
+  knockback: 19, knockback_mov: 13, hurt8: 34, burning: 30,
+  psyche_up: 18, psyche_up2: 17, psyche_up3: 13, celebrate1: 26
 });
 
 test("EXACTLY EIGHT LABELS MOVED to the build's clock, and every other stays on the authored beat", () => {
@@ -172,4 +180,28 @@ test("EVERY POSE OF THE DRAWN RUN IS FIRST SHOWN ON ITS OWN BUILD FRAME — so i
       assert.equal(after, pose, `${label} pose ${pose} must show from ${buildMs.toFixed(1)} ms`);
     }
   }
+});
+
+test("THE RENDER BARREL RE-EXPORTS EVERY RENDER MODULE — the two timing modules were missing from it", () => {
+  // `src/render/index.js` is the pure core's one front door, and every other
+  // module under `src/render/` goes through it. `build-timing.js` and
+  // `blood-timing.js` were added on 2026-09-24 without a line there, found by
+  // their own implementers. Swept by IDENTITY, not by name, because two
+  // `export *` lines exporting one name cancel out silently in ESM: the name is
+  // simply absent from the barrel, and only an import of it would say so.
+  const dir = nodePath.join(ROOT, "src/render");
+  return import("../src/render/index.js").then(async (barrel) => {
+    const modules = nodeFs.readdirSync(dir).filter((name) => name.endsWith(".js") && name !== "index.js").sort();
+    assert.ok(modules.length > 20, `the render modules were listed: ${modules.length}`);
+    assert.ok(modules.includes("build-timing.js") && modules.includes("blood-timing.js"));
+    let checked = 0;
+    for (const name of modules) {
+      const module = await import(`../src/render/${name}`);
+      for (const [exported, value] of Object.entries(module)) {
+        assert.equal(barrel[exported], value, `${name}'s \`${exported}\` must reach \`src/render/index.js\``);
+        checked += 1;
+      }
+    }
+    assert.ok(checked > 100, `every export was compared: ${checked}`);
+  });
 });

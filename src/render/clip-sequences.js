@@ -96,8 +96,9 @@
  *   reasons, which is the distinction `clip-labels.js` already drew for
  *   `block`. **And the last three of them are silent ENTRY POINTS**: `hurt8`
  *   and `knockback` carry no sound because the sound fires on their
- *   CONTINUATION (`hurt9` -> `1183.mp3` at frame 1266, `knockback_mov` ->
- *   `1104.mp3` at frame 1440). That is a better answer to "why is `hurt8` the
+ *   CONTINUATION (`hurt9` -> `1183.mp3` at frame ~~1266~~ **1267** —
+ *   corrected 2026-09-24 against the player's sound manifest, offset 1 into
+ *   `hurt9` — `knockback_mov` -> `1104.mp3` at frame 1440). That is a better answer to "why is `hurt8` the
  *   one silent hurt" than the one this repository recorded, and it was
  *   available from the same bytes.
  *
@@ -157,9 +158,28 @@ export class ClipSequenceError extends Error {
  *
  * `frames` is the build's frame count for the whole run and `entryFrames` for
  * the entry clip alone. Neither DRAWS anything — the pack's poses do.
+ * ► **`frames` COUNTS THE FRAMES THE BUILD SHOWS, since 2026-09-24**: for the
+ *   two runs that end on a jump (`burning`, `celebrate1`) that is one fewer per
+ *   pass than the frame slots the playhead passes, because a jump frame
+ *   renders its target (`clipPassesFor`). `timelineFor` times a run by it, at
+ *   the build's rate, and `stance.js` splits the celebration's loop by it.
  *
- * ## `beats`: an AUTHORED duration, one per entry, and why it is not a formula
+ * ## ~~`beats`: an AUTHORED duration, one per entry, and why it is not a formula~~
  *
+ * ► **NOTHING SCHEDULES FROM `beats` ANY MORE — STRUCK 2026-09-24, KEPT AS
+ *   HISTORY.** `timelineFor` times every run by `frames` at the build's 30 fps
+ *   (`build-timing.js`) and stamps `provenance: "build-frames"`; `beats` and
+ *   `sequenceBeatsFor` are read by no schedule, only by the tests that pin what
+ *   they were. The rule below was measured against the drawing that day and
+ *   was wrong for four of its five uses: the `psyche` "pace" was a 120 ms beat
+ *   standing in for a 33.3 ms frame (3.6 times the build's length), and
+ *   `hurt`'s 5 and `knockback`'s 9 were written on 2026-09-10 (473ef59), three
+ *   days before any frame of the fighter was extracted (ede9350) — no clip
+ *   length was ever in them. The table's pace column is therefore not a pace.
+ *   And "thirteen clips of 16 to 18 frames" is wrong on the pack: the thirteen
+ *   hurt clips run 13 to 31 frames (`hurt1`/`hurt6` 13 ... `hurt12` 31).
+ *
+ * ~~*(Struck from here to the closing marks after the table.)*
  * A continuation doubles the art a schedule has to show. Left at the family's
  * old duration it plays at twice the speed, so the duration has to grow — and
  * the first version of this file grew it by a RATIO, `frames / entryFrames`,
@@ -189,14 +209,19 @@ export class ClipSequenceError extends Error {
  *
  * Every one of those is AUTHORED, like every other duration in this engine, and
  * `timeline.js` keeps stamping `provenance: "authored-timing"` on the result.
- * The build's frame counts beside them are the measured part.
+ * The build's frame counts beside them are the measured part.~~ *(The `run`
+ * column above is the frame SLOTS: `burning` shows 30 and `celebrate1` 26.)*
  */
 export const CLIP_SEQUENCES = Object.freeze({
   /**
    * THE ONE SILENT HURT IS HALF A PERFORMANCE. Direction 8 dispatches
    * `hurt8` — `defender_hurt` assembles `"hurt" + attack_direction` — and the
    * build plays 34 frames for it against 18 for every neighbouring direction.
-   * The sound lands at frame 1266, seventeen frames in.
+   * ~~The sound lands at frame 1266, seventeen frames in.~~ **The sound lands
+   * at frame 1267, run pose 17 — the eighteenth frame, 566.7 ms in at the
+   * build's rate** (corrected 2026-09-24 against the player's sound manifest,
+   * `cues.labels.hurt9`: `1183.mp3`, frame 1267, offset 1). 1266 is `hurt9`'s
+   * first frame, where its BLOOD is (`clip-effects.json`), not its sound.
    */
   hurt8: Object.freeze({
     plays: Object.freeze(["hurt8", "hurt9"]),
@@ -254,34 +279,46 @@ export const CLIP_SEQUENCES = Object.freeze({
    * frame 1963 is the clip's ONLY conditional —
    * `if (burncycle >= 2) { struck = true; gotoAndPlay("Standing") }
    *  else { burncycle++; gotoAndPlay("flame_repeat") }`, compiled as
-   * `Less2; Not; Not; If` — so the cycle body plays TWICE and the run is
-   * 2 + 15 + 15 frames.
+   * `Less2; Not; Not; If` — so the cycle body plays TWICE and the playhead
+   * passes 2 + 15 + 15 frame slots, of which the build SHOWS 2 + 14 + 14
+   * (below).
    *
    * **This engine played the two-frame stub**, which is 6% of what the build
    * plays, and no test could see it because the pack's `burning` entry really
    * is two poses long.
    *
-   * ► **`frames: 32` IS THE ONE NUMBER IN THIS TABLE THE TOOL DOES NOT PROVE,
-   *   and a verifier caught it sitting there looking like the others.**
+   * ► **~~`frames: 32`~~ `frames: 30` IS THE ONE NUMBER IN THIS TABLE THE
+   *   TOOL DOES NOT PROVE, and a verifier caught it sitting there looking like
+   *   the others.**
    *   `tools/clip-sequences.mjs` finds the terminator and reports
    *   `goto:Standing goto:flame_repeat`; it does not EVALUATE the counter, so
    *   the repeat count of 2 is read by hand out of `burncycle = 1` and
    *   `>= 2`. `repeats` says so at the field, and the tool flags the run as
    *   `loops` so the two cannot silently diverge.
    *
-   * ► **AND IT IS FRAME-SLOT EXECUTIONS, NOT RENDERED TICKS.** AVM1 runs a
-   *   frame's actions before it renders, so frame 1963's own artwork is never
-   *   shown — each entry to it renders the goto target instead. The build's
-   *   wall-clock is therefore ~30 ticks, not 32. The beat count below is
-   *   authored against the slot count, which is the conservative direction: it
-   *   errs long by two frames rather than clipping the cycle.
+   * ► ~~**AND IT IS FRAME-SLOT EXECUTIONS, NOT RENDERED TICKS.**~~ **IT WAS
+   *   FRAME-SLOT EXECUTIONS, AND IS RENDERED FRAMES SINCE 2026-09-24.** AVM1
+   *   runs a frame's actions before it renders, so frame 1963's own artwork is
+   *   never shown — each entry to it renders the goto target instead. ~~The
+   *   build's wall-clock is therefore ~30 ticks, not 32. The beat count below
+   *   is authored against the slot count, which is the conservative direction:
+   *   it errs long by two frames rather than clipping the cycle.~~ **This
+   *   paragraph already said so, and the slot count stayed in `frames` anyway;
+   *   while nothing but a beat count read it, that cost nothing. The day
+   *   `timelineFor` began timing runs by `frames` at the build's rate, 32 slots
+   *   became a burn drawn 67 ms long with 1963's art on screen twice, stamped
+   *   `build-frames`** — found by an adversarial verifier the same day.
+   *   `frames` is now what the build SHOWS, 2 + 14 + 14, and the join drops the
+   *   jump frame from each pass by the one rule `clipPassesFor` states.
    */
   burning: Object.freeze({
     plays: Object.freeze(["burning", "flame_repeat", "flame_repeat"]),
-    entryFrames: 2, frames: 32, beats: 9,
+    entryFrames: 2, frames: 30, beats: 9,
     endsAt: 1963, ending: "goto:Standing",
     // HAND-DERIVED from `burncycle = 1` at 1947 and `>= 2` at 1963. The only
-    // hand-derived number here; everything else comes out of the tool.
+    // hand-derived number here; everything else comes out of the tool — the
+    // frame counts through the pack's spans, less each jump frame
+    // (`clipPassesFor`), which is AVM1's rule and not a count read by hand.
     repeats: Object.freeze({ label: "flame_repeat", passes: 2, derivedBy: "hand" })
   }),
 
@@ -293,11 +330,14 @@ export const CLIP_SEQUENCES = Object.freeze({
    *
    * `celebrate1a` SELF-LOOPS at 1426, so the run does not terminate: the
    * gladiator celebrates until something else moves him. `frames` counts one
-   * pass.
+   * pass — the frames it SHOWS, 1400-1425: ~~27~~ 26 since 2026-09-24. 1426
+   * is `GoToLabel("celebrate1a"); Play` and jumps before it renders, so the
+   * body the winner cycles is 1409-1425, 17 frames, and 1426's art (1409's,
+   * placement for placement) never gets a tick of its own (`clipPassesFor`).
    */
   celebrate1: Object.freeze({
     plays: Object.freeze(["celebrate1", "celebrate1a"]),
-    entryFrames: 9, frames: 27, beats: null,
+    entryFrames: 9, frames: 26, beats: null,
     endsAt: 1426, ending: "loop:celebrate1a"
   })
 });
@@ -366,12 +406,65 @@ export function clipSequenceFor(label) {
   return entry ? entry.plays : Object.freeze([key]);
 }
 
+/**
+ * THE PASSES A `gotoAndPlay(<label>)` RENDERS: the run's members in play
+ * order, each saying whether its LAST frame is ever shown.
+ *
+ * ► **A FRAME WHOSE OWN SCRIPT JUMPS IS NEVER SHOWN** *(added 2026-09-24,
+ *   after an adversarial verifier broke `burning`'s `frames: 32`)*. AVM1 runs a
+ *   frame's actions before that frame is rendered, and a goto among them moves
+ *   the playhead there and then — so the tick that ENTERS a jump frame renders
+ *   the jump's TARGET instead, and the next tick advances from the target.
+ *   Two runs end on a jump, and each pass through the member holding it stops
+ *   one frame short:
+ *
+ *   - `burning`: 1963 is `flame_repeat`'s last frame and BOTH arms of its
+ *     if/else jump, so each of the two passes shows 1949-1962 — 2 + 14 + 14 =
+ *     30 frames, not the 32 frame slots the playhead passes through;
+ *   - `celebrate1`: 1426 is `GoToLabel("celebrate1a"); Play`, so a pass shows
+ *     1400-1425 and the body the winner cycles is 17 frames, not 18.
+ *
+ *   **The pack is the corroboration, not the source**: 1426 is placement for
+ *   placement 1409's art, and 1963 is 1949's body under the flame — a closing
+ *   keyframe that exists so the tween meets its own start, and that renders
+ *   as a held frame at every seam if it is drawn. No capture has timed either
+ *   loop; the rule is the player's, applied to the build's actions.
+ *
+ * A run that ends on a `Stop` renders its last frame and holds it, so its
+ * passes are all shown to the end. **A label outside `CLIP_SEQUENCES` is one
+ * pass shown whole**, because this table records no ending for it — right for
+ * every `Stop`-ended span, and one frame long for the six self-loops the
+ * header names outside it (`Standing` and the gaits), which are NOT handled
+ * here: their loop art is drawn over an authored length.
+ */
+export function clipPassesFor(label) {
+  const plays = clipSequenceFor(label);
+  if (plays.length === 0) return NO_PASSES;
+  const run = CLIP_SEQUENCES[plays[0]];
+  // The jump frame is the run's `endsAt`, which is its LAST member's last frame
+  // (checked against the pack in the tests), so every pass through that member
+  // reaches it.
+  const holdsJump = run && endsOnJump(run) ? plays[plays.length - 1] : null;
+  return Object.freeze(plays.map((member) => Object.freeze({ label: member, lastFrameShown: member !== holdsJump })));
+}
+
+const NO_PASSES = Object.freeze([]);
+
+/** Whether a run ENDS on a jump — a goto away or a self-loop — rather than a `Stop`. */
+function endsOnJump(run) {
+  return typeof run.ending === "string" && /^(goto|loop):/.test(run.ending);
+}
+
 /** Whether entering at this label plays more than the clip that carries its name. */
 export function isSequencedLabel(label) {
   return typeof label === "string" && Object.hasOwn(CLIP_SEQUENCES, label.toLowerCase());
 }
 
 /**
+ * ► **READ BY NO SCHEDULE SINCE 2026-09-24** — `timelineFor` times a run by
+ *   its `frames` at the build's rate. Kept because tests pin what the table
+ *   held; the paragraphs below describe what it WAS for.
+ *
  * The authored beat count a sequenced label's schedule should run for, or null
  * to leave the family's own duration alone.
  *

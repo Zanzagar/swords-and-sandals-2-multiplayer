@@ -10,6 +10,9 @@
  * 1434-1446), so the pose arithmetic is checked on the real run lengths.
  */
 import assert from "node:assert/strict";
+import nodeFs from "node:fs";
+import nodePath from "node:path";
+import { fileURLToPath as toPath } from "node:url";
 import test from "node:test";
 
 import {
@@ -27,6 +30,16 @@ import { chooseSound } from "../src/render/sound.js";
 import { timelineFor } from "../src/render/timeline.js";
 import { allClipLabels } from "../src/render/clip-labels.js";
 import { animationFor, figurePackFrom, poseIndexAt } from "../src/render/extracted-figure.js";
+
+/** The player's own extraction, when this machine has one — never committed. */
+function readRealPack(relative) {
+  const at = nodePath.join(toPath(new URL("..", import.meta.url)), relative);
+  return nodeFs.existsSync(at) ? JSON.parse(nodeFs.readFileSync(at, "utf8")) : null;
+}
+const REAL_MANIFEST = readRealPack("assets/sound/manifest.json");
+const REAL_SHAPES = readRealPack("assets/figure/shapes.json");
+const REAL_ANIMATIONS = readRealPack("assets/figure/animations.json");
+const REAL_PACK = REAL_SHAPES && REAL_ANIMATIONS ? figurePackFrom(REAL_SHAPES, REAL_ANIMATIONS) : null;
 
 /** A manifest's `cues`, in the extractor's own shape. */
 function manifestWith(labels, extra = {}) {
@@ -121,6 +134,74 @@ test("a tag past the build's STOP is never reached, so it is not a cue", () => {
   assert.deepEqual(plan.cues.map(({ file }) => file), ["1240.mp3"]);
 });
 
+test("A RUN THAT ENDS ON A JUMP draws each pass a frame short, and a tag ON the jump frame plays on the tick that enters it", () => {
+  // ► **ADDED 2026-09-24 AFTER AN ADVERSARIAL VERIFIER BROKE `burning`'s 32.**
+  //   1963 ends both `flame_repeat` passes with a jump (`clipPassesFor`). AVM1
+  //   processes the frame's tags and runs its actions — the jump among them —
+  //   before it renders, so that tick SHOWS the jump's target: the drawing has
+  //   2 + 14 + 14 poses, not 32. A `StartSound` on the jump frame still starts
+  //   on that tick, which is the next pass's first pose. The shipped build puts
+  //   none there (`flame_repeat` carries no sound); the tags below are this
+  //   test's, so the arithmetic is pinned before a build that does.
+  const timing = soundTimingFrom(manifestWith({
+    burning: label(1947, 2, [at("1216.mp3", 0), at("1181.mp3", 1)]),
+    flame_repeat: label(1949, 15, [at("second.mp3", 1), at("jump.mp3", 14)])
+  }));
+  const plan = soundCuesFor({ timing }, { family: "condition:burning", label: "burning" });
+  assert.equal(plan.poseCount, 30, "2 + 14 + 14 frames shown — not the 32 slots the playhead passes");
+  assert.deepEqual(plan.cues.map(({ file, poseIndex }) => [file, poseIndex]), [
+    ["1216.mp3", 0], ["1181.mp3", 1],
+    ["second.mp3", 3],   // 1950 on the first pass
+    ["jump.mp3", 16],    // 1963, entered on the tick that shows the second pass's 1949
+    ["second.mp3", 17]   // 1950 again
+    // and 1963's tag on the LAST pass is the tick the run hands back to
+    // `Standing` — past the last drawn pose, like the build's `struck = true`
+  ]);
+});
+
+test("THE SOUND PLAN COUNTS THE POSES THE DRAWING DRAWS, for every run, on the player's own packs", () => {
+  // The one number the two must share: `dueSoundCues` picks the drawn pose
+  // with `poseIndexAt(plan.poseCount, at)`, so a plan counting 32 against a
+  // drawing of 30 fires every cue on the wrong frame.
+  if (!REAL_MANIFEST || !REAL_PACK) {
+    assert.ok(!REAL_MANIFEST || !REAL_PACK, "no extraction on this machine");
+    return;
+  }
+  const timing = soundTimingFrom(REAL_MANIFEST);
+  for (const label of ["hurt8", "knockback", "psyche_up", "psyche_up2", "burning", "celebrate1"]) {
+    const { family } = timelineFor(label, { role: "actor" });
+    const drawn = animationFor(REAL_PACK, { family, label });
+    const plan = soundCuesFor({ timing }, { family, label, drawnLabel: drawn.label });
+    assert.equal(plan.poseCount, drawn.animation.poses.length, `${label}: the plan and the drawing count the same poses`);
+  }
+});
+
+test("hurt8's sound lands where the BUILD's does, on the player's own manifest: frame 1267, pose 17, 566.7 ms", () => {
+  // ► **CORRECTED 2026-09-24 by an adversarial verifier.** This file's fixture
+  //   puts `1183.mp3` on `hurt9`'s FIRST frame, 1266 (offset 0), and the
+  //   sweep above times it at pose 16, 533.3 ms — right for the fixture. The
+  //   clip-speed report and a comment here carried those numbers over as the
+  //   BUILD's; the real manifest has the tag at 1267, offset 1: run pose 17,
+  //   566.7 ms at the build's 30 fps (600 under the old 1,200 ms schedule).
+  if (!REAL_MANIFEST) {
+    assert.equal(REAL_MANIFEST, null, "no extraction on this machine");
+    return;
+  }
+  const hurt9 = REAL_MANIFEST.cues.labels.hurt9;
+  assert.deepEqual(hurt9.sounds.map(({ file, frame, offset }) => [file, frame, offset]), [["1183.mp3", 1267, 1]]);
+  const timeline = timelineFor("hurt8", { role: "target" });
+  const plan = soundCuesFor({ timing: soundTimingFrom(REAL_MANIFEST) }, { family: timeline.family, label: timeline.label });
+  assert.deepEqual(plan.cues.map(({ file, poseIndex }) => [file, poseIndex]), [["1183.mp3", 17]]);
+  let fired = 0;
+  let firstFiredAt = null;
+  for (let elapsed = 0; elapsed <= timeline.durationMs; elapsed += 0.5) {
+    const result = dueSoundCues(plan, { elapsedMs: elapsed, durationMs: timeline.durationMs, fired });
+    if (result.due.length > 0 && firstFiredAt === null) firstFiredAt = elapsed;
+    fired = result.fired;
+  }
+  assert.ok(Math.abs(firstFiredAt - 1700 / 3) <= 0.5, `fired ${firstFiredAt} ms in, where the build's is 566.7`);
+});
+
 test("silence stays silence: the idle, a held stance, and a run with no tags", () => {
   assert.deepEqual(soundCuesFor({ timing: TIMING }, { family: "standing", label: "Standing" }).cues, []);
   assert.deepEqual(soundCuesFor({ timing: TIMING }, { family: "stance:psyche", label: "psyche_charging" }).cues, []);
@@ -173,8 +254,11 @@ test("A CUE FIRES EXACTLY WHEN THE DRAWING SHOWS ITS POSE, at every millisecond 
     fired = result.fired;
   }
   // ~~16/34 of 1200 ms~~ — frame 1266 is sixteen of the build's frames into
-  // the run, 533.3 ms at 30 fps, which is where the build starts it. To the
-  // half-millisecond sweep.
+  // the run, 533.3 ms at 30 fps~~, which is where the build starts it~~. To the
+  // half-millisecond sweep. *(Corrected 2026-09-24 by an adversarial verifier:
+  // 1266 is THIS FIXTURE's frame for the tag, offset 0. The build's is 1267,
+  // offset 1 — run pose 17, 566.7 ms, and 600 under the old schedule; the
+  // player's-manifest test below pins it.)*
   assert.ok(Math.abs(firstFiredAt - 16 * (1000 / 30)) <= 0.5, `fired at ${firstFiredAt} ms`);
 });
 

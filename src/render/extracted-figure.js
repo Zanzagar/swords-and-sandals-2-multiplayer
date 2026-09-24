@@ -134,7 +134,7 @@
 
 import { isBareskinPlacement, lookPaintFor } from "./appearance.js";
 import { clipLabelsFor, directionalLabel } from "./clip-labels.js";
-import { clipSequenceFor, shortRunFramesFor } from "./clip-sequences.js";
+import { clipPassesFor, shortRunFramesFor } from "./clip-sequences.js";
 import {
   applyColourTransform,
   applyColourTransformAlpha,
@@ -364,7 +364,8 @@ function isDrawable(pack, animation) {
  */
 function sequencedAnimation(pack, name) {
   if (pack.sequenced.has(name)) return pack.sequenced.get(name);
-  const members = clipSequenceFor(name);
+  const passes = clipPassesFor(name);
+  const members = passes.map((pass) => pass.label);
   let built = null;
   if (members.length > 1) {
     const parts = members.map((member) => pack.animations[member]);
@@ -372,10 +373,15 @@ function sequencedAnimation(pack, name) {
       const poses = [];
       const limbs = [];
       const effectGroups = [];
-      for (const part of parts) {
+      parts.forEach((part, passIndex) => {
         const offset = effectGroups.length;
         if (Array.isArray(part.effectGroups)) effectGroups.push(...part.effectGroups);
-        part.poses.forEach((pose, index) => {
+        // ► **A PASS THAT ENDS ON A JUMP NEVER SHOWS ITS LAST FRAME** (added
+        //   2026-09-24): the build renders the jump's target on that tick, so
+        //   `burning`'s 1963 and `celebrate1`'s 1426 are passed through and
+        //   never drawn (`clipPassesFor`).
+        const shown = passes[passIndex].lastFrameShown ? part.poses.length : part.poses.length - 1;
+        part.poses.slice(0, shown).forEach((pose, index) => {
           poses.push(pose.map((placement) => (
             Array.isArray(placement.effects) && placement.effects.length > 0 && offset > 0
               ? { ...placement, effects: placement.effects.map((id) => id + offset) }
@@ -385,7 +391,7 @@ function sequencedAnimation(pack, name) {
           // shift every later pose's limbs by its own length.
           limbs.push(part.limbs?.[index]);
         });
-      }
+      });
       const first = parts[0];
       const last = parts[parts.length - 1];
       built = Object.freeze({

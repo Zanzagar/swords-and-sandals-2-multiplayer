@@ -10,9 +10,10 @@
  * ## The rule
  *
  * ```text
- *   run       = clipSequenceFor(label)            hurt8 -> [hurt8, hurt9]
- *   poseIndex = sum(frames of the run's earlier members) + the cue's offset
- *   poseCount = sum(frames of every member), cut to a SHORT_RUNS stop
+ *   run       = clipPassesFor(label)              hurt8 -> [hurt8, hurt9]
+ *   poseIndex = sum(frames SHOWN by the run's earlier passes) + the cue's offset
+ *   poseCount = sum(frames SHOWN by every pass), cut to a SHORT_RUNS stop
+ *               (a pass ending on a jump shows one frame fewer than its span)
  *   fires     when poseIndexAt(poseCount, at) >= poseIndex
  * ```
  *
@@ -47,7 +48,7 @@
  */
 
 import { chooseSound, soundLabelsFor } from "./sound.js";
-import { clipSequenceFor, shortRunFramesFor } from "./clip-sequences.js";
+import { clipPassesFor, shortRunFramesFor } from "./clip-sequences.js";
 import { directionalLabel } from "./clip-labels.js";
 import { poseIndexAt } from "./extracted-figure.js";
 
@@ -217,8 +218,8 @@ export function soundCuesFor({ bindings = null, timing = null } = {}, {
     const cues = [];
     let base = 0;
     let complete = true;
-    for (const member of clipSequenceFor(entry)) {
-      const timed = timing.labels[member];
+    for (const pass of clipPassesFor(entry)) {
+      const timed = timing.labels[pass.label];
       // A member the table does not know means a table from some other build:
       // its offsets would be offsets into nothing. Fall back rather than guess.
       if (!timed) { complete = false; break; }
@@ -230,7 +231,14 @@ export function soundCuesFor({ bindings = null, timing = null } = {}, {
           noMultiple: sound.noMultiple
         }));
       }
-      base += timed.frames;
+      // ► **A PASS THAT ENDS ON A JUMP SHOWS ONE FRAME FEWER** (2026-09-24,
+      //   `clipPassesFor`): the drawing never draws the jump frame, so the run
+      //   advances by the frames SHOWN. A tag ON the jump frame is kept, and
+      //   lands on the next pass's first pose — the tick the build enters the
+      //   jump frame, starts its sounds and renders the target. On the last
+      //   pass that is the tick the run hands back, past `poseCount`, and the
+      //   cut below drops it.
+      base += pass.lastFrameShown ? timed.frames : timed.frames - 1;
     }
     if (complete) {
       // A run the build STOPS early plays fewer frames than its span, and a

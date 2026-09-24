@@ -26,7 +26,7 @@ import test from "node:test";
 
 import { clipLabelsFor } from "../src/render/clip-labels.js";
 import { CLIP_SEQUENCES } from "../src/render/clip-sequences.js";
-import { animationFor, figureEffectGroupsFor, figurePackFrom } from "../src/render/extracted-figure.js";
+import { animationFor, figureEffectGroupsFor, figurePackFrom, poseIndexAt } from "../src/render/extracted-figure.js";
 import { chooseSound, soundLabelsFor } from "../src/render/sound.js";
 import {
   CELEBRATION_LABEL,
@@ -404,9 +404,12 @@ test("it LOOPS, and the whole run is drawn rather than just the entry clip", () 
   );
   assert.equal(timeline.loop, true, "a victory idle must not end and hand back");
   assert.equal(at, 0);
-  // ~~27 beats~~ 27 of the build's FRAMES, at its 30 fps since 2026-09-24:
-  // the build's 9-frame `celebrate1` plus `celebrate1a`'s 18, 900 ms a pass.
-  assert.equal(timeline.durationMs, 900);
+  // ~~27 beats~~ ~~27 of the build's FRAMES~~ the 26 frames the build SHOWS,
+  // at its 30 fps since 2026-09-24: the 9-frame `celebrate1` plus
+  // `celebrate1a`'s 1409-1425. Its 18th frame, 1426, is
+  // `GoToLabel("celebrate1a"); Play` and jumps before it renders
+  // (`clipPassesFor`) — ~~900 ms~~ 866.7 ms a pass.
+  assert.ok(Math.abs(timeline.durationMs - 2600 / 3) < 1e-9, `${timeline.durationMs} ms a pass`);
   // And it breathes on the caller's clock, unlike the held stance.
   assert.notEqual(idleFrameFor(
     { id: "h", teamId: "red", alive: true, resources: {} },
@@ -417,12 +420,13 @@ test("it LOOPS, and the whole run is drawn rather than just the entry clip", () 
     assert.equal(REAL_PACK, null, "no extraction on this machine");
     return;
   }
-  // ► **27 POSES, NOT 9.** `celebrate1` runs on into `celebrate1a`, so a winner
-  //   who drew only the entry clip would flourish for a third of a second and
-  //   then snap back to the start.
+  // ► **~~27~~ 26 POSES, NOT 9.** `celebrate1` runs on into `celebrate1a`, so a
+  //   winner who drew only the entry clip would flourish for a third of a
+  //   second and then snap back to the start. (26 since 2026-09-24: the jump
+  //   frame 1426 is never drawn.)
   const { label, animation } = animationFor(REAL_PACK, { family: "celebrate", label: CELEBRATION_LABEL });
   assert.equal(label, CELEBRATION_LABEL);
-  assert.equal(animation.poses.length, 27);
+  assert.equal(animation.poses.length, 26);
   assert.deepEqual([...animation.playsSequence], ["celebrate1", "celebrate1a"]);
 });
 
@@ -469,8 +473,8 @@ test("THE VICTORY FLOURISH PLAYS ONCE, and the owner reported the version that d
   //   and reported it: **"the guy keeps victory emoting at the end too."**
   //
   //   A stated approximation is still a wrong picture. The split point is
-  //   DERIVED from `CLIP_SEQUENCES` (`entryFrames / frames`, 9 of 27) rather
-  //   than authored as 0.333.
+  //   DERIVED from `CLIP_SEQUENCES` (`entryFrames / frames`, 9 of ~~27~~ 26)
+  //   rather than authored as 0.333.
   const winner = { id: "w", teamId: "red", alive: true };
   const run = CLIP_SEQUENCES[CELEBRATION_LABEL];
   const entry = run.entryFrames / run.frames;
@@ -491,7 +495,51 @@ test("THE VICTORY FLOURISH PLAYS ONCE, and the owner reported the version that d
       `cycle ${cycles} must land in the tail, not back in the entry (got ${at(cycles)})`);
     assert.ok(at(cycles) < 1);
   }
-  assert.ok(Math.abs(at(1) - entry) < 1e-9, "the second pass starts exactly at the continuation");
+  // ► **AT THE SEAM ITSELF THE CLOCK IS A FLOAT** *(2026-09-24)*: 26 frames is
+  //   866.66... ms, and `1000 + d - 1000` comes back a hair short of `d`, so
+  //   the instant of the wrap reads as the body's end — which IS the seam, on
+  //   a loop. (At 27 frames, 900 ms, it happened to be exact.) Just past it is
+  //   the continuation's first pose, and that is the claim.
+  const seam = at(1);
+  assert.ok(Math.abs(seam - entry) < 1e-9 || Math.abs(seam - 1) < 1e-9, `the seam of the second pass, got ${seam}`);
+  assert.ok(Math.abs(at(1 + 1e-6) - entry) < 1e-5, "the second pass starts exactly at the continuation");
+});
+
+test("THE BODY A WINNER CYCLES IS 17 OF THE BUILD'S FRAMES, 1409-1425, and 1426 is never drawn", () => {
+  // ► **ADDED 2026-09-24 AFTER AN ADVERSARIAL VERIFIER MEASURED 18.** 1426 is
+  //   `GoToLabel("celebrate1a"); Play`: AVM1 runs it before the frame renders,
+  //   so each tick that enters 1426 shows 1409 and the next shows 1410. The
+  //   cycle is 1409-1425 — seventeen frames, 566.7 ms — and 1426's art (which
+  //   is 1409's, placement for placement) is never on screen for a tick of its
+  //   own. Drawn as 18, the winner held 1409's pose for two frames every cycle.
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  const winner = { id: "w", teamId: "red", alive: true };
+  const { animation } = animationFor(REAL_PACK, { family: "celebrate", label: CELEBRATION_LABEL });
+  const body = REAL_PACK.animations.celebrate1a;
+  const frameOf = (limb) => {
+    const index = body.limbs.indexOf(limb);
+    return index < 0 ? null : body.firstFrame + index;
+  };
+  const shown = [];
+  for (let now = 1000; now <= 1000 + 4000; now += 0.5) {
+    const { at } = idleFrameFor(winner, { now, winnerTeamId: "red", celebratingSince: 1000 });
+    const frame = frameOf(animation.limbs[poseIndexAt(animation.poses.length, at)]);
+    if (shown.length === 0 || shown.at(-1)[1] !== frame) shown.push([now - 1000, frame]);
+  }
+  assert.equal(shown.some(([, frame]) => frame === 1426), false, "1426 is never drawn");
+  const starts = shown.filter(([, frame]) => frame === 1409).map(([ms]) => ms);
+  assert.ok(starts.length >= 5, `the body loops: ${starts.join(", ")}`);
+  assert.ok(Math.abs(starts[0] - 300) <= 0.5, `the body begins after the 9-frame flourish, at ${starts[0]} ms`);
+  for (let index = 1; index < starts.length; index += 1) {
+    assert.ok(Math.abs(starts[index] - starts[index - 1] - 1700 / 3) <= 0.5,
+      `cycle ${index}: ${starts[index] - starts[index - 1]} ms, where 17 of the build's frames are 566.7`);
+  }
+  // Every frame of the cycle, in order, once — 1425 hands straight to 1409.
+  const cycle = shown.filter(([ms]) => ms >= starts[1] && ms < starts[2]).map(([, frame]) => frame);
+  assert.deepEqual(cycle, Array.from({ length: 17 }, (_, index) => 1409 + index));
 });
 
 test("WITHOUT A START TIME IT LOOPS THE WHOLE RUN, so no existing caller changed behaviour", () => {

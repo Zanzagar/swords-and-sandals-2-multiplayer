@@ -30,6 +30,11 @@
  * - `sound-timing.js` fires each of a clip's sounds at the DRAWN pose the
  *   build's `StartSound` sits on, with the drawing's own pose arithmetic, so a
  *   sound follows everything that delays or cuts short the figure.
+ * - `build-timing.js` is the build's frame clock — its 30 fps, read from the
+ *   oracle's fingerprint — which every schedule that plays the build's own
+ *   frames runs on; `blood-timing.js` fires a clip's `bounceitem` calls at the
+ *   DRAWN pose, sound-timing's twin. *(Both were added 2026-09-24 without a
+ *   line here, and a barrel test now sweeps every module by identity.)*
  * - `crowd-sound.js` is the other half: the sounds the build plays from CODE
  *   and from the arena's own timelines — the crowd's ambience at its live
  *   volume, its seeded chance cheers and boos, the win sound, the sting and the
@@ -99,6 +104,8 @@ export * from "./painter.js";
 export * from "./timeline.js";
 export * from "./sound.js";
 export * from "./sound-timing.js";
+export * from "./build-timing.js";
+export * from "./blood-timing.js";
 export * from "./crowd-sound.js";
 export * from "./clip-labels.js";
 export * from "./clip-sequences.js";

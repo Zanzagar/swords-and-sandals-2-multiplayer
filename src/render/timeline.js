@@ -606,9 +606,14 @@ const FAMILIES = Object.freeze({
    * THE VICTORY CELEBRATION, and the one schedule here that is meant to run
    * forever.
    *
-   * ► **27 FRAMES, WHICH IS THE BUILD'S OWN RUN**: `celebrate1` is 9 frames
-   *   (1400-1408) and runs on into `celebrate1a`'s 18 (1409-1426), and
-   *   `clip-sequences.js` gives the renderer all 27 poses. ~~One beat a frame,
+   * ► **~~27~~ 26 FRAMES, WHICH IS THE BUILD'S OWN RUN**: `celebrate1` is 9
+   *   frames (1400-1408) and runs on into `celebrate1a`'s 18 (1409-1426), and
+   *   ~~`clip-sequences.js` gives the renderer all 27 poses~~ **the build
+   *   SHOWS 17 of those 18: 1426 is the `GoToLabel` and jumps before it
+   *   renders** (corrected 2026-09-24 by an adversarial verifier;
+   *   `clipPassesFor`), so the renderer draws 26 poses. Only reachable through
+   *   `celebrate1`, whose run length overrides it in `timelineFor`; stated
+   *   here so the two agree. ~~One beat a frame,
    *   because the `psyche` family set that precedent for a clip whose length
    *   the pack states.~~ **A beat is not a frame (corrected 2026-09-24): 27
    *   beats drew the run over 3,240 ms where the build plays it in 900, and
@@ -626,7 +631,7 @@ const FAMILIES = Object.freeze({
    *   winner re-plays his opening flourish once a cycle**; the benefit is that
    *   no part of the renderer has to hold when a bout ended.
    */
-  celebrate: () => buildSchedule("celebrate", 27, [
+  celebrate: () => buildSchedule("celebrate", 26, [
     { at: 0, pose: {} },
     { at: 0.18, pose: { armSwing: 0.9, bob: 0.45, lean: -0.2 } },
     { at: 0.36, pose: { armSwing: 0.5, bob: 0.1, legSpread: 0.5 } },
@@ -885,9 +890,20 @@ export function timelineFor(label, { role = "actor" } = {}) {
   //   before any frame of the fighter was extracted (ede9350), so no clip length
   //   was ever in them — a knockback drew 1,560 ms where the build plays 633.
   //   The fifth, `burning`, was already "the build's own 30 fps" rounded to the
-  //   beat, and moves 13 ms. The run's frame count is the tool-derived half of
-  //   the table (`tools/clip-sequences.mjs`), which is why the provenance says
-  //   whose clock this is.
+  //   beat, and moves ~~13 ms~~ **80 ms, 1,080 to 1,000**. ~~The run's frame
+  //   count is the tool-derived half of the table (`tools/clip-sequences.mjs`),
+  //   which is why the provenance says whose clock this is.~~
+  //
+  // ► **CORRECTED THE SAME DAY BY AN ADVERSARIAL VERIFIER, at both halves of
+  //   that sentence.** (1) `burning`'s count is NOT the tool's: its repeat is
+  //   read by hand (`repeats.derivedBy: "hand"` at the field), and the 32 this
+  //   first timed was the frame SLOTS the playhead passes — 1963 jumps before it
+  //   renders, twice, so the build shows 30 (`clipPassesFor`), and `celebrate1`
+  //   shows 26 of its 27 for the same reason. Timing the slots drew the burn
+  //   67 ms long with 1963's art on screen twice. (2) The other four runs'
+  //   counts ARE the tool's spans. `frames` is what the build SHOWS, and the
+  //   provenance says whose clock that is — the SWF header's nominal rate over
+  //   the build's own frames, with no capture yet timing either loop.
   const key = typeof label === "string" ? label.toLowerCase() : "";
   const runFrames = Object.hasOwn(CLIP_SEQUENCES, key) ? CLIP_SEQUENCES[key].frames : null;
   const timed = Number.isInteger(runFrames) && runFrames > 0

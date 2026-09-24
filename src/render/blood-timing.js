@@ -13,8 +13,9 @@
  * ```text
  *   drawn     = animationFor(pack, {family, label, facing})   the PAINTER's own call
  *   run       = drawn.playsSequence ?? [drawn]                 hurt8 -> [hurt8, hurt9]
- *   poseIndex = sum(poses of the run's earlier members) + (clipFrame - member.firstFrame)
+ *   poseIndex = sum(poses SHOWN by the run's earlier passes) + (clipFrame - member.firstFrame)
  *   poseCount = the drawn animation's own pose count
+ *               (a pass ending on a jump shows one frame fewer — `clipPassesFor`)
  *   fires     when poseIndexAt(poseCount, at) >= poseIndex
  * ```
  *
@@ -42,9 +43,16 @@
  * ► **A MEMBER THAT REPEATS THROWS AGAIN.** `burning` plays `flame_repeat`
  *   twice, so a call inside it is two calls, one per pass — which is why the
  *   run is walked member by member rather than by one clip-frame window.
+ *
+ * ► **AND A PASS THAT ENDS ON A JUMP IS DRAWN ONE FRAME SHORT** *(added
+ *   2026-09-24)*: 1963 and 1426 jump before they render, so each such pass
+ *   advances the run by its span less one. A call ON the jump frame is still
+ *   made — its actions run — on the tick that shows the next pass's first
+ *   pose. The shipped build makes none there.
  */
 
 import { effectsForAnimation } from "./clip-effects.js";
+import { clipPassesFor } from "./clip-sequences.js";
 import { animationFor, poseIndexAt } from "./extracted-figure.js";
 
 const NO_BLOOD = Object.freeze({ label: null, poseCount: 1, effects: Object.freeze([]) });
@@ -63,14 +71,21 @@ export function bloodPlanFor(table, pack, { family, label = null, facing = "righ
   const drawn = animationFor(pack, { family, label, facing });
   if (!drawn) return NO_BLOOD;
   const { animation } = drawn;
-  const members = Array.isArray(animation.playsSequence)
-    ? animation.playsSequence.map((member) => pack.animations[member])
-    : [animation];
+  // The drawing's own passes: a joined run carries its members, and
+  // `clipPassesFor` says which of them end on a jump frame the build never
+  // renders. Anything else is one pass, drawn whole.
+  const passes = Array.isArray(animation.playsSequence)
+    ? clipPassesFor(drawn.label).map((pass) => ({ member: pack.animations[pass.label], lastFrameShown: pass.lastFrameShown }))
+    : [{ member: animation, lastFrameShown: true }];
   const poseCount = animation.poses.length;
   const effects = [];
   let base = 0;
-  for (const member of members) {
+  for (const { member, lastFrameShown } of passes) {
     for (const effect of effectsForAnimation(table, member)) {
+      // A call on a jump frame is made on the tick that enters it, which shows
+      // the NEXT pass's first pose — `base + offset` lands there. On the last
+      // pass that tick is the run handing back, past the drawing: not planned.
+      if (base + effect.poseIndex >= poseCount) continue;
       effects.push(Object.freeze({
         poseIndex: base + effect.poseIndex,
         clipFrame: member.firstFrame + effect.poseIndex,
@@ -78,7 +93,7 @@ export function bloodPlanFor(table, pack, { family, label = null, facing = "righ
         count: effect.count
       }));
     }
-    base += member.poses.length;
+    base += lastFrameShown ? member.poses.length : member.poses.length - 1;
   }
   return Object.freeze({
     label: drawn.label,

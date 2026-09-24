@@ -76,8 +76,29 @@ test("a member the run plays TWICE throws twice, once per pass", () => {
     flame_repeat: clip("flame_repeat", { poses: 3, firstFrame: 202 })
   });
   const plan = bloodPlanFor(tableOf({ 203: blood(3) }), pack, { family: "condition:burning", label: "burning" });
-  assert.equal(plan.poseCount, 8, "2 + 3 + 3");
-  assert.deepEqual(plan.effects.map((effect) => [effect.poseIndex, effect.clipFrame]), [[3, 203], [6, 203]]);
+  // ~~8, "2 + 3 + 3"~~ and ~~[[3, 203], [6, 203]]~~ until 2026-09-24: the run
+  // ends on a jump, so each `flame_repeat` pass stops a frame short
+  // (`clipPassesFor`) and the second pass begins a pose earlier.
+  assert.equal(plan.poseCount, 6, "2 + 2 + 2: the jump frame 204 is never drawn");
+  assert.deepEqual(plan.effects.map((effect) => [effect.poseIndex, effect.clipFrame]), [[3, 203], [5, 203]]);
+});
+
+test("a call ON a jump frame fires on the tick that enters it — the next pass's first pose — and not past the run", () => {
+  // ► **ADDED 2026-09-24 WITH THE JUMP-FRAME RULE.** AVM1 runs the frame's
+  //   actions — a `bounceitem` among them — before it renders, and the jump in
+  //   them makes that tick SHOW the target. So a call on 204 (standing for the
+  //   build's 1963) belongs to the pose the drawing shows on that tick: the
+  //   second pass's 202, pose 4. On the LAST pass that tick is the run handing
+  //   back, past the drawing, and nothing is planned for it. The shipped build
+  //   calls nothing on 1963 or 1426; this pins the arithmetic before one does.
+  const pack = packOf({
+    burning: clip("burning", { poses: 2, firstFrame: 200 }),
+    flame_repeat: clip("flame_repeat", { poses: 3, firstFrame: 202 })
+  });
+  const plan = bloodPlanFor(tableOf({ 204: blood(5) }), pack, { family: "condition:burning", label: "burning" });
+  assert.equal(plan.poseCount, 6);
+  assert.deepEqual(plan.effects.map((effect) => [effect.poseIndex, effect.clipFrame]), [[4, 204]],
+    "the first pass's jump, drawn as the second pass's first pose; the last pass's is past the run");
 });
 
 test("a death bleeds from the clip the drawing DRAWS, not from the engine's variant name", () => {
@@ -206,7 +227,7 @@ test("every call of one action sprays differently, and the same action sprays th
   const calls = [
     { poseIndex: 0, clipFrame: 1250 }, { poseIndex: 16, clipFrame: 1266 }, { poseIndex: 27, clipFrame: 1277 },
     { poseIndex: 0, clipFrame: 585 },                                        // death1, same token
-    { poseIndex: 3, clipFrame: 1952 }, { poseIndex: 18, clipFrame: 1952 }     // one frame, two passes
+    { poseIndex: 3, clipFrame: 1952 }, { poseIndex: 17, clipFrame: 1952 }     // one frame, two passes (~~18~~: 2 + 14 + 1)
   ];
   const seeds = calls.map((call) => bloodSeedFor(token, call));
   assert.equal(new Set(seeds).size, calls.length, `distinct seeds: ${seeds.join(", ")}`);
