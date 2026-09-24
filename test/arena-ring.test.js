@@ -210,17 +210,22 @@ test("an action aimed at ANOTHER foe is left for that foe's selection, never lis
   const host = demoHost({ perSide: 3, seed: 3, kit: "tricks" });
   const first = modelOf(host);
   assert.equal(first.selectedId, "blue-1");
-  const spells = (model) => model.offRing.map((entry) => line(entry.action)).filter((text) => text.startsWith("cast-"));
+  // ~~The spells were listed (`offRing`)~~ until S5 put them on the items row (`model.items`, in the row's
+  // key order; test/arena-ring-items.test.js). The rule is the same: only this foe's, and the caster's own.
+  const spells = (model) => model.items.filter((item) => item.action).map((item) => line(item.action));
   assert.deepEqual(spells(first), [
-    "cast-whirlwind -> blue-1", "cast-ghost-strike -> blue-1", "cast-gale -> blue-1", "cast-command -> blue-1",
-    "cast-teleport -> red-1", "cast-weaken-armour -> blue-1"
+    "cast-ghost-strike -> blue-1", "cast-whirlwind -> blue-1", "cast-gale -> blue-1", "cast-teleport -> red-1",
+    "cast-command -> blue-1", "cast-weaken-armour -> blue-1"
   ]);
   const switched = modelOf(host, "blue-3");
   assert.equal(switched.selectedId, "blue-3");
   assert.deepEqual(spells(switched), [
-    "cast-whirlwind -> blue-3", "cast-ghost-strike -> blue-3", "cast-gale -> blue-3", "cast-command -> blue-3",
-    "cast-teleport -> red-1", "cast-weaken-armour -> blue-3"
+    "cast-ghost-strike -> blue-3", "cast-whirlwind -> blue-3", "cast-gale -> blue-3", "cast-teleport -> red-1",
+    "cast-command -> blue-3", "cast-weaken-armour -> blue-3"
   ]);
+  for (const model of [first, switched]) {
+    assert.ok(!model.offRing.some((entry) => entry.action.type.startsWith("cast-")), "no spell is listed any more");
+  }
 });
 
 /* ------------------------------------------------------------------ */
@@ -426,11 +431,15 @@ test("over whole bouts, with every foe selected in turn: each slot holds what th
             const model = modelOf(host, foeId);
             assert.equal(model.selectedId, foeId);
             // S4: a move no slot holds — a walk beside the ring, a rank arrow — is on the ring too.
-            // S6: and the weapon swap, the ring's ninth button.
+            // S6: and the weapon swap, the ring's ninth button. S5: and the items row's spells and
+            // potions — one place per slot, so two slots of one item would be two places sending one
+            // action (test/arena-ring-items.test.js); they are counted once here.
+            const rowItems = [...new Map(model.items.filter((item) => item.action).map((item) => [identity(item.action), item.action])).values()];
             const shown = [
               ...model.slots.filter((slot) => slot.action).map((slot) => slot.action),
               ...model.moves.filter((move) => move.place !== "slot").map((move) => move.action),
               ...(model.swap ? [model.swap.action] : []),
+              ...rowItems,
               ...model.offRing.map((entry) => entry.action)
             ];
             const ids = shown.map(identity);

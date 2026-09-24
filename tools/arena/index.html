@@ -143,10 +143,11 @@
   </header>
   <main>
     <div class="stage-column">
-      <div id="stage"><canvas id="arena" tabindex="0" aria-label="The arena. On your turn: click a button around your fighter, or a foe to target him. Keys: 1 to 8 press the buttons, 9 swaps weapons when you carry two, the arrow keys walk left and right and step back or forward a rank, Tab and Shift+Tab change the target, Esc moves to the list of actions under the stage."></canvas></div>
+      <div id="stage"><canvas id="arena" tabindex="0" aria-label="The arena. On your turn: click a button around your fighter, or a foe to target him. Keys: 1 to 8 press the buttons, 9 swaps weapons when you carry two, Q to Y use your items and spells, the arrow keys walk left and right and step back or forward a rank, Tab and Shift+Tab change the target, Esc moves to the list of actions under the stage."></canvas></div>
       <section class="ring-strip" id="ring-strip" aria-label="Your actions" data-state="idle" hidden>
         <div class="ring-row" id="ring-target" role="group" aria-label="Target"></div>
         <div class="ring-row" id="ring-slots" role="group" aria-label="The ring"></div>
+        <div class="ring-row" id="ring-items" role="group" aria-label="Items and spells"></div>
         <div class="ring-row" id="ring-off" role="group" aria-label="More actions"></div>
         <p class="ring-status" id="ring-status"></p>
       </section>

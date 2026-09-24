@@ -49,13 +49,18 @@ import { actionButtonOps } from "../../src/render/action-buttons.js";
  *   (18.25, 18.25) (S6)
  *
  * The weapon swap (S6) draws 116's frame for the weapon it swaps TO — the
- * button's `usingBow`, the engine's — as `actionButtonOps` picks it.
+ * button's `usingBow`, the engine's — as `actionButtonOps` picks it. A place
+ * of the items row (S5) draws 116 at its ITEM's frame — the build's
+ * `inventory_buttonN.gotoAndStop(hero.inventoryN)`, the id is the frame —
+ * over the same up/over background (the row's own rollover, overlay frame 1
+ * body 0x2378d2 `+0x03bd`/`+0x04e3`), from the button's `itemId`.
  */
 export function ringButtonArt(buttons, { pack = null, facing = "right", hoverSlot = null, psyche = 1, ammo = null, textPack = null } = {}) {
   return Object.freeze((buttons ?? []).map((button) => {
     const state = button.slot === hoverSlot ? "hover" : "normal";
     const { ops, source, centre } = actionButtonOps(pack, button.verb, {
-      state, facing, psyche, ammo, textPack, scale: button.scale, usingBow: button.usingBow === true
+      state, facing, psyche, ammo, textPack, scale: button.scale, usingBow: button.usingBow === true,
+      itemId: Number.isInteger(button.itemId) ? button.itemId : null
     });
     return Object.freeze({ ...button, state, ops, source, centre });
   }));

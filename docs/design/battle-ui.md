@@ -138,7 +138,7 @@ first (ab5feb5, `src/render/action-buttons.js`).
 - **S2** the ring's core: the who-first selection model, eight slots per stance, one-click, Tab, the
   keyboard strip — drawn with the authored fallback buttons (the tracer bullet)
 - **S3** the build's own button art and placement on the ring · **S4** movement (walk slots, rank arrows)
-- **S5** the items row · **S6** the weapon swap button (built, below) · **S7** hover previews and the confirm setting
+- **S5** the items row (built, below) · **S6** the weapon swap button (built, below) · **S7** hover previews and the confirm setting
 - **S8** AI pacing (speed-up, skip) · **S9** greyed-button reasons (needs E)
 
 ### S2, built 2026-09-24: what it does, and what it decided that the owner did not
@@ -300,6 +300,77 @@ out of the list.
   arrows' look (a disc with a chevron, like the authored buttons).
 - **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=3` (the rank arrows on a
   mid-rank fighter; the forward arrow over the front rank's heads) before trusting the look.
+
+### S5, built 2026-09-24: the items row, the build's spells and potions over the ring
+
+`items` in the model and the keys Q-Y (`tools/arena/ring.js`), `ringItemButtonsAt` and the row's
+labels (`tools/arena/ring-layout.js`), the item's frame in `tools/arena/ring-art.js`, the row's resting
+positions in `src/render/action-buttons.js` (`SS2_STRIP.items`), wired in `tools/arena/main.js` and
+`tools/arena/index.html`. Tests: `test/arena-ring-items.test.js`; the real pack's row in
+`test/render-action-buttons.test.js`; S2's `test/arena-ring.test.js` and `test/arena-ring-bouts.test.js`
+updated where the spells left the list.
+
+- **Every spell and potion the engine offers is on the row, for its target.** The engine's own menu
+  names each of the six inventory slots' item, verb and target for the selected foe
+  (`ss2UnavailableActions`, group `inventory`): a spell that strikes a foe is aimed at the SELECTED foe,
+  the caster's own spells and every potion at the caster. A place holds its item only when the offer
+  holds the action (S2's rule) and sends the offered option itself — a potion's with its `itemId`,
+  which must be the slot's own. A foe spell at ANOTHER foe is reached by selecting him, as a swing is.
+  Proven over 24 seeded bouts (1v1 and 3v3; the `tricks`, `crowd`, `buffs` and `blasts` kits), every foe
+  selected in turn, under the arena's own settled camera: every offered spell and potion at the
+  selected foe or the caster on the row, none listed, each drawn once, inside the stage, clear of every
+  other button, sent by its click and its letter, and above the step-back arrow wherever that is drawn;
+  and on every turn the union of the rows over the selections is exactly the offer's spells and
+  potions. The strip's "Also" row now holds only what has no place (a rest beside a taunt, a forced
+  phase).
+- **Where the build puts it:** `inventory_overlay` (492) at (0, -80) of the overlay, scaled 60 (overlay
+  frame 1 body 0x2378d2, `+0x02fe`..`+0x0365`), over the eight (its depth, 199999, is the overlay's
+  highest). 492 is a five-frame clip whose six `inventory_buttons` start stacked and slide out to frame
+  5, where it stops (492 frame 5 body 0x514b8, `Stop`); the row is drawn at rest, in one line 42 px
+  apart — and NOT in slot order: left to right the slots are 5, 4, 1, 2, 3, 6 (measured in the
+  player's pack, `buttons.inventory.layout`, compared in the suite). Each is a 116, so its disc and its
+  click stand at (18.25, 18.25) of its own pixels, as the swap's do (S6). At rest it clears the eight:
+  optionA's and optionD's discs are 32.3 overlay px from the nearest place, against 25.2 of radii.
+- **What each place shows is the build's own:** 116 at the frame the slot's item id names
+  (`inventory_buttonN.gotoAndStop(hero.inventoryN)`, 492 frame 1 body 0x50e55, `+0x0132`), over the up
+  background, the over frame under the pointer (the row's own rollover, `+0x03bd`/`+0x04e3`). Without
+  the pack, the authored disc with a potion or spell glyph. An empty slot draws nothing, as the build
+  hides it (`+0x02c4`). The strip says each in the build's own NAME for it — the row's rollover text,
+  `_root["inventory" + id][1]` (`+0x0954`..`+0x0aaf`), from the item table root frame 35 builds (body
+  0x3fa9e2, `+0x4d27`..`+0x50b8`) — then the foe it is aimed at: "Gale at Nym", "Maximum health potion".
+- **The owner's layout: the row sits ABOVE the step-back arrow, moved up to clear it** — as relayed by
+  this slice's brief; the DECIDED list above says only "above the head". The row keeps the build's
+  place wherever that already clears the step-back arrow's place (offered or not, so the row does not
+  jump between turns and S9's greyed arrow keeps its room) by the gap the ring leaves between two of
+  its buttons; otherwise the whole row rises just that far. At the build's own sizes it never has to:
+  over 60 bouts in both of the page's views, no row of a fighter at his built size moved. A COLOSSUS
+  (drawn at 150) is the case — his head, and the arrow over it, stand high over the ring: 605 of the
+  arena view's rows and 530 of the fitted view's rose, by up to 70 and 75 overlay px, every button still
+  on the stage and clear of every other (a scratch measurement, in the S5 implementer's report; the
+  suite's acceptance draws the colossus at 150 and asserts the row over the arrow).
+- **Authored, the owner did not decide these:**
+  - **Keys Q W E R T Y, one per place, left to right across the row as drawn** — the keyboard's row
+    under the digits, in the order the eye reads the row. So a two-spell kit (slots 1 and 2) is on E and
+    R. From the stage or a strip button, whatever case Shift or Caps Lock gives, once per press, never
+    while typing or with Ctrl/Alt/Meta. The stage label is the letter alone, ABOVE its place (the row's
+    neighbours are 3.6 overlay px apart, no room beside), else under it; the name is the strip's.
+  - **The letters are kept on the stage with the ring.** S4 moves the whole ring onto the stage by its
+    discs; the row is the ring's top, so its letters over it ran off the top of the stage — 2,169 letter
+    placements under the arena's camera and 7,627 in the fitted view, over 60 bouts, in the first S5
+    build. Each place now carries its letter's room (`labelRoom`, from S2's label size, now
+    `ringLabelSizeFor`), which the stage fit keeps above it: 0 after, every button still on the stage.
+  - **The strip** gains an "Items" row between the ring's row and "Also", each button with its letter.
+    The strip keeps S2's fixed 132 px and scrolls when full.
+  - **The row is drawn at rest**, not sliding out over 492's first four frames as the build's does.
+- **Two slots of one item are two places, as in the build, sending the one action the engine offers —
+  and the engine spends the FIRST slot holding it, whichever was pressed** (`ss2InventorySlotHolding`,
+  `check_inventory`'s order), where the build's own button empties the slot pressed (`+0x0626` for slot
+  1). An action names no slot, so the ring cannot say which; pinned in the suite as it stands. **Owner
+  decision:** leave it, or give the engine's item actions a slot (a protocol change, with its own
+  census).
+- **Not seen:** no agent may open a browser. Screenshot `?play=red&teams=3&items=tricks` (six spells over
+  the ring, their letters above them, a foe spell re-aimed by Tab), `?play=red&items=crowd` (the potions)
+  and `?play=red&items=buffs` after a colossus (the row risen over the step-back arrow).
 
 ### S6, built 2026-09-24: the weapon swap, the build's ninth button
 

@@ -464,14 +464,45 @@ export function unselectedButtonFrames(declaredFrames = SS2_ACTION_BUTTON.declar
  *   or spell ID as the frame (sprite 492 frame 1 body 0x50e55, `+0x0132`), in
  *   `inventory_overlay`, attached to the overlay at (0, -80), scale 60
  *   (frame 1 body 0x2378d2, `+0x02fe`..`+0x0365`). Frame 1 is the empty slot
- *   and the build hides it (`+0x02c4`).
+ *   and the build hides it (`+0x02c4`), and a slot above the hero's
+ *   `inventory_maxslots` too (`+0x0216`..`+0x027e`).
+ * - WHERE THE SIX STAND IN 492 (slice S5, `slots`): 492 is a five-frame clip
+ *   whose six instances start stacked at x -17 (-340 twips) on frame 1 and
+ *   spread out to frame 5, where it STOPS (492 frame 5 body 0x514b8: `Stop`,
+ *   the clip's only other DoAction) — `restsAt`. At rest they stand in one
+ *   row at y 0, 42 px apart, and NOT in slot order: left to right the slots
+ *   are 5, 4, 1, 2, 3, 6 (x -122, -80, -38, 4, 46, 88), the row growing out
+ *   from its middle. Measured in the player's pack (`buttons.inventory.layout`,
+ *   each track's matrix at frame 5, scale 1) for a layout with no pack;
+ *   `test/render-action-buttons.test.js` compares them with a real one. (The
+ *   pack's own `stops` for 492 is EMPTY only because the extractor never
+ *   passes 492's stops to `summariseOverlayLayout`; the dump has the `Stop`.)
+ * - What each says on rollover is the item's NAME, `_root["inventory" +
+ *   hero.inventoryN][1]` (overlay frame 1 body 0x2378d2, `optiontext` at
+ *   `+0x0954`..`+0x0aaf`, `tooltip` from `+0x0ab6`), from the item table root
+ *   frame 35 builds (body 0x3fa9e2, `+0x4ce6`..`+0x50b8`: `new Array(label,
+ *   name, 1, price, description)` per id). `tools/arena/ring.js` carries the
+ *   names the engine can use (`RING_ITEM_WORDS`).
  */
 export const SS2_STRIP = Object.freeze({
   character: 116,
   linkage: "inventory_buttons",
   swap: Object.freeze({ usingBow: 11, melee: 10, at: Object.freeze(["+0x0ec8", "+0x0ee4"]), verb: "swap_weapons" }),
   backgroundAt: Object.freeze({ x: 18.25, y: 18.25 }),
-  items: Object.freeze({ emptyFrame: 1, row: "inventory_overlay", rowAt: Object.freeze({ x: 0, y: -80, scale: 0.6 }) })
+  items: Object.freeze({
+    emptyFrame: 1,
+    row: "inventory_overlay",
+    rowAt: Object.freeze({ x: 0, y: -80, scale: 0.6 }),
+    restsAt: 5,
+    slots: Object.freeze({
+      inventory_button1: Object.freeze({ x: -38, y: 0, scale: 1 }),
+      inventory_button2: Object.freeze({ x: 4, y: 0, scale: 1 }),
+      inventory_button3: Object.freeze({ x: 46, y: 0, scale: 1 }),
+      inventory_button4: Object.freeze({ x: -80, y: 0, scale: 1 }),
+      inventory_button5: Object.freeze({ x: -122, y: 0, scale: 1 }),
+      inventory_button6: Object.freeze({ x: 88, y: 0, scale: 1 })
+    })
+  })
 });
 
 /* ------------------------------------------------------------------ */

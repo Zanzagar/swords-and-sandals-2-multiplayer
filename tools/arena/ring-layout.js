@@ -1,6 +1,7 @@
 /**
  * WHERE THE RING IS DRAWN, AND WHAT A CLICK ON THE CANVAS HITS — slices S2,
- * S3 and S4 (the moves no slot holds, `ringMoveButtonsAt`) of
+ * S3, S4 (the moves no slot holds, `ringMoveButtonsAt`), S5 (the items row,
+ * `ringItemButtonsAt`) and S6 (the swap, `ringSwapButtonAt`) of
  * `docs/design/battle-ui.md`. Pure canvas geometry for
  * `tools/arena/main.js`, which only paints what this places and asks this what
  * a point landed on.
@@ -185,6 +186,74 @@ export function ringSwapButtonAt(model, { centerX, centerY, unit, layout = null 
 }
 
 /**
+ * ► **THE ITEMS ROW (slice S5): the build's six-button row of spells and
+ *   potions over the ring, where the build puts it** — `inventory_overlay`
+ *   (492), attached to the overlay at `SS2_STRIP.items.rowAt` (0, -80) and
+ *   scaled 60 (overlay frame 1 body 0x2378d2, `+0x02fe`..`+0x0365`), each of
+ *   its six `inventory_buttonN` where 492 RESTS (frame 5, its `Stop`): the
+ *   pack's measured matrix there (`buttons.inventory.layout`, `rowLayout`),
+ *   else `SS2_STRIP.items.slots`. Each is a 116, so — as for the swap — its
+ *   disc, and its click, stand at `SS2_STRIP.backgroundAt` (18.25, 18.25) of
+ *   its own pixels; the radius is the ring's rule, the fallback's 18 at the
+ *   row's scale. Only the places the model fills are drawn.
+ *
+ * ► **ABOVE THE STEP-BACK ARROW (the owner's layout, as this slice's brief
+ *   relays it: "moved up to clear it").** The row keeps the build's place
+ *   wherever that clears the step-back arrow's place by the ring's own gap
+ *   between two buttons — offered or not, so the row never jumps between
+ *   turns; otherwise the whole row rises just that far. At a fighter's built
+ *   size the build's place always clears it (measured over 60 bouts in both
+ *   of the page's views); a colossus's head, and the arrow over it, do not.
+ *
+ * @param {object} model  from `ringModelFor`; its `items`
+ * @param {object} at
+ * @param {number} at.centerX, at.centerY  the ring's centre, canvas pixels
+ * @param {number} at.unit     canvas pixels per overlay pixel
+ * @param {object|null} [at.layout]     the pack's `buttons.layout`, as `ringMoveButtonsAt` takes it
+ * @param {object|null} [at.rowLayout]  the pack's `buttons.inventory.layout`
+ * @param {number} [at.head]   canvas y of the top of the acting fighter's head; none, no lift
+ * @param {{top: number, bottom: number}|null} [at.bounds]  what the step-back arrow is kept inside
+ * @returns {object[]} `{key, slot, verb: "item", itemId, x, y, r, scale, side: "top"}`,
+ *   in the row's key order
+ */
+export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null, rowLayout = null, head, bounds = null }) {
+  const row = SS2_STRIP.items.rowAt;
+  const out = [];
+  for (const item of model?.items ?? []) {
+    if (!item.action) continue;
+    const at = overlaySlotPosition(item.slot, { layout: rowLayout, frame: SS2_STRIP.items.restsAt })
+      ?? SS2_STRIP.items.slots[item.slot];
+    if (!at) continue;
+    const scale = row.scale * at.scale;
+    const r = FALLBACK_BUTTON_RADIUS * scale * unit;
+    const label = ringLabelSizeFor(r);
+    out.push(Object.freeze({
+      key: item.key,
+      slot: item.slot,
+      verb: "item",
+      itemId: item.itemId,
+      x: centerX + (row.x + row.scale * (at.x + SS2_STRIP.backgroundAt.x * at.scale)) * unit,
+      y: centerY + (row.y + row.scale * (at.y + SS2_STRIP.backgroundAt.y * at.scale)) * unit,
+      r,
+      scale: scale * unit,
+      side: "top",
+      // Its letter stands over it (`ringLabelAt`): the room `ringButtonsInside`
+      // keeps on the stage above its disc.
+      labelRoom: label.gap + label.px
+    }));
+  }
+  if (out.length === 0) return Object.freeze(out);
+  // THE OWNER'S LAYOUT: above the step-back arrow's place — offered or not,
+  // so the row does not jump between turns, and S9's greyed arrow has its
+  // room — by the gap the ring leaves between two buttons. Only as far up as
+  // that takes; the build's place stands where it already clears.
+  const arrow = rankArrowPlace(model, "above-head", { centerX, unit, layout, head, bounds });
+  const limit = arrow.y - arrow.r - arrow.gap;
+  const lift = Number.isFinite(limit) ? Math.max(0, Math.max(...out.map((button) => button.y + button.r)) - limit) : 0;
+  return Object.freeze(lift === 0 ? out : out.map((button) => Object.freeze({ ...button, y: button.y - lift })));
+}
+
+/**
  * THE SLOT EACH WALK SITS IN, from the build's own wiring: every controller
  * frame that wires `walkleft` wires it at the same slot, and `walkright` too
  * (`SS2_BUTTON_WIRING`, all four frames in both facings). Computed, never
@@ -201,6 +270,33 @@ const WALK_SLOTS = (() => {
   }
   return Object.freeze(Object.fromEntries(Object.entries(found).map(([verb, slots]) => [verb, slots.size === 1 ? [...slots][0] : null])));
 })();
+
+/** The ring's tightest pitch: the smallest distance between two of its eight slots at the stance's resting frame. */
+function ringPitchFor(model, layout) {
+  const restsAt = layout?.controllers?.[model?.stance?.frame]?.restsAt ?? null;
+  const positions = SS2_OPTION_SLOTS.map((slot) => overlaySlotPosition(slot, { layout, frame: restsAt })).filter(Boolean);
+  let pitch = Infinity;
+  for (const a of positions) for (const b of positions) if (a !== b) pitch = Math.min(pitch, Math.hypot(a.x - b.x, a.y - b.y));
+  return pitch;
+}
+
+/**
+ * WHERE A RANK ARROW STANDS (S4), whether or not it is on offer: on the
+ * fighter's line, `gap` off his head (`above-head`) or the bottom of his name
+ * (`below-feet`), at the ring's button size, kept inside `bounds`. `gap` is
+ * the one the ring leaves between two of its buttons. The items row (S5)
+ * stands above the step-back arrow's place, so both read it here.
+ */
+function rankArrowPlace(model, place, { centerX, unit, layout, head, feet, bounds }) {
+  const restsAt = layout?.controllers?.[model?.stance?.frame]?.restsAt ?? null;
+  const walk = overlaySlotPosition(WALK_SLOTS.walkleft, { layout, frame: restsAt });
+  const scale = walk.scale;
+  const r = FALLBACK_BUTTON_RADIUS * scale * unit;
+  const gap = (ringPitchFor(model, layout) - 2 * FALLBACK_BUTTON_RADIUS * scale) * unit;
+  let y = place === "above-head" ? head - gap - r : feet + gap + r;
+  if (bounds) y = Math.min(Math.max(y, bounds.top + r), bounds.bottom - r);
+  return { x: centerX, y, r, gap, scale };
+}
 
 /**
  * ► **THE MOVES NO SLOT HOLDS (slice S4; the owner's Q5, "movement is
@@ -244,9 +340,7 @@ const WALK_SLOTS = (() => {
  */
 export function ringMoveButtonsAt(model, { centerX, centerY, unit, layout = null, head, feet, bounds = null }) {
   const restsAt = layout?.controllers?.[model?.stance?.frame]?.restsAt ?? null;
-  const positions = SS2_OPTION_SLOTS.map((slot) => overlaySlotPosition(slot, { layout, frame: restsAt })).filter(Boolean);
-  let pitch = Infinity;
-  for (const a of positions) for (const b of positions) if (a !== b) pitch = Math.min(pitch, Math.hypot(a.x - b.x, a.y - b.y));
+  const pitch = ringPitchFor(model, layout);
   const out = [];
   for (const move of model?.moves ?? []) {
     if (move.place === "slot") continue;
@@ -263,13 +357,8 @@ export function ringMoveButtonsAt(model, { centerX, centerY, unit, layout = null
       scale = own.scale;
       side = own.x < 0 ? "left" : "right";
     } else {
-      const walk = overlaySlotPosition(WALK_SLOTS.walkleft, { layout, frame: restsAt });
-      scale = walk.scale;
-      const r = FALLBACK_BUTTON_RADIUS * scale * unit;
-      const gap = (pitch - 2 * FALLBACK_BUTTON_RADIUS * scale) * unit;
-      x = centerX;
-      y = move.place === "above-head" ? head - gap - r : feet + gap + r;
-      if (bounds) y = Math.min(Math.max(y, bounds.top + r), bounds.bottom - r);
+      const arrow = rankArrowPlace(model, move.place, { centerX, unit, layout, head, feet, bounds });
+      ({ x, y, scale } = arrow);
       side = "centre";
     }
     out.push(Object.freeze({
@@ -299,7 +388,9 @@ export function ringMoveButtonsAt(model, { centerX, centerY, unit, layout = null
  *   the stage by the least that does it, on each axis, EVERY button by the
  *   same amount: the ring keeps its shape, nothing overlaps that did not, and
  *   the eight stay around the fighter as nearly as the edge allows. A set
- *   wider than the stage keeps its left (top) edge on the stage's.
+ *   wider than the stage keeps its left (top) edge on the stage's. A button
+ *   with `labelRoom` (a place of the items row, S5, whose letter stands over
+ *   it) counts that much more above its disc, so its letter stays on too.
  *
  * @param {object[]} buttons  from `ringButtonsAt` and `ringMoveButtonsAt`: `{x, y, r, ...}`
  * @param {{x: number, y: number, width: number, height: number}} stage  the visible
@@ -310,7 +401,8 @@ export function ringButtonsInside(buttons, stage) {
   if (!Array.isArray(buttons) || buttons.length === 0 || !stage) return buttons;
   const into = (low, high, from, to) => (high - low > to - from ? from - low : Math.max(from - low, Math.min(0, to - high)));
   const dx = into(Math.min(...buttons.map((b) => b.x - b.r)), Math.max(...buttons.map((b) => b.x + b.r)), stage.x, stage.x + stage.width);
-  const dy = into(Math.min(...buttons.map((b) => b.y - b.r)), Math.max(...buttons.map((b) => b.y + b.r)), stage.y, stage.y + stage.height);
+  // A place of the items row (S5) keeps its letter's room above it on the stage too.
+  const dy = into(Math.min(...buttons.map((b) => b.y - b.r - (b.labelRoom ?? 0))), Math.max(...buttons.map((b) => b.y + b.r)), stage.y, stage.y + stage.height);
   if (dx === 0 && dy === 0) return buttons;
   return Object.freeze(buttons.map((button) => Object.freeze({ ...button, x: button.x + dx, y: button.y + dy })));
 }
@@ -321,7 +413,9 @@ export function ringButtonsInside(buttons, stage) {
  *   every label — unless that would run across another drawn button: then
  *   under the button, centred, and failing that above it. The swap stands
  *   outboard of optionG, right where optionG's label runs, so with the swap on
- *   offer optionG's label goes under it; with no swap, nothing moves.
+ *   offer optionG's label goes under it; with no swap, nothing moves. A place
+ *   of the items row (`side: "top"`, S5) puts its label above itself, else
+ *   under it: its neighbours are 3.6 overlay px away, no room beside.
  *
  * @param {object} button   a drawn button: `{slot, x, y, r, side}`
  * @param {object[]} buttons  every button drawn this frame
@@ -333,11 +427,13 @@ export function ringButtonsInside(buttons, stage) {
 export function ringLabelAt(button, buttons, { width, height, gap }) {
   const half = height / 2;
   const outerX = button.side === "left" ? button.x - button.r - gap : button.x + button.r + gap;
-  const candidates = [
-    { x: outerX, y: button.y, align: button.side === "left" ? "right" : "left" },
-    { x: button.x, y: button.y + button.r + gap + half, align: "center" },
-    { x: button.x, y: button.y - button.r - gap - half, align: "center" }
-  ];
+  const below = { x: button.x, y: button.y + button.r + gap + half, align: "center" };
+  const above = { x: button.x, y: button.y - button.r - gap - half, align: "center" };
+  // The items row's outer side is UP (S5): its places stand too close for a
+  // label beside them, so above, else under.
+  const candidates = button.side === "top"
+    ? [above, below]
+    : [{ x: outerX, y: button.y, align: button.side === "left" ? "right" : "left" }, below, above];
   const boxOf = ({ x, y, align }) => {
     const x0 = align === "right" ? x - width : align === "left" ? x : x - width / 2;
     return { x0, x1: x0 + width, y0: y - half, y1: y + half };
@@ -349,6 +445,16 @@ export function ringLabelAt(button, buttons, { width, height, gap }) {
     return Math.hypot(dx, dy) >= other.r;
   });
   return Object.freeze(candidates.find((candidate) => clear(boxOf(candidate))) ?? candidates[0]);
+}
+
+/**
+ * THE SIZE OF A BUTTON'S KEY LABEL (S2's, authored): `px` tall, `gap` off the
+ * button — `max(9, round(0.62 r))` and `max(3, 0.2 r)` for a button of radius
+ * `r` canvas px. `paintRing` draws every label at this size, and the items
+ * row keeps this much room above itself on the stage (S5).
+ */
+export function ringLabelSizeFor(r) {
+  return Object.freeze({ px: Math.max(9, Math.round(r * 0.62)), gap: Math.max(3, r * 0.2) });
 }
 
 /** The slot of the drawn button a point is on (rim included), or null. */

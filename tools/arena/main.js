@@ -181,7 +181,9 @@ import {
   foeAt,
   ringButtonsAt,
   ringButtonsInside,
+  ringItemButtonsAt,
   ringLabelAt,
+  ringLabelSizeFor,
   ringMoveButtonsAt,
   ringPlacementFor,
   ringSlotAt,
@@ -500,12 +502,13 @@ let boulders = [];
 let settled = false;
 
 /**
- * ► **THE RING (slices S2, S3, S4 and S6 of `docs/design/battle-ui.md`, "The
- *   in-battle actions: DECIDED").** On a person's turn the build's eight
+ * ► **THE RING (slices S2-S6 of `docs/design/battle-ui.md`, "The in-battle
+ *   actions: DECIDED").** On a person's turn the build's eight
  *   buttons stand around the acting fighter, a gold ring marks the selected
  *   foe, one click acts, every walk and rank change on offer has a button and
  *   an arrow key (S4), the weapon swap is the build's ninth button on key 9
- *   when the engine offers it (S6), and the strip under the stage carries the
+ *   when the engine offers it (S6), the build's items row over the ring holds
+ *   every spell and potion on offer, on Q-Y (S5), and the strip under the stage carries the
  *   same actions for the keyboard and for screen readers. What sits where, who is
  *   selected and what a click or key sends are `tools/arena/ring.js`'s, under
  *   the suite; where the buttons are drawn — the build's own placement under
@@ -4805,7 +4808,9 @@ function paintTargetRing(view, origin) {
  * outer side, or under the button where another stands (`ringLabelAt`). Only
  * the slots the engine offers are drawn (S2). The weapon swap, when offered,
  * is the build's own ninth button at its own place (S6, `ringSwapButtonAt`),
- * showing the weapon it swaps to. Then the moves
+ * showing the weapon it swaps to; the items row (S5, `ringItemButtonsAt`) is
+ * the build's own over the ring, lifted over the step-back arrow where that
+ * would reach it, each place labelled with its letter above it. Then the moves
  * no slot holds (S4, `ringMoveButtonsAt`): a walk the stance does not wire,
  * beside its side's walk slot, and the rank arrows, back above the head and
  * forward below the name — no label, as their glyph is their arrow key. The
@@ -4838,6 +4843,18 @@ function paintRing(view, fit) {
       unit: placement.unit,
       layout: ringButtonPack?.layout ?? null
     }),
+    // The items row (S5): the build's own row over the ring, and — the
+    // owner's layout — above the step-back arrow, which stands off the same
+    // drawn head.
+    ...ringItemButtonsAt(ringView.model, {
+      centerX: placement.x,
+      centerY: placement.y,
+      unit: placement.unit,
+      layout: ringButtonPack?.layout ?? null,
+      rowLayout: ringButtonPack?.inventory?.layout ?? null,
+      head: ringOrigins.actor.head,
+      bounds: { top: stage.y, bottom: stage.y + stage.height }
+    }),
     ...ringSwapButtonAt(ringView.model, {
       centerX: placement.x,
       centerY: placement.y,
@@ -4869,9 +4886,10 @@ function paintRing(view, fit) {
     // A move no slot holds carries no label: its glyph is its arrow, and its
     // key is that arrow (the strip says both).
     if (button.move) continue;
-    const label = `${button.key} ${RING_VERB_LABELS[button.verb]?.short ?? button.verb}`;
-    const gap = Math.max(3, button.r * 0.2);
-    const px = Math.max(9, Math.round(button.r * 0.62));
+    // A place of the items row (S5) is labelled with its letter alone, above
+    // it; the build's own name for its item is the strip's.
+    const label = button.verb === "item" ? button.key : `${button.key} ${RING_VERB_LABELS[button.verb]?.short ?? button.verb}`;
+    const { px, gap } = ringLabelSizeFor(button.r);
     context.save();
     try {
       context.font = `600 ${px}px ui-sans-serif, system-ui, sans-serif`;
@@ -5599,7 +5617,8 @@ function renderControls() {
     const note = document.createElement("div");
     note.className = "provenance";
     note.textContent = `${byId.get(actorId)?.name ?? actorId}'s actions are on the ring around him and in the strip ` +
-      `under the stage: click a button or press 1–8${ring.swap ? " (9 swaps weapons)" : ""}; click a foe or press Tab ` +
+      `under the stage: click a button or press 1–8${ring.swap ? " (9 swaps weapons)" : ""}` +
+      `${ring.items.some((item) => item.action) ? ", Q–Y your items" : ""}; click a foe or press Tab ` +
       "to change the target.";
     container.replaceChildren(note);
     return;
@@ -5677,6 +5696,7 @@ function renderRingStrip() {
   }
   const targetRow = el("ring-target");
   const slotRow = el("ring-slots");
+  const itemRow = el("ring-items");
   const offRow = el("ring-off");
   const status = el("ring-status");
   const view = ringView;
@@ -5684,6 +5704,7 @@ function renderRingStrip() {
     strip.dataset.state = "idle";
     targetRow.replaceChildren();
     slotRow.replaceChildren();
+    itemRow.replaceChildren();
     offRow.replaceChildren();
     status.textContent = ringIdleNote();
     return;
@@ -5736,6 +5757,13 @@ function renderRingStrip() {
   if (model.swap) {
     slotRow.append(actionButton(model.swap.action, { words: model.swap.words, keys: [model.swap.key] }));
   }
+  // The items row (S5), left to right as drawn, each in the build's own name
+  // for its item and aimed where the engine aims it: the selected foe, or the
+  // fighter himself.
+  const items = model.items.filter((item) => item.action);
+  itemRow.replaceChildren(...(items.length > 0
+    ? [heading("Items"), ...items.map((item) => actionButton(item.action, { words: item.words, keys: [item.key] }))]
+    : []));
   offRow.replaceChildren(...(model.offRing.length > 0
     ? [heading("Also"), ...model.offRing.map((entry) => actionButton(entry.action))]
     : []));
@@ -5743,13 +5771,14 @@ function renderRingStrip() {
   status.textContent = `${nameOf(view.actorId)} against ${nameOf(model.selectedId)}${range ? `, ${range}` : ""}` +
     (view.ready ? "." : " — wait for the arena.") +
     " Keys: 1–8 the ring" + (model.swap ? `, ${model.swap.key} ${model.swap.words.toLowerCase()}` : "") +
+    `${items.length > 0 ? `, ${items.map((item) => item.key).join(" ")} your items` : ""}` +
     ", arrows walk (← →) and change rank (↑ back, ↓ forward), Tab / Shift+Tab the target " +
     "(from the stage), Esc into this list.";
   if (ringFocusWanted && view.ready) {
     const enabled = (row) => [...(el(row)?.querySelectorAll("button:not(:disabled)") ?? [])];
     const wanted = ringFocusWanted;
     const next = enabled(wanted.row).find((button) => button.textContent === wanted.text)
-      ?? enabled("ring-slots")[0] ?? enabled("ring-target")[0] ?? enabled("ring-off")[0];
+      ?? enabled("ring-slots")[0] ?? enabled("ring-items")[0] ?? enabled("ring-target")[0] ?? enabled("ring-off")[0];
     if (next) {
       next.focus();
       ringFocusWanted = null;
@@ -5760,6 +5789,7 @@ function renderRingStrip() {
     ringAnnounced = turnKey;
     announce(`Your turn: ${nameOf(view.actorId)}. Target ${nameOf(model.selectedId)}${range ? `, ${range}` : ""}. ` +
       `${filled.length + unslotted.length} on the ring${model.swap ? " and the weapon swap" : ""}` +
+      `${items.length > 0 ? `, ${items.length} item${items.length === 1 ? "" : "s"} over your head` : ""}` +
       `${model.offRing.length > 0 ? `, ${model.offRing.length} more listed` : ""}.`);
   }
 }
@@ -5901,14 +5931,15 @@ function ringProvenance() {
   const art = ringButtonPack?.button
     ? "is the build's own buttons, from your install's icons: each verb's icon for its stance and facing and the " +
       `rollover background${textPack ? ", with the attack and bow words and the arrow count in the build's glyphs" : ""}` +
-      `${ringButtonPack.strip ? ", and the weapon swap showing the weapon it swaps to" : ""}`
+      `${ringButtonPack.strip ? ", the weapon swap showing the weapon it swaps to, and the items row showing each spell's and potion's own icon" : ""}`
     : "is authored round buttons (run `node tools/extract-icons.mjs` for the build's own)" +
-      `${ringButtonPack?.strip ? ", but for the weapon swap, which is the build's own" : ""}`;
+      `${ringButtonPack?.strip ? ", but for the weapon swap and the items row, which are the build's own" : ""}`;
   const where = arenaScreenAvailable()
     ? "where the build's overlay stands — on the acting fighter, 180 above his feet, sized against the camera by its " +
       "own table (a team camera's in-between zoom takes the band below's size; the close-up past 1,600 apart is not drawn)"
     : "on the acting fighter at an authored size, as this fitted view has no build camera";
-  return ["The action ring", `${art}, ${where}. The keys, the labels and the gold target ring are authored.`];
+  return ["The action ring", `${art}, ${where}. The keys, the labels and the gold target ring are authored; ` +
+    "so is the items row's lift over the step-back arrow, where a tall fighter's arrow would reach it."];
 }
 
 function renderProvenance() {

@@ -1,18 +1,19 @@
 /**
- * THE RING'S MODEL — slices S2, S4 and S6 of `docs/design/battle-ui.md` ("The
- * in-battle actions: DECIDED"): on a person's turn, which foe is selected,
- * which of the build's four stances the ring shows, which verb sits in which
- * of the eight slots, where each walk and rank change the engine offers
- * stands (S4), whether the weapon swap is on the ring and which weapon it
- * offers (S6), what the engine offers that the ring does not show, and the
- * exact action a click, a digit or an arrow key sends.
+ * THE RING'S MODEL — slices S2, S4, S5 and S6 of `docs/design/battle-ui.md`
+ * ("The in-battle actions: DECIDED"): on a person's turn, which foe is
+ * selected, which of the build's four stances the ring shows, which verb sits
+ * in which of the eight slots, where each walk and rank change the engine
+ * offers stands (S4), which spell or potion each place of the items row holds
+ * and whom it is aimed at (S5), whether the weapon swap is on the ring and
+ * which weapon it offers (S6), what the engine offers that the ring does not
+ * show, and the exact action a click, a digit, a letter or an arrow key sends.
  *
  * Pure. It reads what it is handed — the fighters, the engine's offer and the
  * engine's own menu for the selected foe — and decides only how to ARRANGE
  * them: "the engine decides what is possible; the interface only arranges it".
  */
 
-import { SS2_OPTION_SLOTS, SS2_OVERLAY_SLOTS, SS2_SWAP_SLOT, actionButtonVerbFor } from "../../src/render/action-buttons.js";
+import { SS2_OPTION_SLOTS, SS2_OVERLAY_SLOTS, SS2_STRIP, SS2_SWAP_SLOT, actionButtonVerbFor } from "../../src/render/action-buttons.js";
 import { ss2FightDistance, ss2SameLane } from "../../src/team/ss2-rules.js";
 
 /**
@@ -65,6 +66,64 @@ export const RING_KEY_ORDER = Object.freeze([...SS2_OPTION_SLOTS].sort((left, ri
  */
 export const RING_SWAP_KEY = "9";
 const SWAP_WORDS = Object.freeze({ toMelee: "Switch to melee weapon", toRanged: "Switch to ranged weapon" });
+
+/**
+ * ► **THE ITEMS ROW (slice S5; the owner's decision 1, "its six-slot items
+ *   row above the head for spells and potions").** The build's row is
+ *   `inventory_overlay` (sprite 492): six `inventory_buttons` (116),
+ *   `inventory_buttonN` showing whatever `hero.inventoryN` holds (492 frame 1
+ *   body 0x50e55, `+0x0132`..`+0x0204`). Its buttons do not stand in slot
+ *   order — left to right they are slots 5, 4, 1, 2, 3, 6
+ *   (`SS2_STRIP.items.slots`) — so the KEYS go left to right across the row as
+ *   drawn, Q W E R T Y, one per place, whatever it holds: the six letters of
+ *   the keyboard row under the digits, in the order the eye reads the row.
+ *   Computed from the row's positions, never typed. AUTHORED: the build has no
+ *   keyboard.
+ */
+export const RING_ITEM_KEYS = Object.freeze(["Q", "W", "E", "R", "T", "Y"]);
+export const RING_ITEM_ORDER = Object.freeze(Object.keys(SS2_STRIP.items.slots)
+  .sort((left, right) => SS2_STRIP.items.slots[left].x - SS2_STRIP.items.slots[right].x));
+
+/**
+ * ► **WHAT EACH ITEM IS CALLED — THE BUILD'S OWN NAMES**, the words its row
+ *   shows on rollover: `optiontext` (and `tooltip`) of `inventory_buttonN` is
+ *   `_root["inventory" + hero.inventoryN][1]` (overlay frame 1 body 0x2378d2,
+ *   `+0x0954`..`+0x0aaf`), and root frame 35 (body 0x3fa9e2) builds each
+ *   `inventoryN` as `new Array(label, name, 1, price, description)`
+ *   (`+0x4d27` for 2 … `+0x50b8` for 49). The build's spellings are kept
+ *   ("Frightning Bolt", "Rejuvinate"), as the engine keeps them. Ids 0 and 1
+ *   are "Nothing", and 10-29 have no entry at all.
+ */
+export const RING_ITEM_WORDS = Object.freeze({
+  2: "Small health potion",
+  3: "Medium health potion",
+  4: "Large health potion",
+  5: "Maximum health potion",
+  6: "Medium stamina vial",
+  7: "Maximum stamina vial",
+  8: "Medium armour oil",
+  9: "Maximum armour oil",
+  30: "Fireball",
+  31: "Hell Fireball",
+  32: "Dire Fireball",
+  33: "Little Fat Kid",
+  34: "Lightning Bolt",
+  35: "Frightning Bolt",
+  36: "Ghost Strike",
+  37: "Whirlwind",
+  38: "Gale",
+  39: "Command",
+  40: "Swift Sandals",
+  41: "Bloodlust",
+  42: "Colossus",
+  43: "Rejuvinate",
+  44: "Weaken Armour",
+  45: "Boundless Energy",
+  46: "Regenerate",
+  47: "Adulation",
+  48: "Teleport",
+  49: "Molten Death"
+});
 
 /**
  * WHO FIRST (the owner's Q4): a foe is always selected. The previous selection
@@ -138,8 +197,17 @@ function stageOrder(foes) {
  *     second weapon (`no-secondary`) or under a forced phase, all "hide"s in
  *     `SS2_UNAVAILABLE_REASONS`. `usingBow` is the engine's stance `weapon`;
  *     `words` the build's rollover text for what it does;
+ *   - `items` (S5) — the items row's six places, in KEY order (Q-Y, left to
+ *     right as the build draws them), each `{key, slot, inventory, itemId,
+ *     verb, words, action}`: `slot` the build's `inventory_buttonN`,
+ *     `inventory` the engine's slot it shows, `itemId` what it holds (null
+ *     when empty), `words` the build's name for it; `verb` (`item`) and
+ *     `action` null unless the offer holds the item's action — aimed at the
+ *     SELECTED foe for a spell that strikes a foe, at the actor otherwise, as
+ *     the engine's menu aims it;
  *   - `offRing` — `{action}` for every offered action at the selected foe or
- *     at no foe that no slot, move or the swap holds, in the offer's order;
+ *     at no foe that no slot, move, the swap or the items row holds, in the
+ *     offer's order;
  *   - `menuError` — why the menu could not be asked, or null.
  *   Every `action` is an offered option plus `actorId`: what `host.submit` takes.
  */
@@ -229,15 +297,47 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
     })
     : null;
 
+  // THE ITEMS ROW (S5): the engine's own six inventory buttons for the
+  // selected foe — each slot's item, its verb, and whom it is aimed at: the
+  // SELECTED foe for a spell that strikes a foe, the actor for his own spells
+  // and potions (`ss2UnavailableActions`'s `inventory` group). A place holds
+  // its item's action only when the OFFER holds it (S2's rule), and sends the
+  // offered option itself — a potion's with its `itemId`, which must be the
+  // slot's own. The build's `inventory_buttonN` shows `hero.inventoryN`.
+  const byInventory = new Map();
+  for (const entry of menu?.ring ?? []) if (entry.group === "inventory") byInventory.set(entry.slot, entry);
+  const itemOptions = new Set();
+  const items = RING_ITEM_ORDER.map((slot, index) => {
+    const inventory = slot.replace("inventory_button", "inventory");
+    const entry = byInventory.get(inventory) ?? null;
+    // 1 is the build's empty marker and 0 the item table's "Nothing".
+    const itemId = Number.isInteger(entry?.itemId) && entry.itemId > 1 ? entry.itemId : null;
+    const option = itemId !== null && entry.type
+      ? offer.find((candidate) => candidate.type === entry.type && candidate.targetId === entry.targetId
+        && (candidate.itemId == null || candidate.itemId === itemId)) ?? null
+      : null;
+    if (option) itemOptions.add(option);
+    return Object.freeze({
+      key: RING_ITEM_KEYS[index],
+      slot,
+      inventory,
+      itemId,
+      verb: option ? "item" : null,
+      words: itemId !== null ? (RING_ITEM_WORDS[itemId] ?? null) : null,
+      action: option ? Object.freeze({ ...option, actorId }) : null
+    });
+  });
+
   // OFF THE RING: whatever the engine offers against the selected foe or
-  // anyone who is not a foe (the actor, today) that no slot, move or the swap holds, in
-  // the offer's own order. An action at ANOTHER foe is that foe's: selecting
-  // him puts it on his ring or in his list, so every offered action is
-  // reachable and none is listed twice.
+  // anyone who is not a foe (the actor, today) that no slot, move, the swap or
+  // the items row holds, in the offer's own order. An action at ANOTHER foe is
+  // that foe's: selecting him puts it on his ring or in his list, so every
+  // offered action is reachable and none is listed twice.
   const foeIds = new Set(foes.map((foe) => foe.id));
   const slotted = new Set([...bySlot.values()].map((held) => held.option));
   for (const option of moved) slotted.add(option);
   if (swapOption) slotted.add(swapOption);
+  for (const option of itemOptions) slotted.add(option);
   const offRing = offer
     .filter((option) => !slotted.has(option) && (option.targetId === selected.id || !foeIds.has(option.targetId)))
     .map((option) => Object.freeze({ action: Object.freeze({ ...option, actorId }) }));
@@ -253,6 +353,7 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
     slots: Object.freeze(slots),
     moves: Object.freeze(moves),
     swap,
+    items: Object.freeze(items),
     offRing: Object.freeze(offRing),
     menuError
   });
@@ -260,9 +361,10 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
 
 /**
  * THE EXACT ACTION ONE SLOT OR MOVE SENDS — named by its key (`"1"`-`"9"`,
- * `"ArrowUp"`), by the build's slot name (`"optionD"`, `"swap_inventory"`)
- * or by the move's name (`"rank-back"`, what a move's drawn button is called)
- * — or null for an empty slot, a withheld move or swap, or no such thing. It is the engine's own
+ * `"Q"`-`"Y"`, `"ArrowUp"`), by the build's slot name (`"optionD"`,
+ * `"swap_inventory"`, `"inventory_button1"`) or by the move's name
+ * (`"rank-back"`, what a move's drawn button is called) — or null for an
+ * empty slot or place, a withheld move or swap, or no such thing. It is the engine's own
  * offered option with the actor added, which is what `host.submit` takes.
  */
 export function ringActionFor(model, slotOrKey) {
@@ -270,6 +372,8 @@ export function ringActionFor(model, slotOrKey) {
   if (slot) return slot.action ?? null;
   const swap = model?.swap ?? null;
   if (swap && (swap.key === slotOrKey || swap.slot === slotOrKey)) return swap.action;
+  const item = model?.items?.find((candidate) => candidate.key === slotOrKey || candidate.slot === slotOrKey);
+  if (item) return item.action ?? null;
   const move = model?.moves?.find((candidate) => candidate.key === slotOrKey || candidate.move === slotOrKey);
   return move?.action ?? null;
 }
@@ -292,10 +396,11 @@ export function ringNextFoe(model, step = 1) {
  * stage's canvas), `"control"` (a button), `"adjust"` (a control whose own
  * arrow keys change it: the volume slider) or `"text"` (a field that types).
  *
- * - `1`-`8` press the slots, and `9` the weapon swap (S6), from the stage or a
- *   control; never while typing, never with Ctrl/Alt/Meta (the browser's), and
- *   never on a held key's repeats — one press, one action. A digit with
- *   nothing behind it is the browser's.
+ * - `1`-`8` press the slots, `9` the weapon swap (S6) and `Q`-`Y` the items
+ *   row (S5, either case), from the stage or a control; never while typing,
+ *   never with Ctrl/Alt/Meta (the browser's), and never on a held key's
+ *   repeats — one press, one action. A key with nothing behind it is the
+ *   browser's.
  * - Tab / Shift+Tab switch the target, from the stage only and only with a
  *   second foe to switch to. **Inside a control Tab stays the browser's**, so
  *   the strip's buttons are reachable and nothing traps the focus.
@@ -330,6 +435,13 @@ export function ringKeyCommand(model, { key, shiftKey = false, ctrlKey = false, 
   if (/^[1-8]$/.test(key ?? "") || key === RING_SWAP_KEY) {
     if (repeat) return null;
     const action = ringActionFor(model, key);
+    return action ? Object.freeze({ kind: "act", action }) : null;
+  }
+  // The items row (S5): a letter, whichever case Shift or Caps Lock gives it.
+  const letter = typeof key === "string" && key.length === 1 ? key.toUpperCase() : null;
+  if (letter !== null && RING_ITEM_KEYS.includes(letter)) {
+    if (repeat) return null;
+    const action = ringActionFor(model, letter);
     return action ? Object.freeze({ kind: "act", action }) : null;
   }
   const move = RING_MOVES.find((candidate) => candidate.key === key);
@@ -397,7 +509,8 @@ export function ringActionLabel(action, { verb = null, words: given = null, name
     ?? RING_VERB_LABELS[verb]?.long
     ?? ACTION_WORDS[type]
     ?? (type.charAt(0).toUpperCase() + type.slice(1).replaceAll("-", " "));
-  const item = action?.itemId != null ? ` #${action.itemId}` : "";
+  // A potion's id says which of eight it is — unless its own name already has.
+  const item = action?.itemId != null && given === null ? ` #${action.itemId}` : "";
   const aimed = action?.targetId != null && action.targetId !== action.actorId ? ` at ${nameOf(action.targetId)}` : "";
   return `${words}${item}${aimed}`;
 }

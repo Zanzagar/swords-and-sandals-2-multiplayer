@@ -2,8 +2,8 @@
  * THE RING'S ACCEPTANCE (slice S2 of `docs/design/battle-ui.md`): whole bouts
  * played the way the arena seats them under `?play=red`, every red turn chosen
  * ONLY through the ring model — a key on a slot, an arrow key on a move (S4),
- * Tab / Shift+Tab to switch the target, or an entry in the off-ring list — by
- * one fixed policy, and every
+ * a letter on the items row (S5), Tab / Shift+Tab to switch the target, or an
+ * entry in the off-ring list — by one fixed policy, and every
  * blue turn by the rule set's own AI, as `aiTurnStep` takes it.
  *
  * What is pinned:
@@ -53,7 +53,9 @@ const identity = (action) => JSON.stringify([action.type, action.targetId, actio
 /**
  * THE FIXED POLICY — one choice from what the model shows, never from the
  * offer itself: a swing or a shot on the ring; else a spell at the selected
- * foe from the list; else the walk toward him in its slot, by its arrow key; else the
+ * foe from the items row, the first left to right, by its letter (S5 put the
+ * spells there; ~~from the list~~ until then, in the offer's order); else the
+ * walk toward him in its slot, by its arrow key; else the
  * rank change toward his rank, by its arrow key (S4 put both on the ring;
  * ~~the list's rank change~~ until then); else the first filled slot; else,
  * with nothing listed, the swap by key 9 (S6); else the first listed.
@@ -69,8 +71,12 @@ function choose(model, selected, actor) {
   const listed = (wanted) => model.offRing.find((entry) => wanted(entry.action));
   const attack = byVerb(ATTACKS);
   if (attack) return press(attack);
-  const spell = listed((action) => action.type.startsWith("cast-") && action.targetId === model.selectedId);
-  if (spell) return { via: "list", action: spell.action };
+  const spell = model.items.find((item) => item.action?.type.startsWith("cast-") && item.action.targetId === model.selectedId);
+  if (spell) {
+    const command = ringKeyCommand(model, { key: spell.key.toLowerCase(), focus: "stage" });
+    assert.equal(command?.kind, "act", `key ${spell.key} casts ${spell.action.type}`);
+    return { via: "item", action: command.action };
+  }
   const arrow = (key) => {
     const command = ringKeyCommand(model, { key, focus: "stage" });
     return command?.kind === "act" ? { via: "arrow", action: command.action } : null;
@@ -98,7 +104,7 @@ function choose(model, selected, actor) {
 }
 
 test("?play=red: whole bouts chosen only through the ring — every action sent is on offer, and every bout finishes", (t) => {
-  const tally = { bouts: 0, personTurns: 0, aiTurns: 0, key: 0, arrow: 0, swap: 0, list: 0, tab: 0, shiftTab: 0, attacksByKey: 0 };
+  const tally = { bouts: 0, personTurns: 0, aiTurns: 0, key: 0, arrow: 0, item: 0, swap: 0, list: 0, tab: 0, shiftTab: 0, attacksByKey: 0 };
   for (const perSide of [1, 3]) {
     for (const kit of ["", "tricks"]) {
       for (const seed of [1, 2, 3, 4, 5]) {
@@ -144,8 +150,9 @@ test("?play=red: whole bouts chosen only through the ring — every action sent 
     }
   }
   assert.equal(tally.bouts, 20);
-  // The policy really plays through the ring: it swings by key, lists, and switches targets both ways.
-  assert.ok(tally.attacksByKey > 0 && tally.arrow > 0 && tally.list > 0 && tally.tab > 0 && tally.shiftTab > 0, JSON.stringify(tally));
+  // The policy really plays through the ring: it swings by key, casts by letter (S5), lists, and
+  // switches targets both ways.
+  assert.ok(tally.attacksByKey > 0 && tally.arrow > 0 && tally.item > 0 && tally.list > 0 && tally.tab > 0 && tally.shiftTab > 0, JSON.stringify(tally));
   t.diagnostic(JSON.stringify(tally));
 });
 

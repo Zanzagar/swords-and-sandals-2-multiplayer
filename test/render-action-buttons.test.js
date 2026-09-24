@@ -649,4 +649,20 @@ test("THE REAL PACK'S LAYOUT: each controller rests where the relayed table puts
       assert.equal(rest.slots[slot].depth, relayed.depth);
     }
   }
+  // THE ITEMS ROW (slice S5): 492's six stand where `SS2_STRIP.items.slots` says once it rests — its
+  // last frame, 5, where the dump has its `Stop` (492 frame 5 body 0x514b8) — and stand stacked on its
+  // first. The pack's own `stops` for 492 is empty: the extractor does not pass 492's stops to
+  // `summariseOverlayLayout`, which is why the rest frame is a constant here.
+  const row = raw.buttons.inventory;
+  assert.deepEqual([row.character, row.linkage, row.layout.declaredFrames], [492, SS2_STRIP.items.row, SS2_STRIP.items.restsAt]);
+  for (const [instance, table] of Object.entries(SS2_STRIP.items.slots)) {
+    const measured = overlaySlotPosition(instance, { layout: row.layout, frame: SS2_STRIP.items.restsAt });
+    assert.deepEqual({ ...measured }, { ...table, source: "pack" }, instance);
+    assert.equal(row.layout.tracks[instance][0].matrix[4], -340, `${instance} starts its slide from the stack`);
+    assert.equal(row.layout.tracks[instance].every((run) => run.character === SS2_STRIP.character), true, `${instance} is a 116`);
+  }
+  // The row's own rollover is the eight's: `battlebutton` 2 over, 1 out (overlay frame 1 +0x03bd/+0x04e3).
+  const rowHandlers = raw.buttons.handlers.handlers.filter((entry) => entry.slots.includes("inventory_button1"));
+  assert.deepEqual(rowHandlers.map((entry) => [entry.event, entry.battlebutton, entry.slots.length, entry.at]),
+    [["onRollOver", 2, 6, "+0x03bd"], ["onRollOut", 1, 6, "+0x04e3"], ["onRelease", 1, 6, "+0x05bf"]]);
 });
