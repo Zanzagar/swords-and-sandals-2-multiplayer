@@ -16,12 +16,22 @@
  * damage would not be. Nothing in this module clamps, rounds or re-derives a
  * number the resolver owns, and nothing it returns is fed back into combat.
  *
+ * ► **AND, SINCE 2026-09-24, THE FIGHTER'S LOOK** — the skin and hair colour
+ *   indices from the roster (`appearance.js`). The colours are the build's own
+ *   `begincolouring` TABLE (numbers in its code, not art) applied to an
+ *   AUTHORED neutral grey, `AUTHORED_LOOK_BASE`, so a fighter with no licensed
+ *   art still reads as the same colour as with it. The hair and beard shapes
+ *   are `painter.js`'s own and are authored like everything else here.
+ *
  * PROVENANCE. Every proportion below is AUTHORED. No capture has ever observed
  * the build's art, so there is nothing here to be faithful to and nothing here
  * may be presented as SS2's appearance. The spec says so in its own
  * `provenance` field so a surface cannot lose the distinction on the way to a
  * canvas.
  */
+
+import { colourTransformForLook } from "./appearance.js";
+import { applyColourTransform } from "./filters.js";
 
 export class FigureError extends Error {
   constructor(message, options = {}) {
@@ -154,10 +164,48 @@ function weaponFor(combatant) {
 }
 
 /**
- * @param {object} combatant one entry from `toTeamWireState(battle).teams[].combatants`
- * @param {{side: "hero"|"villain"}} options the arena side, from the layout
+ * THE AUTHORED NEUTRAL a look's colour is multiplied onto, for the fallback's
+ * skin and hair — AUTHORED, and chosen as a mid-light grey (204) so the
+ * fallback's skin lands near the tone the build's own body greys take under the
+ * same index. It is an approximation of a colour, not art: the fallback's
+ * shapes stay this file's and `painter.js`'s own.
  */
-export function figureSpecFor(combatant, { side } = {}) {
+export const AUTHORED_LOOK_BASE = "#cccccc";
+
+/**
+ * A look's colours for the AUTHORED figure, or null when there is no look.
+ *
+ * `skin` and `hair` are `AUTHORED_LOOK_BASE` under the build's own table
+ * (`colourTransformForLook`) — so a fighter reads as the same colour whether
+ * the player has the licensed art or not — and `null` when the index has no
+ * row. `hair`/`beard` say whether to draw any: the build's `hair1` and
+ * `facehair1` are fully transparent (bald, clean-shaven) and there is no
+ * `hair0` or `facehair0`, so only an id above 1 draws.
+ */
+function lookColoursFor(appearance) {
+  if (!appearance || typeof appearance !== "object") return null;
+  const colour = (index) => {
+    const transform = Number.isInteger(index) ? colourTransformForLook(index) : null;
+    return transform ? applyColourTransform(AUTHORED_LOOK_BASE, transform) : null;
+  };
+  return Object.freeze({
+    skin: colour(appearance.skincolor),
+    hair: colour(appearance.haircolor),
+    hasHair: Number.isFinite(appearance.hairstyle) && appearance.hairstyle > 1,
+    hasBeard: Number.isFinite(appearance.facehairstyle) && appearance.facehairstyle > 1
+  });
+}
+
+/**
+ * @param {object} combatant one entry from `toTeamWireState(battle).teams[].combatants`
+ * @param {{side: "hero"|"villain", appearance?: object|null}} options the arena
+ *   side, from the layout, and — since 2026-09-24 — the fighter's LOOK
+ *   (`ss2LookFrom` in `appearance.js`), from the ROSTER and not the combatant,
+ *   which carries none. With a look the palette's `skin` becomes the look's
+ *   and it gains `hair`; the spec gains `look` for the painter's hair and
+ *   beard. Without one the spec is byte-identical to what it was.
+ */
+export function figureSpecFor(combatant, { side, appearance = null } = {}) {
   if (!combatant || typeof combatant.id !== "string") {
     throw new FigureError("figureSpecFor needs a combatant projection carrying a string id.");
   }
@@ -169,11 +217,20 @@ export function figureSpecFor(combatant, { side } = {}) {
   }
 
   const pieces = ARMOUR_SLOTS.map((slot) => pieceFor(combatant, slot));
+  const look = lookColoursFor(appearance);
+  const palette = look
+    ? Object.freeze({
+      ...SIDE_PALETTES[side],
+      skin: look.skin ?? SIDE_PALETTES[side].skin,
+      hair: look.hair ?? SIDE_PALETTES[side].leather
+    })
+    : SIDE_PALETTES[side];
   return Object.freeze({
     combatantId: combatant.id,
     name: combatant.name ?? combatant.id,
     side,
-    palette: SIDE_PALETTES[side],
+    palette,
+    ...(look ? { look: Object.freeze({ hair: look.hasHair, beard: look.hasBeard }) } : {}),
     build: buildFor(combatant),
     weapon: weaponFor(combatant),
     armour: Object.freeze(pieces),

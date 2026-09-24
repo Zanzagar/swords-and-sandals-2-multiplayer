@@ -80,8 +80,10 @@ import {
   clipToArenaScale,
   composeInClipSpace,
   hasExtractedArt,
+  limbColoursOf,
   poseIndexAt
 } from "./extracted-figure.js";
+import { applyColourTransform, applyColourTransformAlpha } from "./filters.js";
 
 /** The two members `updatecharacter` attaches, in the order it attaches them. */
 export const FACE_PARTS = Object.freeze(["eyes", "mouth"]);
@@ -379,6 +381,12 @@ export function faceOpsFor(icons, figure, options = {}) {
     && Number.isFinite(figure.centreX) && Number.isFinite(figure.groundY);
   const ops = [];
   const drawn = {};
+  // ► **THE HEAD'S OWN ANIMATION COLOUR REACHES THE FACE (2026-09-24).** The
+  //   eyes and mouth are attached INSIDE the head clip, so a frozen or poisoned
+  //   head tints them as it tints everything else attached there — the rule
+  //   `limbColoursOf` states for the wardrobe. Applied only when the limb has
+  //   one this pose, so every other face op is byte-identical to before.
+  const limbColours = limbColoursOf(pose).colours;
 
   for (const part of FACE_PARTS) {
     drawn[part] = 0;
@@ -511,6 +519,7 @@ export function faceOpsFor(icons, figure, options = {}) {
         zero(-scale * (composed[5] / TWIPS_PER_PIXEL - figure.groundY))
       ]);
 
+      const inherited = limbColours.get(limbName) ?? null;
       for (const entry of shape.paths) {
         if (!entry.d) {
           // **NEVER EMIT A SILENTLY-EMPTY PATH.** A path with no data draws
@@ -532,11 +541,11 @@ export function faceOpsFor(icons, figure, options = {}) {
           // the face where the build puts it: above the head's own art, below
           // the hair.
           sortKey: Object.freeze([Number.isFinite(limbDepth) ? limbDepth : Number.MAX_SAFE_INTEGER, attachDepth]),
-          fill: entry.fill ?? null,
-          fillOpacity: entry.fillOpacity ?? 1,
+          fill: inherited && entry.fill ? applyColourTransform(entry.fill, inherited) : (entry.fill ?? null),
+          fillOpacity: inherited ? applyColourTransformAlpha(entry.fillOpacity ?? 1, inherited) : (entry.fillOpacity ?? 1),
           fillRule: entry.fillRule ?? "evenodd",
-          stroke: entry.stroke ?? null,
-          strokeOpacity: entry.strokeOpacity ?? 1,
+          stroke: inherited && entry.stroke ? applyColourTransform(entry.stroke, inherited) : (entry.stroke ?? null),
+          strokeOpacity: inherited ? applyColourTransformAlpha(entry.strokeOpacity ?? 1, inherited) : (entry.strokeOpacity ?? 1),
           // IN THE SHAPE'S OWN PIXELS, UNSCALED: the matrix already carries the
           // scale and the shell sets `lineWidth` after applying it. Pre-scaling
           // here would apply the factor twice — the defect `extracted-figure.js`

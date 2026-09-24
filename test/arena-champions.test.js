@@ -13,7 +13,9 @@
  *   ships no champion of the build's. Weapon ids are table rows the
  *   repository already carries (`src/team/ss2-weapon-table.js`), and every
  *   expected number is worked from `battlevalues`' formulas at the assertion,
- *   never read back out of the engine.
+ *   never read back out of the engine. (One test at the foot, added
+ *   2026-09-24, READS the player's own pack when there is one and stores
+ *   nothing of it; it names champions by `which_boss` number only.)
  */
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -31,11 +33,13 @@ import {
   ss2ActiveDamagePair, ss2BattleValues, ss2Combatant, ss2InBowMode, ss2Reach, ss2TeamRules
 } from "../src/team/ss2-rules.js";
 import { CHAMPION_PACK_URL, arenaRequestFrom, championRequestFrom, championSide } from "../tools/arena/roster.js";
+import { colourTransformForLook, featuresForSkin } from "../src/render/appearance.js";
 
 /* ───────────────────────────  a synthetic pack  ──────────────────────────── */
 
 /** `initcharacter`'s indices for the fields these champions vary. */
 const AT = Object.freeze({
+  skincolor: 1, haircolor: 2, features: 3, hairstyle: 4, facehair: 5,
   weapon: 13, shield: 14, strength: 16, speed: 17, attack: 18, defence: 19, vitality: 20, charisma: 21,
   stamina: 22, magicka: 23, herolevel: 24, inventory1: 34, maxslots: 40, secondary: 45, ammo: 48, equipped: 49
 });
@@ -229,6 +233,43 @@ test("a champion whose DNA draws the bow enters as a proper archer (owner, 2026-
   assert.equal(ss2Reach(inBattle), 4484);
 });
 
+/**
+ * ► **A CHAMPION'S LOOK IS ITS OWN DNA's, AND IT IS NOT IN THE BATTLE
+ *   (2026-09-24).** Indices 1-5, with the drawn `features` derived from the
+ *   skin as `initcolour` derives it — this invented champion's DNA says
+ *   features 23, and skin 11 draws 13. The look rides BESIDE `vanilla` and
+ *   `resources`, and a bout played with it and without it is the same bout,
+ *   hash for hash.
+ */
+test("a champion's LOOK comes from its own DNA, derived as the build derives it, and never enters the battle", () => {
+  const painted = dna("Painted Uncle", { skincolor: 11, haircolor: 21, features: 23, hairstyle: 16, facehair: 16 });
+  const pack = { champions: [...PACK.champions, { whichBoss: 4, dnaFrom: "literal", dna: painted, name: "Painted Uncle" }] };
+  const red = championSide("red", [4, 0], deps({ pack }));
+  const [uncle, oaf] = red.members;
+  assert.deepEqual({ ...uncle.appearance }, { skincolor: 11, haircolor: 21, hairstyle: 16, facehairstyle: 16, features: 13 });
+  // The synthetic DNA's zeros: skin 0 has no branch, so the DNA's own 0 stands.
+  assert.deepEqual({ ...oaf.appearance }, { skincolor: 0, haircolor: 0, hairstyle: 0, facehairstyle: 0, features: 0 });
+  for (const field of ["skincolor", "haircolor", "hairstyle", "facehairstyle", "features"]) {
+    assert.equal(field in uncle.vanilla, false, `${field} is not on the vanilla mirror`);
+    assert.equal(field in uncle.resources, false, `${field} is not a resource`);
+  }
+
+  const play = (sides) => {
+    const host = createVanillaBattleHost({ teams: sides, rules: ss2TeamRules, bindings: SS2_STATIC_MAP_BINDINGS, seed: 5 });
+    const hashes = [host.hash()];
+    for (let turn = 0; turn < 40 && !host.battle.result; turn += 1) {
+      host.submit({ actorId: host.currentCombatantId(), ...host.suggestAction() });
+      hashes.push(host.hash());
+    }
+    return hashes;
+  };
+  const blue = championSide("blue", [5], deps());
+  const withoutLook = (side) => ({ ...side, members: side.members.map(({ appearance, ...member }) => member) });
+  const played = play([red, blue]);
+  assert.ok(played.length > 2, "the bout actually runs");
+  assert.deepEqual(play([withoutLook(red), withoutLook(blue)]), played, "the look moves no hash");
+});
+
 test("a champion that cannot be built, or cannot enter the host, is refused by its which_boss", () => {
   const refusals = [
     [[3], /which_boss 3 is not in the pack \(it has 0, 2, 5, 6, 17, 18\)/],
@@ -284,4 +325,39 @@ test("a 3v3 of champions constructs in the arena's host and plays 60 AI actions"
   assert.equal(actions, 60, `the bout ran 60 actions (${JSON.stringify(taken)})`);
   assert.equal(bareSwapOffers, 0, "a bare secondary slot is never offered as a bow");
   assert.equal(host.battle.teams.flatMap((team) => team.combatants).length, 6);
+});
+
+/* ─────────────────────  the player's own pack, when present  ─────────────── */
+
+/**
+ * ► **THE ONE TEST HERE THAT READS THE PLAYER'S OWN `champions.json`**, and it
+ *   stores nothing from it: no DNA, name or value is written in this file, and
+ *   every message names a `which_boss` number only. On a clone it returns
+ *   silently, as the real-pack checks in `test/render-extracted-figure.test.js`
+ *   do. What it measures is that every buildable champion's LOOK decodes to
+ *   colour indices `begincolouring` has a branch for (so no champion reaches
+ *   the stale-transform case the renderer cannot draw), and that the derived
+ *   features differ from the DNA's own index 3 for exactly three of them —
+ *   the 2026-09-24 wave's finding, re-measured.
+ */
+const REAL_CHAMPIONS = (() => {
+  const at = fileURLToPath(new URL("../assets/champions/champions.json", import.meta.url));
+  return fs.existsSync(at) ? JSON.parse(fs.readFileSync(at, "utf8")) : null;
+})();
+
+test("REAL PACK: every buildable champion's look decodes, every colour it uses has a branch, and three wear derived features", () => {
+  if (!REAL_CHAMPIONS) return;
+  const literal = REAL_CHAMPIONS.champions.filter((champion) => Array.isArray(champion?.dna));
+  assert.ok(literal.length > 0, "the pack holds champions with DNA of their own");
+  let derivedDiffers = 0;
+  for (const champion of literal) {
+    const label = `which_boss ${champion.whichBoss}`;
+    const [member] = championSide("red", [champion.whichBoss], deps({ pack: REAL_CHAMPIONS })).members;
+    const look = member.appearance;
+    assert.ok(colourTransformForLook(look.skincolor), `${label}: its skin index has a branch`);
+    assert.ok(colourTransformForLook(look.haircolor), `${label}: its hair index has a branch`);
+    assert.equal(look.features, featuresForSkin(look.skincolor), `${label}: features are the skin's`);
+    if (look.features !== Number(champion.dna[3])) derivedDiffers += 1;
+  }
+  assert.equal(derivedDiffers, 3, "three champions' DNA states a features value the build never draws");
 });

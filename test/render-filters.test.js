@@ -57,10 +57,45 @@ import {
   colourMatrixIsFillExact,
   colourTransformApplies,
   colourTransformFrom,
+  concatColourTransforms,
   isIdentityColourMatrix,
   isIdentityColourTransform,
   summariseFilterUse
 } from "../src/render/filters.js";
+
+/**
+ * ► **NESTED COLOUR TRANSFORMS COMPOSE, THEN APPLY AND CLAMP ONCE (2026-09-24).**
+ *   Ruffle's `TransformStack::push` multiplies parent x child
+ *   (`render/src/transform.rs`) with `impl Mul for ColorTransform`
+ *   (`swf/src/types/color_transform.rs`): Fixed8 multipliers `(a*b)>>8`, and
+ *   `add = parent.add + (parent.mult * child.add)>>8`. Every expected number
+ *   below is worked by hand from that rule, not read back from the code.
+ */
+test("concatColourTransforms composes in 8.8 and leaves the one clamp to the application", () => {
+  // A missing side hands the other back untouched; both missing is nothing.
+  const half = [0.5, 0.5, 0.5, 1, 10, 0, 0, 0];
+  assert.equal(concatColourTransforms(null, null), null);
+  assert.equal(concatColourTransforms(half, null), half);
+  assert.equal(concatColourTransforms(undefined, half), half);
+
+  // Saturation: skin 1 (652/230/192) inside frozen (0.398 -> 102, blue +153).
+  //   R (102*652)>>8 = 259, G (102*230)>>8 = 91, B (102*192)>>8 = 76, A 256.
+  const skin1 = [652 / 256, 230 / 256, 192 / 256, 1, 0, 0, 0, 0];
+  const frozen = [0.398, 0.398, 0.398, 1, 0, 0, 153, 0];
+  const composed = concatColourTransforms(frozen, skin1);
+  assert.deepEqual([...composed], [259 / 256, 91 / 256, 76 / 256, 1, 0, 0, 153, 0]);
+  // #cccccc: R (204*259)>>8 = 206, G (204*91)>>8 = 72, B (204*76)>>8 + 153 = 213.
+  assert.equal(applyColourTransform("#cccccc", composed), "#ce48d5");
+  assert.equal(applyColourTransform(applyColourTransform("#cccccc", skin1), frozen), "#6548d5",
+    "what clamping BETWEEN the two gives, which is not the player's picture");
+
+  // The child's offset is scaled by the PARENT's multiplier and floored — a
+  // negative one too, as an arithmetic shift floors: (128*-51)>>8 = -26.
+  const offsets = concatColourTransforms(half, [1, 1, 1, 1, 100, -51, 0, 0]);
+  assert.deepEqual([...offsets], [0.5, 0.5, 0.5, 1, 10 + 50, -26, 0, 0]);
+  // And alpha: 122% (312) inside 50% (128) is (128*312)>>8 = 156.
+  assert.equal(concatColourTransforms([1, 1, 1, 0.5, 0, 0, 0, 0], [1, 1, 1, 312 / 256, 0, 0, 0, 0])[3], 156 / 256);
+});
 
 /** The identity colour matrix, as `parseFilterList` would hand it over. */
 const IDENTITY_CELLS = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];

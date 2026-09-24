@@ -132,11 +132,13 @@
  *   gladiator on every frame and a regression here is the whole screen.
  */
 
+import { isBareskinPlacement, lookPaintFor } from "./appearance.js";
 import { clipLabelsFor, directionalLabel } from "./clip-labels.js";
 import { clipSequenceFor, shortRunFramesFor } from "./clip-sequences.js";
 import {
   applyColourTransform,
   applyColourTransformAlpha,
+  concatColourTransforms,
   blendModeFor,
   canvasFilterFor,
   glowAmplificationFor,
@@ -537,6 +539,14 @@ function tint(hex, colour) {
  *
  * The `field` is the character resource whose VALUE is the linkage suffix:
  * `helmet3` is the art for helmet 3, so the item row's own id is the selector.
+ *
+ * ► **THE THREE HEAD ROWS ARE THE LOOK, AND `features` IS NOT A CHOICE**
+ *   (2026-09-24). `features`, `facehairstyle` and `hairstyle` are not combat
+ *   resources; they reach a paint as the `appearance` option, and `features`
+ *   there is ALREADY the skin-derived value `initcolour` writes before
+ *   `updatecharacter` attaches it — see `src/render/appearance.js`. Fed the
+ *   DNA's own index 3 instead, three champions would wear features the build
+ *   never draws on them.
  */
 export const ATTACHMENTS = Object.freeze([
   { slot: "features", field: "features", limb: "head", depth: 4 },
@@ -609,6 +619,81 @@ export function attachmentsFor(loadout) {
 }
 
 /**
+ * WHETHER THE HELMET TAKES THE HAIR'S PLACE on this paint.
+ *
+ * `updatecharacter` attaches the hair unconditionally (`+0x0d75`, depth 5) and
+ * then, ONLY WHEN `helmet != 0`, the helmet at the same depth (`+0x0d9b`
+ * `Push helmet; Push 0; Equals2; Not; Not; If` jumps past the attach at
+ * `+0x0db7`-`+0x0ddc` when it is 0). An `attachMovie` onto an occupied depth
+ * replaces what is there, so the helmet wins — when there IS one.
+ *
+ * ► **`Number.isFinite(loadout.helmet)` STOOD HERE UNTIL 2026-09-24 AND IT
+ *   COUNTED HELMET 0.** Harmless while no gladiator had hair; the moment the
+ *   look arrived it would have drawn every bare-headed fighter bald — among
+ *   them the three champions whose DNA carries helmet 0. Found by the
+ *   2026-09-24 look wave, fixed here at the claim.
+ *
+ * ► **AND A HELMET THE WARDROBE DOES NOT HOLD DOES NOT TAKE THE HAIR.** In the
+ *   player an `attachMovie` of a linkage nobody exported attaches nothing and
+ *   leaves the depth as it was (the Flash semantics the verifier's interpreter
+ *   also used — not measured on this route). The wardrobe pack IS the export
+ *   table for this slot, so "not in the pack" is "not exported". `helmet1` IS
+ *   in it and is EMPTY — no placements — so a helmet-1 gladiator shows no hair
+ *   and no helmet, which is what the build draws.
+ */
+export function helmetReplacesHair(loadout, wardrobe) {
+  const helmet = loadout?.helmet;
+  if (!Number.isFinite(helmet) || helmet === 0) return false;
+  return Boolean(wardrobe?.pieces?.helmet?.[helmet]);
+}
+
+/**
+ * EACH LIMB'S OWN ANIMATION COLOUR TRANSFORM on one pose — what everything
+ * `attachMovie` hangs INSIDE that limb inherits.
+ *
+ * Added 2026-09-24 after a Codex review of the look: in `frozen` the head's own
+ * placements all carry the blue condition transform, and the features, hair
+ * and beard attached to that head stayed their standing colours while the skin
+ * under them turned blue. An attachment is a CHILD of the limb clip, so Flash
+ * composes the limb's transform onto it exactly as onto the limb's own art —
+ * and this module used to hand attachments no transform at all (the armour,
+ * helmet, weapon and shield included, since long before the look).
+ *
+ * ► **READ OFF THE POSE, BECAUSE THE PACK CARRIES IT NOWHERE ELSE.** The
+ *   `limbs` table is matrices only. A placement's `colour` is its WHOLE chain
+ *   composed — limb, then the child sprite, then the shape's placement — and
+ *   every child below a limb is a one-frame sprite whose own transform is
+ *   identity (`standing` carries no colour on any placement), so the composed
+ *   colour of ANY placement under a limb IS that limb's own transform.
+ *   Measured on the real pack: across all 2,222 poses, the placements under
+ *   one limb never disagree (0 conflicts), and every attachment limb that has
+ *   a matrix has a placement to read it from. A disagreement is COUNTED
+ *   (`limbColourConflicts`) and the first placement's is used.
+ *
+ * ► **NO ATTACHMENT SITS OUTSIDE ITS LIMB.** Every `ATTACHMENTS` row targets a
+ *   named limb clip; the weapon's `realweapon` target is inside the `weapon`
+ *   limb, and the rig's own weapon art ([39, 1, 1]) passes through that same
+ *   `realweapon`, so its composed colour is the blade's too.
+ *
+ * @returns {{colours: Map<string, number[]|null>, conflicts: number}}
+ */
+export function limbColoursOf(pose) {
+  const colours = new Map();
+  let conflicts = 0;
+  if (!Array.isArray(pose)) return { colours, conflicts };
+  for (const placement of pose) {
+    if (!placement?.limb) continue;
+    const colour = Array.isArray(placement.colour) ? placement.colour : null;
+    if (!colours.has(placement.limb)) {
+      colours.set(placement.limb, colour);
+    } else if (JSON.stringify(colours.get(placement.limb)) !== JSON.stringify(colour)) {
+      conflicts += 1;
+    }
+  }
+  return { colours, conflicts };
+}
+
+/**
  * A combatant's wire projection -> the loadout the dressing table indexes.
  *
  * ► **The resource names ARE the build's own**, which is not a coincidence and
@@ -618,9 +703,12 @@ export function attachmentsFor(loadout) {
  *   suffix is the same number. Nothing is mapped or renamed here.
  *
  * `hairstyle`, `facehairstyle` and `features` are the build's appearance
- * fields and this engine does not model them yet, so they are absent and the
- * gladiator simply has no hair. **Absent is not zero** — a `0` would be a
- * claim that the build's piece 0 is what he wears.
+ * fields and are NOT combat resources, so this never finds them on a
+ * combatant. ~~"this engine does not model them yet, so they are absent and
+ * the gladiator simply has no hair"~~ — **since 2026-09-24 they travel as the
+ * paint's separate `appearance` option** (`src/render/appearance.js`), beside
+ * the roster and never in the combat state. **Absent is not zero** — a `0`
+ * would be a claim that the build's piece 0 is what he wears.
  */
 export function loadoutFrom(combatant) {
   if (!combatant || typeof combatant !== "object") return null;
@@ -722,6 +810,11 @@ const NO_EFFECTS = Object.freeze([]);
 
 function tintAlpha(alpha, colour) {
   return applyColourTransformAlpha(alpha, colour);
+}
+
+/** `apply(value, transform)` when there is a transform, `value` untouched when there is none. */
+function through(value, transform, apply) {
+  return transform ? apply(value, transform) : value;
 }
 
 /* ══════════ THE ENCLOSING EFFECT GROUPS — read here since 2026-09-15 ═════ */
@@ -1015,7 +1108,28 @@ function emptyFigureInvoice() {
     // the six that do not are unreachable labels — but a pose without one is an
     // ordinary thing for an animation to be, so it is counted rather than
     // assumed away.
-    enchantmentNoLimb: 0
+    enchantmentNoLimb: 0,
+
+    /* THE LOOK (2026-09-24). `bareskinPlacements` is the denominator: the
+       placements inside one of `initcolour`'s ten `bareskin` children, tinted
+       or not. `skinTintedOps` and `hairTintedOps` are what the look actually
+       recoloured; a look whose index has no branch in `begincolouring` tints
+       nothing and is counted instead — per bareskin PLACEMENT for the skin
+       (`skinNoBranch`), per attached hair or beard PIECE for the hair
+       (`hairNoBranch`). No DNA in the build reaches either. */
+    bareskinPlacements: 0,
+    skinTintedOps: 0,
+    skinNoBranch: 0,
+    hairTintedOps: 0,
+    hairNoBranch: 0,
+
+    /* THE LIMB'S ANIMATION COLOUR ON WHAT IS ATTACHED TO IT (2026-09-24).
+       `inheritedColourOps` over `attachedOps`: attached operations whose limb
+       carries a colour transform this pose (frozen, poisoned, colossus …).
+       `limbColourConflicts` counts placements under one limb that disagree
+       about it — 0 on the real pack, so only a synthetic pack moves it. */
+    inheritedColourOps: 0,
+    limbColourConflicts: 0
   };
 }
 
@@ -1206,10 +1320,14 @@ export function weaponEnchantmentFor(pack, loadout) {
 function emitFigureOps(pack, options, invoice, collected = null) {
   const {
     family, label = null, facing = "right", at = 0, height = 1, fade = 0,
-    wardrobe = null, loadout = null, scale: canvasScale = 1
+    wardrobe = null, loadout = null, scale: canvasScale = 1, appearance = null
   } = options;
   const chosen = animationFor(pack, { family, label, facing });
   if (!chosen) return [];
+  // The look, resolved once per paint: two transforms and three attachment
+  // ids, or null when the caller has none — in which case every operation
+  // below is BYTE-IDENTICAL to what this module drew before the option existed.
+  const look = lookPaintFor(appearance);
 
   const pose = chosen.animation.poses[poseIndexAt(chosen.animation.poses.length, at)];
   if (!Array.isArray(pose)) return [];
@@ -1376,9 +1494,34 @@ function emitFigureOps(pack, options, invoice, collected = null) {
     }
 
     const colour = placement.colour ?? null;
+    // ► **THE SKIN TINT, AND IT GOES ON FIRST.** `initcolour` sets it on the
+    //   limb's `bareskin` CHILD with `Color.setTransform`, and the animation's
+    //   own colour (`placement.colour` — frozen, poisoned, colossus) sits on
+    //   the LIMB, the child's parent. The screen colour is `T_limb(T_skin(fill))`
+    //   — skin inside, timeline outside — COMPOSED into one transform and
+    //   applied and clamped ONCE (`concatColourTransforms`, which cites the
+    //   Ruffle source). ~~Two `tint` calls in a row~~ clamped between them and
+    //   drew skin 1 in `frozen` as `#6548d5` where the composed transform gives
+    //   `#ce48d5` — found by Codex, 2026-09-24.
+    //   `setTransform` REPLACES the child's own placement transform, which is
+    //   identity on this rig (no placement in `standing` carries a colour), so
+    //   nothing is lost by composing rather than replacing. EVERYTHING in the
+    //   clip is multiplied — the black outline stays black, and the head's
+    //   `#ffcc99` and the torso's `#cc0000` are tinted with the rest, as the
+    //   build tints them.
+    let skin = null;
+    if (look && isBareskinPlacement(placement)) {
+      invoice.bareskinPlacements += 1;
+      if (look.skin) skin = look.skin;
+      else invoice.skinNoBranch += 1;
+    }
+    // With no skin this is `colour` itself, so every other placement's
+    // operations are byte-identical to what they were.
+    const bodyColour = skin ? concatColourTransforms(colour, skin) : colour;
     for (const entry of shape.paths) {
       if (!entry.d) continue;
       invoice.ops += 1;
+      if (skin) invoice.skinTintedOps += 1;
       if (group) {
         invoice.groupedOps += 1;
         // ► **EVERY RECORD IN THE CHAIN, NOT JUST THE INNERMOST.** An outer
@@ -1397,8 +1540,8 @@ function emitFigureOps(pack, options, invoice, collected = null) {
         // The rig depth this part hangs at, so an attached piece can be merged
         // into the body's own paint order rather than stacked after all of it.
         rigDepth: Array.isArray(placement.depth) ? placement.depth[0] : null,
-        fill: tint(entry.fill, colour),
-        fillOpacity: tintAlpha(entry.fillOpacity ?? 1, colour),
+        fill: tint(entry.fill, bodyColour),
+        fillOpacity: tintAlpha(entry.fillOpacity ?? 1, bodyColour),
         fillRule: entry.fillRule ?? "evenodd",
         // ► **THIS IS THE ARENA-WALL DEFECT, UNFIXED, ON THE FIGHTER.** Both
         //   loops in this file copied named fields one at a time and neither
@@ -1411,8 +1554,8 @@ function emitFigureOps(pack, options, invoice, collected = null) {
         ...(entry.gradient ? { gradient: entry.gradient } : {}),
         ...(entry.bitmap ? { bitmap: entry.bitmap } : {}),
         ...(entry.approximated ? { approximated: entry.approximated } : {}),
-        stroke: entry.stroke ? tint(entry.stroke, colour) : null,
-        strokeOpacity: tintAlpha(entry.strokeOpacity ?? 1, colour),
+        stroke: entry.stroke ? tint(entry.stroke, bodyColour) : null,
+        strokeOpacity: tintAlpha(entry.strokeOpacity ?? 1, bodyColour),
         // ► **IN THE SHAPE'S OWN PIXELS, UNSCALED, and the first version
         //   multiplied by `scale` here.** The matrix above ALREADY carries that
         //   factor, and the shell sets `lineWidth` after applying the matrix —
@@ -1440,7 +1583,15 @@ function emitFigureOps(pack, options, invoice, collected = null) {
   // Within a limb the build separates them by depth; across limbs the body's
   // own paint order already holds, and a piece never crosses limbs.
   let result = ops;
-  if (wardrobe && loadout && limbs) {
+  // ► **THE LOOK'S THREE HEAD PIECES JOIN THE LOADOUT HERE, AND ONLY HERE.**
+  //   They are not combat resources, so `loadoutFrom` never finds them; the
+  //   `appearance` option is where they come from, and when it is given it is
+  //   the whole answer for those three fields — including a `null`, which is
+  //   "attach nothing", not "keep what the loadout said".
+  const dress = look
+    ? { ...(loadout ?? {}), hairstyle: look.hairstyle, facehairstyle: look.facehairstyle, features: look.features }
+    : loadout;
+  if (wardrobe && dress && limbs) {
     // ► **PAINT ORDER IS THE LIMB'S DEPTH, THEN THE ATTACHMENT'S — not "all
     //   armour last".** The first version appended every piece after every body
     //   part, in table order, and never read `attachment.depth` at all. The
@@ -1459,16 +1610,42 @@ function emitFigureOps(pack, options, invoice, collected = null) {
       }
     }
     const dressed = [];
-    for (const attachment of attachmentsFor(loadout)) {
-      const id = loadout[attachment.field];
+    const helmetDrawn = helmetReplacesHair(dress, wardrobe);
+    // The limb's own animation transform, which every piece attached inside it
+    // inherits. See `limbColoursOf`.
+    const limbColours = limbColoursOf(pose);
+    invoice.limbColourConflicts += limbColours.conflicts;
+    for (const attachment of attachmentsFor(dress)) {
+      const id = dress[attachment.field];
       if (!Number.isFinite(id)) continue;
       // ► **A HELMET REPLACES THE HAIR**, because the build gives them the same
-      //   depth on the same limb. Derived, not chosen.
-      if (attachment.slot === "hair" && Number.isFinite(loadout.helmet)) continue;
+      //   depth on the same limb. Derived, not chosen — and ~~`Number.isFinite(
+      //   loadout.helmet)`~~ **was wrong until 2026-09-24: it counted helmet 0,
+      //   which the build never attaches.** See `helmetReplacesHair`.
+      if (attachment.slot === "hair" && helmetDrawn) continue;
       const piece = wardrobe.pieces?.[attachment.slot]?.[id];
       if (!piece || !Array.isArray(piece.placements)) continue;
       const limbMatrix = limbs[attachment.limb];
       if (!Array.isArray(limbMatrix)) continue;
+      // ► **THE HAIR TINT: `colorhero` colours `head.hair` and `head.facehair`
+      //   with the HAIR index, through the same table as the skin, and nothing
+      //   else it attaches.** The features art is pre-coloured and never
+      //   tinted; the helmet, which takes the hair's instance, is never tinted
+      //   either (the build's only three `Color` objects are this one and two
+      //   shadow tints). The WHOLE attached clip is multiplied — its black
+      //   outline stays black, its white highlight takes the colour.
+      let hair = null;
+      if (look && (attachment.slot === "hair" || attachment.slot === "facehair")) {
+        if (look.hair) hair = look.hair;
+        else invoice.hairNoBranch += 1;
+      }
+      // ► **THEN THE LIMB'S OWN ANIMATION TRANSFORM, OUTSIDE THE HAIR TINT** —
+      //   `colorhero`'s transform sits on the attached clip, the condition's on
+      //   the limb that holds it, and the player composes child then parent:
+      //   `T_limb(T_hair(fill))`, clamped ONCE. Features and armour get the
+      //   limb's alone.
+      const inherited = limbColours.colours.get(attachment.limb) ?? null;
+      const pieceColour = hair ? concatColourTransforms(inherited, hair) : inherited;
 
       // ► **THE GLOW GOES ON THE WEAPON ATTACHMENT AND NOWHERE ELSE.** In the
       //   build the filter sits on the placement of `realweapon` INSIDE the
@@ -1540,6 +1717,8 @@ function emitFigureOps(pack, options, invoice, collected = null) {
         for (const entry of pieceShape.paths) {
           if (!entry.d) continue;
           invoice.attachedOps += 1;
+          if (hair) invoice.hairTintedOps += 1;
+          if (inherited) invoice.inheritedColourOps += 1;
           if (attachmentGroup) {
             invoice.enchantmentOps += 1;
             invoice.groupedOps += 1;
@@ -1554,11 +1733,15 @@ function emitFigureOps(pack, options, invoice, collected = null) {
             limb: attachment.limb,
             slot: attachment.slot,
             sortKey: [limbDepth.get(attachment.limb) ?? Number.MAX_SAFE_INTEGER, attachment.depth],
-            fill: entry.fill,
-            fillOpacity: entry.fillOpacity ?? 1,
+            // ONE composed transform, applied and clamped once — never two
+            // tints in a row (see `concatColourTransforms`). Absent when the
+            // piece has neither, so it is byte-identical to what this loop
+            // emitted before either existed.
+            fill: through(entry.fill, pieceColour, tint),
+            fillOpacity: through(entry.fillOpacity ?? 1, pieceColour, tintAlpha),
             fillRule: entry.fillRule ?? "evenodd",
-            stroke: entry.stroke ?? null,
-            strokeOpacity: entry.strokeOpacity ?? 1,
+            stroke: entry.stroke ? through(entry.stroke, pieceColour, tint) : (entry.stroke ?? null),
+            strokeOpacity: through(entry.strokeOpacity ?? 1, pieceColour, tintAlpha),
             strokeWidth: entry.strokeWidth ?? 0,
             alpha,
             // Last, and absent unless there is a glow — see the body's own
@@ -1615,9 +1798,16 @@ function emitFigureOps(pack, options, invoice, collected = null) {
  *   it draws exactly what it drew before; that is the off switch, and it is the
  *   same one `propOpsFor` offers.
  *
+ * ► **AND `appearance` IS THE LOOK (2026-09-24)**: `{skincolor, haircolor,
+ *   hairstyle, facehairstyle, features}` as `ss2LookFrom` normalises it. The
+ *   skin index tints every placement inside a `bareskin` child, the hair index
+ *   tints the attached hair and facial hair, and the three ids are attached at
+ *   the head's depths 5, 3 and 4. Absent (or null), the paint is byte-identical
+ *   to what it was before the option existed.
+ *
  * @param {object} pack from `figurePackFrom`
  * @param {object} options `{family, label, facing, at, height, fade, wardrobe,
- *   loadout, scale}` — `scale` is canvas pixels per ARENA unit and reaches only
+ *   loadout, appearance, scale}` — `scale` is canvas pixels per ARENA unit and reaches only
  *   the filter strings; see `emitFigureOps`. `height` is a multiplier on the
  *   BUILD's size, default 1, and the arena passes none: see
  *   `clipToArenaScale`. The operations come out at `_yscale` 100, one arena

@@ -283,6 +283,70 @@ export function applyColourTransformAlpha(alpha, transform) {
   return Math.max(0, Math.min(1, base * eight[3] + eight[7] / 255));
 }
 
+/**
+ * TWO NESTED COLOUR TRANSFORMS AS THE ONE THE PLAYER APPLIES — a CHILD clip's
+ * transform inside its PARENT's — composed in 8.8 fixed point, so a caller
+ * applies the result ONCE and clamps ONCE.
+ *
+ * ► **CLAMPING BETWEEN THE TWO IS A DIFFERENT PICTURE, AND THIS REPOSITORY
+ *   DREW IT FOR A DAY (2026-09-24, found by Codex).** A skin of 255% over a
+ *   frozen limb's 40% saturates to 255 first and then darkens to 101 when the
+ *   two are applied in turn; composed, 255% x 40% is ~101% and the grey keeps
+ *   its 206. On the real `frozen` pose, skin 1 on the head's `#cccccc` is
+ *   `#ce48d5` composed and was `#6548d5` nested.
+ *
+ * THE RULE, as Ruffle states it (read 2026-09-24 from ruffle-rs/ruffle
+ * `master`; Flash Player itself is closed and was not consulted):
+ *
+ * ```text
+ *   render/src/transform.rs      TransformStack::push
+ *       color_transform = cur_transform.color_transform * transform.color_transform
+ *                         (PARENT on the left, the pushed CHILD on the right)
+ *   swf/src/types/color_transform.rs   impl Mul for ColorTransform
+ *       r_multiply = self.r_multiply.wrapping_mul(rhs.r_multiply)
+ *       r_add      = self.r_add.wrapping_add(self.r_multiply.wrapping_mul_int(rhs.r_add))
+ *   swf/src/types/fixed.rs       Fixed8::wrapping_mul / wrapping_mul_int
+ *       (a * b) >> 8, in i32        — an arithmetic shift, so FLOOR
+ *   swf/src/types/color_transform.rs   impl Mul<Color> for &ColorTransform
+ *       r = r_multiply.mul_int(r).saturating_add(r_add).clamp(0, 255)
+ * ```
+ *
+ * So the composed transform is `parent(child(c))` with no clamp in between:
+ * multipliers multiply (8.8 x 8.8, floored back to 8.8), and an offset is
+ * `parent.add + floor(parent.mult8 * child.add / 256)`. `applyColourTransform`
+ * then does the `mul_int` (`floor(c * m8 / 256)`), the add and the one clamp —
+ * exact, because an 8.8 multiplier is a binary fraction.
+ *
+ * ► **THE PACK'S MULTIPLIERS ARE SNAPPED BACK TO THE 8.8 GRID HERE.** The SWF
+ *   stores `readSB / 256`, and `tools/extract-figure.mjs` `packColour` writes
+ *   it rounded to three decimals (`frozen`'s 102/256 = 0.3984375 is `0.398`).
+ *   `Math.round(m * 256)` recovers the stored integer exactly — the rounding
+ *   error is at most 0.0005 x 256 = 0.128 of a step. A single transform
+ *   applied WITHOUT this function still reads the rounded float, which can
+ *   floor one unit low (`#808080` under `0.398` is 50, under 102/256 is 51);
+ *   that is pre-existing and not changed here.
+ *
+ * @param {number[]|object|null} parent the OUTER clip's transform
+ * @param {number[]|object|null} child  the INNER clip's transform
+ * @returns {ReadonlyArray<number>|null} eight numbers, or whichever side is
+ *   present unchanged when the other is absent, or null when both are
+ */
+export function concatColourTransforms(parent, child) {
+  const outer = Array.isArray(parent) ? parent : colourTransformFrom(parent);
+  const inner = Array.isArray(child) ? child : colourTransformFrom(child);
+  if (!outer) return inner ?? null;
+  if (!inner) return outer;
+  const fixed = (multiplier) => Math.round(multiplier * 256);
+  const composed = [];
+  for (let channel = 0; channel < 4; channel += 1) {
+    composed.push(Math.floor((fixed(outer[channel]) * fixed(inner[channel])) / 256) / 256);
+  }
+  for (let channel = 0; channel < 4; channel += 1) {
+    composed.push(outer[4 + channel] + Math.floor((fixed(outer[channel]) * inner[4 + channel]) / 256));
+  }
+  return Object.freeze(composed);
+}
+
 /** Twenty finite numbers, or `null`. The wire's own row-major 4x5 order. */
 export function colourMatrixFrom(value) {
   const matrix = Array.isArray(value) ? value : value?.matrix;

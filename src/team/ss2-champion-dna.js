@@ -16,12 +16,18 @@
  * copies of one index map is two places for a typo to disagree.
  *
  * WHAT IS DECODED. The 32 fields a combatant is built from — equipment, stats,
- * level, enchantments, inventory and the weapon selector. Appearance (1-5),
- * progression (15, 25-31, 41-44) and the name are left out: nothing in the
- * engine reads them, and a decode that carries fields no consumer checks is how
- * a wrong index goes unnoticed. **No DNA value, name or quote lives in this
- * repository**; they come from the player's own install, into gitignored
- * `assets/champions/`.
+ * level, enchantments, inventory and the weapon selector. Progression (15,
+ * 25-31, 41-44) and the name are left out: nothing in the engine reads them,
+ * and a decode that carries fields no consumer checks is how a wrong index goes
+ * unnoticed. **No DNA value, name or quote lives in this repository**; they
+ * come from the player's own install, into gitignored `assets/champions/`.
+ *
+ * ► ~~Appearance (1-5) … left out: nothing in the engine reads them~~ — **the
+ *   RENDERER reads them since 2026-09-24**, so they are decoded, by a SEPARATE
+ *   function into a SEPARATE record (`ss2ChampionAppearanceFromDna`). The look
+ *   is presentation: folding it into `ss2ChampionFromDna`'s record would put
+ *   it on the vanilla mirror and in reach of the combat state, and the combat
+ *   record — and every hash built from it — is exactly what it was.
  */
 
 export class Ss2ChampionDnaError extends Error {
@@ -131,6 +137,50 @@ export function ss2ChampionFromDna(dna) {
   }
   for (const [level, slots] of MAXSLOTS_BY_LEVEL) {
     if (!(record.herolevel < level)) record.inventory_maxslots = slots;
+  }
+  return record;
+}
+
+/**
+ * `initcharacter`'s index for each APPEARANCE field, with the
+ * `Push register:3, "<field>"` offset that opens its assignment. Each is
+ * `ToNumber(characterDNA[n])` with no clamp and no default; the serialisers
+ * (`constructDNA` `+0x1b66`, `constructvillainDNA` `+0x268c`) write them back in
+ * the same order.
+ *
+ * ► **INDEX 3 IS NOT WHAT THE BUILD DRAWS.** `initcolour` runs straight after
+ *   this parse and overwrites `features` from the skin colour for every skin
+ *   index `begincolouring` has a branch for — see `featuresForSkin` in
+ *   `src/render/appearance.js`. It is decoded here as the DNA says and derived
+ *   there, so the two facts stay separately checkable.
+ */
+export const SS2_CHAMPION_APPEARANCE_INDEX = Object.freeze({
+  skincolor: 1, //      +0x060d
+  haircolor: 2, //      +0x0624
+  features: 3, //       +0x063b
+  hairstyle: 4, //      +0x0652
+  facehairstyle: 5 //   +0x0669
+});
+
+/**
+ * A champion's LOOK as its DNA states it: the five appearance fields,
+ * ToNumber'd, each a number or `null`.
+ *
+ * ► **IT REFUSES NOTHING, where `ss2ChampionFromDna` refuses loudly — on
+ *   purpose.** A malformed combat field would fight a gladiator nobody wrote;
+ *   a malformed look field only draws him untinted or bald, which is what the
+ *   build does too (a `NaN` index matches no `begincolouring` branch and no
+ *   linkage). A cosmetic field is not a reason to refuse a bout.
+ *
+ * @param {ArrayLike<string|number>|Record<number, string|number>} dna
+ * @returns {{skincolor: number|null, haircolor: number|null, features: number|null,
+ *   hairstyle: number|null, facehairstyle: number|null} | null} null when there is no DNA
+ */
+export function ss2ChampionAppearanceFromDna(dna) {
+  if (dna === null || typeof dna !== "object") return null;
+  const record = {};
+  for (const [field, index] of Object.entries(SS2_CHAMPION_APPEARANCE_INDEX)) {
+    record[field] = toNumber(dna[index]);
   }
   return record;
 }

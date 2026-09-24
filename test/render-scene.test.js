@@ -49,7 +49,12 @@ import {
   figureYAt,
   figureScaleFor,
   TimelineError,
-  travelAt
+  travelAt,
+  AUTHORED_LOOK_BASE,
+  applyColourTransform,
+  colourTransformForLook,
+  paintFigure,
+  ss2LookFrom
 } from "../src/render/index.js";
 
 /* ------------------------------------------------------------------ */
@@ -322,6 +327,38 @@ test("the two sides get different palettes, and an unknown side is refused", () 
   );
   assert.throws(() => figureSpecFor(combatant, { side: "red" }), /arena side/);
   assert.throws(() => figureSpecFor(combatant, {}), /arena side/);
+});
+
+/**
+ * ► **THE AUTHORED FALLBACK TAKES THE LOOK TOO (2026-09-24)** — so a clone
+ *   with no licensed art still sees a green gladiator where the build draws a
+ *   green one. The colour is the build's table on an AUTHORED grey; the hair
+ *   and beard shapes are the painter's own.
+ */
+test("the authored figure takes a look's skin and hair, and without one is exactly what it was", () => {
+  const bareHeaded = toTeamWireState(battleOf(1, 3, { helmet: 0 })).teams[0].combatants[0];
+  const before = figureSpecFor(bareHeaded, { side: "hero" });
+  assert.equal(JSON.stringify(figureSpecFor(bareHeaded, { side: "hero", appearance: null })), JSON.stringify(before));
+  assert.equal("look" in before, false);
+
+  const appearance = ss2LookFrom({ skincolor: 8, haircolor: 13, hairstyle: 5, facehairstyle: 3 });
+  const looked = figureSpecFor(bareHeaded, { side: "hero", appearance });
+  assert.equal(looked.palette.skin, applyColourTransform(AUTHORED_LOOK_BASE, colourTransformForLook(8)));
+  assert.equal(looked.palette.hair, applyColourTransform(AUTHORED_LOOK_BASE, colourTransformForLook(13)));
+  assert.equal(looked.palette.tunic, before.palette.tunic, "only skin and hair change");
+  assert.deepEqual({ ...looked.look }, { hair: true, beard: true });
+  assert.equal(looked.provenance, "authored-original-art");
+
+  const pose = poseAt(timelineFor("Standing", { role: "actor" }), 0);
+  const fills = (figure) => paintFigure(figure, pose).map((op) => op.fill);
+  assert.ok(fills(looked).includes(looked.palette.skin), "skin is painted in the look's colour");
+  assert.ok(!fills(looked).includes(before.palette.skin));
+  assert.equal(fills(looked).filter((fill) => fill === looked.palette.hair).length, 3, "hair, beard and brow");
+  assert.equal(paintFigure(looked, pose).length, paintFigure(before, pose).length + 2, "the look adds the hair and the beard");
+
+  // A look with no hair to show (the build's hair1 is bald), under no helmet.
+  const bald = figureSpecFor(bareHeaded, { side: "hero", appearance: ss2LookFrom({ skincolor: 8, haircolor: 13, hairstyle: 1, facehairstyle: 1 }) });
+  assert.equal(paintFigure(bald, pose).length, paintFigure(before, pose).length);
 });
 
 /* ------------------------------------------------------------------ */

@@ -41,6 +41,7 @@ import {
   mergeFaceOps
 } from "../src/render/face.js";
 import { figurePackFrom, paintExtractedFigure } from "../src/render/extracted-figure.js";
+import { applyColourTransform } from "../src/render/filters.js";
 
 /* ------------------------------------------------------------------ */
 /* The packs, in the shape the two extractors actually write            */
@@ -831,4 +832,33 @@ test("a colour transform or a mask on a face placement is COUNTED, never dropped
   const [eyes] = opsFor(face, "eyes");
   assert.equal(eyes.fill, "#ffffff", "the colour is carried UNTINTED rather than tinted by a second copy of `tint`");
   assertCountsAreRecomputable(face);
+});
+
+/**
+ * ► **THE HEAD'S ANIMATION COLOUR REACHES THE FACE (2026-09-24).** The eyes and
+ *   mouth are attached INSIDE the head clip, so a frozen or poisoned head tints
+ *   them as the build tints everything else attached there — found with the
+ *   same Codex finding that caught the hair and armour staying untinted.
+ */
+test("a condition transform on the head tints the eyes and the mouth, and nothing without one", () => {
+  const blue = [0.5, 0.5, 0.5, 1, 0, 0, 100, 0];
+  const tinted = figurePackFrom(
+    { 1: { bounds: {}, paths: [{ d: "M0 0L10 0", fill: "#442200" }] } },
+    {
+      standing: {
+        label: "Standing", firstFrame: 1, lastFrame: 1,
+        poses: [[{ shape: 1, limb: "head", depth: [25, 1, 1], matrix: [1, 0, 0, 1, 0, -2000], colour: blue }]],
+        limbs: [{ head: [1, 0, 0, 1, 0, -2000] }],
+        bounds: { xMin: -50, xMax: 50, yMin: -150, yMax: 0 }
+      }
+    }
+  );
+  const face = faceOpsFor(facePack(), tinted, { family: "standing", label: "Standing", at: 0 });
+  const eyes = opsFor(face, "eyes");
+  const mouth = opsFor(face, "mouth");
+  assert.ok(eyes.length > 0 && mouth.length > 0);
+  for (const op of eyes) assert.equal(op.fill, applyColourTransform("#ffffff", blue));
+  for (const op of mouth) assert.equal(op.stroke, applyColourTransform("#000000", blue));
+  const plain = faceOpsFor(facePack(), figurePack(), { family: "standing", label: "Standing", at: 0 });
+  for (const op of opsFor(plain, "eyes")) assert.equal(op.fill, "#ffffff");
 });

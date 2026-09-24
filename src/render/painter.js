@@ -81,6 +81,21 @@ function circle(x, y, r, fill, { stroke = null, alpha = 1 } = {}) {
 }
 
 /**
+ * Points on an arc about `centre` from `fromDegrees` to `toDegrees`
+ * (counter-clockwise, +y UP, 0 = the way the figure faces), then any `extra`
+ * points to close the shape. Authored geometry for the look's hair and beard.
+ */
+function arcPoints(centre, radius, fromDegrees, toDegrees, extra = []) {
+  const points = [];
+  const steps = 10;
+  for (let step = 0; step <= steps; step += 1) {
+    const angle = ((fromDegrees + ((toDegrees - fromDegrees) * step) / steps) * Math.PI) / 180;
+    points.push([centre.x + Math.cos(angle) * radius, centre.y + Math.sin(angle) * radius]);
+  }
+  return [...points, ...extra];
+}
+
+/**
  * The skeleton, in arena units relative to the figure's own feet at (0, 0),
  * with +y UP. The shell flips it into the arena's ground plane.
  *
@@ -228,6 +243,14 @@ export function paintFigure(figure, pose) {
   // Head, then helmet over it.
   const headRadius = HEAD_RADIUS * s.h;
   ops.push(circle(s.head.x, s.head.y, headRadius, p.skin, { alpha }));
+  // ► **THE LOOK'S BEARD (2026-09-24), AUTHORED**: a jaw-line wedge in the
+  //   look's hair colour, under any helmet — the build attaches `facehair` at
+  //   head depth 3 whether or not a helmet takes depth 5. Only with a look
+  //   (`figure.look`), so a spec without one paints exactly what it did.
+  if (figure.look?.beard) {
+    ops.push(poly(arcPoints(s.head, headRadius * 1.06, -150, -10, arcPoints(s.head, headRadius * 0.62, -10, -150)),
+      p.hair, { alpha }));
+  }
   const helm = weightOf(figure, "helmet");
   if (helm > 0) {
     // The dome sits on the head; the face is left open so the figure still has
@@ -261,12 +284,18 @@ export function paintFigure(figure, pose) {
       { alpha }
     ));
   } else {
+    // ► **THE LOOK'S HAIR (2026-09-24), AUTHORED**: a cap over the crown and
+    //   the back of the head in the look's hair colour, only when the look has
+    //   hair to show (the build's `hair1` is bald) and only bare-headed — a
+    //   helmet takes the hair's place in the build.
+    if (figure.look?.hair) ops.push(poly(arcPoints(s.head, headRadius * 1.1, 12, 196), p.hair, { alpha }));
     // Bare-headed: a brow line, so an unhelmed gladiator still faces somewhere.
+    // In the look's hair colour when there is a look, as before otherwise.
     ops.push(limb(
       { x: s.head.x - headRadius * 0.5, y: s.head.y + headRadius * 0.35 },
       { x: s.head.x + headRadius * 0.7, y: s.head.y + headRadius * 0.35 },
       headRadius * 0.22,
-      p.leather,
+      figure.look ? p.hair : p.leather,
       alpha
     ));
   }

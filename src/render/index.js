@@ -37,6 +37,10 @@
  * - `extracted-figure.js` draws the BUILD'S OWN rig when the player has
  *   extracted it, and returns nothing when they have not. Same shape as
  *   `sound.js`: the pack is an argument, never a table in the file.
+ * - `appearance.js` is a gladiator's LOOK — `begincolouring`'s skin and hair
+ *   table in the player's 8.8 arithmetic, the skin-derived features, which
+ *   rig placements are `bareskin`, and `randomise_gladiator`'s rule for a new
+ *   look. Presentation data only: it never enters the combat state.
  * - `props.js` draws the BUILD'S OWN arrow and trail when the player has
  *   extracted them, and returns null when they have not — the same shape as
  *   `extracted-figure.js` and `sound.js`, pack as an argument.
@@ -90,6 +94,7 @@ export * from "./clip-labels.js";
 export * from "./clip-sequences.js";
 export * from "./stance.js";
 export * from "./extracted-figure.js";
+export * from "./appearance.js";
 export * from "./projectile.js";
 export * from "./spell-effect.js";
 export * from "./props.js";

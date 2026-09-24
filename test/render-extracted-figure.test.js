@@ -32,7 +32,11 @@ import { SHADOW_RADIUS_PER_SIGMA, canvasFilterFor } from "../src/render/filters.
 import { figureScaleFor } from "../src/render/figure.js";
 import { SS2_FIGURE_HEIGHT } from "../src/render/painter.js";
 import { UNMAPPED_CLIP_LABELS, allUnmappedLabels, clipLabelsFor, directionalLabel } from "../src/render/clip-labels.js";
-import { ATTACHMENTS, attachmentsFor, composeInClipSpace, loadoutFrom } from "../src/render/extracted-figure.js";
+import {
+  ATTACHMENTS, attachmentsFor, composeInClipSpace, helmetReplacesHair, limbColoursOf, loadoutFrom
+} from "../src/render/extracted-figure.js";
+import { colourTransformForLook, ss2LookFrom } from "../src/render/appearance.js";
+import { applyColourTransform, concatColourTransforms } from "../src/render/filters.js";
 import nodeFs from "node:fs";
 import nodePath from "node:path";
 import { fileURLToPath as toPath } from "node:url";
@@ -566,6 +570,269 @@ test("a HELMET suppresses the hair, which is behaviour and not a fact about the 
   assert.deepEqual(slots({ helmet: 3 }), ["helmet"], "a helmet alone draws");
   assert.deepEqual(slots({ hairstyle: 4, helmet: 3 }), ["helmet"],
     "and together the helmet REPLACES the hair — they share depth 5 in the build");
+});
+
+/**
+ * ► **HELMET 0 IS NO HELMET, AND THIS ONCE DREW THE HAIR AWAY (fixed
+ *   2026-09-24).** The hair rule was `Number.isFinite(loadout.helmet)`, true
+ *   for 0; `updatecharacter` attaches a helmet only when `helmet != 0`
+ *   (`+0x0d9b`). And an id the wardrobe does not hold attaches nothing, so it
+ *   takes nothing's place either — while an EMPTY helmet the wardrobe does hold
+ *   (the build's `helmet1`) still does.
+ */
+test("helmet 0 keeps the hair, an unheld helmet keeps it too, and an empty held helmet takes it", () => {
+  const pack = packOf();
+  const wardrobe = wardrobeOf({ helmet: [3], hair: [4] });
+  wardrobe.pieces.helmet[1] = { linkage: "helmet1", character: 9901, frames: 1, placements: [] };
+  const slots = (loadout) => paintExtractedFigure(pack, {
+    family: "standing", label: "Standing", at: 0, height: 1, wardrobe, loadout
+  }).filter((op) => op.slot).map((op) => op.slot);
+  assert.deepEqual(slots({ hairstyle: 4, helmet: 0 }), ["hair"], "the build never attaches helmet 0");
+  assert.deepEqual(slots({ hairstyle: 4, helmet: 7 }), ["hair"], "helmet7 is not in the wardrobe, so nothing replaces the hair");
+  assert.deepEqual(slots({ hairstyle: 4, helmet: 1 }), [], "helmet1 is attached — empty — and the hair is gone");
+  assert.equal(helmetReplacesHair({ helmet: 0 }, wardrobe), false);
+  assert.equal(helmetReplacesHair({ helmet: 3 }, wardrobe), true);
+  assert.equal(helmetReplacesHair({}, wardrobe), false);
+});
+
+/** A rig with a head (bareskin at child depth 1, a default piece at 3), a torso, and a foot with no bareskin. */
+function lookPackOf({ colour = null } = {}) {
+  const limbs = { torso: [1, 0, 0, 1, 0, -1000], head: [1, 0, 0, 1, 0, -1800], Lfoot: [1, 0, 0, 1, 0, 0] };
+  return figurePackFrom(SHAPES, {
+    standing: {
+      label: "Standing", firstFrame: 2, lastFrame: 2,
+      bounds: { xMin: -20, xMax: 20, yMin: -100, yMax: 0 },
+      poses: [[
+        { shape: 1, limb: "Lfoot", depth: [17, 1], matrix: [1, 0, 0, 1, 0, 0] },
+        { shape: 1, limb: "torso", depth: [23, 1, 1], matrix: [1, 0, 0, 1, 0, -1000], ...(colour ? { colour } : {}) },
+        { shape: 1, limb: "head", depth: [25, 1, 1], matrix: [1, 0, 0, 1, 0, -1800] },
+        { shape: 2, limb: "head", depth: [25, 3, 1], matrix: [1, 0, 0, 1, 0, -1800] }
+      ]],
+      limbs: [limbs]
+    }
+  });
+}
+
+test("a LOOK tints the bareskin placements only, and its hair and beard, and attaches the derived features", () => {
+  const wardrobe = wardrobeOf({ hair: [4], facehair: [6], features: [7] });
+  const look = ss2LookFrom({ skincolor: 5, haircolor: 13, hairstyle: 4, facehairstyle: 6, features: 1 });
+  const ops = paintExtractedFigure(lookPackOf(), {
+    family: "standing", label: "Standing", at: 0, height: 1, wardrobe, appearance: look
+  });
+  const skin = colourTransformForLook(5);
+  const hair = colourTransformForLook(13);
+  const byKey = (limb, rigDepth, pick = () => true) => ops.filter((op) => !op.slot && op.limb === limb && op.rigDepth === rigDepth && pick(op));
+  assert.equal(byKey("Lfoot", 17)[0].fill, "#804020", "the foot has no bareskin and keeps its own colour");
+  assert.equal(byKey("torso", 23)[0].fill, applyColourTransform("#804020", skin), "the torso's bareskin takes the skin");
+  assert.equal(byKey("torso", 23)[0].stroke, "#000000", "the outline is multiplied too, and black stays black");
+  const head = byKey("head", 25);
+  assert.equal(head[0].fill, applyColourTransform("#804020", skin), "the head's bareskin takes the skin");
+  assert.equal(head[1].fill, "#ffffff", "the head's default piece at child depth 3 is not bareskin");
+
+  const slot = (name) => ops.find((op) => op.slot === name);
+  assert.equal(slot("features").fill, "#ffffff", "features 7 — derived from skin 5, not the DNA's 1 — and never tinted");
+  assert.equal(slot("hair").fill, applyColourTransform("#ffffff", hair), "hair takes the hair index");
+  assert.equal(slot("facehair").fill, applyColourTransform("#ffffff", hair), "and so does the beard");
+  assert.deepEqual(ops.filter((op) => op.slot).map((op) => op.slot), ["facehair", "features", "hair"],
+    "in the head's depth order: facehair 3, features 4, hair 5");
+
+  const invoice = figureInvoiceFor(lookPackOf(), {
+    family: "standing", label: "Standing", at: 0, height: 1, wardrobe, appearance: look
+  });
+  assert.equal(invoice.bareskinPlacements, 2);
+  assert.equal(invoice.skinTintedOps, 2);
+  assert.equal(invoice.hairTintedOps, 2);
+  assert.equal(invoice.skinNoBranch + invoice.hairNoBranch, 0);
+});
+
+/**
+ * ► **THE SKIN AND THE ANIMATION'S COLOUR ARE COMPOSED, THEN APPLIED AND
+ *   CLAMPED ONCE (Codex, 2026-09-24).** This test used to expect two tints in
+ *   a row — the code's own model, so it passed while the code was wrong. The
+ *   numbers below are worked by hand from the player's 8.8 rule
+ *   (`concatColourTransforms` cites the Ruffle source):
+ *
+ *     parent 0.5 -> 128;  skin 1 = 255/90/75% -> 652/230/192
+ *     composed  R (128*652)>>8 = 326   G (128*230)>>8 = 115   B (128*192)>>8 = 96   R+40
+ *     #804020   R (128*326)>>8 + 40 = 203 (cb)   G (64*115)>>8 = 28 (1c)   B (32*96)>>8 = 12 (0c)
+ *
+ *   Two tints in a row saturate red at 255 first and give `#a71c0c`.
+ */
+test("the skin is composed with the animation's own colour and clamped ONCE: #cb1c0c, not #a71c0c", () => {
+  const colour = [0.5, 0.5, 0.5, 1, 40, 0, 0, 0];
+  const look = ss2LookFrom({ skincolor: 1, haircolor: 1, hairstyle: null, facehairstyle: null });
+  const torso = paintExtractedFigure(lookPackOf({ colour }), {
+    family: "standing", label: "Standing", at: 0, height: 1, appearance: look
+  }).find((op) => op.limb === "torso");
+  assert.equal(torso.fill, "#cb1c0c");
+  // Alpha composes the same way: skin 24's 122% (312) inside a half-alpha limb
+  // (128) is (128*312)>>8 = 156 -> 0.609375, where clamping first gives 0.5.
+  const faded = paintExtractedFigure(lookPackOf({ colour: [1, 1, 1, 0.5, 0, 0, 0, 0] }), {
+    family: "standing", label: "Standing", at: 0, height: 1,
+    appearance: ss2LookFrom({ skincolor: 24, haircolor: 1, hairstyle: null, facehairstyle: null })
+  }).find((op) => op.limb === "torso");
+  assert.equal(faded.fillOpacity, 156 / 256);
+});
+
+/**
+ * ► **WHAT IS ATTACHED TO A LIMB TAKES THAT LIMB'S ANIMATION COLOUR (Codex
+ *   review of the look, 2026-09-24).** In the build's `frozen` pose every head
+ *   placement carries the blue condition transform, and the features, hair and
+ *   beard attached to that head stayed their standing colours while the skin
+ *   under them turned blue — and so did every armour piece, long before the
+ *   look. An attachment is a child of the limb clip: `T_limb(T_hair(fill))`
+ *   for hair, `T_limb(fill)` for the rest.
+ */
+function conditionPackOf(colour) {
+  const limbs = { torso: [1, 0, 0, 1, 0, -1000], head: [1, 0, 0, 1, 0, -1800] };
+  return figurePackFrom(SHAPES, {
+    standing: {
+      label: "Standing", firstFrame: 2, lastFrame: 2,
+      bounds: { xMin: -20, xMax: 20, yMin: -100, yMax: 0 },
+      poses: [[
+        { shape: 1, limb: "torso", depth: [23, 1, 1], matrix: [1, 0, 0, 1, 0, -1000], colour },
+        { shape: 1, limb: "head", depth: [25, 1, 1], matrix: [1, 0, 0, 1, 0, -1800], colour },
+        { shape: 2, limb: "head", depth: [25, 3, 1], matrix: [1, 0, 0, 1, 0, -1800], colour }
+      ]],
+      limbs: [limbs]
+    }
+  });
+}
+
+test("a CONDITION pose tints what hangs on the limb: features, hair (after its own tint) and armour", () => {
+  const frozen = [0.398, 0.398, 0.398, 1, 0, 0, 153, 0];
+  const wardrobe = wardrobeOf({ hair: [4], features: [7], breastplate: [3] });
+  const look = ss2LookFrom({ skincolor: 5, haircolor: 13, hairstyle: 4, facehairstyle: null });
+  const options = { family: "standing", label: "Standing", at: 0, height: 1, wardrobe, loadout: { breastplate: 3 }, appearance: look };
+  const ops = paintExtractedFigure(conditionPackOf(frozen), options);
+  const slot = (name) => ops.find((op) => op.slot === name);
+  assert.equal(slot("features").fill, applyColourTransform("#ffffff", frozen), "features: the limb's transform alone");
+  // Hair 13 (160/0/0%) inside frozen, worked by hand in 8.8: 160% -> 409 and
+  // 0.398 -> 102, composed R (102*409)>>8 = 162, B offset 153; on #ffffff
+  // R (255*162)>>8 = 161 (a1), G 0, B 0 + 153 (99). Two tints in a row would
+  // saturate at 255 first and give #650099.
+  assert.equal(slot("hair").fill, "#a10099", "hair: its own tint composed inside the limb's, clamped once");
+  assert.equal(slot("breastplate").fill, applyColourTransform("#ffffff", frozen), "armour takes the torso's");
+  const invoice = figureInvoiceFor(conditionPackOf(frozen), options);
+  assert.equal(invoice.inheritedColourOps, 3);
+  assert.equal(invoice.limbColourConflicts, 0);
+
+  // No condition: the pieces are exactly as before.
+  const plain = paintExtractedFigure(conditionPackOf(undefined), options);
+  assert.equal(plain.find((op) => op.slot === "breastplate").fill, "#ffffff");
+  assert.equal(figureInvoiceFor(conditionPackOf(undefined), options).inheritedColourOps, 0);
+
+  // Hair and beard ALPHA compose too: hair 24's 122% (312) inside a half-alpha
+  // head (128) is (128*312)>>8 = 156, not min(1, 1.21875) * 0.5.
+  const halfAlpha = paintExtractedFigure(conditionPackOf([1, 1, 1, 0.5, 0, 0, 0, 0]), {
+    ...options, wardrobe: wardrobeOf({ hair: [4], facehair: [6] }),
+    appearance: ss2LookFrom({ skincolor: 1, haircolor: 24, hairstyle: 4, facehairstyle: 6 })
+  });
+  for (const name of ["hair", "facehair"]) {
+    assert.equal(halfAlpha.find((op) => op.slot === name).fillOpacity, 156 / 256, `${name} alpha`);
+  }
+});
+
+test("limbColoursOf reads each limb's transform off the pose and counts a disagreement", () => {
+  const red = [1, 0, 0, 1, 0, 0, 0, 0];
+  const { colours, conflicts } = limbColoursOf([
+    { limb: "head", colour: red }, { limb: "head", colour: red }, { limb: "torso" }, { limb: null, colour: red }
+  ]);
+  assert.deepEqual(colours.get("head"), red);
+  assert.equal(colours.get("torso"), null);
+  assert.equal(conflicts, 0);
+  assert.equal(limbColoursOf([{ limb: "head", colour: red }, { limb: "head" }]).conflicts, 1);
+  assert.equal(limbColoursOf(null).colours.size, 0);
+});
+
+test("REAL PACK: in `frozen`, the features, hair, beard and armour turn with the head and torso", () => {
+  if (!REAL_SHAPES || !REAL_ANIMATIONS || !REAL_WARDROBE) return;
+  const pack = figurePackFrom(REAL_SHAPES, REAL_ANIMATIONS);
+  const options = {
+    family: "condition:frozen", label: "frozen", at: 0.5, wardrobe: REAL_WARDROBE,
+    loadout: { helmet: 0, breastplate: 3 },
+    appearance: ss2LookFrom({ skincolor: 5, haircolor: 13, hairstyle: 2, facehairstyle: 3 })
+  };
+  const chosen = animationFor(pack, { family: "condition:frozen", label: "frozen" });
+  const pose = chosen.animation.poses[poseIndexAt(chosen.animation.poses.length, 0.5)];
+  const { colours } = limbColoursOf(pose);
+  const head = colours.get("head");
+  const torso = colours.get("torso");
+  assert.ok(head && torso, "the frozen pose carries a condition transform on the head and the torso");
+  const ops = paintExtractedFigure(pack, options);
+  const standing = paintExtractedFigure(pack, { ...options, family: "standing", label: "Standing", at: 0 });
+  const fillsOf = (list, slot) => new Set(list.filter((op) => op.slot === slot).map((op) => op.fill));
+  // The piece's OWN art, straight out of the wardrobe, so the expectation does
+  // not inherit whatever the code did to the standing paint.
+  const artOf = (slot, id) => new Set(REAL_WARDROBE.pieces[slot][id].placements
+    .flatMap((placement) => REAL_WARDROBE.shapes[placement.shape].paths.map((path) => path.fill)));
+  const hairInHead = concatColourTransforms(head, colourTransformForLook(13));
+  for (const [slot, id, transform] of [
+    ["features", 7, head], ["breastplate", 3, torso], ["hair", 2, hairInHead], ["facehair", 3, hairInHead]
+  ]) {
+    const expected = new Set([...artOf(slot, id)].map((fill) => applyColourTransform(fill, transform)));
+    assert.deepEqual(fillsOf(ops, slot), expected, `${slot}: its art under ONE composed transform`);
+    assert.notDeepEqual(fillsOf(ops, slot), fillsOf(standing, slot), `${slot} must actually change`);
+  }
+  // Every pose of the whole pack reads one colour per limb.
+  let conflicts = 0;
+  for (const animation of Object.values(REAL_ANIMATIONS)) {
+    for (const each of animation.poses) conflicts += limbColoursOf(each).conflicts;
+  }
+  assert.equal(conflicts, 0, "the placements under one limb never disagree about its transform");
+});
+
+/**
+ * ► **THE NAMED REGRESSION (Codex pass 2, 2026-09-24): skin 1 on the head's
+ *   `#cccccc` in the real `frozen` pose is `#ce48d5`.** Re-derived by hand
+ *   from the head's transform in the pack, `[0.398, 0.398, 0.398, 1, 0, 0,
+ *   153, 0]` -> 102/256 with blue +153, and skin 1's 652/230/192:
+ *
+ *     composed  R (102*652)>>8 = 259   G (102*230)>>8 = 91   B (102*192)>>8 = 76   B+153
+ *     #cccccc   R (204*259)>>8 = 206 (ce)   G (204*91)>>8 = 72 (48)   B (204*76)>>8 + 153 = 213 (d5)
+ *
+ *   The same number Codex reached. Two tints in a row gave `#6548d5`: red
+ *   saturates at 255 under skin 1 and then falls to 101 under the frost.
+ */
+test("REAL PACK: skin 1 in the frozen pose draws the head's #cccccc as #ce48d5, composed and clamped once", () => {
+  if (!REAL_SHAPES || !REAL_ANIMATIONS) return;
+  const pack = figurePackFrom(REAL_SHAPES, REAL_ANIMATIONS);
+  const chosen = animationFor(pack, { family: "condition:frozen", label: "frozen" });
+  const pose = chosen.animation.poses[poseIndexAt(chosen.animation.poses.length, 0.5)];
+  assert.deepEqual(limbColoursOf(pose).colours.get("head"), [0.398, 0.398, 0.398, 1, 0, 0, 153, 0],
+    "the pack's own frozen head transform, which the hand working above starts from");
+  assert.ok(REAL_SHAPES[689].paths.some((path) => path.fill === "#cccccc"), "the head's bareskin art carries #cccccc");
+  const head = paintExtractedFigure(pack, {
+    family: "condition:frozen", label: "frozen", at: 0.5,
+    appearance: ss2LookFrom({ skincolor: 1, haircolor: 1, hairstyle: null, facehairstyle: null })
+  }).filter((op) => op.limb === "head" && !op.slot).map((op) => op.fill);
+  assert.ok(head.includes("#ce48d5"), `the head's grey under skin 1 in frozen: ${head.join(" ")}`);
+  assert.ok(!head.includes("#6548d5"), "and not the doubly-clamped colour");
+});
+
+test("no look, or a null one, paints byte for byte what it did before the option existed", () => {
+  const wardrobe = wardrobeOf({ hair: [4], helmet: [3] });
+  const base = { family: "standing", label: "Standing", at: 0, height: 1, wardrobe, loadout: { hairstyle: 4, helmet: 3 } };
+  const before = JSON.stringify(paintExtractedFigure(lookPackOf(), base));
+  assert.equal(JSON.stringify(paintExtractedFigure(lookPackOf(), { ...base, appearance: null })), before);
+  assert.equal(JSON.stringify(paintExtractedFigure(lookPackOf(), { ...base, appearance: undefined })), before);
+});
+
+test("a look index with no branch tints nothing and says so; a look with no hair attaches none", () => {
+  const wardrobe = wardrobeOf({ hair: [4], facehair: [6] });
+  const look = ss2LookFrom({ skincolor: 23, haircolor: 23, hairstyle: 4, facehairstyle: 6 });
+  const options = { family: "standing", label: "Standing", at: 0, height: 1, wardrobe, appearance: look };
+  const ops = paintExtractedFigure(lookPackOf(), options);
+  assert.equal(ops.find((op) => op.limb === "torso").fill, "#804020");
+  assert.equal(ops.find((op) => op.slot === "hair").fill, "#ffffff");
+  const invoice = figureInvoiceFor(lookPackOf(), options);
+  assert.equal(invoice.skinNoBranch, 2);
+  assert.equal(invoice.hairNoBranch, 2);
+  const bald = paintExtractedFigure(lookPackOf(), {
+    ...options, loadout: { hairstyle: 4 }, appearance: ss2LookFrom({ skincolor: 1, haircolor: 1, hairstyle: null, facehairstyle: 0 })
+  });
+  assert.deepEqual(bald.filter((op) => op.slot).map((op) => op.slot), [],
+    "the look is the whole answer for the head pieces: its null hair overrides the loadout's");
 });
 
 test("the dressing loop actually RUNS, which is the assertion that was missing", () => {

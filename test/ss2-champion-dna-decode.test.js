@@ -19,8 +19,10 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  SS2_CHAMPION_APPEARANCE_INDEX,
   SS2_CHAMPION_DNA_INDEX,
   Ss2ChampionDnaError,
+  ss2ChampionAppearanceFromDna,
   ss2ChampionFromDna
 } from "../src/team/ss2-champion-dna.js";
 
@@ -56,6 +58,26 @@ test("the index map agrees, row for row, with the doc's mechanically re-parsed t
     assert.equal(rows.get(index), field, `DNA index ${index}`);
   }
   assert.equal(Object.keys(SS2_CHAMPION_DNA_INDEX).length, 32, "the decode reads the 32 combat fields");
+  // The LOOK's five (2026-09-24), against the same independent table.
+  for (const [field, index] of Object.entries(SS2_CHAMPION_APPEARANCE_INDEX)) {
+    assert.equal(rows.get(index), field, `appearance DNA index ${index}`);
+  }
+  assert.deepEqual(Object.values(SS2_CHAMPION_APPEARANCE_INDEX), [1, 2, 3, 4, 5]);
+});
+
+test("the look decodes beside the combat record, never into it, and refuses nothing", () => {
+  const dna = syntheticDna({ 1: "11", 2: "21", 3: "23", 4: "16", 5: "0" });
+  assert.deepEqual(ss2ChampionAppearanceFromDna(dna), {
+    skincolor: 11, haircolor: 21, features: 23, hairstyle: 16, facehairstyle: 0
+  }, "as the DNA states it: features is DERIVED later, in src/render/appearance.js");
+  for (const field of Object.keys(SS2_CHAMPION_APPEARANCE_INDEX)) {
+    assert.equal(field in ss2ChampionFromDna(dna), false, `${field} stays out of the combat record`);
+  }
+  // A malformed look field draws as absent; it does not refuse the champion.
+  assert.deepEqual(ss2ChampionAppearanceFromDna(syntheticDna({ 1: "", 2: "red" })), {
+    skincolor: null, haircolor: null, features: 103, hairstyle: 104, facehairstyle: 105
+  });
+  assert.equal(ss2ChampionAppearanceFromDna(null), null);
 });
 
 test("a literal's fields are ToNumber'd, strings or numbers alike", () => {

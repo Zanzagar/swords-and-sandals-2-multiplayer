@@ -317,6 +317,17 @@ const championsBySlot = new Map(
     .filter((member) => Number.isInteger(member.whichBoss))
     .map((member) => [member.id, member.whichBoss])
 );
+/**
+ * EACH FIGHTER'S LOOK, by combatant id (2026-09-24): skin, hair colour, hair,
+ * facial hair and the skin-derived features, as the roster built them — a
+ * champion's from its own DNA, a demo gladiator's from `randomise_gladiator`'s
+ * rule on the bout's seed. **Read from the roster, never from the host**: the
+ * look is presentation and is not in the combat state, so it cannot move a
+ * hash. `src/render/appearance.js` holds the rules.
+ */
+const appearanceById = new Map(
+  teams.flatMap((team) => team.members).map((member) => [member.id, member.appearance ?? null])
+);
 const matchLabel = `${teams[0].members.length}v${teams[1].members.length}`;
 
 /**
@@ -3919,7 +3930,7 @@ function renderStage(view, fit, now) {
     const combatant = byId.get(combatantId);
     if (!combatant) continue;
     const placement = host.layout.placementFor(combatantId);
-    const figure = figureSpecFor(combatant, { side: placement.side });
+    const figure = figureSpecFor(combatant, { side: placement.side, appearance: appearanceById.get(combatantId) ?? null });
 
     // ► **A QUEUED ENTRY IS NOT POSED UNTIL IT BEGINS** — a fireball's or an
     //   arrow's victim before impact (`reactionDelaysFor`). Until then it stands
@@ -4084,7 +4095,8 @@ function renderStage(view, fit, now) {
       ? paintExtractedFigure(figurePack, {
         ...figureOptions,
         wardrobe,
-        loadout: reportedLoadout(combatant)
+        loadout: reportedLoadout(combatant),
+        appearance: appearanceById.get(combatantId) ?? null
       })
       : [];
     // ► **`mergeFaceOps`, NEVER `concat`.** The eyes and the mouth are two

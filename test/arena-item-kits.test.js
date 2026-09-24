@@ -42,11 +42,22 @@ function arenaHost({ items, perSide = 2, seed = 7 }) {
  * 3 a side), MEASURED at 3f386d7 before kits learned pools, magicka or a seed.
  * It is a literal on purpose: every other test in the suite that builds the
  * demo roster without a kit relies on this not moving.
+ *
+ * ► **EVERY MEMBER'S `appearance` IS LEFT OUT OF IT, AND THE LITERAL DID NOT
+ *   MOVE (2026-09-24).** The look is new, is presentation only, and is seeded
+ *   by the bout's seed — so it differs at seed 8 by design and would move this
+ *   hash for a reason that is not combat. Stripped, the six sides still hash to
+ *   the 3f386d7 literal byte for byte, which is the proof that adding the look
+ *   changed nothing a battle is built from. The look has its own tests below.
  */
 const PLAIN_ROSTER_SHA256 = "a529ec13e796d44e6a6b2cffa74c109b92883850b869fdd4014268d24e5da689";
+const withoutLook = (side) => ({
+  ...side,
+  members: side.members.map(({ appearance, ...member }) => member)
+});
 const plainRosterHash = (extra) => {
   const sides = [];
-  for (const size of [1, 2, 3]) for (const side of ["red", "blue"]) sides.push(demoSide(side, size, { ...deps, ...extra }));
+  for (const size of [1, 2, 3]) for (const side of ["red", "blue"]) sides.push(withoutLook(demoSide(side, size, { ...deps, ...extra })));
   return crypto.createHash("sha256").update(JSON.stringify(sides)).digest("hex");
 };
 

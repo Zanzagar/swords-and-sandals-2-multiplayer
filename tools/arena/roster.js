@@ -22,7 +22,10 @@
  *   never a champion.
  */
 
-import { ss2ChampionFromDna } from "../../src/team/ss2-champion-dna.js";
+import { fnv1a } from "../../src/common/fnv1a.js";
+import { generatedSs2Look, ss2LookFrom } from "../../src/render/appearance.js";
+import { ss2ChampionAppearanceFromDna, ss2ChampionFromDna } from "../../src/team/ss2-champion-dna.js";
+import { createOrderedRngChannel } from "../../src/team/rng.js";
 
 /**
  * A vanilla-shaped gladiator record — the shape `createVanillaBattleHost`
@@ -329,6 +332,39 @@ export function demoItemsFrom(spec) {
 }
 
 /**
+ * THE SEED A DEMO LOOK IS DRAWN FROM WHEN THE CALLER GIVES NONE — the arena's
+ * own default bout seed (`tools/arena/main.js`: `Number(params.get("seed")) ||
+ * 7`), so a caller that passes nothing sees what the arena shows by default.
+ */
+export const DEMO_LOOK_DEFAULT_SEED = 7;
+
+/**
+ * ONE DEMO GLADIATOR'S LOOK, added 2026-09-24: `randomise_gladiator`'s own
+ * four draws (`generatedSs2Look` in `src/render/appearance.js`), from a stream
+ * seeded by the BOUT'S seed and the SLOT — so a bout looks the same every time
+ * it is replayed, two slots never share a stream, and a 1v1's `red-1` looks
+ * like the 3v3's `red-1` on the same seed.
+ *
+ * ► **ITS OWN STREAM, NEVER THE BATTLE'S.** A draw from the battle's ordered
+ *   channel would move its cursor and with it every hash the bout produces.
+ *   This is a separate `createOrderedRngChannel` (the repository's seeded
+ *   generator, not `Math.random`) that nothing else reads, seeded by
+ *   `fnv1a("demo-look|<seed>|<side>|<slot>")`.
+ *
+ * ► **AND THE VILLAIN BRANCH'S ONE LOOK RULE IS APPLIED**: a gladiator whose
+ *   helmet is above 1 gets `hairstyle 0` (`+0x2aac`) — bald under the helmet,
+ *   as the build's own generated opponents are, which shows only if the helmet
+ *   is knocked off. The helmet is the roster's and is not touched.
+ */
+export function demoLookFor(side, slotIndex, seed = DEMO_LOOK_DEFAULT_SEED, { helmet = null } = {}) {
+  const channel = createOrderedRngChannel({
+    seed: Number.parseInt(fnv1a(`demo-look|${seed}|${side}|${slotIndex}`), 16),
+    journal: false
+  });
+  return generatedSs2Look((upperExclusive) => channel.randomNumber("demo_look", upperExclusive), { helmet });
+}
+
+/**
  * Builds one side's members in the shape the host takes.
  *
  * `resources` is the OPT-IN SS2 resource bag. It is declared here rather than
@@ -349,9 +385,14 @@ export function demoItemsFrom(spec) {
  *   roster, byte for byte. NON-EMPTY is a KIT FIGHTER: `DEMO_KIT_MAGICKA` and
  *   the seed-parity opener below — and, if it holds any of
  *   `DEMO_DAMAGE_SPELL_IDS`, `battlevalues`' own pools.
- * @param {number|null} [deps.seed] the bout's seed. Read ONLY for a kit, and
- *   only for which side opens: on an even seed the +1 speed is blue's. Pass
- *   the same seed to both sides, as the arena does.
+ * @param {number|null} [deps.seed] the bout's seed. For COMBAT it is read ONLY
+ *   for a kit, and only for which side opens: on an even seed the +1 speed is
+ *   blue's. Pass the same seed to both sides, as the arena does. **Since
+ *   2026-09-24 it also seeds each member's LOOK** (`demoLookFor`; absent, the
+ *   arena's default 7), which is presentation and reaches no combat number.
+ *
+ * Each member carries `appearance` — its look, BESIDE `vanilla` and
+ * `resources` and never in them, so nothing the host builds or hashes sees it.
  */
 export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = [], seed = null }) {
   const slots = Object.fromEntries(items.slice(0, 6).map((id, index) => [`inventory${index + 1}`, id]));
@@ -614,7 +655,14 @@ export function demoSide(side, size, { ss2Combatant, ss2BattleValues, items = []
           : {})
       };
       const canonical = ss2Combatant(priced, { id, name, controller: "local", derive: false });
-      return { id, controller: "local", vanilla: priced, resources: canonical.resources, clip: { gladiator_dir: facing } };
+      return {
+        id,
+        controller: "local",
+        vanilla: priced,
+        resources: canonical.resources,
+        clip: { gladiator_dir: facing },
+        appearance: demoLookFor(side, index, Number.isInteger(seed) ? seed : DEMO_LOOK_DEFAULT_SEED, { helmet: priced.helmet })
+      };
     })
   };
 }
@@ -842,7 +890,18 @@ export function championSide(side, whichBossList, { ss2Combatant, ss2BattleValue
         }
       }
       return {
-        id, controller: "local", vanilla: priced, resources: canonical.resources, clip: { gladiator_dir: facing }, whichBoss
+        id,
+        controller: "local",
+        vanilla: priced,
+        resources: canonical.resources,
+        clip: { gladiator_dir: facing },
+        whichBoss,
+        // ► **THE CHAMPION'S OWN LOOK, from its own DNA (2026-09-24)** —
+        //   indices 1-5, decoded beside the combat record and never into it,
+        //   with `features` derived from the skin as `initcolour` derives it
+        //   (so three champions do NOT wear their DNA's index 3). Presentation
+        //   only: `vanilla` and `resources` are exactly what they were.
+        appearance: ss2LookFrom(ss2ChampionAppearanceFromDna(entry.dna))
       };
     })
   };
