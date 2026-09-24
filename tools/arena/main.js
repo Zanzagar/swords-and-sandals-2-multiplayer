@@ -143,8 +143,7 @@ import {
   popupPackFrom,
   popupOpsFor,
   popupFallbackOpsFor,
-  actionButtonFallbackOpsFor,
-  SS2_OVERLAY_PLACEMENT
+  actionButtonPackFrom
 } from "/src/render/index.js";
 // Imported directly, like `crowd-sound.js` below: the blood's plan and clock.
 import { bloodPlanFor, bloodSeedFor, dueBloodEffects } from "/src/render/blood-timing.js";
@@ -176,7 +175,8 @@ import {
   ringKeyCommand,
   ringModelFor
 } from "/tools/arena/ring.js";
-import { RING_STAGE_SCALE, fighterBoxFor, foeAt, ringButtonsAt, ringSlotAt } from "/tools/arena/ring-layout.js";
+import { fighterBoxFor, foeAt, ringButtonsAt, ringPlacementFor, ringSlotAt } from "/tools/arena/ring-layout.js";
+import { ringButtonArt } from "/tools/arena/ring-art.js";
 import {
   ARENA_ASSET_TIMEOUT_MS,
   PackOutcome,
@@ -489,15 +489,17 @@ let boulders = [];
 let settled = false;
 
 /**
- * ► **THE RING (slice S2 of `docs/design/battle-ui.md`, "The in-battle
- *   actions: DECIDED").** On a person's turn the build's eight buttons stand
- *   around the acting fighter, a gold ring marks the selected foe, one click
- *   acts, and the strip under the stage carries the same actions for the
- *   keyboard and for screen readers. What sits where, who is selected and
- *   what a click or key sends are `tools/arena/ring.js`'s, under the suite;
- *   where the buttons are drawn and what a point hits are
- *   `tools/arena/ring-layout.js`'s. This file holds the state they are handed
- *   and paints what they return.
+ * ► **THE RING (slices S2 and S3 of `docs/design/battle-ui.md`, "The
+ *   in-battle actions: DECIDED").** On a person's turn the build's eight
+ *   buttons stand around the acting fighter, a gold ring marks the selected
+ *   foe, one click acts, and the strip under the stage carries the same
+ *   actions for the keyboard and for screen readers. What sits where, who is
+ *   selected and what a click or key sends are `tools/arena/ring.js`'s, under
+ *   the suite; where the buttons are drawn — the build's own placement under
+ *   the camera — and what a point hits are `tools/arena/ring-layout.js`'s;
+ *   what each button paints — the build's own art from the player's icons
+ *   pack, or the authored buttons without one — is `tools/arena/ring-art.js`'s.
+ *   This file holds the state they are handed and paints what they return.
  *
  * - `ringView` — the ring for the person's turn on screen: its model, whose
  *   turn and whether the arena is ready for it. Null on every other turn, so
@@ -506,16 +508,20 @@ let settled = false;
  *   keeps while it is valid (the owner's Q4: "it stays selected between
  *   turns"). Per fighter, because a person playing three fighters in three
  *   ranks fights three different foes.
- * - `ringButtons`, `fighterBoxes`, `ringAnchor` — where the last frame DREW
- *   the buttons, the fighters and the acting fighter's ring centre, in canvas
- *   pixels, so a click is tested against what the person actually saw.
+ * - `ringButtons`, `fighterBoxes` — where the last frame DREW the buttons and
+ *   the fighters, in canvas pixels, so a click is tested against what the
+ *   person actually saw; `ringOrigins` — where it drew the acting fighter and
+ *   the selected foe, in arena units, which is what the ring is placed from.
+ * - `ringButtonPack` — the build's buttons from the icons pack
+ *   (`actionButtonPackFrom`), or null: the authored buttons are drawn.
  */
 let ringView = null;
 const ringSelection = new Map();
 let ringButtons = [];
 let fighterBoxes = [];
-let ringAnchor = null;
-/** The slot under the pointer, drawn in the fallback's hover look. */
+let ringOrigins = { actor: null, foe: null };
+let ringButtonPack = null;
+/** The slot under the pointer: its background on the over frame (the build's rollover), or the fallback's hover look. */
 let ringHover = null;
 /** Which person's turn the live region last announced, so a turn is announced once. */
 let ringAnnounced = null;
@@ -2374,6 +2380,10 @@ function useIconPack(data) {
   if (facePack) log("face: eyes and mouth from your own install.");
   popupPack = popupPackFrom(data);
   if (popupPack) log("pop-ups: the damage, spell and BLOCK art from your own install.");
+  // The ring's buttons (S3): the build's own when the pack has its buttons
+  // section, the authored ones otherwise — `ring-art.js` decides per button.
+  ringButtonPack = actionButtonPackFrom(data);
+  if (ringButtonPack?.button) log("ring: the build's own action buttons from your install.");
 }
 
 assetGate.track("bitmaps", fetch("/assets/bitmaps/manifest.json")
@@ -4322,9 +4332,10 @@ function renderStage(view, fit, now) {
   // Which pop-ups each fighter is showing this frame, by the build's
   // replace-by-depth rule; drawn with him, below.
   const livePopups = livePopupsFor(popups, now);
-  // THE RING's hit boxes and centre, re-made from what THIS frame draws.
+  // THE RING's hit boxes and the two fighters it is placed from, re-made from
+  // what THIS frame draws.
   const drawnBoxes = [];
-  ringAnchor = null;
+  ringOrigins = { actor: null, foe: null };
 
   // ► **PAINT ORDER FOLLOWS THE DEPTH BEING DRAWN, NOT THE ONE BEING HELD
   //   (2026-09-12).** `scene.drawOrder` sorts on the actor's `y`, which the
@@ -4667,15 +4678,14 @@ function renderStage(view, fit, now) {
     context.fillText(combatant.name, view.toX(origin.x), view.toY(origin.y, -22));
     context.globalAlpha = 1;
 
-    // Where he was drawn, for a click on him and — for the acting fighter —
-    // for the ring: the build's overlay stands 180 above his feet.
+    // Where he was drawn, for a click on him and — for the acting fighter and
+    // the selected foe, the build's hero and villain — for the ring's placement.
     drawnBoxes.push({
       id: combatantId,
       ...fighterBoxFor({ footX: view.toX(origin.x), footY: view.toY(origin.y, 0), pxPerUnit: view.scale, size: origin.size ?? 1 })
     });
-    if (combatantId === ringView?.actorId) {
-      ringAnchor = { x: view.toX(origin.x), y: view.toY(origin.y, SS2_OVERLAY_PLACEMENT.aboveFeet) };
-    }
+    if (combatantId === ringView?.actorId) ringOrigins.actor = { x: origin.x, y: origin.y };
+    if (combatantId === ringView?.model.selectedId) ringOrigins.foe = { x: origin.x, y: origin.y };
   }
   fighterBoxes = drawnBoxes;
 
@@ -4694,7 +4704,7 @@ function renderStage(view, fit, now) {
   // bodies, and the bar and border are root layers above the whole arena. The
   // build's arrows (45000) would pass over it; the ring is drawn only once
   // nothing is in flight, so the order between them never shows.
-  paintRing(fit);
+  paintRing(view, fit);
 
   // ► **THE RAIN, THE UI BAR AND THE BORDER GO ON TOP, and the build's own
   //   depths are what say so.** They sit at root depths 80, 438 and 1193,
@@ -4737,7 +4747,7 @@ function renderStage(view, fit, now) {
 }
 
 /* ------------------------------------------------------------------ */
-/* The ring on the stage (S2)                                          */
+/* The ring on the stage (S2, S3)                                      */
 /* ------------------------------------------------------------------ */
 
 /** Whether the ring is on the stage: a person's turn, and the arena ready for it. */
@@ -4768,32 +4778,45 @@ function paintTargetRing(view, origin) {
 }
 
 /**
- * THE EIGHT BUTTONS AROUND THE ACTING FIGHTER, in the AUTHORED fallback look
- * (`actionButtonFallbackOpsFor`: a round bronze button and a glyph; the
- * build's own art is slice S3), each with its key and a short label on the
- * ring's outer side. Only the slots the engine offers are drawn (S2).
- * `ringButtons` records where, for the click.
+ * THE EIGHT BUTTONS AROUND THE ACTING FIGHTER (S3): where the build puts its
+ * overlay — on him, 180 above his feet, scaled by `flipoverlay` against the
+ * camera (`ringPlacementFor`), each slot where the pack measured it — and in
+ * the build's own art from the player's icons pack, the background on its
+ * over frame under the pointer (`ringButtonArt`); without the pack, S2's
+ * authored round buttons. Each has its key and a short label on the ring's
+ * outer side. Only the slots the engine offers are drawn (S2). `ringButtons`
+ * records where, for the click.
  */
-function paintRing(fit) {
+function paintRing(view, fit) {
   ringButtons = [];
-  if (!ringShown() || !ringAnchor) return;
+  if (!ringShown() || !ringOrigins.actor) return;
+  // The build's placement needs the build's camera; the FITTED view (no
+  // extracted arena) has none, and takes the authored size.
+  const placement = ringPlacementFor({
+    actor: ringOrigins.actor,
+    foe: ringOrigins.foe,
+    camera: arenaScreenAvailable() ? camera : null,
+    view,
+    fit
+  });
   const buttons = ringButtonsAt(ringView.model, {
-    centerX: ringAnchor.x,
-    centerY: ringAnchor.y,
-    unit: fit.scale * RING_STAGE_SCALE
+    centerX: placement.x,
+    centerY: placement.y,
+    unit: placement.unit,
+    layout: ringButtonPack?.layout ?? null
   });
   ringButtons = buttons;
-  const facing = ringView.model.stance?.facing ?? "right";
-  for (const button of buttons) {
-    const ops = actionButtonFallbackOpsFor(button.verb, { state: button.slot === ringHover ? "hover" : "normal", facing });
-    context.save();
-    try {
-      context.translate(button.x, button.y);
-      context.scale(button.scale, button.scale);
-      for (const operation of ops) paintPropOperation(operation);
-    } finally {
-      context.restore();
-    }
+  const actor = host.combatant(ringView.actorId);
+  const drawn = ringButtonArt(buttons, {
+    pack: ringButtonPack,
+    facing: ringView.model.stance?.facing ?? "right",
+    hoverSlot: ringHover,
+    psyche: resourceValue(actor, "psyche_up", 1),
+    ammo: resourceValue(actor, "ammo_left", 0),
+    textPack
+  });
+  for (const button of drawn) {
+    paintRingButton(button);
     const label = `${button.key} ${RING_VERB_LABELS[button.verb]?.short ?? button.verb}`;
     const gap = Math.max(3, button.r * 0.2);
     context.save();
@@ -4811,6 +4834,42 @@ function paintRing(fit) {
     } finally {
       context.restore();
     }
+  }
+}
+
+/**
+ * ONE RING BUTTON'S OPS, in its own pixels, at its centre and scale. Paths go
+ * through the group compositor — the build's words glow, as the pop-ups'
+ * numbers do, and `ringButtonArt` built those glows at `button.scale` — with
+ * translations in twips; a `text` op is the ammo count in this page's font
+ * when the text pack has no glyphs for it.
+ */
+function paintRingButton(button) {
+  const paths = button.ops.filter((op) => op.kind === "path");
+  const words = button.ops.filter((op) => op.kind === "text");
+  context.save();
+  try {
+    context.translate(button.x, button.y);
+    context.scale(button.scale, button.scale);
+    if (paths.length > 0) {
+      paintGroupRuns(paths, { translationDivisor: TWIPS_PER_PIXEL, filtersScaled: true }, paintLayerOperation);
+    }
+    for (const word of words) {
+      context.globalAlpha = word.alpha ?? 1;
+      context.font = `bold ${word.size}px ui-sans-serif, system-ui, sans-serif`;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.lineJoin = "round";
+      if (word.outline) {
+        context.strokeStyle = word.outline;
+        context.lineWidth = Math.max(1, word.size / 7);
+        context.strokeText(word.text, word.x, word.y);
+      }
+      context.fillStyle = word.fill ?? "#ffffff";
+      context.fillText(word.text, word.x, word.y);
+    }
+  } finally {
+    context.restore();
   }
 }
 
@@ -5734,6 +5793,24 @@ window.addEventListener("keydown", (event) => {
   else if (command.kind === "focus-strip") el("ring-strip").querySelector("button:not(:disabled)")?.focus();
 });
 
+/**
+ * THE RING'S LINE IN THE PROVENANCE PANEL, derived from what is drawn: the
+ * build's buttons or the authored ones, the build's placement or the fitted
+ * view's authored size. The keys, the labels and the gold target ring are
+ * authored either way.
+ */
+function ringProvenance() {
+  const art = ringButtonPack?.button
+    ? "is the build's own buttons, from your install's icons: each verb's icon for its stance and facing and the " +
+      `rollover background${textPack ? ", with the attack and bow words and the arrow count in the build's glyphs" : ""}`
+    : "is authored round buttons (run `node tools/extract-icons.mjs` for the build's own)";
+  const where = arenaScreenAvailable()
+    ? "where the build's overlay stands — on the acting fighter, 180 above his feet, sized against the camera by its " +
+      "own table (a team camera's in-between zoom takes the band below's size; the close-up past 1,600 apart is not drawn)"
+    : "on the acting fighter at an authored size, as this fitted view has no build camera";
+  return ["The action ring", `${art}, ${where}. The keys, the labels and the gold target ring are authored.`];
+}
+
 function renderProvenance() {
   const rules = host.battle.rulesDescriptor ?? ss2TeamRules;
   el("tier").textContent = `${(rules.verification ?? "unknown").toUpperCase()} — NOT RUNTIME-VERIFIED`;
@@ -5761,6 +5838,7 @@ function renderProvenance() {
     ["The fight pop-ups", "are the build's own damage, spell and BLOCK callouts, drawn from your install's icons when " +
       "extracted and as a plain number when not. A hit shows the build's GROSS roll, before armour — read off the " +
       "rule set's unhashed observer, because the event log does not carry it."],
+    ringProvenance(),
     ["Slot 0 of each side", "reuses the battle map's own instance names, depths and positions. Everything past it is authored mod surface no capture can settle."]
   ];
   if (championsBySlot.size > 0) {

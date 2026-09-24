@@ -47,6 +47,7 @@ import {
   unselectedButtonFrames
 } from "../src/render/action-buttons.js";
 import { applyColourMatrix } from "../src/render/filters.js";
+import { TEXT_UNITS_PER_EM, textPackFrom } from "../src/render/text.js";
 import { Ss2ActionType } from "../src/team/ss2-rules.js";
 
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
@@ -362,6 +363,58 @@ test("THE BOW FRAMES CARRY THE AMMO COUNT, and a text that is not the ammo is co
   assert.equal(actionButtonInvoiceFor(pack, "quick_attack").textsNotDrawn, 1, "frame 4's other field");
 });
 
+/**
+ * A text pack with one font (id 7, glyph 1 a 10 px box) and one static run,
+ * 829, drawn at (1000, 200) twips in its own space — the shape
+ * `tools/extract-text.mjs` writes, as `test/render-text.test.js` builds it.
+ */
+function wordPack() {
+  const box = "M0 -10000L10000 -10000L10000 0L0 0Z";
+  return textPackFrom({
+    fonts: {
+      7: {
+        id: 7, unitsPerEm: TEXT_UNITS_PER_EM, ascent: 16000, descent: 4000, leading: 0,
+        glyphs: [{ code: 32, char: " ", path: "", empty: true, advance: 10000 }, { code: 65, char: "A", path: box, empty: false, advance: 12000 }]
+      }
+    },
+    statics: {
+      829: {
+        id: 829, matrix: [1, 0, 0, 1, 1000, 0], text: "AA", unresolved: 0,
+        // Gold, not the build's white, so the disabled grey below has something to change.
+        records: [{ font: 7, fontInherited: false, height: 409.6, colour: "#ffcc00", alpha: 1, x: 0, y: 200, glyphs: [[1, 300], [1, 300]] }]
+      }
+    }
+  });
+}
+
+test("THE BUILD'S WORD ON THE BUTTON — POWER, NORMAL, QUICK, SNIPE, BASH, BOMBARD — in its own glyphs and its own glow, when the text pack has it", () => {
+  // Frame 2 (power attack facing right) places static text 829 over the icon, at (-1433, -470) twips,
+  // under a dark red glow: the real pack's placement (icons.json, 860 frame 2).
+  const raw = syntheticPack();
+  const glow = { type: "glow", colour: { red: 153, green: 0, blue: 0, alpha: 255 }, blurX: 2, blurY: 2, strength: 10, inner: false, knockout: false, compositeSource: true, passes: 1 };
+  raw.buttons.clips[860].frames[1] = [BACKGROUND, placed("shape", 1002), placed("text", 829, { matrix: [1, 0, 0, 1, -1433, -470], filters: [glow] })];
+  const pack = actionButtonPackFrom(raw);
+  const ops = actionButtonOpsFor(pack, "power_attack", { facing: "right", textPack: wordPack(), scale: 2 });
+  const words = ops.filter((op) => op.button === "label");
+  assert.equal(words.length, 2, "two glyphs, after the background and the icon");
+  assert.deepEqual(fillsOf(ops), ["#403020", "#cc0000", "#ffcc00", "#ffcc00"], "the run's own colour");
+  // The placement (-1433, -470) composed with the run's own (1000, 0), then the baked pen: x 0 and 300, y 200.
+  assert.deepEqual(words.map((op) => [op.matrix[4], op.matrix[5]]), [[-433, -270], [-133, -270]]);
+  assert.ok(words[0].group && words[0].group === words[1].group, "one glow group over the word");
+  assert.match(words[0].group.filter ?? "", /drop-shadow/, "the placement's own glow, as a canvas filter");
+  const atOne = actionButtonOpsFor(pack, "power_attack", { facing: "right", textPack: wordPack(), scale: 1 }).find((op) => op.button === "label");
+  assert.notEqual(atOne.group.filter, words[0].group.filter, "the glow is built at the scale the button is drawn at");
+  // Disabled (authored): the word greyed and faded with the rest of the button.
+  const dim = actionButtonOpsFor(pack, "power_attack", { facing: "right", textPack: wordPack(), state: "disabled" }).find((op) => op.button === "label");
+  assert.equal(dim.fill, applyColourMatrix("#ffcc00", SS2_GREYSCALE_MATRIX, 1).fill);
+  assert.notEqual(dim.fill, "#ffcc00");
+  assert.ok(Math.abs(dim.fillOpacity - 0.55) < 1e-9, String(dim.fillOpacity));
+  assert.equal(actionButtonInvoiceFor(pack, "power_attack", { textPack: wordPack() }).textsNotDrawn, 0);
+  // Without the text pack the word is counted, never guessed at.
+  assert.equal(actionButtonOpsFor(pack, "power_attack").filter((op) => op.button === "label").length, 0);
+  assert.equal(actionButtonInvoiceFor(pack, "power_attack").textsNotDrawn, 1);
+});
+
 test("a pack that cannot draw a verb returns NULL, and the caller draws the fallback — never a blank button", () => {
   const pack = actionButtonPackFrom(syntheticPack());
   assert.equal(actionButtonOpsFor(pack, "rank_back"), null, "team play's own verb: no build art");
@@ -382,6 +435,26 @@ test("a pack that cannot draw a verb returns NULL, and the caller draws the fall
   const orphan = actionButtonPackFrom(raw);
   assert.deepEqual(fillsOf(actionButtonOpsFor(orphan, "power_attack")), ["#cc0000"]);
   assert.equal(actionButtonInvoiceFor(orphan, "power_attack").missingChildren, 1);
+  // ...and the chooser does not call that the build's button: it is not whole.
+  assert.equal(actionButtonOps(orphan, "power_attack").source, "authored");
+  // An icon SHAPE the pack does not hold: drawn without it, COUNTED, and not the build's button either.
+  const bare = syntheticPack();
+  delete bare.shapes[1002];
+  const hollow = actionButtonPackFrom(bare);
+  assert.deepEqual(fillsOf(actionButtonOpsFor(hollow, "power_attack")), ["#403020"], "the background alone");
+  assert.equal(actionButtonInvoiceFor(hollow, "power_attack").shapesMissing, 1);
+  assert.equal(actionButtonInvoiceFor(pack, "power_attack").shapesMissing, 0);
+  assert.equal(actionButtonOps(hollow, "power_attack").source, "authored");
+  assert.equal(actionButtonOps(hollow, "normal_attack").source, "build", "only the verb whose part is missing");
+  // A placement of a kind this cannot draw leaves the button short too.
+  const odd = syntheticPack();
+  odd.buttons.clips[860].frames[2] = [...odd.buttons.clips[860].frames[2], placed("button", 77)];
+  const oddPack = actionButtonPackFrom(odd);
+  assert.equal(actionButtonInvoiceFor(oddPack, "normal_attack").unsupported, 1);
+  assert.equal(actionButtonOps(oddPack, "normal_attack").source, "authored");
+  // A word with no text pack to draw it is counted, but the button is whole: still the build's.
+  assert.equal(actionButtonInvoiceFor(pack, "quick_attack").textsNotDrawn, 1);
+  assert.equal(actionButtonOps(pack, "quick_attack").source, "build");
   for (const junk of [null, 7, {}, { shapes: {} }, { shapes: {}, buttons: { button: 860, clips: {} } }]) {
     assert.equal(actionButtonPackFrom(junk), null, JSON.stringify(junk));
   }
@@ -522,6 +595,9 @@ test("THE REAL PACK'S BUTTON: 860 at the slots, 826 up/over behind it, and art o
         assert.ok(hasActionButtonArt(pack, verb, { facing, psyche }), `${verb} facing ${facing}: 860 frame ${frame} has no icon`);
         const invoice = actionButtonInvoiceFor(pack, verb, { facing, psyche, ammo: 30 });
         assert.equal(invoice.missingChildren, 0, `${verb} ${facing}`);
+        // Whole, so the ring draws the build's button and not the authored one.
+        assert.deepEqual([invoice.shapesMissing, invoice.unsupported], [0, 0], `${verb} ${facing}`);
+        assert.equal(actionButtonOps(pack, verb, { facing, psyche, ammo: 30 }).source, "build", `${verb} ${facing}`);
       }
     }
   }

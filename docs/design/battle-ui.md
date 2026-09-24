@@ -173,7 +173,9 @@ click hits), wired in `tools/arena/main.js` and `tools/arena/index.html`. Tests:
   the key and a short label on the ring's outer side; a gold ellipse on the sand under the selected
   foe. The ring stands where the build's does, 180 above the actor's feet, at the relayed slot
   positions, drawn at `RING_STAGE_SCALE` 1.2 stage pixels per overlay pixel — inside the build's own
-  0.9-1.4 (`flipoverlay × maxscale`, computed in the test). No close-up at 1,600 apart: that is S3.
+  0.9-1.4 (`flipoverlay × maxscale`, computed in the test). ~~No close-up at 1,600 apart: that is
+  S3.~~ **S3 replaced the buttons and the size, and did NOT draw the close-up** — see "S3, built"
+  below; the authored buttons and `RING_STAGE_SCALE` remain only as the fallbacks named there.
 - **The strip** is a fixed 132 px under the stage (so the stage does not resize between turns),
   hidden when spectating: the target (one pressed button per foe), the ring's actions with their
   keys, the rest of the offer, a status line, and a polite live region announcing each person's turn
@@ -184,6 +186,58 @@ click hits), wired in `tools/arena/main.js` and `tools/arena/index.html`. Tests:
   raw one-button-per-action list survives only as the fallback for a rule set with no menu to ask.
 - **Not seen:** no agent may open a browser, so the page was never looked at. Screenshot
   `?play=red&teams=3&items=tricks` (and a 1v1) before trusting the layout.
+
+### S3, built 2026-09-24: the build's own buttons, where the build puts them
+
+`tools/arena/ring-art.js` (what each button paints), `ringPlacementFor` and the pack layout in
+`tools/arena/ring-layout.js` (where the ring and each button stand), the word and glow on the build's
+buttons in `src/render/action-buttons.js`, wired in `tools/arena/main.js`. Tests:
+`test/arena-ring-art.test.js`, and the word test in `test/render-action-buttons.test.js`.
+
+- **The art is the build's**, from the player's icons pack: each slot draws character 860 at the
+  frame its controller sends that slot to for that verb and facing (power 2 facing right, 13 facing
+  left; the psyche slot 26/27/28 from the actor's own counter), over its `battlebutton` background
+  (826) — frame 1, or frame 2 under the pointer, the overlay's own rollover. Proven through the
+  drawing API for every slot of all four stances in both facings, and over 20 seeded bouts for
+  every button drawn for whoever was due. The attack and bow frames' own word (POWER, NORMAL, QUICK,
+  SNIPE, BASH, BOMBARD, static runs 829-852) is drawn in the build's glyphs with the placement's own
+  dark-red glow, and the bow frames' `ammo_left` shows the actor's arrows, both when a text pack is
+  there. **Without the icons pack** (a fresh clone, or a pack from before the buttons section) every
+  button is S2's authored one; a pack that cannot draw one verb WHOLE draws that button authored
+  alone — a blank frame, or a frame whose icon or background clip or shape the pack lacks, or a
+  placement the painter cannot draw (`actionButtonOps`). A word with no text pack is not a missing
+  part. ~~A frame missing its icon was drawn as the bare background and called the build's~~ —
+  the first S3 build did that; Codex review pass 2 caught it, and it is now under test.
+- **The placement is the build's** (`gladiators.onEnterFrame`, sprite 2249 frame 1 body 0x6e4221,
+  re-read from an action dump for this slice): the overlay on the acting fighter, 180 above his
+  feet, drawn at `view.scale × flipoverlay / 100` canvas pixels per overlay pixel — the zoom the
+  fighters are drawn at times the build's table keyed on the TARGET zoom, so while the camera eases
+  the ring eases with it as the build's does. `flipoverlay` flips nothing: both facing arms write the
+  same positive scale, so the ring is never mirrored; the facing lives only in each slot's frame.
+  Each slot stands at the matrix the pack MEASURED at the frame its controller rests on
+  (`buttons.layout`), else at the relayed table (on the real pack the two agree within 0.05 px on
+  each axis at every resting frame; the test's tolerance is 0.06).
+- **Authored, the owner did not decide these:**
+  - **A team camera's in-between zoom.** A pair's target zoom always has an arm in the build's table
+    (swept over every separation 0-8,000: the fit binds only at 2,991-3,000 apart, at 19, inside the
+    `< 20` arm). A team camera targets the fit, any integer, where the build would keep a stale
+    `flipoverlay`; the ring takes the on-screen size of the band at or below instead, which stays
+    inside the build's own 0.9-1.4.
+  - **No close-up.** At 1,600 or more apart the build moves the overlay to the midpoint, grows it to
+    600% and shows its own large copy of the hero inside it (`overlay.hero`, sprite 711). No pack holds
+    that copy, and a ring at the midpoint around nobody would mark no fighter — so the ring stays on
+    the actor at the table's size. `ringPlacementFor` reports `buildClosesUp` for when it would.
+  - **The psyche slot's stray.** `closerange_warrior` facing right sends the third psyche frame to
+    `optionHG`, so the build's button keeps its old frame at a counter of 3; here it shows 28, as every
+    other controller does.
+  - Kept from S2: the key and short label beside each button (the build's buttons carry no key), the
+    gold ellipse, the hit radius (18 × the slot scale; the build's background is 18.5), and — in the
+    FITTED view only, which has no build camera — the authored 1.2 stage pixels per overlay pixel.
+- **Owner decisions:** draw the close-up (extract sprite 711's `overlay` frame, or author a stand-in),
+  and whether the S2 labels stay now that the build's own art and words are drawn.
+- **Not seen:** no agent may open a browser. Screenshot `?play=red` (1v1: the long and close warrior
+  frames), `?play=red&teams=3&items=tricks` (team zooms, the archer frames, the bow words and ammo) and
+  hover a button before trusting the look.
 
 ## Delivery order
 

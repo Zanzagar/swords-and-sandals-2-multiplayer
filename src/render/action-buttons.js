@@ -51,6 +51,15 @@
  *   _root.game.hero.ammo_left` on entry (860 frame 20 body 0x2364d3, 22
  *   0x2365d1, 23 0x236683, 25 0x236779). The painter fills it from `ammo`.
  *
+ * ► **THE ATTACK AND BOW FRAMES CARRY A WORD.** Twelve of 860's frames place
+ *   one static text run over the icon under a dark red glow — measured in the
+ *   player's own packs (icons `buttons.clips[860]`, text `statics`), not in a
+ *   dump: 829 `POWER` on 2 and 13, 830 `NORMAL` on 3 and 14, 831 `QUICK` on 4
+ *   and 15, 849 `SNIPE` on 20 and 23, 851 `BASH` on 21 and 24, 852 `BOMBARD`
+ *   on 22 and 25. The painter draws the run in the build's own glyphs, with
+ *   the placement's glow, when a text pack is handed in; without one it is
+ *   counted (`textsNotDrawn`), never guessed at.
+ *
  * ## Findings the wiring carries (each is in the table, with its offset)
  *
  * - `closerange_warrior` facing right sends the third psyche frame to
@@ -118,11 +127,13 @@
 import {
   applyColourMatrix,
   applyColourTransformAlpha,
+  canvasFilterFor,
   colourTransformFrom,
-  concatColourTransforms
+  concatColourTransforms,
+  glowAmplificationFor
 } from "./filters.js";
 import { propOpsFor } from "./props.js";
-import { fieldOpsFor } from "./text.js";
+import { fieldOpsFor, staticTextOpsFor } from "./text.js";
 
 export class ActionButtonError extends Error {
   constructor(message) {
@@ -755,6 +766,12 @@ function flattenEntryFrame(pack, entry, frame, ctx, out) {
       chain = [...chain, ctx.groups.length - 1];
     }
     if (placement.kind === "shape") {
+      if (!(pack.shapes[placement.character] ?? pack.shapes[String(placement.character)])) {
+        // An icon or background SHAPE the pack does not hold: `propOpsFor`
+        // would skip it; it is counted here, so the button is not called whole.
+        ctx.counts.shapesMissing += 1;
+        continue;
+      }
       out.push({
         shape: placement.character,
         matrix,
@@ -784,30 +801,56 @@ function flattenEntryFrame(pack, entry, frame, ctx, out) {
 }
 
 /**
- * The ammo count (or nothing) for one text placement, in the build's glyphs
- * when a text pack has them. The placement's colour transform — which carries
- * the disabled state's alpha — fades it, and `grey` folds the disabled
- * state's matrix into its fill, as the props painter does for the shapes.
+ * The group one text placement's glyphs share when the placement carries its
+ * own glow, built at the draw scale — `popups.js`'s rule for the pop-ups'
+ * glowing numbers, which this is the same case of. Null when it has none.
  */
-function textOpsFor(pack, textPack, item, ammo, grey) {
+function glowGroupFor(filters, scale) {
+  if (!Array.isArray(filters) || filters.length === 0) return null;
+  const built = canvasFilterFor(filters, { scale });
+  const amplify = glowAmplificationFor(filters, { scale });
+  if (!built.filter && !amplify) return null;
+  return Object.freeze({
+    id: null, path: Object.freeze([]), character: null, enclosedBy: null,
+    filter: built.filter, amplify, composite: null, blendModeRefused: null,
+    colourMatricesFolded: 0, ops: 0, placements: 0, counts: built.counts
+  });
+}
+
+/**
+ * One text placement's ops, or none: the ammo count on a bow frame, or the
+ * build's word (a static run) on an attack or bow frame — in the build's
+ * glyphs when a text pack has them, under the placement's own glow. The
+ * placement's colour transform — which carries the disabled state's alpha —
+ * fades them, and `grey` folds the disabled state's matrix into their fill,
+ * as the props painter does for the shapes.
+ */
+function textOpsFor(pack, textPack, item, ammo, grey, scale) {
   const placement = item.text;
-  const isAmmo = placement.name === SS2_ACTION_BUTTON.ammoField;
-  if (!isAmmo || !Number.isFinite(ammo)) return [];
-  const text = String(Math.trunc(ammo));
+  const character = placement.character;
   const fade = applyColourTransformAlpha(1, item.colour);
   const tint = (fill) => (grey && typeof fill === "string" ? applyColourMatrix(fill, grey, 1).fill : fill);
-  const character = placement.character;
+  const group = glowGroupFor(placement.filters, scale);
+  const finish = (glyphs, role) => glyphs.map((op) => Object.freeze({
+    ...op,
+    fill: tint(op.fill),
+    fillOpacity: (Number.isFinite(op.fillOpacity) ? op.fillOpacity : 1) * fade,
+    strokeOpacity: (Number.isFinite(op.strokeOpacity) ? op.strokeOpacity : 1) * fade,
+    ...(group ? { group } : {}),
+    button: role
+  }));
+  if (placement.name !== SS2_ACTION_BUTTON.ammoField) {
+    const run = textPack?.statics?.[character] ?? textPack?.statics?.[String(character)];
+    if (!run) return [];
+    // The run's own matrix inside the placement's, as `popups.js` composes a static.
+    const glyphs = staticTextOpsFor(textPack, character, { matrix: compose(item.matrix, matrixOf(run.matrix) ?? IDENTITY) });
+    return glyphs ? finish(glyphs, "label") : [];
+  }
+  if (!Number.isFinite(ammo)) return [];
+  const text = String(Math.trunc(ammo));
   if (textPack?.fields?.[character] ?? textPack?.fields?.[String(character)]) {
     const glyphs = fieldOpsFor(textPack, character, { text, matrix: item.matrix });
-    if (glyphs) {
-      return glyphs.map((op) => Object.freeze({
-        ...op,
-        fill: tint(op.fill),
-        fillOpacity: (Number.isFinite(op.fillOpacity) ? op.fillOpacity : 1) * fade,
-        strokeOpacity: (Number.isFinite(op.strokeOpacity) ? op.strokeOpacity : 1) * fade,
-        button: "ammo"
-      }));
-    }
+    if (glyphs) return finish(glyphs, "ammo");
   }
   // No glyphs: the plain number at the centre of the field's own box.
   const record = pack.texts?.[character] ?? pack.texts?.[String(character)];
@@ -829,8 +872,9 @@ function textOpsFor(pack, textPack, item, ammo, grey) {
 
 /**
  * ONE BUTTON, FROM THE PLAYER'S OWN PACK: the background at the state's frame
- * (up, or over for `hover`), the verb's icon, and — on the four bow frames —
- * the ammunition count. Ops are in the BUTTON's own pixels with `matrix` tx/ty
+ * (up, or over for `hover`), the verb's icon, the build's word on the attack
+ * and bow frames, and — on the four bow frames — the ammunition count (both
+ * only with a text pack). Ops are in the BUTTON's own pixels with `matrix` tx/ty
  * in TWIPS (`propOpsFor`'s convention); the caller composes the slot's matrix.
  *
  * `disabled` is AUTHORED (see `SS2_GREYSCALE_MATRIX`): the whole button inside
@@ -849,10 +893,15 @@ function textOpsFor(pack, textPack, item, ammo, grey) {
  * @param {boolean} [options.usingBow=false]
  * @param {number} [options.itemId]
  * @param {number} [options.ammo]      drawn into `ammo_left` where the frame has one
- * @param {object} [options.textPack]  from `textPackFrom`, for the ammo glyphs
+ * @param {object} [options.textPack]  from `textPackFrom`, for the ammo count and the word in the build's glyphs
  * @param {number} [options.scale=1]   device pixels per button pixel, for any filter
  */
 export function actionButtonOpsFor(pack, verb, options = {}) {
+  return buttonDrawingFor(pack, verb, options)?.ops ?? null;
+}
+
+/** The one walk behind the three readers: `{ops, counts, art}`, or null where the pack has no frame for the verb. */
+function buttonDrawingFor(pack, verb, options) {
   const { state = "normal" } = options;
   if (!ACTION_BUTTON_STATES.includes(state)) throw new ActionButtonError(`No button state "${state}".`);
   if (!pack) return null;
@@ -860,33 +909,29 @@ export function actionButtonOpsFor(pack, verb, options = {}) {
   if (!art) return null;
   const entry = art.clip === "button" ? pack.button : pack.strip;
   if (!entry || art.frame > entry.frames.length || frameIsBlank(entry, art.frame)) return null;
-
-  return drawButton(pack, entry, art, options).ops;
+  return { ...drawButton(pack, entry, art, options), art };
 }
 
 /**
  * WHAT ONE BUTTON'S DRAWING COULD NOT CARRY, counted: children the pack lacks
- * (`missingChildren` — a button drawn without its background), multi-frame
+ * (`missingChildren` — a button drawn without its background), shapes it
+ * lacks (`shapesMissing` — an icon or background drawn without them), multi-frame
  * children other than the background drawn at frame 1 (`childFrameAssumed`),
- * text placements that are not the ammo count (`textsNotDrawn`), placements of
- * a kind this cannot draw (`unsupported`). Null where `actionButtonOpsFor` is.
+ * text placements that drew nothing — a word with no text pack to draw it, an
+ * ammo field with no count — (`textsNotDrawn`), placements of a kind this
+ * cannot draw (`unsupported`). Null where `actionButtonOpsFor` is.
  */
 export function actionButtonInvoiceFor(pack, verb, options = {}) {
-  const { state = "normal" } = options;
-  if (!ACTION_BUTTON_STATES.includes(state)) throw new ActionButtonError(`No button state "${state}".`);
-  if (!pack) return null;
-  const art = actionButtonArtFor(verb, options);
-  if (!art) return null;
-  const entry = art.clip === "button" ? pack.button : pack.strip;
-  if (!entry || art.frame > entry.frames.length || frameIsBlank(entry, art.frame)) return null;
-  return Object.freeze({ ...drawButton(pack, entry, art, options).counts, clip: art.clip, frame: art.frame });
+  const drawing = buttonDrawingFor(pack, verb, options);
+  if (!drawing) return null;
+  return Object.freeze({ ...drawing.counts, clip: drawing.art.clip, frame: drawing.art.frame });
 }
 
 function drawButton(pack, entry, art, options) {
   const { state = "normal", ammo = null, textPack = null, scale = 1 } = options;
   const disabled = state === "disabled";
   const groups = disabled ? [{ filters: [{ type: "colourMatrix", matrix: SS2_GREYSCALE_MATRIX }], path: [], character: null }] : [];
-  const counts = { placements: 0, missingChildren: 0, childFrameAssumed: 0, textsNotDrawn: 0, unsupported: 0 };
+  const counts = { placements: 0, missingChildren: 0, shapesMissing: 0, childFrameAssumed: 0, textsNotDrawn: 0, unsupported: 0 };
   const ctx = {
     matrix: IDENTITY,
     colour: disabled ? Object.freeze([1, 1, 1, DISABLED_ALPHA, 0, 0, 0, 0]) : null,
@@ -914,7 +959,7 @@ function drawButton(pack, entry, art, options) {
     counts.placements += 1;
     if (item.text) {
       flush();
-      const drawn = textOpsFor(pack, textPack, item, ammo, disabled ? SS2_GREYSCALE_MATRIX : null);
+      const drawn = textOpsFor(pack, textPack, item, ammo, disabled ? SS2_GREYSCALE_MATRIX : null, scale);
       if (drawn.length === 0) counts.textsNotDrawn += 1;
       ops.push(...drawn);
     } else {
@@ -1084,11 +1129,21 @@ function mirrorPath(d) {
 }
 
 /**
- * The build's art when the pack has it, the authored button otherwise — with
- * the answer's source, so a surface can say which it drew.
+ * The build's art when the pack has ALL of it, the authored button otherwise —
+ * with the answer's source, so a surface can say which it drew.
+ *
+ * ► **WHOLE, NOT MERELY NON-EMPTY (S3, Codex review pass 2).** A frame whose
+ *   icon or background the pack does not hold — a child clip or a shape
+ *   missing, or a placement this cannot draw — would come back from
+ *   `actionButtonOpsFor` as the rest of the button, and was called the
+ *   build's: a bare disc, or an icon floating without its disc. Such a button
+ *   is drawn authored instead. A word or count with no text pack to draw it
+ *   (`textsNotDrawn`) does not count against it: the icon is whole.
  */
 export function actionButtonOps(pack, verb, options = {}) {
-  const built = actionButtonOpsFor(pack, verb, options);
-  if (built) return Object.freeze({ ops: built, source: "build" });
+  const drawing = buttonDrawingFor(pack, verb, options);
+  const whole = drawing?.ops && drawing.counts.missingChildren === 0 && drawing.counts.shapesMissing === 0
+    && drawing.counts.unsupported === 0;
+  if (whole) return Object.freeze({ ops: drawing.ops, source: "build" });
   return Object.freeze({ ops: actionButtonFallbackOpsFor(verb, options), source: "authored" });
 }
