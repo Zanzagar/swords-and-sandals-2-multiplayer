@@ -2557,13 +2557,21 @@ initiation, Relic-side bind cut, disposition after a legal in-flight context
 change, participant cancellation, automatic expiry/horizon, and concurrency.
 A second owner-visible amendment therefore replaced that one row with seven
 atomic conditional rows, producing thirty-one slots and a pre-answer
-`Phi_SR = 29`. After `RCS-03A-C`, current `Phi_SR = 28`. An interim four-row
-draft omitted initiation, cancellation, and expiry even while citing their
-material gameplay consequences; the omission was corrected before owner
-presentation. Tuple atomicity is derived: one evaluation cannot read its Relic
-identity/version, mutable coordinate, Soul resonance, and Charm presence from
-torn authoritative revisions. Additional slots may appear only through another
-explicit owner-visible charter amendment, not automatic frontier recursion.
+`Phi_SR = 29`. After `RCS-03A-C`, `Phi_SR` was 28. An interim four-row draft
+omitted initiation, cancellation, and expiry even while citing their material
+gameplay consequences; the omission was corrected before owner presentation.
+The owner then selected `RCS-03B1-A`, cut-atomic evaluation, which pruned all six
+pending-only lifecycle descendants. Re-derivation of the next row found that
+`RCS-03C` still bundled eligible-cut cadence, invocation authority, and
+contingent evidence acquisition. C133/C141/C155 keep those axes independent, so
+a third owner-visible amendment replaces that parent with
+`RCS-03C1`–`RCS-03C3`, producing thirty-three total slots. Splitting one counted
+row into three adds two while the B1 answer selects/prunes seven; current
+`Phi_SR = 28 - 7 + 2 = 23`. Tuple atomicity is derived: one evaluation cannot
+read its Relic identity/version, mutable coordinate, Soul resonance, and Charm
+presence from torn authoritative revisions. Additional slots may appear only
+through another explicit owner-visible charter amendment, not automatic
+frontier recursion.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

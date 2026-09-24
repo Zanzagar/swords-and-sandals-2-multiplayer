@@ -1433,9 +1433,21 @@ them. The three missing conditional rows were added before the card was shown
 to the owner; exact trigger catalogs, durations, and UI realization may later
 be `AUTHOR`/`SPEC`, but their authority topology cannot be implicit.
 
+**Third prerequisite correction, 2026-09-24.** After the owner selected
+`RCS-03B1-A`, the six pending-only lifecycle descendants became impossible and
+were pruned. Re-deriving the next row then found that `RCS-03C` still combined
+three independently variable consequence boundaries: which canonical cuts are
+eligible for cut-atomic evaluation, who or what invokes the evaluator at an
+eligible cut, and which contingent `H`/`S` projection it acquires. C133 makes
+provisional completeness counterfactual rather than a sample; C141 explicitly
+treats phase eligibility and evaluation authority as independent inputs and
+leaves actual invocation open; C155 does not select evaluator cadence or
+authority. The register therefore replaces `RCS-03C` with
+`RCS-03C1`–`RCS-03C3`. The parent remains a non-counting alias.
+
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has thirty-one
+To make that route genuinely finite, the remaining C3c pass has thirty-three
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -1451,15 +1463,17 @@ overcompression.
 | `RCS-01` | Required launch content families and distinct player-facing build purposes | `SCREEN` under `SR-06` |
 | `RCS-02` | Decision-holder and pre/post-choice information promise | `SCREEN` under `SR-10` |
 | `RCS-03A` | Persistent transformation semantic domain: which Relic-owned dimensions may materially change or must remain invariant while identity is provisionally held fixed | `DIR-SELECTED`; C gives every state-supporting definition remembered-condition transformation and every boundary-supporting definition remembered-attunement transformation under `SR-04` |
-| `RCS-03B1` | Pre-completion semantic evaluation-lifetime topology: whether a Relic evaluation is cut-atomic or may remain authoritatively pending across semantic cuts before provisional completion | `OWNER-OPEN`; follows `RCS-03A` under `SR-04` |
-| `RCS-03B2` | Pending-evaluation initiation: which act or authored event opens an attempt and whose authority or precommitment is required | `SCREEN`; conditional on `RCS-03B1` admitting pending evaluations |
-| `RCS-03B3` | Pending-evaluation Relic-side binding cut: which authoritative revision supplies the one atomic Relic tuple | `SCREEN`; conditional on pending evaluations; follows `RCS-03B2` |
-| `RCS-03B4` | In-flight legal Relic-context-change disposition: whether an already-pending evaluation preserves, rebinds, or terminates after a later authorized change | `SCREEN`; conditional on pending evaluations and a later legal in-flight change premise; follows applicable `RCS-03D`/`RCS-03E`/`RCS-13` authority |
-| `RCS-03B5` | Participant cancellation/disruption authority, required consent, and no-result disposition for a pending evaluation | `SCREEN`; conditional on `RCS-03B1` admitting pending evaluations |
-| `RCS-03B6` | Automatic expiry and maximum player-semantic persistence horizon for a pending evaluation | `SCREEN`; conditional on `RCS-03B1` admitting pending evaluations; exact durations remain `TUNE`/`SPEC` |
-| `RCS-03B7` | Pending-evaluation concurrency and overlap authority | `SCREEN`; conditional on `RCS-03B1` admitting pending evaluations |
-| `RCS-03C` | Contingent `H`/`S` evidence sampling relative to the selected evaluation lifetime and any applicable bound context | `SCREEN`; follows `RCS-03B1` and any applicable `RCS-03B2`/`RCS-03B3` under `SR-03`/`SR-04` |
-| `RCS-03D` | Transformation-cause eligibility: which authored events may propose a persistent transition | `SCREEN`; follows `RCS-03A`–`RCS-03C` under `SR-04` |
+| `RCS-03B1` | Pre-completion semantic evaluation-lifetime topology: whether a Relic evaluation is cut-atomic or may remain authoritatively pending across semantic cuts before provisional completion | `DIR-SELECTED`; A makes every evaluation cut-atomic under `SR-04` |
+| `RCS-03B2` | Pending-evaluation initiation: which act or authored event opens an attempt and whose authority or precommitment is required | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B3` | Pending-evaluation Relic-side binding cut: which authoritative revision supplies the one atomic Relic tuple | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B4` | In-flight legal Relic-context-change disposition: whether an already-pending evaluation preserves, rebinds, or terminates after a later authorized change | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B5` | Participant cancellation/disruption authority, required consent, and no-result disposition for a pending evaluation | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B6` | Automatic expiry and maximum player-semantic persistence horizon for a pending evaluation | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B7` | Pending-evaluation concurrency and overlap authority | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03C1` | Cut-atomic evaluation-eligibility cadence: immediate eligibility at each non-cadence-readiness episode's opening cut versus an authored later schedule gate | `OWNER-OPEN`; follows `RCS-03B1-A` under `SR-04` |
+| `RCS-03C2` | Cut-atomic evaluator invocation authority at an eligible cut: deterministic/system invocation versus participant declaration or precommitment, including the applicable authority topology | `SCREEN`; follows `RCS-03C1` under `SR-04`; exact decision-holder and consent detail also feed `RCS-02` |
+| `RCS-03C3` | Contingent `H`/`S` acquisition or retention relative to the authorized invocation cut | `SCREEN`; follows `RCS-03C2` under `SR-03`/`SR-04`; close as `DERIVED`/`SPEC` rather than manufacture a choice if selected `H`/`S` semantics leave no product branch |
+| `RCS-03D` | Transformation-cause eligibility: which authored events may propose a persistent transition | `SCREEN`; follows `RCS-03A`–`RCS-03C3` under `SR-04` |
 | `RCS-03E` | Transformation agency and approval: discretionary, precommitted, or deterministic authority under the selected cause | `SCREEN`; follows `RCS-03D` under `SR-04` |
 | `RCS-04A` | Collision precedence and settlement when multiple already-legal transformation proposals coexist | `SCREEN`; follows `RCS-03E` and any applicable `RCS-03B4`/`RCS-03B7` under `SR-04` |
 | `RCS-04B` | Committed-output identity across artifact, definition, and lineage | `SCREEN`; follows `RCS-04A` under `SR-04`; persistence realization stays in `RCS-15` |
@@ -1482,15 +1496,18 @@ overcompression.
 
 Define `Phi_SR` as the number of `SCREEN` plus `OWNER-OPEN` rows. It began at
 **23** after the first prerequisite correction. Replacing one `SCREEN` row with
-seven registered rows raised that pre-answer potential to **29**. It is now
-**28** after `RCS-03A-C`.
+seven registered rows raised that pre-answer potential to **29**. It became
+**28** after `RCS-03A-C`. Replacing the still-bundled `RCS-03C` row with three
+registered rows would have raised that pre-`RCS-03B1` potential to **30**;
+`RCS-03B1-A` then selected one row and pruned its six pending-only descendants,
+so current `Phi_SR = 23`.
 Every Relic round must reduce
 `Phi_SR` by selecting or reclassifying one
 registered slot; no ordinary answer may increase it. `RCS-16` and `RCS-18` are
 already routed outside owner choice. Therefore the remaining Relic pass has at
-most twenty-eight owner cards under this twice-amended charter and will usually
-have fewer. `RCS-03`, `RCS-03B`, and `RCS-04` remain readable parent aliases
-only; they are not additional counted slots.
+most twenty-three owner cards under this thrice-amended charter and will
+usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, and `RCS-04` remain
+readable parent aliases only; they are not additional counted slots.
 
 `Phi_SR = 0` is necessary but not sufficient for Relic closure: the twelve
 `SR-*` exit tests, proof packet, coherent normative replay, and explicit
@@ -1504,7 +1521,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 31 frozen candidate slots; current `Phi_SR = 28` after `RCS-03A-C` | At most 28 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 33 frozen candidate slots; current `Phi_SR = 23` after `RCS-03B1-A` and its six conditional prunings | At most 23 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

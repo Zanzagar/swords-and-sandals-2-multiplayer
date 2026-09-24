@@ -171,8 +171,13 @@ transformation. A second prerequisite audit then found that the old RCS-03B
 still bundled evaluation-lifetime topology, a conditional pending-evaluation
 initiation, bind cut, in-flight context-change disposition, participant
 cancellation, automatic expiry/horizon, and concurrency. The twice-amended
-register replaces that parent alias with RCS-03B1–RCS-03B7; the next candidate
-is RCS-03B1, pre-completion semantic evaluation-lifetime topology under SR-04.
+register replaces that parent alias with RCS-03B1–RCS-03B7. The owner selected
+RCS-03B1-A: every evaluation is cut-atomic, so RCS-03B2–RCS-03B7 are pruned. A
+third prerequisite audit then found that RCS-03C still combined eligible-cut
+cadence, actual invocation authority, and contingent evidence acquisition even
+though C133/C141/C155 expressly left those axes open. The thrice-amended
+register splits that parent into RCS-03C1–RCS-03C3; the next candidate is
+RCS-03C1, cut-atomic evaluation-eligibility cadence under SR-04.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -18100,7 +18105,8 @@ This card deliberately defers:
 - `RCS-03B2`–`RCS-03B7`: if pending evaluations exist, their initiation,
   Relic-side bind cut, disposition after a legal in-flight context change,
   participant cancellation, automatic expiry/horizon, and concurrency;
-- `RCS-03C`: when contingent `H`/`S` combat evidence is sampled or latched;
+- `RCS-03C1`–`RCS-03C3`: eligible-cut cadence, invocation authority, and when
+  contingent `H`/`S` combat evidence is acquired or retained;
 - `RCS-03D`: which authored events may propose a persistent change, including
   direction, adjacency, clearing, and reversibility;
 - `RCS-03E`: whether change is discretionary, precommitted, or deterministic,
@@ -18141,7 +18147,7 @@ The authoritative decision record remains unchanged.
 > now contains RCS-03B1–RCS-03B7; no omitted lifecycle axis is silently treated
 > as implementation.
 
-### RCS-03B1 — pre-completion semantic evaluation-lifetime topology — active owner choice
+### RCS-03B1 — pre-completion semantic evaluation-lifetime topology — A selected
 
 This card asks one question only: **before a relationship becomes
 provisionally complete, is there already an authoritative Relic evaluation that
@@ -18195,12 +18201,12 @@ Several boundaries are already fixed and are not choices on this card:
   A torn mixture of revisions is an implementation race, not a fourth product
   direction.
 - Contingent combatant `H`/`S` evidence remains outside that Relic-side tuple.
-  `RCS-03C` will decide when that evidence is sampled relative to the selected
-  lifetime and any applicable binding cut.
+  `RCS-03C3` will decide when that evidence is acquired relative to the
+  `RCS-03C1` cadence, `RCS-03C2` authority, and any applicable binding cut.
 
 | Choice | Evaluation-lifetime rule | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
 | --- | --- | --- | --- |
-| **A — cut-atomic evaluations only** | `K^{pending}_v` is empty. No player-semantic Relic evaluation persists across pre-completion semantic cuts. At an authorized evaluation cut, one atomic Relic-side tuple is combined with the combat evidence selected later by `RCS-03C`; the evaluation reaches provisional completion or yields no candidate at that cut. Earlier actions and `H` facts may still be essential inputs, but they do not create a dormant attempt. | **Recommended.** A keeps the drama in assembling the relationship rather than adding a second queue of half-open rituals. At the decisive cut, Soul, Relic, Charm, and qualifying combat evidence can participate in one **direct** result relation; continuity supplied by earlier `H` facts remains **partial** across time; excluding a separate pending object is **neutral/protective**; catalog-wide atomicity is **aggregate**. The benefits are crisp causality, readable counterplay through the facts themselves, no snapshot hoard, no cancellation grief, and no expiry/concurrency subgame competing with other systems. The cost is real: Relics may feel more like uncanny reactive instruments than visible rituals being woven over several actions, and the authorized cut and presentation must prevent results from feeling like opaque procs. | Aster guarded earlier, so `Guard` exists in `H`; Borel now creates `Heat` in `S`. At the authorized cut, Ashen's current `Defiance` assignment, Soul resonance, Charms, and later-selected evidence sample either produce receipt P or do not. There was no older `Mercy` evaluation waiting in the background merely because Guard happened earlier. |
+| **A — cut-atomic evaluations only** | `K^{pending}_v` is empty. No player-semantic Relic evaluation persists across pre-completion semantic cuts. Whenever an evaluation is invoked at a cut that later choices make eligible, one atomic Relic-side tuple is combined with the combat evidence selected later by `RCS-03C3`; the evaluation reaches provisional completion or yields no candidate at that cut. Earlier actions and `H` facts may still be essential inputs, but they do not create a dormant attempt. | **Recommended.** A keeps the drama in assembling the relationship rather than adding a second queue of half-open rituals. At the decisive cut, Soul, Relic, Charm, and qualifying combat evidence can participate in one **direct** result relation; continuity supplied by earlier `H` facts remains **partial** across time; excluding a separate pending object is **neutral/protective**; catalog-wide atomicity is **aggregate**. The benefits are crisp causality, readable counterplay through the facts themselves, no snapshot hoard, no cancellation grief, and no expiry/concurrency subgame competing with other systems. The cost is real: Relics may feel more like uncanny reactive instruments than visible rituals being woven over several actions, and the eventual eligible cut and presentation must prevent results from feeling like opaque procs. | Aster guarded earlier, so `Guard` exists in `H`; Borel now creates `Heat` in `S`. Whenever the later-selected cadence and authority permit invocation, Ashen's current `Defiance` assignment, Soul resonance, Charms, and later-selected evidence sample either produce receipt P or do not at that same cut. There was no older `Mercy` evaluation waiting in the background merely because Guard happened earlier. |
 | **B — every supported tag is pending-capable** | `K^{pending}_v = K^{candidate}_v`. Every supported relationship tag has at least one legal occurrence in which a real evaluation begins before completion, persists across a later meaningful cut or decision, and then completes or terminates. This is a universal capability witness, not a demand that every occurrence be delayed. | **Most ritualistic countercase.** B can make Relics feel like relationships players visibly begin, sustain, protect, disrupt, or complete together. The same evaluation persists while genuinely distinct contributions arrive over time, giving a **partial** realization at the one-attempt/across-changing-contributions boundary; universal tag support is **aggregate**. It offers strong anticipation, cooperation, bluffing, and enemy disruption. It also creates a second combat state machine: pending-attempt UI, opening and expiry rules, stale-attunement questions, pre-open hoarding, cancellation grief, orphaned attempts after death/disconnect, reload persistence, and burst queues. Those are not implementation trivia; they materially shape play and require the later conditional cards. | Ashen visibly opens a `Covenant` attempt while attuned to `Mercy`. Another participant then receives and takes a meaningful action while that same attempt remains open; a later contribution brings it to `q`. This card does not decide whether the attempt is bound to old Mercy, follows Ashen into Defiance, or dies on that change. |
 | **C — atomic and pending-capable tags coexist** | `K^{pending}_v` is a nonempty proper subset of `K^{candidate}_v`. At least one supported tag has a cross-cut pending witness, and at least one other tag is proved cut-atomic in every legal occurrence. | C supports deliberate Vows beside instantaneous Echoes and therefore the richest cadence vocabulary. Each pending-positive tag has B's **partial** temporal fit; each atomic-only tag has A's **direct-at-cut** inherited relation; their coexistence is only **aggregate**. This can make different Relics feel radically distinct, but it teaches two temporal languages on top of the already-selected state/boundary transformation dialects. Pending tags are also likely to read as premium or more sophisticated unless acquisition, power, UI, and non-dominance rules compensate. | One authored Ashen tag may open a visible Vow that survives another meaningful action before completion, while a Dreamglass tag can only listen and resolve at the exact cut where its complete relationship exists. These names are illustrative; C selects the coexistence rule, not those assignments. |
 
@@ -18244,7 +18250,8 @@ This card deliberately defers:
   tuning/specification;
 - `RCS-03B7`: pending-evaluation concurrency and overlap authority, activated
   only if B or C admits a pending evaluation;
-- `RCS-03C`: contingent `H`/`S` sampling;
+- `RCS-03C1`–`RCS-03C3`: eligible-cut cadence, invocation authority, and
+  contingent `H`/`S` acquisition;
 - `RCS-03D`/`RCS-03E`: transformation cause and agency;
 - `RCS-04A`/`RCS-04B`: proposal collision and committed-output identity;
 - `RCS-13`: macro equip, reconfiguration, evolution initiation, and lock
@@ -18255,10 +18262,147 @@ This card deliberately defers:
   accessibility, and playtest procedure.
 
 If A is selected, `RCS-03B2`–`RCS-03B7` close by derivation or pruning and the
-next prerequisite-ready choice is `RCS-03C`. If B or C is selected,
+next prerequisite-ready choice is `RCS-03C1`. If B or C is selected,
 `RCS-03B2` initiation becomes the next prerequisite, then `RCS-03B3` binding
 must precede evidence sampling; the other conditional rows remain separately
 bounded rather than being accepted in bulk.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **A, cut-atomic
+evaluations only.** Thus
+
+`K^{pending}_v` is empty.
+
+No player-semantic Soul Relic evaluation begins before its decisive semantic
+cut or remains authoritative across a later meaningful cut before provisional
+completion. Whenever later cadence and authority choices permit an evaluation
+to be invoked, one co-temporal Relic-side tuple is combined with the applicable
+contingent combat evidence; the evaluation reaches provisional completion or
+yields no candidate at that cut. Earlier
+actions and bounded `H` facts may remain essential, but neither they nor an
+animation, callback, delayed payoff, cache, or stored identifier create a
+dormant attempt. C133-A/C134-A still seal and promptly commit a successful
+candidate, while C135-authorized recommitment remains a fresh occurrence.
+
+At the decisive cut, the distinct Soul, Relic, Charm, and qualifying combat
+contributions participate in one **direct** result relation. Earlier temporal
+continuity through `H` remains **partial**; excluding a second pending-attempt
+state machine is **neutral/protective**; universal cut-atomicity is
+**aggregate**. This favors crisp causality and keeps Relics from competing with
+transformation and recurrence through a queue of half-open rituals. Its cost is
+less visible begin-and-sustain ritual play and a stronger presentation
+obligation against opaque proc behavior.
+
+`RCS-03B2`–`RCS-03B7` are pruned: without a pending evaluation there is no
+pending initiation, bind cut, in-flight context-change disposition,
+participant cancellation, automatic expiry/horizon, or concurrency topology
+to choose. This answer does not decide which otherwise-ready cut is eligible
+to invoke an evaluation, whether invocation there is automatic or participant-
+authorized, or how contingent `H`/`S` facts are acquired. Those remain
+separate below. This direction changes no authoritative decision-record wording
+and authorizes no implementation.
+
+> **Codex prerequisite correction, 2026-09-24:** the old RCS-03C row still
+> bundled three player-material axes. C133 makes provisional completeness
+> counterfactual and says it performs no sample; C141 treats phase eligibility
+> and evaluation authority as independent inputs while leaving actual
+> invocation, actor, and authority open; C155 constrains decisive-cut
+> coincidence but leaves evaluator scheduling and chooser open. Which cuts are
+> eligible, who or what invokes at one, and which `H`/`S` evidence it acquires
+> can vary independently. The pre-amendment thirty-one-slot register therefore
+> replaces RCS-03C with RCS-03C1–RCS-03C3 before any of them is offered,
+> yielding thirty-three counted slots. RCS-03C remains a non-counting parent
+> alias.
+
+### RCS-03C1 — cut-atomic evaluation-eligibility cadence — active owner choice
+
+RCS-03B1-A says an evaluation exists only at the cut where it atomically
+produces a provisional candidate or no candidate. It does not say **which
+canonical semantic cut first permits that evaluation**. RCS-03C1 resolves only
+that cadence. RCS-03C2 will separately decide system-versus-participant
+invocation authority; RCS-03C3 will separately screen evidence acquisition.
+
+For one fixed tag and legal history, a **non-cadence-readiness episode** is a
+maximal uninterrupted interval during which all inputs other than evaluation-
+cadence eligibility are semantically ready. Its first canonical cut is `r`.
+The exact Relic-side tuple is coherent, its context is operative, the
+applicable relationship facts and the already-selected tag-specific
+occurrence/recurrence permission are sufficient, and no other non-phase input
+prevents evaluation. RCS-03C2 evaluator-invocation authority is explicitly
+projected out; a decision about who invokes cannot manufacture or erase
+readiness on this card.
+
+Readiness uses the counterfactual semantic truth of the authoritative `H` and
+`S` projections. It performs no acquisition or latch: an earlier frozen state
+does not become current `S`, and RCS-03C3 remains open. An episode is
+**immediate-eligible** when its opening cut `r` is cadence-eligible. It is
+**scheduled-gated** whenever `r` is not cadence-eligible. If a later authored
+cadence gate exists, call the earliest one `g > r`, whether or not that episode
+survives to `g`; if none exists, the episode is **orphaned**. A **qualifying
+scheduled witness** is non-orphaned, additionally keeps every non-cadence input
+ready through at least one meaningful transition or participant decision, and
+remains ready at `g`, where evaluation is still cut-atomic.
+
+No evaluation identity or provisional candidate exists before `g`; creating
+one would violate RCS-03B1-A. For a qualifying scheduled witness, `r` is not
+C133's provisional-completion cut `q`: phase eligibility remains a material
+part of the complete occurrence contract, so `q` cannot begin before `g`. An
+intervening participant decision is therefore not a post-completion response
+window. That distinction is also the gameplay cost being chosen—relationship
+sufficiency may be real before the rules permit it to become a candidate.
+
+Let `K^{gated}_v` contain exactly the supported tags with at least one legal
+scheduled-gated readiness episode, including an orphaned one. Every tag in
+that set must also have at least one qualifying scheduled witness; a tag whose
+gated episodes all expire before `g`, or whose episodes are all orphaned, is
+invalid/unresolved rather than negative evidence. A tag outside the set is
+proved immediate-eligible at the opening cut of every legal readiness episode.
+Incomplete analysis is unresolved, not a negative proof.
+
+| Choice | Eligible-cut rule | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — every readiness episode is immediate-eligible** | `K^{gated}_v` is empty. Whenever all non-cadence semantic inputs first become ready at episode-opening cut `r`, that same cut is cadence-eligible for cut-atomic evaluation. RCS-03C2 may still make actual invocation automatic or participant-authorized; A selects no authority. | **Recommended.** A protects the crisp causality selected in RCS-03B1-A: the relationship and its opportunity to manifest become whole at one boundary rather than being separated by a hidden schedule. At `r`, distinct Soul, Relic, Charm, relationship facts, and evaluation opportunity coexist **directly**; the prior formation history remains **partial**; excluding readiness queues is **neutral/protective**; universal immediacy is **aggregate**. Benefits are prompt feedback, less timing opacity, no pseudo-pending “ready but not listenable” state, and less cadence/UI competition. The cost is no authored waiting beat after readiness: later counterplay must prevent the inputs from becoming ready, not answer a merely phase-gated relationship afterward. | Aster's Guard history and Borel's current Heat first make Ashen ready at the resolution cut of Borel's action. That same cut is cadence-eligible. RCS-03C2 still decides whether the rules invoke Ashen or an authorized participant must do so there. |
+| **B — every supported tag is scheduled-gate-capable** | `K^{gated}_v=K^{candidate}_v`. Every supported tag has at least one scheduled-gated episode and at least one qualifying witness that remains ready across a later meaningful transition or decision through its first later authored cadence gate `g`. Other episodes of the same tag may remain immediate. | **Strongest cadence-and-counterplay countercase.** B lets every relationship become ready before its appointed listening moment, creating anticipation, bluffing, protection, and disruption without a persistent evaluation object. At `g`, the ready relationship and distinct schedule coincide **directly**; their continuity from `r` to `g` is **partial**; universal tag capability is **aggregate**. The danger is semantic laundering: players experience a half-open ritual even though the rules refuse to call it pending. It also adds readiness UI, schedule memorization, phase camping, snapshot pressure, and an intervening opportunity during which opponents may erase the ready inputs on counterfactual branches. | Guard and Heat are ready after Borel acts and stay ready while another participant decides; Ashen becomes cadence-eligible only at the authored Dusk Bell. A matched opposing continuation clears Heat and ends that readiness episode before the Bell; on the qualifying witness the facts persist, but in neither branch did an Ashen evaluation or candidate exist before the Bell. |
+| **C — immediate-only and scheduled-gate-capable tags coexist** | `K^{gated}_v` is a nonempty proper subset of `K^{candidate}_v`. Every tag in the positive class has a qualifying scheduled witness, while at least one other tag is proved immediate-eligible at the opening cut of every legal readiness episode. | C supports instantaneous Echoes beside appointed Vows and gives the widest cadence identity. Each actual boundary inherits A or B's local rating; catalog coexistence is only **aggregate**. Costs are two timing languages on top of the selected transformation dialects, heavier preview/UI and proof burden, and likely premium asymmetry if scheduled tags gain safer timing or more dramatic payoff. | Every Dreamglass readiness episode is cadence-eligible immediately. An Ashen tag has a qualifying episode that becomes ready earlier and survives until its authored Bell. These assignments are illustrative only. |
+
+**Recommendation: A, every readiness episode is immediate-eligible.** B's waiting
+beat is genuinely exciting, but immediately rebuilding a readiness interval
+after choosing cut-atomic evaluations would recreate much of pending ritual
+play under a different noun. A keeps the drama in forming the relationship and
+lets later invocation authority determine who acts at the exact hinge without
+adding a second scheduling layer.
+
+A/B/C are exhaustive because `K^{gated}_v` is respectively empty, the whole
+nonempty supported tag domain, or a nonempty proper subset. A later payoff,
+animation, network response, or implementation callback does not create a
+scheduled gate. B/C require a meaningful canonical transition or participant
+decision between `r` and `g`; adjacent resolver microsteps do not qualify.
+An owner-written replacement must define a genuinely different canonical
+eligibility relation rather than rename a phase or callback.
+
+The proof burden follows the selected quantifier: A requires complete
+reachable-domain analysis showing no scheduled-gated readiness episode; B
+requires full tag coverage plus one qualifying surviving witness per tag; C
+requires the same positive proof for every tag in its gated class and complete
+negative proof for at least one immediate-only tag. An orphaned gated episode
+is still positive membership and therefore cannot be discarded to prove A or
+C's negative class.
+
+This card deliberately defers:
+
+- `RCS-03C2`: deterministic/system versus participant declaration or
+  precommitment authority at an eligible cut, including the applicable actor;
+- `RCS-03C3`: coherent `H`/`S` acquisition or retention relative to that cut;
+- exact cut names and phase catalogs within the selected topology to
+  `AUTHOR`/`SPEC`;
+- `RCS-02` and `RCS-13`: information, command-holder/consent detail, and any
+  macro commitment or lock horizon;
+- `RCS-03D`/`RCS-03E`: persistent transformation cause and agency;
+- `RCS-04A`/`RCS-04B`: collision and committed-output identity; and
+- payoff, consumption, power, UI realization, accessibility, simulation, RL,
+  playtest, persistence, migration, release, and implementation.
+
+Every option proceeds next to RCS-03C2. None creates a pending evaluation or a
+post-completion response window.
 
 ## Session protocol and evidence
 

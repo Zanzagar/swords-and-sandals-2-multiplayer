@@ -1,5 +1,34 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-24 Relic evaluation lifetime — RCS-03B1-A selected
+
+The owner selected `RCS-03B1-A`: every Soul Relic evaluation is cut-atomic.
+No player-semantic evaluation begins before its decisive cut or remains pending
+across a later meaningful cut before provisional completion. Earlier bounded
+`H` history may remain necessary evidence, but it is not an open attempt.
+Whenever later cadence and authority choices permit invocation, one coherent
+Relic-side tuple and the applicable contingent evidence atomically produce a
+provisional candidate or no candidate at that cut.
+
+`RCS-03B2`–`RCS-03B7` are pruned because pending initiation, binding,
+in-flight context change, cancellation, expiry, and concurrency have no object
+under A. At the decisive cut the Soul/Relic/Charm/evidence relation is
+**direct**; earlier temporal continuity is **partial**; excluding pending state
+is **neutral/protective**; universal cut-atomicity is **aggregate**. The
+authoritative decision record remains unchanged and implementation remains
+blocked.
+
+The next-row audit found that old `RCS-03C` still bundled three independent
+axes that C133/C141/C155 explicitly leave open: eligible-cut cadence,
+invocation authority, and contingent `H`/`S` acquisition. The owner-visible
+register now contains thirty-three slots and splits that parent into
+`RCS-03C1`–`RCS-03C3`. After selecting B1, pruning its six descendants,
+and replacing one C row with three, current `Phi_SR = 23` (`28 - 7 + 2`). The
+sole active card is `RCS-03C1`: whether every non-cadence-readiness episode is
+immediately evaluation-eligible when it opens, every tag can instead support a
+real later authored schedule gate, or those tag classes coexist. Recommend A,
+immediate eligibility. Present only that A/B/C choice.
+
 ## 2026-09-24 design-first correction — the master index must not flatten the game
 
 The first master-index draft compressed each `SC-*` gate into closure language.
@@ -48,12 +77,14 @@ same-definition state/boundary cross-product.
 overcompressed `RCS-03B`. It assumed a cross-cut pending evaluation existed
 while combining its lifetime topology, initiation, Relic-side bind cut, later
 legal context-change disposition, participant cancellation, automatic expiry/
-horizon, and concurrency. The twice-amended register now contains
-`RCS-03B1`–`RCS-03B7`. The sole active owner card is `RCS-03B1` /
-`SR-04`, pre-completion semantic evaluation-lifetime topology. Present that one
-A/B/C choice only. Do not revive C171 as an owner question. Exact Relic tuple
-atomicity is derived, not a choice; `H`/`S` sampling remains later in
-`RCS-03C`.
+horizon, and concurrency. The owner selected `RCS-03B1-A`, cut-atomic
+evaluation, so `RCS-03B2`–`RCS-03B7` are pruned. **Third prerequisite
+correction, 2026-09-24:** the next audit found that `RCS-03C` still combined
+eligible-cut cadence, invocation authority, and contingent evidence
+acquisition. The thrice-amended register replaces it with
+`RCS-03C1`–`RCS-03C3`. The sole active owner card is `RCS-03C1` under `SR-04`.
+Do not revive C171 as an owner question. Exact Relic tuple atomicity is derived,
+not a choice.
 
 **Agent correction:** the first internal version of that second amendment
 still omitted initiation, participant cancellation, and automatic expiry even
@@ -90,16 +121,19 @@ direct Codex progression method lives in `$ss2-progression-design`.
 The active finite scope controller is
 `docs/design/endless-progression-master-closure-index.md`. It fixes twenty
 whole-system closure gates, twelve Soul Relic/Charm exit gates, an explicit
-card-admission/reopening rule, and a twice-amended frozen thirty-one-slot
+card-admission/reopening rule, and a thrice-amended frozen thirty-three-slot
 remaining Relic register. Two Relic slots are already routed to specification/
-evaluation and RCS-03A-C is direction-selected, so current `Phi_SR = 28`; each
-future Relic round must reduce it and may not mint an automatic descendant. The
+evaluation; `RCS-03A-C` and `RCS-03B1-A` are direction-selected; and six
+pending-only descendants are pruned, so current `Phi_SR = 23`. Each future
+Relic round must reduce it and may not mint an automatic descendant. The
 original twenty-slot/`Phi_SR = 18` count first became twenty-five/23 when the
 source audit exposed seven atomic boundaries inside two old parent rows. The
 second audit replaced one still-bundled binding row with seven atomic rows,
 raising the pre-answer potential to 29 and the current post-RCS-03A potential to
-28. Adding another genuinely missed product slot requires an owner-visible
-charter amendment with the new bound.
+28. The third audit replaced one still-bundled sampling row with three atomic
+rows, raising that pre-B1 potential to 30; B1-A then selected/pruned seven rows,
+yielding 23. Adding another genuinely missed product slot requires an owner-
+visible charter amendment with the new bound.
 
 EP-D02-C3c.171 remains unanswered but is no longer an owner choice. Its own
 scope changes only catalog prevalence/proof burden, not a player action,
@@ -109,16 +143,15 @@ authoring/evaluation possibilities; C170-A is sufficient for the framework's
 existential continuity promise. Its graph descendants are pruned unless later
 evidence passes the index's reopening test.
 
-The sole active Relic boundary is `RCS-03B1` under `SR-04`: whether all Relic
-evaluations are cut-atomic, every supported tag is capable of a real cross-cut
-pending evaluation, or atomic-only and pending-capable tags coexist. Recommend
-A: existing `H`/`S`, recurrence, and transformation already provide temporal
-texture without a second queue of half-open rituals. B remains the strongest
-ritual-play countercase. Present only this prerequisite-ready admitted choice.
-Initiation, binding cut, context-change disposition, cancellation, expiry,
-concurrency, evidence sampling, cause, and agency remain separate conditional
-or later slots. The authoritative decision record is unchanged; implementation
-remains blocked.
+The sole active Relic boundary is `RCS-03C1` under `SR-04`: whether every
+non-cadence-readiness episode becomes evaluation-eligible at its opening cut,
+every supported tag can instead have a real later authored schedule gate, or
+immediate-only and gate-capable tags coexist. Recommend A: it protects
+RCS-03B1-A's crisp causality and prevents a “ready but not listenable” pseudo-
+pending state. Invocation authority and
+`H`/`S` acquisition remain separate as `RCS-03C2` and `RCS-03C3`. Present only
+this prerequisite-ready admitted choice. The authoritative decision record is
+unchanged; implementation remains blocked.
 
 ## 2026-09-15 standalone-game north star — Souls and Simulacra
 
@@ -7418,11 +7451,12 @@ for framework closure. The proposed three-opportunity and graph descendants
 are pruned unless later evidence passes the master closure index's reopening
 test. **Corrected continuation:** the combined RCS-03 instruction was
 overcompressed, and its first split still left the binding row bundled. The
-owner selected `RCS-03A-C`. Continue at registered Relic slot `RCS-03B1`, pre-
-completion semantic evaluation-lifetime topology under `SR-04`; conditional
-initiation, binding, context-change disposition, cancellation, expiry,
-concurrency, contingent evidence sampling, cause, and agency follow separately
-as `RCS-03B2`–`RCS-03E`.
+owner selected `RCS-03A-C` and then `RCS-03B1-A`. Pending-only
+`RCS-03B2`–`RCS-03B7` are pruned. A third prerequisite audit split the still-
+bundled `RCS-03C` parent into eligible-cut cadence, invocation authority, and
+evidence acquisition. Continue at registered Relic slot `RCS-03C1`, cut-atomic
+evaluation-eligibility cadence under `SR-04`; `RCS-03C2`, `RCS-03C3`,
+cause, and agency follow separately.
 
 R11 begins only
 after R10 completes and first chooses package proximity for R10.7's selected
