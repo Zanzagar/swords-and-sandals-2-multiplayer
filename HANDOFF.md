@@ -1982,7 +1982,11 @@ wrong**; that file is kept only as the record of how.)*
 
 ► ~~**THE FILTERS LEAVE THE EXTRACTORS NOW, AND NOTHING READS THEM.**~~
   **CLOSED — AND `prefixesOf` NO LONGER EXISTS, WHICH THIS PARAGRAPH WENT ON
-  ASSERTING.** `props.json` carries 363 effect groups over 3209 placements;
+  ASSERTING.** `props.json` carries ~~363 effect groups over 3209 placements~~
+  366 effect groups over 3,258 placements (**corrected 2026-09-24**: 363/3209
+  was the 12-prop pack's; the bolt and the boulder added 3 groups and 49
+  grouped placements, 46 of them in their clocks — re-derived from the
+  player's pack, and `tools/extract-props.mjs`'s header says so);
   `screens.json` carries 276 typed filters. The diagnosis below was right and is
   why the work went where it did: ~~`prefixesOf` in `screen.js` reads only
   `entry.path`, so its output is invariant under those records being correct,
@@ -2069,8 +2073,10 @@ item 2 is HALF closed — the extractors carry the filters, nothing reads them:)
   diagnosis was right and is why the work went where it did: ~~the data never
   leaves `extract-props.mjs` (which discards the `filters`/`blendMode`
   `flattenFrame` already returns) or `extract-screens.mjs` (which writes
-  `filters: true` where the LIST belongs)~~ — both carry them now, 363 effect
-  groups over 3209 placements and 276 typed filters respectively, and the arena
+  `filters: true` where the LIST belongs)~~ — both carry them now, ~~363 effect
+  groups over 3209 placements~~ 366 effect groups over 3,258 placements (the
+  count since the spell props; corrected 2026-09-24, see the entry above) and
+  276 typed filters respectively, and the arena
   page no longer reports `props: NO filter data in the pack`.
   ► ~~**BUT NOTHING READS THEM AND THE PICTURE IS UNCHANGED.**~~ **CLOSED, and
     the function named here is GONE.** ~~`prefixesOf` in `screen.js` reads only

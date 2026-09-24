@@ -61,6 +61,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import zlib from "node:zlib";
+import { fileURLToPath } from "node:url";
 
 const TWIPS = 20;
 
@@ -750,6 +751,29 @@ function main(argv) {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+/**
+ * IS THIS FILE THE SCRIPT NODE WAS ASKED TO RUN? — `import.meta.main`, for the
+ * reasons `tools/clip-sequences.mjs` gives at its own copy: the old
+ * `"file://" + argv[1]` string never matched a path holding a space or any
+ * Windows path, and ran nothing and exited 0; a comparison of paths misses a
+ * run through a symlink or falsely matches an import whose `argv[1]` names
+ * this file, which here could reach `mkdirSync` and `writeFileSync` on
+ * import. The real-path comparison answers only on a node without
+ * `import.meta.main`. Pinned by `test/tool-main-guard.test.js`.
+ */
+function invokedAsScript() {
+  if (typeof import.meta.main === "boolean") return import.meta.main;
+  const script = process.argv[1];
+  if (!script) return false;
+  const self = fileURLToPath(import.meta.url);
+  if (self === path.resolve(script)) return true;
+  try {
+    return fs.realpathSync(self) === fs.realpathSync(script);
+  } catch {
+    return false;
+  }
+}
+
+if (invokedAsScript()) {
   await main(process.argv.slice(2));
 }

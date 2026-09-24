@@ -11,17 +11,20 @@
  *   returns and to COUNT what cannot be carried.
  *
  * ► **AND THE FIRST THING MEASURING IT BROKE WAS THE BRIEF THAT ASKED FOR IT.**
- *   Re-measured on the installed build: **ZERO of the 3,345 placements this
- *   tool EMITS carries a filter or a blend mode of its OWN.** Every effect the
- *   pack can draw is on an ENCLOSING SPRITE — 363 groups, 570 filters, 1 blend
- *   mode — so "carry `drawable.filters` onto the placement" writes nothing at
+ *   Re-measured on the installed build: **ZERO of the ~~3,345~~ 3,574
+ *   placements this tool EMITS carries a filter or a blend mode of its OWN.**
+ *   Every effect the pack can draw is on an ENCLOSING SPRITE — ~~363~~ 366
+ *   groups, ~~570~~ 573 filters, 1 blend mode (**corrected 2026-09-24**: the
+ *   struck numbers are the 12-prop pack's; see the list at the end of this
+ *   note) — so "carry `drawable.filters` onto the placement" writes nothing at
  *   all and reports success. The tests below are built around that split,
  *   because it is the whole difficulty: **an ancestor's blur on a leaf is worse
  *   than a dropped one**, and the two live one property apart on the same
  *   object.
  *
  * ► **AND THE SECOND THING IT BROKE WAS THAT ZERO.** ~~*So every own filter in
- *   the build is absent.*~~ The flatten returns **3,436 drawables, 2 of them
+ *   the build is absent.*~~ The flatten returns **3,436 drawables (the 12-prop
+ *   pack's; dated in `tools/extract-props.mjs`'s header), 2 of them refused as
  *   `unsupported`, and BOTH of those carry their own glow** — `panel` frame 1's
  *   edit-text children 1527 and 1528. They were skipped above `ownEffectsOf`
  *   and counted nowhere, so the zero was a measurement of the extractor's skip
@@ -54,12 +57,24 @@
  *   fresh-clone form of a trap is not avoiding the trap. It now asserts on BOTH
  *   branches: an old pack is checked against what an old pack has, and says so.
  *
- * What the real build contributes is numbers, quoted and not stored: 12 props,
- * 302 frames, 3,345 placements, 56 shapes, 258 paths, 11 approximated, 363
- * effect groups over 3,209 placements, 570 filters (150 colourMatrix, 208 blur,
- * 212 glow) and one blend mode — `lighten`, on the arrow trail. Reproduce with
+ * What the real build contributes is numbers, quoted and not stored: ~~12~~ 15
+ * props, ~~302~~ 312 frames, ~~3,345~~ 3,574 placements, ~~56~~ 87 shapes,
+ * ~~258~~ 604 paths, 11 approximated, ~~363~~ 366 effect groups over ~~3,209~~
+ * 3,258 placements, ~~570~~ 573 filters (~~150~~ 151 colourMatrix, 208 blur,
+ * ~~212~~ 214 glow) and one blend mode — `lighten`, on the arrow trail.
+ * Reproduce with
  * `node tools/extract-props.mjs --out <somewhere outside the repo> --report`,
  * never by committing a fixture.
+ *
+ * **CORRECTED 2026-09-24: THE STRUCK NUMBERS ARE THE 12-PROP PACK'S**, before
+ * `lightning_bolt_combat`, `fireball_combat` (2026-09-22) and `boulder_combat`
+ * (2026-09-23). Re-derived from the player's own pack, read-only and without
+ * running the extractor: the placements are 3,356 in `frames` and 218 in the
+ * three clocks' `framesByParent`, and the grouped ones 3,212 and 46, because
+ * this tool emits both (the manifest's `placementsUnderAGroup` is the 3,258);
+ * the 87 shapes are 69 characters and 18 baked morphs, every one reached. The
+ * same counts with the three spell props left out give every struck number
+ * exactly, the 56 shapes and 258 paths included.
  */
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -390,7 +405,9 @@ const COLOUR_MATRIX = { id: 6 };
  *
  * The characters are the ones `PROP_EXPORTS` names — by linkage where the
  * build exports one and by character id where it does not — so `extractProps`
- * finds twelve props here exactly as it finds twelve in the installed copy.
+ * finds ~~twelve~~ fifteen props here exactly as it finds ~~twelve~~ fifteen in
+ * the installed copy (corrected 2026-09-24: the first test below asserts the
+ * fifteen here, and the player's own pack holds fifteen).
  */
 function propsBuild() {
   return swfFile([
@@ -603,7 +620,9 @@ test("a colour matrix that CHANGES between frames is two records, because the nu
   //   compared only the filter's TYPE would store the first and label the other
   //   199 frames with it, which is a day-lit sky at midnight. (That is not a
   //   hypothetical: keying on type is how this session's first census reported
-  //   7 groups and 10 filters where there are 363 and 570.)
+  //   7 groups and 10 filters where there are ~~363 and 570~~ 362 and 570 on
+  //   the sky, which is all that census covered — **corrected 2026-09-24**:
+  //   363 and 570 were the 12-prop WHOLE pack, which is 366 and 573 now.)
   const one = { id: 6, matrix: Array.from({ length: 20 }, (value, index) => index / 8) };
   const other = { id: 6, matrix: Array.from({ length: 20 }, (value, index) => (index + 1) / 8) };
   const pack = extractProps(swfFile([
@@ -670,14 +689,19 @@ test("A FILTER ON A MASK IS COUNTED, because a clip is a region and a blurred st
 test("every prop carries an effects invoice, INCLUDING the ones with nothing in it", () => {
   // ► "A pack that invoices some of its entries is worse than one that invoices
   //   none", because a reader who checks one entry concludes the pack has
-  //   invoices. Eight of the twelve real props have no effects at all.
+  //   invoices. ~~Eight of the twelve~~ Eleven of the fifteen real props have
+  //   no effect groups at all (**corrected 2026-09-24**, and the eight did not
+  //   reproduce even before the spell props: the old twelve count ten; see
+  //   `effectGroups` in `tools/extract-props.mjs`).
   const props = Object.values(PACK.props);
   const silent = props.filter((prop) => !prop.effects || !prop.effectGroups).map((prop) => prop.linkage);
   assert.deepEqual(silent, [], "an absent invoice and an empty one are different facts and must look different");
   const empty = props.filter((prop) => prop.effectGroups.length === 0);
   assert.ok(empty.length > 0, "the synthetic build has props with no effects; they must still carry the shape");
-  // The refusal invoice obeys the same rule: present on all twelve, including
-  // the eleven that refused nothing. An absent `dropped` and a zeroed one are
+  // The refusal invoice obeys the same rule: present on all ~~twelve~~
+  // fifteen, including the ~~eleven~~ fourteen that refused nothing — every
+  // real prop but `panel` (corrected 2026-09-24; the synthetic build here
+  // refuses nothing at all, its `failures` being empty). An absent `dropped` and a zeroed one are
   // different facts, and telling them apart is the whole point of the block.
   const unrefused = props.filter((prop) => !prop.effects.own.dropped).map((prop) => prop.linkage);
   assert.deepEqual(unrefused, [], "every prop states what its skipped drawables cost, even when that is nothing");
@@ -699,7 +723,8 @@ test("A DROPPED DRAWABLE'S OWN FILTERS ARE INVOICED WHERE THEY ARE DROPPED", () 
   //   filter on such a drawable left no trace anywhere: not in the placement,
   //   not in `notCarried`, not in the invoice, not even in the `failures` line
   //   that named the drawable. On the installed build that is not a corner —
-  //   it is 100% of the own filters in it: 3,436 drawables, 2 unsupported, and
+  //   it is 100% of the own filters in it: 3,436 drawables (the 12-prop pack's
+  //   flatten), 2 refused as unsupported, and
   //   the SAME 2 own-filtered (`panel` frame 1, edit-text 1527 and 1528, one
   //   glow each). `0 own filters` measured the skip list, not the game.
   //
@@ -783,7 +808,8 @@ test("A TWO-DEEP CHAIN IS OUTERMOST FIRST, which NOTHING in the shipped build ca
   // ► **AN ORDERING GUARANTEE WHOSE EVIDENCE COULD NOT VARY.** `outermost
   //   first` is stated three times in `tools/extract-props.mjs` and was
   //   asserted against a chain of length ONE — and every one of the installed
-  //   build's 3,209 chains has length 1, as does every group path. So reversing
+  //   build's ~~3,209~~ 3,258 chains has length 1, as does every group path
+  //   (all 366; corrected 2026-09-24, clocks included). So reversing
   //   the loop in `inheritedEffectsFor` left the whole suite green: no input in
   //   the game or in this file could distinguish the order from its reverse.
   //
@@ -866,7 +892,9 @@ test("`notCarried.effectGroupMatrix` is ONE PER GROUP, and says so rather than b
   //   It is not vacuous today: the two sides come from different code paths —
   //   one `refuse()` inside the new-group branch against `groups.length` — so
   //   counting once per LEAF instead of once per group fails here. On the
-  //   installed build that mutation reads 3,209 against 363.
+  //   installed build that mutation reads ~~3,209 against 363~~ 3,258 against
+  //   366 (corrected 2026-09-24: every grouped placement, the clocks' 46
+  //   included, since they are walked by the same code, against every group).
   const rolled = tallyEffects(PACK.props);
   assert.equal(rolled.notCarried.effectGroupMatrix, rolled.groups);
   assert.ok(rolled.groups > 0);
@@ -1372,7 +1400,7 @@ test("THE MANIFEST'S PER-ENTRY INVOICE IS THE ONLY ONE A HUMAN READS, and it was
       `${name}'s published invoice must be the one the pack holds, not a second copy that can drift`);
   }
   // The invoice has to be non-trivial somewhere, or "every entry has one" is
-  // twelve empty objects agreeing.
+  // ~~twelve~~ fifteen empty objects agreeing.
   const withFilters = Object.values(manifest.props).filter((entry) => entry.effects.own.filters > 0);
   assert.ok(withFilters.length > 0, "the fixture carries own filters on purpose");
   assert.ok(Object.values(manifest.props).some((entry) => entry.effects.inherited.groups > 0));
@@ -1389,7 +1417,10 @@ test("THE INSTALLED PACK holds every prop `PROP_EXPORTS` declares, or it predate
   // ► **WHY THIS EXISTS: A STALE PACK FAILS THIRTEEN OTHER TESTS WITH BARE
   //   NUMBERS.** `test/render-props.test.js` and `test/render-arena-shell.test.js`
   //   pin measured counts over the REAL pack — 3,348 placements, 747 group
-  //   instances, 297 paths — and on 2026-09-22 every one of them moved because
+  //   instances, 297 paths as they stood with the bolt (3,356, 748 and 604
+  //   since the fireball and the boulder; re-derived 2026-09-24 from the
+  //   player's pack, where the 13 props of that date still give 3,348, 747
+  //   and 297) — and on 2026-09-22 every one of them moved because
   //   `lightning_bolt_combat` joined. A machine that extracted before that date
   //   reads `3345 !== 3348` thirteen times and nothing says why. This test says
   //   why, by name, beside them.

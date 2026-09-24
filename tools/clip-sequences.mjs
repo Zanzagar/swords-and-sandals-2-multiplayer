@@ -31,8 +31,10 @@
  */
 
 import fs from "node:fs";
+import path from "node:path";
 import zlib from "node:zlib";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
 /** The fighter clip. Every animation label this project cares about is on it. */
 const DEFAULT_SPRITE = 1241;
@@ -362,6 +364,50 @@ function main(argv) {
   return 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+/**
+ * IS THIS FILE THE SCRIPT NODE WAS ASKED TO RUN? — NODE IS ASKED, NOT `argv`.
+ *
+ * ► **NOT THE STRING TEST, `import.meta.url` against `"file://" + argv[1]`,
+ *   which is what this was until 2026-09-24.** A URL percent-encodes a space
+ *   and a Windows path is not a URL path at all, so from any directory with a
+ *   space in its name, or from `C:\...`, the strings never matched: the tool
+ *   ran NOTHING and exited 0, which is success to anything that ran it.
+ *
+ * ► **AND NOT ANY COMPARISON OF PATHS, which is what replaced it first.**
+ *   `path.resolve(argv[1])`, the form the extractors use, misses a run through
+ *   a symlink (node runs the TARGET, so `import.meta.url` names it while
+ *   `argv[1]` keeps the link); real paths fix that — and every path form
+ *   FALSELY matches an import whose process happens to carry this file as
+ *   `argv[1]`: `node -e 'await import("./tools/clip-sequences.mjs")'
+ *   ./tools/clip-sequences.mjs` ran `main` on import. A Codex review
+ *   reproduced that on the real-path version, 2026-09-24.
+ *
+ * ► **`import.meta.main` IS NODE'S OWN ANSWER**: true for the entry module
+ *   however it was named — a spaced or linked path, `--preserve-symlinks-main`
+ *   — and false for anything imported. Measured on node 26.3.1, the runtime
+ *   this repository names. On a node that predates it the field is absent,
+ *   and a guard that trusted it would run nothing and exit 0 again, which is
+ *   the defect itself; so there, and only there, the real-path comparison
+ *   answers, with its one false match. That branch cannot run on node 26 and
+ *   no test reaches it.
+ *
+ * Pinned from a copy in a directory whose name holds a space, `#` and `%20`,
+ * through a link to it, and imported with `argv[1]` absent, unresolvable and
+ * naming this file: `test/tool-main-guard.test.js`.
+ */
+function invokedAsScript() {
+  if (typeof import.meta.main === "boolean") return import.meta.main;
+  const script = process.argv[1];
+  if (!script) return false;
+  const self = fileURLToPath(import.meta.url);
+  if (self === path.resolve(script)) return true;
+  try {
+    return fs.realpathSync(self) === fs.realpathSync(script);
+  } catch {
+    return false;
+  }
+}
+
+if (invokedAsScript()) {
   process.exitCode = main(process.argv.slice(2));
 }

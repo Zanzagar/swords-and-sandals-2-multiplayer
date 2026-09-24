@@ -38,9 +38,23 @@
  *   drawable and drop `filters`, `blendMode` and `ancestorEffects` — all three
  *   of which `flattenFrame` returns — so the arena page reported *"props: NO
  *   filter data in the pack"* and was right. Carrying them measures: **0 of the
- *   3,345 placements this tool EMITS carries a filter or a blend mode of its
- *   own**, while 3,209 of them sit inside one of **363 effect groups holding
- *   570 filters** (150 colourMatrix, 208 blur, 212 glow) and one blend mode.
+ *   ~~3,345~~ 3,574 placements this tool EMITS carries a filter or a blend mode
+ *   of its own**, while ~~3,209~~ 3,258 of them sit inside one of **~~363~~ 366
+ *   effect groups holding ~~570~~ 573 filters** (~~150~~ 151 colourMatrix, 208
+ *   blur, ~~212~~ 214 glow) and one blend mode.
+ *
+ *   **CORRECTED 2026-09-24: THE STRUCK NUMBERS ARE THE 12-PROP PACK'S.** The
+ *   three spell props joined after they were measured — `lightning_bolt_combat`
+ *   and `fireball_combat` on 2026-09-22, `boulder_combat` on 2026-09-23 — and
+ *   their CLOCKS are placements this tool emits too: 3,356 in `frames` and 218
+ *   in `clock.framesByParent` (the bolt 36, the fireball 91, the boulder 91).
+ *   Of the 3,258 grouped, 3,212 are in `frames` and 46 in the clocks (the bolt
+ *   2 + 24 under its two glow groups, the boulder 1 + 22 under its one
+ *   colourMatrix), which is the manifest's `placementsUnderAGroup` — it counts
+ *   the clocks as this tool does. Still 0 own, clocks included. Re-derived from
+ *   the player's own pack by walking every placement in `frames` and in each
+ *   clock and every `effectGroups` record; the same walk with the three spell
+ *   props left out gives every struck number exactly.
  *
  *   ~~*and that zero is the whole finding*~~ — **IT WAS NOT, AND SAYING SO
  *   COST THIS FILE ITS HEADLINE.** A verifier re-derived it and found the zero
@@ -54,6 +68,15 @@
  *   drawable`, and `notCarried.unsupportedDrawableFilters` holds the 2. A zero
  *   meaning "none exist" and a zero meaning "I dropped them before looking"
  *   must never look the same again.
+ *
+ *   (**Dated 2026-09-24: 3,436 is the 12-PROP pack's flatten** — its 3,345
+ *   emitted placements, these 2, and the sky's 89 masks, one on each of frames
+ *   112-200, which sum to it exactly. It is not re-counted here: masks are not
+ *   written into the pack, and this correction did not run the flatten. Since
+ *   2026-09-22 a morph also comes back `unsupported` and is BAKED rather than
+ *   refused — 38 placements in `fireball_combat` and `boulder_combat` — so read
+ *   "2 unsupported" as "2 refused". The refused are still exactly these two:
+ *   they are the manifest's only two `failures`.)
  *
  *   **The own/inherited difference is still the point, and it is not
  *   bookkeeping.** The groups are stored ONCE each and the leaves point at them
@@ -284,6 +307,17 @@ export const PROP_EXPORTS = Object.freeze([
      *   `_parent.removeMovieClip()` like the fireball's explosion — and this
      *   tool reads display lists, not actions. See `BOULDER_LANDED_FRAMES` in
      *   `src/render/props.js`.
+     *
+     * ► **DATED 2026-09-24: THE CHILD IS READ NOW, BY THIS TOOL, AND THE
+     *   LANDING'S LENGTH BY THE MAIN SESSION.** The player's own pack records
+     *   `clockDiscovery.byFrame` as `[[], [], [], [27]]`: frames 1-3 place no
+     *   animated sprite and frame 4 places exactly one, character 27 — the same
+     *   23-frame sprite `fireball_combat`'s clock walks. The length was read
+     *   from the actions on 2026-09-23 and is recorded at
+     *   `BOULDER_LANDED_FRAMES` (22 frames); that reading is cited, not
+     *   re-derived here. The entry still names the FRAME: declaring
+     *   `character: 27` would drop `clockDiscovery` from the pack, which is a
+     *   change to the extraction and not to this comment.
      */
     linkage: "boulder_combat",
     indexedBy: "frame: 1 while the rock falls (its own Stop), 4 from the landing (`gotoAndStop(4)`, `+0x88c0`); 2 and 3 are never shown",
@@ -544,11 +578,13 @@ function refuse(notCarried, kind, howMany = 1) {
  * ONE PLACEMENT'S OWN EFFECTS — its own, and on no account its ancestors'.
  *
  * ► **MEASURED ON THE ORACLE, AND IT IS THE REASON THIS FUNCTION IS SEPARATE
- *   FROM THE ONE BELOW: ZERO of the 3,345 placements this tool EMITS carries a
- *   filter or a blend mode of its own.** Every effect this pack can draw lives
- *   on an ENCLOSING SPRITE. So a fix that spread `drawable.filters` onto the
- *   placement and stopped there would write an empty object 3,345 times and
- *   report success, and the arena would still have no filter data.
+ *   FROM THE ONE BELOW: ZERO of the ~~3,345~~ 3,574 placements this tool EMITS
+ *   carries a filter or a blend mode of its own.** Every effect this pack can
+ *   draw lives on an ENCLOSING SPRITE. So a fix that spread `drawable.filters`
+ *   onto the placement and stopped there would write an empty object ~~3,345~~
+ *   3,574 times and report success, and the arena would still have no filter
+ *   data. (**Corrected 2026-09-24**: 3,345 was the 12-prop pack's; 3,574 is
+ *   3,356 in `frames` and 218 in the spell props' clocks — see the header.)
  *
  * ► **WHAT THAT ZERO IS NOT.** ~~*Every effect in the props pack lives on an
  *   enclosing sprite — 7 groups, 10 filters, 1 blend mode. Reproduce with
@@ -557,14 +593,17 @@ function refuse(notCarried, kind, howMany = 1) {
  *   dangerous half.**
  *
  *   - The counts were a SKY-ONLY census under a key that ignores a filter's
- *     numbers. The pack holds **363 groups and 570 filters**; see
- *     `inheritedEffectsFor` for the whole table. One blend mode is right.
+ *     numbers. The pack holds **~~363~~ 366 groups and ~~570~~ 573 filters**
+ *     (corrected 2026-09-24: +2 glow groups on `lightning_bolt_combat`, +1
+ *     colourMatrix group on `boulder_combat`); see `inheritedEffectsFor` for
+ *     the whole table. One blend mode is right.
  *   - `--report` reading `0 own` proved nothing about the build, because the
  *     sweep ran only over drawables that survived the `unsupported` skip
  *     upstream — and the build's **only two own-filtered placements are exactly
  *     the two that skip removes**: `panel` frame 1's `DefineEditText` children
- *     1527 and 1528, each carrying its own glow. 3,436 drawables, 2
- *     unsupported, 2 own-filtered, and the intersection is both of them. The
+ *     1527 and 1528, each carrying its own glow. 3,436 drawables (the 12-prop
+ *     pack's flatten; dated in the header), 2 refused as unsupported, 2
+ *     own-filtered, and the intersection is both of them. The
  *     number could not have come back non-zero for any input in this build.
  *
  *   `refusedEffectsOf` now invoices those two where they are dropped, `--report`
@@ -805,9 +844,13 @@ function nestedLookupFor(buffer, characters, resolved, frameCount, declared, cac
  * `effectGroups` list, OUTERMOST FIRST — or `null` when it sits inside none.
  *
  * ► **NOTHING IN THE SHIPPED BUILD CAN TELL THAT ORDER FROM ITS REVERSE, AND
- *   THIS COMMENT USED TO STATE IT AS THOUGH MEASURED.** Every one of the 3,209
- *   chains here has length 1 and every one of the 363 group paths has length 1,
- *   so reversing the loop below changes nothing about this pack. It is a
+ *   THIS COMMENT USED TO STATE IT AS THOUGH MEASURED.** Every one of the
+ *   ~~3,209~~ 3,258 chains here has length 1 and every one of the ~~363~~ 366
+ *   group paths has length 1 (corrected 2026-09-24: the spell props added 49
+ *   chains, 46 of them in their clocks, and 3 groups, all one deep — re-measured over every
+ *   placement's `inheritedEffects`, clocks included, and every
+ *   `effectGroups[].path`), so reversing the loop below changes nothing about
+ *   this pack. It is a
  *   guarantee to the RENDERER, not a finding about the game: a caller that
  *   nests buffers composites the outermost group first. It is pinned by a
  *   fixture that nests two filtered sprites (`test/extract-props.test.js`,
@@ -842,12 +885,21 @@ function nestedLookupFor(buffer, characters, resolved, frameCount, declared, cac
  *   key):
  *
  *   ```text
- *     key                       sky            whole pack
- *     path                      6 groups /  8    7 groups /  8 filters
- *     path + character          7 / 10           8 / 10
- *     path + filter types       7 / 10           8 / 10
- *     THE WHOLE RECORD        362 / 570        363 / 570   <- what this writes
+ *     key                       sky            whole pack: 12 props -> 15
+ *     path                      6 groups /  8    7 /   8  ->   9 groups / 10 filters
+ *     path + character          7 / 10           8 /  10  ->  10 / 12
+ *     path + filter types       7 / 10           8 /  10  ->  10 / 12
+ *     THE WHOLE RECORD        362 / 570        363 / 570  -> 366 / 573   <- what this writes
  *   ```
+ *
+ *   (**The 15-prop column added 2026-09-24**; the 12-prop column is as first
+ *   measured. Recomputed from the player's own pack's `effectGroups`, per prop:
+ *   a coarser key's distinct values over the distinct whole records are its
+ *   distinct values over every occurrence, and `effectGroups` is in
+ *   first-occurrence order, so the filters counted are the first occurrence's.
+ *   The same recount over the old twelve gives the 12-prop column exactly. The
+ *   spell props add the bolt's two glow groups — one path, one character — and
+ *   the boulder's one colourMatrix group; the sky's column does not move.)
  *
  *   The three small keys agree with each other and disagree with the build by
  *   fifty times, because every one of them throws away the twenty numbers in a
@@ -983,10 +1035,13 @@ function effectSummaryFor(groups, ownFilterLists, ownBlendModes, underGroup, not
  *   RECOMPUTES this from the pack's own data on every run and fails by name if
  *   the two disagree.
  *
- * ► **ALL 56 SHAPES OR NONE.** That test's own note: *"A pack that invoices
+ * ► **ALL ~~56~~ 87 SHAPES OR NONE.** That test's own note: *"A pack that invoices
  *   some of its entries is worse than one that invoices none"*, because a
  *   reader who checks one entry concludes the pack has invoices. This pack had
- *   0 of 56 before today, which was uniform and honest; it now has 56.
+ *   0 of 56 before today, which was uniform and honest; it now has ~~56~~ 87
+ *   (**corrected 2026-09-24**: 69 characters and 18 baked morphs, every one
+ *   carrying `approximated` and `approximatedByKind`, in the player's own
+ *   pack; the shapes the old twelve props reach are exactly the 56).
  */
 function pathApproximations(paths) {
   const approximatedByKind = {};
@@ -1478,15 +1533,21 @@ export function extractProps(buffer) {
       indexedBy: declared.indexedBy,
       reader: declared.reader,
       distinctFrames: new Set(signatures.filter((s) => s.length > 0)).size,
-      // ALWAYS PRESENT, EMPTY WHERE THERE ARE NONE — 8 of the 12 props have no
-      // effects at all. An absent key would make "this prop has no groups" and
-      // "this pack predates groups" the same shape, and telling those apart is
-      // the whole point of writing a count down.
+      // ALWAYS PRESENT, EMPTY WHERE THERE ARE NONE — ~~8 of the 12~~ 11 of the
+      // 15 props have no effect groups at all. An absent key would make "this
+      // prop has no groups" and "this pack predates groups" the same shape, and
+      // telling those apart is the whole point of writing a count down.
+      // (**Corrected 2026-09-24, and the 8 did not reproduce even before the
+      // spell props:** in the player's own pack only `bullet_trail`, `sky`,
+      // `lightning_bolt_combat` and `boulder_combat` hold a group, so the old
+      // twelve count 10 with none, not 8. Whether 8 was ever right is not
+      // recoverable from this pack. `panel`, one of the 11, is not empty of
+      // effects: its 2 refused glows are in `effects.own.dropped`.)
       effectGroups: groups,
       // ► **PRESENT ONLY WHERE THE ENTRY DECLARES ONE, unlike `effectGroups`
       //   beside it, and the asymmetry is deliberate.** An always-present
-      //   `nestedLookup: null` would claim this tool went looking on all twelve
-      //   props; it goes looking exactly where `PROP_EXPORTS` says the build
+      //   `nestedLookup: null` would claim this tool went looking on all ~~twelve~~
+      //   fifteen props; it goes looking exactly where `PROP_EXPORTS` says the build
       //   indexes a child, and a refusal is in `notCarried` under its own name.
       ...(nestedLookup ? { nestedLookup } : {}),
       // Present only where `PROP_EXPORTS` declares a clock, for the reason
