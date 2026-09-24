@@ -981,9 +981,12 @@ test("in range the build offers the retreat and NEVER the advance, and out of ra
   // verbs and the retreat-walk this line already pins.
   // `wincrowd` joined 2026-09-23: frame 13 wires it in both facings too
   // (`+0x0b69`, `+0x0fb7`), hidden only below `herolevel` 3, and this pair is 3.
+  // ► ~~`"rest"`~~ **left 2026-09-24 — the owner's decision, matching the
+  //   build: frame 13 wires no rest in either facing.** No rest while a foe is
+  //   in reach; the long-range list below keeps it.
   assert.deepEqual(
     typesOf(engaged),
-    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "wincrowd", "rest"]
+    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "wincrowd"]
   );
 
   const apart = bout(1);

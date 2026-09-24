@@ -750,7 +750,12 @@ test("it PRE-EMPTS ghost strike too, whose own gate wants the foe beyond 500", (
 });
 
 test("it REPLACES the tired rest in range, because the ladder runs after it", () => {
-  const battle = aiStaged({ hero: { inventory1: 49 } });
+  // ► **A DRAWN BOW BEYOND ITS FLOOR SINCE 2026-09-24, and in melee reach until
+  //   then.** A swordsman in reach has no rest to replace any more — the
+  //   owner's decision, `closerange_warrior` wires none — so the control could
+  //   not rest there. `longrange_archer` is in range by the villain's own test
+  //   and still offers the rest below half stamina.
+  const battle = aiStaged({ hero: { inventory1: 49, secondary_weapon: 61, equipped_weapon: 2 }, foeX: 1000 });
   heroOf(battle).resources.staminaleft.value = 10;
   assert.equal(pick(battle).type, MOLTEN);
   heroOf(battle).resources.inventory1.value = SS2_INVENTORY_EMPTY;

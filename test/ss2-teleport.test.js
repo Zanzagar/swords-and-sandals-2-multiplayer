@@ -60,6 +60,7 @@ import {
 import {
   applyCommands, emptyScene, figureXAt, poseAt, timelineFor, timelinesForStep
 } from "../src/render/index.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 
 const TELEPORT = Ss2ActionType.CAST_TELEPORT;
 
@@ -447,18 +448,24 @@ function overlapping({ actor = "hero" } = {}) {
   Object.assign(combatantById(battle, "hero"), { x: 60 });
   Object.assign(combatantById(battle, "foe"), { x: 60 });
   if (actor === "foe") {
-    // Pass the hero's turn with the one action that moves nobody.
-    applyAction(battle, { actorId: "hero", type: Ss2ActionType.REST, targetId: "hero" });
+    // Pass the hero's turn with the one action that moves nobody — the FORCED
+    // rest, since in reach there is no other (2026-09-24; see
+    // `./ss2-rest-anywhere.js`).
+    restAnywhere(battle, "hero");
     assert.equal(currentCombatant(battle).id, "foe");
   }
   return battle;
 }
 
-test("overlapped, BOTH fighters are offered a sane list: a swing, a rest, and the close frame's ONE walk", () => {
+test("overlapped, BOTH fighters are offered a sane list: a swing, NO rest, and the close frame's ONE walk", () => {
   for (const id of ["hero", "foe"]) {
     const battle = overlapping({ actor: id });
     const types = legalActions(battle, id).map((option) => option.type);
-    assert.ok(types.includes(Ss2ActionType.REST), `${id} can always rest`);
+    // ► ~~`${id} can always rest`~~ — **not in reach since 2026-09-24, the
+    //   owner's decision: `closerange_warrior` wires no rest.** A body standing
+    //   in yours is in reach, so the list is the close frame's; what still
+    //   always exists is the forced rest at zero stamina.
+    assert.ok(!types.includes(Ss2ActionType.REST), `${id} is in reach, where no rest is offered`);
     // At fightdistance 0 the other body is inside every reach, so the melee
     // verbs are on offer — and the close frame wires the retreat only.
     assert.ok(types.includes(Ss2ActionType.QUICK_ATTACK), `${id} can swing at a body it is standing in`);

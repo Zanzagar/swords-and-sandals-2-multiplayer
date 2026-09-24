@@ -44,6 +44,7 @@ import { removeSs2ArmourCandidate } from "../src/golden/ss2-attack-candidate.js"
 import {
   buildArenaLayout, CommandKind, LabelProvenance, presentResolvedEvents, SS2_STATIC_MAP_BINDINGS
 } from "../src/adapter/index.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 
 const WEAKEN = Ss2ActionType.CAST_WEAKEN_ARMOUR;
 
@@ -538,7 +539,10 @@ function shieldedVictim() {
 }
 
 const swap = (battle, id) => applyAction(battle, { actorId: id, type: Ss2ActionType.SWAP_WEAPONS, targetId: id });
-const rest = (battle, id) => applyAction(battle, { actorId: id, type: Ss2ActionType.REST, targetId: id });
+// ► 120 apart is inside both fighters' reach, where no voluntary rest is offered
+//   since 2026-09-24 (the owner's decision), so this is the FORCED rest; see
+//   `./ss2-rest-anywhere.js`. Only armour is read after it.
+const rest = (battle, id) => restAnywhere(battle, id);
 
 test("a victim HOLDING ITS BOW loses its shield for nothing: `battlevalues` priced it at 0 (+0x3623)", () => {
   const battle = shieldedVictim();

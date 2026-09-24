@@ -79,6 +79,7 @@ import {
   SS2_INVENTORY_EMPTY, SS2_REJUVENATE, SS2_RESOURCE_DEFAULTS, SS2_RESOURCE_NAMES, Ss2ActionType, VANILLA_PHASE_LABEL,
   createSs2TeamRules, ss2Combatant, ss2TeamRules
 } from "../src/team/ss2-rules.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 
 const REJUVENATE = Ss2ActionType.CAST_REJUVINATE;
 
@@ -646,7 +647,8 @@ test("a shield restored with the BOW in hand is worth NOTHING while the bow stay
 test("...and once it SHEATHES, the restored shield is worth its 12 again (+0x4fab)", () => {
   const battle = resumed({ hero: { ...ARCHER }, rngTape: SHIELD_TAPE });
   cast(battle);
-  applyAction(battle, { actorId: "foe", type: Ss2ActionType.REST, targetId: "foe" });
+  // In reach, so the FORCED rest (2026-09-24; see `./ss2-rest-anywhere.js`).
+  restAnywhere(battle, "foe");
   applyAction(battle, { actorId: "hero", type: Ss2ActionType.SWAP_WEAPONS, targetId: "hero" });
   assert.equal(valueOf(battle, "hero", "equipped_weapon"), 1, "the sword is back in hand");
   weakenHero(battle);

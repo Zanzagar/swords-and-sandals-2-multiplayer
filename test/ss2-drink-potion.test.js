@@ -62,6 +62,7 @@ import {
 } from "../src/adapter/index.js";
 import { timelineFor } from "../src/render/timeline.js";
 import { allUnmappedLabels, clipLabelsFor } from "../src/render/clip-labels.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 
 const DRINK = Ss2ActionType.DRINK_POTION;
 const POTION_IDS = [2, 3, 4, 5, 6, 7, 8, 9];
@@ -363,8 +364,9 @@ test("drinking CONSUMES the first slot holding the potion, and the offer goes wi
   assert.equal(heroOf(battle).resources.inventory5.value, 3);
   assert.deepEqual(drinkIds(battle), [3], "the second vial is still there");
 
-  // The foe's turn, then the second vial.
-  applyAction(battle, { actorId: "foe", type: Ss2ActionType.REST, targetId: "foe" });
+  // The foe's turn, then the second vial. In reach, so the forced rest
+  // (2026-09-24; see `./ss2-rest-anywhere.js`).
+  restAnywhere(battle, "foe");
   assert.equal(drink(battle, 3).consumedSlot, "inventory5");
   assert.equal(heroOf(battle).resources.inventory5.value, SS2_INVENTORY_EMPTY);
   assert.deepEqual(drinkIds(battle), [], "and with the last one spent, the offer is gone");
@@ -613,12 +615,17 @@ test("a health potion PRE-EMPTS the teleport, whose health condition is the same
 // drink, on both sides of the gate. `test/ss2-ai-tired-rest.test.js` pins the
 // rest of the order.
 test("a stamina vial REPLACES the tired rest, because the ladder runs after it", () => {
-  const battle = aiDrinker({ inventory: { inventory1: 7 }, staminaleft: 10 });
+  // ► **A DRAWN BOW BEYOND ITS FLOOR SINCE 2026-09-24, and in melee reach until
+  //   then.** A swordsman in reach has no rest for the vial to replace any more
+  //   — the owner's decision, `closerange_warrior` wires none. `longrange_archer`
+  //   is in range by the villain's own test and still offers it below half.
+  const archer = { extra: { secondary_weapon: 61, equipped_weapon: 2 }, foeX: 1000 };
+  const battle = aiDrinker({ ...archer, inventory: { inventory1: 7 }, staminaleft: 10 });
   assert.deepEqual(suggestAction(battle, "hero"), { type: DRINK, targetId: "hero", itemId: 7 });
-  assert.equal(suggestAction(aiDrinker({ inventory: { inventory1: 7 }, staminaleft: 11 }), "hero").itemId, 7);
+  assert.equal(suggestAction(aiDrinker({ ...archer, inventory: { inventory1: 7 }, staminaleft: 11 }), "hero").itemId, 7);
   // The control: the same gladiator without the vial rests at 10, so the drink
   // above is the ladder replacing a rest and not a gate that never fired.
-  assert.equal(suggestAction(aiDrinker({ staminaleft: 10 }), "hero").type, Ss2ActionType.REST);
+  assert.equal(suggestAction(aiDrinker({ ...archer, staminaleft: 10 }), "hero").type, Ss2ActionType.REST);
 });
 
 test("the AI takes no sample to decide, so the build's 90% roll is not reproduced", () => {

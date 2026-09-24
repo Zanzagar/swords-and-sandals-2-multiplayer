@@ -10029,7 +10029,8 @@ export function createSs2TeamRules({
     },
 
     /**
-     * Three melee verbs against every living foe, plus rest.
+     * Three melee verbs against every living foe, plus rest (for a
+     * positioned gladiator, not on a close-range frame — 2026-09-24).
      *
      * One gate, and it is the build's: overlay frame 1 `+0x0d2e` forces
      * `getphase("rest")` at `staminaleft <= 0`, before any player choice, so
@@ -10045,7 +10046,10 @@ export function createSs2TeamRules({
      * `closerange_warrior`, and wires `rest` only on the two long-range frames
      * and only below 50% stamina. (Both halves re-derived 2026-09-10 against
      * the map's own table at `docs/integration/ss2-battle-map.md:223-246`, and
-     * both hold.)
+     * both hold.) **Both are narrowed for a POSITIONED gladiator since**: the
+     * melee verbs by reach and lane, and — 2026-09-24, the owner's decision —
+     * `rest` off both close-range frames. `rest` above half stamina on a
+     * long-range frame is still offered, and is the widening that remains.
      *
      * ► **THE SENTENCE THAT USED TO END THIS PARAGRAPH WAS THE THING STANDING
      *   IN FRONT OF THE WORK, and it does not survive being checked —
@@ -10856,13 +10860,21 @@ export function createSs2TeamRules({
       //   argument the walk arm above makes and `suggestAction` makes twice.
       //   A warrior on the close frame is the one case with no taunt at all.
       //
-      // ► **AND `rest` IS STILL OFFERED UNCONDITIONALLY BELOW, WHICH IS A
-      //   DIVERGENCE THIS ARM DOES NOT INTRODUCE AND DOES NOT FIX.** The build
+      // ► ~~**AND `rest` IS STILL OFFERED UNCONDITIONALLY BELOW, WHICH IS A
+      //   DIVERGENCE THIS ARM DOES NOT INTRODUCE AND DOES NOT FIX.**~~ The build
       //   wires `rest` only on the two longrange frames and only BELOW half
-      //   stamina; here it is always legal. So above half on a longrange frame
-      //   this engine offers both where the build offers one. Changing that
+      //   stamina; ~~here it is always legal~~. So above half on a longrange frame
+      //   this engine offers both where the build offers one. ~~Changing that
       //   moves every bout's option list and the AI's forced-rest gate, so it
-      //   is its own decision and is recorded rather than taken.
+      //   is its own decision and is recorded rather than taken.~~
+      //   **HALF DECIDED, 2026-09-24 (owner, grill Q7): NO REST WHILE A FOE IS
+      //   IN REACH — neither close-range frame offers it, as neither wires
+      //   it.** Taken where `rest` is appended, at the end of this function.
+      //   The OTHER half is still open and still not taken: on a longrange
+      //   frame at or above half stamina this engine offers `rest` beside the
+      //   taunt, where the build's shared slot shows the taunt alone. The
+      //   forced-rest gate was never at stake: it returns `[rest]` at the top
+      //   of this function, before any frame is chosen.
       //
       // ► **AND ONLY AGAINST A FOE IN THE TAUNTER'S OWN RANK, AT ANY DISTANCE
       //   — AUTHORED, the owner's decision of 2026-09-23.** The build has one
@@ -11106,7 +11118,36 @@ export function createSs2TeamRules({
         actions.push({ type: Ss2ActionType.SWAP_WEAPONS, targetId: actorId });
       }
 
-      actions.push(rest);
+      // ► **NO REST WHILE A FOE IS IN REACH — the owner's decision,
+      //   2026-09-24 (grill Q7), matching the build.** Neither close-range
+      //   controller wires `rest` in either facing (`closerange_warrior`,
+      //   overlay frame 13; `closerange_archer`, frame 28 — map §"Buttons
+      //   wired per controller frame", the table and "`rest` is never wired by
+      //   either close-range controller"). So on the close frame the verb is
+      //   simply not offered, to a player or to the AI.
+      //
+      //   - **"Close frame" is `onCloseFrame`, computed once above** for the
+      //     walks, the taunt and the shove — a warrior with a foe in reach in
+      //     his lane, or a drawn bow with the nearest foe inside the floor. A
+      //     second distance test here would be a second chance to disagree.
+      //   - **The FORCED rest is untouched.** At `staminaleft <= 0` this
+      //     function returned `[rest]` at its top (overlay frame 1 `+0x0d2e`,
+      //     the forced chain, which runs before any button is pressed), so a
+      //     gladiator at zero rests in reach exactly as out of it — for
+      //     everyone, per decision (b).
+      //   - **A gladiator with NO position keeps it**, the widening this
+      //     function has always given the position-blind vocabulary (see the
+      //     controller-frame block above): with no `fightdistance` there is no
+      //     frame to read, and a position-blind WARRIOR's `onCloseFrame` is
+      //     `true` only because `anyInReach` starts true. `fixtureReplay` is
+      //     position-blind, so no golden's option list moves.
+      //   - **The build's VILLAIN does rest in range** — its tired rest,
+      //     `staminaleft > 10` inside the in-range test (`DoAction@0x23f835`
+      //     `+0x03e8`, `+0x08b6`). That is the hero-and-villain split the
+      //     owner's standing rule settles: the hero's rule is the player's, and
+      //     applies to everyone. See "THE TIRED REST" in `chooseAiAction`.
+      //   - **The longrange half is NOT taken**: see the taunt block above.
+      if (!(positioned && onCloseFrame)) actions.push(rest);
       return actions;
     },
 
@@ -15359,8 +15400,17 @@ export function createSs2TeamRules({
       //   block; an out-of-range one with no attack on offer leaves it by a
       //   step and never gets here. So the range test below decides only the
       //   cases where an attack IS on offer out of range — the bash frame, or a
-      //   damage spell from across the sands — and a mutation that drops it is
-      //   caught by the bash case alone (`test/ss2-ai-tired-rest.test.js`).
+      //   damage spell from across the sands — ~~and a mutation that drops it is
+      //   caught by the bash case alone (`test/ss2-ai-tired-rest.test.js`)~~.
+      //   **SINCE 2026-09-24 NO MUTATION THAT DROPS IT IS CAUGHT, and none
+      //   can be.** The bash frame offers no rest now, so `restOption` already
+      //   says no there; and across the sands a damage spell is cast either way
+      //   (this arm's `boltOptions[0]`, or the table below, where no swing or
+      //   shot is offered and the spell rows rank in the ladder's own order).
+      //   Measured by dropping it: eleven AI and spell suites (445 tests) green
+      //   and 300 seeded arena bouts identical, bout for bout. KEPT, because it
+      //   is the build's structure and becomes live again the day a close frame
+      //   offers a rest.
       //
       // ► **"IN RANGE" IS READ FROM THE VOCABULARY, and it is an
       //   APPROXIMATION of the build's test, named:**
@@ -15382,6 +15432,21 @@ export function createSs2TeamRules({
       //     units farther (strength 9 on the demo roster: 186 against 200);
       //   - a gladiator with no position is offered every verb, so it is IN
       //     range, exactly as before this change.
+      //
+      // ► **AND SINCE 2026-09-24 A SWORDSMAN IN REACH NEVER GETS HERE WITH A
+      //   REST: the owner's decision (grill Q7), no rest while a foe is in
+      //   reach** — `closerange_warrior` wires none, and where the build's
+      //   hero and villain differ the hero's rule is everyone's. `restOption`
+      //   is `undefined` on the close frame, so this arm is skipped and a tired
+      //   swordsman does what an untired one does: the table below, where a
+      //   damage spell is PRICED against the swings rather than cast first.
+      //   Measured on the arena's host (`demoSide`, seeds 1-25, 1v1 and 3v3,
+      //   plain and every kit, at 937795b): 18 swordsmen's rests in reach, each
+      //   re-asked with the rest struck out, chose a quick attack all 18 times;
+      //   and the forced rest at zero still stops him (8 of the 23 forced rests
+      //   in the same 300 bouts after the change were taken in reach). The arm still
+      //   RESTS in one place: a drawn bow beyond its floor — in range by this
+      //   test, and `longrange_archer` offers the rest below half stamina.
       //
       // ► **WHAT IS OMITTED, NAMED:** the ladder's 90% roll (`+0x056f`), as
       //   everywhere here; and the build's other writes between the rest and
@@ -15706,6 +15771,19 @@ export function createSs2TeamRules({
         if (!option) continue;
         if (best === null || expected[type] > expected[best.type]) best = option;
       }
+      // ► **`restOption` IS `undefined` ON EITHER CLOSE FRAME SINCE 2026-09-24**
+      //   (the owner's decision: no rest while a foe is in reach), so where
+      //   nothing above was priced this is `options[0]` there. Measured on the
+      //   arena's host (`demoSide`, seeds 1-25, 1v1 and 3v3, plain and every
+      //   kit, at 937795b), it reaches that only for a drawn bow CLOSED ON by a
+      //   foe in another rank — the close frame, and no bash, which needs the
+      //   lane: 6 decisions that rested before, re-asked with the rest struck
+      //   out, took the retreat walk twice on the plain roster and, in the
+      //   tricks kit, whichever spell leads the list (gale 1, teleport 2, ghost
+      //   strike 1). **Not a choice this AI makes on purpose.** Taking the
+      //   retreat explicitly — "an archer that gets closed on bashes and backs
+      //   away", as the swap arm above puts it — would be a new AI rule, and is
+      //   left for the owner rather than slipped in here.
       return best ?? restOption ?? options[0];
     }
   });

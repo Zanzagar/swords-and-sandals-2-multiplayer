@@ -63,6 +63,7 @@ import {
   SS2_TAUNT, Ss2ActionType, VANILLA_PHASE_LABEL, createSs2TeamRules, ss2ActiveDamagePair, ss2BattleValues,
   ss2Combatant, ss2PhysicalSize, ss2Reach, ss2TauntValue, ss2TeamRules
 } from "../src/team/ss2-rules.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 
 const COLOSSUS = Ss2ActionType.CAST_COLOSSUS;
 const FAT_KID = Ss2ActionType.CAST_LITTLE_FAT_KID;
@@ -95,8 +96,11 @@ const valueOf = (battle, id, name) => combatantById(battle, id).resources[name]?
 const statOf = (battle, id, stat) => combatantById(battle, id).stats[stat];
 const offersOf = (battle, type, id = "hero") => legalActions(battle, id).filter((option) => option.type === type);
 const cast = (battle, type, actorId = "hero", targetId = actorId) => applyAction(battle, { actorId, type, targetId });
-const rest = (battle, actorId = currentCombatant(battle).id) =>
-  applyAction(battle, { actorId, type: Ss2ActionType.REST, targetId: actorId });
+// ► `staged()` stands the pair 120 apart, inside the 130 these fighters
+//   reach, where no voluntary rest is offered since 2026-09-24 (the owner's
+//   decision: neither close-range frame wires it). So a turn passed there is
+//   the FORCED rest; see `./ss2-rest-anywhere.js`.
+const rest = restAnywhere;
 
 /* ------------------------------------------------------------------ *
  * The vocabulary                                                      *

@@ -139,6 +139,14 @@ function battleOf(heroFields, villainFields, options = {}) {
   });
 }
 
+/**
+ * `battleOf`'s pair 1000 apart rather than 60, for a test that RESTS. In
+ * contact no voluntary rest is offered since 2026-09-24 (the owner's decision:
+ * neither close-range frame wires one), and the forced one empties the stamina
+ * a rest test is measuring.
+ */
+const APART = Object.freeze({ heroX: -500, villainX: 500 });
+
 const strip = (journal) => journal.map(({ label, source, min, max, value }) => ({ label, source, min, max, value }));
 
 /* ------------------------------------------------------------------ */
@@ -715,20 +723,30 @@ test("there is NO affordability gate: the build never refuses an attack for lack
   //   gladiator is `herolevel` 3, the button's own gate (all eight menu
   //   branches, `herolevel < 3` hides it), and the phase has no stamina test:
   //   `staminacost = 3` (`+0x5014`) is spent by `nextphase` and floored.
+  // ► **`rest` LEFT THIS LIST 2026-09-24 — the owner's decision, matching the
+  //   build: `closerange_warrior` wires no rest in either facing.** Nothing was
+  //   withheld for want of stamina; the verb is simply not on this frame. At 1
+  //   stamina it is not forced either — that is `staminaleft <= 0`, above.
   assert.deepEqual(
     options,
-    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "wincrowd", "rest"]
+    ["quick-attack", "normal-attack", "power-attack", "walk-left", "shove", "wincrowd"]
   );
 });
 
-test("every living foe gets all three melee verbs AND a shove, and rest targets the actor", () => {
+test("every living foe gets all three melee verbs AND a shove; in contact there is NO rest, and apart it targets the actor", () => {
   const battle = battleOf({}, {});
   const options = legalActions(battle);
   // Three melee verbs plus `shove`, which `closerange_warrior` wires beside
   // them in both facings (map `:225`-`:226`). Counted per FOE rather than in
   // total, so a verb offered once for a three-foe battle still fails here.
   assert.equal(options.filter((option) => option.targetId === "villain").length, 4);
-  assert.deepEqual(options.at(-1), { type: Ss2ActionType.REST, targetId: "hero" });
+  // ► **NO REST WHILE A FOE IS IN REACH — the owner's decision, 2026-09-24,
+  //   matching the build**: neither close-range controller wires it (map
+  //   §"Buttons wired per controller frame").
+  assert.equal(options.some((option) => option.type === Ss2ActionType.REST), false,
+    "closerange_warrior wires no rest");
+  const apart = legalActions(battleOf({}, {}, { heroX: -500, villainX: 500 }));
+  assert.deepEqual(apart.at(-1), { type: Ss2ActionType.REST, targetId: "hero" });
 });
 
 /* ------------------------------------------------------------------ */
@@ -777,7 +795,9 @@ test("rest gains the negative staminacost, the branch's own bonus, and the per-t
   // `staminaleft += stamina` `+0x521d`, and `nextphase`'s
   // `+= 1 + round(stamina / 3)` `+0x32c9`.
   const stamina = 4;
-  const battle = battleOf({ stamina }, {});
+  // APART since 2026-09-24: in contact the only rest is the forced one, and
+  // this reads what a rest does to a stamina that is not empty.
+  const battle = battleOf({ stamina }, {}, APART);
   const hero = combatantById(battle, "hero");
   hero.resources.staminaleft.value = 10;
   hero.health = 5;
@@ -805,7 +825,7 @@ test("rest gains the negative staminacost, the branch's own bonus, and the per-t
 });
 
 test("rest clamps at staminamax and at maxHealth rather than overshooting", () => {
-  const battle = battleOf({ stamina: 9 }, {});
+  const battle = battleOf({ stamina: 9 }, {}, APART);
   const hero = combatantById(battle, "hero");
   applyAction(battle, { actorId: "hero", type: Ss2ActionType.REST, targetId: "hero" });
   assert.equal(hero.resources.staminaleft.value, hero.resources.staminamax.value);
@@ -1617,15 +1637,25 @@ test("a first-blood outcome is REFUSED, not silently dropped", () => {
 /* The AI: two decisions from the build, one invented                   */
 /* ------------------------------------------------------------------ */
 
-test("the AI rests at or below the ONE stamina gate the bytes actually decode", () => {
+test("in melee reach the AI rests only when FORCED, at zero — the tired gate has no rest there to take", () => {
   // ~~`villainChooseAction` `+0x03e8` gates the whole action-choice block on
   // `staminaleft > 10`, unconditionally.~~ **Corrected 2026-09-22: it gates the
   // IN-RANGE block only** (it sits inside the in-range test at `+0x03d5`), and
-  // the spell ladder that runs after it can replace the rest. This battle
+  // the spell ladder that runs after it can replace the rest. ~~This battle
   // stands at 60, inside melee reach, and carries nothing on the ladder, so the
-  // AI still rests here; `test/ss2-ai-tired-rest.test.js` pins the order and the
+  // AI still rests here~~; `test/ss2-ai-tired-rest.test.js` pins the order and the
   // out-of-range case. That is the only villain stamina gate this rule set
   // applies.
+  //
+  // ► **SINCE 2026-09-24 IT CANNOT REST HERE AT 5 OR 10.** This battle stands
+  //   at 60, inside melee reach — `closerange_warrior`, which wires no rest,
+  //   and the owner decided that the build's hero rule is everyone's: no rest
+  //   while a foe is in reach. The gate is still read; it finds no rest on
+  //   offer and the AI swings. What is left in reach is the FORCED rest at 0
+  //   (overlay frame 1 `+0x0d2e`), which is a legality fact, not the gate. The
+  //   gate's own rests, and the 11 that pins the removed 40% gate below, are
+  //   pinned where a rest IS offered in range — the drawn bow beyond its floor,
+  //   in `test/ss2-ai-tired-rest.test.js`.
   //
   // A `< 40%` rest gate stood here and has been removed. The map places that
   // test on ONE `choices` band arm, and a verifier reading the bytes found the
@@ -1641,10 +1671,19 @@ test("the AI rests at or below the ONE stamina gate the bytes actually decode", 
       "hero",
       legalActions(battle)
     );
-    assert.equal(choice.type, Ss2ActionType.REST, `staminaleft ${staminaleft} (of ${100 + 10 * 10})`);
+    if (staminaleft === 0) {
+      assert.equal(choice.type, Ss2ActionType.REST, "the forced rest, in reach as anywhere");
+    } else {
+      assert.ok(
+        [Ss2ActionType.QUICK_ATTACK, Ss2ActionType.NORMAL_ATTACK, Ss2ActionType.POWER_ATTACK].includes(choice.type),
+        `staminaleft ${staminaleft} (of ${100 + 10 * 10}): in reach a tired AI swings, it has no rest (chose ${choice.type})`
+      );
+    }
   }
-  // Above the gate it attacks, even at 11 of 200 — the removed 40% gate would
-  // have rested here, so this pins the removal rather than merely allowing it.
+  // Above the gate it attacks, even at 11 of 200 — ~~the removed 40% gate would
+  // have rested here, so this pins the removal rather than merely allowing it~~
+  // in reach since 2026-09-24 that no longer discriminates (there is no rest to
+  // take); the removal is pinned on the archer's frame, see above.
   const battle = battleOf({ stamina: 10 }, {});
   reassignController(battle, "red:slot-1", "ai");
   combatantById(battle, "hero").resources.staminaleft.value = 11;
@@ -2401,7 +2440,8 @@ test("the phase-transition heal rounds UP, measured with odd stamina and headroo
   // `+0x51d5`. The neighbouring rest test above uses `stamina 4`, where ceil
   // and floor agree — which is precisely why the mutants lived.
   for (const stamina of [1, 3, 5, 9]) {
-    const battle = battleOf({ stamina }, {});
+    // APART since 2026-09-24, for the rest test's reason above.
+    const battle = battleOf({ stamina }, {}, APART);
     const hero = combatantById(battle, "hero");
     hero.resources.staminaleft.value = 10;
     // Real headroom. Without it `Math.min(..., maxHealth - health)` clamps the

@@ -65,6 +65,7 @@ import {
   SS2_STATIC_MAP_BINDINGS
 } from "../src/adapter/index.js";
 import { applyCommands, emptyScene, timelineFor } from "../src/render/index.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 
 const REGEN = Ss2ActionType.CAST_REGENERATE;
 const BOUNDLESS = Ss2ActionType.CAST_BOUNDLESS_ENERGY;
@@ -155,8 +156,11 @@ function stagedTrios(sides = {}) {
 const counterOf = (battle, id, counter) => combatantById(battle, id).resources[counter]?.value;
 const offersOf = (battle, type, id = "hero") => legalActions(battle, id).filter((option) => option.type === type);
 const cast = (battle, type, actorId = "hero") => applyAction(battle, { actorId, type, targetId: actorId });
-const rest = (battle, actorId = currentCombatant(battle).id) =>
-  applyAction(battle, { actorId, type: Ss2ActionType.REST, targetId: actorId });
+// ► `staged()` stands the pair 120 apart, inside the 130 these fighters
+//   reach, where no voluntary rest is offered since 2026-09-24 (the owner's
+//   decision: neither close-range frame wires it). So a turn passed there is
+//   the FORCED rest; see `./ss2-rest-anywhere.js`.
+const rest = restAnywhere;
 const effectsOn = (battle, id) => lastResolvedAction(battle).effects.filter((effect) => effect.targetId === id);
 const heals = (battle, id) => effectsOn(battle, id)
   .filter((effect) => effect.kind === EffectKind.HEAL).map((effect) => effect.amount);
@@ -549,8 +553,10 @@ test("THE EFFECT APPLIES ONLY TO THE ACTOR: a ticking bystander gains nothing on
 });
 
 test("on its OWN phase a ticking bearer gains exactly round(staminamax / 4) on top of the ordinary transition", () => {
-  const withBuff = staged({ foe: { spell_boundless_energy: 6 } });
-  const control = staged({ foe: { spell_boundless_energy: 0 } });
+  // Staged APART (2026-09-24): this reads the rester's own stamina, and in
+  // reach the only rest is the forced one, which would empty it first.
+  const withBuff = staged({ foe: { spell_boundless_energy: 6 }, heroX: -300, foeX: 300 });
+  const control = staged({ foe: { spell_boundless_energy: 0 }, heroX: -300, foeX: 300 });
   for (const battle of [withBuff, control]) {
     combatantById(battle, "foe").resources.staminaleft.value = 5;
     rest(battle, "hero");

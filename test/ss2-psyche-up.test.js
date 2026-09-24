@@ -55,6 +55,7 @@ import { clipLabelsFor } from "../src/render/clip-labels.js";
 import { clipSequenceFor } from "../src/render/clip-sequences.js";
 import { animationFor, figurePackFrom } from "../src/render/extracted-figure.js";
 import { timelineFor } from "../src/render/index.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 
 /**
  * The extracted pack, or null on a machine that has not run the extractor.
@@ -122,13 +123,17 @@ function duel({ seed = 1, gap = 20, hero = {}, villain = {} } = {}) {
   });
 }
 
+// ► **EVERY REST HERE IS TAKEN TOE TO TOE, SO IT IS THE FORCED ONE (2026-09-24).**
+//   `duel()` stands the pair 20 apart, and neither close-range frame offers a
+//   voluntary rest since the owner's decision; see `./ss2-rest-anywhere.js`.
+//   The counter these tests read is the hero's, and no rest's stamina reaches it.
 function take(battle, actorId, type, targetId = actorId) {
   for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== actorId; guard += 1) {
-    const other = currentCombatant(battle);
-    applyAction(battle, { actorId: other.id, type: Ss2ActionType.REST, targetId: other.id });
+    restAnywhere(battle, currentCombatant(battle).id);
   }
   assert.equal(currentCombatant(battle)?.id, actorId, "the turn cursor must have reached the actor under test");
-  applyAction(battle, { actorId, type, targetId });
+  if (type === Ss2ActionType.REST) restAnywhere(battle, actorId);
+  else applyAction(battle, { actorId, type, targetId });
   return battle.lastResolution;
 }
 
@@ -304,8 +309,7 @@ test("DRAWING THE BOW ENDS A CHARGE, and the bow then offers no way to start ano
     "drawing the bow banked the charge, which the build's nextphase does not allow");
 
   for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {
-    const other = currentCombatant(battle);
-    applyAction(battle, { actorId: other.id, type: Ss2ActionType.REST, targetId: other.id });
+    restAnywhere(battle, currentCombatant(battle).id);
   }
   assert.equal(legalActions(battle, "hero").some((option) => option.type === Ss2ActionType.PSYCHE_UP), false,
     "and with the bow drawn there is no button to start a new charge, at herolevel 9 or any other");

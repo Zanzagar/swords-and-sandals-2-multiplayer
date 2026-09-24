@@ -229,7 +229,9 @@ test("each fighter has its own start, as each fighter clip has its own wincrowd_
 });
 
 test("the event carries the clip it plays, and consecutive rounds of wincrowd by one fighter cycle it", () => {
-  const battle = staged();
+  // 500 apart, so the foe can pass its turn with a rest: in reach no voluntary
+  // rest is offered since 2026-09-24 (the owner's decision).
+  const battle = staged({ gap: 500 });
   applyAction(battle, { actorId: "hero", type: WINCROWD, targetId: "hero" });
   const first = lastResolvedAction(battle).events.find((entry) => entry.type === WINCROWD);
   assert.deepEqual(

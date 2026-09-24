@@ -170,6 +170,12 @@ and probe warning are both WITHDRAWN** — see the two entries below.)*
     The rule exposed an AI chase to the arena wall (the walk arm stepped at the
     nearest foe in ANY rank), fixed in the same commit: with a foe in its own
     rank the AI walks at that one.
+  - **ONE MORE, 2026-09-24 (grill Q7): NO REST WHILE A FOE IS IN REACH, matching
+    the build** — neither close-range controller wires `rest`, so `legalActions`
+    withholds it on the close frame for everyone; the zero-stamina forced rest
+    still applies in reach, and a position-blind gladiator keeps it. **Still
+    open:** at or above half stamina on a long-range frame the engine offers
+    `rest` beside the taunt, where the build's shared slot shows the taunt alone.
 
 ► **THE FIRST SPELL VERBS ARE BUILT, AND A `null` IN THE CANDIDATE TABLE WAS A
   SCHEDULED FALSE DIVERGENCE (2026-09-20).** `cast_lightning_bolt` and

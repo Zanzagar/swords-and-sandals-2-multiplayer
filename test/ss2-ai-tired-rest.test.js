@@ -42,6 +42,25 @@
  * (`longrange_archer`). A drawn bow closed on is offered only `bash_attack`
  * (`closerange_archer`), which is the build's `equipped_weapon == 2 &&
  * fightdistance < 200` — OUT of range.
+ *
+ * ## AND SINCE 2026-09-24 A MELEE FIGHTER IN RANGE HAS NO REST TO TAKE
+ *
+ * The owner decided (grill Q7) that nobody rests while a foe is in reach,
+ * matching the build: neither close-range controller wires `rest` (battle map
+ * §"Buttons wired per controller frame"). That is the HERO's controller; the
+ * build's VILLAIN rests in range, by the gate above — and the owner's standing
+ * rule is that where the two differ, the hero's rule is everyone's. So:
+ *
+ * - **in melee reach the gate is read and finds no rest on offer**: the arm
+ *   is skipped, and a tired swordsman does what an untired one does — the
+ *   swing table, with any damage spell priced against the swings rather than
+ *   cast first. What stops him is the FORCED rest at zero, which is a
+ *   legality fact (overlay frame 1 `+0x0d2e`) and not this gate;
+ * - **a drawn bow beyond its floor is the one place the gate still rests**:
+ *   in range by the villain's own test (it is offered a shot), on
+ *   `longrange_archer`, whose shared taunt/rest slot shows the rest below half
+ *   stamina — and 10 or less is always below half, since `staminamax >= 100`.
+ *   The gate's own numbers are pinned there.
  */
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -94,12 +113,38 @@ test("the staging is what the tests say: a swing is on offer at 120 and none at 
   assert.ok(!typesOf(staged({ foeX: OUT_OF_REACH })).includes(Ss2ActionType.QUICK_ATTACK));
 });
 
+/** A drawn bow with the foe beyond its floor: `longrange_archer`, in range, and a rest on offer below half. */
+const ARCHER = Object.freeze({ secondary_weapon: 61, equipped_weapon: 2 });
+
 test("tired IN RANGE with nothing on the ladder, the AI rests — the one gate, where the build has it", () => {
+  // ► **ON THE ARCHER'S FRAME SINCE 2026-09-24, and in melee reach until then**:
+  //   a swordsman in reach has no rest on offer any more (the owner's decision;
+  //   see the header), so the gate is pinned where it can still say yes.
   for (const staminaleft of [1, 5, TIRED]) {
-    assert.deepEqual(choose(staged({ staminaleft })), { type: Ss2ActionType.REST, targetId: "hero" }, `staminaleft ${staminaleft}`);
+    const battle = staged({ hero: ARCHER, foeX: OUT_OF_REACH, staminaleft });
+    assert.ok(typesOf(battle).includes(Ss2ActionType.BOMBARD), "the long-range archer frame, in range");
+    assert.deepEqual(choose(battle), { type: Ss2ActionType.REST, targetId: "hero" }, `staminaleft ${staminaleft}`);
   }
-  // `staminaleft > 10` is strict: at 11 the in-range bands run, and this AI swings.
-  assert.notEqual(choose(staged({ staminaleft: 11 })).type, Ss2ActionType.REST);
+  // `staminaleft > 10` is strict: at 11 the in-range bands run, and this AI
+  // shoots. 11 of 160 is under 7%, so the `< 40%` gate this file's neighbour
+  // records as REMOVED would have rested here: this pins the removal too.
+  const eleven = staged({ hero: ARCHER, foeX: OUT_OF_REACH, staminaleft: 11 });
+  assert.ok(typesOf(eleven).includes(Ss2ActionType.REST), "the rest is on offer at 11, so declining it means something");
+  assert.notEqual(choose(eleven).type, Ss2ActionType.REST);
+});
+
+test("tired in MELEE reach there is no rest to take, so the AI swings until the forced rest at zero", () => {
+  // The owner's decision, 2026-09-24: `closerange_warrior` wires no rest.
+  for (const staminaleft of [1, 5, TIRED]) {
+    const battle = staged({ staminaleft });
+    assert.ok(!typesOf(battle).includes(Ss2ActionType.REST), `no rest on the close frame at ${staminaleft}`);
+    assert.ok(
+      [Ss2ActionType.QUICK_ATTACK, Ss2ActionType.NORMAL_ATTACK, Ss2ActionType.POWER_ATTACK].includes(choose(battle).type),
+      `staminaleft ${staminaleft}: a swing`
+    );
+  }
+  // At zero the forced chain rests him, in reach as anywhere.
+  assert.deepEqual(choose(staged({ staminaleft: 0 })), { type: Ss2ActionType.REST, targetId: "hero" });
 });
 
 test("tired IN RANGE with a stamina vial, the AI DRINKS: arm 12 replaces the rest", () => {
@@ -107,6 +152,11 @@ test("tired IN RANGE with a stamina vial, the AI DRINKS: arm 12 replaces the res
   assert.deepEqual(choose(staged({ hero: { inventory1: 6 } })), { type: Ss2ActionType.DRINK_POTION, targetId: "hero", itemId: 6 });
 });
 
+// ► **IN MELEE REACH THIS IS THE PRICED PATH SINCE 2026-09-24, NOT THE TIRED
+//   ARM**: with no rest on offer the arm is skipped, and the bolt wins the
+//   swing table on its mean (150 lightning, 120 fireball; this gladiator's
+//   best swing prices below 120, which the fireball case itself shows). The
+//   answer, and the ladder's order, are the same.
 test("tired IN RANGE with a bolt, the AI CASTS it, and in the ladder's order", () => {
   assert.deepEqual(choose(staged({ hero: { inventory1: 34 } })), { type: Ss2ActionType.CAST_LIGHTNING_BOLT, targetId: "foe" });
   assert.deepEqual(choose(staged({ hero: { inventory1: 30 } })), { type: Ss2ActionType.CAST_FIREBALL, targetId: "foe" });
@@ -127,12 +177,18 @@ test("tired IN RANGE, every other ladder arm this engine holds replaces the rest
   assert.equal(choose(staged({ hero: { inventory1: 48 }, health: 60 })).type, Ss2ActionType.CAST_TELEPORT);
 });
 
-test("tired IN RANGE, a ladder arm whose gate is SHUT still leaves the rest", () => {
+test("tired IN RANGE, a ladder arm whose gate is SHUT leaves what the gladiator does without it", () => {
   // The regenerate and the teleport at full health, the gale unarmoured: each
   // item is carried and offered, and none of their gates is open.
+  // ► ~~still leaves the rest~~ — **until 2026-09-24 this was a rest; in melee
+  //   reach there is none on offer now** (the owner's decision), so the control
+  //   is the same gladiator carrying nothing: whatever it does, the shut arm
+  //   must not change it.
+  const without = choose(staged());
+  assert.notEqual(without.type, Ss2ActionType.REST, "in melee reach the control swings");
   for (const item of [46, 48, 38]) {
     const battle = staged({ hero: { inventory1: item } });
-    assert.equal(choose(battle).type, Ss2ActionType.REST, `item ${item}`);
+    assert.deepEqual(choose(battle), without, `item ${item}`);
   }
 });
 
@@ -156,6 +212,12 @@ test("tired OUT of range, the AI does NOT rest: it does what it would untired", 
   assert.deepEqual(choose(tired), { type: Ss2ActionType.WALK_RIGHT, targetId: "hero" }, "it closes the distance");
 });
 
+// ► **SINCE 2026-09-24 THIS PASSES FOR A SECOND REASON, and no longer isolates
+//   the range test.** `closerange_archer` offers no rest (the owner's decision),
+//   so the tired arm has nothing to return here whatever it reads. The range
+//   test is now unobservable — dropping it moves nothing, measured; see "THE
+//   TIRED REST" in `chooseAiAction`. Kept as the statement of the build's
+//   reading, which still holds.
 test("a drawn bow CLOSED ON is out of range too — the bash frame is the build's `fightdistance < 200`", () => {
   const tired = staged({ hero: { secondary_weapon: 61, equipped_weapon: 2 } });
   assert.ok(typesOf(tired).includes(Ss2ActionType.BASH_ATTACK), "the close-range archer frame");

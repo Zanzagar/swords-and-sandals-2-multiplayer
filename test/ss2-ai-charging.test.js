@@ -41,6 +41,16 @@ import {
 } from "../src/team/index.js";
 import { SS2_PSYCHE_UP, Ss2ActionType, createSs2TeamRules, ss2Combatant, ss2Reach } from "../src/team/ss2-rules.js";
 import { stanceLabelFor } from "../src/render/stance.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
+
+// ► **EVERY FILLER TURN HERE IS `restAnywhere`, AND UNTIL 2026-09-24 IT WAS
+//   `legal.find(REST) ?? legal[0]`.** Once the owner's decision took `rest`
+//   off both close-range frames, `legal[0]` in reach became a QUICK ATTACK on
+//   the hero — a filler that wounded the gladiator whose charge these tests
+//   read, and reset his counter when it landed. Two tests failed on it ("and
+//   still charged when it is his turn", and the sword-drawn wind-up control);
+//   the others were left passing on a different setup. In reach the rest is
+//   the forced one; see `./ss2-rest-anywhere.js`.
 
 /**
  * The melee and ranged verbs, spelled out here because `ATTACK_BANDS` is
@@ -144,8 +154,7 @@ test("`psyche_up` IS STILL NOT AN ATTACK BAND, and that must survive this arm", 
   assert.ok(close(battle));
   for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {
     const who = currentCombatant(battle);
-    const legal = legalActions(battle);
-    applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
+    restAnywhere(battle, who.id);
   }
   const before = rngJournal(battle).length;
   applyAction(battle, { actorId: "hero", type: Ss2ActionType.PSYCHE_UP, targetId: "villain" });
@@ -181,17 +190,18 @@ test("A READY CHARGE IS TAKEN, because it is the best swing on the table", () =>
   for (let guard = 0; guard < 30 && counterOf("hero") !== SS2_PSYCHE_UP.dischargeAt; guard += 1) {
     const who = currentCombatant(battle);
     if (!who) break;
+    if (who.id !== "hero") {
+      restAnywhere(battle, who.id);
+      continue;
+    }
     const legal = legalActions(battle);
-    const press = who.id === "hero"
-      ? legal.find((o) => o.type === Ss2ActionType.PSYCHE_UP)
-      : legal.find((o) => o.type === Ss2ActionType.REST);
+    const press = legal.find((o) => o.type === Ss2ActionType.PSYCHE_UP);
     applyAction(battle, { actorId: who.id, ...(press ?? legal[0]) });
   }
   assert.equal(counterOf("hero"), SS2_PSYCHE_UP.dischargeAt, "the hero must be fully charged");
   for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {
     const who = currentCombatant(battle);
-    const legal = legalActions(battle);
-    applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
+    restAnywhere(battle, who.id);
   }
   assert.equal(currentCombatant(battle)?.id, "hero");
   assert.equal(counterOf("hero"), SS2_PSYCHE_UP.dischargeAt, "and still charged when it is his turn");
@@ -219,8 +229,7 @@ test("A WOUNDED GLADIATOR FIGHTS RATHER THAN WINDING UP", () => {
     assert.ok(close(battle), "the pair must reach melee or this proves nothing");
     for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {
       const who = currentCombatant(battle);
-      const legal = legalActions(battle);
-      applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
+      restAnywhere(battle, who.id);
     }
     assert.equal(currentCombatant(battle)?.id, "hero");
     if (wounded) wound(battle, "hero");
@@ -315,8 +324,7 @@ function staged({ heroX, foes, counter = SS2_PSYCHE_UP.dischargeAt, hero = {} })
   place();
   for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== "hero"; guard += 1) {
     const who = currentCombatant(battle);
-    const legal = legalActions(battle);
-    applyAction(battle, { actorId: who.id, ...(legal.find((o) => o.type === Ss2ActionType.REST) ?? legal[0]) });
+    restAnywhere(battle, who.id);
     place();
   }
   assert.equal(currentCombatant(battle)?.id, "hero", "the staging must leave it the hero's turn");

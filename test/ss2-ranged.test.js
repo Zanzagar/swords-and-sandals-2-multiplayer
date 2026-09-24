@@ -66,6 +66,7 @@ import { SS2_WEAPON_IDS, ss2WeaponEntry } from "../src/team/ss2-weapon-table.js"
 import { LabelProvenance, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 import { chooseSound } from "../src/render/sound.js";
 import { clipLabelsFor } from "../src/render/clip-labels.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 
 /* ------------------------------------------------------------------ */
 /* Staging                                                             */
@@ -134,11 +135,15 @@ const MELEE = [Ss2ActionType.QUICK_ATTACK, Ss2ActionType.NORMAL_ATTACK, Ss2Actio
  * cursor is inside `combatStateHash`, so a test that bypassed it would be
  * measuring a battle no peer could reproduce. Every foe staged in this file
  * carries enough vitality to absorb the heal a rest hands it.
+ *
+ * ► **IN REACH THE REST IS THE FORCED ONE, since 2026-09-24**: neither
+ *   close-range frame offers a voluntary rest (the owner's decision), so a
+ *   gladiator staged inside reach passes its turn at zero stamina. See
+ *   `./ss2-rest-anywhere.js`; nothing here reads a rester's stamina.
  */
 function take(battle, actorId, type, targetId = actorId) {
   for (let guard = 0; guard < 8 && currentCombatant(battle)?.id !== actorId; guard += 1) {
-    const other = currentCombatant(battle);
-    applyAction(battle, { actorId: other.id, type: Ss2ActionType.REST, targetId: other.id });
+    restAnywhere(battle, currentCombatant(battle).id);
   }
   assert.equal(currentCombatant(battle)?.id, actorId, "the turn cursor must have reached the actor under test");
   applyAction(battle, { actorId, type, targetId });
@@ -466,9 +471,13 @@ test("longrange_archer wires two shots and BOTH walks; closerange_archer wires a
       // `wincrowd` joined 2026-09-23: frame 28 wires it too (`+0x0cf2`,
       // `+0x10fd`, gated `+0x0951`, `+0x0d3a`).
       Ss2ActionType.WINCROWD,
-      Ss2ActionType.SWAP_WEAPONS, Ss2ActionType.REST
+      // ► ~~`Ss2ActionType.REST`~~ — **left 2026-09-24, the owner's decision:
+      //   frame 28 wires no rest in either facing** (the row above), so an
+      //   archer closed on cannot rest either. The long frame's list above
+      //   keeps it.
+      Ss2ActionType.SWAP_WEAPONS
     ],
-    "inside the floor an archer bashes and backs away; it cannot shoot and cannot advance"
+    "inside the floor an archer bashes and backs away; it cannot shoot, cannot advance, and cannot rest"
   );
 
   // ► **AND `closerange_archer` HAS NO STAMINA TEST AT ALL, which is the ONE
@@ -1220,7 +1229,10 @@ test("a blow that knocks the shield off a gladiator HOLDING ITS BOW takes nothin
     Object.assign(combatantById(battle, "hero"), { x: -60, y: 200 });
     Object.assign(combatantById(battle, "foe"), { x: 60, y: 200 });
     assert.equal(currentCombatant(battle).id, "foe", "the victim opens, so its own turn sets the mode");
-    applyAction(battle, { actorId: "foe", type: victimTurn, targetId: "foe" });
+    // In reach, so the control's rest is the FORCED one (2026-09-24; see
+    // `./ss2-rest-anywhere.js`): the victim's own stamina, which nothing here reads.
+    if (victimTurn === Ss2ActionType.REST) restAnywhere(battle, "foe");
+    else applyAction(battle, { actorId: "foe", type: victimTurn, targetId: "foe" });
     applyAction(battle, { actorId: "hero", type: Ss2ActionType.NORMAL_ATTACK, targetId: "foe" });
     assert.equal(battle.rng.remainingCount, 0, "every scripted sample is consumed");
     const { resources } = combatantById(battle, "foe");

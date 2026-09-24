@@ -44,6 +44,7 @@ import {
   createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS, vanillaWritesForResolvedAction, WriteSource, WriteTarget
 } from "../src/adapter/index.js";
 import { demoSide } from "../tools/arena/roster.js";
+import { restAnywhere } from "./ss2-rest-anywhere.js";
 import {
   SS2_CROWD_ACTION, SS2_CROWD_INTEREST, SS2_EMPERORS_GIFT, ss2CrowdInterestOf, ss2CrowdStep, ss2TeamVictoryPurses,
   ss2VictoryPurse
@@ -190,7 +191,8 @@ test("a battle where somebody has no herolevel has no crowd, rather than an inve
 
 test("a completed phase adds its delta and nextphase clamps to 1..100, floor first", () => {
   // Two level-1s open at 2. Rest adds -2 (+0x5150): 0, and `< 1` sets 1 (+0x356e).
-  const low = duel({ hero: { herolevel: 1 }, foe: { herolevel: 1, ...tough } });
+  // 500 apart: in reach no voluntary rest is offered since 2026-09-24.
+  const low = duel({ hero: { herolevel: 1 }, foe: { herolevel: 1, ...tough }, gap: 500 });
   assert.equal(crowd(low), 2);
   act(low, Ss2ActionType.REST, "hero");
   assert.equal(crowd(low), 1);
@@ -202,7 +204,8 @@ test("a completed phase adds its delta and nextphase clamps to 1..100, floor fir
 });
 
 test("the step is ONE battle-resource effect, after the buffs and before the psyche reset, as nextphase orders it", () => {
-  const battle = duel({ hero: { psyche_up: 2, herolevel: 9 }, foe: tough });
+  // 500 apart: in reach no voluntary rest is offered since 2026-09-24.
+  const battle = duel({ hero: { psyche_up: 2, herolevel: 9 }, foe: tough, gap: 500 });
   act(battle, Ss2ActionType.REST, "hero");
   const effects = lastResolvedAction(battle).effects;
   const crowdAt = effects.findIndex((effect) => effect.kind === "battle-resource");
@@ -490,13 +493,15 @@ test("the team purse (AUTHORED base): each winner is paid on an equal share of t
 test("a settled SS2 bout carries the crowd its purse is paid on", () => {
   const battle = duel({ hero: { herolevel: 6 }, foe: { herolevel: 4 } });
   assert.equal(crowd(battle), 10);
-  act(battle, Ss2ActionType.REST, "hero"); // -2
-  act(battle, Ss2ActionType.REST, "foe", "foe"); // -2
+  // In reach, so every rest here is the FORCED one (2026-09-24; see
+  // `./ss2-rest-anywhere.js`) — the same -2 to the crowd, which is all this reads.
+  restAnywhere(battle, "hero"); // -2
+  restAnywhere(battle, "foe"); // -2
   combatantById(battle, "foe").health = 1;
   for (let seed = 0; !battle.result && seed < 50; seed += 1) {
     const actorId = currentCombatant(battle).id;
     if (actorId === "hero") act(battle, Ss2ActionType.POWER_ATTACK);
-    else act(battle, Ss2ActionType.REST, "foe", "foe");
+    else restAnywhere(battle, "foe");
   }
   assert.equal(battle.result?.winnerTeamId, "red");
   const wire = toTeamWireState(battle);
