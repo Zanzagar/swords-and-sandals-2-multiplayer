@@ -82,6 +82,22 @@ test("the SINGLETON is selected by the shipped value, never by zero", () => {
   assert.throws(() => selectRules(0, { shippedStride: 0, singleton }), ArenaShellError);
 });
 
+test("an OBSERVER always gets a fresh rule set — at the shipped stride too — and is handed to it", () => {
+  // The fight pop-ups' ledger (src/render/popups.js): the singleton carries no
+  // observer, so a request for one can never be answered with it.
+  const singleton = { id: "the-shipped-one" };
+  const create = (options) => ({ id: `fresh-${options.rankStride}`, options });
+  const observer = () => {};
+  const shipped = selectRules(97, { shippedStride: 97, singleton, create, observer });
+  assert.notEqual(shipped, singleton);
+  assert.equal(shipped.options.observer, observer);
+  assert.equal(shipped.options.rankStride, 97, "the shipped stride, stated rather than defaulted");
+  assert.equal(selectRules(0, { shippedStride: 97, singleton, create, observer }).options.rankStride, 0);
+  assert.equal(selectRules(97, { shippedStride: 97, singleton, create, observer: null }), singleton,
+    "no observer is the old rule exactly");
+  assert.throws(() => selectRules(97, { shippedStride: 97, singleton, create, observer: "log" }), ArenaShellError);
+});
+
 test("finished voices are reclaimed before a live one is ever stopped", () => {
   // Stopping a playing sound to make room is audible; reclaiming a dead one is
   // not. So the dead go first, always.

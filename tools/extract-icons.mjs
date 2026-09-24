@@ -267,32 +267,73 @@ export const FACE_MEMBERS = Object.freeze(["eyes", "mouth"]);
  *   straight past them into the child:
  *
  *   ```text
- *     +0x1603  damage_icon.damage_splat.gotoAndStop(1)   after "normal"
+ *     +0x1603  damage_icon.damage_splat.gotoAndStop(1)   always, first
  *     +0x163b  damage_icon.damage_splat.gotoAndStop(3)   under "critical"
  *     +0x1698  damage_icon.damage_splat.gotoAndStop(5)   under "grievous"
+ *     +0x1824  damage_icon.damage_splat.gotoAndStop(2)   armour broken (< 0)
+ *     +0x18c2  damage_icon.damage_splat.gotoAndStop(2)   hit points reached,
+ *                                                       splat still on 1
  *   ```
  *
- *   Frames 2 and 4 are never asked for by name. They are still extracted —
+ *   ~~Frames 2 and 4 are never asked for by name. They are still extracted —
  *   **a frame nothing indexes is a finding, not a reason to drop it** — and the
  *   three that ARE indexed are named here so a renderer does not have to guess
- *   which of five splats a critical hit wants.
+ *   which of five splats a critical hit wants.~~
  *
- *   `bonus_icon`'s child has eight frames and `addstats_icon`'s has seven, and
+ *   ► **CORRECTED 2026-09-23 (the fight pop-ups; re-derived from the overlay
+ *     frame-52 body 0x240c85 disassembly): FRAME 2 IS ASKED FOR, TWICE, AND
+ *     FRAME 1 DOES NOT MEAN "normal".** The two `gotoAndStop(2)` rows above
+ *     were missed. `+0x1603` is unconditional, and the armour block after it
+ *     turns it 2 whenever the blow reaches the hit points — broken armour
+ *     (`+0x1824`, which also OVERWRITES a grievous 5), or `armourclass <= 0`
+ *     (`+0x1864`, then `+0x18a1`/`+0x18c2`). So frame 1 survives ONLY for a
+ *     normal or taunt blow the armour absorbed whole, and an ordinary hit that
+ *     hurts shows 2. **Frame 4 (TAUNT) is the one never selected**: a taunt's
+ *     method is rewritten to "normal" at `+0x1673` before any frame is chosen,
+ *     and the five rows above are every `gotoAndStop` on 815 in the file.
+ *     The whole rule is `damageSplatFrame` in `src/render/popups.js`. Packs
+ *     extracted before this correction carry the old `meaning`; nothing reads
+ *     it to decide a frame.
+ *
+ *   ~~`bonus_icon`'s child has eight frames and `addstats_icon`'s has seven, and
  *   this session found no `gotoAndStop` selecting either. That gap is recorded
- *   as `null` rather than filled in with a plausible order.
+ *   as `null` rather than filled in with a plausible order.~~
+ *
+ *   ► **ALSO CORRECTED 2026-09-23: `bonus_icon`'s child IS selected**, by
+ *     `magic_damage_character`'s own `damage_splat.gotoAndStop(bonus_frame)`
+ *     (`+0x1381`) and by the eight potion arms (`+0x5888`..`+0x5d20`), and its
+ *     frames are named by their own static texts 124..150. The callers pass 8
+ *     for the bolts (`+0x858f`), 4 for the fireballs and molten death
+ *     (`+0x91a2`, `+0x88c1`), 5/6/7/4 for the frozen/lifesteal/poisoned/
+ *     burning ticks (`+0x5335`, `+0x5469`, `+0x559d`, `+0x56d1`) and 1/2/3 for
+ *     the potions. `addstats_icon`'s child stays `null`: its parent is never
+ *     attached.
  */
 export const NESTED_MEANINGS = Object.freeze({
   815: Object.freeze({
     instance: "damage_splat",
     parent: 817,
-    frames: Object.freeze({ 1: "normal", 3: "critical", 5: "grievous" }),
-    source: "damagecharacter, sprite 862 frame 52, +0x1603 / +0x163b / +0x1698"
+    // ~~{ 1: "normal", 3: "critical", 5: "grievous" }~~ — corrected 2026-09-23, see above.
+    frames: Object.freeze({
+      1: "absorbed: a normal or taunt blow the armour took whole",
+      2: "hurt: a normal or taunt blow reached the hit points, or a grievous one broke the armour",
+      3: "critical",
+      5: "grievous, armour not broken: absorbed, exactly spent, or none"
+    }),
+    unreachable: Object.freeze([4]),
+    source: "damagecharacter, sprite 862 frame 52, +0x1603 / +0x163b / +0x1698 / +0x1824 / +0x18c2; " +
+      "taunt rewritten to normal at +0x1673"
   }),
   151: Object.freeze({
     instance: "damage_splat",
     parent: 153,
-    frames: null,
-    source: "no gotoAndStop on this child was found; eight frames, meanings unknown"
+    // ~~null, "no gotoAndStop on this child was found"~~ — corrected 2026-09-23, see above.
+    frames: Object.freeze({
+      1: "HEALTH", 2: "STAMINA", 3: "ARMOUR", 4: "BURNING",
+      5: "FROZEN", 6: "WRAITH", 7: "POISONED", 8: "LIGHTNING"
+    }),
+    source: "magic_damage_character +0x1381 (bonus_frame) and the potion arms +0x5888..+0x5d20; " +
+      "names from static texts 124..150"
   }),
   161: Object.freeze({
     instance: "damage_splat",
@@ -362,7 +403,9 @@ export const ICON_CLIPS = Object.freeze([
   Object.freeze({
     character: 817,
     linkage: "damage_icon",
-    indexedBy: "frame, as a 30-frame pop; the SEVERITY is damage_splat's own frame 1/3/5",
+    // ~~"the SEVERITY is damage_splat's own frame 1/3/5"~~ — frames 1, 2, 3 and 5; 4 is never
+    // selected (corrected 2026-09-23, see NESTED_MEANINGS).
+    indexedBy: "frame, as a 30-frame pop; the SEVERITY is damage_splat's own frame 1/2/3/5",
     attachedBy: "damagecharacter, sprite 862 frame 52 +0x15ea, depth 25000",
     reader: "the damage splat over a struck gladiator"
   }),

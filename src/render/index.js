@@ -69,6 +69,11 @@
  *   states this surface's animation-timeout policy — part 4 of the
  *   acknowledgement seam, which `src/adapter/action-gate.js` deliberately left
  *   to whoever actually has an animation surface.
+ * - `popups.js` is the build's own FIGHT POP-UPS — the damage number, the
+ *   spell/status/potion callout and BLOCK — decided from a resolved action's
+ *   events (and the rule set's unhashed observer, for the one number the
+ *   events do not carry), replaced per fighter by the build's own depths, and
+ *   drawn from the player's icon and text packs.
  */
 
 export * from "./scene.js";
@@ -92,3 +97,4 @@ export * from "./screen.js";
 export * from "./screen-text.js";
 export * from "./clip-effects.js";
 export * from "./arena-shell.js";
+export * from "./popups.js";

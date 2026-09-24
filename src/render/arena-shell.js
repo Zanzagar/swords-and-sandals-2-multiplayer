@@ -76,9 +76,23 @@ export function rankStrideFrom(params, shippedStride) {
  * The singleton matters because it is the object the goldens and the test suite
  * run against: using it when the request IS the default means the shipped arena
  * is the shipped rule set rather than a lookalike built from the same defaults.
+ *
+ * ► **AN `observer` ALWAYS GETS A FRESH RULE SET (2026-09-23, the fight
+ *   pop-ups).** The singleton carries none, and the observer is the only way
+ *   the gross physical number the build displays reaches a surface without
+ *   entering the hashed event log (`src/render/popups.js`, header). It is
+ *   `createSs2TeamRules`'s own documented option — "not in the rule-set id and
+ *   not in the projection" — so the fresh set has the singleton's id,
+ *   descriptor and stride, and differs from it ONLY by the diagnostic sink.
+ *   That is a departure from "the shipped arena is the singleton", made on
+ *   purpose and named here.
  */
-export function selectRules(rankStride, { shippedStride, singleton, create }) {
+export function selectRules(rankStride, { shippedStride, singleton, create, observer = null }) {
   if (typeof create !== "function") throw new ArenaShellError("selectRules needs a `create` factory.");
+  if (observer !== null && typeof observer !== "function") {
+    throw new ArenaShellError("selectRules' `observer` must be a function or null.");
+  }
+  if (observer !== null) return create({ rankStride, observer });
   if (rankStride === shippedStride) return singleton;
   return create({ rankStride });
 }

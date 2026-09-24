@@ -897,13 +897,21 @@ test("the eyes carry an offset in the head's space and the mouth does not", () =
 });
 
 test("a nested clip's declared meaning names the frames the BUILD indexes, and no others", () => {
-  // Frames 2 and 4 of `damage_splat` are never asked for by name. They are
-  // still extracted; what is refused is inventing a meaning for them.
-  assert.deepEqual(NESTED_MEANINGS[815].frames, { 1: "normal", 3: "critical", 5: "grievous" });
+  // ~~Frames 2 and 4 of `damage_splat` are never asked for by name.~~
+  // CORRECTED 2026-09-23: frame 2 IS asked for (+0x1824, +0x18c2) and frame 1
+  // survives only for a blow the armour took whole; frame 4 (TAUNT) is the one
+  // never selected (taunt is rewritten to normal at +0x1673). This test pinned
+  // the wrong table for as long as the table was wrong.
+  assert.deepEqual(Object.keys(NESTED_MEANINGS[815].frames), ["1", "2", "3", "5"]);
+  assert.match(NESTED_MEANINGS[815].frames[1], /absorbed/);
+  assert.equal(NESTED_MEANINGS[815].frames[3], "critical");
+  assert.deepEqual(NESTED_MEANINGS[815].unreachable, [4]);
   assert.equal(NESTED_MEANINGS[815].parent, 817);
-  assert.equal(NESTED_MEANINGS[151].frames, null,
-    "eight frames whose selector was not found is a GAP, not an order to guess at");
-  assert.equal(NESTED_MEANINGS[161].frames, null);
+  // ~~151: null, "no gotoAndStop found"~~ — `magic_damage_character` +0x1381
+  // selects it by `bonus_frame`, and the potion arms by 1/2/3.
+  assert.deepEqual(Object.values(NESTED_MEANINGS[151].frames),
+    ["HEALTH", "STAMINA", "ARMOUR", "BURNING", "FROZEN", "WRAITH", "POISONED", "LIGHTNING"]);
+  assert.equal(NESTED_MEANINGS[161].frames, null, "addstats_icon is never attached, so its child has no reader");
 });
 
 /* ------------------------------------------------------------------ */

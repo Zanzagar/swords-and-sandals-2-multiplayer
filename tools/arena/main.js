@@ -127,7 +127,15 @@ import {
   spawnDrops,
   dropAt,
   SS2_DROP,
-  PROJECTILE_FRAME_MS
+  PROJECTILE_FRAME_MS,
+  createStrikeLedger,
+  popupsForEvents,
+  livePopupsFor,
+  prunePopups,
+  popupAnchorFor,
+  popupPackFrom,
+  popupOpsFor,
+  popupFallbackOpsFor
 } from "/src/render/index.js";
 import { citationFor } from "/src/adapter/vanilla-fields.js";
 import {
@@ -304,16 +312,28 @@ const championsBySlot = new Map(
 );
 const matchLabel = `${teams[0].members.length}v${teams[1].members.length}`;
 
+/**
+ * What the rule set's diagnostic `observer` saw, for the fight pop-ups: the
+ * GROSS number the build shows on a hit (`damagecharacter` +0x1719/+0x1733),
+ * which the hashed event log does not carry and cannot without moving every
+ * pinned hash. See `src/render/popups.js`. Emptied before every submit and
+ * read once per step in `spawnPopups`.
+ */
+const strikeLedger = createStrikeLedger();
+
 let host;
 try {
   host = createVanillaBattleHost({
     teams,
-    // The module singleton when the request IS the shipped stride, so the shipped
-    // arena is the shipped rule set and not a lookalike built with the defaults.
+    // ~~The module singleton when the request IS the shipped stride~~ — a
+    // FRESH rule set with the pop-ups' observer, always (2026-09-23): the same
+    // id, descriptor and stride as the singleton, plus the diagnostic sink.
+    // `selectRules` says why.
     rules: selectRules(rankStride, {
       shippedStride: SS2_ARENA.rankStride,
       singleton: ss2TeamRules,
-      create: createSs2TeamRules
+      create: createSs2TeamRules,
+      observer: strikeLedger.observe
     }),
     bindings: SS2_STATIC_MAP_BINDINGS,
     seed,
@@ -509,6 +529,20 @@ fetch("/assets/props/clip-effects.json")
  *   arena's, like the arrows, and they are pruned by their own 25-frame life.
  */
 let drops = [];
+
+/**
+ * The fight pop-ups on screen or waiting to be — the damage number, the
+ * spell/status/potion callout and BLOCK — each `{ popup, startedAt, maxscale }`.
+ *
+ * ► **HELD AGAINST THE FIGHTER, UNLIKE THE DROPS**: the build attaches every one
+ *   to the struck fighter's own clip at a fixed depth (`damagecharacter`
+ *   +0x15ea at 25000, `magic_damage_character` +0x1313 and `defender_blocked`
+ *   +0x21ce at 25005, the potions at 25001), so it rides with him and a new one
+ *   at the same depth REPLACES the old. `livePopupsFor` applies that rule;
+ *   `renderStage` draws each fighter's right after his body. Every decision is
+ *   `src/render/popups.js`'s.
+ */
+let popups = [];
 
 /**
  * WHAT THE RIG'S OWN PACK SAYS ABOUT EFFECT GROUPS, counted from the raw
@@ -981,6 +1015,10 @@ function beginStep(step) {
   }
   for (const [combatantId, entry] of started) playing.set(combatantId, entry);
 
+  // The fight pop-ups, each starting WITH its fighter's reaction clip — the
+  // build attaches it in the same action (`defender_hurt` +0x211e/+0x2120).
+  spawnPopups(step, started, delays);
+
   // A sound per animation that STARTS, keyed on the same family AND THE SAME
   // LABEL the schedule was chosen by, so the two can never disagree about what
   // is playing. **The label was missing until 2026-09-13** and the figure and
@@ -1011,6 +1049,32 @@ function beginStep(step) {
 }
 
 /**
+ * The pop-ups one step shows, clocked. WHICH and WITH WHAT is
+ * `popupsForEvents`; this reads the step's own events off the wire (every event
+ * at or after its action boundary is this action's — it was just applied) and
+ * the ledger the rule set's observer filled during `host.submit`.
+ *
+ * WHEN: a pop-up starts with its fighter's clip from this batch (a fireball's
+ * victim at impact, via `reactionDelaysFor`), a molten-death rock's on its own
+ * landing frame. `maxscale` is the camera's TARGET zoom now, because the build
+ * scales the icon once, at attach (+0x16cf).
+ */
+function spawnPopups(step, started, delays) {
+  const strikes = strikeLedger.take();
+  const boundary = step.actionBoundary;
+  if (!Number.isFinite(boundary)) return;
+  const events = host.wire().events.filter((event) => event.sequence >= boundary);
+  const now = performance.now();
+  for (const popup of popupsForEvents(events, { strikes, seed: boundary })) {
+    const clipStart = started.get(popup.combatantId)?.startedAt;
+    const startedAt = Number.isFinite(popup.delayFrames)
+      ? now + popup.delayFrames * PROJECTILE_FRAME_MS
+      : (Number.isFinite(clipStart) ? clipStart : now + (delays.get(popup.combatantId) ?? 0));
+    popups.push({ popup, startedAt, maxscale: camera?.maxscale ?? null });
+  }
+}
+
+/**
  * Reports or abandons any token whose timelines have finished.
  *
  * The DECISION is `animationCursor` in `src/render/cursor.js`, under the suite;
@@ -1035,6 +1099,10 @@ function drainFinishedAnimations(now) {
   // A drop lives 25 of the build's frames and is REMOVED rather than fading
   // (`+0x046a`). Pruned by the same comparison that decides whether to draw it.
   drops = drops.filter((spray) => (now - spray.startedAt) / PROJECTILE_FRAME_MS <= SS2_DROP.lifeFrames);
+  // A pop-up goes at its removeMovieClip frame, or the moment a later one takes
+  // its depth on the same fighter. It holds no gate: nothing in the build
+  // waits on one (the only read is +0x18a1, inside `damagecharacter`).
+  popups = prunePopups(popups, now);
   // Only a fireball's FLIGHT holds the gate — `bullet_in_air` is cleared at
   // impact (`+0x91f5`) — and its victim's reaction, started then, holds it on.
   const cursor = animationCursor(pendingTokens, playing, now, {
@@ -1826,12 +1894,21 @@ function loadBitmaps(manifest) {
  */
 let facePack = null;
 const heldFace = new Map();
+/**
+ * The pop-ups' art — `damage_icon`, `bonus_icon`, `defend_icon` and their
+ * splats — from the SAME `icons.json` the face comes from. Null until it
+ * loads, and then the pop-ups draw their authored fallback: the plain number
+ * (or BLOCK) at the same place and for the same frames.
+ */
+let popupPack = null;
 
 fetch("/assets/icons/icons.json")
   .then((response) => (response.ok ? response.json() : null))
   .then((data) => {
     facePack = facePackFrom(data);
     if (facePack) log("face: eyes and mouth from your own install.");
+    popupPack = popupPackFrom(data);
+    if (popupPack) log("pop-ups: the damage, spell and BLOCK art from your own install.");
   })
   .catch(() => { /* no icons extracted; the gladiator keeps his blank head */ });
 
@@ -3661,6 +3738,9 @@ function renderStage(view, fit, now) {
   }
 
   const byId = combatantsById();
+  // Which pop-ups each fighter is showing this frame, by the build's
+  // replace-by-depth rule; drawn with him, below.
+  const livePopups = livePopupsFor(popups, now);
 
   // ► **PAINT ORDER FOLLOWS THE DEPTH BEING DRAWN, NOT THE ONE BEING HELD
   //   (2026-09-12).** `scene.drawOrder` sorts on the actor's `y`, which the
@@ -3949,6 +4029,13 @@ function renderStage(view, fit, now) {
       });
     }
 
+    // ► **HIS POP-UPS, RIGHT AFTER HIS BODY**, because the build attaches them
+    //   to HIS clip (depths 25000/25001/25005): over his own limbs, under any
+    //   fighter painted after him. Anchored where he is DRAWN this frame, at
+    //   his own size — the same `clipScale` the blood uses — so a pop-up rides
+    //   a knockback and shrinks with a rear rank.
+    drawPopups(livePopups.get(combatantId), view, origin);
+
     // The name plate. It is the combatant's OWN name, never an item name.
     //
     // ► **IT USED TO BE DRAWN AT `actor.x`/`actor.y` WHILE THE BODY WAS DRAWN
@@ -4016,6 +4103,60 @@ function renderStage(view, fit, now) {
   // printed mid-frame would report a third of it.
   reportGroupPaint();
   reportFigureGroups();
+}
+
+/**
+ * One fighter's live pop-ups, in depth order. The anchor, the frame, the ops
+ * and the fallback are all `src/render/popups.js`'s; this places and paints.
+ */
+function drawPopups(list, view, origin) {
+  if (!list || list.length === 0) return;
+  // Arena units per fighter-clip pixel, his size and rank included — the
+  // blood's factor, because both are children of his clip.
+  const clipScale = (clipToArenaScale(figurePack) ?? 1) * (origin.size ?? 1);
+  for (const { entry, frame } of list) {
+    const anchor = popupAnchorFor(entry.popup, { origin, clipScale, maxscale: entry.maxscale });
+    const ops = popupOpsFor(popupPack, textPack, entry.popup, frame, { scale: anchor.size * view.scale })
+      ?? popupFallbackOpsFor(entry.popup, frame);
+    paintPopup(ops, view, anchor);
+  }
+}
+
+/**
+ * A pop-up's ops, in the icon's own pixels, placed like a prop (no flip — the
+ * build un-mirrors it in `check_flipping`). Paths go through the group
+ * compositor so the number's glow is drawn; `text` ops are the fallback's
+ * words and numbers, in this page's own font.
+ */
+function paintPopup(ops, view, anchor) {
+  if (!ops || ops.length === 0) return;
+  const paths = ops.filter((op) => op.kind === "path");
+  const words = ops.filter((op) => op.kind === "text");
+  const m = propOriginMatrix(view, anchor);
+  context.save();
+  context.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+  try {
+    if (paths.length > 0) {
+      paintGroupRuns(paths, { translationDivisor: TWIPS_PER_PIXEL, filtersScaled: true }, paintLayerOperation);
+    }
+    for (const word of words) {
+      context.globalAlpha = word.alpha ?? 1;
+      context.font = `bold ${word.size}px ui-sans-serif, system-ui, sans-serif`;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.lineJoin = "round";
+      if (word.outline) {
+        context.strokeStyle = word.outline;
+        context.lineWidth = Math.max(1, word.size / 7);
+        context.strokeText(word.text, word.x, word.y);
+      }
+      context.fillStyle = word.fill ?? "#ffffff";
+      context.fillText(word.text, word.x, word.y);
+    }
+  } finally {
+    context.restore();
+  }
+  context.globalAlpha = 1;
 }
 
 /**
@@ -4583,6 +4724,8 @@ function renderControls() {
       button.disabled = !ready.ready;
       button.addEventListener("click", () => {
         try {
+          // Anything a refused submit left in the ledger is not this action's.
+          strikeLedger.take();
           const step = host.submit({ ...action, actorId });
           log(`${byId.get(actorId)?.name ?? actorId}: ${action.type}${target ? ` → ${target.name}` : ""}`);
           beginStep(step);
@@ -4615,9 +4758,13 @@ function renderProvenance() {
     wardrobePieces
   })];
   const lines = [
-    ["The arithmetic", "runs the same `ss2TeamRules` the test suite runs — map-derived from a licensed build, never observed in it."],
+    ["The arithmetic", "runs the same SS2 rule set the test suite runs (a fresh instance whose only addition is the " +
+      "pop-ups' diagnostic observer) — map-derived from a licensed build, never observed in it."],
     figureLine,
     ["The animation timing", "is authored. No capture has ever recorded a clip label or a frame duration."],
+    ["The fight pop-ups", "are the build's own damage, spell and BLOCK callouts, drawn from your install's icons when " +
+      "extracted and as a plain number when not. A hit shows the build's GROSS roll, before armour — read off the " +
+      "rule set's unhashed observer, because the event log does not carry it."],
     ["Slot 0 of each side", "reuses the battle map's own instance names, depths and positions. Everything past it is authored mod surface no capture can settle."]
   ];
   if (championsBySlot.size > 0) {
@@ -4668,6 +4815,7 @@ function spectateStep() {
   //   survives and the bout actually happens.
   const action = host.suggestAction(actorId);
   try {
+    strikeLedger.take();
     const step = host.submit({ ...action, actorId });
     log(`${host.combatant(actorId)?.name ?? actorId}: ${action.type}`);
     beginStep(step);
