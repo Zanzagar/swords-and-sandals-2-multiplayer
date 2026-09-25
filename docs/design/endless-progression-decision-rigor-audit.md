@@ -3073,9 +3073,9 @@ root succession nor simultaneous multi-root support, exact catalog breadth,
 addressability, claim/reuse, payoff, persistence, or implementation.
 
 A3A moves from `OWNER-OPEN` to `DIR-SELECTED`, and conditional A3B moves from
-`SCREEN` to `OWNER-OPEN`. The fifty-six-slot register now has 28 `SCREEN`, 1
+`SCREEN` to `OWNER-OPEN`. The then-current fifty-six-slot register had 28 `SCREEN`, 1
 `OWNER-OPEN`, 7 `PRUNED`, 17 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 29`. `RCS-03C3B2A3B` is the sole active card.
+`EVALUATE`; `Phi_SR = 29`. `RCS-03C3B2A3B` was the sole active card.
 
 The A3B prerequisite audit found no further split once succession is defined
 as the one canonical current-state episode identity at the committed cut. For
@@ -3125,6 +3125,74 @@ episode, satisfies no tag, and exposes neither root. Preserve-plus-additive-root
 is not a fourth A3B policy. No branch grants root/child addressability, nested
 use, fan-out, cross-combatant access, claim, consumption, reuse, payoff,
 persistence, or release authority. A4 follows every answer.
+
+The owner selected `RCS-03C3B2A3B-A`. `Q^{state-succ}_v` is empty: every
+successfully committed eligible revision preserves the founder continuity root
+throughout the uninterrupted episode. Its cut-indexed lineage append-only adds
+every indispensable revision-cause lineage, but no revision mints an additive
+root. Distinct manifestations remain materially real; they simply share one
+causal identity. This selection changes no response-window, H, readiness, tag,
+addressability, claim/reuse, payoff, persistence, release, or implementation
+rule.
+
+A3B moves from `OWNER-OPEN` to `DIR-SELECTED`, and A4 moves from `SCREEN` to
+`OWNER-OPEN`. The fifty-six-slot register now has 27 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 18 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 28`. `RCS-03C3B2A4` is the sole active card.
+
+The A4 prerequisite audit separates the episode's one continuity identity from
+the root cardinality of the fact's presently operative causal support. For a
+canonical current-state fact `f` at authoritative cut `t`, let
+`B^{support}_t(f)` be its family of inclusion-minimal direct support bases.
+Each basis is a nonempty set of already-existing canonical roots after the
+selected operation and episode coarsening and applicable relation promotion.
+A qualifying multi-root basis requires at least two members that are presently
+co-necessary for the same fact, have disjoint complete lineages, have no
+ancestor relation, and share no nonmultiplying authorization/accounting parent.
+A reachable matched witness must hold form, source roles, read H, and every
+non-support input fixed while removing any one member changes the fact's truth,
+semantic content, legal continuation, or authoritative outcome. No proper
+subset may suffice.
+
+This definition defeats the relevant countermodels. A relation root with
+multi-parent ancestry is one direct member, not several; it cannot count beside
+an ancestor. Aliases and semantic children carrying one root do not multiply
+support. Roots that take turns across cuts are not simultaneous. Alternative
+singleton bases `{r_A}` and `{r_B}` do not become conjunctive `{r_A,r_B}` merely
+because both are present. A conjunctive route beside singleton `r_C` qualifies
+only in a reachable context where `r_C` is absent or ineffective and every
+member of the conjunctive basis is indispensable. Adding a revision cause to
+the preserved continuity root's ancestry does not make it current support.
+
+Let `E^{state-mroot}_v` contain the prospectively versioned canonical
+current-state source forms with at least one reachable, committed,
+non-preempted, materially functional occurrence having such a basis. A4 has
+exactly two admitted alternatives: A makes this set empty; B makes it nonempty.
+B is recommended as an existential support floor. It permits at least one
+composite state in which distinct roots directly sustain one present fact—the
+strongest local ideal fit at this boundary—while ordinary root-atomic states
+remain legal. A is the clearest support and disruption grammar but excludes
+that signature composite-state play.
+
+An all-forms-versus-mixed third option fails the closure-index admission test.
+It changes only catalog saturation after support is admitted, repeats the
+anti-recursion rule's barred some-to-all pattern, and does not change an
+occurrence-level legal or counterplay contract: a universally capable form may
+still have root-atomic occurrences. Exact forms, widths, counts, distribution,
+prevalence, redundant alternatives, and incidence therefore remain
+AUTHOR/SPEC unless later evidence meets the reopening test.
+
+A4 mints no root, changes no continuity identity, and exposes no support member.
+It creates no H/readiness/tag/payoff event. Loss of an indispensable member must
+atomically select another already-valid minimal basis or commit the authored
+revision/termination; a unique broken basis cannot leave a zombie fact.
+Circular reference alone cannot prove an A4 witness: the qualifying basis must
+be grounded by roots whose operative status is independent of the candidate
+fact. A4 does not decide whether later-authored support graphs may contain
+cyclic continuation. Root/child addressability, multi-position use, nesting,
+fan-out, cross-combatant access, claims, consumption, reuse, payoff,
+persistence, serialization, release, and implementation remain downstream.
+B2B follows every answer.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

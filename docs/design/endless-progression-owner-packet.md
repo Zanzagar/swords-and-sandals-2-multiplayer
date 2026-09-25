@@ -234,7 +234,9 @@ therefore a non-counting parent for support boundary RCS-03C3B2A3A and
 conditional succession boundary RCS-03C3B2A3B. The owner selected
 RCS-03C3B2A3A-B: the completed catalog supports at least one reachable
 material revision inside an uninterrupted current-state continuity episode.
-RCS-03C3B2A3B is the active owner choice under SR-03.
+The owner then selected RCS-03C3B2A3B-A: every such revision preserves the
+episode's founder continuity root. RCS-03C3B2A4 is the active owner choice
+under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -20019,12 +20021,12 @@ termination followed by re-establishment remain outside the domain. B selects
 neither root preservation/succession nor simultaneous multi-root support,
 addressability, claim/reuse, payoff, persistence, release, or implementation.
 It moves A3A from `OWNER-OPEN` to `DIR-SELECTED` and activates already-counted
-A3B from `SCREEN` to `OWNER-OPEN`. The fifty-six-slot register now contains 28
+A3B from `SCREEN` to `OWNER-OPEN`. The then-current fifty-six-slot register contained 28
 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 17 `DIR-SELECTED`, 1 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR` falls from 30 to 29. The authoritative
 decision record remains unchanged.
 
-### RCS-03C3B2A3B — current-state continuity-root preservation versus succession — active owner choice
+### RCS-03C3B2A3B — current-state continuity-root preservation versus succession — A selected
 
 A3A-B establishes a nonempty catalog of material revisions that leave one
 current-state continuity episode uninterrupted. For a successfully committed
@@ -20112,6 +20114,140 @@ option:
 `RCS-03C3B2A4` follows every answer. Any choice moves A3B to
 `DIR-SELECTED`, reduces `Phi_SR` from 29 to 28, and makes A4 the sole active
 card. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-25:** **A, every
+continuous revision preserves its root.** `Q^{state-succ}_v` is empty. Every
+successfully committed eligible revision leaves `r^+_x=r^-_x`; therefore the
+founder continuity root remains operative throughout one uninterrupted state
+episode. Material manifestations may still change predicates, counters, legal
+continuations, and outcomes. At each revision cut the preserved root's
+cut-indexed lineage append-only retains its complete prior ancestry plus every
+indispensable revision-cause lineage, without retroactively rewriting earlier
+snapshots or settled results.
+
+This gives one evolving episode one causal identity without flattening its
+different manifestations. Stack gains, duration changes, thresholds, and mode
+cycling do not become roots-per-update currency. `Heat I`, `Heat II`, and
+`White-Hot` may therefore remain genuinely different states under one `r_K`;
+only genuine termination followed by re-establishment opens a new continuity
+root. The continuing root as “soul” and its materially different
+manifestations as “simulacra” are a **direct** local expression of the standing
+ideal. Universal preservation is **aggregate**.
+
+A creates no additive revision root and grants no addressability, response
+window, H fact, H-age refresh, readiness break/rearm, tag satisfaction, claim,
+reuse, fan-out, payoff, persistence, release, or implementation authority. It
+moves A3B from `OWNER-OPEN` to `DIR-SELECTED` and A4 from `SCREEN` to
+`OWNER-OPEN`. The fifty-six-slot register now contains 27 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 18 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR` falls from 29 to 28. The authoritative decision record
+remains unchanged.
+
+### RCS-03C3B2A4 — current-state irreducible multi-root causal support — active owner choice
+
+Selected A3B-A gives every uninterrupted current-state episode one continuing
+identity root. It does not determine whether the material fact beneath that
+identity may be jointly sustained by several otherwise independent source
+roots at one authoritative cut.
+
+Let `F^{state}_v` be the nonempty set of prospectively versioned canonical
+current-state source forms that the completed Relic catalog materially reads
+through its selected `S` grammar. A field, packet, alias, cache, view, callback,
+animation, or resolver microstep is not a form. For a committed operative fact
+occurrence `f` at authoritative cut `t`, let `B^{support}_t(f)` be its canonical
+family of inclusion-minimal **direct support bases**. Each basis `K` is a
+nonempty set of already-existing canonical roots after the selected
+within-operation and finite-episode coarsening rules and any applicable
+relation-root promotion.
+
+A basis counts for A4 only when all of these hold:
+
+- every member is presently operative as causal support for the same canonical
+  current-state fact at `t`; ancestry, provenance, an earlier cut, or mere
+  co-presence is insufficient;
+- distinct members have disjoint complete lineages, neither is an ancestor of
+  the other, and they share no nonmultiplying authorization or accounting
+  parent;
+- the basis is jointly sufficient and irreducible in a reachable matched
+  witness: with the form, source roles, read H, and every non-support input held
+  fixed, withdrawing any one member's current contribution changes the fact's
+  truth, player-semantic content, legal continuation, or authoritative outcome,
+  and no proper subset supports that same fact in the witness; and
+- the occurrence is committed, non-preempted, and materially functional with
+  Relic matching, payoff, claim bookkeeping, and later addressability projected
+  out.
+
+“Simultaneous” means co-necessary at one authoritative cut, not created at the
+same time. Roots created at different cuts may qualify if both are currently
+indispensable. Roots that merely hand support from one to another do not. The
+episode's continuity root may be a singleton direct-support member when it is
+itself the source root, but it is never counted again as a wrapper beside its
+own ancestors. A promoted relation root is likewise one member even when it
+has several ancestors, and it cannot qualify beside any intersecting parent.
+
+Alternative bases remain alternatives. If Ward is supported by `r_A OR r_B`,
+its minimal bases are `{r_A}` and `{r_B}`; co-presence cannot counterfeit
+`{r_A,r_B}`. If another route `r_C` exists beside a genuinely conjunctive
+`{r_A,r_B}` route, the latter qualifies only through a reachable context in
+which `r_C` is absent or ineffective and both `r_A` and `r_B` remain
+indispensable.
+
+Let
+
+`E^{state-mroot}_v={g in F^{state}_v | some reachable functional occurrence of g has a basis K with |K| >= 2}`.
+
+Membership belongs prospectively to the state form and its authored source
+grammar. It is never selected after observing a target, equipped Relic,
+favorable history, payoff, claim state, or present recipe completion.
+
+| Choice | Current-state support language | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — root-atomic current-state support only** | `E^{state-mroot}_v` is empty. Every inclusion-minimal direct support basis is singleton after canonicalization. A fact may have several redundant singleton alternatives, but no fact has a jointly indispensable multi-root basis. | A gives the clearest support, disruption, tooltip, and replay grammar and blocks ancestry or redundant-cause laundering. Its fit is **neutral/protective**: distinct roots may still participate through separate current-state positions, but never directly constitute one present fact. The cost is losing composite formations, wards, or stances whose identity genuinely depends on several sources remaining together. | `Guarding/r_G` and `Heat-readied/r_H` may coexist and later satisfy distinct Relic positions. No one canonical state fact requires both. A Ward supported independently by either root has two singleton bases, not one two-root basis. |
+| **B — require irreducible simultaneous multi-root support** | `E^{state-mroot}_v` is nonempty. The completed catalog contains at least one prospectively versioned form with a reachable functional occurrence whose direct support basis contains at least two independent roots. Exact forms, widths, counts, distribution, prevalence, and redundant alternatives remain AUTHOR/SPEC. | **Recommended.** At the qualifying cut, distinct roots remain mechanically legible while directly sustaining one current fact: the strongest local Souls and Simulacra / Achintya Bheda Abheda fit at this boundary. It enables protect-and-break composite-state play without making every state compound. Costs are support disclosure, same-cut loss settlement, dependency validation, and the risk that multi-root states become premium coordination or ally-stack fuel. | `Tempered Formation` has one continuity identity but is presently sustained by independent `Guarding/r_G` and `Heat-readied/r_H`. With every other input fixed and no alternative basis active, clearing either contribution alone ends or materially changes the Formation. The state remains one fact, not two Relic positions. |
+
+**Recommendation: B, require at least one irreducibly multi-root current-state
+form.** A3B-A keeps one stable identity for the episode; B lets selected source
+roots participate in that one present manifestation without erasing their
+distinction. This opens a distinctive composite-state play pattern while the
+existential floor leaves ordinary root-atomic states legal and teachable.
+
+A/B are mutually exclusive and exhaustive because `E^{state-mroot}_v` is
+either empty or nonempty. Universal-versus-mixed prevalence would only replace
+“some” with “all” after this support language is admitted, so exact breadth
+remains AUTHOR/SPEC under the closure index's anti-recursion rule. Positive
+membership needs one reachable, non-preempted, inclusion-minimal multi-root
+witness; negative membership needs complete reachable-domain proof. Exact
+support width, named roots, operator families, incidence, quotas, and
+distribution do not create another owner card without a later demonstrated
+player-contract consequence.
+
+For both options:
+
+- A4 mints no continuity, relation, support, or compound root; selected A3B-A
+  continues to preserve the episode's one continuity root;
+- adding a revision cause to that root's ancestry does not make the cause a
+  current support member unless the A4 held-fixed indispensability test passes;
+- a support-edge change that leaves state truth, semantic content, legal
+  continuation, and outcome unchanged is not an A3A material revision and by
+  itself creates no H fact, H-age refresh, readiness change, tag, or payoff;
+- removal of an indispensable member cannot leave a unique basis silently
+  sustaining an unchanged fact: the same authoritative cut must select another
+  already-valid minimal basis or commit the authored material revision or
+  termination atomically;
+- circular reference alone cannot establish a qualifying A4 basis: every
+  witness must be grounded by roots whose operative status is established
+  independently of the candidate fact; an already-established continuity or
+  source root may support that fact only when its own operative status does not
+  depend on the fact in the witness; A4 does not otherwise decide whether a
+  later-authored support graph may contain cyclic continuation; and
+- no answer makes roots or children addressable, lets one state fill several
+  positions, permits nesting or same-cut fan-out, grants cross-combatant access,
+  claims, consumes, reuses, or assigns payoff to evidence, selects persistence
+  or serialization, or authorizes implementation.
+
+`RCS-03C3B2B` follows every answer. Any choice moves A4 to `DIR-SELECTED`,
+reduces `Phi_SR` from 28 to 27, and makes B2B the sole active card. The
+authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
