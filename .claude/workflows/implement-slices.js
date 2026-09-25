@@ -12,8 +12,8 @@ export const meta = {
 // args: {
 //   project: string,        // how prompts name the project, e.g. 'the Swords & Sandals II multiplayer repo'
 //   base: string,           // the commit every worktree starts from
-//   night: string,          // scratch root: reports, cumulative diffs, verifier scratch (agents get private subdirs)
-//   mainTree: string,       // the project's main tree: READ-ONLY to every agent
+//   night: string,          // scratch root, ABSOLUTE and symlink-free: reports, cumulative diffs, verifier scratch (agents get private subdirs)
+//   mainTree: string,       // the project's main tree, ABSOLUTE and symlink-free: READ-ONLY to every agent
 //   codex: string,          // pinned Codex review command, run as: <codex> <worktree> <outfile> "<focus>"
 //   suite: string,          // the full test command, run from the worktree
 //   suiteExpect: string,    // what a green run looks like there, e.g. 'expect 0 fail and 1 skipped (the archive check)'
@@ -24,7 +24,9 @@ export const meta = {
 //                           //   (pass claude-harness githooks/check-trailers if the main tree has not adopted the gate)
 //   maxCodexPasses?: number,// default 4
 //   tracks: [{
-//     key, worktree, branch,
+//     key, worktree, branch,  // key (track and slice alike): ONE path component — letters, digits,
+//                           //   "-" and "_", starting with a letter or digit, unique ignoring case —
+//                           //   because it names directories under args.night
 //     files: string,        // the files this track may touch
 //     chain?: boolean,      // later slices build on earlier ones; a failed slice stops the track
 //     binding?: string[],   // extra rules for this track only
@@ -66,9 +68,19 @@ const titled = (c) => c[0].toUpperCase() + c.slice(1)
 const trailerFor = (s) => (s.decided ? `Decided: ${s.decided}` : `${titled(s.class)}: <why>`)
 
 const refused = []
+// Track and slice keys become directory names under args.night (scratch
+// <night>/<track>/<slice>, reports beside it), so each must be ONE safe path
+// component: no separator, no dot at all (so no "." or ".." segment, and no key
+// can equal a report's file name), nothing a shell would split, no leading "-".
+// Keys are compared ignoring case, as NTFS and APFS compare file names.
+const KEY = /^[A-Za-z0-9][A-Za-z0-9_-]*$/
+const keyRule = 'must be one path component: letters, digits, "-" and "_", starting with a letter or digit'
+const fold = (k) => String(k).toLowerCase()
 // A POSIX path with ".", ".." and repeated "/" resolved, so "/wt/./a" and
-// "/wt/a" compare equal. The sandbox has no filesystem, so a SYMLINK alias of
-// a worktree cannot be seen here: give every track its real path.
+// "/wt/a" compare equal. Every check here compares STRINGS: the sandbox has no
+// filesystem, so an alias through a symlink (or /proc/self/root) of the
+// scratch root, the main tree or a worktree cannot be seen. Give every path as
+// its real, symlink-free path; nothing here can verify that you did.
 function normal(path) {
   const out = []
   for (const part of path.split('/')) {
@@ -77,6 +89,19 @@ function normal(path) {
   }
   return `/${out.join('/')}`
 }
+// Both are compared as paths below, and every agent cds into its own worktree
+// first, so a relative one would mean something different to each of them.
+// Every path, and the base, reaches agents inside shell commands (and as prose
+// they turn into commands), so it must mean to a shell exactly what it means
+// here: no character a shell reinterprets. (A decided pointer, which may name a
+// document with a space in it, is quoted instead.)
+const SHELL_SAFE = /^[A-Za-z0-9._/@+,:=-]+$/
+const unsafe = 'has a character a shell would reinterpret; use letters, digits and . _ / @ + , : = - only'
+for (const k of ['night', 'mainTree']) {
+  if (!A[k].startsWith('/')) refused.push(`args.${k} "${A[k]}" must be an absolute path`)
+  else if (!SHELL_SAFE.test(A[k])) refused.push(`args.${k} "${A[k]}" ${unsafe}`)
+}
+if (!/^[A-Za-z0-9]/.test(A.base) || !SHELL_SAFE.test(A.base)) refused.push(`args.base "${A.base}" must start with a letter or digit and ${unsafe}: give a commit id or a plain ref name`)
 const mainTree = normal(A.mainTree)
 // Tracks run in parallel, so each needs its own worktree; scratch paths are
 // <night>/<track>/<slice>, so keys must not repeat either.
@@ -87,23 +112,28 @@ for (const t of A.tracks) {
     refused.push(`${t && t.key ? t.key : '(unnamed track)'}: a track needs a key and at least one slice`)
     continue
   }
-  if (seenTracks.has(t.key)) refused.push(`track key "${t.key}" appears twice; its slices would share scratch paths`)
-  seenTracks.add(t.key)
+  if (typeof t.key !== 'string' || !KEY.test(t.key)) refused.push(`track key "${t.key}" ${keyRule} (it names a directory under ${A.night})`)
+  if (seenTracks.has(fold(t.key))) refused.push(`track key "${t.key}" appears twice (letter case aside); its slices would share scratch paths`)
+  seenTracks.add(fold(t.key))
   if (typeof t.worktree !== 'string' || t.worktree === '' || typeof t.branch !== 'string' || t.branch === '') {
     refused.push(`${t.key}: a track needs its own worktree and branch`)
   } else if (!t.worktree.startsWith('/')) {
     refused.push(`${t.key}: worktree "${t.worktree}" must be an absolute path`)
   } else {
-    const w = normal(t.worktree)
-    if (w === mainTree) refused.push(`${t.key}: worktree ${t.worktree} is the main tree, which is read-only to every agent`)
-    byWorktree.set(w, [...(byWorktree.get(w) || []), t.key])
+    if (!SHELL_SAFE.test(t.worktree)) refused.push(`${t.key}: worktree "${t.worktree}" ${unsafe}`)
+    // Compared ignoring case, like every path here: NTFS and APFS would merge them.
+    const w = fold(normal(t.worktree))
+    if (w === fold(mainTree)) refused.push(`${t.key}: worktree ${t.worktree} is the main tree, which is read-only to every agent`)
+    const seen = byWorktree.get(w) || { shown: normal(t.worktree), keys: [] }
+    byWorktree.set(w, { ...seen, keys: [...seen.keys, t.key] })
   }
   const seenSlices = new Set()
   for (const s of t.slices) {
     const name = `${t.key}:${s && s.key ? s.key : '(unnamed slice)'}`
-    if (s && s.key && seenSlices.has(s.key)) refused.push(`${name}: slice key appears twice in the track`)
-    if (s && s.key) seenSlices.add(s.key)
+    if (s && s.key && seenSlices.has(fold(s.key))) refused.push(`${name}: slice key appears twice in the track (letter case aside)`)
+    if (s && s.key) seenSlices.add(fold(s.key))
     if (!s || !s.key || !s.brief) { refused.push(`${name}: a slice needs a key and a brief`); continue }
+    if (typeof s.key !== 'string' || !KEY.test(s.key)) refused.push(`${name}: slice key ${keyRule} (it names a directory under ${A.night})`)
     if (s.decided === undefined && s.class === undefined) {
       refused.push(`${name}: carries neither \`decided\` ("path#anchor", the recorded grilling decision it implements) nor \`class\` (${CLASSES.join('|')}). Grill it and record the decision first, or give it a class.`)
       continue
@@ -116,8 +146,56 @@ for (const t of A.tracks) {
     }
   }
 }
-for (const [w, keys] of byWorktree) {
-  if (keys.length > 1) refused.push(`worktree ${w} is named by tracks ${keys.join(', ')}; parallel tracks would overwrite each other there`)
+for (const { shown, keys } of byWorktree.values()) {
+  if (keys.length > 1) refused.push(`worktree ${shown} is named by tracks ${keys.join(', ')}; parallel tracks would overwrite each other there`)
+}
+
+// Every path an agent is told is ITS OWN, built by the same functions the
+// prompts use. Each must lie inside args.night, and no two agents may be given
+// the same path, or one inside the other (compared ignoring case). Safe keys
+// are not enough on their own: a track named "verify" puts its slices'
+// scratch beside the verifiers' (<night>/verify/<track>-<n>).
+const pad = (i) => String(i + 1).padStart(2, '0')
+const scratchOf = (t, s) => `${A.night}/${t.key}/${s.key}`
+const reportOf = (t, s, i) => `${A.night}/${t.key}/${pad(i)}-${s.key}.report.md`
+const diffOf = (t, s, i) => `${A.night}/${t.key}/${pad(i)}-${s.key}.cumulative.diff`
+const verifierScratchOf = (t, j) => `${A.night}/verify/${t.key}-${j + 1}`
+const privatePaths = []
+for (const t of A.tracks) {
+  if (!t || !t.key || !Array.isArray(t.slices)) continue
+  t.slices.forEach((s, i) => {
+    if (!s || !s.key) return
+    for (const path of [scratchOf(t, s), reportOf(t, s, i), diffOf(t, s, i)]) privatePaths.push({ path, owner: `${t.key}:${s.key}` })
+  })
+  if (Array.isArray(t.verifiers)) t.verifiers.forEach((_, j) => privatePaths.push({ path: verifierScratchOf(t, j), owner: `${t.key}:verify${j + 1}` }))
+}
+const root = normal(A.night)
+const within = (p, dir) => p.startsWith(dir === '/' ? '/' : `${dir}/`) && p !== dir
+for (const x of privatePaths) {
+  x.n = normal(x.path)
+  x.f = fold(x.n)
+  if (!within(x.n, root)) refused.push(`${x.owner}: its private path ${x.path} resolves to ${x.n}, outside ${A.night}`)
+}
+// Nor may a private path overlap a tree an agent must not write in as scratch:
+// the read-only main tree, or any track's worktree (its own included, where
+// scratch would land in the diff). Either way round: one inside the other.
+const protectedTrees = [{ n: mainTree, what: 'the main tree' }]
+for (const t of A.tracks) {
+  if (t && t.key && typeof t.worktree === 'string' && t.worktree.startsWith('/')) protectedTrees.push({ n: normal(t.worktree), what: `track ${t.key}'s worktree` })
+}
+for (const x of privatePaths) {
+  for (const p of protectedTrees) {
+    const f = fold(p.n)
+    if (x.f === f || within(x.f, f) || within(f, x.f)) refused.push(`${x.owner}: its private path ${x.n} overlaps ${p.what} (${p.n})`)
+  }
+}
+for (let i = 0; i < privatePaths.length; i++) {
+  for (let j = i + 1; j < privatePaths.length; j++) {
+    const [x, y] = [privatePaths[i], privatePaths[j]]
+    if (x.owner === y.owner) continue
+    if (x.f === y.f) refused.push(`${x.n} is private to both ${x.owner} and ${y.owner}; they would overwrite each other`)
+    else if (within(y.f, x.f) || within(x.f, y.f)) refused.push(`${x.n} (private to ${x.owner}) and ${y.n} (private to ${y.owner}) are one inside the other`)
+  }
 }
 // The cap on verifiers is claude-harness docs/adr/0001's: at most 6 in a run.
 const MAX_VERIFIERS = 6
@@ -177,7 +255,6 @@ const VERDICT = {
   required: ['claim', 'verdict', 'evidence'],
 }
 
-const pad = (i) => String(i + 1).padStart(2, '0')
 const lines = (xs) => (xs && xs.length ? xs.map((x) => `- ${x}`).join('\n') + '\n' : '')
 const maxPasses = Number.isInteger(A.maxCodexPasses) && A.maxCodexPasses > 0 ? A.maxCodexPasses : 4
 
@@ -185,7 +262,7 @@ function decisionBlock(s) {
   if (s.decided) {
     const [path, anchor] = [s.decided.slice(0, s.decided.indexOf('#')), s.decided.slice(s.decided.indexOf('#') + 1)]
     return `THE DECISION THIS SLICE IMPLEMENTS: ${s.decided}
-Read that section of ${path} first: it is the spec, recorded by the owner in a grilling round. Where the brief below and the decision disagree, the decision wins and the disagreement is a finding. If the project has .githooks/check-trailers, confirm the pointer resolves: \`sh .githooks/check-trailers --anchors < ${path} | grep -Fx '${anchor}'\`; a pointer that does not resolve is a wrong premise.`
+Read that section of ${path} first: it is the spec, recorded by the owner in a grilling round. Where the brief below and the decision disagree, the decision wins and the disagreement is a finding. If the project has .githooks/check-trailers, confirm the pointer resolves: \`sh .githooks/check-trailers --anchors < ${sq(path)} | grep -Fx -- ${sq(anchor)}\`; a pointer that does not resolve is a wrong premise.`
   }
   return `THIS SLICE'S CLASS: ${s.class} (a ${s.class} change needs no recorded decision). If it turns out to need a design decision the owner has not made, stop and report it under ownerDecisions instead of making it.`
 }
@@ -193,7 +270,7 @@ Read that section of ${path} first: it is the spec, recorded by the owner in a g
 function implPrompt(t, s, i) {
   const n = t.slices.length
   const earlier = t.slices.slice(0, i).map((x) => x.key).join(', ')
-  const scratch = `${A.night}/${t.key}/${s.key}`
+  const scratch = scratchOf(t, s)
   const checks = (t.checks || A.checks || []).map((c) => c.split('{scratch}').join(scratch))
   return `You are an IMPLEMENTER on ${A.project}: slice "${s.key}" (${i + 1} of ${n}) of the track "${t.key}". The main session merges and commits; you build, test and get Codex to approve.
 
@@ -218,14 +295,14 @@ METHOD
 1. Test-first: invoke the \`tdd\` skill and follow its red-green-refactor loop, testing through public interfaces. For every assertion you add or change, name the one-line mutation that should break it and confirm it does.
 2. Focused tests while working; at the end the full suite from the worktree: \`${A.suite}\` (${A.suiteExpect}; report exact counts and explain any other skip).
 ${checks.length ? `3. Then:\n${lines(checks)}` : '3. (No extra checks for this track.)\n'}4. When the slice is green, run the pinned Codex review: \`${A.codex} ${t.worktree} ${scratch}/codex-<pass>.txt "<focus: what THIS slice changed and the concrete ways it could be wrong>"\` with a Bash timeout of 600000. Its findings are CLAIMS: reproduce each as a failing test before fixing; reject with evidence any that do not reproduce. Re-run the review after fixes. Stop at "Verdict: approve" or after ${maxPasses} passes (then status is partial unless every open finding was rejected with evidence).
-5. Snapshot the CUMULATIVE worktree diff: \`{ git diff --full-index; git ls-files --others --exclude-standard | while read -r f; do git diff --no-index --full-index /dev/null "$f"; done; } > ${A.night}/${t.key}/${pad(i)}-${s.key}.cumulative.diff\`
-6. Write your full report (the evidence behind every number) to ${A.night}/${t.key}/${pad(i)}-${s.key}.report.md, ENDING with the commit trailer this slice is committed under, on its own line:
+5. Snapshot the CUMULATIVE worktree diff: \`{ git diff --full-index; git ls-files --others --exclude-standard | while read -r f; do git diff --no-index --full-index /dev/null "$f"; done; } > ${diffOf(t, s, i)}\`
+6. Write your full report (the evidence behind every number) to ${reportOf(t, s, i)}, ENDING with the commit trailer this slice is committed under, on its own line:
    ${trailerFor(s)}
    ${s.decided ? 'exactly as written.' : 'with <why> replaced by one line saying why this change was needed.'} Return the same line as \`trailer\` in the structured summary. The project's commit-msg hook and CI refuse a commit without it (claude-harness docs/git-hygiene.md rule 14).`
 }
 
 function verifyPrompt(t, claim, j) {
-  return `You are an ADVERSARIAL VERIFIER on ${A.project}. You WRITE NOTHING except in your own scratch directory ${A.night}/verify/${t.key}-${j + 1}/ (mkdir -p it). No git state changes of any kind, no edits in any worktree or in the main tree.
+  return `You are an ADVERSARIAL VERIFIER on ${A.project}. You WRITE NOTHING except in your own scratch directory ${verifierScratchOf(t, j)}/ (mkdir -p it). No git state changes of any kind, no edits in any worktree or in the main tree.
 
 TARGET: the uncommitted work in ${t.worktree} (branch ${t.branch}, base ${A.base}). The implementers' reports are ${A.night}/${t.key}/*.report.md and their per-slice cumulative diffs sit beside them — treat every number and claim in them as a hypothesis. To compare with the base, export it read-only: \`git -C ${A.mainTree} archive ${A.base} | tar -x -C <your scratch>/base\`.
 
