@@ -2963,13 +2963,41 @@ while a change of order or trajectory flips the claim. Raw adjacency,
 co-occurrence, shared records/views, aliases, packets, same-root episode
 members, and post-hoc Relic matching do not qualify.
 
-Replacing one row with two offsets B2A2A-B's ordinary reduction. The current
+Replacing one row with two offsets B2A2A-B's ordinary reduction. The pre-answer
 fifty-five-slot register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 14
 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`.
-`RCS-03C3B2A2B1` is the sole active card. Its two exhaustive choices are no
+`RCS-03C3B2A2B1` was the sole active card. Its two exhaustive choices were no
 eligible support or at least one eligible form; exact operators, identities,
 counts, distribution, and prevalence remain AUTHOR/SPEC. Absence prunes
 B2A2B2 and advances to B2A3; nonempty support opens B2A2B2 next.
+
+The owner selected `RCS-03C3B2A2B1-B`. `E^{rel}_v` is nonempty: at least one
+reachable, materially effective, non-preempted, inclusion-minimal canonical H
+form indispensably relates at least two distinct post-coarsening roots through
+order or trajectory, retains the complete union of all indispensable operand
+lineages, and passes the held-fixed temporal separator. This is an existential
+support floor only. It selects neither universal temporal prevalence nor an
+additive relation root; exact operators, forms, counts, distribution, and
+prevalence remain AUTHOR/SPEC. The selection is consistent with A1-A because
+each operand operation retains one primitive lineage, and with A2A-B because
+same-root members of a coarsened episode cannot establish the required
+multi-root support.
+
+B1 moves from `OWNER-OPEN` to `DIR-SELECTED`, and conditional B2 moves from
+`SCREEN` to `OWNER-OPEN`. The current fifty-five-slot register therefore has
+29 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 15 `DIR-SELECTED`, 1 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`. `RCS-03C3B2A2B2` is the sole active
+card. Let `P^{rel-root}_v` be the stable versioned subset of nonempty
+`E^{rel}_v` whose successfully realized occurrences receive one additive
+multi-parent relation root while retaining their full indispensable
+parent-lineage union and remaining non-independent from every ancestor. The
+exhaustive choices are `P^{rel-root}_v` empty, equal to `E^{rel}_v`, or a
+nonempty proper subset. B is recommended: it gives every genuine cross-root
+temporal relationship one coherent higher-order identity without allowing it
+to pair independently with either parent. A leaves unity at the predicate
+boundary only; C adds a promoted-versus-lineage-only root-topology taxonomy.
+Addressability, current-state roots, build roots, fan-out, claims, reuse,
+payoff, presentation, persistence, release, and implementation remain separate.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

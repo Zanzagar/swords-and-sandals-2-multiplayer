@@ -1,5 +1,89 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-25 temporal cross-root Relic language — RCS-03C3B2A2B1-B selected
+
+The owner selected `RCS-03C3B2A2B1-B`: `E^{rel}_v` is nonempty. The completed
+catalog must contain at least one reachable, materially effective,
+non-preempted, inclusion-minimal canonical H order/trajectory form whose
+indispensable operands retain at least two distinct roots after the selected
+one-lineage-per-operation and universal authored-episode coarsening rules. A
+reachable matched separator must hold the operand multiset, source roles,
+post-coarsening lineage topology, and every non-temporal admitted input fixed
+while reversing the relevant order or substituting a non-equivalent
+same-endpoint trajectory flips the claim. Every qualifying relationship keeps
+the complete union of all indispensable operand lineages.
+
+This is a support floor, not universal prevalence. Exact operators, forms,
+counts, distribution, and prevalence remain AUTHOR/SPEC. Unordered cross-root
+relationships, single-root histories, and Relics that do not read temporal
+relationships remain legal. Same-root coarsened episode members, raw adjacency
+or co-occurrence, shared records/views, aliases, packets, and post-hoc Relic
+matches do not qualify. Guard-before-Heat is a valid boundary witness only when
+Guard and Heat retain distinct roots and a held-fixed Heat-before-Guard foil
+defeats the claim.
+
+Distinct roots now participate directly in at least one irreducible temporal
+claim without losing their identities—the stronger selected Souls and
+Simulacra / Achintya Bheda Abheda fit at the predicate boundary. The costs are
+order/freshness disclosure, replay and log burden, coordination and denial
+windows, and formulaic-sequence risk. B1-B itself creates no additive root.
+
+B1 moved from `OWNER-OPEN` to `DIR-SELECTED`; already-counted B2 moved from
+`SCREEN` to `OWNER-OPEN`. The current fifty-five-slot register contains 29
+`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 15 `DIR-SELECTED`, 1 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`. `RCS-03C3B2A2B2` is the sole active
+Relic card.
+
+B2 asks which eligible temporal-relationship forms receive one additive
+multi-parent relation root. For a realized eligible occurrence `x`, retain the
+deduplicated complete operand-lineage union `U_x`. A promoted occurrence gets
+exactly one fresh relation root carrying `U_x`; it replaces no parent and is
+non-independent from every ancestor, so it cannot occupy an independent-source
+position alongside any parent for the same result. Subject to later B3,
+fan-out, claim, and reuse choices, it may behave distinctly against a genuinely
+unrelated root. Promotion is stable by prospectively versioned form, never
+chosen after observing a payoff, Relic match, target, interruption, or favorable
+history. An attempted occurrence interrupted before satisfaction, completed in
+the opposite order, or outside the authored trajectory creates no root for
+that form; a separately authored inverse form may realize its own occurrence,
+and later disruption never revokes a completed root. Duplicate records/views
+create no duplicate.
+
+Present B2's three exhaustive directions:
+
+- A: no eligible form promotes; relationships retain only their operand
+  lineages;
+- B: every eligible form promotes; every successfully realized genuine
+  cross-root temporal relationship receives one additive relation root; or
+- C: promoted and lineage-only eligible forms coexist under stable disclosed
+  form rules, requiring at least one reachable witness of each kind.
+
+Recommend B. It gives the clearest grammar—one accepted operation has one
+primitive lineage, one qualifying authored finite episode has one coarsened
+root, and one genuine nonmerged cross-root temporal relationship has one
+additive root—and the strongest direct ideal fit at this boundary. The new root
+cannot act as a third independent source beside either parent for the same
+result. Whether it is net upside, bears a gameplay cost, or can build outward
+toward unrelated sources remains for later addressability, claim, reuse,
+fan-out, and payoff rows; that route could then create setup, interruption,
+reversal, and denial play. Keep the eligible catalog narrow and authored to
+contain log/UI and combinatorial burden. A is simpler but leaves unity only in
+the predicate. C permits special “soul-forming” relationships but creates a
+promoted-versus-lineage-only root-topology taxonomy and likely catalog
+arbitrage.
+
+Every B2 answer advances to `RCS-03C3B2A3`. Root/child addressability,
+current-state root succession/support, build provenance, fan-out, claims,
+reuse, payoff, presentation, persistence, release, and implementation remain
+separate. Canonical operand-tuple identity and overlapping-match resolution
+remain AUTHOR/SPEC; B2 never auto-enumerates every matching pair. A relation
+root can become a later operand only if B3 addressability and a separately
+authored nested form permit it, with an acyclic graph and complete transitive
+ancestry. Source-role authoring and RCS-08/team fan-out decide who can read a
+cross-combatant root. The authoritative decision record is unchanged: a bare
+option label selects direction but does not complete its explicit acceptance
+protocol.
+
 ## 2026-09-25 integrated-history preservation audit — decisions intact, navigation corrected
 
 Merge `8ff63c0` joined the current engine and progression histories. Three
@@ -44,9 +128,10 @@ no-probe-archive profile is 15: the prior 11 plus four real-pack checks in
 `test/render-action-buttons.test.js`. The instruction now says 15 at its source;
 this was documentation drift, not a new skip or test regression.
 
-This audit changes no progression selection. Universal finite source-episode
-coarsening remains selected, and `RCS-03C3B2A2B1` remains the next and sole
-active Relic frontier card.
+This audit itself changed no progression selection. At that checkpoint,
+universal finite source-episode coarsening remained selected and
+`RCS-03C3B2A2B1` was the sole active Relic frontier card. The owner subsequently
+selected B1-B; the current sole active card is `RCS-03C3B2A2B2`.
 
 ## 2026-09-25 universal authored-episode coarsening — RCS-03C3B2A2A-B selected
 
@@ -93,7 +178,8 @@ Replacing one counted row with two adds one slot. The twelve-times-amended
 fifty-five-slot register now contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`,
 14 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`.
 
-The sole active card is `RCS-03C3B2A2B1`. Present only:
+At that presentation, the sole active card was `RCS-03C3B2A2B1`, with these
+two choices:
 
 - A: exclude canonical nonmerged multi-root H order/trajectory forms; or
 - B: require at least one reachable, materially effective, non-preempted,
@@ -124,6 +210,10 @@ Under A, B2A2B2 is pruned and B2A3 follows. Under B, B2A2B2 becomes the next
 card. Current-state roots, build roots, addressability, fan-out, claims/reuse,
 payoff, persistence, release, and implementation remain separate. The
 authoritative decision record is unchanged and implementation remains blocked.
+
+**Subsequent answer:** the owner selected B1-B. `E^{rel}_v` is nonempty,
+`Phi_SR = 30`, and `RCS-03C3B2A2B2` is now the sole active card. Use the newer
+top section rather than presenting B1 again.
 
 ## 2026-09-25 one primitive lineage per operation — RCS-03C3B2A1-A selected
 
@@ -178,8 +268,9 @@ terminal/abort opens a fresh identity. Later membership never rolls back a
 committed result.
 
 **Corrected continuation:** the owner selected B2A2A-B. A twelfth audit then
-split old B2A2B into support and conditional promotion. Current `Phi_SR = 31`
-across fifty-five slots; present only `RCS-03C3B2A2B1`.
+split old B2A2B into support and conditional promotion, initially producing
+`Phi_SR = 31` across fifty-five slots with B1 active. The owner subsequently
+selected B1-B; current `Phi_SR = 30`, and present only `RCS-03C3B2A2B2`.
 
 ## 2026-09-24 mixed coupled-package widths — RCS-03C3B1A2B-C selected
 
@@ -246,8 +337,9 @@ multi-parent `r_T` countermodel disproved that inference; B2A2B restores the
 missing policy before owner presentation or commit.
 
 **Corrected continuation:** the owner selected B2A1-A and B2A2A-B. A twelfth
-audit split old B2A2B into support and conditional promotion. Current
-`Phi_SR = 31` across fifty-five slots; present only `RCS-03C3B2A2B1`.
+audit split old B2A2B into support and conditional promotion, initially
+producing `Phi_SR = 31` across fifty-five slots with B1 active. The owner then
+selected B1-B; current `Phi_SR = 30`, and present only `RCS-03C3B2A2B2`.
 
 ## 2026-09-24 mixed coupled-package prevalence — RCS-03C3B1A2A-C selected
 
@@ -301,7 +393,8 @@ remain AUTHOR/SPEC. No eleventh register amendment is required.
 exist. Later choices selected one primitive lineage per operation and universal
 finite source-episode coarsening, and a twelfth amendment split the next
 relationship boundary. The current register has fifty-five rows,
-`Phi_SR = 31`, and sole active card `RCS-03C3B2A2B1`; do not present B1A2B again.
+`Phi_SR = 30`, and sole active card `RCS-03C3B2A2B2` after the owner's later
+B1-B selection; do not present B1A2B or B1 again.
 
 ## 2026-09-24 exact-two independent phase routes — RCS-03C3B1A1B2-A selected
 
@@ -368,8 +461,9 @@ B1B follows; under B or C, B1A2B becomes next.
 `{D,E,O}` phase support. The eleventh amendment split old B2A into five counted
 children. The resulting fifty-four-slot register had `Phi_SR = 32`, with only
 `RCS-03C3B2A1` active. The owner then selected B2A1-A and B2A2A-B. A twelfth
-audit split old B2A2B; current `Phi_SR = 31` across fifty-five slots, and only
-`RCS-03C3B2A2B1` is active.
+audit split old B2A2B, initially producing `Phi_SR = 31` with B1 active. The
+owner subsequently selected B1-B; current `Phi_SR = 30` across fifty-five
+slots, and only `RCS-03C3B2A2B2` is active.
 
 ## 2026-09-24 mixed Relic phase multiplicity — RCS-03C3B1A1B1-C selected
 
@@ -421,8 +515,9 @@ package-width support. The owner then selected A2A-C and A2B-C, deriving exact
 `{D,E,O}` phase support. The eleventh amendment split old B2A into five counted
 children. The resulting fifty-four-slot register had `Phi_SR = 32`, with only
 `RCS-03C3B2A1` active. The owner then selected B2A1-A and B2A2A-B. A twelfth
-audit split old B2A2B; current `Phi_SR = 31` across fifty-five slots, and only
-`RCS-03C3B2A2B1` is active.
+audit split old B2A2B, initially producing `Phi_SR = 31` with B1 active. The
+owner subsequently selected B1-B; current `Phi_SR = 30` across fifty-five
+slots, and only `RCS-03C3B2A2B2` is active.
 
 ## 2026-09-24 universal Relic phase attribution — RCS-03C3B1A1A-A selected
 
@@ -539,8 +634,9 @@ tri-phase prevalence. The owner then selected B1-C and B2-A. A tenth audit
 split old B1A2, and the owner selected A2A-C and A2B-C, deriving B1B. The
 eleventh amendment supersedes the fifty-slot count: fifty-four slots,
 `Phi_SR = 32`, with only `RCS-03C3B2A1` active. The owner then selected
-B2A1-A and B2A2A-B. A twelfth audit split old B2A2B; current `Phi_SR = 31`
-across fifty-five slots, and only `RCS-03C3B2A2B1` is active.
+B2A1-A and B2A2A-B. A twelfth audit split old B2A2B, initially producing
+`Phi_SR = 31` with B1 active. The owner subsequently selected B1-B; current
+`Phi_SR = 30` across fifty-five slots, and only `RCS-03C3B2A2B2` is active.
 
 ## 2026-09-24 fully coupled H+S evidence excluded — RCS-03C3B0-A selected
 
@@ -590,8 +686,9 @@ forty-nine-slot register; the owner then selected B1-C and B2-A. A tenth audit
 split old B1A2, and the owner selected A2A-C and A2B-C, deriving B1B. The
 eleventh amendment superseded that count with `Phi_SR = 32` across fifty-four
 slots and only `RCS-03C3B2A1` active. The owner then selected B2A1-A and
-B2A2A-B. A twelfth audit split old B2A2B; current `Phi_SR = 31` across
-fifty-five slots, and only `RCS-03C3B2A2B1` is active.
+B2A2A-B. A twelfth audit split old B2A2B, initially producing `Phi_SR = 31`
+with B1 active. The owner subsequently selected B1-B; current `Phi_SR = 30`
+across fifty-five slots, and only `RCS-03C3B2A2B2` is active.
 
 ## 2026-09-24 Relic history freshness — RCS-03C3A-A selected
 
@@ -637,8 +734,9 @@ amendment, the owner selected B1-C and B2-A. A tenth audit split old B1A2.
 The owner then selected A2A-C and A2B-C, deriving B1B. The eleventh amendment
 superseded that count: the fifty-four-slot register had
 `Phi_SR = 32` with only `RCS-03C3B2A1` active. The owner then selected
-B2A1-A and B2A2A-B. A twelfth audit split old B2A2B; current `Phi_SR = 31`
-across fifty-five slots, and only `RCS-03C3B2A2B1` is active.
+B2A1-A and B2A2A-B. A twelfth audit split old B2A2B, initially producing
+`Phi_SR = 31` with B1 active. The owner subsequently selected B1-B; current
+`Phi_SR = 30` across fifty-five slots, and only `RCS-03C3B2A2B2` is active.
 
 ## 2026-09-24 Relic invocation control — RCS-03C2A-A selected
 
@@ -725,8 +823,9 @@ register amendment the owner selected A2B-C, deriving B1B's exact `{D,E,O}`
 support. The eleventh amendment then split old B2A into five counted children;
 the sole active card became `RCS-03C3B2A1`, with `Phi_SR = 32` across
 fifty-four slots. The owner then selected B2A1-A and B2A2A-B. A twelfth audit
-split old B2A2B; current `Phi_SR = 31` across fifty-five slots, and only
-`RCS-03C3B2A2B1` is active.
+split old B2A2B, initially producing `Phi_SR = 31` with B1 active. The owner
+subsequently selected B1-B; current `Phi_SR = 30` across fifty-five slots, and
+only `RCS-03C3B2A2B2` is active.
 
 ## 2026-09-24 Relic evaluation lifetime — RCS-03B1-A selected
 
@@ -765,8 +864,9 @@ owner then selected B1-C and B2-A. A tenth audit split old B1A2. The owner then
 selected A2A-C and A2B-C, deriving B1B. The eleventh amendment supersedes that
 count: the fifty-four-slot register had `Phi_SR = 32`, with only
 `RCS-03C3B2A1` active. The owner then selected B2A1-A and B2A2A-B. A twelfth
-audit split old B2A2B; current `Phi_SR = 31` across fifty-five slots, and only
-`RCS-03C3B2A2B1` is active.
+audit split old B2A2B, initially producing `Phi_SR = 31` with B1 active. The
+owner subsequently selected B1-B; current `Phi_SR = 30` across fifty-five
+slots, and only `RCS-03C3B2A2B2` is active.
 
 ## 2026-09-24 design-first correction — the master index must not flatten the game
 
@@ -853,9 +953,10 @@ exact `{D,E,O}` phase support. **Eleventh prerequisite correction:** old B2A is
 a non-counting parent for five source-root policies. The owner selected
 `RCS-03C3B2A1-A` and then `RCS-03C3B2A2A-B`. **Twelfth prerequisite
 correction:** old B2A2B is a non-counting parent for temporal-relationship
-support and conditional additive-root promotion. The sole active card is now
-`RCS-03C3B2A2B1`. Do not revive C171 as an owner question. Exact Relic tuple
-and evidence-projection atomicity are derived, not choices.
+support and conditional additive-root promotion. The owner selected
+`RCS-03C3B2A2B1-B`, requiring nonempty eligible temporal support; the sole
+active card is now `RCS-03C3B2A2B2`. Do not revive C171 as an owner question.
+Exact Relic tuple and evidence-projection atomicity are derived, not choices.
 
 **Agent correction:** the first internal sixth-amendment draft omitted coupled
 H+S admission and phase attribution while relying on both. Adversarial review
@@ -924,7 +1025,8 @@ descendants and conditional `RCS-03C2B` are pruned. `RCS-03C3B2A1-A` gives
 each accepted operation occurrence one primitive lineage across its realized
 applications, and `RCS-03C3B2A2A-B` coarsens every qualifying authored finite
 episode into one canonical root. The twelfth amendment exposes the separate
-temporal-support boundary. Current `Phi_SR = 31`. Each ordinary future
+temporal-support boundary, and the owner selected its nonempty-support branch
+B1-B. Current `Phi_SR = 30`. Each ordinary future
 Relic round must reduce it and may not mint an automatic descendant. The
 original twenty-slot/`Phi_SR = 18` count first became twenty-five/23 when the
 source audit exposed seven atomic boundaries inside two old parent rows. The
@@ -949,8 +1051,9 @@ to 30; selecting A2B-C reduces it to 29; deriving B1B reduces it to 28;
 replacing old B2A with five atomic children adds four, producing fifty-four
 slots and `Phi_SR = 32`; selecting B2A1-A reduces it to 31; selecting B2A2A-B
 reduces it to 30; replacing old B2A2B with two atomic children adds one,
-producing fifty-five slots and `Phi_SR = 31`. Adding another genuinely missed
-product slot requires an owner-visible charter amendment with the new bound.
+producing fifty-five slots and `Phi_SR = 31`; selecting B1-B reduces it to 30.
+Adding another genuinely missed product slot requires an owner-visible charter
+amendment with the new bound.
 
 EP-D02-C3c.171 remains unanswered but is no longer an owner choice. Its own
 scope changes only catalog prevalence/proof burden, not a player action,
@@ -960,23 +1063,22 @@ authoring/evaluation possibilities; C170-A is sufficient for the framework's
 existential continuity promise. Its graph descendants are pruned unless later
 evidence passes the index's reopening test.
 
-The owner selected `RCS-03C3B2A1-A` and `RCS-03C3B2A2A-B`, so one accepted
-operation first has one primitive lineage and every qualifying prospectively
-authored finite source episode then coarsens all realized member lineages into
-one canonical episode root. The sole active Relic boundary is now
-`RCS-03C3B2A2B1` under `SR-03`: whether the catalog excludes or supports at
-least one eligible canonical nonmerged multi-root H order/trajectory form.
-Present only A/B and recommend B for a lived temporal cross-source language.
-Eligibility requires a reachable, materially effective, non-preempted,
-inclusion-minimal relation with at least two indispensable operands retaining
-at least two distinct post-coarsening roots. A reachable matched separator must
-hold operands, source roles, lineage topology, and non-temporal inputs fixed
-while a change of order or trajectory flips the claim. Raw adjacency/co-
-occurrence, shared records/views, aliases, packets, same-root episode members,
-and Relic matching never suffice. Additive relation-root promotion remains
-conditional B2A2B2; current-state roots, build roots, child partitioning,
-fan-out, claims/reuse, exact horizons, actor information, and configuration
-locks remain separate.
+The owner selected `RCS-03C3B2A1-A`, `RCS-03C3B2A2A-B`, and
+`RCS-03C3B2A2B1-B`. One accepted operation first has one primitive lineage;
+every qualifying prospectively authored finite source episode then coarsens
+all realized member lineages into one canonical episode root; and the catalog
+contains at least one eligible canonical nonmerged multi-root H order/
+trajectory form outside those same-root episodes. The sole active Relic
+boundary is now `RCS-03C3B2A2B2` under `SR-03`: whether no, every, or a
+nonempty proper subset of eligible forms additionally receives one additive
+multi-parent relation root under a stable versioned form policy. Recommend B,
+universal promotion inside the narrow eligible domain, for one coherent
+relationship-root grammar and the strongest direct ideal fit. Every promoted
+root retains complete operand ancestry, is non-independent from every
+ancestor, and cannot pair with a parent as an independent source for one
+result. Current-state roots, build roots, child partitioning, fan-out,
+claims/reuse, exact horizons, actor information, and configuration locks remain
+separate.
 The authoritative decision record is unchanged; implementation remains blocked.
 
 ## 2026-09-15 standalone-game north star — Souls and Simulacra
@@ -8294,10 +8396,10 @@ The owner then selected B1-C, B2-A, A2A-C, and A2B-C. A tenth amendment split
 old B1A2, B1B then derived exact `{D,E,O}` support, and the eleventh amendment
 split old B2A into five counted children. The owner then selected B2A1-A;
 the owner then selected B2A2A-B, and a twelfth amendment split old B2A2B into
-support and conditional promotion. Continue at registered Relic slot
-`RCS-03C3B2A2B1` under `SR-03`. Conditional `RCS-03C3B2A2B2`,
-`RCS-03C3B2A3`–`RCS-03C3F`, expanded `RCS-08`, cause, and agency follow
-separately.
+support and conditional promotion. The owner then selected B1-B, requiring
+nonempty eligible temporal support. Continue at registered Relic slot
+`RCS-03C3B2A2B2` under `SR-03`; `RCS-03C3B2A3`–`RCS-03C3F`, expanded
+`RCS-08`, cause, and agency follow separately.
 
 R11 begins only
 after R10 completes and first chooses package proximity for R10.7's selected
@@ -8441,10 +8543,10 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-25 04:37 UTC — integrated history preservation audited](docs/handoffs/2026-09-25-0437--integrated-history-preservation-audited.md)**
-(session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the audit
-result and active progression frontier, then use this living head for the
-integrated engine state.
+[2026-09-25 05:11 UTC — temporal relationship support selected](docs/handoffs/2026-09-25-0511--relic-temporal-relationship-support-selected.md)**
+(session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
+progression frontier, then use this living head for the integrated project
+state.
 
 **ENGINE-LANE LATEST:**
 [2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md)
