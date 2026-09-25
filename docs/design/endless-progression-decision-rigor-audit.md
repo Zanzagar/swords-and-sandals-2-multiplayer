@@ -2833,11 +2833,67 @@ catalog support set is a nonempty subset of `{2,3}` and is therefore exactly
 interruption counterplay, as the recorded `110`/`111` countermodel proves.
 Exact pairs, operators, counts, local co-location, singular/exact-two mapping,
 incidence, prevalence, and quotas remain AUTHOR/SPEC under the anti-recursion
-rule. No eleventh register amendment is required.
+rule. No eleventh register amendment is required for the width boundary itself.
 
-The current fifty-slot register contains 29 `SCREEN`, 1 `OWNER-OPEN`, 7
-`PRUNED`, 11 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so
-`Phi_SR = 30`. `RCS-03C3B1A2B` is the sole active card.
+The owner then selected `RCS-03C3B1A2B-C`. The coupled-package catalog supports
+both width two and width three: `W^{multi}_v={2,3}`. Distinct width witnesses
+need not occur at distinct positions, entries, or Relics. Each package's
+indispensable phase claims participate directly while retaining their semantic
+differences; coexistence is aggregate. Width three is the narratively fullest
+whole-act package but is neither doctrinally superior nor automatically rarer,
+stronger, or more rewarding. Selecting C reduced `Phi_SR` from 30 to 29.
+
+That answer eliminates the next owner fork. An admitted width-three package
+contains indispensable claims in each of `D`, `E`, and `O` relative to one
+candidate source role and is already reachable, materially effective,
+non-preempted, and inclusion-minimal. Because `{D,E,O}` is exhaustive,
+`RCS-03C3B1B` closes `DERIVED` with exact material phase support `{D,E,O}`.
+This does not create a third independently isolatable route at a position;
+selected B1A1B2-A still makes every phase-plural position exact-two. The
+derivation reduced `Phi_SR` from 29 to 28.
+
+An eleventh prerequisite audit then found that old `RCS-03C3B2A` compressed
+five independent policies. Within one accepted multi-application operation,
+semantic applications may share one root or split into several. Across
+separately accepted operations, roots may remain separate or merge into a
+finite authored episode. On the nonmerged complement, a compound order/
+trajectory claim may retain only its full operand lineage or additionally own
+an additive multi-parent relation root. These three policies vary
+independently. After applicable action roots exist, a material nonterminating
+revision may preserve or succeed a current state's root, while irreducibly
+multi-root current-state support is a separate cardinality topology.
+Founder-versus-successor and singleton-versus-composite support therefore
+cannot share one option list.
+
+One order/trajectory rule inside `H` is forced: a concrete compound claim
+retains the nonempty union of all indispensable operand lineages and drops no
+endpoint. Otherwise a wrapper could hide an ineligible origin or count an
+already-accounted source twice. Whether the claim additionally owns a
+higher-order relation root is B2A2B; atom addressability, exact operator, and
+witness-tuple catalogs remain later.
+
+The register makes `RCS-03C3B2A` a non-counting parent for five counted
+children: within-operation root partition, cross-operation finite-episode
+merging, additive compound-H relation-root promotion, current-state root
+succession, and current-state multi-root support. Replacing one screened row
+with five adds four rows and potential cards. The current fifty-four-slot
+register contains 31 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 12 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE` row, so
+`Phi_SR = 32`. `RCS-03C3B2A1` is the sole active card. Its A/B/C partition is
+one primitive lineage per operation occurrence, every eligible
+multi-application form splitting into several primitive lineages, or form-level
+coexistence; A is recommended to avoid a hidden “roots per button” premium
+while preserving semantic applications as possible later children. B2A2A
+separately decides whether lineages from distinct operation occurrences are
+later coarsened into one canonical finite-episode root; conditional B2A2B owns
+additive relation-root promotion on its nonmerged complement.
+
+**Agent correction:** the first eleventh-amendment draft conflated forced full
+operand-lineage retention with a ban on additive multi-parent relation roots.
+The `r_A`,`r_B`/higher-order `r_T` countermodel preserves both ancestries and
+overlap exclusion while changing later root-level behavior against unrelated
+`r_C`. The unsupported no-root derivation was removed and B2A2B restored before
+owner presentation or commit.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

@@ -208,8 +208,13 @@ The owner selected RCS-03C3B1A1B1-C: phase-singular and phase-plural history
 positions coexist, then selected RCS-03C3B1A1B2-A: every phase-plural
 position is exact-two. A tenth audit split old RCS-03C3B1A2 into prevalence
 and conditional package-width support. The owner selected RCS-03C3B1A2A-C:
-coupled-supplement and clean history positions coexist. RCS-03C3B1A2B is the
-active owner choice under SR-03.
+coupled-supplement and clean history positions coexist, then selected
+RCS-03C3B1A2B-C: width-two and width-three packages coexist. That width-three
+witness derives exact material phase support `{D,E,O}` at RCS-03C3B1B. An
+eleventh audit makes old RCS-03C3B2A a non-counting parent for within-operation
+root partition, cross-operation finite-episode merging, additive compound-H
+relation-root promotion, current-state root succession, and current-state
+multi-root support. RCS-03C3B2A1 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19374,10 +19379,10 @@ remain **neutral/protective** anchors, and catalog coexistence is
 **aggregate**. This is a direction selection. It changes no authoritative
 decision wording and authorizes no implementation.
 
-Selecting C reduces `Phi_SR` from 31 to 30 and activates the already-counted
-conditional width row. `RCS-03C3B1A2B` is the sole active owner choice.
+Selecting C reduced `Phi_SR` from 31 to 30 and activated the already-counted
+conditional width row. `RCS-03C3B1A2B` was then the sole active owner choice.
 
-### RCS-03C3B1A2B — coupled-package semantic phase-width support — active owner choice
+### RCS-03C3B1A2B — coupled-package semantic phase-width support — C selected
 
 For every admitted supplemental coupled package `K` at any
 `p in J^{multi}_v`, with phase claims still classified relative to the same
@@ -19427,6 +19432,160 @@ UI, persistence, release, or implementation. Under B or C, all-three material
 phase support is derived for later `RCS-03C3B1B`; under A, B1B recomputes the
 remaining feasible catalog phase-support alternatives. The authoritative
 decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-24:** **C, two-phase and
+all-three-phase coupled packages coexist.** `W^{multi}_v={2,3}`. The completed
+catalog contains at least one reachable, materially effective, non-preempted,
+inclusion-minimal coupled package with indispensable claims in exactly two of
+`{D,E,O}`, and at least one distinct package witness with indispensable claims
+in all three. The witnesses may occur at the same or different positions,
+entries, or Relics. Exact phase pairs, operators, counts, co-location,
+singular/exact-two mapping, prevalence, incidence, and quotas remain
+AUTHOR/SPEC.
+
+Within each admitted package, its distinct indispensable phase claims and the
+position transition participate **directly** while remaining mechanically
+legible; coexistence of the two width classes is **aggregate**. Width three is
+the narratively fullest whole-act form, but is neither doctrinally superior nor
+automatically rarer, stronger, or more rewarding than width two. Width is route
+shape, not a power ladder. This is a direction selection. It changes no
+authoritative decision wording and authorizes no implementation.
+
+Selecting C reduces `Phi_SR` from 30 to 29. Because C necessarily supplies an
+admitted width-three package, the next registered phase-support row has no
+remaining owner branch and closes by derivation below.
+
+### RCS-03C3B1B — material occurrence-history phase support — derived
+
+The supported material occurrence-history phase set is exactly `{D,E,O}`. By
+selected A2B-C, there exists an admitted width-three package `K`. By definition,
+`ph(K)={D,E,O}`: relative to the same candidate source role, `K` contains at
+least one indispensable claim in each of declaration/commitment,
+execution/performance, and authoritative outcome/disposition. Admission already
+requires the package to be reachable, materially effective, non-preempted, and
+inclusion-minimal. The three-phase witness therefore establishes positive
+material support for every member of the exhaustive phase universe.
+
+This derivation does not create a third independently isolatable route at any
+position. Selected B1A1B2-A still makes every phase-plural position exact-two;
+the third phase is material inside an irreducible package, not independently
+isolatable there. Clean positions selected by B1A2A-C do not erase the positive
+catalog witness. Same-role classification prevents stitching unrelated source
+roles together, and indispensability prevents a redundant third claim from
+manufacturing all-three support. No A/B/C choice remains. Reclassifying B1B
+from `SCREEN` to `DERIVED` reduces `Phi_SR` from 29 to 28.
+
+> **Eleventh prerequisite correction, 2026-09-24:** re-deriving old
+> `RCS-03C3B2A` proved that “action/transition source-root identity across
+> occurrence, order, trajectory, and current-state attribution” compressed five
+> independently variable player-semantic policies.
+>
+> First, one authorized, accounted multi-application operation may keep one
+> root or expose several semantic roots. Second, separately authorized
+> operations may remain separate roots or merge into one finite, authored,
+> disclosed episode root. These vary independently: a Twinstrike can split
+> internally while Plant Sigil and Detonate remain separate, or Twinstrike can
+> remain whole while Plant/Detonate merge. Raw causal connectedness is never an
+> episode boundary. Third, a nonmerged compound order/trajectory claim may
+> retain only its indispensable operand-root lineages or additionally own one
+> additive multi-parent relation root carrying that complete ancestry. The
+> additive root remains non-independent from every ancestor but may, subject to
+> later B3 and claim rules, differ against an unrelated root. This varies from
+> both primitive partition and replacement/coarsening. Fourth, once primitive
+> and applicable episode/relation roots exist, a material revision of
+> an uninterrupted current-state episode may preserve its founder root or
+> succeed it. Fifth, a current-state fact may remain root-confined or admit an
+> irreducible package supported by several roots; succession and support
+> cardinality vary independently.
+>
+> One part of multi-occurrence `H` lineage is derived: every concrete canonical
+> witness retains the nonempty union of every indispensable operand's full
+> root lineages and drops no operand. `Guard-before-Heat` therefore always
+> retains both ancestries, and a same-root compound remains same-lineage.
+> Endpoint-only or empty attribution would launder origin or repeat an
+> already-accounted source. Whether the fully attributed claim additionally
+> receives a higher-order relation root is the separate B2A2B policy, not a
+> derivation.
+>
+> The register therefore makes `RCS-03C3B2A` a non-counting parent and replaces
+> its one row with `RCS-03C3B2A1` (within-operation root partition),
+> non-counting `RCS-03C3B2A2` for `RCS-03C3B2A2A` (cross-operation
+> finite-episode root merging) and conditional `RCS-03C3B2A2B` (additive
+> compound-H relation-root promotion),
+> `RCS-03C3B2A3` (current-state root succession through a nonterminating semantic
+> revision), and `RCS-03C3B2A4` (current-state irreducible multi-root support).
+> `RCS-03C3B2B` follows all five. Replacing one screened row with five adds four
+> rows and four potential cards. After A2B-C and derived B1B had reduced
+> `Phi_SR` to 28, this amendment produces fifty-four counted slots and
+> `Phi_SR = 32`.
+
+> **Agent correction:** the first eleventh-amendment draft correctly derived
+> full operand-lineage retention but incorrectly inferred that a fully
+> attributed compound claim could never own an additive relation root. A
+> countermodel preserves `r_A` and `r_B`, gives `A-before-B` a higher-order
+> `r_T` with ancestry `{r_A,r_B}`, forbids `r_T` from pairing with either
+> ancestor, and still permits later-distinct treatment against unrelated
+> `r_C`. That world differs materially without laundering lineage. The no-root
+> overclaim was removed and B2A2B restored before owner presentation or commit.
+
+> **Scope guard:** aliases, phase views, action/build views, packets, fields,
+> storage writes, animation callbacks, and resolver microsteps never mint
+> roots. Every root retains authorization, payment/accounting, origin, and full
+> lineage. Two position proofs cannot be independent for one relationship
+> result if their full root-lineage sets intersect or their candidate roots
+> share one nonmultiplying authorization/accounting parent. Root-versus-child
+> addressability remains B3, child partitioning B4,
+> same-cut fan-out C3C, claims/reuse C3D-C3F, and cross-root/team fan-out RCS-08.
+> Exact family catalogs and serialized IDs remain AUTHOR/SPEC after the global
+> semantic policies are selected.
+
+### RCS-03C3B2A1 — primitive within-operation action-root partition — active owner choice
+
+Let `O^{multi-app}_v` be the set of versioned action-operation forms that can,
+within one accepted authorization and accounting episode, produce at least two
+separately authored, semantically distinguishable action applications. A
+multi-hit Technique, a channel with authored pulses, or a compound advance and
+intercept may qualify. Multiple records, targets, fields, D/E/O views, or
+resolver steps do not establish membership. Every occurrence of one form uses
+the same disclosed partition policy over applications it actually realizes; an
+interrupted or shortened occurrence that realizes only one application mints
+no phantom lineage for an application that never happened.
+
+Let `S^{split}_v` contain the forms in `O^{multi-app}_v` whose one occurrence
+produces more than one primitive pre-episode action-root lineage. A split
+lineage still retains the operation's shared authorization and accounting;
+this card never lets one paid operation counterfeit a second independently
+accounted source. B2A2 may later coarsen primitive lineages belonging to
+distinct operation occurrences into one canonical finite-episode root or
+promote an eligible nonmerged compound claim into an additive relation root;
+A1 decides neither cross-operation policy.
+
+| Choice | Within-operation root policy | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — every operation occurrence yields one primitive lineage** | `S^{split}_v` is empty. Before any B2A2 cross-operation policy, one accepted operation occurrence has one primitive action-root lineage from commitment, if any, through all realized internal applications and terminal disposition. Its distinct semantic applications may later become child atoms, but retain that lineage. | **Recommended.** The operation and its several meaningful manifestations participate **directly** as one causal identity without erasing their differences; this is the strongest local Achintya fit. It protects the cross-source weaver from a hidden “roots per button” premium and gives claims, logs, and replay one stable within-operation lineage. The cost is that a long channel or compound Technique cannot preserve separate primitive claim/reuse identity for its authored applications. | One paid Twinstrike makes an opening and returning cut. Both initially carry `r_Twinstrike`. Even if B3 later exposes two child applications, they retain the same lineage and cannot occupy two independent-source positions of one result. B2A2A separately decides whether `r_Twinstrike` may merge with a distinct operation lineage; B2A2B owns additive compound roots. |
+| **B — every eligible multi-application operation splits** | `S^{split}_v=O^{multi-app}_v`, with at least one functional witness. Before B2A2, every eligible occurrence that actually realizes at least two authored applications yields at least two primitive action-root lineages under a stable semantic partition. A one-application truncated occurrence yields only its realized lineage. Exact lineage count and grouping remain AUTHOR/SPEC. | B makes each authored application and its primitive lineage **directly** continuous while preserving operation-level accounting only **partially**. Subject to B3 and later claim/reuse rules, it can permit separate treatment and finer replay blame, but creates a root-density stat: channels, summons, and multi-hit moves can become premium Relic fuel even though one authorization paid for them. UI and balance must disclose and price the partition. | Twinstrike's opening cut initially carries `r_T1` and its return `r_T2`, both recording the same authorization/accounting parent. If B3 later admits root occurrences as addressable atoms, either may pair with an independent ally lineage and later claim rules may distinguish them; together they still do not counterfeit two independently accounted sources. B2A2 may later coarsen or promote eligible cross-operation structures. |
+| **C — whole-lineage and split-lineage operation forms coexist** | `S^{split}_v` is a nonempty proper subset of `O^{multi-app}_v`. At least one functional form yields one primitive lineage across a multi-application occurrence and at least one distinct form yields several, under stable disclosed form-level rules. | Local forms inherit A or B; their catalog coexistence is **aggregate**, not a stronger local realization of the ideal. C offers the richest action identities—for example, ordinary compound moves stay whole while ritual channels expose distinct pulses—but creates two lineage grammars, taxonomy arbitrage, tooltip burden, and a likely premium for split forms. | Guarding Rush initially retains one lineage across advance and intercept, while a versioned Choral Rite yields two authored pulse lineages. The mapping is stable by form, never selected opportunistically after seeing a Relic recipe; B2A2 still owns later cross-operation coarsening and promotion. |
+
+**Recommendation: A, one primitive lineage per accepted operation occurrence.** It best
+preserves the selected cross-source purpose: a single action can have several
+truthful semantic faces without quietly becoming several primitive resources.
+B3 can later decide whether meaningful internal applications are addressable
+children while the one-lineage partition continues to prevent double counting.
+
+A/B/C are mutually exclusive and exhaustive over `S^{split}_v`: it is empty,
+all of `O^{multi-app}_v`, or a nonempty proper subset. B and C require reachable,
+material functional witnesses rather than labels. If no eligible
+multi-application form exists, only A is realized. A representation-only split,
+a D/E/O view split, or a target/packet split proves none of B or C.
+
+This card does not decide whether distinct operation occurrences may merge into
+one episode root, whether a nonmerged compound claim additionally owns a
+multi-parent relation root, how a live current state inherits or succeeds
+roots, whether a state fact may have irreducibly multi-root support,
+build-provenance roots, root/child atom addressability, claims, reuse, fan-out,
+payoff, UI realization, persistence, release, or implementation.
+`RCS-03C3B2A2A` follows every answer.
+The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
