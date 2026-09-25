@@ -2876,8 +2876,8 @@ The register makes `RCS-03C3B2A` a non-counting parent for five counted
 children: within-operation root partition, cross-operation finite-episode
 merging, additive compound-H relation-root promotion, current-state root
 succession, and current-state multi-root support. Replacing one screened row
-with five adds four rows and potential cards. The current fifty-four-slot
-register initially contained 31 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 12
+with five adds four rows and potential cards. The eleventh-amendment
+fifty-four-slot register initially contained 31 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 12
 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE` row, so
 `Phi_SR = 32` with `RCS-03C3B2A1` active.
 
@@ -2913,8 +2913,9 @@ keeps maximum action-level buildcraft but permits lifecycle root farming; C
 adds a source-density taxonomy and authoring arbitrage. Conditional B2A2B still
 owns additive relation-root promotion on the eligible nonmerged complement.
 
-The current register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 13
-`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`.
+At presentation, the register contained 30 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 13 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 31`.
 
 **Agent correction:** the first eleventh-amendment draft conflated forced full
 operand-lineage retention with a ban on additive multi-parent relation roots.
@@ -2922,6 +2923,53 @@ The `r_A`,`r_B`/higher-order `r_T` countermodel preserves both ancestries and
 overlap exclusion while changing later root-level behavior against unrelated
 `r_C`. The unsupported no-root derivation was removed and B2A2B restored before
 owner presentation or commit.
+
+The owner then selected `RCS-03C3B2A2A-B`.
+`M^{merge}_v=F^{xop}_v`, with at least one reachable functional witness:
+every qualifying prospectively authored finite source episode gives all of its
+realized member operations one canonical episode root. Member payments,
+primitive histories, outcomes, and full ancestry remain, but the members
+cannot occupy independent-source positions together. Whole-form/whole-
+occurrence assignment, exclusive prospective membership, fresh identity after
+terminal or abort, no phantom members, no rollback, and replacement rather
+than additive-root semantics remain enforced. This directly preserves
+meaningful operational difference within one authored episode identity and
+reduces `Phi_SR` from 31 to 30.
+
+A twelfth prerequisite audit then disproved the old conditional routing rule's
+assumption that the remaining relation-promotion domain could be mechanically
+screened from prior answers. Two countermodels satisfy every selected rule. In
+the empty-domain world, required H positions use unary occurrence claims under
+unordered conjunction, phase-width packages remain within single roots, and a
+Plant–Detonate episode supplies B2A2A-B's functional coarsening witness. No
+canonical nonmerged multi-root order/trajectory claim exists. In the nonempty-
+domain world, add `Guard-before-Heat` over two distinct operation roots outside
+every prospectively authored source episode, plus a reachable matched
+Heat-before-Guard separator holding source roles, lineage topology, and every
+non-temporal admitted input fixed. Order alone flips the relationship claim.
+The worlds differ in readiness, interruption, and counterplay while preserving
+all predecessor selections.
+
+The missing boundary is therefore player-material content support, not catalog
+arithmetic. Old `RCS-03C3B2A2B` becomes a non-counting parent for counted
+`RCS-03C3B2A2B1`, empty versus nonempty eligible nonmerged multi-root H order/
+trajectory support, and conditional `RCS-03C3B2A2B2`, additive relation-root
+promotion. Eligibility requires a reachable, materially effective, non-
+preempted, inclusion-minimal canonical temporal claim with at least two
+indispensable operands retaining at least two distinct post-coarsening roots;
+its temporal structure must also pass a reachable matched separator that holds
+the operands, source roles, lineage topology, and non-temporal inputs fixed
+while a change of order or trajectory flips the claim. Raw adjacency,
+co-occurrence, shared records/views, aliases, packets, same-root episode
+members, and post-hoc Relic matching do not qualify.
+
+Replacing one row with two offsets B2A2A-B's ordinary reduction. The current
+fifty-five-slot register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 14
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`.
+`RCS-03C3B2A2B1` is the sole active card. Its two exhaustive choices are no
+eligible support or at least one eligible form; exact operators, identities,
+counts, distribution, and prevalence remain AUTHOR/SPEC. Absence prunes
+B2A2B2 and advances to B2A3; nonempty support opens B2A2B2 next.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

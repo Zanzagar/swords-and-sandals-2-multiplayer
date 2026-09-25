@@ -216,7 +216,14 @@ root partition, cross-operation finite-episode merging, additive compound-H
 relation-root promotion, current-state root succession, and current-state
 multi-root support. The owner selected RCS-03C3B2A1-A: every accepted
 operation occurrence has one primitive lineage across its realized
-applications. RCS-03C3B2A2A is the active owner choice under SR-03.
+applications. The owner then selected RCS-03C3B2A2A-B: every qualifying
+prospectively authored finite source episode coarsens all realized member
+operation lineages into one canonical episode root. A twelfth prerequisite
+audit proved that this does not determine whether the completed catalog
+supports any canonical nonmerged multi-root H order/trajectory claim. Old
+RCS-03C3B2A2B is therefore a non-counting parent for support boundary
+RCS-03C3B2A2B1 and conditional promotion boundary RCS-03C3B2A2B2.
+RCS-03C3B2A2B1 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19612,7 +19619,7 @@ succession or cardinality, build provenance, root/child addressability, or
 claims and reuse. No later row derives or prunes. `RCS-03C3B2A2A` becomes the
 sole active owner choice.
 
-### RCS-03C3B2A2A — cross-operation finite source-episode root coarsening — active owner choice
+### RCS-03C3B2A2A — cross-operation finite source-episode root coarsening — B selected
 
 Inherit A1-A: every accepted operation occurrence first contributes one
 primitive action lineage. Let `F^{xop}_v` be the set of versioned finite
@@ -19678,6 +19685,111 @@ payoff, persistence, release, or implementation. After any answer, screen
 `RCS-03C3B2A2B` against the remaining eligible nonmerged compound-H domain: it
 becomes the next card if that domain is nonempty, otherwise it is pruned and
 `RCS-03C3B2A3` follows. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-25:** **B, every
+qualifying finite source episode coarsens.** `M^{merge}_v=F^{xop}_v`, and B's
+functional-witness requirement makes `F^{xop}_v` nonempty. Every occurrence of
+one qualifying prospectively authored form opens one canonical episode root;
+every separately accepted member operation that it actually realizes joins
+that root. Primitive histories, payments, outcomes, semantic applications,
+and full ancestry remain legible, but the realized members cannot occupy
+independent-source positions together. An unperformed member adds no lineage,
+and every re-initiation after terminal or abort disposition opens a fresh
+identity.
+
+The distinct member operations and their one finite source episode participate
+**directly** in one operative root identity while their commitments, costs,
+histories, and outcomes remain mechanically different. Universal coarsening
+within the qualifying authored domain is **aggregate**. This gives Souls and
+Simulacra the teachable rule “one authored source episode, one canonical
+source root” and prevents an integral multi-button lifecycle from farming
+independent Relic sources. Its cost is the loss of internal cross-source
+eligibility for every qualifying lifecycle, so episode forms must remain
+narrow, prospective, disclosed, canonical, exclusive, and source-owned.
+
+Plant Sigil prospectively opens `r_Rupture`; its later separately accepted
+Detonate joins that same root. Their histories remain distinct ancestry, but
+they cannot fill two independent positions of one relationship result. An
+unrelated Guard root may still pair with `r_Rupture`. An emergent
+`Guard -> Heat` sequence remains separate unless the source system had already
+authored that exact finite episode before its first member's commitment.
+Coarsening remains replacement/equivalence, never an additive third root, and
+later membership never rolls back a committed result.
+
+Selecting B reduces `Phi_SR` from 31 to 30. It decides no additive relation
+root, current-state root, build root, addressability, claim/reuse, payoff,
+persistence, release, or implementation policy. The authoritative decision
+record remains unchanged.
+
+> **Twelfth prerequisite correction, 2026-09-25:** screening old
+> `RCS-03C3B2A2B` after B2A2A-B found that the selected rules prove neither an
+> empty nor a nonempty eligible nonmerged multi-root H order/trajectory domain.
+> In one valid world, required H positions use unary occurrence claims under
+> unordered conjunction, width-two/three packages remain inside single roots,
+> and Plant–Detonate supplies B2A2A-B's coarsened episode witness; no canonical
+> nonmerged multi-root order/trajectory claim exists. A second valid world adds
+> `Guard-before-Heat` across two separately rooted operations that were not one
+> prospectively authored source episode. The worlds preserve every prior
+> answer but differ in sequence timing, denial, and counterplay.
+>
+> Silently opening promotion would invent the second content family; silently
+> pruning it would exclude that family. Old `RCS-03C3B2A2B` is therefore a
+> non-counting parent for counted `RCS-03C3B2A2B1` (support for eligible
+> nonmerged multi-root H order/trajectory forms) and conditional
+> `RCS-03C3B2A2B2` (whether an admitted form additionally owns a relation
+> root). Replacing one counted row with two adds one slot. After B2A2A-B first
+> reduced `Phi_SR` to 30, the twelfth amendment produces fifty-five counted
+> slots and restores `Phi_SR = 31`: 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`,
+> 14 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`.
+
+### RCS-03C3B2A2B1 — nonmerged multi-root H order/trajectory support — active owner choice
+
+Let `E^{rel}_v` be the completed catalog's set of canonical H relationship
+forms satisfying all of the following:
+
+- the form has an inclusion-minimal package of at least two indispensable
+  operand claims;
+- after A1-A and A2A-B apply, those operands' full lineage union contains at
+  least two distinct canonical roots;
+- every listed operand is indispensable, and temporal structure is separately
+  indispensable: a reachable matched separator holds the operand multiset,
+  source roles, post-coarsening root-lineage topology, and every non-temporal
+  admitted input fixed; either reversing the relevant order or substituting a
+  non-equivalent authored trajectory must flip the claim. When literal
+  reversal is inapplicable, the alternative trajectory retains the relevant
+  endpoints;
+- the form has a reachable, materially effective, non-preempted witness under
+  the selected finite freshness rule; and
+- the relationship is canonical source evidence, not raw adjacency,
+  co-occurrence, a shared record or view, aliasing, packet structure, or a
+  post-hoc Relic match.
+
+Same-root members of one coarsened episode cannot establish membership. Every
+eligible form retains the nonempty full lineage union of all indispensable
+operands and inherits their authorization/accounting ancestry. This card asks
+only whether this temporal cross-root relationship language exists. It does
+not yet decide whether the claim itself becomes a new root.
+
+| Choice | Catalog support policy | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — exclude nonmerged multi-root order/trajectory forms** | `E^{rel}_v` is empty. Canonical H evidence may still use unary occurrences, single-root phase packages, and unordered cross-root conjunctions, but no materially effective order/trajectory claim indispensably relates two roots left distinct after episode coarsening. Live-state positions remain a separate selected evidence language and later root question, not H evidence. | A is the lower-burden, highly legible countercase. It keeps cross-source weaving available through simultaneous or unordered relationships while avoiding sequence-chasing, temporal logs, and order-denial edge cases. At this omitted boundary the ideal is **neutral/protective**, not contradicted; however, the cross-source system loses a powerful way for distinct acts to participate in one lived temporal relation. Promotion row B2A2B2 is pruned and B2A3 follows. | A Relic may require “Guard occurred and ally Heat occurred within the valid horizon, in either order,” with each source retaining its root. It may not treat “Guard completed before Heat landed” as a canonical material H relationship. |
+| **B — support nonmerged multi-root order/trajectory forms** | `E^{rel}_v` is nonempty. At least one reachable canonical H form indispensably relates two or more distinct post-coarsening roots through order or trajectory. Exact operators, forms, counts, distribution, and prevalence remain AUTHOR/SPEC. | **Recommended.** At the predicate/relationship boundary, distinct source roots retain their identities while participating **directly** in one irreducible temporal claim—the stronger Souls and Simulacra expression of Achintya Bheda Abheda. It makes cross-source weaving feel lived rather than merely co-present. Costs are order/freshness disclosure, replay and log burden, coordination pressure, denial-window edge cases, and the risk of formulaic “perform A then B” recipes. B2A2B2 follows to decide whether such a claim also owns a relation root. | Guard carries `r_G`; a later ally Heat carries unrelated `r_H`; neither belongs to one prospectively authored source episode. “Guard completed before Heat landed within the valid horizon” is canonical only if a reachable matched Heat-before-Guard history with the same operands and non-temporal admitted inputs defeats the claim. It retains both roots. This card does not decide whether it additionally receives `r_G-before-H`. |
+
+**Recommendation: B, require at least one eligible nonmerged multi-root
+order/trajectory form.** The already-selected cross-source weaver benefits from at
+least one relationship whose meaning is genuinely in how distinct acts unfold,
+not only that their facts coexist. This is a support floor, not universal
+prevalence: focused unordered builds and single-root histories remain legal,
+and exact temporal grammars stay authored after the global language is chosen.
+
+A/B are mutually exclusive and exhaustive because the eligible support set is
+either empty or nonempty. A third prevalence option would be false precision:
+no fixed candidate universe exists yet, and exact counts or shares do not
+change the global support boundary. A prunes conditional B2A2B2 and advances
+to B2A3. B opens B2A2B2 next. Current-state roots, build roots,
+root/child addressability, claim/reuse, payoff, UI realization, persistence,
+release, and implementation remain separate. The authoritative decision
+record remains unchanged.
 
 ## Session protocol and evidence
 
