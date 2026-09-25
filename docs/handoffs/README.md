@@ -132,8 +132,15 @@ Keep this shape; it is what worked:
 ## Index
 
 The engine/evidence and progression-design lanes developed concurrently before
-their 2026-09-25 integration. Each lane is newest-first within its own table;
-the root living head's single `LATEST` pointer is authoritative across both.
+their 2026-09-25 integration. Each historical lane is newest-first within its
+own table; new integrated handoffs are indexed first. The root living head's
+single `LATEST` pointer is authoritative across all three tables.
+
+### Integrated repository lane — newest first
+
+| Handoff | Session | One line |
+| --- | --- | --- |
+| [integrated history preservation audited](2026-09-25-0437--integrated-history-preservation-audited.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | Three independent max-effort audits preserve both histories, repair the live integration defects they found, and leave `RCS-03C3B2A2B1` as the sole active Relic frontier. |
 
 ### Progression decision-round lane — newest first
 

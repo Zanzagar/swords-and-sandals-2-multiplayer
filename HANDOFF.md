@@ -25,12 +25,18 @@ The audits also found defects in the integrated documentation, which are
 corrected at their live instructions rather than hidden: one stale
 fifty-row/B1A2B presentation, one stale overnight-plan boundary claim, two
 broken source fragments, compressed Stage 5 implementation detail, and a stale
-adapter-gap claim. None was a lost owner choice. The combined handoff histories exposed 36 additional ordering
-inversions: 34 arise from the delayed progression checkpoint `ede5ad1`, not
+adapter-gap claim. None was a lost owner choice. The combined handoff histories
+exposed 36 additional ordering inversions: 34 arise from delayed progression
+checkpoint `ede5ad1`, not
 from timezone conversion, and two from mixed local/UTC naming. Frozen files
 remain untouched and exactly allowlisted; future handoffs use UTC filenames,
 explicit `+0000` frontmatter, same-session commits, and the single `LATEST`
 pointer as the start authority.
+
+At clean commit `194cae1`, `node --test --test-concurrency=1` completed with
+3,642 tests: 3,627 passed, 0 failed, and 15 skipped under this tree's existing
+asset/archive profile. The repaired handoff-navigation file passed 7/7 inside
+that full run.
 
 This audit changes no progression selection. Universal finite source-episode
 coarsening remains selected, and `RCS-03C3B2A2B1` remains the next and sole
@@ -8429,10 +8435,10 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-25 04:02 UTC — universal authored-episode coarsening selected](docs/handoffs/2026-09-25-0402--relic-authored-episode-coarsening-selected.md)**
-(session `1b7efff1-0561-4822-a925-84a0382490b9`). Start there for the active
-progression frontier, then use this living head for the integrated engine
-state.
+[2026-09-25 04:37 UTC — integrated history preservation audited](docs/handoffs/2026-09-25-0437--integrated-history-preservation-audited.md)**
+(session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the audit
+result and active progression frontier, then use this living head for the
+integrated engine state.
 
 **ENGINE-LANE LATEST:**
 [2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md)
