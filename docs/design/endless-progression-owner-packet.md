@@ -225,7 +225,14 @@ RCS-03C3B2A2B is therefore a non-counting parent for support boundary
 RCS-03C3B2A2B1 and conditional promotion boundary RCS-03C3B2A2B2.
 The owner selected RCS-03C3B2A2B1-B: the completed catalog supports at least
 one eligible canonical nonmerged multi-root H order/trajectory form.
-RCS-03C3B2A2B2 is the active owner choice under SR-03.
+The owner then selected RCS-03C3B2A2B2-B: every successfully realized
+qualifying occurrence of every eligible temporal-relationship form receives
+one additive relation root with complete operand ancestry. A thirteenth
+prerequisite audit then proved that current-state support does not itself prove
+that any state can revise materially without terminating. Old RCS-03C3B2A3 is
+therefore a non-counting parent for support boundary RCS-03C3B2A3A and
+conditional succession boundary RCS-03C3B2A3B. RCS-03C3B2A3A is the active
+owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19819,9 +19826,9 @@ itself. Selecting it reclassifies B1 from `OWNER-OPEN` to `DIR-SELECTED` and
 activates already-counted B2, reducing `Phi_SR` from 31 to 30. The fifty-five-
 slot register now contains 29 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 15
 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`. B2 is the sole active
-card. The authoritative decision record remains unchanged.
+card at this checkpoint. The authoritative decision record remains unchanged.
 
-### RCS-03C3B2A2B2 — additive multi-parent relation-root promotion — active owner choice
+### RCS-03C3B2A2B2 — additive multi-parent relation-root promotion — B selected
 
 For a successfully realized canonical relationship occurrence `x`, let
 `Ops(x)` be its inclusion-minimal indispensable operand claims, and let `U_x`
@@ -19854,7 +19861,7 @@ duplicates it; exact downstream availability remains separate.
 | Choice | Promotion policy | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
 | --- | --- | --- | --- |
 | **A — relationships retain operand lineages only** | `P^{rel-root}_v` is empty. Every eligible temporal relationship retains `U_x`, but none receives an additional relation root. | This is the lowest-burden ontology. It avoids higher-order root proliferation, layered root logs, and relation-root combo ladders while preserving B1-B's meaningful choreography. Its Achintya fit remains **direct** at the predicate boundary but is **partial** here: unity lives in the irreducible claim, while root identity remains entirely in the distinct operands. | Guard supplies `r_G`, Heat supplies unrelated `r_H`, and Guard-before-Heat canonically carries both. It may satisfy the Relic currently reading that claim, but no `r_G->H` exists for later root-level treatment. |
-| **B — every eligible relationship promotes** | `P^{rel-root}_v=E^{rel}_v`. Every successfully realized eligible form receives exactly one additive relation root with its complete operand ancestry. | **Recommended.** The parents remain genuinely distinct while their temporal relationship receives one operative identity: the strongest direct Souls and Simulacra / Achintya Bheda Abheda expression at this root boundary. It gives one teachable rule and, if later addressability/claim/reuse rows authorize the route, can support outward interruptible sequence-building rather than free double counting. Costs are deeper logs/tooltips, more root entities, stronger sequence incentives if exposed downstream, and combinatorial pressure if the eligible catalog is too broad. Universal prevalence is **aggregate**. | Guard-before-Heat creates `r_G->H` carrying `{r_G,r_H}`. It cannot pair independently with `r_G` or `r_H`; subject to later rows, it may pair with unrelated Shatter root `r_S`, so an opponent can deny the higher-order route by disrupting or reversing the first relationship before satisfaction. |
+| **B — every eligible relationship promotes** | `P^{rel-root}_v=E^{rel}_v`. Every successfully realized qualifying occurrence of every eligible form receives exactly one additive relation root with its complete operand ancestry. | **Recommended.** The parents remain genuinely distinct while their temporal relationship receives one operative identity: the strongest direct Souls and Simulacra / Achintya Bheda Abheda expression at this root boundary. It gives one teachable rule and, if later addressability/claim/reuse rows authorize the route, can support outward interruptible sequence-building rather than free double counting. Costs are deeper logs/tooltips, more root entities, stronger sequence incentives if exposed downstream, and combinatorial pressure if the eligible catalog is too broad. Universal prevalence is **aggregate**. | Guard-before-Heat creates `r_G->H` carrying `{r_G,r_H}`. It cannot pair independently with `r_G` or `r_H`; subject to later rows, it may pair with unrelated Shatter root `r_S`, so an opponent can deny the higher-order route by disrupting or reversing the first relationship before satisfaction. |
 | **C — promoted and lineage-only relationships coexist** | `P^{rel-root}_v` is a nonempty proper subset of `E^{rel}_v`. At least one reachable eligible form promotes and at least one distinct reachable eligible form does not, under stable disclosed form rules; C therefore requires at least two functional forms. | Promoted forms have B's direct fit and unpromoted forms have A's partial root-boundary fit; coexistence is **aggregate**. C lets foundational or “soul-forming” relationships receive higher-order root identities while lighter tactical sequences remain lineage-only claims. It also creates a root-topology taxonomy: players must learn which relationships can become distinct future build material if later rows expose them, and authors must prevent promoted forms from becoming categorically privileged. | Guard-before-Heat creates `r_G->H`, while Feint-before-Riposte remains a canonical claim carrying `{r_F,r_R}` but creates no new root. The distinction belongs to their versioned definitions, never the Relic that later notices them. |
 
 **Recommendation: B, every eligible relationship promotes.** The resulting
@@ -19884,7 +19891,113 @@ decide who may read or use a cross-combatant relationship root; the ally-Heat
 example selects graph identity only. Current-state roots remain B2A3/B2A4;
 build provenance remains B2B; claims, reuse, payoff, presentation, persistence,
 release, and implementation remain later or AUTHOR/SPEC.
-`RCS-03C3B2A3` follows every answer. The authoritative decision record remains
+At presentation, old `RCS-03C3B2A3` followed every answer. The authoritative
+decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-25:** **B, every
+eligible temporal relationship promotes.** `P^{rel-root}_v=E^{rel}_v`. Every
+successfully realized qualifying occurrence of every eligible form receives
+exactly one fresh additive relation root. The occurrence's actual operand tuple
+must still retain at least two distinct canonical roots after episode
+coarsening; a same-root realization of a generally eligible form does not
+promote.
+
+The relation root retains the deduplicated complete transitive ancestry of
+every indispensable operand. It replaces or coarsens no parent. It is
+non-independent from every ancestor, from every root whose lineage intersects
+that ancestry, and from every root sharing a nonmultiplying authorization or
+accounting parent. Sibling relation roots that share such lineage therefore
+cannot counterfeit independent positions together. One canonical occurrence
+mints at most one root: reevaluation, several Relics reading it, replay, logs,
+aliases, and repeated result commits do not duplicate it.
+
+Promotion remains a stable prospective form policy. An interrupted,
+opposite-order, or off-trajectory attempt creates no root for that form; a
+separately authored inverse form may qualify. Later disruption does not rewrite
+historical root identity, although freshness expiry, claim/consumption, or
+later access rules may make that root inadmissible. B grants no addressability,
+nested operands, same-cut cascading, fan-out, cross-combatant access, claim,
+reuse, payoff, presentation, persistence, or release rule. Canonical
+occurrence/operand-tuple identity and overlapping-match resolution remain
+AUTHOR/SPEC; if a later all-pairs versus exclusive-matching policy materially
+changes root counts, it must pass the reopening screen rather than hide as an
+implementation detail.
+
+This is universal only inside the narrow authored eligible catalog, not a
+promise that temporal forms dominate the catalog. Locally, the relationship's
+dependent operative unity and its irreducibly distinct parents directly express
+the standing ideal. Under `SR-03`, at least one promoted root must eventually
+receive a material player-facing use; otherwise the new identity would remain
+decorative at closure. Selecting B moves B2 from `OWNER-OPEN` to
+`DIR-SELECTED`, would ordinarily reduce `Phi_SR` from 30 to 29, and initially
+advance to old B2A3. The authoritative decision record remains unchanged.
+
+> **Thirteenth prerequisite correction, 2026-09-25:** screening old
+> `RCS-03C3B2A3` found that the selected rules require useful current-state
+> evidence but do not require any state episode to survive a material semantic
+> revision. In one valid world, `Guarding-now` exists, yet every material
+> change genuinely ends that state occurrence and any later state opens a new
+> episode. In another otherwise valid world, a Ward or Heat state materially
+> intensifies while the same uninterrupted episode remains operative. Both
+> worlds preserve every selected H/S, phase, operation-root, episode-root, and
+> relation-root rule, but differ in continuity, interruption, logging, and
+> counterplay.
+>
+> Old `RCS-03C3B2A3` is therefore a non-counting parent for counted
+> `RCS-03C3B2A3A` (whether the completed catalog supports any reachable
+> material nonterminating current-state revision) and conditional
+> `RCS-03C3B2A3B` (root preservation versus succession within the nonempty
+> domain). Replacing one counted row with two adds one slot. After B2-B's
+> ordinary reduction to `Phi_SR = 29`, this amendment produces fifty-six
+> counted slots and restores `Phi_SR = 30`: 29 `SCREEN`, 1 `OWNER-OPEN`, 7
+> `PRUNED`, 16 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`.
+
+### RCS-03C3B2A3A — material nonterminating current-state revision support — active owner choice
+
+A **current-state continuity episode** is the maximal authoritative interval
+in which one prospectively versioned state-form instance remains operatively
+present for one source role. Establishment opens it; genuine clear, expiry,
+consumption, replacement, transfer, or encounter termination ends it.
+
+A **material nonterminating revision** is one canonical transition inside that
+interval which:
+
+- leaves the same state episode continuously operative;
+- changes player-semantic state content under a reachable held-fixed
+  comparison;
+- can independently change an effective `S` predicate, legal continuation, or
+  authoritative outcome;
+- remains material when root identity, Relic matching, payoff, and claim
+  bookkeeping are projected out; and
+- reaches an authoritative committed cut.
+
+No-op writes, aliases, fields, caches, timestamps, packets, logs, animations,
+callbacks, resolver microsteps, and representation churn do not qualify. An
+internal clear-and-rewrite with no authoritative state-absent cut cannot
+counterfeit termination. Conversely, genuine termination followed by
+re-establishment opens a new episode and is not a revision.
+
+Let `E^{state-rev}_v` be the completed catalog's set of prospectively versioned
+revision forms having at least one reachable functional occurrence.
+
+| Choice | Revision-support policy | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — no continuous material state revisions** | `E^{state-rev}_v` is empty. Current states may establish, persist unchanged, disrupt, terminate, and later re-establish, but none changes material semantic form while its episode remains continuously operative. | A gives the crispest lifecycle grammar, lowest UI/log burden, and no revision-threshold ambiguity. It excludes evolving wards, stances, charges, and other living state trajectories. It is compatible with the ideal but omits same-episode unity/difference at this boundary. A prunes conditional A3B and advances to A4. | `Guarding` is active or inactive. A stronger guard must genuinely end the old episode and establish a new state; it cannot emerge as an uninterrupted revision. |
+| **B — require continuous material state revision support** | `E^{state-rev}_v` is nonempty. The completed catalog contains at least one reachable state episode whose material semantic form changes without terminating. Exact forms, counts, distribution, and prevalence remain AUTHOR/SPEC. | **Recommended.** B supports evolving stances, wards, charges, and visible threshold counterplay. It is the stronger Souls and Simulacra / Achintya Bheda Abheda fit: one continuing state episode directly possesses materially different manifestations. Costs are lifecycle UI, transition logs, threshold clarity, and revision-spam pressure. B opens conditional A3B. | `Kindle` establishes continuous `Heat I`; an authored transition reaches `Heat II` while Heat is never authoritatively absent. A held-fixed foil remains at Heat I and changes a current-state Relic predicate or legal counter. |
+
+**Recommendation: B, require at least one continuous material state revision.**
+It creates room for a living state to remain one operative episode while its
+meaningful manifestation changes, without yet deciding whether that change
+preserves its root or succeeds it. Keep the support floor existential: exact
+revision families and their prevalence belong to AUTHOR/SPEC after the global
+language is chosen.
+
+A/B are mutually exclusive and exhaustive because `E^{state-rev}_v` is either
+empty or nonempty. A third prevalence choice would conflate the support floor
+with future catalog breadth. A prunes `RCS-03C3B2A3B`; B opens it next.
+Simultaneous multi-root state support remains B2A4, root/child addressability
+remains B3, and claims, reuse, payoff, presentation, persistence, release, and
+implementation remain separate. The authoritative decision record remains
 unchanged.
 
 ## Session protocol and evidence

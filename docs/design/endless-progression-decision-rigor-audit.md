@@ -2984,9 +2984,9 @@ same-root members of a coarsened episode cannot establish the required
 multi-root support.
 
 B1 moves from `OWNER-OPEN` to `DIR-SELECTED`, and conditional B2 moves from
-`SCREEN` to `OWNER-OPEN`. The current fifty-five-slot register therefore has
+`SCREEN` to `OWNER-OPEN`. The then-current fifty-five-slot register therefore had
 29 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 15 `DIR-SELECTED`, 1 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`. `RCS-03C3B2A2B2` is the sole active
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`. `RCS-03C3B2A2B2` was the sole active
 card. Let `P^{rel-root}_v` be the stable versioned subset of nonempty
 `E^{rel}_v` whose successfully realized occurrences receive one additive
 multi-parent relation root while retaining their full indispensable
@@ -2998,6 +2998,71 @@ to pair independently with either parent. A leaves unity at the predicate
 boundary only; C adds a promoted-versus-lineage-only root-topology taxonomy.
 Addressability, current-state roots, build roots, fan-out, claims, reuse,
 payoff, presentation, persistence, release, and implementation remain separate.
+
+The owner then selected `RCS-03C3B2A2B2-B`.
+`P^{rel-root}_v=E^{rel}_v`: every successfully realized qualifying occurrence
+of every eligible form receives exactly one fresh additive relation root. The
+actual occurrence must retain at least two distinct roots after episode
+coarsening. The root carries the deduplicated complete transitive ancestry of
+all indispensable operands, replaces no parent, and is non-independent from
+every ancestor, every intersecting lineage, and every root sharing a
+nonmultiplying authorization or accounting parent. Reevaluation, multiple
+Relics, replay, logs, aliases, and repeated commits cannot duplicate one
+canonical occurrence. Stable prospective form policy owns promotion;
+post-payoff, target-sensitive, Relic-sensitive, or favorable-history selection
+does not.
+
+The selected rule creates no addressability, nested-operand, same-cut cascade,
+fan-out, cross-combatant access, claim, reuse, payoff, persistence, or release
+authority. Failed, interrupted, opposite-order, and off-trajectory attempts
+create no root for that form. A separately authored inverse may qualify, and
+later disruption does not rewrite historical identity; later freshness,
+claim, or access rules may still make the root inadmissible. Canonical
+occurrence and overlapping-match resolution remain AUTHOR/SPEC, subject to
+reopening if their eventual policy materially changes root counts. B2 moves to
+`DIR-SELECTED`, ordinarily reducing `Phi_SR` from 30 to 29.
+
+A thirteenth prerequisite audit then disproved the old B2A3 row's assumption
+that current-state evidence entails a nonempty material-revision domain. In
+one valid world, `Guarding-now` is useful current-state evidence, but every
+material change genuinely terminates the old state and any later state begins
+a new continuity episode. In a second otherwise valid world, continuous Heat
+or Ward materially intensifies while the same episode remains operatively
+present. Every prior H/S, phase, operation-root, episode-root, and relation-
+root selection holds in both worlds, while continuity, interruption, logs,
+and counterplay differ.
+
+Old `RCS-03C3B2A3` is therefore a non-counting parent for
+`RCS-03C3B2A3A`, empty versus nonempty support for reachable material
+nonterminating current-state revision forms, and conditional
+`RCS-03C3B2A3B`, root preservation versus succession within the admitted
+domain. This is not catalog arithmetic: support determines whether evolving
+states exist at all, while succession determines lineage identity only after
+they do. Simultaneous multi-root support remains B2A4.
+
+Replacing one counted row with two adds one potential slot. The current
+thirteenth-amendment register has fifty-six slots: 29 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 16 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 30`. `RCS-03C3B2A3A` is the sole active card. Its
+eligible set contains prospectively versioned transitions that leave one
+state continuity episode uninterrupted, materially change player-semantic
+state content under a reachable held-fixed comparison, independently alter an
+effective `S` predicate, legal continuation, or authoritative outcome, remain
+material with root/Relic/payoff/claim bookkeeping projected out, and reach an
+authoritative committed cut. No-op writes, fields, caches, aliases, timestamps,
+packets, logs, animation, callbacks, resolver microsteps, and representation
+churn do not qualify. Neither can an internal clear/rewrite with no
+authoritative absent cut counterfeit termination; a genuine termination and
+re-establishment is a new episode rather than a revision.
+
+The two exhaustive A3A choices are an empty or nonempty support set. B is
+recommended: at least one continuous state may change material manifestation,
+supporting evolving wards, stances, charges, and visible threshold counterplay
+while expressing one continuing episode through real difference. Its costs are
+lifecycle UI, transition logs, threshold clarity, and revision-spam pressure.
+A supplies a crisper binary lifecycle but excludes living state trajectories.
+A prunes conditional A3B; B opens it next. Exact forms, counts, distribution,
+and prevalence remain AUTHOR/SPEC.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
