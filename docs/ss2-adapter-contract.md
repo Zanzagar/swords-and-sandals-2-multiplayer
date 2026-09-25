@@ -1328,11 +1328,12 @@ handover, and reconnects do not read as desyncs.
 
 With a supplied licensed SS2 build, complete a 1v1 adapter first and compare it
 with vanilla combat. Then render the additional static slots and exercise 2v2
-binding as a non-product integration harness. Before any Endless team build is
-called the first playable version, accepted EP-D07 requires per-action
-acknowledgement plus one distinct connected human for every allied seat,
-action-boundary pause, authenticated same-seat reconnect, and the established
-team-abandonment path. That path includes the visible versioned grace policy,
+binding as a non-product integration harness. The per-action acknowledgement
+gate already exists. Before any Endless team build is called the first playable
+version, accepted EP-D07 requires one distinct connected human for every allied
+seat and a session layer that uses that gate for action-boundary pause,
+authenticated same-seat reconnect, and the established team-abandonment path.
+That path includes the visible versioned grace policy,
 non-automatic expiry, every connected member's approval, and stale-on-reconnect
 ordering accepted in the corrected EP-D07 supplement. Terminal actions settle
 without a timer, partial reconnect stays paused, and Recovery keeps its original
@@ -1359,9 +1360,6 @@ above. The separate campaign save record is implemented asset-free in
 
 What is still missing before a playable mod:
 
-- **per-action presentation acknowledgement** — the terminal result bridge
-  cannot prevent action N+1 from rebinding the four vanilla globals while
-  action N's timeline is still running;
 - **the accepted human session lifecycle** — no admission/transport layer
   proves one distinct human per allied seat, persists action-boundary pause, or
   authenticates same-seat reconnect, visible grace timing, and race-safe

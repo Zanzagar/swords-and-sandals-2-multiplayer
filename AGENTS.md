@@ -18,10 +18,11 @@ measured evidence into self-confirming data.
 
 ## Start here
 
-**Read the newest file in `docs/handoffs/` before doing anything else**, then
-**`HANDOFF.md`'s LIVING HEAD** for accumulated state — everything above the
-`## THE ARCHIVE LINE` heading. Below that line is frozen evidence and history:
-read it to check a claim, never to learn what is current, and never append there.
+**Open `HANDOFF.md` and follow its single `LATEST` link before doing anything
+else**, then read **`HANDOFF.md`'s LIVING HEAD** for accumulated state —
+everything above the `## THE ARCHIVE LINE` heading. Below that line is frozen
+evidence and history: read it to check a claim, never to learn what is current,
+and never append there.
 
 `HANDOFF.md` is long and is deliberately NOT imported here — open it, do not
 expect it in context.
@@ -214,9 +215,9 @@ and the path is unreachable from Linux anyway.
   a wrong document.
 
 **Otherwise a skipped test is a real finding, not noise.** Expect the exact count
-the newest handoff states; if you measure a different number, say so rather than
-carrying the old one forward. The archive check is anchored so that a broken path
-derivation FAILS and names itself rather than skipping silently.
+the `LATEST`-linked handoff states; if you measure a different number, say so
+rather than carrying the old one forward. The archive check is anchored so that
+a broken path derivation FAILS and names itself rather than skipping silently.
 
 ## Conventions
 

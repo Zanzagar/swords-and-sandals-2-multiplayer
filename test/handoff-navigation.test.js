@@ -113,9 +113,11 @@ function headingOffset(text, heading) {
 }
 
 /**
- * Handoff stamps sort lexicographically, so the newest is the last name.
- * `README.md` is not a handoff and is excluded by the stamp pattern rather
- * than by name, so a second non-handoff file cannot quietly join it.
+ * Handoff stamps sort lexicographically. The integrated frozen history has
+ * explicit exceptions, so the last name is not treated as authoritative;
+ * `HANDOFF.md`'s LATEST pointer is. `README.md` is excluded by the stamp
+ * pattern rather than by name, so a second non-handoff file cannot quietly
+ * join it.
  */
 const HANDOFF_STAMP = /^(\d{4}-\d{2}-\d{2}-\d{4})--[a-z0-9-]+\.md$/;
 
@@ -154,12 +156,11 @@ function supersededName(frontmatterText) {
 /**
  * When each handoff FIRST entered git, as an epoch-seconds number.
  *
- * THE FILENAME STAMP IS A CLAIM; THIS IS THE FACT, and the two have disagreed
- * twice. Both times a handoff was stamped with the UTC time while labelled
- * `-0400`, so it sorted after a file written hours later and `ls
- * docs/handoffs/` sent the next session to a superseded brief. The head asks
- * every session to check with `git log --date=iso-local` and nothing enforced
- * it; that is what this derivation is for.
+ * THE FILENAME STAMP IS A CLAIM; THIS IS THE FACT. The frozen engine and
+ * progression histories used different timezone conventions, and a delayed
+ * progression checkpoint causes 34 ordering inversions. Those boundaries are
+ * enumerated exactly below. This derivation keeps future UTC, same-session
+ * handoffs honest without rewriting history.
  *
  * `--follow` is load-bearing: `2026-09-01-1550--codex-independence…` was
  * renamed from `…-1950--` for this same bug, so without it that file has no
@@ -197,30 +198,80 @@ async function firstCommitInstants() {
 
 /**
  * Handoffs whose filename stamp is out of order with the commit that added
- * them, with the reason each is left alone. BOTH ARE RECORDED IN THE LIVING
- * HEAD; neither may be renamed, because every link to them would break.
+ * them, with the reason each is left alone. They are recorded in the living
+ * head and may not be renamed, because existing links would break.
  *
  * This list is asserted MINIMAL below — an entry that stops being an inversion
  * fails the test as unnecessary — so it cannot quietly outlive its cause. Add
  * to it only for a handoff that is already committed and already linked;
- * a NEW handoff that lands here is the bug, and the fix is to stamp it in
- * local time before committing, not to widen this list.
+ * a NEW handoff that lands here is the bug. New briefs use UTC in filename and
+ * frontmatter and enter git in the same session; do not widen this list for
+ * them.
  */
+const DELAYED_PROGRESSION_CHECKPOINT_INVERSIONS = Object.freeze([
+  "2026-09-07-0330--the-armoured-golden-reaches-the-resolver.md",
+  "2026-09-10-1212--everything-is-pushed-and-the-workflow-gate-is-gone.md",
+  "2026-09-10-1730--the-map-was-not-silent-twice.md",
+  "2026-09-11-2115--both-halves-of-position-are-built.md",
+  "2026-09-11-2340--two-owner-items-were-a-session-away.md",
+  "2026-09-12-0140--the-last-authored-number-is-derived.md",
+  "2026-09-12-0930--weapon-range-is-projected-and-the-wave-broke-six.md",
+  "2026-09-12-2358--the-arena-has-two-axes-and-the-build-has-its-own-voice.md",
+  "2026-09-13-0040--the-fighter-is-a-rig-and-codex-broke-four-things.md",
+  "2026-09-13-1145--the-gladiator-is-dressed-and-the-shell-has-a-seam.md",
+  "2026-09-14-0130--the-arena-is-1to1-and-three-readings-were-mine.md",
+  "2026-09-14-0200--i-read-the-corpse-and-the-arena-is-drawn.md",
+  "2026-09-14-0255--the-backgrounds-were-jpegs-and-i-drew-none-of-them.md",
+  "2026-09-14-1400--five-modules-exist-and-two-are-not-drawn-yet.md",
+  "2026-09-15-0046--the-tint-landed-and-the-trail-vanished.md",
+  "2026-09-15-0400--the-filters-land-and-the-sky-has-a-clock.md",
+  "2026-09-15-0718--the-glow-is-drawn-and-it-hangs-the-page.md",
+  "2026-09-15-1015--the-glow-is-drawn-and-i-measured-the-instrument-twice.md",
+  "2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md",
+  "2026-09-15-1900--the-residual-was-the-rectangle-and-a-warning-was-wrong.md",
+  "2026-09-15-2330--two-clip-phenomena-one-per-rasteriser.md",
+  "2026-09-16-0130--psyche-up-was-never-the-owners.md",
+  "2026-09-16-2228--the-build-plays-seven-runs.md",
+  "2026-09-16-2356--the-stance-the-glow-and-an-ai-that-winds-up.md",
+  "2026-09-18-0130--the-picture-was-lying-and-the-canvas-was-a-postage-stamp.md",
+  "2026-09-19-0400--the-taunt-was-never-ranked.md",
+  "2026-09-19-1500--four-ranked-items-and-three-broken-premises.md",
+  "2026-09-19-2130--four-defects-a-campaign-and-a-blocker-that-moved.md",
+  "2026-09-20-0200--the-slots-are-declared-and-three-sentences-were-wrong.md",
+  "2026-09-20-2130--the-bolts-are-built-and-a-null-was-a-scheduled-divergence.md",
+  "2026-09-22-1821--nine-verbs-built-and-the-build-plays-favourites.md",
+  "2026-09-22-1934--every-spell-but-rejuvenate-and-the-build-plays-favourites.md",
+  "2026-09-23-0119--every-quirk-decided-and-the-crowd-is-built.md",
+  "2026-09-23-2119--the-arena-draws-what-the-engine-does.md"
+]);
+
 const KNOWN_STAMP_INVERSIONS = Object.freeze({
   "2026-09-01-0030--migration-closeout-and-what-is-untested.md":
     "two sessions closed the same night; this one committed at 2026-08-31 23:39 -0400 " +
     "while the 00:21 corpus brief committed at 00:24. The head names both and says which answers what.",
   "2026-09-02-0130--ss2-rules-and-the-wave-that-broke-it.md":
     "stamped with the UTC time under a -0400 label; committed 2026-09-01 22:58 -0400, " +
-    "so its true stamp is 2026-09-01-2258. It carries a forward pointer instead of a rename."
+    "so its true stamp is 2026-09-01-2258. It carries a forward pointer instead of a rename.",
+  ...Object.fromEntries(DELAYED_PROGRESSION_CHECKPOINT_INVERSIONS.map((name) => [
+    name,
+    "follows a progression handoff whose earlier filename was preserved when it first entered git " +
+      "in delayed historical checkpoint ede5ad1 on 2026-09-24; both files are already linked"
+  ])),
+  "2026-09-24-0454--progression-index-overview-pause.md":
+    "UTC progression filename follows the 04:53 local engine filename but entered git earlier; " +
+    "both conventions are frozen at the integration boundary",
+  "2026-09-24-1534--relic-fully-coupled-evidence-excluded.md":
+    "UTC progression filename follows the 14:50 local engine filename but entered git earlier; " +
+    "both conventions are frozen at the integration boundary"
 });
 
 test("the head's LATEST pointer names a handoff nothing else supersedes", async () => {
   // This has gone stale twice, both times the same way: a session lands a
-  // handoff and the pointer keeps naming the previous one, so AGENTS.md sends
-  // the next reader to "read the newest file in docs/handoffs/" while the head
-  // names a different file as latest. It went stale again the moment a
-  // concurrent session pushed a newer handoff without touching the head, which
+  // handoff and the pointer keeps naming the previous one. Before the
+  // integrated pointer rule, AGENTS.md sent the next reader to the newest
+  // filename while the head named a different file as latest. It went stale
+  // again the moment a concurrent session pushed a newer handoff without
+  // touching the head, which
   // is the case no amount of care by one author prevents.
   //
   // This half needs no git, so it is the half that survives a tarball. The
@@ -253,10 +304,9 @@ test("the head's LATEST pointer names a handoff nothing else supersedes", async 
 });
 
 test("the head's LATEST pointer names the handoff that entered git most recently", async () => {
-  // The git half. `ls docs/handoffs/` orders by the stamp a session TYPED, and
-  // twice that stamp was the UTC time wearing a -0400 label. Commit order is
-  // the fact the stamp is a claim about, so this is the assertion that would
-  // have caught both, and the one the head asks every session to make by hand.
+  // The git half. Historical filename order is not authoritative after the
+  // lane merge. First-add time is the fact the LATEST pointer must follow, so
+  // this assertion prevents that pointer from drifting toward either lane.
   const handoffs = await committedHandoffs();
   const instants = await firstCommitInstants();
   const latest = latestPointerTarget(handoffText);
@@ -278,18 +328,15 @@ test("the head's LATEST pointer names the handoff that entered git most recently
     latest,
     newest,
     `the head's LATEST pointer names ${latest}, but ${newest} entered git more recently. ` +
-    `Either the pointer is stale, or the newer file's stamp is wrong — check with ` +
-    `\`git log --date=iso-local -- docs/handoffs/\` and stamp handoffs in LOCAL time.`
+    `Either the pointer is stale, or the newer file did not enter git in its own session — check ` +
+    `\`git log -- docs/handoffs/\`; new handoffs use UTC filenames and +0000 frontmatter.`
   );
 });
 
 test("handoff filename stamps sort in the order the files entered git", async () => {
-  // `AGENTS.md` tells every session to "read the newest file in
-  // docs/handoffs/", so the sort order of the directory listing is an
-  // instruction, not a convenience. When a stamp disagrees with its commit,
-  // that instruction points at a superseded brief — which has now happened
-  // twice, and the second time the head recorded it as "the SECOND time this
-  // bug has shipped".
+  // `AGENTS.md` directs every session through the head's LATEST pointer. New
+  // UTC handoffs must still sort in first-add order so the historical exception
+  // list cannot silently become the normal authoring path.
   const instants = await firstCommitInstants();
   if (instants === null) {
     // Nothing to assert without history, and inventing a weaker stand-in here
@@ -308,9 +355,9 @@ test("handoff filename stamps sort in the order the files entered git", async ()
   assert.deepEqual(
     unexpected,
     [],
-    "these handoffs sort AFTER a file that entered git later, so `ls docs/handoffs/` now points the " +
-    "next session at a superseded brief. Stamp handoffs in LOCAL time; check with " +
-    "`git log --date=iso-local` BEFORE committing one."
+    "these handoffs sort after a file that entered git later. New handoffs use UTC filenames, " +
+    "+0000 frontmatter, and must enter git in the session that writes them; check with `git log` " +
+    "before widening the historical exception list."
   );
 
   // Self-cleaning: an allowance that has stopped being an inversion is a lie

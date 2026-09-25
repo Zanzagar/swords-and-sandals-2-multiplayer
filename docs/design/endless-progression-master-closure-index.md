@@ -801,7 +801,7 @@ library while no sequence creates a new item, power, currency, tradable copy,
 Capacity, or incentive to delay completion.
 
 **Source spine.** [Epoch completion proposal](endless-progression-system.md#33-epochs-after-level-100),
-[EP-A03 readiness blocker](endless-mvp-readiness.md#r-03--post-completion-access-deadlocks-or-rewards-hoarding),
+[EP-A03 readiness blocker](endless-mvp-readiness.md#r-03--catalog-completion-can-permanently-strand-known-builds),
 and the owner packet's superseded Reconstruction Tray note.
 
 **State:** `OPEN` — the desired player outcome is clear; the conservation model
@@ -941,7 +941,7 @@ retains real tactics and no debt combination dominates the standard or other
 Contract routes in reward per risk/action.
 
 **Source spine.** [Contracts and Arena Pressure](endless-progression-system.md#6-contracts-arena-laws-and-anti-stall-pressure)
-and [R-05](endless-mvp-readiness.md#r-05--pressure-does-not-yet-prove-termination).
+and [R-05](endless-mvp-readiness.md#r-05--pressures-termination-proof-omits-skipped-turns-and-rounding).
 
 **State:** `OPEN` — the experience is defined; the proof and exact content are
 not.

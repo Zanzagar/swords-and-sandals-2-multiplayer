@@ -1,5 +1,41 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-25 integrated-history preservation audit — decisions intact, navigation corrected
+
+Merge `8ff63c0` joined the current engine and progression histories. Three
+independent read-only audits then tested preservation from different premises
+rather than accepting the conflict resolutions by inspection:
+
+- At merge `8ff63c0`, against progression parent `3435d5d`, all 12 pre-existing
+  design documents, all 220 progression handoffs, and both `.agents` files
+  were byte-identical: 234 files, zero missing, renamed, mode-changed, or
+  mismatched. The decision record still hashes to
+  `e7e5c0fb047e42e5852648972f7f57f5539708bf990d97fe597d000ad5ed5358`.
+- Against `github/main` at `a89704c`, all 689 tracked entries remained and no
+  runtime, tool, test, evidence, or file-mode content was lost at the merge.
+  The follow-up deliberately changes only integrated documentation and the
+  handoff-navigation guard; game/runtime/evidence content remains untouched.
+- An independent semantic parse recovered 55 unique Relic closure rows: 30
+  `SCREEN`, 14 `DIR-SELECTED`, 7 `PRUNED`, and one each `OWNER-OPEN`,
+  `DERIVED`, `SPEC`, and `EVALUATE`. `Phi_SR = 31`; the sole owner-open card is
+  `RCS-03C3B2A2B1`. All 20 SC cards retain every required design field, and the
+  coarsening choice agrees across packet, index, audit, head, and handoff.
+
+The audits also found defects in the integrated documentation, which are
+corrected at their live instructions rather than hidden: one stale
+fifty-row/B1A2B presentation, one stale overnight-plan boundary claim, two
+broken source fragments, compressed Stage 5 implementation detail, and a stale
+adapter-gap claim. None was a lost owner choice. The combined handoff histories exposed 36 additional ordering
+inversions: 34 arise from the delayed progression checkpoint `ede5ad1`, not
+from timezone conversion, and two from mixed local/UTC naming. Frozen files
+remain untouched and exactly allowlisted; future handoffs use UTC filenames,
+explicit `+0000` frontmatter, same-session commits, and the single `LATEST`
+pointer as the start authority.
+
+This audit changes no progression selection. Universal finite source-episode
+coarsening remains selected, and `RCS-03C3B2A2B1` remains the next and sole
+active Relic frontier card.
+
 ## 2026-09-25 universal authored-episode coarsening — RCS-03C3B2A2A-B selected
 
 The owner selected `RCS-03C3B2A2A-B`: `M^{merge}_v=F^{xop}_v`, with at least
@@ -218,13 +254,14 @@ that package; clean positions are **neutral/protective** anchors, and catalog
 coexistence is **aggregate**. The authoritative decision record remains
 unchanged and implementation remains blocked.
 
-The fifty-slot register now contains 29 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`,
-11 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so `Phi_SR = 30`. The sole
-active card is `RCS-03C3B1A2B`, coupled-package semantic phase-width support.
-For every admitted package `K`, with phases classified relative to one
-candidate source role, let `w(K)` count the members of `{D,E,O}` containing at
-least one indispensable claim and let `W^{multi}_v` be the catalog set of such
-widths. Present only:
+**Historical frontier, superseded later on 2026-09-24:** at this point the
+fifty-slot register contained 29 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 11
+`DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so `Phi_SR = 30`. The then-active
+card was `RCS-03C3B1A2B`, coupled-package semantic phase-width support. For
+every admitted package `K`, with phases classified relative to one candidate
+source role, `w(K)` counted the members of `{D,E,O}` containing at least one
+indispensable claim and `W^{multi}_v` was the catalog set of such widths. The
+options presented then were:
 
 - A: `W^{multi}_v={2}`; every coupled package spans exactly two phases;
 - B: `W^{multi}_v={3}`; every coupled package indispensably spans all three; or
@@ -247,6 +284,12 @@ co-variation does not count. C needs two distinct package witnesses but not
 distinct positions or Relics. Exact phase pairs, operators, counts,
 co-location, singular/exact-two mapping, prevalence, incidence, and quotas
 remain AUTHOR/SPEC. No eleventh register amendment is required.
+
+**Current continuation:** the owner selected C, so both coupled-package widths
+exist. Later choices selected one primitive lineage per operation and universal
+finite source-episode coarsening, and a twelfth amendment split the next
+relationship boundary. The current register has fifty-five rows,
+`Phi_SR = 31`, and sole active card `RCS-03C3B2A2B1`; do not present B1A2B again.
 
 ## 2026-09-24 exact-two independent phase routes — RCS-03C3B1A1B2-A selected
 
@@ -951,18 +994,17 @@ Existing vanilla evidence, capture provenance, and the byte-identical
 measurement oracle remain in their current SS2 lane and are not renamed or
 reinterpreted by this direction.
 
-## 2026-09-20 process-pointer correction — overnight plan quarantined
+## 2026-09-20 process-pointer correction — overnight-plan boundary restored
 
-`AGENTS.md` points readers to guidance above `## THE ARCHIVE LINE` in
-`docs/overnight-agent-plan.md`, but that target file currently contains no such
-heading and still carries superseded fan-out and scoped-Ruffle language that
-conflicts with the direct rules in `AGENTS.md`. Do not treat any portion of the
-overnight plan as current standing guidance until its live/frozen boundary is
-repaired. The direct `AGENTS.md` rules govern: subagents never launch Ruffle;
-Pocock decision discipline is the default, Codex adversarial review is the
+**Integrated-state correction, 2026-09-25:**
+`docs/overnight-agent-plan.md` now has the `## THE ARCHIVE LINE` boundary that
+was missing when this section was first written. Only its material above that
+heading is standing guidance; everything below is frozen run history. Direct
+`AGENTS.md` precedence still governs: subagents never launch Ruffle; Pocock
+decision discipline is the default, Codex adversarial review is the
 material-diff check, and a capped single fan-out wave is the last resort for a
-qualifying unpinned byte/archive claim. This correction records the broken
-pointer without rewriting the frozen historical plan.
+qualifying unpinned byte/archive claim. Do not revive superseded fan-out or
+scoped-Ruffle language from below that boundary.
 
 ## 2026-09-11 Endless owner-decision update — full-assurance remediation underway
 
@@ -8361,9 +8403,9 @@ frontier at a time.
 
 **This file is the accumulated STATE of the project. The brief for a single
 session lives in [`docs/handoffs/`](docs/handoffs/README.md), stamped
-`YYYY-MM-DD-HHMM--slug`.** Starting a session should cost one sentence — "read
-the latest handoff in `docs/handoffs/` and proceed" — with this file as the state
-it points at. A handoff must not restate what is here; if the two ever disagree,
+`YYYY-MM-DD-HHMM--slug`.** Starting a session should cost one sentence — "follow
+this head's single `LATEST` link and proceed" — with this file as the state it
+points at. A handoff must not restate what is here; if the two ever disagree,
 THIS file is right and the handoff was frozen at the end of its session.
 
 **THE PROJECT BOARD (owner's request, 2026-09-23):
@@ -10694,11 +10736,14 @@ getting there cost a full retraction of that session's own central conclusion.**
 
 ► **A HANDOFF STAMPED ITSELF TWO HOURS INTO THE FUTURE AND BROKE THE ONE
   PROPERTY THE CONVENTION RESTS ON.** `docs/handoffs/README.md` promises that
-  `ls docs/handoffs/` puts the newest last, and AGENTS.md's first instruction
-  depends on it. The `0130` brief's own commit landed at 2026-09-13 23:23, so
-  the next session's honest stamp would have sorted BEFORE it. **Stamp from the
-  clock, check that it sorts after what it supersedes**, and see that handoff's
-  "THE STAMP" section for the two-line test that would make it mechanical.
+  `ls docs/handoffs/` would put the newest last under the then-single-lane
+  convention, and AGENTS.md's first instruction depended on it. The `0130`
+  brief's own commit landed at 2026-09-13 23:23, so
+  the next session's honest stamp would have sorted BEFORE it. **The repair at
+  that time was “stamp from the clock and check that it sorts after what it
+  supersedes.”** The integrated rule is now the `LATEST`/UTC/same-session policy
+  recorded in the current stamp correction below; see that handoff's “THE
+  STAMP” section for the original two-line test.
 
 *(The brief it supersedes, whose ranked item 1 is DONE and whose size table is
 WRONG in three of five rows:)*
@@ -11555,7 +11600,7 @@ priced on the weapon with strength in the denominator — and **both gated behin
     edit there is discarded, silently, on the next update.
     ► **AND IT FOUND TWO HIGH DEFECTS THAT A 12-AGENT WAVE MISSED, one of them
       introduced by the very commit the wave had just audited.** Both reproduced
-      by hand before being believed. See the ranked list in the newest handoff.
+      by hand before being believed. See the ranked list in the `LATEST`-linked handoff.
       That is the ADR's precedence rule vindicated the expensive way round:
       Codex review is the check on a diff that matters, and a fan-out wave is
       not a substitute for it.
@@ -11929,7 +11974,7 @@ all still the owner's:)*
 Historical context only; do not start there. Ranked item 2 was answered with a
 fork for the owner, and every accepted clause withheld implementation
 authority. **Integrated-state correction, 2026-09-25:** the accepted text and
-current progression packet are now on this branch. Read the newest handoff,
+current progression packet are now on this branch. Read the `LATEST`-linked handoff,
 the authoritative decision record, and `$ss2-progression-design`; do not use
 the frozen 2026-09-07 branch-location warning as present guidance. Meanwhile
 the campaign read-back got its first consumer —
@@ -12124,15 +12169,24 @@ launching any wave.**
 *(And the one before that:)*
 [2026-09-02 00:07 — the wave refuted more than it confirmed](docs/handoffs/2026-09-02-0007--the-wave-refuted-more-than-it-confirmed.md).
 
-► **`ls docs/handoffs/` PUTS THE NEWEST BRIEF SECOND-TO-LAST, NOT LAST, AND WILL
-  UNTIL SOMEONE RENAMES A FILE.** `2026-09-02-0130--ss2-rules-and-the-wave-that-broke-it`
+► **HISTORICAL STAMP FAILURE, WITH INTEGRATED-STATE CORRECTION (2026-09-25).**
+  `2026-09-02-0130--ss2-rules-and-the-wave-that-broke-it`
   is stamped with the UTC time under a `-0400` label — it was committed at
   **2026-09-01 22:58 -0400**, so its true stamp is `2026-09-01-2258`. It carries
   a forward pointer at the top so a reader who lands on it is redirected, and it
   was NOT renamed, because every link to it would break. **This is the SECOND
-  time this bug has shipped** (see the `-1950-`/`-1550-` rename below).
-  **Stamp handoffs in LOCAL time and check with `git log --date=iso-local`
-  before you commit one.**
+  time this bug shipped** (see the `-1950-`/`-1550-` rename below).
+
+  Merging the engine and progression histories exposed 36 additional adjacent
+  filename/first-add inversions. Thirty-four follow progression handoffs that
+  were written earlier but first entered git together in delayed checkpoint
+  `ede5ad1`; the final two are nearby mixed-local/UTC names. Those frozen files
+  remain linked and are enumerated exactly in the navigation test. **Do not use
+  lexicographic `ls` order as the global authority. Follow the single `LATEST`
+  pointer above. Every newly written handoff uses a UTC filename, explicit
+  `+0000` frontmatter, and is committed in that same session.** UTC makes the
+  two lanes consistent going forward; the same-session rule is what prevents a
+  delayed checkpoint from creating the larger failure again.
 
   ► **IT IS NOW ENFORCED, so a third occurrence fails the suite rather than
     reaching the next reader (2026-09-02).** `test/handoff-navigation.test.js`
@@ -12140,8 +12194,7 @@ launching any wave.**
     `git log --follow --diff-filter=A --format=%at` and asserts three things:
     the head's `**LATEST:` pointer names the handoff that entered git most
     recently; that file is not one some other handoff declares it supersedes;
-    and the filename stamps sort in commit order, with the two KNOWN inversions
-    (`2026-09-01-0030`, `2026-09-02-0130`) listed with their reasons and
+    and every filename/first-add inversion is listed with its reason and
     asserted MINIMAL — an allowance that stops inverting fails as unnecessary.
     Where git history is not derivable the git-free half still runs and the
     assertion message SAYS which check it made.
@@ -12165,7 +12218,7 @@ launching any wave.**
 runs inside the shared resolver, all 22 goldens replay through
 `createTeamBattle`/`applyAction`, and `node tools/hotseat.mjs` plays that rule
 set by default. **Its ranked items 2, 3 and 5 are now DONE or REFUTED, and item
-4 is answered but left to the owner — read the newest brief, not this one, for
+4 is answered but left to the owner — read the `LATEST`-linked brief, not this one, for
 which is which.** Notably its item 2 is REFUTED: `activeEnchantment`'s
 primary-potency pairing is byte-faithful and must NOT be changed.
 
@@ -12249,7 +12302,7 @@ here, HOIST IT UP rather than correcting it in place.
 
 ## What to read, and what you may skip
 
-**The living head is large; after the mandatory newest handoff and current
+**The living head is large; after the mandatory `LATEST`-linked handoff and current
 top-state sections, use this map for scoped navigation.** This map is keyed on
 WHAT YOU ARE ABOUT TO DO, deliberately not on
 the numbered next-steps list — that list renumbers every session, and a map

@@ -3,7 +3,7 @@
 A handoff is the **brief for one session**: what to do next, in what order, and
 what not to do. Starting a session should cost one sentence —
 
-> read the latest handoff in `docs/handoffs/` and proceed
+> follow `HANDOFF.md`'s `LATEST` link and proceed
 
 — rather than a pasted wall of context that goes stale the moment it is sent.
 
@@ -14,13 +14,19 @@ docs/handoffs/YYYY-MM-DD-HHMM--short-slug.md
               2026-08-31-1238--corpus-audit-provenance-repair.md
 ```
 
-Local date and time **when the handoff was written** (which is the end of its
-session), then a slug naming what the session was about. Local rather than UTC
-because a human reads it; the offset is recorded in the frontmatter, so nothing
-is ambiguous. No colons — Windows forbids them in filenames.
+For every handoff written after the two repository histories were integrated on
+2026-09-25, use the **UTC** date and time at the end of the session, then a slug
+naming what the session was about. Record `+0000` in `written:` and commit the
+handoff in that same session. No colons — Windows forbids them in filenames.
 
-The names sort chronologically, so `ls docs/handoffs/` puts the newest last and
-"the latest handoff" is unambiguous without an index to consult.
+The frozen history contains two former conventions: engine briefs used local
+time, progression briefs used UTC, and many progression briefs first entered
+git together in one delayed historical checkpoint. Their combined filenames
+therefore do **not** form one reliable global chronology, and renaming them
+would break existing links. The single `LATEST` pointer in `HANDOFF.md` is the
+authority for where a session starts; the index below preserves both historical
+lanes. UTC plus a same-session commit makes newly written names sortable without
+pretending a timezone can repair delayed historical commits.
 
 Sequential `H-NNN` numbering was tried first and dropped: a number tells you
 nothing about when it was written or whether it is still current, and a stale
