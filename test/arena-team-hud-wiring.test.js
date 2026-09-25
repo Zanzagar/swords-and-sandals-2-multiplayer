@@ -92,9 +92,13 @@ test("H2: the side panel is the model's — the crowd meter, then a panel per si
   assert.match(row, /if \(row\.seat\) tags\.append\(hudNode\("span", `seat\$\{row\.you \? " you" : ""\}`, row\.seat\)\);/);
   assert.match(row, /for \(const condition of row\.conditions\) \{\s*const chip = hudNode\("span", "chip", condition\.words\);\s*chip\.title = condition\.title;/);
   assert.match(row, /readingNode\("Health", row\.health, "health"\),\s*readingNode\("Energy", row\.energy, "energy"\),\s*readingNode\("Armour", row\.armour, "armour"\)/);
+  // ► RE-PINNED FOR D5 of the in-frame team HUD (2026-09-25): ~~`reading.shown ? `${value} / ${max}` :
+  //   "—"` and the bar's `fill.style.width`~~ — the readings are the build's own gauges in the frame now,
+  //   and each row keeps them only as a visually hidden meter, its value in words
+  //   (`test/arena-combat-hud-wiring.test.js` pins the whole of it).
   const reading = rawBody("readingNode");
-  assert.match(reading, /reading\.shown \? `\$\{reading\.value\} \/ \$\{reading\.max\}` : "—"/);
-  assert.match(reading, /fill\.style\.width = `\$\{reading\.shown \? reading\.percent : 0\}%`;/);
+  assert.match(reading, /meter\.setAttribute\("aria-valuetext", reading\.shown \? `\$\{reading\.value\} of \$\{reading\.max\}` : "none"\);/);
+  assert.match(reading, /hudNode\("span", `visually-hidden reading-\$\{kind\}`\)/);
   const crowd = rawBody("renderCrowdMeter");
   assert.match(crowd, /el\("crowd"\)\.hidden = !crowd\.shown;\s*if \(!crowd\.shown\) return;/);
   assert.match(crowd, /\.textContent = crowd\.text;/);

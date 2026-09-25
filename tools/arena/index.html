@@ -179,17 +179,9 @@
   .seat.you { border-color: #f2c14e; color: #f2c14e; }
   .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
   .chip { font-size: 11px; padding: 0 7px; border-radius: 999px; border: 1px solid #6b4f2a; background: #2e2417; color: #f3d9a8; cursor: help; }
-  .reading {
-    display: grid; grid-template-columns: 4.3em 1fr auto; gap: 6px; align-items: center;
-    margin-top: 3px; font-size: 11px; color: var(--ink-dim);
-  }
-  .reading .meter { height: 6px; border-radius: 3px; background: #000; overflow: hidden; }
-  .reading .meter > i { display: block; height: 100%; }
-  .reading.health .meter > i { background: #6ea84f; }
-  .reading.health.hurt .meter > i { background: #b8562f; }
-  .reading.energy .meter > i { background: #d8a13a; }
-  .reading.armour .meter > i { background: #9aa7b8; }
-  .reading .num { min-width: 5.5em; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+  /* D5 (2026-09-25): a row's three readings are the build's own gauges IN THE
+     FRAME now; here each is only a visually hidden meter for a screen reader
+     (.visually-hidden), ~~a label, a bar and its number~~. */
   .actions { display: flex; flex-direction: column; gap: 5px; }
   button {
     font: inherit; text-align: left; cursor: pointer;

@@ -578,8 +578,11 @@ test("the shell draws the moves with the ring, off the acting fighter's DRAWN he
   assert.match(stage, /ringOrigins\.actor = \{ x: origin\.x, y: origin\.y, head: box\.y0, below: nameY \+ namePx \* 0\.5 \};/);
   const paint = functionBody("paintRing");
   assert.match(paint, /ringMoveButtonsAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null,[^}]*head: ringOrigins\.actor\.head,[^}]*feet: ringOrigins\.actor\.below,[^}]*bounds: \{ top: stage\.y, bottom: stage\.y \+ stage\.height \}/);
-  // CODEX PASS 2: the whole ring, moves included, kept on the visible stage — the rectangle the frame is clipped to.
-  assert.match(paint, /const stage = stageClipRectFor\(fit\);/);
+  // CODEX PASS 2: the whole ring, moves included, kept on the visible stage — ~~the rectangle the frame is
+  // clipped to (`stageClipRectFor(fit)`)~~ RE-PINNED FOR D4 of the in-frame team HUD (2026-09-25): the stage
+  // left visible above the build's UI bar, where the bar is drawn (`ringBoundsFor`,
+  // `test/arena-combat-hud.test.js`) — the whole clipped stage let the rank-front arrow sit under the bar.
+  assert.match(paint, /const stage = ringBoundsFor\(fit, \{ barred: arenaScreenAvailable\(\) \}\);/);
   assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\(/, "the eight first, all kept on the stage");
   // ring2 "edge": with the fighter's drawn centre, so a walk the move would carry across him stays on his side.
   assert.match(paint, /\.\.\.ringMoveButtonsAt\([\s\S]*?\}\)\s*\], stage, \{ fighterX: placement\.x \}\);/);
