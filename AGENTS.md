@@ -205,14 +205,15 @@ and the path is unreachable from Linux anyway.
   line above read as though any session directory sufficed.)
 - A working tree with `assets/` but no probe session: **1 skipped**, the
   raw-trace archive existence check. EXPECTED, not a defect.
-- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ 11 —
-  measured 2026-09-23 with the fight pop-ups** (10 at b51ad05; 9 on 2026-09-15,
-  where this line used to say 1 and mean the tree above). Besides the archive
-  check, 8 are gated on the extracted TEXT pack, 1, since 2690559, on the
-  extracted PROPS pack (the boulder test), and 1 on the ICONS and TEXT packs
-  together (`test/render-popups.test.js`), all gitignored like every other
-  asset. A cloner who measures 11 against a documented 1 has a correct tree and
-  a wrong document.
+- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ ~~11~~ 15 —
+  measured 2026-09-25 at `194cae1` after the four real-pack action-button
+  checks landed** (11 on 2026-09-23; 10 at b51ad05; 9 on 2026-09-15, where this
+  line used to say 1 and mean the tree above). Besides the archive check, 8 are
+  gated on the extracted TEXT pack, 1 on the extracted PROPS pack (the boulder
+  test), 1 on the ICONS and TEXT packs together (`test/render-popups.test.js`),
+  and 4 on the ICONS pack (`test/render-action-buttons.test.js`), all gitignored
+  like every other asset. A cloner who measures 15 against a documented 1 has a
+  correct tree and a wrong document.
 
 **Otherwise a skipped test is a real finding, not noise.** Expect the exact count
 the `LATEST`-linked handoff states; if you measure a different number, say so

@@ -38,6 +38,12 @@ At clean commit `194cae1`, `node --test --test-concurrency=1` completed with
 asset/archive profile. The repaired handoff-navigation file passed 7/7 inside
 that full run.
 
+**Fresh-clone profile correction:** the integrated `AGENTS.md` still said 11
+skips. Re-derived from the actual run and skip gates, the current no-assets,
+no-probe-archive profile is 15: the prior 11 plus four real-pack checks in
+`test/render-action-buttons.test.js`. The instruction now says 15 at its source;
+this was documentation drift, not a new skip or test regression.
+
 This audit changes no progression selection. Universal finite source-episode
 coarsening remains selected, and `RCS-03C3B2A2B1` remains the next and sole
 active Relic frontier card.

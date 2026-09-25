@@ -64,6 +64,11 @@ clean. Commit `194cae1` corrects each finding at its live instruction:
   instead of listing it as absent; and
 - combined handoff history is no longer treated as one lexicographic timeline.
 
+After the full run, the suite's own skip count exposed one more stale live
+instruction: `AGENTS.md` still described an asset-free clone as 11 skips. The
+current profile is 15: the previous 11 plus four real-pack action-button checks.
+That instruction is corrected at its source; no test newly began skipping.
+
 The last item required care. History contains 38 adjacent filename/first-add
 inversions: the two old exceptions, 34 boundaries caused by progression
 handoffs first added in delayed checkpoint `ede5ad1`, and two mixed-local/UTC
@@ -117,3 +122,5 @@ authorized.
   same-session-commit rule is equally load-bearing.
 - “Sole active Relic frontier” is not “only owner decision”; EP-D/EP-A work also
   remains open.
+- A green exit is not permission to ignore the skip total. The 15-versus-11
+  discrepancy was documentation drift and had to be re-derived before closeout.
