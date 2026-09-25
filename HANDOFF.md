@@ -829,13 +829,25 @@ for the already-accumulated design record; and `bf12e53` merges main's mailmap
 fix without rebasing pushed history. Do not recreate fake historical commit
 granularity. Resume small per-choice commits from here.
 
-The branch is current with `github/main`, and PR #3 already exists. **Owner
-correction, 2026-09-24:** the project-specific per-push approval tightening is
-removed. Follow harness rule 7 as written: push feature branches freely and
-often without per-push owner approval. This does not authorize pushing `main`,
-a force-push forbidden by rule 9, or an agent merge. Claude settings do not
-enforce Codex or a human shell; shared policy lives in `AGENTS.md`, while the
-direct Codex progression method lives in `$ss2-progression-design`.
+PR #3 exists, and the feature branch is pushed through design commit
+`fe33018`. **Owner correction, 2026-09-24:** the project-specific per-push
+approval tightening is removed. Follow harness rule 7 as written: push feature
+branches freely and often without per-push owner approval. This does not
+authorize pushing `main`, a force-push forbidden by rule 9, or an agent merge.
+Claude settings do not enforce Codex or a human shell; shared policy lives in
+`AGENTS.md`, while the direct Codex progression method lives in
+`$ss2-progression-design`.
+
+**Git-divergence correction, 2026-09-25:** the earlier statement that this
+branch was current with `github/main` became false as main advanced. A fresh
+fetch at main `a89704c` and design commit `fe33018` found that neither tip was
+an ancestor of the other; PR #3 reports `DIRTY`/`CONFLICTING` and is not
+rule-13 merge-eligible. Do not hide this with an `ours`/`theirs` merge:
+`AGENTS.md`, `HANDOFF.md`, and `README.md` contain concurrent current-state
+edits, and choosing either whole side would erase a live lane. The feature
+branch may continue to be pushed under rule 7, but a deliberate integration
+must preserve both the engine and progression living heads, rerun the full
+suite, and leave the actual merge to a human.
 
 ## 2026-09-24 master progression closure index
 

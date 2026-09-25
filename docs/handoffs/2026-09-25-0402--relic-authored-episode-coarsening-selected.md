@@ -117,5 +117,12 @@ prevalence is catalog authoring, not a third global support direction.
   and 1 expected raw-trace archive skip.
 - The authoritative decision record remains byte-identical at SHA-256
   `e7e5c0fb047e42e5852648972f7f57f5539708bf990d97fe597d000ad5ed5358`.
+- Design commit `fe33018` is pushed and synchronized with
+  `github/design/endless-progression-owner-packet`.
+- PR #3 is **not merge-eligible**: after fetching main `a89704c`, GitHub
+  reports `DIRTY`/`CONFLICTING`, and neither branch tip is the other's
+  ancestor. A later deliberate integration must preserve both current
+  `HANDOFF.md` lanes rather than resolving the overlap wholesale to one side;
+  only a human may merge.
 - No runtime, Ruffle, capture, installation, save, snapshot, fixture,
   candidate, observation, manifest, or golden work is authorized.
