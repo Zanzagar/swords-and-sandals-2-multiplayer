@@ -23,20 +23,28 @@ import { seatTagFor } from "./seats.js";
  * `#4c8fe0`. The roster's sides are `"red"` and `"blue"` (`demoSide`,
  * `championSide` in `roster.js`). The demo fighters' SKIN colours are random
  * across both teams, which is why the name plate has to say whose side a
- * fighter is on — and says it with a letter too, not colour alone.
+ * fighter is on — and it says so in his side's colour, and nothing else.
+ *
+ * ► **THE COLOUR IS THE SIDE'S ONLY CUE (D1 of the in-frame team HUD, the
+ *   owner, 2026-09-24: "the team names dont need the R and B icons next to
+ *   them and underlined. Colors suffice.").** ~~Each side also carried an
+ *   `initial`, "R" or "B", drawn on a disc beside every name — the plate, the
+ *   roster heading and rows, the turn strip — "a cue that is not colour
+ *   alone", with a coloured underline on the plate and under each strip
+ *   chip~~: all of it is gone, from the drawing and from this model.
  */
 const TEAM_STYLES = Object.freeze({
-  red: Object.freeze({ teamId: "red", colour: "#e0584f", initial: "R", name: "Red" }),
-  blue: Object.freeze({ teamId: "blue", colour: "#4c8fe0", initial: "B", name: "Blue" })
+  red: Object.freeze({ teamId: "red", colour: "#e0584f", name: "Red" }),
+  blue: Object.freeze({ teamId: "blue", colour: "#4c8fe0", name: "Blue" })
 });
 
 /** The page's dim ink (`--ink-dim` in `index.html`), for a side with no colour of its own. */
 const UNCOLOURED = "#9a9287";
 
 /**
- * A side's colour, its initial and its name. Total: a side the arena has no
- * colour for (no roster builds one today) is drawn in the page's dim ink with
- * the first letter of its id, so the HUD never throws on a rule set's team.
+ * A side's colour and its name. Total: a side the arena has no colour for (no
+ * roster builds one today) is drawn in the page's dim ink under its own id, so
+ * the HUD never throws on a rule set's team.
  */
 export function teamStyleFor(teamId) {
   if (Object.hasOwn(TEAM_STYLES, teamId ?? "")) return TEAM_STYLES[teamId];
@@ -44,15 +52,14 @@ export function teamStyleFor(teamId) {
   return Object.freeze({
     teamId: id,
     colour: UNCOLOURED,
-    initial: id ? id[0].toUpperCase() : "?",
     name: id ?? "?"
   });
 }
 
 /**
- * The name plate's dark outline: stroked under the team-coloured name, its
- * underline and its initial, so they read on the sand as well as on the dark
- * stands. The team colours alone reach only 1.4-3.4 : 1 against the sand
+ * The name plate's dark outline: stroked under the team-coloured name, so it
+ * reads on the sand as well as on the dark stands. The team colours alone
+ * reach only 1.4-3.4 : 1 against the sand
  * (`#602d18`, the build's own sand shape 667; `#4a3a2b`-`#836b4b`, the
  * authored bowl) — the outline is what carries them: 5.3 : 1 (red) and
  * 5.9 : 1 (blue) against it. `test/arena-team-hud.test.js` measures both.
@@ -60,10 +67,11 @@ export function teamStyleFor(teamId) {
 export const NAME_PLATE_OUTLINE = "#0b0a0d";
 
 /**
- * How a fighter's name plate on the stage is coloured (H1): his side's colour
- * and initial, the dark outline, and its alpha — OPAQUE while he stands, and
- * 0.4 once he has fallen, as the plate always faded the fallen. The words are
- * his own name, which the shell draws from the combatant as it always has.
+ * How a fighter's name plate on the stage is coloured (H1): his side's colour,
+ * the dark outline, and its alpha — OPAQUE while he stands, and 0.4 once he
+ * has fallen, as the plate always faded the fallen. The words are his own
+ * name, which the shell draws from the combatant as it always has; the plate
+ * is that name and nothing else (D1: no initial, no underline).
  *
  * ► **A LIVING PLATE IS OPAQUE, NOT THE 0.85 THE LIGHT PLATE HAD** (Codex
  *   review of H1, pass 1). The canvas applies the alpha to the outline and to
@@ -77,49 +85,31 @@ export const NAME_PLATE_OUTLINE = "#0b0a0d";
 export function namePlateFor(combatant) {
   const style = teamStyleFor(combatant?.teamId);
   return Object.freeze({
-    initial: style.initial,
     fill: style.colour,
-    underline: style.colour,
     outline: NAME_PLATE_OUTLINE,
     alpha: combatant?.alive === false ? 0.4 : 1
   });
 }
 
 /**
- * WHERE THE PLATE'S PARTS GO, in canvas pixels, around the name the shell
- * draws centred on `x` at `baseline` in a `px` font (H1): the name's outline
- * width, the coloured underline and the outline under it, and the initial's
- * disc to the left of the name.
+ * THE PLATE'S SHAPE, in canvas pixels, for a name the shell draws in a `px`
+ * font (H1): the width of the dark outline stroked under the name — which is
+ * all of the plate there is besides the name itself (D1).
+ *
+ * ► **~~The coloured underline under the name, its outline, and the initial's
+ *   disc to the left of it~~** were placed here until 2026-09-24 (D1), and
+ *   were why this took the name's centre, baseline and measured width.
  *
  * ► **NOTHING REACHES UNDER `baseline + px / 2`**, which is where the ring
  *   reads the bottom of the acting fighter's name (`below` in `renderStage`)
- *   and stands its forward arrow off. An underline drawn past it would sit
- *   under that arrow.
+ *   and stands its forward arrow off. Under the baseline the plate now inks a
+ *   descender and half of this outline, and the test holds the two together
+ *   above that line.
  *
- * @param {{x: number, baseline: number, px: number, nameWidth: number}} input
- *   the name's centre and baseline, its font size and its measured width
+ * @param {{px: number}} input the name's font size
  */
-export function namePlateLayout({ x, baseline, px, nameWidth }) {
-  const left = x - nameWidth / 2;
-  // The underline: just under the baseline, a hair wider than the name.
-  const lineHeight = Math.max(1.5, px * 0.1);
-  const lineOver = px * 0.05;
-  const line = Object.freeze({ x: left - lineOver, y: baseline + px * 0.16, width: nameWidth + 2 * lineOver, height: lineHeight });
-  const edge = Math.max(1, px * 0.08);
-  const lineOutline = Object.freeze({
-    x: line.x - edge, y: line.y - edge, width: line.width + 2 * edge, height: line.height + 2 * edge
-  });
-  // The initial: a disc on the name's line, a gap to the left of its first letter.
-  const r = px * 0.42;
-  const gap = px * 0.3;
-  const disc = Object.freeze({
-    x: left - gap - r,
-    y: baseline - px * 0.35,
-    r,
-    outlineWidth: Math.max(1.5, px * 0.12),
-    letterPx: Math.max(7, px * 0.62)
-  });
-  return Object.freeze({ outlineWidth: Math.max(2, px * 0.24), line, lineOutline, disc });
+export function namePlateLayout({ px }) {
+  return Object.freeze({ outlineWidth: Math.max(2, px * 0.24) });
 }
 
 /* ------------------------------------------------------------------ */
@@ -322,7 +312,6 @@ export function teamHudFor({ wire, seats = null, crowdShown = true }) {
         teamId: style.teamId,
         name: style.name,
         colour: style.colour,
-        initial: style.initial,
         standing: rows.filter((row) => row.alive).length,
         rows: Object.freeze(rows)
       });
@@ -344,7 +333,6 @@ function rowOf(combatant, { style, actingId, seats }) {
     name: combatant.name,
     teamId: style.teamId,
     colour: style.colour,
-    initial: style.initial,
     acting: combatant.id === actingId,
     alive: combatant.alive !== false,
     seat,
@@ -374,7 +362,7 @@ function rowOf(combatant, { style, actingId, seats }) {
  *   `initiative[turnCursor]` — nobody's once the bout is decided.
  *
  * @param {object} wire `host.wire()`
- * @returns {{id: string, name: string, teamId: string, colour: string, initial: string, current: boolean, alive: boolean}[]}
+ * @returns {{id: string, name: string, teamId: string, colour: string, current: boolean, alive: boolean}[]}
  */
 export function turnOrderFor(wire) {
   const byId = new Map((wire?.teams ?? []).flatMap((team) => team.combatants.map((combatant) => [combatant.id, { combatant, teamId: team.id }])));
@@ -388,7 +376,6 @@ export function turnOrderFor(wire) {
       name: found.combatant.name,
       teamId: style.teamId,
       colour: style.colour,
-      initial: style.initial,
       current: index === cursor,
       alive: found.combatant.alive !== false
     })];

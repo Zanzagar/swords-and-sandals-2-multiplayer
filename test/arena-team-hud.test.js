@@ -13,6 +13,7 @@ import test from "node:test";
 
 import { applyAction, combatantById, createTeamBattle, legalActions } from "../src/team/resolver.js";
 import { SS2_FACING_LEFT, SS2_STATUS_FLAGS, createSs2TeamRules, ss2Combatant, ss2StatusToken } from "../src/team/ss2-rules.js";
+import { SS2_CLOSE_UP } from "../src/render/arena-backdrop.js";
 import { seatControllersFrom } from "../tools/arena/seats.js";
 import {
   NAME_PLATE_OUTLINE, conditionsFor, crowdMeterFor, namePlateFor, namePlateLayout, teamHudFor, teamStyleFor, turnOrderFor
@@ -22,32 +23,32 @@ import {
 /* H1: the team colours                                                */
 /* ------------------------------------------------------------------ */
 
-test("H1: red is #e0584f and blue #4c8fe0 (the owner's Q4), each with its initial — a cue that is not colour alone", () => {
+// ~~Each side also had an INITIAL ("R", "B") — "a cue that is not colour alone" —
+// drawn on a disc beside every name, with a coloured underline on the stage~~
+// until the owner, 2026-09-24: "the team names dont need the R and B icons next
+// to them and underlined. Colors suffice." (D1 of the in-frame team HUD.)
+test("H1: red is #e0584f and blue #4c8fe0 (the owner's Q4) — and the colour is the side's only cue: no initial (D1)", () => {
   assert.deepEqual(
     { ...teamStyleFor("red") },
-    { teamId: "red", colour: "#e0584f", initial: "R", name: "Red" }
+    { teamId: "red", colour: "#e0584f", name: "Red" }
   );
   assert.deepEqual(
     { ...teamStyleFor("blue") },
-    { teamId: "blue", colour: "#4c8fe0", initial: "B", name: "Blue" }
+    { teamId: "blue", colour: "#4c8fe0", name: "Blue" }
   );
 });
 
-test("H1: a side the arena has no colour for is drawn in the page's dim ink with its own initial, never a crash", () => {
-  assert.deepEqual({ ...teamStyleFor("green") }, { teamId: "green", colour: "#9a9287", initial: "G", name: "green" });
-  assert.deepEqual({ ...teamStyleFor(null) }, { teamId: null, colour: "#9a9287", initial: "?", name: "?" });
+test("H1: a side the arena has no colour for is drawn in the page's dim ink, never a crash", () => {
+  assert.deepEqual({ ...teamStyleFor("green") }, { teamId: "green", colour: "#9a9287", name: "green" });
+  assert.deepEqual({ ...teamStyleFor(null) }, { teamId: null, colour: "#9a9287", name: "?" });
 });
 
-test("H1: a name plate is in his side's colour, over a dark outline, with his side's initial; the dead are faint", () => {
+test("H1: a name plate is his name in his side's colour over a dark outline, and nothing else (D1); the dead are faint", () => {
   const living = namePlateFor({ id: "red-1", name: "Tarn", teamId: "red", alive: true });
   // Opaque while he stands (~~0.85, the light plate's~~ until the Codex review of H1: see below).
-  assert.deepEqual({ ...living }, {
-    initial: "R", fill: "#e0584f", underline: "#e0584f", outline: NAME_PLATE_OUTLINE, alpha: 1
-  });
+  assert.deepEqual({ ...living }, { fill: "#e0584f", outline: NAME_PLATE_OUTLINE, alpha: 1 });
   const dead = namePlateFor({ id: "blue-2", name: "Nym", teamId: "blue", alive: false });
-  assert.equal(dead.fill, "#4c8fe0");
-  assert.equal(dead.initial, "B");
-  assert.equal(dead.alpha, 0.4, "the alpha the plate always had for the fallen");
+  assert.deepEqual({ ...dead }, { fill: "#4c8fe0", outline: NAME_PLATE_OUTLINE, alpha: 0.4 }, "the alpha the plate always had for the fallen");
 });
 
 /** WCAG 2.1's contrast ratio of two `#rrggbb` colours (relative luminance, sRGB). */
@@ -77,38 +78,28 @@ test("H1: both colours read at WCAG AA (4.5 : 1) on the plate's outline and on t
     assert.ok(contrast(colour, ground) >= 4.5, `${team} on a row (--ground ${ground}): ${contrast(colour, ground).toFixed(2)}`);
   }
   assert.match(page, /\.fighter \{[^}]*background: var\(--ground\)/, "a roster row is drawn on --ground");
+  // A turn-strip chip names its side by its name's colour alone (D1), so it is on --ground too —
+  // and the chip whose turn it is keeps it: its mark is an outline, never a fill the names were not measured on.
+  assert.match(page, /\n\s*\.turn-chip \{[^}]*background: var\(--ground\)/, "a strip chip is drawn on --ground");
+  const current = /\n\s*\.turn-chip\.current \{([^}]*)\}/.exec(page);
+  assert.ok(current, "index.html has a .turn-chip.current rule");
+  assert.doesNotMatch(current[1], /background/, "the current chip is not refilled");
 });
 
-test("H1: the plate's underline and initial stay inside what the ring reads as the name — its forward arrow clears them", () => {
+test("H1: the plate is the name's own outline and nothing else (D1) — and it stays inside what the ring reads as the name", () => {
   // The ring's rank arrows stand off `below: nameY + namePx * 0.5` (renderStage; pinned in
-  // test/arena-ring-movement.test.js), so nothing the plate draws may reach under that line.
-  for (const px of [10, 15, 22.5, 40]) {
-    for (const nameWidth of [12, 80, 160]) {
-      const x = 500;
-      const baseline = 300;
-      const plate = namePlateLayout({ x, baseline, px, nameWidth });
-      const where = `px ${px}, width ${nameWidth}`;
-      const left = x - nameWidth / 2;
-      const right = x + nameWidth / 2;
-      assert.ok(plate.outlineWidth > 0, `${where}: the name is outlined`);
-      // The underline: under the baseline, the whole name's width, in colour over its own outline.
-      const { line, lineOutline } = plate;
-      assert.ok(line.y > baseline, `${where}: the underline is under the baseline`);
-      assert.ok(line.x <= left && line.x + line.width >= right, `${where}: it underlines the whole name`);
-      assert.ok(line.height >= 1.5, `${where}: at least 1.5 px, so it is seen`);
-      assert.ok(lineOutline.x < line.x && lineOutline.y < line.y
-        && lineOutline.x + lineOutline.width > line.x + line.width
-        && lineOutline.y + lineOutline.height > line.y + line.height, `${where}: its outline surrounds it`);
-      // The initial: a disc left of the name, on the name's own line, never over a letter.
-      const { disc } = plate;
-      assert.ok(disc.x + disc.r + disc.outlineWidth / 2 < left, `${where}: the initial is clear of the name`);
-      assert.ok(disc.y < baseline && disc.y > baseline - px, `${where}: on the name's line`);
-      assert.ok(disc.letterPx >= 7, `${where}: a letter that can be read`);
-      // Nothing under the ring's line.
-      const lowest = Math.max(lineOutline.y + lineOutline.height, disc.y + disc.r + disc.outlineWidth / 2);
-      assert.ok(lowest <= baseline + px * 0.5, `${where}: the plate reaches ${lowest - baseline} under the baseline, past ${px * 0.5}`);
-    }
+  // test/arena-ring-movement.test.js). Under the baseline the plate now inks only a descender and
+  // half of the name's outline; the camera budgets the descender at `namePlateFont.descent` of the
+  // font, so the two together must stay above that line. The shell's font is never under 10 px.
+  const { descent } = SS2_CLOSE_UP.namePlateFont;
+  // Worked by hand: 0.24 of the font, never under 2 px.
+  for (const [px, width] of [[10, 2.4], [15, 3.6], [22.5, 5.4], [40, 9.6]]) {
+    const plate = namePlateLayout({ px });
+    assert.deepEqual(Object.keys(plate), ["outlineWidth"], `px ${px}: no underline, no disc — nothing but the outline`);
+    assert.ok(Math.abs(plate.outlineWidth - width) < 1e-9, `px ${px}: an outline ${plate.outlineWidth} px wide, not ${width}`);
+    assert.ok(plate.outlineWidth / 2 + px * descent <= px * 0.5, `px ${px}: a descender and half the outline reach ${plate.outlineWidth / 2 + px * descent} under the baseline, past ${px * 0.5}`);
   }
+  assert.equal(namePlateLayout({ px: 5 }).outlineWidth, 2, "never thinner than 2 px");
 });
 
 /** `top` drawn at `alpha` over `under`, as a 2D canvas composites (source-over, in sRGB). */
@@ -244,11 +235,37 @@ function wireOf({ result = null, turnCursor = 0, crowd = 42 } = {}) {
 
 test("H2: two panels, red then blue, a row per fighter in slot order — whatever order the wire lists them in", () => {
   const hud = teamHudFor({ wire: wireOf() });
-  assert.deepEqual(hud.teams.map((team) => [team.teamId, team.name, team.colour, team.initial]),
-    [["red", "Red", "#e0584f", "R"], ["blue", "Blue", "#4c8fe0", "B"]]);
+  assert.deepEqual(hud.teams.map((team) => [team.teamId, team.name, team.colour]),
+    [["red", "Red", "#e0584f"], ["blue", "Blue", "#4c8fe0"]]);
   assert.deepEqual(hud.teams.map((team) => team.rows.map((row) => row.id)), [["red-1", "red-2"], ["blue-1", "blue-2"]]);
   assert.deepEqual(hud.teams.map((team) => team.standing), [1, 2], "how many of each side still stand");
-  assert.deepEqual(hud.teams[0].rows.map((row) => [row.name, row.colour, row.initial]), [["RED-1", "#e0584f", "R"], ["RED-2", "#e0584f", "R"]]);
+  assert.deepEqual(hud.teams[0].rows.map((row) => [row.name, row.colour]), [["RED-1", "#e0584f"], ["RED-2", "#e0584f"]]);
+});
+
+test("D1: nothing in the HUD model carries an initial or an underline — the side's colour is its only cue, everywhere", () => {
+  const keysOf = (value, into = new Set()) => {
+    if (value && typeof value === "object") {
+      for (const [key, inner] of Object.entries(value)) { into.add(key); keysOf(inner, into); }
+    }
+    return into;
+  };
+  const wire = wireOf({ turnCursor: 1 });
+  const models = {
+    teamHudFor: teamHudFor({ wire }),
+    turnOrderFor: turnOrderFor(wire),
+    teamStyleFor: ["red", "blue", "green", null].map(teamStyleFor),
+    namePlateFor: [namePlateFor({ teamId: "red", alive: true }), namePlateFor({ teamId: "blue", alive: false })],
+    namePlateLayout: namePlateLayout({ px: 15 })
+  };
+  for (const [name, model] of Object.entries(models)) {
+    const keys = keysOf(model);
+    assert.ok(keys.size > 0, `${name} was read`);
+    for (const gone of ["initial", "underline", "line", "lineOutline", "disc"]) {
+      assert.ok(!keys.has(gone), `${name} still carries "${gone}", which nothing draws`);
+    }
+  }
+  // The walk reaches the rows and the strip's entries, where the initial used to be.
+  assert.ok(keysOf(models.teamHudFor).has("colour") && keysOf(models.teamHudFor).has("current"));
 });
 
 test("H2: a row's three readings are the build's — health, energy (stamina) and armour, value / max and the bar's rounded percent", () => {
@@ -379,12 +396,12 @@ test("H2 (Codex review of H2, pass 3): nor damage the engine may not deal — a 
 
 test("H3: the strip is the engine's own initiative, in its order, each in his side's colour; whose turn it is marked, the fallen too", () => {
   // `wireOf`'s initiative is red-1, blue-1, red-2, blue-2 — NOT the panels' order — and red-2 has fallen.
-  const entries = (order) => order.map((entry) => [entry.id, entry.name, entry.colour, entry.initial, entry.current, entry.alive]);
+  const entries = (order) => order.map((entry) => [entry.id, entry.name, entry.colour, entry.current, entry.alive]);
   assert.deepEqual(entries(turnOrderFor(wireOf({ turnCursor: 1 }))), [
-    ["red-1", "RED-1", "#e0584f", "R", false, true],
-    ["blue-1", "BLUE-1", "#4c8fe0", "B", true, true],
-    ["red-2", "RED-2", "#e0584f", "R", false, false],
-    ["blue-2", "BLUE-2", "#4c8fe0", "B", false, true]
+    ["red-1", "RED-1", "#e0584f", false, true],
+    ["blue-1", "BLUE-1", "#4c8fe0", true, true],
+    ["red-2", "RED-2", "#e0584f", false, false],
+    ["blue-2", "BLUE-2", "#4c8fe0", false, true]
   ]);
   assert.deepEqual(turnOrderFor(wireOf({ turnCursor: 3 })).map((entry) => entry.current), [false, false, false, true]);
   assert.deepEqual(turnOrderFor(wireOf({ turnCursor: 1, result: { winnerTeamId: "blue" } })).map((entry) => entry.current),

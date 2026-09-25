@@ -4071,12 +4071,20 @@ function paintLayerOperation(operation) {
   //   while the build's blur spills past it. 4,312 of the 5,810 `sky`
   //   operations under a filtered group carry one of these, so that is not a
   //   corner case — it is most of the sky.
+  //
+  // ► **ONLY THE TRANSFORM IS PUT BACK AFTER `clip()`, NEVER THE DRAWING
+  //   STATE.** ~~`save()`, transform, `clip()`, `restore()`~~ until 2026-09-24:
+  //   the clipping region IS drawing state, `restore()` pops it, and so every
+  //   masked operation — the moon's 56 from sky frame 112 — was filled
+  //   UNCLIPPED (found by the in-frame HUD's wave 1; D7). The clip now lives in
+  //   the outer `save()` above and ends at its `restore()` below;
+  //   `test/arena-layer-clip.test.js` runs this body against the spec's stack.
   if (operation.clip) {
     const c = operation.clip.matrix;
-    context.save();
+    const layerSpace = context.getTransform();
     context.transform(c[0], c[1], c[2], c[3], c[4] / TWIPS_PER_PIXEL, c[5] / TWIPS_PER_PIXEL);
     context.clip(path2dFor(operation.clip.d), "evenodd");
-    context.restore();
+    context.setTransform(layerSpace);
   }
   context.transform(m[0], m[1], m[2], m[3], m[4] / TWIPS_PER_PIXEL, m[5] / TWIPS_PER_PIXEL);
   const path = path2dFor(operation.d);
@@ -4775,13 +4783,14 @@ function renderStage(view, fit, now) {
     //   drawn this frame, and the two are the same only when nothing is moving.
     //   Both values were already in scope eleven lines apart.
     //
-    // ► **IN HIS SIDE'S COLOUR, OUTLINED, UNDERLINED AND WITH HIS SIDE'S
-    //   INITIAL (H1, the owner's Q4 and Q12, 2026-09-24)**: the demo fighters'
-    //   skins are random across both teams, so the plate says whose side he is
-    //   on — and says it with a letter too, not colour alone. The colours, the
-    //   outline and where each part goes are `tools/arena/team-hud.js`'s
-    //   (`namePlateFor`, `namePlateLayout`), under the suite; nothing it draws
-    //   reaches under `nameY + namePx * 0.5`, the ring's `below` just after.
+    // ► **IN HIS SIDE'S COLOUR, OUTLINED (H1, the owner's Q4 and Q12,
+    //   2026-09-24)**: the demo fighters' skins are random across both teams,
+    //   so the plate says whose side he is on — by its colour, and by nothing
+    //   else (D1, the owner, 2026-09-24: "Colors suffice."; ~~underlined, and
+    //   with his side's initial on a disc~~). The colours and the outline are
+    //   `tools/arena/team-hud.js`'s (`namePlateFor`, `namePlateLayout`), under
+    //   the suite; nothing it draws reaches under `nameY + namePx * 0.5`, the
+    //   ring's `below` just after.
     const plate = namePlateFor(combatant);
     const nameX = view.toX(origin.x);
     const nameY = view.toY(origin.y, -22);
@@ -4792,27 +4801,12 @@ function renderStage(view, fit, now) {
     context.textAlign = "center";
     context.textBaseline = "alphabetic";
     context.lineJoin = "round";
-    const plateShape = namePlateLayout({ x: nameX, baseline: nameY, px: namePx, nameWidth: context.measureText(combatant.name).width });
+    const plateShape = namePlateLayout({ px: namePx });
     context.strokeStyle = plate.outline;
     context.lineWidth = plateShape.outlineWidth;
     context.strokeText(combatant.name, nameX, nameY);
     context.fillStyle = plate.fill;
     context.fillText(combatant.name, view.toX(origin.x), nameY);
-    const { line, lineOutline, disc } = plateShape;
-    context.fillStyle = plate.outline;
-    context.fillRect(lineOutline.x, lineOutline.y, lineOutline.width, lineOutline.height);
-    context.fillStyle = plate.underline;
-    context.fillRect(line.x, line.y, line.width, line.height);
-    context.beginPath();
-    context.arc(disc.x, disc.y, disc.r, 0, Math.PI * 2);
-    context.fillStyle = plate.fill;
-    context.fill();
-    context.lineWidth = disc.outlineWidth;
-    context.stroke();
-    context.fillStyle = plate.outline;
-    context.font = `800 ${disc.letterPx}px ui-sans-serif, system-ui, sans-serif`;
-    context.textBaseline = "middle";
-    context.fillText(plate.initial, disc.x, disc.y);
     context.restore();
 
     // Where he was drawn, for a click on him and — for the acting fighter and
@@ -5729,19 +5723,18 @@ function teamPanelNode(team) {
   panel.style.setProperty("--team", team.colour);
   panel.setAttribute("aria-label", `${team.name} team`);
   const heading = hudNode("h3", "team-heading");
-  heading.append(teamInitialNode(team), `${team.name} team`, hudNode("span", "team-standing", `${team.standing} of ${team.rows.length} standing`));
+  heading.append(`${team.name} team`, hudNode("span", "team-standing", `${team.standing} of ${team.rows.length} standing`));
   const rows = hudNode("ol", "team-rows");
   rows.append(...team.rows.map(fighterRowNode));
   panel.append(heading, rows);
   return panel;
 }
 
-/** A side's initial on its disc: a cue that is not colour alone. */
-function teamInitialNode(style) {
-  const initial = hudNode("span", "team-initial", style.initial);
-  initial.setAttribute("aria-hidden", "true");
-  return initial;
-}
+/*
+ * ~~`teamInitialNode` — a side's initial on its disc, "a cue that is not colour
+ * alone", before the heading, every row's name and every strip chip's~~ until
+ * 2026-09-24: the side's colour is its only cue (D1; `tools/arena/team-hud.js`).
+ */
 
 /** One fighter's row: his name, his tags (turn, down, you or AI), his conditions and his three readings. */
 function fighterRowNode(row) {
@@ -5749,8 +5742,7 @@ function fighterRowNode(row) {
   node.style.setProperty("--team", row.colour);
   if (row.acting) node.setAttribute("aria-current", "true");
   const head = hudNode("div", "row");
-  const name = hudNode("span", "name");
-  name.append(teamInitialNode(row), row.name);
+  const name = hudNode("span", "name", row.name);
   const tags = hudNode("span", "tags");
   if (row.acting) tags.append(hudNode("span", "tag turn", "turn"));
   if (!row.alive) tags.append(hudNode("span", "tag down", "down"));
@@ -5814,7 +5806,7 @@ function renderTurnStrip(order) {
     item.style.setProperty("--team", entry.colour);
     item.title = entry.name;
     if (entry.current) item.setAttribute("aria-current", "step");
-    item.append(teamInitialNode(entry), hudNode("span", "turn-name", entry.name));
+    item.append(hudNode("span", "turn-name", entry.name));
     if (!entry.alive) item.append(hudNode("span", "visually-hidden", " (down)"));
     return item;
   }));

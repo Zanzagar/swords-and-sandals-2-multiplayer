@@ -40,29 +40,40 @@ function rawBody(name) {
   return raw.slice(start, end + 2);
 }
 
-test("H1: the name plate is stroked in the model's outline, filled in his side's colour, underlined and given its initial", () => {
+test("H1: the name plate is the name alone — stroked in the model's outline, filled in his side's colour; no underline, no initial (D1)", () => {
   const stage = functionBody("renderStage");
-  const plate = stage.slice(stage.indexOf("const plate = namePlateFor(combatant);"));
-  assert.ok(plate.length < stage.length, "the plate is coloured by namePlateFor");
-  assert.match(plate, /const plateShape = namePlateLayout\(\{ x: nameX, baseline: nameY, px: namePx, nameWidth: context\.measureText\(combatant\.name\)\.width \}\);/);
+  const from = stage.indexOf("const plate = namePlateFor(combatant);");
+  assert.ok(from >= 0, "the plate is coloured by namePlateFor");
+  // The plate: from its colours to the restore that ends it.
+  const end = stage.indexOf("context.restore();", from);
+  assert.ok(end > from, "the plate's drawing state is restored");
+  const plate = stage.slice(from, end + "context.restore();".length);
+  assert.match(plate, /const plateShape = namePlateLayout\(\{ px: namePx \}\);/);
   // The outline under the name, then the name in the side's colour — in that order.
   const stroke = plate.indexOf("context.strokeText(combatant.name, nameX, nameY);");
   const fill = plate.indexOf("context.fillText(combatant.name, view.toX(origin.x), nameY);");
   assert.ok(stroke >= 0 && fill > stroke, "the outline is stroked under the name");
   assert.ok(plate.indexOf("context.strokeStyle = plate.outline;") < stroke);
+  assert.ok(plate.indexOf("context.lineWidth = plateShape.outlineWidth;") < stroke, "at the model's width");
   assert.ok(plate.indexOf("context.fillStyle = plate.fill;") < fill && plate.indexOf("context.fillStyle = plate.fill;") > stroke);
   assert.match(plate, /context\.globalAlpha = plate\.alpha;/, "the dead are faint, as they were");
-  // The underline over its outline, and the initial on its disc.
-  assert.match(plate, /context\.fillStyle = plate\.outline;\s*context\.fillRect\(lineOutline\.x, lineOutline\.y, lineOutline\.width, lineOutline\.height\);\s*context\.fillStyle = plate\.underline;\s*context\.fillRect\(line\.x, line\.y, line\.width, line\.height\);/);
-  assert.match(plate, /context\.arc\(disc\.x, disc\.y, disc\.r, 0, Math\.PI \* 2\);/);
-  assert.match(plate, /context\.fillText\(plate\.initial, disc\.x, disc\.y\);/);
+  // D1: the name is ALL it draws — ~~the underline over its outline, and the initial on its disc~~.
+  assert.deepEqual([...plate.matchAll(/context\.(\w+)\(/g)].map((call) => call[1]), ["save", "strokeText", "fillText", "restore"],
+    "the plate draws its name's outline and its name, and nothing else");
   // Its state does not leak into the next fighter or the ring.
   const saved = plate.indexOf("context.save();");
   assert.ok(saved >= 0 && saved < plate.indexOf("context.globalAlpha = plate.alpha;"), "saved before the plate's own font, alpha and baseline");
-  assert.ok(plate.indexOf("context.restore();") > plate.indexOf("context.fillText(plate.initial"), "and restored after it");
+  assert.ok(plate.lastIndexOf("context.restore();") > fill, "and restored after the name is drawn");
 });
 
 const page = fs.readFileSync(new URL("../tools/arena/index.html", import.meta.url), "utf8");
+
+/** The declarations of one of `index.html`'s CSS rules, by its exact selector at the start of a line. */
+function cssRule(selector) {
+  const found = new RegExp(`\\n\\s*${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\{([^}]*)\\}`).exec(page);
+  assert.ok(found, `index.html has a ${selector} rule`);
+  return found[1];
+}
 
 test("H2: the side panel is the model's — the crowd meter, then a panel per side with a row per fighter", () => {
   const roster = functionBody("renderRoster");
@@ -115,7 +126,7 @@ test("H3: the turn-order strip is the model's, drawn with the side panel on ever
   assert.match(strip, /hudNode\("li", `turn-chip\$\{entry\.current \? " current" : ""\}\$\{entry\.alive \? "" : " down"\}`\)/);
   assert.match(strip, /item\.style\.setProperty\("--team", entry\.colour\);/);
   assert.match(strip, /if \(entry\.current\) item\.setAttribute\("aria-current", "step"\);/);
-  assert.match(strip, /item\.append\(teamInitialNode\(entry\), hudNode\("span", "turn-name", entry\.name\)\);/);
+  assert.match(strip, /item\.append\(hudNode\("span", "turn-name", entry\.name\)\);/);
   assert.match(strip, /if \(!entry\.alive\) item\.append\(hudNode\("span", "visually-hidden", " \(down\)"\)\);/, "struck through, and said");
   // Nothing of the stage: it never draws on the canvas nor moves the camera.
   assert.doesNotMatch(strip, /\b(context|canvas|camera|cameraFrame|render|scrollIntoView)\b/);
@@ -132,18 +143,34 @@ test("H3: the strip stands just above the stage, outside it, at a fixed height, 
 });
 
 test("H3 (Codex review of H3, pass 1): the strip never scrolls — a classic scrollbar would eat its fixed 30 px — the names shrink instead", () => {
-  const rule = (selector) => {
-    const found = new RegExp(`\\n\\s*${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\{([^}]*)\\}`).exec(page);
-    assert.ok(found, `index.html has a ${selector} rule`);
-    return found[1];
-  };
-  const strip = rule(".turn-strip");
+  const strip = cssRule(".turn-strip");
   assert.doesNotMatch(strip, /overflow(-x)?: (auto|scroll)/, "no scrollbar inside the fixed height");
   assert.match(strip, /overflow: hidden;/);
-  assert.match(rule(".turn-chip"), /flex: 0 1 auto;[^]*min-width: 0;/, "a chip may shrink below its name's width");
-  assert.match(rule(".turn-chip .turn-name"), /overflow: hidden;[^]*text-overflow: ellipsis;[^]*white-space: nowrap;/, "and its name ends in an ellipsis");
+  assert.match(cssRule(".turn-chip"), /flex: 0 1 auto;[^]*min-width: 0;/, "a chip may shrink below its name's width");
+  assert.match(cssRule(".turn-chip .turn-name"), /overflow: hidden;[^]*text-overflow: ellipsis;[^]*white-space: nowrap;/, "and its name ends in an ellipsis");
   // The whole name is still there to read, and nothing scrolls.
   const strip2 = rawBody("renderTurnStrip");
   assert.match(strip2, /item\.title = entry\.name;/);
   assert.doesNotMatch(strip2, /scroll/);
+});
+
+test("D1: no initial and no underline anywhere on the page — the heading, the rows and the strip name a side by its colour alone", () => {
+  // The owner, 2026-09-24: "the team names dont need the R and B icons next to them and underlined. Colors suffice."
+  assert.doesNotMatch(code, /teamInitialNode/, "~~a side's initial on its disc~~ is drawn nowhere");
+  for (const name of ["renderStage", "teamPanelNode", "fighterRowNode", "renderTurnStrip"]) {
+    assert.doesNotMatch(functionBody(name), /\binitial\b|underline/, `${name} draws no initial and no underline`);
+  }
+  assert.match(rawBody("teamPanelNode"), /heading\.append\(`\$\{team\.name\} team`, hudNode\("span", "team-standing", /);
+  assert.match(rawBody("fighterRowNode"), /const name = hudNode\("span", "name", row\.name\);/);
+  assert.doesNotMatch(page, /team-initial/, "and no style for one");
+  // The strip chip's coloured bottom border was an underline too; the current chip is ringed instead.
+  assert.doesNotMatch(cssRule(".turn-chip"), /border-bottom/, "no coloured underline under a chip");
+  assert.doesNotMatch(cssRule(".turn-chip.current"), /border-bottom/);
+  assert.match(cssRule(".turn-chip.current"), /border-color: var\(--warn\);[^]*box-shadow: 0 0 0 1px var\(--warn\);/, "the current chip is ringed, not underlined");
+  // Every colour cue that remains, where it was: the colour is now the only one.
+  assert.match(cssRule(".team-panel"), /border-top: 3px solid var\(--team, var\(--edge\)\);/);
+  assert.match(cssRule(".team-heading"), /color: var\(--team, var\(--ink\)\);/);
+  assert.match(cssRule(".fighter"), /border-left: 3px solid var\(--team, var\(--edge\)\);/);
+  assert.match(cssRule(".fighter .name"), /color: var\(--team, var\(--ink\)\);/);
+  assert.match(cssRule(".turn-chip .turn-name"), /color: var\(--team, var\(--ink\)\);/);
 });

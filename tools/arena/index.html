@@ -58,7 +58,10 @@
      strip below, so the stage is the same size on every turn — and it never
      SCROLLS: a classic scrollbar would eat that height (Codex review of H3,
      pass 1), so on a narrow stage the chips shrink and the names end in an
-     ellipsis, each chip carrying the whole name as its title. */
+     ellipsis, each chip carrying the whole name as its title. A chip names
+     its side by its name's colour ALONE (D1, 2026-09-24: ~~an initial on a
+     disc, and a bottom border in the side's colour~~ — "Colors suffice");
+     the chip whose turn it is is ringed in --warn, never underlined. */
   .turn-strip {
     flex: 0 0 auto; height: 30px; margin: 0; padding: 0 10px; list-style: none;
     display: flex; gap: 4px; align-items: center;
@@ -66,16 +69,15 @@
     border-bottom: 1px solid var(--edge); background: var(--panel);
   }
   .turn-chip {
-    flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 0; padding: 1px 7px 1px 3px;
-    border: 1px solid var(--edge); border-bottom: 2px solid var(--team, var(--edge)); border-radius: 999px;
+    flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 0; padding: 1px 7px;
+    border: 1px solid var(--edge); border-radius: 999px;
     background: var(--ground); font-size: 12px; line-height: 1.4;
   }
-  .turn-chip .team-initial { flex: 0 0 auto; }
   .turn-chip .turn-name {
     color: var(--team, var(--ink)); font-weight: 600;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
   }
-  .turn-chip.current { border-color: var(--warn); border-bottom-color: var(--team, var(--warn)); box-shadow: 0 0 0 1px var(--warn); }
+  .turn-chip.current { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); }
   .turn-chip.down { opacity: .45; }
   .turn-chip.down .turn-name { text-decoration: line-through; }
   #stage { flex: 1 1 auto; min-height: 0; position: relative; }
@@ -148,8 +150,9 @@
   .crowd-bar > b { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--ink-dim); }
   /* H2: the two team panels, red then blue. Each carries its side's colour
      (--team, set from tools/arena/team-hud.js) on its top edge, its heading,
-     each row's left edge and each name, and its initial in a disc: a cue that
-     is not colour alone. The rows sit on --ground: the side panel's own --panel
+     each row's left edge and each name — and that colour is the side's only
+     cue (D1, 2026-09-24: ~~and its initial in a disc: a cue that is not
+     colour alone~~). The rows sit on --ground: the side panel's own --panel
      gives red only 4.44 : 1, --ground 4.90 (blue 5.45). */
   .roster { display: flex; flex-direction: column; gap: 12px; }
   .team-panel { border-top: 3px solid var(--team, var(--edge)); padding-top: 6px; display: flex; flex-direction: column; gap: 6px; }
@@ -167,12 +170,6 @@
   .fighter.down { opacity: .45; }
   .fighter .row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
   .fighter .name { font-weight: 600; color: var(--team, var(--ink)); }
-  .team-initial {
-    display: inline-block; min-width: 1.5em; margin-right: 6px; padding: 0 .3em; border-radius: 999px;
-    background: var(--team, var(--ink-dim)); color: #0b0a0d;
-    font-size: 10.5px; font-weight: 800; line-height: 1.5; text-align: center; vertical-align: 1px;
-    letter-spacing: 0;
-  }
   .fighter .tags { display: inline-flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
   .tag, .seat {
     font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
