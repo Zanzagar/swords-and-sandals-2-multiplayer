@@ -214,7 +214,9 @@ witness derives exact material phase support `{D,E,O}` at RCS-03C3B1B. An
 eleventh audit makes old RCS-03C3B2A a non-counting parent for within-operation
 root partition, cross-operation finite-episode merging, additive compound-H
 relation-root promotion, current-state root succession, and current-state
-multi-root support. RCS-03C3B2A1 is the active owner choice under SR-03.
+multi-root support. The owner selected RCS-03C3B2A1-A: every accepted
+operation occurrence has one primitive lineage across its realized
+applications. RCS-03C3B2A2A is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19539,7 +19541,7 @@ from `SCREEN` to `DERIVED` reduces `Phi_SR` from 29 to 28.
 > Exact family catalogs and serialized IDs remain AUTHOR/SPEC after the global
 > semantic policies are selected.
 
-### RCS-03C3B2A1 — primitive within-operation action-root partition — active owner choice
+### RCS-03C3B2A1 — primitive within-operation action-root partition — A selected
 
 Let `O^{multi-app}_v` be the set of versioned action-operation forms that can,
 within one accepted authorization and accounting episode, produce at least two
@@ -19586,6 +19588,96 @@ build-provenance roots, root/child atom addressability, claims, reuse, fan-out,
 payoff, UI realization, persistence, release, or implementation.
 `RCS-03C3B2A2A` follows every answer.
 The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-25:** **A, one primitive
+lineage per accepted operation occurrence.** `S^{split}_v` is empty. From its
+commitment, if any, through its terminal disposition, one accepted occurrence
+has exactly one primitive pre-episode action-root lineage across every authored
+application it actually realizes. An interrupted occurrence mints no phantom
+lineage for an unrealized application.
+
+Distinct applications retain their semantic differences and may later become
+addressable child atoms if B3/B4 permit, but every such child retains the same
+operation lineage. Two hits, pulses, targets, or effects from one occurrence
+therefore cannot occupy two independent-source positions of one relationship
+result. The operation and its manifestations participate **directly** in one
+operative identity without becoming mechanically identical, the strongest
+local Achintya fit at this boundary. Universal one-lineage prevalence is
+**aggregate**. This is a direction selection; it changes no authoritative
+decision wording and authorizes no implementation.
+
+Selecting A reduces `Phi_SR` from 32 to 31. It neither merges distinct
+operation occurrences nor decides additive relation roots, current-state root
+succession or cardinality, build provenance, root/child addressability, or
+claims and reuse. No later row derives or prunes. `RCS-03C3B2A2A` becomes the
+sole active owner choice.
+
+### RCS-03C3B2A2A — cross-operation finite source-episode root coarsening — active owner choice
+
+Inherit A1-A: every accepted operation occurrence first contributes one
+primitive action lineage. Let `F^{xop}_v` be the set of versioned finite
+authored **source-episode forms**. A qualifying form can contain at least two
+distinct, separately accepted and accounted operation occurrences; discloses
+one source-owned episode identity, membership grammar, and finite terminal,
+abort, and restart rules no later than its first member's commitment; assigns
+membership canonically and exclusively upstream of every Relic, Charm, result,
+or payoff; and preserves each member's authorization, payment, semantic
+identity, and outcome.
+
+Adjacency, one freshness window, a shared target or record, raw causal
+connectedness, or a Relic noticing a useful pattern never creates membership.
+Ambiguous overlapping memberships are invalid until an authored deterministic
+exclusive resolution applies before commitment. An unperformed member supplies
+no phantom lineage, a stopped episode keeps only realized ancestry, and a
+re-initiation after any terminal or abort disposition always opens a fresh
+episode identity. Same-identity continuation exists only before terminal
+disposition. Because the identity is prospective, a later member never rolls
+back an already committed result.
+
+Let `M^{merge}_v` contain the forms in `F^{xop}_v` whose realized members
+canonicalize to one episode root. A merged form opens that identity
+prospectively. Every accepted member retains its primitive history, while the
+episode root carries the nonempty union of all realized member lineages.
+Coarsening is a replacement/equivalence rule rather than an additional root:
+the members remain legible ancestry or later children, but cannot occupy two
+independent-source positions of one result.
+
+The form-level policy is total and occurrence-stable. For every occurrence of
+one versioned form, either every realized member shares that occurrence's one
+episode root or none are coarsened by this rule. Partial subgroups,
+completion-dependent merging, or actor/target/context variants must be distinct
+prospectively keyed forms before first-member commitment; the occurrence may
+not choose its policy after seeing interruption, outcomes, or a Relic recipe.
+
+| Choice | Cross-operation root policy | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — no finite source episode coarsens** | `M^{merge}_v` is empty. Every separately accepted operation keeps a distinct canonical root, even inside a prospectively authored finite lifecycle. | This gives maximum action-level buildcraft and the simplest extension of “one accepted action, one root.” Its Achintya fit is **partial**: the source episode supplies continuity, but canonical root identity expresses only distinction. A self-contained multi-button lifecycle can also farm several nominally independent Relic sources. | Plant Sigil carries `r_P`; its later separately accepted Detonate carries `r_D`. Subject to later entry rules, the two may occupy independent action-source positions. B2A2B separately asks whether their nonmerged relation may own an additive relation root. |
+| **B — every finite source episode coarsens** | `M^{merge}_v=F^{xop}_v`, with at least one reachable functional witness. Every qualifying form has one canonical episode root across its realized member operations while retaining their complete primitive ancestry. | **Recommended.** “One authored source episode, one canonical source root” is teachable and prevents integral multi-step lifecycles from generating roots per button. Distinct commitments, costs, histories, and outcomes participate in one continuing identity at the same root boundary, a **direct** local Achintya fit; universal prevalence is **aggregate**. The cost is that every qualifying ritual or lifecycle loses internal cross-source eligibility, and an overbroad episode catalog could suppress enjoyable combinations. | Accepting Plant Sigil prospectively opens `r_Rupture`; a later Detonate joins that root. Both actions keep their own payment and history, but cannot jointly counterfeit two independent Relic sources. An unrelated Guard root may still pair with `r_Rupture`. |
+| **C — coarsened and uncoarsened source-episode forms coexist** | `M^{merge}_v` is a nonempty proper subset of `F^{xop}_v`. At least one reachable form coarsens and one distinct reachable form retains separate member roots under stable disclosed form rules. | C offers the richest ontology: integral rites may be one root while tactical cadences remain several. Merged cases have B's **direct** local fit, unmerged cases have A's **partial** fit, and coexistence is **aggregate**. The cost is a hidden source-density taxonomy, tooltip burden, and authoring arbitrage as players prefer whichever class better fuels later claim rules. | Rupture Rite's Plant and Detonate share `r_Rupture`, while an authored Feint–Riposte Cadence retains `r_Feint` and `r_Riposte`. The mapping is fixed by versioned source form before play, never chosen after inspecting a Relic recipe. |
+
+**Recommendation: B, every qualifying finite source episode coarsens.** Once
+eligibility is restricted to prospectively authored, finite, source-owned
+forms, B is both the strongest direct expression of meaningful unity with
+preserved difference and the cleanest defense against lifecycle root farming.
+It does not merge emergent action pairs: `Guard -> Heat` remains two roots
+unless the source system had already authored that exact structure as one
+episode.
+
+A/B/C are mutually exclusive and exhaustive over `M^{merge}_v` under the
+whole-form/whole-occurrence invariant: it is empty, all of `F^{xop}_v`, or a
+nonempty proper subset. If `F^{xop}_v` is empty, only A is realized; B and C
+require reachable material witnesses. Exact episode catalogs, prospectively
+keyed actor/target variants, durations, and presentation remain AUTHOR/SPEC,
+but none may infer membership or merge policy post hoc from interruption,
+outcome, or a Relic match.
+
+This card does not decide whether a still-nonmerged compound order/trajectory
+claim gains an **additional** multi-parent relation root, whether a live state
+preserves or succeeds its root, root/child addressability, claims, reuse,
+payoff, persistence, release, or implementation. After any answer, screen
+`RCS-03C3B2A2B` against the remaining eligible nonmerged compound-H domain: it
+becomes the next card if that domain is nonempty, otherwise it is pruned and
+`RCS-03C3B2A3` follows. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

@@ -2877,16 +2877,44 @@ children: within-operation root partition, cross-operation finite-episode
 merging, additive compound-H relation-root promotion, current-state root
 succession, and current-state multi-root support. Replacing one screened row
 with five adds four rows and potential cards. The current fifty-four-slot
-register contains 31 `SCREEN`, 1 `OWNER-OPEN`, 7
-`PRUNED`, 12 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE` row, so
-`Phi_SR = 32`. `RCS-03C3B2A1` is the sole active card. Its A/B/C partition is
-one primitive lineage per operation occurrence, every eligible
-multi-application form splitting into several primitive lineages, or form-level
-coexistence; A is recommended to avoid a hidden “roots per button” premium
-while preserving semantic applications as possible later children. B2A2A
-separately decides whether lineages from distinct operation occurrences are
-later coarsened into one canonical finite-episode root; conditional B2A2B owns
-additive relation-root promotion on its nonmerged complement.
+register initially contained 31 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 12
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE` row, so
+`Phi_SR = 32` with `RCS-03C3B2A1` active.
+
+The owner then selected `RCS-03C3B2A1-A`. `S^{split}_v` is empty: every
+accepted operation occurrence has one primitive pre-episode action-root
+lineage across all authored applications it actually realizes. Distinct
+applications may later become addressable children, but retain that lineage
+and cannot occupy independent-source positions together. This preserves one
+operative identity without erasing its meaningful manifestations, prevents a
+hidden roots-per-button premium, and reduces `Phi_SR` from 32 to 31. No
+cross-operation, current-state, build-root, or addressability row derives or
+prunes.
+
+`RCS-03C3B2A2A` is now the sole active card. Let `F^{xop}_v` be prospectively
+source-authored, finite, disclosed multi-operation episode forms whose
+membership and stop/restart grammar are canonical no later than the first
+member's commitment. Let `M^{merge}_v` contain forms whose realized member operations
+canonicalize to one episode root while retaining their complete primitive
+ancestry. Raw causal connectedness, adjacency, a shared record, or a Relic
+match cannot create membership. Each versioned form uses one total,
+occurrence-stable policy: all realized members share one episode root or none
+coarsen; partial/contextual variants require separate prospective form keys.
+Every post-terminal or post-abort re-initiation opens a fresh episode identity.
+The exhaustive options are no forms merge, every form merges, or a nonempty
+proper subset merges.
+
+B is recommended: every qualifying source episode becomes one canonical root.
+It gives one teachable rule, prevents an integral multi-button lifecycle from
+self-supplying several Relic roots, and directly combines distinct operation
+histories with one continuing episode identity. The cost is loss of internal
+cross-source eligibility and the danger of an overbroad episode catalog. A
+keeps maximum action-level buildcraft but permits lifecycle root farming; C
+adds a source-density taxonomy and authoring arbitrage. Conditional B2A2B still
+owns additive relation-root promotion on the eligible nonmerged complement.
+
+The current register contains 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 13
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`.
 
 **Agent correction:** the first eleventh-amendment draft conflated forced full
 operand-lineage retention with a ban on additive multi-parent relation roots.

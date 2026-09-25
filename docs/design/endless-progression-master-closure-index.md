@@ -1739,7 +1739,7 @@ relation-root promotion),
 `RCS-03C3B2A3` (current-state root succession), and `RCS-03C3B2A4`
 (current-state irreducible multi-root support). Replacing one screened row with
 five adds four rows and potential cards. The register grows from fifty to
-fifty-four rows, and current `Phi_SR` rises from 28 to 32.
+fifty-four rows, and the then-current `Phi_SR` rises from 28 to 32.
 
 **Agent correction.** The first eleventh-amendment draft correctly required
 full operand-lineage retention but incorrectly treated that invariant as proof
@@ -1748,6 +1748,18 @@ preserve both parents and forbid overlap while giving the relation distinct
 later root-level behavior against an unrelated source. B2A2B restores that
 policy before owner presentation; B3 still decides addressability after root
 existence is settled.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A1-A`, so `S^{split}_v` is empty: every accepted operation
+occurrence has one primitive pre-episode action-root lineage across all
+authored applications it actually realizes. Applications may later be
+semantic child atoms, but retain that lineage and cannot fill independent-
+source positions together. Selecting A reduces `Phi_SR` from 32 to 31. It
+does not decide any cross-operation, current-state, build-root, or
+addressability row. `RCS-03C3B2A2A` is therefore the sole active card:
+whether no, every, or a nonempty proper subset of prospectively authored,
+finite, source-owned multi-operation episode forms coarsen their realized
+member lineages into one canonical episode root.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -1786,8 +1798,8 @@ overcompression.
 | `RCS-03C3B1A2A` | Prevalence of positions with at least one supplemental irreducibly multi-phase H package | `DIR-SELECTED`; C requires a nonempty proper coupled-position subset under `SR-03`, so coupled-supplement and clean history positions coexist |
 | `RCS-03C3B1A2B` | Catalog support for inclusion-minimal coupled-package phase width | `DIR-SELECTED`; C requires both width-two and width-three package witnesses under `SR-03`, without making width a power or rarity rank |
 | `RCS-03C3B1B` | Material occurrence-history phase support across accepted declaration/commitment, execution/performance, and authoritative outcome/disposition | `DERIVED`; A2B-C's admitted width-three package forces exact support `{D,E,O}` under `SR-03` |
-| `RCS-03C3B2A1` | Primitive within-operation action-root partition: one lineage per accepted operation occurrence versus semantic multi-lineage forms before cross-operation equivalence | `OWNER-OPEN`; follows derived `RCS-03C3B1B` under `SR-03`; aliases, views, fields, packets, and resolver microsteps never mint lineages, while B2A2A/B separately own later cross-operation coarsening and compound-root promotion |
-| `RCS-03C3B2A2A` | Cross-operation root merging/coarsening into finite, authored, disclosed episode identities | `SCREEN`; follows `RCS-03C3B2A1` under `SR-03`; raw causal connectedness is never a root boundary |
+| `RCS-03C3B2A1` | Primitive within-operation action-root partition: one lineage per accepted operation occurrence versus semantic multi-lineage forms before cross-operation equivalence | `DIR-SELECTED`; A gives every accepted operation occurrence one primitive lineage across all realized applications under `SR-03`; later children retain that lineage, and B2A2A/B separately own cross-operation coarsening and compound-root promotion |
+| `RCS-03C3B2A2A` | Cross-operation root merging/coarsening into finite, authored, disclosed episode identities | `OWNER-OPEN`; follows `RCS-03C3B2A1-A` under `SR-03`; candidate identity, exclusive membership, whole-form merge policy, and finite stop/restart grammar are source-authored prospectively; every re-initiation after terminal/abort opens a fresh identity, and adjacency, raw causation, or a Relic match never creates membership |
 | `RCS-03C3B2A2B` | Additive multi-parent relation-root promotion for nonmerged compound-H order/trajectory claims | `SCREEN`; follows `RCS-03C3B2A2A` under `SR-03` and is `PRUNED` if no nonmerged eligible complement remains; every promoted root retains the full indispensable parent-lineage union and is non-independent from every ancestor |
 | `RCS-03C3B2A3` | Current-state source-root succession across a material nonterminating semantic revision | `SCREEN`; follows `RCS-03C3B2A1`, `RCS-03C3B2A2A`, and applicable `RCS-03C3B2A2B` under `SR-03`; no-op writes and representation churn never revise roots |
 | `RCS-03C3B2A4` | Current-state irreducible multi-root causal-support topology | `SCREEN`; follows `RCS-03C3B2A1`, `RCS-03C3B2A2A`, applicable `RCS-03C3B2A2B`, and `RCS-03C3B2A3` under `SR-03`; exact redundant-support representation follows the selected semantic boundary |
@@ -1863,14 +1875,18 @@ row, producing 29 `SCREEN`, 0 `OWNER-OPEN`, 7 `PRUNED`, 12 `DIR-SELECTED`, 1
 `SPEC`, and 1 `EVALUATE` row, with `Phi_SR = 29`. Its width-three witness then
 closes `RCS-03C3B1B` as `DERIVED`, reducing the potential to 28 across fifty
 rows. Replacing old `RCS-03C3B2A` with five children adds four potential rows,
-so the eleventh-amendment register has **fifty-four slots**: 31 `SCREEN`, 1
+so the eleventh-amendment register had **fifty-four slots**: 31 `SCREEN`, 1
 `OWNER-OPEN`, 7 `PRUNED`, 12 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`. Current `Phi_SR = 32`, and `RCS-03C3B2A1` is the sole active card.
+`EVALUATE`, with `Phi_SR = 32`. `RCS-03C3B2A1-A` then selected one primitive
+lineage per accepted operation occurrence and advanced the frontier. The
+current register has 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 13
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
+`Phi_SR = 31`, and `RCS-03C3B2A2A` is the sole active card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
-outside owner choice. Therefore the remaining Relic pass has at most thirty-two
+outside owner choice. Therefore the remaining Relic pass has at most thirty-one
 owner cards under this eleven-times-amended charter and will usually have
 fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
@@ -1889,7 +1905,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 54 frozen candidate slots; current `Phi_SR = 32` after `RCS-03C3B1A2B-C`, derived all-three phase support, and the eleventh source-root amendment | At most 32 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 54 frozen candidate slots; current `Phi_SR = 31` after `RCS-03C3B2A1-A` selects one primitive lineage per accepted operation occurrence | At most 31 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
