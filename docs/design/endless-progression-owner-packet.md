@@ -231,8 +231,10 @@ one additive relation root with complete operand ancestry. A thirteenth
 prerequisite audit then proved that current-state support does not itself prove
 that any state can revise materially without terminating. Old RCS-03C3B2A3 is
 therefore a non-counting parent for support boundary RCS-03C3B2A3A and
-conditional succession boundary RCS-03C3B2A3B. RCS-03C3B2A3A is the active
-owner choice under SR-03.
+conditional succession boundary RCS-03C3B2A3B. The owner selected
+RCS-03C3B2A3A-B: the completed catalog supports at least one reachable
+material revision inside an uninterrupted current-state continuity episode.
+RCS-03C3B2A3B is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19952,7 +19954,7 @@ advance to old B2A3. The authoritative decision record remains unchanged.
 > counted slots and restores `Phi_SR = 30`: 29 `SCREEN`, 1 `OWNER-OPEN`, 7
 > `PRUNED`, 16 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`.
 
-### RCS-03C3B2A3A — material nonterminating current-state revision support — active owner choice
+### RCS-03C3B2A3A — material nonterminating current-state revision support — B selected
 
 A **current-state continuity episode** is the maximal authoritative interval
 in which one prospectively versioned state-form instance remains operatively
@@ -19999,6 +20001,117 @@ Simultaneous multi-root state support remains B2A4, root/child addressability
 remains B3, and claims, reuse, payoff, presentation, persistence, release, and
 implementation remain separate. The authoritative decision record remains
 unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-25:** **B, require
+continuous material state-revision support.** `E^{state-rev}_v` is nonempty.
+The completed catalog must contain at least one prospectively versioned
+revision form with a reachable functional occurrence inside one uninterrupted
+current-state continuity episode. The transition keeps that episode
+continuously operative, materially changes player-semantic state under a
+reachable held-fixed comparison, can independently change an effective `S`
+predicate, legal continuation, or authoritative outcome, remains material with
+root identity, Relic matching, payoff, and claim bookkeeping projected out,
+and commits at an authoritative cut.
+
+This is an existential support floor. Exact forms, counts, distribution, and
+prevalence remain AUTHOR/SPEC. No-op writes, representation churn, and genuine
+termination followed by re-establishment remain outside the domain. B selects
+neither root preservation/succession nor simultaneous multi-root support,
+addressability, claim/reuse, payoff, persistence, release, or implementation.
+It moves A3A from `OWNER-OPEN` to `DIR-SELECTED` and activates already-counted
+A3B from `SCREEN` to `OWNER-OPEN`. The fifty-six-slot register now contains 28
+`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 17 `DIR-SELECTED`, 1 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR` falls from 30 to 29. The authoritative
+decision record remains unchanged.
+
+### RCS-03C3B2A3B — current-state continuity-root preservation versus succession — active owner choice
+
+A3A-B establishes a nonempty catalog of material revisions that leave one
+current-state continuity episode uninterrupted. For a successfully committed
+eligible revision occurrence `x`, let `r^-_x` be the episode's one operative
+continuity root immediately before the revision and `r^+_x` its one operative
+continuity root immediately after it. Simultaneous causal-support roots remain
+the separate A4 boundary.
+
+Let `Q^{state-succ}_v` be the stable, prospectively versioned subset of
+`E^{state-rev}_v` whose successfully committed occurrences create successor
+continuity roots. A preserving occurrence leaves `r^+_x=r^-_x`. A succeeding
+occurrence atomically creates exactly one fresh `r^+_x` at the authoritative
+revision cut. The successor replaces the predecessor as the episode's
+operative continuity root without terminating the episode. The predecessor
+remains ancestry-only under A3B; this card does not automatically expose it as
+any second current support candidate.
+
+At each committed revision cut, define the post-cut operative root's cut-indexed
+lineage as the deduplicated union of the pre-cut root's complete transitive
+lineage and every indispensable revision-cause lineage. This union is
+append-only for both preservation and succession. Earlier snapshots and
+settled results retain the lineage authoritative at their own cuts; no later
+revision retroactively rewrites them. A successor is non-independent from the
+predecessor, every ancestor, every intersecting lineage, and every root sharing
+a nonmultiplying authorization or accounting parent. A4 later decides the
+exact causal-support topology of the revised state fact.
+
+Policy belongs to the disclosed revision form, never to the equipped Relic,
+target, later payoff, favorable history, claim state, or whether a successor
+would presently complete a recipe. A mechanically meaningful contextual
+variant may differ only through its own prospective form. A root-only relabel
+is not a new form.
+
+| Choice | Continuity-root policy | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — every continuous revision preserves its root** | `Q^{state-succ}_v` is empty. Every eligible revision keeps the episode's then-current root; therefore the founder continuity root remains operative throughout the uninterrupted episode. | **Recommended.** One uninterrupted state episode has one teachable causal identity. Stack gains, material duration extensions, threshold changes, and mode shifts cannot become a hidden “roots per update” stat. The state can still change predicates, legal counters, outcomes, and later semantic children. The cost is that even a dramatic continuous metamorphosis cannot itself become fresh root-level combo material. The root as continuing “soul” and its materially different state manifestations as “simulacra” give the strongest direct local ideal fit. | `Kindle` establishes `Heat I` with `r_K`. Tempering it into `Heat II`, then `White-Hot`, changes real predicates and counterplay but retains `r_K`. Breaking Heat ends the episode; a later Kindle opens a fresh root under the applicable source rule. |
+| **B — every continuous revision creates a successor root** | `Q^{state-succ}_v=E^{state-rev}_v`. Every successfully committed eligible revision creates one fresh successor continuity root. | Every meaningful evolution becomes a distinct root-level milestone and may, only if later addressability/claim rules permit, seed outward routes against genuinely unrelated roots. This card grants no response window. Costs are successor-chain UI and persistence plus latent root-density, stack/refresh, and oscillation pressure that later access/payoff rules could expose; revision cadence is not itself a build stat yet. Its ideal fit is legitimate—predecessor and successor remain inseparable through ancestry while genuinely distinct—but more roots are not automatically a stronger expression. | `Heat I/r_K0 -> Heat II/r_K1 -> White-Hot/r_K2`, where each successor retains the full prior lineage. `r_K2` cannot count independently with `r_K1` or `r_K0`. A later return to Heat II through another succeeding revision creates fresh `r_K3`; it never resurrects `r_K1`. |
+| **C — preserving and succeeding revision forms coexist** | `Q^{state-succ}_v` is a nonempty proper subset of `E^{state-rev}_v`. At least one reachable form preserves and at least one distinct reachable form succeeds; C therefore requires at least two functional revision forms. | C supplies an authored vocabulary of development versus metamorphosis. Local forms inherit A or B's fit; coexistence is aggregate. It can make named thresholds exciting, but creates a root-topology taxonomy players must learn and makes successor-bearing transitions categorically tempting. Authors must classify by prospective semantic identity, never downstream payoff. | Within one prospectively authored Heat state-form, `Heat I -> Heat II -> Heat III` preserves `r_K`, while its `Heat III -> Living Flame` manifestation leaves that same state episode continuously operative but succeeds to `r_L` with `r_K` in its ancestry. Within one Ward state-form, ordinary reinforcement may preserve while its Mirror manifestation succeeds. |
+
+**Recommendation: A, every continuous revision preserves its root.** A3A-B
+already guarantees that states can evolve meaningfully. A preserves that
+gameplay while completing a clean identity grammar: one accepted operation has
+one primitive lineage; one qualifying finite source episode has one coarsened
+root; one genuine eligible cross-root temporal relationship has one additive
+relation root; and one uninterrupted current-state episode has one continuity
+root. Distinct manifestations remain real mechanics rather than being
+flattened into labels; they simply do not become new root currency by default.
+
+A/B/C are mutually exclusive and exhaustive because the stable successor
+subset of nonempty `E^{state-rev}_v` is empty, the whole set, or nonempty and
+proper. Occurrence-sensitive succession is not a fourth policy. For every
+option:
+
+- failed, interrupted, preempted, or speculative revisions create no
+  successor; state content, operative-root pointer, and post-cut ancestry
+  commit or roll back atomically;
+- one canonical committed revision occurrence creates at most one successor;
+  retry or replay of that occurrence returns the same root identity, and
+  fields, callbacks, logs, aliases, Relic matches, repeated reads, or restore
+  cannot duplicate it;
+- all same-episode semantic changes committed at one authoritative cut
+  canonicalize into one pre-cut-to-post-cut revision occurrence; distinct
+  revisions require distinct authoritative cuts, and no successor recursively
+  triggers another same-cut revision or root;
+- a root-blind no-op never qualifies; a duration refresh qualifies only when it
+  materially changes authoritative semantic state or legal continuation;
+- reversal or oscillation never resurrects an earlier root—under a succeeding
+  form, each newly committed revision receives a fresh successor;
+- genuine termination/re-establishment is outside A3B and opens a new episode,
+  while an implementation clear/rewrite without an authoritative absent cut
+  cannot counterfeit termination;
+- succession replaces the operative continuity root; the predecessor is
+  ancestry-only under A3B and is not automatically a second current support
+  candidate;
+- preserve-plus-additive-revision-root is not a fourth policy: A3B creates no
+  additive root, while any extra current support belongs exclusively to A4 or
+  requires a later explicit amendment;
+- succession alone creates no occurrence-history fact, refreshes no H age,
+  breaks/rearms no readiness episode, satisfies no tag, and exposes neither the
+  retired predecessor nor the successor to later use; and
+- no answer grants root/child addressability, nested use, fan-out,
+  cross-combatant access, claim, consumption, reuse, payoff, persistence, or
+  release authority.
+
+`RCS-03C3B2A4` follows every answer. Any choice moves A3B to
+`DIR-SELECTED`, reduces `Phi_SR` from 29 to 28, and makes A4 the sole active
+card. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

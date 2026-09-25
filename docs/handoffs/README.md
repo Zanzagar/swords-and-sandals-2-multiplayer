@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [evolving current-state support selected](2026-09-25-0551--relic-evolving-state-support-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | A3A-B requires at least one material revision inside an uninterrupted state episode and leaves continuity-root preservation versus succession as the sole active Relic frontier. |
 | [universal temporal relation roots selected](2026-09-25-0531--relic-relation-roots-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | B2-B promotes every qualifying eligible temporal relationship occurrence; a thirteenth audit opens continuous state-revision support as the sole active Relic frontier. |
 | [temporal relationship support selected](2026-09-25-0511--relic-temporal-relationship-support-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | B1-B requires nonempty eligible temporal cross-root support and leaves additive relation-root promotion as the sole active Relic frontier. |
 | [integrated history preservation audited](2026-09-25-0437--integrated-history-preservation-audited.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | Three independent max-effort audits preserve both histories, repair the live integration defects they found, and leave `RCS-03C3B2A2B1` as the sole active Relic frontier. |

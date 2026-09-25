@@ -3040,10 +3040,10 @@ domain. This is not catalog arithmetic: support determines whether evolving
 states exist at all, while succession determines lineage identity only after
 they do. Simultaneous multi-root support remains B2A4.
 
-Replacing one counted row with two adds one potential slot. The current
-thirteenth-amendment register has fifty-six slots: 29 `SCREEN`, 1
+Replacing one counted row with two adds one potential slot. The then-current
+thirteenth-amendment register had fifty-six slots: 29 `SCREEN`, 1
 `OWNER-OPEN`, 7 `PRUNED`, 16 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 30`. `RCS-03C3B2A3A` is the sole active card. Its
+`EVALUATE`; `Phi_SR = 30`. `RCS-03C3B2A3A` was then the sole active card. Its
 eligible set contains prospectively versioned transitions that leave one
 state continuity episode uninterrupted, materially change player-semantic
 state content under a reachable held-fixed comparison, independently alter an
@@ -3063,6 +3063,68 @@ lifecycle UI, transition logs, threshold clarity, and revision-spam pressure.
 A supplies a crisper binary lifecycle but excludes living state trajectories.
 A prunes conditional A3B; B opens it next. Exact forms, counts, distribution,
 and prevalence remain AUTHOR/SPEC.
+
+The owner selected `RCS-03C3B2A3A-B`. `E^{state-rev}_v` is nonempty: the
+completed catalog must contain at least one reachable functional revision form
+that materially changes player-semantic state while one continuity episode
+remains uninterrupted and passes the root-blind, held-fixed, committed-cut
+test above. This is only an existential support floor. It selects neither
+root succession nor simultaneous multi-root support, exact catalog breadth,
+addressability, claim/reuse, payoff, persistence, or implementation.
+
+A3A moves from `OWNER-OPEN` to `DIR-SELECTED`, and conditional A3B moves from
+`SCREEN` to `OWNER-OPEN`. The fifty-six-slot register now has 28 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 17 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 29`. `RCS-03C3B2A3B` is the sole active card.
+
+The A3B prerequisite audit found no further split once succession is defined
+as the one canonical current-state episode identity at the committed cut. For
+each eligible revision occurrence, there is exactly one operative continuity
+root before and after. Preservation keeps the root. Succession atomically
+creates one fresh replacement root while the predecessor remains complete
+historical ancestry rather than an automatically exposed second current
+support candidate. At the revision cut, both policies append to the post-cut
+root's cut-indexed lineage the deduplicated union of complete pre-cut ancestry
+and every indispensable revision-cause lineage. Earlier snapshots and settled
+results retain their earlier lineage; no later revision rewrites them. A4 still
+owns the exact causal-support topology of the current fact.
+
+The stable successor-form subset of nonempty `E^{state-rev}_v` is necessarily
+empty, universal, or nonempty and proper. A makes every form preserve, B makes
+every form succeed, and C requires reachable preserving and succeeding forms
+under prospective disclosed classification. Occurrence-sensitive succession
+based on Relic, target, payoff, favorable history, claim state, or present
+recipe completion is invalid; a meaningful contextual variant needs its own
+form.
+
+A is recommended. A3A-B already makes evolving states materially different;
+keeping one continuity root throughout one uninterrupted episode prevents
+revision cadence, stack oscillation, material refresh, or mode cycling from
+becoming hidden root currency. Heat may progress from `Heat I` to `Heat II` to
+`White-Hot` under one `r_K`, with genuinely different predicates and counters.
+This gives the root/manifestation relation the strongest direct local ideal
+fit. B instead creates a fresh successor at every committed revision, enabling
+distinct root-level milestones only if later access rules expose them but
+creating root-chain, UI, persistence, and latent outward-reuse pressure. It
+grants no response window. C reserves succession for named same-state-form
+metamorphoses but adds a premium root-topology taxonomy.
+
+Every branch keeps the episode uninterrupted and obeys the same exploit
+guards. Failed, interrupted, preempted, and speculative revisions create no
+successor. State content, operative-root pointer, and post-cut ancestry commit
+or roll back atomically. Retry/replay of one canonical committed occurrence
+returns the same root identity; reads, restore, logs, aliases, callbacks, and
+Relic matches never duplicate it. Oscillation never resurrects an older root.
+A no-op cannot qualify. All same-episode changes committed at one authoritative
+cut canonicalize into one pre-to-post revision; distinct revisions require
+distinct cuts, and no same-cut recursive promotion is allowed. Genuine
+termination and re-establishment opens a new episode outside A3B; an internal
+clear/rewrite without an authoritative absent cut cannot fake one. Succession
+alone creates no H fact, refreshes no H age, breaks/rearms no readiness
+episode, satisfies no tag, and exposes neither root. Preserve-plus-additive-root
+is not a fourth A3B policy. No branch grants root/child addressability, nested
+use, fan-out, cross-combatant access, claim, consumption, reuse, payoff,
+persistence, or release authority. A4 follows every answer.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
