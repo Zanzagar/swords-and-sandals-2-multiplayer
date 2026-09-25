@@ -795,7 +795,10 @@ and the ring is squeezed onto the stage after it.
    and dims the rest; the hover text names the target ("Fireball → Nym · click another lit foe to
    change"); one click still fires at the SELECTED foe (the who-first decision stands).
 2. **Team HUD (Q1a, Q2, Q3c):** the right-hand roster becomes TWO TEAM PANELS, red then blue; each
-   fighter's row shows **health, energy and armour** bars with numbers (the build's three readings;
+   fighter's row shows **health, energy and armour** bars with numbers *(**superseded for the
+   three readings, 2026-09-24 evening**: they are drawn IN THE GAME FRAME with the build's own
+   gauges — [the in-frame HUD](#decided-inframe-hud-2026-09-24), D2 and D5; the rows keep them only
+   as visually-hidden meters for screen readers)* (the build's three readings;
    SS2 has no mana — spells are paid from energy; magicka appears only in spell previews), a
    highlight on the fighter whose turn it is, condition chips in plain words (Burning, Frozen,
    Poisoned…), and a "you" marker on seats a person controls.
@@ -834,14 +837,19 @@ and the ring is squeezed onto the stage after it.
    name. `test/arena-team-hud-bouts.test.js` holds it to `host.battle.initiative` after every
    action.
 5. **Team colours (Q4, Q12):** red team `#e0584f`, blue team `#4c8fe0`; each name plate on the stage
-   is tinted with a dark outline PLUS a coloured underline and a team initial (a cue that does not
-   rely on colour alone); the panels and the strip use the same colours. The demo fighters' SKIN
+   is tinted with a dark outline ~~PLUS a coloured underline and a team initial (a cue that does not
+   rely on colour alone)~~ **— and nothing else: COLOUR IS THE ONLY SIDE CUE (the owner, 2026-09-24
+   evening: "the team names dont need the R and B icons next to them and underlined. Colors
+   suffice"; see [the in-frame HUD](#decided-inframe-hud-2026-09-24), D1). No disc, initial or
+   underline on the stage, the roster heading and rows, or the turn-strip chips.** The panels and
+   the strip use the same colours. The demo fighters' SKIN
    colours are random across both teams, which is why the name cue matters.
    **Built 2026-09-24 (H1):** `tools/arena/team-hud.js` (`teamStyleFor`, `namePlateFor`,
    `namePlateLayout`), drawn by `renderStage`'s name plate and `renderRoster`;
    `test/arena-team-hud.test.js`, `test/arena-team-hud-wiring.test.js`. The plate is the name in
-   the side's colour stroked in `#0b0a0d`, a coloured underline over the same outline, and the
-   side's initial (R, B) on a disc to the left; nothing reaches under the ring's `below` line.
+   the side's colour stroked in `#0b0a0d`~~, a coloured underline over the same outline, and the
+   side's initial (R, B) on a disc to the left~~ *(the underline and the disc are removed, D1
+   below)*; nothing reaches under the ring's `below` line.
    Contrast, WCAG 2.1: on the sand the colours alone reach only 1.4–3.4 : 1 (the build's sand shape
    667 `#602d18`; the authored bowl `#4a3a2b`–`#836b4b`), so the OUTLINE carries them — red 5.34,
    blue 5.94 against it — so a LIVING plate is drawn opaque (the light plate's 0.85 let the sand
@@ -852,7 +860,10 @@ and the ring is squeezed onto the stage after it.
    ring (buttons, items row, rank arrows) with a margin, and every lit target while a reach preview
    shows; the ring is drawn at a FIXED on-screen size, capped at what the build shows at zoom 80,
    instead of growing with the survivors' close-up. AI and spectate turns stay byte-identical — the
-   close-up and 1v1 untouched.
+   close-up and 1v1 untouched. *(**Amended 2026-09-24 evening** by the owner's "make camera
+   adjustments necessary to fit these assets": in a TEAM bout every camera — AI and spectate turns
+   and the close-up included — keeps the fighters above the in-frame HUD, and the close-up keeps
+   every rank off the painted wall; a 1v1 stays the build's own camera. See D3 below.)*
 7. **The spell row never covers the bow buttons' words** ("Bombard", "Snipe", the arrow count).
 8. **The grilling gate (Q6a, Q8a, Q9b)** — how the harness enforces this front end rather than
    invoking it on judgment: every commit carries a trailer, `Decided: <doc#section>` (a recorded
@@ -877,6 +888,50 @@ and the ring is squeezed onto the stage after it.
     stall rate and exploit win rate. The analysis: free y opens flanking, area-effect spacing, formations
     and escape routes, but in a turn-based side-on game it invites kiting, tape-measure micro, turtling and
     AI exploitation, reads poorly in depth, and costs a spatial AI.
+
+<a id="decided-inframe-hud-2026-09-24"></a>
+
+### The in-frame team HUD: DECIDED 2026-09-24 (evening)
+
+The owner, after playing the team HUD: *"First, the team names dont need the R and B icons next to
+them and underlined. Colors suffice. Secondly, the team health, energy, and aramor should be in the
+game frame as UI elements, using the same ui elements that are used in 1v1 in the original game.
+Pull these assets. Make camera adjustments necessary tofit these assets."* He delegated the shape;
+the main session decided D1–D7 on a read-only wave's measurements (session `5bb96879`, wave
+`wf_dca6f0e1-503`: 4 questions, 4 verifiers).
+
+- **D1 — colour is the only side cue.** The name plate is the name in team colour stroked in
+  `#0b0a0d`; no disc, initial or underline anywhere (stage, roster, turn strip). The contrast
+  figures of item 5 stand (they never depended on the initial). *Cost, stated:* red and blue are
+  1.11 : 1 in luminance, so the side is not readable in greyscale; they stay far apart under the
+  common colour-vision deficiencies.
+- **D2 — the HUD is the build's own `combat_panel` gauges (sprite 751), drawn in the stage.** The
+  health vial (733), the energy vial (742) and the armour gauge (749), each with its `blood_health`
+  liquid moved as the build moves it (`_y = Math.round(-30 + (101 - pct) * 0.7)`,
+  `pct = Math.round(value / max * 100)`), the number `value + " / " + max`, the labels, and the
+  name banner (sprite 52). The extractor PULLS them into the icons pack as their own `gauges`
+  section, derived from the bytes. **A 1v1 is the build's own panel at its own place** (stage
+  origin (-0.05, 288.75)); **a team bout gives each fighter one cluster** — the build's hero
+  cluster for red, the villain cluster for blue — scaled `min(1, 316 / (N * 215))` for N a side,
+  bottom-anchored where the build's banners end. The name is in the fighter's team colour; the
+  acting fighter's cluster is marked in the target ring's gold; a fallen fighter's fades to 0.4; the
+  armour gauge hides at 0, as the build's does. A clone without the pack draws an authored fallback
+  of the same layout.
+- **D3 — the camera keeps every framed fighter above the HUD in a team bout** (`hudTop`, the HUD's
+  highest ink): the team line lifts to `min(line, hudTop − ink)`, the zoom is capped so the back
+  rank stays 5 px off the painted wall in every arena, and the close-up's bottom is the HUD's top.
+  **The close-up also keeps every rank off the wall** with or without a HUD (a pre-existing defect:
+  a back-ranker could stand 17 px inside arena 5's wall at z97). A 1v1 keeps the build's camera.
+- **D4 — the ring is drawn over the HUD** and kept inside the visible stage (above the UI bar),
+  not the whole 0..420 rect (a pre-existing defect: the rank-front arrow sat under the bar).
+- **D5 — the side panel loses its three visible bars**; they stay as visually-hidden meters, the
+  only screen-reader form of the readings.
+- **D6 — the gauges do not drain before the blow lands**: a fighter's readings hold their
+  pre-step values until that step's first pop-up on him starts, or the step settles.
+- **D7 — masks really clip.** `paintLayerOperation` set its clip inside its own save/restore, so
+  every masked op was drawn UNCLIPPED (the night sky's moon since `df49dc3`, now the gauges'
+  liquid); fixed there and in the screens page, whose `clipsApplied` tally had counted clips that
+  never applied.
 
 ### Slices (tracked on the board)
 
